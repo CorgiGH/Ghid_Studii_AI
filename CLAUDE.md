@@ -45,8 +45,16 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 - `Section` — Collapsible section with checkbox (props: title, id, checked, onCheck)
 - `CourseBlock` — Course-level collapsible container
 - `MultipleChoice` — Multiple choice quiz with answer checking
+- `CodeEditor` — CodeMirror 6 wrapper with C syntax highlighting and dark mode
+- `CodeChallenge` — Interactive coding problem: editor + Judge0 API execution + answer checking
 - `SubjectCard` — Home page subject card
 - `TabBar` — Courses/Practice tab switcher
+
+### Code execution (Judge0 CE)
+- API: `POST https://ce.judge0.com/submissions?wait=true`
+- No API key needed. C language_id = 50.
+- Used by `CodeChallenge` component for "Run" button
+- Status codes: 3=Accepted, 6=Compilation Error, 11=Runtime Error, 5=Time Limit
 
 ## Current subjects (Year 1, Semester 2)
 - **os** — Operating Systems (11 courses, fully populated with bilingual content + practice problems)
