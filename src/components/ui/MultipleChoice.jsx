@@ -1,18 +1,38 @@
 import React, { useState } from 'react';
 import { useApp } from '../../contexts/AppContext';
 
-export default function MultipleChoice({ questions }) {
+export default function MultipleChoice({ questions, multiSelect = false, onScore }) {
   const { t, lang } = useApp();
   const [answers, setAnswers] = useState({});
   const [revealed, setRevealed] = useState({});
 
   const select = (qIdx, oIdx) => {
     if (revealed[qIdx]) return;
-    setAnswers(prev => ({ ...prev, [qIdx]: oIdx }));
+    if (multiSelect) {
+      setAnswers(prev => {
+        const current = new Set(prev[qIdx] || []);
+        if (current.has(oIdx)) current.delete(oIdx); else current.add(oIdx);
+        return { ...prev, [qIdx]: new Set(current) };
+      });
+    } else {
+      setAnswers(prev => ({ ...prev, [qIdx]: oIdx }));
+    }
   };
 
   const reveal = (qIdx) => {
     setRevealed(prev => ({ ...prev, [qIdx]: true }));
+    if (onScore) {
+      const q = questions[qIdx];
+      const correctIndices = new Set(q.options.map((o, i) => o.correct ? i : -1).filter(i => i >= 0));
+      if (multiSelect) {
+        const selected = answers[qIdx] || new Set();
+        const isCorrect = selected.size === correctIndices.size && [...selected].every(i => correctIndices.has(i));
+        onScore(qIdx, isCorrect);
+      } else {
+        const isCorrect = q.options[answers[qIdx]]?.correct === true;
+        onScore(qIdx, isCorrect);
+      }
+    }
   };
 
   return (
@@ -23,12 +43,14 @@ export default function MultipleChoice({ questions }) {
         return (
           <div key={qIdx} className="border rounded-lg dark:border-gray-600 p-4">
             <p className="font-medium mb-3">{q.question[lang]}</p>
+            {multiSelect && <p className="text-xs opacity-50 mb-2">{t('Select all that apply', 'Selectează toate variantele corecte')}</p>}
             <div className="space-y-2">
               {q.options.map((opt, oIdx) => {
+                const isSelected = multiSelect ? (picked instanceof Set && picked.has(oIdx)) : picked === oIdx;
                 let cls = 'border rounded-lg p-2 cursor-pointer transition text-sm ';
                 if (shown && opt.correct) cls += 'border-green-500 bg-green-50 dark:bg-green-950 ';
-                else if (shown && picked === oIdx && !opt.correct) cls += 'border-red-500 bg-red-50 dark:bg-red-950 ';
-                else if (picked === oIdx) cls += 'border-blue-500 bg-blue-50 dark:bg-blue-950 ';
+                else if (shown && isSelected && !opt.correct) cls += 'border-red-500 bg-red-50 dark:bg-red-950 ';
+                else if (isSelected) cls += 'border-blue-500 bg-blue-50 dark:bg-blue-950 ';
                 else cls += 'border-gray-300 dark:border-gray-600 hover:border-blue-400 ';
                 return (
                   <div key={oIdx} className={cls} onClick={() => select(qIdx, oIdx)}>
@@ -37,7 +59,7 @@ export default function MultipleChoice({ questions }) {
                 );
               })}
             </div>
-            {picked !== undefined && !shown && (
+            {((multiSelect ? (picked instanceof Set && picked.size > 0) : picked !== undefined)) && !shown && (
               <button onClick={() => reveal(qIdx)} className="mt-3 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                 {t('Check Answer', 'Verifică răspunsul')}
               </button>

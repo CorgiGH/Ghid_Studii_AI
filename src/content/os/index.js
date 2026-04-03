@@ -41,6 +41,9 @@ const os = {
     { id: 'l6', title: { en: 'Week 6: mmap & Shared Memory (Exercises)', ro: 'Săptămâna 6: mmap și memorie partajată (Exerciții)' }, shortTitle: { en: 'W6: mmap/shm', ro: 'S6: mmap/shm' }, component: lazy(() => import('./labs/Lab06.jsx')) },
     { id: 'l7', title: { en: 'Week 7: Pipes, FIFOs & Signals (Exercises)', ro: 'Săptămâna 7: Pipes, FIFO-uri și Signals (Exerciții)' }, shortTitle: { en: 'W7: Pipes/Signals', ro: 'S7: Pipes/Signals' }, component: lazy(() => import('./labs/Lab07.jsx')) },
   ],
+  tests: [
+    { id: 'test-lab1-7', title: { en: 'Test: Labs 1–7', ro: 'Test: Laboratoarele 1–7' }, shortTitle: { en: 'Labs 1–7', ro: 'Lab 1–7' }, component: lazy(() => import('./test/TestLab1_7.jsx')) },
+  ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
 

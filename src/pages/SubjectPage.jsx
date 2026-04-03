@@ -88,7 +88,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     return () => clearTimeout(timer);
   }, [search, searchActive, subject]);
 
-  const tab = ['seminars', 'labs', 'practice'].includes(wildcard) ? wildcard : 'courses';
+  const tab = ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
 
   if (!subject) {
     return (
@@ -103,6 +103,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     { id: 'seminars', label: t('Solved Exercises', 'Exerciții rezolvate') },
     { id: 'labs', label: t('Exercises', 'Exerciții') },
     { id: 'practice', label: t('Practice', 'Practică') },
+    ...(subject.tests ? [{ id: 'tests', label: t('Tests', 'Teste') }] : []),
   ];
 
   const handleTabChange = (tabId) => {
@@ -217,6 +218,21 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
           <Suspense fallback={<div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>}>
             <PracticeTab practice={subject.practice} />
           </Suspense>
+        )}
+
+        {tab === 'tests' && subject.tests && (
+          <div>
+            {subject.tests.map(test => {
+              const TestContent = test.component;
+              return (
+                <CourseBlock key={test.id} title={test.title[lang]} id={test.id}>
+                  <Suspense fallback={<div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>}>
+                    <TestContent />
+                  </Suspense>
+                </CourseBlock>
+              );
+            })}
+          </div>
         )}
       </main>
     </div>
