@@ -47,6 +47,8 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 - `MultipleChoice` — Multiple choice quiz with answer checking
 - `CodeEditor` — CodeMirror 6 wrapper with C syntax highlighting and dark mode
 - `CodeChallenge` — Interactive coding problem: editor + Judge0 API execution + answer checking
+- `LinuxTerminal` — Simulated Linux terminal (xterm.js UI + bash-emulator engine, virtual filesystem)
+- `TerminalChallenge` — Interactive terminal problem with check/reset/solution
 - `SubjectCard` — Home page subject card
 - `TabBar` — Courses/Practice tab switcher
 
