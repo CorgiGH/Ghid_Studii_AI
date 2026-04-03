@@ -18,7 +18,10 @@ const pa = {
     { id: 'pa-c5', title: { en: 'Lecture 5a: KMP Algorithm', ro: 'Cursul 5a: Algoritmul KMP' }, shortTitle: { en: 'L5a: KMP', ro: 'C5a: KMP' }, component: lazy(() => import('./courses/Course05.jsx')) },
     { id: 'pa-c6', title: { en: 'Lecture 5b: Boyer-Moore & Rabin-Karp', ro: 'Cursul 5b: Boyer-Moore și Rabin-Karp' }, shortTitle: { en: 'L5b: BM/RK', ro: 'C5b: BM/RK' }, component: lazy(() => import('./courses/Course06.jsx')) },
   ],
-  seminars: [],
+  seminars: [
+    { id: 'pa-s1', title: { en: 'Week 1: Computational Problems', ro: 'Săptămâna 1: Probleme computaționale' }, shortTitle: { en: 'W1: Comp. Problems', ro: 'S1: Probleme comp.' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
+    { id: 'pa-s2', title: { en: 'Week 2: Algorithm Efficiency Analysis', ro: 'Săptămâna 2: Analiza eficienței algoritmilor' }, shortTitle: { en: 'W2: Analysis', ro: 'S2: Analiză' }, component: lazy(() => import('./seminars/Seminar02.jsx')) },
+  ],
   labs: [],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
