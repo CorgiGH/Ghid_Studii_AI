@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import MultipleChoice from '../../../components/ui/MultipleChoice';
 import CodeChallenge from '../../../components/ui/CodeChallenge';
+import TerminalChallenge from '../../../components/ui/TerminalChallenge';
 
 const mcQuestions = [
   {
@@ -205,6 +206,86 @@ int main() {
     printf("\\n");
     return 0;
 }`}
+      />
+
+      <h3 className="text-lg font-bold mt-10 mb-4">{t('Terminal Challenges', 'Provocări de terminal')}</h3>
+      <p className="text-sm opacity-60 mb-6">{t('Practice Linux commands in a simulated terminal.', 'Exersează comenzi Linux într-un terminal simulat.')}</p>
+
+      <TerminalChallenge
+        description={t(
+          '1. Navigate to the "documents" directory and read the contents of "notes.txt" using cat.',
+          '1. Navighează în directorul "documents" și citește conținutul fișierului "notes.txt" folosind cat.'
+        )}
+        files={{
+          '/home/user/documents': null,
+          '/home/user/documents/notes.txt': 'Operating systems manage hardware resources.\nThe kernel is the core of the OS.\nProcesses are instances of running programs.',
+          '/home/user/documents/readme.md': '# My Project\nThis is a sample project.',
+          '/home/user/pictures': null,
+          '/home/user/music': null,
+        }}
+        welcomeMessage={t('Navigate to documents/ and read notes.txt', 'Navighează în documents/ și citește notes.txt')}
+        checkFn={async (emu) => {
+          const dir = await emu.getDir();
+          return dir === '/home/user/documents';
+        }}
+        solution={`cd documents
+cat notes.txt`}
+      />
+
+      <TerminalChallenge
+        description={t(
+          '2. Create a directory called "project" inside the home directory, then create a file called "main.c" inside it with some content using echo.',
+          '2. Creează un director numit "project" în directorul home, apoi creează un fișier "main.c" în el cu ceva conținut folosind echo.'
+        )}
+        files={{}}
+        welcomeMessage={t('Create project/main.c with content', 'Creează project/main.c cu conținut')}
+        checkFn={async (emu) => {
+          try {
+            const content = await emu.read('/home/user/project/main.c');
+            return content && content.length > 0;
+          } catch { return false; }
+        }}
+        solution={`mkdir project
+cd project
+echo #include <stdio.h> > main.c`}
+      />
+
+      <TerminalChallenge
+        description={t(
+          '3. Use grep to find all lines containing "error" in the log file, then count the total lines in the file with wc.',
+          '3. Folosește grep pentru a găsi toate liniile ce conțin "error" în fișierul log, apoi numără totalul de linii cu wc.'
+        )}
+        files={{
+          '/home/user/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully',
+        }}
+        welcomeMessage={t('Find "error" lines in server.log (case-sensitive)', 'Găsește liniile cu "error" în server.log (sensibil la majuscule)')}
+        solution={`grep error server.log
+wc server.log`}
+      />
+
+      <TerminalChallenge
+        description={t(
+          '4. Explore the filesystem: list all files in /home/user/src/, read the Makefile, and then remove the "temp" directory.',
+          '4. Explorează sistemul de fișiere: listează fișierele din /home/user/src/, citește Makefile-ul, apoi șterge directorul "temp".'
+        )}
+        files={{
+          '/home/user/src': null,
+          '/home/user/src/main.c': '#include <stdio.h>\nint main() { return 0; }',
+          '/home/user/src/utils.h': '#ifndef UTILS_H\n#define UTILS_H\nvoid helper();\n#endif',
+          '/home/user/src/Makefile': 'CC=gcc\nCFLAGS=-Wall -g\n\nall: main\n\nmain: main.c\n\t$(CC) $(CFLAGS) -o main main.c\n\nclean:\n\trm -f main',
+          '/home/user/temp': null,
+          '/home/user/temp/scratch.txt': 'temporary data',
+        }}
+        welcomeMessage={t('Explore src/, read Makefile, remove temp/', 'Explorează src/, citește Makefile, șterge temp/')}
+        checkFn={async (emu) => {
+          try {
+            await emu.stat('/home/user/temp');
+            return false;
+          } catch { return true; }
+        }}
+        solution={`ls src/
+cat src/Makefile
+rm -r temp`}
       />
     </div>
   );
