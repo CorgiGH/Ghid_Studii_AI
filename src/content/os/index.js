@@ -23,6 +23,12 @@ const os = {
     { id: 'c10', title: { en: 'Course 10: POSIX Signals', ro: 'Cursul 10: POSIX Signals' }, shortTitle: { en: 'C10: Signals', ro: 'C10: Signals' }, component: lazy(() => import('./courses/Course10.jsx')) },
     { id: 'c11', title: { en: 'Course 11: NCURSES & Terminal Management', ro: 'Cursul 11: NCURSES și gestiunea terminalelor' }, shortTitle: { en: 'C11: ncurses', ro: 'C11: ncurses' }, component: lazy(() => import('./courses/Course11.jsx')) },
   ],
+  seminars: [
+    { id: 's1', title: { en: 'Week 1: Basic Linux Commands (Solved)', ro: 'Săptămâna 1: Comenzi de bază Linux (Rezolvate)' }, shortTitle: { en: 'W1: Commands', ro: 'S1: Comenzi' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
+  ],
+  labs: [
+    { id: 'l1', title: { en: 'Week 1: Simple Commands (Exercises)', ro: 'Săptămâna 1: Comenzi simple (Exerciții)' }, shortTitle: { en: 'W1: Commands', ro: 'S1: Comenzi' }, component: lazy(() => import('./labs/Lab01.jsx')) },
+  ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
 
