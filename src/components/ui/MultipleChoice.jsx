@@ -32,7 +32,7 @@ export default function MultipleChoice({ questions }) {
                 else cls += 'border-gray-300 dark:border-gray-600 hover:border-blue-400 ';
                 return (
                   <div key={oIdx} className={cls} onClick={() => select(qIdx, oIdx)}>
-                    {opt.text}
+                    {typeof opt.text === 'object' ? opt.text[lang] : opt.text}
                   </div>
                 );
               })}
