@@ -25,9 +25,21 @@ const os = {
   ],
   seminars: [
     { id: 's1', title: { en: 'Week 1: Basic Linux Commands (Solved)', ro: 'Săptămâna 1: Comenzi de bază Linux (Rezolvate)' }, shortTitle: { en: 'W1: Commands', ro: 'S1: Comenzi' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
+    { id: 's2', title: { en: 'Week 2: Chained Commands & Pipelines (Solved)', ro: 'Săptămâna 2: Comenzi înlănțuite și pipeline-uri (Rezolvate)' }, shortTitle: { en: 'W2: Pipelines', ro: 'S2: Pipeline-uri' }, component: lazy(() => import('./seminars/Seminar02.jsx')) },
+    { id: 's3', title: { en: 'Week 3: Bash Scripting (Solved)', ro: 'Săptămâna 3: Scripting Bash (Rezolvate)' }, shortTitle: { en: 'W3: Bash Scripts', ro: 'S3: Scripturi Bash' }, component: lazy(() => import('./seminars/Seminar03.jsx')) },
+    { id: 's4', title: { en: 'Week 4: File I/O & Locking in C (Solved)', ro: 'Săptămâna 4: I/O fișiere și blocaje în C (Rezolvate)' }, shortTitle: { en: 'W4: File I/O', ro: 'S4: I/O fișiere' }, component: lazy(() => import('./seminars/Seminar04.jsx')) },
+    { id: 's5', title: { en: 'Week 5: fork/wait/exec (Solved)', ro: 'Săptămâna 5: fork/wait/exec (Rezolvate)' }, shortTitle: { en: 'W5: Processes', ro: 'S5: Procese' }, component: lazy(() => import('./seminars/Seminar05.jsx')) },
+    { id: 's6', title: { en: 'Week 6: mmap & Shared Memory (Solved)', ro: 'Săptămâna 6: mmap și memorie partajată (Rezolvate)' }, shortTitle: { en: 'W6: mmap/shm', ro: 'S6: mmap/shm' }, component: lazy(() => import('./seminars/Seminar06.jsx')) },
+    { id: 's7', title: { en: 'Week 7: Pipes, FIFOs & Signals (Solved)', ro: 'Săptămâna 7: Pipes, FIFO-uri și Signals (Rezolvate)' }, shortTitle: { en: 'W7: Pipes/Signals', ro: 'S7: Pipes/Signals' }, component: lazy(() => import('./seminars/Seminar07.jsx')) },
   ],
   labs: [
     { id: 'l1', title: { en: 'Week 1: Simple Commands (Exercises)', ro: 'Săptămâna 1: Comenzi simple (Exerciții)' }, shortTitle: { en: 'W1: Commands', ro: 'S1: Comenzi' }, component: lazy(() => import('./labs/Lab01.jsx')) },
+    { id: 'l2', title: { en: 'Week 2: Chained Commands & Pipelines (Exercises)', ro: 'Săptămâna 2: Comenzi înlănțuite și pipeline-uri (Exerciții)' }, shortTitle: { en: 'W2: Pipelines', ro: 'S2: Pipeline-uri' }, component: lazy(() => import('./labs/Lab02.jsx')) },
+    { id: 'l3', title: { en: 'Week 3: Bash Scripting (Exercises)', ro: 'Săptămâna 3: Scripting Bash (Exerciții)' }, shortTitle: { en: 'W3: Bash Scripts', ro: 'S3: Scripturi Bash' }, component: lazy(() => import('./labs/Lab03.jsx')) },
+    { id: 'l4', title: { en: 'Week 4: File I/O & Locking in C (Exercises)', ro: 'Săptămâna 4: I/O fișiere și blocaje în C (Exerciții)' }, shortTitle: { en: 'W4: File I/O', ro: 'S4: I/O fișiere' }, component: lazy(() => import('./labs/Lab04.jsx')) },
+    { id: 'l5', title: { en: 'Week 5: fork/wait/exec (Exercises)', ro: 'Săptămâna 5: fork/wait/exec (Exerciții)' }, shortTitle: { en: 'W5: Processes', ro: 'S5: Procese' }, component: lazy(() => import('./labs/Lab05.jsx')) },
+    { id: 'l6', title: { en: 'Week 6: mmap & Shared Memory (Exercises)', ro: 'Săptămâna 6: mmap și memorie partajată (Exerciții)' }, shortTitle: { en: 'W6: mmap/shm', ro: 'S6: mmap/shm' }, component: lazy(() => import('./labs/Lab06.jsx')) },
+    { id: 'l7', title: { en: 'Week 7: Pipes, FIFOs & Signals (Exercises)', ro: 'Săptămâna 7: Pipes, FIFO-uri și Signals (Exerciții)' }, shortTitle: { en: 'W7: Pipes/Signals', ro: 'S7: Pipes/Signals' }, component: lazy(() => import('./labs/Lab07.jsx')) },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
