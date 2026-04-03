@@ -3,25 +3,40 @@ import { useApp } from '../../contexts/AppContext';
 import CodeEditor from './CodeEditor';
 import { Code } from './index';
 
-const JUDGE0_URL = 'https://ce.judge0.com/submissions?wait=true';
+const JUDGE0_URL = 'https://ce.judge0.com/submissions?base64_encoded=true&wait=true';
 const C_LANGUAGE_ID = 50;
+
+function toBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+function fromBase64(str) {
+  if (!str) return str;
+  try { return decodeURIComponent(escape(atob(str))); } catch { return atob(str); }
+}
 
 async function executeCode(sourceCode, stdin = '') {
   const res = await fetch(JUDGE0_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      source_code: sourceCode,
+      source_code: toBase64(sourceCode),
       language_id: C_LANGUAGE_ID,
-      stdin,
+      stdin: toBase64(stdin),
     }),
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    throw new Error(`API error: ${res.status}`);
+    throw new Error(data.error || data.message || `API error: ${res.status}`);
   }
 
-  return res.json();
+  // Decode base64 fields in response
+  data.stdout = fromBase64(data.stdout);
+  data.stderr = fromBase64(data.stderr);
+  data.compile_output = fromBase64(data.compile_output);
+  return data;
 }
 
 export default function CodeChallenge({ description, starterCode, expectedOutput, solution, stdin = '' }) {
@@ -51,7 +66,9 @@ export default function CodeChallenge({ description, starterCode, expectedOutput
         if (result.stderr) setError(result.stderr);
       }
     } catch (e) {
-      setError(t('Network error — check your connection or try again later.', 'Eroare de rețea — verifică conexiunea sau încearcă mai târziu.'));
+      setError(e.message.startsWith('API error') || e.message.startsWith('some ')
+        ? e.message
+        : t('Network error — check your connection or try again later.', 'Eroare de rețea — verifică conexiunea sau încearcă mai târziu.'));
     }
     setLoading(false);
   };
