@@ -46,7 +46,7 @@ const mcQuestions = [
     explanation: { en: 'ps aux shows all processes for all users with detailed information.', ro: 'ps aux afișează toate procesele pentru toți utilizatorii cu informații detaliate.' },
   },
   {
-    question: { en: 'What does a pipe (|) do in the shell?', ro: 'Ce face o conductă (|) în shell?' },
+    question: { en: 'What does a pipe (|) do in the shell?', ro: 'Ce face un pipe (|) în shell?' },
     options: [
       { text: 'Redirects output to a file', correct: false },
       { text: 'Connects stdout of one command to stdin of another', correct: true },

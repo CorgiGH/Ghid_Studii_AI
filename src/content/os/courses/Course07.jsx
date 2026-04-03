@@ -102,14 +102,14 @@ exit(127);`}</Code>
                     <li>{t('PID, PPID, priority', 'PID, PPID, prioritate')}</li>
                     <li>{t('Open file descriptors (unless FD_CLOEXEC is set)', 'Descriptorii de fișiere deschiși (dacă nu este setat FD_CLOEXEC)')}</li>
                     <li>{t('UID/GID (unless setuid/setgid bit is set on new executable)', 'UID/GID (dacă nu este setat bitul setuid/setgid pe noul executabil)')}</li>
-                    <li>{t('Working directory, umask, signal masks', 'Directorul de lucru, umask, măști de semnale')}</li>
+                    <li>{t('Working directory, umask, signal masks', 'Directorul de lucru, umask, signal masks')}</li>
                   </ul>
                 </Box>
 
                 <Box type="warning">
                   <p className="font-bold">{t('NOT preserved:', 'NU se păstrează:')}</p>
                   <ul className="list-disc pl-5 text-sm">
-                    <li><strong>{t('Signal handlers', 'Handler-ele de semnale')}</strong> {t('are reset to defaults (the old handler code no longer exists)', 'sunt resetate la implicit (vechiul cod handler nu mai există)')}</li>
+                    <li><strong>{t('Signal handlers', 'Signal handler-ele')}</strong> {t('are reset to defaults (the old handler code no longer exists)', 'sunt resetate la implicit (vechiul cod handler nu mai există)')}</li>
                     <li><strong>{t('Memory mappings', 'Mapările de memorie')}</strong> {t('are destroyed', 'sunt distruse')}</li>
                     <li><strong>{t('stdio buffers', 'Buffer-ele stdio')}</strong> {t('are lost! (Call ', 'se pierd! (Apelați ')} <code>fflush(NULL)</code> {t('before exec!)', 'înainte de exec!)')}</li>
                     <li>{t('FDs with ', 'Descriptorii cu ')} <strong>FD_CLOEXEC</strong> {t('(or O_CLOEXEC) are closed', '(sau O_CLOEXEC) sunt închiși')}</li>
@@ -184,8 +184,8 @@ int ret = system("ls -l /home ; rm -i temp.txt");
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">{t('exec naming', 'Denumire exec')}</p><p>{t('l=list, v=vector, p=PATH, e=env', 'l=listă, v=vector, p=PATH, e=env')}</p><p>{t('execve = the actual syscall', 'execve = apelul de sistem real')}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Key behavior', 'Comportament cheie')}</p><p>{t('Does NOT create new process', 'NU creează un proces nou')}</p><p>{t('Replaces code+data+stack', 'Înlocuiește cod+date+stivă')}</p><p>{t('Never returns on success (-1 on fail)', 'Nu returnează la succes (-1 la eșec)')}</p></Box>
-                  <Box type="formula"><p className="font-bold">{t('Survives exec', 'Supraviețuiește exec')}</p><p>{t('PID, PPID, open fds, UID/GID', 'PID, PPID, descriptori deschiși, UID/GID')}</p><p>{t('cwd, umask, signal mask', 'cwd, umask, mască de semnale')}</p></Box>
-                  <Box type="formula"><p className="font-bold">{t('Lost at exec', 'Pierdut la exec')}</p><p>{t('Signal handlers (reset to default)', 'Handler-e de semnale (resetate la implicit)')}</p><p>{t('stdio buffers (call fflush first!)', 'Buffer-e stdio (apelați fflush mai întâi!)')}</p><p>{t('FD_CLOEXEC fds, memory maps', 'Descriptori FD_CLOEXEC, mapări de memorie')}</p></Box>
+                  <Box type="formula"><p className="font-bold">{t('Survives exec', 'Supraviețuiește exec')}</p><p>{t('PID, PPID, open fds, UID/GID', 'PID, PPID, descriptori deschiși, UID/GID')}</p><p>{t('cwd, umask, signal mask', 'cwd, umask, signal mask')}</p></Box>
+                  <Box type="formula"><p className="font-bold">{t('Lost at exec', 'Pierdut la exec')}</p><p>{t('Signal handlers (reset to default)', 'Signal handlers (resetate la implicit)')}</p><p>{t('stdio buffers (call fflush first!)', 'Buffer-e stdio (apelați fflush mai întâi!)')}</p><p>{t('FD_CLOEXEC fds, memory maps', 'Descriptori FD_CLOEXEC, mapări de memorie')}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Redirection', 'Redirecționare')}</p><p>dup(fd), dup2(old, new)</p><p>{t('Set up before exec in child', 'Configurați înainte de exec în fiu')}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Pattern', 'Tipar')}</p><p>{t('fork → child: setup + exec', 'fork → fiu: configurare + exec')}</p><p>{t('parent: wait + inspect status', 'părinte: wait + inspectare status')}</p><p>{t('system("cmd") = fork+exec+wait', 'system("cmd") = fork+exec+wait')}</p></Box>
                 </div>

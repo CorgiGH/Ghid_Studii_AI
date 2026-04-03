@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../contexts/AppContext';
 
-const Sidebar = ({ subject, open, onClose }) => {
+const Sidebar = ({ subject, open, onClose, onCourseClick }) => {
   const { lang, t, checked } = useApp();
 
   if (!subject) return null;
@@ -41,17 +41,16 @@ const Sidebar = ({ subject, open, onClose }) => {
             const hasProgress = completedCount > 0;
 
             return (
-              <a
+              <button
                 key={course.id}
-                href={`#${course.id}`}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                onClick={onClose}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition w-full text-left"
+                onClick={() => { onCourseClick?.(course.id); onClose(); }}
               >
                 {hasProgress && (
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
                 )}
                 <span className="truncate">{course.shortTitle[lang]}</span>
-              </a>
+              </button>
             );
           })}
         </nav>

@@ -17,7 +17,7 @@ export default function Course04() {
                   <li>{t('Directory primitives: opendir, readdir, closedir', 'Primitive pentru directoare: opendir, readdir, closedir')}</li>
                   <li>{t('Filesystem cache (kernel-level disk cache)', 'Cache-ul sistemului de fișiere (cache disc la nivel kernel)')}</li>
                   <li>{t('C stdlib I/O: fopen, fread/fwrite, fscanf/fprintf, fclose', 'I/O biblioteca standard C: fopen, fread/fwrite, fscanf/fprintf, fclose')}</li>
-                  <li>{t('Buffered vs unbuffered I/O — the two-level cache', 'I/O cu tampon vs. fără tampon — cache-ul pe două niveluri')}</li>
+                  <li>{t('Buffered vs unbuffered I/O — the two-level cache', 'I/O buffered vs. unbuffered — cache-ul pe două niveluri')}</li>
                   <li>{t('Format specifiers (%d, %s, %f, etc.)', 'Specificatori de format (%d, %s, %f, etc.)')}</li>
                 </ol>
               </Box>
@@ -29,12 +29,12 @@ export default function Course04() {
                   <rect x="10" y="10" width="200" height="60" rx="8" fill="#3b82f6" opacity="0.12" stroke="#3b82f6" strokeWidth="1.5"/>
                   <text x="110" y="30" textAnchor="middle" fill="#3b82f6" fontWeight="bold" fontSize="11">C Standard Library</text>
                   <text x="110" y="45" textAnchor="middle" fill="currentColor" fontSize="9">fopen, fread, fprintf, fclose</text>
-                  <text x="110" y="58" textAnchor="middle" fill="currentColor" fontSize="9">{t('Buffered, FILE*, portable', 'Cu tampon, FILE*, portabil')}</text>
+                  <text x="110" y="58" textAnchor="middle" fill="currentColor" fontSize="9">{t('Buffered, FILE*, portable', 'Buffered, FILE*, portabil')}</text>
 
                   <rect x="260" y="10" width="200" height="60" rx="8" fill="#10b981" opacity="0.12" stroke="#10b981" strokeWidth="1.5"/>
                   <text x="360" y="30" textAnchor="middle" fill="#10b981" fontWeight="bold" fontSize="11">POSIX API</text>
                   <text x="360" y="45" textAnchor="middle" fill="currentColor" fontSize="9">open, read, write, close</text>
-                  <text x="360" y="58" textAnchor="middle" fill="currentColor" fontSize="9">{t('Unbuffered, int fd, Linux/UNIX only', 'Fără tampon, int fd, doar Linux/UNIX')}</text>
+                  <text x="360" y="58" textAnchor="middle" fill="currentColor" fontSize="9">{t('Unbuffered, int fd, Linux/UNIX only', 'Unbuffered, int fd, doar Linux/UNIX')}</text>
 
                   <rect x="130" y="90" width="220" height="40" rx="6" fill="#f59e0b" opacity="0.1" stroke="#f59e0b"/>
                   <text x="240" y="112" textAnchor="middle" fill="#f59e0b" fontWeight="bold" fontSize="10">{t('Kernel filesystem cache', 'Cache-ul sistemului de fișiere din kernel')}</text>
@@ -52,7 +52,7 @@ export default function Course04() {
                   <p className="font-bold">{t('Key trade-off:', 'Compromisul esențial:')}</p>
                   <ul className="list-disc pl-5 text-sm">
                     <li><strong>POSIX API</strong>{t(': Full access to OS features (permissions, locks, devices). Not portable to Windows. Uses ', ': Acces complet la funcționalitățile SO (permisiuni, blocaje, dispozitive). Nu este portabil pe Windows. Folosește ')} <code>int</code> {t('file descriptors.', 'descriptorii de fișiere.')}</li>
-                    <li><strong>C stdlib</strong>{t(': Portable across platforms. Buffer-ized (user-space cache per process). Uses ', ': Portabilă pe platforme. Cu tampon (cache user-space per proces). Folosește ')} <code>FILE*</code> {t('pointers. Limited OS control.', 'pointeri. Control limitat al SO.')}</li>
+                    <li><strong>C stdlib</strong>{t(': Portable across platforms. Buffer-ized (user-space cache per process). Uses ', ': Portabilă pe platforme. Buffered (cache user-space per proces). Folosește ')} <code>FILE*</code> {t('pointers. Limited OS control.', 'pointeri. Control limitat al SO.')}</li>
                   </ul>
                 </Box>
 
@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
 }`}</Code>
 
                 <Box type="warning">
-                  <p className="font-bold">{t('Trap — buffer size matters:', 'Capcană — dimensiunea tamponului contează:')}</p>
+                  <p className="font-bold">{t('Trap — buffer size matters:', 'Capcană — dimensiunea buffer-ului contează:')}</p>
                   <p>{t('Using ', 'Folosirea ')} <code>BUF_SIZE = 4096</code> {t('(one page) is optimal because the kernel filesystem cache operates at page granularity. Using 1-byte reads is catastrophically slow (thousands of system calls).', '(o pagină) este optimă deoarece cache-ul sistemului de fișiere din kernel operează la granularitate de pagină. Citirile de 1 byte sunt catastrofal de lente (mii de apeluri sistem).')}</p>
                 </Box>
               </Section>
@@ -185,15 +185,15 @@ fclose(f);                          // close`}</Code>
                 <Box type="theorem">
                   <p className="font-bold">{t('Two-level caching:', 'Cache pe două niveluri:')}</p>
                   <ol className="list-decimal pl-5 text-sm">
-                    <li><strong>{t('stdio buffer', 'tamponul stdio')}</strong>{t(' (user-space, per process) — fwrite writes here first', ' (user-space, per proces) — fwrite scrie aici mai întâi')}</li>
+                    <li><strong>{t('stdio buffer', 'buffer-ul stdio')}</strong>{t(' (user-space, per process) — fwrite writes here first', ' (user-space, per proces) — fwrite scrie aici mai întâi')}</li>
                     <li><strong>{t('Kernel filesystem cache', 'Cache-ul sistemului de fișiere din kernel')}</strong>{t(' (kernel-space, shared by all processes) — actual disk I/O', ' (kernel-space, partajat de toate procesele) — I/O efectiv pe disc')}</li>
                   </ol>
-                  <p className="text-sm mt-1">{t('The stdio buffer is flushed: on ', 'Tamponul stdio este golit: la ')} <code>fclose</code>{t(', when buffer fills, on ', ', când tamponul se umple, la ')} <code>fflush(f)</code>{t(', or on ', ', sau la ')} <code>\n</code> {t('for line-buffered streams (stdout to terminal).', 'pentru fluxurile cu tampon de linie (stdout la terminal).')}</p>
+                  <p className="text-sm mt-1">{t('The stdio buffer is flushed: on ', 'Buffer-ul stdio este golit: la ')} <code>fclose</code>{t(', when buffer fills, on ', ', când buffer-ul se umple, la ')} <code>fflush(f)</code>{t(', or on ', ', sau la ')} <code>\n</code> {t('for line-buffered streams (stdout to terminal).', 'pentru fluxurile line-buffered (stdout la terminal).')}</p>
                 </Box>
 
                 <Box type="warning">
-                  <p className="font-bold">{t('Critical trap — buffered writes before exec/fork:', 'Capcană critică — scrieri cu tampon înainte de exec/fork:')}</p>
-                  <p>{t('Calling ', 'Apelarea ')} <code>exec()</code> {t('does NOT flush stdio buffers! Data in the buffer is ', 'NU golește tampoanele stdio! Datele din tampon sunt ')}<strong>{t('lost', 'pierdute')}</strong>{t('. Always call ', '. Apelați întotdeauna ')} <code>fflush(NULL)</code> {t('(flushes all open streams) before ', '(golește toate fluxurile deschise) înainte de ')} <code>exec</code> {t('or', 'sau')} <code>fork</code>{t('.', '.')}</p>
+                  <p className="font-bold">{t('Critical trap — buffered writes before exec/fork:', 'Capcană critică — scrieri buffered înainte de exec/fork:')}</p>
+                  <p>{t('Calling ', 'Apelarea ')} <code>exec()</code> {t('does NOT flush stdio buffers! Data in the buffer is ', 'NU golește buffer-ele stdio! Datele din buffer sunt ')}<strong>{t('lost', 'pierdute')}</strong>{t('. Always call ', '. Apelați întotdeauna ')} <code>fflush(NULL)</code> {t('(flushes all open streams) before ', '(golește toate fluxurile deschise) înainte de ')} <code>exec</code> {t('or', 'sau')} <code>fork</code>{t('.', '.')}</p>
                 </Box>
 
                 <Box type="formula">
@@ -223,14 +223,14 @@ fclose(f);                          // close`}</Code>
 
                 <Box type="warning">
                   <p className="font-bold">{t('Connection:', 'Legătură:')}</p>
-                  <p>{t('The stdio buffer (Course 4) sits ON TOP of the filesystem cache. So there are ', 'Tamponul stdio (Cursul 4) se află DEASUPRA cache-ului sistemului de fișiere. Deci există ')}<strong>{t('two layers', 'două niveluri')}</strong>{t(' of caching between your ', ' de cache între ')} <code>fprintf</code> {t('and the actual disk. This is why ', 'și discul efectiv. De aceea ')} <code>fflush</code> {t('is critical before sharing data between processes.', 'este critic înainte de a partaja date între procese.')}</p>
+                  <p>{t('The stdio buffer (Course 4) sits ON TOP of the filesystem cache. So there are ', 'Buffer-ul stdio (Cursul 4) se află DEASUPRA cache-ului sistemului de fișiere. Deci există ')}<strong>{t('two layers', 'două niveluri')}</strong>{t(' of caching between your ', ' de cache între ')} <code>fprintf</code> {t('and the actual disk. This is why ', 'și discul efectiv. De aceea ')} <code>fflush</code> {t('is critical before sharing data between processes.', 'este critic înainte de a partaja date între procese.')}</p>
                 </Box>
               </Section>
 
               <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="c4-cheat" checked={!!checked['c4-cheat']} onCheck={() => toggleCheck('c4-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">POSIX I/O</p><p>open, read, write, lseek, close</p><p>access, creat, stat, chmod, link, unlink</p><p>dup, dup2, pipe, mkfifo, fcntl</p></Box>
-                  <Box type="formula"><p className="font-bold">{t('C stdlib I/O', 'I/O bibliotecă standard C')}</p><p>fopen, fread/fwrite, fclose</p><p>fscanf/fprintf, fseek, fflush</p><p>FILE*, {t('buffered, portable', 'cu tampon, portabil')}</p></Box>
+                  <Box type="formula"><p className="font-bold">{t('C stdlib I/O', 'I/O bibliotecă standard C')}</p><p>fopen, fread/fwrite, fclose</p><p>fscanf/fprintf, fseek, fflush</p><p>FILE*, {t('buffered, portable', 'buffered, portabil')}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Directories', 'Directoare')}</p><p>opendir, readdir, closedir</p><p>mkdir, rmdir, chdir, getcwd</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Error handling', 'Gestionarea erorilor')}</p><p>return -1, errno, perror()</p><p>{t('Always check return values!', 'Verificați întotdeauna valorile returnate!')}</p></Box>
                 </div>
@@ -248,18 +248,18 @@ fclose(f);                          // close`}</Code>
                   hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
                 />
                 <Toggle
-                  question={t('3. Why is buffer size 4096 optimal for read/write?', '3. De ce dimensiunea 4096 a tamponului este optimă pentru read/write?')}
+                  question={t('3. Why is buffer size 4096 optimal for read/write?', '3. De ce dimensiunea 4096 a buffer-ului este optimă pentru read/write?')}
                   answer={t('4096 bytes is the page size on x86/x64. The kernel filesystem cache operates at page granularity. Reads/writes aligned to page boundaries minimize system calls and maximize DMA transfer efficiency.', '4096 bytes este dimensiunea paginii pe x86/x64. Cache-ul sistemului de fișiere din kernel operează la granularitate de pagină. Citirile/scrierile aliniate la granițele de pagini minimizează apelurile sistem și maximizează eficiența transferului DMA.')}
                   hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
                 />
                 <Toggle
                   question={t('4. What is the difference between POSIX descriptors (int) and stdio descriptors (FILE*)?', '4. Care este diferența dintre descriptorii POSIX (int) și descriptorii stdio (FILE*)?')}
-                  answer={t('POSIX int fd is a raw OS-level handle — unbuffered, direct syscalls. FILE* is a library-level wrapper that adds user-space buffering, formatted I/O, and portability. Internally, FILE* uses an int fd underneath.', 'int fd POSIX este un handle brut la nivel SO — fără tampon, apeluri sistem directe. FILE* este un wrapper la nivel de bibliotecă ce adaugă tampon în user-space, I/O formatat și portabilitate. Intern, FILE* folosește un int fd pe dedesubt.')}
+                  answer={t('POSIX int fd is a raw OS-level handle — unbuffered, direct syscalls. FILE* is a library-level wrapper that adds user-space buffering, formatted I/O, and portability. Internally, FILE* uses an int fd underneath.', 'int fd POSIX este un handle brut la nivel SO — unbuffered, apeluri sistem directe. FILE* este un wrapper la nivel de bibliotecă ce adaugă buffering în user-space, I/O formatat și portabilitate. Intern, FILE* folosește un int fd pe dedesubt.')}
                   hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
                 />
                 <Toggle
-                  question={t('5. What happens to stdio buffers when you call exec()?', '5. Ce se întâmplă cu tampoanele stdio când apelați exec()?')}
-                  answer={t('They are LOST. exec() replaces the process image (including all user-space memory), but does NOT flush stdio buffers first. Always call fflush(NULL) before exec().', 'Sunt PIERDUTE. exec() înlocuiește imaginea procesului (inclusiv toată memoria user-space), dar NU golește tampoanele stdio mai întâi. Apelați întotdeauna fflush(NULL) înainte de exec().')}
+                  question={t('5. What happens to stdio buffers when you call exec()?', '5. Ce se întâmplă cu buffer-ele stdio când apelați exec()?')}
+                  answer={t('They are LOST. exec() replaces the process image (including all user-space memory), but does NOT flush stdio buffers first. Always call fflush(NULL) before exec().', 'Sunt PIERDUTE. exec() înlocuiește imaginea procesului (inclusiv toată memoria user-space), dar NU golește buffer-ele stdio mai întâi. Apelați întotdeauna fflush(NULL) înainte de exec().')}
                   hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
                 />
                 <Toggle

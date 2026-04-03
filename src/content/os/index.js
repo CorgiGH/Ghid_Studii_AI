@@ -7,7 +7,7 @@ const os = {
   shortTitle: { en: 'OS', ro: 'SO' },
   description: {
     en: 'Linux systems programming: commands, shell, file I/O, processes, IPC, signals, ncurses',
-    ro: 'Programare de sistem Linux: comenzi, shell, I/O fișiere, procese, IPC, semnale, ncurses',
+    ro: 'Programare de sistem Linux: comenzi, shell, I/O fișiere, procese, IPC, signals, ncurses',
   },
   icon: '\uD83D\uDDA5\uFE0F',
   courses: [
@@ -19,8 +19,8 @@ const os = {
     { id: 'c6', title: { en: 'Course 6: Process Management I - fork() & wait()', ro: 'Cursul 6: Gestiunea proceselor I - fork() și wait()' }, shortTitle: { en: 'C6: fork/wait', ro: 'C6: fork/wait' }, component: lazy(() => import('./courses/Course06.jsx')) },
     { id: 'c7', title: { en: 'Course 7: Process Management II - exec()', ro: 'Cursul 7: Gestiunea proceselor II - exec()' }, shortTitle: { en: 'C7: exec', ro: 'C7: exec' }, component: lazy(() => import('./courses/Course07.jsx')) },
     { id: 'c8', title: { en: 'Course 8: Memory-Mapped Files, Shared Memory & Semaphores', ro: 'Cursul 8: Fișiere mapate în memorie, memorie partajată și semafoare' }, shortTitle: { en: 'C8: mmap/IPC', ro: 'C8: mmap/IPC' }, component: lazy(() => import('./courses/Course08.jsx')) },
-    { id: 'c9', title: { en: 'Course 9: IPC via Pipes (Anonymous & Named)', ro: 'Cursul 9: Comunicația inter-procese prin canale (anonime și cu nume)' }, shortTitle: { en: 'C9: Pipes', ro: 'C9: Canale' }, component: lazy(() => import('./courses/Course09.jsx')) },
-    { id: 'c10', title: { en: 'Course 10: POSIX Signals', ro: 'Cursul 10: Semnale POSIX' }, shortTitle: { en: 'C10: Signals', ro: 'C10: Semnale' }, component: lazy(() => import('./courses/Course10.jsx')) },
+    { id: 'c9', title: { en: 'Course 9: IPC via Pipes (Anonymous & Named)', ro: 'Cursul 9: Comunicația inter-procese prin pipes (anonime și cu nume)' }, shortTitle: { en: 'C9: Pipes', ro: 'C9: Pipes' }, component: lazy(() => import('./courses/Course09.jsx')) },
+    { id: 'c10', title: { en: 'Course 10: POSIX Signals', ro: 'Cursul 10: POSIX Signals' }, shortTitle: { en: 'C10: Signals', ro: 'C10: Signals' }, component: lazy(() => import('./courses/Course10.jsx')) },
     { id: 'c11', title: { en: 'Course 11: NCURSES & Terminal Management', ro: 'Cursul 11: NCURSES și gestiunea terminalelor' }, shortTitle: { en: 'C11: ncurses', ro: 'C11: ncurses' }, component: lazy(() => import('./courses/Course11.jsx')) },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),

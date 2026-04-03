@@ -118,7 +118,7 @@ EOF`}</Code>
 $ cat ok.txt    # listing of /home
 $ cat err.txt   # "No such file or directory"`}</Code>
 
-                <p className="font-bold mt-2">{t('Example - merge stderr into stdout, then pipe:', 'Exemplu - combinarea stderr în stdout, apoi canal:')}</p>
+                <p className="font-bold mt-2">{t('Example - merge stderr into stdout, then pipe:', 'Exemplu - combinarea stderr în stdout, apoi pipe:')}</p>
                 <Code>{`$ gcc program.c 2>&1 | grep error
 # Compiler errors AND warnings piped to grep`}</Code>
               </Section>
@@ -131,7 +131,7 @@ $ cat err.txt   # "No such file or directory"`}</Code>
                     <li><strong>{t('non-zero', 'non-zero')}</strong> = {t('failure (specific codes vary by command)', 'eșec (coduri specifice variază pe comandă)')}</li>
                     <li><strong>126</strong> = {t('found but not executable', 'găsit dar nu este executabil')}</li>
                     <li><strong>127</strong> = {t('command not found', 'comandă negăsită')}</li>
-                    <li><strong>128+N</strong> = {t('killed by signal N', 'omorât de semnalul N')}</li>
+                    <li><strong>128+N</strong> = {t('killed by signal N', 'omorât de signal-ul N')}</li>
                   </ul>
                 </Box>
                 <Code>{`$ ls /home ; echo $?    # prints 0 (success)
@@ -299,7 +299,7 @@ $ CTRL+R           # reverse search in history`}</Code>
                 />
                 <Toggle
                   question={t('4. Do commands in a pipeline run sequentially or in parallel?', '4. Comenzile dintr-un pipeline rulează secvențial sau în paralel?')}
-                  answer={t("In PARALLEL. All commands in a pipeline start simultaneously. Data flows through the pipe as it's produced. The shell waits for ALL to finish before returning.", 'În PARALEL. Toate comenzile dintr-un pipeline pornesc simultan. Datele curg prin canal pe măsură ce sunt produse. Shell-ul așteaptă ca TOATE să termine înainte de a continua.')}
+                  answer={t("In PARALLEL. All commands in a pipeline start simultaneously. Data flows through the pipe as it's produced. The shell waits for ALL to finish before returning.", 'În PARALEL. Toate comenzile dintr-un pipeline pornesc simultan. Datele curg prin pipe pe măsură ce sunt produse. Shell-ul așteaptă ca TOATE să termine înainte de a continua.')}
                   hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
                 />
                 <Toggle

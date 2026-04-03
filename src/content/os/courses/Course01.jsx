@@ -114,7 +114,7 @@ $ last            # login history`}</Code>
                     <li><strong>{t('Directories', 'Directoare')}</strong>{t(' - "catalogs" containing other files', ' - „cataloage" ce conțin alte fișiere')}</li>
                     <li><strong>{t('Links', 'Legături')}</strong>{t(' (hard or symbolic) - aliases for existing files', ' (hard sau simbolice) - aliasuri pentru fișiere existente')}</li>
                     <li><strong>{t('Device files', 'Fișiere de dispozitiv')}</strong>{t(' (block or character) - hardware drivers', ' (bloc sau caracter) - drivere hardware')}</li>
-                    <li><strong>{t('FIFO files', 'Fișiere FIFO')}</strong>{t(' (named pipes) - local IPC mechanism', ' (canale cu nume) - mecanism local de comunicare între procese')}</li>
+                    <li><strong>{t('FIFO files', 'Fișiere FIFO')}</strong>{t(' (named pipes) - local IPC mechanism', ' (pipe-uri cu nume) - mecanism local de comunicare între procese')}</li>
                     <li><strong>{t('Socket files', 'Fișiere socket')}</strong>{t(' - network IPC mechanism', ' - mecanism de comunicare prin rețea')}</li>
                   </ol>
                 </Box>
@@ -360,7 +360,7 @@ $ killall name     # kill by name`}</Code>
                 />
                 <Toggle
                   question={t('6. What are the 6 file types in UNIX?', '6. Care sunt cele 6 tipuri de fișiere în UNIX?')}
-                  answer={t('Regular files, directories, links (hard/symbolic), device files (block/character), FIFO (named pipe), sockets.', 'Fișiere obișnuite, directoare, legături (hard/simbolice), fișiere de dispozitiv (bloc/caracter), FIFO (canal cu nume), socket-uri.')}
+                  answer={t('Regular files, directories, links (hard/symbolic), device files (block/character), FIFO (named pipe), sockets.', 'Fișiere obișnuite, directoare, legături (hard/simbolice), fișiere de dispozitiv (bloc/caracter), FIFO (pipe cu nume), socket-uri.')}
                   hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
                 />
                 <Toggle
@@ -375,7 +375,7 @@ $ killall name     # kill by name`}</Code>
                 />
                 <Toggle
                   question={t('9. What\'s the difference between kill PID and kill -9 PID?', '9. Care este diferența dintre kill PID și kill -9 PID?')}
-                  answer={t('kill PID sends SIGTERM (signal 15), which asks the process to terminate gracefully (it can be caught/ignored). kill -9 PID sends SIGKILL (signal 9), which forcefully terminates the process immediately and cannot be caught or ignored.', 'kill PID trimite SIGTERM (semnalul 15), care cere procesului să se termine elegant (poate fi capturat/ignorat). kill -9 PID trimite SIGKILL (semnalul 9), care termină forțat procesul imediat și nu poate fi captat sau ignorat.')}
+                  answer={t('kill PID sends SIGTERM (signal 15), which asks the process to terminate gracefully (it can be caught/ignored). kill -9 PID sends SIGKILL (signal 9), which forcefully terminates the process immediately and cannot be caught or ignored.', 'kill PID trimite SIGTERM (signal 15), care cere procesului să se termine elegant (poate fi capturat/ignorat). kill -9 PID trimite SIGKILL (signal 9), care termină forțat procesul imediat și nu poate fi captat sau ignorat.')}
                   hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
                 />
                 <Toggle
