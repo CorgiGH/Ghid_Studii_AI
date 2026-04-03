@@ -228,6 +228,7 @@ int main() {
           const dir = await emu.getDir();
           return dir === '/home/user/documents';
         }}
+        hints={[t('Use "cd dirname" to change directory', 'Folosește "cd dirname" pentru a schimba directorul'), t('Use "cat filename" to display file contents', 'Folosește "cat filename" pentru a afișa conținutul')]}
         solution={`cd documents
 cat notes.txt`}
       />
