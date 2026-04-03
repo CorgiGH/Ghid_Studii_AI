@@ -21,6 +21,7 @@ const pa = {
   seminars: [
     { id: 'pa-s1', title: { en: 'Week 1: Computational Problems', ro: 'Săptămâna 1: Probleme computaționale' }, shortTitle: { en: 'W1: Comp. Problems', ro: 'S1: Probleme comp.' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
     { id: 'pa-s2', title: { en: 'Week 2: Algorithm Efficiency Analysis', ro: 'Săptămâna 2: Analiza eficienței algoritmilor' }, shortTitle: { en: 'W2: Analysis', ro: 'S2: Analiză' }, component: lazy(() => import('./seminars/Seminar02.jsx')) },
+    { id: 'pa-s3', title: { en: 'Week 3: Nondeterministic & Probabilistic Algorithms', ro: 'Săptămâna 3: Algoritmi nedeterminiști și probabiliști' }, shortTitle: { en: 'W3: Nondet/Prob', ro: 'S3: Nedet/Prob' }, component: lazy(() => import('./seminars/Seminar03.jsx')) },
   ],
   labs: [],
   practice: lazy(() => import('./practice/Practice.jsx')),
