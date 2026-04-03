@@ -14,11 +14,12 @@ export default function V86Terminal() {
   }, [boot, booted, booting]);
 
   return (
-    <div className="relative rounded-lg overflow-hidden border dark:border-gray-600 bg-black" style={{ minHeight: '400px' }}>
+    <div className="relative border dark:border-gray-600 bg-black" style={{ minHeight: '450px' }}>
       {/* v86 screen container */}
       <div
         ref={screenRef}
-        style={{ width: '100%', height: '400px', overflow: 'hidden' }}
+        className="v86-screen"
+        style={{ width: '100%', minHeight: '450px', overflow: 'auto' }}
       />
 
       {/* Loading overlay */}
