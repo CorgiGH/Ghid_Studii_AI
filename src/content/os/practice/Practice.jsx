@@ -60,6 +60,96 @@ const mcQuestions = [
 export default function Practice() {
   const { t } = useApp();
 
+  const terminalExercises = [
+    {
+      description: t(
+        'Navigate to the "documents" directory and read the contents of "notes.txt" using cat.',
+        'Navighează în directorul "documents" și citește conținutul fișierului "notes.txt" folosind cat.'
+      ),
+      courseRef: t('Course 1: Directory commands', 'Cursul 1: Comenzi directoare'),
+      files: {
+        '/home/user/documents': null,
+        '/home/user/documents/notes.txt': 'Operating systems manage hardware resources.\nThe kernel is the core of the OS.\nProcesses are instances of running programs.',
+        '/home/user/documents/readme.md': '# My Project\nThis is a sample project.',
+        '/home/user/pictures': null,
+        '/home/user/music': null,
+      },
+      welcomeMessage: t('Navigate to documents/ and read notes.txt', 'Navighează în documents/ și citește notes.txt'),
+      checkFn: async (emu) => {
+        const dir = await emu.getDir();
+        return dir === '/home/user/documents';
+      },
+      hints: [
+        t('Use "cd dirname" to enter a directory', 'Folosește "cd dirname" pentru a intra într-un director'),
+        t('Use "cat filename" to print contents', 'Folosește "cat filename" pentru a afișa conținutul'),
+      ],
+      solution: 'cd documents\ncat notes.txt',
+    },
+    {
+      description: t(
+        'Create a directory called "project", then create a file "main.c" inside it with some content.',
+        'Creează un director numit "project", apoi creează un fișier "main.c" în el cu ceva conținut.'
+      ),
+      courseRef: t('Course 1: File commands', 'Cursul 1: Comenzi fișiere'),
+      files: {},
+      welcomeMessage: t('Create project/main.c with content', 'Creează project/main.c cu conținut'),
+      checkFn: async (emu) => {
+        try {
+          const content = await emu.read('/home/user/project/main.c');
+          return content && content.length > 0;
+        } catch { return false; }
+      },
+      hints: [
+        t('"mkdir dirname" creates a directory', '"mkdir dirname" creează un director'),
+        t('"echo text > file" writes text to a file', '"echo text > file" scrie text într-un fișier'),
+      ],
+      solution: 'mkdir project\ncd project\necho #include <stdio.h> > main.c',
+    },
+    {
+      description: t(
+        'Use grep to find all lines containing "error" in the log file, then count the total lines with wc.',
+        'Folosește grep pentru a găsi toate liniile ce conțin "error" în fișierul log, apoi numără totalul de linii cu wc.'
+      ),
+      courseRef: t('Course 1: File processing', 'Cursul 1: Procesare fișiere'),
+      files: {
+        '/home/user/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully',
+      },
+      welcomeMessage: t('Find "error" lines in server.log', 'Găsește liniile cu "error" în server.log'),
+      hints: [
+        t('"grep pattern file" searches for matches', '"grep pattern file" caută potriviri'),
+        t('"wc file" counts lines, words, and chars', '"wc file" numără linii, cuvinte și caractere'),
+      ],
+      solution: 'grep error server.log\nwc server.log',
+    },
+    {
+      description: t(
+        'List files in src/, read the Makefile, then remove the "temp" directory and its contents.',
+        'Listează fișierele din src/, citește Makefile-ul, apoi șterge directorul "temp" cu tot conținutul.'
+      ),
+      courseRef: t('Course 1: Directory & file commands', 'Cursul 1: Comenzi directoare & fișiere'),
+      files: {
+        '/home/user/src': null,
+        '/home/user/src/main.c': '#include <stdio.h>\nint main() { return 0; }',
+        '/home/user/src/utils.h': '#ifndef UTILS_H\n#define UTILS_H\nvoid helper();\n#endif',
+        '/home/user/src/Makefile': 'CC=gcc\nCFLAGS=-Wall -g\n\nall: main\n\nmain: main.c\n\t$(CC) $(CFLAGS) -o main main.c\n\nclean:\n\trm -f main',
+        '/home/user/temp': null,
+        '/home/user/temp/scratch.txt': 'temporary data',
+      },
+      welcomeMessage: t('Explore src/, read Makefile, remove temp/', 'Explorează src/, citește Makefile, șterge temp/'),
+      checkFn: async (emu) => {
+        try {
+          await emu.stat('/home/user/temp');
+          return false;
+        } catch { return true; }
+      },
+      hints: [
+        t('"ls dir/" lists directory contents', '"ls dir/" listează conținutul directorului'),
+        t('"rm -r dir" removes a directory recursively', '"rm -r dir" șterge un director recursiv'),
+      ],
+      solution: 'ls src/\ncat src/Makefile\nrm -r temp',
+    },
+  ];
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-2">{t('Practice Problems', 'Probleme de practică')}</h2>
@@ -72,222 +162,45 @@ export default function Practice() {
       <p className="text-sm opacity-60 mb-6">{t('Write C code, run it, and check your answer against the expected output.', 'Scrie cod C, rulează-l și verifică răspunsul față de output-ul așteptat.')}</p>
 
       <CodeChallenge
-        description={t(
-          '1. Write a program that prints "Hello, World!" followed by a newline.',
-          '1. Scrieți un program care afișează "Hello, World!" urmat de o linie nouă.'
-        )}
-        starterCode={`#include <stdio.h>
-
-int main() {
-    // Your code here
-
-    return 0;
-}`}
+        description={t('1. Write a program that prints "Hello, World!" followed by a newline.', '1. Scrieți un program care afișează "Hello, World!" urmat de o linie nouă.')}
+        starterCode={`#include <stdio.h>\n\nint main() {\n    // Your code here\n\n    return 0;\n}`}
         expectedOutput="Hello, World!"
-        solution={`#include <stdio.h>
-
-int main() {
-    printf("Hello, World!\\n");
-    return 0;
-}`}
+        solution={`#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`}
       />
 
       <CodeChallenge
-        description={t(
-          '2. Write a program that reads an integer from stdin and prints its square.',
-          '2. Scrieți un program care citește un întreg de la stdin și afișează pătratul său.'
-        )}
-        starterCode={`#include <stdio.h>
-
-int main() {
-    int n;
-    // Read n from stdin, print n*n
-
-    return 0;
-}`}
+        description={t('2. Write a program that reads an integer from stdin and prints its square.', '2. Scrieți un program care citește un întreg de la stdin și afișează pătratul său.')}
+        starterCode={`#include <stdio.h>\n\nint main() {\n    int n;\n    // Read n from stdin, print n*n\n\n    return 0;\n}`}
         stdin="7"
         expectedOutput="49"
-        solution={`#include <stdio.h>
-
-int main() {
-    int n;
-    scanf("%d", &n);
-    printf("%d\\n", n * n);
-    return 0;
-}`}
+        solution={`#include <stdio.h>\n\nint main() {\n    int n;\n    scanf("%d", &n);\n    printf("%d\\n", n * n);\n    return 0;\n}`}
       />
 
       <CodeChallenge
-        description={t(
-          '3. Write a program that prints numbers 1 to 10, each on a new line.',
-          '3. Scrieți un program care afișează numerele de la 1 la 10, fiecare pe o linie nouă.'
-        )}
-        starterCode={`#include <stdio.h>
-
-int main() {
-    // Print 1 through 10
-
-    return 0;
-}`}
+        description={t('3. Write a program that prints numbers 1 to 10, each on a new line.', '3. Scrieți un program care afișează numerele de la 1 la 10, fiecare pe o linie nouă.')}
+        starterCode={`#include <stdio.h>\n\nint main() {\n    // Print 1 through 10\n\n    return 0;\n}`}
         expectedOutput={"1\n2\n3\n4\n5\n6\n7\n8\n9\n10"}
-        solution={`#include <stdio.h>
-
-int main() {
-    for (int i = 1; i <= 10; i++) {
-        printf("%d\\n", i);
-    }
-    return 0;
-}`}
+        solution={`#include <stdio.h>\n\nint main() {\n    for (int i = 1; i <= 10; i++) {\n        printf("%d\\n", i);\n    }\n    return 0;\n}`}
       />
 
       <CodeChallenge
-        description={t(
-          '4. Write a program using fork() that prints "parent" in the parent process and "child" in the child process. Parent should print first (use wait).',
-          '4. Scrieți un program folosind fork() care afișează "parent" în procesul părinte și "child" în procesul copil. Părintele trebuie să afișeze primul (folosiți wait).'
-        )}
-        starterCode={`#include <stdio.h>
-#include <unistd.h>
-#include <sys/wait.h>
-
-int main() {
-    // Use fork(), print "parent" and "child"
-
-    return 0;
-}`}
+        description={t('4. Write a program using fork() that prints "child" then "parent" (use wait).', '4. Scrieți un program folosind fork() care afișează "child" apoi "parent" (folosiți wait).')}
+        starterCode={`#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    // Use fork(), print "parent" and "child"\n\n    return 0;\n}`}
         expectedOutput={"child\nparent"}
-        solution={`#include <stdio.h>
-#include <unistd.h>
-#include <sys/wait.h>
-
-int main() {
-    pid_t pid = fork();
-    if (pid == 0) {
-        printf("child\\n");
-    } else {
-        wait(NULL);
-        printf("parent\\n");
-    }
-    return 0;
-}`}
+        solution={`#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    pid_t pid = fork();\n    if (pid == 0) {\n        printf("child\\n");\n    } else {\n        wait(NULL);\n        printf("parent\\n");\n    }\n    return 0;\n}`}
       />
 
       <CodeChallenge
-        description={t(
-          '5. Write a program that opens a file "test.txt", writes "Hello File" to it, then reads it back and prints the contents. (Hint: use POSIX open/write/read/close)',
-          '5. Scrieți un program care deschide fișierul "test.txt", scrie "Hello File" în el, apoi îl citește înapoi și afișează conținutul. (Indiciu: folosiți open/write/read/close POSIX)'
-        )}
-        starterCode={`#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-
-int main() {
-    // Open, write, read back, print
-
-    return 0;
-}`}
+        description={t('5. Open "test.txt", write "Hello File", read it back and print. (POSIX I/O)', '5. Deschideți "test.txt", scrieți "Hello File", citiți înapoi și afișați. (I/O POSIX)')}
+        starterCode={`#include <stdio.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <string.h>\n\nint main() {\n    // Open, write, read back, print\n\n    return 0;\n}`}
         expectedOutput="Hello File"
-        solution={`#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-
-int main() {
-    int fd = open("test.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    write(fd, "Hello File", 10);
-    close(fd);
-
-    char buf[64];
-    fd = open("test.txt", O_RDONLY);
-    int n = read(fd, buf, sizeof(buf));
-    close(fd);
-
-    write(STDOUT_FILENO, buf, n);
-    printf("\\n");
-    return 0;
-}`}
+        solution={`#include <stdio.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <string.h>\n\nint main() {\n    int fd = open("test.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);\n    write(fd, "Hello File", 10);\n    close(fd);\n\n    char buf[64];\n    fd = open("test.txt", O_RDONLY);\n    int n = read(fd, buf, sizeof(buf));\n    close(fd);\n\n    write(STDOUT_FILENO, buf, n);\n    printf("\\n");\n    return 0;\n}`}
       />
 
       <h3 className="text-lg font-bold mt-10 mb-4">{t('Terminal Challenges', 'Provocări de terminal')}</h3>
-      <p className="text-sm opacity-60 mb-6">{t('Practice Linux commands in a simulated terminal.', 'Exersează comenzi Linux într-un terminal simulat.')}</p>
+      <p className="text-sm opacity-60 mb-6">{t('Use "Try It" to experiment in a real Linux terminal, then "Submit Answer" to auto-check.', 'Folosește "Încearcă" pentru a experimenta într-un terminal Linux real, apoi "Trimite răspunsul" pentru verificare automată.')}</p>
 
-      <TerminalChallenge
-        description={t(
-          '1. Navigate to the "documents" directory and read the contents of "notes.txt" using cat.',
-          '1. Navighează în directorul "documents" și citește conținutul fișierului "notes.txt" folosind cat.'
-        )}
-        files={{
-          '/home/user/documents': null,
-          '/home/user/documents/notes.txt': 'Operating systems manage hardware resources.\nThe kernel is the core of the OS.\nProcesses are instances of running programs.',
-          '/home/user/documents/readme.md': '# My Project\nThis is a sample project.',
-          '/home/user/pictures': null,
-          '/home/user/music': null,
-        }}
-        welcomeMessage={t('Navigate to documents/ and read notes.txt', 'Navighează în documents/ și citește notes.txt')}
-        checkFn={async (emu) => {
-          const dir = await emu.getDir();
-          return dir === '/home/user/documents';
-        }}
-        hints={[t('Use "cd dirname" to change directory', 'Folosește "cd dirname" pentru a schimba directorul'), t('Use "cat filename" to display file contents', 'Folosește "cat filename" pentru a afișa conținutul')]}
-        solution={`cd documents
-cat notes.txt`}
-      />
-
-      <TerminalChallenge
-        description={t(
-          '2. Create a directory called "project" inside the home directory, then create a file called "main.c" inside it with some content using echo.',
-          '2. Creează un director numit "project" în directorul home, apoi creează un fișier "main.c" în el cu ceva conținut folosind echo.'
-        )}
-        files={{}}
-        welcomeMessage={t('Create project/main.c with content', 'Creează project/main.c cu conținut')}
-        checkFn={async (emu) => {
-          try {
-            const content = await emu.read('/home/user/project/main.c');
-            return content && content.length > 0;
-          } catch { return false; }
-        }}
-        solution={`mkdir project
-cd project
-echo #include <stdio.h> > main.c`}
-      />
-
-      <TerminalChallenge
-        description={t(
-          '3. Use grep to find all lines containing "error" in the log file, then count the total lines in the file with wc.',
-          '3. Folosește grep pentru a găsi toate liniile ce conțin "error" în fișierul log, apoi numără totalul de linii cu wc.'
-        )}
-        files={{
-          '/home/user/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully',
-        }}
-        welcomeMessage={t('Find "error" lines in server.log (case-sensitive)', 'Găsește liniile cu "error" în server.log (sensibil la majuscule)')}
-        solution={`grep error server.log
-wc server.log`}
-      />
-
-      <TerminalChallenge
-        description={t(
-          '4. Explore the filesystem: list all files in /home/user/src/, read the Makefile, and then remove the "temp" directory.',
-          '4. Explorează sistemul de fișiere: listează fișierele din /home/user/src/, citește Makefile-ul, apoi șterge directorul "temp".'
-        )}
-        files={{
-          '/home/user/src': null,
-          '/home/user/src/main.c': '#include <stdio.h>\nint main() { return 0; }',
-          '/home/user/src/utils.h': '#ifndef UTILS_H\n#define UTILS_H\nvoid helper();\n#endif',
-          '/home/user/src/Makefile': 'CC=gcc\nCFLAGS=-Wall -g\n\nall: main\n\nmain: main.c\n\t$(CC) $(CFLAGS) -o main main.c\n\nclean:\n\trm -f main',
-          '/home/user/temp': null,
-          '/home/user/temp/scratch.txt': 'temporary data',
-        }}
-        welcomeMessage={t('Explore src/, read Makefile, remove temp/', 'Explorează src/, citește Makefile, șterge temp/')}
-        checkFn={async (emu) => {
-          try {
-            await emu.stat('/home/user/temp');
-            return false;
-          } catch { return true; }
-        }}
-        solution={`ls src/
-cat src/Makefile
-rm -r temp`}
-      />
+      <TerminalChallenge exercises={terminalExercises} />
     </div>
   );
 }
