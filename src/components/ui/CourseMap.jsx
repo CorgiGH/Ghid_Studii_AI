@@ -10,8 +10,9 @@ const CourseMap = ({ subject, onCourseClick }) => {
 
   const courseProgress = courses.map(course => {
     const total = course.sectionCount || 0;
+    const prefix = `${course.id}-`;
     const completed = total > 0
-      ? Array.from({ length: total }, (_, i) => `${course.id}-${i}`).filter(id => checked[id]).length
+      ? Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length
       : 0;
     return { course, completed, total };
   });

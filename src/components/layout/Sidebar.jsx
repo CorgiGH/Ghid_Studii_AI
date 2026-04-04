@@ -42,8 +42,9 @@ const Sidebar = ({ subject, activeCourseId, open, onClose, onCourseClick }) => {
         <nav className="flex flex-col gap-0.5">
           {subject.courses.map(course => {
             const total = course.sectionCount || 0;
+            const prefix = `${course.id}-`;
             const completed = total > 0
-              ? Array.from({ length: total }, (_, i) => `${course.id}-${i}`).filter(id => checked[id]).length
+              ? Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length
               : 0;
             const isActive = activeCourseId === course.id;
             const isComplete = total > 0 && completed >= total;
