@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import ProgressRing from '../ui/ProgressRing';
 
-const Sidebar = ({ subject, activeCourseId, open, onClose, onCourseClick }) => {
+const Sidebar = ({ subject, activeCourseId, open, onClose, yearSem, subjectSlug }) => {
+  const navigate = useNavigate();
   const { lang, t, checked } = useApp();
+  const [hoveredId, setHoveredId] = useState(null);
 
   if (!subject || !subject.courses?.length) return null;
+
+  const handleCourseClick = (course) => {
+    const match = course.id.match(/course_(\d+)$/);
+    if (match) {
+      navigate(`/${yearSem}/${subjectSlug}/course_${match[1]}`);
+    }
+    onClose();
+  };
 
   return (
     <>
@@ -39,7 +50,7 @@ const Sidebar = ({ subject, activeCourseId, open, onClose, onCourseClick }) => {
           </button>
         </div>
 
-        <nav className="flex flex-col gap-0.5">
+        <nav className="flex flex-col gap-1">
           {subject.courses.map(course => {
             const total = course.sectionCount || 0;
             const prefix = `${course.id}-`;
@@ -49,17 +60,52 @@ const Sidebar = ({ subject, activeCourseId, open, onClose, onCourseClick }) => {
             const isActive = activeCourseId === course.id;
             const isComplete = total > 0 && completed >= total;
             const hasProgress = completed > 0;
+            const isHovered = hoveredId === course.id && !isActive;
+
+            const buttonStyle = {
+              position: 'relative',
+              border: '1.5px solid transparent',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+              ...(isActive ? {
+                transform: 'scale(1.07)',
+                borderColor: '#3b82f6',
+                backgroundColor: 'var(--theme-hover-bg)',
+                boxShadow: '0 4px 20px rgba(59, 130, 246, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.1)',
+              } : isHovered ? {
+                transform: 'scale(1.04)',
+                borderColor: 'rgba(59, 130, 246, 0.25)',
+                backgroundColor: 'var(--theme-hover-bg)',
+                boxShadow: '0 2px 12px rgba(59, 130, 246, 0.1)',
+              } : {
+                transform: 'scale(1)',
+                borderColor: 'transparent',
+                backgroundColor: 'transparent',
+                boxShadow: 'none',
+              }),
+            };
 
             return (
               <button
                 key={course.id}
-                className="flex items-center gap-2 px-2 py-2 rounded-lg transition-all duration-150 w-full text-left"
-                style={{
-                  backgroundColor: isActive ? 'var(--theme-hover-bg)' : 'transparent',
-                  borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
-                }}
-                onClick={() => { onCourseClick?.(course.id); onClose(); }}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg w-full text-left"
+                style={buttonStyle}
+                onMouseEnter={() => setHoveredId(course.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                onClick={() => handleCourseClick(course)}
               >
+                {isActive && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: '-1px',
+                      top: '20%',
+                      bottom: '20%',
+                      width: '3px',
+                      borderRadius: '0 3px 3px 0',
+                      background: '#3b82f6',
+                    }}
+                  />
+                )}
                 <ProgressRing
                   size={20}
                   completed={completed}
@@ -71,7 +117,7 @@ const Sidebar = ({ subject, activeCourseId, open, onClose, onCourseClick }) => {
                     className="text-xs truncate"
                     style={{
                       fontWeight: isActive ? 600 : 500,
-                      color: isActive ? '#3b82f6' : (isComplete ? '#16a34a' : 'var(--theme-content-text)'),
+                      color: isActive ? '#fff' : (isComplete ? '#16a34a' : 'var(--theme-content-text)'),
                       opacity: !hasProgress && !isActive ? 0.5 : 1,
                     }}
                   >

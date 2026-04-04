@@ -144,7 +144,8 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             activeCourseId={activeCourseId}
             open={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
-            onCourseClick={handleCourseClick}
+            yearSem={yearSem}
+            subjectSlug={subjectSlug}
           />
         )}
 
