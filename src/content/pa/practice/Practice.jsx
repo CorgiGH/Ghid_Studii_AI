@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import MultipleChoice from '../../../components/ui/MultipleChoice';
+import CourseBlock from '../../../components/ui/CourseBlock';
 
 /* ═══════════════════════════════════════════════════════════
    Section 1: Algorithm Design & Analysis
@@ -650,39 +651,22 @@ const npQuestions = [
 export default function Practice() {
   const { t } = useApp();
 
-  const sectionStyle = "text-xl font-bold mb-4 mt-8";
+  const sections = [
+    { id: 'pa-practice-design', title: t('1. Algorithm Design & Analysis', '1. Proiectare și analiză'), questions: designQuestions },
+    { id: 'pa-practice-nondet', title: t('2. Nondeterministic Algorithms', '2. Algoritmi nedeterminiști'), questions: nondeterministicQuestions },
+    { id: 'pa-practice-prob', title: t('3. Probabilistic Algorithms & Average Complexity', '3. Algoritmi probabiliști și complexitate medie'), questions: probabilisticQuestions },
+    { id: 'pa-practice-strings', title: t('4. String Searching', '4. Căutare peste șiruri'), questions: stringQuestions },
+    { id: 'pa-practice-geometry', title: t('5. Computational Geometry', '5. Geometrie computațională'), questions: geometryQuestions },
+    { id: 'pa-practice-np', title: t('6. NP-Completeness', '6. NP-Completitudine'), questions: npQuestions },
+  ];
 
   return (
     <div>
-      <h2 className={sectionStyle} style={{ color: 'var(--theme-text)' }}>
-        1. {t('Algorithm Design & Analysis', 'Proiectare și analiză')}
-      </h2>
-      <MultipleChoice questions={designQuestions} />
-
-      <h2 className={sectionStyle} style={{ color: 'var(--theme-text)' }}>
-        2. {t('Nondeterministic Algorithms', 'Algoritmi nedeterminiști')}
-      </h2>
-      <MultipleChoice questions={nondeterministicQuestions} />
-
-      <h2 className={sectionStyle} style={{ color: 'var(--theme-text)' }}>
-        3. {t('Probabilistic Algorithms & Average Complexity', 'Algoritmi probabiliști și complexitate medie')}
-      </h2>
-      <MultipleChoice questions={probabilisticQuestions} />
-
-      <h2 className={sectionStyle} style={{ color: 'var(--theme-text)' }}>
-        4. {t('String Searching', 'Căutare peste șiruri')}
-      </h2>
-      <MultipleChoice questions={stringQuestions} />
-
-      <h2 className={sectionStyle} style={{ color: 'var(--theme-text)' }}>
-        5. {t('Computational Geometry', 'Geometrie computațională')}
-      </h2>
-      <MultipleChoice questions={geometryQuestions} />
-
-      <h2 className={sectionStyle} style={{ color: 'var(--theme-text)' }}>
-        6. {t('NP-Completeness', 'NP-Completitudine')}
-      </h2>
-      <MultipleChoice questions={npQuestions} />
+      {sections.map((s) => (
+        <CourseBlock key={s.id} title={`${s.title} (${s.questions.length})`} id={s.id}>
+          <MultipleChoice questions={s.questions} />
+        </CourseBlock>
+      ))}
     </div>
   );
 }
