@@ -1,55 +1,87 @@
 import React from 'react';
 import { useApp } from '../../contexts/AppContext';
+import ProgressRing from '../ui/ProgressRing';
 
-const Sidebar = ({ subject, open, onClose, onCourseClick }) => {
+const Sidebar = ({ subject, activeCourseId, open, onClose, onCourseClick }) => {
   const { lang, t, checked } = useApp();
 
-  if (!subject) return null;
+  if (!subject || !subject.courses?.length) return null;
 
   return (
     <>
-      {/* Mobile overlay */}
       {open && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
       )}
 
-      <aside className={`
-        fixed lg:sticky top-0 left-0 z-50 lg:z-auto
-        w-64 h-screen overflow-y-auto
-        border-r dark:border-gray-700
-        bg-white dark:bg-gray-800
-        p-4 text-sm
-        transition-transform duration-200
-        lg:translate-x-0
-        ${open ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      <aside
+        className={`
+          fixed lg:sticky top-0 left-0 z-50 lg:z-auto
+          w-60 h-screen overflow-y-auto
+          p-3 text-sm
+          transition-all duration-200
+          lg:translate-x-0
+          ${open ? 'translate-x-0' : '-translate-x-full'}
+        `}
+        style={{
+          backgroundColor: 'var(--theme-sidebar-bg)',
+          borderRight: '1px solid var(--theme-sidebar-border)',
+        }}
+      >
         <div className="lg:hidden flex justify-end mb-2">
-          <button onClick={onClose} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <button
+            onClick={onClose}
+            className="p-1 rounded transition"
+            style={{ backgroundColor: 'var(--theme-hover-bg)' }}
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <h2 className="font-bold text-base mb-1">{subject.title[lang]}</h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{subject.description[lang]}</p>
-
-        <nav className="space-y-1">
+        <nav className="flex flex-col gap-0.5">
           {subject.courses.map(course => {
-            const sectionIds = Array.from({ length: 20 }, (_, i) => `${course.id}-${i}`);
-            const completedCount = sectionIds.filter(id => checked[id]).length;
-            const hasProgress = completedCount > 0;
+            const total = course.sectionCount || 0;
+            const completed = total > 0
+              ? Array.from({ length: total }, (_, i) => `${course.id}-${i}`).filter(id => checked[id]).length
+              : 0;
+            const isActive = activeCourseId === course.id;
+            const isComplete = total > 0 && completed >= total;
+            const hasProgress = completed > 0;
 
             return (
               <button
                 key={course.id}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition w-full text-left"
+                className="flex items-center gap-2 px-2 py-2 rounded-lg transition-all duration-150 w-full text-left"
+                style={{
+                  backgroundColor: isActive ? 'var(--theme-hover-bg)' : 'transparent',
+                  borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
+                }}
                 onClick={() => { onCourseClick?.(course.id); onClose(); }}
               >
-                {hasProgress && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
-                )}
-                <span className="truncate">{course.shortTitle[lang]}</span>
+                <ProgressRing
+                  size={20}
+                  completed={completed}
+                  total={total}
+                  isActive={isActive}
+                />
+                <div className="flex-1 min-w-0">
+                  <div
+                    className="text-xs truncate"
+                    style={{
+                      fontWeight: isActive ? 600 : 500,
+                      color: isActive ? '#3b82f6' : (isComplete ? '#16a34a' : 'var(--theme-content-text)'),
+                      opacity: !hasProgress && !isActive ? 0.5 : 1,
+                    }}
+                  >
+                    {course.shortTitle[lang]}
+                  </div>
+                  {total > 0 && (
+                    <div className="text-[10px]" style={{ color: isComplete ? '#22c55e' : 'var(--theme-muted-text)' }}>
+                      {isComplete ? t('Complete', 'Complet') : `${completed}/${total}`}
+                    </div>
+                  )}
+                </div>
               </button>
             );
           })}

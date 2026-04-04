@@ -3,17 +3,26 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { getSubject } from '../content/registry';
 import Sidebar from '../components/layout/Sidebar';
-import TabBar from '../components/ui/TabBar';
+import Breadcrumbs from '../components/layout/Breadcrumbs';
+import ContentTypeBar from '../components/ui/ContentTypeBar';
+import CourseMap from '../components/ui/CourseMap';
+import ReadingProgress from '../components/ui/ReadingProgress';
+import CourseNavigation from '../components/ui/CourseNavigation';
 import { CourseBlock } from '../components/ui';
 
 function PracticeTab({ practice: LazyPractice }) {
   return <LazyPractice />;
 }
 
+const LoadingFallback = () => {
+  const { t } = useApp();
+  return <div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se \u00eencarc\u0103...')}</div>;
+};
+
 export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const { yearSem, subject: subjectSlug, '*': wildcard } = useParams();
   const navigate = useNavigate();
-  const { lang, t, search, setSearch, checked, toggleCheck } = useApp();
+  const { lang, t, search, setSearch, checked } = useApp();
   const subject = getSubject(subjectSlug);
   const [activeCourseId, setActiveCourseId] = useState(null);
   const [courseSearchStates, setCourseSearchStates] = useState({});
@@ -21,7 +30,6 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
 
   const searchActive = search && search.length >= 2;
 
-  // Reset activeCourseId after scroll so the same course can be clicked again
   useEffect(() => {
     if (activeCourseId) {
       const timer = setTimeout(() => setActiveCourseId(null), 500);
@@ -29,7 +37,6 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     }
   }, [activeCourseId]);
 
-  // Two-phase content search
   useEffect(() => {
     if (!searchActive || !subject) {
       setCourseSearchStates({});
@@ -37,10 +44,8 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
       return;
     }
 
-    // Debounce: wait for user to stop typing, then search the DOM
     const timer = setTimeout(() => {
       if (!coursesRef.current) return;
-
       const query = search.toLowerCase();
       const newStates = {};
       const allRanges = [];
@@ -67,18 +72,15 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             pos = idx + search.length;
           }
         }
-
         newStates[course.id] = hasMatch ? 'match' : 'no-match';
       }
 
       setCourseSearchStates(newStates);
 
-      // Apply CSS highlights
       if (CSS.highlights) {
         CSS.highlights.delete('search-results');
         if (allRanges.length > 0) {
           CSS.highlights.set('search-results', new Highlight(...allRanges));
-          // Scroll to first match
           const el = allRanges[0].startContainer.parentElement;
           if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
         }
@@ -93,18 +95,10 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   if (!subject) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
-        <p className="text-lg opacity-60">{t('Subject not found', 'Materia nu a fost găsită')}</p>
+        <p className="text-lg opacity-60">{t('Subject not found', 'Materia nu a fost g\u0103sit\u0103')}</p>
       </div>
     );
   }
-
-  const tabs = [
-    { id: 'courses', label: t('Courses', 'Cursuri') },
-    { id: 'seminars', label: t('Solved Exercises', 'Exerciții rezolvate') },
-    { id: 'labs', label: t('Exercises', 'Exerciții') },
-    { id: 'practice', label: t('Practice', 'Practică') },
-    ...(subject.tests ? [{ id: 'tests', label: t('Tests', 'Teste') }] : []),
-  ];
 
   const handleTabChange = (tabId) => {
     if (tabId === 'courses') {
@@ -114,127 +108,167 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     }
   };
 
+  const handleCourseClick = (courseId) => {
+    setActiveCourseId(courseId);
+    const el = document.getElementById(courseId);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  };
+
+  const activeCourseIndex = activeCourseId
+    ? subject.courses.findIndex(c => c.id === activeCourseId)
+    : -1;
+
+  const openCourse = activeCourseId
+    ? subject.courses.find(c => c.id === activeCourseId)
+    : null;
+
+  const showCourseMap = tab === 'courses' && !searchActive && subject.courses.length > 0;
+
   return (
-    <div className="flex flex-1">
-      <Sidebar subject={subject} open={sidebarOpen} onClose={() => setSidebarOpen(false)} onCourseClick={setActiveCourseId} />
+    <div className="flex flex-col flex-1">
+      <ContentTypeBar subject={subject} activeTab={tab} onTabChange={handleTabChange} />
 
-      <main className="flex-1 max-w-5xl mx-auto p-4 lg:p-8 min-h-[calc(100vh-57px)]">
-        <div className="mb-4">
-          <button
-            onClick={() => navigate('/')}
-            className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-2 inline-block"
-          >
-            ← {t('All subjects', 'Toate materiile')}
-          </button>
-          <h2 className="text-2xl font-bold">{subject.title[lang]}</h2>
-        </div>
+      <Breadcrumbs
+        yearSem={yearSem}
+        subject={subject}
+        tab={tab}
+        activeItemTitle={openCourse ? openCourse.shortTitle[lang] : undefined}
+      />
 
-        <TabBar tabs={tabs} activeTab={tab} onTabChange={handleTabChange} />
+      <div className="flex flex-1">
+        {tab === 'courses' && subject.courses.length > 0 && (
+          <Sidebar
+            subject={subject}
+            activeCourseId={activeCourseId}
+            open={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            onCourseClick={handleCourseClick}
+          />
+        )}
 
-        {tab === 'courses' && (
-          <>
-            <input
-              type="text"
-              placeholder={t('Search across all content...', 'Caută în tot conținutul...')}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full p-3 mb-6 rounded-lg border dark:border-gray-600 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        <main className="flex-1 max-w-5xl mx-auto p-4 lg:p-8 min-h-[calc(100vh-120px)]">
+          {tab === 'courses' && (
+            <>
+              {showCourseMap && (
+                <CourseMap subject={subject} onCourseClick={handleCourseClick} />
+              )}
 
-            {subject.courses.length === 0 ? (
-              <div className="text-center py-12 opacity-60">
-                <p className="text-4xl mb-4">{subject.icon}</p>
-                <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
-                <p className="text-sm mt-2">{t('Course content will be added here.', 'Conținutul cursurilor va fi adăugat aici.')}</p>
-              </div>
-            ) : (
-              <div ref={coursesRef}>
-                {subject.courses.map(course => {
-                  const CourseContent = course.component;
+              <input
+                type="text"
+                placeholder={t('Search across all content...', 'Caut\u0103 \u00een tot con\u021binutul...')}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full p-3 mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                style={{
+                  backgroundColor: 'var(--theme-card-bg)',
+                  border: '1px solid var(--theme-border)',
+                  color: 'var(--theme-content-text)',
+                }}
+              />
+
+              {subject.courses.length === 0 ? (
+                <div className="text-center py-12 opacity-60">
+                  <p className="text-4xl mb-4">{subject.icon}</p>
+                  <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
+                  <p className="text-sm mt-2">{t('Course content will be added here.', 'Con\u021binutul cursurilor va fi ad\u0103ugat aici.')}</p>
+                </div>
+              ) : (
+                <div ref={coursesRef}>
+                  {subject.courses.map((course, index) => {
+                    const CourseContent = course.component;
+                    return (
+                      <CourseBlock
+                        key={course.id}
+                        title={course.title[lang]}
+                        id={course.id}
+                        forceOpen={activeCourseId === course.id}
+                        searchState={courseSearchStates[course.id]}
+                      >
+                        {course.sectionCount > 0 && (
+                          <ReadingProgress courseId={course.id} sectionCount={course.sectionCount} />
+                        )}
+                        <Suspense fallback={<LoadingFallback />}>
+                          <CourseContent />
+                        </Suspense>
+                        <CourseNavigation
+                          items={subject.courses}
+                          currentIndex={index}
+                          onNavigate={handleCourseClick}
+                        />
+                      </CourseBlock>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {tab === 'seminars' && subject.seminars && (
+            <div>
+              {subject.seminars.length === 0 ? (
+                <div className="text-center py-12 opacity-60">
+                  <p className="text-4xl mb-4">{subject.icon}</p>
+                  <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
+                </div>
+              ) : (
+                subject.seminars.map(sem => {
+                  const SemContent = sem.component;
                   return (
-                    <CourseBlock
-                      key={course.id}
-                      title={course.title[lang]}
-                      id={course.id}
-                      forceOpen={activeCourseId === course.id}
-                      searchState={courseSearchStates[course.id]}
-                    >
-                      <Suspense fallback={<div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>}>
-                        <CourseContent />
+                    <CourseBlock key={sem.id} title={sem.title[lang]} id={sem.id}>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <SemContent />
                       </Suspense>
                     </CourseBlock>
                   );
-                })}
-              </div>
-            )}
-          </>
-        )}
+                })
+              )}
+            </div>
+          )}
 
-        {tab === 'seminars' && subject.seminars && (
-          <div>
-            {subject.seminars.length === 0 ? (
-              <div className="text-center py-12 opacity-60">
-                <p className="text-4xl mb-4">{subject.icon}</p>
-                <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
-              </div>
-            ) : (
-              subject.seminars.map(sem => {
-                const SemContent = sem.component;
+          {tab === 'labs' && subject.labs && (
+            <div>
+              {subject.labs.length === 0 ? (
+                <div className="text-center py-12 opacity-60">
+                  <p className="text-4xl mb-4">{subject.icon}</p>
+                  <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
+                </div>
+              ) : (
+                subject.labs.map(lab => {
+                  const LabContent = lab.component;
+                  return (
+                    <CourseBlock key={lab.id} title={lab.title[lang]} id={lab.id}>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <LabContent />
+                      </Suspense>
+                    </CourseBlock>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {tab === 'practice' && (
+            <Suspense fallback={<LoadingFallback />}>
+              <PracticeTab practice={subject.practice} />
+            </Suspense>
+          )}
+
+          {tab === 'tests' && subject.tests && (
+            <div>
+              {subject.tests.map(test => {
+                const TestContent = test.component;
                 return (
-                  <CourseBlock key={sem.id} title={sem.title[lang]} id={sem.id}>
-                    <Suspense fallback={<div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>}>
-                      <SemContent />
+                  <CourseBlock key={test.id} title={test.title[lang]} id={test.id}>
+                    <Suspense fallback={<LoadingFallback />}>
+                      <TestContent />
                     </Suspense>
                   </CourseBlock>
                 );
-              })
-            )}
-          </div>
-        )}
-
-        {tab === 'labs' && subject.labs && (
-          <div>
-            {subject.labs.length === 0 ? (
-              <div className="text-center py-12 opacity-60">
-                <p className="text-4xl mb-4">{subject.icon}</p>
-                <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
-              </div>
-            ) : (
-              subject.labs.map(lab => {
-                const LabContent = lab.component;
-                return (
-                  <CourseBlock key={lab.id} title={lab.title[lang]} id={lab.id}>
-                    <Suspense fallback={<div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>}>
-                      <LabContent />
-                    </Suspense>
-                  </CourseBlock>
-                );
-              })
-            )}
-          </div>
-        )}
-
-        {tab === 'practice' && (
-          <Suspense fallback={<div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>}>
-            <PracticeTab practice={subject.practice} />
-          </Suspense>
-        )}
-
-        {tab === 'tests' && subject.tests && (
-          <div>
-            {subject.tests.map(test => {
-              const TestContent = test.component;
-              return (
-                <CourseBlock key={test.id} title={test.title[lang]} id={test.id}>
-                  <Suspense fallback={<div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>}>
-                    <TestContent />
-                  </Suspense>
-                </CourseBlock>
-              );
-            })}
-          </div>
-        )}
-      </main>
+              })}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

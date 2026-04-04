@@ -8,7 +8,10 @@ const AppShell = ({ children }) => {
 
   return (
     <div className={dark ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
+      <div
+        className="min-h-screen font-sans transition-colors duration-200"
+        style={{ backgroundColor: 'var(--theme-content-bg)', color: 'var(--theme-content-text)' }}
+      >
         <TopBar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         {typeof children === 'function' ? children({ sidebarOpen, setSidebarOpen }) : children}
       </div>

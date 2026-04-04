@@ -4,7 +4,6 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState }) => {
   const [userOpen, setUserOpen] = useState(false);
   const ref = useRef(null);
 
-  // searchState overrides user toggle: 'match' = open, 'no-match' = closed, undefined = user control
   const open = searchState ? searchState === 'match' : userOpen;
 
   useEffect(() => {
@@ -15,15 +14,27 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState }) => {
   }, [forceOpen]);
 
   return (
-    <div ref={ref} className="mb-4 border-2 rounded-xl dark:border-gray-600 overflow-hidden transition-shadow hover:shadow-md" id={id}>
+    <div
+      ref={ref}
+      className="mb-4 rounded-xl overflow-hidden transition-shadow hover:shadow-md"
+      style={{ border: '2px solid var(--theme-border)' }}
+      id={id}
+    >
       <div
-        className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 font-bold text-lg transition-colors"
+        className="p-4 cursor-pointer font-bold text-lg transition-colors"
+        style={{ color: 'var(--theme-content-text)' }}
         onClick={() => { if (!searchState) setUserOpen(!userOpen); }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-hover-bg)'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
       >
-        <span className="mr-2">{open ? '▾' : '▸'}</span>{title}
+        <span className="mr-2">{open ? '\u25BE' : '\u25B8'}</span>{title}
       </div>
-      {/* Always render content so it's searchable in the DOM; hide with CSS when closed */}
-      <div className={`p-4 border-t dark:border-gray-600 ${open ? '' : 'hidden'}`}>{children}</div>
+      <div
+        className={`p-4 ${open ? '' : 'hidden'}`}
+        style={{ borderTop: '1px solid var(--theme-border)' }}
+      >
+        {children}
+      </div>
     </div>
   );
 };

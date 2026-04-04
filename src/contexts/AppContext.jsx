@@ -1,13 +1,19 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
+import { applyPalette, DEFAULT_PALETTE } from '../theme/palettes';
 
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
   const [dark, setDark] = useLocalStorage('dark', true);
   const [lang, setLang] = useLocalStorage('lang', 'ro');
+  const [palette, setPalette] = useLocalStorage('palette', DEFAULT_PALETTE);
   const [search, setSearch] = useState('');
   const [checked, setChecked] = useLocalStorage('checked', {});
+
+  useEffect(() => {
+    applyPalette(palette, dark);
+  }, [palette, dark]);
 
   const t = useCallback((en, ro) => lang === 'ro' ? ro : en, [lang]);
 
@@ -30,10 +36,11 @@ export function AppProvider({ children }) {
   const value = useMemo(() => ({
     dark, setDark, toggleDark,
     lang, setLang, toggleLang,
+    palette, setPalette,
     search, setSearch,
     checked, toggleCheck,
     t, highlight,
-  }), [dark, lang, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang]);
+  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

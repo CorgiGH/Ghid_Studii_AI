@@ -10,23 +10,29 @@ const SubjectCard = ({ subject }) => {
   return (
     <div
       onClick={() => navigate(`/${subject.yearSemester}/${subject.slug}`)}
-      className="border rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-blue-400 dark:border-gray-700 dark:hover:border-blue-500 bg-white dark:bg-gray-800 group"
+      className="rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 group"
+      style={{
+        backgroundColor: 'var(--theme-card-bg)',
+        border: '1px solid var(--theme-border)',
+      }}
     >
       <div className="text-3xl mb-3">{subject.icon}</div>
-      <h3 className="font-bold text-lg mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+      <h3 className="font-bold text-lg mb-1 group-hover:text-blue-600 transition-colors"
+        style={{ color: 'var(--theme-content-text)' }}
+      >
         {subject.title[lang]}
       </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+      <p className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--theme-muted-text)' }}>
         {subject.description[lang]}
       </p>
       <div className="text-xs font-medium">
         {hasCourses ? (
-          <span className="inline-flex items-center gap-1.5 text-green-600 dark:text-green-400">
+          <span className="inline-flex items-center gap-1.5 text-green-600">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
             {subject.courses.length} {t('courses', 'cursuri')}
           </span>
         ) : (
-          <span className="text-gray-400 italic">{t('Coming soon', 'În curând')}</span>
+          <span style={{ color: 'var(--theme-muted-text)' }} className="italic">{t('Coming soon', '\u00cen cur\u00e2nd')}</span>
         )}
       </div>
     </div>
