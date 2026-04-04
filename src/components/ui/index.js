@@ -9,3 +9,4 @@ export { default as ContentTypeBar } from './ContentTypeBar';
 export { default as CourseMap } from './CourseMap';
 export { default as ReadingProgress } from './ReadingProgress';
 export { default as CourseNavigation } from './CourseNavigation';
+export { default as MultiFileEditor } from './MultiFileEditor';

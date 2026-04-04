@@ -2,14 +2,15 @@ import os from './os/index.js';
 import probStat from './prob-stat/index.js';
 import alo from './alo/index.js';
 import pa from './pa/index.js';
+import oop from './oop/index.js';
 
-export const subjects = [os, probStat, alo, pa];
+export const subjects = [os, probStat, alo, pa, oop];
 
 export const yearSemesters = [
   {
     id: 'y1s2',
     title: { en: 'Year 1, Semester 2', ro: 'Anul 1, Semestrul 2' },
-    subjects: ['os', 'prob-stat', 'alo', 'pa'],
+    subjects: ['os', 'prob-stat', 'alo', 'pa', 'oop'],
   },
 ];
 
