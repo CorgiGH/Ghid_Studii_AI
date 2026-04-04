@@ -21,6 +21,21 @@ function migrateCheckedKeys(obj) {
   return changed ? out : null;
 }
 
+/** One-time migration: rename lab section keys (lab1-ex4 → lab_1-ex4) */
+function migrateLabKeys(obj) {
+  const out = {};
+  let changed = false;
+  for (const [k, v] of Object.entries(obj)) {
+    let nk = k;
+    if (/^lab(\d+)-(.+)$/.test(k)) {
+      nk = k.replace(/^lab(\d+)-(.+)$/, 'lab_$1-$2');
+    }
+    if (nk !== k) changed = true;
+    out[nk] = v;
+  }
+  return changed ? out : null;
+}
+
 export function AppProvider({ children }) {
   const [dark, setDark] = useLocalStorage('dark', true);
   const [lang, setLang] = useLocalStorage('lang', 'ro');
@@ -32,12 +47,20 @@ export function AppProvider({ children }) {
     applyPalette(palette, dark);
   }, [palette, dark]);
 
-  // Run one-time checked-key migration
+  // Run one-time checked-key migration (course IDs: c1-xxx → course_1-xxx)
   useEffect(() => {
     if (localStorage.getItem('checked_v2_migrated')) return;
     const migrated = migrateCheckedKeys(checked);
     if (migrated) setChecked(migrated);
     localStorage.setItem('checked_v2_migrated', '1');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Run one-time checked-key migration (lab IDs: lab1-xxx → lab_1-xxx)
+  useEffect(() => {
+    if (localStorage.getItem('checked_v3_migrated')) return;
+    const migrated = migrateLabKeys(checked);
+    if (migrated) setChecked(migrated);
+    localStorage.setItem('checked_v3_migrated', '1');
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const t = useCallback((en, ro) => lang === 'ro' ? ro : en, [lang]);
