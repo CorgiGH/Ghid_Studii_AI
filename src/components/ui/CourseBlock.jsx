@@ -6,6 +6,7 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
   const [userOpen, setUserOpen] = useState(false);
   const ref = useRef(null);
   const contentRef = useRef(null);
+  const innerRef = useRef(null);
   const [maxHeight, setMaxHeight] = useState('0px');
   const { checked } = useApp();
   const [vignetteActive, setVignetteActive] = useState(false);
@@ -21,21 +22,21 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
   }, [forceOpen]);
 
   useEffect(() => {
-    if (open && contentRef.current) {
-      setMaxHeight(`${contentRef.current.scrollHeight}px`);
+    if (open && innerRef.current) {
+      setMaxHeight(`${innerRef.current.scrollHeight}px`);
     } else {
       setMaxHeight('0px');
     }
   }, [open]);
 
   useEffect(() => {
-    if (!open || !contentRef.current) return;
+    if (!open || !innerRef.current) return;
     const observer = new ResizeObserver(() => {
-      if (contentRef.current) {
-        setMaxHeight(`${contentRef.current.scrollHeight}px`);
+      if (innerRef.current) {
+        setMaxHeight(`${innerRef.current.scrollHeight}px`);
       }
     });
-    observer.observe(contentRef.current);
+    observer.observe(innerRef.current);
     return () => observer.disconnect();
   }, [open]);
 
@@ -100,7 +101,7 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
           transition: 'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
-        <div className="p-4" style={{ borderTop: '1px solid var(--theme-border)' }}>
+        <div ref={innerRef} className="p-4" style={{ borderTop: '1px solid var(--theme-border)' }}>
           {children}
         </div>
       </div>
