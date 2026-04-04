@@ -1,65 +1,48 @@
-import React, { useRef, useEffect } from 'react';
-import { EditorView, basicSetup } from 'codemirror';
-import { cpp } from '@codemirror/lang-cpp';
-import { oneDark } from '@codemirror/theme-one-dark';
-import { EditorState } from '@codemirror/state';
+import React, { useRef, useCallback } from 'react';
 import { useApp } from '../../contexts/AppContext';
 
 export default function CodeEditor({ value, onChange, readOnly = false }) {
-  const containerRef = useRef(null);
-  const viewRef = useRef(null);
   const { dark } = useApp();
+  const textareaRef = useRef(null);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  const handleChange = useCallback((e) => {
+    if (onChange) onChange(e.target.value);
+  }, [onChange]);
 
-    const extensions = [
-      basicSetup,
-      cpp(),
-      EditorView.updateListener.of(update => {
-        if (update.docChanged && onChange) {
-          onChange(update.state.doc.toString());
-        }
-      }),
-    ];
-
-    if (dark) extensions.push(oneDark);
-    if (readOnly) extensions.push(EditorState.readOnly.of(true));
-
-    const state = EditorState.create({
-      doc: value || '',
-      extensions,
-    });
-
-    const view = new EditorView({
-      state,
-      parent: containerRef.current,
-    });
-
-    viewRef.current = view;
-
-    return () => {
-      view.destroy();
-      viewRef.current = null;
-    };
-  }, [dark]);
-
-  // Sync external value changes
-  useEffect(() => {
-    const view = viewRef.current;
-    if (!view) return;
-    const current = view.state.doc.toString();
-    if (value !== undefined && value !== current) {
-      view.dispatch({
-        changes: { from: 0, to: current.length, insert: value },
+  const handleKeyDown = useCallback((e) => {
+    // Tab inserts 2 spaces instead of changing focus
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const ta = e.target;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const newValue = value.substring(0, start) + '  ' + value.substring(end);
+      if (onChange) onChange(newValue);
+      // Restore cursor position after React re-render
+      requestAnimationFrame(() => {
+        ta.selectionStart = ta.selectionEnd = start + 2;
       });
     }
-  }, [value]);
+  }, [value, onChange]);
 
   return (
-    <div
-      ref={containerRef}
-      className="border rounded-lg overflow-hidden dark:border-gray-600 text-sm"
+    <textarea
+      ref={textareaRef}
+      value={value || ''}
+      onChange={handleChange}
+      onKeyDown={handleKeyDown}
+      readOnly={readOnly}
+      spellCheck={false}
+      className="w-full font-mono text-sm p-4 resize-y outline-none min-h-[200px]"
+      style={{
+        backgroundColor: dark ? '#1e1e2e' : '#fafafa',
+        color: dark ? '#cdd6f4' : '#1e1e1e',
+        border: 'none',
+        borderTop: `1px solid ${dark ? '#45475a' : '#e5e7eb'}`,
+        borderBottom: `1px solid ${dark ? '#45475a' : '#e5e7eb'}`,
+        tabSize: 2,
+        lineHeight: 1.6,
+      }}
     />
   );
 }
