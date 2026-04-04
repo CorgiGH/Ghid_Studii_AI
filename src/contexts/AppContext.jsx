@@ -4,6 +4,23 @@ import { applyPalette, DEFAULT_PALETTE } from '../theme/palettes';
 
 const AppContext = createContext();
 
+/** One-time migration: rename old section-check keys (c1-xxx → course_1-xxx) */
+function migrateCheckedKeys(obj) {
+  const out = {};
+  let changed = false;
+  for (const [k, v] of Object.entries(obj)) {
+    let nk = k;
+    if (/^c(\d+)-(.+)$/.test(k)) {
+      nk = k.replace(/^c(\d+)-(.+)$/, 'course_$1-$2');
+    } else if (/^(.+?)-c(\d+)-(.+)$/.test(k)) {
+      nk = k.replace(/^(.+?)-c(\d+)-(.+)$/, '$1-course_$2-$3');
+    }
+    if (nk !== k) changed = true;
+    out[nk] = v;
+  }
+  return changed ? out : null;
+}
+
 export function AppProvider({ children }) {
   const [dark, setDark] = useLocalStorage('dark', true);
   const [lang, setLang] = useLocalStorage('lang', 'ro');
@@ -14,6 +31,14 @@ export function AppProvider({ children }) {
   useEffect(() => {
     applyPalette(palette, dark);
   }, [palette, dark]);
+
+  // Run one-time checked-key migration
+  useEffect(() => {
+    if (localStorage.getItem('checked_v2_migrated')) return;
+    const migrated = migrateCheckedKeys(checked);
+    if (migrated) setChecked(migrated);
+    localStorage.setItem('checked_v2_migrated', '1');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const t = useCallback((en, ro) => lang === 'ro' ? ro : en, [lang]);
 
@@ -38,7 +63,7 @@ export function AppProvider({ children }) {
     lang, setLang, toggleLang,
     palette, setPalette,
     search, setSearch,
-    checked, toggleCheck,
+    checked, setChecked, toggleCheck,
     t, highlight,
   }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang]);
 
