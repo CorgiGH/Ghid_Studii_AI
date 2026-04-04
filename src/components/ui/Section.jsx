@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import useAutoProgress from '../../hooks/useAutoProgress';
 
 const Section = ({ title, id, children, checked, onCheck }) => {
+  const { ref: autoRef } = useAutoProgress(id);
   const [open, setOpen] = useState(false);
   const contentRef = useRef(null);
   const [maxHeight, setMaxHeight] = useState('0px');
@@ -39,7 +41,7 @@ const Section = ({ title, id, children, checked, onCheck }) => {
   }, [open]);
 
   return (
-    <div className="mb-3 border rounded-lg overflow-hidden transition-shadow hover:shadow-sm" id={id}
+    <div ref={autoRef} className="mb-3 border rounded-lg overflow-hidden transition-shadow hover:shadow-sm" id={id}
       style={{ borderColor: 'var(--theme-border)' }}
     >
       <div
