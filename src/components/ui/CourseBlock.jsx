@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CompletionVignette from './CompletionVignette';
 import { useApp } from '../../contexts/AppContext';
 
@@ -8,6 +8,7 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
   const contentRef = useRef(null);
   const innerRef = useRef(null);
   const [maxHeight, setMaxHeight] = useState('0px');
+  const [transitioning, setTransitioning] = useState(false);
   const { checked } = useApp();
   const [vignetteActive, setVignetteActive] = useState(false);
   const [showGreenBorder, setShowGreenBorder] = useState(false);
@@ -21,29 +22,50 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
     }
   }, [forceOpen]);
 
+  // Handle open/close transitions
+  const prevOpenRef = useRef(open);
   useEffect(() => {
+    if (open === prevOpenRef.current) return;
+    prevOpenRef.current = open;
+
     if (open && innerRef.current) {
+      // Opening: animate from 0 to scrollHeight
+      setTransitioning(true);
       setMaxHeight(`${innerRef.current.scrollHeight}px`);
-    } else {
-      setMaxHeight('0px');
+    } else if (!open && innerRef.current) {
+      // Closing: snap to scrollHeight then animate to 0
+      setTransitioning(false);
+      setMaxHeight(`${innerRef.current.scrollHeight}px`);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTransitioning(true);
+          setMaxHeight('0px');
+        });
+      });
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open || !innerRef.current) return;
-    const el = innerRef.current;
-    const remeasure = () => {
-      if (el) setMaxHeight(`${el.scrollHeight}px`);
-    };
-    const observer = new ResizeObserver(remeasure);
-    observer.observe(el);
-    // Re-measure after nested transitions complete (Toggle/Section expanding)
-    el.addEventListener('transitionend', remeasure);
-    return () => {
-      observer.disconnect();
-      el.removeEventListener('transitionend', remeasure);
-    };
+  // After open transition ends, remove maxHeight constraint so children expand instantly
+  const handleTransitionEnd = useCallback((e) => {
+    if (e.target !== contentRef.current) return;
+    setTransitioning(false);
+    if (open && innerRef.current) {
+      setMaxHeight('none');
+    }
   }, [open]);
+
+  // When maxHeight is 'none' (open, not transitioning), re-measure if children resize
+  // This handles cases where lazy-loaded content changes the height
+  useEffect(() => {
+    if (maxHeight !== 'none' || !innerRef.current) return;
+    const el = innerRef.current;
+    const observer = new ResizeObserver(() => {
+      // maxHeight is already 'none', so no action needed — content expands naturally
+      // But we need to keep scrollHeight current for when we close
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [maxHeight]);
 
   // Detect course completion for vignette
   const prevCompleteRef = useRef(false);
@@ -62,6 +84,10 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
     if (isComplete) setShowGreenBorder(true);
     else setShowGreenBorder(false);
   }, [isComplete]);
+
+  const handleClick = useCallback(() => {
+    if (!searchState) setUserOpen(prev => !prev);
+  }, [searchState]);
 
   return (
     <div
@@ -83,7 +109,7 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
       <div
         className="p-4 cursor-pointer font-bold text-lg transition-colors"
         style={{ color: 'var(--theme-content-text)' }}
-        onClick={() => { if (!searchState) setUserOpen(!userOpen); }}
+        onClick={handleClick}
         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-hover-bg)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
       >
@@ -103,8 +129,9 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
         className="overflow-hidden"
         style={{
           maxHeight,
-          transition: 'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: transitioning ? 'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
         }}
+        onTransitionEnd={handleTransitionEnd}
       >
         <div ref={innerRef} className="p-4" style={{ borderTop: '1px solid var(--theme-border)' }}>
           {children}

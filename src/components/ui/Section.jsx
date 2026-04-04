@@ -1,33 +1,41 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const Section = ({ title, id, children, checked, onCheck }) => {
   const [open, setOpen] = useState(false);
   const contentRef = useRef(null);
   const [maxHeight, setMaxHeight] = useState('0px');
+  const [transitioning, setTransitioning] = useState(false);
 
-  useEffect(() => {
-    if (open && contentRef.current) {
-      setMaxHeight(`${contentRef.current.scrollHeight}px`);
+  const handleToggle = useCallback(() => {
+    if (!open) {
+      // Opening: animate from 0 to scrollHeight
+      setTransitioning(true);
+      if (contentRef.current) {
+        setMaxHeight(`${contentRef.current.scrollHeight}px`);
+      }
+      setOpen(true);
     } else {
-      setMaxHeight('0px');
+      // Closing: snap maxHeight from 'none' to current scrollHeight, then animate to 0
+      setTransitioning(true);
+      if (contentRef.current) {
+        setMaxHeight(`${contentRef.current.scrollHeight}px`);
+      }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setMaxHeight('0px');
+          setOpen(false);
+        });
+      });
     }
   }, [open]);
 
-  // Re-measure when children change (e.g. nested toggles opening)
-  useEffect(() => {
-    if (!open || !contentRef.current) return;
-    const el = contentRef.current;
-    const remeasure = () => {
-      if (el) setMaxHeight(`${el.scrollHeight}px`);
-    };
-    const observer = new ResizeObserver(remeasure);
-    observer.observe(el);
-    // Also re-measure after CSS transitions end (catches nested expand/collapse)
-    el.addEventListener('transitionend', remeasure);
-    return () => {
-      observer.disconnect();
-      el.removeEventListener('transitionend', remeasure);
-    };
+  // After open transition ends, remove maxHeight constraint so children expand instantly
+  const handleTransitionEnd = useCallback((e) => {
+    if (e.target !== contentRef.current) return;
+    setTransitioning(false);
+    if (open && contentRef.current) {
+      setMaxHeight('none');
+    }
   }, [open]);
 
   return (
@@ -37,7 +45,7 @@ const Section = ({ title, id, children, checked, onCheck }) => {
       <div
         className="flex items-center gap-2 p-3 cursor-pointer transition-colors"
         style={{ backgroundColor: 'transparent' }}
-        onClick={() => setOpen(!open)}
+        onClick={handleToggle}
         onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--theme-hover-bg)'}
         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
       >
@@ -68,9 +76,10 @@ const Section = ({ title, id, children, checked, onCheck }) => {
         className="overflow-hidden"
         style={{
           maxHeight,
-          transition: 'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: transitioning ? 'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
           borderTop: open ? '1px solid var(--theme-border)' : '1px solid transparent',
         }}
+        onTransitionEnd={handleTransitionEnd}
       >
         <div className="p-4">
           {children}
