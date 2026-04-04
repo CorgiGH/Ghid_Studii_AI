@@ -2,14 +2,14 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 
-const CourseNavigation = ({ items, currentIndex, yearSem, subjectSlug }) => {
+const CourseNavigation = ({ items, currentIndex, yearSem, subjectSlug, routePrefix = 'course_' }) => {
   const { lang } = useApp();
   const navigate = useNavigate();
 
-  const navTo = (course) => {
-    const match = course.id.match(/course_(\d+)$/);
+  const navTo = (item) => {
+    const match = item.id.match(new RegExp(routePrefix + '(\\d+)$'));
     if (match) {
-      navigate(`/${yearSem}/${subjectSlug}/course_${match[1]}`);
+      navigate(`/${yearSem}/${subjectSlug}/${routePrefix}${match[1]}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };

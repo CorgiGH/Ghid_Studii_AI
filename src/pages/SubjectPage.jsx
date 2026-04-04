@@ -30,10 +30,16 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const courseMatch = wildcard?.match(/^course_(\d+)$/);
   const courseNum = courseMatch ? courseMatch[1] : null;
 
+  // Detect lab_N in wildcard
+  const labMatch = wildcard?.match(/^lab_(\d+)$/);
+  const labNum = labMatch ? labMatch[1] : null;
+
   // Determine active tab
   const tab = courseNum
     ? 'courses'
-    : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
+    : labNum
+      ? 'labs'
+      : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
 
   // Find active course when a specific course is selected
   const activeCourse = useMemo(() => {
@@ -55,6 +61,20 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     if (!activeCourse?.sections) return [];
     return activeCourse.sections.map(s => s.title[lang]);
   }, [activeCourse, lang]);
+
+  // Find active lab when a specific lab is selected
+  const activeLab = useMemo(() => {
+    if (!labNum || !subject) return null;
+    return subject.labs?.find(l => l.id.endsWith('lab_' + labNum)) || null;
+  }, [labNum, subject]);
+
+  const activeLabIndex = useMemo(() => {
+    if (!activeLab || !subject) return -1;
+    return subject.labs.findIndex(l => l.id === activeLab.id);
+  }, [activeLab, subject]);
+
+  const labSectionIds = useMemo(() => activeLab?.sections?.map(s => s.id) || [], [activeLab]);
+  const labSectionTitles = useMemo(() => activeLab?.sections?.map(s => s.title[lang]) || [], [activeLab, lang]);
 
   if (!subject) {
     return (
@@ -87,7 +107,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         yearSem={yearSem}
         subject={subject}
         tab={tab}
-        activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : undefined}
+        activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : undefined}
       />
 
       <div className="flex flex-1">
@@ -100,6 +120,18 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             yearSem={yearSem}
             subjectSlug={subjectSlug}
             routePrefix="course_"
+          />
+        )}
+
+        {tab === 'labs' && subject.labs?.length > 0 && (
+          <Sidebar
+            items={subject.labs}
+            activeCourseId={activeLab?.id || null}
+            open={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            yearSem={yearSem}
+            subjectSlug={subjectSlug}
+            routePrefix="lab_"
           />
         )}
 
@@ -159,25 +191,40 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
           )}
 
           {tab === 'labs' && subject.labs && (
-            <div>
-              {subject.labs.length === 0 ? (
-                <div className="text-center py-12 opacity-60">
-                  <p className="text-4xl mb-4">{subject.icon}</p>
-                  <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
-                </div>
+            <>
+              {activeLab ? (
+                <CourseTransition courseIndex={activeLabIndex}>
+                  <Suspense fallback={<LoadingFallback />}>
+                    {React.createElement(activeLab.component)}
+                  </Suspense>
+                  <CourseNavigation
+                    items={subject.labs}
+                    currentIndex={activeLabIndex}
+                    yearSem={yearSem}
+                    subjectSlug={subjectSlug}
+                    routePrefix="lab_"
+                  />
+                </CourseTransition>
               ) : (
-                subject.labs.map(lab => {
-                  const LabContent = lab.component;
-                  return (
-                    <CourseBlock key={lab.id} title={lab.title[lang]} id={lab.id}>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <LabContent />
-                      </Suspense>
-                    </CourseBlock>
-                  );
-                })
+                subject.labs.length === 0 ? (
+                  <div className="text-center py-12 opacity-60">
+                    <p className="text-4xl mb-4">{subject.icon}</p>
+                    <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
+                  </div>
+                ) : (
+                  subject.labs.map(lab => {
+                    const LabContent = lab.component;
+                    return (
+                      <CourseBlock key={lab.id} title={lab.title[lang]} id={lab.id}>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <LabContent />
+                        </Suspense>
+                      </CourseBlock>
+                    );
+                  })
+                )
               )}
-            </div>
+            </>
           )}
 
           {tab === 'practice' && (
@@ -209,6 +256,15 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             sectionCount={activeCourse.sectionCount}
             sectionIds={sectionIds}
             sectionTitles={sectionTitles}
+          />
+        )}
+
+        {tab === 'labs' && activeLab && activeLab.sectionCount > 0 && (
+          <ProgressSidebar
+            courseId={activeLab.id}
+            sectionCount={activeLab.sectionCount}
+            sectionIds={labSectionIds}
+            sectionTitles={labSectionTitles}
           />
         )}
       </div>
