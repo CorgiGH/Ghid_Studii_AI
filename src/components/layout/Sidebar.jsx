@@ -192,15 +192,16 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
             position: 'sticky',
           }}
         >
+          {/* Button on the outer sticky wrapper so it stays fixed at 50% viewport */}
+          {toggleBtn}
           <div
-            className="h-full p-3 text-sm overflow-y-auto relative"
+            className="h-full p-3 text-sm overflow-y-auto"
             style={{
               backgroundColor: 'var(--theme-sidebar-bg)',
               borderRight: '1px solid var(--theme-sidebar-border)',
               scrollbarWidth: 'none',
             }}
           >
-            {toggleBtn}
             <nav className="flex flex-col gap-1">{courseList}</nav>
           </div>
         </div>
@@ -245,12 +246,15 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
           style={{
             width: '15%',
             minWidth: '160px',
+            position: 'relative',
           }}
           onMouseEnter={handleMouseEnterSidebar}
           onMouseLeave={handleMouseLeave}
         >
+          {/* Button on outer container so it stays at 50% of viewport */}
+          {toggleBtn}
           <div
-            className="h-full p-3 text-sm overflow-y-auto relative"
+            className="h-full p-3 text-sm overflow-y-auto"
             style={{
               paddingTop: 'calc(3rem + 8px)',
               backgroundColor: 'var(--theme-sidebar-bg)',
@@ -258,7 +262,6 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
               scrollbarWidth: 'none',
             }}
           >
-            {toggleBtn}
             <nav className="flex flex-col gap-1">{courseList}</nav>
           </div>
         </aside>
