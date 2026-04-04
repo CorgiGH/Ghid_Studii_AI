@@ -1,8 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 
-const CourseNavigation = ({ items, currentIndex, onNavigate }) => {
+const CourseNavigation = ({ items, currentIndex, yearSem, subjectSlug }) => {
   const { lang } = useApp();
+  const navigate = useNavigate();
+
+  const navTo = (course) => {
+    const match = course.id.match(/course_(\d+)$/);
+    if (match) {
+      navigate(`/${yearSem}/${subjectSlug}/course_${match[1]}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
   const prev = currentIndex > 0 ? items[currentIndex - 1] : null;
   const next = currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
 
@@ -15,7 +25,7 @@ const CourseNavigation = ({ items, currentIndex, onNavigate }) => {
     >
       {prev ? (
         <button
-          onClick={() => onNavigate(prev.id)}
+          onClick={() => navTo(prev)}
           className="flex items-center gap-2 hover:opacity-80 transition"
           style={{ color: 'var(--theme-muted-text)' }}
         >
@@ -29,7 +39,7 @@ const CourseNavigation = ({ items, currentIndex, onNavigate }) => {
 
       {next ? (
         <button
-          onClick={() => onNavigate(next.id)}
+          onClick={() => navTo(next)}
           className="flex items-center gap-2 hover:opacity-80 transition text-right"
           style={{ color: '#3b82f6' }}
         >
