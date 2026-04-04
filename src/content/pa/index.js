@@ -27,6 +27,9 @@ const pa = {
     { id: 'pa-s6', title: { en: 'Week 6: String Searching (Cont.)', ro: 'Săptămâna 6: Căutarea peste șiruri (cont.)' }, shortTitle: { en: 'W6: Strings II', ro: 'S6: Șiruri II' }, component: lazy(() => import('./seminars/Seminar06.jsx')) },
   ],
   labs: [],
+  tests: [
+    { id: 'pa-tests', title: { en: 'Tests', ro: 'Teste' }, shortTitle: { en: 'Tests', ro: 'Teste' }, component: lazy(() => import('./tests/PATests.jsx')) },
+  ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
 
