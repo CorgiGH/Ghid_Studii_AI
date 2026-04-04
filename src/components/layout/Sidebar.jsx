@@ -69,14 +69,16 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
       )}
 
-      {/* Hover zone when unlocked — invisible strip on the left edge */}
-      {!locked && (
+      {/* Hover zone + visible toggle when unlocked and sidebar hidden */}
+      {!locked && !overlayVisible && !peeking && (
         <div
-          className="hidden lg:block fixed top-20 left-0 z-30 h-[calc(100vh-5rem)]"
-          style={{ width: '16px' }}
+          className="hidden lg:flex fixed left-0 z-20 items-center"
+          style={{ top: '0', height: '100vh', width: '16px' }}
           onMouseEnter={handleMouseEnter}
         >
-          <SidebarToggle locked={false} onToggle={onToggleLock} side="content" />
+          <div style={{ position: 'absolute', top: '50%', left: '0', transform: 'translateY(-50%)' }}>
+            <SidebarToggle locked={false} onToggle={onToggleLock} />
+          </div>
         </div>
       )}
 
@@ -87,14 +89,17 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
 
       <aside
         className={`
-          fixed top-20 left-0 z-50
-          h-[calc(100vh-5rem)] overflow-y-auto
+          fixed left-0 z-20
+          overflow-y-auto
           p-3 text-sm
           transition-all duration-200
           ${open ? 'translate-x-0' : (showSidebar ? 'translate-x-0' : '-translate-x-full')}
           ${!locked ? 'shadow-xl' : ''}
         `}
         style={{
+          top: '0',
+          height: '100vh',
+          paddingTop: 'calc(5rem + 4px)',
           width: '15%',
           minWidth: '160px',
           backgroundColor: 'var(--theme-sidebar-bg)',
@@ -103,12 +108,10 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Lock toggle tab — only in locked mode on desktop */}
-        {locked && (
-          <div className="hidden lg:block relative">
-            <SidebarToggle locked={true} onToggle={onToggleLock} side="sidebar" />
-          </div>
-        )}
+        {/* Lock/unlock toggle tab — always on sidebar's right edge */}
+        <div className="hidden lg:block" style={{ position: 'absolute', top: '50%', right: '-12px', transform: 'translateY(-50%)', zIndex: 30 }}>
+          <SidebarToggle locked={locked} onToggle={onToggleLock} side="sidebar" />
+        </div>
 
         <div className="lg:hidden flex justify-end mb-2">
           <button

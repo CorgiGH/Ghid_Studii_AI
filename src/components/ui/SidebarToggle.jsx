@@ -1,22 +1,22 @@
 import React from 'react';
 
-const SidebarToggle = ({ locked, onToggle, side = 'sidebar' }) => {
-  const pointsRight = side === 'content';
+const SidebarToggle = ({ locked, onToggle }) => {
+  // On sidebar's right edge always
+  // Locked: chevron points left (click to unlock/hide)
+  // Unlocked: chevron points right (click to lock/pin)
+  const pointsRight = !locked;
 
   return (
     <button
-      onClick={onToggle}
-      className="absolute top-1/2 -translate-y-1/2 z-30 flex items-center justify-center transition-colors duration-200 hover:brightness-125"
+      onClick={(e) => { e.stopPropagation(); onToggle(); }}
+      className="flex items-center justify-center transition-colors duration-200 hover:brightness-125"
       style={{
-        right: side === 'sidebar' ? '-12px' : undefined,
-        left: side === 'content' ? '0px' : undefined,
         width: '12px',
         height: '36px',
         background: '#1e293b',
         border: '1px solid #334155',
-        borderLeft: side === 'content' ? 'none' : undefined,
-        borderRight: side === 'sidebar' ? 'none' : undefined,
-        borderRadius: side === 'content' ? '0 6px 6px 0' : '6px 0 0 6px',
+        borderRight: 'none',
+        borderRadius: '0 6px 6px 0',
         boxShadow: '2px 0 6px rgba(0,0,0,0.2)',
         cursor: 'pointer',
       }}
