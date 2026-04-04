@@ -12,8 +12,11 @@ const InlineProgress = ({ courseId, sectionCount, sectionIds }) => {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-2"
-      style={{ borderBottom: '1px solid var(--theme-border)' }}
+      className="flex items-center gap-3 px-4 py-2 sticky top-12 z-10"
+      style={{
+        borderBottom: '1px solid var(--theme-border)',
+        backgroundColor: 'var(--theme-content-bg)',
+      }}
     >
       <div className="flex-1 flex gap-[3px] h-[5px]">
         {Array.from({ length: sectionCount }, (_, i) => {

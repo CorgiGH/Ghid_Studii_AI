@@ -140,7 +140,7 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
 
   return (
     <div
-      className="hidden lg:flex flex-col flex-shrink-0 h-[calc(100vh-5rem)] sticky top-20"
+      className="hidden lg:flex flex-col flex-shrink-0 h-[calc(100vh-3rem)] sticky top-12"
       style={{
         width: '30%',
         minWidth: '280px',
