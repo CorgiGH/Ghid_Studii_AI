@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import useAutoProgress from '../../hooks/useAutoProgress';
 
 const Section = ({ title, id, children, checked, onCheck }) => {
-  const { ref: autoRef } = useAutoProgress(id);
   const [open, setOpen] = useState(false);
+  const { ref: autoRef } = useAutoProgress(id, open);
   const contentRef = useRef(null);
   const [maxHeight, setMaxHeight] = useState('0px');
   const [transitioning, setTransitioning] = useState(false);

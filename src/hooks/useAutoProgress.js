@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../contexts/AppContext';
 
-export default function useAutoProgress(sectionId) {
+export default function useAutoProgress(sectionId, isOpen) {
   const { checked, setChecked } = useApp();
   const sectionRef = useRef(null);
   const hasScrolledThrough = useRef(false);
@@ -11,6 +11,7 @@ export default function useAutoProgress(sectionId) {
 
   const tryComplete = useCallback(() => {
     if (hasAutoFired.current) return;
+    if (!isOpen) return;
     if (!hasScrolledThrough.current) return;
     if (needsToggle.current && !hasInteractedWithToggle.current) return;
 
@@ -19,7 +20,7 @@ export default function useAutoProgress(sectionId) {
       if (prev[sectionId]) return prev;
       return { ...prev, [sectionId]: true };
     });
-  }, [sectionId, setChecked]);
+  }, [sectionId, setChecked, isOpen]);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -66,6 +67,11 @@ export default function useAutoProgress(sectionId) {
       if (sentinel.parentNode) sentinel.parentNode.removeChild(sentinel);
     };
   }, [tryComplete]);
+
+  // Re-check when section is expanded (scroll/toggle may already be satisfied)
+  useEffect(() => {
+    if (isOpen) tryComplete();
+  }, [isOpen, tryComplete]);
 
   return { ref: sectionRef };
 }
