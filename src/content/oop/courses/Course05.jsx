@@ -20,7 +20,7 @@ export default function Course05() {
       </Box>
 
       {/* ── 1. Inheritance ── */}
-      <Section title={t('1. Inheritance', '1. Moștenire')} id="oop-c5-inheritance" checked={!!checked['oop-c5-inheritance']} onCheck={() => toggleCheck('oop-c5-inheritance')}>
+      <Section title={t('1. Inheritance', '1. Moștenire')} id="oop-course_5-inheritance" checked={!!checked['oop-course_5-inheritance']} onCheck={() => toggleCheck('oop-course_5-inheritance')}>
         <Box type="definition">
           <p className="font-bold">{t('Inheritance', 'Moștenire')}</p>
           <p className="text-sm">{t('Inheritance is a process that transfers class properties (methods and members) from one class (the base class) to another that inherits it (the derived class). The derived class may extend the base class by adding additional methods and/or members.', 'Moștenirea este un proces care transferă proprietățile clasei (metode și membri) de la o clasă (clasa de bază) la alta care o moștenește (clasa derivată). Clasa derivată poate extinde clasa de bază adăugând metode și/sau membri suplimentari.')}</p>
@@ -197,7 +197,7 @@ int main() { D d; return 0; }
       </Section>
 
       {/* ── 2. Virtual Methods ── */}
-      <Section title={t('2. Virtual Methods', '2. Metode Virtuale')} id="oop-c5-virtual" checked={!!checked['oop-c5-virtual']} onCheck={() => toggleCheck('oop-c5-virtual')}>
+      <Section title={t('2. Virtual Methods', '2. Metode Virtuale')} id="oop-course_5-virtual" checked={!!checked['oop-course_5-virtual']} onCheck={() => toggleCheck('oop-course_5-virtual')}>
         <p>{t('When a derived class defines a method with the same name as the base class, it hides the base method:', 'Când o clasă derivată definește o metodă cu același nume ca în clasa de bază, aceasta ascunde metoda de bază:')}</p>
 
         <Code>{`class A {
@@ -354,7 +354,7 @@ struct C : public B { };  // ERROR: cannot inherit from 'B' as 'final'`}</Code>
       </Section>
 
       {/* ── 3. How Virtual Methods Are Modeled (vtables) ── */}
-      <Section title={t('3. vtables — How the Compiler Models Virtual Methods', '3. vtable — Cum modelează compilatorul metodele virtuale')} id="oop-c5-vtables" checked={!!checked['oop-c5-vtables']} onCheck={() => toggleCheck('oop-c5-vtables')}>
+      <Section title={t('3. vtables — How the Compiler Models Virtual Methods', '3. vtable — Cum modelează compilatorul metodele virtuale')} id="oop-course_5-vtables" checked={!!checked['oop-course_5-vtables']} onCheck={() => toggleCheck('oop-course_5-vtables')}>
         <Box type="definition">
           <p className="font-bold">vfptr (Virtual Function Pointer)</p>
           <p className="text-sm">{t('Using the "virtual" keyword forces the compiler to add a hidden data member — a pointer to a list of function pointers (the vtable). This pointer, called vfptr, is the first field in the class. It points to a global table (VFTable) containing addresses of all virtual methods.', 'Utilizarea cuvântului cheie "virtual" forțează compilatorul să adauge un membru dat ascuns — un pointer la o listă de pointeri la funcții (vtable). Acest pointer, numit vfptr, este primul câmp din clasă. Indică spre un tabel global (VFTable) care conține adresele tuturor metodelor virtuale.')}</p>
@@ -484,7 +484,7 @@ public:
       </Section>
 
       {/* ── 4. Covariance ── */}
-      <Section title={t('4. Covariance', '4. Covarianță')} id="oop-c5-covariance" checked={!!checked['oop-c5-covariance']} onCheck={() => toggleCheck('oop-c5-covariance')}>
+      <Section title={t('4. Covariance', '4. Covarianță')} id="oop-course_5-covariance" checked={!!checked['oop-course_5-covariance']} onCheck={() => toggleCheck('oop-course_5-covariance')}>
         <Box type="definition">
           <p className="font-bold">{t('Covariance', 'Covarianță')}</p>
           <p className="text-sm">{t('Covariance allows a virtual method in a derived class to change its return type to a pointer/reference of the derived class (instead of the base class). The new return type must be derived from the original return type.', 'Covarianța permite unei metode virtuale din clasa derivată să schimbe tipul de retur la un pointer/referință al clasei derivate (în loc de clasa de bază). Noul tip de retur trebuie să fie derivat din tipul de retur original.')}</p>
@@ -548,7 +548,7 @@ public:
       </Section>
 
       {/* ── 5. Abstract Classes (Interfaces) ── */}
-      <Section title={t('5. Abstract Classes (Interfaces)', '5. Clase Abstracte (Interfețe)')} id="oop-c5-abstract" checked={!!checked['oop-c5-abstract']} onCheck={() => toggleCheck('oop-c5-abstract')}>
+      <Section title={t('5. Abstract Classes (Interfaces)', '5. Clase Abstracte (Interfețe)')} id="oop-course_5-abstract" checked={!!checked['oop-course_5-abstract']} onCheck={() => toggleCheck('oop-course_5-abstract')}>
         <Box type="definition">
           <p className="font-bold">{t('Pure Virtual Method', 'Metodă pur virtuală')}</p>
           <p className="text-sm">{t('A virtual method without a body, defined by adding "= 0" at the end of its declaration. A class with at least one pure virtual method is an abstract class — it cannot be instantiated.', 'O metodă virtuală fără corp, definită prin adăugarea "= 0" la sfârșitul declarației. O clasă cu cel puțin o metodă pur virtuală este o clasă abstractă — nu poate fi instanțiată.')}</p>
@@ -617,7 +617,7 @@ public:
       </Section>
 
       {/* ── 6. Memory Alignment in Inheritance ── */}
-      <Section title={t('6. Memory Alignment in Inheritance', '6. Alinierea Memoriei în Moștenire')} id="oop-c5-memory" checked={!!checked['oop-c5-memory']} onCheck={() => toggleCheck('oop-c5-memory')}>
+      <Section title={t('6. Memory Alignment in Inheritance', '6. Alinierea Memoriei în Moștenire')} id="oop-course_5-memory" checked={!!checked['oop-course_5-memory']} onCheck={() => toggleCheck('oop-course_5-memory')}>
         <p>{t('When building a derived class in memory, base class fields are placed first using the left-to-right rule for inheritance order:', 'La construirea unei clase derivate în memorie, câmpurile clasei de bază sunt plasate primele folosind regula stânga-dreapta pentru ordinea moștenirii:')}</p>
 
         <Code>{`class A { public: int a1, a2, a3; };  // sizeof = 12

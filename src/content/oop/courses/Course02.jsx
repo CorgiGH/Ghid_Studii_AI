@@ -20,7 +20,7 @@ export default function Course02() {
       </Box>
 
       {/* ── 1. Pointers and References ── */}
-      <Section title={t('1. Pointers and References', '1. Pointeri și referințe')} id="oop-c2-pointers" checked={!!checked['oop-c2-pointers']} onCheck={() => toggleCheck('oop-c2-pointers')}>
+      <Section title={t('1. Pointers and References', '1. Pointeri și referințe')} id="oop-course_2-pointers" checked={!!checked['oop-course_2-pointers']} onCheck={() => toggleCheck('oop-course_2-pointers')}>
         <p>{t('Pointers and references are two mechanisms to indirectly access a variable. Although they produce identical assembly code, references provide safer usage patterns.', 'Pointerii și referințele sunt două mecanisme de accesare indirectă a unei variabile. Deși produc cod assembler identic, referințele oferă modele de utilizare mai sigure.')}</p>
 
         <Code>{`// Pointer version
@@ -70,7 +70,7 @@ void SetInt(Date &d) {
       </Section>
 
       {/* ── 2. References: Properties and Constraints ── */}
-      <Section title={t('2. References: Properties and Constraints', '2. Referințe: proprietăți și constrângeri')} id="oop-c2-references" checked={!!checked['oop-c2-references']} onCheck={() => toggleCheck('oop-c2-references')}>
+      <Section title={t('2. References: Properties and Constraints', '2. Referințe: proprietăți și constrângeri')} id="oop-course_2-references" checked={!!checked['oop-course_2-references']} onCheck={() => toggleCheck('oop-course_2-references')}>
         <Box type="definition">
           <p className="font-bold">{t('Pointer vs Reference — Key Differences', 'Pointer vs Referință — Diferențe cheie')}</p>
         </Box>
@@ -140,7 +140,7 @@ int *p = (int *)&refI;      // Can create pointer from const reference`}</Code>
       </Section>
 
       {/* ── 3. Method Overloading ── */}
-      <Section title={t('3. Method Overloading', '3. Supraîncărcarea metodelor')} id="oop-c2-overloading" checked={!!checked['oop-c2-overloading']} onCheck={() => toggleCheck('oop-c2-overloading')}>
+      <Section title={t('3. Method Overloading', '3. Supraîncărcarea metodelor')} id="oop-course_2-overloading" checked={!!checked['oop-course_2-overloading']} onCheck={() => toggleCheck('oop-course_2-overloading')}>
         <Box type="definition">
           <p className="font-bold">{t('Method Overloading', 'Supraîncărcarea metodelor')}</p>
           <p className="text-sm">{t('A technique in C++ where multiple functions/methods share the same name but differ in their parameters. A function signature consists of: (1) function name, and (2) parameter types. The return type is NOT part of the signature.', 'O tehnică în C++ în care mai multe funcții/metode au același nume dar diferă prin parametri. Semnătura unei funcții constă din: (1) numele funcției și (2) tipurile parametrilor. Tipul returnat NU face parte din semnătură.')}</p>
@@ -296,7 +296,7 @@ m.Inc(100);   // → Inc(const int&), 100 is a constant value`}</Code>
       </Section>
 
       {/* ── 4. NULL Pointer ── */}
-      <Section title={t('4. NULL Pointer vs nullptr', '4. Pointerul NULL vs nullptr')} id="oop-c2-null" checked={!!checked['oop-c2-null']} onCheck={() => toggleCheck('oop-c2-null')}>
+      <Section title={t('4. NULL Pointer vs nullptr', '4. Pointerul NULL vs nullptr')} id="oop-course_2-null" checked={!!checked['oop-course_2-null']} onCheck={() => toggleCheck('oop-course_2-null')}>
         <p>{t('The NULL macro is defined differently in C and C++:', 'Macro-ul NULL este definit diferit în C și C++:')}</p>
 
         <Code>{`// In C++:
@@ -368,7 +368,7 @@ Print(nullptr);  // ERROR: ambiguous (const char* or int*?)`}</Code>
       </Section>
 
       {/* ── 5. The "const" Specifier ── */}
-      <Section title={t('5. The "const" Specifier', '5. Specificatorul "const"')} id="oop-c2-const" checked={!!checked['oop-c2-const']} onCheck={() => toggleCheck('oop-c2-const')}>
+      <Section title={t('5. The "const" Specifier', '5. Specificatorul "const"')} id="oop-course_2-const" checked={!!checked['oop-course_2-const']} onCheck={() => toggleCheck('oop-course_2-const')}>
         <Box type="definition">
           <p className="font-bold">{t('The const specifier', 'Specificatorul const')}</p>
           <p className="text-sm">{t('Used to declare that a value, pointer, or method behavior is read-only. Follows the Clockwise/Spiral Rule for C/C++ declarations.', 'Folosit pentru a declara că o valoare, pointer sau comportament al metodei este doar-citire. Urmează Regula Spiralei în sensul acelor de ceasornic pentru declarațiile C/C++.')}</p>
@@ -545,7 +545,7 @@ public:
       </Section>
 
       {/* ── 6. The "friend" Specifier ── */}
-      <Section title={t('6. The "friend" Specifier', '6. Specificatorul "friend"')} id="oop-c2-friend" checked={!!checked['oop-c2-friend']} onCheck={() => toggleCheck('oop-c2-friend')}>
+      <Section title={t('6. The "friend" Specifier', '6. Specificatorul "friend"')} id="oop-course_2-friend" checked={!!checked['oop-course_2-friend']} onCheck={() => toggleCheck('oop-course_2-friend')}>
         <Box type="definition">
           <p className="font-bold">{t('friend specifier', 'Specificatorul friend')}</p>
           <p className="text-sm">{t('A "friend" function or class can access private and protected members of the class that declares it as a friend. A friend function does NOT belong to the class — access specifiers (public/private) are irrelevant for the friend declaration itself.', 'O funcție sau clasă "friend" poate accesa membrii privați și protejați ai clasei care o declară ca friend. O funcție friend NU aparține clasei — specificatorii de acces (public/private) sunt irelevanți pentru declarația friend în sine.')}</p>

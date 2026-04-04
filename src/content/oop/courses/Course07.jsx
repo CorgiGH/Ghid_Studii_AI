@@ -20,7 +20,7 @@ export default function Course07() {
       </Box>
 
       {/* ── 1. Sequence Containers ── */}
-      <Section title={t('1. Sequence Containers', '1. Containere secvențiale')} id="oop-c7-sequence" checked={!!checked['oop-c7-sequence']} onCheck={() => toggleCheck('oop-c7-sequence')}>
+      <Section title={t('1. Sequence Containers', '1. Containere secvențiale')} id="oop-course_7-sequence" checked={!!checked['oop-course_7-sequence']} onCheck={() => toggleCheck('oop-course_7-sequence')}>
         <Box type="definition">
           <p className="font-bold">{t('Standard Template Library (STL)', 'Biblioteca Standard de Șabloane (STL)')}</p>
           <p className="text-sm mt-1">{t(
@@ -215,7 +215,7 @@ v.erase_after(it);
       </Section>
 
       {/* ── 2. Adaptors ── */}
-      <Section title={t('2. Adaptors', '2. Adaptori')} id="oop-c7-adaptors" checked={!!checked['oop-c7-adaptors']} onCheck={() => toggleCheck('oop-c7-adaptors')}>
+      <Section title={t('2. Adaptors', '2. Adaptori')} id="oop-course_7-adaptors" checked={!!checked['oop-course_7-adaptors']} onCheck={() => toggleCheck('oop-course_7-adaptors')}>
         <Box type="definition">
           <p className="font-bold">{t('What are Adaptors?', 'Ce sunt Adaptorii?')}</p>
           <p className="text-sm mt-1">{t(
@@ -348,7 +348,7 @@ while (s.empty() == false) {
       </Section>
 
       {/* ── 3. I/O Streams ── */}
-      <Section title={t('3. I/O Streams', '3. Fluxuri I/O')} id="oop-c7-streams" checked={!!checked['oop-c7-streams']} onCheck={() => toggleCheck('oop-c7-streams')}>
+      <Section title={t('3. I/O Streams', '3. Fluxuri I/O')} id="oop-course_7-streams" checked={!!checked['oop-course_7-streams']} onCheck={() => toggleCheck('oop-course_7-streams')}>
         <Box type="definition">
           <p className="font-bold">{t('IOS Class Hierarchy', 'Ierarhia claselor IOS')}</p>
           <p className="text-sm mt-1">{t(
@@ -490,7 +490,7 @@ int main() {
       </Section>
 
       {/* ── 4. Strings ── */}
-      <Section title={t('4. Strings', '4. Șiruri de caractere')} id="oop-c7-strings" checked={!!checked['oop-c7-strings']} onCheck={() => toggleCheck('oop-c7-strings')}>
+      <Section title={t('4. Strings', '4. Șiruri de caractere')} id="oop-course_7-strings" checked={!!checked['oop-course_7-strings']} onCheck={() => toggleCheck('oop-course_7-strings')}>
         <Box type="definition">
           <p className="font-bold">basic_string</p>
           <p className="text-sm mt-1">{t(
@@ -612,7 +612,7 @@ printf("%s", sv.data());           // UNDEFINED: prints "C++<garbage>"`}</Code>
       </Section>
 
       {/* ── 5. Initialization Lists ── */}
-      <Section title={t('5. Initialization Lists', '5. Liste de inițializare')} id="oop-c7-init-lists" checked={!!checked['oop-c7-init-lists']} onCheck={() => toggleCheck('oop-c7-init-lists')}>
+      <Section title={t('5. Initialization Lists', '5. Liste de inițializare')} id="oop-course_7-init-lists" checked={!!checked['oop-course_7-init-lists']} onCheck={() => toggleCheck('oop-course_7-init-lists')}>
         <Box type="definition">
           <p className="font-bold">{t('Initialization Lists with STL', 'Liste de inițializare cu STL')}</p>
           <p className="text-sm mt-1">{t(
@@ -691,7 +691,7 @@ DO_SOMETHING( vector<int> x{1, 2, 3}; );  // OK!`}</Code>
       </Section>
 
       {/* ── 6. Iterators ── */}
-      <Section title={t('6. Iterators', '6. Iteratori')} id="oop-c7-iterators" checked={!!checked['oop-c7-iterators']} onCheck={() => toggleCheck('oop-c7-iterators')}>
+      <Section title={t('6. Iterators', '6. Iteratori')} id="oop-course_7-iterators" checked={!!checked['oop-course_7-iterators']} onCheck={() => toggleCheck('oop-course_7-iterators')}>
         <Box type="definition">
           <p className="font-bold">{t('What are Iterators?', 'Ce sunt Iteratorii?')}</p>
           <p className="text-sm mt-1">{t(

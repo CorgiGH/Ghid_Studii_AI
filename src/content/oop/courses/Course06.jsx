@@ -20,7 +20,7 @@ export default function Course06() {
       </Box>
 
       {/* ── 1. Casts ── */}
-      <Section title={t('1. Casts', '1. Cast-uri')} id="oop-c6-casts" checked={!!checked['oop-c6-casts']} onCheck={() => toggleCheck('oop-c6-casts')}>
+      <Section title={t('1. Casts', '1. Cast-uri')} id="oop-course_6-casts" checked={!!checked['oop-course_6-casts']} onCheck={() => toggleCheck('oop-course_6-casts')}>
         <p>{t('Assuming class A is derived from class B, an object of type A can be converted to an object of type B. The conversion rules are:', 'Presupunând că clasa A este derivată din clasa B, un obiect de tip A poate fi convertit într-un obiect de tip B. Regulile de conversie sunt:')}</p>
         <ul className="list-disc pl-5 text-sm space-y-1">
           <li>{t('It is always possible to convert a class to any of the classes it inherits (upcast)', 'Este întotdeauna posibil să convertești o clasă la oricare din clasele pe care le moștenește (upcast)')}</li>
@@ -171,7 +171,7 @@ printf("%d", x);  // prints 100! Compiler replaces x with the constant`}</Code>
       </Section>
 
       {/* ── 2. Macros ── */}
-      <Section title={t('2. Macros', '2. Macro-uri')} id="oop-c6-macros" checked={!!checked['oop-c6-macros']} onCheck={() => toggleCheck('oop-c6-macros')}>
+      <Section title={t('2. Macros', '2. Macro-uri')} id="oop-course_6-macros" checked={!!checked['oop-course_6-macros']} onCheck={() => toggleCheck('oop-course_6-macros')}>
         <p>{t('Macros are methods used to modify (pre-process) C/C++ code before compiling. They work by text substitution in a preprocessor phase — think of it as a search-and-replace in an editor.', 'Macro-urile sunt metode folosite pentru a modifica (pre-procesa) codul C/C++ înainte de compilare. Funcționează prin substituție de text într-o fază de preprocesare — gândiți-vă la ele ca la un search-and-replace într-un editor.')}</p>
 
         <Box type="definition">
@@ -317,7 +317,7 @@ int main() {
       </Section>
 
       {/* ── 3. Literals ── */}
-      <Section title={t('3. Literals', '3. Literali')} id="oop-c6-literals" checked={!!checked['oop-c6-literals']} onCheck={() => toggleCheck('oop-c6-literals')}>
+      <Section title={t('3. Literals', '3. Literali')} id="oop-course_6-literals" checked={!!checked['oop-course_6-literals']} onCheck={() => toggleCheck('oop-course_6-literals')}>
         <p>{t('Literals are a way of providing a special meaning to numbers or strings by following them with a predefined suffix.', 'Literalii sunt o modalitate de a oferi un sens special numerelor sau string-urilor prin adăugarea unui sufix predefinit.')}</p>
 
         <Box type="definition">
@@ -390,7 +390,7 @@ void main(void) {
       </Section>
 
       {/* ── 4. Function Templates ── */}
-      <Section title={t('4. Function Templates', '4. Șabloane de funcții')} id="oop-c6-func-templates" checked={!!checked['oop-c6-func-templates']} onCheck={() => toggleCheck('oop-c6-func-templates')}>
+      <Section title={t('4. Function Templates', '4. Șabloane de funcții')} id="oop-course_6-func-templates" checked={!!checked['oop-course_6-func-templates']} onCheck={() => toggleCheck('oop-course_6-func-templates')}>
         <p>{t('Templates can be considered derived from the notion of macros, adapted for functions and classes. The goal is to define a model where the types of data can be modified at the precompilation stage through substitution. Just like macros, templates generate extra code at compilation, but the code is faster and more efficient.', 'Șabloanele pot fi considerate derivate din noțiunea de macro-uri, adaptate pentru funcții și clase. Scopul este de a defini un model în care tipurile de date pot fi modificate în faza de precompilare prin substituție. Ca și macro-urile, șabloanele generează cod suplimentar la compilare, dar codul este mai rapid și mai eficient.')}</p>
 
         <Box type="definition">
@@ -471,7 +471,7 @@ void main(void) {
       </Section>
 
       {/* ── 5. Class Templates ── */}
-      <Section title={t('5. Class Templates', '5. Șabloane de clase')} id="oop-c6-class-templates" checked={!!checked['oop-c6-class-templates']} onCheck={() => toggleCheck('oop-c6-class-templates')}>
+      <Section title={t('5. Class Templates', '5. Șabloane de clase')} id="oop-course_6-class-templates" checked={!!checked['oop-course_6-class-templates']} onCheck={() => toggleCheck('oop-course_6-class-templates')}>
         <Box type="definition">
           <p className="font-bold">{t('Class Template Syntax', 'Sintaxa șabloanelor de clase')}</p>
           <p className="text-sm font-mono">template &lt;class T&gt; class MyClass {'{ ... }'}</p>
@@ -600,7 +600,7 @@ void main(void) {
       </Section>
 
       {/* ── 6. Template Specialization & static_assert ── */}
-      <Section title={t('6. Template Specialization & static_assert', '6. Specializarea șabloanelor & static_assert')} id="oop-c6-specialization" checked={!!checked['oop-c6-specialization']} onCheck={() => toggleCheck('oop-c6-specialization')}>
+      <Section title={t('6. Template Specialization & static_assert', '6. Specializarea șabloanelor & static_assert')} id="oop-course_6-specialization" checked={!!checked['oop-course_6-specialization']} onCheck={() => toggleCheck('oop-course_6-specialization')}>
         <p>{t('The biggest limitation of templates is that a method has exactly the same behavior for all types — only the type of parameters differs. Specialized templates overcome this by defining type-specific implementations.', 'Cea mai mare limitare a șabloanelor este că o metodă are exact același comportament pentru toate tipurile — diferă doar tipul parametrilor. Șabloanele specializate depășesc această limitare prin definirea de implementări specifice tipului.')}</p>
 
         <Box type="definition">

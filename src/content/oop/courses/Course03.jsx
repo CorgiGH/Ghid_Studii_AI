@@ -21,7 +21,7 @@ export default function Course03() {
       </Box>
 
       {/* ── 1. Initialization Lists ── */}
-      <Section title={t('1. Initialization Lists', '1. Liste de inițializare')} id="oop-c3-init-lists" checked={!!checked['oop-c3-init-lists']} onCheck={() => toggleCheck('oop-c3-init-lists')}>
+      <Section title={t('1. Initialization Lists', '1. Liste de inițializare')} id="oop-course_3-init-lists" checked={!!checked['oop-course_3-init-lists']} onCheck={() => toggleCheck('oop-course_3-init-lists')}>
         <Box type="definition">
           <p className="font-bold">{t('Initialization Lists', 'Liste de inițializare')}</p>
           <p className="text-sm">{t('Curly braces "{" and "}" can be used to initialize values. This method is called "Initialization lists".', 'Acoladele "{" și "}" pot fi folosite pentru a inițializa valori. Această metodă se numește "Liste de inițializare".')}</p>
@@ -64,7 +64,7 @@ int x[][] = { { 1, 2, 3 }, { 4, 5, 6 } };
       </Section>
 
       {/* ── 2. Constructors ── */}
-      <Section title={t('2. Constructors', '2. Constructori')} id="oop-c3-constructors" checked={!!checked['oop-c3-constructors']} onCheck={() => toggleCheck('oop-c3-constructors')}>
+      <Section title={t('2. Constructors', '2. Constructori')} id="oop-course_3-constructors" checked={!!checked['oop-course_3-constructors']} onCheck={() => toggleCheck('oop-course_3-constructors')}>
         <Box type="definition">
           <p className="font-bold">{t('Constructor', 'Constructor')}</p>
           <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
@@ -207,7 +207,7 @@ public:
       </Section>
 
       {/* ── 3. Const & Reference Data Members ── */}
-      <Section title={t('3. Const & Reference Data Members', '3. Membri date const și referință')} id="oop-c3-const-ref" checked={!!checked['oop-c3-const-ref']} onCheck={() => toggleCheck('oop-c3-const-ref')}>
+      <Section title={t('3. Const & Reference Data Members', '3. Membri date const și referință')} id="oop-course_3-const-ref" checked={!!checked['oop-course_3-const-ref']} onCheck={() => toggleCheck('oop-course_3-const-ref')}>
         <Box type="definition">
           <p className="font-bold">{t('Rule', 'Regulă')}</p>
           <p className="text-sm">{t('A class that contains at least one const data member or a reference data member must have a constructor where these members are initialized. They MUST be initialized in the constructor initializer list, NOT in the constructor body.', 'O clasă care conține cel puțin un membru dat const sau un membru dat referință trebuie să aibă un constructor în care acești membri sunt inițializați. Aceștia TREBUIE inițializați în lista de inițializare a constructorului, NU în corpul constructorului.')}</p>
@@ -316,7 +316,7 @@ void main() {
       </Section>
 
       {/* ── 4. Delegating Constructor ── */}
-      <Section title={t('4. Delegating Constructor', '4. Constructor delegat')} id="oop-c3-delegating" checked={!!checked['oop-c3-delegating']} onCheck={() => toggleCheck('oop-c3-delegating')}>
+      <Section title={t('4. Delegating Constructor', '4. Constructor delegat')} id="oop-course_3-delegating" checked={!!checked['oop-course_3-delegating']} onCheck={() => toggleCheck('oop-course_3-delegating')}>
         <Box type="definition">
           <p className="font-bold">{t('Delegating Constructor', 'Constructor delegat')}</p>
           <p className="text-sm">{t('A constructor can call another constructor of the same class during its initialization. This is called constructor delegation.', 'Un constructor poate apela un alt constructor al aceleiași clase în timpul inițializării sale. Aceasta se numește delegare de constructor.')}</p>
@@ -394,7 +394,7 @@ public:
       </Section>
 
       {/* ── 5. Value Types ── */}
-      <Section title={t('5. Value Types', '5. Tipuri de valori')} id="oop-c3-value-types" checked={!!checked['oop-c3-value-types']} onCheck={() => toggleCheck('oop-c3-value-types')}>
+      <Section title={t('5. Value Types', '5. Tipuri de valori')} id="oop-course_3-value-types" checked={!!checked['oop-course_3-value-types']} onCheck={() => toggleCheck('oop-course_3-value-types')}>
         <Box type="definition">
           <p className="font-bold">{t('Value Categories', 'Categorii de valori')}</p>
           <p className="text-sm">{t('When an expression is evaluated, each of its terms is associated with a value type. This helps the compiler understand how to use that value and what methods/functions can be used for overload resolution. There are 5 such types:', 'Când o expresie este evaluată, fiecărui termen i se asociază un tip de valoare. Acest lucru ajută compilatorul să înțeleagă cum să folosească valoarea și ce metode/funcții pot fi utilizate pentru rezoluția supraîncărcării. Există 5 astfel de tipuri:')}</p>
@@ -463,7 +463,7 @@ b = (a += 20) + 10;
       </Section>
 
       {/* ── 6. Copy & Move Constructors ── */}
-      <Section title={t('6. Copy & Move Constructors', '6. Constructori de copiere și mutare')} id="oop-c3-copy-move" checked={!!checked['oop-c3-copy-move']} onCheck={() => toggleCheck('oop-c3-copy-move')}>
+      <Section title={t('6. Copy & Move Constructors', '6. Constructori de copiere și mutare')} id="oop-course_3-copy-move" checked={!!checked['oop-course_3-copy-move']} onCheck={() => toggleCheck('oop-course_3-copy-move')}>
         <Box type="definition">
           <p className="font-bold">{t('Copy Constructor', 'Constructorul de copiere')}</p>
           <p className="text-sm">{t('A constructor with only one parameter that is a reference (const or non-const) to the same class. Used when creating an object from an existing one.', 'Un constructor cu un singur parametru care este o referință (const sau non-const) la aceeași clasă. Folosit la crearea unui obiect dintr-unul existent.')}</p>
@@ -608,7 +608,7 @@ int main() {
       </Section>
 
       {/* ── 7. Constraints ── */}
-      <Section title={t('7. Constraints', '7. Constrângeri')} id="oop-c3-constraints" checked={!!checked['oop-c3-constraints']} onCheck={() => toggleCheck('oop-c3-constraints')}>
+      <Section title={t('7. Constraints', '7. Constrângeri')} id="oop-course_3-constraints" checked={!!checked['oop-course_3-constraints']} onCheck={() => toggleCheck('oop-course_3-constraints')}>
         <Box type="definition">
           <p className="font-bold">{t('Singleton Pattern', 'Pattern-ul Singleton')}</p>
           <p className="text-sm">{t('A class that can only have one instance. Combines a private constructor with a static factory method.', 'O clasă care poate avea o singură instanță. Combină un constructor privat cu o metodă statică de fabricare.')}</p>

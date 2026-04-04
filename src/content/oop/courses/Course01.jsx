@@ -20,7 +20,7 @@ export default function Course01() {
       </Box>
 
       {/* ── 1. Glossary ── */}
-      <Section title={t('1. Glossary', '1. Glosar')} id="oop-c1-glossary" checked={!!checked['oop-c1-glossary']} onCheck={() => toggleCheck('oop-c1-glossary')}>
+      <Section title={t('1. Glossary', '1. Glosar')} id="oop-course_1-glossary" checked={!!checked['oop-course_1-glossary']} onCheck={() => toggleCheck('oop-course_1-glossary')}>
         <Box type="definition">
           <p className="font-bold">{t('Key Terms', 'Termeni cheie')}</p>
           <ul className="list-disc pl-5 text-sm mt-1 space-y-1">
@@ -66,7 +66,7 @@ export default function Course01() {
       </Section>
 
       {/* ── 2. OS Architecture ── */}
-      <Section title={t('2. OS Architecture', '2. Arhitectura SO')} id="oop-c1-os-arch" checked={!!checked['oop-c1-os-arch']} onCheck={() => toggleCheck('oop-c1-os-arch')}>
+      <Section title={t('2. OS Architecture', '2. Arhitectura SO')} id="oop-course_1-os-arch" checked={!!checked['oop-course_1-os-arch']} onCheck={() => toggleCheck('oop-course_1-os-arch')}>
         <p>{t('When the OS executes a native application compiled from C++, the process memory is organized into several regions:', 'Când SO execută o aplicație nativă compilată din C++, memoria procesului este organizată în mai multe regiuni:')}</p>
 
         <Box type="definition">
@@ -120,7 +120,7 @@ struct Test {
       </Section>
 
       {/* ── 3. C++ History and Revisions ── */}
-      <Section title={t('3. C++ History and Revisions', '3. Istoria C++ și revizii')} id="oop-c1-cpp-history" checked={!!checked['oop-c1-cpp-history']} onCheck={() => toggleCheck('oop-c1-cpp-history')}>
+      <Section title={t('3. C++ History and Revisions', '3. Istoria C++ și revizii')} id="oop-course_1-cpp-history" checked={!!checked['oop-course_1-cpp-history']} onCheck={() => toggleCheck('oop-course_1-cpp-history')}>
         <Box type="definition">
           <p className="font-bold">{t('C++ Timeline', 'Cronologia C++')}</p>
           <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
@@ -168,7 +168,7 @@ struct Test {
       </Section>
 
       {/* ── 4. From C to C++ ── */}
-      <Section title={t('4. From C to C++', '4. De la C la C++')} id="oop-c1-c-to-cpp" checked={!!checked['oop-c1-c-to-cpp']} onCheck={() => toggleCheck('oop-c1-c-to-cpp')}>
+      <Section title={t('4. From C to C++', '4. De la C la C++')} id="oop-course_1-c-to-cpp" checked={!!checked['oop-course_1-c-to-cpp']} onCheck={() => toggleCheck('oop-course_1-c-to-cpp')}>
         <p>{t('Consider a C struct with no protection or initialization:', 'Considerăm o structură C fără protecție sau inițializare:')}</p>
 
         <Code>{`// C approach — problems:
@@ -230,7 +230,7 @@ void main() {
       </Section>
 
       {/* ── 5. Classes — Data Members ── */}
-      <Section title={t('5. Classes — Data Members', '5. Clase — Membri date')} id="oop-c1-data-members" checked={!!checked['oop-c1-data-members']} onCheck={() => toggleCheck('oop-c1-data-members')}>
+      <Section title={t('5. Classes — Data Members', '5. Clase — Membri date')} id="oop-course_1-data-members" checked={!!checked['oop-course_1-data-members']} onCheck={() => toggleCheck('oop-course_1-data-members')}>
         <Box type="definition">
           <p className="font-bold">{t('Data Members', 'Membri date')}</p>
           <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
@@ -286,7 +286,7 @@ class C4 { };                          // sizeof = 1`}</Code>
       </Section>
 
       {/* ── 6. Classes — Methods ── */}
-      <Section title={t('6. Classes — Methods', '6. Clase — Metode')} id="oop-c1-methods" checked={!!checked['oop-c1-methods']} onCheck={() => toggleCheck('oop-c1-methods')}>
+      <Section title={t('6. Classes — Methods', '6. Clase — Metode')} id="oop-course_1-methods" checked={!!checked['oop-course_1-methods']} onCheck={() => toggleCheck('oop-course_1-methods')}>
         <Box type="definition">
           <p className="font-bold">{t('Methods', 'Metode')}</p>
           <ul className="list-disc pl-5 text-sm space-y-1 mt-1">

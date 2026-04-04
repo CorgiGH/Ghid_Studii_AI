@@ -20,7 +20,7 @@ export default function Course04() {
       </Box>
 
       {/* ── 1. Destructor ── */}
-      <Section title={t('1. Destructor', '1. Destructor')} id="oop-c4-destructor" checked={!!checked['oop-c4-destructor']} onCheck={() => toggleCheck('oop-c4-destructor')}>
+      <Section title={t('1. Destructor', '1. Destructor')} id="oop-course_4-destructor" checked={!!checked['oop-course_4-destructor']} onCheck={() => toggleCheck('oop-course_4-destructor')}>
         <Box type="definition">
           <p className="font-bold">{t('Destructor', 'Destructor')}</p>
           <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
@@ -155,7 +155,7 @@ void main() {
       </Section>
 
       {/* ── 2. C++ Operators ── */}
-      <Section title={t('2. C++ Operators', '2. Operatori C++')} id="oop-c4-cpp-operators" checked={!!checked['oop-c4-cpp-operators']} onCheck={() => toggleCheck('oop-c4-cpp-operators')}>
+      <Section title={t('2. C++ Operators', '2. Operatori C++')} id="oop-course_4-cpp-operators" checked={!!checked['oop-course_4-cpp-operators']} onCheck={() => toggleCheck('oop-course_4-cpp-operators')}>
         <Box type="definition">
           <p className="font-bold">{t('Operator Classification', 'Clasificarea operatorilor')}</p>
           <p className="text-sm mt-1">{t('By number of parameters:', 'După numărul de parametri:')}</p>
@@ -327,7 +327,7 @@ void main() {
       </Section>
 
       {/* ── 3. Operators for Classes ── */}
-      <Section title={t('3. Operators for Classes', '3. Operatori pentru clase')} id="oop-c4-class-operators" checked={!!checked['oop-c4-class-operators']} onCheck={() => toggleCheck('oop-c4-class-operators')}>
+      <Section title={t('3. Operators for Classes', '3. Operatori pentru clase')} id="oop-course_4-class-operators" checked={!!checked['oop-course_4-class-operators']} onCheck={() => toggleCheck('oop-course_4-class-operators')}>
         <Box type="definition">
           <p className="font-bold">{t('Operator Overloading for Classes', 'Supraîncărcarea operatorilor pentru clase')}</p>
           <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
@@ -440,7 +440,7 @@ void main() {
       </Section>
 
       {/* ── 4. Arithmetic & Special Operators ── */}
-      <Section title={t('4. Arithmetic & Special Operators', '4. Operatori aritmetici și speciali')} id="oop-c4-arithmetic" checked={!!checked['oop-c4-arithmetic']} onCheck={() => toggleCheck('oop-c4-arithmetic')}>
+      <Section title={t('4. Arithmetic & Special Operators', '4. Operatori aritmetici și speciali')} id="oop-course_4-arithmetic" checked={!!checked['oop-course_4-arithmetic']} onCheck={() => toggleCheck('oop-course_4-arithmetic')}>
         <p className="font-bold">{t('Prefix vs Postfix Operators (++ and --)', 'Operatori prefix vs postfix (++ și --)')}</p>
         <p className="text-sm">{t('The prefix form has no parameter, the postfix form has a dummy int parameter (always 0).', 'Forma prefix nu are parametru, forma postfix are un parametru int fictiv (întotdeauna 0).')}</p>
 
@@ -616,7 +616,7 @@ void main() {
       </Section>
 
       {/* ── 5. Comparison & Logical Operators ── */}
-      <Section title={t('5. Comparison & Logical Operators', '5. Operatori de comparație și logici')} id="oop-c4-comparison" checked={!!checked['oop-c4-comparison']} onCheck={() => toggleCheck('oop-c4-comparison')}>
+      <Section title={t('5. Comparison & Logical Operators', '5. Operatori de comparație și logici')} id="oop-course_4-comparison" checked={!!checked['oop-course_4-comparison']} onCheck={() => toggleCheck('oop-course_4-comparison')}>
         <Box type="definition">
           <p className="font-bold">{t('Relational Operators', 'Operatori relaționali')}</p>
           <p className="text-sm">{t('Relational operators are defined exactly like arithmetic ones. From the compiler\'s point of view, there is no real difference between them.', 'Operatorii relaționali sunt definiți exact ca cei aritmetici. Din punctul de vedere al compilatorului, nu există o diferență reală între ei.')}</p>
@@ -748,7 +748,7 @@ void main() {
       </Section>
 
       {/* ── 6. Assignment & Object Operations ── */}
-      <Section title={t('6. Assignment & Object Operations', '6. Atribuire și operații cu obiecte')} id="oop-c4-assignment" checked={!!checked['oop-c4-assignment']} onCheck={() => toggleCheck('oop-c4-assignment')}>
+      <Section title={t('6. Assignment & Object Operations', '6. Atribuire și operații cu obiecte')} id="oop-course_4-assignment" checked={!!checked['oop-course_4-assignment']} onCheck={() => toggleCheck('oop-course_4-assignment')}>
         <Box type="definition">
           <p className="font-bold">{t('Assignment Operator', 'Operatorul de atribuire')}</p>
           <p className="text-sm">{t('It is recommended to return a reference to the object to allow chaining. There is also a move assignment operator that uses a temporary reference (&&).', 'Se recomandă returnarea unei referințe la obiect pentru a permite înlănțuirea. Există și un operator de atribuire prin mutare care folosește o referință temporară (&&).')}</p>
