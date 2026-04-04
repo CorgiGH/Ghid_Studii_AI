@@ -25,7 +25,7 @@ export default function Course08() {
                 </ol>
               </Box>
 
-              <Section title={t('1. Memory-Mapped Files Concept', '1. Conceptul fișierelor mapate în memorie')} id="c8-concept" checked={!!checked['c8-concept']} onCheck={() => toggleCheck('c8-concept')}>
+              <Section title={t('1. Memory-Mapped Files Concept', '1. Conceptul fișierelor mapate în memorie')} id="course_8-concept" checked={!!checked['course_8-concept']} onCheck={() => toggleCheck('course_8-concept')}>
                 <p>{t('A ', 'Un ')}<strong>{t('memory-mapped file', 'fișier mapat în memorie')}</strong>{t(" creates a direct byte-to-byte correspondence between a region of a process's virtual address space and a portion of a file on disk.", ' creează o corespondență directă octet-la-octet între o regiune din spațiul virtual de adrese al unui proces și o porțiune a unui fișier de pe disc.')}</p>
 
                 <svg viewBox="0 0 440 160" className="w-full max-w-lg mx-auto my-4" style={{fontFamily:'monospace',fontSize:10}}>
@@ -56,7 +56,7 @@ export default function Course08() {
                 </Box>
               </Section>
 
-              <Section title={t('2. mmap() and munmap()', '2. mmap() și munmap()')} id="c8-mmap" checked={!!checked['c8-mmap']} onCheck={() => toggleCheck('c8-mmap')}>
+              <Section title={t('2. mmap() and munmap()', '2. mmap() și munmap()')} id="course_8-mmap" checked={!!checked['course_8-mmap']} onCheck={() => toggleCheck('course_8-mmap')}>
                 <Box type="formula">
                   <p className="font-bold">{t('mmap — create a mapping:', 'mmap — crearea unei mapări:')}</p>
                   <Code>{`#include <sys/mman.h>
@@ -96,7 +96,7 @@ for (int i = 0; i < sb.st_size; i++)
 munmap(map, sb.st_size);`}</Code>
               </Section>
 
-              <Section title={t('3. MAP_PRIVATE vs MAP_SHARED', '3. MAP_PRIVATE vs. MAP_SHARED')} id="c8-flags" checked={!!checked['c8-flags']} onCheck={() => toggleCheck('c8-flags')}>
+              <Section title={t('3. MAP_PRIVATE vs MAP_SHARED', '3. MAP_PRIVATE vs. MAP_SHARED')} id="course_8-flags" checked={!!checked['course_8-flags']} onCheck={() => toggleCheck('course_8-flags')}>
                 <Box type="theorem">
                   <p className="font-bold">{t('The critical distinction:', 'Distincția critică:')}</p>
                   <table className="text-sm mt-1 w-full">
@@ -131,7 +131,7 @@ munmap(map, length);`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('4. Non-Persistent Mappings & POSIX Shared Memory', '4. Mapări nepersistente și memorie partajată POSIX')} id="c8-shm" checked={!!checked['c8-shm']} onCheck={() => toggleCheck('c8-shm')}>
+              <Section title={t('4. Non-Persistent Mappings & POSIX Shared Memory', '4. Mapări nepersistente și memorie partajată POSIX')} id="course_8-shm" checked={!!checked['course_8-shm']} onCheck={() => toggleCheck('course_8-shm')}>
                 <Box type="definition">
                   <p className="font-bold">{t('Two types of mappings:', 'Două tipuri de mapări:')}</p>
                   <ul className="list-disc pl-5 text-sm">
@@ -187,7 +187,7 @@ shm_unlink("/myshm");  // cleanup
                 </Box>
               </Section>
 
-              <Section title={t('5. IPC Models & Cooperation Patterns', '5. Modele IPC și șabloane de cooperare')} id="c8-ipc" checked={!!checked['c8-ipc']} onCheck={() => toggleCheck('c8-ipc')}>
+              <Section title={t('5. IPC Models & Cooperation Patterns', '5. Modele IPC și șabloane de cooperare')} id="course_8-ipc" checked={!!checked['course_8-ipc']} onCheck={() => toggleCheck('course_8-ipc')}>
                 <svg viewBox="0 0 460 130" className="w-full max-w-lg mx-auto my-4" style={{fontFamily:'monospace',fontSize:10}}>
                   <rect x="10" y="10" width="200" height="50" rx="6" fill="#3b82f6" opacity="0.1" stroke="#3b82f6"/>
                   <text x="110" y="28" textAnchor="middle" fill="#3b82f6" fontWeight="bold">{t('Shared Memory Model', 'Modelul memoriei partajate')}</text>
@@ -208,7 +208,7 @@ shm_unlink("/myshm");  // cleanup
                 </Box>
               </Section>
 
-              <Section title={t('6. POSIX Semaphores', '6. POSIX Semaphores')} id="c8-sem" checked={!!checked['c8-sem']} onCheck={() => toggleCheck('c8-sem')}>
+              <Section title={t('6. POSIX Semaphores', '6. POSIX Semaphores')} id="course_8-sem" checked={!!checked['course_8-sem']} onCheck={() => toggleCheck('course_8-sem')}>
                 <Box type="definition">
                   <p>{t('A ', 'Un ')}<strong>{t('semaphore', 'semaphore')}</strong>{t(' is a non-negative integer counter. Two atomic operations: ', ' este un contor întreg non-negativ. Două operații atomice: ')} <code>sem_wait</code> {t('(decrement, blocks if 0) and ', '(decrementare, blochează dacă 0) și ')} <code>sem_post</code> {t('(increment, never blocks).', '(incrementare, nu blochează niciodată).')}</p>
                 </Box>
@@ -250,7 +250,7 @@ sem_close(mutex);
 if (pid > 0) { wait(NULL); sem_unlink("/mutex"); }`}</Code>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="c8-cheat" checked={!!checked['c8-cheat']} onCheck={() => toggleCheck('c8-cheat')}>
+              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="course_8-cheat" checked={!!checked['course_8-cheat']} onCheck={() => toggleCheck('course_8-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">mmap</p><p>mmap(NULL, len, prot, flags, fd, off)</p><p>munmap(addr, len)</p><p>msync(addr, len, MS_SYNC)</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Flags', 'Flag-uri')}</p><p>MAP_SHARED vs MAP_PRIVATE</p><p>MAP_ANONYMOUS ({t('no file', 'fără fișier')})</p><p>PROT_READ | PROT_WRITE</p></Box>
@@ -259,7 +259,7 @@ if (pid > 0) { wait(NULL); sem_unlink("/mutex"); }`}</Code>
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c8-quiz" checked={!!checked['c8-quiz']} onCheck={() => toggleCheck('c8-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_8-quiz" checked={!!checked['course_8-quiz']} onCheck={() => toggleCheck('course_8-quiz')}>
                 <Toggle question={t('1. What is the fundamental advantage of mmap over read/write?', '1. Care este avantajul fundamental al mmap față de read/write?')} answer={t('With mmap, file contents are accessed directly in memory via pointer operations — no system calls needed for each read/write. The kernel handles loading pages on demand via page faults.', 'Cu mmap, conținutul fișierului este accesat direct în memorie prin operații cu pointeri — nu sunt necesare apeluri de sistem pentru fiecare read/write. Kernel-ul gestionează încărcarea paginilor la cerere prin erori de pagină.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('2. Can you close the fd immediately after mmap?', '2. Puteți închide descriptorul imediat după mmap?')} answer={t("Yes. The mapping remains valid even after closing the file descriptor. The kernel maintains its own reference to the file's inode.", "Da. Maparea rămâne validă chiar și după închiderea descriptorului. Kernel-ul menține propria referință la inode-ul fișierului.")} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('3. What happens if you write to a MAP_PRIVATE mapping?', '3. Ce se întâmplă dacă scrieți într-o mapare MAP_PRIVATE?')} answer={t('The write uses copy-on-write: the kernel creates a private copy of the affected page. The change is NOT visible to other processes and NOT propagated to the disk file. It goes to swap if evicted.', 'Scrierea folosește copy-on-write: kernel-ul creează o copie privată a paginii afectate. Modificarea NU este vizibilă altor procese și NU este propagată la fișierul de pe disc. Merge în swap dacă este evacuată.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />

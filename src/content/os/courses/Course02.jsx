@@ -24,7 +24,7 @@ export default function Course02() {
                 </ol>
               </Box>
 
-              <Section title={t('1. Simple Commands & Execution Model', '1. Comenzi simple și modelul de execuție')} id="c2-simple" checked={!!checked['c2-simple']} onCheck={() => toggleCheck('c2-simple')}>
+              <Section title={t('1. Simple Commands & Execution Model', '1. Comenzi simple și modelul de execuție')} id="course_2-simple" checked={!!checked['course_2-simple']} onCheck={() => toggleCheck('course_2-simple')}>
                 <p>{t('A ', 'O ')}<strong>{t('simple command', 'comandă simplă')}</strong>{t(' is a single command (internal or external) with its options, arguments, and optional I/O redirections.', ' este o singură comandă (internă sau externă) cu opțiunile, argumentele și redirecționările I/O opționale.')}</p>
                 <Box type="formula">
                   <p className="font-bold font-mono">{t('Three ways to execute a script:', 'Trei moduri de a executa un script:')}</p>
@@ -58,7 +58,7 @@ $ source test.sh ; echo $myvar  # prints "hello" (same shell)`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('2. Background Execution', '2. Execuția în background')} id="c2-bg" checked={!!checked['c2-bg']} onCheck={() => toggleCheck('c2-bg')}>
+              <Section title={t('2. Background Execution', '2. Execuția în background')} id="course_2-bg" checked={!!checked['course_2-bg']} onCheck={() => toggleCheck('course_2-bg')}>
                 <Box type="definition">
                   <p><strong>{t('Foreground', 'Foreground')}</strong>{t(': shell waits for command to finish before showing prompt. ', ': shell-ul așteaptă terminarea comenzii înainte de a afișa prompterul. ')}<strong>{t('Background', 'Background')}</strong>{t(': shell immediately shows prompt; command runs concurrently.', ': shell-ul afișează imediat prompterul; comanda rulează concurent.')}</p>
                 </Box>
@@ -74,7 +74,7 @@ $ bg %1                     # resume suspended job in background`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('3. I/O Redirections', '3. Redirecționări I/O')} id="c2-redirect" checked={!!checked['c2-redirect']} onCheck={() => toggleCheck('c2-redirect')}>
+              <Section title={t('3. I/O Redirections', '3. Redirecționări I/O')} id="course_2-redirect" checked={!!checked['course_2-redirect']} onCheck={() => toggleCheck('course_2-redirect')}>
                 <p>{t('Every process has three standard I/O streams:', 'Fiecare proces are trei fluxuri I/O standard:')}</p>
                 <Box type="definition">
                   <ul className="space-y-1">
@@ -123,7 +123,7 @@ $ cat err.txt   # "No such file or directory"`}</Code>
 # Compiler errors AND warnings piped to grep`}</Code>
               </Section>
 
-              <Section title={t('4. Exit Status', '4. Valoarea de exit')} id="c2-exit" checked={!!checked['c2-exit']} onCheck={() => toggleCheck('c2-exit')}>
+              <Section title={t('4. Exit Status', '4. Valoarea de exit')} id="course_2-exit" checked={!!checked['course_2-exit']} onCheck={() => toggleCheck('course_2-exit')}>
                 <Box type="definition">
                   <p>{t('Every command returns an integer ', 'Fiecare comandă returnează o ')}<strong>{t('exit status', 'valoare de exit')}</strong>{t(' (0-255). Stored in ', ' (0-255) ca întreg. Stocată în ')} <code>$?</code>{t('.', '.')}</p>
                   <ul className="list-disc pl-5 mt-1">
@@ -144,7 +144,7 @@ $ kill -9 PID ; echo $?  # process exit: 137 = 128+9`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('5. Pipelines (Command Chains)', '5. Lanțuri de comenzi (pipeline-uri)')} id="c2-pipe" checked={!!checked['c2-pipe']} onCheck={() => toggleCheck('c2-pipe')}>
+              <Section title={t('5. Pipelines (Command Chains)', '5. Lanțuri de comenzi (pipeline-uri)')} id="course_2-pipe" checked={!!checked['course_2-pipe']} onCheck={() => toggleCheck('course_2-pipe')}>
                 <Box type="definition">
                   <p>{t('A ', 'Un ')}<strong>{t('pipeline', 'lanț de comenzi')}</strong>{t(' connects stdout of one command to stdin of the next using ', ' conectează stdout-ul unei comenzi la stdin-ul următoarei folosind ')} <code>|</code>{t('. All commands in a pipeline run ', '. Toate comenzile dintr-un pipeline rulează ')}<strong>{t('in parallel', 'în paralel')}</strong>{t(' (not sequentially!).', ' (nu secvențial!).')}</p>
                 </Box>
@@ -180,7 +180,7 @@ $ cat /etc/passwd | grep -w "bash"
                 </Box>
               </Section>
 
-              <Section title={t('6. Compound Commands (; & && ||)', '6. Comenzi compuse (; & && ||)')} id="c2-compound" checked={!!checked['c2-compound']} onCheck={() => toggleCheck('c2-compound')}>
+              <Section title={t('6. Compound Commands (; & && ||)', '6. Comenzi compuse (; & && ||)')} id="course_2-compound" checked={!!checked['course_2-compound']} onCheck={() => toggleCheck('course_2-compound')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Four composition operators:', 'Patru operatori de compunere:')}</p>
                   <table className="text-sm mt-1 w-full">
@@ -224,7 +224,7 @@ $ cat file.txt || echo "File not found!"
                 </Box>
               </Section>
 
-              <Section title={t('7. Filename Globbing (Wildcards)', '7. Șabloane pentru nume de fișiere (metacaractere)')} id="c2-glob" checked={!!checked['c2-glob']} onCheck={() => toggleCheck('c2-glob')}>
+              <Section title={t('7. Filename Globbing (Wildcards)', '7. Șabloane pentru nume de fișiere (metacaractere)')} id="course_2-glob" checked={!!checked['course_2-glob']} onCheck={() => toggleCheck('course_2-glob')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Pattern characters:', 'Caractere speciale de șablon:')}</p>
                   <table className="text-sm mt-1">
@@ -250,7 +250,7 @@ $ ls !(*.o)           # everything except .o files (bash)`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('8. Shell Configuration & History', '8. Configurarea shell-ului și istoricul comenzilor')} id="c2-config" checked={!!checked['c2-config']} onCheck={() => toggleCheck('c2-config')}>
+              <Section title={t('8. Shell Configuration & History', '8. Configurarea shell-ului și istoricul comenzilor')} id="course_2-config" checked={!!checked['course_2-config']} onCheck={() => toggleCheck('course_2-config')}>
                 <Box type="definition">
                   <p className="font-bold">{t('Bash config files (execution order):', 'Fișierele de configurare Bash (ordinea de execuție):')}</p>
                   <ul className="list-disc pl-5 text-sm">
@@ -270,7 +270,7 @@ $ CTRL+R           # reverse search in history`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="c2-cheat" checked={!!checked['c2-cheat']} onCheck={() => toggleCheck('c2-cheat')}>
+              <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="course_2-cheat" checked={!!checked['course_2-cheat']} onCheck={() => toggleCheck('course_2-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">{t('Redirections', 'Redirecționări')}</p><p>{'< > >> 2> 2>> &> 2>&1'}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Composition', 'Compunere')}</p><p>{'; (seq) & (bg) && (AND) || (OR)'}</p></Box>
@@ -281,7 +281,7 @@ $ CTRL+R           # reverse search in history`}</Code>
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c2-quiz" checked={!!checked['c2-quiz']} onCheck={() => toggleCheck('c2-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_2-quiz" checked={!!checked['course_2-quiz']} onCheck={() => toggleCheck('course_2-quiz')}>
                 <Toggle
                   question={t('1. What is the difference between ./script.sh and source script.sh?', '1. Care este diferența dintre ./script.sh și source script.sh?')}
                   answer={t('./script.sh creates a new child process (subshell). source script.sh (or . script.sh) runs in the current shell. Variable assignments and cd changes only persist with source.', './script.sh creează un nou proces copil (subshell). source script.sh (sau . script.sh) rulează în shell-ul curent. Atribuirile de variabile și schimbările de director persistă doar cu source.')}

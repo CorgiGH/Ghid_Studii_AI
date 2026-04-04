@@ -23,7 +23,7 @@ export default function Course07() {
                 </ol>
               </Box>
 
-              <Section title={t('1. The exec() Concept', '1. Conceptul exec()')} id="c7-concept" checked={!!checked['c7-concept']} onCheck={() => toggleCheck('c7-concept')}>
+              <Section title={t('1. The exec() Concept', '1. Conceptul exec()')} id="course_7-concept" checked={!!checked['course_7-concept']} onCheck={() => toggleCheck('course_7-concept')}>
                 <p><code>fork()</code> {t('creates a new process running the ', 'creează un proces nou care rulează ')}<strong>{t('same', 'același')}</strong>{t(' program. But how do we run a ', ' program. Dar cum rulăm un ')}<strong>{t('different', 'alt')}</strong>{t(' program? Answer: ', ' program? Răspuns: ')} <code>exec()</code> <strong>{t('replaces', 'înlocuiește')}</strong>{t(" the current process's program with a new one.", ' programul procesului curent cu unul nou.')}</p>
 
                 <Box type="definition">
@@ -50,7 +50,7 @@ export default function Course07() {
                 </Box>
               </Section>
 
-              <Section title={t('2. The 6+1 exec Functions', '2. Cele 6+1 funcții exec')} id="c7-family" checked={!!checked['c7-family']} onCheck={() => toggleCheck('c7-family')}>
+              <Section title={t('2. The 6+1 exec Functions', '2. Cele 6+1 funcții exec')} id="course_7-family" checked={!!checked['course_7-family']} onCheck={() => toggleCheck('course_7-family')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Naming convention — each letter means something:', 'Convenția de denumire — fiecare literă are o semnificație:')}</p>
                   <table className="text-sm mt-1 w-full">
@@ -95,7 +95,7 @@ perror("exec failed");
 exit(127);`}</Code>
               </Section>
 
-              <Section title={t('3. What Survives exec()', '3. Ce supraviețuiește exec()')} id="c7-survives" checked={!!checked['c7-survives']} onCheck={() => toggleCheck('c7-survives')}>
+              <Section title={t('3. What Survives exec()', '3. Ce supraviețuiește exec()')} id="course_7-survives" checked={!!checked['course_7-survives']} onCheck={() => toggleCheck('course_7-survives')}>
                 <Box type="theorem">
                   <p className="font-bold">{t('Preserved after exec:', 'Păstrat după exec:')}</p>
                   <ul className="list-disc pl-5 text-sm">
@@ -117,7 +117,7 @@ exit(127);`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('4. The fork+exec Pattern', '4. Tiparul fork+exec')} id="c7-forkexec" checked={!!checked['c7-forkexec']} onCheck={() => toggleCheck('c7-forkexec')}>
+              <Section title={t('4. The fork+exec Pattern', '4. Tiparul fork+exec')} id="course_7-forkexec" checked={!!checked['course_7-forkexec']} onCheck={() => toggleCheck('course_7-forkexec')}>
                 <p>{t('The standard way to run an external command from C:', 'Metoda standard de a rula o comandă externă din C:')}</p>
 
                 <Box type="formula">
@@ -151,7 +151,7 @@ if (WIFEXITED(st)) {
                 </Box>
               </Section>
 
-              <Section title={t('5. File Descriptors & Redirection', '5. Descriptori de fișiere și redirecționare')} id="c7-redirect" checked={!!checked['c7-redirect']} onCheck={() => toggleCheck('c7-redirect')}>
+              <Section title={t('5. File Descriptors & Redirection', '5. Descriptori de fișiere și redirecționare')} id="course_7-redirect" checked={!!checked['course_7-redirect']} onCheck={() => toggleCheck('course_7-redirect')}>
                 <Box type="formula">
                   <p className="font-bold">{t('dup() and dup2() — duplicate file descriptors:', 'dup() și dup2() — duplicarea descriptorilor de fișiere:')}</p>
                   <Code>{`int dup(int oldfd);            // returns new fd pointing to same file
@@ -180,7 +180,7 @@ int ret = system("ls -l /home ; rm -i temp.txt");
                 </Box>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="c7-cheat" checked={!!checked['c7-cheat']} onCheck={() => toggleCheck('c7-cheat')}>
+              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="course_7-cheat" checked={!!checked['course_7-cheat']} onCheck={() => toggleCheck('course_7-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">{t('exec naming', 'Denumire exec')}</p><p>{t('l=list, v=vector, p=PATH, e=env', 'l=listă, v=vector, p=PATH, e=env')}</p><p>{t('execve = the actual syscall', 'execve = apelul de sistem real')}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Key behavior', 'Comportament cheie')}</p><p>{t('Does NOT create new process', 'NU creează un proces nou')}</p><p>{t('Replaces code+data+stack', 'Înlocuiește cod+date+stivă')}</p><p>{t('Never returns on success (-1 on fail)', 'Nu returnează la succes (-1 la eșec)')}</p></Box>
@@ -191,7 +191,7 @@ int ret = system("ls -l /home ; rm -i temp.txt");
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c7-quiz" checked={!!checked['c7-quiz']} onCheck={() => toggleCheck('c7-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_7-quiz" checked={!!checked['course_7-quiz']} onCheck={() => toggleCheck('course_7-quiz')}>
                 <Toggle question={t('1. Does exec() create a new process?', '1. exec() creează un proces nou?')} answer={t('No. exec() REPLACES the current process\'s program image. Same PID, same parent. It is not process creation — that\'s fork(). exec is process transformation.', 'Nu. exec() ÎNLOCUIEȘTE imaginea de program a procesului curent. Același PID, același părinte. Nu este crearea unui proces — aceea este treaba lui fork(). exec este transformarea procesului.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('2. What happens to code written after a successful exec() call?', '2. Ce se întâmplă cu codul scris după un apel exec() reușit?')} answer={t('It never executes. A successful exec() completely replaces the program — there is no return. Code after exec() only runs if exec FAILED (returned -1).', 'Nu se execută niciodată. Un exec() reușit înlocuiește complet programul — nu există returnare. Codul după exec() rulează doar dacă exec A EȘUAT (a returnat -1).')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('3. What do the letters l, v, p, e mean in exec function names?', '3. Ce înseamnă literele l, v, p, e din numele funcțiilor exec?')} answer={t('l = args as list (variadic), v = args as vector (array), p = search PATH for the executable, e = provide custom environment variables. So execlp = list args + PATH search.', 'l = argumente ca listă (variadic), v = argumente ca vector (tablou), p = caută în PATH executabilul, e = furnizează variabile de mediu personalizate. Deci execlp = argumente ca listă + căutare în PATH.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />

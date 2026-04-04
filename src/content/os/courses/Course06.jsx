@@ -24,7 +24,7 @@ export default function Course06() {
                 </ol>
               </Box>
 
-              <Section title={t('1. Program vs Process', '1. Program vs. Proces')} id="c6-def" checked={!!checked['c6-def']} onCheck={() => toggleCheck('c6-def')}>
+              <Section title={t('1. Program vs Process', '1. Program vs. Proces')} id="course_6-def" checked={!!checked['course_6-def']} onCheck={() => toggleCheck('course_6-def')}>
                 <Box type="definition">
                   <p><strong>{t('Program', 'Program')}</strong> = {t('an executable file on disk (compiled from source).', 'un fișier executabil pe disc (compilat din sursă).')}</p>
                   <p><strong>{t('Process', 'Proces')}</strong> = {t('an instance of a program in execution, characterized by: lifetime, allocated memory (code + data + stacks), CPU time, and other resources.', 'o instanță a unui program în execuție, caracterizată prin: durată de viață, memorie alocată (cod + date + stive), timp procesor și alte resurse.')}</p>
@@ -45,7 +45,7 @@ Terminal, cmdline, env, hardware context, ...`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('2. Info & Utility Primitives', '2. Primitive informative și utilitare')} id="c6-info" checked={!!checked['c6-info']} onCheck={() => toggleCheck('c6-info')}>
+              <Section title={t('2. Info & Utility Primitives', '2. Primitive informative și utilitare')} id="course_6-info" checked={!!checked['course_6-info']} onCheck={() => toggleCheck('course_6-info')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Process information:', 'Informații despre proces:')}</p>
                   <Code>{`pid_t getpid(void);   // my PID
@@ -78,7 +78,7 @@ abort();       // sends SIGABRT to self → abnormal exit`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('3. fork() — Process Creation', '3. fork() — Crearea proceselor')} id="c6-fork" checked={!!checked['c6-fork']} onCheck={() => toggleCheck('c6-fork')}>
+              <Section title={t('3. fork() — Process Creation', '3. fork() — Crearea proceselor')} id="course_6-fork" checked={!!checked['course_6-fork']} onCheck={() => toggleCheck('course_6-fork')}>
                 <p><code>fork()</code> {t('is the ', 'este singura ')}<strong>{t('only', '')}</strong>{t(' way to create a new process in UNIX/Linux.', 'modalitate de a crea un proces nou în UNIX/Linux.')}</p>
 
                 <Box type="formula">
@@ -151,7 +151,7 @@ wait(NULL);
 printf("Parent: x=%d\\n", x);     // prints 10 (unchanged!)`}</Code>
               </Section>
 
-              <Section title={t('4. wait() — Synchronization', '4. wait() — Sincronizare')} id="c6-wait" checked={!!checked['c6-wait']} onCheck={() => toggleCheck('c6-wait')}>
+              <Section title={t('4. wait() — Synchronization', '4. wait() — Sincronizare')} id="course_6-wait" checked={!!checked['course_6-wait']} onCheck={() => toggleCheck('course_6-wait')}>
                 <Box type="formula">
                   <p className="font-bold">{t('wait() and waitpid():', 'wait() și waitpid():')}</p>
                   <Code>{`pid_t wait(int* wstatus);
@@ -213,7 +213,7 @@ for (int i = 0; i < N; i++) {
                 </Box>
               </Section>
 
-              <Section title={t('5. Synchronization Points', '5. Puncte de sincronizare')} id="c6-sync" checked={!!checked['c6-sync']} onCheck={() => toggleCheck('c6-sync')}>
+              <Section title={t('5. Synchronization Points', '5. Puncte de sincronizare')} id="course_6-sync" checked={!!checked['course_6-sync']} onCheck={() => toggleCheck('course_6-sync')}>
                 <Box type="theorem">
                   <p className="font-bold">{t('Two synchronization points:', 'Două puncte de sincronizare:')}</p>
                   <ol className="list-decimal pl-5 text-sm">
@@ -241,7 +241,7 @@ for (int i = 0; i < N; i++) {
                 </svg>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="c6-cheat" checked={!!checked['c6-cheat']} onCheck={() => toggleCheck('c6-cheat')}>
+              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="course_6-cheat" checked={!!checked['course_6-cheat']} onCheck={() => toggleCheck('course_6-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">fork()</p><p>{t('Returns: child PID (parent), 0 (child), -1 (error)', 'Returnează: PID fiu (părinte), 0 (fiu), -1 (eroare)')}</p><p>{t('Child = clone, separate memory (COW)', 'Fiu = clonă, memorie separată (COW)')}</p><p>{t('Shares: open fds, mmaps, env', 'Partajează: descriptori deschiși, mmap-uri, env')}</p></Box>
                   <Box type="formula"><p className="font-bold">wait()/waitpid()</p><p>WIFEXITED, WEXITSTATUS</p><p>WIFSIGNALED, WTERMSIG</p><p>{t('WNOHANG for non-blocking', 'WNOHANG pentru neblocant')}</p></Box>
@@ -250,7 +250,7 @@ for (int i = 0; i < N; i++) {
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c6-quiz" checked={!!checked['c6-quiz']} onCheck={() => toggleCheck('c6-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_6-quiz" checked={!!checked['course_6-quiz']} onCheck={() => toggleCheck('course_6-quiz')}>
                 <Toggle question={t('1. What is the ONLY way to create a new process in UNIX?', '1. Care este singura modalitate de a crea un proces nou în UNIX?')} answer={t('The fork() system call. It creates a clone of the calling process. There is no other mechanism (unlike Windows which has CreateProcess).', 'Apelul de sistem fork(). Creează o clonă a procesului apelant. Nu există alt mecanism (spre deosebire de Windows care are CreateProcess).')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('2. What does fork() return in the child process, and why?', '2. Ce returnează fork() în procesul fiu și de ce?')} answer={t("0. Because the child can always find its parent's PID via getppid(), but the parent has no built-in way to find the child's PID other than the fork() return value. So the asymmetry is by design.", '0. Deoarece fiul poate afla oricând PID-ul părintelui prin getppid(), dar părintele nu are altă metodă built-in de a afla PID-ul fiului decât valoarea returnată de fork(). Asimetria este intenționată.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('3. After fork(), if the child modifies variable x, does the parent see the change?', '3. După fork(), dacă fiul modifică variabila x, o vede și părintele?')} answer={t('No. Parent and child have separate memory spaces. Changes in one are invisible to the other. This is the fundamental consequence of fork() creating a COPY. (Implemented efficiently via copy-on-write pages.)', 'Nu. Părintele și fiul au spații de memorie separate. Modificările dintr-unul sunt invizibile pentru celălalt. Aceasta este consecința fundamentală a faptului că fork() creează o COPIE. (Implementat eficient prin pagini copy-on-write.)')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />

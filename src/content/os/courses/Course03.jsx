@@ -25,7 +25,7 @@ export default function Course03() {
                 </ol>
               </Box>
 
-              <Section title={t('1. Shell Scripts & the Shebang', '1. Scripturi shell și shebang')} id="c3-scripts" checked={!!checked['c3-scripts']} onCheck={() => toggleCheck('c3-scripts')}>
+              <Section title={t('1. Shell Scripts & the Shebang', '1. Scripturi shell și shebang')} id="course_3-scripts" checked={!!checked['course_3-scripts']} onCheck={() => toggleCheck('course_3-scripts')}>
                 <p>{t('A ', 'Un ')}<strong>{t('shell script', 'script shell')}</strong>{t(' is a text file containing a sequence of UNIX commands. The first line (the ', ' este un fișier text care conține o secvență de comenzi UNIX. Prima linie (')}<strong>{t('shebang', 'shebang')}</strong>{t(') tells the system which interpreter to use.', ') indică sistemului ce interpretor să folosească.')}</p>
                 <Code>{`#!/bin/bash
 # This is a comment
@@ -46,7 +46,7 @@ $ source Hello.sh world  # Method 3: current shell (no new process)`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('2. Variables', '2. Variabile')} id="c3-vars" checked={!!checked['c3-vars']} onCheck={() => toggleCheck('c3-vars')}>
+              <Section title={t('2. Variables', '2. Variabile')} id="course_3-vars" checked={!!checked['course_3-vars']} onCheck={() => toggleCheck('course_3-vars')}>
                 <p>{t('Shell variables are ', 'Variabilele shell sunt ')}<strong>{t('string-typed by default', 'de tip șir implicit')}</strong>{t(", don't need declaration, and are created on first assignment.", ', nu necesită declarare și sunt create la prima atribuire.')}</p>
 
                 <Box type="formula">
@@ -84,7 +84,7 @@ echo \${path%.c}.txt   # Replace .c with .txt`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('3. Special Variables & Positional Parameters', '3. Variabile speciale și parametri pozițional')} id="c3-special" checked={!!checked['c3-special']} onCheck={() => toggleCheck('c3-special')}>
+              <Section title={t('3. Special Variables & Positional Parameters', '3. Variabile speciale și parametri pozițional')} id="course_3-special" checked={!!checked['course_3-special']} onCheck={() => toggleCheck('course_3-special')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Positional parameters:', 'Parametri pozițional:')}</p>
                   <table className="text-sm mt-1">
@@ -119,7 +119,7 @@ set -n                 # Syntax check only (don't execute)`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('4. Arithmetic Expressions', '4. Expresii aritmetice')} id="c3-arith" checked={!!checked['c3-arith']} onCheck={() => toggleCheck('c3-arith')}>
+              <Section title={t('4. Arithmetic Expressions', '4. Expresii aritmetice')} id="course_3-arith" checked={!!checked['course_3-arith']} onCheck={() => toggleCheck('course_3-arith')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Four ways to do arithmetic:', 'Patru moduri de a face aritmetică:')}</p>
                   <Code>{`# 1. let command
@@ -157,7 +157,7 @@ echo \${arr[1]} # "world"`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('5. Conditional Expressions (test)', '5. Expresii condiționale (test)')} id="c3-test" checked={!!checked['c3-test']} onCheck={() => toggleCheck('c3-test')}>
+              <Section title={t('5. Conditional Expressions (test)', '5. Expresii condiționale (test)')} id="course_3-test" checked={!!checked['course_3-test']} onCheck={() => toggleCheck('course_3-test')}>
                 <Box type="formula">
                   <p className="font-bold">{t('test / [ ] syntax:', 'Sintaxa test / [ ]:')}</p>
                   <Code>{`# String comparisons
@@ -195,7 +195,7 @@ test c1 -o c2      # OR`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('6. Control Structures', '6. Structuri de control')} id="c3-control" checked={!!checked['c3-control']} onCheck={() => toggleCheck('c3-control')}>
+              <Section title={t('6. Control Structures', '6. Structuri de control')} id="course_3-control" checked={!!checked['course_3-control']} onCheck={() => toggleCheck('course_3-control')}>
 
                 {/* SVG: Control flow diagram */}
                 <svg viewBox="0 0 480 170" className="w-full max-w-lg mx-auto my-4" style={{fontFamily:'monospace',fontSize:10}}>
@@ -290,7 +290,7 @@ done
                 </Box>
               </Section>
 
-              <Section title={t('7. Shell Functions', '7. Funcții shell')} id="c3-funcs" checked={!!checked['c3-funcs']} onCheck={() => toggleCheck('c3-funcs')}>
+              <Section title={t('7. Shell Functions', '7. Funcții shell')} id="course_3-funcs" checked={!!checked['course_3-funcs']} onCheck={() => toggleCheck('course_3-funcs')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Function declaration:', 'Declararea funcțiilor:')}</p>
                   <Code>{`function my_func() {
@@ -329,7 +329,7 @@ my_listing /home`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="c3-cheat" checked={!!checked['c3-cheat']} onCheck={() => toggleCheck('c3-cheat')}>
+              <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="course_3-cheat" checked={!!checked['course_3-cheat']} onCheck={() => toggleCheck('course_3-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">{t('Variables', 'Variabile')}</p><p>var=val, $var, ${'{var}'}, ${'{#var}'}</p><p>${'{var:start:len}'}, ${'{var#pat}'}, ${'{var%pat}'}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Special vars', 'Variabile speciale')}</p><p>$0 $1..$9 $# $@ $* $$ $? $!</p></Box>
@@ -340,7 +340,7 @@ my_listing /home`}</Code>
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c3-quiz" checked={!!checked['c3-quiz']} onCheck={() => toggleCheck('c3-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_3-quiz" checked={!!checked['course_3-quiz']} onCheck={() => toggleCheck('course_3-quiz')}>
                 <Toggle
                   question={t('1. Why does v = 5 fail but v=5 works?', '1. De ce eșuează v = 5 dar v=5 funcționează?')}
                   answer={t("The shell parses 'v = 5' as running a command named 'v' with arguments '=' and '5'. Assignment requires NO spaces around '='. This is the #1 beginner bash mistake.", "Shell-ul interpretează 'v = 5' ca rularea unei comenzi numite 'v' cu argumentele '=' și '5'. Atribuirea nu necesită spații în jurul '='. Aceasta este greșeala #1 a începătorilor în bash.")}

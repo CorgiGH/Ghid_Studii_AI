@@ -24,7 +24,7 @@ export default function Course09() {
                 </ol>
               </Box>
 
-              <Section title={t('1. Pipe Fundamentals', '1. Noțiuni fundamentale despre pipe-uri')} id="c9-fund" checked={!!checked['c9-fund']} onCheck={() => toggleCheck('c9-fund')}>
+              <Section title={t('1. Pipe Fundamentals', '1. Noțiuni fundamentale despre pipe-uri')} id="course_9-fund" checked={!!checked['course_9-fund']} onCheck={() => toggleCheck('course_9-fund')}>
                 <Box type="definition">
                   <p>{t('A ', 'Un ')}<strong>{t('pipe', 'pipe')}</strong>{t(' is a unidirectional FIFO buffer managed by the kernel. Data written at one end is read (and consumed) at the other. Capacity is limited (typically 64KB on Linux).', ' este un buffer FIFO unidirecțional gestionat de kernel. Datele scrise la un capăt sunt citite (și consumate) la celălalt. Capacitatea este limitată (în mod obișnuit 64KB pe Linux).')}</p>
                 </Box>
@@ -57,7 +57,7 @@ export default function Course09() {
                 </Box>
               </Section>
 
-              <Section title={t('2. Anonymous Pipes', '2. Pipe-uri anonime')} id="c9-anon" checked={!!checked['c9-anon']} onCheck={() => toggleCheck('c9-anon')}>
+              <Section title={t('2. Anonymous Pipes', '2. Pipe-uri anonime')} id="course_9-anon" checked={!!checked['course_9-anon']} onCheck={() => toggleCheck('course_9-anon')}>
                 <Box type="formula">
                   <p className="font-bold">{t('pipe() — create anonymous pipe:', 'pipe() — crearea unui pipe anonim:')}</p>
                   <Code>{`int pfd[2];
@@ -99,7 +99,7 @@ wait(NULL);`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('3. Named Pipes (FIFOs)', '3. Pipe-uri cu nume (FIFO)')} id="c9-fifo" checked={!!checked['c9-fifo']} onCheck={() => toggleCheck('c9-fifo')}>
+              <Section title={t('3. Named Pipes (FIFOs)', '3. Pipe-uri cu nume (FIFO)')} id="course_9-fifo" checked={!!checked['course_9-fifo']} onCheck={() => toggleCheck('course_9-fifo')}>
                 <Box type="formula">
                   <p className="font-bold">{t('mkfifo — create a named pipe:', 'mkfifo — crearea unui pipe cu nume:')}</p>
                   <Code>{`int mkfifo(const char* path, mode_t mode);
@@ -133,7 +133,7 @@ close(fd);`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('4. Blocking Behavior', '4. Comportamentul blocant')} id="c9-block" checked={!!checked['c9-block']} onCheck={() => toggleCheck('c9-block')}>
+              <Section title={t('4. Blocking Behavior', '4. Comportamentul blocant')} id="course_9-block" checked={!!checked['course_9-block']} onCheck={() => toggleCheck('course_9-block')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Default (blocking) behavior summary:', 'Rezumatul comportamentului implicit (blocant):')}</p>
                   <table className="text-sm mt-1 w-full">
@@ -167,7 +167,7 @@ fcntl(fd, F_SETFL, O_NONBLOCK);
                 </Box>
               </Section>
 
-              <Section title={t('5. Communication Patterns', '5. Șabloane de comunicație')} id="c9-patterns" checked={!!checked['c9-patterns']} onCheck={() => toggleCheck('c9-patterns')}>
+              <Section title={t('5. Communication Patterns', '5. Șabloane de comunicație')} id="course_9-patterns" checked={!!checked['course_9-patterns']} onCheck={() => toggleCheck('course_9-patterns')}>
                 <Box type="definition">
                   <p className="font-bold">{t('Four patterns by writer/reader count:', 'Patru șabloane după numărul de scriitori/cititori:')}</p>
                   <ul className="list-disc pl-5 text-sm">
@@ -194,7 +194,7 @@ struct message {
 // (if total size <= PIPE_BUF)`}</Code>
               </Section>
 
-              <Section title={t('6. Applications', '6. Aplicații')} id="c9-apps" checked={!!checked['c9-apps']} onCheck={() => toggleCheck('c9-apps')}>
+              <Section title={t('6. Applications', '6. Aplicații')} id="course_9-apps" checked={!!checked['course_9-apps']} onCheck={() => toggleCheck('course_9-apps')}>
                 <Box type="definition">
                   <p className="font-bold">{t('Semaphore via fifo:', 'Semaphore prin fifo:')}</p>
                   <p className="text-sm">{t('Create a fifo, write 1 byte (init). ', 'Se creează un fifo, se scrie 1 octet (inițializare). ')}<code>wait()</code>{t(' = read 1 byte (blocks if empty). ', ' = citire 1 octet (blochează dacă e gol). ')}<code>signal()</code>{t(' = write 1 byte. The blocking read behavior gives us semaphore semantics for free.', ' = scriere 1 octet. Comportamentul blocant al citirii ne oferă semantica semaphore-ului în mod gratuit.')}</p>
@@ -211,7 +211,7 @@ struct message {
                 </Box>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="c9-cheat" checked={!!checked['c9-cheat']} onCheck={() => toggleCheck('c9-cheat')}>
+              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="course_9-cheat" checked={!!checked['course_9-cheat']} onCheck={() => toggleCheck('course_9-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">{t('Anonymous pipe', 'Pipe anonim')}</p><p>pipe(pfd) → pfd[0]=read, pfd[1]=write</p><p>{t('Must pipe() BEFORE fork()', 'pipe() trebuie apelat ÎNAINTE de fork()')}</p><p>{t('Close unused ends!', 'Închideți capetele neutilizate!')}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Named pipe', 'Pipe cu nume')}</p><p>mkfifo(path, mode)</p><p>{t('open() blocks until both ends open', 'open() blochează până la deschiderea ambelor capete')}</p><p>{t('Data non-persistent (RAM only)', 'Date nepersistente (doar în RAM)')}</p></Box>
@@ -220,7 +220,7 @@ struct message {
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c9-quiz" checked={!!checked['c9-quiz']} onCheck={() => toggleCheck('c9-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_9-quiz" checked={!!checked['course_9-quiz']} onCheck={() => toggleCheck('course_9-quiz')}>
                 <Toggle question={t('1. Why must you create the pipe BEFORE fork?', '1. De ce trebuie să creați pipe-ul ÎNAINTE de fork?')} answer={t('Because the child needs to inherit both file descriptors (pfd[0] and pfd[1]) from the parent. After fork, both processes have copies. If you pipe() after fork, only the calling process has the descriptors — the other can\'t access the pipe.', 'Deoarece procesul fiu trebuie să moștenească ambii descriptori (pfd[0] și pfd[1]) de la părinte. După fork, ambele procese au copii. Dacă apelați pipe() după fork, doar procesul apelant are descriptorii — celălalt nu poate accesa pipe-ul.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('2. What happens if you don\'t close the unused write end in the reader?', '2. Ce se întâmplă dacă nu închideți capătul de scriere neutilizat în cititor?')} answer={t('The reader will NEVER see EOF. read() returns 0 (EOF) only when ALL write-end descriptors are closed. Since the reader still has a write end open, read blocks forever when the pipe empties.', 'Cititorul nu va vedea NICIODATĂ EOF. read() returnează 0 (EOF) doar când TOȚI descriptorii capătului de scriere sunt închiși. Deoarece cititorul are în continuare un capăt de scriere deschis, read blochează la infinit când pipe-ul se golește.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('3. Can unrelated processes use an anonymous pipe?', '3. Pot procesele neînrudite folosi un pipe anonim?')} answer={t('No. Anonymous pipes have no name/path — the only way to share the descriptors is through fork (inheritance) or exec (fd inheritance). Use named pipes (fifos) for unrelated processes.', 'Nu. Pipe-urile anonime nu au nume/cale — singura modalitate de a partaja descriptorii este prin fork (moștenire) sau exec (moștenirea fd). Utilizați pipe-uri cu nume (fifouri) pentru procese neînrudite.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />

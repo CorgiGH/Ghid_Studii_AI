@@ -24,7 +24,7 @@ export default function Course05() {
                 </ol>
               </Box>
 
-              <Section title={t('1. The Concurrent Access Problem', '1. Problema accesului concurent')} id="c5-concur" checked={!!checked['c5-concur']} onCheck={() => toggleCheck('c5-concur')}>
+              <Section title={t('1. The Concurrent Access Problem', '1. Problema accesului concurent')} id="course_5-concur" checked={!!checked['course_5-concur']} onCheck={() => toggleCheck('course_5-concur')}>
                 <p>{t('Linux is ', 'Linux este ')}<strong>{t('multi-tasking', 'multi-tasking')}</strong>{t(': multiple processes can access the same file simultaneously. This is the default and requires no special code.', ': mai multe procese pot accesa același fișier simultan. Acesta este comportamentul implicit și nu necesită cod special.')}</p>
 
                 <Box type="warning">
@@ -53,7 +53,7 @@ $ ./access_v1 1 & ./access_v1 2 &
 # Actual:   aaaa1bbbb#cccc  or  aaaa2bbbb#cccc  (data race!)`}</Code>
               </Section>
 
-              <Section title={t('2. File Locks with fcntl()', '2. Blocaje pe fișiere cu fcntl()')} id="c5-locks" checked={!!checked['c5-locks']} onCheck={() => toggleCheck('c5-locks')}>
+              <Section title={t('2. File Locks with fcntl()', '2. Blocaje pe fișiere cu fcntl()')} id="course_5-locks" checked={!!checked['course_5-locks']} onCheck={() => toggleCheck('course_5-locks')}>
                 <Box type="definition">
                   <p className="font-bold">{t('struct flock — describes a lock:', 'struct flock — descrie un blocaj:')}</p>
                   <Code>{`#include <fcntl.h>
@@ -106,7 +106,7 @@ fcntl(fd, F_SETLK, &fl);`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('3. Advisory Nature of Locks', '3. Caracterul advisory al blocajelor')} id="c5-advisory" checked={!!checked['c5-advisory']} onCheck={() => toggleCheck('c5-advisory')}>
+              <Section title={t('3. Advisory Nature of Locks', '3. Caracterul advisory al blocajelor')} id="course_5-advisory" checked={!!checked['course_5-advisory']} onCheck={() => toggleCheck('course_5-advisory')}>
                 <Box type="warning">
                   <p className="font-bold">{t('Locks are ADVISORY, not mandatory!', 'Blocajele sunt ADVISORY, nu mandatory!')}</p>
                   <p>{t('A lock only works if ', 'Un blocaj funcționează doar dacă ')}<strong>{t('all cooperating processes', 'toate procesele cooperante')}</strong>{t(' agree to check for locks before accessing the file. A process that simply calls ', ' sunt de acord să verifice blocajele înainte de a accesa fișierul. Un proces care pur și simplu apelează ')} <code>write()</code> {t('without checking locks will ', 'fără a verifica blocajele va ')}<strong>{t('succeed', 'reuși')}</strong>{t(' even if another process holds a write lock.', ' chiar dacă un alt proces deține un blocaj de scriere.')}</p>
@@ -129,7 +129,7 @@ $ sleep 2; echo "xyxyxy" > fis.dat   # This does NOT use locks
                 </Box>
               </Section>
 
-              <Section title={t('4. Optimized Locking', '4. Blocare optimizată')} id="c5-optim" checked={!!checked['c5-optim']} onCheck={() => toggleCheck('c5-optim')}>
+              <Section title={t('4. Optimized Locking', '4. Blocare optimizată')} id="course_5-optim" checked={!!checked['course_5-optim']} onCheck={() => toggleCheck('course_5-optim')}>
                 <p>{t('Locking the ', 'Blocarea ')}<strong>{t('entire file for the entire duration', 'întregului fișier pe toată durata')}</strong>{t(' serializes access — processes run one-after-another, defeating concurrency.', ' serializează accesul — procesele rulează unul după altul, eliminând concurența.')}</p>
 
                 <Box type="theorem">
@@ -165,7 +165,7 @@ while (read(fd, &c, 1) == 1) {
                 </Box>
               </Section>
 
-              <Section title={t('5. Measuring Execution Time', '5. Măsurarea timpului de execuție')} id="c5-time" checked={!!checked['c5-time']} onCheck={() => toggleCheck('c5-time')}>
+              <Section title={t('5. Measuring Execution Time', '5. Măsurarea timpului de execuție')} id="course_5-time" checked={!!checked['course_5-time']} onCheck={() => toggleCheck('course_5-time')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Methods:', 'Metode:')}</p>
                   <Code>{`# Shell level:
@@ -183,7 +183,7 @@ clock_gettime(CLOCK_REALTIME, &ts); // nanosecond precision`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="c5-cheat" checked={!!checked['c5-cheat']} onCheck={() => toggleCheck('c5-cheat')}>
+              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="course_5-cheat" checked={!!checked['course_5-cheat']} onCheck={() => toggleCheck('course_5-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">{t('Lock types', 'Tipuri de blocaje')}</p><p>F_RDLCK ({t('shared read', 'citire partajată')})</p><p>F_WRLCK ({t('exclusive write', 'scriere exclusivă')})</p><p>F_UNLCK ({t('release', 'eliberare')})</p></Box>
                   <Box type="formula"><p className="font-bold">{t('fcntl commands', 'Comenzi fcntl')}</p><p>F_SETLK ({t('non-blocking', 'neblocant')})</p><p>F_SETLKW ({t('blocking/wait', 'blocant/așteptare')})</p><p>F_GETLK ({t('query', 'interogare')})</p></Box>
@@ -192,7 +192,7 @@ clock_gettime(CLOCK_REALTIME, &ts); // nanosecond precision`}</Code>
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c5-quiz" checked={!!checked['c5-quiz']} onCheck={() => toggleCheck('c5-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_5-quiz" checked={!!checked['course_5-quiz']} onCheck={() => toggleCheck('course_5-quiz')}>
                 <Toggle question={t('1. What is a data race on a file?', '1. Ce este un data race pe un fișier?')} answer={t('When two or more processes read-then-write the same region of a file concurrently, and the result depends on the unpredictable timing of their operations. One process\'s write can be overwritten or lost.', 'Când două sau mai multe procese citesc și apoi scriu în aceeași regiune a unui fișier concurent, iar rezultatul depinde de temporizarea impredictibilă a operațiilor lor. Scrierea unui proces poate fi suprascrisă sau pierdută.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('2. What does F_SETLKW do differently from F_SETLK?', '2. Ce face F_SETLKW diferit față de F_SETLK?')} answer={t('F_SETLKW is BLOCKING: if the lock conflicts with an existing lock, the call waits (blocks) until the lock becomes available. F_SETLK is non-blocking: it returns -1 immediately with errno = EACCES or EAGAIN.', 'F_SETLKW este BLOCANT: dacă blocajul intră în conflict cu unul existent, apelul așteaptă (blochează) până când blocajul devine disponibil. F_SETLK este neblocant: returnează -1 imediat cu errno = EACCES sau EAGAIN.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('3. Can a read lock and a write lock coexist on the same region?', '3. Pot coexista un blocaj de citire și unul de scriere pe aceeași regiune?')} answer={t('No. A write lock (F_WRLCK) is exclusive — it conflicts with both read and write locks. Multiple read locks CAN coexist (they are shared). This is CREW semantics.', 'Nu. Un blocaj de scriere (F_WRLCK) este exclusiv — intră în conflict atât cu blocajele de citire, cât și cu cele de scriere. Mai multe blocaje de citire POT coexista (sunt partajate). Aceasta este semantica CREW.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />

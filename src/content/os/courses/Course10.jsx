@@ -25,7 +25,7 @@ export default function Course10() {
                 </ol>
               </Box>
 
-              <Section title={t('1. What is a Signal?', '1. Ce este un signal?')} id="c10-what" checked={!!checked['c10-what']} onCheck={() => toggleCheck('c10-what')}>
+              <Section title={t('1. What is a Signal?', '1. Ce este un signal?')} id="course_10-what" checked={!!checked['course_10-what']} onCheck={() => toggleCheck('course_10-what')}>
                 <Box type="definition">
                   <p>{t('A ', 'Un ')}<strong>{t('signal', 'signal')}</strong>{t(' is a software interrupt generated when an exceptional event occurs, delivered by the OS to a specific process. Each signal has a ', ' este o întrerupere software generată când apare un eveniment excepțional, transmisă de sistemul de operare unui anumit proces. Fiecare signal are un ')}<strong>{t('type', 'tip')}</strong>{t(' (integer) and a ', ' (întreg) și un ')}<strong>{t('destination process', 'proces destinatar')}</strong>{t('.', '.')}</p>
                 </Box>
@@ -59,7 +59,7 @@ export default function Course10() {
                 </Box>
               </Section>
 
-              <Section title={t('2. Generating Signals', '2. Generarea signal-elor')} id="c10-gen" checked={!!checked['c10-gen']} onCheck={() => toggleCheck('c10-gen')}>
+              <Section title={t('2. Generating Signals', '2. Generarea signal-elor')} id="course_10-gen" checked={!!checked['course_10-gen']} onCheck={() => toggleCheck('course_10-gen')}>
                 <Box type="formula">
                   <p className="font-bold">{t('From C code:', 'Din cod C:')}</p>
                   <Code>{`#include <signal.h>
@@ -92,7 +92,7 @@ $ killall -SIGINT myprg # send SIGINT to all processes named "myprg"`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('3. Signal Types', '3. Tipuri de signals')} id="c10-types" checked={!!checked['c10-types']} onCheck={() => toggleCheck('c10-types')}>
+              <Section title={t('3. Signal Types', '3. Tipuri de signals')} id="course_10-types" checked={!!checked['course_10-types']} onCheck={() => toggleCheck('course_10-types')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Key predefined signals:', 'Signals predefinite principale:')}</p>
                   <table className="text-sm mt-1 w-full">
@@ -119,7 +119,7 @@ $ killall -SIGINT myprg # send SIGINT to all processes named "myprg"`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('4. Signal Handling with signal()', '4. Tratarea signal-elor cu signal()')} id="c10-handle" checked={!!checked['c10-handle']} onCheck={() => toggleCheck('c10-handle')}>
+              <Section title={t('4. Signal Handling with signal()', '4. Tratarea signal-elor cu signal()')} id="course_10-handle" checked={!!checked['course_10-handle']} onCheck={() => toggleCheck('course_10-handle')}>
                 <p>{t('Three possible reactions when a signal arrives:', 'Trei reacții posibile când sosește un signal:')}</p>
                 <Box type="definition">
                   <ol className="list-decimal pl-5 text-sm">
@@ -179,7 +179,7 @@ void handler(int sig) {
                 </Box>
               </Section>
 
-              <Section title={t('5. Blocking Signals', '5. Blocarea signal-elor')} id="c10-block" checked={!!checked['c10-block']} onCheck={() => toggleCheck('c10-block')}>
+              <Section title={t('5. Blocking Signals', '5. Blocarea signal-elor')} id="course_10-block" checked={!!checked['course_10-block']} onCheck={() => toggleCheck('course_10-block')}>
                 <p><strong>{t('Blocking', 'Blocarea')}</strong>{t(' ≠ ignoring. Blocked signals are ', ' ≠ ignorarea. Signal-ele blocate sunt ')}<strong>{t('queued', 'puse în coadă')}</strong>{t(' and delivered when unblocked. Ignored signals are discarded permanently.', ' și livrate când sunt deblocate. Signal-ele ignorate sunt eliminate permanent.')}</p>
 
                 <Box type="formula">
@@ -212,7 +212,7 @@ if (sigismember(&pending, SIGINT))
                 </Box>
               </Section>
 
-              <Section title={t('6. Waiting for Signals', '6. Așteptarea signal-elor')} id="c10-wait" checked={!!checked['c10-wait']} onCheck={() => toggleCheck('c10-wait')}>
+              <Section title={t('6. Waiting for Signals', '6. Așteptarea signal-elor')} id="course_10-wait" checked={!!checked['course_10-wait']} onCheck={() => toggleCheck('course_10-wait')}>
                 <Box type="formula">
                   <p className="font-bold">{t('pause() — simple wait:', 'pause() — așteptare simplă:')}</p>
                   <Code>{`int pause(void);
@@ -240,7 +240,7 @@ sigsuspend(&wait_mask);           // sleep until SIGQUIT arrives`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="c10-cheat" checked={!!checked['c10-cheat']} onCheck={() => toggleCheck('c10-cheat')}>
+              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="course_10-cheat" checked={!!checked['course_10-cheat']} onCheck={() => toggleCheck('course_10-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">{t('Generate', 'Generare')}</p><p>kill(pid, sig), raise(sig)</p><p>{t('Keyboard: Ctrl+C/\\/Z', 'Tastatură: Ctrl+C/\\/Z')}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Handle', 'Tratare')}</p><p>signal(sig, handler)</p><p>SIG_DFL, SIG_IGN, custom func</p><p>{t('Handler signature: void f(int)', 'Semnătură handler: void f(int)')}</p></Box>
@@ -249,7 +249,7 @@ sigsuspend(&wait_mask);           // sleep until SIGQUIT arrives`}</Code>
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c10-quiz" checked={!!checked['c10-quiz']} onCheck={() => toggleCheck('c10-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_10-quiz" checked={!!checked['course_10-quiz']} onCheck={() => toggleCheck('course_10-quiz')}>
                 <Toggle question={t('1. What is the difference between a signal and a system call?', '1. Care este diferența dintre un signal și un apel de sistem?')} answer={t('A system call is a SYNCHRONOUS request from a process to the kernel (the process initiates it). A signal is an ASYNCHRONOUS notification from the kernel (or another process) to a process — it arrives at unpredictable times, interrupting whatever the process is doing.', 'Un apel de sistem este o cerere SINCRONĂ de la un proces la kernel (procesul o inițiază). Un signal este o notificare ASINCRONĂ de la kernel (sau alt proces) la un proces — sosește la momente imprevizibile, întrerupând orice face procesul.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('2. Which two signals can never be caught, ignored, or blocked?', '2. Care două signals nu pot fi niciodată interceptate, ignorate sau blocate?')} answer={t("SIGKILL (9) and SIGSTOP (19). They are the OS's unconditional controls: SIGKILL always terminates, SIGSTOP always suspends. This ensures the administrator can always stop a runaway process.", 'SIGKILL (9) și SIGSTOP (19). Ele sunt controalele necondiționate ale sistemului de operare: SIGKILL termină întotdeauna, SIGSTOP suspendă întotdeauna. Aceasta garantează că administratorul poate opri oricând un proces scăpat de sub control.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('3. What happens if a signal arrives while its handler is already running?', '3. Ce se întâmplă dacă un signal sosește în timp ce handler-ul său este deja în execuție?')} answer={t('If the SAME signal arrives again, it is blocked until the current handler finishes (one is queued). If a DIFFERENT signal arrives, it CAN interrupt the current handler (nesting). This is why handlers must be kept short.', 'Dacă același signal sosește din nou, este blocat până când handler-ul curent termină (unul este pus în coadă). Dacă un signal DIFERIT sosește, el POATE întrerupe handler-ul curent (imbricare). De aceea handler-ele trebuie menținute scurte.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />

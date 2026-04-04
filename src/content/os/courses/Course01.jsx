@@ -33,7 +33,7 @@ export default function Course01() {
               </Box>
 
               {/* Topic 1: Intro */}
-              <Section title={t('1. Command-Line Introduction', '1. Introducere în linia de comandă')} id="c1-intro" checked={!!checked['c1-intro']} onCheck={() => toggleCheck('c1-intro')}>
+              <Section title={t('1. Command-Line Introduction', '1. Introducere în linia de comandă')} id="course_1-intro" checked={!!checked['course_1-intro']} onCheck={() => toggleCheck('course_1-intro')}>
                 <p>{t('A ', 'Un ')} <strong>{t('command interpreter', 'interpretor de comenzi')}</strong> {t('(shell) is a program that takes user commands, executes them, and displays results. It is the interface between the user and the OS.', '(shell) este un program care preia comenzile utilizatorului, le execută și afișează rezultatele. Este interfața dintre utilizator și sistemul de operare.')}</p>
 
                 <Box type="definition">
@@ -71,7 +71,7 @@ export default function Course01() {
               </Section>
 
               {/* Topic 2: Users & Groups */}
-              <Section title={t('2. Users, Groups & Authentication', '2. Utilizatori, grupuri și autentificare')} id="c1-users" checked={!!checked['c1-users']} onCheck={() => toggleCheck('c1-users')}>
+              <Section title={t('2. Users, Groups & Authentication', '2. Utilizatori, grupuri și autentificare')} id="course_1-users" checked={!!checked['course_1-users']} onCheck={() => toggleCheck('course_1-users')}>
                 <p>{t('Every user needs an ', 'Fiecare utilizator are nevoie de un ')}<strong>{t('account', 'cont')}</strong>{t(' (username + password) to work on a UNIX system. Each account has a ', ' (nume utilizator + parolă) pentru a lucra pe un sistem UNIX. Fiecare cont are un ')}<strong>UID</strong>{t(' (User ID). The special user ', ' (identificator de utilizator). Utilizatorul special ')}<strong>root</strong>{t(' (UID=0) has full system privileges.', ' (UID=0) are toate privilegiile pe sistem.')}</p>
 
                 <Box type="formula">
@@ -104,7 +104,7 @@ $ last            # login history`}</Code>
               </Section>
 
               {/* Topic 3: Files & Filesystem Structure */}
-              <Section title={t('3. Files & Filesystem Structure', '3. Fișiere și structura sistemului de fișiere')} id="c1-files" checked={!!checked['c1-files']} onCheck={() => toggleCheck('c1-files')}>
+              <Section title={t('3. Files & Filesystem Structure', '3. Fișiere și structura sistemului de fișiere')} id="course_1-files" checked={!!checked['course_1-files']} onCheck={() => toggleCheck('course_1-files')}>
                 <p>{t('In UNIX, data and programs are stored in ', 'În UNIX, datele și programele sunt stocate în ')}<strong>{t('files', 'fișiere')}</strong>{t('. Files are organized into ', '. Fișierele sunt organizate în ')}<strong>{t('filesystems', 'sisteme de fișiere')}</strong>{t(' (volumes on disk).', ' (volume pe disc).')}</p>
 
                 <Box type="definition">
@@ -145,7 +145,7 @@ $ last            # login history`}</Code>
               </Section>
 
               {/* Topic 4: Permissions */}
-              <Section title={t('4. File Permissions', '4. Permisiuni de acces la fișiere')} id="c1-perms" checked={!!checked['c1-perms']} onCheck={() => toggleCheck('c1-perms')}>
+              <Section title={t('4. File Permissions', '4. Permisiuni de acces la fișiere')} id="course_1-perms" checked={!!checked['course_1-perms']} onCheck={() => toggleCheck('course_1-perms')}>
                 <p>{t('Every file has an ', 'Fiecare fișier are un ')}<strong>{t('owner user', 'utilizator proprietar')}</strong>{t(', an ', ', un ')}<strong>{t('owner group', 'grup proprietar')}</strong>{t(', and ', ', și ')}<strong>{t('3 sets of permissions', '3 seturi de permisiuni')}</strong>{t(' for: user (u), group (g), others (o).', ' pentru: utilizator (u), grup (g), alții (o).')}</p>
 
                 <PermissionsSVG />
@@ -193,7 +193,7 @@ $ chown newuser:newgroup file.txt  # both at once`}</Code>
               </Section>
 
               {/* Topic 5: Essential Commands */}
-              <Section title={t('5. Essential File & Directory Commands', '5. Comenzi esențiale pentru fișiere și directoare')} id="c1-cmds" checked={!!checked['c1-cmds']} onCheck={() => toggleCheck('c1-cmds')}>
+              <Section title={t('5. Essential File & Directory Commands', '5. Comenzi esențiale pentru fișiere și directoare')} id="course_1-cmds" checked={!!checked['course_1-cmds']} onCheck={() => toggleCheck('course_1-cmds')}>
                 <Box type="definition">
                   <p className="font-bold">{t('Directory commands:', 'Comenzi pentru directoare:')}</p>
                   <Code>{`mkdir dirname     # create directory
@@ -247,7 +247,7 @@ file myfile       # detect file content type`}</Code>
               </Section>
 
               {/* Topic 6: Processes */}
-              <Section title={t('6. Processes', '6. Procese')} id="c1-proc" checked={!!checked['c1-proc']} onCheck={() => toggleCheck('c1-proc')}>
+              <Section title={t('6. Processes', '6. Procese')} id="course_1-proc" checked={!!checked['course_1-proc']} onCheck={() => toggleCheck('course_1-proc')}>
                 <Box type="definition">
                   <p><strong>{t('Process', 'Proces')}</strong> = {t('an instance of a program in execution. Processes form a ', 'o instanță a unui program în execuție. Procesele formează o ')}<strong>{t('tree hierarchy', 'ierarhie de arbore')}</strong>{t(' (parent-child) rooted at PID 0 (created at boot).', ' (părinte-copil) cu rădăcina la PID 0 (creat la pornire).')}</p>
                 </Box>
@@ -269,7 +269,7 @@ $ killall name     # kill by name`}</Code>
               </Section>
 
               {/* Topic 7: Troubleshooting */}
-              <Section title={t('7. Troubleshooting (Survival Guide)', '7. Depanare (Ghid de supraviețuire)')} id="c1-trouble" checked={!!checked['c1-trouble']} onCheck={() => toggleCheck('c1-trouble')}>
+              <Section title={t('7. Troubleshooting (Survival Guide)', '7. Depanare (Ghid de supraviețuire)')} id="course_1-trouble" checked={!!checked['course_1-trouble']} onCheck={() => toggleCheck('course_1-trouble')}>
                 <Box type="warning">
                   <p className="font-bold">{t('When a command appears "stuck":', 'Când o comandă pare „blocată":')}</p>
                   <ol className="list-decimal pl-5">
@@ -282,7 +282,7 @@ $ killall name     # kill by name`}</Code>
               </Section>
 
               {/* Cheat Sheet */}
-              <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="c1-cheat" checked={!!checked['c1-cheat']} onCheck={() => toggleCheck('c1-cheat')}>
+              <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="course_1-cheat" checked={!!checked['course_1-cheat']} onCheck={() => toggleCheck('course_1-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula">
                     <p className="font-bold">{t('Navigation', 'Navigare')}</p>
@@ -332,7 +332,7 @@ $ killall name     # kill by name`}</Code>
               </Section>
 
               {/* Quiz */}
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c1-quiz" checked={!!checked['c1-quiz']} onCheck={() => toggleCheck('c1-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_1-quiz" checked={!!checked['course_1-quiz']} onCheck={() => toggleCheck('course_1-quiz')}>
                 <Toggle
                   question={t('1. What is the difference between an internal and an external command?', '1. Care este diferența dintre o comandă internă și una externă?')}
                   answer={t('Internal commands are built into the shell (e.g., cd, help). External commands are separate executable files on disk (e.g., ls → /bin/ls). External commands can be scripts or compiled binaries.', 'Comenzile interne sunt implementate în interpretorul de comenzi (ex: cd, help). Comenzile externe sunt fișiere executabile separate pe disc (ex: ls → /bin/ls). Comenzile externe pot fi scripturi sau binare compilate.')}

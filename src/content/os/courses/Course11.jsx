@@ -25,7 +25,7 @@ export default function Course11() {
                 </ol>
               </Box>
 
-              <Section title={t('1. Physical vs Virtual Screen', '1. Ecran fizic vs. ecran virtual')} id="c11-concept" checked={!!checked['c11-concept']} onCheck={() => toggleCheck('c11-concept')}>
+              <Section title={t('1. Physical vs Virtual Screen', '1. Ecran fizic vs. ecran virtual')} id="course_11-concept" checked={!!checked['course_11-concept']} onCheck={() => toggleCheck('course_11-concept')}>
                 <Box type="definition">
                   <p><strong>{t('Physical screen', 'Ecran fizic')}</strong>{t(' = what you see on the terminal right now. ', ' = ceea ce vedeți pe terminal în acest moment. ')}<strong>{t('Virtual screen', 'Ecran virtual')}</strong>{t(' = an in-memory image of the screen. All NCURSES I/O operates on the virtual screen. The ', ' = o imagine în memorie a ecranului. Toate operațiile I/O NCURSES operează pe ecranul virtual. Apelul ')}<code>refresh()</code>{t(' call copies changes to the physical screen.', ' copiază modificările pe ecranul fizic.')}</p>
                 </Box>
@@ -54,7 +54,7 @@ export default function Course11() {
                 </Box>
               </Section>
 
-              <Section title={t('2. Program Structure', '2. Structura programului')} id="c11-struct" checked={!!checked['c11-struct']} onCheck={() => toggleCheck('c11-struct')}>
+              <Section title={t('2. Program Structure', '2. Structura programului')} id="course_11-struct" checked={!!checked['course_11-struct']} onCheck={() => toggleCheck('course_11-struct')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Minimal NCURSES program:', 'Program NCURSES minimal:')}</p>
                   <Code>{`#include <ncurses.h>
@@ -81,7 +81,7 @@ int main() {
                 </Box>
               </Section>
 
-              <Section title={t('3. Windows & Function Naming', '3. Ferestre și denumirea funcțiilor')} id="c11-windows" checked={!!checked['c11-windows']} onCheck={() => toggleCheck('c11-windows')}>
+              <Section title={t('3. Windows & Function Naming', '3. Ferestre și denumirea funcțiilor')} id="course_11-windows" checked={!!checked['course_11-windows']} onCheck={() => toggleCheck('course_11-windows')}>
                 <p>{t('A ', 'O ')}<strong>{t('window', 'fereastră')}</strong>{t(' is a 2D character matrix of type ', ' este o matrice 2D de caractere de tip ')}<code>WINDOW*</code>{t('. Each cell stores a character + attributes + colors (', '. Fiecare celulă stochează un caracter + atribute + culori (')}<code>chtype</code>{t(').', ').')}</p>
 
                 <Box type="definition">
@@ -115,7 +115,7 @@ int w = COLS;         // terminal width`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('4. Output & Input Functions', '4. Funcții de ieșire și intrare')} id="c11-io" checked={!!checked['c11-io']} onCheck={() => toggleCheck('c11-io')}>
+              <Section title={t('4. Output & Input Functions', '4. Funcții de ieșire și intrare')} id="course_11-io" checked={!!checked['course_11-io']} onCheck={() => toggleCheck('course_11-io')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Output:', 'Ieșire:')}</p>
                   <Code>{`addch('A');               // single character
@@ -156,7 +156,7 @@ halfdelay(n);             // getch waits max n/10 seconds`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('5. Attributes & Colors', '5. Atribute și culori')} id="c11-color" checked={!!checked['c11-color']} onCheck={() => toggleCheck('c11-color')}>
+              <Section title={t('5. Attributes & Colors', '5. Atribute și culori')} id="course_11-color" checked={!!checked['course_11-color']} onCheck={() => toggleCheck('course_11-color')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Text attributes:', 'Atribute text:')}</p>
                   <Code>{`attron(A_BOLD);        // bold
@@ -186,7 +186,7 @@ attrset(A_NORMAL);     // reset all attributes`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('6. Low-Level Terminal (termios)', '6. Terminal la nivel scăzut (termios)')} id="c11-termios" checked={!!checked['c11-termios']} onCheck={() => toggleCheck('c11-termios')}>
+              <Section title={t('6. Low-Level Terminal (termios)', '6. Terminal la nivel scăzut (termios)')} id="course_11-termios" checked={!!checked['course_11-termios']} onCheck={() => toggleCheck('course_11-termios')}>
                 <Box type="definition">
                   <p>{t('For direct terminal control without NCURSES, use the ', 'Pentru controlul direct al terminalului fără NCURSES, utilizați API-ul ')}<code>termios</code>{t(' API:', ':')}</p>
                   <Code>{`#include <termios.h>
@@ -211,7 +211,7 @@ $ reset            # hard reset terminal (fixes garbled state)`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="c11-cheat" checked={!!checked['c11-cheat']} onCheck={() => toggleCheck('c11-cheat')}>
+              <Section title={t('Cheat Sheet', 'Rezumat rapid')} id="course_11-cheat" checked={!!checked['course_11-cheat']} onCheck={() => toggleCheck('course_11-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">{t('Lifecycle', 'Ciclu de viață')}</p><p>initscr() → operations → endwin()</p><p>{t('Compile: gcc -lncurses', 'Compilare: gcc -lncurses')}</p></Box>
                   <Box type="formula"><p className="font-bold">{t('Output', 'Ieșire')}</p><p>addch, addstr, printw</p><p>move(y,x), clear(), refresh()</p></Box>
@@ -222,7 +222,7 @@ $ reset            # hard reset terminal (fixes garbled state)`}</Code>
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c11-quiz" checked={!!checked['c11-quiz']} onCheck={() => toggleCheck('c11-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_11-quiz" checked={!!checked['course_11-quiz']} onCheck={() => toggleCheck('course_11-quiz')}>
                 <Toggle question={t('1. Why doesn\'t text appear on screen immediately after printw()?', '1. De ce textul nu apare pe ecran imediat după printw()?')} answer={t('printw() writes to the virtual screen (in memory), not the physical terminal. You must call refresh() to copy the virtual screen to the physical screen. This two-phase design allows NCURSES to optimize by sending only changes.', 'printw() scrie pe ecranul virtual (în memorie), nu pe terminalul fizic. Trebuie să apelați refresh() pentru a copia ecranul virtual pe ecranul fizic. Acest design în două faze permite NCURSES să optimizeze prin trimiterea doar a modificărilor.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('2. What does cbreak() do?', '2. Ce face cbreak()?')} answer={t('It disables line buffering: characters are available to the program as soon as typed (no need to press Enter). Without cbreak, input is buffered until a newline. Essential for interactive programs.', 'Dezactivează bufferizarea pe linii: caracterele sunt disponibile pentru program imediat ce sunt tastate (fără a fi nevoie de apăsarea Enter). Fără cbreak, intrarea este bufferizată până la o linie nouă. Esențial pentru programele interactive.')} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />
                 <Toggle question={t('3. What is stdscr?', '3. Ce este stdscr?')} answer={t("A global WINDOW* variable created by initscr() that covers the entire terminal. Functions without the 'w' prefix (like addch, printw) operate on stdscr. You cannot delete or recreate it.", "O variabilă globală WINDOW* creată de initscr() care acoperă întregul terminal. Funcțiile fără prefixul 'w' (cum ar fi addch, printw) operează pe stdscr. Nu puteți să o ștergeți sau să o recreați.")} hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')} />

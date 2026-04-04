@@ -22,7 +22,7 @@ export default function Course04() {
                 </ol>
               </Box>
 
-              <Section title={t('1. POSIX API vs C Standard Library', '1. API POSIX vs. biblioteca standard C')} id="c4-api" checked={!!checked['c4-api']} onCheck={() => toggleCheck('c4-api')}>
+              <Section title={t('1. POSIX API vs C Standard Library', '1. API POSIX vs. biblioteca standard C')} id="course_4-api" checked={!!checked['course_4-api']} onCheck={() => toggleCheck('course_4-api')}>
                 <p>{t('Two families of functions for file I/O in C on Linux:', 'Două familii de funcții pentru I/O cu fișiere în C pe Linux:')}</p>
 
                 <svg viewBox="0 0 480 180" className="w-full max-w-lg mx-auto my-4" style={{fontFamily:'monospace',fontSize:10}}>
@@ -62,7 +62,7 @@ export default function Course04() {
                 </Box>
               </Section>
 
-              <Section title={t('2. Core POSIX Primitives', '2. Primitivele de bază POSIX')} id="c4-posix" checked={!!checked['c4-posix']} onCheck={() => toggleCheck('c4-posix')}>
+              <Section title={t('2. Core POSIX Primitives', '2. Primitivele de bază POSIX')} id="course_4-posix" checked={!!checked['course_4-posix']} onCheck={() => toggleCheck('course_4-posix')}>
                 <Box type="formula">
                   <p className="font-bold">{t('access — check file permissions:', 'access — verificarea permisiunilor:')}</p>
                   <Code>{`#include <unistd.h>
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
                 </Box>
               </Section>
 
-              <Section title={t('3. Directory Primitives', '3. Primitive pentru directoare')} id="c4-dir" checked={!!checked['c4-dir']} onCheck={() => toggleCheck('c4-dir')}>
+              <Section title={t('3. Directory Primitives', '3. Primitive pentru directoare')} id="course_4-dir" checked={!!checked['course_4-dir']} onCheck={() => toggleCheck('course_4-dir')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Directory traversal pattern:', 'Șablonul de parcurgere a unui director:')}</p>
                   <Code>{`#include <dirent.h>
@@ -170,7 +170,7 @@ getcwd(buf, size);    // get current working directory`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('4. C Standard Library I/O', '4. I/O din biblioteca standard C')} id="c4-stdio" checked={!!checked['c4-stdio']} onCheck={() => toggleCheck('c4-stdio')}>
+              <Section title={t('4. C Standard Library I/O', '4. I/O din biblioteca standard C')} id="course_4-stdio" checked={!!checked['course_4-stdio']} onCheck={() => toggleCheck('course_4-stdio')}>
                 <Box type="formula">
                   <p className="font-bold">{t('Equivalent functions (FILE* based):', 'Funcții echivalente (bazate pe FILE*):')}</p>
                   <Code>{`FILE* f = fopen("data.txt", "rb");  // modes: r/w/a + b
@@ -209,7 +209,7 @@ fclose(f);                          // close`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('5. Filesystem Cache', '5. Cache-ul sistemului de fișiere')} id="c4-cache" checked={!!checked['c4-cache']} onCheck={() => toggleCheck('c4-cache')}>
+              <Section title={t('5. Filesystem Cache', '5. Cache-ul sistemului de fișiere')} id="course_4-cache" checked={!!checked['course_4-cache']} onCheck={() => toggleCheck('course_4-cache')}>
                 <Box type="theorem">
                   <p className="font-bold">{t('Kernel filesystem cache:', 'Cache-ul sistemului de fișiere din kernel:')}</p>
                   <ul className="list-disc pl-5 text-sm">
@@ -227,7 +227,7 @@ fclose(f);                          // close`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="c4-cheat" checked={!!checked['c4-cheat']} onCheck={() => toggleCheck('c4-cheat')}>
+              <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="course_4-cheat" checked={!!checked['course_4-cheat']} onCheck={() => toggleCheck('course_4-cheat')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
                   <Box type="formula"><p className="font-bold">POSIX I/O</p><p>open, read, write, lseek, close</p><p>access, creat, stat, chmod, link, unlink</p><p>dup, dup2, pipe, mkfifo, fcntl</p></Box>
                   <Box type="formula"><p className="font-bold">{t('C stdlib I/O', 'I/O bibliotecă standard C')}</p><p>fopen, fread/fwrite, fclose</p><p>fscanf/fprintf, fseek, fflush</p><p>FILE*, {t('buffered, portable', 'buffered, portabil')}</p></Box>
@@ -236,7 +236,7 @@ fclose(f);                          // close`}</Code>
                 </div>
               </Section>
 
-              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="c4-quiz" checked={!!checked['c4-quiz']} onCheck={() => toggleCheck('c4-quiz')}>
+              <Section title={t('Self-Test (10 Questions)', 'Autoevaluare (10 întrebări)')} id="course_4-quiz" checked={!!checked['course_4-quiz']} onCheck={() => toggleCheck('course_4-quiz')}>
                 <Toggle
                   question={t('1. What does open() return on success vs failure?', '1. Ce returnează open() la succes față de eșec?')}
                   answer={t('On success: a non-negative integer (file descriptor, the lowest available fd number). On failure: -1, and errno is set.', 'La succes: un număr întreg non-negativ (file descriptor, cel mai mic număr fd disponibil). La eșec: -1, și errno este setat.')}
