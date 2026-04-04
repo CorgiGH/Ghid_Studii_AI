@@ -19,18 +19,20 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 ### Key files
 - `src/main.jsx` — Entry: HashRouter + AppProvider wrapping
 - `src/App.jsx` — Routes shell (~20 lines)
-- `src/contexts/AppContext.jsx` — All shared state: `dark`, `lang`, `search`, `checked`, plus `t(en, ro)` helper, `toggleCheck()`, `highlight()`
+- `src/contexts/AppContext.jsx` — All shared state: `dark`, `lang`, `palette`, `search`, `checked`, plus `t(en, ro)` helper, `toggleCheck()`, `highlight()`
 - `src/hooks/useLocalStorage.js` — Persist state to localStorage
 - `src/content/registry.js` — Master index of all subjects and year/semesters
+- `src/theme/palettes.js` — 5 color palette definitions + `applyPalette()` function
 
 ### Adding a new subject
 1. Create `src/content/<slug>/index.js` with metadata + lazy course imports
 2. Create `src/content/<slug>/practice/Practice.jsx`
 3. Add import + entry in `src/content/registry.js` (subjects array + yearSemesters)
+4. Each course entry must include `sectionCount` (number of `<Section>` components in that course file)
 
 ### Adding a course to an existing subject
 1. Create `src/content/<slug>/courses/CourseNN.jsx` — React component using `useApp()` for `t`, `checked`, `toggleCheck`
-2. Add lazy import entry to `src/content/<slug>/index.js` courses array
+2. Add lazy import entry to `src/content/<slug>/index.js` courses array with `sectionCount`
 
 ### Bilingual system
 - `t(en, ro)` helper returns Romanian when `lang === 'ro'`, English otherwise
@@ -38,20 +40,41 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 - Code blocks stay in English (they're actual commands/syntax)
 - Default language is Romanian
 
+### Theme system
+- 5 color palettes: Slate, Warm Stone, Ocean Blue, Zinc, Forest Green
+- Each palette defines light + dark mode colors for: nav, content, sidebar, breadcrumbs, cards, borders, text
+- Colors applied via CSS custom properties (`--theme-nav-bg`, `--theme-content-bg`, etc.) set on `:root`
+- `applyPalette(paletteId, isDark)` in `src/theme/palettes.js` sets all CSS vars
+- Palette preference stored in localStorage via `palette` state in AppContext
+- **All new/modified components must use `var(--theme-*)` for colors, not hardcoded Tailwind `dark:` classes**
+- Accent color (blue) remains hardcoded `#3b82f6` across palettes
+
+### Navigation layout
+- **TopBar** (`src/components/layout/TopBar.jsx`) — Persistent header with: brand, subject switcher dropdown (pill chips), language toggle, palette picker (🎨), dark mode toggle
+- **ContentTypeBar** (`src/components/ui/ContentTypeBar.jsx`) — Secondary nav row below TopBar, replaces old TabBar. Data-driven: only shows content types the subject actually has
+- **Breadcrumbs** (`src/components/layout/Breadcrumbs.jsx`) — Clickable trail: Home / Year Sem / Subject / Tab / Item
+- **Sidebar** (`src/components/layout/Sidebar.jsx`) — Course list with inline progress rings, only visible on Courses tab
+
+### Progress feedback
+- **ProgressRing** (`src/components/ui/ProgressRing.jsx`) — Reusable SVG ring. Props: `size`, `completed`, `total`, `isActive`. Color states: green=complete, blue=active, amber=started, grey=not-started
+- **CourseMap** (`src/components/ui/CourseMap.jsx`) — Bird's-eye grid of course tiles with progress rings. Shows on Courses tab when no course is selected
+- **ReadingProgress** (`src/components/ui/ReadingProgress.jsx`) — Top gradient bar + section segment bars inside each course. Props: `courseId`, `sectionCount`
+- **CourseNavigation** (`src/components/ui/CourseNavigation.jsx`) — Prev/next course links at bottom of course content
+
 ### Component library (src/components/ui/)
 - `Box` — Colored callout (types: definition, theorem, warning, formula, code)
 - `Code` — Monospace code block
 - `Toggle` — Show/hide Q&A (props: question, answer, hideLabel, showLabel)
 - `Section` — Collapsible section with checkbox (props: title, id, checked, onCheck)
-- `CourseBlock` — Course-level collapsible container
+- `CourseBlock` — Course-level collapsible container (themed with CSS vars)
 - `MultipleChoice` — Multiple choice quiz with answer checking
 - `CodeEditor` — CodeMirror 6 wrapper with C syntax highlighting and dark mode
 - `CodeChallenge` — Interactive coding problem: editor + Judge0 API execution + answer checking
 - `LinuxTerminal` — Simulated Linux terminal (xterm.js UI + bash-emulator engine, virtual filesystem, auto-check)
 - `V86Terminal` — Real Linux terminal via v86 x86 emulator (boots Buildroot Linux in browser, ~7MB)
 - `TerminalChallenge` — W3Schools-style "Try It / Submit" layout: v86 for practice, bash-emulator for auto-check
-- `SubjectCard` — Home page subject card
-- `TabBar` — Courses/Practice tab switcher
+- `SubjectCard` — Home page subject card (themed with CSS vars)
+- `PalettePicker` — Popover with 5 flat color circles for theme switching
 
 ### Code execution (Judge0 CE)
 - API: `POST https://ce.judge0.com/submissions?wait=true`
