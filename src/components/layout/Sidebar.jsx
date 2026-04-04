@@ -181,113 +181,63 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
       )}
 
-      {/* ===== LOCKED: in-flow sticky sidebar ===== */}
+      {/* Layout spacer when locked */}
       {locked && (
-        <div
-          className="hidden lg:block flex-shrink-0 sticky top-0 self-start"
-          style={{
-            width: '15%',
-            minWidth: '160px',
-            height: '100vh',
-            position: 'sticky',
-          }}
-        >
-          {/* Button on the outer sticky wrapper so it stays fixed at 50% viewport */}
-          {toggleBtn}
-          <div
-            className="h-full p-3 text-sm overflow-y-auto"
-            style={{
-              backgroundColor: 'var(--theme-sidebar-bg)',
-              borderRight: '1px solid var(--theme-sidebar-border)',
-              scrollbarWidth: 'none',
-            }}
-          >
-            <nav className="flex flex-col gap-1">{courseList}</nav>
-          </div>
-        </div>
+        <div className="hidden lg:block flex-shrink-0" style={{ width: '15%', minWidth: '160px' }} />
       )}
 
-      {/* ===== UNLOCKED: just a toggle nub in flow + overlay on hover ===== */}
+      {/* ===== Desktop sidebar (fixed, always present, animated) ===== */}
+      <aside
+        className="hidden lg:block fixed top-0 left-0 z-20"
+        style={{
+          width: '15%',
+          minWidth: '160px',
+          height: '100vh',
+          transform: (locked || showOverlay) ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.2s ease-in-out',
+          boxShadow: !locked && showOverlay ? '4px 0 16px rgba(0,0,0,0.2)' : 'none',
+        }}
+        onMouseEnter={handleMouseEnterSidebar}
+        onMouseLeave={handleMouseLeave}
+      >
+        {toggleBtn}
+        <div
+          className="h-full p-3 text-sm overflow-y-auto"
+          style={{
+            paddingTop: 'calc(3rem + 8px)',
+            backgroundColor: 'var(--theme-sidebar-bg)',
+            borderRight: '1px solid var(--theme-sidebar-border)',
+            scrollbarWidth: 'none',
+          }}
+        >
+          <nav className="flex flex-col gap-1">{courseList}</nav>
+        </div>
+      </aside>
+
+      {/* Toggle nub visible when sidebar is hidden */}
       {!locked && !showOverlay && (
-        <div
-          className="hidden lg:block flex-shrink-0 sticky top-0 self-start"
-          style={{ width: '0px', height: '100vh', position: 'sticky', zIndex: 5 }}
-        >
-          <button
-            onClick={onToggleLock}
-            className="hidden lg:flex items-center justify-center hover:brightness-125"
-            style={{
-              position: 'absolute',
-              left: '0',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '14px',
-              height: '40px',
-              background: 'var(--theme-sidebar-bg)',
-              border: '1px solid var(--theme-sidebar-border)',
-              borderLeft: 'none',
-              borderRadius: '0 8px 8px 0',
-              boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
-              cursor: 'pointer',
-            }}
-            aria-label="Lock sidebar"
-          >
-            <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
-              <path d="M1 1L5 5L1 9" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* ===== UNLOCKED overlay sidebar ===== */}
-      {showOverlay && (
-        <aside
-          className="hidden lg:block fixed top-0 left-0 z-40 shadow-xl"
+        <button
+          onClick={onToggleLock}
+          className="hidden lg:flex items-center justify-center hover:brightness-125 fixed z-20"
           style={{
-            width: '15%',
-            minWidth: '160px',
-            height: '100vh',
+            left: '0',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '14px',
+            height: '40px',
+            background: 'var(--theme-sidebar-bg)',
+            border: '1px solid var(--theme-sidebar-border)',
+            borderLeft: 'none',
+            borderRadius: '0 8px 8px 0',
+            boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
+            cursor: 'pointer',
           }}
-          onMouseEnter={handleMouseEnterSidebar}
-          onMouseLeave={handleMouseLeave}
+          aria-label="Lock sidebar"
         >
-          {/* Button on outer fixed container so it stays at 50% viewport */}
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
-            className="hidden lg:flex items-center justify-center hover:brightness-125"
-            style={{
-              position: 'absolute',
-              right: '-14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '14px',
-              height: '40px',
-              background: 'var(--theme-sidebar-bg)',
-              border: '1px solid var(--theme-sidebar-border)',
-              borderLeft: 'none',
-              borderRadius: '0 8px 8px 0',
-              boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
-              cursor: 'pointer',
-              zIndex: 10,
-            }}
-            aria-label="Lock sidebar"
-          >
-            <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
-              <path d="M1 1L5 5L1 9" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <div
-            className="h-full p-3 text-sm overflow-y-auto"
-            style={{
-              paddingTop: 'calc(3rem + 8px)',
-              backgroundColor: 'var(--theme-sidebar-bg)',
-              borderRight: '1px solid var(--theme-sidebar-border)',
-              scrollbarWidth: 'none',
-            }}
-          >
-            <nav className="flex flex-col gap-1">{courseList}</nav>
-          </div>
-        </aside>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
+            <path d="M1 1L5 5L1 9" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       )}
 
       {/* Mobile sidebar */}
