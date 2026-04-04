@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useRef, useEffect } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { getSubject } from '../content/registry';
@@ -6,8 +6,8 @@ import Sidebar from '../components/layout/Sidebar';
 import Breadcrumbs from '../components/layout/Breadcrumbs';
 import ContentTypeBar from '../components/ui/ContentTypeBar';
 import CourseMap from '../components/ui/CourseMap';
-import StickyProgressBar from '../components/ui/StickyProgressBar';
-import useStaggeredEntrance from '../hooks/useStaggeredEntrance';
+import ProgressSidebar from '../components/ui/ProgressSidebar';
+import CourseTransition from '../components/ui/CourseTransition';
 import CourseNavigation from '../components/ui/CourseNavigation';
 import { CourseBlock } from '../components/ui';
 
@@ -23,76 +23,38 @@ const LoadingFallback = () => {
 export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const { yearSem, subject: subjectSlug, '*': wildcard } = useParams();
   const navigate = useNavigate();
-  const { lang, t, search, setSearch, checked } = useApp();
+  const { lang, t, checked } = useApp();
   const subject = getSubject(subjectSlug);
-  const [activeCourseId, setActiveCourseId] = useState(null);
-  const [courseSearchStates, setCourseSearchStates] = useState({});
-  const coursesRef = useRef(null);
 
-  const searchActive = search && search.length >= 2;
-  const getStaggerStyle = useStaggeredEntrance(subjectSlug + '-courses');
+  // Detect course_N in wildcard
+  const courseMatch = wildcard?.match(/^course_(\d+)$/);
+  const courseNum = courseMatch ? courseMatch[1] : null;
 
-  useEffect(() => {
-    if (activeCourseId) {
-      const timer = setTimeout(() => setActiveCourseId(null), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [activeCourseId]);
+  // Determine active tab
+  const tab = courseNum
+    ? 'courses'
+    : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
 
-  useEffect(() => {
-    if (!searchActive || !subject) {
-      setCourseSearchStates({});
-      if (CSS.highlights) CSS.highlights.delete('search-results');
-      return;
-    }
+  // Find active course when a specific course is selected
+  const activeCourse = useMemo(() => {
+    if (!courseNum || !subject) return null;
+    return subject.courses.find(c => c.id.endsWith('course_' + courseNum)) || null;
+  }, [courseNum, subject]);
 
-    const timer = setTimeout(() => {
-      if (!coursesRef.current) return;
-      const query = search.toLowerCase();
-      const newStates = {};
-      const allRanges = [];
+  const activeCourseIndex = useMemo(() => {
+    if (!activeCourse || !subject) return -1;
+    return subject.courses.findIndex(c => c.id === activeCourse.id);
+  }, [activeCourse, subject]);
 
-      for (const course of subject.courses) {
-        const el = document.getElementById(course.id);
-        if (!el) { newStates[course.id] = 'no-match'; continue; }
+  const sectionIds = useMemo(() => {
+    if (!activeCourse?.sections) return [];
+    return activeCourse.sections.map(s => s.id);
+  }, [activeCourse]);
 
-        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-        let hasMatch = false;
-
-        while (walker.nextNode()) {
-          const node = walker.currentNode;
-          const text = node.textContent.toLowerCase();
-          let pos = 0;
-          while (pos < text.length) {
-            const idx = text.indexOf(query, pos);
-            if (idx === -1) break;
-            hasMatch = true;
-            const range = new Range();
-            range.setStart(node, idx);
-            range.setEnd(node, idx + search.length);
-            allRanges.push(range);
-            pos = idx + search.length;
-          }
-        }
-        newStates[course.id] = hasMatch ? 'match' : 'no-match';
-      }
-
-      setCourseSearchStates(newStates);
-
-      if (CSS.highlights) {
-        CSS.highlights.delete('search-results');
-        if (allRanges.length > 0) {
-          CSS.highlights.set('search-results', new Highlight(...allRanges));
-          const el = allRanges[0].startContainer.parentElement;
-          if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-        }
-      }
-    }, 400);
-
-    return () => clearTimeout(timer);
-  }, [search, searchActive, subject]);
-
-  const tab = ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
+  const sectionTitles = useMemo(() => {
+    if (!activeCourse?.sections) return [];
+    return activeCourse.sections.map(s => s.title[lang]);
+  }, [activeCourse, lang]);
 
   if (!subject) {
     return (
@@ -110,21 +72,12 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     }
   };
 
-  const handleCourseClick = (courseId) => {
-    setActiveCourseId(courseId);
-    const el = document.getElementById(courseId);
-    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  const handleCourseMapClick = (courseId) => {
+    const match = courseId.match(/course_(\d+)$/);
+    if (match) {
+      navigate(`/${yearSem}/${subjectSlug}/course_${match[1]}`);
+    }
   };
-
-  const activeCourseIndex = activeCourseId
-    ? subject.courses.findIndex(c => c.id === activeCourseId)
-    : -1;
-
-  const openCourse = activeCourseId
-    ? subject.courses.find(c => c.id === activeCourseId)
-    : null;
-
-  const showCourseMap = tab === 'courses' && !searchActive && subject.courses.length > 0;
 
   return (
     <div className="flex flex-col flex-1">
@@ -134,14 +87,14 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         yearSem={yearSem}
         subject={subject}
         tab={tab}
-        activeItemTitle={openCourse ? openCourse.shortTitle[lang] : undefined}
+        activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : undefined}
       />
 
       <div className="flex flex-1">
         {tab === 'courses' && subject.courses.length > 0 && (
           <Sidebar
             subject={subject}
-            activeCourseId={activeCourseId}
+            activeCourseId={activeCourse?.id || null}
             open={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             yearSem={yearSem}
@@ -152,63 +105,32 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         <main className="flex-1 max-w-5xl mx-auto p-4 lg:p-8 min-h-[calc(100vh-120px)]">
           {tab === 'courses' && (
             <>
-              {showCourseMap && (
-                <CourseMap subject={subject} onCourseClick={handleCourseClick} />
-              )}
-
-              <input
-                type="text"
-                placeholder={t('Search across all content...', 'Caut\u0103 \u00een tot con\u021binutul...')}
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full p-3 mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                style={{
-                  backgroundColor: 'var(--theme-card-bg)',
-                  border: '1px solid var(--theme-border)',
-                  color: 'var(--theme-content-text)',
-                }}
-              />
-
-              {subject.courses.length === 0 ? (
-                <div className="text-center py-12 opacity-60">
-                  <p className="text-4xl mb-4">{subject.icon}</p>
-                  <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
-                  <p className="text-sm mt-2">{t('Course content will be added here.', 'Con\u021binutul cursurilor va fi ad\u0103ugat aici.')}</p>
-                </div>
+              {activeCourse ? (
+                /* Single course view with transition */
+                <CourseTransition courseIndex={activeCourseIndex}>
+                  <Suspense fallback={<LoadingFallback />}>
+                    {React.createElement(activeCourse.component)}
+                  </Suspense>
+                  <CourseNavigation
+                    items={subject.courses}
+                    currentIndex={activeCourseIndex}
+                    yearSem={yearSem}
+                    subjectSlug={subjectSlug}
+                  />
+                </CourseTransition>
               ) : (
-                <div ref={coursesRef}>
-                  {subject.courses.map((course, index) => {
-                    const CourseContent = course.component;
-                    return (
-                      <div key={course.id} style={getStaggerStyle(index)}>
-                        <CourseBlock
-                          title={course.title[lang]}
-                          id={course.id}
-                          forceOpen={activeCourseId === course.id}
-                          searchState={courseSearchStates[course.id]}
-                          courseId={course.id}
-                          sectionCount={course.sectionCount}
-                        >
-                          {course.sectionCount > 0 && (
-                            <StickyProgressBar
-                              courseId={course.id}
-                              sectionCount={course.sectionCount}
-                              courseName={course.shortTitle[lang]}
-                            />
-                          )}
-                          <Suspense fallback={<LoadingFallback />}>
-                            <CourseContent />
-                          </Suspense>
-                          <CourseNavigation
-                            items={subject.courses}
-                            currentIndex={index}
-                            onNavigate={handleCourseClick}
-                          />
-                        </CourseBlock>
-                      </div>
-                    );
-                  })}
-                </div>
+                /* Course map overview (no course selected) */
+                <>
+                  {subject.courses.length === 0 ? (
+                    <div className="text-center py-12 opacity-60">
+                      <p className="text-4xl mb-4">{subject.icon}</p>
+                      <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
+                      <p className="text-sm mt-2">{t('Course content will be added here.', 'Con\u021binutul cursurilor va fi ad\u0103ugat aici.')}</p>
+                    </div>
+                  ) : (
+                    <CourseMap subject={subject} onCourseClick={handleCourseMapClick} />
+                  )}
+                </>
               )}
             </>
           )}
@@ -278,6 +200,16 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             </div>
           )}
         </main>
+
+        {/* Right progress sidebar - only when viewing a specific course */}
+        {tab === 'courses' && activeCourse && (
+          <ProgressSidebar
+            courseId={activeCourse.id}
+            sectionCount={activeCourse.sectionCount}
+            sectionIds={sectionIds}
+            sectionTitles={sectionTitles}
+          />
+        )}
       </div>
     </div>
   );
