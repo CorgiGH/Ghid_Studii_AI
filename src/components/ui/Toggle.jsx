@@ -2,6 +2,8 @@ import React, { useState, useRef, useCallback } from 'react';
 
 const Toggle = ({ question, answer, hideLabel = 'Hide', showLabel = 'Show Answer' }) => {
   const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const hasFiredEvent = useRef(false);
   const contentRef = useRef(null);
   const [maxHeight, setMaxHeight] = useState('0px');
   const [transitioning, setTransitioning] = useState(false);
@@ -13,6 +15,10 @@ const Toggle = ({ question, answer, hideLabel = 'Hide', showLabel = 'Show Answer
         setMaxHeight(`${contentRef.current.scrollHeight}px`);
       }
       setOpen(true);
+      if (!hasFiredEvent.current && rootRef.current) {
+        hasFiredEvent.current = true;
+        rootRef.current.dispatchEvent(new CustomEvent('toggle-interacted', { bubbles: true }));
+      }
     } else {
       setTransitioning(true);
       if (contentRef.current) {
@@ -36,7 +42,7 @@ const Toggle = ({ question, answer, hideLabel = 'Hide', showLabel = 'Show Answer
   }, [open]);
 
   return (
-    <div className="my-2 border rounded-lg overflow-hidden"
+    <div ref={rootRef} data-toggle className="my-2 border rounded-lg overflow-hidden"
       style={{ borderColor: 'var(--theme-border)' }}
     >
       <div
