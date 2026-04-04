@@ -93,12 +93,13 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
       <div className="flex flex-1">
         {tab === 'courses' && subject.courses.length > 0 && (
           <Sidebar
-            subject={subject}
+            items={subject.courses}
             activeCourseId={activeCourse?.id || null}
             open={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             yearSem={yearSem}
             subjectSlug={subjectSlug}
+            routePrefix="course_"
           />
         )}
 

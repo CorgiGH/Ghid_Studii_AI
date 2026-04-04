@@ -3,17 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import ProgressRing from '../ui/ProgressRing';
 
-const Sidebar = ({ subject, activeCourseId, open, onClose, yearSem, subjectSlug }) => {
+const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, routePrefix }) => {
   const navigate = useNavigate();
   const { lang, t, checked } = useApp();
   const [hoveredId, setHoveredId] = useState(null);
 
-  if (!subject || !subject.courses?.length) return null;
+  if (!items?.length) return null;
 
-  const handleCourseClick = (course) => {
-    const match = course.id.match(/course_(\d+)$/);
+  const handleItemClick = (item) => {
+    const match = item.id.match(new RegExp(routePrefix + '(\\d+)$'));
     if (match) {
-      navigate(`/${yearSem}/${subjectSlug}/course_${match[1]}`);
+      navigate(`/${yearSem}/${subjectSlug}/${routePrefix}${match[1]}`);
     }
     onClose();
   };
@@ -51,7 +51,7 @@ const Sidebar = ({ subject, activeCourseId, open, onClose, yearSem, subjectSlug 
         </div>
 
         <nav className="flex flex-col gap-1">
-          {subject.courses.map(course => {
+          {items.map(course => {
             const total = course.sectionCount || 0;
             const prefix = `${course.id}-`;
             const completed = total > 0
@@ -91,7 +91,7 @@ const Sidebar = ({ subject, activeCourseId, open, onClose, yearSem, subjectSlug 
                 style={buttonStyle}
                 onMouseEnter={() => setHoveredId(course.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                onClick={() => handleCourseClick(course)}
+                onClick={() => handleItemClick(course)}
               >
                 {isActive && (
                   <div
