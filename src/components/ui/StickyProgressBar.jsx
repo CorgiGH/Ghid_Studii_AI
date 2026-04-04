@@ -104,45 +104,44 @@ const StickyProgressBar = ({ courseId, sectionCount, courseName }) => {
 
   return (
     <div
-      className="sticky z-10 py-2 px-3 -mx-4 mb-4"
+      className="sticky z-10 py-1 px-3 -mx-4 mb-2"
       style={{
-        top: '5rem',
+        top: '2.75rem',
         backgroundColor: 'var(--theme-content-bg)',
         borderBottom: '1px solid var(--theme-border)',
       }}
     >
-      <div className="flex items-center gap-2 text-xs mb-1.5" style={{ color: 'var(--theme-muted-text)' }}>
-        <span className="truncate">{courseName}</span>
+      <div className="flex items-center gap-2">
+        <div className="relative overflow-visible flex-1" ref={barRef}>
+          <div
+            ref={segmentsRef}
+            className="flex h-1.5"
+            style={{ gap: isComplete ? '0px' : '2px', transition: 'gap 0.4s ease' }}
+          >
+            {Array.from({ length: sectionCount }, (_, i) => (
+              <div
+                key={i}
+                className="flex-1"
+                style={{
+                  borderRadius: isComplete
+                    ? (i === 0 ? '3px 0 0 3px' : i === sectionCount - 1 ? '0 3px 3px 0' : '0')
+                    : '3px',
+                  background: i < completedCount
+                    ? (isComplete ? '#22c55e' : '#3b82f6')
+                    : 'var(--theme-border)',
+                  transition: 'background 0.3s, border-radius 0.4s',
+                }}
+              />
+            ))}
+          </div>
+        </div>
         <span
           ref={counterRef}
-          className="ml-auto font-bold whitespace-nowrap"
-          style={{ color: isComplete ? '#22c55e' : undefined }}
+          className="text-[11px] font-bold whitespace-nowrap"
+          style={{ color: isComplete ? '#22c55e' : 'var(--theme-muted-text)' }}
         >
           {isComplete ? t('Complete', 'Complet') : `${completedCount}/${sectionCount}`}
         </span>
-      </div>
-      <div className="relative overflow-visible" ref={barRef}>
-        <div
-          ref={segmentsRef}
-          className="flex h-2"
-          style={{ gap: isComplete ? '0px' : '3px', transition: 'gap 0.4s ease' }}
-        >
-          {Array.from({ length: sectionCount }, (_, i) => (
-            <div
-              key={i}
-              className="flex-1"
-              style={{
-                borderRadius: isComplete
-                  ? (i === 0 ? '4px 0 0 4px' : i === sectionCount - 1 ? '0 4px 4px 0' : '0')
-                  : '4px',
-                background: i < completedCount
-                  ? (isComplete ? '#22c55e' : '#3b82f6')
-                  : 'var(--theme-border)',
-                transition: 'background 0.3s, border-radius 0.4s',
-              }}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );
