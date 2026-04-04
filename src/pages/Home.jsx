@@ -2,9 +2,11 @@ import React from 'react';
 import { useApp } from '../contexts/AppContext';
 import { yearSemesters, subjects } from '../content/registry';
 import SubjectCard from '../components/ui/SubjectCard';
+import useStaggeredEntrance from '../hooks/useStaggeredEntrance';
 
 export default function Home() {
   const { lang, t } = useApp();
+  const getStaggerStyle = useStaggeredEntrance('home');
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
@@ -27,9 +29,13 @@ export default function Home() {
             {ys.title[lang]}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {ys.subjects.map(slug => {
+            {ys.subjects.map((slug, i) => {
               const subject = subjects.find(s => s.slug === slug);
-              return subject ? <SubjectCard key={slug} subject={subject} /> : null;
+              return subject ? (
+                <div key={slug} style={getStaggerStyle(i)}>
+                  <SubjectCard subject={subject} />
+                </div>
+              ) : null;
             })}
           </div>
         </div>

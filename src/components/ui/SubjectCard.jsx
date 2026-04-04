@@ -10,7 +10,7 @@ const SubjectCard = ({ subject }) => {
   return (
     <div
       onClick={() => navigate(`/${subject.yearSemester}/${subject.slug}`)}
-      className="rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 group"
+      className="rounded-xl p-6 cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-1 active:translate-y-px active:scale-[0.98] active:shadow-sm group"
       style={{
         backgroundColor: 'var(--theme-card-bg)',
         border: '1px solid var(--theme-border)',

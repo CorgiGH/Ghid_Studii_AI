@@ -1,9 +1,11 @@
 import React from 'react';
 import { useApp } from '../../contexts/AppContext';
 import ProgressRing from './ProgressRing';
+import useStaggeredEntrance from '../../hooks/useStaggeredEntrance';
 
 const CourseMap = ({ subject, onCourseClick }) => {
   const { lang, t, checked } = useApp();
+  const getStaggerStyle = useStaggeredEntrance(subject.slug);
 
   const courses = subject.courses || [];
   if (courses.length === 0) return null;
@@ -43,7 +45,7 @@ const CourseMap = ({ subject, onCourseClick }) => {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {courseProgress.map(({ course, completed, total }) => {
+        {courseProgress.map(({ course, completed, total }, index) => {
           const isComplete = total > 0 && completed >= total;
           const hasProgress = completed > 0;
 
@@ -60,11 +62,12 @@ const CourseMap = ({ subject, onCourseClick }) => {
             <button
               key={course.id}
               onClick={() => onCourseClick(course.id)}
-              className="text-center p-3 rounded-xl cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md"
+              className="text-center p-3 rounded-xl cursor-pointer transition-all duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-px active:scale-[0.98] active:shadow-sm"
               style={{
+                ...getStaggerStyle(index),
                 backgroundColor: tileBg,
                 border: `1.5px solid ${tileBorder}`,
-                opacity: !hasProgress && !isComplete ? 0.6 : 1,
+                opacity: (!hasProgress && !isComplete) ? 0.6 : getStaggerStyle(index).opacity,
               }}
             >
               <div className="flex justify-center mb-1.5">

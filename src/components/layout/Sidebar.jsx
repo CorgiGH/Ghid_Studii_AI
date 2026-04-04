@@ -15,8 +15,8 @@ const Sidebar = ({ subject, activeCourseId, open, onClose, onCourseClick }) => {
 
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 z-50 lg:z-auto
-          w-60 h-screen overflow-y-auto
+          fixed lg:sticky top-20 left-0 z-50 lg:z-auto
+          w-60 h-[calc(100vh-5rem)] overflow-y-auto
           p-3 text-sm
           transition-all duration-200
           lg:translate-x-0

@@ -6,7 +6,8 @@ import Sidebar from '../components/layout/Sidebar';
 import Breadcrumbs from '../components/layout/Breadcrumbs';
 import ContentTypeBar from '../components/ui/ContentTypeBar';
 import CourseMap from '../components/ui/CourseMap';
-import ReadingProgress from '../components/ui/ReadingProgress';
+import StickyProgressBar from '../components/ui/StickyProgressBar';
+import useStaggeredEntrance from '../hooks/useStaggeredEntrance';
 import CourseNavigation from '../components/ui/CourseNavigation';
 import { CourseBlock } from '../components/ui';
 
@@ -29,6 +30,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const coursesRef = useRef(null);
 
   const searchActive = search && search.length >= 2;
+  const getStaggerStyle = useStaggeredEntrance(subjectSlug + '-courses');
 
   useEffect(() => {
     if (activeCourseId) {
@@ -177,25 +179,32 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
                   {subject.courses.map((course, index) => {
                     const CourseContent = course.component;
                     return (
-                      <CourseBlock
-                        key={course.id}
-                        title={course.title[lang]}
-                        id={course.id}
-                        forceOpen={activeCourseId === course.id}
-                        searchState={courseSearchStates[course.id]}
-                      >
-                        {course.sectionCount > 0 && (
-                          <ReadingProgress courseId={course.id} sectionCount={course.sectionCount} />
-                        )}
-                        <Suspense fallback={<LoadingFallback />}>
-                          <CourseContent />
-                        </Suspense>
-                        <CourseNavigation
-                          items={subject.courses}
-                          currentIndex={index}
-                          onNavigate={handleCourseClick}
-                        />
-                      </CourseBlock>
+                      <div key={course.id} style={getStaggerStyle(index)}>
+                        <CourseBlock
+                          title={course.title[lang]}
+                          id={course.id}
+                          forceOpen={activeCourseId === course.id}
+                          searchState={courseSearchStates[course.id]}
+                          courseId={course.id}
+                          sectionCount={course.sectionCount}
+                        >
+                          {course.sectionCount > 0 && (
+                            <StickyProgressBar
+                              courseId={course.id}
+                              sectionCount={course.sectionCount}
+                              courseName={course.shortTitle[lang]}
+                            />
+                          )}
+                          <Suspense fallback={<LoadingFallback />}>
+                            <CourseContent />
+                          </Suspense>
+                          <CourseNavigation
+                            items={subject.courses}
+                            currentIndex={index}
+                            onNavigate={handleCourseClick}
+                          />
+                        </CourseBlock>
+                      </div>
                     );
                   })}
                 </div>
