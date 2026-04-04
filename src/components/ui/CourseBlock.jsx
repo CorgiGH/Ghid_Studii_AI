@@ -31,13 +31,18 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
 
   useEffect(() => {
     if (!open || !innerRef.current) return;
-    const observer = new ResizeObserver(() => {
-      if (innerRef.current) {
-        setMaxHeight(`${innerRef.current.scrollHeight}px`);
-      }
-    });
-    observer.observe(innerRef.current);
-    return () => observer.disconnect();
+    const el = innerRef.current;
+    const remeasure = () => {
+      if (el) setMaxHeight(`${el.scrollHeight}px`);
+    };
+    const observer = new ResizeObserver(remeasure);
+    observer.observe(el);
+    // Re-measure after nested transitions complete (Toggle/Section expanding)
+    el.addEventListener('transitionend', remeasure);
+    return () => {
+      observer.disconnect();
+      el.removeEventListener('transitionend', remeasure);
+    };
   }, [open]);
 
   // Detect course completion for vignette

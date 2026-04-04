@@ -16,13 +16,18 @@ const Section = ({ title, id, children, checked, onCheck }) => {
   // Re-measure when children change (e.g. nested toggles opening)
   useEffect(() => {
     if (!open || !contentRef.current) return;
-    const observer = new ResizeObserver(() => {
-      if (contentRef.current) {
-        setMaxHeight(`${contentRef.current.scrollHeight}px`);
-      }
-    });
-    observer.observe(contentRef.current);
-    return () => observer.disconnect();
+    const el = contentRef.current;
+    const remeasure = () => {
+      if (el) setMaxHeight(`${el.scrollHeight}px`);
+    };
+    const observer = new ResizeObserver(remeasure);
+    observer.observe(el);
+    // Also re-measure after CSS transitions end (catches nested expand/collapse)
+    el.addEventListener('transitionend', remeasure);
+    return () => {
+      observer.disconnect();
+      el.removeEventListener('transitionend', remeasure);
+    };
   }, [open]);
 
   return (

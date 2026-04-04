@@ -104,7 +104,7 @@ const StickyProgressBar = ({ courseId, sectionCount, courseName }) => {
 
   return (
     <div
-      className="sticky z-10 py-1 px-3 -mx-4 mb-2"
+      className="sticky z-10 py-1.5 px-3 -mx-4 mb-3"
       style={{
         top: '2.75rem',
         backgroundColor: 'var(--theme-content-bg)',
