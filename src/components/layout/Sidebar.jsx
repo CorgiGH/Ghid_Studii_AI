@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import ProgressRing from '../ui/ProgressRing';
+import SidebarToggle from '../ui/SidebarToggle';
 
-const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, routePrefix }) => {
+const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, routePrefix, locked, onToggleLock }) => {
   const navigate = useNavigate();
   const { lang, t, checked } = useApp();
   const [hoveredId, setHoveredId] = useState(null);
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const [peeking, setPeeking] = useState(false);
+  const hideTimeoutRef = useRef(null);
+  const prevCompletedRef = useRef(null);
 
   if (!items?.length) return null;
 
@@ -16,28 +21,95 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
       navigate(`/${yearSem}/${subjectSlug}/${routePrefix}${match[1]}`);
     }
     onClose();
+    if (!locked) setOverlayVisible(false);
   };
+
+  // Count total completed courses for auto-peek
+  const totalCompleted = items.reduce((count, course) => {
+    const total = course.sectionCount || 0;
+    if (total === 0) return count;
+    const prefix = `${course.id}-`;
+    const done = Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length;
+    return done >= total ? count + 1 : count;
+  }, 0);
+
+  // Auto-peek when a course is newly completed (unlocked mode only)
+  useEffect(() => {
+    if (locked) return;
+    if (prevCompletedRef.current === null) {
+      prevCompletedRef.current = totalCompleted;
+      return;
+    }
+    if (totalCompleted > prevCompletedRef.current) {
+      setPeeking(true);
+      const timer = setTimeout(() => setPeeking(false), 2000);
+      prevCompletedRef.current = totalCompleted;
+      return () => clearTimeout(timer);
+    }
+    prevCompletedRef.current = totalCompleted;
+  }, [totalCompleted, locked]);
+
+  const handleMouseEnter = () => {
+    if (locked) return;
+    clearTimeout(hideTimeoutRef.current);
+    setOverlayVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (locked) return;
+    hideTimeoutRef.current = setTimeout(() => setOverlayVisible(false), 200);
+  };
+
+  const showSidebar = locked || overlayVisible || peeking;
 
   return (
     <>
+      {/* Mobile overlay backdrop */}
       {open && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
       )}
 
+      {/* Hover zone when unlocked — invisible strip on the left edge */}
+      {!locked && (
+        <div
+          className="hidden lg:block fixed top-20 left-0 z-30 h-[calc(100vh-5rem)]"
+          style={{ width: '16px' }}
+          onMouseEnter={handleMouseEnter}
+        >
+          <SidebarToggle locked={false} onToggle={onToggleLock} side="content" />
+        </div>
+      )}
+
+      {/* Spacer to reserve layout space when locked */}
+      {locked && (
+        <div className="hidden lg:block flex-shrink-0" style={{ width: '15%', minWidth: '160px' }} />
+      )}
+
       <aside
         className={`
-          fixed lg:sticky top-20 left-0 z-50 lg:z-auto
-          w-60 h-[calc(100vh-5rem)] overflow-y-auto
+          fixed top-20 left-0 z-50
+          h-[calc(100vh-5rem)] overflow-y-auto
           p-3 text-sm
           transition-all duration-200
-          lg:translate-x-0
-          ${open ? 'translate-x-0' : '-translate-x-full'}
+          ${open ? 'translate-x-0' : (showSidebar ? 'translate-x-0' : '-translate-x-full')}
+          ${!locked ? 'shadow-xl' : ''}
         `}
         style={{
+          width: '15%',
+          minWidth: '160px',
           backgroundColor: 'var(--theme-sidebar-bg)',
           borderRight: '1px solid var(--theme-sidebar-border)',
         }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
+        {/* Lock toggle tab — only in locked mode on desktop */}
+        {locked && (
+          <div className="hidden lg:block relative">
+            <SidebarToggle locked={true} onToggle={onToggleLock} side="sidebar" />
+          </div>
+        )}
+
         <div className="lg:hidden flex justify-end mb-2">
           <button
             onClick={onClose}

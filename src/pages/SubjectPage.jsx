@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { getSubject } from '../content/registry';
@@ -6,7 +6,8 @@ import Sidebar from '../components/layout/Sidebar';
 import Breadcrumbs from '../components/layout/Breadcrumbs';
 import ContentTypeBar from '../components/ui/ContentTypeBar';
 import CourseMap from '../components/ui/CourseMap';
-import ProgressSidebar from '../components/ui/ProgressSidebar';
+import InlineProgress from '../components/ui/InlineProgress';
+import ChatPanel from '../components/ui/ChatPanel';
 import CourseTransition from '../components/ui/CourseTransition';
 import CourseNavigation from '../components/ui/CourseNavigation';
 import { CourseBlock } from '../components/ui';
@@ -17,31 +18,27 @@ function PracticeTab({ practice: LazyPractice }) {
 
 const LoadingFallback = () => {
   const { t } = useApp();
-  return <div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se \u00eencarc\u0103...')}</div>;
+  return <div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>;
 };
 
 export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const { yearSem, subject: subjectSlug, '*': wildcard } = useParams();
   const navigate = useNavigate();
-  const { lang, t } = useApp();
+  const { lang, t, sidebarLocked, toggleSidebarLock, chatOpen, toggleChat } = useApp();
   const subject = getSubject(subjectSlug);
 
-  // Detect course_N in wildcard
   const courseMatch = wildcard?.match(/^course_(\d+)$/);
   const courseNum = courseMatch ? courseMatch[1] : null;
 
-  // Detect lab_N in wildcard
   const labMatch = wildcard?.match(/^lab_(\d+)$/);
   const labNum = labMatch ? labMatch[1] : null;
 
-  // Determine active tab
   const tab = courseNum
     ? 'courses'
     : labNum
       ? 'labs'
       : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
 
-  // Find active course when a specific course is selected
   const activeCourse = useMemo(() => {
     if (!courseNum || !subject) return null;
     return subject.courses.find(c => c.id.endsWith('course_' + courseNum)) || null;
@@ -57,12 +54,6 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     return activeCourse.sections.map(s => s.id);
   }, [activeCourse]);
 
-  const sectionTitles = useMemo(() => {
-    if (!activeCourse?.sections) return [];
-    return activeCourse.sections.map(s => s.title[lang]);
-  }, [activeCourse, lang]);
-
-  // Find active lab when a specific lab is selected
   const activeLab = useMemo(() => {
     if (!labNum || !subject) return null;
     return subject.labs?.find(l => l.id.endsWith('lab_' + labNum)) || null;
@@ -74,12 +65,47 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   }, [activeLab, subject]);
 
   const labSectionIds = useMemo(() => activeLab?.sections?.map(s => s.id) || [], [activeLab]);
-  const labSectionTitles = useMemo(() => activeLab?.sections?.map(s => s.title[lang]) || [], [activeLab, lang]);
+
+  // Page context extraction for chat
+  const contentRef = useRef(null);
+  const [pageContext, setPageContext] = useState('');
+
+  useEffect(() => {
+    if (!contentRef.current) {
+      setPageContext('');
+      return;
+    }
+    const extract = () => {
+      const el = contentRef.current;
+      if (!el) return;
+      const sections = el.querySelectorAll('[id^="course_"], [id^="lab_"]');
+      if (sections.length === 0) {
+        setPageContext(el.innerText.slice(0, 2000));
+        return;
+      }
+      let closest = sections[0];
+      let closestDist = Infinity;
+      for (const sec of sections) {
+        const dist = Math.abs(sec.getBoundingClientRect().top);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closest = sec;
+        }
+      }
+      setPageContext(closest.innerText.slice(0, 2000));
+    };
+
+    extract();
+    let debounceTimer;
+    const handler = () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(extract, 300); };
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => { window.removeEventListener('scroll', handler); clearTimeout(debounceTimer); };
+  }, [activeCourse, activeLab]);
 
   if (!subject) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
-        <p className="text-lg opacity-60">{t('Subject not found', 'Materia nu a fost g\u0103sit\u0103')}</p>
+        <p className="text-lg opacity-60">{t('Subject not found', 'Materia nu a fost găsită')}</p>
       </div>
     );
   }
@@ -99,6 +125,9 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     }
   };
 
+  const activeItem = activeCourse || activeLab;
+  const activeItemSectionIds = activeCourse ? sectionIds : labSectionIds;
+
   return (
     <div className="flex flex-col flex-1">
       <ContentTypeBar subject={subject} activeTab={tab} onTabChange={handleTabChange} />
@@ -111,6 +140,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
       />
 
       <div className="flex flex-1">
+        {/* Left sidebar */}
         {tab === 'courses' && subject.courses.length > 0 && (
           <Sidebar
             items={subject.courses}
@@ -120,6 +150,8 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             yearSem={yearSem}
             subjectSlug={subjectSlug}
             routePrefix="course_"
+            locked={sidebarLocked}
+            onToggleLock={toggleSidebarLock}
           />
         )}
 
@@ -132,140 +164,164 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             yearSem={yearSem}
             subjectSlug={subjectSlug}
             routePrefix="lab_"
+            locked={sidebarLocked}
+            onToggleLock={toggleSidebarLock}
           />
         )}
 
-        <main className="flex-1 max-w-5xl mx-auto p-4 lg:p-8 min-h-[calc(100vh-120px)]">
-          {tab === 'courses' && (
-            <>
-              {activeCourse ? (
-                /* Single course view with transition */
-                <CourseTransition courseIndex={activeCourseIndex}>
-                  <Suspense fallback={<LoadingFallback />}>
-                    {React.createElement(activeCourse.component)}
-                  </Suspense>
-                  <CourseNavigation
-                    items={subject.courses}
-                    currentIndex={activeCourseIndex}
-                    yearSem={yearSem}
-                    subjectSlug={subjectSlug}
-                  />
-                </CourseTransition>
-              ) : (
-                /* Course map overview (no course selected) */
-                <>
-                  {subject.courses.length === 0 ? (
-                    <div className="text-center py-12 opacity-60">
-                      <p className="text-4xl mb-4">{subject.icon}</p>
-                      <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
-                      <p className="text-sm mt-2">{t('Course content will be added here.', 'Con\u021binutul cursurilor va fi ad\u0103ugat aici.')}</p>
-                    </div>
-                  ) : (
-                    <CourseMap subject={subject} onCourseClick={handleCourseMapClick} />
-                  )}
-                </>
-              )}
-            </>
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col min-h-[calc(100vh-120px)]">
+          {/* Inline progress bar */}
+          {activeItem && activeItem.sectionCount > 0 && (
+            <InlineProgress
+              courseId={activeItem.id}
+              sectionCount={activeItem.sectionCount}
+              sectionIds={activeItemSectionIds}
+            />
           )}
 
-          {tab === 'seminars' && subject.seminars && (
-            <div>
-              {subject.seminars.length === 0 ? (
-                <div className="text-center py-12 opacity-60">
-                  <p className="text-4xl mb-4">{subject.icon}</p>
-                  <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
-                </div>
-              ) : (
-                subject.seminars.map(sem => {
-                  const SemContent = sem.component;
-                  return (
-                    <CourseBlock key={sem.id} title={sem.title[lang]} id={sem.id}>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <SemContent />
-                      </Suspense>
-                    </CourseBlock>
-                  );
-                })
-              )}
-            </div>
-          )}
+          <main ref={contentRef} className="flex-1 max-w-5xl mx-auto p-4 lg:p-8" style={{ fontSize: '1.05rem' }}>
+            {tab === 'courses' && (
+              <>
+                {activeCourse ? (
+                  <CourseTransition courseIndex={activeCourseIndex}>
+                    <Suspense fallback={<LoadingFallback />}>
+                      {React.createElement(activeCourse.component)}
+                    </Suspense>
+                    <CourseNavigation
+                      items={subject.courses}
+                      currentIndex={activeCourseIndex}
+                      yearSem={yearSem}
+                      subjectSlug={subjectSlug}
+                    />
+                  </CourseTransition>
+                ) : (
+                  <>
+                    {subject.courses.length === 0 ? (
+                      <div className="text-center py-12 opacity-60">
+                        <p className="text-4xl mb-4">{subject.icon}</p>
+                        <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
+                        <p className="text-sm mt-2">{t('Course content will be added here.', 'Conținutul cursurilor va fi adăugat aici.')}</p>
+                      </div>
+                    ) : (
+                      <CourseMap subject={subject} onCourseClick={handleCourseMapClick} />
+                    )}
+                  </>
+                )}
+              </>
+            )}
 
-          {tab === 'labs' && subject.labs && (
-            <>
-              {activeLab ? (
-                <CourseTransition courseIndex={activeLabIndex}>
-                  <Suspense fallback={<LoadingFallback />}>
-                    {React.createElement(activeLab.component)}
-                  </Suspense>
-                  <CourseNavigation
-                    items={subject.labs}
-                    currentIndex={activeLabIndex}
-                    yearSem={yearSem}
-                    subjectSlug={subjectSlug}
-                    routePrefix="lab_"
-                  />
-                </CourseTransition>
-              ) : (
-                subject.labs.length === 0 ? (
+            {tab === 'seminars' && subject.seminars && (
+              <div>
+                {subject.seminars.length === 0 ? (
                   <div className="text-center py-12 opacity-60">
                     <p className="text-4xl mb-4">{subject.icon}</p>
-                    <p className="text-lg font-medium">{t('Coming soon', '\u00cen cur\u00e2nd')}</p>
+                    <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
                   </div>
                 ) : (
-                  subject.labs.map(lab => {
-                    const LabContent = lab.component;
+                  subject.seminars.map(sem => {
+                    const SemContent = sem.component;
                     return (
-                      <CourseBlock key={lab.id} title={lab.title[lang]} id={lab.id}>
+                      <CourseBlock key={sem.id} title={sem.title[lang]} id={sem.id}>
                         <Suspense fallback={<LoadingFallback />}>
-                          <LabContent />
+                          <SemContent />
                         </Suspense>
                       </CourseBlock>
                     );
                   })
-                )
-              )}
-            </>
-          )}
+                )}
+              </div>
+            )}
 
-          {tab === 'practice' && (
-            <Suspense fallback={<LoadingFallback />}>
-              <PracticeTab practice={subject.practice} />
-            </Suspense>
-          )}
-
-          {tab === 'tests' && subject.tests && (
-            <div>
-              {subject.tests.map(test => {
-                const TestContent = test.component;
-                return (
-                  <CourseBlock key={test.id} title={test.title[lang]} id={test.id}>
+            {tab === 'labs' && subject.labs && (
+              <>
+                {activeLab ? (
+                  <CourseTransition courseIndex={activeLabIndex}>
                     <Suspense fallback={<LoadingFallback />}>
-                      <TestContent />
+                      {React.createElement(activeLab.component)}
                     </Suspense>
-                  </CourseBlock>
-                );
-              })}
-            </div>
-          )}
-        </main>
+                    <CourseNavigation
+                      items={subject.labs}
+                      currentIndex={activeLabIndex}
+                      yearSem={yearSem}
+                      subjectSlug={subjectSlug}
+                      routePrefix="lab_"
+                    />
+                  </CourseTransition>
+                ) : (
+                  subject.labs.length === 0 ? (
+                    <div className="text-center py-12 opacity-60">
+                      <p className="text-4xl mb-4">{subject.icon}</p>
+                      <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
+                    </div>
+                  ) : (
+                    subject.labs.map(lab => {
+                      const LabContent = lab.component;
+                      return (
+                        <CourseBlock key={lab.id} title={lab.title[lang]} id={lab.id}>
+                          <Suspense fallback={<LoadingFallback />}>
+                            <LabContent />
+                          </Suspense>
+                        </CourseBlock>
+                      );
+                    })
+                  )
+                )}
+              </>
+            )}
 
-        {/* Right progress sidebar - only when viewing a specific course */}
-        {tab === 'courses' && activeCourse && (
-          <ProgressSidebar
-            courseId={activeCourse.id}
-            sectionCount={activeCourse.sectionCount}
-            sectionIds={sectionIds}
-            sectionTitles={sectionTitles}
+            {tab === 'practice' && (
+              <Suspense fallback={<LoadingFallback />}>
+                <PracticeTab practice={subject.practice} />
+              </Suspense>
+            )}
+
+            {tab === 'tests' && subject.tests && (
+              <div>
+                {subject.tests.map(test => {
+                  const TestContent = test.component;
+                  return (
+                    <CourseBlock key={test.id} title={test.title[lang]} id={test.id}>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <TestContent />
+                      </Suspense>
+                    </CourseBlock>
+                  );
+                })}
+              </div>
+            )}
+          </main>
+        </div>
+
+        {/* Right chat panel */}
+        {chatOpen && (
+          <ChatPanel
+            pageContext={pageContext}
+            subjectSyllabus={subject.description?.[lang] || ''}
           />
         )}
 
-        {tab === 'labs' && activeLab && activeLab.sectionCount > 0 && (
-          <ProgressSidebar
-            courseId={activeLab.id}
-            sectionCount={activeLab.sectionCount}
-            sectionIds={labSectionIds}
-            sectionTitles={labSectionTitles}
-          />
+        {/* Chat reopen button when collapsed */}
+        {!chatOpen && (
+          <button
+            className="hidden lg:flex items-center justify-center fixed right-0 top-1/2 -translate-y-1/2 z-30 transition-colors hover:brightness-125"
+            style={{
+              width: '12px',
+              height: '36px',
+              background: '#1e293b',
+              border: '1px solid #334155',
+              borderRight: 'none',
+              borderRadius: '6px 0 0 6px',
+              boxShadow: '-2px 0 6px rgba(0,0,0,0.2)',
+              cursor: 'pointer',
+            }}
+            onClick={toggleChat}
+            aria-label="Open chat"
+          >
+            <svg width="7" height="10" viewBox="0 0 7 10" fill="none">
+              <path d="M6 1L1 5L6 9" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         )}
       </div>
     </div>

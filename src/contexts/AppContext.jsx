@@ -42,6 +42,8 @@ export function AppProvider({ children }) {
   const [palette, setPalette] = useLocalStorage('palette', DEFAULT_PALETTE);
   const [search, setSearch] = useState('');
   const [checked, setChecked] = useLocalStorage('checked', {});
+  const [sidebarLocked, setSidebarLocked] = useLocalStorage('sidebarLocked', true);
+  const [chatOpen, setChatOpen] = useLocalStorage('chatOpen', true);
 
   useEffect(() => {
     applyPalette(palette, dark);
@@ -80,6 +82,8 @@ export function AppProvider({ children }) {
 
   const toggleLang = useCallback(() => setLang(l => l === 'ro' ? 'en' : 'ro'), []);
   const toggleDark = useCallback(() => setDark(d => !d), []);
+  const toggleSidebarLock = useCallback(() => setSidebarLocked(l => !l), []);
+  const toggleChat = useCallback(() => setChatOpen(c => !c), []);
 
   const value = useMemo(() => ({
     dark, setDark, toggleDark,
@@ -88,7 +92,9 @@ export function AppProvider({ children }) {
     search, setSearch,
     checked, setChecked, toggleCheck,
     t, highlight,
-  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang]);
+    sidebarLocked, setSidebarLocked, toggleSidebarLock,
+    chatOpen, setChatOpen, toggleChat,
+  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

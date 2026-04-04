@@ -65,9 +65,36 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
               </button>
             )}
             {shown && (
-              <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                {q.explanation?.[lang]}
-              </p>
+              <>
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                  {q.explanation?.[lang]}
+                </p>
+                <button
+                  onClick={() => {
+                    const selectedIdx = multiSelect ? [...(picked || [])][0] : picked;
+                    const selectedText = q.options[selectedIdx]
+                      ? (typeof q.options[selectedIdx].text === 'object' ? q.options[selectedIdx].text[lang] : q.options[selectedIdx].text)
+                      : '';
+                    window.dispatchEvent(new CustomEvent('check-with-ai', {
+                      detail: {
+                        type: 'multiple-choice',
+                        question: typeof q.question === 'object' ? q.question[lang] : q.question,
+                        selectedText,
+                        studentAnswer: selectedText,
+                        options: q.options.map(o => typeof o.text === 'object' ? o.text[lang] : o.text),
+                        correct: q.options.findIndex(o => o.correct),
+                        keyConcepts: q.keyConcepts || [],
+                        explanation: typeof q.explanation === 'object' ? q.explanation[lang] : (q.explanation || ''),
+                      }
+                    }));
+                  }}
+                  className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white transition-colors hover:brightness-110 flex items-center gap-1.5"
+                  style={{ backgroundColor: '#8b5cf6' }}
+                >
+                  <span style={{ fontSize: '13px' }}>&#10024;</span>
+                  {t('Check with AI', 'Verifică cu AI')}
+                </button>
+              </>
             )}
           </div>
         );
