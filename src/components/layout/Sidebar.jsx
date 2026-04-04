@@ -242,17 +242,40 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
       {/* ===== UNLOCKED overlay sidebar ===== */}
       {showOverlay && (
         <aside
-          className="hidden lg:block fixed top-0 left-0 z-40 h-full shadow-xl"
+          className="hidden lg:block fixed top-0 left-0 z-40 shadow-xl"
           style={{
             width: '15%',
             minWidth: '160px',
-            position: 'relative',
+            height: '100vh',
           }}
           onMouseEnter={handleMouseEnterSidebar}
           onMouseLeave={handleMouseLeave}
         >
-          {/* Button on outer container so it stays at 50% of viewport */}
-          {toggleBtn}
+          {/* Button on outer fixed container so it stays at 50% viewport */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
+            className="hidden lg:flex items-center justify-center hover:brightness-125"
+            style={{
+              position: 'absolute',
+              right: '-14px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '14px',
+              height: '40px',
+              background: 'var(--theme-sidebar-bg)',
+              border: '1px solid var(--theme-sidebar-border)',
+              borderLeft: 'none',
+              borderRadius: '0 8px 8px 0',
+              boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
+              cursor: 'pointer',
+              zIndex: 10,
+            }}
+            aria-label="Lock sidebar"
+          >
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
+              <path d="M1 1L5 5L1 9" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
           <div
             className="h-full p-3 text-sm overflow-y-auto"
             style={{
