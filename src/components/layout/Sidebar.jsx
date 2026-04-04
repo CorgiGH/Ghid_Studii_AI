@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import ProgressRing from '../ui/ProgressRing';
 
+const HOVER_ZONE_WIDTH = 48; // px from left edge that triggers sidebar
+
 const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, routePrefix, locked, onToggleLock }) => {
   const navigate = useNavigate();
   const { lang, t, checked } = useApp();
@@ -46,24 +48,36 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
     prevCompletedRef.current = totalCompleted;
   }, [totalCompleted, locked]);
 
-  const handleMouseEnter = () => {
+  // Global mousemove listener for left-edge hover detection
+  useEffect(() => {
     if (locked) return;
-    clearTimeout(hideTimeoutRef.current);
-    setOverlayVisible(true);
-  };
+    const onMove = (e) => {
+      if (e.clientX <= HOVER_ZONE_WIDTH) {
+        clearTimeout(hideTimeoutRef.current);
+        setOverlayVisible(true);
+      }
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
+  }, [locked]);
 
   const handleMouseLeave = () => {
     if (locked) return;
-    hideTimeoutRef.current = setTimeout(() => setOverlayVisible(false), 200);
+    hideTimeoutRef.current = setTimeout(() => setOverlayVisible(false), 300);
+  };
+
+  const handleMouseEnterSidebar = () => {
+    if (locked) return;
+    clearTimeout(hideTimeoutRef.current);
   };
 
   const showOverlay = !locked && (overlayVisible || peeking);
 
-  /* --- Toggle button (shared by locked inline + unlocked edge) --- */
+  /* --- Toggle button --- */
   const toggleBtn = (
     <button
       onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
-      className="hidden lg:flex items-center justify-center transition-all duration-200 hover:brightness-125"
+      className="hidden lg:flex items-center justify-center hover:brightness-125"
       style={{
         position: 'absolute',
         right: '-14px',
@@ -93,183 +107,161 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
     </button>
   );
 
-  const sidebarContent = (
-    <nav className="flex flex-col gap-1">
-      {items.map(course => {
-        const total = course.sectionCount || 0;
-        const prefix = `${course.id}-`;
-        const completed = total > 0
-          ? Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length
-          : 0;
-        const isActive = activeCourseId === course.id;
-        const isComplete = total > 0 && completed >= total;
-        const hasProgress = completed > 0;
-        const isHovered = hoveredId === course.id && !isActive;
+  const courseList = items.map(course => {
+    const total = course.sectionCount || 0;
+    const prefix = `${course.id}-`;
+    const completed = total > 0
+      ? Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length
+      : 0;
+    const isActive = activeCourseId === course.id;
+    const isComplete = total > 0 && completed >= total;
+    const hasProgress = completed > 0;
+    const isHovered = hoveredId === course.id && !isActive;
 
-        const buttonStyle = {
-          position: 'relative',
-          border: '1.5px solid transparent',
-          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-          ...(isActive ? {
-            transform: 'scale(1.07)',
-            borderColor: '#3b82f6',
-            backgroundColor: 'var(--theme-hover-bg)',
-            boxShadow: '0 4px 20px rgba(59, 130, 246, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.1)',
-          } : isHovered ? {
-            transform: 'scale(1.04)',
-            borderColor: 'rgba(59, 130, 246, 0.25)',
-            backgroundColor: 'var(--theme-hover-bg)',
-            boxShadow: '0 2px 12px rgba(59, 130, 246, 0.1)',
-          } : {
-            transform: 'scale(1)',
-            borderColor: 'transparent',
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-          }),
-        };
+    const buttonStyle = {
+      position: 'relative',
+      border: '1.5px solid transparent',
+      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+      ...(isActive ? {
+        transform: 'scale(1.07)',
+        borderColor: '#3b82f6',
+        backgroundColor: 'var(--theme-hover-bg)',
+        boxShadow: '0 4px 20px rgba(59, 130, 246, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.1)',
+      } : isHovered ? {
+        transform: 'scale(1.04)',
+        borderColor: 'rgba(59, 130, 246, 0.25)',
+        backgroundColor: 'var(--theme-hover-bg)',
+        boxShadow: '0 2px 12px rgba(59, 130, 246, 0.1)',
+      } : {
+        transform: 'scale(1)',
+        borderColor: 'transparent',
+        backgroundColor: 'transparent',
+        boxShadow: 'none',
+      }),
+    };
 
-        return (
-          <button
-            key={course.id}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg w-full text-left"
-            style={buttonStyle}
-            onMouseEnter={() => setHoveredId(course.id)}
-            onMouseLeave={() => setHoveredId(null)}
-            onClick={() => handleItemClick(course)}
-          >
-            {isActive && (
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '-1px',
-                  top: '20%',
-                  bottom: '20%',
-                  width: '3px',
-                  borderRadius: '0 3px 3px 0',
-                  background: '#3b82f6',
-                }}
-              />
-            )}
-            <ProgressRing
-              size={20}
-              completed={completed}
-              total={total}
-              isActive={isActive}
-            />
-            <div className="flex-1 min-w-0">
-              <div
-                className="text-xs truncate"
-                style={{
-                  fontWeight: isActive ? 600 : 500,
-                  color: isActive ? '#fff' : (isComplete ? '#16a34a' : 'var(--theme-content-text)'),
-                  opacity: !hasProgress && !isActive ? 0.5 : 1,
-                }}
-              >
-                {course.shortTitle[lang]}
-              </div>
-              {total > 0 && (
-                <div className="text-[10px]" style={{ color: isComplete ? '#22c55e' : 'var(--theme-muted-text)' }}>
-                  {isComplete ? t('Complete', 'Complet') : `${completed}/${total}`}
-                </div>
-              )}
+    return (
+      <button
+        key={course.id}
+        className="flex items-center gap-2 px-3 py-2.5 rounded-lg w-full text-left"
+        style={buttonStyle}
+        onMouseEnter={() => setHoveredId(course.id)}
+        onMouseLeave={() => setHoveredId(null)}
+        onClick={() => handleItemClick(course)}
+      >
+        {isActive && (
+          <div style={{
+            position: 'absolute', left: '-1px', top: '20%', bottom: '20%',
+            width: '3px', borderRadius: '0 3px 3px 0', background: '#3b82f6',
+          }} />
+        )}
+        <ProgressRing size={20} completed={completed} total={total} isActive={isActive} />
+        <div className="flex-1 min-w-0">
+          <div className="text-xs truncate" style={{
+            fontWeight: isActive ? 600 : 500,
+            color: isActive ? '#fff' : (isComplete ? '#16a34a' : 'var(--theme-content-text)'),
+            opacity: !hasProgress && !isActive ? 0.5 : 1,
+          }}>
+            {course.shortTitle[lang]}
+          </div>
+          {total > 0 && (
+            <div className="text-[10px]" style={{ color: isComplete ? '#22c55e' : 'var(--theme-muted-text)' }}>
+              {isComplete ? t('Complete', 'Complet') : `${completed}/${total}`}
             </div>
-          </button>
-        );
-      })}
-    </nav>
-  );
+          )}
+        </div>
+      </button>
+    );
+  });
 
   return (
     <>
-      {/* Mobile overlay backdrop */}
+      {/* Mobile backdrop */}
       {open && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
       )}
 
-      {/* ===== LOCKED: sticky sidebar in the flex row ===== */}
+      {/* ===== LOCKED: in-flow sticky sidebar ===== */}
       {locked && (
-        <aside
-          className="hidden lg:block sticky top-12 flex-shrink-0 overflow-y-auto p-3 text-sm"
+        <div
+          className="hidden lg:block flex-shrink-0 sticky top-0 self-start"
           style={{
             width: '15%',
             minWidth: '160px',
-            height: 'calc(100vh - 3rem)',
-            backgroundColor: 'var(--theme-sidebar-bg)',
-            borderRight: '1px solid var(--theme-sidebar-border)',
-            position: 'relative',
+            height: '100vh',
+            position: 'sticky',
           }}
         >
-          {toggleBtn}
-          {sidebarContent}
-        </aside>
+          <div
+            className="h-full p-3 text-sm overflow-y-auto relative"
+            style={{
+              backgroundColor: 'var(--theme-sidebar-bg)',
+              borderRight: '1px solid var(--theme-sidebar-border)',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {toggleBtn}
+            <nav className="flex flex-col gap-1">{courseList}</nav>
+          </div>
+        </div>
       )}
 
-      {/* ===== UNLOCKED: floating toggle on left edge + overlay sidebar ===== */}
-      {!locked && (
-        <>
-          {/* Small toggle button visible on the left edge when sidebar is hidden */}
-          {!showOverlay && (
-            <div
-              className="hidden lg:block sticky top-12 flex-shrink-0"
-              style={{ width: '0px', height: 'calc(100vh - 3rem)', position: 'relative' }}
-              onMouseEnter={handleMouseEnter}
-            >
-              <button
-                onClick={onToggleLock}
-                className="hidden lg:flex items-center justify-center transition-all duration-200 hover:brightness-125"
-                style={{
-                  position: 'absolute',
-                  left: '0',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '14px',
-                  height: '40px',
-                  background: 'var(--theme-sidebar-bg)',
-                  border: '1px solid var(--theme-sidebar-border)',
-                  borderLeft: 'none',
-                  borderRadius: '0 8px 8px 0',
-                  boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
-                  cursor: 'pointer',
-                  zIndex: 10,
-                }}
-                aria-label="Lock sidebar"
-              >
-                <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
-                  <path d="M1 1L5 5L1 9" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-          )}
+      {/* ===== UNLOCKED: just a toggle nub in flow + overlay on hover ===== */}
+      {!locked && !showOverlay && (
+        <div
+          className="hidden lg:block flex-shrink-0 sticky top-0 self-start"
+          style={{ width: '0px', height: '100vh', position: 'sticky', zIndex: 5 }}
+        >
+          <button
+            onClick={onToggleLock}
+            className="hidden lg:flex items-center justify-center hover:brightness-125"
+            style={{
+              position: 'absolute',
+              left: '0',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '14px',
+              height: '40px',
+              background: 'var(--theme-sidebar-bg)',
+              border: '1px solid var(--theme-sidebar-border)',
+              borderLeft: 'none',
+              borderRadius: '0 8px 8px 0',
+              boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
+              cursor: 'pointer',
+            }}
+            aria-label="Lock sidebar"
+          >
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
+              <path d="M1 1L5 5L1 9" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      )}
 
-          {/* Overlay sidebar when hovering */}
-          {showOverlay && (
-            <div
-              className="hidden lg:block fixed inset-0 z-40"
-              style={{ pointerEvents: 'none' }}
-            >
-              <aside
-                className="overflow-y-auto p-3 text-sm shadow-xl"
-                style={{
-                  pointerEvents: 'auto',
-                  position: 'absolute',
-                  top: '0',
-                  left: '0',
-                  width: '15%',
-                  minWidth: '160px',
-                  height: '100%',
-                  paddingTop: 'calc(3rem + 8px)',
-                  backgroundColor: 'var(--theme-sidebar-bg)',
-                  borderRight: '1px solid var(--theme-sidebar-border)',
-                }}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {toggleBtn}
-                {sidebarContent}
-              </aside>
-            </div>
-          )}
-        </>
+      {/* ===== UNLOCKED overlay sidebar ===== */}
+      {showOverlay && (
+        <aside
+          className="hidden lg:block fixed top-0 left-0 z-40 h-full shadow-xl"
+          style={{
+            width: '15%',
+            minWidth: '160px',
+          }}
+          onMouseEnter={handleMouseEnterSidebar}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div
+            className="h-full p-3 text-sm overflow-y-auto relative"
+            style={{
+              paddingTop: 'calc(3rem + 8px)',
+              backgroundColor: 'var(--theme-sidebar-bg)',
+              borderRight: '1px solid var(--theme-sidebar-border)',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {toggleBtn}
+            <nav className="flex flex-col gap-1">{courseList}</nav>
+          </div>
+        </aside>
       )}
 
       {/* Mobile sidebar */}
@@ -287,18 +279,18 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
         }}
       >
         <div className="flex justify-end mb-2">
-          <button
-            onClick={onClose}
-            className="p-1 rounded transition"
-            style={{ backgroundColor: 'var(--theme-hover-bg)' }}
-          >
+          <button onClick={onClose} className="p-1 rounded transition" style={{ backgroundColor: 'var(--theme-hover-bg)' }}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        {sidebarContent}
+        <nav className="flex flex-col gap-1">{courseList}</nav>
       </aside>
+
+      <style>{`
+        aside::-webkit-scrollbar, aside div::-webkit-scrollbar { display: none; }
+      `}</style>
     </>
   );
 };

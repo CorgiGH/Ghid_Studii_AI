@@ -12,7 +12,7 @@ const InlineProgress = ({ courseId, sectionCount, sectionIds }) => {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-2 sticky top-12 z-10"
+      className="flex items-center gap-3 px-4 py-2 sticky top-0 z-10"
       style={{
         borderBottom: '1px solid var(--theme-border)',
         backgroundColor: 'var(--theme-content-bg)',
