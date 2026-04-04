@@ -23,7 +23,7 @@ const LoadingFallback = () => {
 export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const { yearSem, subject: subjectSlug, '*': wildcard } = useParams();
   const navigate = useNavigate();
-  const { lang, t, checked } = useApp();
+  const { lang, t } = useApp();
   const subject = getSubject(subjectSlug);
 
   // Detect course_N in wildcard
