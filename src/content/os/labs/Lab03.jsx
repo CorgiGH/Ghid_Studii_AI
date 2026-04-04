@@ -37,7 +37,7 @@ export default function Lab03() {
       </p>
 
       {/* Recursive math #3 */}
-      <Section title={t('[Recursive math #3] Powers of 2 recursively', '[Recursive math #3] Puterile lui 2 recursiv')} id="lab3-rec3" checked={!!checked['lab3-rec3']} onCheck={() => toggleCheck('lab3-rec3')}>
+      <Section title={t('[Recursive math #3] Powers of 2 recursively', '[Recursive math #3] Puterile lui 2 recursiv')} id="lab_3-rec3" checked={!!checked['lab_3-rec3']} onCheck={() => toggleCheck('lab_3-rec3')}>
         <p>{t(
           'Write a script that takes a number n and recursively computes the successive powers of 2, from 2^0 to 2^n, printing them to stderr. Based on the recurrence: 2^k = 2 * 2^(k-1) for k > 0.',
           'Sa se scrie un script care primeste un numar n si calculeaza recursiv puterile succesive ale lui 2, de la 2^0 pana la 2^n, afisandu-le pe stderr. Pe baza recurentei: 2^k = 2 * 2^(k-1) pentru k > 0.'
@@ -70,7 +70,7 @@ power2 $n > /dev/null`}</Code>
       </Section>
 
       {/* Cooperating iterative math #2 */}
-      <Section title={t('[Cooperating iterative math #2] Producer-Consumer with cube sum', '[Cooperating iterative math #2] Producer-Consumer cu suma cuburilor')} id="lab3-coop2" checked={!!checked['lab3-coop2']} onCheck={() => toggleCheck('lab3-coop2')}>
+      <Section title={t('[Cooperating iterative math #2] Producer-Consumer with cube sum', '[Cooperating iterative math #2] Producer-Consumer cu suma cuburilor')} id="lab_3-coop2" checked={!!checked['lab_3-coop2']} onCheck={() => toggleCheck('lab_3-coop2')}>
         <p>{t(
           'Write two scripts that collaboratively compute the iterative sum of cubes of numbers that are <= p (where p is read from keyboard).',
           'Sa se scrie doua script-uri care sa efectueze in maniera colaborativa calculul iterativ al sumei cuburilor doar a acelor numere care sunt <= p (unde p se citeste de la tastatura).'
@@ -123,7 +123,7 @@ exit 0`}</Code>
       </h3>
 
       {/* Iterative math #6: Fibonacci */}
-      <Section title={t('[Iterative math #6] Fibonacci number', '[Iterative math #6] Numarul Fibonacci')} id="lab3-fib" checked={!!checked['lab3-fib']} onCheck={() => toggleCheck('lab3-fib')}>
+      <Section title={t('[Iterative math #6] Fibonacci number', '[Iterative math #6] Numarul Fibonacci')} id="lab_3-fib" checked={!!checked['lab_3-fib']} onCheck={() => toggleCheck('lab_3-fib')}>
         <p>{t(
           'Write a script that computes the n-th value in the Fibonacci sequence. The value n is taken as a command-line argument or read from keyboard.',
           'Sa se scrie un script care calculeaza valoarea de rang n din sirul lui Fibonacci. Valoarea n se preia ca argument sau se citeste de la tastatura.'
@@ -146,7 +146,7 @@ echo "Fibonacci($n) = $b"`}</Code>
       </Section>
 
       {/* Iterative math #7: Arrangements A(n,k) */}
-      <Section title={t('[Iterative math #7] Arrangements A(n,k)', '[Iterative math #7] Aranjamente A(n,k)')} id="lab3-ank" checked={!!checked['lab3-ank']} onCheck={() => toggleCheck('lab3-ank')}>
+      <Section title={t('[Iterative math #7] Arrangements A(n,k)', '[Iterative math #7] Aranjamente A(n,k)')} id="lab_3-ank" checked={!!checked['lab_3-ank']} onCheck={() => toggleCheck('lab_3-ank')}>
         <p>{t(
           'Write a script that computes A(n,k) (arrangements of n taken k at a time). Values n and k from command-line or keyboard.',
           'Sa se scrie un script care calculeaza A(n,k) (aranjamente de n luate cate k). Valorile n si k din linia de comanda sau tastatura.'
@@ -165,7 +165,7 @@ echo "A($n,$k) = $result"`}</Code>
       </Section>
 
       {/* Iterative math #8: Sum groups of N */}
-      <Section title={t('[Iterative math #8] Sum of arguments in groups of N', '[Iterative math #8] Suma argumentelor in grupuri de N')} id="lab3-sumN" checked={!!checked['lab3-sumN']} onCheck={() => toggleCheck('lab3-sumN')}>
+      <Section title={t('[Iterative math #8] Sum of arguments in groups of N', '[Iterative math #8] Suma argumentelor in grupuri de N')} id="lab_3-sumN" checked={!!checked['lab_3-sumN']} onCheck={() => toggleCheck('lab_3-sumN')}>
         <p>{t(
           'Write a script launched with 1+N*k+p arguments. The first argument is N. The script sums the following arguments in groups of N, printing each sum and writing them to output.txt. If no arguments, read N and N values from keyboard.',
           'Sa se scrie un script lansat cu 1+N*k+p argumente. Primul argument este N. Scriptul calculeaza suma urmatoarelor argumente luate cate N, afisand sumele si scriindu-le in output.txt. Fara argumente, citeste N si N valori de la tastatura.'
@@ -200,7 +200,7 @@ done`}</Code>
       </Section>
 
       {/* Iterative math #9: Iterative Factorial */}
-      <Section title={t('[Iterative math #9] Iterative Factorial', '[Iterative math #9] Factorial iterativ')} id="lab3-ifact" checked={!!checked['lab3-ifact']} onCheck={() => toggleCheck('lab3-ifact')}>
+      <Section title={t('[Iterative math #9] Iterative Factorial', '[Iterative math #9] Factorial iterativ')} id="lab_3-ifact" checked={!!checked['lab_3-ifact']} onCheck={() => toggleCheck('lab_3-ifact')}>
         <p>{t(
           'Write a script that computes n! iteratively (n! = 1 * 2 * ... * n for n > 0). Value n from command-line or keyboard.',
           'Sa se scrie un script care calculeaza n! iterativ (n! = 1 * 2 * ... * n pentru n > 0). Valoarea n din linia de comanda sau tastatura.'
@@ -219,7 +219,7 @@ echo "$n! = $result"`}</Code>
       </Section>
 
       {/* Cooperating iterative math #3 */}
-      <Section title={t('[Cooperating iterative math #3] Producer-Consumer via env variable', '[Cooperating iterative math #3] Producer-Consumer prin variabila de mediu')} id="lab3-coop3" checked={!!checked['lab3-coop3']} onCheck={() => toggleCheck('lab3-coop3')}>
+      <Section title={t('[Cooperating iterative math #3] Producer-Consumer via env variable', '[Cooperating iterative math #3] Producer-Consumer prin variabila de mediu')} id="lab_3-coop3" checked={!!checked['lab_3-coop3']} onCheck={() => toggleCheck('lab_3-coop3')}>
         <p>{t(
           'Write two scripts that collaboratively compute the iterative sum of numbers > 1000 from a sequence. The producer filters numbers > 1000 into an environment variable "secventa1001", then calls the consumer script which processes that variable.',
           'Sa se scrie doua script-uri care calculeaza colaborativ suma iterativa a numerelor > 1000 dintr-o secventa. Producer-ul filtreaza numerele > 1000 intr-o variabila de mediu "secventa1001", apoi apeleaza consumer-ul care proceseaza acea variabila.'
@@ -263,7 +263,7 @@ exit 0`}</Code>
       </Section>
 
       {/* Recursive math #4: Sum of prime digits */}
-      <Section title={t('[Recursive math #4] Sum of prime digits', '[Recursive math #4] Suma cifrelor prime')} id="lab3-rec4" checked={!!checked['lab3-rec4']} onCheck={() => toggleCheck('lab3-rec4')}>
+      <Section title={t('[Recursive math #4] Sum of prime digits', '[Recursive math #4] Suma cifrelor prime')} id="lab_3-rec4" checked={!!checked['lab_3-rec4']} onCheck={() => toggleCheck('lab_3-rec4')}>
         <p>{t(
           'Write a script that takes n (verify n > 0) and recursively computes the sum of its digits that are prime numbers.',
           'Sa se scrie un script care primeste n (verificati ca n > 0) si calculeaza recursiv suma cifrelor sale care sunt numere prime.'
@@ -303,7 +303,7 @@ echo "Sum of prime digits of $n = $result"`}</Code>
       </Section>
 
       {/* Recursive math #5: Complement inverse */}
-      <Section title={t('[Recursive math #5] Reverse of 9-complement', '[Recursive math #5] Inversul complementului fata de 9')} id="lab3-rec5" checked={!!checked['lab3-rec5']} onCheck={() => toggleCheck('lab3-rec5')}>
+      <Section title={t('[Recursive math #5] Reverse of 9-complement', '[Recursive math #5] Inversul complementului fata de 9')} id="lab_3-rec5" checked={!!checked['lab_3-rec5']} onCheck={() => toggleCheck('lab_3-rec5')}>
         <p>{t(
           'Write a script that takes n (verify n > 0) and recursively computes the reverse of the number obtained by complementing all digits with respect to 9.',
           'Sa se scrie un script care primeste n (verificati ca n > 0) si calculeaza recursiv inversul numarului obtinut prin complementarierea tuturor cifrelor fata de 9.'
@@ -339,7 +339,7 @@ echo "Result: $result"`}</Code>
       </Section>
 
       {/* Recursive math #6: Sequence x_m */}
-      <Section title={t('[Recursive math #6] Sequence x_m = x_(m-1) + 4*x_(m-2) + m', '[Recursive math #6] Sirul x_m = x_(m-1) + 4*x_(m-2) + m')} id="lab3-rec6" checked={!!checked['lab3-rec6']} onCheck={() => toggleCheck('lab3-rec6')}>
+      <Section title={t('[Recursive math #6] Sequence x_m = x_(m-1) + 4*x_(m-2) + m', '[Recursive math #6] Sirul x_m = x_(m-1) + 4*x_(m-2) + m')} id="lab_3-rec6" checked={!!checked['lab_3-rec6']} onCheck={() => toggleCheck('lab_3-rec6')}>
         <p>{t(
           'Write a script that takes n (verify n > 0) and recursively computes x_n where: x_0 = 1, x_1 = 2, x_m = x_(m-1) + 4*x_(m-2) + m for m >= 2.',
           'Sa se scrie un script care primeste n (verificati ca n > 0) si calculeaza recursiv x_n unde: x_0 = 1, x_1 = 2, x_m = x_(m-1) + 4*x_(m-2) + m pentru m >= 2.'
@@ -365,7 +365,7 @@ echo "x_$n = $result"`}</Code>
       </Section>
 
       {/* Recursive math #7: Sequence y_m */}
-      <Section title={t('[Recursive math #7] Sequence y_m = (m+1)*y_(m-1) + (m+2)*y_(m-2)', '[Recursive math #7] Sirul y_m = (m+1)*y_(m-1) + (m+2)*y_(m-2)')} id="lab3-rec7" checked={!!checked['lab3-rec7']} onCheck={() => toggleCheck('lab3-rec7')}>
+      <Section title={t('[Recursive math #7] Sequence y_m = (m+1)*y_(m-1) + (m+2)*y_(m-2)', '[Recursive math #7] Sirul y_m = (m+1)*y_(m-1) + (m+2)*y_(m-2)')} id="lab_3-rec7" checked={!!checked['lab_3-rec7']} onCheck={() => toggleCheck('lab_3-rec7')}>
         <p>{t(
           'Write a script that takes n (verify n > 0) and recursively computes y_n where: y_0 = 1, y_1 = 1, y_m = (m+1)*y_(m-1) + (m+2)*y_(m-2) for m >= 2.',
           'Sa se scrie un script care primeste n (verificati ca n > 0) si calculeaza recursiv y_n unde: y_0 = 1, y_1 = 1, y_m = (m+1)*y_(m-1) + (m+2)*y_(m-2) pentru m >= 2.'
@@ -391,7 +391,7 @@ echo "y_$n = $result"`}</Code>
       </Section>
 
       {/* Recursive math #8: GCD */}
-      <Section title={t('[Recursive math #8] GCD with Euclidean subtraction', '[Recursive math #8] CMMDC cu algoritmul lui Euclid cu scaderi')} id="lab3-rec8" checked={!!checked['lab3-rec8']} onCheck={() => toggleCheck('lab3-rec8')}>
+      <Section title={t('[Recursive math #8] GCD with Euclidean subtraction', '[Recursive math #8] CMMDC cu algoritmul lui Euclid cu scaderi')} id="lab_3-rec8" checked={!!checked['lab_3-rec8']} onCheck={() => toggleCheck('lab_3-rec8')}>
         <p>{t(
           'Write a script that recursively computes the greatest common divisor of two numbers a and b using Euclid\'s algorithm with subtractions.',
           'Sa se scrie un script care calculeaza recursiv cel mai mare divizor comun a doua numere a si b folosind algoritmul lui Euclid cu scaderi.'
@@ -427,7 +427,7 @@ echo "GCD($a, $b) = $result"`}</Code>
       </p>
 
       {/* Call2Find #3 */}
-      <Section title={t('[Call2Find #3] Find and compile recently modified C files', '[Call2Find #3] Gasirea si compilarea fisierelor C modificate recent')} id="lab3-c2f3" checked={!!checked['lab3-c2f3']} onCheck={() => toggleCheck('lab3-c2f3')}>
+      <Section title={t('[Call2Find #3] Find and compile recently modified C files', '[Call2Find #3] Gasirea si compilarea fisierelor C modificate recent')} id="lab_3-c2f3" checked={!!checked['lab_3-c2f3']} onCheck={() => toggleCheck('lab_3-c2f3')}>
         <p>{t(
           'Write a script that takes a number (max depth), finds all regular files you own in ~ modified in the last 4 weeks up to that depth. If find fails, print error to stderr and exit 1. For each file: if it\'s a C source (file command reports "C source"), compile it; otherwise display its modification date.',
           'Sa se scrie un script care primeste un numar (adancime maxima), gaseste toate fisierele de tip normal din ~ modificate in ultimele 4 saptamani pana la acea adancime. Daca find esueaza, afiseaza eroare pe stderr si exit 1. Pentru fiecare fisier: daca e sursa C (comanda file raporteaza "C source"), compileaza-l; altfel afiseaza data modificarii.'
@@ -460,7 +460,7 @@ done`}</Code>
       </Section>
 
       {/* Cooperating MyFind #1 */}
-      <Section title={t('[Cooperating MyFind #1] Recursive SHA256 of bash scripts', '[Cooperating MyFind #1] SHA256 recursiv al script-urilor bash')} id="lab3-cmf1" checked={!!checked['lab3-cmf1']} onCheck={() => toggleCheck('lab3-cmf1')}>
+      <Section title={t('[Cooperating MyFind #1] Recursive SHA256 of bash scripts', '[Cooperating MyFind #1] SHA256 recursiv al script-urilor bash')} id="lab_3-cmf1" checked={!!checked['lab_3-cmf1']} onCheck={() => toggleCheck('lab_3-cmf1')}>
         <p>{t(
           'Write two scripts. The first validates a directory argument (exists, readable, traversable) and calls the second from a "subfolder" subdirectory. The second recursively traverses the directory (explicitly, no find/ls -R): for bash scripts, compute SHA256 and display; for other regular files, display name and newline count on stderr. At the end, display total bash script count.',
           'Sa se scrie doua script-uri. Primul valideaza argumentul director (exista, citibil, traversabil) si apeleaza al doilea dintr-un subdirector "subfolder". Al doilea parcurge recursiv directorul (explicit, fara find/ls -R): pentru script-uri bash, calculeaza SHA256 si afiseaza; pentru alte fisiere normale, afiseaza numele si numarul de newline pe stderr. La final afiseaza totalul script-urilor bash.'
@@ -483,7 +483,7 @@ done`}</Code>
       </h3>
 
       {/* MyFind #4 */}
-      <Section title={t('[MyFind #4] Count words and longest line (recursive)', '[MyFind #4] Numararea cuvintelor si cea mai lunga linie (recursiv)')} id="lab3-mf4" checked={!!checked['lab3-mf4']} onCheck={() => toggleCheck('lab3-mf4')}>
+      <Section title={t('[MyFind #4] Count words and longest line (recursive)', '[MyFind #4] Numararea cuvintelor si cea mai lunga linie (recursiv)')} id="lab_3-mf4" checked={!!checked['lab_3-mf4']} onCheck={() => toggleCheck('lab_3-mf4')}>
         <p>{t(
           'Write a script that computes the total word count and the longest line length from all ASCII text files in a given directory, traversing explicitly and recursively (without find or ls -R). Display totals per subdirectory.',
           'Sa se scrie un script care calculeaza numarul total de cuvinte si lungimea celei mai lungi linii din toate fisierele ASCII text dintr-un director dat, parcurgand explicit si recursiv (fara find sau ls -R). Afisati totalurile per subdirector.'
@@ -500,7 +500,7 @@ done`}</Code>
       </Section>
 
       {/* Cooperating MyFind #2 */}
-      <Section title={t('[Cooperating MyFind #2] Recursive: count C source lines', '[Cooperating MyFind #2] Recursiv: numara liniile din surse C')} id="lab3-cmf2" checked={!!checked['lab3-cmf2']} onCheck={() => toggleCheck('lab3-cmf2')}>
+      <Section title={t('[Cooperating MyFind #2] Recursive: count C source lines', '[Cooperating MyFind #2] Recursiv: numara liniile din surse C')} id="lab_3-cmf2" checked={!!checked['lab_3-cmf2']} onCheck={() => toggleCheck('lab_3-cmf2')}>
         <p>{t(
           'Write two scripts. The first validates a directory argument (exists, readable) and calls the second from "subdir_sh". The second recursively traverses the directory (explicitly): for C source files, display line count and name; for other regular files, display name and first 5 lines on stderr. At the end, display total C source line count.',
           'Sa se scrie doua script-uri. Primul valideaza argumentul director (exista, citibil) si apeleaza al doilea din "subdir_sh". Al doilea parcurge recursiv directorul (explicit): pentru surse C, afiseaza numarul de linii si numele; pentru alte fisiere normale, afiseaza numele si primele 5 linii pe stderr. La final afiseaza totalul liniilor din surse C.'
@@ -517,7 +517,7 @@ done`}</Code>
       </Section>
 
       {/* Call2Find #4 */}
-      <Section title={t('[Call2Find #4] Find and process files with read+write', '[Call2Find #4] Gasirea si procesarea fisierelor cu read+write')} id="lab3-c2f4" checked={!!checked['lab3-c2f4']} onCheck={() => toggleCheck('lab3-c2f4')}>
+      <Section title={t('[Call2Find #4] Find and process files with read+write', '[Call2Find #4] Gasirea si procesarea fisierelor cu read+write')} id="lab_3-c2f4" checked={!!checked['lab_3-c2f4']} onCheck={() => toggleCheck('lab_3-c2f4')}>
         <p>{t(
           'Write a script that takes a number (min depth), finds all regular files you own in ~ from that minimum depth where the owner has read AND write. If find fails, print error to stderr and exit 2. For bash scripts: add execute permission for all users and display name with new permissions. For other files: display octal permissions and name.',
           'Sa se scrie un script care primeste un numar (adancime minima), gaseste toate fisierele de tip normal din ~ de la acea adancime minima unde proprietarul are citire SI scriere. Daca find esueaza, afiseaza eroare pe stderr si exit 2. Pentru script-uri bash: adaugati permisiune de executie pentru toti si afisati numele cu permisiunile noi. Pentru alte fisiere: afisati permisiunile in octal si numele.'
@@ -545,7 +545,7 @@ done`}</Code>
       </Section>
 
       {/* Call2Find #5: MP3 playlist */}
-      <Section title={t('[Call2Find #5] Scan for MP3 files and create HTML playlist', '[Call2Find #5] Scanarea fisierelor MP3 si crearea unui playlist HTML')} id="lab3-c2f5" checked={!!checked['lab3-c2f5']} onCheck={() => toggleCheck('lab3-c2f5')}>
+      <Section title={t('[Call2Find #5] Scan for MP3 files and create HTML playlist', '[Call2Find #5] Scanarea fisierelor MP3 si crearea unui playlist HTML')} id="lab_3-c2f5" checked={!!checked['lab_3-c2f5']} onCheck={() => toggleCheck('lab_3-c2f5')}>
         <p>{t(
           'Write a script that scans a directory (default: ~) for MP3 files, creates hard links in ~/html/muzica/, generates an HTML playlist in ~/html/, and sets appropriate permissions for web access.',
           'Sa se scrie un script care scaneaza un director (implicit: ~) pentru fisiere MP3, creeaza link-uri hard in ~/html/muzica/, genereaza un playlist HTML in ~/html/ si seteaza permisiunile adecvate pentru acces web.'
@@ -575,7 +575,7 @@ chmod o+r ~/html/playlist.html`}</Code>
       </Section>
 
       {/* Call2Find #6: Image gallery */}
-      <Section title={t('[Call2Find #6] Build HTML page with image links', '[Call2Find #6] Construirea unei pagini HTML cu link-uri catre imagini')} id="lab3-c2f6" checked={!!checked['lab3-c2f6']} onCheck={() => toggleCheck('lab3-c2f6')}>
+      <Section title={t('[Call2Find #6] Build HTML page with image links', '[Call2Find #6] Construirea unei pagini HTML cu link-uri catre imagini')} id="lab_3-c2f6" checked={!!checked['lab_3-c2f6']} onCheck={() => toggleCheck('lab_3-c2f6')}>
         <p>{t(
           'Write a script that builds an HTML web page with links to all image files (.jpg, .gif, .png, etc.) in your personal account, ordered by last modification date. Ensure proper permissions for web visibility.',
           'Sa se scrie un script care construieste o pagina web HTML cu link-uri catre toate fisierele imagine (.jpg, .gif, .png etc.) din contul personal, ordonate dupa data ultimei modificari. Asigurati permisiuni adecvate pentru vizibilitate web.'
@@ -598,7 +598,7 @@ chmod o+r ~/html/gallery.html`}</Code>
       </Section>
 
       {/* MyLast */}
-      <Section title={t('[MyLast] Last 3 logins per user', '[MyLast] Ultimele 3 conectari per utilizator')} id="lab3-mylast" checked={!!checked['lab3-mylast']} onCheck={() => toggleCheck('lab3-mylast')}>
+      <Section title={t('[MyLast] Last 3 logins per user', '[MyLast] Ultimele 3 conectari per utilizator')} id="lab_3-mylast" checked={!!checked['lab_3-mylast']} onCheck={() => toggleCheck('lab_3-mylast')}>
         <p>{t(
           'Write a script that reads usernames from stdin and, for each user, displays their last 3 logins this month. If not logged in, display "User X has never logged in!".',
           'Sa se scrie un script care citeste nume de utilizatori de la stdin si, pentru fiecare utilizator, afiseaza ultimele 3 conectari din luna curenta. Daca nu s-a conectat, afiseaza "Utilizatorul X nu s-a conectat niciodata!".'
@@ -623,7 +623,7 @@ done`}</Code>
       </Section>
 
       {/* MyZip */}
-      <Section title={t('[MyZip] Archive text and script files', '[MyZip] Arhivarea fisierelor text si script')} id="lab3-myzip" checked={!!checked['lab3-myzip']} onCheck={() => toggleCheck('lab3-myzip')}>
+      <Section title={t('[MyZip] Archive text and script files', '[MyZip] Arhivarea fisierelor text si script')} id="lab_3-myzip" checked={!!checked['lab_3-myzip']} onCheck={() => toggleCheck('lab_3-myzip')}>
         <p>{t(
           'Write a script that takes a directory and archives all .txt files with gzip and all .sh files with zip (replacing .sh extension with .zip). Not recursive.',
           'Sa se scrie un script care primeste un director si arhiveaza toate fisierele .txt cu gzip si toate fisierele .sh cu zip (inlocuind extensia .sh cu .zip). Nu recursiv.'
@@ -660,7 +660,7 @@ done`}</Code>
       </h3>
 
       {/* Error script #2 */}
-      <Section title={t('[Error script #2] Fix a script to count subdirectories', '[Script cu erori #2] Corectarea unui script care numara subdirectoare')} id="lab3-err2" checked={!!checked['lab3-err2']} onCheck={() => toggleCheck('lab3-err2')}>
+      <Section title={t('[Error script #2] Fix a script to count subdirectories', '[Script cu erori #2] Corectarea unui script care numara subdirectoare')} id="lab_3-err2" checked={!!checked['lab_3-err2']} onCheck={() => toggleCheck('lab_3-err2')}>
         <p>{t(
           'A script is given that should display the number of subdirectories in /usr/share followed by the number of parameters it was called with. i) Explain what the script outputs. ii) Fix all syntax and semantic errors.',
           'Se da un script care trebuie sa afiseze numarul subdirectoarelor din /usr/share urmat de numarul parametrilor cu care a fost apelat. i) Explicati ce afiseaza scriptul. ii) Corectati toate erorile sintactice si semantice.'
@@ -680,7 +680,7 @@ done`}</Code>
       </Section>
 
       {/* Error script #3 */}
-      <Section title={t('[Error script #3] Fix a factorial script', '[Script cu erori #3] Corectarea unui script de factorial')} id="lab3-err3" checked={!!checked['lab3-err3']} onCheck={() => toggleCheck('lab3-err3')}>
+      <Section title={t('[Error script #3] Fix a factorial script', '[Script cu erori #3] Corectarea unui script de factorial')} id="lab_3-err3" checked={!!checked['lab_3-err3']} onCheck={() => toggleCheck('lab_3-err3')}>
         <p>{t(
           'A script is given that should display the factorial of the number received as parameter. i) Explain what the script outputs. ii) Fix all syntax and semantic errors so it correctly computes the factorial.',
           'Se da un script care trebuie sa afiseze factorialul numarului primit ca parametru. i) Explicati ce afiseaza scriptul. ii) Corectati toate erorile sintactice si semantice ca sa calculeze corect factorialul.'

@@ -159,37 +159,37 @@ export default function Lab01() {
         )}
       </p>
 
-      <Section title={t('cut #2: Display group names and GIDs', 'cut #2: Afișarea numelor și GID-urilor grupurilor')} id="lab1-ex4" checked={!!checked['lab1-ex4']} onCheck={() => toggleCheck('lab1-ex4')}>
+      <Section title={t('cut #2: Display group names and GIDs', 'cut #2: Afișarea numelor și GID-urilor grupurilor')} id="lab_1-ex4" checked={!!checked['lab_1-ex4']} onCheck={() => toggleCheck('lab_1-ex4')}>
         <p>{t('Write the command that displays the names and GIDs of all user groups on the system. Additional: replace ":" with " - " in the output.', 'Scrieți comanda care afișează numele și GID-urile tuturor grupurilor de utilizatori ai sistemului. Suplimentar: înlocuiți ":" cu " - " în output.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`cut -d: -f1,3 /etc/group\n# With delimiter replacement:\ncut -d: -f1,3 --output-delimiter=" - " /etc/group`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('grep #2: Find users in root group', 'grep #2: Găsirea utilizatorilor din grupul root')} id="lab1-ex5" checked={!!checked['lab1-ex5']} onCheck={() => toggleCheck('lab1-ex5')}>
+      <Section title={t('grep #2: Find users in root group', 'grep #2: Găsirea utilizatorilor din grupul root')} id="lab_1-ex5" checked={!!checked['lab_1-ex5']} onCheck={() => toggleCheck('lab_1-ex5')}>
         <p>{t('Write the command that displays information about all users who are members of the root group.', 'Scrieți comanda care afișează informațiile asociate tuturor utilizatorilor care sunt membri ai grupului root.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<><p className="text-sm mb-2">{t('First find root GID from /etc/group, then grep in /etc/passwd:', 'Mai întâi aflați GID-ul root din /etc/group, apoi grep în /etc/passwd:')}</p><Code>{`grep "^root:" /etc/group\n# root:x:0:\n# Then find users with GID 0:\ngrep ":0:" /etc/passwd`}</Code></>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('stat #1: Count hard links of a file', 'stat #1: Numărarea link-urilor hard ale unui fișier')} id="lab1-ex6" checked={!!checked['lab1-ex6']} onCheck={() => toggleCheck('lab1-ex6')}>
+      <Section title={t('stat #1: Count hard links of a file', 'stat #1: Numărarea link-urilor hard ale unui fișier')} id="lab_1-ex6" checked={!!checked['lab_1-ex6']} onCheck={() => toggleCheck('lab_1-ex6')}>
         <p>{t('Write the command that finds how many synonym names (hard links) a file has.', 'Scrieți comanda care să afle câte nume sinonime (link-uri hard) are un fișier.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`stat -c "%h" filename\n# Or with more context:\nstat -c "File: %n  Hard links: %h" filename`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('wc #2: Count lines and longest line', 'wc #2: Numărarea liniilor și cea mai lungă linie')} id="lab1-ex7" checked={!!checked['lab1-ex7']} onCheck={() => toggleCheck('lab1-ex7')}>
+      <Section title={t('wc #2: Count lines and longest line', 'wc #2: Numărarea liniilor și cea mai lungă linie')} id="lab_1-ex7" checked={!!checked['lab_1-ex7']} onCheck={() => toggleCheck('lab_1-ex7')}>
         <p>{t('Write the command that displays how many lines /etc/mtab has and the length of the longest line.', 'Scrieți comanda ce afișează câte linii conține /etc/mtab și lungimea celei mai lungi linii.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`wc -lL /etc/mtab`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('find #3: Files modified in last 2 weeks', 'find #3: Fișiere modificate în ultimele 2 săptămâni')} id="lab1-ex8" checked={!!checked['lab1-ex8']} onCheck={() => toggleCheck('lab1-ex8')}>
+      <Section title={t('find #3: Files modified in last 2 weeks', 'find #3: Fișiere modificate în ultimele 2 săptămâni')} id="lab_1-ex8" checked={!!checked['lab_1-ex8']} onCheck={() => toggleCheck('lab_1-ex8')}>
         <p>{t('Write the command that displays all regular files you own in your home directory, modified in the last 2 weeks, with permissions and modification date.', 'Scrieți comanda ce afișează toate fișierele de tip normal pe care le dețineți în directorul acasă, modificate în ultimele 2 săptămâni, cu permisiuni și data modificării.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`find ~ -type f -mtime -14 -printf "%M %Tc %p\\n"`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('find #4: Files with owner write+execute', 'find #4: Fișiere cu write+execute pentru proprietar')} id="lab1-ex9" checked={!!checked['lab1-ex9']} onCheck={() => toggleCheck('lab1-ex9')}>
+      <Section title={t('find #4: Files with owner write+execute', 'find #4: Fișiere cu write+execute pentru proprietar')} id="lab_1-ex9" checked={!!checked['lab_1-ex9']} onCheck={() => toggleCheck('lab_1-ex9')}>
         <p>{t('Write the command that displays all regular files (recursive) where the owner has write AND execute permissions, with last access date and size in bytes.', 'Scrieți comanda ce afișează toate fișierele de tip normal (recursiv) unde proprietarul are drepturi de scriere ȘI execuție, cu data ultimei accesări și dimensiunea în bytes.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`find /path -type f -perm -u=wx -printf "%Ac %s %p\\n"`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('ps #1: List all processes', 'ps #1: Listarea tuturor proceselor')} id="lab1-ex10" checked={!!checked['lab1-ex10']} onCheck={() => toggleCheck('lab1-ex10')}>
+      <Section title={t('ps #1: List all processes', 'ps #1: Listarea tuturor proceselor')} id="lab_1-ex10" checked={!!checked['lab_1-ex10']} onCheck={() => toggleCheck('lab_1-ex10')}>
         <p>{t('Write the command that displays all processes in the format "username command processID".', 'Scrieți comanda care afișează toate procesele în formatul "username command processID".')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`ps -eo user,comm,pid`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
@@ -199,32 +199,32 @@ export default function Lab01() {
         {t('Homework Exercises', 'Exerciții pentru acasă')}
       </h3>
 
-      <Section title={t('ps #2: Root processes with details', 'ps #2: Procesele root cu detalii')} id="lab1-hw1" checked={!!checked['lab1-hw1']} onCheck={() => toggleCheck('lab1-hw1')}>
+      <Section title={t('ps #2: Root processes with details', 'ps #2: Procesele root cu detalii')} id="lab_1-hw1" checked={!!checked['lab_1-hw1']} onCheck={() => toggleCheck('lab_1-hw1')}>
         <p>{t('Display all processes running as root (real and effective owner), in format "processID parentID real_userID effective_userID command".', 'Afișați toate procesele ce rulează ca root (proprietarul real și cel efectiv), în formatul "processID parentID real_userID effective_userID command".')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`ps -eo pid,ppid,ruid,euid,comm | grep root`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('sort #3: Sort /etc/group by GID descending', 'sort #3: Sortarea /etc/group după GID descrescător')} id="lab1-hw2" checked={!!checked['lab1-hw2']} onCheck={() => toggleCheck('lab1-hw2')}>
+      <Section title={t('sort #3: Sort /etc/group by GID descending', 'sort #3: Sortarea /etc/group după GID descrescător')} id="lab_1-hw2" checked={!!checked['lab_1-hw2']} onCheck={() => toggleCheck('lab_1-hw2')}>
         <p>{t('Sort the lines of /etc/group in descending order by GID.', 'Sortați descrescător după GID liniile din /etc/group.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`sort -t: -k3 -n -r /etc/group`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('find #5: Group read+execute permissions', 'find #5: Permisiuni read+execute pentru grup')} id="lab1-hw3" checked={!!checked['lab1-hw3']} onCheck={() => toggleCheck('lab1-hw3')}>
+      <Section title={t('find #5: Group read+execute permissions', 'find #5: Permisiuni read+execute pentru grup')} id="lab_1-hw3" checked={!!checked['lab_1-hw3']} onCheck={() => toggleCheck('lab_1-hw3')}>
         <p>{t('Display all files and directories (recursive) where the owner group has read and execute permissions, with their access permissions.', 'Afișați toate fișierele și directoarele (recursiv) pentru care grupul proprietarului are drepturi de citire și execuție, cu permisiunile de acces.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`find /path -perm -g=rx -printf "%M %p\\n"`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('find #6: C/C++ source files with sizes', 'find #6: Fișiere sursă C/C++ cu dimensiuni')} id="lab1-hw4" checked={!!checked['lab1-hw4']} onCheck={() => toggleCheck('lab1-hw4')}>
+      <Section title={t('find #6: C/C++ source files with sizes', 'find #6: Fișiere sursă C/C++ cu dimensiuni')} id="lab_1-hw4" checked={!!checked['lab_1-hw4']} onCheck={() => toggleCheck('lab_1-hw4')}>
         <p>{t('Display all C/C++ source files (.c, .cpp, .h) you own, with sizes (bytes) and last modification date.', 'Afișați toate fișierele sursă C/C++ (.c, .cpp, .h) pe care le dețineți, cu dimensiunile (bytes) și data ultimei modificări.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`find ~ \\( -name "*.c" -o -name "*.cpp" -o -name "*.h" \\) -printf "%s %Tc %p\\n"`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('find #9: Delete temporary files', 'find #9: Ștergerea fișierelor temporare')} id="lab1-hw7" checked={!!checked['lab1-hw7']} onCheck={() => toggleCheck('lab1-hw7')}>
+      <Section title={t('find #9: Delete temporary files', 'find #9: Ștergerea fișierelor temporare')} id="lab_1-hw7" checked={!!checked['lab_1-hw7']} onCheck={() => toggleCheck('lab_1-hw7')}>
         <p>{t('Delete all temporary files (names ending with "~" or ".bak") from your home directory, recursively.', 'Ștergeți toate fișierele temporare (nume terminate cu "~" sau ".bak") din directorul home, recursiv.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`find ~ \\( -name "*~" -o -name "*.bak" \\) -delete\n# Or with -exec:\nfind ~ \\( -name "*~" -o -name "*.bak" \\) -exec rm {} \\;`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('find #10: Find all hard link names', 'find #10: Găsirea tuturor numelor hard link')} id="lab1-hw8" checked={!!checked['lab1-hw8']} onCheck={() => toggleCheck('lab1-hw8')}>
+      <Section title={t('find #10: Find all hard link names', 'find #10: Găsirea tuturor numelor hard link')} id="lab_1-hw8" checked={!!checked['lab_1-hw8']} onCheck={() => toggleCheck('lab_1-hw8')}>
         <p>{t('Find and display all synonym names (hard links) of a file, specified by any of its names.', 'Găsiți și afișați toate numele sinonime (link-urile hard) ale unui fișier, specificat prin oricare dintre numele sale.')}</p>
         <Toggle question={t('Solution', 'Soluție')} answer={<Code>{`# Find the inode number first:\nstat -c "%i" filename\n# Then find all files with the same inode:\nfind / -inum <inode_number> 2>/dev/null`}</Code>} showLabel={t('Show Solution', 'Arată soluția')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>

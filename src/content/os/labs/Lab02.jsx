@@ -137,7 +137,7 @@ export default function Lab02() {
       {/* a) In-class exercises */}
       <h4 className="text-base font-semibold mt-4 mb-2">{t('a) In-class Exercises', 'a) Exercitii propuse pentru laborator')}</h4>
 
-      <Section title={t('File/DB Processing #1: Filter usernames from first 15 lines', 'Procesare fisier/BD #1: Filtrarea username-urilor din primele 15 linii')} id="lab2-ex1" checked={!!checked['lab2-ex1']} onCheck={() => toggleCheck('lab2-ex1')}>
+      <Section title={t('File/DB Processing #1: Filter usernames from first 15 lines', 'Procesare fisier/BD #1: Filtrarea username-urilor din primele 15 linii')} id="lab_2-ex1" checked={!!checked['lab_2-ex1']} onCheck={() => toggleCheck('lab_2-ex1')}>
         <p>{t(
           'Write a chained command that writes to max15.txt only the usernames from the first 15 lines of /etc/passwd, for accounts whose username ends with a letter from m..z and whose login shell is /sbin/nologin.',
           'Scrieti comanda inlantuita care scrie in fisierul max15.txt doar username-urile acelor conturi din primele 15 linii ale /etc/passwd, al caror username se termina cu o litera din intervalul m..z si care folosesc ca interpretor de login /sbin/nologin.'
@@ -147,7 +147,7 @@ export default function Lab02() {
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('Running Tasks #2: Bash processes on specific terminals', 'Procese in executie #2: Procese bash pe terminale specifice')} id="lab2-ex2" checked={!!checked['lab2-ex2']} onCheck={() => toggleCheck('lab2-ex2')}>
+      <Section title={t('Running Tasks #2: Bash processes on specific terminals', 'Procese in executie #2: Procese bash pe terminale specifice')} id="lab_2-ex2" checked={!!checked['lab_2-ex2']} onCheck={() => toggleCheck('lab_2-ex2')}>
         <p>{t(
           'Write a chained command that writes to output.txt all processes of users using bash as their command interpreter, working at terminals (pts/XY) starting with digits 0, 1, 2, or 5, sorted by PID in descending numeric order.',
           'Scrieti comanda inlantuita care scrie in output.txt toate procesele utilizatorilor ce folosesc bash drept interpretor de comenzi, care lucreaza la terminale (pts/XY) ce incep cu cifrele 0, 1, 2 sau 5, sortate dupa PID-uri in ordine descrescatoare (numerica).'
@@ -163,7 +163,7 @@ export default function Lab02() {
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('Connected Users #3: IPs of most recent 8 users', 'Utilizatori conectati #3: IP-urile celor mai recenti 8 utilizatori')} id="lab2-ex3" checked={!!checked['lab2-ex3']} onCheck={() => toggleCheck('lab2-ex3')}>
+      <Section title={t('Connected Users #3: IPs of most recent 8 users', 'Utilizatori conectati #3: IP-urile celor mai recenti 8 utilizatori')} id="lab_2-ex3" checked={!!checked['lab_2-ex3']} onCheck={() => toggleCheck('lab_2-ex3')}>
         <p>{t(
           'Write a chained command that writes to filtruIPs.txt only the IPs of the computers from which the 8 most recently connected users logged in.',
           'Scrieti comanda inlantuita care scrie in filtruIPs.txt doar IP-urile calculatoarelor de la care s-au conectat cei mai recent conectati 8 utilizatori.'
@@ -179,7 +179,7 @@ export default function Lab02() {
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('Puzzle Pipeline #2: Arrange 4 commands correctly', 'Puzzle Pipeline #2: Aranjati 4 comenzi corect')} id="lab2-ex4" checked={!!checked['lab2-ex4']} onCheck={() => toggleCheck('lab2-ex4')}>
+      <Section title={t('Puzzle Pipeline #2: Arrange 4 commands correctly', 'Puzzle Pipeline #2: Aranjati 4 comenzi corect')} id="lab_2-ex4" checked={!!checked['lab_2-ex4']} onCheck={() => toggleCheck('lab_2-ex4')}>
         <p>{t(
           'Specify the correct chaining order for these 4 commands, so the pipeline displays all system processes in the format user:command:pid, sorted by command name:',
           'Specificati ordinea corecta de inlantuire a celor 4 comenzi de mai jos, astfel incat pipeline-ul sa afiseze toate procesele din sistem in formatul user:comanda:pid, sortate dupa numele comenzii:'
@@ -205,7 +205,7 @@ export default function Lab02() {
       {/* b) Homework exercises */}
       <h4 className="text-base font-semibold mt-6 mb-2">{t('b) Homework Exercises', 'b) Exercitii suplimentare (pentru acasa)')}</h4>
 
-      <Section title={t('User Accounts #2: Display username -> UID -> GID sorted by UID', 'Conturi utilizatori #2: Afisare username -> UID -> GID sortat dupa UID')} id="lab2-hw1" checked={!!checked['lab2-hw1']} onCheck={() => toggleCheck('lab2-hw1')}>
+      <Section title={t('User Accounts #2: Display username -> UID -> GID sorted by UID', 'Conturi utilizatori #2: Afisare username -> UID -> GID sortat dupa UID')} id="lab_2-hw1" checked={!!checked['lab_2-hw1']} onCheck={() => toggleCheck('lab_2-hw1')}>
         <p>{t(
           'Write a chained command that displays the data: username, UID, and GID in the format "username -> UID -> GID", for all system users, sorted ascending by UID.',
           'Scrieti comanda inlantuita care afiseaza datele: username, UID si GID in formatul "username -> UID -> GID", pentru toti utilizatorii sistemului, sortati crescator dupa UID.'
@@ -215,7 +215,7 @@ export default function Lab02() {
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('Regex #3 / User Accounts #3: Users with UID > 4681', 'Regex #3 / Conturi utilizatori #3: Utilizatori cu UID > 4681')} id="lab2-hw2" checked={!!checked['lab2-hw2']} onCheck={() => toggleCheck('lab2-hw2')}>
+      <Section title={t('Regex #3 / User Accounts #3: Users with UID > 4681', 'Regex #3 / Conturi utilizatori #3: Utilizatori cu UID > 4681')} id="lab_2-hw2" checked={!!checked['lab_2-hw2']} onCheck={() => toggleCheck('lab_2-hw2')}>
         <p>{t(
           'Write a chained command that displays all system users whose UID is strictly greater than 4681.',
           'Scrieti comanda inlantuita care afiseaza toti utilizatorii sistemului care au UID-ul mai mare (strict) decat 4681.'
@@ -231,7 +231,7 @@ export default function Lab02() {
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('File/DB Processing #2: ext4 partitions with rw', 'Procesare fisier/BD #2: Partitii ext4 cu rw')} id="lab2-hw3" checked={!!checked['lab2-hw3']} onCheck={() => toggleCheck('lab2-hw3')}>
+      <Section title={t('File/DB Processing #2: ext4 partitions with rw', 'Procesare fisier/BD #2: Partitii ext4 cu rw')} id="lab_2-hw3" checked={!!checked['lab_2-hw3']} onCheck={() => toggleCheck('lab_2-hw3')}>
         <p>{t(
           'Write a chained command that writes to volume-montate.txt the names of partitions using the ext4 filesystem mounted with the rw option, along with their mount points, separated by " -> ".',
           'Scrieti comanda inlantuita care scrie in volume-montate.txt numele partitiilor ce folosesc sistemul de fisiere ext4 si au fost montate cu optiunea rw, precum si punctele lor de montare, separate prin " -> ".'
@@ -243,7 +243,7 @@ grep ext4 /etc/mtab | grep rw | cut -d" " -f1,2 --output-delimiter=" -> " > volu
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('Running Tasks #3: Root processes running init', 'Procese in executie #3: Procese root care ruleaza init')} id="lab2-hw4" checked={!!checked['lab2-hw4']} onCheck={() => toggleCheck('lab2-hw4')}>
+      <Section title={t('Running Tasks #3: Root processes running init', 'Procese in executie #3: Procese root care ruleaza init')} id="lab_2-hw4" checked={!!checked['lab_2-hw4']} onCheck={() => toggleCheck('lab_2-hw4')}>
         <p>{t(
           'Write a chained command that writes to CMDs.txt all commands (with arguments, i.e. the full command line) running as root that are instances of the init program.',
           'Scrieti comanda inlantuita care afiseaza in CMDs.txt toate comenzile (cu argumente, adica intreaga linie de comanda) rulate cu drepturi de root si care sunt instante de executie ale programului init.'
@@ -255,7 +255,7 @@ ps -eo user,args | grep "^root" | grep init > CMDs.txt`}</Code>
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('Last Connected Users: Last 15 users by login time', 'Ultimii utilizatori conectati: Ultimii 15 dupa ora logarii')} id="lab2-hw5" checked={!!checked['lab2-hw5']} onCheck={() => toggleCheck('lab2-hw5')}>
+      <Section title={t('Last Connected Users: Last 15 users by login time', 'Ultimii utilizatori conectati: Ultimii 15 dupa ora logarii')} id="lab_2-hw5" checked={!!checked['lab_2-hw5']} onCheck={() => toggleCheck('lab_2-hw5')}>
         <p>{t(
           'Write a chained command that displays the last 15 users connected to the system by login time, along with the date, time, and station from which they connected.',
           'Scrieti comanda inlantuita care afiseaza ultimii 15 utilizatori conectati la sistem in functie de ora conectarii, precum si data, ora si statia de la care s-au conectat.'
@@ -265,7 +265,7 @@ ps -eo user,args | grep "^root" | grep init > CMDs.txt`}</Code>
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('Connected Users #4: User, station, foreground process', 'Utilizatori conectati #4: Utilizator, statie, proces foreground')} id="lab2-hw6" checked={!!checked['lab2-hw6']} onCheck={() => toggleCheck('lab2-hw6')}>
+      <Section title={t('Connected Users #4: User, station, foreground process', 'Utilizatori conectati #4: Utilizator, statie, proces foreground')} id="lab_2-hw6" checked={!!checked['lab_2-hw6']} onCheck={() => toggleCheck('lab_2-hw6')}>
         <p>{t(
           'Write a chained command that displays, for each connected user: account name, connection station, and foreground process, sorted alphabetically by account name.',
           'Scrieti comanda inlantuita care afiseaza, pentru fiecare utilizator conectat: numele de cont, statia de la care s-a conectat si procesul rulat in foreground, ordonate in ordinea alfabetica a numelor de cont.'
@@ -281,7 +281,7 @@ ps -eo user,args | grep "^root" | grep init > CMDs.txt`}</Code>
         } showLabel={t('Show Solution', 'Arata solutia')} hideLabel={t('Hide', 'Ascunde')} />
       </Section>
 
-      <Section title={t('Connected Users #5: Earliest 12 login times appended to file', 'Utilizatori conectati #5: Cele mai mici 12 ore de login adaugate in fisier')} id="lab2-hw7" checked={!!checked['lab2-hw7']} onCheck={() => toggleCheck('lab2-hw7')}>
+      <Section title={t('Connected Users #5: Earliest 12 login times appended to file', 'Utilizatori conectati #5: Cele mai mici 12 ore de login adaugate in fisier')} id="lab_2-hw7" checked={!!checked['lab_2-hw7']} onCheck={() => toggleCheck('lab_2-hw7')}>
         <p>{t(
           'Write a chained command that appends to the end of FirstLogins.txt the 12 smallest login times (HH:MM format) of currently connected users.',
           'Scrieti comanda inlantuita care adauga la finalul fisierului FirstLogins.txt cele mai mici 12 "ore" (formatul HH:MM) la care s-au logat utilizatorii prezenti pe server.'
@@ -302,7 +302,7 @@ ps -eo user,args | grep "^root" | grep init > CMDs.txt`}</Code>
         {t('II) Login Initialization Files Experiment', 'II) Experiment cu fisierele de initializare a sesiunii')}
       </h3>
 
-      <Section title={t('Experiment: .bash_profile vs .profile execution order', 'Experiment: ordinea executiei .bash_profile vs .profile')} id="lab2-init" checked={!!checked['lab2-init']} onCheck={() => toggleCheck('lab2-init')}>
+      <Section title={t('Experiment: .bash_profile vs .profile execution order', 'Experiment: ordinea executiei .bash_profile vs .profile')} id="lab_2-init" checked={!!checked['lab_2-init']} onCheck={() => toggleCheck('lab_2-init')}>
         <p>{t(
           'Test what happens when you have both .bash_profile and .profile in your home directory. Which one is executed? In what order? What if only one exists? What if neither exists?',
           'Testati ce se intampla cand aveti ambele fisiere .bash_profile si .profile in directorul home. Care este executat? In ce ordine? Ce se intampla daca exista doar unul? Dar daca niciunul nu exista?'
@@ -334,7 +334,7 @@ echo 'echo "Executing .profile..."' >> ~/.profile`}</Code>
         {t('III) I/O Redirections Experiment', 'III) Experiment cu redirectarile I/O')}
       </h3>
 
-      <Section title={t('Experiment: Redirecting stdout and stderr', 'Experiment: Redirectarea stdout si stderr')} id="lab2-redir" checked={!!checked['lab2-redir']} onCheck={() => toggleCheck('lab2-redir')}>
+      <Section title={t('Experiment: Redirecting stdout and stderr', 'Experiment: Redirectarea stdout si stderr')} id="lab_2-redir" checked={!!checked['lab_2-redir']} onCheck={() => toggleCheck('lab_2-redir')}>
         <p>{t(
           'Determine what the three standard I/O devices will be during execution for each of these command lines. Does anything get lost?',
           'Determinati care vor fi cele trei dispozitive I/O standard in timpul executiei pentru fiecare din liniile de comanda urmatoare. Se pierde ceva?'
