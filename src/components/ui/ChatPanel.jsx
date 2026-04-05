@@ -12,14 +12,31 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const messagesEndRef = useRef(null);
+  const lastResponseRef = useRef(null);
   const historyRef = useRef([]);
+  const hasScrolledRef = useRef(false);
 
-  const scrollToBottom = () => {
-    const container = messagesEndRef.current?.parentElement;
-    if (container) container.scrollTop = container.scrollHeight;
-  };
+  // Scroll to the top of the latest response once when it first appears
+  useEffect(() => {
+    if (streamingContent && !hasScrolledRef.current) {
+      hasScrolledRef.current = true;
+      lastResponseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    if (!streamingContent) {
+      hasScrolledRef.current = false;
+    }
+  }, [streamingContent]);
 
-  useEffect(() => { scrollToBottom(); }, [messages, verifyMessages, streamingContent]);
+  // Scroll to top of new verify/finalized messages
+  useEffect(() => {
+    const msgs = activeTab === 'chat' ? messages : verifyMessages;
+    const last = msgs[msgs.length - 1];
+    if (last?.role === 'assistant') {
+      requestAnimationFrame(() => {
+        lastResponseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }, [messages, verifyMessages, activeTab]);
 
   // Keep historyRef in sync with messages
   useEffect(() => {
@@ -205,11 +222,18 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
               : t('Type your question and answer, or use "Check with AI" buttons', 'Scrie întrebarea și răspunsul, sau folosește butoanele "Verifică cu AI"')}
           </div>
         )}
-        {currentMessages.map((msg, i) => (
-          <ChatMessage key={i} role={msg.role} content={msg.content} verdict={msg.verdict} />
-        ))}
+        {currentMessages.map((msg, i) => {
+          const isLastAssistant = msg.role === 'assistant' && i === currentMessages.length - 1;
+          return (
+            <div key={i} ref={isLastAssistant ? lastResponseRef : undefined}>
+              <ChatMessage role={msg.role} content={msg.content} verdict={msg.verdict} />
+            </div>
+          );
+        })}
         {streamingContent && activeTab === 'chat' && (
-          <ChatMessage role="assistant" content={streamingContent} isStreaming={true} />
+          <div ref={lastResponseRef}>
+            <ChatMessage role="assistant" content={streamingContent} isStreaming={true} />
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
