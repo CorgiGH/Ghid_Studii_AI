@@ -1,16 +1,17 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { createHash } from 'crypto';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const CORS_ORIGINS = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map(s => s.trim());
 const GROQ_KEY = process.env.GROQ_API_KEY;
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const OPENROUTER_MODEL = 'meta-llama/llama-3.3-70b-instruct:free';
 
-app.use(cors({ origin: CORS_ORIGIN }));
+app.use(cors({ origin: CORS_ORIGINS }));
 app.use(express.json({ limit: '64kb' }));
 
 const verifyCache = new Map();
@@ -186,5 +187,5 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.listen(PORT, () => {
   console.log(`Proxy running on port ${PORT}`);
-  console.log(`CORS origin: ${CORS_ORIGIN}`);
+  console.log(`CORS origins: ${CORS_ORIGINS.join(', ')}`);
 });
