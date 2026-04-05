@@ -211,7 +211,7 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
   return (
     <div
       ref={panelRef}
-      className="hidden lg:flex flex-col flex-shrink-0 sticky self-start"
+      className="hidden lg:flex flex-col sticky self-start"
       style={{
         top: 'var(--topbar-height, 44px)',
         width: chatWidth ? chatWidth + 'px' : '30%',

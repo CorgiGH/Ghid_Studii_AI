@@ -165,7 +165,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         />
       </div>
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         {/* Left sidebar */}
         {tab === 'courses' && subject.courses.length > 0 && (
           <Sidebar
