@@ -53,13 +53,15 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 - **TopBar** (`src/components/layout/TopBar.jsx`) — Persistent header with: brand, subject switcher dropdown (pill chips), language toggle, palette picker (🎨), dark mode toggle
 - **ContentTypeBar** (`src/components/ui/ContentTypeBar.jsx`) — Secondary nav row below TopBar, replaces old TabBar. Data-driven: only shows content types the subject actually has
 - **Breadcrumbs** (`src/components/layout/Breadcrumbs.jsx`) — Clickable trail: Home / Year Sem / Subject / Tab / Item
-- **Sidebar** (`src/components/layout/Sidebar.jsx`) — Course list with inline progress rings, only visible on Courses tab
+- **Sidebar** (`src/components/layout/Sidebar.jsx`) — Course list with inline progress rings, hover-zone triggered on desktop, lockable. No auto-peek on completion.
 
 ### Progress feedback
 - **ProgressRing** (`src/components/ui/ProgressRing.jsx`) — Reusable SVG ring. Props: `size`, `completed`, `total`, `isActive`. Color states: green=complete, blue=active, amber=started, grey=not-started
+- **InlineProgress** (`src/components/ui/InlineProgress.jsx`) — Sticky segmented progress bar below TopBar. Left-to-right fill by count (not section-specific). Includes celebration animations: green flash, +1 floater, counter bounce, completion merge. Shows a center popup toast on course completion (auto-dismisses after 1.2s). Uses ProgressRing for the counter.
 - **CourseMap** (`src/components/ui/CourseMap.jsx`) — Bird's-eye grid of course tiles with progress rings. Shows on Courses tab when no course is selected
-- **ReadingProgress** (`src/components/ui/ReadingProgress.jsx`) — Top gradient bar + section segment bars inside each course. Props: `courseId`, `sectionCount`
 - **CourseNavigation** (`src/components/ui/CourseNavigation.jsx`) — Prev/next course links at bottom of course content
+- **ReadingProgress** (`src/components/ui/ReadingProgress.jsx`) — *Unused legacy component.* Replaced by InlineProgress.
+- **StickyProgressBar** (`src/components/ui/StickyProgressBar.jsx`) — *Unused legacy component.* Animation logic ported to InlineProgress.
 
 ### Component library (src/components/ui/)
 - `Box` — Colored callout (types: definition, theorem, warning, formula, code)
