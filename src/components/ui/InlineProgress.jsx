@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import ProgressRing from './ProgressRing';
 
 const InlineProgress = ({ courseId, sectionCount, sectionIds }) => {
   const { checked } = useApp();
+  const [topBarHeight, setTopBarHeight] = useState(0);
+
+  useEffect(() => {
+    const topBar = document.querySelector('header');
+    if (!topBar) return;
+    const measure = () => setTopBarHeight(Math.round(topBar.getBoundingClientRect().height));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(topBar);
+    return () => ro.disconnect();
+  }, []);
 
   if (!sectionCount || sectionCount === 0) return null;
 
@@ -12,8 +23,9 @@ const InlineProgress = ({ courseId, sectionCount, sectionIds }) => {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-2 sticky top-0 z-10"
+      className="flex items-center gap-3 px-4 py-2 sticky z-10"
       style={{
+        top: `${topBarHeight}px`,
         borderBottom: '1px solid var(--theme-border)',
         backgroundColor: 'var(--theme-content-bg)',
       }}

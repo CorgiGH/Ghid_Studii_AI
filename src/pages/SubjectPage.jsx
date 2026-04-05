@@ -159,6 +159,15 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
           tab={tab}
           activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : undefined}
         />
+
+        {/* Inline progress bar — sticky below TopBar, measured as part of header */}
+        {activeItem && activeItem.sectionCount > 0 && (
+          <InlineProgress
+            courseId={activeItem.id}
+            sectionCount={activeItem.sectionCount}
+            sectionIds={activeItemSectionIds}
+          />
+        )}
       </div>
 
       <div className="flex flex-1">
@@ -195,14 +204,6 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
 
         {/* Main content area */}
         <div className="flex-1 flex flex-col min-h-[calc(100vh-120px)]">
-          {/* Inline progress bar */}
-          {activeItem && activeItem.sectionCount > 0 && (
-            <InlineProgress
-              courseId={activeItem.id}
-              sectionCount={activeItem.sectionCount}
-              sectionIds={activeItemSectionIds}
-            />
-          )}
 
           <main ref={contentRef} className="flex-1 max-w-5xl mx-auto p-4 lg:p-8" style={{ fontSize: '1.05rem' }}>
             {tab === 'courses' && (
