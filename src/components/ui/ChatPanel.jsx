@@ -15,7 +15,8 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
   const historyRef = useRef([]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesEndRef.current?.parentElement;
+    if (container) container.scrollTop = container.scrollHeight;
   };
 
   useEffect(() => { scrollToBottom(); }, [messages, verifyMessages, streamingContent]);
