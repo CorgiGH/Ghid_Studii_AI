@@ -20,6 +20,34 @@ console.log(`Loaded ${groqKeys.length} Groq key(s), ${openRouterKeys.length} Ope
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const OPENROUTER_MODEL = 'meta-llama/llama-3.3-70b-instruct:free';
 
+// --- Daily usage tracking per key ---
+const usageStats = new Map(); // key hash -> { provider, requests, inputTokens, outputTokens, date }
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function keyHash(key) {
+  return createHash('sha256').update(key).digest('hex').slice(0, 8);
+}
+
+function getKeyStats(key, provider) {
+  const hash = keyHash(key);
+  const today = todayStr();
+  if (!usageStats.has(hash) || usageStats.get(hash).date !== today) {
+    usageStats.set(hash, { provider, requests: 0, inputTokens: 0, outputTokens: 0, date: today });
+  }
+  return usageStats.get(hash);
+}
+
+function recordUsage(key, provider, inputTokens, outputTokens) {
+  const stats = getKeyStats(key, provider);
+  stats.requests++;
+  stats.inputTokens += inputTokens;
+  stats.outputTokens += outputTokens;
+  console.log(`[usage] ${stats.provider} key ...${keyHash(key)} | today: ${stats.requests} reqs, ${stats.inputTokens + stats.outputTokens} tokens (${stats.inputTokens} in + ${stats.outputTokens} out)`);
+}
+
 app.use(cors({ origin: CORS_ORIGINS }));
 app.use(express.json({ limit: '64kb' }));
 
@@ -79,6 +107,9 @@ async function tryKey(url, model, key, messages, stream) {
 }
 
 async function callLLM(messages, stream = false) {
+  // Estimate input tokens (~4 chars per token)
+  const inputEstimate = Math.ceil(messages.reduce((sum, m) => sum + m.content.length, 0) / 4);
+
   // Try all Groq keys starting from round-robin index
   for (let i = 0; i < groqKeys.length; i++) {
     const idx = (nextGroqIndex + i) % groqKeys.length;
@@ -89,7 +120,7 @@ async function callLLM(messages, stream = false) {
     );
     if (res) {
       nextGroqIndex = (idx + 1) % groqKeys.length;
-      return res;
+      return { res, key: groqKeys[idx], provider: 'Groq', inputEstimate };
     }
     console.log(`Groq key index ${idx} rate-limited`);
   }
@@ -104,7 +135,7 @@ async function callLLM(messages, stream = false) {
     );
     if (res) {
       nextOpenRouterIndex = (idx + 1) % openRouterKeys.length;
-      return res;
+      return { res, key: openRouterKeys[idx], provider: 'OpenRouter', inputEstimate };
     }
     console.log(`OpenRouter key index ${idx} rate-limited`);
   }
@@ -124,7 +155,7 @@ app.post('/api/chat', async (req, res) => {
       { role: 'user', content: message },
     ];
 
-    const llmRes = await callLLM(messages, true);
+    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, true);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -133,6 +164,7 @@ app.post('/api/chat', async (req, res) => {
     const reader = llmRes.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    let outputChars = 0;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -146,6 +178,7 @@ app.post('/api/chat', async (req, res) => {
         if (line.startsWith('data: ')) {
           const data = line.slice(6).trim();
           if (data === '[DONE]') {
+            recordUsage(key, provider, inputEstimate, Math.ceil(outputChars / 4));
             res.write('data: [DONE]\n\n');
             res.end();
             return;
@@ -154,6 +187,7 @@ app.post('/api/chat', async (req, res) => {
             const parsed = JSON.parse(data);
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
+              outputChars += content.length;
               res.write(`data: ${JSON.stringify({ content })}\n\n`);
             }
           } catch {
@@ -163,6 +197,7 @@ app.post('/api/chat', async (req, res) => {
       }
     }
 
+    recordUsage(key, provider, inputEstimate, Math.ceil(outputChars / 4));
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err) {
@@ -199,9 +234,10 @@ app.post('/api/verify', async (req, res) => {
       { role: 'user', content: userContent },
     ];
 
-    const llmRes = await callLLM(messages, false);
+    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false);
     const data = await llmRes.json();
     const raw = data.choices?.[0]?.message?.content || '';
+    recordUsage(key, provider, inputEstimate, Math.ceil(raw.length / 4));
 
     let result;
     try {
@@ -219,6 +255,25 @@ app.post('/api/verify', async (req, res) => {
 });
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// GET /stats — daily usage per key
+app.get('/stats', (req, res) => {
+  const today = todayStr();
+  const stats = [];
+  for (const [hash, s] of usageStats) {
+    if (s.date === today) {
+      stats.push({
+        key: `...${hash}`,
+        provider: s.provider,
+        requests: s.requests,
+        inputTokens: s.inputTokens,
+        outputTokens: s.outputTokens,
+        totalTokens: s.inputTokens + s.outputTokens,
+      });
+    }
+  }
+  res.json({ date: today, keys: stats, totalRequests: stats.reduce((s, k) => s + k.requests, 0) });
+});
 
 app.listen(PORT, () => {
   console.log(`Proxy running on port ${PORT}`);
