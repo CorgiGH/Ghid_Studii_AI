@@ -124,7 +124,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     if (progressRef.current) ro.observe(progressRef.current);
     window.addEventListener('scroll', measure, { passive: true });
     return () => { ro.disconnect(); window.removeEventListener('scroll', measure); };
-  }, [activeItem]);
+  }, [activeCourse, activeLab]);
 
   if (!subject) {
     return (
