@@ -5,7 +5,7 @@ import ProgressRing from '../ui/ProgressRing';
 
 const HOVER_ZONE_WIDTH = 48; // px from left edge that triggers sidebar
 
-const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, routePrefix, locked, onToggleLock }) => {
+const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, routePrefix, locked, onToggleLock, sidebarTop = 0 }) => {
   const navigate = useNavigate();
   const { lang, t, checked } = useApp();
   const [hoveredId, setHoveredId] = useState(null);
@@ -188,11 +188,12 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
 
       {/* ===== Desktop sidebar (fixed, always present, animated) ===== */}
       <aside
-        className="hidden lg:block fixed top-0 left-0 z-20"
+        className="hidden lg:block fixed left-0 z-20"
         style={{
           width: '15%',
           minWidth: '160px',
-          height: '100vh',
+          top: `${sidebarTop}px`,
+          height: `calc(100vh - ${sidebarTop}px)`,
           transform: (locked || showOverlay) ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.2s ease-in-out',
           boxShadow: !locked && showOverlay ? '4px 0 16px rgba(0,0,0,0.2)' : 'none',
@@ -204,7 +205,6 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
         <div
           className="h-full p-3 text-sm overflow-y-auto"
           style={{
-            paddingTop: 'calc(3rem + 8px)',
             backgroundColor: 'var(--theme-sidebar-bg)',
             borderRight: '1px solid var(--theme-sidebar-border)',
             scrollbarWidth: 'none',
@@ -221,7 +221,7 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
           className="hidden lg:flex items-center justify-center hover:brightness-125 fixed z-20"
           style={{
             left: '0',
-            top: '50%',
+            top: `calc(${sidebarTop}px + (100vh - ${sidebarTop}px) / 2)`,
             transform: 'translateY(-50%)',
             width: '14px',
             height: '40px',
