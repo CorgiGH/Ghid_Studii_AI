@@ -159,7 +159,7 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
 
       {/* Layout spacer when locked */}
       {locked && (
-        <div className="hidden lg:block flex-shrink-0" style={{ width: '15%', minWidth: '160px' }} />
+        <div data-sidebar className="hidden lg:block flex-shrink-0" style={{ width: '15%', minWidth: '160px' }} />
       )}
 
       {/* ===== Desktop sidebar (fixed, always present, animated) ===== */}

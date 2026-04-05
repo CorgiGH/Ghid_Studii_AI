@@ -4,7 +4,7 @@ import ChatMessage from './ChatMessage';
 import { streamChat, verifyAnswer } from '../../services/api';
 
 const ChatPanel = ({ pageContext, subjectSyllabus }) => {
-  const { t, toggleChat } = useApp();
+  const { t, toggleChat, chatWidth, setChatWidth } = useApp();
   const [activeTab, setActiveTab] = useState('chat');
   const [messages, setMessages] = useState([]);
   const [verifyMessages, setVerifyMessages] = useState([]);
@@ -15,6 +15,8 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
   const lastResponseRef = useRef(null);
   const historyRef = useRef([]);
   const hasScrolledRef = useRef(false);
+  const panelRef = useRef(null);
+  const isDragging = useRef(false);
 
   // Scroll to the top of the latest response once when it first appears
   useEffect(() => {
@@ -42,6 +44,56 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
   useEffect(() => {
     historyRef.current = messages.map(m => ({ role: m.role, content: m.content }));
   }, [messages]);
+
+  // --- Resize handle drag logic ---
+  const handleMouseDown = useCallback((e) => {
+    e.preventDefault();
+    isDragging.current = true;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+
+    const handleMouseMove = (e) => {
+      if (!isDragging.current) return;
+      const newWidth = window.innerWidth - e.clientX;
+      const sidebar = document.querySelector('[data-sidebar]');
+      const sidebarWidth = sidebar ? sidebar.getBoundingClientRect().width : 0;
+      const maxWidth = window.innerWidth - sidebarWidth - 300;
+      const clamped = Math.max(280, Math.min(newWidth, maxWidth));
+      if (panelRef.current) {
+        panelRef.current.style.width = clamped + 'px';
+      }
+    };
+
+    const handleMouseUp = () => {
+      isDragging.current = false;
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+      if (panelRef.current) {
+        setChatWidth(parseInt(panelRef.current.style.width, 10));
+      }
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [setChatWidth]);
+
+  // Clamp persisted width on window resize
+  useEffect(() => {
+    if (chatWidth === null) return;
+    const handleResize = () => {
+      const sidebar = document.querySelector('[data-sidebar]');
+      const sidebarWidth = sidebar ? sidebar.getBoundingClientRect().width : 0;
+      const maxWidth = window.innerWidth - sidebarWidth - 300;
+      if (chatWidth > maxWidth) {
+        const clamped = Math.max(280, maxWidth);
+        setChatWidth(clamped);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [chatWidth, setChatWidth]);
 
   const currentMessages = activeTab === 'chat' ? messages : verifyMessages;
 
@@ -158,17 +210,35 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
 
   return (
     <div
+      ref={panelRef}
       className="hidden lg:flex flex-col flex-shrink-0 sticky self-start"
       style={{
         top: 'var(--topbar-height, 44px)',
-        width: '30%',
-        minWidth: '280px',
-        maxWidth: '400px',
+        width: chatWidth ? chatWidth + 'px' : '30%',
+        minWidth: chatWidth ? undefined : '280px',
+        maxWidth: chatWidth ? undefined : '400px',
         height: 'calc(100vh - var(--topbar-height, 44px))',
         backgroundColor: 'var(--theme-sidebar-bg)',
         borderLeft: '1px solid var(--theme-sidebar-border)',
+        position: 'relative',
       }}
     >
+      {/* Resize handle */}
+      <div
+        onMouseDown={handleMouseDown}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '6px',
+          cursor: 'col-resize',
+          zIndex: 10,
+          transition: 'background-color 0.15s',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(59,130,246,0.3)'}
+        onMouseLeave={(e) => { if (!isDragging.current) e.currentTarget.style.backgroundColor = 'transparent'; }}
+      />
       {/* Header with tabs */}
       <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid var(--theme-border)' }}>
         <button
