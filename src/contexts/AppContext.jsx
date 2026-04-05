@@ -44,6 +44,7 @@ export function AppProvider({ children }) {
   const [checked, setChecked] = useLocalStorage('checked', {});
   const [sidebarLocked, setSidebarLocked] = useLocalStorage('sidebarLocked', true);
   const [chatOpen, setChatOpen] = useLocalStorage('chatOpen', true);
+  const [chatWidth, setChatWidth] = useLocalStorage('chatWidth', null);
 
   useEffect(() => {
     applyPalette(palette, dark);
@@ -94,7 +95,8 @@ export function AppProvider({ children }) {
     t, highlight,
     sidebarLocked, setSidebarLocked, toggleSidebarLock,
     chatOpen, setChatOpen, toggleChat,
-  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat]);
+    chatWidth, setChatWidth,
+  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
