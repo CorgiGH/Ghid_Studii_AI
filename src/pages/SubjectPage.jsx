@@ -27,6 +27,9 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const { lang, t, sidebarLocked, toggleSidebarLock, chatOpen, toggleChat } = useApp();
   const subject = getSubject(subjectSlug);
 
+  const headerRef = useRef(null);
+  const [sidebarTop, setSidebarTop] = useState(0);
+
   const courseMatch = wildcard?.match(/^course_(\d+)$/);
   const courseNum = courseMatch ? parseInt(courseMatch[1], 10) : null;
 
@@ -102,6 +105,17 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     return () => { window.removeEventListener('scroll', handler); clearTimeout(debounceTimer); };
   }, [activeCourse, activeLab]);
 
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const measure = () => setSidebarTop(el.getBoundingClientRect().bottom);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('scroll', measure, { passive: true });
+    return () => { ro.disconnect(); window.removeEventListener('scroll', measure); };
+  }, []);
+
   if (!subject) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
@@ -130,14 +144,16 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
 
   return (
     <div className="flex flex-col flex-1">
-      <ContentTypeBar subject={subject} activeTab={tab} onTabChange={handleTabChange} />
+      <div ref={headerRef}>
+        <ContentTypeBar subject={subject} activeTab={tab} onTabChange={handleTabChange} />
 
-      <Breadcrumbs
-        yearSem={yearSem}
-        subject={subject}
-        tab={tab}
-        activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : undefined}
-      />
+        <Breadcrumbs
+          yearSem={yearSem}
+          subject={subject}
+          tab={tab}
+          activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : undefined}
+        />
+      </div>
 
       <div className="flex flex-1">
         {/* Left sidebar */}
@@ -152,6 +168,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             routePrefix="course_"
             locked={sidebarLocked}
             onToggleLock={toggleSidebarLock}
+            sidebarTop={sidebarTop}
           />
         )}
 
@@ -166,6 +183,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             routePrefix="lab_"
             locked={sidebarLocked}
             onToggleLock={toggleSidebarLock}
+            sidebarTop={sidebarTop}
           />
         )}
 
