@@ -112,6 +112,24 @@ const InlineProgress = forwardRef(({ courseId, sectionCount, sectionIds }, ref) 
     return () => clearTimeout(timer);
   }, [showToast, toastDismissing, dismissToast]);
 
+  // Reset state when switching to a different course/lab
+  useEffect(() => {
+    initializedRef.current = false;
+    prevCountRef.current = 0;
+    setShowToast(false);
+    setToastDismissing(false);
+    // Reset segment inline styles from celebrate/celebrateComplete
+    const segments = segmentsRef.current;
+    if (segments) {
+      segments.style.gap = '';
+      Array.from(segments.children).forEach(s => {
+        s.style.transition = '';
+        s.style.background = '';
+        s.style.borderRadius = '';
+      });
+    }
+  }, [courseId]);
+
   // Detect changes and fire celebrations
   useEffect(() => {
     if (!initializedRef.current) {
