@@ -79,10 +79,10 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
     document.addEventListener('mouseup', handleMouseUp);
   }, [setChatWidth]);
 
-  // Clamp persisted width on window resize
+  // Clamp persisted width on mount and window resize
   useEffect(() => {
     if (chatWidth === null) return;
-    const handleResize = () => {
+    const clampWidth = () => {
       const sidebar = document.querySelector('[data-sidebar]');
       const sidebarWidth = sidebar ? sidebar.getBoundingClientRect().width : 0;
       const maxWidth = window.innerWidth - sidebarWidth - 300;
@@ -91,8 +91,9 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
         setChatWidth(clamped);
       }
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    clampWidth(); // clamp on mount too
+    window.addEventListener('resize', clampWidth);
+    return () => window.removeEventListener('resize', clampWidth);
   }, [chatWidth, setChatWidth]);
 
   const currentMessages = activeTab === 'chat' ? messages : verifyMessages;
@@ -211,7 +212,7 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
   return (
     <div
       ref={panelRef}
-      className="hidden lg:flex flex-col sticky self-start"
+      className="hidden lg:flex flex-col flex-shrink-0 sticky self-start"
       style={{
         top: 'var(--topbar-height, 44px)',
         width: chatWidth ? chatWidth + 'px' : '30%',
