@@ -6,8 +6,17 @@ import { createHash } from 'crypto';
 const app = express();
 const PORT = process.env.PORT || 3001;
 const CORS_ORIGINS = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map(s => s.trim());
-const GROQ_KEY = process.env.GROQ_API_KEY;
-const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
+function parseKeys(plural, singular) {
+  const raw = process.env[plural] || process.env[singular] || '';
+  return raw.split(',').map(k => k.trim()).filter(Boolean);
+}
+
+const groqKeys = parseKeys('GROQ_API_KEYS', 'GROQ_API_KEY');
+const openRouterKeys = parseKeys('OPENROUTER_API_KEYS', 'OPENROUTER_API_KEY');
+let nextGroqIndex = 0;
+let nextOpenRouterIndex = 0;
+
+console.log(`Loaded ${groqKeys.length} Groq key(s), ${openRouterKeys.length} OpenRouter key(s)`);
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const OPENROUTER_MODEL = 'meta-llama/llama-3.3-70b-instruct:free';
 
@@ -49,13 +58,7 @@ Rules:
 - Respond ONLY with the JSON object, no other text`;
 }
 
-async function callLLM(messages, stream = false, useOpenRouter = false) {
-  const url = useOpenRouter
-    ? 'https://openrouter.ai/api/v1/chat/completions'
-    : 'https://api.groq.com/openai/v1/chat/completions';
-  const key = useOpenRouter ? OPENROUTER_KEY : GROQ_KEY;
-  const model = useOpenRouter ? OPENROUTER_MODEL : GROQ_MODEL;
-
+async function tryKey(url, model, key, messages, stream) {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
@@ -65,9 +68,7 @@ async function callLLM(messages, stream = false, useOpenRouter = false) {
     body: JSON.stringify({ model, messages, stream, temperature: 0.7, max_tokens: 1024 }),
   });
 
-  if (res.status === 429 && !useOpenRouter) {
-    return callLLM(messages, stream, true);
-  }
+  if (res.status === 429) return null; // signal to try next key
 
   if (!res.ok) {
     const err = await res.text();
@@ -75,6 +76,40 @@ async function callLLM(messages, stream = false, useOpenRouter = false) {
   }
 
   return res;
+}
+
+async function callLLM(messages, stream = false) {
+  // Try all Groq keys starting from round-robin index
+  for (let i = 0; i < groqKeys.length; i++) {
+    const idx = (nextGroqIndex + i) % groqKeys.length;
+    console.log(`Trying Groq key index ${idx}`);
+    const res = await tryKey(
+      'https://api.groq.com/openai/v1/chat/completions',
+      GROQ_MODEL, groqKeys[idx], messages, stream
+    );
+    if (res) {
+      nextGroqIndex = (idx + 1) % groqKeys.length;
+      return res;
+    }
+    console.log(`Groq key index ${idx} rate-limited`);
+  }
+
+  // All Groq keys exhausted — try OpenRouter keys
+  for (let i = 0; i < openRouterKeys.length; i++) {
+    const idx = (nextOpenRouterIndex + i) % openRouterKeys.length;
+    console.log(`Trying OpenRouter key index ${idx}`);
+    const res = await tryKey(
+      'https://openrouter.ai/api/v1/chat/completions',
+      OPENROUTER_MODEL, openRouterKeys[idx], messages, stream
+    );
+    if (res) {
+      nextOpenRouterIndex = (idx + 1) % openRouterKeys.length;
+      return res;
+    }
+    console.log(`OpenRouter key index ${idx} rate-limited`);
+  }
+
+  throw new Error('All API keys rate-limited. Try again later.');
 }
 
 // POST /api/chat — streaming
