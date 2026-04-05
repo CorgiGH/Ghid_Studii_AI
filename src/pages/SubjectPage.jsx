@@ -107,12 +107,19 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
 
   useEffect(() => {
     const el = headerRef.current;
+    const topBar = document.querySelector('header');
     if (!el) return;
-    const measure = () => setSidebarTop(Math.round(el.getBoundingClientRect().bottom));
+    const measure = () => {
+      const headerBottom = Math.round(el.getBoundingClientRect().bottom);
+      const minTop = topBar ? Math.round(topBar.getBoundingClientRect().bottom) : 0;
+      setSidebarTop(Math.max(headerBottom, minTop));
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
-    return () => ro.disconnect();
+    if (topBar) ro.observe(topBar);
+    window.addEventListener('scroll', measure, { passive: true });
+    return () => { ro.disconnect(); window.removeEventListener('scroll', measure); };
   }, []);
 
   if (!subject) {
