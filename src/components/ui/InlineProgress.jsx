@@ -108,7 +108,7 @@ const InlineProgress = forwardRef(({ courseId, sectionCount, sectionIds }, ref) 
   // Auto-dismiss toast
   useEffect(() => {
     if (!showToast || toastDismissing) return;
-    const timer = setTimeout(dismissToast, 2000);
+    const timer = setTimeout(dismissToast, 1200);
     return () => clearTimeout(timer);
   }, [showToast, toastDismissing, dismissToast]);
 
