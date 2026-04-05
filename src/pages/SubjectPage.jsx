@@ -28,6 +28,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const subject = getSubject(subjectSlug);
 
   const headerRef = useRef(null);
+  const progressRef = useRef(null);
   const [sidebarTop, setSidebarTop] = useState(0);
 
   const courseMatch = wildcard?.match(/^course_(\d+)$/);
@@ -112,15 +113,18 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     const measure = () => {
       const headerBottom = Math.round(el.getBoundingClientRect().bottom);
       const minTop = topBar ? Math.round(topBar.getBoundingClientRect().bottom) : 0;
-      setSidebarTop(Math.max(headerBottom, minTop));
+      const progEl = progressRef.current;
+      const progBottom = progEl ? Math.round(progEl.getBoundingClientRect().bottom) : 0;
+      setSidebarTop(Math.max(headerBottom, minTop, progBottom));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     if (topBar) ro.observe(topBar);
+    if (progressRef.current) ro.observe(progressRef.current);
     window.addEventListener('scroll', measure, { passive: true });
     return () => { ro.disconnect(); window.removeEventListener('scroll', measure); };
-  }, []);
+  }, [activeItem]);
 
   if (!subject) {
     return (
@@ -159,15 +163,6 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
           tab={tab}
           activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : undefined}
         />
-
-        {/* Inline progress bar — sticky below TopBar, measured as part of header */}
-        {activeItem && activeItem.sectionCount > 0 && (
-          <InlineProgress
-            courseId={activeItem.id}
-            sectionCount={activeItem.sectionCount}
-            sectionIds={activeItemSectionIds}
-          />
-        )}
       </div>
 
       <div className="flex flex-1">
@@ -204,6 +199,15 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
 
         {/* Main content area */}
         <div className="flex-1 flex flex-col min-h-[calc(100vh-120px)]">
+          {/* Inline progress bar — sticky below TopBar */}
+          {activeItem && activeItem.sectionCount > 0 && (
+            <InlineProgress
+              ref={progressRef}
+              courseId={activeItem.id}
+              sectionCount={activeItem.sectionCount}
+              sectionIds={activeItemSectionIds}
+            />
+          )}
 
           <main ref={contentRef} className="flex-1 max-w-5xl mx-auto p-4 lg:p-8" style={{ fontSize: '1.05rem' }}>
             {tab === 'courses' && (
