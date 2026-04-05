@@ -10,9 +10,7 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
   const { lang, t, checked } = useApp();
   const [hoveredId, setHoveredId] = useState(null);
   const [overlayVisible, setOverlayVisible] = useState(false);
-  const [peeking, setPeeking] = useState(false);
   const hideTimeoutRef = useRef(null);
-  const prevCompletedRef = useRef(null);
 
   if (!items?.length) return null;
 
@@ -25,28 +23,6 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
     if (!locked) setOverlayVisible(false);
   };
 
-  const totalCompleted = items.reduce((count, course) => {
-    const total = course.sectionCount || 0;
-    if (total === 0) return count;
-    const prefix = `${course.id}-`;
-    const done = Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length;
-    return done >= total ? count + 1 : count;
-  }, 0);
-
-  useEffect(() => {
-    if (locked) return;
-    if (prevCompletedRef.current === null) {
-      prevCompletedRef.current = totalCompleted;
-      return;
-    }
-    if (totalCompleted > prevCompletedRef.current) {
-      setPeeking(true);
-      const timer = setTimeout(() => setPeeking(false), 2000);
-      prevCompletedRef.current = totalCompleted;
-      return () => clearTimeout(timer);
-    }
-    prevCompletedRef.current = totalCompleted;
-  }, [totalCompleted, locked]);
 
   // Global mousemove listener for left-edge hover detection
   useEffect(() => {
@@ -71,7 +47,7 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
     clearTimeout(hideTimeoutRef.current);
   };
 
-  const showOverlay = !locked && (overlayVisible || peeking);
+  const showOverlay = !locked && overlayVisible;
 
   /* --- Toggle button --- */
   const toggleBtn = (
