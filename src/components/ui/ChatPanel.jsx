@@ -221,7 +221,6 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
         height: 'calc(100vh - var(--topbar-height, 44px))',
         backgroundColor: 'var(--theme-sidebar-bg)',
         borderLeft: '1px solid var(--theme-sidebar-border)',
-        position: 'relative',
       }}
     >
       {/* Resize handle */}
