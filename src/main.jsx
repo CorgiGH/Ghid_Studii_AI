@@ -2,15 +2,18 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import { AppProvider } from './contexts/AppContext'
+import ErrorBoundary from './components/ErrorBoundary'
 import './index.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <HashRouter>
-      <AppProvider>
-        <App />
-      </AppProvider>
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter>
+        <AppProvider>
+          <App />
+        </AppProvider>
+      </HashRouter>
+    </ErrorBoundary>
   </StrictMode>,
 )

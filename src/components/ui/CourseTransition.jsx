@@ -4,26 +4,34 @@ const DURATION = 350;
 
 export default function CourseTransition({ courseIndex, children }) {
   const prevIndexRef = useRef(null);
+  const childrenRef = useRef(children);
   const [displayChildren, setDisplayChildren] = useState(children);
   const [animClass, setAnimClass] = useState('');
   const containerRef = useRef(null);
+  const timer2Ref = useRef(null);
 
+  // Always keep ref in sync with latest children
+  childrenRef.current = children;
+
+  // When children change without courseIndex changing (e.g. lazy resolve),
+  // update displayed content immediately
+  useEffect(() => {
+    setDisplayChildren(children);
+  }, [children]);
+
+  // Animation effect — only depends on courseIndex
   useEffect(() => {
     const prevIndex = prevIndexRef.current;
     prevIndexRef.current = courseIndex;
 
     if (prevIndex === null) {
       // First load — fade in
-      setDisplayChildren(children);
       setAnimClass('course-fade-in');
       const timer = setTimeout(() => setAnimClass(''), DURATION);
       return () => clearTimeout(timer);
     }
 
-    if (prevIndex === courseIndex) {
-      setDisplayChildren(children);
-      return;
-    }
+    if (prevIndex === courseIndex) return;
 
     const goingDown = courseIndex > prevIndex;
 
@@ -32,15 +40,17 @@ export default function CourseTransition({ courseIndex, children }) {
 
     const timer1 = setTimeout(() => {
       // Phase 2: swap content and slide in
-      setDisplayChildren(children);
+      setDisplayChildren(childrenRef.current);
       setAnimClass(goingDown ? 'course-slide-in-up' : 'course-slide-in-down');
 
-      const timer2 = setTimeout(() => setAnimClass(''), DURATION);
-      return () => clearTimeout(timer2);
+      timer2Ref.current = setTimeout(() => setAnimClass(''), DURATION);
     }, DURATION);
 
-    return () => clearTimeout(timer1);
-  }, [courseIndex, children]);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2Ref.current);
+    };
+  }, [courseIndex]);
 
   return (
     <div ref={containerRef} className={`course-transition ${animClass}`}>
