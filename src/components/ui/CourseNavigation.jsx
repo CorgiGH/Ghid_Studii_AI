@@ -7,9 +7,9 @@ const CourseNavigation = ({ items, currentIndex, yearSem, subjectSlug, routePref
   const navigate = useNavigate();
 
   const navTo = (item) => {
-    const match = item.id.match(new RegExp(routePrefix + '(\\d+)$'));
-    if (match) {
-      navigate(`/${yearSem}/${subjectSlug}/${routePrefix}${match[1]}`);
+    const idx = items.findIndex(i => i.id === item.id);
+    if (idx !== -1) {
+      navigate(`/${yearSem}/${subjectSlug}/${routePrefix}${idx + 1}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };

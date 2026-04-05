@@ -28,10 +28,10 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const subject = getSubject(subjectSlug);
 
   const courseMatch = wildcard?.match(/^course_(\d+)$/);
-  const courseNum = courseMatch ? courseMatch[1] : null;
+  const courseNum = courseMatch ? parseInt(courseMatch[1], 10) : null;
 
   const labMatch = wildcard?.match(/^lab_(\d+)$/);
-  const labNum = labMatch ? labMatch[1] : null;
+  const labNum = labMatch ? parseInt(labMatch[1], 10) : null;
 
   const tab = courseNum
     ? 'courses'
@@ -41,7 +41,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
 
   const activeCourse = useMemo(() => {
     if (!courseNum || !subject) return null;
-    return subject.courses.find(c => c.id.endsWith('course_' + courseNum)) || null;
+    return subject.courses[courseNum - 1] || null;
   }, [courseNum, subject]);
 
   const activeCourseIndex = useMemo(() => {
@@ -56,7 +56,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
 
   const activeLab = useMemo(() => {
     if (!labNum || !subject) return null;
-    return subject.labs?.find(l => l.id.endsWith('lab_' + labNum)) || null;
+    return subject.labs?.[labNum - 1] || null;
   }, [labNum, subject]);
 
   const activeLabIndex = useMemo(() => {
@@ -119,9 +119,9 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   };
 
   const handleCourseMapClick = (courseId) => {
-    const match = courseId.match(/course_(\d+)$/);
-    if (match) {
-      navigate(`/${yearSem}/${subjectSlug}/course_${match[1]}`);
+    const idx = subject.courses.findIndex(c => c.id === courseId);
+    if (idx !== -1) {
+      navigate(`/${yearSem}/${subjectSlug}/course_${idx + 1}`);
     }
   };
 

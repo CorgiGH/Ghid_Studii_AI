@@ -17,9 +17,9 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
   if (!items?.length) return null;
 
   const handleItemClick = (item) => {
-    const match = item.id.match(new RegExp(routePrefix + '(\\d+)$'));
-    if (match) {
-      navigate(`/${yearSem}/${subjectSlug}/${routePrefix}${match[1]}`);
+    const idx = items.findIndex(i => i.id === item.id);
+    if (idx !== -1) {
+      navigate(`/${yearSem}/${subjectSlug}/${routePrefix}${idx + 1}`);
     }
     onClose();
     if (!locked) setOverlayVisible(false);
