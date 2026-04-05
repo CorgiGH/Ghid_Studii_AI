@@ -16,6 +16,7 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const switcherRef = useRef(null);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     if (!switcherOpen) return;
@@ -26,8 +27,22 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
     return () => document.removeEventListener('mousedown', handler);
   }, [switcherOpen]);
 
+  // Publish TopBar height as CSS variable for other sticky elements
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const update = () => {
+      document.documentElement.style.setProperty('--topbar-height', `${el.offsetHeight}px`);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <header
+      ref={headerRef}
       className="sticky top-0 z-30 backdrop-blur-sm transition-colors duration-200"
       style={{ backgroundColor: 'var(--theme-nav-bg)', color: 'var(--theme-nav-text)' }}
     >
