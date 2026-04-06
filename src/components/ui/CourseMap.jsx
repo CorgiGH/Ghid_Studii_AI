@@ -4,7 +4,7 @@ import ProgressRing from './ProgressRing';
 import useStaggeredEntrance from '../../hooks/useStaggeredEntrance';
 
 const CourseMap = ({ subject, onCourseClick }) => {
-  const { lang, t, checked } = useApp();
+  const { lang, t, checked, progress } = useApp();
   const getStaggerStyle = useStaggeredEntrance(subject.slug);
 
   const courses = subject.courses || [];
@@ -12,10 +12,19 @@ const CourseMap = ({ subject, onCourseClick }) => {
 
   const courseProgress = courses.map(course => {
     const total = course.sectionCount || 0;
-    const prefix = `${course.id}-`;
-    const completed = total > 0
-      ? Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length
-      : 0;
+    let completed;
+    if (course.src) {
+      // JSON course — count understood steps from progress state
+      const prefix = (course.metaId || course.id) + '-';
+      completed = total > 0
+        ? Object.keys(progress).filter(k => k.startsWith(prefix) && progress[k]?.understood).length
+        : 0;
+    } else {
+      const prefix = `${course.id}-`;
+      completed = total > 0
+        ? Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length
+        : 0;
+    }
     return { course, completed, total };
   });
 

@@ -143,7 +143,7 @@ const os = {
         { id: 'course_11-quiz', title: { en: 'Self-Test', ro: 'Autoevaluare' } },
       ],
       component: lazy(() => import('./courses/Course11.jsx')) },
-    { id: 'os-c1-json', src: 'os/courses/course-01-sample.json',
+    { id: 'os-c1-json', src: 'os/courses/course-01-sample.json', metaId: 'os-c1',
       title: { en: '[JSON Test] Course 1: Basic Linux Commands', ro: '[JSON Test] Cursul 1: Comenzi Linux' },
       shortTitle: { en: 'JSON Test: C1', ro: 'JSON Test: C1' },
       sectionCount: 3 },
