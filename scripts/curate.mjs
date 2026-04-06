@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
 import { resolve, basename, dirname } from 'path';
 import { sendPdfWithPrompt, sendTextPrompt, loadPromptTemplate } from './gemini.mjs';
 
@@ -8,11 +8,6 @@ dotenv.config({ path: resolve('proxy/.env') });
 // ── CLI Argument Parsing ──
 
 const args = process.argv.slice(2);
-
-if (args[0] === 'status') {
-  showStatus();
-  process.exit(0);
-}
 
 const pdfPath = args.find(a => !a.startsWith('--'));
 if (!pdfPath) {
@@ -76,7 +71,6 @@ function stageOutputExists(filename) {
 // ── Status Command ──
 
 function showStatus() {
-  const { readdirSync } = await import('fs');
   const contentDir = resolve('src/content');
   const subjects = readdirSync(contentDir, { withFileTypes: true })
     .filter(d => d.isDirectory())
@@ -109,6 +103,11 @@ function getFlagValue(flag) {
 // ── Main Pipeline ──
 
 async function main() {
+  if (args[0] === 'status') {
+    showStatus();
+    process.exit(0);
+  }
+
   const status = readStatus();
   console.log(`\n📄 Curating: ${pdfPath}`);
   console.log(`   Subject: ${subject} | Type: ${contentType} | Redo: ${flags.redo}`);
@@ -254,7 +253,6 @@ async function runStage2_5() {
   // Find existing JSX file for this course
   const contentDir = resolve(`src/content/${subject}`);
   const typeDir = contentType === 'course' ? 'courses' : contentType === 'lab' ? 'labs' : contentType === 'seminar' ? 'seminars' : 'test';
-  const { readdirSync } = await import('fs');
   const existingFiles = readdirSync(resolve(contentDir, typeDir)).filter(f => f.endsWith('.jsx'));
 
   if (existingFiles.length === 0) {
