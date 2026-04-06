@@ -11,7 +11,24 @@ const pa = {
   },
   icon: '\u2699\uFE0F',
   courses: [
-    { id: 'pa-c1', title: { en: 'Lecture 1: Computational Problems', ro: 'Cursul 1: Probleme computaționale' }, shortTitle: { en: 'L1: Comp. Problems', ro: 'C1: Probleme comp.' }, sectionCount: 6, component: lazy(() => import('./courses/Course01.jsx')) },
+    {
+      id: 'pa-c1',
+      title: { en: 'Lecture 1: Computational Problems', ro: 'Cursul 1: Probleme computaționale' },
+      shortTitle: { en: 'L1: Comp. Problems', ro: 'C1: Probleme comp.' },
+      sectionCount: 9,
+      sections: [
+        { id: 'pa-c1-intro', title: { en: '1. Introduction', ro: '1. Introducere' } },
+        { id: 'pa-c1-def', title: { en: '2. Defining Computational Problems', ro: '2. Definirea problemelor computaționale' } },
+        { id: 'pa-c1-output', title: { en: '3. Classification by Output Type', ro: '3. Clasificarea după tipul output-ului' } },
+        { id: 'pa-c1-input', title: { en: '4. Classification by Input Type', ro: '4. Clasificarea după tipul input-ului' } },
+        { id: 'pa-c1-solvability', title: { en: '5. Solvability', ro: '5. Rezolvabilitate' } },
+        { id: 'pa-c1-representation', title: { en: '6. Internal Representation', ro: '6. Reprezentarea internă' } },
+        { id: 'pa-c1-algo', title: { en: '7. Problem → Algorithm → Implementation', ro: '7. Problemă → Algoritm → Implementare' } },
+        { id: 'pa-c1-cheat', title: { en: 'Cheat Sheet', ro: 'Referință rapidă' } },
+        { id: 'pa-c1-quiz', title: { en: 'Self-Test', ro: 'Autoevaluare' } },
+      ],
+      component: lazy(() => import('./courses/Course01.jsx'))
+    },
     { id: 'pa-c2', title: { en: 'Lecture 2: Algorithm Efficiency Analysis', ro: 'Cursul 2: Analiza eficienței algoritmilor' }, shortTitle: { en: 'L2: Analysis', ro: 'C2: Analiză' }, sectionCount: 7, component: lazy(() => import('./courses/Course02.jsx')) },
     { id: 'pa-c3', title: { en: 'Lecture 3: Nondeterministic & Probabilistic Algorithms', ro: 'Cursul 3: Algoritmi nedeterministici și probabilistici' }, shortTitle: { en: 'L3: Nondet/Prob', ro: 'C3: Nedet/Prob' }, sectionCount: 7, component: lazy(() => import('./courses/Course03.jsx')) },
     { id: 'pa-c4', title: { en: 'Lecture 4: Probabilistic Analysis', ro: 'Cursul 4: Analiză probabilistică' }, shortTitle: { en: 'L4: Prob. Analysis', ro: 'C4: Analiză prob.' }, sectionCount: 6, component: lazy(() => import('./courses/Course04.jsx')) },

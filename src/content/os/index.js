@@ -163,7 +163,7 @@ const os = {
     { id: 'lab_7', title: { en: 'Week 7: Pipes, FIFOs & Signals (Exercises)', ro: 'Săptămâna 7: Pipes, FIFO-uri și Signals (Exerciții)' }, shortTitle: { en: 'W7: Pipes/Signals', ro: 'S7: Pipes/Signals' }, sectionCount: 10, component: lazy(() => import('./labs/Lab07.jsx')) },
   ],
   tests: [
-    { id: 'test-lab1-7', title: { en: 'Test: Labs 1–7', ro: 'Test: Laboratoarele 1–7' }, shortTitle: { en: 'Labs 1–7', ro: 'Lab 1–7' }, component: lazy(() => import('./test/TestLab1_7.jsx')) },
+    { id: 'test-lab1-7', title: { en: 'Test: Labs 1–7', ro: 'Test: Laboratoarele 1–7' }, shortTitle: { en: 'Labs 1–7', ro: 'Lab 1–7' }, component: lazy(() => import('./tests/TestLab1_7.jsx')) },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
