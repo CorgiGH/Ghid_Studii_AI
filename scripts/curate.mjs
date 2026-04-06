@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve, basename, dirname } from 'path';
+import { sendPdfWithPrompt, sendTextPrompt, loadPromptTemplate } from './gemini.mjs';
 
 dotenv.config({ path: resolve('proxy/.env') });
 
@@ -150,7 +151,34 @@ async function main() {
 // ── Stage Stubs (implemented in later tasks) ──
 
 async function runStage1(pdfPath) {
-  throw new Error('Stage 1 not yet implemented');
+  const promptFile = `extract-${contentType}.md`;
+  const prompt = loadPromptTemplate(promptFile);
+
+  console.log(`  Sending PDF to Gemini (${promptFile})...`);
+  const rawResponse = await sendPdfWithPrompt(pdfPath, prompt);
+
+  // Parse JSON from response (strip markdown code fence if present)
+  let jsonStr = rawResponse.trim();
+  if (jsonStr.startsWith('```')) {
+    jsonStr = jsonStr.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+  }
+
+  let extraction;
+  try {
+    extraction = JSON.parse(jsonStr);
+  } catch (e) {
+    // Save raw response for debugging
+    writeFileSync(resolve(curateDir, 'stage1-raw-response.txt'), rawResponse);
+    throw new Error(`Gemini returned invalid JSON. Raw response saved to stage1-raw-response.txt. Error: ${e.message}`);
+  }
+
+  // Save extraction
+  writeFileSync(resolve(curateDir, 'stage1-extraction.json'), JSON.stringify(extraction, null, 2));
+
+  // Log stats
+  const sectionCount = extraction.sections?.length || extraction.exercises?.length || extraction.problems?.length || 0;
+  const diagramCount = extraction.diagrams?.length || 0;
+  console.log(`  Extracted: ${sectionCount} sections, ${diagramCount} diagrams`);
 }
 
 async function runStage2() {
