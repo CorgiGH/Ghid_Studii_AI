@@ -5,12 +5,11 @@ import CourseTransition from '../ui/CourseTransition';
 import ProgressRing from '../ui/ProgressRing';
 
 export default function CourseRenderer({ src }) {
-  const { t, markVisited, progress, toggleUnderstood } = useApp();
+  const { t, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture } = useApp();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [lectureVisible, setLectureVisible] = useState(false);
   const [topBarHeight, setTopBarHeight] = useState(0);
 
   // Measure TopBar height for sticky positioning
@@ -166,7 +165,7 @@ export default function CourseRenderer({ src }) {
 
           {/* Lecture toggle */}
           <button
-            onClick={() => setLectureVisible(v => !v)}
+            onClick={toggleLecture}
             className="flex items-center gap-1.5 text-xs cursor-pointer select-none flex-shrink-0"
             style={{ color: lectureVisible ? '#818cf8' : 'var(--theme-muted-text)' }}
           >

@@ -46,6 +46,8 @@ export function AppProvider({ children }) {
   const [chatOpen, setChatOpen] = useLocalStorage('chatOpen', true);
   const [chatWidth, setChatWidth] = useLocalStorage('chatWidth', null);
   const [progress, setProgress] = useLocalStorage('progress', {});
+  const [lectureVisible, setLectureVisible] = useLocalStorage('lectureVisible', false);
+  const toggleLecture = useCallback(() => setLectureVisible(v => !v), []);
 
   const markVisited = useCallback((stepId) => {
     setProgress(prev => {
@@ -108,11 +110,12 @@ export function AppProvider({ children }) {
     search, setSearch,
     checked, setChecked, toggleCheck,
     progress, markVisited, toggleUnderstood,
+    lectureVisible, toggleLecture,
     t, highlight,
     sidebarLocked, setSidebarLocked, toggleSidebarLock,
     chatOpen, setChatOpen, toggleChat,
     chatWidth, setChatWidth,
-  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood]);
+  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood, lectureVisible, toggleLecture]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
