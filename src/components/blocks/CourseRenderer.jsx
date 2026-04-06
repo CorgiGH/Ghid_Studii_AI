@@ -4,7 +4,7 @@ import StepRenderer from './StepRenderer';
 import CourseTransition from '../ui/CourseTransition';
 
 export default function CourseRenderer({ src }) {
-  const { t } = useApp();
+  const { t, markVisited, progress, toggleUnderstood } = useApp();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,6 +37,12 @@ export default function CourseRenderer({ src }) {
     setCurrentStep(index);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [totalSteps]);
+
+  // Auto-mark step as visited when navigating
+  useEffect(() => {
+    if (!step?.id) return;
+    markVisited(step.id);
+  }, [step?.id, markVisited]);
 
   if (loading) {
     return <div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>;
@@ -102,22 +108,28 @@ export default function CourseRenderer({ src }) {
 
       {/* Progress strip */}
       <div className="flex gap-0.5 mb-5">
-        {courseData.steps.map((s, i) => (
-          <div
-            key={s.id}
-            className="flex-1 h-1 rounded-sm cursor-pointer transition-colors"
-            style={{
-              backgroundColor: i === currentStep
-                ? '#3b82f6'
-                : i < currentStep
-                  ? '#10b981'
-                  : 'var(--theme-border)',
-              boxShadow: i === currentStep ? '0 0 6px rgba(59,130,246,0.4)' : 'none',
-            }}
-            onClick={() => goToStep(i)}
-            title={t(s.title.en, s.title.ro)}
-          />
-        ))}
+        {courseData.steps.map((s, i) => {
+          const sp = progress[s.id];
+          const isUnderstood = sp?.understood;
+          const isVisited = sp?.visited;
+          let bgColor;
+          if (i === currentStep) bgColor = '#3b82f6';
+          else if (isUnderstood) bgColor = '#10b981';
+          else if (isVisited) bgColor = 'rgba(59, 130, 246, 0.35)';
+          else bgColor = 'var(--theme-border)';
+          return (
+            <div
+              key={s.id}
+              className="flex-1 h-1 rounded-sm cursor-pointer transition-colors"
+              style={{
+                backgroundColor: bgColor,
+                boxShadow: i === currentStep ? '0 0 6px rgba(59,130,246,0.4)' : 'none',
+              }}
+              onClick={() => goToStep(i)}
+              title={t(s.title.en, s.title.ro)}
+            />
+          );
+        })}
       </div>
 
       {/* Step title */}
@@ -130,7 +142,12 @@ export default function CourseRenderer({ src }) {
 
       {/* Step content */}
       <CourseTransition courseIndex={currentStep}>
-        <StepRenderer step={step} lectureVisible={lectureVisible} />
+        <StepRenderer
+          step={step}
+          lectureVisible={lectureVisible}
+          isUnderstood={!!progress[step.id]?.understood}
+          onToggleUnderstood={() => toggleUnderstood(step.id)}
+        />
       </CourseTransition>
 
       {/* Navigation */}
