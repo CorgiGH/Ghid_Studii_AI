@@ -9,6 +9,11 @@ dotenv.config({ path: resolve('proxy/.env') });
 
 const args = process.argv.slice(2);
 
+if (args[0] === 'status') {
+  showStatus();
+  process.exit(0);
+}
+
 const pdfPath = args.find(a => !a.startsWith('--'));
 if (!pdfPath) {
   console.error('Usage: node curate.mjs <pdf-path> [--subject <slug>] [--type <course|lab|seminar|test>] [--redo]');
@@ -103,11 +108,6 @@ function getFlagValue(flag) {
 // ── Main Pipeline ──
 
 async function main() {
-  if (args[0] === 'status') {
-    showStatus();
-    process.exit(0);
-  }
-
   const status = readStatus();
   console.log(`\n📄 Curating: ${pdfPath}`);
   console.log(`   Subject: ${subject} | Type: ${contentType} | Redo: ${flags.redo}`);
