@@ -7,7 +7,7 @@ const HOVER_ZONE_WIDTH = 48; // px from left edge that triggers sidebar
 
 const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, routePrefix, locked, onToggleLock, sidebarTop = 0 }) => {
   const navigate = useNavigate();
-  const { lang, t, checked } = useApp();
+  const { lang, t, checked, progress } = useApp();
   const [hoveredId, setHoveredId] = useState(null);
   const [overlayVisible, setOverlayVisible] = useState(false);
   const hideTimeoutRef = useRef(null);
@@ -85,10 +85,18 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
 
   const courseList = items.map(course => {
     const total = course.sectionCount || 0;
-    const prefix = `${course.id}-`;
-    const completed = total > 0
-      ? Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length
-      : 0;
+    let completed;
+    if (course.src) {
+      const prefix = (course.metaId || course.id) + '-';
+      completed = total > 0
+        ? Object.keys(progress).filter(k => k.startsWith(prefix) && progress[k]?.understood).length
+        : 0;
+    } else {
+      const prefix = `${course.id}-`;
+      completed = total > 0
+        ? Object.keys(checked).filter(k => k.startsWith(prefix) && checked[k]).length
+        : 0;
+    }
     const isActive = activeCourseId === course.id;
     const isComplete = total > 0 && completed >= total;
     const hasProgress = completed > 0;
