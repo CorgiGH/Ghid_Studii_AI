@@ -1,6 +1,8 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve, basename, dirname } from 'path';
+
+dotenv.config({ path: resolve('proxy/.env') });
 
 // ── CLI Argument Parsing ──
 
