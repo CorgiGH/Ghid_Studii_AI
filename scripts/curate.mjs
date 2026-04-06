@@ -182,7 +182,70 @@ async function runStage1(pdfPath) {
 }
 
 async function runStage2() {
-  throw new Error('Stage 2 not yet implemented');
+  const refsDir = resolve(`src/content/${subject}/refs`);
+  const sourcesPath = resolve(refsDir, 'sources.json');
+
+  // Load extraction from stage 1
+  const extraction = JSON.parse(readFileSync(resolve(curateDir, 'stage1-extraction.json'), 'utf-8'));
+
+  // Check if bibliography exists
+  if (!existsSync(sourcesPath)) {
+    console.log('  No bibliography found (refs/sources.json missing). Skipping cross-reference.');
+    console.log('  All content will be flagged as ⚠️ UNVERIFIED.');
+    const emptyResult = {
+      annotations: [],
+      summary: { totalChecked: 0, verified: 0, deviations: 0, unverified: 0, missing: 0 },
+      noBibliography: true,
+    };
+    writeFileSync(resolve(curateDir, 'stage2-crossref.json'), JSON.stringify(emptyResult, null, 2));
+    return;
+  }
+
+  const sourcesIndex = JSON.parse(readFileSync(sourcesPath, 'utf-8'));
+  const prompt = loadPromptTemplate('crossref.md');
+
+  // Load available source texts
+  let sourcesContext = '';
+  for (const src of sourcesIndex.sources) {
+    if (!src.available || !src.file) continue;
+    const srcPath = resolve(refsDir, src.file);
+    if (existsSync(srcPath)) {
+      const content = readFileSync(srcPath, 'utf-8');
+      sourcesContext += `\n\n--- SOURCE: ${src.title} (${src.author}) ---\n${content}`;
+    }
+  }
+
+  if (!sourcesContext) {
+    console.log('  Bibliography exists but no source files are available. Skipping.');
+    const emptyResult = {
+      annotations: [],
+      summary: { totalChecked: 0, verified: 0, deviations: 0, unverified: 0, missing: 0 },
+      noSourceFiles: true,
+    };
+    writeFileSync(resolve(curateDir, 'stage2-crossref.json'), JSON.stringify(emptyResult, null, 2));
+    return;
+  }
+
+  const fullPrompt = `${prompt}\n\n--- EXTRACTED CONTENT ---\n${JSON.stringify(extraction, null, 2)}\n\n--- BIBLIOGRAPHY SOURCES ---\n${sourcesContext}`;
+
+  console.log(`  Cross-referencing against ${sourcesIndex.sources.filter(s => s.available).length} source(s)...`);
+  const rawResponse = await sendTextPrompt(fullPrompt);
+
+  let jsonStr = rawResponse.trim();
+  if (jsonStr.startsWith('```')) {
+    jsonStr = jsonStr.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+  }
+
+  let crossref;
+  try {
+    crossref = JSON.parse(jsonStr);
+  } catch (e) {
+    writeFileSync(resolve(curateDir, 'stage2-raw-response.txt'), rawResponse);
+    throw new Error(`Cross-reference returned invalid JSON. Saved to stage2-raw-response.txt. Error: ${e.message}`);
+  }
+
+  writeFileSync(resolve(curateDir, 'stage2-crossref.json'), JSON.stringify(crossref, null, 2));
+  console.log(`  Results: ${crossref.summary.verified} verified, ${crossref.summary.deviations} deviations, ${crossref.summary.unverified} unverified`);
 }
 
 async function runStage2_5() {
