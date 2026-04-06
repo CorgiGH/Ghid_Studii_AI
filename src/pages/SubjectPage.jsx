@@ -215,15 +215,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
               <>
                 {activeCourse ? (
                   activeCourse.src ? (
-                    <>
-                      <CourseRenderer src={activeCourse.src} />
-                      <CourseNavigation
-                        items={subject.courses}
-                        currentIndex={activeCourseIndex}
-                        yearSem={yearSem}
-                        subjectSlug={subjectSlug}
-                      />
-                    </>
+                    <CourseRenderer src={activeCourse.src} />
                   ) : (
                   <CourseTransition courseIndex={activeCourseIndex}>
                     <Suspense fallback={<LoadingFallback />}>
