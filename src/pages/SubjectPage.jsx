@@ -200,8 +200,8 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
 
         {/* Main content area */}
         <div className="flex-1 flex flex-col min-h-[calc(100vh-120px)]">
-          {/* Inline progress bar — sticky below TopBar */}
-          {activeItem && activeItem.sectionCount > 0 && (
+          {/* Inline progress bar — sticky below TopBar (legacy JSX courses only; JSON courses have their own sticky header in CourseRenderer) */}
+          {activeItem && activeItem.sectionCount > 0 && !activeItem.src && (
             <InlineProgress
               ref={progressRef}
               courseId={activeItem.id}
