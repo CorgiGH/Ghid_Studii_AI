@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../../contexts/AppContext';
 
 export default function QuizBlock({ questions }) {
@@ -29,6 +29,18 @@ function QuizQuestion({ q, index, total }) {
   const { t } = useApp();
   const [selected, setSelected] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const explanationRef = useRef(null);
+  const [explanationHeight, setExplanationHeight] = useState(0);
+
+  // Measure explanation height
+  useEffect(() => {
+    if (!explanationRef.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setExplanationHeight(entry.contentRect.height);
+    });
+    ro.observe(explanationRef.current);
+    return () => ro.disconnect();
+  }, []);
 
   const handleSelect = (i) => {
     if (submitted) return;
@@ -71,12 +83,13 @@ function QuizQuestion({ q, index, total }) {
             <button
               key={oi}
               onClick={() => handleSelect(oi)}
-              className="flex items-center gap-3 p-2.5 rounded-lg text-left text-sm transition-colors cursor-pointer"
+              className="flex items-center gap-3 p-2.5 rounded-lg text-left text-sm cursor-pointer"
               style={{
                 backgroundColor: bg,
                 border: `1px solid ${border}`,
                 color: textColor,
                 pointerEvents: submitted ? 'none' : 'auto',
+                transition: 'background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease',
               }}
             >
               <span
@@ -90,7 +103,16 @@ function QuizQuestion({ q, index, total }) {
           );
         })}
       </div>
-      {!submitted && (
+
+      {/* Check button — smoothly collapses after submit */}
+      <div
+        style={{
+          maxHeight: submitted ? '0px' : '40px',
+          opacity: submitted ? 0 : 1,
+          overflow: 'hidden',
+          transition: 'max-height 0.25s ease, opacity 0.15s ease',
+        }}
+      >
         <button
           onClick={handleCheck}
           disabled={selected === null}
@@ -103,17 +125,30 @@ function QuizQuestion({ q, index, total }) {
         >
           {t('Check Answer', 'Verifică')}
         </button>
-      )}
-      {submitted && q.explanation && (
+      </div>
+
+      {/* Explanation — smoothly expands after submit */}
+      {q.explanation && (
         <div
-          className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
           style={{
-            backgroundColor: 'color-mix(in srgb, #10b981 8%, var(--theme-card-bg))',
-            border: '1px solid color-mix(in srgb, #10b981 20%, var(--theme-border))',
-            color: '#10b981',
+            maxHeight: submitted ? `${explanationHeight + 16}px` : '0px',
+            opacity: submitted ? 1 : 0,
+            overflow: 'hidden',
+            transition: 'max-height 0.35s ease 0.1s, opacity 0.25s ease 0.15s',
           }}
         >
-          {t(q.explanation.en, q.explanation.ro)}
+          <div ref={explanationRef}>
+            <div
+              className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
+              style={{
+                backgroundColor: 'color-mix(in srgb, #10b981 8%, var(--theme-card-bg))',
+                border: '1px solid color-mix(in srgb, #10b981 20%, var(--theme-border))',
+                color: '#10b981',
+              }}
+            >
+              {t(q.explanation.en, q.explanation.ro)}
+            </div>
+          </div>
         </div>
       )}
     </div>
