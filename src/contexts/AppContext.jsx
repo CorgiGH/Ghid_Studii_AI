@@ -45,6 +45,21 @@ export function AppProvider({ children }) {
   const [sidebarLocked, setSidebarLocked] = useLocalStorage('sidebarLocked', true);
   const [chatOpen, setChatOpen] = useLocalStorage('chatOpen', true);
   const [chatWidth, setChatWidth] = useLocalStorage('chatWidth', null);
+  const [progress, setProgress] = useLocalStorage('progress', {});
+
+  const markVisited = useCallback((stepId) => {
+    setProgress(prev => {
+      if (prev[stepId]?.visited) return prev;
+      return { ...prev, [stepId]: { ...prev[stepId], visited: true, understood: prev[stepId]?.understood || false } };
+    });
+  }, []);
+
+  const toggleUnderstood = useCallback((stepId) => {
+    setProgress(prev => {
+      const current = prev[stepId] || { visited: false, understood: false };
+      return { ...prev, [stepId]: { ...current, visited: true, understood: !current.understood } };
+    });
+  }, []);
 
   useEffect(() => {
     applyPalette(palette, dark);
@@ -92,11 +107,12 @@ export function AppProvider({ children }) {
     palette, setPalette,
     search, setSearch,
     checked, setChecked, toggleCheck,
+    progress, markVisited, toggleUnderstood,
     t, highlight,
     sidebarLocked, setSidebarLocked, toggleSidebarLock,
     chatOpen, setChatOpen, toggleChat,
     chatWidth, setChatWidth,
-  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth]);
+  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
