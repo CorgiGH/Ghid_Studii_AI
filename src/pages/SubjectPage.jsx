@@ -10,6 +10,7 @@ import InlineProgress from '../components/ui/InlineProgress';
 import ChatPanel from '../components/ui/ChatPanel';
 import CourseTransition from '../components/ui/CourseTransition';
 import CourseNavigation from '../components/ui/CourseNavigation';
+import CourseRenderer from '../components/blocks/CourseRenderer';
 import { CourseBlock } from '../components/ui';
 
 function PracticeTab({ practice: LazyPractice }) {
@@ -213,6 +214,17 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             {tab === 'courses' && (
               <>
                 {activeCourse ? (
+                  activeCourse.src ? (
+                    <>
+                      <CourseRenderer src={activeCourse.src} />
+                      <CourseNavigation
+                        items={subject.courses}
+                        currentIndex={activeCourseIndex}
+                        yearSem={yearSem}
+                        subjectSlug={subjectSlug}
+                      />
+                    </>
+                  ) : (
                   <CourseTransition courseIndex={activeCourseIndex}>
                     <Suspense fallback={<LoadingFallback />}>
                       {React.createElement(activeCourse.component)}
@@ -223,7 +235,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
                       yearSem={yearSem}
                       subjectSlug={subjectSlug}
                     />
-                  </CourseTransition>
+                  </CourseTransition>)
                 ) : (
                   <>
                     {subject.courses.length === 0 ? (
