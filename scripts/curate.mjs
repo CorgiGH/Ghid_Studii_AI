@@ -249,7 +249,82 @@ async function runStage2() {
 }
 
 async function runStage2_5() {
-  throw new Error('Stage 2.5 not yet implemented');
+  const extraction = JSON.parse(readFileSync(resolve(curateDir, 'stage1-extraction.json'), 'utf-8'));
+
+  // Find existing JSX file for this course
+  const contentDir = resolve(`src/content/${subject}`);
+  const typeDir = contentType === 'course' ? 'courses' : contentType === 'lab' ? 'labs' : contentType === 'seminar' ? 'seminars' : 'test';
+  const { readdirSync } = await import('fs');
+  const existingFiles = readdirSync(resolve(contentDir, typeDir)).filter(f => f.endsWith('.jsx'));
+
+  if (existingFiles.length === 0) {
+    console.log('  No existing files found. Treating as new content.');
+    writeFileSync(resolve(curateDir, 'stage2.5-diff.json'), JSON.stringify({ isNew: true, decisions: [] }, null, 2));
+    return;
+  }
+
+  // Read existing JSX content
+  console.log(`  Found existing files: ${existingFiles.join(', ')}`);
+
+  // Simple heuristic: match by number in filename
+  const numberMatch = pdfName.match(/(\d+)/);
+  const targetFile = numberMatch
+    ? existingFiles.find(f => f.includes(numberMatch[1].padStart(2, '0')))
+    : existingFiles[0];
+
+  if (!targetFile) {
+    console.log('  Could not match to an existing file. Treating as new content.');
+    writeFileSync(resolve(curateDir, 'stage2.5-diff.json'), JSON.stringify({ isNew: true, decisions: [] }, null, 2));
+    return;
+  }
+
+  const existingContent = readFileSync(resolve(contentDir, typeDir, targetFile), 'utf-8');
+
+  const prompt = `You are comparing extracted PDF content against an existing JSX course file to decide what needs updating.
+
+EXTRACTED CONTENT (from PDF):
+${JSON.stringify(extraction, null, 2)}
+
+EXISTING JSX FILE (${targetFile}):
+${existingContent}
+
+For each section in the extracted content, decide:
+- "keep" — the existing JSX covers this section accurately
+- "rewrite" — the existing JSX is missing content, has errors, or is incomplete
+- "new" — this section doesn't exist in the current JSX at all
+
+Output valid JSON only:
+{
+  "existingFile": "${targetFile}",
+  "decisions": [
+    {
+      "sectionIndex": 0,
+      "sectionTitle": "Section title",
+      "decision": "keep|rewrite|new",
+      "reason": "Brief explanation"
+    }
+  ],
+  "summary": { "keep": 5, "rewrite": 2, "new": 1 }
+}`;
+
+  console.log(`  Comparing against ${targetFile}...`);
+  const rawResponse = await sendTextPrompt(prompt);
+
+  let jsonStr = rawResponse.trim();
+  if (jsonStr.startsWith('```')) {
+    jsonStr = jsonStr.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+  }
+
+  let diff;
+  try {
+    diff = JSON.parse(jsonStr);
+  } catch (e) {
+    writeFileSync(resolve(curateDir, 'stage2.5-raw-response.txt'), rawResponse);
+    throw new Error(`Diff returned invalid JSON. Saved to stage2.5-raw-response.txt. Error: ${e.message}`);
+  }
+
+  writeFileSync(resolve(curateDir, 'stage2.5-diff.json'), JSON.stringify(diff, null, 2));
+  console.log(`  Decisions: ${diff.summary.keep} keep, ${diff.summary.rewrite} rewrite, ${diff.summary.new} new`);
 }
 
 main().catch(err => {
