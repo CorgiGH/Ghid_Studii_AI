@@ -50,6 +50,8 @@ export function AppProvider({ children }) {
   const toggleLecture = useCallback(() => setLectureVisible(v => !v), []);
   const [testProgress, setTestProgress] = useLocalStorage('testProgress', {});
 
+  const [courseContext, setCourseContext] = useState(null);
+
   const saveTestResult = useCallback((testId, score, totalPoints, answers) => {
     setTestProgress(prev => ({
       ...prev,
@@ -96,6 +98,21 @@ export function AppProvider({ children }) {
     localStorage.setItem('checked_v3_migrated', '1');
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // One-time migration: checked keys → progress entries (visited + understood)
+  useEffect(() => {
+    if (localStorage.getItem('progress_v1_migrated')) return;
+    const newProgress = { ...progress };
+    let changed = false;
+    for (const [key, value] of Object.entries(checked)) {
+      if (value && !newProgress[key]) {
+        newProgress[key] = { visited: true, understood: true };
+        changed = true;
+      }
+    }
+    if (changed) setProgress(newProgress);
+    localStorage.setItem('progress_v1_migrated', '1');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const t = useCallback((en, ro) => lang === 'ro' ? ro : en, [lang]);
 
   const toggleCheck = useCallback((id) => {
@@ -125,11 +142,12 @@ export function AppProvider({ children }) {
     progress, markVisited, toggleUnderstood,
     lectureVisible, toggleLecture,
     testProgress, saveTestResult,
+    courseContext, setCourseContext,
     t, highlight,
     sidebarLocked, setSidebarLocked, toggleSidebarLock,
     chatOpen, setChatOpen, toggleChat,
     chatWidth, setChatWidth,
-  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood, lectureVisible, toggleLecture, testProgress, saveTestResult]);
+  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood, lectureVisible, toggleLecture, testProgress, saveTestResult, courseContext, setCourseContext]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
