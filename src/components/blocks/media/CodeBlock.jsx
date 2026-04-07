@@ -1,6 +1,7 @@
 import React from 'react';
 
-export default function CodeBlock({ language, content }) {
+export default function CodeBlock({ language, content, code }) {
+  content = content || code || '';
   return (
     <div className="rounded-xl mb-3 overflow-hidden" style={{ border: '1px solid var(--theme-border)' }}>
       {language && (
