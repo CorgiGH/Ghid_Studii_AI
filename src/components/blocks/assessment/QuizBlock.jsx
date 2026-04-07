@@ -98,7 +98,7 @@ function QuizQuestion({ q, index, total }) {
               >
                 {String.fromCharCode(65 + oi)}
               </span>
-              {t(opt.text.en, opt.text.ro)}
+              {typeof opt.text === 'string' ? opt.text : t(opt.text.en, opt.text.ro)}
             </button>
           );
         })}
