@@ -86,14 +86,14 @@ Rules:
 - Respond ONLY with the JSON object, no other text`;
 }
 
-async function tryKey(url, model, key, messages, stream) {
+async function tryKey(url, model, key, messages, stream, { temperature = 0.7, max_tokens = 1024 } = {}) {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${key}`,
     },
-    body: JSON.stringify({ model, messages, stream, temperature: 0.7, max_tokens: 1024 }),
+    body: JSON.stringify({ model, messages, stream, temperature, max_tokens }),
   });
 
   if (res.status === 429) return null; // signal to try next key
@@ -106,7 +106,7 @@ async function tryKey(url, model, key, messages, stream) {
   return res;
 }
 
-async function callLLM(messages, stream = false) {
+async function callLLM(messages, stream = false, opts = {}) {
   // Estimate input tokens (~4 chars per token)
   const inputEstimate = Math.ceil(messages.reduce((sum, m) => sum + m.content.length, 0) / 4);
 
@@ -116,7 +116,7 @@ async function callLLM(messages, stream = false) {
     console.log(`Trying Groq key index ${idx}`);
     const res = await tryKey(
       'https://api.groq.com/openai/v1/chat/completions',
-      GROQ_MODEL, groqKeys[idx], messages, stream
+      GROQ_MODEL, groqKeys[idx], messages, stream, opts
     );
     if (res) {
       nextGroqIndex = (idx + 1) % groqKeys.length;
@@ -131,7 +131,7 @@ async function callLLM(messages, stream = false) {
     console.log(`Trying OpenRouter key index ${idx}`);
     const res = await tryKey(
       'https://openrouter.ai/api/v1/chat/completions',
-      OPENROUTER_MODEL, openRouterKeys[idx], messages, stream
+      OPENROUTER_MODEL, openRouterKeys[idx], messages, stream, opts
     );
     if (res) {
       nextOpenRouterIndex = (idx + 1) % openRouterKeys.length;
@@ -262,14 +262,16 @@ Format:
 {"score": <number>, "maxScore": <number>, "feedback": {"correct": ["..."], "missing": ["..."], "incorrect": ["..."]}}
 
 Rules:
-- score is 0 to maxScore (partial credit allowed)
+- score is 0 to maxScore (partial credit allowed, be generous with partial credit)
 - "correct": 1-2 bullet points on what the student got right (skip if nothing correct)
 - "missing": 1-2 bullet points on key concepts the student missed (skip if nothing missing)
 - "incorrect": 1-2 bullet points on factual errors (skip if none)
 - Each bullet point is ONE short sentence (max 20 words)
 - Empty arrays are fine — omit categories with nothing to say
 - Match the language of the question (Romanian or English)
-- Be fair but strict — grade based on the rubric, not on effort
+- Grade the MEANING, not the exact wording — if the student says the same thing in different words, it counts
+- Paraphrasing, synonyms, and reordering are perfectly fine — only mark as missing if the concept is truly absent
+- If the answer covers all rubric points even in informal language, give full marks
 - NEVER pad feedback with filler like "Good attempt!" — only substantive points`;
 }
 
@@ -292,7 +294,7 @@ app.post('/api/grade', async (req, res) => {
       { role: 'user', content: userContent },
     ];
 
-    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false);
+    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false, { temperature: 0.1 });
     const data = await llmRes.json();
     const raw = data.choices?.[0]?.message?.content || '';
     recordUsage(key, provider, inputEstimate, Math.ceil(raw.length / 4));
