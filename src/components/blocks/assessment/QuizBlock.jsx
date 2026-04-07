@@ -58,7 +58,7 @@ function QuizQuestion({ q, index, total }) {
         {total > 1 && <span style={{ color: 'var(--theme-muted-text)' }}>Q{index + 1}. </span>}
         {t(q.question.en, q.question.ro)}
       </p>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         {q.options.map((opt, oi) => {
           let bg = 'var(--theme-card-bg)';
           let border = 'var(--theme-border)';
@@ -83,7 +83,7 @@ function QuizQuestion({ q, index, total }) {
             <button
               key={oi}
               onClick={() => handleSelect(oi)}
-              className="flex items-center gap-3 p-2.5 rounded-lg text-left text-sm cursor-pointer"
+              className="flex items-center gap-3 p-3.5 rounded-lg text-left text-sm cursor-pointer"
               style={{
                 backgroundColor: bg,
                 border: `1px solid ${border}`,
