@@ -3,8 +3,12 @@ import React from 'react';
 export default class ErrorBoundary extends React.Component {
   state = { hasError: false };
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error: error?.message || String(error) };
+  }
+
+  componentDidCatch(error, info) {
+    console.error('ErrorBoundary caught:', error, info?.componentStack);
   }
 
   handleReload = () => {
@@ -26,7 +30,7 @@ export default class ErrorBoundary extends React.Component {
         }}>
           <p style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</p>
           <h1 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-            Something went wrong
+            Something went wrong{this.state.error && <span style={{ display: 'block', fontSize: '0.7rem', opacity: 0.5, marginTop: '0.5rem', maxWidth: '400px', wordBreak: 'break-all' }}>{this.state.error}</span>}
           </h1>
           <p style={{ fontSize: '0.875rem', opacity: 0.6, marginBottom: '1.5rem' }}>
             An unexpected error occurred. This is usually fixed by reloading.
