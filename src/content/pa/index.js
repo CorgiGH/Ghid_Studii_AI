@@ -35,7 +35,24 @@ const pa = {
   ],
   labs: [],
   tests: [
-    { id: 'pa-tests', title: { en: 'Tests', ro: 'Teste' }, shortTitle: { en: 'Tests', ro: 'Teste' }, component: lazy(() => import('./tests/PATests.jsx')) },
+    // Midterms (Partials)
+    { id: 'partial-2025-a', title: { en: 'Partial 2025 — Variant A', ro: 'Partial 2025 — Varianta A' }, shortTitle: { en: '2025 A', ro: '2025 A' }, src: 'pa/tests/partial-2025-a.json' },
+    { id: 'partial-2025-b', title: { en: 'Partial 2025 — Variant B', ro: 'Partial 2025 — Varianta B' }, shortTitle: { en: '2025 B', ro: '2025 B' }, src: 'pa/tests/partial-2025-b.json' },
+    { id: 'partial-2022-a', title: { en: 'Partial 2022 — Variant A', ro: 'Partial 2022 — Varianta A' }, shortTitle: { en: '2022 A', ro: '2022 A' }, src: 'pa/tests/partial-2022-a.json' },
+    { id: 'partial-2022-b', title: { en: 'Partial 2022 — Variant B', ro: 'Partial 2022 — Varianta B' }, shortTitle: { en: '2022 B', ro: '2022 B' }, src: 'pa/tests/partial-2022-b.json' },
+    { id: 'partial-2022-ex', title: { en: 'Week 8 Test — Example', ro: 'Test Săpt. 8 — Exemplu' }, shortTitle: { en: 'W8 Ex', ro: 'S8 Ex' }, src: 'pa/tests/partial-2022-ex.json' },
+    { id: 'partial-2022-i', title: { en: 'Week 8 — Series I (Cubes)', ro: 'Test Săpt. 8 — Seria I (Cuburi)' }, shortTitle: { en: 'W8 S1', ro: 'S8 S1' }, src: 'pa/tests/partial-2022-i.json' },
+    { id: 'partial-2022-ii', title: { en: 'Week 8 — Series II (Odd Cubes)', ro: 'Test Săpt. 8 — Seria II (Cuburi impare)' }, shortTitle: { en: 'W8 S2', ro: 'S8 S2' }, src: 'pa/tests/partial-2022-ii.json' },
+    { id: 'partial-2019-a', title: { en: 'Partial 2019 — Variant A', ro: 'Partial 2019 — Varianta A' }, shortTitle: { en: '2019 A', ro: '2019 A' }, src: 'pa/tests/partial-2019-a.json' },
+    { id: 'partial-2019-b', title: { en: 'Partial 2019 — Variant B', ro: 'Partial 2019 — Varianta B' }, shortTitle: { en: '2019 B', ro: '2019 B' }, src: 'pa/tests/partial-2019-b.json' },
+    { id: 'partial-2017-a', title: { en: 'Partial 2017 — Variant A', ro: 'Partial 2017 — Varianta A' }, shortTitle: { en: '2017 A', ro: '2017 A' }, src: 'pa/tests/partial-2017-a.json' },
+    { id: 'partial-2017-b', title: { en: 'Partial 2017 — Variant B', ro: 'Partial 2017 — Varianta B' }, shortTitle: { en: '2017 B', ro: '2017 B' }, src: 'pa/tests/partial-2017-b.json' },
+    { id: 'partial-2016-a', title: { en: 'Partial 2016 — Variant A', ro: 'Partial 2016 — Varianta A' }, shortTitle: { en: '2016 A', ro: '2016 A' }, src: 'pa/tests/partial-2016-a.json' },
+    { id: 'partial-2015-a', title: { en: 'Partial 2015 — Variant A', ro: 'Partial 2015 — Varianta A' }, shortTitle: { en: '2015 A', ro: '2015 A' }, src: 'pa/tests/partial-2015-a.json' },
+    // Finals
+    { id: 'exam-2014-a', title: { en: 'Exam 2014 — Variant A (BM)', ro: 'Examen 2014 — Varianta A (BM)' }, shortTitle: { en: 'Exam A', ro: 'Ex. A' }, src: 'pa/tests/exam-2014-a.json' },
+    { id: 'exam-2014-b', title: { en: 'Exam 2014 — Variant B (Regex + DP)', ro: 'Examen 2014 — Varianta B (Regex + PD)' }, shortTitle: { en: 'Exam B', ro: 'Ex. B' }, src: 'pa/tests/exam-2014-b.json' },
+    { id: 'exam-2014-c', title: { en: 'Exam 2014 — Variant A\' (Voronoi)', ro: 'Examen 2014 — Varianta A\' (Voronoi)' }, shortTitle: { en: 'Exam A\'', ro: 'Ex. A\'' }, src: 'pa/tests/exam-2014-c.json' },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
