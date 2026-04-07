@@ -23,7 +23,25 @@ export default function CodeBlock({ language, content }) {
           margin: 0,
         }}
       >
-        <code>{content}</code>
+        <code>
+          {content.split('\n').map((line, i) => {
+            const trimmed = line.trimStart();
+            const isComment = trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('/*') || trimmed.startsWith('*');
+            const isSubgoal = isComment && /^(\/\/|#)\s*(Step|Phase|Initialize|Process|Check|Return|Finalize)/i.test(trimmed);
+            return (
+              <React.Fragment key={i}>
+                {i > 0 && '\n'}
+                <span style={isComment ? {
+                  color: '#6ee7b7',
+                  fontStyle: 'italic',
+                  ...(isSubgoal ? { fontWeight: 600 } : {}),
+                } : undefined}>
+                  {line}
+                </span>
+              </React.Fragment>
+            );
+          })}
+        </code>
       </pre>
     </div>
   );
