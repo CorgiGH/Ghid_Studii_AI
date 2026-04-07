@@ -12,8 +12,7 @@ function getGeminiClient() {
   if (!geminiClient) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.error('❌ GEMINI_API_KEY not set. Add it to proxy/.env');
-      process.exit(1);
+      throw new Error('GEMINI_API_KEY not set. Add it to proxy/.env');
     }
     geminiClient = new GoogleGenerativeAI(apiKey);
   }
@@ -83,8 +82,7 @@ function getOpenRouterKeys() {
     const raw = process.env.OPENROUTER_API_KEYS || process.env.OPENROUTER_API_KEY || '';
     openrouterKeys = raw.split(',').map(k => k.trim()).filter(Boolean);
     if (openrouterKeys.length === 0) {
-      console.error('❌ OPENROUTER_API_KEYS not set. Add it to proxy/.env');
-      process.exit(1);
+      throw new Error('OPENROUTER_API_KEYS not set. Add it to proxy/.env');
     }
   }
   return openrouterKeys;
@@ -129,6 +127,9 @@ async function openrouterRequest(model, messages, retries = 0) {
   }
 
   const data = await res.json();
+  if (!data.choices?.[0]?.message?.content) {
+    throw new Error(`OpenRouter returned unexpected response: ${JSON.stringify(data).slice(0, 200)}`);
+  }
   return data.choices[0].message.content;
 }
 
