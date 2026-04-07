@@ -349,7 +349,7 @@ Rules:
       { role: 'user', content: userContent },
     ];
 
-    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false, { temperature: 0.7 });
+    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false, { temperature: 0.7, max_tokens: 4096 });
     const data = await llmRes.json();
     const raw = data.choices?.[0]?.message?.content || '';
     recordUsage(key, provider, inputEstimate, Math.ceil(raw.length / 4));
