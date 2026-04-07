@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import ProgressRing from '../ui/ProgressRing';
+import BottomSheet from './BottomSheet';
 
 const HOVER_ZONE_WIDTH = 48; // px from left edge that triggers sidebar
 
@@ -160,10 +161,10 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
 
   return (
     <>
-      {/* Mobile backdrop */}
-      {open && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
-      )}
+      {/* Mobile bottom sheet */}
+      <BottomSheet open={open} onClose={onClose}>
+        <nav className="flex flex-col gap-1 text-sm">{courseList}</nav>
+      </BottomSheet>
 
       {/* Layout spacer when locked */}
       {locked && (
@@ -224,29 +225,6 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
         </button>
       )}
 
-      {/* Mobile sidebar */}
-      <aside
-        className={`
-          fixed top-0 left-0 z-50 lg:hidden
-          w-60 h-full overflow-y-auto
-          p-3 pt-16 text-sm
-          transition-transform duration-200
-          ${open ? 'translate-x-0' : '-translate-x-full'}
-        `}
-        style={{
-          backgroundColor: 'var(--theme-sidebar-bg)',
-          borderRight: '1px solid var(--theme-sidebar-border)',
-        }}
-      >
-        <div className="flex justify-end mb-2">
-          <button onClick={onClose} className="p-1 rounded transition" style={{ backgroundColor: 'var(--theme-hover-bg)' }}>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <nav className="flex flex-col gap-1">{courseList}</nav>
-      </aside>
 
       <style>{`
         aside::-webkit-scrollbar, aside div::-webkit-scrollbar { display: none; }
