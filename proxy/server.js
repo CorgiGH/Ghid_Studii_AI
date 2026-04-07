@@ -254,6 +254,64 @@ app.post('/api/verify', async (req, res) => {
   }
 });
 
+// POST /api/grade — rubric-based AI grading with concise structured feedback
+function buildGradeSystemPrompt() {
+  return `You grade university CS exam answers. Return ONLY a JSON object, no other text.
+
+Format:
+{"score": <number>, "maxScore": <number>, "feedback": {"correct": ["..."], "missing": ["..."], "incorrect": ["..."]}}
+
+Rules:
+- score is 0 to maxScore (partial credit allowed)
+- "correct": 1-2 bullet points on what the student got right (skip if nothing correct)
+- "missing": 1-2 bullet points on key concepts the student missed (skip if nothing missing)
+- "incorrect": 1-2 bullet points on factual errors (skip if none)
+- Each bullet point is ONE short sentence (max 20 words)
+- Empty arrays are fine — omit categories with nothing to say
+- Match the language of the question (Romanian or English)
+- Be fair but strict — grade based on the rubric, not on effort
+- NEVER pad feedback with filler like "Good attempt!" — only substantive points`;
+}
+
+app.post('/api/grade', async (req, res) => {
+  try {
+    const { prompt, studentAnswer, rubric, maxPoints, questionType, courseContext } = req.body;
+    if (!prompt || !studentAnswer) return res.status(400).json({ error: 'prompt and studentAnswer required' });
+
+    const cacheKey = createHash('sha256').update(`grade|${prompt}|${studentAnswer}`).digest('hex');
+    if (verifyCache.has(cacheKey)) {
+      return res.json(verifyCache.get(cacheKey));
+    }
+
+    let userContent = `Question (${questionType || 'open-ended'}, ${maxPoints || 10} points):\n${prompt}\n\nStudent answer:\n${studentAnswer}`;
+    if (rubric) userContent += `\n\nGrading rubric:\n${rubric}`;
+    if (courseContext) userContent += `\n\nRelevant course material (use as ground truth):\n${courseContext}`;
+
+    const messages = [
+      { role: 'system', content: buildGradeSystemPrompt() },
+      { role: 'user', content: userContent },
+    ];
+
+    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false);
+    const data = await llmRes.json();
+    const raw = data.choices?.[0]?.message?.content || '';
+    recordUsage(key, provider, inputEstimate, Math.ceil(raw.length / 4));
+
+    let result;
+    try {
+      result = JSON.parse(raw);
+    } catch {
+      result = { score: 0, maxScore: maxPoints || 10, feedback: { incorrect: [raw.slice(0, 200)] } };
+    }
+
+    verifyCache.set(cacheKey, result);
+    res.json(result);
+  } catch (err) {
+    console.error('Grade error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // GET /stats — daily usage per key
