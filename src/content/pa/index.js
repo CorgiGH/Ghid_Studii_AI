@@ -21,9 +21,9 @@ const pa = {
     },
     { id: 'pa-c2', title: { en: 'Course 2: Algorithm Efficiency Analysis', ro: 'Cursul 2: Analiza eficienței algoritmilor' }, shortTitle: { en: 'C2: Efficiency Analysis', ro: 'C2: Analiza eficienței' }, sectionCount: 13, metaId: 'pa-c2', src: 'pa/courses/course-02.json' },
     { id: 'pa-c3', title: { en: 'Course 3: Nondeterministic & Probabilistic Algorithms', ro: 'Cursul 3: Algoritmi nedeterministici și probabilistici' }, shortTitle: { en: 'C3: Nondet/Prob', ro: 'C3: Nedet/Prob' }, sectionCount: 13, metaId: 'pa-c3', src: 'pa/courses/course-03.json' },
-    { id: 'pa-c4', title: { en: 'Lecture 4: Probabilistic Analysis', ro: 'Cursul 4: Analiză probabilistică' }, shortTitle: { en: 'L4: Prob. Analysis', ro: 'C4: Analiză prob.' }, sectionCount: 6, component: lazy(() => import('./courses/Course04.jsx')) },
-    { id: 'pa-c5', title: { en: 'Lecture 5a: KMP Algorithm', ro: 'Cursul 5a: Algoritmul KMP' }, shortTitle: { en: 'L5a: KMP', ro: 'C5a: KMP' }, sectionCount: 5, component: lazy(() => import('./courses/Course05.jsx')) },
-    { id: 'pa-c6', title: { en: 'Lecture 5b: Boyer-Moore & Rabin-Karp', ro: 'Cursul 5b: Boyer-Moore și Rabin-Karp' }, shortTitle: { en: 'L5b: BM/RK', ro: 'C5b: BM/RK' }, sectionCount: 6, component: lazy(() => import('./courses/Course06.jsx')) },
+    { id: 'pa-c4', title: { en: 'Course 4: Probabilistic Analysis', ro: 'Cursul 4: Analiză probabilistică' }, shortTitle: { en: 'C4: Prob. Analysis', ro: 'C4: Analiză prob.' }, sectionCount: 6, metaId: 'pa-c4', src: 'pa/courses/course-04.json' },
+    { id: 'pa-c5', title: { en: 'Course 5a: KMP Algorithm', ro: 'Cursul 5a: Algoritmul KMP' }, shortTitle: { en: 'C5a: KMP', ro: 'C5a: KMP' }, sectionCount: 5, metaId: 'pa-c5', src: 'pa/courses/course-05.json' },
+    { id: 'pa-c6', title: { en: 'Course 5b: Boyer-Moore & Rabin-Karp', ro: 'Cursul 5b: Boyer-Moore și Rabin-Karp' }, shortTitle: { en: 'C5b: BM/RK', ro: 'C5b: BM/RK' }, sectionCount: 6, metaId: 'pa-c6', src: 'pa/courses/course-06.json' },
   ],
   seminars: [
     { id: 'pa-s1', title: { en: 'Week 1: Computational Problems', ro: 'Săptămâna 1: Probleme computaționale' }, shortTitle: { en: 'W1: Comp. Problems', ro: 'S1: Probleme comp.' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
