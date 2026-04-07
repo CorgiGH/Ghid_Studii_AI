@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Page Transition Mockups</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; }
+
+  .header {
+    text-align: center;
+    padding: 30px 20px 10px;
+  }
+  .header h1 { font-size: 22px; color: #e0e0e0; margin-bottom: 6px; }
+  .header p { font-size: 13px; color: #888; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px 32px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .demo-card {
+    background: #16213e;
+    border: 1.5px solid #0f3460;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .demo-label {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid #0f3460;
+  }
+  .demo-label h2 { font-size: 15px; color: #e0e0e0; }
+  .demo-label p { font-size: 11px; color: #888; margin-top: 2px; }
+
+  .demo-viewport {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    display: flex;
+  }
+
+  /* Mini sidebar */
+  .mini-sidebar {
+    width: 100px;
+    background: #111a30;
+    border-right: 1px solid #0f3460;
+    padding: 10px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .mini-item {
+    font-size: 11px;
+    padding: 7px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    color: #999;
+  }
+  .mini-item:hover { background: #1a2744; transform: scale(1.03); border-color: #3b82f630; }
+  .mini-item.active {
+    background: #1e3a5f;
+    border-color: #3b82f6;
+    color: #fff;
+    font-weight: 600;
+    transform: scale(1.05);
+  }
+
+  /* Content area */
+  .content-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page {
+    position: absolute;
+    inset: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .page-title { font-size: 16px; font-weight: 600; color: #e0e0e0; }
+  .page-bar { height: 4px; border-radius: 2px; background: #2a3a5c; }
+  .page-bar-fill { height: 100%; border-radius: 2px; background: #3b82f6; }
+  .page-line { height: 8px; border-radius: 4px; background: #1a2744; }
+  .page-line.short { width: 60%; }
+  .page-line.med { width: 80%; }
+  .page-block { height: 40px; border-radius: 6px; background: #1a2744; border: 1px solid #0f3460; }
+
+  .page.green .page-title { color: #4ade80; }
+  .page.blue .page-title { color: #60a5fa; }
+  .page.amber .page-title { color: #fbbf24; }
+
+  /* ====== TRANSITION A: Fade ====== */
+  .fade-out { animation: fadeOut 0.3s ease forwards; }
+  .fade-in { animation: fadeIn 0.3s ease forwards; }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ====== TRANSITION B: Slide ====== */
+  .slide-out-up { animation: slideOutUp 0.35s ease forwards; }
+  .slide-in-up { animation: slideInUp 0.35s ease forwards; }
+  .slide-out-down { animation: slideOutDown 0.35s ease forwards; }
+  .slide-in-down { animation: slideInDown 0.35s ease forwards; }
+  @keyframes slideOutUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-40px); opacity: 0; } }
+  @keyframes slideInUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes slideOutDown { from { transform: translateY(0); opacity: 1; } to { transform: translateY(40px); opacity: 0; } }
+  @keyframes slideInDown { from { transform: translateY(-40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ====== TRANSITION C: Instant ====== */
+  .instant-hide { display: none; }
+
+  /* ====== TRANSITION D: Fade + Slide ====== */
+  .fadeslide-out-up { animation: fadeslideOutUp 0.3s ease forwards; }
+  .fadeslide-in-up { animation: fadeslideInUp 0.3s ease forwards; }
+  .fadeslide-out-down { animation: fadeslideOutDown 0.3s ease forwards; }
+  .fadeslide-in-down { animation: fadeslideInDown 0.3s ease forwards; }
+  @keyframes fadeslideOutUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+  @keyframes fadeslideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes fadeslideOutDown { from { transform: translateY(0); opacity: 1; } to { transform: translateY(20px); opacity: 0; } }
+  @keyframes fadeslideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .try-label {
+    text-align: center;
+    font-size: 10px;
+    color: #555;
+    padding: 8px;
+    border-top: 1px solid #0f3460;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Page Transition Options</h1>
+  <p>Click the sidebar courses in each demo to see the transition style</p>
+</div>
+
+<div class="grid">
+
+  <!-- A: Fade -->
+  <div class="demo-card">
+    <div class="demo-label">
+      <h2>A) Fade</h2>
+      <p>Old page fades out, new page fades in</p>
+    </div>
+    <div class="demo-viewport">
+      <div class="mini-sidebar" data-demo="fade">
+        <div class="mini-item active" data-idx="0">1. Intro</div>
+        <div class="mini-item" data-idx="1">2. Processes</div>
+        <div class="mini-item" data-idx="2">3. Threads</div>
+        <div class="mini-item" data-idx="3">4. CPU Sched</div>
+      </div>
+      <div class="content-area" data-demo="fade">
+        <div class="page green" data-idx="0">
+          <div class="page-title">1. Introduction</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:100%"></div></div>
+          <div class="page-line"></div><div class="page-line med"></div>
+          <div class="page-block"></div>
+          <div class="page-line short"></div><div class="page-line"></div>
+        </div>
+        <div class="page blue" data-idx="1" style="opacity:0;pointer-events:none;">
+          <div class="page-title">2. Processes</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:55%"></div></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+          <div class="page-block"></div><div class="page-block"></div>
+          <div class="page-line short"></div>
+        </div>
+        <div class="page amber" data-idx="2" style="opacity:0;pointer-events:none;">
+          <div class="page-title">3. Threads</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:30%"></div></div>
+          <div class="page-line"></div><div class="page-line short"></div>
+          <div class="page-block"></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+        </div>
+        <div class="page" data-idx="3" style="opacity:0;pointer-events:none;">
+          <div class="page-title">4. CPU Scheduling</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:0%"></div></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+          <div class="page-line short"></div>
+          <div class="page-block"></div><div class="page-block"></div>
+        </div>
+      </div>
+    </div>
+    <div class="try-label">Click sidebar items to preview</div>
+  </div>
+
+  <!-- B: Slide -->
+  <div class="demo-card">
+    <div class="demo-label">
+      <h2>B) Slide</h2>
+      <p>Content slides up/down based on course direction</p>
+    </div>
+    <div class="demo-viewport">
+      <div class="mini-sidebar" data-demo="slide">
+        <div class="mini-item active" data-idx="0">1. Intro</div>
+        <div class="mini-item" data-idx="1">2. Processes</div>
+        <div class="mini-item" data-idx="2">3. Threads</div>
+        <div class="mini-item" data-idx="3">4. CPU Sched</div>
+      </div>
+      <div class="content-area" data-demo="slide">
+        <div class="page green" data-idx="0">
+          <div class="page-title">1. Introduction</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:100%"></div></div>
+          <div class="page-line"></div><div class="page-line med"></div>
+          <div class="page-block"></div>
+          <div class="page-line short"></div><div class="page-line"></div>
+        </div>
+        <div class="page blue" data-idx="1" style="opacity:0;pointer-events:none;">
+          <div class="page-title">2. Processes</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:55%"></div></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+          <div class="page-block"></div><div class="page-block"></div>
+          <div class="page-line short"></div>
+        </div>
+        <div class="page amber" data-idx="2" style="opacity:0;pointer-events:none;">
+          <div class="page-title">3. Threads</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:30%"></div></div>
+          <div class="page-line"></div><div class="page-line short"></div>
+          <div class="page-block"></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+        </div>
+        <div class="page" data-idx="3" style="opacity:0;pointer-events:none;">
+          <div class="page-title">4. CPU Scheduling</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:0%"></div></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+          <div class="page-line short"></div>
+          <div class="page-block"></div><div class="page-block"></div>
+        </div>
+      </div>
+    </div>
+    <div class="try-label">Click sidebar items to preview</div>
+  </div>
+
+  <!-- C: Instant -->
+  <div class="demo-card">
+    <div class="demo-label">
+      <h2>C) Instant</h2>
+      <p>No transition, immediate content swap</p>
+    </div>
+    <div class="demo-viewport">
+      <div class="mini-sidebar" data-demo="instant">
+        <div class="mini-item active" data-idx="0">1. Intro</div>
+        <div class="mini-item" data-idx="1">2. Processes</div>
+        <div class="mini-item" data-idx="2">3. Threads</div>
+        <div class="mini-item" data-idx="3">4. CPU Sched</div>
+      </div>
+      <div class="content-area" data-demo="instant">
+        <div class="page green" data-idx="0">
+          <div class="page-title">1. Introduction</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:100%"></div></div>
+          <div class="page-line"></div><div class="page-line med"></div>
+          <div class="page-block"></div>
+          <div class="page-line short"></div><div class="page-line"></div>
+        </div>
+        <div class="page blue" data-idx="1" style="opacity:0;pointer-events:none;">
+          <div class="page-title">2. Processes</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:55%"></div></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+          <div class="page-block"></div><div class="page-block"></div>
+          <div class="page-line short"></div>
+        </div>
+        <div class="page amber" data-idx="2" style="opacity:0;pointer-events:none;">
+          <div class="page-title">3. Threads</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:30%"></div></div>
+          <div class="page-line"></div><div class="page-line short"></div>
+          <div class="page-block"></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+        </div>
+        <div class="page" data-idx="3" style="opacity:0;pointer-events:none;">
+          <div class="page-title">4. CPU Scheduling</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:0%"></div></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+          <div class="page-line short"></div>
+          <div class="page-block"></div><div class="page-block"></div>
+        </div>
+      </div>
+    </div>
+    <div class="try-label">Click sidebar items to preview</div>
+  </div>
+
+  <!-- D: Fade + Slide -->
+  <div class="demo-card">
+    <div class="demo-label">
+      <h2>D) Fade + Subtle Slide</h2>
+      <p>Fades while sliding slightly in navigation direction</p>
+    </div>
+    <div class="demo-viewport">
+      <div class="mini-sidebar" data-demo="fadeslide">
+        <div class="mini-item active" data-idx="0">1. Intro</div>
+        <div class="mini-item" data-idx="1">2. Processes</div>
+        <div class="mini-item" data-idx="2">3. Threads</div>
+        <div class="mini-item" data-idx="3">4. CPU Sched</div>
+      </div>
+      <div class="content-area" data-demo="fadeslide">
+        <div class="page green" data-idx="0">
+          <div class="page-title">1. Introduction</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:100%"></div></div>
+          <div class="page-line"></div><div class="page-line med"></div>
+          <div class="page-block"></div>
+          <div class="page-line short"></div><div class="page-line"></div>
+        </div>
+        <div class="page blue" data-idx="1" style="opacity:0;pointer-events:none;">
+          <div class="page-title">2. Processes</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:55%"></div></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+          <div class="page-block"></div><div class="page-block"></div>
+          <div class="page-line short"></div>
+        </div>
+        <div class="page amber" data-idx="2" style="opacity:0;pointer-events:none;">
+          <div class="page-title">3. Threads</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:30%"></div></div>
+          <div class="page-line"></div><div class="page-line short"></div>
+          <div class="page-block"></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+        </div>
+        <div class="page" data-idx="3" style="opacity:0;pointer-events:none;">
+          <div class="page-title">4. CPU Scheduling</div>
+          <div class="page-bar"><div class="page-bar-fill" style="width:0%"></div></div>
+          <div class="page-line med"></div><div class="page-line"></div>
+          <div class="page-line short"></div>
+          <div class="page-block"></div><div class="page-block"></div>
+        </div>
+      </div>
+    </div>
+    <div class="try-label">Click sidebar items to preview</div>
+  </div>
+
+</div>
+
+<script>
+  const activeIndices = { fade: 0, slide: 0, instant: 0, fadeslide: 0 };
+
+  document.querySelectorAll('.mini-sidebar').forEach(sidebar => {
+    const demo = sidebar.dataset.demo;
+    sidebar.querySelectorAll('.mini-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const newIdx = parseInt(item.dataset.idx);
+        const oldIdx = activeIndices[demo];
+        if (newIdx === oldIdx) return;
+
+        const goingDown = newIdx > oldIdx;
+        activeIndices[demo] = newIdx;
+
+        // Update sidebar active
+        sidebar.querySelectorAll('.mini-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        // Get content area
+        const contentArea = document.querySelector(`.content-area[data-demo="${demo}"]`);
+        const pages = contentArea.querySelectorAll('.page');
+        const oldPage = pages[oldIdx];
+        const newPage = pages[newIdx];
+
+        switch (demo) {
+          case 'fade':
+            oldPage.style.pointerEvents = 'none';
+            oldPage.className = oldPage.className.replace(/ fade-\w+/g, '');
+            newPage.className = newPage.className.replace(/ fade-\w+/g, '');
+            oldPage.classList.add('fade-out');
+            setTimeout(() => {
+              newPage.style.opacity = '1';
+              newPage.style.pointerEvents = 'auto';
+              newPage.classList.add('fade-in');
+            }, 150);
+            break;
+
+          case 'slide':
+            oldPage.style.pointerEvents = 'none';
+            oldPage.className = oldPage.className.replace(/ slide-\w+-\w+/g, '');
+            newPage.className = newPage.className.replace(/ slide-\w+-\w+/g, '');
+            newPage.style.opacity = '1';
+            newPage.style.pointerEvents = 'auto';
+            if (goingDown) {
+              oldPage.classList.add('slide-out-up');
+              newPage.classList.add('slide-in-up');
+            } else {
+              oldPage.classList.add('slide-out-down');
+              newPage.classList.add('slide-in-down');
+            }
+            break;
+
+          case 'instant':
+            oldPage.style.opacity = '0';
+            oldPage.style.pointerEvents = 'none';
+            newPage.style.opacity = '1';
+            newPage.style.pointerEvents = 'auto';
+            break;
+
+          case 'fadeslide':
+            oldPage.style.pointerEvents = 'none';
+            oldPage.className = oldPage.className.replace(/ fadeslide-\w+-\w+/g, '');
+            newPage.className = newPage.className.replace(/ fadeslide-\w+-\w+/g, '');
+            newPage.style.opacity = '1';
+            newPage.style.pointerEvents = 'auto';
+            if (goingDown) {
+              oldPage.classList.add('fadeslide-out-up');
+              newPage.classList.add('fadeslide-in-up');
+            } else {
+              oldPage.classList.add('fadeslide-out-down');
+              newPage.classList.add('fadeslide-in-down');
+            }
+            break;
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

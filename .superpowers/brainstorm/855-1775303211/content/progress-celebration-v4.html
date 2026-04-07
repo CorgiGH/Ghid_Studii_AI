@@ -1,0 +1,149 @@
+<h2>The Mix: Unified Shimmer</h2>
+<p class="subtitle">Shimmer now sweeps across the entire bar as one continuous wave. Click to try.</p>
+
+<div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:32px;">
+
+  <div style="background:#1a1a2e;border-radius:12px;padding:24px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;margin-bottom:8px;">
+      <span>Course 3: Process Management</span>
+      <span id="count" style="margin-left:auto;display:inline-block;font-weight:bold;">3/7</span>
+    </div>
+
+    <!-- Outer wrapper for the shimmer overlay -->
+    <div style="position:relative;overflow:visible;" id="barOuter">
+      <!-- Segments -->
+      <div style="display:flex;gap:3px;height:8px;" id="segments">
+        <div class="seg filled" style="flex:1;border-radius:4px;background:#3b82f6;"></div>
+        <div class="seg filled" style="flex:1;border-radius:4px;background:#3b82f6;"></div>
+        <div class="seg filled" style="flex:1;border-radius:4px;background:#3b82f6;"></div>
+        <div class="seg" style="flex:1;border-radius:4px;background:#333;"></div>
+        <div class="seg" style="flex:1;border-radius:4px;background:#333;"></div>
+        <div class="seg" style="flex:1;border-radius:4px;background:#333;"></div>
+        <div class="seg" style="flex:1;border-radius:4px;background:#333;"></div>
+      </div>
+
+      <!-- Single shimmer overlay that spans the full width, clipped to filled segments -->
+      <div id="shimmerMask" style="position:absolute;top:0;left:0;height:8px;pointer-events:none;overflow:hidden;border-radius:4px;width:0%;">
+        <div id="shimmer" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg, transparent 20%, rgba(255,255,255,0.4) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.4) 55%, transparent 80%);transform:translateX(-100%);"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button onclick="complete()" style="padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Complete next section</button>
+      <button onclick="reset()" style="padding:8px 18px;background:#333;color:#aaa;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Reset</button>
+    </div>
+  </div>
+
+  <div style="background:#1a1a2e;border-radius:12px;padding:24px;">
+    <h3 style="color:#eee;margin:0 0 8px;">What changed</h3>
+    <p style="color:#aaa;font-size:13px;line-height:1.7;margin:0;">
+      The shimmer is now a single overlay that spans the full width of all filled segments, so it reads as one continuous sweep rather than individual per-segment flashes. Everything else (green flash, +1, counter bounce) stays the same.
+    </p>
+  </div>
+
+</div>
+
+<style>
+  @keyframes shimmerAcross {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-18px) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-30px) scale(0.8); }
+  }
+  @keyframes counterBounce {
+    0% { transform: scale(1); color: #aaa; }
+    35% { transform: scale(1.45); color: #4ade80; }
+    100% { transform: scale(1); color: #aaa; }
+  }
+</style>
+
+<script>
+  let state = 3;
+  const total = 7;
+
+  function getFilledWidth() {
+    // Calculate what percentage of the bar container the filled segments occupy
+    // Each segment is 1/total of the full width, but we need to account for gaps
+    const container = document.getElementById('segments');
+    const segs = container.querySelectorAll('.seg');
+    if (state === 0) return '0%';
+    const lastFilled = segs[state - 1];
+    const containerRect = container.getBoundingClientRect();
+    const segRight = lastFilled.getBoundingClientRect().right - containerRect.left;
+    return segRight + 'px';
+  }
+
+  function updateMask() {
+    const mask = document.getElementById('shimmerMask');
+    mask.style.width = getFilledWidth();
+  }
+
+  // Init mask
+  setTimeout(updateMask, 50);
+
+  function complete() {
+    if (state >= total) return;
+    state++;
+
+    const segs = document.querySelectorAll('#segments .seg');
+    const seg = segs[state - 1];
+    const count = document.getElementById('count');
+
+    // 1. Green flash on the new segment
+    seg.style.transition = 'background 0.15s';
+    seg.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+
+    // 2. Settle to blue
+    setTimeout(() => {
+      seg.style.transition = 'background 0.5s';
+      seg.style.background = '#3b82f6';
+    }, 350);
+
+    // 3. Update mask width then fire unified shimmer
+    setTimeout(() => {
+      updateMask();
+      const shimmer = document.getElementById('shimmer');
+      shimmer.style.animation = 'none';
+      shimmer.offsetHeight; // force reflow
+      shimmer.style.animation = 'shimmerAcross 0.65s ease-out forwards';
+      setTimeout(() => { shimmer.style.transform = 'translateX(-100%)'; shimmer.style.animation = ''; }, 700);
+    }, 200);
+
+    // 4. +1 floater
+    const floater = document.createElement('div');
+    floater.textContent = '+1';
+    floater.style.cssText = `
+      position: absolute;
+      left: ${seg.offsetLeft + seg.offsetWidth / 2 - 10}px;
+      top: -6px;
+      color: #4ade80;
+      font-size: 15px;
+      font-weight: bold;
+      pointer-events: none;
+      animation: floatUp 0.7s ease-out forwards;
+      text-shadow: 0 0 8px rgba(74,222,128,0.5);
+      z-index: 10;
+    `;
+    document.getElementById('barOuter').appendChild(floater);
+    setTimeout(() => floater.remove(), 700);
+
+    // 5. Counter bounce
+    count.textContent = state + '/' + total;
+    count.style.animation = 'counterBounce 0.45s ease';
+    setTimeout(() => { count.style.animation = ''; }, 450);
+  }
+
+  function reset() {
+    state = 3;
+    const segs = document.querySelectorAll('#segments .seg');
+    segs.forEach((s, i) => {
+      s.style.transition = 'background 0.3s';
+      s.style.background = i < 3 ? '#3b82f6' : '#333';
+    });
+    document.getElementById('count').textContent = '3/7';
+    setTimeout(updateMask, 350);
+  }
+</script>

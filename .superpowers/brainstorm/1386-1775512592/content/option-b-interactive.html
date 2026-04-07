@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option B: Unified Flow</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+
+  .header { background: #111118; border-bottom: 1px solid #222; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 14px; color: #888; }
+  .header .badge { background: #10b981; color: white; font-size: 10px; padding: 3px 10px; border-radius: 12px; }
+
+  .content { max-width: 720px; margin: 0 auto; padding: 24px; }
+
+  /* Progress bar */
+  .progress-strip { display: flex; gap: 3px; margin-bottom: 24px; }
+  .progress-seg { flex: 1; height: 4px; border-radius: 2px; background: #1a1a25; transition: background 0.5s; cursor: pointer; }
+  .progress-seg.done { background: #10b981; }
+  .progress-seg.current { background: #3b82f6; box-shadow: 0 0 6px rgba(59,130,246,0.4); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .block { border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; animation: fadeUp 0.3s ease; }
+  .block-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+  .block p { font-size: 13px; line-height: 1.7; color: #bbb; }
+  .block strong { color: #e0e0e0; }
+
+  .block-learn { background: #111118; border: 1px solid #1e1e2e; }
+  .block-learn .block-label { color: #3b82f6; }
+  .block-visual { background: #0a1a0f; border: 1px solid #1a3a1f; }
+  .block-visual .block-label { color: #10b981; }
+  .block-think { background: #1a1a0a; border: 1px solid #3a3a1a; }
+  .block-think .block-label { color: #f59e0b; }
+  .block-quiz { background: #150a1a; border: 1px solid #2a1a3a; }
+  .block-quiz .block-label { color: #a855f7; }
+  .block-definition { background: #0f1120; border: 1px solid #1e2040; }
+  .block-definition .block-label { color: #60a5fa; }
+
+  /* Lecture anchor — blended inline */
+  .lecture-anchor { background: #13112a; border: 1px solid #2a2554; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+  .lecture-icon { font-size: 20px; flex-shrink: 0; }
+  .lecture-anchor .la-title { color: #a5b4fc; font-size: 11px; font-weight: bold; }
+  .lecture-anchor .la-text { color: #777; font-size: 11px; margin-top: 2px; }
+
+  .video-embed { background: #111118; border: 1px solid #222; border-radius: 10px; overflow: hidden; margin-bottom: 14px; cursor: pointer; transition: border-color 0.2s; }
+  .video-embed:hover { border-color: #444; }
+  .video-thumb { width: 100%; height: 180px; background: linear-gradient(135deg, #0a0a1a, #1a0a1a); display: flex; align-items: center; justify-content: center; position: relative; }
+  .video-thumb .play-btn { width: 56px; height: 56px; border-radius: 50%; background: rgba(239,68,68,0.9); display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; transition: transform 0.2s; }
+  .video-embed:hover .play-btn { transform: scale(1.1); }
+  .video-meta { padding: 12px 14px; }
+  .video-meta h4 { font-size: 13px; color: #ccc; margin-bottom: 4px; }
+  .video-meta p { font-size: 11px; color: #666; }
+
+  /* Reveal */
+  .reveal-btn { background: #222; border: 1px dashed #444; border-radius: 8px; padding: 10px 16px; color: #888; font-size: 12px; cursor: pointer; width: 100%; text-align: center; transition: all 0.2s; margin-top: 10px; }
+  .reveal-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+  .reveal-content { margin-top: 10px; padding: 12px; background: #1a1a0a; border-radius: 8px; font-size: 12px; color: #ccc; line-height: 1.6; display: none; }
+  .reveal-content.visible { display: block; }
+
+  /* Quiz */
+  .quiz-option { background: #1a1a25; border: 1px solid #2a2a35; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; font-size: 12px; color: #bbb; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+  .quiz-option:hover { border-color: #555; }
+  .quiz-option.selected { border-color: #a855f7; background: #1a102a; }
+  .quiz-option.correct { border-color: #10b981; background: #0a1a0f; color: #6ee7b7; }
+  .quiz-option.wrong { border-color: #ef4444; background: #1a0a0a; color: #fca5a5; }
+  .quiz-letter { width: 24px; height: 24px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; flex-shrink: 0; }
+  .quiz-explanation { margin-top: 10px; padding: 12px; background: #0a1a0f; border: 1px solid #1a3a1f; border-radius: 8px; font-size: 12px; color: #6ee7b7; line-height: 1.5; display: none; }
+  .quiz-explanation.visible { display: block; }
+  .check-btn { background: #a855f7; color: white; border: none; border-radius: 8px; padding: 8px 20px; font-size: 12px; cursor: pointer; margin-top: 8px; }
+  .check-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* State diagram */
+  .state-box { cursor: pointer; transition: all 0.2s; }
+  .state-box:hover rect { filter: brightness(1.4); }
+  .state-info { margin-top: 10px; background: #111; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #999; display: none; }
+  .state-info.visible { display: block; }
+
+  /* Exam tip callout */
+  .exam-tip { background: #1a1508; border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .exam-tip .tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .exam-tip p { font-size: 12px; color: #fcd34d; line-height: 1.5; }
+
+  /* Navigation */
+  .nav-bar { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid #1a1a25; }
+  .nav-btn { color: #3b82f6; font-size: 13px; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+  .nav-btn:hover { background: #111118; }
+  .nav-btn.disabled { color: #333; cursor: not-allowed; }
+
+  /* Section header */
+  .section-header { margin-bottom: 20px; }
+  .section-header h2 { font-size: 18px; color: #e0e0e0; margin-bottom: 4px; }
+  .section-header p { font-size: 12px; color: #666; }
+
+  code { background: #1a1a25; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #10b981; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Option B: Unified Flow &mdash; Course 3: Process Management</h1>
+  <span class="badge">INTERACTIVE MOCKUP</span>
+</div>
+
+<div class="content">
+  <!-- Progress segments -->
+  <div class="progress-strip" id="progress-strip"></div>
+
+  <!-- Each section is a page -->
+  <div class="flow-section" data-section="1">
+    <div class="section-header">
+      <h2>What happens when you run a program?</h2>
+      <p>Step 1 of 8 &middot; Process Fundamentals</p>
+    </div>
+
+    <div class="block block-learn">
+      <div class="block-label">Learn</div>
+      <p>When you double-click an executable or type a command in the terminal, the operating system doesn't just "run the code." It creates something called a <strong>process</strong> &mdash; a living, managed instance of that program.</p>
+      <p style="margin-top:10px;">A process has its own memory space, its own set of open files, and its own execution state. But here's the key insight: <strong>a process isn't always running on the CPU.</strong></p>
+    </div>
+
+    <div class="lecture-anchor">
+      <div class="lecture-icon">&#127891;</div>
+      <div>
+        <div class="la-title">Lecture 3, Slides 1&ndash;4</div>
+        <div class="la-text">Prof introduces program vs. process distinction</div>
+      </div>
+    </div>
+
+    <div class="block block-definition">
+      <div class="block-label">&#128214; Definition</div>
+      <p><strong>Process:</strong> An instance of a program in execution. It includes the program code (text section), current activity (program counter, registers), stack, data section, and heap.</p>
+    </div>
+
+    <div class="block block-think">
+      <div class="block-label">&#128161; Think about it</div>
+      <p>If you open the same program twice (e.g., two browser windows), how many processes are created?</p>
+      <div class="reveal-btn" onclick="toggleReveal(this)">Click to reveal &#9660;</div>
+      <div class="reveal-content">
+        <strong>Two separate processes.</strong> Each has its own memory space, PID, and execution state. They share the same code on disk, but are completely independent in memory.
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-section" data-section="2" style="display:none;">
+    <div class="section-header">
+      <h2>Process States</h2>
+      <p>Step 2 of 8 &middot; Process Fundamentals</p>
+    </div>
+
+    <div class="block block-learn">
+      <div class="block-label">Learn</div>
+      <p>A process moves through several states during its lifetime. At any moment, it's in exactly <strong>one</strong> state:</p>
+      <ul style="margin-top:10px; padding-left:20px; font-size:13px; color:#bbb; line-height:2;">
+        <li><strong style="color:#60a5fa;">New</strong> &mdash; Being created</li>
+        <li><strong style="color:#10b981;">Ready</strong> &mdash; Waiting for CPU</li>
+        <li><strong style="color:#f59e0b;">Running</strong> &mdash; Executing on CPU</li>
+        <li><strong style="color:#ef4444;">Blocked</strong> &mdash; Waiting for I/O</li>
+        <li><strong style="color:#888;">Terminated</strong> &mdash; Finished</li>
+      </ul>
+    </div>
+
+    <div class="exam-tip">
+      <div class="tip-icon">&#9888;</div>
+      <p><strong>Exam emphasis (Prof. Popescu):</strong> "Draw the complete state diagram with all transitions labeled. Students always confuse Blocked and Ready."</p>
+    </div>
+
+    <div class="block block-visual">
+      <div class="block-label">&#128200; Interactive &mdash; click a state</div>
+      <div style="text-align:center; padding:12px 0;">
+        <svg width="440" height="180" viewBox="0 0 440 180">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/>
+            </marker>
+          </defs>
+          <line x1="80" y1="75" x2="130" y2="75" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="215" y1="75" x2="265" y2="75" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="345" y1="75" x2="390" y2="75" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <path d="M 310 93 Q 310 140 235 140 Q 175 140 175 93" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="290" y1="93" x2="255" y2="130" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <path d="M 210 130 Q 145 130 145 93" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <text x="100" y="67" fill="#555" font-size="9">admit</text>
+          <text x="230" y="67" fill="#555" font-size="9">dispatch</text>
+          <text x="235" y="158" fill="#555" font-size="9">preempt</text>
+          <text x="260" y="120" fill="#555" font-size="9">I/O wait</text>
+          <text x="148" y="125" fill="#555" font-size="9">I/O done</text>
+          <rect x="200" y="120" width="75" height="30" rx="6" fill="#1a0a0a" stroke="#ef4444" style="cursor:pointer;" onclick="showInfo('blocked')"/>
+          <text x="237" y="139" text-anchor="middle" fill="#fca5a5" font-size="10" style="pointer-events:none;">Blocked</text>
+          <g class="state-box" onclick="showInfo('new')"><rect x="10" y="57" width="65" height="34" rx="8" fill="#0c1020" stroke="#60a5fa"/><text x="42" y="78" text-anchor="middle" fill="#93c5fd" font-size="11">New</text></g>
+          <g class="state-box" onclick="showInfo('ready')"><rect x="135" y="57" width="75" height="34" rx="8" fill="#0a1a0f" stroke="#10b981"/><text x="172" y="78" text-anchor="middle" fill="#6ee7b7" font-size="11">Ready</text></g>
+          <g class="state-box" onclick="showInfo('running')"><rect x="270" y="57" width="75" height="34" rx="8" fill="#1a1a0a" stroke="#f59e0b"/><text x="307" y="78" text-anchor="middle" fill="#fcd34d" font-size="11">Running</text></g>
+          <g class="state-box" onclick="showInfo('exit')"><rect x="395" y="57" width="40" height="34" rx="8" fill="#111" stroke="#555"/><text x="415" y="78" text-anchor="middle" fill="#888" font-size="11">Exit</text></g>
+        </svg>
+      </div>
+      <div class="state-info" id="info-new"><strong style="color:#60a5fa;">New:</strong> Memory is being allocated, PCB initialized. Not yet in the ready queue.</div>
+      <div class="state-info" id="info-ready"><strong style="color:#10b981;">Ready:</strong> Has everything it needs. Waiting in queue for CPU time.</div>
+      <div class="state-info" id="info-running"><strong style="color:#f59e0b;">Running:</strong> Actively executing. Only 1 process per CPU core can be here.</div>
+      <div class="state-info" id="info-blocked"><strong style="color:#ef4444;">Blocked:</strong> Waiting for I/O. Must go through Ready (not directly to Running) when done.</div>
+      <div class="state-info" id="info-exit"><strong style="color:#888;">Terminated:</strong> Done. PCB lingers until parent reads exit status.</div>
+    </div>
+
+    <div class="video-embed" onclick="this.querySelector('.play-btn').style.display='none'; this.querySelector('.video-msg').style.display='block';">
+      <div class="video-thumb">
+        <div class="play-btn">&#9654;</div>
+        <p class="video-msg" style="display:none;color:#888;font-size:12px;">Would open: Neso Academy &mdash; Process State Transitions</p>
+      </div>
+      <div class="video-meta">
+        <h4>Process State Transitions Explained</h4>
+        <p>Neso Academy &middot; 8:42 &middot; Animated walkthrough of the state diagram</p>
+      </div>
+    </div>
+
+    <div class="block block-think">
+      <div class="block-label">&#128161; Think about it</div>
+      <p>A process is reading from disk. What state is it in? When done, does it go straight to Running?</p>
+      <div class="reveal-btn" onclick="toggleReveal(this)">Click to reveal &#9660;</div>
+      <div class="reveal-content">
+        It's <strong style="color:#ef4444;">Blocked</strong>. When I/O completes, it goes to <strong style="color:#10b981;">Ready</strong>, not Running. It must wait for the scheduler. This is the most common exam mistake.
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-section" data-section="3" style="display:none;">
+    <div class="section-header">
+      <h2>Process Control Block (PCB)</h2>
+      <p>Step 3 of 8 &middot; Process Internals</p>
+    </div>
+
+    <div class="block block-learn">
+      <div class="block-label">Learn</div>
+      <p>The OS tracks every process using a <strong>Process Control Block (PCB)</strong> &mdash; the process's "identity card." It stores everything the OS needs to manage, pause, and resume a process.</p>
+    </div>
+
+    <div class="lecture-anchor">
+      <div class="lecture-icon">&#128196;</div>
+      <div>
+        <div class="la-title">Lecture 3, Slides 19&ndash;24</div>
+        <div class="la-text">PCB fields and their purpose. Prof says: "List all fields and explain each."</div>
+      </div>
+    </div>
+
+    <div class="block block-visual">
+      <div class="block-label">&#128230; PCB Structure &mdash; hover for details</div>
+      <div style="max-width:300px;margin:12px auto;">
+        <div class="pcb-field" onmouseenter="showPCBDetail(this, 'Unique number identifying this process. Assigned at creation, never reused while process exists.')" onmouseleave="hidePCBDetail(this)">
+          <span class="pcb-name">PID</span><span class="pcb-val">12345</span>
+        </div>
+        <div class="pcb-field" onmouseenter="showPCBDetail(this, 'Current state: New, Ready, Running, Blocked, or Terminated.')" onmouseleave="hidePCBDetail(this)">
+          <span class="pcb-name">State</span><span class="pcb-val" style="color:#10b981;">Ready</span>
+        </div>
+        <div class="pcb-field" onmouseenter="showPCBDetail(this, 'Address of the next instruction to execute. Saved on context switch, restored when process resumes.')" onmouseleave="hidePCBDetail(this)">
+          <span class="pcb-name">Program Counter</span><span class="pcb-val">0x7f4a2c</span>
+        </div>
+        <div class="pcb-field" onmouseenter="showPCBDetail(this, 'All CPU register values: general purpose, stack pointer, flags. Saved/restored on every context switch.')" onmouseleave="hidePCBDetail(this)">
+          <span class="pcb-name">CPU Registers</span><span class="pcb-val">{rax, rbx, ...}</span>
+        </div>
+        <div class="pcb-field" onmouseenter="showPCBDetail(this, 'Page tables, base/limit registers. Defines what memory the process can access.')" onmouseleave="hidePCBDetail(this)">
+          <span class="pcb-name">Memory Info</span><span class="pcb-val">page tables</span>
+        </div>
+        <div class="pcb-field" onmouseenter="showPCBDetail(this, 'List of open file descriptors, allocated devices, pending I/O requests.')" onmouseleave="hidePCBDetail(this)">
+          <span class="pcb-name">I/O Status</span><span class="pcb-val">fd 0,1,2,3</span>
+        </div>
+        <div class="pcb-field" onmouseenter="showPCBDetail(this, 'Priority level, time quantum remaining, scheduling queue pointers.')" onmouseleave="hidePCBDetail(this)">
+          <span class="pcb-name">Scheduling</span><span class="pcb-val">priority: 5</span>
+        </div>
+      </div>
+      <div id="pcb-tooltip" style="text-align:center;font-size:12px;color:#888;min-height:40px;padding:0 20px;transition:opacity 0.2s;">Hover over a field to see details</div>
+    </div>
+
+    <div class="block block-think">
+      <div class="block-label">&#128161; Think about it</div>
+      <p>Why does the PCB store the program counter? What would happen if it didn't?</p>
+      <div class="reveal-btn" onclick="toggleReveal(this)">Click to reveal &#9660;</div>
+      <div class="reveal-content">
+        Without saving the PC, a context-switched process would lose its place. When resumed, it wouldn't know which instruction to execute next &mdash; it would either restart from the beginning or crash. The PC is the "bookmark" for execution.
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-section" data-section="4" style="display:none;">
+    <div class="section-header">
+      <h2>Quick Check</h2>
+      <p>Step 4 of 8 &middot; Test your understanding</p>
+    </div>
+
+    <div class="block block-quiz">
+      <div class="block-label">Question 1 of 2</div>
+      <p style="margin-bottom:12px; font-size:14px; color:#e0e0e0;"><strong>A process is waiting for keyboard input. What state is it in?</strong></p>
+      <div class="quiz-option" onclick="selectQuiz(this, 1)" data-correct="false">
+        <div class="quiz-letter">A</div><span>Ready</span>
+      </div>
+      <div class="quiz-option" onclick="selectQuiz(this, 1)" data-correct="true">
+        <div class="quiz-letter">B</div><span>Blocked</span>
+      </div>
+      <div class="quiz-option" onclick="selectQuiz(this, 1)" data-correct="false">
+        <div class="quiz-letter">C</div><span>Running</span>
+      </div>
+      <button class="check-btn" id="check-1" onclick="checkQuiz(1)" disabled>Check Answer</button>
+      <div class="quiz-explanation" id="explain-1">&#9989; <strong>Blocked.</strong> Keyboard input is I/O. The process waits until the event occurs.</div>
+    </div>
+
+    <div class="block block-quiz" style="margin-top:16px;">
+      <div class="block-label">Question 2 of 2</div>
+      <p style="margin-bottom:12px; font-size:14px; color:#e0e0e0;"><strong>During a context switch, the OS saves the process state to its:</strong></p>
+      <div class="quiz-option" onclick="selectQuiz(this, 2)" data-correct="false">
+        <div class="quiz-letter">A</div><span>Stack</span>
+      </div>
+      <div class="quiz-option" onclick="selectQuiz(this, 2)" data-correct="true">
+        <div class="quiz-letter">B</div><span>PCB</span>
+      </div>
+      <div class="quiz-option" onclick="selectQuiz(this, 2)" data-correct="false">
+        <div class="quiz-letter">C</div><span>Heap</span>
+      </div>
+      <button class="check-btn" id="check-2" onclick="checkQuiz(2)" disabled>Check Answer</button>
+      <div class="quiz-explanation" id="explain-2">&#9989; <strong>PCB.</strong> The Process Control Block stores all saved state (registers, PC, memory info) so it can be restored later.</div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav-bar">
+    <div class="nav-btn disabled" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</div>
+    <div class="nav-btn" id="next-btn" onclick="navigate(1)">Continue &#8594;</div>
+  </div>
+</div>
+
+<style>
+  .pcb-field { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: #111118; border: 1px solid #1e1e2e; margin-bottom: 4px; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 12px; }
+  .pcb-field:hover { border-color: #3b82f6; background: #0f1120; }
+  .pcb-name { color: #93c5fd; font-weight: bold; }
+  .pcb-val { color: #888; font-family: monospace; font-size: 11px; }
+</style>
+
+<script>
+  let current = 1;
+  const total = 4;
+
+  function buildProgress() {
+    const strip = document.getElementById('progress-strip');
+    strip.innerHTML = '';
+    for (let i = 1; i <= total; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'progress-seg ' + (i < current ? 'done' : i === current ? 'current' : '');
+      seg.onclick = () => { if (i <= current) goTo(i); };
+      strip.appendChild(seg);
+    }
+  }
+
+  function goTo(s) {
+    document.querySelectorAll('.flow-section').forEach(el => el.style.display = 'none');
+    const target = document.querySelector(`.flow-section[data-section="${s}"]`);
+    if (target) target.style.display = 'block';
+    current = s;
+    buildProgress();
+    document.getElementById('prev-btn').className = s <= 1 ? 'nav-btn disabled' : 'nav-btn';
+    document.getElementById('next-btn').textContent = s >= total ? 'Complete ✓' : 'Continue →';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next < 1 || next > total) return;
+    if (next > current) current = next;
+    goTo(next);
+  }
+
+  function toggleReveal(btn) {
+    const c = btn.nextElementSibling;
+    if (c.classList.contains('visible')) { c.classList.remove('visible'); btn.textContent = 'Click to reveal ▼'; }
+    else { c.classList.add('visible'); btn.textContent = 'Hide ▲'; }
+  }
+
+  function showInfo(id) {
+    document.querySelectorAll('.state-info').forEach(el => el.classList.remove('visible'));
+    document.getElementById('info-' + id).classList.add('visible');
+  }
+
+  function showPCBDetail(el, text) {
+    el.style.borderColor = '#3b82f6';
+    document.getElementById('pcb-tooltip').textContent = text;
+    document.getElementById('pcb-tooltip').style.color = '#bbb';
+  }
+  function hidePCBDetail(el) {
+    el.style.borderColor = '#1e1e2e';
+    document.getElementById('pcb-tooltip').textContent = 'Hover over a field to see details';
+    document.getElementById('pcb-tooltip').style.color = '#888';
+  }
+
+  const quizSel = {};
+  function selectQuiz(el, q) {
+    el.parentElement.querySelectorAll('.quiz-option').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    quizSel[q] = el;
+    document.getElementById('check-' + q).disabled = false;
+  }
+  function checkQuiz(q) {
+    const sel = quizSel[q];
+    sel.parentElement.querySelectorAll('.quiz-option').forEach(s => {
+      s.style.pointerEvents = 'none';
+      if (s.dataset.correct === 'true') s.classList.add('correct');
+      else if (s === sel) s.classList.add('wrong');
+    });
+    document.getElementById('explain-' + q).classList.add('visible');
+    document.getElementById('check-' + q).disabled = true;
+  }
+
+  buildProgress();
+</script>
+</body>
+</html>

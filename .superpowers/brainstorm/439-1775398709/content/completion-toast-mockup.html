@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Completion Toast Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; }
+
+  .page-title { text-align: center; padding: 24px 0 8px; font-size: 22px; color: #94a3b8; }
+  .page-subtitle { text-align: center; padding: 0 0 24px; font-size: 14px; color: #64748b; }
+
+  /* Fake page layout */
+  .fake-page { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+
+  /* Progress bar mockup */
+  .progress-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 16px;
+    border-bottom: 1px solid #334155;
+    background: #1e293b;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 0;
+  }
+  .segments { display: flex; gap: 3px; flex: 1; height: 5px; }
+  .seg { flex: 1; border-radius: 3px; transition: background 0.3s; }
+  .seg.done { background: #3b82f6; }
+  .seg.empty { background: #334155; }
+
+  /* Progress Ring */
+  .ring-wrap { position: relative; width: 22px; height: 22px; flex-shrink: 0; }
+  .ring-wrap svg { width: 22px; height: 22px; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: #334155; stroke-width: 2.5; }
+  .ring-fg { fill: none; stroke-width: 2.5; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease, stroke 0.3s; }
+  .ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #94a3b8; }
+
+  /* Fake content area */
+  .content-area {
+    background: #1e293b;
+    border-radius: 0 0 8px 8px;
+    padding: 24px;
+    min-height: 200px;
+    position: relative;
+    overflow: hidden;
+  }
+  .fake-section { padding: 12px 16px; margin-bottom: 8px; background: #0f172a; border-radius: 6px; font-size: 13px; color: #94a3b8; display: flex; align-items: center; gap: 8px; }
+  .fake-check { width: 16px; height: 16px; border-radius: 3px; background: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; }
+  .fake-check.empty { background: #334155; }
+
+  /* ========== TOAST OPTIONS ========== */
+  .options-grid { display: flex; flex-direction: column; gap: 32px; margin-top: 24px; }
+  .option-block { border: 2px solid #334155; border-radius: 12px; padding: 20px; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; position: relative; }
+  .option-block:hover { border-color: #3b82f6; }
+  .option-block.selected { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.2); }
+  .option-label { display: inline-block; background: #3b82f6; color: white; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 99px; margin-bottom: 12px; letter-spacing: 0.5px; }
+  .option-title { font-size: 16px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+  .option-desc { font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
+
+  /* Toast A: Minimal bottom toast */
+  .toast-a {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #166534, #15803d);
+    border: 1px solid #22c55e;
+    border-radius: 12px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 32px rgba(34,197,94,0.3);
+    animation: slideUp 0.4s ease-out;
+    white-space: nowrap;
+  }
+  .toast-a .icon { font-size: 18px; }
+  .toast-a .text { font-size: 13px; font-weight: 600; color: #bbf7d0; }
+
+  /* Toast B: Center overlay with checkmark */
+  .toast-b-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15,23,42,0.6);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s ease;
+  }
+  .toast-b {
+    background: #1e293b;
+    border: 2px solid #22c55e;
+    border-radius: 16px;
+    padding: 24px 36px;
+    text-align: center;
+    box-shadow: 0 12px 48px rgba(34,197,94,0.25);
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .toast-b .check-circle {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 24px; color: white;
+    box-shadow: 0 0 20px rgba(34,197,94,0.4);
+  }
+  .toast-b .title { font-size: 16px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+  .toast-b .sub { font-size: 12px; color: #94a3b8; }
+
+  /* Toast C: Top banner slide-down */
+  .toast-c {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: linear-gradient(90deg, #166534, #15803d, #166534);
+    border-bottom: 1px solid #22c55e;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    animation: slideDown 0.4s ease-out;
+    box-shadow: 0 4px 16px rgba(34,197,94,0.2);
+  }
+  .toast-c .icon { font-size: 16px; }
+  .toast-c .text { font-size: 13px; font-weight: 600; color: #bbf7d0; }
+  .toast-c .dismiss { font-size: 11px; color: #86efac; opacity: 0.7; margin-left: 8px; }
+
+  @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Selection indicator */
+  .select-indicator {
+    position: fixed; bottom: 20px; right: 20px;
+    background: #3b82f6; color: white;
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    display: none; z-index: 100;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+  }
+  .select-indicator.visible { display: block; }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Course Completion Toast</h1>
+<p class="page-subtitle">Pick the style you like best. All auto-dismiss after ~2 seconds.</p>
+
+<div class="fake-page">
+  <div class="options-grid">
+
+    <!-- Option A: Minimal bottom toast -->
+    <div class="option-block" data-choice="a" onclick="selectOption(this)">
+      <div class="option-label">A</div>
+      <div class="option-title">Minimal Bottom Toast</div>
+      <div class="option-desc">Small pill at the bottom center. Unobtrusive, slides up and fades away.</div>
+      <div style="position: relative;">
+        <div class="progress-bar">
+          <div class="segments">
+            <div class="seg done"></div><div class="seg done"></div><div class="seg done"></div>
+            <div class="seg done"></div><div class="seg done"></div><div class="seg done"></div>
+          </div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 22 22"><circle class="ring-bg" cx="11" cy="11" r="8.5"/><circle class="ring-fg" cx="11" cy="11" r="8.5" stroke="#22c55e" stroke-dasharray="53.4" stroke-dashoffset="0"/></svg>
+          </div>
+        </div>
+        <div class="content-area" style="min-height: 160px;">
+          <div class="fake-section"><div class="fake-check">&#10003;</div> Section 6 - Final Topic</div>
+          <div class="toast-a">
+            <span class="icon">&#10003;</span>
+            <span class="text">Course 2 completed!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option B: Center popup -->
+    <div class="option-block" data-choice="b" onclick="selectOption(this)">
+      <div class="option-label">B</div>
+      <div class="option-title">Center Popup</div>
+      <div class="option-desc">Centered card with checkmark circle. Brief overlay with backdrop blur, pops in with a bounce.</div>
+      <div style="position: relative;">
+        <div class="progress-bar">
+          <div class="segments">
+            <div class="seg done"></div><div class="seg done"></div><div class="seg done"></div>
+            <div class="seg done"></div><div class="seg done"></div><div class="seg done"></div>
+          </div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 22 22"><circle class="ring-bg" cx="11" cy="11" r="8.5"/><circle class="ring-fg" cx="11" cy="11" r="8.5" stroke="#22c55e" stroke-dasharray="53.4" stroke-dashoffset="0"/></svg>
+          </div>
+        </div>
+        <div class="content-area" style="min-height: 180px;">
+          <div class="fake-section"><div class="fake-check">&#10003;</div> Section 6 - Final Topic</div>
+          <div class="toast-b-overlay">
+            <div class="toast-b">
+              <div class="check-circle">&#10003;</div>
+              <div class="title">Course Complete!</div>
+              <div class="sub">All 6 sections finished</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option C: Top banner -->
+    <div class="option-block" data-choice="c" onclick="selectOption(this)">
+      <div class="option-label">C</div>
+      <div class="option-title">Top Banner Slide</div>
+      <div class="option-desc">Green banner slides down from under the progress bar. Full-width, compact.</div>
+      <div style="position: relative;">
+        <div class="progress-bar">
+          <div class="segments">
+            <div class="seg done"></div><div class="seg done"></div><div class="seg done"></div>
+            <div class="seg done"></div><div class="seg done"></div><div class="seg done"></div>
+          </div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 22 22"><circle class="ring-bg" cx="11" cy="11" r="8.5"/><circle class="ring-fg" cx="11" cy="11" r="8.5" stroke="#22c55e" stroke-dasharray="53.4" stroke-dashoffset="0"/></svg>
+          </div>
+        </div>
+        <div class="content-area" style="min-height: 160px;">
+          <div class="toast-c">
+            <span class="icon">&#10003;</span>
+            <span class="text">Course 2 completed!</span>
+            <span class="dismiss">auto-dismisses</span>
+          </div>
+          <div class="fake-section" style="margin-top: 44px;"><div class="fake-check">&#10003;</div> Section 6 - Final Topic</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="select-indicator" id="indicator"></div>
+
+<script>
+  let selected = null;
+  function selectOption(el) {
+    document.querySelectorAll('.option-block').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selected = el.dataset.choice;
+    const ind = document.getElementById('indicator');
+    ind.textContent = 'Selected: Option ' + selected.toUpperCase();
+    ind.classList.add('visible');
+
+    // Send event
+    if (window.__brainstormEvent) {
+      window.__brainstormEvent({ type: 'click', choice: selected, text: 'Option ' + selected.toUpperCase() });
+    }
+  }
+</script>
+
+</body>
+</html>

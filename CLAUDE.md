@@ -60,8 +60,6 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 - **InlineProgress** (`src/components/ui/InlineProgress.jsx`) — Sticky segmented progress bar below TopBar. Left-to-right fill by count (not section-specific). Includes celebration animations: green flash, +1 floater, counter bounce, completion merge. Shows a center popup toast on course completion (auto-dismisses after 1.2s). Uses ProgressRing for the counter.
 - **CourseMap** (`src/components/ui/CourseMap.jsx`) — Bird's-eye grid of course tiles with progress rings. Shows on Courses tab when no course is selected
 - **CourseNavigation** (`src/components/ui/CourseNavigation.jsx`) — Prev/next course links at bottom of course content
-- **ReadingProgress** (`src/components/ui/ReadingProgress.jsx`) — *Unused legacy component.* Replaced by InlineProgress.
-- **StickyProgressBar** (`src/components/ui/StickyProgressBar.jsx`) — *Unused legacy component.* Animation logic ported to InlineProgress.
 
 ### Component library (src/components/ui/)
 - `Box` — Colored callout (types: definition, theorem, warning, formula, code)

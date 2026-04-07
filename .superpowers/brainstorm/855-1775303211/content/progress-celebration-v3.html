@@ -1,0 +1,137 @@
+<h2>The Mix: Segmented XP Bar</h2>
+<p class="subtitle">Segments from C + shimmer/+1/counter bounce from G + green flash from D. Click to try it out.</p>
+
+<div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:32px;">
+
+  <div style="background:#1a1a2e;border-radius:12px;padding:24px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;margin-bottom:8px;">
+      <span>Course 3: Process Management</span>
+      <span id="count" style="margin-left:auto;display:inline-block;font-weight:bold;">3/7</span>
+    </div>
+    <div style="display:flex;gap:3px;height:8px;position:relative;overflow:visible;" id="segments">
+      <div class="seg filled" style="flex:1;border-radius:4px;position:relative;overflow:hidden;background:#3b82f6;">
+        <div class="shimmer" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);transform:translateX(-100%);"></div>
+      </div>
+      <div class="seg filled" style="flex:1;border-radius:4px;position:relative;overflow:hidden;background:#3b82f6;">
+        <div class="shimmer" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);transform:translateX(-100%);"></div>
+      </div>
+      <div class="seg filled" style="flex:1;border-radius:4px;position:relative;overflow:hidden;background:#3b82f6;">
+        <div class="shimmer" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);transform:translateX(-100%);"></div>
+      </div>
+      <div class="seg" style="flex:1;border-radius:4px;position:relative;overflow:hidden;background:#333;">
+        <div class="shimmer" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);transform:translateX(-100%);"></div>
+      </div>
+      <div class="seg" style="flex:1;border-radius:4px;position:relative;overflow:hidden;background:#333;">
+        <div class="shimmer" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);transform:translateX(-100%);"></div>
+      </div>
+      <div class="seg" style="flex:1;border-radius:4px;position:relative;overflow:hidden;background:#333;">
+        <div class="shimmer" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);transform:translateX(-100%);"></div>
+      </div>
+      <div class="seg" style="flex:1;border-radius:4px;position:relative;overflow:hidden;background:#333;">
+        <div class="shimmer" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);transform:translateX(-100%);"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button onclick="complete()" style="padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Complete next section</button>
+      <button onclick="reset()" style="padding:8px 18px;background:#333;color:#aaa;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Reset</button>
+    </div>
+  </div>
+
+  <div style="background:#1a1a2e;border-radius:12px;padding:24px;">
+    <h3 style="color:#eee;margin:0 0 8px;">What's happening</h3>
+    <ul style="color:#aaa;font-size:13px;line-height:1.8;margin:0;padding-left:20px;">
+      <li><strong style="color:#4ade80;">Green flash</strong> — segment lights up green then settles to blue (from D)</li>
+      <li><strong style="color:#60a5fa;">Shimmer sweep</strong> — bright highlight sweeps across all filled segments (from G)</li>
+      <li><strong style="color:#4ade80;">+1 floater</strong> — "+1" rises up from the completed segment (from G)</li>
+      <li><strong style="color:#60a5fa;">Counter bounce</strong> — the "N/7" number does a quick scale-pop (from G)</li>
+      <li><strong style="color:#a78bfa;">Segments</strong> — discrete chunks so you see exactly where you are (from C)</li>
+    </ul>
+  </div>
+
+</div>
+
+<style>
+  @keyframes shimmerSwipe {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-18px) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-30px) scale(0.8); }
+  }
+  @keyframes counterBounce {
+    0% { transform: scale(1); color: #aaa; }
+    35% { transform: scale(1.45); color: #4ade80; }
+    100% { transform: scale(1); color: #aaa; }
+  }
+</style>
+
+<script>
+  let state = 3;
+  const total = 7;
+
+  function complete() {
+    if (state >= total) return;
+    state++;
+
+    const segs = document.querySelectorAll('#segments .seg');
+    const seg = segs[state - 1];
+    const count = document.getElementById('count');
+
+    // 1. Green flash on the new segment
+    seg.style.transition = 'background 0.15s';
+    seg.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+
+    // 2. After a beat, settle to blue
+    setTimeout(() => {
+      seg.style.transition = 'background 0.5s';
+      seg.style.background = '#3b82f6';
+    }, 350);
+
+    // 3. Shimmer sweep across all filled segments
+    setTimeout(() => {
+      for (let i = 0; i < state; i++) {
+        const sh = segs[i].querySelector('.shimmer');
+        sh.style.animation = 'shimmerSwipe 0.6s ease-out';
+        setTimeout(() => { sh.style.animation = ''; }, 650);
+      }
+    }, 200);
+
+    // 4. +1 floater from the segment
+    const segRect = seg.getBoundingClientRect();
+    const parentRect = document.getElementById('segments').getBoundingClientRect();
+    const floater = document.createElement('div');
+    floater.textContent = '+1';
+    floater.style.cssText = `
+      position: absolute;
+      left: ${seg.offsetLeft + seg.offsetWidth / 2 - 10}px;
+      top: -6px;
+      color: #4ade80;
+      font-size: 15px;
+      font-weight: bold;
+      pointer-events: none;
+      animation: floatUp 0.7s ease-out forwards;
+      text-shadow: 0 0 8px rgba(74,222,128,0.5);
+      z-index: 10;
+    `;
+    document.getElementById('segments').appendChild(floater);
+    setTimeout(() => floater.remove(), 700);
+
+    // 5. Counter bounce
+    count.textContent = state + '/' + total;
+    count.style.animation = 'counterBounce 0.45s ease';
+    setTimeout(() => { count.style.animation = ''; }, 450);
+  }
+
+  function reset() {
+    state = 3;
+    const segs = document.querySelectorAll('#segments .seg');
+    segs.forEach((s, i) => {
+      s.style.transition = 'background 0.3s';
+      s.style.background = i < 3 ? '#3b82f6' : '#333';
+    });
+    document.getElementById('count').textContent = '3/7';
+  }
+</script>

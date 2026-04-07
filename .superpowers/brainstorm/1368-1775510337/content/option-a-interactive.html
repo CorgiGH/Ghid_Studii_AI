@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option A: Two Separate Views</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+
+  .header { background: #111118; border-bottom: 1px solid #222; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 14px; color: #888; }
+  .header .badge { background: #3b82f6; color: white; font-size: 10px; padding: 3px 10px; border-radius: 12px; }
+
+  .tab-bar { display: flex; background: #111118; border-bottom: 2px solid #1a1a25; }
+  .tab { padding: 12px 24px; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #666; transition: all 0.2s; user-select: none; }
+  .tab:hover { color: #aaa; }
+  .tab.active-learn { color: #3b82f6; border-bottom-color: #3b82f6; }
+  .tab.active-lecture { color: #818cf8; border-bottom-color: #818cf8; }
+
+  .content { max-width: 720px; margin: 0 auto; padding: 24px; }
+
+  /* Progress steps */
+  .steps { display: flex; align-items: center; gap: 4px; margin-bottom: 24px; padding: 0 20px; }
+  .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; transition: all 0.3s; flex-shrink: 0; }
+  .step-dot.completed { background: #10b981; color: white; }
+  .step-dot.current { background: #3b82f6; color: white; box-shadow: 0 0 12px rgba(59,130,246,0.4); }
+  .step-dot.upcoming { background: #1a1a25; color: #555; }
+  .step-line { height: 2px; flex: 1; transition: background 0.3s; }
+  .step-line.done { background: #10b981; }
+  .step-line.pending { background: #1a1a25; }
+
+  /* Content blocks */
+  .block { border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .block-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+
+  .block-learn { background: #111118; border: 1px solid #1e1e2e; }
+  .block-learn .block-label { color: #3b82f6; }
+
+  .block-visual { background: #0a1a0f; border: 1px solid #1a3a1f; }
+  .block-visual .block-label { color: #10b981; }
+
+  .block-think { background: #1a1a0a; border: 1px solid #3a3a1a; }
+  .block-think .block-label { color: #f59e0b; }
+
+  .block-quiz { background: #150a1a; border: 1px solid #2a1a3a; }
+  .block-quiz .block-label { color: #a855f7; }
+
+  .block-definition { background: #0f1120; border: 1px solid #1e2040; }
+  .block-definition .block-label { color: #60a5fa; }
+
+  .block-code { background: #0f110f; border: 1px solid #1e2a1e; }
+
+  .block p { font-size: 13px; line-height: 1.7; color: #bbb; }
+  .block strong { color: #e0e0e0; }
+
+  /* SVG diagram */
+  .diagram-container { text-align: center; padding: 16px 0; }
+  .state-box { cursor: pointer; transition: all 0.2s; }
+  .state-box:hover rect { filter: brightness(1.4); }
+  .state-box.active rect { stroke-width: 2.5; filter: brightness(1.6); }
+
+  .state-info { margin-top: 12px; background: #111; border-radius: 8px; padding: 12px; font-size: 12px; color: #999; display: none; animation: fadeUp 0.2s ease; }
+  .state-info.visible { display: block; }
+
+  /* Think reveal */
+  .reveal-btn { background: #222; border: 1px dashed #444; border-radius: 8px; padding: 10px 16px; color: #888; font-size: 12px; cursor: pointer; width: 100%; text-align: center; transition: all 0.2s; margin-top: 10px; }
+  .reveal-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+  .reveal-content { margin-top: 10px; padding: 12px; background: #1a1a0a; border-radius: 8px; font-size: 12px; color: #ccc; line-height: 1.6; display: none; animation: fadeUp 0.2s ease; }
+  .reveal-content.visible { display: block; }
+
+  /* Quiz options */
+  .quiz-option { background: #1a1a25; border: 1px solid #2a2a35; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; font-size: 12px; color: #bbb; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+  .quiz-option:hover { border-color: #555; background: #1e1e2e; }
+  .quiz-option.selected { border-color: #a855f7; background: #1a102a; }
+  .quiz-option.correct { border-color: #10b981; background: #0a1a0f; color: #6ee7b7; }
+  .quiz-option.wrong { border-color: #ef4444; background: #1a0a0a; color: #fca5a5; }
+  .quiz-letter { width: 24px; height: 24px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; flex-shrink: 0; }
+  .quiz-explanation { margin-top: 10px; padding: 12px; background: #0a1a0f; border: 1px solid #1a3a1f; border-radius: 8px; font-size: 12px; color: #6ee7b7; line-height: 1.5; display: none; }
+  .quiz-explanation.visible { display: block; }
+  .check-btn { background: #a855f7; color: white; border: none; border-radius: 8px; padding: 8px 20px; font-size: 12px; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+  .check-btn:hover { background: #9333ea; }
+  .check-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Navigation */
+  .nav-bar { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid #1a1a25; }
+  .nav-btn { color: #3b82f6; font-size: 13px; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+  .nav-btn:hover { background: #111118; }
+  .nav-btn.disabled { color: #333; cursor: not-allowed; }
+
+  /* Lecture view styles */
+  .lecture-segment { background: #111118; border-left: 3px solid #818cf8; border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 14px; }
+  .lecture-segment .segment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .lecture-segment h3 { color: #c4b5fd; font-size: 14px; }
+  .lecture-segment .slide-ref { color: #555; font-size: 11px; }
+
+  .prof-note { background: #1a1508; border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-bottom: 14px; }
+  .prof-note .block-label { color: #f59e0b; }
+
+  .video-card { background: #111118; border: 1px solid #222; border-radius: 8px; padding: 12px; margin-bottom: 14px; display: flex; gap: 12px; align-items: center; cursor: pointer; transition: all 0.2s; }
+  .video-card:hover { border-color: #444; }
+  .video-thumb { width: 80px; height: 50px; background: #1a0a0a; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .video-thumb span { color: #ef4444; font-size: 22px; }
+
+  .notes-area { background: #0a1a0f; border: 1px solid #1a3a1f; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+  .notes-area textarea { width: 100%; min-height: 60px; background: #111; border: 1px solid #222; border-radius: 6px; padding: 10px; color: #ccc; font-size: 12px; font-family: inherit; resize: vertical; }
+  .notes-area textarea:focus { outline: none; border-color: #10b981; }
+
+  .slide-visual { background: #0c0c1a; border: 1px solid #1a1a3a; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+  .slide-visual .block-label { color: #818cf8; }
+
+  /* View containers */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Code block */
+  code { background: #1a1a25; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #10b981; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Option A: Two Separate Views &mdash; Course 3: Process Management</h1>
+  <span class="badge">INTERACTIVE MOCKUP</span>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active-learn" id="tab-learn" onclick="switchView('learn')">&#128218; Learn</div>
+  <div class="tab" id="tab-lecture" onclick="switchView('lecture')">&#127891; Lecture Review</div>
+</div>
+
+<!-- =================== LEARN VIEW =================== -->
+<div class="view active" id="view-learn">
+  <div class="content">
+    <div class="steps" id="learn-steps"></div>
+
+    <!-- Step 1: Intro -->
+    <div class="learn-step" data-step="1">
+      <div class="block block-learn">
+        <div class="block-label">Learn</div>
+        <h3 style="color:#e0e0e0; font-size:16px; margin-bottom:10px;">What happens when you run a program?</h3>
+        <p>When you double-click an executable or type a command in the terminal, the operating system doesn't just "run the code." It creates something called a <strong>process</strong> &mdash; a living, managed instance of that program.</p>
+        <p style="margin-top:10px;">A process has its own memory space, its own set of open files, and its own execution state. But here's the key insight: <strong>a process isn't always running on the CPU.</strong></p>
+      </div>
+
+      <div class="block block-definition">
+        <div class="block-label">&#128214; Definition</div>
+        <p><strong>Process:</strong> An instance of a program in execution. It includes the program code (text section), current activity (program counter, registers), stack, data section, and heap.</p>
+      </div>
+
+      <div class="block block-think">
+        <div class="block-label">&#128161; Think about it</div>
+        <p>If you open the same program twice (e.g., two browser windows), how many processes are created? Are they the same process or different?</p>
+        <div class="reveal-btn" onclick="toggleReveal(this)">Click to reveal answer &#9660;</div>
+        <div class="reveal-content">
+          <strong>Two separate processes.</strong> Each has its own memory space, process ID (PID), and execution state. They share the same program code on disk, but in memory they are completely independent. If one crashes, the other keeps running.
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: States -->
+    <div class="learn-step" data-step="2" style="display:none;">
+      <div class="block block-learn">
+        <div class="block-label">Learn</div>
+        <h3 style="color:#e0e0e0; font-size:16px; margin-bottom:10px;">Process States</h3>
+        <p>A process moves through several states during its lifetime. At any moment, a process is in exactly <strong>one</strong> of these states:</p>
+        <ul style="margin-top:10px; padding-left:20px; font-size:13px; color:#bbb; line-height:2;">
+          <li><strong style="color:#60a5fa;">New</strong> &mdash; Being created</li>
+          <li><strong style="color:#10b981;">Ready</strong> &mdash; Waiting to be assigned to a CPU</li>
+          <li><strong style="color:#f59e0b;">Running</strong> &mdash; Instructions are being executed</li>
+          <li><strong style="color:#ef4444;">Blocked</strong> &mdash; Waiting for some event (I/O, signal)</li>
+          <li><strong style="color:#888;">Terminated</strong> &mdash; Finished execution</li>
+        </ul>
+      </div>
+
+      <div class="block block-visual">
+        <div class="block-label">&#128200; Interactive Diagram &mdash; click a state to learn more</div>
+        <div class="diagram-container">
+          <svg width="520" height="200" viewBox="0 0 520 200">
+            <defs>
+              <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/>
+              </marker>
+            </defs>
+            <!-- Arrows -->
+            <line x1="95" y1="90" x2="155" y2="90" stroke="#444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+            <line x1="255" y1="90" x2="315" y2="90" stroke="#444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+            <path d="M 370 110 Q 370 160 290 160 Q 210 160 210 110" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+            <line x1="415" y1="90" x2="455" y2="90" stroke="#444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+            <path d="M 370 70 Q 370 30 290 30 Q 210 30 210 70" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+            <!-- I/O arrow down -->
+            <line x1="340" y1="110" x2="300" y2="150" stroke="#444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+            <!-- Labels on arrows -->
+            <text x="120" y="82" fill="#555" font-size="9">admit</text>
+            <text x="270" y="82" fill="#555" font-size="9">dispatch</text>
+            <text x="290" y="178" fill="#555" font-size="9">timeout / preempt</text>
+            <text x="435" y="82" fill="#555" font-size="9">exit</text>
+            <text x="290" y="22" fill="#ef4444" font-size="9" font-style="italic">NOT allowed</text>
+            <text x="285" y="142" fill="#555" font-size="9">I/O wait</text>
+
+            <!-- Blocked state -->
+            <g class="state-box" onclick="showStateInfo('blocked')">
+              <rect x="230" y="140" width="90" height="36" rx="8" fill="#1a0a0a" stroke="#ef4444"/>
+              <text x="275" y="162" text-anchor="middle" fill="#fca5a5" font-size="11">Blocked</text>
+            </g>
+            <!-- Arrow from Blocked to Ready -->
+            <path d="M 230 158 Q 170 158 170 110" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+            <text x="160" y="140" fill="#555" font-size="9">I/O done</text>
+
+            <!-- States -->
+            <g class="state-box" onclick="showStateInfo('new')">
+              <rect x="10" y="72" width="80" height="36" rx="8" fill="#0c1020" stroke="#60a5fa"/>
+              <text x="50" y="94" text-anchor="middle" fill="#93c5fd" font-size="11">New</text>
+            </g>
+            <g class="state-box" onclick="showStateInfo('ready')">
+              <rect x="160" y="72" width="90" height="36" rx="8" fill="#0a1a0f" stroke="#10b981"/>
+              <text x="205" y="94" text-anchor="middle" fill="#6ee7b7" font-size="11">Ready</text>
+            </g>
+            <g class="state-box" onclick="showStateInfo('running')">
+              <rect x="320" y="72" width="90" height="36" rx="8" fill="#1a1a0a" stroke="#f59e0b"/>
+              <text x="365" y="94" text-anchor="middle" fill="#fcd34d" font-size="11">Running</text>
+            </g>
+            <g class="state-box" onclick="showStateInfo('terminated')">
+              <rect x="460" y="72" width="50" height="36" rx="8" fill="#111" stroke="#555"/>
+              <text x="485" y="94" text-anchor="middle" fill="#888" font-size="11">Exit</text>
+            </g>
+          </svg>
+        </div>
+        <div class="state-info" id="state-info-new"><strong style="color:#60a5fa;">New:</strong> Process is being created. Memory is being allocated, PCB is initialized. Not yet in the ready queue.</div>
+        <div class="state-info" id="state-info-ready"><strong style="color:#10b981;">Ready:</strong> Process has everything it needs to run and is waiting in the ready queue. The scheduler will pick it when a CPU is available.</div>
+        <div class="state-info" id="state-info-running"><strong style="color:#f59e0b;">Running:</strong> Process instructions are actively being executed on a CPU core. Only ONE process per core can be in this state.</div>
+        <div class="state-info" id="state-info-blocked"><strong style="color:#ef4444;">Blocked (Waiting):</strong> Process is waiting for an external event &mdash; disk I/O, network response, user input. It <em>cannot</em> go directly back to Running, it must go through Ready first.</div>
+        <div class="state-info" id="state-info-terminated"><strong style="color:#888;">Terminated:</strong> Process has finished or was killed. PCB still exists until parent reads exit status (zombie state in UNIX).</div>
+      </div>
+
+      <div class="block block-think">
+        <div class="block-label">&#128161; Think about it</div>
+        <p>A process is reading a large file from disk. What state is it in? When the disk finishes, does the process go straight to <strong>Running</strong>?</p>
+        <div class="reveal-btn" onclick="toggleReveal(this)">Click to reveal answer &#9660;</div>
+        <div class="reveal-content">
+          While waiting for disk I/O, the process is in the <strong style="color:#ef4444;">Blocked</strong> state. When I/O completes, it moves to <strong style="color:#10b981;">Ready</strong>, NOT directly to Running. It must wait in the ready queue until the scheduler gives it CPU time. This is why the red dashed arrow in the diagram says "NOT allowed."
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: PCB -->
+    <div class="learn-step" data-step="3" style="display:none;">
+      <div class="block block-learn">
+        <div class="block-label">Learn</div>
+        <h3 style="color:#e0e0e0; font-size:16px; margin-bottom:10px;">Process Control Block (PCB)</h3>
+        <p>The OS needs to keep track of every process. It does this with a data structure called the <strong>Process Control Block (PCB)</strong> &mdash; think of it as the process's "ID card" that the OS carries around.</p>
+        <p style="margin-top:10px;">Every time a context switch happens, the OS saves the current process's state INTO its PCB, then loads the next process's state FROM its PCB.</p>
+      </div>
+
+      <div class="block block-definition">
+        <div class="block-label">&#128214; Definition</div>
+        <p><strong>PCB contains:</strong></p>
+        <ul style="margin-top:6px; padding-left:20px; font-size:13px; color:#bbb; line-height:1.8;">
+          <li><code>PID</code> &mdash; Unique process identifier</li>
+          <li><code>State</code> &mdash; Current state (new, ready, running...)</li>
+          <li><code>Program Counter</code> &mdash; Address of next instruction</li>
+          <li><code>CPU Registers</code> &mdash; Saved register values</li>
+          <li><code>Memory Info</code> &mdash; Page tables, segment tables</li>
+          <li><code>I/O Status</code> &mdash; Open files, devices</li>
+          <li><code>Scheduling Info</code> &mdash; Priority, queue pointers</li>
+        </ul>
+      </div>
+
+      <div class="block block-code" style="border:1px solid #1e2a1e;">
+        <div class="block-label" style="color:#10b981;">&#128187; See it in Linux</div>
+        <pre style="background:#0a0f0a; padding:12px; border-radius:6px; font-size:12px; color:#6ee7b7; overflow-x:auto; margin-top:8px;"><span style="color:#888;">$ </span>cat /proc/self/status
+Name:   cat
+State:  R (running)
+Pid:    12345
+PPid:   12300
+Threads: 1
+VmSize: 8432 kB
+VmRSS:  1204 kB
+...</pre>
+        <p style="margin-top:8px; font-size:12px; color:#888;">In Linux, <code>/proc/[pid]/</code> exposes PCB-like information as files. Try it!</p>
+      </div>
+    </div>
+
+    <!-- Step 4: Context Switch -->
+    <div class="learn-step" data-step="4" style="display:none;">
+      <div class="block block-learn">
+        <div class="block-label">Learn</div>
+        <h3 style="color:#e0e0e0; font-size:16px; margin-bottom:10px;">Context Switching</h3>
+        <p>When the OS switches the CPU from one process to another, it performs a <strong>context switch</strong>. This is pure overhead &mdash; no useful work gets done during the switch.</p>
+        <p style="margin-top:10px;">The switch involves: saving the state of the current process → loading the state of the next process → jumping to the new process's program counter.</p>
+      </div>
+
+      <div class="block block-visual">
+        <div class="block-label">&#9201; Context Switch Animation</div>
+        <div style="display:flex; gap:20px; justify-content:center; align-items:center; padding:20px 0;">
+          <div id="cs-proc-a" style="text-align:center; transition:all 0.5s;">
+            <div style="width:80px;height:80px;border-radius:12px;background:#0a1a0f;border:2px solid #10b981;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+              <span style="font-size:24px;">P1</span>
+            </div>
+            <span style="font-size:11px;color:#10b981;" id="cs-label-a">Running</span>
+          </div>
+          <div style="text-align:center;">
+            <div id="cs-arrow" style="font-size:20px;color:#555;transition:all 0.3s;">&#8644;</div>
+            <button onclick="animateContextSwitch()" style="margin-top:8px;background:#3b82f6;color:white;border:none;border-radius:6px;padding:6px 14px;font-size:11px;cursor:pointer;" id="cs-btn">Switch!</button>
+          </div>
+          <div id="cs-proc-b" style="text-align:center; transition:all 0.5s; opacity:0.4;">
+            <div style="width:80px;height:80px;border-radius:12px;background:#111;border:2px solid #555;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+              <span style="font-size:24px;">P2</span>
+            </div>
+            <span style="font-size:11px;color:#888;" id="cs-label-b">Ready</span>
+          </div>
+        </div>
+        <div id="cs-steps" style="text-align:center; font-size:12px; color:#888; min-height:20px;"></div>
+      </div>
+
+      <div class="block block-think">
+        <div class="block-label">&#128161; Think about it</div>
+        <p>Context switches take ~1-10 microseconds. If a system does 1000 context switches per second, how much CPU time is "wasted" on overhead?</p>
+        <div class="reveal-btn" onclick="toggleReveal(this)">Click to reveal answer &#9660;</div>
+        <div class="reveal-content">
+          At 10&micro;s per switch &times; 1000 switches = <strong>10ms per second</strong>, which is only 1% overhead. Acceptable! But if switches take longer (e.g., heavy TLB flushes) or happen more frequently, it adds up. This is why efficient scheduling matters.
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Quiz -->
+    <div class="learn-step" data-step="5" style="display:none;">
+      <div class="block block-quiz">
+        <div class="block-label">&#9989; Quick Check</div>
+        <p style="margin-bottom:12px; font-size:14px; color:#e0e0e0;"><strong>Question 1:</strong> A process is waiting for keyboard input. What state is it in?</p>
+        <div class="quiz-option" onclick="selectQuiz(this, 1)" data-correct="false">
+          <div class="quiz-letter">A</div>
+          <span>Ready &mdash; it's ready to run once input arrives</span>
+        </div>
+        <div class="quiz-option" onclick="selectQuiz(this, 1)" data-correct="true">
+          <div class="quiz-letter">B</div>
+          <span>Blocked &mdash; it's waiting for an I/O event</span>
+        </div>
+        <div class="quiz-option" onclick="selectQuiz(this, 1)" data-correct="false">
+          <div class="quiz-letter">C</div>
+          <span>Running &mdash; it's actively checking for input</span>
+        </div>
+        <button class="check-btn" id="check-1" onclick="checkQuiz(1)" disabled>Check Answer</button>
+        <div class="quiz-explanation" id="explain-1">
+          &#9989; <strong>Blocked</strong> is correct! Keyboard input is I/O. The process cannot continue until the event occurs, so the OS puts it in the Blocked state and schedules another process.
+        </div>
+      </div>
+
+      <div class="block block-quiz" style="margin-top:16px;">
+        <div class="block-label">&#9989; Quick Check</div>
+        <p style="margin-bottom:12px; font-size:14px; color:#e0e0e0;"><strong>Question 2:</strong> What information is NOT stored in the PCB?</p>
+        <div class="quiz-option" onclick="selectQuiz(this, 2)" data-correct="false">
+          <div class="quiz-letter">A</div>
+          <span>Program counter</span>
+        </div>
+        <div class="quiz-option" onclick="selectQuiz(this, 2)" data-correct="false">
+          <div class="quiz-letter">B</div>
+          <span>Open file descriptors</span>
+        </div>
+        <div class="quiz-option" onclick="selectQuiz(this, 2)" data-correct="true">
+          <div class="quiz-letter">C</div>
+          <span>The program's source code</span>
+        </div>
+        <button class="check-btn" id="check-2" onclick="checkQuiz(2)" disabled>Check Answer</button>
+        <div class="quiz-explanation" id="explain-2">
+          &#9989; <strong>Source code</strong> is NOT in the PCB. The PCB stores runtime state (registers, PC, memory maps, I/O), not the original source. The compiled binary is in the text section of the process's memory.
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:24px; padding:20px; background:#0a1a0f; border-radius:12px; border:1px solid #1a3a1f;">
+        <div style="font-size:24px; margin-bottom:8px;">&#127881;</div>
+        <p style="color:#10b981; font-weight:bold;">Course section complete!</p>
+        <p style="color:#888; font-size:12px; margin-top:4px;">You've covered Process Management fundamentals.</p>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-bar">
+      <div class="nav-btn disabled" id="prev-btn" onclick="navigateStep(-1)">&#8592; Previous</div>
+      <div class="nav-btn" id="next-btn" onclick="navigateStep(1)">Continue &#8594;</div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== LECTURE VIEW =================== -->
+<div class="view" id="view-lecture">
+  <div class="content">
+    <!-- Timeline -->
+    <div style="background:#111118; border-radius:10px; padding:14px 18px; margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="color:#818cf8;font-size:12px;font-weight:bold;">Lecture 3: Process Management</span>
+        <span style="color:#555;font-size:11px;">Prof. Popescu &middot; 42 slides</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <div style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;cursor:pointer;" onclick="jumpToLectureSection(event, this)">
+          <div id="lecture-progress" style="width:0%;height:100%;background:linear-gradient(90deg,#818cf8,#a78bfa);border-radius:3px;transition:width 0.5s;"></div>
+        </div>
+        <span style="color:#555;font-size:10px;margin-left:6px;" id="lecture-progress-text">0%</span>
+      </div>
+    </div>
+
+    <!-- Lecture sections -->
+    <div class="lecture-section" data-ls="1">
+      <div class="lecture-segment">
+        <div class="segment-header">
+          <h3>Process Concept</h3>
+          <span class="slide-ref">Slides 1&ndash;8</span>
+        </div>
+        <p style="font-size:13px;color:#bbb;line-height:1.6;">Introduction to what a process is. Program vs process distinction. Process memory layout: text, data, heap, stack.</p>
+      </div>
+
+      <div class="slide-visual">
+        <div class="block-label">&#128196; From the slides</div>
+        <div style="display:flex; gap:16px; margin-top:10px; justify-content:center; flex-wrap:wrap;">
+          <div style="background:#0c0c20; border:1px solid #222; border-radius:6px; padding:12px; text-align:center; width:120px;">
+            <div style="font-size:10px;color:#666;margin-bottom:4px;">High Address</div>
+            <div style="background:#1a0a0a;padding:4px;border-radius:3px;margin-bottom:2px;font-size:10px;color:#fca5a5;">Stack &#8595;</div>
+            <div style="background:#111;padding:8px;margin-bottom:2px;font-size:10px;color:#555;">...</div>
+            <div style="background:#0a1a0a;padding:4px;border-radius:3px;margin-bottom:2px;font-size:10px;color:#6ee7b7;">Heap &#8593;</div>
+            <div style="background:#0a0a1a;padding:4px;border-radius:3px;margin-bottom:2px;font-size:10px;color:#93c5fd;">Data</div>
+            <div style="background:#1a1a0a;padding:4px;border-radius:3px;font-size:10px;color:#fcd34d;">Text</div>
+            <div style="font-size:10px;color:#666;margin-top:4px;">Low Address</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prof-note">
+        <div class="block-label">&#127891; Professor's note</div>
+        <p style="font-size:12px;color:#ccc;margin-top:6px;line-height:1.5;">"Know the difference between a program and a process. A program is passive &mdash; it sits on disk. A process is active &mdash; it has a program counter and resources."</p>
+      </div>
+
+      <button class="mark-read-btn" onclick="markLectureRead(this, 1)" style="width:100%;background:#1a1a25;border:1px solid #2a2a35;color:#818cf8;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:14px;transition:all 0.2s;">&#9744; Mark as reviewed</button>
+    </div>
+
+    <div class="lecture-section" data-ls="2">
+      <div class="lecture-segment">
+        <div class="segment-header">
+          <h3>Process States & Transitions</h3>
+          <span class="slide-ref">Slides 9&ndash;18</span>
+        </div>
+        <p style="font-size:13px;color:#bbb;line-height:1.6;">The 5-state model. Transitions: admit, dispatch, timeout, event-wait, event-occurs. Why Blocked &rarr; Running is not allowed.</p>
+      </div>
+
+      <div class="prof-note">
+        <div class="block-label">&#9888; Exam emphasis</div>
+        <p style="font-size:12px;color:#fcd34d;margin-top:6px;line-height:1.5;">"This WILL be on the exam. Draw the complete state diagram with all transitions labeled. Students always forget the Blocked &rarr; Ready transition."</p>
+      </div>
+
+      <div class="video-card" onclick="window.open('#','_blank')">
+        <div class="video-thumb"><span>&#9654;</span></div>
+        <div>
+          <p style="color:#ccc;font-size:12px;margin:0 0 3px;font-weight:bold;">Process State Transitions Explained</p>
+          <p style="color:#666;font-size:11px;margin:0;">Neso Academy &middot; 8:42 &middot; Clear animated walkthrough of state diagram</p>
+        </div>
+      </div>
+
+      <button class="mark-read-btn" onclick="markLectureRead(this, 2)" style="width:100%;background:#1a1a25;border:1px solid #2a2a35;color:#818cf8;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:14px;transition:all 0.2s;">&#9744; Mark as reviewed</button>
+    </div>
+
+    <div class="lecture-section" data-ls="3">
+      <div class="lecture-segment">
+        <div class="segment-header">
+          <h3>PCB & Context Switching</h3>
+          <span class="slide-ref">Slides 19&ndash;30</span>
+        </div>
+        <p style="font-size:13px;color:#bbb;line-height:1.6;">PCB structure. What gets saved/restored. Context switch overhead. Hardware support for fast switching.</p>
+      </div>
+
+      <div class="prof-note">
+        <div class="block-label">&#127891; Professor's note</div>
+        <p style="font-size:12px;color:#ccc;margin-top:6px;line-height:1.5;">"You should be able to list all PCB fields and explain why each one is needed. I'll ask you to trace a context switch step by step."</p>
+      </div>
+
+      <button class="mark-read-btn" onclick="markLectureRead(this, 3)" style="width:100%;background:#1a1a25;border:1px solid #2a2a35;color:#818cf8;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:14px;transition:all 0.2s;">&#9744; Mark as reviewed</button>
+    </div>
+
+    <!-- Notes area -->
+    <div class="notes-area">
+      <div class="block-label" style="color:#10b981; margin-bottom:8px;">&#128221; Your lecture notes</div>
+      <textarea placeholder="Add personal notes for this lecture... (saved locally)"></textarea>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Learn view navigation
+  let currentStep = 1;
+  const totalSteps = 5;
+
+  function buildSteps() {
+    const container = document.getElementById('learn-steps');
+    container.innerHTML = '';
+    for (let i = 1; i <= totalSteps; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'step-dot ' + (i < currentStep ? 'completed' : i === currentStep ? 'current' : 'upcoming');
+      dot.textContent = i;
+      dot.onclick = () => { if (i <= currentStep) goToStep(i); };
+      container.appendChild(dot);
+      if (i < totalSteps) {
+        const line = document.createElement('div');
+        line.className = 'step-line ' + (i < currentStep ? 'done' : 'pending');
+        container.appendChild(line);
+      }
+    }
+  }
+
+  function goToStep(step) {
+    document.querySelectorAll('.learn-step').forEach(el => el.style.display = 'none');
+    const target = document.querySelector(`.learn-step[data-step="${step}"]`);
+    if (target) target.style.display = 'block';
+    currentStep = step;
+    buildSteps();
+    document.getElementById('prev-btn').className = step <= 1 ? 'nav-btn disabled' : 'nav-btn';
+    document.getElementById('next-btn').textContent = step >= totalSteps ? 'Complete ✓' : 'Continue →';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function navigateStep(dir) {
+    const next = currentStep + dir;
+    if (next < 1 || next > totalSteps) return;
+    if (next > currentStep) currentStep = next; // allow going back without losing max
+    goToStep(next);
+  }
+
+  // Think reveal
+  function toggleReveal(btn) {
+    const content = btn.nextElementSibling;
+    if (content.classList.contains('visible')) {
+      content.classList.remove('visible');
+      btn.textContent = 'Click to reveal answer ▼';
+    } else {
+      content.classList.add('visible');
+      btn.textContent = 'Hide answer ▲';
+    }
+  }
+
+  // State diagram interaction
+  function showStateInfo(state) {
+    document.querySelectorAll('.state-info').forEach(el => el.classList.remove('visible'));
+    document.querySelectorAll('.state-box').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-info-' + state).classList.add('visible');
+    event.currentTarget.classList.add('active');
+  }
+
+  // Context switch animation
+  let csState = 'a';
+  function animateContextSwitch() {
+    const btn = document.getElementById('cs-btn');
+    const steps = document.getElementById('cs-steps');
+    btn.disabled = true;
+
+    const procA = document.getElementById('cs-proc-a');
+    const procB = document.getElementById('cs-proc-b');
+    const labelA = document.getElementById('cs-label-a');
+    const labelB = document.getElementById('cs-label-b');
+
+    if (csState === 'a') {
+      steps.textContent = '1. Saving P1 state to PCB...';
+      steps.style.color = '#f59e0b';
+      setTimeout(() => {
+        procA.style.opacity = '0.4';
+        labelA.textContent = 'Ready';
+        labelA.style.color = '#888';
+        steps.textContent = '2. Loading P2 state from PCB...';
+        setTimeout(() => {
+          procB.style.opacity = '1';
+          labelB.textContent = 'Running';
+          labelB.style.color = '#10b981';
+          steps.textContent = 'Context switch complete! P2 is now running.';
+          steps.style.color = '#10b981';
+          csState = 'b';
+          btn.disabled = false;
+        }, 800);
+      }, 800);
+    } else {
+      steps.textContent = '1. Saving P2 state to PCB...';
+      steps.style.color = '#f59e0b';
+      setTimeout(() => {
+        procB.style.opacity = '0.4';
+        labelB.textContent = 'Ready';
+        labelB.style.color = '#888';
+        steps.textContent = '2. Loading P1 state from PCB...';
+        setTimeout(() => {
+          procA.style.opacity = '1';
+          labelA.textContent = 'Running';
+          labelA.style.color = '#10b981';
+          steps.textContent = 'Context switch complete! P1 is now running.';
+          steps.style.color = '#10b981';
+          csState = 'a';
+          btn.disabled = false;
+        }, 800);
+      }, 800);
+    }
+  }
+
+  // Quiz
+  const quizSelections = {};
+  function selectQuiz(el, qId) {
+    const siblings = el.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    quizSelections[qId] = el;
+    document.getElementById('check-' + qId).disabled = false;
+  }
+
+  function checkQuiz(qId) {
+    const selected = quizSelections[qId];
+    if (!selected) return;
+    const isCorrect = selected.dataset.correct === 'true';
+    const siblings = selected.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => {
+      s.style.pointerEvents = 'none';
+      if (s.dataset.correct === 'true') s.classList.add('correct');
+      else if (s === selected && !isCorrect) s.classList.add('wrong');
+    });
+    document.getElementById('explain-' + qId).classList.add('visible');
+    document.getElementById('check-' + qId).disabled = true;
+  }
+
+  // View switching
+  function switchView(view) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active-learn', 'active-lecture'); });
+    document.getElementById('view-' + view).classList.add('active');
+    document.getElementById('tab-' + view).classList.add(view === 'learn' ? 'active-learn' : 'active-lecture');
+  }
+
+  // Lecture progress
+  let lectureRead = new Set();
+  function markLectureRead(btn, section) {
+    if (lectureRead.has(section)) {
+      lectureRead.delete(section);
+      btn.innerHTML = '☐ Mark as reviewed';
+      btn.style.background = '#1a1a25';
+      btn.style.color = '#818cf8';
+    } else {
+      lectureRead.add(section);
+      btn.innerHTML = '☑ Reviewed';
+      btn.style.background = '#0a1a0f';
+      btn.style.color = '#10b981';
+      btn.style.borderColor = '#10b981';
+    }
+    const pct = Math.round((lectureRead.size / 3) * 100);
+    document.getElementById('lecture-progress').style.width = pct + '%';
+    document.getElementById('lecture-progress-text').textContent = pct + '%';
+  }
+
+  // Init
+  buildSteps();
+</script>
+</body>
+</html>

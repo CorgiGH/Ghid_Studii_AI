@@ -1,0 +1,154 @@
+<h2>The Mix: Unified Shimmer v2</h2>
+<p class="subtitle">Shimmer respects segment gaps, effects fire together. Click to try.</p>
+
+<div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:32px;">
+
+  <div style="background:#1a1a2e;border-radius:12px;padding:24px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;margin-bottom:8px;">
+      <span>Course 3: Process Management</span>
+      <span id="count" style="margin-left:auto;display:inline-block;font-weight:bold;">3/7</span>
+    </div>
+
+    <div style="position:relative;overflow:visible;" id="barOuter">
+      <div style="display:flex;gap:3px;height:8px;" id="segments">
+        <div class="seg" data-filled style="flex:1;border-radius:4px;background:#3b82f6;position:relative;overflow:hidden;">
+          <div class="shimmer-inner"></div>
+        </div>
+        <div class="seg" data-filled style="flex:1;border-radius:4px;background:#3b82f6;position:relative;overflow:hidden;">
+          <div class="shimmer-inner"></div>
+        </div>
+        <div class="seg" data-filled style="flex:1;border-radius:4px;background:#3b82f6;position:relative;overflow:hidden;">
+          <div class="shimmer-inner"></div>
+        </div>
+        <div class="seg" style="flex:1;border-radius:4px;background:#333;position:relative;overflow:hidden;">
+          <div class="shimmer-inner"></div>
+        </div>
+        <div class="seg" style="flex:1;border-radius:4px;background:#333;position:relative;overflow:hidden;">
+          <div class="shimmer-inner"></div>
+        </div>
+        <div class="seg" style="flex:1;border-radius:4px;background:#333;position:relative;overflow:hidden;">
+          <div class="shimmer-inner"></div>
+        </div>
+        <div class="seg" style="flex:1;border-radius:4px;background:#333;position:relative;overflow:hidden;">
+          <div class="shimmer-inner"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button onclick="complete()" style="padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Complete next section</button>
+      <button onclick="reset()" style="padding:8px 18px;background:#333;color:#aaa;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Reset</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .shimmer-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.5) 50%, transparent 90%);
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-18px) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-30px) scale(0.8); }
+  }
+  @keyframes counterBounce {
+    0% { transform: scale(1); color: #aaa; }
+    35% { transform: scale(1.45); color: #4ade80; }
+    100% { transform: scale(1); color: #aaa; }
+  }
+</style>
+
+<script>
+  let state = 3;
+  const total = 7;
+
+  function complete() {
+    if (state >= total) return;
+    state++;
+
+    const segs = document.querySelectorAll('#segments .seg');
+    const seg = segs[state - 1];
+    const count = document.getElementById('count');
+
+    // 1. Green flash on the new segment — immediate
+    seg.style.transition = 'background 0.15s';
+    seg.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+    seg.setAttribute('data-filled', '');
+
+    // 2. Settle to blue
+    setTimeout(() => {
+      seg.style.transition = 'background 0.5s';
+      seg.style.background = '#3b82f6';
+    }, 300);
+
+    // 3. Shimmer across all filled segments — starts immediately with the flash
+    // Each segment's shimmer is offset by its position so it looks like one wave traveling across
+    const filledSegs = document.querySelectorAll('#segments .seg[data-filled]');
+    const totalFilled = filledSegs.length;
+    const totalDuration = 500; // ms for the wave to cross the entire bar
+    const segDuration = 250; // ms for the shimmer to cross one segment
+
+    filledSegs.forEach((s, i) => {
+      const shimmer = s.querySelector('.shimmer-inner');
+      const delay = (i / totalFilled) * totalDuration;
+      shimmer.style.transition = 'none';
+      shimmer.style.transform = 'translateX(-100%)';
+      shimmer.offsetHeight;
+      setTimeout(() => {
+        shimmer.style.transition = `transform ${segDuration}ms ease-out`;
+        shimmer.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+          shimmer.style.transition = 'none';
+          shimmer.style.transform = 'translateX(-100%)';
+        }, segDuration + 10);
+      }, delay);
+    });
+
+    // 4. +1 floater — immediate
+    const floater = document.createElement('div');
+    floater.textContent = '+1';
+    floater.style.cssText = `
+      position: absolute;
+      left: ${seg.offsetLeft + seg.offsetWidth / 2 - 10}px;
+      top: -6px;
+      color: #4ade80;
+      font-size: 15px;
+      font-weight: bold;
+      pointer-events: none;
+      animation: floatUp 0.7s ease-out forwards;
+      text-shadow: 0 0 8px rgba(74,222,128,0.5);
+      z-index: 10;
+    `;
+    document.getElementById('barOuter').appendChild(floater);
+    setTimeout(() => floater.remove(), 700);
+
+    // 5. Counter bounce — immediate
+    count.textContent = state + '/' + total;
+    count.style.animation = 'counterBounce 0.45s ease';
+    setTimeout(() => { count.style.animation = ''; }, 450);
+  }
+
+  function reset() {
+    state = 3;
+    const segs = document.querySelectorAll('#segments .seg');
+    segs.forEach((s, i) => {
+      s.style.transition = 'background 0.3s';
+      if (i < 3) {
+        s.style.background = '#3b82f6';
+        s.setAttribute('data-filled', '');
+      } else {
+        s.style.background = '#333';
+        s.removeAttribute('data-filled');
+      }
+    });
+    document.getElementById('count').textContent = '3/7';
+  }
+</script>

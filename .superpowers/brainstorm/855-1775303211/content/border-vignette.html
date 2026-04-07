@@ -1,0 +1,184 @@
+<h2>Clockwise Vignette Border Glow</h2>
+<p class="subtitle">A soft green vignette sweeps clockwise around the border, then fades leaving a green-tinted completed state</p>
+
+<div style="max-width:700px;margin:0 auto;">
+
+  <div id="page" style="position:relative;background:#1a1a2e;border-radius:12px;min-height:200px;border:1px solid #333;overflow:hidden;transition:border-color 0.5s ease;">
+
+    <!-- Vignette glow layer — 4 edges animated sequentially -->
+    <div id="glowTop" style="position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(to bottom,rgba(34,197,94,0.35),transparent);opacity:0;z-index:3;pointer-events:none;"></div>
+    <div id="glowRight" style="position:absolute;top:0;right:0;bottom:0;width:60px;background:linear-gradient(to left,rgba(34,197,94,0.35),transparent);opacity:0;z-index:3;pointer-events:none;"></div>
+    <div id="glowBottom" style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,rgba(34,197,94,0.35),transparent);opacity:0;z-index:3;pointer-events:none;"></div>
+    <div id="glowLeft" style="position:absolute;top:0;left:0;bottom:0;width:60px;background:linear-gradient(to right,rgba(34,197,94,0.35),transparent);opacity:0;z-index:3;pointer-events:none;"></div>
+
+    <!-- Content -->
+    <div style="position:relative;z-index:1;padding:24px;">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;margin-bottom:8px;">
+        <svg id="checkmark" width="20" height="20" viewBox="0 0 20 20" style="opacity:0;">
+          <circle cx="10" cy="10" r="9" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="56.5" stroke-dashoffset="56.5" style="transition:stroke-dashoffset 0.4s ease 0.1s;"/>
+          <path d="M6 10 L9 13 L14 7" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="20" stroke-dashoffset="20" style="transition:stroke-dashoffset 0.3s ease 0.4s;"/>
+        </svg>
+        <span>Course 3: Process Management</span>
+        <span id="count" style="margin-left:auto;display:inline-block;font-weight:bold;">6/7</span>
+      </div>
+
+      <div style="position:relative;overflow:visible;" id="barOuter">
+        <div id="segmentWrap" style="display:flex;gap:3px;height:8px;transition:gap 0.4s ease;">
+          <div class="seg" style="flex:1;border-radius:4px;background:#3b82f6;transition:background 0.3s,border-radius 0.4s;"></div>
+          <div class="seg" style="flex:1;border-radius:4px;background:#3b82f6;transition:background 0.3s,border-radius 0.4s;"></div>
+          <div class="seg" style="flex:1;border-radius:4px;background:#3b82f6;transition:background 0.3s,border-radius 0.4s;"></div>
+          <div class="seg" style="flex:1;border-radius:4px;background:#3b82f6;transition:background 0.3s,border-radius 0.4s;"></div>
+          <div class="seg" style="flex:1;border-radius:4px;background:#3b82f6;transition:background 0.3s,border-radius 0.4s;"></div>
+          <div class="seg" style="flex:1;border-radius:4px;background:#3b82f6;transition:background 0.3s,border-radius 0.4s;"></div>
+          <div class="seg last" style="flex:1;border-radius:4px;background:#333;transition:background 0.3s,border-radius 0.4s;"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;color:#aaa;font-size:13px;line-height:1.7;">
+        <div style="background:#252545;border-radius:6px;padding:12px;border-left:3px solid #3b82f6;margin-bottom:10px;">
+          <strong style="color:#60a5fa;">Definition:</strong> A process is the unit of work in most systems.
+        </div>
+        <p style="margin:0 0 10px;">The OS manages process creation, scheduling, and termination through system calls like fork(), exec(), and wait().</p>
+        <div style="background:#252545;border-radius:6px;padding:12px;border-left:3px solid #f59e0b;">
+          <strong style="color:#f59e0b;">Note:</strong> Each process has a unique PID assigned by the kernel.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:20px;">
+        <button onclick="fire()" style="padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Complete final section</button>
+        <button onclick="reset()" style="padding:8px 18px;background:#333;color:#aaa;border:none;border-radius:6px;cursor:pointer;font-size:12px;">Reset</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-18px) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-30px) scale(0.8); }
+  }
+  @keyframes counterBounce {
+    0% { transform: scale(1); color: #aaa; }
+    35% { transform: scale(1.45); color: #4ade80; }
+    100% { transform: scale(1); color: #4ade80; }
+  }
+  @keyframes edgeFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes edgeFadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+</style>
+
+<script>
+  function fire() {
+    const segs = document.querySelectorAll('.seg');
+    const last = segs[6];
+    const count = document.getElementById('count');
+    const barOuter = document.getElementById('barOuter');
+    const segWrap = document.getElementById('segmentWrap');
+    const check = document.getElementById('checkmark');
+    const page = document.getElementById('page');
+
+    // 1. Normal +1 celebration
+    last.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+
+    const floater = document.createElement('div');
+    floater.textContent = '+1';
+    floater.style.cssText = `position:absolute;left:${last.offsetLeft + last.offsetWidth/2 - 10}px;top:-6px;color:#4ade80;font-size:15px;font-weight:bold;pointer-events:none;animation:floatUp 0.7s ease-out forwards;text-shadow:0 0 8px rgba(74,222,128,0.5);z-index:10;`;
+    barOuter.appendChild(floater);
+    setTimeout(() => floater.remove(), 700);
+
+    count.textContent = '7/7';
+    count.style.animation = 'counterBounce 0.45s ease forwards';
+
+    // 2. Segments merge and go green
+    setTimeout(() => {
+      segWrap.style.gap = '0px';
+      segs.forEach((s, i) => {
+        s.style.background = '#22c55e';
+        if (i === 0) s.style.borderRadius = '4px 0 0 4px';
+        else if (i === 6) s.style.borderRadius = '0 4px 4px 0';
+        else s.style.borderRadius = '0';
+      });
+    }, 400);
+
+    // 3. Checkmark
+    setTimeout(() => {
+      check.style.opacity = '1';
+      check.style.transition = 'opacity 0.2s';
+      check.querySelector('circle').style.strokeDashoffset = '0';
+      check.querySelector('path').style.strokeDashoffset = '0';
+    }, 500);
+
+    setTimeout(() => {
+      count.textContent = 'Complete';
+      count.style.color = '#22c55e';
+      count.style.animation = '';
+    }, 700);
+
+    // 4. Vignette sweeps clockwise: top → right → bottom → left
+    const glows = ['glowTop', 'glowRight', 'glowBottom', 'glowLeft'];
+    const edgeDuration = 250; // ms per edge
+    const startDelay = 500;
+
+    glows.forEach((id, i) => {
+      const el = document.getElementById(id);
+      // Fade in this edge
+      setTimeout(() => {
+        el.style.transition = `opacity ${edgeDuration}ms ease-in`;
+        el.style.opacity = '1';
+      }, startDelay + i * edgeDuration * 0.6);
+    });
+
+    // After all edges lit, hold briefly then fade everything out and leave green border
+    const totalSweep = startDelay + glows.length * edgeDuration * 0.6 + edgeDuration;
+    setTimeout(() => {
+      // Set the settled green border
+      page.style.borderColor = 'rgba(34,197,94,0.35)';
+      page.style.boxShadow = '0 0 12px rgba(34,197,94,0.08)';
+
+      // Fade out vignettes
+      glows.forEach(id => {
+        const el = document.getElementById(id);
+        el.style.transition = 'opacity 0.6s ease-out';
+        el.style.opacity = '0';
+      });
+    }, totalSweep + 300);
+  }
+
+  function reset() {
+    const segs = document.querySelectorAll('.seg');
+    const segWrap = document.getElementById('segmentWrap');
+    const check = document.getElementById('checkmark');
+    const count = document.getElementById('count');
+    const page = document.getElementById('page');
+
+    segWrap.style.gap = '3px';
+    segs.forEach((s, i) => {
+      s.style.borderRadius = '4px';
+      s.style.background = i < 6 ? '#3b82f6' : '#333';
+    });
+
+    check.style.opacity = '0';
+    check.querySelector('circle').style.strokeDashoffset = '56.5';
+    check.querySelector('path').style.strokeDashoffset = '20';
+
+    count.textContent = '6/7';
+    count.style.color = '';
+    count.style.animation = '';
+
+    page.style.borderColor = '#333';
+    page.style.boxShadow = '';
+
+    ['glowTop','glowRight','glowBottom','glowLeft'].forEach(id => {
+      const el = document.getElementById(id);
+      el.style.transition = 'none';
+      el.style.opacity = '0';
+    });
+  }
+</script>
