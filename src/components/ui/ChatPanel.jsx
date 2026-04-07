@@ -4,7 +4,7 @@ import ChatMessage from './ChatMessage';
 import { streamChat, verifyAnswer } from '../../services/api';
 
 const ChatPanel = ({ pageContext, subjectSyllabus }) => {
-  const { t, toggleChat, chatWidth, setChatWidth } = useApp();
+  const { t, toggleChat, chatWidth, setChatWidth, courseContext } = useApp();
   const [activeTab, setActiveTab] = useState('chat');
   const [messages, setMessages] = useState([]);
   const [verifyMessages, setVerifyMessages] = useState([]);
@@ -98,6 +98,21 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
 
   const currentMessages = activeTab === 'chat' ? messages : verifyMessages;
 
+  // Build chat context: prefer structured JSON from courseContext, fall back to DOM-scraped pageContext
+  const effectiveContext = React.useMemo(() => {
+    if (courseContext?.blocks?.length > 0) {
+      const blocksText = courseContext.blocks
+        .filter(b => !b.type.startsWith('lecture'))
+        .map(b => {
+          const content = b.content ? (typeof b.content === 'string' ? b.content : b.content.en || b.content.ro || '') : '';
+          return `[${b.type}] ${b.term?.en || b.term?.ro || ''} ${content}`.trim();
+        })
+        .join('\n');
+      return `Current step: ${courseContext.stepTitle}\n\n${blocksText}`;
+    }
+    return pageContext || '';
+  }, [courseContext, pageContext]);
+
   const handleSendChat = useCallback(async (text) => {
     if (!text.trim() || isLoading) return;
 
@@ -109,11 +124,15 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
 
     let fullResponse = '';
 
+    const contextNote = courseContext?.testMode
+      ? 'NOTE: Student is taking a test. Help them reason through problems but do NOT give direct answers.\n\n'
+      : '';
+
     await streamChat(
       {
         message: text.trim(),
         history: historyRef.current,
-        pageContext: pageContext || '',
+        pageContext: contextNote + effectiveContext,
         subjectSyllabus: subjectSyllabus || '',
       },
       (chunk) => {
@@ -131,7 +150,7 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
         setIsLoading(false);
       }
     );
-  }, [isLoading, pageContext, subjectSyllabus]);
+  }, [isLoading, effectiveContext, subjectSyllabus, courseContext?.testMode]);
 
   const handleSendVerify = useCallback(async (text) => {
     if (!text.trim() || isLoading) return;
@@ -261,6 +280,11 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
         >
           {t('Check Answer', 'Verifică')}
         </button>
+        {courseContext && (
+          <span className="text-[9px] truncate max-w-[120px]" style={{ color: courseContext.testMode ? '#f59e0b' : '#818cf8' }}>
+            {courseContext.testMode ? '\uD83D\uDCDD' : '\uD83D\uDCD6'} {courseContext.stepTitle || courseContext.courseTitle}
+          </span>
+        )}
         <div className="flex-1" />
         {activeTab === 'chat' && messages.length > 0 && (
           <button
