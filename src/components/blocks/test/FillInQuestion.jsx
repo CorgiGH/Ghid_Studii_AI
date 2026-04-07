@@ -52,7 +52,7 @@ export default function FillInQuestion({ question, onAnswer }) {
               disabled={submitted}
               className="rounded px-2 py-1 text-xs font-mono text-center"
               style={{
-                width: `${Math.max(6, (blank.accept[0]?.length || 6) + 2)}ch`,
+                minWidth: '140px',
                 backgroundColor: 'var(--theme-card-bg)',
                 border: `1.5px solid ${borderColor}`,
                 color: 'var(--theme-content-text)',
