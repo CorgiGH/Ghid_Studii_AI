@@ -85,8 +85,8 @@ const geminiProvider = {
 // ── OpenRouter Provider ──
 
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1/chat/completions';
-const OPENROUTER_VISION_MODEL = 'google/gemini-2.5-flash:free';
-const OPENROUTER_TEXT_MODEL = 'google/gemini-2.5-flash:free';
+const OPENROUTER_VISION_MODEL = 'google/gemini-2.5-flash';
+const OPENROUTER_TEXT_MODEL = 'google/gemini-2.5-flash';
 
 let openrouterKeys = [];
 let openrouterKeyIndex = 0;
@@ -181,9 +181,9 @@ const openrouterProvider = {
 const STAGE_PROVIDER = {
   'stage1':       'gemini',
   'stage2':       'gemini',
-  'stage2.5':     'gemini',
+  'stage2.5':     'openrouter',
   'bibliography': 'gemini',
-  'source-search':'gemini',
+  'source-search':'openrouter',
 };
 
 let geminiExhausted = false;

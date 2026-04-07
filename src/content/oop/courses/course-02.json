@@ -1,0 +1,675 @@
+{
+  "meta": {
+    "id": "oop-c2",
+    "title": { "en": "Course 2: C++ Language Specifiers", "ro": "Cursul 2: Specificatori ai limbajului C++" },
+    "shortTitle": { "en": "C2: Specifiers", "ro": "C2: Specificatori" },
+    "source": { "en": "OOP -- Lecture 2, Prof. Gavrilut Dragos, UAIC 2024-2025", "ro": "POO -- Cursul 2, Prof. Gavrilut Dragos, UAIC 2024-2025" }
+  },
+  "steps": [
+    {
+      "id": "oop-c2-pointers",
+      "title": { "en": "Pointers and References", "ro": "Pointeri si referinte" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Both pointers and references let you indirectly access a variable. But at the CPU level, is there any difference between `void SetInt(int *i) { *i = 5; }` and `void SetInt(int &i) { i = 5; }`?",
+            "ro": "Atat pointerii cat si referintele permit accesarea indirecta a unei variabile. Dar la nivel de CPU, exista vreo diferenta intre `void SetInt(int *i) { *i = 5; }` si `void SetInt(int &i) { i = 5; }`?"
+          },
+          "answer": {
+            "en": "No! Both produce identical assembly code. The difference is purely at the language level -- references provide safer syntax (no `->`, no NULL checks needed).",
+            "ro": "Nu! Ambele produc cod assembler identic. Diferenta e pur la nivel de limbaj -- referintele ofera sintaxa mai sigura (fara `->`, fara verificari NULL necesare)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Pointer version\nvoid SetInt(int *i) {\n    (*i) = 5;\n}\nvoid main() {\n    int x;\n    SetInt(&x);\n}\n\n// Reference version -- identical assembly!\nvoid SetInt(int &i) {\n    i = 5;\n}\nvoid main() {\n    int x;\n    SetInt(x);\n}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The resulting assembly code is identical for both pointer and reference versions. Both translate to the same machine instructions (`push`, `mov`, `pop`, `ret`).\n\nFrom the programmer's perspective, references fix several problems:\n- No need for the `->` operator -- use `.` instead\n- No need to check for NULL pointers",
+            "ro": "Codul assembler rezultat este identic pentru ambele versiuni -- pointer si referinta. Ambele se traduc in aceleasi instructiuni masina (`push`, `mov`, `pop`, `ret`).\n\nDin perspectiva programatorului, referintele rezolva mai multe probleme:\n- Nu e nevoie de operatorul `->` -- se foloseste `.` in schimb\n- Nu e nevoie de verificarea pointerilor NULL"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// With pointer: must use ->\nstruct Date { int X; };\nvoid SetInt(Date *d) {\n    d->X = 5;\n}\n\n// With reference: use . directly\nstruct Date { int X; };\nvoid SetInt(Date &d) {\n    d.X = 5;\n}"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the key advantage of references over pointers from a safety perspective?",
+            "ro": "Care este avantajul cheie al referintelor fata de pointeri din perspectiva sigurantei?"
+          },
+          "answer": {
+            "en": "References must be initialized when declared and cannot be NULL. This guarantees that a reference always points to a valid memory location, eliminating an entire class of bugs related to null pointer dereferencing.",
+            "ro": "Referintele trebuie initializate la declarare si nu pot fi NULL. Aceasta garanteaza ca o referinta indica intotdeauna o locatie de memorie valida, eliminand o clasa intreaga de bug-uri legate de dereferentierea pointerilor nuli."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 1-8: Pointer vs Reference syntax and assembly equivalence", "ro": "Slide-uri 1-8: Sintaxa Pointer vs Referinta si echivalenta assembler" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/TKVgH-pD4kM",
+          "label": { "en": "Course 2.1 -- Pointers and References (Prof. Balan)", "ro": "Cursul 2.1 -- Pointeri si referinte (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c2-references",
+      "title": { "en": "References: Properties and Constraints", "ro": "Referinte: proprietati si constrangeri" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "References have strict rules compared to pointers. Here are the 7 key differences:\n\n**1. Initialization** -- Pointers can remain uninitialized. References must always be initialized.",
+            "ro": "Referintele au reguli stricte comparativ cu pointerii. Iata cele 7 diferente cheie:\n\n**1. Initializare** -- Pointerii pot ramane neinitializati. Referintele trebuie intotdeauna initializate."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "int i = 10;\nint *p;          // OK: pointer can be uninitialized\nint &refI;       // COMPILE ERROR: uninitialized reference"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**2. Reassignment** -- A pointer can point to different addresses. A reference, once initialized, cannot be reassigned.\n\n**3. NULL values** -- A pointer can be NULL. A reference must always point to an existing memory address.\n\n**4. Arithmetic** -- Pointers support arithmetic (`+`, `-`, `++`). References do not.",
+            "ro": "**2. Reasignare** -- Un pointer poate indica adrese diferite. O referinta, odata initializata, nu poate fi reasignata.\n\n**3. Valori NULL** -- Un pointer poate fi NULL. O referinta trebuie sa indice intotdeauna o adresa de memorie existenta.\n\n**4. Aritmetica** -- Pointerii suporta operatii aritmetice (`+`, `-`, `++`). Referintele nu."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "int i = 10, j = 20;\nint *p = &i;\np = &j;          // OK: pointer reassigned\n\nint &refI = i;\n&refI = j;       // COMPILE ERROR: cannot reassign reference\n\n// Arithmetic\nint *p2 = &i;\np2++;             // OK: pointer arithmetic\n(&refI)++;        // COMPILE ERROR: no arithmetic on references"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**5. Type casting** -- A pointer can be cast to another pointer type (especially to `void*`). A reference cannot be converted to another reference type.\n\n**6. Multiple indirection** -- A pointer can point to another pointer (`int **`). A reference cannot refer to another reference (`int & &` is illegal).\n\n**7. Arrays** -- Pointers can be used in arrays. References cannot.",
+            "ro": "**5. Conversie de tip** -- Un pointer poate fi convertit la alt tip de pointer (in special la `void*`). O referinta nu poate fi convertita la alt tip de referinta.\n\n**6. Indirectare multipla** -- Un pointer poate indica alt pointer (`int **`). O referinta nu poate referi alta referinta (`int & &` este ilegal).\n\n**7. Tablouri** -- Pointerii pot fi folositi in tablouri. Referintele nu."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Type casting\nint i = 10;\nchar *p = (char *)&i;   // OK: pointer cast\nchar &refI = i;          // COMPILE ERROR: cannot cast reference\n\n// Multiple indirection\nint *p2 = &i;\nint **p_to_p = &p2;     // OK: pointer to pointer\nint & &ref_to_ref = i;  // COMPILE ERROR: no reference to reference\n\n// Arrays\nint *p3[100];            // OK: array of pointers\nint &ref[100];           // COMPILE ERROR: array of references"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Special case:** A reference can point to a temporary (constant) value, but only with `const`:\n```cpp\nconst int &refI = int(12);   // OK: const reference to temporary\nint *p = (int *)&refI;       // Can create pointer from const reference\n```",
+            "ro": "**Caz special:** O referinta poate indica o valoare temporara (constanta), dar doar cu `const`:\n```cpp\nconst int &refI = int(12);   // OK: referinta const la temporar\nint *p = (int *)&refI;       // Se poate crea pointer din referinta const\n```"
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why is `int & &ref` (reference to reference, with a space) different from `int &&ref` (rvalue reference, no space)?",
+            "ro": "De ce este `int & &ref` (referinta la referinta, cu spatiu) diferit de `int &&ref` (referinta rvalue, fara spatiu)?"
+          },
+          "answer": {
+            "en": "`int & &ref` (with a space) attempts to create a reference to a reference, which is illegal in C++. `int &&ref` (no space, C++11) declares an rvalue reference, a completely different concept used for move semantics.",
+            "ro": "`int & &ref` (cu spatiu) incearca sa creeze o referinta la o referinta, ceea ce este ilegal in C++. `int &&ref` (fara spatiu, C++11) declara o referinta rvalue, un concept complet diferit folosit pentru semantica de mutare."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which of the following is valid C++ code?",
+                "ro": "Care dintre urmatoarele este cod C++ valid?"
+              },
+              "options": [
+                {
+                  "text": { "en": "int &ref;  // uninitialized reference", "ro": "int &ref;  // referinta neinitializata" },
+                  "correct": false,
+                  "explanation": { "en": "References MUST be initialized at declaration. Unlike pointers, you cannot leave a reference uninitialized.", "ro": "Referintele TREBUIE initializate la declarare. Spre deosebire de pointeri, nu poti lasa o referinta neinitializata." }
+                },
+                {
+                  "text": { "en": "const int &ref = int(42);", "ro": "const int &ref = int(42);" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! A const reference can bind to a temporary value. The const qualifier extends the lifetime of the temporary.", "ro": "Corect! O referinta const poate fi legata de o valoare temporara. Calificatorul const extinde durata de viata a temporarului." }
+                },
+                {
+                  "text": { "en": "int &ref[10];  // array of references", "ro": "int &ref[10];  // tablou de referinte" },
+                  "correct": false,
+                  "explanation": { "en": "Arrays of references are not allowed in C++. You can have arrays of pointers (int *p[10]) but not arrays of references.", "ro": "Tablourile de referinte nu sunt permise in C++. Puteti avea tablouri de pointeri (int *p[10]) dar nu tablouri de referinte." }
+                }
+              ],
+              "explanation": { "en": "References have strict initialization and type constraints that pointers don't.", "ro": "Referintele au constrangeri stricte de initializare si tip pe care pointerii nu le au." },
+              "reviewStep": "oop-c2-references"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 9-30: 7 pointer vs reference differences, rvalue references", "ro": "Slide-uri 9-30: 7 diferente pointer vs referinta, referinte rvalue" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/Ww6aYQirsTo",
+          "label": { "en": "Course 2.2 -- Reference properties and constraints (Prof. Balan)", "ro": "Cursul 2.2 -- Proprietatile si constrangerile referintelor (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c2-overloading",
+      "title": { "en": "Method Overloading", "ro": "Supraincarcarea metodelor" },
+      "group": "overloading",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Can two functions in the same class have the same name? If so, what makes them different? What about two functions with the same name AND same parameters but different return types?",
+            "ro": "Pot doua functii din aceeasi clasa sa aiba acelasi nume? Daca da, ce le face diferite? Dar doua functii cu acelasi nume SI aceiasi parametri dar tipuri de retur diferite?"
+          },
+          "answer": {
+            "en": "Yes, multiple functions can share a name if their parameter types differ -- this is method overloading. However, the return type is NOT part of the function signature, so two functions with the same name and parameters but different return types are considered duplicates and will cause a compile error.",
+            "ro": "Da, mai multe functii pot imparti un nume daca tipurile parametrilor difera -- aceasta este supraincarcarea metodelor. Totusi, tipul de retur NU face parte din semnatura functiei, deci doua functii cu acelasi nume si parametri dar tipuri de retur diferite sunt considerate duplicate si vor cauza eroare de compilare."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Function Signature", "ro": "Semnatura functiei" },
+          "content": {
+            "en": "A function/method signature consists of: (1) the function name, and (2) the parameter types. The return type is **NOT** part of the signature.",
+            "ro": "Semnatura unei functii/metode consta din: (1) numele functiei si (2) tipurile parametrilor. Tipul de retur **NU** face parte din semnatura."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Math {\npublic:\n    int   Add(int v1, int v2);           // Signature: Add(int, int)\n    int   Add(int v1, int v2, int v3);   // Signature: Add(int, int, int)\n    float Add(float v1, float v2);       // Signature: Add(float, float)\n};"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Invalid overloading:** Functions with the same name and same parameter types but different return types are NOT valid overloads. Default parameter values do NOT change the signature either.\n```cpp\nint  Add(int v1, int v2);\nlong Add(int v1, int v2);     // ERROR: duplicate signature!\nlong Add(int v1, int v2 = 0); // ERROR: still same signature!\n```",
+            "ro": "**Supraincarcare invalida:** Functiile cu acelasi nume si aceleasi tipuri de parametri dar tipuri de retur diferite NU sunt supraincarcari valide. Valorile implicite ale parametrilor NU schimba semnatura.\n```cpp\nint  Add(int v1, int v2);\nlong Add(int v1, int v2);     // EROARE: semnatura duplicata!\nlong Add(int v1, int v2 = 0); // EROARE: tot aceeasi semnatura!\n```"
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Overload Resolution Steps** -- when a call is made, the compiler resolves which overload to use:\n\n1. **Exact match** -- same parameter types\n2. **Numerical promotion** -- lossless: `bool`/`char`/`short` -> `int`, `float` -> `double`, `enum` -> `int`\n3. **Numerical conversion** -- possible loss: `double` -> `int` (if only one candidate)\n4. **Casts** -- non-const -> const pointer, pointer -> `void*`, `NULL` -> `0`\n5. **Explicit casts** -- user-defined\n6. **Fallback** -- variadic method `(...)`\n7. **Error** -- no match found",
+            "ro": "**Pasii rezolutiei supraincarcarii** -- cand se face un apel, compilatorul rezolva care supraincarcare sa foloseasca:\n\n1. **Potrivire exacta** -- aceleasi tipuri de parametri\n2. **Promovare numerica** -- fara pierdere: `bool`/`char`/`short` -> `int`, `float` -> `double`, `enum` -> `int`\n3. **Conversie numerica** -- posibila pierdere: `double` -> `int` (daca e un singur candidat)\n4. **Cast-uri** -- non-const -> const pointer, pointer -> `void*`, `NULL` -> `0`\n5. **Cast-uri explicite** -- definite de utilizator\n6. **Rezerva** -- metoda variadica `(...)`\n7. **Eroare** -- nicio potrivire gasita"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Math {\npublic:\n    int   Inc(int v1);\n    float Inc(float v1);\n};\nMath m;\nm.Inc(100);     // Exact match -> Inc(int)\nm.Inc(1.0f);    // Exact match -> Inc(float)\nm.Inc('a');     // Promotion: char -> int -> Inc(int)\nm.Inc(1.0);     // ERROR: ambiguous (double -> int or float?)"
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Common misconceptions about promotion:**\n1. \"char to short is a promotion\" -- NO, promotion only targets `int` and `double`\n2. \"If promotion fails, it's always an error\" -- NO, if there's only ONE overload, conversion is attempted\n3. \"The fallback `(...)` method is tried before conversion\" -- NO, conversion comes first (step 3 before step 6)",
+            "ro": "**Conceptii gresite frecvente despre promovare:**\n1. \"char la short este o promovare\" -- NU, promovarea tinteste doar `int` si `double`\n2. \"Daca promovarea esueaza, e mereu eroare\" -- NU, daca e o singura supraincarcare, se incearca conversia\n3. \"Metoda de rezerva `(...)` e incercata inaintea conversiei\" -- NU, conversia vine prima (pasul 3 inaintea pasului 6)"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Single method: conversion allowed even with precision loss\nclass Math {\npublic:\n    int Inc(char v1) { return v1 + 1; }\n};\nMath m;\nm.Inc(1.0);  // WARNING: double -> char conversion, compiles\n\n// Ambiguity: char promotes to int, but no Inc(int) exists\nclass Math {\npublic:\n    int   Inc(short v1);\n    float Inc(float v1);\n};\nm.Inc('a');  // ERROR: ambiguous"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Multi-parameter resolution:** Each parameter is evaluated independently. The compiler selects the overload covering the highest number of exact matches. If two candidates each uniquely match different parameters, it is ambiguous.\n\n**const in overloading:** For value types, `const` is ignored in the signature. For pointers and references, `const` IS part of the signature.",
+            "ro": "**Rezolutie cu parametri multipli:** Fiecare parametru e evaluat independent. Compilatorul selecteaza supraincarcarea cu cel mai mare numar de potriviri exacte. Daca doi candidati potrivesc exact parametri diferiti, e ambiguitate.\n\n**const in supraincarcare:** Pentru tipuri valoare, `const` e ignorat din semnatura. Pentru pointeri si referinte, `const` FACE parte din semnatura."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// const ignored for value types\nclass Math {\npublic:\n    int Inc(int x) { return x + 2; }\n    int Inc(const int x) { return x + 1; }  // ERROR: duplicate!\n};\n\n// const matters for pointers/references\nclass Math {\npublic:\n    int Inc(int & x)       { return x + 2; }\n    int Inc(const int & x) { return x + 1; }\n};\nMath m;\nint x = 10;\nm.Inc(x);     // -> Inc(int&)\nm.Inc(100);   // -> Inc(const int&), 100 is constant"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What happens when you call `m.Inc('a')` with overloads `Inc(int)` and `Inc(float)`?",
+                "ro": "Ce se intampla cand apelati `m.Inc('a')` cu supraincarcari `Inc(int)` si `Inc(float)`?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Calls Inc(int) via promotion", "ro": "Apeleaza Inc(int) prin promovare" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! char is promoted to int (lossless promotion). Since Inc(int) exists, it's an exact match after promotion.", "ro": "Corect! char este promovat la int (promovare fara pierdere). Deoarece Inc(int) exista, e potrivire exacta dupa promovare." }
+                },
+                {
+                  "text": { "en": "Calls Inc(float) via promotion", "ro": "Apeleaza Inc(float) prin promovare" },
+                  "correct": false,
+                  "explanation": { "en": "Promotion targets int and double, not float. char promotes to int, and since Inc(int) exists, it's selected.", "ro": "Promovarea tinteste int si double, nu float. char se promoveaza la int, si deoarece Inc(int) exista, e selectat." }
+                },
+                {
+                  "text": { "en": "Compile error: ambiguous call", "ro": "Eroare de compilare: apel ambiguu" },
+                  "correct": false,
+                  "explanation": { "en": "It would be ambiguous only if Inc(int) didn't exist (e.g., Inc(short) and Inc(float)). With Inc(int) available, promotion resolves cleanly.", "ro": "Ar fi ambiguu doar daca Inc(int) nu exista (ex: Inc(short) si Inc(float)). Cu Inc(int) disponibil, promovarea se rezolva curat." }
+                }
+              ],
+              "explanation": { "en": "Promotion targets int (for integral types) and double (for floating types). char -> int is a promotion.", "ro": "Promovarea tinteste int (tipuri integrale) si double (tipuri floating). char -> int e promovare." },
+              "reviewStep": "oop-c2-overloading"
+            },
+            {
+              "question": {
+                "en": "Can two functions `int Add(int, int)` and `long Add(int, int)` coexist in the same class?",
+                "ro": "Pot coexista doua functii `int Add(int, int)` si `long Add(int, int)` in aceeasi clasa?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Yes, the return type makes them different", "ro": "Da, tipul de retur le face diferite" },
+                  "correct": false,
+                  "explanation": { "en": "The return type is NOT part of the function signature. These two have identical signatures (Add, int, int) and are considered duplicates.", "ro": "Tipul de retur NU face parte din semnatura functiei. Acestea doua au semnaturi identice (Add, int, int) si sunt considerate duplicate." }
+                },
+                {
+                  "text": { "en": "No, the return type is not part of the signature", "ro": "Nu, tipul de retur nu face parte din semnatura" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! The signature is only the function name + parameter types. Different return types with identical signatures cause a compile error.", "ro": "Corect! Semnatura e doar numele functiei + tipurile parametrilor. Tipuri de retur diferite cu semnaturi identice cauzeaza eroare de compilare." }
+                },
+                {
+                  "text": { "en": "Yes, but only if they're in different access sections", "ro": "Da, dar doar daca sunt in sectiuni de acces diferite" },
+                  "correct": false,
+                  "explanation": { "en": "Access modifiers (public/private) don't affect function signatures. Two functions with the same name and parameter types are always duplicates regardless of access level.", "ro": "Modificatorii de acces (public/private) nu afecteaza semnaturile functiilor. Doua functii cu acelasi nume si tipuri de parametri sunt mereu duplicate indiferent de nivelul de acces." }
+                }
+              ],
+              "explanation": { "en": "Function signature = name + parameter types. Return type is excluded.", "ro": "Semnatura functiei = nume + tipuri parametri. Tipul de retur e exclus." },
+              "reviewStep": "oop-c2-overloading"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 31-70: Overloading rules, resolution hierarchy, ambiguity cases", "ro": "Slide-uri 31-70: Reguli supraincarcare, ierarhie rezolutie, cazuri de ambiguitate" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/qIVEKumAdV4",
+          "label": { "en": "Course 2.3 -- Method overloading and resolution (Prof. Balan)", "ro": "Cursul 2.3 -- Supraincarcarea metodelor si rezolutia (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c2-null",
+      "title": { "en": "NULL Pointer vs nullptr", "ro": "Pointerul NULL vs nullptr" },
+      "group": "overloading",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "If you have `void Print(int value)` and `void Print(const char* text)`, what does `Print(NULL)` call? Is NULL a pointer or a number?",
+            "ro": "Daca aveti `void Print(int value)` si `void Print(const char* text)`, ce apeleaza `Print(NULL)`? E NULL un pointer sau un numar?"
+          },
+          "answer": {
+            "en": "In C++, NULL is defined as `0` (an integer!), not as a pointer. So `Print(NULL)` calls `Print(int)` and outputs \"Number: 0\". This is the core problem that `nullptr` (C++11) solves.",
+            "ro": "In C++, NULL este definit ca `0` (un intreg!), nu ca un pointer. Deci `Print(NULL)` apeleaza `Print(int)` si afiseaza \"Number: 0\". Aceasta e problema fundamentala pe care `nullptr` (C++11) o rezolva."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// The NULL macro in C++\n#ifdef __cplusplus\n    #define NULL 0       // Integer!\n#else\n    #define NULL ((void*)0)  // Pointer in C\n#endif\n\nvoid Print(int value) { printf(\"Number: %d\\n\", value); }\nvoid Print(const char* text) { printf(\"Text: %s\\n\", text); }\n\nvoid main() {\n    Print(10);          // Output: Number: 10\n    Print(\"C++ test\");  // Output: Text: C++ test\n    Print(NULL);        // Output: Number: 0  <-- NOT a pointer!\n}"
+        },
+        {
+          "type": "definition",
+          "term": { "en": "nullptr (C++11)", "ro": "nullptr (C++11)" },
+          "content": {
+            "en": "A keyword that refers exclusively to null pointers. Unlike NULL (which is `0`), nullptr cannot be implicitly converted to an integer. It can only be assigned to pointers and `bool`.",
+            "ro": "Un cuvant cheie care se refera exclusiv la pointeri nuli. Spre deosebire de NULL (care e `0`), nullptr nu poate fi convertit implicit la un intreg. Poate fi atribuit doar pointerilor si `bool`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "Print(nullptr);  // -> Print(const char*) -- correct!\n\n// nullptr assignment rules:\nint x = nullptr;        // ERROR: not an integer\nbool b = nullptr;       // OK: b = false\nconst char* p = nullptr;// OK: null pointer\n\n// nullptr with multiple pointer overloads:\nvoid Print(const char* text) { ... }\nvoid Print(int* value) { ... }\nPrint(nullptr);  // ERROR: ambiguous (const char* or int*?)"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Why does `Print(NULL)` call `Print(int)` instead of `Print(const char*)`?",
+                "ro": "De ce apeleaza `Print(NULL)` `Print(int)` in loc de `Print(const char*)`?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Because NULL is defined as 0 (an integer) in C++", "ro": "Deoarece NULL e definit ca 0 (un intreg) in C++" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! In C++, the NULL macro expands to 0, which is an integer literal. The overload resolution picks Print(int) as an exact match.", "ro": "Corect! In C++, macro-ul NULL se expandeaza la 0, care e un literal intreg. Rezolutia supraincarcarii alege Print(int) ca potrivire exacta." }
+                },
+                {
+                  "text": { "en": "Because Print(int) is declared first", "ro": "Deoarece Print(int) e declarata prima" },
+                  "correct": false,
+                  "explanation": { "en": "Declaration order doesn't affect overload resolution. The compiler evaluates all candidates and picks the best match based on type compatibility.", "ro": "Ordinea declararii nu afecteaza rezolutia supraincarcarii. Compilatorul evalueaza toti candidatii si alege cea mai buna potrivire pe baza compatibilitatii tipurilor." }
+                },
+                {
+                  "text": { "en": "Because const char* has lower priority than int", "ro": "Deoarece const char* are prioritate mai mica decat int" },
+                  "correct": false,
+                  "explanation": { "en": "There's no general priority between types. The issue is specifically that NULL = 0, which is an exact match for int. If NULL were a pointer, it would match const char*.", "ro": "Nu exista prioritate generala intre tipuri. Problema e specific ca NULL = 0, care e potrivire exacta pentru int. Daca NULL ar fi un pointer, ar potrivi const char*." }
+                }
+              ],
+              "explanation": { "en": "NULL is 0 in C++, making it an integer. Use nullptr for type-safe null pointers.", "ro": "NULL e 0 in C++, facandu-l intreg. Folositi nullptr pentru pointeri nuli type-safe." },
+              "reviewStep": "oop-c2-null"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 71-82: NULL macro, nullptr, overload ambiguity with pointer types", "ro": "Slide-uri 71-82: Macro-ul NULL, nullptr, ambiguitate supraincarcare cu tipuri pointer" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/tJ6QuKlyTZE",
+          "label": { "en": "Course 2.4 -- NULL vs nullptr (Prof. Balan)", "ro": "Cursul 2.4 -- NULL vs nullptr (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c2-const",
+      "title": { "en": "The const Specifier", "ro": "Specificatorul const" },
+      "group": "specifiers",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "What does `const` mean in `const int * const ptr`? Can you change the value? Can you change the pointer? How do you read complex const declarations?",
+            "ro": "Ce inseamna `const` in `const int * const ptr`? Puteti schimba valoarea? Puteti schimba pointerul? Cum cititi declaratii const complexe?"
+          },
+          "answer": {
+            "en": "Neither! `const int * const ptr` is a constant pointer to a constant value -- you can't change the pointer OR the value it points to. To read const declarations, use the Clockwise/Spiral Rule: read from the variable name outward.",
+            "ro": "Niciunul! `const int * const ptr` e un pointer constant la o valoare constanta -- nu puteti schimba nici pointerul NICI valoarea la care indica. Pentru a citi declaratii const, folositi Regula Spiralei: cititi de la numele variabilei in afara."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Returning a `const` reference is the recommended way to provide read-only access to member variables:",
+            "ro": "Returnarea unei referinte `const` este metoda recomandata pentru a oferi acces doar-citire la variabilele membru:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Date {\nprivate:\n    int x;\npublic:\n    int& GetX();           // returns modifiable reference\n    const int& GetY();     // returns read-only reference\n};\n\nDate d;\nd.GetX()++;   // OK: modifies x through reference\nd.GetY()++;   // ERROR: cannot modify const reference\nint x = d.GetY(); x++;  // OK: modifies local copy"
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Expression", "ro": "Expresie" },
+            { "en": "Meaning", "ro": "Semnificatie" },
+            { "en": "Change Value", "ro": "Modific. valoare" },
+            { "en": "Change Pointer", "ro": "Modific. pointer" }
+          ],
+          "rows": [
+            ["`int * ptr`", { "en": "Non-const pointer to non-const value", "ro": "Pointer non-const la valoare non-const" }, { "en": "YES", "ro": "DA" }, { "en": "YES", "ro": "DA" }],
+            ["`const int * ptr`", { "en": "Non-const pointer to const value", "ro": "Pointer non-const la valoare const" }, { "en": "NO", "ro": "NU" }, { "en": "YES", "ro": "DA" }],
+            ["`int const * ptr`", { "en": "Same as above (equivalent)", "ro": "La fel ca mai sus (echivalent)" }, { "en": "NO", "ro": "NU" }, { "en": "YES", "ro": "DA" }],
+            ["`int * const ptr`", { "en": "Const pointer to non-const value", "ro": "Pointer const la valoare non-const" }, { "en": "YES", "ro": "DA" }, { "en": "NO", "ro": "NU" }],
+            ["`const int * const ptr`", { "en": "Const pointer to const value", "ro": "Pointer const la valoare const" }, { "en": "NO", "ro": "NU" }, { "en": "NO", "ro": "NU" }]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Double pointers** (pointers to pointers) follow the same const rules, applied at each level:\n\n| Expression | Change `**ptr` | Change `*ptr` | Change `ptr` |\n|------------|---------------|--------------|-------------|\n| `int ** ptr` | YES | YES | YES |\n| `const int ** ptr` | NO | YES | YES |\n| `int ** const ptr` | YES | YES | NO |\n| `int * const * const ptr` | YES | NO | NO |\n| `const int * const * const ptr` | NO | NO | NO |",
+            "ro": "**Pointeri dubli** (pointeri la pointeri) urmeaza aceleasi reguli const, aplicate la fiecare nivel:\n\n| Expresie | Modific. `**ptr` | Modific. `*ptr` | Modific. `ptr` |\n|----------|-----------------|----------------|---------------|\n| `int ** ptr` | DA | DA | DA |\n| `const int ** ptr` | NU | DA | DA |\n| `int ** const ptr` | DA | DA | NU |\n| `int * const * const ptr` | DA | NU | NU |\n| `const int * const * const ptr` | NU | NU | NU |"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "int x;\n\n// const value, non-const pointer\nconst int * ptr;\nptr = &x;     // OK: can change pointer\n*ptr = 1;     // ERROR: cannot change value\n\n// const pointer, non-const value\nint * const ptr2 = &x;  // must initialize immediately\n*ptr2 = 1;    // OK: can change value\nptr2 += 1;    // ERROR: cannot change pointer\n\n// both const\nconst int * const ptr3 = &x;\n*ptr3 = 1;    // ERROR\nptr3 += 1;    // ERROR"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**const at the end of a method** means the method cannot modify any data member (cannot modify `this`):\n\n- A `const` method CAN modify `static` members (they don't belong to `this`)\n- A `const` method CAN modify other instances passed as parameters\n- A `static` method CANNOT have `const` qualifier (no `this` pointer)\n- A `const` object can only call `const` methods",
+            "ro": "**const la sfarsitul unei metode** inseamna ca metoda nu poate modifica niciun membru date (nu poate modifica `this`):\n\n- O metoda `const` POATE modifica membrii `static` (nu apartin lui `this`)\n- O metoda `const` POATE modifica alte instante primite ca parametri\n- O metoda `static` NU POATE avea calificatorul `const` (fara pointer `this`)\n- Un obiect `const` poate apela doar metode `const`"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Date {\nprivate:\n    int x;\n    mutable int y;      // can be modified in const methods\n    static int z;\npublic:\n    const int& GetX() const {\n        x = 0;          // ERROR: cannot modify x\n        y = 0;          // OK: y is mutable\n        z = 0;          // OK: z is static (not part of this)\n        return x;\n    }\n    void ModifyOther(Date * d) const {\n        d->x = 0;       // OK: d is a different object\n        this->x = 0;    // ERROR: this is const\n    }\n};"
+        },
+        {
+          "type": "definition",
+          "term": { "en": "mutable", "ro": "mutable" },
+          "content": {
+            "en": "A specifier that allows a data member to be modified even inside a `const` method. Useful for multi-threading variables, lambda expressions, and selective write access.",
+            "ro": "Un specificator care permite modificarea unui membru date chiar si intr-o metoda `const`. Util pentru variabile multi-threading, expresii lambda si acces selectiv de scriere."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Can a const method modify a static data member? Why? And can a static method have the const qualifier?",
+            "ro": "Poate o metoda const sa modifice un membru date static? De ce? Si poate o metoda statica sa aiba calificatorul const?"
+          },
+          "answer": {
+            "en": "Yes, a const method CAN modify static members because `const` only applies to `this` (the current instance), and static members belong to the class, not any instance. However, a static method CANNOT have `const` because there's no `this` pointer to apply it to.",
+            "ro": "Da, o metoda const POATE modifica membrii statici deoarece `const` se aplica doar la `this` (instanta curenta), iar membrii statici apartin clasei, nu vreunei instante. Totusi, o metoda statica NU POATE avea `const` deoarece nu exista pointer `this` caruia sa i se aplice."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which of the following compiles without errors?",
+                "ro": "Care dintre urmatoarele compileaza fara erori?"
+              },
+              "options": [
+                {
+                  "text": { "en": "const int & x = int(42);", "ro": "const int & x = int(42);" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! A const reference can bind to a temporary value, extending its lifetime.", "ro": "Corect! O referinta const poate fi legata de o valoare temporara, extinzandu-i durata de viata." }
+                },
+                {
+                  "text": { "en": "A const method modifying this->x (non-mutable)", "ro": "O metoda const care modifica this->x (non-mutable)" },
+                  "correct": false,
+                  "explanation": { "en": "A const method cannot modify non-mutable, non-static members. Only mutable or static members can be changed.", "ro": "O metoda const nu poate modifica membrii non-mutable, non-statici. Doar membrii mutable sau statici pot fi schimbati." }
+                },
+                {
+                  "text": { "en": "static const int& GetX() const;", "ro": "static const int& GetX() const;" },
+                  "correct": false,
+                  "explanation": { "en": "A static method cannot have the const qualifier because there's no 'this' pointer. The const at the end applies to 'this', which doesn't exist for static methods.", "ro": "O metoda statica nu poate avea calificatorul const deoarece nu exista pointer 'this'. const-ul de la final se aplica lui 'this', care nu exista pentru metodele statice." }
+                }
+              ],
+              "explanation": { "en": "const references can bind to temporaries; const methods protect 'this' but not static members.", "ro": "Referintele const pot fi legate de temporari; metodele const protejeaza 'this' dar nu membrii statici." },
+              "reviewStep": "oop-c2-const"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 83-110: const with pointers, double pointers, methods, mutable, static", "ro": "Slide-uri 83-110: const cu pointeri, pointeri dubli, metode, mutable, static" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/CQr7ZJCVId4",
+          "label": { "en": "Course 2.5 -- The const specifier (Prof. Balan)", "ro": "Cursul 2.5 -- Specificatorul const (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c2-friend",
+      "title": { "en": "The friend Specifier", "ro": "Specificatorul friend" },
+      "group": "specifiers",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "If class A declares class B as a friend, can B access A's private members? What about the reverse -- can A access B's private members?",
+            "ro": "Daca clasa A declara clasa B ca friend, poate B accesa membrii privati ai lui A? Dar invers -- poate A accesa membrii privati ai lui B?"
+          },
+          "answer": {
+            "en": "B CAN access A's private members (because A granted friendship). But A CANNOT access B's private members -- friendship is NOT symmetric. B would also need to declare A as friend for that to work.",
+            "ro": "B POATE accesa membrii privati ai lui A (deoarece A a acordat prietenia). Dar A NU POATE accesa membrii privati ai lui B -- prietenia NU este simetrica. B ar trebui de asemenea sa declare A ca friend pentru ca aceasta sa functioneze."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "friend specifier", "ro": "Specificatorul friend" },
+          "content": {
+            "en": "A `friend` function or class can access private and protected members of the class that declares it. A friend function does NOT belong to the class -- access specifiers (public/private) are irrelevant for the friend declaration.",
+            "ro": "O functie sau clasa `friend` poate accesa membrii privati si protejati ai clasei care o declara. O functie friend NU apartine clasei -- specificatorii de acces (public/private) sunt irelevanti pentru declaratia friend."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Friend function\nclass Date {\n    int x;\npublic:\n    Date(int value) : x(value) {}\n    friend void PrintDate(Date &d);  // friend declaration\n};\n\nvoid PrintDate(Date &d) {\n    printf(\"X = %d\\n\", d.x);  // OK: friend can access private\n}"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Friend class -- ALL methods of Printer can access Date's privates\nclass Date {\n    int x;\npublic:\n    Date(int value) : x(value) {}\n    friend class Printer;\n};\n\nclass Printer {\npublic:\n    void PrintDecimal(Date &d) { printf(\"x = %d\\n\", d.x); }     // OK\n    void PrintHexadecimal(Date &d) { printf(\"x = %x\\n\", d.x); } // OK\n};"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Friend method -- only ONE specific method from another class\nclass Data;  // forward declaration needed!\n\nclass Modifier {\npublic:\n    void SetX(Data & d, int value);\n};\n\nclass Data {\n    int x;\n    int& GetXRef() { return x; }\npublic:\n    int GetX() { return x; }\n    friend void Modifier::SetX(Data &, int);  // only this method\n};\n\nvoid Modifier::SetX(Data & d, int value) {\n    d.GetXRef() = value;  // OK: can access private GetXRef()\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Important rules about friend:**\n- Friendship is **not symmetric**: if A is friend of B, B is NOT automatically friend of A\n- Friendship is **not transitive**: if A is friend of B and B is friend of C, A is NOT friend of C\n- The friend declaration can appear in any access section (public/private/protected) -- it makes no difference",
+            "ro": "**Reguli importante despre friend:**\n- Prietenia **nu este simetrica**: daca A e friend al lui B, B NU este automat friend al lui A\n- Prietenia **nu este tranzitiva**: daca A e friend al lui B si B e friend al lui C, A NU este friend al lui C\n- Declaratia friend poate aparea in orice sectiune de acces (public/private/protected) -- nu face diferenta"
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why might you need a forward declaration (`class Data;`) when using friend methods from another class?",
+            "ro": "De ce ai putea avea nevoie de o declaratie forward (`class Data;`) cand folosesti metode friend din alta clasa?"
+          },
+          "answer": {
+            "en": "When class Modifier uses Data as a parameter type, the compiler needs to know that Data exists before Modifier is defined. But Data can't be fully defined first because it references Modifier::SetX in its friend declaration. The forward declaration breaks this circular dependency.",
+            "ro": "Cand clasa Modifier foloseste Data ca tip de parametru, compilatorul trebuie sa stie ca Data exista inainte ca Modifier sa fie definit. Dar Data nu poate fi complet definit prima deoarece refera Modifier::SetX in declaratia friend. Declaratia forward rupe aceasta dependenta circulara."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "If class A declares `friend class B;`, which statement is true?",
+                "ro": "Daca clasa A declara `friend class B;`, care afirmatie e adevarata?"
+              },
+              "options": [
+                {
+                  "text": { "en": "B can access A's private members, and A can access B's private members", "ro": "B poate accesa membrii privati ai lui A, si A poate accesa membrii privati ai lui B" },
+                  "correct": false,
+                  "explanation": { "en": "Friendship is not symmetric! A granted B access to its privates, but B did NOT grant A the same. A would need its own friend declaration in B.", "ro": "Prietenia nu e simetrica! A a acordat lui B acces la privatele sale, dar B NU a acordat lui A la fel. A ar avea nevoie de propria declaratie friend in B." }
+                },
+                {
+                  "text": { "en": "B can access A's private members, but A cannot access B's private members", "ro": "B poate accesa membrii privati ai lui A, dar A nu poate accesa membrii privati ai lui B" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Friendship is one-directional. A declared B as friend, so B gets access. A does not automatically get reciprocal access.", "ro": "Corect! Prietenia e unidirectionala. A a declarat B ca friend, deci B primeste acces. A nu primeste automat acces reciproc." }
+                },
+                {
+                  "text": { "en": "Both A and B can access each other's private members because friendship is transitive", "ro": "Atat A cat si B pot accesa membrii privati ai celuilalt deoarece prietenia e tranzitiva" },
+                  "correct": false,
+                  "explanation": { "en": "Friendship is neither symmetric nor transitive. Each class must explicitly grant friendship -- it's never automatic.", "ro": "Prietenia nu e nici simetrica nici tranzitiva. Fiecare clasa trebuie sa acorde explicit prietenia -- nu e niciodata automata." }
+                }
+              ],
+              "explanation": { "en": "friend is a one-way access grant. The declaring class gives access; it doesn't receive it.", "ro": "friend e un acces unidirectional. Clasa care declara acorda acces; nu il primeste." },
+              "reviewStep": "oop-c2-friend"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 111-125: friend functions, classes, methods, forward declarations", "ro": "Slide-uri 111-125: functii friend, clase, metode, declaratii forward" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c2-quiz",
+      "title": { "en": "Self-Test Quiz", "ro": "Test de autoevaluare" },
+      "group": "review",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which is NOT a valid difference between pointers and references?", "ro": "Care NU este o diferenta valida intre pointeri si referinte?" },
+              "options": [
+                { "text": { "en": "Pointers can be NULL, references cannot", "ro": "Pointerii pot fi NULL, referintele nu" }, "correct": false, "explanation": { "en": "This IS a valid difference. References must always point to valid memory.", "ro": "Aceasta ESTE o diferenta valida. Referintele trebuie sa indice intotdeauna memorie valida." } },
+                { "text": { "en": "Pointers generate different assembly code than references", "ro": "Pointerii genereaza cod assembler diferit fata de referinte" }, "correct": true, "explanation": { "en": "Correct -- this is NOT a valid difference. Both generate identical assembly code. The differences are at the language level only.", "ro": "Corect -- aceasta NU este o diferenta valida. Ambele genereaza cod assembler identic. Diferentele sunt doar la nivel de limbaj." } },
+                { "text": { "en": "Pointers support arithmetic, references do not", "ro": "Pointerii suporta aritmetica, referintele nu" }, "correct": false, "explanation": { "en": "This IS a valid difference. You can do p++ on a pointer but not on a reference.", "ro": "Aceasta ESTE o diferenta valida. Puteti face p++ pe un pointer dar nu pe o referinta." } }
+              ],
+              "explanation": { "en": "Pointers and references produce identical machine code despite their syntactic differences.", "ro": "Pointerii si referintele produc cod masina identic in ciuda diferentelor sintactice." },
+              "reviewStep": "oop-c2-pointers"
+            },
+            {
+              "question": { "en": "What is the function signature of `float Add(int a, int b, int c = 0)`?", "ro": "Care e semnatura functiei `float Add(int a, int b, int c = 0)`?" },
+              "options": [
+                { "text": { "en": "Add(int, int)", "ro": "Add(int, int)" }, "correct": false, "explanation": { "en": "Default values don't remove parameters from the signature. The function still has 3 parameters.", "ro": "Valorile implicite nu elimina parametrii din semnatura. Functia are inca 3 parametri." } },
+                { "text": { "en": "float Add(int, int, int)", "ro": "float Add(int, int, int)" }, "correct": false, "explanation": { "en": "Close, but the return type (float) is NOT part of the signature. The signature is just name + parameter types.", "ro": "Aproape, dar tipul de retur (float) NU face parte din semnatura. Semnatura e doar nume + tipuri parametri." } },
+                { "text": { "en": "Add(int, int, int)", "ro": "Add(int, int, int)" }, "correct": true, "explanation": { "en": "Correct! Signature = name + parameter types. Return type and default values are excluded.", "ro": "Corect! Semnatura = nume + tipuri parametri. Tipul de retur si valorile implicite sunt excluse." } }
+              ],
+              "explanation": { "en": "Signature = function name + parameter types. Return type and defaults are not included.", "ro": "Semnatura = numele functiei + tipurile parametrilor. Tipul de retur si valorile implicite nu sunt incluse." },
+              "reviewStep": "oop-c2-overloading"
+            },
+            {
+              "question": { "en": "What does `Print(nullptr)` call when both `Print(bool)` and `Print(const char*)` exist?", "ro": "Ce apeleaza `Print(nullptr)` cand exista atat `Print(bool)` cat si `Print(const char*)`?" },
+              "options": [
+                { "text": { "en": "Print(bool) -- nullptr converts to false", "ro": "Print(bool) -- nullptr se converteste la false" }, "correct": false, "explanation": { "en": "While nullptr CAN convert to bool, it prefers pointer types. The pointer overload wins.", "ro": "Desi nullptr SE POATE converti la bool, prefera tipurile pointer. Supraincarcarea pointer castiga." } },
+                { "text": { "en": "Print(const char*) -- nullptr prefers pointer types", "ro": "Print(const char*) -- nullptr prefera tipurile pointer" }, "correct": true, "explanation": { "en": "Correct! nullptr always prefers pointer overloads over bool, even though bool conversion is possible.", "ro": "Corect! nullptr prefera intotdeauna supraincarcari pointer in fata bool, chiar daca conversia la bool e posibila." } },
+                { "text": { "en": "Compile error: ambiguous", "ro": "Eroare de compilare: ambiguitate" }, "correct": false, "explanation": { "en": "It would be ambiguous only with TWO pointer overloads (e.g., const char* AND int*). With one pointer and one bool, the pointer wins.", "ro": "Ar fi ambiguu doar cu DOUA supraincarcari pointer (ex: const char* SI int*). Cu un pointer si un bool, pointerul castiga." } }
+              ],
+              "explanation": { "en": "nullptr prefers pointer types over bool in overload resolution.", "ro": "nullptr prefera tipuri pointer in fata bool in rezolutia supraincarcarii." },
+              "reviewStep": "oop-c2-null"
+            },
+            {
+              "question": { "en": "What does `int * const ptr` mean?", "ro": "Ce inseamna `int * const ptr`?" },
+              "options": [
+                { "text": { "en": "A pointer that cannot be changed, pointing to a value that CAN be changed", "ro": "Un pointer care nu poate fi schimbat, indicand o valoare care POATE fi schimbata" }, "correct": true, "explanation": { "en": "Correct! The const applies to the pointer itself (can't reassign ptr), but the pointed-to value is non-const (can modify *ptr).", "ro": "Corect! const se aplica pointerului insusi (nu se poate reasigna ptr), dar valoarea indicata e non-const (se poate modifica *ptr)." } },
+                { "text": { "en": "A pointer to a constant integer value", "ro": "Un pointer la o valoare intreaga constanta" }, "correct": false, "explanation": { "en": "That would be `const int * ptr` or `int const * ptr`. The const BEFORE * applies to the value; const AFTER * applies to the pointer.", "ro": "Acela ar fi `const int * ptr` sau `int const * ptr`. const-ul INAINTE de * se aplica valorii; const-ul DUPA * se aplica pointerului." } },
+                { "text": { "en": "A constant integer stored in a pointer variable", "ro": "Un intreg constant stocat intr-o variabila pointer" }, "correct": false, "explanation": { "en": "That doesn't make sense syntactically. Pointers store addresses, not values. The const qualifies what can/can't be modified.", "ro": "Aceasta nu are sens sintactic. Pointerii stocheaza adrese, nu valori. const califica ce poate/nu poate fi modificat." } }
+              ],
+              "explanation": { "en": "Read const relative to *: const before * = const value, const after * = const pointer.", "ro": "Cititi const relativ la *: const inainte de * = valoare const, const dupa * = pointer const." },
+              "reviewStep": "oop-c2-const"
+            },
+            {
+              "question": { "en": "Can a mutable member be modified inside a const method?", "ro": "Poate un membru mutable sa fie modificat intr-o metoda const?" },
+              "options": [
+                { "text": { "en": "Yes -- that's the purpose of mutable", "ro": "Da -- acesta e scopul lui mutable" }, "correct": true, "explanation": { "en": "Correct! The mutable keyword specifically exempts a member from the const restriction on methods.", "ro": "Corect! Cuvantul cheie mutable excepteaza specific un membru de la restrictia const a metodelor." } },
+                { "text": { "en": "No -- const methods cannot modify any member", "ro": "Nu -- metodele const nu pot modifica niciun membru" }, "correct": false, "explanation": { "en": "Const methods cannot modify MOST members, but mutable members and static members are exceptions.", "ro": "Metodele const nu pot modifica MAJORITATEA membrilor, dar membrii mutable si statici sunt exceptii." } },
+                { "text": { "en": "Only if the method is also static", "ro": "Doar daca metoda e si statica" }, "correct": false, "explanation": { "en": "A static method can't have const qualifier at all (no 'this'). Mutable works with non-static const methods.", "ro": "O metoda statica nu poate avea deloc calificatorul const (fara 'this'). Mutable functioneaza cu metode const non-statice." } }
+              ],
+              "explanation": { "en": "mutable exempts a member from const restrictions. static members are also exempt (different reason).", "ro": "mutable excepteaza un membru de la restrictiile const. Membrii statici sunt de asemenea exceptati (motiv diferit)." },
+              "reviewStep": "oop-c2-const"
+            },
+            {
+              "question": { "en": "If class A declares `friend class B`, is B automatically a friend of A?", "ro": "Daca clasa A declara `friend class B`, este B automat friend al lui A?" },
+              "options": [
+                { "text": { "en": "Yes -- friendship is symmetric", "ro": "Da -- prietenia e simetrica" }, "correct": false, "explanation": { "en": "Friendship is NOT symmetric. A granted B access, but B did not grant A access. Each class must declare friendship independently.", "ro": "Prietenia NU e simetrica. A a acordat lui B acces, dar B nu a acordat lui A acces. Fiecare clasa trebuie sa declare prietenia independent." } },
+                { "text": { "en": "No -- friendship is one-directional", "ro": "Nu -- prietenia e unidirectionala" }, "correct": true, "explanation": { "en": "Correct! A declaring B as friend means B can access A's privates. A cannot access B's privates unless B also declares A as friend.", "ro": "Corect! A declarand B ca friend inseamna ca B poate accesa privatele lui A. A nu poate accesa privatele lui B decat daca B il declara si pe A ca friend." } },
+                { "text": { "en": "Only if both classes are in the same namespace", "ro": "Doar daca ambele clase sunt in acelasi namespace" }, "correct": false, "explanation": { "en": "Namespaces don't affect friendship. friend is always explicit and one-directional regardless of scope.", "ro": "Namespace-urile nu afecteaza prietenia. friend e mereu explicit si unidirectional indiferent de domeniu." } }
+              ],
+              "explanation": { "en": "friend is one-directional and non-transitive. Each class must explicitly grant access.", "ro": "friend e unidirectional si non-tranzitiv. Fiecare clasa trebuie sa acorde explicit acces." },
+              "reviewStep": "oop-c2-friend"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
