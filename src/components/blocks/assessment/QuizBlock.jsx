@@ -32,7 +32,6 @@ function QuizQuestion({ q, index, total }) {
   const explanationRef = useRef(null);
   const [explanationHeight, setExplanationHeight] = useState(0);
 
-  // Measure explanation height
   useEffect(() => {
     if (!explanationRef.current) return;
     const ro = new ResizeObserver(([entry]) => {
@@ -51,6 +50,9 @@ function QuizQuestion({ q, index, total }) {
     if (selected === null) return;
     setSubmitted(true);
   };
+
+  // Detect per-option explanations (new format) vs single explanation (old format)
+  const hasPerOptionExplanations = q.options.some(opt => opt.explanation);
 
   return (
     <div className={index < total - 1 ? 'mb-4 pb-4' : ''} style={index < total - 1 ? { borderBottom: '1px solid var(--theme-border)' } : {}}>
@@ -80,26 +82,51 @@ function QuizQuestion({ q, index, total }) {
           }
 
           return (
-            <button
-              key={oi}
-              onClick={() => handleSelect(oi)}
-              className="flex items-center gap-3 p-3.5 rounded-lg text-left text-sm cursor-pointer"
-              style={{
-                backgroundColor: bg,
-                border: `1px solid ${border}`,
-                color: textColor,
-                pointerEvents: submitted ? 'none' : 'auto',
-                transition: 'background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease',
-              }}
-            >
-              <span
-                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                style={{ backgroundColor: 'var(--theme-border)' }}
+            <div key={oi}>
+              <button
+                onClick={() => handleSelect(oi)}
+                className="flex items-center gap-3 p-3.5 rounded-lg text-left text-sm cursor-pointer w-full"
+                style={{
+                  backgroundColor: bg,
+                  border: `1px solid ${border}`,
+                  color: textColor,
+                  pointerEvents: submitted ? 'none' : 'auto',
+                  transition: 'background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease',
+                }}
               >
-                {String.fromCharCode(65 + oi)}
-              </span>
-              {typeof opt.text === 'string' ? opt.text : t(opt.text.en, opt.text.ro)}
-            </button>
+                <span
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  style={{ backgroundColor: 'var(--theme-border)' }}
+                >
+                  {String.fromCharCode(65 + oi)}
+                </span>
+                {typeof opt.text === 'string' ? opt.text : t(opt.text.en, opt.text.ro)}
+              </button>
+
+              {/* Per-option explanation (new format) */}
+              {submitted && hasPerOptionExplanations && opt.explanation && (oi === selected || opt.correct) && (
+                <div
+                  className="mt-1.5 ml-9 p-2.5 rounded-lg text-xs leading-relaxed"
+                  style={{
+                    backgroundColor: opt.correct
+                      ? 'color-mix(in srgb, #10b981 8%, var(--theme-card-bg))'
+                      : 'color-mix(in srgb, #ef4444 8%, var(--theme-card-bg))',
+                    border: `1px solid ${opt.correct
+                      ? 'color-mix(in srgb, #10b981 20%, var(--theme-border))'
+                      : 'color-mix(in srgb, #ef4444 20%, var(--theme-border))'}`,
+                    color: opt.correct ? '#10b981' : '#ef4444',
+                    animation: 'fadeIn 0.3s ease',
+                  }}
+                >
+                  <span className="font-semibold">
+                    {opt.correct
+                      ? t('Why this is correct: ', 'De ce e corect: ')
+                      : t('Why this is wrong: ', 'De ce e greșit: ')}
+                  </span>
+                  {typeof opt.explanation === 'string' ? opt.explanation : t(opt.explanation.en, opt.explanation.ro)}
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
@@ -127,8 +154,8 @@ function QuizQuestion({ q, index, total }) {
         </button>
       </div>
 
-      {/* Explanation — smoothly expands after submit */}
-      {q.explanation && (
+      {/* Legacy single explanation (old format — backwards compatible) */}
+      {q.explanation && !hasPerOptionExplanations && (
         <div
           style={{
             maxHeight: submitted ? `${explanationHeight + 16}px` : '0px',
@@ -149,6 +176,19 @@ function QuizQuestion({ q, index, total }) {
               {t(q.explanation.en, q.explanation.ro)}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Review step link */}
+      {submitted && q.reviewStep && (
+        <div className="mt-2 text-xs" style={{ animation: 'fadeIn 0.3s ease 0.2s both' }}>
+          <a
+            href={`#${q.reviewStep}`}
+            className="underline"
+            style={{ color: '#3b82f6' }}
+          >
+            {t('Review this topic', 'Revizuiește acest subiect')} →
+          </a>
         </div>
       )}
     </div>
