@@ -316,6 +316,72 @@ app.post('/api/grade', async (req, res) => {
   }
 });
 
+// POST /api/generate-test — generate test questions from course content
+app.post('/api/generate-test', async (req, res) => {
+  try {
+    const { courseContent, numQuestions, lang } = req.body;
+    if (!courseContent) return res.status(400).json({ error: 'courseContent required' });
+    const count = Math.min(numQuestions || 8, 15);
+    const language = lang === 'ro' ? 'Romanian' : 'English';
+
+    const systemPrompt = `You generate university-level CS exam questions. Return ONLY a JSON array, no other text.
+
+Each element has this shape:
+{"type": "open-ended"|"code-writing", "points": <2-5>, "prompt": {"en": "...", "ro": "..."}, "rubric": {"en": "...", "ro": "..."}}
+
+For "code-writing" questions, also include "language": "pseudocode".
+
+Rules:
+- Generate exactly ${count} questions
+- Mix question types: ~40% open-ended (explain, prove, analyze), ~40% code-writing (write algorithm, compute), ~20% short-answer (define, state complexity)
+- Questions should test UNDERSTANDING, not just memorization
+- Include questions about: problem formulation (input/output), algorithm correctness (invariants), complexity analysis, and algorithm tracing
+- Rubrics must contain the expected answer with enough detail to grade
+- Both en and ro fields are required for prompt and rubric
+- Primary language for the content is ${language}
+- Questions should be at exam difficulty level — not trivial
+- Do NOT copy questions verbatim from the content — create original questions that test the same concepts`;
+
+    const userContent = `Generate ${count} exam questions based on this course material:\n\n${courseContent.slice(0, 12000)}`;
+
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userContent },
+    ];
+
+    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false, { temperature: 0.7 });
+    const data = await llmRes.json();
+    const raw = data.choices?.[0]?.message?.content || '';
+    recordUsage(key, provider, inputEstimate, Math.ceil(raw.length / 4));
+
+    // Parse — handle markdown fences
+    let cleaned = raw.trim();
+    if (cleaned.startsWith('```')) cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+
+    let questions;
+    try {
+      questions = JSON.parse(cleaned);
+    } catch {
+      return res.status(500).json({ error: 'Failed to parse generated questions', raw: cleaned.slice(0, 500) });
+    }
+
+    // Assign IDs and validate
+    const result = (Array.isArray(questions) ? questions : []).map((q, i) => ({
+      id: `gen-q${i + 1}`,
+      type: q.type || 'open-ended',
+      points: q.points || 3,
+      prompt: q.prompt || { en: '', ro: '' },
+      rubric: q.rubric || { en: '', ro: '' },
+      ...(q.language ? { language: q.language } : {}),
+    }));
+
+    res.json({ questions: result });
+  } catch (err) {
+    console.error('Generate test error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // GET /stats — daily usage per key

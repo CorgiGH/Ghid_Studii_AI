@@ -1,5 +1,6 @@
 import React, { useState, Suspense, useCallback } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { generateTest } from '../../services/api';
 import TestRenderer from '../blocks/test/TestRenderer';
 import GeneratedTestRenderer from './GeneratedTestRenderer';
 
@@ -7,11 +8,69 @@ function LoadingFallback() {
   return <div className="animate-pulse p-4 text-sm opacity-50">Loading...</div>;
 }
 
-export default function TestsTab({ tests }) {
+export default function TestsTab({ tests, courses }) {
   const { t, lang, testProgress } = useApp();
   const [activeTest, setActiveTest] = useState(null);
   const [generatedTest, setGeneratedTest] = useState(null);
   const [generating, setGenerating] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState(null);
+
+  const generateAITest = useCallback(async () => {
+    setAiGenerating(true);
+    setAiError(null);
+    try {
+      // Load all JSON courses to extract content
+      const jsonCourses = (courses || []).filter(c => c.src);
+      if (!jsonCourses.length) throw new Error('No JSON courses available');
+
+      // Pick 2-3 random courses for variety
+      const shuffled = [...jsonCourses].sort(() => Math.random() - 0.5);
+      const picked = shuffled.slice(0, Math.min(3, shuffled.length));
+
+      const loaded = await Promise.all(
+        picked.map(c => import(`../../content/${c.src}`).then(m => m.default))
+      );
+
+      // Extract text content from steps/blocks
+      const contentParts = loaded.map(course => {
+        const title = course.meta.title.en;
+        const steps = course.steps.map(step => {
+          const blocks = step.blocks
+            .filter(b => b.type === 'learn' || b.type === 'definition' || b.type === 'code')
+            .map(b => {
+              if (b.type === 'code') return b.content;
+              return b.content?.en || b.term?.en || '';
+            })
+            .join('\n');
+          return `## ${step.title.en}\n${blocks}`;
+        }).join('\n\n');
+        return `# ${title}\n${steps}`;
+      }).join('\n\n---\n\n');
+
+      const { questions } = await generateTest({
+        courseContent: contentParts,
+        numQuestions: 8,
+        lang,
+      });
+
+      const totalPoints = questions.reduce((s, q) => s + q.points, 0);
+      setGeneratedTest({
+        meta: {
+          id: `ai-${Date.now()}`,
+          title: { en: 'AI-Generated Test', ro: 'Test generat de AI' },
+          totalPoints,
+          duration: 60,
+        },
+        questions,
+      });
+    } catch (err) {
+      console.error('AI generation failed:', err);
+      setAiError(err.message);
+    } finally {
+      setAiGenerating(false);
+    }
+  }, [courses, lang]);
 
   const generatePracticeTest = useCallback(async () => {
     setGenerating(true);
@@ -189,26 +248,54 @@ export default function TestsTab({ tests }) {
 
   return (
     <div>
-      {/* Generate practice test card */}
-      <button
-        onClick={generatePracticeTest}
-        disabled={generating}
-        className="w-full mb-8 p-5 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.005]"
-        style={{
-          background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-          opacity: generating ? 0.7 : 1,
-        }}
-      >
-        <div className="text-white text-base font-bold">
-          {generating
-            ? t('Generating...', 'Se genereaz\u0103...')
-            : t('Generate Practice Test', 'Genereaz\u0103 test de practic\u0103')
-          }
+      {/* Generate buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+        <button
+          onClick={generatePracticeTest}
+          disabled={generating}
+          className="p-4 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.005]"
+          style={{
+            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+            opacity: generating ? 0.7 : 1,
+          }}
+        >
+          <div className="text-white text-sm font-bold">
+            {generating
+              ? t('Generating...', 'Se genereaz\u0103...')
+              : t('Random Mix', 'Mix aleatoriu')
+            }
+          </div>
+          <div className="text-white/70 text-[11px] mt-1">
+            {t('8-12 questions sampled from past exams', '8-12 \u00eentreb\u0103ri din examenele anterioare')}
+          </div>
+        </button>
+
+        <button
+          onClick={generateAITest}
+          disabled={aiGenerating}
+          className="p-4 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.005]"
+          style={{
+            background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+            opacity: aiGenerating ? 0.7 : 1,
+          }}
+        >
+          <div className="text-white text-sm font-bold">
+            {aiGenerating
+              ? t('AI is thinking...', 'AI-ul genereaz\u0103...')
+              : t('AI Generate from Courses', 'Genereaz\u0103 cu AI din cursuri')
+            }
+          </div>
+          <div className="text-white/70 text-[11px] mt-1">
+            {t('New original questions based on course content', '\u00centreb\u0103ri originale bazate pe con\u021binutul cursurilor')}
+          </div>
+        </button>
+      </div>
+
+      {aiError && (
+        <div className="mb-4 p-3 rounded-lg text-xs" style={{ backgroundColor: '#ef444420', color: '#ef4444', border: '1px solid #ef444440' }}>
+          {t('Generation failed', 'Generarea a e\u0219uat')}: {aiError}
         </div>
-        <div className="text-white/70 text-xs mt-1">
-          {t('Random mix of 8-12 questions from all past exams', 'Mix aleatoriu de 8-12 \u00eentreb\u0103ri din toate examenele')}
-        </div>
-      </button>
+      )}
 
       {renderGroup(t('Midterms', 'Par\u021biale'), partials)}
       {renderGroup(t('Final Exams', 'Examene'), exams)}

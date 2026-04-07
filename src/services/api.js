@@ -64,6 +64,21 @@ export async function gradeAnswer({ prompt, studentAnswer, rubric, maxPoints, qu
   return res.json();
 }
 
+export async function generateTest({ courseContent, numQuestions, lang }) {
+  const res = await fetch(`${PROXY_URL}/api/generate-test`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ courseContent, numQuestions, lang }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err || `Error ${res.status}`);
+  }
+
+  return res.json();
+}
+
 export async function verifyAnswer({ question, studentAnswer, type, options, correct, keyConcepts, modelAnswer }) {
   const res = await fetch(`${PROXY_URL}/api/verify`, {
     method: 'POST',
