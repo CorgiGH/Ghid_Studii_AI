@@ -12,6 +12,7 @@ import CourseTransition from '../components/ui/CourseTransition';
 import CourseNavigation from '../components/ui/CourseNavigation';
 import CourseRenderer from '../components/blocks/CourseRenderer';
 import TestRenderer from '../components/blocks/test/TestRenderer';
+import TestsTab from '../components/ui/TestsTab';
 import { CourseBlock } from '../components/ui';
 
 function PracticeTab({ practice: LazyPractice }) {
@@ -311,23 +312,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             )}
 
             {tab === 'tests' && subject.tests && (
-              <div>
-                {subject.tests.map(test => {
-                  // JSON test entry — render via TestRenderer
-                  if (test.src) {
-                    return <TestRenderer key={test.id} src={test.src} />;
-                  }
-                  // Legacy JSX test
-                  const TestContent = test.component;
-                  return (
-                    <CourseBlock key={test.id} title={test.title[lang]} id={test.id}>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <TestContent />
-                      </Suspense>
-                    </CourseBlock>
-                  );
-                })}
-              </div>
+              <TestsTab tests={subject.tests} />
             )}
           </main>
         </div>
