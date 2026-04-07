@@ -6,7 +6,7 @@ const StringMatchAnimation = lazy(() => import('./StringMatchAnimation'));
 const KNOWN_VARIANTS = {
   kmp: { component: StringMatchAnimation, props: { variant: 'kmp' } },
   'boyer-moore': { component: StringMatchAnimation, props: { variant: 'bm' } },
-  'rabin-karp': { component: StringMatchAnimation, props: { variant: 'bm' } },
+  'rabin-karp': { component: StringMatchAnimation, props: { variant: 'rk' } },
   'string-matching': { component: StringMatchAnimation, props: { variant: 'kmp' } },
 };
 

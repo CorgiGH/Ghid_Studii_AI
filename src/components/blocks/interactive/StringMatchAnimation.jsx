@@ -22,6 +22,11 @@ const PRESETS = {
     { text: 'ABCABDABCABC', pattern: 'ABCABC' },
     { text: 'AAAAAAAAAB', pattern: 'AAAB' },
   ],
+  rk: [
+    { text: 'ABCABDABCABC', pattern: 'ABCABC' },
+    { text: 'AAAAAAB', pattern: 'AAB' },
+    { text: 'HELLO WORLD', pattern: 'ORLD' },
+  ],
 };
 
 function computeFailure(p) {
@@ -63,6 +68,7 @@ export default function StringMatchAnimation({ variant = 'kmp' }) {
   const [foundAt, setFoundAt] = useState(null);
   const [stateVars, setStateVars] = useState({});
   const [lastOccTable, setLastOccTable] = useState(null);
+  const [hashInfo, setHashInfo] = useState(null);
   const cancelRef = useRef(false);
   const speedRef = useRef(speed);
   const pauseRef = useRef(false);
@@ -111,7 +117,7 @@ export default function StringMatchAnimation({ variant = 'kmp' }) {
       setStatus(''); setLog([]);
       setRunning(false); setPaused(false);
       setComparisons(0); setFoundAt(null);
-      setStateVars({}); setLastOccTable(null);
+      setStateVars({}); setLastOccTable(null); setHashInfo(null);
     }, 50);
   }, []);
 
@@ -281,7 +287,135 @@ export default function StringMatchAnimation({ variant = 'kmp' }) {
     }
   }, [text, pattern, waitForStep, addLog, t]);
 
-  const start = variant === 'bm' ? runBM : runKMP;
+  // ── Rabin-Karp ──
+  const runRK = useCallback(async () => {
+    setRunning(true);
+    const T = text, P = pattern;
+    const n = T.length, m = P.length;
+    const BASE = 256, MOD = 101;
+    let comps = 0;
+
+    // Compute h = BASE^(m-1) mod MOD
+    let h = 1;
+    for (let k = 0; k < m - 1; k++) h = (h * BASE) % MOD;
+
+    // Hash the pattern and first window
+    let pHash = 0, tHash = 0;
+    for (let k = 0; k < m; k++) {
+      pHash = (pHash * BASE + P.charCodeAt(k)) % MOD;
+      tHash = (tHash * BASE + T.charCodeAt(k)) % MOD;
+    }
+
+    addLog(t(
+      `Preprocessing: BASE=${BASE}, MOD=${MOD}, h=BASE^${m - 1} mod ${MOD}=${h}`,
+      `Preprocesare: BASE=${BASE}, MOD=${MOD}, h=BASE^${m - 1} mod ${MOD}=${h}`
+    ));
+    addLog(t(`hash(P)=${pHash}, hash(T[0..${m - 1}])=${tHash}`, `hash(P)=${pHash}, hash(T[0..${m - 1}])=${tHash}`));
+    setHashInfo({ pHash, tHash, base: BASE, mod: MOD, h });
+    setStateVars({ i: 0, pHash, tHash });
+    await waitForStep();
+
+    for (let i = 0; i <= n - m && !cancelRef.current; i++) {
+      // Recompute rolling hash for i > 0
+      if (i > 0) {
+        const oldChar = T.charCodeAt(i - 1);
+        const newChar = T.charCodeAt(i + m - 1);
+        tHash = ((tHash - oldChar * h) * BASE + newChar) % MOD;
+        if (tHash < 0) tHash += MOD;
+        addLog(t(
+          `Rolling hash: remove '${T[i - 1]}'(${oldChar}), add '${T[i + m - 1]}'(${newChar}) \u2192 tHash=${tHash}`,
+          `Rolling hash: elimin\u0103 '${T[i - 1]}'(${oldChar}), adaug\u0103 '${T[i + m - 1]}'(${newChar}) \u2192 tHash=${tHash}`
+        ));
+      }
+
+      setOffset(i);
+      setHashInfo(prev => ({ ...prev, tHash }));
+      setStateVars({ i, pHash, tHash });
+
+      // Highlight current window
+      const tc = {};
+      for (let k = 0; k < m; k++) tc[i + k] = 'comparing';
+      setTextColors(tc);
+      setPatColors(Object.fromEntries(Array.from({ length: m }, (_, k) => [k, 'comparing'])));
+
+      if (tHash === pHash) {
+        setStatus(t(
+          `Hash match! tHash=${tHash} = pHash=${pHash}. Verifying character by character...`,
+          `Hash-uri egale! tHash=${tHash} = pHash=${pHash}. Verificare caracter cu caracter...`
+        ));
+        addLog(t(`i=${i}: tHash=${tHash} = pHash=${pHash} \u2192 verify`, `i=${i}: tHash=${tHash} = pHash=${pHash} \u2192 verificare`));
+        await waitForStep();
+        if (cancelRef.current) break;
+
+        // Character-by-character verification
+        let match = true;
+        for (let j = 0; j < m && !cancelRef.current; j++) {
+          comps++;
+          setComparisons(comps);
+          const vc = {};
+          for (let k = 0; k < j; k++) { vc[i + k] = 'match'; }
+          vc[i + j] = 'comparing';
+          setTextColors(vc);
+          const vpc = {};
+          for (let k = 0; k < j; k++) vpc[k] = 'match';
+          vpc[j] = 'comparing';
+          setPatColors(vpc);
+          setStateVars({ i, j, pHash, tHash, verifying: true });
+          setStatus(t(`Verify: T[${i + j}]='${T[i + j]}' vs P[${j}]='${P[j]}'`, `Verificare: T[${i + j}]='${T[i + j]}' cu P[${j}]='${P[j]}'`));
+          await waitForStep();
+          if (cancelRef.current) break;
+
+          if (T[i + j] !== P[j]) {
+            vc[i + j] = 'mismatch';
+            vpc[j] = 'mismatch';
+            setTextColors({ ...vc }); setPatColors({ ...vpc });
+            addLog(t(
+              `Verify fail at j=${j}: T[${i + j}]='${T[i + j]}' \u2260 P[${j}]='${P[j]}' (false positive!)`,
+              `Verificare e\u0219uat\u0103 la j=${j}: T[${i + j}]='${T[i + j]}' \u2260 P[${j}]='${P[j]}' (fals pozitiv!)`
+            ));
+            setStatus(t(`False positive! Hashes matched but strings differ at position ${j}`, `Fals pozitiv! Hash-urile s-au potrivit dar \u0219irurile difer\u0103 la pozi\u021bia ${j}`));
+            match = false;
+            await waitForStep();
+            break;
+          } else {
+            vc[i + j] = 'match'; vpc[j] = 'match';
+            setTextColors({ ...vc }); setPatColors({ ...vpc });
+          }
+        }
+
+        if (match && !cancelRef.current) {
+          setFoundAt(i);
+          addLog(t(`\u2705 FOUND at offset ${i}! (${comps} char comparisons)`, `\u2705 G\u0102SIT la offset-ul ${i}! (${comps} compara\u021bii de caractere)`));
+          setStatus(t(`Pattern found at index ${i}!`, `Pattern g\u0103sit la indexul ${i}!`));
+          const ftc = {};
+          for (let k = 0; k < m; k++) ftc[i + k] = 'found';
+          setTextColors(ftc);
+          setPatColors(Object.fromEntries(Array.from({ length: m }, (_, k) => [k, 'found'])));
+          setRunning(false);
+          return;
+        }
+      } else {
+        setStatus(t(
+          `tHash=${tHash} \u2260 pHash=${pHash}. Skip (no comparison needed)`,
+          `tHash=${tHash} \u2260 pHash=${pHash}. S\u0103rim (nu e nevoie de compara\u021bie)`
+        ));
+        addLog(t(`i=${i}: tHash=${tHash} \u2260 pHash=${pHash} \u2192 skip`, `i=${i}: tHash=${tHash} \u2260 pHash=${pHash} \u2192 s\u0103rim`));
+        // Flash skip color
+        for (let k = 0; k < m; k++) tc[i + k] = 'skip';
+        setTextColors({ ...tc });
+        await waitForStep();
+      }
+    }
+
+    if (!cancelRef.current) {
+      setStatus(t('Pattern not found', 'Pattern-ul nu a fost g\u0103sit'));
+      addLog(t(`\u274C Not found (${comps} char comparisons)`, `\u274C Neg\u0103sit (${comps} compara\u021bii)`));
+      setTextColors({}); setPatColors({});
+      setRunning(false);
+    }
+  }, [text, pattern, waitForStep, addLog, t]);
+
+  const start = variant === 'rk' ? runRK : variant === 'bm' ? runBM : runKMP;
   const cellSize = text.length > 30 ? 'w-5 h-7 text-[9px]' : 'w-7 h-8 text-xs';
 
   return (
@@ -289,7 +423,7 @@ export default function StringMatchAnimation({ variant = 'kmp' }) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <span className="text-xs font-bold" style={{ color: 'var(--theme-content-text)' }}>
-          {variant === 'bm' ? 'Boyer-Moore' : 'KMP'} {t('Animation', 'Anima\u021bie')}
+          {variant === 'rk' ? 'Rabin-Karp' : variant === 'bm' ? 'Boyer-Moore' : 'KMP'} {t('Animation', 'Anima\u021bie')}
         </span>
         <div className="flex gap-1 ml-2">
           {presets.map((_, i) => (
@@ -453,6 +587,31 @@ export default function StringMatchAnimation({ variant = 'kmp' }) {
         </div>
       )}
 
+      {/* RK: Hash info */}
+      {variant === 'rk' && hashInfo && (
+        <div className="mt-3 overflow-x-auto">
+          <div className="text-[10px] font-bold mb-1" style={{ color: 'var(--theme-muted-text)' }}>
+            {t('Hash values', 'Valori hash')} (BASE={hashInfo.base}, MOD={hashInfo.mod}, h=BASE^{pattern.length - 1} mod {hashInfo.mod}={hashInfo.h})
+          </div>
+          <div className="flex gap-3">
+            <div className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-mono"
+              style={{ backgroundColor: 'var(--theme-content-bg)', border: '1px solid var(--theme-border)' }}>
+              <span style={{ color: 'var(--theme-muted-text)' }}>hash(P)=</span>
+              <strong style={{ color: '#8b5cf6' }}>{hashInfo.pHash}</strong>
+            </div>
+            <div className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-mono"
+              style={{
+                backgroundColor: hashInfo.tHash === hashInfo.pHash ? COLORS.comparing + '20' : 'var(--theme-content-bg)',
+                border: `1px solid ${hashInfo.tHash === hashInfo.pHash ? COLORS.comparing : 'var(--theme-border)'}`,
+              }}>
+              <span style={{ color: 'var(--theme-muted-text)' }}>hash(window)=</span>
+              <strong style={{ color: hashInfo.tHash === hashInfo.pHash ? COLORS.comparing : '#3b82f6' }}>{hashInfo.tHash}</strong>
+              {hashInfo.tHash === hashInfo.pHash && <span style={{ color: COLORS.comparing }}> !</span>}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Status line */}
       {status && (
         <div className="mt-3 text-[11px] font-mono p-2 rounded-lg" style={{ backgroundColor: 'var(--theme-content-bg)', color: foundAt !== null ? COLORS.found : 'var(--theme-content-text)', border: '1px solid var(--theme-border)' }}>
@@ -483,6 +642,7 @@ export default function StringMatchAnimation({ variant = 'kmp' }) {
           { color: COLORS.comparing, label: t('Comparing', 'Compar\u0103') },
           { color: COLORS.match, label: t('Match', 'Potrivire') },
           { color: COLORS.mismatch, label: t('Mismatch', 'Nepotrivire') },
+          ...(variant === 'rk' ? [{ color: COLORS.skip, label: t('Hash skip', 'Salt hash') }] : []),
           { color: COLORS.found, label: t('Found', 'G\u0103sit') },
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1">
