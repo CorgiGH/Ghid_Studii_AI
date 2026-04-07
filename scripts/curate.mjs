@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync } from 'fs';
 import { resolve, basename, dirname } from 'path';
-import { sendPdfWithPrompt, sendTextPrompt, loadPromptTemplate } from './gemini.mjs';
+import { getProvider, markGeminiExhausted, RateLimitError, loadPromptTemplate } from './providers.mjs';
 
 dotenv.config({ path: resolve('proxy/.env') });
 
@@ -69,7 +69,7 @@ if (args[0] === 'status') {
 
 let pdfPath = args.find(a => !a.startsWith('--'));
 if (!pdfPath) {
-  console.error('Usage: node curate.mjs <pdf-path> [--subject <slug>] [--type <course|lab|seminar|test>] [--desc <course-description.pdf>] [--redo]');
+  console.error('Usage: node curate.mjs <pdf-path> [--subject <slug>] [--type <course|lab|seminar|test>] [--desc <course-description.pdf>] [--redo] [--fallback]');
   process.exit(1);
 }
 // Resolve short paths like "pa/info/lecture1.pdf" against src/content/
@@ -83,6 +83,7 @@ const flags = {
   type: getFlagValue('--type'),
   desc: getFlagValue('--desc'),
   redo: args.includes('--redo'),
+  fallback: args.includes('--fallback'),
 };
 
 // ── Auto-Detection ──
@@ -126,14 +127,32 @@ function ensureCurateDir() {
   mkdirSync(curateDir, { recursive: true });
 }
 
+const stageProviders = {};
+
 function readStatus() {
-  if (!existsSync(statusPath)) return { lastCompleted: 0, type: contentType, subject };
-  return JSON.parse(readFileSync(statusPath, 'utf-8'));
+  if (!existsSync(statusPath)) return { lastCompleted: 0, type: contentType, subject, stages: {} };
+  const status = JSON.parse(readFileSync(statusPath, 'utf-8'));
+  if (status.stages) Object.assign(stageProviders, status.stages);
+  return status;
 }
 
 function writeStatus(stage) {
   ensureCurateDir();
-  writeFileSync(statusPath, JSON.stringify({ lastCompleted: stage, type: contentType, subject }, null, 2));
+  writeFileSync(statusPath, JSON.stringify({
+    lastCompleted: stage,
+    type: contentType,
+    subject,
+    stages: { ...stageProviders },
+  }, null, 2));
+}
+
+function recordStageProvider(stageName, providerInfo) {
+  stageProviders[stageName] = {
+    provider: providerInfo.name,
+    model: providerInfo.model,
+    ...(providerInfo.fallback ? { fallback: true } : {}),
+    timestamp: new Date().toISOString(),
+  };
 }
 
 function stageOutputExists(filename) {
@@ -172,6 +191,52 @@ function getFlagValue(flag) {
   return idx !== -1 && args[idx + 1] ? args[idx + 1] : null;
 }
 
+// ── Provider-Aware API Calls ──
+
+async function sendPdf(stageName, pdfPath, promptText) {
+  const provider = getProvider(stageName);
+  try {
+    const result = await provider.sendPdf(pdfPath, promptText);
+    return { result, provider: { name: provider.name, model: provider.model } };
+  } catch (err) {
+    if (err instanceof RateLimitError && err.provider === 'gemini') {
+      markGeminiExhausted();
+      if (flags.fallback) {
+        console.log(`  ⚠ Gemini rate limited — falling back to OpenRouter for ${stageName}`);
+        const fallbackProvider = getProvider(stageName);
+        const result = await fallbackProvider.sendPdf(pdfPath, promptText);
+        return { result, provider: { name: fallbackProvider.name, model: fallbackProvider.model, fallback: true } };
+      }
+      console.error(`\n⚠️  Gemini rate limit hit on ${stageName}.`);
+      console.error('   Run with --fallback to continue with OpenRouter, or wait and re-run tomorrow.');
+      process.exit(1);
+    }
+    throw err;
+  }
+}
+
+async function sendText(stageName, promptText) {
+  const provider = getProvider(stageName);
+  try {
+    const result = await provider.sendText(promptText);
+    return { result, provider: { name: provider.name, model: provider.model } };
+  } catch (err) {
+    if (err instanceof RateLimitError && err.provider === 'gemini') {
+      markGeminiExhausted();
+      if (flags.fallback) {
+        console.log(`  ⚠ Gemini rate limited — falling back to OpenRouter for ${stageName}`);
+        const fallbackProvider = getProvider(stageName);
+        const result = await fallbackProvider.sendText(promptText);
+        return { result, provider: { name: fallbackProvider.name, model: fallbackProvider.model, fallback: true } };
+      }
+      console.error(`\n⚠️  Gemini rate limit hit on ${stageName}.`);
+      console.error('   Run with --fallback to continue with OpenRouter, or wait and re-run tomorrow.');
+      process.exit(1);
+    }
+    throw err;
+  }
+}
+
 // ── Main Pipeline ──
 
 async function main() {
@@ -187,7 +252,7 @@ async function main() {
   await ensureBibliography();
 
   if (status.lastCompleted < 1) {
-    console.log('── Stage 1: PDF Extraction (Gemini) ──');
+    console.log(`── Stage 1: PDF Extraction (${getProvider('stage1').name}) ──`);
     await runStage1(pdfPath);
     writeStatus(1);
     console.log('✅ Stage 1 complete\n');
@@ -196,7 +261,7 @@ async function main() {
   }
 
   if (status.lastCompleted < 2) {
-    console.log('── Stage 2: Bibliography Cross-Reference (Gemini) ──');
+    console.log(`── Stage 2: Bibliography Cross-Reference (${getProvider('stage2').name}) ──`);
     await runStage2();
     writeStatus(2);
     console.log('✅ Stage 2 complete\n');
@@ -205,7 +270,7 @@ async function main() {
   }
 
   if (flags.redo && status.lastCompleted < 2.5) {
-    console.log('── Stage 2.5: Diff Against Existing (Gemini) ──');
+    console.log(`── Stage 2.5: Diff Against Existing (${getProvider('stage2.5').name}) ──`);
     await runStage2_5();
     writeStatus(2.5);
     console.log('✅ Stage 2.5 complete\n');
@@ -213,7 +278,7 @@ async function main() {
 
   // Stages 3-5 are handled by Claude Code skill (Haiku/Opus agents)
   // Script outputs JSON for those stages to consume
-  console.log('── Gemini stages complete ──');
+  console.log('── AI stages complete ──');
   console.log('Run /curate in Claude Code to continue with stages 3-5.\n');
 }
 
@@ -275,7 +340,7 @@ Output valid JSON only:
 }
 List every reference mentioned, even if informal.`;
 
-  const rawResponse = await sendPdfWithPrompt(descPdf, extractPrompt);
+  const { result: rawResponse } = await sendPdf('bibliography', descPdf, extractPrompt);
   let jsonStr = rawResponse.trim();
   if (jsonStr.startsWith('```')) {
     jsonStr = jsonStr.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
@@ -318,7 +383,7 @@ NOT_FOUND:
 
 Then provide the content.`;
 
-    const searchResult = await sendTextPrompt(searchPrompt);
+    const { result: searchResult } = await sendText('source-search', searchPrompt);
     const firstLine = searchResult.split('\n')[0].trim();
 
     if (firstLine.startsWith('NOT_FOUND')) {
@@ -356,8 +421,10 @@ async function runStage1(pdfPath) {
   const promptFile = `extract-${contentType}.md`;
   const prompt = loadPromptTemplate(promptFile);
 
-  console.log(`  Sending PDF to Gemini (${promptFile})...`);
-  const rawResponse = await sendPdfWithPrompt(pdfPath, prompt);
+  const provider = getProvider('stage1');
+  console.log(`  Sending PDF to ${provider.name} (${promptFile})...`);
+  const { result: rawResponse, provider: providerInfo } = await sendPdf('stage1', pdfPath, prompt);
+  recordStageProvider('stage1', providerInfo);
 
   // Parse JSON from response (strip markdown code fence if present)
   let jsonStr = rawResponse.trim();
@@ -375,11 +442,12 @@ async function runStage1(pdfPath) {
       console.log(`  ⚠ Repaired malformed JSON (${warnings.join(', ')})`);
     } else {
       writeFileSync(resolve(curateDir, 'stage1-raw-response.txt'), rawResponse);
-      throw new Error(`Gemini returned invalid JSON. Raw response saved to stage1-raw-response.txt. Error: ${e.message}`);
+      throw new Error(`${providerInfo.name} returned invalid JSON. Raw response saved to stage1-raw-response.txt. Error: ${e.message}`);
     }
   }
 
   // Save extraction
+  extraction._provider = { name: providerInfo.name, model: providerInfo.model, timestamp: new Date().toISOString() };
   writeFileSync(resolve(curateDir, 'stage1-extraction.json'), JSON.stringify(extraction, null, 2));
 
   // Log stats
@@ -435,8 +503,11 @@ async function runStage2() {
 
   const fullPrompt = `${prompt}\n\n--- EXTRACTED CONTENT ---\n${JSON.stringify(extraction, null, 2)}\n\n--- BIBLIOGRAPHY SOURCES ---\n${sourcesContext}`;
 
-  console.log(`  Cross-referencing against ${sourcesIndex.sources.filter(s => s.available).length} source(s)...`);
-  const rawResponse = await sendTextPrompt(fullPrompt);
+  const availableCount = sourcesIndex.sources.filter(s => s.available).length;
+  const provider = getProvider('stage2');
+  console.log(`  Cross-referencing against ${availableCount} source(s) via ${provider.name}...`);
+  const { result: rawResponse, provider: providerInfo } = await sendText('stage2', fullPrompt);
+  recordStageProvider('stage2', providerInfo);
 
   let jsonStr = rawResponse.trim();
   if (jsonStr.startsWith('```')) {
@@ -453,10 +524,11 @@ async function runStage2() {
       console.log(`  ⚠ Repaired malformed JSON (${warnings.join(', ')})`);
     } else {
       writeFileSync(resolve(curateDir, 'stage2-raw-response.txt'), rawResponse);
-      throw new Error(`Cross-reference returned invalid JSON. Saved to stage2-raw-response.txt. Error: ${e.message}`);
+      throw new Error(`${providerInfo.name} cross-reference returned invalid JSON. Saved to stage2-raw-response.txt. Error: ${e.message}`);
     }
   }
 
+  crossref._provider = { name: providerInfo.name, model: providerInfo.model, timestamp: new Date().toISOString() };
   writeFileSync(resolve(curateDir, 'stage2-crossref.json'), JSON.stringify(crossref, null, 2));
   console.log(`  Results: ${crossref.summary.verified} verified, ${crossref.summary.deviations} deviations, ${crossref.summary.unverified} unverified`);
 }
@@ -529,8 +601,10 @@ Output valid JSON only:
   "summary": { "keep": 5, "rewrite": 2, "new": 1 }
 }`;
 
-  console.log(`  Comparing against ${targetFile}...`);
-  const rawResponse = await sendTextPrompt(prompt);
+  const provider = getProvider('stage2.5');
+  console.log(`  Comparing against ${targetFile} via ${provider.name}...`);
+  const { result: rawResponse, provider: providerInfo } = await sendText('stage2.5', prompt);
+  recordStageProvider('stage2.5', providerInfo);
 
   let jsonStr = rawResponse.trim();
   if (jsonStr.startsWith('```')) {
@@ -547,10 +621,11 @@ Output valid JSON only:
       console.log(`  ⚠ Repaired malformed JSON (${warnings.join(', ')})`);
     } else {
       writeFileSync(resolve(curateDir, 'stage2.5-raw-response.txt'), rawResponse);
-      throw new Error(`Diff returned invalid JSON. Saved to stage2.5-raw-response.txt. Error: ${e.message}`);
+      throw new Error(`${providerInfo.name} diff returned invalid JSON. Saved to stage2.5-raw-response.txt. Error: ${e.message}`);
     }
   }
 
+  diff._provider = { name: providerInfo.name, model: providerInfo.model, timestamp: new Date().toISOString() };
   writeFileSync(resolve(curateDir, 'stage2.5-diff.json'), JSON.stringify(diff, null, 2));
   console.log(`  Decisions: ${diff.summary.keep} keep, ${diff.summary.rewrite} rewrite, ${diff.summary.new} new`);
 }
