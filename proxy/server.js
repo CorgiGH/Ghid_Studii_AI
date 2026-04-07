@@ -272,6 +272,8 @@ Rules:
 - Grade the MEANING, not the exact wording — if the student says the same thing in different words, it counts
 - Paraphrasing, synonyms, and reordering are perfectly fine — only mark as missing if the concept is truly absent
 - If the answer covers all rubric points even in informal language, give full marks
+- If the question says "at least N" of something and the student provides N or more valid points, that's full marks — don't penalize extra points for lacking detail
+- When a student exceeds the minimum requirements, grade generously — bonus content should help their score, never hurt it
 - NEVER pad feedback with filler like "Good attempt!" — only substantive points`;
 }
 
