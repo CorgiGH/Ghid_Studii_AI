@@ -464,10 +464,18 @@ async function runStage2() {
 async function runStage2_5() {
   const extraction = JSON.parse(readFileSync(resolve(curateDir, 'stage1-extraction.json'), 'utf-8'));
 
-  // Find existing JSX file for this course
+  // Find existing file for this course (JSX or JSON)
   const contentDir = resolve(`src/content/${subject}`);
   const typeDir = contentType === 'course' ? 'courses' : contentType === 'lab' ? 'labs' : contentType === 'seminar' ? 'seminars' : 'test';
-  const existingFiles = readdirSync(resolve(contentDir, typeDir)).filter(f => f.endsWith('.jsx'));
+  const typeDirPath = resolve(contentDir, typeDir);
+
+  if (!existsSync(typeDirPath)) {
+    console.log('  No existing content directory found. Treating as new content.');
+    writeFileSync(resolve(curateDir, 'stage2.5-diff.json'), JSON.stringify({ isNew: true, decisions: [] }, null, 2));
+    return;
+  }
+
+  const existingFiles = readdirSync(typeDirPath).filter(f => f.endsWith('.jsx') || f.endsWith('.json'));
 
   if (existingFiles.length === 0) {
     console.log('  No existing files found. Treating as new content.');
@@ -475,10 +483,8 @@ async function runStage2_5() {
     return;
   }
 
-  // Read existing JSX content
+  // Match by number in filename
   console.log(`  Found existing files: ${existingFiles.join(', ')}`);
-
-  // Simple heuristic: match by number in filename
   const numberMatch = pdfName.match(/(\d+)/);
   const targetFile = numberMatch
     ? existingFiles.find(f => f.includes(numberMatch[1].padStart(2, '0')))
@@ -490,24 +496,28 @@ async function runStage2_5() {
     return;
   }
 
-  const existingContent = readFileSync(resolve(contentDir, typeDir, targetFile), 'utf-8');
+  const existingContent = readFileSync(resolve(typeDirPath, targetFile), 'utf-8');
+  const isJSON = targetFile.endsWith('.json');
 
-  const prompt = `You are comparing extracted PDF content against an existing JSX course file to decide what needs updating.
+  const prompt = `You are comparing extracted PDF content against an existing ${isJSON ? 'JSON course' : 'JSX course'} file to decide what needs updating.
 
 EXTRACTED CONTENT (from PDF):
 ${JSON.stringify(extraction, null, 2)}
 
-EXISTING JSX FILE (${targetFile}):
+EXISTING ${isJSON ? 'JSON' : 'JSX'} FILE (${targetFile}):
 ${existingContent}
 
 For each section in the extracted content, decide:
-- "keep" — the existing JSX covers this section accurately
-- "rewrite" — the existing JSX is missing content, has errors, or is incomplete
-- "new" — this section doesn't exist in the current JSX at all
+- "keep" — the existing file covers this section accurately
+- "rewrite" — the existing file is missing content, has errors, or is incomplete
+- "new" — this section doesn't exist in the current file at all
+
+${isJSON ? 'For JSON files, compare against the steps and their blocks. A section maps to one or more steps.' : 'For JSX files, compare against the Section components and their content.'}
 
 Output valid JSON only:
 {
   "existingFile": "${targetFile}",
+  "existingFormat": "${isJSON ? 'json' : 'jsx'}",
   "decisions": [
     {
       "sectionIndex": 0,
