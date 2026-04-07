@@ -19,8 +19,8 @@ const pa = {
       metaId: 'pa-c1',
       src: 'pa/courses/course-01.json'
     },
-    { id: 'pa-c2', title: { en: 'Lecture 2: Algorithm Efficiency Analysis', ro: 'Cursul 2: Analiza eficienței algoritmilor' }, shortTitle: { en: 'L2: Analysis', ro: 'C2: Analiză' }, sectionCount: 7, component: lazy(() => import('./courses/Course02.jsx')) },
-    { id: 'pa-c3', title: { en: 'Lecture 3: Nondeterministic & Probabilistic Algorithms', ro: 'Cursul 3: Algoritmi nedeterministici și probabilistici' }, shortTitle: { en: 'L3: Nondet/Prob', ro: 'C3: Nedet/Prob' }, sectionCount: 7, component: lazy(() => import('./courses/Course03.jsx')) },
+    { id: 'pa-c2', title: { en: 'Course 2: Algorithm Efficiency Analysis', ro: 'Cursul 2: Analiza eficienței algoritmilor' }, shortTitle: { en: 'C2: Efficiency Analysis', ro: 'C2: Analiza eficienței' }, sectionCount: 13, metaId: 'pa-c2', src: 'pa/courses/course-02.json' },
+    { id: 'pa-c3', title: { en: 'Course 3: Nondeterministic & Probabilistic Algorithms', ro: 'Cursul 3: Algoritmi nedeterministici și probabilistici' }, shortTitle: { en: 'C3: Nondet/Prob', ro: 'C3: Nedet/Prob' }, sectionCount: 13, metaId: 'pa-c3', src: 'pa/courses/course-03.json' },
     { id: 'pa-c4', title: { en: 'Lecture 4: Probabilistic Analysis', ro: 'Cursul 4: Analiză probabilistică' }, shortTitle: { en: 'L4: Prob. Analysis', ro: 'C4: Analiză prob.' }, sectionCount: 6, component: lazy(() => import('./courses/Course04.jsx')) },
     { id: 'pa-c5', title: { en: 'Lecture 5a: KMP Algorithm', ro: 'Cursul 5a: Algoritmul KMP' }, shortTitle: { en: 'L5a: KMP', ro: 'C5a: KMP' }, sectionCount: 5, component: lazy(() => import('./courses/Course05.jsx')) },
     { id: 'pa-c6', title: { en: 'Lecture 5b: Boyer-Moore & Rabin-Karp', ro: 'Cursul 5b: Boyer-Moore și Rabin-Karp' }, shortTitle: { en: 'L5b: BM/RK', ro: 'C5b: BM/RK' }, sectionCount: 6, component: lazy(() => import('./courses/Course06.jsx')) },

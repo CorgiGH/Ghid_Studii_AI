@@ -1,0 +1,560 @@
+{
+  "meta": {
+    "id": "pa-c2",
+    "title": { "en": "Course 2: Algorithm Efficiency Analysis", "ro": "Cursul 2: Analiza eficien\u021bei algoritmilor" },
+    "shortTitle": { "en": "C2: Efficiency Analysis", "ro": "C2: Analiza eficien\u021bei" },
+    "source": { "en": "Algorithm Design \u2014 Lecture 2, UAIC 2025-2026", "ro": "Proiectarea Algoritmilor \u2014 Cursul 2, UAIC 2025-2026" }
+  },
+  "steps": [
+    {
+      "id": "pa-c2-intro",
+      "title": { "en": "Introduction: The Sorting Problem", "ro": "Introducere: Problema sort\u0103rii" },
+      "group": "sorting",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When analyzing an algorithm, we care about two key aspects:\n\n1. **Correctness** \u2014 Does it work?\n2. **Performance** \u2014 Does it have good performance?\n\nIn this lecture, we explore how to formally answer these questions using sorting as a case study. We start with **InsertionSort** and move to the more efficient **MergeSort**, learning the mathematical tools needed to compare them.",
+            "ro": "C\u00e2nd analiz\u0103m un algoritm, ne intereseaz\u0103 dou\u0103 aspecte cheie:\n\n1. **Corectitudine** \u2014 Func\u021bioneaz\u0103?\n2. **Performan\u021b\u0103** \u2014 Are o performan\u021b\u0103 bun\u0103?\n\n\u00cen acest curs, explor\u0103m cum s\u0103 r\u0103spundem formal la aceste \u00eentreb\u0103ri, folosind sortarea ca studiu de caz. \u00cencepem cu **InsertionSort** \u0219i trecem la mai eficientul **MergeSort**, \u00eenv\u0103\u021b\u00e2nd instrumentele matematice necesare compar\u0103rii lor."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "SORTING", "ro": "SORTARE" },
+          "content": {
+            "en": "**INPUT:** A sequence (or array) of n elements drawn from a totally ordered set (meaning there exists a defined comparison operation, like \u2264), a = (a\u2080, a\u2081, ..., a\u2099\u208b\u2081).\n\n**OUTPUT:** a' = (\u03b1\u2080, \u03b1\u2081, ..., \u03b1\u2099\u208b\u2081), a permutation of the elements in a, such that a\u1d62 R a\u1d62\u208a\u2081, 0 \u2264 i < n \u2212 1, where R is an ordered relationship.\n\n**Example:** Input: a = [5, 2, 4, 3, 6, 1, 3] \u2192 Output: a = [1, 2, 3, 3, 4, 5, 6]",
+            "ro": "**INPUT:** O secven\u021b\u0103 (sau tablou) de n elemente dintr-o mul\u021bime total ordonat\u0103 (adic\u0103 exist\u0103 o opera\u021bie de comparare definit\u0103, precum \u2264), a = (a\u2080, a\u2081, ..., a\u2099\u208b\u2081).\n\n**OUTPUT:** a' = (\u03b1\u2080, \u03b1\u2081, ..., \u03b1\u2099\u208b\u2081), o permutare a elementelor din a, astfel \u00eenc\u00e2t a\u1d62 R a\u1d62\u208a\u2081, 0 \u2264 i < n \u2212 1, unde R este o rela\u021bie de ordine.\n\n**Exemplu:** Input: a = [5, 2, 4, 3, 6, 1, 3] \u2192 Output: a = [1, 2, 3, 3, 4, 5, 6]"
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Introduction and sorting problem definition", "ro": "Slide-uri curs: Introducere \u0219i definirea problemei sort\u0103rii" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-insertion",
+      "title": { "en": "Insertion Sort", "ro": "Sortarea prin inserare" },
+      "group": "sorting",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Insertion Sort** operates similarly to how people arrange a hand of playing cards. We start with an empty left hand and a set of face-down cards on the table. We pick up one card at a time and place it into its appropriate position in the left hand by comparing it with the cards already held.\n\nAt all times, the cards in the left hand are **sorted**. The index `i` indicates the \"current card\" being inserted. At the beginning of each iteration of the `for` loop, the subarray `a[0..i-1]` constitutes the currently sorted hand, while `a[i+1..n-1]` corresponds to the pile of cards still on the table.",
+            "ro": "**Sortarea prin inserare** func\u021bioneaz\u0103 similar cu modul \u00een care oamenii aranjaz\u0103 o m\u00e2n\u0103 de c\u0103r\u021bi de joc. \u00cencepem cu m\u00e2na st\u00e2ng\u0103 goal\u0103 \u0219i un set de c\u0103r\u021bi cu fa\u021ba \u00een jos pe mas\u0103. Ridic\u0103m c\u00e2te o carte pe r\u00e2nd \u0219i o plac\u0103m \u00een pozi\u021bia potrivit\u0103 \u00een m\u00e2na st\u00e2ng\u0103, compar\u00e2nd-o cu c\u0103r\u021bile deja \u021binute.\n\n\u00cen orice moment, c\u0103r\u021bile din m\u00e2na st\u00e2ng\u0103 sunt **sortate**. Indexul `i` indic\u0103 \"cartea curent\u0103\" care este inserat\u0103. La \u00eenceputul fiec\u0103rei itera\u021bii a buclei `for`, sub-tabloul `a[0..i-1]` constituie m\u00e2na sortat\u0103 curent\u0103, iar `a[i+1..n-1]` corespunde teancului de c\u0103r\u021bi r\u0103mase pe mas\u0103."
+          }
+        },
+        {
+          "type": "code",
+          "language": "pseudocode",
+          "title": { "en": "Algorithm 1: InsertionSort(a)", "ro": "Algoritmul 1: InsertionSort(a)" },
+          "content": "Algorithm 1 InsertionSort(a)\nInput: An array a of nonnegative integers of length n.\nOutput: The sorted array (sorts in place).\n1: n \u2190 a.size()\n2: for i \u2190 1..n - 1 do\n3:     current \u2190 a[i]\n4:     // Insert a[i] into the sorted sequence a[0..i-1]\n5:     j \u2190 i - 1\n6:     while j \u2265 0 and a[j] > current do\n7:         // Shift values > current one position to the right\n8:         a[j + 1] \u2190 a[j]\n9:         j \u2190 j - 1\n10:    a[j + 1] \u2190 current"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The professor uses **0-based indexing** (`a[0..n-1]`) and `a.size()` for array length, which differs from CLRS's typical 1-based indexing (`A[1..n]`) and `A.length`. Both conventions are equivalent.",
+            "ro": "Profesorul folose\u0219te **indexare de la 0** (`a[0..n-1]`) \u0219i `a.size()` pentru lungimea tabloului, ceea ce difer\u0103 de indexarea de la 1 folosit\u0103 \u00een CLRS (`A[1..n]`) \u0219i `A.length`. Ambele conven\u021bii sunt echivalente."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: InsertionSort algorithm and card analogy", "ro": "Slide-uri curs: Algoritmul InsertionSort \u0219i analogia cu c\u0103r\u021bile" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-loop-invariant",
+      "title": { "en": "Correctness: Loop Invariants", "ro": "Corectitudine: Invarian\u021bi de bucl\u0103" },
+      "group": "sorting",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Even if an algorithm seems obviously correct, we still need to **prove** it. We use **loop invariants** \u2014 properties that hold at the start of each iteration of a loop. To prove correctness using a loop invariant, we must show three things:\n\n- **Initialization** (Base Case): The invariant is true before the first iteration.\n- **Maintenance** (Inductive Step): If the invariant is true before an iteration, it remains true after that iteration.\n- **Termination** (Conclusion): When the loop terminates, the invariant gives a useful property proving correctness.\n\nThis approach is analogous to **mathematical induction**: initialization is the base case, maintenance is the inductive step, and termination tells us when to stop.\n\n> **Mnemonic:** *It Must Terminate* or *It Must be True* (I, M, T).",
+            "ro": "Chiar dac\u0103 un algoritm pare evident corect, tot trebuie s\u0103-l **demonstr\u0103m**. Folosim **invarian\u021bi de bucl\u0103** \u2014 propriet\u0103\u021bi care sunt adev\u0103rate la \u00eenceputul fiec\u0103rei itera\u021bii. Pentru a demonstra corectitudinea, trebuie s\u0103 ar\u0103t\u0103m trei lucruri:\n\n- **Ini\u021bializare** (Cazul de baz\u0103): Invariantul este adev\u0103rat \u00eenainte de prima itera\u021bie.\n- **Mentenan\u021b\u0103** (Pasul inductiv): Dac\u0103 invariantul e adev\u0103rat \u00eenainte de o itera\u021bie, r\u0103m\u00e2ne adev\u0103rat dup\u0103 acea itera\u021bie.\n- **Terminare** (Concluzie): C\u00e2nd bucla se termin\u0103, invariantul ofer\u0103 o proprietate util\u0103 care demonstreaz\u0103 corectitudinea.\n\nAceast\u0103 abordare e analog\u0103 cu **induc\u021bia matematic\u0103**: ini\u021bializarea e cazul de baz\u0103, mentenan\u021ba e pasul inductiv, iar terminarea ne spune c\u00e2nd ne oprim.\n\n> **Mnemonic\u0103:** *It Must Terminate* sau *It Must be True* (I, M, T)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Loop Invariant for InsertionSort", "ro": "Invariantul de bucl\u0103 pentru InsertionSort" },
+          "content": {
+            "en": "At the beginning of each iteration of the `for` loop (index `i`), the subarray `a[0..i-1]` contains the same elements as the original first `i` positions, but in **sorted order**.",
+            "ro": "La \u00eenceputul fiec\u0103rei itera\u021bii a buclei `for` (index `i`), sub-tabloul `a[0..i-1]` con\u021bine acelea\u0219i elemente ca primele `i` pozi\u021bii originale, dar \u00een **ordine sortat\u0103**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Proof for InsertionSort:**\n\n**Initialization:** i = 1, and `a[0..0]` contains only one element, which is trivially sorted. The invariant holds.\n\n**Maintenance:** Assume `a[0..i-1]` is sorted upon entering iteration `i`. The body of the `for` loop shifts elements `a[i-1], a[i-2], ...` one position right until finding the proper position j' for `a[i]`, where `a[j'] < a[i] < a[j'+1]`. After insertion, `a[0..i]` is sorted.\n\n**Termination:** The loop terminates when i = n. Substituting into the invariant, `a[0..n-1]` is sorted \u2014 this is the entire array. The algorithm is correct.",
+            "ro": "**Demonstra\u021bie pentru InsertionSort:**\n\n**Ini\u021bializare:** i = 1, iar `a[0..0]` con\u021bine un singur element, deci este trivial sortat. Invariantul este respectat.\n\n**Mentenan\u021b\u0103:** Presupunem c\u0103 `a[0..i-1]` este sortat la intrarea \u00een itera\u021bia `i`. Corpul buclei `for` mut\u0103 elementele `a[i-1], a[i-2], ...` c\u00e2te o pozi\u021bie la dreapta p\u00e2n\u0103 g\u0103se\u0219te pozi\u021bia corect\u0103 j' pentru `a[i]`, unde `a[j'] < a[i] < a[j'+1]`. Dup\u0103 inserare, `a[0..i]` este sortat.\n\n**Terminare:** Bucla se termin\u0103 c\u00e2nd i = n. Substituind \u00een invariant, `a[0..n-1]` este sortat \u2014 acesta este \u00eentregul tablou. Algoritmul este corect."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why is the termination step necessary? Mathematical induction goes on forever \u2014 how is the loop invariant approach different?",
+            "ro": "De ce este necesar pasul de terminare? Induc\u021bia matematic\u0103 continu\u0103 la infinit \u2014 cum difer\u0103 abordarea cu invariantul de bucl\u0103?"
+          },
+          "answer": {
+            "en": "In mathematical induction, we prove a property holds for all natural numbers (infinitely many). With loop invariants, the loop **stops** at some point. The termination step uses the invariant at that stopping point to conclude something useful about the algorithm's output. Without it, we'd know the invariant is true at each step but not why the final result is correct.",
+            "ro": "\u00cen induc\u021bia matematic\u0103, demonstr\u0103m c\u0103 o proprietate e valabil\u0103 pentru toate numerele naturale (infinit de multe). Cu invarian\u021bii de bucl\u0103, bucla **se opre\u0219te** la un moment dat. Pasul de terminare folose\u0219te invariantul \u00een acel punct de oprire pentru a concluziona ceva util despre ie\u0219irea algoritmului. F\u0103r\u0103 el, am \u0219ti c\u0103 invariantul e adev\u0103rat la fiecare pas, dar nu de ce rezultatul final e corect."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Loop invariant definition and InsertionSort correctness proof", "ro": "Slide-uri curs: Defini\u021bia invariantului de bucl\u0103 \u0219i demonstra\u021bia corectitudinii InsertionSort" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-analysis-foundations",
+      "title": { "en": "Foundations of Algorithm Analysis", "ro": "Bazele analizei algoritmilor" },
+      "group": "analysis",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Analyzing an algorithm** means predicting the resources it requires \u2014 most often **computational time**, but also memory or communication bandwidth. By analyzing several candidates for a problem, we can identify the most efficient one and discard inferior algorithms.",
+            "ro": "**A analiza un algoritm** \u00eenseamn\u0103 a prezice resursele necesare \u2014 cel mai des **timpul de calcul**, dar \u0219i memoria sau l\u0103rgimea de band\u0103. Analizand mai mul\u021bi candida\u021bi pentru o problem\u0103, putem identifica cel mai eficient \u0219i elimina algoritmii inferiori."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "RAM Model of Computation", "ro": "Modelul de calcul RAM" },
+          "content": {
+            "en": "We assume a generic **one-processor, random-access machine (RAM)** model:\n\n- Instructions are executed **one after another**, with no concurrency.\n- Available instructions: **arithmetic** (add, subtract, multiply, divide, remainder), **data movement** (load, store, copy), and **control** (branch, subroutine call/return).\n- Each instruction takes **constant time**.\n- Data types: **integer** and **floating point**.\n- Word size: for inputs of size n, integers are represented by **c lg n bits** (c \u2265 1), ensuring each word can hold the value n for indexing, while preventing arbitrarily large words.",
+            "ro": "Presupunem un model generic de calcul **RAM (Random-Access Machine)** cu un singur procesor:\n\n- Instruc\u021biunile se execut\u0103 **una dup\u0103 alta**, f\u0103r\u0103 concuren\u021b\u0103.\n- Instruc\u021biuni disponibile: **aritmetice** (adunare, sc\u0103dere, \u00eenmul\u021bire, \u00eemp\u0103r\u021bire, rest), **mi\u0219care de date** (\u00eenc\u0103rcare, stocare, copiere) \u0219i **control** (ramificare, apel/returnare subrutine).\n- Fiecare instruc\u021biune ia **timp constant**.\n- Tipuri de date: **\u00eentreg** \u0219i **virgul\u0103 mobil\u0103**.\n- Dimensiune cuv\u00e2nt: pentru intr\u0103ri de dimensiune n, \u00eentregii sunt reprezenta\u021bi pe **c lg n bi\u021bi** (c \u2265 1), asigur\u00e2nd c\u0103 fiecare cuv\u00e2nt poate stoca valoarea n pentru indexare, prevent\u00e2nd cuvinte arbitrar de mari."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Input size** depends on the problem:\n- For sorting/searching: the **number of items** (e.g., array size n).\n- For multiplying two integers: the **total number of bits** in binary representation.\n- For graph problems: the **number of vertices and edges** (|V|, |E|).\n\n**Running time** is measured as the number of **primitive operations (steps)** executed. We assume each line of pseudocode takes constant time c\u1d62 (different lines may have different costs). This is consistent with the RAM model.",
+            "ro": "**Dimensiunea intr\u0103rii** depinde de problem\u0103:\n- Pentru sortare/c\u0103utare: **num\u0103rul de elemente** (ex. dimensiunea tabloului n).\n- Pentru \u00eenmul\u021birea a dou\u0103 \u00eentregi: **num\u0103rul total de bi\u021bi** \u00een reprezentarea binar\u0103.\n- Pentru probleme pe grafuri: **num\u0103rul de v\u00e2rfuri \u0219i muchii** (|V|, |E|).\n\n**Timpul de execu\u021bie** se m\u0103soar\u0103 ca num\u0103rul de **opera\u021bii primitive (pa\u0219i)** executate. Presupunem c\u0103 fiecare linie de pseudocod ia timp constant c\u1d62 (linii diferite pot avea costuri diferite). Aceasta e consistent cu modelul RAM."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Algorithm analysis, RAM model, input size measures", "ro": "Slide-uri curs: Analiza algoritmilor, modelul RAM, m\u0103suri ale dimensiunii intr\u0103rii" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-insertion-analysis",
+      "title": { "en": "Detailed Analysis of InsertionSort", "ro": "Analiza detaliat\u0103 a InsertionSort" },
+      "group": "analysis",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Let's analyze InsertionSort line by line. For each line, we assign a cost c\u1d62 and count how many times it executes. The variable t\u1d62 denotes the number of times the `while` loop test (line 5) executes for a given value of i. Note: loop tests execute **one more time** than the loop body (the final check that ends the loop).",
+            "ro": "S\u0103 analiz\u0103m InsertionSort linie cu linie. Pentru fiecare linie, asign\u0103m un cost c\u1d62 \u0219i num\u0103r\u0103m de c\u00e2te ori se execut\u0103. Variabila t\u1d62 denot\u0103 num\u0103rul de ori c\u00e2nd testul buclei `while` (linia 5) se execut\u0103 pentru o valoare dat\u0103 a lui i. Not\u0103: testele buclelor se execut\u0103 cu **o dat\u0103 \u00een plus** fa\u021b\u0103 de corpul buclei (verificarea final\u0103 care opre\u0219te bucla)."
+          }
+        },
+        {
+          "type": "table",
+          "caption": { "en": "Line-by-line cost analysis of InsertionSort", "ro": "Analiza cost pe linie a InsertionSort" },
+          "headers": [
+            { "en": "Line", "ro": "Linia" },
+            { "en": "Statement", "ro": "Instruc\u021biune" },
+            { "en": "Cost", "ro": "Cost" },
+            { "en": "Times executed", "ro": "Nr. execu\u021bii" }
+          ],
+          "rows": [
+            [{ "en": "1", "ro": "1" }, { "en": "n \u2190 a.size()", "ro": "n \u2190 a.size()" }, { "en": "c\u2081", "ro": "c\u2081" }, { "en": "1", "ro": "1" }],
+            [{ "en": "2", "ro": "2" }, { "en": "for i \u2190 1..n-1 do", "ro": "for i \u2190 1..n-1 do" }, { "en": "c\u2082", "ro": "c\u2082" }, { "en": "n", "ro": "n" }],
+            [{ "en": "3", "ro": "3" }, { "en": "current \u2190 a[i]", "ro": "current \u2190 a[i]" }, { "en": "c\u2083", "ro": "c\u2083" }, { "en": "n-1", "ro": "n-1" }],
+            [{ "en": "4", "ro": "4" }, { "en": "j \u2190 i - 1", "ro": "j \u2190 i - 1" }, { "en": "c\u2084", "ro": "c\u2084" }, { "en": "n-1", "ro": "n-1" }],
+            [{ "en": "5", "ro": "5" }, { "en": "while j \u2265 0 and a[j] > current do", "ro": "while j \u2265 0 and a[j] > current do" }, { "en": "c\u2085", "ro": "c\u2085" }, { "en": "\u03a3 t\u1d62 (i=1..n-1)", "ro": "\u03a3 t\u1d62 (i=1..n-1)" }],
+            [{ "en": "6", "ro": "6" }, { "en": "a[j+1] \u2190 a[j]", "ro": "a[j+1] \u2190 a[j]" }, { "en": "c\u2086", "ro": "c\u2086" }, { "en": "\u03a3 (t\u1d62-1)", "ro": "\u03a3 (t\u1d62-1)" }],
+            [{ "en": "7", "ro": "7" }, { "en": "j \u2190 j - 1", "ro": "j \u2190 j - 1" }, { "en": "c\u2087", "ro": "c\u2087" }, { "en": "\u03a3 (t\u1d62-1)", "ro": "\u03a3 (t\u1d62-1)" }],
+            [{ "en": "8", "ro": "8" }, { "en": "a[j+1] \u2190 current", "ro": "a[j+1] \u2190 current" }, { "en": "c\u2088", "ro": "c\u2088" }, { "en": "n-1", "ro": "n-1" }]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **total running time** is the sum of costs for each line:\n\nT(n) = c\u2081 + c\u2082n + c\u2083(n\u22121) + c\u2084(n\u22121) + c\u2085\u03a3t\u1d62 + c\u2086\u03a3(t\u1d62\u22121) + c\u2087\u03a3(t\u1d62\u22121) + c\u2088(n\u22121)\n\n**Best case** (already sorted): The `while` loop test executes only once per i (t\u1d62 = 1), so no shifts happen. We get:\n\nT(n) = n(c\u2082 + c\u2083 + c\u2084 + c\u2085 + c\u2088) + c\u2081 \u2212 (c\u2083 + c\u2084 + c\u2085 + c\u2088) = **an + b \u2192 linear**\n\n**Worst case** (reverse sorted): The `while` loop runs i times for each i, so t\u1d62 = i. Since \u03a3(i=1 to n\u22121) i = n(n\u22121)/2, we get:\n\nT(n) = (c\u2085+c\u2086+c\u2087)n\u00b2/2 + ... = **an\u00b2 + bn + c \u2192 quadratic**",
+            "ro": "**Timpul total de execu\u021bie** este suma costurilor pe fiecare linie:\n\nT(n) = c\u2081 + c\u2082n + c\u2083(n\u22121) + c\u2084(n\u22121) + c\u2085\u03a3t\u1d62 + c\u2086\u03a3(t\u1d62\u22121) + c\u2087\u03a3(t\u1d62\u22121) + c\u2088(n\u22121)\n\n**Cazul favorabil** (deja sortat): Testul `while` se execut\u0103 o singur\u0103 dat\u0103 per i (t\u1d62 = 1), deci nu au loc mut\u0103ri. Ob\u021binem:\n\nT(n) = n(c\u2082 + c\u2083 + c\u2084 + c\u2085 + c\u2088) + c\u2081 \u2212 (c\u2083 + c\u2084 + c\u2085 + c\u2088) = **an + b \u2192 liniar**\n\n**Cazul defavorabil** (sortat invers): Bucla `while` ruleaz\u0103 de i ori pentru fiecare i, deci t\u1d62 = i. Deoarece \u03a3(i=1 la n\u22121) i = n(n\u22121)/2, ob\u021binem:\n\nT(n) = (c\u2085+c\u2086+c\u2087)n\u00b2/2 + ... = **an\u00b2 + bn + c \u2192 p\u0103tratic**"
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The running time depends not only on input **size** but also on which **specific input** is given. For InsertionSort, a sorted array gives O(n) while a reverse-sorted array gives O(n\u00b2) \u2014 a huge difference!",
+            "ro": "Timpul de execu\u021bie depinde nu doar de **dimensiunea** intr\u0103rii, ci \u0219i de **intrarea specific\u0103** dat\u0103. Pentru InsertionSort, un tablou sortat d\u0103 O(n) \u00een timp ce unul sortat invers d\u0103 O(n\u00b2) \u2014 o diferen\u021b\u0103 imens\u0103!"
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Detailed cost analysis of InsertionSort", "ro": "Slide-uri curs: Analiza detaliat\u0103 a costului InsertionSort" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-worst-average",
+      "title": { "en": "Worst-Case vs. Average-Case", "ro": "Cazul defavorabil vs. cazul mediu" },
+      "group": "analysis",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "We usually concentrate on the **worst-case** running time \u2014 the longest running time for any input of size n. Why?\n\n- It provides an **upper bound guarantee**: the algorithm will never take longer than this.\n- The worst case may **occur frequently** in practice (e.g., searching for data that isn't present).\n- The **average case** is often roughly as bad as the worst case.\n\nFor InsertionSort, the average case is also **quadratic**: on average, about half of the elements in `a[0..i-1]` are less than `a[i]`, so t\u1d62 \u2248 i/2. The resulting average-case running time is still O(n\u00b2).\n\nCan we do **asymptotically better** than n\u00b2? Yes \u2014 MergeSort achieves O(n lg n).",
+            "ro": "De obicei ne concentr\u0103m pe **cazul defavorabil** \u2014 cel mai lung timp de execu\u021bie pentru orice intrare de dimensiune n. De ce?\n\n- Ofer\u0103 o **garan\u021bie de limit\u0103 superioar\u0103**: algoritmul nu va dura niciodat\u0103 mai mult.\n- Cazul defavorabil poate **ap\u0103rea frecvent** \u00een practic\u0103 (ex. c\u0103utarea unor date care nu exist\u0103).\n- **Cazul mediu** este adesea la fel de r\u0103u ca \u0219i cazul defavorabil.\n\nPentru InsertionSort, cazul mediu este tot **p\u0103tratic**: \u00een medie, aproximativ jum\u0103tate din elementele din `a[0..i-1]` sunt mai mici dec\u00e2t `a[i]`, deci t\u1d62 \u2248 i/2. Timpul mediu rezultat este tot O(n\u00b2).\n\nPutem face **asimptotic mai bine** dec\u00e2t n\u00b2? Da \u2014 MergeSort atinge O(n lg n)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "InsertionSort's best case is O(n), which is excellent. When would InsertionSort actually be a good choice in practice?",
+            "ro": "Cazul favorabil al InsertionSort este O(n), ceea ce e excelent. C\u00e2nd ar fi InsertionSort o alegere bun\u0103 \u00een practic\u0103?"
+          },
+          "answer": {
+            "en": "InsertionSort is a great choice when the input is **nearly sorted** (few elements out of place). In such cases, t\u1d62 is small for most values of i, making the running time close to linear. It is also preferred for **small arrays** due to low overhead (no recursion, no extra memory). Many practical sorting implementations use InsertionSort as a subroutine for small sub-arrays within algorithms like MergeSort or QuickSort.",
+            "ro": "InsertionSort e o alegere excelent\u0103 c\u00e2nd intrarea este **aproape sortat\u0103** (pu\u021bine elemente deplasate). \u00cen astfel de cazuri, t\u1d62 e mic pentru cele mai multe valori ale lui i, f\u0103c\u00e2nd timpul de execu\u021bie aproape liniar. Este de asemenea preferat pentru **tablouri mici** datorit\u0103 suprasarcinii reduse (f\u0103r\u0103 recursie, f\u0103r\u0103 memorie suplimentar\u0103). Multe implement\u0103ri practice folosesc InsertionSort ca subrutin\u0103 pentru sub-tablouri mici \u00een cadrul algoritmilor ca MergeSort sau QuickSort."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Worst-case and average-case analysis", "ro": "Slide-uri curs: Analiza cazului defavorabil \u0219i mediu" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-mergesort",
+      "title": { "en": "MergeSort: Divide and Conquer", "ro": "MergeSort: Divide et Impera" },
+      "group": "mergesort",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "InsertionSort uses an **incremental approach** (extending the sorted subarray one element at a time). **MergeSort** uses a fundamentally different strategy: **Divide and Conquer**.\n\nThe paradigm has three steps:\n1. **Divide** the problem into smaller sub-problems.\n2. **Conquer** the sub-problems by solving them recursively. Base cases are solved directly.\n3. **Combine** the sub-problem solutions into a solution for the original problem.\n\nFor sorting, MergeSort works as follows:\n- **Divide:** Split the n-element array into two n/2-element halves.\n- **Conquer:** Recursively sort each half using MergeSort.\n- **Combine:** Merge the two sorted halves into one sorted array.\n\nThe base case is an array of length 1, which is trivially sorted.",
+            "ro": "InsertionSort folose\u0219te o **abordare incremental\u0103** (extinderea sub-tabloului sortat c\u00e2te un element). **MergeSort** folose\u0219te o strategie fundamental diferit\u0103: **Divide et Impera**.\n\nParadigma are trei pa\u0219i:\n1. **Divide** problema \u00een sub-probleme mai mici.\n2. **Cucere\u0219te** sub-problemele rezolv\u00e2ndu-le recursiv. Cazurile de baz\u0103 se rezolv\u0103 direct.\n3. **Combin\u0103** solu\u021biile sub-problemelor \u00eentr-o solu\u021bie pentru problema original\u0103.\n\nPentru sortare, MergeSort func\u021bioneaz\u0103 astfel:\n- **Divide:** \u00cemparte tabloul de n elemente \u00een dou\u0103 jum\u0103t\u0103\u021bi de n/2 elemente.\n- **Cucere\u0219te:** Sorteaz\u0103 recursiv fiecare jum\u0103tate folosind MergeSort.\n- **Combin\u0103:** Interclaseaz\u0103 cele dou\u0103 jum\u0103t\u0103\u021bi sortate \u00eentr-un tablou sortat."
+          }
+        },
+        {
+          "type": "code",
+          "language": "pseudocode",
+          "title": { "en": "Algorithm 3: MergeSort(A, p, r)", "ro": "Algoritmul 3: MergeSort(A, p, r)" },
+          "content": "Algorithm 3 MergeSort(A, p, r)\nInput: An array A of nonnegative integers, indices p and r.\nOutput: The sorted subarray A[p..r]\n1: if p < r then\n2:     q \u2190 \u230a(p+r)/2\u230b\n3:     MergeSort(A, p, q)\n4:     MergeSort(A, q + 1, r)\n5:     Merge(A, p, q, r)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The key operation is the **Merge** procedure, which merges two sorted subarrays A[p..q] and A[q+1..r] into one sorted subarray.\n\nUsing the card analogy: imagine two face-up piles of sorted cards. At each step, compare the top cards of both piles and place the smaller one face-down onto the output pile. Repeat until one pile is empty, then add the remaining cards.\n\nTo avoid checking whether a pile is empty at each step, a **sentinel** value \u221e is placed at the bottom of each pile. When reached, it cannot be smaller than any real card.",
+            "ro": "Opera\u021bia cheie este procedura **Merge**, care interclaseaz\u0103 dou\u0103 sub-tablouri sortate A[p..q] \u0219i A[q+1..r] \u00eentr-un singur sub-tablou sortat.\n\nFolosind analogia cu c\u0103r\u021bile: imagina\u021bi-v\u0103 dou\u0103 teancuri de c\u0103r\u021bi sortate cu fa\u021ba \u00een sus. La fiecare pas, compara\u021bi c\u0103r\u021bile de deasupra ambelor teancuri \u0219i pune\u021bi-o pe cea mai mic\u0103 cu fa\u021ba \u00een jos pe teancul de ie\u0219ire. Repeta\u021bi p\u00e2n\u0103 c\u00e2nd un teanc se gole\u0219te, apoi ad\u0103uga\u021bi c\u0103r\u021bile r\u0103mase.\n\nPentru a evita verificarea la fiecare pas dac\u0103 un teanc e gol, se plaseaz\u0103 o valoare **santinel\u0103** \u221e la baza fiec\u0103rui teanc. C\u00e2nd este atins\u0103, nu poate fi mai mic\u0103 dec\u00e2t nicio carte real\u0103."
+          }
+        },
+        {
+          "type": "code",
+          "language": "pseudocode",
+          "title": { "en": "Algorithm 4: Merge(A, p, q, r)", "ro": "Algoritmul 4: Merge(A, p, q, r)" },
+          "content": "Algorithm 4 Merge(A, p, q, r)\n1:  n\u2081 \u2190 q - p + 1\n2:  n\u2082 \u2190 r - q\n3:  Create arrays L[0..n\u2081] and R[0..n\u2082]\n4:  for i \u2190 0 to n\u2081 - 1 do\n5:      L[i] \u2190 A[p + i]\n6:  for i \u2190 0 to n\u2082 - 1 do\n7:      R[i] \u2190 A[q + i + 1]\n8:  L[n\u2081] \u2190 \u221e\n9:  R[n\u2082] \u2190 \u221e\n10: i \u2190 0\n11: j \u2190 0\n12: for k \u2190 p .. r do\n13:     if L[i] \u2264 R[j] then\n14:         A[k] \u2190 L[i]\n15:         i \u2190 i + 1\n16:     else\n17:         A[k] \u2190 R[j]\n18:         j \u2190 j + 1"
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Divide-and-conquer paradigm and MergeSort/Merge pseudocode", "ro": "Slide-uri curs: Paradigma Divide et Impera \u0219i pseudocodul MergeSort/Merge" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-mergesort-correctness",
+      "title": { "en": "Correctness of MergeSort", "ro": "Corectitudinea MergeSort" },
+      "group": "mergesort",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "We prove correctness in two parts: first **Merge**, then **MergeSort**.\n\n**Merge correctness** uses a loop invariant for the `for` loop (lines 12-18):\n\n> At the start of each iteration, A[p..k-1] contains the k-p smallest elements of L and R, in sorted order. L[i] and R[j] are the smallest elements not yet copied back.\n\n- **Initialization:** k = p, so A[p..k-1] is empty (0 elements). Since i = j = 0, L[0] and R[0] are the smallest in their arrays.\n- **Maintenance:** If L[i] \u2264 R[j], copying L[i] into A[k] and incrementing i and k extends the sorted portion correctly. Symmetrically for R[j] < L[i].\n- **Termination:** k = r+1, so A[p..r] contains all r-p+1 smallest elements in sorted order. Only the two sentinels remain.\n\n**Merge runs in \u0398(n) time** (one pass through n elements).",
+            "ro": "Demonstr\u0103m corectitudinea \u00een dou\u0103 p\u0103r\u021bi: \u00eent\u00e2i **Merge**, apoi **MergeSort**.\n\n**Corectitudinea Merge** folose\u0219te un invariant de bucl\u0103 pentru `for` (liniile 12-18):\n\n> La \u00eenceputul fiec\u0103rei itera\u021bii, A[p..k-1] con\u021bine cele mai mici k-p elemente din L \u0219i R, \u00een ordine sortat\u0103. L[i] \u0219i R[j] sunt cele mai mici elemente necopiate \u00eenc\u0103.\n\n- **Ini\u021bializare:** k = p, deci A[p..k-1] e vid (0 elemente). Deoarece i = j = 0, L[0] \u0219i R[0] sunt cele mai mici din tablourile lor.\n- **Mentenan\u021b\u0103:** Dac\u0103 L[i] \u2264 R[j], copierea L[i] \u00een A[k] \u0219i incrementarea i \u0219i k extinde corect por\u021biunea sortat\u0103. Simetric pentru R[j] < L[i].\n- **Terminare:** k = r+1, deci A[p..r] con\u021bine toate cele r-p+1 cele mai mici elemente \u00een ordine sortat\u0103. R\u0103m\u00e2n doar cele dou\u0103 santinele.\n\n**Merge ruleaz\u0103 \u00een \u0398(n)** (o singur\u0103 trecere prin n elemente)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**MergeSort correctness** uses a **recursion invariant**:\n\n> After MergeSort(A, p, r) completes, A[p..r] is sorted and contains the same elements as the original input.\n\n- **Initialization** (Base Case): When p \u2265 r, the subarray has at most one element, which is trivially sorted.\n- **Maintenance** (Recursive Step): By the inductive hypothesis, the recursive calls MergeSort(A, p, q) and MergeSort(A, q+1, r) correctly sort both halves. Since Merge is proven correct, the combined result is sorted.\n- **Termination:** The recursion terminates when all sub-arrays reach the base case. The final Merge produces a fully sorted array.\n\n**Conclusion:** MergeSort correctly sorts any input array.",
+            "ro": "**Corectitudinea MergeSort** folose\u0219te un **invariant de recursie**:\n\n> Dup\u0103 ce MergeSort(A, p, r) se termin\u0103, A[p..r] este sortat \u0219i con\u021bine acelea\u0219i elemente ca intrarea original\u0103.\n\n- **Ini\u021bializare** (Cazul de baz\u0103): C\u00e2nd p \u2265 r, sub-tabloul are cel mult un element, deci e trivial sortat.\n- **Mentenan\u021b\u0103** (Pasul recursiv): Prin ipoteza inductiv\u0103, apelurile recursive MergeSort(A, p, q) \u0219i MergeSort(A, q+1, r) sorteaz\u0103 corect ambele jum\u0103t\u0103\u021bi. Deoarece Merge e demonstrat corect, rezultatul combinat e sortat.\n- **Terminare:** Recursia se termin\u0103 c\u00e2nd toate sub-tablourile ating cazul de baz\u0103. Merge-ul final produce un tablou complet sortat.\n\n**Concluzie:** MergeSort sorteaz\u0103 corect orice tablou de intrare."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Correctness proofs for Merge and MergeSort", "ro": "Slide-uri curs: Demonstra\u021biile de corectitudine pentru Merge \u0219i MergeSort" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-dc-analysis",
+      "title": { "en": "Analyzing Divide-and-Conquer Algorithms", "ro": "Analiza algoritmilor Divide et Impera" },
+      "group": "mergesort",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When an algorithm contains recursive calls, we describe its running time by a **recurrence relation**. For a divide-and-conquer algorithm that splits a problem of size n into **a** sub-problems, each of size **n/b**, with D(n) time to divide and C(n) time to combine:\n\nT(n) = a\u00b7T(n/b) + D(n) + C(n),  for n > c\nT(n) = \u0398(1),  for n \u2264 c\n\n**Analysis of MergeSort** (assuming n is a power of 2):\n- **Divide:** Computing the midpoint takes \u0398(1), so D(n) = \u0398(1).\n- **Conquer:** Two recursive calls on n/2 elements: 2T(n/2).\n- **Combine:** Merge takes \u0398(n), so C(n) = \u0398(n).\n\nTotal: D(n) + C(n) = \u0398(1) + \u0398(n) = \u0398(n). The recurrence becomes:\n\n**T(n) = 2T(n/2) + \u0398(n)**",
+            "ro": "C\u00e2nd un algoritm con\u021bine apeluri recursive, descriem timpul de execu\u021bie printr-o **rela\u021bie de recuren\u021b\u0103**. Pentru un algoritm D&I care \u00eemparte o problem\u0103 de dimensiune n \u00een **a** sub-probleme, fiecare de dimensiune **n/b**, cu D(n) timp de \u00eemp\u0103r\u021bire \u0219i C(n) timp de combinare:\n\nT(n) = a\u00b7T(n/b) + D(n) + C(n),  pentru n > c\nT(n) = \u0398(1),  pentru n \u2264 c\n\n**Analiza MergeSort** (presupun\u00e2nd n putere a lui 2):\n- **Divide:** Calculul mijlocului ia \u0398(1), deci D(n) = \u0398(1).\n- **Cucere\u0219te:** Dou\u0103 apeluri recursive pe n/2 elemente: 2T(n/2).\n- **Combin\u0103:** Merge ia \u0398(n), deci C(n) = \u0398(n).\n\nTotal: D(n) + C(n) = \u0398(1) + \u0398(n) = \u0398(n). Recuren\u021ba devine:\n\n**T(n) = 2T(n/2) + \u0398(n)**"
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Solving via the recursion tree:**\n\nRewriting with a constant c: T(n) = 2T(n/2) + cn.\n\nExpand the recursion into a tree:\n- **Root (level 0):** cost cn, spawns 2 sub-problems of size n/2.\n- **Level 1:** 2 nodes, each costs c(n/2). Total: cn.\n- **Level 2:** 4 nodes, each costs c(n/4). Total: cn.\n- **Level i:** 2\u2071 nodes, each costs c(n/2\u2071). Total per level: **cn**.\n- **Leaves (level lg n):** n nodes, each costs c. Total: cn.\n\nThe tree has **lg n + 1** levels, each costing **cn**. Total:\n\nT(n) = cn(lg n + 1) = cn lg n + cn\n\nIgnoring lower-order terms: **T(n) = O(n lg n)**\n\nThis is a massive improvement over InsertionSort's O(n\u00b2). For n = 1,000,000: n\u00b2 = 10\u00b9\u00b2, while n lg n \u2248 20,000,000.",
+            "ro": "**Rezolvare prin arborele de recursie:**\n\nRescriind cu o constant\u0103 c: T(n) = 2T(n/2) + cn.\n\nExpand\u0103m recursia \u00eentr-un arbore:\n- **R\u0103d\u0103cina (nivelul 0):** cost cn, genereaz\u0103 2 sub-probleme de dimensiune n/2.\n- **Nivelul 1:** 2 noduri, fiecare cost\u0103 c(n/2). Total: cn.\n- **Nivelul 2:** 4 noduri, fiecare cost\u0103 c(n/4). Total: cn.\n- **Nivelul i:** 2\u2071 noduri, fiecare cost\u0103 c(n/2\u2071). Total per nivel: **cn**.\n- **Frunze (nivelul lg n):** n noduri, fiecare cost\u0103 c. Total: cn.\n\nArborele are **lg n + 1** niveluri, fiecare cost\u00e2nd **cn**. Total:\n\nT(n) = cn(lg n + 1) = cn lg n + cn\n\nIgnor\u00e2nd termenii de ordin inferior: **T(n) = O(n lg n)**\n\nAceasta e o \u00eembun\u0103t\u0103\u021bire masiv\u0103 fa\u021b\u0103 de O(n\u00b2) al InsertionSort. Pentru n = 1.000.000: n\u00b2 = 10\u00b9\u00b2, \u00een timp ce n lg n \u2248 20.000.000."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Recurrence relations and recursion tree for MergeSort", "ro": "Slide-uri curs: Rela\u021bii de recuren\u021b\u0103 \u0219i arborele de recursie pentru MergeSort" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-karatsuba",
+      "title": { "en": "Karatsuba: Fast Multiplication", "ro": "Karatsuba: \u00cenm\u00e2l\u021bire rapid\u0103" },
+      "group": "mergesort",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The divide-and-conquer paradigm applies beyond sorting. Consider multiplying two **n-digit numbers**. The school algorithm does n \u00d7 n digit multiplications: O(n\u00b2).\n\n**Can we do better?** Split each number in half:\n- x = a \u00d7 10^(n/2) + b,  y = c \u00d7 10^(n/2) + d\n- x \u00d7 y = ac \u00d7 10\u207f + (ad + bc) \u00d7 10^(n/2) + bd\n\nThis gives **4 sub-problems** of size n/2: T(n) = 4T(n/2) + O(n). Expanding: T(n) = n\u00b2 \u2014 no improvement!\n\n**Karatsuba's insight:** We need (ad + bc) but not ad and bc separately. Notice:\n\n(a+b)(c+d) = ac + ad + bc + bd\n\nSo: **ad + bc = (a+b)(c+d) \u2212 ac \u2212 bd**\n\nWe already compute ac and bd, so we only need **3 multiplications** instead of 4!\n\nT(n) = 3T(n/2) + O(n) \u2192 T(n) = n^(log\u2082 3) < n^1.6",
+            "ro": "Paradigma Divide et Impera se aplic\u0103 dincolo de sortare. Consider\u0103m \u00eenmul\u021birea a dou\u0103 **numere de n cifre**. Algoritmul din \u0219coal\u0103 face n \u00d7 n \u00eenmul\u021biri de cifre: O(n\u00b2).\n\n**Putem face mai bine?** \u00cemp\u0103r\u021bim fiecare num\u0103r \u00een dou\u0103:\n- x = a \u00d7 10^(n/2) + b,  y = c \u00d7 10^(n/2) + d\n- x \u00d7 y = ac \u00d7 10\u207f + (ad + bc) \u00d7 10^(n/2) + bd\n\nAceasta d\u0103 **4 sub-probleme** de dimensiune n/2: T(n) = 4T(n/2) + O(n). Expand\u00e2nd: T(n) = n\u00b2 \u2014 nicio \u00eembun\u0103t\u0103\u021bire!\n\n**Observa\u021bia lui Karatsuba:** Avem nevoie de (ad + bc) dar nu de ad \u0219i bc separat. Observ\u0103m:\n\n(a+b)(c+d) = ac + ad + bc + bd\n\nDeci: **ad + bc = (a+b)(c+d) \u2212 ac \u2212 bd**\n\nDeja calcul\u0103m ac \u0219i bd, deci avem nevoie de doar **3 \u00eenmul\u021biri** \u00een loc de 4!\n\nT(n) = 3T(n/2) + O(n) \u2192 T(n) = n^(log\u2082 3) < n^1.6"
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Further improvements to multiplication:\n- **Toom-Cook** (1963): O(n^(log\u2083 5)) \u2248 O(n^1.465)\n- **Sch\u00f6nhage-Strassen** (1971): O(n log n log log n)\n- **F\u00fcrer** (2007): O(n log n 2^(O(log* n)))\n- **Harvey-van der Hoeven** (2019): O(n log n) \u2014 optimal!",
+            "ro": "\u00cembun\u0103t\u0103\u021biri ulterioare ale \u00eenmul\u021birii:\n- **Toom-Cook** (1963): O(n^(log\u2083 5)) \u2248 O(n^1.465)\n- **Sch\u00f6nhage-Strassen** (1971): O(n log n log log n)\n- **F\u00fcrer** (2007): O(n log n 2^(O(log* n)))\n- **Harvey-van der Hoeven** (2019): O(n log n) \u2014 optimal!"
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Number multiplication and Karatsuba's algorithm", "ro": "Slide-uri curs: \u00cenm\u00e2l\u021birea numerelor \u0219i algoritmul lui Karatsuba" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-asymptotic",
+      "title": { "en": "Asymptotic Notation: O, \u03a9, \u0398", "ro": "Nota\u021bie asimptotic\u0103: O, \u03a9, \u0398" },
+      "group": "notation",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When analyzing running times, we abstract away constants and lower-order terms using **asymptotic notation**. Instead of saying InsertionSort takes an\u00b2 + bn + c steps, we write O(n\u00b2).\n\nThere are three main notations, each serving a different purpose:",
+            "ro": "C\u00e2nd analiz\u0103m timpii de execu\u021bie, abstractiz\u0103m constantele \u0219i termenii de ordin inferior folosind **nota\u021bia asimptotic\u0103**. \u00cen loc s\u0103 spunem c\u0103 InsertionSort ia an\u00b2 + bn + c pa\u0219i, scriem O(n\u00b2).\n\nExist\u0103 trei nota\u021bii principale, fiecare cu un scop diferit:"
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Big-O (Upper Bound)", "ro": "Big-O (Limit\u0103 superioar\u0103)" },
+          "content": {
+            "en": "T(n) = O(f(n)) if and only if there exist constants c > 0 and n\u2080 > 0 such that:\n\n**0 \u2264 T(n) \u2264 c\u00b7f(n),  for all n \u2265 n\u2080**\n\nMeaning: T(n) grows **at most as fast** as f(n) for large n. It is an **asymptotic upper bound**.\n\nExample: 3n\u00b2 + 5n = O(n\u00b2) because 3n\u00b2 + 5n \u2264 4n\u00b2 for all n \u2265 5 (c=4, n\u2080=5).",
+            "ro": "T(n) = O(f(n)) dac\u0103 \u0219i numai dac\u0103 exist\u0103 constantele c > 0 \u0219i n\u2080 > 0 astfel \u00eenc\u00e2t:\n\n**0 \u2264 T(n) \u2264 c\u00b7f(n),  pentru orice n \u2265 n\u2080**\n\nSemnifica\u021bie: T(n) cre\u0219te **cel mult la fel de repede** ca f(n) pentru n mare. Este o **limit\u0103 superioar\u0103 asimptotic\u0103**.\n\nExemplu: 3n\u00b2 + 5n = O(n\u00b2) deoarece 3n\u00b2 + 5n \u2264 4n\u00b2 pentru orice n \u2265 5 (c=4, n\u2080=5)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Big-\u03a9 (Lower Bound)", "ro": "Big-\u03a9 (Limit\u0103 inferioar\u0103)" },
+          "content": {
+            "en": "T(n) = \u03a9(f(n)) if and only if there exist constants c > 0 and n\u2080 > 0 such that:\n\n**0 \u2264 c\u00b7f(n) \u2264 T(n),  for all n \u2265 n\u2080**\n\nMeaning: T(n) grows **at least as fast** as f(n) for large n. It is an **asymptotic lower bound**.",
+            "ro": "T(n) = \u03a9(f(n)) dac\u0103 \u0219i numai dac\u0103 exist\u0103 constantele c > 0 \u0219i n\u2080 > 0 astfel \u00eenc\u00e2t:\n\n**0 \u2264 c\u00b7f(n) \u2264 T(n),  pentru orice n \u2265 n\u2080**\n\nSemnifica\u021bie: T(n) cre\u0219te **cel pu\u021bin la fel de repede** ca f(n) pentru n mare. Este o **limit\u0103 inferioar\u0103 asimptotic\u0103**."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Big-\u0398 (Tight Bound)", "ro": "Big-\u0398 (Limit\u0103 strâns\u0103)" },
+          "content": {
+            "en": "T(n) = \u0398(f(n)) if and only if there exist constants c\u2081, c\u2082 > 0 and n\u2080 > 0 such that:\n\n**0 \u2264 c\u2081\u00b7f(n) \u2264 T(n) \u2264 c\u2082\u00b7f(n),  for all n \u2265 n\u2080**\n\nMeaning: T(n) grows **at the same rate** as f(n) for large n. It is an **asymptotically tight bound**.\n\n**Key relationship:** T(n) = \u0398(f(n)) if and only if T(n) = O(f(n)) AND T(n) = \u03a9(f(n)).",
+            "ro": "T(n) = \u0398(f(n)) dac\u0103 \u0219i numai dac\u0103 exist\u0103 constantele c\u2081, c\u2082 > 0 \u0219i n\u2080 > 0 astfel \u00eenc\u00e2t:\n\n**0 \u2264 c\u2081\u00b7f(n) \u2264 T(n) \u2264 c\u2082\u00b7f(n),  pentru orice n \u2265 n\u2080**\n\nSemnifica\u021bie: T(n) cre\u0219te **cu aceea\u0219i rat\u0103** ca f(n) pentru n mare. Este o **limit\u0103 strâns\u0103 asimptotic\u0103**.\n\n**Rela\u021bia cheie:** T(n) = \u0398(f(n)) dac\u0103 \u0219i numai dac\u0103 T(n) = O(f(n)) \u0218I T(n) = \u03a9(f(n))."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Asymptotic notation definitions and graphs", "ro": "Slide-uri curs: Defini\u021biile nota\u021biei asimptotice \u0219i grafice" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-reductions",
+      "title": { "en": "Turing (Cook) Problem Reductions", "ro": "Reduc\u021bii Turing (Cook) de probleme" },
+      "group": "notation",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "We say problem P **polynomially reduces** to a solvable problem Q, written **P \u221d Q**, if we can design an algorithm for P using an algorithm for Q:\n\n1. Let p be an instance of P.\n2. **Preprocess** p in polynomial time to get instance(s) q of Q.\n3. **Call** an algorithm for Q (possibly several times, but a polynomial number of times).\n4. **Postprocess** the output(s) from Q in polynomial time to get P(p).\n\nIf the pre+post processing takes O(g(n)) time, we write P \u221d_{g(n)} Q.\n\n**Key insight:** Reducing P to Q means **P is no harder than Q**. If we have an efficient algorithm for Q, we automatically get one for P.",
+            "ro": "Spunem c\u0103 problema P **se reduce polinomial** la o problem\u0103 rezolvabil\u0103 Q, scris **P \u221d Q**, dac\u0103 putem proiecta un algoritm pentru P folosind un algoritm pentru Q:\n\n1. Fie p o instan\u021b\u0103 a lui P.\n2. **Preprocesare:** transform\u0103 p \u00een timp polinomial \u00een instan\u021b\u0103(e) q ale lui Q.\n3. **Apel:** algoritmul pentru Q (posibil de mai multe ori, dar de un num\u0103r polinomial de ori).\n4. **Postprocesare:** prelucreaz\u0103 ie\u0219irea/ie\u0219irile lui Q \u00een timp polinomial pentru a ob\u021bine P(p).\n\nDac\u0103 pre+postprocesarea ia O(g(n)) timp, scriem P \u221d_{g(n)} Q.\n\n**Idee cheie:** A reduce P la Q \u00eenseamn\u0103 c\u0103 **P nu e mai grea dec\u00e2t Q**. Dac\u0103 avem un algoritm eficient pentru Q, ob\u021binem automat unul pentru P."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example: SET-INCLUSION \u221d SORTING**\n\nGiven two finite sets A = {a\u2080, ..., a\u2099\u208b\u2081} and B = {b\u2080, ..., b\u2098\u208b\u2081} with n \u2264 m, determine whether A \u2286 B.\n\n**Reduction algorithm:**\n1. Sort both A and B (using any sorting algorithm).\n2. Walk through both sorted arrays left to right:\n   - If A'[i] = B'[j]: advance in both arrays.\n   - If A'[i] > B'[j]: advance only in B' (keep searching).\n   - If A'[i] < B'[j]: A'[i] is not in B \u2192 return NO.\n3. If all elements of A' are found in B': return YES.\n\nThe sorting takes O(n lg n + m lg m) and the linear scan takes O(n + m). Total: O(m lg m). We used SORTING to solve SET-INCLUSION!",
+            "ro": "**Exemplu: SET-INCLUSION \u221d SORTING**\n\nDate dou\u0103 mul\u021bimi finite A = {a\u2080, ..., a\u2099\u208b\u2081} \u0219i B = {b\u2080, ..., b\u2098\u208b\u2081} cu n \u2264 m, determin\u0103 dac\u0103 A \u2286 B.\n\n**Algoritmul de reducere:**\n1. Sorteaz\u0103 at\u00e2t A c\u00e2t \u0219i B (folosind orice algoritm de sortare).\n2. Parcurge ambele tablouri sortate de la st\u00e2nga la dreapta:\n   - Dac\u0103 A'[i] = B'[j]: avanseaz\u0103 \u00een ambele tablouri.\n   - Dac\u0103 A'[i] > B'[j]: avanseaz\u0103 doar \u00een B' (continu\u0103 c\u0103utarea).\n   - Dac\u0103 A'[i] < B'[j]: A'[i] nu e \u00een B \u2192 returneaz\u0103 NU.\n3. Dac\u0103 toate elementele lui A' sunt g\u0103site \u00een B': returneaz\u0103 DA.\n\nSortarea ia O(n lg n + m lg m) \u0219i parcurgerea liniar\u0103 ia O(n + m). Total: O(m lg m). Am folosit SORTING pentru a rezolva SET-INCLUSION!"
+          }
+        },
+        {
+          "type": "code",
+          "language": "pseudocode",
+          "title": { "en": "Algorithm 5: SetInclusion(A, B)", "ro": "Algoritmul 5: SetInclusion(A, B)" },
+          "content": "Algorithm 5 SetInclusion(A, B)\n1:  A' \u2190 Sort(A)\n2:  B' \u2190 Sort(B)\n3:  i \u2190 0\n4:  j \u2190 0\n5:  while i < n and j < m do\n6:      if A'[i] = B'[j] then\n7:          i \u2190 i + 1\n8:          j \u2190 j + 1\n9:      else if A'[i] > B'[j] then\n10:         j \u2190 j + 1\n11:     else\n12:         return NO\n13: if i = n then\n14:     return YES\n15: else\n16:     return NO"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "There also exist **Karp reductions** (covered in the NP-completeness lectures). Key differences: Karp reductions apply to decision problems only, allow only a **single call** to Q, and **no post-processing** of the output.",
+            "ro": "Exist\u0103 \u0219i **reduc\u021bii Karp** (acoperite \u00een cursurile despre NP-completitudine). Diferen\u021be cheie: reduc\u021biile Karp se aplic\u0103 doar problemelor de decizie, permit doar un **singur apel** la Q \u0219i **f\u0103r\u0103 postprocesare** a ie\u0219irii."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Lecture slides: Turing (Cook) reductions and SET-INCLUSION example", "ro": "Slide-uri curs: Reduc\u021bii Turing (Cook) \u0219i exemplul SET-INCLUSION" }
+        }
+      ]
+    },
+    {
+      "id": "pa-c2-quiz",
+      "title": { "en": "Self-Test Quiz", "ro": "Test de autoevaluare" },
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What are the three steps for proving algorithm correctness using a loop invariant?",
+                "ro": "Care sunt cei trei pa\u0219i pentru demonstrarea corectitudinii unui algoritm folosind un invariant de bucl\u0103?"
+              },
+              "options": [
+                { "text": { "en": "Base case, Inductive step, Conclusion", "ro": "Caz de baz\u0103, Pas inductiv, Concluzie" }, "correct": false },
+                { "text": { "en": "Initialization, Maintenance, Termination", "ro": "Ini\u021bializare, Mentenan\u021b\u0103, Terminare" }, "correct": true },
+                { "text": { "en": "Divide, Conquer, Combine", "ro": "Divide, Cucere\u0219te, Combin\u0103" }, "correct": false },
+                { "text": { "en": "Hypothesis, Verification, Proof", "ro": "Ipotez\u0103, Verificare, Demonstra\u021bie" }, "correct": false }
+              ],
+              "explanation": {
+                "en": "The three properties are Initialization (true before loop starts), Maintenance (preserved by each iteration), and Termination (implies correctness when loop ends). While similar to mathematical induction (base case + inductive step), the termination step is unique to loop invariants.",
+                "ro": "Cele trei propriet\u0103\u021bi sunt Ini\u021bializarea (adev\u0103rat \u00eenainte de \u00eenceperea buclei), Mentenan\u021ba (p\u0103strat de fiecare itera\u021bie) \u0219i Terminarea (implic\u0103 corectitudinea c\u00e2nd bucla se termin\u0103). De\u0219i similar\u0103 induc\u021biei matematice, pasul de terminare e unic invarian\u021bilor de bucl\u0103."
+              }
+            },
+            {
+              "question": {
+                "en": "What is the worst-case running time of InsertionSort?",
+                "ro": "Care este timpul de execu\u021bie \u00een cazul defavorabil al InsertionSort?"
+              },
+              "options": [
+                { "text": { "en": "O(n)", "ro": "O(n)" }, "correct": false },
+                { "text": { "en": "O(n log n)", "ro": "O(n log n)" }, "correct": false },
+                { "text": { "en": "O(n\u00b2)", "ro": "O(n\u00b2)" }, "correct": true },
+                { "text": { "en": "O(2\u207f)", "ro": "O(2\u207f)" }, "correct": false }
+              ],
+              "explanation": {
+                "en": "When the array is sorted in reverse order, InsertionSort must shift all previous elements for each insertion. The total number of shifts is \u03a3(i=1 to n-1) i = n(n-1)/2, giving O(n\u00b2). The best case (already sorted) is O(n).",
+                "ro": "C\u00e2nd tabloul este sortat \u00een ordine invers\u0103, InsertionSort trebuie s\u0103 mute toate elementele anterioare la fiecare inserare. Num\u0103rul total de mut\u0103ri este \u03a3(i=1 la n-1) i = n(n-1)/2, dând O(n\u00b2). Cazul favorabil (deja sortat) este O(n)."
+              }
+            },
+            {
+              "question": {
+                "en": "In the RAM model of computation, which assumption is made about instruction execution?",
+                "ro": "\u00cen modelul de calcul RAM, ce presupunere se face despre execu\u021bia instruc\u021biunilor?"
+              },
+              "options": [
+                { "text": { "en": "Instructions can execute in parallel", "ro": "Instruc\u021biunile se pot executa \u00een paralel" }, "correct": false },
+                { "text": { "en": "Each instruction takes constant time, executed sequentially", "ro": "Fiecare instruc\u021biune ia timp constant, executat\u0103 secven\u021bial" }, "correct": true },
+                { "text": { "en": "Instructions take time proportional to the data size", "ro": "Instruc\u021biunile iau timp propor\u021bional cu dimensiunea datelor" }, "correct": false },
+                { "text": { "en": "Only arithmetic instructions take constant time", "ro": "Doar instruc\u021biunile aritmetice iau timp constant" }, "correct": false }
+              ],
+              "explanation": {
+                "en": "The RAM model assumes a single processor executing instructions one at a time (no concurrency), with each instruction (arithmetic, data movement, control) taking constant time.",
+                "ro": "Modelul RAM presupune un singur procesor care execut\u0103 instruc\u021biuni pe r\u00e2nd (f\u0103r\u0103 concuren\u021b\u0103), fiecare instruc\u021biune (aritmetic\u0103, mi\u0219care de date, control) lu\u00e2nd timp constant."
+              }
+            },
+            {
+              "question": {
+                "en": "What is the running time of MergeSort?",
+                "ro": "Care este timpul de execu\u021bie al MergeSort?"
+              },
+              "options": [
+                { "text": { "en": "O(n\u00b2)", "ro": "O(n\u00b2)" }, "correct": false },
+                { "text": { "en": "O(n lg n)", "ro": "O(n lg n)" }, "correct": true },
+                { "text": { "en": "O(n)", "ro": "O(n)" }, "correct": false },
+                { "text": { "en": "O(lg n)", "ro": "O(lg n)" }, "correct": false }
+              ],
+              "explanation": {
+                "en": "MergeSort's recurrence is T(n) = 2T(n/2) + \u0398(n). The recursion tree has lg n + 1 levels, each costing cn, giving T(n) = cn lg n + cn = O(n lg n).",
+                "ro": "Recuren\u021ba MergeSort este T(n) = 2T(n/2) + \u0398(n). Arborele de recursie are lg n + 1 niveluri, fiecare cost\u00e2nd cn, dând T(n) = cn lg n + cn = O(n lg n)."
+              }
+            },
+            {
+              "question": {
+                "en": "What trick does Karatsuba's algorithm use to reduce the number of multiplications?",
+                "ro": "Ce truc folose\u0219te algoritmul Karatsuba pentru a reduce num\u0103rul de \u00eenmul\u021biri?"
+              },
+              "options": [
+                { "text": { "en": "It avoids multiplying the two halves together", "ro": "Evit\u0103 \u00eenmul\u021birea celor dou\u0103 jum\u0103t\u0103\u021bi" }, "correct": false },
+                { "text": { "en": "It computes ad+bc as (a+b)(c+d) - ac - bd, using 3 multiplications instead of 4", "ro": "Calculeaz\u0103 ad+bc ca (a+b)(c+d) - ac - bd, folosind 3 \u00eenmul\u021biri \u00een loc de 4" }, "correct": true },
+                { "text": { "en": "It uses lookup tables for single-digit products", "ro": "Folose\u0219te tabele de c\u0103utare pentru produse de o cifr\u0103" }, "correct": false },
+                { "text": { "en": "It splits the numbers into three parts instead of two", "ro": "\u00cemparte numerele \u00een trei p\u0103r\u021bi \u00een loc de dou\u0103" }, "correct": false }
+              ],
+              "explanation": {
+                "en": "Karatsuba noticed that the cross-term ad+bc can be computed from (a+b)(c+d) - ac - bd, reusing the products ac and bd that are already needed. This reduces 4 recursive multiplications to 3, giving T(n) = 3T(n/2) = O(n^(log\u2082 3)) \u2248 O(n^1.585).",
+                "ro": "Karatsuba a observat c\u0103 termenul \u00eencruci\u0219at ad+bc poate fi calculat din (a+b)(c+d) - ac - bd, reutiliz\u00e2nd produsele ac \u0219i bd deja necesare. Aceasta reduce 4 \u00eenmul\u021biri recursive la 3, d\u00e2nd T(n) = 3T(n/2) = O(n^(log\u2082 3)) \u2248 O(n^1.585)."
+              }
+            },
+            {
+              "question": {
+                "en": "If T(n) = O(n\u00b2) and T(n) = \u03a9(n\u00b2), what can we conclude?",
+                "ro": "Dac\u0103 T(n) = O(n\u00b2) \u0219i T(n) = \u03a9(n\u00b2), ce putem concluziona?"
+              },
+              "options": [
+                { "text": { "en": "T(n) = O(n)", "ro": "T(n) = O(n)" }, "correct": false },
+                { "text": { "en": "T(n) = \u0398(n\u00b2)", "ro": "T(n) = \u0398(n\u00b2)" }, "correct": true },
+                { "text": { "en": "T(n) = n\u00b2 exactly", "ro": "T(n) = n\u00b2 exact" }, "correct": false },
+                { "text": { "en": "Nothing more can be concluded", "ro": "Nu se poate concluziona nimic \u00een plus" }, "correct": false }
+              ],
+              "explanation": {
+                "en": "By definition, T(n) = \u0398(f(n)) if and only if T(n) = O(f(n)) AND T(n) = \u03a9(f(n)). Having both an upper and lower bound of n\u00b2 gives us the tight bound \u0398(n\u00b2). Note this doesn't mean T(n) = n\u00b2 exactly, just that it grows at the same rate up to constant factors.",
+                "ro": "Prin defini\u021bie, T(n) = \u0398(f(n)) dac\u0103 \u0219i numai dac\u0103 T(n) = O(f(n)) \u0218I T(n) = \u03a9(f(n)). Av\u00e2nd at\u00e2t limita superioar\u0103 c\u00e2t \u0219i cea inferioar\u0103 n\u00b2, ob\u021binem limita str\u00e2ns\u0103 \u0398(n\u00b2). Asta nu \u00eenseamn\u0103 c\u0103 T(n) = n\u00b2 exact, ci c\u0103 cre\u0219te cu aceea\u0219i rat\u0103 p\u00e2n\u0103 la factori constanti."
+              }
+            },
+            {
+              "question": {
+                "en": "What does the reduction P \u221d Q mean?",
+                "ro": "Ce \u00eenseamn\u0103 reducerea P \u221d Q?"
+              },
+              "options": [
+                { "text": { "en": "P is harder than Q", "ro": "P este mai grea dec\u00e2t Q" }, "correct": false },
+                { "text": { "en": "P and Q are equivalent problems", "ro": "P \u0219i Q sunt probleme echivalente" }, "correct": false },
+                { "text": { "en": "P is no harder than Q (we can solve P using Q)", "ro": "P nu e mai grea dec\u00e2t Q (putem rezolva P folosind Q)" }, "correct": true },
+                { "text": { "en": "Q is a special case of P", "ro": "Q este un caz special al lui P" }, "correct": false }
+              ],
+              "explanation": {
+                "en": "P \u221d Q means we can solve P by preprocessing, calling Q a polynomial number of times, and postprocessing. This shows P is no harder than Q \u2014 if we have an efficient algorithm for Q, we automatically get one for P.",
+                "ro": "P \u221d Q \u00eenseamn\u0103 c\u0103 putem rezolva P prin preprocesare, apelarea lui Q de un num\u0103r polinomial de ori \u0219i postprocesare. Aceasta arat\u0103 c\u0103 P nu e mai grea dec\u00e2t Q \u2014 dac\u0103 avem un algoritm eficient pentru Q, ob\u021binem automat unul pentru P."
+              }
+            },
+            {
+              "question": {
+                "en": "Why do we use a sentinel value (\u221e) in the Merge procedure?",
+                "ro": "De ce folosim o valoare santinel\u0103 (\u221e) \u00een procedura Merge?"
+              },
+              "options": [
+                { "text": { "en": "To mark the boundary between subarrays", "ro": "Pentru a marca grani\u021ba dintre sub-tablouri" }, "correct": false },
+                { "text": { "en": "To avoid checking whether a pile is empty at each comparison step", "ro": "Pentru a evita verificarea dac\u0103 un teanc e gol la fiecare pas de comparare" }, "correct": true },
+                { "text": { "en": "To handle arrays with duplicate elements", "ro": "Pentru a gestiona tablourile cu elemente duplicate" }, "correct": false },
+                { "text": { "en": "To ensure the algorithm terminates", "ro": "Pentru a asigura terminarea algoritmului" }, "correct": false }
+              ],
+              "explanation": {
+                "en": "The sentinel \u221e at the bottom of each temporary array L and R means we never have to check if a pile is exhausted during the merge loop. When one side reaches \u221e, the other side's elements will always be smaller and correctly placed. This simplifies the loop logic.",
+                "ro": "Santinela \u221e la baza fiec\u0103rui tablou temporar L \u0219i R \u00eenseamn\u0103 c\u0103 nu trebuie niciodat\u0103 s\u0103 verific\u0103m dac\u0103 un teanc e epuizat \u00een bucla de interclasare. C\u00e2nd o parte ajunge la \u221e, elementele celeilalte p\u0103r\u021bi vor fi \u00eentotdeauna mai mici \u0219i plasate corect."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
