@@ -374,30 +374,38 @@ NOT_FOUND:
 
 Then provide the content.`;
 
-    const { result: searchResult, provider: searchProviderInfo } = await sendText('source-search', searchPrompt);
-    recordStageProvider('source-search', searchProviderInfo);
-    const firstLine = searchResult.split('\n')[0].trim();
+    try {
+      const { result: searchResult, provider: searchProviderInfo } = await sendText('source-search', searchPrompt);
+      recordStageProvider('source-search', searchProviderInfo);
+      const firstLine = searchResult.split('\n')[0].trim();
 
-    if (firstLine.startsWith('NOT_FOUND')) {
-      console.log(`    ❌ Not found`);
+      if (firstLine.startsWith('NOT_FOUND')) {
+        console.log(`    ❌ Not found`);
+        src.file = null;
+        src.format = 'not_found';
+        src.available = false;
+        src.searchedAt = new Date().toISOString();
+      } else {
+        const content = searchResult.substring(searchResult.indexOf('\n') + 1).trim();
+        const tokenEstimate = Math.ceil(content.length / 4);
+        const isPartial = firstLine.startsWith('SUMMARY') || firstLine.startsWith('PARTIAL') || tokenEstimate > 30000;
+        const format = firstLine.startsWith('PARTIAL') ? 'partial' : isPartial ? 'summary' : 'full';
+
+        const filename = `${src.id}${format !== 'full' ? '.' + format : ''}.md`;
+        writeFileSync(resolve(refsDir, filename), content);
+
+        src.file = filename;
+        src.format = format;
+        src.available = true;
+        src.searchedAt = new Date().toISOString();
+        console.log(`    ✅ Saved as ${filename} (~${tokenEstimate} tokens, ${format})`);
+      }
+    } catch (searchErr) {
+      console.log(`    ⚠ Search failed (${searchErr.message?.slice(0, 80)}), skipping`);
       src.file = null;
       src.format = 'not_found';
       src.available = false;
       src.searchedAt = new Date().toISOString();
-    } else {
-      const content = searchResult.substring(searchResult.indexOf('\n') + 1).trim();
-      const tokenEstimate = Math.ceil(content.length / 4);
-      const isPartial = firstLine.startsWith('SUMMARY') || firstLine.startsWith('PARTIAL') || tokenEstimate > 30000;
-      const format = firstLine.startsWith('PARTIAL') ? 'partial' : isPartial ? 'summary' : 'full';
-
-      const filename = `${src.id}${format !== 'full' ? '.' + format : ''}.md`;
-      writeFileSync(resolve(refsDir, filename), content);
-
-      src.file = filename;
-      src.format = format;
-      src.available = true;
-      src.searchedAt = new Date().toISOString();
-      console.log(`    ✅ Saved as ${filename} (~${tokenEstimate} tokens, ${format})`);
     }
   }
 

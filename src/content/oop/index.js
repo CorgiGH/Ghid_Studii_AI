@@ -11,16 +11,7 @@ const oop = {
   },
   icon: '🧱',
   courses: [
-    { id: 'oop-course_1', title: { en: 'Course 1: Introduction', ro: 'Cursul 1: Introducere' }, shortTitle: { en: 'C1: Introduction', ro: 'C1: Introducere' }, sectionCount: 6,
-      sections: [
-        { id: 'oop-course_1-glossary', title: { en: '1. Glossary', ro: '1. Glosar' } },
-        { id: 'oop-course_1-os-arch', title: { en: '2. OS Arch', ro: '2. Arhitectura SO' } },
-        { id: 'oop-course_1-cpp-history', title: { en: '3. C++ History', ro: '3. Istoria C++' } },
-        { id: 'oop-course_1-c-to-cpp', title: { en: '4. C to C++', ro: '4. De la C la C++' } },
-        { id: 'oop-course_1-data-members', title: { en: '5. Data Members', ro: '5. Membri date' } },
-        { id: 'oop-course_1-methods', title: { en: '6. Methods', ro: '6. Metode' } },
-      ],
-      component: lazy(() => import('./courses/Course01.jsx')) },
+    { id: 'oop-c1', title: { en: 'Course 1: Introduction to C++', ro: 'Cursul 1: Introducere în C++' }, shortTitle: { en: 'C1: Introduction', ro: 'C1: Introducere' }, sectionCount: 12, metaId: 'oop-c1', src: 'oop/courses/course-01.json' },
     { id: 'oop-course_2', title: { en: 'Course 2: C++ Language Specifiers', ro: 'Cursul 2: Specificatori ai limbajului C++' }, shortTitle: { en: 'C2: Specifiers', ro: 'C2: Specificatori' }, sectionCount: 6,
       sections: [
         { id: 'oop-course_2-pointers', title: { en: '1. Pointers & Refs', ro: '1. Pointeri & Ref' } },
