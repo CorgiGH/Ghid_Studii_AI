@@ -6,21 +6,29 @@ import { resolve } from 'path';
 
 const GEMINI_MODEL = 'gemini-3-flash-preview';
 
-let geminiClient = null;
+let geminiKeys = [];
+let geminiKeyIndex = 0;
 
-function getGeminiClient() {
-  if (!geminiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY not set. Add it to proxy/.env');
+function getGeminiKeys() {
+  if (geminiKeys.length === 0) {
+    const raw = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
+    geminiKeys = raw.split(',').map(k => k.trim()).filter(Boolean);
+    if (geminiKeys.length === 0) {
+      throw new Error('GEMINI_API_KEY not set. Add it to proxy/.env (supports comma-separated GEMINI_API_KEYS for rotation)');
     }
-    geminiClient = new GoogleGenerativeAI(apiKey);
+    if (geminiKeys.length > 1) {
+      console.log(`  🔑 ${geminiKeys.length} Gemini keys loaded — will rotate on rate limit`);
+    }
   }
-  return geminiClient;
+  return geminiKeys;
 }
 
-function getGeminiModel() {
-  return getGeminiClient().getGenerativeModel({ model: GEMINI_MODEL });
+function nextGeminiModel() {
+  const keys = getGeminiKeys();
+  const key = keys[geminiKeyIndex % keys.length];
+  geminiKeyIndex++;
+  const client = new GoogleGenerativeAI(key);
+  return client.getGenerativeModel({ model: GEMINI_MODEL });
 }
 
 class RateLimitError extends Error {
@@ -31,40 +39,46 @@ class RateLimitError extends Error {
   }
 }
 
+async function geminiWithRetry(fn, retries = 0) {
+  const keys = getGeminiKeys();
+  try {
+    const model = nextGeminiModel();
+    return await fn(model);
+  } catch (err) {
+    const isRateLimit = err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED');
+    if (isRateLimit && retries < keys.length - 1) {
+      console.log(`  ⚠ Gemini key ${((geminiKeyIndex - 1) % keys.length) + 1} rate limited, trying key ${(geminiKeyIndex % keys.length) + 1}...`);
+      return geminiWithRetry(fn, retries + 1);
+    }
+    if (isRateLimit) {
+      throw new RateLimitError('gemini', `All ${keys.length} Gemini key(s) rate limited: ${err.message}`);
+    }
+    throw err;
+  }
+}
+
 const geminiProvider = {
   name: 'gemini',
   model: GEMINI_MODEL,
 
   async sendPdf(pdfPath, promptText) {
-    const model = getGeminiModel();
     const pdfBuffer = readFileSync(resolve(pdfPath));
     const pdfBase64 = pdfBuffer.toString('base64');
 
-    try {
+    return geminiWithRetry(async (model) => {
       const result = await model.generateContent([
         { inlineData: { mimeType: 'application/pdf', data: pdfBase64 } },
         { text: promptText },
       ]);
       return result.response.text();
-    } catch (err) {
-      if (err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
-        throw new RateLimitError('gemini', `Gemini rate limit hit: ${err.message}`);
-      }
-      throw err;
-    }
+    });
   },
 
   async sendText(promptText) {
-    const model = getGeminiModel();
-    try {
+    return geminiWithRetry(async (model) => {
       const result = await model.generateContent(promptText);
       return result.response.text();
-    } catch (err) {
-      if (err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
-        throw new RateLimitError('gemini', `Gemini rate limit hit: ${err.message}`);
-      }
-      throw err;
-    }
+    });
   },
 };
 
