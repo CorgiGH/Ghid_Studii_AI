@@ -48,6 +48,19 @@ export function AppProvider({ children }) {
   const [progress, setProgress] = useLocalStorage('progress', {});
   const [lectureVisible, setLectureVisible] = useLocalStorage('lectureVisible', false);
   const toggleLecture = useCallback(() => setLectureVisible(v => !v), []);
+  const [testProgress, setTestProgress] = useLocalStorage('testProgress', {});
+
+  const saveTestResult = useCallback((testId, score, totalPoints, answers) => {
+    setTestProgress(prev => ({
+      ...prev,
+      [testId]: {
+        score,
+        totalPoints,
+        completedAt: new Date().toISOString().slice(0, 10),
+        answers,
+      },
+    }));
+  }, []);
 
   const markVisited = useCallback((stepId) => {
     setProgress(prev => {
@@ -111,11 +124,12 @@ export function AppProvider({ children }) {
     checked, setChecked, toggleCheck,
     progress, markVisited, toggleUnderstood,
     lectureVisible, toggleLecture,
+    testProgress, saveTestResult,
     t, highlight,
     sidebarLocked, setSidebarLocked, toggleSidebarLock,
     chatOpen, setChatOpen, toggleChat,
     chatWidth, setChatWidth,
-  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood, lectureVisible, toggleLecture]);
+  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood, lectureVisible, toggleLecture, testProgress, saveTestResult]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
