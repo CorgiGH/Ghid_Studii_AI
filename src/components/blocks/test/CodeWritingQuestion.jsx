@@ -36,6 +36,17 @@ export default function CodeWritingQuestion({ question, onAnswer }) {
       <textarea
         value={code}
         onChange={e => setCode(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            const { selectionStart, selectionEnd } = e.target;
+            const newVal = code.slice(0, selectionStart) + '\t' + code.slice(selectionEnd);
+            setCode(newVal);
+            requestAnimationFrame(() => {
+              e.target.selectionStart = e.target.selectionEnd = selectionStart + 1;
+            });
+          }
+        }}
         disabled={!!result}
         rows={8}
         spellCheck={false}
