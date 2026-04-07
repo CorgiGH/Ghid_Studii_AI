@@ -113,6 +113,7 @@ export default function ArrayRenderer({ data }) {
         onPlayPause={() => setPlaying(p => !p)}
         speed={speed}
         onSpeedChange={setSpeed}
+        currentStepData={step}
       />
     </div>
   );

@@ -134,6 +134,7 @@ export default function TableRenderer({ data }) {
         onPlayPause={() => setPlaying(p => !p)}
         speed={speed}
         onSpeedChange={setSpeed}
+        currentStepData={step}
       />
     </div>
   );

@@ -162,6 +162,7 @@ export default function GraphRenderer({ data }) {
         onPlayPause={() => setPlaying(p => !p)}
         speed={speed}
         onSpeedChange={setSpeed}
+        currentStepData={step}
       />
     </div>
   );
