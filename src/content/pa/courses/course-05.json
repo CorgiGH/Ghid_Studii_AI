@@ -124,8 +124,8 @@
           "type": "definition",
           "term": { "en": "Failure function F[j]", "ro": "Func\u021bia de e\u0219ec F[j]" },
           "content": {
-            "en": "**F[j]** = length of the longest proper border of P[0..j].\n\n**F[0] = 0** always (a single character has no proper border).\n\nThis tells KMP: after matching j+1 characters and finding a mismatch, the next comparison should start at position F[j] in the pattern (skipping F[j] characters that are already known to match).",
-            "ro": "**F[j]** = lungimea celui mai lung border propriu al P[0..j].\n\n**F[0] = 0** \u00eentotdeauna (un singur caracter nu are border propriu).\n\nAceasta spune KMP-ului: dup\u0103 potrivirea a j+1 caractere \u0219i g\u0103sirea unui mismatch, urm\u0103toarea compara\u021bie ar trebui s\u0103 \u00eenceap\u0103 de la pozi\u021bia F[j] \u00een pattern (s\u0103rind F[j] caractere deja \u0219tiute ca potrivite)."
+            "en": "**F[j]** = length of the longest proper border of P[0..j-1].\n\n**F[0] = -1** always (sentinel value -- no prefix to consider).\n\nThis tells KMP: on mismatch at position j in the pattern, fall back to j = F[j]. The -1 sentinel handles the case where no border exists and we must advance in the text.",
+            "ro": "**F[j]** = lungimea celui mai lung border propriu al P[0..j-1].\n\n**F[0] = -1** intotdeauna (valoare santinela -- nu exista prefix de considerat).\n\nAceasta spune KMP-ului: la mismatch la pozitia j in pattern, revenim la j = F[j]. Santinela -1 trateaza cazul in care nu exista border si trebuie sa avansam in text."
           }
         },
         {
@@ -137,40 +137,40 @@
         },
         {
           "type": "code",
-          "content": "Pattern: A B A B X A B A B Y\nIndex:   0 1 2 3 4 5 6 7 8 9\nF[j]:    0 0 1 2 0 1 2 3 4 0\n\nF[3]=2: border of \"ABAB\" is \"AB\" (length 2)\nF[8]=4: border of \"ABABXABAB\" is \"ABAB\" (length 4)"
+          "content": "Pattern: A  B  A  B  X  A  B  A  B  Y\nIndex:   0  1  2  3  4  5  6  7  8  9\nF[j]:   -1  0  0  1  2  0  1  2  3  4\n\nF[0]=-1: sentinel (no prefix)\nF[4]=2:  border of \"ABAB\" is \"AB\" (length 2)\nF[9]=4:  border of \"ABABXABAB\" is \"ABAB\" (length 4)"
         },
         {
           "type": "table",
           "headers": [
             { "en": "j", "ro": "j" },
-            { "en": "P[0..j]", "ro": "P[0..j]" },
+            { "en": "P[0..j-1]", "ro": "P[0..j-1]" },
             { "en": "Longest border", "ro": "Cel mai lung border" },
             { "en": "F[j]", "ro": "F[j]" }
           ],
           "rows": [
-            [{ "en": "0", "ro": "0" }, { "en": "A", "ro": "A" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
-            [{ "en": "1", "ro": "1" }, { "en": "AB", "ro": "AB" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
-            [{ "en": "2", "ro": "2" }, { "en": "ABA", "ro": "ABA" }, { "en": "A", "ro": "A" }, { "en": "1", "ro": "1" }],
-            [{ "en": "3", "ro": "3" }, { "en": "ABAB", "ro": "ABAB" }, { "en": "AB", "ro": "AB" }, { "en": "2", "ro": "2" }],
-            [{ "en": "4", "ro": "4" }, { "en": "ABABX", "ro": "ABABX" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
-            [{ "en": "5", "ro": "5" }, { "en": "ABABXA", "ro": "ABABXA" }, { "en": "A", "ro": "A" }, { "en": "1", "ro": "1" }],
-            [{ "en": "6", "ro": "6" }, { "en": "ABABXAB", "ro": "ABABXAB" }, { "en": "AB", "ro": "AB" }, { "en": "2", "ro": "2" }],
-            [{ "en": "7", "ro": "7" }, { "en": "ABABXABA", "ro": "ABABXABA" }, { "en": "ABA", "ro": "ABA" }, { "en": "3", "ro": "3" }],
-            [{ "en": "8", "ro": "8" }, { "en": "ABABXABAB", "ro": "ABABXABAB" }, { "en": "ABAB", "ro": "ABAB" }, { "en": "4", "ro": "4" }],
-            [{ "en": "9", "ro": "9" }, { "en": "ABABXABABY", "ro": "ABABXABABY" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }]
+            [{ "en": "0", "ro": "0" }, { "en": "(sentinel)", "ro": "(santinela)" }, { "en": "--", "ro": "--" }, { "en": "-1", "ro": "-1" }],
+            [{ "en": "1", "ro": "1" }, { "en": "A", "ro": "A" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
+            [{ "en": "2", "ro": "2" }, { "en": "AB", "ro": "AB" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
+            [{ "en": "3", "ro": "3" }, { "en": "ABA", "ro": "ABA" }, { "en": "A", "ro": "A" }, { "en": "1", "ro": "1" }],
+            [{ "en": "4", "ro": "4" }, { "en": "ABAB", "ro": "ABAB" }, { "en": "AB", "ro": "AB" }, { "en": "2", "ro": "2" }],
+            [{ "en": "5", "ro": "5" }, { "en": "ABABX", "ro": "ABABX" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
+            [{ "en": "6", "ro": "6" }, { "en": "ABABXA", "ro": "ABABXA" }, { "en": "A", "ro": "A" }, { "en": "1", "ro": "1" }],
+            [{ "en": "7", "ro": "7" }, { "en": "ABABXAB", "ro": "ABABXAB" }, { "en": "AB", "ro": "AB" }, { "en": "2", "ro": "2" }],
+            [{ "en": "8", "ro": "8" }, { "en": "ABABXABA", "ro": "ABABXABA" }, { "en": "ABA", "ro": "ABA" }, { "en": "3", "ro": "3" }],
+            [{ "en": "9", "ro": "9" }, { "en": "ABABXABAB", "ro": "ABABXABAB" }, { "en": "ABAB", "ro": "ABAB" }, { "en": "4", "ro": "4" }]
           ]
         },
         {
           "type": "learn",
           "content": {
-            "en": "**KMP Search Algorithm:**\n\nThe search phase scans T left to right with index **i**, maintaining **j** = number of characters matched so far in P. On mismatch, instead of resetting j to 0, we set j = F[j-1] (fall back to the longest border). This way, each character of T is examined at most twice.",
-            "ro": "**Algoritmul de c\u0103utare KMP:**\n\nFaza de c\u0103utare scaneaz\u0103 T de la st\u00e2nga la dreapta cu indexul **i**, men\u021bin\u00e2nd **j** = num\u0103rul de caractere potrivite p\u00e2n\u0103 acum \u00een P. La mismatch, \u00een loc s\u0103 reset\u0103m j la 0, set\u0103m j = F[j-1] (revenim la cel mai lung border). Astfel, fiecare caracter din T este examinat cel mult de dou\u0103 ori."
+            "en": "**KMP Search Algorithm:**\n\nThe search phase scans T left to right with index **i**, maintaining **j** = number of characters matched so far in P. On mismatch (or when j == -1), we advance both i and j. On mismatch with j > 0, we fall back: j = F[j]. The -1 sentinel lets us handle the case where no border exists cleanly.",
+            "ro": "**Algoritmul de cautare KMP:**\n\nFaza de cautare scaneaza T de la stanga la dreapta cu indexul **i**, mentinand **j** = numarul de caractere potrivite pana acum in P. La mismatch (sau cand j == -1), avansam atat i cat si j. La mismatch cu j > 0, revenim: j = F[j]. Santinela -1 trateaza elegant cazul in care nu exista border."
           }
         },
         {
           "type": "code",
           "language": "c",
-          "content": "int kmp(char *T, int n, char *P, int m, int *F) {\n  int j = 0;  // position in pattern\n  for (int i = 0; i < n; ++i) {\n    while (j > 0 && T[i] != P[j])\n      j = F[j - 1];     // fall back using failure function\n    if (T[i] == P[j])\n      j++;\n    if (j == m)\n      return i - m + 1;  // match found at offset i-m+1\n  }\n  return -1;\n}\n// Time: O(n) -- each character of T examined at most twice"
+          "content": "int kmp(char *T, int n, char *P, int m, int *F) {\n  int i = 0, j = 0;\n  while (i < n) {\n    if (j == -1 || T[i] == P[j]) {\n      i++; j++;\n      if (j == m)\n        return i - m;  // match found\n    } else {\n      j = F[j];        // fall back using failure function\n    }\n  }\n  return -1;\n}\n// Time: O(n) -- each character of T examined at most twice"
         },
         {
           "type": "callout",
@@ -201,13 +201,13 @@
         {
           "type": "code",
           "language": "c",
-          "content": "void computeF(char *P, int m, int *F) {\n  F[0] = 0;\n  int j = 0;\n  for (int i = 1; i < m; ++i) {\n    while (j > 0 && P[i] != P[j])\n      j = F[j - 1];\n    if (P[i] == P[j])\n      j++;\n    F[i] = j;\n  }\n}\n// Time: O(m)"
+          "content": "void computeF(char *P, int m, int *F) {\n  int i = 0, j = -1;\n  F[0] = -1;\n  while (i < m - 1) {\n    if (j == -1 || P[i] == P[j]) {\n      i++; j++;\n      F[i] = j;\n    } else {\n      j = F[j];\n    }\n  }\n}\n// Time: O(m)"
         },
         {
           "type": "learn",
           "content": {
-            "en": "**How it works step by step:**\n\n1. Initialize F[0] = 0 and j = 0 (current border length)\n2. For each i from 1 to m-1:\n   - While there's a mismatch P[i] != P[j] and j > 0, fall back: j = F[j-1]\n   - If P[i] == P[j], extend the border: j++\n   - Store F[i] = j\n\nThe amortized analysis shows this is **O(m)**: j increases at most m times total, and each fall-back decreases j, so the total number of fall-backs across all iterations is also at most m.",
-            "ro": "**Cum func\u021bioneaz\u0103 pas cu pas:**\n\n1. Ini\u021bializ\u0103m F[0] = 0 \u0219i j = 0 (lungimea border-ului curent)\n2. Pentru fiecare i de la 1 la m-1:\n   - C\u00e2t timp exist\u0103 mismatch P[i] != P[j] \u0219i j > 0, revenim: j = F[j-1]\n   - Dac\u0103 P[i] == P[j], extindem border-ul: j++\n   - Stoc\u0103m F[i] = j\n\nAnaliza amortizat\u0103 arat\u0103 c\u0103 este **O(m)**: j cre\u0219te cel mult de m ori \u00een total, \u0219i fiecare revenire scade j, deci num\u0103rul total de reveniri pe toate itera\u021biile este de asemenea cel mult m."
+            "en": "**How it works step by step:**\n\n1. Initialize F[0] = -1, i = 0, j = -1\n2. While i < m-1:\n   - If j == -1 or P[i] == P[j]: advance both (i++, j++), store F[i] = j\n   - Otherwise: fall back j = F[j]\n\nThe amortized analysis shows this is **O(m)**: j increases at most m times total, and each fall-back decreases j, so the total number of fall-backs across all iterations is also at most m.",
+            "ro": "**Cum functioneaza pas cu pas:**\n\n1. Initializam F[0] = -1, i = 0, j = -1\n2. Cat timp i < m-1:\n   - Daca j == -1 sau P[i] == P[j]: avansam ambele (i++, j++), stocam F[i] = j\n   - Altfel: revenim j = F[j]\n\nAnaliza amortizata arata ca este **O(m)**: j creste cel mult de m ori in total, si fiecare revenire scade j, deci numarul total de reveniri pe toate iteratiile este de asemenea cel mult m."
           }
         },
         {
@@ -283,12 +283,12 @@
               "options": [
                 { "text": { "en": "The index where the pattern first fails to match", "ro": "Indexul unde pattern-ul nu reu\u0219e\u0219te s\u0103 se potriveasc\u0103 prima dat\u0103" }, "correct": false },
                 { "text": { "en": "The number of characters to skip in the text", "ro": "Num\u0103rul de caractere de s\u0103rit \u00een text" }, "correct": false },
-                { "text": { "en": "The length of the longest proper border of P[0..j]", "ro": "Lungimea celui mai lung border propriu al P[0..j]" }, "correct": true },
+                { "text": { "en": "The length of the longest proper border of P[0..j-1]", "ro": "Lungimea celui mai lung border propriu al P[0..j-1]" }, "correct": true },
                 { "text": { "en": "The position of the last mismatch in the pattern", "ro": "Pozi\u021bia ultimului mismatch \u00een pattern" }, "correct": false }
               ],
               "explanation": {
-                "en": "F[j] gives the length of the longest proper border (a string that is both a proper prefix and proper suffix) of the substring P[0..j]. KMP uses this to know where to resume matching after a mismatch.",
-                "ro": "F[j] d\u0103 lungimea celui mai lung border propriu (un \u0219ir care este at\u00e2t prefix propriu c\u00e2t \u0219i sufix propriu) al sub\u0219irului P[0..j]. KMP folose\u0219te aceasta pentru a \u0219ti de unde s\u0103 reia potrivirea dup\u0103 un mismatch."
+                "en": "F[j] gives the length of the longest proper border (a string that is both a proper prefix and proper suffix) of P[0..j-1], with F[0] = -1 as sentinel. On mismatch at position j, KMP falls back to j = F[j].",
+                "ro": "F[j] da lungimea celui mai lung border propriu (un sir care este atat prefix propriu cat si sufix propriu) al P[0..j-1], cu F[0] = -1 ca santinela. La mismatch la pozitia j, KMP revine la j = F[j]."
               }
             },
             {
@@ -298,13 +298,13 @@
               },
               "options": [
                 { "text": { "en": "1", "ro": "1" }, "correct": false },
-                { "text": { "en": "0", "ro": "0" }, "correct": true },
-                { "text": { "en": "-1", "ro": "-1" }, "correct": false },
+                { "text": { "en": "0", "ro": "0" }, "correct": false },
+                { "text": { "en": "-1", "ro": "-1" }, "correct": true },
                 { "text": { "en": "Depends on the first character", "ro": "Depinde de primul caracter" }, "correct": false }
               ],
               "explanation": {
-                "en": "F[0] = 0 always because a single character has no proper prefix or suffix, so it cannot have a border.",
-                "ro": "F[0] = 0 \u00eentotdeauna deoarece un singur caracter nu are prefix sau sufix propriu, deci nu poate avea un border."
+                "en": "F[0] = -1 always. It is a sentinel value: there is no prefix P[0..-1] to consider, so -1 signals that we must advance in the text.",
+                "ro": "F[0] = -1 intotdeauna. Este o valoare santinela: nu exista prefix P[0..-1] de considerat, deci -1 semnaleaza ca trebuie sa avansam in text."
               }
             },
             {
