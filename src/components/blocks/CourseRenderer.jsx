@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { loadJson } from '../../content/jsonLoader';
 import StepRenderer from './StepRenderer';
 import CourseTransition from '../ui/CourseTransition';
 import ProgressRing from '../ui/ProgressRing';
@@ -30,15 +31,13 @@ export default function CourseRenderer({ src }) {
     setCourseData(null);
     setCurrentStep(0);
 
-    import(`../../content/${src}`)
-      .then(module => {
-        setCourseData(module.default);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
+    try {
+      setCourseData(loadJson(src));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [src]);
 
   const totalSteps = courseData?.steps?.length || 0;

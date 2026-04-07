@@ -1,6 +1,7 @@
 import React, { useState, Suspense, useCallback } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { generateTest } from '../../services/api';
+import { loadJson } from '../../content/jsonLoader';
 import TestRenderer from '../blocks/test/TestRenderer';
 import GeneratedTestRenderer from './GeneratedTestRenderer';
 
@@ -29,7 +30,7 @@ export default function TestsTab({ tests, courses }) {
       const picked = shuffled.slice(0, Math.min(3, shuffled.length));
 
       const loaded = await Promise.all(
-        picked.map(c => import(`../../content/${c.src}`).then(m => m.default))
+        picked.map(c => Promise.resolve(loadJson(c.src)))
       );
 
       // Extract text content from steps/blocks
@@ -77,7 +78,7 @@ export default function TestsTab({ tests, courses }) {
     try {
       const jsonTests = tests.filter(t => t.src);
       const loaded = await Promise.all(
-        jsonTests.map(t => import(`../../content/${t.src}`).then(m => m.default))
+        jsonTests.map(t => Promise.resolve(loadJson(t.src)))
       );
       const pool = [];
       for (const test of loaded) {

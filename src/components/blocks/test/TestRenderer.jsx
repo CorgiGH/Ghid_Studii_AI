@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../../../contexts/AppContext';
+import { loadJson } from '../../../content/jsonLoader';
 import MultipleChoiceQuestion from './MultipleChoiceQuestion';
 import OpenEndedQuestion from './OpenEndedQuestion';
 import CodeWritingQuestion from './CodeWritingQuestion';
@@ -32,15 +33,13 @@ export default function TestRenderer({ src }) {
     setAnswers({});
     setShowResults(false);
 
-    import(`../../../content/${src}`)
-      .then(module => {
-        setTestData(module.default);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
+    try {
+      setTestData(loadJson(src));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [src]);
 
   // Set test context for chat panel (test mode guard)
