@@ -16,8 +16,8 @@ export default function CalloutBlock({ variant = 'info', content }) {
     <div
       className="rounded-xl p-4 mb-3"
       style={{
-        backgroundColor: `color-mix(in srgb, ${v.color} 6%, var(--theme-card-bg))`,
-        border: `1px solid color-mix(in srgb, ${v.color} 15%, var(--theme-border))`,
+        backgroundColor: `color-mix(in srgb, ${v.color} 12%, var(--theme-card-bg))`,
+        border: `1px solid color-mix(in srgb, ${v.color} 25%, var(--theme-border))`,
         borderLeftWidth: '3px',
         borderLeftColor: v.color,
       }}
