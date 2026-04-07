@@ -181,9 +181,9 @@ const openrouterProvider = {
 const STAGE_PROVIDER = {
   'stage1':       'gemini',
   'stage2':       'gemini',
-  'stage2.5':     'openrouter',
+  'stage2.5':     'gemini',
   'bibliography': 'gemini',
-  'source-search':'openrouter',
+  'source-search':'gemini',
 };
 
 let geminiExhausted = false;

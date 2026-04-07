@@ -13,17 +13,7 @@ const oop = {
   courses: [
     { id: 'oop-c1', title: { en: 'Course 1: Introduction to C++', ro: 'Cursul 1: Introducere în C++' }, shortTitle: { en: 'C1: Introduction', ro: 'C1: Introducere' }, sectionCount: 12, metaId: 'oop-c1', src: 'oop/courses/course-01.json' },
     { id: 'oop-c2', title: { en: 'Course 2: C++ Language Specifiers', ro: 'Cursul 2: Specificatori ai limbajului C++' }, shortTitle: { en: 'C2: Specifiers', ro: 'C2: Specificatori' }, sectionCount: 7, metaId: 'oop-c2', src: 'oop/courses/course-02.json' },
-    { id: 'oop-course_3', title: { en: 'Course 3: Creating an Object', ro: 'Cursul 3: Crearea unui obiect' }, shortTitle: { en: 'C3: Objects', ro: 'C3: Obiecte' }, sectionCount: 7,
-      sections: [
-        { id: 'oop-course_3-init-lists', title: { en: '1. Init Lists', ro: '1. Liste inițial.' } },
-        { id: 'oop-course_3-constructors', title: { en: '2. Constructors', ro: '2. Constructori' } },
-        { id: 'oop-course_3-const-ref', title: { en: '3. Const & Ref', ro: '3. Const & Ref' } },
-        { id: 'oop-course_3-delegating', title: { en: '4. Delegating', ro: '4. Constr. delegat' } },
-        { id: 'oop-course_3-value-types', title: { en: '5. Value Types', ro: '5. Tipuri valori' } },
-        { id: 'oop-course_3-copy-move', title: { en: '6. Copy & Move', ro: '6. Copiere & Mut.' } },
-        { id: 'oop-course_3-constraints', title: { en: '7. Constraints', ro: '7. Constrângeri' } },
-      ],
-      component: lazy(() => import('./courses/Course03.jsx')) },
+    { id: 'oop-c3', title: { en: 'Course 3: Creating an Object', ro: 'Cursul 3: Crearea unui obiect' }, shortTitle: { en: 'C3: Objects', ro: 'C3: Obiecte' }, sectionCount: 9, metaId: 'oop-c3', src: 'oop/courses/course-03.json' },
     { id: 'oop-course_4', title: { en: 'Course 4: Operators', ro: 'Cursul 4: Operatori' }, shortTitle: { en: 'C4: Operators', ro: 'C4: Operatori' }, sectionCount: 6,
       sections: [
         { id: 'oop-course_4-destructor', title: { en: '1. Destructor', ro: '1. Destructor' } },
