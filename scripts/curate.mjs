@@ -6,7 +6,7 @@ import { getProvider, markGeminiExhausted, RateLimitError, loadPromptTemplate } 
 dotenv.config({ path: resolve('proxy/.env') });
 
 // ── JSON Repair ──
-// Gemini sometimes returns malformed JSON: bare compound numbers (3.1.1) or truncated output
+// AI providers sometimes return malformed JSON: bare compound numbers (3.1.1) or truncated output
 
 function repairJSON(str) {
   let repaired = str;
@@ -193,19 +193,23 @@ function getFlagValue(flag) {
 
 // ── Provider-Aware API Calls ──
 
-async function sendPdf(stageName, pdfPath, promptText) {
+async function callProvider(stageName, method, ...args) {
   const provider = getProvider(stageName);
   try {
-    const result = await provider.sendPdf(pdfPath, promptText);
+    const result = await provider[method](...args);
     return { result, provider: { name: provider.name, model: provider.model } };
   } catch (err) {
     if (err instanceof RateLimitError && err.provider === 'gemini') {
       markGeminiExhausted();
       if (flags.fallback) {
         console.log(`  ⚠ Gemini rate limited — falling back to OpenRouter for ${stageName}`);
-        const fallbackProvider = getProvider(stageName);
-        const result = await fallbackProvider.sendPdf(pdfPath, promptText);
-        return { result, provider: { name: fallbackProvider.name, model: fallbackProvider.model, fallback: true } };
+        const fb = getProvider(stageName);
+        try {
+          const result = await fb[method](...args);
+          return { result, provider: { name: fb.name, model: fb.model, fallback: true } };
+        } catch (fbErr) {
+          throw new Error(`Both Gemini and OpenRouter failed on ${stageName}: ${fbErr.message}`);
+        }
       }
       console.error(`\n⚠️  Gemini rate limit hit on ${stageName}.`);
       console.error('   Run with --fallback to continue with OpenRouter, or wait and re-run tomorrow.');
@@ -215,26 +219,12 @@ async function sendPdf(stageName, pdfPath, promptText) {
   }
 }
 
+async function sendPdf(stageName, pdfPath, promptText) {
+  return callProvider(stageName, 'sendPdf', pdfPath, promptText);
+}
+
 async function sendText(stageName, promptText) {
-  const provider = getProvider(stageName);
-  try {
-    const result = await provider.sendText(promptText);
-    return { result, provider: { name: provider.name, model: provider.model } };
-  } catch (err) {
-    if (err instanceof RateLimitError && err.provider === 'gemini') {
-      markGeminiExhausted();
-      if (flags.fallback) {
-        console.log(`  ⚠ Gemini rate limited — falling back to OpenRouter for ${stageName}`);
-        const fallbackProvider = getProvider(stageName);
-        const result = await fallbackProvider.sendText(promptText);
-        return { result, provider: { name: fallbackProvider.name, model: fallbackProvider.model, fallback: true } };
-      }
-      console.error(`\n⚠️  Gemini rate limit hit on ${stageName}.`);
-      console.error('   Run with --fallback to continue with OpenRouter, or wait and re-run tomorrow.');
-      process.exit(1);
-    }
-    throw err;
-  }
+  return callProvider(stageName, 'sendText', promptText);
 }
 
 // ── Main Pipeline ──
@@ -340,7 +330,8 @@ Output valid JSON only:
 }
 List every reference mentioned, even if informal.`;
 
-  const { result: rawResponse } = await sendPdf('bibliography', descPdf, extractPrompt);
+  const { result: rawResponse, provider: biblioProviderInfo } = await sendPdf('bibliography', descPdf, extractPrompt);
+  recordStageProvider('bibliography', biblioProviderInfo);
   let jsonStr = rawResponse.trim();
   if (jsonStr.startsWith('```')) {
     jsonStr = jsonStr.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
@@ -383,7 +374,8 @@ NOT_FOUND:
 
 Then provide the content.`;
 
-    const { result: searchResult } = await sendText('source-search', searchPrompt);
+    const { result: searchResult, provider: searchProviderInfo } = await sendText('source-search', searchPrompt);
+    recordStageProvider('source-search', searchProviderInfo);
     const firstLine = searchResult.split('\n')[0].trim();
 
     if (firstLine.startsWith('NOT_FOUND')) {
