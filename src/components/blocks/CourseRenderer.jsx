@@ -49,6 +49,13 @@ export default function CourseRenderer({ src }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [totalSteps]);
 
+  // Save last step for resume
+  useEffect(() => {
+    if (!step?.id || !src) return;
+    const key = `lastStep:${src}`;
+    localStorage.setItem(key, JSON.stringify({ stepId: step.id, stepIndex: currentStep, timestamp: Date.now() }));
+  }, [step?.id, currentStep, src]);
+
   // Auto-mark step as visited when navigating
   useEffect(() => {
     if (!step?.id) return;
