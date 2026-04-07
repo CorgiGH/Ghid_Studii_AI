@@ -71,7 +71,10 @@ export default function StringMatchAnimation({ variant = 'kmp' }) {
 
   useEffect(() => { speedRef.current = speed; }, [speed]);
   useEffect(() => { pauseRef.current = paused; }, [paused]);
-  useEffect(() => { logEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [log]);
+  useEffect(() => {
+    const el = logEndRef.current;
+    if (el?.parentElement) el.parentElement.scrollTop = el.parentElement.scrollHeight;
+  }, [log]);
 
   const waitForStep = useCallback(() => {
     return new Promise(resolve => {
