@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../../contexts/AppContext';
+import { useCourseNav } from '../CourseRenderer';
 
 export default function QuizBlock({ questions }) {
   const { t } = useApp();
@@ -27,6 +28,7 @@ export default function QuizBlock({ questions }) {
 
 function QuizQuestion({ q, index, total }) {
   const { t } = useApp();
+  const courseNav = useCourseNav();
   const [selected, setSelected] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const explanationRef = useRef(null);
@@ -180,15 +182,15 @@ function QuizQuestion({ q, index, total }) {
       )}
 
       {/* Review step link */}
-      {submitted && q.reviewStep && (
+      {submitted && q.reviewStep && courseNav && (
         <div className="mt-2 text-xs" style={{ animation: 'fadeIn 0.3s ease 0.2s both' }}>
-          <a
-            href={`#${q.reviewStep}`}
-            className="underline"
-            style={{ color: '#3b82f6' }}
+          <button
+            onClick={() => courseNav.navigateToStep(q.reviewStep)}
+            className="underline cursor-pointer"
+            style={{ color: '#3b82f6', background: 'none', border: 'none', padding: 0, font: 'inherit' }}
           >
             {t('Review this topic', 'Revizuiește acest subiect')} →
-          </a>
+          </button>
         </div>
       )}
     </div>

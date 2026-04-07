@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, createContext, useContext, useMemo } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { loadJson } from '../../content/jsonLoader';
 import StepRenderer from './StepRenderer';
 import CourseTransition from '../ui/CourseTransition';
 import ProgressRing from '../ui/ProgressRing';
+
+const CourseNavContext = createContext(null);
+export const useCourseNav = () => useContext(CourseNavContext);
 
 export default function CourseRenderer({ src }) {
   const { t, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture, setCourseContext } = useApp();
@@ -82,6 +85,15 @@ export default function CourseRenderer({ src }) {
     : 0;
   const allUnderstood = totalSteps > 0 && understoodCount >= totalSteps;
 
+  // Navigation helper: resolve a step ID to its index and navigate
+  const navigateToStep = useCallback((stepId) => {
+    if (!courseData?.steps) return;
+    const idx = courseData.steps.findIndex(s => s.id === stepId);
+    if (idx !== -1) goToStep(idx);
+  }, [courseData?.steps, goToStep]);
+
+  const courseNavValue = useMemo(() => ({ navigateToStep }), [navigateToStep]);
+
   // Completion celebration
   const [showCompletionToast, setShowCompletionToast] = useState(false);
   const [toastDismissing, setToastDismissing] = useState(false);
@@ -125,6 +137,7 @@ export default function CourseRenderer({ src }) {
   }
 
   return (
+    <CourseNavContext.Provider value={courseNavValue}>
     <div>
       {/* ===== Sticky progress header ===== */}
       <div
@@ -293,5 +306,6 @@ export default function CourseRenderer({ src }) {
         </div>
       )}
     </div>
+    </CourseNavContext.Provider>
   );
 }
