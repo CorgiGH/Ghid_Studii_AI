@@ -23,7 +23,7 @@ export default function CalloutBlock({ variant = 'info', content }) {
       }}
     >
       <div
-        className="text-[10px] font-bold uppercase tracking-widest mb-2"
+        className="text-xs font-semibold uppercase tracking-wide mb-2"
         style={{ color: v.color }}
       >
         {v.icon} {t(v.label.en, v.label.ro)}

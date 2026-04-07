@@ -5,7 +5,7 @@ export default function CodeBlock({ language, content }) {
     <div className="rounded-xl mb-3 overflow-hidden" style={{ border: '1px solid var(--theme-border)' }}>
       {language && (
         <div
-          className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest"
+          className="px-3 py-1 text-xs font-semibold uppercase tracking-wide"
           style={{
             backgroundColor: 'var(--theme-border)',
             color: 'var(--theme-muted-text)',

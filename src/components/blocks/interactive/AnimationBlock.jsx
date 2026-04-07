@@ -25,7 +25,7 @@ export default function AnimationBlock({ variant }) {
 
   return (
     <div className="rounded-xl p-4 mb-3 text-center" style={{ backgroundColor: 'color-mix(in srgb, #10b981 6%, var(--theme-card-bg))', border: '1px solid color-mix(in srgb, #10b981 15%, var(--theme-border))' }}>
-      <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#10b981' }}>{'\uD83C\uDFAC'} {t('Animation', 'Anima\u021bie')}</div>
+      <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#10b981' }}>{'\uD83C\uDFAC'} {t('Animation', 'Anima\u021bie')}</div>
       <div className="text-xs" style={{ color: 'var(--theme-muted-text)' }}>{t('Animation placeholder', 'Placeholder anima\u021bie')}: {variant}</div>
     </div>
   );

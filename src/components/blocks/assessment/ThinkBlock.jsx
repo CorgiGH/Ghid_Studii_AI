@@ -26,7 +26,7 @@ export default function ThinkBlock({ question, answer }) {
       }}
     >
       <div
-        className="text-[10px] font-bold uppercase tracking-widest mb-2"
+        className="text-xs font-semibold uppercase tracking-wide mb-2"
         style={{ color: '#f59e0b' }}
       >
         {t('\uD83D\uDCA1 Think about it', '\uD83D\uDCA1 Gândește-te')}

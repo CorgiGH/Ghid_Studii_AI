@@ -22,7 +22,7 @@ export default function LearnBlock({ content }) {
       }}
     >
       <div
-        className="text-[10px] font-bold uppercase tracking-widest mb-2"
+        className="text-xs font-semibold uppercase tracking-wide mb-2"
         style={{ color: '#3b82f6' }}
       >
         {t('Learn', 'Învață')}

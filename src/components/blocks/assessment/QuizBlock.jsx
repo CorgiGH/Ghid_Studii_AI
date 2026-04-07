@@ -13,7 +13,7 @@ export default function QuizBlock({ questions }) {
       }}
     >
       <div
-        className="text-[10px] font-bold uppercase tracking-widest mb-3"
+        className="text-xs font-semibold uppercase tracking-wide mb-3"
         style={{ color: '#a855f7' }}
       >
         {t('Quick Check', 'Verificare rapidă')}

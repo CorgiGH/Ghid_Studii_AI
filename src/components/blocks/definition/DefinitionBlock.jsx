@@ -13,7 +13,7 @@ export default function DefinitionBlock({ term, content }) {
       }}
     >
       <div
-        className="text-[10px] font-bold uppercase tracking-widest mb-2"
+        className="text-xs font-semibold uppercase tracking-wide mb-2"
         style={{ color: '#60a5fa' }}
       >
         {t('Definition', 'Definiție')}
