@@ -5,7 +5,7 @@ import CourseTransition from '../ui/CourseTransition';
 import ProgressRing from '../ui/ProgressRing';
 
 export default function CourseRenderer({ src }) {
-  const { t, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture } = useApp();
+  const { t, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture, setCourseContext } = useApp();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,6 +55,20 @@ export default function CourseRenderer({ src }) {
     if (!step?.id) return;
     markVisited(step.id);
   }, [step?.id, markVisited]);
+
+  // Set course context for chat panel
+  useEffect(() => {
+    if (!step || !courseData) return;
+    setCourseContext({
+      type: 'course',
+      courseTitle: t(courseData.meta.title.en, courseData.meta.title.ro),
+      stepTitle: t(step.title.en, step.title.ro),
+      stepId: step.id,
+      blocks: step.blocks,
+      testMode: false,
+    });
+    return () => setCourseContext(null);
+  }, [step, courseData, setCourseContext, t]);
 
   // Count understood steps
   const understoodCount = courseData?.steps

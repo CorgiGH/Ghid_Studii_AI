@@ -16,7 +16,7 @@ const questionComponents = {
 };
 
 export default function TestRenderer({ src }) {
-  const { t, lang, saveTestResult, testProgress } = useApp();
+  const { t, lang, saveTestResult, testProgress, setCourseContext } = useApp();
   const [testData, setTestData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,6 +42,20 @@ export default function TestRenderer({ src }) {
         setLoading(false);
       });
   }, [src]);
+
+  // Set test context for chat panel (test mode guard)
+  useEffect(() => {
+    if (!testData) return;
+    setCourseContext({
+      type: 'test',
+      courseTitle: t(testData.meta.title.en, testData.meta.title.ro),
+      stepTitle: null,
+      stepId: null,
+      blocks: [],
+      testMode: true,
+    });
+    return () => setCourseContext(null);
+  }, [testData, setCourseContext, t]);
 
   const handleAnswer = useCallback((questionId, score, maxScore) => {
     setAnswers(prev => ({ ...prev, [questionId]: { score, maxScore } }));
