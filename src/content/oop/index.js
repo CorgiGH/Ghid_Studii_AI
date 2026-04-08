@@ -49,6 +49,7 @@ const oop = {
     { id: 'examen2023-2024-t1-p2', title: { en: '2023-2024 T1 P2 — PriorityQueue', ro: '2023-2024 T1 P2 — PriorityQueue' }, shortTitle: { en: 'T1 P2: PriorityQueue', ro: 'T1 P2: PriorityQueue' }, src: 'oop/tests/examen2023-2024-t1-p2.json' },
     { id: 'examen2023-2024-t1-p3', title: { en: '2023-2024 T1 P3 — CharSet', ro: '2023-2024 T1 P3 — CharSet' }, shortTitle: { en: 'T1 P3: CharSet', ro: 'T1 P3: CharSet' }, src: 'oop/tests/examen2023-2024-t1-p3.json' },
     { id: 'examen2023-2024-t2-p1-2024', title: { en: '2023-2024 T2 P1 — MyVector', ro: '2023-2024 T2 P1 — MyVector' }, shortTitle: { en: 'T2 P1: MyVector', ro: 'T2 P1: MyVector' }, src: 'oop/tests/examen2023-2024-t2-p1-2024.json' },
+    { id: 'examen2023-2024-t2-p2-2024', title: { en: '2023-2024 T2 P2 — Students', ro: '2023-2024 T2 P2 — Students' }, shortTitle: { en: 'T2 P2: Students', ro: 'T2 P2: Students' }, src: 'oop/tests/examen2023-2024-t2-p2-2024.json' },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
