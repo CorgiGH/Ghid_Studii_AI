@@ -99,3 +99,65 @@ git push             # Auto-deploys via GitHub Actions to Pages
 - Repo: https://github.com/CorgiGH/Ghid_Studii_AI
 - Deploys via `.github/workflows/deploy.yml` on push to main
 - Uses `base: '/Ghid_Studii_AI/'` in vite.config.js for GitHub Pages subpath
+
+## LLM Wiki
+
+A persistent knowledge base at `wiki/` (Obsidian vault, gitignored). Claude maintains all wiki pages; the user curates raw sources and directs analysis.
+
+### Three Layers
+1. **Raw sources** (`wiki/raw/`) — Immutable. PDFs, web clips, notes, images. Claude reads but never modifies.
+2. **Wiki pages** (`wiki/` subdirs) — LLM-owned. Summaries, entities, concepts, architecture, comparisons. Claude creates/updates/maintains.
+3. **Schema** (this section) — Loaded every session. Defines conventions and workflows.
+
+### Directory Layout
+- `wiki/raw/{assets,pdfs,articles,notes,other}/` — user drops sources here
+- `wiki/sources/` — one summary page per ingested source
+- `wiki/entities/` — specific things (components, tools, subjects)
+- `wiki/concepts/` — ideas (pedagogy techniques, design patterns)
+- `wiki/architecture/` — platform architecture, infra, decisions
+- `wiki/comparisons/` — side-by-side analyses filed from queries
+- `wiki/index.md` — master catalog (read first on queries)
+- `wiki/log.md` — chronological operation record
+- `wiki/overview.md` — high-level synthesis front page
+
+### Page Format
+Every wiki page MUST have YAML frontmatter with: `title`, `type` (source|entity|concept|architecture|comparison), `created`, `updated`, `sources` (list of raw filenames), `tags` (from curated set).
+- Use `[[wikilinks]]` for all cross-references (Obsidian-native)
+- Cross-references must be bidirectional (if A links B, B links A)
+- Update `updated:` date on every page edit
+- Trace every claim to raw sources via `sources:` field
+
+### Tag Set
+`os`, `oop`, `pa`, `prob-stat`, `alo`, `pedagogy`, `ui`, `ux`, `architecture`, `infrastructure`, `components`, `deployment`, `testing`, `design-decisions`
+
+### Operations
+
+**Ingest** — user drops source in `raw/`, tells Claude to process it:
+- *Collaborative:* Claude reads source, discusses takeaways, user guides emphasis, Claude updates wiki
+- *Autonomous:* Claude processes end-to-end, gives short summary of changes
+- For PDFs: run `node scripts/wiki-ingest.mjs <path>` (calls Gemini 3 Flash Preview), then integrate output
+- For text/markdown: Claude reads directly
+- Always: write/update summary page in `sources/`, update entity/concept pages, update `index.md`, append to `log.md`
+
+**Query** — user asks a question:
+- Read `index.md` first to find relevant pages, then drill in
+- Synthesize answer with `[[wikilink]]` citations
+- If answer is substantial/reusable, offer to file as new wiki page
+
+**Lint** — health check (user-triggered or Claude-suggested):
+- Orphan pages (no inbound links)
+- Mentioned concepts without own page
+- Stale pages (old `updated`, newer sources exist)
+- Contradictions between pages
+- Missing cross-references
+- Report findings, fix with user approval
+
+### Maintenance Rules
+- Update `index.md` after every page creation or modification
+- Append to `log.md` after every operation (format: `## [YYYY-MM-DD] type | Title`)
+- Keep cross-references bidirectional
+- When new info contradicts existing pages, flag contradiction explicitly in both pages
+- `raw/` is read-only — never modify source documents
+
+### Startup
+When wiki work is expected, read `wiki/index.md` and last 10 lines of `wiki/log.md` to understand current state.
