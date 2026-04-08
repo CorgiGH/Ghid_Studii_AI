@@ -15,16 +15,7 @@ const oop = {
     { id: 'oop-c2', title: { en: 'Course 2: C++ Language Specifiers', ro: 'Cursul 2: Specificatori ai limbajului C++' }, shortTitle: { en: 'C2: Specifiers', ro: 'C2: Specificatori' }, sectionCount: 7, metaId: 'oop-c2', src: 'oop/courses/course-02.json' },
     { id: 'oop-c3', title: { en: 'Course 3: Creating an Object', ro: 'Cursul 3: Crearea unui obiect' }, shortTitle: { en: 'C3: Objects', ro: 'C3: Obiecte' }, sectionCount: 9, metaId: 'oop-c3', src: 'oop/courses/course-03.json' },
     { id: 'oop-c4', title: { en: 'Course 4: Destructors & Operators', ro: 'Cursul 4: Destructori si operatori' }, shortTitle: { en: 'C4: Operators', ro: 'C4: Operatori' }, sectionCount: 11, metaId: 'oop-c4', src: 'oop/courses/course-04.json' },
-    { id: 'oop-course_5', title: { en: 'Course 5: Inheritance', ro: 'Cursul 5: Moștenire' }, shortTitle: { en: 'C5: Inheritance', ro: 'C5: Moștenire' }, sectionCount: 6,
-      sections: [
-        { id: 'oop-course_5-inheritance', title: { en: '1. Inheritance', ro: '1. Moștenire' } },
-        { id: 'oop-course_5-virtual', title: { en: '2. Virtual Methods', ro: '2. Metode virt.' } },
-        { id: 'oop-course_5-vtables', title: { en: '3. vtables', ro: '3. vtable' } },
-        { id: 'oop-course_5-covariance', title: { en: '4. Covariance', ro: '4. Covarianță' } },
-        { id: 'oop-course_5-abstract', title: { en: '5. Abstract', ro: '5. Clase abstracte' } },
-        { id: 'oop-course_5-memory', title: { en: '6. Memory Align', ro: '6. Aliniere mem.' } },
-      ],
-      component: lazy(() => import('./courses/Course05.jsx')) },
+    { id: 'oop-c5', title: { en: 'Course 5: Inheritance & Virtual Methods', ro: 'Cursul 5: Mostenire si metode virtuale' }, shortTitle: { en: 'C5: Inheritance', ro: 'C5: Mostenire' }, sectionCount: 9, metaId: 'oop-c5', src: 'oop/courses/course-05.json' },
     { id: 'oop-course_6', title: { en: 'Course 6: Templates', ro: 'Cursul 6: Șabloane' }, shortTitle: { en: 'C6: Templates', ro: 'C6: Șabloane' }, sectionCount: 6,
       sections: [
         { id: 'oop-course_6-casts', title: { en: '1. Casts', ro: '1. Cast-uri' } },

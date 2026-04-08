@@ -1,0 +1,503 @@
+{
+  "meta": {
+    "id": "oop-c5",
+    "title": { "en": "Course 5: Inheritance & Virtual Methods", "ro": "Cursul 5: Mostenire si metode virtuale" },
+    "shortTitle": { "en": "C5: Inheritance", "ro": "C5: Mostenire" },
+    "source": { "en": "OOP -- Lecture 5, Prof. Gavrilut Dragos, UAIC 2024-2025", "ro": "POO -- Cursul 5, Prof. Gavrilut Dragos, UAIC 2024-2025" }
+  },
+  "steps": [
+    {
+      "id": "oop-c5-inheritance-basics",
+      "title": { "en": "Inheritance Basics & Access Modifiers", "ro": "Bazele mostenirii si modificatori de acces" },
+      "group": "inheritance",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You have a class `Automobile` with properties like doors, wheels, and size. Now you need an `ElectricCar` class that has all of those plus battery lifetime. How would you avoid duplicating code?",
+            "ro": "Aveti o clasa `Automobil` cu proprietati precum usi, roti si dimensiune. Acum aveti nevoie de o clasa `MasinaElectrica` care are toate acestea plus durata bateriei. Cum evitati duplicarea codului?"
+          },
+          "answer": {
+            "en": "**Inheritance** lets `ElectricCar` derive from `Automobile`, automatically gaining all its properties and methods. The derived class only needs to add its new members (`batteryLifetime`).",
+            "ro": "**Mostenirea** permite clasei `MasinaElectrica` sa derive din `Automobil`, castigand automat toate proprietatile si metodele. Clasa derivata trebuie doar sa adauge membrii noi (`durataViataBaterie`)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Common misconceptions about inheritance:**\n1. \"A derived class can access all base class members\" -- No, `private` members are inaccessible in derived classes\n2. \"The inheritance access modifier doesn't matter\" -- It changes how base members are seen in the derived class\n3. \"A friend function in the derived class can access private base members\" -- No, friendship is not inherited",
+            "ro": "**Conceptii gresite frecvente despre mostenire:**\n1. <<O clasa derivata poate accesa toti membrii clasei de baza>> -- Nu, membrii `private` sunt inaccesibili in clasele derivate\n2. <<Modificatorul de acces al mostenirii nu conteaza>> -- Schimba modul in care membrii de baza sunt vazuti in clasa derivata\n3. <<O functie friend in clasa derivata poate accesa membrii privati ai bazei>> -- Nu, prietenia nu se mosteneste"
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Inheritance syntax** -- simple and multiple:\n\n```cpp\n// Simple inheritance\nclass Derived : public Base { /* ... */ };\n\n// Multiple inheritance\nclass Derived : public Base1, public Base2 { /* ... */ };\n```\n\nThe access modifier (`public`/`private`/`protected`) is optional -- default is `private`. It controls how base members appear in the derived class.\n\nA concrete example:\n\n```cpp\nclass Base {\npublic:\n    int x;\n    void SetX(int value);\n};\nclass Derived : public Base {\n    int y;\npublic:\n    void SetY(int value);\n};\n\nvoid main() {\n    Derived d;\n    d.SetX(100);  // inherited from Base\n    d.x = 10;     // inherited public member\n    d.SetY(200);  // own method\n}\n```",
+            "ro": "**Sintaxa mostenirii** -- simpla si multipla:\n\n```cpp\n// Mostenire simpla\nclass Derivat : public Baza { /* ... */ };\n\n// Mostenire multipla\nclass Derivat : public Baza1, public Baza2 { /* ... */ };\n```\n\nModificatorul de acces (`public`/`private`/`protected`) este optional -- implicit este `private`. Controleaza cum apar membrii bazei in clasa derivata.\n\nUn exemplu concret:\n\n```cpp\nclass Base {\npublic:\n    int x;\n    void SetX(int value);\n};\nclass Derived : public Base {\n    int y;\npublic:\n    void SetY(int value);\n};\n\nvoid main() {\n    Derived d;\n    d.SetX(100);  // mostenit din Base\n    d.x = 10;     // membru public mostenit\n    d.SetY(200);  // metoda proprie\n}\n```"
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "protected", "ro": "protected" },
+          "content": {
+            "en": "A `protected` member can be accessed by the class itself and its derived classes, but NOT from outside the class scope. It solves the problem of `private` (inaccessible in derived) vs `public` (accessible everywhere).",
+            "ro": "Un membru `protected` poate fi accesat de clasa insasi si de clasele derivate, dar NU din exteriorul clasei. Rezolva problema `private` (inaccesibil in derivate) vs `public` (accesibil peste tot)."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Access modifier", "ro": "Modificator acces" },
+            { "en": "Same class", "ro": "Aceeasi clasa" },
+            { "en": "Derived class", "ro": "Clasa derivata" },
+            { "en": "Outside scope", "ro": "In afara" },
+            { "en": "Friend in base", "ro": "Friend in baza" },
+            { "en": "Friend in derived", "ro": "Friend in derivat" }
+          ],
+          "rows": [
+            ["public", { "en": "Yes", "ro": "Da" }, { "en": "Yes", "ro": "Da" }, { "en": "Yes", "ro": "Da" }, { "en": "Yes", "ro": "Da" }, { "en": "Yes", "ro": "Da" }],
+            ["protected", { "en": "Yes", "ro": "Da" }, { "en": "Yes", "ro": "Da" }, { "en": "No", "ro": "Nu" }, { "en": "Yes", "ro": "Da" }, { "en": "Yes", "ro": "Da" }],
+            ["private", { "en": "Yes", "ro": "Da" }, { "en": "No", "ro": "Nu" }, { "en": "No", "ro": "Nu" }, { "en": "Yes", "ro": "Da" }, { "en": "No", "ro": "Nu" }]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Friend functions and inheritance:** A friend function declared in the **derived** class can only access private/protected members of the **derived** class, NOT the base class. To access base class private members, the friend must be declared in the **base** class.",
+            "ro": "**Functii friend si mostenirea:** O functie friend declarata in clasa **derivata** poate accesa doar membrii private/protected ai clasei **derivate**, NU ai clasei de baza. Pentru a accesa membrii privati ai bazei, friend-ul trebuie declarat in clasa **de baza**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Inheritance access modifiers** change how base members are seen in the derived class. The rule: the resulting access is the **more restrictive** of the two (member access vs inheritance access).\n\n| Member \\\\ Inheritance | `public` | `private` | `protected` |\n|---|---|---|---|\n| **public** | public | private | protected |\n| **private** | private | private | private |\n| **protected** | protected | private | protected |\n\n**Rule of thumb:** `private > protected > public`. The resulting modifier is always the more restrictive one.",
+            "ro": "**Modificatorii de acces ai mostenirii** schimba cum sunt vazuti membrii bazei in clasa derivata. Regula: accesul rezultat este cel **mai restrictiv** dintre cele doua (accesul membrului vs accesul mostenirii).\n\n| Membru \\\\ Mostenire | `public` | `private` | `protected` |\n|---|---|---|---|\n| **public** | public | private | protected |\n| **private** | private | private | private |\n| **protected** | protected | private | protected |\n\n**Regula:** `private > protected > public`. Modificatorul rezultat este intotdeauna cel mai restrictiv."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 3-17: Inheritance syntax, access modifiers, protected keyword, friend functions in inheritance, inheritance access modifier table", "ro": "Slide-uri 3-17: Sintaxa mostenirii, modificatori de acces, cuvantul cheie protected, functii friend in mostenire, tabelul modificatorilor de acces la mostenire" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/R385c8FaR1E",
+          "label": { "en": "Course 5.1 -- Inheritance (Prof. Balan)", "ro": "Cursul 5.1 -- Mostenire (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c5-ctor-dtor-order",
+      "title": { "en": "Constructor & Destructor Order in Inheritance", "ro": "Ordinea constructorilor si destructorilor in mostenire" },
+      "group": "inheritance",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "If `class D : public B, public A` and `A` has only `A(int x)` (no default constructor), what happens when you try to create a `D` object?",
+            "ro": "Daca `class D : public B, public A` si `A` are doar `A(int x)` (fara constructor implicit), ce se intampla cand incercati sa creati un obiect `D`?"
+          },
+          "answer": {
+            "en": "Compilation error! The compiler can't create a default constructor for `D` because `A` has no default constructor. You must explicitly call `A(int)` in `D`'s initializer list: `D() : A(100) { }`.",
+            "ro": "Eroare de compilare! Compilatorul nu poate crea un constructor implicit pentru `D` deoarece `A` nu are constructor implicit. Trebuie sa apelati explicit `A(int)` in lista de initializare a lui `D`: `D() : A(100) { }`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The 4-step construction order** (and destruction in reverse):\n\n1. **Base class constructors** -- in the order of the inheritance definition (left-to-right), NOT the initializer list order\n2. **Member object constructors** -- in their declaration order (top-to-bottom)\n3. **Primitive member initialization** -- basic types, references, constants, in declaration order\n4. **Constructor body** -- your code runs last\n\n**Destructors run in exact reverse order** (4 -> 3 -> 2 -> 1).\n\n**Important:** The initializer list order does NOT change construction order. Even if you write `D() : A(100), B()`, the compiler still calls `B::B()` first if `B` is listed first in the inheritance.",
+            "ro": "**Ordinea constructiei in 4 pasi** (si distrugerea in ordine inversa):\n\n1. **Constructorii claselor de baza** -- in ordinea definitiei mostenirii (stanga-dreapta), NU ordinea listei de initializare\n2. **Constructorii obiectelor membru** -- in ordinea declararii (sus-jos)\n3. **Initializarea membrilor primitivi** -- tipuri de baza, referinte, constante, in ordinea declararii\n4. **Corpul constructorului** -- codul vostru ruleaza ultimul\n\n**Destructorii ruleaza in ordine exact inversa** (4 -> 3 -> 2 -> 1).\n\n**Important:** Ordinea listei de initializare NU schimba ordinea constructiei. Chiar daca scrieti `D() : A(100), B()`, compilatorul tot apeleaza `B::B()` primul daca `B` este listat primul in mostenire."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "struct A { A(int x) { printf(\"ctor: A\\n\"); } ~A() { printf(\"dtor: A\\n\"); } };\nstruct B { B()      { printf(\"ctor: B\\n\"); } ~B() { printf(\"dtor: B\\n\"); } };\nstruct C { C(bool)  { printf(\"ctor: C\\n\"); } ~C() { printf(\"dtor: C\\n\"); } };\nstruct D { D(bool)  { printf(\"ctor: D\\n\"); } ~D() { printf(\"dtor: D\\n\"); } };\n\nclass E : public B, public A {\n    C c;\n    D d;\n    int v1, v2;\npublic:\n    // Initializer list order does NOT change construction order!\n    E() : d(true), A(100), c(true), B(), v2(100), v1(20) {\n        printf(\"ctor: E\\n\");\n    }\n    ~E() { printf(\"dtor: E\\n\"); }\n};\n// Output: B, A, C, D, (v1, v2), E -- then reverse for destructors"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Given `class C : public B, public A`, with `C() : A(100), B()`, which constructor is called first?", "ro": "Dat fiind `class C : public B, public A`, cu `C() : A(100), B()`, care constructor este apelat primul?" },
+              "options": [
+                {
+                  "text": { "en": "A(100) -- it's listed first in the initializer", "ro": "A(100) -- este listat primul in initializator" },
+                  "correct": false,
+                  "explanation": { "en": "The initializer list order does NOT determine construction order. The inheritance declaration order does.", "ro": "Ordinea listei de initializare NU determina ordinea constructiei. Ordinea declararii mostenirii o face." }
+                },
+                {
+                  "text": { "en": "B() -- B is first in the inheritance list (left-to-right)", "ro": "B() -- B este primul in lista de mostenire (stanga-dreapta)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Base class constructors follow the inheritance declaration order, regardless of the initializer list.", "ro": "Corect! Constructorii claselor de baza urmeaza ordinea declararii mostenirii, indiferent de lista de initializare." }
+                },
+                {
+                  "text": { "en": "C() -- the derived class constructor runs first", "ro": "C() -- constructorul clasei derivate ruleaza primul" },
+                  "correct": false,
+                  "explanation": { "en": "The derived class constructor body runs LAST, after all base and member constructors.", "ro": "Corpul constructorului clasei derivate ruleaza ULTIMUL, dupa toti constructorii bazelor si membrilor." }
+                }
+              ],
+              "explanation": { "en": "Construction order: base classes (left-to-right), then members (top-to-bottom), then constructor body.", "ro": "Ordinea constructiei: clase de baza (stanga-dreapta), apoi membri (sus-jos), apoi corpul constructorului." },
+              "reviewStep": "oop-c5-ctor-dtor-order"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 18-27: Constructor/destructor order, multiple inheritance, explicit base constructor calls, 4-step rule", "ro": "Slide-uri 18-27: Ordinea constructor/destructor, mostenire multipla, apeluri explicite constructor baza, regula celor 4 pasi" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/vOOwbJz_OYo",
+          "label": { "en": "Course 5.2 -- Constructor order, virtual methods (Prof. Balan)", "ro": "Cursul 5.2 -- Ordinea constructorilor, metode virtuale (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c5-virtual-methods",
+      "title": { "en": "Virtual Methods & Polymorphism", "ro": "Metode virtuale si polimorfism" },
+      "group": "virtual",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You have `A* a = &b;` where `b` is of type `B : public A`. Both A and B have a method `Set()`. When you call `a->Set()`, which version runs?",
+            "ro": "Aveti `A* a = &b;` unde `b` este de tipul `B : public A`. Atat A cat si B au o metoda `Set()`. Cand apelati `a->Set()`, care versiune ruleaza?"
+          },
+          "answer": {
+            "en": "Without `virtual`: **A::Set()** runs (static binding -- compiler uses the pointer type). With `virtual`: **B::Set()** runs (dynamic binding -- the actual object type determines the method). This is the fundamental difference.",
+            "ro": "Fara `virtual`: **A::Set()** ruleaza (legare statica -- compilatorul foloseste tipul pointerului). Cu `virtual`: **B::Set()** ruleaza (legare dinamica -- tipul real al obiectului determina metoda). Aceasta este diferenta fundamentala."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Without `virtual`, a derived class method with the same name **hides** the base class version. Through a base pointer, the base version is called.\n\nWith `virtual`, the derived class **overrides** the base method. Through a base pointer, the actual object's version is called. This is **polymorphism** -- accessing different class instances through the same interface.\n\n**Uses of virtual methods:**\n- Polymorphism (plugin/add-on systems)\n- Proper memory deallocation (virtual destructors)\n- Anti-debugging techniques (vtable manipulation)",
+            "ro": "Fara `virtual`, o metoda din clasa derivata cu acelasi nume **ascunde** versiunea din clasa de baza. Printr-un pointer de baza, versiunea bazei este apelata.\n\nCu `virtual`, clasa derivata **suprascrie** metoda bazei. Printr-un pointer de baza, versiunea obiectului real este apelata. Acesta este **polimorfismul** -- accesarea instantelor diferitelor clase prin aceeasi interfata.\n\n**Utilizari ale metodelor virtuale:**\n- Polimorfism (sisteme de plugin-uri/add-on-uri)\n- Dealocare corecta a memoriei (destructori virtuali)\n- Tehnici anti-debugging (manipulare vtable)"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Figure {\npublic:\n    virtual void Draw() { printf(\"Figure\"); }\n    virtual ~Figure() { printf(\"Delete Figure\\n\"); }  // Virtual destructor!\n};\nclass Circle : public Figure {\npublic:\n    void Draw() { printf(\"Circle\"); }\n    ~Circle() { printf(\"Delete Circle\\n\"); }\n};\nclass Square : public Figure {\npublic:\n    void Draw() { printf(\"Square\"); }\n    ~Square() { printf(\"Delete Square\\n\"); }\n};\n\nvoid main() {\n    Figure *f[2];\n    f[0] = new Circle();\n    f[1] = new Square();\n    for (int i = 0; i < 2; i++) {\n        f[i]->Draw();     // Polymorphism: Circle, Square\n        delete f[i];      // Virtual dtor: Circle+Figure, Square+Figure\n    }\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Virtual destructor is essential!** Without it, `delete f[i]` only calls `~Figure()`, leaking any memory allocated by `Circle` or `Square`. Always declare the base class destructor `virtual` when using polymorphism.",
+            "ro": "**Destructorul virtual este esential!** Fara el, `delete f[i]` apeleaza doar `~Figure()`, pierzand orice memorie alocata de `Circle` sau `Square`. Declarati intotdeauna destructorul clasei de baza `virtual` cand folositi polimorfismul."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 28-36: Hiding vs overriding, virtual keyword, polymorphism, virtual destructors", "ro": "Slide-uri 28-36: Ascundere vs suprascriere, cuvantul cheie virtual, polimorfism, destructori virtuali" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/mz8vjIIP__4",
+          "label": { "en": "Course 5.3 -- Polymorphism, virtual destructors (Prof. Balan)", "ro": "Cursul 5.3 -- Polimorfism, destructori virtuali (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c5-override-final",
+      "title": { "en": "override & final Specifiers", "ro": "Specificatorii override si final" },
+      "group": "virtual",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "To override a virtual function, the signature must match **exactly**. A subtle mismatch (e.g., `int` vs `char` parameter) creates a **new** virtual method instead of overriding.\n\nC++11 added two specifiers to catch these bugs:\n\n- **`override`**: Ensures the method correctly overrides a base class virtual function. Compilation error if it doesn't match.\n- **`final`**: Prevents further overriding in derived classes. Can also be applied to a class/struct to prevent inheritance entirely.\n\nYou can combine both: `override final` means \"I override the base, AND no one can override me.\"",
+            "ro": "Pentru a suprascrie o functie virtuala, semnatura trebuie sa se potriveasca **exact**. O nepotrivire subtila (ex. parametru `int` vs `char`) creeaza o metoda virtuala **noua** in loc sa suprascrie.\n\nC++11 a adaugat doi specificatori pentru a prinde aceste erori:\n\n- **`override`**: Asigura ca metoda suprascrie corect o functie virtuala din clasa de baza. Eroare de compilare daca nu se potriveste.\n- **`final`**: Previne suprascrierile ulterioare in clasele derivate. Poate fi aplicat si unei clase/struct pentru a preveni mostenirea complet.\n\nPuteti combina ambele: `override final` inseamna <<eu suprascriu baza, SI nimeni nu ma poate suprascrie>>."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "struct A {\n    virtual bool Odd(int x) = 0;  // Pure virtual\n};\nstruct B : public A {\n    // override: ensures we correctly override A::Odd\n    // final: prevents C from overriding this\n    virtual bool Odd(int x) override final { return x % 2 == 0; }\n};\nstruct C : public B {\n    // ERROR: 'B::Odd' declared as 'final' cannot be overridden\n    // virtual bool Odd(int x) { return x % 3 == 0; }\n};\n\n// final on class: prevents inheritance entirely\nstruct D final : public A {\n    bool Odd(int x) override { return x % 2 != 0; }\n};\n// ERROR: 'E' cannot inherit from 'D' as it has been declared 'final'\n// struct E : public D { };"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Class A has `virtual bool Odd(int x)`. Class B has `virtual bool Odd(char x)`. Does B override A::Odd?", "ro": "Clasa A are `virtual bool Odd(int x)`. Clasa B are `virtual bool Odd(char x)`. Suprascrie B metoda A::Odd?" },
+              "options": [
+                {
+                  "text": { "en": "Yes -- both are named Odd so it's an override", "ro": "Da -- ambele se numesc Odd deci este o suprascriere" },
+                  "correct": false,
+                  "explanation": { "en": "The signatures differ (int vs char), so B creates a NEW virtual method instead of overriding A's.", "ro": "Semnaturile difera (int vs char), deci B creeaza o metoda virtuala NOUA in loc sa o suprascrie pe a lui A." }
+                },
+                {
+                  "text": { "en": "No -- parameter types differ, so B has TWO Odd methods", "ro": "Nu -- tipurile parametrilor difera, deci B are DOUA metode Odd" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! B has Odd(int) inherited from A and its own Odd(char). Through an A* pointer, Odd(int) is called -- the A version.", "ro": "Corect! B are Odd(int) mostenit de la A si propriul Odd(char). Printr-un pointer A*, Odd(int) este apelat -- versiunea A." }
+                },
+                {
+                  "text": { "en": "Compilation error -- you can't have different parameter types", "ro": "Eroare de compilare -- nu puteti avea tipuri diferite de parametri" },
+                  "correct": false,
+                  "explanation": { "en": "It compiles fine -- it's just not an override. Using the `override` keyword would catch this as an error.", "ro": "Se compileaza fara probleme -- doar ca nu este o suprascriere. Folosirea cuvantului cheie `override` ar prinde aceasta ca eroare." }
+                }
+              ],
+              "explanation": { "en": "Use `override` to let the compiler verify your intent. Without it, signature mismatches silently create new methods.", "ro": "Folositi `override` pentru a lasa compilatorul sa va verifice intentia. Fara el, nepotrivirile de semnatura creeaza silentios metode noi." },
+              "reviewStep": "oop-c5-override-final"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 37-44: Signature matching, override keyword, final keyword, combining override+final", "ro": "Slide-uri 37-44: Potrivirea semnaturii, cuvantul cheie override, cuvantul cheie final, combinarea override+final" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c5-vtables",
+      "title": { "en": "How vtables Work (vfptr)", "ro": "Cum functioneaza vtable-urile (vfptr)" },
+      "group": "compiler-internals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Adding a single `virtual` keyword to a class with 3 ints changes its sizeof from 12 to 16 on x86 (or 24 on x64). What is the compiler adding, and why?",
+            "ro": "Adaugarea unui singur cuvant cheie `virtual` la o clasa cu 3 int-uri ii schimba sizeof de la 12 la 16 pe x86 (sau 24 pe x64). Ce adauga compilatorul si de ce?"
+          },
+          "answer": {
+            "en": "The compiler adds a hidden pointer called **vfptr** (virtual function pointer) as the FIRST member. It points to a **vtable** -- an array of function pointers for all virtual methods of that class. This is how polymorphism works at the machine level.",
+            "ro": "Compilatorul adauga un pointer ascuns numit **vfptr** (virtual function pointer) ca PRIMUL membru. Indica catre un **vtable** -- un array de pointeri la functii pentru toate metodele virtuale ale clasei. Asa functioneaza polimorfismul la nivel de masina."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Key facts about vfptr/vtables:**\n\n1. **Every class with virtual methods** gets a vtable (one per class, not per object)\n2. **Every object** of that class gets a vfptr pointer (first 4/8 bytes)\n3. The compiler **initializes vfptr** in every constructor (including copy constructor) but NOT in the assignment operator\n4. When calling a virtual method **through a pointer/reference**, the compiler reads the vtable to find the function address (indirect call via `call eax`)\n5. When calling a virtual method **directly on an object** (not pointer), the compiler calls the function directly (no vtable lookup)\n6. **Derived classes** get their own vtable with overridden methods replaced\n7. **Multiple inheritance** with virtual methods creates multiple vfptr pointers (one per base class with virtuals)",
+            "ro": "**Fapte cheie despre vfptr/vtable:**\n\n1. **Fiecare clasa cu metode virtuale** primeste un vtable (unul per clasa, nu per obiect)\n2. **Fiecare obiect** al clasei primeste un pointer vfptr (primii 4/8 bytes)\n3. Compilatorul **initializeaza vfptr** in fiecare constructor (inclusiv copy constructor) dar NU in operatorul de atribuire\n4. La apelarea unei metode virtuale **prin pointer/referinta**, compilatorul citeste vtable-ul pentru a gasi adresa functiei (apel indirect via `call eax`)\n5. La apelarea unei metode virtuale **direct pe un obiect** (nu pointer), compilatorul apeleaza functia direct (fara cautare in vtable)\n6. **Clasele derivate** primesc propriul vtable cu metodele suprascrise inlocuite\n7. **Mostenirea multipla** cu metode virtuale creeaza mai multi pointeri vfptr (cate unul per clasa de baza cu metode virtuale)"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class A {\npublic:\n    int x, y;\n    virtual int Suma()      { return x + y; }\n    virtual int Diferenta() { return x - y; }\n    virtual int Produs()    { return x * y; }\n};\nclass B : public A {\npublic:\n    int Suma() { return 1; }  // Overrides A::Suma\n};\n\n// VTable for A: [&A::Suma, &A::Diferenta, &A::Produs]\n// VTable for B: [&B::Suma, &A::Diferenta, &A::Produs]\n//                ^^^^^^^^ -- only Suma is replaced\n\nvoid main() {\n    B b; b.x = 1; b.y = 2;\n    A* a = &b;\n    int x = a->Suma();      // Calls B::Suma via vtable => 1\n    int y = a->Diferenta(); // Calls A::Diferenta via vtable => -1\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**vfptr can be manipulated with memcpy!** Since it's just a pointer at offset 0, you can overwrite object `a`'s vfptr with `b`'s vfptr using `memcpy(&a, &b, sizeof(void*))`. After this, `a->Print()` through a pointer calls `B::Print` even though `a` is type A. However, calling the copy constructor resets the vfptr correctly.",
+            "ro": "**vfptr poate fi manipulat cu memcpy!** Deoarece este doar un pointer la offset 0, puteti suprascrie vfptr-ul obiectului `a` cu vfptr-ul lui `b` folosind `memcpy(&a, &b, sizeof(void*))`. Dupa aceasta, `a->Print()` prin pointer apeleaza `B::Print` chiar daca `a` este de tip A. Totusi, apelarea constructorului de copiere reseteaza vfptr-ul corect."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 45-85: sizeof with virtual, vfptr, vtable layout, constructor vfptr init, pseudo-code translation, memcpy vtable hack, multiple inheritance vtables", "ro": "Slide-uri 45-85: sizeof cu virtual, vfptr, layout vtable, initializarea vfptr in constructor, traducere pseudo-cod, hack-ul memcpy vtable, vtable-uri cu mostenire multipla" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/om6_bS5tU5A",
+          "label": { "en": "Course 5.4 -- vtables internals (Prof. Balan)", "ro": "Cursul 5.4 -- Mecanismul intern vtable (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c5-covariance",
+      "title": { "en": "Covariance", "ro": "Covarianta" },
+      "group": "virtual",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Normally, overriding a virtual function requires the **exact same signature**, including return type. But there's one exception: **covariant return types**.\n\nIf the base returns `A*`, the derived can return `B*` (where B derives from A). This is because a `B*` can always be safely used as an `A*`.\n\n```cpp\nclass A {\npublic:\n    virtual A* clone() { return new A(); }\n};\nclass B : public A {\npublic:\n    virtual B* clone() { return new B(); }  // Covariant: B* derives from A*\n};\n```\n\n**Important:** Covariance depends on the **pointer type**, not the actual object. Calling `clone()` through an `A*` pointer returns `A*` (even if `B::clone` runs internally), requiring a cast to get `B*`.\n\nIf the return type is unrelated (e.g., `int*` instead of `A*`), compilation fails with error C2555.",
+            "ro": "In mod normal, suprascriererea unei functii virtuale necesita **exact aceeasi semnatura**, inclusiv tipul de retur. Dar exista o exceptie: **tipuri de retur covariante**.\n\nDaca baza returneaza `A*`, derivatul poate returna `B*` (unde B deriveaza din A). Aceasta deoarece un `B*` poate fi intotdeauna folosit in siguranta ca `A*`.\n\n```cpp\nclass A {\npublic:\n    virtual A* clone() { return new A(); }\n};\nclass B : public A {\npublic:\n    virtual B* clone() { return new B(); }  // Covariant: B* deriveaza din A*\n};\n```\n\n**Important:** Covarianta depinde de **tipul pointerului**, nu de obiectul real. Apelarea `clone()` printr-un pointer `A*` returneaza `A*` (chiar daca `B::clone` ruleaza intern), necesitand un cast pentru a obtine `B*`.\n\nDaca tipul de retur nu are legatura (ex. `int*` in loc de `A*`), compilarea esueaza cu eroarea C2555."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 86-93: Covariant return types, clone pattern, error C2555", "ro": "Slide-uri 86-93: Tipuri de retur covariante, pattern-ul clone, eroarea C2555" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/QUFPrfdjPbE",
+          "label": { "en": "Course 5.5 -- Covariance, abstract classes (Prof. Balan)", "ro": "Cursul 5.5 -- Covarianta, clase abstracte (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c5-abstract",
+      "title": { "en": "Abstract Classes & Interfaces", "ro": "Clase abstracte si interfete" },
+      "group": "virtual",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A **pure virtual method** has no body and is declared with `= 0`:\n\n```cpp\nvirtual void Set() = 0;\n```\n\nA class with at least one pure virtual method is **abstract** -- it cannot be instantiated (error C2259). You CAN create pointers to abstract classes (essential for polymorphism).\n\nTo create an instance of a derived class, ALL pure virtual methods must be implemented.\n\n**Abstract class vs Interface:**\n- **Abstract class**: has at least one pure virtual method, but CAN have data members, constructors, destructors, and regular methods\n- **Interface** (Java/C#): CAN NOT have data members or non-pure methods\n- C++ has no `interface` keyword (MSVC has non-standard `__interface`). Use `struct` with only pure virtual methods to simulate interfaces.",
+            "ro": "O **metoda pur virtuala** nu are corp si este declarata cu `= 0`:\n\n```cpp\nvirtual void Set() = 0;\n```\n\nO clasa cu cel putin o metoda pur virtuala este **abstracta** -- nu poate fi instantiata (eroarea C2259). PUTETI crea pointeri la clase abstracte (esential pentru polimorfism).\n\nPentru a crea o instanta a unei clase derivate, TOATE metodele pur virtuale trebuie implementate.\n\n**Clasa abstracta vs Interfata:**\n- **Clasa abstracta**: are cel putin o metoda pur virtuala, dar POATE avea membri date, constructori, destructori si metode obisnuite\n- **Interfata** (Java/C#): NU POATE avea membri date sau metode non-pure\n- C++ nu are cuvantul cheie `interface` (MSVC are non-standard `__interface`). Folositi `struct` doar cu metode pur virtuale pentru a simula interfete."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 94-98: Pure virtual, abstract classes, interface concept, __interface", "ro": "Slide-uri 94-98: Pur virtual, clase abstracte, conceptul de interfata, __interface" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c5-memory-alignment",
+      "title": { "en": "Memory Alignment & Diamond Problem", "ro": "Alinierea memoriei si problema diamantului" },
+      "group": "memory",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "If `class C : public A, public B`, class A has `a1,a2,a3` (12 bytes) and B has `b1,b2` (8 bytes), what is `sizeof(C)` if C adds `c1,c2`?",
+            "ro": "Daca `class C : public A, public B`, clasa A are `a1,a2,a3` (12 bytes) si B are `b1,b2` (8 bytes), cat este `sizeof(C)` daca C adauga `c1,c2`?"
+          },
+          "answer": {
+            "en": "28 bytes. Memory layout: A's members first (12), then B's (8), then C's own (8). The left-to-right inheritance order determines the memory layout.",
+            "ro": "28 bytes. Layout-ul memoriei: membrii lui A primii (12), apoi ai lui B (8), apoi propriii lui C (8). Ordinea stanga-dreapta a mostenirii determina layout-ul memoriei."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Non-virtual inheritance** uses left-to-right layout: base classes are placed in the order they appear in the inheritance list, followed by the derived class's own members.\n\n**The Diamond Problem:** If `C : public A, public B` and `B : public A`, then A's members appear TWICE in C (once from direct inheritance, once through B). Accessing `c.a1` is ambiguous (error C2385).\n\n**Solutions:**\n1. Use full scope: `c.A::a1` vs `c.B::A::a1`\n2. Use **virtual inheritance**: `class B : public virtual A` and `class C : public virtual A, public B`\n\nVirtual inheritance ensures A's fields appear only ONCE, placed at the end of the layout. The compiler adds a **Variable Offsets Table** pointer to find the virtually-inherited base at runtime (3-step access instead of 1).",
+            "ro": "**Mostenirea non-virtuala** foloseste layout stanga-dreapta: clasele de baza sunt plasate in ordinea in care apar in lista de mostenire, urmate de membrii proprii ai clasei derivate.\n\n**Problema diamantului:** Daca `C : public A, public B` si `B : public A`, atunci membrii lui A apar de DOUA ORI in C (o data din mostenirea directa, o data prin B). Accesarea `c.a1` este ambigua (eroarea C2385).\n\n**Solutii:**\n1. Folositi scopul complet: `c.A::a1` vs `c.B::A::a1`\n2. Folositi **mostenirea virtuala**: `class B : public virtual A` si `class C : public virtual A, public B`\n\nMostenirea virtuala asigura ca membrii lui A apar o singura DATA, plasati la sfarsitul layout-ului. Compilatorul adauga un pointer la **Variable Offsets Table** pentru a gasi baza mostenita virtual la runtime (acces in 3 pasi in loc de 1)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What problem does `virtual` inheritance solve?", "ro": "Ce problema rezolva mostenirea `virtual`?" },
+              "options": [
+                {
+                  "text": { "en": "Prevents method hiding in derived classes", "ro": "Previne ascunderea metodelor in clasele derivate" },
+                  "correct": false,
+                  "explanation": { "en": "Method hiding is solved by the `virtual` keyword on methods, not on inheritance. Virtual inheritance solves the Diamond Problem.", "ro": "Ascunderea metodelor este rezolvata de cuvantul cheie `virtual` pe metode, nu pe mostenire. Mostenirea virtuala rezolva Problema Diamantului." }
+                },
+                {
+                  "text": { "en": "Ensures base class fields appear only once in diamond inheritance", "ro": "Asigura ca membrii clasei de baza apar o singura data in mostenirea diamant" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Virtual inheritance ensures that a shared base class is only included once in the memory layout, avoiding ambiguity.", "ro": "Corect! Mostenirea virtuala asigura ca o clasa de baza partajata este inclusa o singura data in layout-ul memoriei, evitand ambiguitatea." }
+                },
+                {
+                  "text": { "en": "Makes all methods virtual automatically", "ro": "Face toate metodele virtuale automat" },
+                  "correct": false,
+                  "explanation": { "en": "Virtual inheritance affects memory layout, not method dispatch. Methods need their own `virtual` keyword.", "ro": "Mostenirea virtuala afecteaza layout-ul memoriei, nu dispecerizarea metodelor. Metodele au nevoie de propriul cuvant cheie `virtual`." }
+                }
+              ],
+              "explanation": { "en": "Virtual inheritance: `class B : public virtual A` -- ensures A appears once even with diamond inheritance.", "ro": "Mostenirea virtuala: `class B : public virtual A` -- asigura ca A apare o data chiar si cu mostenirea diamant." },
+              "reviewStep": "oop-c5-memory-alignment"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 99-121: Memory layout, left-to-right rule, Diamond Problem, virtual inheritance, Variable Offsets Table, 3-step access", "ro": "Slide-uri 99-121: Layout memorie, regula stanga-dreapta, Problema Diamantului, mostenire virtuala, Variable Offsets Table, acces in 3 pasi" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/6f24_mOqKp0",
+          "label": { "en": "Course 5.6 -- Memory alignment, diamond problem (Prof. Balan)", "ro": "Cursul 5.6 -- Alinierea memoriei, problema diamantului (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c5-quiz",
+      "title": { "en": "Course 5 Self-Test", "ro": "Autoevaluare Cursul 5" },
+      "group": "review",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "A friend function declared in class Derived tries to access a private member of class Base. Does it compile?", "ro": "O functie friend declarata in clasa Derivat incearca sa acceseze un membru privat al clasei Baza. Se compileaza?" },
+              "options": [
+                {
+                  "text": { "en": "Yes -- friend functions can access all inherited members", "ro": "Da -- functiile friend pot accesa toti membrii mosteniti" },
+                  "correct": false,
+                  "explanation": { "en": "A friend in Derived can only access Derived's own private/protected members, not Base's private members.", "ro": "Un friend in Derivat poate accesa doar membrii private/protected proprii ai lui Derivat, nu membrii privati ai Bazei." }
+                },
+                {
+                  "text": { "en": "No -- friendship is scoped to the class where it's declared", "ro": "Nu -- prietenia este limitata la clasa unde este declarata" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! To access Base's private members, the friend must be declared in Base, not Derived.", "ro": "Corect! Pentru a accesa membrii privati ai Bazei, friend-ul trebuie declarat in Baza, nu in Derivat." }
+                },
+                {
+                  "text": { "en": "Only if the inheritance is public", "ro": "Doar daca mostenirea este publica" },
+                  "correct": false,
+                  "explanation": { "en": "The inheritance access modifier doesn't help here. Private members of Base are never accessible in Derived, regardless of inheritance type.", "ro": "Modificatorul de acces al mostenirii nu ajuta aici. Membrii privati ai Bazei nu sunt niciodata accesibili in Derivat, indiferent de tipul mostenirii." }
+                }
+              ],
+              "explanation": { "en": "Friendship is not inherited and is scoped to the declaring class only.", "ro": "Prietenia nu se mosteneste si este limitata doar la clasa care o declara." },
+              "reviewStep": "oop-c5-inheritance-basics"
+            },
+            {
+              "question": { "en": "What does `virtual` add to each object's memory layout?", "ro": "Ce adauga `virtual` la layout-ul memoriei fiecarui obiect?" },
+              "options": [
+                {
+                  "text": { "en": "A copy of all virtual method code", "ro": "O copie a codului tuturor metodelor virtuale" },
+                  "correct": false,
+                  "explanation": { "en": "Method code is shared (one copy in the code segment). Each object only gets a 4/8-byte pointer to the vtable.", "ro": "Codul metodelor este partajat (o copie in segmentul de cod). Fiecare obiect primeste doar un pointer de 4/8 bytes la vtable." }
+                },
+                {
+                  "text": { "en": "A vfptr pointer (4 bytes on x86, 8 on x64) pointing to the class vtable", "ro": "Un pointer vfptr (4 bytes pe x86, 8 pe x64) care indica vtable-ul clasei" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! The vfptr is added as the first member and initialized in every constructor (but NOT in operator=).", "ro": "Corect! vfptr-ul este adaugat ca primul membru si initializat in fiecare constructor (dar NU in operator=)." }
+                },
+                {
+                  "text": { "en": "Nothing -- virtual is resolved at compile time", "ro": "Nimic -- virtual este rezolvat la compilare" },
+                  "correct": false,
+                  "explanation": { "en": "Virtual dispatch happens at RUNTIME via the vtable. This is the whole point -- the compiler can't know which derived type a base pointer points to.", "ro": "Dispecerizarea virtuala se intampla la RUNTIME prin vtable. Acesta este scopul -- compilatorul nu poate sti la ce tip derivat indica un pointer de baza." }
+                }
+              ],
+              "explanation": { "en": "Each object with virtual methods has a hidden vfptr pointer, adding sizeof(void*) to its size.", "ro": "Fiecare obiect cu metode virtuale are un pointer vfptr ascuns, adaugand sizeof(void*) la dimensiunea sa." },
+              "reviewStep": "oop-c5-vtables"
+            },
+            {
+              "question": { "en": "Can you instantiate an abstract class?", "ro": "Puteti instantia o clasa abstracta?" },
+              "options": [
+                {
+                  "text": { "en": "Yes, if it has a constructor", "ro": "Da, daca are un constructor" },
+                  "correct": false,
+                  "explanation": { "en": "Having a constructor doesn't help. Any class with at least one pure virtual method cannot be instantiated.", "ro": "Avand un constructor nu ajuta. Orice clasa cu cel putin o metoda pur virtuala nu poate fi instantiata." }
+                },
+                {
+                  "text": { "en": "No, but you can create pointers to it (A* a)", "ro": "Nu, dar puteti crea pointeri la ea (A* a)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Abstract class pointers are the foundation of polymorphism -- they point to concrete derived objects.", "ro": "Corect! Pointerii la clase abstracte sunt fundatia polimorfismului -- indica catre obiecte derivate concrete." }
+                },
+                {
+                  "text": { "en": "No, and you cannot create pointers to it either", "ro": "Nu, si nici nu puteti crea pointeri la ea" },
+                  "correct": false,
+                  "explanation": { "en": "You CAN create pointers (A* a) and references to abstract classes. You just can't create objects (A a).", "ro": "PUTETI crea pointeri (A* a) si referinte la clase abstracte. Doar nu puteti crea obiecte (A a)." }
+                }
+              ],
+              "explanation": { "en": "Abstract classes cannot be instantiated but can be used as pointer/reference types for polymorphism.", "ro": "Clasele abstracte nu pot fi instantiate dar pot fi folosite ca tipuri de pointer/referinta pentru polimorfism." },
+              "reviewStep": "oop-c5-abstract"
+            },
+            {
+              "question": { "en": "In the Diamond Problem (`C : public A, public B` where `B : public A`), accessing `c.a1` causes:", "ro": "In Problema Diamantului (`C : public A, public B` unde `B : public A`), accesarea `c.a1` cauzeaza:" },
+              "options": [
+                {
+                  "text": { "en": "Ambiguity error -- a1 exists twice in C", "ro": "Eroare de ambiguitate -- a1 exista de doua ori in C" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! A's members are duplicated. Use `c.A::a1` or `c.B::A::a1` to disambiguate, or use virtual inheritance to have only one copy.", "ro": "Corect! Membrii lui A sunt duplicati. Folositi `c.A::a1` sau `c.B::A::a1` pentru a dezambiguiza, sau folositi mostenirea virtuala pentru a avea o singura copie." }
+                },
+                {
+                  "text": { "en": "Runtime crash -- memory corruption", "ro": "Crash la runtime -- coruptie de memorie" },
+                  "correct": false,
+                  "explanation": { "en": "This is a compile-time error (C2385), not a runtime issue. The compiler catches the ambiguity.", "ro": "Aceasta este o eroare la compilare (C2385), nu o problema la runtime. Compilatorul prinde ambiguitatea." }
+                },
+                {
+                  "text": { "en": "No problem -- the compiler picks the first occurrence", "ro": "Nicio problema -- compilatorul alege prima aparitie" },
+                  "correct": false,
+                  "explanation": { "en": "The compiler cannot choose automatically -- both copies are equally valid. You must specify which one.", "ro": "Compilatorul nu poate alege automat -- ambele copii sunt la fel de valide. Trebuie sa specificati pe care." }
+                }
+              ],
+              "explanation": { "en": "The Diamond Problem is resolved by virtual inheritance: `class B : public virtual A`.", "ro": "Problema Diamantului este rezolvata prin mostenirea virtuala: `class B : public virtual A`." },
+              "reviewStep": "oop-c5-memory-alignment"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
