@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useApp } from '../../../contexts/AppContext';
 import { loadJson } from '../../../content/jsonLoader';
 import MultipleChoiceQuestion from './MultipleChoiceQuestion';
@@ -7,6 +8,58 @@ import CodeWritingQuestion from './CodeWritingQuestion';
 import DiagramQuestion from './DiagramQuestion';
 import FillInQuestion from './FillInQuestion';
 import TestResults from './TestResults';
+
+const promptMarkdown = {
+  code({ inline, children, ...props }) {
+    if (inline) {
+      return (
+        <code
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            padding: '1px 5px',
+            borderRadius: '4px',
+            fontSize: '0.85em',
+            fontFamily: 'monospace',
+          }}
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    }
+    return (
+      <pre
+        style={{
+          backgroundColor: '#1e293b',
+          padding: '10px 12px',
+          borderRadius: '8px',
+          overflowX: 'auto',
+          margin: '8px 0',
+          fontSize: '0.82em',
+          lineHeight: '1.5',
+          border: '1px solid var(--theme-border)',
+        }}
+      >
+        <code style={{ fontFamily: 'monospace', color: '#e2e8f0' }} {...props}>{children}</code>
+      </pre>
+    );
+  },
+  p({ children }) {
+    return <p style={{ margin: '4px 0' }}>{children}</p>;
+  },
+  strong({ children }) {
+    return <strong style={{ fontWeight: 700 }}>{children}</strong>;
+  },
+  ul({ children }) {
+    return <ul style={{ margin: '4px 0', paddingLeft: '18px' }}>{children}</ul>;
+  },
+  ol({ children }) {
+    return <ol style={{ margin: '4px 0', paddingLeft: '18px' }}>{children}</ol>;
+  },
+  li({ children }) {
+    return <li style={{ margin: '2px 0' }}>{children}</li>;
+  },
+};
 
 const questionComponents = {
   'multiple-choice': MultipleChoiceQuestion,
@@ -148,9 +201,11 @@ export default function TestRenderer({ src }) {
                 >
                   {i + 1}
                 </span>
-                <span className="text-xs font-semibold flex-1" style={{ color: 'var(--theme-content-text)' }}>
-                  {t(q.prompt.en, q.prompt.ro)}
-                </span>
+                <div className="text-xs font-semibold flex-1 prose-sm" style={{ color: 'var(--theme-content-text)' }}>
+                  <ReactMarkdown components={promptMarkdown}>
+                    {t(q.prompt.en, q.prompt.ro)}
+                  </ReactMarkdown>
+                </div>
                 <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--theme-muted-text)' }}>
                   {q.points} {t('pts', 'p')}
                 </span>
