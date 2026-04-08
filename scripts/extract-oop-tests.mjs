@@ -62,7 +62,7 @@ const openrouterKeys = (env.OPENROUTER_API_KEYS || '').split(',').map(k => k.tri
 let orKeyIndex = 0;
 console.log(`Loaded ${openrouterKeys.length} OpenRouter key(s)`);
 
-const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+const GEMINI_MODELS = ['gemini-3-flash-preview'];
 
 // ── Gemini call with retry + OpenRouter fallback ──
 
