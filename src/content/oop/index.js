@@ -58,6 +58,7 @@ const oop = {
     { id: 'examen2020-2021-model-model-test-2-lab-oop-2', title: { en: '2020-2021 Model T2 P2 — Number', ro: '2020-2021 Model T2 P2 — Number' }, shortTitle: { en: 'Model T2 P2: Number', ro: 'Model T2 P2: Number' }, src: 'oop/tests/examen2020-2021-model-model-test-2-lab-oop-2.json' },
     { id: 'examen2020-2021-model-model-test-2-lab-oop-3', title: { en: '2020-2021 Model T2 P3 — Database', ro: '2020-2021 Model T2 P3 — Database' }, shortTitle: { en: 'Model T2 P3: Database', ro: 'Model T2 P3: Database' }, src: 'oop/tests/examen2020-2021-model-model-test-2-lab-oop-3.json' },
     { id: 'examen2020-2021-restanta', title: { en: '2020-2021 Restanta — Quiz Collection', ro: '2020-2021 Restanta — Quiz Collection' }, shortTitle: { en: 'Restanta: Quiz', ro: 'Restanta: Quiz' }, src: 'oop/tests/examen2020-2021-restanta.json' },
+    { id: 'examen2023-2024-t2-alti-ani-prob-biblioteca', title: { en: 'T2 Alti Ani — Biblioteca', ro: 'T2 Alti Ani — Biblioteca' }, shortTitle: { en: 'Alti Ani: Biblioteca', ro: 'Alti Ani: Biblioteca' }, src: 'oop/tests/examen2023-2024-t2-alti-ani-prob-biblioteca.json' },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
