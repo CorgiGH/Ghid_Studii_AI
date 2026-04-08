@@ -1,0 +1,771 @@
+{
+  "meta": {
+    "id": "oop-c4",
+    "title": { "en": "Course 4: Destructors & Operators", "ro": "Cursul 4: Destructori si operatori" },
+    "shortTitle": { "en": "C4: Operators", "ro": "C4: Operatori" },
+    "source": { "en": "OOP -- Lecture 4, Prof. Gavrilut Dragos, UAIC 2024-2025", "ro": "POO -- Cursul 4, Prof. Gavrilut Dragos, UAIC 2024-2025" }
+  },
+  "steps": [
+    {
+      "id": "oop-c4-destructor",
+      "title": { "en": "Destructor Basics", "ro": "Bazele destructorului" },
+      "group": "destructor",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You allocate memory in a constructor with `new`. The object goes out of scope. Who frees that memory -- and what happens if nobody does?",
+            "ro": "Alocati memorie in constructor cu `new`. Obiectul iese din scop. Cine elibereaza memoria -- si ce se intampla daca nimeni nu o face?"
+          },
+          "answer": {
+            "en": "Without a **destructor**, the memory leaks -- it stays allocated until the program ends. The destructor is the special member function called automatically when an object is destroyed, giving you a place to clean up resources.",
+            "ro": "Fara un **destructor**, memoria se pierde -- ramane alocata pana la sfarsitul programului. Destructorul este functia membru speciala apelata automat cand un obiect este distrus, oferindu-va un loc pentru eliberarea resurselor."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Common misconceptions about destructors:**\n1. \"A destructor can have parameters\" -- No, a destructor takes zero parameters and cannot be overloaded\n2. \"A destructor is always called\" -- Heap objects without `delete` are never destroyed\n3. \"`delete` and `delete[]` are interchangeable\" -- Using `delete` on an array only destroys the first element and may crash",
+            "ro": "**Conceptii gresite frecvente despre destructori:**\n1. <<Un destructor poate avea parametri>> -- Nu, un destructor nu are parametri si nu poate fi supraincarcat\n2. <<Un destructor este intotdeauna apelat>> -- Obiectele heap fara `delete` nu sunt niciodata distruse\n3. <<`delete` si `delete[]` sunt interschimbabile>> -- Folosind `delete` pe un array distruge doar primul element si poate produce crash"
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Consider a simple `String` class that allocates memory in the constructor. Without a destructor, every `String` object leaks memory:\n\n```cpp\nclass String {\n    char * text;\npublic:\n    String(const char * s) {\n        text = new char[strlen(s) + 1];\n        memcpy(text, s, strlen(s) + 1);\n    }\n    ~String() {\n        delete text;\n        text = nullptr;\n    }\n};\n```\n\nThe destructor `~String()` frees the allocated buffer when the object is destroyed. This is the **most common use** of destructors: releasing resources acquired by the constructor.",
+            "ro": "Consideram o clasa simpla `String` care aloca memorie in constructor. Fara un destructor, fiecare obiect `String` pierde memorie:\n\n```cpp\nclass String {\n    char * text;\npublic:\n    String(const char * s) {\n        text = new char[strlen(s) + 1];\n        memcpy(text, s, strlen(s) + 1);\n    }\n    ~String() {\n        delete text;\n        text = nullptr;\n    }\n};\n```\n\nDestructorul `~String()` elibereaza buffer-ul alocat cand obiectul este distrus. Aceasta este **cea mai comuna utilizare** a destructorilor: eliberarea resurselor achizitionate de constructor."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Destructor", "ro": "Destructor" },
+          "content": {
+            "en": "A special member function (named `~ClassName()`) that is called when an object is destroyed. It has no parameters, no return type, cannot be overloaded, cannot be `static`, and can have any access modifier (`public`/`private`/`protected`).",
+            "ro": "O functie membru speciala (numita `~NumeClasa()`) care este apelata cand un obiect este distrus. Nu are parametri, nu are tip de retur, nu poate fi supraincarcata, nu poate fi `static` si poate avea orice modificator de acces (`public`/`private`/`protected`)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Basic destructor syntax\nclass Date {\nprivate:\n    int x;\npublic:\n    Date();          // Constructor\n    ~Date();         // Destructor\n};\n\nDate::Date() : x(100) { /* ... */ }\nDate::~Date() { /* cleanup here */ }\n\nvoid main() {\n    Date d;    // Constructor called\n}              // Destructor called automatically here"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why would you ever make a destructor `private`? What does that prevent, and how can you still destroy such objects?",
+            "ro": "De ce ati face vreodata un destructor `private`? Ce previne acest lucru si cum puteti totusi distruge astfel de obiecte?"
+          },
+          "answer": {
+            "en": "A **private destructor** prevents stack allocation (compiler error at scope exit) and prevents external `delete` calls. You can still destroy heap objects via a `static` member function (like a factory pattern for destruction). This pattern is used when you want to control object lifetime strictly.",
+            "ro": "Un **destructor privat** previne alocarea pe stack (eroare de compilare la iesirea din scop) si previne apelurile `delete` externe. Puteti totusi distruge obiectele heap printr-o functie membru `static` (ca un pattern factory pentru distrugere). Acest pattern se foloseste cand doriti sa controlati strict durata de viata a obiectelor."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Date {\nprivate:\n    int x;\npublic:\n    Date();\n    static void DestroyData(Date *d);\nprivate:\n    ~Date();  // Private destructor\n};\n\nDate::Date() : x(100) { /* ... */ }\nDate::~Date() { /* ... */ }\n\nvoid Date::DestroyData(Date *d) {\n    delete d;  // OK: private destructor accessible from within the class\n}\n\nvoid main() {\n    // Date d;         // ERROR: ~Date is private, stack object needs it at scope exit\n    Date *d = new Date();    // OK: no destructor call yet\n    // delete d;              // ERROR: ~Date is private\n    Date::DestroyData(d);    // OK: static method has access\n}"
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 3-9: Destructor definition, private destructors, static DestroyData pattern", "ro": "Slide-uri 3-9: Definitia destructorului, destructori privati, pattern-ul static DestroyData" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/B2x4ASmEu5M",
+          "label": { "en": "Course 4.1 -- Destructors / Operators / Object Operations (Prof. Balan)", "ro": "Cursul 4.1 -- Destructori / Operatori / Operatii cu obiecte (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-dtor-order",
+      "title": { "en": "Destruction Order & delete[]", "ro": "Ordinea distrugerii si delete[]" },
+      "group": "destructor",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "If a class `Date` has three member objects (Tree, Car, Animal -- declared in that order), and you create a `Date` object, in what order are the members destroyed?",
+            "ro": "Daca o clasa `Date` are trei obiecte membru (Tree, Car, Animal -- declarate in aceasta ordine) si creati un obiect `Date`, in ce ordine sunt membrii distrusi?"
+          },
+          "answer": {
+            "en": "**Reverse order of declaration**: Animal first, then Car, then Tree. The class destructor body runs first, then member destructors in reverse. This is a stack-like behavior (LIFO).",
+            "ro": "**In ordinea inversa a declararii**: Animal primul, apoi Car, apoi Tree. Corpul destructorului clasei ruleaza primul, apoi destructorii membrilor in ordine inversa. Aceasta este o comportare de tip stiva (LIFO)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Tree   { public: ~Tree()   { printf(\"dtor: Tree\\n\"); } };\nclass Car    { public: ~Car()    { printf(\"dtor: Car\\n\"); } };\nclass Animal { public: ~Animal() { printf(\"dtor: Animal\\n\"); } };\n\nclass Date {\n    Tree t;       // Created first\n    Car c;        // Created second\n    Animal a;     // Created third (last)\npublic:\n    ~Date() { printf(\"dtor: Date\\n\"); }\n};\n\nvoid main() {\n    Date d;\n}\n// Output:\n// dtor: Date      <-- class destructor body first\n// dtor: Animal    <-- last created, first destroyed\n// dtor: Car\n// dtor: Tree      <-- first created, last destroyed"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Key rules about destruction order:**\n\n1. **Global objects**: destructor called when program ends\n2. **Local objects**: destructor called when the function/method ends\n3. **Scoped objects**: destructor called when execution exits the scope (e.g., a `for` loop body)\n4. **Heap objects**: destructor called when `delete` is used\n5. **Member objects**: if the class has no explicit destructor but members have destructors, the compiler generates a default destructor that calls them in reverse order",
+            "ro": "**Reguli cheie despre ordinea distrugerii:**\n\n1. **Obiecte globale**: destructorul apelat cand programul se termina\n2. **Obiecte locale**: destructorul apelat cand functia/metoda se termina\n3. **Obiecte in scop**: destructorul apelat cand executia iese din scop (ex. corpul unui `for`)\n4. **Obiecte heap**: destructorul apelat cand se foloseste `delete`\n5. **Obiecte membru**: daca clasa nu are destructor explicit dar membrii au, compilatorul genereaza un destructor implicit care le apeleaza in ordine inversa"
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**`delete` vs `delete[]`**: When you allocate an array with `new Type[N]`, you **must** use `delete[]` to destroy it. Using plain `delete` on an array only destroys the first element and may crash (especially in debug mode). `delete[]` calls destructors in reverse order for all elements.",
+            "ro": "**`delete` vs `delete[]`**: Cand alocati un array cu `new Type[N]`, **trebuie** sa folositi `delete[]` pentru a-l distruge. Folosind `delete` simplu pe un array distruge doar primul element si poate produce crash (mai ales in mod debug). `delete[]` apeleaza destructorii in ordine inversa pentru toate elementele."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "int global_id = 0;\nclass Date {\n    int id;\npublic:\n    Date() { global_id++; id = global_id; printf(\"ctor id:%d\\n\", id); }\n    ~Date() { printf(\"dtor id:%d\\n\", id); }\n};\n\nvoid main() {\n    Date *d = new Date[5];\n    // delete d;     // WRONG: only destroys d[0], may crash!\n    delete [] d;     // CORRECT: destroys all 5 in reverse order\n}\n// Output: ctor 1,2,3,4,5 then dtor 5,4,3,2,1"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens if you use `delete` (without `[]`) on a pointer returned by `new Date[5]`?", "ro": "Ce se intampla daca folositi `delete` (fara `[]`) pe un pointer returnat de `new Date[5]`?" },
+              "options": [
+                {
+                  "text": { "en": "All 5 objects are destroyed normally", "ro": "Toate cele 5 obiecte sunt distruse normal" },
+                  "correct": false,
+                  "explanation": { "en": "Only the first element's destructor is called. The compiler doesn't know the array size without `[]`.", "ro": "Doar destructorul primului element este apelat. Compilatorul nu cunoaste dimensiunea array-ului fara `[]`." }
+                },
+                {
+                  "text": { "en": "Only the first object is destroyed, and the program may crash", "ro": "Doar primul obiect este distrus, si programul poate produce crash" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! `delete` without `[]` calls only one destructor and frees memory incorrectly, leading to potential crashes especially in debug mode.", "ro": "Corect! `delete` fara `[]` apeleaza un singur destructor si elibereaza memoria incorect, ducand la potentiale crash-uri mai ales in mod debug." }
+                },
+                {
+                  "text": { "en": "Compilation error -- the compiler detects the mismatch", "ro": "Eroare de compilare -- compilatorul detecteaza nepotrivirea" },
+                  "correct": false,
+                  "explanation": { "en": "The compiler does NOT detect this mismatch. Both `delete` and `delete[]` accept the same pointer type. This is a runtime bug, not a compile-time error.", "ro": "Compilatorul NU detecteaza aceasta nepotrivire. Atat `delete` cat si `delete[]` accepta acelasi tip de pointer. Aceasta este o eroare la runtime, nu la compilare." }
+                }
+              ],
+              "explanation": { "en": "Always match `new[]` with `delete[]` and `new` with `delete`.", "ro": "Potriviti intotdeauna `new[]` cu `delete[]` si `new` cu `delete`." },
+              "reviewStep": "oop-c4-dtor-order"
+            },
+            {
+              "question": { "en": "Given `class A { B b; C c; D d; };` with no explicit destructor, what happens when an `A` object is destroyed?", "ro": "Dat fiind `class A { B b; C c; D d; };` fara destructor explicit, ce se intampla cand un obiect `A` este distrus?" },
+              "options": [
+                {
+                  "text": { "en": "Nothing -- no destructor means no cleanup", "ro": "Nimic -- fara destructor inseamna fara curatare" },
+                  "correct": false,
+                  "explanation": { "en": "The compiler generates a default destructor that calls member destructors in reverse order.", "ro": "Compilatorul genereaza un destructor implicit care apeleaza destructorii membrilor in ordine inversa." }
+                },
+                {
+                  "text": { "en": "Compiler generates a destructor: D::~D(), C::~C(), B::~B()", "ro": "Compilatorul genereaza un destructor: D::~D(), C::~C(), B::~B()" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Even without an explicit destructor, the compiler creates one that destroys members in reverse declaration order.", "ro": "Corect! Chiar si fara un destructor explicit, compilatorul creeaza unul care distruge membrii in ordinea inversa a declararii." }
+                },
+                {
+                  "text": { "en": "Members are destroyed in declaration order: B, C, D", "ro": "Membrii sunt distrusi in ordinea declararii: B, C, D" },
+                  "correct": false,
+                  "explanation": { "en": "Destruction is always in REVERSE order of construction/declaration. B is constructed first, so B is destroyed last.", "ro": "Distrugerea este intotdeauna in ordinea INVERSA a constructiei/declararii. B este construit primul, deci B este distrus ultimul." }
+                }
+              ],
+              "explanation": { "en": "Member destruction always follows reverse order of declaration, whether or not the class has an explicit destructor.", "ro": "Distrugerea membrilor urmeaza intotdeauna ordinea inversa a declararii, indiferent daca clasa are un destructor explicit sau nu." },
+              "reviewStep": "oop-c4-dtor-order"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 10-16: Destruction order, delete vs delete[], ID tracking example", "ro": "Slide-uri 10-16: Ordinea distrugerii, delete vs delete[], exemplu cu ID-uri" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-operator-categories",
+      "title": { "en": "C/C++ Operator Categories", "ro": "Categorii de operatori C/C++" },
+      "group": "operators",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "How many operators does C++ have? Can you name at least 3 different ways to classify them?",
+            "ro": "Cati operatori are C++? Puteti numi cel putin 3 moduri diferite de a-i clasifica?"
+          },
+          "answer": {
+            "en": "C++ has ~40 operators. They can be classified by: (1) **arity** -- unary, binary, ternary, multi-parameter; (2) **operation type** -- arithmetic, relational, logical, bitwise, assignment, others; (3) **overloadability** -- those that can be overloaded vs those that cannot.",
+            "ro": "C++ are ~40 operatori. Pot fi clasificati dupa: (1) **aritate** -- unari, binari, ternari, multi-parametru; (2) **tipul operatiei** -- aritmetici, relationali, logici, pe biti, de atribuire, altii; (3) **posibilitatea de supraincarcare** -- cei care pot fi supraincarcati vs cei care nu pot."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Category", "ro": "Categorie" },
+            { "en": "Operators", "ro": "Operatori" },
+            { "en": "Overloadable?", "ro": "Supraincarcabil?" }
+          ],
+          "rows": [
+            [{ "en": "Arithmetic", "ro": "Aritmetici" }, "+ - * / % ++ --", { "en": "Yes", "ro": "Da" }],
+            [{ "en": "Relational", "ro": "Relationali" }, "== > < <= >= !=", { "en": "Yes", "ro": "Da" }],
+            [{ "en": "Logical", "ro": "Logici" }, "&& || !", { "en": "Yes", "ro": "Da" }],
+            [{ "en": "Bitwise", "ro": "Pe biti" }, "& | ^ << >> ~", { "en": "Yes", "ro": "Da" }],
+            [{ "en": "Assignment", "ro": "Atribuire" }, "= += -= *= /= %= >>= <<= &= ^= |=", { "en": "Yes", "ro": "Da" }],
+            [{ "en": "Other (overloadable)", "ro": "Altii (supraincarcabili)" }, "new delete -> [] () , cast", { "en": "Yes", "ro": "Da" }],
+            [{ "en": "NOT overloadable", "ro": "NU supraincarcabili" }, "sizeof ?: :: .", { "en": "No", "ro": "Nu" }]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Operator precedence** (from highest to lowest):\n\n1. `::` (scope)\n2. `() [] -> . ++ --`\n3. `+ - ! ~ ++ -- (type)* & sizeof` (unary)\n4. `* / %`\n5. `+ -`\n6. `<< >>`\n7. `< <= > >=`\n8. `== !=`\n9. `&`\n10. `^`\n11. `|`\n12. `&&`\n13. `||`\n14. `?:`\n15. `= += -= *= /= %= >>= <<= &= ^= |=`\n16. `,`",
+            "ro": "**Precedenta operatorilor** (de la cea mai mare la cea mai mica):\n\n1. `::` (scop)\n2. `() [] -> . ++ --`\n3. `+ - ! ~ ++ -- (type)* & sizeof` (unari)\n4. `* / %`\n5. `+ -`\n6. `<< >>`\n7. `< <= > >=`\n8. `== !=`\n9. `&`\n10. `^`\n11. `|`\n12. `&&`\n13. `||`\n14. `?:`\n15. `= += -= *= /= %= >>= <<= &= ^= |=`\n16. `,`"
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 17-25: Operator classification tables and precedence", "ro": "Slide-uri 17-25: Tabele de clasificare a operatorilor si precedenta" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/C_fH3tY2iU0",
+          "label": { "en": "Course 4.2 -- Operators (Prof. Balan)", "ro": "Cursul 4.2 -- Operatori (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-overloading-basics",
+      "title": { "en": "Operator Overloading for Classes", "ro": "Supraincarcarea operatorilor pentru clase" },
+      "group": "operators",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You have a class `Integer` wrapping an `int`. You write `Integer a(5), b(3); int sum = a + b;`. This won't compile -- why not, and what would you need to add to make it work?",
+            "ro": "Aveti o clasa `Integer` care impacheteaza un `int`. Scrieti `Integer a(5), b(3); int sum = a + b;`. Nu se compileaza -- de ce nu, si ce ar trebui sa adaugati pentru a functiona?"
+          },
+          "answer": {
+            "en": "The compiler doesn't know how to add two `Integer` objects. You need to define `operator+` as a member function: `int operator+(const Integer &i)`. The keyword `operator` followed by the symbol defines the special function.",
+            "ro": "Compilatorul nu stie cum sa adune doua obiecte `Integer`. Trebuie sa definiti `operator+` ca functie membru: `int operator+(const Integer &i)`. Cuvantul cheie `operator` urmat de simbol defineste functia speciala."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Operator overloading** lets you define how operators work with your classes. Key rules:\n\n- Use the keyword `operator` followed by the symbol: `operator+`, `operator==`, `operator[]`, etc.\n- **Binary operators** as member functions have one parameter (the right operand); `this` is the left operand\n- The expression `n1 + n2` is equivalent to `n1.operator+(n2)`\n- Return type is **not restricted** -- `operator>` can return an `Integer` instead of `bool` (though this is unusual)\n- Operators can be **overloaded** (e.g., `operator+(Integer)` and `operator+(float)` can coexist)\n- But you **cannot** have two overloads that differ only in return type",
+            "ro": "**Supraincarcarea operatorilor** va permite sa definiti cum functioneaza operatorii cu clasele voastre. Reguli cheie:\n\n- Folositi cuvantul cheie `operator` urmat de simbol: `operator+`, `operator==`, `operator[]`, etc.\n- **Operatorii binari** ca functii membru au un parametru (operandul drept); `this` este operandul stang\n- Expresia `n1 + n2` este echivalenta cu `n1.operator+(n2)`\n- Tipul de retur **nu este restrictionat** -- `operator>` poate returna un `Integer` in loc de `bool` (desi este neobisnuit)\n- Operatorii pot fi **supraincarcati** (ex. `operator+(Integer)` si `operator+(float)` pot coexista)\n- Dar **nu puteti** avea doua supraincarcari care difera doar prin tipul de retur"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Integer {\n    int value;\npublic:\n    Integer(int val) : value(val) {}\n    // Binary operator+ as member function\n    int operator+(const Integer &i) {\n        return value + i.value;  // this->value + i.value\n    }\n    // Overloaded: Integer + float\n    int operator+(float nr) {\n        return value + (int)nr;\n    }\n};\n\nvoid main() {\n    Integer n1(100), n2(200);\n    int x = n1 + n2;     // calls n1.operator+(n2) => 300\n    int y = n1 + 1.2f;   // calls n1.operator+(1.2f) => 101\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Operator order matters!** `n1 + 1.2f` works because `Integer` has `operator+(float)`. But `1.2f + n1` does NOT work -- `float` doesn't have an `operator+` that takes `Integer`. To solve this, use **friend functions**.",
+            "ro": "**Ordinea operatorilor conteaza!** `n1 + 1.2f` functioneaza pentru ca `Integer` are `operator+(float)`. Dar `1.2f + n1` NU functioneaza -- `float` nu are un `operator+` care sa accepte `Integer`. Pentru a rezolva, folositi **functii friend**."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Integer {\n    int value;\npublic:\n    Integer(int val) : value(val) {}\n    // Friend functions solve both directions\n    friend int operator+(const Integer &i, float val);\n    friend int operator+(float val, const Integer &i);\n};\n\nint operator+(const Integer &i, float val) {\n    return i.value + (int)val;\n}\nint operator+(float val, const Integer &i) {\n    return i.value + (int)val;\n}\n\nvoid main() {\n    Integer n1(100), n2(200);\n    int y = (1.2f + n1) + (n2 + 1.5f);  // Both directions work!\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Ambiguity error**: If you define both a member `operator+(Integer)` AND a friend `operator+(Integer, Integer)`, the compiler cannot choose between them -- compilation fails with `'operator +' is ambiguous`.",
+            "ro": "**Eroare de ambiguitate**: Daca definiti atat un membru `operator+(Integer)` CAT si un friend `operator+(Integer, Integer)`, compilatorul nu poate alege intre ele -- compilarea esueaza cu `'operator +' is ambiguous`."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is `n1 + n2` equivalent to when `operator+` is a member function?", "ro": "Cu ce este echivalent `n1 + n2` cand `operator+` este functie membru?" },
+              "options": [
+                {
+                  "text": { "en": "n2.operator+(n1)", "ro": "n2.operator+(n1)" },
+                  "correct": false,
+                  "explanation": { "en": "The LEFT operand is the object on which the method is called. `n1 + n2` means `n1.operator+(n2)`, not `n2.operator+(n1)`.", "ro": "Operandul STANG este obiectul pe care se apeleaza metoda. `n1 + n2` inseamna `n1.operator+(n2)`, nu `n2.operator+(n1)`." }
+                },
+                {
+                  "text": { "en": "n1.operator+(n2)", "ro": "n1.operator+(n2)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! For member operators, the left operand becomes `this` and the right operand is the parameter.", "ro": "Corect! Pentru operatorii membri, operandul stang devine `this` si operandul drept este parametrul." }
+                },
+                {
+                  "text": { "en": "operator+(n1, n2)", "ro": "operator+(n1, n2)" },
+                  "correct": false,
+                  "explanation": { "en": "This would be the friend function form. A member function only takes one parameter (the right operand); `this` is the left.", "ro": "Aceasta ar fi forma functiei friend. O functie membru ia un singur parametru (operandul drept); `this` este cel stang." }
+                }
+              ],
+              "explanation": { "en": "Binary member operators: left operand = this, right operand = parameter.", "ro": "Operatori membri binari: operand stang = this, operand drept = parametru." },
+              "reviewStep": "oop-c4-overloading-basics"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 26-37: operator keyword, member vs friend, overloading, ambiguity", "ro": "Slide-uri 26-37: cuvantul cheie operator, membru vs friend, supraincarcare, ambiguitate" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-relational-logical",
+      "title": { "en": "Relational, Logical & Unary Operators", "ro": "Operatori relationali, logici si unari" },
+      "group": "operators",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "From the compiler's perspective, there is **no real difference** between arithmetic, relational, and logical operators. They are all just functions with special syntax. Key implications:\n\n- `operator>` doesn't **have** to return `bool` -- it could return an `Integer`!\n- `operator&&` works exactly the same way as `operator+` from the compiler's view\n- **Unary operators** (like `!`) have no parameters as member functions, or one parameter as friend functions\n\nThis flexibility is powerful but can lead to confusing code if abused.",
+            "ro": "Din perspectiva compilatorului, **nu exista o diferenta reala** intre operatorii aritmetici, relationali si logici. Sunt toti doar functii cu sintaxa speciala. Implicatii cheie:\n\n- `operator>` nu **trebuie** sa returneze `bool` -- ar putea returna un `Integer`!\n- `operator&&` functioneaza exact la fel ca `operator+` din perspectiva compilatorului\n- **Operatorii unari** (ca `!`) nu au parametri ca functii membru, sau au un parametru ca functii friend\n\nAceasta flexibilitate este puternica dar poate duce la cod confuz daca este abuzata."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Integer {\n    int value;\npublic:\n    Integer(int val) : value(val) {}\n\n    // Relational -- returns bool (normal)\n    bool operator>(const Integer &i) {\n        return value > i.value;\n    }\n\n    // Unary -- no parameter as member function\n    int operator!() {\n        return 100 - this->value;  // custom meaning!\n    }\n};\n\nvoid main() {\n    Integer n1(20);\n    int x = !n1;  // x = 80 (100 - 20)\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Best practice**: For symmetric binary operators like `+ - * / == != < >`, prefer **friend functions** so both directions work. For operators that modify the left operand like `+= -= = [] () ->`, use **member functions**.",
+            "ro": "**Buna practica**: Pentru operatori binari simetrici ca `+ - * / == != < >`, preferati **functii friend** ca ambele directii sa functioneze. Pentru operatorii care modifica operandul stang ca `+= -= = [] () ->`, folositi **functii membru**."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 38-42: Relational, logical, and unary operator examples", "ro": "Slide-uri 38-42: Exemple de operatori relationali, logici si unari" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/WCU6lrt6H58",
+          "label": { "en": "Course 4.3 -- Operator overloading continued (Prof. Balan)", "ro": "Cursul 4.3 -- Continuare supraincarcare operatori (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-assignment-prefix",
+      "title": { "en": "Assignment & Prefix/Postfix Operators", "ro": "Operatorul de atribuire si prefix/postfix" },
+      "group": "operators",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "In `int y = x++;` and `int z = ++x;`, the compiler generates different assembly. How does C++ distinguish prefix from postfix when you overload `operator++` for a class?",
+            "ro": "In `int y = x++;` si `int z = ++x;`, compilatorul genereaza assembly diferit. Cum distinge C++ prefix de postfix cand supraincarcati `operator++` pentru o clasa?"
+          },
+          "answer": {
+            "en": "C++ uses a **dummy `int` parameter** to distinguish: `operator++()` is prefix, `operator++(int)` is postfix. The `int` parameter is always 0 and is never used -- it's purely a syntactic trick.",
+            "ro": "C++ foloseste un **parametru `int` fictiv** pentru a distinge: `operator++()` este prefix, `operator++(int)` este postfix. Parametrul `int` este intotdeauna 0 si nu este niciodata folosit -- este pur un truc sintactic."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Assignment operator (`operator=`)**:\n- Returns a **reference** to `*this` to enable chaining: `a = b = c`\n- `operator=` CANNOT be a friend function (also `operator[]`, `operator()`, `operator->`)\n- However, compound assignments (`+=`, `-=`, etc.) CAN be friend functions\n\n**Prefix/Postfix distinction:**\n- **Prefix** `++n1`: `operator++()` -- no parameter, returns reference to modified object\n- **Postfix** `n1++`: `operator++(int)` -- dummy `int` param (always 0), returns copy of old value\n\nPostfix returns the **old value** first, then increments. Prefix increments first, then returns the **new value**.",
+            "ro": "**Operatorul de atribuire (`operator=`)**:\n- Returneaza o **referinta** la `*this` pentru a permite inlantuirea: `a = b = c`\n- `operator=` NU poate fi functie friend (la fel `operator[]`, `operator()`, `operator->`)\n- Totusi, atribuirile compuse (`+=`, `-=`, etc.) POT fi functii friend\n\n**Distinctia prefix/postfix:**\n- **Prefix** `++n1`: `operator++()` -- fara parametru, returneaza referinta la obiectul modificat\n- **Postfix** `n1++`: `operator++(int)` -- parametru `int` fictiv (intotdeauna 0), returneaza copie a valorii vechi\n\nPostfix returneaza **valoarea veche** prima, apoi incrementeaza. Prefix incrementeaza prima, apoi returneaza **valoarea noua**."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Integer {\n    int value;\npublic:\n    Integer(int val) : value(val) {}\n\n    // Assignment -- returns reference for chaining\n    Integer& operator=(int val) {\n        value = val;\n        return (*this);\n    }\n\n    // Prefix ++n1: increment then return reference\n    Integer& operator++() {\n        value += 1;\n        return (*this);\n    }\n\n    // Postfix n1++: save old, increment, return old copy\n    Integer operator++(int) {   // dummy int parameter\n        Integer tempObject(value);  // Save old value\n        value += 1;                 // Increment\n        return (tempObject);        // Return OLD value\n    }\n};"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which operators CANNOT be defined as friend (non-member) functions?", "ro": "Care operatori NU pot fi definiti ca functii friend (non-membru)?" },
+              "options": [
+                {
+                  "text": { "en": "+ - * / == !=", "ro": "+ - * / == !=" },
+                  "correct": false,
+                  "explanation": { "en": "All arithmetic and relational operators CAN be friend functions. In fact, this is recommended for symmetric operators.", "ro": "Toti operatorii aritmetici si relationali POT fi functii friend. De fapt, acest lucru este recomandat pentru operatorii simetrici." }
+                },
+                {
+                  "text": { "en": "= [] () ->", "ro": "= [] () ->" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! These four operators must be non-static member functions. The compiler requires them to be defined within the class.", "ro": "Corect! Acesti patru operatori trebuie sa fie functii membru non-statice. Compilatorul cere ca acestia sa fie definiti in interiorul clasei." }
+                },
+                {
+                  "text": { "en": "+= -= >>= <<=", "ro": "+= -= >>= <<=" },
+                  "correct": false,
+                  "explanation": { "en": "Compound assignment operators CAN be friend functions (unlike plain `=`). The professor shows an example of `operator+=` as a friend.", "ro": "Operatorii de atribuire compusa POT fi functii friend (spre deosebire de `=` simplu). Profesorul arata un exemplu de `operator+=` ca friend." }
+                }
+              ],
+              "explanation": { "en": "Only operator=, operator[], operator(), and operator-> must be non-static member functions.", "ro": "Doar operator=, operator[], operator() si operator-> trebuie sa fie functii membru non-statice." },
+              "reviewStep": "oop-c4-assignment-prefix"
+            },
+            {
+              "question": { "en": "How does C++ distinguish `++x` (prefix) from `x++` (postfix) in operator overloading?", "ro": "Cum distinge C++ `++x` (prefix) de `x++` (postfix) in supraincarcarea operatorilor?" },
+              "options": [
+                {
+                  "text": { "en": "Different function names: operator_pre++ and operator_post++", "ro": "Nume de functii diferite: operator_pre++ si operator_post++" },
+                  "correct": false,
+                  "explanation": { "en": "Both use the same name `operator++`. The distinction is in the parameter list.", "ro": "Ambele folosesc acelasi nume `operator++`. Distinctia este in lista de parametri." }
+                },
+                {
+                  "text": { "en": "Postfix has a dummy int parameter: operator++(int)", "ro": "Postfix are un parametru int fictiv: operator++(int)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! `operator++()` = prefix, `operator++(int)` = postfix. The int is always 0 and just serves as a syntactic marker.", "ro": "Corect! `operator++()` = prefix, `operator++(int)` = postfix. Int-ul este intotdeauna 0 si serveste doar ca marker sintactic." }
+                },
+                {
+                  "text": { "en": "The return type distinguishes them: reference for prefix, value for postfix", "ro": "Tipul de retur le distinge: referinta pentru prefix, valoare pentru postfix" },
+                  "correct": false,
+                  "explanation": { "en": "While the return types typically differ (reference for prefix, copy for postfix), this is convention, not what the compiler uses to distinguish them. The dummy int parameter is the actual mechanism.", "ro": "Desi tipurile de retur difera de obicei (referinta pentru prefix, copie pentru postfix), aceasta este o conventie, nu ceea ce compilatorul foloseste pentru a le distinge. Parametrul int fictiv este mecanismul real." }
+                }
+              ],
+              "explanation": { "en": "The dummy int parameter is the C++ trick for distinguishing prefix from postfix operator overloading.", "ro": "Parametrul int fictiv este trucul C++ pentru a distinge supraincarcarea operatorilor prefix de postfix." },
+              "reviewStep": "oop-c4-assignment-prefix"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 43-57: Assignment operators, prefix/postfix distinction, correct implementations", "ro": "Slide-uri 43-57: Operatori de atribuire, distinctia prefix/postfix, implementari corecte" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-special-operators",
+      "title": { "en": "Special Operators: new, cast, [], (), ->", "ro": "Operatori speciali: new, cast, [], (), ->" },
+      "group": "operators",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Several operators have unique rules that differ from regular arithmetic/relational operators:\n\n**`operator new`**: Must return `void*`, first parameter is `size_t` (object size). Does NOT call the constructor -- the compiler calls it after allocation. Cannot be a friend function. Multi-parameter versions are called **placement new**.\n\n**`operator delete`**: Must return `void`, parameter is `void*`. Similarly, `operator new[]` and `operator delete[]` handle arrays.\n\n**Cast operator**: Has no explicit return type (it IS the type you cast to). Syntax: `operator float()`. Called both for explicit `(float)obj` and implicit `float f = obj;`. Cannot be a friend function.",
+            "ro": "Cativa operatori au reguli unice care difera de operatorii aritmetici/relationali obisnuiti:\n\n**`operator new`**: Trebuie sa returneze `void*`, primul parametru este `size_t` (dimensiunea obiectului). NU apeleaza constructorul -- compilatorul il apeleaza dupa alocare. Nu poate fi functie friend. Versiunile cu mai multi parametri se numesc **placement new**.\n\n**`operator delete`**: Trebuie sa returneze `void`, parametrul este `void*`. Similar, `operator new[]` si `operator delete[]` gestioneaza array-uri.\n\n**Operatorul de cast**: Nu are tip de retur explicit (ESTE tipul la care se face cast-ul). Sintaxa: `operator float()`. Apelat atat pentru cast explicit `(float)obj` cat si implicit `float f = obj;`. Nu poate fi functie friend."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// operator new -- custom memory allocation\nint GlobalValue = 0;\nclass Integer {\n    int value;\npublic:\n    Integer(int val) : value(val) {}\n    void* operator new(size_t t) {\n        return &GlobalValue;  // Allocate at custom location\n    }\n};\nvoid main() {\n    Integer *n1 = new Integer(100); // GlobalValue becomes 100\n}\n\n// Placement new -- extra parameters\nvoid* operator new(size_t t, int value) {\n    return &GlobalValue;\n}\nInteger *n1 = new(100) Integer(123); // Syntax: new(extra_params) Type(ctor_params)"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Cast operator -- no return type needed\nclass Integer {\n    int value;\npublic:\n    Integer(int val) : value(val) {}\n    operator float() {            // Cast to float\n        return float(value * 2);\n    }\n};\nvoid main() {\n    Integer n1(2);\n    float f1 = (float)n1;   // Explicit cast: f1 = 4.0\n    float f2 = n1;           // Implicit conversion: f2 = 4.0\n    float f3 = n1 + 0.2f;   // Cast applied first: f3 = 4.2\n}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**`operator[]` (index)**: Takes exactly one parameter (any type). Cannot be friend. Supports overloading with different key types:\n\n```cpp\nbool operator[](int index);          // n1[2]\nbool operator[](const char *name);   // n1[\"second\"]\n```\n\n**`operator()` (function call)**: Can have **any number** of parameters (including zero). This is the main difference from `operator[]`. Cannot be friend:\n\n```cpp\nint operator()(int start, int end);  // n1(1, 3)\nint operator()();                    // n1()\n```\n\n**`operator->` (member access)**: Must return a **pointer to an object**. Only works on objects, not pointers. Cannot be friend.",
+            "ro": "**`operator[]` (index)**: Primeste exact un parametru (de orice tip). Nu poate fi friend. Suporta supraincarcare cu tipuri diferite de chei:\n\n```cpp\nbool operator[](int index);          // n1[2]\nbool operator[](const char *name);   // n1[\"second\"]\n```\n\n**`operator()` (apel functie)**: Poate avea **orice numar** de parametri (inclusiv zero). Aceasta este diferenta principala fata de `operator[]`. Nu poate fi friend:\n\n```cpp\nint operator()(int start, int end);  // n1(1, 3)\nint operator()();                    // n1()\n```\n\n**`operator->` (acces membru)**: Trebuie sa returneze un **pointer la un obiect**. Functioneaza doar pe obiecte, nu pe pointeri. Nu poate fi friend."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is the key difference between `operator[]` and `operator()`?", "ro": "Care este diferenta cheie intre `operator[]` si `operator()`?" },
+              "options": [
+                {
+                  "text": { "en": "operator[] can be a friend function but operator() cannot", "ro": "operator[] poate fi functie friend dar operator() nu" },
+                  "correct": false,
+                  "explanation": { "en": "Neither can be a friend function. Both must be non-static member functions.", "ro": "Niciunul nu poate fi functie friend. Ambii trebuie sa fie functii membru non-statice." }
+                },
+                {
+                  "text": { "en": "operator() can have multiple parameters (or none), operator[] takes exactly one", "ro": "operator() poate avea mai multi parametri (sau niciunul), operator[] primeste exact unul" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! `operator()` is the most flexible -- any number of parameters. `operator[]` is limited to exactly one.", "ro": "Corect! `operator()` este cel mai flexibil -- orice numar de parametri. `operator[]` este limitat la exact unul." }
+                },
+                {
+                  "text": { "en": "operator[] returns a reference, operator() returns a value", "ro": "operator[] returneaza o referinta, operator() returneaza o valoare" },
+                  "correct": false,
+                  "explanation": { "en": "Both can return any type -- there is no restriction on return types for either operator.", "ro": "Ambii pot returna orice tip -- nu exista restrictii asupra tipurilor de retur pentru niciunul." }
+                }
+              ],
+              "explanation": { "en": "operator() is the most versatile overloadable operator -- any number of params, any return type.", "ro": "operator() este cel mai versatil operator supraincarcabil -- orice numar de parametri, orice tip de retur." },
+              "reviewStep": "oop-c4-special-operators"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 58-76: operator new, placement new, cast, index, function call, arrow operators", "ro": "Slide-uri 58-76: operator new, placement new, cast, index, apel functie, operator sageata" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-comma-lazy",
+      "title": { "en": "Comma Operator & Lazy Evaluation", "ro": "Operatorul virgula si evaluarea lenesa" },
+      "group": "operators",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Comma operator (`operator,`)**: Evaluates left-to-right and normally returns the rightmost value. When overloaded, it works like any binary operator.\n\nExample: `int x = (10, 20, 30, 40)` evaluates to 40 (each comma discards the left value).\n\nWith a class: `(n1, 2.5f)` calls `n1.operator,(2.5f)`. Friend functions are recommended for multiple type combinations.",
+            "ro": "**Operatorul virgula (`operator,`)**: Evalueaza de la stanga la dreapta si in mod normal returneaza valoarea din dreapta. Cand este supraincarcat, functioneaza ca orice operator binar.\n\nExemplu: `int x = (10, 20, 30, 40)` se evalueaza la 40 (fiecare virgula ignora valoarea din stanga).\n\nCu o clasa: `(n1, 2.5f)` apeleaza `n1.operator,(2.5f)`. Functiile friend sunt recomandate pentru combinatii multiple de tipuri."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Overloading disables lazy evaluation!** Normally, `true || expr` skips `expr` (short-circuit evaluation). But if you overload `operator||`, the compiler must evaluate BOTH operands to pass them as function arguments. This is a significant behavioral change:\n\n- `(bool)n1 || (bool)n2 || (bool)n3` with built-in `||`: stops at first `true`\n- `n1 || n2 || n3` with overloaded `operator||`: evaluates ALL three operands",
+            "ro": "**Supraincarcarea dezactiveaza evaluarea lenesa!** In mod normal, `true || expr` sare peste `expr` (evaluare scurt-circuit). Dar daca supraincarcati `operator||`, compilatorul trebuie sa evalueze AMBII operanzi pentru a-i pasa ca argumente de functie. Aceasta este o schimbare comportamentala semnificativa:\n\n- `(bool)n1 || (bool)n2 || (bool)n3` cu `||` built-in: se opreste la primul `true`\n- `n1 || n2 || n3` cu `operator||` supraincarcat: evalueaza TOTI trei operanzii"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Bool {\n    bool value;\n    const char * name;\npublic:\n    Bool(bool val, const char * nm) : value(val), name(nm) {}\n    Bool operator||(const Bool &i) {\n        bool res = value || i.value;\n        printf(\"Compute bool(%s || %s)=>%s\\n\", name, i.name,\n               res ? \"true\" : \"false\");\n        Bool b(res, \"temp\");\n        return b;\n    };\n    operator bool() {\n        printf(\"Return bool for %s => %s\\n\", name, value?\"true\":\"false\");\n        return value;\n    }\n};\n\nint main() {\n    Bool n1(true,\"n1\"), n2(false,\"n2\"), n3(false,\"n3\");\n\n    // With cast (built-in ||): lazy evaluation works\n    bool res1 = ((bool)n1) || ((bool)n2) || ((bool)n3);\n    // Output: \"Return bool for n1 => true\" (stops here!)\n\n    // With overloaded ||: ALL evaluated\n    bool res2 = n1 || n2 || n3;\n    // Output: Compute(n1||n2)=>true, Compute(temp||n3)=>true, Return temp=>true\n}"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens to short-circuit (lazy) evaluation when you overload operator|| or operator&&?", "ro": "Ce se intampla cu evaluarea scurt-circuit (lenesa) cand supraincarcati operator|| sau operator&&?" },
+              "options": [
+                {
+                  "text": { "en": "It still works -- the compiler optimizes overloaded operators too", "ro": "Functioneaza in continuare -- compilatorul optimizeaza si operatorii supraincarcati" },
+                  "correct": false,
+                  "explanation": { "en": "The compiler cannot short-circuit because both operands must be evaluated before calling the function.", "ro": "Compilatorul nu poate scurt-circuita deoarece ambii operanzi trebuie evaluati inainte de a apela functia." }
+                },
+                {
+                  "text": { "en": "It is lost -- both operands are always evaluated", "ro": "Se pierde -- ambii operanzi sunt intotdeauna evaluati" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Overloaded operators are function calls. Both parameters must be evaluated before the function is invoked.", "ro": "Corect! Operatorii supraincarcati sunt apeluri de functie. Ambii parametri trebuie evaluati inainte de invocarea functiei." }
+                },
+                {
+                  "text": { "en": "Compilation error -- you cannot overload || and &&", "ro": "Eroare de compilare -- nu puteti supraincarca || si &&" },
+                  "correct": false,
+                  "explanation": { "en": "You CAN overload them. But you lose short-circuit evaluation, which is why most style guides recommend against it.", "ro": "PUTETI sa-i supraincarcati. Dar pierdeti evaluarea scurt-circuit, motiv pentru care majoritatea ghidurilor de stil recomanda sa nu o faceti." }
+                }
+              ],
+              "explanation": { "en": "Overloading || and && is legal but discouraged because it silently removes short-circuit behavior.", "ro": "Supraincarcarea || si && este legala dar descurajata deoarece elimina silentios comportamentul scurt-circuit." },
+              "reviewStep": "oop-c4-comma-lazy"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 77-84: Comma operator, lazy evaluation loss with overloaded ||/&&", "ro": "Slide-uri 77-84: Operatorul virgula, pierderea evaluarii lenese cu ||/&& supraincarcati" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/zP4N73IBMK8",
+          "label": { "en": "Course 4.4 -- Special operators, comma, lazy eval (Prof. Balan)", "ro": "Cursul 4.4 -- Operatori speciali, virgula, evaluare lenesa (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-object-ops",
+      "title": { "en": "Object Operations: Copy vs Move", "ro": "Operatii cu obiecte: copiere vs mutare" },
+      "group": "object-operations",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "When you pass an object by value to a function, what exactly gets copied onto the stack? What if the object contains a pointer to heap memory?",
+            "ro": "Cand pasati un obiect prin valoare la o functie, ce anume se copiaza pe stack? Ce se intampla daca obiectul contine un pointer la memorie heap?"
+          },
+          "answer": {
+            "en": "Without a copy constructor, the compiler does a **byte-by-byte copy** (like `memcpy`). If the object has a pointer, both the original and the copy point to the **same heap memory** -- a dangerous situation called **shallow copy**. A copy constructor lets you do a **deep copy** (allocate new memory).",
+            "ro": "Fara un constructor de copiere, compilatorul face o **copiere byte cu byte** (ca `memcpy`). Daca obiectul are un pointer, atat originalul cat si copia indica aceeasi **memorie heap** -- o situatie periculoasa numita **copiere superficiala**. Un constructor de copiere va permite sa faceti o **copiere profunda** (alocare de memorie noua)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**When passing objects to functions:**\n- **By reference/pointer**: only the address is pushed onto the stack (4/8 bytes)\n- **By value**: the entire object is copied. The compiler uses:\n  1. **Copy constructor** if defined: `Date(const Date &d)`\n  2. **Byte-by-byte memcpy** if no copy constructor exists\n\n**When returning objects from functions:**\nThe compiler creates a temporary object, copies/moves the local into it, then copies/moves it to the destination. With **move constructor** `Date(Date &&d)`, the temporary's resources can be *stolen* instead of copied.\n\n**Important**: If you define a move constructor but NOT a copy constructor, the compiler **deletes** the implicit copy constructor. You must define both.",
+            "ro": "**La pasarea obiectelor la functii:**\n- **Prin referinta/pointer**: doar adresa este pusa pe stack (4/8 bytes)\n- **Prin valoare**: intregul obiect este copiat. Compilatorul foloseste:\n  1. **Constructorul de copiere** daca este definit: `Date(const Date &d)`\n  2. **Memcpy byte cu byte** daca nu exista constructor de copiere\n\n**La returnarea obiectelor din functii:**\nCompilatorul creeaza un obiect temporar, copiaza/muta localul in el, apoi il copiaza/muta la destinatie. Cu **constructorul de mutare** `Date(Date &&d)`, resursele temporarului pot fi *furate* in loc de copiate.\n\n**Important**: Daca definiti un constructor de mutare dar NU un constructor de copiere, compilatorul **sterge** constructorul de copiere implicit. Trebuie sa le definiti pe amandoua."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class Date {\n    int X, Y, Z, T;\npublic:\n    Date(int value) : X(value), Y(value+1), Z(value+2), T(value+3) {}\n    Date(const Date &d) : X(d.X), Y(d.Y), Z(d.Z), T(d.T) {} // Copy ctor\n    void SetX(int value) { X = value; }\n};\n\n// By value: copy constructor called to push 16 bytes onto stack\nvoid Set(Date d, int value) { d.SetX(value); }\n\n// By reference: only 4/8 byte address pushed\nvoid Set(Date &d, int value) { d.SetX(value); }\n\nvoid main() {\n    Date d(1);\n    Set(d, 123);  // Which overload? Depends on declaration\n}"
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 85-97: Object copy by value, copy constructor vs memcpy, move constructor, reference passing", "ro": "Slide-uri 85-97: Copiere obiecte prin valoare, constructor copiere vs memcpy, constructor mutare, pasare prin referinta" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-move-semantics",
+      "title": { "en": "Move Semantics in Practice", "ro": "Semantica de mutare in practica" },
+      "group": "object-operations",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Let's trace what happens when returning an object from a function, comparing **copy only** vs **copy + move** implementations.\n\n**Without move semantics** (String class with only copy ctor + operator=):\n1. Allocate memory for `main::s`\n2. Allocate memory for `Get::s`\n3. Allocate memory for temp copy (copy constructor)\n4. Copy string from `Get::s` to temp\n5. Free `Get::s`\n6. Free old `main::s`\n7. Copy string from temp to `main::s`\n8. Free temp\n9. Free `main::s` at end\n\n**Result**: The string `\"C++ test\"` is allocated **3 times** and copied twice.\n\n**With move semantics** (add move ctor + move operator=):\n1. Allocate memory for `main::s`\n2. Allocate memory for `Get::s`\n3. Move pointer from `Get::s` to temp (set source to nullptr)\n4. `Get::s` destructor: nothing to delete\n5. Move pointer from temp to `main::s`\n6. temp destructor: nothing to delete\n7. Free `main::s` at end\n\n**Result**: The string is allocated **once** and the pointer is just moved.",
+            "ro": "Sa urmarim ce se intampla cand returnam un obiect dintr-o functie, comparand implementarile **doar copiere** vs **copiere + mutare**.\n\n**Fara semantica de mutare** (clasa String cu doar copy ctor + operator=):\n1. Aloca memorie pentru `main::s`\n2. Aloca memorie pentru `Get::s`\n3. Aloca memorie pentru copia temporara (constructor copiere)\n4. Copiaza string-ul din `Get::s` in temp\n5. Elibereaza `Get::s`\n6. Elibereaza vechiul `main::s`\n7. Copiaza string-ul din temp in `main::s`\n8. Elibereaza temp\n9. Elibereaza `main::s` la sfarsit\n\n**Rezultat**: String-ul `\"C++ test\"` este alocat de **3 ori** si copiat de doua ori.\n\n**Cu semantica de mutare** (adaugam move ctor + move operator=):\n1. Aloca memorie pentru `main::s`\n2. Aloca memorie pentru `Get::s`\n3. Muta pointerul din `Get::s` in temp (seteaza sursa la nullptr)\n4. Destructorul `Get::s`: nimic de sters\n5. Muta pointerul din temp in `main::s`\n6. Destructorul temp: nimic de sters\n7. Elibereaza `main::s` la sfarsit\n\n**Rezultat**: String-ul este alocat **o singura data** si pointerul este doar mutat."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "class String {\n    char * text;\n    void CopyString(const char * s) {\n        text = new char[strlen(s) + 1];\n        memcpy(text, s, strlen(s) + 1);\n    }\npublic:\n    String(const char * s) { CopyString(s); }\n    ~String() { if (text) delete text; }\n\n    // Copy constructor -- allocates NEW memory\n    String(const String &obj) { CopyString(obj.text); }\n\n    // Copy assignment -- frees old, allocates new\n    String& operator=(const String &obj) {\n        if (text) { delete text; text = nullptr; }\n        CopyString(obj.text);\n        return (*this);\n    }\n\n    // Move constructor -- STEALS the pointer\n    String(String &&obj) {\n        this->text = obj.text;\n        obj.text = nullptr;   // Source loses ownership\n    }\n\n    // Move assignment -- STEALS the pointer\n    String& operator=(String &&obj) {\n        this->text = obj.text;\n        obj.text = nullptr;\n        return (*this);\n    }\n};"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**When does the compiler prefer move over copy?**\n- **Temporary objects** (return values, results of expressions): move constructor / move assignment\n- **Named objects** (references): copy constructor / copy assignment\n\nIf no move constructor/assignment exists, the compiler falls back to copy. Move semantics are an optimization, not a requirement.",
+            "ro": "**Cand prefera compilatorul mutarea in locul copierii?**\n- **Obiecte temporare** (valori de retur, rezultate ale expresiilor): constructor mutare / atribuire mutare\n- **Obiecte cu nume** (referinte): constructor copiere / atribuire copiere\n\nDaca nu exista constructor/atribuire de mutare, compilatorul recurge la copiere. Semantica de mutare este o optimizare, nu o cerinta."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Returning a reference to a local variable is undefined behavior!** If `Get` returns `Date&` instead of `Date`, it returns a pointer to stack memory that no longer exists after `Get` returns. The data may be overwritten at any time.",
+            "ro": "**Returnarea unei referinte la o variabila locala este comportament nedefinit!** Daca `Get` returneaza `Date&` in loc de `Date`, returneaza un pointer la memorie stack care nu mai exista dupa ce `Get` se termina. Datele pot fi suprascrise oricand."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 98-108: String class trace, copy vs move performance, returning references to locals", "ro": "Slide-uri 98-108: Trasarea clasei String, performanta copiere vs mutare, returnarea referintelor la locale" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c4-quiz",
+      "title": { "en": "Course 4 Self-Test", "ro": "Autoevaluare Cursul 4" },
+      "group": "review",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "A class has a private destructor. Which statement compiles?", "ro": "O clasa are un destructor privat. Care instructiune se compileaza?" },
+              "options": [
+                {
+                  "text": { "en": "Date d; (stack allocation)", "ro": "Date d; (alocare pe stack)" },
+                  "correct": false,
+                  "explanation": { "en": "Stack allocation requires calling the destructor at scope exit. Since the destructor is private, this fails.", "ro": "Alocarea pe stack necesita apelarea destructorului la iesirea din scop. Deoarece destructorul este privat, aceasta esueaza." }
+                },
+                {
+                  "text": { "en": "Date *d = new Date(); (without delete)", "ro": "Date *d = new Date(); (fara delete)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Heap allocation doesn't need the destructor until delete is called. Without delete, it compiles but leaks memory.", "ro": "Corect! Alocarea pe heap nu are nevoie de destructor pana cand se apeleaza delete. Fara delete, se compileaza dar pierde memorie." }
+                },
+                {
+                  "text": { "en": "Date *d = new Date(); delete d;", "ro": "Date *d = new Date(); delete d;" },
+                  "correct": false,
+                  "explanation": { "en": "The `delete d;` call requires access to the destructor, which is private. This line fails to compile.", "ro": "Apelul `delete d;` necesita acces la destructor, care este privat. Aceasta linie nu se compileaza." }
+                }
+              ],
+              "explanation": { "en": "Private destructors prevent both stack allocation and external delete, but allow new without delete.", "ro": "Destructorii privati previn atat alocarea pe stack cat si delete-ul extern, dar permit new fara delete." },
+              "reviewStep": "oop-c4-destructor"
+            },
+            {
+              "question": { "en": "What does `operator new` return and what is its first parameter?", "ro": "Ce returneaza `operator new` si care este primul sau parametru?" },
+              "options": [
+                {
+                  "text": { "en": "Returns the object, first param is constructor args", "ro": "Returneaza obiectul, primul param sunt argumentele constructorului" },
+                  "correct": false,
+                  "explanation": { "en": "operator new only allocates memory -- it does NOT call the constructor. The compiler calls the constructor separately after allocation.", "ro": "operator new doar aloca memorie -- NU apeleaza constructorul. Compilatorul apeleaza constructorul separat dupa alocare." }
+                },
+                {
+                  "text": { "en": "Returns void*, first param is size_t (object size)", "ro": "Returneaza void*, primul param este size_t (dimensiunea obiectului)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! operator new is a memory allocator, not an object constructor. It returns raw memory as void*.", "ro": "Corect! operator new este un alocator de memorie, nu un constructor de obiecte. Returneaza memorie bruta ca void*." }
+                },
+                {
+                  "text": { "en": "Returns void*, first param is the object pointer", "ro": "Returneaza void*, primul param este pointerul la obiect" },
+                  "correct": false,
+                  "explanation": { "en": "The first parameter is size_t (the size in bytes needed), not an object pointer. The object doesn't exist yet when new is called.", "ro": "Primul parametru este size_t (dimensiunea in bytes necesara), nu un pointer la obiect. Obiectul nu exista inca cand new este apelat." }
+                }
+              ],
+              "explanation": { "en": "operator new allocates raw memory; the constructor is called automatically by the compiler afterwards.", "ro": "operator new aloca memorie bruta; constructorul este apelat automat de compilator ulterior." },
+              "reviewStep": "oop-c4-special-operators"
+            },
+            {
+              "question": { "en": "A class has operator float() and operator+(float). What does `n1 + 0.2f` call?", "ro": "O clasa are operator float() si operator+(float). Ce apeleaza `n1 + 0.2f`?" },
+              "options": [
+                {
+                  "text": { "en": "Cast to float first, then built-in float + float", "ro": "Cast la float prima data, apoi float + float built-in" },
+                  "correct": false,
+                  "explanation": { "en": "When an exact operator+ match exists for the given parameter type, it takes priority over implicit conversion.", "ro": "Cand exista o potrivire exacta operator+ pentru tipul de parametru dat, aceasta are prioritate fata de conversia implicita." }
+                },
+                {
+                  "text": { "en": "operator+(float) directly -- the explicit operator has priority", "ro": "operator+(float) direct -- operatorul explicit are prioritate" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! The compiler prefers the direct operator+ match over implicit conversion via cast operator.", "ro": "Corect! Compilatorul prefera potrivirea directa operator+ fata de conversia implicita prin operatorul de cast." }
+                },
+                {
+                  "text": { "en": "Ambiguity error -- compiler can't choose", "ro": "Eroare de ambiguitate -- compilatorul nu poate alege" },
+                  "correct": false,
+                  "explanation": { "en": "There is no ambiguity. Direct operator overload resolution takes priority over implicit conversion sequences.", "ro": "Nu exista ambiguitate. Rezolutia directa a supraincarcarii operatorului are prioritate fata de secventele de conversie implicita." }
+                }
+              ],
+              "explanation": { "en": "Direct operator matches are preferred over implicit conversions. Cast operators are fallbacks.", "ro": "Potrivirile directe de operatori sunt preferate fata de conversiile implicite. Operatorii de cast sunt solutii de rezerva." },
+              "reviewStep": "oop-c4-special-operators"
+            },
+            {
+              "question": { "en": "With move semantics, how many times is the string \"C++ test\" allocated when returned from a function?", "ro": "Cu semantica de mutare, de cate ori este alocat string-ul \"C++ test\" cand este returnat dintr-o functie?" },
+              "options": [
+                {
+                  "text": { "en": "3 times (source, temp, destination)", "ro": "De 3 ori (sursa, temp, destinatie)" },
+                  "correct": false,
+                  "explanation": { "en": "That's the count WITHOUT move semantics. With move, the pointer is transferred, not re-allocated.", "ro": "Acesta este numarul FARA semantica de mutare. Cu mutare, pointerul este transferat, nu realocat." }
+                },
+                {
+                  "text": { "en": "1 time (allocated in source, pointer moved to destination)", "ro": "O singura data (alocat in sursa, pointerul mutat la destinatie)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Move constructor/assignment steals the pointer instead of allocating new memory. The string data is allocated once.", "ro": "Corect! Constructorul/atribuirea de mutare fura pointerul in loc sa aloce memorie noua. Datele string-ului sunt alocate o singura data." }
+                },
+                {
+                  "text": { "en": "0 times (the compiler optimizes it away completely)", "ro": "De 0 ori (compilatorul optimizeaza complet)" },
+                  "correct": false,
+                  "explanation": { "en": "The string must be allocated at least once (in the function). Move semantics avoid extra copies, not the initial allocation.", "ro": "String-ul trebuie alocat cel putin o data (in functie). Semantica de mutare evita copiile extra, nu alocarea initiala." }
+                }
+              ],
+              "explanation": { "en": "Move semantics reduce 3 allocations to 1 by transferring ownership of heap memory instead of copying it.", "ro": "Semantica de mutare reduce 3 alocari la 1 prin transferul proprietatii memoriei heap in loc de copierea ei." },
+              "reviewStep": "oop-c4-move-semantics"
+            },
+            {
+              "question": { "en": "What's wrong with returning a Date& (reference) from a function that creates a local Date object?", "ro": "Ce e gresit in returnarea unui Date& (referinta) dintr-o functie care creeaza un obiect Date local?" },
+              "options": [
+                {
+                  "text": { "en": "The reference points to destroyed stack memory (dangling reference)", "ro": "Referinta indica memorie stack distrusa (referinta suspendata)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! The local object is destroyed when the function returns. The reference now points to invalid memory -- undefined behavior.", "ro": "Corect! Obiectul local este distrus cand functia se termina. Referinta indica acum memorie invalida -- comportament nedefinit." }
+                },
+                {
+                  "text": { "en": "Nothing -- the compiler makes a copy automatically", "ro": "Nimic -- compilatorul face o copie automat" },
+                  "correct": false,
+                  "explanation": { "en": "Returning by reference does NOT copy. It returns the address of the local, which becomes invalid after the function returns.", "ro": "Returnarea prin referinta NU copiaza. Returneaza adresa localului, care devine invalida dupa ce functia se termina." }
+                },
+                {
+                  "text": { "en": "Compilation error -- you cannot return local references", "ro": "Eroare de compilare -- nu puteti returna referinte locale" },
+                  "correct": false,
+                  "explanation": { "en": "The compiler may warn but it compiles. The error is at runtime -- the reference points to freed stack memory.", "ro": "Compilatorul poate avertiza dar se compileaza. Eroarea este la runtime -- referinta indica memorie stack eliberata." }
+                }
+              ],
+              "explanation": { "en": "Never return references or pointers to local variables. Return by value (the compiler will use move semantics to optimize).", "ro": "Nu returnati niciodata referinte sau pointeri la variabile locale. Returnati prin valoare (compilatorul va folosi semantica de mutare pentru optimizare)." },
+              "reviewStep": "oop-c4-move-semantics"
+            },
+            {
+              "question": { "en": "When does the compiler use the move constructor instead of the copy constructor?", "ro": "Cand foloseste compilatorul constructorul de mutare in loc de constructorul de copiere?" },
+              "options": [
+                {
+                  "text": { "en": "Always, because move is faster", "ro": "Intotdeauna, pentru ca mutarea este mai rapida" },
+                  "correct": false,
+                  "explanation": { "en": "Move is only used for temporary/rvalue objects. Named objects (lvalues) still use copy constructor.", "ro": "Mutarea se foloseste doar pentru obiecte temporare/rvalue. Obiectele cu nume (lvalue) folosesc in continuare constructorul de copiere." }
+                },
+                {
+                  "text": { "en": "For temporary (rvalue) objects; named objects use copy", "ro": "Pentru obiecte temporare (rvalue); obiectele cu nume folosesc copiere" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Move semantics apply to temporaries (return values, results of expressions). For named variables, copy is used.", "ro": "Corect! Semantica de mutare se aplica temporarelor (valori de retur, rezultate ale expresiilor). Pentru variabilele cu nume, se foloseste copierea." }
+                },
+                {
+                  "text": { "en": "Only when explicitly called with std::move()", "ro": "Doar cand se apeleaza explicit cu std::move()" },
+                  "correct": false,
+                  "explanation": { "en": "The compiler automatically selects move for temporaries. std::move() forces move on named objects, but it's not the only trigger.", "ro": "Compilatorul selecteaza automat mutarea pentru temporare. std::move() forteaza mutarea pe obiecte cu nume, dar nu este singurul declansator." }
+                }
+              ],
+              "explanation": { "en": "Move constructor is used for temporaries; copy constructor for named (lvalue) objects. std::move can force move on lvalues.", "ro": "Constructorul de mutare se foloseste pentru temporare; constructorul de copiere pentru obiecte cu nume (lvalue). std::move poate forta mutarea pe lvalue-uri." },
+              "reviewStep": "oop-c4-move-semantics"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

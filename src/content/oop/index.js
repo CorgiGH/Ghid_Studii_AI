@@ -14,16 +14,7 @@ const oop = {
     { id: 'oop-c1', title: { en: 'Course 1: Introduction to C++', ro: 'Cursul 1: Introducere în C++' }, shortTitle: { en: 'C1: Introduction', ro: 'C1: Introducere' }, sectionCount: 12, metaId: 'oop-c1', src: 'oop/courses/course-01.json' },
     { id: 'oop-c2', title: { en: 'Course 2: C++ Language Specifiers', ro: 'Cursul 2: Specificatori ai limbajului C++' }, shortTitle: { en: 'C2: Specifiers', ro: 'C2: Specificatori' }, sectionCount: 7, metaId: 'oop-c2', src: 'oop/courses/course-02.json' },
     { id: 'oop-c3', title: { en: 'Course 3: Creating an Object', ro: 'Cursul 3: Crearea unui obiect' }, shortTitle: { en: 'C3: Objects', ro: 'C3: Obiecte' }, sectionCount: 9, metaId: 'oop-c3', src: 'oop/courses/course-03.json' },
-    { id: 'oop-course_4', title: { en: 'Course 4: Operators', ro: 'Cursul 4: Operatori' }, shortTitle: { en: 'C4: Operators', ro: 'C4: Operatori' }, sectionCount: 6,
-      sections: [
-        { id: 'oop-course_4-destructor', title: { en: '1. Destructor', ro: '1. Destructor' } },
-        { id: 'oop-course_4-cpp-operators', title: { en: '2. C++ Operators', ro: '2. Operatori C++' } },
-        { id: 'oop-course_4-class-operators', title: { en: '3. Class Ops', ro: '3. Op. clase' } },
-        { id: 'oop-course_4-arithmetic', title: { en: '4. Arithmetic', ro: '4. Aritmetici' } },
-        { id: 'oop-course_4-comparison', title: { en: '5. Comparison', ro: '5. Comparație' } },
-        { id: 'oop-course_4-assignment', title: { en: '6. Assignment', ro: '6. Atribuire' } },
-      ],
-      component: lazy(() => import('./courses/Course04.jsx')) },
+    { id: 'oop-c4', title: { en: 'Course 4: Destructors & Operators', ro: 'Cursul 4: Destructori si operatori' }, shortTitle: { en: 'C4: Operators', ro: 'C4: Operatori' }, sectionCount: 11, metaId: 'oop-c4', src: 'oop/courses/course-04.json' },
     { id: 'oop-course_5', title: { en: 'Course 5: Inheritance', ro: 'Cursul 5: Moștenire' }, shortTitle: { en: 'C5: Inheritance', ro: 'C5: Moștenire' }, sectionCount: 6,
       sections: [
         { id: 'oop-course_5-inheritance', title: { en: '1. Inheritance', ro: '1. Moștenire' } },
