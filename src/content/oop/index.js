@@ -61,6 +61,7 @@ const oop = {
     { id: 'examen2023-2024-t2-alti-ani-prob-biblioteca', title: { en: 'T2 Alti Ani — Biblioteca', ro: 'T2 Alti Ani — Biblioteca' }, shortTitle: { en: 'Alti Ani: Biblioteca', ro: 'Alti Ani: Biblioteca' }, src: 'oop/tests/examen2023-2024-t2-alti-ani-prob-biblioteca.json' },
     { id: 'examen2023-2024-t2-alti-ani-prob-cumparaturi', title: { en: 'T2 Alti Ani — Cumparaturi', ro: 'T2 Alti Ani — Cumparaturi' }, shortTitle: { en: 'Alti Ani: Cumparaturi', ro: 'Alti Ani: Cumparaturi' }, src: 'oop/tests/examen2023-2024-t2-alti-ani-prob-cumparaturi.json' },
     { id: 'examen2023-2024-t2-alti-ani-prob-database', title: { en: 'T2 Alti Ani — Database', ro: 'T2 Alti Ani — Database' }, shortTitle: { en: 'Alti Ani: Database', ro: 'Alti Ani: Database' }, src: 'oop/tests/examen2023-2024-t2-alti-ani-prob-database.json' },
+    { id: 'examen2023-2024-t2-alti-ani-prob-forme', title: { en: 'T2 Alti Ani — Forme', ro: 'T2 Alti Ani — Forme' }, shortTitle: { en: 'Alti Ani: Forme', ro: 'Alti Ani: Forme' }, src: 'oop/tests/examen2023-2024-t2-alti-ani-prob-forme.json' },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
