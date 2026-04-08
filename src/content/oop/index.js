@@ -44,7 +44,9 @@ const oop = {
     { id: 'oop-lab_7', title: { en: 'Lab 07: Literals & Templates', ro: 'Lab 07: Literali & Șabloane' }, shortTitle: { en: 'L7: Templates', ro: 'L7: Șabloane' }, component: lazy(() => import('./labs/Lab07.jsx')) },
     { id: 'oop-lab_7e', title: { en: 'Lab 07 Extra: Vector Template', ro: 'Lab 07 Extra: Șablon Vector' }, shortTitle: { en: 'L7E: Vector', ro: 'L7E: Vector' }, component: lazy(() => import('./labs/Lab07Extra.jsx')) },
   ],
-  tests: [],
+  tests: [
+    { id: 'examen2023-2024-t1-p1', title: { en: '2023-2024 T1 P1 — CircularString', ro: '2023-2024 T1 P1 — CircularString' }, shortTitle: { en: 'T1 P1: CircularString', ro: 'T1 P1: CircularString' }, src: 'oop/tests/examen2023-2024-t1-p1.json' },
+  ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
 
