@@ -54,6 +54,7 @@ const oop = {
     { id: 'examen2020-2021-model-model-test-1-lab-oop-1', title: { en: '2020-2021 Model T1 P1 — DoubleLinkedList', ro: '2020-2021 Model T1 P1 — DoubleLinkedList' }, shortTitle: { en: 'Model T1 P1: DoubleLinkedList', ro: 'Model T1 P1: DoubleLinkedList' }, src: 'oop/tests/examen2020-2021-model-model-test-1-lab-oop-1.json' },
     { id: 'examen2020-2021-model-model-test-1-lab-oop-2', title: { en: '2020-2021 Model T1 P2 — Catalog', ro: '2020-2021 Model T1 P2 — Catalog' }, shortTitle: { en: 'Model T1 P2: Catalog', ro: 'Model T1 P2: Catalog' }, src: 'oop/tests/examen2020-2021-model-model-test-1-lab-oop-2.json' },
     { id: 'examen2020-2021-model-model-test-1-lab-oop-3', title: { en: '2020-2021 Model T1 P3 — Calculator', ro: '2020-2021 Model T1 P3 — Calculator' }, shortTitle: { en: 'Model T1 P3: Calculator', ro: 'Model T1 P3: Calculator' }, src: 'oop/tests/examen2020-2021-model-model-test-1-lab-oop-3.json' },
+    { id: 'examen2020-2021-model-model-test-2-lab-oop-1', title: { en: '2020-2021 Model T2 P1 — Biblioteca', ro: '2020-2021 Model T2 P1 — Biblioteca' }, shortTitle: { en: 'Model T2 P1: Biblioteca', ro: 'Model T2 P1: Biblioteca' }, src: 'oop/tests/examen2020-2021-model-model-test-2-lab-oop-1.json' },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
