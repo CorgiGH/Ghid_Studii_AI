@@ -1,0 +1,496 @@
+{
+  "meta": {
+    "id": "oop-c6",
+    "title": { "en": "Course 6: Casts, Macros & Templates", "ro": "Cursul 6: Cast-uri, macro-uri si sabloane" },
+    "shortTitle": { "en": "C6: Templates", "ro": "C6: Sabloane" },
+    "source": { "en": "OOP -- Lecture 6, Prof. Gavrilut Dragos, UAIC 2024-2025", "ro": "POO -- Cursul 6, Prof. Gavrilut Dragos, UAIC 2024-2025" }
+  },
+  "steps": [
+    {
+      "id": "oop-c6-casts",
+      "title": { "en": "Casts & Pointer Adjustment", "ro": "Cast-uri si ajustarea pointerilor" },
+      "group": "casts",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "If `class C : public A, public B` and you have a `C* c`, what happens when you cast it to `B* b = c`? Does `b` point to the same address as `c`?",
+            "ro": "Daca `class C : public A, public B` si aveti un `C* c`, ce se intampla cand il castati la `B* b = c`? Indica `b` catre aceeasi adresa ca `c`?"
+          },
+          "answer": {
+            "en": "No! The compiler adds an offset (+12 in this case, the size of A's members) to adjust the pointer. `b` points 12 bytes past `c`, directly to where B's members start in C's layout. This is why casting between classes with multiple inheritance is NOT just copying the pointer value.",
+            "ro": "Nu! Compilatorul adauga un offset (+12 in acest caz, dimensiunea membrilor lui A) pentru a ajusta pointerul. `b` indica 12 bytes dupa `c`, direct la locul unde membrii lui B incep in layout-ul lui C. De aceea castarea intre clase cu mostenire multipla NU inseamna doar copierea valorii pointerului."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Common misconceptions about casts:**\n1. \"Casting a pointer just changes the type, not the address\" -- False with multiple inheritance: the compiler adjusts the offset\n2. \"You can always cast from base to derived\" -- Downcast requires explicit cast and is unsafe without `dynamic_cast`\n3. \"C-style casts are fine\" -- They bypass safety checks; C++ cast keywords give you control and safety",
+            "ro": "**Conceptii gresite frecvente despre cast-uri:**\n1. <<Castarea unui pointer doar schimba tipul, nu adresa>> -- Fals cu mostenirea multipla: compilatorul ajusteaza offset-ul\n2. <<Puteti intotdeauna casta de la baza la derivat>> -- Downcast necesita cast explicit si este nesigur fara `dynamic_cast`\n3. <<Cast-urile C-style sunt OK>> -- Ele ignora verificarile de siguranta; cuvintele cheie C++ va dau control si siguranta"
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "When classes share an inheritance relationship, the compiler can convert between them. The rules are simple:\n\n- **Upcast** (child to parent): always possible and safe\n- **Downcast** (parent to child): requires explicit cast, unsafe\n- If the cast operator is overloaded, these rules don't apply",
+            "ro": "Cand clasele au o relatie de mostenire, compilatorul poate converti intre ele. Regulile sunt simple:\n\n- **Upcast** (copil la parinte): intotdeauna posibil si sigur\n- **Downcast** (parinte la copil): necesita cast explicit, nesigur\n- Daca operatorul de cast este supraincarcat, aceste reguli nu se aplica"
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Object Slicing", "ro": "Object Slicing" },
+          "content": {
+            "en": "When a derived object is passed by value to a function expecting a base object, only the base class fields are copied. The derived class's own members are \"sliced off\". This happens automatically during upcast by value.",
+            "ro": "Cand un obiect derivat este pasat prin valoare la o functie care asteapta un obiect de baza, doar campurile clasei de baza sunt copiate. Membrii proprii ai clasei derivate sunt <<taiati>>. Aceasta se intampla automat la upcast prin valoare."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "struct A {\n    int a1, a2, a3;\n    A(int v) : a1(v), a2(v), a3(v) {}\n};\nstruct B : public A {\n    int b1, b2;\n    B(int v) : A(v*v), b1(v), b2(v) {}\n};\n\nvoid DoSomething(A object) {  // Takes A by VALUE\n    printf(\"a1=%d\\n\", object.a1);\n    // b1, b2 are sliced off -- they don't exist in 'object'\n}\n\nvoid main() {\n    B b_object(5);\n    DoSomething(b_object);  // Object slicing: only a1,a2,a3 copied\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Casting from derived to base only works with `public` inheritance. If A is inherited using `private`, the cast fails: error C2243: conversion exists but is inaccessible.",
+            "ro": "Castarea de la derivat la baza functioneaza doar cu mostenirea `public`. Daca A este mostenit folosind `private`, castarea esueaza: eroarea C2243: conversia exista dar este inaccesibila."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 3-16: Pointer adjustment, upcast/downcast, object slicing, assembly-level offset addition", "ro": "Slide-uri 3-16: Ajustarea pointerului, upcast/downcast, object slicing, adunarea offset-ului la nivel de assembly" }
+        },
+        {
+          "type": "lecture-video",
+          "url": "https://youtu.be/LceSk9FCBWE",
+          "label": { "en": "Course 6 -- Templates, Macros, Casts (Prof. Balan)", "ro": "Cursul 6 -- Sabloane, macro-uri, cast-uri (Prof. Balan)" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c6-cast-keywords",
+      "title": { "en": "C++ Cast Keywords", "ro": "Cuvinte cheie de cast C++" },
+      "group": "casts",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You have a `Base* b` that might point to a `Derived` object. You need to call a method that only exists in `Derived`. How do you safely check if the cast is valid at runtime?",
+            "ro": "Aveti un `Base* b` care ar putea indica catre un obiect `Derived`. Trebuie sa apelati o metoda care exista doar in `Derived`. Cum verificati in siguranta daca cast-ul este valid la runtime?"
+          },
+          "answer": {
+            "en": "Use `dynamic_cast<Derived*>(b)`. It checks the RTTI at runtime and returns `nullptr` if the cast is invalid. But the class must have at least one virtual method (be polymorphic). `static_cast` would skip this check and give you a potentially invalid pointer.",
+            "ro": "Folositi `dynamic_cast<Derived*>(b)`. Verifica RTTI-ul la runtime si returneaza `nullptr` daca cast-ul este invalid. Dar clasa trebuie sa aiba cel putin o metoda virtuala (sa fie polimorfica). `static_cast` ar sari peste aceasta verificare si v-ar da un pointer potential invalid."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "C++ provides four cast keywords, each with different safety guarantees. The general syntax is: `cast_type<target_type>(expression)`",
+            "ro": "C++ ofera patru cuvinte cheie de cast, fiecare cu garantii de siguranta diferite. Sintaxa generala este: `cast_type<target_type>(expression)`"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Cast", "ro": "Cast" },
+            { "en": "What it does", "ro": "Ce face" },
+            { "en": "Speed", "ro": "Viteza" },
+            { "en": "Safety", "ro": "Siguranta" }
+          ],
+          "rows": [
+            [
+              { "en": "`reinterpret_cast`", "ro": "`reinterpret_cast`" },
+              { "en": "Changes pointer type, keeps same address. No conversion.", "ro": "Schimba tipul pointerului, pastreaza aceeasi adresa. Fara conversie." },
+              { "en": "Fastest", "ro": "Cel mai rapid" },
+              { "en": "Unsafe -- no checks at all", "ro": "Nesigur -- fara verificari" }
+            ],
+            [
+              { "en": "`static_cast`", "ro": "`static_cast`" },
+              { "en": "Compile-time cast. May adjust pointer offset. Truncates values.", "ro": "Cast la compilare. Poate ajusta offset-ul pointerului. Trunchiaza valori." },
+              { "en": "Fast", "ro": "Rapid" },
+              { "en": "No runtime check -- trusts the programmer", "ro": "Fara verificare runtime -- are incredere in programator" }
+            ],
+            [
+              { "en": "`dynamic_cast`", "ro": "`dynamic_cast`" },
+              { "en": "Runtime cast using RTTI. Returns `nullptr` if invalid.", "ro": "Cast la runtime folosind RTTI. Returneaza `nullptr` daca e invalid." },
+              { "en": "Slower", "ro": "Mai lent" },
+              { "en": "Safe -- checks at runtime (needs virtual methods)", "ro": "Sigur -- verifica la runtime (necesita metode virtuale)" }
+            ],
+            [
+              { "en": "`const_cast`", "ro": "`const_cast`" },
+              { "en": "Adds or removes `const` qualifier only.", "ro": "Adauga sau elimina doar calificatorul `const`." },
+              { "en": "Fastest", "ro": "Cel mai rapid" },
+              { "en": "Can cause undefined behavior if object was truly const", "ro": "Poate cauza comportament nedefinit daca obiectul era cu adevarat const" }
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// static_cast: resolve function overload ambiguity\nint Add(int a, int b) { return a + b; }\nfloat Add(float a, float b) { return a + b; }\nint result = static_cast<int(*)(int, char)>(Add)(100, 200);\n\n// dynamic_cast: safe downcast (requires virtual methods)\nBase* b = GetSomeObject();\nDerived* d = dynamic_cast<Derived*>(b);\nif (d != nullptr) {\n    d->DerivedOnlyMethod();\n}"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which cast should you use for a safe downcast that checks at runtime?", "ro": "Ce cast ar trebui sa folositi pentru un downcast sigur care verifica la runtime?" },
+              "options": [
+                {
+                  "text": { "en": "static_cast", "ro": "static_cast" },
+                  "correct": false,
+                  "explanation": { "en": "static_cast does no runtime check. If the object isn't actually the derived type, you get undefined behavior.", "ro": "static_cast nu face verificare la runtime. Daca obiectul nu este de fapt tipul derivat, obtineti comportament nedefinit." }
+                },
+                {
+                  "text": { "en": "dynamic_cast", "ro": "dynamic_cast" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! dynamic_cast checks RTTI at runtime and returns nullptr for invalid casts. Requires the class to be polymorphic (have at least one virtual method).", "ro": "Corect! dynamic_cast verifica RTTI-ul la runtime si returneaza nullptr pentru cast-uri invalide. Necesita ca clasa sa fie polimorfica (sa aiba cel putin o metoda virtuala)." }
+                },
+                {
+                  "text": { "en": "reinterpret_cast", "ro": "reinterpret_cast" },
+                  "correct": false,
+                  "explanation": { "en": "reinterpret_cast just changes the pointer type without any checks or offset adjustment. Completely unsafe for inheritance casts.", "ro": "reinterpret_cast doar schimba tipul pointerului fara verificari sau ajustare de offset. Complet nesigur pentru cast-uri de mostenire." }
+                }
+              ],
+              "explanation": { "en": "dynamic_cast is the only cast that validates at runtime using RTTI.", "ro": "dynamic_cast este singurul cast care valideaza la runtime folosind RTTI." },
+              "reviewStep": "oop-c6-cast-keywords"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 17-40: reinterpret_cast, static_cast, dynamic_cast, const_cast with examples", "ro": "Slide-uri 17-40: reinterpret_cast, static_cast, dynamic_cast, const_cast cu exemple" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c6-macros",
+      "title": { "en": "Macros", "ro": "Macro-uri" },
+      "group": "preprocessor",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "What's the difference between `#define SQUARE(x) x*x` and a function `int square(int x) { return x*x; }`? What happens with `SQUARE(1+2)`?",
+            "ro": "Care este diferenta intre `#define SQUARE(x) x*x` si o functie `int square(int x) { return x*x; }`? Ce se intampla cu `SQUARE(1+2)`?"
+          },
+          "answer": {
+            "en": "`SQUARE(1+2)` expands to `1+2*1+2` = 5, not 9! The macro does text replacement, not evaluation. The function correctly returns 9. This is why macros need parentheses: `#define SQUARE(x) ((x)*(x))`.",
+            "ro": "`SQUARE(1+2)` se expandeaza la `1+2*1+2` = 5, nu 9! Macro-ul face inlocuire de text, nu evaluare. Functia returneaza corect 9. De aceea macro-urile au nevoie de paranteze: `#define SQUARE(x) ((x)*(x))`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Macros pre-process code before compilation using `#define`. Key features:\n\n- Work sequentially (order matters)\n- Multi-line with `\\` at end of line\n- Can be defined using other macros\n- Can look like functions: `#define MAX(a,b) ((a)>(b)?(a):(b))`\n- Support variadic parameters with `...` and `__VA_ARGS__`\n- `#` converts a parameter to its string representation\n- `##` concatenates tokens\n- Cannot be overloaded (last `#define` wins)\n- Always use parentheses around parameters to avoid operator precedence bugs",
+            "ro": "Macro-urile pre-proceseaza codul inainte de compilare folosind `#define`. Caracteristici cheie:\n\n- Functioneaza secvential (ordinea conteaza)\n- Multi-linie cu `\\` la sfarsitul liniei\n- Pot fi definite folosind alte macro-uri\n- Pot arata ca functii: `#define MAX(a,b) ((a)>(b)?(a):(b))`\n- Suporta parametri variadici cu `...` si `__VA_ARGS__`\n- `#` converteste un parametru la reprezentarea sa ca string\n- `##` concateneaza token-uri\n- Nu pot fi supraincarcate (ultimul `#define` castiga)\n- Folositi intotdeauna paranteze in jurul parametrilor pentru a evita bug-uri de precedenta"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Basic macro\n#define PI 3.14159\n\n// Function-like macro (ALWAYS use parentheses!)\n#define SQUARE(x) ((x)*(x))\n\n// Multi-line macro\n#define SWAP(a,b) { \\\n    auto temp = a; \\\n    a = b; \\\n    b = temp; \\\n}\n\n// Variadic macro\n#define LOG(fmt, ...) printf(fmt, __VA_ARGS__)\n\n// Stringification: #param -> \"param\"\n#define TO_STRING(x) #x\n// TO_STRING(hello) -> \"hello\"\n\n// Token concatenation: a ## b -> ab\n#define MAKE_VAR(name) int var_##name\n// MAKE_VAR(count) -> int var_count"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "C/C++ provides several predefined macros:",
+            "ro": "C/C++ ofera mai multe macro-uri predefinite:"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Macro", "ro": "Macro" },
+            { "en": "Value", "ro": "Valoare" }
+          ],
+          "rows": [
+            [{ "en": "`__FILE__`", "ro": "`__FILE__`" }, { "en": "Current file name", "ro": "Numele fisierului curent" }],
+            [{ "en": "`__LINE__`", "ro": "`__LINE__`" }, { "en": "Current line number", "ro": "Numarul liniei curente" }],
+            [{ "en": "`__DATE__`", "ro": "`__DATE__`" }, { "en": "Compilation date", "ro": "Data compilarii" }],
+            [{ "en": "`__TIME__`", "ro": "`__TIME__`" }, { "en": "Compilation time", "ro": "Ora compilarii" }],
+            [{ "en": "`__cplusplus`", "ro": "`__cplusplus`" }, { "en": "Defined if C++ compiler is used", "ro": "Definit daca se foloseste compilator C++" }],
+            [{ "en": "`__COUNTER__`", "ro": "`__COUNTER__`" }, { "en": "Unique auto-incrementing ID (0..n)", "ro": "ID unic auto-incrementat (0..n)" }]
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 41-70: Macro syntax, pitfalls, variadic macros, stringification, concatenation, predefined macros", "ro": "Slide-uri 41-70: Sintaxa macro, capcane, macro-uri variadice, stringificare, concatenare, macro-uri predefinite" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c6-inline-volatile",
+      "title": { "en": "Macros vs Inline & volatile", "ro": "Macro-uri vs inline si volatile" },
+      "group": "preprocessor",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Macros vs `inline` functions:**\n\n- Macros **guarantee** text replacement but debugging is hard (no type checking, no stepping)\n- `inline` is a **suggestion** to the compiler -- it may or may not inline the function\n- `inline` works best in release mode with optimizations (`-O1`, `-O2`)\n- Class methods defined inside the class body are implicitly considered `inline`",
+            "ro": "**Macro-uri vs functii `inline`:**\n\n- Macro-urile **garanteaza** inlocuirea textului dar debugging-ul este dificil (fara verificare de tip, fara stepping)\n- `inline` este o **sugestie** pentru compilator -- poate sau nu sa faca inline functia\n- `inline` functioneaza cel mai bine in mod release cu optimizari (`-O1`, `-O2`)\n- Metodele claselor definite in corpul clasei sunt implicit considerate `inline`"
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "volatile", "ro": "volatile" },
+          "content": {
+            "en": "A specifier that tells the compiler NOT to optimize away a variable. Without it, the compiler might remove a variable it thinks is unused or cache its value in a register. Used in multi-threaded code and hardware register access.",
+            "ro": "Un specificator care spune compilatorului sa NU optimizeze o variabila. Fara el, compilatorul ar putea elimina o variabila pe care o considera nefolosita sau sa ii pastreze valoarea in registru. Folosit in cod multi-thread si la accesul registrelor hardware."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 71-76: inline vs macros comparison, volatile specifier", "ro": "Slide-uri 71-76: comparatie inline vs macro-uri, specificatorul volatile" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c6-literals",
+      "title": { "en": "User-Defined Literals", "ro": "Literali definiti de utilizator" },
+      "group": "language-features",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Literals let you attach a special meaning to numbers or strings by adding a suffix. The syntax is:",
+            "ro": "Literalii va permit sa atasati un sens special numerelor sau string-urilor prin adaugarea unui sufix. Sintaxa este:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Syntax: return_type operator\"\" _suffix(parameter_type)\n\n// Example: convert base-3 number string to int\nint operator\"\" _baza_3(const char* str) {\n    int result = 0;\n    while (*str) {\n        result = result * 3 + (*str - '0');\n        str++;\n    }\n    return result;\n}\n\n// Example: convert megabytes to bytes\nunsigned long long operator\"\" _Mega(unsigned long long val) {\n    return val * 1024 * 1024;\n}\n\nvoid main() {\n    int x = 210_baza_3;           // 21 in decimal\n    unsigned long long mem = 5_Mega; // 5242880 bytes\n}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Parameter type must be one of: `const char*`, `unsigned long long int`, `long double`, `char`, `wchar_t`, `char8_t`, `char16_t`, `char32_t`. The underscore prefix `_` is recommended -- compilers warn without it. The return type can be anything, including `void`.",
+            "ro": "Tipul parametrului trebuie sa fie unul din: `const char*`, `unsigned long long int`, `long double`, `char`, `wchar_t`, `char8_t`, `char16_t`, `char32_t`. Prefixul underscore `_` este recomandat -- compilatoarele avertizeaza fara el. Tipul de retur poate fi orice, inclusiv `void`."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 77-84: User-defined literal syntax, parameter requirements, examples", "ro": "Slide-uri 77-84: Sintaxa literalilor definiti de utilizator, cerinte parametri, exemple" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c6-func-templates",
+      "title": { "en": "Function Templates", "ro": "Sabloane de functii" },
+      "group": "templates",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You write a `Sum` function that adds two ints, then need one for floats, then for doubles. How do you avoid writing 3 nearly identical functions?",
+            "ro": "Scrieti o functie `Sum` care aduna doua int-uri, apoi aveti nevoie de una pentru float, apoi pentru double. Cum evitati scrierea a 3 functii aproape identice?"
+          },
+          "answer": {
+            "en": "Use a **template**: `template<class T> T Sum(T a, T b) { return a + b; }`. The compiler generates a specialized version for each type you actually use. One definition, multiple type-safe versions.",
+            "ro": "Folositi un **sablon**: `template<class T> T Sum(T a, T b) { return a + b; }`. Compilatorul genereaza o versiune specializata pentru fiecare tip pe care il folositi efectiv. O singura definitie, mai multe versiuni type-safe."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Templates define a model where data types are substituted at precompilation. This generates extra code at compile time but results in faster execution (no runtime type dispatch).\n\n**Important:** Because substitution happens at precompilation, templates must be stored in header files (`.h`), not in `.cpp` files. The compiler needs to see the full template definition at every usage point.",
+            "ro": "Sabloanele definesc un model in care tipurile de date sunt substituite la precompilare. Aceasta genereaza cod suplimentar la compilare dar rezulta in executie mai rapida (fara dispecerizare de tip la runtime).\n\n**Important:** Deoarece substitutia se face la precompilare, sabloanele trebuie stocate in fisiere header (`.h`), nu in fisiere `.cpp`. Compilatorul trebuie sa vada definitia completa a sablonului in fiecare punct de utilizare."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Function template\ntemplate <class T>\nT Sum(T value_1, T value_2) {\n    return value_1 + value_2;\n}\n\n// Can have default template parameters\ntemplate <class T = int>\nT Double(T value) {\n    return value * 2;\n}\n\nvoid main() {\n    int a = Sum(1, 2);           // T = int (deduced)\n    float b = Sum(1.5f, 2.3f);   // T = float (deduced)\n    int c = Sum<int>(1, 2);      // T = int (explicit)\n    int d = Double(5);           // Uses default T = int\n}"
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 85-100: Function template syntax, type deduction, default parameters", "ro": "Slide-uri 85-100: Sintaxa sablonului de functii, deducerea tipului, parametri impliciti" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c6-class-templates",
+      "title": { "en": "Class Templates & Specialization", "ro": "Sabloane de clase si specializare" },
+      "group": "templates",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Class templates work the same way as function templates but for entire classes. Features:\n\n- Members, parameters, and local variables can use the template type `T`\n- Can accept non-type parameters (constants): `template<class T, int Size>`\n- Can have default type values: `template<class T = int>`\n- Can have static members, friend functions, and template methods\n- Each instantiation with a different type creates a separate class (separate static members, etc.)",
+            "ro": "Sabloanele de clase functioneaza la fel ca sabloanele de functii dar pentru clase intregi. Caracteristici:\n\n- Membrii, parametrii si variabilele locale pot folosi tipul sablon `T`\n- Pot accepta parametri non-tip (constante): `template<class T, int Size>`\n- Pot avea valori implicite de tip: `template<class T = int>`\n- Pot avea membri statici, functii friend si metode sablon\n- Fiecare instantiere cu un tip diferit creeaza o clasa separata (membri statici separati, etc.)"
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Template Specialization", "ro": "Specializarea sabloanelor" },
+          "content": {
+            "en": "A way to provide a different implementation of a template for a specific type. Uses `template<>` with the specific type: `template<> class MyClass<char> { ... }`. The specialized version completely replaces the generic one for that type.",
+            "ro": "Un mod de a oferi o implementare diferita a unui sablon pentru un tip specific. Foloseste `template<>` cu tipul specific: `template<> class MyClass<char> { ... }`. Versiunea specializata inlocuieste complet versiunea generica pentru acel tip."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Generic class template\ntemplate <class T>\nclass Number {\n    T value;\npublic:\n    void Set(T t) { value = t; }\n    T Get() { return value; }\n};\n\n// Specialization for char -- different behavior\ntemplate <>\nclass Number<char> {\n    char value;\npublic:\n    void Set(char t) { value = t - '0'; }  // Convert ASCII to digit\n    int Get() { return (int)value; }\n};\n\nvoid main() {\n    Number<int> n1;\n    n1.Set(42);         // Uses generic template\n\n    Number<char> n2;\n    n2.Set('5');        // Uses specialization: value = 5\n    int x = n2.Get();  // x = 5\n}"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Why must templates be defined in header files (.h) instead of .cpp files?", "ro": "De ce trebuie sabloanele definite in fisiere header (.h) in loc de fisiere .cpp?" },
+              "options": [
+                {
+                  "text": { "en": "Because templates are interpreted at runtime", "ro": "Deoarece sabloanele sunt interpretate la runtime" },
+                  "correct": false,
+                  "explanation": { "en": "Templates are resolved at COMPILE time, not runtime. That's exactly why the compiler needs to see the full definition.", "ro": "Sabloanele sunt rezolvate la COMPILARE, nu la runtime. Exact de aceea compilatorul trebuie sa vada definitia completa." }
+                },
+                {
+                  "text": { "en": "The compiler needs the full definition at every usage point for type substitution", "ro": "Compilatorul are nevoie de definitia completa in fiecare punct de utilizare pentru substitutia tipului" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! Template instantiation happens during precompilation. The compiler generates specific code for each type used, so it must see the full template body.", "ro": "Corect! Instantierea sablonului se face in timpul precompilarii. Compilatorul genereaza cod specific pentru fiecare tip folosit, deci trebuie sa vada intregul corp al sablonului." }
+                },
+                {
+                  "text": { "en": "It's just a convention -- they work in .cpp files too", "ro": "Este doar o conventie -- functioneaza si in fisiere .cpp" },
+                  "correct": false,
+                  "explanation": { "en": "It's NOT just convention. If the template definition is in a .cpp file, other .cpp files that #include only the .h won't see the body, causing linker errors.", "ro": "NU este doar o conventie. Daca definitia sablonului este intr-un fisier .cpp, alte fisiere .cpp care includ doar .h nu vor vedea corpul, cauzand erori de linker." }
+                }
+              ],
+              "explanation": { "en": "Templates need full visibility at compile time because the compiler generates type-specific code for each instantiation.", "ro": "Sabloanele au nevoie de vizibilitate completa la compilare deoarece compilatorul genereaza cod specific tipului pentru fiecare instantiere." },
+              "reviewStep": "oop-c6-class-templates"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 101-124: Class templates, non-type parameters, static members, friend functions, specialization", "ro": "Slide-uri 101-124: Sabloane de clase, parametri non-tip, membri statici, functii friend, specializare" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c6-static-assert",
+      "title": { "en": "static_assert & Type Checking", "ro": "static_assert si verificarea tipurilor" },
+      "group": "templates",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "C++11 provides `static_assert` to evaluate conditions at compile time. If the condition is false, compilation fails with your custom error message. Only works with constant expressions that can be evaluated at compile time.",
+            "ro": "C++11 ofera `static_assert` pentru a evalua conditii la compilare. Daca conditia este falsa, compilarea esueaza cu mesajul de eroare personalizat. Functioneaza doar cu expresii constante care pot fi evaluate la compilare."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Basic usage\nstatic_assert(sizeof(int) == 4, \"int must be 4 bytes\");\n\n// Restrict templates to specific types using a helper\ntemplate <class A, class B>\nstruct TypeCompare {\n    static const bool value = false;\n};\ntemplate <class A>\nstruct TypeCompare<A, A> {  // Specialization: same type\n    static const bool value = true;\n};\n\ntemplate <class T>\nclass OnlyForInts {\n    static_assert(\n        TypeCompare<T, int>::value || TypeCompare<T, long>::value,\n        \"This class only works with int or long!\"\n    );\n    T data;\n};\n\nOnlyForInts<int> ok;      // Compiles\n// OnlyForInts<float> bad; // ERROR: \"This class only works with int or long!\""
+        },
+        {
+          "type": "lecture",
+          "note": { "en": "Slides 125-134: static_assert, TypeCompare trick for compile-time type checking", "ro": "Slide-uri 125-134: static_assert, trucul TypeCompare pentru verificarea tipurilor la compilare" }
+        }
+      ]
+    },
+    {
+      "id": "oop-c6-quiz",
+      "title": { "en": "Course 6 Self-Test", "ro": "Autoevaluare Cursul 6" },
+      "group": "review",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is object slicing?", "ro": "Ce este object slicing?" },
+              "options": [
+                {
+                  "text": { "en": "Copying only base class members when passing a derived object by value", "ro": "Copierea doar a membrilor clasei de baza cand se paseaza un obiect derivat prin valoare" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! When a derived object is passed by value as a base type, only the base part is copied. Derived members are lost.", "ro": "Corect! Cand un obiect derivat este pasat prin valoare ca tip de baza, doar partea de baza este copiata. Membrii derivati sunt pierduti." }
+                },
+                {
+                  "text": { "en": "Splitting a class into multiple smaller classes", "ro": "Impartirea unei clase in mai multe clase mai mici" },
+                  "correct": false,
+                  "explanation": { "en": "That would be refactoring/decomposition, not slicing. Object slicing is about data loss during upcast by value.", "ro": "Aceasta ar fi refactorizare/descompunere, nu slicing. Object slicing este despre pierderea datelor in timpul upcast-ului prin valoare." }
+                },
+                {
+                  "text": { "en": "A compiler optimization that removes unused members", "ro": "O optimizare a compilatorului care elimina membrii nefolositi" },
+                  "correct": false,
+                  "explanation": { "en": "The compiler doesn't remove members. Object slicing is a semantic issue: copying a derived object into a base variable drops the derived part.", "ro": "Compilatorul nu elimina membrii. Object slicing este o problema semantica: copierea unui obiect derivat intr-o variabila de baza pierde partea derivata." }
+                }
+              ],
+              "explanation": { "en": "Object slicing occurs during upcast by value. Pass by pointer/reference to avoid it.", "ro": "Object slicing apare la upcast prin valoare. Pasati prin pointer/referinta pentru a-l evita." },
+              "reviewStep": "oop-c6-casts"
+            },
+            {
+              "question": { "en": "What does `#define SQUARE(x) x*x` produce for `SQUARE(1+2)`?", "ro": "Ce produce `#define SQUARE(x) x*x` pentru `SQUARE(1+2)`?" },
+              "options": [
+                {
+                  "text": { "en": "9 (correct square of 3)", "ro": "9 (patratul corect al lui 3)" },
+                  "correct": false,
+                  "explanation": { "en": "Macros do text replacement, not evaluation. SQUARE(1+2) becomes 1+2*1+2 = 1+2+2 = 5, not (1+2)*(1+2) = 9.", "ro": "Macro-urile fac inlocuire de text, nu evaluare. SQUARE(1+2) devine 1+2*1+2 = 1+2+2 = 5, nu (1+2)*(1+2) = 9." }
+                },
+                {
+                  "text": { "en": "5 (due to operator precedence after text substitution)", "ro": "5 (din cauza precedentei operatorilor dupa substitutia textului)" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! SQUARE(1+2) → 1+2*1+2 → 1+(2*1)+2 = 5. Fix: #define SQUARE(x) ((x)*(x))", "ro": "Corect! SQUARE(1+2) → 1+2*1+2 → 1+(2*1)+2 = 5. Solutie: #define SQUARE(x) ((x)*(x))" }
+                },
+                {
+                  "text": { "en": "Compilation error", "ro": "Eroare de compilare" },
+                  "correct": false,
+                  "explanation": { "en": "It compiles fine -- the substitution produces valid C++ (1+2*1+2). It just gives the wrong result.", "ro": "Se compileaza fara probleme -- substitutia produce C++ valid (1+2*1+2). Doar da rezultatul gresit." }
+                }
+              ],
+              "explanation": { "en": "Always parenthesize macro parameters: ((x)*(x)) to prevent precedence bugs.", "ro": "Intotdeauna puneti paranteze la parametrii macro: ((x)*(x)) pentru a preveni bug-uri de precedenta." },
+              "reviewStep": "oop-c6-macros"
+            },
+            {
+              "question": { "en": "What is template specialization used for?", "ro": "Pentru ce se foloseste specializarea sabloanelor?" },
+              "options": [
+                {
+                  "text": { "en": "Making templates faster at runtime", "ro": "A face sabloanele mai rapide la runtime" },
+                  "correct": false,
+                  "explanation": { "en": "Templates are resolved at compile time. Specialization provides different CODE for specific types, not speed optimization.", "ro": "Sabloanele sunt rezolvate la compilare. Specializarea ofera COD diferit pentru tipuri specifice, nu optimizare de viteza." }
+                },
+                {
+                  "text": { "en": "Providing a different implementation for a specific type", "ro": "Oferirea unei implementari diferite pentru un tip specific" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! template<> class X<char> { ... } completely replaces the generic template for the char type.", "ro": "Corect! template<> class X<char> { ... } inlocuieste complet sablonul generic pentru tipul char." }
+                },
+                {
+                  "text": { "en": "Restricting which types can use the template", "ro": "Restrictionarea tipurilor care pot folosi sablonul" },
+                  "correct": false,
+                  "explanation": { "en": "That's done with static_assert + type traits, not specialization. Specialization provides alternative implementations.", "ro": "Aceasta se face cu static_assert + type traits, nu cu specializare. Specializarea ofera implementari alternative." }
+                }
+              ],
+              "explanation": { "en": "Specialization lets you customize template behavior per type (e.g., handle char differently from int).", "ro": "Specializarea va permite sa personalizati comportamentul sablonului per tip (ex. sa tratati char diferit de int)." },
+              "reviewStep": "oop-c6-class-templates"
+            },
+            {
+              "question": { "en": "Which cast checks RTTI at runtime to verify validity?", "ro": "Care cast verifica RTTI-ul la runtime pentru a valida?" },
+              "options": [
+                {
+                  "text": { "en": "static_cast", "ro": "static_cast" },
+                  "correct": false,
+                  "explanation": { "en": "static_cast is compile-time only. It trusts the programmer and does no runtime checks.", "ro": "static_cast este doar la compilare. Are incredere in programator si nu face verificari la runtime." }
+                },
+                {
+                  "text": { "en": "dynamic_cast", "ro": "dynamic_cast" },
+                  "correct": true,
+                  "explanation": { "en": "Correct! dynamic_cast uses RTTI from the vfptr to verify the cast at runtime. Returns nullptr if invalid.", "ro": "Corect! dynamic_cast foloseste RTTI-ul din vfptr pentru a verifica cast-ul la runtime. Returneaza nullptr daca e invalid." }
+                },
+                {
+                  "text": { "en": "reinterpret_cast", "ro": "reinterpret_cast" },
+                  "correct": false,
+                  "explanation": { "en": "reinterpret_cast does zero checks. It just reinterprets the bits at the same address as a different type.", "ro": "reinterpret_cast face zero verificari. Doar reinterpreteaza bitii de la aceeasi adresa ca un tip diferit." }
+                }
+              ],
+              "explanation": { "en": "dynamic_cast is the only runtime-checked cast. Requires polymorphic types (at least one virtual method).", "ro": "dynamic_cast este singurul cast verificat la runtime. Necesita tipuri polimorfice (cel putin o metoda virtuala)." },
+              "reviewStep": "oop-c6-cast-keywords"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

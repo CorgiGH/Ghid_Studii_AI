@@ -16,16 +16,7 @@ const oop = {
     { id: 'oop-c3', title: { en: 'Course 3: Creating an Object', ro: 'Cursul 3: Crearea unui obiect' }, shortTitle: { en: 'C3: Objects', ro: 'C3: Obiecte' }, sectionCount: 9, metaId: 'oop-c3', src: 'oop/courses/course-03.json' },
     { id: 'oop-c4', title: { en: 'Course 4: Destructors & Operators', ro: 'Cursul 4: Destructori si operatori' }, shortTitle: { en: 'C4: Operators', ro: 'C4: Operatori' }, sectionCount: 11, metaId: 'oop-c4', src: 'oop/courses/course-04.json' },
     { id: 'oop-c5', title: { en: 'Course 5: Inheritance & Virtual Methods', ro: 'Cursul 5: Mostenire si metode virtuale' }, shortTitle: { en: 'C5: Inheritance', ro: 'C5: Mostenire' }, sectionCount: 9, metaId: 'oop-c5', src: 'oop/courses/course-05.json' },
-    { id: 'oop-course_6', title: { en: 'Course 6: Templates', ro: 'Cursul 6: Șabloane' }, shortTitle: { en: 'C6: Templates', ro: 'C6: Șabloane' }, sectionCount: 6,
-      sections: [
-        { id: 'oop-course_6-casts', title: { en: '1. Casts', ro: '1. Cast-uri' } },
-        { id: 'oop-course_6-macros', title: { en: '2. Macros', ro: '2. Macro-uri' } },
-        { id: 'oop-course_6-literals', title: { en: '3. Literals', ro: '3. Literali' } },
-        { id: 'oop-course_6-func-templates', title: { en: '4. Func Templates', ro: '4. Șabl. funcții' } },
-        { id: 'oop-course_6-class-templates', title: { en: '5. Class Templates', ro: '5. Șabl. clase' } },
-        { id: 'oop-course_6-specialization', title: { en: '6. Specialization', ro: '6. Specializare' } },
-      ],
-      component: lazy(() => import('./courses/Course06.jsx')) },
+    { id: 'oop-c6', title: { en: 'Course 6: Casts, Macros & Templates', ro: 'Cursul 6: Cast-uri, macro-uri si sabloane' }, shortTitle: { en: 'C6: Templates', ro: 'C6: Sabloane' }, sectionCount: 9, metaId: 'oop-c6', src: 'oop/courses/course-06.json' },
     { id: 'oop-course_7', title: { en: 'Course 7: STL (1)', ro: 'Cursul 7: STL (1)' }, shortTitle: { en: 'C7: STL', ro: 'C7: STL' }, sectionCount: 6,
       sections: [
         { id: 'oop-course_7-sequence', title: { en: '1. Seq Containers', ro: '1. Cont. secvenț.' } },
