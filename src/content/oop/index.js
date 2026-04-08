@@ -51,6 +51,7 @@ const oop = {
     { id: 'examen2023-2024-t2-p1-2024', title: { en: '2023-2024 T2 P1 — MyVector', ro: '2023-2024 T2 P1 — MyVector' }, shortTitle: { en: 'T2 P1: MyVector', ro: 'T2 P1: MyVector' }, src: 'oop/tests/examen2023-2024-t2-p1-2024.json' },
     { id: 'examen2023-2024-t2-p2-2024', title: { en: '2023-2024 T2 P2 — Students', ro: '2023-2024 T2 P2 — Students' }, shortTitle: { en: 'T2 P2: Students', ro: 'T2 P2: Students' }, src: 'oop/tests/examen2023-2024-t2-p2-2024.json' },
     { id: 'examen2023-2024-t2-p3-2024', title: { en: '2023-2024 T2 P3 — BankAccount', ro: '2023-2024 T2 P3 — BankAccount' }, shortTitle: { en: 'T2 P3: BankAccount', ro: 'T2 P3: BankAccount' }, src: 'oop/tests/examen2023-2024-t2-p3-2024.json' },
+    { id: 'examen2020-2021-model-model-test-1-lab-oop-1', title: { en: '2020-2021 Model T1 P1 — DoubleLinkedList', ro: '2020-2021 Model T1 P1 — DoubleLinkedList' }, shortTitle: { en: 'Model T1 P1: DoubleLinkedList', ro: 'Model T1 P1: DoubleLinkedList' }, src: 'oop/tests/examen2020-2021-model-model-test-1-lab-oop-1.json' },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
