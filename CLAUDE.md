@@ -116,8 +116,12 @@ A persistent knowledge base at `wiki/` (Obsidian vault, gitignored). Claude main
 - `wiki/concepts/` — ideas (pedagogy techniques, design patterns)
 - `wiki/architecture/` — platform architecture, infra, decisions
 - `wiki/comparisons/` — side-by-side analyses filed from queries
-- `wiki/index.md` — master catalog (read first on queries)
-- `wiki/log.md` — chronological operation record
+- `wiki/index.md` — router index (links to domain sub-indexes)
+- `wiki/index-oop.md` — OOP sources, entities, concepts
+- `wiki/index-os.md` — OS sources, concepts
+- `wiki/index-pa.md` — PA sources, concepts
+- `wiki/index-platform.md` — architecture, UX, infrastructure, pedagogy
+- `wiki/log.md` — chronological operation record (summary header + entries)
 - `wiki/overview.md` — high-level synthesis front page
 
 ### Page Format
@@ -137,10 +141,10 @@ Every wiki page MUST have YAML frontmatter with: `title`, `type` (source|entity|
 - *Autonomous:* Claude processes end-to-end, gives short summary of changes
 - For PDFs: run `node scripts/wiki-ingest.mjs <path>` (calls Gemini 3 Flash Preview), then integrate output
 - For text/markdown: Claude reads directly
-- Always: write/update summary page in `sources/`, update entity/concept pages, update `index.md`, append to `log.md`
+- Always: write/update summary page in `sources/`, update entity/concept pages, update the relevant domain sub-index (e.g., `index-oop.md`), append to `log.md`
 
 **Query** — user asks a question:
-- Read `index.md` first to find relevant pages, then drill in
+- Read `index.md` (router) to identify the domain, then read the relevant sub-index, then drill into pages
 - Synthesize answer with `[[wikilink]]` citations
 - If answer is substantial/reusable, offer to file as new wiki page
 
@@ -153,11 +157,11 @@ Every wiki page MUST have YAML frontmatter with: `title`, `type` (source|entity|
 - Report findings, fix with user approval
 
 ### Maintenance Rules
-- Update `index.md` after every page creation or modification
+- Update the relevant domain sub-index after every page creation or modification. Update the router `index.md` only when adding a new domain. Quick stats (page count) are best-effort, updated during lint operations.
 - Append to `log.md` after every operation (format: `## [YYYY-MM-DD] type | Title`)
 - Keep cross-references bidirectional
 - When new info contradicts existing pages, flag contradiction explicitly in both pages
 - `raw/` is read-only — never modify source documents
 
 ### Startup
-When wiki work is expected, read `wiki/index.md` and last 10 lines of `wiki/log.md` to understand current state.
+When wiki work is expected, read `wiki/index.md` (router). Based on the query domain, read the relevant sub-index (e.g., `index-oop.md` for OOP questions). Read the `## Summary` header of `wiki/log.md` for recent activity context.
