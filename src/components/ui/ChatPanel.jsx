@@ -262,9 +262,13 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
       <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid var(--theme-border)' }}>
         <button
           className="text-xs px-3 py-1 rounded-full transition-colors"
-          style={{
-            backgroundColor: activeTab === 'chat' ? '#3b82f6' : 'transparent',
-            color: activeTab === 'chat' ? '#fff' : 'var(--theme-muted-text)',
+          style={activeTab === 'chat' ? {
+            backgroundColor: '#3b82f6',
+            color: '#fff',
+          } : {
+            backgroundColor: 'var(--theme-hover-bg)',
+            color: 'var(--theme-content-text)',
+            border: '1px solid var(--theme-border)',
           }}
           onClick={() => setActiveTab('chat')}
         >
@@ -272,9 +276,13 @@ const ChatPanel = ({ pageContext, subjectSyllabus }) => {
         </button>
         <button
           className="text-xs px-3 py-1 rounded-full transition-colors"
-          style={{
-            backgroundColor: activeTab === 'check' ? '#3b82f6' : 'transparent',
-            color: activeTab === 'check' ? '#fff' : 'var(--theme-muted-text)',
+          style={activeTab === 'check' ? {
+            backgroundColor: '#3b82f6',
+            color: '#fff',
+          } : {
+            backgroundColor: 'var(--theme-hover-bg)',
+            color: 'var(--theme-content-text)',
+            border: '1px solid var(--theme-border)',
           }}
           onClick={() => setActiveTab('check')}
         >

@@ -35,7 +35,7 @@ const ContentTypeBar = ({ subject, activeTab, onTabChange }) => {
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className="px-3.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all duration-150"
+            className="px-3.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all duration-150 min-h-[44px] flex items-center"
             style={isActive ? {
               backgroundColor: 'var(--theme-card-bg)',
               color: '#3b82f6',

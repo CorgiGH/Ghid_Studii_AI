@@ -317,8 +317,8 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
           </main>
         </div>
 
-        {/* Right chat panel */}
-        {chatOpen && (
+        {/* Right chat panel — only show when a course or lab is active (not on CourseMap overview) */}
+        {chatOpen && (activeCourse || activeLab) && (
           <ChatPanel
             pageContext={pageContext}
             subjectSyllabus={subject.description?.[lang] || ''}
@@ -326,7 +326,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         )}
 
         {/* Chat reopen button when collapsed */}
-        {!chatOpen && (
+        {!chatOpen && (activeCourse || activeLab) && (
           <button
             className="hidden lg:flex items-center justify-center fixed right-0 top-1/2 -translate-y-1/2 z-30 transition-colors hover:brightness-125"
             style={{

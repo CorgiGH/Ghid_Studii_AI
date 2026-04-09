@@ -150,7 +150,11 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
             {course.shortTitle[lang]}
           </div>
           {total > 0 && (
-            <div className="text-[10px]" style={{ color: isComplete ? '#22c55e' : 'var(--theme-muted-text)' }}>
+            <div
+              className="text-[10px]"
+              style={{ color: isComplete ? '#22c55e' : 'var(--theme-muted-text)' }}
+              title={isComplete ? t('All sections completed', 'Toate secțiunile completate') : t(`${completed} of ${total} sections completed`, `${completed} din ${total} secțiuni completate`)}
+            >
               {isComplete ? t('Complete', 'Complet') : `${completed}/${total}`}
             </div>
           )}

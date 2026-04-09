@@ -16,9 +16,11 @@ const Breadcrumbs = ({ yearSem, subject, tab, activeItemTitle }) => {
     tests: t('Tests', 'Teste'),
   };
 
+  const ysShortLabel = ys ? ys.id.toUpperCase() : null;
+
   const crumbs = [
     { label: t('Home', 'Acasă'), onClick: () => navigate('/') },
-    ...(ys ? [{ label: ys.title[lang], onClick: () => navigate('/') }] : []),
+    ...(ys ? [{ label: ys.title[lang], shortLabel: ysShortLabel, onClick: () => navigate('/') }] : []),
     { label: subject.title[lang], onClick: () => navigate(`/${yearSem}/${subject.slug}`) },
     { label: tabLabels[tab] || tab, onClick: () => {
       if (tab === 'courses') navigate(`/${yearSem}/${subject.slug}`);
@@ -47,7 +49,12 @@ const Breadcrumbs = ({ yearSem, subject, tab, activeItemTitle }) => {
                 className="cursor-pointer hover:underline"
                 style={{ color: '#3b82f6' }}
               >
-                {crumb.label}
+                {crumb.shortLabel ? (
+                  <>
+                    <span className="sm:hidden">{crumb.shortLabel}</span>
+                    <span className="hidden sm:inline">{crumb.label}</span>
+                  </>
+                ) : crumb.label}
               </span>
             )}
           </React.Fragment>

@@ -113,14 +113,35 @@ async function callGemini() {
   }
 }
 
-try {
-  const text = await callGemini();
+function cleanJson(text) {
   // Strip markdown code fences if present
-  const cleaned = text.replace(/^```json\s*\n?/, '').replace(/\n?```\s*$/, '');
-  // Validate JSON
-  JSON.parse(cleaned);
-  console.log(cleaned);
-} catch (err) {
-  console.error(`Request failed: ${err.message}`);
-  process.exit(1);
+  let cleaned = text.replace(/^```json\s*\n?/, '').replace(/\n?```\s*$/, '');
+  // Fix common Gemini JSON issues: bad escape sequences
+  cleaned = cleaned.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+  return cleaned;
+}
+
+const MAX_RETRIES = 2;
+for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+  try {
+    const text = await callGemini();
+    const cleaned = cleanJson(text);
+    JSON.parse(cleaned);
+    console.log(cleaned);
+    process.exit(0);
+  } catch (err) {
+    if (err instanceof SyntaxError && attempt < MAX_RETRIES) {
+      console.error(`JSON parse error (attempt ${attempt + 1}), retrying...`);
+      continue;
+    }
+    if (err instanceof SyntaxError) {
+      // Output raw text to stderr for debugging, still try to output cleaned version
+      console.error(`JSON parse failed after ${MAX_RETRIES + 1} attempts. Outputting raw text.`);
+      const text = await callGemini();
+      console.log(cleanJson(text));
+      process.exit(0);
+    }
+    console.error(`Request failed: ${err.message}`);
+    process.exit(1);
+  }
 }

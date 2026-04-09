@@ -56,11 +56,11 @@ const CourseMap = ({ subject, onCourseClick }) => {
     <div className="mb-8">
       <div className="flex items-center gap-3 mb-5">
         <div className="flex-1">
-          <div className="flex justify-between mb-1.5">
-            <span className="font-bold text-sm" style={{ color: 'var(--theme-content-text)' }}>
+          <div className="flex flex-wrap items-baseline gap-x-2 mb-1.5">
+            <span className="font-bold text-sm min-w-0" style={{ color: 'var(--theme-content-text)' }}>
               {subject.title[lang]}
             </span>
-            <span className="text-xs font-semibold" style={{ color: '#3b82f6' }}>
+            <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#3b82f6' }}>
               {overallPercent}% {t('complete', 'complet')}
             </span>
           </div>
@@ -131,7 +131,7 @@ const CourseMap = ({ subject, onCourseClick }) => {
                 ...getStaggerStyle(index),
                 backgroundColor: tileBg,
                 border: `1.5px solid ${tileBorder}`,
-                opacity: (!hasProgress && !isComplete && !isNext) ? 0.6 : getStaggerStyle(index).opacity,
+                opacity: (!hasProgress && !isComplete && !isNext) ? 0.75 : getStaggerStyle(index).opacity,
               }}
             >
               <div className="flex justify-center mb-1.5">
@@ -143,9 +143,14 @@ const CourseMap = ({ subject, onCourseClick }) => {
               >
                 {course.shortTitle[lang].split(':')[0]}
               </div>
-              <div className="text-[10px] mt-0.5 truncate" style={{ color: 'var(--theme-muted-text)' }}>
+              <div className="text-xs mt-0.5 truncate" style={{ color: 'var(--theme-muted-text)' }}>
                 {course.shortTitle[lang].split(':').slice(1).join(':').trim() || course.shortTitle[lang]}
               </div>
+              {totalCompleted === 0 && index === 0 && (
+                <div className="text-[10px] mt-1 font-semibold" style={{ color: '#3b82f6' }}>
+                  {t('Start here →', 'Începe aici →')}
+                </div>
+              )}
             </button>
           );
         })}
