@@ -1,73 +1,135 @@
 {
   "meta": {
     "id": "pa-c5",
-    "title": { "en": "Course 5a: KMP Algorithm", "ro": "Cursul 5a: Algoritmul KMP" },
-    "shortTitle": { "en": "C5a: KMP", "ro": "C5a: KMP" },
-    "source": { "en": "Algorithm Design \u2014 Lecture 5a, UAIC 2025-2026", "ro": "Proiectarea Algoritmilor \u2014 Cursul 5a, UAIC 2025-2026" }
+    "title": {
+      "en": "Course 5: KMP Algorithm",
+      "ro": "Cursul 5: Algoritmul KMP"
+    },
+    "shortTitle": {
+      "en": "C5: KMP",
+      "ro": "C5: KMP"
+    },
+    "source": {
+      "en": "Algorithm Design — Lecture 5, UAIC 2025-2026",
+      "ro": "Proiectarea Algoritmilor — Cursul 5, UAIC 2025-2026"
+    }
   },
   "steps": [
     {
       "id": "pa-c5-problem",
-      "title": { "en": "1. String Matching Problem", "ro": "1. Problema potrivirii \u0219irurilor" },
+      "title": {
+        "en": "String Matching Problem",
+        "ro": "Problema potrivirii șirurilor"
+      },
       "group": "fundamentals",
       "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Diagnostic question: how would you search for a word in a text file?",
+                "ro": "Întrebare diagnostică: cum ai căuta un cuvânt într-un fișier text?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Compare the word against every possible position in the text, character by character",
+                    "ro": "Compară cuvântul cu fiecare poziție posibilă din text, caracter cu caracter"
+                  },
+                  "correct": true
+                },
+                {
+                  "text": {
+                    "en": "Sort the text first, then use binary search",
+                    "ro": "Sortează textul mai întâi, apoi folosește căutarea binară"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "Read the entire text into memory and use a hash table",
+                    "ro": "Citește tot textul în memorie și folosește o tabelă hash"
+                  },
+                  "correct": false
+                }
+              ],
+              "explanation": {
+                "en": "The naive approach is correct: slide the word across the text and compare. But it can be slow (O(n*m)). KMP improves this to O(n+m) by reusing information from previous comparisons. Binary search doesn't apply because text positions aren't sorted by content, and hash tables solve a different problem (exact lookup, not substring search).",
+                "ro": "Abordarea naivă este corectă: glisează cuvântul pe text și compară. Dar poate fi lentă (O(n*m)). KMP îmbunătățește la O(n+m) reutilizând informația din comparațiile anterioare. Căutarea binară nu se aplică deoarece pozițiile textului nu sunt sortate după conținut, iar tabelele hash rezolvă o problemă diferită (căutare exactă, nu căutare de subșir)."
+              }
+            }
+          ]
+        },
         {
           "type": "learn",
           "content": {
             "en": "String matching is one of the most fundamental problems in computer science. Given a **text** and a **pattern**, we want to find where (if anywhere) the pattern occurs inside the text.\n\nThis problem appears everywhere: text editors (Ctrl+F), search engines, DNA sequence analysis, plagiarism detection, network intrusion detection, and more.",
-            "ro": "\u00cempotrivirea \u0219irurilor este una dintre cele mai fundamentale probleme din informatic\u0103. Dat un **text** \u0219i un **pattern**, vrem s\u0103 g\u0103sim unde (dac\u0103 undeva) apare pattern-ul \u00een text.\n\nAceast\u0103 problem\u0103 apare peste tot: editoare text (Ctrl+F), motoare de c\u0103utare, analiza secven\u021belor ADN, detectarea plagiatului, detectarea intruziunilor \u00een re\u021bele \u0219i altele."
+            "ro": "Împotrivirea șirurilor este una dintre cele mai fundamentale probleme din informatică. Dat un **text** și un **pattern**, vrem să găsim unde (dacă undeva) apare pattern-ul în text.\n\nAceastă problemă apare peste tot: editoare text (Ctrl+F), motoare de căutare, analiza secvențelor ADN, detectarea plagiatului, detectarea intruziunilor în rețele și altele."
           }
         },
         {
           "type": "definition",
-          "term": { "en": "Pattern Matching Problem", "ro": "Problema Pattern Matching" },
+          "term": {
+            "en": "Pattern Matching Problem",
+            "ro": "Problema Pattern Matching"
+          },
           "content": {
             "en": "**Input:** T[0..n-1] (text, n symbols), P[0..m-1] (pattern, m symbols).\n**Output:** index i such that T[i..i+m-1] == P, or -1 if no such i exists.",
-            "ro": "**Input:** T[0..n-1] (text, n simboluri), P[0..m-1] (pattern, m simboluri).\n**Output:** index i astfel \u00eenc\u00e2t T[i..i+m-1] == P, sau -1 dac\u0103 nu exist\u0103 un astfel de i."
+            "ro": "**Input:** T[0..n-1] (text, n simboluri), P[0..m-1] (pattern, m simboluri).\n**Output:** index i astfel încât T[i..i+m-1] == P, sau -1 dacă nu există un astfel de i."
           }
         },
         {
           "type": "learn",
           "content": {
-            "en": "**Notation:**\n- **T** = text, **P** = pattern\n- **n** = |T| (length of text), **m** = |P| (length of pattern)\n- **S[i..j]** denotes the substring from index i to j\n- Both T and P use the same alphabet **\u03a3**",
-            "ro": "**Nota\u021bie:**\n- **T** = text, **P** = pattern\n- **n** = |T| (lungimea textului), **m** = |P| (lungimea pattern-ului)\n- **S[i..j]** denot\u0103 sub\u0219irul de la indexul i la j\n- At\u00e2t T c\u00e2t \u0219i P folosesc acela\u0219i alfabet **\u03a3**"
+            "en": "**Notation:**\n- **T** = text, **P** = pattern\n- **n** = |T| (length of text), **m** = |P| (length of pattern)\n- **S[i..j]** denotes the substring from index i to j\n- Both T and P use the same alphabet **Σ**",
+            "ro": "**Notație:**\n- **T** = text, **P** = pattern\n- **n** = |T| (lungimea textului), **m** = |P| (lungimea pattern-ului)\n- **S[i..j]** denotă subșirul de la indexul i la j\n- Atât T cât și P folosesc același alfabet **Σ**"
           }
         },
         {
           "type": "definition",
-          "term": { "en": "Problem Variants", "ro": "Variante ale problemei" },
+          "term": {
+            "en": "Problem Variants",
+            "ro": "Variante ale problemei"
+          },
           "content": {
             "en": "- **First occurrence:** return the smallest index i where P matches (or -1)\n- **All occurrences:** return the set of all indices i where P matches\n- **Decision version:** does P occur in T? (Yes/No)",
-            "ro": "- **Prima apari\u021bie:** returneaz\u0103 cel mai mic index i unde P se potrive\u0219te (sau -1)\n- **Toate apari\u021biile:** returneaz\u0103 mul\u021bimea tuturor indicilor i unde P se potrive\u0219te\n- **Versiunea de decizie:** apare P \u00een T? (Da/Nu)"
+            "ro": "- **Prima apariție:** returnează cel mai mic index i unde P se potrivește (sau -1)\n- **Toate aparițiile:** returnează mulțimea tuturor indicilor i unde P se potrivește\n- **Versiunea de decizie:** apare P în T? (Da/Nu)"
           }
         },
         {
           "type": "think",
           "question": {
             "en": "Before looking at efficient algorithms, how would you solve the string matching problem? What is the simplest approach you can think of?",
-            "ro": "\u00cenainte de a analiza algoritmi eficien\u021bi, cum ai rezolva problema potrivirii \u0219irurilor? Care este cea mai simpl\u0103 abordare la care te po\u021bi g\u00e2ndi?"
+            "ro": "Înainte de a analiza algoritmi eficienți, cum ai rezolva problema potrivirii șirurilor? Care este cea mai simplă abordare la care te poți gândi?"
           },
           "answer": {
             "en": "The simplest approach is brute force: try every possible position in T where P could start (from 0 to n-m), and at each position compare P character by character. If all m characters match, we found it. This is the naive algorithm we'll formalize next.",
-            "ro": "Cea mai simpl\u0103 abordare este for\u021ba brut\u0103: \u00eencearc\u0103 fiecare pozi\u021bie posibil\u0103 \u00een T unde P ar putea \u00eencepe (de la 0 la n-m), \u0219i la fiecare pozi\u021bie compar\u0103 P caracter cu caracter. Dac\u0103 toate cele m caractere se potrivesc, l-am g\u0103sit. Acesta este algoritmul naiv pe care \u00eel vom formaliza \u00een continuare."
+            "ro": "Cea mai simplă abordare este forța brută: încearcă fiecare poziție posibilă în T unde P ar putea începe (de la 0 la n-m), și la fiecare poziție compară P caracter cu caracter. Dacă toate cele m caractere se potrivesc, l-am găsit. Acesta este algoritmul naiv pe care îl vom formaliza în continuare."
           }
         },
         {
           "type": "lecture",
-          "note": { "en": "Slides: String matching problem definition, notation, variants", "ro": "Slide-uri: Definirea problemei de potrivire, nota\u021bie, variante" }
+          "note": {
+            "en": "Slides: String matching problem definition, notation, variants",
+            "ro": "Slide-uri: Definirea problemei de potrivire, notație, variante"
+          }
         }
       ]
     },
     {
       "id": "pa-c5-naive",
-      "title": { "en": "2. The Naive Algorithm", "ro": "2. Algoritmul naiv" },
+      "title": {
+        "en": "The Naive Algorithm",
+        "ro": "Algoritmul naiv"
+      },
       "group": "fundamentals",
       "blocks": [
         {
           "type": "learn",
           "content": {
             "en": "The naive approach checks every possible offset **i** from 0 to n-m, comparing P against T[i..i+m-1] character by character. If all characters match, we return i. If any character mismatches, we move to offset i+1 and start comparing from scratch.",
-            "ro": "Abordarea naiv\u0103 verific\u0103 fiecare offset posibil **i** de la 0 la n-m, compar\u00e2nd P cu T[i..i+m-1] caracter cu caracter. Dac\u0103 toate caracterele se potrivesc, return\u0103m i. Dac\u0103 vreun caracter nu se potrive\u0219te, trecem la offset-ul i+1 \u0219i \u00eencepem compararea de la zero."
+            "ro": "Abordarea naivă verifică fiecare offset posibil **i** de la 0 la n-m, comparând P cu T[i..i+m-1] caracter cu caracter. Dacă toate caracterele se potrivesc, returnăm i. Dacă vreun caracter nu se potrivește, trecem la offset-ul i+1 și începem compararea de la zero."
           }
         },
         {
@@ -79,50 +141,62 @@
           "type": "callout",
           "variant": "warning",
           "content": {
-            "en": "**Worst case: O(n\u00b7m)**\n\nWorst case input: T = \"AAA...AB\" (n-1 A's followed by B), P = \"AA...AB\" (m-1 A's followed by B). At every offset, all m comparisons are made before the mismatch at the last character.",
-            "ro": "**Caz defavorabil: O(n\u00b7m)**\n\nInput-ul cel mai defavorabil: T = \"AAA...AB\" (n-1 A-uri urmate de B), P = \"AA...AB\" (m-1 A-uri urmate de B). La fiecare offset, toate cele m compara\u021bii sunt f\u0103cute \u00eenainte de mismatch la ultimul caracter."
+            "en": "**Worst case: O(n·m)**\n\nWorst case input: T = \"AAA...AB\" (n-1 A's followed by B), P = \"AA...AB\" (m-1 A's followed by B). At every offset, all m comparisons are made before the mismatch at the last character.",
+            "ro": "**Caz defavorabil: O(n·m)**\n\nInput-ul cel mai defavorabil: T = \"AAA...AB\" (n-1 A-uri urmate de B), P = \"AA...AB\" (m-1 A-uri urmate de B). La fiecare offset, toate cele m comparații sunt făcute înainte de mismatch la ultimul caracter."
           }
         },
         {
           "type": "think",
           "question": {
             "en": "Why is the naive algorithm slow? When a mismatch occurs at position j in the pattern (after j successful comparisons), what information does the naive algorithm throw away?",
-            "ro": "De ce este algoritmul naiv lent? C\u00e2nd apare un mismatch la pozi\u021bia j \u00een pattern (dup\u0103 j compara\u021bii reu\u0219ite), ce informa\u021bie arunc\u0103 algoritmul naiv?"
+            "ro": "De ce este algoritmul naiv lent? Când apare un mismatch la poziția j în pattern (după j comparații reușite), ce informație aruncă algoritmul naiv?"
           },
           "answer": {
             "en": "The naive algorithm forgets everything it learned from the previous comparison. After matching j characters and failing, it shifts by just 1 position and re-compares characters it already saw. The key insight of KMP is: those j matched characters contain information about which offsets are impossible, so we can skip ahead.",
-            "ro": "Algoritmul naiv uit\u0103 tot ce a \u00eenv\u0103\u021bat din compara\u021bia anterioar\u0103. Dup\u0103 potrivirea a j caractere \u0219i e\u0219ec, se deplaseaz\u0103 cu doar 1 pozi\u021bie \u0219i recompar\u0103 caractere pe care le-a v\u0103zut deja. Observa\u021bia cheie a KMP este: acele j caractere potrivite con\u021bin informa\u021bie despre ce offset-uri sunt imposibile, deci putem s\u0103ri \u00eenainte."
+            "ro": "Algoritmul naiv uită tot ce a învățat din comparația anterioară. După potrivirea a j caractere și eșec, se deplasează cu doar 1 poziție și recompară caractere pe care le-a văzut deja. Observația cheie a KMP este: acele j caractere potrivite conțin informație despre ce offset-uri sunt imposibile, deci putem sări înainte."
           }
         },
         {
           "type": "lecture",
-          "note": { "en": "Slides: Naive algorithm, worst-case analysis", "ro": "Slide-uri: Algoritmul naiv, analiza cazului defavorabil" }
+          "note": {
+            "en": "Slides: Naive algorithm, worst-case analysis",
+            "ro": "Slide-uri: Algoritmul naiv, analiza cazului defavorabil"
+          }
         }
       ]
     },
     {
       "id": "pa-c5-kmp",
-      "title": { "en": "3. The KMP Algorithm", "ro": "3. Algoritmul KMP" },
+      "title": {
+        "en": "The KMP Algorithm",
+        "ro": "Algoritmul KMP"
+      },
       "group": "core",
       "blocks": [
         {
           "type": "learn",
           "content": {
             "en": "The **Knuth-Morris-Pratt (KMP)** algorithm improves on the naive approach by reusing information from previous comparisons. When a mismatch occurs after matching j characters, KMP uses the **failure function** to jump directly to the next viable offset -- without re-comparing characters already known to match.",
-            "ro": "Algoritmul **Knuth-Morris-Pratt (KMP)** \u00eembun\u0103t\u0103\u021be\u0219te abordarea naiv\u0103 reutiliz\u00e2nd informa\u021bia din compara\u021biile anterioare. C\u00e2nd apare un mismatch dup\u0103 potrivirea a j caractere, KMP folose\u0219te **func\u021bia de e\u0219ec** pentru a s\u0103ri direct la urm\u0103torul offset viabil -- f\u0103r\u0103 a recompara caractere deja cunoscute ca potrivite."
+            "ro": "Algoritmul **Knuth-Morris-Pratt (KMP)** îmbunătățește abordarea naivă reutilizând informația din comparațiile anterioare. Când apare un mismatch după potrivirea a j caractere, KMP folosește **funcția de eșec** pentru a sări direct la următorul offset viabil -- fără a recompara caractere deja cunoscute ca potrivite."
           }
         },
         {
           "type": "definition",
-          "term": { "en": "Border of a string", "ro": "Border al unui \u0219ir" },
+          "term": {
+            "en": "Border of a string",
+            "ro": "Border al unui șir"
+          },
           "content": {
             "en": "A **border** of string S is a substring that is simultaneously a **proper prefix** AND a **proper suffix** of S. A string can have multiple borders.\n\nExample: \"ABAB\" is a border of \"ABABXABAB\" (prefix ABAB = suffix ABAB). Also \"AB\" is not a border here since the suffix would be \"AB\" at position 7-8 but the full string ending is \"ABAB\".",
-            "ro": "Un **border** al \u0219irului S este un sub\u0219ir care este simultan un **prefix propriu** \u0218I un **sufix propriu** al lui S. Un \u0219ir poate avea mai multe borders.\n\nExemplu: \"ABAB\" este un border al \"ABABXABAB\" (prefix ABAB = sufix ABAB)."
+            "ro": "Un **border** al șirului S este un subșir care este simultan un **prefix propriu** ȘI un **sufix propriu** al lui S. Un șir poate avea mai multe borders.\n\nExemplu: \"ABAB\" este un border al \"ABABXABAB\" (prefix ABAB = sufix ABAB)."
           }
         },
         {
           "type": "definition",
-          "term": { "en": "Failure function F[j]", "ro": "Func\u021bia de e\u0219ec F[j]" },
+          "term": {
+            "en": "Failure function F[j]",
+            "ro": "Funcția de eșec F[j]"
+          },
           "content": {
             "en": "**F[j]** = length of the longest proper border of P[0..j-1].\n\n**F[0] = -1** always (sentinel value -- no prefix to consider).\n\nThis tells KMP: on mismatch at position j in the pattern, fall back to j = F[j]. The -1 sentinel handles the case where no border exists and we must advance in the text.",
             "ro": "**F[j]** = lungimea celui mai lung border propriu al P[0..j-1].\n\n**F[0] = -1** intotdeauna (valoare santinela -- nu exista prefix de considerat).\n\nAceasta spune KMP-ului: la mismatch la pozitia j in pattern, revenim la j = F[j]. Santinela -1 trateaza cazul in care nu exista border si trebuie sa avansam in text."
@@ -132,7 +206,7 @@
           "type": "learn",
           "content": {
             "en": "**Example: Failure function for ABABXABABY**",
-            "ro": "**Exemplu: Func\u021bia de e\u0219ec pentru ABABXABABY**"
+            "ro": "**Exemplu: Funcția de eșec pentru ABABXABABY**"
           }
         },
         {
@@ -142,22 +216,204 @@
         {
           "type": "table",
           "headers": [
-            { "en": "j", "ro": "j" },
-            { "en": "P[0..j-1]", "ro": "P[0..j-1]" },
-            { "en": "Longest border", "ro": "Cel mai lung border" },
-            { "en": "F[j]", "ro": "F[j]" }
+            {
+              "en": "j",
+              "ro": "j"
+            },
+            {
+              "en": "P[0..j-1]",
+              "ro": "P[0..j-1]"
+            },
+            {
+              "en": "Longest border",
+              "ro": "Cel mai lung border"
+            },
+            {
+              "en": "F[j]",
+              "ro": "F[j]"
+            }
           ],
           "rows": [
-            [{ "en": "0", "ro": "0" }, { "en": "(sentinel)", "ro": "(santinela)" }, { "en": "--", "ro": "--" }, { "en": "-1", "ro": "-1" }],
-            [{ "en": "1", "ro": "1" }, { "en": "A", "ro": "A" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
-            [{ "en": "2", "ro": "2" }, { "en": "AB", "ro": "AB" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
-            [{ "en": "3", "ro": "3" }, { "en": "ABA", "ro": "ABA" }, { "en": "A", "ro": "A" }, { "en": "1", "ro": "1" }],
-            [{ "en": "4", "ro": "4" }, { "en": "ABAB", "ro": "ABAB" }, { "en": "AB", "ro": "AB" }, { "en": "2", "ro": "2" }],
-            [{ "en": "5", "ro": "5" }, { "en": "ABABX", "ro": "ABABX" }, { "en": "(none)", "ro": "(niciunul)" }, { "en": "0", "ro": "0" }],
-            [{ "en": "6", "ro": "6" }, { "en": "ABABXA", "ro": "ABABXA" }, { "en": "A", "ro": "A" }, { "en": "1", "ro": "1" }],
-            [{ "en": "7", "ro": "7" }, { "en": "ABABXAB", "ro": "ABABXAB" }, { "en": "AB", "ro": "AB" }, { "en": "2", "ro": "2" }],
-            [{ "en": "8", "ro": "8" }, { "en": "ABABXABA", "ro": "ABABXABA" }, { "en": "ABA", "ro": "ABA" }, { "en": "3", "ro": "3" }],
-            [{ "en": "9", "ro": "9" }, { "en": "ABABXABAB", "ro": "ABABXABAB" }, { "en": "ABAB", "ro": "ABAB" }, { "en": "4", "ro": "4" }]
+            [
+              {
+                "en": "0",
+                "ro": "0"
+              },
+              {
+                "en": "(sentinel)",
+                "ro": "(santinela)"
+              },
+              {
+                "en": "--",
+                "ro": "--"
+              },
+              {
+                "en": "-1",
+                "ro": "-1"
+              }
+            ],
+            [
+              {
+                "en": "1",
+                "ro": "1"
+              },
+              {
+                "en": "A",
+                "ro": "A"
+              },
+              {
+                "en": "(none)",
+                "ro": "(niciunul)"
+              },
+              {
+                "en": "0",
+                "ro": "0"
+              }
+            ],
+            [
+              {
+                "en": "2",
+                "ro": "2"
+              },
+              {
+                "en": "AB",
+                "ro": "AB"
+              },
+              {
+                "en": "(none)",
+                "ro": "(niciunul)"
+              },
+              {
+                "en": "0",
+                "ro": "0"
+              }
+            ],
+            [
+              {
+                "en": "3",
+                "ro": "3"
+              },
+              {
+                "en": "ABA",
+                "ro": "ABA"
+              },
+              {
+                "en": "A",
+                "ro": "A"
+              },
+              {
+                "en": "1",
+                "ro": "1"
+              }
+            ],
+            [
+              {
+                "en": "4",
+                "ro": "4"
+              },
+              {
+                "en": "ABAB",
+                "ro": "ABAB"
+              },
+              {
+                "en": "AB",
+                "ro": "AB"
+              },
+              {
+                "en": "2",
+                "ro": "2"
+              }
+            ],
+            [
+              {
+                "en": "5",
+                "ro": "5"
+              },
+              {
+                "en": "ABABX",
+                "ro": "ABABX"
+              },
+              {
+                "en": "(none)",
+                "ro": "(niciunul)"
+              },
+              {
+                "en": "0",
+                "ro": "0"
+              }
+            ],
+            [
+              {
+                "en": "6",
+                "ro": "6"
+              },
+              {
+                "en": "ABABXA",
+                "ro": "ABABXA"
+              },
+              {
+                "en": "A",
+                "ro": "A"
+              },
+              {
+                "en": "1",
+                "ro": "1"
+              }
+            ],
+            [
+              {
+                "en": "7",
+                "ro": "7"
+              },
+              {
+                "en": "ABABXAB",
+                "ro": "ABABXAB"
+              },
+              {
+                "en": "AB",
+                "ro": "AB"
+              },
+              {
+                "en": "2",
+                "ro": "2"
+              }
+            ],
+            [
+              {
+                "en": "8",
+                "ro": "8"
+              },
+              {
+                "en": "ABABXABA",
+                "ro": "ABABXABA"
+              },
+              {
+                "en": "ABA",
+                "ro": "ABA"
+              },
+              {
+                "en": "3",
+                "ro": "3"
+              }
+            ],
+            [
+              {
+                "en": "9",
+                "ro": "9"
+              },
+              {
+                "en": "ABABXABAB",
+                "ro": "ABABXABAB"
+              },
+              {
+                "en": "ABAB",
+                "ro": "ABAB"
+              },
+              {
+                "en": "4",
+                "ro": "4"
+              }
+            ]
           ]
         },
         {
@@ -177,7 +433,18 @@
           "variant": "info",
           "content": {
             "en": "**KMP Complexity:** Search phase: **O(n)**. Preprocessing (computing F): **O(m)**. Total: **O(n + m)** -- linear in the input size. This is optimal since you must read every character at least once.",
-            "ro": "**Complexitatea KMP:** Faza de c\u0103utare: **O(n)**. Preprocesare (calculul lui F): **O(m)**. Total: **O(n + m)** -- liniar \u00een dimensiunea input-ului. Este optim deoarece trebuie citit fiecare caracter cel pu\u021bin o dat\u0103."
+            "ro": "**Complexitatea KMP:** Faza de căutare: **O(n)**. Preprocesare (calculul lui F): **O(m)**. Total: **O(n + m)** -- liniar în dimensiunea input-ului. Este optim deoarece trebuie citit fiecare caracter cel puțin o dată."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Before stepping through the animation: when pattern 'ABABX' mismatches at position 4 (after matching ABAB), where will KMP jump to? What does F[4]=2 tell you?",
+            "ro": "Înainte de a parcurge animația: când patternul 'ABABX' nu se potrivește la poziția 4 (după ce a potrivit ABAB), unde va sări KMP? Ce ne spune F[4]=2?"
+          },
+          "answer": {
+            "en": "F[4]=2 means the longest proper prefix of 'ABAB' that is also a suffix has length 2 ('AB'). So KMP jumps back to position 2 in the pattern, avoiding re-comparison of the first two characters.",
+            "ro": "F[4]=2 înseamnă că cel mai lung prefix propriu al 'ABAB' care este și sufix are lungimea 2 ('AB'). Deci KMP sare înapoi la poziția 2 în pattern, evitând re-compararea primelor două caractere."
           }
         },
         {
@@ -186,20 +453,26 @@
         },
         {
           "type": "lecture",
-          "note": { "en": "Slides: KMP key idea, borders, failure function, search algorithm, complexity proof", "ro": "Slide-uri: Ideea cheie KMP, borders, func\u021bia de e\u0219ec, algoritmul de c\u0103utare, demonstra\u021bia complexit\u0103\u021bii" }
+          "note": {
+            "en": "Slides: KMP key idea, borders, failure function, search algorithm, complexity proof",
+            "ro": "Slide-uri: Ideea cheie KMP, borders, funcția de eșec, algoritmul de căutare, demonstrația complexității"
+          }
         }
       ]
     },
     {
       "id": "pa-c5-fail",
-      "title": { "en": "4. Computing the Failure Function", "ro": "4. Calculul func\u021biei de e\u0219ec" },
+      "title": {
+        "en": "Computing the Failure Function",
+        "ro": "Calculul funcției de eșec"
+      },
       "group": "core",
       "blocks": [
         {
           "type": "learn",
           "content": {
             "en": "The failure function is computed by matching the **pattern against itself** -- essentially running KMP on P with P as both text and pattern. We iterate through P from index 1, extending or falling back the current border length j.",
-            "ro": "Func\u021bia de e\u0219ec este calculat\u0103 potrivind **pattern-ul cu el \u00eensu\u0219i** -- rul\u00e2nd esen\u021bial KMP pe P cu P ca at\u00e2t text c\u00e2t \u0219i pattern. Iter\u0103m prin P de la indexul 1, extinz\u00e2nd sau revenind la lungimea border-ului curent j."
+            "ro": "Funcția de eșec este calculată potrivind **pattern-ul cu el însuși** -- rulând esențial KMP pe P cu P ca atât text cât și pattern. Iterăm prin P de la indexul 1, extinzând sau revenind la lungimea border-ului curent j."
           }
         },
         {
@@ -218,11 +491,11 @@
           "type": "think",
           "question": {
             "en": "Why does the computeF function look almost identical to the KMP search function? What is the connection?",
-            "ro": "De ce func\u021bia computeF arat\u0103 aproape identic cu func\u021bia de c\u0103utare KMP? Care este conexiunea?"
+            "ro": "De ce funcția computeF arată aproape identic cu funcția de căutare KMP? Care este conexiunea?"
           },
           "answer": {
             "en": "Computing F is literally the same problem as KMP search, but with P as both the text and the pattern! We're finding where P matches itself (shifted). The while-loop fallback logic is identical because we're using the same border principle: when extending a border fails, we fall back to the next longest border.",
-            "ro": "Calculul lui F este literalmente aceea\u0219i problem\u0103 ca \u0219i c\u0103utarea KMP, dar cu P ca at\u00e2t text c\u00e2t \u0219i pattern! G\u0103sim unde P se potrive\u0219te cu el \u00eensu\u0219i (deplasat). Logica de revenire din while este identic\u0103 deoarece folosim acela\u0219i principiu al border-ului: c\u00e2nd extinderea unui border e\u0219ueaz\u0103, revenim la urm\u0103torul cel mai lung border."
+            "ro": "Calculul lui F este literalmente aceeași problemă ca și căutarea KMP, dar cu P ca atât text cât și pattern! Găsim unde P se potrivește cu el însuși (deplasat). Logica de revenire din while este identică deoarece folosim același principiu al border-ului: când extinderea unui border eșuează, revenim la următorul cel mai lung border."
           }
         },
         {
@@ -230,18 +503,24 @@
           "variant": "tip",
           "content": {
             "en": "**Why is KMP not commonly used in practice?** While KMP guarantees O(n+m) worst case, the **Boyer-Moore** algorithm is typically faster in practice (sublinear average case -- it can skip characters by looking at the end of the pattern first). However, KMP concepts (borders, failure function) are reused in Boyer-Moore and other string algorithms like Aho-Corasick.",
-            "ro": "**De ce KMP nu este folosit frecvent \u00een practic\u0103?** De\u0219i KMP garanteaz\u0103 O(n+m) \u00een cazul cel mai defavorabil, algoritmul **Boyer-Moore** este de obicei mai rapid \u00een practic\u0103 (caz mediu subliniar -- poate s\u0103ri caractere privind la sf\u00e2r\u0219itul pattern-ului mai \u00eent\u00e2i). Totu\u0219i, conceptele KMP (borders, func\u021bia de e\u0219ec) sunt reutilizate \u00een Boyer-Moore \u0219i al\u021bi algoritmi pe \u0219iruri precum Aho-Corasick."
+            "ro": "**De ce KMP nu este folosit frecvent în practică?** Deși KMP garantează O(n+m) în cazul cel mai defavorabil, algoritmul **Boyer-Moore** este de obicei mai rapid în practică (caz mediu subliniar -- poate sări caractere privind la sfârșitul pattern-ului mai întâi). Totuși, conceptele KMP (borders, funcția de eșec) sunt reutilizate în Boyer-Moore și alți algoritmi pe șiruri precum Aho-Corasick."
           }
         },
         {
           "type": "lecture",
-          "note": { "en": "Slides: Failure function computation, amortized analysis, KMP in practice", "ro": "Slide-uri: Calculul func\u021biei de e\u0219ec, analiz\u0103 amortizat\u0103, KMP \u00een practic\u0103" }
+          "note": {
+            "en": "Slides: Failure function computation, amortized analysis, KMP in practice",
+            "ro": "Slide-uri: Calculul funcției de eșec, analiză amortizată, KMP în practică"
+          }
         }
       ]
     },
     {
       "id": "pa-c5-quiz",
-      "title": { "en": "Self-Test (7 Questions)", "ro": "Autoevaluare (7 \u00eentreb\u0103ri)" },
+      "title": {
+        "en": "Self-Test (7 Questions)",
+        "ro": "Autoevaluare (7 întrebări)"
+      },
       "group": "assessment",
       "blocks": [
         {
@@ -253,42 +532,114 @@
                 "ro": "Care este complexitatea de timp a cazului cel mai defavorabil al algoritmului naiv de potrivire?"
               },
               "options": [
-                { "text": { "en": "O(n + m)", "ro": "O(n + m)" }, "correct": false },
-                { "text": { "en": "O(n \u00b7 m)", "ro": "O(n \u00b7 m)" }, "correct": true },
-                { "text": { "en": "O(n \u00b7 log m)", "ro": "O(n \u00b7 log m)" }, "correct": false },
-                { "text": { "en": "O(n\u00b2)", "ro": "O(n\u00b2)" }, "correct": false }
+                {
+                  "text": {
+                    "en": "O(n + m)",
+                    "ro": "O(n + m)"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "O(n · m)",
+                    "ro": "O(n · m)"
+                  },
+                  "correct": true
+                },
+                {
+                  "text": {
+                    "en": "O(n · log m)",
+                    "ro": "O(n · log m)"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "O(n²)",
+                    "ro": "O(n²)"
+                  },
+                  "correct": false
+                }
               ],
               "explanation": {
-                "en": "The naive algorithm tries all n-m+1 offsets and at each offset compares up to m characters. Worst case: T = \"AAA...AB\", P = \"AA...AB\" gives O(n \u00b7 m).",
-                "ro": "Algoritmul naiv \u00eencearc\u0103 toate cele n-m+1 offset-uri \u0219i la fiecare offset compar\u0103 p\u00e2n\u0103 la m caractere. Cazul cel mai defavorabil: T = \"AAA...AB\", P = \"AA...AB\" d\u0103 O(n \u00b7 m)."
+                "en": "The naive algorithm tries all n-m+1 offsets and at each offset compares up to m characters. Worst case: T = \"AAA...AB\", P = \"AA...AB\" gives O(n · m).",
+                "ro": "Algoritmul naiv încearcă toate cele n-m+1 offset-uri și la fiecare offset compară până la m caractere. Cazul cel mai defavorabil: T = \"AAA...AB\", P = \"AA...AB\" dă O(n · m)."
               }
             },
             {
               "question": {
                 "en": "What is a \"border\" of a string S?",
-                "ro": "Ce este un \"border\" al unui \u0219ir S?"
+                "ro": "Ce este un \"border\" al unui șir S?"
               },
               "options": [
-                { "text": { "en": "Any substring of S", "ro": "Orice sub\u0219ir al lui S" }, "correct": false },
-                { "text": { "en": "A substring that is both a proper prefix and a proper suffix of S", "ro": "Un sub\u0219ir care este at\u00e2t prefix propriu c\u00e2t \u0219i sufix propriu al lui S" }, "correct": true },
-                { "text": { "en": "The first and last character of S", "ro": "Primul \u0219i ultimul caracter al lui S" }, "correct": false },
-                { "text": { "en": "The longest repeated substring of S", "ro": "Cel mai lung sub\u0219ir repetat al lui S" }, "correct": false }
+                {
+                  "text": {
+                    "en": "Any substring of S",
+                    "ro": "Orice subșir al lui S"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "A substring that is both a proper prefix and a proper suffix of S",
+                    "ro": "Un subșir care este atât prefix propriu cât și sufix propriu al lui S"
+                  },
+                  "correct": true
+                },
+                {
+                  "text": {
+                    "en": "The first and last character of S",
+                    "ro": "Primul și ultimul caracter al lui S"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "The longest repeated substring of S",
+                    "ro": "Cel mai lung subșir repetat al lui S"
+                  },
+                  "correct": false
+                }
               ],
               "explanation": {
                 "en": "A border is simultaneously a proper prefix AND a proper suffix. For example, \"AB\" is a border of \"ABAB\" because ABAB starts with AB and ends with AB.",
-                "ro": "Un border este simultan un prefix propriu \u0218I un sufix propriu. De exemplu, \"AB\" este un border al \"ABAB\" deoarece ABAB \u00eencepe cu AB \u0219i se termin\u0103 cu AB."
+                "ro": "Un border este simultan un prefix propriu ȘI un sufix propriu. De exemplu, \"AB\" este un border al \"ABAB\" deoarece ABAB începe cu AB și se termină cu AB."
               }
             },
             {
               "question": {
                 "en": "What does the failure function F[j] represent?",
-                "ro": "Ce reprezint\u0103 func\u021bia de e\u0219ec F[j]?"
+                "ro": "Ce reprezintă funcția de eșec F[j]?"
               },
               "options": [
-                { "text": { "en": "The index where the pattern first fails to match", "ro": "Indexul unde pattern-ul nu reu\u0219e\u0219te s\u0103 se potriveasc\u0103 prima dat\u0103" }, "correct": false },
-                { "text": { "en": "The number of characters to skip in the text", "ro": "Num\u0103rul de caractere de s\u0103rit \u00een text" }, "correct": false },
-                { "text": { "en": "The length of the longest proper border of P[0..j-1]", "ro": "Lungimea celui mai lung border propriu al P[0..j-1]" }, "correct": true },
-                { "text": { "en": "The position of the last mismatch in the pattern", "ro": "Pozi\u021bia ultimului mismatch \u00een pattern" }, "correct": false }
+                {
+                  "text": {
+                    "en": "The index where the pattern first fails to match",
+                    "ro": "Indexul unde pattern-ul nu reușește să se potrivească prima dată"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "The number of characters to skip in the text",
+                    "ro": "Numărul de caractere de sărit în text"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "The length of the longest proper border of P[0..j-1]",
+                    "ro": "Lungimea celui mai lung border propriu al P[0..j-1]"
+                  },
+                  "correct": true
+                },
+                {
+                  "text": {
+                    "en": "The position of the last mismatch in the pattern",
+                    "ro": "Poziția ultimului mismatch în pattern"
+                  },
+                  "correct": false
+                }
               ],
               "explanation": {
                 "en": "F[j] gives the length of the longest proper border (a string that is both a proper prefix and proper suffix) of P[0..j-1], with F[0] = -1 as sentinel. On mismatch at position j, KMP falls back to j = F[j].",
@@ -298,13 +649,37 @@
             {
               "question": {
                 "en": "What is F[0] always equal to?",
-                "ro": "Cu ce este F[0] \u00eentotdeauna egal?"
+                "ro": "Cu ce este F[0] întotdeauna egal?"
               },
               "options": [
-                { "text": { "en": "1", "ro": "1" }, "correct": false },
-                { "text": { "en": "0", "ro": "0" }, "correct": false },
-                { "text": { "en": "-1", "ro": "-1" }, "correct": true },
-                { "text": { "en": "Depends on the first character", "ro": "Depinde de primul caracter" }, "correct": false }
+                {
+                  "text": {
+                    "en": "1",
+                    "ro": "1"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "0",
+                    "ro": "0"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "-1",
+                    "ro": "-1"
+                  },
+                  "correct": true
+                },
+                {
+                  "text": {
+                    "en": "Depends on the first character",
+                    "ro": "Depinde de primul caracter"
+                  },
+                  "correct": false
+                }
               ],
               "explanation": {
                 "en": "F[0] = -1 always. It is a sentinel value: there is no prefix P[0..-1] to consider, so -1 signals that we must advance in the text.",
@@ -314,29 +689,77 @@
             {
               "question": {
                 "en": "What is the total time complexity of KMP (search + preprocessing)?",
-                "ro": "Care este complexitatea total\u0103 de timp a KMP (c\u0103utare + preprocesare)?"
+                "ro": "Care este complexitatea totală de timp a KMP (căutare + preprocesare)?"
               },
               "options": [
-                { "text": { "en": "O(n \u00b7 m)", "ro": "O(n \u00b7 m)" }, "correct": false },
-                { "text": { "en": "O(n + m)", "ro": "O(n + m)" }, "correct": true },
-                { "text": { "en": "O(n \u00b7 log m)", "ro": "O(n \u00b7 log m)" }, "correct": false },
-                { "text": { "en": "O(n\u00b2)", "ro": "O(n\u00b2)" }, "correct": false }
+                {
+                  "text": {
+                    "en": "O(n · m)",
+                    "ro": "O(n · m)"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "O(n + m)",
+                    "ro": "O(n + m)"
+                  },
+                  "correct": true
+                },
+                {
+                  "text": {
+                    "en": "O(n · log m)",
+                    "ro": "O(n · log m)"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "O(n²)",
+                    "ro": "O(n²)"
+                  },
+                  "correct": false
+                }
               ],
               "explanation": {
                 "en": "KMP preprocessing (computing F) takes O(m) and the search phase takes O(n). Total: O(n + m), which is linear and optimal.",
-                "ro": "Preprocesarea KMP (calculul lui F) ia O(m) \u0219i faza de c\u0103utare ia O(n). Total: O(n + m), care este liniar \u0219i optim."
+                "ro": "Preprocesarea KMP (calculul lui F) ia O(m) și faza de căutare ia O(n). Total: O(n + m), care este liniar și optim."
               }
             },
             {
               "question": {
                 "en": "For the pattern P = \"AABAAAB\", what is F[6]?",
-                "ro": "Pentru pattern-ul P = \"AABAAAB\", c\u00e2t este F[6]?"
+                "ro": "Pentru pattern-ul P = \"AABAAAB\", cât este F[6]?"
               },
               "options": [
-                { "text": { "en": "1", "ro": "1" }, "correct": false },
-                { "text": { "en": "2", "ro": "2" }, "correct": false },
-                { "text": { "en": "3", "ro": "3" }, "correct": true },
-                { "text": { "en": "4", "ro": "4" }, "correct": false }
+                {
+                  "text": {
+                    "en": "1",
+                    "ro": "1"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "2",
+                    "ro": "2"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "3",
+                    "ro": "3"
+                  },
+                  "correct": true
+                },
+                {
+                  "text": {
+                    "en": "4",
+                    "ro": "4"
+                  },
+                  "correct": false
+                }
               ],
               "explanation": {
                 "en": "P[0..6] = \"AABAAAB\". The longest proper border is \"AAB\" (prefix AAB = suffix AAB), so F[6] = 3.",
@@ -346,17 +769,41 @@
             {
               "question": {
                 "en": "Why does the computeF function resemble the KMP search function?",
-                "ro": "De ce func\u021bia computeF seam\u0103n\u0103 cu func\u021bia de c\u0103utare KMP?"
+                "ro": "De ce funcția computeF seamănă cu funcția de căutare KMP?"
               },
               "options": [
-                { "text": { "en": "It is a coincidence of the implementation", "ro": "Este o coinciden\u021b\u0103 a implement\u0103rii" }, "correct": false },
-                { "text": { "en": "Computing F is matching the pattern against itself", "ro": "Calculul lui F este potrivirea pattern-ului cu el \u00eensu\u0219i" }, "correct": true },
-                { "text": { "en": "Both use dynamic programming", "ro": "Ambele folosesc programare dinamic\u0103" }, "correct": false },
-                { "text": { "en": "They share the same loop structure by convention", "ro": "Au aceea\u0219i structur\u0103 de bucl\u0103 prin conven\u021bie" }, "correct": false }
+                {
+                  "text": {
+                    "en": "It is a coincidence of the implementation",
+                    "ro": "Este o coincidență a implementării"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "Computing F is matching the pattern against itself",
+                    "ro": "Calculul lui F este potrivirea pattern-ului cu el însuși"
+                  },
+                  "correct": true
+                },
+                {
+                  "text": {
+                    "en": "Both use dynamic programming",
+                    "ro": "Ambele folosesc programare dinamică"
+                  },
+                  "correct": false
+                },
+                {
+                  "text": {
+                    "en": "They share the same loop structure by convention",
+                    "ro": "Au aceeași structură de buclă prin convenție"
+                  },
+                  "correct": false
+                }
               ],
               "explanation": {
                 "en": "Computing the failure function is literally KMP searching the pattern P within itself. We look for where P matches a shifted version of P, which is exactly what borders represent.",
-                "ro": "Calculul func\u021biei de e\u0219ec este literalmente c\u0103utarea KMP a pattern-ului P \u00een el \u00eensu\u0219i. C\u0103ut\u0103m unde P se potrive\u0219te cu o versiune deplasat\u0103 a lui P, ceea ce este exact ceea ce reprezint\u0103 borders."
+                "ro": "Calculul funcției de eșec este literalmente căutarea KMP a pattern-ului P în el însuși. Căutăm unde P se potrivește cu o versiune deplasată a lui P, ceea ce este exact ceea ce reprezintă borders."
               }
             }
           ]

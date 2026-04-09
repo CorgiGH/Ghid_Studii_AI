@@ -14,10 +14,10 @@ export default function Seminar06() {
         ro: 'Care este formalizarea I/O pentru implementarea algoritmului Rabin-Karp?',
       },
       options: [
-        { text: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: {i ∈ ℕ | s[i..i+|p|−1] = p}', correct: true },
-        { text: 'Input: s ∈ Σ*, p ∈ Σ*; Output: i ∈ ℕ (first occurrence of p in s)', correct: false },
-        { text: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: hash(p)', correct: false },
-        { text: 'Input: s ∈ Σ*, p ∈ Σ*; Output: true/false (p is substring of s)', correct: false },
+        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: {i ∈ ℕ | s[i..i+|p|−1] = p}', ro: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: {i ∈ ℕ | s[i..i+|p|−1] = p}' }, correct: true },
+        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*; Output: i ∈ ℕ (first occurrence of p in s)', ro: 'Input: s ∈ Σ*, p ∈ Σ*; Output: i ∈ ℕ (prima apariție a lui p în s)' }, correct: false },
+        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: hash(p)', ro: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: hash(p)' }, correct: false },
+        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*; Output: true/false (p is substring of s)', ro: 'Input: s ∈ Σ*, p ∈ Σ*; Output: true/false (p este subșir al lui s)' }, correct: false },
       ],
       explanation: {
         en: 'Rabin-Karp takes a text s, pattern p, and a prime q for hashing. It outputs all positions where p occurs in s.',
@@ -34,9 +34,9 @@ export default function Seminar06() {
         ro: 'Dat p = "aba", s = "aabbababbabab", q = 3, d = 3 (dimensiunea alfabetului), care este hash(p) mod q?\nFolosind h = (d·h + char) mod q, cu a=0, b=1:\nh = ((3·((3·0+0) mod 3)+1) mod 3·3+0) mod 3',
       },
       options: [
-        { text: '0', correct: false },
-        { text: '1', correct: false },
-        { text: '2', correct: false },
+        { text: { en: '0', ro: '0' }, correct: false },
+        { text: { en: '1', ro: '1' }, correct: false },
+        { text: { en: '2', ro: '2' }, correct: false },
         {
           text: {
             en: '0 — because hash("aba") = (0·9 + 1·3 + 0·1) mod 3 = 3 mod 3 = 0',
@@ -104,10 +104,10 @@ export default function Seminar06() {
         ro: 'Care este formalizarea I/O pentru căutarea unei matrici P (m₁×m₂) într-o matrice T (n₁×n₂)?',
       },
       options: [
-        { text: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: {(i,j) | T[i..i+m₁−1][j..j+m₂−1] = P}', correct: true },
-        { text: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: true/false', correct: false },
-        { text: 'Input: T ∈ Σⁿˣⁿ, P ∈ Σᵐˣᵐ; Output: count of occurrences', correct: false },
-        { text: 'Input: T ∈ Σ*, P ∈ Σ*; Output: {(i,j) | T[i][j] = P[0][0]}', correct: false },
+        { text: { en: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: {(i,j) | T[i..i+m₁−1][j..j+m₂−1] = P}', ro: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: {(i,j) | T[i..i+m₁−1][j..j+m₂−1] = P}' }, correct: true },
+        { text: { en: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: true/false', ro: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: true/false' }, correct: false },
+        { text: { en: 'Input: T ∈ Σⁿˣⁿ, P ∈ Σᵐˣᵐ; Output: count of occurrences', ro: 'Input: T ∈ Σⁿˣⁿ, P ∈ Σᵐˣᵐ; Output: numărul de apariții' }, correct: false },
+        { text: { en: 'Input: T ∈ Σ*, P ∈ Σ*; Output: {(i,j) | T[i][j] = P[0][0]}', ro: 'Input: T ∈ Σ*, P ∈ Σ*; Output: {(i,j) | T[i][j] = P[0][0]}' }, correct: false },
       ],
       explanation: {
         en: 'We search for all top-left corners (i,j) where the m₁×m₂ submatrix of T starting at (i,j) equals P. The matrices need not be square.',
@@ -124,10 +124,10 @@ export default function Seminar06() {
         ro: 'Care este complexitatea algoritmului naiv pentru căutarea matricii P (m₁×m₂) în T (n₁×n₂)?',
       },
       options: [
-        { text: 'O(n₁·n₂·m₁·m₂)', correct: true },
-        { text: 'O((n₁−m₁)·(n₂−m₂)·m₁·m₂)', correct: false },
-        { text: 'O(n₁·n₂ + m₁·m₂)', correct: false },
-        { text: 'O(n₁²·m₁²)', correct: false },
+        { text: { en: 'O(n₁·n₂·m₁·m₂)', ro: 'O(n₁·n₂·m₁·m₂)' }, correct: true },
+        { text: { en: 'O((n₁−m₁)·(n₂−m₂)·m₁·m₂)', ro: 'O((n₁−m₁)·(n₂−m₂)·m₁·m₂)' }, correct: false },
+        { text: { en: 'O(n₁·n₂ + m₁·m₂)', ro: 'O(n₁·n₂ + m₁·m₂)' }, correct: false },
+        { text: { en: 'O(n₁²·m₁²)', ro: 'O(n₁²·m₁²)' }, correct: false },
       ],
       explanation: {
         en: 'For each of the O(n₁·n₂) possible positions, we compare all m₁·m₂ elements. The precise count is (n₁−m₁+1)·(n₂−m₂+1)·m₁·m₂, which is O(n₁·n₂·m₁·m₂).',
@@ -187,10 +187,10 @@ export default function Seminar06() {
         ro: 'Care este complexitatea așteptată a Rabin-Karp 2D (presupunând puține potriviri false)?',
       },
       options: [
-        { text: 'O(n₁·n₂)', correct: true },
-        { text: 'O(n₁·n₂·m₁)', correct: false },
-        { text: 'O(n₁·n₂·m₂)', correct: false },
-        { text: 'O(n₁·n₂·m₁·m₂)', correct: false },
+        { text: { en: 'O(n₁·n₂)', ro: 'O(n₁·n₂)' }, correct: true },
+        { text: { en: 'O(n₁·n₂·m₁)', ro: 'O(n₁·n₂·m₁)' }, correct: false },
+        { text: { en: 'O(n₁·n₂·m₂)', ro: 'O(n₁·n₂·m₂)' }, correct: false },
+        { text: { en: 'O(n₁·n₂·m₁·m₂)', ro: 'O(n₁·n₂·m₁·m₂)' }, correct: false },
       ],
       explanation: {
         en: 'With a good hash function and few collisions, each position is processed in O(1) amortized time (rolling hash update), giving O(n₁·n₂) expected time. Preprocessing column hashes takes O(n₁·n₂) as well.',
@@ -251,10 +251,10 @@ export default function Seminar06() {
         ro: 'Dat s = "acecaxy", care este numărul minim de caractere care trebuie adăugate la început pentru a deveni palindrom?',
       },
       options: [
-        { text: '2', correct: true },
-        { text: '3', correct: false },
-        { text: '1', correct: false },
-        { text: '4', correct: false },
+        { text: { en: '2', ro: '2' }, correct: true },
+        { text: { en: '3', ro: '3' }, correct: false },
+        { text: { en: '1', ro: '1' }, correct: false },
+        { text: { en: '4', ro: '4' }, correct: false },
       ],
       explanation: {
         en: 'We need to prepend "yx" → "yxacecaxy" which is a palindrome. The key insight: find the longest prefix of s that is a palindrome. Here "aceca" (length 5) is a palindromic prefix, so we prepend the reverse of the remaining suffix "xy" → "yx". Answer: 7 − 5 = 2.',
@@ -541,9 +541,9 @@ export default function Seminar06() {
           },
           correct: true,
         },
-        { text: '200', correct: false },
-        { text: '1000', correct: false },
-        { text: '4980', correct: false },
+        { text: { en: '200', ro: '200' }, correct: false },
+        { text: { en: '1000', ro: '1000' }, correct: false },
+        { text: { en: '4980', ro: '4980' }, correct: false },
       ],
       explanation: {
         en: 'Pattern "00001": last char is "1", text is all "0"s. At each position, we compare P[4]="1" with T[i]="0" — mismatch. Bad character rule: "0" last occurs at P[3], so shift = max(1, 4−3) = 1. We make 1 comparison per position, for 996 positions (1000−5+1).',
@@ -566,9 +566,9 @@ export default function Seminar06() {
           },
           correct: true,
         },
-        { text: '996', correct: false },
-        { text: '200', correct: false },
-        { text: '4980', correct: false },
+        { text: { en: '996', ro: '996' }, correct: false },
+        { text: { en: '200', ro: '200' }, correct: false },
+        { text: { en: '4980', ro: '4980' }, correct: false },
       ],
       explanation: {
         en: 'Pattern "10000": starting from the right, P[4]="0",P[3]="0",P[2]="0",P[1]="0" all match the text\'s zeros. Then P[0]="1" mismatches T[j]="0". Bad character: "0" appears at P[4], but we\'re at P[0], so shift by 1. That\'s ~4 comparisons per position × 996 positions ≈ 3984.',
@@ -591,9 +591,9 @@ export default function Seminar06() {
           },
           correct: true,
         },
-        { text: '996', correct: false },
-        { text: '200', correct: false },
-        { text: '1992', correct: false },
+        { text: { en: '996', ro: '996' }, correct: false },
+        { text: { en: '200', ro: '200' }, correct: false },
+        { text: { en: '1992', ro: '1992' }, correct: false },
       ],
       explanation: {
         en: 'Pattern "01010": compare from right — P[4]="0" matches T[i]="0", then P[3]="1" mismatches T[i−1]="0". Bad character: "0" appears at P[2], shift = max(1, 3−2) = 1… but the good suffix rule may give shift 2. Either way, ~2 comparisons per ~2 positions ≈ 996 comparisons total, or fewer with good suffix optimization.',
@@ -654,10 +654,10 @@ export default function Seminar06() {
         ro: 'Care este formalizarea I/O pentru verificarea dacă s este o subsecvență a lui S?',
       },
       options: [
-        { text: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a subsequence of S (can be obtained by deleting characters from S)', correct: true },
-        { text: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a substring of S', correct: false },
-        { text: 'Input: s ∈ Σ*, S ∈ Σ*; Output: positions of s in S', correct: false },
-        { text: 'Input: s ∈ Σ*, S ∈ Σ*; Output: longest common subsequence', correct: false },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a subsequence of S (can be obtained by deleting characters from S)', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true dacă s este o subecvență a lui S (poate fi obținută prin ștergerea de caractere din S)' }, correct: true },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a substring of S', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true dacă s este un subșir al lui S' }, correct: false },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: positions of s in S', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: pozițiile lui s în S' }, correct: false },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: longest common subsequence', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: cea mai lungă subecvență comună' }, correct: false },
       ],
       explanation: {
         en: 'A subsequence preserves order but not contiguity: "abcd" is a subsequence of "cdaaacbbacccda" because we can pick a(4), b(8), c(9), d(12). This is different from a substring which must be contiguous.',
@@ -761,10 +761,10 @@ export default function Seminar06() {
         ro: 'Dat pattern-ul P cu |P|=m > 5, și funcția prefix f[m] = 5. Vectorul h[] este oglindirea lui g[] (funcția prefix pentru R = inversul lui P). Cât este h[0]?',
       },
       options: [
-        { text: '5', correct: true },
-        { text: '0', correct: false },
-        { text: 'm − 5', correct: false },
-        { text: '1', correct: false },
+        { text: { en: '5', ro: '5' }, correct: true },
+        { text: { en: '0', ro: '0' }, correct: false },
+        { text: { en: 'm − 5', ro: 'm − 5' }, correct: false },
+        { text: { en: '1', ro: '1' }, correct: false },
       ],
       explanation: {
         en: 'f[m] = 5 means the longest proper prefix of P that is also a suffix has length 5. Since h[] mirrors g[] (prefix function of reversed P), h[0] = g[m−1] which corresponds to the longest suffix of P that is also a prefix — which is exactly f[m] = 5.',
@@ -785,7 +785,7 @@ export default function Seminar06() {
       </p>
 
       {/* ── Problem 1 ── */}
-      <h3 className="text-lg font-bold mt-6 mb-2">
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 1: Rabin-Karp Implementation', 'Problema 1: Implementarea Rabin-Karp')}
       </h3>
       <Box type="definition">
@@ -837,7 +837,7 @@ export default function Seminar06() {
       />
 
       {/* ── Problem 2 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 2: Hash Computation Example', 'Problema 2: Exemplu de calcul hash')}
       </h3>
       <Box type="definition">
@@ -889,7 +889,7 @@ pos 10: "bab" = 1`}</Code>
       />
 
       {/* ── Problem 3 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 3: Rabin-Karp Worst Case', 'Problema 3: Cazul defavorabil Rabin-Karp')}
       </h3>
       <Box type="definition">
@@ -903,7 +903,7 @@ pos 10: "bab" = 1`}</Code>
       <MultipleChoice questions={mc3} />
 
       {/* ── Problems 4-6: Matrix Search ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problems 4–6: Matrix Pattern Matching', 'Problemele 4–6: Căutarea matricilor')}
       </h3>
       <Box type="definition">
@@ -964,7 +964,7 @@ pos 10: "bab" = 1`}</Code>
       />
 
       {/* ── Problem 7 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 7: Longest Substring Appearing K Times', 'Problema 7: Cel mai lung subșir care apare de K ori')}
       </h3>
       <Box type="definition">
@@ -1006,7 +1006,7 @@ existsSubstringOfLengthAppearingKTimes(s, L, K)
       />
 
       {/* ── Problem 8 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 8: Minimum Prepend for Palindrome', 'Problema 8: Minim de caractere adăugate pentru palindrom')}
       </h3>
       <Box type="definition">
@@ -1048,7 +1048,7 @@ existsSubstringOfLengthAppearingKTimes(s, L, K)
       />
 
       {/* ── Problem 9 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 9: Longest Palindromic Substring', 'Problema 9: Cel mai lung subșir palindromic')}
       </h3>
       <Box type="definition">
@@ -1101,7 +1101,7 @@ existsSubstringOfLengthAppearingKTimes(s, L, K)
       />
 
       {/* ── Problem 10 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 10: Java hashCode Collisions', 'Problema 10: Coliziuni Java hashCode')}
       </h3>
       <Box type="definition">
@@ -1149,7 +1149,7 @@ These are equal regardless of z!`}</Code>
       />
 
       {/* ── Problem 11 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 11: String Rotation Detection', 'Problema 11: Detectarea rotației de șiruri')}
       </h3>
       <Box type="definition">
@@ -1163,7 +1163,7 @@ These are equal regardless of z!`}</Code>
       <MultipleChoice questions={mc11} />
 
       {/* ── Problem 12 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 12: Anagram Search', 'Problema 12: Căutarea anagramelor')}
       </h3>
       <Box type="definition">
@@ -1205,7 +1205,7 @@ These are equal regardless of z!`}</Code>
       />
 
       {/* ── Problems 13–14: Boyer-Moore Comparisons ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problems 13–14: Boyer-Moore Comparison Counts', 'Problemele 13–14: Numărul de comparații Boyer-Moore')}
       </h3>
       <Box type="definition">
@@ -1230,7 +1230,7 @@ These are equal regardless of z!`}</Code>
       <MultipleChoice questions={mc14c} />
 
       {/* ── Problem 15 & 20 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problems 15 & 20: Repeated Substring Pattern', 'Problemele 15 & 20: Subșir repetat')}
       </h3>
       <Box type="definition">
@@ -1244,7 +1244,7 @@ These are equal regardless of z!`}</Code>
       <MultipleChoice questions={mc15} />
 
       {/* ── Problem 16 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 16: Subsequence Check', 'Problema 16: Verificarea subsecvenței')}
       </h3>
       <Box type="definition">
@@ -1284,7 +1284,7 @@ These are equal regardless of z!`}</Code>
       />
 
       {/* ── Problem 17 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 17: Boyer-Moore BC & GS Tables', 'Problema 17: Tabelele BC & GS Boyer-Moore')}
       </h3>
       <Box type="definition">
@@ -1350,7 +1350,7 @@ Search proceeds right-to-left within pattern:
       />
 
       {/* ── Problem 18: Boyer-Moore Case III ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 18: Boyer-Moore Bad Character — Case III', 'Problema 18: Boyer-Moore Caracter rău — Cazul III')}
       </h3>
       <Box type="definition">
@@ -1387,7 +1387,7 @@ Search proceeds right-to-left within pattern:
       />
 
       {/* ── Problem 19 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 19: Prefix Function & h[] Vector', 'Problema 19: Funcția prefix & vectorul h[]')}
       </h3>
       <Box type="definition">

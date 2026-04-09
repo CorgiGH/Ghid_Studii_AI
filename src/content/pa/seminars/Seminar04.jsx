@@ -10,10 +10,10 @@ export default function Seminar04() {
   const mc1io = [{
     question: { en: 'Which I/O formalization best describes Problem 1?', ro: 'Care formalizare I/O descrie cel mai bine Problema 1?' },
     options: [
-      { text: 'Input: n ∈ ℕ, v: permutation of {1,...,n}; Output: sum ∈ ℕ₀', correct: true },
-      { text: 'Input: n ∈ ℕ, v: array of n reals; Output: max ∈ ℝ', correct: false },
-      { text: 'Input: n ∈ ℕ, v: permutation of {1,...,n}; Output: max ∈ ℕ', correct: false },
-      { text: 'Input: n ∈ ℕ; Output: sum ∈ ℕ₀', correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {1,...,n}; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ, v: permutare a lui {1,...,n}; Output: sumă ∈ ℕ₀' }, correct: true },
+      { text: { en: 'Input: n ∈ ℕ, v: array of n reals; Output: max ∈ ℝ', ro: 'Input: n ∈ ℕ, v: vector de n reale; Output: max ∈ ℝ' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {1,...,n}; Output: max ∈ ℕ', ro: 'Input: n ∈ ℕ, v: permutare a lui {1,...,n}; Output: max ∈ ℕ' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ; Output: sumă ∈ ℕ₀' }, correct: false },
     ],
     explanation: {
       en: 'The algorithm takes n and a vector v (permutation of {1,...,n}) and returns sum — a counter incremented in the inner loop. The max variable is internal, not returned.',
@@ -24,10 +24,10 @@ export default function Seminar04() {
   const mc1comp = [{
     question: { en: 'What is the average-case time complexity of Problem 1\'s algorithm?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 1?' },
     options: [
-      { text: 'Θ(n · ln n)', correct: true },
-      { text: 'Θ(n²)', correct: false },
-      { text: 'Θ(n)', correct: false },
-      { text: 'Θ(n² · ln n)', correct: false },
+      { text: { en: 'Θ(n · ln n)', ro: 'Θ(n · ln n)' }, correct: true },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
+      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
     ],
     explanation: {
       en: 'The inner loop runs n times each time a new maximum is found. The expected number of new-max updates is Hₙ = Σᵢ₌₁ⁿ 1/i ≈ ln n. Total average cost = n · Hₙ + n = Θ(n · ln n).',
@@ -39,10 +39,10 @@ export default function Seminar04() {
   const mc2io = [{
     question: { en: 'Which I/O formalization best describes Problem 2?', ro: 'Care formalizare I/O descrie cel mai bine Problema 2?' },
     options: [
-      { text: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: sum ∈ ℕ₀', correct: true },
-      { text: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: number of inversions ∈ ℕ₀', correct: false },
-      { text: 'Input: n ∈ ℕ, v: array of n integers; Output: sorted array', correct: false },
-      { text: 'Input: n ∈ ℕ; Output: sum ∈ ℕ₀', correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: sumă ∈ ℕ₀' }, correct: true },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: number of inversions ∈ ℕ₀', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: numărul de inversiuni ∈ ℕ₀' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: array of n integers; Output: sorted array', ro: 'Input: n ∈ ℕ, v: vector de n întregi; Output: vector sortat' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ; Output: sumă ∈ ℕ₀' }, correct: false },
     ],
     explanation: {
       en: 'The algorithm returns sum, which counts n for each inversion found (not the number of inversions itself). The input is n and a permutation of {0,...,n−1}.',
@@ -53,10 +53,10 @@ export default function Seminar04() {
   const mc2comp = [{
     question: { en: 'What is the average-case time complexity of Problem 2\'s algorithm?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 2?' },
     options: [
-      { text: 'Θ(n³)', correct: true },
-      { text: 'Θ(n²)', correct: false },
-      { text: 'Θ(n² · ln n)', correct: false },
-      { text: 'Θ(n⁴)', correct: false },
+      { text: { en: 'Θ(n³)', ro: 'Θ(n³)' }, correct: true },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
+      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
+      { text: { en: 'Θ(n⁴)', ro: 'Θ(n⁴)' }, correct: false },
     ],
     explanation: {
       en: 'For any pair (i,j) with i < j, P(v[i] > v[j]) = 1/2. Expected inversions = C(n,2) · 1/2 = n(n−1)/4. Each inversion triggers n inner iterations. Total = n · n(n−1)/4 = Θ(n³).',
@@ -68,10 +68,10 @@ export default function Seminar04() {
   const mc3io = [{
     question: { en: 'Which I/O formalization best describes Problem 3?', ro: 'Care formalizare I/O descrie cel mai bine Problema 3?' },
     options: [
-      { text: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: 0', correct: true },
-      { text: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: index of first even element', correct: false },
-      { text: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: v[i] (first even element)', correct: false },
-      { text: 'Input: n ∈ ℕ; Output: boolean', correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: 0', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: 0' }, correct: true },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: index of first even element', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: indicele primului element par' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: v[i] (first even element)', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: v[i] (primul element par)' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ; Output: boolean', ro: 'Input: n ∈ ℕ; Output: boolean' }, correct: false },
     ],
     explanation: {
       en: 'The algorithm always returns 0 regardless of input. The interesting aspect is the execution time, not the output — it breaks early when finding the first even element.',
@@ -82,10 +82,10 @@ export default function Seminar04() {
   const mc3comp = [{
     question: { en: 'What is the average-case time complexity of Problem 3\'s algorithm?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 3?' },
     options: [
-      { text: 'Θ(1)', correct: true },
-      { text: 'Θ(n)', correct: false },
-      { text: 'Θ(ln n)', correct: false },
-      { text: 'Θ(√n)', correct: false },
+      { text: { en: 'Θ(1)', ro: 'Θ(1)' }, correct: true },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
+      { text: { en: 'Θ(ln n)', ro: 'Θ(ln n)' }, correct: false },
+      { text: { en: 'Θ(√n)', ro: 'Θ(√n)' }, correct: false },
     ],
     explanation: {
       en: 'In a permutation of {0,...,n−1}, about half the elements are even. The expected position of the first even element is (n+1)/(⌈n/2⌉+1) ≈ 2 for large n. This is constant, so Θ(1).',
@@ -114,10 +114,10 @@ export default function Seminar04() {
   const mc4p1 = [{
     question: { en: 'What is the average complexity of Problem 1\'s algorithm under the i.i.d. uniform model?', ro: 'Care este complexitatea medie a algoritmului din Problema 1 sub modelul i.i.d. uniform?' },
     options: [
-      { text: 'Θ(n · ln n)', correct: true },
-      { text: 'Θ(n²)', correct: false },
-      { text: 'Θ(n)', correct: false },
-      { text: 'Θ(n · ln² n)', correct: false },
+      { text: { en: 'Θ(n · ln n)', ro: 'Θ(n · ln n)' }, correct: true },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
+      { text: { en: 'Θ(n · ln² n)', ro: 'Θ(n · ln² n)' }, correct: false },
     ],
     explanation: {
       en: 'With i.i.d. uniform values on {0,...,n−1}, P(v[i] > max(v[0],...,v[i−1])) is close to 1/(i+1) for large n. The expected number of max updates remains Θ(ln n), giving Θ(n · ln n) total.',
@@ -128,10 +128,10 @@ export default function Seminar04() {
   const mc4p2 = [{
     question: { en: 'What is the average complexity of Problem 2\'s algorithm under the i.i.d. uniform model?', ro: 'Care este complexitatea medie a algoritmului din Problema 2 sub modelul i.i.d. uniform?' },
     options: [
-      { text: 'Θ(n³)', correct: true },
-      { text: 'Θ(n²)', correct: false },
-      { text: 'Θ(n² · ln n)', correct: false },
-      { text: 'Θ(n⁴)', correct: false },
+      { text: { en: 'Θ(n³)', ro: 'Θ(n³)' }, correct: true },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
+      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
+      { text: { en: 'Θ(n⁴)', ro: 'Θ(n⁴)' }, correct: false },
     ],
     explanation: {
       en: 'P(v[i] > v[j]) = (n−1)/(2n) for i.i.d. uniform on {0,...,n−1}. Expected "inversions" = C(n,2) · (n−1)/(2n) = (n−1)²/4 ≈ n²/4. Each triggers n inner iterations: total ≈ n³/4 = Θ(n³).',
@@ -142,10 +142,10 @@ export default function Seminar04() {
   const mc4p3 = [{
     question: { en: 'What is the average complexity of Problem 3\'s algorithm under the i.i.d. uniform model?', ro: 'Care este complexitatea medie a algoritmului din Problema 3 sub modelul i.i.d. uniform?' },
     options: [
-      { text: 'Θ(1)', correct: true },
-      { text: 'Θ(n)', correct: false },
-      { text: 'Θ(ln n)', correct: false },
-      { text: 'Θ(n / ln n)', correct: false },
+      { text: { en: 'Θ(1)', ro: 'Θ(1)' }, correct: true },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
+      { text: { en: 'Θ(ln n)', ro: 'Θ(ln n)' }, correct: false },
+      { text: { en: 'Θ(n / ln n)', ro: 'Θ(n / ln n)' }, correct: false },
     ],
     explanation: {
       en: 'Each position independently has P(even) = ⌈n/2⌉/n ≈ 1/2. The number of iterations follows a geometric distribution with expected value 1/p ≈ 2. This is Θ(1).',
@@ -171,10 +171,10 @@ export default function Seminar04() {
   const mc5b = [{
     question: { en: 'What is the time complexity of the original Fisher-Yates algorithm?', ro: 'Care este complexitatea de timp a algoritmului Fisher-Yates original?' },
     options: [
-      { text: 'O(n²)', correct: true },
-      { text: 'O(n)', correct: false },
-      { text: 'O(n · ln n)', correct: false },
-      { text: 'O(n³)', correct: false },
+      { text: { en: 'O(n²)', ro: 'O(n²)' }, correct: true },
+      { text: { en: 'O(n)', ro: 'O(n)' }, correct: false },
+      { text: { en: 'O(n · ln n)', ro: 'O(n · ln n)' }, correct: false },
+      { text: { en: 'O(n³)', ro: 'O(n³)' }, correct: false },
     ],
     explanation: {
       en: 'In each iteration i, the while loop scans the used[] array to find the k-th unused element. In the worst case it scans up to n elements. Over n iterations, total scans ≈ n + (n−1) + ... + 1 = n(n+1)/2 = O(n²).',
@@ -185,10 +185,10 @@ export default function Seminar04() {
   const mc5c = [{
     question: { en: 'What is the time complexity of the optimized Fisher-Yates algorithm?', ro: 'Care este complexitatea de timp a algoritmului Fisher-Yates optimizat?' },
     options: [
-      { text: 'O(n)', correct: true },
-      { text: 'O(n²)', correct: false },
-      { text: 'O(n · ln n)', correct: false },
-      { text: 'O(1)', correct: false },
+      { text: { en: 'O(n)', ro: 'O(n)' }, correct: true },
+      { text: { en: 'O(n²)', ro: 'O(n²)' }, correct: false },
+      { text: { en: 'O(n · ln n)', ro: 'O(n · ln n)' }, correct: false },
+      { text: { en: 'O(1)', ro: 'O(1)' }, correct: false },
     ],
     explanation: {
       en: 'The optimized version does two passes of n iterations each: one to initialize p[i] = i, one to perform swaps. Each swap is O(1). Total = O(n).',
@@ -200,10 +200,10 @@ export default function Seminar04() {
   const mc6io = [{
     question: { en: 'Which I/O formalization best describes Problem 6?', ro: 'Care formalizare I/O descrie cel mai bine Problema 6?' },
     options: [
-      { text: 'Input: n ∈ ℕ, a: array of n distinct elements; Output: sum ∈ ℕ₀ (printed)', correct: true },
-      { text: 'Input: n ∈ ℕ, a: array of n distinct elements; Output: min ∈ ℝ', correct: false },
-      { text: 'Input: n ∈ ℕ; Output: permutation p', correct: false },
-      { text: 'Input: n ∈ ℕ, a: array; Output: sorted array', correct: false },
+      { text: { en: 'Input: n ∈ ℕ, a: array of n distinct elements; Output: sum ∈ ℕ₀ (printed)', ro: 'Input: n ∈ ℕ, a: vector de n elemente distincte; Output: sumă ∈ ℕ₀ (afișată)' }, correct: true },
+      { text: { en: 'Input: n ∈ ℕ, a: array of n distinct elements; Output: min ∈ ℝ', ro: 'Input: n ∈ ℕ, a: vector de n elemente distincte; Output: min ∈ ℝ' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ; Output: permutation p', ro: 'Input: n ∈ ℕ; Output: permutare p' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ, a: array; Output: sorted array', ro: 'Input: n ∈ ℕ, a: vector; Output: vector sortat' }, correct: false },
     ],
     explanation: {
       en: 'The algorithm takes an array a of n distinct elements, shuffles access order via Fisher-Yates, and prints sum — a counter incremented n times for each new minimum found.',
@@ -214,10 +214,10 @@ export default function Seminar04() {
   const mc6comp = [{
     question: { en: 'What is the average-case time complexity of Problem 6\'s algorithm (excluding the Fisher-Yates call)?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 6 (excluzând apelul Fisher-Yates)?' },
     options: [
-      { text: 'Θ(n · ln n)', correct: true },
-      { text: 'Θ(n²)', correct: false },
-      { text: 'Θ(n)', correct: false },
-      { text: 'Θ(n² · ln n)', correct: false },
+      { text: { en: 'Θ(n · ln n)', ro: 'Θ(n · ln n)' }, correct: true },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
+      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
     ],
     explanation: {
       en: 'Fisher-Yates produces a uniform random permutation, so a[p[0]], a[p[1]], ... is a random ordering of distinct elements. The analysis is identical to Problem 1: expected min updates = Hₙ, each costs n. Total = Θ(n · ln n).',
@@ -233,7 +233,7 @@ export default function Seminar04() {
       </p>
 
       {/* ═══════ Problem 1 ═══════ */}
-      <h3 className="text-lg font-bold mt-6 mb-2">
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 1: Max-Tracking with Inner Loop', 'Problema 1: Urmărirea maximului cu buclă interioară')}
       </h3>
       <Box type="definition">
@@ -294,7 +294,7 @@ return sum;`}</Code>
       />
 
       {/* ═══════ Problem 2 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 2: Inversion-Counting with Inner Loop', 'Problema 2: Numărarea inversiunilor cu buclă interioară')}
       </h3>
       <Box type="definition">
@@ -353,7 +353,7 @@ return sum;`}</Code>
       />
 
       {/* ═══════ Problem 3 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 3: Break on First Even Element', 'Problema 3: Oprire la primul element par')}
       </h3>
       <Box type="definition">
@@ -409,7 +409,7 @@ return 0;`}</Code>
       />
 
       {/* ═══════ Problem 4 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 4: i.i.d. Uniform Model (Not Permutations)', 'Problema 4: Modelul i.i.d. uniform (nu permutări)')}
       </h3>
       <Box type="definition">
@@ -465,7 +465,7 @@ return 0;`}</Code>
       />
 
       {/* ═══════ Problem 5 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 5: Permutation Generation Algorithms', 'Problema 5: Algoritmi de generare a permutărilor')}
       </h3>
       <Box type="definition">
@@ -589,7 +589,7 @@ Permutation  | Count | Probability
       />
 
       {/* ═══════ Problem 6 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 6: Min-Finding with Fisher-Yates Shuffle', 'Problema 6: Găsirea minimului cu amestecarea Fisher-Yates')}
       </h3>
       <Box type="definition">

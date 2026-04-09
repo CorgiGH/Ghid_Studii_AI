@@ -13,10 +13,10 @@ export default function Seminar02() {
       ro: 'Care este formalizarea corectă Input-Output pentru „Dându-se un vector de numere naturale cu cel puțin două elemente, să se afișeze doi indici, pentru cele mai mici două elemente din vector, în ordine după valoarea elementelor"?',
     },
     options: [
-      { text: 'Input: a[0..n−1], n ≥ 2, a[i] ∈ ℕ; Output: (i, j) where a[i] ≤ a[j] ≤ a[k] ∀k ≠ i,j and i ≠ j', correct: true },
-      { text: 'Input: a[0..n−1]; Output: (min₁, min₂) — the two smallest values', correct: false },
-      { text: 'Input: a[0..n−1], n ≥ 2; Output: index of the smallest element', correct: false },
-      { text: 'Input: a[0..n−1]; Output: (i, j) where a[i] and a[j] are the two largest elements', correct: false },
+      { text: { en: 'Input: a[0..n−1], n ≥ 2, a[i] ∈ ℕ; Output: (i, j) where a[i] ≤ a[j] ≤ a[k] ∀k ≠ i,j and i ≠ j', ro: 'Input: a[0..n−1], n ≥ 2, a[i] ∈ ℕ; Output: (i, j) unde a[i] ≤ a[j] ≤ a[k] ∀k ≠ i,j și i ≠ j' }, correct: true },
+      { text: { en: 'Input: a[0..n−1]; Output: (min₁, min₂) — the two smallest values', ro: 'Input: a[0..n−1]; Output: (min₁, min₂) — cele două valori minime' }, correct: false },
+      { text: { en: 'Input: a[0..n−1], n ≥ 2; Output: index of the smallest element', ro: 'Input: a[0..n−1], n ≥ 2; Output: indicele celui mai mic element' }, correct: false },
+      { text: { en: 'Input: a[0..n−1]; Output: (i, j) where a[i] and a[j] are the two largest elements', ro: 'Input: a[0..n−1]; Output: (i, j) unde a[i] și a[j] sunt cele două elemente maxime' }, correct: false },
     ],
     explanation: {
       en: 'The problem asks for indices (not values), of the two smallest elements, ordered by value. We need both indices, not just the minimum.',
@@ -47,10 +47,10 @@ export default function Seminar02() {
       ro: 'Care este formalizarea corectă I/O pentru „Găsiți un punct fix (indice i unde arr[i] == i) într-un vector sortat de numere întregi distincte, sau returnați -1"?',
     },
     options: [
-      { text: 'Input: a[0..n−1] sorted, distinct, a[i] ∈ ℤ; Output: i such that a[i] = i, or −1 if none exists', correct: true },
-      { text: 'Input: a[0..n−1]; Output: all indices i where a[i] = i', correct: false },
-      { text: 'Input: a[0..n−1] sorted; Output: true if a fixed point exists', correct: false },
-      { text: 'Input: a[0..n−1], target value v; Output: index where a[i] = v', correct: false },
+      { text: { en: 'Input: a[0..n−1] sorted, distinct, a[i] ∈ ℤ; Output: i such that a[i] = i, or −1 if none exists', ro: 'Input: a[0..n−1] sortat, distinct, a[i] ∈ ℤ; Output: i astfel încât a[i] = i, sau −1 dacă nu există' }, correct: true },
+      { text: { en: 'Input: a[0..n−1]; Output: all indices i where a[i] = i', ro: 'Input: a[0..n−1]; Output: toți indicii i unde a[i] = i' }, correct: false },
+      { text: { en: 'Input: a[0..n−1] sorted; Output: true if a fixed point exists', ro: 'Input: a[0..n−1] sortat; Output: true dacă există un punct fix' }, correct: false },
+      { text: { en: 'Input: a[0..n−1], target value v; Output: index where a[i] = v', ro: 'Input: a[0..n−1], valoare țintă v; Output: indicele unde a[i] = v' }, correct: false },
     ],
     explanation: {
       en: 'The problem asks for a single fixed point index (or -1), not all of them, not a boolean, and not a standard search. The key constraints are: sorted and distinct elements.',
@@ -65,10 +65,10 @@ export default function Seminar02() {
       ro: 'Care este formalizarea corectă I/O pentru „Găsiți elementul majoritar (apare de mai mult de n/2 ori) într-un vector, sau returnați -1 dacă nu există"?',
     },
     options: [
-      { text: 'Input: a[0..n−1], a[i] ∈ ℕ; Output: x if #{i : a[i]=x} > ⌊n/2⌋, else −1', correct: true },
-      { text: 'Input: a[0..n−1]; Output: the element that appears most often', correct: false },
-      { text: 'Input: a[0..n−1]; Output: all elements appearing more than once', correct: false },
-      { text: 'Input: a[0..n−1], threshold k; Output: elements appearing > k times', correct: false },
+      { text: { en: 'Input: a[0..n−1], a[i] ∈ ℕ; Output: x if #{i : a[i]=x} > ⌊n/2⌋, else −1', ro: 'Input: a[0..n−1], a[i] ∈ ℕ; Output: x dacă #{i : a[i]=x} > ⌊n/2⌋, altfel −1' }, correct: true },
+      { text: { en: 'Input: a[0..n−1]; Output: the element that appears most often', ro: 'Input: a[0..n−1]; Output: elementul care apare cel mai des' }, correct: false },
+      { text: { en: 'Input: a[0..n−1]; Output: all elements appearing more than once', ro: 'Input: a[0..n−1]; Output: toate elementele care apar de mai mult de o dată' }, correct: false },
+      { text: { en: 'Input: a[0..n−1], threshold k; Output: elements appearing > k times', ro: 'Input: a[0..n−1], prag k; Output: elementele care apar de > k ori' }, correct: false },
     ],
     explanation: {
       en: 'A majority element must appear strictly more than n/2 times — not just "most often" (which is the mode). The threshold n/2 is fixed, not a parameter k.',
@@ -98,10 +98,10 @@ export default function Seminar02() {
       ro: 'Care este complexitatea timp a algoritmului de vot Boyer-Moore?',
     },
     options: [
-      { text: 'O(n)', correct: true },
-      { text: 'O(n log n)', correct: false },
-      { text: 'O(n²)', correct: false },
-      { text: 'O(1)', correct: false },
+      { text: { en: 'O(n)', ro: 'O(n)' }, correct: true },
+      { text: { en: 'O(n log n)', ro: 'O(n log n)' }, correct: false },
+      { text: { en: 'O(n²)', ro: 'O(n²)' }, correct: false },
+      { text: { en: 'O(1)', ro: 'O(1)' }, correct: false },
     ],
     explanation: {
       en: 'Two sequential linear passes: O(n) + O(n) = O(n). Each pass goes through the array exactly once. Space is O(1) — only candidate and count variables.',
@@ -116,10 +116,10 @@ export default function Seminar02() {
       ro: 'Care este formalizarea corectă I/O pentru „Adunați două numere naturale mari reprezentate ca șiruri de cifre"?',
     },
     options: [
-      { text: 'Input: a[1..n], b[1..m] where a[i], b[j] ∈ {0..9}; Output: c[1..max(n,m)+1] representing a + b', correct: true },
-      { text: 'Input: two integers a, b; Output: a + b', correct: false },
-      { text: 'Input: a[1..n], b[1..n] (same length); Output: c[1..n] representing a + b', correct: false },
-      { text: 'Input: a[1..n], b[1..m]; Output: true if a + b overflows', correct: false },
+      { text: { en: 'Input: a[1..n], b[1..m] where a[i], b[j] ∈ {0..9}; Output: c[1..max(n,m)+1] representing a + b', ro: 'Input: a[1..n], b[1..m] unde a[i], b[j] ∈ {0..9}; Output: c[1..max(n,m)+1] reprezentând a + b' }, correct: true },
+      { text: { en: 'Input: two integers a, b; Output: a + b', ro: 'Input: două numere întregi a, b; Output: a + b' }, correct: false },
+      { text: { en: 'Input: a[1..n], b[1..n] (same length); Output: c[1..n] representing a + b', ro: 'Input: a[1..n], b[1..n] (aceeași lungime); Output: c[1..n] reprezentând a + b' }, correct: false },
+      { text: { en: 'Input: a[1..n], b[1..m]; Output: true if a + b overflows', ro: 'Input: a[1..n], b[1..m]; Output: true dacă a + b depășește limita' }, correct: false },
     ],
     explanation: {
       en: 'Numbers are represented as digit arrays (not native integers — they\'re too large). Arrays can have different lengths. The result may have one extra digit due to carry (e.g. 999 + 1 = 1000).',
@@ -134,10 +134,10 @@ export default function Seminar02() {
       ro: 'Care este formalizarea corectă I/O pentru „Sortați un vector de numere naturale în ordine crescătoare"?',
     },
     options: [
-      { text: 'Input: a[1..n], a[i] ∈ ℕ; Output: a permutation a\'[1..n] of a such that a\'[1] ≤ a\'[2] ≤ … ≤ a\'[n]', correct: true },
-      { text: 'Input: a[1..n]; Output: the sorted array (without specifying it\'s a permutation)', correct: false },
-      { text: 'Input: a[1..n]; Output: the indices that would sort the array', correct: false },
-      { text: 'Input: a[1..n]; Output: true if the array is already sorted', correct: false },
+      { text: { en: 'Input: a[1..n], a[i] ∈ ℕ; Output: a permutation a\'[1..n] of a such that a\'[1] ≤ a\'[2] ≤ … ≤ a\'[n]', ro: 'Input: a[1..n], a[i] ∈ ℕ; Output: o permutare a\'[1..n] a lui a astfel încât a\'[1] ≤ a\'[2] ≤ … ≤ a\'[n]' }, correct: true },
+      { text: { en: 'Input: a[1..n]; Output: the sorted array (without specifying it\'s a permutation)', ro: 'Input: a[1..n]; Output: vectorul sortat (fără a specifica că este o permutare)' }, correct: false },
+      { text: { en: 'Input: a[1..n]; Output: the indices that would sort the array', ro: 'Input: a[1..n]; Output: indicii care ar sorta vectorul' }, correct: false },
+      { text: { en: 'Input: a[1..n]; Output: true if the array is already sorted', ro: 'Input: a[1..n]; Output: true dacă vectorul este deja sortat' }, correct: false },
     ],
     explanation: {
       en: 'The output must be a permutation of the input (same elements, reordered). Just saying "sorted array" is incomplete — we must specify it contains exactly the same elements. Argsort and checking sortedness are different problems.',
@@ -152,10 +152,10 @@ export default function Seminar02() {
       ro: 'Care este formalizarea corectă I/O pentru „Dându-se n și n−1 numere naturale distincte între 1 și n, determinați numărul lipsă"?',
     },
     options: [
-      { text: 'Input: n ∈ ℤ⁺, a[1..n−1] where a[i] ∈ {1..n} all distinct; Output: x ∈ {1..n} \\ {a[1], …, a[n−1]}', correct: true },
-      { text: 'Input: a[1..n]; Output: the smallest missing positive integer', correct: false },
-      { text: 'Input: n, a[1..n−1]; Output: true if a number is missing', correct: false },
-      { text: 'Input: a[1..n−1] sorted; Output: the missing number', correct: false },
+      { text: { en: 'Input: n ∈ ℤ⁺, a[1..n−1] where a[i] ∈ {1..n} all distinct; Output: x ∈ {1..n} \\ {a[1], …, a[n−1]}', ro: 'Input: n ∈ ℤ⁺, a[1..n−1] unde a[i] ∈ {1..n} toți distincți; Output: x ∈ {1..n} \\ {a[1], …, a[n−1]}' }, correct: true },
+      { text: { en: 'Input: a[1..n]; Output: the smallest missing positive integer', ro: 'Input: a[1..n]; Output: cel mai mic număr natural pozitiv lipsă' }, correct: false },
+      { text: { en: 'Input: n, a[1..n−1]; Output: true if a number is missing', ro: 'Input: n, a[1..n−1]; Output: true dacă lipsește un număr' }, correct: false },
+      { text: { en: 'Input: a[1..n−1] sorted; Output: the missing number', ro: 'Input: a[1..n−1] sortat; Output: numărul lipsă' }, correct: false },
     ],
     explanation: {
       en: 'The input is n and an array of n−1 distinct values from {1..n}. The output is the single missing value. The array is not necessarily sorted. "Smallest missing positive" is a different, harder problem.',
@@ -170,10 +170,10 @@ export default function Seminar02() {
       ro: 'Care este formalizarea corectă I/O pentru „Dându-se n numere de la 1 la n unde un număr apare de două ori și unul lipsește, găsiți ambele"?',
     },
     options: [
-      { text: 'Input: a[1..n], a[i] ∈ {1..n}, exactly one value appears twice; Output: (duplicate, missing)', correct: true },
-      { text: 'Input: a[1..n]; Output: the duplicate value only', correct: false },
-      { text: 'Input: a[1..n]; Output: all values that appear more than once', correct: false },
-      { text: 'Input: a[1..n−1]; Output: (duplicate, missing)', correct: false },
+      { text: { en: 'Input: a[1..n], a[i] ∈ {1..n}, exactly one value appears twice; Output: (duplicate, missing)', ro: 'Input: a[1..n], a[i] ∈ {1..n}, exact o valoare apare de două ori; Output: (duplicat, lipsă)' }, correct: true },
+      { text: { en: 'Input: a[1..n]; Output: the duplicate value only', ro: 'Input: a[1..n]; Output: doar valoarea duplicat' }, correct: false },
+      { text: { en: 'Input: a[1..n]; Output: all values that appear more than once', ro: 'Input: a[1..n]; Output: toate valorile care apar de mai mult de o dată' }, correct: false },
+      { text: { en: 'Input: a[1..n−1]; Output: (duplicate, missing)', ro: 'Input: a[1..n−1]; Output: (duplicat, lipsă)' }, correct: false },
     ],
     explanation: {
       en: 'The array has exactly n elements (not n−1): one value from {1..n} appears twice, one is missing. We need to find both the duplicate and the missing value.',
@@ -242,7 +242,7 @@ export default function Seminar02() {
       </p>
 
       {/* ═══ Problem 1 ═══ */}
-      <h3 className="text-lg font-bold mt-6 mb-2">{t('Problem 1: Two Smallest Indices', 'Problema 1: Indicii celor mai mici două elemente')}</h3>
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 1: Two Smallest Indices', 'Problema 1: Indicii celor mai mici două elemente')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given an array of natural numbers with at least two elements, display two indices for the two smallest elements, ordered by value. Example: for [3, 5, 2, 7, 4, 1] output 5, 2.',
@@ -287,7 +287,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 2 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 2: Fixed Point in Sorted Array', 'Problema 2: Punct fix într-un vector sortat')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 2: Fixed Point in Sorted Array', 'Problema 2: Punct fix într-un vector sortat')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A fixed point in an array is an index i such that arr[i] == i. Given a sorted array of distinct integers, design an algorithm to find a fixed point if one exists, or return -1. Can you do better than O(n)?',
@@ -326,7 +326,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 3 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 3: Majority Element (Boyer-Moore)', 'Problema 3: Element majoritar (Boyer-Moore)')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 3: Majority Element (Boyer-Moore)', 'Problema 3: Element majoritar (Boyer-Moore)')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A majority element in an array of size n is an element that appears more than n/2 times. Given an array of n natural numbers, return the majority element if it exists, or -1 otherwise.',
@@ -381,7 +381,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 4 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 4: Big Number Operations', 'Problema 4: Operații pe numere mari')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 4: Big Number Operations', 'Problema 4: Operații pe numere mari')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'State the problems of adding/multiplying two natural numbers represented as digit arrays. Write algorithms and analyze their worst-case time complexity. Harder: write the Karatsuba multiplication algorithm with O(n^log₂(3)) complexity.',
@@ -447,7 +447,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 5 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 5: Sorting — Bubble Sort & Selection Sort', 'Problema 5: Sortare — Bubble Sort și Selection Sort')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 5: Sorting — Bubble Sort & Selection Sort', 'Problema 5: Sortare — Bubble Sort și Selection Sort')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'State and formalize the sorting problem. Write bubble sort and selection sort. Prove their correctness. Compute their execution time for inputs 1,2,…,n and n,n−1,…,1.',
@@ -502,7 +502,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 6 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 6: Missing Number', 'Problema 6: Numărul lipsă')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 6: Missing Number', 'Problema 6: Numărul lipsă')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given n and n−1 distinct natural numbers between 1 and n, determine the missing number. Find the most efficient solution in terms of time and space.',
@@ -545,7 +545,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 7 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 7: Duplicate & Missing Number', 'Problema 7: Număr duplicat și lipsă')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 7: Duplicate & Missing Number', 'Problema 7: Număr duplicat și lipsă')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Same setup as above, but now one number appears twice and one number is missing. Formalize the problem and find both.',
@@ -580,7 +580,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 8 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 8: Reductions', 'Problema 8: Reduceri')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 8: Reductions', 'Problema 8: Reduceri')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Formalize the following reductions: (a) LCM to GCD, (b) set equality to sorting, (c) set disjunction to sorting.',
@@ -619,7 +619,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problems 9-11: Complexity definitions ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problems 9-11: Complexity Definitions', 'Problemele 9-11: Definiții de complexitate')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problems 9-11: Complexity Definitions', 'Problemele 9-11: Definiții de complexitate')}</h3>
 
       <Toggle
         question={t('Problem 9: How do we define O(f(n)) and Ω(f(n)) complexity of a problem?', 'Problema 9: Cum definim complexitatea O(f(n)) și Ω(f(n)) a unei probleme?')}
@@ -668,7 +668,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 12 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 12: Prove 0.5n² − 3n = Θ(n²)', 'Problema 12: Demonstrați că 0.5n² − 3n = Θ(n²)')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 12: Prove 0.5n² − 3n = Θ(n²)', 'Problema 12: Demonstrați că 0.5n² − 3n = Θ(n²)')}</h3>
       <MultipleChoice questions={mc12} />
       <Toggle
         question={t('Show proof', 'Arată demonstrația')}
@@ -692,7 +692,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problems 13-14: Asymptotic proofs ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problems 13-14: Asymptotic Properties', 'Problemele 13-14: Proprietăți asimptotice')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problems 13-14: Asymptotic Properties', 'Problemele 13-14: Proprietăți asimptotice')}</h3>
 
       <Toggle
         question={t('Problem 13: If f is a polynomial of degree k, then f(n) ∈ Θ(nᵏ)', 'Problema 13: Dacă f este polinom de grad k, atunci f(n) ∈ Θ(nᵏ)')}
@@ -738,7 +738,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 15 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 15: Recurrence T(n) = 2T(n/2) + Θ(n)', 'Problema 15: Recurența T(n) = 2T(n/2) + Θ(n)')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 15: Recurrence T(n) = 2T(n/2) + Θ(n)', 'Problema 15: Recurența T(n) = 2T(n/2) + Θ(n)')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Let T(n) = Θ(1) if n = 1, and T(n) = 2T(n/2) + Θ(n) if n > 1. Prove that T(n) = Θ(n log n).',
@@ -775,7 +775,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 16 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 16: Induction Proof — f(n) = 3ⁿ − 2ⁿ', 'Problema 16: Demonstrație prin inducție — f(n) = 3ⁿ − 2ⁿ')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 16: Induction Proof — f(n) = 3ⁿ − 2ⁿ', 'Problema 16: Demonstrație prin inducție — f(n) = 3ⁿ − 2ⁿ')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Prove by induction that the following function returns 3ⁿ − 2ⁿ:',
@@ -821,7 +821,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 17 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 17: Fibonacci Search', 'Problema 17: Căutarea Fibonacci')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 17: Fibonacci Search', 'Problema 17: Căutarea Fibonacci')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Write the Fibonacci search algorithm for searching a value in a sorted array. Analyze its complexity relative to binary search. Are they asymptotically equivalent in the worst case?',
@@ -876,7 +876,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 18 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 18: Heapsort', 'Problema 18: Heapsort')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 18: Heapsort', 'Problema 18: Heapsort')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Implement the heapsort algorithm and write relevant tests showing it works correctly.',

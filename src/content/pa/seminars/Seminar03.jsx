@@ -13,10 +13,10 @@ export default function Seminar03() {
       ro: 'Care este formalizarea corectă I/O pentru „Scrieți un algoritm probabilist ce modelează aruncarea unui ban măsluit: cap cu probabilitatea 5/9 și pajură cu probabilitatea 4/9"?',
     },
     options: [
-      { text: 'Input: (none); Output: "heads" with P = 5/9, "tails" with P = 4/9', correct: true },
-      { text: 'Input: p ∈ (0,1); Output: "heads" with P = p, "tails" with P = 1−p', correct: false },
-      { text: 'Input: (none); Output: "heads" with P = 1/2, "tails" with P = 1/2', correct: false },
-      { text: 'Input: n — number of flips; Output: array of n results', correct: false },
+      { text: { en: 'Input: (none); Output: "heads" with P = 5/9, "tails" with P = 4/9', ro: 'Input: (niciunul); Output: "cap" cu P = 5/9, "pajură" cu P = 4/9' }, correct: true },
+      { text: { en: 'Input: p ∈ (0,1); Output: "heads" with P = p, "tails" with P = 1−p', ro: 'Input: p ∈ (0,1); Output: "cap" cu P = p, "pajură" cu P = 1−p' }, correct: false },
+      { text: { en: 'Input: (none); Output: "heads" with P = 1/2, "tails" with P = 1/2', ro: 'Input: (niciunul); Output: "cap" cu P = 1/2, "pajură" cu P = 1/2' }, correct: false },
+      { text: { en: 'Input: n — number of flips; Output: array of n results', ro: 'Input: n — numărul de aruncări; Output: vector de n rezultate' }, correct: false },
     ],
     explanation: {
       en: 'The algorithm takes no input — the probabilities 5/9 and 4/9 are fixed by the problem. It outputs a single result with the specified bias, not a fair coin and not a parameterized one.',
@@ -31,10 +31,10 @@ export default function Seminar03() {
       ro: 'În algoritmul probabilist dat (aruncă monezi până la 0), care este probabilitatea ca algoritmul să se oprească după exact i iterații?',
     },
     options: [
-      { text: 'P(stop after i iterations) = (1/2)ⁱ', correct: true },
-      { text: 'P(stop after i iterations) = 1/i', correct: false },
-      { text: 'P(stop after i iterations) = (1/2)ⁱ⁻¹', correct: false },
-      { text: 'P(stop after i iterations) = i · (1/2)ⁱ', correct: false },
+      { text: { en: 'P(stop after i iterations) = (1/2)ⁱ', ro: 'P(oprire după i iterații) = (1/2)ⁱ' }, correct: true },
+      { text: { en: 'P(stop after i iterations) = 1/i', ro: 'P(oprire după i iterații) = 1/i' }, correct: false },
+      { text: { en: 'P(stop after i iterations) = (1/2)ⁱ⁻¹', ro: 'P(oprire după i iterații) = (1/2)ⁱ⁻¹' }, correct: false },
+      { text: { en: 'P(stop after i iterations) = i · (1/2)ⁱ', ro: 'P(oprire după i iterații) = i · (1/2)ⁱ' }, correct: false },
     ],
     explanation: {
       en: 'To stop after exactly i iterations: we need x=1 for the first i−1 iterations (each with P=1/2) and x=0 on iteration i (P=1/2). Total: (1/2)ⁱ.',
@@ -65,10 +65,10 @@ export default function Seminar03() {
       ro: 'Care este formalizarea corectă I/O pentru „Dându-se un vector de numere naturale care conține un element majoritar, găsiți-l"?',
     },
     options: [
-      { text: 'Input: a[0..n−1], a[i] ∈ ℕ, ∃x: #{i : a[i]=x} > ⌊n/2⌋; Output: x (the majority element)', correct: true },
-      { text: 'Input: a[0..n−1]; Output: x if majority exists, else −1', correct: false },
-      { text: 'Input: a[0..n−1]; Output: the element that appears most often', correct: false },
-      { text: 'Input: a[0..n−1], x; Output: true if x is the majority element', correct: false },
+      { text: { en: 'Input: a[0..n−1], a[i] ∈ ℕ, ∃x: #{i : a[i]=x} > ⌊n/2⌋; Output: x (the majority element)', ro: 'Input: a[0..n−1], a[i] ∈ ℕ, ∃x: #{i : a[i]=x} > ⌊n/2⌋; Output: x (elementul majoritar)' }, correct: true },
+      { text: { en: 'Input: a[0..n−1]; Output: x if majority exists, else −1', ro: 'Input: a[0..n−1]; Output: x dacă există majoritar, altfel −1' }, correct: false },
+      { text: { en: 'Input: a[0..n−1]; Output: the element that appears most often', ro: 'Input: a[0..n−1]; Output: elementul care apare cel mai des' }, correct: false },
+      { text: { en: 'Input: a[0..n−1], x; Output: true if x is the majority element', ro: 'Input: a[0..n−1], x; Output: true dacă x este elementul majoritar' }, correct: false },
     ],
     explanation: {
       en: 'The precondition guarantees a majority element exists — no need to handle the "not found" case. We must find the element itself, not just check a candidate. "Most frequent" ≠ majority (majority requires > n/2).',
@@ -99,10 +99,10 @@ export default function Seminar03() {
       ro: 'Pentru algoritmul Monte Carlo majoritar, câte încercări aleatorii sunt necesare pentru a aduce probabilitatea de eroare sub 1/2⁵⁰?',
     },
     options: [
-      { text: '50', correct: true },
-      { text: '250', correct: false },
-      { text: '25', correct: false },
-      { text: '100', correct: false },
+      { text: { en: '50', ro: '50' }, correct: true },
+      { text: { en: '250', ro: '250' }, correct: false },
+      { text: { en: '25', ro: '25' }, correct: false },
+      { text: { en: '100', ro: '100' }, correct: false },
     ],
     explanation: {
       en: 'Each trial picks a random element. Since the majority appears > n/2 times, each trial has P > 1/2 of picking it. If we verify and it fails, P(error per trial) < 1/2. After k independent trials, P(all fail) < (1/2)ᵏ. For (1/2)ᵏ < 1/2⁵⁰, we need k = 50.',
@@ -117,10 +117,10 @@ export default function Seminar03() {
       ro: 'Pentru algoritmul care sumează n biți aleatori uniformi din {0,1}, care este valoarea așteptată a output-ului?',
     },
     options: [
-      { text: 'E[sum] = n/2', correct: true },
-      { text: 'E[sum] = n', correct: false },
-      { text: 'E[sum] = n²/4', correct: false },
-      { text: 'E[sum] = √n', correct: false },
+      { text: { en: 'E[sum] = n/2', ro: 'E[sumă] = n/2' }, correct: true },
+      { text: { en: 'E[sum] = n', ro: 'E[sumă] = n' }, correct: false },
+      { text: { en: 'E[sum] = n²/4', ro: 'E[sumă] = n²/4' }, correct: false },
+      { text: { en: 'E[sum] = √n', ro: 'E[sumă] = √n' }, correct: false },
     ],
     explanation: {
       en: 'Each bit xᵢ has E[xᵢ] = 0·(1/2) + 1·(1/2) = 1/2. By linearity of expectation, E[sum] = Σᵢ₌₁ⁿ E[xᵢ] = n · (1/2) = n/2.',
@@ -135,10 +135,10 @@ export default function Seminar03() {
       ro: 'Care este formalizarea corectă I/O pentru „Folosind doar rand2 (bit echiprobabil), scrieți o funcție zar care returnează un număr din {0..5} fiecare cu probabilitatea 1/6"?',
     },
     options: [
-      { text: 'Input: (none, uses rand2); Output: x ∈ {0,1,2,3,4,5} with P(x) = 1/6 for each x', correct: true },
-      { text: 'Input: n; Output: x ∈ {0..n−1} with P(x) = 1/n', correct: false },
-      { text: 'Input: (none); Output: x ∈ {1..6} with P(x) = 1/6', correct: false },
-      { text: 'Input: (none); Output: x ∈ {0..5} with P(x) ≈ 1/6 (approximate)', correct: false },
+      { text: { en: 'Input: (none, uses rand2); Output: x ∈ {0,1,2,3,4,5} with P(x) = 1/6 for each x', ro: 'Input: (niciunul, folosește rand2); Output: x ∈ {0,1,2,3,4,5} cu P(x) = 1/6 pentru fiecare x' }, correct: true },
+      { text: { en: 'Input: n; Output: x ∈ {0..n−1} with P(x) = 1/n', ro: 'Input: n; Output: x ∈ {0..n−1} cu P(x) = 1/n' }, correct: false },
+      { text: { en: 'Input: (none); Output: x ∈ {1..6} with P(x) = 1/6', ro: 'Input: (niciunul); Output: x ∈ {1..6} cu P(x) = 1/6' }, correct: false },
+      { text: { en: 'Input: (none); Output: x ∈ {0..5} with P(x) ≈ 1/6 (approximate)', ro: 'Input: (niciunul); Output: x ∈ {0..5} cu P(x) ≈ 1/6 (aproximativ)' }, correct: false },
     ],
     explanation: {
       en: 'The output range is {0..5} (not {1..6}). The distribution must be exactly uniform (not approximate). No input parameter — the range 0-5 is fixed.',
@@ -153,10 +153,10 @@ export default function Seminar03() {
       ro: 'Care este formalizarea corectă I/O pentru „Dată rand2p (returnează 0 cu probabilitate necunoscută p, 1 cu probabilitate 1−p), scrieți rand2corect care returnează 0 sau 1 fiecare cu probabilitate 0.5"?',
     },
     options: [
-      { text: 'Input: (none, uses rand2p); Output: x ∈ {0,1} with P(x=0) = P(x=1) = 0.5', correct: true },
-      { text: 'Input: p ∈ (0,1); Output: x ∈ {0,1} with P(x) = 0.5', correct: false },
-      { text: 'Input: (none); Output: x ∈ {0,1} with P(x=0) = p', correct: false },
-      { text: 'Input: (none); Output: x ∈ {0,1} with P(x) ≈ 0.5 (approximate)', correct: false },
+      { text: { en: 'Input: (none, uses rand2p); Output: x ∈ {0,1} with P(x=0) = P(x=1) = 0.5', ro: 'Input: (niciunul, folosește rand2p); Output: x ∈ {0,1} cu P(x=0) = P(x=1) = 0.5' }, correct: true },
+      { text: { en: 'Input: p ∈ (0,1); Output: x ∈ {0,1} with P(x) = 0.5', ro: 'Input: p ∈ (0,1); Output: x ∈ {0,1} cu P(x) = 0.5' }, correct: false },
+      { text: { en: 'Input: (none); Output: x ∈ {0,1} with P(x=0) = p', ro: 'Input: (niciunul); Output: x ∈ {0,1} cu P(x=0) = p' }, correct: false },
+      { text: { en: 'Input: (none); Output: x ∈ {0,1} with P(x) ≈ 0.5 (approximate)', ro: 'Input: (niciunul); Output: x ∈ {0,1} cu P(x) ≈ 0.5 (aproximativ)' }, correct: false },
     ],
     explanation: {
       en: 'We don\'t know p, so it cannot be an input. The output must be exactly fair (P = 0.5), not approximate. The function uses rand2p internally but takes no arguments.',
@@ -171,10 +171,10 @@ export default function Seminar03() {
       ro: 'Care este formalizarea corectă I/O pentru „Folosind doar rand2, scrieți o funcție random(n) care returnează un număr din {0..n−1} fiecare cu probabilitate 1/n"?',
     },
     options: [
-      { text: 'Input: n ∈ ℕ, n ≥ 1 (uses rand2); Output: x ∈ {0,1,…,n−1} with P(x) = 1/n for each x', correct: true },
-      { text: 'Input: n; Output: x ∈ {1..n} with P(x) = 1/n', correct: false },
-      { text: 'Input: (none); Output: x ∈ {0..n−1}', correct: false },
-      { text: 'Input: n, k (number of bits); Output: x ∈ {0..n−1} with P(x) ≈ 1/n', correct: false },
+      { text: { en: 'Input: n ∈ ℕ, n ≥ 1 (uses rand2); Output: x ∈ {0,1,…,n−1} with P(x) = 1/n for each x', ro: 'Input: n ∈ ℕ, n ≥ 1 (folosește rand2); Output: x ∈ {0,1,…,n−1} cu P(x) = 1/n pentru fiecare x' }, correct: true },
+      { text: { en: 'Input: n; Output: x ∈ {1..n} with P(x) = 1/n', ro: 'Input: n; Output: x ∈ {1..n} cu P(x) = 1/n' }, correct: false },
+      { text: { en: 'Input: (none); Output: x ∈ {0..n−1}', ro: 'Input: (niciunul); Output: x ∈ {0..n−1}' }, correct: false },
+      { text: { en: 'Input: n, k (number of bits); Output: x ∈ {0..n−1} with P(x) ≈ 1/n', ro: 'Input: n, k (numărul de biți); Output: x ∈ {0..n−1} cu P(x) ≈ 1/n' }, correct: false },
     ],
     explanation: {
       en: 'The range is {0..n−1} (not {1..n}). n is an input parameter. The distribution must be exactly 1/n (not approximate). No extra parameter k is needed.',
@@ -224,10 +224,10 @@ export default function Seminar03() {
       ro: 'Care este formalizarea corectă I/O pentru problema 3-satisfiabilității?',
     },
     options: [
-      { text: 'Input: v[n][3] — 3-CNF formula matrix, n — number of clauses; Output: "yes" if satisfiable, "no" otherwise', correct: true },
-      { text: 'Input: v[n][3], n; Output: a satisfying assignment if one exists', correct: false },
-      { text: 'Input: a boolean formula; Output: the number of satisfying assignments', correct: false },
-      { text: 'Input: v[n][3], n; Output: "yes" if all assignments satisfy the formula', correct: false },
+      { text: { en: 'Input: v[n][3] — 3-CNF formula matrix, n — number of clauses; Output: "yes" if satisfiable, "no" otherwise', ro: 'Input: v[n][3] — matrice formulă 3-FNC, n — numărul de clauze; Output: "da" dacă este satisfiabilă, "nu" altfel' }, correct: true },
+      { text: { en: 'Input: v[n][3], n; Output: a satisfying assignment if one exists', ro: 'Input: v[n][3], n; Output: o asignare satisfăcătoare dacă există' }, correct: false },
+      { text: { en: 'Input: a boolean formula; Output: the number of satisfying assignments', ro: 'Input: o formulă booleană; Output: numărul de asignări satisfăcătoare' }, correct: false },
+      { text: { en: 'Input: v[n][3], n; Output: "yes" if all assignments satisfy the formula', ro: 'Input: v[n][3], n; Output: "da" dacă toate asignările satisfac formula' }, correct: false },
     ],
     explanation: {
       en: 'The 3-SAT decision problem asks only whether the formula is satisfiable (yes/no), not to find or count assignments. "All assignments satisfy" would be validity, not satisfiability.',
@@ -273,10 +273,10 @@ export default function Seminar03() {
       ro: 'Care este complexitatea timp în cazul cel mai nefavorabil a unui algoritm determinist brute-force pentru 3-SAT cu n clauze peste k variabile?',
     },
     options: [
-      { text: 'O(n · 2ᵏ)', correct: true },
-      { text: 'O(2ⁿ)', correct: false },
-      { text: 'O(n · k)', correct: false },
-      { text: 'O(3ⁿ)', correct: false },
+      { text: { en: 'O(n · 2ᵏ)', ro: 'O(n · 2ᵏ)' }, correct: true },
+      { text: { en: 'O(2ⁿ)', ro: 'O(2ⁿ)' }, correct: false },
+      { text: { en: 'O(n · k)', ro: 'O(n · k)' }, correct: false },
+      { text: { en: 'O(3ⁿ)', ro: 'O(3ⁿ)' }, correct: false },
     ],
     explanation: {
       en: 'Enumerate all 2ᵏ possible truth assignments for k variables. For each assignment, evaluate the formula in O(n) (check each of the n clauses). Total: O(n · 2ᵏ). The exponential is in the number of variables, not clauses.',
@@ -294,7 +294,7 @@ export default function Seminar03() {
       </p>
 
       {/* ═══ Problem 1 ═══ */}
-      <h3 className="text-lg font-bold mt-6 mb-2">{t('Problem 1: Biased Coin Simulation', 'Problema 1: Simularea unui ban măsluit')}</h3>
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 1: Biased Coin Simulation', 'Problema 1: Simularea unui ban măsluit')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Write a probabilistic algorithm that simulates a biased coin flip: "heads" with probability 5/9 and "tails" with probability 4/9.',
@@ -327,7 +327,7 @@ export default function Seminar03() {
       />
 
       {/* ═══ Problem 2 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 2: Geometric Stopping', 'Problema 2: Oprire geometrică')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 2: Geometric Stopping', 'Problema 2: Oprire geometrică')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Consider a probabilistic algorithm (no input) that flips a fair coin in a loop, incrementing a counter. It stops when the coin shows 0, and prints the counter. (a) Execute it a few times. (b) What is the probability that it stops? Hint: compute the probability of stopping after exactly i iterations.',
@@ -361,7 +361,7 @@ print(i);`}</Code>
       />
 
       {/* ═══ Problem 3 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 3: Majority Element — Three Approaches', 'Problema 3: Element majoritar — Trei abordări')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 3: Majority Element — Three Approaches', 'Problema 3: Element majoritar — Trei abordări')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given a, an array of natural numbers that contains a majority element (an element appearing on more than half the indices), find the majority element. (a) Write a nondeterministic algorithm. (b) Write a Las Vegas algorithm. (c) Write a Monte Carlo algorithm with error probability < 1/2⁵⁰.',
@@ -437,7 +437,7 @@ print(i);`}</Code>
       />
 
       {/* ═══ Problem 4 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 4: Sum of Random Bits', 'Problema 4: Suma de biți aleatori')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 4: Sum of Random Bits', 'Problema 4: Suma de biți aleatori')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Consider a probabilistic algorithm that takes n as input, sums n uniform random bits from {0,1}, and prints the sum. (a) Execute it a few times. (b) What is the expected value of the output for arbitrary n ∈ ℕ?',
@@ -467,7 +467,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 5 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 5: Fair Die from rand2', 'Problema 5: Zar echiprobabil din rand2')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 5: Fair Die from rand2', 'Problema 5: Zar echiprobabil din rand2')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given a function rand2 that returns 0 or 1 each with probability 0.5, write a function zar (no arguments) that returns a number from {0,1,2,3,4,5} each with equal probability 1/6. You may only use rand2 — no other random source.',
@@ -503,7 +503,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 6 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 6: Fair Bit from Biased Coin', 'Problema 6: Bit echiprobabil din monedă măsluită')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 6: Fair Bit from Biased Coin', 'Problema 6: Bit echiprobabil din monedă măsluită')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given rand2p (returns 0 with unknown probability p ∈ (0,1) and 1 with probability 1−p), write rand2corect (no arguments) that returns 0 or 1 each with probability exactly 0.5. You may only use rand2p — no other random source.',
@@ -540,7 +540,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 7 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 7: Uniform Random from rand2', 'Problema 7: Aleator uniform din rand2')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 7: Uniform Random from rand2', 'Problema 7: Aleator uniform din rand2')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Using only rand2 (fair bit), write a function random(n) that returns a number from {0, 1, …, n−1} each with probability exactly 1/n.',
@@ -579,7 +579,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 8 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 8: Subset Sum Variants (SSD1, SSD2, SSD3)', 'Problema 8: Variante ale sumei de submulțime (SSD1, SSD2, SSD3)')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 8: Subset Sum Variants (SSD1, SSD2, SSD3)', 'Problema 8: Variante ale sumei de submulțime (SSD1, SSD2, SSD3)')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Write nondeterministic algorithms for three variants of the subset sum problem:',
@@ -650,7 +650,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 9 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 9: 3-SAT and Related Problems', 'Problema 9: 3-SAT și probleme conexe')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 9: 3-SAT and Related Problems', 'Problema 9: 3-SAT și probleme conexe')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A 3-CNF formula (e.g., (x₁ ∨ ¬x₂ ∨ x₃) ∧ (¬x₁ ∨ x₅ ∨ ¬x₂)) is represented as a matrix v[n][3]. (a) Write a nondeterministic algorithm for 3-satisfiability. (b) Describe 3-DNF validity as I/O. (c) Write a nondeterministic algorithm for 3-non-equivalence. (d) Write a deterministic brute-force for 3-SAT.',

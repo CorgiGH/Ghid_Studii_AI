@@ -13,10 +13,10 @@ export default function Seminar01() {
       ro: 'Care este formalizarea corectă Input-Output pentru „Determinați primele n numere prime"?',
     },
     options: [
-      { text: 'Input: n \u2208 \u2124\u207A; Output: (p\u2081, p\u2082, \u2026, p\u2099) where p\u1D62 is the i-th prime number', correct: true },
-      { text: 'Input: a list of numbers; Output: which of them are prime', correct: false },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: true if n is prime, false otherwise', correct: false },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: the n-th prime number only', correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: (p\u2081, p\u2082, \u2026, p\u2099) where p\u1D62 is the i-th prime number', ro: 'Input: n \u2208 \u2124\u207A; Output: (p\u2081, p\u2082, \u2026, p\u2099) unde p\u1D62 este al i-lea număr prim' }, correct: true },
+      { text: { en: 'Input: a list of numbers; Output: which of them are prime', ro: 'Input: o listă de numere; Output: care dintre ele sunt prime' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is prime, false otherwise', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este prim, false altfel' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the n-th prime number only', ro: 'Input: n \u2208 \u2124\u207A; Output: doar al n-lea număr prim' }, correct: false },
     ],
     explanation: {
       en: 'The problem asks for the first n primes as a sequence, not a single number or a primality test. Input is a positive integer n, output is an ordered tuple of the first n primes.',
@@ -31,10 +31,10 @@ export default function Seminar01() {
       ro: 'Care este formalizarea corectă Input-Output pentru „Generați numerele prime mai mici decât n folosind ciurul lui Eratostene"?',
     },
     options: [
-      { text: 'Input: n \u2208 \u2124\u207A; Output: all prime numbers in {2, 3, \u2026, n\u22121}', correct: true },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: the first n prime numbers', correct: false },
-      { text: 'Input: a range [a, b]; Output: primes in that range', correct: false },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: composite numbers less than n', correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: all prime numbers in {2, 3, \u2026, n\u22121}', ro: 'Input: n \u2208 \u2124\u207A; Output: toate numerele prime din {2, 3, \u2026, n\u22121}' }, correct: true },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the first n prime numbers', ro: 'Input: n \u2208 \u2124\u207A; Output: primele n numere prime' }, correct: false },
+      { text: { en: 'Input: a range [a, b]; Output: primes in that range', ro: 'Input: un interval [a, b]; Output: numerele prime din acel interval' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: composite numbers less than n', ro: 'Input: n \u2208 \u2124\u207A; Output: numerele compuse mai mici decât n' }, correct: false },
     ],
     explanation: {
       en: 'The Sieve finds all primes strictly less than n (in the set {2, \u2026, n\u22121}). It does not find the first n primes \u2014 that would be a different problem.',
@@ -49,10 +49,10 @@ export default function Seminar01() {
       ro: 'Care este formalizarea corectă I/O pentru „Găsiți toate palindromurile pătrate \u2264 n"?',
     },
     options: [
-      { text: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x is a palindrome AND x\u00B2 is a palindrome}', correct: true },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x\u00B2 \u2264 n, x\u00B2 is a palindrome}', correct: false },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: true if n is a square palindrome', correct: false },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x is a palindrome}', correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x is a palindrome AND x\u00B2 is a palindrome}', ro: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x este palindrom \u0218I x\u00B2 este palindrom}' }, correct: true },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x\u00B2 \u2264 n, x\u00B2 is a palindrome}', ro: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x\u00B2 \u2264 n, x\u00B2 este palindrom}' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is a square palindrome', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este un palindrom pătrat' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x is a palindrome}', ro: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x este palindrom}' }, correct: false },
     ],
     explanation: {
       en: 'A square palindrome x requires BOTH x and x\u00B2 to be palindromes (e.g. 11\u00B2 = 121). The last option only checks if x is a palindrome, ignoring x\u00B2.',
@@ -67,9 +67,9 @@ export default function Seminar01() {
       ro: 'Care este formalizarea corectă I/O pentru „Stabiliți dacă n este un număr fericit"?',
     },
     options: [
-      { text: 'Input: n \u2208 \u2124\u207A; Output: "happy" if repeated digit-square-sum reaches 1, "unhappy" otherwise', correct: true },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: the sequence of sums until a cycle is found', correct: false },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: the sum of squares of digits of n', correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: "happy" if repeated digit-square-sum reaches 1, "unhappy" otherwise', ro: 'Input: n \u2208 \u2124\u207A; Output: "fericit" dacă suma repetată a pătratelor cifrelor ajunge la 1, "nefericit" altfel' }, correct: true },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the sequence of sums until a cycle is found', ro: 'Input: n \u2208 \u2124\u207A; Output: secvența sumelor până la găsirea unui ciclu' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the sum of squares of digits of n', ro: 'Input: n \u2208 \u2124\u207A; Output: suma pătratelor cifrelor lui n' }, correct: false },
     ],
     explanation: {
       en: 'The problem asks for a decision (happy or not), not the intermediate sequence. A happy number eventually reaches 1; an unhappy one enters a cycle that never includes 1.',
@@ -84,10 +84,10 @@ export default function Seminar01() {
       ro: 'Care este formalizarea corectă I/O pentru „Găsiți suma termenilor pari din secvența Fibonacci care nu depășesc 4.000.000"?',
     },
     options: [
-      { text: 'Input: limit = 4,000,000; Output: \u03A3{f \u2208 Fibonacci | f \u2264 limit AND f is even}', correct: true },
-      { text: 'Input: none; Output: all even Fibonacci numbers up to 4,000,000', correct: false },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: the n-th even Fibonacci number', correct: false },
-      { text: 'Input: limit = 4,000,000; Output: count of even Fibonacci numbers \u2264 limit', correct: false },
+      { text: { en: 'Input: limit = 4,000,000; Output: \u03A3{f \u2208 Fibonacci | f \u2264 limit AND f is even}', ro: 'Input: limit = 4.000.000; Output: \u03A3{f \u2208 Fibonacci | f \u2264 limit \u0218I f este par}' }, correct: true },
+      { text: { en: 'Input: none; Output: all even Fibonacci numbers up to 4,000,000', ro: 'Input: niciunul; Output: toate numerele Fibonacci pare până la 4.000.000' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the n-th even Fibonacci number', ro: 'Input: n \u2208 \u2124\u207A; Output: al n-lea număr Fibonacci par' }, correct: false },
+      { text: { en: 'Input: limit = 4,000,000; Output: count of even Fibonacci numbers \u2264 limit', ro: 'Input: limit = 4.000.000; Output: numărul de Fibonacci pare \u2264 limit' }, correct: false },
     ],
     explanation: {
       en: 'The output is a single number (the sum), not a list or a count. The input is the upper bound (4,000,000). Starting sequence: 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, \u2026',
@@ -102,10 +102,10 @@ export default function Seminar01() {
       ro: 'Care este formalizarea corectă I/O pentru „Dat un vector de numere, determinați câte sunt numere hexagonale"?',
     },
     options: [
-      { text: 'Input: (a\u2081, \u2026, a\u2099) where a\u1D62 \u2208 \u2124\u207A; Output: |{a\u1D62 | \u2203k: a\u1D62 = k(2k\u22121)}|', correct: true },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: the first n hexagonal numbers', correct: false },
-      { text: 'Input: (a\u2081, \u2026, a\u2099); Output: the hexagonal numbers in the array', correct: false },
-      { text: 'Input: n \u2208 \u2124\u207A; Output: true if n is hexagonal', correct: false },
+      { text: { en: 'Input: (a\u2081, \u2026, a\u2099) where a\u1D62 \u2208 \u2124\u207A; Output: |{a\u1D62 | \u2203k: a\u1D62 = k(2k\u22121)}|', ro: 'Input: (a\u2081, \u2026, a\u2099) unde a\u1D62 \u2208 \u2124\u207A; Output: |{a\u1D62 | \u2203k: a\u1D62 = k(2k\u22121)}|' }, correct: true },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the first n hexagonal numbers', ro: 'Input: n \u2208 \u2124\u207A; Output: primele n numere hexagonale' }, correct: false },
+      { text: { en: 'Input: (a\u2081, \u2026, a\u2099); Output: the hexagonal numbers in the array', ro: 'Input: (a\u2081, \u2026, a\u2099); Output: numerele hexagonale din vector' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is hexagonal', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este hexagonal' }, correct: false },
     ],
     explanation: {
       en: 'The output is a count (how many), not the list itself. A number h is hexagonal iff h = k(2k\u22121) for some positive integer k. First hexagonal numbers: 1, 6, 15, 28, 45, 66, 91, 120, \u2026',
@@ -120,10 +120,10 @@ export default function Seminar01() {
       ro: 'Care este formalizarea corectă I/O pentru „Determinați drumul cu cel mai mic cost între două noduri, vizitând cel mult k noduri, într-un graf orientat ponderat"?',
     },
     options: [
-      { text: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: min cost path from s to d using \u2264 k nodes', correct: true },
-      { text: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V; Output: shortest path from s to d', correct: false },
-      { text: 'Input: G = (V, E, w), k \u2208 \u2124\u207A; Output: all paths with \u2264 k nodes', correct: false },
-      { text: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: true if a path with \u2264 k nodes exists', correct: false },
+      { text: { en: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: min cost path from s to d using \u2264 k nodes', ro: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: drumul de cost minim de la s la d folosind \u2264 k noduri' }, correct: true },
+      { text: { en: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V; Output: shortest path from s to d', ro: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V; Output: drumul cel mai scurt de la s la d' }, correct: false },
+      { text: { en: 'Input: G = (V, E, w), k \u2208 \u2124\u207A; Output: all paths with \u2264 k nodes', ro: 'Input: G = (V, E, w), k \u2208 \u2124\u207A; Output: toate drumurile cu \u2264 k noduri' }, correct: false },
+      { text: { en: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: true if a path with \u2264 k nodes exists', ro: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: true dacă există un drum cu \u2264 k noduri' }, correct: false },
     ],
     explanation: {
       en: 'The problem requires finding the minimum cost path (not just existence), from a specific source to destination, with the constraint of visiting at most k nodes. All four inputs (graph, source, destination, k) are needed.',
@@ -138,10 +138,10 @@ export default function Seminar01() {
       ro: 'Care este formalizarea corectă I/O pentru problema celor N regine?',
     },
     options: [
-      { text: 'Input: N \u2208 \u2124\u207A; Output: all placements of N queens on an N\u00D7N board such that no two queens attack each other', correct: true },
-      { text: 'Input: an N\u00D7N board with queens placed; Output: true if no two queens attack each other', correct: false },
-      { text: 'Input: N \u2208 \u2124\u207A; Output: the maximum number of queens that can be placed on an N\u00D7N board', correct: false },
-      { text: 'Input: N \u2208 \u2124\u207A; Output: one valid placement of N non-attacking queens', correct: false },
+      { text: { en: 'Input: N \u2208 \u2124\u207A; Output: all placements of N queens on an N\u00D7N board such that no two queens attack each other', ro: 'Input: N \u2208 \u2124\u207A; Output: toate plasările a N regine pe o tablă N\u00D7N astfel încât nicio pereche de regine să nu se atace' }, correct: true },
+      { text: { en: 'Input: an N\u00D7N board with queens placed; Output: true if no two queens attack each other', ro: 'Input: o tablă N\u00D7N cu regine plasate; Output: true dacă nicio pereche de regine nu se atacă' }, correct: false },
+      { text: { en: 'Input: N \u2208 \u2124\u207A; Output: the maximum number of queens that can be placed on an N\u00D7N board', ro: 'Input: N \u2208 \u2124\u207A; Output: numărul maxim de regine care pot fi plasate pe o tablă N\u00D7N' }, correct: false },
+      { text: { en: 'Input: N \u2208 \u2124\u207A; Output: one valid placement of N non-attacking queens', ro: 'Input: N \u2208 \u2124\u207A; Output: o plasare validă a N regine care nu se atacă' }, correct: false },
     ],
     explanation: {
       en: 'The N-Queens problem asks for ALL valid arrangements, not just one. The answer N is always N queens (trivially), so max-queens makes no sense. The input is the board size N, not a pre-placed board.',
@@ -159,7 +159,7 @@ export default function Seminar01() {
       </p>
 
       {/* ═══ Problem 1 ═══ */}
-      <h3 className="text-lg font-bold mt-6 mb-2">{t('Problem 1: First n Primes', 'Problema 1: Primele n numere prime')}</h3>
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 1: First n Primes', 'Problema 1: Primele n numere prime')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given a positive integer n, find the first n prime numbers.',
@@ -197,7 +197,7 @@ export default function Seminar01() {
       />
 
       {/* ═══ Problem 2 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 2: Sieve of Eratosthenes', 'Problema 2: Ciurul lui Eratostene')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 2: Sieve of Eratosthenes', 'Problema 2: Ciurul lui Eratostene')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Write an algorithm that generates all prime numbers less than a given number n using the Sieve of Eratosthenes.',
@@ -235,7 +235,7 @@ export default function Seminar01() {
       />
 
       {/* ═══ Problem 3 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 3: Square Palindromes', 'Problema 3: Palindromuri pătrate')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 3: Square Palindromes', 'Problema 3: Palindromuri pătrate')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A square palindrome is a number where both the number and its square are palindromes (e.g. 11\u00B2 = 121). Given n, find all square palindromes \u2264 n.',
@@ -274,7 +274,7 @@ Algorithm SquarePalindromes(n)
       />
 
       {/* ═══ Problem 4 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 4: Happy Number', 'Problema 4: Număr fericit')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 4: Happy Number', 'Problema 4: Număr fericit')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A happy number reaches 1 when repeatedly replaced by the sum of squares of its digits. If it enters a cycle not including 1, it is unhappy. Example: 19 is happy, 4 is not.',
@@ -313,7 +313,7 @@ Algorithm IsHappy(n)
       />
 
       {/* ═══ Problem 5 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 5: Even Fibonacci Sum', 'Problema 5: Suma Fibonacci pară')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 5: Even Fibonacci Sum', 'Problema 5: Suma Fibonacci pară')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Starting with 1 and 2, each Fibonacci term is the sum of the two preceding ones. Find the sum of even-valued Fibonacci terms not exceeding 4,000,000.',
@@ -351,7 +351,7 @@ Algorithm IsHappy(n)
       />
 
       {/* ═══ Problem 6 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 6: Hexagonal Numbers', 'Problema 6: Numere hexagonale')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 6: Hexagonal Numbers', 'Problema 6: Numere hexagonale')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'The n-th hexagonal number is h\u2099 = n(2n\u22121). First values: 1, 6, 15, 28, 45, 66, 91, 120, \u2026 Given an array, count how many elements are hexagonal numbers.',
@@ -391,7 +391,7 @@ Algorithm CountHexagonal(a[1..n])
       />
 
       {/* ═══ Problem 7 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 7: Shortest Path with \u2264 k Nodes', 'Problema 7: Drum de cost minim cu \u2264 k noduri')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 7: Shortest Path with \u2264 k Nodes', 'Problema 7: Drum de cost minim cu \u2264 k noduri')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given a weighted directed graph with positive edge costs, find the minimum cost path between a source and destination, such that the path visits at most k nodes.',
@@ -424,7 +424,7 @@ Algorithm CountHexagonal(a[1..n])
       />
 
       {/* ═══ Problem 8 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2">{t('Problem 8: N-Queens Problem', 'Problema 8: Problema celor N regine')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 8: N-Queens Problem', 'Problema 8: Problema celor N regine')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'State the N-Queens problem. Give an example of a problem instance.',

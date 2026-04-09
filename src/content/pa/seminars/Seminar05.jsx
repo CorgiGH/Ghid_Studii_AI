@@ -31,10 +31,10 @@ export default function Seminar05() {
       ro: 'Care este formalizarea I/O pentru găsirea datelor de intrare în cazul cel mai nefavorabil pentru căutarea naivă?',
     },
     options: [
-      { text: 'Input: n, m ∈ ℤ⁺; Output: T[1..n], P[1..m] such that naive search performs maximum comparisons', correct: true },
-      { text: 'Input: T[1..n], P[1..m]; Output: count of comparisons', correct: false },
-      { text: 'Input: n ∈ ℤ⁺; Output: T[1..n] with maximum repetitions', correct: false },
-      { text: 'Input: m ∈ ℤ⁺; Output: P[1..m] that maximizes search time for any text', correct: false },
+      { text: { en: 'Input: n, m ∈ ℤ⁺; Output: T[1..n], P[1..m] such that naive search performs maximum comparisons', ro: 'Input: n, m ∈ ℤ⁺; Output: T[1..n], P[1..m] astfel încât căutarea naivă realizează maximum de comparații' }, correct: true },
+      { text: { en: 'Input: T[1..n], P[1..m]; Output: count of comparisons', ro: 'Input: T[1..n], P[1..m]; Output: numărul de comparații' }, correct: false },
+      { text: { en: 'Input: n ∈ ℤ⁺; Output: T[1..n] with maximum repetitions', ro: 'Input: n ∈ ℤ⁺; Output: T[1..n] cu maximum de repetiții' }, correct: false },
+      { text: { en: 'Input: m ∈ ℤ⁺; Output: P[1..m] that maximizes search time for any text', ro: 'Input: m ∈ ℤ⁺; Output: P[1..m] care maximizează timpul de căutare pentru orice text' }, correct: false },
     ],
     explanation: {
       en: 'We need to construct both the text and pattern of given sizes that maximize the number of comparisons.',
@@ -65,10 +65,10 @@ export default function Seminar05() {
       ro: 'Care este numărul maxim exact de comparații pentru căutarea naivă cu text de lungime n și pattern de lungime m?',
     },
     options: [
-      { text: '(n − m + 1) · m', correct: true },
-      { text: 'n · m', correct: false },
-      { text: 'n · (m − 1)', correct: false },
-      { text: '(n − m) · m + 1', correct: false },
+      { text: { en: '(n − m + 1) · m', ro: '(n − m + 1) · m' }, correct: true },
+      { text: { en: 'n · m', ro: 'n · m' }, correct: false },
+      { text: { en: 'n · (m − 1)', ro: 'n · (m − 1)' }, correct: false },
+      { text: { en: '(n − m) · m + 1', ro: '(n − m) · m + 1' }, correct: false },
     ],
     explanation: {
       en: 'There are (n - m + 1) valid starting positions, and at each position at most m comparisons are made. The worst case achieves exactly m comparisons at each position.',
@@ -83,10 +83,10 @@ export default function Seminar05() {
       ro: 'Care este numărul minim de comparații pentru căutarea naivă pentru a determina că nu există potrivire (lungime text n, lungime pattern m, P NU apare în T)?',
     },
     options: [
-      { text: 'n − m + 1', correct: true },
-      { text: 'n', correct: false },
-      { text: 'm', correct: false },
-      { text: 'n / m', correct: false },
+      { text: { en: 'n − m + 1', ro: 'n − m + 1' }, correct: true },
+      { text: { en: 'n', ro: 'n' }, correct: false },
+      { text: { en: 'm', ro: 'm' }, correct: false },
+      { text: { en: 'n / m', ro: 'n / m' }, correct: false },
     ],
     explanation: {
       en: 'Best case: the first character of P doesn\'t match any position in T. We check 1 comparison per starting position = n - m + 1. Example: T = "bbb...b", P = "a...a".',
@@ -101,10 +101,10 @@ export default function Seminar05() {
       ro: 'Care este formalizarea I/O pentru găsirea tuturor aparițiilor lui P în T, știind că toate caracterele din P sunt distincte?',
     },
     options: [
-      { text: 'Input: T[1..n], P[1..m] with all characters in P distinct; Output: all positions i where T[i..i+m-1] = P', correct: true },
-      { text: 'Input: T[1..n], P[1..m]; Output: true/false', correct: false },
-      { text: 'Input: T[1..n], P[1..m] with all characters distinct in both; Output: positions', correct: false },
-      { text: 'Input: T[1..n]; Output: P[1..m] with distinct characters', correct: false },
+      { text: { en: 'Input: T[1..n], P[1..m] with all characters in P distinct; Output: all positions i where T[i..i+m-1] = P', ro: 'Input: T[1..n], P[1..m] cu toate caracterele din P distincte; Output: toate pozițiile i unde T[i..i+m-1] = P' }, correct: true },
+      { text: { en: 'Input: T[1..n], P[1..m]; Output: true/false', ro: 'Input: T[1..n], P[1..m]; Output: true/false' }, correct: false },
+      { text: { en: 'Input: T[1..n], P[1..m] with all characters distinct in both; Output: positions', ro: 'Input: T[1..n], P[1..m] cu toate caracterele distincte în ambele; Output: poziții' }, correct: false },
+      { text: { en: 'Input: T[1..n]; Output: P[1..m] with distinct characters', ro: 'Input: T[1..n]; Output: P[1..m] cu caractere distincte' }, correct: false },
     ],
     explanation: {
       en: 'The key constraint is that characters are distinct only in P (not necessarily in T). We output all starting positions of matches.',
@@ -136,10 +136,10 @@ export default function Seminar05() {
       ro: 'Care este funcția prefix (de eșec) KMP pentru pattern-ul "abcab"?',
     },
     options: [
-      { text: 'f = [-1, 0, 0, 0, 1, 2]', correct: true },
-      { text: 'f = [-1, 0, 0, 1, 1, 2]', correct: false },
-      { text: 'f = [-1, 0, 0, 0, 0, 1]', correct: false },
-      { text: 'f = [0, 0, 0, 1, 2, 0]', correct: false },
+      { text: { en: 'f = [-1, 0, 0, 0, 1, 2]', ro: 'f = [-1, 0, 0, 0, 1, 2]' }, correct: true },
+      { text: { en: 'f = [-1, 0, 0, 1, 1, 2]', ro: 'f = [-1, 0, 0, 1, 1, 2]' }, correct: false },
+      { text: { en: 'f = [-1, 0, 0, 0, 0, 1]', ro: 'f = [-1, 0, 0, 0, 0, 1]' }, correct: false },
+      { text: { en: 'f = [0, 0, 0, 1, 2, 0]', ro: 'f = [0, 0, 0, 1, 2, 0]' }, correct: false },
     ],
     explanation: {
       en: 'f[0] = -1 (by convention). f[1] = 0 ("a" has no proper prefix = suffix). f[2] = 0 ("ab": no match). f[3] = 0 ("abc": no match). f[4] = 1 ("abca": "a" is both prefix and suffix). f[5] = 2 ("abcab": "ab" is both prefix and suffix).',
@@ -188,10 +188,10 @@ export default function Seminar05() {
       ro: 'Câte caractere sunt garantat potrivite la noua aliniere (după deplasarea descrisă mai sus)?',
     },
     options: [
-      { text: '1', correct: true },
-      { text: '0', correct: false },
-      { text: '2', correct: false },
-      { text: '3', correct: false },
+      { text: { en: '1', ro: '1' }, correct: true },
+      { text: { en: '0', ro: '0' }, correct: false },
+      { text: { en: '2', ro: '2' }, correct: false },
+      { text: { en: '3', ro: '3' }, correct: false },
     ],
     explanation: {
       en: 'f[3] = 1 means the longest proper prefix of "aba" that is also a suffix has length 1 ("a"). So 1 character is already matched at the new position.',
@@ -206,10 +206,10 @@ export default function Seminar05() {
       ro: 'Ce pattern are un caracter unde bucla while din funcția prefix KMP execută exact două iterații (două cele mai lungi prefixe-sufixe nu pot fi extinse, dar al treilea poate)?',
     },
     options: [
-      { text: '"abaababaab"', correct: true },
-      { text: '"ababab"', correct: false },
-      { text: '"abcabc"', correct: false },
-      { text: '"aabaaab"', correct: false },
+      { text: { en: '"abaababaab"', ro: '"abaababaab"' }, correct: true },
+      { text: { en: '"ababab"', ro: '"ababab"' }, correct: false },
+      { text: { en: '"abcabc"', ro: '"abcabc"' }, correct: false },
+      { text: { en: '"aabaaab"', ro: '"aabaaab"' }, correct: false },
     ],
     explanation: {
       en: 'Consider "abaababaab": at position 9 (the last "b"), f[8] = 4 ("abaa" → try extending with "b": P[4]="a" ≠ "b"), fall to f[4] = 1 ("a" → try extending: P[1]="b" = "b" ✓). The while loop ran twice before finding a match on the third prefix-suffix.',
@@ -224,10 +224,10 @@ export default function Seminar05() {
       ro: 'Pentru pattern-ul "xyxxyxxyxyxyyxyyxyyxyxyyxyy", care este f[4] (prefixul "xyxxy")?',
     },
     options: [
-      { text: '1', correct: false },
-      { text: '2', correct: true },
-      { text: '0', correct: false },
-      { text: '3', correct: false },
+      { text: { en: '1', ro: '1' }, correct: false },
+      { text: { en: '2', ro: '2' }, correct: true },
+      { text: { en: '0', ro: '0' }, correct: false },
+      { text: { en: '3', ro: '3' }, correct: false },
     ],
     explanation: {
       en: '"xyxxy": the longest proper prefix that is also a suffix is "xy" (length 2). "xyx" is a prefix but not a suffix ("xxy" ≠ "xyx").',
@@ -241,10 +241,10 @@ export default function Seminar05() {
       ro: 'Continuând pattern-ul "xyxxyxxyxyxyyxyyxyyxyxyyxyy": care este f[8] (prefixul "xyxxyxxyx")?',
     },
     options: [
-      { text: '3', correct: true },
-      { text: '2', correct: false },
-      { text: '4', correct: false },
-      { text: '1', correct: false },
+      { text: { en: '3', ro: '3' }, correct: true },
+      { text: { en: '2', ro: '2' }, correct: false },
+      { text: { en: '4', ro: '4' }, correct: false },
+      { text: { en: '1', ro: '1' }, correct: false },
     ],
     explanation: {
       en: '"xyxxyxxyx": the longest proper prefix that is also a suffix is "xyx" (length 3). Check: prefix "xyx" = suffix "xyx" ✓.',
@@ -258,10 +258,10 @@ export default function Seminar05() {
       ro: 'Pentru același pattern, care este f[12] (prefixul "xyxxyxxyxyxyy")?',
     },
     options: [
-      { text: '0', correct: true },
-      { text: '1', correct: false },
-      { text: '2', correct: false },
-      { text: '3', correct: false },
+      { text: { en: '0', ro: '0' }, correct: true },
+      { text: { en: '1', ro: '1' }, correct: false },
+      { text: { en: '2', ro: '2' }, correct: false },
+      { text: { en: '3', ro: '3' }, correct: false },
     ],
     explanation: {
       en: '"xyxxyxxyxyxyy": ends with "y". The prefix starts with "x", so any prefix-suffix must start with "x" and end with "y". Checking: "xy" prefix vs last two "yy" — no match. The suffix "y" ≠ prefix "x". So f[12] = 0.',
@@ -295,7 +295,7 @@ export default function Seminar05() {
       </p>
 
       {/* ─── Problem 1 ─── */}
-      <h3 className="text-lg font-bold mt-6 mb-2">
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 1: Editor Search Performance', 'Problema 1: Performanța căutării în editor')}
       </h3>
       <Box type="definition">
@@ -309,7 +309,7 @@ export default function Seminar05() {
       <MultipleChoice questions={mc1} />
 
       {/* ─── Problem 2 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 2: Worst Case for Naive Search', 'Problema 2: Cazul cel mai nefavorabil pentru căutarea naivă')}
       </h3>
       <Box type="definition">
@@ -350,7 +350,7 @@ export default function Seminar05() {
       />
 
       {/* ─── Problem 3 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 3: Best Case for Naive Search', 'Problema 3: Cazul cel mai favorabil pentru căutarea naivă')}
       </h3>
       <Box type="definition">
@@ -386,7 +386,7 @@ export default function Seminar05() {
       />
 
       {/* ─── Problem 4 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 4: Pattern with All Distinct Characters', 'Problema 4: Pattern cu toate caracterele distincte')}
       </h3>
       <Box type="definition">
@@ -441,7 +441,7 @@ export default function Seminar05() {
       />
 
       {/* ─── Problem 5 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 5: KMP Prefix Function & Simulation', 'Problema 5: Funcția prefix KMP și simulare')}
       </h3>
       <Box type="definition">
@@ -498,7 +498,7 @@ i=11: T[11]='b' = P[4]='b' ✓, j=5 = m → MATCH at position 7`}</Code>
       />
 
       {/* ─── Problem 6 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 6: KMP Mismatch Handling', 'Problema 6: Gestionarea nepotrivirilor în KMP')}
       </h3>
       <Box type="definition">
@@ -518,7 +518,7 @@ i=11: T[11]='b' = P[4]='b' ✓, j=5 = m → MATCH at position 7`}</Code>
       <MultipleChoice questions={mc6count} />
 
       {/* ─── Problem 7 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 7: Prefix Function — Two While Iterations', 'Problema 7: Funcția prefix — Două iterații while')}
       </h3>
       <Box type="definition">
@@ -559,7 +559,7 @@ f[i]: -1  0  0  1  1  2  3  2  3  4`}</Code>
       />
 
       {/* ─── Problem 8 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 8: Complete the Prefix Function', 'Problema 8: Completați funcția prefix')}
       </h3>
       <Box type="definition">
@@ -600,7 +600,7 @@ f[i]:-1  0  0  1  2  1  2  1  2  3  4  3  4  0  1  0  1  0  1  0  1  2  3  4  0 
       />
 
       {/* ─── Problem 9 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2">
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 9: KMP — Find All Occurrences', 'Problema 9: KMP — Găsirea tuturor aparițiilor')}
       </h3>
       <Box type="definition">
