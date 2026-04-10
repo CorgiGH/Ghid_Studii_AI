@@ -36,21 +36,33 @@
                     "en": "How many characters to skip in the text after a mismatch",
                     "ro": "Câte caractere să sară în text după un mismatch"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "KMP doesn't skip text characters — the text pointer only advances forward, never backward. The failure function tells where to resume matching in the PATTERN, not how far to jump in the text.",
+                    "ro": "KMP nu sare caractere din text — indicele din text avansează doar înainte, niciodată înapoi. Funcția de eșec spune unde să reia potrivirea în PATTERN, nu cât de departe să sară în text."
+                  }
                 },
                 {
                   "text": {
                     "en": "The length of the longest proper border of each prefix of the pattern",
                     "ro": "Lungimea celui mai lung border propriu al fiecărui prefix al pattern-ului"
                   },
-                  "correct": true
+                  "correct": true,
+                  "explanation": {
+                    "en": "F[j] gives the longest proper prefix of P[0..j-1] that is also a suffix. On mismatch at position j, KMP falls back to j = F[j], reusing the matched portion. This avoids re-examining text characters.",
+                    "ro": "F[j] dă cel mai lung prefix propriu al P[0..j-1] care este și sufix. La mismatch la poziția j, KMP revine la j = F[j], reutilizând porțiunea potrivită. Aceasta evită re-examinarea caracterelor din text."
+                  }
                 },
                 {
                   "text": {
                     "en": "The position of the next potential match in the text",
                     "ro": "Poziția următoarei potriviri potențiale în text"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "The failure function is computed from the pattern alone — it has no knowledge of any specific text. It encodes the pattern's internal structure (borders), which indirectly determines how matching proceeds.",
+                    "ro": "Funcția de eșec este calculată doar din pattern — nu are cunoștință de vreun text specific. Codifică structura internă a pattern-ului (borders), care determină indirect cum procedează potrivirea."
+                  }
                 }
               ],
               "explanation": {
@@ -476,28 +488,44 @@
                     "en": "It makes the algorithm simpler to implement",
                     "ro": "Face algoritmul mai simplu de implementat"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "Boyer-Moore is actually more complex to implement than left-to-right algorithms like KMP. The right-to-left comparison is a deliberate design choice for performance, not simplicity.",
+                    "ro": "Boyer-Moore este de fapt mai complex de implementat decât algoritmii de la stânga la dreapta precum KMP. Comparația de la dreapta la stânga este o alegere deliberată de design pentru performanță, nu simplicitate."
+                  }
                 },
                 {
                   "text": {
                     "en": "It enables the bad character rule to skip large portions of text, achieving sublinear performance",
                     "ro": "Permite regulii caracterului rău să sară porțiuni mari de text, atingând performanță subliniară"
                   },
-                  "correct": true
+                  "correct": true,
+                  "explanation": {
+                    "en": "When the rightmost character mismatches a character absent from the pattern, the entire pattern shifts past that position — skipping m characters at once. This yields O(n/m) average performance, which is sublinear.",
+                    "ro": "Când cel mai din dreapta caracter nu se potrivește cu un caracter absent din pattern, întregul pattern se deplasează dincolo de acea poziție — sărind m caractere deodată. Aceasta produce performanță medie O(n/m), care este subliniară."
+                  }
                 },
                 {
                   "text": {
                     "en": "It avoids the need for preprocessing",
                     "ro": "Evită necesitatea preprocesării"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "Boyer-Moore requires preprocessing to build both the bad character table and the good suffix table. Right-to-left comparison increases the need for preprocessing, not eliminates it.",
+                    "ro": "Boyer-Moore necesită preprocesare pentru a construi atât tabela caracterului rău cât și tabela sufixului bun. Comparația de la dreapta la stânga crește nevoia de preprocesare, nu o elimină."
+                  }
                 },
                 {
                   "text": {
                     "en": "It guarantees O(n) worst case complexity",
                     "ro": "Garantează complexitate O(n) în cazul defavorabil"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "Boyer-Moore's worst case is O(n·m) without the good suffix rule. Even with it, the basic version doesn't guarantee O(n). The Galil rule optimization is needed to achieve O(n) worst case.",
+                    "ro": "Cazul defavorabil al Boyer-Moore este O(n·m) fără regula sufixului bun. Chiar și cu ea, versiunea de bază nu garantează O(n). Optimizarea cu regula Galil este necesară pentru a atinge O(n) în cazul defavorabil."
+                  }
                 }
               ],
               "explanation": {
@@ -516,28 +544,44 @@
                     "en": "A hash function that uses a circular buffer",
                     "ro": "O funcție hash care folosește un buffer circular"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "A rolling hash doesn't use a circular buffer. It uses an algebraic trick: subtract the contribution of the outgoing character, multiply by the base, and add the incoming character. This is arithmetic, not a data structure.",
+                    "ro": "Un rolling hash nu folosește un buffer circular. Folosește un truc algebric: scade contribuția caracterului care iese, înmulțește cu baza și adaugă caracterul care intră. Aceasta e aritmetică, nu o structură de date."
+                  }
                 },
                 {
                   "text": {
                     "en": "A technique to compute the next window's hash from the previous one in O(1)",
                     "ro": "O tehnică de a calcula hash-ul ferestrei următoare din cel anterior în O(1)"
                   },
-                  "correct": true
+                  "correct": true,
+                  "explanation": {
+                    "en": "The rolling hash updates incrementally: remove the leftmost character's contribution, shift by multiplying by |Σ|, and add the new rightmost character. This gives O(1) per window instead of O(m), essential for Rabin-Karp's efficiency.",
+                    "ro": "Rolling hash-ul se actualizează incremental: elimină contribuția caracterului din stânga, deplasează prin înmulțire cu |Σ| și adaugă noul caracter din dreapta. Aceasta dă O(1) per fereastră în loc de O(m), esențial pentru eficiența Rabin-Karp."
+                  }
                 },
                 {
                   "text": {
                     "en": "A hash function that never produces collisions",
                     "ro": "O funcție hash care nu produce niciodată coliziuni"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "No hash function avoids all collisions when mapping a large domain to a smaller range. Rabin-Karp uses modular arithmetic (mod q), so collisions are inevitable. When hashes match, character-by-character verification is needed.",
+                    "ro": "Nicio funcție hash nu evită toate coliziunile când mapează un domeniu mare la un interval mai mic. Rabin-Karp folosește aritmetică modulară (mod q), deci coliziunile sunt inevitabile. Când hash-urile se potrivesc, e necesară verificarea caracter cu caracter."
+                  }
                 },
                 {
                   "text": {
                     "en": "A method to hash 2D matrices",
                     "ro": "O metodă de a calcula hash-ul matricelor 2D"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "While rolling hashes can be extended to 2D (which is a Rabin-Karp advantage), the rolling hash itself is a 1D technique for efficiently updating window hashes. 2D matching is an application, not the definition.",
+                    "ro": "Deși rolling hash-urile pot fi extinse la 2D (ceea ce este un avantaj al Rabin-Karp), rolling hash-ul în sine este o tehnică 1D pentru actualizarea eficientă a hash-urilor de fereastră. Potrivirea 2D este o aplicație, nu definiția."
+                  }
                 }
               ],
               "explanation": {
@@ -556,28 +600,44 @@
                     "en": "A position where the pattern matches but the algorithm misses it",
                     "ro": "O poziție unde pattern-ul se potrivește dar algoritmul o ratează"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "This describes a false negative (missing a real match), not a false positive. Rabin-Karp never has false negatives — if the strings match, their hashes always match. False positives go the other way.",
+                    "ro": "Aceasta descrie un fals negativ (ratarea unei potriviri reale), nu un fals pozitiv. Rabin-Karp nu are niciodată fals negative — dacă șirurile se potrivesc, hash-urile lor se potrivesc mereu. Fals pozitivele merg în direcția opusă."
+                  }
                 },
                 {
                   "text": {
                     "en": "A position where hashes match but the actual strings differ",
                     "ro": "O poziție unde hash-urile se potrivesc dar șirurile reale diferă"
                   },
-                  "correct": true
+                  "correct": true,
+                  "explanation": {
+                    "en": "A false positive is a hash collision: hash(text window) == hash(pattern) but the strings are different. Rabin-Karp handles this by verifying character by character when hashes match. Choosing a large prime q reduces false positives.",
+                    "ro": "Un fals pozitiv este o coliziune hash: hash(fereastra text) == hash(pattern) dar șirurile sunt diferite. Rabin-Karp gestionează aceasta verificând caracter cu caracter când hash-urile se potrivesc. Alegerea unui prim q mare reduce fals pozitivele."
+                  }
                 },
                 {
                   "text": {
                     "en": "An error in the rolling hash computation",
                     "ro": "O eroare în calculul rolling hash-ului"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "False positives are not computation errors — they are a natural consequence of hashing. Any hash function mapping a large domain to a smaller range must have collisions. The rolling hash computation itself is exact.",
+                    "ro": "Fals pozitivele nu sunt erori de calcul — sunt o consecință naturală a hashing-ului. Orice funcție hash care mapează un domeniu mare la un interval mai mic trebuie să aibă coliziuni. Calculul rolling hash-ului în sine este exact."
+                  }
                 },
                 {
                   "text": {
                     "en": "A hash value that overflows the integer limit",
                     "ro": "O valoare hash care depășește limita întregului"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "Overflow is prevented by computing mod q at each step. False positives are about hash collisions (different strings, same hash value), which occur even with correct modular arithmetic.",
+                    "ro": "Overflow-ul este prevenit prin calculul mod q la fiecare pas. Fals pozitivele sunt despre coliziuni hash (șiruri diferite, aceeași valoare hash), care apar chiar și cu aritmetică modulară corectă."
+                  }
                 }
               ],
               "explanation": {
@@ -596,28 +656,44 @@
                     "en": "Naive — it has no preprocessing overhead",
                     "ro": "Naiv — nu are overhead de preprocesare"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "While the naive algorithm has no preprocessing, its O(n·m) worst case makes it the slowest option. The lack of preprocessing doesn't compensate for the inability to skip text positions.",
+                    "ro": "Deși algoritmul naiv nu are preprocesare, cazul său defavorabil O(n·m) îl face cea mai lentă opțiune. Lipsa preprocesării nu compensează incapacitatea de a sări poziții din text."
+                  }
                 },
                 {
                   "text": {
                     "en": "KMP — it guarantees O(n) in all cases",
                     "ro": "KMP — garantează O(n) în toate cazurile"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "KMP guarantees O(n+m) worst case, which is excellent. But it cannot skip text characters — it must examine every position. Boyer-Moore can skip entire sections of text, achieving O(n/m) on average for large alphabets.",
+                    "ro": "KMP garantează O(n+m) în cel mai rău caz, ceea ce e excelent. Dar nu poate sări caractere din text — trebuie să examineze fiecare poziție. Boyer-Moore poate sări secțiuni întregi de text, atingând O(n/m) în medie pentru alfabete mari."
+                  }
                 },
                 {
                   "text": {
                     "en": "Boyer-Moore — large alphabets increase the effectiveness of the bad character rule",
                     "ro": "Boyer-Moore — alfabetele mari cresc eficiența regulii caracterului rău"
                   },
-                  "correct": true
+                  "correct": true,
+                  "explanation": {
+                    "en": "With large alphabets, mismatched characters are more likely absent from the pattern entirely, triggering maximum shifts. This pushes Boyer-Moore's average case toward O(n/m) — sublinear performance no other algorithm achieves.",
+                    "ro": "Cu alfabete mari, caracterele nepotrivite sunt mai probabil absente complet din pattern, declanșând deplasări maxime. Aceasta împinge cazul mediu al Boyer-Moore spre O(n/m) — performanță subliniară pe care niciun alt algoritm nu o atinge."
+                  }
                 },
                 {
                   "text": {
                     "en": "Rabin-Karp — hashing is independent of alphabet size",
                     "ro": "Rabin-Karp — hashing-ul este independent de dimensiunea alfabetului"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "Rabin-Karp's hash function actually uses the alphabet size |Σ| as its base. While it works well regardless of alphabet, it still examines every text window, giving O(n+m) average — not sublinear like Boyer-Moore.",
+                    "ro": "Funcția hash a Rabin-Karp folosește de fapt dimensiunea alfabetului |Σ| ca bază. Deși funcționează bine indiferent de alfabet, examinează fiecare fereastră de text, dând O(n+m) în medie — nu subliniar ca Boyer-Moore."
+                  }
                 }
               ],
               "explanation": {
@@ -636,28 +712,44 @@
                     "en": "It can match multiple patterns simultaneously",
                     "ro": "Poate potrivi mai multe pattern-uri simultan"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "While Rabin-Karp can be adapted for multiple patterns, this is not its unique capability. Aho-Corasick (based on KMP) also handles multiple patterns. The truly unique advantage is 2D pattern matching.",
+                    "ro": "Deși Rabin-Karp poate fi adaptat pentru pattern-uri multiple, aceasta nu este capacitatea sa unică. Aho-Corasick (bazat pe KMP) gestionează și el pattern-uri multiple. Avantajul cu adevărat unic este potrivirea 2D de pattern-uri."
+                  }
                 },
                 {
                   "text": {
                     "en": "It guarantees no false positives",
                     "ro": "Garantează absența false positives"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "Rabin-Karp can have false positives (hash collisions) — this is an inherent property of hashing. Verification eliminates errors, but false positives are possible and their handling is part of the algorithm's design.",
+                    "ro": "Rabin-Karp poate avea fals pozitive (coliziuni hash) — aceasta e o proprietate inerentă a hashing-ului. Verificarea elimină erorile, dar fals pozitivele sunt posibile și gestionarea lor face parte din designul algoritmului."
+                  }
                 },
                 {
                   "text": {
                     "en": "It can be generalized to 2D pattern matching (matrices)",
                     "ro": "Poate fi generalizat la potrivirea 2D a pattern-urilor (matrice)"
                   },
-                  "correct": true
+                  "correct": true,
+                  "explanation": {
+                    "en": "Rabin-Karp's hash-based approach naturally extends to 2D: compute row hashes for the pattern matrix, then use rolling hashes across columns. KMP and Boyer-Moore rely on sequential character comparison that doesn't generalize to 2D.",
+                    "ro": "Abordarea bazată pe hash a Rabin-Karp se extinde natural la 2D: calculează hash-uri pe rânduri pentru matricea pattern, apoi folosește rolling hash-uri pe coloane. KMP și Boyer-Moore se bazează pe comparare secvențială care nu se generalizează la 2D."
+                  }
                 },
                 {
                   "text": {
                     "en": "It works without any preprocessing",
                     "ro": "Funcționează fără nicio preprocesare"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "Rabin-Karp requires preprocessing to compute the pattern's hash value. While this is simpler than KMP's failure function or BM's shift tables, it is still preprocessing.",
+                    "ro": "Rabin-Karp necesită preprocesare pentru a calcula valoarea hash a pattern-ului. Deși aceasta e mai simplă decât funcția de eșec a KMP sau tabelele de deplasare ale BM, este tot preprocesare."
+                  }
                 }
               ],
               "explanation": {
@@ -676,28 +768,44 @@
                     "en": "When the bad character is not in the pattern at all",
                     "ro": "Când caracterul rău nu este deloc în pattern"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "When the bad character is absent from the pattern, lastOcc = -1, giving shift = k - (-1) = k + 1 — the maximum possible positive shift. Negative shifts only occur when lastOcc > k.",
+                    "ro": "Când caracterul rău este absent din pattern, lastOcc = -1, dând deplasare = k - (-1) = k + 1 — deplasarea maximă pozitivă posibilă. Deplasări negative apar doar când lastOcc > k."
+                  }
                 },
                 {
                   "text": {
                     "en": "When the rightmost occurrence of the bad character is to the right of the mismatch position",
                     "ro": "Când cea mai din dreapta apariție a caracterului rău este la dreapta poziției de mismatch"
                   },
-                  "correct": true
+                  "correct": true,
+                  "explanation": {
+                    "en": "The bad character shift is k - lastOcc[T[i+k]]. When lastOcc > k (the rightmost occurrence is to the right of the mismatch), the result is negative. In this case, we use shift = 1 or rely on the good suffix rule.",
+                    "ro": "Deplasarea caracterului rău este k - lastOcc[T[i+k]]. Când lastOcc > k (cea mai din dreapta apariție este la dreapta mismatch-ului), rezultatul este negativ. În acest caz, folosim deplasare = 1 sau ne bazăm pe regula sufixului bun."
+                  }
                 },
                 {
                   "text": {
                     "en": "When the pattern is longer than the remaining text",
                     "ro": "Când pattern-ul este mai lung decât textul rămas"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "The pattern length vs. remaining text is a termination condition, not related to negative shifts. Negative shifts are a mathematical consequence of the bad character formula when lastOcc > k.",
+                    "ro": "Lungimea pattern-ului vs. textul rămas este o condiție de terminare, nu are legătură cu deplasările negative. Deplasările negative sunt o consecință matematică a formulei caracterului rău când lastOcc > k."
+                  }
                 },
                 {
                   "text": {
                     "en": "When both shift rules give zero",
                     "ro": "Când ambele reguli de deplasare dau zero"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "The good suffix rule always gives a positive shift (at least 1). A negative shift from the bad character rule is a specific case where lastOcc > k, not about both rules being zero.",
+                    "ro": "Regula sufixului bun dă mereu o deplasare pozitivă (cel puțin 1). O deplasare negativă de la regula caracterului rău este un caz specific unde lastOcc > k, nu despre ambele reguli fiind zero."
+                  }
                 }
               ],
               "explanation": {
@@ -716,28 +824,44 @@
                     "en": "O(n)",
                     "ro": "O(n)"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "O(n) is KMP's complexity, meaning every text character is examined. Boyer-Moore does better on average — it can skip characters, examining fewer than n total. This gives sublinear O(n/m) performance.",
+                    "ro": "O(n) este complexitatea KMP, însemnând că fiecare caracter din text este examinat. Boyer-Moore face mai bine în medie — poate sări caractere, examinând mai puțin de n în total. Aceasta dă performanță subliniară O(n/m)."
+                  }
                 },
                 {
                   "text": {
                     "en": "O(n·m)",
                     "ro": "O(n·m)"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "O(n·m) is the worst case of the naive algorithm and of Boyer-Moore without the good suffix rule. The average case is dramatically better: O(n/m), which is sublinear.",
+                    "ro": "O(n·m) este cazul defavorabil al algoritmului naiv și al Boyer-Moore fără regula sufixului bun. Cazul mediu este dramatic mai bun: O(n/m), care este subliniar."
+                  }
                 },
                 {
                   "text": {
                     "en": "O(n/m) — sublinear",
                     "ro": "O(n/m) — subliniar"
                   },
-                  "correct": true
+                  "correct": true,
+                  "explanation": {
+                    "en": "Boyer-Moore achieves O(n/m) on average — examining fewer characters than the text length. The bad character and good suffix rules allow skipping large chunks of text, especially with large alphabets and long patterns.",
+                    "ro": "Boyer-Moore atinge O(n/m) în medie — examinând mai puține caractere decât lungimea textului. Regulile caracterului rău și sufixului bun permit sărirea porțiunilor mari de text, în special cu alfabete mari și pattern-uri lungi."
+                  }
                 },
                 {
                   "text": {
                     "en": "O(n + m)",
                     "ro": "O(n + m)"
                   },
-                  "correct": false
+                  "correct": false,
+                  "explanation": {
+                    "en": "O(n + m) is KMP's complexity. Boyer-Moore's average O(n/m) is actually better than O(n + m) because n/m < n when m > 1. Boyer-Moore examines fewer characters by skipping portions of text.",
+                    "ro": "O(n + m) este complexitatea KMP. Media Boyer-Moore de O(n/m) este de fapt mai bună decât O(n + m) deoarece n/m < n când m > 1. Boyer-Moore examinează mai puține caractere sărind porțiuni de text."
+                  }
                 }
               ],
               "explanation": {
