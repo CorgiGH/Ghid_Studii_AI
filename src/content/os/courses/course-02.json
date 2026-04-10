@@ -1,0 +1,544 @@
+{
+  "meta": {
+    "id": "os-c2",
+    "title": { "en": "Course 2: Shell Interpreters — General Overview", "ro": "Cursul 2: Interpretoare de comenzi — prezentare generala" },
+    "shortTitle": { "en": "C2: Shell Overview", "ro": "C2: Interpretoare" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 2 slides", "ro": "Prof. C. Vidrascu — Curs 2" }
+  },
+  "steps": [
+    {
+      "id": "os-c2-intro",
+      "title": { "en": "Introduction", "ro": "Introducere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In a UNIX system, the **command interpreter** is a program that performs the same basic tasks as in MS-DOS or Windows: it takes the commands entered by the user, interprets and executes them, providing the interface between the user and the operating system. It also offers programming facilities in a specific command language, allowing users to write **script** files containing sequences of UNIX commands.",
+            "ro": "Intr-un sistem UNIX, **interpretorul de comenzi** este un program ce indeplineste aceleasi sarcini ca si in MS-DOS sau Windows: preia comenzile introduse de utilizator, le interpreteaza si le executa, realizand interfata dintre utilizator si sistemul de operare. Ofera si facilitati de programare intr-un limbaj de comanda specific, cu ajutorul caruia se pot scrie fisiere **script** ce contin secvente de comenzi UNIX."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "UNIX systems have many command interpreters (sometimes called **shell**). The most common ones are: **sh** (Bourne SHell), **bash** (Bourne Again SHell), **csh** (C SHell), **ksh** (Korn SHell), **ash**, **zsh**, etc. The main characteristic that differentiates them is the syntax of the specific command language for each shell. UNIX shells are much more powerful than the classic Windows command interpreter (`cmd.exe`), offering control structures (if, case, for, while, etc.) that allow writing complex shell scripts.",
+            "ro": "Sistemele UNIX au la dispozitie mai multe interpretoare de comenzi (denumite si **shell**). Cele mai intalnite sunt: **sh** (Bourne SHell), **bash** (Bourne Again SHell), **csh** (C SHell), **ksh** (Korn SHell), **ash**, **zsh**, etc. Principala caracteristica prin care se diferentiaza este sintaxa limbajului de comanda specific fiecaruia. Shell-urile UNIX sunt mult mai puternice decat interpretorul clasic de comenzi din Windows (`cmd.exe`), oferind structuri de control (if, case, for, while, etc.) ce permit scrierea de programe complexe ca fisiere script."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "This course presents shell facilities common to all UNIX shells, primarily using **bash** syntax. For a detailed description, consult the official bash documentation.",
+            "ro": "Acest curs prezinta facilitatile comune tuturor shell-urilor UNIX, folosind cu precadere sintaxa interpretorului **bash**. Pentru o descriere detaliata, consultati documentatia oficiala a shell-ului bash."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-simple-commands-def",
+      "title": { "en": "Simple Commands — Definition", "ro": "Comenzi simple — definitie" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Simple commands** are the individual \"components\" that can be \"assembled\" into **compound commands** using certain syntactic operators. As a reminder, in UNIX there are two categories of simple commands: **internal commands** (built into the shell, e.g. `cd`, `help`) and **external commands** (standalone files on disk, either executable binaries like `passwd`, `ls`, or script files like `.profile`, `.bashrc`).",
+            "ro": "**Comenzile simple** sunt \"componentele\" individuale care pot fi \"asamblate\" in **comenzi compuse**, folosind anumiti operatori sintactici de compunere. Ca reamintire, in UNIX exista doua categorii de comenzi simple: **comenzi interne** (implementate in interpretorul de comenzi, ex. `cd`, `help`) si **comenzi externe** (fisiere de sine statatoare pe disc, fie executabile binare ca `passwd`, `ls`, fie fisiere script ca `.profile`, `.bashrc`)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-execution-mode",
+      "title": { "en": "Execution Mode of Simple Commands", "ro": "Modul de executie a comenzilor simple" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The general form for launching a simple command (internal or external) is: `UNIX> command_name [options] [arguments] [redirections]`. The `UNIX>` text is the **prompt** displayed by the interpreter, which waits for the user to type a command and press ENTER. Spaces or TAB characters separate words on the command line. Options and arguments after the command name may be optional (indicated by `[...]`). By convention, options are preceded by `-` or `--`. External commands can be specified by their full path (absolute or relative).",
+            "ro": "Forma generala de lansare in executie a unei comenzi simple, interne sau externe, este: `UNIX> numele_comenzii [optiuni] [argumente] [redirectari I/O]`. Textul `UNIX>` este **prompterul** afisat de interpretorul de comenzi, la care acesta asteapta sa fie tastata comanda dorita, urmata de apasarea tastei ENTER. Drept caracter separator intre cuvintele din linia de comanda se utilizeaza SPACE sau TAB. Optiunile si argumentele specificate dupa numele comenzii pot eventual lipsa (indicate prin `[...]`). Prin conventie, optiunile sunt precedate de `-` sau `--`. Comenzile externe pot fi specificate si prin numele complet (cale absoluta sau relativa)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "A long command (with many parameters) can be split across multiple lines. Each line must end with `\\` followed by ENTER, except for the last line (which is terminated by pressing ENTER directly). I/O redirections will be discussed later in this presentation.",
+            "ro": "O comanda mai lunga (cu multi parametri) poate fi introdusa pe mai multe linii, caz in care fiecare linie trebuie terminata cu caracterul `\\` urmat de ENTER, cu exceptia ultimei linii (terminarea acesteia se face apasand doar tasta ENTER). Despre redirectarile I/O vom discuta ulterior in aceasta prezentare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Another way to execute external commands that are scripts is by calling a specific shell: `UNIX> bash script [options] [arguments] [redirections]`. In this case, the script file is executed in a new **non-interactive** session by a new shell instance invoked from the first position on the command line (in this example, bash).",
+            "ro": "O alta posibilitate de a lansa in executie comenzi externe ce sunt script-uri este prin apelul unui anumit shell: `UNIX> bash script [optiuni] [argumente] [redirectari I/O]`. In acest caz, secventa de comenzi din fisierul cu numele script va fi executata intr-o sesiune de lucru **neinteractiva**, de catre o instanta a shell-ului invocat pe prima pozitie din linia de comanda (in acest exemplu, bash)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Direct execution\nUNIX> command_name [options] [arguments] [redirections]\n\n# Execution via explicit shell call (non-interactive)\nUNIX> bash script [options] [arguments] [redirections]\n\n# Execution via source (interactive, same shell instance)\nUNIX> . script [options] [arguments] [redirections]\nUNIX> source script [options] [arguments] [redirections]"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "If you do not specify the script name after the shell name on the first position of the command line, a new **interactive** session will be created, controlled by the specified shell. Using `. script` or `source script` executes the script in the **current** shell instance, not in a new one.",
+            "ro": "Daca nu se specifica niciun script dupa numele shell-ului invocat pe prima pozitie din linia de comanda, se va crea o noua sesiune de lucru **interactiva**, controlata de instanta de executie a shell-ului specificat. Folosirea `. script` sau `source script` executa script-ul in instanta **curenta** a shell-ului, nu intr-una noua."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the difference between running `bash myscript.sh` and `. myscript.sh`?",
+            "ro": "Care este diferenta intre executia `bash myscript.sh` si `. myscript.sh`?"
+          },
+          "answer": {
+            "en": "`bash myscript.sh` creates a new non-interactive shell instance (a child process) to execute the script — any variables set inside the script are lost when it finishes. `. myscript.sh` (or `source myscript.sh`) runs the script in the current shell session, so any variable changes, directory changes, or function definitions persist after the script completes.",
+            "ro": "`bash myscript.sh` creeaza o noua instanta de shell neinteractiva (un proces copil) pentru executia script-ului — orice variabila setata in script se pierde la terminare. `. myscript.sh` (sau `source myscript.sh`) ruleaza script-ul in sesiunea curenta a shell-ului, deci orice modificare de variabile, schimbare de director sau definitie de functie persista dupa terminarea script-ului."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-background-execution",
+      "title": { "en": "Background Execution of Simple Commands", "ro": "Executia comenzilor simple in background" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When a simple command is executed normally, we say it runs in **foreground** (i.e., \"in front\"), because the interpreter waits for it to finish before re-displaying the prompt. An alternative is to run commands in **background** (i.e., \"behind\"), where the interpreter does not wait for the command to finish and immediately re-displays the prompt, allowing the user to enter a new command. Background commands are also called **asynchronous commands**.",
+            "ro": "Cand o comanda simpla este executata in mod normal, spunem ca ruleaza in **foreground** (adica \"in fata\"), deoarece interpretorul asteapta terminarea executiei si apoi reafiseaza prompterul. O alternativa este executia in **background** (adica \"in spate\"), unde interpretorul nu mai asteapta terminarea executiei comenzii, ci reafiseaza imediat prompterul, oferind utilizatorului posibilitatea de a introduce imediat o noua comanda. Comenzile executate in background mai sunt denumite si **comenzi asincrone**."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Run a command in background by appending '&'\nUNIX> command_name [options] [arguments] [redirections] &"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "For external commands that are scripts, you can add `&` at the end of any of the three execution forms (direct, via shell call, or via source). This applies to simple commands and also to command chains (discussed later).",
+            "ro": "In cazul comenzilor externe ce sunt script-uri, se poate adauga `&` la finalul oricareia dintre cele trei forme de lansare in executie (directa, prin apelul unui shell, sau prin source). Acest lucru este valabil atat pentru comenzi simple cat si pentru lanturi de comenzi (discutate ulterior)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-io-redirections",
+      "title": { "en": "I/O Redirections", "ro": "Redirectari I/O" },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Standard I/O Devices", "ro": "Dispozitive logice de I/O standard" },
+          "content": {
+            "en": "There are three standard logical I/O devices: **stdin** (standard input, file-descriptor 0) — reads input data; **stdout** (standard output, file-descriptor 1) — writes output data; **stderr** (standard error, file-descriptor 2) — writes error messages. By default, stdin is attached to the keyboard, while stdout and stderr are attached to the screen.",
+            "ro": "Exista trei dispozitive logice de I/O standard: **stdin** (intrarea standard, file-descriptor 0) — citeste date de intrare; **stdout** (iesirea normala standard, file-descriptor 1) — scrie date de iesire; **stderr** (iesirea de eroare standard, file-descriptor 2) — scrie mesaje de eroare. Implicit, stdin este atasat tastaturii, iar stdout si stderr sunt atasate ecranului."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The interpreter can \"force\" a command to read its input from a specified file instead of the keyboard, and to send its output and/or error messages to a specified file instead of the screen. This is called **redirection** of the respective I/O flow, and it is valid only for that command's execution, without any modifications to the source code.",
+            "ro": "Interpretorul de comenzi poate \"forta\" o comanda ca, pe parcursul executiei sale, sa primeasca datele de intrare dintr-un fisier specificat, in locul citirii lor de la tastatura, precum si sa trimita datele de iesire si/sau mesajele de eroare intr-un fisier specificat, in locul afisarii lor pe ecran. Aceasta poarta numele de **redirectarea** fluxului I/O respectiv, si este valabila doar pentru acea executie a comenzii."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Redirect stdin\nUNIX> command [params] < input_file\n\n# Redirect stdout (overwrite vs. append)\nUNIX> command [params] > output_file\nUNIX> command [params] >> output_file\n\n# Redirect stderr (overwrite vs. append)\nUNIX> command [params] 2> error_file\nUNIX> command [params] 2>> error_file\n\n# Example: concatenate two files into a third\nUNIX> cat fis1 fis2 > fis3\n\n# Redirect both stdout and stderr using n>&m syntax\nUNIX> ls -l .bashrc wm_fisier_inexistent >listing.txt 2>&1"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Multiple redirections can be specified in one command. The evaluation is performed left-to-right. The syntax `n>&m` (where n and m are file-descriptors) merges descriptor n into descriptor m. For example, `2>&1` sends stderr to the same destination as stdout.",
+            "ro": "Se pot specifica mai multe redirectari intr-o comanda, evaluarea lor efectuandu-se de la stanga spre dreapta. Sintaxa `n>&m` (unde n si m sunt file-descriptori) redirecteaza descriptorul n catre descriptorul m. De exemplu, `2>&1` trimite stderr catre aceeasi destinatie ca stdout."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which file-descriptor number corresponds to standard error (stderr)?", "ro": "Ce numar de file-descriptor corespunde iesirii de eroare standard (stderr)?" },
+              "options": [
+                { "text": { "en": "0", "ro": "0" }, "correct": false },
+                { "text": { "en": "1", "ro": "1" }, "correct": false },
+                { "text": { "en": "2", "ro": "2" }, "correct": true },
+                { "text": { "en": "3", "ro": "3" }, "correct": false }
+              ],
+              "explanation": { "en": "File-descriptor 0 is stdin, 1 is stdout, and 2 is stderr.", "ro": "File-descriptor 0 este stdin, 1 este stdout, iar 2 este stderr." }
+            },
+            {
+              "question": { "en": "What does the `>>` operator do compared to `>`?", "ro": "Ce face operatorul `>>` comparativ cu `>`?" },
+              "options": [
+                { "text": { "en": "Overwrites the file", "ro": "Suprascrie fisierul" }, "correct": false },
+                { "text": { "en": "Appends to the file", "ro": "Adauga la sfarsitul fisierului" }, "correct": true },
+                { "text": { "en": "Creates a new file only", "ro": "Creeaza doar un fisier nou" }, "correct": false },
+                { "text": { "en": "Redirects stderr", "ro": "Redirecteaza stderr" }, "correct": false }
+              ],
+              "explanation": { "en": "`>` overwrites the file (rewrite mode), while `>>` appends to the end of the file (append mode).", "ro": "`>` suprascrie fisierul (modul rewrite), in timp ce `>>` adauga la sfarsitul fisierului (modul append)." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c2-exit-status",
+      "title": { "en": "Exit Status (Termination Code)", "ro": "Valoarea de exit (codul de terminare)" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **exit status** (exit value) of a simple command executed by a shell instance in foreground is the value returned by the `waitpid` system call, through which the interpreter waits for the command to finish. For asynchronous commands, the exit value is 0. The exit value of a simple command (and also of compound commands and shell internal commands) is always an integer in the range **0 to 255**.",
+            "ro": "**Valoarea de exit** (exit status) a unei comenzi simple executate de catre o instanta de shell in foreground este valoarea returnata de apelul de sistem `waitpid`, prin care interpretorul de comenzi asteapta terminarea executiei. Pentru comenzile asincrone, valoarea de exit este 0. Valoarea de exit a unei comenzi simple (dar si a comenzilor compuse si a comenzilor interne ale shell-ului) este intotdeauna o valoare intreaga din intervalul **0 — 255**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The exit value of the **last executed command** is available in the special variable **`$?`**. An exit value of **zero indicates success**. A non-zero exit value indicates **failure**. Values above 125 have special meanings: **126** — command found but not executable; **127** — command not found; **128+N** — command terminated by fatal signal N.",
+            "ro": "Valoarea de exit a **ultimei comenzi executate** este disponibila in variabila speciala **`$?`**. O valoare de exit **zero indica succesul** executiei comenzii. O valoare de exit diferita de zero indica un **esec** al executiei. Valorile peste 125 au semnificatii speciale: **126** — comanda gasita dar nu executabila; **127** — comanda nu a fost gasita; **128+N** — comanda terminata de semnalul fatal N."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Exit Status for Shell Internal Commands", "ro": "Valoarea de exit pentru comenzile interne ale shell-ului" },
+          "content": {
+            "en": "Shell internal commands return exit value 0 (true) on success, and a non-zero value (false) if an error occurs during execution. Most internal commands return exit value 2 to indicate incorrect usage (e.g., invalid options or missing arguments).",
+            "ro": "Comenzile interne ale shell-ului returneaza valoarea de exit 0 (true) daca au succes, si o valoare diferita de zero (false) daca apare o eroare in timpul executiei lor. Majoritatea comenzilor interne returneaza valoarea de exit 2 pentru a indica utilizarea incorecta (de ex., optiuni nevalide sau argumente lipsa)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Check exit status of the last command\nUNIX> ls /tmp\nUNIX> echo $?\n0\n\n# Non-zero exit status (command not found)\nUNIX> nonexistent_command\nUNIX> echo $?\n127"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does an exit status of 0 mean?", "ro": "Ce semnifica o valoare de exit egala cu 0?" },
+              "options": [
+                { "text": { "en": "Error occurred", "ro": "A aparut o eroare" }, "correct": false },
+                { "text": { "en": "Command not found", "ro": "Comanda nu a fost gasita" }, "correct": false },
+                { "text": { "en": "Successful execution", "ro": "Executie cu succes" }, "correct": true },
+                { "text": { "en": "Command was killed", "ro": "Comanda a fost terminata fortat" }, "correct": false }
+              ],
+              "explanation": { "en": "In UNIX, an exit status of 0 always means the command completed successfully. Any non-zero value indicates some form of failure.", "ro": "In UNIX, o valoare de exit de 0 inseamna intotdeauna ca comanda s-a executat cu succes. Orice valoare diferita de zero indica o forma de esec." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c2-compound-commands-def",
+      "title": { "en": "Compound Commands — Definition", "ro": "Comenzi compuse — definitie" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Two or more simple commands can be \"grouped\" into a **compound command** by writing them on a single line (at the prompt or in a script), separated by the following syntactic operators: `;` — sequential execution; `|` — parallel chained execution (pipeline); `&` — parallel unchained execution; `&&` and `||` — conditional execution.",
+            "ro": "Doua sau mai multe comenzi simple se pot \"grupa\" intr-o **comanda compusa**, prin scrierea lor pe un singur rand (la prompterul liniei de comanda sau intr-un script), separate prin urmatorii operatori sintactici de compunere: `;` — executia secventiala; `|` — executia paralela, inlantuita (pipeline); `&` — executia paralela, neinlantuita; `&&` si `||` — executia conditionala."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The description below focuses on **bash** syntax. For other UNIX shells, the compound command syntax may differ (e.g., different composition operators). For a detailed description, consult the official bash documentation.",
+            "ro": "Descrierea de mai jos se axeaza pe sintaxa interpretorului de comenzi **bash**. In cazul altor shell-uri UNIX, sintaxa comenzilor compuse s-ar putea sa difere (de ex., alti operatori de compunere). Pentru o descriere detaliata, consultati documentatia oficiala a shell-ului bash."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-pipes",
+      "title": { "en": "Pipelines (Command Chains)", "ro": "Lanturi de comenzi simple (Pipeline)" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Chaining multiple simple commands is done using the `|` character (the **pipe** symbol) in a so-called **pipeline**: `UNIX> [time] command_1 | command_2 | ... | command_N`. The `|` symbol \"connects\" the standard output of one command to the standard input of the next command in the chain. Communication between the two commands is done through an **anonymous pipe**. The optional `time` keyword reports the execution time of the entire pipeline. A pipeline with N=1 is just a simple command.",
+            "ro": "Inlantuirea mai multor comenzi simple se realizeaza folosind simbolul `|` (caracterul **pipe**) intr-un asa-numit **lant de comenzi** (pipeline): `UNIX> [time] comanda_1 | comanda_2 | ... | comanda_N`. Simbolul `|` \"conecteaza\" iesirea normala standard a unei comenzi la intrarea standard a comenzii urmatoare din lant. Comunicarea intre cele doua comenzi se face printr-un **canal de comunicatie anonim** (pipe). Cuvantul cheie `time` optional raporteaza timpul de executie al intregului lant. Un lant cu N=1 este format dintr-o singura comanda simpla."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Execution mode**: all simple commands in the pipeline are executed simultaneously, in parallel, at the \"same\" time. Each command is executed by a new shell instance or process. In practice, multiple processes are created, one for each command in the chain. The **exit value** of a pipeline is the exit value of the **last command** in the chain. The shell waits for all commands in the pipeline to finish before returning a value.",
+            "ro": "**Modul de executie**: toate comenzile simple din lant sunt executate simultan, in paralel, in \"acelasi\" timp. Fiecare comanda este executata de catre o noua instanta de executie a shell-ului sau un proces. Practic, se creeaza procese multiple, cate un proces pentru fiecare comanda din lant. **Valoarea de exit** a unui lant de comenzi este valoarea de exit a **ultimei comenzi** din lant. Shell-ul asteapta ca toate comenzile din lant sa se termine inainte de a returna o valoare."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Count total files (including subdirectories) in current directory\nUNIX> ls -Rl | wc -l\n\n# List usernames sorted alphabetically\nUNIX> who | cut -f1 -d\" \" | sort -u\n\n# Search for a pattern in a file\nUNIX> cat /etc/passwd | grep -w so\n\n# Extended syntax: use '|&' instead of '|' to pipe both stdout and stderr\n# '|&' is shorthand for '2>&1 |'\nUNIX> command_1 |& command_2"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "In the pipeline `who | cut -f1 -d\" \" | sort -u`, what does each command do and what is the final result?",
+            "ro": "In lantul de comenzi `who | cut -f1 -d\" \" | sort -u`, ce face fiecare comanda si care este rezultatul final?"
+          },
+          "answer": {
+            "en": "`who` lists all currently logged-in users with details. `cut -f1 -d\" \"` extracts only the first field (username) using space as delimiter. `sort -u` sorts the names alphabetically and removes duplicates. The final result is a sorted, unique list of currently logged-in usernames.",
+            "ro": "`who` listeaza toti utilizatorii conectati cu detalii. `cut -f1 -d\" \"` extrage doar primul camp (username) folosind spatiul ca delimitator. `sort -u` sorteaza numele alfabetic si elimina duplicatele. Rezultatul final este o lista sortata si unica a numelor utilizatorilor conectati."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-sequential-execution",
+      "title": { "en": "Sequential Execution of Multiple Commands", "ro": "Executia secventiala a mai multor comenzi" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Multiple commands (simple or pipelines, with N >= 2) can be separated by the `;` character and will be executed **sequentially** by the same shell instance. They are executed one after another, in order, where the shell waits for each command to finish before executing the next one. The syntax is: `UNIX> command_1 ; command_2 ; ... ; command_N`. Equivalently, the N commands can be written one per line at the prompt or in a script. The **exit value** of a sequence is the exit value of the **last command** executed.",
+            "ro": "Mai multe comenzi (simple sau lanturi, cu N >= 2) pot fi separate prin caracterul `;` si vor fi executate **secvential**, de catre aceeasi instanta de executie a shell-ului. Sunt executate una dupa alta, in ordine, unde shell-ul asteapta fiecare comanda sa se termine inainte de a o executa pe urmatoarea. Sintaxa este: `UNIX> comanda_1 ; comanda_2 ; ... ; comanda_N`. Echivalent, cele N comenzi se pot scrie fiecare pe cate un rand, la prompter sau intr-un script. **Valoarea de exit** a unei secvente este valoarea de exit a **ultimei comenzi** executate."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Sequential execution examples\nUNIX> ls -A ; cd Desktop ; ls -l\nUNIX> mkdir d1 ; echo \"Salut !\" > d1/f1.txt ; cd d1 ; stat f1.txt"
+        }
+      ]
+    },
+    {
+      "id": "os-c2-parallel-execution",
+      "title": { "en": "Parallel (Unchained) Execution", "ro": "Executia paralela, neinlantuita" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Multiple commands (simple or pipelines, with N >= 2) can be separated by the `&` character and will be executed (almost) simultaneously, each launched in **background**. Each command is executed by a new shell instance and runs independently of the others (without \"chaining\" between them). The syntax is: `UNIX> command_1 & command_2 & ... & command_N [&]`. The last command runs in background if terminated with `&`, otherwise it runs in foreground (in that case, what are the exit values returned in each case?).",
+            "ro": "Mai multe comenzi (simple sau lanturi, cu N >= 2) pot fi separate prin caracterul `&` si vor fi executate (aproape) simultan, fiecare lansata in **background**. Fiecare comanda este executata de catre o noua instanta de executie a shell-ului si ruleaza in mod independent de celelalte (fara \"inlantuire\" intre ele). Sintaxa este: `UNIX> comanda_1 & comanda_2 & ... & comanda_N [&]`. Ultima comanda ruleaza in background daca este terminata cu `&`, altfel ruleaza in foreground (in acest caz, care sunt valorile de exit returnate in fiecare caz?)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Parallel unchained execution\nUNIX> cat /etc/passwd & cat /etc/group &"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Equivalently, the N commands can be written one per line (each ending with `&`), at the prompt or in a script. This can help \"parallelize\" the prompt, improving the speed of user input from the keyboard.",
+            "ro": "Echivalent, cele N comenzi se pot scrie fiecare pe cate un rand (fiecare terminandu-se cu `&`), la prompter sau intr-un script. Acest lucru poate ajuta la \"paralelizarea\" prompterului, imbunatatind viteza de introducere de la tastatura."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-conditional-execution",
+      "title": { "en": "Conditional Execution of Commands", "ro": "Executia conditionala a comenzilor" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The execution of a command can be **conditioned** by the result of the execution of a previous command. There are two operators: the `&&` operator (\"conjunction\", AND list): `UNIX> command_1 && command_2` — the second command is executed **only if** the first command **succeeds** (i.e., returns exit code 0). The `||` operator (\"disjunction\", OR list): `UNIX> command_1 || command_2` — the second command is executed **only if** the first command **fails** (i.e., returns a non-zero exit code).",
+            "ro": "Executia unei comenzi poate fi **conditionata** de rezultatul executiei unei alte comenzi. Exista doi operatori: operatorul `&&` (\"conjunctia\", lista AND): `UNIX> comanda_1 && comanda_2` — a doua comanda se executa **numai daca** prima comanda se termina **cu succes** (adica returneaza codul de terminare 0). Operatorul `||` (\"disjunctia\", lista OR): `UNIX> comanda_1 || comanda_2` — a doua comanda se executa **numai daca** prima comanda **esueaza** (adica returneaza un cod de terminare nenul)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "Note the analogy with **short-circuit evaluation** of boolean expressions. The exit value of AND and OR lists is the exit value of the last command executed in the list. Sequences of more than two commands separated by `&&` or `||` are permitted, and they have left-to-right associativity for execution.",
+            "ro": "Se poate remarca analogia cu evaluarea **scurt-circuitata** a expresiilor logice booleene. Valoarea de exit a listelor AND si OR este valoarea de exit a ultimei comenzi executate din lista. Sunt permise secvente de mai mult de doua comenzi separate prin operatorii `&&` sau `||`, iar acestea au asociativitate stanga-dreapta pentru executie."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does `mkdir test && cd test` do if `mkdir test` fails?", "ro": "Ce face `mkdir test && cd test` daca `mkdir test` esueaza?" },
+              "options": [
+                { "text": { "en": "Executes cd test anyway", "ro": "Executa cd test oricum" }, "correct": false },
+                { "text": { "en": "Skips cd test entirely", "ro": "Sare peste cd test complet" }, "correct": true },
+                { "text": { "en": "Displays an error and runs cd test", "ro": "Afiseaza o eroare si ruleaza cd test" }, "correct": false },
+                { "text": { "en": "Retries mkdir test", "ro": "Reincearca mkdir test" }, "correct": false }
+              ],
+              "explanation": { "en": "With `&&`, the second command only runs if the first succeeds (exit code 0). If `mkdir test` fails, `cd test` is skipped entirely.", "ro": "Cu `&&`, a doua comanda se executa doar daca prima are succes (cod de exit 0). Daca `mkdir test` esueaza, `cd test` este sarit complet." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c2-command-lists",
+      "title": { "en": "Extended Syntax: Command Lists & Compound Commands", "ro": "Sintaxa extinsa: liste de comenzi si comenzi compuse" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A **command list** is a sequence of one or more pipelines, separated by the operators `;`, `&`, `&&`, or `||`, and optionally terminated by one of `;`, `&`, or newline. Execution follows left-to-right order, taking into account **operator precedence**: `&&` and `||` have higher precedence than `;` and `&`, which also have precedence between them. Each pipeline in the list is then executed in the established order, applying its specific semantics.",
+            "ro": "O **lista de comenzi** este o secventa de una sau mai multe pipeline-uri (lanturi de comenzi simple), separate intre ele prin operatorii `;`, `&`, `&&` sau `||`, si optional terminata cu `;`, `&` sau newline. Executia se face de la stanga la dreapta, tinand cont de **precedenta operatorilor**: `&&` si `||` au precedenta mai mare decat `;` si `&`, care au si ele precedenta intre ele. Apoi se executa fiecare lant din lista, in ordinea astfel stabilita, aplicand pentru fiecare operator semnificatia sa."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Examples of command lists\nUNIX> stat /etc/passwd | grep Uid && ln -l /non-existent-folder || echo \"Ok\"\nUNIX> uname -srv && date ; cat non-existent-file || echo \"Ok\"\nUNIX> pwd || date ; stat non-existent-file && echo \"Ok\""
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Two types of **compound commands** are subshells and group commands. A **subshell** `(list)` creates a new subshell (a new instance of the interpreter) that executes the command list. A **group command** `{ list; }` executes the command list in the current shell instance. The exit value of both compound command types is the exit value of the command list inside them.",
+            "ro": "Doua tipuri de **comenzi compuse** sunt subshell-urile si comenzile de grup. Un **subshell** `(list)` creeaza un subshell (o noua instanta a interpretorului) care executa lista de comenzi. O **comanda de grup** `{ list; }` executa lista de comenzi in instanta curenta de shell. Valoarea de exit a ambelor tipuri de comenzi compuse este valoarea de exit a listei de comenzi din interior."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Subshell — executes in a new child shell\nUNIX> ps -f ; var=outside ; ( ps -f ; var=inside; ) ; echo \"list_exit=$?, var=$var\"\n\n# Group command — executes in the current shell\nUNIX> ps -f ; var=outside ; { ps -f ; var=inside; } ; echo \"list_exit=$?, var=$var\""
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the key difference between `(list)` and `{ list; }` in terms of variable scope?",
+            "ro": "Care este diferenta cheie intre `(list)` si `{ list; }` in ceea ce priveste domeniul de vizibilitate al variabilelor?"
+          },
+          "answer": {
+            "en": "`(list)` runs in a **subshell** (child process), so any variable changes inside the parentheses are lost when the subshell exits. `{ list; }` runs in the **current shell**, so variable modifications persist after the group command finishes. For example, `var=outside; (var=inside); echo $var` prints \"outside\", while `var=outside; { var=inside; }; echo $var` prints \"inside\".",
+            "ro": "`(list)` ruleaza intr-un **subshell** (proces copil), deci orice modificare de variabile din interiorul parantezelor se pierde la iesirea din subshell. `{ list; }` ruleaza in **shell-ul curent**, deci modificarile variabilelor persista dupa terminarea comenzii de grup. De exemplu, `var=outside; (var=inside); echo $var` afiseaza \"outside\", in timp ce `var=outside; { var=inside; }; echo $var` afiseaza \"inside\"."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "Other types of compound commands include control structures like `if`, `case`, `for`, `while`, `until`, `select`, and arithmetic expressions `(( arithmetic-expression ))` and conditional tests `[[ conditional-expression ]]`. These will be discussed in later courses.",
+            "ro": "Alte tipuri de comenzi compuse includ structuri de control precum `if`, `case`, `for`, `while`, `until`, `select`, expresii aritmetice `(( arithmetic-expression ))` si teste conditionale `[[ conditional-expression ]]`. Acestea vor fi discutate in cursurile urmatoare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-file-specification",
+      "title": { "en": "Specifying Individual File Names", "ro": "Specificarea fisierelor individuale" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Specifying the name of a file (as an argument to commands or as the name of an external command) can be done in three different ways: by **absolute path** (the full name starting from the root directory, e.g. `/home/vidrascu/so/file0003.txt`), by **relative path** from the current working directory (e.g. `so/file0003.txt` if the current directory is `/home/vidrascu`), or by **relative path from a user's home directory** using the `~` prefix (e.g. `~vidrascu/so/file0003.txt`).",
+            "ro": "Specificarea numelui unui fisier (ca argument pentru comenzi sau ca nume al unei comenzi externe) se poate face in trei moduri diferite: prin **cale absoluta** (numele complet, pornind de la directorul radacina, ex. `/home/vidrascu/so/file0003.txt`), prin **cale relativa** la directorul curent de lucru (ex. `so/file0003.txt` daca directorul curent este `/home/vidrascu`), sau prin **cale relativa la directorul home** al unui anumit utilizator folosind prefixul `~` (ex. `~vidrascu/so/file0003.txt`)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "If the username is omitted after `~` (e.g. `~/so/file0003.txt`), the current user's home directory is used. The third way of specifying paths (`~user/path`) can only be used at the command line or in scripts, NOT as arguments to functions called in C programs.",
+            "ro": "Daca se omite numele utilizatorului dupa `~` (ex. `~/so/file0003.txt`), se considera directorul home al utilizatorului curent. Al treilea mod de specificare (`~user/cale`) se poate folosi doar la linia de comanda sau in script-uri, NU si ca argumente ale functiilor apelate in programe C."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-glob-patterns",
+      "title": { "en": "Glob Patterns for Multiple File Specification", "ro": "Sabloane pentru specificarea multipla de fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "You can specify a list of files as arguments to commands using a single **glob pattern** (wildcard pattern) with the help of **special interpretation characters**: `*` matches any string of characters (including the empty string, e.g. `~/vidrascu/so/file*.txt`); `?` matches exactly one character (e.g. `~/vidrascu/so/file000?.txt`); `[...]` matches exactly one character from the set specified between brackets, either as an enumeration (separated by `,` or nothing) or as a range (endpoints separated by `-`), e.g. `~/vidrascu/so/file000[1,3,579].txt` or `~/vidrascu/so/file000[1-3,5-7,9].txt`.",
+            "ro": "Se poate specifica o lista de fisiere ca argumente pentru comenzi, utilizand un singur **sablon de specificare multipla** (glob pattern) cu ajutorul **caracterelor cu interpretare speciala**: `*` se inlocuieste cu orice sir de caractere (inclusiv sirul vid, ex. `~/vidrascu/so/file*.txt`); `?` se inlocuieste cu orice caracter (exact un caracter, ex. `~/vidrascu/so/file000?.txt`); `[...]` se inlocuieste cu exact un caracter din cele specificate intre paranteze, sub forma de enumerare (separate prin `,` sau nimic) si/sau interval (capetele separate prin `-`), ex. `~/vidrascu/so/file000[1,3,579].txt` sau `~/vidrascu/so/file000[1-3,5-7,9].txt`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **negated character set** `[^...]` (or `[!...]`) matches exactly one character that is NOT in the specified set. The **backslash** `\\` character is used to escape special characters — when you write `\\c` (where c is `*`, `?`, `[`, `]`, `\\`), the character c is treated as a literal character rather than a special operator. For example: `~/vidrascu/so/file000[^1-3].txt` or `ce_mai_faci\\?.txt,lectie\\[lesson\\].txt`.",
+            "ro": "**Multimea exclusa de caractere** `[^...]` (sau `[!...]`) se inlocuieste cu exact un caracter care NU face parte din multimea specificata. Caracterul **backslash** `\\` se foloseste pentru a inhiba interpretarea operator a caracterelor speciale — cand scriem `\\c` (unde c este `*`, `?`, `[`, `]`, `\\`), caracterul c va fi interpretat ca text obisnuit, nu ca operator. De exemplu: `~/vidrascu/so/file000[^1-3].txt` sau `ce_mai_faci\\?.txt,lectie\\[lesson\\].txt`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Each glob pattern is substituted at the position where it appears on the command line. The shell replaces it with the list of matching existing file names. If no files match the pattern, the pattern remains unmodified in the resulting command. Glob patterns can also be **negated**: e.g. `ls -l !(*.ab)`.",
+            "ro": "Fiecare sablon este inlocuit in pozitia din linia de comanda in care apare. Shell-ul il inlocuieste cu lista tuturor fisierelor existente ce satisfac acel sablon. Daca nu exista fisiere care sa corespunda, sablonul ramane nemodificat in comanda rezultata. Sabloanele pot fi si **negate**: ex. `ls -l !(*.ab)`."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does the glob pattern `file[0-9][0-9].txt` match?", "ro": "Cu ce se potriveste sablonul glob `file[0-9][0-9].txt`?" },
+              "options": [
+                { "text": { "en": "Files named file followed by any characters and .txt", "ro": "Fisiere cu numele file urmat de orice caractere si .txt" }, "correct": false },
+                { "text": { "en": "Files named file followed by exactly two digits and .txt", "ro": "Fisiere cu numele file urmat de exact doua cifre si .txt" }, "correct": true },
+                { "text": { "en": "Files named file followed by one digit and .txt", "ro": "Fisiere cu numele file urmat de o cifra si .txt" }, "correct": false },
+                { "text": { "en": "All .txt files in the directory", "ro": "Toate fisierele .txt din director" }, "correct": false }
+              ],
+              "explanation": { "en": "Each `[0-9]` matches exactly one digit (0 through 9). Two consecutive `[0-9]` patterns match exactly two digits. So `file[0-9][0-9].txt` matches files like `file00.txt`, `file42.txt`, `file99.txt`, etc.", "ro": "Fiecare `[0-9]` se potriveste cu exact o cifra (0 pana la 9). Doua sabloane consecutive `[0-9]` se potrivesc cu exact doua cifre. Deci `file[0-9][0-9].txt` se potriveste cu fisiere ca `file00.txt`, `file42.txt`, `file99.txt`, etc." }
+            },
+            {
+              "question": { "en": "How do you match a literal `?` character in a filename?", "ro": "Cum se potriveste un caracter `?` literal intr-un nume de fisier?" },
+              "options": [
+                { "text": { "en": "Use ??", "ro": "Se foloseste ??" }, "correct": false },
+                { "text": { "en": "Use \\?", "ro": "Se foloseste \\?" }, "correct": true },
+                { "text": { "en": "Use [?]", "ro": "Se foloseste [?]" }, "correct": false },
+                { "text": { "en": "It cannot be escaped", "ro": "Nu poate fi escapatat" }, "correct": false }
+              ],
+              "explanation": { "en": "The backslash `\\` is used to escape special characters. `\\?` treats the `?` as a literal character instead of a wildcard that matches any single character.", "ro": "Backslash-ul `\\` se foloseste pentru a escapa caracterele speciale. `\\?` trateaza `?` ca un caracter literal in loc de wildcard care se potriveste cu orice caracter." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c2-shell-config-files",
+      "title": { "en": "Shell Configuration Files", "ro": "Fisierele de configurare a interpretorului de comenzi" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "UNIX command interpreters can use certain configuration files that store various setup commands for interactive sessions. In the case of **bash**, the following files are used: **Login session initialization files**: a global script `/etc/profile` (for all users) and local scripts `~/.bash_profile`, `~/.bash_login` or `~/.profile` (user-specific). **Login session finalization file**: a local script `~/.bash_logout`. **Interactive non-login session initialization files**: a local script `~/.bashrc` and a global script `/etc/bashrc` (though the latter must be explicitly sourced from `~/.bashrc`).",
+            "ro": "Interpretoarele de comenzi din UNIX pot folosi anumite fisiere ce stocheaza diverse comenzi de configurare a sesiunilor interactive de executie. In cazul **bash**, se folosesc urmatoarele fisiere: **Fisiere de initializare a sesiunilor de login**: un script global `/etc/profile` (pentru toti utilizatorii) si script-uri locale `~/.bash_profile`, `~/.bash_login` sau `~/.profile` (specifice utilizatorului). **Fisier de finalizare a sesiunii de login**: un script local `~/.bash_logout`. **Fisiere de initializare a sesiunilor interactive non-login**: un script local `~/.bashrc` si un script global `/etc/bashrc` (insa acesta trebuie apelat explicit din `~/.bashrc`)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the difference between a login shell session and a non-login interactive shell session? Which config files does each one read?",
+            "ro": "Care este diferenta intre o sesiune shell de login si o sesiune shell interactiva non-login? Ce fisiere de configurare citeste fiecare?"
+          },
+          "answer": {
+            "en": "A **login shell** session is created when you first log into the system (e.g., via SSH or console login). It reads `/etc/profile`, then looks for `~/.bash_profile`, `~/.bash_login`, or `~/.profile` (in that order, using the first one found). On logout, it reads `~/.bash_logout`. A **non-login interactive** session is created when you open a new terminal window in a graphical environment or type `bash` at the prompt. It only reads `~/.bashrc`. This is why `~/.bash_profile` often sources `~/.bashrc` to share common configuration.",
+            "ro": "O sesiune **shell de login** este creata la prima conectare la sistem (ex. prin SSH sau login de consola). Citeste `/etc/profile`, apoi cauta `~/.bash_profile`, `~/.bash_login` sau `~/.profile` (in aceasta ordine, folosind primul gasit). La delogare, citeste `~/.bash_logout`. O sesiune **interactiva non-login** este creata la deschiderea unui terminal nou in mediul grafic sau la tastarea `bash` la prompter. Aceasta citeste doar `~/.bashrc`. De aceea, `~/.bash_profile` adesea face source la `~/.bashrc` pentru a partaja configuratia comuna."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c2-command-history",
+      "title": { "en": "Command History", "ro": "Istoricul comenzilor executate" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Bash maintains a **history file** of commands entered and executed at the command line — a local file named `~/.bash_history`. The contents of this file can be viewed with the `history` command. The numbers displayed by `history` can be used to re-execute previous commands without retyping them: type `!` followed immediately by the number associated with the desired command.",
+            "ro": "Bash mentine un **fisier de istoric** al comenzilor introduse si executate la linia de comanda — un fisier local cu numele `~/.bash_history`. Continutul acestui fisier poate fi vizualizat cu comanda `history`. Numerele afisate de `history` pot fi folosite pentru a re-executa comenzile anterioare fara a le retasta: tastati `!` urmat imediat de numarul asociat comenzii dorite."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Another useful feature of bash is the ability to invoke previously typed commands and edit them using the **UP** and **DOWN** arrow keys to navigate through history, and the **LEFT** and **RIGHT** arrow keys to move within the selected command line. You can modify parameters, delete text, add new content, and then press ENTER to execute the modified command.",
+            "ro": "O alta facilitate utila a interpretorului bash este posibilitatea de a invoca comenzile tastate anterior si de a le edita, folosind tastele **UP** si **DOWN** (sageti sus si jos) pentru navigarea prin istoric, si tastele **LEFT** si **RIGHT** (sageti stanga si dreapta) pentru deplasarea in cadrul liniei de comanda selectate. Se pot modifica parametri, sterge text, adauga continut nou, si apoi apasa ENTER pentru a executa comanda modificata."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# View command history\nUNIX> history\n\n# Re-execute command number 42 from history\nUNIX> !42\n\n# Navigate history with arrow keys:\n# UP/DOWN — browse previous/next commands\n# LEFT/RIGHT — move cursor within a command line"
+        }
+      ]
+    }
+  ]
+}

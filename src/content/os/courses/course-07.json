@@ -1,0 +1,517 @@
+{
+  "meta": {
+    "id": "os-c7",
+    "title": { "en": "Course 7: Process Overlay — The exec() Primitives", "ro": "Cursul 7: Reacoperirea proceselor — primitivele exec()" },
+    "shortTitle": { "en": "C7: exec() Primitives", "ro": "C7: Primitivele exec()" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 7 slides", "ro": "Prof. C. Vidrascu — Curs 7" }
+  },
+  "steps": [
+    {
+      "id": "os-c7-intro",
+      "title": { "en": "Introduction: Process Overlay", "ro": "Introducere: Reacoperirea proceselor" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "As we saw in the previous lecture, the only way to create a new process in UNIX/Linux is by calling `fork()`. However, `fork()` only creates a copy of the calling process, meaning a new instance of the **same program** (the same executable file). So how can we execute a **different executable** file from the one that called `fork()`?",
+            "ro": "Dupa cum am vazut in lectia anterioara, singura modalitate de a crea un nou proces in UNIX/Linux este prin apelul functiei `fork()`. Numai ca in acest fel se creeaza o copie a procesului apelant, adica o noua instanta de executie a **aceluiasi program** (acelasi fisier executabil). Si atunci, cum este posibil sa executam un alt fisier executabil decat cel care apeleaza primitiva `fork()`?"
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Process Overlay (exec)", "ro": "Reacoperirea proceselor (exec)" },
+          "content": {
+            "en": "The mechanism of **process overlay**, available in UNIX/Linux through the `exec` family of primitives. The `exec` family \"replaces\" the program running within the calling process with a different program, specified by the name of its executable file passed as an argument to `exec`. We say the new program **overlays** the old program in the process that executes the `exec` call.",
+            "ro": "Mecanismul de **reacoperire a proceselor**, disponibil in sistemele de operare UNIX/Linux prin intermediul primitivelor din familia `exec`. Familia de primitive `exec` \"inlocuieste\" programul rulat in cadrul procesului apelant cu un alt program, specificat prin numele fisierului executabil asociat, transmis ca argument al apelului `exec`. Spunem ca noul program **reacoper** vechiul program in procesul ce executa apelul `exec`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The process is \"transformed\" by replacing the old program with the new one. It **inherits** the characteristics of the old program (with a few exceptions), including the **PID** (because from the OS perspective, it is the same process).",
+            "ro": "Procesul este \"transformat\" prin inlocuirea cu noul program. Acesta **mosteneste** caracteristicile avute de vechiul program (cu exceptia catorva dintre acestea), inclusiv **PID-ul** (deoarece, din punctul de vedere al SO-ului, este acelasi proces)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does the process keep the same PID after an exec() call, even though the program has completely changed?",
+            "ro": "De ce isi pastreaza procesul acelasi PID dupa un apel exec(), chiar daca programul s-a schimbat complet?"
+          },
+          "answer": {
+            "en": "Because exec() does not create a new process — it replaces the program image within the existing process. The kernel still tracks the same process entry (same PID, same parent, same priority, same open file descriptors). Only the code, data, and stack segments are replaced with those of the new program. This is fundamental to the UNIX fork+exec model: fork() creates the process, exec() loads the program.",
+            "ro": "Deoarece exec() nu creeaza un proces nou — inlocuieste imaginea programului in cadrul procesului existent. Nucleul continua sa urmareasca aceeasi intrare de proces (acelasi PID, acelasi parinte, aceeasi prioritate, aceiasi descriptori de fisiere deschise). Doar segmentele de cod, date si stiva sunt inlocuite cu cele ale noului program. Acesta este principiul fundamental al modelului UNIX fork+exec: fork() creeaza procesul, exec() incarca programul."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c7-exec-family",
+      "title": { "en": "The exec() Family of Primitives", "ro": "Primitivele din familia exec()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are **6+1 functions** in the `exec` family of calls. These functions differ by name and parameter list, and can be divided into two categories based on how arguments are passed: the number of parameters is **variable** (command line given by enumeration) or the number of parameters is **fixed** (command line specified via a vector/array).",
+            "ro": "Exista **6+1 functii** in familia de apeluri `exec`. Aceste functii difera intre ele prin nume si lista parametrilor de apel, putand fi impartite in doua categorii prin forma in care se dau parametrii de apel: numarul de parametri este **variabil** (linia de comanda este data prin enumerare) sau numarul de parametri este **fix** (linia de comanda specificata printr-un vector)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The naming convention for exec functions: **l** = list (variable args), **v** = vector (array), **e** = environment, **p** = PATH search. For example, `execvpe` means: vector args + PATH search + custom environment.",
+            "ro": "Conventia de numire a functiilor exec: **l** = list (argumente variabile), **v** = vector (tablou), **e** = environment (mediu), **p** = cautare in PATH. De exemplu, `execvpe` inseamna: argumente vector + cautare in PATH + mediu personalizat."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Pair 1: `execl` and `execv`** — The basic pair. `ref` is a mandatory argument specifying the name of the program that will overlay the calling process.",
+            "ro": "**Perechea 1: `execl` si `execv`** — Perechea de baza. `ref` este un argument obligatoriu, fiind numele programului ce va recoperi procesul apelant al respectivei primitive `exec`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Pair 1: execl (list) and execv (vector)\nint execl(char* ref, char* argv0, ..., char* argvN, NULL);\nint execv(char* ref, char* argv[]);\n// N >= 1, i.e. argv0 and argvN can be omitted\n// but the other arguments represent the effective\n// command-line parameters for the program ref"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Pair 2: `execle` and `execve`** — Same as Pair 1, but with an additional `env` parameter that allows passing a custom **environment** (a set of environment variables) to the new program that will overlay the calling process.",
+            "ro": "**Perechea 2: `execle` si `execve`** — La fel ca Perechea 1, dar cu un parametru suplimentar `env` ce permite transmiterea unui **environment** (un set de variabile de mediu) catre noul program ce va recoperi procesul apelant."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Pair 2: execle (list+env) and execve (vector+env)\nint execle(char* ref, char* argv0, ..., char* argvN, char* env[]);\nint execve(char* ref, char* argv[], char* env[]);\n// env[] must also be NULL-terminated"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Pair 3: `execlp` and `execvp`** — Same arguments as Pair 1, but if `ref` does not contain a `/` character (i.e., it is not specified with an absolute or relative path), then the executable is searched in the directories listed in the `PATH` environment variable. Also, `ref` can be the name of a script starting with `#!interpreter`.",
+            "ro": "**Perechea 3: `execlp` si `execvp`** — Aceleasi argumente ca Perechea 1, dar daca `ref` nu contine caracterul `/` (adica nu este specificat impreuna cu calea absoluta sau relativa pana la acel fisier), atunci el va fi cautat in directoarele din variabila de mediu `PATH`. De asemenea, `ref` mai poate fi si numele unui script, care incepe cu o linie de forma `#!interpreter`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Pair 3: execlp (list+PATH) and execvp (vector+PATH)\nint execlp(char* ref, char* argv0, ..., char* argvN);\nint execvp(char* ref, char* argv[]);\n\n// 7th function (GNU extension): execvpe (vector+PATH+env)\nint execvpe(char* ref, char* argv[], char* env[]);"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The function `execve` is the actual **system call** for overlay (see `man 2 execve`), while all the other functions are **C library wrappers** that internally call `execve` (see `man 3 exec`).",
+            "ro": "Functia `execve` este apelul de sistem propriu-zis pentru reacoperire (a se consulta `man 2 execve`), iar celelalte functii sunt de fapt niste **wrappere** definite in C Standard Library, ce apeleaza la randul lor functia `execve` (a se consulta `man 3 exec`)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c7-exec-observations",
+      "title": { "en": "exec() Observations & Conventions", "ro": "Observatii si conventii exec()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Observations about the `ref` argument:** It must be the name of an executable file that is either in the current directory, specified by its full path (absolute or relative), or searched in the `PATH` directories. It can also be the name of a script starting with `#!interpreter`.",
+            "ro": "**Observatii despre argumentul `ref`:** Trebuie sa fie un nume de fisier executabil care sa se afle in directorul curent (sau sa se specifice si directorul in care se afla, prin cale absoluta sau relativa), deoarece nu este cautat in directoarele din variabila de mediu `PATH`. De asemenea, `ref` mai poate fi si numele unui script, care incepe cu o linie de forma `#!interpreter`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Convention:** `argv0` (or `argv[0]`) specifies the **transformed process name** (i.e., the name of the process after overlay with the new program), displayed by commands such as `ps`, `pstree`, `w`, etc. By convention, `argv0` / `argv[0]` must match `ref` (the executable file name). This is a convention, not a strict requirement, and violating it causes an error only if the path is actually invalid.",
+            "ro": "**Conventie:** `argv0` (respectiv `argv[0]`) specifica **numele procesului \"transformat\"** (adica numele procesului dupa reacoperirea cu noul program), afisat de comenzi precum `ps`, `pstree`, `w`, s.a. Prin conventie, `argv0` / `argv[0]` trebuie sa coincida cu `ref` (deci cu numele fisierului executabil). Aceasta este insa doar o conventie, nu se produce eroare in caz ca este incalcata."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "ref vs argv[0]", "ro": "ref vs argv[0]" },
+          "content": {
+            "en": "The `ref` argument specifies the **real name** of the executable file (or script) to be loaded and executed, while `argv0` / `argv[0]` specifies the **process name** displayed by monitoring commands (`ps`, `pstree`, `w`, etc.) after the overlay.",
+            "ro": "Argumentul `ref` specifica **numele real** al fisierului executabil (sau scriptului) ce se va incarca si executa, iar `argv0` / `argv[0]` specifica **numele procesului** \"transformat\" afisat de comenzi precum `ps`, `pstree`, `w`, s.a. dupa reacoperire."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Return value:** On failure (e.g., insufficient memory or other causes), all `exec` primitives return **-1**. On success, `exec` calls **do not return** at all, because the calling program no longer exists (having been \"overlaid\" by the new program). The `exec` family is the only example of functions (except `exit` and `abort`) whose calls do not return back to the calling program.",
+            "ro": "**Valoarea returnata:** In caz de esec (de ex., datorita memoriei insuficiente, sau altor cauze posibile), toate primitivele `exec` returneaza valoarea **-1**. Altfel, in caz de succes, apelurile `exec` **nu returneaza** deloc, deoarece programul apelant nu mai exista (fiind \"reacoperit\" de noul program). Familia de primitive `exec` este singurul exemplu de functii (cu exceptia primitivelor `exit` si `abort`) ai caror apeluri nu returneaza inapoi in programul apelant."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Since `exec` never returns on success, any code placed **after** an `exec` call will only execute if `exec` **failed**. This is a common pattern: call `exec`, then immediately handle the error case (e.g., `perror` + `exit`).",
+            "ro": "Deoarece `exec` nu returneaza niciodata in caz de succes, orice cod plasat **dupa** un apel `exec` se va executa doar daca `exec` a **esuat**. Acesta este un pattern comun: se apeleaza `exec`, apoi se trateaza imediat cazul de eroare (de ex., `perror` + `exit`)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens when an exec() call succeeds?", "ro": "Ce se intampla cand un apel exec() reuseste?" },
+              "options": [
+                { "text": { "en": "It returns 0", "ro": "Returneaza 0" }, "correct": false },
+                { "text": { "en": "It returns the PID of the new program", "ro": "Returneaza PID-ul noului program" }, "correct": false },
+                { "text": { "en": "It does not return at all", "ro": "Nu returneaza deloc" }, "correct": true },
+                { "text": { "en": "It returns 1", "ro": "Returneaza 1" }, "correct": false }
+              ],
+              "explanation": { "en": "On success, exec() replaces the entire program image, so the calling code no longer exists — there is nowhere to return to. exec() only returns (with -1) on failure.", "ro": "In caz de succes, exec() inlocuieste intreaga imagine a programului, deci codul apelant nu mai exista — nu exista unde sa se intoarca. exec() returneaza (cu -1) doar in caz de esec." }
+            },
+            {
+              "question": { "en": "Which exec function is the actual system call, while the others are library wrappers?", "ro": "Care functie exec este apelul de sistem propriu-zis, in timp ce celelalte sunt wrappere de biblioteca?" },
+              "options": [
+                { "text": { "en": "execl", "ro": "execl" }, "correct": false },
+                { "text": { "en": "execve", "ro": "execve" }, "correct": true },
+                { "text": { "en": "execvp", "ro": "execvp" }, "correct": false },
+                { "text": { "en": "execlp", "ro": "execlp" }, "correct": false }
+              ],
+              "explanation": { "en": "execve is the actual system call (man 2 execve). All other exec functions (execl, execv, execlp, execvp, execle) are C standard library wrappers that internally call execve (man 3 exec).", "ro": "execve este apelul de sistem propriu-zis (man 2 execve). Toate celelalte functii exec (execl, execv, execlp, execvp, execle) sunt wrappere din biblioteca standard C ce apeleaza intern execve (man 3 exec)." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c7-exec-summary-table",
+      "title": { "en": "exec() Family Summary", "ro": "Rezumatul familiei exec()" },
+      "blocks": [
+        {
+          "type": "table",
+          "caption": { "en": "The 6+1 exec() Functions", "ro": "Cele 6+1 functii exec()" },
+          "headers": [
+            { "en": "Function", "ro": "Functia" },
+            { "en": "Args format", "ro": "Format argumente" },
+            { "en": "PATH search", "ro": "Cautare PATH" },
+            { "en": "Custom env", "ro": "Mediu personalizat" }
+          ],
+          "rows": [
+            [{ "en": "`execl`", "ro": "`execl`" }, { "en": "List (variable)", "ro": "Lista (variabila)" }, { "en": "No", "ro": "Nu" }, { "en": "No", "ro": "Nu" }],
+            [{ "en": "`execv`", "ro": "`execv`" }, { "en": "Vector (array)", "ro": "Vector (tablou)" }, { "en": "No", "ro": "Nu" }, { "en": "No", "ro": "Nu" }],
+            [{ "en": "`execle`", "ro": "`execle`" }, { "en": "List (variable)", "ro": "Lista (variabila)" }, { "en": "No", "ro": "Nu" }, { "en": "Yes", "ro": "Da" }],
+            [{ "en": "`execve`", "ro": "`execve`" }, { "en": "Vector (array)", "ro": "Vector (tablou)" }, { "en": "No", "ro": "Nu" }, { "en": "Yes", "ro": "Da" }],
+            [{ "en": "`execlp`", "ro": "`execlp`" }, { "en": "List (variable)", "ro": "Lista (variabila)" }, { "en": "Yes", "ro": "Da" }, { "en": "No", "ro": "Nu" }],
+            [{ "en": "`execvp`", "ro": "`execvp`" }, { "en": "Vector (array)", "ro": "Vector (tablou)" }, { "en": "Yes", "ro": "Da" }, { "en": "No", "ro": "Nu" }],
+            [{ "en": "`execvpe`", "ro": "`execvpe`" }, { "en": "Vector (array)", "ro": "Vector (tablou)" }, { "en": "Yes", "ro": "Da" }, { "en": "Yes", "ro": "Da" }]
+          ]
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why are there so many exec variants instead of just one function?",
+            "ro": "De ce exista atatea variante exec in loc de o singura functie?"
+          },
+          "answer": {
+            "en": "Each variant serves a different use case for convenience: sometimes you know the exact number of arguments at compile time (list variants: execl, execle, execlp), sometimes you build the argument list dynamically (vector variants: execv, execve, execvp). The 'p' variants add PATH searching (useful when you don't know the full path), and the 'e' variants let you pass a custom environment. The only true system call is execve — the rest are convenience wrappers.",
+            "ro": "Fiecare varianta serveste un caz de utilizare diferit pentru comoditate: uneori cunosti numarul exact de argumente la compilare (variantele cu lista: execl, execle, execlp), alteori construiesti lista de argumente dinamic (variantele cu vector: execv, execve, execvp). Variantele cu 'p' adauga cautarea in PATH (util cand nu cunosti calea completa), iar variantele cu 'e' permit transmiterea unui mediu personalizat. Singurul apel de sistem real este execve — restul sunt wrappere de comoditate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c7-process-characteristics",
+      "title": { "en": "Process Characteristics After exec()", "ro": "Caracteristicile procesului dupa exec()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When a process is \"overlaid\", the new program **inherits** the characteristics of the old program (same PID, same priority, same parent process, same open file descriptors, etc.), with some exceptions specified in the table below.",
+            "ro": "Cand un proces este \"reacoperit\", noul program **mosteneste** caracteristicile vechiului program (acelasi PID, aceeasi prioritate, acelasi proces parinte, aceiasi descriptori de fisiere deschise, s.a.), cu unele exceptii precizate in tabelul de mai jos."
+          }
+        },
+        {
+          "type": "table",
+          "caption": { "en": "Characteristics NOT Preserved After exec()", "ro": "Caracteristici care NU se conserva dupa exec()" },
+          "headers": [
+            { "en": "Characteristic", "ro": "Caracteristica" },
+            { "en": "Condition for change", "ro": "Conditia in care nu se conserva" }
+          ],
+          "rows": [
+            [{ "en": "Effective owner", "ro": "Proprietarul efectiv" }, { "en": "If the **setuid** bit is set on the loaded file, the file owner becomes the effective owner of the process", "ro": "Daca este setat bitul **setuid** al fisierului incarcat, proprietarul acestui fisier devine proprietarul efectiv al procesului" }],
+            [{ "en": "Effective group owner", "ro": "Grupul proprietar efectiv" }, { "en": "If the **setgid** bit is set on the loaded file, the group owner of the file becomes the effective group of the process", "ro": "Daca este setat bitul **setgid** al fisierului incarcat, grupul proprietar al acestui fisier devine grupul proprietar efectiv al procesului" }],
+            [{ "en": "Signal handlers", "ro": "Handler-ele de semnale" }, { "en": "Handlers are reinstalled to their **implicit/default** values for signals that were \"corrupted\" (i.e., intercepted)", "ro": "Sunt reinstalate handler-ele implicite pentru acele semnale ce erau \"corupte\" (adica interceptate)" }],
+            [{ "en": "File descriptors", "ro": "Descriptorii de fisiere" }, { "en": "If the **FD_CLOEXEC** (close-on-exec) flag was set on a file descriptor using `fcntl`, that descriptor is **closed** by exec (all other descriptors remain open)", "ro": "Daca bitul **FD_CLOEXEC** de inchidere automata in caz de exec al vreunui descriptor de fisiere a fost setat cu ajutorul primitivei `fcntl`, atunci descriptorul respectiv este inchis la exec (ceilalti descriptori de fisiere raman deschisi)" }]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The fact that open file descriptors are inherited across `exec` is very important. It means that if the parent process redirects `stdout` (fd 1) to a file before calling `exec`, the new program will also write to that file instead of the terminal. This is the basis of I/O redirection in shells.",
+            "ro": "Faptul ca descriptorii de fisiere deschise sunt mosteniti dupa `exec` este foarte important. Inseamna ca daca procesul parinte redirecteaza `stdout` (fd 1) catre un fisier inainte de a apela `exec`, noul program va scrie de asemenea in acel fisier in loc de terminal. Aceasta este baza redirectarii I/O in shell-uri."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which of the following is preserved after an exec() call?", "ro": "Care dintre urmatoarele se pastreaza dupa un apel exec()?" },
+              "options": [
+                { "text": { "en": "Signal handlers for intercepted signals", "ro": "Handler-ele de semnale pentru semnale interceptate" }, "correct": false },
+                { "text": { "en": "The process PID", "ro": "PID-ul procesului" }, "correct": true },
+                { "text": { "en": "File descriptors with FD_CLOEXEC set", "ro": "Descriptorii de fisiere cu FD_CLOEXEC setat" }, "correct": false },
+                { "text": { "en": "The program's code segment", "ro": "Segmentul de cod al programului" }, "correct": false }
+              ],
+              "explanation": { "en": "The PID is always preserved because exec() does not create a new process — it replaces the program image within the existing process. Signal handlers are reset, FD_CLOEXEC descriptors are closed, and the code segment is replaced entirely.", "ro": "PID-ul se pastreaza intotdeauna deoarece exec() nu creeaza un proces nou — inlocuieste imaginea programului in cadrul procesului existent. Handler-ele de semnale sunt resetate, descriptorii cu FD_CLOEXEC sunt inchisi, iar segmentul de cod este inlocuit in totalitate." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c7-example-overlay",
+      "title": { "en": "Example #1: Overlaying with Another Program", "ro": "Exemplul #1: Reacoperirea unui program cu alt program" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "This example illustrates using an `exec` call and the preservation of some process properties after the `exec` call. The program `before_exec.c` calls `execl` to overlay itself with a second program, `after_exec.c`.",
+            "ro": "Un exemplu ce ilustreaza folosirea unui apel din familia `exec`, precum si conservarea a catorva dintre proprietatile procesului dupa executia apelului `exec`. Programul `before_exec.c` apeleaza `execl` pentru a se \"recoperi\" cu un al doilea program, `after_exec.c`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* before_exec.c */\n#include <stdio.h>\n#include <unistd.h>\n#include <fcntl.h>\n\nint main() {\n    int fd;\n    char buf[100];\n    int nrBytesRead;\n\n    printf(\"[before_exec] PID = %d\\n\", getpid());\n\n    /* Read from stdin */\n    nrBytesRead = read(0, buf, sizeof(buf));\n    printf(\"[before_exec] Read %d bytes from stdin\\n\", nrBytesRead);\n\n    /* Overlay with after_exec */\n    execl(\"./after_exec\", \"after_exec\", NULL);\n\n    /* Only reached if exec fails */\n    perror(\"exec failed\");\n    return 1;\n}"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* after_exec.c */\n#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    char buf[100];\n    int nrBytesRead;\n\n    printf(\"[after_exec] PID = %d\\n\", getpid());\n\n    /* Try to read from stdin */\n    nrBytesRead = read(0, buf, sizeof(buf));\n    printf(\"[after_exec] Read %d bytes from stdin\\n\", nrBytesRead);\n\n    return 0;\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "When running `before_exec`, you will notice that `nrBytesRead` in `after_exec` will be **-1**, because `stdin` is inherited as closed from `before_exec` (the input was already consumed). The PID printed by both programs will be the **same**, confirming that it is the same process.",
+            "ro": "La executia `before_exec`, veti observa ca `nrBytesRead` din `after_exec` va avea valoarea **-1**, deoarece `stdin` este mostenit ca fiind inchis de la `before_exec` (intrarea a fost deja consumata). PID-ul afisat de ambele programe va fi **acelasi**, confirmand ca este acelasi proces."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c7-example-recursive",
+      "title": { "en": "Example #2: Recursive Overlay", "ro": "Exemplul #2: Reacoperirea recursiva" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A program that \"overlays\" itself, but at the second call it modifies the call parameters to detect that it is at the second call and thus avoids entering an infinite loop of recursive `exec` calls. See the program `exec_rec.c`.",
+            "ro": "Un program care se \"reacoper\" cu el insusi, dar la al doilea apel isi modifica parametrii de apel pentru a-si putea da seama ca este la al doilea apel si astfel sa nu intre intr-o \"bucla infinita\" de apeluri recursive."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* exec_rec.c - Recursive overlay example */\n#include <stdio.h>\n#include <string.h>\n#include <unistd.h>\n\nint main(int argc, char *argv[]) {\n    printf(\"[exec_rec] PID=%d, argc=%d\\n\", getpid(), argc);\n\n    if (argc == 1) {\n        /* First call: overlay with self, adding an argument */\n        printf(\"[exec_rec] First call, overlaying with self...\\n\");\n        execl(\"./exec_rec\", \"exec_rec\", \"second\", NULL);\n        perror(\"exec failed\");\n    } else {\n        /* Second call: detected by extra argument */\n        printf(\"[exec_rec] Second call (arg: %s), stopping.\\n\", argv[1]);\n    }\n    return 0;\n}"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What would happen if the program called exec on itself without modifying the arguments? How could you detect and prevent the infinite loop?",
+            "ro": "Ce s-ar intampla daca programul ar apela exec pe el insusi fara sa modifice argumentele? Cum ai putea detecta si preveni bucla infinita?"
+          },
+          "answer": {
+            "en": "Without modifying the arguments, each exec call would overlay the process with the same program and the same arguments, leading to an infinite loop. The program would keep overlaying itself forever (consuming CPU). You can prevent this by: (1) adding/changing an argument to signal which iteration you are on (as in this example), (2) using an environment variable as a counter, or (3) using a file to track state. The most common approach is passing an argument.",
+            "ro": "Fara modificarea argumentelor, fiecare apel exec ar recoperi procesul cu acelasi program si aceleasi argumente, ducand la o bucla infinita. Programul s-ar recoperi la infinit (consumand CPU). Puteti preveni asta prin: (1) adaugarea/modificarea unui argument pentru a semnala la ce iteratie sunteti (ca in acest exemplu), (2) folosirea unei variabile de mediu ca contor, sau (3) folosirea unui fisier pentru a urmari starea. Cea mai comuna abordare este transmiterea unui argument."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c7-example-open-files",
+      "title": { "en": "Example #3 & #4: Overlay with Open Files", "ro": "Exemplele #3 si #4: Reacoperirea cu fisiere deschise" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #3:** The program `com-0.c` redirects `stdout` to the file `fis.txt` using the `dup` primitive, then overlays itself with `com-2.c`. Because open file descriptors are inherited, `com-2.c` inherits this redirection — messages written to `stdout` will appear in the file instead of on the screen.",
+            "ro": "**Exemplul #3:** Programul `com-0.c` redirecteaza fluxul `stdout` in fisierul `fis.txt`, folosind primitiva `dup`, si ca atare programul `com-2.c` mosteneste aceasta redirectare. Astfel, veti observa ca mesajele scrise vor apare in acel fisier si nu pe ecran."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #4:** Demonstrates the behavior when using **buffered** write functions (`fprintf`, `fwrite`, etc. from the C standard I/O library). If the `fflush` call is removed from `com-1.c` before executing exec, the buffer content may be **lost** because exec replaces the process image, discarding any unflushed buffers.",
+            "ro": "**Exemplul #4:** Demonstreaza comportamentul la folosirea functiilor de scriere cu **buffer** (`fprintf`, `fwrite`, s.a. din biblioteca standard I/O de C). Daca eliminam apelul `fflush` din `com-1.c` inainte de exec, continutul buffer-ului poate fi **pierdut** deoarece exec inlocuieste imaginea procesului, renuntand la orice buffer-e neflushuite."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Important:** When using `exec` after writing with buffered I/O functions (`printf`, `fprintf`, `fwrite`), always call `fflush()` before `exec`. Otherwise, the buffer content is lost because the C library buffers exist in user space and are destroyed when exec replaces the process image. In normal mode, the buffer is flushed when it is full or when `\\n` is encountered.",
+            "ro": "**Important:** Cand folositi `exec` dupa scrieri cu functii I/O cu buffer (`printf`, `fprintf`, `fwrite`), apelati intotdeauna `fflush()` inainte de `exec`. Altfel, continutul buffer-ului se pierde deoarece buffer-ele bibliotecii C exista in spatiul utilizator si sunt distruse cand exec inlocuieste imaginea procesului. In mod normal, buffer-ul este golit cand se umple sau cand se intalneste `\\n`."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens to unflushed printf() buffers when exec() is called?", "ro": "Ce se intampla cu buffer-ele printf() neflushuite cand se apeleaza exec()?" },
+              "options": [
+                { "text": { "en": "They are automatically flushed before exec", "ro": "Sunt golite automat inainte de exec" }, "correct": false },
+                { "text": { "en": "They are saved and restored in the new program", "ro": "Sunt salvate si restaurate in noul program" }, "correct": false },
+                { "text": { "en": "The buffered data is lost", "ro": "Datele din buffer se pierd" }, "correct": true },
+                { "text": { "en": "They cause exec to fail", "ro": "Provoaca esecul exec-ului" }, "correct": false }
+              ],
+              "explanation": { "en": "C library buffers (used by printf, fprintf, etc.) exist in user space memory. When exec() replaces the process image, this memory is overwritten with the new program's data, and the unflushed buffer content is permanently lost. Always call fflush() before exec().", "ro": "Buffer-ele bibliotecii C (folosite de printf, fprintf, etc.) exista in memoria spatiului utilizator. Cand exec() inlocuieste imaginea procesului, aceasta memorie este suprascrisa cu datele noului program, iar continutul neflushuit al buffer-ului se pierde permanent. Apelati intotdeauna fflush() inainte de exec()." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c7-stdout-redirect",
+      "title": { "en": "Example #5: Redirecting stdout", "ro": "Exemplul #5: Redirectarea fluxului stdout" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Besides the `dup` primitive, there is another primitive called `dup2`, both being used to **duplicate a file descriptor**. With these calls, you can redirect standard I/O streams, as we saw in the previous example (program `com-0.c`).",
+            "ro": "Pe langa primitiva `dup`, mai exista si o alta primitiva, cu numele `dup2`, ambele fiind utilizate pentru **duplicarea unui descriptor de fisier**. Cu ajutorul acestor apeluri se poate realiza redirectarea fluxurilor standard de I/O, precum am vazut in exemplul precedent (programul `com-0.c`)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* redirect.c - Redirecting stdout to a file and back */\n#include <stdio.h>\n#include <unistd.h>\n#include <fcntl.h>\n\nint main() {\n    int fd, saved_stdout;\n\n    /* Save stdout */\n    saved_stdout = dup(1);\n\n    /* Open file and redirect stdout to it */\n    fd = open(\"fis.txt\", O_WRONLY | O_CREAT | O_TRUNC, 0644);\n    dup2(fd, 1);  /* fd 1 (stdout) now points to fis.txt */\n    close(fd);\n\n    printf(\"This goes to fis.txt\\n\");\n    fflush(stdout);\n\n    /* Restore stdout to terminal */\n    dup2(saved_stdout, 1);\n    close(saved_stdout);\n\n    printf(\"This goes to the terminal\\n\");\n    return 0;\n}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "In the program `redirect.c`, the redirection is first made to the file `fis.txt`, and then it is **cancelled** (restored) by redirecting back to the physical I/O terminal associated with the current session, referred to by the name `/dev/tty`.",
+            "ro": "In programul `redirect.c`, redirectarea se face mai intai catre fisierul `fis.txt`, iar apoi este **anulata** (restaurata) prin redirectarea inapoi catre terminalul I/O fizic asociat sesiunii de lucru curente, referit prin numele `/dev/tty`."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Explain the difference between dup() and dup2(). When would you use one over the other?",
+            "ro": "Explicati diferenta dintre dup() si dup2(). Cand ati folosi una in locul celeilalte?"
+          },
+          "answer": {
+            "en": "**dup(fd)** creates a copy of fd using the lowest available file descriptor number. **dup2(oldfd, newfd)** creates a copy of oldfd into the specific descriptor newfd (closing newfd first if open). Use dup() when you just need a copy and don't care about the descriptor number. Use dup2() when you need to redirect a specific descriptor (e.g., dup2(fd, 1) to redirect stdout, or dup2(fd, 0) to redirect stdin).",
+            "ro": "**dup(fd)** creeaza o copie a lui fd folosind cel mai mic numar de descriptor disponibil. **dup2(oldfd, newfd)** creeaza o copie a lui oldfd in descriptorul specific newfd (inchizand mai intai newfd daca este deschis). Folositi dup() cand aveti nevoie doar de o copie si nu va intereseaza numarul descriptorului. Folositi dup2() cand trebuie sa redirectati un descriptor specific (de ex., dup2(fd, 1) pentru a redirecta stdout, sau dup2(fd, 0) pentru a redirecta stdin)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c7-example-script",
+      "title": { "en": "Example #6: Overlaying with a Script", "ro": "Exemplul #6: Reacoperirea unui program cu un script" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "An example that illustrates using an `exec` call to overlay the calling program with a **shell script**. The program `exec_script.c` calls `execl` to overlay itself with a bash script, `my_script.sh`.",
+            "ro": "Un exemplu ce ilustreaza folosirea unui apel din familia `exec` pentru a \"recoperi\" programul apelant cu un **script bash**. Programul `exec_script.c` apeleaza `execl` pentru a se recoperi cu un script bash, `my_script.sh`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* exec_script.c */\n#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    printf(\"[exec_script] About to overlay with a script...\\n\");\n\n    execl(\"./my_script.sh\", \"my_script.sh\", NULL);\n\n    /* Only reached if exec fails */\n    perror(\"exec failed\");\n    return 1;\n}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "More precisely, the effect of the `exec` call here is to overlay the calling program with an instance of the **interpreter** specified on the first line of the script (the `#!` shebang line), and this instance will interpret the script line by line (and execute it in an interpreted manner).",
+            "ro": "Mai exact, aici, efectul apelului `exec` este acela de a \"recoperi\" programul apelant cu o instanta a **interpretorului** specificat pe prima linie din script (linia `#!` shebang), iar aceasta instanta va interpreta scriptul linie cu linie (si-l va executa, astfel, in maniera interpretata)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "#!/bin/bash\n# my_script.sh\necho \"Hello from the script!\"\necho \"PID = $$\"\necho \"Script arguments: $@\""
+        }
+      ]
+    },
+    {
+      "id": "os-c7-fork-exec-pattern",
+      "title": { "en": "The fork+exec Pattern: Executing Commands", "ro": "Sablonul fork+exec: Executia comenzilor" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A common and important pattern: a program uses `fork` to create a child process, then the child calls `exec` to run a command, accompanied by a list of arguments. The parent process then uses `wait` to retrieve the execution status of the command (success vs. failure).",
+            "ro": "Un sablon comun si important: un program foloseste `fork` pentru a crea un proces fiu, apoi procesul fiu apeleaza `exec` pentru a rula o comanda, insotita de o lista de argumente. Procesul parinte foloseste apoi `wait` pentru a prelucra statusul executiei comenzii respective (succes vs. esec)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main(int argc, char *argv[]) {\n    pid_t pid;\n    int ret;\n    char* dirname = (argc < 2) ? \".\" : argv[1];\n\n    /* Create a child process to run the command via exec */\n    if (-1 == (pid = fork())) {\n        perror(\"Error at fork\");\n        exit(1);\n    }\n\n    if (pid == 0) {\n        /* Child: exec the ls command */\n        execl(\"/bin/ls\", \"ls\", \"-l\", \"-i\", dirname, NULL);\n        perror(\"Error at exec\");\n        exit(10);  /* Return a large number as error code */\n    }\n\n    /* Parent: wait for the child */\n    wait(&ret);\n    if (WIFEXITED(ret)) {\n        switch (WEXITSTATUS(ret)) {\n            case 10: printf(\"ls could not be executed (exec error).\\n\"); break;\n            case  0: printf(\"ls executed successfully.\\n\"); break;\n            default: printf(\"ls failed (code: %d).\\n\", WEXITSTATUS(ret));\n        }\n    } else {\n        printf(\"ls was terminated by signal: %d.\\n\", WTERMSIG(ret));\n    }\n    return 0;\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "This is exactly how a **shell** works: it reads a command, calls `fork` to create a child, the child calls `exec` to run the command, and the parent calls `wait` to wait for it to finish. The fork+exec+wait pattern is the foundation of UNIX process management.",
+            "ro": "Exact asa functioneaza un **shell**: citeste o comanda, apeleaza `fork` pentru a crea un fiu, fiul apeleaza `exec` pentru a rula comanda, iar parintele apeleaza `wait` pentru a astepta terminarea. Sablonul fork+exec+wait este fundamentul gestiunii proceselor in UNIX."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c7-system-function",
+      "title": { "en": "The system() Function", "ro": "Functia system()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `system` function allows launching common UNIX/Linux commands from a C program, via a call of the form: `system(command);`. **Effect:** A new process is created, into which a shell is implicitly loaded, and it executes the specified command (see `man 3 system` for more details).",
+            "ro": "Functia `system` permite lansarea de comenzi uzuale de UNIX/Linux dintr-un program C, printr-un apel de forma: `system(comanda);`. **Efect:** Se creeaza un nou proces, in care se incarca shell-ul implicit, iar acesta va executa comanda specificata (pentru detalii suplimentare, consultati `man 3 system`)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char *argv[]) {\n    int ret;\n    char *dirname = (argc < 2) ? \".\" : argv[1];\n\n    /* Build command string */\n    char cmdline[256];\n    sprintf(cmdline, \"ls -l -a %s ; ls -a %s\", dirname, dirname);\n\n    /* Execute via system() */\n    ret = system(cmdline);\n    printf(\"system() returned: %d\\n\", ret);\n\n    return 0;\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The `system()` function internally uses `fork`, `wait`, and `exec` to implement its functionality. Unlike calling `exec` directly, `system()` can execute **compound commands** (multiple simple commands combined with operators like `;`, `&&`, `||`, `|`). The calling program **continues** after `system()` returns, unlike bare `exec` which replaces the calling program.",
+            "ro": "Functia `system()` foloseste intern `fork`, `wait` si `exec` pentru a-si implementa functionalitatea. Spre deosebire de apelarea directa a `exec`, `system()` poate executa **comenzi compuse** (mai multe comenzi simple combinate cu operatori precum `;`, `&&`, `||`, `|`). Programul apelant **continua** dupa ce `system()` returneaza, spre deosebire de `exec` care inlocuieste programul apelant."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is the key difference between exec() and system()?", "ro": "Care este diferenta cheie intre exec() si system()?" },
+              "options": [
+                { "text": { "en": "exec() is faster", "ro": "exec() este mai rapid" }, "correct": false },
+                { "text": { "en": "system() replaces the process, exec() does not", "ro": "system() inlocuieste procesul, exec() nu" }, "correct": false },
+                { "text": { "en": "exec() replaces the process, system() creates a child and returns", "ro": "exec() inlocuieste procesul, system() creeaza un fiu si returneaza" }, "correct": true },
+                { "text": { "en": "They are identical in behavior", "ro": "Sunt identice ca si comportament" }, "correct": false }
+              ],
+              "explanation": { "en": "exec() replaces the current process image entirely (it never returns on success). system() internally calls fork+exec+wait: it creates a child process, the child runs the command via exec, and the parent waits and returns control to the caller.", "ro": "exec() inlocuieste complet imaginea procesului curent (nu returneaza niciodata in caz de succes). system() apeleaza intern fork+exec+wait: creeaza un proces fiu, fiul ruleaza comanda prin exec, iar parintele asteapta si returneaza controlul apelantului." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c7-references",
+      "title": { "en": "References", "ro": "Referinte bibliografice" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Required bibliography:** [1] Ch. 4, S4.4 from \"Sisteme de operare -- manual pentru ID\", C. Vidrascu, UAIC, 2006. [2] Demo programs available on the course support page. [3] Lab support: `suport_lab5.html`. **Supplementary:** [4] Ch. 27 from \"The Linux Programming Interface\", M. Kerrisk, No Starch Press, 2010. [5] POSIX API: `man 2 execve`, `man 3 exec`, `man 2 dup`, `man 3 system`.",
+            "ro": "**Bibliografie obligatorie:** [1] Cap. 4, S4.4 din \"Sisteme de operare -- manual pentru ID\", C. Vidrascu, ed. UAIC, 2006. [2] Programele demonstrative de pe suportul de curs online. [3] Suportul de laborator: `suport_lab5.html`. **Bibliografie suplimentara:** [4] Cap. 27 din \"The Linux Programming Interface\", M. Kerrisk, No Starch Press, 2010. [5] POSIX API: `man 2 execve`, `man 3 exec`, `man 2 dup`, `man 3 system`."
+          }
+        }
+      ]
+    }
+  ]
+}

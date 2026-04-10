@@ -1,0 +1,563 @@
+{
+  "meta": {
+    "id": "os-c9",
+    "title": { "en": "Course 9: IPC — Anonymous & Named Pipes", "ro": "Cursul 9: IPC — Canale de comunicatie anonime si cu nume" },
+    "shortTitle": { "en": "C9: Pipes & FIFOs", "ro": "C9: Canale & FIFO" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 9 slides", "ro": "Prof. C. Vidrascu — Curs 9" }
+  },
+  "steps": [
+    {
+      "id": "os-c9-ipc-models",
+      "title": { "en": "Inter-Process Communication Models (IPC)", "ro": "Modele de comunicatie intre procese (IPC)" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are two main IPC models: **(a) Shared-memory model** — processes communicate through memory-mapped files or anonymous memory mappings. The OS must provide mechanisms for processes to synchronize access to shared memory (e.g., POSIX semaphores). **(b) Message-passing model** — the OS provides a transmission system where processes communicate by sending and receiving messages, without directly accessing shared variables.",
+            "ro": "Exista doua modele principale de IPC: **(a) Modelul prin memorie partajata** — procesele comunica prin fisiere mapate in memorie sau mapari anonime. SO-ul trebuie sa ofere mecanisme pentru sincronizarea accesului la memoria partajata (ex. semafoare POSIX). **(b) Modelul prin schimb de mesaje** — SO-ul ofera un sistem de transmitere prin care procesele comunica prin trimiterea si primirea de mesaje, fara a accesa direct variabile partajate."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Local Message-Passing Mechanisms", "ro": "Mecanisme locale de schimb de mesaje" },
+          "content": {
+            "en": "For local communication (same machine), the message-passing model is implemented through: **anonymous and named communication channels** (pipes), and **message queues**. For remote communication, **sockets** with communication protocols are used.",
+            "ro": "Pentru comunicatia locala (acelasi calculator), modelul prin schimb de mesaje este implementat prin: **canale de comunicatie anonime si cu nume** (pipe-uri) si **cozi de mesaje**. Pentru comunicatia la distanta, se folosesc **socket-uri** cu protocoale de comunicatie."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Message-passing implementations can be further classified by: **(i) Persistence** — **non-persistent (transient)** communications use pipes (anonymous and named), while **persistent** communications use message queues. **(ii) Transfer completion** — **synchronous** communications use blocking calls, while **asynchronous** communications use non-blocking calls.",
+            "ro": "Implementarile prin schimb de mesaje pot fi clasificate si dupa: **(i) Persistenta** — comunicatiile **nepersistente (tranziente)** folosesc canale (anonime si cu nume), iar comunicatiile **persistente** folosesc cozi de mesaje. **(ii) Finalizarea transferului** — comunicatiile **sincrone** folosesc apeluri blocante, iar comunicatiile **asincrone** folosesc apeluri neblocante."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the key difference between shared-memory IPC and message-passing IPC in terms of the OS role?",
+            "ro": "Care este diferenta cheie intre IPC prin memorie partajata si IPC prin schimb de mesaje din punct de vedere al rolului SO-ului?"
+          },
+          "answer": {
+            "en": "In shared-memory IPC, the OS only sets up the shared region — synchronization is the programmer's responsibility (using semaphores, etc.). In message-passing IPC, the OS actively manages the data transfer through its own kernel-level mechanisms (pipes, queues, sockets), providing built-in ordering and atomicity guarantees.",
+            "ro": "In IPC prin memorie partajata, SO-ul doar configureaza zona partajata — sincronizarea este responsabilitatea programatorului (folosind semafoare etc.). In IPC prin schimb de mesaje, SO-ul gestioneaza activ transferul de date prin mecanismele proprii la nivel de kernel (canale, cozi, socket-uri), oferind garantii de ordonare si atomicitate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-pipe-intro",
+      "title": { "en": "Communication Channels — Introduction", "ro": "Canale de comunicatie — Introducere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A UNIX **communication channel** (pipe) is a conduit where one end is used for writing messages (as sequences of bytes) and the other end for reading them. It behaves as a FIFO queue (**First-In, First-Out**). In practice, a pipe is implemented by the kernel as a FIFO list with a constant capacity, managed in **kernel-space**.",
+            "ro": "Un **canal de comunicatie** UNIX (pipe) este o conducta la un capat al careia se scriu mesajele (ca secvente de octeti), iar la celalalt capat acestea sunt citite. Se comporta ca o coada FIFO (**First-In, First-Out**). In practica, un pipe este implementat de nucleu ca o lista FIFO cu o capacitate constanta, gestionata in **kernel-space**."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Anonymous Pipes", "ro": "Canale anonime" },
+          "content": {
+            "en": "Created in the kernel's internal memory with no associated name in the filesystem. Can only be used for communication between **related** processes (parent-child via `fork`/`exec`).",
+            "ro": "Create in memoria interna a nucleului, fara niciun nume asociat in sistemul de fisiere. Pot fi folosite doar pentru comunicarea intre procese **inrudite** (parinte-copil prin `fork`/`exec`)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Named Pipes (FIFO)", "ro": "Canale cu nume (FIFO)" },
+          "content": {
+            "en": "Also created in the kernel's internal memory, but have an associated name represented by a special **fifo** file in the filesystem. Can be used by **any** processes that know the filename and have appropriate permissions.",
+            "ro": "Create tot in memoria interna a sistemului, dar au asociat un nume, reprezentat printr-un fisier de tip special **fifo** pastrat in sistemul de fisiere. Pot fi folosite de **orice** procese care cunosc numele fisierului si au drepturile de acces necesare."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which type of pipe can be used between unrelated processes?", "ro": "Care tip de canal poate fi folosit intre procese neinrudite?" },
+              "options": [
+                { "text": { "en": "Anonymous pipes only", "ro": "Doar canale anonime" }, "correct": false },
+                { "text": { "en": "Named pipes (FIFO) only", "ro": "Doar canale cu nume (FIFO)" }, "correct": true },
+                { "text": { "en": "Both types equally", "ro": "Ambele tipuri in mod egal" }, "correct": false },
+                { "text": { "en": "Neither — only sockets work", "ro": "Niciunul — doar socket-urile functioneaza" }, "correct": false }
+              ],
+              "explanation": { "en": "Anonymous pipes can only be shared between related processes (via `fork`/`exec`), because the file descriptors must be inherited. Named pipes have a filesystem name, so any process with the right permissions can open them.", "ro": "Canalele anonime pot fi partajate doar intre procese inrudite (prin `fork`/`exec`), deoarece descriptorii de fisiere trebuie mosteniti. Canalele cu nume au un nume in sistemul de fisiere, deci orice proces cu permisiunile potrivite le poate deschide." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c9-anonymous-pipe",
+      "title": { "en": "Anonymous Pipes — Creating with pipe()", "ro": "Canale anonime — Crearea cu pipe()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "An anonymous pipe is created using the `pipe` system call. Its interface is: `int pipe(int pfd[2])`. The parameter **pfd** must be an `int[2]` array that will be filled by the function: **pfd[0]** becomes the file descriptor for the **read end**, and **pfd[1]** becomes the file descriptor for the **write end**. Returns 0 on success, -1 on error.",
+            "ro": "Un canal anonim se creeaza cu ajutorul apelului de sistem `pipe`. Interfata acestuia este: `int pipe(int pfd[2])`. Parametrul **pfd** trebuie sa fie un vector `int[2]` care va fi actualizat de functie: **pfd[0]** va fi descriptorul de fisier pentru **capatul de citire**, iar **pfd[1]** va fi descriptorul de fisier pentru **capatul de scriere**. Returneaza 0 in caz de succes, -1 in caz de eroare."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <unistd.h>\n\nint fds[2];\npipe(fds);\n// fds[0] = read end\n// fds[1] = write end\n\n// Reading from pipe:\nread(fds[0], buf, len);\n\n// Writing to pipe:\nwrite(fds[1], buf, len);"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "After creating the pipe, writing and reading are done using the regular POSIX I/O calls `read` and `write` (or the `stdio` library functions `fscanf`, `fprintf` etc. after converting descriptors to `FILE*` with `fdopen`).",
+            "ro": "Dupa crearea canalului, scrierea si citirea se fac folosind apelurile obisnuite de I/O POSIX `read` si `write` (sau functiile din biblioteca `stdio` precum `fscanf`, `fprintf` etc. dupa conversia descriptorilor la `FILE*` cu `fdopen`)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Anonymous pipes can **only** be used for communication between related processes. The `pipe` call must be made **before** `fork`, so both parent and child inherit the descriptors **pfd[0]** and **pfd[1]**. These descriptors are also inherited through `exec` calls (since open file descriptors survive exec).",
+            "ro": "Canalele anonime pot fi folosite **doar** pentru comunicarea intre procese inrudite. Apelul `pipe` trebuie facut **inainte** de `fork`, astfel incat atat parintele cat si copilul sa mosteneasca descriptorii **pfd[0]** si **pfd[1]**. Acesti descriptori se mostenesc si prin apelurile `exec` (deoarece descriptorii de fisiere deschise supravietuiesc exec)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "If a process closes one end of an anonymous pipe, it **cannot** reopen that end later. This is a key restriction of anonymous pipes that does not apply to named pipes.",
+            "ro": "Daca un proces isi inchide unul dintre capetele unui canal anonim, **nu** mai are posibilitatea de a redeschide ulterior acel capat. Aceasta este o restrictie importanta a canalelor anonime care nu se aplica canalelor cu nume."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-anonymous-demo",
+      "title": { "en": "Demo: Communication Between Two Processes", "ro": "Demo: Comunicatie intre doua procese" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #1** (`pipe_ex1.c`): A producer-consumer program using low-level POSIX I/O (`read`/`write`). The parent creates a pipe and forks a child. The parent reads characters from the keyboard (terminated by CTRL+D / EOF), filters only lowercase letters, and sends them through the pipe. The child reads from the pipe and displays the received characters.",
+            "ro": "**Exemplul #1** (`pipe_ex1.c`): Un program producator-consumator folosind I/O POSIX de nivel scazut (`read`/`write`). Parintele creeaza un canal si un proces fiu prin fork. Parintele citeste caractere de la tastatura (terminate cu CTRL+D / EOF), filtreaza doar literele mici si le trimite prin canal. Procesul fiu citeste din canal si afiseaza caracterele primite."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* pipe_ex1.c — producer-consumer with POSIX read/write */\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <ctype.h>\n#include <sys/wait.h>\n\nint main() {\n    int fds[2];\n    pipe(fds);\n\n    if (fork() == 0) {\n        /* Child: consumer — reads from pipe */\n        close(fds[1]);          /* close write end */\n        char c;\n        while (read(fds[0], &c, 1) > 0)\n            printf(\"%c\", c);\n        close(fds[0]);\n        exit(0);\n    }\n    /* Parent: producer — writes to pipe */\n    close(fds[0]);              /* close read end */\n    char c;\n    while (read(0, &c, 1) > 0) {  /* read from stdin */\n        if (islower(c))\n            write(fds[1], &c, 1);\n    }\n    close(fds[1]);\n    wait(NULL);\n    return 0;\n}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #2** (`pipe_ex2.c`): Same producer-consumer pattern but using high-level `stdio` functions (`fscanf`/`fprintf`). This requires converting file descriptors to `FILE*` pointers using `fdopen`. The parent reads numbers from stdin and sends them through the pipe; the child reads and displays them.",
+            "ro": "**Exemplul #2** (`pipe_ex2.c`): Acelasi sablon producator-consumator dar folosind functii `stdio` de nivel inalt (`fscanf`/`fprintf`). Aceasta necesita conversia descriptorilor de fisiere la pointeri `FILE*` folosind `fdopen`. Parintele citeste numere de la stdin si le trimite prin canal; copilul le citeste si le afiseaza."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "When using `stdio` buffered functions (`fprintf`, `fscanf`) with pipes, remember to call `fflush` after writing to force the buffer to be sent through the pipe. Otherwise, data may remain in the user-space buffer and not reach the reader, causing subtle bugs.",
+            "ro": "Cand folositi functii `stdio` cu buffer (`fprintf`, `fscanf`) cu canale, nu uitati sa apelati `fflush` dupa scriere pentru a forta trimiterea buffer-ului prin canal. Altfel, datele pot ramane in buffer-ul din user-space si sa nu ajunga la cititor, cauzand erori subtile."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-named-pipe-mkfifo",
+      "title": { "en": "Named Pipes — Creating with mkfifo()", "ro": "Canale cu nume — Crearea cu mkfifo()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A named pipe is created using the `mkfifo` system call. Its interface is: `int mkfifo(const char *pathname, mode_t mode)`. The parameter **pathname** is the name of the fifo file to be created, and **mode** specifies the file permissions. Returns 0 on success, -1 on error. The pipe is created **without** automatically opening either end.",
+            "ro": "Un canal cu nume se creeaza cu ajutorul apelului de sistem `mkfifo`. Interfata acestuia este: `int mkfifo(const char *pathname, mode_t mode)`. Parametrul **pathname** este numele fisierului fifo ce va fi creat, iar **mode** specifica permisiunile fisierului. Returneaza 0 in caz de succes, -1 in caz de eroare. Canalul este creat **fara** a deschide automat vreunul din capete."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/types.h>\n#include <sys/stat.h>\n\n// Create a named pipe (FIFO file)\nint mkfifo(const char *pathname, mode_t mode);\n\n// Example:\nmkfifo(\"/tmp/my_fifo\", 0666);\n\n// Alternative: using mknod with S_IFIFO flag\nmknod(\"/tmp/my_fifo\", S_IFIFO | 0666, 0);\n\n// Or from the command line:\n// $ mkfifo /tmp/my_fifo\n// $ mknod /tmp/my_fifo p"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "A FIFO file can also be created using `mknod` with the `S_IFIFO` flag, or directly from the command line using `mkfifo` or `mknod` commands. The fifo file will persist in the filesystem even after all processes close it.",
+            "ro": "Un fisier FIFO poate fi creat si cu `mknod` cu flag-ul `S_IFIFO`, sau direct din linia de comanda cu comenzile `mkfifo` sau `mknod`. Fisierul fifo va persista in sistemul de fisiere chiar si dupa ce toate procesele il inchid."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-named-pipe-usage",
+      "title": { "en": "Named Pipes — Usage and Opening", "ro": "Canale cu nume — Utilizare si deschidere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "After creating a named pipe, processes communicate by **explicitly** opening the fifo file using `open` (or `fopen`). The desired end must be specified via the open mode: **read & write** (both ends), **read-only** (read end only), or **write-only** (write end only). Reading and writing use the same `read`/`write` calls (or `stdio` functions) as with regular files.",
+            "ro": "Dupa crearea unui canal cu nume, procesele comunica **deschizand explicit** fisierul fifo cu `open` (sau `fopen`). Capatul dorit se specifica prin modul de deschidere: **read & write** (ambele capete), **read-only** (doar capatul de citire) sau **write-only** (doar capatul de scriere). Citirea si scrierea folosesc aceleasi apeluri `read`/`write` (sau functii `stdio`) ca la fisierele obisnuite."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "By default, opening a named pipe is **blocking**: a read-only open blocks until another process opens the write end, and vice versa. This means processes must coordinate — one opens for reading and another for writing, or both will block indefinitely.",
+            "ro": "Implicit, deschiderea unui canal cu nume este **blocanta**: o deschidere read-only se blocheaza pana cand alt proces deschide capatul de scriere, si invers. Aceasta inseamna ca procesele trebuie sa se coordoneze — unul deschide pentru citire si altul pentru scriere, altfel ambele se vor bloca nedefinit."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What are the three key differences between named pipes and anonymous pipes?",
+            "ro": "Care sunt cele trei diferente cheie intre canalele cu nume si canalele anonime?"
+          },
+          "answer": {
+            "en": "1) **mkfifo does not auto-open** — unlike `pipe()` which returns two open descriptors, `mkfifo` just creates the file; processes must explicitly `open` it. 2) **Any process can open it** — not just related processes, as long as they know the filename and have permissions. 3) **Reopenable** — after closing one end, a process can reopen it by calling `open` again on the fifo file; anonymous pipes cannot be reopened once closed.",
+            "ro": "1) **mkfifo nu deschide automat** — spre deosebire de `pipe()` care returneaza doi descriptori deschisi, `mkfifo` doar creeaza fisierul; procesele trebuie sa il deschida explicit cu `open`. 2) **Orice proces il poate deschide** — nu doar cele inrudite, atata timp cat cunosc numele si au permisiunile necesare. 3) **Poate fi redeschis** — dupa inchiderea unui capat, procesul il poate redeschide apeland `open` din nou pe fisierul fifo; canalele anonime nu pot fi redeschise."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-fifo-persistence",
+      "title": { "en": "Data Persistence in FIFO Files", "ro": "Persistenta informatiei in fisiere FIFO" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A named pipe is created in the kernel's internal memory (like anonymous pipes) but also has a name represented by a **fifo** file in the filesystem. The information contained in fifo files is stored in main memory, not on disk, and is therefore **not persistent**. The kernel manages the FIFO queue in memory.",
+            "ro": "Un canal cu nume este creat in memoria interna a nucleului (la fel ca cele anonime) dar are si un nume reprezentat de un fisier **fifo** in sistemul de fisiere. Informatiile continute in fisierele fifo sunt stocate in memoria principala, nu pe disc, si deci **nu sunt persistente**. Nucleul SO gestioneaza coada FIFO din memorie."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "FIFO Retention Period", "ro": "Perioada de retentie FIFO" },
+          "content": {
+            "en": "Data written to a **fifo** is retained only from the moment of writing until the moment the writing process closes all access to that fifo (closing the channel endpoints). Unlike regular files, data is not preserved on disk. Once consumed by reading, the data is destroyed (FIFO behavior).",
+            "ro": "Datele scrise intr-un **fifo** sunt pastrate doar din momentul scrierii pana in momentul in care procesul care a scris inchide tot accesul la acel fifo (inchizand capetele canalului). Spre deosebire de fisierele obisnuite, datele nu sunt pastrate pe disc. Odata consumate prin citire, datele sunt distruse (comportament FIFO)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens to data stored in a named pipe (fifo) when all processes close the channel?", "ro": "Ce se intampla cu datele stocate intr-un canal cu nume (fifo) cand toate procesele inchid canalul?" },
+              "options": [
+                { "text": { "en": "Data is saved to disk in the fifo file", "ro": "Datele sunt salvate pe disc in fisierul fifo" }, "correct": false },
+                { "text": { "en": "Data is lost — it only existed in kernel memory", "ro": "Datele se pierd — existau doar in memoria nucleului" }, "correct": true },
+                { "text": { "en": "Data remains in memory until system reboot", "ro": "Datele raman in memorie pana la repornirea sistemului" }, "correct": false },
+                { "text": { "en": "The fifo file is deleted from the filesystem", "ro": "Fisierul fifo este sters din sistemul de fisiere" }, "correct": false }
+              ],
+              "explanation": { "en": "FIFO data exists only in kernel memory. When all processes close the channel, unread data is lost. However, the fifo **file** itself (the name entry) persists in the filesystem — only the data content is lost.", "ro": "Datele FIFO exista doar in memoria nucleului. Cand toate procesele inchid canalul, datele necitite se pierd. Totusi, **fisierul** fifo (intrarea de nume) persista in sistemul de fisiere — doar continutul de date se pierde." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c9-common-characteristics",
+      "title": { "en": "Common Characteristics of Both Pipe Types", "ro": "Caracteristici comune ambelor tipuri de canale" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Both anonymous and named pipes are **unidirectional** — data is written at one end and read at the opposite end. However, there can be multiple writers and/or multiple readers on the same channel. The unit of information is the **byte** (minimum read/write is 1 byte).",
+            "ro": "Atat canalele anonime cat si cele cu nume sunt **unidirectionale** — informatia se scrie la un capat si se citeste la capatul opus. Totusi, pot exista mai multi scriitori si/sau mai multi cititori pe acelasi canal. Unitatea de informatie este **octetul** (minimum de citire/scriere este 1 octet)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The capacity of a pipe is limited to a configurable maximum size (e.g., 4 KB, 8 KB, 16 KB, 32 KB, ..., 1024 KB). In Linux (since version 2.6.35), the capacity can be queried and configured using `fcntl` with `F_GETPIPE_SZ` and `F_SETPIPE_SZ`.",
+            "ro": "Capacitatea unui canal este limitata la o dimensiune maxima configurabila (ex. 4 KB, 8 KB, 16 KB, 32 KB, ..., 1024 KB). In Linux (incepand de la versiunea 2.6.35), capacitatea poate fi aflata si configurata folosind `fcntl` cu `F_GETPIPE_SZ` si `F_SETPIPE_SZ`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Both types function as a FIFO queue: reading **consumes** data from the channel (unlike regular files where reading does not destroy content). There is **no offset** concept for pipes — they are not seekable. Reading from a fifo file differs from reading a regular file precisely because reading consumes the information.",
+            "ro": "Ambele tipuri functioneaza ca o coada FIFO: citirea **consuma** datele din canal (spre deosebire de fisierele obisnuite unde citirea nu distruge continutul). **Nu exista** conceptul de offset pentru canale — nu sunt seekable. Citirea dintr-un fisier fifo difera de citirea unui fisier obisnuit tocmai prin faptul ca citirea consuma informatia."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <fcntl.h>\n\n// Query pipe capacity (Linux >= 2.6.35)\nint capacity = fcntl(fd, F_GETPIPE_SZ);\n\n// Set pipe capacity\nfcntl(fd, F_SETPIPE_SZ, new_size);"
+        }
+      ]
+    },
+    {
+      "id": "os-c9-blocking-behavior",
+      "title": { "en": "Default Blocking Behavior", "ro": "Comportamentul implicit, de tip blocant" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Reading** from a pipe works as follows: If data is available, `read` returns immediately with the number of bytes read. If the channel is **empty** but writers still have it open, `read` **blocks** until data becomes available. If the channel is empty and **no writer** has it open (all write ends closed), `read` returns 0 (EOF).",
+            "ro": "**Citirea** dintr-un canal functioneaza astfel: Daca exista date disponibile, `read` returneaza imediat numarul de octeti cititi. Daca canalul este **gol** dar scriitorii inca il au deschis, `read` se **blocheaza** pana cand devin disponibile date. Daca canalul este gol si **niciun scriitor** nu il mai are deschis (toate capetele de scriere inchise), `read` returneaza 0 (EOF)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "To read EOF from a pipe, **all** processes must first close the write end. This is a common source of deadlocks: if the reading process forgets to close its own copy of the write descriptor, it will block forever waiting for EOF that never comes.",
+            "ro": "Pentru a citi EOF dintr-un canal, **toate** procesele trebuie sa inchida mai intai capatul de scriere. Aceasta este o sursa frecventa de deadlock-uri: daca procesul cititor uita sa isi inchida propria copie a descriptorului de scriere, se va bloca pentru totdeauna asteptand un EOF care nu vine niciodata."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Writing** to a pipe works as follows: If there is enough free space, `write` returns immediately with the number of bytes written. If the channel is **full**, `write` **blocks** until enough space becomes available (when a reader consumes data). If no reader has the channel open (all read ends closed), the system sends the **SIGPIPE** signal to the writing process, causing forced termination without an error message.",
+            "ro": "**Scrierea** intr-un canal functioneaza astfel: Daca exista suficient spatiu liber, `write` returneaza imediat numarul de octeti scrisi. Daca canalul este **plin**, `write` se **blocheaza** pana cand devine disponibil suficient spatiu (cand un cititor consuma date). Daca niciun cititor nu mai are canalul deschis (toate capetele de citire inchise), sistemul trimite semnalul **SIGPIPE** procesului scriitor, cauzand terminarea fortata fara mesaj de eroare."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does writing to a pipe with no readers cause SIGPIPE instead of just returning an error?",
+            "ro": "De ce scrierea intr-un canal fara cititori cauzeaza SIGPIPE in loc sa returneze pur si simplu o eroare?"
+          },
+          "answer": {
+            "en": "SIGPIPE is a safety mechanism: if the reader has crashed or exited, continuing to write is pointless and would waste resources. The signal provides immediate notification. If caught or ignored, `write` will return -1 with `errno` set to `EPIPE`, allowing the program to handle the situation gracefully. Older Linux versions called this a \"Broken pipe\" error.",
+            "ro": "SIGPIPE este un mecanism de siguranta: daca cititorul a esuat sau s-a terminat, continuarea scrierii este inutila si ar irosi resurse. Semnalul ofera notificare imediata. Daca este prins sau ignorat, `write` va returna -1 cu `errno` setat la `EPIPE`, permitand programului sa gestioneze situatia. Versiunile mai vechi de Linux numeau aceasta eroare \"Broken pipe\"."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens when a process calls read() on an empty pipe where the write end is still open by another process?", "ro": "Ce se intampla cand un proces apeleaza read() pe un canal gol unde capatul de scriere este inca deschis de alt proces?" },
+              "options": [
+                { "text": { "en": "read() returns 0 (EOF)", "ro": "read() returneaza 0 (EOF)" }, "correct": false },
+                { "text": { "en": "read() returns -1 with an error", "ro": "read() returneaza -1 cu o eroare" }, "correct": false },
+                { "text": { "en": "read() blocks until data is available", "ro": "read() se blocheaza pana cand sunt disponibile date" }, "correct": true },
+                { "text": { "en": "The process receives SIGPIPE", "ro": "Procesul primeste SIGPIPE" }, "correct": false }
+              ],
+              "explanation": { "en": "In blocking mode (default), `read` on an empty pipe blocks as long as at least one write descriptor is still open. It returns 0 (EOF) only when ALL write ends are closed. SIGPIPE is sent only when writing to a pipe with no readers.", "ro": "In modul blocant (implicit), `read` pe un canal gol se blocheaza atata timp cat cel putin un descriptor de scriere este inca deschis. Returneaza 0 (EOF) doar cand TOATE capetele de scriere sunt inchise. SIGPIPE este trimis doar la scrierea intr-un canal fara cititori." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c9-nonblocking",
+      "title": { "en": "Non-Blocking Behavior", "ro": "Comportamentul de tip neblocant" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The default blocking behavior can be changed to **non-blocking** for both pipe types. In non-blocking mode, `read` and `write` calls no longer block on empty/full channels — instead they return -1 immediately with `errno` set to `EAGAIN`. Each end of the pipe can have its behavior changed **independently**.",
+            "ro": "Comportamentul implicit blocant poate fi modificat in **neblocant** pentru ambele tipuri de canale. In modul neblocant, apelurile `read` si `write` nu se mai blocheaza pe canale goale/pline — in schimb returneaza imediat -1 cu `errno` setat la `EAGAIN`. Fiecare capat al canalului poate avea comportamentul modificat **independent**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `O_NONBLOCK` attribute can be set in two ways: **(1)** At open time (named pipes only): `fd_out = open(\"pathname\", O_WRONLY | O_NONBLOCK);` — this also makes the `open` call itself non-blocking for named pipes. **(2)** After opening, using `fcntl`: `fcntl(fd_out, F_SETFL, O_NONBLOCK);` — this works for both pipe types.",
+            "ro": "Atributul `O_NONBLOCK` poate fi setat in doua moduri: **(1)** La deschidere (doar canale cu nume): `fd_out = open(\"pathname\", O_WRONLY | O_NONBLOCK);` — aceasta face si apelul `open` neblocant pentru canalele cu nume. **(2)** Dupa deschidere, cu `fcntl`: `fcntl(fd_out, F_SETFL, O_NONBLOCK);` — functioneaza pentru ambele tipuri de canale."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <fcntl.h>\n\n// Method 1: Set O_NONBLOCK at open time (named pipes only)\nint fd_out = open(\"/tmp/my_fifo\", O_WRONLY | O_NONBLOCK);\n\n// Method 2: Set O_NONBLOCK after opening (both pipe types)\nfcntl(fd_out, F_SETFL, O_NONBLOCK);"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "For named pipes, a **non-blocking** `open` of one end will succeed immediately without waiting for the other end to be opened. In contrast, a blocking `open` (default) waits until another process opens the opposite end.",
+            "ro": "Pentru canalele cu nume, un `open` **neblocant** al unui capat va reusi imediat fara a astepta deschiderea celuilalt capat. In contrast, un `open` blocant (implicit) asteapta pana cand alt proces deschide capatul opus."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-buffered-io",
+      "title": { "en": "Buffered I/O Warning (stdio with Pipes)", "ro": "Atentie la I/O cu buffer (stdio cu canale)" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Instead of `read`/`write`, you can use `stdio` library functions (`fscanf`, `fprintf`, `fread`, `fwrite`) by converting descriptors with `fdopen`. These functions have the same **blocking** behavior, but they work with a **user-space buffer**. This buffering can cause hard-to-debug errors.",
+            "ro": "In locul `read`/`write`, puteti folosi functii din biblioteca `stdio` (`fscanf`, `fprintf`, `fread`, `fwrite`) prin conversia descriptorilor cu `fdopen`. Aceste functii au acelasi comportament **blocant**, dar lucreaza cu un **buffer in user-space**. Acest buffering poate cauza erori greu de depanat."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The `stdio` buffer can cause data to remain stuck in user-space after a write call, never reaching the pipe. Always use `fflush` immediately after writing to force the buffer into the channel. A reader process waiting for this data may remain blocked indefinitely because the data sits in the writer's buffer, not in the kernel pipe. This is one of the most common bugs in student programs.",
+            "ro": "Buffer-ul `stdio` poate face ca datele sa ramana blocate in user-space dupa un apel de scriere, fara sa ajunga in canal. Folositi intotdeauna `fflush` imediat dupa scriere pentru a forta trimiterea buffer-ului in canal. Un proces cititor care asteapta aceste date poate ramane blocat nedefinit deoarece datele stau in buffer-ul scriitorului, nu in canalul din kernel. Aceasta este una dintre cele mai frecvente erori in programele studentilor."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-communication-patterns",
+      "title": { "en": "IPC Communication Patterns", "ro": "Sabloane de comunicatie inter-procese" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Based on the number of writer and reader processes using a channel, there are four communication patterns: **one-to-one** (1 writer, 1 reader), **one-to-many** (1 writer, many readers), **many-to-one** (many writers, 1 reader), and **many-to-many** (many writers, many readers).",
+            "ro": "In functie de numarul de procese scriitor si cititor care folosesc un canal, exista patru sabloane de comunicatie: **unul-la-unul** (1 scriitor, 1 cititor), **unul-la-multi** (1 scriitor, multi cititori), **multi-la-unul** (multi scriitori, 1 cititor) si **multi-la-multi** (multi scriitori, multi cititori)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "One-to-One Pattern", "ro": "Sablonul unul-la-unul" },
+          "content": {
+            "en": "The simplest pattern: one writer and one reader. Poses no special synchronization problems. Both demo programs (`pipe_ex1.c`, `pipe_ex2.c`) use this pattern.",
+            "ro": "Cel mai simplu sablon: un scriitor si un cititor. Nu ridica probleme speciale de sincronizare. Ambele programe demonstrative (`pipe_ex1.c`, `pipe_ex2.c`) folosesc acest sablon."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The other three patterns can cause **synchronization problems** that affect **data integrity** (message \"corruption\"). These issues arise from: **(1) message length** — constant-length messages are atomic and safe, but variable-length messages may get interleaved; **(2) message recipient** — arbitrary recipients are simple, but specific recipients require a header with destination ID; **(3) message sender** — arbitrary senders are simple, but specific senders require a header with sender ID.",
+            "ro": "Celelalte trei sabloane pot cauza **probleme de sincronizare** care afecteaza **integritatea datelor** (\"coruperea\" mesajelor). Aceste probleme provin din: **(1) lungimea mesajelor** — mesajele de lungime constanta sunt atomice si sigure, dar cele de lungime variabila pot fi intercalate; **(2) destinatarul mesajelor** — destinatarii arbitrari sunt simpli, dar destinatarii specifici necesita un header cu ID-ul destinatarului; **(3) expeditorul mesajelor** — expeditorii arbitrari sunt simpli, dar expeditorii specifici necesita un header cu ID-ul expeditorului."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-variable-messages",
+      "title": { "en": "Formatted Messages with Headers", "ro": "Mesaje formatate cu header" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "For variable-length messages in one-to-many and many-to-one patterns, the solution is to use **formatted messages**: `MESSAGE = HEADER + PAYLOAD`, where the **header** has a fixed size and contains the length of the payload. The communication protocol then requires two `read` calls: first read the header to learn the message length, then read exactly that many bytes for the payload.",
+            "ro": "Pentru mesaje de lungime variabila in sabloanele unul-la-multi si multi-la-unul, solutia este folosirea **mesajelor formatate**: `MESAJ = HEADER + MESAJUL PROPRIU-ZIS`, unde **header-ul** are o dimensiune fixa si contine lungimea mesajului propriu-zis. Protocolul de comunicatie necesita doua apeluri `read`: mai intai se citeste header-ul pentru a afla lungimea mesajului, apoi se citesc exact atatia octeti pentru payload."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "For **specific recipients** (one-to-many), the header additionally contains a **destination identifier**. A reader that receives a message not intended for it must write it back to the channel and try again. This can cause **starvation** if messages keep cycling. For **specific senders** (many-to-one), the header contains a **sender identifier**. Writing a formatted message can be done atomically with a single `write` call (just like constant-length messages).",
+            "ro": "Pentru **destinatari specifici** (unul-la-multi), header-ul contine suplimentar un **identificator de destinatie**. Un cititor care primeste un mesaj care nu ii este destinat trebuie sa il scrie inapoi in canal si sa incerce din nou. Aceasta poate cauza **starvation** daca mesajele se recicleaza continuu. Pentru **expeditori specifici** (multi-la-unul), header-ul contine un **identificator de expeditor**. Scrierea unui mesaj formatat se poate face atomic cu un singur apel `write` (la fel ca mesajele de lungime constanta)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "For simplicity, the one-to-many pattern can be replaced by multiple one-to-one channels (one per reader). Similarly, many-to-one and many-to-many can be simplified using one channel per communication pair. The supervisor-worker pattern from the lab exercises uses this approach.",
+            "ro": "Pentru simplitate, sablonul unul-la-multi poate fi inlocuit cu mai multe canale unul-la-unul (cate unul per cititor). Similar, multi-la-unul si multi-la-multi pot fi simplificate folosind un canal per pereche de comunicatie. Sablonul supervisor-worker din exercitiile de laborator foloseste aceasta abordare."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "In a many-to-one pipe, what problem can arise with variable-length messages?", "ro": "Intr-un canal multi-la-unul, ce problema poate aparea cu mesaje de lungime variabila?" },
+              "options": [
+                { "text": { "en": "Messages are lost", "ro": "Mesajele se pierd" }, "correct": false },
+                { "text": { "en": "Messages can be interleaved (corrupted)", "ro": "Mesajele pot fi intercalate (corupte)" }, "correct": true },
+                { "text": { "en": "Only one writer can use the pipe at a time", "ro": "Doar un scriitor poate folosi canalul la un moment dat" }, "correct": false },
+                { "text": { "en": "The pipe capacity doubles", "ro": "Capacitatea canalului se dubleaza" }, "correct": false }
+              ],
+              "explanation": { "en": "With multiple writers sending variable-length messages, if a message is larger than `PIPE_BUF` (the atomic write limit), it may not be written atomically. Bytes from different writers can interleave, corrupting the data. The solution is formatted messages (HEADER + PAYLOAD) written in a single atomic `write`.", "ro": "Cu mai multi scriitori care trimit mesaje de lungime variabila, daca un mesaj este mai mare decat `PIPE_BUF` (limita de scriere atomica), s-ar putea sa nu fie scris atomic. Octetii de la scriitori diferiti se pot intercala, corupand datele. Solutia este mesaje formatate (HEADER + PAYLOAD) scrise intr-un singur `write` atomic." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c9-app-semaphore",
+      "title": { "en": "Application #1: Implementing a Semaphore with FIFO", "ro": "Aplicatia #1: Implementarea unui semafor cu FIFO" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A semaphore can be implemented using a named pipe (fifo). The idea: A **supervisor** process creates the fifo file and writes 1 byte (for a binary semaphore) or **n** bytes (for a general semaphore of value n). It then keeps both ends open for the entire duration so the data persists in the channel (due to FIFO retention rules).",
+            "ro": "Un semafor poate fi implementat folosind un canal cu nume (fifo). Ideea: Un proces **supervisor** creeaza fisierul fifo si scrie 1 octet (pentru semafor binar) sau **n** octeti (pentru semafor general cu valoarea n). Apoi pastreaza ambele capete deschise pe toata durata, astfel incat datele sa persiste in canal (conform regulilor de retentie FIFO)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Wait Operation (P)", "ro": "Operatia Wait (P)" },
+          "content": {
+            "en": "Consists of **reading** one byte from the fifo file: open, read one byte (blocks if fifo is empty = semaphore is \"red\"), then close. The blocking read naturally provides the waiting semantics.",
+            "ro": "Consta in **citirea** unui octet din fisierul fifo: deschidere, citirea unui octet (se blocheaza daca fifo-ul este gol = semaforul este \"pe rosu\"), apoi inchidere. Citirea blocanta ofera natural semantica de asteptare."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Signal Operation (V)", "ro": "Operatia Signal (V)" },
+          "content": {
+            "en": "Consists of **writing** one byte to the fifo file: open, write one byte, then close. The write will block if the channel is full (the semaphore's maximum value equals the pipe's maximum capacity).",
+            "ro": "Consta in **scrierea** unui octet in fisierul fifo: deschidere, scrierea unui octet, apoi inchidere. Scrierea se va bloca daca canalul este plin (valoarea maxima a semaforului este egala cu capacitatea maxima a canalului)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why must the supervisor keep both ends of the FIFO open during the entire execution?",
+            "ro": "De ce trebuie supervisorul sa pastreze ambele capete ale FIFO-ului deschise pe toata durata executiei?"
+          },
+          "answer": {
+            "en": "Due to the FIFO retention rules: data persists in the channel only as long as some process has the endpoints open. If the supervisor closed both ends, the data (semaphore value bytes) would be lost. Additionally, keeping both ends open prevents any process that opens the fifo from blocking on the open call (since both a reader and writer already exist).",
+            "ro": "Din cauza regulilor de retentie FIFO: datele persista in canal doar cat timp un proces are capetele deschise. Daca supervisorul ar inchide ambele capete, datele (octetii valorii semaforului) s-ar pierde. In plus, pastrarea ambelor capete deschise previne blocarea oricarui proces la apelul open (deoarece exista deja un cititor si un scriitor)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c9-app-client-server",
+      "title": { "en": "Application #2: Client/Server Architecture", "ro": "Aplicatia #2: Arhitectura client/server" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A **client/server** application has two components: the **server** provides services (functions, operations) to clients, and the **client** queries the server to request a service. The server runs in the **background**, waiting for client requests and serving multiple clients simultaneously.",
+            "ro": "O aplicatie **client/server** are doua componente: **serverul** ofera servicii (functii, operatii) clientilor, iar **clientul** interogheaza serverul pentru a solicita un serviciu. Serverul ruleaza in **background**, asteptand cererile clientilor si servind mai multi clienti simultan."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Iterative Server", "ro": "Server iterativ" },
+          "content": {
+            "en": "A server that handles one client request at a time, sequentially. While resolving a request, it **cannot** respond to other clients. Simpler to implement but cannot serve multiple clients simultaneously.",
+            "ro": "Un server care gestioneaza o cerere de client la un moment dat, secvential. Cat timp rezolva o cerere, **nu poate** raspunde altor clienti. Mai simplu de implementat dar nu poate servi mai multi clienti simultan."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Concurrent Server", "ro": "Server concurent" },
+          "content": {
+            "en": "A server that can handle multiple client requests simultaneously. Implemented using a **supervisor** process that accepts requests and forks **worker** child processes (one per client). The supervisor immediately returns to accept new requests without waiting for workers to finish. Can also be implemented with a multi-threaded process.",
+            "ro": "Un server care poate gestiona mai multe cereri de clienti simultan. Implementat folosind un proces **supervisor** care accepta cereri si creeaza procese **worker** fiu (cate unul per client). Supervisorul revine imediat la acceptarea de cereri noi fara sa astepte terminarea worker-ilor. Poate fi implementat si cu un proces multi-threaded."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Implementation using named pipes: The server creates a well-known **fifo** with a known name and waits for client connections. Each client opens this fifo, sends identification information, and the server creates **additional private fifos** for that specific client (to avoid mixing communications between different clients). Named pipes are required (not anonymous) because server and client are not related via `fork`/`exec`. File permissions must allow execution from **different user accounts**.",
+            "ro": "Implementare folosind canale cu nume: Serverul creeaza un **fifo** bine-cunoscut cu un nume predefinit si asteapta conexiuni de la clienti. Fiecare client deschide acest fifo, trimite informatii de identificare, iar serverul creeaza **fifo-uri private suplimentare** pentru acel client specific (pentru a evita amestecarea comunicatiilor intre clienti diferiti). Canalele cu nume sunt necesare (nu anonime) deoarece serverul si clientul nu sunt inruditi prin `fork`/`exec`. Permisiunile fisierelor trebuie sa permita executia din **conturi de utilizator diferite**."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Why must a client/server implementation use named pipes instead of anonymous pipes?", "ro": "De ce trebuie o implementare client/server sa foloseasca canale cu nume in loc de canale anonime?" },
+              "options": [
+                { "text": { "en": "Named pipes are faster", "ro": "Canalele cu nume sunt mai rapide" }, "correct": false },
+                { "text": { "en": "Anonymous pipes cannot handle multiple clients", "ro": "Canalele anonime nu pot gestiona mai multi clienti" }, "correct": false },
+                { "text": { "en": "Server and client are not related processes (no fork/exec)", "ro": "Serverul si clientul nu sunt procese inrudite (fara fork/exec)" }, "correct": true },
+                { "text": { "en": "Named pipes support larger messages", "ro": "Canalele cu nume suporta mesaje mai mari" }, "correct": false }
+              ],
+              "explanation": { "en": "Anonymous pipes can only be shared between related processes (parent-child via fork/exec). In a client/server architecture, the server and clients are independent programs run by potentially different users, so they need named pipes (which can be opened by any process knowing the filename).", "ro": "Canalele anonime pot fi partajate doar intre procese inrudite (parinte-copil prin fork/exec). Intr-o arhitectura client/server, serverul si clientii sunt programe independente rulate potential de utilizatori diferiti, deci au nevoie de canale cu nume (care pot fi deschise de orice proces care cunoaste numele fisierului)." }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

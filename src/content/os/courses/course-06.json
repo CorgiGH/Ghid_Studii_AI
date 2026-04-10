@@ -1,0 +1,461 @@
+{
+  "meta": {
+    "id": "os-c6",
+    "title": { "en": "Course 6: Process Creation & Synchronization — fork() and wait()", "ro": "Cursul 6: Crearea si sincronizarea proceselor — fork() si wait()" },
+    "shortTitle": { "en": "C6: fork() & wait()", "ro": "C6: fork() & wait()" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 6 slides", "ro": "Prof. C. Vidrascu — Curs 6" }
+  },
+  "steps": [
+    {
+      "id": "os-c6-intro",
+      "title": { "en": "Introduction: Programs vs Processes", "ro": "Introducere: Programe vs Procese" },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Program", "ro": "Program" },
+          "content": {
+            "en": "An **executable file** obtained by compiling a source file, stored on secondary storage (e.g. hard disk, SSD, USB stick).",
+            "ro": "Un **fisier executabil** obtinut prin compilare dintr-un fisier sursa, aflat pe un suport de stocare secundara (e.g. hard disk, SSD, stick USB)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Process", "ro": "Proces" },
+          "content": {
+            "en": "A program that is currently executing. More precisely, a process is an **execution instance** of a program, characterized by: a lifetime, allocated memory (code + data + stacks), CPU time allocated by the OS scheduler, and other resources needed for execution.",
+            "ro": "Un program aflat in curs de executie. Mai precis, un proces este o **instanta de executie** a unui program, caracterizat de: o durata de viata, memorie alocata (cod + date + stive), timp procesor alocat de planificatorul SO-ului si alte resurse necesare executiei."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Can the same program produce multiple processes at the same time? Why would this happen?",
+            "ro": "Poate acelasi program sa produca mai multe procese in acelasi timp? De ce s-ar intampla asta?"
+          },
+          "answer": {
+            "en": "Yes. A process is an execution instance, so the same executable file can be launched multiple times, creating multiple independent processes. For example, multiple users running the same text editor simultaneously each have their own process with separate memory and state.",
+            "ro": "Da. Un proces este o instanta de executie, deci acelasi fisier executabil poate fi lansat de mai multe ori, creand mai multe procese independente. De exemplu, mai multi utilizatori care ruleaza acelasi editor de text simultan au fiecare propriul proces cu memorie si stare separate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c6-process-table",
+      "title": { "en": "Process Table & PCB", "ro": "Tabela proceselor si PCB" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The OS kernel maintains a **process table** that tracks all active processes in the system. This table contains one entry for each existing process, called a **PCB** (Process Control Block), which stores associated information about that process.",
+            "ro": "Nucleul SO pastreaza evidenta proceselor din sistem cu ajutorul unei **tabele a proceselor active**. Aceasta tabela contine cate o intrare pentru fiecare proces existent, numita **PCB** (Process Control Block), care contine informatii despre procesul asociat."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each PCB entry contains: **PID** (process identifier, type `pid_t` defined in `sys/types.h`), **PPID** (parent PID), **UID/GID** (real owner/group), **EUID/EGID** (effective user/group that determines resource access rights), the **terminal** of control, the **command line** used to launch it, **environment variables** inherited from the parent, the **current state** (ready, running, waiting, or finished/zombie), and hardware context.",
+            "ro": "Fiecare intrare PCB contine: **PID** (identificatorul procesului, tip `pid_t` definit in `sys/types.h`), **PPID** (PID-ul parintelui), **UID/GID** (proprietar/grup real), **EUID/EGID** (utilizator/grup efectiv ce determina drepturile de acces la resurse), **terminalul** de control, **linia de comanda** de lansare, **variabilele de mediu** mostenite de la parinte, **starea curenta** (ready, running, waiting sau finished/zombie) si contextul hardware."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "If the **setuid** bit is set to 1, the effective owner of the process will be the owner of the executable file, not the user who launched it. Similarly for the **setgid** bit. This is how commands like `passwd` can modify `/etc/shadow` even when run by a normal user.",
+            "ro": "Daca bitul **setuid** este setat pe 1, proprietarul efectiv al procesului va fi proprietarul fisierului executabil, nu utilizatorul care il executa. Similar pentru bitul **setgid**. Asa pot comenzi precum `passwd` sa modifice `/etc/shadow` chiar cand sunt rulate de un utilizator obisnuit."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does the EUID of a process determine?", "ro": "Ce determina EUID-ul unui proces?" },
+              "options": [
+                { "text": { "en": "The user who launched the process", "ro": "Utilizatorul care a lansat procesul" }, "correct": false },
+                { "text": { "en": "The resource access rights of the process", "ro": "Drepturile de acces la resurse ale procesului" }, "correct": true },
+                { "text": { "en": "The parent process identity", "ro": "Identitatea procesului parinte" }, "correct": false },
+                { "text": { "en": "The process priority", "ro": "Prioritatea procesului" }, "correct": false }
+              ],
+              "explanation": { "en": "EUID (Effective User ID) determines the actual access rights the process has. It may differ from the real UID when the setuid bit is set on the executable.", "ro": "EUID (Effective User ID) determina drepturile efective de acces ale procesului. Poate diferi de UID-ul real cand bitul setuid este setat pe executabil." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c6-process-info",
+      "title": { "en": "Primitives for Process Information", "ro": "Primitive pentru informatii despre procese" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "To find the PID of the current process and its parent, use `getpid` and `getppid`. To find the real/effective UID and GID, use `getuid`/`geteuid` and `getgid`/`getegid`.",
+            "ro": "Pentru aflarea PID-ului procesului curent si al parintelui, se folosesc `getpid` si `getppid`. Pentru aflarea UID-ului/GID-ului real/efectiv, se folosesc `getuid`/`geteuid` si `getgid`/`getegid`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Process ID primitives\npid_t getpid(void);    // returns PID of current process\npid_t getppid(void);   // returns PID of parent process\n\n// User/Group ID primitives\nuid_t getuid(void);    // real user ID\nuid_t geteuid(void);   // effective user ID\ngid_t getgid(void);    // real group ID\ngid_t getegid(void);   // effective group ID"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `getrlimit` and `setrlimit` primitives allow querying and setting soft/hard resource limits. The `sysconf` function retrieves system configuration constants. See `man 2 getrlimit` and `man 3 sysconf` for details.",
+            "ro": "Primitivele `getrlimit` si `setrlimit` permit aflarea si setarea unor limite (soft si hard) pentru diverse tipuri de resurse. Functia `sysconf` permite aflarea unor constante de configurare a sistemului. Consultati `man 2 getrlimit` si `man 3 sysconf` pentru detalii."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c6-sleep",
+      "title": { "en": "Primitives for Suspending Execution", "ro": "Primitive pentru suspendarea executiei" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are three primitives for suspending program execution for a specified duration: **sleep** (seconds precision), **usleep** (microseconds precision), and **nanosleep** (nanoseconds precision, the most efficient and POSIX-recommended).",
+            "ro": "Exista trei primitive pentru suspendarea executiei programului pe o durata specificata: **sleep** (precizie de ordinul secundelor), **usleep** (precizie de ordinul microsecundelor) si **nanosleep** (precizie de ordinul nanosecundelor, cea mai eficienta si recomandata de POSIX)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Second-precision sleep\nunsigned int sleep(unsigned int nr_seconds);\n\n// Microsecond-precision sleep\nint usleep(useconds_t nr_microseconds);\n\n// Nanosecond-precision sleep (most efficient, POSIX)\nint nanosleep(const struct timespec *req, struct timespec *rem);"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The actual pause duration may be slightly longer than specified due to hardware precision limitations. On Linux, time measurement precision depends on the hardware; see `man 7 time`. Also, if a sleep is interrupted by a signal, the `nanosleep` function stores the remaining time in `rem` so you can resume the sleep.",
+            "ro": "Durata efectiva de pauza poate fi putin mai mare decat valoarea specificata, din cauza limitarilor de precizie hardware. Pe Linux, precizia masurarii timpului depinde de hardware; consultati `man 7 time`. De asemenea, daca un sleep este intrerupt de un semnal, functia `nanosleep` salveaza timpul ramas in `rem` pentru a putea relua pauza."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which sleep primitive is the most efficient and recommended by POSIX?", "ro": "Care primitiva de sleep este cea mai eficienta si recomandata de POSIX?" },
+              "options": [
+                { "text": { "en": "sleep", "ro": "sleep" }, "correct": false },
+                { "text": { "en": "usleep", "ro": "usleep" }, "correct": false },
+                { "text": { "en": "nanosleep", "ro": "nanosleep" }, "correct": true },
+                { "text": { "en": "pause", "ro": "pause" }, "correct": false }
+              ],
+              "explanation": { "en": "`nanosleep` provides nanosecond precision and is the most efficient. It was introduced in more recent POSIX versions and can save the remaining time if interrupted by a signal.", "ro": "`nanosleep` ofera precizie de nanosecunde si este cea mai eficienta. A fost introdusa in versiuni mai recente ale standardului POSIX si poate salva timpul ramas daca este intrerupta de un semnal." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c6-exit",
+      "title": { "en": "Primitives for Terminating Execution", "ro": "Primitive pentru terminarea executiei" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A process can terminate in two ways: **normal termination** and **abnormal termination**.",
+            "ro": "Un proces se poate termina in doua moduri: **terminare normala** si **terminare anormala**."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Normal Termination (exit)", "ro": "Terminare normala (exit)" },
+          "content": {
+            "en": "Occurs when the program calls `exit()` or when a `return` statement is reached in `main`. The process enters the **finished** state, open files are closed, disk buffers are flushed, memory is deallocated, and a **termination code** (`status & 0xFF`) is saved in the PCB. The process becomes a **zombie** until the parent reads its status.",
+            "ro": "Are loc cand programul apeleaza `exit()` sau cand se intalneste `return` in `main`. Procesul trece in starea **finished**, fisierele deschise se inchid, buffer-ele de disc se salveaza, memoria se dealoca si un **cod de terminare** (`status & 0xFF`) este salvat in PCB. Procesul devine **zombie** pana cand parintele ii citeste statusul."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Normal termination\nnoreturn void exit(int status);"
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Abnormal Termination (abort)", "ro": "Terminare anormala (abort)" },
+          "content": {
+            "en": "Occurs when a process receives a signal of a certain type (e.g., a signal generated by an `abort` call). The `abort` function first unblocks the **SIGABRT** signal, then sends it to the calling process, causing abnormal termination. Memory is deallocated and the PCB is preserved until the parent reads it, with the termination code being the signal number.",
+            "ro": "Are loc cand un proces primeste un semnal de un anumit tip (e.g., un semnal generat de un apel `abort`). Functia `abort` deblocheaza mai intai semnalul **SIGABRT**, apoi il livreaza procesului apelant, cauzand terminarea anormala. Memoria se dealoca si PCB-ul se pastreaza pana cand parintele il citeste, codul de terminare fiind numarul semnalului."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Abnormal termination\nnoreturn void abort(void);"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does a process become a zombie after termination instead of being immediately removed?",
+            "ro": "De ce devine un proces zombie dupa terminare in loc sa fie eliminat imediat?"
+          },
+          "answer": {
+            "en": "The zombie state preserves the process's termination status (exit code or signal number) in the PCB so the parent process can later read it using `wait()`. Without the zombie state, the parent would have no way to know how its child terminated. The zombie is removed only after the parent calls `wait()` and retrieves this information.",
+            "ro": "Starea zombie pastreaza statusul de terminare al procesului (codul de iesire sau numarul semnalului) in PCB, astfel incat procesul parinte sa il poata citi ulterior cu `wait()`. Fara starea zombie, parintele nu ar avea cum sa stie cum s-a terminat copilul. Zombie-ul este eliminat doar dupa ce parintele apeleaza `wait()` si preia informatia."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c6-fork",
+      "title": { "en": "Process Creation: The fork() Primitive", "ro": "Crearea proceselor: Primitiva fork()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The only way to create processes in UNIX/Linux is with the `fork` system call. When called, `fork` creates a **copy of the calling process**. Both processes (the original and the new one) continue execution from the instruction immediately after the `fork` call. The calling process is called the **parent** and the new process is called the **child**.",
+            "ro": "Singura modalitate de creare a proceselor in UNIX/Linux este cu apelul de sistem `fork`. La apel, `fork` creeaza o **copie a procesului apelant**. Ambele procese (originalul si cel nou) continua executia de la instructiunea imediat dupa apelul `fork`. Procesul apelant se numeste **parinte** iar cel nou creat se numeste **fiu**."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "pid_t fork(void);"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The only practical difference between the two processes after `fork` is the **return value** and the **PIDs**. Based on the return value, the program can branch so the child executes different code than the parent.",
+            "ro": "Singura diferenta practica intre cele doua procese dupa `fork` este **valoarea returnata** si **PID-urile**. Pe baza valorii returnate, programul poate ramifica executia astfel incat fiul sa execute alt cod decat tatal."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "fork() Return Value", "ro": "Valoarea returnata de fork()" },
+          "content": {
+            "en": "Returns **-1** on error (no child created). On success, returns **n** (the child's PID) in the parent process, and **0** in the child process.",
+            "ro": "Returneaza **-1** in caz de eroare (niciun copil creat). In caz de succes, returneaza **n** (PID-ul copilului) in procesul tata si **0** in procesul fiu."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "pid_t pid = fork();\nif (pid == -1) {\n    // Error: fork failed\n    perror(\"fork\");\n    exit(1);\n} else if (pid == 0) {\n    // Child process\n    printf(\"I am the child, my PID is %d\\n\", getpid());\n} else {\n    // Parent process, pid = child's PID\n    printf(\"I am the parent, child PID is %d\\n\", pid);\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "A PID of 0 can never be assigned to a regular process because PID 0 is the root of the process tree (the scheduler, created at boot time, not via `fork`). PID 1 is always the `init` process. The newly created child cannot retrieve its sibling's PID; there is no primitive for that since a process can have zero or more children at any given time.",
+            "ro": "Un PID de 0 nu poate fi atribuit unui proces obisnuit deoarece PID-ul 0 este radacina arborelui de procese (planificatorul, creat la boot, nu prin `fork`). PID-ul 1 este intotdeauna procesul `init`. Procesul fiu nu poate afla PID-ul unui frate; nu exista o primitiva pentru aceasta deoarece un proces poate avea zero sau mai multi copii la un moment dat."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What value does fork() return in the child process on success?", "ro": "Ce valoare returneaza fork() in procesul fiu in caz de succes?" },
+              "options": [
+                { "text": { "en": "-1", "ro": "-1" }, "correct": false },
+                { "text": { "en": "The parent's PID", "ro": "PID-ul parintelui" }, "correct": false },
+                { "text": { "en": "0", "ro": "0" }, "correct": true },
+                { "text": { "en": "1", "ro": "1" }, "correct": false }
+              ],
+              "explanation": { "en": "`fork()` returns 0 in the child process. In the parent, it returns the child's PID (a positive number). A return of -1 indicates an error.", "ro": "`fork()` returneaza 0 in procesul fiu. In parinte, returneaza PID-ul copilului (un numar pozitiv). Returnarea -1 indica o eroare." }
+            },
+            {
+              "question": { "en": "How many processes exist after a single successful fork() call?", "ro": "Cate procese exista dupa un singur apel fork() reusit?" },
+              "options": [
+                { "text": { "en": "1", "ro": "1" }, "correct": false },
+                { "text": { "en": "2", "ro": "2" }, "correct": true },
+                { "text": { "en": "3", "ro": "3" }, "correct": false },
+                { "text": { "en": "It depends on the system", "ro": "Depinde de sistem" }, "correct": false }
+              ],
+              "explanation": { "en": "A successful `fork()` creates exactly one new process (the child), so there are 2 processes total: the original parent and the new child.", "ro": "Un `fork()` reusit creeaza exact un proces nou (copilul), deci exista 2 procese in total: parintele original si copilul nou." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c6-fork-properties",
+      "title": { "en": "Child Process Properties After fork()", "ro": "Caracteristicile procesului fiu dupa fork()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Through \"cloning\", the child process inherits a series of characteristics from its parent: the same real and effective owner/group, the same command line and environment variables from the parent, the same set of open file descriptors (both processes share entries in the global file table, so the same file can be accessed from both), the same set of shared memory regions (created with `shm_open`), and the same persistent and non-persistent memory mappings.",
+            "ro": "Prin \"clonare\", procesul fiu mosteneste o serie de caracteristici de la parinte: acelasi proprietar si grup, real si efectiv, aceeasi linie de comanda si variabile de mediu de la parinte, acelasi set de descriptori de fisiere deschise (ambele procese partajeaza intrari in tabela globala de fisiere), acelasi set de regiuni de memorie partajata (create cu `shm_open`) si aceleasi mapari de memorie persistente si ne-persistente."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Important conclusion**: Immediately after `fork`, the child has the same values for all variables and the same references to resources (open files, maps, shared memory) as the parent. However, each process then works on its **own copy of memory** and its own set of shared resources. If the parent modifies a variable, that change is **not visible** in the child (and vice versa).",
+            "ro": "**Concluzie importanta**: Imediat dupa `fork`, fiul are aceleasi valori ale variabilelor si aceleasi referinte la resurse (fisiere deschise, mapari, memorie partajata) ca si parintele. Insa, de acum fiecare proces lucreaza pe **propria copie de memorie** si pe propriul set de resurse partajate. Daca parintele modifica o variabila, acea modificare **nu va fi vizibila** in fiul (si invers)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "In practice, the `fork` system call is implemented using **COW (copy-on-write)** optimization: memory pages are not actually copied until one of the processes modifies them. This optimizes the creation time, especially when the child immediately calls `exec` to load a new program.",
+            "ro": "In practica, apelul de sistem `fork` este implementat folosind optimizarea **COW (copy-on-write)**: paginile de memorie nu sunt copiate efectiv pana cand unul dintre procese nu le modifica. Aceasta optimizeaza timpul de creare, mai ales cand fiul apeleaza imediat `exec` pentru a incarca un program nou."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "If parent and child share the same file descriptors after fork(), what happens when one of them writes to a file?",
+            "ro": "Daca parintele si fiul partajeaza aceiasi descriptori de fisiere dupa fork(), ce se intampla cand unul scrie intr-un fisier?"
+          },
+          "answer": {
+            "en": "Since they share the same entry in the global file table, they share the same file offset. If the parent writes to the file, the offset advances, and the child's next write will continue from that position (not overwrite). This is by design and allows coordinated output, but can also cause interleaved writes if not synchronized.",
+            "ro": "Deoarece partajeaza aceeasi intrare in tabela globala de fisiere, partajeaza si aceeasi pozitie curenta (offset). Daca parintele scrie in fisier, offset-ul avanseaza, iar urmatoarea scriere a fiului va continua de la acea pozitie (nu va suprascrie). Acesta este un comportament intentionat ce permite iesire coordonata, dar poate cauza si scrieri intercalate daca nu se sincronizeaza."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c6-synchronization",
+      "title": { "en": "Process Synchronization", "ro": "Sincronizarea proceselor" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In concurrent programming, a **synchronization point** is a point where two processes have or could have simultaneous execution (a mutual waiting point). Synchronization is not a dynamic or static notion but a **fixed concept**: it is the point in the algorithm (the place in the program) where the synchronization occurs.",
+            "ro": "In programarea concurenta, un **punct de sincronizare** este un punct in care doua procese au sau ar putea avea o executie simultana (un punct de asteptare reciproca). Sincronizarea nu este o notiune dinamica, ci una **fixa**: este locul in algoritm (in program) unde se gaseste punctul de sincronizare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are two key synchronization points with `fork` and `wait`: **(i)** The `fork` primitive itself is a synchronization point: both the parent and the child continue execution simultaneously from the instruction after `fork`. **(ii)** The parent may need the child's termination value: a synchronization point must be established where the parent waits for the child to finish and transfers the termination value back to the parent.",
+            "ro": "Exista doua puncte cheie de sincronizare cu `fork` si `wait`: **(i)** Primitiva `fork` insasi este un punct de sincronizare: atat parintele cat si fiul continua executia simultan de la instructiunea de dupa `fork`. **(ii)** Parintele poate avea nevoie de valoarea de terminare a fiului: trebuie stabilit un punct de sincronizare unde parintele asteapta terminarea fiului si se transfera valoarea de terminare inapoi la parinte."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c6-wait",
+      "title": { "en": "The wait() Primitive", "ro": "Primitiva wait()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `wait` system call is used to wait for a child process to finish. It **suspends** the calling process until one of its children terminates (normally or by a signal) or is stopped. If a child has already terminated before `wait` is called, the function returns immediately.",
+            "ro": "Apelul de sistem `wait` este utilizat pentru a astepta terminarea unui proces fiu. **Suspenda** executia procesului apelant pana cand unul dintre fiii sai se termina (normal sau printr-un semnal) sau este stopat. Daca un fiu s-a terminat deja inainte de apelul `wait`, functia returneaza imediat."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "pid_t wait(int* wstatus);"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The return value of `wait` is the **PID** of the terminated child. The `wstatus` pointer receives: the **termination code** (in the high byte of `int`) if the child terminated normally, or the **signal number** (in the low byte) if the child was stopped by a signal. If the caller has no children, `wait` returns **-1** and sets `errno` to `ECHILD`.",
+            "ro": "Valoarea returnata de `wait` este **PID-ul** copilului terminat. Pointerul `wstatus` primeste: **codul de terminare** (in octetul high al `int`) daca fiul s-a terminat normal, sau **numarul semnalului** (in octetul low) daca fiul a fost stopat de un semnal. Daca apelantul nu are procese fiu, `wait` returneaza **-1** si seteaza `errno` la `ECHILD`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Inspect wstatus using macros:\n// WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG,\n// WIFSTOPPED, WSTOPSIG, etc.\n\nint wstatus;\npid_t child_pid = wait(&wstatus);\nif (child_pid == -1) {\n    perror(\"wait\");\n} else if (WIFEXITED(wstatus)) {\n    printf(\"Child %d exited with code %d\\n\",\n           child_pid, WEXITSTATUS(wstatus));\n} else if (WIFSIGNALED(wstatus)) {\n    printf(\"Child %d killed by signal %d\\n\",\n           child_pid, WTERMSIG(wstatus));\n}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "There is also `waitpid` which can wait for a specific child (by PID), any child (PID = -1), or any child in a group (if PID < -1). An additional argument controls the wait mode, e.g. the `WNOHANG` option makes it non-blocking (useful for checking if any child has terminated without actually waiting).",
+            "ro": "Exista si `waitpid` care poate astepta un copil specific (dupa PID), orice copil (PID = -1) sau orice copil dintr-un grup (daca PID < -1). Un argument suplimentar controleaza modul de asteptare, de ex. optiunea `WNOHANG` o face ne-blocanta (utila pentru a verifica daca vreun fiu s-a terminat fara a astepta efectiv)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "pid_t waitpid(pid_t pid, int* wstatus, int options);\n\n// Wait for a specific child:\nwaitpid(child_pid, &wstatus, 0);\n\n// Non-blocking check:\nwaitpid(-1, &wstatus, WNOHANG);"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "If a child terminates before its parent, it becomes a **zombie** (its PCB remains in the process table). If the parent terminates before the child, the orphaned child is adopted by `init` (PID 1), which will call `wait` to clean up the zombie. `init` handles cleanup for all orphaned processes whose parents have already terminated.",
+            "ro": "Daca un copil se termina inaintea parintelui sau, devine **zombie** (PCB-ul ramane in tabela proceselor). Daca parintele se termina inaintea copilului, copilul orfan este adoptat de `init` (PID 1), care va apela `wait` pentru a curata zombie-ul. `init` gestioneaza curatarea tuturor proceselor orfane ai caror parinti s-au terminat deja."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does wait() return when there are no child processes?", "ro": "Ce returneaza wait() cand nu exista procese fiu?" },
+              "options": [
+                { "text": { "en": "0", "ro": "0" }, "correct": false },
+                { "text": { "en": "-1 with errno = ECHILD", "ro": "-1 cu errno = ECHILD" }, "correct": true },
+                { "text": { "en": "It blocks forever", "ro": "Se blocheaza la nesfarsit" }, "correct": false },
+                { "text": { "en": "The parent's PID", "ro": "PID-ul parintelui" }, "correct": false }
+              ],
+              "explanation": { "en": "When the caller has no children, `wait()` returns -1 and sets `errno` to `ECHILD` (Error: no child processes).", "ro": "Cand apelantul nu are procii fiu, `wait()` returneaza -1 si seteaza `errno` la `ECHILD` (Eroare: nu exista procese copil)." }
+            },
+            {
+              "question": { "en": "What is the purpose of the WNOHANG option in waitpid()?", "ro": "Care este scopul optiunii WNOHANG in waitpid()?" },
+              "options": [
+                { "text": { "en": "Wait for all children to terminate", "ro": "Asteapta terminarea tuturor copiilor" }, "correct": false },
+                { "text": { "en": "Return immediately if no child has terminated", "ro": "Returneaza imediat daca niciun copil nu s-a terminat" }, "correct": true },
+                { "text": { "en": "Ignore zombie processes", "ro": "Ignora procesele zombie" }, "correct": false },
+                { "text": { "en": "Wait for a specific child only", "ro": "Asteapta doar un copil specific" }, "correct": false }
+              ],
+              "explanation": { "en": "`WNOHANG` makes `waitpid()` non-blocking. It returns 0 if no child has terminated yet, instead of suspending the caller.", "ro": "`WNOHANG` face `waitpid()` ne-blocant. Returneaza 0 daca niciun copil nu s-a terminat inca, in loc sa suspende apelantul." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c6-demos",
+      "title": { "en": "Demo Programs: fork() and wait()", "ro": "Programe demonstrative: fork() si wait()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The following examples demonstrate common patterns with `fork` and `wait`. The **fork_ex1.c** and **fork_ex2.c** demos (from the course support) show basic fork usage where parent and child diverge based on the return value. The **wait_ex1.c**, **wait_ex2.c**, and **wait_ex3.c** demos show how to use `wait` to collect child termination status.",
+            "ro": "Urmatoarele exemple demonstreaza tipare comune cu `fork` si `wait`. Demo-urile **fork_ex1.c** si **fork_ex2.c** (din suportul de curs) arata utilizarea de baza a fork unde parintele si fiul divergeaza pe baza valorii returnate. Demo-urile **wait_ex1.c**, **wait_ex2.c** si **wait_ex3.c** arata cum se foloseste `wait` pentru a colecta statusul de terminare al copilului."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Classic fork pattern: parent creates one child\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    pid_t pid = fork();\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(1);\n    }\n    if (pid == 0) {\n        // Child process\n        printf(\"Child: PID=%d, PPID=%d\\n\", getpid(), getppid());\n        exit(42);  // terminate with code 42\n    }\n    // Parent process\n    int wstatus;\n    pid_t w = wait(&wstatus);\n    if (WIFEXITED(wstatus)) {\n        printf(\"Parent: child %d exited with %d\\n\",\n               w, WEXITSTATUS(wstatus));\n    }\n    return 0;\n}"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Creating N children with a loop\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int N = 3;\n    for (int i = 0; i < N; i++) {\n        pid_t pid = fork();\n        if (pid == -1) { perror(\"fork\"); exit(1); }\n        if (pid == 0) {\n            // Child i\n            printf(\"Child %d: PID=%d\\n\", i, getpid());\n            exit(i);\n        }\n    }\n    // Parent waits for all children\n    for (int i = 0; i < N; i++) {\n        int wstatus;\n        pid_t w = wait(&wstatus);\n        printf(\"Child %d terminated\\n\", w);\n    }\n    return 0;\n}"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "In the N-children loop above, why is it important that the child calls exit() inside the loop? What would happen without it?",
+            "ro": "In bucla cu N copii de mai sus, de ce este important ca fiul sa apeleze exit() in interiorul buclei? Ce s-ar intampla fara?"
+          },
+          "answer": {
+            "en": "Without `exit()`, the child would continue the loop and create its own children in subsequent iterations. After 3 iterations, instead of 3 children you would get 2^3 - 1 = 7 processes (a binary tree). The `exit()` ensures each child terminates immediately after its work, preventing this exponential process creation.",
+            "ro": "Fara `exit()`, fiul ar continua bucla si ar crea propriii copii in iteratiile urmatoare. Dupa 3 iteratii, in loc de 3 copii ai avea 2^3 - 1 = 7 procese (un arbore binar). `exit()` asigura ca fiecare copil se termina imediat dupa munca sa, prevenind aceasta creare exponentiala de procese."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c6-references",
+      "title": { "en": "References", "ro": "Referinte bibliografice" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Required reading**: [1] Ch. 4, sections 4.1-4.3 from \"Sisteme de operare - manual pentru ID\" by C. Vidrascu, UAIC 2006. [2] Demo programs available at the online course support. [3] Lab support for this lecture.",
+            "ro": "**Bibliografie obligatorie**: [1] Cap. 4, sectiunile 4.1-4.3 din \"Sisteme de operare - manual pentru ID\" de C. Vidrascu, UAIC 2006. [2] Programele demonstrative din suportul online de curs. [3] Suportul de laborator asociat acestei prezentari."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Supplementary reading**: [4] Chapters 24, 25, 26 from \"The Linux Programming Interface\" by M. Kerrisk, No Starch Press 2010. [5] POSIX API for sleeping: `man 3 sleep`, `man 3 usleep`, `man 2 nanosleep`, `man 7 time`. [6] POSIX API for cloning and waiting: `man 2 fork`, `man 2 wait`, `man 2 waitpid`.",
+            "ro": "**Bibliografie suplimentara**: [4] Capitolele 24, 25, 26 din \"The Linux Programming Interface\" de M. Kerrisk, No Starch Press 2010. [5] API POSIX pentru sleep: `man 3 sleep`, `man 3 usleep`, `man 2 nanosleep`, `man 7 time`. [6] API POSIX pentru clonare si asteptare: `man 2 fork`, `man 2 wait`, `man 2 waitpid`."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,689 @@
+{
+  "meta": {
+    "id": "os-c3",
+    "title": { "en": "Course 3: Bash Scripting", "ro": "Cursul 3: Scripting Bash" },
+    "shortTitle": { "en": "C3: Bash Scripting", "ro": "C3: Scripting Bash" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 3 slides", "ro": "Prof. C. Vidrascu — Curs 3" }
+  },
+  "steps": [
+    {
+      "id": "os-c3-intro",
+      "title": { "en": "Introduction & Recap", "ro": "Introducere si recapitulare" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In the previous course, we discussed: **simple commands** (execution modes, background execution, I/O redirections, exit codes), **compound commands** (command chains, sequential/parallel/conditional execution, extended syntax with lists), **file name specification** (individual files, glob patterns for multiple files), and **shell configuration files** (interactive session initialization, command history).",
+            "ro": "In cursul anterior, am discutat despre: **comenzi simple** (moduri de executie, executie in background, redirectari I/O, coduri de terminare), **comenzi compuse** (lanturi de comenzi, executie secventiala/paralela/conditionala, sintaxa extinsa cu liste), **specificarea numelor de fisiere** (fisiere individuale, sabloane pentru specificare multipla) si **fisierele de configurare ale interpretorului** (initializarea sesiunilor interactive, istoricul comenzilor)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "In a UNIX system, the **command interpreter** is an executable program that offers two basic functionalities: it reads and executes the commands entered by the user, and it provides **programming facilities** through a specific command language, allowing users to write **scripts** (text files containing sequences of UNIX commands). The scripting language enables automation of command-line work.",
+            "ro": "Intr-un sistem UNIX, **interpretorul de comenzi** este un program executabil ce ofera doua functionalitati de baza: preia si executa comenzile introduse de utilizator si ofera **facilitati de programare** intr-un limbaj de comanda specific, cu ajutorul caruia se pot scrie **scripturi** (fisiere text ce contin secvente de comenzi UNIX). Limbajul de scripting permite automatizarea lucrului la linia de comanda."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "In the UNIX OS family, there are many shells available: `sh` (Bourne SHell), `bash` (Bourne Again SHell), `csh` (C SHell), `ksh` (Korn SHell), `ash`, `zsh`, etc. Each shell has its own scripting syntax with variables, assignment instructions, structured control instructions (if, case, while, for), procedures and functions, call parameters, etc. This course focuses on the **bash** scripting language.",
+            "ro": "In familia de SO UNIX exista mai multe shell-uri disponibile: `sh` (Bourne SHell), `bash` (Bourne Again SHell), `csh` (C SHell), `ksh` (Korn SHell), `ash`, `zsh`, etc. Fiecare shell are propria sintaxa de scripting cu variabile, instructiuni de atribuire, instructiuni de control structurate (if, case, while, for), proceduri si functii, parametri de apel, etc. Acest curs se concentreaza pe limbajul de scripting **bash**."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why are there so many different shells in UNIX? Why not just one?",
+            "ro": "De ce exista atatea shell-uri diferite in UNIX? De ce nu doar unul singur?"
+          },
+          "answer": {
+            "en": "UNIX follows the philosophy of choice and modularity. Different shells evolved to address different needs: `sh` was the original, `csh` added C-like syntax, `ksh` added advanced scripting features, and `bash` combined the best of all while being free software. Users can choose the shell that best fits their workflow, and system scripts may target specific shells for portability.",
+            "ro": "UNIX urmeaza filosofia alegerii si modularitatii. Diferite shell-uri au evoluat pentru a satisface nevoi diferite: `sh` a fost originalul, `csh` a adaugat sintaxa similara cu C, `ksh` a adaugat facilitati avansate de scripting, iar `bash` a combinat cele mai bune facilitati, fiind software liber. Utilizatorii pot alege shell-ul potrivit, iar scripturile de sistem pot viza shell-uri specifice pentru portabilitate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-shell-scripts",
+      "title": { "en": "Shell Procedures — Scripts", "ro": "Proceduri shell — Scripturi" },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Shell Script", "ro": "Script shell" },
+          "content": {
+            "en": "A **shell procedure** (also called a **script**) is a text file that contains sequences of UNIX commands, either simple or compound. In Windows, a similar concept exists with batch files (`*.bat`) and PowerShell scripts (`*.ps`).",
+            "ro": "O **procedura shell** (numita si **script**) este un fisier text ce contine secvente de comenzi UNIX, simple si/sau compuse. In Windows, exista un concept similar cu fisierele batch (`*.bat`) si scripturile PowerShell (`*.ps`)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "To add a comment in a script, use the `#` character followed by text (everything until the end of that line is a comment). The body of a script can access its call arguments through special variables: `$1`, `$2`, ..., `$9`, `${10}`, `${11}`, etc. Calling a script means invoking its name using any of the syntactic forms allowed for external commands: simple foreground or background call, pipeline call, or any other compound command form.",
+            "ro": "Pentru a indica un comentariu intr-un script, se utilizeaza caracterul `#` urmat de un text (pana la finalul acelei linii de text). Accesarea in corpul unei proceduri a argumentelor de apel se realizeaza cu ajutorul unor variabile speciale: `$1`, `$2`, ..., `$9`, `${10}`, `${11}`, etc. Apelul unui script inseamna invocarea numelui sau folosind oricare dintre formele sintactice permise pentru comenzi externe: apel simplu in foreground sau in background, apel de pipeline, sau alte forme de comenzi compuse."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-script-execution",
+      "title": { "en": "Executing Shell Scripts", "ro": "Executia procedurilor shell" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are **three ways** to launch a script in the foreground: (1) `./script_name [args] [redirections]` — creates a new process running the shell specified on the first line via `#!/shell_name` (or the current shell if no shebang is present), then executes the file line by line; (2) `shell_name script_name [args]` — creates a new process with the explicitly specified shell; (3) `source script_name [args]` or `. script_name [args]` — does NOT create a new process, the current shell itself executes the lines from that file.",
+            "ro": "Exista **trei moduri** de a lansa un script in foreground: (1) `./nume_script [args] [redirectari]` — creeaza un proces nou ce ruleaza shell-ul specificat pe prima linie prin `#!/nume_shell` (sau shell-ul curent daca nu e specificat), apoi executa linie cu linie comenzile; (2) `nume_shell nume_script [args]` — creeaza un proces nou cu shell-ul specificat explicit; (3) `source nume_script [args]` sau `. nume_script [args]` — NU se creeaza un proces nou, insusi procesul shell curent va executa linie cu linie comenzile din acel fisier."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Method 1: Direct execution (needs chmod u+x)\nUNIX> ./script_name [options] [arguments] [redirections]\n\n# Method 2: Explicit shell invocation\nUNIX> bash script_name [parameters and redirections]\n\n# Method 3: Source (runs in current shell process)\nUNIX> source script_name [parameters and redirections]\nUNIX> . script_name [parameters and redirections]"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "For method 1 (direct execution), the script must have the execute permission set (use `chmod u+x script_name`), and the name must be specified with an absolute or relative path. For background execution, append `&` to any of the three forms.",
+            "ro": "Pentru metoda 1 (executie directa), scriptul trebuie sa aiba dreptul de executie setat (folositi `chmod u+x nume_script`), iar numele trebuie specificat prin cale absoluta sau relativa. Pentru executie in background, adaugati `&` la sfarsitul oricareia dintre cele trei forme."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the practical difference between running a script with `./script.sh` versus `source script.sh`? When would you prefer one over the other?",
+            "ro": "Care este diferenta practica intre rularea unui script cu `./script.sh` fata de `source script.sh`? Cand ati prefera una fata de cealalta?"
+          },
+          "answer": {
+            "en": "With `./script.sh`, a new child process is created. Any variable changes, directory changes (`cd`), or environment modifications happen in the child and are lost when the script finishes. With `source`, the script runs in the current shell, so all changes persist. Use `source` when you want the script to modify your current environment (e.g., `.bashrc`, setting environment variables). Use `./` for isolated execution where you do not want side effects.",
+            "ro": "Cu `./script.sh`, se creeaza un proces copil nou. Orice modificari de variabile, schimbari de director (`cd`) sau modificari de mediu se fac in copil si se pierd la terminarea scriptului. Cu `source`, scriptul ruleaza in shell-ul curent, deci toate modificarile persista. Folositi `source` cand doriti ca scriptul sa modifice mediul curent (de ex., `.bashrc`, setarea variabilelor de mediu). Folositi `./` pentru executie izolata unde nu doriti efecte secundare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-helloworld-demo",
+      "title": { "en": "Demo: \"Helloworld\" Script", "ro": "Demo: Script \"Helloworld\"" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Here is an example script named `Hello.sh` that demonstrates the three execution methods. The script uses `echo -e` to print a greeting with the first argument (`$1`), a newline, and then runs `ps -f` to show the active processes in the current session.",
+            "ro": "Iata un exemplu de script numit `Hello.sh` care demonstreaza cele trei metode de executie. Scriptul foloseste `echo -e` pentru a afisa un mesaj de salut cu primul argument (`$1`), o linie noua, apoi ruleaza `ps -f` pentru a afisa procesele active din sesiunea curenta."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "#!/bin/bash\necho -e Hello, $1! \\\\n \"Lista proceselor active in sesiunea de lucru curenta:\"\nps -f"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Method 1: Direct execution (runs /bin/bash as child process)\nUNIX> ./Hello.sh world\nHello, world!\n Lista proceselor active in sesiunea de lucru curenta:\n UID   PID  PPID  C STIME TTY      TIME CMD\n user  24249 24248 0 13:08 pts/4  00:00:00 -bash\n user  24286 24249 0 13:08 pts/4  00:00:00 /bin/bash ./Hello.sh world\n user  24287 24286 0 13:08 pts/4  00:00:00 ps -f\n\n# Method 2: Explicit shell (runs dash as child process)\nUNIX> dash Hello.sh Cristian\n-e Hello, Cristian!\n\n# Method 3: Source (runs in current bash process — no child)\nUNIX> source Hello.sh\nHello, !"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Notice in the `ps -f` output: method 1 creates a `/bin/bash ./Hello.sh` child process; method 2 creates a `dash Hello.sh` child process (note: `dash` does not support `echo -e`); method 3 (`source`) runs directly in the parent `-bash` process with no new child created.",
+            "ro": "Observati in output-ul `ps -f`: metoda 1 creeaza un proces copil `/bin/bash ./Hello.sh`; metoda 2 creeaza un proces copil `dash Hello.sh` (nota: `dash` nu suporta `echo -e`); metoda 3 (`source`) ruleaza direct in procesul parinte `-bash` fara a crea un proces copil nou."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-variables-intro",
+      "title": { "en": "Shell Variables: Definition & Substitution", "ro": "Variabile shell: Definire si substitutie" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A common facility of all UNIX command interpreters is the use of **variables**, which implicitly hold values of type **character string**. Variables are also called shell **parameters**. Variables are stored in a memory area of the shell process as **name=value** pairs. A variable is defined (created) at the moment the first **assignment instruction** is executed (either implicitly or when it appears on the left side of `=`) or when a `read` command specifies it as an argument.",
+            "ro": "O facilitate comuna tuturor interpretoarelor de comenzi disponibile in sistemele UNIX este utilizarea de **variabile**, care au implicit valori de tip **sir de caractere**. Variabilele mai sunt numite si **parametrii** shell-ului. Variabilele sunt pastrate intr-o zona de memorie a procesului shell sub forma de perechi **nume=valoare**. O variabila este definita (creata) in momentul executiei primei **instructiuni de atribuire** (implicit sau cand apare in stanga semnului `=`) sau a primei comenzi `read` ce o specifica drept argument."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Variable Substitution", "ro": "Substitutia variabilelor" },
+          "content": {
+            "en": "Referencing the value of a variable is done by preceding its name with the `$` symbol. The effect is **substitution**: the variable name is replaced by its value in the expression where it appears. The syntax `${var}suffix` is used when the variable name must be delimited from surrounding text.",
+            "ro": "Referirea la valoarea unei variabile se face prin precedarea numelui ei de simbolul `$`. Efectul este **substitutia**: numele variabilei este inlocuit cu valoarea ei in expresia in care apare. Sintaxa `${var}sufix` se foloseste cand numele variabilei trebuie delimitat de textul inconjurator."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-assignment",
+      "title": { "en": "The Assignment Instruction", "ro": "Instructiunea de atribuire" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The assignment instruction is an internal command with the syntax: `var=expr` where `var` is an identifier (variable name) and `expr` is an expression that evaluates to a character string (which can be empty). **Important**: the `=` character must NOT be preceded or followed by whitespace!",
+            "ro": "Instructiunea de atribuire este o comanda interna cu sintaxa: `var=expr` unde `var` este un identificator (nume de variabila) iar `expr` este o expresie care trebuie sa se evalueze la un sir de caractere (poate fi inclusiv sirul vid). **Important**: caracterul `=` nu trebuie sa fie precedat ori urmat de spatii albe!"
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "UNIX> v=123           # Variable v gets the value \"123\"\nUNIX> echo $v         # Displays \"123\"\nUNIX> cat xyv         # Displays the content of file xyv\nUNIX> cat xy$v        # Displays the content of file xy123\nUNIX> v=abc${v}xyz    # Variable v gets the value \"abc123xyz\"\nUNIX> set             # Lists all defined variables\nUNIX> unset v         # Variable v is \"destroyed\" (deleted)\nUNIX> v=              # Variable v gets the empty string value"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Use `${var}suffix` syntax when the variable name would be ambiguous. For example, `${v}xyz` correctly appends \"xyz\" to the value of `v`, while `$vxyz` would look for a variable named `vxyz`. Use `unset v` to delete a variable, or `v=` to set it to an empty string.",
+            "ro": "Folositi sintaxa `${var}sufix` cand numele variabilei ar fi ambiguu. De exemplu, `${v}xyz` adauga corect \"xyz\" la valoarea lui `v`, in timp ce `$vxyz` ar cauta o variabila numita `vxyz`. Folositi `unset v` pentru a sterge o variabila, sau `v=` pentru a o seta la sir vid."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is wrong with the command `v = 123`?", "ro": "Ce este gresit la comanda `v = 123`?" },
+              "options": [
+                { "text": { "en": "Nothing, it assigns 123 to v", "ro": "Nimic, atribuie 123 lui v" }, "correct": false },
+                { "text": { "en": "The spaces around = make bash interpret v as a command name", "ro": "Spatiile in jurul = fac bash sa interpreteze v ca un nume de comanda" }, "correct": true },
+                { "text": { "en": "Variables must start with $", "ro": "Variabilele trebuie sa inceapa cu $" }, "correct": false },
+                { "text": { "en": "123 is not a valid string value", "ro": "123 nu este o valoare valida de sir" }, "correct": false }
+              ],
+              "explanation": { "en": "In bash, the assignment syntax `var=expr` must have NO spaces around `=`. With spaces, bash interprets `v` as a command to execute with `=` and `123` as arguments.", "ro": "In bash, sintaxa de atribuire `var=expr` nu trebuie sa aiba spatii in jurul `=`. Cu spatii, bash interpreteaza `v` ca o comanda de executat cu `=` si `123` ca argumente." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c3-substitution-forms",
+      "title": { "en": "Other Substitution Forms", "ro": "Alte forme de substitutie" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Beyond simple `$var` substitution, bash supports several advanced substitution forms that operate on variable values. **Parameter length**: `${#var}` substitutes with the length of the variable's value. **Substring expansion**: `${var:start:length}` or `${var:start}` extracts a substring starting at position `start` with optional `length` (positions start from 0).",
+            "ro": "Dincolo de substitutia simpla `$var`, bash suporta mai multe forme avansate de substitutie ce opereaza asupra valorilor variabilelor. **Lungimea parametrului**: `${#var}` se substituie cu lungimea valorii variabilei. **Expansiunea subcuvantului**: `${var:start:length}` sau `${var:start}` extrage un subcuvant incepand de la pozitia `start` cu `length` optional (pozitiile incep de la 0)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "UNIX> word=12345       # Variable word gets the value \"12345\"\nUNIX> echo $word       # Displays \"12345\"\nUNIX> echo ${#word}    # Displays \"5\" (length)\nUNIX> echo ${word:0:2} # Displays \"12\" (2 chars from position 0)\nUNIX> echo ${word:1:2} # Displays \"23\" (2 chars from position 1)\nUNIX> echo ${word:2}   # Displays \"345\" (from position 2 to end)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Remove matching prefix pattern**: `${var#word}` removes the shortest matching prefix, `${var##word}` removes the longest matching prefix. **Remove matching suffix pattern**: `${var%word}` removes the shortest matching suffix, `${var%%word}` removes the longest matching suffix. These are very useful for manipulating file paths.",
+            "ro": "**Eliminarea prefixului potrivit**: `${var#word}` elimina cel mai scurt prefix potrivit, `${var##word}` elimina cel mai lung prefix potrivit. **Eliminarea sufixului potrivit**: `${var%word}` elimina cel mai scurt sufix potrivit, `${var%%word}` elimina cel mai lung sufix potrivit. Acestea sunt foarte utile pentru manipularea cailor de fisiere."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "UNIX> v=AbcAbcAbcDEF\nUNIX> echo ${v#A*c}       # Displays \"AbcAbcDEF\" (shortest prefix)\nUNIX> echo ${v##A*c}      # Displays \"DEF\" (longest prefix)\n\nUNIX> fisier=/thor/profs/vidrascu/subdir/sursa.c\nUNIX> echo ${fisier#*/}   # Displays \"thor/profs/vidrascu/subdir/sursa.c\"\nUNIX> echo ${fisier##*/}  # Displays \"sursa.c\"\nUNIX> echo ${fisier%.c}.txt  # Displays \"/thor/profs/vidrascu/subdir/sursa.txt\"\n\n# Equivalent to dirname and basename commands:\nUNIX> dirname $fisier     # Displays \"/thor/profs/vidrascu/subdir\"\nUNIX> basename $fisier .c # Displays \"sursa\""
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Command substitution**: `$(command)` or equivalently backtick syntax. The expression is replaced with the text output to stdout by executing the specified command (executed in a subshell). **Arithmetic expansion**: `$((expression))` is replaced with the calculated value of the arithmetic expression. **Word splitting**: after substitutions, the shell splits the result into words using `<space>`, `<tab>`, and `<newline>` as separators. **Pathname expansion**: after word splitting, glob patterns are expanded to matching filenames.",
+            "ro": "**Substitutia de comanda**: `$(comanda)` sau echivalent cu backtick-uri. Expresia este inlocuita cu textul afisat pe stdout prin executia comenzii specificate (executata intr-un subshell). **Expansiunea aritmetica**: `$((expresie))` este inlocuita cu valoarea calculata a expresiei aritmetice. **Word splitting**: dupa substitutii, shell-ul imparte rezultatul in cuvinte folosind `<space>`, `<tab>` si `<newline>` ca separatori. **Pathname expansion**: dupa impartirea in cuvinte, sabloanele glob sunt expandate la numele de fisiere potrivite."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Given `f=/home/user/docs/report.txt`, what does `${f##*/}` return?", "ro": "Dat fiind `f=/home/user/docs/report.txt`, ce returneaza `${f##*/}`?" },
+              "options": [
+                { "text": { "en": "report.txt", "ro": "report.txt" }, "correct": true },
+                { "text": { "en": "/home/user/docs/", "ro": "/home/user/docs/" }, "correct": false },
+                { "text": { "en": "report", "ro": "report" }, "correct": false },
+                { "text": { "en": "home/user/docs/report.txt", "ro": "home/user/docs/report.txt" }, "correct": false }
+              ],
+              "explanation": { "en": "`${f##*/}` removes the longest prefix matching `*/`, which removes everything up to and including the last `/`, leaving just the filename `report.txt`. This is equivalent to `basename $f`.", "ro": "`${f##*/}` elimina cel mai lung prefix potrivit cu `*/`, ceea ce elimina totul pana la si inclusiv ultimul `/`, lasand doar numele fisierului `report.txt`. Echivalent cu `basename $f`." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c3-positional-special-vars",
+      "title": { "en": "Positional & Special Variables", "ro": "Variabile pozitionale si speciale" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are several variables dynamically modified by the shell process during command execution. **Positional parameters**: `$1`, `$2`, ..., `$9`, `${10}`, `${11}`, ... represent the arguments passed to the current script or function. **`$0`** is the name of the current process (the script name). **`$#`** is the number of positional parameters. **`$@`** is the list of all positional parameters (from `$1` onward). **`$*`** produces a single word containing all parameters.",
+            "ro": "Exista o serie de variabile modificate dinamic de procesul shell pe parcursul executiei comenzilor. **Parametri pozitionali**: `$1`, `$2`, ..., `$9`, `${10}`, `${11}`, ... reprezinta argumentele transmise scriptului sau functiei curente. **`$0`** este numele procesului curent (numele scriptului). **`$#`** este numarul parametrilor pozitionali. **`$@`** este lista tuturor parametrilor pozitionali (de la `$1`). **`$*`** produce un singur cuvant continand toti parametrii."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The difference between `$*` and `$@` appears when used inside double quotes: `\"$*\"` produces a single word containing all parameters joined together, while `\"$@\"` produces one separate word for each parameter. Other special variables: **`$$`** is the PID of the current shell process; **`$?`** is the exit code of the last foreground pipeline; **`$!`** is the PID of the last background process. The shell also has predefined environment variables: `$HOME`, `$USER`, `$LOGNAME`, `$SHELL`, `$MAIL`, `$PS1`, `$PS2`, `$TERM`, `$PATH`, `$CDPATH`, `$IFS`, etc.",
+            "ro": "Diferenta intre `$*` si `$@` apare cand sunt folosite intre ghilimele: `\"$*\"` produce un singur cuvant continand toti parametrii, pe cand `\"$@\"` produce cate un cuvant separat pentru fiecare parametru. Alte variabile speciale: **`$$`** este PID-ul procesului shell curent; **`$?`** este codul de terminare al ultimului pipeline executat in foreground; **`$!`** este PID-ul ultimului proces executat in background. Shell-ul are si variabile de mediu predefinite: `$HOME`, `$USER`, `$LOGNAME`, `$SHELL`, `$MAIL`, `$PS1`, `$PS2`, `$TERM`, `$PATH`, `$CDPATH`, `$IFS`, etc."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "If a script is called with `./script.sh a b c`, what is the value of `$#`?", "ro": "Daca un script este apelat cu `./script.sh a b c`, care este valoarea lui `$#`?" },
+              "options": [
+                { "text": { "en": "4", "ro": "4" }, "correct": false },
+                { "text": { "en": "3", "ro": "3" }, "correct": true },
+                { "text": { "en": "0", "ro": "0" }, "correct": false },
+                { "text": { "en": "a b c", "ro": "a b c" }, "correct": false }
+              ],
+              "explanation": { "en": "`$#` counts the positional parameters starting from `$1`. Here `$1=a`, `$2=b`, `$3=c`, so `$#=3`. Note that `$0` (the script name) is NOT counted.", "ro": "`$#` numara parametrii pozitionali incepand de la `$1`. Aici `$1=a`, `$2=b`, `$3=c`, deci `$#=3`. Nota: `$0` (numele scriptului) NU este numarat." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c3-internal-commands",
+      "title": { "en": "Useful Internal Commands", "ro": "Comenzi interne utile" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Several internal commands are useful for working with variables: The **`read`** command (`read var [var2 var3 ...]`) reads values from stdin and assigns them to the specified variables. The **`readonly`** command (`readonly var [var2 ...]`) declares variables as read-only (they cannot be modified after the command that set them). The **`export`** command (`export var [var2 ...]`) makes variables visible in all child processes of the current shell (by default, variables are local to the shell process).",
+            "ro": "Mai multe comenzi interne sunt utile pentru lucrul cu variabile: Comanda **`read`** (`read var [var2 var3 ...]`) citeste valori de la stdin si le atribuie variabilelor specificate. Comanda **`readonly`** (`readonly var [var2 ...]`) declara variabilele ca fiind read-only (nu mai pot fi modificate dupa executarea comenzii). Comanda **`export`** (`export var [var2 ...]`) face variabilele vizibile in toate procesele copil ale shell-ului curent (implicit, variabilele sunt locale procesului shell)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Read input from user\nUNIX> read -p \"Enter a number n:\" n\n\n# Declare a variable as read-only\nUNIX> readonly var [var2 var3 ...]\n\n# Export variables to child processes\nUNIX> export var [var2 ...]\nUNIX> export var=value [var2=value2 ...]"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **`shift`** command (`shift [n]`) shifts positional parameters left by `n` positions (default 1). For example, if `n=1`, `$2` becomes `$1`, `$3` becomes `$2`, etc., and `$#` is updated. This is useful for processing all arguments in a loop. The **`eval`** command (`eval parameters`) evaluates the parameters and executes the result as if typed at the prompt, enabling indirect variable references. The **`set`** command is used to set (or reset) the attributes of the current shell process, for example: `set -o noexec` checks syntax without executing, `set -o xtrace` or `set -x` prints each line before execution (useful for debugging).",
+            "ro": "Comanda **`shift`** (`shift [n]`) deplaseaza parametrii pozitionali la stanga cu `n` pozitii (implicit 1). De exemplu, daca `n=1`, `$2` devine `$1`, `$3` devine `$2`, etc., si `$#` se actualizeaza. Utila pentru procesarea tuturor argumentelor intr-o bucla. Comanda **`eval`** (`eval parametri`) evalueaza parametrii si executa rezultatul ca si cum ar fi introdus la prompter, permitand referiri indirecte de variabile. Comanda **`set`** seteaza (sau reseteaza) atributele procesului shell curent, de exemplu: `set -o noexec` verifica sintaxa fara executie, `set -o xtrace` sau `set -x` afiseaza fiecare linie inainte de executie (util pentru depanare)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Add `set -x` at the beginning of your script to enable debug tracing. This prints each command before execution, helping you find errors. You can also add `set -x` from the command line before running a script. For more details, consult the bash manual.",
+            "ro": "Adaugati `set -x` la inceputul scriptului pentru a activa trasarea de depanare. Aceasta afiseaza fiecare comanda inainte de executie, ajutandu-va sa gasiti erori. Puteti adauga `set -x` si de la linia de comanda inainte de a rula un script. Pentru mai multe detalii, consultati manualul bash."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-printargs-demo",
+      "title": { "en": "Demo: \"PrintArgs\" Script", "ro": "Demo: Script \"PrintArgs\"" },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "#!/bin/bash\necho Positional parameters are: '$1'=$1, '$2'=$2, '$3'=$3, '$4'=$4, ...\necho The parameter '$0'=$0 , the parameter '$@'=$@ , and the parameter '$#'=$#\nps -o user,pid,ppid,cmd"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Method 1: Direct execution\nUNIX> ./PrintArgs.sh hello world\nPositional parameters are: $1=hello, $2=world, $3=, $4=, ...\nThe parameter $0=./PrintArgs.sh, the parameter $@=hello world, and the parameter $#=2\n\n# Method 2: With dash\nUNIX> dash PrintArgs.sh val1 val2 val3\nPositional parameters are: $1=val1, $2=val2, $3=val3, $4=, ...\nThe parameter $0=PrintArgs.sh, the parameter $@=val1 val2 val3, and the parameter $#=3\n\n# Method 3: Source (runs in current shell)\nUNIX> source PrintArgs.sh p1 p2 p3 p4 p5 p6\nPositional parameters are: $1=p1, $2=p2, $3=p3, $4=p4, ...\nThe parameter $0=-bash, the parameter $@=p1 p2 p3 p4 p5 p6, and the parameter $#=6"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Notice how `$0` changes across methods: with `./PrintArgs.sh` it is `./PrintArgs.sh`, with `dash PrintArgs.sh` it is `PrintArgs.sh`, and with `source` it is `-bash` (the current shell). Also notice that `$*` and `$@` show the same value when NOT inside double quotes.",
+            "ro": "Observati cum `$0` se schimba intre metode: cu `./PrintArgs.sh` este `./PrintArgs.sh`, cu `dash PrintArgs.sh` este `PrintArgs.sh`, iar cu `source` este `-bash` (shell-ul curent). De asemenea, `$*` si `$@` afiseaza aceeasi valoare cand NU sunt intre ghilimele."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-arithmetic",
+      "title": { "en": "Arithmetic Commands", "ro": "Comenzi pentru calcule aritmetice" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Arithmetic expressions can be computed using the internal command `let`, external commands `expr` or `bc`, or with **arithmetic expansion** `$((...))`. The `let` command evaluates arithmetic expressions: `let v=v-1` decrements `v`, `let v+=10` adds 10 to `v`, `let \"v *= 2 ** 3\"` multiplies `v` by 8 (2 raised to power 3). The `expr` command evaluates and prints the result: `expr 1 + 2 \\* 3` displays 7.",
+            "ro": "Expresiile aritmetice pot fi calculate cu comanda interna `let`, comenzile externe `expr` sau `bc`, sau cu **expansiunea aritmetica** `$((...))`. Comanda `let` evalueaza expresii aritmetice: `let v=v-1` decrementeaza `v`, `let v+=10` adauga 10 la `v`, `let \"v *= 2 ** 3\"` inmulteste `v` cu 8 (2 la puterea 3). Comanda `expr` evalueaza si afiseaza rezultatul: `expr 1 + 2 \\* 3` afiseaza 7."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Another way to work with integer variables is using `declare -i n` which sets the \"integer\" attribute for variable `n`. After this, arithmetic expressions can be written directly: `n=5+4` sets `n` to 9, `n=2**3` sets `n` to 8. Array variables can be declared with `declare -a v` and elements are accessed with `${v[i]}`. The command `bc` is a floating-point calculator language. Examples: `echo \"3 * 2\" | bc` displays 6, `echo \"scale=4; 3/2\" | bc` displays 1.5000, `echo \"scale=5; sqrt(2)\" | bc` displays 1.41421.",
+            "ro": "O alta modalitate de a lucra cu variabile intregi este `declare -i n` care seteaza atributul \"intreg\" pentru variabila `n`. Dupa aceasta, expresiile aritmetice se scriu direct: `n=5+4` seteaza `n` la 9, `n=2**3` seteaza `n` la 8. Variabilele de tip vector se declara cu `declare -a v` si elementele se acceseaza cu `${v[i]}`. Comanda `bc` este un limbaj de calculator in virgula mobila. Exemple: `echo \"3 * 2\" | bc` afiseaza 6, `echo \"scale=4; 3/2\" | bc` afiseaza 1.5000, `echo \"scale=5; sqrt(2)\" | bc` afiseaza 1.41421."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Using let\nUNIX> let v=v-1              # Decrement v\nUNIX> let v+=10              # Add 10 to v\nUNIX> let \"v *= 2 ** 3\"      # Multiply v by 8\n\n# Using expr\nUNIX> expr 1 + 2 \\* 3       # Displays 7\nUNIX> v=$(expr $v + 10)      # Add 10 to v, store result\n\n# Using bc (floating point)\nUNIX> echo \"3 * 2\" | bc           # Displays 6\nUNIX> echo \"3/ 2\" | bc            # Displays 1 (integer division)\nUNIX> echo \"scale=4; 3/2\" | bc    # Displays 1.5000\nUNIX> echo \"scale=5; sqrt(2)\" | bc # Displays 1.41421\n\n# Using arithmetic expansion (( )) and $(( ))\nUNIX> a=$((4 + 5))          # a = 9\nUNIX> (( a += 10 ))          # a = 19\nUNIX> echo $((0xFFFF))       # Displays 65535 (hex to decimal)\nUNIX> echo $((4#1203))       # Displays 99 (base-4 number)"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is the result of `echo $((2 ** 10))`?", "ro": "Care este rezultatul lui `echo $((2 ** 10))`?" },
+              "options": [
+                { "text": { "en": "20", "ro": "20" }, "correct": false },
+                { "text": { "en": "1024", "ro": "1024" }, "correct": true },
+                { "text": { "en": "1000", "ro": "1000" }, "correct": false },
+                { "text": { "en": "Error", "ro": "Eroare" }, "correct": false }
+              ],
+              "explanation": { "en": "`**` is the exponentiation operator in bash arithmetic. `2 ** 10 = 1024`.", "ro": "`**` este operatorul de exponentiare in aritmetica bash. `2 ** 10 = 1024`." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c3-conditional-expressions",
+      "title": { "en": "Conditional Expressions", "ro": "Comenzi pentru expresii conditionale" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The internal command for evaluating conditional expressions (`test` or `[`) has the syntax: `test condition` or `[ condition ]`. The conditional expression can be one of several forms. **String relational operators**: `test -z string` (true if string has length 0), `test -n string` (true if string is non-empty), `test string_1 = string_2` (true if strings are equal), `test string_1 != string_2` (true if strings differ), and `<` / `>` for lexicographic comparison.",
+            "ro": "Comanda interna de evaluare a unei expresii conditionale (`test` sau `[`) are sintaxa: `test conditie` sau `[ conditie ]`. Expresia conditionala poate fi de mai multe forme. **Operatori relationali pe siruri**: `test -z string` (adevarat daca sirul are lungimea 0), `test -n string` (adevarat daca sirul nu e vid), `test string_1 = string_2` (adevarat daca sirurile sunt egale), `test string_1 != string_2` (adevarat daca sirurile difera), si `<` / `>` pentru comparatie lexicografica."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Integer relational operators**: `test val_1 -eq val_2` (equal), `test val_1 -ne val_2` (not equal), `test val_1 -gt val_2` (greater than), `test val_1 -ge val_2` (greater or equal), `test val_1 -lt val_2` (less than), `test val_1 -le val_2` (less or equal). **File tests**: `test -e file` (exists), `test -d/-f/-p file` (is directory/regular file/pipe), `test -b/-c file` (block/character device), `test -r/-w/-x file` (readable/writable/executable by current user).",
+            "ro": "**Operatori relationali pe numere intregi**: `test val_1 -eq val_2` (egal), `test val_1 -ne val_2` (diferit), `test val_1 -gt val_2` (mai mare), `test val_1 -ge val_2` (mai mare sau egal), `test val_1 -lt val_2` (mai mic), `test val_1 -le val_2` (mai mic sau egal). **Teste pe fisiere**: `test -e fisier` (exista), `test -d/-f/-p fisier` (este director/fisier obisnuit/pipe), `test -b/-c fisier` (dispozitiv bloc/caracter), `test -r/-w/-x fisier` (citire/scriere/executie permisa utilizatorului curent)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Logical operators** for combining conditions: `test ! condition_1` (negation), `test condition_1 -a condition_2` (AND — conjunction), `test condition_1 -o condition_2` (OR — disjunction). The exit value of `test` is 0 if the condition is true, and 1 if it is false. The compound command `[[ condition ]]` is also available in bash, with the same syntax as `test` but additionally supporting regex operators and pattern matching.",
+            "ro": "**Operatori logici** pentru combinarea conditiilor: `test ! conditie_1` (negatie), `test conditie_1 -a conditie_2` (SI — conjunctie), `test conditie_1 -o conditie_2` (SAU — disjunctie). Valoarea de exit a `test` este 0 daca conditia este adevarata si 1 daca este falsa. Comanda compusa `[[ conditie ]]` este de asemenea disponibila in bash, cu aceeasi sintaxa ca `test` dar suportand suplimentar operatori regex si pattern matching."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which command checks if variable `n` is greater than 10?", "ro": "Care comanda verifica daca variabila `n` este mai mare decat 10?" },
+              "options": [
+                { "text": { "en": "test $n > 10", "ro": "test $n > 10" }, "correct": false },
+                { "text": { "en": "test $n -gt 10", "ro": "test $n -gt 10" }, "correct": true },
+                { "text": { "en": "test $n -lt 10", "ro": "test $n -lt 10" }, "correct": false },
+                { "text": { "en": "test $n == 10", "ro": "test $n == 10" }, "correct": false }
+              ],
+              "explanation": { "en": "For integer comparison, use `-gt` (greater than). The `>` operator in `test` is for lexicographic string comparison, and `> 10` would also be interpreted as output redirection to a file named `10`.", "ro": "Pentru comparatia de intregi, se foloseste `-gt` (mai mare decat). Operatorul `>` in `test` este pentru comparatie lexicografica de siruri, si `> 10` ar fi interpretat si ca redirectare de output intr-un fisier numit `10`." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c3-if-structure",
+      "title": { "en": "IF Structure", "ro": "Structura alternativa IF" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **IF structure** is implemented by the internal command `if` with the following syntax: `if command_list_1 ; then command_list_2 ; [else command_list_3 ;] fi`. Any of the `;` characters can be replaced with a newline. The **semantics**: first execute `command_list_1`; if its exit value is 0 (success), execute `command_list_2`; otherwise (if the `else` branch exists), execute `command_list_3`.",
+            "ro": "**Structura IF** este realizata de comanda interna `if` cu sintaxa urmatoare: `if lista_comenzi_1 ; then lista_comenzi_2 ; [else lista_comenzi_3 ;] fi`. Oricare dintre caracterele `;` poate fi inlocuit cu newline. **Semantica**: se executa mai intai `lista_comenzi_1`; daca valoarea de exit este 0 (succes), se executa `lista_comenzi_2`; altfel (daca ramura `else` exista), se executa `lista_comenzi_3`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Single-line form\nif command_list_1 ; then command_list_2 ; [else command_list_3 ;] fi\n\n# Multi-line form\nif command_list_1\nthen\n    command_list_2\n[ else\n    command_list_3 ]\nfi\n\n# Multiple IFs (elif)\nif list_1; then list_2; elif list_3; then list_4; [elif ...;[else list_N;]] fi"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The \"Multiple IFs\" structure uses `elif` for chained conditions: `if list_1; then list_2; elif list_3; then list_4; ... fi`. The exit value of the entire `if` command is the exit value of the last command executed, or zero if no condition was true and there was no `else`.",
+            "ro": "Structura \"IF-uri multiple\" foloseste `elif` pentru conditii inlantuite: `if lista_1; then lista_2; elif lista_3; then lista_4; ... fi`. Valoarea de exit a intregii comenzi `if` este valoarea de exit a ultimei comenzi executate, sau zero daca nicio conditie nu a fost adevarata si nu exista `else`."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "In bash `if`, why does the condition use exit codes (0=true) instead of boolean values like in C/C++ (0=false)?",
+            "ro": "In `if`-ul bash, de ce conditia foloseste coduri de exit (0=adevarat) in loc de valori booleene ca in C/C++ (0=fals)?"
+          },
+          "answer": {
+            "en": "In UNIX, an exit code of 0 means \"success\" (the command completed without errors), and any non-zero code indicates an error. Since `if` checks whether a command succeeded, 0 naturally maps to \"true\". This is the opposite convention from C/C++ where 0 is false, but it makes shell scripts more intuitive: `if grep pattern file` means \"if grep found something (succeeded)\".",
+            "ro": "In UNIX, codul de exit 0 inseamna \"succes\" (comanda s-a terminat fara erori), si orice cod nenul indica o eroare. Deoarece `if` verifica daca o comanda a reusit, 0 se mapeaza natural la \"adevarat\". Aceasta este conventia opusa din C/C++ unde 0 este fals, dar face scripturile shell mai intuitive: `if grep pattern file` inseamna \"daca grep a gasit ceva (a reusit)\"."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-case-structure",
+      "title": { "en": "CASE Structure", "ro": "Structura alternativa CASE" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **CASE structure** is implemented by the internal command `case` with the following syntax. The expression is evaluated and the shell scans each line looking for the first `value_list` that matches the expression. When found, the associated `command_list` is executed and `case` terminates. If no match is found, no commands are executed. The value lists can contain glob patterns and the `|` separator means OR. The special pattern `*` matches anything (used as default).",
+            "ro": "**Structura CASE** este realizata de comanda interna `case` cu sintaxa urmatoare. Expresia este evaluata si shell-ul scaneaza fiecare linie cautand prima `lista_valori` care se potriveste cu expresia. Cand este gasita, se executa `lista_comenzi` asociata si `case` se termina. Daca nu se gaseste nicio potrivire, nu se executa nicio comanda. Listele de valori pot contine sabloane glob si separatorul `|` inseamna SAU. Sablonul special `*` se potriveste cu orice (folosit ca default)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "case expression in\n    value_list_1 ) command_list_1 ;;\n    value_list_2 ) command_list_2 ;;\n    ...\n    value_list_N-1 ) command_list_N-1 ;;\n    value_list_N ) command_list_N\nesac"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The exit value of `case` is zero if no pattern was matched. If a pattern is matched, it is the exit value of the last command from the selected command list. The `;;` terminates each branch. To use `|` as OR: `yes|Yes|YES) echo \"confirmed\" ;;`.",
+            "ro": "Valoarea de exit a `case` este zero daca niciun sablon nu s-a potrivit. Daca un sablon este potrivit, este valoarea de exit a ultimei comenzi din lista selectata. `;;` termina fiecare ramura. Pentru a folosi `|` ca SAU: `yes|Yes|YES) echo \"confirmat\" ;;`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-while-until",
+      "title": { "en": "WHILE & UNTIL Loops", "ro": "Buclele WHILE si UNTIL" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **WHILE loop** is implemented by the internal command `while`: `while command_list_1 ; do command_list_2 ; done`. At each iteration, `command_list_1` is executed; if its exit value is 0 (success), then `command_list_2` is executed and the loop repeats. Otherwise, the loop ends. The **UNTIL loop** has identical syntax but opposite logic: `until command_list_1 ; do command_list_2 ; done`. The loop body executes while the exit value of `command_list_1` is non-zero (failure), and stops when it becomes 0.",
+            "ro": "**Bucla WHILE** este realizata de comanda interna `while`: `while lista_comenzi_1 ; do lista_comenzi_2 ; done`. La fiecare iteratie, se executa `lista_comenzi_1`; daca valoarea de exit este 0 (succes), se executa `lista_comenzi_2` si se reia bucla. Altfel, bucla se termina. **Bucla UNTIL** are sintaxa identica dar logica opusa: `until lista_comenzi_1 ; do lista_comenzi_2 ; done`. Corpul buclei se executa cat timp valoarea de exit a `lista_comenzi_1` este nenula (esec), si se opreste cand devine 0."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# WHILE loop (multi-line form)\nwhile command_list_1\ndo\n    command_list_2\ndone\n\n# UNTIL loop (multi-line form)\nuntil command_list_1\ndo\n    command_list_2\ndone"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "For both `while` and `until`: the return value of the loop is the exit value of the last command from `command_list_2` that was executed, or zero if no command was executed (the body never ran). Any `;` can be replaced with a newline.",
+            "ro": "Pentru ambele `while` si `until`: valoarea returnata a buclei este valoarea de exit a ultimei comenzi din `lista_comenzi_2` care a fost executata, sau zero daca nicio comanda nu a fost executata (corpul nu a rulat niciodata). Orice `;` poate fi inlocuit cu newline."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "When would you use `until` instead of `while`? Can anything written with `until` also be written with `while`?",
+            "ro": "Cand ati folosi `until` in loc de `while`? Poate orice scris cu `until` sa fie scris si cu `while`?"
+          },
+          "answer": {
+            "en": "Yes, `until condition; do body; done` is equivalent to `while ! condition; do body; done`. Use `until` when it reads more naturally, for example: `until test -f lockfile` (wait until a file appears) is clearer than `while ! test -f lockfile`. It is purely a readability choice.",
+            "ro": "Da, `until conditie; do corp; done` este echivalent cu `while ! conditie; do corp; done`. Folositi `until` cand se citeste mai natural, de exemplu: `until test -f lockfile` (asteapta pana apare un fisier) este mai clar decat `while ! test -f lockfile`. Este pur o alegere de lizibilitate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-for-loop",
+      "title": { "en": "FOR Loop", "ro": "Structura repetitiva FOR" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **FOR loop** is implemented by the internal command `for`: `for variable [ in word_list ] ; do command_list ; done`. The `word_list` describes a list of values; for each value, `variable` is set to that value and `command_list` is executed. This loop is typically used for iterating over unordered sets of values. For ordered numeric ranges, you can use the C-style syntax: `for (( exp1; exp2; exp3 )); do command_list; done` where exp1/exp2/exp3 are arithmetic expressions (like C/C++ for loops). You can also use `for v in $(seq first increment last)` for numeric sequences.",
+            "ro": "**Bucla FOR** este realizata de comanda interna `for`: `for variabila [ in lista_cuvinte ] ; do lista_comenzi ; done`. `lista_cuvinte` descrie o lista de valori; pentru fiecare valoare, `variabila` primeste acea valoare si se executa `lista_comenzi`. Aceasta bucla este folosita de obicei pentru iterarea peste multimi neordonate de valori. Pentru intervale numerice ordonate, puteti folosi sintaxa C: `for (( exp1; exp2; exp3 )); do lista_comenzi; done` unde exp1/exp2/exp3 sunt expresii aritmetice (ca buclele for din C/C++). Puteti folosi si `for v in $(seq first increment last)` pentru secvente numerice."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Standard for loop\nfor variable [ in word_list ]\ndo\n    command_list\ndone\n\n# C-style for loop\nfor (( exp1; exp2; exp3 ))\ndo\n    command_list\ndone\n\n# Using seq for numeric ranges\nfor v in $(seq first increment last); do command_list; done"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "If the `in word_list` part is omitted, the for loop iterates over the positional parameters (`$@`). The `word_list` can also be a glob pattern: `for f in *.txt; do echo $f; done` iterates over all .txt files. The C-style `for (( i=0; i<10; i++ ))` is useful for numeric loops with a specific range and increment.",
+            "ro": "Daca partea `in lista_cuvinte` este omisa, bucla for itereaza peste parametrii pozitionali (`$@`). `lista_cuvinte` poate fi si un sablon glob: `for f in *.txt; do echo $f; done` itereaza peste toate fisierele .txt. Sintaxa C `for (( i=0; i<10; i++ ))` este utila pentru bucle numerice cu interval si increment specific."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-select-loop",
+      "title": { "en": "SELECT Loop", "ro": "Structura repetitiva SELECT" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **SELECT loop** is implemented by the internal command `select`: `select variable [ in word_list ] ; do command_list ; done`. This is a combination of `for` and `case`: at each iteration, `variable` gets the value of the item selected interactively by the user from a numbered menu of `word_list` items. The loop terminates when the user presses **CTRL+D** (EOF). If no `word_list` is provided, it defaults to `$@`.",
+            "ro": "**Bucla SELECT** este realizata de comanda interna `select`: `select variabila [ in lista_cuvinte ] ; do lista_comenzi ; done`. Este o combinatie intre `for` si `case`: la fiecare iteratie, `variabila` primeste valoarea elementului selectat interactiv de utilizator dintr-un meniu numerotat al elementelor din `lista_cuvinte`. Bucla se termina cand utilizatorul apasa **CTRL+D** (EOF). Daca `lista_cuvinte` lipseste, se foloseste `$@`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "select variable [ in word_list ]\ndo\n    command_list\ndone"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The return values for both `select` and `for`: the exit value is that of the last command from `command_list` that was executed, or zero if no command was executed. If the elements in `word_list` produce an empty result (or do not exist), no command is executed in the body.",
+            "ro": "Valorile de return pentru ambele `select` si `for`: valoarea de exit este cea a ultimei comenzi din `lista_comenzi` executata, sau zero daca nicio comanda nu a fost executata. Daca elementele din `lista_cuvinte` produc un rezultat gol (sau nu exista), nicio comanda nu se executa in corp."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-control-commands",
+      "title": { "en": "Other Useful Internal Commands", "ro": "Alte comenzi interne utile" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Several internal commands are useful in scripts and at the command line: **`break [n]`** exits from `n` nested do-done loops (default 1). When `n=1`, it exits the innermost loop. **`continue [n]`** restarts the n-th enclosing do-done loop (default 1). When `n=1`, it skips to the next iteration of the innermost loop. **`exit [code]`** terminates the script (or shell instance) with the specified exit code (default is `$?`, the last command's exit code).",
+            "ro": "Mai multe comenzi interne sunt utile in scripturi si la linia de comanda: **`break [n]`** iese din `n` bucle do-done imbricate (implicit 1). Cand `n=1`, iese din bucla cea mai interioara. **`continue [n]`** reporneste a n-a bucla do-done (implicit 1). Cand `n=1`, sare la urmatoarea iteratie a buclei interioare. **`exit [cod]`** termina scriptul (sau instanta shell) cu codul de exit specificat (implicit `$?`, codul de exit al ultimei comenzi)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**`wait [pid]`** suspends execution of the script (or shell) until the specified background process terminates (assumes all background processes if no PID given). **`exec command`** executes the specified command, replacing the current shell process (so the shell creates a new process and \"reopens\" the associated command on that process, making it re-entrant). **`trap command signal`** sets up a handler: the specified command is executed when the given signal is received (e.g., `trap 'rm /tmp/p$$; exit' 2` removes a temp file and exits on Ctrl+C).",
+            "ro": "**`wait [pid]`** suspenda executia scriptului (sau shell-ului) pana la terminarea procesului de background specificat (toate procesele de background daca nu se da PID). **`exec comanda`** executa comanda specificata, inlocuind procesul shell curent (shell-ul creeaza un proces nou si \"redeschide\" comanda asociata pe acel proces). **`trap comanda semnal`** seteaza un handler: comanda specificata se executa cand se primeste semnalul dat (de ex., `trap 'rm /tmp/p$$; exit' 2` sterge un fisier temporar si iese la Ctrl+C)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# break — exit innermost loop\nbreak [n]\n\n# continue — skip to next iteration\ncontinue [n]\n\n# exit — terminate script with code\nexit [code]\n\n# wait — wait for background process\nwait [pid]\n\n# exec — replace current shell with command\nexec command\n\n# trap — set signal handler\ntrap 'rm /tmp/p$$; exit' 2   # On SIGINT (Ctrl+C), cleanup and exit"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Signal 2 is SIGINT (the interrupt signal, typically sent by pressing Ctrl+C), and signal 3 is SIGQUIT (sent by Ctrl+\\\\). The `trap` command is essential for cleanup in scripts that create temporary files or acquire resources that must be released on exit.",
+            "ro": "Semnalul 2 este SIGINT (semnalul de intrerupere, trimis de obicei prin Ctrl+C), iar semnalul 3 este SIGQUIT (trimis prin Ctrl+\\\\). Comanda `trap` este esentiala pentru curatare in scripturile care creeaza fisiere temporare sau achizitioneaza resurse ce trebuie eliberate la iesire."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-functions",
+      "title": { "en": "Shell Functions", "ro": "Functii shell" },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Shell Function", "ro": "Functie shell" },
+          "content": {
+            "en": "A **shell function** is a name for a sequence of UNIX commands, similar to a shell procedure (script), but with the difference that a function is NOT written in a separate file. Instead, it is written (declared) in a shell procedure or directly at the shell prompt, using the syntax: `function func_name () { command_list ; }`. The `function` keyword is optional if `()` is present, and vice versa.",
+            "ro": "O **functie shell** este un nume pentru o secventa de comenzi UNIX, similara cu o procedura shell (script), cu diferenta ca o functie NU se scrie intr-un fisier separat. In schimb, se scrie (declara) intr-o procedura shell sau direct la prompterul shell-ului, folosind sintaxa: `function nume_functie () { lista_comenzi ; }`. Cuvantul cheie `function` este optional daca `()` este prezent, si invers."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Function declaration syntax\nfunction func_name () { command_list ; }\n\n# Calling a function (same as calling any command)\nfunc_name [arguments] [redirections]"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Calling a function means executing the associated command sequence, done the same way as calling any simple command (by its name, plus parameters and optional I/O redirections). Inside the function body, positional variables `$1`, `$2`, ..., `$9`, `${10}`, `${11}`, ... refer to the function's call parameters (not the script's). `$#`, `$*`, and `$@` also refer to the function's parameters. The concept of shell functions is NOT the same as functions in C/C++ — it is purely syntactic and semantic convenience, similar to procedures.",
+            "ro": "Apelul unei functii inseamna executia secventei de comenzi asociate, in acelasi mod ca apelul oricarei comenzi simple (prin numele ei, plus parametri si redirectari I/O optionale). In corpul functiei, variabilele pozitionale `$1`, `$2`, ..., `$9`, `${10}`, `${11}`, ... se refera la parametrii de apel ai functiei (nu ai scriptului). `$#`, `$*` si `$@` se refera de asemenea la parametrii functiei. Conceptul de functii shell NU este acelasi cu functiile din C/C++ — este pur o facilitate sintactica si semantica, similara procedurilor."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Important notes: (1) In the declaration, either `function` or `()` can be omitted, but not both. (2) The parentheses `()` are never actually used for passing parameters — they are part of the declaration syntax only. (3) The concept of shell functions is NOT similar to C/C++ functions in terms of scope, return values, or parameter passing. Shell functions are essentially command aliases with their own positional parameters.",
+            "ro": "Note importante: (1) In declaratie, fie `function` fie `()` poate fi omis, dar nu ambele. (2) Parantezele `()` nu sunt folosite niciodata pentru transmiterea parametrilor — fac parte doar din sintaxa declaratiei. (3) Conceptul de functii shell NU este similar cu functiile C/C++ in ceea ce priveste scopul, valorile de return sau transmiterea parametrilor. Functiile shell sunt in esenta aliasuri de comenzi cu proprii parametri pozitionali."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c3-function-examples",
+      "title": { "en": "Function Examples", "ro": "Exemple de functii" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Example 1: A function declared and called directly at the shell prompt. The function `my_listing` takes a directory as an argument and lists its contents, or prints an error if the argument is not a directory.",
+            "ro": "Exemplul 1: O functie declarata si apelata direct la prompterul shell-ului. Functia `my_listing` primeste un director ca argument si listeaza continutul acestuia, sau afiseaza o eroare daca argumentul nu este un director."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Example 1: Function at the command line\nUNIX> function my_listing () { echo \"Listing of directory: $1\" ; \\\n> if test -d $1 ; then ls -lA $1 ; else echo \"Error\" ; fi }\nUNIX> my_listing ~/vidrascu/so"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Example 2: A function declared and called inside a script. This script defines `count_params` which demonstrates the difference between `$*` and `$@` when used inside double quotes.",
+            "ro": "Exemplul 2: O functie declarata si apelata in interiorul unui script. Scriptul defineste `count_params` care demonstreaza diferenta dintre `$*` si `$@` cand sunt folosite intre ghilimele."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "#!/bin/bash\nfunction count_params ()\n{\n    echo \"Call with $# argument(s) : $*\"\n    count_params  \"$*\"   # \"$*\" = single argument with all params\n    count_params  \"$@\"   # \"$@\" = separate arguments\n}\n\n# Calling: ./script.sh a b c\n# Output:\n# Call with 3 argument(s) : a b c\n# Call with 1 argument(s) : a b c    (\"$*\" = one word)\n# Call with 3 argument(s) : a b c    (\"$@\" = three words)"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does `$0` refer to inside a shell function?", "ro": "La ce se refera `$0` in interiorul unei functii shell?" },
+              "options": [
+                { "text": { "en": "The function name", "ro": "Numele functiei" }, "correct": false },
+                { "text": { "en": "The script name (or shell name)", "ro": "Numele scriptului (sau al shell-ului)" }, "correct": true },
+                { "text": { "en": "The first argument to the function", "ro": "Primul argument al functiei" }, "correct": false },
+                { "text": { "en": "Nothing (undefined)", "ro": "Nimic (nedefinit)" }, "correct": false }
+              ],
+              "explanation": { "en": "Inside a function, `$1`, `$2`, etc. refer to the function's arguments, but `$0` still refers to the script name (or shell name if interactive). The function name is not accessible via a special variable.", "ro": "In interiorul unei functii, `$1`, `$2`, etc. se refera la argumentele functiei, dar `$0` se refera in continuare la numele scriptului (sau al shell-ului daca e interactiv). Numele functiei nu este accesibil printr-o variabila speciala." }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,712 @@
+{
+  "meta": {
+    "id": "os-c4",
+    "title": { "en": "Course 4: POSIX File I/O Primitives", "ro": "Cursul 4: Primitivele I/O POSIX pentru fisiere" },
+    "shortTitle": { "en": "C4: File I/O", "ro": "C4: I/O Fisiere" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 4 slides", "ro": "Prof. C. Vidrascu — Curs 4" }
+  },
+  "steps": [
+    {
+      "id": "os-c4-intro",
+      "title": { "en": "Introduction: Two Approaches to File I/O", "ro": "Introducere: Doua abordari pentru I/O cu fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Functions you can call in C programs to access and process files (regular files, directories, and other file types) fall into two categories: the **POSIX API** and the **C Standard Library**.",
+            "ro": "Functiile pe care le puteti apela in programele C pentru a accesa si prelucra fisiere (atat fisiere obisnuite, cat si directoare sau alte tipuri de fisiere) se impart in doua categorii: **API-ul POSIX** si **Biblioteca standard de C**."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "POSIX API", "ro": "API-ul POSIX" },
+          "content": {
+            "en": "Provides **wrapper functions** for kernel **system calls** supplied by Linux. These functions can be included in C programs compiled for the Linux platform and, more generally, for any UNIX-family OS that implements the POSIX standard. **Advantage:** access to all Linux kernel functionality exported to user-space. **Disadvantage:** programs using these functions are not portable (e.g., they cannot be fully compiled for Windows, though WSL partially supports them).",
+            "ro": "Ofera **functii wrapper** pentru **apelurile de sistem** furnizate de nucleul Linux. Aceste functii pot fi apelate din programele C compilate pentru platforma Linux si, mai general, pentru orice sistem de operare din familia UNIX ce implementeaza standardul POSIX. **Avantaj:** acces la toate functionalitatile din nucleul Linux exportate catre user-space. **Dezavantaj:** programele care folosesc aceste functii nu sunt portabile (de ex., nu pot fi compilate complet pentru platforma Windows, desi WSL le suporta partial)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "C Standard Library", "ro": "Biblioteca standard de C" },
+          "content": {
+            "en": "Provides a set of **higher-level** functions, including file I/O. These functions can be included in C programs compiled for **any platform** that offers a C compiler plus a standard library implementation. For Linux, the most common implementation is **GLIBC** (the GNU C library) from the GCC suite. **Advantage:** portable programs across diverse platforms (Windows, UNIX/Linux, etc.). **Disadvantage:** limited OS resource control; restricted to synchronous I/O only.",
+            "ro": "Ofera o serie de functii de **nivel mai inalt**, inclusiv pentru lucrul cu fisiere. Aceste functii pot fi apelate din programele C compilate pentru **orice platforma** ce ofera un compilator de C plus o implementare a bibliotecii standard de C. Pentru Linux, cea mai folosita implementare este **GLIBC** (biblioteca GNU C) din suita GCC. **Avantaj:** permite scrierea de programe portabile, intre diverse platforme (Windows, UNIX/Linux, etc.). **Dezavantaj:** control limitat al resurselor SO; restrictionata doar la operatii I/O sincrone."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "When would you choose POSIX API functions over C Standard Library functions for file I/O, and vice versa?",
+            "ro": "Cand ati alege functiile API-ului POSIX in locul functiilor din biblioteca standard de C pentru I/O cu fisiere, si invers?"
+          },
+          "answer": {
+            "en": "Use the **POSIX API** when you need fine-grained control over OS resources (e.g., file permissions, non-blocking I/O, async I/O, file locking) or when writing Linux-specific system software. Use the **C Standard Library** when portability across operating systems matters, when writing simple programs, or when you need formatted I/O (`fprintf`/`fscanf`). In practice, POSIX primitives are often used for system-level programming, while the C library is preferred for application-level code.",
+            "ro": "Folositi **API-ul POSIX** cand aveti nevoie de control fin asupra resurselor SO (de ex., permisiuni de fisiere, I/O non-blocant, I/O asincron, blocare de fisiere) sau cand scrieti software de sistem specific Linux. Folositi **Biblioteca standard de C** cand portabilitatea intre sisteme de operare conteaza, cand scrieti programe simple, sau cand aveti nevoie de I/O formatat (`fprintf`/`fscanf`). In practica, primitivele POSIX sunt folosite adesea pentru programare la nivel de sistem, iar biblioteca C este preferata pentru cod la nivel de aplicatie."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-categories",
+      "title": { "en": "Main Categories of I/O Primitives", "ro": "Principalele categorii de primitive I/O" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The UNIX/Linux file management system provides the following categories of **system calls**, in conformance with the POSIX standard: primitives for **creating** files (`mknod`, `mkfifo`, `mkdir`, `link`, `symlink`, `creat`, `socket`), primitives for **deleting** files (`rmdir` for directories, `unlink` for all other types), **renaming** (`rename`), **consulting** an i-node (`stat`, `fstat`, `lstat`, `access`), **manipulating** an i-node (`chmod`, `fchmod`, `chown`, `fchown`, `lchown`), and **extending** the file system (`mount`, `umount`).",
+            "ro": "Sistemul de gestiune a fisierelor din UNIX/Linux furnizeaza urmatoarele categorii de **apeluri sistem**, in conformitate cu standardul POSIX: primitive de **creare** de fisiere (`mknod`, `mkfifo`, `mkdir`, `link`, `symlink`, `creat`, `socket`), primitive de **stergere** (`rmdir` pentru directoare, `unlink` pentru toate celelalte tipuri), **redenumire** (`rename`), **consultare** a i-nodului (`stat`, `fstat`, `lstat`, `access`), **manipulare** a i-nodului (`chmod`, `fchmod`, `chown`, `fchown`, `lchown`) si **extindere** a sistemului de fisiere (`mount`, `umount`)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Additional categories include: primitives for **accessing and manipulating file content** through a work session: `open`/`creat`, `read`, `write`, `lseek`, `close`, `fcntl`, etc. Primitives for **duplicating** a file descriptor within a process: `dup`, `dup2`. Primitives for **querying work session state** (multiplexed synchronous I/O): `select`, `poll`. Primitives for **truncating** file content: `truncate`/`ftruncate`. Primitives for **exclusive file access** (locking): `flock`, `fcntl`. Primitive for **memory-mapping** a file: `mmap`. Primitive for creating an **anonymous communication channel** (pipe): `pipe`.",
+            "ro": "Categorii suplimentare includ: primitive de **accesare si manipulare a continutului** unui fisier, printr-o sesiune de lucru: `open`/`creat`, `read`, `write`, `lseek`, `close`, `fcntl`, etc. Primitive de **duplicare** a unui descriptor de fisier: `dup`, `dup2`. Primitive pentru **consultarea starii sesiunilor de lucru** (operatii I/O sincrone multiplexate): `select`, `poll`. Primitive de **trunchiere** a continutului: `truncate`/`ftruncate`. Primitive pentru **acces exclusiv** la fisiere (blocare): `flock`, `fcntl`. Primitiva de **mapare** a unui fisier in memorie: `mmap`. Primitiva de creare a unui **canal de comunicatie anonim** (pipe): `pipe`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "On error, all these primitives return the value **-1** and store an error number in the global variable `errno` (defined in the header file `<errno.h>`). The error cause can be diagnosed with the `perror()` function.",
+            "ro": "In caz de eroare, toate aceste primitive returneaza valoarea **-1** si stocheaza un numar de eroare in variabila globala `errno` (definita in fisierul header `<errno.h>`). Cauza erorii poate fi diagnosticata cu functia `perror()`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Other process-level primitives include: `chdir` (modify current working directory), `umask` (modify the default permission mask for file creation), and `chroot` (change the root of the file system accessible to the process).",
+            "ro": "Alte primitive la nivel de proces includ: `chdir` (modifica directorul curent de lucru), `umask` (modifica masca permisiunilor implicite la crearea unui fisier) si `chroot` (modifica radacina sistemului de fisiere accesibil procesului)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which primitive is used to delete a directory in UNIX/Linux?", "ro": "Care primitiva este folosita pentru stergerea unui director in UNIX/Linux?" },
+              "options": [
+                { "text": { "en": "unlink", "ro": "unlink" }, "correct": false },
+                { "text": { "en": "rmdir", "ro": "rmdir" }, "correct": true },
+                { "text": { "en": "remove", "ro": "remove" }, "correct": false },
+                { "text": { "en": "delete", "ro": "delete" }, "correct": false }
+              ],
+              "explanation": { "en": "`rmdir` is used specifically for directories. `unlink` is used for all other file types (regular files, symbolic links, etc.).", "ro": "`rmdir` este folosit specific pentru directoare. `unlink` este folosit pentru toate celelalte tipuri de fisiere (fisiere obisnuite, legaturi simbolice, etc.)." }
+            },
+            {
+              "question": { "en": "What does every POSIX I/O primitive return on error?", "ro": "Ce returneaza fiecare primitiva I/O POSIX in caz de eroare?" },
+              "options": [
+                { "text": { "en": "0", "ro": "0" }, "correct": false },
+                { "text": { "en": "-1", "ro": "-1" }, "correct": true },
+                { "text": { "en": "NULL", "ro": "NULL" }, "correct": false },
+                { "text": { "en": "EOF", "ro": "EOF" }, "correct": false }
+              ],
+              "explanation": { "en": "All POSIX primitives return **-1** on error and set the global variable `errno` with a specific error code. Use `perror()` to print a human-readable error message.", "ro": "Toate primitivele POSIX returneaza **-1** in caz de eroare si seteaza variabila globala `errno` cu un cod de eroare specific. Folositi `perror()` pentru a afisa un mesaj de eroare inteligibil." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c4-access",
+      "title": { "en": "The access Primitive", "ro": "Primitiva access" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `access` primitive **verifies the access permissions** to a file. It checks whether the calling process has the specified permissions on the given file.",
+            "ro": "Primitiva `access` **verifica permisiunile de acces** la un fisier. Verifica daca procesul apelant are permisiunile specificate asupra fisierului dat."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <unistd.h>\n\nint access(char* nume_cale, int perm_acces);\n\n// nume_cale  = the file path to check\n// perm_acces = permission to verify (bitwise OR of constants):\n//   F_OK (=0) : check file existence\n//   X_OK (=1) : check execute permission\n//   W_OK (=2) : check write permission\n//   R_OK (=4) : check read permission\n// Returns: 0 on success, -1 on error"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "When `perm_acces = F_OK` (value 0), only the **existence** of the file is checked. For other values, if the file does not exist, `access` implicitly verifies existence first. The calling process is checked as its **real** (effective) owner. Returns 0 if access is permitted, -1 if any of the requested permissions is denied or another error occurs.",
+            "ro": "Cand `perm_acces = F_OK` (valoarea 0), se verifica doar **existenta** fisierului. Pentru alte valori, daca fisierul nu exista, `access` verifica implicit existenta mai intai. Procesul apelant se intelege ca proprietarul **real** (efectiv) al acestuia. Returneaza 0 daca accesul este permis, -1 daca cel putin unul dintre drepturi este interzis sau alta eroare survine."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the difference between checking `F_OK` and checking `R_OK` with the `access` primitive?",
+            "ro": "Care este diferenta intre verificarea `F_OK` si verificarea `R_OK` cu primitiva `access`?"
+          },
+          "answer": {
+            "en": "`F_OK` only checks whether the file **exists** in the filesystem, regardless of any permissions. `R_OK` checks whether the calling process has **read permission** on the file. A file can exist but not be readable by the current user (e.g., if the permissions are `--wx------`). Conversely, `R_OK` implicitly also verifies that the file exists.",
+            "ro": "`F_OK` verifica doar daca fisierul **exista** in sistemul de fisiere, indiferent de permisiuni. `R_OK` verifica daca procesul apelant are **permisiunea de citire** asupra fisierului. Un fisier poate exista dar sa nu fie citibil de utilizatorul curent (de ex., daca permisiunile sunt `--wx------`). Invers, `R_OK` verifica implicit si existenta fisierului."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-creat",
+      "title": { "en": "The creat Primitive", "ro": "Primitiva creat" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `creat` primitive is used for **creating regular files**. When executed, it creates the specified file and opens it for **writing**. The return value has the same meaning as the `open` function (a file descriptor, or -1 on error).",
+            "ro": "Primitiva `creat` este folosita pentru **crearea fisierelor de tip obisnuit**. La executie, creeaza fisierul specificat si il deschide in **scriere**. Valoarea returnata are aceeasi semnificatie ca la functia `open` (un descriptor de fisier, sau -1 in caz de eroare)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/types.h>\n#include <sys/stat.h>\n#include <fcntl.h>\n\nint creat(char* nume_cale, mode_t perm_acces);\n\n// nume_cale  = name of the file to create\n// perm_acces = access permissions for the new file\n// Returns: file descriptor of the opened file, or -1 on error"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "If the file already exists, it is **truncated to zero length**, while preserving its existing access permissions. A call to `creat(path, perms)` is practically equivalent to: `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)`.",
+            "ro": "Daca fisierul deja exista, acesta este **trunchiat la zero**, pastrand permisiunile de acces existente. Un apel `creat(path, perms)` este practic echivalent cu: `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)`."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens when you call creat() on a file that already exists?", "ro": "Ce se intampla cand apelati creat() pe un fisier care deja exista?" },
+              "options": [
+                { "text": { "en": "An error is returned (-1)", "ro": "Se returneaza o eroare (-1)" }, "correct": false },
+                { "text": { "en": "The file is truncated to zero and opened for writing", "ro": "Fisierul este trunchiat la zero si deschis in scriere" }, "correct": true },
+                { "text": { "en": "The file content is preserved and opened for appending", "ro": "Continutul fisierului este pastrat si deschis pentru adaugare" }, "correct": false },
+                { "text": { "en": "A new file with a different name is created", "ro": "Se creeaza un fisier nou cu alt nume" }, "correct": false }
+              ],
+              "explanation": { "en": "When `creat()` is called on an existing file, the file is truncated to zero length (all content is deleted) while its permissions are preserved. The file is then opened for writing.", "ro": "Cand `creat()` este apelat pe un fisier existent, fisierul este trunchiat la zero (tot continutul este sters) iar permisiunile sunt pastrate. Fisierul este apoi deschis in scriere." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c4-open",
+      "title": { "en": "The open Primitive", "ro": "Primitiva open" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `open` primitive **opens a file**, i.e., initializes a **work session**. It returns a file descriptor (an index into the per-process local file table), which is a new entry referencing a new entry in the system-level global file table. See `man 2 open` for full details.",
+            "ro": "Primitiva `open` **deschide un fisier**, adica initializeaza o **sesiune de lucru**. Returneaza un descriptor de fisier (un index in tabela locala de fisiere a procesului), care este o intrare noua ce refera o intrare noua in tabela globala de fisiere la nivel de sistem. Vezi `man 2 open` pentru detalii complete."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/types.h>\n#include <sys/stat.h>\n#include <fcntl.h>\n\nint open(char* nume_cale, int tip_desch, mode_t perm_acces);\n\n// nume_cale  = name of the file to open\n// tip_desch  = opening type: exactly one of O_RDONLY, O_WRONLY, O_RDWR\n//              optionally combined (bitwise OR) with:\n//              O_APPEND, O_CREAT, O_TRUNC, O_CLOEXEC,\n//              O_NONBLOCK, O_DIRECT, O_SYNC, O_ASYNC, etc.\n// perm_acces = permissions (only used when O_CREAT causes file creation)\n// Returns: file descriptor, or -1 on error"
+        },
+        {
+          "type": "definition",
+          "term": { "en": "File Descriptor", "ro": "Descriptor de fisier" },
+          "content": {
+            "en": "A non-negative integer that serves as an index into the per-process local file descriptor table. Each entry in this table points to an entry in the kernel's global open file table. File descriptors 0, 1, and 2 are conventionally reserved for **stdin**, **stdout**, and **stderr** respectively.",
+            "ro": "Un intreg non-negativ care serveste ca index in tabela locala de descriptori de fisiere a procesului. Fiecare intrare din aceasta tabela pointeaza catre o intrare in tabela globala de fisiere deschise a nucleului. Descriptorii de fisier 0, 1 si 2 sunt rezervati conventional pentru **stdin**, **stdout** si respectiv **stderr**."
+          }
+        },
+        {
+          "type": "table",
+          "caption": { "en": "Common open() Flags", "ro": "Flag-uri comune open()" },
+          "headers": [
+            { "en": "Flag", "ro": "Flag" },
+            { "en": "Description", "ro": "Descriere" }
+          ],
+          "rows": [
+            [{ "en": "`O_RDONLY`", "ro": "`O_RDONLY`" }, { "en": "Open for reading only", "ro": "Deschide doar pentru citire" }],
+            [{ "en": "`O_WRONLY`", "ro": "`O_WRONLY`" }, { "en": "Open for writing only", "ro": "Deschide doar pentru scriere" }],
+            [{ "en": "`O_RDWR`", "ro": "`O_RDWR`" }, { "en": "Open for reading and writing", "ro": "Deschide pentru citire si scriere" }],
+            [{ "en": "`O_CREAT`", "ro": "`O_CREAT`" }, { "en": "Create the file if it does not exist", "ro": "Creeaza fisierul daca nu exista" }],
+            [{ "en": "`O_TRUNC`", "ro": "`O_TRUNC`" }, { "en": "Truncate file to zero length", "ro": "Trunchiaza fisierul la lungime zero" }],
+            [{ "en": "`O_APPEND`", "ro": "`O_APPEND`" }, { "en": "Append writes to end of file", "ro": "Scrierile se adauga la sfarsitul fisierului" }],
+            [{ "en": "`O_EXCL`", "ro": "`O_EXCL`" }, { "en": "With O_CREAT, fail if file exists", "ro": "Cu O_CREAT, esueaza daca fisierul exista" }],
+            [{ "en": "`O_SYNC`", "ro": "`O_SYNC`" }, { "en": "Synchronous writes (bypass cache)", "ro": "Scrieri sincrone (ocoleste cache-ul)" }],
+            [{ "en": "`O_DIRECT`", "ro": "`O_DIRECT`" }, { "en": "Direct I/O (bypass file-system cache)", "ro": "I/O direct (ocoleste cache-ul file-system)" }]
+          ]
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which combination of flags in open() is equivalent to calling creat()?", "ro": "Care combinatie de flag-uri in open() este echivalenta cu apelarea creat()?" },
+              "options": [
+                { "text": { "en": "O_RDONLY | O_CREAT", "ro": "O_RDONLY | O_CREAT" }, "correct": false },
+                { "text": { "en": "O_WRONLY | O_CREAT | O_TRUNC", "ro": "O_WRONLY | O_CREAT | O_TRUNC" }, "correct": true },
+                { "text": { "en": "O_RDWR | O_CREAT", "ro": "O_RDWR | O_CREAT" }, "correct": false },
+                { "text": { "en": "O_WRONLY | O_APPEND", "ro": "O_WRONLY | O_APPEND" }, "correct": false }
+              ],
+              "explanation": { "en": "`creat(path, perms)` is equivalent to `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)` — it opens for writing only, creates if needed, and truncates if the file exists.", "ro": "`creat(path, perms)` este echivalent cu `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)` — deschide doar pentru scriere, creeaza daca e nevoie si trunchiaza daca fisierul exista." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c4-read",
+      "title": { "en": "The read Primitive", "ro": "Primitiva read" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `read` primitive **reads data from a file**. It attempts to read `nr_oct` bytes from the file associated with file descriptor `df` into the memory buffer `buffer`.",
+            "ro": "Primitiva `read` **citeste date dintr-un fisier**. Incearca sa citeasca `nr_oct` octeti din fisierul asociat descriptorului de fisier `df` in bufferul de memorie `buffer`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <unistd.h>\n\nint read(int df, char* buffer, size_t nr_oct);\n\n// df     = file descriptor to read from\n// buffer = memory address where read bytes are stored\n// nr_oct = number of bytes to read\n// Returns: number of bytes actually read (may be partial),\n//          0 if cursor is at EOF, or -1 on error"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "After reading, the file cursor is positioned on the byte **after the last byte read**. The number of bytes actually read may be **less than requested** (e.g., if the cursor was near the end of the file). In particular, if the cursor is at EOF at the start of the read, the return value is **0**.",
+            "ro": "Dupa citire, cursorul in fisier este pozitionat pe octetul **dupa ultimul octet citit**. Numarul de octeti efectiv cititi poate fi **mai mic decat cel cerut** (de ex., daca cursorul era aproape de sfarsitul fisierului). In particular, daca la inceputul citirii cursorul este pe pozitia EOF, valoarea returnata este **0**."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why can read() return fewer bytes than requested even when there is no error?",
+            "ro": "De ce poate read() sa returneze mai putini octeti decat cei ceruti chiar si cand nu exista eroare?"
+          },
+          "answer": {
+            "en": "This happens when the file has fewer bytes remaining from the current cursor position to the end of file than the number requested. For example, if you request 4096 bytes but only 100 bytes remain before EOF, `read()` will return 100. This is a normal partial read, not an error. Programs must always check the return value and handle partial reads correctly, typically by calling `read()` in a loop.",
+            "ro": "Acest lucru se intampla cand fisierul are mai putini octeti ramasi de la pozitia curenta a cursorului pana la sfarsitul fisierului decat numarul cerut. De exemplu, daca cereti 4096 octeti dar doar 100 raman inainte de EOF, `read()` va returna 100. Aceasta este o citire partiala normala, nu o eroare. Programele trebuie intotdeauna sa verifice valoarea returnata si sa trateze citirile partiale corect, de obicei apeland `read()` intr-o bucla."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-write",
+      "title": { "en": "The write Primitive", "ro": "Primitiva write" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `write` primitive **writes data to a file**. It attempts to write `nr_oct` bytes from the memory buffer `buffer` to the file associated with file descriptor `df`.",
+            "ro": "Primitiva `write` **scrie date intr-un fisier**. Incearca sa scrie `nr_oct` octeti din bufferul de memorie `buffer` in fisierul asociat descriptorului de fisier `df`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <unistd.h>\n\nint write(int df, char* buffer, size_t nr_oct);\n\n// df     = file descriptor to write to\n// buffer = memory address of the content to write\n// nr_oct = number of bytes to write\n// Returns: number of bytes actually written (may be partial),\n//          or -1 on error"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "After writing, the file cursor is positioned on the byte **after the last byte written**. The number of bytes actually written may be **less than requested** if the write would increase the file size and the system cannot allocate enough space (e.g., no free disk space or quota exceeded).",
+            "ro": "Dupa scriere, cursorul in fisier este pozitionat pe octetul **dupa ultimul octet scris**. Numarul de octeti efectiv scrisi poate fi **mai mic decat cel cerut** daca scrierea ar mari dimensiunea fisierului si sistemul nu poate aloca suficient spatiu (de ex., lipsa de spatiu liber pe disc sau depasire de cota)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "When can write() return fewer bytes than requested?", "ro": "Cand poate write() sa returneze mai putini octeti decat cei ceruti?" },
+              "options": [
+                { "text": { "en": "When the file is opened in read-only mode", "ro": "Cand fisierul este deschis in modul doar-citire" }, "correct": false },
+                { "text": { "en": "When there is insufficient disk space or quota is exceeded", "ro": "Cand nu exista suficient spatiu pe disc sau cota este depasita" }, "correct": true },
+                { "text": { "en": "When the buffer is too small", "ro": "Cand bufferul este prea mic" }, "correct": false },
+                { "text": { "en": "This never happens; write always writes all bytes or fails", "ro": "Nu se intampla niciodata; write scrie intotdeauna toti octetii sau esueaza" }, "correct": false }
+              ],
+              "explanation": { "en": "A partial write occurs when the system cannot grow the file to accommodate all the data, typically due to insufficient disk space or exceeding the user's disk quota. The program should check the return value and handle partial writes.", "ro": "O scriere partiala apare cand sistemul nu poate mari fisierul pentru a gazdui toate datele, de obicei din cauza spatiului insuficient pe disc sau depasirii cotei utilizatorului. Programul trebuie sa verifice valoarea returnata si sa trateze scrierile partiale." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c4-lseek",
+      "title": { "en": "The lseek Primitive", "ro": "Primitiva lseek" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `lseek` primitive **repositions the file cursor** (i.e., adjusts the current offset within a file). This allows random access to any position in the file, not just sequential reading/writing.",
+            "ro": "Primitiva `lseek` **repozitioneaza cursorul in fisier** (adica ajusteaza deplasamentul curent in fisier). Aceasta permite acces aleator la orice pozitie din fisier, nu doar citire/scriere secventiala."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/types.h>\n#include <unistd.h>\n\nlong lseek(int df, off_t val_ajust, int mod_ajust);\n\n// df        = file descriptor to reposition\n// val_ajust = offset adjustment value\n// mod_ajust = how to interpret val_ajust:\n//   SEEK_SET (=0) : relative to the beginning of the file\n//   SEEK_CUR (=1) : relative to the current cursor position\n//   SEEK_END (=2) : relative to the end of the file\n// Returns: the new offset from the beginning of the file,\n//          or -1 on error"
+        },
+        {
+          "type": "table",
+          "caption": { "en": "lseek Modes", "ro": "Modurile lseek" },
+          "headers": [
+            { "en": "Mode", "ro": "Mod" },
+            { "en": "Constant", "ro": "Constanta" },
+            { "en": "Meaning", "ro": "Semnificatie" }
+          ],
+          "rows": [
+            [{ "en": "0", "ro": "0" }, { "en": "`SEEK_SET`", "ro": "`SEEK_SET`" }, { "en": "Offset from the beginning of the file", "ro": "Deplasament fata de inceputul fisierului" }],
+            [{ "en": "1", "ro": "1" }, { "en": "`SEEK_CUR`", "ro": "`SEEK_CUR`" }, { "en": "Offset from the current cursor position", "ro": "Deplasament fata de pozitia curenta a cursorului" }],
+            [{ "en": "2", "ro": "2" }, { "en": "`SEEK_END`", "ro": "`SEEK_END`" }, { "en": "Offset from the end of the file", "ro": "Deplasament fata de sfarsitul fisierului" }]
+          ]
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "How would you use lseek to determine the size of a file without reading it?",
+            "ro": "Cum ati folosi lseek pentru a determina dimensiunea unui fisier fara a-l citi?"
+          },
+          "answer": {
+            "en": "Call `lseek(fd, 0, SEEK_END)`. This moves the cursor to 0 bytes relative to the end of the file, which positions it exactly at the end. The return value is the new offset from the beginning, which equals the file size in bytes. You can then use `lseek(fd, 0, SEEK_SET)` to move back to the beginning if needed.",
+            "ro": "Apelati `lseek(fd, 0, SEEK_END)`. Aceasta muta cursorul la 0 octeti relativ la sfarsitul fisierului, pozitionandu-l exact la sfarsit. Valoarea returnata este noul deplasament fata de inceput, care este egal cu dimensiunea fisierului in octeti. Apoi puteti folosi `lseek(fd, 0, SEEK_SET)` pentru a reveni la inceput daca este necesar."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-close",
+      "title": { "en": "The close Primitive", "ro": "Primitiva close" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `close` primitive **closes a file**, i.e., finalizes a work session. After closing, the file descriptor is no longer valid and should not be used.",
+            "ro": "Primitiva `close` **inchide un fisier**, adica finalizeaza o sesiune de lucru. Dupa inchidere, descriptorul de fisier nu mai este valid si nu trebuie folosit."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <unistd.h>\n\nint close(int df);\n\n// df = file descriptor to close\n// Returns: 0 on success, -1 on error"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The typical pattern for a **work session** with a file consists of the following steps: (1) **open** the file, (2) **traverse** it with read/write operations and optionally reposition with `lseek`, (3) **close** the file. For example, the `dos2unix.c` and `unix2dos.c` filter programs demonstrate this pattern with POSIX API file I/O functions.",
+            "ro": "Sablonul tipic pentru o **sesiune de lucru** cu un fisier consta in urmatorii pasi: (1) **deschiderea** fisierului, (2) **parcurgerea** acestuia cu operatii de citire si/sau de scriere, si eventual cu schimbari ale pozitiei curente in fisier, (3) **inchiderea** acestuia. De exemplu, programele filtru `dos2unix.c` si `unix2dos.c` demonstreaza acest sablon cu functiile I/O din API-ul POSIX."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-demo-cp",
+      "title": { "en": "Demo: POSIX File Copy Program", "ro": "Demo: Program de copiere cu POSIX" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Here is a program that performs two **work sessions** with files, implementing a sequential copy of a given file using POSIX I/O primitives. Note the use of `BUF_SIZE 4096` which matches the typical page size for optimal disk I/O efficiency.",
+            "ro": "Iata un program care efectueaza doua **sesiuni de lucru** cu fisiere, realizand o copiere secventiala a unui fisier dat folosind primitivele I/O POSIX. De notat utilizarea `BUF_SIZE 4096` care corespunde dimensiunii tipice a unei pagini pentru eficienta optima a I/O-ului pe disc."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* Basic cp file copy program. POSIX implementation. */\n#include <stdio.h>\n#include <unistd.h>\n#include <sys/types.h>\n#include <sys/stat.h>\n#include <fcntl.h>\n#define BUF_SIZE 4096 // This is exactly the page size, for disk I/O efficiency!\n\nint main (int argc, char *argv []) {\n    int input_fd, output_fd;\n    ssize_t bytes_in, bytes_out;\n    char buffer[BUF_SIZE];\n    if (argc != 3) { printf(\"Usage: cp file-src file-dest\\n\");  return 1; }\n    input_fd = open(argv[1], O_RDONLY);\n    if (input_fd == -1) { perror(argv[1]);  return 2; }\n    output_fd = open(argv[2], O_WRONLY|O_CREAT|O_TRUNC, 0600);\n    if (output_fd == -1) { perror(argv[2]);  return 3; }\n\n    /* Process the input file a record at a time. */\n    while ((bytes_in = read(input_fd, buffer, BUF_SIZE)) > 0) {\n        bytes_out = write(output_fd, buffer, bytes_in);\n        if (bytes_out != bytes_in) {\n            fprintf(stderr,\"Fatal write error!\\n\");  return 4;\n        }\n    }\n    close(input_fd);  close(output_fd);  return 0;\n}"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does the program use BUF_SIZE = 4096 for the buffer? What would happen if it used a buffer of size 1?",
+            "ro": "De ce programul foloseste BUF_SIZE = 4096 pentru buffer? Ce s-ar intampla daca ar folosi un buffer de dimensiune 1?"
+          },
+          "answer": {
+            "en": "**4096 bytes** matches the typical memory page size on x86/x64 architectures, which is also the block allocation granularity for the file-system cache. This means each `read()`/`write()` call transfers an optimal amount of data. Using a buffer of **size 1** would require 4096 times more system calls to copy the same amount of data, resulting in enormously worse performance due to the overhead of each kernel context switch.",
+            "ro": "**4096 octeti** corespunde dimensiunii tipice a unei pagini de memorie pe arhitecturi x86/x64, care este si granularitatea de alocare a blocurilor in cache-ul file-system. Aceasta inseamna ca fiecare apel `read()`/`write()` transfera o cantitate optima de date. Folosirea unui buffer de **dimensiune 1** ar necesita de 4096 ori mai multe apeluri de sistem pentru a copia aceeasi cantitate de date, rezultand in performanta enorm de proasta din cauza overhead-ului fiecarui context switch la kernel."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-demo-lseek",
+      "title": { "en": "Demo: Reading with lseek", "ro": "Demo: Citire cu lseek" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "This second example illustrates using `lseek` to read from specific offsets within a file. It demonstrates both `SEEK_SET` (absolute positioning) and `SEEK_END` (positioning relative to end).",
+            "ro": "Acest al doilea exemplu ilustreaza folosirea `lseek` pentru a citi de la offset-uri specifice dintr-un fisier. Demonstreaza atat `SEEK_SET` (pozitionare absoluta) cat si `SEEK_END` (pozitionare relativa la sfarsit)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* Basic program using lseek for reading from a file. POSIX implementation. */\n#include <stdio.h>\n#include <unistd.h>\n#include <fcntl.h>\n\nint main () {\n    int input_fd;  long offset;  ssize_t bytes_in;  char buffer[6];\n\n    input_fd = open(\"datafile.txt\", O_RDONLY);\n    if (input_fd == -1) { perror(\"open\"); return 1; }\n\n    offset = lseek(input_fd, 10, SEEK_SET);\n    if (offset == -1) { perror(\"1st lseek\"); return 2; }\n    bytes_in = read(input_fd, buffer, 5);\n    if (bytes_in == -1) { perror(\"1st read\"); return 3; }\n    if (bytes_in != 5) { fprintf(stderr,\"1st read warning: insufficient info in file!\"); }\n    buffer[bytes_in]=0; printf(\"First read from file: %s\\n\", buffer);\n\n    lseek(input_fd, -10, SEEK_END);\n    bytes_in = read(input_fd, buffer, 5);\n    buffer[bytes_in]=0; printf(\"Second read from file: %s\\n\", buffer);\n    close(input_fd);  return 0;\n}"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Compile and run:\nUNIX> gcc -Wall 2nd_program.c\nUNIX> echo -n \"0123456789ABCDEabcde01234\" > datafile.txt\nUNIX> ./a.out\nFirst read from file: ABCDE\nSecond read from file: abcde"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "In the demo above, explain why the first read outputs \"ABCDE\" and the second outputs \"abcde\".",
+            "ro": "In demo-ul de mai sus, explicati de ce prima citire afiseaza \"ABCDE\" si a doua afiseaza \"abcde\"."
+          },
+          "answer": {
+            "en": "The file content is `0123456789ABCDEabcde01234` (24 characters). The first `lseek(fd, 10, SEEK_SET)` moves to offset 10 from the start, which is right after `0123456789`, landing on `A`. Reading 5 bytes gives `ABCDE`. The second `lseek(fd, -10, SEEK_END)` moves to 10 bytes before the end (offset 14), which is the position of `a`. Reading 5 bytes gives `abcde`.",
+            "ro": "Continutul fisierului este `0123456789ABCDEabcde01234` (24 caractere). Primul `lseek(fd, 10, SEEK_SET)` muta la offset 10 de la inceput, adica dupa `0123456789`, pe `A`. Citirea a 5 octeti da `ABCDE`. Al doilea `lseek(fd, -10, SEEK_END)` muta la 10 octeti inainte de sfarsit (offset 14), adica pe pozitia `a`. Citirea a 5 octeti da `abcde`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-other-primitives",
+      "title": { "en": "Other File I/O Primitives", "ro": "Alte primitive I/O pentru fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Beyond the core primitives, POSIX provides many additional file I/O operations: `stat`/`lstat`/`fstat` (obtain i-node information), `chmod` (change access permissions), `chown`/`chgrp` (change file ownership), `umask` (configure default permission mask for file creation), `link`/`unlink` (create/remove hard links), `dup`/`dup2` (duplicate a file descriptor), `fcntl`/`ioctl` (control I/O operations), `mount`/`umount` (mount/unmount a file system), and `pipe` (create anonymous pipes).",
+            "ro": "Dincolo de primitivele de baza, POSIX ofera multe operatii I/O suplimentare: `stat`/`lstat`/`fstat` (obtinerea informatiilor din i-nod), `chmod` (schimbarea permisiunilor de acces), `chown`/`chgrp` (schimbarea proprietarului), `umask` (configurarea mastii permisiunilor implicite la crearea fisierelor), `link`/`unlink` (crearea/stergerea legaturilor hard), `dup`/`dup2` (duplicarea unui descriptor de fisier), `fcntl`/`ioctl` (controlul operatiilor I/O), `mount`/`umount` (montarea/demontarea unui sistem de fisiere) si `pipe` (crearea pipe-urilor anonime)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "mkfifo", "ro": "mkfifo" },
+          "content": {
+            "en": "Creates a **FIFO file** (named pipe), which is a special file type for inter-process communication. Interface: `int mkfifo(char* nume_cale, mode_t perm_acces)`. Returns 0 on success, -1 on error. The `perm_acces` parameter specifies the access permissions for the created FIFO.",
+            "ro": "Creeaza un **fisier FIFO** (pipe cu nume), care este un tip special de fisier pentru comunicare intre procese. Interfata: `int mkfifo(char* nume_cale, mode_t perm_acces)`. Returneaza 0 in caz de succes, -1 in caz de eroare. Parametrul `perm_acces` specifica drepturile de acces pentru FIFO-ul creat."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-directory-io",
+      "title": { "en": "Directory I/O Primitives", "ro": "Primitive I/O pentru directoare" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Directories have their own set of primitives: `mkdir` (create a directory), `rmdir` (delete a directory), `getcwd` (get current working directory), and `chdir` (change current working directory).",
+            "ro": "Directoarele au propriul set de primitive: `mkdir` (crearea unui director), `rmdir` (stergerea unui director), `getcwd` (aflarea directorului curent de lucru) si `chdir` (schimbarea directorului curent de lucru)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/stat.h>\nint mkdir(char* nume_cale, mode_t perm_acces);\n// Creates a directory. Returns 0 on success, -1 on error.\n\n#include <unistd.h>\nint chdir(char* nume_cale);\n// Changes the current working directory. Returns 0 on success, -1 on error.\n\n#include <unistd.h>\nchar* getcwd(char* buf, size_t size);\n// Returns the current working directory path."
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Processing files within a directory** uses the primitives `opendir`, `readdir`, `closedir`, and utility functions like `rewinddir`, `seekdir`, `telldir`, and `scandir`. A work session with a directory is similar to one with a file: open the directory, iterate through its entries, then close it.",
+            "ro": "**Prelucrarea fisierelor dintr-un director** utilizeaza primitivele `opendir`, `readdir`, `closedir` si functii utile precum `rewinddir`, `seekdir`, `telldir` si `scandir`. O sesiune de lucru cu un director este asemanatoare cu una cu un fisier: deschiderea directorului, iterarea prin intrari, apoi inchiderea."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-directory-template",
+      "title": { "en": "Directory Work Template", "ro": "Sablonul de lucru cu directoare" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The standard template for traversing a directory uses the `DIR` type and `struct dirent`, together with `opendir`, `readdir`, and `closedir`. Each directory entry has a `d_name` field containing the entry name.",
+            "ro": "Sablonul standard pentru parcurgerea unui director foloseste tipul `DIR` si `struct dirent`, impreuna cu `opendir`, `readdir` si `closedir`. Fiecare intrare din director are un camp `d_name` care contine numele intrarii."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <dirent.h>\n\nDIR         *dd;            // open directory descriptor\nstruct dirent *de;          // directory entry\n\n/* open the directory */\nif ( (dd = opendir(dirname)) == NULL) {\n    // TODO: handle the open error\n}\n\n/* iterate through all directory entries */\nwhile ( (de = readdir(dd)) != NULL) {\n    // TODO: process current entry, whose name is: de->d_name\n}\n\n/* close the directory */\nclosedir(dd);"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The `readdir` function returns `NULL` when there are no more entries. Each `struct dirent` contains at minimum the `d_name` field (the entry's filename). The lab exercise **MyFind #1** demonstrates this template combined with `stat` for querying file properties.",
+            "ro": "Functia `readdir` returneaza `NULL` cand nu mai sunt intrari. Fiecare `struct dirent` contine cel putin campul `d_name` (numele fisierului intrarii). Exercitiul de laborator **MyFind #1** demonstreaza acest sablon combinat cu `stat` pentru aflarea proprietatilor unui fisier."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is the correct order of operations for traversing a directory?", "ro": "Care este ordinea corecta a operatiilor pentru parcurgerea unui director?" },
+              "options": [
+                { "text": { "en": "readdir -> opendir -> closedir", "ro": "readdir -> opendir -> closedir" }, "correct": false },
+                { "text": { "en": "opendir -> readdir (loop) -> closedir", "ro": "opendir -> readdir (bucla) -> closedir" }, "correct": true },
+                { "text": { "en": "open -> read -> close", "ro": "open -> read -> close" }, "correct": false },
+                { "text": { "en": "mkdir -> readdir -> rmdir", "ro": "mkdir -> readdir -> rmdir" }, "correct": false }
+              ],
+              "explanation": { "en": "The correct pattern is: `opendir` to get a `DIR*` handle, then `readdir` in a loop until it returns `NULL`, then `closedir` to release the handle. Using `open`/`read`/`close` is for regular files, not directories.", "ro": "Sablonul corect este: `opendir` pentru a obtine un handle `DIR*`, apoi `readdir` intr-o bucla pana returneaza `NULL`, apoi `closedir` pentru a elibera handle-ul. Folosirea `open`/`read`/`close` este pentru fisiere obisnuite, nu directoare." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c4-filesystem-cache",
+      "title": { "en": "The Linux File-System Cache", "ro": "Cache-ul file-system gestionat de nucleul Linux" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "At the kernel level, the file management component uses an internal memory zone in **kernel-space** that implements a **cache** for disk operations. This cache stores in RAM the content of the most recently accessed disk blocks. It is called the **file-system cache** (or **disk cache**) and operates on a dual principle: repeated reads of the same block are served directly from cache (memory); repeated writes to the same block update only the cache, and the actual disk write happens later (asynchronously).",
+            "ro": "La nivelul nucleului, componenta de gestiune a fisierelor foloseste o zona de memorie interna in **kernel-space** ce implementeaza un **cache** pentru operatiile cu discul. Acest cache pastreaza in RAM continutul celor mai recent accesate blocuri de disc. Se numeste **file-system cache** (sau **disk cache**) si functioneaza dupa un principiu dual: citirile repetate ale aceluiasi bloc se rezolva direct din cache (memorie); scrierile repetate ale aceluiasi bloc actualizeaza doar cache-ul, iar scrierea efectiva pe disc are loc mai tarziu (asincron)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The allocation unit in the cache is the **page** (for x86/x64 architecture, page size is **4096 bytes**). I/O operations between the cache in main memory and the disk transfer blocks of information with this granularity. There is a **single** file-system cache per system, shared by all processes. This is why `BUF_SIZE = 4096` is optimal for POSIX `read`/`write` calls.",
+            "ro": "Unitatea de alocare in cache este **pagina** (pentru arhitectura x86/x64, dimensiunea paginii este **4096 octeti**). Operatiile I/O intre cache-ul din memoria principala si disc transfera blocuri de informatie cu aceasta granularitate. Exista un **singur** cache file-system pe sistem, partajat de toate procesele. De aceea `BUF_SIZE = 4096` este optim pentru apelurile POSIX `read`/`write`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The existence of the file-system cache has important implications for programming with POSIX `read` and `write`. By default, writes go to the cache, not directly to disk. Use the `O_SYNC` or `O_DIRECT` flags with `open()` to control cache behavior when you need guaranteed writes to disk.",
+            "ro": "Existenta cache-ului file-system are implicatii importante pentru programarea cu POSIX `read` si `write`. Implicit, scrierile ajung in cache, nu direct pe disc. Folositi flag-urile `O_SYNC` sau `O_DIRECT` cu `open()` pentru a controla comportamentul cache-ului cand aveti nevoie de scrieri garantate pe disc."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why is the file-system cache shared by all processes rather than each process having its own cache?",
+            "ro": "De ce cache-ul file-system este partajat de toate procesele in loc ca fiecare proces sa aiba propriul cache?"
+          },
+          "answer": {
+            "en": "A **single shared cache** ensures **data consistency** — if one process writes to a file and another reads it, both see the same data through the shared cache. It also uses memory more efficiently since popular disk blocks are cached only once instead of being duplicated per process. Additionally, the kernel can make better caching decisions (eviction policies) when it has a global view of all I/O activity.",
+            "ro": "Un **singur cache partajat** asigura **consistenta datelor** — daca un proces scrie intr-un fisier si altul il citeste, ambele vad aceleasi date prin cache-ul partajat. De asemenea, foloseste memoria mai eficient deoarece blocurile de disc populare sunt cache-uite o singura data in loc sa fie duplicate per proces. In plus, nucleul poate lua decizii mai bune de caching (politici de evacuare) cand are o viziune globala asupra intregii activitati I/O."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-stdlib-overview",
+      "title": { "en": "C Standard Library: Overview", "ro": "Biblioteca standard de C: Prezentare generala" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The C Standard Library provides functions with limited capability to manage OS resources (e.g., files). It is often adequate for writing **simple programs** and enables **portable** code across diverse platforms (Windows, UNIX/Linux, etc.). It includes the headers `<stdlib.h>`, `<stdio.h>`, and `<string.h>`. It has **competitive performance** but is restricted to **synchronous I/O** only, and provides **no control** over file security.",
+            "ro": "Biblioteca standard de C contine functii cu capacitate limitata de a gestiona resursele SO (de ex., fisiere). Este adesea adecvata pentru scrierea unor **programe simple** si permite scrierea de **programe portabile** intre diverse platforme (Windows, UNIX/Linux, etc.). Include header-ele `<stdlib.h>`, `<stdio.h>` si `<string.h>`. Are **performanta competitiva** dar este restrictionata doar la **operatii I/O sincrone** si nu ofera **control** asupra securitatii fisierelor."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Work sessions with files are identified through pointers to `FILE` structures (not integer file descriptors). The `fopen()` call specifies whether the file is **text** or **binary**. A `NULL` pointer signifies an invalid value. Errors are diagnosed with `perror()` or `ferror()`. The underlying implementations of these library functions use the corresponding system calls for each platform (e.g., Windows vs. Linux/UNIX).",
+            "ro": "Sesiunile de lucru cu fisiere sunt identificate prin pointeri catre structuri `FILE` (nu descriptori de fisier intregi). Apelul `fopen()` specifica daca fisierul este **text** sau **binar**. Un pointer `NULL` semnifica o valoare invalida. Erorile sunt diagnosticate cu `perror()` sau `ferror()`. Implementarile subiacente ale acestor functii de biblioteca folosesc apelurile de sistem corespunzatoare fiecarei platforme (de ex., Windows vs. Linux/UNIX)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c4-stdlib-io-functions",
+      "title": { "en": "C Standard Library I/O Functions", "ro": "Functiile I/O din biblioteca standard de C" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The C Standard Library (`<stdio.h>`) contains a set of I/O functions for processing files in the usual manner: `fopen` (open a file), `fread`/`fwrite` (binary read/write), `fscanf`/`fprintf` (formatted read/write), and `fclose` (close a file). These are **library functions** (not system calls) and work **buffer-ized**, using `FILE*` stream pointers rather than integer file descriptors.",
+            "ro": "Biblioteca standard de C (`<stdio.h>`) contine un set de functii I/O pentru prelucrarea fisierelor in maniera uzuala: `fopen` (deschiderea unui fisier), `fread`/`fwrite` (citire/scriere binara), `fscanf`/`fprintf` (citire/scriere formatata) si `fclose` (inchiderea unui fisier). Acestea sunt **functii de biblioteca** (nu apeluri sistem) si lucreaza **buffer-izat**, folosind pointeri de stream `FILE*` in loc de descriptori de fisier intregi."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Being **buffer-ized** means these functions use a **user-space cache** at the stdio library level, on top of the kernel's file-system cache. This is a per-process cache (each process has its own), unlike the single shared kernel cache. The **conclusion**: the stdio library cache is **not** shared between processes — it is local to each process, while the kernel's file-system cache is shared system-wide.",
+            "ro": "Faptul ca sunt **buffer-izate** inseamna ca aceste functii folosesc un **cache in user-space** la nivelul bibliotecii stdio, deasupra cache-ului file-system al nucleului. Acesta este un cache per-proces (fiecare proces are propriul sau), spre deosebire de cache-ul unic partajat al nucleului. **Concluzia**: cache-ul bibliotecii stdio **nu** este partajat intre procese — este local fiecarui proces, in timp ce cache-ul file-system al nucleului este partajat la nivel de sistem."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "There are many more I/O functions in `<stdio.h>`, including details about the three standard I/O streams (`stdin`, `stdout`, `stderr`). See `man 3 stdio` for the complete list and `man 0p stdlib.h` for the standard library header.",
+            "ro": "Exista multe alte functii I/O in `<stdio.h>`, inclusiv detalii despre cele trei fluxuri I/O standard (`stdin`, `stdout`, `stderr`). Vezi `man 3 stdio` pentru lista completa si `man 0p stdlib.h` pentru header-ul bibliotecii standard."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is the key difference between POSIX read/write and C library fread/fwrite?", "ro": "Care este diferenta cheie intre read/write POSIX si fread/fwrite din biblioteca C?" },
+              "options": [
+                { "text": { "en": "fread/fwrite are faster because they bypass the kernel", "ro": "fread/fwrite sunt mai rapide pentru ca ocolesc nucleul" }, "correct": false },
+                { "text": { "en": "fread/fwrite add a user-space buffer layer on top of the kernel cache", "ro": "fread/fwrite adauga un strat de buffer in user-space peste cache-ul nucleului" }, "correct": true },
+                { "text": { "en": "read/write work with FILE* pointers while fread/fwrite use file descriptors", "ro": "read/write lucreaza cu pointeri FILE* iar fread/fwrite folosesc descriptori de fisier" }, "correct": false },
+                { "text": { "en": "There is no difference; they are aliases for the same functions", "ro": "Nu exista diferenta; sunt aliasuri pentru aceleasi functii" }, "correct": false }
+              ],
+              "explanation": { "en": "POSIX `read`/`write` interact directly with the kernel's file-system cache. C library `fread`/`fwrite` add an additional **user-space buffer** (per-process, in the stdio library) on top of the kernel cache. This extra buffering reduces the number of system calls but means data may not be immediately visible to other processes.", "ro": "POSIX `read`/`write` interactioneaza direct cu cache-ul file-system al nucleului. `fread`/`fwrite` din biblioteca C adauga un **buffer suplimentar in user-space** (per-proces, in biblioteca stdio) peste cache-ul nucleului. Acest buffering suplimentar reduce numarul de apeluri de sistem dar inseamna ca datele pot sa nu fie imediat vizibile altor procese." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c4-formatted-io",
+      "title": { "en": "Formatted I/O Library Functions", "ro": "Functiile de biblioteca pentru I/O formatat" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The C library provides functions for **formatted I/O** that convert between two representations: **binary** (in memory) vs. **textual** (on disk/screen), based on a **format** argument with **format specifiers**. The main function pairs are: `scanf`/`printf` (read/write from stdin/stdout), `fscanf`/`fprintf` (read/write from a file on disk), and `sscanf`/`sprintf` (read/write from a string in memory).",
+            "ro": "Biblioteca C ofera functii pentru **I/O formatat** care efectueaza conversii intre doua reprezentari: **binara** (in memorie) vs. **textuala** (pe disc/ecran), pe baza unui argument **format** cu **specificatori de format**. Perechile principale de functii sunt: `scanf`/`printf` (citire/scriere de la stdin/stdout), `fscanf`/`fprintf` (citire/scriere dintr-un fisier de pe disc) si `sscanf`/`sprintf` (citire/scriere dintr-un string in memorie)."
+          }
+        },
+        {
+          "type": "table",
+          "caption": { "en": "Common Format Specifiers", "ro": "Specificatori de format comuni" },
+          "headers": [
+            { "en": "Specifier", "ro": "Specificator" },
+            { "en": "Type", "ro": "Tip" },
+            { "en": "Description", "ro": "Descriere" }
+          ],
+          "rows": [
+            [{ "en": "`%c`", "ro": "`%c`" }, { "en": "`char`", "ro": "`char`" }, { "en": "A single character", "ro": "Un singur caracter" }],
+            [{ "en": "`%d` / `%i`", "ro": "`%d` / `%i`" }, { "en": "`int`", "ro": "`int`" }, { "en": "Signed integer in base 10", "ro": "Intreg cu semn in baza 10" }],
+            [{ "en": "`%u`", "ro": "`%u`" }, { "en": "`unsigned int`", "ro": "`unsigned int`" }, { "en": "Unsigned integer in base 10", "ro": "Intreg fara semn in baza 10" }],
+            [{ "en": "`%ld`", "ro": "`%ld`" }, { "en": "`long`", "ro": "`long`" }, { "en": "Long integer in base 10", "ro": "Intreg lung in baza 10" }],
+            [{ "en": "`%f`", "ro": "`%f`" }, { "en": "`float`/`double`", "ro": "`float`/`double`" }, { "en": "Floating point in decimal notation", "ro": "Virgula mobila in notatie zecimala" }],
+            [{ "en": "`%e`", "ro": "`%e`" }, { "en": "`float`/`double`", "ro": "`float`/`double`" }, { "en": "Floating point in scientific notation (E)", "ro": "Virgula mobila in notatia cu mantisa E" }],
+            [{ "en": "`%x` / `%X`", "ro": "`%x` / `%X`" }, { "en": "`unsigned int`", "ro": "`unsigned int`" }, { "en": "Unsigned integer in base 16", "ro": "Intreg fara semn in baza 16" }],
+            [{ "en": "`%o`", "ro": "`%o`" }, { "en": "`unsigned int`", "ro": "`unsigned int`" }, { "en": "Unsigned integer in base 8", "ro": "Intreg fara semn in baza 8" }],
+            [{ "en": "`%s`", "ro": "`%s`" }, { "en": "`char*`", "ro": "`char*`" }, { "en": "A string (null-terminated)", "ro": "Un sir de caractere (null-terminated)" }]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c4-demo-stdlib-cp",
+      "title": { "en": "Demo: C Library File Copy", "ro": "Demo: Copiere cu biblioteca standard C" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Here is the same file copy program implemented using C Standard Library functions instead of POSIX primitives. Compare with the POSIX version: `fopen` replaces `open`, `fread`/`fwrite` replace `read`/`write`, and `fclose` replaces `close`. File handles are `FILE*` pointers instead of integer descriptors.",
+            "ro": "Iata acelasi program de copiere implementat folosind functii din biblioteca standard de C in loc de primitive POSIX. Comparati cu versiunea POSIX: `fopen` inlocuieste `open`, `fread`/`fwrite` inlocuiesc `read`/`write`, si `fclose` inlocuieste `close`. Handle-urile de fisier sunt pointeri `FILE*` in loc de descriptori intregi."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* Basic cp file copy program. C library implementation. */\n#include <stdio.h>\n#define BUF_SIZE 4096 // This is exactly the page size, for disk I/O efficiency!\n\nint main (int argc, char *argv []) {\n    FILE *input_file, *output_file;\n    ssize_t bytes_in, bytes_out;\n    char buffer[BUF_SIZE];\n    if (argc != 3) { printf(\"Usage: cp file-src file-dest\\n\");  return 1; }\n    input_file = fopen(argv[1], \"rb\");\n    if (input_file == NULL) { perror(argv[1]);  return 2; }\n    output_file = fopen(argv[2], \"wb\");\n    if (output_file == NULL) { perror(argv[2]);  return 3; }\n\n    /* Process the input file a record at a time. */\n    while ((bytes_in = fread(buffer, 1, BUF_SIZE, input_file)) > 0) {\n        bytes_out = fwrite(buffer, 1, bytes_in, output_file);\n        if (bytes_out != bytes_in) {\n            fprintf(stderr,\"Fatal write error!\\n\");  return 4;\n        }\n    }\n    fclose(input_file);  fclose(output_file);\n    return 0;\n}"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "In the C library version, what does fopen(argv[1], \"rb\") do?", "ro": "In versiunea cu biblioteca C, ce face fopen(argv[1], \"rb\")?" },
+              "options": [
+                { "text": { "en": "Opens the file for reading in text mode", "ro": "Deschide fisierul pentru citire in modul text" }, "correct": false },
+                { "text": { "en": "Opens the file for reading in binary mode", "ro": "Deschide fisierul pentru citire in modul binar" }, "correct": true },
+                { "text": { "en": "Opens the file for reading and writing in binary mode", "ro": "Deschide fisierul pentru citire si scriere in modul binar" }, "correct": false },
+                { "text": { "en": "Creates a new file for reading in binary mode", "ro": "Creeaza un fisier nou pentru citire in modul binar" }, "correct": false }
+              ],
+              "explanation": { "en": "The mode string `\"rb\"` means: `r` = open for reading (file must exist), `b` = binary mode (no text conversions). For writing a new file, you would use `\"wb\"` (write + binary).", "ro": "Sirul de mod `\"rb\"` inseamna: `r` = deschide pentru citire (fisierul trebuie sa existe), `b` = mod binar (fara conversii de text). Pentru scrierea unui fisier nou, se foloseste `\"wb\"` (scriere + binar)." }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

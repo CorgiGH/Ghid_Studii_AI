@@ -1,0 +1,278 @@
+{
+  "meta": {
+    "id": "os-c11",
+    "title": { "en": "Course 11: Terminal Management — NCURSES Library", "ro": "Cursul 11: Gestiunea terminalelor — Biblioteca NCURSES" },
+    "shortTitle": { "en": "C11: NCURSES", "ro": "C11: NCURSES" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 11 slides", "ro": "Prof. C. Vidrascu — Curs 11" }
+  },
+  "steps": [
+    {
+      "id": "os-c11-intro",
+      "title": { "en": "Introduction: Physical vs Virtual Screens", "ro": "Introducere: Ecranul fizic vs ecranul virtual" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **NCURSES** library provides users with a method for managing text-mode screens, independent of terminal type, with reasonable optimizations. The basic idea is that the terminal screen is \"separated\" into two distinct concepts: the **physical screen** (what the user actually sees on the physical terminal screen) and the **virtual screen** (what the user would see if all I/O operations executed through the NCURSES library were reflected exactly on the physical screen).",
+            "ro": "Biblioteca **NCURSES** pune la dispozitia utilizatorilor o metoda de gestiune a ecranelor in mod text, independenta de terminal si cu optimizari rezonabile. Ideea de baza este ca ecranul terminalului este \"separat\" in doua concepte distincte: **ecranul fizic** (ceea ce vede utilizatorul pe ecranul terminalului fizic) si **ecranul virtual** (ceea ce ar fi vazut utilizatorul daca ecranul terminalului fizic ar fi reflectat intocmai toate operatiile de I/O executate prin intermediul bibliotecii NCURSES)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Virtual Screen", "ro": "Ecran virtual" },
+          "content": {
+            "en": "An image in the computer's memory of the physical screen. All I/O operations executed by the user through the NCURSES library are performed on this in-memory image, without being instantly synchronized with the physical screen image.",
+            "ro": "O imagine in memoria calculatorului a ecranului fizic. Toate operatiile de I/O executate de utilizator prin intermediul bibliotecii NCURSES se executa asupra acestei imagini in memorie, fara a se sincroniza instantaneu cu imaginea de pe ecranul fizic."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Refresh Operation", "ro": "Operatia de refresh" },
+          "content": {
+            "en": "The synchronization of the two screens (i.e., \"copying\" the virtual screen image onto the physical screen) is performed explicitly through the **refresh** operation.",
+            "ro": "Sincronizarea celor doua ecrane (i.e., \"copierea\" imaginii ecranului virtual pe ecranul fizic) se executa in mod explicit prin operatia de **refresh**."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does NCURSES use a virtual screen instead of writing directly to the physical terminal? What advantage does this provide?",
+            "ro": "De ce foloseste NCURSES un ecran virtual in loc sa scrie direct pe terminalul fizic? Ce avantaj ofera aceasta abordare?"
+          },
+          "answer": {
+            "en": "By buffering all changes in a virtual screen, NCURSES can optimize the actual terminal output during refresh. Instead of sending every single character change to the terminal, it computes the minimal set of terminal commands needed to transform the current physical screen into the desired virtual screen. This dramatically reduces the amount of I/O, which was critical for slow serial terminals and still improves performance today.",
+            "ro": "Prin stocarea tuturor modificarilor intr-un ecran virtual, NCURSES poate optimiza iesirea efectiva catre terminal in timpul operatiei de refresh. In loc sa trimita fiecare modificare de caracter catre terminal, calculeaza setul minim de comenzi terminale necesare pentru a transforma ecranul fizic curent in ecranul virtual dorit. Aceasta reduce dramatic cantitatea de I/O, ceea ce era critic pentru terminalele seriale lente si imbunatateste performanta si astazi."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c11-overview",
+      "title": { "en": "NCURSES Library Overview", "ro": "Vedere generala asupra bibliotecii NCURSES" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The NCURSES library allows working with **text-mode windows**. A **window** is a rectangular area on the screen, stored in its own memory zone. The `WINDOW` data structure is used for this purpose. Windows have allocated distinct memory zones, even if their images overlap on screen (partially or totally). All I/O operations and the refresh operation are executed on the window specified as argument.",
+            "ro": "Biblioteca NCURSES permite lucrul cu **ferestre in mod text**. O **fereastra** este o zona dreptunghiulara de pe ecran, care este pastrata in propria sa zona de memorie. Pentru aceasta se utilizeaza o structura de date numita `WINDOW`. Ferestrele au alocate zone de memorie distincte, chiar daca imaginile lor pe ecran se suprapun (partial sau total). Toate operatiile de I/O si operatia de refresh se executa asupra ferestrei specificate ca argument al operatiei respective."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The refresh of a window involves two phases: \"copying\" the window onto the virtual screen, then \"copying\" the virtual screen onto the physical screen. This \"copy\" is optimized in the sense that only what has changed since the previous refresh operation is transferred.",
+            "ro": "Operatia de refresh a unei ferestre presupune doua faze: \"copierea\" ferestrei pe ecranul virtual, apoi \"copierea\" ecranului virtual pe ecranul fizic. Aceasta \"copiere\" este optimizata in sensul ca se transfera doar ceea ce s-a modificat de la operatia de refresh precedenta."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "/* Basic ncurses program template. */\n#include <stdio.h>\n#include <ncurses.h>\n...\nint main (int argc, char *argv []) {\n    ...\n    initscr();   // initialize ncurses mode\n    while( ! done ) {\n        execute_IO_operations();  // I/O on in-memory image\n        execute_refresh();        // 'copy' virtual screen to physical\n    }\n    endwin();    // end ncurses mode\n    ...\n    return 0;\n}"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Compile a program that uses the NCURSES library\nUNIX> gcc source.c -lncurses [-o executable]"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The main man page describing the NCURSES library is accessed with `man 3x ncurses`. This page contains an overview of the library along with the list of all available functions. Each function name includes a **keyword** that is used as a parameter in the `man` command to view the manual page for that function. For example, `initscr()` and `endwin()` are described on `man 3x curs_initscr`.",
+            "ro": "Pagina de manual principala ce descrie biblioteca NCURSES se acceseaza cu `man 3x ncurses`. Aceasta pagina contine o descriere de ansamblu a bibliotecii, impreuna cu lista tuturor functiilor disponibile. Numele fiecarei functii include un **keyword** care trebuie folosit ca parametru in comanda `man` pentru a vizualiza pagina de manual. De exemplu, `initscr()` si `endwin()` sunt descrise pe `man 3x curs_initscr`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c11-windows",
+      "title": { "en": "Windows and Their Functions", "ro": "Ferestre si functii pentru ele" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A window is essentially a two-dimensional character matrix with type `chtype` which equals **char + video mode attributes + a pair of colors** (ink and paper colors). Most NCURSES functions that operate on windows are defined in two forms: `wfunction(WINDOW *, ...)` and `function(...)`, where the second form is a macro that calls the first form for the standard window `stdscr`. In practice, `stdscr` is a global variable of the library that identifies a window that \"covers\" the entire screen.",
+            "ro": "O fereastra este practic o matrice bidimensionala de caractere, avand tipul `chtype` care este egal cu **char + atribute mod video + o pereche de culori** (ink si paper colors). Majoritatea functiilor bibliotecii NCURSES care opereaza cu ferestre sunt definite in doua forme: `wfunction(WINDOW *, ...)` si `function(...)`, cea de-a doua forma fiind un macro care apeleaza prima forma pentru fereastra standard `stdscr`. In practica, `stdscr` este o variabila globala a bibliotecii care identifica o fereastra ce \"acopera\" intregul ecran."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Most NCURSES functions that read or write at the cursor position in windows are also defined in two forms: `function(...)` and `mvfunction(..., int y, int x)`, where the **mv** variant is a macro that first moves the cursor to position (y, x) and then calls the first form, performing the operation at the new cursor position.",
+            "ro": "Majoritatea functiilor bibliotecii care opereaza (scriu sau citesc) la pozitia cursorului in ferestre sunt de asemenea definite in doua forme: `function(...)` si `mvfunction(..., int y, int x)`, unde varianta **mv** este un macro care intai muta cursorul la pozitia (y, x) si apoi apeleaza prima forma, realizand operatia la noua pozitie a cursorului."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does `stdscr` represent in NCURSES?", "ro": "Ce reprezinta `stdscr` in NCURSES?" },
+              "options": [
+                { "text": { "en": "The physical terminal screen", "ro": "Ecranul fizic al terminalului" }, "correct": false },
+                { "text": { "en": "A global variable referencing the default full-screen window", "ro": "O variabila globala ce refera fereastra implicita pe tot ecranul" }, "correct": true },
+                { "text": { "en": "The standard output stream", "ro": "Fluxul de iesire standard" }, "correct": false },
+                { "text": { "en": "A function that initializes the screen", "ro": "O functie care initializeaza ecranul" }, "correct": false }
+              ],
+              "explanation": { "en": "`stdscr` is a global `WINDOW *` variable that represents the default window covering the entire screen. Functions like `printw()` are macros that call `wprintw(stdscr, ...)`.", "ro": "`stdscr` este o variabila globala de tip `WINDOW *` care reprezinta fereastra implicita ce acopera intregul ecran. Functii precum `printw()` sunt macro-uri care apeleaza `wprintw(stdscr, ...)`." }
+            },
+            {
+              "question": { "en": "What is the difference between `addch()` and `mvaddch()`?", "ro": "Care este diferenta intre `addch()` si `mvaddch()`?" },
+              "options": [
+                { "text": { "en": "`mvaddch()` operates on a different window", "ro": "`mvaddch()` opereaza pe o fereastra diferita" }, "correct": false },
+                { "text": { "en": "`mvaddch()` first moves the cursor to (y,x), then writes the character", "ro": "`mvaddch()` intai muta cursorul la (y,x), apoi scrie caracterul" }, "correct": true },
+                { "text": { "en": "`addch()` writes to the physical screen directly", "ro": "`addch()` scrie direct pe ecranul fizic" }, "correct": false },
+                { "text": { "en": "They are identical", "ro": "Sunt identice" }, "correct": false }
+              ],
+              "explanation": { "en": "The `mv` prefix variants are macros that first move the cursor to position (y, x) and then call the base function. So `mvaddch(y, x, ch)` is equivalent to `move(y, x)` followed by `addch(ch)`.", "ro": "Variantele cu prefixul `mv` sunt macro-uri care intai muta cursorul la pozitia (y, x) si apoi apeleaza functia de baza. Deci `mvaddch(y, x, ch)` este echivalent cu `move(y, x)` urmat de `addch(ch)`." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c11-function-categories",
+      "title": { "en": "Main Function Categories in NCURSES", "ro": "Principalele categorii de functii din NCURSES" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "NCURSES provides a rich set of function categories: **Initialization/termination** of NCURSES mode: `initscr`, `endwin`. **Refresh** of windows: `[w]refresh`. **Touch** operations (which \"short-circuit\" the refresh optimization mechanism): `touchwin`, `touchline`. **Window creation/destruction**: `newwin`, `delwin`. **Clearing** window content (filling with blanks): `[w]clear`. **Copying** between windows: `overlay`, `overwrite`, `copywin`.",
+            "ro": "NCURSES ofera un set bogat de categorii de functii: **Initializare/terminare** a modului de lucru NCURSES: `initscr`, `endwin`. **Refresh** a ferestrelor: `[w]refresh`. **Touch** al ferestrelor (prin care se \"scurtcircuiteaza\" mecanismul de optimizare a operatiei de refresh): `touchwin`, `touchline`. **Creare/distrugere** a ferestrelor: `newwin`, `delwin`. **Stergere** a continutului ferestrelor (umplere cu blank-uri): `[w]clear`. **Copiere** de ferestre: `overlay`, `overwrite`, `copywin`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Cursor positioning**: `getyx`, `[w]move`. **Writing** a single character: `[mv][w]addch`, `[w]echochar`. **Writing** a character string: `[mv][w]add[n]str`, `[mv][w]in[n]str`. **Formatted reading/writing**: `[mv][w]printw`, `[mv][w]scanw`. **Character insertion/extraction** (at line level): `[mv][w]insch`, `[mv][w]delch`. **Line insertion/extraction** (at window level): `[w]insertin`, `[w]deleteln`, `[w]insdelln`.",
+            "ro": "**Pozitia cursorului** in ferestre: `getyx`, `[w]move`. **Citire/scriere** a unui caracter: `[mv][w]addch`, `[w]echochar`. **Citire/scriere** a unui sir de caractere: `[mv][w]add[n]str`, `[mv][w]in[n]str`. **Citire/scriere formatate**: `[mv][w]printw`, `[mv][w]scanw`. **Inserare/extractie** a unui caracter (la nivel de linie): `[mv][w]insch`, `[mv][w]delch`. **Inserare/extractie** a unei linii (la nivel de fereastra): `[w]insertin`, `[w]deleteln`, `[w]insdelln`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Drawing** borders and horizontal/vertical lines in windows: `[w]border`, `box`, `[w]hline`, `[w]vline`. **Attribute and color manipulation**: `[w]attron`, `[w]attroff`, `[w]attrset`, `[w]color_set`, `start_color`, `init_pair`, etc. **Keyboard input**: `[mv][w]getch`, `[mv][w]get[n]str`. **Input terminal characteristics control**: `echo`, `noecho`, `cbreak`, `nocbreak`, `keypad`, etc. **Output terminal characteristics control**: `nl`, `nonl`, `scrollok`, `[w]setscrreg`, etc.",
+            "ro": "**Desenare** de margini interioare si de linii orizontale si verticale in ferestre: `[w]border`, `box`, `[w]hline`, `[w]vline`. **Manipulare** a atributelor si culorilor caracterelor: `[w]attron`, `[w]attroff`, `[w]attrset`, `[w]color_set`, `start_color`, `init_pair`, etc. **Citire** de la tastatura terminalului: `[mv][w]getch`, `[mv][w]get[n]str`. **Control** al caracteristicilor legaturii de intrare a terminalului: `echo`, `noecho`, `cbreak`, `nocbreak`, `keypad`, etc. **Control** al caracteristicilor legaturii de iesire a terminalului: `nl`, `nonl`, `scrollok`, `[w]setscrreg`, etc."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which pair of functions initializes and terminates NCURSES mode?", "ro": "Care pereche de functii initializeaza si termina modul NCURSES?" },
+              "options": [
+                { "text": { "en": "start_color() / end_color()", "ro": "start_color() / end_color()" }, "correct": false },
+                { "text": { "en": "initscr() / endwin()", "ro": "initscr() / endwin()" }, "correct": true },
+                { "text": { "en": "newwin() / delwin()", "ro": "newwin() / delwin()" }, "correct": false },
+                { "text": { "en": "cbreak() / nocbreak()", "ro": "cbreak() / nocbreak()" }, "correct": false }
+              ],
+              "explanation": { "en": "`initscr()` initializes the NCURSES library and allocates memory for the default `stdscr` window. `endwin()` restores the terminal to its previous state and releases resources.", "ro": "`initscr()` initializeaza biblioteca NCURSES si aloca memorie pentru fereastra implicita `stdscr`. `endwin()` restaureaza terminalul la starea anterioara si elibereaza resursele." }
+            },
+            {
+              "question": { "en": "What does the `touchwin()` function do?", "ro": "Ce face functia `touchwin()`?" },
+              "options": [
+                { "text": { "en": "Closes the window", "ro": "Inchide fereastra" }, "correct": false },
+                { "text": { "en": "Forces the next refresh to repaint the entire window, bypassing optimization", "ro": "Forteaza urmatorul refresh sa redeseneze intreaga fereastra, ocolind optimizarea" }, "correct": true },
+                { "text": { "en": "Moves the window to a new position", "ro": "Muta fereastra la o pozitie noua" }, "correct": false },
+                { "text": { "en": "Detects if the window has been modified", "ro": "Detecteaza daca fereastra a fost modificata" }, "correct": false }
+              ],
+              "explanation": { "en": "`touchwin()` marks the entire window as \"changed\" so the refresh optimization mechanism is bypassed — the entire window content will be sent to the terminal on the next refresh.", "ro": "`touchwin()` marcheaza intreaga fereastra ca \"modificata\" astfel incat mecanismul de optimizare al refresh-ului este ocolit — intregul continut al ferestrei va fi trimis catre terminal la urmatorul refresh." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c11-demo-programs",
+      "title": { "en": "Demo Programs with NCURSES", "ro": "Programe demo cu NCURSES" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #1** (`TUI_ex1.c`): Demonstrates working with the main display functions, using only the standard `stdscr` window. **Example #2** (`TUI_ex2.c`): Demonstrates working with overlapping windows and the phenomena that can occur due to the optimizations used by the refresh operation. **Example #3** (`TUI_ex3.c` and `TUI_ex3b.c`): Demonstrates working with the main display functions using a user-defined window and the standard `stdscr` window; the second variant also illustrates temporary exit from ncurses mode.",
+            "ro": "**Exemplul #1** (`TUI_ex1.c`): Ilustreaza lucrul cu principalele functii de afisare, folosind doar fereastra standard `stdscr`. **Exemplul #2** (`TUI_ex2.c`): Ilustreaza lucrul cu ferestre suprapuse si fenomenele ce pot aparea datorita optimizarilor folosite de operatia de refresh. **Exemplul #3** (`TUI_ex3.c` si `TUI_ex3b.c`): Ilustreaza lucrul cu principalele functii de afisare, folosind o fereastra definita si fereastra standard `stdscr`; a doua varianta ilustreaza si o iesire temporara din modul ncurses."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #4** (`TUI_ex4.c`): Demonstrates working with attributes and colors, using the standard `stdscr` window. **Example #5** (`TUI_ex5.c`): Demonstrates working with background and colors for windows. **Example #6** (`TUI_ex6.c`): Demonstrates working with scroll regions for windows. **Example #7** (`TUI_ex7.c`): Demonstrates working with interactive keyboard input. **Example #8** (`TUI_ex8-menu.c` + `TUI_ex8-menu.h`): Demonstrates a small interactive application with menus, capable of responding to arrow keys, ENTER, F1/H (for help), and Q (for quit).",
+            "ro": "**Exemplul #4** (`TUI_ex4.c`): Ilustreaza lucrul cu atribute si culori, folosind fereastra standard `stdscr`. **Exemplul #5** (`TUI_ex5.c`): Ilustreaza lucrul cu background si culori pentru ferestre. **Exemplul #6** (`TUI_ex6.c`): Ilustreaza lucrul cu zone de scroll pentru ferestre. **Exemplul #7** (`TUI_ex7.c`): Ilustreaza lucrul cu input interactiv de la tastatura. **Exemplul #8** (`TUI_ex8-menu.c` + `TUI_ex8-menu.h`): Ilustreaza o mica aplicatie interactiva cu meniuri, capabila sa raspunda la apasarea tastelor: sageti, ENTER, F1/H (pentru help) si Q (pentru quit)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The demo programs can be downloaded from the course materials page at `edu.info.uaic.ro/operating-systems-and-computer-networks/SO/lectures/demo/ncurses/`. More detailed explanations are available in **course support #7.2**.",
+            "ro": "Programele demonstrative pot fi descarcate din suportul de curs online de la `edu.info.uaic.ro/operating-systems-and-computer-networks/SO/lectures/demo/ncurses/`. Explicatii mai detaliate pot fi citite in **suportul de curs #7.2**."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why might overlapping windows cause unexpected behavior during refresh operations (as shown in Example #2)?",
+            "ro": "De ce pot ferestrele suprapuse cauza comportament neasteptat in timpul operatiilor de refresh (cum este aratat in Exemplul #2)?"
+          },
+          "answer": {
+            "en": "Because refresh is optimized to only transfer changes since the last refresh, overlapping windows can cause artifacts. When window A overlaps window B on the physical screen, refreshing A only updates the changed parts of A. If B was refreshed after A last time, parts of B might still be visible where A should be displayed. Using `touchwin()` before refresh forces a complete repaint, solving this issue. The `overlay()` and `overwrite()` functions also help manage overlapping windows correctly.",
+            "ro": "Deoarece refresh-ul este optimizat sa transfere doar modificarile de la ultimul refresh, ferestrele suprapuse pot cauza artefacte. Cand fereastra A se suprapune peste fereastra B pe ecranul fizic, refresh-ul lui A actualizeaza doar partile modificate ale lui A. Daca B a fost actualizat dupa ultimul refresh al lui A, parti din B ar putea ramane vizibile acolo unde ar trebui afisat A. Folosirea `touchwin()` inainte de refresh forteaza o redesenare completa, rezolvand aceasta problema. Functiile `overlay()` si `overwrite()` ajuta de asemenea la gestionarea corecta a ferestrelor suprapuse."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c11-terminals-pseudoterminals",
+      "title": { "en": "Terminals and Pseudo-Terminals", "ro": "Terminale si pseudo-terminale" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Low-level terminal work involves UNIX commands and C programming primitives. To find which terminal you are connected to, use the `tty` command. To view or modify terminal characteristics, use the `stty` command. For C programming, the `termios` data structure and its manipulation functions are used, as described in the manual page accessed with `man 3 termios`.",
+            "ro": "Lucrul de nivel scazut cu terminalul implica comenzi UNIX si primitive de programare C. Pentru a afla terminalul la care sunteti conectat, folositi comanda `tty`. Pentru aflarea sau modificarea caracteristicilor terminalului, folositi comanda `stty`. Pentru programare in C, se utilizeaza structura de date `termios` si functiile de manipulare a ei, descrise in pagina de manual accesata cu `man 3 termios`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Find which terminal you are connected to\nUNIX> tty\n\n# View terminal characteristics\nUNIX> stty [-a]\n\n# Modify terminal characteristics\nUNIX> stty ...\n\n# View termios manual page\nUNIX> man 3 termios"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "For more information about terminals and pseudo-terminals, refer to chapters 62 and 64 from **\"The Linux Programming Interface\"** by M. Kerrisk (No Starch Press, 2010).",
+            "ro": "Pentru mai multe informatii despre terminale si pseudo-terminale, consultati capitolele 62 si 64 din **\"The Linux Programming Interface\"** de M. Kerrisk (No Starch Press, 2010)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which command shows the terminal device you are connected to?", "ro": "Care comanda arata dispozitivul terminal la care sunteti conectat?" },
+              "options": [
+                { "text": { "en": "stty", "ro": "stty" }, "correct": false },
+                { "text": { "en": "tty", "ro": "tty" }, "correct": true },
+                { "text": { "en": "terminal", "ro": "terminal" }, "correct": false },
+                { "text": { "en": "who", "ro": "who" }, "correct": false }
+              ],
+              "explanation": { "en": "`tty` prints the file name of the terminal connected to standard input. `stty` is used to view or change terminal settings, not to identify the terminal.", "ro": "`tty` afiseaza numele fisierului terminalului conectat la intrarea standard. `stty` este folosit pentru a vizualiza sau modifica setarile terminalului, nu pentru a identifica terminalul." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c11-references",
+      "title": { "en": "Bibliographic References", "ro": "Referinte bibliografice" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Required bibliography**: [1] Demo programs from this presentation can be downloaded from the course support online at `edu.info.uaic.ro/operating-systems-and-computer-networks/SO/lectures/demo/ncurses/`. [2] Lab support associated with this presentation: `edu.info.uaic.ro/operating-systems-and-computer-networks/SO/support-lessons/C/suport_lab7c.html`. **Supplementary bibliography**: [3] Chapters 62 and 64 from \"The Linux Programming Interface\" by M. Kerrisk, No Starch Press, 2010. [4] NCURSES summary: `man 3x ncurses`. [5] termios summary: `man 3 termios`.",
+            "ro": "**Bibliografie obligatorie**: [1] Programele demonstrative din aceasta prezentare pot fi descarcate din suportul de curs online de la `edu.info.uaic.ro/operating-systems-and-computer-networks/SO/lectures/demo/ncurses/`. [2] Suportul de laborator online asociat acestei prezentari: `edu.info.uaic.ro/operating-systems-and-computer-networks/SO/support-lessons/C/suport_lab7c.html`. **Bibliografie suplimentara**: [3] Capitolele 62 si 64 din \"The Linux Programming Interface\" de M. Kerrisk, No Starch Press, 2010. [4] NCURSES — Sumar: `man 3x ncurses`. [5] termios — Sumar: `man 3 termios`."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,585 @@
+{
+  "meta": {
+    "id": "os-c8",
+    "title": { "en": "Course 8: Memory-Mapped Files — mmap()", "ro": "Cursul 8: Fisiere mapate in memorie — mmap()" },
+    "shortTitle": { "en": "C8: mmap()", "ro": "C8: mmap()" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 8 slides", "ro": "Prof. C. Vidrascu — Curs 8" }
+  },
+  "steps": [
+    {
+      "id": "os-c8-intro",
+      "title": { "en": "Introduction: Memory-Mapped Files", "ro": "Introducere: Fisiere mapate in memorie" },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Memory-Mapped File", "ro": "Fisier mapat in memorie" },
+          "content": {
+            "en": "A mechanism by which the content (or part) of a file is \"mapped\" into memory, in the virtual address space of the process. The primitive `mmap` is used for this purpose.",
+            "ro": "Un mecanism prin care continutul (o parte din) unui fisier este \"mapat\" in memorie, in spatiul virtual de adrese al procesului. In acest scop se apeleaza primitiva `mmap`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Through this \"mapping\", a direct **byte-to-byte** correlation is established between a portion of the process's virtual address space and a portion of a file on disk. The virtual pages forming that portion of the process's virtual address space are assigned as their **backing store** (the disk space reserved for eviction from memory) the disk area that stores that portion of the file, instead of reserving space in the operating system's **swap file**.",
+            "ro": "Prin aceasta \"mapare\" se realizeaza practic o corelatie directa **octet-la-octet** intre o portiune din spatiul virtual de adrese al procesului si o portiune a unui fisier de pe disc. Paginilor virtuale ce formeaza respectiva portiune din spatiul virtual de adrese al procesului, li se asociaza drept **backing store** (spatiul pe disc rezervat pentru evacuarea lor din memorie), de catre nucleul sistemului de operare, zona de pe disc ce stocheaza acea portiune a fisierului de pe disc, in loc de a le rezerva spatiu in **fisierul de swap** al sistemului de operare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Through a mapping, we can read and write **directly in memory** to the file's contents, as if we were reading and writing ordinary program variables, without needing to use `read`/`write` system calls or standard C I/O library functions. Changes written to memory are \"propagated\" to disk with a delay, when the kernel decides to flush the dirty pages to disk (e.g., when they are selected as eviction victims from memory).",
+            "ro": "Printr-o mapare, putem face accese de citire si scriere **direct in memorie** asupra fisierului, ca si cum am citi sau scrie diverse variabile din program, fara sa mai utilizam apelurile de sistem `read`/`write` sau functiile de I/O din biblioteca standard de C. Efectul scrierilor in memorie va fi \"propagat\" pe disc cu intarziere, atunci cand nucleul decide sa salveze paginile dirty pe disc (de ex., atunci cand le selecteaza drept victime pentru evacuare din memorie)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Another advantage of this mechanism: a file can be \"mapped\" simultaneously in the virtual address spaces of two (or more) processes, and these processes can cooperate by exchanging information through the **shared memory** communication model. A simple example of cooperating processes using shared mapping is the **Producer/Consumer** pattern.",
+            "ro": "Un alt avantaj al acestui mecanism: un anumit fisier poate fi \"mapat\" simultan in spatiile virtuale de adrese a doua (sau mai multor) procese si astfel procesele respective pot coopera schimband informatii prin **modelul de comunicare cu shared memory**. Un exemplu simplu de procese cooperante prin modelul de comunicare cu memorie partajata este reprezentat de sablonul **Producator/Consumator**."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The term **memory-mapped file** refers to the portion of the process's virtual address space for which a mapping was established via an `mmap` call — a direct byte-to-byte correlation with a portion of a file on disk. Do not confuse this with the file itself on disk (or its disk portion).",
+            "ro": "Termenul **fisier mapat in memorie** se refera la acea portiune din spatiul virtual de adrese al procesului pentru care s-a stabilit, printr-un apel `mmap`, o corelatie directa octet-la-octet cu o portiune a unui fisier de pe disc. Nu confundati semnificatia acestui termen cu fisierul propriu-zis de pe disc (sau portiunea acestuia de pe disc)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the key advantage of memory-mapped files over traditional read/write I/O?",
+            "ro": "Care este avantajul principal al fisierelor mapate in memorie fata de I/O traditional cu read/write?"
+          },
+          "answer": {
+            "en": "Memory-mapped files allow direct memory access to file contents (reading/writing variables) without explicit system calls. The kernel handles propagation to disk transparently. Additionally, multiple processes can share the same mapping for IPC via shared memory, which is more efficient than passing data through the kernel with read/write.",
+            "ro": "Fisierele mapate in memorie permit accesul direct din memorie la continutul fisierului (citirea/scrierea variabilelor) fara apeluri de sistem explicite. Nucleul se ocupa de propagarea pe disc in mod transparent. In plus, mai multe procese pot partaja aceeasi mapare pentru IPC prin memorie partajata, ceea ce este mai eficient decat transmiterea datelor prin nucleu cu read/write."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c8-mmap-primitive",
+      "title": { "en": "The mmap Primitive", "ro": "Primitiva mmap" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The \"mapping\" of a file into the virtual memory of a process is done with the `mmap` primitive. The function interface is: `void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)`. It returns the start address of the successfully created mapping (the beginning of the mapped region in the caller process's virtual space), or `MAP_FAILED` (i.e., `(void *) -1`) on error.",
+            "ro": "\"Maparea\" unui fisier in memoria virtuala a unui proces se realizeaza cu primitiva `mmap`. Interfata functiei este: `void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)`. Returneaza adresa de start a maparii create cu succes (inceputul regiunii mapate in spatiul virtual al procesului apelant), sau `MAP_FAILED` (adica `(void *) -1`) in caz de eroare."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/mman.h>\n\nvoid *mmap(void *addr, size_t length, int prot, int flags,\n           int fd, off_t offset);\n\n// Returns: start address of mapping on success\n//          MAP_FAILED ((void *) -1) on error"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Parameters:** **addr** = start address hint for the new mapping (if `NULL`, the kernel chooses a convenient page-aligned address; the address must be a multiple of the page size). **length** = the length of the new mapping to create (the length must be a positive integer). **fd** = file descriptor of the file (or another object, e.g., a device) associated with the mapping being created. **offset** = must be an integer that is a multiple of the page size (it need not be a multiple of the page size for `length`).",
+            "ro": "**Parametri:** **addr** = adresa de start pentru noua mapare (daca este `NULL`, nucleul va alege in mod convenabil o adresa page-aligned; adresa trebuie sa fie multiplu de dimensiunea paginii). **length** = lungimea noii mapari ce se creeaza (lungimea trebuie sa fie un intreg strict pozitiv). **fd** = descriptorul fisierului (sau un alt obiect, de ex. un device) asociat maparii ce se creeaza. **offset** = trebuie sa fie un intreg pozitiv multiplu de dimensiunea paginii."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The file descriptor `fd` can be closed immediately after the `mmap` call without invalidating the mapping. Also, the newly created mapping is initialized by copying the corresponding portion from the disk file associated with the file descriptor, starting from position `offset` and of size `length`.",
+            "ro": "Descriptorul de fisier `fd` poate fi inchis imediat dupa apelul `mmap`, fara a invalida maparea creata. De asemenea, maparea nou creata este initializata prin copierea de pe disc a continutului portiunii din fisierul asociat, incepand de la pozitia `offset` si de lungime `length`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "When using `MAP_UNINITIALIZED` flag, the mapping is set as \"destination on disc\" for any modifications made in memory that need to be \"propagated\" to disc, but does not use the file's existing content as the initial source.",
+            "ro": "Cand se foloseste flag-ul `MAP_UNINITIALIZED`, maparea este setata ca \"destinatie pe disc\" pentru acele modificari efectuate in memorie ce trebuie \"propagate\" pe disc, dar nu foloseste continutul existent al fisierului ca sursa initiala."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c8-mmap-prot-flags",
+      "title": { "en": "mmap Protection & Flags", "ro": "mmap: Protectie si flag-uri" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**prot** specifies the type of protection for all memory pages forming the new mapping (it must not conflict with the file's open mode). It can be the symbolic constant `PROT_NONE` (pages cannot be accessed), or a combination (logical OR on bits) of one or more of the following values:",
+            "ro": "**prot** specifica tipul de protectie al tuturor paginilor de memorie ce formeaza noua mapare (si trebuie sa nu fie in conflict cu modul de deschidere al fisierului). Poate avea ca valoare fie constanta simbolica `PROT_NONE` (paginile maparii nou create NU vor putea fi accesate), fie o combinatie (disjunctie logica pe biti) a uneia sau mai multora dintre constantele:"
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "PROT_READ", "ro": "PROT_READ" },
+          "content": {
+            "en": "Pages of the new mapping can be accessed for reading.",
+            "ro": "Paginile maparii nou create vor putea fi accesate pentru citire."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "PROT_WRITE", "ro": "PROT_WRITE" },
+          "content": {
+            "en": "Pages of the new mapping can be accessed for writing.",
+            "ro": "Paginile maparii nou create vor putea fi accesate pentru scriere."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "PROT_EXEC", "ro": "PROT_EXEC" },
+          "content": {
+            "en": "Pages of the new mapping can be accessed for execution.",
+            "ro": "Paginile maparii nou create vor putea fi accesate pentru executie."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**flags** is a set of flags used to determine whether modifications (writes) made by the process in the \"visible\" pages will also be visible in other processes mapping the same file, and whether those modifications will be \"propagated\" (i.e., flushed) to the file on disk. It must contain exactly one of the two values: **MAP_PRIVATE** (creates a \"private\" copy-on-write mapping) or **MAP_SHARED** (creates a \"shared\" mapping). It can also be accompanied by a combination of other flags such as: `MAP_FIXED`, `MAP_LOCKED`, `MAP_ANONYMOUS`, `MAP_UNINITIALIZED`, etc.",
+            "ro": "**flags** este o serie de flag-uri folosite pentru a determina daca modificarile (scrierile) efectuate de proces in paginile maparii vor fi \"vizibile\" sau nu si in celelalte procese ce mapeaza acelasi fisier, precum si daca aceste modificari efectuate in memorie vor fi \"propagate\" (flush-uite pe disc) in fisierul propriu-zis stocat pe disc. Trebuie sa contina exact una singura dintre valorile: **MAP_PRIVATE** (se creeaza o mapare \"privata\" de tipul copy-on-write) sau **MAP_SHARED** (se creeaza o mapare \"partajata\"). Aceasta poate fi insotita de o combinatie a altor valori, precum: `MAP_FIXED`, `MAP_LOCKED`, `MAP_ANONYMOUS`, `MAP_UNINITIALIZED`, etc."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which flag must be specified to create a shared mapping visible to other processes?", "ro": "Ce flag trebuie specificat pentru a crea o mapare partajata vizibila celorlalte procese?" },
+              "options": [
+                { "text": { "en": "MAP_PRIVATE", "ro": "MAP_PRIVATE" }, "correct": false },
+                { "text": { "en": "MAP_SHARED", "ro": "MAP_SHARED" }, "correct": true },
+                { "text": { "en": "MAP_ANONYMOUS", "ro": "MAP_ANONYMOUS" }, "correct": false },
+                { "text": { "en": "MAP_FIXED", "ro": "MAP_FIXED" }, "correct": false }
+              ],
+              "explanation": { "en": "`MAP_SHARED` creates a mapping where writes are visible to other processes mapping the same file and are propagated to disk. `MAP_PRIVATE` creates a copy-on-write mapping where writes are not visible to others.", "ro": "`MAP_SHARED` creeaza o mapare in care scrierile sunt vizibile celorlalte procese ce mapeaza acelasi fisier si sunt propagate pe disc. `MAP_PRIVATE` creeaza o mapare copy-on-write in care scrierile nu sunt vizibile celorlalti." }
+            },
+            {
+              "question": { "en": "What does PROT_NONE mean for a memory mapping?", "ro": "Ce inseamna PROT_NONE pentru o mapare de memorie?" },
+              "options": [
+                { "text": { "en": "Pages can only be read", "ro": "Paginile pot fi doar citite" }, "correct": false },
+                { "text": { "en": "Pages cannot be accessed at all", "ro": "Paginile nu pot fi accesate deloc" }, "correct": true },
+                { "text": { "en": "Pages have no protection", "ro": "Paginile nu au protectie" }, "correct": false },
+                { "text": { "en": "Pages can be read and written", "ro": "Paginile pot fi citite si scrise" }, "correct": false }
+              ],
+              "explanation": { "en": "`PROT_NONE` means the pages of the mapping cannot be accessed in any way. Any access attempt will cause a segmentation fault.", "ro": "`PROT_NONE` inseamna ca paginile maparii nu pot fi accesate in niciun mod. Orice incercare de acces va cauza un segmentation fault." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c8-munmap",
+      "title": { "en": "The munmap Primitive", "ro": "Primitiva munmap" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The \"deletion\" of a mapping from a process's virtual memory is done with the `munmap` primitive. The specified address must be a multiple of the page size. Returns 0 on success, or -1 on error.",
+            "ro": "\"Stergerea\" unei mapari din memoria virtuala a unui proces se realizeaza cu primitiva `munmap`. Adresa specificata trebuie sa fie multiplu de dimensiunea paginii. Returneaza 0 in caz de succes, si respectiv -1 in caz de eroare."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/mman.h>\n\nint munmap(void *addr, size_t length);\n\n// addr   = start address of the mapping to remove\n// length = length of the mapping to remove\n// Returns: 0 on success, -1 on error"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Important observations: 1) The `length` parameter does not have to be a multiple of the page size, but the kernel will round it up to the nearest page size multiple. 2) The `munmap` call \"removes\" the address range specified from the process's virtual address space. Accessing an address in that range after `munmap` generates a `SIGSEGV` signal, causing abnormal termination with a \"Segmentation fault\" message. 3) If no mapping exists for the specified range, `munmap` still succeeds (it represents an unmapping of a portion of pages that happen to already be mapped in the process's address space). 4) Mappings created with `mmap` are automatically \"deleted\" at process termination. Closing the file descriptor used in the previous `mmap` call does NOT cause \"deletion\" of the mapping.",
+            "ro": "Observatii importante: 1) Parametrul `length` nu trebuie sa fie neaparat multiplu de dimensiunea paginii, dar se va lua in considerare cel mai mic multiplu de dimensiunea paginii mai mare sau egal cu `length`. 2) Apelul `munmap` \"sterge\" intervalul de adrese specificat din spatiul virtual de adrese al procesului apelant. Accesarea unei adrese din acel interval dupa `munmap` genereaza semnalul `SIGSEGV`, ceea ce cauzeaza terminarea anormala a procesului cu un mesaj de eroare \"Segmentation fault\". 3) In caz ca nicio mapare nu se regaseste la un interval de adrese corespunzator unor pagini mapate in spatiul virtual de adrese al procesului, apelul `munmap` reuseste. 4) Maparile create prin apelul `mmap` sunt \"sterse\" automat la terminarea executiei procesului. Inchiderea descriptorului de fisier utilizat intr-un apel `mmap` anterior nu provoaca \"stergerea\" maparii respective."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c8-mmap-characteristics",
+      "title": { "en": "Characteristics of mmap Mappings", "ro": "Caracteristici ale maparilor create cu mmap" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**1) Portable creation:** The portable way to create a mapping is to specify `addr` as 0 (`NULL`) and to omit `MAP_FIXED` from `flags`. In this case, the kernel chooses the address for the mapping in a way that does not conflict with any existing mapping. **2) Two types of mappings (MAP_PRIVATE vs. MAP_SHARED):** For a **private** mapping (copy-on-write), writes by the creating process will NOT be \"visible\" to other processes mapping the same file and will NOT be \"propagated\" to the file on disk (only to the swap file, if applicable). For a **shared** mapping, writes by the creating process will be \"visible\" to other processes mapping the same file and will be \"propagated\" to the file on disk.",
+            "ro": "**1) Modul portabil de creare:** Modul portabil de a crea o mapare este de a specifica `addr` ca 0 (`NULL`) si de a omite `MAP_FIXED` din `flags`. In acest caz, nucleul alege adresa pentru mapare intr-o maniera adecvata ce nu intra in conflict cu nicio mapare existenta. **2) Doua tipuri de mapari (MAP_PRIVATE vs. MAP_SHARED):** Pentru o mapare **privata** (de tipul copy-on-write), scrierile efectuate de procesul ce a creat-o NU vor fi \"vizibile\" in celelalte procese ce mapeaza aceleasi portiuni de fisier si NU vor fi \"propagate\" in fisierul propriu-zis de pe disc (ci doar, eventual, in fisierul de swap al sistemului). Pentru o mapare **partajata**, scrierile efectuate de proces vor fi \"vizibile\" in celelalte procese ce mapeaza aceleasi portiuni de fisier si vor fi \"propagate\" in fisierul propriu-zis de pe disc."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**3) Effective length:** The effective length (i.e., the number of bytes) of a mapping will create the nearest multiple of the page size greater than or equal to `length`. Thus, if the `length` parameter is not a multiple of the page size, the mapping will fill the remaining addresses of the last page with zero, and subsequent writes to these addresses will succeed but will NOT be \"propagated\" to the file on disk. **4) fork inheritance:** After a `fork` call, the child process \"inherits\" the memory mapped by `mmap` from the parent. The respective mapping will refer to the same file portion in the child process as in the parent (more details in the lecture on `fork`).",
+            "ro": "**3) Lungimea efectiva:** Lungimea efectiva (adica dimensiunea in octeti) a maparii nou create va fi cel mai mic multiplu de dimensiunea paginii, mai mare sau egal cu `length`. Astfel, daca parametrul `length` nu este multiplu de dimensiunea paginii, atunci crearea maparii restul adreselor din ultima pagina a maparii vor fi initializate cu zero, iar scrierile ulterioare la aceste adrese nu vor da eroare, dar nici NU vor fi \"propagate\" in fisierul de pe disc. **4) Mostenire la fork:** In urma unui apel `fork`, procesul fiu \"mosteneste\" memoria mapata cu primitiva `mmap` de catre parinte. Maparea respectiva va avea in procesul fiu acelasi atribut si va referi aceeasi portiune de fisier asociata ca in procesul parinte."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**5) Hardware architecture implications:** On most hardware architectures (e.g., x86/x64), memory protection only supports **read-only** or **read & write** values, not write-only. Therefore, `PROT_WRITE` implicitly includes `PROT_READ` even if not explicitly specified. **6) PROT_EXEC behavior:** On some architectures, `PROT_READ` also implies `PROT_EXEC` (e.g., older x86 CPUs without NX bit support), while on others it does not (e.g., x64 with NX bit). For portability, always specify `PROT_EXEC` explicitly when creating an executable mapping. **7) mprotect:** To modify the page protections of an existing mapping, use the `mprotect` primitive.",
+            "ro": "**5) Implicatii ale arhitecturii hardware:** Pe marea majoritate a arhitecturilor hardware (de ex., x86/x64), modul de protectie accepta la memorie doar valorile **read-only** sau **read & write**, dar nu si write-only. Prin urmare, `PROT_WRITE` implica automat si permisiunea `PROT_READ`, chiar daca aceasta din urma nu este specificata explicit. **6) Comportamentul PROT_EXEC:** Pe anumite arhitecturi hardware, `PROT_READ` implica automat si permisiunea `PROT_EXEC` (de ex., CPU-uri x86 mai vechi, fara suport pentru bitul NX), iar pe alte arhitecturi nu implica acest lucru (de ex., x64 cu suport NX). Pentru portabilitate, specificati intotdeauna explicit `PROT_EXEC` in apelul `mmap` ce va crea o mapare ce intentioneaza sa execute cod. **7) mprotect:** Pentru a modifica protectia paginilor dintr-o mapare, se poate utiliza primitiva `mprotect`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**8) Demand paging:** Physical pages (from RAM) that store virtual pages from the process's address space are managed by the kernel using the **demand paging** mechanism. Each virtual page alternates between periods when it resides in memory (in a physical RAM frame) and periods when it does not reside in memory (its content is only on disk — either a mapped file or the swap file). To find which virtual pages are currently resident, use `mincore`. **9) Page locking:** The kernel allows \"locking\" virtual pages in memory so they remain resident permanently until process termination. Use `mlock`/`mlockall` to lock and `munlock`/`munlockall` to unlock.",
+            "ro": "**8) Paginare la cerere:** Paginile fizice (din RAM) ce stocheaza paginile virtuale din spatiul virtual de adrese al unui proces sunt gestionate de nucleu conform mecanismului de **administrare a memoriei virtuale prin paginare la cerere**. Fiecare pagina virtuala trece prin perioade cand este rezidenta in memorie (intr-o pagina fizica din RAM) si perioade cand nu este rezidenta in memorie (continutul sau este doar pe disc — fie un fisier mapat, fie in fisierul de swap). Pentru a afla care pagini virtuale sunt rezidente, se poate folosi `mincore`. **9) Blocarea paginilor:** Nucleul permite \"incuierea\" unor pagini virtuale in memorie, astfel incat ele vor ramane rezidente in permanenta pana la terminarea procesului. Se folosesc `mlock`/`mlockall` pentru blocare si `munlock`/`munlockall` pentru deblocare."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the practical difference between MAP_PRIVATE and MAP_SHARED when two processes map the same file?",
+            "ro": "Care este diferenta practica intre MAP_PRIVATE si MAP_SHARED cand doua procese mapeaza acelasi fisier?"
+          },
+          "answer": {
+            "en": "With MAP_SHARED, both processes see each other's writes and the changes are propagated to the file on disk — this enables shared-memory IPC. With MAP_PRIVATE (copy-on-write), each process gets its own private copy of modified pages: writes are not visible to the other process and are not written to the file on disk (only to the swap area). MAP_PRIVATE is useful when you want to modify data locally without affecting the file or other processes.",
+            "ro": "Cu MAP_SHARED, ambele procese vad scrierile celuilalt si modificarile sunt propagate in fisierul de pe disc — acest lucru permite IPC prin memorie partajata. Cu MAP_PRIVATE (copy-on-write), fiecare proces primeste propria copie privata a paginilor modificate: scrierile nu sunt vizibile celuilalt proces si nu sunt scrise in fisierul de pe disc (doar in zona de swap). MAP_PRIVATE este util cand doriti sa modificati datele local fara a afecta fisierul sau alte procese."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c8-msync",
+      "title": { "en": "The msync Primitive", "ro": "Primitiva msync" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The \"synchronization\" of a file with its mapping in a process's memory is done with the `msync` primitive. It flushes dirty pages from the mapping area to disk.",
+            "ro": "\"Sincronizarea\" unui fisier cu maparea sa din memoria virtuala a unui proces se realizeaza cu primitiva `msync`. Aceasta forteaza scrierea paginilor dirty din zona maparii pe disc."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/mman.h>\n\nint msync(void *addr, size_t length, int flags);\n\n// addr   = start address of the mapping to sync\n// length = length of the mapping region to sync\n// flags  = MS_SYNC | MS_ASYNC, optionally | MS_INVALIDATE\n// Returns: 0 on success, -1 on error"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Parameters:** **addr** = start address for the mapping (from the caller process's virtual space) whose associated disk file portion we want to \"propagate\" (i.e., the dirty pages of that mapping). **length** = the length of the mapping, i.e., the portion of the file on disk to synchronize. **flags** = specifies the initial flushing mode (blocking or non-blocking) of dirty pages from the mapping area, with exactly one of: **MS_SYNC** (blocking flush — waits for writes to complete) or **MS_ASYNC** (non-blocking flush — does not wait for writes to complete). Either can be combined with `MS_INVALIDATE` to invalidate other mappings of the same file so they update with the latest disk contents.",
+            "ro": "**Parametri:** **addr** = adresa de start pentru maparea (din spatiul virtual al procesului apelant) pentru care vrem sa \"propagam\" pe disc (portiunea de fisier asociata maparii) scrierile deja efectuate in memorie si inca \"nepropagare\" (paginile dirty). **length** = lungimea maparii, adica a portiunii de fisier de pe disc asociata. **flags** = specifica tipul initial, in mod blocant sau neblocant, un flushing pe disc a paginilor dirty din acea mapare, prin specificarea exact a uneia dintre valorile: **MS_SYNC** (flushing in mod blocant — asteapta finalizarea scrierilor) sau **MS_ASYNC** (flushing neblocant — fara a astepta finalizarea scrierilor). Oricare poate fi combinata cu `MS_INVALIDATE` pentru a invalida celelalte mapari posibil existente ale aceluiasi fisier, astfel incat sa se vor actualiza cu modificarile survenite pe disc."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The `addr` parameter is the value returned by the `mmap` call that created the mapping (so it is obligatorily a multiple of the page size). The `length` parameter does not need to be a multiple of the page size. If `length` is not a multiple of the page size, then writes in the mapping beyond the file boundary will succeed but their effects will NOT be \"propagated\" to the file on disk.",
+            "ro": "Parametrul `addr` este valoarea returnata de apelul `mmap` ce a creat acea mapare (deci obligatoriu este multiplu de dimensiunea paginii). Parametrul `length` nu trebuie neaparat sa fie multiplu de dimensiunea paginii. Daca `length` nu este multiplu de dimensiunea paginii, atunci scrierile din mapare dincolo de limita fisierului vor reusi dar efectele lor nu vor fi \"propagate\" pe disc."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The `munmap` call does NOT perform an implicit `msync` (i.e., it does NOT do flushing for the dirty pages at that moment). In other words, when you close (unmap) a mapping without first synchronizing it, you may \"lose\" the latest modifications made in that mapping's memory (i.e., they may not be saved to the file on disk).",
+            "ro": "Apelul `munmap` nu efectueaza si un apel `msync` implicit (adica nu face si flushing pentru paginile dirty din acel moment). Cu alte cuvinte, cand stergeti o mapare fara a o sincroniza mai intai, este posibil sa \"pierdeti\" ultimele modificari efectuate in memoria acelei mapari (adica acestea nu se vor salva in fisierul de pe disc)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens if you call munmap without first calling msync?", "ro": "Ce se intampla daca apelati munmap fara a apela mai intai msync?" },
+              "options": [
+                { "text": { "en": "All changes are automatically saved to disk", "ro": "Toate modificarile sunt salvate automat pe disc" }, "correct": false },
+                { "text": { "en": "Recent changes may be lost (not propagated to disk)", "ro": "Modificarile recente pot fi pierdute (nepropagare pe disc)" }, "correct": true },
+                { "text": { "en": "The program crashes with SIGSEGV", "ro": "Programul se opreste cu SIGSEGV" }, "correct": false },
+                { "text": { "en": "munmap fails and returns -1", "ro": "munmap esueaza si returneaza -1" }, "correct": false }
+              ],
+              "explanation": { "en": "`munmap` does NOT perform an implicit `msync`. Dirty pages that have not yet been flushed to disk may be lost. Always call `msync` before `munmap` if you need to ensure data persistence.", "ro": "`munmap` NU efectueaza un `msync` implicit. Paginile dirty care nu au fost inca scrise pe disc pot fi pierdute. Apelati intotdeauna `msync` inainte de `munmap` daca trebuie sa asigurati persistenta datelor." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c8-non-persistent",
+      "title": { "en": "Non-Persistent Mappings", "ro": "Mapari nepersistente" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are two types of memory-mapped files: **1) Persistent (file-backed) mappings:** This is the default mapping type. A persistent file mapping is associated with a source file on disk and maps a region of the process's virtual memory to that file. Reading those memory areas causes reading the file and writing causes writing to the file on disk. **2) Non-persistent mappings:** A non-persistent mapping is NOT associated with any file on disk, i.e., it maps a region of the process's virtual memory that has no disk file association. The content is initialized to zero. When the last process using such a mapping finishes, the data is lost. This type of mapping is used for creating shared memory for IPC between processes.",
+            "ro": "Exista doua tipuri de fisiere mapate in memorie: **1) Mapari persistente de fisiere:** Acesta este tipul de mapare implicit. O mapare de fisier persistenta este asociata cu un fisier sursa de pe un disc si mapeaza o zona de memorie virtuala a procesului catre acel fisier de pe disc. Citirea acelor zone ale memoriei cauzeaza citirea fisierului asociat si scrierea acelor zone cauzeaza o scriere a fisierului de pe disc. **2) Mapari nepersistente:** O mapare nepersistenta nu este asociata cu vreun fisier de pe disc, adica mapeaza o zona din memoria virtuala a procesului care nu are asociere cu niciun fisier de disc. Continutul este initializat la zero. Cand ultimul proces a terminat de lucrat cu o astfel de mapare, datele se pierd. Acest tip de mapare este utilizat pentru crearea memoriei partajate pentru comunicatii intre procese (IPC)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Anonymous Non-Persistent Mapping", "ro": "Mapare nepersistenta anonima" },
+          "content": {
+            "en": "Created using the `MAP_ANONYMOUS` flag in the `mmap` call. Can be used for IPC only between related processes (parent-child via `fork`). The anonymous mapping inherits the mapping through the fork call.",
+            "ro": "Creata folosind flag-ul `MAP_ANONYMOUS` in apelul `mmap`. Poate fi utilizata pentru IPC doar intre procese inrudite (parinte-fiu prin `fork`). Maparea anonima este mostenita prin apelul fork."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Named Non-Persistent Mapping (POSIX Shared Memory)", "ro": "Mapare nepersistenta cu nume (Memorie partajata POSIX)" },
+          "content": {
+            "en": "Created by first opening a POSIX shared memory object with `shm_open`, then mapping it with `mmap`. Can be used for IPC between any processes (not just related ones). The shared memory object persists at the kernel level until the system is stopped/restarted or until it is deleted with `shm_unlink`.",
+            "ro": "Creata prin deschiderea unui obiect de memorie partajata POSIX cu `shm_open`, apoi maparea cu `mmap`. Poate fi utilizata pentru IPC intre orice procese (nu doar inrudite). Obiectul de memorie partajata persista la nivel de kernel pana cand sistemul este oprit/repornit sau pana este sters cu `shm_unlink`."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "When would you use an anonymous mapping vs. a named POSIX shared memory object?",
+            "ro": "Cand ati folosi o mapare anonima vs. un obiect de memorie partajata POSIX cu nume?"
+          },
+          "answer": {
+            "en": "Use an anonymous mapping (MAP_ANONYMOUS) when communication is needed only between a parent process and its children (created via fork), since the mapping is inherited. Use a named POSIX shared memory object (shm_open + mmap) when unrelated processes need to share memory — they can find the shared object by name without needing a parent-child relationship.",
+            "ro": "Folositi o mapare anonima (MAP_ANONYMOUS) cand comunicarea este necesara doar intre un proces parinte si copiii sai (creati prin fork), deoarece maparea este mostenita. Folositi un obiect de memorie partajata POSIX cu nume (shm_open + mmap) cand procese neinrudite trebuie sa partajeze memorie — pot gasi obiectul partajat dupa nume fara a necesita o relatie parinte-copil."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c8-shm-api",
+      "title": { "en": "POSIX Shared Memory API", "ro": "API-ul POSIX pentru memorie partajata" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The POSIX API for shared memory allows processes to communicate information by sharing a memory region. The following functions are used:",
+            "ro": "API-ul POSIX pentru memorie partajata permite proceselor sa comunice informatii prin partajarea unei regiuni de memorie. Se folosesc urmatoarele functii:"
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "shm_open", "ro": "shm_open" },
+          "content": {
+            "en": "Creates and opens a new shared memory object, or opens an existing one. Returns a file descriptor used by the other functions below.",
+            "ro": "Creeaza si deschide un obiect nou de memorie partajata, sau deschide un obiect existent. Returneaza un descriptor de fisier utilizat de catre celelalte functii enumerate mai jos."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "ftruncate", "ro": "ftruncate" },
+          "content": {
+            "en": "Sets the size of the shared memory object. A newly created object has size zero.",
+            "ro": "Seteaza dimensiunea obiectului de memorie partajata. Un obiect nou creat are dimensiunea zero."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "mmap / munmap", "ro": "mmap / munmap" },
+          "content": {
+            "en": "Maps/unmaps the shared memory object into/from the virtual address space of the calling process.",
+            "ro": "Mapeaza/de-mapeaza obiectul de memorie partajata in/din spatiul de adrese virtual al procesului apelant."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "shm_unlink", "ro": "shm_unlink" },
+          "content": {
+            "en": "Removes a shared memory object from the system (specified by its name).",
+            "ro": "Elimina din sistem un obiect de memorie partajata (specificat prin numele sau)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Persistence:** POSIX shared memory objects persist at the **kernel level** — an object exists as long as the system is not stopped/restarted, even after all processes that opened it have terminated, until explicitly deleted with `shm_unlink`. **Accessing shared memory objects via the filesystem:** In Linux, shared memory objects are created in a virtual filesystem of type `tmpfs`, mounted under `/dev/shm`, as files of the form `sem.<name>`.",
+            "ro": "**Persistenta:** Obiectele de memorie partajata POSIX au persistenta la **nivel de kernel** — un obiect exista pana cand sistemul este oprit/repornit, chiar si dupa ce toate procesele ce l-au deschis s-au terminat, pana cand este sters explicit cu `shm_unlink`. **Accesarea obiectelor prin sistemul de fisiere:** In Linux, obiectele de memorie partajata sunt create intr-un sistem de fisiere virtual de tip `tmpfs`, montat de obicei sub `/dev/shm`, ca fisiere de forma `sem.<name>`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Typical POSIX shared memory workflow:\n#include <sys/mman.h>\n#include <fcntl.h>\n#include <unistd.h>\n\nint fd = shm_open(\"/my_shm\", O_CREAT | O_RDWR, 0666);\nftruncate(fd, SIZE);\nvoid *ptr = mmap(NULL, SIZE, PROT_READ | PROT_WRITE,\n                 MAP_SHARED, fd, 0);\nclose(fd);  // fd no longer needed after mmap\n\n// ... use ptr to read/write shared data ...\n\nmunmap(ptr, SIZE);\nshm_unlink(\"/my_shm\");  // remove when done"
+        }
+      ]
+    },
+    {
+      "id": "os-c8-demo-programs",
+      "title": { "en": "Demo Programs with mmap", "ro": "Programe demonstrative cu mmap" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #1: Private mapping, read-only.** Demonstrates using `mmap` with a \"private\" mapping with read-only access permissions to a specified file portion. Programs `mmap_ex1a.c` and `mmap_ex1b.c` show reading directly from memory instead of using classic I/O system calls (`read`/`write`) or `libc` functions. The difference between the two variants is in handling invalid user input (the first variant exits with an error, the second corrects invalid data and continues).",
+            "ro": "**Exemplul #1: Mapare privata, read-only.** Demonstreaza folosirea `mmap` cu o mapare \"privata\" cu permisiuni de acces read-only a unei portiuni specificate dintr-un fisier. Programele `mmap_ex1a.c` si `mmap_ex1b.c` arata citirea directa din memorie in loc de a folosi apelurile clasice de sistem I/O (`read`/`write`) sau functii din `libc`. Diferenta intre cele doua variante consta in modul de tratare a datelor de intrare invalide (prima varianta iese cu eroare, a doua corecteaza si continua)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #2: Shared mapping, read & write.** Demonstrates using `mmap` with a \"shared\" mapping with read & write permissions. Program `mmap_ex2f.c` shows both reading and writing directly in memory to mapped file data, without using `read`/`write` system calls or `libc` I/O functions.",
+            "ro": "**Exemplul #2: Mapare partajata, read & write.** Demonstreaza folosirea `mmap` cu o mapare \"partajata\" cu permisiuni read & write. Programul `mmap_ex2f.c` arata atat citirea cat si scrierea directa in memorie a informatiei mapate din fisier, fara a folosi apelurile de sistem `read`/`write` sau functii I/O din `libc`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #3: Shared mapping, writing \"outside\" the mapping.** Demonstrates what happens when we write to memory addresses located \"outside\" the mapping (addresses after the end of the mapped file portion in memory). Programs `mmap_ex3a.c` and `mmap_ex3b.c` address two different cases: writing within the allocated page but beyond the mapping, versus writing to addresses beyond the last allocated page of the mapping.",
+            "ro": "**Exemplul #3: Mapare partajata, scrieri \"in afara\" maparii.** Demonstreaza ce se intampla cand scriem la adrese de memorie situate \"in afara\" maparii (adrese dupa sfarsitul portiunii de fisier mapate in memorie). Programele `mmap_ex3a.c` si `mmap_ex3b.c` trateaza doua cazuri diferite: scrierea in interiorul paginii alocate dar dincolo de mapare, versus scrierea la adrese dincolo de ultima pagina alocata a maparii."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example #4: Shared mapping for creating a new file.** Demonstrates using `mmap` with a \"shared\" mapping with read & write permissions to perform direct write operations in memory to create a new file's content, followed by observing the file's data being saved to disk. **Example #5: Named non-persistent mapping.** Uses `shm_open` and `mmap` to create a named POSIX shared memory object for IPC between a producer (`shm_producer.c`) and consumer (`shm_consumer.c`). **Example #6: Anonymous non-persistent mapping.** Uses `mmap` with `MAP_ANONYMOUS` to create an anonymous mapping, then demonstrates accessing addresses beyond the mapping (read access and write access in the two program variants `anon-mmap_ex1.c` and `anon-mmap_ex2.c`).",
+            "ro": "**Exemplul #4: Mapare partajata pentru crearea unui fisier nou.** Demonstreaza folosirea `mmap` cu o mapare \"partajata\" cu permisiuni read & write pentru a efectua operatii de scriere directa in memorie a continutului unui fisier nou, urmata de observarea salvarii datelor in fisierul de pe disc. **Exemplul #5: Mapare nepersistenta cu nume.** Foloseste `shm_open` si `mmap` pentru a crea un obiect de memorie partajata POSIX cu nume pentru IPC intre un producator (`shm_producer.c`) si un consumator (`shm_consumer.c`). **Exemplul #6: Mapare nepersistenta anonima.** Foloseste `mmap` cu `MAP_ANONYMOUS` pentru a crea o mapare anonima, apoi demonstreaza accesarea adreselor dincolo de mapare (acces de citire si scriere in cele doua variante `anon-mmap_ex1.c` si `anon-mmap_ex2.c`)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Other mmap demo programs:** The online lab support includes additional exercises: **txt2bin_write-mapped-file** (reading text from keyboard, converting to binary, writing via mmap), **bin2txt_read-mapped-file** (reading binary data via mmap, displaying as text). Additionally, demo programs for the **data race** phenomenon illustrate Producer-Consumer variants with and without synchronization, using POSIX semaphores and shared file mappings.",
+            "ro": "**Alte programe demonstrative cu mmap:** Suportul de laborator online include exercitii suplimentare: **txt2bin_write-mapped-file** (citirea textului de la tastatura, convertirea in binar, scrierea prin mmap), **bin2txt_read-mapped-file** (citirea datelor binare prin mmap, afisarea ca text). De asemenea, programe demonstrative pentru fenomenul de **data race** ilustreaza variante Producator-Consumator cu si fara sincronizare, folosind semafoare POSIX si mapari partajate de fisiere."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c8-ipc-models",
+      "title": { "en": "IPC Communication Models", "ro": "Modele de comunicatie intre procese (IPC)" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are two main IPC models: **(a) Shared memory model:** Communication through shared memory — via memory-mapped files or non-persistent mappings (named and anonymous). Communication is under the control of the user processes, not the OS. The OS must provide mechanisms for processes to synchronize their actions when accessing shared memory (e.g., POSIX semaphores). **(b) Message passing model:** Communication through message exchange — locally via named/anonymous pipes and message queues, or remotely via sockets (+ network protocols).",
+            "ro": "Exista doua modele principale de IPC: **(a) Modelul de comunicare prin memorie partajata:** Comunicarea prin memorie partajata — prin fisiere mapate in memorie sau mapari nepersistente (cu nume si anonime). Comunicarea se realizeaza sub controlul proceselor utilizator, nu al SO. SO-ul trebuie sa ofere mecanisme pentru ca procesele sa-si sincronizeze actiunile cand acceseaza memoria partajata (de ex., semafoare POSIX). **(b) Modelul de comunicare prin schimb de mesaje:** Comunicarea prin schimb de mesaje — local prin canale de comunicatie cu nume si anonime si cozi de mesaje, sau la distanta prin socket-uri (+ protocoale de comunicatie)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "In the shared-memory IPC model, who controls the communication?", "ro": "In modelul IPC prin memorie partajata, cine controleaza comunicarea?" },
+              "options": [
+                { "text": { "en": "The operating system kernel", "ro": "Nucleul sistemului de operare" }, "correct": false },
+                { "text": { "en": "The user processes themselves", "ro": "Procesele utilizator insele" }, "correct": true },
+                { "text": { "en": "The hardware (MMU)", "ro": "Hardware-ul (MMU)" }, "correct": false },
+                { "text": { "en": "The network stack", "ro": "Stiva de retea" }, "correct": false }
+              ],
+              "explanation": { "en": "In the shared-memory model, communication is under the control of user processes. The OS only provides the shared memory region and synchronization primitives (like semaphores). In contrast, in the message-passing model, the OS mediates all communication.", "ro": "In modelul de memorie partajata, comunicarea se realizeaza sub controlul proceselor utilizator. SO-ul ofera doar regiunea de memorie partajata si primitivele de sincronizare (ca semafoarele). In schimb, in modelul de schimb de mesaje, SO-ul mediaza toata comunicarea." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c8-sync-patterns",
+      "title": { "en": "Cooperation & Synchronization Patterns", "ro": "Sabloane arhitecturale de cooperare si sincronizare" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The main architectural patterns for process cooperation and synchronization are: **Critical Section**, **Producer-Consumer**, **Readers and Writers (CREW)**.",
+            "ro": "Principalele sabloane arhitecturale de cooperare si sincronizare a proceselor sunt: **Critical Section** (Sectiune critica), **Producer-Consumer** (Producator-Consumator), **Readers and Writers (CREW)** (Cititori si Scriitori)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Supervisor/Workers Pattern", "ro": "Sablonul Supervisor/Workers" },
+          "content": {
+            "en": "Also known as Master/Slaves. A cooperation pattern applicable when a complex problem can be \"divided\" into many sub-problems that can be solved in parallel, independently. The partial results are then \"aggregated\" to obtain the final result of the original problem.",
+            "ro": "Cunoscut si ca Master/Slaves. Un sablon de cooperare aplicabil cand o problema complexa poate fi \"divizata\" in mai multe sub-probleme ce pot fi apoi rezolvate in paralel, independent. Rezultatele partiale obtinute pot fi apoi \"agregate\" pentru a obtine rezultatul final al problemei initiale."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Token Ring Pattern", "ro": "Sablonul Token Ring" },
+          "content": {
+            "en": "A synchronization pattern: given a number p of processes, each executing specific actions A_1, ..., A_p in sequence, the synchronization of their parallel execution is required so that each process starts its execution of A_1, A_2, ..., A_p repeated a certain number of times.",
+            "ro": "Un sablon de sincronizare: avand un numar p de procese, fiecare executand actiuni specifice A_1, ..., A_p in mod repetat, se cere sincronizarea executiei lor in paralel, astfel incat fiecare proces isi incepe executia actiunilor A_1, A_2, ..., A_p, repetata de un anumit numar de ori."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Client/Server Pattern", "ro": "Sablonul Client/Server" },
+          "content": {
+            "en": "A parallel/distributed computing pattern applicable when there is a service provider (\"Server\") offering a computing service, and multiple consumers of that service (\"Clients\") that can simultaneously access the services offered.",
+            "ro": "Un sablon de calcul paralel/distribuit aplicabil cand avem un furnizor al unui serviciu (\"Server\"), care ofera un anumit serviciu de calcul, si mai multi consumatori ai acelui serviciu (\"Clienti\"), care vor accesa posibil simultan \"serviciile\" oferite."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c8-posix-semaphores",
+      "title": { "en": "POSIX Semaphores", "ro": "Semafoare POSIX" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The POSIX API for semaphores allows processes (and threads) to synchronize their actions. A semaphore is an integer whose value is never allowed to drop below zero. Two operations can be performed on semaphores: **sem_post** (increment the semaphore value by one) and **sem_wait** (decrement the semaphore value by one). If the semaphore value is zero, a `sem_wait` operation will block until the value becomes greater than zero.",
+            "ro": "API-ul POSIX pentru semafoare permite proceselor (si firelor de executie) sa-si sincronizeze actiunile. Un semafor este un numar intreg a carui valoare nu este niciodata permis sa scada sub zero. Doua operatii pot fi efectuate pe semafoare: **sem_post** (incrementarea valorii semaforului cu unu) si **sem_wait** (decrementarea valorii semaforului cu unu). Daca valoarea unui semafor este zero, atunci o operatie `sem_wait` se va bloca pana cand valoarea semaforului devine mai mare decat zero."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "POSIX semaphores come in two types: **Unnamed (anonymous) semaphores:** Created using the `MAP_ANONYMOUS` flag or by placing them in a POSIX shared memory region (`shm_open`). They can be shared among multiple threads within a process, or among processes related by `fork`. Operations: `sem_init` (initialize before use), `sem_post`/`sem_wait` (use), `sem_destroy` (deallocate when no longer needed). **Named semaphores:** Identified by a name of the form `/sn-name`. Two processes can operate on the same named semaphore by specifying the same name in `sem_open`.",
+            "ro": "Semafoarele POSIX sunt de doua feluri: **Semafoare fara nume (anonime):** Create folosind flag-ul `MAP_ANONYMOUS` sau prin plasarea lor intr-o regiune de memorie partajata POSIX (`shm_open`). Pot fi partajate intre mai multe fire de executie dintr-un proces, sau intre procese inrudite prin `fork`. Operatii: `sem_init` (initializare inainte de utilizare), `sem_post`/`sem_wait` (utilizare), `sem_destroy` (dealocare cand nu mai e necesar). **Semafoare cu nume:** Identificate printr-un nume de forma `/sn-name`. Doua procese pot opera pe acelasi semafor cu nume prin specificarea aceluiasi nume in apelul `sem_open`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Named semaphore operations:\n#include <semaphore.h>\n#include <fcntl.h>\n\nsem_t *sem = sem_open(\"/my_sem\", O_CREAT, 0666, 1);\n// ... use sem_post(sem) and sem_wait(sem) ...\nsem_close(sem);      // close when process no longer needs it\nsem_unlink(\"/my_sem\"); // remove from system when done"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Named semaphore operations:** `sem_open` (create or open), `sem_post`/`sem_wait` (use the semaphore), `sem_close` (close the descriptor when the calling process no longer needs it), `sem_unlink` (remove from the system). **Persistence:** Named POSIX semaphores persist at the **kernel level** — a named semaphore exists until the system is stopped/restarted or until deleted with `sem_unlink`. **Filesystem access:** In Linux, named semaphores are created in a `tmpfs` virtual filesystem, mounted under `/dev/shm`, as files of the form `sem.<name>`.",
+            "ro": "**Operatii pe semafoare cu nume:** `sem_open` (creare sau deschidere), `sem_post`/`sem_wait` (utilizare semafor), `sem_close` (inchidere descriptor cand procesul apelant nu-l mai necesita), `sem_unlink` (eliminare din sistem). **Persistenta:** Semafoarele POSIX cu nume au persistenta la **nivel de kernel** — un semafor cu nume exista pana cand sistemul este oprit/repornit sau pana este sters cu `sem_unlink`. **Accesare prin filesystem:** In Linux, semafoarele cu nume sunt create intr-un sistem de fisiere virtual de tip `tmpfs`, montat de obicei sub `/dev/shm`, ca fisiere de forma `sem.<name>`."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens when sem_wait is called on a semaphore with value 0?", "ro": "Ce se intampla cand sem_wait este apelat pe un semafor cu valoarea 0?" },
+              "options": [
+                { "text": { "en": "It returns immediately with value -1", "ro": "Returneaza imediat cu valoarea -1" }, "correct": false },
+                { "text": { "en": "It blocks until the value becomes greater than 0", "ro": "Se blocheaza pana cand valoarea devine mai mare decat 0" }, "correct": true },
+                { "text": { "en": "It sets the semaphore value to -1", "ro": "Seteaza valoarea semaforului la -1" }, "correct": false },
+                { "text": { "en": "It destroys the semaphore", "ro": "Distruge semaforul" }, "correct": false }
+              ],
+              "explanation": { "en": "`sem_wait` decrements the semaphore value. If the value is already 0, the operation blocks until another process/thread calls `sem_post` to increment the value above 0.", "ro": "`sem_wait` decrementeaza valoarea semaforului. Daca valoarea este deja 0, operatia se blocheaza pana cand un alt proces/fir apeleaza `sem_post` pentru a incrementa valoarea peste 0." }
+            },
+            {
+              "question": { "en": "Where are named POSIX semaphores stored in the Linux filesystem?", "ro": "Unde sunt stocate semafoarele POSIX cu nume in sistemul de fisiere Linux?" },
+              "options": [
+                { "text": { "en": "/tmp/sem/", "ro": "/tmp/sem/" }, "correct": false },
+                { "text": { "en": "/dev/shm/", "ro": "/dev/shm/" }, "correct": true },
+                { "text": { "en": "/var/run/sem/", "ro": "/var/run/sem/" }, "correct": false },
+                { "text": { "en": "/proc/semaphores/", "ro": "/proc/semaphores/" }, "correct": false }
+              ],
+              "explanation": { "en": "Named POSIX semaphores are created in a `tmpfs` virtual filesystem mounted at `/dev/shm`, with filenames of the form `sem.<name>`.", "ro": "Semafoarele POSIX cu nume sunt create intr-un sistem de fisiere virtual `tmpfs` montat la `/dev/shm`, cu nume de fisiere de forma `sem.<name>`." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c8-summary",
+      "title": { "en": "Summary & Key Takeaways", "ro": "Rezumat si concluzii" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "This course covered: **mmap** (maps a file into process virtual memory for direct read/write access), **munmap** (removes a mapping), **msync** (synchronizes memory with file on disk), **persistent vs. non-persistent mappings** (file-backed vs. anonymous/named shared memory), **POSIX shared memory API** (`shm_open`, `ftruncate`, `mmap`, `shm_unlink`), **IPC communication models** (shared memory vs. message passing), **synchronization patterns** (Critical Section, Producer-Consumer, Readers-Writers, Supervisor/Workers, Token Ring, Client/Server), and **POSIX semaphores** (`sem_open`, `sem_post`, `sem_wait`, `sem_close`, `sem_unlink` for named; `sem_init`, `sem_destroy` for unnamed).",
+            "ro": "Acest curs a acoperit: **mmap** (mapeaza un fisier in memoria virtuala a procesului pentru acces direct de citire/scriere), **munmap** (sterge o mapare), **msync** (sincronizeaza memoria cu fisierul de pe disc), **mapari persistente vs. nepersistente** (cu fisier pe disc vs. memorie partajata anonima/cu nume), **API-ul POSIX pentru memorie partajata** (`shm_open`, `ftruncate`, `mmap`, `shm_unlink`), **modele de comunicatie IPC** (memorie partajata vs. schimb de mesaje), **sabloane de sincronizare** (Sectiune critica, Producator-Consumator, Cititori-Scriitori, Supervisor/Workers, Token Ring, Client/Server), si **semafoare POSIX** (`sem_open`, `sem_post`, `sem_wait`, `sem_close`, `sem_unlink` pentru cele cu nume; `sem_init`, `sem_destroy` pentru cele fara nume)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Describe the complete workflow for two unrelated processes to communicate via POSIX shared memory with synchronization.",
+            "ro": "Descrieti fluxul complet pentru ca doua procese neinrudite sa comunice prin memorie partajata POSIX cu sincronizare."
+          },
+          "answer": {
+            "en": "1) Both processes call shm_open with the same name to create/open the shared memory object. 2) One process calls ftruncate to set the size. 3) Both call mmap with MAP_SHARED to map it. 4) They create named semaphores (sem_open) for synchronization. 5) The producer writes data and calls sem_post; the consumer calls sem_wait then reads. 6) When done, both call munmap, then sem_close. 7) One process calls shm_unlink and sem_unlink to clean up.",
+            "ro": "1) Ambele procese apeleaza shm_open cu acelasi nume pentru a crea/deschide obiectul de memorie partajata. 2) Un proces apeleaza ftruncate pentru a seta dimensiunea. 3) Ambele apeleaza mmap cu MAP_SHARED pentru mapare. 4) Creeaza semafoare cu nume (sem_open) pentru sincronizare. 5) Producatorul scrie date si apeleaza sem_post; consumatorul apeleaza sem_wait apoi citeste. 6) La final, ambele apeleaza munmap, apoi sem_close. 7) Un proces apeleaza shm_unlink si sem_unlink pentru curatare."
+          }
+        }
+      ]
+    }
+  ]
+}

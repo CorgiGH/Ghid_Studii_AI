@@ -1,0 +1,604 @@
+{
+  "meta": {
+    "id": "os-c5",
+    "title": { "en": "Course 5: File Locks & Concurrent Access", "ro": "Cursul 5: Blocaje pe fisiere si acces concurent" },
+    "shortTitle": { "en": "C5: File Locks", "ro": "C5: Blocaje fisiere" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 5 slides", "ro": "Prof. C. Vidrascu — Curs 5" }
+  },
+  "steps": [
+    {
+      "id": "os-c5-intro",
+      "title": { "en": "Introduction: Concurrent vs Exclusive Access", "ro": "Introducere: Acces concurent vs exclusiv" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Since UNIX operating systems (including Linux) are **multi-tasking** systems that support simultaneous execution of multiple programs, **concurrent access** to files is normally allowed. Multiple processes can read and/or write the same file, or even the same record within a file, at the same time.",
+            "ro": "Deoarece sistemele de operare din familia UNIX (inclusiv Linux) sunt sisteme **multi-tasking** care suporta executia simultana a mai multor programe, **accesul concurent** la fisiere este permis in mod uzual. Mai multe procese pot accesa simultan in citire si/sau in scriere un acelasi fisier, sau chiar o aceeasi inregistrare dintr-un fisier."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "However, concurrent (simultaneous) access to a file by different processes can sometimes have undesirable side effects, such as destroying the integrity of data in the file due to **data races**.",
+            "ro": "Totusi, accesul concurent (simultan) la un fisier de catre procese diferite poate avea uneori efecte nedorite, ca de exemplu distrugerea integritatii datelor din fisier, datorita **data race**-urilor."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "For this reason, UNIX systems have implemented mechanisms that also allow **exclusive access** to files. Exclusive access means that a single process has, at a given moment, the permission to access a file or even a specific record within a file.",
+            "ro": "Din acest motiv, in sistemele din familia UNIX s-au implementat mecanisme care sa permita si un mod de **acces exclusiv** la fisiere, adica un mod de acces in care un singur proces are, la un moment dat, permisiunea de acces la un fisier, sau chiar la o anumita inregistrare dintr-un fisier."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why is concurrent file access the default in UNIX, and why might it cause problems?",
+            "ro": "De ce este accesul concurent la fisiere comportamentul implicit in UNIX si de ce poate cauza probleme?"
+          },
+          "answer": {
+            "en": "Concurrent access is the default because multi-tasking systems need multiple processes to work with files simultaneously for efficiency. Problems arise when two or more processes write to the same file region at the same time — data races can corrupt the file content because the order of writes is unpredictable.",
+            "ro": "Accesul concurent este implicit deoarece sistemele multi-tasking necesita ca mai multe procese sa lucreze cu fisiere simultan pentru eficienta. Problemele apar cand doua sau mai multe procese scriu in aceeasi regiune a fisierului in acelasi timp — data race-urile pot corupe continutul fisierului deoarece ordinea scrierilor este imprevizibila."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c5-concurrent-demo",
+      "title": { "en": "Demo: Concurrent File Access", "ro": "Demo: Acces concurent la un fisier" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "To demonstrate the effects of concurrent access, consider the program `access_v1.c`. The programmer does not need any special techniques beyond what was discussed in the previous lecture about file access to \"benefit\" from concurrent access.",
+            "ro": "Pentru a ilustra efectele accesului concurent, consideram programul `access_v1.c`. Programatorul nu trebuie sa utilizeze nicio tehnica suplimentara celor discutate in lectia precedenta despre accesul la fisiere, pentru a \"beneficia\" de accesul in mod concurent."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "What happens at runtime: if a user runs two or more instances of a program that accesses the same file at roughly the same time, then file access occurs concurrently (i.e., approximately at the same time).",
+            "ro": "Ce se petrece la momentul executiei: daca utilizatorul ruleaza in acelasi timp doua sau mai multe instante de programe ce acceseaza in mod uzual un acelasi fisier, atunci accesele la fisier se vor petrece simultan (i.e., aproximativ in acelasi timp)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Sequential access demo**: First, a demo illustrating **sequential** access to a file. A single process accesses a file over a time interval. We create a file `fis.dat` containing the line of text: `aaaa#bbbb#cccc#dddd#eeee`. Then we launch sequentially multiple instances of the program: `./access_v1 1 ; ./access_v1 2 ; ./access_v1 3`.",
+            "ro": "**Demo acces secvential**: Mai intai, un demo ce ilustreaza **accesul secvential** la un fisier. Un singur proces doreste sa acceseze fisierul intr-un anumit interval de timp. Cream un fisier `fis.dat` ce contine urmatoarea linie de text: `aaaa#bbbb#cccc#dddd#eeee`. Apoi lansam in executie secvential mai multe instante ale acestui program: `./access_v1 1 ; ./access_v1 2 ; ./access_v1 3`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Sequential execution — predictable results\n$ echo 'aaaa#bbbb#cccc#dddd#eeee' > fis.dat\n$ ./access_v1 1 ; ./access_v1 2 ; ./access_v1 3\n\n# After instance 1: aaaa!bbbb!cccc!dddd!eeee\n# After instance 2: aaaa!bbbb!cccc#dddd#eeee\n# After instance 3: aaaa!bbbb!cccc!dddd!eeee"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Concurrent access demo**: Now, a demo illustrating **concurrent** access to the file. Multiple instances of the program want to access the file at the same time. We reinitialize `fis.dat` and launch two instances in parallel: `./access_v1 1 & ./access_v1 2 &`.",
+            "ro": "**Demo acces concurent**: Acum, un demo ce ilustreaza **accesul concurent** la fisier. Mai multe instante ale programului doresc sa acceseze fisierul in acelasi interval de timp. Reinitializam `fis.dat` si lansam doua instante in paralel: `./access_v1 1 & ./access_v1 2 &`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Concurrent execution — unpredictable results!\n$ echo 'aaaa#bbbb#cccc#dddd#eeee' > fis.dat\n$ ./access_v1 1 & ./access_v1 2 &\n\n# Expected: aaaa!bbbb!cccc#dddd#eeee or aaaa!bbbb!cccc#dddd#eeee\n# Actual:   aaaa!bbbb!cccc#dddd#eeee (always!)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Surprisingly, no matter how many times we run the concurrent execution, we always get `aaaa!bbbb!cccc#dddd#eeee`. The reason is the `sleep(5)` call in the program, which causes a 5-second delay that allows the first process to finish overwriting the first `#` character before the second process starts its own traversal.",
+            "ro": "Surprinzator, indiferent de cate ori executam comanda, obtinem intotdeauna `aaaa!bbbb!cccc#dddd#eeee`. Motivul este apelul `sleep(5)` din program, care provoaca o asteptare de 5 secunde intre momentul depistarii primei inregistrari din fisier care este `#` si momentul suprascrierii acestei inregistrari cu alt caracter."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "By removing the `sleep(5)` call from the program, repeating the concurrent execution of a large number of instances would yield more interesting results to observe.",
+            "ro": "Prin eliminarea apelului `sleep(5)` din program, repetand executia concurenta a unui numar suficient de mare de ori, se pot obtine toate cele 4 rezultate de mai sus, cu frecvente diferite de observare."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What causes data corruption during concurrent file access?", "ro": "Ce cauzeaza coruperea datelor la accesul concurent la fisiere?" },
+              "options": [
+                { "text": { "en": "The file system is too slow", "ro": "Sistemul de fisiere este prea lent" }, "correct": false },
+                { "text": { "en": "Data races between processes reading/writing the same region", "ro": "Data race-uri intre procese care citesc/scriu in aceeasi regiune" }, "correct": true },
+                { "text": { "en": "The operating system has a bug", "ro": "Sistemul de operare are un bug" }, "correct": false },
+                { "text": { "en": "Files cannot be shared between processes", "ro": "Fisierele nu pot fi partajate intre procese" }, "correct": false }
+              ],
+              "explanation": { "en": "Data races occur when multiple processes access the same file region concurrently and at least one is writing. The order of operations becomes unpredictable, leading to corrupted data.", "ro": "Data race-urile apar cand mai multe procese acceseaza aceeasi regiune a fisierului concurent si cel putin unul scrie. Ordinea operatiilor devine imprevizibila, ducand la date corupte." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c5-flock-struct",
+      "title": { "en": "The flock Structure for Locks", "ro": "Structura de date flock pentru blocaje" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "UNIX systems provide programmers with a **locking** mechanism (i.e., placing locks on file portions for exclusive access). This mechanism defines an **exclusive access zone** on a file. Such a portion cannot be accessed concurrently by multiple processes for the entire duration of the lock.",
+            "ro": "Sistemele din familia UNIX furnizeaza programatorilor un mecanism de **blocare** (i.e., de punere de lacate) pe portiuni de fisier pentru accesul in mod exclusiv. Prin acest mecanism se defineste o zona de **acces exclusiv** in fisier. O asemenea portiune nu va putea fi accesata in mod concurent de mai multe procese pe toata durata de existenta a blocajului."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "To specify a lock on a file portion (or the entire file), the `struct flock` data structure is used, defined in the header file `fcntl.h`.",
+            "ro": "Pentru a specifica un blocaj pe o portiune dintr-un fisier (sau pe intregul fisier), se utilizeaza structura de date `flock`, definita in fisierul header `fcntl.h`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "struct flock {\n    short l_type;    // lock type: F_RDLCK, F_WRLCK, F_UNLCK\n    short l_whence;  // reference position for l_start\n    long  l_start;   // offset relative to l_whence\n    long  l_len;     // length of locked portion in bytes\n    long  l_pid;     // PID of locking process (F_GETLK only)\n};"
+        },
+        {
+          "type": "definition",
+          "term": { "en": "l_type — Lock Type", "ro": "l_type — Tipul blocarii" },
+          "content": {
+            "en": "Indicates the type of lock. Can be one of: **F_RDLCK** (read lock), **F_WRLCK** (write lock), or **F_UNLCK** (unlock, i.e., remove the lock).",
+            "ro": "Indica tipul blocarii. Poate avea una din valorile: **F_RDLCK** (blocaj in citire), **F_WRLCK** (blocaj in scriere), sau **F_UNLCK** (deblocare, i.e., se inlatura lacatul)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "l_whence — Reference Position", "ro": "l_whence — Pozitia relativa" },
+          "content": {
+            "en": "Indicates the reference position (origin) from which `l_start` is interpreted. Can be: **SEEK_SET** (=0, beginning of file), **SEEK_CUR** (=1, current position), or **SEEK_END** (=2, end of file).",
+            "ro": "Indica pozitia relativa (originea) in raport cu care este interpretat campul `l_start`. Poate avea valorile: **SEEK_SET** (=0, inceputul fisierului), **SEEK_CUR** (=1, pozitia curenta), sau **SEEK_END** (=2, sfarsitul fisierului)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "l_start — Starting Offset", "ro": "l_start — Offset-ul de inceput" },
+          "content": {
+            "en": "Indicates the position (i.e., offset relative to `l_whence`) from which the locked portion begins. Note: `l_start` must be non-negative when `l_whence` is `SEEK_END`.",
+            "ro": "Indica pozitia (i.e., offset-ul in raport cu originea `l_whence`) de la care incepe portiunea blocata. Observatie: `l_start` trebuie sa fie negativ pentru `l_whence=SEEK_END`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "l_len — Lock Length", "ro": "l_len — Lungimea blocajului" },
+          "content": {
+            "en": "Indicates the length in bytes of the locked portion. A value of 0 means the lock extends from `l_start` to the end of the file.",
+            "ro": "Indica lungimea in octeti a portiunii blocate."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "l_pid — Process ID", "ro": "l_pid — ID-ul procesului" },
+          "content": {
+            "en": "Managed by the `fcntl` function, used to store the PID of the process that owns the lock. This field is only set when querying locks with the **F_GETLK** command.",
+            "ro": "Gestionat de functia `fcntl`, folosit pentru a memora PID-ul procesului proprietar al acelui lacat. Acest camp este consultat doar atunci cand functia `fcntl` se apeleaza cu parametrul **F_GETLK**."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What value should l_len have to lock from a given offset to the end of the file?", "ro": "Ce valoare trebuie sa aiba l_len pentru a bloca de la un offset dat pana la sfarsitul fisierului?" },
+              "options": [
+                { "text": { "en": "-1", "ro": "-1" }, "correct": false },
+                { "text": { "en": "0", "ro": "0" }, "correct": true },
+                { "text": { "en": "The file size", "ro": "Dimensiunea fisierului" }, "correct": false },
+                { "text": { "en": "SEEK_END", "ro": "SEEK_END" }, "correct": false }
+              ],
+              "explanation": { "en": "When `l_len` is 0, the lock extends from the offset specified by `l_start` and `l_whence` to the end of the file, no matter how large the file grows.", "ro": "Cand `l_len` este 0, blocajul se extinde de la offset-ul specificat de `l_start` si `l_whence` pana la sfarsitul fisierului, indiferent cat de mare creste fisierul." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c5-fcntl",
+      "title": { "en": "The fcntl System Call for Locking", "ro": "Primitiva fcntl pentru blocaje" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `fcntl` function ([5]) is one of the interfaces for file locking. After filling in the fields of the `flock` structure, you call `fcntl` to actually place the lock on the file portion.",
+            "ro": "Functia `fcntl` ([5]) este una dintre interfetele pentru blocajele pe fisiere. Dupa ce se completeaza campurile structurii `flock`, ulterior se va apela functia `fcntl` pentru a pune efectiv lacatul pe portiunea respectiva din fisier."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "int fcntl(int df, int cmd, struct flock* p_flock);\n\n// df      = file descriptor of the open file\n// p_flock = pointer to the flock structure\n// cmd     = locking mode (F_SETLK, F_SETLKW, F_GETLK)\n// returns 0 on success, -1 on error"
+        },
+        {
+          "type": "definition",
+          "term": { "en": "F_SETLK — Non-blocking Lock", "ro": "F_SETLK — Blocare neblocanta" },
+          "content": {
+            "en": "Allows placing a read or write lock on a file, or removing an existing lock (depending on the type specified in the `flock` structure). If the lock conflicts with an existing lock held by another process, `fcntl` returns immediately with error (`errno` set to `EACCES` or `EAGAIN`).",
+            "ro": "Permite punerea unui lacat pe fisier, in citire sau in scriere, sau scoaterea unuia deja pus (in functie de tipul specificat in structura `flock`). In caz de esec datorita conflictului cu un alt lacat deja pus, se seteaza variabila `errno` la valoarea `EACCES` sau `EAGAIN`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "F_SETLKW — Blocking Lock", "ro": "F_SETLKW — Blocare blocanta" },
+          "content": {
+            "en": "Allows placing locks in **blocking** mode. The function does not return until the lock can be placed. This means: if the requested lock conflicts with an existing lock held by another process, `fcntl` will **wait** (block) until the conflicting lock is released.",
+            "ro": "Permite punerea lacatelor in mod **blocant**, adica functia nu returneaza pana cand se poate pune lacatul. Motivul posibil de asteptare: se incearca blocarea unei zone deja blocate de un alt proces."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "F_GETLK — Query Lock", "ro": "F_GETLK — Interogare lacat" },
+          "content": {
+            "en": "Allows querying information about a lock on a file. The `flock` structure is filled with details about any existing lock that would conflict with the requested lock.",
+            "ro": "Permite extragerea informatiilor despre un lacat pus pe fisier."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The return value of `fcntl` is **0** for a successful lock and **-1** on error. To place a read lock, the file must have been opened for reading. To place a write lock, the file must have been opened for writing.",
+            "ro": "Valoarea returnata este **0** pentru blocaj reusit si **-1** in caz de eroare. Pentru a putea pune un lacat in citire, fisierul trebuie sa fi fost anterior deschis in citire. Pentru a pune un lacat in scriere, fisierul trebuie sa fi fost deschis in scriere."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the difference between F_SETLK and F_SETLKW? When would you use each?",
+            "ro": "Care este diferenta intre F_SETLK si F_SETLKW? Cand ati folosi fiecare?"
+          },
+          "answer": {
+            "en": "**F_SETLK** is non-blocking: if the lock cannot be placed (conflict), it returns immediately with an error. Use it when you want to try to lock but continue doing other work if the lock is unavailable. **F_SETLKW** is blocking: it waits until the lock can be placed. Use it when the process must have exclusive access and can afford to wait.",
+            "ro": "**F_SETLK** este neblocant: daca lacatul nu poate fi pus (conflict), returneaza imediat cu eroare. Se foloseste cand vreti sa incercati sa blocati, dar sa continuati alte operatii daca lacatul nu e disponibil. **F_SETLKW** este blocant: asteapta pana cand lacatul poate fi pus. Se foloseste cand procesul trebuie sa aiba acces exclusiv si isi permite sa astepte."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What happens when fcntl is called with F_SETLK and the lock conflicts with an existing lock?", "ro": "Ce se intampla cand fcntl este apelat cu F_SETLK si lacatul intra in conflict cu un lacat existent?" },
+              "options": [
+                { "text": { "en": "The process waits until the lock is released", "ro": "Procesul asteapta pana cand lacatul este eliberat" }, "correct": false },
+                { "text": { "en": "The existing lock is overwritten", "ro": "Lacatul existent este suprascris" }, "correct": false },
+                { "text": { "en": "fcntl returns immediately with an error", "ro": "fcntl returneaza imediat cu eroare" }, "correct": true },
+                { "text": { "en": "The process is terminated", "ro": "Procesul este terminat" }, "correct": false }
+              ],
+              "explanation": { "en": "With `F_SETLK` (non-blocking), `fcntl` returns -1 immediately and sets `errno` to `EACCES` or `EAGAIN` when the lock conflicts with an existing lock.", "ro": "Cu `F_SETLK` (neblocant), `fcntl` returneaza -1 imediat si seteaza `errno` la `EACCES` sau `EAGAIN` cand lacatul intra in conflict cu un lacat existent." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c5-fcntl-notes",
+      "title": { "en": "fcntl Locking: Important Notes", "ro": "Blocaje fcntl: Observatii importante" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "To place a **read lock**, the file descriptor must have been opened for reading. To place a **write lock**, the file descriptor must have been opened for writing.",
+            "ro": "Pentru a putea pune un lacat in **citire**, descriptorul de fisier trebuie sa fi fost anterior deschis in citire. Pentru a pune un lacat in **scriere**, descriptorul trebuie sa fi fost deschis in scriere."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The lock is automatically removed when the process that placed it **closes the file** or **terminates execution**.",
+            "ro": "Blocajul este scos automat atunci cand procesul care l-a pus **inchide acel fisier**, sau isi **termina executia**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Removing (unlocking) a segment from a previously locked larger portion can produce **two separate locked segments**.",
+            "ro": "Scoaterea (deblocarea) unui segment dintr-o portiune mai mare anterior blocata poate produce **doua segmente blocate**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `l_pid` field in the `flock` structure is updated by the `fcntl` function itself (when using `F_GETLK`).",
+            "ro": "Campul `l_pid` din structura `flock` este actualizat de functia `fcntl` (cand se foloseste `F_GETLK`)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Locks are **NOT** transmitted to child processes created with `fork`. Reason: each lock in the `flock` structure associates the PID of the process that created it (its own PID). The child process and the parent have different PIDs.",
+            "ro": "Lacatele **NU** se transmit proceselor fii in momentul crearii acestora cu functia `fork`. Motivul: fiecare lacat are in structura `flock` asociata PID-ul procesului care l-a creat (si care este cel propriu). Procesul fiu si cel parinte au PID-uri diferite."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "In Linux there are two additional interfaces for file locks: the function `flock` (see `man 2 flock`) and the function `lockf` (see `man 3 lockf`). There are also two useful commands for locks: `flock` and `lslocks` ([6]).",
+            "ro": "In Linux mai exista alte doua interfete ce ofera lacate pe fisiere ([6]): functia `flock` (consultati `man 2 flock`) si functia `lockf` (consultati `man 3 lockf`). Exista si doua comenzi utile pentru lacate: `flock` si `lslocks` ([6])."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c5-exclusive-demo",
+      "title": { "en": "Demo: Exclusive Access with Locks", "ro": "Demo: Acces exclusiv la un fisier" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "We can rewrite the previous program, adding write locks to prevent concurrent access. See the program `access_v2.c` ([2]). We reinitialize `fis.dat` and launch two instances in parallel: `./access_v2 1 & ./access_v2 2 &`.",
+            "ro": "Putem rescrie programul anterior, adaugand utilizarea de lacate in scriere pentru a inhiba accesul concurent la fisier. A se vedea programul `access_v2.c` ([2]). Reinitializam fisierul `fis.dat` si lansam doua instante in paralel: `./access_v2 1 & ./access_v2 2 &`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Exclusive access with locks — predictable results\n$ echo 'aaaa#bbbb#cccc#dddd#eeee' > fis.dat\n$ ./access_v2 1 & ./access_v2 2 &\n\n# Result is always one of:\n#   aaaa!bbbb!cccc#dddd#eeee\n# or\n#   aaaa!bbbb!cccc#dddd#eeee"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "This time, the output is always predictable: `aaaa!bbbb!cccc#dddd#eeee`. The lock ensures that only one process at a time can access the file. You can also use a **non-blocking** lock with `F_SETLK` — the function returns immediately, and you can retry or do other work if the lock is not available.",
+            "ro": "De data aceasta, rezultatul este intotdeauna previzibil: `aaaa!bbbb!cccc#dddd#eeee`. Lacatul asigura ca doar un proces la un moment dat poate accesa fisierul. Se poate face si un apel neblocant, cu parametrul `F_SETLK` — functia returneaza imediat, si puteti reincerca sau face altceva daca lacatul nu este disponibil."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The non-blocking variant (`access_v2n.c`) uses `F_SETLK` instead of `F_SETLKW`. If the lock cannot be obtained, the function returns immediately and the program can either wait in a loop retrying, or continue with other work.",
+            "ro": "Varianta neblocanta (`access_v2n.c`) foloseste `F_SETLK` in loc de `F_SETLKW`. Daca lacatul nu poate fi obtinut, functia returneaza imediat si programul poate fie sa astepte intr-o bucla reincercand, fie sa continue cu alte operatii."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c5-advisory",
+      "title": { "en": "Lock Characteristics: Advisory & CREW", "ro": "Caracteristici ale blocajelor pe fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Important**: Write locks (`F_WRLCK` type) are **exclusive**, while read locks (`F_RDLCK` type) are **shared**, in the sense of **CREW** (Concurrent Read or Exclusive Write).",
+            "ro": "**Important**: lacatele in scriere (cele cu tipul `F_WRLCK`) sunt **exclusive**, iar cele in citire (cele cu tipul `F_RDLCK`) sunt **partajate**, in sensul **CREW** (Concurrent Read or Exclusive Write)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "CREW — Concurrent Read or Exclusive Write", "ro": "CREW — Concurrent Read or Exclusive Write" },
+          "content": {
+            "en": "At any given moment, for any file portion, many processes can hold a **read lock** simultaneously (shared), but only one process can hold a **write lock** (exclusive). In other words: a process can hold a read lock on a portion even if other processes also hold read locks on the same portion. But only one process at a time can hold a write lock on a portion.",
+            "ro": "In orice moment, pentru orice portiune dintr-un fisier, mai multe procese pot detine un **lacat in citire** simultan (partajat), dar doar un proces poate detine un **lacat in scriere** (exclusiv). Cu alte cuvinte: un proces poate detine un lacat in citire pe o portiune si atunci nici un proces nu poate detine concomitent vreun lacat in scriere pe acea portiune."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Important**: File locks in UNIX are **advisory**, NOT **mandatory**! This means that the correct functioning of locks relies on the **cooperation of processes**. All processes that want to mutually exclusively access a file (or a portion of a file) must use write locks for that access. Otherwise, if a process writes directly to a file or portion without checking for locks (and has write permissions), it will NOT be impeded by any existing write lock on that file.",
+            "ro": "**Important**: blocajele puse pe fisiere sunt **advisory**, nu sunt **mandatory**! Functionarea corecta a lacatelor in scriere se bazeaza pe **cooperarea proceselor** pentru asigurarea accesului exclusiv la fisiere. Toate procesele care vor sa acceseze mutual exclusiv un fisier vor trebui sa foloseasca lacate in scriere. Altfel, daca un proces scrie direct in fisier fara sa verifice lacatele (si are permisiunile de scriere), NU va fi impiedicat de un eventual lacat in scriere pus pe acel fisier."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Since locks are advisory, we can read (using `cat`) a file even while another process holds a write lock on it. The read succeeds because `cat` does not check for locks. This demonstrates that locks only work when all cooperating processes agree to use them.",
+            "ro": "Deoarece lacatele au un caracter advisory, putem citi (folosind `cat`) un fisier chiar si in timp ce alt proces detine un lacat in scriere pe el. Citirea reuseste deoarece `cat` nu verifica lacatele. Aceasta demonstreaza ca lacatele functioneaza doar cand toate procesele cooperante sunt de acord sa le foloseasca."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does it mean that UNIX file locks are 'advisory'?", "ro": "Ce inseamna ca lacatele pe fisiere UNIX sunt 'advisory'?" },
+              "options": [
+                { "text": { "en": "The OS enforces them automatically on all processes", "ro": "SO le impune automat tuturor proceselor" }, "correct": false },
+                { "text": { "en": "They only work if all processes cooperate and check for locks", "ro": "Functioneaza doar daca toate procesele coopereaza si verifica lacatele" }, "correct": true },
+                { "text": { "en": "They are only suggestions and never actually lock anything", "ro": "Sunt doar sugestii si nu blocheaza nimic niciodata" }, "correct": false },
+                { "text": { "en": "They require root privileges to use", "ro": "Necesita privilegii root pentru utilizare" }, "correct": false }
+              ],
+              "explanation": { "en": "Advisory locks rely on process cooperation. A process that does not check for locks can freely read/write a locked file. Mandatory locks (not used in standard UNIX) would be enforced by the kernel on all processes.", "ro": "Lacatele advisory se bazeaza pe cooperarea proceselor. Un proces care nu verifica lacatele poate citi/scrie liber un fisier blocat. Lacatele mandatory (nefolosite in UNIX standard) ar fi impuse de kernel tuturor proceselor." }
+            },
+            {
+              "question": { "en": "Can multiple processes hold read locks (F_RDLCK) on the same file region simultaneously?", "ro": "Pot mai multe procese detine lacate de citire (F_RDLCK) pe aceeasi regiune a fisierului simultan?" },
+              "options": [
+                { "text": { "en": "No, only one process can lock a region at a time", "ro": "Nu, doar un proces poate bloca o regiune la un moment dat" }, "correct": false },
+                { "text": { "en": "Yes, read locks are shared (CREW model)", "ro": "Da, lacatele de citire sunt partajate (modelul CREW)" }, "correct": true },
+                { "text": { "en": "Only if they are from the same user", "ro": "Doar daca sunt de la acelasi utilizator" }, "correct": false },
+                { "text": { "en": "Only with F_SETLKW", "ro": "Doar cu F_SETLKW" }, "correct": false }
+              ],
+              "explanation": { "en": "Under the CREW model, multiple processes can hold read locks (F_RDLCK) on the same region simultaneously. However, a write lock (F_WRLCK) is exclusive — only one process can hold it at a time, and no read locks can coexist.", "ro": "In modelul CREW, mai multe procese pot detine lacate de citire (F_RDLCK) pe aceeasi regiune simultan. Totusi, un lacat de scriere (F_WRLCK) este exclusiv — doar un proces il poate detine la un moment dat, si niciun lacat de citire nu poate coexista." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c5-advisory-demo",
+      "title": { "en": "Demo: Illustrating Advisory Lock Behavior", "ro": "Demo: Ilustrarea caracterului advisory al blocajelor" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "To justify the observation about advisory locks, we reinitialize `fis.dat` with `aaaa#bbbb#cccc#dddd#eeee` and run: `./access_v2 1 & sleep 2 ; echo \"xyxyxy\" > fis.dat`.",
+            "ro": "Pentru a justifica observatia despre caracterul advisory al blocajelor, reinitializam `fis.dat` cu `aaaa#bbbb#cccc#dddd#eeee` si rulam: `./access_v2 1 & sleep 2 ; echo \"xyxyxy\" > fis.dat`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Demonstrating advisory nature of locks\n$ echo 'aaaa#bbbb#cccc#dddd#eeee' > fis.dat\n$ ./access_v2 1 & sleep 2 ; echo \"xyxyxy\" > fis.dat\n\n# Result: fis.dat contains \"xyxy!y\"\n# The echo command overwrote the file despite the lock!"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "At the end of execution, `fis.dat` contains `xyxy!y`. This proves that the `echo` command's overwrite occurred while `access_v2` held the lock during its 5-second sleep. The `echo` command does not check for file locks, so it wrote freely.",
+            "ro": "La finalul executiei, `fis.dat` contine `xyxy!y`. Aceasta demonstreaza ca suprascrierea executata de comanda `echo` in fisier s-a petrecut in intervalul de timp al celor 5 secunde in care instanta `access_v2` detinea blocajul pe fisier."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Reading a locked file also works (advisory!)\n$ ./access_v2 1 & sleep 2 ; cat fis.dat\n\n# cat succeeds — the file was locked but cat doesn't check locks"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Running the `cat` command on a locked file also succeeds, because `cat` does not check for locks. This confirms the advisory nature: locks are only effective among processes that cooperate by checking locks before accessing the file.",
+            "ro": "Ruland comanda `cat` pe un fisier blocat, observam ca citirea reuseste, desi fisierul era blocat la momentul citirii. Aceasta confirma caracterul advisory: lacatele sunt eficiente doar intre procesele care coopereaza verificand lacatele inainte de accesul la fisier."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c5-optimized",
+      "title": { "en": "Demo: Optimized Exclusive Access", "ro": "Demo: Acces exclusiv optimizat la un fisier" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The second version of the demo program (`access_v2`) is not optimal in terms of execution: the two processes work **sequentially** one after the other because each locks the entire file. The first process to obtain the lock runs to completion while the other waits.",
+            "ro": "A doua versiune a programului demonstrativ (`access_v2`) nu este optima: cele doua procese isi fac treaba **secvential**, unul dupa altul, deoarece fiecare blocheaza intregul fisier. Primul proces care reuseste sa puna lacatul isi termina executia, apoi celalalt."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "We can **improve total execution time** by allowing the two processes to truly execute concurrently. Instead of locking the entire file, we lock only a single character (the `#` character at the position we find) and keep the lock for the minimal time needed to overwrite it. See program `access_v3.c` ([2]).",
+            "ro": "Putem **imbunatati timpul total de executie** permitand celor doua procese sa se execute intr-adevar concurent. In loc sa blocam intregul fisier, punem lacat doar pe un singur caracter (caracterul `#` la pozitia pe care il gasim) si pastram blocajul doar pe durata minima necesara pentru a face suprascrierea. A se vedea programul `access_v3.c` ([2])."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "The `access_v3.c` approach has a subtle race condition: between the moment of finding a `#` character and the moment the lock is successfully placed, another parallel instance might have already overwritten that `#`. The solution (`access_v4.c`): after placing the lock, **re-check** that the character is still `#`. If not, release the lock and restart the search.",
+            "ro": "Abordarea din `access_v3.c` are o conditie de cursa subtila: intre momentul depistarii primei pozitii a unui caracter `#` in fisier si momentul reusitei blocajului, exista posibilitatea ca acel `#` sa fie suprascris de cealalta instanta executata in paralel. Solutia (`access_v4.c`): dupa punerea blocajului, **verificati din nou** ca acel caracter este inca `#`. Daca nu mai este, scoateti blocajul si reluati bucla de cautare."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does locking only the character being modified improve performance over locking the entire file?",
+            "ro": "De ce blocarea doar a caracterului care este modificat imbunatateste performanta fata de blocarea intregului fisier?"
+          },
+          "answer": {
+            "en": "When the entire file is locked, only one process can work at a time (sequential execution). By locking only the specific character, both processes can traverse different parts of the file concurrently. One process might be working on position 5 while the other works on position 15 — true parallelism. The total execution time is significantly reduced.",
+            "ro": "Cand intregul fisier este blocat, doar un proces poate lucra la un moment dat (executie secventiala). Blocand doar caracterul specific, ambele procese pot parcurge parti diferite ale fisierului concurent. Un proces poate lucra pe pozitia 5 in timp ce celalalt lucreaza pe pozitia 15 — paralelism real. Timpul total de executie este semnificativ redus."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is the race condition in access_v3.c?", "ro": "Care este conditia de cursa in access_v3.c?" },
+              "options": [
+                { "text": { "en": "Two processes might try to open the same file", "ro": "Doua procese ar putea incerca sa deschida acelasi fisier" }, "correct": false },
+                { "text": { "en": "Between finding '#' and acquiring the lock, another process might overwrite it", "ro": "Intre gasirea '#' si obtinerea lacatului, alt proces ar putea sa il suprascrie" }, "correct": true },
+                { "text": { "en": "The file descriptor might become invalid", "ro": "Descriptorul de fisier ar putea deveni invalid" }, "correct": false },
+                { "text": { "en": "The lock structure might be corrupted", "ro": "Structura de lacat ar putea fi corupta" }, "correct": false }
+              ],
+              "explanation": { "en": "The race condition exists between finding the '#' character and successfully placing the lock. Another process running in parallel might find and overwrite the same '#' in that window. The fix (v4) is to re-check the character after acquiring the lock.", "ro": "Conditia de cursa exista intre gasirea caracterului '#' si punerea cu succes a lacatului. Alt proces executat in paralel ar putea gasi si suprascrie acelasi '#' in acea fereastra de timp. Solutia (v4) este sa verificati din nou caracterul dupa obtinerea lacatului." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c5-execution-time",
+      "title": { "en": "Measuring Program Execution Time", "ro": "Metode de masurare a timpului de executie" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are multiple methods to measure the execution time of a program.",
+            "ro": "Exista mai multe posibilitati de masurare a duratei de executie a unui program."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "time — Shell Built-in", "ro": "time — Comanda interna" },
+          "content": {
+            "en": "The internal shell command `time` measures total execution time, user-mode time, and kernel-mode time, with millisecond precision. Usage: `time ./MyProgram parameters`.",
+            "ro": "Comanda interna a interpretorului de comenzi `time` masoara durata totala de executie, precum si timpul consumat in starea running, in user-mode si kernel-mode, cu precizie de milisecunde. Utilizare: `time ./MyProgram parameters`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "/usr/bin/time — External Command", "ro": "/usr/bin/time — Comanda externa" },
+          "content": {
+            "en": "The external command `/usr/bin/time` provides total execution time, running time in user-mode and kernel-mode, plus various other statistics about resource types consumed by the program (specified via the `--format` option). Usage: `/usr/bin/time ./MyProgram parameters`.",
+            "ro": "Comanda externa `/usr/bin/time` ofera durata totala de executie, timpul consumat in starea running, in user-mode si kernel-mode, precum si diverse alte informatii statistice despre tipurile de resurse consumate pentru executia programului (specificate prin intermediul optiunii `--format`). Utilizare: `/usr/bin/time ./MyProgram parameters`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Shell built-in time\n$ time ./MyProgram parameters\n\n# External time command (more details)\n$ /usr/bin/time ./MyProgram parameters"
+        },
+        {
+          "type": "definition",
+          "term": { "en": "gettimeofday() — Microsecond Precision", "ro": "gettimeofday() — Precizie de microsecunde" },
+          "content": {
+            "en": "The system call `gettimeofday()` returns the current time with **microsecond** precision. Signature: `int gettimeofday(struct timeval *tv, struct timezone *tz)`. Returns the current time in the first parameter.",
+            "ro": "Apelul de sistem `gettimeofday()` returneaza ora curenta cu o precizie de **microsecunde**. Semnatura: `int gettimeofday(struct timeval *tv, struct timezone *tz)`. Returneaza in primul parametru ora curenta."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "clock_gettime() — Nanosecond Precision", "ro": "clock_gettime() — Precizie de nanosecunde" },
+          "content": {
+            "en": "The system call `clock_gettime()` returns the current time with **nanosecond** precision. Signature: `int clock_gettime(clockid_t clockid, struct timespec *tp)`. Called with `CLOCK_REALTIME` in the first parameter, it returns the current time in the second parameter.",
+            "ro": "Apelul de sistem `clock_gettime()` returneaza ora curenta cu o precizie de **nanosecunde**. Semnatura: `int clock_gettime(clockid_t clockid, struct timespec *tp)`. Apelat cu ceasul `CLOCK_REALTIME` in primul parametru, returneaza in al doilea parametru ora curenta."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// gettimeofday — microsecond precision\nint gettimeofday(struct timeval *tv, struct timezone *tz);\n\n// clock_gettime — nanosecond precision\nint clock_gettime(clockid_t clockid, struct timespec *tp);\n// Use CLOCK_REALTIME for wall-clock time"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which function provides the highest time measurement precision?", "ro": "Care functie ofera cea mai mare precizie de masurare a timpului?" },
+              "options": [
+                { "text": { "en": "time (shell built-in) — milliseconds", "ro": "time (comanda interna) — milisecunde" }, "correct": false },
+                { "text": { "en": "gettimeofday() — microseconds", "ro": "gettimeofday() — microsecunde" }, "correct": false },
+                { "text": { "en": "clock_gettime() — nanoseconds", "ro": "clock_gettime() — nanosecunde" }, "correct": true },
+                { "text": { "en": "/usr/bin/time — milliseconds", "ro": "/usr/bin/time — milisecunde" }, "correct": false }
+              ],
+              "explanation": { "en": "`clock_gettime()` provides nanosecond precision, which is the highest among all listed methods. `gettimeofday()` provides microsecond precision, while the `time` commands provide millisecond precision.", "ro": "`clock_gettime()` ofera precizie de nanosecunde, cea mai mare dintre toate metodele enumerate. `gettimeofday()` ofera precizie de microsecunde, iar comenzile `time` ofera precizie de milisecunde." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c5-references",
+      "title": { "en": "References", "ro": "Referinte bibliografice" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Required reading**: [1] Cap. 3, par. 3.2 from \"Sisteme de operare — manual pentru ID\", C. Vidrascu, UAIC 2006. [2] Demo programs available at the course online page. [3] Lab support associated with this lecture (suport_lab4).",
+            "ro": "**Bibliografie obligatorie**: [1] Cap. 3, par. 3.2 din cartea \"Sisteme de operare — manual pentru ID\", autor C. Vidrascu, editura UAIC, 2006. [2] Programele demonstrative din aceasta prezentare pot fi descarcate din suportul de curs online. [3] Suportul de laborator online asociat acestei prezentari (suport_lab4)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Supplementary reading**: [4] Chapter 55 from \"The Linux Programming Interface\", M. Kerrisk, No Starch Press, 2010. [5] POSIX API: `man 2 fcntl`, `man 2 flock`, and `man 3 lockf`. [6] Lock command documentation: `man 1 flock` and `man 8 lslocks`.",
+            "ro": "**Bibliografie suplimentara**: [4] Cap. 55 din cartea \"The Linux Programming Interface : A Linux and UNIX System Programming Handbook\", autor M. Kerrisk, editura No Starch Press, 2010. [5] POSIX API: `man 2 fcntl`, `man 2 flock` si `man 3 lockf`. [6] Documentatia comenzilor pentru lacate: `man 1 flock` si `man 8 lslocks`."
+          }
+        }
+      ]
+    }
+  ]
+}
