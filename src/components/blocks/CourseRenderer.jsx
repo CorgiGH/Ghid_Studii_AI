@@ -164,7 +164,7 @@ export default function CourseRenderer({ src }) {
                 `Pasul ${currentStep + 1} din ${totalSteps}`
               )}
               {step.group && (
-                <span style={{ color: 'var(--theme-border)' }}> · {step.group}</span>
+                <span style={{ color: 'var(--theme-muted-text)' }}> · {step.group}</span>
               )}
             </span>
           </div>

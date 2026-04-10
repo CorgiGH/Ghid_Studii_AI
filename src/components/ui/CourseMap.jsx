@@ -153,6 +153,11 @@ const CourseMap = ({ subject, onCourseClick }) => {
                   {t('Start here →', 'Începe aici →')}
                 </div>
               )}
+              {totalCompleted > 0 && isNext && (
+                <div className="text-[10px] mt-1 font-semibold" style={{ color: '#10b981' }}>
+                  {t('Up next →', 'Urmează →')}
+                </div>
+              )}
             </button>
           );
         })}
