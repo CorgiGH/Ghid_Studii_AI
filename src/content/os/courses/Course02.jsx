@@ -60,7 +60,7 @@ $ source test.sh ; echo $myvar  # prints "hello" (same shell)`}</Code>
 
               <Section title={t('2. Background Execution', '2. Execuția în background')} id="course_2-bg" checked={!!checked['course_2-bg']} onCheck={() => toggleCheck('course_2-bg')}>
                 <Box type="definition">
-                  <p><strong>{t('Foreground', 'Foreground')}</strong>{t(': shell waits for command to finish before showing prompt. ', ': shell-ul așteaptă terminarea comenzii înainte de a afișa prompterul. ')}<strong>{t('Background', 'Background')}</strong>{t(': shell immediately shows prompt; command runs concurrently.', ': shell-ul afișează imediat prompterul; comanda rulează concurent.')}</p>
+                  <p><strong>{t('Foreground', 'Foreground (prim-plan)')}</strong>{t(': shell waits for command to finish before showing prompt. ', ': shell-ul așteaptă terminarea comenzii înainte de a afișa prompterul. ')}<strong>{t('Background', 'Background (fundal)')}</strong>{t(': shell immediately shows prompt; command runs concurrently.', ': shell-ul afișează imediat prompterul; comanda rulează concurent.')}</p>
                 </Box>
                 <Code>{`$ long_command &          # run in background
 [1] 12345                   # job number + PID
@@ -85,7 +85,7 @@ $ bg %1                     # resume suspended job in background`}</Code>
                 </Box>
 
                 {/* SVG: I/O redirect diagram */}
-                <svg viewBox="0 0 420 140" className="w-full max-w-md mx-auto my-4" style={{fontFamily:'monospace',fontSize:11}}>
+                <svg viewBox="0 0 420 140" className="w-full max-w-md mx-auto my-4" role="img" aria-label={t('I/O redirection diagram showing stdin, stdout, and stderr streams flowing through a process', 'Diagramă de redirecționare I/O care arată fluxurile stdin, stdout și stderr trecând printr-un proces')} style={{fontFamily:'monospace',fontSize:11}}>
                   <rect x="150" y="40" width="120" height="50" rx="8" fill="none" stroke="currentColor" strokeWidth="1.5"/>
                   <text x="210" y="70" textAnchor="middle" fill="currentColor" fontWeight="bold">PROCESS</text>
                   <text x="50" y="55" textAnchor="middle" fill="#3b82f6">stdin(0)</text>
@@ -149,7 +149,7 @@ $ kill -9 PID ; echo $?  # process exit: 137 = 128+9`}</Code>
                   <p>{t('A ', 'Un ')}<strong>{t('pipeline', 'lanț de comenzi')}</strong>{t(' connects stdout of one command to stdin of the next using ', ' conectează stdout-ul unei comenzi la stdin-ul următoarei folosind ')} <code>|</code>{t('. All commands in a pipeline run ', '. Toate comenzile dintr-un pipeline rulează ')}<strong>{t('in parallel', 'în paralel')}</strong>{t(' (not sequentially!).', ' (nu secvențial!).')}</p>
                 </Box>
 
-                <svg viewBox="0 0 450 80" className="w-full max-w-lg mx-auto my-4" style={{fontFamily:'monospace',fontSize:11}}>
+                <svg viewBox="0 0 450 80" className="w-full max-w-lg mx-auto my-4" role="img" aria-label={t('Pipeline diagram showing three commands connected by pipes running in parallel', 'Diagramă de pipeline arătând trei comenzi conectate prin pipe-uri rulând în paralel')} style={{fontFamily:'monospace',fontSize:11}}>
                   <rect x="10" y="20" width="80" height="35" rx="6" fill="none" stroke="#3b82f6" strokeWidth="1.5"/>
                   <text x="50" y="42" textAnchor="middle" fill="#3b82f6">cmd1</text>
                   <rect x="150" y="20" width="80" height="35" rx="6" fill="none" stroke="#f59e0b" strokeWidth="1.5"/>
@@ -160,7 +160,7 @@ $ kill -9 PID ; echo $?  # process exit: 137 = 128+9`}</Code>
                   <line x1="230" y1="37" x2="290" y2="37" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arr)"/>
                   <text x="120" y="32" textAnchor="middle" fill="currentColor" fontSize="9">pipe</text>
                   <text x="260" y="32" textAnchor="middle" fill="currentColor" fontSize="9">pipe</text>
-                  <text x="225" y="72" textAnchor="middle" fill="currentColor" fontSize="9" opacity="0.6">{t("All 3 run in parallel. Exit status = last command's.", 'Toate 3 rulează în paralel. Valoarea de exit = a ultimei comenzi.')}</text>
+                  <text x="225" y="72" textAnchor="middle" fill="currentColor" fontSize="9" opacity="0.6">{t("All 3 run in parallel. Exit status = last command's (by default).", 'Toate 3 rulează în paralel. Valoarea de exit = a ultimei comenzi (implicit).')}</text>
                 </svg>
 
                 <Code>{`$ who | cut -f1 -d" " | sort -u
@@ -184,11 +184,11 @@ $ cat /etc/passwd | grep -w "bash"
                 <Box type="formula">
                   <p className="font-bold">{t('Four composition operators:', 'Patru operatori de compunere:')}</p>
                   <table className="text-sm mt-1 w-full">
-                    <thead><tr className="border-b dark:border-gray-600"><th className="text-left p-1">{t('Operator', 'Operator')}</th><th className="text-left p-1">{t('Execution', 'Execuție')}</th><th className="text-left p-1">{t('Behavior', 'Comportament')}</th></tr></thead>
+                    <thead><tr className="border-b" style={{ borderColor: 'var(--theme-border)' }}><th className="text-left p-1">{t('Operator', 'Operator')}</th><th className="text-left p-1">{t('Execution', 'Execuție')}</th><th className="text-left p-1">{t('Behavior', 'Comportament')}</th></tr></thead>
                     <tbody>
-                      <tr className="border-b dark:border-gray-700"><td className="p-1 font-mono">;</td><td className="p-1">{t('Sequential', 'Secvențial')}</td><td className="p-1">{t('Run next regardless of result', 'Rulează următoarea indiferent de rezultat')}</td></tr>
-                      <tr className="border-b dark:border-gray-700"><td className="p-1 font-mono">&amp;</td><td className="p-1">{t('Parallel', 'Paralel')}</td><td className="p-1">{t('Run in background, next starts immediately', 'Rulează în background, următoarea pornește imediat')}</td></tr>
-                      <tr className="border-b dark:border-gray-700"><td className="p-1 font-mono">&amp;&amp;</td><td className="p-1">{t('Conditional AND', 'AND condiționat')}</td><td className="p-1">{t('Run next only if previous ', 'Rulează următoarea doar dacă precedenta a ')}<strong>{t('succeeded', 'reușit')}</strong>{t(' (exit 0)', ' (exit 0)')}</td></tr>
+                      <tr className="border-b" style={{ borderColor: 'var(--theme-border)' }}><td className="p-1 font-mono">;</td><td className="p-1">{t('Sequential', 'Secvențial')}</td><td className="p-1">{t('Run next regardless of result', 'Rulează următoarea indiferent de rezultat')}</td></tr>
+                      <tr className="border-b" style={{ borderColor: 'var(--theme-border)' }}><td className="p-1 font-mono">&amp;</td><td className="p-1">{t('Parallel', 'Paralel')}</td><td className="p-1">{t('Run in background, next starts immediately', 'Rulează în background, următoarea pornește imediat')}</td></tr>
+                      <tr className="border-b" style={{ borderColor: 'var(--theme-border)' }}><td className="p-1 font-mono">&amp;&amp;</td><td className="p-1">{t('Conditional AND', 'AND condiționat')}</td><td className="p-1">{t('Run next only if previous ', 'Rulează următoarea doar dacă precedenta a ')}<strong>{t('succeeded', 'reușit')}</strong>{t(' (exit 0)', ' (exit 0)')}</td></tr>
                       <tr><td className="p-1 font-mono">||</td><td className="p-1">{t('Conditional OR', 'OR condiționat')}</td><td className="p-1">{t('Run next only if previous ', 'Rulează următoarea doar dacă precedenta a ')}<strong>{t('failed', 'eșuat')}</strong>{t(' (exit ≠ 0)', ' (exit ≠ 0)')}</td></tr>
                     </tbody>
                   </table>
@@ -254,9 +254,9 @@ $ ls !(*.o)           # everything except .o files (bash)`}</Code>
                 <Box type="definition">
                   <p className="font-bold">{t('Bash config files (execution order):', 'Fișierele de configurare Bash (ordinea de execuție):')}</p>
                   <ul className="list-disc pl-5 text-sm">
-                    <li><strong>Login shell</strong>: <code>/etc/profile</code> → <code>~/.bash_profile</code> (or <code>~/.bash_login</code> or <code>~/.profile</code>)</li>
-                    <li><strong>Non-login interactive</strong>: <code>~/.bashrc</code></li>
-                    <li><strong>Logout</strong>: <code>~/.bash_logout</code></li>
+                    <li><strong>{t('Login shell', 'Login shell (shell de login)')}</strong>: <code>/etc/profile</code> → <code>~/.bash_profile</code> ({t('or', 'sau')} <code>~/.bash_login</code> {t('or', 'sau')} <code>~/.profile</code>)</li>
+                    <li><strong>{t('Non-login interactive', 'Non-login interactive (interactiv fără login)')}</strong>: <code>~/.bashrc</code></li>
+                    <li><strong>{t('Logout', 'Logout (deconectare)')}</strong>: <code>~/.bash_logout</code></li>
                   </ul>
                 </Box>
 
@@ -271,13 +271,13 @@ $ CTRL+R           # reverse search in history`}</Code>
               </Section>
 
               <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="course_2-cheat" checked={!!checked['course_2-cheat']} onCheck={() => toggleCheck('course_2-cheat')}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
-                  <Box type="formula"><p className="font-bold">{t('Redirections', 'Redirecționări')}</p><p>{'< > >> 2> 2>> &> 2>&1'}</p></Box>
-                  <Box type="formula"><p className="font-bold">{t('Composition', 'Compunere')}</p><p>{'; (seq) & (bg) && (AND) || (OR)'}</p></Box>
-                  <Box type="formula"><p className="font-bold">{t('Pipelines', 'Lanțuri de comenzi')}</p><p>cmd1 | cmd2 | cmd3</p><p>{'|& = 2>&1 |'}</p></Box>
-                  <Box type="formula"><p className="font-bold">{t('Globs', 'Șabloane')}</p><p>* ? [abc] [a-z] [^abc] \c</p></Box>
-                  <Box type="formula"><p className="font-bold">{t('Execution', 'Execuție')}</p><p>./script, bash script, source script</p></Box>
-                  <Box type="formula"><p className="font-bold">{t('Exit status', 'Valoarea de exit')}</p><p>$? (0=ok, 126/127/128+N)</p></Box>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <Box type="formula"><p className="font-bold">{t('Redirections', 'Redirecționări')}</p><code className="text-xs">{'< > >> 2> 2>> &> 2>&1'}</code></Box>
+                  <Box type="formula"><p className="font-bold">{t('Composition', 'Compunere')}</p><code className="text-xs">{'; (seq) & (bg) && (AND) || (OR)'}</code></Box>
+                  <Box type="formula"><p className="font-bold">{t('Pipelines', 'Lanțuri de comenzi')}</p><code className="text-xs">cmd1 | cmd2 | cmd3</code><br/><code className="text-xs">{'|& = 2>&1 |'}</code></Box>
+                  <Box type="formula"><p className="font-bold">{t('Globs', 'Șabloane')}</p><code className="text-xs">* ? [abc] [a-z] [^abc] \c</code></Box>
+                  <Box type="formula"><p className="font-bold">{t('Execution', 'Execuție')}</p><code className="text-xs">./script, bash script, source script</code></Box>
+                  <Box type="formula"><p className="font-bold">{t('Exit status', 'Valoarea de exit')}</p><code className="text-xs">$? (0=ok, 126/127/128+N)</code></Box>
                 </div>
               </Section>
 

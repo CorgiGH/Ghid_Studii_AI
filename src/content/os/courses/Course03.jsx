@@ -15,7 +15,7 @@ export default function Course03() {
                   <li>{t('Shell scripts & shebang', 'Scripturi shell și shebang')}</li>
                   <li>{t('Variables (definition, substitution, assignment)', 'Variabile (definire, substituție, atribuire)')}</li>
                   <li>{t('String operations (length, substring, prefix/suffix removal)', 'Operații pe șiruri (lungime, substring, eliminare prefix/sufix)')}</li>
-                  <li>{t('Positional parameters & special variables', 'Parametri pozițional și variabile speciale')}</li>
+                  <li>{t('Positional parameters & special variables', 'Parametri poziționali și variabile speciale')}</li>
                   <li>{t('Useful built-in commands (read, export, shift, eval, set)', 'Comenzi interne utile (read, export, shift, eval, set)')}</li>
                   <li>{t('Arithmetic expressions (let, expr, bc, $((...)))', 'Expresii aritmetice (let, expr, bc, $((...)))')}</li>
                   <li>{t('Conditional expressions (test, [ ], [[ ]])', 'Expresii condiționale (test, [ ], [[ ]])')}</li>
@@ -23,6 +23,31 @@ export default function Course03() {
                   <li>{t('Loops: while, until, for, select', 'Bucle: while, until, for, select')}</li>
                   <li>{t('Shell functions', 'Funcții shell')}</li>
                 </ol>
+              </Box>
+
+              <Box type="warning">
+                <p className="font-bold mb-2">{t('Pretest: What do you already know?', 'Pre-test: Ce știi deja?')}</p>
+                <p className="text-sm mb-2">{t('Try these before reading — revisit after to measure what you learned.', 'Încearcă acestea înainte de a citi — revino după pentru a măsura ce ai învățat.')}</p>
+                <Toggle
+                  question={t('1. What does $0 refer to in a bash script?', '1. La ce se referă $0 într-un script bash?')}
+                  answer={t('$0 holds the name of the script itself (not the first argument — that is $1). For example, if you run ./myscript.sh hello, then $0 is "./myscript.sh" and $1 is "hello".', '$0 conține numele scriptului în sine (nu primul argument — acela este $1). De exemplu, dacă rulezi ./myscript.sh hello, atunci $0 este "./myscript.sh" iar $1 este "hello".')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('2. Does bash support floating-point arithmetic natively?', '2. Suportă bash aritmetica cu virgulă mobilă nativ?')}
+                  answer={t('No. Bash arithmetic ($((...)), let, expr) only handles integers. For floating-point you need external tools like bc or awk.', 'Nu. Aritmetica bash ($((...)), let, expr) gestionează doar numere întregi. Pentru virgulă mobilă ai nevoie de instrumente externe precum bc sau awk.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t("3. What's the difference between [ ] and [[ ]] in bash?", '3. Care este diferența dintre [ ] și [[ ]] în bash?')}
+                  answer={t('[ ] (or test) is a POSIX-compatible command — it requires careful quoting and uses -a/-o for logic. [[ ]] is a bash built-in keyword that supports pattern matching (=~), safer variable handling (no word splitting), and && / || operators inside.', '[ ] (sau test) este o comandă compatibilă POSIX — necesită citare atentă și folosește -a/-o pentru logică. [[ ]] este un cuvânt cheie intern bash care suportă potrivire de modele (=~), gestionare mai sigură a variabilelor (fără word splitting) și operatori && / || în interior.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('4. What happens if you write v = 5 (with spaces) in bash?', '4. Ce se întâmplă dacă scrii v = 5 (cu spații) în bash?')}
+                  answer={t('Bash interprets "v" as a command name, "=" and "5" as its arguments. It will try to run a program called "v" — which almost certainly fails. Assignment requires NO spaces: v=5.', 'Bash interpretează "v" ca nume de comandă, "=" și "5" ca argumente ale sale. Va încerca să ruleze un program numit "v" — ceea ce aproape sigur eșuează. Atribuirea nu necesită spații: v=5.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
               </Box>
 
               <Section title={t('1. Shell Scripts & the Shebang', '1. Scripturi shell și shebang')} id="course_3-scripts" checked={!!checked['course_3-scripts']} onCheck={() => toggleCheck('course_3-scripts')}>
@@ -84,9 +109,23 @@ echo \${path%.c}.txt   # Replace .c with .txt`}</Code>
                 </Box>
               </Section>
 
-              <Section title={t('3. Special Variables & Positional Parameters', '3. Variabile speciale și parametri pozițional')} id="course_3-special" checked={!!checked['course_3-special']} onCheck={() => toggleCheck('course_3-special')}>
+              <Box type="definition">
+                <p className="font-bold mb-1">{t('Checkpoint: Sections 1-2', 'Checkpoint: Secțiunile 1-2')}</p>
+                <Toggle
+                  question={t('What are the three ways to run a shell script, and which one does NOT create a new process?', 'Care sunt cele trei moduri de a rula un script shell și care NU creează un proces nou?')}
+                  answer={t('1) ./script.sh (direct, needs chmod +x), 2) bash script.sh (explicit shell), 3) source script.sh (current shell). The "source" method does not create a new process.', '1) ./script.sh (direct, necesită chmod +x), 2) bash script.sh (shell explicit), 3) source script.sh (shell curent). Metoda "source" nu creează un proces nou.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('How do you extract just the filename from a path like "/home/user/file.c" using parameter expansion?', 'Cum extragi doar numele fișierului dintr-o cale precum "/home/user/file.c" folosind expandarea parametrilor?')}
+                  answer={t('${path##*/} — removes the longest prefix matching */. Result: "file.c". The ## means greedy (longest match) from the front.', '${path##*/} — elimină cel mai lung prefix care se potrivește cu */. Rezultat: "file.c". ## înseamnă lacom (cea mai lungă potrivire) din față.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+              </Box>
+
+              <Section title={t('3. Special Variables & Positional Parameters', '3. Variabile speciale și parametri poziționali')} id="course_3-special" checked={!!checked['course_3-special']} onCheck={() => toggleCheck('course_3-special')}>
                 <Box type="formula">
-                  <p className="font-bold">{t('Positional parameters:', 'Parametri pozițional:')}</p>
+                  <p className="font-bold">{t('Positional parameters:', 'Parametri poziționali:')}</p>
                   <table className="text-sm mt-1">
                     <tbody>
                       <tr><td className="pr-4 font-mono">$0</td><td>{t('Script name', 'Numele scriptului')}</td></tr>
@@ -134,7 +173,7 @@ expr 1 + 2 \\* 3     # prints 7
 a=$(( 4 + 5 ))       # a = 9
 (( a += 10 ))        # a = 19
 echo $((0xFFFF))     # 65535 (hex)
-echo $((4#1203))     # 99 (base 4)
+echo $((4#1203))     # 99 (base 4: 1*4^3 + 2*4^2 + 0*4^1 + 3*4^0 = 64 + 32 + 0 + 3 = 99)
 
 # 4. bc (floating-point capable)
 echo "3/2" | bc -l              # 1.500...
@@ -156,6 +195,20 @@ arr[0]=hello; arr[1]=world
 echo \${arr[1]} # "world"`}</Code>
                 </Box>
               </Section>
+
+              <Box type="definition">
+                <p className="font-bold mb-1">{t('Checkpoint: Sections 3-4', 'Checkpoint: Secțiunile 3-4')}</p>
+                <Toggle
+                  question={t('What is the difference between "$@" and "$*" when quoted?', 'Care este diferența dintre "$@" și "$*" când sunt citate?')}
+                  answer={t('"$*" combines all arguments into one string (separated by IFS). "$@" preserves each argument as a separate string. Use "$@" in for loops.', '"$*" combină toate argumentele într-un singur șir (separate prin IFS). "$@" păstrează fiecare argument ca șir separat. Folosește "$@" în bucle for.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('Name two ways to do integer arithmetic in bash and one way to do floating-point.', 'Numește două moduri de a face aritmetică cu numere întregi în bash și un mod pentru virgulă mobilă.')}
+                  answer={t('Integer: $((...)) and let (also expr). Floating-point: echo "expression" | bc -l. Bash itself cannot do floating-point math.', 'Numere întregi: $((...)) și let (și expr). Virgulă mobilă: echo "expresie" | bc -l. Bash în sine nu poate face aritmetică cu virgulă mobilă.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+              </Box>
 
               <Section title={t('5. Conditional Expressions (test)', '5. Expresii condiționale (test)')} id="course_3-test" checked={!!checked['course_3-test']} onCheck={() => toggleCheck('course_3-test')}>
                 <Box type="formula">
@@ -198,7 +251,7 @@ test c1 -o c2      # OR`}</Code>
               <Section title={t('6. Control Structures', '6. Structuri de control')} id="course_3-control" checked={!!checked['course_3-control']} onCheck={() => toggleCheck('course_3-control')}>
 
                 {/* SVG: Control flow diagram */}
-                <svg viewBox="0 0 480 170" className="w-full max-w-lg mx-auto my-4" style={{fontFamily:'monospace',fontSize:10}}>
+                <svg viewBox="0 0 480 170" className="w-full max-w-lg mx-auto my-4" style={{fontFamily:'monospace',fontSize:10}} role="img" aria-label={t('Control flow diagram: alternatives (if/elif/fi, case/esac), loops (while, until, for, select), and flow commands (break, continue, exit, return)', 'Diagrama fluxului de control: alternative (if/elif/fi, case/esac), bucle (while, until, for, select) și comenzi de flux (break, continue, exit, return)')}>
                   <rect x="10" y="10" width="90" height="40" rx="6" fill="#3b82f6" opacity="0.15" stroke="#3b82f6"/>
                   <text x="55" y="34" textAnchor="middle" fill="#3b82f6" fontWeight="bold">if/elif/fi</text>
                   <rect x="120" y="10" width="90" height="40" rx="6" fill="#f59e0b" opacity="0.15" stroke="#f59e0b"/>
@@ -219,7 +272,7 @@ test c1 -o c2      # OR`}</Code>
                 </svg>
 
                 <Box type="formula">
-                  <p className="font-bold">if/elif/else:</p>
+                  <p className="font-bold">{t('if/elif/else:', 'if/elif/else:')}</p>
                   <Code>{`if [ $# -eq 0 ]; then
     echo "No arguments"
 elif [ $# -eq 1 ]; then
@@ -230,7 +283,7 @@ fi`}</Code>
                 </Box>
 
                 <Box type="formula">
-                  <p className="font-bold">case:</p>
+                  <p className="font-bold">{t('case:', 'case:')}</p>
                   <Code>{`case "$1" in
     start)  echo "Starting..." ;;
     stop)   echo "Stopping..." ;;
@@ -289,6 +342,20 @@ done
                   <p>{t('The ', 'Condiția ')} <code>while</code> {t('condition checks the exit status of the ', 'verifică valoarea de exit a ')}<strong>{t('entire command list', 'întregii liste de comenzi')}</strong>{t(', not a boolean expression. ', ', nu o expresie booleană. ')} <code>while read line</code> {t('is idiomatic because ', 'este idiomul standard deoarece ')} <code>read</code> {t('returns non-zero at EOF.', 'returnează non-zero la EOF.')}</p>
                 </Box>
               </Section>
+
+              <Box type="definition">
+                <p className="font-bold mb-1">{t('Checkpoint: Sections 5-6', 'Checkpoint: Secțiunile 5-6')}</p>
+                <Toggle
+                  question={t('Why must you put spaces around the condition in [ $x -gt 5 ]?', 'De ce trebuie să pui spații în jurul condiției în [ $x -gt 5 ]?')}
+                  answer={t('Because [ is actually a command (synonym for test), and ] is its last argument. Without spaces, the shell cannot parse the tokens correctly.', 'Deoarece [ este de fapt o comandă (sinonim pentru test), iar ] este ultimul său argument. Fără spații, shell-ul nu poate analiza corect token-urile.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('What is the difference between while and until loops?', 'Care este diferența dintre buclele while și until?')}
+                  answer={t('while loops while the condition is TRUE (exit 0). until loops while the condition is FALSE (exit non-zero). They are logical inverses of each other.', 'while iterează cât timp condiția este ADEVĂRATĂ (exit 0). until iterează cât timp condiția este FALSĂ (exit non-zero). Sunt inversele logice una alteia.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+              </Box>
 
               <Section title={t('7. Shell Functions', '7. Funcții shell')} id="course_3-funcs" checked={!!checked['course_3-funcs']} onCheck={() => toggleCheck('course_3-funcs')}>
                 <Box type="formula">
@@ -378,7 +445,7 @@ my_listing /home`}</Code>
                 />
                 <Toggle
                   question={t('8. What does shift 2 do?', '8. Ce face shift 2?')}
-                  answer={t('It shifts all positional parameters left by 2. $3 becomes $1, $4 becomes $2, etc. The old $1 and $2 are discarded. $# decreases by 2. Useful for parsing options in a loop.', 'Deplasează toți parametrii pozițional la stânga cu 2. $3 devine $1, $4 devine $2, etc. Vechii $1 și $2 sunt eliminați. $# scade cu 2. Util pentru analiza opțiunilor în buclă.')}
+                  answer={t('It shifts all positional parameters left by 2. $3 becomes $1, $4 becomes $2, etc. The old $1 and $2 are discarded. $# decreases by 2. Useful for parsing options in a loop.', 'Deplasează toți parametrii poziționali la stânga cu 2. $3 devine $1, $4 devine $2, etc. Vechii $1 și $2 sunt eliminați. $# scade cu 2. Util pentru analiza opțiunilor în buclă.')}
                   hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
                 />
                 <Toggle

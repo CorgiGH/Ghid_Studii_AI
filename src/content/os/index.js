@@ -11,7 +11,7 @@ const os = {
   },
   icon: '\uD83D\uDDA5\uFE0F',
   courses: [
-    { id: 'course_1', title: { en: 'Course 1: Basic Linux Commands & Filesystems', ro: 'Cursul 1: Comenzi de bază Linux și sisteme de fișiere' }, shortTitle: { en: 'C1: Commands & FS', ro: 'C1: Comenzi & FS' }, sectionCount: 9,
+    { id: 'course_1', title: { en: 'Course 1: Basic Linux Commands & Filesystems', ro: 'Cursul 1: Comenzi de bază Linux și sisteme de fișiere' }, shortTitle: { en: 'C1: Commands & FS', ro: 'C1: Comenzi & FS' }, sectionCount: 10,
       sections: [
         { id: 'course_1-intro', title: { en: '1. Commands Intro', ro: '1. Intro Comenzi' } },
         { id: 'course_1-users', title: { en: '2. Users & Auth', ro: '2. Utilizatori' } },

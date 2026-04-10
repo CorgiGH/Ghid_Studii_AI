@@ -32,6 +32,37 @@ export default function Course01() {
                 </ol>
               </Box>
 
+              {/* Pretest */}
+              <Box type="theorem">
+                <p className="font-bold mb-2">{t('Pretest — What do you already know?', 'Pre-test — Ce știți deja?')}</p>
+                <p className="text-sm mb-2">{t('Try answering these before reading the course. Come back after to see how your understanding changed.', 'Încercați să răspundeți înainte de a citi cursul. Reveniți după pentru a vedea cum s-a schimbat înțelegerea voastră.')}</p>
+                <Toggle
+                  question={t('1. Is Linux case-sensitive? Does it matter if you type "ls" or "LS"?', '1. Este Linux sensibil la majuscule? Contează dacă tastați „ls" sau „LS"?')}
+                  answer={t('Yes! Linux is case-sensitive. "ls" is a valid command, but "LS" is not. Similarly, "File.txt" and "file.txt" are two completely different files.', 'Da! Linux este sensibil la majuscule. „ls" este o comandă validă, dar „LS" nu. Similar, „File.txt" și „file.txt" sunt două fișiere complet diferite.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('2. What does the root directory "/" contain? Is it the same as the root user\'s home?', '2. Ce conține directorul rădăcină „/"? Este același lucru cu directorul home al utilizatorului root?')}
+                  answer={t('"/" is the top of the filesystem tree — it contains all other directories (/home, /etc, /bin, etc.). It is NOT the same as root\'s home directory, which is /root. Every path on the system starts from /.', '„/" este vârful arborelui de fișiere — conține toate celelalte directoare (/home, /etc, /bin, etc.). NU este același lucru cu directorul home al utilizatorului root, care este /root. Fiecare cale din sistem pornește de la /.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('3. What is the difference between "rm" and "rmdir"?', '3. Care este diferența dintre „rm" și „rmdir"?')}
+                  answer={t('"rmdir" only removes empty directories — it fails if the directory has any contents. "rm" removes files; with the -r flag it removes directories recursively (including all contents). "rm -rf" is dangerous because it deletes everything without asking.', '„rmdir" șterge doar directoare goale — eșuează dacă directorul conține ceva. „rm" șterge fișiere; cu flag-ul -r șterge directoare recursiv (inclusiv tot conținutul). „rm -rf" este periculos deoarece șterge totul fără a întreba.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('4. Can two files with different names point to the same data on disk?', '4. Pot două fișiere cu nume diferite să indice aceleași date pe disc?')}
+                  answer={t('Yes! Hard links and symbolic links both allow this. A hard link is another name for the same file data (same inode). A symbolic link is a shortcut that points to another filename.', 'Da! Atât legăturile hard cât și cele simbolice permit acest lucru. O legătură hard este un alt nume pentru aceleași date (același inod). O legătură simbolică este o scurtătură care indică spre un alt nume de fișier.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+                <Toggle
+                  question={t('5. If you have read (r) permission on a directory but not execute (x), can you open files inside it?', '5. Dacă aveți permisiune de citire (r) pe un director dar nu și de execuție (x), puteți deschide fișierele din interior?')}
+                  answer={t('No! Read permission on a directory only lets you list the filenames. You need execute (x) permission to actually access/traverse the directory and open files inside it. Without x, you can see names but not open anything.', 'Nu! Permisiunea de citire pe un director vă permite doar să listați numele fișierelor. Aveți nevoie de permisiunea de execuție (x) pentru a accesa/traversa directorul și a deschide fișierele. Fără x, puteți vedea numele dar nu puteți deschide nimic.')}
+                  hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+                />
+              </Box>
+
               {/* Topic 1: Intro */}
               <Section title={t('1. Command-Line Introduction', '1. Introducere în linia de comandă')} id="course_1-intro" checked={!!checked['course_1-intro']} onCheck={() => toggleCheck('course_1-intro')}>
                 <p>{t('A ', 'Un ')} <strong>{t('command interpreter', 'interpretor de comenzi')}</strong> {t('(shell) is a program that takes user commands, executes them, and displays results. It is the interface between the user and the OS.', '(shell) este un program care preia comenzile utilizatorului, le execută și afișează rezultatele. Este interfața dintre utilizator și sistemul de operare.')}</p>
@@ -39,8 +70,8 @@ export default function Course01() {
                 <Box type="definition">
                   <p className="font-bold">{t('Two categories of simple commands:', 'Două categorii de comenzi simple:')}</p>
                   <ul className="list-disc pl-5 mt-1">
-                    <li><strong>{t('Internal commands', 'Comenzi interne')}</strong> {t('- built into the shell itself. Examples:', '- implementate în interpretorul de comenzi. Exemple:')} <code className="font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded">cd</code>, <code className="font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded">help</code></li>
-                    <li><strong>{t('External commands', 'Comenzi externe')}</strong> {t('- separate executables on disk. Examples:', '- implementate de sine stătător (fiecare în câte un fișier). Exemple:')} <code className="font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded">ls</code>, <code className="font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded">passwd</code>{t(', scripts like ', ', scripturi de genul ')} <code className="font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded">.bashrc</code></li>
+                    <li><strong>{t('Internal commands', 'Comenzi interne')}</strong> {t('- built into the shell itself. Examples:', '- implementate în interpretorul de comenzi. Exemple:')} <code>cd</code>, <code>help</code></li>
+                    <li><strong>{t('External commands', 'Comenzi externe')}</strong> {t('- separate executables on disk. Examples:', '- implementate de sine stătător (fiecare în câte un fișier). Exemple:')} <code>ls</code>, <code>passwd</code>{t(', scripts like ', ', scripturi de genul ')} <code>backup.sh</code></li>
                   </ul>
                 </Box>
 
@@ -70,8 +101,47 @@ export default function Course01() {
                 </Box>
               </Section>
 
-              {/* Topic 2: Users & Groups */}
-              <Section title={t('2. Users, Groups & Authentication', '2. Utilizatori, grupuri și autentificare')} id="course_1-users" checked={!!checked['course_1-users']} onCheck={() => toggleCheck('course_1-users')}>
+              {/* Topic 2: Help Commands */}
+              <Section title={t('2. Help Commands', '2. Comenzi de ajutor')} id="course_1-help" checked={!!checked['course_1-help']} onCheck={() => toggleCheck('course_1-help')}>
+                <p>{t('When you encounter an unfamiliar command, Linux provides several tools to look up documentation directly from the terminal.', 'Când întâlniți o comandă necunoscută, Linux oferă mai multe instrumente pentru a căuta documentația direct din terminal.')}</p>
+
+                <Box type="formula">
+                  <p className="font-bold font-mono">{t('The man command (manual pages):', 'Comanda man (pagini de manual):')}</p>
+                  <Code>{`$ man ls          # open the manual page for ls
+$ man 5 passwd    # open section 5 (file formats) for passwd
+$ man -k keyword  # search all man pages for keyword (same as apropos)`}</Code>
+                  <p className="text-sm mt-1">{t('Man pages are organized into sections: 1=commands, 2=system calls, 3=library functions, 4=devices, 5=file formats, 6=games, 7=misc, 8=admin commands. Navigate with arrows, search with /, quit with q.', 'Paginile de manual sunt organizate în secțiuni: 1=comenzi, 2=apeluri de sistem, 3=funcții de bibliotecă, 4=dispozitive, 5=formate de fișiere, 6=jocuri, 7=diverse, 8=comenzi admin. Navigați cu săgețile, căutați cu /, ieșiți cu q.')}</p>
+                </Box>
+
+                <Box type="definition">
+                  <p className="font-bold">{t('Other help commands:', 'Alte comenzi de ajutor:')}</p>
+                  <Code>{`$ whatis ls       # one-line description of a command
+$ which ls        # shows the path of the executable
+$ whereis ls      # shows binary, source, and man page locations
+$ apropos copy    # search man page descriptions for "copy"
+$ help cd         # help for shell built-in commands only`}</Code>
+                </Box>
+
+                <Box type="warning">
+                  <p className="font-bold">{t('Tip:', 'Sfat:')}</p>
+                  <p>{t('Use "man -k" or "apropos" when you know what you want to do but not the command name. For example, "apropos compress" will list all commands related to compression.', 'Folosiți „man -k" sau „apropos" când știți ce doriți să faceți dar nu și numele comenzii. De exemplu, „apropos compress" va lista toate comenzile legate de compresie.')}</p>
+                </Box>
+              </Section>
+
+              {/* Checkpoint: Sections 1-2 */}
+              <Toggle
+                question={t('Checkpoint: Name two ways to get help about a command you don\'t know.', 'Punct de control: Numiți două modalități de a obține ajutor despre o comandă pe care nu o cunoașteți.')}
+                answer={t('You can use "man command" to read its full manual page, or "whatis command" for a one-line summary. You can also use "apropos keyword" to search for commands by description.', 'Puteți folosi „man comandă" pentru a citi pagina de manual completă, sau „whatis comandă" pentru un rezumat de o linie. Puteți folosi și „apropos cuvânt" pentru a căuta comenzi după descriere.')}
+                hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+              />
+              <Toggle
+                question={t('Checkpoint: What is the difference between an internal and an external command? Give one example of each.', 'Punct de control: Care este diferența dintre o comandă internă și una externă? Dați un exemplu pentru fiecare.')}
+                answer={t('Internal commands are built into the shell (e.g., cd). External commands are separate programs stored on disk (e.g., ls at /bin/ls). Use "type command" to check.', 'Comenzile interne sunt integrate în shell (ex: cd). Comenzile externe sunt programe separate stocate pe disc (ex: ls la /bin/ls). Folosiți „type comandă" pentru a verifica.')}
+                hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+              />
+
+              {/* Topic 3: Users & Groups */}
+              <Section title={t('3. Users, Groups & Authentication', '3. Utilizatori, grupuri și autentificare')} id="course_1-users" checked={!!checked['course_1-users']} onCheck={() => toggleCheck('course_1-users')}>
                 <p>{t('Every user needs an ', 'Fiecare utilizator are nevoie de un ')}<strong>{t('account', 'cont')}</strong>{t(' (username + password) to work on a UNIX system. Each account has a ', ' (nume utilizator + parolă) pentru a lucra pe un sistem UNIX. Fiecare cont are un ')}<strong>UID</strong>{t(' (User ID). The special user ', ' (identificator de utilizator). Utilizatorul special ')}<strong>root</strong>{t(' (UID=0) has full system privileges.', ' (UID=0) are toate privilegiile pe sistem.')}</p>
 
                 <Box type="formula">
@@ -103,8 +173,8 @@ $ last            # login history`}</Code>
                 </Box>
               </Section>
 
-              {/* Topic 3: Files & Filesystem Structure */}
-              <Section title={t('3. Files & Filesystem Structure', '3. Fișiere și structura sistemului de fișiere')} id="course_1-files" checked={!!checked['course_1-files']} onCheck={() => toggleCheck('course_1-files')}>
+              {/* Topic 4: Files & Filesystem Structure */}
+              <Section title={t('4. Files & Filesystem Structure', '4. Fișiere și structura sistemului de fișiere')} id="course_1-files" checked={!!checked['course_1-files']} onCheck={() => toggleCheck('course_1-files')}>
                 <p>{t('In UNIX, data and programs are stored in ', 'În UNIX, datele și programele sunt stocate în ')}<strong>{t('files', 'fișiere')}</strong>{t('. Files are organized into ', '. Fișierele sunt organizate în ')}<strong>{t('filesystems', 'sisteme de fișiere')}</strong>{t(' (volumes on disk).', ' (volume pe disc).')}</p>
 
                 <Box type="definition">
@@ -144,8 +214,20 @@ $ last            # login history`}</Code>
                 </Box>
               </Section>
 
-              {/* Topic 4: Permissions */}
-              <Section title={t('4. File Permissions', '4. Permisiuni de acces la fișiere')} id="course_1-perms" checked={!!checked['course_1-perms']} onCheck={() => toggleCheck('course_1-perms')}>
+              {/* Checkpoint: Sections 3-4 */}
+              <Toggle
+                question={t('Checkpoint: What is the difference between an absolute path and a relative path?', 'Punct de control: Care este diferența dintre o cale absolută și una relativă?')}
+                answer={t('An absolute path starts from the root "/" (e.g., /home/user/file.txt). A relative path starts from the current directory (e.g., ../docs/file.txt). Absolute paths always work regardless of where you are; relative paths depend on your current location.', 'O cale absolută pornește de la rădăcina „/" (ex: /home/user/file.txt). O cale relativă pornește de la directorul curent (ex: ../docs/file.txt). Căile absolute funcționează indiferent de locație; căile relative depind de directorul curent.')}
+                hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+              />
+              <Toggle
+                question={t('Checkpoint: Where is user account information stored, and what does the "x" in the password field mean?', 'Punct de control: Unde sunt stocate informațiile conturilor de utilizator și ce înseamnă „x" din câmpul parolei?')}
+                answer={t('User accounts are stored in /etc/passwd. The "x" means the actual password hash is stored separately in /etc/shadow, which is only readable by root — this is a security measure.', 'Conturile de utilizator sunt stocate în /etc/passwd. „x" înseamnă că hash-ul parolei este stocat separat în /etc/shadow, care este citibil doar de root — aceasta este o măsură de securitate.')}
+                hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+              />
+
+              {/* Topic 5: Permissions */}
+              <Section title={t('5. File Permissions', '5. Permisiuni de acces la fișiere')} id="course_1-perms" checked={!!checked['course_1-perms']} onCheck={() => toggleCheck('course_1-perms')}>
                 <p>{t('Every file has an ', 'Fiecare fișier are un ')}<strong>{t('owner user', 'utilizator proprietar')}</strong>{t(', an ', ', un ')}<strong>{t('owner group', 'grup proprietar')}</strong>{t(', and ', ', și ')}<strong>{t('3 sets of permissions', '3 seturi de permisiuni')}</strong>{t(' for: user (u), group (g), others (o).', ' pentru: utilizator (u), grup (g), alții (o).')}</p>
 
                 <PermissionsSVG />
@@ -192,8 +274,8 @@ $ chown newuser:newgroup file.txt  # both at once`}</Code>
                 </Box>
               </Section>
 
-              {/* Topic 5: Essential Commands */}
-              <Section title={t('5. Essential File & Directory Commands', '5. Comenzi esențiale pentru fișiere și directoare')} id="course_1-cmds" checked={!!checked['course_1-cmds']} onCheck={() => toggleCheck('course_1-cmds')}>
+              {/* Topic 6: Essential Commands */}
+              <Section title={t('6. Essential File & Directory Commands', '6. Comenzi esențiale pentru fișiere și directoare')} id="course_1-cmds" checked={!!checked['course_1-cmds']} onCheck={() => toggleCheck('course_1-cmds')}>
                 <Box type="definition">
                   <p className="font-bold">{t('Directory commands:', 'Comenzi pentru directoare:')}</p>
                   <Code>{`mkdir dirname     # create directory
@@ -246,10 +328,22 @@ file myfile       # detect file content type`}</Code>
                 </Box>
               </Section>
 
-              {/* Topic 6: Processes */}
-              <Section title={t('6. Processes', '6. Procese')} id="course_1-proc" checked={!!checked['course_1-proc']} onCheck={() => toggleCheck('course_1-proc')}>
+              {/* Checkpoint: Sections 5-6 */}
+              <Toggle
+                question={t('Checkpoint: What is the octal value for rwxr-x--- and how do you set it?', 'Punct de control: Care este valoarea octală pentru rwxr-x--- și cum o setați?')}
+                answer={t('rwx=7, r-x=5, ---=0, so the octal is 750. Set it with: chmod 750 filename. You can also use symbolic mode: chmod u=rwx,g=rx,o= filename.', 'rwx=7, r-x=5, ---=0, deci octalul este 750. Setați cu: chmod 750 numefișier. Puteți folosi și modul simbolic: chmod u=rwx,g=rx,o= numefișier.')}
+                hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+              />
+              <Toggle
+                question={t('Checkpoint: What is the difference between "cp" and "mv"? What happens to the original file?', 'Punct de control: Care este diferența dintre „cp" și „mv"? Ce se întâmplă cu fișierul original?')}
+                answer={t('"cp" creates a copy — the original remains. "mv" moves or renames — the original is gone from the old location. Neither asks for confirmation by default, so be careful.', '„cp" creează o copie — originalul rămâne. „mv" mută sau redenumește — originalul dispare din locația veche. Niciuna nu cere confirmare implicit, deci fiți atenți.')}
+                hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+              />
+
+              {/* Topic 7: Processes */}
+              <Section title={t('7. Processes', '7. Procese')} id="course_1-proc" checked={!!checked['course_1-proc']} onCheck={() => toggleCheck('course_1-proc')}>
                 <Box type="definition">
-                  <p><strong>{t('Process', 'Proces')}</strong> = {t('an instance of a program in execution. Processes form a ', 'o instanță a unui program în execuție. Procesele formează o ')}<strong>{t('tree hierarchy', 'ierarhie de arbore')}</strong>{t(' (parent-child) rooted at PID 0 (created at boot).', ' (părinte-copil) cu rădăcina la PID 0 (creat la pornire).')}</p>
+                  <p><strong>{t('Process', 'Proces')}</strong> = {t('an instance of a program in execution. Processes form a ', 'o instanță a unui program în execuție. Procesele formează o ')}<strong>{t('tree hierarchy', 'ierarhie de arbore')}</strong>{t(' (parent-child) rooted at PID 1 (init or systemd, the first user-space process).', ' (părinte-copil) cu rădăcina la PID 1 (init sau systemd, primul proces din spațiul utilizator).')}</p>
                 </Box>
                 <Code>{`$ ps -f            # processes in current session
 $ ps aux           # all processes, detailed
@@ -268,8 +362,8 @@ $ killall name     # kill by name`}</Code>
                 </Box>
               </Section>
 
-              {/* Topic 7: Troubleshooting */}
-              <Section title={t('7. Troubleshooting (Survival Guide)', '7. Depanare (Ghid de supraviețuire)')} id="course_1-trouble" checked={!!checked['course_1-trouble']} onCheck={() => toggleCheck('course_1-trouble')}>
+              {/* Topic 8: Troubleshooting */}
+              <Section title={t('8. Troubleshooting (Survival Guide)', '8. Depanare (Ghid de supraviețuire)')} id="course_1-trouble" checked={!!checked['course_1-trouble']} onCheck={() => toggleCheck('course_1-trouble')}>
                 <Box type="warning">
                   <p className="font-bold">{t('When a command appears "stuck":', 'Când o comandă pare „blocată":')}</p>
                   <ol className="list-decimal pl-5">
@@ -280,6 +374,13 @@ $ killall name     # kill by name`}</Code>
                   </ol>
                 </Box>
               </Section>
+
+              {/* Checkpoint: Sections 7-8 */}
+              <Toggle
+                question={t('Checkpoint: Your terminal appears frozen after running a command. What steps do you take?', 'Punct de control: Terminalul pare înghețat după rularea unei comenzi. Ce pași urmați?')}
+                answer={t('1) Wait briefly — it might be computing. 2) Press CTRL+C to send SIGINT. 3) Press CTRL+\\ to send SIGQUIT. 4) Press CTRL+Z to suspend, then find the PID with "ps" and use "kill -9 PID" to force-kill it.', '1) Așteptați scurt — poate calculează. 2) Apăsați CTRL+C pentru SIGINT. 3) Apăsați CTRL+\\ pentru SIGQUIT. 4) Apăsați CTRL+Z pentru a suspenda, apoi găsiți PID-ul cu „ps" și folosiți „kill -9 PID" pentru terminare forțată.')}
+                hideLabel={t('Hide', 'Ascunde')} showLabel={t('Show Answer', 'Arată răspunsul')}
+              />
 
               {/* Cheat Sheet */}
               <Section title={t('Cheat Sheet', 'Foaie de referință rapidă')} id="course_1-cheat" checked={!!checked['course_1-cheat']} onCheck={() => toggleCheck('course_1-cheat')}>
