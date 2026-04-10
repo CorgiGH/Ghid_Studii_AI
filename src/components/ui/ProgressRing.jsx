@@ -27,7 +27,7 @@ const ProgressRing = ({ size = 24, completed = 0, total = 0, isActive = false })
   } else {
     strokeColor = 'var(--theme-border, #e5e7eb)';
     fillColor = 'none';
-    textColor = 'var(--theme-muted-text, #9ca3af)';
+    textColor = 'var(--theme-content-text, #6b7280)';
   }
 
   const fontSize = size >= 36 ? 10 : (size >= 28 ? 8 : 7);
@@ -59,6 +59,7 @@ const ProgressRing = ({ size = 24, completed = 0, total = 0, isActive = false })
         fontSize={fontSize}
         fontWeight="bold"
         fill={textColor}
+        opacity={(!isComplete && !hasProgress) ? 0.5 : 1}
       >
         {isComplete ? '\u2713' : (total > 0 ? Math.round(percent * 100) : '')}
       </text>

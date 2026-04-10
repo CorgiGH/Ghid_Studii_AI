@@ -212,7 +212,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             />
           )}
 
-          <main ref={contentRef} className="flex-1 max-w-5xl mx-auto p-4 lg:p-8" style={{ fontSize: '1.05rem' }}>
+          <main ref={contentRef} className="flex-1 flex flex-col max-w-5xl mx-auto p-4 lg:p-8" style={{ fontSize: '1.05rem' }}>
             {tab === 'courses' && (
               <>
                 {activeCourse ? (
@@ -239,7 +239,9 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
                         <p className="text-sm mt-2">{t('Course content will be added here.', 'Conținutul cursurilor va fi adăugat aici.')}</p>
                       </div>
                     ) : (
-                      <CourseMap subject={subject} onCourseClick={handleCourseMapClick} />
+                      <div className="self-start w-full">
+                        <CourseMap subject={subject} onCourseClick={handleCourseMapClick} />
+                      </div>
                     )}
                   </>
                 )}

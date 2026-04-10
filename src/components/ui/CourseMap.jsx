@@ -4,7 +4,7 @@ import ProgressRing from './ProgressRing';
 import useStaggeredEntrance from '../../hooks/useStaggeredEntrance';
 
 const CourseMap = ({ subject, onCourseClick }) => {
-  const { lang, t, checked, progress } = useApp();
+  const { lang, t, dark, checked, progress } = useApp();
   const getStaggerStyle = useStaggeredEntrance(subject.slug);
 
   const courses = subject.courses || [];
@@ -60,7 +60,7 @@ const CourseMap = ({ subject, onCourseClick }) => {
             <span className="font-bold text-sm min-w-0" style={{ color: 'var(--theme-content-text)' }}>
               {subject.title[lang]}
             </span>
-            <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#3b82f6' }}>
+            <span className="text-xs font-semibold flex-shrink-0" style={{ color: overallPercent > 0 ? '#3b82f6' : 'var(--theme-muted-text)' }}>
               {overallPercent}% {t('complete', 'complet')}
             </span>
           </div>
@@ -113,9 +113,11 @@ const CourseMap = ({ subject, onCourseClick }) => {
 
           let tileBg, tileBorder;
           if (isComplete) {
-            tileBg = '#f0fdf4'; tileBorder = '#bbf7d0';
+            tileBg = dark ? 'rgba(22,163,74,0.15)' : '#f0fdf4';
+            tileBorder = dark ? 'rgba(34,197,94,0.4)' : '#bbf7d0';
           } else if (hasProgress) {
-            tileBg = '#eff6ff'; tileBorder = '#bfdbfe';
+            tileBg = dark ? 'rgba(59,130,246,0.15)' : '#eff6ff';
+            tileBorder = dark ? 'rgba(96,165,250,0.4)' : '#bfdbfe';
           } else if (isNext) {
             tileBg = 'var(--theme-card-bg)'; tileBorder = '#93c5fd';
           } else {
