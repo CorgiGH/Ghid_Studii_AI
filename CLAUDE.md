@@ -165,3 +165,25 @@ Every wiki page MUST have YAML frontmatter with: `title`, `type` (source|entity|
 
 ### Startup
 When wiki work is expected, read `wiki/index.md` (router). Based on the query domain, read the relevant sub-index (e.g., `index-oop.md` for OOP questions). Read the `## Summary` header of `wiki/log.md` for recent activity context.
+
+## Enhanced Pipeline Rules
+
+### Model Routing
+- Use haiku agents for: JSON validation, formatting checks, file listing, simple searches
+- Use opus for: content creation, architectural decisions, review analysis
+
+### Validation Gates
+After creating or modifying any JSON file, ALWAYS run:
+- `node scripts/validate-course-json.mjs <file>` for course JSONs
+- `node scripts/validate-test-json.mjs <file>` for test JSONs
+- `node scripts/validate-bilingual.mjs <file>` for any JSON with bilingual content
+
+Fix all errors before proceeding.
+
+### Self-Review Checklist
+After completing each task, verify:
+1. All JSON files pass validation scripts
+2. `npm run build` succeeds with no errors
+3. No hardcoded English-only text (all user-facing strings use {en, ro})
+4. Section IDs are descriptive (e.g., os-c1-intro, not os-c1-0)
+5. Block types match component expectations (learn content=string, code code=string, quiz questions=array)
