@@ -1,0 +1,645 @@
+{
+  "meta": {
+    "id": "os-c1",
+    "title": { "en": "Course 1: Basic Linux Commands & Filesystems", "ro": "Cursul 1: Comenzi de baza Linux si sisteme de fisiere" },
+    "shortTitle": { "en": "C1: Commands & FS", "ro": "C1: Comenzi & FS" },
+    "source": { "en": "Prof. C. Vidrascu — Lecture 1 slides", "ro": "Prof. C. Vidrascu — Curs 1" }
+  },
+  "steps": [
+    {
+      "id": "os-c1-intro",
+      "title": { "en": "Introduction: Command Interpreters", "ro": "Introducere: Interpretoare de comenzi" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A **command interpreter** (shell) is an executable program that provides the interface between the user and the operating system. It reads the commands entered by the user, executes them, and displays the results. In UNIX there are many command interpreters, which allow working at the **command line** (text mode, not graphical).",
+            "ro": "Un **interpretor de comenzi** (shell) este un program executabil care realizeaza interfata dintre utilizator si sistemul de operare. Preia comenzile introduse de utilizator, le executa si afiseaza rezultatele acestora. In UNIX exista mai multe interpretoare de comenzi, ce ofera posibilitatea lucrului la **linia de comanda** (mod text, nu grafic)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Internal Commands", "ro": "Comenzi interne" },
+          "content": {
+            "en": "Commands that are built into the command interpreter itself. Examples: `cd`, `help`, etc.",
+            "ro": "Comenzi implementate in interpretoarele de comenzi. Exemple: `cd`, `help`, etc."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "External Commands", "ro": "Comenzi externe" },
+          "content": {
+            "en": "Standalone commands found as individual files on disk, having the same name as the command. They can be: **executable files** (compiled from C or other languages, e.g. `passwd`, `ls`) or **script files** (text files with command sequences, e.g. `.profile`, `.bashrc`).",
+            "ro": "Comenzi de sine statatoare care se gasesc fiecare in cate un fisier, avand acelasi nume cu comanda respectiva. Pot fi: **fisiere executabile** (compilate din C sau alte limbaje, ex. `passwd`, `ls`) sau **fisiere script** (fisiere text cu secvente de comenzi, ex. `.profile`, `.bashrc`)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The general form to launch a simple command is: `UNIX> command_name [options] [arguments]`. The `UNIX>` text is the **prompt** displayed by the interpreter. Options are usually preceded by `-` or `--` and arguments depend on the command (e.g., they can be file names). External commands can be specified by their full path (**absolute** or **relative**).",
+            "ro": "Forma generala de lansare in executie a unei comenzi simple este: `UNIX> numele_comenzii [optiuni] [argumente]`. Textul `UNIX>` este **prompterul** afisat de interpretorul de comenzi. Optiunile sunt precedate de `-` sau `--`, iar argumentele depind de comanda (de ex., pot fi nume de fisiere). Comenzile externe pot fi specificate prin numele complet (**cale absoluta** sau **relativa**)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does UNIX distinguish between internal and external commands? What is the practical difference for the user?",
+            "ro": "De ce face UNIX distinctie intre comenzile interne si cele externe? Care este diferenta practica pentru utilizator?"
+          },
+          "answer": {
+            "en": "Internal commands execute faster because they are part of the shell process itself (no new process is created). External commands require the OS to locate the file on disk and launch a new process. For the user, the difference is mostly transparent, but understanding it helps with troubleshooting (e.g., if PATH is misconfigured, external commands may not be found).",
+            "ro": "Comenzile interne se executa mai rapid deoarece fac parte din procesul shell-ului (nu se creeaza un proces nou). Comenzile externe necesita ca SO sa localizeze fisierul pe disc si sa lanseze un proces nou. Pentru utilizator, diferenta este in mare parte transparenta, dar intelegerea ei ajuta la depanare (de ex., daca PATH este configurat gresit, comenzile externe pot sa nu fie gasite)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-help-commands",
+      "title": { "en": "Help Commands", "ro": "Comenzi de help" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Documentation about internal commands is available via the `help` built-in command. For external commands and C library functions (POSIX API and C Standard Library), documentation is available through: `man`, `whatis`, `which`, `whereis`, `apropos`, and `info`.",
+            "ro": "Documentatia despre comenzile interne este disponibila cu ajutorul comenzii interne `help`. Pentru comenzile externe si functiile C din API-ul POSIX si C Standard Library, documentatia este disponibila prin: `man`, `whatis`, `which`, `whereis`, `apropos` si `info`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Display help for internal commands\nUNIX> help\nUNIX> help command_name\n\n# Man pages (organized in 8 sections)\nUNIX> whatis name        # list commands/functions matching name\nUNIX> man [section] name  # display manual page\nUNIX> which name          # show command location\nUNIX> whereis name        # show command and man page locations\nUNIX> apropos keyword     # search keyword in command descriptions\nUNIX> info [options] [keyword ...]  # alternative TEXINFO format"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Man pages are organized in **8 sections**: **Section 1** covers common user commands, **Section 2** covers system calls (Linux/POSIX API), **Section 3** covers C standard library functions, and **Section 8** covers system administration commands. You can run `man man` and `man 1 whatis` for more details.",
+            "ro": "Paginile de manual sunt organizate in **8 sectiuni**: **Sectiunea 1** contine documentatia comenzilor uzuale, **Sectiunea 2** contine documentatia apelurilor de sistem (API Linux/POSIX), **Sectiunea 3** contine documentatia functiilor din biblioteca standard C, iar **Sectiunea 8** contine comenzi de administrare. Puteti rula `man man` si `man 1 whatis` pentru detalii."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which command searches for a keyword in the descriptions of all commands?", "ro": "Care comanda cauta un cuvant cheie in descrierile tuturor comenzilor?" },
+              "options": [
+                { "text": { "en": "which", "ro": "which" }, "correct": false },
+                { "text": { "en": "whereis", "ro": "whereis" }, "correct": false },
+                { "text": { "en": "apropos", "ro": "apropos" }, "correct": true },
+                { "text": { "en": "whatis", "ro": "whatis" }, "correct": false }
+              ],
+              "explanation": { "en": "`apropos` searches the keyword in command descriptions and displays all matching results. `whatis` only matches exact command names.", "ro": "`apropos` cauta cuvantul in descrierile comenzilor si afiseaza toate rezultatele. `whatis` potriveste doar numele exacte de comenzi." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c1-text-editors",
+      "title": { "en": "Text Editors", "ro": "Editoare de texte" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In UNIX there are many categories of text editors. **Plain text editors** work in text mode (`mcedit`, `pico`, `nano`, `vi`, `vim`, `joe`) or graphical mode (`gedit`, `kedit`). **Office suites** like OpenOffice and LibreOffice provide graphical editors. **Specialized editors** exist for HTML, TeX/LaTeX, and programming. **emacs** is a powerful text-mode editor from the GNU project, often used as an integrated development environment.",
+            "ro": "In UNIX exista mai multe categorii de editoare de texte. **Editoare de text obisnuit** lucreaza in mod text (`mcedit`, `pico`, `nano`, `vi`, `vim`, `joe`) sau in mod grafic (`gedit`, `kedit`). **Suite de birou** precum OpenOffice si LibreOffice ofera editoare grafice. **Editoare specializate** exista pentru HTML, TeX/LaTeX si programare. **emacs** este un editor puternic in mod text din proiectul GNU, adesea folosit ca mediu integrat de programare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-compilers",
+      "title": { "en": "Compilers & Debuggers", "ro": "Compilatoare si depanatoare" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "UNIX systems have compilers and interpreters for most programming languages: C, C++, Pascal, Fortran, Java, Ada, etc. For C and C++, the most popular compiler is from the **GCC** (GNU Compiler Collection) suite.",
+            "ro": "Sistemele UNIX au compilatoare si interpretoare pentru majoritatea limbajelor de programare: C, C++, Pascal, Fortran, Java, Ada, etc. Pentru C si C++, cel mai popular compilator este din suita **GCC** (GNU Compiler Collection)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Compile a C program\nUNIX> gcc sursa.c [-o executabil] [-Wall]\n\n# Compile a C++ program\nUNIX> g++ sursa.cpp [-o executabil] [-Wall]\n\n# Debug with GDB (GNU Debugger)\nUNIX> gdb executabil"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Use `-Wall` to display all warnings (not just errors). Without `-o`, the default output is `a.out`. The `-o` option requires the `.c` extension in the source file name. Use `gdb` for debugging programs.",
+            "ro": "Folositi `-Wall` pentru a afisa toate avertismentele (nu doar erorile). Fara `-o`, executabilul implicit este `a.out`. Optiunea `-o` impune folosirea extensiei `.c` in numele fisierului sursa. Folositi `gdb` pentru depanarea programelor."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-remote-connection",
+      "title": { "en": "Remote Connection Commands", "ro": "Comenzi pentru conectarea la distanta" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "To connect remotely to a UNIX/Linux server, you use **ssh** (encrypted communication). For interactive file transfer, use **sftp** (also encrypted). A non-interactive alternative for file transfer is **scp**.",
+            "ro": "Pentru conectarea la distanta pe un server UNIX/Linux, se foloseste **ssh** (comunicatii criptate). Pentru transfer interactiv de fisiere, se foloseste **sftp** (de asemenea criptat). O varianta neinteractiva pentru transferul de fisiere este **scp**."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Remote interactive session (encrypted)\nUNIX> ssh [options] [[username@]host]\n\n# Interactive file transfer (encrypted)\nUNIX> sftp [options] host\n\n# Non-interactive file copy\nUNIX> scp [opts] [[user@]host1:]file1 [[user@]host2:]file2"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "On Windows, you can use PuTTY for SSH connections and WinSCP for file transfer. The faculty provides a student Linux server at `s-endure-1.info.local` accessible via wired LAN or VPN (not WiFi).",
+            "ro": "Sub Windows, puteti folosi aplicatia PuTTY pentru conexiuni SSH si WinSCP pentru transfer de fisiere. Facultatea ofera un server Linux pentru studenti la `s-endure-1.info.local`, accesibil prin cablu sau VPN (nu prin WiFi)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-users-groups",
+      "title": { "en": "User Accounts & Groups", "ro": "Conturi de utilizatori si grupuri" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Every user on a UNIX system needs an account identified by a **username** and a **password**. Each account is assigned a **UID** (User IDentification). A special user called **root** (or superuser) has UID = 0 and has full system control. User account information is stored in `/etc/passwd` with the format: `username:x:UID:GID:userdata:home directory:login shell`. The encrypted password is stored in `/etc/shadow` (accessible only by superuser).",
+            "ro": "Fiecare utilizator pe un sistem UNIX trebuie sa posede un cont identificat printr-un **username** si o **parola**. Fiecare cont are asignat un **UID** (User IDentification). Un utilizator special numit **root** (sau superuser) are UID = 0 si are drepturi depline asupra sistemului. Informatiile despre conturile de utilizatori sunt stocate in `/etc/passwd` cu formatul: `username:x:UID:GID:userdata:home directory:login shell`. Parola criptata este stocata in `/etc/shadow` (accesibil doar superuser-ului)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**User groups** help manage access rights and restrictions to system resources. Each group has a **groupname**, a **GID** (Group IDentification), and optionally a password. Each user belongs to a primary group (indicated by the GID field in `/etc/passwd`) and can optionally belong to supplementary groups (via `/etc/group`). Group information is stored in `/etc/group` with format: `groupname:x:GID:list_of_users`.",
+            "ro": "**Grupurile de utilizatori** ajuta la gestionarea drepturilor si restrictiilor de acces la resursele sistemului. Fiecare grup are un **groupname**, un **GID** (Group IDentification) si optional o parola. Fiecare utilizator face parte dintr-un grup primar (indicat de campul GID din `/etc/passwd`) si poate fi optional afiliat la grupuri suplimentare (prin `/etc/group`). Informatiile despre grupuri sunt stocate in `/etc/group` cu formatul: `groupname:x:GID:list_of_users`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "UID (User IDentification)", "ro": "UID (User IDentification)" },
+          "content": {
+            "en": "A numeric identifier assigned to each user account. UID 0 is always reserved for the root (superuser) account.",
+            "ro": "Un identificator numeric atribuit fiecarui cont de utilizator. UID 0 este intotdeauna rezervat contului root (superuser)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "GID (Group IDentification)", "ro": "GID (Group IDentification)" },
+          "content": {
+            "en": "A numeric identifier assigned to each user group. Each user has a primary GID and can belong to additional supplementary groups.",
+            "ro": "Un identificator numeric atribuit fiecarui grup de utilizatori. Fiecare utilizator are un GID primar si poate apartine de grupuri suplimentare."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What UID does the root user always have?", "ro": "Ce UID are intotdeauna utilizatorul root?" },
+              "options": [
+                { "text": { "en": "1", "ro": "1" }, "correct": false },
+                { "text": { "en": "0", "ro": "0" }, "correct": true },
+                { "text": { "en": "1000", "ro": "1000" }, "correct": false },
+                { "text": { "en": "-1", "ro": "-1" }, "correct": false }
+              ],
+              "explanation": { "en": "UID 0 is always root. This is hardcoded in the kernel.", "ro": "UID 0 este intotdeauna root. Acest lucru este codificat in nucleu." }
+            },
+            {
+              "question": { "en": "Where are user account details stored in UNIX?", "ro": "Unde sunt stocate detaliile conturilor de utilizatori in UNIX?" },
+              "options": [
+                { "text": { "en": "/etc/users", "ro": "/etc/users" }, "correct": false },
+                { "text": { "en": "/etc/passwd", "ro": "/etc/passwd" }, "correct": true },
+                { "text": { "en": "/etc/shadow", "ro": "/etc/shadow" }, "correct": false },
+                { "text": { "en": "/etc/accounts", "ro": "/etc/accounts" }, "correct": false }
+              ],
+              "explanation": { "en": "`/etc/passwd` stores user account information (username, UID, GID, home directory, shell). `/etc/shadow` stores only the encrypted passwords.", "ro": "`/etc/passwd` stocheaza informatiile conturilor (username, UID, GID, directorul home, shell-ul). `/etc/shadow` stocheaza doar parolele criptate." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c1-user-commands",
+      "title": { "en": "User-Related Commands", "ro": "Comenzi referitoare la utilizatori" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Account administration commands**: A regular user can change their own account data using `passwd` (change password), `chsh` (change login shell), etc. Only the **superuser** can use `chage` to change another user's account data.",
+            "ro": "**Comenzi de administrare a conturilor**: Un utilizator obisnuit isi poate schimba datele proprii cu `passwd` (schimba parola), `chsh` (schimba shell-ul de login), etc. Doar **superuser-ul** poate folosi `chage` pentru a schimba datele contului altui utilizator."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Information about the current user\n$ whoami          # display current username\n$ id              # display UID, GID, and groups\n$ groups          # display group memberships\n\n# Information about logged-in users\n$ users           # list logged-in usernames\n$ w               # detailed info about logged-in users\n$ who             # who is logged in\n$ finger          # user info lookup\n$ last            # login history"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the difference between `whoami`, `id`, and `who`?",
+            "ro": "Care este diferenta intre `whoami`, `id` si `who`?"
+          },
+          "answer": {
+            "en": "`whoami` shows just the current username. `id` shows the current user's UID, GID, and all group memberships. `who` shows all users currently logged into the system (not just the current user) along with their sessions.",
+            "ro": "`whoami` afiseaza doar numele utilizatorului curent. `id` afiseaza UID-ul, GID-ul si toate grupurile utilizatorului curent. `who` afiseaza toti utilizatorii conectati la sistem (nu doar utilizatorul curent) impreuna cu sesiunile lor."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-files-filesystems",
+      "title": { "en": "Files & Filesystems", "ro": "Fisiere si sisteme de fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In UNIX, data and programs are stored on disk in **files**. Each file is identified by a name and has an **owner**. Files are organized in volumes on disk, called **filesystems**. File names in UNIX are **case-sensitive** (unlike Windows FAT/NTFS). Names can be up to 255 characters and may contain any character except `NULL` and `/`.",
+            "ro": "In UNIX, datele si programele utilizatorilor sunt pastrate pe disc in **fisiere**. Fiecare fisier este identificat printr-un nume si are un **proprietar**. Fisierele sunt organizate in volume pe disc, numite **sisteme de fisiere**. Numele fisierelor in UNIX sunt **case-sensitive** (spre deosebire de Windows FAT/NTFS). Numele pot avea pana la 255 caractere si pot contine orice caracter in afara de `NULL` si `/`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "UNIX classifies files into **6 types**: **normal files** (regular files with data or programs), **directories** (file catalogs), **links** (hard or symbolic, aliases for existing files), **special device** files (block or character mode, for peripherals), **fifo** files (inter-process communication mechanisms), and **socket** files (for network communication between processes).",
+            "ro": "UNIX clasifica fisierele in **6 tipuri**: **fisiere normale** (fisiere cu continut ordinar sau programe), **directoare** (cataloage de fisiere), **link-uri** (hard sau simbolice, alias-uri pentru fisiere existente), **fisiere speciale device** (in mod bloc sau caracter, pentru periferice), **fisiere fifo** (mecanisme de comunicatie locala intre procese) si **fisiere socket** (pentru comunicatia la distanta intre procese)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "UNIX does not require file extensions, but conventions exist: `.c` and `.h` for C source, `.cpp` for C++, `.txt` for text, `.sh` for shell scripts, `.tar/.gz/.zip` for archives. These extensions are useful for users and some tools, but are not enforced by the OS.",
+            "ro": "UNIX nu impune extensii la numirea fisierelor, dar exista conventii: `.c` si `.h` pentru sursa C, `.cpp` pentru C++, `.txt` pentru text, `.sh` pentru scripturi, `.tar/.gz/.zip` pentru arhive. Aceste extensii sunt utile utilizatorilor si unor unelte, dar nu sunt impuse de SO."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "How many file types does UNIX recognize?", "ro": "Cate tipuri de fisiere recunoaste UNIX?" },
+              "options": [
+                { "text": { "en": "3", "ro": "3" }, "correct": false },
+                { "text": { "en": "4", "ro": "4" }, "correct": false },
+                { "text": { "en": "6", "ro": "6" }, "correct": true },
+                { "text": { "en": "8", "ro": "8" }, "correct": false }
+              ],
+              "explanation": { "en": "UNIX has 6 file types: normal, directory, link, special device, fifo, and socket.", "ro": "UNIX are 6 tipuri de fisiere: normal, director, link, special device, fifo si socket." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c1-logical-structure",
+      "title": { "en": "Logical Structure of Filesystems", "ro": "Structura logica a sistemelor de fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In UNIX, each filesystem is logically organized as a **tree structure** (hierarchical, based on the concept of directories as containers). Unlike Windows, in UNIX there is a single \"logical tree\" called the **root filesystem**, whose root is referred to by `/`. The **full path** of any file is the linear representation from `/` to the file in the logical tree.",
+            "ro": "In UNIX, fiecare sistem de fisiere este organizat logic intr-o **structura arborescenta** (ierarhica, bazata pe ideea de director ca si container). Spre deosebire de Windows, in UNIX avem un singur \"arbore logic\" numit **root filesystem**, a carui radacina este referita prin `/`. **Numele complet** al unui fisier este reprezentarea liniara a caii de la `/` pana la fisierul respectiv."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Paths use `/` as separator (Windows uses `\\`). An **absolute path** starts from root `/` (e.g., `/usr/bin/bash`, `/etc/passwd`, `/dev/eda`, `/home/username/.profile`). A **relative path** is specified from the current working directory. Files can be accessed in two modes: by absolute path (from root `/`) or by relative path (from the current directory).",
+            "ro": "Caile folosesc `/` ca separator (Windows foloseste `\\`). O **cale absoluta** porneste de la radacina `/` (ex. `/usr/bin/bash`, `/etc/passwd`, `/dev/eda`, `/home/username/.profile`). O **cale relativa** este specificata pornind de la directorul curent de lucru. Fisierele pot fi accesate in doua moduri: prin cale absoluta (de la radacina `/`) sau prin cale relativa (de la directorul curent)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does UNIX use a single root '/' for its filesystem tree, while Windows uses drive letters like C:, D:?",
+            "ro": "De ce UNIX foloseste o singura radacina '/' pentru arborele de fisiere, in timp ce Windows foloseste litere de unitate ca C:, D:?"
+          },
+          "answer": {
+            "en": "UNIX mounts all storage devices into a single unified tree rooted at `/`. Different disks/partitions are mounted at different points in the tree (e.g., `/home`, `/var`). This provides a uniform, location-transparent namespace. Windows inherited drive letters from DOS, where each disk had its own separate namespace.",
+            "ro": "UNIX monteaza toate dispozitivele de stocare intr-un singur arbore unificat cu radacina in `/`. Discurile/partitiile diferite sunt montate in puncte diferite ale arborelui (ex. `/home`, `/var`). Aceasta ofera un spatiu de nume uniform si transparent. Windows a mostenit literele de unitate de la DOS, unde fiecare disc avea propriul spatiu de nume separat."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-physical-structure",
+      "title": { "en": "Physical Structure of Filesystems", "ro": "Structura fizica a sistemelor de fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In Linux, there are many filesystem types: `ext2fs`, `ext3fs`, `ext4fs`, `xfs`, `reiserfs`, `btrfs`, `zfs`, `vfat`, `ntfs`, etc. Some filesystems are for special purposes: storing data in RAM, volatile storage, or alternative formats (e.g., `tmpfs`, `procfs`, `devfs`, `sysfs`, `unionfs`, `squashfs`). There are also distributed filesystems (e.g., `NFS`, `AFS`, `SMB/CIFS`).",
+            "ro": "In Linux exista mai multe tipuri de sisteme de fisiere: `ext2fs`, `ext3fs`, `ext4fs`, `xfs`, `reiserfs`, `btrfs`, `zfs`, `vfat`, `ntfs`, etc. Unele sunt pentru scopuri speciale: stocare in RAM, stocare volatila sau formate alternative (ex. `tmpfs`, `procfs`, `devfs`, `sysfs`, `unionfs`, `squashfs`). Exista si sisteme de fisiere distribuite (ex. `NFS`, `AFS`, `SMB/CIFS`)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **principal filesystem** (root filesystem) is the single logical disk mounted at `/`. Unlike Windows (which has multiple logical drives C:, D:, etc.), UNIX has only one root. This filesystem is configured for each computer, and all other filesystem volumes are \"included\" as subdirectories within it via the **mount** operation.",
+            "ro": "**Sistemul de fisiere principal** (root filesystem) este singurul disc logic, montat la `/`. Spre deosebire de Windows (care are mai multe unitati logice C:, D:, etc.), UNIX are o singura radacina. Acest sistem de fisiere este configurat pentru fiecare calculator, iar toate celelalte volume se \"includ\" ca subdirectoare in el prin operatia de **montare**."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-mounting",
+      "title": { "en": "Mounting Filesystems", "ro": "Montarea sistemelor de fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A UNIX system can contain multiple filesystem volumes, each being a volume of a certain type stored on a disk \"storage unit\". A disk can be split into multiple partitions, and each partition can hold a single filesystem volume (RAID systems also exist). Each volume is attached at a directory in the root tree via **mounting**. The `mount` command (superuser only) attaches a filesystem, and `umount` detaches it.",
+            "ro": "Un sistem UNIX poate contine mai multe volume de sisteme de fisiere, fiecare fiind un volum de un anumit tip stocat pe o \"unitate de stocare\" disc. Un disc poate fi impartit in mai multe partitii, iar fiecare partitie poate stoca un singur volum (exista si sisteme RAID). Fiecare volum este atasat la un director din arborele radacina prin **montare**. Comanda `mount` (doar superuser) ataseaza un sistem de fisiere, iar `umount` il detaseaza."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Mount a filesystem (superuser only)\nUNIX> mount device mountpoint\n\n# Unmount a filesystem\nUNIX> umount mountpoint\n\n# Configuration files for filesystems:\n# /etc/fstab   - automatic mount at boot\n# /etc/mtab    - currently mounted filesystems\n# /etc/filesystems"
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Mount Point", "ro": "Punct de montare" },
+          "content": {
+            "en": "A directory in the existing filesystem tree where a new filesystem volume is attached. After mounting, the contents of the volume appear as a subtree under that directory.",
+            "ro": "Un director din arborele de fisiere existent unde un nou volum de sistem de fisiere este atasat. Dupa montare, continutul volumului apare ca un sub-arbore sub acel director."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which command is used to attach a filesystem to the directory tree?", "ro": "Ce comanda se foloseste pentru a atasa un sistem de fisiere la arborele de directoare?" },
+              "options": [
+                { "text": { "en": "attach", "ro": "attach" }, "correct": false },
+                { "text": { "en": "mount", "ro": "mount" }, "correct": true },
+                { "text": { "en": "link", "ro": "link" }, "correct": false },
+                { "text": { "en": "connect", "ro": "connect" }, "correct": false }
+              ],
+              "explanation": { "en": "The `mount` command attaches a filesystem volume to a mount point in the directory tree. Use `umount` to detach.", "ro": "Comanda `mount` ataseaza un volum de sistem de fisiere la un punct de montare in arborele de directoare. Folositi `umount` pentru detasare." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c1-basic-file-commands",
+      "title": { "en": "Basic File & Directory Commands", "ro": "Comenzi de baza pentru fisiere si directoare" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Directory commands**: `mkdir` (create directory), `rmdir` (remove directory), `ls` (list directory contents), `pwd` (print working directory), `cd` (change directory).",
+            "ro": "**Comenzi pentru directoare**: `mkdir` (creeaza director), `rmdir` (sterge director), `ls` (afiseaza continutul directorului), `pwd` (afiseaza directorul curent), `cd` (schimba directorul curent)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**File commands**: `ln` (create alias/link), `mkfifo` (create fifo file), `mknod` (create device file), `touch`/`truncate` (create normal file), `rm` (delete files), `cp` (copy files), `mv` (move/rename files), `rename` (batch rename), `realpath` (show absolute path), `mc` (Midnight Commander, a two-panel file manager).",
+            "ro": "**Comenzi pentru fisiere**: `ln` (creeaza alias/link), `mkfifo` (creeaza fisier fifo), `mknod` (creeaza fisier device), `touch`/`truncate` (creeaza fisier normal), `rm` (sterge fisiere), `cp` (copiaza fisiere), `mv` (muta/redenumeste fisiere), `rename` (redenumire multipla), `realpath` (afiseaza calea absoluta), `mc` (Midnight Commander, manager de fisiere cu 2 panouri)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Directory operations\n$ mkdir mydir          # create a directory\n$ rmdir mydir          # remove empty directory\n$ ls -la               # list all files with details\n$ pwd                  # print current directory\n$ cd /home/user        # change to specified directory\n\n# File operations\n$ touch newfile.txt    # create empty file\n$ cp source dest       # copy file\n$ mv old new           # move or rename\n$ rm file              # delete file\n$ ln -s target link    # create symbolic link"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "What is the difference between `rm` and `rmdir`? Can you use `rm` to delete a directory?",
+            "ro": "Care este diferenta intre `rm` si `rmdir`? Poti folosi `rm` pentru a sterge un director?"
+          },
+          "answer": {
+            "en": "`rmdir` removes only empty directories. `rm` deletes files by default, but with the `-r` (recursive) flag, it can delete directories and all their contents. `rm -r` is more powerful but also more dangerous.",
+            "ro": "`rmdir` sterge doar directoare goale. `rm` sterge fisiere in mod implicit, dar cu optiunea `-r` (recursiv), poate sterge directoare si tot continutul lor. `rm -r` este mai puternic dar si mai periculos."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-file-permissions",
+      "title": { "en": "File Permissions", "ro": "Protectia fisierelor prin permisiuni de acces" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The classic UNIX security model assigns each file an **owner user** and an **owner group**. Users are classified into three categories relative to a file: **u** (user/owner), **g** (group), **o** (others). Each file has three **access permissions** for each category: **r** (read), **w** (write), **x** (execute).",
+            "ro": "Modelul de securitate clasic din UNIX atribuie fiecarui fisier un **utilizator proprietar** si un **grup proprietar**. Utilizatorii sunt clasificati in trei categorii in raport cu un fisier: **u** (user/proprietar), **g** (group/grup), **o** (others/ceilalti). Fiecare fisier are trei **permisiuni de acces** pentru fiecare categorie: **r** (read/citire), **w** (write/scriere), **x** (execute/executie)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "For **directories**, permissions have slightly different meanings: **r** = right to read directory contents (list files), **w** = right to write to directory (add, delete, rename files), **x** = right to traverse the directory (access files and subdirectories within it).",
+            "ro": "Pentru **directoare**, permisiunile au semnificatii usor diferite: **r** = drept de citire a continutului directorului (listare fisiere), **w** = drept de scriere in director (adaugare, stergere, redenumire fisiere), **x** = drept de traversare a directorului (acces la fisierele si subdirectoarele din el)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Change file permissions\n$ chmod u+x script.sh      # add execute for owner\n$ chmod 755 program        # rwxr-xr-x\n$ chmod go-w file.txt      # remove write from group and others\n\n# Change file owner/group\n$ chown newowner file       # change owner (superuser only)\n$ chgrp newgroup file       # change group"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Permission verification** is performed by the OS when opening or executing a file. For a file at path `/d1/d2/d3/../file1`, the system traverses each directory from left to right, checking the **x** (traverse) permission for each directory against the user's category, and finally checks the appropriate permission (r/w/x) on the file itself. If any check fails, the operation returns -1 (error).",
+            "ro": "**Verificarea permisiunilor** este efectuata de SO la deschiderea sau executia unui fisier. Pentru un fisier la calea `/d1/d2/d3/../file1`, sistemul parcurge fiecare director de la stanga la dreapta, verificand permisiunea **x** (traversare) pentru fiecare director, si in final verifica permisiunea corespunzatoare (r/w/x) pe fisierul insusi. Daca vreo verificare esueaza, operatia returneaza -1 (eroare)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What does the 'x' permission mean for a directory?", "ro": "Ce inseamna permisiunea 'x' pentru un director?" },
+              "options": [
+                { "text": { "en": "Execute programs in the directory", "ro": "Executia programelor din director" }, "correct": false },
+                { "text": { "en": "Traverse the directory (access its files/subdirectories)", "ro": "Traversarea directorului (acces la fisierele/subdirectoarele din el)" }, "correct": true },
+                { "text": { "en": "Delete the directory", "ro": "Stergerea directorului" }, "correct": false },
+                { "text": { "en": "Rename the directory", "ro": "Redenumirea directorului" }, "correct": false }
+              ],
+              "explanation": { "en": "For directories, 'x' means the right to traverse (access files and subdirectories within). Without 'x' on a directory, you cannot access anything inside it, even if you have 'r' permission.", "ro": "Pentru directoare, 'x' inseamna dreptul de traversare (acces la fisierele si subdirectoarele din interior). Fara 'x' pe un director, nu puteti accesa nimic din el, chiar daca aveti permisiunea 'r'." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c1-other-file-commands",
+      "title": { "en": "Other File Commands", "ro": "Alte comenzi pentru lucrul cu fisiere" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Content viewing commands**: `cat`, `tac`, `more`, `less`, `head`, `tail`, `mcview` display file contents in various formats. `file` identifies the file type. `stat` shows file attributes (more powerful than `ls -l`). `grep` selects lines matching a pattern. `cut` selects columns from text files.",
+            "ro": "**Comenzi de vizualizare continut**: `cat`, `tac`, `more`, `less`, `head`, `tail`, `mcview` afiseaza continutul fisierelor in diverse formate. `file` identifica tipul fisierului. `stat` afiseaza atributele fisierului (mai puternic decat `ls -l`). `grep` selecteaza liniile care contin un anumit sablon. `cut` selecteaza coloane din fisiere text."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Text processing commands**: `sort` sorts file contents by various criteria. `wc` provides statistics (character, word, or line count). `tr` translates (replaces) specified characters. `uniq` removes duplicate consecutive lines. `rev` reverses each line. **File search**: `find` searches for files by various criteria. **File comparison**: `cmp`, `comm`, `diff` compare files. **Checksums**: `sum`, `md5sum`, `sha1sum`, `sha256sum` calculate integrity checksums.",
+            "ro": "**Comenzi de prelucrare text**: `sort` sorteaza continutul dupa diverse criterii. `wc` ofera statistici (numar de caractere, cuvinte sau linii). `tr` translateaza (inlocuieste) caractere specificate. `uniq` elimina liniile duplicate consecutive. `rev` inverseaza fiecare linie. **Cautare fisiere**: `find` cauta fisiere dupa diverse criterii. **Comparare fisiere**: `cmp`, `comm`, `diff` compara fisiere. **Sume de control**: `sum`, `md5sum`, `sha1sum`, `sha256sum` calculeaza sume de control pentru integritate."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# View file contents\n$ cat file.txt            # display entire file\n$ head -n 10 file.txt     # first 10 lines\n$ tail -n 5 file.txt      # last 5 lines\n$ grep \"pattern\" file.txt  # find matching lines\n\n# Text processing\n$ sort file.txt           # sort lines\n$ wc -l file.txt          # count lines\n$ cut -d: -f1 /etc/passwd # extract first field\n\n# File search and comparison\n$ find /home -name \"*.txt\"  # find files by name\n$ diff file1 file2          # compare files\n$ md5sum file               # calculate checksum"
+        }
+      ]
+    },
+    {
+      "id": "os-c1-processes",
+      "title": { "en": "Processes", "ro": "Procese" },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Process", "ro": "Proces" },
+          "content": {
+            "en": "An instance of execution of a program. Processes are organized logically in a tree hierarchy (parent-child), based on an \"inheritance\" mechanism. Each process in the system was created by a parent process and inherits certain characteristics (owner, permissions, etc.). A process can create child processes.",
+            "ro": "O instanta de executie a unui program. Procesele sunt organizate logic intr-o ierarhie arborescenta (parinte-copil), bazata pe un mecanism de \"mostenire generica\". Fiecare proces din sistem a fost creat de un proces parinte si mosteneste anumite caracteristici (proprietar, permisiuni, etc.). Un proces poate crea procese fii."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each process is assigned a **PID** (Process IDentification), a unique positive integer. PID 0 is a special process created at boot (the init process of the UNIX system). It is the root of the process tree. No two active processes can have the same PID.",
+            "ro": "Fiecarui proces ii este asignat un **PID** (Process IDentification), un numar intreg pozitiv unic. PID 0 este un proces special creat la pornirea (boot) sistemului UNIX. Acesta este radacina arborelui de procese. Nu pot exista doua procese active cu acelasi PID."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Process information commands\n$ ps              # list current processes\n$ pstree          # process tree\n$ top             # real-time process monitor\n$ jobs            # list background jobs\n$ fg              # bring job to foreground\n$ bg              # send job to background\n\n# Process control\n$ kill PID        # send signal to process\n$ killall name    # kill processes by name\n$ nice command    # run with modified priority\n$ timeout 5 cmd   # run with time limit\n$ at time         # schedule command"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is a PID?", "ro": "Ce este un PID?" },
+              "options": [
+                { "text": { "en": "A file identifier", "ro": "Un identificator de fisier" }, "correct": false },
+                { "text": { "en": "A unique numeric identifier for a process", "ro": "Un identificator numeric unic pentru un proces" }, "correct": true },
+                { "text": { "en": "A type of filesystem", "ro": "Un tip de sistem de fisiere" }, "correct": false },
+                { "text": { "en": "A user group identifier", "ro": "Un identificator de grup de utilizatori" }, "correct": false }
+              ],
+              "explanation": { "en": "PID (Process IDentification) is a unique positive integer assigned to each active process. PID 0 is the special init process created at boot.", "ro": "PID (Process IDentification) este un numar intreg pozitiv unic atribuit fiecarui proces activ. PID 0 este procesul special init creat la pornirea sistemului." }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "os-c1-system-info",
+      "title": { "en": "System Information Commands", "ro": "Comenzi ce ofera diverse informatii" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "UNIX provides commands for various system information: `date`/`cal`/`ncal` (time and calendar), `uptime` (system uptime), `tty`/`stty` (terminal info), `hostname`/`hostnamectl` (system name, FQDN, IP address), `uname` (kernel information), `lshw`/`lscpu`/`lsmem`/`lspci` (hardware info), `lsb_release` or `/etc/os-release` (distribution info).",
+            "ro": "UNIX ofera comenzi pentru diverse informatii de sistem: `date`/`cal`/`ncal` (ora si calendar), `uptime` (timpul de cand ruleaza sistemul), `tty`/`stty` (informatii terminal), `hostname`/`hostnamectl` (numele sistemului, FQDN, adresa IP), `uname` (informatii despre nucleu), `lshw`/`lscpu`/`lsmem`/`lspci` (informatii hardware), `lsb_release` sau `/etc/os-release` (informatii despre distributie)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "$ date                    # current date and time\n$ uptime                  # system uptime\n$ hostname                # system hostname\n$ uname -a                # kernel and system info\n$ lscpu                   # CPU information\n$ cat /etc/os-release     # distribution info"
+        }
+      ]
+    },
+    {
+      "id": "os-c1-other-commands",
+      "title": { "en": "Other Command Categories", "ro": "Alte categorii de comenzi" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Additional command categories include: **Output**: `printf` (formatted), `echo` (unformatted), `clear` (clear screen). **Non-interactive editors**: `ed`, `sed` (stream editor). **Scripting languages**: `awk`, `perl`, `python`. **Archiving/compression**: `gzip`, `gunzip`, `zip`/`unzip`, `tar`, `fsarchiver`, `compress`/`uncompress`. **Connection commands**: `ssh`, `telnet`, `login`/`logout`, `exit`. **Internet tools**: `ftp`, `sftp`, `scp`, `mail`/`pine`, `lynx`/`links`, `host`. **Debugging/tracing**: `strace`, `ltrace`, `perf-trace`, `trace-cmd`.",
+            "ro": "Categorii suplimentare de comenzi includ: **Afisare**: `printf` (formatat), `echo` (neformatat), `clear` (stergere ecran). **Editoare neinteractive**: `ed`, `sed` (stream editor). **Limbaje de scripting**: `awk`, `perl`, `python`. **Arhivare/comprimare**: `gzip`, `gunzip`, `zip`/`unzip`, `tar`, `fsarchiver`, `compress`/`uncompress`. **Comenzi de conectare**: `ssh`, `telnet`, `login`/`logout`, `exit`. **Unelte Internet**: `ftp`, `sftp`, `scp`, `mail`/`pine`, `lynx`/`links`, `host`. **Depanare/trasare**: `strace`, `ltrace`, `perf-trace`, `trace-cmd`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-troubleshooting",
+      "title": { "en": "Troubleshooting: Command Line Survival Guide", "ro": "Troubleshooting: Ghid de supravietuire la linia de comanda" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "What to do if a command gets \"stuck\" (hangs): **Step 1**: Wait a reasonable time - the program may just be busy with intensive computations. **Step 2**: Press **Ctrl+C** to send SIGINT (interrupt signal). **Step 3**: Press **Ctrl+\\** to send SIGQUIT (terminate signal). **Step 4**: Press **Ctrl+Z** to suspend the program (SUSPENDED state), then use `kill -9 PID` to forcefully terminate it (where PID can be found with `ps`).",
+            "ro": "Ce sa faceti daca o comanda se \"blocheaza\": **Pasul 1**: Asteptati un timp rezonabil - programul poate fi doar ocupat cu calcule intensive. **Pasul 2**: Apasati **Ctrl+C** pentru a trimite SIGINT (semnal de intrerupere). **Pasul 3**: Apasati **Ctrl+\\** pentru a trimite SIGQUIT (semnal de terminare). **Pasul 4**: Apasati **Ctrl+Z** pentru a suspenda programul (starea SUSPENDED), apoi folositi `kill -9 PID` pentru a-l termina fortat (unde PID-ul se afla cu `ps`)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# If a command is stuck:\nCtrl+C          # send SIGINT (interrupt)\nCtrl+\\          # send SIGQUIT (terminate)\nCtrl+Z          # suspend (SUSPENDED state)\n\n# After Ctrl+Z, find and kill the process:\n$ ps            # find the PID\n$ kill -9 PID   # forcefully terminate"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Always try **Ctrl+C** first before escalating to **Ctrl+\\** or **kill -9**. The `kill -9` (SIGKILL) signal cannot be caught or ignored by the process, so it is a last resort that may cause data loss.",
+            "ro": "Incercati intotdeauna **Ctrl+C** inainte de a escalada la **Ctrl+\\** sau **kill -9**. Semnalul `kill -9` (SIGKILL) nu poate fi capturat sau ignorat de proces, deci este o ultima solutie care poate cauza pierdere de date."
+          }
+        }
+      ]
+    },
+    {
+      "id": "os-c1-self-test",
+      "title": { "en": "Self-Test", "ro": "Autoevaluare" },
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "What is the difference between internal and external commands?", "ro": "Care este diferenta intre comenzile interne si cele externe?" },
+              "options": [
+                { "text": { "en": "Internal commands are faster; external are separate files on disk", "ro": "Comenzile interne sunt mai rapide; cele externe sunt fisiere separate pe disc" }, "correct": true },
+                { "text": { "en": "There is no difference", "ro": "Nu exista nicio diferenta" }, "correct": false },
+                { "text": { "en": "External commands are built into the shell", "ro": "Comenzile externe sunt incorporate in shell" }, "correct": false },
+                { "text": { "en": "Internal commands require root access", "ro": "Comenzile interne necesita acces root" }, "correct": false }
+              ],
+              "explanation": { "en": "Internal commands are built into the shell process (e.g., cd, help). External commands are standalone executable files or scripts on disk (e.g., ls, passwd).", "ro": "Comenzile interne sunt incorporate in procesul shell (ex. cd, help). Comenzile externe sunt fisiere executabile sau scripturi de sine statatoare pe disc (ex. ls, passwd)." }
+            },
+            {
+              "question": { "en": "Which file stores user group information?", "ro": "Ce fisier stocheaza informatiile despre grupurile de utilizatori?" },
+              "options": [
+                { "text": { "en": "/etc/passwd", "ro": "/etc/passwd" }, "correct": false },
+                { "text": { "en": "/etc/group", "ro": "/etc/group" }, "correct": true },
+                { "text": { "en": "/etc/shadow", "ro": "/etc/shadow" }, "correct": false },
+                { "text": { "en": "/etc/users", "ro": "/etc/users" }, "correct": false }
+              ],
+              "explanation": { "en": "`/etc/group` stores group information with format: groupname:x:GID:list_of_users. `/etc/passwd` stores user account information.", "ro": "`/etc/group` stocheaza informatiile despre grupuri cu formatul: groupname:x:GID:list_of_users. `/etc/passwd` stocheaza informatiile despre conturile de utilizatori." }
+            },
+            {
+              "question": { "en": "In UNIX, what character represents the root of the filesystem?", "ro": "In UNIX, ce caracter reprezinta radacina sistemului de fisiere?" },
+              "options": [
+                { "text": { "en": "C:\\", "ro": "C:\\" }, "correct": false },
+                { "text": { "en": "/", "ro": "/" }, "correct": true },
+                { "text": { "en": "~", "ro": "~" }, "correct": false },
+                { "text": { "en": "\\", "ro": "\\" }, "correct": false }
+              ],
+              "explanation": { "en": "The forward slash `/` is the root of the single unified filesystem tree in UNIX. Unlike Windows which uses drive letters (C:\\, D:\\), UNIX has only one root.", "ro": "Slash-ul `/` este radacina arborelui unificat de fisiere in UNIX. Spre deosebire de Windows care foloseste litere de unitate (C:\\, D:\\), UNIX are o singura radacina." }
+            },
+            {
+              "question": { "en": "What key combination should you try FIRST when a command is stuck?", "ro": "Ce combinatie de taste trebuie incercata PRIMA cand o comanda este blocata?" },
+              "options": [
+                { "text": { "en": "Ctrl+Z", "ro": "Ctrl+Z" }, "correct": false },
+                { "text": { "en": "Ctrl+\\", "ro": "Ctrl+\\" }, "correct": false },
+                { "text": { "en": "Ctrl+C", "ro": "Ctrl+C" }, "correct": true },
+                { "text": { "en": "kill -9", "ro": "kill -9" }, "correct": false }
+              ],
+              "explanation": { "en": "Ctrl+C sends SIGINT, which is the gentlest way to interrupt a command. Escalate to Ctrl+\\ (SIGQUIT) or kill -9 (SIGKILL) only if Ctrl+C does not work.", "ro": "Ctrl+C trimite SIGINT, care este cea mai blanda modalitate de a intrerupe o comanda. Escaladati la Ctrl+\\ (SIGQUIT) sau kill -9 (SIGKILL) doar daca Ctrl+C nu functioneaza." }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import OpenEndedQuestion from './OpenEndedQuestion';
 import CodeWritingQuestion from './CodeWritingQuestion';
 import DiagramQuestion from './DiagramQuestion';
 import FillInQuestion from './FillInQuestion';
+import CodeTracingQuestion from './CodeTracingQuestion';
 import TestResults from './TestResults';
 
 const promptMarkdown = {
@@ -67,6 +68,7 @@ const questionComponents = {
   'code-writing': CodeWritingQuestion,
   'diagram': DiagramQuestion,
   'fill-in': FillInQuestion,
+  'code-tracing': CodeTracingQuestion,
 };
 
 export default function TestRenderer({ src }) {
