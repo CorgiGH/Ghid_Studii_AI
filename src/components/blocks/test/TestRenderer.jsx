@@ -247,7 +247,17 @@ export default function TestRenderer({ src }) {
       )}
 
       {showResults && (
-        <TestResults questions={questions} answers={answers} totalPoints={meta.totalPoints} />
+        <TestResults
+          questions={questions}
+          answers={answers}
+          totalPoints={meta.totalPoints}
+          onRetake={() => {
+            setAnswers({});
+            setShowResults(false);
+            setActiveQ(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
       )}
     </div>
   );
