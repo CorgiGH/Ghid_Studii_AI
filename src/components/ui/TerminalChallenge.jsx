@@ -150,8 +150,13 @@ export default function TerminalChallenge({ exercises }) {
     setHasAttempted(false);
   };
 
+  // Track current index via ref so async check can detect stale results
+  const idxRef = useRef(currentIdx);
+  idxRef.current = currentIdx;
+
   const check = useCallback(async () => {
     if (!exec.current || !ex?.checkScript) return;
+    const checkIdx = currentIdx;
     setChecking(true);
     setCheckResult(null);
     setHasAttempted(true);
@@ -161,9 +166,12 @@ export default function TerminalChallenge({ exercises }) {
         runCheck(exec.current, ex.checkScript),
         minDelay,
       ]);
+      // Bail if user switched exercises during the check
+      if (idxRef.current !== checkIdx) return;
       setCheckResult(result);
-      if (result.passed) setCompleted(prev => ({ ...prev, [currentIdx]: true }));
+      if (result.passed) setCompleted(prev => ({ ...prev, [checkIdx]: true }));
     } catch {
+      if (idxRef.current !== checkIdx) return;
       setCheckResult({ passed: false, feedback: '' });
     }
     setChecking(false);
@@ -380,11 +388,11 @@ export default function TerminalChallenge({ exercises }) {
               )}
             </div>
 
-            {/* P5: gate solution behind at least one attempt */}
+            {/* P5: gate solution behind at least one attempt (skip gate if no checkScript) */}
             {ex.solution && (
               <button
                 onClick={() => setShowSolution(!showSolution)}
-                disabled={!hasAttempted && !showSolution}
+                disabled={!hasAttempted && !showSolution && !!ex.checkScript}
                 className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80"
                 style={{ borderColor: 'var(--theme-border)', background: 'transparent', color: 'var(--theme-text)' }}
                 title={!hasAttempted ? t('Try checking your answer first', 'Încearcă mai întâi să verifici răspunsul') : ''}

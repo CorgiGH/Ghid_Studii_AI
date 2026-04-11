@@ -96,7 +96,7 @@ export async function injectFiles(exec, files) {
   dirs.sort((a, b) => a.split('/').length - b.split('/').length);
 
   for (const dir of dirs) {
-    await exec(`mkdir -p ${dir}`);
+    await exec(`mkdir -p "${dir}"`);
   }
 
   for (const [path, content] of fileEntries) {
@@ -105,10 +105,10 @@ export async function injectFiles(exec, files) {
     }
     const parentDir = path.substring(0, path.lastIndexOf('/'));
     if (parentDir) {
-      await exec(`mkdir -p ${parentDir}`);
+      await exec(`mkdir -p "${parentDir}"`);
     }
     const escaped = escapeForPrintf(content);
-    await exec(`printf '${escaped}' > ${path}`);
+    await exec(`printf '${escaped}' > "${path}"`);
   }
 }
 

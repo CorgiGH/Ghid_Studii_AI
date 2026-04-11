@@ -112,6 +112,12 @@ export default function useV86(containerRef) {
         execRef.current = globalExec;
       };
       bootListeners.push(listener);
+      // Re-check in case notifyBoot() fired between render and effect
+      if (globalBooted) {
+        listener();
+        bootListeners = bootListeners.filter(fn => fn !== listener);
+        return;
+      }
       return () => { bootListeners = bootListeners.filter(fn => fn !== listener); };
     }
   }, []);
