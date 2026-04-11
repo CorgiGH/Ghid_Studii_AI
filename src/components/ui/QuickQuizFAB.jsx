@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
  */
 export default function QuickQuizFAB({ onQuiz, lang }) {
   const [hovered, setHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 1023px)').matches);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 1023px)');
