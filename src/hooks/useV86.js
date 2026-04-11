@@ -51,9 +51,11 @@ export default function useV86(containerRef) {
         output += String.fromCharCode(byte);
         if (output.includes('login:') || output.includes('$') || output.includes('#')) {
           if (!globalBooted) {
-            // Auto-login if we see login prompt
+            // Auto-login on serial (for exec commands)
             setTimeout(() => {
               emulator.serial0_send('root\n');
+              // Auto-login on VGA console (what the user sees)
+              emulator.keyboard_send_text('root\n');
               setTimeout(() => {
                 notifyBoot();
                 setBooted(true);
