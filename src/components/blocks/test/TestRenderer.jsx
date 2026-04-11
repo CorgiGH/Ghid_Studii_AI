@@ -199,6 +199,8 @@ export default function TestRenderer({ src }) {
       .map(q => q.id);
     setReviewQuestionIds(wrongIds);
     setReviewMode(true);
+    setTestMode(null);
+    setTimeLeft(null);
     setAnswers({});
     setShowResults(false);
     setActiveQ(null);
@@ -326,7 +328,7 @@ export default function TestRenderer({ src }) {
         <TestResults
           questions={questions}
           answers={answers}
-          totalPoints={meta.totalPoints}
+          totalPoints={reviewMode ? questions.reduce((sum, q) => sum + q.points, 0) : meta.totalPoints}
           onRetake={() => {
             setAnswers({});
             setShowResults(false);
