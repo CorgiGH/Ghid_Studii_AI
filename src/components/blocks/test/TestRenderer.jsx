@@ -12,8 +12,10 @@ import TestResults from './TestResults';
 import TestModeSelector from '../../ui/TestModeSelector';
 
 const promptMarkdown = {
-  code({ inline, children, ...props }) {
-    if (inline) {
+  // react-markdown v9+ no longer passes `inline` prop — detect via className
+  code({ className, children, ...props }) {
+    if (!className) {
+      // Inline code
       return (
         <code
           style={{
@@ -29,6 +31,21 @@ const promptMarkdown = {
         </code>
       );
     }
+    // Block code (className contains language- prefix)
+    return (
+      <code
+        style={{
+          fontFamily: 'monospace',
+          color: 'var(--theme-content-text)',
+          fontSize: '0.82em',
+        }}
+        {...props}
+      >
+        {children}
+      </code>
+    );
+  },
+  pre({ children }) {
     return (
       <pre
         style={{
@@ -37,12 +54,11 @@ const promptMarkdown = {
           borderRadius: '8px',
           overflowX: 'auto',
           margin: '8px 0',
-          fontSize: '0.82em',
           lineHeight: '1.5',
           border: '1px solid var(--theme-border)',
         }}
       >
-        <code style={{ fontFamily: 'monospace', color: 'var(--theme-content-text)' }} {...props}>{children}</code>
+        {children}
       </pre>
     );
   },

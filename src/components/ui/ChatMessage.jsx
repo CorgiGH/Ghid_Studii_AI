@@ -8,8 +8,8 @@ const verdictStyles = {
 };
 
 const markdownComponents = {
-  code({ inline, children, ...props }) {
-    if (inline) {
+  code({ className, children, ...props }) {
+    if (!className) {
       return (
         <code
           style={{
@@ -26,6 +26,11 @@ const markdownComponents = {
       );
     }
     return (
+      <code style={{ fontFamily: 'monospace', fontSize: '0.82em' }} {...props}>{children}</code>
+    );
+  },
+  pre({ children }) {
+    return (
       <pre
         style={{
           backgroundColor: 'rgba(0,0,0,0.3)',
@@ -33,11 +38,10 @@ const markdownComponents = {
           borderRadius: '6px',
           overflowX: 'auto',
           margin: '6px 0',
-          fontSize: '0.82em',
           lineHeight: '1.5',
         }}
       >
-        <code style={{ fontFamily: 'monospace' }} {...props}>{children}</code>
+        {children}
       </pre>
     );
   },
