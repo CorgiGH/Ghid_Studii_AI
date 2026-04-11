@@ -47,24 +47,28 @@ export default function useV86(containerRef) {
 
       // Detect boot completion by watching serial output for login prompt
       let output = '';
-      emulator.add_listener('serial0-output-byte', (byte) => {
+      let bootTriggered = false;
+      const onBootByte = (byte) => {
+        if (bootTriggered) return;
         output += String.fromCharCode(byte);
         if (output.includes('login:') || output.includes('$') || output.includes('#')) {
-          if (!globalBooted) {
-            // Auto-login on serial (for exec commands)
+          bootTriggered = true;
+          // Remove this listener immediately — we only need it once
+          emulator.remove_listener('serial0-output-byte', onBootByte);
+          // Auto-login on serial (for exec commands)
+          setTimeout(() => {
+            emulator.serial0_send('root\n');
+            // Auto-login on VGA console (what the user sees)
+            emulator.keyboard_send_text('root\n');
             setTimeout(() => {
-              emulator.serial0_send('root\n');
-              // Auto-login on VGA console (what the user sees)
-              emulator.keyboard_send_text('root\n');
-              setTimeout(() => {
-                notifyBoot();
-                setBooted(true);
-                setBooting(false);
-              }, 1000);
-            }, 500);
-          }
+              notifyBoot();
+              setBooted(true);
+              setBooting(false);
+            }, 1000);
+          }, 500);
         }
-      });
+      };
+      emulator.add_listener('serial0-output-byte', onBootByte);
 
       // Fallback: consider booted after 15 seconds regardless
       setTimeout(() => {
