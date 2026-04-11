@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import ProgressRing from '../ui/ProgressRing';
 import BottomSheet from './BottomSheet';
+import useScrollSpy from '../../hooks/useScrollSpy';
 
 const HOVER_ZONE_WIDTH = 48; // px from left edge that triggers sidebar
 
@@ -12,6 +13,26 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
   const [hoveredId, setHoveredId] = useState(null);
   const [overlayVisible, setOverlayVisible] = useState(false);
   const hideTimeoutRef = useRef(null);
+  const activeCourseRef = useRef(null);
+
+  // Collect section IDs from DOM for scroll spy
+  const [sectionIds, setSectionIds] = useState([]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const sections = document.querySelectorAll('[data-section-id]');
+      setSectionIds(Array.from(sections).map(el => el.id));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [activeCourseId]);
+
+  const activeSection = useScrollSpy(sectionIds, { updateHash: false });
+
+  // Auto-scroll sidebar to keep active course visible
+  useEffect(() => {
+    if (activeCourseRef.current) {
+      activeCourseRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [activeCourseId]);
 
   if (!items?.length) return null;
 
@@ -128,6 +149,7 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
     return (
       <button
         key={course.id}
+        ref={isActive ? activeCourseRef : null}
         className="flex items-center gap-2 px-3 py-2.5 rounded-lg w-full text-left"
         style={buttonStyle}
         onMouseEnter={() => setHoveredId(course.id)}
