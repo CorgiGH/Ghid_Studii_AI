@@ -111,8 +111,8 @@ export default function useV86(containerRef) {
           }
           notifyBoot();
           execRef.current = globalExec;
-          setBooted(true);
-          setBooting(false);
+          safeSetBooted(true);
+          safeSetBooting(false);
         }
       }, 20000);
     };
@@ -136,7 +136,7 @@ export default function useV86(containerRef) {
       execRef.current = globalExec;
     } else {
       const listener = () => {
-        setBooted(true);
+        safeSetBooted(true);
         emulatorRef.current = globalEmulator;
         execRef.current = globalExec;
       };

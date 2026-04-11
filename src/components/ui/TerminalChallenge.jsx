@@ -213,7 +213,7 @@ export default function TerminalChallenge({ exercises }) {
   if (!exercises || exercises.length === 0 || !ex) return null;
 
   return (
-    <div className="border rounded-xl mb-6" style={{ borderColor: 'var(--theme-border)' }}>
+    <div className="border rounded-xl mb-6" style={{ borderColor: 'var(--theme-border)', overflow: 'clip' }}>
       {/* Exercise selector — sticky top — U4: a11y roles — U7: completion indicators */}
       <div
         role="tablist"
