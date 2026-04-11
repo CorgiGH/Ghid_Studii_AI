@@ -92,6 +92,10 @@ export default function TestRenderer({ src }) {
     setTestData(null);
     setAnswers({});
     setShowResults(false);
+    setTestMode(null);
+    setTimeLeft(null);
+    setReviewMode(false);
+    setReviewQuestionIds([]);
 
     try {
       setTestData(loadJson(src));
@@ -269,7 +273,7 @@ export default function TestRenderer({ src }) {
 
           const a = answers[q.id];
           const badgeColor = a
-            ? (a.score / q.points >= 0.7 ? '#22c55e' : a.score / q.points >= 0.4 ? '#f59e0b' : '#ef4444')
+            ? (q.points > 0 && a.score / q.points >= 0.7 ? '#22c55e' : q.points > 0 && a.score / q.points >= 0.4 ? '#f59e0b' : '#ef4444')
             : '#3b82f6';
 
           return (

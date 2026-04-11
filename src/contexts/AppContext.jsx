@@ -102,6 +102,8 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     applyPalette(palette, dark);
+    // Sync <html> dark class (FOUC script sets it before React, React must update it)
+    document.documentElement.classList.toggle('dark', dark);
   }, [palette, dark]);
 
   // Run one-time checked-key migration (course IDs: c1-xxx → course_1-xxx)
