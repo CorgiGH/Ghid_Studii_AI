@@ -4,12 +4,16 @@ import { mkdir } from 'fs/promises';
 import { resolve } from 'path';
 import { spawn } from 'child_process';
 
-const url = process.argv[2];
+let url = process.argv[2];
 if (!url) {
   console.error('Usage: node scripts/review-screenshot.mjs <url-path>');
   console.error('Example: node scripts/review-screenshot.mjs /#/y1s2/oop');
   process.exit(1);
 }
+// Git Bash on Windows expands leading slashes to Windows paths (e.g. /#/y1s2/pa → C:/Program Files/Git/#/y1s2/pa)
+// Sanitize: extract the hash route portion if present
+const hashMatch = url.match(/(#\/.*)/);
+if (hashMatch) url = '/' + hashMatch[1];
 
 const BASE = 'http://localhost:5173';
 const OUT_DIR = resolve('wiki/raw/assets/review');
