@@ -15,16 +15,7 @@ export default function Lab01() {
       ),
       courseRef: t('Course 1: Directory commands', 'Cursul 1: Comenzi directoare'),
       files: {},
-      welcomeMessage: t('Create the directory structure', 'Creați structura de directoare'),
-      checkFn: async (emu) => {
-        try {
-          await emu.stat('/home/user/programe');
-          await emu.stat('/home/user/programe/tema1');
-          await emu.stat('/home/user/programe/tema2');
-          await emu.stat('/home/user/programe/tema2/tema2_sub-temaA');
-          return true;
-        } catch { return false; }
-      },
+      checkScript: 'test -d /home/user/programe && test -d /home/user/programe/tema1 && test -d /home/user/programe/tema2 && test -d /home/user/programe/tema2/tema2_sub-temaA',
       hints: [
         t('Use "mkdir" to create directories', 'Folosiți "mkdir" pentru a crea directoare'),
         t('Use "mv old new" to rename', 'Folosiți "mv vechi nou" pentru a redenumi'),
@@ -44,19 +35,7 @@ export default function Lab01() {
         '/home/user/programe/tema2': null,
         '/home/user/programe/tema2/tema2_sub-temaA': null,
       },
-      welcomeMessage: t('Create the required files', 'Creați fișierele cerute'),
-      checkFn: async (emu) => {
-        try {
-          await emu.stat('/home/user/programe/program1.c');
-          await emu.stat('/home/user/programe/program2.c');
-          await emu.stat('/home/user/programe/program2.h');
-          await emu.stat('/home/user/programe/tema1/tema1-1.c');
-          await emu.stat('/home/user/programe/tema1/tema1-2.c');
-          await emu.stat('/home/user/programe/tema2/tema2_sub-temaA/sub-temaA1.c');
-          await emu.stat('/home/user/programe/tema2/tema2_sub-temaA/sub-temaA2.cpp');
-          return true;
-        } catch { return false; }
-      },
+      checkScript: 'test -f /home/user/programe/program1.c && test -f /home/user/programe/program2.c && test -f /home/user/programe/program2.h && test -f /home/user/programe/tema1/tema1-1.c && test -f /home/user/programe/tema1/tema1-2.c && test -f /home/user/programe/tema2/tema2_sub-temaA/sub-temaA1.c && test -f /home/user/programe/tema2/tema2_sub-temaA/sub-temaA2.cpp',
       hints: [
         t('Use "touch filename" to create empty files', 'Folosiți "touch fisier" pentru a crea fișiere goale'),
         t('You can create multiple files: touch a.c b.c c.h', 'Puteți crea mai multe fișiere: touch a.c b.c c.h'),
@@ -78,17 +57,7 @@ export default function Lab01() {
         '/home/user/temp': null,
         '/home/user/temp/scratch.txt': 'temporary data',
       },
-      welcomeMessage: t('Copy, move, and delete files', 'Copiați, mutați și ștergeți fișiere'),
-      checkFn: async (emu) => {
-        try {
-          const copied = await emu.read('/home/user/programe/tema2/tema2-1.c');
-          const moved = await emu.read('/home/user/programe/tema2/tema2-2.c');
-          if (!copied || !moved) return false;
-          // temp should be deleted
-          try { await emu.stat('/home/user/temp'); return false; } catch { /* good, deleted */ }
-          return true;
-        } catch { return false; }
-      },
+      checkScript: 'test -f /home/user/programe/tema2/tema2-1.c && grep -q "tema1" /home/user/programe/tema2/tema2-1.c && test -f /home/user/programe/tema2/tema2-2.c && ! test -d /home/user/temp',
       hints: [
         t('"cp source dest" copies a file', '"cp sursa dest" copiază un fișier'),
         t('"mv source dest" moves/renames a file', '"mv sursa dest" mută/redenumește un fișier'),
@@ -105,7 +74,6 @@ export default function Lab01() {
       files: {
         '/home/user/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully',
       },
-      welcomeMessage: t('Search and count in server.log', 'Căutați și numărați în server.log'),
       hints: [
         t('"grep -i pattern file" searches case-insensitively', '"grep -i pattern file" caută fără a ține cont de litere mari/mici'),
         t('"wc -l file" counts lines', '"wc -l file" numără liniile'),
@@ -142,8 +110,8 @@ export default function Lab01() {
       </h3>
       <p className="text-sm mb-4 opacity-80">
         {t(
-          'Practice in the terminal below. Use "Try It" for free experimentation, then switch to "Submit Answer" and click "Check" to verify your solution.',
-          'Exersați în terminalul de mai jos. Folosiți "Încearcă" pentru experimentare liberă, apoi treceți la "Trimite răspunsul" și apăsați "Verifică" pentru a valida soluția.'
+          'Practice in the real Linux terminal below. Click "Check" to verify your solution.',
+          'Exersați în terminalul Linux real de mai jos. Apăsați "Verifică" pentru a valida soluția.'
         )}
       </p>
       <TerminalChallenge exercises={terminalExercises} />
