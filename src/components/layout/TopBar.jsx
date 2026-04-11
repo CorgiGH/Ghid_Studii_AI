@@ -5,7 +5,7 @@ import { subjects } from '../../content/registry';
 import PalettePicker from '../ui/PalettePicker';
 
 const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
-  const { dark, toggleDark, lang, toggleLang, t } = useApp();
+  const { dark, themeMode, cycleTheme, lang, toggleLang, t } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
@@ -121,11 +121,12 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
           </button>
           <PalettePicker />
           <button
-            onClick={toggleDark}
+            onClick={cycleTheme}
             className="text-xs px-2 py-1.5 rounded-lg transition"
             style={{ backgroundColor: 'var(--theme-nav-hover)' }}
+            title={themeMode === 'light' ? 'Light mode' : themeMode === 'dark' ? 'Dark mode' : 'System mode'}
           >
-            {dark ? '\u2600\uFE0F' : '\uD83C\uDF19'}
+            {themeMode === 'light' ? '\u2600\uFE0F' : themeMode === 'dark' ? '\uD83C\uDF19' : '\uD83D\uDCBB'}
           </button>
         </div>
       </div>

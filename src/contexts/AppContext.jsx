@@ -36,8 +36,30 @@ function migrateLabKeys(obj) {
   return changed ? out : null;
 }
 
+// Migrate dark boolean → themeMode string (one-time)
+(function migrateDarkToThemeMode() {
+  const rawDark = localStorage.getItem('dark');
+  if (rawDark !== null && !localStorage.getItem('themeMode')) {
+    localStorage.setItem('themeMode', JSON.stringify(JSON.parse(rawDark) ? 'dark' : 'light'));
+    localStorage.removeItem('dark');
+  }
+})();
+
 export function AppProvider({ children }) {
-  const [dark, setDark] = useLocalStorage('dark', true);
+  const [themeMode, setThemeMode] = useLocalStorage('themeMode', 'system');
+
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => setSystemDark(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const dark = themeMode === 'dark' || (themeMode === 'system' && systemDark);
   const [lang, setLang] = useLocalStorage('lang', 'ro');
   const [palette, setPalette] = useLocalStorage('palette', DEFAULT_PALETTE);
   const [search, setSearch] = useState('');
@@ -129,12 +151,14 @@ export function AppProvider({ children }) {
   }, [search]);
 
   const toggleLang = useCallback(() => setLang(l => l === 'ro' ? 'en' : 'ro'), []);
-  const toggleDark = useCallback(() => setDark(d => !d), []);
+  const cycleTheme = useCallback(() => {
+    setThemeMode(m => m === 'light' ? 'dark' : m === 'dark' ? 'system' : 'light');
+  }, []);
   const toggleSidebarLock = useCallback(() => setSidebarLocked(l => !l), []);
   const toggleChat = useCallback(() => setChatOpen(c => !c), []);
 
   const value = useMemo(() => ({
-    dark, setDark, toggleDark,
+    dark, themeMode, cycleTheme,
     lang, setLang, toggleLang,
     palette, setPalette,
     search, setSearch,
@@ -147,7 +171,7 @@ export function AppProvider({ children }) {
     sidebarLocked, setSidebarLocked, toggleSidebarLock,
     chatOpen, setChatOpen, toggleChat,
     chatWidth, setChatWidth,
-  }), [dark, lang, palette, search, checked, t, toggleCheck, highlight, toggleDark, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood, lectureVisible, toggleLecture, testProgress, saveTestResult, courseContext, setCourseContext]);
+  }), [dark, themeMode, lang, palette, search, checked, t, toggleCheck, highlight, cycleTheme, toggleLang, sidebarLocked, chatOpen, toggleSidebarLock, toggleChat, chatWidth, progress, markVisited, toggleUnderstood, lectureVisible, toggleLecture, testProgress, saveTestResult, courseContext, setCourseContext]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
