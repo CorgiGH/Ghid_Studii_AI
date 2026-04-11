@@ -78,8 +78,8 @@ const ChatMessage = ({ role, content, verdict, isStreaming }) => {
       <div
         className="max-w-[90%] rounded-lg px-3 py-2 text-sm leading-relaxed"
         style={{
-          backgroundColor: isUser ? '#1e293b' : '#1a2332',
-          color: isUser ? '#ccc' : '#ddd',
+          backgroundColor: 'var(--theme-card-bg)',
+          color: 'var(--theme-content-text)',
           borderLeft: !isUser ? `2px solid ${vStyle?.borderColor || '#3b82f6'}` : undefined,
         }}
       >

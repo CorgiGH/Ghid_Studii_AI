@@ -37,13 +37,13 @@ function migrateLabKeys(obj) {
 }
 
 // Migrate dark boolean → themeMode string (one-time)
-(function migrateDarkToThemeMode() {
+try {
   const rawDark = localStorage.getItem('dark');
   if (rawDark !== null && !localStorage.getItem('themeMode')) {
     localStorage.setItem('themeMode', JSON.stringify(JSON.parse(rawDark) ? 'dark' : 'light'));
     localStorage.removeItem('dark');
   }
-})();
+} catch { /* ignore corrupted localStorage */ }
 
 export function AppProvider({ children }) {
   const [themeMode, setThemeMode] = useLocalStorage('themeMode', 'system');

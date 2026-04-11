@@ -59,7 +59,7 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
   useEffect(() => {
     if (!step?.id || !src) return;
     const key = `lastStep:${src}`;
-    localStorage.setItem(key, JSON.stringify({ stepId: step.id, stepIndex: currentStep, timestamp: Date.now() }));
+    try { localStorage.setItem(key, JSON.stringify({ stepId: step.id, stepIndex: currentStep, timestamp: Date.now() })); } catch { /* quota */ }
   }, [step?.id, currentStep, src]);
 
   // Auto-mark step as visited when navigating
