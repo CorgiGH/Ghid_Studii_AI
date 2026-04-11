@@ -170,7 +170,7 @@ export default function TestRenderer({ src }) {
   const prevBest = testProgress?.[testData?.meta?.id];
 
   // Show mode selector before test starts
-  if (!testMode && testData && !loading) {
+  if (!testMode && !reviewMode && testData && !loading) {
     return <TestModeSelector onSelect={setTestMode} lang={lang} />;
   }
 
