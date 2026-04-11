@@ -102,6 +102,24 @@ export default function useV86(containerRef) {
     document.head.appendChild(script);
   }, [containerRef, booting]);
 
+  // Move v86 screen elements to the current container if booted by a different instance
+  useEffect(() => {
+    if (!globalBooted || !globalEmulator || !containerRef?.current) return;
+    const container = containerRef.current;
+    // v86 creates its canvas/div inside the original screen_container
+    // Find the canvas and move its parent wrapper to the new container
+    const canvas = document.querySelector('.v86-screen canvas');
+    if (canvas && canvas.closest('.v86-screen') !== container) {
+      // Move all v86-generated nodes (canvas + cursor div) to new container
+      const oldContainer = canvas.closest('.v86-screen');
+      if (oldContainer) {
+        while (oldContainer.firstChild) {
+          container.appendChild(oldContainer.firstChild);
+        }
+      }
+    }
+  });
+
   useEffect(() => {
     if (globalBooted) {
       setBooted(true);
