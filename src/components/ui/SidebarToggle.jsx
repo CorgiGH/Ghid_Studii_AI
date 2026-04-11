@@ -13,8 +13,8 @@ const SidebarToggle = ({ locked, onToggle }) => {
       style={{
         width: '12px',
         height: '36px',
-        background: '#1e293b',
-        border: '1px solid #334155',
+        background: 'var(--theme-sidebar-bg)',
+        border: '1px solid var(--theme-sidebar-border)',
         borderRight: 'none',
         borderRadius: '0 6px 6px 0',
         boxShadow: '2px 0 6px rgba(0,0,0,0.2)',

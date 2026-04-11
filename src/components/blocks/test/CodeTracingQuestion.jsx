@@ -54,11 +54,11 @@ export default function CodeTracingQuestion({ question, onAnswer }) {
       <pre
         className="rounded-lg text-xs leading-relaxed overflow-x-auto mb-3"
         style={{
-          backgroundColor: '#1e293b',
+          backgroundColor: 'var(--theme-card-bg)',
           padding: '12px 14px',
           border: '1px solid var(--theme-border)',
           fontFamily: 'monospace',
-          color: '#e2e8f0',
+          color: 'var(--theme-content-text)',
         }}
       >
         <code>{question.code}</code>

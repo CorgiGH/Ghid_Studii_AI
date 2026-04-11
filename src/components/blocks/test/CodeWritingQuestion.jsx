@@ -52,9 +52,9 @@ export default function CodeWritingQuestion({ question, onAnswer }) {
         spellCheck={false}
         className="w-full rounded-lg p-3 text-xs resize-y font-mono"
         style={{
-          backgroundColor: '#1e293b',
+          backgroundColor: 'var(--theme-card-bg)',
           border: '1px solid var(--theme-border)',
-          color: '#e2e8f0',
+          color: 'var(--theme-content-text)',
           tabSize: 2,
         }}
         placeholder={t(`Write your ${question.language || 'code'} here...`, `Scrie codul ${question.language || ''} aici...`)}

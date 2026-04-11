@@ -48,8 +48,8 @@ export default class ErrorBoundary extends React.Component {
             <button
               onClick={this.handleGoHome}
               style={{
-                padding: '0.5rem 1.25rem', borderRadius: '0.5rem', border: '1px solid #334155',
-                backgroundColor: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: '0.875rem',
+                padding: '0.5rem 1.25rem', borderRadius: '0.5rem', border: '1px solid var(--theme-border)',
+                backgroundColor: 'transparent', color: 'var(--theme-muted-text)', cursor: 'pointer', fontSize: '0.875rem',
               }}
             >
               Go home

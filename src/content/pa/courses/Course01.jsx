@@ -43,7 +43,7 @@ export default function Course01() {
 
         {/* Inline SVG: Input → Algorithm → Output */}
         <div className="my-4 flex justify-center">
-          <svg width="400" height="60" viewBox="0 0 400 60" className="text-[var(--theme-text)]">
+          <svg width="400" height="60" viewBox="0 0 400 60" className="text-[var(--theme-content-text)]">
             <rect x="10" y="15" width="90" height="30" rx="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
             <text x="55" y="35" textAnchor="middle" fill="currentColor" fontSize="13" fontFamily="monospace">Input</text>
             <line x1="100" y1="30" x2="145" y2="30" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arrow)" />

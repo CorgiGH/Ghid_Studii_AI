@@ -10,11 +10,11 @@ export default function Lab02() {
     <div className="space-y-8">
       {/* ── Exercise 1: NumberList ── */}
       <section className="space-y-4">
-        <h3 className="font-bold text-lg" style={{ color: 'var(--theme-text)' }}>
+        <h3 className="font-bold text-lg" style={{ color: 'var(--theme-content-text)' }}>
           {t('Exercise 1 — NumberList Class', 'Exercițiul 1 — Clasa NumberList')}
         </h3>
 
-        <p style={{ color: 'var(--theme-text)' }}>
+        <p style={{ color: 'var(--theme-content-text)' }}>
           {t(
             'Create a class that manages a fixed-size array of integers (maximum 10 elements).',
             'Creați o clasă care gestionează un tablou de dimensiune fixă de numere întregi (maxim 10 elemente).'
@@ -67,11 +67,11 @@ export default function Lab02() {
 
       {/* ── Exercise 2: Student ── */}
       <section className="space-y-4">
-        <h3 className="font-bold text-lg" style={{ color: 'var(--theme-text)' }}>
+        <h3 className="font-bold text-lg" style={{ color: 'var(--theme-content-text)' }}>
           {t('Exercise 2 — Student Class', 'Exercițiul 2 — Clasa Student')}
         </h3>
 
-        <p style={{ color: 'var(--theme-text)' }}>
+        <p style={{ color: 'var(--theme-content-text)' }}>
           {t(
             'Create a Student class and five global comparison functions.',
             'Creați o clasă Student și cinci funcții globale de comparare.'

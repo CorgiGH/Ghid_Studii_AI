@@ -32,7 +32,7 @@ const promptMarkdown = {
     return (
       <pre
         style={{
-          backgroundColor: '#1e293b',
+          backgroundColor: 'var(--theme-card-bg)',
           padding: '10px 12px',
           borderRadius: '8px',
           overflowX: 'auto',
@@ -42,7 +42,7 @@ const promptMarkdown = {
           border: '1px solid var(--theme-border)',
         }}
       >
-        <code style={{ fontFamily: 'monospace', color: '#e2e8f0' }} {...props}>{children}</code>
+        <code style={{ fontFamily: 'monospace', color: 'var(--theme-content-text)' }} {...props}>{children}</code>
       </pre>
     );
   },
@@ -265,14 +265,8 @@ export default function TestRenderer({ src }) {
       {/* Questions */}
       <div className="space-y-6">
         {questions.map((q, i) => {
-          const QuestionComp = questionComponents[q.type];
-          if (!QuestionComp) {
-            return (
-              <div key={q.id} className="p-3 rounded-lg text-xs" style={{ backgroundColor: 'var(--theme-card-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-muted-text)' }}>
-                {t(`Unknown question type: ${q.type}`, `Tip de întrebare necunoscut: ${q.type}`)}
-              </div>
-            );
-          }
+          // Fall back to open-ended for any unregistered question type
+          const QuestionComp = questionComponents[q.type] || OpenEndedQuestion;
 
           const a = answers[q.id];
           const badgeColor = a

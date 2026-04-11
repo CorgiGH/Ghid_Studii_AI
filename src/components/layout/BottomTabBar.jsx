@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 const TABS = [
   { key: 'courses', label: 'Courses', labelRo: 'Cursuri', icon: '\uD83D\uDCD6' },
-  { key: 'seminars', label: 'Exercises', labelRo: 'Exerci\u021Bii', icon: '\u270D\uFE0F' },
+  { key: 'seminars', label: 'Solved Exercises', labelRo: 'Exerci\u021Bii rezolvate', icon: '\u270D\uFE0F' },
   { key: 'labs', label: 'Labs', labelRo: 'Laboratoare', icon: '\uD83E\uDDEA' },
   { key: 'practice', label: 'Practice', labelRo: 'Practic\u0103', icon: '\uD83D\uDCBB' },
   { key: 'tests', label: 'Tests', labelRo: 'Teste', icon: '\uD83D\uDCCB' },

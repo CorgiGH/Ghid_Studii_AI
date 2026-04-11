@@ -9,11 +9,11 @@ export default function Lab02Extra() {
   return (
     <div className="space-y-8">
       <section className="space-y-4">
-        <h3 className="font-bold text-lg" style={{ color: 'var(--theme-text)' }}>
+        <h3 className="font-bold text-lg" style={{ color: 'var(--theme-content-text)' }}>
           {t('Exercise — Movie & MovieSeries Classes', 'Exercițiu — Clasele Movie și MovieSeries')}
         </h3>
 
-        <p style={{ color: 'var(--theme-text)' }}>
+        <p style={{ color: 'var(--theme-content-text)' }}>
           {t(
             'Create a Movie class and a MovieSeries class that manages a collection of movies, along with five comparison functions.',
             'Creați o clasă Movie și o clasă MovieSeries care gestionează o colecție de filme, împreună cu cinci funcții de comparare.'
