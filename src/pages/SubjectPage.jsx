@@ -42,6 +42,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const headerRef = useRef(null);
   const progressRef = useRef(null);
   const [sidebarTop, setSidebarTop] = useState(0);
+  const [examMode, setExamMode] = useState(false);
 
   const courseMatch = wildcard?.match(/^course_(\d+)$/);
   const courseNum = courseMatch ? parseInt(courseMatch[1], 10) : null;
@@ -171,12 +172,30 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
           <ContentTypeBar subject={subject} activeTab={tab} onTabChange={handleTabChange} />
         </div>
 
-        <Breadcrumbs
-          yearSem={yearSem}
-          subject={subject}
-          tab={tab}
-          activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : undefined}
-        />
+        <div className="flex items-center">
+          <div className="flex-1">
+            <Breadcrumbs
+              yearSem={yearSem}
+              subject={subject}
+              tab={tab}
+              activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : undefined}
+            />
+          </div>
+          {tab === 'courses' && activeCourse && (
+            <button
+              onClick={() => setExamMode(e => !e)}
+              className="px-3 py-1.5 rounded-lg text-sm transition-colors mr-4"
+              style={{
+                backgroundColor: examMode ? 'rgba(239, 68, 68, 0.12)' : 'var(--theme-card-bg)',
+                color: examMode ? '#ef4444' : 'var(--theme-muted-text)',
+                border: `1px solid ${examMode ? '#ef4444' : 'var(--theme-border)'}`,
+                fontWeight: examMode ? 600 : 400,
+              }}
+            >
+              {t('\uD83C\uDFAF Exam Mode', '\uD83C\uDFAF Mod Examen')}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-1">
@@ -228,7 +247,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
               <>
                 {activeCourse ? (
                   activeCourse.src ? (
-                    <CourseRenderer src={activeCourse.src} />
+                    <CourseRenderer src={activeCourse.src} examMode={examMode} />
                   ) : (
                   <CourseTransition courseIndex={activeCourseIndex}>
                     <Suspense fallback={<LoadingFallback />}>

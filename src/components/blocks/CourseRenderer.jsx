@@ -10,7 +10,7 @@ import CompletionModal from '../ui/CompletionModal';
 const CourseNavContext = createContext(null);
 export const useCourseNav = () => useContext(CourseNavContext);
 
-export default function CourseRenderer({ src }) {
+export default function CourseRenderer({ src, examMode = false }) {
   const { t, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture, setCourseContext } = useApp();
   useScrollToHash();
   const [courseData, setCourseData] = useState(null);
@@ -236,14 +236,16 @@ export default function CourseRenderer({ src }) {
       </h2>
 
       {/* Step content */}
-      <CourseTransition courseIndex={currentStep}>
-        <StepRenderer
-          step={step}
-          lectureVisible={lectureVisible}
-          isUnderstood={!!progress[step.id]?.understood}
-          onToggleUnderstood={() => toggleUnderstood(step.id)}
-        />
-      </CourseTransition>
+      <div style={examMode && step.examRelevant === false ? { opacity: 0.3, pointerEvents: 'none', transition: 'opacity 0.2s' } : { transition: 'opacity 0.2s' }}>
+        <CourseTransition courseIndex={currentStep}>
+          <StepRenderer
+            step={step}
+            lectureVisible={lectureVisible}
+            isUnderstood={!!progress[step.id]?.understood}
+            onToggleUnderstood={() => toggleUnderstood(step.id)}
+          />
+        </CourseTransition>
+      </div>
 
       {/* Navigation */}
       <div
