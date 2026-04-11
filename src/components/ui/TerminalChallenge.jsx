@@ -19,6 +19,8 @@ function Hint({ children }) {
   return (
     <span ref={ref} className="relative inline-block">
       <span
+        role="button"
+        aria-label="Hint"
         className="cursor-help text-blue-500 hover:text-blue-400 transition text-sm"
         onClick={() => setShow(s => !s)}
         onMouseEnter={() => setShow(true)}
@@ -98,6 +100,9 @@ export default function TerminalChallenge({ exercises }) {
   const solutionRef = useRef(null);
   const resetRef = useRef(null);
   const { exec, booted, booting, boot } = useV86(screenRef);
+
+  // #3: guard against empty exercises
+  if (!exercises || exercises.length === 0) return null;
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [checkResult, setCheckResult] = useState(null);
@@ -215,7 +220,7 @@ export default function TerminalChallenge({ exercises }) {
             }`}
             style={i !== currentIdx ? { background: 'var(--theme-content-bg)', color: 'var(--theme-text)' } : undefined}
           >
-            {completed[i] && <span className="text-green-300 mr-1">✓</span>}
+            {completed[i] && <span className="mr-1" style={{ color: '#22c55e' }}>✓</span>}
             {t('Ex', 'Ex')} {i + 1}
           </button>
         ))}
@@ -291,7 +296,7 @@ export default function TerminalChallenge({ exercises }) {
           {checkResult.passed
             ? t('Correct! Task completed.', 'Corect! Sarcină finalizată.')
             : failMessage}
-          {checkResult.feedback && !checkResult.passed && (
+          {checkResult.feedback && !checkResult.passed && failMessage !== checkResult.feedback && (
             <p className="text-xs mt-1 opacity-70 font-mono">{checkResult.feedback}</p>
           )}
         </div>

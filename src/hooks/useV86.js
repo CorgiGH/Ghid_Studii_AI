@@ -104,11 +104,13 @@ export default function useV86(containerRef) {
       emulatorRef.current = globalEmulator;
       execRef.current = globalExec;
     } else {
-      bootListeners.push(() => {
+      const listener = () => {
         setBooted(true);
         emulatorRef.current = globalEmulator;
         execRef.current = globalExec;
-      });
+      };
+      bootListeners.push(listener);
+      return () => { bootListeners = bootListeners.filter(fn => fn !== listener); };
     }
   }, []);
 

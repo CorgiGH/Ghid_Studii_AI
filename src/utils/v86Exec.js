@@ -73,6 +73,7 @@ export function createSerialExecutor(emulator) {
 function escapeForPrintf(str) {
   return str
     .replace(/\\/g, '\\\\')
+    .replace(/%/g, '%%')
     .replace(/'/g, "'\\''")
     .replace(/\n/g, '\\n')
     .replace(/\t/g, '\\t');
