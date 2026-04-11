@@ -4,6 +4,7 @@ import { createSerialExecutor } from '../utils/v86Exec';
 let globalEmulator = null;
 let globalBooted = false;
 let globalExec = null;
+let globalScreenDiv = null; // persistent div that v86 renders into
 let bootListeners = [];
 
 function notifyBoot() {
@@ -28,11 +29,17 @@ export default function useV86(containerRef) {
     const script = document.createElement('script');
     script.src = `${basePath}v86/libv86.js`;
     script.onload = () => {
+      // Create a persistent screen div that outlives React component unmounts
+      globalScreenDiv = document.createElement('div');
+      globalScreenDiv.style.width = '100%';
+      globalScreenDiv.style.height = '100%';
+      containerRef.current.appendChild(globalScreenDiv);
+
       const emulator = new window.V86({
         wasm_path: `${basePath}v86/v86.wasm`,
         memory_size: 64 * 1024 * 1024,
         vga_memory_size: 2 * 1024 * 1024,
-        screen_container: containerRef.current,
+        screen_container: globalScreenDiv,
         bios: { url: `${basePath}v86/seabios.bin` },
         vga_bios: { url: `${basePath}v86/vgabios.bin` },
         cdrom: { url: `${basePath}v86/linux.iso` },
@@ -102,23 +109,15 @@ export default function useV86(containerRef) {
     document.head.appendChild(script);
   }, [containerRef, booting]);
 
-  // Move v86 screen elements to the current container if booted by a different instance
+  // Reparent the persistent v86 screen div into the current component's container.
+  // This handles navigation between pages that each have a TerminalChallenge.
   useEffect(() => {
-    if (!globalBooted || !globalEmulator || !containerRef?.current) return;
+    if (!globalScreenDiv || !containerRef?.current) return;
     const container = containerRef.current;
-    // v86 creates its canvas/div inside the original screen_container
-    // Find the canvas and move its parent wrapper to the new container
-    const canvas = document.querySelector('.v86-screen canvas');
-    if (canvas && canvas.closest('.v86-screen') !== container) {
-      // Move all v86-generated nodes (canvas + cursor div) to new container
-      const oldContainer = canvas.closest('.v86-screen');
-      if (oldContainer) {
-        while (oldContainer.firstChild) {
-          container.appendChild(oldContainer.firstChild);
-        }
-      }
+    if (globalScreenDiv.parentNode !== container) {
+      container.appendChild(globalScreenDiv);
     }
-  });
+  }, [booted]);
 
   useEffect(() => {
     if (globalBooted) {
