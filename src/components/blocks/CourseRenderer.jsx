@@ -150,7 +150,7 @@ export default function CourseRenderer({ src }) {
       <div
         className="sticky z-10 -mx-4 lg:-mx-8 px-4 lg:px-8"
         style={{
-          top: `${topBarHeight}px`,
+          top: 'var(--topbar-offset, 0px)',
           backgroundColor: 'var(--theme-content-bg)',
           borderBottom: '1px solid var(--theme-border)',
         }}

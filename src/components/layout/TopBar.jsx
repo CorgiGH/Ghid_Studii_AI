@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import { subjects } from '../../content/registry';
 import PalettePicker from '../ui/PalettePicker';
+import useHideOnScroll from '../../hooks/useHideOnScroll';
 
 const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
   const { dark, themeMode, cycleTheme, lang, toggleLang, t } = useApp();
@@ -14,6 +15,7 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
   const currentSubjectSlug = pathParts[1] || null;
   const currentSubject = subjects.find(s => s.slug === currentSubjectSlug);
 
+  const hidden = useHideOnScroll(60);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const switcherRef = useRef(null);
   const headerRef = useRef(null);
@@ -40,11 +42,27 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
     return () => ro.disconnect();
   }, []);
 
+  // Publish effective offset (0 when hidden, full height when visible)
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    document.documentElement.style.setProperty(
+      '--topbar-offset',
+      hidden ? '0px' : `${el.offsetHeight}px`
+    );
+  }, [hidden]);
+
   return (
     <header
       ref={headerRef}
       className="sticky top-0 z-30 backdrop-blur-sm transition-colors duration-200"
-      style={{ backgroundColor: 'var(--theme-nav-bg)', color: 'var(--theme-nav-text)' }}
+      style={{
+        backgroundColor: 'var(--theme-nav-bg)',
+        color: 'var(--theme-nav-text)',
+        transform: hidden ? 'translateY(-100%)' : 'translateY(0)',
+        transition: 'transform 0.2s ease-in-out, background-color 0.2s, color 0.2s',
+        willChange: 'transform',
+      }}
     >
       <div className="flex items-center gap-3 px-4 py-2.5">
         {!isHome && (
