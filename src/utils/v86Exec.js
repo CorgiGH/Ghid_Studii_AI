@@ -67,9 +67,21 @@ export function createSerialExecutor(emulator) {
 }
 
 /**
+ * Escape content for use inside a single-line printf command.
+ * Converts newlines to \n, escapes backslashes and single quotes.
+ */
+function escapeForPrintf(str) {
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "'\\''")
+    .replace(/\n/g, '\\n')
+    .replace(/\t/g, '\\t');
+}
+
+/**
  * Inject files and directories into the running v86 VM.
  * Directories (null values) are created with mkdir -p.
- * Files (string values) are written via heredoc to avoid shell escaping issues.
+ * Files (string values) are written via printf (single-line, no heredoc issues).
  * Directories are created first (sorted by depth), then files.
  */
 export async function injectFiles(exec, files) {
@@ -94,7 +106,8 @@ export async function injectFiles(exec, files) {
     if (parentDir) {
       await exec(`mkdir -p ${parentDir}`);
     }
-    await exec(`cat <<'__FILEINJECT__' > ${path}\n${content}\n__FILEINJECT__`);
+    const escaped = escapeForPrintf(content);
+    await exec(`printf '${escaped}' > ${path}`);
   }
 }
 
