@@ -103,6 +103,14 @@ const CourseMap = ({ subject, onCourseClick }) => {
         </button>
       )}
 
+      {/* Total subject progress — research §2: Khan Academy 120px dashboard ring */}
+      <div className="flex flex-col items-center mb-6">
+        <ProgressRing size={120} completed={totalCompleted} total={totalSections} />
+        <p className="mt-2" style={{ fontSize: 'var(--type-body)', color: 'var(--theme-muted-text)' }}>
+          {totalCompleted}/{totalSections} {t('sections', 'secțiuni')}
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {courseProgress.map(({ course, completed, total }, index) => {
           const isComplete = total > 0 && completed >= total;
