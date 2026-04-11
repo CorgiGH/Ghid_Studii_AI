@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../../contexts/AppContext';
+import formatMarkdown from '../formatMarkdown';
 
 export default function DefinitionBlock({ term, content }) {
   const { t } = useApp();
@@ -21,9 +22,11 @@ export default function DefinitionBlock({ term, content }) {
       <p className="font-bold text-sm mb-1" style={{ color: 'var(--theme-content-text)' }}>
         {t(term.en, term.ro)}
       </p>
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-content-text)', opacity: 0.85 }}>
-        {t(content.en, content.ro)}
-      </p>
+      <div
+        className="text-sm leading-relaxed"
+        style={{ color: 'var(--theme-content-text)', opacity: 0.85 }}
+        dangerouslySetInnerHTML={{ __html: formatMarkdown(t(content.en, content.ro)) }}
+      />
     </div>
   );
 }

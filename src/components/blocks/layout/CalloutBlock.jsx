@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../../contexts/AppContext';
+import formatMarkdown from '../formatMarkdown';
 
 const VARIANTS = {
   tip:     { color: '#3b82f6', icon: '\uD83D\uDCA1', label: { en: 'Tip', ro: 'Sfat' } },
@@ -28,9 +29,11 @@ export default function CalloutBlock({ variant = 'info', content }) {
       >
         {v.icon} {t(v.label.en, v.label.ro)}
       </div>
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-content-text)' }}>
-        {t(content.en, content.ro)}
-      </p>
+      <div
+        className="text-sm leading-relaxed"
+        style={{ color: 'var(--theme-content-text)' }}
+        dangerouslySetInnerHTML={{ __html: formatMarkdown(t(content.en, content.ro)) }}
+      />
     </div>
   );
 }
