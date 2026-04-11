@@ -5,6 +5,7 @@ import StepRenderer from './StepRenderer';
 import CourseTransition from '../ui/CourseTransition';
 import ProgressRing from '../ui/ProgressRing';
 import useScrollToHash from '../../hooks/useScrollToHash';
+import CompletionModal from '../ui/CompletionModal';
 
 const CourseNavContext = createContext(null);
 export const useCourseNav = () => useContext(CourseNavContext);
@@ -96,9 +97,8 @@ export default function CourseRenderer({ src }) {
 
   const courseNavValue = useMemo(() => ({ navigateToStep }), [navigateToStep]);
 
-  // Completion celebration
-  const [showCompletionToast, setShowCompletionToast] = useState(false);
-  const [toastDismissing, setToastDismissing] = useState(false);
+  // Completion celebration — modal (research §4)
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
   const prevUnderstoodRef = useRef(0);
 
   useEffect(() => {
@@ -106,14 +106,7 @@ export default function CourseRenderer({ src }) {
     const total = courseData.steps.length;
     const prev = prevUnderstoodRef.current;
     if (understoodCount >= total && prev < total && prev > 0) {
-      setShowCompletionToast(true);
-      setTimeout(() => {
-        setToastDismissing(true);
-        setTimeout(() => {
-          setShowCompletionToast(false);
-          setToastDismissing(false);
-        }, 300);
-      }, 1500);
+      setShowCompletionModal(true);
     }
     prevUnderstoodRef.current = understoodCount;
   }, [understoodCount, courseData?.steps]);
@@ -281,44 +274,14 @@ export default function CourseRenderer({ src }) {
         </button>
       </div>
 
-      {/* Completion celebration toast */}
-      {showCompletionToast && (
-        <div
-          onClick={() => { setToastDismissing(true); setTimeout(() => { setShowCompletionToast(false); setToastDismissing(false); }, 300); }}
-          style={{
-            position: 'fixed', inset: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(2px)',
-            zIndex: 50,
-            animation: toastDismissing ? 'fadeOut 0.3s ease forwards' : 'fadeIn 0.3s ease',
-            cursor: 'pointer',
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: 'var(--theme-content-bg, #1e293b)',
-              border: '2px solid #22c55e', borderRadius: '16px',
-              padding: '24px 36px', textAlign: 'center',
-              boxShadow: '0 12px 48px rgba(34,197,94,0.25)',
-              animation: toastDismissing ? 'fadeOut 0.3s ease forwards' : 'popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            }}
-          >
-            <div style={{
-              width: '48px', height: '48px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 12px', fontSize: '24px', color: 'white',
-              boxShadow: '0 0 20px rgba(34,197,94,0.4)',
-            }}>&#10003;</div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--theme-text, #e2e8f0)', marginBottom: '4px' }}>
-              {t('Course Complete!', 'Curs complet!')}
-            </div>
-            <div style={{ fontSize: '12px', color: 'var(--theme-muted-text, #94a3b8)' }}>
-              {t(`All ${totalSteps} steps understood`, `Toți cei ${totalSteps} pași înțeleși`)}
-            </div>
-          </div>
-        </div>
+      {/* Completion celebration modal — research §4 */}
+      {showCompletionModal && (
+        <CompletionModal
+          courseName={courseData?.meta?.title ? t(courseData.meta.title.en, courseData.meta.title.ro) : ''}
+          sectionsCompleted={totalSteps}
+          onClose={() => setShowCompletionModal(false)}
+          lang={t('en', 'ro') === 'ro' ? 'ro' : 'en'}
+        />
       )}
     </div>
     </CourseNavContext.Provider>
