@@ -67,6 +67,7 @@ const questionComponents = {
   'multiple-choice': MultipleChoiceQuestion,
   'open-ended': OpenEndedQuestion,
   'code-writing': CodeWritingQuestion,
+  'bash-scripting': CodeWritingQuestion,
   'diagram': DiagramQuestion,
   'fill-in': FillInQuestion,
   'code-tracing': CodeTracingQuestion,
