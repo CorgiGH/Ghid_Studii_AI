@@ -153,9 +153,12 @@ export default function TestRenderer({ src }) {
   const handleFinish = useCallback(() => {
     if (!testData) return;
     const totalScore = Object.values(answers).reduce((sum, a) => sum + (a.score || 0), 0);
-    saveTestResult(testData.meta.id, totalScore, testData.meta.totalPoints, answers);
+    // Only save to persistent progress for full test attempts, not review-mistakes sessions
+    if (!reviewMode) {
+      saveTestResult(testData.meta.id, totalScore, testData.meta.totalPoints, answers);
+    }
     setShowResults(true);
-  }, [testData, answers, saveTestResult]);
+  }, [testData, answers, saveTestResult, reviewMode]);
 
   const handleFinishRef = useRef(handleFinish);
   handleFinishRef.current = handleFinish;

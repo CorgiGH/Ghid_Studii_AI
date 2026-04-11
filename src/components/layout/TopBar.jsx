@@ -56,6 +56,7 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
     <header
       ref={headerRef}
       className="sticky top-0 z-30 backdrop-blur-sm transition-colors duration-200"
+      aria-hidden={hidden}
       style={{
         backgroundColor: 'var(--theme-nav-bg)',
         color: 'var(--theme-nav-text)',

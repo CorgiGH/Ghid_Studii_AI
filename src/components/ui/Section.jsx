@@ -66,7 +66,7 @@ const Section = ({ title, id, children, checked, onCheck }) => {
           onClick={(e) => {
             e.stopPropagation();
             const url = window.location.href.split('#').slice(0, 2).join('#') + '#' + id;
-            navigator.clipboard.writeText(url);
+            navigator.clipboard.writeText(url).catch(() => {});
             e.currentTarget.textContent = '\u2713';
             setTimeout(() => { e.currentTarget.textContent = '#'; }, 2000);
           }}

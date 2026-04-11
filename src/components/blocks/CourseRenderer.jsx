@@ -11,7 +11,7 @@ const CourseNavContext = createContext(null);
 export const useCourseNav = () => useContext(CourseNavContext);
 
 export default function CourseRenderer({ src, examMode = false, onNextCourse }) {
-  const { t, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture, setCourseContext } = useApp();
+  const { t, lang, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture, setCourseContext } = useApp();
   useScrollToHash();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -284,7 +284,7 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
           sectionsCompleted={totalSteps}
           onClose={() => setShowCompletionModal(false)}
           onNext={onNextCourse}
-          lang={t('en', 'ro') === 'ro' ? 'ro' : 'en'}
+          lang={lang}
         />
       )}
     </div>
