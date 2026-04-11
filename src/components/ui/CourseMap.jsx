@@ -111,17 +111,19 @@ const CourseMap = ({ subject, onCourseClick }) => {
           const isNext = !isComplete && !hasProgress &&
             courseProgress.slice(0, index).every(cp => cp.total > 0 && cp.completed >= cp.total);
 
-          let tileBg, tileBorder;
+          let borderLeftColor, tileBorder;
           if (isComplete) {
-            tileBg = dark ? 'rgba(22,163,74,0.15)' : '#f0fdf4';
-            tileBorder = dark ? 'rgba(34,197,94,0.4)' : '#bbf7d0';
+            borderLeftColor = '#22c55e';
+            tileBorder = dark ? 'rgba(34,197,94,0.3)' : '#d1fae5';
           } else if (hasProgress) {
-            tileBg = dark ? 'rgba(59,130,246,0.15)' : '#eff6ff';
-            tileBorder = dark ? 'rgba(96,165,250,0.4)' : '#bfdbfe';
+            borderLeftColor = '#3b82f6';
+            tileBorder = dark ? 'rgba(96,165,250,0.3)' : '#dbeafe';
           } else if (isNext) {
-            tileBg = 'var(--theme-card-bg)'; tileBorder = '#93c5fd';
+            borderLeftColor = '#93c5fd';
+            tileBorder = 'var(--theme-border)';
           } else {
-            tileBg = 'var(--theme-card-bg)'; tileBorder = 'var(--theme-border)';
+            borderLeftColor = 'transparent';
+            tileBorder = 'var(--theme-border)';
           }
 
           return (
@@ -131,8 +133,9 @@ const CourseMap = ({ subject, onCourseClick }) => {
               className="text-center p-3 rounded-xl cursor-pointer transition-all duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-px active:scale-[0.98] active:shadow-sm"
               style={{
                 ...getStaggerStyle(index),
-                backgroundColor: tileBg,
-                border: `1.5px solid ${tileBorder}`,
+                backgroundColor: 'var(--theme-card-bg)',
+                border: `1px solid ${tileBorder}`,
+                borderLeft: `4px solid ${borderLeftColor}`,
                 opacity: (!hasProgress && !isComplete && !isNext) ? 0.75 : getStaggerStyle(index).opacity,
               }}
             >
