@@ -58,8 +58,13 @@ const Section = ({ title, id, children, checked, onCheck }) => {
           onClick={e => e.stopPropagation()}
           className="w-4 h-4 accent-green-500"
         />
-        <span className={`font-semibold flex-1 transition-colors ${checked ? 'text-green-600 line-through opacity-70' : ''}`}
-          style={{ color: checked ? undefined : 'var(--theme-content-text)' }}
+        <span className={`flex-1 transition-colors ${checked ? 'line-through opacity-70' : ''}`}
+          style={{
+            fontSize: 'var(--type-h3)',
+            lineHeight: 'var(--type-h3-lh)',
+            fontWeight: 'var(--type-h3-weight)',
+            color: checked ? '#16a34a' : 'var(--theme-content-text)',
+          }}
         >
           <span
             className="inline-block mr-1"

@@ -107,8 +107,13 @@ const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, se
         onComplete={() => setVignetteActive(false)}
       />
       <div
-        className="p-4 cursor-pointer font-bold text-lg transition-colors"
-        style={{ color: 'var(--theme-content-text)' }}
+        className="p-4 cursor-pointer transition-colors"
+        style={{
+          fontSize: 'var(--type-h2)',
+          lineHeight: 'var(--type-h2-lh)',
+          fontWeight: 'var(--type-h2-weight)',
+          color: 'var(--theme-content-text)',
+        }}
         onClick={handleClick}
         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-hover-bg)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}

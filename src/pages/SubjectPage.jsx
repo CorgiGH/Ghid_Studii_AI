@@ -212,7 +212,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             />
           )}
 
-          <main ref={contentRef} className="flex-1 flex flex-col max-w-5xl mx-auto p-4 lg:p-8" style={{ fontSize: '1.05rem' }}>
+          <main ref={contentRef} className="flex-1 flex flex-col mx-auto p-4 lg:p-8" style={{ maxWidth: 'var(--content-max-width)', fontSize: 'var(--type-body)', lineHeight: 'var(--type-body-lh)' }}>
             {tab === 'courses' && (
               <>
                 {activeCourse ? (

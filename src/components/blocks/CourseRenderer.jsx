@@ -221,8 +221,14 @@ export default function CourseRenderer({ src }) {
 
       {/* Step title */}
       <h2
-        className="text-lg font-bold mb-4 mt-5"
-        style={{ color: 'var(--theme-content-text)' }}
+        style={{
+          fontSize: 'var(--type-h2)',
+          lineHeight: 'var(--type-h2-lh)',
+          fontWeight: 'var(--type-h2-weight)',
+          color: 'var(--theme-content-text)',
+          marginTop: '1.25rem',
+          marginBottom: '1rem',
+        }}
       >
         {t(step.title.en, step.title.ro)}
       </h2>
