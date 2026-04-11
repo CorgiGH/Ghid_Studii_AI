@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import useAutoProgress from '../../hooks/useAutoProgress';
 
 const Section = ({ title, id, children, checked, onCheck }) => {
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const { ref: autoRef } = useAutoProgress(id, open);
   const contentRef = useRef(null);
@@ -43,9 +45,10 @@ const Section = ({ title, id, children, checked, onCheck }) => {
   return (
     <div ref={autoRef} className="mb-3 border rounded-lg overflow-hidden transition-shadow hover:shadow-sm" id={id}
       style={{ borderColor: 'var(--theme-border)' }}
+      data-section-id={id}
     >
       <div
-        className="flex items-center gap-2 p-3 cursor-pointer transition-colors"
+        className="group flex items-center gap-2 p-3 cursor-pointer transition-colors"
         style={{ backgroundColor: 'transparent' }}
         onClick={handleToggle}
         onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--theme-hover-bg)'}
@@ -58,6 +61,20 @@ const Section = ({ title, id, children, checked, onCheck }) => {
           onClick={e => e.stopPropagation()}
           className="w-4 h-4 accent-green-500"
         />
+        <span
+          className="opacity-0 group-hover:opacity-70 cursor-pointer select-none transition-opacity"
+          style={{ fontSize: 'var(--type-body)', color: 'var(--theme-muted-text)' }}
+          title="Copy link"
+          onClick={(e) => {
+            e.stopPropagation();
+            const url = `${window.location.origin}${window.location.pathname}#${pathname}#${id}`;
+            navigator.clipboard.writeText(url);
+            e.currentTarget.textContent = '\u2713';
+            setTimeout(() => { e.currentTarget.textContent = '#'; }, 2000);
+          }}
+        >
+          #
+        </span>
         <span className={`flex-1 transition-colors ${checked ? 'line-through opacity-70' : ''}`}
           style={{
             fontSize: 'var(--type-h3)',

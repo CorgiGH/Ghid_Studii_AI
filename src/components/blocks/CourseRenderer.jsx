@@ -4,12 +4,14 @@ import { loadJson } from '../../content/jsonLoader';
 import StepRenderer from './StepRenderer';
 import CourseTransition from '../ui/CourseTransition';
 import ProgressRing from '../ui/ProgressRing';
+import useScrollToHash from '../../hooks/useScrollToHash';
 
 const CourseNavContext = createContext(null);
 export const useCourseNav = () => useContext(CourseNavContext);
 
 export default function CourseRenderer({ src }) {
   const { t, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture, setCourseContext } = useApp();
+  useScrollToHash();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
