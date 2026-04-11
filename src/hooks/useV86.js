@@ -8,7 +8,6 @@ let bootListeners = [];
 
 function notifyBoot() {
   globalBooted = true;
-  globalExec = createSerialExecutor(globalEmulator);
   bootListeners.forEach(fn => fn());
   bootListeners = [];
 }
@@ -45,39 +44,52 @@ export default function useV86(containerRef) {
       globalEmulator = emulator;
       emulatorRef.current = emulator;
 
-      // Detect boot completion by watching serial output for login prompt
-      let output = '';
+      // Wait for serial login prompt, log in, verify exec works, THEN mark booted
+      let serialOutput = '';
       let bootTriggered = false;
       const onBootByte = (byte) => {
         if (bootTriggered) return;
-        output += String.fromCharCode(byte);
-        if (output.includes('login:') || output.includes('$') || output.includes('#')) {
+        serialOutput += String.fromCharCode(byte);
+        if (serialOutput.includes('login:')) {
           bootTriggered = true;
-          // Remove this listener immediately — we only need it once
           emulator.remove_listener('serial0-output-byte', onBootByte);
-          // Auto-login on serial (for exec commands)
-          setTimeout(() => {
-            emulator.serial0_send('root\n');
-            // Auto-login on VGA console (what the user sees)
-            emulator.keyboard_send_text('root\n');
-            setTimeout(() => {
-              notifyBoot();
-              setBooted(true);
-              setBooting(false);
-            }, 1000);
-          }, 500);
+
+          // Log in on serial console
+          emulator.serial0_send('root\n');
+
+          // Wait for shell to be ready, then verify exec works
+          setTimeout(async () => {
+            globalExec = createSerialExecutor(emulator);
+
+            // Warm-up: drain residual output and confirm serial exec works
+            try {
+              const result = await globalExec('echo v86ok', 5000);
+              if (!result.includes('v86ok')) {
+                console.warn('v86Exec warm-up: unexpected result:', result);
+              }
+            } catch (e) {
+              console.warn('v86Exec warm-up failed:', e);
+            }
+
+            notifyBoot();
+            setBooted(true);
+            setBooting(false);
+          }, 2000);
         }
       };
       emulator.add_listener('serial0-output-byte', onBootByte);
 
-      // Fallback: consider booted after 15 seconds regardless
+      // Fallback: consider booted after 20 seconds regardless
       setTimeout(() => {
         if (!globalBooted) {
+          if (!globalExec) {
+            globalExec = createSerialExecutor(emulator);
+          }
           notifyBoot();
           setBooted(true);
           setBooting(false);
         }
-      }, 15000);
+      }, 20000);
     };
     document.head.appendChild(script);
   }, [containerRef, booting]);
