@@ -13,6 +13,7 @@ import CourseNavigation from '../components/ui/CourseNavigation';
 import CourseRenderer from '../components/blocks/CourseRenderer';
 import TestRenderer from '../components/blocks/test/TestRenderer';
 import TestsTab from '../components/ui/TestsTab';
+import BottomTabBar from '../components/layout/BottomTabBar';
 import { CourseBlock } from '../components/ui';
 
 function PracticeTab({ practice: LazyPractice }) {
@@ -166,7 +167,9 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   return (
     <div className="flex flex-col flex-1">
       <div ref={headerRef}>
-        <ContentTypeBar subject={subject} activeTab={tab} onTabChange={handleTabChange} />
+        <div className="hidden lg:block">
+          <ContentTypeBar subject={subject} activeTab={tab} onTabChange={handleTabChange} />
+        </div>
 
         <Breadcrumbs
           yearSem={yearSem}
@@ -358,6 +361,14 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
           </button>
         )}
       </div>
+
+      {/* Mobile bottom tab bar — replaces ContentTypeBar on small screens */}
+      <BottomTabBar
+        subject={subject}
+        activeTab={tab}
+        onTabChange={handleTabChange}
+        lang={lang}
+      />
     </div>
   );
 }
