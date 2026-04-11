@@ -18,6 +18,16 @@ export default function useV86(containerRef) {
   const [booting, setBooting] = useState(false);
   const emulatorRef = useRef(globalEmulator);
   const execRef = useRef(globalExec);
+  const mountedRef = useRef(true);
+
+  // Track mount state to guard async state updates
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  const safeSetBooted = (v) => { if (mountedRef.current) setBooted(v); };
+  const safeSetBooting = (v) => { if (mountedRef.current) setBooting(v); };
 
   const boot = useCallback(() => {
     if (globalEmulator || booting) return;
@@ -84,8 +94,8 @@ export default function useV86(containerRef) {
 
             notifyBoot();
             execRef.current = globalExec;
-            setBooted(true);
-            setBooting(false);
+            safeSetBooted(true);
+            safeSetBooting(false);
           }, 2000);
         }
       };
