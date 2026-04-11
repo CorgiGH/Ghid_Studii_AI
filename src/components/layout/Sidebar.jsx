@@ -170,7 +170,7 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
         <div className="flex-1 min-w-0">
           <div className="text-xs truncate" style={{
             fontWeight: isActive ? 600 : 500,
-            color: isActive ? '#fff' : (isComplete ? '#16a34a' : 'var(--theme-content-text)'),
+            color: isActive ? '#3b82f6' : (isComplete ? '#16a34a' : 'var(--theme-content-text)'),
             opacity: !hasProgress && !isActive ? 0.5 : 1,
           }}>
             {course.shortTitle[lang]}

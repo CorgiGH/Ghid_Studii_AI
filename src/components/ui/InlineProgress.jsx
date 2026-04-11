@@ -136,6 +136,7 @@ const InlineProgress = forwardRef(({ courseId, sectionCount, sectionIds }, ref) 
         className="flex items-center gap-3 px-4 py-2 sticky z-10"
         style={{
           top: 'var(--topbar-offset, 0px)',
+          transition: 'top 0.2s ease-in-out',
           borderBottom: '1px solid var(--theme-border)',
           backgroundColor: 'var(--theme-content-bg)',
         }}
@@ -213,7 +214,7 @@ const InlineProgress = forwardRef(({ courseId, sectionCount, sectionIds }, ref) 
             >
               &#10003;
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--theme-text, #e2e8f0)', marginBottom: '4px' }}>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--theme-content-text)', marginBottom: '4px' }}>
               {t('Course Complete!', 'Curs complet!')}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--theme-muted-text, #94a3b8)' }}>

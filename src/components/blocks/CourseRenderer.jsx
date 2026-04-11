@@ -146,6 +146,7 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
         className="sticky z-10 -mx-4 lg:-mx-8 px-4 lg:px-8"
         style={{
           top: 'var(--topbar-offset, 0px)',
+          transition: 'top 0.2s ease-in-out',
           backgroundColor: 'var(--theme-content-bg)',
           borderBottom: '1px solid var(--theme-border)',
         }}

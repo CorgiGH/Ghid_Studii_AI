@@ -185,7 +185,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
           {tab === 'courses' && activeCourse && (
             <button
               onClick={() => setExamMode(e => !e)}
-              className="px-3 py-1.5 rounded-lg text-sm transition-colors mr-4"
+              className="px-3 py-1.5 rounded-lg text-sm transition-colors mr-4 flex-shrink-0 whitespace-nowrap"
               style={{
                 backgroundColor: examMode ? 'rgba(239, 68, 68, 0.12)' : 'var(--theme-card-bg)',
                 color: examMode ? '#ef4444' : 'var(--theme-muted-text)',
@@ -369,8 +369,8 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             style={{
               width: '12px',
               height: '36px',
-              background: '#1e293b',
-              border: '1px solid #334155',
+              background: 'var(--theme-sidebar-bg)',
+              border: '1px solid var(--theme-sidebar-border)',
               borderRight: 'none',
               borderRadius: '6px 0 0 6px',
               boxShadow: '-2px 0 6px rgba(0,0,0,0.2)',

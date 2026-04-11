@@ -41,7 +41,7 @@ const ContentTypeBar = ({ subject, activeTab, onTabChange }) => {
               color: '#3b82f6',
               fontWeight: 600,
               boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-              border: '1px solid #bfdbfe',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
             } : {
               backgroundColor: 'transparent',
               color: 'var(--theme-muted-text)',
