@@ -244,7 +244,7 @@ export default function TerminalChallenge({ exercises }) {
         <div className="flex-1 min-w-0 relative">
           <div
             ref={screenRef}
-            className="v86-screen"
+            className="v86-screen relative"
             style={{
               width: '100%',
               minHeight: 'clamp(320px, 50vh, 600px)',
