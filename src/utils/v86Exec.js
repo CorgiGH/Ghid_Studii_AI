@@ -108,7 +108,9 @@ export async function injectFiles(exec, files) {
       await exec(`mkdir -p "${parentDir}"`);
     }
     const escaped = escapeForPrintf(content);
-    await exec(`printf '${escaped}' > "${path}"`);
+    // Larger timeout proportional to content size (serial is slow)
+    const timeout = Math.max(3000, Math.ceil(content.length / 10));
+    await exec(`printf '${escaped}' > "${path}"`, timeout);
   }
 }
 

@@ -43,7 +43,13 @@ export default function useV86(containerRef) {
       globalScreenDiv = document.createElement('div');
       globalScreenDiv.style.width = '100%';
       globalScreenDiv.style.height = '100%';
-      containerRef.current.appendChild(globalScreenDiv);
+      // Guard against unmount between boot() call and script.onload
+      if (containerRef?.current) {
+        containerRef.current.appendChild(globalScreenDiv);
+      } else {
+        document.body.appendChild(globalScreenDiv);
+        globalScreenDiv.style.display = 'none';
+      }
 
       const emulator = new window.V86({
         wasm_path: `${basePath}v86/v86.wasm`,
