@@ -14,6 +14,7 @@ import CourseRenderer from '../components/blocks/CourseRenderer';
 import TestRenderer from '../components/blocks/test/TestRenderer';
 import TestsTab from '../components/ui/TestsTab';
 import BottomTabBar from '../components/layout/BottomTabBar';
+import QuickQuizFAB from '../components/ui/QuickQuizFAB';
 import { CourseBlock } from '../components/ui';
 
 function PracticeTab({ practice: LazyPractice }) {
@@ -388,6 +389,18 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         onTabChange={handleTabChange}
         lang={lang}
       />
+
+      {/* Quick quiz FAB — only show when subject has tests */}
+      {subject.tests?.length > 0 && (
+        <QuickQuizFAB
+          lang={lang}
+          onQuiz={() => {
+            const tests = subject.tests;
+            const randomTest = tests[Math.floor(Math.random() * tests.length)];
+            handleTabChange('tests');
+          }}
+        />
+      )}
     </div>
   );
 }
