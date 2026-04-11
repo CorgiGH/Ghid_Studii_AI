@@ -117,7 +117,14 @@ export default function CourseRenderer({ src }) {
   }, [understoodCount, courseData?.steps]);
 
   if (loading) {
-    return <div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>;
+    return (
+      <div className="p-4 space-y-3">
+        <div className="skeleton-shimmer h-6 w-2/3" />
+        <div className="skeleton-shimmer h-4 w-full" />
+        <div className="skeleton-shimmer h-4 w-5/6" />
+        <div className="skeleton-shimmer h-24 w-full" />
+      </div>
+    );
   }
 
   if (error) {

@@ -23,8 +23,9 @@ export default function AnimationBlock({ variant, renderer, data }) {
   const { t } = useApp();
 
   const loading = (
-    <div className="animate-pulse p-4 text-sm opacity-50">
-      {t('Loading animation...', 'Se incarca animatia...')}
+    <div className="p-4 space-y-3">
+      <div className="skeleton-shimmer h-6 w-1/3" />
+      <div className="skeleton-shimmer h-48 w-full" />
     </div>
   );
 

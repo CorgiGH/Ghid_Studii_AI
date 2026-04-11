@@ -6,7 +6,13 @@ import TestRenderer from '../blocks/test/TestRenderer';
 import GeneratedTestRenderer from './GeneratedTestRenderer';
 
 function LoadingFallback() {
-  return <div className="animate-pulse p-4 text-sm opacity-50">Loading...</div>;
+  return (
+    <div className="p-4 space-y-3">
+      <div className="skeleton-shimmer h-6 w-1/2" />
+      <div className="skeleton-shimmer h-4 w-full" />
+      <div className="skeleton-shimmer h-4 w-3/4" />
+    </div>
+  );
 }
 
 export default function TestsTab({ tests, courses }) {

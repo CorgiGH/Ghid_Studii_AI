@@ -128,7 +128,14 @@ export default function TestRenderer({ src }) {
 
   const prevBest = testProgress?.[testData?.meta?.id];
 
-  if (loading) return <div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>;
+  if (loading) return (
+    <div className="p-4 space-y-3">
+      <div className="skeleton-shimmer h-6 w-1/2" />
+      <div className="skeleton-shimmer h-4 w-full" />
+      <div className="skeleton-shimmer h-4 w-4/5" />
+      <div className="skeleton-shimmer h-40 w-full" />
+    </div>
+  );
   if (error) return <div className="p-4 text-sm" style={{ color: '#ef4444' }}>{t('Failed to load test', 'Nu s-a putut încărca testul')}: {error}</div>;
   if (!testData) return null;
 

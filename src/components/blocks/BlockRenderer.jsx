@@ -14,7 +14,7 @@ export default function BlockRenderer({ block, lectureVisible }) {
   // Non-lecture blocks render directly — no animation wrapper overhead
   if (!isLecture) {
     return (
-      <Suspense fallback={<div className="animate-pulse h-8 rounded" style={{ backgroundColor: 'var(--theme-border)' }} />}>
+      <Suspense fallback={<div className="skeleton-shimmer h-8" />}>
         <Component {...block} />
       </Suspense>
     );
@@ -23,7 +23,7 @@ export default function BlockRenderer({ block, lectureVisible }) {
   // Lecture blocks get animated wrapper
   return (
     <LectureBlockWrapper visible={lectureVisible}>
-      <Suspense fallback={<div className="animate-pulse h-8 rounded" style={{ backgroundColor: 'var(--theme-border)' }} />}>
+      <Suspense fallback={<div className="skeleton-shimmer h-8" />}>
         <Component {...block} />
       </Suspense>
     </LectureBlockWrapper>

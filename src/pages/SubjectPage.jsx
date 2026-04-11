@@ -21,7 +21,15 @@ function PracticeTab({ practice: LazyPractice }) {
 
 const LoadingFallback = () => {
   const { t } = useApp();
-  return <div className="animate-pulse p-4 text-sm opacity-50">{t('Loading...', 'Se încarcă...')}</div>;
+  return (
+    <div className="p-4 lg:p-8 space-y-4" style={{ maxWidth: 'var(--content-max-width)' }}>
+      <div className="skeleton-shimmer h-8 w-3/4" />
+      <div className="skeleton-shimmer h-4 w-full" />
+      <div className="skeleton-shimmer h-4 w-5/6" />
+      <div className="skeleton-shimmer h-4 w-2/3" />
+      <div className="skeleton-shimmer h-32 w-full mt-4" />
+    </div>
+  );
 };
 
 export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
