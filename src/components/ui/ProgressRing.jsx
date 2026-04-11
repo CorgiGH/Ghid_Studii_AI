@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const ProgressRing = ({ size = 24, completed = 0, total = 0, isActive = false }) => {
+  // Animated fill on mount — research §2: 600ms ease-in-out (Khan Academy)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
   const percent = total > 0 ? completed / total : 0;
   const isComplete = total > 0 && completed >= total;
   const hasProgress = completed > 0;
@@ -47,10 +53,10 @@ const ProgressRing = ({ size = 24, completed = 0, total = 0, isActive = false })
           stroke={strokeColor}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
-          strokeDashoffset={offset}
+          strokeDashoffset={mounted ? offset : circumference}
           strokeLinecap="round"
           transform={`rotate(-90 ${center} ${center})`}
-          className="transition-all duration-300"
+          style={{ transition: 'stroke-dashoffset 0.6s ease-in-out, stroke 0.4s ease' }}
         />
       )}
       <text
