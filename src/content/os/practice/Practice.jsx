@@ -74,11 +74,7 @@ export default function Practice() {
         '/home/user/pictures': null,
         '/home/user/music': null,
       },
-      welcomeMessage: t('Navigate to documents/ and read notes.txt', 'Navighează în documents/ și citește notes.txt'),
-      checkFn: async (emu) => {
-        const dir = await emu.getDir();
-        return dir === '/home/user/documents';
-      },
+      checkScript: 'test "$(pwd)" = "/home/user/documents" || test "$(pwd)" = "/root/documents"',
       hints: [
         t('Use "cd dirname" to enter a directory', 'Folosește "cd dirname" pentru a intra într-un director'),
         t('Use "cat filename" to print contents', 'Folosește "cat filename" pentru a afișa conținutul'),
@@ -92,13 +88,7 @@ export default function Practice() {
       ),
       courseRef: t('Course 1: File commands', 'Cursul 1: Comenzi fișiere'),
       files: {},
-      welcomeMessage: t('Create project/main.c with content', 'Creează project/main.c cu conținut'),
-      checkFn: async (emu) => {
-        try {
-          const content = await emu.read('/home/user/project/main.c');
-          return content && content.length > 0;
-        } catch { return false; }
-      },
+      checkScript: 'test -f /home/user/project/main.c && test -s /home/user/project/main.c',
       hints: [
         t('"mkdir dirname" creates a directory', '"mkdir dirname" creează un director'),
         t('"echo text > file" writes text to a file', '"echo text > file" scrie text într-un fișier'),
@@ -114,7 +104,6 @@ export default function Practice() {
       files: {
         '/home/user/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully',
       },
-      welcomeMessage: t('Find "error" lines in server.log', 'Găsește liniile cu "error" în server.log'),
       hints: [
         t('"grep pattern file" searches for matches', '"grep pattern file" caută potriviri'),
         t('"wc file" counts lines, words, and chars', '"wc file" numără linii, cuvinte și caractere'),
@@ -135,13 +124,7 @@ export default function Practice() {
         '/home/user/temp': null,
         '/home/user/temp/scratch.txt': 'temporary data',
       },
-      welcomeMessage: t('Explore src/, read Makefile, remove temp/', 'Explorează src/, citește Makefile, șterge temp/'),
-      checkFn: async (emu) => {
-        try {
-          await emu.stat('/home/user/temp');
-          return false;
-        } catch { return true; }
-      },
+      checkScript: '! test -d /home/user/temp',
       hints: [
         t('"ls dir/" lists directory contents', '"ls dir/" listează conținutul directorului'),
         t('"rm -r dir" removes a directory recursively', '"rm -r dir" șterge un director recursiv'),
@@ -198,7 +181,7 @@ export default function Practice() {
       />
 
       <h3 className="text-lg font-bold mt-10 mb-4">{t('Terminal Challenges', 'Provocări de terminal')}</h3>
-      <p className="text-sm opacity-60 mb-6">{t('Use "Try It" to experiment in a real Linux terminal, then "Submit Answer" to auto-check.', 'Folosește "Încearcă" pentru a experimenta într-un terminal Linux real, apoi "Trimite răspunsul" pentru verificare automată.')}</p>
+      <p className="text-sm opacity-60 mb-6">{t('Practice in the real Linux terminal below. Click "Check" to verify your solution.', 'Exersați în terminalul Linux real de mai jos. Apăsați "Verifică" pentru a valida soluția.')}</p>
 
       <TerminalChallenge exercises={terminalExercises} />
     </div>
