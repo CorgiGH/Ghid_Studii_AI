@@ -3,6 +3,7 @@ import { createSerialExecutor } from '../utils/v86Exec';
 
 let globalEmulator = null;
 let globalBooted = false;
+let globalBootStarted = false; // module-level guard against concurrent boot()
 let globalExec = null;
 let globalScreenDiv = null; // persistent div that v86 renders into
 let bootListeners = [];
@@ -30,8 +31,9 @@ export default function useV86(containerRef) {
   const safeSetBooting = (v) => { if (mountedRef.current) setBooting(v); };
 
   const boot = useCallback(() => {
-    if (globalEmulator || booting) return;
+    if (globalEmulator || globalBootStarted) return;
     if (!containerRef?.current) return;
+    globalBootStarted = true;
     setBooting(true);
 
     const basePath = import.meta.env.BASE_URL || '/';
@@ -123,7 +125,7 @@ export default function useV86(containerRef) {
       }, 20000);
     };
     document.head.appendChild(script);
-  }, [containerRef, booting]);
+  }, [containerRef]);
 
   // Reparent the persistent v86 screen div into the current component's container.
   // This handles navigation between pages that each have a TerminalChallenge.
