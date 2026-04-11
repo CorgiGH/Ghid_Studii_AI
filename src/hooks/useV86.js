@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createSerialExecutor } from '../utils/v86Exec';
 
 let globalEmulator = null;
 let globalBooted = false;
+let globalExec = null;
 let bootListeners = [];
 
 function notifyBoot() {
   globalBooted = true;
+  globalExec = createSerialExecutor(globalEmulator);
   bootListeners.forEach(fn => fn());
   bootListeners = [];
 }
@@ -14,6 +17,7 @@ export default function useV86(containerRef) {
   const [booted, setBooted] = useState(globalBooted);
   const [booting, setBooting] = useState(false);
   const emulatorRef = useRef(globalEmulator);
+  const execRef = useRef(globalExec);
 
   const boot = useCallback(() => {
     if (globalEmulator || booting) return;
@@ -76,13 +80,15 @@ export default function useV86(containerRef) {
     if (globalBooted) {
       setBooted(true);
       emulatorRef.current = globalEmulator;
+      execRef.current = globalExec;
     } else {
       bootListeners.push(() => {
         setBooted(true);
         emulatorRef.current = globalEmulator;
+        execRef.current = globalExec;
       });
     }
   }, []);
 
-  return { emulator: emulatorRef, booted, booting, boot };
+  return { emulator: emulatorRef, exec: execRef, booted, booting, boot };
 }
