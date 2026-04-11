@@ -63,8 +63,8 @@ export default function Practice() {
   const terminalExercises = [
     {
       description: t(
-        'Navigate to the "documents" directory and read the contents of "notes.txt" using cat.',
-        'Navighează în directorul "documents" și citește conținutul fișierului "notes.txt" folosind cat.'
+        'Navigate to "documents", read "notes.txt" with cat, and save a copy as ~/backup.txt.',
+        'Navighează în "documents", citește "notes.txt" cu cat, și salvează o copie ca ~/backup.txt.'
       ),
       courseRef: t('Course 1: Directory commands', 'Cursul 1: Comenzi directoare'),
       files: {
@@ -74,12 +74,14 @@ export default function Practice() {
         '/root/pictures': null,
         '/root/music': null,
       },
-      checkScript: 'test "$(pwd)" = "/root/documents" || test "$(pwd)" = "/root/documents"',
+      checkScript: 'test -f /root/backup.txt && diff /root/documents/notes.txt /root/backup.txt > /dev/null 2>&1',
+      failureHint: (t) => t('Make sure ~/backup.txt exists and matches notes.txt. Try: cp documents/notes.txt ~/backup.txt', 'Asigură-te că ~/backup.txt există și se potrivește cu notes.txt. Încearcă: cp documents/notes.txt ~/backup.txt'),
       hints: [
         t('Use "cd dirname" to enter a directory', 'Folosește "cd dirname" pentru a intra într-un director'),
         t('Use "cat filename" to print contents', 'Folosește "cat filename" pentru a afișa conținutul'),
+        t('Use "cp source dest" to copy a file', 'Folosește "cp sursă dest" pentru a copia un fișier'),
       ],
-      solution: 'cd documents\ncat notes.txt',
+      solution: 'cd documents\ncat notes.txt\ncp notes.txt ~/backup.txt',
     },
     {
       description: t(
@@ -97,8 +99,8 @@ export default function Practice() {
     },
     {
       description: t(
-        'Use grep to find all lines containing "error" in the log file, then count the total lines with wc.',
-        'Folosește grep pentru a găsi toate liniile ce conțin "error" în fișierul log, apoi numără totalul de linii cu wc.'
+        'Use grep to find all lines containing "error" (case-insensitive) in server.log, then count the total lines with wc.',
+        'Folosește grep pentru a găsi toate liniile ce conțin "error" (fără a ține cont de litere mari/mici) în server.log, apoi numără totalul de linii cu wc.'
       ),
       courseRef: t('Course 1: File processing', 'Cursul 1: Procesare fișiere'),
       files: {
@@ -108,7 +110,7 @@ export default function Practice() {
         t('"grep pattern file" searches for matches', '"grep pattern file" caută potriviri'),
         t('"wc file" counts lines, words, and chars', '"wc file" numără linii, cuvinte și caractere'),
       ],
-      solution: 'grep error server.log\nwc server.log',
+      solution: 'grep -i error server.log\nwc -l server.log',
     },
     {
       description: t(

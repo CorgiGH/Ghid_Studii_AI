@@ -16,6 +16,7 @@ export default function Lab01() {
       courseRef: t('Course 1: Directory commands', 'Cursul 1: Comenzi directoare'),
       files: {},
       checkScript: 'test -d /root/programe && test -d /root/programe/tema1 && test -d /root/programe/tema2 && test -d /root/programe/tema2/tema2_sub-temaA',
+      failureHint: (t) => t('Check: ~/programe, ~/programe/tema1, ~/programe/tema2, ~/programe/tema2/tema2_sub-temaA all exist as directories', 'Verifică: ~/programe, ~/programe/tema1, ~/programe/tema2, ~/programe/tema2/tema2_sub-temaA există ca directoare'),
       hints: [
         t('Use "mkdir" to create directories', 'Folosiți "mkdir" pentru a crea directoare'),
         t('Use "mv old new" to rename', 'Folosiți "mv vechi nou" pentru a redenumi'),
@@ -36,6 +37,7 @@ export default function Lab01() {
         '/root/programe/tema2/tema2_sub-temaA': null,
       },
       checkScript: 'test -f /root/programe/program1.c && test -f /root/programe/program2.c && test -f /root/programe/program2.h && test -f /root/programe/tema1/tema1-1.c && test -f /root/programe/tema1/tema1-2.c && test -f /root/programe/tema2/tema2_sub-temaA/sub-temaA1.c && test -f /root/programe/tema2/tema2_sub-temaA/sub-temaA2.cpp',
+      failureHint: (t) => t('Check that all 7 files exist: program1.c, program2.c, program2.h in ~/programe, tema1-1.c and tema1-2.c in tema1/, sub-temaA1.c and sub-temaA2.cpp in tema2_sub-temaA/', 'Verifică că toate 7 fișiere există: program1.c, program2.c, program2.h în ~/programe, tema1-1.c și tema1-2.c în tema1/, sub-temaA1.c și sub-temaA2.cpp în tema2_sub-temaA/'),
       hints: [
         t('Use "touch filename" to create empty files', 'Folosiți "touch fisier" pentru a crea fișiere goale'),
         t('You can create multiple files: touch a.c b.c c.h', 'Puteți crea mai multe fișiere: touch a.c b.c c.h'),
@@ -58,6 +60,7 @@ export default function Lab01() {
         '/root/temp/scratch.txt': 'temporary data',
       },
       checkScript: 'test -f /root/programe/tema2/tema2-1.c && grep -q "tema1" /root/programe/tema2/tema2-1.c && test -f /root/programe/tema2/tema2-2.c && ! test -d /root/temp',
+      failureHint: (t) => t('Check: tema2-1.c copied (with content), tema2-2.c moved, temp/ deleted', 'Verifică: tema2-1.c copiat (cu conținut), tema2-2.c mutat, temp/ șters'),
       hints: [
         t('"cp source dest" copies a file', '"cp sursa dest" copiază un fișier'),
         t('"mv source dest" moves/renames a file', '"mv sursa dest" mută/redenumește un fișier'),
