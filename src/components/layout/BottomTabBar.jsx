@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const TABS = [
   { key: 'courses', label: 'Courses', labelRo: 'Cursuri', icon: '\uD83D\uDCD6' },
@@ -19,12 +19,23 @@ export default function BottomTabBar({ subject, activeTab, onTabChange, lang }) 
     return false;
   });
 
-  // Add bottom padding to body only when tab bar is visible
+  // Add bottom padding to body only when tab bar is actually visible (mobile only)
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 1023px)').matches);
   useEffect(() => {
-    if (visibleTabs.length < 2) return;
+    const mq = window.matchMedia('(max-width: 1023px)');
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    if (visibleTabs.length < 2 || !isMobile) {
+      document.body.style.paddingBottom = '';
+      return;
+    }
     document.body.style.paddingBottom = 'calc(64px + env(safe-area-inset-bottom, 0px))';
     return () => { document.body.style.paddingBottom = ''; };
-  }, [visibleTabs.length]);
+  }, [visibleTabs.length, isMobile]);
 
   if (visibleTabs.length < 2) return null;
 
