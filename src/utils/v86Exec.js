@@ -118,12 +118,16 @@ export async function injectFiles(exec, files) {
  * The check script should exit 0 for pass, non-zero for fail.
  */
 export async function runCheck(exec, checkScript) {
+  const id = ++cmdId;
+  const passMark = `__PASS_${id}__`;
+  const failMark = `__FAIL_${id}__`;
   const result = await exec(
-    `( ${checkScript} ) 2>&1 && echo __PASS__ || echo __FAIL__`,
+    `( ${checkScript} ) 2>&1 && echo ${passMark} || echo ${failMark}`,
     5000
   );
-  const passed = result.includes('__PASS__');
-  const feedbackEnd = result.lastIndexOf(passed ? '__PASS__' : '__FAIL__');
+  const passed = result.includes(passMark);
+  const marker = passed ? passMark : failMark;
+  const feedbackEnd = result.lastIndexOf(marker);
   const feedback = result.slice(0, feedbackEnd).trim();
   return { passed, feedback };
 }

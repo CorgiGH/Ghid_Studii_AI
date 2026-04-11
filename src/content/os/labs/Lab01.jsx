@@ -59,7 +59,7 @@ export default function Lab01() {
         '/root/temp': null,
         '/root/temp/scratch.txt': 'temporary data',
       },
-      checkScript: 'test -f /root/programe/tema2/tema2-1.c && grep -q "tema1" /root/programe/tema2/tema2-1.c && test -f /root/programe/tema2/tema2-2.c && ! test -d /root/temp',
+      checkScript: 'test -f /root/programe/tema2/tema2-1.c && grep -q "tema1" /root/programe/tema2/tema2-1.c && test -f /root/programe/tema2/tema2-2.c && ! test -f /root/programe/tema1/tema1-2.c && ! test -d /root/temp',
       failureHint: (t) => t('Check: tema2-1.c copied (with content), tema2-2.c moved, temp/ deleted', 'Verifică: tema2-1.c copiat (cu conținut), tema2-2.c mutat, temp/ șters'),
       hints: [
         t('"cp source dest" copies a file', '"cp sursa dest" copiază un fișier'),

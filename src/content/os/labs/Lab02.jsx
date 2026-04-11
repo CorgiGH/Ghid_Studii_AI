@@ -10,37 +10,37 @@ export default function Lab02() {
   const terminalExercises = [
     {
       description: t(
-        'Write a pipeline that extracts all unique login shells from /etc/passwd and saves them to shells.txt. Then display the contents of shells.txt.',
-        'Scrieți un pipeline care extrage toate shell-urile de login unice din /etc/passwd și le salvează în shells.txt. Apoi afișați conținutul shells.txt.'
+        'The file passwd (in your home directory) contains user account data. Write a pipeline that extracts all unique login shells and saves them to shells.txt. Then display the contents.',
+        'Fișierul passwd (în directorul home) conține date despre conturile de utilizatori. Scrieți un pipeline care extrage toate shell-urile de login unice și le salvează în shells.txt. Apoi afișați conținutul.'
       ),
       courseRef: t('Course 2: Pipelines, cut, sort', 'Cursul 2: Pipeline-uri, cut, sort'),
       files: {
-        '/etc/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
+        '/root/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
       checkScript: 'test -f /root/shells.txt && LINES=$(sort -u /root/shells.txt | grep -c .) && test "$LINES" -ge 2 && grep -qE "/bin/bash|nologin" /root/shells.txt',
       hints: [
-        t('Use "cut -f7 -d: /etc/passwd" to extract the shell field', 'Folosiți "cut -f7 -d: /etc/passwd" pentru a extrage câmpul shell'),
+        t('Use "cut -f7 -d: passwd" to extract the shell field', 'Folosiți "cut -f7 -d: passwd" pentru a extrage câmpul shell'),
         t('Pipe to "sort -u" to get unique values', 'Pipe la "sort -u" pentru valori unice'),
         t('Redirect with > shells.txt, then cat shells.txt', 'Redirectați cu > shells.txt, apoi cat shells.txt'),
       ],
-      solution: 'cut -f7 -d: /etc/passwd | sort -u > shells.txt\ncat shells.txt',
+      solution: 'cut -f7 -d: passwd | sort -u > shells.txt\ncat shells.txt',
     },
     {
       description: t(
-        'The file /etc/passwd contains user accounts. Write a pipeline that counts how many accounts use /bin/bash as their login shell. Save just the number to bash_count.txt.',
-        'Fișierul /etc/passwd conține conturile de utilizatori. Scrieți un pipeline care numără câte conturi folosesc /bin/bash ca shell de login. Salvați doar numărul în bash_count.txt.'
+        'The file passwd contains user accounts. Write a pipeline that counts how many accounts use /bin/bash as their login shell. Save just the number to bash_count.txt.',
+        'Fișierul passwd conține conturile de utilizatori. Scrieți un pipeline care numără câte conturi folosesc /bin/bash ca shell de login. Salvați doar numărul în bash_count.txt.'
       ),
       courseRef: t('Course 2: grep, wc, pipelines', 'Cursul 2: grep, wc, pipeline-uri'),
       files: {
-        '/etc/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
+        '/root/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
       checkScript: 'test -f /root/bash_count.txt && test "$(cat /root/bash_count.txt | tr -d "[:space:]")" = "4"',
       hints: [
-        t('Use "grep /bin/bash /etc/passwd" to find matching lines', 'Folosiți "grep /bin/bash /etc/passwd" pentru a găsi liniile potrivite'),
+        t('Use "grep /bin/bash passwd" to find matching lines', 'Folosiți "grep /bin/bash passwd" pentru a găsi liniile potrivite'),
         t('Pipe to "wc -l" to count lines, or use "grep -c"', 'Pipe la "wc -l" pentru a număra linii, sau folosiți "grep -c"'),
         t('Redirect output with > bash_count.txt', 'Redirectați output-ul cu > bash_count.txt'),
       ],
-      solution: 'grep -c /bin/bash /etc/passwd > bash_count.txt\ncat bash_count.txt',
+      solution: 'grep -c /bin/bash passwd > bash_count.txt\ncat bash_count.txt',
     },
     {
       description: t(

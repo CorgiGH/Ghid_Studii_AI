@@ -174,7 +174,7 @@ export default function TerminalChallenge({ exercises }) {
       if (idxRef.current !== checkIdx) return;
       setCheckResult({ passed: false, feedback: '' });
     }
-    setChecking(false);
+    if (idxRef.current === checkIdx) setChecking(false);
   }, [ex, currentIdx]);
 
   const resetExercise = useCallback(async () => {
