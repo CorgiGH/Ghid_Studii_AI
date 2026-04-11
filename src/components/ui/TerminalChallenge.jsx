@@ -129,8 +129,8 @@ export default function TerminalChallenge({ exercises }) {
 
   return (
     <div className="border rounded-xl overflow-hidden mb-6" style={{ borderColor: 'var(--theme-border)' }}>
-      {/* Exercise selector */}
-      <div className="flex items-center gap-1 p-2 overflow-x-auto" style={{ background: 'var(--theme-sidebar-bg)', borderBottom: '1px solid var(--theme-border)' }}>
+      {/* Exercise selector — sticky top */}
+      <div className="sticky top-0 z-30 flex items-center gap-1 p-2 overflow-x-auto" style={{ background: 'var(--theme-sidebar-bg)', borderBottom: '1px solid var(--theme-border)' }}>
         {exercises.map((e, i) => (
           <button
             key={i}
@@ -147,11 +147,21 @@ export default function TerminalChallenge({ exercises }) {
         ))}
       </div>
 
-      {/* Two-column layout */}
-      <div className="flex flex-col lg:flex-row">
-        {/* Left: v86 terminal */}
+      {/* Two-column layout — reversed on mobile so instructions show first */}
+      <div className="flex flex-col-reverse lg:flex-row">
+        {/* Terminal */}
         <div className="flex-1 min-w-0 relative">
-          <div ref={screenRef} className="v86-screen" style={{ width: '100%', minHeight: '450px', overflow: 'auto', background: '#000' }} />
+          <div
+            ref={screenRef}
+            className="v86-screen"
+            style={{
+              width: '100%',
+              minHeight: 'clamp(480px, 60vh, 680px)',
+              maxHeight: 'calc(100vh - 200px)',
+              overflow: 'auto',
+              background: '#000',
+            }}
+          />
           {/* Boot overlay */}
           {!booted && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/90 z-10">
@@ -172,8 +182,11 @@ export default function TerminalChallenge({ exercises }) {
           )}
         </div>
 
-        {/* Right: Instructions panel */}
-        <div className="w-full lg:w-72 border-t lg:border-t-0 lg:border-l p-4" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}>
+        {/* Instructions panel — shows FIRST on mobile (flex-col-reverse), right side on desktop */}
+        <div
+          className="w-full lg:w-80 border-b lg:border-b-0 lg:border-l p-4 max-h-64 lg:max-h-none overflow-y-auto"
+          style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}
+        >
           <div className="flex items-center gap-2 mb-3">
             <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--theme-muted)' }}>
               {t('Exercise', 'Exercițiu')} {currentIdx + 1}/{exercises.length}
@@ -200,82 +213,6 @@ export default function TerminalChallenge({ exercises }) {
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-2 p-3 flex-wrap" style={{ borderTop: '1px solid var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}>
-        <button
-          onClick={() => switchExercise(Math.max(0, currentIdx - 1))}
-          disabled={currentIdx === 0}
-          className="px-3 py-1.5 text-sm font-medium rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80"
-          style={{ background: 'var(--theme-content-bg)', color: 'var(--theme-text)' }}
-        >
-          ← {t('Prev', 'Anterior')}
-        </button>
-        <button
-          onClick={() => switchExercise(Math.min(exercises.length - 1, currentIdx + 1))}
-          disabled={currentIdx === exercises.length - 1}
-          className="px-3 py-1.5 text-sm font-medium rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80"
-          style={{ background: 'var(--theme-content-bg)', color: 'var(--theme-text)' }}
-        >
-          {t('Next', 'Următor')} →
-        </button>
-
-        <div className="flex-1" />
-
-        {ex.checkScript && (
-          <button
-            onClick={check}
-            disabled={checking || !booted}
-            className="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {checking ? (
-              <span className="flex items-center gap-2">
-                <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" />
-                {t('Checking...', 'Se verifică...')}
-              </span>
-            ) : t('Check', 'Verifică')}
-          </button>
-        )}
-
-        {/* Reset dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setResetMenuOpen(!resetMenuOpen)}
-            disabled={!booted}
-            className="px-4 py-1.5 text-sm font-medium bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {t('Reset', 'Resetează')} ▾
-          </button>
-          {resetMenuOpen && (
-            <div className="absolute bottom-full mb-1 right-0 w-48 rounded-lg shadow-lg border overflow-hidden z-20" style={{ background: 'var(--theme-content-bg)', borderColor: 'var(--theme-border)' }}>
-              <button
-                onClick={resetExercise}
-                className="w-full px-3 py-2 text-sm text-left hover:bg-blue-50 dark:hover:bg-blue-950/20 transition"
-              >
-                {t('Reset Exercise', 'Resetează exercițiul')}
-                <span className="block text-xs opacity-50">{t('Re-inject files (~0.5s)', 'Reinjectează fișierele (~0.5s)')}</span>
-              </button>
-              <button
-                onClick={resetVM}
-                className="w-full px-3 py-2 text-sm text-left hover:bg-red-50 dark:hover:bg-red-950/20 transition border-t"
-                style={{ borderColor: 'var(--theme-border)' }}
-              >
-                {t('Reset VM', 'Resetează VM')}
-                <span className="block text-xs opacity-50">{t('Full reboot (~5s)', 'Repornire completă (~5s)')}</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {ex.solution && (
-          <button
-            onClick={() => setShowSolution(!showSolution)}
-            className="px-4 py-1.5 text-sm font-medium bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-          >
-            {showSolution ? t('Hide Solution', 'Ascunde soluția') : t('Show Solution', 'Arată soluția')}
-          </button>
-        )}
-      </div>
-
       {/* Check result banner */}
       {checkResult !== null && (
         <div className={`p-3 text-sm font-medium ${
@@ -291,6 +228,90 @@ export default function TerminalChallenge({ exercises }) {
           )}
         </div>
       )}
+
+      {/* Controls — sticky bottom */}
+      <div className="sticky bottom-0 z-30" style={{ borderTop: '1px solid var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3">
+          {/* Nav buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => switchExercise(Math.max(0, currentIdx - 1))}
+              disabled={currentIdx === 0}
+              className="flex-1 sm:flex-none px-3 py-2 text-sm font-medium rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80"
+              style={{ background: 'var(--theme-content-bg)', color: 'var(--theme-text)' }}
+            >
+              ← {t('Prev', 'Anterior')}
+            </button>
+            <button
+              onClick={() => switchExercise(Math.min(exercises.length - 1, currentIdx + 1))}
+              disabled={currentIdx === exercises.length - 1}
+              className="flex-1 sm:flex-none px-3 py-2 text-sm font-medium rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80"
+              style={{ background: 'var(--theme-content-bg)', color: 'var(--theme-text)' }}
+            >
+              {t('Next', 'Următor')} →
+            </button>
+          </div>
+
+          <div className="hidden sm:block flex-1" />
+
+          {/* Action buttons */}
+          <div className="flex gap-2">
+            {ex.checkScript && (
+              <button
+                onClick={check}
+                disabled={checking || !booted}
+                className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {checking ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" />
+                    {t('Checking...', 'Se verifică...')}
+                  </span>
+                ) : t('Check', 'Verifică')}
+              </button>
+            )}
+
+            {/* Reset dropdown */}
+            <div className="relative flex-1 sm:flex-none">
+              <button
+                onClick={() => setResetMenuOpen(!resetMenuOpen)}
+                disabled={!booted}
+                className="w-full px-4 py-2 text-sm font-medium bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('Reset', 'Resetează')} ▾
+              </button>
+              {resetMenuOpen && (
+                <div className="absolute bottom-full mb-1 right-0 w-48 rounded-lg shadow-lg border overflow-hidden z-20" style={{ background: 'var(--theme-content-bg)', borderColor: 'var(--theme-border)' }}>
+                  <button
+                    onClick={resetExercise}
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-blue-50 dark:hover:bg-blue-950/20 transition"
+                  >
+                    {t('Reset Exercise', 'Resetează exercițiul')}
+                    <span className="block text-xs opacity-50">{t('Re-inject files (~0.5s)', 'Reinjectează fișierele (~0.5s)')}</span>
+                  </button>
+                  <button
+                    onClick={resetVM}
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-red-50 dark:hover:bg-red-950/20 transition border-t"
+                    style={{ borderColor: 'var(--theme-border)' }}
+                  >
+                    {t('Reset VM', 'Resetează VM')}
+                    <span className="block text-xs opacity-50">{t('Full reboot (~5s)', 'Repornire completă (~5s)')}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {ex.solution && (
+              <button
+                onClick={() => setShowSolution(!showSolution)}
+                className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+              >
+                {showSolution ? t('Hide Solution', 'Ascunde soluția') : t('Show Solution', 'Arată soluția')}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Solution */}
       {showSolution && ex.solution && (
