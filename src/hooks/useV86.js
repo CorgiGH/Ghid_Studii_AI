@@ -76,6 +76,7 @@ export default function useV86(containerRef) {
             }
 
             notifyBoot();
+            execRef.current = globalExec;
             setBooted(true);
             setBooting(false);
           }, 2000);
@@ -92,6 +93,7 @@ export default function useV86(containerRef) {
             globalExec = createSerialExecutor(emulator);
           }
           notifyBoot();
+          execRef.current = globalExec;
           setBooted(true);
           setBooting(false);
         }
