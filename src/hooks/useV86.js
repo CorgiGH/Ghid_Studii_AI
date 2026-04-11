@@ -54,8 +54,12 @@ export default function useV86(containerRef) {
           bootTriggered = true;
           emulator.remove_listener('serial0-output-byte', onBootByte);
 
-          // Log in on serial console
+          // Log in on serial console, then disable echo so exec
+          // markers aren't duplicated in the command echo
           emulator.serial0_send('root\n');
+          setTimeout(() => {
+            emulator.serial0_send('stty -echo\n');
+          }, 1000);
 
           // Wait for shell to be ready, then verify exec works
           setTimeout(async () => {
