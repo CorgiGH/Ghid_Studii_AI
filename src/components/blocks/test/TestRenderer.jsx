@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useApp } from '../../../contexts/AppContext';
 import { loadJson } from '../../../content/jsonLoader';
@@ -9,6 +9,7 @@ import DiagramQuestion from './DiagramQuestion';
 import FillInQuestion from './FillInQuestion';
 import CodeTracingQuestion from './CodeTracingQuestion';
 import TestResults from './TestResults';
+import TestModeSelector from '../../ui/TestModeSelector';
 
 const promptMarkdown = {
   code({ inline, children, ...props }) {
@@ -81,6 +82,8 @@ export default function TestRenderer({ src }) {
   const [activeQ, setActiveQ] = useState(null);
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewQuestionIds, setReviewQuestionIds] = useState([]);
+  const [testMode, setTestMode] = useState(null); // null=not started, 'tutor'|'timed'
+  const [timeLeft, setTimeLeft] = useState(null);
 
   // Load test JSON
   useEffect(() => {
@@ -113,6 +116,30 @@ export default function TestRenderer({ src }) {
     return () => setCourseContext(null);
   }, [testData, setCourseContext, t]);
 
+  // Timed mode countdown
+  useEffect(() => {
+    if (testMode !== 'timed' || showResults || !testData) return;
+    const totalSeconds = (testData.meta.duration || testData.questions.length * 2) * 60;
+    setTimeLeft(totalSeconds);
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [testMode, showResults, testData]);
+
+  // Auto-submit when timer hits 0
+  useEffect(() => {
+    if (timeLeft === 0 && testMode === 'timed' && !showResults) {
+      handleFinishRef.current?.();
+    }
+  }, [timeLeft, testMode, showResults]);
+
   const handleAnswer = useCallback((questionId, score, maxScore) => {
     setAnswers(prev => ({ ...prev, [questionId]: { score, maxScore } }));
   }, []);
@@ -123,14 +150,22 @@ export default function TestRenderer({ src }) {
   const answeredCount = Object.keys(answers).length;
   const allAnswered = answeredCount >= visibleQuestionCount;
 
-  const handleFinish = () => {
+  const handleFinish = useCallback(() => {
     if (!testData) return;
     const totalScore = Object.values(answers).reduce((sum, a) => sum + (a.score || 0), 0);
     saveTestResult(testData.meta.id, totalScore, testData.meta.totalPoints, answers);
     setShowResults(true);
-  };
+  }, [testData, answers, saveTestResult]);
+
+  const handleFinishRef = useRef(handleFinish);
+  handleFinishRef.current = handleFinish;
 
   const prevBest = testProgress?.[testData?.meta?.id];
+
+  // Show mode selector before test starts
+  if (!testMode && testData && !loading) {
+    return <TestModeSelector onSelect={setTestMode} lang={lang} />;
+  }
 
   if (loading) return (
     <div className="p-4 space-y-3">
@@ -178,7 +213,12 @@ export default function TestRenderer({ src }) {
           )}
         </div>
         <div className="flex flex-wrap gap-3 mt-2 text-xs" style={{ color: 'var(--theme-muted-text)' }}>
-          {meta.duration && <span>{'\u23F1'} {meta.duration} min</span>}
+          {testMode === 'timed' && timeLeft !== null && !showResults && (
+            <span style={{ color: timeLeft < 60 ? '#ef4444' : '#3b82f6', fontWeight: 600 }}>
+              {'\u23F1'} {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+            </span>
+          )}
+          {testMode !== 'timed' && meta.duration && <span>{'\u23F1'} {meta.duration} min</span>}
           <span>{meta.totalPoints} {t('points', 'puncte')}</span>
           <span>{visibleQuestionCount} {t('questions', 'întrebări')}</span>
           {prevBest && (
