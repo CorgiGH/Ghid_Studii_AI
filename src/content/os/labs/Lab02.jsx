@@ -17,17 +17,7 @@ export default function Lab02() {
       files: {
         '/etc/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
-      welcomeMessage: t('Extract unique login shells', 'Extrageti shell-urile de login unice'),
-      checkFn: async (emu) => {
-        try {
-          const content = await emu.read('/home/user/shells.txt');
-          if (!content) return false;
-          const lines = content.trim().split('\n').map(l => l.trim()).filter(Boolean);
-          const hasShells = lines.some(l => l.includes('/bin/bash') || l.includes('nologin'));
-          const unique = new Set(lines).size === lines.length;
-          return hasShells && unique && lines.length >= 2;
-        } catch { return false; }
-      },
+      checkScript: 'test -f /home/user/shells.txt && LINES=$(sort -u /home/user/shells.txt | grep -c .) && test "$LINES" -ge 2 && grep -qE "/bin/bash|nologin" /home/user/shells.txt',
       hints: [
         t('Use "cut -f7 -d: /etc/passwd" to extract the shell field', 'Folositi "cut -f7 -d: /etc/passwd" pentru a extrage campul shell'),
         t('Pipe to "sort -u" to get unique values', 'Pipe la "sort -u" pentru valori unice'),
@@ -44,15 +34,7 @@ export default function Lab02() {
       files: {
         '/etc/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
-      welcomeMessage: t('Count bash users', 'Numarati utilizatorii bash'),
-      checkFn: async (emu) => {
-        try {
-          const content = await emu.read('/home/user/bash_count.txt');
-          if (!content) return false;
-          const num = parseInt(content.trim(), 10);
-          return num === 4;
-        } catch { return false; }
-      },
+      checkScript: 'test -f /home/user/bash_count.txt && test "$(cat /home/user/bash_count.txt | tr -d "[:space:]")" = "4"',
       hints: [
         t('Use "grep /bin/bash /etc/passwd" to find matching lines', 'Folositi "grep /bin/bash /etc/passwd" pentru a gasi liniile potrivite'),
         t('Pipe to "wc -l" to count lines, or use "grep -c"', 'Pipe la "wc -l" pentru a numara linii, sau folositi "grep -c"'),
@@ -69,18 +51,7 @@ export default function Lab02() {
       files: {
         '/home/user/data.txt': 'ana.popescu\ndiana.ionescu\nioana.stan\nroxana.marin\nmihai.popa\nstefana.dinu\ndiana.vasile\nbogdana.rusu\nana.voicu\nadrian.ganea\n',
       },
-      welcomeMessage: t('Filter names with grep', 'Filtrati numele cu grep'),
-      checkFn: async (emu) => {
-        try {
-          const content = await emu.read('/home/user/filtered.txt');
-          if (!content) return false;
-          const lines = content.trim().split('\n').map(l => l.trim()).filter(Boolean);
-          const hasDiana = lines.some(l => l.includes('diana'));
-          const hasAna = lines.some(l => l.includes('ana'));
-          // Should contain names with "ana" but not "diana"
-          return !hasDiana && hasAna && lines.length >= 4;
-        } catch { return false; }
-      },
+      checkScript: 'test -f /home/user/filtered.txt && grep -q "ana" /home/user/filtered.txt && ! grep -q "diana" /home/user/filtered.txt && test "$(wc -l < /home/user/filtered.txt)" -ge 4',
       hints: [
         t('Start with "cat data.txt | grep ana" to select lines with "ana"', 'Incepeti cu "cat data.txt | grep ana" pentru a selecta liniile cu "ana"'),
         t('Pipe to "grep -v diana" to exclude lines containing "diana"', 'Pipe la "grep -v diana" pentru a exclude liniile cu "diana"'),
@@ -117,8 +88,8 @@ export default function Lab02() {
       </h3>
       <p className="text-sm mb-4 opacity-80">
         {t(
-          'Practice in the terminal below. Use "Try It" for free experimentation, then switch to "Submit Answer" and click "Check" to verify your solution.',
-          'Exersati in terminalul de mai jos. Folositi "Incearca" pentru experimentare libera, apoi treceti la "Trimite raspunsul" si apasati "Verifica" pentru a valida solutia.'
+          'Practice in the real Linux terminal below. Click "Check" to verify your solution.',
+          'Exersați în terminalul Linux real de mai jos. Apăsați "Verifică" pentru a valida soluția.'
         )}
       </p>
       <TerminalChallenge exercises={terminalExercises} />
