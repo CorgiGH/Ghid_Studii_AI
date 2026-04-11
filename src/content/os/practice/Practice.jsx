@@ -95,7 +95,7 @@ export default function Practice() {
         t('"mkdir dirname" creates a directory', '"mkdir dirname" creează un director'),
         t('"echo text > file" writes text to a file', '"echo text > file" scrie text într-un fișier'),
       ],
-      solution: 'mkdir project\ncd project\necho #include <stdio.h> > main.c',
+      solution: 'mkdir project\ncd project\necho "#include <stdio.h>" > main.c',
     },
     {
       description: t(

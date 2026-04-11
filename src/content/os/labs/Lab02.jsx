@@ -4,7 +4,7 @@ import { Box, Code, Section, Toggle } from '../../../components/ui';
 import TerminalChallenge from '../../../components/ui/TerminalChallenge';
 
 export default function Lab02() {
-  const { t, lang, checked, toggleCheck } = useApp();
+  const { t, checked, toggleCheck } = useApp();
 
   // ── Interactive terminal exercises (chained commands) ──────────
   const terminalExercises = [

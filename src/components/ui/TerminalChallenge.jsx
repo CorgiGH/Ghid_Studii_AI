@@ -20,9 +20,11 @@ function Hint({ children }) {
     <span ref={ref} className="relative inline-block">
       <span
         role="button"
+        tabIndex={0}
         aria-label="Hint"
         className="cursor-help text-blue-500 hover:text-blue-400 transition text-sm"
         onClick={() => setShow(s => !s)}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setShow(s => !s)}
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
       >
@@ -142,6 +144,7 @@ export default function TerminalChallenge({ exercises }) {
   const switchExercise = (idx) => {
     setCurrentIdx(idx);
     setCheckResult(null);
+    setChecking(false);
     setShowSolution(false);
     setResetMenuOpen(false);
     setHasAttempted(false);
@@ -206,6 +209,7 @@ export default function TerminalChallenge({ exercises }) {
       {/* Exercise selector — sticky top — U4: a11y roles — U7: completion indicators */}
       <div
         role="tablist"
+        aria-label={t('Exercises', 'Exerciții')}
         className="sticky top-0 z-30 flex items-center gap-1 p-2 overflow-x-auto"
         style={{ background: 'var(--theme-sidebar-bg)', borderBottom: '1px solid var(--theme-border)' }}
       >

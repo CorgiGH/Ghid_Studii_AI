@@ -86,6 +86,8 @@ export default function useV86(containerRef) {
       // Fallback: consider booted after 20 seconds regardless
       setTimeout(() => {
         if (!globalBooted) {
+          bootTriggered = true;
+          emulator.remove_listener('serial0-output-byte', onBootByte);
           if (!globalExec) {
             globalExec = createSerialExecutor(emulator);
           }
