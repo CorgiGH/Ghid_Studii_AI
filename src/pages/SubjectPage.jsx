@@ -248,7 +248,11 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
               <>
                 {activeCourse ? (
                   activeCourse.src ? (
-                    <CourseRenderer src={activeCourse.src} examMode={examMode} />
+                    <CourseRenderer
+                      src={activeCourse.src}
+                      examMode={examMode}
+                      onNextCourse={courseNum < subject.courses.length ? () => navigate(`/${yearSem}/${subjectSlug}/course_${courseNum + 1}`) : undefined}
+                    />
                   ) : (
                   <CourseTransition courseIndex={activeCourseIndex}>
                     <Suspense fallback={<LoadingFallback />}>
@@ -394,11 +398,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
       {subject.tests?.length > 0 && (
         <QuickQuizFAB
           lang={lang}
-          onQuiz={() => {
-            const tests = subject.tests;
-            const randomTest = tests[Math.floor(Math.random() * tests.length)];
-            handleTabChange('tests');
-          }}
+          onQuiz={() => handleTabChange('tests')}
         />
       )}
     </div>

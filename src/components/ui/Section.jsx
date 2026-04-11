@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
 import useAutoProgress from '../../hooks/useAutoProgress';
 
 const Section = ({ title, id, children, checked, onCheck }) => {
-  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const { ref: autoRef } = useAutoProgress(id, open);
   const contentRef = useRef(null);
@@ -67,7 +65,7 @@ const Section = ({ title, id, children, checked, onCheck }) => {
           title="Copy link"
           onClick={(e) => {
             e.stopPropagation();
-            const url = `${window.location.origin}${window.location.pathname}#${pathname}#${id}`;
+            const url = window.location.href.split('#').slice(0, 2).join('#') + '#' + id;
             navigator.clipboard.writeText(url);
             e.currentTarget.textContent = '\u2713';
             setTimeout(() => { e.currentTarget.textContent = '#'; }, 2000);

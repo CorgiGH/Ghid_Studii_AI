@@ -36,7 +36,7 @@ const ProgressRing = ({ size = 24, completed = 0, total = 0, isActive = false })
     textColor = 'var(--theme-content-text, #6b7280)';
   }
 
-  const fontSize = size >= 36 ? 10 : (size >= 28 ? 8 : 7);
+  const fontSize = size >= 80 ? Math.round(size * 0.2) : size >= 36 ? 10 : (size >= 28 ? 8 : 7);
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="flex-shrink-0">

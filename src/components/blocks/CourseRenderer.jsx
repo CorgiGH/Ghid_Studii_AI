@@ -10,7 +10,7 @@ import CompletionModal from '../ui/CompletionModal';
 const CourseNavContext = createContext(null);
 export const useCourseNav = () => useContext(CourseNavContext);
 
-export default function CourseRenderer({ src, examMode = false }) {
+export default function CourseRenderer({ src, examMode = false, onNextCourse }) {
   const { t, markVisited, progress, toggleUnderstood, lectureVisible, toggleLecture, setCourseContext } = useApp();
   useScrollToHash();
   const [courseData, setCourseData] = useState(null);
@@ -282,6 +282,7 @@ export default function CourseRenderer({ src, examMode = false }) {
           courseName={courseData?.meta?.title ? t(courseData.meta.title.en, courseData.meta.title.ro) : ''}
           sectionsCompleted={totalSteps}
           onClose={() => setShowCompletionModal(false)}
+          onNext={onNextCourse}
           lang={t('en', 'ro') === 'ro' ? 'ro' : 'en'}
         />
       )}

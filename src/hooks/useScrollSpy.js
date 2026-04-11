@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 /**
  * Observes section headings and returns the ID of the currently visible one.
@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
  */
 export default function useScrollSpy(sectionIds = [], { rootMargin = '-80px 0px -70% 0px', updateHash = true } = {}) {
   const [activeId, setActiveId] = useState(null);
+  const idsKey = useMemo(() => JSON.stringify(sectionIds), [sectionIds]);
 
   useEffect(() => {
     if (!sectionIds.length) return;
@@ -33,7 +34,7 @@ export default function useScrollSpy(sectionIds = [], { rootMargin = '-80px 0px 
 
     elements.forEach(el => observer.observe(el));
     return () => observer.disconnect();
-  }, [sectionIds.join(','), rootMargin, updateHash]);
+  }, [idsKey, rootMargin, updateHash]);
 
   return activeId;
 }

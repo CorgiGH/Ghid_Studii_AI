@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
  * Floating action button that launches a random quiz.
- * Bottom-right, above bottom tab bar on mobile.
+ * Bottom-right, above bottom tab bar on mobile, near bottom on desktop.
  * Standard FAB: 56px, circular, shadow elevation 6dp.
  */
 export default function QuickQuizFAB({ onQuiz, lang }) {
   const [hovered, setHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)');
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   return (
     <button
@@ -17,7 +25,7 @@ export default function QuickQuizFAB({ onQuiz, lang }) {
       style={{
         width: '56px',
         height: '56px',
-        bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
+        bottom: isMobile ? 'calc(80px + env(safe-area-inset-bottom, 0px))' : '24px',
         right: '16px',
         backgroundColor: '#3b82f6',
         color: 'white',

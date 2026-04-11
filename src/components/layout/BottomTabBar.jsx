@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const TABS = [
   { key: 'courses', label: 'Courses', labelRo: 'Cursuri', icon: '\uD83D\uDCD6' },
@@ -18,6 +18,13 @@ export default function BottomTabBar({ subject, activeTab, onTabChange, lang }) 
     if (t.key === 'tests') return subject.tests?.length > 0;
     return false;
   });
+
+  // Add bottom padding to body only when tab bar is visible
+  useEffect(() => {
+    if (visibleTabs.length < 2) return;
+    document.body.style.paddingBottom = 'calc(64px + env(safe-area-inset-bottom, 0px))';
+    return () => { document.body.style.paddingBottom = ''; };
+  }, [visibleTabs.length]);
 
   if (visibleTabs.length < 2) return null;
 

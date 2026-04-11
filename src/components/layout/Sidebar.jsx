@@ -124,6 +124,10 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
     const hasProgress = completed > 0;
     const isHovered = hoveredId === course.id && !isActive;
 
+    // Scroll spy: check if the currently visible section belongs to this course
+    const coursePrefix = (course.metaId || course.id) + '-';
+    const isSectionVisible = activeSection && activeSection.startsWith(coursePrefix);
+
     const buttonStyle = {
       position: 'relative',
       border: '1.5px solid transparent',
@@ -181,6 +185,12 @@ const Sidebar = ({ items, activeCourseId, open, onClose, yearSem, subjectSlug, r
             </div>
           )}
         </div>
+        {isSectionVisible && !isActive && (
+          <div style={{
+            width: '6px', height: '6px', borderRadius: '50%',
+            backgroundColor: '#3b82f6', flexShrink: 0,
+          }} />
+        )}
       </button>
     );
   });

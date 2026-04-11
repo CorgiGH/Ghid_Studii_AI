@@ -326,6 +326,8 @@ export default function TestRenderer({ src }) {
             setActiveQ(null);
             setReviewMode(false);
             setReviewQuestionIds([]);
+            setTestMode(null);
+            setTimeLeft(null);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onReviewMistakes={!reviewMode ? startReviewMistakes : undefined}
