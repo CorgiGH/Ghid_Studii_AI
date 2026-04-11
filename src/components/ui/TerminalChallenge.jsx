@@ -101,9 +101,6 @@ export default function TerminalChallenge({ exercises }) {
   const resetRef = useRef(null);
   const { exec, booted, booting, boot } = useV86(screenRef);
 
-  // #3: guard against empty exercises
-  if (!exercises || exercises.length === 0) return null;
-
   const [currentIdx, setCurrentIdx] = useState(0);
   const [checkResult, setCheckResult] = useState(null);
   const [checking, setChecking] = useState(false);
@@ -114,7 +111,7 @@ export default function TerminalChallenge({ exercises }) {
   // U7+V3: track completed exercises
   const [completed, setCompleted] = useState({});
 
-  const ex = exercises[currentIdx];
+  const ex = exercises?.[currentIdx];
 
   // Boot v86 on mount
   useEffect(() => {
@@ -123,7 +120,7 @@ export default function TerminalChallenge({ exercises }) {
 
   // Inject files when exercise changes or VM boots
   useEffect(() => {
-    if (!booted || !exec.current || !ex.files || Object.keys(ex.files).length === 0) return;
+    if (!booted || !exec.current || !ex?.files || Object.keys(ex.files).length === 0) return;
     let cancelled = false;
     setInjecting(true);
     injectFiles(exec.current, ex.files).then(() => {
@@ -151,7 +148,7 @@ export default function TerminalChallenge({ exercises }) {
   };
 
   const check = useCallback(async () => {
-    if (!exec.current || !ex.checkScript) return;
+    if (!exec.current || !ex?.checkScript) return;
     setChecking(true);
     setCheckResult(null);
     setHasAttempted(true);
@@ -170,7 +167,7 @@ export default function TerminalChallenge({ exercises }) {
   }, [ex, currentIdx]);
 
   const resetExercise = useCallback(async () => {
-    if (!exec.current || !ex.files || Object.keys(ex.files).length === 0) return;
+    if (!exec.current || !ex?.files || Object.keys(ex.files).length === 0) return;
     setCheckResult(null);
     setResetMenuOpen(false);
     setInjecting(true);
@@ -198,8 +195,11 @@ export default function TerminalChallenge({ exercises }) {
 
   // P1: failure hint — show exercise-specific hint on fail, or generic message
   const failMessage = checkResult && !checkResult.passed
-    ? (checkResult.feedback || ex.failureHint?.(t) || t('Not quite — try again.', 'Nu exact — încearcă din nou.'))
+    ? (checkResult.feedback || ex?.failureHint?.(t) || t('Not quite — try again.', 'Nu exact — încearcă din nou.'))
     : null;
+
+  // Guard after all hooks — safe position
+  if (!exercises || exercises.length === 0 || !ex) return null;
 
   return (
     <div className="border rounded-xl overflow-hidden mb-6" style={{ borderColor: 'var(--theme-border)' }}>
