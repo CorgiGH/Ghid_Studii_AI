@@ -67,6 +67,7 @@ export default function Practice() {
         'Navighează în "documents", citește "notes.txt" cu cat, și salvează o copie ca ~/backup.txt.'
       ),
       courseRef: t('Course 1: Directory commands', 'Cursul 1: Comenzi directoare'),
+      topic: t('cd/cp', 'cd/cp'),
       files: {
         '/root/documents': null,
         '/root/documents/notes.txt': 'Operating systems manage hardware resources.\nThe kernel is the core of the OS.\nProcesses are instances of running programs.',
@@ -89,6 +90,7 @@ export default function Practice() {
         'Creează un director numit "project", apoi creează un fișier "main.c" în el cu ceva conținut.'
       ),
       courseRef: t('Course 1: File commands', 'Cursul 1: Comenzi fișiere'),
+      topic: t('mkdir/echo', 'mkdir/echo'),
       files: {},
       checkScript: 'test -f /root/project/main.c && test -s /root/project/main.c',
       hints: [
@@ -103,10 +105,11 @@ export default function Practice() {
         'Salvează toate liniile cu "error" (fără a ține cont de litere mari/mici) din server.log în errors.txt. Apoi salvează numărul total de linii din server.log în total.txt.'
       ),
       courseRef: t('Course 1: File processing', 'Cursul 1: Procesare fișiere'),
+      topic: t('grep/wc', 'grep/wc'),
       files: {
         '/root/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully\n',
       },
-      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && test -f /root/total.txt && test "$(grep -oE "[0-9]+" /root/total.txt | head -1)" = "9"',
+      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && grep -qi "error" /root/errors.txt && ! grep -q "INFO" /root/errors.txt && test -f /root/total.txt && test "$(grep -oE "[0-9]+" /root/total.txt | head -1)" = "9"',
       failureHint: (t) => t('errors.txt should have 4 lines (one per error). total.txt should contain just the number 9.', 'errors.txt trebuie să aibă 4 linii (câte una pentru fiecare eroare). total.txt trebuie să conțină doar numărul 9.'),
       hints: [
         t('"grep -i pattern file" searches case-insensitively', '"grep -i pattern file" caută fără a ține cont de litere mari/mici'),
@@ -121,6 +124,7 @@ export default function Practice() {
         'Listează fișierele din src/, citește Makefile-ul, apoi șterge directorul "temp" cu tot conținutul.'
       ),
       courseRef: t('Course 1: Directory & file commands', 'Cursul 1: Comenzi directoare & fișiere'),
+      topic: t('ls/rm', 'ls/rm'),
       files: {
         '/root/src': null,
         '/root/src/main.c': '#include <stdio.h>\nint main() { return 0; }',

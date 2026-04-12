@@ -82,25 +82,19 @@ function ExerciseFilesList({ files, t }) {
   );
 }
 
-/* ── U9: Boot progress stages ── */
-function BootOverlay({ booting, t }) {
-  const [stage, setStage] = useState(0);
-  useEffect(() => {
-    const t1 = setTimeout(() => setStage(1), 3000);
-    const t2 = setTimeout(() => setStage(2), 8000);
-    const t3 = setTimeout(() => setStage(3), 13000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
-  const messages = [
-    booting ? t('Booting Linux...', 'Se pornește Linux...') : t('Preparing terminal...', 'Se pregătește terminalul...'),
-    t('Loading system image...', 'Se încarcă imaginea sistemului...'),
-    t('Starting kernel...', 'Se pornește kernelul...'),
-    t('Almost ready...', 'Aproape gata...'),
-  ];
+/* ── BootOverlay driven by real v86 boot stages ── */
+function BootOverlay({ bootStage, t }) {
+  const messages = {
+    idle: t('Preparing terminal...', 'Se pregătește terminalul...'),
+    script: t('Loading v86 runtime...', 'Se încarcă runtime-ul v86...'),
+    emulator: t('Starting Linux kernel...', 'Se pornește kernelul Linux...'),
+    login: t('Logging in...', 'Se autentifică...'),
+    ready: t('Almost ready...', 'Aproape gata...'),
+  };
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center z-10" style={{ background: 'rgba(10,10,20,0.92)' }}>
       <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mb-4" />
-      <p className="text-sm text-gray-300 font-mono">{messages[stage]}</p>
+      <p className="text-sm text-gray-300 font-mono">{messages[bootStage] || messages.idle}</p>
       <p className="text-xs text-gray-500 mt-2">
         {t('This may take a few seconds on first load', 'Poate dura câteva secunde la prima încărcare')}
       </p>
@@ -113,7 +107,7 @@ export default function TerminalChallenge({ exercises }) {
   const screenRef = useRef(null);
   const solutionRef = useRef(null);
   const resetRef = useRef(null);
-  const { exec, booted, booting, boot } = useV86(screenRef);
+  const { exec, booted, booting, bootStage, boot } = useV86(screenRef);
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [checkResult, setCheckResult] = useState(null);
@@ -121,9 +115,12 @@ export default function TerminalChallenge({ exercises }) {
   const [showSolution, setShowSolution] = useState(false);
   const [injecting, setInjecting] = useState(false);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
-  const [hasAttempted, setHasAttempted] = useState(false);
-  // U7+V3: track completed exercises
+  const [resetVMConfirming, setResetVMConfirming] = useState(false);
+  // Per-exercise tracking — count failed attempts so solution gate requires genuine struggle
+  const [attempts, setAttempts] = useState({}); // { idx: count }
   const [completed, setCompleted] = useState({});
+  const attemptCount = attempts[currentIdx] || 0;
+  const hasAttempted = attemptCount >= 2 || !!completed[currentIdx];
 
   const ex = exercises?.[currentIdx];
 
@@ -132,12 +129,21 @@ export default function TerminalChallenge({ exercises }) {
     if (screenRef.current && !booted && !booting) boot();
   }, [boot, booted, booting]);
 
-  // Inject files when exercise changes or VM boots
+  // Inject files when exercise changes or VM boots — clean /root first for deterministic state
   useEffect(() => {
-    if (!booted || !exec.current || !ex?.files || Object.keys(ex.files).length === 0) return;
+    if (!booted || !exec.current) return;
     let cancelled = false;
     setInjecting(true);
-    injectFiles(exec.current, ex.files).then(() => {
+    // Clean /root (but not system files) before injecting, for reproducible exercise state
+    const cleanup = exec.current('cd /root && rm -rf ./* ./.[!.]* 2>/dev/null; cd /root').catch(() => {});
+    cleanup.then(() => {
+      if (cancelled) return;
+      if (!ex?.files || Object.keys(ex.files).length === 0) {
+        setInjecting(false);
+        return;
+      }
+      return injectFiles(exec.current, ex.files);
+    }).then(() => {
       if (!cancelled) setInjecting(false);
     }).catch(() => {
       if (!cancelled) setInjecting(false);
@@ -159,7 +165,7 @@ export default function TerminalChallenge({ exercises }) {
     setChecking(false);
     setShowSolution(false);
     setResetMenuOpen(false);
-    setHasAttempted(false);
+    setResetVMConfirming(false);
   };
 
   // Track current index via ref so async check can detect stale results
@@ -171,7 +177,7 @@ export default function TerminalChallenge({ exercises }) {
     const checkIdx = currentIdx;
     setChecking(true);
     setCheckResult(null);
-    setHasAttempted(true);
+    setAttempts(prev => ({ ...prev, [currentIdx]: (prev[currentIdx] || 0) + 1 }));
     const minDelay = new Promise(r => setTimeout(r, 300));
     try {
       const [result] = await Promise.all([
@@ -198,16 +204,16 @@ export default function TerminalChallenge({ exercises }) {
     setInjecting(false);
   }, [ex]);
 
-  // U3: confirm before destructive Reset VM
-  const resetVM = useCallback(() => {
+  // Inline themed two-step confirm for Reset VM
+  const resetVMRequest = useCallback(() => {
+    setResetVMConfirming(true);
+  }, []);
+  const resetVMExecute = useCallback(() => {
     setResetMenuOpen(false);
-    if (!window.confirm(t(
-      'This will reload the page and reset all progress. Continue?',
-      'Aceasta va reîncărca pagina și va reseta tot progresul. Continuați?'
-    ))) return;
+    setResetVMConfirming(false);
     setCheckResult(null);
     window.location.reload();
-  }, [t]);
+  }, []);
 
   // U6: scroll solution into view
   useEffect(() => {
@@ -281,7 +287,7 @@ export default function TerminalChallenge({ exercises }) {
             }}
           />
           {/* V1: softer boot overlay with progress stages */}
-          {!booted && <BootOverlay booting={booting} t={t} />}
+          {!booted && <BootOverlay bootStage={bootStage} t={t} />}
           {injecting && booted && (
             <div className="absolute bottom-2 left-2 z-10 px-2 py-1 rounded bg-blue-900/80 text-xs text-blue-200 font-mono">
               {t('Loading files...', 'Se încarcă fișierele...')}
@@ -291,7 +297,7 @@ export default function TerminalChallenge({ exercises }) {
 
         {/* Instructions panel — U2: max-h-none on mobile, constrained on desktop */}
         <div
-          className="w-full lg:w-80 border-b lg:border-b-0 lg:border-l p-4 max-h-none lg:max-h-[calc(100vh-200px)] overflow-y-auto"
+          className="w-full lg:w-96 border-b lg:border-b-0 lg:border-l p-4 max-h-none lg:max-h-[calc(100vh-200px)] overflow-y-auto"
           style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}
         >
           <div className="flex items-center gap-2 mb-3">
@@ -299,8 +305,15 @@ export default function TerminalChallenge({ exercises }) {
               {t('Exercise', 'Exercițiu')} {currentIdx + 1}/{exercises.length}
             </h4>
             {ex.courseRef && (
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'color-mix(in srgb, var(--theme-content-bg), #a855f7 15%)', color: 'var(--theme-text)' }}>
-                {ex.courseRef}
+              <span
+                className="text-xs px-2 py-0.5 rounded-full border"
+                style={{
+                  background: 'rgba(168, 85, 247, 0.15)',
+                  color: 'var(--theme-text)',
+                  borderColor: 'rgba(168, 85, 247, 0.4)',
+                }}
+              >
+                📘 {ex.courseRef}
               </span>
             )}
           </div>
@@ -343,8 +356,8 @@ export default function TerminalChallenge({ exercises }) {
         </div>
       )}
 
-      {/* Controls — sticky bottom */}
-      <div className="sticky bottom-0 z-30" style={{ borderTop: '1px solid var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}>
+      {/* Controls — sticky on mobile only (desktop card fits in viewport) */}
+      <div className="sticky bottom-0 lg:static z-30" style={{ borderTop: '1px solid var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3">
           {/* Nav buttons */}
           <div className="flex gap-2">
@@ -369,7 +382,7 @@ export default function TerminalChallenge({ exercises }) {
           <div className="hidden sm:block flex-1" />
 
           {/* Action buttons — V4: visual hierarchy Check(primary) > Reset(secondary) > Solution(tertiary) */}
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2 sm:flex">
             {ex.checkScript && (
               <button
                 onClick={check}
@@ -396,23 +409,49 @@ export default function TerminalChallenge({ exercises }) {
                 {t('Reset', 'Resetează')} ▾
               </button>
               {resetMenuOpen && (
-                <div className="absolute bottom-full mb-1 right-0 w-48 rounded-lg shadow-lg border overflow-hidden z-40" style={{ background: 'var(--theme-content-bg)', borderColor: 'var(--theme-border)' }}>
-                  <button
-                    onClick={resetExercise}
-                    className="w-full px-3 py-2 text-sm text-left transition hover:opacity-80"
-                    style={{ color: 'var(--theme-text)' }}
-                  >
-                    {t('Reset Exercise', 'Resetează exercițiul')}
-                    <span className="block text-xs opacity-50">{t('Re-inject files (~0.5s)', 'Reinjectează fișierele (~0.5s)')}</span>
-                  </button>
-                  <button
-                    onClick={resetVM}
-                    className="w-full px-3 py-2 text-sm text-left transition border-t hover:opacity-80"
-                    style={{ borderColor: 'var(--theme-border)', color: '#dc2626' }}
-                  >
-                    {t('Reset VM', 'Resetează VM')}
-                    <span className="block text-xs opacity-50" style={{ color: 'var(--theme-muted)' }}>{t('Full reboot (~5s)', 'Repornire completă (~5s)')}</span>
-                  </button>
+                <div className="absolute bottom-full mb-1 right-0 rounded-lg shadow-lg border overflow-hidden z-40" style={{ background: 'var(--theme-content-bg)', borderColor: 'var(--theme-border)', width: 'min(14rem, calc(100vw - 2rem))' }}>
+                  {!resetVMConfirming ? (
+                    <>
+                      <button
+                        onClick={resetExercise}
+                        className="w-full px-3 py-2 text-sm text-left transition hover:opacity-80"
+                        style={{ color: 'var(--theme-text)' }}
+                      >
+                        {t('Reset Exercise', 'Resetează exercițiul')}
+                        <span className="block text-xs opacity-50">{t('Re-inject files (~0.5s)', 'Reinjectează fișierele (~0.5s)')}</span>
+                      </button>
+                      <button
+                        onClick={resetVMRequest}
+                        className="w-full px-3 py-2 text-sm text-left transition border-t hover:opacity-80"
+                        style={{ borderColor: 'var(--theme-border)', color: '#dc2626' }}
+                      >
+                        {t('Reset VM', 'Resetează VM')}
+                        <span className="block text-xs opacity-50" style={{ color: 'var(--theme-muted)' }}>{t('Full reboot (~5s)', 'Repornire completă (~5s)')}</span>
+                      </button>
+                    </>
+                  ) : (
+                    <div className="p-3">
+                      <p className="text-xs mb-2" style={{ color: 'var(--theme-text)' }}>
+                        {t('This will reload the page and reset all progress. Continue?', 'Aceasta va reîncărca pagina și va reseta tot progresul. Continuați?')}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setResetVMConfirming(false)}
+                          className="flex-1 px-2 py-1 text-xs rounded transition hover:opacity-80"
+                          style={{ background: 'var(--theme-content-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-text)' }}
+                        >
+                          {t('Cancel', 'Anulează')}
+                        </button>
+                        <button
+                          onClick={resetVMExecute}
+                          className="flex-1 px-2 py-1 text-xs text-white rounded transition hover:opacity-80"
+                          style={{ background: '#dc2626' }}
+                        >
+                          {t('Reset', 'Resetează')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -424,7 +463,7 @@ export default function TerminalChallenge({ exercises }) {
                 disabled={!hasAttempted && !showSolution && !!ex.checkScript}
                 className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 style={{ borderColor: 'var(--theme-border)', background: 'transparent', color: 'var(--theme-text)' }}
-                title={!hasAttempted ? t('Try checking your answer first', 'Încearcă mai întâi să verifici răspunsul') : ''}
+                title={!hasAttempted ? t('Try at least twice before revealing the solution', 'Încearcă de cel puțin două ori înainte de a vedea soluția') : ''}
               >
                 {showSolution ? t('Hide Solution', 'Ascunde soluția') : t('Show Solution', 'Arată soluția')}
               </button>

@@ -8,12 +8,30 @@ export default function Lab02() {
 
   // ── Interactive terminal exercises (chained commands) ──────────
   const terminalExercises = [
+    // Interleaving: combines Lab01 (mkdir/touch) + Lab02 (pipeline/wc) skills
+    {
+      description: t(
+        'Review: Create directory ~/work, then create 3 empty files inside it (a.txt, b.txt, c.txt). Then count how many .txt files exist in ~/work and save the number to count.txt.',
+        'Recapitulare: Creați directorul ~/work, apoi creați 3 fișiere goale în el (a.txt, b.txt, c.txt). Apoi numărați câte fișiere .txt există în ~/work și salvați numărul în count.txt.'
+      ),
+      courseRef: t('Review: Lab 1 + pipelines', 'Recapitulare: Lab 1 + pipeline-uri'),
+      topic: t('review', 'recap'),
+      files: {},
+      checkScript: 'test -f /root/work/a.txt && test -f /root/work/b.txt && test -f /root/work/c.txt && test -f /root/count.txt && test "$(grep -oE "[0-9]+" /root/count.txt | head -1)" = "3"',
+      failureHint: (t) => t('Create ~/work, touch the 3 .txt files inside, then pipe ls | wc -l or similar to count.txt.', 'Creează ~/work, fă touch la cele 3 fișiere .txt în el, apoi pipe ls | wc -l sau similar în count.txt.'),
+      hints: [
+        t('mkdir and touch from Lab 1', 'mkdir și touch din Lab 1'),
+        t('ls ~/work/*.txt | wc -l counts matching files', 'ls ~/work/*.txt | wc -l numără fișierele potrivite'),
+      ],
+      solution: 'mkdir work\ntouch work/a.txt work/b.txt work/c.txt\nls work/*.txt | wc -l > count.txt',
+    },
     {
       description: t(
         'The file passwd (in your home directory) contains user account data. Write a pipeline that extracts all unique login shells and saves them to shells.txt. Then display the contents.',
         'Fișierul passwd (în directorul home) conține date despre conturile de utilizatori. Scrieți un pipeline care extrage toate shell-urile de login unice și le salvează în shells.txt. Apoi afișați conținutul.'
       ),
       courseRef: t('Course 2: Pipelines, cut, sort', 'Cursul 2: Pipeline-uri, cut, sort'),
+      topic: t('cut/sort', 'cut/sort'),
       files: {
         '/root/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
@@ -31,6 +49,7 @@ export default function Lab02() {
         'Fișierul passwd conține conturile de utilizatori. Scrieți un pipeline care numără câte conturi folosesc /bin/bash ca shell de login. Salvați doar numărul în bash_count.txt.'
       ),
       courseRef: t('Course 2: grep, wc, pipelines', 'Cursul 2: grep, wc, pipeline-uri'),
+      topic: t('grep/wc', 'grep/wc'),
       files: {
         '/root/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
@@ -48,6 +67,7 @@ export default function Lab02() {
         'Fișierul data.txt conține nume de utilizatori (câte unul pe linie). Scrieți un pipeline care: (1) selectează doar numele ce conțin "ana" dar NU "diana", (2) le sortează alfabetic, și (3) salvează rezultatul în filtered.txt.'
       ),
       courseRef: t('Course 2: grep, grep -v, sort, pipelines', 'Cursul 2: grep, grep -v, sort, pipeline-uri'),
+      topic: t('filter', 'filtrare'),
       files: {
         '/root/data.txt': 'ana.popescu\ndiana.ionescu\nioana.stan\nroxana.marin\nmihai.popa\nstefana.dinu\ndiana.vasile\nbogdana.rusu\nana.voicu\nadrian.ganea\n',
       },

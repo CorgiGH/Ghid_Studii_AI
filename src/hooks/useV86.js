@@ -17,6 +17,7 @@ function notifyBoot() {
 export default function useV86(containerRef) {
   const [booted, setBooted] = useState(globalBooted);
   const [booting, setBooting] = useState(false);
+  const [bootStage, setBootStage] = useState('idle'); // idle | script | emulator | login | ready
   const emulatorRef = useRef(globalEmulator);
   const execRef = useRef(globalExec);
   const mountedRef = useRef(true);
@@ -29,18 +30,21 @@ export default function useV86(containerRef) {
 
   const safeSetBooted = (v) => { if (mountedRef.current) setBooted(v); };
   const safeSetBooting = (v) => { if (mountedRef.current) setBooting(v); };
+  const safeSetBootStage = (v) => { if (mountedRef.current) setBootStage(v); };
 
   const boot = useCallback(() => {
     if (globalEmulator || globalBootStarted) return;
     if (!containerRef?.current) return;
     globalBootStarted = true;
     setBooting(true);
+    safeSetBootStage('script');
 
     const basePath = import.meta.env.BASE_URL || '/';
 
     const script = document.createElement('script');
     script.src = `${basePath}v86/libv86.js`;
     script.onload = () => {
+      safeSetBootStage('emulator');
       // Create a persistent screen div that outlives React component unmounts
       globalScreenDiv = document.createElement('div');
       globalScreenDiv.style.width = '100%';
@@ -77,6 +81,7 @@ export default function useV86(containerRef) {
         serialOutput += String.fromCharCode(byte);
         if (serialOutput.includes('login:')) {
           bootTriggered = true;
+          safeSetBootStage('login');
           emulator.remove_listener('serial0-output-byte', onBootByte);
 
           // Log in on serial console, then disable echo so exec
@@ -102,6 +107,7 @@ export default function useV86(containerRef) {
 
             notifyBoot();
             execRef.current = globalExec;
+            safeSetBootStage('ready');
             safeSetBooted(true);
             safeSetBooting(false);
           }, 2000);
@@ -159,5 +165,5 @@ export default function useV86(containerRef) {
     }
   }, []);
 
-  return { emulator: emulatorRef, exec: execRef, booted, booting, boot };
+  return { emulator: emulatorRef, exec: execRef, booted, booting, bootStage, boot };
 }
