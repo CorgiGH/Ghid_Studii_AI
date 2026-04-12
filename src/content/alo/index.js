@@ -19,6 +19,10 @@ const alo = {
       title: { en: 'Course 2: Inner products, norms, and a short history of linear systems', ro: 'Cursul 2: Produse scalare, norme și o scurtă istorie a sistemelor liniare' },
       shortTitle: { en: 'C2: Norms', ro: 'C2: Norme' },
       sectionCount: 12 },
+    { id: 'alo-c3', src: 'alo/courses/course-03.json', metaId: 'alo-c3',
+      title: { en: 'Course 3: Floating point, errors, conditioning, and stability', ro: 'Cursul 3: Virgulă mobilă, erori, condiționare și stabilitate' },
+      shortTitle: { en: 'C3: Errors', ro: 'C3: Erori' },
+      sectionCount: 13 },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };

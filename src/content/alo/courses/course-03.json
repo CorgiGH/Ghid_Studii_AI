@@ -1,0 +1,1752 @@
+{
+  "meta": {
+    "id": "alo-c3",
+    "title": {
+      "en": "Course 3: Floating point, errors, conditioning, and stability",
+      "ro": "Cursul 3: Virgulă mobilă, erori, condiționare și stabilitate"
+    },
+    "shortTitle": {
+      "en": "C3: Errors",
+      "ro": "C3: Erori"
+    },
+    "slug": "alo-c3",
+    "source": "ALO curs 03.pdf (Anca Ignat & Corina Forăscu)"
+  },
+  "steps": [
+    {
+      "id": "alo-c3-intro",
+      "title": {
+        "en": "From exact math to finite machines",
+        "ro": "De la matematică exactă la mașini finite"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Type `0.1 + 0.2` into any language with floating-point numbers (Python, JavaScript, C). Does it print $0.3$? What does it actually print, and why?",
+            "ro": "Scrie `0.1 + 0.2` în orice limbaj cu numere în virgulă mobilă (Python, JavaScript, C). Afișează $0.3$? Ce afișează de fapt și de ce?"
+          },
+          "answer": {
+            "en": "It prints **0.30000000000000004**. The number $0.1$ has no exact binary representation — in binary it is the infinite repeating $0.0001100110011\\ldots_2$. The computer stores a **rounded** 64-bit approximation, and the tiny rounding error shows up in the sum. Course 3 is about these errors: where they come from, how they grow, and which problems/algorithms amplify them catastrophically.",
+            "ro": "Afișează **0.30000000000000004**. Numărul $0.1$ nu are reprezentare binară exactă — în binar este repetarea infinită $0.0001100110011\\ldots_2$. Calculatorul stochează o aproximare **rotunjită** pe 64 de biți, iar eroarea minusculă apare în sumă. Cursul 3 este despre aceste erori: de unde vin, cum cresc și ce probleme/algoritmi le amplifică catastrofal."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The gap between real numbers and machine numbers.** $\\mathbb{R}$ is uncountable; any real machine has finite memory. The computer can only store a **finite, discrete subset** of the reals. Every number in your program is either exactly representable or silently rounded. Every arithmetic operation then rounds again.\n\nThe result: two independent notions of \"error-tolerance\" appear. **Conditioning** asks: *is my problem fragile to tiny input changes?* **Stability** asks: *does my algorithm amplify rounding?* A rough analogy:\n\n- Conditioning = fragility of the **glass**.\n- Stability = how carefully you **handle** the glass.\n\nDrop a solid glass carelessly — it still breaks. Touch a cracked glass gently — it still shatters.",
+            "ro": "**Golul dintre numerele reale și numerele mașinii.** $\\mathbb{R}$ este nenumărabil; orice mașină reală are memorie finită. Calculatorul poate stoca doar o **submulțime finită, discretă** a reale. Fiecare număr din programul tău este ori reprezentabil exact, ori rotunjit tacit. Apoi fiecare operație aritmetică rotunjește din nou.\n\nRezultatul: apar două noțiuni independente de \"toleranță la erori\". **Condiționarea** întreabă: *problema mea este fragilă la mici schimbări în intrare?* **Stabilitatea** întreabă: *algoritmul meu amplifică rotunjirea?* O analogie:\n\n- Condiționare = fragilitatea **paharului**.\n- Stabilitate = cât de atent **manipulezi** paharul.\n\nScapă neglijent un pahar solid — tot se sparge. Atinge blând un pahar crăpat — tot se face cioburi."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Recap of course 2:** inner products, vector norms (1, 2, $\\infty$), matrix norms (induced), spectral radius, and the formula $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$. Course 3 drops from exact algebra into **finite-precision arithmetic** — all computations from here on live in IEEE 754.",
+            "ro": "**Recap curs 2:** produse scalare, norme vectoriale (1, 2, $\\infty$), norme matriciale (induse), raza spectrală și formula $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$. Cursul 3 coboară din algebra exactă în **aritmetica de precizie finită** — de aici înainte toate calculele trăiesc în IEEE 754."
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Act 1 — IEEE 754** (steps 2–4). The standard, binary formats, and the anatomy of a `double`.",
+              "ro": "**Actul 1 — IEEE 754** (pașii 2–4). Standardul, formatele binare și anatomia unui `double`."
+            },
+            {
+              "en": "**Act 2 — Rounding and machine arithmetic** (steps 5–7). Decimal floats, truncation vs rounding, and the $+_c, \\times_c$ notation.",
+              "ro": "**Actul 2 — Rotunjire și aritmetica mașinii** (pașii 5–7). Flotante zecimale, trunchiere vs rotunjire și notația $+_c, \\times_c$."
+            },
+            {
+              "en": "**Act 3 — Errors: sources and size** (steps 8–9). Four error categories; absolute vs relative error; propagation.",
+              "ro": "**Actul 3 — Erori: surse și mărime** (pașii 8–9). Patru categorii de erori; absolute vs relative; propagare."
+            },
+            {
+              "en": "**Act 4 — Conditioning** (steps 10–11). Condition number $k(x)$ and the Wilkinson polynomial shock.",
+              "ro": "**Actul 4 — Condiționare** (pașii 10–11). Numărul de condiționare $k(x)$ și șocul polinomului lui Wilkinson."
+            },
+            {
+              "en": "**Act 5 — Stability + self-test** (steps 12–13). Algorithm stability, conditioning vs stability, and a comprehensive retrieval quiz.",
+              "ro": "**Actul 5 — Stabilitate + auto-test** (pașii 12–13). Stabilitate algoritmică, condiționare vs stabilitate și un test cuprinzător de retenție."
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 1–3 of ALO curs 03 (Anca Ignat & Corina Forăscu). Course page: https://edu.info.uaic.ro/algebra-liniara/",
+            "ro": "Slide-urile 1–3 din ALO curs 03 (Anca Ignat & Corina Forăscu). Pagina cursului: https://edu.info.uaic.ro/algebra-liniara/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-ieee754",
+      "title": {
+        "en": "IEEE 754: the standard that makes portable math possible",
+        "ro": "IEEE 754: standardul care face matematica portabilă posibilă"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Imagine there was no universal floating-point standard. You run the same C program on two different CPUs and get different answers for `sin(0.5) * 1e100`. List three concrete ways this could break modern software.",
+            "ro": "Imaginează-ți că nu ar exista un standard universal pentru virgulă mobilă. Rulezi același program C pe două procesoare diferite și obții răspunsuri diferite pentru `sin(0.5) * 1e100`. Enumeră trei moduri concrete în care acest lucru ar putea strica software-ul modern."
+          },
+          "answer": {
+            "en": "**(1)** Scientific data exchange breaks: a `.csv` of simulation results means different things on different machines. **(2)** Financial systems diverge: the same transaction rounds differently, and audits fail. **(3)** Reproducibility collapses: published research cannot be replicated because the rounding isn't specified. IEEE 754 (1985) fixed all three by pinning down **formats, rounding rules, exceptions, and special values**.",
+            "ro": "**(1)** Schimbul de date științifice se strică: un `.csv` cu rezultate de simulare înseamnă lucruri diferite pe mașini diferite. **(2)** Sistemele financiare diverg: aceeași tranzacție se rotunjește diferit, iar auditurile eșuează. **(3)** Reproductibilitatea se prăbușește: cercetarea publicată nu poate fi replicată pentru că rotunjirea nu este specificată. IEEE 754 (1985) a rezolvat toate cele trei prin fixarea **formatelor, regulilor de rotunjire, excepțiilor și valorilor speciale**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**IEEE 754 timeline:**\n\n- **1985** — original standard. First binary floating-point specification adopted universally.\n- **2008** — major revision. Merged the 1985 binary standard with the 1987 base-independent standard and added **decimal** formats.\n- **2019** — current minor revision with clarifications and recommended operations.\n\nThe standard pins down five things:",
+            "ro": "**Cronologia IEEE 754:**\n\n- **1985** — standardul original. Prima specificație de virgulă mobilă binară adoptată universal.\n- **2008** — revizuire majoră. A unit standardul binar 1985 cu standardul independent de bază 1987 și a adăugat formate **zecimale**.\n- **2019** — revizuirea minoră actuală cu clarificări și operații recomandate.\n\nStandardul fixează cinci lucruri:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Arithmetic formats** — finite numbers, signed zeros ($+0, -0$), subnormals, infinities, and `NaN` (Not a Number).",
+              "ro": "**Formate aritmetice** — numere finite, zerouri semnate ($+0, -0$), subnormale, infinituri și `NaN` (Not a Number)."
+            },
+            {
+              "en": "**Interchange formats** — the exact bit layouts used for transmitting numbers between systems.",
+              "ro": "**Formate de schimb** — aspectele biților exacte folosite pentru transmiterea numerelor între sisteme."
+            },
+            {
+              "en": "**Rounding rules** — how to round results when they don't fit exactly (default: round-to-nearest-even).",
+              "ro": "**Reguli de rotunjire** — cum se rotunjesc rezultatele când nu încap exact (implicit: rotunjire la cel mai apropiat par)."
+            },
+            {
+              "en": "**Operations** — arithmetic ($+, -, \\times, \\div$), square root, conversions, comparisons, and (recommended) transcendentals.",
+              "ro": "**Operații** — aritmetice ($+, -, \\times, \\div$), radical, conversii, comparații și (recomandat) transcendente."
+            },
+            {
+              "en": "**Exception handling** — how to signal division by zero, overflow, underflow, inexact, and invalid operations.",
+              "ro": "**Tratarea excepțiilor** — cum se semnalează împărțire la zero, depășire superioară, depășire inferioară, inexact și operații invalide."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Today, almost every FPU and language runtime speaks IEEE 754.** That's why `double` in C, `float64` in NumPy, and `Number` in JavaScript all agree on the same 64-bit layout — and all print the same `0.30000000000000004`.",
+            "ro": "**Astăzi, aproape orice FPU și runtime de limbaj vorbește IEEE 754.** De aceea `double` din C, `float64` din NumPy și `Number` din JavaScript se pun de acord asupra aceluiași aspect pe 64 de biți — și toate afișează același `0.30000000000000004`."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Format", "ro": "Format" },
+            { "en": "Bits", "ro": "Biți" },
+            { "en": "Approx. precision", "ro": "Precizie aprox." },
+            { "en": "Typical use", "ro": "Utilizare tipică" }
+          ],
+          "rows": [
+            [
+              "`binary16`",
+              "16",
+              { "en": "3–4 digits", "ro": "3–4 cifre" },
+              { "en": "Graphics, AI (half precision)", "ro": "Grafică, AI (half precision)" }
+            ],
+            [
+              "`binary32`",
+              "32",
+              { "en": "~7 digits", "ro": "~7 cifre" },
+              { "en": "General-purpose (`float`)", "ro": "Aplicații generale (`float`)" }
+            ],
+            [
+              "`binary64`",
+              "64",
+              { "en": "~15–16 digits", "ro": "~15–16 cifre" },
+              { "en": "Scientific default (`double`)", "ro": "Implicit științific (`double`)" }
+            ],
+            [
+              "`binary128`",
+              "128",
+              { "en": "~34 digits", "ro": "~34 cifre" },
+              { "en": "Advanced research (quad precision)", "ro": "Cercetare avansată (quad precision)" }
+            ]
+          ]
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Why does the same floating-point program now produce identical results on Intel, AMD, and ARM CPUs?",
+                "ro": "De ce același program în virgulă mobilă produce acum rezultate identice pe procesoare Intel, AMD și ARM?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Because all modern CPUs use the same physical circuits internally.",
+                    "ro": "Pentru că toate procesoarele moderne folosesc aceleași circuite fizice intern."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "CPUs have very different internal implementations. Agreement comes from a shared specification, not shared hardware.",
+                    "ro": "Procesoarele au implementări interne foarte diferite. Acordul vine dintr-o specificație comună, nu din hardware comun."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Because all of them implement the IEEE 754 standard: same formats, same rounding, same exceptions.",
+                    "ro": "Pentru că toate implementează standardul IEEE 754: aceleași formate, aceeași rotunjire, aceleași excepții."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. IEEE 754 is a behavioural contract — any compliant FPU must produce bit-identical results for the defined operations.",
+                    "ro": "Corect. IEEE 754 este un contract de comportament — orice FPU conform trebuie să producă rezultate identice la nivel de bit pentru operațiile definite."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Because the C compiler rewrites all floating-point code into integer arithmetic.",
+                    "ro": "Pentru că compilatorul C rescrie tot codul în virgulă mobilă ca aritmetică întreagă."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Compilers emit FPU instructions, not integer emulation. The reason for portability is the standard, not rewriting.",
+                    "ro": "Compilatoarele emit instrucțiuni FPU, nu emulare întreagă. Motivul portabilității este standardul, nu rescrierea."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "IEEE 754 specifies the bit-level behaviour of floating-point operations, which is why compliant hardware agrees.",
+                "ro": "IEEE 754 specifică comportamentul la nivel de bit al operațiilor în virgulă mobilă, de aceea hardware-ul conform este de acord."
+              },
+              "reviewStep": "alo-c3-ieee754"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 4–9 of ALO curs 03.",
+            "ro": "Slide-urile 4–9 din ALO curs 03."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-binary64",
+      "title": {
+        "en": "Anatomy of a double: sign, exponent, mantissa",
+        "ro": "Anatomia unui double: semn, exponent, mantisă"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Common misconceptions before we start:**\n\n- *\"A `double` has 64 digits of precision.\"* No — it has 64 **bits**, which is only ~15–16 decimal digits.\n- *\"The exponent is stored as a signed integer.\"* No — it is stored **biased** (unsigned with a fixed offset).\n- *\"The leading $1$ of the mantissa is stored.\"* No — it is **implicit**, so you get one extra free bit.",
+            "ro": "**Concepții greșite frecvente înainte să începem:**\n\n- *<<Un `double` are 64 de cifre precizie.\"* Nu — are 64 de **biți**, adică doar ~15–16 cifre zecimale.\n- *<<Exponentul este stocat ca întreg cu semn.\"* Nu — este stocat **deplasat** (fără semn, cu un offset fix).\n- *<<Cifra $1$ de la început a mantisei este stocată.\"* Nu — este **implicită**, deci câștigi un bit gratis."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Concrete first.** Take the number $27.56640625$. In a 64-bit `binary64`, its 64 bits look like this (sign | exponent | fraction):",
+            "ro": "**Întâi concretul.** Ia numărul $27.56640625$. Într-un `binary64` pe 64 de biți, cei 64 de biți arată așa (semn | exponent | fracție):"
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "0  10000000011  1011100100010000000000000000000000000000000000000000\n^  ^----------  ^--------------------------------------------------\n|  |           |\n|  |           fraction f (52 bits)\n|  exponent c (11 bits, biased)\nsign s (1 bit)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The stored value is reconstructed via the IEEE 754 formula for `binary64`:",
+            "ro": "Valoarea stocată se reconstruiește prin formula IEEE 754 pentru `binary64`:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\text{value} = (-1)^s \\cdot 2^{c - 1023} \\cdot (1 + f)"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "en": "$s$ — **sign bit** (1 bit). $0 = $ positive, $1 = $ negative.",
+              "ro": "$s$ — **bitul de semn** (1 bit). $0 = $ pozitiv, $1 = $ negativ."
+            },
+            {
+              "en": "$c$ — **biased exponent** (11 bits, unsigned). True exponent is $c - 1023$.",
+              "ro": "$c$ — **exponent deplasat** (11 biți, fără semn). Exponentul real este $c - 1023$."
+            },
+            {
+              "en": "$f$ — **fractional part of the mantissa** (52 bits). The leading $1$ is implicit, giving effective 53-bit precision.",
+              "ro": "$f$ — **partea fracționară a mantisei** (52 biți). Cifra $1$ de la început este implicită, dând precizie efectivă de 53 biți."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Why the bias?** Biasing makes the 11-bit exponent an unsigned integer from $0$ to $2047$, which makes **comparing two floating-point numbers reduce to comparing them as integers** (with sign handling). Hardware loves this.",
+            "ro": "**De ce deplasarea?** Deplasarea face ca exponentul pe 11 biți să fie un întreg fără semn de la $0$ la $2047$, ceea ce face ca **compararea a două numere în virgulă mobilă să se reducă la compararea lor ca întregi** (cu tratarea semnului). Hardware-ului îi place asta."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Extreme values for `binary64`:**\n\nThe smallest positive normal number ($s=0, c=1, f=0$):",
+            "ro": "**Valori extreme pentru `binary64`:**\n\nCel mai mic număr pozitiv normal ($s=0, c=1, f=0$):"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "z = 2^{-1022}(1 + 0) \\approx 0.22251 \\times 10^{-307}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The largest positive number ($s=0, c=2046, f=1-2^{-52}$):",
+            "ro": "Cel mai mare număr pozitiv ($s=0, c=2046, f=1-2^{-52}$):"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "Z = 2^{1023}(2 - 2^{-52}) \\approx 0.17977 \\times 10^{309}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Underflow** ($|x| < z$): result is silently set to $0$. **Overflow** ($|x| > Z$): result becomes $\\pm\\infty$ and usually halts computation. Both are exceptional conditions IEEE 754 signals — but many programs ignore the signal.",
+            "ro": "**Depășire inferioară** ($|x| < z$): rezultatul este setat tacit la $0$. **Depășire superioară** ($|x| > Z$): rezultatul devine $\\pm\\infty$ și de obicei oprește calculul. Ambele sunt condiții excepționale pe care IEEE 754 le semnalează — dar multe programe ignoră semnalul."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "The number $27.56640625$ is exactly representable in `binary64` (the fraction $0.56640625 = 0.10010001_2$ terminates). But the decimal $0.1$ is not. Why do some simple decimal values have infinite binary expansions, and what's the consequence?",
+            "ro": "Numărul $27.56640625$ este exact reprezentabil în `binary64` (fracția $0.56640625 = 0.10010001_2$ se termină). Dar zecimalul $0.1$ nu este. De ce unele valori zecimale simple au expansiuni binare infinite și care este consecința?"
+          },
+          "answer": {
+            "en": "A fraction $p/q$ terminates in base $b$ iff every prime factor of $q$ divides $b$. In base 10, denominators $2^a \\cdot 5^b$ terminate. In base 2, **only** denominators that are powers of 2 terminate. So $0.1 = 1/10 = 1/(2 \\cdot 5)$ has a $5$ in the denominator and **cannot** terminate in binary. Consequence: $0.1$ gets stored as a rounded 53-bit approximation, introducing a tiny error that compounds over operations.",
+            "ro": "O fracție $p/q$ se termină în baza $b$ dacă și numai dacă fiecare factor prim al lui $q$ divide $b$. În baza 10, numitorii $2^a \\cdot 5^b$ se termină. În baza 2, **doar** numitorii care sunt puteri ale lui 2 se termină. Deci $0.1 = 1/10 = 1/(2 \\cdot 5)$ are un $5$ la numitor și **nu poate** să se termine în binar. Consecință: $0.1$ se stochează ca aproximare rotunjită pe 53 de biți, introducând o eroare minusculă care se compune peste operații."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 9–12 of ALO curs 03 — bit layouts for `binary16`, `binary32`, `binary64`.",
+            "ro": "Slide-urile 9–12 din ALO curs 03 — aspectele biților pentru `binary16`, `binary32`, `binary64`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-binary-formats",
+      "title": {
+        "en": "The four binary formats at a glance",
+        "ro": "Cele patru formate binare dintr-o privire"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The same sign/biased-exponent/mantissa pattern scales across four standardized binary formats. Only the bit widths change.",
+            "ro": "Același tipar semn/exponent-deplasat/mantisă se scalează în patru formate binare standardizate. Doar lățimile de biți se schimbă."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Format", "ro": "Format" },
+            { "en": "Total bits", "ro": "Biți total" },
+            { "en": "Sign", "ro": "Semn" },
+            { "en": "Exponent", "ro": "Exponent" },
+            { "en": "Fraction", "ro": "Fracție" },
+            { "en": "Bias", "ro": "Deplasare" },
+            { "en": "Decimal precision", "ro": "Precizie zecimală" }
+          ],
+          "rows": [
+            [
+              "`binary16`",
+              "16",
+              "1",
+              "5",
+              "10",
+              "15",
+              { "en": "~3–4 digits", "ro": "~3–4 cifre" }
+            ],
+            [
+              "`binary32`",
+              "32",
+              "1",
+              "8",
+              "23",
+              "127",
+              { "en": "~7 digits", "ro": "~7 cifre" }
+            ],
+            [
+              "`binary64`",
+              "64",
+              "1",
+              "11",
+              "52",
+              "1023",
+              { "en": "~15–16 digits", "ro": "~15–16 cifre" }
+            ],
+            [
+              "`binary128`",
+              "128",
+              "1",
+              "15",
+              "112",
+              "16383",
+              { "en": "~34 digits", "ro": "~34 cifre" }
+            ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The decoding formula is structurally identical. For a $(1 + e + m)$-bit format with bias $B$:",
+            "ro": "Formula de decodare este identică structural. Pentru un format pe $(1 + e + m)$ biți cu deplasarea $B$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\text{value} = (-1)^{s} \\cdot 2^{c - B} \\cdot \\left(1 + \\sum_{i=1}^{m} b_{m-i} \\cdot 2^{-i}\\right)"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Rule of thumb.** Adding one bit to the exponent **roughly doubles the dynamic range**. Adding one bit to the fraction **adds ~0.3 decimal digits** to precision ($\\log_{10} 2 \\approx 0.301$).",
+            "ro": "**Regulă empirică.** Un bit în plus la exponent **aproximativ dublează intervalul dinamic**. Un bit în plus la fracție **adaugă ~0.3 cifre zecimale** la precizie ($\\log_{10} 2 \\approx 0.301$)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "A neural network runs in `binary16` (half precision). Roughly how many correct decimal digits does each weight store?",
+                "ro": "O rețea neuronală rulează în `binary16` (half precision). Aproximativ câte cifre zecimale corecte stochează fiecare pondere?"
+              },
+              "options": [
+                {
+                  "text": { "en": "About 7", "ro": "Aproximativ 7" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "7 digits is `binary32` (single precision). `binary16` has only 10 fraction bits, giving about 3–4 decimal digits.",
+                    "ro": "7 cifre este `binary32` (single precision). `binary16` are doar 10 biți fracție, ceea ce dă aproximativ 3–4 cifre zecimale."
+                  }
+                },
+                {
+                  "text": { "en": "About 3–4", "ro": "Aproximativ 3–4" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. 10 fraction bits give $10 \\cdot 0.301 \\approx 3$ decimal digits; with the implicit leading bit, precision reaches roughly 3–4 digits.",
+                    "ro": "Corect. 10 biți fracție dau $10 \\cdot 0.301 \\approx 3$ cifre zecimale; cu bitul implicit de început, precizia ajunge la aproximativ 3–4 cifre."
+                  }
+                },
+                {
+                  "text": { "en": "About 15–16", "ro": "Aproximativ 15–16" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "15–16 digits is `binary64` (double precision) with 52 fraction bits — far more than `binary16`.",
+                    "ro": "15–16 cifre este `binary64` (double precision) cu 52 de biți fracție — mult mai mult decât `binary16`."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Decimal precision scales with fraction bit count: $\\text{bits} \\cdot \\log_{10} 2$.",
+                "ro": "Precizia zecimală se scalează cu numărul de biți de fracție: $\\text{biți} \\cdot \\log_{10} 2$."
+              },
+              "reviewStep": "alo-c3-binary-formats"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 11–13 of ALO curs 03 — binary16, binary32, binary64, binary128 bit layouts.",
+            "ro": "Slide-urile 11–13 din ALO curs 03 — aspectele biților pentru binary16, binary32, binary64, binary128."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-decimal",
+      "title": {
+        "en": "Decimal floating point: when base 10 matters",
+        "ro": "Virgulă mobilă zecimală: când baza 10 contează"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "A bank stores every account balance as `binary64`. You deposit $\\$0.10$ one thousand times. The final balance prints as $99.99999999999859$. You lose a cent. Why does this happen, and what kind of number format would fix it?",
+            "ro": "O bancă stochează fiecare sold de cont ca `binary64`. Depui $\\$0.10$ de o mie de ori. Soldul final se afișează ca $99.99999999999859$. Pierzi un cent. De ce se întâmplă asta și ce tip de format numeric ar repara-o?"
+          },
+          "answer": {
+            "en": "$0.10$ has **no exact binary representation**, so each deposit introduces a tiny rounding error; 1000 additions amplify it. A **decimal floating-point** format, which stores numbers as $\\pm\\text{coefficient} \\times 10^{\\text{exponent}}$, represents $0.10$ exactly. IEEE 754-2008 added `decimal32/64/128` specifically for financial software where base-10 rounding is the legal specification.",
+            "ro": "$0.10$ **nu are reprezentare binară exactă**, deci fiecare depunere introduce o eroare minusculă de rotunjire; 1000 de adunări o amplifică. Un format **zecimal în virgulă mobilă**, care stochează numerele ca $\\pm\\text{coeficient} \\times 10^{\\text{exponent}}$, reprezintă $0.10$ exact. IEEE 754-2008 a adăugat `decimal32/64/128` tocmai pentru software financiar unde rotunjirea în bază 10 este specificația legală."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**General form of a decimal float:**",
+            "ro": "**Forma generală a unui flotant zecimal:**"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "(-1)^{\\text{sign}} \\cdot \\text{coefficient} \\cdot 10^{\\text{exponent}}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Differences from binary formats:",
+            "ro": "Diferențe față de formatele binare:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "en": "The base is **10**, not $2$.",
+              "ro": "Baza este **10**, nu $2$."
+            },
+            {
+              "en": "The coefficient is a **finite decimal** (no implicit leading 1).",
+              "ro": "Coeficientul este **decimal finit** (fără $1$ implicit la început)."
+            },
+            {
+              "en": "The exponent is stored in **base 10**, with its own bias.",
+              "ro": "Exponentul este stocat în **baza 10**, cu propria deplasare."
+            }
+          ]
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "decimal32",
+            "ro": "decimal32"
+          },
+          "content": {
+            "en": "A 32-bit IEEE 754 decimal format: 1 sign bit, a biased exponent, and a significand. Gives **~7 significant decimal digits** and an exponent range of roughly $-95$ to $+96$.",
+            "ro": "Un format zecimal IEEE 754 pe 32 de biți: 1 bit semn, un exponent deplasat și un significand. Oferă **~7 cifre zecimale semnificative** și un interval al exponentului de aproximativ $-95$ la $+96$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Who uses decimal floats?** Banks, tax software, currency conversion, anywhere regulations specify decimal rounding. Most scientific code stays on `binary64` because hardware support for decimal is rare and slow.",
+            "ro": "**Cine folosește flotante zecimale?** Băncile, software-ul fiscal, conversia valutară, oriunde reglementările specifică rotunjirea zecimală. Majoritatea codului științific rămâne pe `binary64` pentru că suportul hardware pentru zecimal este rar și lent."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-rounding",
+      "title": {
+        "en": "Truncation vs rounding: the two ways to shorten a number",
+        "ro": "Trunchiere vs rotunjire: cele două moduri de a scurta un număr"
+      },
+      "group": "rounding",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You must keep 4 significant digits of $y = 0.31415926\\ldots \\times 10^1$. Write down two different \"shortened\" values of $y$, each justifiable. Which one is closer to $y$, and by how much?",
+            "ro": "Trebuie să păstrezi 4 cifre semnificative din $y = 0.31415926\\ldots \\times 10^1$. Scrie două valori \"scurtate\" diferite ale lui $y$, fiecare justificabilă. Care este mai aproape de $y$ și cu cât?"
+          },
+          "answer": {
+            "en": "**Truncation** drops the tail: $\\text{fl}(y) = 0.3141 \\times 10^1 = 3.141$. **Round-half-up** looks at the next digit ($5$) and rounds up: $\\text{fl}(y) = 0.3142 \\times 10^1 = 3.142$. The rounded version is closer — truncation's error can be up to $10^{-k+1}$, while rounding halves that bound to $0.5 \\times 10^{-k+1}$.",
+            "ro": "**Trunchierea** elimină coada: $\\text{fl}(y) = 0.3141 \\times 10^1 = 3.141$. **Rotunjirea la cel mai apropiat** privește următoarea cifră ($5$) și rotunjește în sus: $\\text{fl}(y) = 0.3142 \\times 10^1 = 3.142$. Versiunea rotunjită este mai aproape — eroarea trunchierii poate fi până la $10^{-k+1}$, în timp ce rotunjirea înjumătățește această limită la $0.5 \\times 10^{-k+1}$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Normalized decimal representation.** Any nonzero real $y$ can be written as:",
+            "ro": "**Reprezentare zecimală normalizată.** Orice real nenul $y$ se poate scrie ca:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "y = \\pm\\, 0.d_1 d_2 d_3 \\ldots d_k d_{k+1} \\ldots \\times 10^n, \\quad 1 \\leq d_1 \\leq 9, \\quad 0 \\leq d_i \\leq 9"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "We write $\\text{fl}(y)$ for the **floating-point representation** — the value of $y$ as stored in the machine, with only $k$ digits kept. There are two ways to obtain $\\text{fl}(y)$:",
+            "ro": "Notăm $\\text{fl}(y)$ pentru **reprezentarea în virgulă mobilă** — valoarea lui $y$ stocată în mașină, cu doar $k$ cifre păstrate. Există două moduri de a obține $\\text{fl}(y)$:"
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Truncation (chopping)",
+            "ro": "Trunchiere"
+          },
+          "content": {
+            "en": "Drop all digits after position $k$:",
+            "ro": "Elimină toate cifrele după poziția $k$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\text{fl}(y) = 0.d_1 d_2 \\ldots d_k \\times 10^n"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Rounding",
+            "ro": "Rotunjire"
+          },
+          "content": {
+            "en": "Keep $k$ digits, but choose the representable number closest to $y$:",
+            "ro": "Păstrează $k$ cifre, dar alege numărul reprezentabil cel mai apropiat de $y$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\text{fl}(y) = 0.\\delta_1 \\delta_2 \\ldots \\delta_k \\times 10^n"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The rounding rule is based on the first discarded digit $d_{k+1}$:",
+            "ro": "Regula de rotunjire se bazează pe prima cifră eliminată $d_{k+1}$:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "en": "If $d_{k+1} < 5$ — **round down** ($\\text{fl}(y) = 0.d_1 \\ldots d_k \\times 10^n$).",
+              "ro": "Dacă $d_{k+1} < 5$ — **rotunjire în jos** ($\\text{fl}(y) = 0.d_1 \\ldots d_k \\times 10^n$)."
+            },
+            {
+              "en": "If $d_{k+1} > 5$ — **round up** ($\\text{fl}(y) = 0.d_1 \\ldots (d_k + 1) \\times 10^n$).",
+              "ro": "Dacă $d_{k+1} > 5$ — **rotunjire în sus** ($\\text{fl}(y) = 0.d_1 \\ldots (d_k + 1) \\times 10^n$)."
+            },
+            {
+              "en": "If $d_{k+1} = 5$ — tie-break. Either always round up, or (IEEE 754 default) **round-to-even**: keep $d_k$ if it is even, otherwise increment it.",
+              "ro": "Dacă $d_{k+1} = 5$ — departajare. Fie se rotunjește întotdeauna în sus, fie (implicit IEEE 754) **rotunjire la cel mai apropiat par**: se păstrează $d_k$ dacă este par, altfel se incrementează."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why round-to-even?** Always-round-up introduces a positive bias (sums drift upward). Round-to-even is **unbiased** — errors cancel on average over many operations. IEEE 754 makes round-to-even the default for exactly this reason.",
+            "ro": "**De ce rotunjire la cel mai apropiat par?** Rotunjirea-mereu-în-sus introduce o deviație pozitivă (sumele urcă). Rotunjirea la cel mai apropiat par este **nedeviată** — erorile se anulează în medie peste multe operații. IEEE 754 o face implicită exact din acest motiv."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "$t$ exact digits",
+            "ro": "$t$ cifre exacte"
+          },
+          "content": {
+            "en": "An approximation $r^*$ of $r$ has $t$ exact digits if $t$ is the largest non-negative integer such that $\\frac{|r - r^*|}{|r|} \\leq 5 \\times 10^{-t}$.",
+            "ro": "O aproximare $r^*$ a lui $r$ are $t$ cifre exacte dacă $t$ este cel mai mare întreg nenegativ pentru care $\\frac{|r - r^*|}{|r|} \\leq 5 \\times 10^{-t}$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Relative error bounds for keeping $k$ digits.** These are the core inequalities of floating-point analysis:",
+            "ro": "**Limite ale erorii relative pentru păstrarea a $k$ cifre.** Acestea sunt inegalitățile de bază ale analizei în virgulă mobilă:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\text{Truncation:} \\quad \\left| \\frac{y - \\text{fl}(y)}{y} \\right| \\leq 10^{-k+1}"
+        },
+        {
+          "type": "equation",
+          "tex": "\\text{Rounding:} \\quad \\left| \\frac{y - \\text{fl}(y)}{y} \\right| \\leq 0.5 \\times 10^{-k+1}"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Round $0.37485 \\times 10^2$ to 4 significant digits using IEEE round-to-even.",
+                "ro": "Rotunjește $0.37485 \\times 10^2$ la 4 cifre semnificative folosind rotunjirea IEEE la cel mai apropiat par."
+              },
+              "options": [
+                {
+                  "text": "$0.3748 \\times 10^2$",
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Discarded digit is $5$ (tie). The last kept digit is $8$ (even), so we keep it. Result: $37.48$.",
+                    "ro": "Corect. Cifra eliminată este $5$ (departajare). Ultima cifră păstrată este $8$ (par), deci o păstrăm. Rezultat: $37.48$."
+                  }
+                },
+                {
+                  "text": "$0.3749 \\times 10^2$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "That would be round-half-up, not round-to-even. Since $d_k = 8$ is already even, round-to-even keeps it at $8$.",
+                    "ro": "Aceasta ar fi rotunjire-jumătate-în-sus, nu la cel mai apropiat par. Cum $d_k = 8$ este deja par, rotunjirea la cel mai apropiat par îl păstrează la $8$."
+                  }
+                },
+                {
+                  "text": "$0.3750 \\times 10^2$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "That rounds to 3 digits, not 4. The task is to keep 4 significant digits.",
+                    "ro": "Asta rotunjește la 3 cifre, nu 4. Sarcina este să păstrezi 4 cifre semnificative."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Round-to-even: on a tie ($d_{k+1} = 5$), keep $d_k$ if even, increment if odd.",
+                "ro": "Rotunjire la cel mai apropiat par: la departajare ($d_{k+1} = 5$), păstrează $d_k$ dacă e par, incrementează dacă e impar."
+              },
+              "reviewStep": "alo-c3-rounding"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-machine-ops",
+      "title": {
+        "en": "Machine arithmetic: $+_c, -_c, \\times_c, \\div_c$",
+        "ro": "Aritmetica mașinii: $+_c, -_c, \\times_c, \\div_c$"
+      },
+      "group": "rounding",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Two independent rounding events per operation.** When the computer performs $x + y$, it does not compute the exact sum. It does three things:\n\n1. Replace $x$ with $\\text{fl}(x)$ (representation error).\n2. Replace $y$ with $\\text{fl}(y)$ (representation error).\n3. Compute the exact sum of those, then round **again** to fit the result format (operation error).\n\nNumerical analysis uses the subscript $c$ (\"computer\") to distinguish the machine operation from the exact math one:",
+            "ro": "**Două evenimente de rotunjire independente per operație.** Când calculatorul face $x + y$, nu calculează suma exactă. Face trei lucruri:\n\n1. Înlocuiește $x$ cu $\\text{fl}(x)$ (eroare de reprezentare).\n2. Înlocuiește $y$ cu $\\text{fl}(y)$ (eroare de reprezentare).\n3. Calculează suma exactă a acestora, apoi rotunjește **din nou** pentru a încăpea în formatul rezultatului (eroare de operație).\n\nAnaliza numerică folosește indicele $c$ (\"calculator\") pentru a distinge operația mașinii de cea matematică exactă:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\begin{aligned} x +_c y &= \\text{fl}(\\text{fl}(x) + \\text{fl}(y)) \\\\ x -_c y &= \\text{fl}(\\text{fl}(x) - \\text{fl}(y)) \\\\ x \\times_c y &= \\text{fl}(\\text{fl}(x) \\times \\text{fl}(y)) \\\\ x \\div_c y &= \\text{fl}(\\text{fl}(x) \\div \\text{fl}(y)) \\end{aligned}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The subscript $c$ is a warning flag:",
+            "ro": "Indicele $c$ este un semnal de avertizare:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "en": "We are in **finite-precision arithmetic**.",
+              "ro": "Suntem în **aritmetica de precizie finită**."
+            },
+            {
+              "en": "**Representation errors** affect the inputs before the op.",
+              "ro": "**Erorile de reprezentare** afectează intrările înainte de operație."
+            },
+            {
+              "en": "**Rounding errors** appear on every operation's output.",
+              "ro": "**Erorile de rotunjire** apar la ieșirea fiecărei operații."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Floating-point addition is not associative.** In general $(x +_c y) +_c z \\neq x +_c (y +_c z)$ because each addition rounds independently. This breaks algebraic identities you take for granted: reordering a sum can change the answer by many ULPs.",
+            "ro": "**Adunarea în virgulă mobilă nu este asociativă.** În general $(x +_c y) +_c z \\neq x +_c (y +_c z)$ pentru că fiecare adunare rotunjește independent. Asta strică identitățile algebrice pe care le iei de bune: rearanjarea unei sume poate schimba răspunsul cu multe ULP-uri."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Sum $10^{20}, 1, -10^{20}$ in `binary64` in the order given. Then sum them as $10^{20} + (-10^{20}) + 1$. Explain what each order produces and why.",
+            "ro": "Însumează $10^{20}, 1, -10^{20}$ în `binary64` în ordinea dată. Apoi însumează-le ca $10^{20} + (-10^{20}) + 1$. Explică ce produce fiecare ordine și de ce."
+          },
+          "answer": {
+            "en": "**Order 1:** $10^{20} +_c 1$ rounds to $10^{20}$ (the $1$ is below the precision of $10^{20}$). Then $10^{20} +_c (-10^{20}) = 0$. **Order 2:** $10^{20} +_c (-10^{20}) = 0$ exactly, then $0 +_c 1 = 1$. The true answer is $1$ — only the second order recovers it. This is the classic **catastrophic cancellation** warning: large magnitudes should be combined first so you don't lose the small contributions.",
+            "ro": "**Ordinea 1:** $10^{20} +_c 1$ se rotunjește la $10^{20}$ (cifra $1$ este sub precizia lui $10^{20}$). Apoi $10^{20} +_c (-10^{20}) = 0$. **Ordinea 2:** $10^{20} +_c (-10^{20}) = 0$ exact, apoi $0 +_c 1 = 1$. Răspunsul corect este $1$ — doar a doua ordine îl recuperează. Acesta este avertismentul clasic despre **anularea catastrofală**: magnitudinile mari ar trebui combinate primele ca să nu pierzi contribuțiile mici."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slide 17 of ALO curs 03 — machine operations and rounding.",
+            "ro": "Slide-ul 17 din ALO curs 03 — operațiile mașinii și rotunjirea."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-error-sources",
+      "title": {
+        "en": "Four sources of numerical error",
+        "ro": "Patru surse de erori numerice"
+      },
+      "group": "errors",
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Misconception:** \"All numerical errors are rounding errors.\" In reality, rounding is only one of **four** distinct sources. Mixing them up leads to fixing the wrong thing — e.g., using `binary128` to fight a modeling error.",
+            "ro": "**Concepție greșită:** <<Toate erorile numerice sunt erori de rotunjire.\" În realitate, rotunjirea este doar una dintre **patru** surse distincte. Amestecarea lor duce la repararea a ceva greșit — ex. folosirea `binary128` pentru a combate o eroare de modelare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The four categories of error** in any numerical computation:",
+            "ro": "**Cele patru categorii de erori** din orice calcul numeric:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Input data errors.** Measurements have systematic biases or transient noise. Irrational or repeating constants — $1/3, \\pi, 1/7, \\ldots$ — arrive already rounded.",
+              "ro": "**Erori în datele de intrare.** Măsurătorile au deviații sistematice sau zgomot tranzitoriu. Constantele iraționale sau repetative — $1/3, \\pi, 1/7, \\ldots$ — sosesc deja rotunjite."
+            },
+            {
+              "en": "**Modeling errors.** Discretizing a limit, truncating a series, replacing a nonlinear function with a linear one, or approximating a derivative by a difference quotient. Also: simplifications and ignored parameters.",
+              "ro": "**Erori de modelare.** Discretizarea unei limite, trunchierea unei serii, înlocuirea unei funcții neliniare cu una liniară sau aproximarea unei derivate printr-un raport de diferențe. De asemenea: simplificări și parametri ignorați."
+            },
+            {
+              "en": "**Computation errors.** Rounding errors from finite precision; accumulation over many operations; bugs or limitations in numerical libraries.",
+              "ro": "**Erori de calcul.** Erori de rotunjire din precizia finită; acumulare peste multe operații; bug-uri sau limitări ale bibliotecilor numerice."
+            },
+            {
+              "en": "**Human errors.** Wrong formula, bad algorithm choice, misunderstood problem spec, typos in data entry.",
+              "ro": "**Erori umane.** Formulă greșită, alegerea proastă a algoritmului, specificația problemei înțeleasă greșit, greșeli de tastare la introducerea datelor."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Diagnostic discipline.** Before blaming floating point, ask: is the input clean? Is the model right? Did I pick the right algorithm? Most \"mysterious numerical bugs\" live in categories 1, 2, or 4 — not 3.",
+            "ro": "**Disciplină de diagnosticare.** Înainte să dai vina pe virgula mobilă, întreabă: intrarea este curată? Modelul este corect? Am ales algoritmul corect? Majoritatea \"bug-urilor numerice misterioase\" trăiesc în categoriile 1, 2 sau 4 — nu 3."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "A weather model discretizes time into 1-hour steps and uses `binary64` throughout. Predictions 5 days ahead drift badly. Which error category is the most likely culprit?",
+                "ro": "Un model meteorologic discretizează timpul în pași de 1 oră și folosește `binary64` peste tot. Predicțiile cu 5 zile înainte se abat puternic. Care categorie de eroare este cel mai probabil vinovata?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Computation error — `binary64` rounding accumulates over 120 steps.",
+                    "ro": "Eroare de calcul — rotunjirea `binary64` se acumulează peste 120 de pași."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "`binary64` gives ~15–16 digits; 120 additions accumulate at most a few ULPs, nowhere near the observed drift.",
+                    "ro": "`binary64` dă ~15–16 cifre; 120 de adunări acumulează cel mult câțiva ULP, departe de deviația observată."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Modeling error — 1-hour discretization is too coarse for atmospheric dynamics.",
+                    "ro": "Eroare de modelare — discretizarea de 1 oră este prea grosieră pentru dinamica atmosferică."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The dominant error is **discretization** — using a coarser time step than the physics demands. This is a modeling choice, independent of floating-point precision.",
+                    "ro": "Corect. Eroarea dominantă este **discretizarea** — folosirea unui pas de timp mai grosier decât cere fizica. Este o alegere de modelare, independentă de precizia virgulei mobile."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Input error — measurement noise in sensor readings.",
+                    "ro": "Eroare de intrare — zgomot de măsurare în citirile senzorilor."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Input noise matters but is usually bounded and well-characterized. 5-day divergence in weather is dominated by discretization and chaotic sensitivity (conditioning).",
+                    "ro": "Zgomotul de intrare contează dar este de obicei limitat și bine caracterizat. Divergența la 5 zile în meteo este dominată de discretizare și sensibilitate haotică (condiționare)."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Identifying the dominant category guides the fix: refine the model, not the precision.",
+                "ro": "Identificarea categoriei dominante ghidează soluția: rafinează modelul, nu precizia."
+              },
+              "reviewStep": "alo-c3-error-sources"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-abs-rel-error",
+      "title": {
+        "en": "Absolute error, relative error, and their propagation",
+        "ro": "Eroare absolută, eroare relativă și propagarea lor"
+      },
+      "group": "errors",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "A scale reports $1000\\text{g} \\pm 5\\text{g}$ for a bag of flour and $50\\text{g} \\pm 5\\text{g}$ for a pinch of salt. The **absolute error** is identical — $5\\text{g}$. Would you be equally happy with both measurements?",
+            "ro": "O balanță raportează $1000\\text{g} \\pm 5\\text{g}$ pentru un sac de făină și $50\\text{g} \\pm 5\\text{g}$ pentru un vârf de sare. **Eroarea absolută** este identică — $5\\text{g}$. Ai fi la fel de mulțumit de ambele măsurători?"
+          },
+          "answer": {
+            "en": "No. For the flour, $5\\text{g}$ out of $1000\\text{g}$ is a **relative** error of $0.5\\%$ — perfectly acceptable for cooking. For the salt, $5\\text{g}$ out of $50\\text{g}$ is **10%** — ruins the recipe. The same absolute error has very different consequences depending on the scale of what you're measuring. This is why we need both notions.",
+            "ro": "Nu. Pentru făină, $5\\text{g}$ din $1000\\text{g}$ este o eroare **relativă** de $0.5\\%$ — perfect acceptabilă pentru gătit. Pentru sare, $5\\text{g}$ din $50\\text{g}$ este **10%** — strică rețeta. Aceeași eroare absolută are consecințe foarte diferite în funcție de scara a ceea ce măsori. De aceea ai nevoie de ambele noțiuni."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Absolute error",
+            "ro": "Eroare absolută"
+          },
+          "content": {
+            "en": "For exact value $a$ and approximation $\\tilde{a}$: $|a - \\tilde{a}| \\leq \\Delta_a$, where $\\Delta_a$ is the maximum absolute error. We often write $a = \\tilde{a} \\pm \\Delta_a$. **Units match the quantity** — cm, kg, seconds, etc.",
+            "ro": "Pentru valoarea exactă $a$ și aproximarea $\\tilde{a}$: $|a - \\tilde{a}| \\leq \\Delta_a$, unde $\\Delta_a$ este eroarea absolută maximă. Scriem deseori $a = \\tilde{a} \\pm \\Delta_a$. **Unitățile sunt cele ale mărimii** — cm, kg, secunde etc."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Relative error",
+            "ro": "Eroare relativă"
+          },
+          "content": {
+            "en": "For $a \\neq 0$: $\\frac{|a - \\tilde{a}|}{|a|} \\leq \\delta_a$, where $\\delta_a$ is the maximum relative error, usually expressed as a **percentage**. It is **dimensionless** — comparable across quantities of different scales.",
+            "ro": "Pentru $a \\neq 0$: $\\frac{|a - \\tilde{a}|}{|a|} \\leq \\delta_a$, unde $\\delta_a$ este eroarea relativă maximă, de obicei exprimată ca **procent**. Este **adimensională** — comparabilă între mărimi de scale diferite."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Absolute error", "ro": "Eroare absolută" },
+            { "en": "Relative error", "ro": "Eroare relativă" }
+          ],
+          "rows": [
+            [
+              { "en": "Direct difference $|a - \\tilde{a}|$.", "ro": "Diferență directă $|a - \\tilde{a}|$." },
+              { "en": "Difference scaled by $|a|$.", "ro": "Diferență scalată la $|a|$." }
+            ],
+            [
+              { "en": "Carries the unit of $a$.", "ro": "Poartă unitatea lui $a$." },
+              { "en": "**Dimensionless**.", "ro": "**Adimensională**." }
+            ],
+            [
+              { "en": "Good when values are on the same scale.", "ro": "Bună când valorile sunt pe aceeași scară." },
+              { "en": "Good across scales or for round-off analysis.", "ro": "Bună între scale sau pentru analiza rotunjirii." }
+            ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Error propagation.** If $a_1 = \\tilde{a}_1 \\pm \\Delta_{a_1}$ and $a_2 = \\tilde{a}_2 \\pm \\Delta_{a_2}$, then for sums and differences:",
+            "ro": "**Propagarea erorii.** Dacă $a_1 = \\tilde{a}_1 \\pm \\Delta_{a_1}$ și $a_2 = \\tilde{a}_2 \\pm \\Delta_{a_2}$, atunci pentru sume și diferențe:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\Delta_{a_1 \\pm a_2} \\leq \\Delta_{a_1} + \\Delta_{a_2}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "For products and quotients, **relative** errors add:",
+            "ro": "Pentru produse și câturi, erorile **relative** se adună:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "a = a_1 \\times a_2 \\text{ or } a = a_1 / a_2 \\Longrightarrow \\delta_a \\leq \\delta_{a_1} + \\delta_{a_2}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Intuition.** Addition is \"absolute\" (amounts of stuff add, so do their uncertainties). Multiplication is \"relative\" (percentages compound, like interest rates). These two rules are the workhorse of first-order error analysis.",
+            "ro": "**Intuiție.** Adunarea este \"absolută\" (cantitățile se adună, la fel și incertitudinile lor). Înmulțirea este \"relativă\" (procentele se compun, ca ratele dobânzii). Aceste două reguli sunt instrumentele de bază ale analizei erorilor la ordinul întâi."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "You measure the radius of a disc as $r = 10.0 \\pm 0.1$ cm. You compute its area as $A = \\pi r^2$. Roughly, what is the relative error in $A$?",
+            "ro": "Măsori raza unui disc ca $r = 10.0 \\pm 0.1$ cm. Calculezi aria ca $A = \\pi r^2$. Aproximativ, care este eroarea relativă în $A$?"
+          },
+          "answer": {
+            "en": "The relative error in $r$ is $\\delta_r = 0.1/10 = 1\\%$. Squaring: $r^2 = r \\times r$, so the relative errors add, giving $\\delta_{r^2} \\approx 2\\% $. Multiplying by the exact constant $\\pi$ doesn't add error, so $\\delta_A \\approx 2\\%$. Rule of thumb: **powers multiply relative errors by the exponent**.",
+            "ro": "Eroarea relativă în $r$ este $\\delta_r = 0.1/10 = 1\\%$. Ridicarea la pătrat: $r^2 = r \\times r$, deci erorile relative se adună, dând $\\delta_{r^2} \\approx 2\\%$. Înmulțirea cu constanta exactă $\\pi$ nu adaugă eroare, deci $\\delta_A \\approx 2\\%$. Regulă empirică: **puterile înmulțesc erorile relative cu exponentul**."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Two quantities have relative errors $\\delta_{a_1} = 0.5\\%$ and $\\delta_{a_2} = 2\\%$. Approximately what is the relative error of their **product**?",
+                "ro": "Două mărimi au erori relative $\\delta_{a_1} = 0.5\\%$ și $\\delta_{a_2} = 2\\%$. Aproximativ care este eroarea relativă a **produsului** lor?"
+              },
+              "options": [
+                {
+                  "text": "$\\approx 1\\%$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "That looks like an average. Relative errors on a product **add**, they don't average.",
+                    "ro": "Asta arată ca o medie. Erorile relative pe produs **se adună**, nu se mediază."
+                  }
+                },
+                {
+                  "text": "$\\approx 2.5\\%$",
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. For products, $\\delta_a \\leq \\delta_{a_1} + \\delta_{a_2} = 0.5\\% + 2\\% = 2.5\\%$.",
+                    "ro": "Corect. Pentru produse, $\\delta_a \\leq \\delta_{a_1} + \\delta_{a_2} = 0.5\\% + 2\\% = 2.5\\%$."
+                  }
+                },
+                {
+                  "text": "$\\approx 0.01\\%$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "That would be multiplying the relative errors ($0.005 \\times 0.02 = 0.0001$). That rule is for second-order terms, not the dominant bound.",
+                    "ro": "Asta ar fi înmulțirea erorilor relative ($0.005 \\times 0.02 = 0.0001$). Regula respectivă este pentru termenii de ordin doi, nu limita dominantă."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Relative errors add for multiplication/division, absolute errors add for sum/difference.",
+                "ro": "Erorile relative se adună la înmulțire/împărțire, erorile absolute se adună la sumă/diferență."
+              },
+              "reviewStep": "alo-c3-abs-rel-error"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-conditioning",
+      "title": {
+        "en": "Conditioning: is the problem itself fragile?",
+        "ro": "Condiționarea: este problema în sine fragilă?"
+      },
+      "group": "sensitivity",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You are asked to solve a linear system $Ax = b$, and you know how to do Gaussian elimination perfectly. Is it possible that a $0.01\\%$ change in $b$ gives an answer that differs by $50\\%$ — *without any bug in your algorithm*?",
+            "ro": "Ți se cere să rezolvi un sistem liniar $Ax = b$ și știi să faci eliminarea Gauss perfect. Este posibil ca o modificare de $0.01\\%$ în $b$ să dea un răspuns care diferă cu $50\\%$ — *fără niciun bug în algoritmul tău*?"
+          },
+          "answer": {
+            "en": "**Yes** — if the matrix $A$ is nearly singular, the problem itself is **ill-conditioned**. Any perturbation of $b$ gets enormously amplified in $x$, regardless of how accurately you solve. This is not an algorithm bug; it is a property of the mathematical problem. Some problems are simply fragile.",
+            "ro": "**Da** — dacă matricea $A$ este aproape singulară, problema în sine este **prost condiționată**. Orice perturbare a lui $b$ se amplifică enorm în $x$, indiferent de cât de precis rezolvi. Nu este un bug al algoritmului; este o proprietate a problemei matematice. Unele probleme sunt pur și simplu fragile."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Conditioning",
+            "ro": "Condiționare"
+          },
+          "content": {
+            "en": "The **conditioning** of a problem characterizes the sensitivity of its exact solution to perturbations of the input data $x$, **assuming exact computations**. It is a property of the **problem**, independent of any algorithm used to solve it.",
+            "ro": "**Condiționarea** unei probleme caracterizează sensibilitatea soluției sale exacte la perturbările datelor de intrare $x$, **presupunând calcule exacte**. Este o proprietate a **problemei**, independentă de orice algoritm folosit pentru a o rezolva."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Setup.** Let $x$ be the exact input, $\\tilde{x}$ a known approximation of it, $P(x)$ the exact solution, and $P(\\tilde{x})$ the exact solution with perturbed input. A problem is **ill-conditioned** if $P(x)$ and $P(\\tilde{x})$ differ substantially even when $\\frac{\\|x - \\tilde{x}\\|}{\\|x\\|}$ is small.",
+            "ro": "**Setare.** Fie $x$ intrarea exactă, $\\tilde{x}$ o aproximare cunoscută a ei, $P(x)$ soluția exactă și $P(\\tilde{x})$ soluția exactă cu intrare perturbată. O problemă este **prost condiționată** dacă $P(x)$ și $P(\\tilde{x})$ diferă substanțial chiar când $\\frac{\\|x - \\tilde{x}\\|}{\\|x\\|}$ este mică."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Condition number $k(x)$",
+            "ro": "Număr de condiționare $k(x)$"
+          },
+          "content": {
+            "en": "The amplification factor of relative error, defined for $x \\neq 0, P(x) \\neq 0$:",
+            "ro": "Factorul de amplificare al erorii relative, definit pentru $x \\neq 0, P(x) \\neq 0$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "k(x) = \\frac{\\|P(x) - P(\\tilde{x})\\| / \\|P(x)\\|}{\\|x - \\tilde{x}\\| / \\|x\\|}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Rule of thumb:**",
+            "ro": "**Regulă empirică:**"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "(\\text{relative output error}) \\approx k(x) \\cdot (\\text{relative input error})"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "en": "A **small** $k(x)$ (close to $1$) means the problem is **well-conditioned** — small input changes give small output changes.",
+              "ro": "Un $k(x)$ **mic** (aproape de $1$) înseamnă că problema este **bine condiționată** — modificări mici la intrare dau modificări mici la ieșire."
+            },
+            {
+              "en": "A **large** $k(x)$ means **ill-conditioned** — tiny input changes can blow up the output.",
+              "ro": "Un $k(x)$ **mare** înseamnă **prost condiționată** — modificări minuscule la intrare pot exploda ieșirea."
+            },
+            {
+              "en": "Conditioning is **local**: it is evaluated at specific inputs $x$. A problem is globally well-conditioned only if it is well-conditioned everywhere.",
+              "ro": "Condiționarea este **locală**: se evaluează pentru date specifice $x$. O problemă este global bine condiționată doar dacă este bine condiționată peste tot."
+            },
+            {
+              "en": "Conditioning **cannot be fixed** by choosing a smarter algorithm — it's a property of the mathematics itself.",
+              "ro": "Condiționarea **nu poate fi reparată** prin alegerea unui algoritm mai bun — este o proprietate a matematicii în sine."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Preview.** For the linear system $Ax = b$, the relevant condition number is $\\kappa(A) = \\|A\\| \\cdot \\|A^{-1}\\|$ (course 4). Course 2's norm machinery plugs directly into this.",
+            "ro": "**Previzualizare.** Pentru sistemul liniar $Ax = b$, numărul de condiționare relevant este $\\kappa(A) = \\|A\\| \\cdot \\|A^{-1}\\|$ (cursul 4). Aparatura normelor din cursul 2 se conectează direct aici."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-wilkinson",
+      "title": {
+        "en": "The Wilkinson polynomial: a $10^{-7}$ nudge, a $10^9$ disaster",
+        "ro": "Polinomul lui Wilkinson: o împingere de $10^{-7}$, un dezastru de $10^9$"
+      },
+      "group": "sensitivity",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The classic illustration of ill-conditioning**, discovered by James Wilkinson in 1963. Take the polynomial with $20$ integer roots $1, 2, \\ldots, 20$:",
+            "ro": "**Ilustrația clasică a condiționării proaste**, descoperită de James Wilkinson în 1963. Ia polinomul cu $20$ de rădăcini întregi $1, 2, \\ldots, 20$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "w(x) = (x-1)(x-2)(x-3)\\cdots(x-20) = x^{20} - 210\\, x^{19} + P_{18}(x)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Now perturb **just one coefficient** — the coefficient of $x^{19}$ — by a tiny amount: change $-210$ to $-210 - 2^{-23} \\approx -210.0000001192$. The relative change is about $6 \\times 10^{-10}$, well below the precision of `binary32`. The new roots, to 5 decimals:",
+            "ro": "Acum perturbă **doar un coeficient** — coeficientul lui $x^{19}$ — cu o cantitate minusculă: schimbă $-210$ în $-210 - 2^{-23} \\approx -210.0000001192$. Modificarea relativă este aproximativ $6 \\times 10^{-10}$, mult sub precizia `binary32`. Noile rădăcini, la 5 zecimale:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "1.00000  2.00000  3.00000  4.00000  5.00000  6.00001\n6.99970  8.00727  8.91725  20.84691\n\n10.09527 +/- i * 0.64350\n11.79363 +/- i * 1.65233\n13.99236 +/- i * 2.51883\n16.73074 +/- i * 2.81262\n19.50244 +/- i * 1.94033"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Read that again.** A change invisible to single-precision arithmetic destroyed the roots: the clean integers $11, 12, \\ldots, 19$ shattered into **ten complex conjugate pairs**. Some real roots stayed, others merged into complex ones with imaginary parts larger than $2$.",
+            "ro": "**Citește din nou.** O modificare invizibilă pentru aritmetica de precizie simplă a distrus rădăcinile: întregii $11, 12, \\ldots, 19$ s-au sfărâmat în **zece perechi complexe conjugate**. Unele rădăcini reale au rămas, altele au fuzionat în complexe cu părți imaginare mai mari ca $2$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Why such amplification?** The roots of a polynomial are **not** continuous in the coefficients when the roots are clustered. Geometrically, a small bump on the coefficient landscape can split near-equal roots into a complex-conjugate pair. Wilkinson's example is the textbook proof that **\"well-posed\"** and **\"well-conditioned\"** are different things.",
+            "ro": "**De ce amplificare atât de mare?** Rădăcinile unui polinom **nu** sunt continue în coeficienți atunci când rădăcinile sunt grupate. Geometric, o mică denivelare pe peisajul coeficienților poate scinda rădăcini aproape egale într-o pereche complexă conjugată. Exemplul lui Wilkinson este dovada canonică că **<<bine formulat\"** și **<<bine condiționat\"** sunt lucruri diferite."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Takeaway.** No algorithm — not even solving in `binary128` — can recover the exact integer roots from the perturbed coefficients. The only cure for ill-conditioning is to **reformulate the problem** (e.g., factor the polynomial directly, work with the roots).",
+            "ro": "**Concluzie.** Niciun algoritm — nici măcar rezolvarea în `binary128` — nu poate recupera rădăcinile întregi exacte din coeficienții perturbați. Singurul remediu pentru condiționarea proastă este **reformularea problemei** (ex. factorizarea polinomului direct, lucrul cu rădăcinile)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Your colleague suggests fixing the Wilkinson root-finding problem by switching from `binary64` to `binary128`. What do you tell them?",
+                "ro": "Colegul tău sugerează să repari problema găsirii rădăcinilor Wilkinson prin trecerea de la `binary64` la `binary128`. Ce îi spui?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Good idea — higher precision always solves numerical problems.",
+                    "ro": "Idee bună — precizia mai mare rezolvă întotdeauna problemele numerice."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Higher precision only helps if the problem itself is well-conditioned. For ill-conditioned problems, even exact arithmetic amplifies input errors.",
+                    "ro": "Precizia mai mare ajută doar dacă problema în sine este bine condiționată. Pentru probleme prost condiționate, chiar aritmetica exactă amplifică erorile de intrare."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Higher precision helps slightly but the problem is **ill-conditioned**; the fix is to reformulate.",
+                    "ro": "Precizia mai mare ajută puțin, dar problema este **prost condiționată**; soluția este reformularea."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Conditioning is a property of the problem, not the arithmetic. `binary128` buys you a few more digits of input but doesn't change the catastrophic amplification of the roots.",
+                    "ro": "Corect. Condiționarea este o proprietate a problemei, nu a aritmeticii. `binary128` îți câștigă câteva cifre în plus la intrare, dar nu schimbă amplificarea catastrofală a rădăcinilor."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Switch to integer arithmetic — Wilkinson's roots are integers.",
+                    "ro": "Schimbă la aritmetică întreagă — rădăcinile lui Wilkinson sunt întregi."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Coefficients of a general polynomial are not integers, and the perturbation is already baked into the coefficients — there's no integer representation that recovers the original roots.",
+                    "ro": "Coeficienții unui polinom general nu sunt întregi, iar perturbarea este deja fixată în coeficienți — nu există reprezentare întreagă care să recupereze rădăcinile originale."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Conditioning is a property of the problem. Precision treats the symptom, not the cause.",
+                "ro": "Condiționarea este o proprietate a problemei. Precizia tratează simptomul, nu cauza."
+              },
+              "reviewStep": "alo-c3-conditioning"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slide on Wilkinson's polynomial in ALO curs 03. See also: Wilkinson, *Rounding Errors in Algebraic Processes* (1963).",
+            "ro": "Slide despre polinomul lui Wilkinson din ALO curs 03. Vezi și: Wilkinson, *Rounding Errors in Algebraic Processes* (1963)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-stability",
+      "title": {
+        "en": "Stability: does the algorithm amplify rounding?",
+        "ro": "Stabilitate: algoritmul amplifică rotunjirea?"
+      },
+      "group": "sensitivity",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Two students solve the same well-conditioned quadratic equation $ax^2 + bx + c = 0$ with $b \\gg 0, \\ a, c$ small. Student A uses the textbook formula $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$. Student B uses a modified version. Student A gets bad results for one of the two roots. What went wrong?",
+            "ro": "Doi studenți rezolvă aceeași ecuație de gradul doi bine condiționată $ax^2 + bx + c = 0$ cu $b \\gg 0, \\ a, c$ mici. Studentul A folosește formula clasică $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$. Studentul B folosește o versiune modificată. Studentul A obține rezultate proaste pentru una dintre cele două rădăcini. Ce a mers prost?"
+          },
+          "answer": {
+            "en": "The root $x_1 = \\frac{-b + \\sqrt{b^2 - 4ac}}{2a}$ suffers **catastrophic cancellation**: when $b^2 \\gg 4ac$, $\\sqrt{b^2 - 4ac} \\approx b$, so the numerator is a tiny difference of two close numbers. Lost digits of precision. Student A's problem is **well-conditioned** but the **algorithm is unstable**. Student B uses $x_1 = \\frac{2c}{-b - \\sqrt{b^2 - 4ac}}$ which rearranges to avoid the cancellation. Same problem, better algorithm.",
+            "ro": "Rădăcina $x_1 = \\frac{-b + \\sqrt{b^2 - 4ac}}{2a}$ suferă de **anulare catastrofală**: când $b^2 \\gg 4ac$, $\\sqrt{b^2 - 4ac} \\approx b$, deci numărătorul este o diferență minusculă a două numere apropiate. Cifre de precizie pierdute. Problema studentului A este **bine condiționată**, dar **algoritmul este instabil**. Studentul B folosește $x_1 = \\frac{2c}{-b - \\sqrt{b^2 - 4ac}}$, care rearanjează pentru a evita anularea. Aceeași problemă, algoritm mai bun."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Numerical stability",
+            "ro": "Stabilitate numerică"
+          },
+          "content": {
+            "en": "The stability of an algorithm $\\tilde{P}$ for problem $P$ measures how much it **amplifies rounding errors**, assuming exact input. Measured by $\\|P(x) - \\tilde{P}(x)\\|$ or $\\frac{\\|P(x) - \\tilde{P}(x)\\|}{\\|P(x)\\|}$.",
+            "ro": "Stabilitatea unui algoritm $\\tilde{P}$ pentru problema $P$ măsoară cât de mult **amplifică erorile de rotunjire**, presupunând intrare exactă. Măsurată prin $\\|P(x) - \\tilde{P}(x)\\|$ sau $\\frac{\\|P(x) - \\tilde{P}(x)\\|}{\\|P(x)\\|}$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The binary verdict:**",
+            "ro": "**Verdictul binar:**"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "en": "Errors stay bounded $\\to$ **stable** algorithm.",
+              "ro": "Erorile rămân mărginite $\\to$ algoritm **stabil**."
+            },
+            {
+              "en": "Errors grow explosively $\\to$ **unstable** algorithm.",
+              "ro": "Erorile cresc exploziv $\\to$ algoritm **instabil**."
+            },
+            {
+              "en": "A relative error on the order of the unit roundoff characterizes a numerically stable algorithm.",
+              "ro": "O eroare relativă de ordinul erorii unitare de rotunjire caracterizează un algoritm numeric stabil."
+            }
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Formal definitions.** An algorithm $\\tilde{P}$ is numerically stable if **at least one** of the following holds:",
+            "ro": "**Definiții formale.** Un algoritm $\\tilde{P}$ este numeric stabil dacă **cel puțin una** dintre următoarele este îndeplinită:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Forward stability:** $\\tilde{P}(x) \\approx P(x)$ for any input $x$. The computed answer is close to the true answer.",
+              "ro": "**Stabilitate înainte:** $\\tilde{P}(x) \\approx P(x)$ pentru orice intrare $x$. Răspunsul calculat este aproape de cel adevărat."
+            },
+            {
+              "en": "**Backward stability:** there exists some $\\tilde{x}$ near $x$ such that $\\tilde{P}(x) \\approx P(\\tilde{x})$. The computed answer is the **exact** answer to a slightly perturbed problem.",
+              "ro": "**Stabilitate înapoi:** există un $\\tilde{x}$ aproape de $x$ astfel încât $\\tilde{P}(x) \\approx P(\\tilde{x})$. Răspunsul calculat este răspunsul **exact** pentru o problemă ușor perturbată."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**The golden combination.** A **stable algorithm** applied to a **well-conditioned problem** delivers high-precision results. Conditioning sets the ceiling; stability keeps you close to it.",
+            "ro": "**Combinația de aur.** Un **algoritm stabil** aplicat unei **probleme bine condiționate** dă rezultate de precizie înaltă. Condiționarea stabilește plafonul; stabilitatea te ține aproape de el."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The roles of the players:**",
+            "ro": "**Rolurile actorilor:**"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "en": "$x$ — exact input data.",
+              "ro": "$x$ — date de intrare exacte."
+            },
+            {
+              "en": "$P(x)$ — exact solution with exact data (ground truth).",
+              "ro": "$P(x)$ — soluția exactă cu date exacte (referința adevărată)."
+            },
+            {
+              "en": "$\\tilde{P}(x)$ — computed solution via algorithm $\\tilde{P}$ on exact data.",
+              "ro": "$\\tilde{P}(x)$ — soluția calculată prin algoritmul $\\tilde{P}$ pe date exacte."
+            },
+            {
+              "en": "$P(\\tilde{x})$ — exact solution with perturbed data $\\tilde{x}$ (what conditioning measures).",
+              "ro": "$P(\\tilde{x})$ — soluția exactă cu date perturbate $\\tilde{x}$ (ce măsoară condiționarea)."
+            }
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Conditioning vs stability, side by side:**",
+            "ro": "**Condiționare vs stabilitate, comparativ:**"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Conditioning", "ro": "Condiționare" },
+            { "en": "Stability", "ro": "Stabilitate" }
+          ],
+          "rows": [
+            [
+              { "en": "Property of the **problem**.", "ro": "Proprietate a **problemei**." },
+              { "en": "Property of the **algorithm**.", "ro": "Proprietate a **algoritmului**." }
+            ],
+            [
+              { "en": "Independent of implementation.", "ro": "Independentă de implementare." },
+              { "en": "Depends on the chosen method.", "ro": "Depinde de metoda aleasă." }
+            ],
+            [
+              { "en": "Measures solution sensitivity to input.", "ro": "Măsoară sensibilitatea soluției la intrare." },
+              { "en": "Measures rounding-error propagation.", "ro": "Măsoară propagarea erorilor de rotunjire." }
+            ],
+            [
+              { "en": "**Cannot** be fixed algorithmically.", "ro": "**Nu poate** fi reparată algoritmic." },
+              { "en": "**Can** be improved by a better algorithm.", "ro": "**Poate** fi îmbunătățită printr-un algoritm mai bun." }
+            ],
+            [
+              { "en": "How **fragile** the object is.", "ro": "Cât de **fragil** este obiectul." },
+              { "en": "How **carefully** you handle it.", "ro": "Cât de **atent** îl manipulezi." }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Mnemonic.** Drop a solid glass carelessly — it still breaks (well-conditioned problem, unstable algorithm). Touch a cracked glass gently — it still shatters (ill-conditioned problem, stable algorithm). You need *both* a solid glass *and* careful hands.",
+            "ro": "**Mnemotehnică.** Scapă neglijent un pahar solid — tot se sparge (problemă bine condiționată, algoritm instabil). Atinge delicat un pahar crăpat — tot se face cioburi (problemă prost condiționată, algoritm stabil). Ai nevoie și de un pahar solid, și de mâini atente."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "A problem with $k(x) = 10^8$ is solved with a backward-stable algorithm using `binary64`. What is the best relative error you can hope for in the output?",
+                "ro": "O problemă cu $k(x) = 10^8$ este rezolvată cu un algoritm stabil înapoi folosind `binary64`. Care este cea mai bună eroare relativă pe care poți spera pentru ieșire?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\approx 10^{-16}$ (the unit roundoff).", "ro": "$\\approx 10^{-16}$ (eroarea unitară de rotunjire)." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "That's the best case only for **well-conditioned** problems. A stable algorithm cannot beat conditioning.",
+                    "ro": "Acesta este cazul ideal doar pentru probleme **bine condiționate**. Un algoritm stabil nu poate învinge condiționarea."
+                  }
+                },
+                {
+                  "text": { "en": "$\\approx 10^{-8}$ ($k(x) \\cdot$ unit roundoff).", "ro": "$\\approx 10^{-8}$ ($k(x) \\cdot$ eroarea unitară)." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Backward stability gives an input perturbation on the order of the unit roundoff ($\\approx 10^{-16}$), which conditioning amplifies by $k(x) = 10^8$, yielding $\\approx 10^{-8}$ in the output.",
+                    "ro": "Corect. Stabilitatea înapoi dă o perturbare a intrării de ordinul erorii unitare ($\\approx 10^{-16}$), pe care condiționarea o amplifică cu $k(x) = 10^8$, rezultând $\\approx 10^{-8}$ în ieșire."
+                  }
+                },
+                {
+                  "text": { "en": "$\\approx 10^{0}$ — the problem is unsolvable.", "ro": "$\\approx 10^{0}$ — problema nu se poate rezolva." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$k(x) = 10^8$ is large but not catastrophic. You lose about 8 of the 16 digits of `binary64`, but you still get ~8 correct digits.",
+                    "ro": "$k(x) = 10^8$ este mare, dar nu catastrofal. Pierzi aproximativ 8 din cele 16 cifre `binary64`, dar obții ~8 cifre corecte."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Rule of thumb: output error $\\approx k(x) \\cdot$ machine epsilon for backward-stable algorithms.",
+                "ro": "Regulă empirică: eroarea ieșirii $\\approx k(x) \\cdot$ epsilon-ul mașinii pentru algoritmi stabili înapoi."
+              },
+              "reviewStep": "alo-c3-stability"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c3-quiz",
+      "title": {
+        "en": "Self-test: course 3 retrieval",
+        "ro": "Auto-test: retenție cursul 3"
+      },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Ten questions drawn from across course 3. Aim for **7 or more correct** on the first pass. Wrong answers will show the exact step to revisit.",
+            "ro": "Zece întrebări extrase din tot cursul 3. Țintește **7 sau mai multe corecte** din prima. Răspunsurile greșite îți vor arăta pasul exact de recitit."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which of these does IEEE 754 **not** specify?",
+                "ro": "Care dintre acestea **nu** este specificată de IEEE 754?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Bit layouts of arithmetic formats.", "ro": "Aspectele biților pentru formate aritmetice." },
+                  "correct": false,
+                  "explanation": { "en": "These are formats — they are specified.", "ro": "Acestea sunt formate — sunt specificate." }
+                },
+                {
+                  "text": { "en": "Default rounding mode (round-to-nearest-even).", "ro": "Modul implicit de rotunjire (la cel mai apropiat par)." },
+                  "correct": false,
+                  "explanation": { "en": "Rounding rules are part of the standard.", "ro": "Regulile de rotunjire fac parte din standard." }
+                },
+                {
+                  "text": { "en": "The compiler optimization level used to emit floating-point code.", "ro": "Nivelul de optimizare al compilatorului folosit pentru emiterea codului în virgulă mobilă." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Compilation strategy is outside the scope of IEEE 754, which only governs arithmetic behaviour.", "ro": "Corect. Strategia de compilare este în afara sferei IEEE 754, care guvernează doar comportamentul aritmetic." }
+                }
+              ],
+              "explanation": { "en": "IEEE 754 governs formats, rounding, operations, exceptions.", "ro": "IEEE 754 guvernează formate, rotunjire, operații, excepții." },
+              "reviewStep": "alo-c3-ieee754"
+            },
+            {
+              "question": {
+                "en": "In `binary64`, the biased exponent $c$ satisfies which relation to the true exponent $e$?",
+                "ro": "În `binary64`, exponentul deplasat $c$ satisface ce relație cu exponentul real $e$?"
+              },
+              "options": [
+                {
+                  "text": "$e = c$",
+                  "correct": false,
+                  "explanation": { "en": "The stored exponent is **biased**, not raw.", "ro": "Exponentul stocat este **deplasat**, nu brut." }
+                },
+                {
+                  "text": "$e = c - 1023$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. The bias for `binary64` is $1023$.", "ro": "Corect. Deplasarea pentru `binary64` este $1023$." }
+                },
+                {
+                  "text": "$e = 1023 - c$",
+                  "correct": false,
+                  "explanation": { "en": "Subtraction is in the wrong direction; the stored $c$ is unsigned and offset upward.", "ro": "Scăderea este în direcția greșită; $c$ stocat este fără semn și deplasat în sus." }
+                }
+              ],
+              "explanation": { "en": "Bias: $c$ is unsigned; subtract bias to get the true exponent.", "ro": "Deplasare: $c$ este fără semn; scade deplasarea pentru exponentul real." },
+              "reviewStep": "alo-c3-binary64"
+            },
+            {
+              "question": {
+                "en": "Approximately how many decimal digits of precision does `binary32` provide?",
+                "ro": "Aproximativ câte cifre zecimale de precizie oferă `binary32`?"
+              },
+              "options": [
+                {
+                  "text": { "en": "~7", "ro": "~7" },
+                  "correct": true,
+                  "explanation": { "en": "Correct. 23 fraction bits + 1 implicit $\\approx 24 \\cdot 0.301 \\approx 7.2$ digits.", "ro": "Corect. 23 biți fracție + 1 implicit $\\approx 24 \\cdot 0.301 \\approx 7.2$ cifre." }
+                },
+                {
+                  "text": { "en": "~15", "ro": "~15" },
+                  "correct": false,
+                  "explanation": { "en": "15 digits is `binary64`, not `binary32`.", "ro": "15 cifre este `binary64`, nu `binary32`." }
+                },
+                {
+                  "text": { "en": "~32", "ro": "~32" },
+                  "correct": false,
+                  "explanation": { "en": "That confuses bit count with decimal-digit count.", "ro": "Asta confundă numărul de biți cu numărul de cifre zecimale." }
+                }
+              ],
+              "explanation": { "en": "Decimal precision $\\approx$ fraction bits $\\cdot \\log_{10} 2$.", "ro": "Precizia zecimală $\\approx$ biți fracție $\\cdot \\log_{10} 2$." },
+              "reviewStep": "alo-c3-binary-formats"
+            },
+            {
+              "question": {
+                "en": "Why does $0.1$ not have an exact `binary64` representation?",
+                "ro": "De ce $0.1$ nu are reprezentare exactă în `binary64`?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Because `binary64` is limited to 15 decimal digits.", "ro": "Pentru că `binary64` este limitat la 15 cifre zecimale." },
+                  "correct": false,
+                  "explanation": { "en": "Precision is not the reason. Many values $< 10^{-15}$ are still exactly representable; $0.1$ isn't.", "ro": "Precizia nu este motivul. Multe valori $< 10^{-15}$ sunt totuși reprezentabile exact; $0.1$ nu." }
+                },
+                {
+                  "text": { "en": "Because $1/10$ has a factor of $5$ in the denominator, and $5$ doesn't divide $2$.", "ro": "Pentru că $1/10$ are un factor de $5$ la numitor, iar $5$ nu divide $2$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. A fraction terminates in base $b$ iff the prime factors of its denominator all divide $b$.", "ro": "Corect. O fracție se termină în baza $b$ dacă și numai dacă factorii primi ai numitorului divid toți pe $b$." }
+                },
+                {
+                  "text": { "en": "Because the FPU doesn't support the value $0.1$.", "ro": "Pentru că FPU-ul nu suportă valoarea $0.1$." },
+                  "correct": false,
+                  "explanation": { "en": "The FPU supports any value representable in the format. $0.1$ simply isn't representable exactly.", "ro": "FPU-ul suportă orice valoare reprezentabilă în format. $0.1$ pur și simplu nu este reprezentabil exact." }
+                }
+              ],
+              "explanation": { "en": "Termination in base $b$ requires the denominator's prime factors to divide $b$.", "ro": "Terminarea în baza $b$ cere ca factorii primi ai numitorului să dividă $b$." },
+              "reviewStep": "alo-c3-binary64"
+            },
+            {
+              "question": {
+                "en": "Rounding keeps $k$ digits. What is the relative error bound?",
+                "ro": "Rotunjirea păstrează $k$ cifre. Care este limita erorii relative?"
+              },
+              "options": [
+                {
+                  "text": "$\\leq 10^{-k+1}$",
+                  "correct": false,
+                  "explanation": { "en": "That's the **truncation** bound. Rounding is twice as tight.", "ro": "Aceea este limita pentru **trunchiere**. Rotunjirea este de două ori mai strânsă." }
+                },
+                {
+                  "text": "$\\leq 0.5 \\times 10^{-k+1}$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. Rounding halves the worst case because we always pick the nearer representable value.", "ro": "Corect. Rotunjirea înjumătățește cazul cel mai rău pentru că alegem mereu valoarea reprezentabilă mai apropiată." }
+                },
+                {
+                  "text": "$\\leq 10^{-k}$",
+                  "correct": false,
+                  "explanation": { "en": "Wrong exponent. The bound scales as $10^{-k+1}$, not $10^{-k}$.", "ro": "Exponent greșit. Limita se scalează ca $10^{-k+1}$, nu $10^{-k}$." }
+                }
+              ],
+              "explanation": { "en": "Rounding halves the truncation bound.", "ro": "Rotunjirea înjumătățește limita trunchierii." },
+              "reviewStep": "alo-c3-rounding"
+            },
+            {
+              "question": {
+                "en": "Is floating-point addition associative? $(a +_c b) +_c c = a +_c (b +_c c)$?",
+                "ro": "Adunarea în virgulă mobilă este asociativă? $(a +_c b) +_c c = a +_c (b +_c c)$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Yes — it's still addition.", "ro": "Da — tot adunare e." },
+                  "correct": false,
+                  "explanation": { "en": "Mathematical addition is associative; **machine** addition is not, because each step rounds independently.", "ro": "Adunarea matematică este asociativă; adunarea **mașinii** nu, pentru că fiecare pas rotunjește independent." }
+                },
+                {
+                  "text": { "en": "No — each addition rounds separately, so the order affects the result.", "ro": "Nu — fiecare adunare rotunjește separat, deci ordinea afectează rezultatul." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. This is why algorithms sum from smallest-to-largest magnitude to preserve precision.", "ro": "Corect. De aceea algoritmii însumează de la cea mai mică la cea mai mare magnitudine pentru a păstra precizia." }
+                },
+                {
+                  "text": { "en": "Only if all inputs are positive.", "ro": "Doar dacă toate intrările sunt pozitive." },
+                  "correct": false,
+                  "explanation": { "en": "Sign doesn't matter — associativity fails regardless because rounding is non-linear.", "ro": "Semnul nu contează — asociativitatea eșuează oricum pentru că rotunjirea este neliniară." }
+                }
+              ],
+              "explanation": { "en": "Every $+_c$ rounds, and rounding is not associative.", "ro": "Fiecare $+_c$ rotunjește, iar rotunjirea nu este asociativă." },
+              "reviewStep": "alo-c3-machine-ops"
+            },
+            {
+              "question": {
+                "en": "Which is the **modeling** error?",
+                "ro": "Care este eroarea de **modelare**?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Storing $\\pi$ with 15 digits instead of exactly.", "ro": "Stocarea lui $\\pi$ cu 15 cifre în loc de exact." },
+                  "correct": false,
+                  "explanation": { "en": "That's a **representation** error (category 1 or 3).", "ro": "Aceasta este o eroare de **reprezentare** (categoria 1 sau 3)." }
+                },
+                {
+                  "text": { "en": "Replacing $e^x$ with its first three Taylor terms.", "ro": "Înlocuirea lui $e^x$ cu primii trei termeni Taylor." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Truncating a series is a **discretization** choice — category 2, modeling error.", "ro": "Corect. Trunchierea unei serii este o alegere de **discretizare** — categoria 2, eroare de modelare." }
+                },
+                {
+                  "text": { "en": "A bug in the BLAS library.", "ro": "Un bug în biblioteca BLAS." },
+                  "correct": false,
+                  "explanation": { "en": "Library bugs are category 3 (computation errors).", "ro": "Bug-urile bibliotecii sunt categoria 3 (erori de calcul)." }
+                }
+              ],
+              "explanation": { "en": "Modeling errors come from approximating the math itself.", "ro": "Erorile de modelare vin din aproximarea matematicii însăși." },
+              "reviewStep": "alo-c3-error-sources"
+            },
+            {
+              "question": {
+                "en": "A measurement gives $200 \\pm 4$. Relative error?",
+                "ro": "O măsurătoare dă $200 \\pm 4$. Eroare relativă?"
+              },
+              "options": [
+                {
+                  "text": "$0.2\\%$",
+                  "correct": false,
+                  "explanation": { "en": "That would be $4/2000$. Denominator should be $200$, not $2000$.", "ro": "Aceasta ar fi $4/2000$. Numitorul trebuie să fie $200$, nu $2000$." }
+                },
+                {
+                  "text": "$2\\%$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. $\\delta = 4/200 = 0.02 = 2\\%$.", "ro": "Corect. $\\delta = 4/200 = 0.02 = 2\\%$." }
+                },
+                {
+                  "text": "$20\\%$",
+                  "correct": false,
+                  "explanation": { "en": "That's $4/20$, off by a factor of $10$.", "ro": "Aceasta este $4/20$, greșit cu un factor de $10$." }
+                }
+              ],
+              "explanation": { "en": "$\\delta_a = |\\Delta_a| / |a|$.", "ro": "$\\delta_a = |\\Delta_a| / |a|$." },
+              "reviewStep": "alo-c3-abs-rel-error"
+            },
+            {
+              "question": {
+                "en": "Conditioning is a property of the…",
+                "ro": "Condiționarea este o proprietate a…"
+              },
+              "options": [
+                {
+                  "text": { "en": "Algorithm used to solve the problem.", "ro": "Algoritmului folosit pentru a rezolva problema." },
+                  "correct": false,
+                  "explanation": { "en": "That's **stability**. Conditioning is independent of algorithm.", "ro": "Aceea este **stabilitatea**. Condiționarea este independentă de algoritm." }
+                },
+                {
+                  "text": { "en": "Mathematical problem itself, independent of any algorithm.", "ro": "Problemei matematice în sine, independent de orice algoritm." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. $k(x)$ depends only on the map $x \\mapsto P(x)$.", "ro": "Corect. $k(x)$ depinde doar de funcția $x \\mapsto P(x)$." }
+                },
+                {
+                  "text": { "en": "Floating-point format chosen.", "ro": "Formatului în virgulă mobilă ales." },
+                  "correct": false,
+                  "explanation": { "en": "Precision choice doesn't change how sensitive the problem is.", "ro": "Alegerea preciziei nu schimbă cât de sensibilă este problema." }
+                }
+              ],
+              "explanation": { "en": "Conditioning = problem. Stability = algorithm.", "ro": "Condiționare = problemă. Stabilitate = algoritm." },
+              "reviewStep": "alo-c3-conditioning"
+            },
+            {
+              "question": {
+                "en": "What does the Wilkinson polynomial experiment demonstrate?",
+                "ro": "Ce demonstrează experimentul polinomului lui Wilkinson?"
+              },
+              "options": [
+                {
+                  "text": { "en": "That `binary64` is insufficient for polynomial root-finding.", "ro": "Că `binary64` este insuficient pentru găsirea rădăcinilor polinomiale." },
+                  "correct": false,
+                  "explanation": { "en": "The experiment shows the **problem** amplifies perturbations, regardless of precision.", "ro": "Experimentul arată că **problema** amplifică perturbările, indiferent de precizie." }
+                },
+                {
+                  "text": { "en": "A tiny coefficient perturbation can move polynomial roots enormously — an ill-conditioned problem.", "ro": "O perturbare minusculă a coeficienților poate muta rădăcinile polinomiale enorm — o problemă prost condiționată." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Near-equal roots are structurally sensitive; this is intrinsic to the problem.", "ro": "Corect. Rădăcinile aproape egale sunt sensibile structural; asta este intrinsec problemei." }
+                },
+                {
+                  "text": { "en": "That Horner's method is unstable.", "ro": "Că metoda lui Horner este instabilă." },
+                  "correct": false,
+                  "explanation": { "en": "The experiment is about conditioning, not a specific evaluation algorithm.", "ro": "Experimentul este despre condiționare, nu despre un algoritm specific de evaluare." }
+                }
+              ],
+              "explanation": { "en": "Wilkinson is the canonical ill-conditioning example.", "ro": "Wilkinson este exemplul canonic de condiționare proastă." },
+              "reviewStep": "alo-c3-wilkinson"
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Next up — course 4.** We'll apply conditioning to the concrete problem of solving $Ax = b$. The condition number becomes $\\kappa(A) = \\|A\\| \\cdot \\|A^{-1}\\|$, and course 2's spectral-norm formula $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$ becomes the key computational ingredient.",
+            "ro": "**Urmează — cursul 4.** Vom aplica condiționarea la problema concretă a rezolvării lui $Ax = b$. Numărul de condiționare devine $\\kappa(A) = \\|A\\| \\cdot \\|A^{-1}\\|$, iar formula normei spectrale din cursul 2, $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$, devine ingredientul computațional cheie."
+          }
+        }
+      ]
+    }
+  ]
+}
