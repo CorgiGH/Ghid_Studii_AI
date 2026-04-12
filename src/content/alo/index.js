@@ -10,7 +10,12 @@ const alo = {
     ro: 'Algebră liniară, teoria matricelor, metode de optimizare',
   },
   icon: '\uD83D\uDCD0',
-  courses: [],
+  courses: [
+    { id: 'alo-c1', src: 'alo/courses/course-01.json', metaId: 'alo-c1',
+      title: { en: 'Course 1: Introduction & Motivating Examples', ro: 'Cursul 1: Introducere și exemple motivante' },
+      shortTitle: { en: 'C1: Intro', ro: 'C1: Intro' },
+      sectionCount: 4 },
+  ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
 

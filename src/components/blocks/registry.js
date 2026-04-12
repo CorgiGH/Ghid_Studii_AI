@@ -6,6 +6,7 @@ const registry = {
   'think':       lazy(() => import('./assessment/ThinkBlock.jsx')),
   'quiz':        lazy(() => import('./assessment/QuizBlock.jsx')),
   'code':        lazy(() => import('./media/CodeBlock.jsx')),
+  'equation':    lazy(() => import('./media/EquationBlock.jsx')),
   'callout':     lazy(() => import('./layout/CalloutBlock.jsx')),
   'diagram':     lazy(() => import('./diagram/DiagramBlock.jsx')),
   'image':       lazy(() => import('./media/ImageBlock.jsx')),

@@ -123,7 +123,7 @@ async function openrouterRequest(model, messages, retries = 0) {
     body: JSON.stringify({
       model,
       messages,
-      max_tokens: 16384,
+      max_tokens: 6000,
     }),
   });
 
