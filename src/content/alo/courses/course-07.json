@@ -140,7 +140,7 @@
         {
           "type": "code",
           "language": "text",
-          "code": "valori         = [102.5, 2.5,  3.5, 104.88, 1.05, 0.33,  100,  1.3, 101.3,  0.73, 1.5, 102.23]\nind_col        = [  1,    3,    1,    2,     3,    5,     3,    2,    4,      1,   4,    5  ]\ninceput_linii  = [  1,                4,                 7,    8,        10,          13  ]\n//                row 1            row 2              row 3 row 4     row 5      end+1"
+          "code": "valori         = [102.5, 2.5,  3.5, 104.88, 1.05, 0.33,  100,  1.3, 101.3,  0.73, 1.5, 102.23]\nind_col        = [  1,    3,    1,    2,     3,    5,     3,    2,    4,      1,   4,    5  ]\ninceput_linii  = [  1,           3,                      7,    8,        10,          13  ]\n//                row 1       row 2                   row 3 row 4     row 5      end+1\n//                (2 nnz)     (4 nnz)                 (1)   (2)       (3)"
         },
         {
           "type": "callout",
@@ -251,6 +251,11 @@
             "en": "If every row has at most $n\\_max$ nonzeros, store a dense $n \\times n\\_max$ value matrix and a matching $n \\times n\\_max$ column-index matrix. Row-by-row access is $O(n\\_max)$ with no pointer chasing.",
             "ro": "Dacă fiecare linie are cel mult $n\\_max$ intrări nenule, stochezi o matrice densă $n \\times n\\_max$ de valori și o matrice $n \\times n\\_max$ potrivită de indici de coloană. Accesul linie cu linie este $O(n\\_max)$ fără urmărire de pointeri."
           }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "// Same example A as before, with n_max = 3 (every row has at most 3 nonzeros).\n// valori and ind_col are both n x n_max matrices with 0 padding.\n\nvalori       ind_col\n 102.5  2.5   0         1  3  0        <- row 1: A[1,1]=102.5, A[1,3]=2.5\n 104.88 1.05  0.33      2  3  5        <- row 2: A[2,2]=104.88, A[2,3]=1.05, A[2,5]=0.33\n 100    0     0         3  0  0        <- row 3: A[3,3]=100\n 101.3  1.3   0         4  2  0        <- row 4: A[4,4]=101.3, A[4,2]=1.3\n 102.23 1.5   0.73      5  4  1        <- row 5: A[5,5]=102.23, A[5,4]=1.5, A[5,1]=0.73"
         },
         {
           "type": "definition",
@@ -569,6 +574,53 @@
           }
         },
         {
+          "type": "learn",
+          "content": {
+            "en": "**Worked trace.** Solve $\\begin{pmatrix} 4 & -1 \\\\ -1 & 4 \\end{pmatrix} x = \\begin{pmatrix} 3 \\\\ 3 \\end{pmatrix}$ starting from $x^{(0)} = (0, 0)^T$. The exact solution is $x^* = (1, 1)^T$.",
+            "ro": "**Trasare manuală.** Rezolvă $\\begin{pmatrix} 4 & -1 \\\\ -1 & 4 \\end{pmatrix} x = \\begin{pmatrix} 3 \\\\ 3 \\end{pmatrix}$ pornind de la $x^{(0)} = (0, 0)^T$. Soluția exactă este $x^* = (1, 1)^T$."
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "k=0:  x = (0.0000, 0.0000)     error = 1.0000\nk=1:  x_1 = (3 + x_2_old)/4 = (3 + 0)/4 = 0.7500\n      x_2 = (3 + x_1_old)/4 = (3 + 0)/4 = 0.7500    # Jacobi uses OLD x_1\n      x = (0.7500, 0.7500)                         error = 0.2500\nk=2:  x_1 = (3 + 0.7500)/4 = 0.9375\n      x_2 = (3 + 0.7500)/4 = 0.9375\n      x = (0.9375, 0.9375)                         error = 0.0625\nk=3:  x = (0.9844, 0.9844)                         error = 0.0156\nk=4:  x = (0.9961, 0.9961)                         error = 0.0039\n# Error shrinks by a factor of 1/4 each step - rho(M_J) = 1/4 exactly for this A."
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "In the trace above, the error ratio $\\|e^{(k+1)}\\| / \\|e^{(k)}\\|$ is $0.25$ at every step. What does this identify?",
+                "ro": "În trasarea de mai sus, raportul erorilor $\\|e^{(k+1)}\\| / \\|e^{(k)}\\|$ este $0.25$ la fiecare pas. Ce identifică asta?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\rho(M_J) = 1/4$ — the spectral radius of the iteration matrix.", "ro": "$\\rho(M_J) = 1/4$ — raza spectrală a matricei iterației." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Asymptotically $\\|e^{(k+1)}\\| / \\|e^{(k)}\\| \\to \\rho(M_J)$. For this $A$, $M_J = \\begin{pmatrix} 0 & 1/4 \\\\ 1/4 & 0 \\end{pmatrix}$ with eigenvalues $\\pm 1/4$, so $\\rho = 1/4$ exactly.", "ro": "Corect. Asimptotic $\\|e^{(k+1)}\\| / \\|e^{(k)}\\| \\to \\rho(M_J)$. Pentru acest $A$, $M_J = \\begin{pmatrix} 0 & 1/4 \\\\ 1/4 & 0 \\end{pmatrix}$ cu valorile proprii $\\pm 1/4$, deci $\\rho = 1/4$ exact." }
+                },
+                {
+                  "text": { "en": "That $A$ is not diagonally dominant.", "ro": "Că $A$ nu este diagonal dominantă." },
+                  "correct": false,
+                  "explanation": { "en": "$|4| > |-1|$ on both rows, so $A$ is strictly diagonally dominant — that's exactly why the iteration converges.", "ro": "$|4| > |-1|$ pe ambele linii, deci $A$ este strict diagonal dominantă — exact de aceea iterația converge." }
+                },
+                {
+                  "text": { "en": "The condition number $\\kappa(A) = 4$.", "ro": "Numărul de condiționare $\\kappa(A) = 4$." },
+                  "correct": false,
+                  "explanation": { "en": "$\\kappa(A)$ governs error amplification relative to input perturbations, not iteration convergence rate. Different quantity.", "ro": "$\\kappa(A)$ guvernează amplificarea erorii față de perturbările intrării, nu rata de convergență a iterației. Altă mărime." }
+                },
+                {
+                  "text": { "en": "That each iteration takes $1/4$ second.", "ro": "Că fiecare iterație durează $1/4$ de secundă." },
+                  "correct": false,
+                  "explanation": { "en": "Error ratio is dimensionless; it has nothing to do with wall-clock time per iteration.", "ro": "Raportul erorilor este adimensional; nu are nimic de-a face cu timpul de ceas pe iterație." }
+                }
+              ],
+              "explanation": { "en": "The asymptotic error ratio equals the iteration matrix's spectral radius — $\\rho(M_J)$ for Jacobi.", "ro": "Raportul asimptotic al erorilor este egal cu raza spectrală a matricei iterației — $\\rho(M_J)$ pentru Jacobi." },
+              "reviewStep": "alo-c7-jacobi"
+            }
+          ]
+        },
+        {
           "type": "lecture",
           "note": {
             "en": "Slides 23–27 of ALO curs 07 — Jacobi method and sufficient conditions.",
@@ -631,8 +683,8 @@
           "type": "callout",
           "variant": "tip",
           "content": {
-            "en": "**Sufficient convergence conditions.** Gauss–Seidel converges if **either**:\n\n- $A$ is strictly diagonally dominant (same condition as Jacobi), **or**\n- $A$ is symmetric positive-definite (SPD).\n\nThe SPD case is important: for Poisson-like PDE discretizations, $A$ is SPD, both Jacobi and Gauss–Seidel converge, and Gauss–Seidel typically has $\\rho(M_{GS}) = \\rho(M_J)^2$ — **asymptotically twice as fast**.",
-            "ro": "**Condiții suficiente de convergență.** Gauss–Seidel converge dacă **fie**:\n\n- $A$ este strict diagonal dominantă (aceeași condiție ca Jacobi), **fie**\n- $A$ este simetrică pozitiv definită (SPD).\n\nCazul SPD este important: pentru discretizări PDE de tip Poisson, $A$ este SPD, atât Jacobi cât și Gauss–Seidel converg, iar Gauss–Seidel are de obicei $\\rho(M_{GS}) = \\rho(M_J)^2$ — **asimptotic de două ori mai rapid**."
+            "en": "**Sufficient convergence conditions.** Gauss–Seidel converges if **either**:\n\n- $A$ is strictly diagonally dominant (same condition as Jacobi), **or**\n- $A$ is symmetric positive-definite (SPD).\n\nThe SPD case is important: for Poisson-like PDE discretizations, $A$ is SPD and both Jacobi and Gauss–Seidel converge. For **consistently-ordered** matrices (Young's theorem — block-tridiagonal structures from finite differences fall in this class), we even get $\\rho(M_{GS}) = \\rho(M_J)^2$ — **asymptotically twice as fast**. For generic SPD $A$, $\\rho(M_{GS}) < \\rho(M_J)$ is guaranteed but the squared relation doesn't hold exactly.",
+            "ro": "**Condiții suficiente de convergență.** Gauss–Seidel converge dacă **fie**:\n\n- $A$ este strict diagonal dominantă (aceeași condiție ca Jacobi), **fie**\n- $A$ este simetrică pozitiv definită (SPD).\n\nCazul SPD este important: pentru discretizări PDE de tip Poisson, $A$ este SPD, iar atât Jacobi cât și Gauss–Seidel converg. Pentru matrici **consecvent ordonate** (teorema lui Young — structurile bloc-tridiagonale din diferențe finite se încadrează aici), obținem chiar $\\rho(M_{GS}) = \\rho(M_J)^2$ — **asimptotic de două ori mai rapid**. Pentru $A$ SPD general, $\\rho(M_{GS}) < \\rho(M_J)$ este garantat, dar relația pătratică nu se ține exact."
           }
         },
         {
@@ -745,6 +797,41 @@
             "en": "**Summary of the three methods.**\n\n- **Jacobi** ($B = D$): parallel, slowest.\n- **Gauss–Seidel** ($B = D - L$): sequential, ~2× faster rate when both converge.\n- **SOR** ($B = \\frac{1}{\\omega}(D - \\omega L)$): tuneable, potentially $10\\times$ faster than GS for the right $\\omega$.\n\nFor modern solvers you'd reach for **preconditioned conjugate gradients** (later courses) on SPD systems and **GMRES** on general ones — but all of them still use Jacobi/GS/SOR as **smoothers** inside multigrid and as warm-start preconditioners.",
             "ro": "**Sumarul celor trei metode.**\n\n- **Jacobi** ($B = D$): paralelă, cea mai lentă.\n- **Gauss–Seidel** ($B = D - L$): secvențială, rată ~2× mai rapidă când ambele converg.\n- **SOR** ($B = \\frac{1}{\\omega}(D - \\omega L)$): reglabil, potențial $10\\times$ mai rapid decât GS pentru $\\omega$ potrivit.\n\nPentru solvere moderne ai apela la **gradienți conjugați precondiționați** (cursuri ulterioare) pe sisteme SPD și **GMRES** pe cele generale — dar toate folosesc încă Jacobi/GS/SOR ca **smoothere** în multigrid și ca precondiționere de warm-start."
           }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What does SOR with $\\omega = 1$ recover?",
+                "ro": "Ce recuperează SOR cu $\\omega = 1$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Jacobi.", "ro": "Jacobi." },
+                  "correct": false,
+                  "explanation": { "en": "Jacobi uses $B = D$. SOR uses $B = \\frac{1}{\\omega}(D - \\omega L)$, so $\\omega = 1$ gives $B = D - L$ — Gauss–Seidel, not Jacobi.", "ro": "Jacobi folosește $B = D$. SOR folosește $B = \\frac{1}{\\omega}(D - \\omega L)$, deci $\\omega = 1$ dă $B = D - L$ — Gauss–Seidel, nu Jacobi." }
+                },
+                {
+                  "text": { "en": "Gauss–Seidel.", "ro": "Gauss–Seidel." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. $\\omega = 1$ reduces the update to $x_i^{(k+1)} = 0 \\cdot x_i^{(k)} + \\frac{1}{a_{ii}}(b_i - \\sum_{j<i} a_{ij} x_j^{(k+1)} - \\sum_{j>i} a_{ij} x_j^{(k)})$, which is exactly the Gauss–Seidel formula.", "ro": "Corect. $\\omega = 1$ reduce actualizarea la $x_i^{(k+1)} = 0 \\cdot x_i^{(k)} + \\frac{1}{a_{ii}}(b_i - \\sum_{j<i} a_{ij} x_j^{(k+1)} - \\sum_{j>i} a_{ij} x_j^{(k)})$, care este exact formula Gauss–Seidel." }
+                },
+                {
+                  "text": { "en": "The identity iteration $x^{(k+1)} = x^{(k)}$.", "ro": "Iterația identitate $x^{(k+1)} = x^{(k)}$." },
+                  "correct": false,
+                  "explanation": { "en": "That would be $\\omega = 0$ — a trivial do-nothing iteration. $\\omega = 1$ is the meaningful Gauss–Seidel baseline.", "ro": "Aceea ar fi $\\omega = 0$ — o iterație trivială care nu face nimic. $\\omega = 1$ este baza Gauss–Seidel semnificativă." }
+                },
+                {
+                  "text": { "en": "The exact solution in one step.", "ro": "Soluția exactă într-un pas." },
+                  "correct": false,
+                  "explanation": { "en": "That would require $B = A$ (one step only). No SOR parameter achieves this — SOR always needs multiple iterations.", "ro": "Asta ar cere $B = A$ (doar un pas). Niciun parametru SOR nu realizează asta — SOR are mereu nevoie de mai multe iterații." }
+                }
+              ],
+              "explanation": { "en": "$\\omega = 1$ ⇒ Gauss–Seidel. $\\omega < 1$ = damping. $\\omega > 1$ = over-relaxation.", "ro": "$\\omega = 1$ ⇒ Gauss–Seidel. $\\omega < 1$ = amortizare. $\\omega > 1$ = supra-relaxare." },
+              "reviewStep": "alo-c7-sor"
+            }
+          ]
         },
         {
           "type": "lecture",
