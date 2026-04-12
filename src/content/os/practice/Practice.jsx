@@ -8,10 +8,10 @@ const mcQuestions = [
   {
     question: { en: 'Which system call creates a new process?', ro: 'Ce apel de sistem creează un proces nou?' },
     options: [
-      { text: 'exec()', correct: false },
+      { text: 'exec()', correct: false, feedback: { en: 'exec() replaces the current process image with a new program — it does NOT create a new process.', ro: 'exec() înlocuiește imaginea procesului curent cu un program nou — NU creează un proces nou.' } },
       { text: 'fork()', correct: true },
-      { text: 'clone()', correct: false },
-      { text: 'spawn()', correct: false },
+      { text: 'clone()', correct: false, feedback: { en: 'clone() is a lower-level Linux-specific syscall that fork() wraps. The portable POSIX answer is fork().', ro: 'clone() este un apel de sistem Linux de nivel inferior pe care fork() îl folosește intern. Răspunsul POSIX portabil este fork().' } },
+      { text: 'spawn()', correct: false, feedback: { en: 'spawn() is a Windows API concept, not POSIX. POSIX creates processes via fork().', ro: 'spawn() este un concept Windows API, nu POSIX. POSIX creează procese prin fork().' } },
     ],
     explanation: { en: 'fork() creates a child process by duplicating the calling process. exec() replaces the current process image.', ro: 'fork() creează un proces copil prin duplicarea procesului apelant. exec() înlocuiește imaginea procesului curent.' },
   },
@@ -19,39 +19,39 @@ const mcQuestions = [
     question: { en: 'What does chmod 755 mean?', ro: 'Ce înseamnă chmod 755?' },
     options: [
       { text: 'rwxr-xr-x', correct: true },
-      { text: 'rwxrwxrwx', correct: false },
-      { text: 'rw-r--r--', correct: false },
-      { text: 'rwx------', correct: false },
+      { text: 'rwxrwxrwx', correct: false, feedback: { en: 'rwxrwxrwx = 777, not 755. You may be reading the digits as bit counts rather than rwx triples.', ro: 'rwxrwxrwx = 777, nu 755. Poate confunzi cifrele cu numere de biți în loc de triple rwx.' } },
+      { text: 'rw-r--r--', correct: false, feedback: { en: 'rw-r--r-- = 644. You may be thinking of default file permissions, but 755 includes execute (x=1) for owner, group, and others.', ro: 'rw-r--r-- = 644. Poate te gândești la permisiunile implicite de fișier, dar 755 include execute (x=1) pentru proprietar, grup și alții.' } },
+      { text: 'rwx------', correct: false, feedback: { en: 'rwx------ = 700 (only owner). 755 gives read+execute to group and others as well.', ro: 'rwx------ = 700 (doar proprietar). 755 oferă read+execute și grupului și celorlalți.' } },
     ],
     explanation: { en: '7=rwx (owner), 5=r-x (group), 5=r-x (others). Each digit is the sum: r=4, w=2, x=1.', ro: '7=rwx (proprietar), 5=r-x (grup), 5=r-x (alții). Fiecare cifră este suma: r=4, w=2, x=1.' },
   },
   {
     question: { en: 'What happens when fork() succeeds?', ro: 'Ce se întâmplă când fork() reușește?' },
     options: [
-      { text: 'Returns 0 to both processes', correct: false },
+      { text: 'Returns 0 to both processes', correct: false, feedback: { en: 'If both received 0, they couldn\'t distinguish themselves. fork() returns different values so each process knows its role.', ro: 'Dacă ambele ar primi 0, nu s-ar putea distinge. fork() returnează valori diferite ca fiecare proces să-și cunoască rolul.' } },
       { text: 'Returns child PID to parent, 0 to child', correct: true },
-      { text: 'Returns 1 to parent, -1 to child', correct: false },
-      { text: 'Returns PID to both processes', correct: false },
+      { text: 'Returns 1 to parent, -1 to child', correct: false, feedback: { en: '-1 means failure in POSIX. Success returns the actual child PID to parent and 0 to child.', ro: '-1 înseamnă eșec în POSIX. Succes returnează PID-ul copilului părintelui și 0 copilului.' } },
+      { text: 'Returns PID to both processes', correct: false, feedback: { en: 'Only the parent gets the child\'s PID. The child gets 0 — this asymmetry lets the code branch.', ro: 'Doar părintele primește PID-ul copilului. Copilul primește 0 — această asimetrie permite ramificarea codului.' } },
     ],
     explanation: { en: 'fork() returns the child PID to the parent process and 0 to the child. On failure, it returns -1.', ro: 'fork() returnează PID-ul copilului procesului părinte și 0 procesului copil. La eșec, returnează -1.' },
   },
   {
     question: { en: 'Which command shows all running processes?', ro: 'Ce comandă afișează toate procesele care rulează?' },
     options: [
-      { text: 'ls -a', correct: false },
+      { text: 'ls -a', correct: false, feedback: { en: 'ls -a lists files (including hidden ones), not processes. You may be confusing process listing with file listing.', ro: 'ls -a listează fișiere (inclusiv ascunse), nu procese. Poate confunzi listarea proceselor cu listarea fișierelor.' } },
       { text: 'ps aux', correct: true },
-      { text: 'top -p', correct: false },
-      { text: 'cat /proc', correct: false },
+      { text: 'top -p', correct: false, feedback: { en: 'top shows live process data but "-p" filters by PID. Just "top" works interactively; "ps aux" gives a one-shot listing.', ro: 'top afișează date live despre procese dar "-p" filtrează după PID. Doar "top" funcționează interactiv; "ps aux" dă o listare one-shot.' } },
+      { text: 'cat /proc', correct: false, feedback: { en: '/proc is a directory, not a file — cat alone won\'t work. Process info is under /proc/<pid>/, but ps reads and formats it for you.', ro: '/proc este director, nu fișier — cat singur nu funcționează. Info despre procese sunt în /proc/<pid>/, dar ps le citește și formatează pentru tine.' } },
     ],
     explanation: { en: 'ps aux shows all processes for all users with detailed information.', ro: 'ps aux afișează toate procesele pentru toți utilizatorii cu informații detaliate.' },
   },
   {
     question: { en: 'What does a pipe (|) do in the shell?', ro: 'Ce face un pipe (|) în shell?' },
     options: [
-      { text: 'Redirects output to a file', correct: false },
+      { text: 'Redirects output to a file', correct: false, feedback: { en: 'That\'s what > does. Pipe (|) connects one command to ANOTHER command, not to a file.', ro: 'Asta face >. Pipe (|) conectează o comandă la ALTĂ comandă, nu la un fișier.' } },
       { text: 'Connects stdout of one command to stdin of another', correct: true },
-      { text: 'Runs two commands in parallel', correct: false },
-      { text: 'Sends a signal to a process', correct: false },
+      { text: 'Runs two commands in parallel', correct: false, feedback: { en: 'Pipe actually runs commands concurrently AND connects them (stdout → stdin). Parallel execution without coupling uses & or wait.', ro: 'Pipe rulează comenzile concomitent DAR le și conectează (stdout → stdin). Execuția paralelă fără cuplare folosește & sau wait.' } },
+      { text: 'Sends a signal to a process', correct: false, feedback: { en: 'That\'s what kill does. Pipe only connects data streams between processes.', ro: 'Asta face kill. Pipe doar conectează fluxuri de date între procese.' } },
     ],
     explanation: { en: 'The pipe operator connects the standard output of the left command to the standard input of the right command.', ro: 'Operatorul pipe conectează ieșirea standard a comenzii din stânga la intrarea standard a comenzii din dreapta.' },
   },
@@ -170,6 +170,26 @@ export default function Practice() {
         expectedOutput={"1\n2\n3\n4\n5\n6\n7\n8\n9\n10"}
         solution={`#include <stdio.h>\n\nint main() {\n    for (int i = 1; i <= 10; i++) {\n        printf("%d\\n", i);\n    }\n    return 0;\n}`}
       />
+
+      {/* Trace-before-write: predict fork() behavior before implementing it */}
+      <div className="border rounded-lg p-4 mb-4" style={{ borderColor: 'var(--theme-border)', background: 'color-mix(in srgb, var(--theme-content-bg), #3b82f6 3%)' }}>
+        <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-muted)' }}>
+          {t('Before writing: trace this', 'Înainte de a scrie: trasează acest cod')}
+        </p>
+        <MultipleChoice questions={[{
+          question: {
+            en: 'Given: pid_t pid = fork(); if (pid == 0) printf("A"); else printf("B"); — what prints after fork() succeeds?',
+            ro: 'Dat fiind: pid_t pid = fork(); if (pid == 0) printf("A"); else printf("B"); — ce se afișează după ce fork() reușește?'
+          },
+          options: [
+            { text: { en: 'Just "A"', ro: 'Doar "A"' }, correct: false, feedback: { en: 'fork() creates BOTH a parent and a child. Both continue executing from the fork() call.', ro: 'fork() creează ATÂT un părinte cât și un copil. Ambele continuă execuția de la apelul fork().' } },
+            { text: { en: 'Just "B"', ro: 'Doar "B"' }, correct: false, feedback: { en: 'Both processes execute. The child sees pid==0 (A), parent sees pid==child\'s PID (B).', ro: 'Ambele procese execută. Copilul vede pid==0 (A), părintele vede pid==PID-ul copilului (B).' } },
+            { text: { en: 'Both "A" and "B" (in some order)', ro: 'Atât "A" cât și "B" (în vreo ordine)' }, correct: true },
+            { text: { en: 'Nothing, because fork() doesn\'t return', ro: 'Nimic, deoarece fork() nu returnează' } , correct: false, feedback: { en: 'fork() does return — it returns to BOTH processes with different values (0 to child, child PID to parent).', ro: 'fork() returnează — returnează la AMBELE procese cu valori diferite (0 copilului, PID-ul copilului părintelui).' } },
+          ],
+          explanation: { en: 'After fork() succeeds, both parent and child continue past the call. The child receives 0, the parent receives the child\'s PID — so both branches of the if execute, once per process.', ro: 'După ce fork() reușește, atât părintele cât și copilul continuă după apel. Copilul primește 0, părintele primește PID-ul copilului — deci ambele ramuri ale if se execută, câte una pe proces.' },
+        }]} />
+      </div>
 
       <CodeChallenge
         description={t('4. Write a program using fork() that prints "child" then "parent" (use wait).', '4. Scrieți un program folosind fork() care afișează "child" apoi "parent" (folosiți wait).')}

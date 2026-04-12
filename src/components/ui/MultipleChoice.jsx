@@ -66,6 +66,20 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
             )}
             {shown && (
               <>
+                {/* Per-option feedback for the selected option (if provided and wrong) */}
+                {(() => {
+                  const selectedIdx = multiSelect ? [...(picked || [])][0] : picked;
+                  const selOpt = q.options[selectedIdx];
+                  if (selOpt && !selOpt.correct && selOpt.feedback) {
+                    const msg = typeof selOpt.feedback === 'object' ? selOpt.feedback[lang] : selOpt.feedback;
+                    return (
+                      <p className="mt-3 text-sm p-2 rounded border" style={{ borderColor: '#ef4444', background: 'color-mix(in srgb, var(--theme-content-bg), #ef4444 8%)', color: 'var(--theme-text)' }}>
+                        <strong>{t('Why that\'s wrong: ', 'De ce e greșit: ')}</strong>{msg}
+                      </p>
+                    );
+                  }
+                  return null;
+                })()}
                 <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
                   {q.explanation?.[lang]}
                 </p>

@@ -4,36 +4,48 @@ import { Code } from './index';
 import { injectFiles, runCheck } from '../../utils/v86Exec';
 import useV86 from '../../hooks/useV86';
 
-/* ── U1+P8: Hint — tap OR hover, works on mobile ── */
-function Hint({ children }) {
+/* ── Hint — proper button, keyboard + Escape + viewport-safe ── */
+function Hint({ children, label }) {
   const [show, setShow] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
     if (!show) return;
-    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setShow(false); };
-    document.addEventListener('pointerdown', close);
-    return () => document.removeEventListener('pointerdown', close);
+    const onPointer = (e) => { if (ref.current && !ref.current.contains(e.target)) setShow(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setShow(false); };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [show]);
 
   return (
     <span ref={ref} className="relative inline-block">
-      <span
-        role="button"
-        tabIndex={0}
-        aria-label="Hint"
-        className="cursor-help text-blue-500 hover:text-blue-400 transition text-sm"
+      <button
+        type="button"
+        aria-label={label || 'Hint'}
+        aria-expanded={show}
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-medium transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
         onClick={() => setShow(s => !s)}
-        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setShow(s => !s)}
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
       >
-        💡
-      </span>
+        💡 {label}
+      </button>
       {show && (
         <span
-          className="absolute left-6 top-0 z-20 w-56 p-2 rounded-lg shadow-lg border text-sm animate-slide-down"
-          style={{ background: 'var(--theme-content-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-border)' }}
+          role="tooltip"
+          className="absolute left-0 top-full mt-1 z-20 p-2 rounded-lg shadow-lg border text-sm animate-slide-down"
+          style={{
+            background: 'var(--theme-content-bg)',
+            color: 'var(--theme-text)',
+            borderColor: 'var(--theme-border)',
+            maxWidth: 'min(14rem, calc(100vw - 2rem))',
+            width: 'max-content',
+          }}
         >
           {children}
         </span>
@@ -214,28 +226,44 @@ export default function TerminalChallenge({ exercises }) {
 
   return (
     <div className="border rounded-xl mb-6" style={{ borderColor: 'var(--theme-border)', overflow: 'clip' }}>
-      {/* Exercise selector — sticky top — U4: a11y roles — U7: completion indicators */}
+      {/* Exercise selector — sticky top with full ARIA tabs pattern */}
       <div
         role="tablist"
         aria-label={t('Exercises', 'Exerciții')}
         className="sticky top-0 z-30 flex items-center gap-1 p-2 overflow-x-auto"
         style={{ background: 'var(--theme-sidebar-bg)', borderBottom: '1px solid var(--theme-border)' }}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') {
+            e.preventDefault();
+            let next = currentIdx;
+            if (e.key === 'ArrowLeft') next = Math.max(0, currentIdx - 1);
+            if (e.key === 'ArrowRight') next = Math.min(exercises.length - 1, currentIdx + 1);
+            if (e.key === 'Home') next = 0;
+            if (e.key === 'End') next = exercises.length - 1;
+            switchExercise(next);
+          }
+        }}
       >
-        {exercises.map((e, i) => (
-          <button
-            key={i}
-            role="tab"
-            aria-selected={i === currentIdx}
-            onClick={() => switchExercise(i)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap ${
-              i === currentIdx ? 'bg-blue-600 text-white' : 'hover:opacity-80'
-            }`}
-            style={i !== currentIdx ? { background: 'var(--theme-content-bg)', color: 'var(--theme-text)' } : undefined}
-          >
-            {completed[i] && <span className="mr-1" style={{ color: '#22c55e' }}>✓</span>}
-            {t('Ex', 'Ex')} {i + 1}
-          </button>
-        ))}
+        {exercises.map((e, i) => {
+          const topic = e.topic || null;
+          return (
+            <button
+              key={i}
+              role="tab"
+              aria-selected={i === currentIdx}
+              tabIndex={i === currentIdx ? 0 : -1}
+              onClick={() => switchExercise(i)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                i === currentIdx ? 'bg-blue-600 text-white' : 'hover:opacity-80'
+              }`}
+              style={i !== currentIdx ? { background: 'var(--theme-content-bg)', color: 'var(--theme-text)' } : undefined}
+            >
+              {completed[i] && <span className="mr-1" style={{ color: '#22c55e' }}>✓</span>}
+              {t('Ex', 'Ex')} {i + 1}
+              {topic && <span className="ml-1 opacity-70">· {topic}</span>}
+            </button>
+          );
+        })}
       </div>
 
       {/* Two-column layout — reversed on mobile so instructions show first */}
@@ -247,9 +275,8 @@ export default function TerminalChallenge({ exercises }) {
             className="v86-screen relative"
             style={{
               width: '100%',
-              minHeight: 'clamp(320px, 50vh, 600px)',
-              maxHeight: 'calc(100vh - 280px)',
-              overflow: 'auto',
+              height: 'clamp(320px, 50vh, 600px)',
+              overflow: 'hidden',
               background: '#0a0a14',
             }}
           />
@@ -283,9 +310,8 @@ export default function TerminalChallenge({ exercises }) {
           {ex.hints && ex.hints.length > 0 && (
             <div className="flex items-center gap-2 mb-3 flex-wrap">
               {ex.hints.map((hint, i) => (
-                <Hint key={i}>{hint}</Hint>
+                <Hint key={i} label={`${t('Hint', 'Indiciu')} ${i + 1}`}>{hint}</Hint>
               ))}
-              <span className="text-xs" style={{ color: 'var(--theme-muted)' }}>{t('Tap for hints', 'Atinge pentru indicii')}</span>
             </div>
           )}
 
@@ -293,9 +319,12 @@ export default function TerminalChallenge({ exercises }) {
         </div>
       </div>
 
-      {/* Check result banner — U10+V7: theme vars */}
+      {/* Check result banner — aria-live so screen readers announce pass/fail */}
       {checkResult !== null && (
         <div
+          role={checkResult.passed ? 'status' : 'alert'}
+          aria-live="polite"
+          aria-atomic="true"
           className="p-3 text-sm font-medium"
           style={{
             borderTop: '1px solid var(--theme-border)',
@@ -322,7 +351,7 @@ export default function TerminalChallenge({ exercises }) {
             <button
               onClick={() => switchExercise(Math.max(0, currentIdx - 1))}
               disabled={currentIdx === 0}
-              className="flex-1 sm:flex-none px-3 py-2 text-sm font-medium rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80"
+              className="flex-1 sm:flex-none px-3 py-2 text-sm font-medium rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               style={{ background: 'var(--theme-content-bg)', color: 'var(--theme-text)' }}
             >
               ← {t('Prev', 'Anterior')}
@@ -330,7 +359,7 @@ export default function TerminalChallenge({ exercises }) {
             <button
               onClick={() => switchExercise(Math.min(exercises.length - 1, currentIdx + 1))}
               disabled={currentIdx === exercises.length - 1}
-              className="flex-1 sm:flex-none px-3 py-2 text-sm font-medium rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80"
+              className="flex-1 sm:flex-none px-3 py-2 text-sm font-medium rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               style={{ background: 'var(--theme-content-bg)', color: 'var(--theme-text)' }}
             >
               {t('Next', 'Următor')} →
@@ -361,7 +390,7 @@ export default function TerminalChallenge({ exercises }) {
               <button
                 onClick={() => setResetMenuOpen(!resetMenuOpen)}
                 disabled={!booted}
-                className="w-full px-4 py-2 text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80"
+                className="w-full px-4 py-2 text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 style={{ background: 'color-mix(in srgb, var(--theme-sidebar-bg), #6b7280 30%)', color: 'var(--theme-text)' }}
               >
                 {t('Reset', 'Resetează')} ▾
@@ -393,7 +422,7 @@ export default function TerminalChallenge({ exercises }) {
               <button
                 onClick={() => setShowSolution(!showSolution)}
                 disabled={!hasAttempted && !showSolution && !!ex.checkScript}
-                className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80"
+                className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 style={{ borderColor: 'var(--theme-border)', background: 'transparent', color: 'var(--theme-text)' }}
                 title={!hasAttempted ? t('Try checking your answer first', 'Încearcă mai întâi să verifici răspunsul') : ''}
               >

@@ -10,19 +10,23 @@ export default function Lab01() {
   const terminalExercises = [
     {
       description: t(
-        'Create a subdirectory "programe" in your home directory (~). Then inside it, create "tema1" and "tema2" subdirectories. Inside "tema2", create "sub-temaA", then rename it to "tema2_sub-temaA".',
-        'Creați un subdirector "programe" în directorul acasă (~). Apoi în el, creați subdirectoarele "tema1" și "tema2". În "tema2", creați "sub-temaA", apoi redenumiți-l în "tema2_sub-temaA".'
+        'The directory ~/programe/tema2/sub-temaA already exists. Create ~/programe/tema1, then rename sub-temaA to tema2_sub-temaA using mv.',
+        'Directorul ~/programe/tema2/sub-temaA există deja. Creați ~/programe/tema1, apoi redenumiți sub-temaA în tema2_sub-temaA folosind mv.'
       ),
       courseRef: t('Course 1: Directory commands', 'Cursul 1: Comenzi directoare'),
-      files: {},
-      checkScript: 'test -d /root/programe && test -d /root/programe/tema1 && test -d /root/programe/tema2 && test -d /root/programe/tema2/tema2_sub-temaA',
-      failureHint: (t) => t('Check: ~/programe, ~/programe/tema1, ~/programe/tema2, ~/programe/tema2/tema2_sub-temaA all exist as directories', 'Verifică: ~/programe, ~/programe/tema1, ~/programe/tema2, ~/programe/tema2/tema2_sub-temaA există ca directoare'),
+      topic: t('mkdir/mv', 'mkdir/mv'),
+      // Pre-seed sub-temaA with a marker file so the student MUST rename (mv) to pass
+      files: {
+        '/root/programe/tema2/sub-temaA/.marker': 'rename-me',
+      },
+      checkScript: 'test -d /root/programe/tema1 && test -f /root/programe/tema2/tema2_sub-temaA/.marker && ! test -d /root/programe/tema2/sub-temaA',
+      failureHint: (t) => t('Rename the pre-existing sub-temaA directory (with mv) so its contents move to tema2_sub-temaA. Don\'t just mkdir a new directory.', 'Redenumește directorul sub-temaA (cu mv) astfel încât conținutul său să se mute în tema2_sub-temaA. Nu crea un director nou cu mkdir.'),
       hints: [
         t('Use "mkdir" to create directories', 'Folosiți "mkdir" pentru a crea directoare'),
         t('Use "mv old new" to rename', 'Folosiți "mv vechi nou" pentru a redenumi'),
         t('You can create nested dirs: mkdir -p a/b/c', 'Puteți crea directoare imbricate: mkdir -p a/b/c'),
       ],
-      solution: 'mkdir programe\nmkdir programe/tema1\nmkdir programe/tema2\nmkdir programe/tema2/sub-temaA\nmv programe/tema2/sub-temaA programe/tema2/tema2_sub-temaA',
+      solution: 'mkdir -p programe/tema1\nmv programe/tema2/sub-temaA programe/tema2/tema2_sub-temaA',
     },
     {
       description: t(
