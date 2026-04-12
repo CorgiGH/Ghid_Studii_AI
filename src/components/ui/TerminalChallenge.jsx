@@ -456,8 +456,8 @@ export default function TerminalChallenge({ exercises }) {
               const gated = !hasAttempted && !showSolution && !!ex.checkScript;
               const baseLabel = showSolution ? t('Hide Solution', 'Ascunde soluția') : t('Show Solution', 'Arată soluția');
               const remaining = 2 - attemptCount;
-              const gatedLabel = t(`🔒 Try ${remaining} more`, `🔒 Încearcă încă ${remaining}`);
-              const gatedAria = t(`Solution unlocks after ${remaining} more attempt${remaining === 1 ? '' : 's'}`, `Soluția se deblochează după încă ${remaining} încercări`);
+              const gatedLabel = t(`Unlock (${remaining})`, `Deblochează (${remaining})`);
+              const gatedAria = t(`Unlock solution after ${remaining} more attempt${remaining === 1 ? '' : 's'}`, `Deblochează soluția după încă ${remaining} încercări`);
               return (
                 <button
                   onClick={() => setShowSolution(!showSolution)}
