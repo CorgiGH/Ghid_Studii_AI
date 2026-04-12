@@ -54,24 +54,25 @@ function Hint({ children, label }) {
 
 /* ── Exercise file list (collapsible) ── */
 function ExerciseFilesList({ files, t }) {
-  const [open, setOpen] = useState(false);
+  // Auto-expanded: pre-seeded files are part of the exercise context, not a detail to hunt for
+  const [open, setOpen] = useState(true);
   if (!files || Object.keys(files).length === 0) return null;
   const entries = Object.entries(files);
   return (
-    <div className="mt-3">
+    <div className="mt-3 p-2 rounded border" style={{ borderColor: 'var(--theme-border)' }}>
       <button
         onClick={() => setOpen(!open)}
-        className="text-xs font-medium hover:opacity-80 transition flex items-center gap-1"
+        className="text-xs font-bold uppercase tracking-wider hover:opacity-80 transition flex items-center gap-1 w-full text-left"
         style={{ color: 'var(--theme-muted)' }}
       >
         <span className={`transition-transform ${open ? 'rotate-90' : ''}`}>▶</span>
-        {t('Exercise Files', 'Fișiere exercițiu')} ({entries.length})
+        {t('Pre-seeded files', 'Fișiere pre-create')} ({entries.length})
       </button>
       {open && (
-        <ul className="mt-1 ml-4 text-xs space-y-0.5" style={{ color: 'var(--theme-muted)' }}>
+        <ul className="mt-2 text-xs space-y-0.5" style={{ color: 'var(--theme-text)' }}>
           {entries.map(([path, val]) => (
             <li key={path} className="font-mono">
-              {val === null ? '📁' : '📄'} {path.split('/').pop()}
+              {val === null ? '📁' : '📄'} {path.replace('/root/', '~/')}
             </li>
           ))}
         </ul>
@@ -82,6 +83,11 @@ function ExerciseFilesList({ files, t }) {
 
 /* ── BootOverlay driven by real v86 boot stages ── */
 function BootOverlay({ bootStage, t }) {
+  const [showStuckOption, setShowStuckOption] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowStuckOption(true), 25000);
+    return () => clearTimeout(timer);
+  }, []);
   const messages = {
     idle: t('Preparing terminal...', 'Se pregătește terminalul...'),
     script: t('Loading v86 runtime...', 'Se încarcă runtime-ul v86...'),
@@ -96,6 +102,18 @@ function BootOverlay({ bootStage, t }) {
       <p className="text-xs text-gray-500 mt-2">
         {t('This may take a few seconds on first load', 'Poate dura câteva secunde la prima încărcare')}
       </p>
+      {showStuckOption && (
+        <button
+          onClick={() => {
+            if (window.confirm(t('Reload the page to reboot the VM?', 'Reîncarcă pagina pentru a reporni VM-ul?'))) {
+              window.location.reload();
+            }
+          }}
+          className="mt-4 text-xs text-blue-400 hover:text-blue-300 underline"
+        >
+          {t('Taking too long? Reload to reboot', 'Durează prea mult? Reîncarcă pentru a reporni')}
+        </button>
+      )}
     </div>
   );
 }
@@ -104,7 +122,6 @@ export default function TerminalChallenge({ exercises }) {
   const { t } = useApp();
   const screenRef = useRef(null);
   const solutionRef = useRef(null);
-  const resetRef = useRef(null);
   const { exec, booted, booting, bootStage, boot } = useV86(screenRef);
 
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -112,8 +129,6 @@ export default function TerminalChallenge({ exercises }) {
   const [checking, setChecking] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const [injecting, setInjecting] = useState(false);
-  const [resetMenuOpen, setResetMenuOpen] = useState(false);
-  const [resetVMConfirming, setResetVMConfirming] = useState(false);
   // Per-exercise tracking — count failed attempts so solution gate requires genuine struggle
   const [attempts, setAttempts] = useState({}); // { idx: count }
   const [completed, setCompleted] = useState({});
@@ -166,21 +181,11 @@ export default function TerminalChallenge({ exercises }) {
     return () => { cancelled = true; };
   }, [booted, currentIdx]);
 
-  // U5: click-outside to dismiss reset dropdown
-  useEffect(() => {
-    if (!resetMenuOpen) return;
-    const close = (e) => { if (resetRef.current && !resetRef.current.contains(e.target)) setResetMenuOpen(false); };
-    document.addEventListener('pointerdown', close);
-    return () => document.removeEventListener('pointerdown', close);
-  }, [resetMenuOpen]);
-
   const switchExercise = (idx) => {
     setCurrentIdx(idx);
     setCheckResult(null);
     setChecking(false);
     setShowSolution(false);
-    setResetMenuOpen(false);
-    setResetVMConfirming(false);
   };
 
   // Track current index via ref so async check can detect stale results
@@ -229,22 +234,17 @@ export default function TerminalChallenge({ exercises }) {
   const resetExercise = useCallback(async () => {
     if (!exec.current || !ex?.files || Object.keys(ex.files).length === 0) return;
     setCheckResult(null);
-    setResetMenuOpen(false);
     setInjecting(true);
-    try { await injectFiles(exec.current, ex.files); } catch { /* best effort */ }
+    // Remove previous manifest before re-injecting
+    try {
+      const paths = Object.keys(ex.files);
+      if (paths.length) {
+        await exec.current(paths.map(p => `rm -rf "${p}"`).join(' && ') + ' 2>/dev/null; cd /root');
+      }
+      await injectFiles(exec.current, ex.files);
+    } catch { /* best effort */ }
     setInjecting(false);
   }, [ex]);
-
-  // Inline themed two-step confirm for Reset VM
-  const resetVMRequest = useCallback(() => {
-    setResetVMConfirming(true);
-  }, []);
-  const resetVMExecute = useCallback(() => {
-    setResetMenuOpen(false);
-    setResetVMConfirming(false);
-    setCheckResult(null);
-    window.location.reload();
-  }, []);
 
   // U6: scroll solution into view
   useEffect(() => {
@@ -284,45 +284,40 @@ export default function TerminalChallenge({ exercises }) {
           }
         }}
       >
-        {exercises.map((e, i) => {
-          const topic = e.topic || null;
-          return (
-            <button
-              key={i}
-              role="tab"
-              aria-selected={i === currentIdx}
-              tabIndex={i === currentIdx ? 0 : -1}
-              onClick={() => switchExercise(i)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-                i === currentIdx ? 'bg-blue-600 text-white' : 'hover:opacity-80'
-              }`}
-              style={i !== currentIdx ? { background: 'var(--theme-content-bg)', color: 'var(--theme-text)' } : undefined}
-            >
-              {completed[i] && <span className="mr-1" style={{ color: '#22c55e' }}>✓</span>}
-              {t('Ex', 'Ex')} {i + 1}
-              {topic && <span className="ml-1 opacity-70">· {topic}</span>}
-            </button>
-          );
-        })}
+        {exercises.map((e, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={i === currentIdx}
+            tabIndex={i === currentIdx ? 0 : -1}
+            onClick={() => switchExercise(i)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+              i === currentIdx ? 'bg-blue-600 text-white' : 'hover:opacity-80'
+            }`}
+            style={i !== currentIdx ? { background: 'var(--theme-content-bg)', color: 'var(--theme-text)' } : undefined}
+          >
+            {completed[i] && <span className="mr-1" style={{ color: '#22c55e' }}>✓</span>}
+            {t('Ex', 'Ex')} {i + 1}
+          </button>
+        ))}
       </div>
 
       {/* Two-column layout — reversed on mobile so instructions show first */}
       <div className="flex flex-col-reverse lg:flex-row">
-        {/* Terminal — U8: reduced clamp */}
-        <div className="flex-1 min-w-0 relative">
+        {/* Terminal — fixed height on desktop so both columns match */}
+        <div className="flex-1 min-w-0 relative h-[clamp(320px,55vh,560px)] lg:h-[clamp(320px,55vh,560px)]">
           <div
             ref={screenRef}
             className="v86-screen relative"
             style={{
               width: '100%',
-              minHeight: 'clamp(320px, 50vh, 600px)',
-              maxHeight: 'calc(100vh - 200px)',
+              height: '100%',
               overflow: 'auto',
               background: '#0a0a14',
             }}
           />
           {/* V1: softer boot overlay with progress stages */}
-          {!booted && <BootOverlay bootStage={bootStage} t={t} />}
+          {(!booted || bootStage !== 'ready') && <BootOverlay bootStage={bootStage} t={t} />}
           {injecting && booted && (
             <div className="absolute bottom-2 left-2 z-10 px-2 py-1 rounded bg-blue-900/80 text-xs text-blue-200 font-mono">
               {t('Loading files...', 'Se încarcă fișierele...')}
@@ -330,12 +325,12 @@ export default function TerminalChallenge({ exercises }) {
           )}
         </div>
 
-        {/* Instructions panel — U2: max-h-none on mobile, constrained on desktop */}
+        {/* Instructions panel — matches terminal height on desktop so columns align */}
         <div
-          className="w-full lg:w-96 border-b lg:border-b-0 lg:border-l p-4 max-h-none lg:max-h-[calc(100vh-200px)] overflow-y-auto"
+          className="w-full lg:w-96 lg:h-[clamp(320px,55vh,560px)] border-b lg:border-b-0 lg:border-l p-4 overflow-y-auto"
           style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}
         >
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--theme-muted)' }}>
               {t('Exercise', 'Exercițiu')} {currentIdx + 1}/{exercises.length}
             </h4>
@@ -352,6 +347,11 @@ export default function TerminalChallenge({ exercises }) {
               </span>
             )}
           </div>
+          {ex.topic && (
+            <p className="text-xs mb-3" style={{ color: 'var(--theme-muted)' }}>
+              {t('Covers: ', 'Acoperă: ')}<code className="font-mono">{ex.topic}</code>
+            </p>
+          )}
 
           <p className="text-sm mb-3">{ex.description}</p>
 
@@ -440,79 +440,31 @@ export default function TerminalChallenge({ exercises }) {
               </button>
             )}
 
-            {/* Reset dropdown — U5: click-outside — V8: theme vars */}
-            <div className="relative flex-1 sm:flex-none" ref={resetRef}>
-              <button
-                onClick={() => setResetMenuOpen(!resetMenuOpen)}
-                disabled={!booted}
-                className="w-full px-4 py-2 text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                style={{ background: 'color-mix(in srgb, var(--theme-sidebar-bg), #6b7280 30%)', color: 'var(--theme-text)' }}
-              >
-                {t('Reset', 'Resetează')} ▾
-              </button>
-              {resetMenuOpen && (
-                <div className="absolute bottom-full mb-1 right-0 rounded-lg shadow-lg border overflow-hidden z-40" style={{ background: 'var(--theme-content-bg)', borderColor: 'var(--theme-border)', width: 'min(14rem, calc(100vw - 2rem))' }}>
-                  {!resetVMConfirming ? (
-                    <>
-                      <button
-                        onClick={resetExercise}
-                        className="w-full px-3 py-2 text-sm text-left transition hover:opacity-80"
-                        style={{ color: 'var(--theme-text)' }}
-                      >
-                        {t('Reset Exercise', 'Resetează exercițiul')}
-                        <span className="block text-xs opacity-50">{t('Re-inject files (~0.5s)', 'Reinjectează fișierele (~0.5s)')}</span>
-                      </button>
-                      <button
-                        onClick={resetVMRequest}
-                        className="w-full px-3 py-2 text-sm text-left transition border-t hover:opacity-80"
-                        style={{ borderColor: 'var(--theme-border)', color: '#dc2626' }}
-                      >
-                        {t('Reset VM', 'Resetează VM')}
-                        <span className="block text-xs opacity-50" style={{ color: 'var(--theme-muted)' }}>{t('Full reboot (~5s)', 'Repornire completă (~5s)')}</span>
-                      </button>
-                    </>
-                  ) : (
-                    <div className="p-3">
-                      <p className="text-xs mb-2" style={{ color: 'var(--theme-text)' }}>
-                        {t('This will reload the page and reset all progress. Continue?', 'Aceasta va reîncărca pagina și va reseta tot progresul. Continuați?')}
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setResetVMConfirming(false)}
-                          className="flex-1 px-2 py-1 text-xs rounded transition hover:opacity-80"
-                          style={{ background: 'var(--theme-content-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-text)' }}
-                        >
-                          {t('Cancel', 'Anulează')}
-                        </button>
-                        <button
-                          onClick={resetVMExecute}
-                          className="flex-1 px-2 py-1 text-xs text-white rounded transition hover:opacity-80"
-                          style={{ background: '#dc2626' }}
-                        >
-                          {t('Reset', 'Resetează')}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Single Reset button: re-seed files. VM reset is in the boot overlay if stuck. */}
+            <button
+              onClick={resetExercise}
+              disabled={!booted || injecting}
+              className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              style={{ background: 'color-mix(in srgb, var(--theme-sidebar-bg), #6b7280 30%)', color: 'var(--theme-text)' }}
+              title={t('Re-inject the exercise files', 'Reinjectează fișierele exercițiului')}
+            >
+              {t('Reset', 'Resetează')}
+            </button>
 
             {/* Solution gated behind 2 genuine attempts (skip gate if no checkScript) */}
             {ex.solution && (() => {
               const gated = !hasAttempted && !showSolution && !!ex.checkScript;
               const baseLabel = showSolution ? t('Hide Solution', 'Ascunde soluția') : t('Show Solution', 'Arată soluția');
-              const label = gated ? `${baseLabel} (${attemptCount}/2)` : baseLabel;
+              const gatedLabel = t(`Solution unlocks after ${2 - attemptCount} more attempt${2 - attemptCount === 1 ? '' : 's'}`, `Soluția se deblochează după încă ${2 - attemptCount} încercar${2 - attemptCount === 1 ? 'e' : 'i'}`);
               return (
                 <button
                   onClick={() => setShowSolution(!showSolution)}
                   disabled={gated}
-                  className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   style={{ borderColor: 'var(--theme-border)', background: 'transparent', color: 'var(--theme-text)' }}
-                  aria-label={gated ? t('Show Solution (locked — try twice first)', 'Arată soluția (blocat — încearcă de două ori mai întâi)') : baseLabel}
+                  aria-label={gated ? gatedLabel : baseLabel}
                 >
-                  {gated && <span aria-hidden="true" className="mr-1">🔒</span>}
-                  {label}
+                  {gated ? gatedLabel : baseLabel}
                 </button>
               );
             })()}
