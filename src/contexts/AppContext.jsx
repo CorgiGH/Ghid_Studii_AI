@@ -65,7 +65,9 @@ export function AppProvider({ children }) {
   const [search, setSearch] = useState('');
   const [checked, setChecked] = useLocalStorage('checked', {});
   const [sidebarLocked, setSidebarLocked] = useLocalStorage('sidebarLocked', true);
-  const [chatOpen, setChatOpen] = useLocalStorage('chatOpen', true);
+  // Default collapsed on desktop — user opens deliberately. State persists
+  // in localStorage (useLocalStorage), so returning users keep their choice.
+  const [chatOpen, setChatOpen] = useLocalStorage('chatOpen', false);
   const [chatWidth, setChatWidth] = useLocalStorage('chatWidth', null);
   const [progress, setProgress] = useLocalStorage('progress', {});
   const [lectureVisible, setLectureVisible] = useLocalStorage('lectureVisible', false);

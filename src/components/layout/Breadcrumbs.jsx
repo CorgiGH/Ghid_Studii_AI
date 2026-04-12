@@ -31,7 +31,7 @@ const Breadcrumbs = ({ yearSem, subject, tab, activeItemTitle }) => {
 
   return (
     <nav
-      className="px-4 py-1.5 text-xs transition-colors duration-200 overflow-x-auto whitespace-nowrap"
+      className="hidden sm:flex items-center px-4 py-1.5 text-xs transition-colors duration-200 overflow-x-auto whitespace-nowrap"
       style={{ backgroundColor: 'var(--theme-breadcrumb-bg)', color: 'var(--theme-muted-text)' }}
     >
       {crumbs.map((crumb, i) => {

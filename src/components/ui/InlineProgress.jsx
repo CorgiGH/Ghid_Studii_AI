@@ -133,7 +133,7 @@ const InlineProgress = forwardRef(({ courseId, sectionCount, sectionIds }, ref) 
     <>
       <div
         ref={ref}
-        className="flex items-center gap-3 px-4 py-2 sticky z-10"
+        className="flex items-center gap-3 px-4 py-1 sm:py-2 sticky z-10"
         style={{
           top: 'var(--topbar-offset, 0px)',
           transition: 'top 0.2s ease-in-out',

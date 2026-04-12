@@ -26,11 +26,9 @@ export default function ImageBlock({ src, alt, caption, width, height }) {
   const resolved = resolveSrc(src);
   const altText = pickLang(alt, t);
 
-  // Ensure caption is prefixed with "Fig. — " for convention (only if not already).
-  let captionText = pickLang(caption, t);
-  if (captionText && !/^fig\.?\s*[—-]/i.test(captionText)) {
-    captionText = `Fig. — ${captionText}`;
-  }
+  // Captions are authored by hand — render as-is. Authors can add "Fig. N — "
+  // manually when numbering is desired.
+  const captionText = pickLang(caption, t);
 
   const isDecorative = !altText;
 
@@ -61,31 +59,29 @@ export default function ImageBlock({ src, alt, caption, width, height }) {
         {!isDecorative && (
           <span
             aria-hidden="true"
-            className="absolute flex items-center justify-center rounded-full pointer-events-none"
+            className="absolute flex items-center justify-center pointer-events-none"
             style={{
-              top: '0.75rem',
-              right: '0.75rem',
-              width: '28px',
-              height: '28px',
-              background: 'rgba(0, 0, 0, 0.45)',
-              opacity: 0.6,
+              top: '0.5rem',
+              right: '0.5rem',
+              width: '20px',
+              height: '20px',
+              background: 'transparent',
+              opacity: 0.5,
             }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#ffffff"
-              strokeWidth="2.25"
+              stroke="var(--theme-muted-text)"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
               <circle cx="11" cy="11" r="7" />
               <line x1="21" y1="21" x2="16.5" y2="16.5" />
-              <line x1="11" y1="8" x2="11" y2="14" />
-              <line x1="8" y1="11" x2="14" y2="11" />
             </svg>
           </span>
         )}

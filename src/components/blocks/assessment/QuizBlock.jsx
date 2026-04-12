@@ -9,7 +9,8 @@ export default function QuizBlock({ questions }) {
   // Lift per-question results up so we can render a score summary once every
   // question has been answered. `results[qi]` is null|true|false.
   const [results, setResults] = useState(() => questions.map(() => null));
-  const [resetToken, setResetToken] = useState(0);
+  const [resetSignal, setResetSignal] = useState(0);
+  const containerRef = useRef(null);
 
   const recordResult = (index, correct) => {
     setResults((prev) => {
@@ -22,7 +23,12 @@ export default function QuizBlock({ questions }) {
 
   const handleRetry = () => {
     setResults(questions.map(() => null));
-    setResetToken((t) => t + 1);
+    setResetSignal((n) => n + 1);
+    // Scroll the quiz container back into view so the user can re-answer
+    // without losing orientation.
+    requestAnimationFrame(() => {
+      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const answeredCount = results.filter((r) => r !== null).length;
@@ -34,6 +40,7 @@ export default function QuizBlock({ questions }) {
 
   return (
     <div
+      ref={containerRef}
       className="rounded-xl p-4 mb-3"
       style={{
         backgroundColor: 'color-mix(in srgb, #a855f7 12%, var(--theme-card-bg))',
@@ -48,15 +55,16 @@ export default function QuizBlock({ questions }) {
       </div>
       {questions.map((q, qi) => (
         <QuizQuestion
-          key={`${resetToken}-${qi}`}
+          key={qi}
           q={q}
           index={qi}
           total={questions.length}
+          resetSignal={resetSignal}
           onAnswered={(correct) => recordResult(qi, correct)}
         />
       ))}
 
-      {allAnswered && questions.length > 1 && (
+      {allAnswered && (
         <div
           className="mt-4 pt-4 rounded-lg p-3"
           style={{
@@ -65,15 +73,24 @@ export default function QuizBlock({ questions }) {
             animation: 'fadeIn 0.35s ease',
           }}
         >
-          <div
-            className="text-sm font-semibold mb-2"
-            style={{ color: 'var(--theme-content-text)' }}
-          >
-            {t(
-              `You got ${correctCount}/${questions.length} correct`,
-              `Ai răspuns corect la ${correctCount}/${questions.length}`
-            )}
-          </div>
+          {questions.length > 1 ? (
+            <div
+              className="text-sm font-semibold mb-2"
+              style={{ color: 'var(--theme-content-text)' }}
+            >
+              {t(
+                `You got ${correctCount}/${questions.length} correct`,
+                `Ai răspuns corect la ${correctCount}/${questions.length}`
+              )}
+            </div>
+          ) : (
+            <div
+              className="text-sm font-semibold mb-2"
+              style={{ color: 'var(--theme-content-text)' }}
+            >
+              {t('Try again — reflect first.', 'Încearcă din nou — reflectează întâi.')}
+            </div>
+          )}
           {missedQuestions.length > 0 && (
             <div className="text-xs" style={{ color: 'var(--theme-muted-text)' }}>
               <div className="mb-1">
@@ -117,7 +134,7 @@ export default function QuizBlock({ questions }) {
   );
 }
 
-function QuizQuestion({ q, index, total, onAnswered }) {
+function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
   const { t } = useApp();
   const courseNav = useCourseNav();
   const [selected, setSelected] = useState(null);
@@ -133,6 +150,13 @@ function QuizQuestion({ q, index, total, onAnswered }) {
     ro.observe(explanationRef.current);
     return () => ro.disconnect();
   }, []);
+
+  // Reset without remount: preserves focus/scroll and avoids ResizeObserver churn.
+  useEffect(() => {
+    if (resetSignal === 0) return;
+    setSelected(null);
+    setSubmitted(false);
+  }, [resetSignal]);
 
   const handleSelect = (i) => {
     if (submitted) return;

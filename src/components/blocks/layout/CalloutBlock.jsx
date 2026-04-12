@@ -10,14 +10,18 @@ const VARIANTS = {
 };
 
 export default function CalloutBlock({ variant = 'info', content }) {
-  const { t } = useApp();
+  const { t, dark } = useApp();
   const v = VARIANTS[variant] || VARIANTS.info;
+
+  // In dark mode reduce the tint fill so callouts read as softly-tinted cards
+  // rather than saturated blocks. The left-border accent stays at full chroma.
+  const fillPct = dark ? '8%' : '12%';
 
   return (
     <div
       className="rounded-xl p-4 mb-3"
       style={{
-        backgroundColor: `color-mix(in srgb, ${v.color} 12%, var(--theme-card-bg))`,
+        backgroundColor: `color-mix(in srgb, ${v.color} ${fillPct}, var(--theme-card-bg))`,
         border: `1px solid color-mix(in srgb, ${v.color} 25%, var(--theme-border))`,
         borderLeftWidth: '3px',
         borderLeftColor: v.color,
