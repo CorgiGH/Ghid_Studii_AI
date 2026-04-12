@@ -19,9 +19,11 @@ export default function DefinitionBlock({ term, content }) {
       >
         {t('Definition', 'Definiție')}
       </div>
-      <p className="font-bold text-sm mb-1" style={{ color: 'var(--theme-content-text)' }}>
-        {t(term.en, term.ro)}
-      </p>
+      <p
+        className="font-bold text-sm mb-1"
+        style={{ color: 'var(--theme-content-text)' }}
+        dangerouslySetInnerHTML={{ __html: formatMarkdown(t(term.en, term.ro)) }}
+      />
       <div
         className="text-sm leading-relaxed"
         style={{ color: 'var(--theme-content-text)', opacity: 0.85 }}

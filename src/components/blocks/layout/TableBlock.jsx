@@ -1,13 +1,10 @@
 import React from 'react';
 import { useApp } from '../../../contexts/AppContext';
+import formatMarkdown from '../formatMarkdown';
 
-/** Minimal inline markdown: **bold** and `code` */
 function fmt(text) {
   if (typeof text !== 'string') return text;
-  const html = text
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`(.+?)`/g, '<code style="background:var(--theme-border);padding:1px 4px;border-radius:3px;font-size:0.85em;">$1</code>');
-  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  return <span dangerouslySetInnerHTML={{ __html: formatMarkdown(text) }} />;
 }
 
 function resolveCell(cell, t) {

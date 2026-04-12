@@ -6,6 +6,7 @@ import CourseTransition from '../ui/CourseTransition';
 import ProgressRing from '../ui/ProgressRing';
 import useScrollToHash from '../../hooks/useScrollToHash';
 import CompletionModal from '../ui/CompletionModal';
+import formatMarkdown from './formatMarkdown';
 
 const CourseNavContext = createContext(null);
 export const useCourseNav = () => useContext(CourseNavContext);
@@ -232,9 +233,9 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
           marginTop: '1.25rem',
           marginBottom: '1rem',
         }}
-      >
-        {t(step.title.en, step.title.ro)}
-      </h2>
+        dangerouslySetInnerHTML={{ __html: formatMarkdown(t(step.title.en, step.title.ro)) }}
+      />
+
 
       {/* Step content */}
       <div style={examMode && step.examRelevant === false ? { opacity: 0.3, pointerEvents: 'none', transition: 'opacity 0.2s' } : { transition: 'opacity 0.2s' }}>
