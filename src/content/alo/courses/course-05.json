@@ -1,0 +1,1194 @@
+{
+  "meta": {
+    "id": "alo-c5",
+    "title": {
+      "en": "Course 5: Matrix factorizations — Cholesky, LU, QR",
+      "ro": "Cursul 5: Factorizări matriciale — Cholesky, LU, QR"
+    },
+    "shortTitle": {
+      "en": "C5: Factorizations",
+      "ro": "C5: Factorizări"
+    },
+    "slug": "alo-c5",
+    "source": "ALO curs 05.pdf (Anca Ignat & Corina Forăscu)"
+  },
+  "steps": [
+    {
+      "id": "alo-c5-intro",
+      "title": {
+        "en": "Why decompose a matrix?",
+        "ro": "De ce să descompui o matrice?"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You just spent $\\Theta(n^3)$ operations solving $Ax = b$ with Gaussian elimination. Now a colleague hands you **the same matrix** $A$ and a different right-hand side $b'$. Must you redo all the work?",
+            "ro": "Tocmai ai cheltuit $\\Theta(n^3)$ operații rezolvând $Ax = b$ cu eliminarea Gauss. Acum un coleg îți dă **aceeași matrice** $A$ și o altă parte dreaptă $b'$. Trebuie să refaci toată munca?"
+          },
+          "answer": {
+            "en": "**No — if you saved the elimination's intermediate products.** The key insight is that Gaussian elimination is silently computing a **factorization** $A = LU$; once you have $L$ and $U$, every new right-hand side costs only $\\Theta(n^2)$ (two triangular solves). Course 5 is about making that factorization explicit and extending the idea to two other matrix structures: symmetric positive-definite (Cholesky) and the orthogonal-plus-triangular story (QR).",
+            "ro": "**Nu — dacă ai salvat produsele intermediare ale eliminării.** Perspectiva cheie este că eliminarea Gauss calculează tacit o **factorizare** $A = LU$; odată ce ai $L$ și $U$, fiecare nouă parte dreaptă costă doar $\\Theta(n^2)$ (două rezolvări triunghiulare). Cursul 5 face această factorizare explicită și extinde ideea la alte două structuri matriciale: simetrică pozitiv definită (Cholesky) și povestea ortogonal-plus-triunghiular (QR)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**A factorization is a rewrite of $A$ as a product of structurally simpler matrices.** The payoff is that once $A$ is factored, every downstream task (solving systems, inverting, computing determinants, least squares) reuses the factors and runs on triangular or orthogonal matrices — cheap and stable.",
+            "ro": "**O factorizare este o rescriere a lui $A$ ca produs de matrici structural mai simple.** Câștigul este că, odată ce $A$ este factorizată, fiecare sarcină ulterioară (rezolvarea sistemelor, inversarea, calcularea determinanților, cele mai mici pătrate) reutilizează factorii și rulează pe matrici triunghiulare sau ortogonale — ieftin și stabil."
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Cholesky** ($A = L L^T$) — for **symmetric positive-definite** matrices. Half the cost of LU (~$n^3/6$) and automatically stable.",
+              "ro": "**Cholesky** ($A = L L^T$) — pentru matrici **simetrice pozitiv definite**. Jumătate din costul LU (~$n^3/6$) și automat stabilă."
+            },
+            {
+              "en": "**LU** ($A = L U$) — the factorization hiding inside Gaussian elimination. General square matrices (with pivoting if needed).",
+              "ro": "**LU** ($A = L U$) — factorizarea ascunsă în eliminarea Gauss. Matrici generale pătratice (cu pivotare dacă e nevoie)."
+            },
+            {
+              "en": "**QR** ($A = Q R$) — $Q$ orthogonal, $R$ upper-triangular. Excellent numerical stability; essential for least-squares.",
+              "ro": "**QR** ($A = Q R$) — $Q$ ortogonală, $R$ superior triunghiulară. Stabilitate numerică excelentă; esențială pentru cele mai mici pătrate."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**The running theme.** Every factorization turns $Ax = b$ into **two triangular solves** (or one triangular plus one matrix-vector product for QR). The expensive part — factoring — is done **once**; the cheap part is amortized across many $b$'s.",
+            "ro": "**Tema comună.** Orice factorizare transformă $Ax = b$ în **două rezolvări triunghiulare** (sau una triunghiulară plus un produs matrice-vector pentru QR). Partea scumpă — factorizarea — se face o singură dată; partea ieftină se amortizează peste multe $b$-uri."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "ALO curs 05 (Anca Ignat & Corina Forăscu). Course page: https://edu.info.uaic.ro/algebra-liniara/",
+            "ro": "ALO curs 05 (Anca Ignat & Corina Forăscu). Pagina cursului: https://edu.info.uaic.ro/algebra-liniara/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-posdef",
+      "title": {
+        "en": "Symmetric positive-definite matrices (the Cholesky prerequisite)",
+        "ro": "Matrici simetrice pozitiv definite (prerechizita Cholesky)"
+      },
+      "group": "cholesky",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "A symmetric matrix $A$ satisfies $x^T A x > 0$ for every nonzero vector $x$. Geometrically, $x^T A x$ is a quadratic form: a function $\\mathbb{R}^n \\to \\mathbb{R}$ that assigns a scalar to every vector. **What does positive-definiteness say about the shape of that function?**",
+            "ro": "O matrice simetrică $A$ satisface $x^T A x > 0$ pentru orice vector nenul $x$. Geometric, $x^T A x$ este o formă pătratică: o funcție $\\mathbb{R}^n \\to \\mathbb{R}$ care asociază un scalar fiecărui vector. **Ce spune pozitiv-definirea despre forma acelei funcții?**"
+          },
+          "answer": {
+            "en": "The function is a **bowl** — strictly positive everywhere except at the origin, where it vanishes. In 2D its level sets are ellipses; in 3D they are ellipsoids. SPD matrices arise exactly when you need a notion of \"energy\" or \"second-order curvature that's the same in every direction.\" The Hessian of a strictly convex function, the covariance of a nondegenerate random vector, the stiffness matrix in finite-element simulations — all SPD.",
+            "ro": "Funcția este un **bol** — strict pozitivă peste tot cu excepția originii, unde se anulează. În 2D, mulțimile de nivel sunt elipse; în 3D sunt elipsoizi. Matricile SPD apar exact când ai nevoie de o noțiune de \"energie\" sau \"curbură de ordinul doi care este aceeași în orice direcție\". Hessiana unei funcții strict convexe, covarianța unui vector aleatoriu nedegenerat, matricea de rigiditate în simulările cu elemente finite — toate SPD."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Positive-definite matrix",
+            "ro": "Matrice pozitiv definită"
+          },
+          "content": {
+            "en": "A matrix $A \\in \\mathbb{R}^{n \\times n}$ is **positive-definite** if $(Ax, x) > 0$ for every nonzero $x \\in \\mathbb{R}^n$. Notation: $A > 0$. If we additionally have $A = A^T$, $A$ is **symmetric positive-definite (SPD)** — the assumption Cholesky needs.",
+            "ro": "O matrice $A \\in \\mathbb{R}^{n \\times n}$ este **pozitiv definită** dacă $(Ax, x) > 0$ pentru orice $x \\in \\mathbb{R}^n$ nenul. Notație: $A > 0$. Dacă în plus $A = A^T$, $A$ este **simetrică pozitiv definită (SPD)** — ipoteza de care are nevoie Cholesky."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Three equivalent tests for SPD** (any one implies the others for a symmetric $A$):\n\n- All eigenvalues of $A$ are strictly positive.\n- All principal minors (determinants of the upper-left $k \\times k$ blocks) are strictly positive (**Sylvester's criterion**).\n- $A = B^T B$ for some $B$ with full column rank.\n\nIn practice you rarely test SPD numerically — you know it from the problem (Hessian of a convex loss, finite-element stiffness, covariance).",
+            "ro": "**Trei teste echivalente pentru SPD** (oricare implică celelalte pentru $A$ simetrică):\n\n- Toate valorile proprii ale lui $A$ sunt strict pozitive.\n- Toate minorii principali (determinanții blocurilor $k \\times k$ de sus-stânga) sunt strict pozitivi (**criteriul lui Sylvester**).\n- $A = B^T B$ pentru un $B$ cu rang complet pe coloane.\n\nÎn practică testezi rar SPD numeric — știi asta din problemă (Hessiana unei pierderi convexe, rigiditate în elemente finite, covarianță)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Why SPD matters for factorization.** For a general $A$, Gaussian elimination may need pivoting to stay stable. For SPD $A$, **Cholesky without any pivoting is guaranteed to succeed** — the diagonal pivots are always positive. That is the reward: a simpler, faster, and automatically-stable algorithm.",
+            "ro": "**De ce contează SPD pentru factorizare.** Pentru $A$ general, eliminarea Gauss poate avea nevoie de pivotare ca să rămână stabilă. Pentru $A$ SPD, **Cholesky fără nicio pivotare este garantată să reușească** — pivoții diagonali sunt mereu pozitivi. Aceasta este recompensa: un algoritm mai simplu, mai rapid și automat stabil."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "A $3 \\times 3$ symmetric matrix has eigenvalues $\\{2, 3, -1\\}$. Is it SPD?",
+                "ro": "O matrice simetrică $3 \\times 3$ are valorile proprii $\\{2, 3, -1\\}$. Este SPD?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Yes — the matrix is symmetric and has two positive eigenvalues.", "ro": "Da — matricea este simetrică și are două valori proprii pozitive." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "\"Positive-definite\" requires **all** eigenvalues to be positive, not most of them. A single negative eigenvalue breaks it.",
+                    "ro": "\"Pozitiv definit\" cere ca **toate** valorile proprii să fie pozitive, nu majoritatea. O singură valoare proprie negativă strică."
+                  }
+                },
+                {
+                  "text": { "en": "No — a negative eigenvalue means there exists a direction where $x^T A x < 0$.", "ro": "Nu — o valoare proprie negativă înseamnă că există o direcție în care $x^T A x < 0$." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. If $Ax = \\lambda x$ with $\\lambda = -1$, then $x^T A x = \\lambda \\|x\\|^2 = -\\|x\\|^2 < 0$. The matrix is **indefinite**, and Cholesky would crash (the diagonal pivot would become negative under the square root).",
+                    "ro": "Corect. Dacă $Ax = \\lambda x$ cu $\\lambda = -1$, atunci $x^T A x = \\lambda \\|x\\|^2 = -\\|x\\|^2 < 0$. Matricea este **nedefinită**, iar Cholesky ar eșua (pivotul diagonal ar deveni negativ sub radical)."
+                  }
+                },
+                {
+                  "text": { "en": "Yes — the average eigenvalue is positive.", "ro": "Da — media valorilor proprii este pozitivă." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Average/trace positivity tells you nothing about definiteness. $\\text{tr}(A) = 4 > 0$ here, but the matrix is indefinite.",
+                    "ro": "Pozitivitatea mediei/urmei nu îți spune nimic despre definitudine. $\\text{tr}(A) = 4 > 0$ aici, dar matricea este nedefinită."
+                  }
+                },
+                {
+                  "text": { "en": "Only if the corresponding eigenvector for $-1$ has length zero.", "ro": "Doar dacă vectorul propriu pentru $-1$ are lungime zero." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Eigenvectors by definition are nonzero — that's what makes them eigenvectors. The negative eigenvalue is real, not an artifact.",
+                    "ro": "Vectorii proprii sunt prin definiție nenuli — exact asta îi face vectori proprii. Valoarea proprie negativă este reală, nu un artefact."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "SPD ≡ all eigenvalues strictly positive. One negative eigenvalue makes the matrix indefinite.",
+                "ro": "SPD ≡ toate valorile proprii strict pozitive. O valoare proprie negativă face matricea nedefinită."
+              },
+              "reviewStep": "alo-c5-posdef"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slide 1 of ALO curs 05 — definition of positive-definite.",
+            "ro": "Slide-ul 1 din ALO curs 05 — definiția pozitiv definiției."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-cholesky-formulas",
+      "title": {
+        "en": "Cholesky factorization: A = L Lᵀ",
+        "ro": "Factorizarea Cholesky: A = L Lᵀ"
+      },
+      "group": "cholesky",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The factorization.** For symmetric positive-definite $A$, there exists a **lower-triangular** $L$ such that",
+            "ro": "**Factorizarea.** Pentru $A$ simetrică pozitiv definită, există $L$ **inferior triunghiulară** astfel încât"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A = L L^T"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Because $A$ is symmetric, only the lower half needs to be stored. Because $A$ is positive-definite, the diagonal entries of $L$ will be real and positive, and we can build $L$ **without ever pivoting**.",
+            "ro": "Pentru că $A$ este simetrică, doar jumătatea inferioară trebuie stocată. Pentru că $A$ este pozitiv definită, elementele diagonale ale lui $L$ vor fi reale și pozitive, iar putem construi $L$ **fără nicio pivotare**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Building $L$ column by column.** At step $r = 1, 2, \\ldots, n$ the first $r - 1$ columns of $L$ are already known. Match the $(r, r)$ entry of $A$ against the $(r, r)$ entry of $L L^T$:",
+            "ro": "**Construim $L$ coloană cu coloană.** La pasul $r = 1, 2, \\ldots, n$ primele $r - 1$ coloane ale lui $L$ sunt deja cunoscute. Egalează intrarea $(r, r)$ a lui $A$ cu intrarea $(r, r)$ a lui $L L^T$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "a_{rr} = \\sum_{k=1}^{r} l_{rk}^2 \\ \\Longrightarrow\\ l_{rr} = \\sqrt{a_{rr} - \\sum_{k=1}^{r-1} l_{rk}^2}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Then solve for the sub-diagonal entries in column $r$, using the $(i, r)$ entry of the match ($i > r$):",
+            "ro": "Apoi rezolvă pentru elementele de sub diagonală în coloana $r$, folosind intrarea $(i, r)$ a egalității ($i > r$):"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "a_{ir} = \\sum_{k=1}^{r} l_{ik} l_{rk} \\ \\Longrightarrow\\ l_{ir} = \\frac{a_{ir} - \\sum_{k=1}^{r-1} l_{ik} l_{rk}}{l_{rr}}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why the square root is safe.** For SPD $A$, you can prove that $a_{rr} - \\sum_k l_{rk}^2 > 0$ at every step — so the radical is always well-defined and the algorithm never encounters a negative argument. If it ever did, $A$ was **not** SPD to begin with, and the failure is a reliable detector.",
+            "ro": "**De ce radicalul este sigur.** Pentru $A$ SPD, se poate demonstra că $a_{rr} - \\sum_k l_{rk}^2 > 0$ la fiecare pas — deci radicalul este mereu bine definit, iar algoritmul nu întâlnește niciodată un argument negativ. Dacă totuși s-ar întâmpla, $A$ nu era SPD, iar eșecul este un detector fiabil."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Cholesky factorization: A is SPD, produces lower-triangular L\nfor (int r = 0; r < n; r++) {\n    double s = A[r][r];\n    for (int k = 0; k < r; k++) s -= L[r][k] * L[r][k];\n    L[r][r] = sqrt(s);                                  // diagonal pivot\n    for (int i = r + 1; i < n; i++) {\n        double t = A[i][r];\n        for (int k = 0; k < r; k++) t -= L[i][k] * L[r][k];\n        L[i][r] = t / L[r][r];                          // sub-diagonal\n    }\n}"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Halfway through Cholesky, you compute $a_{rr} - \\sum_{k=1}^{r-1} l_{rk}^2 = -0.4$. What does that tell you about $A$?",
+                "ro": "La jumătatea Cholesky, calculezi $a_{rr} - \\sum_{k=1}^{r-1} l_{rk}^2 = -0.4$. Ce îți spune asta despre $A$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Nothing — just take the complex square root.", "ro": "Nimic — ia pur și simplu radicalul complex." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Cholesky produces a **real** $L$ for real SPD $A$. A complex $l_{rr}$ means the factorization doesn't exist over the reals — which is exactly the signal you wanted.",
+                    "ro": "Cholesky produce un $L$ **real** pentru $A$ SPD real. Un $l_{rr}$ complex înseamnă că factorizarea nu există peste reali — care este exact semnalul dorit."
+                  }
+                },
+                {
+                  "text": { "en": "$A$ is not symmetric positive-definite — the algorithm should halt.", "ro": "$A$ nu este simetrică pozitiv definită — algoritmul trebuie să se oprească." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A negative argument under the square root is Cholesky's reliable detector of a non-SPD input. Many libraries return a status code instead of crashing.",
+                    "ro": "Corect. Un argument negativ sub radical este detectorul fiabil al Cholesky pentru o intrare non-SPD. Multe biblioteci întorc un cod de stare în loc să crape."
+                  }
+                },
+                {
+                  "text": { "en": "The matrix is singular — $\\det A = 0$.", "ro": "Matricea este singulară — $\\det A = 0$." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "A singular $A$ would show up as a **zero** argument (division by zero on the next step), not a negative one. Negative says indefinite, not singular.",
+                    "ro": "Un $A$ singular ar apărea ca un argument **zero** (împărțire la zero la pasul următor), nu ca unul negativ. Negativul spune nedefinit, nu singular."
+                  }
+                },
+                {
+                  "text": { "en": "The matrix has complex eigenvalues.", "ro": "Matricea are valori proprii complexe." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Symmetric real matrices always have real eigenvalues. Cholesky's failure is about **signs** of those real eigenvalues, not complex values.",
+                    "ro": "Matricile reale simetrice au întotdeauna valori proprii reale. Eșecul Cholesky este despre **semnele** acestor valori proprii reale, nu despre valori complexe."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Negative pivot under the radical = non-SPD input. Reliable structural failure mode.",
+                "ro": "Pivot negativ sub radical = intrare non-SPD. Mod de eșec structural fiabil."
+              },
+              "reviewStep": "alo-c5-cholesky-formulas"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 2–5 of ALO curs 05 — Cholesky column-by-column construction.",
+            "ro": "Slide-urile 2–5 din ALO curs 05 — construcția Cholesky coloană cu coloană."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-cholesky-cost",
+      "title": {
+        "en": "Cholesky cost and how to solve with it",
+        "ro": "Costul Cholesky și cum rezolvi cu ea"
+      },
+      "group": "cholesky",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Operation counts.** For $n \\times n$ SPD $A$:",
+            "ro": "**Numărarea operațiilor.** Pentru $A$ SPD $n \\times n$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A_{\\pm} = \\sum_{r=1}^n (n-r+1)(r-1) = \\frac{n(n-1)(n+1)}{6} = \\frac{n^3}{6} + O(n^2)"
+        },
+        {
+          "type": "equation",
+          "tex": "M_{\\times/\\div} = \\sum_{r=1}^n \\bigl[(n-r) r + (r-1)\\bigr] = \\frac{n(n+4)(n-1)}{6} = \\frac{n^3}{6} + O(n^2)"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Cholesky is roughly half the cost of LU.** Gaussian elimination spent $n^3/3$ multiplications to factor a general matrix; Cholesky uses only $n^3/6$. The savings come from exploiting symmetry — you solve for only the lower half of $L$.",
+            "ro": "**Cholesky costă aproximativ jumătate cât LU.** Eliminarea Gauss a cheltuit $n^3/3$ înmulțiri pentru a factoriza o matrice generală; Cholesky folosește doar $n^3/6$. Economiile vin din exploatarea simetriei — rezolvi doar jumătatea inferioară a lui $L$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Solving $A x = b$ once you have $L$.** The system $L L^T x = b$ splits into two triangular solves:",
+            "ro": "**Rezolvarea $A x = b$ odată ce ai $L$.** Sistemul $L L^T x = b$ se împarte în două rezolvări triunghiulare:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Forward substitution** on $L$: solve $L y = b$ for the intermediate $y$. Cost $\\Theta(n^2)$.",
+              "ro": "**Substituție directă** pe $L$: rezolvă $L y = b$ pentru $y$ intermediar. Cost $\\Theta(n^2)$."
+            },
+            {
+              "en": "**Back substitution** on $L^T$: solve $L^T x = y$ for $x$. Cost $\\Theta(n^2)$.",
+              "ro": "**Substituție inversă** pe $L^T$: rezolvă $L^T x = y$ pentru $x$. Cost $\\Theta(n^2)$."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Amortization wins.** Factor once ($\\Theta(n^3)/6$), then solve each new $b$ in $\\Theta(n^2)$. For a simulation with $10\\,000$ right-hand sides sharing the same SPD $A$, Cholesky is orders of magnitude faster than redoing Gauss on $A \\mid b_k$ each time.",
+            "ro": "**Amortizarea câștigă.** Factorizezi o dată ($\\Theta(n^3)/6$), apoi rezolvi fiecare $b$ nou în $\\Theta(n^2)$. Pentru o simulare cu $10\\,000$ părți drepte care împart același $A$ SPD, Cholesky este cu ordine de mărime mai rapidă decât refacerea Gauss pe $A \\mid b_k$ de fiecare dată."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "You are building an iterative optimizer (Newton's method) for a strictly convex loss. At every iteration you must solve $H \\Delta x = -\\nabla f$ where $H$ is the Hessian (SPD). Iterations take different $\\nabla f$'s but often reuse $H$ for a few steps. How should you organize the linear algebra?",
+            "ro": "Construiești un optimizator iterativ (metoda lui Newton) pentru o pierdere strict convexă. La fiecare iterație trebuie să rezolvi $H \\Delta x = -\\nabla f$ unde $H$ este Hessiana (SPD). Iterațiile iau diferite $\\nabla f$-uri dar adesea reutilizează $H$ pentru câțiva pași. Cum organizezi algebra liniară?"
+          },
+          "answer": {
+            "en": "**Factor $H$ once via Cholesky**, cache $L$, and reuse it across iterations where $H$ is held fixed. Each such iteration pays only $\\Theta(n^2)$. When $H$ updates (e.g., after a line search), refactor. This is exactly how LAPACK's `dpotrf` + `dpotrs` (Cholesky factor + triangular solve) underlies quasi-Newton solvers in production.",
+            "ro": "**Factorizează $H$ o dată prin Cholesky**, păstrează $L$ în cache și reutilizează-l peste iterații când $H$ este fix. Fiecare astfel de iterație costă doar $\\Theta(n^2)$. Când $H$ se actualizează (ex. după o căutare liniară), refactorizezi. Exact așa funcționează `dpotrf` + `dpotrs` din LAPACK (factor Cholesky + rezolvare triunghiulară) sub solverele cvasi-Newton din producție."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 6–7 of ALO curs 05 — Cholesky cost.",
+            "ro": "Slide-urile 6–7 din ALO curs 05 — costul Cholesky."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-lu-motivation",
+      "title": {
+        "en": "From Gauss to LU: the factorization hiding in elimination",
+        "ro": "De la Gauss la LU: factorizarea ascunsă în eliminare"
+      },
+      "group": "lu",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Gaussian elimination (without pivoting) transforms $A$ into an upper-triangular matrix $U$ by subtracting multiples of earlier rows from later ones. Every such operation is a linear transformation of $A$. Can you express the **entire** elimination as one matrix equation relating $A$ and $U$?",
+            "ro": "Eliminarea Gauss (fără pivotare) transformă $A$ într-o matrice superior triunghiulară $U$ scăzând multipli ai liniilor anterioare din cele ulterioare. Fiecare astfel de operație este o transformare liniară a lui $A$. Poți exprima **întreaga** eliminare ca o singură ecuație matricială între $A$ și $U$?"
+          },
+          "answer": {
+            "en": "**Yes.** Each stage $r$ is captured by a single lower-triangular matrix $T_r$ — an identity matrix with the stage's multipliers in column $r$ below the diagonal. The whole elimination becomes $T_{n-1} \\cdots T_2 T_1 \\, A = U$. Invert to get $A = T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1} \\, U$, name the product $L$, and you have $A = L U$ — the LU decomposition. Gauss was computing it the whole time.",
+            "ro": "**Da.** Fiecare etapă $r$ este capturată de o singură matrice inferior triunghiulară $T_r$ — o matrice identitate cu multiplicatorii etapei pe coloana $r$ sub diagonală. Întreaga eliminare devine $T_{n-1} \\cdots T_2 T_1 \\, A = U$. Inversează pentru a obține $A = T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1} \\, U$, denumește produsul $L$ și ai $A = L U$ — descompunerea LU. Gauss o calcula tot timpul."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Setup.** Assume Gaussian elimination on $A$ never encounters a zero pivot (no row swaps needed). The pseudocode from course 4 is:",
+            "ro": "**Setare.** Presupune că eliminarea Gauss pe $A$ nu întâlnește niciodată un pivot zero (fără schimbări de linii). Pseudocodul din cursul 4 este:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "for r = 1, ..., n-1:\n    for i = r+1, ..., n:\n        f = -a_ir / a_rr;           // negative multiplier\n        // E_i := E_i + f * E_r\n        for j = r+1, ..., n:\n            a_ij = a_ij + f * a_rj;\n        a_ir = 0;\n        b_i  = b_i + f * b_r;"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**The goal of this Act.** We'll show that Gaussian elimination silently computes $A = LU$ where **$L$** stores the multipliers (exactly the $f$'s we just threw into variables) and **$U$** is the resulting upper-triangular matrix. Two immediate benefits: (1) solving $Ax = b$ becomes two triangular solves ($\\Theta(n^2)$) instead of a full $\\Theta(n^3)$ elimination, and (2) changing $b$ without changing $A$ is free (factor is reused).",
+            "ro": "**Scopul acestui act.** Vom arăta că eliminarea Gauss calculează tacit $A = LU$ unde **$L$** stochează multiplicatorii (exact $f$-urile pe care tocmai le-am aruncat în variabile) și **$U$** este matricea superior triunghiulară rezultată. Două beneficii imediate: (1) rezolvarea lui $Ax = b$ devine două rezolvări triunghiulare ($\\Theta(n^2)$) în loc de o eliminare completă $\\Theta(n^3)$, și (2) schimbarea lui $b$ fără a schimba $A$ este gratuită (factorul este reutilizat)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-lu-tr-matrix",
+      "title": {
+        "en": "The elementary matrix Tᵣ",
+        "ro": "Matricea elementară Tᵣ"
+      },
+      "group": "lu",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Build one matrix per elimination stage.** Define the vector and matrix",
+            "ro": "**Construim o matrice per etapă de eliminare.** Definim vectorul și matricea"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "t^{(r)} = \\begin{pmatrix} 0 \\\\ \\vdots \\\\ 0 \\\\ t_{r+1}^{(r)} \\\\ \\vdots \\\\ t_n^{(r)} \\end{pmatrix} \\in \\mathbb{R}^n, \\qquad T_r := I_n + t^{(r)} e_r^T"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "where $e_r$ is the $r$-th standard basis vector. The outer product $t^{(r)} e_r^T$ is a matrix of zeros everywhere except **column $r$ from row $r+1$ down**, so $T_r$ is lower-triangular with 1's on the diagonal and the entries $t_i^{(r)}$ below the diagonal in column $r$.",
+            "ro": "unde $e_r$ este al $r$-lea vector al bazei standard. Produsul exterior $t^{(r)} e_r^T$ este o matrice de zerouri peste tot, cu excepția **coloanei $r$ de la linia $r+1$ în jos**, deci $T_r$ este inferior triunghiulară cu $1$-uri pe diagonală și intrările $t_i^{(r)}$ sub diagonală în coloana $r$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Two magical properties of $T_r$.** (a) Its inverse is trivial: $T_r^{-1} = I_n - t^{(r)} e_r^T$ — just flip the sign on the off-diagonal entries. (b) Left-multiplying $T_r \\cdot A$ adds a multiple of row $r$ to rows $r+1, \\ldots, n$ — exactly the $i$-loop inside stage $r$ of Gaussian elimination.",
+            "ro": "**Două proprietăți magice ale lui $T_r$.** (a) Inversa este banală: $T_r^{-1} = I_n - t^{(r)} e_r^T$ — doar schimbi semnul intrărilor sub-diagonală. (b) Înmulțirea la stânga $T_r \\cdot A$ adaugă un multiplu al liniei $r$ la liniile $r+1, \\ldots, n$ — exact bucla $i$ din etapa $r$ a eliminării Gauss."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Why the inverse is that simple.** Compute $T_r T_r^{-1}$:",
+            "ro": "**De ce inversa este atât de simplă.** Calculează $T_r T_r^{-1}$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "T_r T_r^{-1} = (I_n + t^{(r)} e_r^T)(I_n - t^{(r)} e_r^T) = I_n - t^{(r)} (e_r^T t^{(r)}) e_r^T = I_n"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The cross-term vanishes because $e_r^T t^{(r)} = 0$ (component $r$ of $t^{(r)}$ is zero by construction). Same trick for $T_r^{-1} T_r = I_n$.",
+            "ro": "Termenul încrucișat dispare pentru că $e_r^T t^{(r)} = 0$ (componenta $r$ a lui $t^{(r)}$ este zero prin construcție). Același truc pentru $T_r^{-1} T_r = I_n$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Matching $T_r A$ to Gauss stage $r$.** Row $i$ of $T_r A$ is",
+            "ro": "**Potrivirea $T_r A$ cu etapa $r$ Gauss.** Linia $i$ din $T_r A$ este"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "e_i^T (T_r A) = e_i^T A + t_i^{(r)} (e_r^T A) = \\begin{cases} e_i^T A, & i \\leq r \\quad (t_i^{(r)} = 0) \\\\ e_i^T A + t_i^{(r)}\\, e_r^T A, & i > r \\end{cases}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "So $T_r A$ coincides with Gauss's stage-$r$ update iff we set",
+            "ro": "Deci $T_r A$ coincide cu actualizarea etapei $r$ din Gauss dacă setăm"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "t_i^{(r)} = -\\frac{a_{ir}^{(r-1)}}{a_{rr}^{(r-1)}}, \\quad i = r+1, \\ldots, n"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**So $T_r$ is Gaussian elimination's stage $r$ expressed as a matrix.** This single abstraction converts a loop into a linear-algebra object, and that's what lets us stack stages into a clean product $T_{n-1} \\cdots T_1 \\, A = U$.",
+            "ro": "**Deci $T_r$ este etapa $r$ a eliminării Gauss exprimată ca matrice.** Această singură abstracție convertește o buclă într-un obiect de algebră liniară, iar asta ne permite să stivuim etapele într-un produs curat $T_{n-1} \\cdots T_1 \\, A = U$."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What do the nonzero off-diagonal entries of $T_r$ store?",
+                "ro": "Ce stochează intrările nenule sub diagonală ale lui $T_r$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "The entries of the original matrix $A$.", "ro": "Intrările matricei originale $A$." },
+                  "correct": false,
+                  "explanation": { "en": "$T_r$ is not $A$; it is the **transformation** that eliminates column $r$.", "ro": "$T_r$ nu este $A$; este **transformarea** care elimină coloana $r$." }
+                },
+                {
+                  "text": { "en": "The negative multipliers $-a_{ir}^{(r-1)}/a_{rr}^{(r-1)}$ used to zero column $r$.", "ro": "Multiplicatorii negativi $-a_{ir}^{(r-1)}/a_{rr}^{(r-1)}$ folosiți să anuleze coloana $r$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Column $r$ of $T_r$ below the diagonal contains the very multipliers the Gauss inner loop computes.", "ro": "Corect. Coloana $r$ a lui $T_r$ sub diagonală conține exact multiplicatorii pe care bucla interioară Gauss îi calculează." }
+                },
+                {
+                  "text": { "en": "The eigenvalues of $A$.", "ro": "Valorile proprii ale lui $A$." },
+                  "correct": false,
+                  "explanation": { "en": "Eigenvalues are properties of $A$ as a whole; $T_r$'s entries are local to the current elimination stage.", "ro": "Valorile proprii sunt proprietăți ale lui $A$ ca întreg; intrările lui $T_r$ sunt locale etapei curente de eliminare." }
+                },
+                {
+                  "text": { "en": "A random permutation of the identity.", "ro": "O permutare aleatoare a identității." },
+                  "correct": false,
+                  "explanation": { "en": "$T_r$ is deterministic, structured, and never swaps rows — that would be a permutation matrix, used only when pivoting.", "ro": "$T_r$ este determinist, structurat și nu schimbă niciodată linii — aceea ar fi o matrice de permutare, folosită doar la pivotare." }
+                }
+              ],
+              "explanation": { "en": "$T_r$ captures a single elimination stage as lower-triangular multiplication.", "ro": "$T_r$ capturează o singură etapă de eliminare ca înmulțire inferior triunghiulară." },
+              "reviewStep": "alo-c5-lu-tr-matrix"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 9–11 of ALO curs 05 — the $T_r$ abstraction.",
+            "ro": "Slide-urile 9–11 din ALO curs 05 — abstracția $T_r$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-lu-decomposition",
+      "title": {
+        "en": "LU: the full factorization",
+        "ro": "LU: factorizarea completă"
+      },
+      "group": "lu",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Stacking the stages.** Applying $T_1, T_2, \\ldots, T_{n-1}$ in order to $A$ triangularizes it completely:",
+            "ro": "**Stivuirea etapelor.** Aplicând $T_1, T_2, \\ldots, T_{n-1}$ în ordine asupra lui $A$, o triangularizează complet:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "T_{n-1} \\cdots T_2 T_1 \\, A = U"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Invert to isolate $A$:",
+            "ro": "Inversează pentru a izola $A$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A = T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1} \\, U = L \\, U"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**The gift of the $T_r$ algebra.** Each $T_r^{-1} = I_n - t^{(r)} e_r^T$, and the product $T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1}$ collapses to a single matrix — no actual multiplication needed — because the cross-terms vanish (adjacent-column outer products kill each other). The result is",
+            "ro": "**Darul algebrei $T_r$.** Fiecare $T_r^{-1} = I_n - t^{(r)} e_r^T$, iar produsul $T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1}$ se colapsează într-o singură matrice — fără înmulțire efectivă — pentru că termenii încrucișați dispar (produsele exterioare de coloane adiacente se anulează reciproc). Rezultatul este"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "L = I_n - \\sum_{r=1}^{n-1} t^{(r)} e_r^T"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "which is **lower-triangular with 1's on the diagonal**, and whose $(i, r)$ entry below the diagonal is $+a_{ir}^{(r-1)}/a_{rr}^{(r-1)}$ — the original (positive) multipliers from Gaussian elimination. This is why course 4 said Gaussian elimination \"secretly computes $A = LU$\": the multipliers you already computed **are** the entries of $L$.",
+            "ro": "care este **inferior triunghiulară cu $1$-uri pe diagonală**, iar intrarea $(i, r)$ sub diagonală este $+a_{ir}^{(r-1)}/a_{rr}^{(r-1)}$ — multiplicatorii originali (pozitivi) din eliminarea Gauss. De aceea cursul 4 spunea că eliminarea Gauss \"calculează în secret $A = LU$\": multiplicatorii pe care i-ai calculat deja **sunt** intrările lui $L$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Storage pattern.** Libraries store $L$ and $U$ in the **same memory** that originally held $A$: $U$ takes the upper-triangular slots (including the diagonal), $L$'s sub-diagonal entries take the positions that Gauss already zeroed. $L$'s implicit $1$-diagonal is not stored. One $n \\times n$ array holds the full factorization.",
+            "ro": "**Tipar de stocare.** Bibliotecile stochează $L$ și $U$ în **aceeași memorie** care conținea inițial $A$: $U$ ia sloturile superior triunghiulare (inclusiv diagonala), intrările sub-diagonale ale lui $L$ iau pozițiile pe care Gauss le-a anulat deja. Diagonala implicită de $1$-uri a lui $L$ nu se stochează. Un singur array $n \\times n$ conține factorizarea completă."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Solving $A x = b$ via LU.** Replace $A$ with $L U$:",
+            "ro": "**Rezolvarea $A x = b$ via LU.** Înlocuiește $A$ cu $L U$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "L U x = b \\ \\Longleftrightarrow\\ L y = b,\\ \\ U x = y"
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "Forward-substitute $L y = b$ for $y$ — $\\Theta(n^2)$.",
+              "ro": "Substituție directă $L y = b$ pentru $y$ — $\\Theta(n^2)$."
+            },
+            {
+              "en": "Back-substitute $U x = y$ for $x$ — $\\Theta(n^2)$.",
+              "ro": "Substituție inversă $U x = y$ pentru $x$ — $\\Theta(n^2)$."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Pivoting caveat.** The construction above assumes every pivot is nonzero. When it isn't, you need **partial pivoting**, and the decomposition becomes $P A = L U$ with a permutation $P$. Every serious library (LAPACK's `dgetrf`) returns $(P, L, U)$ together.",
+            "ro": "**Avertisment despre pivotare.** Construcția de mai sus presupune că fiecare pivot este nenul. Când nu este, ai nevoie de **pivotare parțială**, iar descompunerea devine $P A = L U$ cu o permutare $P$. Orice bibliotecă serioasă (`dgetrf` din LAPACK) întoarce împreună $(P, L, U)$."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Once $A = L U$ is in hand, solving $A x = b$ for a fresh $b$ costs…",
+                "ro": "Odată ce $A = L U$ este la îndemână, rezolvarea $A x = b$ pentru un $b$ nou costă…"
+              },
+              "options": [
+                {
+                  "text": "$\\Theta(n^3)$ — same as re-running Gauss.",
+                  "correct": false,
+                  "explanation": { "en": "That's what LU is designed to **avoid**. The factorization work was already done; only two triangular solves remain.", "ro": "Exact asta este ceea ce LU este proiectat să **evite**. Munca de factorizare a fost deja făcută; rămân doar două rezolvări triunghiulare." }
+                },
+                {
+                  "text": "$\\Theta(n^2)$ — two triangular substitutions.",
+                  "correct": true,
+                  "explanation": { "en": "Correct. Forward substitution on $L$ plus back substitution on $U$, each $\\Theta(n^2)$.", "ro": "Corect. Substituție directă pe $L$ plus substituție inversă pe $U$, fiecare $\\Theta(n^2)$." }
+                },
+                {
+                  "text": "$\\Theta(n)$ — only the diagonal of $L$ is touched.",
+                  "correct": false,
+                  "explanation": { "en": "Each triangular solve touches $\\Theta(n^2)$ entries, not just the diagonal. Linear-time would require a diagonal matrix, not a triangular one.", "ro": "Fiecare rezolvare triunghiulară atinge $\\Theta(n^2)$ intrări, nu doar diagonala. Timpul liniar ar cere o matrice diagonală, nu una triunghiulară." }
+                },
+                {
+                  "text": "$\\Theta(n^3)$ only if $b$ changes; $\\Theta(n^2)$ if it stays the same.",
+                  "correct": false,
+                  "explanation": { "en": "The whole point of LU is to make **every** new $b$ cheap. The answer doesn't depend on $b$'s history.", "ro": "Tot rostul LU este să facă **fiecare** $b$ nou ieftin. Răspunsul nu depinde de istoricul lui $b$." }
+                }
+              ],
+              "explanation": { "en": "LU factor once ($n^3$), solve each $b$ in $n^2$. That's the amortization.", "ro": "Factorizează LU o dată ($n^3$), rezolvă fiecare $b$ în $n^2$. Aceea este amortizarea." },
+              "reviewStep": "alo-c5-lu-decomposition"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 12–14 of ALO curs 05 — LU as product of $T_r^{-1}$'s.",
+            "ro": "Slide-urile 12–14 din ALO curs 05 — LU ca produs al $T_r^{-1}$-urilor."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-orthogonal",
+      "title": {
+        "en": "Orthogonal matrices: isometries in disguise",
+        "ro": "Matrici ortogonale: izometrii deghizate"
+      },
+      "group": "qr",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "A rotation of the plane by angle $\\theta$ preserves lengths: a unit vector rotated by $\\theta$ is still a unit vector. What's the matrix-level condition that captures **\"length-preserving linear map\"**?",
+            "ro": "O rotație a planului cu unghiul $\\theta$ păstrează lungimile: un vector unitar rotit cu $\\theta$ este tot un vector unitar. Care este condiția la nivel matricial care surprinde **\"aplicație liniară care păstrează lungimea\"**?"
+          },
+          "answer": {
+            "en": "A matrix $Q$ preserves Euclidean lengths iff $\\|Q x\\|_2 = \\|x\\|_2$ for every $x$, which squares to $(Q x, Q x) = (x, x)$, hence $(x, Q^T Q x) = (x, x)$ for all $x$. That forces $Q^T Q = I_n$ — **$Q$ is orthogonal**. Rotations, reflections, and their compositions are exactly the orthogonal maps. QR decomposition will use them to triangularize $A$ while keeping error bounds tight.",
+            "ro": "O matrice $Q$ păstrează lungimile euclidiene dacă și numai dacă $\\|Q x\\|_2 = \\|x\\|_2$ pentru orice $x$, care ridicat la pătrat dă $(Q x, Q x) = (x, x)$, deci $(x, Q^T Q x) = (x, x)$ pentru orice $x$. Asta forțează $Q^T Q = I_n$ — **$Q$ este ortogonală**. Rotațiile, reflexiile și compozițiile lor sunt exact aplicațiile ortogonale. Descompunerea QR le va folosi pentru a triangulariza $A$ menținând limitele erorii strânse."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Orthogonal matrix",
+            "ro": "Matrice ortogonală"
+          },
+          "content": {
+            "en": "A matrix $Q \\in \\mathbb{R}^{n \\times n}$ is **orthogonal** if $Q^T Q = Q Q^T = I_n$. Equivalently, $Q^{-1} = Q^T$ — the transpose **is** the inverse.",
+            "ro": "O matrice $Q \\in \\mathbb{R}^{n \\times n}$ este **ortogonală** dacă $Q^T Q = Q Q^T = I_n$. Echivalent, $Q^{-1} = Q^T$ — transpusa **este** inversa."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Key properties.** These are the reasons orthogonal matrices earn their starring role in QR:",
+            "ro": "**Proprietăți cheie.** Acestea sunt motivele pentru care matricile ortogonale își câștigă rolul principal în QR:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**$Q^T$ is also orthogonal.** ($Q$ orthogonal $\\Rightarrow Q^T Q = I_n = Q Q^T$, which is exactly the condition for $Q^T$.)",
+              "ro": "**$Q^T$ este tot ortogonală.** ($Q$ ortogonală $\\Rightarrow Q^T Q = I_n = Q Q^T$, ceea ce este exact condiția pentru $Q^T$.)"
+            },
+            {
+              "en": "**Products preserve orthogonality.** If $Q_1, Q_2$ are orthogonal, so is $Q_1 Q_2$ — verified by $(Q_1 Q_2)^T (Q_1 Q_2) = Q_2^T Q_1^T Q_1 Q_2 = Q_2^T Q_2 = I_n$.",
+              "ro": "**Produsele păstrează ortogonalitatea.** Dacă $Q_1, Q_2$ sunt ortogonale, atunci și $Q_1 Q_2$ este — verificat prin $(Q_1 Q_2)^T (Q_1 Q_2) = Q_2^T Q_1^T Q_1 Q_2 = Q_2^T Q_2 = I_n$."
+            },
+            {
+              "en": "**Orthogonal maps preserve the Euclidean norm.** $\\|Q x\\|_2 = \\|x\\|_2$ for every $x$ — lengths are unchanged.",
+              "ro": "**Aplicațiile ortogonale păstrează norma euclidiană.** $\\|Q x\\|_2 = \\|x\\|_2$ pentru orice $x$ — lungimile sunt neschimbate."
+            },
+            {
+              "en": "**Condition number $\\kappa_2(Q) = 1$.** Orthogonal matrices are the **best-conditioned** square matrices possible. Numerical algorithms built on them are naturally stable.",
+              "ro": "**Numărul de condiționare $\\kappa_2(Q) = 1$.** Matricile ortogonale sunt **cele mai bine condiționate** matrici pătratice posibile. Algoritmii numerici bazați pe ele sunt natural stabili."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Geometric intuition.** Orthogonal matrices are exactly the compositions of rotations and reflections. They never stretch, squash, or shear — they just rotate/reflect the whole space rigidly. That's why they're the \"good guys\" of numerical linear algebra: no direction is favored, no direction is crushed, so rounding errors can't be selectively amplified.",
+            "ro": "**Intuiție geometrică.** Matricile ortogonale sunt exact compozițiile de rotații și reflexii. Nu întind, nu strâng, nu forfecă — doar rotesc/reflectează tot spațiul rigid. De aceea sunt \"băieții buni\" ai algebrei liniare numerice: nicio direcție nu este favorizată, nicio direcție nu este strivită, deci erorile de rotunjire nu pot fi amplificate selectiv."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "The 2D rotation matrix $R(\\theta) = \\begin{pmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{pmatrix}$ is orthogonal. What is $R(\\theta)^{-1}$?",
+                "ro": "Matricea de rotație 2D $R(\\theta) = \\begin{pmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{pmatrix}$ este ortogonală. Care este $R(\\theta)^{-1}$?"
+              },
+              "options": [
+                {
+                  "text": "$R(-\\theta) = R(\\theta)^T$",
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. For orthogonal $Q$, $Q^{-1} = Q^T$. Transposing $R(\\theta)$ negates the off-diagonal sines, which is exactly $R(-\\theta)$ — rotating by the opposite angle undoes the original rotation.",
+                    "ro": "Corect. Pentru $Q$ ortogonală, $Q^{-1} = Q^T$. Transpunerea lui $R(\\theta)$ neagă sinusurile de pe antidiagonală, care este exact $R(-\\theta)$ — rotația cu unghiul opus anulează rotația originală."
+                  }
+                },
+                {
+                  "text": "$\\frac{1}{\\cos^2\\theta + \\sin^2\\theta} R(\\theta)$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "The Pythagorean identity makes the denominator $1$, so this simplifies to $R(\\theta)$ — which is **not** its own inverse (except at $\\theta = 0, \\pi$).",
+                    "ro": "Identitatea pitagoreică face numitorul $1$, deci aceasta se simplifică la $R(\\theta)$ — care **nu** este propria sa inversă (cu excepția $\\theta = 0, \\pi$)."
+                  }
+                },
+                {
+                  "text": "$R(\\theta)$ itself — rotations are self-inverse.",
+                  "correct": false,
+                  "explanation": {
+                    "en": "Rotations are self-inverse only for $\\theta = 0$ or $\\pi$. In general, $R(\\theta) \\cdot R(\\theta) = R(2\\theta)$.",
+                    "ro": "Rotațiile sunt propriile lor inverse doar pentru $\\theta = 0$ sau $\\pi$. În general, $R(\\theta) \\cdot R(\\theta) = R(2\\theta)$."
+                  }
+                },
+                {
+                  "text": "$\\frac{1}{\\det R(\\theta)} \\text{adj}(R(\\theta))$ — compute the classical adjugate.",
+                  "correct": false,
+                  "explanation": {
+                    "en": "Mathematically correct but ignores the whole point: orthogonal matrices have $Q^{-1} = Q^T$, a free transpose — you never need adjugate or determinant work.",
+                    "ro": "Matematic corect, dar ratează tot scopul: matricile ortogonale au $Q^{-1} = Q^T$, o transpunere gratuită — nu ai nevoie niciodată de adjunct sau determinant."
+                  }
+                }
+              ],
+              "explanation": { "en": "Inverting an orthogonal matrix = transposing it. For rotations, this is rotating by the negative angle.", "ro": "Inversarea unei matrici ortogonale = transpunerea ei. Pentru rotații, asta înseamnă rotația cu unghiul negativ." },
+              "reviewStep": "alo-c5-orthogonal"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 15–16 of ALO curs 05 — orthogonal matrix properties.",
+            "ro": "Slide-urile 15–16 din ALO curs 05 — proprietăți ale matricilor ortogonale."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-qr",
+      "title": {
+        "en": "QR decomposition: orthogonal + triangular",
+        "ro": "Descompunerea QR: ortogonal + triunghiular"
+      },
+      "group": "qr",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The QR factorization.** Every real square matrix $A$ can be written as",
+            "ro": "**Factorizarea QR.** Orice matrice reală pătratică $A$ se poate scrie ca"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A = Q R"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "where $Q$ is orthogonal ($Q^T Q = I_n$) and $R$ is upper-triangular. Two classical constructions produce it: **Gram–Schmidt** (conceptually simple, numerically fragile) and **Householder reflections** (numerically excellent, the modern default). We'll cover the algorithms in later courses; today's focus is *why QR exists and what we do with it*.",
+            "ro": "unde $Q$ este ortogonală ($Q^T Q = I_n$) și $R$ este superior triunghiulară. Două construcții clasice o produc: **Gram–Schmidt** (simplă conceptual, fragilă numeric) și **reflexiile Householder** (excelente numeric, implicitul modern). Vom acoperi algoritmii în cursuri ulterioare; astăzi ne concentrăm pe *de ce există QR și ce facem cu ea*."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Solving $A x = b$ via QR.** Substitute $A = QR$:",
+            "ro": "**Rezolvarea $A x = b$ via QR.** Substituie $A = QR$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A x = b \\ \\Longleftrightarrow\\ Q R x = b \\ \\Longleftrightarrow\\ R x = Q^T b"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The last step multiplied both sides by $Q^T$ and used $Q^T Q = I$. Two cheap operations now finish the solve:",
+            "ro": "Ultimul pas a înmulțit ambele părți cu $Q^T$ și a folosit $Q^T Q = I$. Două operații ieftine termină acum rezolvarea:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "Compute $y = Q^T b$ — a matrix–vector product, $\\Theta(n^2)$.",
+              "ro": "Calculează $y = Q^T b$ — un produs matrice-vector, $\\Theta(n^2)$."
+            },
+            {
+              "en": "Back-substitute $R x = y$ — a triangular solve, $\\Theta(n^2)$.",
+              "ro": "Substituție inversă $R x = y$ — o rezolvare triunghiulară, $\\Theta(n^2)$."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why QR is the default for least-squares.** When $A$ is rectangular ($m \\times n$ with $m > n$) and the system is over-determined, QR still exists ($Q$ is $m \\times m$ orthogonal, $R$ is $m \\times n$ upper-triangular), and the least-squares solution drops out of $R x = Q^T b$ by taking the top $n$ rows. Compared to the normal equations $A^T A x = A^T b$, QR **avoids squaring the condition number** — $\\kappa_2(A^T A) = \\kappa_2(A)^2$, so solving the normal equations loses half your digits.",
+            "ro": "**De ce QR este implicitul pentru cele mai mici pătrate.** Când $A$ este dreptunghiulară ($m \\times n$ cu $m > n$) și sistemul este supradeterminat, QR există în continuare ($Q$ este $m \\times m$ ortogonală, $R$ este $m \\times n$ superior triunghiulară), iar soluția celor mai mici pătrate iese din $R x = Q^T b$ luând primele $n$ linii. Comparativ cu ecuațiile normale $A^T A x = A^T b$, QR **evită ridicarea la pătrat a numărului de condiționare** — $\\kappa_2(A^T A) = \\kappa_2(A)^2$, deci rezolvarea ecuațiilor normale pierde jumătate din cifre."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Cost recap across the course.**\n\n- **Cholesky** (SPD): $n^3/6$ factor + $2 n^2$ solve. **Best** choice when applicable.\n- **LU with partial pivoting** (general): $n^3/3$ factor + $2 n^2$ solve. The default.\n- **QR** (general / least-squares): $\\sim 2 n^3 / 3$ factor + $\\sim 2 n^2$ solve. Twice LU's cost, but best numerical stability.\n\nPick Cholesky when the structure allows, LU when it doesn't, and QR when stability is more valuable than speed (especially for rectangular least-squares).",
+            "ro": "**Recapitulare costuri peste tot cursul.**\n\n- **Cholesky** (SPD): $n^3/6$ factor + $2 n^2$ rezolvare. **Cea mai bună** alegere când se aplică.\n- **LU cu pivotare parțială** (general): $n^3/3$ factor + $2 n^2$ rezolvare. Implicitul.\n- **QR** (general / cele mai mici pătrate): $\\sim 2 n^3 / 3$ factor + $\\sim 2 n^2$ rezolvare. De două ori costul LU, dar cea mai bună stabilitate numerică.\n\nAlege Cholesky când structura permite, LU când nu, și QR când stabilitatea contează mai mult decât viteza (în special pentru cele mai mici pătrate dreptunghiulare)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Given $A = QR$, how expensive is computing $Q^T b$ for a new $b$?",
+                "ro": "Dată $A = QR$, cât de scumpă este calcularea lui $Q^T b$ pentru un $b$ nou?"
+              },
+              "options": [
+                {
+                  "text": "$\\Theta(n^3)$ — matrix multiplication.",
+                  "correct": false,
+                  "explanation": { "en": "Matrix–matrix multiplication is $n^3$, but this is matrix–**vector** — only $n^2$.", "ro": "Înmulțirea matrice-matrice este $n^3$, dar aceasta este matrice-**vector** — doar $n^2$." }
+                },
+                {
+                  "text": "$\\Theta(n^2)$ — a matrix–vector product.",
+                  "correct": true,
+                  "explanation": { "en": "Correct. $Q^T b$ sums $n$ dot products of length $n$ = $\\Theta(n^2)$. Same as a triangular solve.", "ro": "Corect. $Q^T b$ însumează $n$ produse scalare de lungime $n$ = $\\Theta(n^2)$. La fel ca o rezolvare triunghiulară." }
+                },
+                {
+                  "text": "$\\Theta(n \\log n)$ using the FFT.",
+                  "correct": false,
+                  "explanation": { "en": "FFT accelerates dense matrix-vector products only for special structured matrices (circulant, Toeplitz). A general orthogonal $Q$ doesn't have that structure.", "ro": "FFT accelerează produsele matrice-vector dense doar pentru matrici structurate special (circulante, Toeplitz). O $Q$ ortogonală generală nu are această structură." }
+                },
+                {
+                  "text": "$\\Theta(n)$ — because $Q$ is orthogonal.",
+                  "correct": false,
+                  "explanation": { "en": "Orthogonality makes $Q^{-1} = Q^T$ free; it doesn't reduce the $n^2$ cost of applying that transpose to a vector.", "ro": "Ortogonalitatea face $Q^{-1} = Q^T$ gratuită; nu reduce costul $n^2$ al aplicării acelei transpuse unui vector." }
+                }
+              ],
+              "explanation": { "en": "Matrix–vector = $\\Theta(n^2)$ regardless of the matrix's structure (unless the structure enables a faster algorithm, which orthogonality alone doesn't).", "ro": "Matrice-vector = $\\Theta(n^2)$ indiferent de structura matricei (cu excepția cazului în care structura permite un algoritm mai rapid, ceea ce ortogonalitatea singură nu face)." },
+              "reviewStep": "alo-c5-qr"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 17–18 of ALO curs 05 — QR statement and use.",
+            "ro": "Slide-urile 17–18 din ALO curs 05 — enunțul și utilizarea QR."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c5-quiz",
+      "title": {
+        "en": "Self-test: course 5 retrieval",
+        "ro": "Auto-test: retenție cursul 5"
+      },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Eight questions across the three factorizations. Target: **6 or more correct** on the first pass.",
+            "ro": "Opt întrebări peste cele trei factorizări. Țintă: **6 sau mai multe corecte** din prima."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Cholesky requires $A$ to be…",
+                "ro": "Cholesky cere ca $A$ să fie…"
+              },
+              "options": [
+                {
+                  "text": { "en": "…any square matrix.", "ro": "…orice matrice pătratică." },
+                  "correct": false,
+                  "explanation": { "en": "That's LU's audience. Cholesky has stricter requirements.", "ro": "Aceea este audiența LU. Cholesky are cerințe mai stricte." }
+                },
+                {
+                  "text": { "en": "…symmetric and positive-definite (SPD).", "ro": "…simetrică și pozitiv definită (SPD)." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Both conditions are needed — symmetry for $A = L L^T$ shape, positive-definiteness for the diagonal radicals.", "ro": "Corect. Ambele condiții sunt necesare — simetria pentru forma $A = L L^T$, pozitiv-definirea pentru radicalii diagonali." }
+                },
+                {
+                  "text": { "en": "…upper-triangular.", "ro": "…superior triunghiulară." },
+                  "correct": false,
+                  "explanation": { "en": "Upper-triangular $A$ is already solvable by back substitution; no factorization needed.", "ro": "$A$ superior triunghiulară este deja rezolvabilă prin substituție inversă; nu e nevoie de factorizare." }
+                },
+                {
+                  "text": { "en": "…orthogonal.", "ro": "…ortogonală." },
+                  "correct": false,
+                  "explanation": { "en": "Orthogonal $A$ is trivially invertible via $A^{-1} = A^T$; no Cholesky needed.", "ro": "$A$ ortogonală este banal inversabilă prin $A^{-1} = A^T$; nu e nevoie de Cholesky." }
+                }
+              ],
+              "explanation": { "en": "Cholesky's audience: SPD matrices. The reward: half the cost of LU.", "ro": "Audiența Cholesky: matrici SPD. Recompensa: jumătate din costul LU." },
+              "reviewStep": "alo-c5-posdef"
+            },
+            {
+              "question": {
+                "en": "Cholesky's factorization cost (multiplications) is roughly…",
+                "ro": "Costul factorizării Cholesky (înmulțiri) este aproximativ…"
+              },
+              "options": [
+                {
+                  "text": "$n^3 / 6$",
+                  "correct": true,
+                  "explanation": { "en": "Correct — half of LU's $n^3/3$ because Cholesky exploits symmetry.", "ro": "Corect — jumătate din $n^3/3$ al LU pentru că Cholesky exploatează simetria." }
+                },
+                {
+                  "text": "$n^3 / 3$",
+                  "correct": false,
+                  "explanation": { "en": "That's LU. Cholesky beats it by a factor of 2.", "ro": "Aceea este LU. Cholesky o bate cu un factor de 2." }
+                },
+                {
+                  "text": "$n^3$",
+                  "correct": false,
+                  "explanation": { "en": "Off by a constant. Algorithms this bad don't make it into LAPACK.", "ro": "Greșit cu o constantă. Algoritmi atât de răi nu ajung în LAPACK." }
+                },
+                {
+                  "text": "$n^2$",
+                  "correct": false,
+                  "explanation": { "en": "$n^2$ is the triangular-solve cost; factorization is a full $n^3$-order job.", "ro": "$n^2$ este costul rezolvării triunghiulare; factorizarea este o sarcină completă de ordin $n^3$." }
+                }
+              ],
+              "explanation": { "en": "Cholesky: $n^3/6$. LU: $n^3/3$. QR: $\\sim 2n^3/3$.", "ro": "Cholesky: $n^3/6$. LU: $n^3/3$. QR: $\\sim 2n^3/3$." },
+              "reviewStep": "alo-c5-cholesky-cost"
+            },
+            {
+              "question": {
+                "en": "Inside Cholesky, a negative argument appears under the square root. Diagnosis?",
+                "ro": "În interiorul Cholesky, un argument negativ apare sub radical. Diagnosticul?"
+              },
+              "options": [
+                {
+                  "text": { "en": "The input $A$ is not SPD.", "ro": "Intrarea $A$ nu este SPD." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. For true SPD $A$, the argument stays positive throughout. A negative value is Cholesky's built-in SPD detector reporting failure.", "ro": "Corect. Pentru $A$ SPD adevărat, argumentul rămâne pozitiv pe tot parcursul. O valoare negativă este detectorul SPD încorporat al Cholesky raportând eșec." }
+                },
+                {
+                  "text": { "en": "Take the complex square root and continue.", "ro": "Ia radicalul complex și continuă." },
+                  "correct": false,
+                  "explanation": { "en": "The real $L$ doesn't exist, so forcing a complex entry violates the output contract.", "ro": "$L$ real nu există, deci forțarea unei intrări complexe încalcă contractul de ieșire." }
+                },
+                {
+                  "text": { "en": "Switch to `binary128` precision.", "ro": "Schimbă la precizia `binary128`." },
+                  "correct": false,
+                  "explanation": { "en": "A sign problem isn't fixed by precision — the arithmetic was correct, the mathematics said \"not SPD.\"", "ro": "O problemă de semn nu se rezolvă prin precizie — aritmetica a fost corectă, matematica a spus \"nu SPD\"." }
+                },
+                {
+                  "text": { "en": "Retry with pivoting.", "ro": "Reîncearcă cu pivotare." },
+                  "correct": false,
+                  "explanation": { "en": "Pivoted Cholesky variants exist for semi-definite $A$, but a truly indefinite $A$ has no Cholesky factor at all.", "ro": "Există variante Cholesky cu pivotare pentru $A$ semi-definit, dar un $A$ într-adevăr nedefinit nu are niciun factor Cholesky." }
+                }
+              ],
+              "explanation": { "en": "Negative diagonal argument ≡ not SPD. Cholesky doubles as an SPD check.", "ro": "Argument diagonal negativ ≡ nu SPD. Cholesky are un rol dublu de verificare SPD." },
+              "reviewStep": "alo-c5-cholesky-formulas"
+            },
+            {
+              "question": {
+                "en": "The LU decomposition $A = LU$ satisfies…",
+                "ro": "Descompunerea LU $A = LU$ satisface…"
+              },
+              "options": [
+                {
+                  "text": { "en": "$L$ is lower-triangular with unit diagonal; $U$ is upper-triangular.", "ro": "$L$ este inferior triunghiulară cu diagonală unitate; $U$ este superior triunghiulară." },
+                  "correct": true,
+                  "explanation": { "en": "Correct (this is Doolittle's convention, used everywhere LAPACK is involved).", "ro": "Corect (aceasta este convenția Doolittle, folosită peste tot unde este implicat LAPACK)." }
+                },
+                {
+                  "text": { "en": "$L$ and $U$ are both upper-triangular.", "ro": "$L$ și $U$ sunt ambele superior triunghiulare." },
+                  "correct": false,
+                  "explanation": { "en": "Then $L U$ would be upper-triangular; it couldn't represent a general $A$.", "ro": "Atunci $L U$ ar fi superior triunghiulară; nu ar putea reprezenta un $A$ general." }
+                },
+                {
+                  "text": { "en": "$L$ is orthogonal and $U$ is upper-triangular.", "ro": "$L$ este ortogonală și $U$ este superior triunghiulară." },
+                  "correct": false,
+                  "explanation": { "en": "That describes QR, not LU.", "ro": "Aceea descrie QR, nu LU." }
+                },
+                {
+                  "text": { "en": "$L$ is upper-triangular and $U$ is lower-triangular.", "ro": "$L$ este superior triunghiulară și $U$ este inferior triunghiulară." },
+                  "correct": false,
+                  "explanation": { "en": "Conventional naming: $L$ = lower, $U$ = upper. Swapping them would produce $L U$ in the wrong structural shape.", "ro": "Denumire convențională: $L$ = lower (inferior), $U$ = upper (superior). Schimbarea lor ar produce $L U$ în forma structurală greșită." }
+                }
+              ],
+              "explanation": { "en": "Doolittle LU: $L$ unit lower-triangular, $U$ upper-triangular.", "ro": "LU Doolittle: $L$ unitate inferior triunghiulară, $U$ superior triunghiulară." },
+              "reviewStep": "alo-c5-lu-decomposition"
+            },
+            {
+              "question": {
+                "en": "After $A = LU$ has been computed, solving $Ax = b$ for a new $b$ costs…",
+                "ro": "După ce $A = LU$ a fost calculată, rezolvarea $Ax = b$ pentru un $b$ nou costă…"
+              },
+              "options": [
+                {
+                  "text": "$\\Theta(n^2)$ — two triangular solves.",
+                  "correct": true,
+                  "explanation": { "en": "Correct. Forward-solve $L y = b$, back-solve $U x = y$. Each $\\Theta(n^2)$.", "ro": "Corect. Rezolvi directă $L y = b$, apoi inversă $U x = y$. Fiecare $\\Theta(n^2)$." }
+                },
+                {
+                  "text": "$\\Theta(n^3)$ — refactor $A$ from scratch.",
+                  "correct": false,
+                  "explanation": { "en": "That's exactly what LU exists to avoid.", "ro": "Exact asta este ce LU evită." }
+                },
+                {
+                  "text": "$\\Theta(n \\cdot n!)$ — Cramer with the LU factors.",
+                  "correct": false,
+                  "explanation": { "en": "LU obviates Cramer entirely. Factorial cost is what we left behind in course 4.", "ro": "LU elimină complet Cramer. Costul factorial este ce am lăsat în urmă în cursul 4." }
+                },
+                {
+                  "text": "$\\Theta(n)$ — trivial linear-time substitution.",
+                  "correct": false,
+                  "explanation": { "en": "Substitution is quadratic, not linear — each $x_i$ involves $\\Theta(n)$ work.", "ro": "Substituția este pătratică, nu liniară — fiecare $x_i$ implică muncă $\\Theta(n)$." }
+                }
+              ],
+              "explanation": { "en": "Factor once in $n^3$, solve each $b$ in $n^2$. The amortization is the whole point.", "ro": "Factorizezi o dată în $n^3$, rezolvi fiecare $b$ în $n^2$. Amortizarea este tot rostul." },
+              "reviewStep": "alo-c5-lu-decomposition"
+            },
+            {
+              "question": {
+                "en": "An orthogonal matrix $Q$ satisfies which of the following?",
+                "ro": "O matrice ortogonală $Q$ satisface care dintre următoarele?"
+              },
+              "options": [
+                {
+                  "text": "$Q^{-1} = Q^T$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. This is the definition — computationally delightful, since transpose is $O(n^2)$ read-only and inverse is normally $O(n^3)$.", "ro": "Corect. Aceasta este definiția — încântătoare computațional, pentru că transpunerea este $O(n^2)$ doar citire, iar inversa este în mod normal $O(n^3)$." }
+                },
+                {
+                  "text": "$Q^{-1} = -Q^T$",
+                  "correct": false,
+                  "explanation": { "en": "The negative transpose is the inverse of a **skew-symmetric** matrix (up to sign conventions) — not orthogonal.", "ro": "Transpusa negativă este inversa unei matrici **antisimetrice** (până la convenții de semn) — nu ortogonală." }
+                },
+                {
+                  "text": "$Q^{-1} = \\bar{Q}^T$ (complex conjugate transpose)",
+                  "correct": false,
+                  "explanation": { "en": "That's the definition of **unitary** (the complex analog). For real $Q$, conjugation is a no-op, so it reduces to $Q^T$ — true, but the question asked about real orthogonal.", "ro": "Aceea este definiția **unitară** (analogul complex). Pentru $Q$ real, conjugarea este identitate, deci se reduce la $Q^T$ — adevărat, dar întrebarea era despre ortogonalitatea reală." }
+                },
+                {
+                  "text": "$Q^{-1} = Q$",
+                  "correct": false,
+                  "explanation": { "en": "That's $Q^2 = I$ — involution, not orthogonality. Reflections satisfy both, but general rotations don't.", "ro": "Aceea este $Q^2 = I$ — involuție, nu ortogonalitate. Reflexiile satisfac ambele, dar rotațiile generale nu." }
+                }
+              ],
+              "explanation": { "en": "Orthogonal = transpose is inverse. Free rotation undo.", "ro": "Ortogonală = transpunerea este inversa. Anularea rotației gratuită." },
+              "reviewStep": "alo-c5-orthogonal"
+            },
+            {
+              "question": {
+                "en": "Why use QR instead of LU for over-determined least-squares problems?",
+                "ro": "De ce folosim QR în loc de LU pentru probleme de cele mai mici pătrate supra-determinate?"
+              },
+              "options": [
+                {
+                  "text": { "en": "QR is faster to factor.", "ro": "QR se factorizează mai rapid." },
+                  "correct": false,
+                  "explanation": { "en": "It is actually **slower** ($\\sim 2n^3/3$ vs LU's $n^3/3$). The reason to prefer QR is numerical, not speed.", "ro": "Este de fapt **mai lentă** ($\\sim 2n^3/3$ față de $n^3/3$ al LU). Motivul preferării QR este numeric, nu de viteză." }
+                },
+                {
+                  "text": { "en": "QR avoids squaring the condition number.", "ro": "QR evită ridicarea la pătrat a numărului de condiționare." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Normal equations $A^T A x = A^T b$ have $\\kappa_2(A^T A) = \\kappa_2(A)^2$ — you lose about half your digits. QR works directly with $A$.", "ro": "Corect. Ecuațiile normale $A^T A x = A^T b$ au $\\kappa_2(A^T A) = \\kappa_2(A)^2$ — pierzi aproximativ jumătate din cifre. QR lucrează direct cu $A$." }
+                },
+                {
+                  "text": { "en": "LU doesn't exist for rectangular matrices.", "ro": "LU nu există pentru matrici dreptunghiulare." },
+                  "correct": false,
+                  "explanation": { "en": "LU does generalize to rectangular via row-reduced echelon form; it just isn't a natural fit for least-squares.", "ro": "LU se generalizează pentru matrici dreptunghiulare prin forma echelon redusă; pur și simplu nu se potrivește natural pentru cele mai mici pătrate." }
+                },
+                {
+                  "text": { "en": "LU produces a non-triangular result for $m \\neq n$.", "ro": "LU produce un rezultat non-triunghiular pentru $m \\neq n$." },
+                  "correct": false,
+                  "explanation": { "en": "LU still produces a lower + upper triangular pair; the shapes just aren't square.", "ro": "LU produce în continuare o pereche inferior + superior triunghiulară; formele pur și simplu nu sunt pătratice." }
+                }
+              ],
+              "explanation": { "en": "QR's stability edge comes from avoiding the normal-equations condition-number squaring.", "ro": "Avantajul de stabilitate al QR vine din evitarea ridicării la pătrat a numărului de condiționare din ecuațiile normale." },
+              "reviewStep": "alo-c5-qr"
+            },
+            {
+              "question": {
+                "en": "Pick the best factorization for this workload: you will solve $10^5$ systems $A x_k = b_k$ where $A$ is a fixed $n = 500$ symmetric positive-definite matrix and only $b_k$ changes.",
+                "ro": "Alege cea mai bună factorizare pentru această sarcină: rezolvi $10^5$ sisteme $A x_k = b_k$ unde $A$ este o matrice fixă $n = 500$ simetrică pozitiv definită, iar doar $b_k$ se schimbă."
+              },
+              "options": [
+                {
+                  "text": { "en": "Re-run Gauss elimination on $[A \\mid b_k]$ each time.", "ro": "Rulează eliminarea Gauss pe $[A \\mid b_k]$ de fiecare dată." },
+                  "correct": false,
+                  "explanation": { "en": "That's $10^5 \\cdot n^3/3 \\approx 4 \\times 10^{12}$ ops — the wrong asymptotic by $n$.", "ro": "Acela este $10^5 \\cdot n^3/3 \\approx 4 \\times 10^{12}$ operații — asimptotica greșită cu un factor de $n$." }
+                },
+                {
+                  "text": { "en": "Cholesky factor $A$ once, solve each $b_k$ in $\\Theta(n^2)$.", "ro": "Factorizează Cholesky $A$ o dată, rezolvă fiecare $b_k$ în $\\Theta(n^2)$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. $A$ is SPD → Cholesky is cheapest. Factor cost $\\approx n^3/6 \\approx 2 \\times 10^7$ ops; each solve $\\approx 2 n^2 = 5 \\times 10^5$ ops; total $\\approx 5 \\times 10^{10}$ — 100× faster than naive.", "ro": "Corect. $A$ este SPD → Cholesky este cea mai ieftină. Cost factorizare $\\approx n^3/6 \\approx 2 \\times 10^7$ operații; fiecare rezolvare $\\approx 2 n^2 = 5 \\times 10^5$ operații; total $\\approx 5 \\times 10^{10}$ — de 100 de ori mai rapid decât naiv." }
+                },
+                {
+                  "text": { "en": "QR factor $A$ once, solve each $b_k$ via $Rx = Q^T b_k$.", "ro": "Factorizează QR $A$ o dată, rezolvă fiecare $b_k$ via $Rx = Q^T b_k$." },
+                  "correct": false,
+                  "explanation": { "en": "QR works but costs 4× the Cholesky factorization. Picking QR over Cholesky when SPD structure is known wastes work.", "ro": "QR funcționează, dar costă de 4 ori cât factorizarea Cholesky. Alegerea QR în locul Cholesky când structura SPD este cunoscută irosește muncă." }
+                },
+                {
+                  "text": { "en": "Compute $A^{-1}$ once, then $x_k = A^{-1} b_k$ by matrix-vector product.", "ro": "Calculează $A^{-1}$ o dată, apoi $x_k = A^{-1} b_k$ prin produs matrice-vector." },
+                  "correct": false,
+                  "explanation": { "en": "Never form $A^{-1}$ explicitly in numerics — it costs more and is less stable than the factor + triangular-solve approach.", "ro": "Nu forma niciodată $A^{-1}$ explicit în calcul numeric — costă mai mult și este mai puțin stabil decât abordarea factor + rezolvare triunghiulară." }
+                }
+              ],
+              "explanation": { "en": "SPD + many right-hand sides = Cholesky every time.", "ro": "SPD + multe părți drepte = Cholesky de fiecare dată." },
+              "reviewStep": "alo-c5-cholesky-cost"
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Next up.** Course 6 applies these factorizations to iterative refinement, sparse systems, and the condition number $\\kappa_2(A)$ you first saw in course 2.",
+            "ro": "**Urmează.** Cursul 6 aplică aceste factorizări la rafinarea iterativă, sistemele rare și numărul de condiționare $\\kappa_2(A)$ pe care l-ai văzut prima dată în cursul 2."
+          }
+        }
+      ]
+    }
+  ]
+}

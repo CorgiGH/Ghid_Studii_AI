@@ -27,6 +27,10 @@ const alo = {
       title: { en: 'Course 4: Solving linear systems — from Cramer to Gauss', ro: 'Cursul 4: Rezolvarea sistemelor liniare — de la Cramer la Gauss' },
       shortTitle: { en: 'C4: Gauss', ro: 'C4: Gauss' },
       sectionCount: 10 },
+    { id: 'alo-c5', src: 'alo/courses/course-05.json', metaId: 'alo-c5',
+      title: { en: 'Course 5: Matrix factorizations — Cholesky, LU, QR', ro: 'Cursul 5: Factorizări matriciale — Cholesky, LU, QR' },
+      shortTitle: { en: 'C5: Factorizations', ro: 'C5: Factorizări' },
+      sectionCount: 10 },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
