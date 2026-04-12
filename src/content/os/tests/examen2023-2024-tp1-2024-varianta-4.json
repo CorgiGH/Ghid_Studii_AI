@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "id": "os-examen2023-2024-tp1-2024-varianta-4",
+    "title": {
+      "en": "Practical OS Test – Variant No. 4",
+      "ro": "Test practic la SO – varianta nr. 4"
+    },
+    "year": null,
+    "type": "midterm",
+    "variant": 4,
+    "duration": null,
+    "totalPoints": 20
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "code-writing",
+      "points": 5.5,
+      "prompt": {
+        "en": "Write a C program named \"first_and_last_byte.c\" according to the following specification:\n\nThe program will receive at least one command-line argument; otherwise, it will terminate with a unique, non-zero exit code. The program will treat that argument as a filename and check if it has read access to it, using only one function call from the POSIX API; if not, it will terminate with a unique, non-zero exit code.\n\nOtherwise, the program will determine the (unsigned) value of both the first byte and the last byte of the given file, using strictly POSIX API function calls. Each POSIX API call must handle error cases by terminating the program with a unique, non-zero exit code. If the file is empty (i.e., size zero), the values of the first and last bytes are considered zero.\n\nThen, it will print to stdout, using a function from the stdio library, a message consisting of: the filename received as an argument, the '=' separator, the unsigned integer representing the sum of the two bytes read from the file, and terminated with a '\\n' character. The program will then terminate with exit code 0.\n\n**Grading (Barem):**\na) 0.5p – correct implementation of checking for the presence of the argument.\nb) 0.5p – correct implementation of checking read access rights using POSIX calls.\nc) 0.5p – correct opening of the file.\nd) 0.5p – correct reading of the first byte using POSIX calls.\ne) 1p – correct reading of the last byte using POSIX calls.\nf) 0.5p – displaying the result on stdout according to format.\ng) 1p – handling all possible error cases.\nh) 1p – program compiles without errors and without warnings.",
+        "ro": "1. Să se scrie un program C, numit \"first_and_last_byte.c\", conform specificației următoare:\n\nProgramul va primi cel puțin un argument în linia de comandă; în caz contrar își va încheia execuția cu un cod de terminare unic, nenul. Programul va considera acel argument ca fiind un nume de fișier și va verifica dacă are access de citire asupra acestuia, folosind doar un apel de funcție din API-ul POSIX, iar în caz negativ își va încheia execuția cu un cod de terminare unic, nenul.\n\nAltfel, programul va determina valoarea (fără semn) atât a primului octet, cât și a ultimului octet din fișierul dat, folosind strict apeluri către funcții din API-ul POSIX. Fiecare apel către funcții din API-ul POSIX va trata cazul de eroare prin încheierea execuției programului cu un cod de terminare unic, nenul. În cazul în care fișierul este gol (i.e., are dimensiunea zero), valorile primului și ultimului octet se consideră a fi zero.\n\nApoi, se va afișa pe ieșirea stdout, folosind o funcție din biblioteca stdio, un mesaj format din: numele fișierului primit ca argument, separatorul '=' , numărul întreg fără semn reprezentând suma celor doi octeți citiți din fișier, și terminat cu caracterul '\\n'. Apoi programul își va încheia execuția cu codul de terminare 0.\n\n**Barem:**\na) 0.5p – implementarea corectă a verificării existenței argumentui primit.\nb) 0.5p – implementarea corectă, conform specificației date, a verificării dreptului de access de citire asupra fișierului.\nc) 0.5p – deschiderea fișierului în mod correct.\nd) 0.5p – citirea corectă a primului octet, conform specificației date.\ne) 1p – citirea corectă a ultimului octet, conform specificației date.\nf) 0.5p – afișarea rezultatului pe ieșirea stdout, conform specificației date.\ng) 1p – tratarea tuturor erorilor posibile, conform specificației date.\nh) 1p – programul se compilează fără erori și fără warning-uri."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `access(argv[1], R_OK)` for access checks and `lseek(fd, -1, SEEK_END)` to position for the last byte.",
+          "ro": "Folosiți `access(argv[1], R_OK)` pentru verificarea accesului și `lseek(fd, -1, SEEK_END)` pentru a vă poziționa la ultimul octet."
+        },
+        {
+          "en": "Read bytes into `unsigned char` variables to ensure the value is treated as unsigned (0-255).",
+          "ro": "Citiți octeții în variabile de tip `unsigned char` pentru a vă asigura că valoarea este tratată fără semn (0-255)."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `argc`. 2. Use `access()` to verify R_OK. 3. `open()` file. 4. Use `fstat()` or `lseek(fd, 0, SEEK_END)` to check size. 5. If size > 0, `lseek` to 0, `read` 1 byte; then `lseek` to offset -1, `read` 1 byte. 6. Sum them. 7. `printf(\"%s=%u\\n\", ...)`. 8. Error check every syscall.",
+        "ro": "1. Verificare `argc`. 2. Utilizare `access()` pentru R_OK. 3. `open()` fișier. 4. Utilizare `fstat()` sau `lseek(fd, 0, SEEK_END)` pentru dimensiune. 5. Dacă dimensiunea > 0, `lseek` la 0, `read` 1 octet; apoi `lseek` la offset -1, `read` 1 octet. 6. Sumare. 7. `printf(\"%s=%u\\n\", ...)`. 8. Verificarea erorilor pentru fiecare apel de sistem."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "bash-scripting",
+      "points": 5,
+      "prompt": {
+        "en": "Write a bash script named \"main.sh\" according to the following specification:\n\nThe script will receive one command-line argument and will perform the following checks, in this exact order:\ni) Check if in the directory where \"main.sh\" is located, there is a subdirectory named \"app\" containing a script named \"control_byte.sh\" and that it has execution permission; if not, print an appropriate error message to stderr and terminate with exit code 1;\nii) Check if in the subdirectory \"app\", there is a subdirectory named \"source\" containing a program named \"first_and_last_byte.c\" and that it has read permission; if not, print an appropriate error message to stderr and terminate with exit code 2;\niii) Check if the received argument represents an existing file of type either directory or regular; if not, print an appropriate error message to stderr and terminate with exit code 3.\n\nThen, the \"main.sh\" script will invoke the \"control_byte.sh\" script, passing it the argument it received, and finally, it will display the exit code of its execution.\n\n**Grading (Barem):**\na) 1.5p (3 x 0.5p) – correct implementation of checks described in point i).\nb) 1.5p (3 x 0.5p) – correct implementation of checks described in point ii).\nc) 1.0p (2 x 0.5p) – correct implementation of checks described in point iii).\nd) 0.5p + 0.5p – correct invocation of \"control_byte.sh\" and displaying the exit code.",
+        "ro": "2. Să se scrie un script bash, numit \"main.sh\", conform specificației următoare:\n\nScriptul va primi un argument în linia de comandă și va face următoarele verificări, în ordinea următoare:\ni) va verifica dacă în directorul în care se află \"main.sh\", există un subdirector numit \"app\" ce conține un script numit \"control_byte.sh\" și că are permisiunea de execuție a acestuia, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 1;\nii) va verifica dacă în subdirectorul numit \"app\", există un subdirector numit \"source\" ce conține un program numit \"first_and_last_byte.c\" și că are permisiunea de citire a acestuia, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 2;\niii) va verifica dacă argumentul primit reprezintă un fișier existent de tip fie director, fie normal (\"regular\"), iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 3.\n\nApoi scriptul \"main.sh\" va invoca scriptul \"control_byte.sh\", transmițându-i în linia de comandă, argumentul pe care l-a primit el în linia de comandă, și la final va afișa codul de terminare a execuției acestuia.\n\n**Barem:**\na) 3 x 0.5p – implementarea corectă, conform specificației date, a verificărilor descrise la punctul i) din specificație.\nb) 3 x 0.5p – implementarea corectă, conform specificației date, a verificărilor descrise la punctul ii) din specificație.\nc) 2 x 0.5p – implementarea corectă, conform specificației date, a verificărilor descrise la punctul iii) din specificație.\nd) 0.5p + 0.5p – invocarea corectă a scriptului \"control_byte.sh\" și afișarea codului de exit, conform specificației date."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `dirname \"$0\"` to find the directory of the current script. Use `[ -x ... ]` for execution and `[ -r ... ]` for read permissions.",
+          "ro": "Folosiți `dirname \"$0\"` pentru a afla directorul scriptului curent. Folosiți `[ -x ... ]` pentru execuție și `[ -r ... ]` pentru citire."
+        },
+        {
+          "en": "Check if a file is directory or regular using `[ -f \"$arg\" ] || [ -d \"$arg\" ]`.",
+          "ro": "Verificați dacă un fișier este director sau normal folosind `[ -f \"$arg\" ] || [ -d \"$arg\" ]`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Validate argument presence. 2. Check existence/exec of `app/control_byte.sh`. 3. Check existence/read of `app/source/first_and_last_byte.c`. 4. Validate input argument type. 5. Run `./app/control_byte.sh \"$1\"`. 6. Print `$?`.",
+        "ro": "1. Validare prezență argument. 2. Verificare existență/execuție `app/control_byte.sh`. 3. Verificare existență/citire `app/source/first_and_last_byte.c`. 4. Validare tip argument intrare. 5. Rulare `./app/control_byte.sh \"$1\"`. 6. Afișare `$?`."
+      }
+    },
+    {
+      "id": "q3",
+      "type": "bash-scripting",
+      "points": 4.5,
+      "prompt": {
+        "en": "Write a second bash script named \"control_byte.sh\" according to the following specification:\n\nThe script will receive one command-line argument; otherwise, it will terminate with exit code 2.\nFirst, the script will check if in the directory where \"control_byte.sh\" is located, there exists a script named \"recurse.sh\" and that it has execution permission; if not, it will print an appropriate error message to stderr and terminate with exit code 1.\nThen, the \"control_byte.sh\" script will invoke the \"recurse.sh\" script, passing it the argument it received. The invocation of \"recurse.sh\" will be done through a composite command of type pipeline, which will process the output produced by the execution of \"recurse.sh\" in the following manner: each decimal digit will be replaced with the \"next\" digit (i.e., 0 replaced with 1, 1 with 2, ..., 9 with 0), and then, in the output produced after the replacement, the lines will be sorted numerically ascending based on the second field delimited by the '=' character.\nAt the end of the pipeline processing, the script \"control_byte.sh\" will terminate with the exit code of the pipeline.\n\n**Grading (Barem):**\na) 0.5p – correct implementation of argument check.\nb) 1p – correct implementation of checks for \"recurse.sh\".\nc) 0.5p – correct invocation of \"recurse.sh\" within a pipeline.\nd) 1p – appropriate command in the pipeline for replacing digits.\ne) 1p – appropriate command in the pipeline for sorting lines.\nf) 0.5p – termination with the pipeline exit code.",
+        "ro": "3. Să se scrie un al doilea script bash, numit \"control_byte.sh\", conform specificației următoare:\nScriptul va primi un argument în linia de comandă; în caz contrar se va termina cu codul de exit 2.\nMai întâi scriptul va verifica dacă în directorul în care se află \"control_byte.sh\" există și un script numit \"recurse.sh\" și că are permisiunea de execuție a acestuia, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 1.\nApoi scriptul \"control_byte.sh\" va invoca scriptul \"recurse.sh\", transmițându-i în linia de comandă, argumentul pe care l-a primit el în linia de comandă. Invocarea scriptului \"recurse.sh\" se va face printr-o comandă compusă de tip pipeline, care să proceseze outputul produs prin execuția scriptului \"recurse.sh\" în maniera următoare: se va înlocui fiecare cifră zecimală cu \"următoarea\" cifră (i.e., 0 va fi înlocuit cu 1, 1 va fi înlocuit cu 2, …, 9 va fi înlocuit cu 0), iar apoi, în outputul produs în urma înlocuirii, se vor sorta liniile numeric crescător după al doilea câmp delimitat de caracterul \"=\".\nLa finalul procesării pipeline-ului, scriptul \"control_byte.sh\" se va termina cu codul de exit a pipeline-ului.\n\n**Barem:**\na) 0.5p – implementarea corectă, conform specificației date, a verificării referitoare la argumentul primit.\nb) 1p – implementarea corectă, conform specificației date, a verificării referitoare la scriptul \"recurse.sh\".\nc) 0.5p – invocarea corectă a scriptului \"recurse.sh\", în cadrul pipeline-ului, conform specificației date.\nd) 1p – apelul comenzii potrivite, în cadrul pipeline-ului, pentru înlocuirea cifrelor, conform specificației date.\ne) 1p – apelul comenzii potrivite, în cadrul pipeline-ului, pentru a sorta liniile, conform specificației date.\nf) 0.5p – terminarea scriptului cu codul de exit a pipeline-ului, conform specificației date."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `tr '0123456789' '1234567890'` for the digit replacement.",
+          "ro": "Folosiți `tr '0123456789' '1234567890'` pentru înlocuirea cifrelor."
+        },
+        {
+          "en": "Use `sort -t'=' -k2,2n` for numerical sorting based on the second field.",
+          "ro": "Folosiți `sort -t'=' -k2,2n` pentru sortarea numerică după al doilea câmp."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check if argument exists. 2. Get dir with `$(dirname \"$0\")`. 3. Check `[ -x \"$DIR/recurse.sh\" ]`. 4. Execute: `\"$DIR/recurse.sh\" \"$1\" | tr '0-9' '1-90' | sort -t'=' -k2,2n`. 5. The script naturally returns the pipe's status if it's the last command, or use `PIPESTATUS`.",
+        "ro": "1. Verificare existență argument. 2. Preluare director cu `$(dirname \"$0\")`. 3. Verificare `[ -x \"$DIR/recurse.sh\" ]`. 4. Execuție: `\"$DIR/recurse.sh\" \"$1\" | tr '0-9' '1-90' | sort -t'=' -k2,2n`. 5. Scriptul returnează natural statusul pipe-ului dacă e ultima comandă, sau folosiți `PIPESTATUS`."
+      }
+    },
+    {
+      "id": "q4",
+      "type": "bash-scripting",
+      "points": 5,
+      "prompt": {
+        "en": "Write a third bash script named \"recurse.sh\" according to the following specification:\n\nThe script will receive one command-line argument; otherwise, it will terminate with exit code 2.\nFirst, the script will check if in the \"source\" subdirectory there is a file named \"first_and_last_byte\" (the executable obtained by compiling the program \"first_and_last_byte.c\"), and if not, it will call the gcc compiler to produce it, and only if there are compilation errors, it will print an appropriate error message to stderr and terminate with exit code 3.\n\nThen, the script \"recurse.sh\" will call a recursive function with that argument received in the command line. If the function's argument is a regular file, then the executable \"first_and_last_byte\" will be called, passing it this file as an argument, the path of the file received as an argument. Instead, if the function's argument is a directory file, then the function will iterate, using a repetitive structure, through all direct entries from that directory and will call itself recursively for each entry found as an argument. (Attention: therefore, here you must implement an explicit recursion!)\n\n**Grading (Barem):**\na) 0.5p – correct implementation of argument check.\nb) 0.5p + 1p – correct check for executable and calling compiler if necessary.\nc) 0.5p – correct implementation of a recursive directory traversal function.\nc1) 0.5p – correct calling of program \"first_and_last_byte\" for regular files.\nc2) 1.5p – taking the processing decision: if argument is a directory, iterate through direct entries and recursively call the function for each.\nd) 0.5p – calling the traversal function for the initial argument.",
+        "ro": "4. Să se scrie un al treilea script bash, numit \"recurse.sh\", conform specificației următoare:\nScriptul va primi un argument în linia de comandă; în caz contrar se va termina cu codul de exit 2.\nMai întâi scriptul va verifica dacă în subdirectorul \"source\" se mai află și un fișier numit \"first_and_last_byte\" (executabilul obținut prin compilare din programul \"first_and_last_byte.c\"), iar în caz negativ va apela compilatorul gcc pentru a-l produce și, doar dacă vor fi erori la compilare, va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul de exit 3.\nApoi, scriptul \"recurse.sh\" va apela o funcție recursivă cu acel argument pe care l-a primit el în linia de comandă. Dacă argumentul funcției este un fișier de tip normal (\"regular\"), atunci se va apela executabilul \"first_and_last_byte\", transmițându-i acestuia ca argument, calea fișierului primit ca argument. În schimb, dacă argumentul funcției este un fișier de tip director, atunci funcția va itera, folosind o structură repetitivă, prin toate intrările directe din acel director și se va apela recursiv cu fiecare intrare găsită, drept argument. (Atenție: așadar, aici trebuie să implementați o recursie explicită!)\n\n**Barem:**\na) 0.5p – implementarea corectă, conform specificației date, a verificării referitoare la argumentul primit.\nb) 0.5p + 1p – implementarea corectă, conform specificației date, a verificării referitoare la programul executabil \"first_and_last_byte\" și apelul compilatorului, dacă este cazul, conform specificației date.\nc) 0.5p – implementarea corectă a funcției recursive de parcurgere a unui director, plus:\nc1) 0.5p – apelarea corectă a programului executabil \"first_and_last_byte\", conform specificației date.\nc2) 1.5p – luarea deciziei de procesare, dacă argumentul primit este un director, prin parcurgerea iterativă a intrărilor directe din acel director și apelarea recursivă a funcției pentru fiecare intrare din acesta, conform specificației date.\nd) 0.5p – apelarea funcției de parcurgere pentru argumentul primit.\nTotal: 5p"
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Inside the recursive function, use a loop like `for entry in \"$1\"/*; do ... done`. Remember to handle the case where a directory is empty.",
+          "ro": "În interiorul funcției recursive, folosiți o buclă de tipul `for entry in \"$1\"/*; do ... done`. Nu uitați să tratați cazul în care un director este gol."
+        },
+        {
+          "en": "To compile, use `gcc source/first_and_last_byte.c -o source/first_and_last_byte`.",
+          "ro": "Pentru compilare, folosiți `gcc source/first_and_last_byte.c -o source/first_and_last_byte`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `$#`. 2. Check `[ ! -f source/first_and_last_byte ]`. If missing, `gcc source/first_and_last_byte.c -o source/first_and_last_byte || exit 3`. 3. Define function `process_path()`. 4. Inside: `if [ -f \"$1\" ]`, call executable. `if [ -d \"$1\" ]`, loop through `\"$1\"/*` and call `process_path \"$entry\"`. 5. Call `process_path \"$1\"` at the end.",
+        "ro": "1. Verificare `$#`. 2. Verificare `[ ! -f source/first_and_last_byte ]`. Dacă lipsește, `gcc source/first_and_last_byte.c -o source/first_and_last_byte || exit 3`. 3. Definire funcție `process_path()`. 4. În interior: `if [ -f \"$1\" ]`, apel executabil. `if [ -d \"$1\" ]`, buclă prin `\"$1\"/*` și apel `process_path \"$entry\"`. 5. Apel `process_path \"$1\"` la final."
+      }
+    }
+  ]
+}

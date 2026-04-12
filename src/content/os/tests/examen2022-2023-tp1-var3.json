@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "id": "os-examen2022-2023-tp1-var3",
+    "title": {
+      "en": "Practical OS Test - Variant no. 3",
+      "ro": "Test practic la SO - varianta nr. 3"
+    },
+    "year": null,
+    "type": "midterm",
+    "variant": 3,
+    "duration": null,
+    "totalPoints": 20
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "code-writing",
+      "points": 5,
+      "prompt": {
+        "en": "Write a C program named \"filegraffiti.c\" according to the following specification:\n\nThe program will receive two command-line arguments; otherwise, it will terminate with error code 2. The program will consider the first argument as a file name and will replace the last N characters of this file with the characters of the word represented by the second argument, where N is its length.\n\nFile operations will be performed using the POSIX API, and potential errors arising from API calls will be handled by terminating the program execution with a distinct exit code for each call.\n\nThe message \"CANVAS TOO SMALL\\n\" will be displayed on stdout using a function from the stdio library if the file length is smaller than N; otherwise, the message \"FILE VANDALIZED: <filepath>\\n\" will be displayed on stdout, where <filepath> is the name of the modified file. Finally, the program will terminate its execution with exit code 0. (Caution: handle the arguments carefully; it is recommended to run the program as a non-root user to avoid accidentally corrupting essential files.)\n\n**Grading:**\na) 2p - correct implementation of the file working session for the specified modification.\nb) 1p - displaying results on stdout as specified.\nc) 1p - handling all possible errors as specified.\nd) 1p - program compiles without errors or warnings.",
+        "ro": "Să se scrie un program C, numit \"filegraffiti.c\", conform specificației următoare:\n\nProgramul va primi două argumente în linia de comandă; în caz contrar se va termina cu codul de eroare 2.\nProgramul va considera primul argument ca fiind un nume de fișier și va înlocui ultimele N caractere din acest fișier cu caracterele cuvântului reprezentat de al doilea argument, unde N este lungimea acestuia.\nOperațiile pe fișier vor fi făcute cu API-ul POSIX și posibilele erori apărute în urma apelurilor de API vor fi abordate prin încheierea execuției programului cu un cod de terminare distinct pentru fiecare apel.\nSe va afișa pe ieșirea stdout, folosind o funcție din biblioteca stdio, mesajul “CANVAS TOO SMALL\\n”, dacă lungimea fișierului este mai mică decât N, iar altfel se va afișa, tot pe ieșirea stdout, mesajul “FILE VANDALIZED: <filepath>\\n”, unde <filepath> este numele fișierului modificat. În final, programul își va încheia execuția cu codul de terminare 0. (Atenție cu ce argumente apelați programul; vă recomand să rulați programul sub un user ce nu are privilegii root, pentru a nu corupe din greșeală fișiere esențiale.)\n\n**Barem:**\na) 2p - implementarea corectă, conform specificației date, a sesiunii de lucru cu fișierul dat ca argument pentru realizarea modificării conținutului acestuia, în maniera specificată.\nb) 1p - afișarea rezultatului pe ieșirea stdout, conform specificației date.\nc) 1p - tratarea tuturor erorilor posibile, conform specificației date.\nd) 1p - programul se compilează fără erori și fără warning-uri."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `lseek(fd, 0, SEEK_END)` to find the file size and `lseek(fd, -N, SEEK_END)` to position the cursor for writing.",
+          "ro": "Folosiți `lseek(fd, 0, SEEK_END)` pentru a afla dimensiunea fișierului și `lseek(fd, -N, SEEK_END)` pentru a poziționa cursorul în vederea scrierii."
+        },
+        {
+          "en": "Remember that POSIX `write` and `open` require specific headers like `<fcntl.h>` and `<unistd.h>`.",
+          "ro": "Rețineți că funcțiile POSIX `write` și `open` necesită headere specifice precum `<fcntl.h>` și `<unistd.h>`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check argc == 3. 2. Calculate N = strlen(argv[2]). 3. Open file using POSIX `open()`. 4. Use `lseek()` to find file size. 5. If size < N, print error and exit. 6. Use `lseek()` to move cursor to position (size - N). 7. Use `write()` to overwrite with argv[2]. 8. Close file and print success message.",
+        "ro": "1. Verificare argc == 3. 2. Calculare N = strlen(argv[2]). 3. Deschidere fișier cu `open()`. 4. Aflare dimensiune cu `lseek()`. 5. Dacă dimensiunea < N, afișare mesaj eroare și exit. 6. Repoziționare la final - N cu `lseek()`. 7. Scriere cuvânt cu `write()`. 8. Închidere fișier și afișare mesaj succes."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "bash-scripting",
+      "points": 5,
+      "prompt": {
+        "en": "Write a bash script named \"iwashere.sh\" according to the following specification:\n\nThe script will receive one command-line argument; otherwise, it will terminate with error code 2. The script will consider that argument as a file name. If the file is a regular file, the script will call the executable \"filegraffiti\" (obtained by compiling \"filegraffiti.c\"), passing it as arguments the file name and the name of the user currently running the script ($USER).\n\nHowever, if the provided name is a directory, the script will perform the following processing of that directory's contents: it will traverse, using a repetitive structure, all direct entries in that directory and, for each entry, the script will call itself recursively, with that entry as a command-line parameter. (Note: therefore, you must implement an explicit recursion here!)\n\n**Grading:**\na) 1p - correct processing decisions based on whether the argument is a directory or a regular file.\nb) 1p - correct invocation of the \"filegraffiti\" executable if the argument is a regular file.\nc) 2p - if the argument is a directory, correct traversal of direct entries and recursive call for each.\nd) 1p - script has no syntax errors at execution.",
+        "ro": "Să se scrie un script bash, numit \"iwashere.sh\", conform specificației următoare:\n\nScriptul va primi un argument în linia de comandă; în caz contrar se va termina cu codul de eroare 2.\nScriptul va considera acel argument ca fiind un nume de fișier. Dacă fișierul este de tip obișnuit, scriptul va apela executabilul “filegraffiti” (obținut prin compilarea sursei “filegraffiti.c”), transmițându-i acestuia ca argumente în linia de comandă, numele fișierului și numele utilizatorului ce rulează scriptul curent.\nÎn schimb, dacă numele de fișier primit este un director, scriptul va efectua următoarea procesare a conținutului acelui director: va parcurge, folosind o structură repetitivă, toate intrările directe din acel director și, pentru fiecare intrare, scriptul va apela recursiv pe sine însuși, cu acea intrare ca parametru în linia de comandă. (Atenție: așadar, aici trebuie să implementați o recursie explicită!)\n\n**Barem:**\na) 1p - luarea deciziilor corecte de procesare, după cum argumentul primit este un director sau un fișier obișnuit (regular), conform specificației date.\nb) 1p - invocarea corectă a programului executabil \"filegrafitti\", dacă argumentul primit este un fișier normal, conform specificației date.\nc) 2p - iar dacă argumentul primit este un director, parcurgerea corectă a intrărilor directe din directorul respectiv și apelarea recursivă a scriptului pentru fiecare intrare din acesta, conform specificației date.\nd) 1p - scriptul nu are erori de sintaxă la execuție."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `[ -f \"$1\" ]` to check for a regular file and `[ -d \"$1\" ]` for a directory.",
+          "ro": "Folosiți `[ -f \"$1\" ]` pentru a verifica dacă este fișier obișnuit și `[ -d \"$1\" ]` pentru director."
+        },
+        {
+          "en": "For explicit recursion, iterate over `\"$1\"/*` and call `$0` on each element.",
+          "ro": "Pentru recursie explicită, iterați peste `\"$1\"/*` și apelați `$0` pentru fiecare element."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check if $# is 1. 2. If -f $1, find the path to filegraffiti (likely ../performances/filegraffiti) and run it with $1 and $USER. 3. If -d $1, use a for loop: `for entry in \"$1\"/*; do \"$0\" \"$entry\"; done`.",
+        "ro": "1. Verificare $# == 1. 2. Dacă e fișier (-f), determină calea către executabil (probabil ../performances/filegraffiti) și rulează-l cu argumentele $1 și $USER. 3. Dacă e director (-d), folosește un for loop: `for entry in \"$1\"/*; do \"$0\" \"$entry\"; done`."
+      }
+    },
+    {
+      "id": "q3",
+      "type": "bash-scripting",
+      "points": 10,
+      "prompt": {
+        "en": "Write another bash script named \"main.sh\" according to the following specification:\n\nThe script will receive one command-line argument and will perform the following checks in order:\ni) it will verify that in the directory where \"main.sh\" is located, there is a subdirectory named \"legal_arts\" containing the script \"iwashere.sh\"; otherwise, it will display an appropriate error message on stderr and terminate with exit code 1. Additionally, if \"iwashere.sh\" does not have execution permission, it will add it.\nii) it will verify that in the directory where \"iwashere.sh\" is located, there is a subdirectory named \"performances\" containing the program \"filegraffiti.c\" and that it has read permission; otherwise, it will display an appropriate error message on stderr and terminate with exit code 2;\niii) it will verify that in the \"performances\" subdirectory there is also a file named \"filegraffiti\" (the executable obtained from \"filegraffiti.c\"); otherwise, it will call the gcc compiler to produce it, and only if there are compilation errors, it will display an appropriate error message on stderr and terminate with exit code 3;\niv) it will verify if the received argument represents an existing directory and has read permission; otherwise, it will display an appropriate error message on stderr and terminate with exit code 4.\n\nThen, \"main.sh\" will invoke the script \"iwashere.sh\", passing the argument it received. The invocation will be done via a pipeline command to process the output of \"iwashere.sh\" as follows: lines will be sorted in reverse lexicographical order, duplicates will be removed, and then every occurrence of the \"/\" character (forward slash) will be replaced with an empty string (i.e., removed).\nAt the end of pipeline processing, \"main.sh\" will terminate with exit code 0.\n\n**Grading:**\na) 2p - correct implementation of check i).\nb) 1p - correct implementation of check ii).\nc) 1p - correct implementation of check iii).\nd) 1p - correct implementation of check iv).\ne) 1p - correct invocation of \"iwashere.sh\" within the pipeline.\nf) 1p - call to the correct command for sorting and removing duplicates.\ng) 1p - call to the correct command to remove all \"/\" occurrences.\nh) 1p - correct writing of the entire pipeline.\ni) 1p - script has no syntax errors.",
+        "ro": "Să se scrie un alt script bash, numit \"main.sh\", conform specificației următoare:\n\nScriptul va primi un argument în linia de comandă și va face următoarele verificări, în ordinea următoare:\ni) va verifica că în directorul în care se află \"main.sh\", există un subdirector numit \"legal_arts\" ce conține scriptul \"iwashere.sh\", iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 1. În plus, în cazul în care nu are drept de execuție pentru \"iwashere.sh\", o va adăuga.\nii) va verifica că în directorul în care se află \"iwashere.sh\", există un subdirector numit \"performances\" ce conține programul \"filegraffiti.c\" și că are permisiunea de citire a acestuia, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 2;\niii) va verifica că în subdirectorul \"performances\" se află și un fișier numit \"filegraffiti\" (executabilul obținut din sursa \"filegraffiti.c\"), iar în caz negativ va apela compilatorul gcc pentru a-l produce și, doar dacă vor fi erori la compilare, va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 3;\niv) va verifica dacă argumentul primit reprezintă un director existent și asupra căruia are permisiune de citire, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 4.\n\nApoi scriptul \"main.sh\" va invoca scriptul \"iwashere.sh\", transmițându-i în linia de comandă, argumentul pe care l-a primit el în linia de comandă. Invocarea scriptului \"iwashere.sh\" se va face printr-o comandă compusă de tip pipeline, care să proceseze outputul produs prin execuția scriptului \"iwashere.sh\" în maniera următoare: se vor sorta rândurile din output în ordine invers lexicografică și se vor elimina cele duplicat, după care se va înlocui fiecare apariție a caracterului “/” (forward slash) cu șirul vid (în alte cuvinte, se vor elimina toate aparițiile caracterului “/”).\nLa finalul procesării pipeline-ului, scriptul \"main.sh\" se va termina cu codul de terminare 0.\n\n**Barem:**\na) 2p - implementarea corectă, conform specificației date, a verificării descrise la punctul i) din specificație.\nb) 1p - implementarea corectă, conform specificației date, a verificării descrise la punctul ii) din specificație.\nc) 1p - implementarea corectă, conform specificației date, a verificării descrise la punctul iii) din specificație.\nd) 1p - implementarea corectă, conform specificației date, a verificării descrise la punctul iv) din specificație.\ne) 1p - invocarea corectă a scriptului \"iwashere.sh\", în cadrul pipeline-ului, conform specificației date.\nf) 1p - apelul comenzii potrivite, în cadrul pipeline-ului, pentru sortarea rândurilor și eliminarea celor duplicat.\ng) 1p - apelul comenzii potrivite, în cadrul pipeline-ului, pentru a elimina toate aparițiile caracterului “/” (forward slash).\nh) 1p - scrierea corectă a întregului pipeline pentru procesarea descrisă în specificație dată.\ni) 1p - scriptul nu are erori de sintaxă la execuție."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "To find the script's own directory, use `dirname \"$0\"`. Use `chmod +x` to add execution permissions.",
+          "ro": "Pentru a găsi directorul scriptului, folosiți `dirname \"$0\"`. Folosiți `chmod +x` pentru a adăuga drepturi de execuție."
+        },
+        {
+          "en": "The pipeline should look like: `./legal_arts/iwashere.sh \"$1\" | sort -r -u | sed 's/\\///g'`.",
+          "ro": "Pipeline-ul ar trebui să arate astfel: `./legal_arts/iwashere.sh \"$1\" | sort -r -u | sed 's/\\///g'`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check if `./legal_arts/iwashere.sh` exists. If not, exit 1. If no exec perm, `chmod +x`. 2. Check if `./performances/filegraffiti.c` exists and is readable. If not, exit 2. 3. Check if `./performances/filegraffiti` exists. If not, run `gcc ./performances/filegraffiti.c -o ./performances/filegraffiti`. Exit 3 on failure. 4. Check if `$1` is a readable directory. If not, exit 4. 5. Run `./legal_arts/iwashere.sh \"$1\" | sort -ru | tr -d '/'`.",
+        "ro": "1. Verifică existența `./legal_arts/iwashere.sh`. Dacă nu, exit 1. Dacă nu are permisiuni, `chmod +x`. 2. Verifică `./performances/filegraffiti.c` (existență + citire). Dacă nu, exit 2. 3. Verifică dacă există executabilul `./performances/filegraffiti`. Dacă nu, compilare cu `gcc`. Exit 3 la eșec. 4. Verifică dacă `$1` e director lizibil. Dacă nu, exit 4. 5. Execută `./legal_arts/iwashere.sh \"$1\" | sort -ru | tr -d '/'`."
+      }
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "id": "os-examen2023-2024-tp1-2024-varianta-3",
+    "title": {
+      "en": "Operating Systems Practical Test – Variant 3",
+      "ro": "Test practic la SO – varianta nr. 3"
+    },
+    "year": 2024,
+    "type": "midterm",
+    "variant": 3,
+    "duration": null,
+    "totalPoints": 20
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "code-writing",
+      "points": 5,
+      "prompt": {
+        "en": "Write a C program called \"file_pages.c\" according to the following specification:\nThe program receives one command-line argument; otherwise, it terminates with error code 1. The program considers this argument as a filename (which does not contain the '+' character) and uses POSIX API calls to determine: i) the number of pages that would be occupied in memory if the entire file were read at once. Page size is 4096 bytes. (Examples: 0 bytes => 0 pages; 1 byte => 1 page; 1250 bytes => 1 page; 4096 bytes => 1 page; 4097 bytes => 2 pages, etc.); ii) the value of the byte located in the file at the position equal to the number of pages calculated in point i).\nIn case of an error in any POSIX API calls, the program will terminate with a unique, non-zero exit code. Otherwise, the program will print to stdout a message consisting of: the number of pages, followed by the separator \"+++\", followed by the received argument, followed by \"+++\", followed by the value of the read byte, followed by a newline. (Example output: `2+++programs/file_pages.c+++95`)\n\n**Grading:**\na) 1.0p – correct implementation of page count determination.\na) 1.5p – correct implementation of determining the specified byte value.\nb) 0.5p – outputting results to stdout as specified.\nc) 1.0p – handling all possible errors.\nd) 1.0p – program compiles without errors and without warnings.",
+        "ro": "Să se scrie un program C, numit \"file_pages.c\", conform specificației următoare:\nProgramul va primi un argument în linia de comandă; în caz contrar se va termina cu codul de eroare 1. Programul va considera acel argument ca fiind un nume de fișier (în care nu apare caracterul ‘+’) și va determina, folosing apeluri din API-ul POSIX, următoarele informații: i) numărul de pagini care ar fi ocupate în memorie dacă tot fișierul ar fi citit deodată. Dimensiunea unei pagini este considerată a fi 4096 octeți. (Exemplificări: 0 octeți => 0 pagini ; 1 octet => 1 pagină ; 1250 octeți => 1 pagină ; 4096 octeți => 1 pagină ; 4097 octeți => 2 pagini ; ș.a.m.d.) ; ii) valoarea octetului aflat în fișier la poziția egală cu numărul de pagini calculat la punctul i).\nÎn caz de eroare la oricare dintre apelurile POSIX utilizate, programul își va încheia execuția cu un cod de terminare unic, nenul. Altfel, programul va afișa pe stdout un mesaj compus din: numărul de pagini, urmat de separatorul “+++”, urmat de argumentul primit, urmat de “+++”, urmat de valoarea octetului citit, urmat de un caracter newline. (Exemplu de output posibil: `2+++programs/file_pages.c+++95` )\n\n**Barem:**\na) 1.0p – implementarea corectă, conform specificației date, a determinării numărului de pagini.\na) 1.5p – implementarea corectă, conform specificației date, a determinării valorii octetului specificat.\nb) 0.5p – afișarea rezultatului pe ieșirea stdout, conform specificației date.\nc) 1.0p – tratarea tuturor erorilor posibile, conform specificației date.\nd) 1.0p – programul se compilează fără erori și fără warning-uri."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `stat()` to find the file size and `lseek()` or `read()` to access the byte at the specific offset.",
+          "ro": "Folosiți `stat()` pentru a afla dimensiunea fișierului și `lseek()` sau `read()` pentru a accesa octetul la offset-ul specificat."
+        },
+        {
+          "en": "The page count formula for $N$ bytes is: `(N == 0) ? 0 : ((N - 1) / 4096 + 1)`.",
+          "ro": "Formula pentru numărul de pagini pentru $N$ octeți este: `(N == 0) ? 0 : ((N - 1) / 4096 + 1)`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `argc`. 2. Use `stat()` to get file size. 3. Calculate pages using ceiling division: `(size + 4095) / 4096` (handling 0 case). 4. Open file with `open()`. 5. Seek to `pages` offset using `lseek()` and read one byte using `read()`. 6. Print using `printf`. 7. Handle errors for each syscall.",
+        "ro": "1. Verificare `argc`. 2. Utilizare `stat()` pentru mărime fișier. 3. Calcul pagini prin împărțire cu rotunjire în sus: `(size + 4095) / 4096` (atenție la cazul 0). 4. Deschidere fișier cu `open()`. 5. Poziționare la offset-ul `pagini` cu `lseek()` și citire un octet cu `read()`. 6. Afișare cu `printf`. 7. Tratare erori pentru fiecare apel de sistem."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "bash-scripting",
+      "points": 4,
+      "prompt": {
+        "en": "Write a bash script called \"main.sh\" according to the following specification:\nThe script receives one command-line argument and performs the following checks, in this order:\ni) check if in the directory where \"main.sh\" is located, there is a subdirectory named \"scripts\" containing a script named \"pipeline.sh\" and that it has execution permission. If not, print an appropriate error message to stderr and terminate with exit code 1.\nii) check if in the directory where \"main.sh\" is located, there is a subdirectory named \"programs\" containing a file named \"file_pages.c\" and that it has read permission. If not, print an appropriate error message to stderr and terminate with exit code 2.\niii) check if the received argument represents an existing directory for which the user has read permission. If not, print an appropriate error message to stderr and terminate with exit code 3.\nThen, \"main.sh\" will invoke \"pipeline.sh\", passing the argument it received, and finally display the exit code of that execution.\n\n**Grading:**\na) 1.0p – correct implementation of the checks described in point i).\nb) 1.0p – correct implementation of the checks described in point ii).\nc) 1.0p – correct implementation of the checks described in point iii).\nd) 1.0p – correct invocation of \"pipeline.sh\" and displaying the exit code.",
+        "ro": "Să se scrie un script bash, numit \"main.sh\", conform specificației următoare:\nScriptul va primi un argument în linia de comandă și va face următoarele verificări, în ordinea următoare:\ni) va verifica dacă în directorul în care se află \"main.sh\", există un subdirector numit \"scripts\" ce conține un script numit \"pipeline.sh\" și că are permisiunea de execuție a acestuia, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 1;\nii) va verifica dacă în directorul în care se află \"main.sh\", există un subdirector numit \"programs\" ce conține un program numit \"file_pages.c\" și că are permisiunea de citire a acestuia, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 2;\niii) va verifica dacă argumentul primit reprezintă un director existent și asupra căruia are permisiune de citire, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 3.\nApoi scriptul \"main.sh\" va invoca scriptul \"pipeline.sh\", transmițându-i în linia de comandă, argumentul pe care l-a primit el în linia de comandă, și la final va afișa codul de terminare a execuției acestuia.\n\n**Barem:**\na) 1.0p – implementarea corectă, conform specificației date, a verificărilor descrise la punctul i).\nb) 1.0p – implementarea corectă, conform specificației date, a verificărilor descrise la punctul ii).\nc) 1.0p – implementarea corectă, conform specificației date, a verificărilor descrise la punctul iii).\nd) 1.0p – invocarea corectă a scriptului \"pipeline.sh\" și, respectiv, afișarea codului de exit."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `[ -x path ]` to check for execution permissions and `[ -r path ]` for read permissions.",
+          "ro": "Folosiți `[ -x cale ]` pentru a verifica permisiunile de execuție și `[ -r cale ]` pentru permisiunile de citire."
+        },
+        {
+          "en": "The exit code of the last command is stored in `$?`.",
+          "ro": "Codul de ieșire al ultimei comenzi este stocat în variabila `$?`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Use `test` flags: `-d` (directory), `-f` (file), `-x` (executable), `-r` (readable). 2. Logic: `if [ ! -x \"scripts/pipeline.sh\" ]; then ... exit 1; fi`. 3. Repeat for other files. 4. Invoke: `./scripts/pipeline.sh \"$1\"`. 5. Store exit code: `RET=$?`. 6. `echo $RET`.",
+        "ro": "1. Utilizare flag-uri `test`: `-d` (director), `-f` (fișier), `-x` (executabil), `-r` (citire). 2. Logică: `if [ ! -x \"scripts/pipeline.sh\" ]; then ... exit 1; fi`. 3. Repetare pentru restul fișierelor. 4. Apel: `./scripts/pipeline.sh \"$1\"`. 5. Salvare cod: `RET=$?`. 6. `echo $RET`."
+      }
+    },
+    {
+      "id": "q3",
+      "type": "bash-scripting",
+      "points": 5.5,
+      "prompt": {
+        "en": "Write a second bash script called \"pipeline.sh\" according to the following specification:\nThe script receives one command-line argument; otherwise, it terminates with exit code 2. First, it checks if there is a script named \"listdir.sh\" in the \"scripts\" subdirectory and that it has execution permission. If not, it prints an error message to stderr and terminates with exit code 1.\nThen, it invokes \"listdir.sh\", passing the received argument. The invocation must be through a pipeline command that processes the output produced by \"listdir.sh\" as follows: the separator \"+++\" is replaced with the string \" ---> \", and then only the filename and the byte read from it are displayed on stdout, without the page count. Additionally, the script will calculate the sum of the page counts for all files processed without errors and display it on stderr.\n\nExample of output on screen:\n`./main.sh ---> 65`\n`./programs/file_pages ---> 251`\n`./programs/file_pages.c ---> 97`\n`./scripts/listdir.sh ---> 101`\n`./scripts/pipeline.sh ---> 75`\n`Total number of pages: 8` (to stderr)\n\n**Grading:**\na) 0.5p – implementation of argument check.\nb) 1.0p – implementation of \"listdir.sh\" verification.\nc) 1.0p – correct invocation of \"listdir.sh\" within the pipeline.\nd) 1.0p – pipeline command to replace \"+++\" with \" ---> \".\ne) 2.0p – commands to calculate and display the total page sum on stderr.",
+        "ro": "Să se scrie un al doilea script bash, numit \"pipeline.sh\", conform specificației următoare:\nScriptul va primi un argument în linia de comandă; în caz contrar se va termina cu codul de exit 2. Mai întâi scriptul va verifica dacă în subdirectorul \"scripts\" există un script numit \"listdir.sh\" și că are permisiunea de execuție a acestuia, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 1.\nApoi scriptul \"pipeline.sh\" va invoca scriptul \"listdir.sh\", transmițându-i în linia de comandă, argumentul pe care l-a primit el în linia de comandă. Invocarea scriptului \"listdir.sh\" se va face printr-o comandă compusă de tip pipeline, care să proceseze outputul produs prin execuția scriptului \"listdir.sh\" în maniera următoare: se va înlocui caracterul separatorul “+++” cu stringul \" ---> \", iar apoi se vor afișa pe stdout doar numele fișierului și octetul citit din acesta, dar fără numărul de pagini calculat. De asemenea, scriptul va calcula suma numerelor de pagini ale tuturor fișierelor procesate fără erori și o va afișa pe stderr.\n\nExemplu posibil de rezultate afișate pe ecran:\n`./main.sh ---> 65`\n`./programs/file_pages ---> 251`\n`./programs/file_pages.c ---> 97`\n`./scripts/listdir.sh ---> 101`\n`./scripts/pipeline.sh ---> 75`\n`Total number of pages: 8` (pe stderr)\n\n**Barem:**\na) 0.5p – implementarea verificării referitoare la argumentul primit.\nb) 1.0p – implementarea verificării referitoare la scriptul \"listdir.sh\".\nc) 1.0p – invocarea corectă a scriptului \"listdir.sh\", în cadrul pipeline-ului.\nd) 1.0p – apelul comenzii potrivite, în cadrul pipeline-ului, pentru înlocuirea stringului separator '+++' cu stringul \" ---> \".\ne) 2.0p – apelul comenzilor potrivite, pentru a calcula și, respectiv, afișa numărul total de pagini pe stderr."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `awk` to extract specific fields and perform the summation simultaneously.",
+          "ro": "Folosiți `awk` pentru a extrage câmpuri specifice și a realiza suma în același timp."
+        },
+        {
+          "en": "The separator for `awk` or `cut` can be set to \"+++\" using the `-F` flag or `sed` can pre-process the line.",
+          "ro": "Separatorul pentru `awk` sau `cut` poate fi setat la \"+++\" folosind flag-ul `-F` sau se poate pre-procesa linia cu `sed`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `$#`. 2. Check `-x scripts/listdir.sh`. 3. Execute `./scripts/listdir.sh \"$1\"`. 4. Pipe to `awk`. 5. Inside `awk`: set FS to `+++`. 6. Print `$2 \" ---> \" $3`. 7. Accumulate `sum += $1`. 8. In `END` block of `awk`, print sum to stderr using `print \"Total...\" > \"/dev/stderr\"`.",
+        "ro": "1. Verificare `$#`. 2. Verificare `-x scripts/listdir.sh`. 3. Execuție `./scripts/listdir.sh \"$1\"`. 4. Pipe către `awk`. 5. În `awk`: setare FS la `+++`. 6. Afișare `$2 \" ---> \" $3`. 7. Acumulare `sum += $1`. 8. În blocul `END` din `awk`, afișare sumă la stderr folosind `print \"Total...\" > \"/dev/stderr\"`."
+      }
+    },
+    {
+      "id": "q4",
+      "type": "bash-scripting",
+      "points": 5.5,
+      "prompt": {
+        "en": "Write a third bash script called \"listdir.sh\" according to the following specification:\nThe script receives one command-line argument; otherwise, it terminates with exit code 2. First, it checks if in the \"programs\" subdirectory there is a file named \"file_pages\" (the executable obtained by compiling \"file_pages.c\"). If not, it will call the `gcc` compiler to produce it, and only if there are compilation errors, it will print an appropriate message to stderr and terminate with exit code 3.\nIf the received argument is a normal file, the script will call the \"file_pages\" executable, passing that file as a command-line argument. If the argument is a directory, the script will traverse all direct entries in that directory using a loop structure and, for each entry, it will call itself recursively with that entry as a parameter. (Note: explicit recursion must be implemented!)\n\n**Grading:**\na) 0.5p – implementation of argument check.\nb) 1.5p – verification of \"file_pages\" executable and compiler call if necessary.\nc) 1.0p – invocation of the \"file_pages\" executable.\nd) 1.5p – decision logic for processing (file vs directory) and iterating entries.\ne) 1.0p – recursive call of the script.",
+        "ro": "Să se scrie un al treilea script bash, numit \"listdir.sh\", conform specificației următoare:\nScriptul va primi un argument în linia de comandă; în caz contrar se va termina cu codul de exit 2. Mai întâi scriptul va verifica dacă în subdirectorul \"programs\" se mai află și un fișier numit \"file_pages\" (executabilul obținut prin compilare din programul \"file_pages.c\"), iar în caz negativ va apela compilatorul gcc pentru a-l produce și, doar dacă vor fi erori la compilare, va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul de exit 3.\nDacă argumentul primit este un fisier normal, scriptul \"listdir.sh\" va apela executabilul \"file_pages\", transmițându-i acestuia ca argument în linia de comandă, argumentul pe care l-a primit el în linia de comandă.\nIar dacă argumentul este un director, scriptul \"listdir.sh\" va parcurge, folosind o structură repetitivă, toate intrările directe din acel director și, pentru fiecare intrare, scriptul se va apela recursiv pe sine însuși, cu acea intrare transmisă ca parametru. (Atenție: așadar, aici trebuie să implementați o recursie explicită!)\n\n**Barem:**\na) 0.5p – implementarea verificării referitoare la argumentul primit.\nb) 1.5p – verificarea executabilului \"file_pages\" și apelul compilatorului, dacă este cazul.\nc) 1.0p – invocarea executabilului \"file_pages\".\nd) 1.5p – luarea deciziei de procesare, dacă argumentul primit este un director, prin parcurgerea iterativă a intrărilor directe din acel director...\ne) 1.0p – ... și apelarea recursivă a scriptului pentru fiecare intrare din acesta."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "To implement recursion, the script should call itself using its path (e.g., `$0`).",
+          "ro": "Pentru a implementa recursivitatea, scriptul ar trebui să se apeleze pe sine însuși folosind calea sa (de ex., `$0`)."
+        },
+        {
+          "en": "When iterating over directory contents, use `\"$1\"/*` but be careful with empty directories or patterns that don't match.",
+          "ro": "Când iterați conținutul unui director, folosiți `\"$1\"/*` dar fiți atenți la directoarele goale sau la pattern-uri care nu se potrivesc."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `$1`. 2. Check `programs/file_pages`. If missing, `gcc programs/file_pages.c -o programs/file_pages`. 3. If `[ -f \"$1\" ]`, run `./programs/file_pages \"$1\"`. 4. If `[ -d \"$1\" ]`, loop: `for entry in \"$1\"/*; do \"$0\" \"$entry\"; done`.",
+        "ro": "1. Verificare `$1`. 2. Verificare `programs/file_pages`. Dacă lipsește, `gcc programs/file_pages.c -o programs/file_pages`. 3. Dacă `[ -f \"$1\" ]`, rulare `./programs/file_pages \"$1\"`. 4. Dacă `[ -d \"$1\" ]`, buclă: `for entry in \"$1\"/*; do \"$0\" \"$entry\"; done`."
+      }
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "id": "os-examen2023-2024-tp2-2024-varianta-1",
+    "title": {
+      "en": "Practical OS Test - Variant 1",
+      "ro": "Test practic la SO – varianta nr. 1"
+    },
+    "year": null,
+    "type": "midterm",
+    "variant": 1,
+    "duration": null,
+    "totalPoints": 25
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "bash-scripting",
+      "points": 2.5,
+      "prompt": {
+        "en": "Write the bash script `starter.sh` which will implement the following functionality:\n\ni) The script receives a parameter `p` (value 1 or 2) in the command line; otherwise, it displays an error and terminates.\nii) If `p=1`, the script first starts `worker2` (from its subdirectory) in the background, waits 2 seconds, then starts `supervisor` (from its subdirectory).\niii) If `p=2`, it starts `supervisor` in the background, waits 3 seconds, then starts `worker2`.\niv) In both cases, `supervisor` is started with one command-line argument: the path (absolute or relative) to the input file `input_data.txt`.\nv) The script waits for all three programs to finish, displays the content of the named non-persistent mapping (shared memory), and performs cleanup: deletes the shared memory and the FIFO file.\n\n**Directory Hierarchy:**\n.\n├── starter.sh\n├── input_data.txt\n├── manager\n│   └── supervisor.c\n└── workers\n    ├── worker1.c\n    └── worker2.c\n\n**Grading Criteria:**\n- 0.25p: Verification of parameter `p`.\n- 0.5p: Correct background execution and path handling for the first program.\n- 0.25p: Pause (2s or 3s) based on `p`.\n- 0.5p: Execution of the second program with correct argument for `supervisor`.\n- 0.25p: Waiting for completion of the three programs.\n- 0.25p: Displaying the shared memory content.\n- 0.5p: Cleanup (deletion) of shared memory and FIFO.",
+        "ro": "Scriptul \"starter.sh\" va implementa funcționalitatea descrisă în specificația următoare:\n\ni) Scriptul va primi în linia de comandă un parametru p, având valoarea 1 sau 2, iar în caz contrar va afișa un mesaj de eroare adecvat și se va termina.\nii) Dacă p=1, atunci scriptul va porni mai întâi execuția programului worker2 (din subdirectorul corespunzător) în background, iar după o pauză de 2 secunde, va porni și execuția programului supervisor (din subdirectorul corespunzător).\niii) Iar dacă p=2, atunci scriptul va porni mai întâi execuția programului supervisor (din subdirectorul corespunzător) în background, iar după o pauză de 3 secunde, va porni și execuția programului worker2 (din subdirectorul corespunzător).\niv) În ambele situații, programul supervisor va fi pornit cu un argument în linia de comandă: calea (absolută sau relativă) către fișierul de intrare \"input_data.txt\".\nv) Apoi scriptul va aștepta terminarea execuției celor trei programe și va afișa conținutul mapării nepersistente cu nume, după care va face curățenie: va “distruge” maparea nepersistentă cu nume și canalul fifo.\n\n**Ierarhia de directoare:**\n.\n├── starter.sh\n├── input_data.txt\n├── manager\n│   └── supervisor.c\n└── workers\n    ├── worker1.c\n    └── worker2.c\n\n**Barem:**\na) 0.25p – scriptul va verifica primirea parametrului p.\nb) 0.5p – scriptul va porni mai întâi execuția în background a programului indicat.\nc) 0.25p – scriptul va face o pauză de 2 sau 3 secunde.\nd) 0.5p – scriptul va porni și execuția celuilalt program (cu argumentul necesar pt supervisor).\ne) 0.25p – scriptul va aștepta terminarea execuțiilor celor trei programe.\nf) 0.25p – scriptul va afișa conținutul mapării nepersistente cu nume.\ng) 0.5p (2 x 0.25p) – scriptul va șterge maparea nepersistentă și fișierul fifo."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `$1` to access the command line parameter and `[[ $1 -eq 1 ]]` for comparison.",
+          "ro": "Folosiți `$1` pentru a accesa parametrul din linia de comandă și `[[ $1 -eq 1 ]]` pentru comparație."
+        },
+        {
+          "en": "Background execution is done using `&`, and `wait` can be used to wait for all background processes to finish.",
+          "ro": "Execuția în background se face folosind `&`, iar `wait` poate fi folosit pentru a aștepta finalizarea proceselor."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check if `$1` is 1 or 2; exit otherwise. 2. Use `if/else` based on `$1`. 3. Execute `workers/worker2 &` or `manager/supervisor input_data.txt &` with appropriate `sleep`. 4. Use `wait` to collect children. 5. Use `cat` on the shared memory device file (e.g., `/dev/shm/...`) if applicable or a specialized tool. 6. Remove the FIFO using `rm` and shared memory using `rm` or `shm_unlink` (if available via utility).",
+        "ro": "1. Verificare `$1` să fie 1 sau 2. 2. Ramificare `if/else`. 3. Lansare procese cu `&` și `sleep`. 4. Apel `wait`. 5. Afișare conținut mapare (uzual din `/dev/shm/`). 6. Ștergere resurse cu `rm`."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "code-writing",
+      "points": 7,
+      "prompt": {
+        "en": "Implement `supervisor.c`. It receives one command-line argument: the path to `input_data.txt`.\n\ni) In `main`, verify the argument and initialize communication: an anonymous pipe to send data to `worker1` and a FIFO to receive data from `worker1`.\nii) Create a child process using `fork` and start `worker1` using an `exec` call.\niii) In a separate function, read integers one by one from the file, convert them to binary representation, and send them to `worker1` via the anonymous pipe using POSIX calls (constant length messages).\niv) In another separate function, read integers from the FIFO sent by `worker1`, sum them, convert the final sum to a base 10 string, calculate the sum of its digits, and print it to the screen.\n\n**Grading Criteria (Total 7p):**\n- 0.25p: Verification of command-line argument.\n- 0.25p: Setup of anonymous pipe (one-to-one).\n- 0.5p: Setup of FIFO (one-to-one).\n- 0.75p: Correct `fork` and `exec` for `worker1`.\n- 0.5p: Reading from file and processing data.\n- 0.75p: Sending data via pipe (no race conditions).\n- 0.75p: Receiving data via FIFO (no race conditions).\n- 0.75p: Processing results and final output.\n- Weighting for: Error handling (+1p), Warnings/Errors (+1p), Code readability (+0.5p).",
+        "ro": "Programul \"supervisor.c\" va implementa funcționalitatea descrisă în specificația următoare:\n\nProgramul va primi un argument în linia de comandă, ce reprezintă calea către un fișier existent pe disc, numit \"input_data.txt\". Acest fișier conține o secvență de numere întregi, în format textual.\ni) În funcția principală, va testa existența argumentului și va face inițializările necesare pentru a trimite informații procesului worker1 printr-un canal anonim și pentru a primi rezultate de la acesta printr-un canal fifo.\nii) Va crea un proces fiu și va starta programul worker1 printr-un apel exec.\niii) Într-o funcție separată, va citi numerele din fișier, le va converti în format binar și le va transmite către worker1 prin canalul anonim (mesaje de lungime constantă).\niv) Într-o altă funcție separată, va citi numerele primite de la worker1 prin canalul fifo și le va aduna. Rezultatul va fi convertit în baza 10, se va calcula suma cifrelor acestei reprezentări și se va afișa pe ecran.\n\n**Barem (Total 7p):**\na) 0.25p – verificare argument.\nb) 0.25p – configurare canal anonim.\nc) 0.5p – configurare canal fifo.\nd) 0.75p – fork și exec worker1.\ne) 0.5p – citire fișier și procesare.\nf) 0.75p – transmitere date canal anonim (fără bug-uri de concurență).\ng) 0.75p – recepționare date canal fifo (fără bug-uri de concurență).\nh) 0.75p – procesare rezultate și afișare finală.\nNote: tratare erori (1p), compilare fără warning (1p), readability (0.5p)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `pipe(fd)` before `fork()` and `dup2()` inside the child to redirect stdin or stdout as needed.",
+          "ro": "Folosiți `pipe(fd)` înainte de `fork()` și `dup2()` în procesul fiu pentru a redirecționa stdin/stdout."
+        },
+        {
+          "en": "For FIFO, use `mkfifo(path, 0666)` and then `open(path, O_RDONLY)`.",
+          "ro": "Pentru FIFO, folosiți `mkfifo(cale, 0666)` și apoi `open(cale, O_RDONLY)`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Validate `argc`. 2. Create pipe with `pipe()`. 3. Create FIFO with `mkfifo()`. 4. `fork()`. 5. In child: close unnecessary pipe end, `execv` worker1. 6. In parent: close child's pipe end, open FIFO. 7. Read file with `fscanf`, `write()` binary `int` to pipe. 8. Close pipe write end. 9. `read()` from FIFO until EOF, sum integers. 10. `sprintf` sum to string, sum digits, `printf` result.",
+        "ro": "1. Validare `argc`. 2. `pipe()`. 3. `mkfifo()`. 4. `fork()`. 5. În fiu: `execv` worker1. 6. În părinte: citire fișier, `write()` în pipe. 7. Citire din FIFO, adunare, calcul sumă cifre string, afișare."
+      }
+    },
+    {
+      "id": "q3",
+      "type": "code-writing",
+      "points": 9.5,
+      "prompt": {
+        "en": "Implement `worker1.c` with the following requirements:\n\ni) Initialize communication to receive data from `supervisor` via anonymous pipe and send data back via FIFO.\nii) Initialize communication with `worker2` in both directions using a single shared memory object (named non-persistent mapping) created with `shm_open`.\niii) In a separate function, read integers from the anonymous pipe (POSIX calls, constant length). If the number is odd, multiply it by 2; if even, keep it. Send the result to `worker2` via the shared memory mapping. Count how many multiplications were performed in a variable `contor_impare`.\niv) In another separate function, read results back from `worker2` via the same shared memory object. Calculate the total sum of these results. Finally, transmit this sum and the value of `contor_impare` to `supervisor` via the FIFO (constant length binary messages).\n\n**Grading Criteria (Total 9.5p):**\n- 0.75p: Setup of anonymous pipe reception.\n- 0.5p: Setup of FIFO transmission.\n- 1p: Initialization of shared memory with `worker2` (`shm_open`, `mmap`).\n- 0.75p: Correct reception from `supervisor` via anonymous pipe.\n- 0.75p: Logic for processing numbers (odd/even).\n- 1p: Transmission of numbers to `worker2` via shared memory (avoiding race conditions).\n- 1p: Reception of results from `worker2` via shared memory (avoiding race conditions).\n- 0.5p: Sum calculation for received numbers.\n- 0.75p: Sending sum and counter to `supervisor` via FIFO.\n- Weighting for: Error handling (+1p), Warnings/Errors (+1p), Code readability (+0.5p).",
+        "ro": "Programul \"worker1.c\" va implementa funcționalitatea descrisă în specificația următoare:\n\ni) În funcția main, va face inițializările necesare pentru a primi informații de la procesul supervisor printr-un canal anonim și pentru a-i trimite rezultate înapoi printr-un canal fifo.\nii) Va face inițializările pentru a schimba informații cu procesul worker2 prin intermediul unui singur obiect de memorie partajată – o mapare nepersistentă cu nume creată cu shm_open.\niii) Într-o funcție separată, va citi din canalul anonim fiecare număr (POSIX, lungime constantă). Dacă e impar, îl înmulțește cu 2, altfel îl păstrează. Rezultatul e trimis către worker2 prin memoria partajată. Se contorizează înmulțirile în variabila contor_impare.\niv) Într-o altă funcție separată, va citi numerele de la worker2 prin memoria partajată și va calcula suma lor. La final va transmite suma și contor_impare către supervisor prin canalul fifo (binar, lungime constantă).\n\n**Barem (Total 9.5p):**\na) 0.75p – configurare canal anonim.\nb) 0.5p – configurare canal fifo.\nc) 1p – inițializare memorie partajată.\nd) 0.75p – recepționare date de la supervisor prin pipe.\ne) 0.75p – procesare numere.\nf) 1p – transmitere date către worker2 prin shared memory (fără race conditions).\ng) 1p – recepționare date de la worker2 prin shared memory (fără race conditions).\nh) 0.5p – procesare date primite de la worker2.\ni) 0.75p – transmitere rezultate către supervisor prin fifo.\nNote: tratare erori (1p), compilare fără warning (1p), readability (0.5p)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Shared memory requires synchronization (semaphores or shared flags) to avoid race conditions when `worker1` and `worker2` read/write.",
+          "ro": "Memoria partajată necesită sincronizare (semafoare sau flag-uri partajate) pentru a evita race conditions la citire/scriere."
+        },
+        {
+          "en": "Ensure `shm_open` uses the same name in both workers.",
+          "ro": "Asigurați-vă că `shm_open` folosește același nume în ambii worker-i."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Access pipe (via stdin/fd). 2. `open` FIFO for writing. 3. `shm_open`, `ftruncate`, `mmap` for shared memory. 4. Implement a protocol for SHM (e.g., using a struct with a flag and data field). 5. Loop: `read()` from pipe, process logic, write to SHM, wait for `worker2` response, `read()` from SHM, update sum. 6. After pipe EOF: `write()` sum and counter to FIFO.",
+        "ro": "1. Acces pipe. 2. Deschidere FIFO scriere. 3. `shm_open`, `mmap`. 4. Protocol SHM (structură cu flag-uri). 5. Loop: citire pipe, prelucrare, scriere SHM, așteptare worker2, citire SHM, update sumă. 6. La final, scriere în FIFO sumă și contor."
+      }
+    },
+    {
+      "id": "q4",
+      "type": "code-writing",
+      "points": 6,
+      "prompt": {
+        "en": "Implement `worker2.c` with the following requirements:\n\ni) Initialize communication with `worker1` using the same named non-persistent shared memory mapping described in `worker1.c`.\nii) In a separate function, read integers one by one from `worker1` via the shared memory, calculate the square of each number, and transmit the result back to `worker1` using the same shared memory object.\n\n**Grading Criteria (Total 6p):**\n- 1p: Initialization of shared memory mapping (bidirectional communication with `worker1`).\n- 1p: Reception of data via shared memory (no race conditions).\n- 0.5p: Square calculation.\n- 1p: Transmission of results back via shared memory (no race conditions).\n- Weighting for: Error handling (+1p), Warnings/Errors (+1p), Code readability (+0.5p).",
+        "ro": "Programul \"worker2.c\" va implementa funcționalitatea descrisă în specificația următoare:\n\ni) În funcția principală, va face inițializările necesare pentru a comunica cu worker1 prin acea mapare nepersistentă cu nume descrisă în specificația worker1.\nii) Într-o funcție separată, va citi rând pe rând fiecare număr de la worker1 prin memoria partajată și va calcula pătratul acelui număr. Va transmite rezultatul înapoi către worker1 prin aceeași memorie partajată.\n\n**Barem (Total 6p):**\na) 1p – inițializare memorie partajată.\nb) 1p – recepționare date prin shared memory (fără race conditions).\nc) 0.5p – calcul pătrat.\nd) 1p – transmitere rezultat prin shared memory (fără race conditions).\nNote: tratare erori (1p), compilare fără warning (1p), readability (0.5p)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "The square of an `int` might overflow; use `long long` for calculations if necessary, although the requirement specifies binary representation of integers.",
+          "ro": "Pătratul unui `int` poate depăși limita; folosiți `long long` pentru calcule dacă e necesar, deși cerința specifică reprezentarea binară a numerelor întregi."
+        },
+        {
+          "en": "Synchronize with `worker1` using a 'turn' flag in the shared memory struct.",
+          "ro": "Sincronizați-vă cu `worker1` folosind un flag de tip 'rând' (turn) în structura din memoria partajată."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. `shm_open` (existing object), `mmap`. 2. Loop until a termination signal is sent (e.g., a special value in SHM or EOF handled via the protocol). 3. Wait for 'new data' flag from `worker1`. 4. Read value, calculate square. 5. Write square to SHM. 6. Set 'result ready' flag for `worker1`.",
+        "ro": "1. `shm_open`, `mmap`. 2. Loop: așteptare flag 'date noi'. 3. Citire, calcul pătrat. 4. Scriere în SHM. 5. Setare flag 'rezultat gata' pentru worker1."
+      }
+    }
+  ]
+}

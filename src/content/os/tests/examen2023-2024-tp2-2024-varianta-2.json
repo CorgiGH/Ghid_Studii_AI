@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "id": "os-examen2023-2024-tp2-2024-varianta-2",
+    "title": {
+      "en": "OS Practical Test – Variant No. 2",
+      "ro": "Test practic la SO – varianta nr. 2"
+    },
+    "year": 2024,
+    "type": "midterm",
+    "variant": 2,
+    "duration": null,
+    "totalPoints": 25
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "bash-scripting",
+      "points": 2.5,
+      "prompt": {
+        "en": "Develop an application consisting of three cooperating programs, an execution script, and a text input file, organized according to the following directory hierarchy:\n\n```\n.\n├── starter.sh\n├── input_data.txt\n├── coordonator\n│   └── supervisor.c\n└── subordinates\n    └── worker1.c\n    └── worker2.c\n```\n\n**Script 'starter.sh' requirements:**\ni) The script receives a parameter `p` (1 or 2) in the command line. If not, it displays an error and exits.\nii) If `p=1`, the script starts `worker1` (from its corresponding subdirectory) in the background. After a 2-second pause, it starts `worker2`.\niii) If `p=2`, the script starts `worker2` in the background. After a 3-second pause, it starts `worker1`.\niv) In both cases, `worker1` must be started with one command-line argument: the path (absolute or relative) to the input file `input_data.txt`.\nv) The script waits for all three programs to terminate, displays the content of the named shared memory mapping, then performs cleanup: it deletes the shared memory segment and the FIFO pipe.\n\n**Grading (Barem):**\n- 0.25p: Verify input parameter `p`.\n- 0.5p: Start the first program in background (worker1 if p=1, worker2 if p=2).\n- 0.25p: Pause for 2 or 3 seconds based on `p`.\n- 0.5p: Start the second program (ensure worker1 receives the input file argument).\n- 0.25p: Wait for all processes to finish.\n- 0.25p: Display the content of the shared memory.\n- 0.5p: Cleanup (delete shm and fifo).",
+        "ro": "Realizați o aplicație formată din următoarele trei programe cooperante, plus un script de execuție a lor și un fișier cu date de intrare în format text, care vor fi plasate conform ierarhiei de directoare de mai jos:\n\n```\n.\n├── starter.sh\n├── input_data.txt\n├── coordonator\n│   └── supervisor.c\n└── subordinates\n    └── worker1.c\n    └── worker2.c\n```\n\n**Specificații Script 'starter.sh':**\ni) Scriptul va primi în linia de comandă un parametru `p`, având valoarea 1 sau 2, iar în caz contrar va afișa un mesaj de eroare adecvat și se va termina.\nii) Dacă `p=1`, atunci scriptul va porni mai întâi execuția programului `worker1` (din subdirectorul corespunzător) în fundal (background), iar după o pauză de 2 secunde, va porni și execuția programului `worker2`.\niii) Dacă `p=2`, atunci scriptul va porni mai întâi execuția programului `worker2` în fundal, iar după o pauză de 3 secunde, va porni și execuția programului `worker1`.\niv) În ambele situații, programul `worker1` va fi pornit cu un argument în linia de comandă: calea (absolută sau relativă) către fișierul de intrare \"input_data.txt\".\nv) Apoi scriptul va aștepta terminarea execuției celor trei programe și va afișa conținutul mapării nepersistente cu nume, după care va face curățenie: va “distruge” maparea nepersistentă cu nume și canalul fifo.\n\n**Baremul pentru scriptul \"starter.sh\":**\n- 0.25p: Verificarea parametrului p.\n- 0.5p: Pornirea primului program în fundal (worker1 pt p=1, worker2 pt p=2).\n- 0.25p: Pauză de 2 sau 3 secunde.\n- 0.5p: Pornirea celui de-al doilea program (worker1 primește calea fișierului).\n- 0.25p: Așteptarea terminării execuțiilor.\n- 0.25p: Afișarea conținutului mapării.\n- 0.5p: Ștergerea mapării și a canalului fifo."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `&` to run a process in the background and `wait` to pause execution until background processes finish. Shared memory objects on Linux are typically visible in `/dev/shm/`.",
+          "ro": "Folosiți `&` pentru a rula un proces în fundal și `wait` pentru a opri execuția până la terminarea proceselor din fundal. Obiectele de memorie partajată în Linux sunt vizibile de obicei în `/dev/shm/`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `$1` for values 1 or 2. 2. Based on `p`, use `sleep` and start programs using `./subordinates/worker1 path &` or `./subordinates/worker2 &`. 3. Use `wait` for synchronization. 4. Display SHM with `cat /dev/shm/[name]`. 5. `rm` the fifo and shm object.",
+        "ro": "1. Verifică `$1` pentru valorile 1 sau 2. 2. În funcție de `p`, folosește `sleep` și pornește programele cu `./subordinates/worker1 cale &` sau `./subordinates/worker2 &`. 3. Folosește `wait` pentru sincronizare. 4. Afișează SHM cu `cat /dev/shm/[nume]`. 5. Folosește `rm` pentru fifo și obiectul shm."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "code-writing",
+      "points": 6.5,
+      "prompt": {
+        "en": "The program **'supervisor.c'** implements the following functionality:\n\nIt receives a command-line argument representing the path to `input_data.txt`. This file contains triplets of real numbers (`a b c`) per line, separated by spaces.\n\ni) In the `main` function, test for the existence of the argument and initialize communication to send data to `worker1` via an **anonymous pipe** and receive results from `worker1` via a **FIFO**.\nii) In a separate function called from `main`, read each line from the file, convert triplets to binary (doubles), and send them to `worker1` via the anonymous pipe using POSIX calls (constant length messages).\niii) In another separate function called from `main`, read cvintets of 5 doubles (`a, b, c, P, A`) from the FIFO sent by `worker1`. \n- If `P != 0`, display: \"tripleta a,b,c reprezintă lungimile laturilor unui triunghi ce are perimetrul P și aria A\".\n- If `P == 0`, display: \"tripleta a,b,c nu poate reprezenta lungimile laturilor unui triunghi\".\nCount the totals for both cases and print them at the end.\n\n**Grading (Barem):**\n- 0.25p: Validate command line argument.\n- 0.25p: Setup anonymous pipe for sending data.\n- 0.5p: Setup FIFO for receiving data.\n- 0.75p: Correct reading and processing of input file.\n- 0.75p: Send binary data via anonymous pipe.\n- 0.75p: Receive results via FIFO.\n- 0.75p: Final counting and display logic.\n- **Note:** Points are adjusted based on (F) factor: error handling (1p), no warnings (1p), and code readability (0.5p).",
+        "ro": "Programul **'supervisor.c'** va implementa următoarea funcționalitate:\n\nProgramul va primi un argument în linia de comandă, ce reprezintă calea către un fișier numit \"input_data.txt\". Fișierul conține triplete de numere reale `a b c` pe fiecare linie.\n\ni) În `main`, testează argumentul și face inițializările pentru a trimite informații procesului `worker1` printr-un **canal anonim** și a primi rezultate de la acesta printr-un **canal fifo**.\nii) Într-o funcție separată, citește fișierul linie cu linie, convertește tripletele la format binar (double) și le transmite lui `worker1` prin canalul anonim folosind apeluri POSIX.\niii) Într-o altă funcție separată, citește fiecare cvintet de 5 numere reale `a,b,c,P,A` transmis de `worker1` prin FIFO. \n- Dacă `P!=0`, afișează: \"tripleta a,b,c reprezintă lungimile laturilor unui triunghi ce are perimetrul P și aria A\".\n- Dacă `P==0`, afișează: \"tripleta a,b,c nu poate reprezenta lungimile laturilor unui triunghi\".\nSe vor contoriza și afișa la final totalurile pentru ambele cazuri.\n\n**Baremul pentru programul \"supervisor.c\":**\n- 0.25p: Verificarea argumentului.\n- 0.25p: Configurare canal anonim pentru trimitere date.\n- 0.5p: Configurare canal fifo pentru primire date.\n- 0.75p: Citire fișier și procesare.\n- 0.75p: Transmitere corectă prin canal anonim.\n- 0.75p: Recepționare corectă prin canal fifo.\n- 0.75p: Contorizare și afișare finală.\n- **Notă:** Punctajul se scalează cu factorul F: tratarea erorilor (1p), lipsa warning-urilor (1p), readability (0.5p)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `write(pipe_fd, buffer, sizeof(double) * 3)` for binary transmission. The FIFO must be created with `mkfifo` before opening.",
+          "ro": "Folosiți `write(pipe_fd, buffer, sizeof(double) * 3)` pentru transmisie binară. Canalul FIFO trebuie creat cu `mkfifo` înainte de deschidere."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `argc`. 2. Open anonymous pipe (passed from worker1). 3. `mkfifo(\"my_fifo\", 0666)` and open for reading. 4. Read text file with `fscanf` and write binary to pipe. 5. In a loop, `read` 5 doubles from FIFO until EOF. 6. Print formatted output and update counters.",
+        "ro": "1. Verifică `argc`. 2. Deschide canalul anonim (moștenit). 3. `mkfifo(\"my_fifo\", 0666)` și deschide pentru citire. 4. Citește fișierul text cu `fscanf` și scrie binar în pipe. 5. Într-o buclă, `read` 5 double-uri din FIFO până la EOF. 6. Afișează rezultatele formatate și actualizează contoarele."
+      }
+    },
+    {
+      "id": "q3",
+      "type": "code-writing",
+      "points": 10,
+      "prompt": {
+        "en": "The program **'worker1.c'** implements the following functionality:\n\ni) In `main`, create a child process. In the child, use `exec` to start the `supervisor` program, passing the input data path as an argument.\nii) In `main`, perform initializations to receive information from `supervisor` via an anonymous pipe and send results back to it via a FIFO.\niii) In `main`, initialize a **named shared memory** (shm_open) to exchange information with `worker2` in both directions.\niv) In a separate function, read triplets `a,b,c` from the anonymous pipe (sent by supervisor). Verify if they form a triangle (`a,b,c > 0` and sum of any two > third). Send `a,b,c,r` to `worker2` via shared memory (`r=1` if valid triangle, `r=0` otherwise).\nv) In another separate function, read quartets `a,b,c,p` from the shared memory (sent by worker2). If `p != 0`, calculate Perimeter `P = 2*p` and Area `A` using Heron's formula: `A = sqrt(p*(p-a)*(p-b)*(p-c))`. If `p == 0`, set `P=0, A=0`. Send the results (`a,b,c,P,A`) to `supervisor` via the FIFO.\n\n**Grading (Barem):**\n- 0.75p: Fork and exec operations.\n- 0.75p: Setup anonymous pipe for supervisor communication.\n- 0.5p: Setup FIFO for supervisor communication.\n- 1p: Initialize and configure named shared memory.\n- 0.75p: Receive data from supervisor.\n- 0.5p: Initial processing of triplets.\n- 1p: Send to worker2 via SHM (no race-conditions/segfault).\n- 1p: Receive from worker2 via SHM (no race-conditions/segfault).\n- 0.5p: Heron calculation processing.\n- 0.75p: Transmit results to supervisor via FIFO.\n- **Note:** Bonus/Penalty for system call error handling, warnings, and code readability (F * 2.5p).",
+        "ro": "Programul **'worker1.c'** va implementa următoarea funcționalitate:\n\ni) În funcția principală, va crea un proces fiu; în fiu va starta prin `exec` programul `supervisor`, transmițându-i calea fișierului de intrare.\nii) În `main`, va face inițializările pentru a primi info de la `supervisor` (canal anonim) și a-i trimite rezultate (fifo).\niii) În `main`, va face inițializările pentru a schimba informații cu `worker2` printr-un obiect de **memorie partajată cu nume** (shm_open).\niv) Într-o funcție separată, va citi din canalul anonim tripletele `a,b,c`, va verifica condițiile de triunghi și va trimite către `worker2` prin SHM cvartetul `a,b,c,r` (r=1 dacă e triunghi, 0 altfel).\nv) Într-o altă funcție separată, va citi din SHM cvartetul `a,b,c,p` de la `worker2`. Dacă `p!=0`, calculează `P=2*p` și aria `A` cu formula lui Heron. Dacă `p=0`, asignează `P=0, A=0`. Rezultatul (5 double: `a,b,c,P,A`) se trimite lui `supervisor` prin fifo.\n\n**Baremul pentru programul \"worker1.c\":**\n- 0.75p: Operații fork și exec.\n- 0.75p: Creare canal anonim și configurare comunicație.\n- 0.5p: Creare canal fifo.\n- 1p: Inițializare memorie partajată cu nume.\n- 0.75p: Recepționare de la supervisor prin pipe.\n- 0.5p: Procesare triplete.\n- 1p: Transmitere către worker2 prin SHM (fără race-condition/segfault).\n- 1p: Recepționare de la worker2 prin SHM (fără race-condition/segfault).\n- 0.5p: Procesare (Heron).\n- 0.75p: Transmitere către supervisor prin fifo.\n- **Notă:** Scalează cu F pt tratarea erorilor, warning-uri și readability (F * 2.5p)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Initialize the pipe before fork() so the child inherits descriptors. For SHM, define a structure that includes a status/flag field to synchronize between worker1 and worker2.",
+          "ro": "Inițializați pipe-ul înainte de fork() pentru ca fiul să moștenească descriptorii. Pentru SHM, definiți o structură care include un câmp de status/flag pentru a sincroniza worker1 și worker2."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. `pipe()` then `fork()`. 2. In child: `execlp(\"./supervisor\", ...)` after redirecting pipe. 3. In parent: `shm_open` + `ftruncate` + `mmap` a struct. 4. Read from pipe, calculate triangle status, write to SHM struct. 5. Wait for worker2 response in SHM, calculate Heron area, and `write` 5 doubles to FIFO.",
+        "ro": "1. `pipe()` apoi `fork()`. 2. În fiu: `execlp(\"./supervisor\", ...)` după redirecționarea pipe-ului. 3. În părinte: `shm_open` + `ftruncate` + `mmap` o structură. 4. Citește din pipe, verifică triunghiul, scrie în structura SHM. 5. Așteaptă răspunsul lui worker2 în SHM, calculează Heron, și `write` 5 double-uri în FIFO."
+      }
+    },
+    {
+      "id": "q4",
+      "type": "code-writing",
+      "points": 6,
+      "prompt": {
+        "en": "The program **'worker2.c'** implements the following functionality:\n\ni) In `main`, perform initializations to communicate with `worker1` via the same named shared memory mapping segment.\nii) In a separate function, read quartets `a,b,c,r` from the shared memory sent by `worker1`. \n- If `r=1`, calculate the semi-perimeter `p = (a+b+c)/2`.\n- If `r=0`, set `p=0`.\nTransmit the result (`a,b,c,p`) back to `worker1` via the same shared memory mapping.\n\n**Grading (Barem):**\n- 1p: Setup and attach shared memory.\n- 1p: Receive data from worker1 (no race-conditions/segfault).\n- 1p: Correct calculation of `p`.\n- 1p: Transmit results back to worker1 (no race-conditions/segfault).\n- **Note:** Bonus/Penalty for error handling, warnings, and code readability (F * 2p).",
+        "ro": "Programul **'worker2.c'** va implementa următoarea funcționalitate:\n\ni) În `main`, va face inițializările pentru a comunica cu `worker1` prin aceeași memorie partajată cu nume.\nii) Într-o funcție separată, va citi din SHM fiecare cvartet `a,b,c,r` de la `worker1`:\n- dacă `r=1`, calculează semi-perimetrul `p = (a+b+c)/2`.\n- dacă `r=0`, setează `p=0`.\nTrimite rezultatul `a,b,c,p` înapoi către `worker1` prin aceeași memorie partajată.\n\n**Baremul pentru programul \"worker2.c\":**\n- 1p: Inițializare și configurare memorie partajată.\n- 1p: Recepționare date de la worker1 (fără race-condition/segfault).\n- 1p: Procesare date (calcul p).\n- 1p: Transmitere rezultate către worker1 (fără race-condition/segfault).\n- **Notă:** Scalează cu F pt tratarea erorilor, warning-uri și readability (F * 2p)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `shm_open` with `O_RDWR` and the same name used in worker1. Since shared memory access can lead to race conditions, ensure you have a protocol for indicating when data is ready.",
+          "ro": "Folosiți `shm_open` cu `O_RDWR` și același nume ca în worker1. Deoarece accesul la SHM poate duce la race conditions, asigurați un protocol pentru a indica când datele sunt gata."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. `shm_open` the shared object by name. 2. `mmap` the structure. 3. Use a loop to check for a 'ready' flag. 4. Read $a,b,c,r$. 5. Compute $p$. 6. Write $p$ back to the struct and update the flag to notify worker1.",
+        "ro": "1. `shm_open` obiectul partajat după nume. 2. `mmap` structura. 3. Folosește o buclă pentru a verifica un flag de 'date gata'. 4. Citește $a,b,c,r$. 5. Calculează $p$. 6. Scrie $p$ în structură și actualizează flag-ul pentru a notifica worker1."
+      }
+    }
+  ]
+}

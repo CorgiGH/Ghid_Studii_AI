@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "id": "os-examen2023-2024-tp2-2024-varianta-3",
+    "title": {
+      "en": "OS Practical Test – TP2 – Variant 3",
+      "ro": "Test practic la SO – TP2 – Varianta nr. 3"
+    },
+    "year": 2024,
+    "type": "midterm",
+    "variant": 3,
+    "duration": null,
+    "totalPoints": 25
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "bash-scripting",
+      "points": 2.5,
+      "prompt": {
+        "en": "Write a script named `starter.sh` that implements the following functionality:\n\ni) The script receives a parameter `p` (0 or 1) from the command line; otherwise, it displays an error message and terminates.\nii) If `p=0`, the script first starts the `analyzer` program (from its subdirectory) in the background, then after a 1-second pause, it starts the `service` program.\niii) If `p=1`, the script first starts the `service` program in the background, then after a 2-second pause, it starts the `analyzer` program.\niv) In both cases, `analyzer` is started with one argument: the path to `input.txt` (located in the `data/` directory).\nv) The script waits for all three programs to finish, displays the content of the named shared memory, and then performs cleanup: deletes the named shared memory and the FIFO pipe.\n\n**File Hierarchy:**\n```\n.\n├── app\n│   ├── analyzers\n│   │   └── analyzer.c\n│   └── services\n│       ├── service.c\n│       └── worker.c\n├── data\n│   └── input.txt\n└── starter.sh\n```\n\n**Grading (Barem):**\na) 0.25p – verify parameter p.\nb) 0.5p – start first program in background based on p.\nc) 0.25p – pause (1s or 2s) based on p.\nd) 0.5p – start second program with correct arguments.\ne) 0.25p – wait for processes.\nf) 0.25p – display shm content.\ng) 0.5p – delete shm and fifo.",
+        "ro": "Scriptul \"starter.sh\" va implementa funcționalitatea descrisă în specificația următoare:\n\ni) Scriptul va primi în linia de comandă un parametru p, având valoarea 0 sau 1, iar în caz contrar va afișa un mesaj de eroare adecvat și se va termina.\nii) Dacă p=0, atunci scriptul va porni mai întâi execuția programului analyzer (din subdirectorul corespunzător) în background, iar după o pauză de 1 secundă, va porni și execuția programului service (din subdirectorul corespunzător).\niii) Iar dacă p=1, atunci scriptul va porni mai întâi execuția programului service (din subdirectorul corespunzător) în background, iar după o pauză de 2 secunde, va porni și execuția programului analyzer (din subdirectorul corespunzător).\niv) În ambele situații, programul analyzer va fi pornit cu un argument în linia de comandă: calea (absolută sau relativă) către fișierul de intrare \"input.txt\".\nv) Apoi scriptul va aștepta terminarea execuției celor trei programe și va afișa conținutul mapării nepersistente cu nume, după care va face curățenie: va “distruge” maparea nepersistentă cu nume și canalul fifo.\n\n**Ierarhia de directoare:**\n```\n.\n├── app\n│   ├── analyzers\n│   │   └── analyzer.c\n│   └── services\n│       ├── service.c\n│       └── worker.c\n├── data\n│   └── input.txt\n└── starter.sh\n```\n\n**Barem:**\na) 0.25p – verificare parametru p.\nb) 0.5p – pornire primul program în fundal conform p.\nc) 0.25p – pauză (1s/2s) conform p.\nd) 0.5p – pornire al doilea program cu argumentul corect.\ne) 0.25p – așteptare procese.\nf) 0.25p – afișare conținut shm.\ng) 0.5p – ștergere shm și fifo."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `&` to run a process in the background and `wait` to wait for all background processes. Use `cat /dev/shm/name` to display shared memory content.",
+          "ro": "Utilizați `&` pentru a rula un proces în fundal și `wait` pentru a aștepta toate procesele din fundal. Utilizați `cat /dev/shm/nume` pentru a afișa conținutul memoriei partajate."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check if $1 is 0 or 1. 2. Use `if` conditions for p. 3. Call `./app/analyzers/analyzer data/input.txt &` or `./app/services/service &`. 4. Use `sleep 1` or `sleep 2`. 5. Call the second program. 6. Use `wait`. 7. `cat` the shm file in /dev/shm. 8. Use `rm` or `shm_unlink` equivalent and `rm` for FIFO.",
+        "ro": "1. Verificare $1 să fie 0 sau 1. 2. Utilizare `if` pentru p. 3. Apel `./app/analyzers/analyzer data/input.txt &` sau `./app/services/service &`. 4. Utilizare `sleep 1` sau `sleep 2`. 5. Apel al doilea program. 6. Utilizare `wait`. 7. `cat` pe fișierul shm din /dev/shm. 8. Utilizare `rm` pentru FIFO și obiectul shm."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "code-writing",
+      "points": 7,
+      "prompt": {
+        "en": "The program `analyzer.c` receives the path to `input.txt` as a command-line argument.\n\ni) In `main`, verify the argument and read permissions. Initialize a named non-persistent shared memory object using `shm_open` for bidirectional communication with `service`.\nii) In a separate function, read every word (sequence of consecutive letters) from `input.txt`. Send these words to the `service` process through the shared memory.\niii) In another separate function, read the results (two trigrams and a number) sent back by `service` via the same shared memory and display them on the screen.\n\n**Grading (Barem):**\na) 0.5p – check argument and read rights.\nb) 1p – correctly initialize and configure named shm.\nc) 0.25p – implement reading from file.\nd) 0.5p – implement word extraction (letters only).\ne) 1p – correctly transmit words to service via shm (no race conditions).\nf) 1p – correctly receive results from service via shm.\ng) 0.25p – display received data.",
+        "ro": "Programul \"analyzer.c\" va primi un argument în linia de comandă, ce reprezintă calea către \"input.txt\".\n\ni) În funcția main, programul va verifica dacă s-a primit un argument și dacă are drepturi de citire asupra sa. Se vor face inițializările necesare pentru a schimba informații cu procesul service printr-un singur obiect de memorie partajată – o mapare nepersistentă cu nume, creată cu funcția shm_open.\nii) Într-o funcție separată, programul va citi fiecare cuvânt (secvență de litere) din fișier și va transmite cuvintele către procesul service prin intermediul acelei mapări.\niii) Într-o altă funcție separată, programul va citi rezultatele (două trigrame și un număr) transmise de către procesul service prin intermediul acelei mapări și le va afișa pe ecran.\n\n**Barem:**\na) 0.5p – verificare argument și drepturi citire.\nb) 1p – inițializare și configurare shm cu nume.\nc) 0.25p – implementare citire din fișier.\nd) 0.5p – extragere cuvinte (doar litere).\ne) 1p – transmitere cuvinte către service prin shm (fără race-condition).\nf) 1p – recepționare date de la service prin shm.\ng) 0.25p – afișare date."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `isalpha()` to identify word characters. Use semaphores or a synchronization protocol within the shared memory structure to avoid race conditions.",
+          "ro": "Folosiți `isalpha()` pentru a identifica caracterele cuvintelor. Utilizați semafoare sau un protocol de sincronizare în cadrul structurii memoriei partajate pentru a evita condițiile de concurență."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. `shm_open` and `mmap` a structure containing a buffer and synchronization flags (or semaphores). 2. Open file with `fopen`. 3. Loop `fgetc` to extract sequences of `isalpha` chars. 4. Write word to shm buffer and toggle flag. 5. Wait for service response flag and read the final struct (2 trigrams, 1 int). 6. Print results.",
+        "ro": "1. `shm_open` și `mmap` pentru o structură ce conține un buffer și flag-uri de sincronizare. 2. Deschidere fișier cu `fopen`. 3. Buclă `fgetc` pentru a extrage secvențe `isalpha`. 4. Scriere cuvânt în shm și activare flag. 5. Așteptare flag răspuns de la service și citire structură finală. 6. Afișare rezultate."
+      }
+    },
+    {
+      "id": "q3",
+      "type": "code-writing",
+      "points": 10,
+      "prompt": {
+        "en": "The program `service.c` coordinates communication between `analyzer` and `worker`.\n\ni) In `main`, create a child process and execute `worker` using `exec`.\nii) In `main`, initialize an anonymous pipe (1-to-1) to send info to `worker` and a FIFO (1-to-1) to receive results back from `worker`.\niii) In `main`, initialize the named shared memory to communicate with `analyzer`.\niv) In a separate function, read words from the shared memory. For each word, generate a list of trigrams (consecutive 3-character sequences, e.g., 'abcabc' -> 'abc', 'bca', 'cab', 'abc'). Transmit each trigram to `worker` via the anonymous pipe using POSIX calls.\nv) In another separate function, read processed trigrams from `worker` via the FIFO. Keep only the first and last received trigrams and count the total number of trigrams received. Send these 3 results back to `analyzer` via the shared memory.\n\n**Grading (Barem):**\na) 0.75p – fork and exec worker.\nb) 0.75p – create anonymous pipe (to worker).\nc) 0.5p – create FIFO (from worker).\\ d) 1p – initialize named shm (with analyzer).\ne) 1p – receive results from analyzer via shm.\nf) 0.5p – process read info.\ng) 0.75p – transmit trigrams to worker via pipe.\nh) 0.75p – receive results from worker via FIFO.\ni) 0.5p – process data from worker.\nj) 1p – transmit processed info back to analyzer via shm.",
+        "ro": "Programul \"service.c\" va coordona comunicația între \"analyzer\" și \"worker\".\n\ni) În funcția principală, va crea un proces fiu și va starta prin exec programul worker.\nii) Tot în main, va face inițializările pentru a trimite informații la worker printr-un canal anonim și pentru a primi rezultate înapoi printr-un canal fifo.\niii) Tot în main, va face inițializările pentru a schimba informații cu procesul analyzer prin maparea nepersistentă cu nume.\niv) Într-o funcție separată, va citi din mapare cuvintele de la analyzer și pentru fiecare cuvânt va genera lista de trigrame (secvență consecutivă de 3 caractere, ex: “abcabc” -> “abc” “bca” “cab” “abc”). Fiecare trigramă va fi transmisă la worker prin canalul anonim.\nv) Într-o altă funcție separată, va citi din canalul fifo trigramele de la worker. Va reține prima și ultima trigramă și va contoriza numărul total. Va transmite aceste rezultate procesării către analyzer prin maparea nepersistentă cu nume.\n\n**Barem:**\na) 0.75p – fork și exec worker.\nb) 0.75p – creare canal anonim.\nc) 0.5p – creare canal fifo.\nd) 1p – inițializare shm cu nume.\ne) 1p – recepționare date de la analyzer prin shm.\nf) 0.5p – procesare info citite.\ng) 0.75p – transmitere trigrame către worker prin canal anonim.\nh) 0.75p – recepționare rezultate de la worker prin canal fifo.\ni) 0.5p – procesare date de la worker.\nj) 1p – transmitere info procesate către analyzer prin shm."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Remember to close unused pipe ends in both parent and child. A trigram loop for a word of length `N` runs from `i=0` to `i=N-3`.",
+          "ro": "Nu uitați să închideți capetele de pipe neutilizate în părinte și fiu. O buclă de trigrame pentru un cuvânt de lungime `N` rulează de la `i=0` până la `i=N-3`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. `pipe(pfd)`, `mkfifo(fifo_path, 0666)`. 2. `fork()`. In child: redirect/close pipes and `execv(\"./worker\", ...)`. 3. In parent: `shm_open`, `mmap`. 4. Read words from shm. 5. Nested loop: `for(i=0; i <= strlen(word)-3; i++)` to extract 3 chars, then `write(pfd[1], trigram, 3)`. 6. Open FIFO for reading. 7. Loop `read(fifo_fd, buf, 3)`: track counter, store first buffer, update last buffer. 8. Write struct {first, last, count} to shm and signal analyzer.",
+        "ro": "1. `pipe(pfd)`, `mkfifo(fifo_path, 0666)`. 2. `fork()`. În fiu: redirectare/închidere pipe-uri și `execv(\"./worker\", ...)`. 3. În părinte: `shm_open`, `mmap`. 4. Citire cuvinte din shm. 5. Buclă imbricată: `for(i=0; i <= strlen(word)-3; i++)` pentru trigrame, apoi `write(pfd[1], trigram, 3)`. 6. Deschidere FIFO pentru citire. 7. Buclă `read(fifo_fd, buf, 3)`: incrementare contor, salvare prima trigramă, actualizare ultima. 8. Scriere structură {prima, ultima, contor} în shm."
+      }
+    },
+    {
+      "id": "q4",
+      "type": "code-writing",
+      "points": 5.5,
+      "prompt": {
+        "en": "The program `worker.c` filters trigrams.\n\ni) In `main`, initialize communication to receive information from `service` via an anonymous pipe and send results back via a FIFO.\nii) In a separate function, read each trigram transmitted by `service` from the pipe. Select only those of the form \"consonant-vowel-consonant\". Send each selected trigram back to `service` through the FIFO.\n\n**Grading (Barem):**\na) 0.5p – configure anonymous pipe for receiving.\nb) 0.25p – configure FIFO for sending.\nc) 0.75p – receive info from service via pipe.\nd) 0.75p – select trigrams of form C-V-C.\ne) 0.75p – transmit results to service via FIFO.",
+        "ro": "Programul \"worker.c\" va implementa funcționalitatea descrisă în specificația următoare:\n\ni) În funcția main, va face inițializările necesare pentru a putea primi informații de la procesul service printr-un canal anonim și pentru a-i putea trimite rezultate înapoi printr-un canal fifo.\nii) Într-o funcție separată, va citi din canalul anonim fiecare trigramă transmisă de service și va selecta doar trigramele de forma “consoană vocală consoană”. Fiecare trigramă selectată va fi transmisă către procesul service prin canalul fifo.\n\n**Barem:**\na) 0.5p – configurare canal anonim pentru primire.\nb) 0.25p – configurare canal fifo pentru trimitere.\nc) 0.75p – recepționare info de la service prin canal anonim.\nd) 0.75p – selecție trigrame de forma C-V-C.\ne) 0.75p – transmitere rezultate către service prin canal fifo."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "A vowel is one of 'aeiouAEIOU'. Any other letter is a consonant. Non-letters shouldn't appear given the analyzer's logic.",
+          "ro": "O vocală este una din 'aeiouAEIOU'. Orice altă literă este consoană. Caracterele non-literă nu ar trebui să apară datorită logicii analyzer-ului."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Read from stdin (if redirected) or a specific fd passed from parent. 2. Open FIFO for writing. 3. Read 3 bytes at a time. 4. Function `is_vowel(char c)` returns 1 for aeiou. 5. Check: `!is_vowel(trig[0]) && is_vowel(trig[1]) && !is_vowel(trig[2])`. 6. If match, `write` to FIFO.",
+        "ro": "1. Citire din stdin (dacă e redirectat) sau fd primit. 2. Deschidere FIFO pentru scriere. 3. Citire câte 3 octeți. 4. Funcție `e_vocală(char c)`. 5. Verificare: `!e_vocală[0] && e_vocală[1] && !e_vocală[2]`. 6. Dacă e match, `write` în FIFO."
+      }
+    }
+  ]
+}

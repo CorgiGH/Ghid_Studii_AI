@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "id": "os-examen2023-2024-tp1-2024-varianta-2",
+    "title": {
+      "en": "OS Practical Test – Variant no. 2",
+      "ro": "Test practic la SO – varianta nr. 2"
+    },
+    "year": 2024,
+    "type": "midterm",
+    "variant": 2,
+    "duration": null,
+    "totalPoints": 20
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "code-writing",
+      "points": 5,
+      "prompt": {
+        "en": "Write a C program called \"build_scattered_number.c\" according to the following specification:\n\nThe program will receive one command-line argument; otherwise, it will terminate with error code 1. The program will consider this argument as a path to a file. If it does not have read permissions for it, it will display an appropriate message on stderr and terminate with error code 1.\n\nUsing only POSIX API calls, the program will construct a number using all digits, in the order they appear, found in the last 8 characters of the file (e.g., for \"x+y-1ab2\", the number \"12\" will be built). If the file has fewer than 8 characters, the entire file will be read. If there are no digits at all, the constructed number will be 0.\n\nIf there are errors during the POSIX API function calls, an appropriate message will be displayed and the program will exit with code 2. Otherwise, the program will write to stdout the file path received as an argument and the constructed number, separated by the \":\" character and followed by the \"\\n\" character, then terminate with exit code 0.\n\n**Grading (Barem):**\na) 0.5p + 0.5p – testing the number of arguments and read permission on the file.\nb) 1.5p + 0.5p – constructing the number and displaying the result on stdout according to the specification, including correct reading in the exceptional case where the file contains insufficient information.\nc) 1p – handling all possible errors according to the specification.\nd) 1p – the program compiles without errors and without warnings.",
+        "ro": "Să se scrie un program C, numit \"build_scattered_number.c\", conform specificației următoare:\n\nProgramul va primi un argument în linia de comandă; în caz contrar se va termina cu codul de eroare 1. Programul va considera acel argument ca fiind o cale către un fișier și în cazul în care nu are drepturi de citire asupra sa, va afișa un mesaj corespunzător pe stderr și se va termina cu codul de eroare 1.\n\nFolosind doar apeluri din cadrul API-ului POSIX, programul va construi un număr cu toate cifrele, în ordinea în care apar, care se află în ultimele 8 caractere ale fișierului (e.g., pentru “x+y-1ab2”, se va construi numărul “12”). În cazul în care fișierul are mai puțin de 8 caractere, practic se va citi tot fișierul, iar dacă nu sunt deloc cifre, numărul construit va fi considerat 0.\n\nDacă sunt erori la apelurile din cadrul funcțiilor din API-ul POSIX se va afișa un mesaj corespunzător și se va ieși din program cu codul de exit 2. Altfel, programul va scrie pe stdout calea către fișier primită ca și argument și numărul construit, separate de caracterul “:” și urmate de caracterul “\\n”, și se va termina cu codul de terminare 0.\n\n**Baremul pentru programul \"build_scattered_number.c\":**\na) 0.5p + 0.5p – testarea numărului de argumente și, respectiv, a dreptului de citire asupra fișierului.\nb) 1.5p + 0.5p – construirea numărului și afișarea rezultatului pe ieșirea stdout, conform specificației date, inclusiv citirea corectă în cazul excepțional când fișierul conține informație insuficientă.\nc) 1p – tratarea tuturor erorilor posibile, conform specificației date.\nd) 1p – programul se compilează fără erori și fără warning-uri."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `lseek(fd, 0, SEEK_END)` to find the file size, then `lseek` again to position yourself 8 bytes before the end (or at the beginning if size < 8).",
+          "ro": "Utilizați `lseek(fd, 0, SEEK_END)` pentru a afla dimensiunea fișierului, apoi `lseek` din nou pentru a vă poziționa cu 8 octeți înainte de final (sau la început dacă dimensiunea < 8)."
+        },
+        {
+          "en": "Use `isdigit()` from `<ctype.h>` to check if a character is a digit, and build the number using `result = result * 10 + (char - '0')`.",
+          "ro": "Folosiți `isdigit()` din `<ctype.h>` pentru a verifica dacă un caracter este cifră și construiți numărul folosind `result = result * 10 + (char - '0')`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `argc`. 2. Check read permissions using `access(argv[1], R_OK)`. 3. Open file with `open()`. 4. Determine size with `lseek()`. 5. Seek to `max(0, size - 8)`. 6. Read the remaining content into a buffer. 7. Iterate through buffer, find digits, and accumulate the number. 8. Print `path:number` and exit.",
+        "ro": "1. Verifică `argc`. 2. Verifică permisiunile de citire cu `access(argv[1], R_OK)`. 3. Deschide fișierul cu `open()`. 4. Determină dimensiunea cu `lseek()`. 5. Salt la `max(0, size - 8)`. 6. Citește conținutul rămas într-un buffer. 7. Iterează prin buffer, identifică cifrele și acumulează numărul. 8. Afișează `cale:numar` și termină."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "bash-scripting",
+      "points": 6,
+      "prompt": {
+        "en": "Write a bash script called \"main.sh\" according to the following specification:\n\nThe script will receive one command-line argument and perform the following checks in order:\ni) Check if it received exactly one argument; otherwise, display an appropriate message and terminate with code 1.\nii) Check if in the directory where \"main.sh\" is located, there exists a subdirectory called \"scripts\" containing the scripts \"pipeline.sh\" and \"listdir.sh\"; if not, display an appropriate error message on stderr and terminate with code 2.\niii) Check if it has execute permission for the two scripts in the \"scripts\" directory; if not, add execute permission for the owner only.\niv) Check if in the directory where \"main.sh\" is located, there exists a subdirectory called \"programs\" containing a program called \"build_scattered_number.c\" and that it has read permission for it; if not, display an appropriate error message on stderr and terminate with code 3.\nv) Check if in the same directory as \"build_scattered_number.c\" there exists \"build_scattered_number\" (the executable); if not, compile the C program with the name \"build_scattered_number\". In case of a compilation error, display an appropriate message on stderr and terminate with code 4.\n\nThen, \"main.sh\" will invoke the \"pipeline.sh\" script, passing the command-line argument it received, and finally display the exit code of its execution.\n\n**Grading (Barem):**\na) 0.5p – correct implementation of the check described in point i).\nb) 3 x 0.5p – correct implementation of the 3 checks described in point ii).\nc) 2 x 0.5p – correct implementation of the checks described in point iii).\nd) 2 x 0.5p – correct implementation of the checks described in point iv).\ne) 1p – correct implementation of point v).\nf) 0.5p + 0.5p – correct invocation of the \"pipeline.sh\" script and display of the exit code.",
+        "ro": "Să se scrie un script bash, numit \"main.sh\", conform specificației următoare:\n\nScriptul va primi un argument în linia de comandă și va face următoarele verificări, în ordinea următoare:\ni) va verifica dacă a primit un singur argument la linia de comandă, iar în caz contrar va afișa un mesaj corespunzător și se va termina cu codul 1.\nii) va verifica dacă în directorul în care se află \"main.sh\", există un subdirector numit \"scripts\" ce conține scripturile \"pipeline.sh\" și “listdir.sh”, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 2.\niii) va verifica, de asemenea, dacă are drept de execuție pentru cele două scripturi din directorul \"scripts\", iar în caz contrar li se va adăuga drept de execuție doar pentru proprietar.\niv) va verifica dacă în directorul în care se află \"main.sh\", există un subdirector numit \"programs\" ce conține un program numit \"build_scattered_number.c\" și că are permisiunea de citire a acestuia, iar în caz negativ va afișa pe ieșirea stderr un mesaj de eroare adecvat și se va termina cu codul 3.\nv) va verifica dacă în același director ca și \"build_scattered_number.c\" există \"build_scattered_number\" iar în caz negativ se va compila programul C cu denumirea \"build_scattered_number\" pentru executabil. În cazul unei erori la compilare, se va afișa un mesaj corespunzător la stderr și se va termina cu codul 4.\n\nApoi scriptul \"main.sh\" va invoca scriptul \"pipeline.sh\", transmițându-i în linia de comandă, argumentul pe care l-a primit el în linia de comandă, și la final va afișa codul de terminare a execuției acestuia.\n\n**Baremul pentru scriptul \"main.sh\":**\na) 0.5p – implementarea corectă, conform specificației date, a verificării descrise la punctul i) din specificație.\nb) 3 x 0.5p – implementarea corectă, conform specificației date, a celor 3 verificări descrise la punctul ii) din specificație.\nc) 2 x 0.5p – implementarea corectă, conform specificației date, a verificărilor descrise la punctul iii) din specificație.\nd) 2 x 0.5p – implementarea corectă, conform specificației date, a verificărilor descrise la punctul iv) din specificație.\ne) 1p – implementarea corectă, conform specificației date, a punctului v) din specificație.\nf) 0.5p + 0.5p – invocarea corectă a scriptului \"pipeline.sh\" și afișarea codului de exit, conform specificației date."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `dirname \"$0\"` to determine the script's directory. Use `[ -x script.sh ]` to check for execution permission and `chmod u+x` to add it.",
+          "ro": "Folosiți `dirname \"$0\"` pentru a determina directorul scriptului. Folosiți `[ -x script.sh ]` pentru a verifica permisiunea de execuție și `chmod u+x` pentru a o adăuga."
+        },
+        {
+          "en": "Capture the exit code of a command using the `$?` variable immediately after its execution.",
+          "ro": "Capturați codul de ieșire al unei comenzi folosind variabila `$?` imediat după execuția acesteia."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Validate `$#`. 2. Set base path. 3. Check `scripts/` directory and contents. 4. Use `[ -x ]` and `chmod` for scripts. 5. Check `programs/` directory and C file readability. 6. Check if executable exists; if not, run `gcc` and check its `$?`. 7. Execute `./scripts/pipeline.sh \"$1\"`. 8. Echo `$?`.",
+        "ro": "1. Validare `$#`. 2. Setează calea de bază. 3. Verifică directorul `scripts/` și conținutul. 4. Folosește `[ -x ]` și `chmod` pentru scripturi. 5. Verifică directorul `programs/` și lizibilitatea fișierului C. 6. Verifică dacă executabilul există; dacă nu, rulează `gcc` și verifică `$?`. 7. Execută `./scripts/pipeline.sh \"$1\"`. 8. Afișează `$?`."
+      }
+    },
+    {
+      "id": "q3",
+      "type": "bash-scripting",
+      "points": 4,
+      "prompt": {
+        "en": "Write a second bash script called \"pipeline.sh\" according to the following specification:\n\nThe script will receive one command-line argument; otherwise, it will display an appropriate message and terminate with code 1. Then the \"pipeline.sh\" script will invoke the \"listdir.sh\" script (located in the same directory as itself), passing the command-line argument it received.\n\nThe invocation of the \"listdir.sh\" script will be done through a compound command of the pipeline type, which will process the output produced by the execution of \"listdir.sh\" in the following manner: it will obtain the first 5 files with the largest numbers, for which only their path will be displayed, without any other extra information.\n\n**Grading (Barem):**\na) 0.5p – correct implementation, according to the specification, of the check for receiving one argument.\nb) 0.5p – correct invocation of the \"listdir.sh\" script, within the pipeline, according to the specification.\nc) 1p – call of the appropriate command within the pipeline for sorting numbers according to the specification.\nd) 1p – call of the appropriate command within the pipeline to obtain the first 5 files according to the specification.\ne) 1p – call of the appropriate command within the pipeline to display only the path to the files, without other extra information, according to the specification.",
+        "ro": "Să se scrie un al doilea script bash, numit \"pipeline.sh\", conform specificației următoare:\n\nScriptul va primi un argument în linia de comandă; în caz contrar se va afișa un mesaj corespunzător și se va termina cu codul 1. Apoi scriptul \"pipeline.sh\" va invoca scriptul \"listdir.sh\" (aflat în același director cu el), transmițându-i în linia de comandă, argumentul pe care l-a primit el în linia de comandă.\n\nInvocarea scriptului \"listdir.sh\" se va face printr-o comandă compusă de tip pipeline, care să proceseze outputul produs prin execuția scriptului \"listdir.sh\" în maniera următoare: se vor obține primele 5 fișiere cu cele mai mari numere, pentru care se va afișa doar calea acestora, fără alte extra informații.\n\n**Baremul pentru scriptul \"pipeline.sh\":**\na) 0.5p – implementarea corectă, conform specificației date, a verificării primirii unui argument.\nb) 0.5p – invocarea corectă a scriptului \"listdir.sh\", în cadrul pipeline-ului, conform specificației date.\nc) 1p – apelul comenzii potrivite, în cadrul pipeline-ului, pentru ordonarea numerelor, conform specificației date.\nd) 1p – apelul comenzii potrivite, în cadrul pipeline-ului, pentru a obține primele 5 fișiere, conform specificației date.\ne) 1p – apelul comenzii potrivite, în cadrul pipeline-ului, pentru afișarea doar a căii către fișiere, fără alte extra informații, conform specificației date."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `sort -t: -k2 -nr` to sort numerically based on the second field (the number) in descending order.",
+          "ro": "Folosiți `sort -t: -k2 -nr` pentru a sorta numeric pe baza celui de-al doilea câmp (numărul), în ordine descrescătoare."
+        },
+        {
+          "en": "Use `cut -d: -f1` or `awk -F: '{print $1}'` to isolate the file path from the output.",
+          "ro": "Folosiți `cut -d: -f1` sau `awk -F: '{print $1}'` pentru a izola calea fișierului din output."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `$#`. 2. Run `./listdir.sh \"$1\"`. 3. Pipe to `sort -t: -k2 -nr`. 4. Pipe to `head -n 5`. 5. Pipe to `cut -d: -f1`.",
+        "ro": "1. Verifică `$#`. 2. Rulează `./listdir.sh \"$1\"`. 3. Pipe către `sort -t: -k2 -nr`. 4. Pipe către `head -n 5`. 5. Pipe către `cut -d: -f1`."
+      }
+    },
+    {
+      "id": "q4",
+      "type": "bash-scripting",
+      "points": 5,
+      "prompt": {
+        "en": "Write a third bash script called \"listdir.sh\" according to the following specification:\n\nThe script will receive one command-line argument and perform the following checks in order:\ni) Check if it received a command-line argument and that it is a directory; if not, an appropriate message will be displayed on stderr and terminate with code 1.\nii) Check if the file \"build_scattered_number\" exists in the \"programs\" directory and that it has execution permission for it; if not, an appropriate message will be displayed on stderr and terminate with code 2.\n\nThen the \"listdir.sh\" script will implement an **explicit recursion**, through a recursive function, to iterate through all files within the directory received as an argument. Only for files that have the \".txt\" extension, the executable \"build_scattered_number\" will be called together with the path to the respective file. If the call to the executable program terminates with a non-zero exit code, an appropriate message will be written to stderr containing the respective code and the name of the \".txt\" file processed by that call, and normal execution will continue with the next iteration. (Attention: therefore, here you must implement an explicit recursion!)\n\n**Grading (Barem):**\na) 1p – correct implementation, according to the specification, of the check described in point i).\nb) 1p – correct implementation, according to the specification, of the check described in point ii).\nc) 1p – correct implementation of a recursive function for traversing a directory, plus:\nc1) 0.5p – correct implementation of the test for the \".txt\" extension.\nc2) 0.5p – correct invocation of the \"build_scattered_number\" program.\nc3) 0.5p – handling according to the specification of the case where the \"build_scattered_number\" program call terminates with an error code.\nd) 0.5p – calling the traversal function for the received argument.",
+        "ro": "Să se scrie un al treilea script bash, numit \"listdir.sh\", conform specificației următoare:\n\nScriptul va primi un argument în linia de comandă și va face următoarele verificări, în ordinea următoare:\ni) va verifica dacă a primit un argument la linia de comandă și că acesta este un director; în caz negativ, se va afișa un mesaj corespunzător pe stderr și se va termina cu codul 1.\nii) va verifica dacă în directorul \"programs\" există fișierul \"build_scattered_number\" și are drept de execuție asupra sa; în caz negativ, se va afișa un mesaj corespunzător pe stderr și se va termina cu codul 2.\n\nApoi scriptul \"listdir.sh\", va implementa o **recursie explicită**, printr-o funcție recursivă, pentru a itera prin toate fișierele din cadrul directorului primit ca și argument. Numai pentru fișierele care au extensia “.txt”, se va apela executabilul \"build_scattered_number\" împreună cu calea către fișierul respectiv. În cazul în care apelul programului executabil se va termina cu un cod de exit nenul, se va scrie pe stderr un mesaj corespunzător care să conțină codul respectiv și numele fișierului “.txt” procesat de acel apel, și se va continua execuția normală, cu următoarea iterație. (Atenție: așadar, aici trebuie să implementați o recursie explicită!)\n\n**Baremul pentru scriptul \"listdir.sh\":**\na) 1p – implementarea corectă, conform specificației date, a verificării descrise la punctul i) din specificație.\nb) 1p – implementarea corectă, conform specificației date, a verificării descrise la punctul ii) din specificație.\nc) 1p – implementarea corectă a funcției recursive de parcurgere a unui director, plus:\nc1) 0.5p – implementarea corectă a testării pentru extensia “.txt”.\nc2) 0.5p – apelarea corectă a programului “build_scattered_number”.\nc3) 0.5p – gestionarea conform specificației a cazului în care apelul programului “build_scattered_number” se termină cu un cod de eroare.\nd) 0.5p – apelarea funcției de parcurgere pentru argumentul primit."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "To iterate through items in a directory, use `for item in \"$dir\"/*`. Check if an item is a directory with `[ -d \"$item\" ]` and handle empty directories.",
+          "ro": "Pentru a itera prin elementele unui director, folosiți `for item in \"$dir\"/*`. Verificați dacă un element este director cu `[ -d \"$item\" ]` și gestionați directoarele goale."
+        },
+        {
+          "en": "Check for the `.txt` extension using `[[ \"$file\" == *.txt ]]` or by using `grep` or `basename`.",
+          "ro": "Verificați extensia `.txt` folosind `[[ \"$file\" == *.txt ]]` sau utilizând `grep` sau `basename`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check if `$1` is a directory. 2. Verify `../programs/build_scattered_number` (relative path) exists and is executable. 3. Define a function `traverse()` that loops through `\"$1\"/*`. 4. Inside loop: if entry is directory, call `traverse \"$entry\"`. 5. If entry is file and matches `*.txt`, call the C binary. 6. Check binary's `$?`; if != 0, print error to stderr. 7. Call `traverse \"$1\"` at the end.",
+        "ro": "1. Verifică dacă `$1` este director. 2. Verifică dacă `../programs/build_scattered_number` există și e executabil. 3. Definește o funcție `traverse()` care iterează prin `\"$1\"/*`. 4. În interior: dacă e director, apelează recursiv `traverse \"$entry\"`. 5. Dacă e fișier și se potrivește `*.txt`, apelează binarul C. 6. Verifică `$?` al binarului; dacă != 0, afișează eroare la stderr. 7. Apelează `traverse \"$1\"` la final."
+      }
+    }
+  ]
+}

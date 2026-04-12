@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "id": "os-examen2023-2024-tp2-2024-varianta-4",
+    "title": {
+      "en": "OS Practical Test – Variant no. 4",
+      "ro": "Test practic la SO – varianta nr. 4"
+    },
+    "year": 2024,
+    "type": "midterm",
+    "variant": 4,
+    "duration": null,
+    "totalPoints": 25
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "bash-scripting",
+      "points": 2.5,
+      "prompt": {
+        "en": "Implement the `starter.sh` script with the following functionality:\n\n**Directory Structure:**\n```\n.\n├── starter.sh\n├── data\n│   └── input.txt\n├── main_app\n│   ├── supervisor.c\n│   └── procesators\n│       ├── worker1.c\n│       └── worker2.c\n```\n\n**Requirements:**\ni) The script receives a parameter `p` (0 or 1) in the command line. Otherwise, display an error message and exit.\nii) If `p=0`, start `worker2` (from its directory) in the background. After 1 second, start `supervisor` (from its directory).\niii) If `p=1`, start `supervisor` in the background. After 2 seconds, start `worker2`.\niv) In both cases, `supervisor` is started with one command-line argument: the path to `input.txt` (created beforehand with English text, letters, digits, and symbols).\nv) The script waits for all three programs to finish, displays the content of the named non-persistent mapping, and then performs cleanup (removes the named mapping and the FIFO pipe).\n\n**Grading Breakdown:**\n- 0.25p: Validate parameter `p`.\n- 0.5p: Start the first program in background based on `p`.\n- 0.25p: Correct pause (1s or 2s).\n- 0.5p: Start the second program (with command line argument for supervisor).\n- 0.25p: Wait for all processes to finish.\n- 0.25p: Display mapping content.\n- 0.5p: Cleanup (mapping and FIFO).",
+        "ro": "Implementați scriptul \"starter.sh\" cu următoarea funcționalitate:\n\n**Ierarhia de directoare:**\n```\n.\n├── starter.sh\n├── data\n│   └── input.txt\n├── main_app\n│   ├── supervisor.c\n│   └── procesators\n│       ├── worker1.c\n│       └── worker2.c\n```\n\n**Cerințe:**\ni) Scriptul va primi în linia de comandă un parametru p, având valoarea 0 sau 1, iar în caz contrar va afișa un mesaj de eroare adecvat și se va termina.\nii) Dacă p=0, scriptul va porni mai întâi execuția programului worker2 în background, iar după o pauză de 1 secundă, va porni și execuția programului supervisor.\niii) Iar dacă p=1, atunci scriptul va porni mai întâi execuția programului supervisor în background, iar după o pauză de 2 secunde, va porni și execuția programului worker2.\niv) În ambele situații, programul supervisor va fi pornit cu un argument în linia de comandă: calea către fișierul de intrare \"input.txt\".\nv) Scriptul va aștepta terminarea execuției celor trei programe și va afișa conținutul mapării nepersistente cu nume, după care va face curățenie (va “distruge” maparea nepersistentă și canalul fifo).\n\n**Barem:**\n- 0.25p – verificarea parametrului p.\n- 0.5p – pornirea primului program în background conform p.\n- 0.25p – pauză de 1 sau 2 secunde.\n- 0.5p – pornirea celuilalt program (cu argument pt supervisor).\n- 0.25p – așteptarea terminării proceselor.\n- 0.25p – afișarea conținutului mapării.\n- 0.5p – ștergerea mapării și a fifo-ului."
+      },
+      "language": "bash",
+      "hints": [
+        {
+          "en": "Use `wait` to ensure all background processes complete before cleanup.",
+          "ro": "Utilizați `wait` pentru a vă asigura că toate procesele din fundal s-au terminat înainte de curățenie."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. Check `$1` value. 2. Based on `$1`, run binaries in background with correct paths. 3. Use `sleep` for the required delay. 4. Use `wait` to block. 5. Print the shared memory content (likely using a utility or via a child's output). 6. Use `rm` or specific IPC removal commands.",
+        "ro": "1. Verificare `$1`. 2. Pornire binare în fundal folosind căi corecte. 3. `sleep` pentru întârziere. 4. `wait` pentru sincronizare. 5. Afișare conținut memorie partajată. 6. Ștergere resurse IPC."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "code-writing",
+      "points": 7.25,
+      "prompt": {
+        "en": "Implement the program `supervisor.c` with the following functionality:\n\n**Requirements:**\ni) In `main`, verify the command-line argument (path to `input.txt`) and initialize a named non-persistent shared memory mapping (`shm_open`) to communicate with `worker1` in both directions.\nii) In a separate function, read `input.txt` line by line. For each line, select only alphanumeric characters (A-Z, a-z, 0-9) and send them to `worker1` via the named shared memory mapping.\niii) In another separate function, read two integers sent back by `worker1` via the same shared memory. Calculate their sum and display it. Exit with code 0 if the sum is even, or 1 if the sum is odd.\n\n**Grading Breakdown:**\n- 0.25p: Validate command line argument.\n- 1p: Correct initialization of named non-persistent shared memory mapping.\n- 0.75p: Correct reading and filtering of `input.txt`.\n- 1p: Sending filtered data to `worker1` via SHM (no race conditions/segfaults).\n- 1p: Receiving data from `worker1` via SHM (no race conditions/segfaults).\n- 0.75p: Process results, display final sum, and correct exit code.\n- 2.5p: Generic points (Error handling, no warnings, readable code).",
+        "ro": "Implementați programul \"supervisor.c\" cu următoarea funcționalitate:\n\n**Cerințe:**\ni) În funcția main, programul va verifica primirea argumentului la linia de comandă și va face inițializările necesare pentru a putea schimba informații cu procesul worker1, în ambele sensuri, printr-un singur obiect de memorie partajată – o mapare nepersistentă cu nume, creată cu funcția shm_open.\nii) Într-o funcție separată, programul va citi pe rând fiecare linie din fișierul input.txt, va selecta doar caracterele alfanumerice și le va transmite către procesul worker1 prin intermediul acelei mapări.\niii) Într-o altă funcție separată, programul va citi două numere întregi transmise de către procesul worker1 prin SHM și va calcula suma acestora, afișând-o. Dacă suma este pară, exit 0, altfel exit 1.\n\n**Barem:**\n- 0.25p – verificarea argumentului liniei de comandă.\n- 1p – inițializarea corectă a mapării nepersistente cu nume (shm_open).\n- 0.75p – citirea corectă din fișier și filtrarea caracterelor.\n- 1p – transmiterea rezultatelor către worker1 prin SHM (fără race condition/segfault).\n- 1p – recepționarea datelor de la worker1 prin SHM (fără race condition/segfault).\n- 0.75p – procesarea rezultatelor, afișarea sumei și exit code corect.\n- 2.5p – Puncte generice (Tratare erori, compilare fără warning-uri, stil de cod)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `mmap` after `shm_open` to access the memory. Consider using semaphores for synchronization.",
+          "ro": "Folosiți `mmap` după `shm_open` pentru a accesa memoria. Luați în calcul utilizarea semafoarelor pentru sincronizare."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. `shm_open` + `ftruncate` + `mmap`. 2. `fopen` for the file. 3. `fgets` in a loop, filtering with `isalnum()`. 4. Synchronization (semaphores) is crucial for SHM communication. 5. Read back results, `printf`, and `exit(sum % 2)`.",
+        "ro": "1. `shm_open` + `ftruncate` + `mmap`. 2. `fopen` pentru fișier. 3. `fgets` în buclă, filtrare cu `isalnum()`. 4. Sincronizarea (semafoare) este critică pentru comunicația prin SHM. 5. Citire rezultate, `printf`, și `exit(sum % 2)`."
+      }
+    },
+    {
+      "id": "q3",
+      "type": "code-writing",
+      "points": 8.75,
+      "prompt": {
+        "en": "Implement the program `worker1.c` with the following functionality:\n\n**Requirements:**\ni) Initialize communication to send data to `worker2` via a FIFO pipe and receive results from `worker2` via an anonymous pipe.\nii) Initialize communication with `supervisor` via the named non-persistent mapping.\niii) In a separate function, read characters from the shared mapping. Calculate the sum of received digits in `sum_digits`. Forward all non-digit characters (letters) to `worker2` via the FIFO pipe.\niv) In another separate function, read all processed characters and an integer (count of transformations) from `worker2` via the anonymous pipe. Calculate the sum of the ASCII codes of the received characters, then subtract the received transformation count. Send this final result and the `sum_digits` back to `supervisor` via the shared mapping.\n\n**Grading Breakdown:**\n- 0.25p: Configure anonymous pipe for receiving from `worker2`.\n- 0.5p: Configure FIFO pipe for sending to `worker2`.\n- 1p: Initialize named non-persistent shared memory mapping for `supervisor`.\n- 1p: Receive data from `supervisor` via SHM (no race condition/segfault).\n- 0.5p: Process received characters (calculate digit sum).\n- 0.75p: Send characters to `worker2` via FIFO (no concurrency bugs).\n- 0.75p: Receive results from `worker2` via anonymous pipe (no concurrency bugs).\n- 0.5p: Process results received from `worker2`.\n- 1p: Send calculated values back to `supervisor` via SHM (no race condition/segfault).\n- 2.5p: Generic points (Error handling, no warnings, readable code).",
+        "ro": "Implementați programul \"worker1.c\" cu următoarea funcționalitate:\n\n**Cerințe:**\ni) În funcția main, face inițializările pentru a trimite informații la procesul worker2 printr-un canal fifo și pentru a primi rezultate înapoi printr-un canal anonim.\nii) Face inițializările pentru a schimba informații cu procesul supervisor prin maparea nepersistentă cu nume.\niii) Într-o funcție separată, va citi din mapare caracterele primite de la supervisor. Calculează suma cifrelor (`sum_digits`) și transmite literele mai departe către worker2 prin fifo.\niv) Într-o altă funcție separată, va citi din canalul anonim toate caracterele și un număr întreg (nr. transformări) primite de la worker2. Calculează suma codurilor ASCII ale caracterelor, din care scade numărul de transformări. Trimite acest rezultat și `sum_digits` către supervisor prin mapare.\n\n**Barem:**\n- 0.25p – configurare canal anonim pt recepție de la worker2.\n- 0.5p – configurare canal fifo pt trimitere către worker2.\n- 1p – inițializare mapare nepersistentă cu nume (comunicație supervisor).\n- 1p – recepție date de la supervisor prin SHM (fără race condition/segfault).\n- 0.5p – procesare caractere (sumă cifre).\n- 0.75p – transmitere caractere către worker2 prin fifo (fără bug-uri de concurență).\n- 0.75p – recepție rezultate de la worker2 prin canal anonim (fără bug-uri de concurență).\n- 0.5p – procesare date primite de la worker2.\n- 1p – transmitere informații către supervisor prin SHM (fără race condition/segfault).\n- 2.5p – Puncte generice (Tratare erori, compilare fără warning-uri, stil de cod)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Ensure the anonymous pipe file descriptors are handled correctly if `worker1` is executed by `worker2`.",
+          "ro": "Asigurați-vă că descriptorii pentru canalul anonim sunt gestionați corect dacă `worker1` este executat de `worker2`."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. `mkfifo` and `pipe`. 2. `shm_open` for supervisor comms. 3. Use `isdigit()` to separate digits from letters. 4. Use `read()` and `write()` for pipes. 5. Synchronize access to shared memory using semaphores.",
+        "ro": "1. `mkfifo` și `pipe`. 2. `shm_open` pentru comunicarea cu supervisor. 3. `isdigit()` pentru a separa cifrele de litere. 4. `read()` și `write()` pentru pipe-uri. 5. Sincronizarea accesului la memoria partajată folosind semafoare."
+      }
+    },
+    {
+      "id": "q4",
+      "type": "code-writing",
+      "points": 6.5,
+      "prompt": {
+        "en": "Implement the program `worker2.c` with the following functionality:\n\n**Requirements:**\ni) Create a child process using `fork`. In the child process, `exec` the program `worker1`.\nii) Initialize communication to receive data from `worker1` via a FIFO pipe and send data back via an anonymous pipe.\niii) In a separate function, read characters one by one from the FIFO. Transform uppercase letters to lowercase, keeping lowercase letters unchanged. Count the number of transformations. Send all processed characters and the total transformation count back to `worker1` via the anonymous pipe.\n\n**Grading Breakdown:**\n- 0.75p: Correct `fork` and `exec` for `worker1`.\n- 0.75p: Create FIFO and configure communication with `worker1`.\n- 0.5p: Create anonymous pipe and configure communication with `worker1`.\n- 0.75p: Receive data from `worker1` via FIFO (no concurrency bugs).\n- 0.5p: Process characters (uppercase to lowercase count).\n- 0.75p: Send results back to `worker1` via anonymous pipe (no concurrency bugs).\n- 2.5p: Generic points (Error handling, no warnings, readable code).",
+        "ro": "Implementați programul \"worker2.c\" cu următoarea funcționalitate:\n\n**Cerințe:**\ni) În funcția principală, va crea un proces fiu, iar în fiu va starta programul worker1 (prin apel `exec`). \nii) Va face inițializările necesare pentru a primi informații de la worker1 printr-un canal fifo și pentru a trimite rezultate înapoi printr-un canal anonim.\niii) Într-o funcție separată, va citi din canalul fifo fiecare caracter transmis de worker1. Transformă literele mari în litere mici, păstrând literele mici neschimbate. Contorizează transformările. Trimite toate caracterele procesate și numărul de transformări înapoi la worker1 prin canalul anonim.\n\n**Barem:**\n- 0.75p – operații fork și exec corecte pt worker1.\n- 0.75p – crearea fifo și configurarea comunicației cu worker1.\n- 0.5p – crearea canalului anonim și configurarea comunicației cu worker1.\n- 0.75p – recepție date de la worker1 prin fifo (fără bug-uri de concurență).\n- 0.5p – procesare date (transformare litere mari și contorizare).\n- 0.75p – transmitere rezultate către worker1 prin canal anonim (fără bug-uri de concurență).\n- 2.5p – Puncte generice (Tratare erori, compilare fără warning-uri, stil de cod)."
+      },
+      "language": "c",
+      "hints": [
+        {
+          "en": "Use `isupper()` and `tolower()` from `ctype.h` for character transformations.",
+          "ro": "Utilizați `isupper()` și `tolower()` din `ctype.h` pentru transformarea caracterelor."
+        }
+      ],
+      "solutionOutline": {
+        "en": "1. `pipe` (for anonymous communication) + `fork`. 2. In child: setup pipe redirection if needed, then `execlp(\"./worker1\", ...)` or equivalent. 3. In parent: `open` FIFO, `read` in a loop. 4. Perform transformation check: `if (isupper(c)) { c = tolower(c); count++; }`. 5. `write` characters and the `int` count to the anonymous pipe.",
+        "ro": "1. `pipe` (pentru comunicare anonimă) + `fork`. 2. În fiu: setup redirecționare pipe dacă e cazul, apoi `execlp(\"./worker1\", ...)` sau echivalent. 3. În părinte: `open` FIFO, `read` în buclă. 4. Verificare transformare: `if (isupper(c)) { c = tolower(c); count++; }`. 5. `write` caracterele și variabila `int` (count) în pipe-ul anonim."
+      }
+    }
+  ]
+}
