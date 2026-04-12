@@ -156,10 +156,26 @@ export default function TestsTab({ tests, courses }) {
     );
   }
 
-  // Group tests by type
-  const partials = tests.filter(t => t.id.startsWith('partial-'));
-  const exams = tests.filter(t => t.id.startsWith('exam-'));
-  const other = tests.filter(t => !t.id.startsWith('partial-') && !t.id.startsWith('exam-'));
+  // Group tests by category. Matched against id + shortTitle (both EN and RO
+  // short titles include session markers like "Restanță", "Sesiune", "TP1",
+  // "Lab T2", "Alți Ani", "Model", "Curs P", "Grile").
+  function categorize(test) {
+    const id = test.id || '';
+    const short = ((test.shortTitle?.en || '') + ' ' + (test.shortTitle?.ro || '')).trim();
+    const hay = `${id} ${short}`;
+    // Order matters: check restanță first (may contain "T2" in its slug like "restanta-curs-partea-2")
+    if (/restan[țt]a|m[ăa]rire|retake/i.test(hay)) return 'restanta';
+    // Final exam: theoretical curs, session, theoretical MC grile
+    if (/sesiune|\bCurs\b|\bGrile\b|final-exam|\bexam\b(?![-_]retake)/i.test(hay)) return 'final';
+    // Midterm: TP1/TP2, T1/T2 lab, Model, Alți Ani, legacy partial-* prefix
+    if (/\bTP?[12]\b|model|al[țt]i|midterm|par[țt]ial|\bLab\s*T\d|^partial-/i.test(hay)) return 'midterm';
+    return 'other';
+  }
+
+  const midterms = tests.filter(t => categorize(t) === 'midterm');
+  const finals = tests.filter(t => categorize(t) === 'final');
+  const retakes = tests.filter(t => categorize(t) === 'restanta');
+  const other = tests.filter(t => categorize(t) === 'other');
 
   const renderCard = (test) => {
     const prev = testProgress?.[test.id];
@@ -304,8 +320,9 @@ export default function TestsTab({ tests, courses }) {
         </div>
       )}
 
-      {renderGroup(t('Midterms', 'Par\u021biale'), partials)}
-      {renderGroup(t('Final Exams', 'Examene'), exams)}
+      {renderGroup(t('Midterms', 'Par\u021biale'), midterms)}
+      {renderGroup(t('Final Exams', 'Examene'), finals)}
+      {renderGroup(t('Retakes', 'Restan\u021be'), retakes)}
       {renderGroup(t('Other', 'Altele'), other)}
     </div>
   );
