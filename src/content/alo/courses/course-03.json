@@ -405,6 +405,56 @@
           }
         },
         {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "A `binary64` number has $s=1$, biased exponent $c = 1021$, and fraction $f = 0.5$. What's its value?",
+                "ro": "Un număr `binary64` are $s=1$, exponentul deplasat $c = 1021$ și fracția $f = 0.5$. Care este valoarea?"
+              },
+              "options": [
+                {
+                  "text": "$-0.375$",
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $(-1)^1 \\cdot 2^{1021 - 1023} \\cdot (1 + 0.5) = -1 \\cdot 2^{-2} \\cdot 1.5 = -0.375$.",
+                    "ro": "Corect. $(-1)^1 \\cdot 2^{1021 - 1023} \\cdot (1 + 0.5) = -1 \\cdot 2^{-2} \\cdot 1.5 = -0.375$."
+                  }
+                },
+                {
+                  "text": "$-0.25$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "You took $2^{-2}$ but forgot the mantissa $(1 + f) = 1.5$. The implicit leading $1$ always contributes.",
+                    "ro": "Ai luat $2^{-2}$ dar ai uitat mantisa $(1 + f) = 1.5$. Cifra $1$ implicită de la început contribuie întotdeauna."
+                  }
+                },
+                {
+                  "text": "$-0.5$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "That's $f$ itself, not the decoded value. Remember: value $= (-1)^s \\cdot 2^{c - 1023} \\cdot (1 + f)$.",
+                    "ro": "Aceasta este $f$ în sine, nu valoarea decodată. Reține: valoarea $= (-1)^s \\cdot 2^{c - 1023} \\cdot (1 + f)$."
+                  }
+                },
+                {
+                  "text": "$-1021.5$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "You read the biased exponent as the value. $c$ is a **biased** integer; subtract $1023$ and use it as the exponent of $2$, don't treat it as the magnitude.",
+                    "ro": "Ai citit exponentul deplasat ca valoare. $c$ este un întreg **deplasat**; scade $1023$ și folosește-l ca exponent al lui $2$, nu îl trata ca magnitudine."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Three moving parts: sign, biased exponent ($c - 1023$), and mantissa $(1 + f)$. Miss any one and the decoded value is wrong.",
+                "ro": "Trei părți mobile: semn, exponent deplasat ($c - 1023$) și mantisa $(1 + f)$. Dacă pierzi una, valoarea decodată e greșită."
+              },
+              "reviewStep": "alo-c3-binary64"
+            }
+          ]
+        },
+        {
           "type": "lecture",
           "note": {
             "en": "Slides 9–12 of ALO curs 03 — bit layouts for `binary16`, `binary32`, `binary64`.",
@@ -919,6 +969,56 @@
           }
         },
         {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "You must compute $10^{20} + 1 + (-10^{20})$ in `binary64`. Which order preserves the most precision?",
+                "ro": "Trebuie să calculezi $10^{20} + 1 + (-10^{20})$ în `binary64`. Ce ordine păstrează cea mai multă precizie?"
+              },
+              "options": [
+                {
+                  "text": "$(10^{20} + 1) + (-10^{20})$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "$10^{20} +_c 1$ rounds back to $10^{20}$ (the $1$ is below the ULP of $10^{20}$), so the $1$ is lost and the final result is $0$, not $1$.",
+                    "ro": "$10^{20} +_c 1$ se rotunjește înapoi la $10^{20}$ (cifra $1$ este sub ULP-ul lui $10^{20}$), deci $1$ se pierde și rezultatul final este $0$, nu $1$."
+                  }
+                },
+                {
+                  "text": "$(10^{20} + (-10^{20})) + 1$",
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Cancel the huge magnitudes first ($0$ exactly), then add $1$ — answer $1$. Rule of thumb: combine like magnitudes before adding small contributions.",
+                    "ro": "Corect. Anulează mai întâi magnitudinile mari (exact $0$), apoi adaugă $1$ — rezultat $1$. Regulă empirică: combină magnitudini similare înainte să adaugi contribuțiile mici."
+                  }
+                },
+                {
+                  "text": { "en": "Order doesn't matter — addition is associative.", "ro": "Ordinea nu contează — adunarea este asociativă." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Machine addition is **not** associative. Each $+_c$ rounds independently, so reordering can change the answer by many ULPs.",
+                    "ro": "Adunarea mașinii **nu** este asociativă. Fiecare $+_c$ rotunjește independent, deci reordonarea poate schimba rezultatul cu multe ULP-uri."
+                  }
+                },
+                {
+                  "text": { "en": "Only if you sort from smallest to largest by absolute value.", "ro": "Doar dacă sortezi de la cea mai mică la cea mai mare în valoare absolută." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "\"Smallest-to-largest\" is a good default for **like-signed** sums, but here the two $10^{20}$ terms cancel exactly only if combined first. Sorting by absolute value would add $1$ to $10^{20}$ first and lose it.",
+                    "ro": "\"De la cea mai mică la cea mai mare\" este o implicită bună pentru sume **cu același semn**, dar aici cei doi termeni $10^{20}$ se anulează exact doar dacă sunt combinați primii. Sortarea după valoare absolută ar adăuga $1$ la $10^{20}$ mai întâi și l-ar pierde."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Non-associativity means the algorithm must be aware of magnitude structure, not just follow a fixed sort.",
+                "ro": "Ne-asociativitatea înseamnă că algoritmul trebuie să fie conștient de structura magnitudinilor, nu doar să urmeze o sortare fixă."
+              },
+              "reviewStep": "alo-c3-machine-ops"
+            }
+          ]
+        },
+        {
           "type": "lecture",
           "note": {
             "en": "Slide 17 of ALO curs 03 — machine operations and rounding.",
@@ -1405,7 +1505,7 @@
         },
         {
           "type": "code",
-          "code": "1.00000  2.00000  3.00000  4.00000  5.00000  6.00001\n6.99970  8.00727  8.91725  20.84691\n\n10.09527 +/- i * 0.64350\n11.79363 +/- i * 1.65233\n13.99236 +/- i * 2.51883\n16.73074 +/- i * 2.81262\n19.50244 +/- i * 1.94033"
+          "code": "# Ten surviving real roots (note 20 drifted to ~20.85, 9 to ~8.92):\n1.00000  2.00000  3.00000  4.00000  5.00000  6.00001\n6.99970  8.00727  8.91725  20.84691\n\n# Ten former real roots 10..19, now five complex-conjugate pairs:\n10.09527 +/- i * 0.64350\n11.79363 +/- i * 1.65233\n13.99236 +/- i * 2.51883\n16.73074 +/- i * 2.81262\n19.50244 +/- i * 1.94033"
         },
         {
           "type": "callout",
@@ -1516,8 +1616,8 @@
             "ro": "Doi studenți rezolvă aceeași ecuație de gradul doi bine condiționată $ax^2 + bx + c = 0$ cu $b \\gg 0, \\ a, c$ mici. Studentul A folosește formula clasică $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$. Studentul B folosește o versiune modificată. Studentul A obține rezultate proaste pentru una dintre cele două rădăcini. Ce a mers prost?"
           },
           "answer": {
-            "en": "The root $x_1 = \\frac{-b + \\sqrt{b^2 - 4ac}}{2a}$ suffers **catastrophic cancellation**: when $b^2 \\gg 4ac$, $\\sqrt{b^2 - 4ac} \\approx b$, so the numerator is a tiny difference of two close numbers. Lost digits of precision. Student A's problem is **well-conditioned** but the **algorithm is unstable**. Student B uses $x_1 = \\frac{2c}{-b - \\sqrt{b^2 - 4ac}}$ which rearranges to avoid the cancellation. Same problem, better algorithm.",
-            "ro": "Rădăcina $x_1 = \\frac{-b + \\sqrt{b^2 - 4ac}}{2a}$ suferă de **anulare catastrofală**: când $b^2 \\gg 4ac$, $\\sqrt{b^2 - 4ac} \\approx b$, deci numărătorul este o diferență minusculă a două numere apropiate. Cifre de precizie pierdute. Problema studentului A este **bine condiționată**, dar **algoritmul este instabil**. Studentul B folosește $x_1 = \\frac{2c}{-b - \\sqrt{b^2 - 4ac}}$, care rearanjează pentru a evita anularea. Aceeași problemă, algoritm mai bun."
+            "en": "The root $x_1 = \\frac{-b + \\sqrt{b^2 - 4ac}}{2a}$ suffers **catastrophic cancellation**: when $b^2 \\gg 4ac$, $\\sqrt{b^2 - 4ac} \\approx b$, so the numerator is a tiny difference of two close numbers. Lost digits of precision. Student A's problem is **well-conditioned** but the **algorithm is unstable** — can you guess how Student B rearranged things to dodge the cancellation? We'll return to this.",
+            "ro": "Rădăcina $x_1 = \\frac{-b + \\sqrt{b^2 - 4ac}}{2a}$ suferă de **anulare catastrofală**: când $b^2 \\gg 4ac$, $\\sqrt{b^2 - 4ac} \\approx b$, deci numărătorul este o diferență minusculă a două numere apropiate. Cifre de precizie pierdute. Problema studentului A este **bine condiționată**, dar **algoritmul este instabil** — poți ghici cum a rearanjat Studentul B lucrurile pentru a evita anularea? Vom reveni."
           }
         },
         {
@@ -1617,8 +1717,8 @@
         {
           "type": "learn",
           "content": {
-            "en": "**Re-mapping the opening example.** In the Student A vs Student B quadratic, $x = (a, b, c)$, $P$ is \"return the two roots,\" $\\tilde{P}_A$ is the textbook formula, and $\\tilde{P}_B$ is Student B's rearrangement. For the small root, $\\tilde{P}_A(x)$ lands far from $P(x)$ (catastrophic cancellation — **forward-unstable**), while $\\tilde{P}_B(x) \\approx P(x)$ directly. Same problem, same $x$, two different $\\tilde{P}$s — the gap between them is pure algorithm stability.",
-            "ro": "**Re-cartografierea exemplului de deschidere.** În cvadratica Studentul A vs Studentul B, $x = (a, b, c)$, $P$ este \"returnează cele două rădăcini\", $\\tilde{P}_A$ este formula clasică, iar $\\tilde{P}_B$ este rearanjarea lui B. Pentru rădăcina mică, $\\tilde{P}_A(x)$ aterizează departe de $P(x)$ (anulare catastrofală — **instabil înainte**), în timp ce $\\tilde{P}_B(x) \\approx P(x)$ direct. Aceeași problemă, același $x$, doi $\\tilde{P}$ diferiți — golul dintre ei este pură stabilitate algoritmică."
+            "en": "**Re-mapping the opening example.** Student B's trick (via Vieta: $x_1 x_2 = c/a$) is to rewrite the troubled root as $x_1 = \\frac{2c}{-b - \\sqrt{b^2 - 4ac}}$ — now the denominator is the **sum** of two same-signed numbers, no cancellation. In the $\\tilde{P}$ framework: $x = (a, b, c)$, $P$ returns both roots, $\\tilde{P}_A$ is the textbook formula, $\\tilde{P}_B$ is the rewrite. For the small root, $\\tilde{P}_A(x)$ lands far from $P(x)$ (**forward-unstable**), while $\\tilde{P}_B(x) \\approx P(x)$ directly. Same problem, same $x$, two different $\\tilde{P}$s — the gap is pure algorithm stability.",
+            "ro": "**Re-cartografierea exemplului de deschidere.** Trucul Studentului B (via Vieta: $x_1 x_2 = c/a$) este să rescrie rădăcina problematică ca $x_1 = \\frac{2c}{-b - \\sqrt{b^2 - 4ac}}$ — acum numitorul este **suma** a două numere cu același semn, fără anulare. În cadrul $\\tilde{P}$: $x = (a, b, c)$, $P$ returnează ambele rădăcini, $\\tilde{P}_A$ este formula clasică, $\\tilde{P}_B$ este rescrierea. Pentru rădăcina mică, $\\tilde{P}_A(x)$ aterizează departe de $P(x)$ (**instabil înainte**), în timp ce $\\tilde{P}_B(x) \\approx P(x)$ direct. Aceeași problemă, același $x$, doi $\\tilde{P}$ diferiți — golul este pură stabilitate algoritmică."
           }
         },
         {
@@ -1912,19 +2012,24 @@
               },
               "options": [
                 {
-                  "text": { "en": "Yes — it's still addition.", "ro": "Da — tot adunare e." },
+                  "text": { "en": "Yes — addition is always associative.", "ro": "Da — adunarea este mereu asociativă." },
                   "correct": false,
-                  "explanation": { "en": "Mathematical addition is associative; **machine** addition is not, because each step rounds independently.", "ro": "Adunarea matematică este asociativă; adunarea **mașinii** nu, pentru că fiecare pas rotunjește independent." }
+                  "explanation": { "en": "Math addition is; machine addition rounds independently at every step, which breaks associativity.", "ro": "Adunarea matematică da; adunarea mașinii rotunjește independent la fiecare pas, ceea ce strică asociativitatea." }
                 },
                 {
-                  "text": { "en": "No — each addition rounds separately, so the order affects the result.", "ro": "Nu — fiecare adunare rotunjește separat, deci ordinea afectează rezultatul." },
+                  "text": { "en": "No — rounding at each step breaks it.", "ro": "Nu — rotunjirea la fiecare pas o strică." },
                   "correct": true,
-                  "explanation": { "en": "Correct. This is why algorithms sum from smallest-to-largest magnitude to preserve precision.", "ro": "Corect. De aceea algoritmii însumează de la cea mai mică la cea mai mare magnitudine pentru a păstra precizia." }
+                  "explanation": { "en": "Correct. This is why algorithms sum from smallest-to-largest magnitude (or cancel large terms first) to preserve precision.", "ro": "Corect. De aceea algoritmii însumează de la cea mai mică la cea mai mare magnitudine (sau anulează termenii mari primii) pentru a păstra precizia." }
                 },
                 {
                   "text": { "en": "Only if all inputs are positive.", "ro": "Doar dacă toate intrările sunt pozitive." },
                   "correct": false,
                   "explanation": { "en": "Sign doesn't matter — associativity fails regardless because rounding is non-linear.", "ro": "Semnul nu contează — asociativitatea eșuează oricum pentru că rotunjirea este neliniară." }
+                },
+                {
+                  "text": { "en": "Only for very large magnitudes — small numbers are associative.", "ro": "Doar pentru magnitudini mari — numerele mici sunt asociative." },
+                  "correct": false,
+                  "explanation": { "en": "Rounding-driven non-associativity is not a \"big numbers\" problem; it applies at every ULP. Small numbers near each other can still round differently depending on order.", "ro": "Ne-asociativitatea din rotunjire nu este o problemă de \"numere mari\"; se aplică la fiecare ULP. Numere mici apropiate se pot rotunji diferit în funcție de ordine." }
                 }
               ],
               "explanation": { "en": "Every $+_c$ rounds, and rounding is not associative.", "ro": "Fiecare $+_c$ rotunjește, iar rotunjirea nu este asociativă." },
