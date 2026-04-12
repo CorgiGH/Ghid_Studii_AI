@@ -32,13 +32,15 @@ export default function ImageBlock({ src, alt, caption, width, height }) {
     captionText = `Fig. — ${captionText}`;
   }
 
+  const isDecorative = !altText;
+
   return (
-    <figure className="mb-3 max-w-2xl mx-auto">
+    <figure className="mb-5 max-w-2xl mx-auto">
       <a
         href={resolved}
         target="_blank"
         rel="noopener noreferrer"
-        className="block rounded-xl"
+        className="block rounded-xl relative"
         style={{
           padding: '0.5rem',
           background: 'var(--theme-card-bg)',
@@ -50,11 +52,43 @@ export default function ImageBlock({ src, alt, caption, width, height }) {
           src={resolved}
           alt={altText || ''}
           className="rounded-lg w-full block"
+          style={{ cursor: 'zoom-in' }}
           loading="lazy"
           decoding="async"
           {...(width ? { width } : {})}
           {...(height ? { height } : {})}
         />
+        {!isDecorative && (
+          <span
+            aria-hidden="true"
+            className="absolute flex items-center justify-center rounded-full pointer-events-none"
+            style={{
+              top: '0.75rem',
+              right: '0.75rem',
+              width: '28px',
+              height: '28px',
+              background: 'rgba(0, 0, 0, 0.45)',
+              opacity: 0.6,
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="2.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.5" y2="16.5" />
+              <line x1="11" y1="8" x2="11" y2="14" />
+              <line x1="8" y1="11" x2="14" y2="11" />
+            </svg>
+          </span>
+        )}
       </a>
       {captionText && (
         <figcaption

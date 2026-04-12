@@ -24,12 +24,23 @@ export default function TableBlock({ headers, rows }) {
     return row;
   };
   return (
-    <div className="overflow-x-auto mb-3 rounded-xl" style={{ border: '1px solid var(--theme-border)' }}>
+    <div
+      className="overflow-x-auto mb-3 rounded-xl max-w-prose mx-auto"
+      style={{ border: '1px solid var(--theme-border)' }}
+    >
       <table className="w-full text-sm" style={{ color: 'var(--theme-content-text)' }}>
         {resolvedHeaders && (
           <thead>
             <tr style={{ backgroundColor: 'var(--theme-border)' }}>
-              {resolvedHeaders.map((h, i) => <th key={i} className="px-3 py-2 text-left font-bold text-xs">{resolveCell(h, t)}</th>)}
+              {resolvedHeaders.map((h, i) => (
+                <th
+                  key={i}
+                  className="px-3 py-2 text-left font-bold text-xs"
+                  style={{ verticalAlign: 'top' }}
+                >
+                  {resolveCell(h, t)}
+                </th>
+              ))}
             </tr>
           </thead>
         )}
@@ -38,7 +49,15 @@ export default function TableBlock({ headers, rows }) {
             const cells = resolveRow(row);
             return (
               <tr key={ri} style={ri % 2 ? { backgroundColor: 'var(--theme-card-bg)' } : {}}>
-                {cells.map((cell, ci) => <td key={ci} className="px-3 py-2 text-xs">{resolveCell(cell, t)}</td>)}
+                {cells.map((cell, ci) => (
+                  <td
+                    key={ci}
+                    className="px-3 py-2 text-xs"
+                    style={{ verticalAlign: 'top', textAlign: 'left' }}
+                  >
+                    {resolveCell(cell, t)}
+                  </td>
+                ))}
               </tr>
             );
           })}

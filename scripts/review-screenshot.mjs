@@ -64,7 +64,7 @@ const configs = [
 const paths = [];
 
 // Max step screenshots per config to keep output bounded even on very long courses.
-const MAX_STEPS = 20;
+const MAX_STEPS = 25;
 
 for (const config of configs) {
   await page.setViewport({ width: config.width, height: config.height });
@@ -80,6 +80,10 @@ for (const config of configs) {
   }, config.dark);
 
   await page.goto(`${BASE}${url}`, { waitUntil: 'networkidle0' });
+
+  // Extra settle after theme localStorage set + reload to avoid capturing
+  // a half-themed or half-loaded first frame on subsequent theme loops.
+  await new Promise(r => setTimeout(r, 500));
 
   // Wait for content to settle (animations, lazy loading)
   await new Promise(r => setTimeout(r, 2000));

@@ -14,7 +14,7 @@ const alo = {
     { id: 'alo-c1', src: 'alo/courses/course-01.json', metaId: 'alo-c1',
       title: { en: 'Course 1: Introduction & Motivating Examples', ro: 'Cursul 1: Introducere și exemple motivante' },
       shortTitle: { en: 'C1: Intro', ro: 'C1: Intro' },
-      sectionCount: 5 },
+      sectionCount: 6 },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };

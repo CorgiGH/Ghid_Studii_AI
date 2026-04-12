@@ -24,27 +24,29 @@ export default function EquationBlock({ tex, label }) {
 
   return (
     <div
-      className="my-4 py-3 pl-4 pr-4 rounded-r-lg"
+      className="equation-grid my-4 py-3 pl-4 pr-4 rounded-r-lg"
       style={{
         display: 'grid',
         gridTemplateColumns: '1fr auto',
         alignItems: 'center',
+        justifyItems: 'center',
         columnGap: '1rem',
-        borderLeft: '3px solid #3b82f6',
-        background: 'color-mix(in srgb, var(--theme-content-text) 3%, transparent)',
+        borderLeft: '4px solid #3b82f6',
+        background: 'color-mix(in srgb, var(--theme-content-text) 5%, transparent)',
       }}
     >
       <div
         className="math-display-wrap"
-        style={{ fontSize: '1.05em' }}
+        style={{ fontSize: '1.05em', textAlign: 'center', width: '100%' }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
       {label && (
         <div
-          className="text-sm italic flex-shrink-0"
+          className="equation-label text-sm italic flex-shrink-0"
           style={{
             color: 'var(--theme-muted-text)',
             fontFamily: 'Georgia, "Times New Roman", serif',
+            justifySelf: 'end',
           }}
         >
           {t(label.en, label.ro)}

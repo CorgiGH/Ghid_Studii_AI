@@ -23,7 +23,7 @@ const ContentTypeBar = ({ subject, activeTab, onTabChange }) => {
 
   return (
     <div
-      className="flex items-center gap-1 px-4 py-2 overflow-x-auto transition-colors duration-200"
+      className="flex items-center gap-1 px-4 py-2 overflow-x-auto transition-colors duration-200 sticky top-0 z-20"
       style={{
         backgroundColor: 'var(--theme-content-type-bg)',
         borderBottom: '1px solid var(--theme-border)',

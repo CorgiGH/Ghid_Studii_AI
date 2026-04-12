@@ -86,6 +86,17 @@
           }
         },
         {
+          "type": "think",
+          "question": {
+            "en": "In a graph where every pair of nodes has exactly one shortest path between them, would $b(v)$ ever include fractional credits? Why or why not?",
+            "ro": "Într-un graf în care fiecare pereche de noduri are exact un singur drum minim între ele, ar include vreodată $b(v)$ credite fracționare? De ce sau de ce nu?"
+          },
+          "answer": {
+            "en": "No. If every pair $(s,t)$ has exactly one shortest path, then $n_{st} = 1$ for every pair, so the ratio $n_{st}(v)/n_{st}$ is always either 0 (the path avoids $v$) or 1 (the path passes through $v$). Fractional credits only appear when multiple shortest paths exist between the same pair — e.g., in graphs with cycles or redundant routes.",
+            "ro": "Nu. Dacă fiecare pereche $(s,t)$ are exact un drum minim, atunci $n_{st} = 1$ pentru orice pereche, deci raportul $n_{st}(v)/n_{st}$ este întotdeauna fie 0 (drumul îl evită pe $v$), fie 1 (drumul trece prin $v$). Creditele fracționare apar doar când există mai multe drumuri minime între aceeași pereche — de exemplu, în grafuri cu cicluri sau rute redundante."
+          }
+        },
+        {
           "type": "image",
           "src": "course-media/alo/c01/page-25.png",
           "alt": "Betweenness centrality slide",
@@ -97,8 +108,8 @@
       ]
     },
     {
-      "id": "alo-c1-eigenvector",
-      "title": { "en": "Example: eigenvector centrality", "ro": "Exemplu: centralitatea de vector propriu" },
+      "id": "alo-c1-eigenvector-geometry",
+      "title": { "en": "Eigenvector centrality — idea & geometry", "ro": "Centralitatea de vector propriu — idee și geometrie" },
       "blocks": [
         {
           "type": "think",
@@ -137,15 +148,8 @@
         {
           "type": "learn",
           "content": {
-            "en": "**A worked 2×2-ish example: star on 3 nodes.** Let the graph be a star centred at node 1 with leaves 2 and 3 (edges $1\\!-\\!2$, $1\\!-\\!3$). Its adjacency matrix is\n$$A = \\begin{pmatrix} 0 & 1 & 1 \\\\ 1 & 0 & 0 \\\\ 1 & 0 & 0 \\end{pmatrix}.$$\n**Step 1 — characteristic polynomial.** $\\det(A - \\lambda I) = -\\lambda \\cdot (\\lambda^2) - 1\\cdot(-\\lambda) + 1 \\cdot 0 - \\ldots$; expanding along the first row gives $-\\lambda^3 + 2\\lambda = -\\lambda(\\lambda^2 - 2)$.\n**Step 2 — eigenvalues.** Set to zero: $\\lambda = 0$ or $\\lambda^2 = 2$, so $\\lambda \\in \\{\\sqrt{2}, \\ 0, \\ -\\sqrt{2}\\}$. The **Perron eigenvalue** is the largest: $\\lambda_{\\max} = \\sqrt{2}$.\n**Step 3 — Perron eigenvector.** Solve $Ax = \\sqrt{2}\\, x$. Writing the rows: $x_2 + x_3 = \\sqrt{2}\\,x_1$; $x_1 = \\sqrt{2}\\, x_2$; $x_1 = \\sqrt{2}\\, x_3$. So $x_2 = x_3 = x_1/\\sqrt{2}$. Picking $x_1 = \\sqrt{2}$ gives $x = (\\sqrt{2},\\ 1,\\ 1)$; normalized by $\\|x\\| = \\sqrt{2+1+1} = 2$, the centrality is $x = (\\sqrt{2},\\ 1,\\ 1)/2$.\n**Reading the result.** The centre node has score $\\sqrt{2}/2 \\approx 0.707$; each leaf has $1/2 = 0.5$. The centre is more central — as expected — and the two leaves are tied, which reflects the graph's symmetry. The procedure (polynomial → roots → back-substitute) is the companion to the geometric picture above.",
-            "ro": "**Un exemplu 2×2-ish rezolvat: steaua cu 3 noduri.** Fie graful o stea centrată în nodul 1 cu frunzele 2 și 3 (muchiile $1\\!-\\!2$, $1\\!-\\!3$). Matricea de adiacență este\n$$A = \\begin{pmatrix} 0 & 1 & 1 \\\\ 1 & 0 & 0 \\\\ 1 & 0 & 0 \\end{pmatrix}.$$\n**Pasul 1 — polinomul caracteristic.** Dezvoltând $\\det(A - \\lambda I)$ pe prima linie obținem $-\\lambda^3 + 2\\lambda = -\\lambda(\\lambda^2 - 2)$.\n**Pasul 2 — valorile proprii.** Egalând cu zero: $\\lambda = 0$ sau $\\lambda^2 = 2$, deci $\\lambda \\in \\{\\sqrt{2}, \\ 0, \\ -\\sqrt{2}\\}$. **Valoarea proprie Perron** este cea mai mare: $\\lambda_{\\max} = \\sqrt{2}$.\n**Pasul 3 — vectorul propriu Perron.** Rezolvăm $Ax = \\sqrt{2}\\, x$. Scriind liniile: $x_2 + x_3 = \\sqrt{2}\\,x_1$; $x_1 = \\sqrt{2}\\, x_2$; $x_1 = \\sqrt{2}\\, x_3$. Deci $x_2 = x_3 = x_1/\\sqrt{2}$. Alegând $x_1 = \\sqrt{2}$ obținem $x = (\\sqrt{2},\\ 1,\\ 1)$; normalizat cu $\\|x\\| = 2$, centralitatea este $x = (\\sqrt{2},\\ 1,\\ 1)/2$.\n**Citind rezultatul.** Nodul central are scor $\\sqrt{2}/2 \\approx 0{,}707$; fiecare frunză are $1/2 = 0{,}5$. Centrul este mai central — cum ne așteptam — iar cele două frunze sunt egale, ceea ce reflectă simetria grafului. Procedura (polinom → rădăcini → substituție) este companionul procedural al imaginii geometrice de mai sus."
-          }
-        },
-        {
-          "type": "learn",
-          "content": {
-            "en": "Let $x_i$ be the centrality of node $v_i$ and $a_{ij}$ the adjacency-matrix entry (1 if there's an edge $v_i \\sim v_j$, else 0). Then the centrality of node $i$ is proportional to the sum of the centralities of its neighbors:",
-            "ro": "Fie $x_i$ centralitatea nodului $v_i$ și $a_{ij}$ intrarea din matricea de adiacență (1 dacă există muchia $v_i \\sim v_j$, altfel 0). Atunci centralitatea nodului $i$ este proporțională cu suma centralităților vecinilor săi:"
+            "en": "**From recursion to $Ax = \\lambda x$.** Let $x_i$ be the centrality of node $v_i$ and $a_{ij}$ the adjacency-matrix entry (1 if there's an edge $v_i \\sim v_j$, else 0). Then the centrality of node $i$ is proportional to the sum of the centralities of its neighbors:",
+            "ro": "**De la recurență la $Ax = \\lambda x$.** Fie $x_i$ centralitatea nodului $v_i$ și $a_{ij}$ intrarea din matricea de adiacență (1 dacă există muchia $v_i \\sim v_j$, altfel 0). Atunci centralitatea nodului $i$ este proporțională cu suma centralităților vecinilor săi:"
           }
         },
         {
@@ -155,14 +159,91 @@
         {
           "type": "learn",
           "content": {
-            "en": "Stacking the $x_i$ into a vector $x = (x(1), x(2), \\dots, x(N))^{\\top}$ and collecting $a_{ij}$ into the adjacency matrix $A$, this is exactly the eigenvector equation",
-            "ro": "Așezând $x_i$-urile într-un vector $x = (x(1), x(2), \\dots, x(N))^{\\top}$ și strângând $a_{ij}$ în matricea de adiacență $A$, aceasta este exact ecuația cu vectori proprii"
+            "en": "Stacking the $x_i$ into a vector $x = (x(1), x(2), \\dots, x(N))^{\\top}$ and collecting $a_{ij}$ into the adjacency matrix $A$, this is exactly the eigenvector equation:",
+            "ro": "Așezând $x_i$-urile într-un vector $x = (x(1), x(2), \\dots, x(N))^{\\top}$ și strângând $a_{ij}$ în matricea de adiacență $A$, aceasta este exact ecuația cu vectori proprii:"
           }
         },
         {
           "type": "equation",
           "tex": "x = \\frac{1}{\\lambda} A x \\quad \\iff \\quad A x = \\lambda x",
           "label": { "en": "(eigen)", "ro": "(eigen)" }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "If $A$ is the adjacency matrix of a graph with no edges (all zeros), what are its eigenvalues and eigenvectors? What does this mean for eigenvector centrality?",
+            "ro": "Dacă $A$ este matricea de adiacență a unui graf fără muchii (toate zerourile), care sunt valorile și vectorii ei proprii? Ce înseamnă asta pentru centralitatea de vector propriu?"
+          },
+          "answer": {
+            "en": "$A = 0$ sends every vector to the zero vector, so $Ax = 0 \\cdot x$ for any $x$ — every non-zero vector is an eigenvector with eigenvalue $\\lambda = 0$. There's no largest positive eigenvalue, so the Perron construction breaks down: eigenvector centrality is **degenerate for empty graphs**. Intuitively: with no connections, there's no recursive structure to rank nodes by, and every node is equally (un)important.",
+            "ro": "$A = 0$ trimite fiecare vector în vectorul nul, deci $Ax = 0 \\cdot x$ pentru orice $x$ — orice vector nenul este vector propriu cu valoarea proprie $\\lambda = 0$. Nu există o cea mai mare valoare proprie pozitivă, deci construcția Perron cade: centralitatea de vector propriu este **degenerată pentru grafuri fără muchii**. Intuitiv: fără conexiuni, nu există structură recursivă după care să clasăm noduri, iar fiecare nod este la fel de (ne)important."
+          }
+        },
+        {
+          "type": "image",
+          "src": "course-media/alo/c01/page-27.png",
+          "alt": "Eigenvector centrality slide",
+          "caption": {
+            "en": "Original lecture slide (for reference only — the geometric picture and equation above are the canonical version).",
+            "ro": "Slide-ul original de curs (doar pentru referință — imaginea geometrică și ecuația de mai sus sunt versiunea canonică)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c1-eigenvector-perron",
+      "title": { "en": "Worked example & the Perron eigenvalue", "ro": "Exemplu rezolvat & valoarea proprie Perron" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**A worked example: star on 3 nodes.** Let the graph be a star centred at node 1 with leaves 2 and 3 (edges $1\\!-\\!2$, $1\\!-\\!3$).\n\n**Step 1 — the adjacency matrix.**",
+            "ro": "**Un exemplu rezolvat: steaua cu 3 noduri.** Fie graful o stea centrată în nodul 1 cu frunzele 2 și 3 (muchiile $1\\!-\\!2$, $1\\!-\\!3$).\n\n**Pasul 1 — matricea de adiacență.**"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A = \\begin{pmatrix} 0 & 1 & 1 \\\\ 1 & 0 & 0 \\\\ 1 & 0 & 0 \\end{pmatrix}, \\qquad A - \\lambda I = \\begin{pmatrix} -\\lambda & 1 & 1 \\\\ 1 & -\\lambda & 0 \\\\ 1 & 0 & -\\lambda \\end{pmatrix}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Step 2 — characteristic polynomial.** Expand $\\det(A - \\lambda I)$ along the first row using cofactor expansion:",
+            "ro": "**Pasul 2 — polinomul caracteristic.** Dezvoltăm $\\det(A - \\lambda I)$ pe prima linie prin cofactori:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\begin{aligned} \\det(A - \\lambda I) &= -\\lambda \\det\\begin{pmatrix}-\\lambda & 0 \\\\ 0 & -\\lambda\\end{pmatrix} - 1 \\cdot \\det\\begin{pmatrix}1 & 0 \\\\ 1 & -\\lambda\\end{pmatrix} + 1 \\cdot \\det\\begin{pmatrix}1 & -\\lambda \\\\ 1 & 0\\end{pmatrix} \\\\ &= -\\lambda (\\lambda^2) - 1 \\cdot (-\\lambda) + 1 \\cdot (\\lambda) \\\\ &= -\\lambda^3 + 2\\lambda \\;=\\; -\\lambda(\\lambda^2 - 2) \\end{aligned}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Step 3 — solve for the eigenvalues.** Setting $-\\lambda(\\lambda^2 - 2) = 0$ gives $\\lambda = 0$ or $\\lambda^2 = 2$, so:",
+            "ro": "**Pasul 3 — rezolvăm pentru valorile proprii.** Punând $-\\lambda(\\lambda^2 - 2) = 0$ obținem $\\lambda = 0$ sau $\\lambda^2 = 2$, deci:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\lambda \\in \\{\\sqrt{2},\\ 0,\\ -\\sqrt{2}\\}, \\qquad \\lambda_{\\max} = \\sqrt{2}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Step 4 — find the Perron eigenvector for $\\lambda = \\sqrt{2}$.** Solve $Ax = \\sqrt{2}\\, x$. Writing the rows gives $x_2 + x_3 = \\sqrt{2}\\,x_1$, $x_1 = \\sqrt{2}\\, x_2$, and $x_1 = \\sqrt{2}\\, x_3$. So $x_2 = x_3 = x_1/\\sqrt{2}$. Picking $x_1 = \\sqrt{2}$ gives $x = (\\sqrt{2},\\ 1,\\ 1)$; normalizing by $\\|x\\| = \\sqrt{2 + 1 + 1} = 2$:",
+            "ro": "**Pasul 4 — găsim vectorul propriu Perron pentru $\\lambda = \\sqrt{2}$.** Rezolvăm $Ax = \\sqrt{2}\\, x$. Scriind liniile obținem $x_2 + x_3 = \\sqrt{2}\\,x_1$, $x_1 = \\sqrt{2}\\, x_2$ și $x_1 = \\sqrt{2}\\, x_3$. Deci $x_2 = x_3 = x_1/\\sqrt{2}$. Alegând $x_1 = \\sqrt{2}$ obținem $x = (\\sqrt{2},\\ 1,\\ 1)$; normalizând cu $\\|x\\| = \\sqrt{2 + 1 + 1} = 2$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x = \\tfrac{1}{2}(\\sqrt{2},\\ 1,\\ 1)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Reading the result.** The centre node has score $\\sqrt{2}/2 \\approx 0.707$; each leaf has $1/2 = 0.5$. The centre is more central — as expected — and the two leaves are tied, reflecting the graph's symmetry. The procedure (polynomial → roots → back-substitute) is the computational companion to the geometric picture from the previous step.",
+            "ro": "**Citind rezultatul.** Nodul central are scor $\\sqrt{2}/2 \\approx 0{,}707$; fiecare frunză are $1/2 = 0{,}5$. Centrul este mai central — cum ne așteptam — iar cele două frunze sunt egale, reflectând simetria grafului. Procedura (polinom → rădăcini → substituție) este companionul procedural al imaginii geometrice din pasul precedent."
+          }
         },
         {
           "type": "callout",
@@ -181,12 +262,14 @@
           }
         },
         {
-          "type": "image",
-          "src": "course-media/alo/c01/page-27.png",
-          "alt": "Eigenvector centrality slide",
-          "caption": {
-            "en": "Original lecture slide (for reference only — the geometric picture, worked star example, and equation above are the canonical version).",
-            "ro": "Slide-ul original de curs (doar pentru referință — imaginea geometrică, exemplul stea rezolvat și ecuația de mai sus sunt versiunea canonică)."
+          "type": "think",
+          "question": {
+            "en": "Our star graph had eigenvalues $\\{\\sqrt{2},\\ 0,\\ -\\sqrt{2}\\}$. What goes wrong if we try to use $\\lambda = 0$ or $\\lambda = -\\sqrt{2}$ as the centrality eigenvalue instead of $\\sqrt{2}$?",
+            "ro": "Steaua noastră avea valorile proprii $\\{\\sqrt{2},\\ 0,\\ -\\sqrt{2}\\}$. Ce merge prost dacă încercăm să folosim $\\lambda = 0$ sau $\\lambda = -\\sqrt{2}$ drept valoare proprie de centralitate în loc de $\\sqrt{2}$?"
+          },
+          "answer": {
+            "en": "For $\\lambda = 0$: the eigenvector equation becomes $Ax = 0$, giving the null-space of $A$ — in our case a degenerate/zero eigenvector, useless as a score. For $\\lambda = -\\sqrt{2}$: solving $Ax = -\\sqrt{2}\\,x$ yields an eigenvector like $(-\\sqrt{2}, 1, 1)$ with **mixed signs** — a node can't have negative importance, so this can't be interpreted as centrality either. Only the largest eigenvalue $\\sqrt{2}$ (the Perron value) gives an entry-wise non-negative eigenvector — that's the whole point of Perron–Frobenius.",
+            "ro": "Pentru $\\lambda = 0$: ecuația devine $Ax = 0$, care dă nucleul matricei $A$ — în cazul nostru un vector propriu degenerat/nul, inutilizabil ca scor. Pentru $\\lambda = -\\sqrt{2}$: rezolvând $Ax = -\\sqrt{2}\\,x$ obținem un vector propriu precum $(-\\sqrt{2}, 1, 1)$ cu **semne mixte** — un nod nu poate avea importanță negativă, deci nici acesta nu poate fi interpretat ca centralitate. Doar cea mai mare valoare proprie $\\sqrt{2}$ (valoarea Perron) dă un vector propriu nenegativ pe fiecare poziție — exact sensul teoremei Perron–Frobenius."
           }
         }
       ]
@@ -196,15 +279,39 @@
       "title": { "en": "Example: SVD image compression", "ro": "Exemplu: compresia imaginilor cu SVD" },
       "blocks": [
         {
-          "type": "think",
-          "question": {
-            "en": "If you had to send a 4K photo over a bad connection in 1/10 the space, what information would you throw away first? Why?",
-            "ro": "Dacă ar trebui să trimiți o fotografie 4K printr-o conexiune proastă în 1/10 din spațiu, ce informație ai arunca prima? De ce?"
-          },
-          "answer": {
-            "en": "Fine detail and high-frequency noise — the pixel-scale flicker the eye barely registers. You'd keep the broad shapes, gradients, and colours. That's *exactly* what SVD formalises: it sorts an image's content by how much \"energy\" each direction carries, largest first, and lets you drop the smallest ones with nearly-invisible visual cost.",
-            "ro": "Detaliile fine și zgomotul de înaltă frecvență — oscilațiile la scară de pixel pe care ochiul abia le observă. Ai păstra formele largi, gradienții și culorile. Exact asta formalizează SVD: sortează conținutul unei imagini după câtă „energie” poartă fiecare direcție, cele mari la început, și îți permite să le arunci pe cele mici cu un cost vizual aproape invizibil."
-          }
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Quick prediction — if you had to shrink a 4K photo to 1/10 the file size, what information would you throw away FIRST?",
+                "ro": "Predicție rapidă — dacă ar trebui să reduci o fotografie 4K la 1/10 din dimensiunea fișierului, ce informație ai arunca PRIMA?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "The overall shapes and colors",
+                    "ro": "Formele și culorile de ansamblu"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "That's the part you want to keep — the broad structure is what makes the photo recognisable. Throwing it away first would leave you with noise, not a compressed photo.",
+                    "ro": "Aceea este partea pe care vrei să o păstrezi — structura largă este cea care face fotografia recunoscută. Aruncând-o prima, ai rămâne cu zgomot, nu cu o fotografie comprimată."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The fine-grained details and high-frequency noise",
+                    "ro": "Detaliile fine și zgomotul de înaltă frecvență"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "That's exactly what SVD does — it drops the smallest singular values, which encode fine detail and noise, while keeping the largest (broad structure).",
+                    "ro": "Exact asta face SVD — aruncă cele mai mici valori singulare, care codifică detaliile fine și zgomotul, păstrându-le pe cele mari (structura largă)."
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
           "type": "learn",
@@ -218,21 +325,21 @@
           "tex": "A = U \\Sigma V^{\\top}"
         },
         {
-          "type": "learn",
-          "content": {
-            "en": "where $\\Sigma$ is a diagonal matrix with non-negative **singular values** $\\sigma_1 \\geq \\sigma_2 \\geq \\dots \\geq \\sigma_r > 0$ on its diagonal, and $U, V$ are orthogonal. Each $\\sigma_i$ encodes how much **energy (variance)** the image has along the $i$-th orthogonal direction — larger $\\sigma_i$ means more dominant structure (broad shapes, gradients), smaller $\\sigma_i$ means fine detail or noise.",
-            "ro": "unde $\\Sigma$ este o matrice diagonală cu **valorile singulare** nenegative $\\sigma_1 \\geq \\sigma_2 \\geq \\dots \\geq \\sigma_r > 0$ pe diagonală, iar $U, V$ sunt ortogonale. Fiecare $\\sigma_i$ codifică câtă **energie (varianță)** poartă imaginea pe a $i$-a direcție ortogonală — $\\sigma_i$ mai mare înseamnă structură mai dominantă (forme largi, gradienți), $\\sigma_i$ mai mic înseamnă detaliu fin sau zgomot."
-          }
-        },
-        {
           "type": "think",
           "question": {
-            "en": "What would go wrong if $\\Sigma$'s diagonal were sorted **ascending** instead of descending — i.e., if we built a low-rank approximation by keeping the *smallest* $k$ singular values?",
-            "ro": "Ce ar merge prost dacă diagonala lui $\\Sigma$ ar fi sortată **crescător** în loc de descrescător — adică dacă am construi aproximarea de rang mic păstrând cele mai *mici* $k$ valori singulare?"
+            "en": "We defined SVD with $\\sigma_1 \\geq \\sigma_2 \\geq \\dots$ — decreasing order. Why does this decreasing order matter? What would change if $\\Sigma$'s diagonal were sorted **ascending** instead, so that a low-rank approximation kept the *smallest* $k$ singular values?",
+            "ro": "Am definit SVD cu $\\sigma_1 \\geq \\sigma_2 \\geq \\dots$ — ordine descrescătoare. De ce contează această ordine descrescătoare? Ce s-ar schimba dacă diagonala lui $\\Sigma$ ar fi sortată **crescător**, astfel încât o aproximare de rang mic ar păstra cele mai *mici* $k$ valori singulare?"
           },
           "answer": {
             "en": "You'd throw away *structure* and keep *noise*. The largest singular values correspond to the dominant content — broad gradients, large shapes, overall brightness. The smallest ones carry high-frequency detail and noise. Discarding the largest would destroy the image's recognisable form while preserving the pixel-level chatter your eye doesn't even register. The result would look like scrambled static — low in energy, high in irrelevance. Ordering matters: SVD sorts descending precisely so truncation throws away the least important information first.",
             "ro": "Ai arunca *structura* și ai păstra *zgomotul*. Valorile singulare mari corespund conținutului dominant — gradienți largi, forme mari, luminozitate globală. Cele mici poartă detalii de înaltă frecvență și zgomot. Eliminându-le pe cele mari ai distruge forma recunoscută a imaginii și ai păstra oscilațiile de pixel pe care ochiul nici nu le înregistrează. Rezultatul ar arăta ca o ninsoare aleatoare — puțină energie, multă irelevanță. Ordinea contează: SVD sortează descrescător exact pentru ca trunchierea să arunce prima informația cea mai puțin importantă."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "where $\\Sigma$ is a diagonal matrix with non-negative **singular values** $\\sigma_1 \\geq \\sigma_2 \\geq \\dots \\geq \\sigma_r > 0$ on its diagonal, and $U, V$ are orthogonal. Each $\\sigma_i$ encodes how much **energy (variance)** the image has along the $i$-th orthogonal direction — larger $\\sigma_i$ means more dominant structure (broad shapes, gradients), smaller $\\sigma_i$ means fine detail or noise.",
+            "ro": "unde $\\Sigma$ este o matrice diagonală cu **valorile singulare** nenegative $\\sigma_1 \\geq \\sigma_2 \\geq \\dots \\geq \\sigma_r > 0$ pe diagonală, iar $U, V$ sunt ortogonale. Fiecare $\\sigma_i$ codifică câtă **energie (varianță)** poartă imaginea pe a $i$-a direcție ortogonală — $\\sigma_i$ mai mare înseamnă structură mai dominantă (forme largi, gradienți), $\\sigma_i$ mai mic înseamnă detaliu fin sau zgomot."
           }
         },
         {
@@ -344,51 +451,51 @@
                 "en": "The Perron eigenvalue is the unique largest eigenvalue of a non-negative matrix; Perron–Frobenius guarantees its eigenvector is non-negative, making it the only interpretable eigenvector centrality.",
                 "ro": "Valoarea proprie Perron este unica cea mai mare valoare proprie a unei matrice nenegative; Perron–Frobenius garantează că vectorul ei propriu este nenegativ, făcând-o singura centralitate de vector propriu interpretabilă."
               },
-              "reviewStep": "alo-c1-eigenvector"
+              "reviewStep": "alo-c1-eigenvector-perron"
             },
             {
               "question": {
-                "en": "Why does betweenness divide $n_{st}(v)$ by $n_{st}$?",
-                "ro": "De ce intermedierea împarte $n_{st}(v)$ la $n_{st}$?"
+                "en": "Recall the 4-node graph with edges $A\\!-\\!B$, $B\\!-\\!C$, $B\\!-\\!D$ (a star centred at $B$). What is the betweenness centrality $b(A)$?",
+                "ro": "Amintește-ți graful cu 4 noduri și muchiile $A\\!-\\!B$, $B\\!-\\!C$, $B\\!-\\!D$ (stea centrată în $B$). Care este centralitatea de intermediere $b(A)$?"
               },
               "options": [
                 {
                   "text": {
-                    "en": "To convert the count into a probability that always sums to 1 across all nodes",
-                    "ro": "Pentru a transforma numărul într-o probabilitate care se însumează întotdeauna la 1 peste toate nodurile"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Betweenness scores do not sum to 1 across nodes. The division is not a probability normalization; it is a per-pair fractional credit so $v$ only gets credit for the fraction of shortest paths it appears on.",
-                    "ro": "Scorurile de intermediere nu se însumează la 1 peste noduri. Împărțirea nu este o normalizare de probabilitate; este o creditare fracționară pe pereche, astfel încât $v$ primește credit doar pentru fracția de drumuri minime pe care apare."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "To normalize so nodes aren't rewarded purely because the graph has many parallel shortest paths between $s$ and $t$",
-                    "ro": "Pentru a normaliza astfel încât nodurile să nu fie recompensate doar pentru că graful are multe drumuri minime paralele între $s$ și $t$"
+                    "en": "$b(A) = 0$",
+                    "ro": "$b(A) = 0$"
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Correct. If there are 3 equally-short paths between $s$ and $t$, $v$ only gets $1/3$ credit per path it lies on. Otherwise a node in a dense graph with many parallel shortest paths would get inflated scores for structural reasons unrelated to its own broker role.",
-                    "ro": "Corect. Dacă există 3 drumuri la fel de scurte între $s$ și $t$, $v$ primește doar $1/3$ credit per drum pe care apare. Altfel, un nod dintr-un graf dens cu multe drumuri paralele ar primi scoruri umflate din motive structurale, nu pentru rolul propriu de broker."
+                    "en": "Correct. $A$ is a leaf — no shortest path between any other pair $(s,t)$ passes through $A$ as an intermediate node. Every term $n_{st}(A)/n_{st}$ is 0, so the sum is 0. All the broker credit goes to $B$ in this graph.",
+                    "ro": "Corect. $A$ este frunză — niciun drum minim între altă pereche $(s,t)$ nu trece prin $A$ ca nod intermediar. Fiecare termen $n_{st}(A)/n_{st}$ este 0, deci suma este 0. Tot creditul de broker revine lui $B$ în acest graf."
                   }
                 },
                 {
                   "text": {
-                    "en": "So that $b(v)$ is always an integer",
-                    "ro": "Pentru ca $b(v)$ să fie întotdeauna un întreg"
+                    "en": "$b(A) = 1$",
+                    "ro": "$b(A) = 1$"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "The opposite is true — the division typically makes $b(v)$ a rational (non-integer) number. That's the whole point: fractional credit per pair.",
-                    "ro": "Dimpotrivă — împărțirea face de obicei $b(v)$ un număr rațional (nu întreg). Acesta este chiar scopul: credit fracționar pe pereche."
+                    "en": "Degree confusion. $A$'s degree is 1 (one edge to $B$), but betweenness is not degree — it counts shortest paths *passing through* the node as an intermediary, and no such path exists for a leaf.",
+                    "ro": "Confuzie cu gradul. Gradul lui $A$ este 1 (o muchie spre $B$), dar intermedierea nu este grad — numără drumuri minime care *trec prin* nod ca intermediar, iar pentru o frunză nu există niciun astfel de drum."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$b(A) = 3$",
+                    "ro": "$b(A) = 3$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Counts endpoint pairs, not paths-through-$A$. $A$ is the endpoint of 3 ordered pairs involving itself, but in the sum $\\sum_{s \\neq v \\neq t}$ we *exclude* pairs where $v$ is an endpoint ($s = v$ or $t = v$). $A$ is never in the interior of any shortest path.",
+                    "ro": "Numără perechile de capete, nu drumuri prin $A$. $A$ este capăt în 3 perechi ordonate care îl implică, dar în suma $\\sum_{s \\neq v \\neq t}$ *excludem* perechile în care $v$ este capăt ($s = v$ sau $t = v$). $A$ nu este niciodată pe interiorul vreunui drum minim."
                   }
                 }
               ],
               "explanation": {
-                "en": "The ratio $n_{st}(v)/n_{st}$ gives $v$ only fractional credit when multiple shortest paths exist, isolating the broker role from the graph's path multiplicity.",
-                "ro": "Raportul $n_{st}(v)/n_{st}$ îi acordă lui $v$ doar credit fracționar când există mai multe drumuri minime, izolând rolul de broker de multiplicitatea drumurilor din graf."
+                "en": "Leaves (degree-1 nodes) always have betweenness 0 — no shortest path can use a leaf as an intermediate node. Only $B$, the hub, accumulates broker credit in this star.",
+                "ro": "Frunzele (noduri de grad 1) au întotdeauna intermediere 0 — niciun drum minim nu poate folosi o frunză ca nod intermediar. Doar $B$, centrul, acumulează credit de broker în această stea."
               },
               "reviewStep": "alo-c1-betweenness"
             },
@@ -422,13 +529,13 @@
                 },
                 {
                   "text": {
-                    "en": "$\\lambda$ is the determinant of $A$",
-                    "ro": "$\\lambda$ este determinantul lui $A$"
+                    "en": "$x$ is the unit vector that maximizes $\\|Ax\\|$ — i.e., the direction in which $A$ amplifies the most",
+                    "ro": "$x$ este vectorul unitar care maximizează $\\|Ax\\|$ — adică direcția în care $A$ amplifică cel mai mult"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "The determinant equals the *product* of all eigenvalues, not any single $\\lambda$. A matrix has many eigenvalues, typically distinct from the determinant.",
-                    "ro": "Determinantul este egal cu *produsul* tuturor valorilor proprii, nu cu un singur $\\lambda$. O matrice are multe valori proprii, de obicei diferite de determinant."
+                    "en": "Cross-concept misconception: that's the definition of a **singular vector**, not an eigenvector. The unit vector that maximizes $\\|Ax\\|$ is the first right-singular vector $v_1$ (with $\\|Av_1\\| = \\sigma_1$). Eigenvectors only require $Ax$ to point in the same direction as $x$ — no maximization is involved, and eigenvectors needn't have maximum stretch.",
+                    "ro": "Concepție greșită între concepte: aceasta este definiția unui **vector singular**, nu a unui vector propriu. Vectorul unitar care maximizează $\\|Ax\\|$ este primul vector singular drept $v_1$ (cu $\\|Av_1\\| = \\sigma_1$). Vectorii proprii cer doar ca $Ax$ să fie în aceeași direcție ca $x$ — nu există maximizare, iar vectorii proprii nu trebuie să aibă întinderea maximă."
                   }
                 }
               ],
@@ -436,7 +543,7 @@
                 "en": "Eigenvalue equations describe directions that a matrix preserves up to scaling. $\\lambda$ is the stretch factor along that preserved direction.",
                 "ro": "Ecuațiile cu valori proprii descriu direcții pe care o matrice le păstrează până la un factor de scalare. $\\lambda$ este factorul de întindere pe acea direcție."
               },
-              "reviewStep": "alo-c1-eigenvector"
+              "reviewStep": "alo-c1-eigenvector-geometry"
             },
             {
               "question": {
@@ -514,13 +621,13 @@
                 },
                 {
                   "text": {
-                    "en": "The matrix $A$ is square",
-                    "ro": "Matricea $A$ este pătratică"
+                    "en": "$k$ is at least half of $\\min(m, n)$",
+                    "ro": "$k$ este cel puțin jumătate din $\\min(m, n)$"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "SVD works for any $m \\times n$ matrix, and the quality of the low-rank approximation depends on the *spectrum* of singular values, not on the shape of $A$.",
-                    "ro": "SVD funcționează pentru orice matrice $m \\times n$, iar calitatea aproximării de rang mic depinde de *spectrul* valorilor singulare, nu de forma lui $A$."
+                    "en": "Rank-heuristic misconception: there is no fixed threshold like \"half the rank\". The acceptable $k$ depends entirely on the **decay of the singular-value spectrum**. For a photo with rapid decay, $k$ can be as small as 5% of $\\min(m,n)$ and still look great; for a matrix with a flat spectrum, no small $k$ will work. The shape of the spectrum determines $k$, not a fraction of the rank.",
+                    "ro": "Concepție greșită de euristică a rangului: nu există un prag fix precum „jumătate din rang”. Valoarea acceptabilă a lui $k$ depinde integral de **descreșterea spectrului de valori singulare**. Pentru o fotografie cu descreștere rapidă, $k$ poate fi 5% din $\\min(m,n)$ și tot arată excelent; pentru o matrice cu spectru plat, niciun $k$ mic nu va merge. Forma spectrului determină $k$, nu o fracție din rang."
                   }
                 }
               ],
@@ -529,6 +636,52 @@
                 "ro": "Aproximarea de rang mic este acceptabilă când coada spectrului valorilor singulare este mică — adică informația pe care o aruncăm este cu adevărat minoră comparativ cu cea pe care o păstrăm."
               },
               "reviewStep": "alo-c1-svd-compression"
+            },
+            {
+              "question": {
+                "en": "**Bridging two concepts.** For a symmetric non-negative matrix $A$ (e.g., the adjacency matrix of an undirected graph), how do $A$'s eigenvalues relate to $A$'s singular values?",
+                "ro": "**Conectând două concepte.** Pentru o matrice simetrică nenegativă $A$ (de exemplu, matricea de adiacență a unui graf neorientat), cum se raportează valorile proprii ale lui $A$ la valorile singulare ale lui $A$?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "They are equal in absolute value: $\\sigma_i = |\\lambda_i|$",
+                    "ro": "Sunt egale în valoare absolută: $\\sigma_i = |\\lambda_i|$"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. For a symmetric matrix, singular values are the *absolute values* of eigenvalues — so a negative $\\lambda$ becomes a positive $\\sigma$. In our star example, $\\lambda \\in \\{\\sqrt{2}, 0, -\\sqrt{2}\\}$ gives $\\sigma \\in \\{\\sqrt{2}, \\sqrt{2}, 0\\}$ (sorted descending). This is the structural bridge between the two concepts.",
+                    "ro": "Corect. Pentru o matrice simetrică, valorile singulare sunt *valorile absolute* ale valorilor proprii — deci un $\\lambda$ negativ devine un $\\sigma$ pozitiv. În exemplul nostru cu steaua, $\\lambda \\in \\{\\sqrt{2}, 0, -\\sqrt{2}\\}$ dă $\\sigma \\in \\{\\sqrt{2}, \\sqrt{2}, 0\\}$ (sortate descrescător). Aceasta este legătura structurală între cele două concepte."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "They are always identical: $\\sigma_i = \\lambda_i$",
+                    "ro": "Sunt întotdeauna identice: $\\sigma_i = \\lambda_i$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Misses the sign. Singular values are always $\\geq 0$ by definition, while eigenvalues of a symmetric matrix can be negative. Whenever $\\lambda_i < 0$, the identity $\\sigma_i = \\lambda_i$ fails; the correct relation is $\\sigma_i = |\\lambda_i|$.",
+                    "ro": "Ratează semnul. Valorile singulare sunt întotdeauna $\\geq 0$ prin definiție, în timp ce valorile proprii ale unei matrice simetrice pot fi negative. Ori de câte ori $\\lambda_i < 0$, egalitatea $\\sigma_i = \\lambda_i$ cade; relația corectă este $\\sigma_i = |\\lambda_i|$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "They are unrelated — eigenvalues and singular values are separate concepts for different purposes",
+                    "ro": "Nu sunt legate — valorile proprii și valorile singulare sunt concepte separate pentru scopuri diferite"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Misses the structural connection. In general $\\sigma_i(A) = \\sqrt{\\lambda_i(A^\\top A)}$, and for symmetric $A$ this simplifies to $\\sigma_i = |\\lambda_i(A)|$. The concepts are deeply linked, and for symmetric non-negative matrices they almost coincide.",
+                    "ro": "Ratează legătura structurală. În general $\\sigma_i(A) = \\sqrt{\\lambda_i(A^\\top A)}$, iar pentru $A$ simetrică aceasta se simplifică la $\\sigma_i = |\\lambda_i(A)|$. Conceptele sunt profund legate, iar pentru matrice simetrice nenegative aproape coincid."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "For symmetric matrices, $\\sigma_i = |\\lambda_i|$. The sign of an eigenvalue encodes a reflection that singular values (being non-negative) throw away; otherwise the two spectra carry the same structural information. This is why the Perron eigenvalue and the top singular value coincide for symmetric non-negative matrices. (Interleaving: this question connects the eigenvector-perron and svd-compression steps.)",
+                "ro": "Pentru matricele simetrice, $\\sigma_i = |\\lambda_i|$. Semnul unei valori proprii codifică o reflexie pe care valorile singulare (fiind nenegative) o aruncă; altfel, cele două spectre poartă aceeași informație structurală. De aceea valoarea proprie Perron și cea mai mare valoare singulară coincid pentru matricele simetrice nenegative. (Intercalare: această întrebare conectează pașii eigenvector-perron și svd-compression.)"
+              },
+              "reviewStep": "alo-c1-eigenvector-perron"
             }
           ]
         }

@@ -49,15 +49,38 @@ export default function ThinkBlock({ question, answer }) {
       >
         <button
           onClick={() => setRevealed(true)}
-          className="w-full text-center text-xs py-2 rounded-lg transition-colors cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 text-sm font-medium py-2.5 rounded-lg transition-colors cursor-pointer"
           style={{
-            backgroundColor: 'var(--theme-border)',
-            color: 'var(--theme-muted-text)',
+            backgroundColor: 'transparent',
+            border: '1px solid var(--theme-border)',
+            color: 'var(--theme-content-text)',
           }}
-          onMouseEnter={e => { e.target.style.color = '#f59e0b'; }}
-          onMouseLeave={e => { e.target.style.color = 'var(--theme-muted-text)'; }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, #f59e0b 10%, transparent)';
+            e.currentTarget.style.borderColor = '#f59e0b';
+            e.currentTarget.style.color = '#f59e0b';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.borderColor = 'var(--theme-border)';
+            e.currentTarget.style.color = 'var(--theme-content-text)';
+          }}
         >
-          {t('Click to reveal answer \u25BC', 'Click pentru răspuns \u25BC')}
+          <span>{t('Click to reveal answer', 'Click pentru răspuns')}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </button>
       </div>
 
