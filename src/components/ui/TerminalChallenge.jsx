@@ -30,8 +30,6 @@ function Hint({ children, label }) {
         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-medium transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
         onClick={() => setShow(s => !s)}
-        onMouseEnter={() => setShow(true)}
-        onMouseLeave={() => setShow(false)}
       >
         💡 {label}
       </button>
@@ -166,6 +164,14 @@ export default function TerminalChallenge({ exercises }) {
     setShowSolution(false);
     setResetMenuOpen(false);
     setResetVMConfirming(false);
+    // Files get wiped+re-injected on switch, so the completion mark no longer
+    // reflects VM state — clear it so the user re-verifies.
+    setCompleted(prev => {
+      if (!prev[idx]) return prev;
+      const next = { ...prev };
+      delete next[idx];
+      return next;
+    });
   };
 
   // Track current index via ref so async check can detect stale results
@@ -356,8 +362,15 @@ export default function TerminalChallenge({ exercises }) {
         </div>
       )}
 
-      {/* Controls — sticky on mobile only (desktop card fits in viewport) */}
-      <div className="sticky bottom-0 lg:static z-30" style={{ borderTop: '1px solid var(--theme-border)', background: 'var(--theme-sidebar-bg)' }}>
+      {/* Controls — sticky on mobile above BottomTabBar (~64px + safe area), static on desktop */}
+      <div
+        className="sticky lg:static z-30"
+        style={{
+          borderTop: '1px solid var(--theme-border)',
+          background: 'var(--theme-sidebar-bg)',
+          bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))',
+        }}
+      >
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3">
           {/* Nav buttons */}
           <div className="flex gap-2">

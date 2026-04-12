@@ -35,7 +35,8 @@ export default function Lab02() {
       files: {
         '/root/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
-      checkScript: 'test -f /root/shells.txt && LINES=$(sort -u /root/shells.txt | grep -c .) && test "$LINES" -ge 2 && grep -qE "/bin/bash|nologin" /root/shells.txt',
+      checkScript: 'test -f /root/shells.txt && ! grep -q ":" /root/shells.txt && awk "NF && !/^\\//{exit 1}" /root/shells.txt && test "$(wc -l < /root/shells.txt)" = "$(sort -u /root/shells.txt | wc -l)" && grep -q "/bin/bash" /root/shells.txt && grep -q "nologin" /root/shells.txt',
+      failureHint: (t) => t('shells.txt must contain only shell paths (starting with /), already deduplicated. Use: cut -f7 -d: passwd | sort -u > shells.txt', 'shells.txt trebuie să conțină doar căi de shell (începând cu /), deja deduplicate. Folosește: cut -f7 -d: passwd | sort -u > shells.txt'),
       hints: [
         t('Use "cut -f7 -d: passwd" to extract the shell field', 'Folosiți "cut -f7 -d: passwd" pentru a extrage câmpul shell'),
         t('Pipe to "sort -u" to get unique values', 'Pipe la "sort -u" pentru valori unice'),

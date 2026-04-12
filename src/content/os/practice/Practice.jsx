@@ -63,8 +63,8 @@ export default function Practice() {
   const terminalExercises = [
     {
       description: t(
-        'Navigate to "documents", read "notes.txt" with cat, and save a copy as ~/backup.txt.',
-        'Navighează în "documents", citește "notes.txt" cu cat, și salvează o copie ca ~/backup.txt.'
+        'Copy documents/notes.txt to ~/backup.txt. (You may also want to cat it first to see what you\'re copying.)',
+        'Copiază documents/notes.txt în ~/backup.txt. (De asemenea poți să îl afișezi cu cat pentru a vedea ce copiezi.)'
       ),
       courseRef: t('Course 1: Directory commands', 'Cursul 1: Comenzi directoare'),
       topic: t('cd/cp', 'cd/cp'),
@@ -109,8 +109,8 @@ export default function Practice() {
       files: {
         '/root/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully\n',
       },
-      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && grep -qi "error" /root/errors.txt && ! grep -q "INFO" /root/errors.txt && test -f /root/total.txt && test "$(grep -oE "[0-9]+" /root/total.txt | head -1)" = "9"',
-      failureHint: (t) => t('errors.txt should have 4 lines (one per error). total.txt should contain just the number 9.', 'errors.txt trebuie să aibă 4 linii (câte una pentru fiecare eroare). total.txt trebuie să conțină doar numărul 9.'),
+      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && grep -qi "error" /root/errors.txt && ! grep -q "INFO" /root/errors.txt && test -f /root/total.txt && test "$(tr -d "[:space:]" < /root/total.txt)" = "9"',
+      failureHint: (t) => t('errors.txt should have 4 lines (all containing error, no INFO). total.txt should contain just the number 9 — use "wc -l < server.log > total.txt" to avoid the filename in output.', 'errors.txt trebuie să aibă 4 linii (toate cu error, fără INFO). total.txt trebuie să conțină doar numărul 9 — folosește "wc -l < server.log > total.txt" pentru a evita numele fișierului în output.'),
       hints: [
         t('"grep -i pattern file" searches case-insensitively', '"grep -i pattern file" caută fără a ține cont de litere mari/mici'),
         t('Redirect output with > filename.txt', 'Redirectează output-ul cu > fisier.txt'),

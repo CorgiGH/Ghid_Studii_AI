@@ -30,24 +30,23 @@ export default function Lab01() {
     },
     {
       description: t(
-        'In ~/programe, create files: program1.c, program2.c, program2.h. In ~/programe/tema1, create tema1-1.c and tema1-2.c. In ~/programe/tema2/tema2_sub-temaA, create sub-temaA1.c and sub-temaA2.cpp.',
-        'În ~/programe, creați fișierele: program1.c, program2.c, program2.h. În ~/programe/tema1, creați tema1-1.c și tema1-2.c. În ~/programe/tema2/tema2_sub-temaA, creați sub-temaA1.c și sub-temaA2.cpp.'
+        'In ~/programe/tema1, create 5 C files named exercise1.c through exercise5.c. Use brace expansion to do it in a single command.',
+        'În ~/programe/tema1, creați 5 fișiere C numite exercise1.c până la exercise5.c. Folosiți expansiunea de acolade pentru a face totul într-o singură comandă.'
       ),
-      courseRef: t('Course 1: File commands', 'Cursul 1: Comenzi fișiere'),
-      topic: t('touch', 'touch'),
+      courseRef: t('Course 1: File commands + brace expansion', 'Cursul 1: Comenzi fișiere + expansiune'),
+      topic: t('touch/brace', 'touch/acolade'),
       files: {
         '/root/programe': null,
         '/root/programe/tema1': null,
-        '/root/programe/tema2': null,
-        '/root/programe/tema2/tema2_sub-temaA': null,
       },
-      checkScript: 'test -f /root/programe/program1.c && test -f /root/programe/program2.c && test -f /root/programe/program2.h && test -f /root/programe/tema1/tema1-1.c && test -f /root/programe/tema1/tema1-2.c && test -f /root/programe/tema2/tema2_sub-temaA/sub-temaA1.c && test -f /root/programe/tema2/tema2_sub-temaA/sub-temaA2.cpp',
-      failureHint: (t) => t('Check that all 7 files exist: program1.c, program2.c, program2.h in ~/programe, tema1-1.c and tema1-2.c in tema1/, sub-temaA1.c and sub-temaA2.cpp in tema2_sub-temaA/', 'Verifică că toate 7 fișiere există: program1.c, program2.c, program2.h în ~/programe, tema1-1.c și tema1-2.c în tema1/, sub-temaA1.c și sub-temaA2.cpp în tema2_sub-temaA/'),
+      checkScript: 'for n in 1 2 3 4 5; do test -f /root/programe/tema1/exercise$n.c || exit 1; done; test "$(ls /root/programe/tema1 | wc -l)" = "5"',
+      failureHint: (t) => t('All 5 files (exercise1.c through exercise5.c) must exist in ~/programe/tema1, and nothing else. Try: touch programe/tema1/exercise{1..5}.c', 'Toate 5 fișiere (exercise1.c până la exercise5.c) trebuie să existe în ~/programe/tema1, și nimic altceva. Încearcă: touch programe/tema1/exercise{1..5}.c'),
       hints: [
-        t('Use "touch filename" to create empty files', 'Folosiți "touch fisier" pentru a crea fișiere goale'),
-        t('You can create multiple files: touch a.c b.c c.h', 'Puteți crea mai multe fișiere: touch a.c b.c c.h'),
+        t('touch creates empty files', 'touch creează fișiere goale'),
+        t('Brace expansion: {1..5} expands to 1 2 3 4 5', 'Expansiune acolade: {1..5} se extinde la 1 2 3 4 5'),
+        t('Combine them: touch prefix{1..N}.ext', 'Combină-le: touch prefix{1..N}.ext'),
       ],
-      solution: 'touch programe/program1.c programe/program2.c programe/program2.h\ntouch programe/tema1/tema1-1.c programe/tema1/tema1-2.c\ntouch programe/tema2/tema2_sub-temaA/sub-temaA1.c programe/tema2/tema2_sub-temaA/sub-temaA2.cpp',
+      solution: 'touch programe/tema1/exercise{1..5}.c',
     },
     {
       description: t(
@@ -84,8 +83,8 @@ export default function Lab01() {
       files: {
         '/root/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully\n',
       },
-      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && grep -qi "error" /root/errors.txt && ! grep -q "INFO" /root/errors.txt && test -f /root/total.txt && test "$(grep -oE "[0-9]+" /root/total.txt | head -1)" = "9"',
-      failureHint: (t) => t('errors.txt should have 4 lines (one per error). total.txt should contain just the number 9.', 'errors.txt trebuie să aibă 4 linii (câte una pentru fiecare eroare). total.txt trebuie să conțină doar numărul 9.'),
+      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && grep -qi "error" /root/errors.txt && ! grep -q "INFO" /root/errors.txt && test -f /root/total.txt && test "$(tr -d "[:space:]" < /root/total.txt)" = "9"',
+      failureHint: (t) => t('errors.txt should have 4 lines (all containing error, no INFO). total.txt should contain just the number 9 — use "wc -l < server.log > total.txt" to avoid the filename in output.', 'errors.txt trebuie să aibă 4 linii (toate cu error, fără INFO). total.txt trebuie să conțină doar numărul 9 — folosește "wc -l < server.log > total.txt" pentru a evita numele fișierului în output.'),
       hints: [
         t('"grep -i pattern file" searches case-insensitively', '"grep -i pattern file" caută fără a ține cont de litere mari/mici'),
         t('Redirect output with > filename.txt', 'Redirectați output-ul cu > fisier.txt'),

@@ -40,61 +40,100 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
       {questions.map((q, qIdx) => {
         const picked = answers[qIdx];
         const shown = revealed[qIdx];
+        const selectedIndices = multiSelect
+          ? [...(picked instanceof Set ? picked : [])]
+          : (picked !== undefined ? [picked] : []);
+        const wrongSelected = shown ? selectedIndices.filter(i => !q.options[i]?.correct) : [];
+
         return (
-          <div key={qIdx} className="border rounded-lg dark:border-gray-600 p-4">
+          <div
+            key={qIdx}
+            className="border rounded-lg p-4"
+            style={{ borderColor: 'var(--theme-border)' }}
+          >
             <p className="font-medium mb-3">{q.question[lang]}</p>
-            {multiSelect && <p className="text-xs opacity-50 mb-2">{t('Select all that apply', 'Selectează toate variantele corecte')}</p>}
-            <div className="space-y-2">
+            {multiSelect && (
+              <p className="text-xs mb-2" style={{ color: 'var(--theme-muted)' }}>
+                {t('Select all that apply', 'Selectează toate variantele corecte')}
+              </p>
+            )}
+            <div
+              className="space-y-2"
+              role={multiSelect ? 'group' : 'radiogroup'}
+              aria-label={q.question[lang]}
+            >
               {q.options.map((opt, oIdx) => {
                 const isSelected = multiSelect ? (picked instanceof Set && picked.has(oIdx)) : picked === oIdx;
-                let cls = 'border rounded-lg p-2 cursor-pointer transition text-sm ';
-                if (shown && opt.correct) cls += 'border-green-500 bg-green-50 dark:bg-green-950 ';
-                else if (shown && isSelected && !opt.correct) cls += 'border-red-500 bg-red-50 dark:bg-red-950 ';
-                else if (isSelected) cls += 'border-blue-500 bg-blue-50 dark:bg-blue-950 ';
-                else cls += 'border-gray-300 dark:border-gray-600 hover:border-blue-400 ';
+                let bg = 'transparent';
+                let borderColor = 'var(--theme-border)';
+                if (shown && opt.correct) {
+                  bg = 'color-mix(in srgb, var(--theme-content-bg), #22c55e 10%)';
+                  borderColor = '#22c55e';
+                } else if (shown && isSelected && !opt.correct) {
+                  bg = 'color-mix(in srgb, var(--theme-content-bg), #ef4444 10%)';
+                  borderColor = '#ef4444';
+                } else if (isSelected) {
+                  bg = 'color-mix(in srgb, var(--theme-content-bg), #3b82f6 10%)';
+                  borderColor = '#3b82f6';
+                }
                 return (
-                  <div key={oIdx} className={cls} onClick={() => select(qIdx, oIdx)}>
+                  <button
+                    key={oIdx}
+                    type="button"
+                    role={multiSelect ? 'checkbox' : 'radio'}
+                    aria-checked={isSelected}
+                    disabled={shown}
+                    onClick={() => select(qIdx, oIdx)}
+                    className="w-full text-left border rounded-lg p-2 transition text-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-default"
+                    style={{ background: bg, borderColor, color: 'var(--theme-text)' }}
+                  >
                     {typeof opt.text === 'object' ? opt.text[lang] : opt.text}
-                  </div>
+                  </button>
                 );
               })}
             </div>
             {((multiSelect ? (picked instanceof Set && picked.size > 0) : picked !== undefined)) && !shown && (
-              <button onClick={() => reveal(qIdx)} className="mt-3 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+              <button
+                onClick={() => reveal(qIdx)}
+                className="mt-3 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              >
                 {t('Check Answer', 'Verifică răspunsul')}
               </button>
             )}
             {shown && (
               <>
-                {/* Per-option feedback for the selected option (if provided and wrong) */}
-                {(() => {
-                  const selectedIdx = multiSelect ? [...(picked || [])][0] : picked;
-                  const selOpt = q.options[selectedIdx];
-                  if (selOpt && !selOpt.correct && selOpt.feedback) {
-                    const msg = typeof selOpt.feedback === 'object' ? selOpt.feedback[lang] : selOpt.feedback;
-                    return (
-                      <p className="mt-3 text-sm p-2 rounded border" style={{ borderColor: '#ef4444', background: 'color-mix(in srgb, var(--theme-content-bg), #ef4444 8%)', color: 'var(--theme-text)' }}>
-                        <strong>{t('Why that\'s wrong: ', 'De ce e greșit: ')}</strong>{msg}
-                      </p>
-                    );
-                  }
-                  return null;
-                })()}
-                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                {/* Per-option feedback for EVERY wrong selection (multi-select can have several) */}
+                {wrongSelected.map(idx => {
+                  const opt = q.options[idx];
+                  if (!opt?.feedback) return null;
+                  const msg = typeof opt.feedback === 'object' ? opt.feedback[lang] : opt.feedback;
+                  const label = typeof opt.text === 'object' ? opt.text[lang] : opt.text;
+                  return (
+                    <p
+                      key={idx}
+                      className="mt-3 text-sm p-2 rounded border"
+                      style={{ borderColor: '#ef4444', background: 'color-mix(in srgb, var(--theme-content-bg), #ef4444 8%)', color: 'var(--theme-text)' }}
+                    >
+                      <strong>"{label}" — </strong>{msg}
+                    </p>
+                  );
+                })}
+                <p className="mt-3 text-sm" style={{ color: 'var(--theme-muted)' }}>
                   {q.explanation?.[lang]}
                 </p>
                 <button
                   onClick={() => {
-                    const selectedIdx = multiSelect ? [...(picked || [])][0] : picked;
-                    const selectedText = q.options[selectedIdx]
-                      ? (typeof q.options[selectedIdx].text === 'object' ? q.options[selectedIdx].text[lang] : q.options[selectedIdx].text)
-                      : '';
+                    const selectedTexts = selectedIndices.map(i => (
+                      q.options[i] ? (typeof q.options[i].text === 'object' ? q.options[i].text[lang] : q.options[i].text) : ''
+                    ));
                     window.dispatchEvent(new CustomEvent('check-with-ai', {
                       detail: {
                         type: 'multiple-choice',
                         question: typeof q.question === 'object' ? q.question[lang] : q.question,
-                        selectedText,
-                        studentAnswer: selectedText,
+                        selectedText: selectedTexts.join(', '),
+                        studentAnswer: selectedTexts.join(', '),
+                        selectedTexts,
+                        selectedIndices,
                         options: q.options.map(o => typeof o.text === 'object' ? o.text[lang] : o.text),
                         correct: q.options.findIndex(o => o.correct),
                         keyConcepts: q.keyConcepts || [],
@@ -102,7 +141,7 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
                       }
                     }));
                   }}
-                  className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white transition-colors hover:brightness-110 flex items-center gap-1.5"
+                  className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white transition-colors hover:brightness-110 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   style={{ backgroundColor: '#8b5cf6' }}
                 >
                   <span style={{ fontSize: '13px' }}>&#10024;</span>
