@@ -124,7 +124,7 @@ async function callOpenRouter(parts) {
     body: JSON.stringify({
       model: 'google/gemini-2.5-flash',
       messages: [{ role: 'user', content }],
-      max_tokens: 8192,
+      max_tokens: 7000,
     }),
   });
 
