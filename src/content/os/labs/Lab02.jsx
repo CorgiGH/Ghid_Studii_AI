@@ -66,6 +66,7 @@ export default function Lab02() {
         '/root/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
       checkScript: 'test -f /root/bash_count.txt && test "$(cat /root/bash_count.txt | tr -d "[:space:]")" = "4"',
+      failureHint: (t) => t('bash_count.txt must contain only the number 4 (no filename, no extra text). Pipe the filtered lines into a counter.', 'bash_count.txt trebuie să conțină doar numărul 4 (fără nume de fișier, fără text în plus). Trimite prin pipe liniile filtrate într-un contor.'),
       hints: [
         t('Use "grep /bin/bash passwd" to find matching lines', 'Folosiți "grep /bin/bash passwd" pentru a găsi liniile potrivite'),
         t('Pipe to "wc -l" to count lines, or use "grep -c"', 'Pipe la "wc -l" pentru a număra linii, sau folosiți "grep -c"'),
@@ -84,6 +85,7 @@ export default function Lab02() {
         '/root/data.txt': 'ana.popescu\ndiana.ionescu\nioana.stan\nroxana.marin\nmihai.popa\nstefana.dinu\ndiana.vasile\nbogdana.rusu\nana.voicu\nadrian.ganea\n',
       },
       checkScript: 'test -f /root/filtered.txt && ! grep -q "diana" /root/filtered.txt && test "$(wc -l < /root/filtered.txt)" = "6" && test "$(sort /root/filtered.txt | head -1)" = "ana.popescu" && test "$(sort /root/filtered.txt | tail -1)" = "stefana.dinu"',
+      failureHint: (t) => t('filtered.txt must contain exactly 6 sorted names — all containing "ana", none containing "diana". Three pipeline stages: grep for "ana", then exclude "diana", then sort.', 'filtered.txt trebuie să conțină exact 6 nume sortate — toate conținând "ana", niciunul "diana". Trei etape de pipeline: grep pentru "ana", apoi exclude "diana", apoi sortează.'),
       hints: [
         t('Start with "cat data.txt | grep ana" to select lines with "ana"', 'Începeți cu "cat data.txt | grep ana" pentru a selecta liniile cu "ana"'),
         t('Pipe to "grep -v diana" to exclude lines containing "diana"', 'Pipe la "grep -v diana" pentru a exclude liniile cu "diana"'),

@@ -91,8 +91,10 @@ export default function Practice() {
       ),
       courseRef: t('Course 1: File commands', 'Cursul 1: Comenzi fișiere'),
       topic: t('mkdir/echo', 'mkdir/echo'),
-      files: {},
-      checkScript: 'test -f /root/project/main.c && test -s /root/project/main.c',
+      // Pre-seed a distractor to rule out stale state passing on load
+      files: { '/root/.reset-marker': 'fresh' },
+      checkScript: 'test -d /root/project && test -f /root/project/main.c && grep -qE "include|main\\(|return" /root/project/main.c',
+      failureHint: (t) => t('You need TWO artifacts: the directory ~/project must exist, AND ~/project/main.c must exist with actual C-like content (e.g., #include, int main, or a return statement).', 'Ai nevoie de DOUĂ artefacte: directorul ~/project trebuie să existe ȘI ~/project/main.c trebuie să existe cu conținut de cod C (ex. #include, int main sau return).'),
       hints: [
         t('"mkdir dirname" creates a directory', '"mkdir dirname" creează un director'),
         t('"echo text > file" writes text to a file', '"echo text > file" scrie text într-un fișier'),
@@ -120,8 +122,8 @@ export default function Practice() {
     },
     {
       description: t(
-        'List files in src/, read the Makefile, then remove the "temp" directory and its contents.',
-        'Listează fișierele din src/, citește Makefile-ul, apoi șterge directorul "temp" cu tot conținutul.'
+        'Remove the "temp" directory and all its contents. (You can explore with "ls src/" or "cat src/Makefile" first, but only the deletion is graded.)',
+        'Șterge directorul "temp" și tot conținutul său. (Poți explora cu "ls src/" sau "cat src/Makefile" mai întâi, dar doar ștergerea este evaluată.)'
       ),
       courseRef: t('Course 1: Directory & file commands', 'Cursul 1: Comenzi directoare & fișiere'),
       topic: t('ls/rm', 'ls/rm'),
@@ -134,6 +136,7 @@ export default function Practice() {
         '/root/temp/scratch.txt': 'temporary data',
       },
       checkScript: '! test -d /root/temp',
+      failureHint: (t) => t('~/temp must not exist anymore. rm alone refuses to delete directories — you need the recursive flag.', '~/temp nu trebuie să mai existe. rm singur refuză să șteargă directoare — ai nevoie de flag-ul recursiv.'),
       hints: [
         t('"ls dir/" lists directory contents', '"ls dir/" listează conținutul directorului'),
         t('"rm -r dir" removes a directory recursively', '"rm -r dir" șterge un director recursiv'),

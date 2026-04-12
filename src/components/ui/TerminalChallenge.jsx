@@ -315,8 +315,9 @@ export default function TerminalChallenge({ exercises }) {
             className="v86-screen relative"
             style={{
               width: '100%',
-              height: 'clamp(320px, 50vh, 600px)',
-              overflow: 'hidden',
+              minHeight: 'clamp(320px, 50vh, 600px)',
+              maxHeight: 'calc(100vh - 200px)',
+              overflow: 'auto',
               background: '#0a0a14',
             }}
           />
@@ -427,7 +428,7 @@ export default function TerminalChallenge({ exercises }) {
             {ex.checkScript && (
               <button
                 onClick={check}
-                disabled={checking || !booted}
+                disabled={checking || !booted || injecting}
                 className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {checking ? (

@@ -6,9 +6,11 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
   const [answers, setAnswers] = useState({});
   const [revealed, setRevealed] = useState({});
 
-  // Arrow-key nav for single-select radio groups
-  const onRadioKeyDown = (e, qIdx, oIdx, total) => {
-    if (multiSelect) return;
+  // Track which option has focus per question (for roving tabindex on multi-select)
+  const [focusedIdx, setFocusedIdx] = useState({});
+
+  // Arrow-key nav — works for both radiogroup and checkbox group
+  const onOptionKeyDown = (e, qIdx, oIdx, total) => {
     if (revealed[qIdx]) return;
     let next = null;
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (oIdx + 1) % total;
@@ -17,8 +19,10 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
     else if (e.key === 'End') next = total - 1;
     if (next !== null) {
       e.preventDefault();
-      setAnswers(prev => ({ ...prev, [qIdx]: next }));
-      // Focus the new selection
+      if (!multiSelect) {
+        setAnswers(prev => ({ ...prev, [qIdx]: next }));
+      }
+      setFocusedIdx(prev => ({ ...prev, [qIdx]: next }));
       const btn = e.currentTarget.parentNode.children[next];
       if (btn) btn.focus();
     }
@@ -66,8 +70,8 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
         const missedCorrect = shown && multiSelect
           ? q.options.map((o, i) => (o.correct && !selectedSet.has(i) ? i : -1)).filter(i => i >= 0)
           : [];
-        // For roving tabindex: first selected option gets tabIndex=0, else first option
-        const focusableIdx = picked !== undefined && !multiSelect ? picked : 0;
+        // Roving tabindex: tracked focused option, or first selected, or first option
+        const focusableIdx = focusedIdx[qIdx] ?? (picked !== undefined && !multiSelect ? picked : 0);
 
         return (
           <div
@@ -106,10 +110,10 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
                     type="button"
                     role={multiSelect ? 'checkbox' : 'radio'}
                     aria-checked={isSelected}
-                    tabIndex={multiSelect ? 0 : (oIdx === focusableIdx ? 0 : -1)}
+                    tabIndex={oIdx === focusableIdx ? 0 : -1}
                     disabled={shown}
-                    onClick={() => select(qIdx, oIdx)}
-                    onKeyDown={(e) => onRadioKeyDown(e, qIdx, oIdx, q.options.length)}
+                    onClick={() => { select(qIdx, oIdx); setFocusedIdx(prev => ({ ...prev, [qIdx]: oIdx })); }}
+                    onKeyDown={(e) => onOptionKeyDown(e, qIdx, oIdx, q.options.length)}
                     className="w-full text-left border rounded-lg p-2 transition text-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-default"
                     style={{ background: bg, borderColor, color: 'var(--theme-text)' }}
                   >

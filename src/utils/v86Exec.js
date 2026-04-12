@@ -119,18 +119,24 @@ export async function injectFiles(exec, files) {
  * Returns { passed: boolean, feedback: string }.
  * The check script should exit 0 for pass, non-zero for fail.
  */
+// Session-unique random suffix makes the markers impossible for a user script to spoof
+const SESSION = Math.random().toString(36).slice(2, 10);
+
 export async function runCheck(exec, checkScript, timeout = 5000) {
   const id = ++cmdId;
-  const passMark = `__PASS_${id}__`;
-  const failMark = `__FAIL_${id}__`;
+  const passMark = `__PASS_${SESSION}_${id}__`;
+  const failMark = `__FAIL_${SESSION}_${id}__`;
   try {
+    // Always echo the marker at the END, on its own line, after any script output
     const result = await exec(
-      `( ${checkScript} ) 2>&1 && echo ${passMark} || echo ${failMark}`,
+      `( ${checkScript} ) 2>&1; ec=$?; if [ $ec = 0 ]; then echo "${passMark}"; else echo "${failMark}"; fi`,
       timeout
     );
-    const passed = result.includes(passMark);
-    const marker = passed ? passMark : failMark;
-    const feedbackEnd = result.lastIndexOf(marker);
+    // Match markers on their own line (end anchor) — can't be spoofed by mid-line text
+    const passed = new RegExp(`(^|\\n)${passMark}\\s*$`).test(result);
+    const failed = new RegExp(`(^|\\n)${failMark}\\s*$`).test(result);
+    const marker = passed ? passMark : (failed ? failMark : null);
+    const feedbackEnd = marker ? result.lastIndexOf(marker) : result.length;
     const feedback = result.slice(0, feedbackEnd).trim();
     return { passed, feedback, timedOut: false };
   } catch (err) {
