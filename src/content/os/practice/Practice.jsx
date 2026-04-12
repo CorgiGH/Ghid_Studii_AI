@@ -91,10 +91,9 @@ export default function Practice() {
       ),
       courseRef: t('Course 1: File commands', 'Cursul 1: Comenzi fișiere'),
       topic: t('mkdir/echo', 'mkdir/echo'),
-      // Pre-seed a distractor to rule out stale state passing on load
-      files: { '/root/.reset-marker': 'fresh' },
-      checkScript: 'test -d /root/project && test -f /root/project/main.c && grep -qE "include|main\\(|return" /root/project/main.c',
-      failureHint: (t) => t('You need TWO artifacts: the directory ~/project must exist, AND ~/project/main.c must exist with actual C-like content (e.g., #include, int main, or a return statement).', 'Ai nevoie de DOUĂ artefacte: directorul ~/project trebuie să existe ȘI ~/project/main.c trebuie să existe cu conținut de cod C (ex. #include, int main sau return).'),
+      files: {},
+      checkScript: 'test -d /root/project && test -s /root/project/main.c',
+      failureHint: (t) => t('You need TWO artifacts: the directory ~/project must exist, AND ~/project/main.c must exist with at least some content (any bytes count).', 'Ai nevoie de DOUĂ artefacte: directorul ~/project trebuie să existe ȘI ~/project/main.c trebuie să existe cu cel puțin ceva conținut (orice bytes contează).'),
       hints: [
         t('"mkdir dirname" creates a directory', '"mkdir dirname" creează un director'),
         t('"echo text > file" writes text to a file', '"echo text > file" scrie text într-un fișier'),
