@@ -99,18 +99,21 @@ export default function Practice() {
     },
     {
       description: t(
-        'Use grep to find all lines containing "error" (case-insensitive) in server.log, then count the total lines with wc.',
-        'Folosește grep pentru a găsi toate liniile ce conțin "error" (fără a ține cont de litere mari/mici) în server.log, apoi numără totalul de linii cu wc.'
+        'Save all "error" lines (case-insensitive) from server.log to errors.txt. Then save the total line count of server.log to total.txt.',
+        'Salvează toate liniile cu "error" (fără a ține cont de litere mari/mici) din server.log în errors.txt. Apoi salvează numărul total de linii din server.log în total.txt.'
       ),
       courseRef: t('Course 1: File processing', 'Cursul 1: Procesare fișiere'),
       files: {
         '/root/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully',
       },
+      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && test -f /root/total.txt && test "$(cat /root/total.txt | tr -d "[:space:]")" = "9"',
+      failureHint: (t) => t('errors.txt should have 4 lines (one per error). total.txt should contain just the number 9.', 'errors.txt trebuie să aibă 4 linii (câte una pentru fiecare eroare). total.txt trebuie să conțină doar numărul 9.'),
       hints: [
-        t('"grep pattern file" searches for matches', '"grep pattern file" caută potriviri'),
-        t('"wc file" counts lines, words, and chars', '"wc file" numără linii, cuvinte și caractere'),
+        t('"grep -i pattern file" searches case-insensitively', '"grep -i pattern file" caută fără a ține cont de litere mari/mici'),
+        t('Redirect output with > filename.txt', 'Redirectează output-ul cu > fisier.txt'),
+        t('"wc -l file" counts just lines', '"wc -l file" numără doar liniile'),
       ],
-      solution: 'grep -i error server.log\nwc -l server.log',
+      solution: 'grep -i error server.log > errors.txt\nwc -l < server.log > total.txt',
     },
     {
       description: t(

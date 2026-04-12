@@ -70,18 +70,21 @@ export default function Lab01() {
     },
     {
       description: t(
-        'The file server.log contains system messages. Use grep to find all lines containing "error" (case-insensitive). Then use wc to count how many lines the file has.',
-        'Fișierul server.log conține mesaje de sistem. Folosiți grep pentru a găsi toate liniile ce conțin "error" (case-insensitive). Apoi folosiți wc pentru a număra câte linii are fișierul.'
+        'The file server.log contains system messages. Save all lines containing "error" (case-insensitive) to errors.txt, and save the total line count to total.txt.',
+        'Fișierul server.log conține mesaje de sistem. Salvați toate liniile ce conțin "error" (fără a ține cont de litere mari/mici) în errors.txt, și salvați numărul total de linii în total.txt.'
       ),
       courseRef: t('Course 1: grep, wc', 'Cursul 1: grep, wc'),
       files: {
         '/root/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully',
       },
+      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && test -f /root/total.txt && test "$(cat /root/total.txt | tr -d "[:space:]")" = "9"',
+      failureHint: (t) => t('errors.txt should have 4 lines (one per error). total.txt should contain just the number 9.', 'errors.txt trebuie să aibă 4 linii (câte una pentru fiecare eroare). total.txt trebuie să conțină doar numărul 9.'),
       hints: [
         t('"grep -i pattern file" searches case-insensitively', '"grep -i pattern file" caută fără a ține cont de litere mari/mici'),
+        t('Redirect output with > filename.txt', 'Redirectați output-ul cu > fisier.txt'),
         t('"wc -l file" counts lines', '"wc -l file" numără liniile'),
       ],
-      solution: 'grep -i error server.log\nwc -l server.log',
+      solution: 'grep -i error server.log > errors.txt\nwc -l < server.log > total.txt',
     },
   ];
 
