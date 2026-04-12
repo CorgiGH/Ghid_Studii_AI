@@ -31,6 +31,10 @@ const alo = {
       title: { en: 'Course 5: Matrix factorizations — Cholesky, LU, QR', ro: 'Cursul 5: Factorizări matriciale — Cholesky, LU, QR' },
       shortTitle: { en: 'C5: Factorizations', ro: 'C5: Factorizări' },
       sectionCount: 10 },
+    { id: 'alo-c6', src: 'alo/courses/course-06.json', metaId: 'alo-c6',
+      title: { en: 'Course 6: Three roads to QR — Householder, Givens, Gram–Schmidt', ro: 'Cursul 6: Trei drumuri spre QR — Householder, Givens, Gram–Schmidt' },
+      shortTitle: { en: 'C6: QR algorithms', ro: 'C6: Algoritmi QR' },
+      sectionCount: 10 },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };

@@ -1,0 +1,1073 @@
+{
+  "meta": {
+    "id": "alo-c6",
+    "title": {
+      "en": "Course 6: Three roads to QR — Householder, Givens, Gram–Schmidt",
+      "ro": "Cursul 6: Trei drumuri spre QR — Householder, Givens, Gram–Schmidt"
+    },
+    "shortTitle": {
+      "en": "C6: QR algorithms",
+      "ro": "C6: Algoritmi QR"
+    },
+    "slug": "alo-c6",
+    "source": "ALO curs 06.pdf (Anca Ignat & Corina Forăscu)"
+  },
+  "steps": [
+    {
+      "id": "alo-c6-intro",
+      "title": {
+        "en": "Three roads to the same QR",
+        "ro": "Trei drumuri spre aceeași QR"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Course 5 told you QR exists and is wonderful for stability. That left an obvious question: **how do you actually compute $Q$ and $R$ on a real matrix?** Naive approaches explode in stability. What would your first attempt look like?",
+            "ro": "Cursul 5 ți-a spus că QR există și este minunată pentru stabilitate. Asta lasă o întrebare evidentă: **cum calculezi efectiv $Q$ și $R$ pentru o matrice reală?** Abordările naive explodează în stabilitate. Cum ar arăta prima ta încercare?"
+          },
+          "answer": {
+            "en": "Three classical approaches exist, each built on a different \"elementary orthogonal operation.\" Householder uses **reflections**, Givens uses **rotations**, and Gram–Schmidt uses **orthogonalization of columns**. All three produce the same $A = QR$ (up to sign), but they differ sharply in cost, stability, and parallelism. This course builds each one, then compares them head-to-head.",
+            "ro": "Există trei abordări clasice, fiecare construită pe o \"operație ortogonală elementară\" diferită. Householder folosește **reflexii**, Givens folosește **rotații**, iar Gram–Schmidt folosește **ortogonalizarea coloanelor**. Toate cele trei produc aceeași $A = QR$ (până la semn), dar diferă net în cost, stabilitate și paralelism. Cursul acesta construiește fiecare abordare, apoi le compară."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Why three algorithms for the same factorization?** Because \"orthogonal + triangular\" can be achieved from different directions:",
+            "ro": "**De ce trei algoritmi pentru aceeași factorizare?** Pentru că \"ortogonal + triunghiular\" se poate obține din direcții diferite:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Householder (reflections).** Apply $n-1$ reflections that each zero an entire column below the diagonal in one shot. The modern default in LAPACK (`dgeqrf`). Cost $\\sim 2 n^3/3$, excellent stability.",
+              "ro": "**Householder (reflexii).** Aplici $n-1$ reflexii care fiecare anulează o coloană întreagă sub diagonală într-o singură lovitură. Implicitul modern din LAPACK (`dgeqrf`). Cost $\\sim 2 n^3/3$, stabilitate excelentă."
+            },
+            {
+              "en": "**Givens (rotations).** Apply $O(n^2)$ rotations that each zero **one** entry at a time. More work on dense matrices, but **embarrassingly parallel** and the right tool for sparse matrices.",
+              "ro": "**Givens (rotații).** Aplici $O(n^2)$ rotații care fiecare anulează **o singură** intrare pe rând. Mai multă muncă pe matrici dense, dar **paralelizabil trivial** și instrumentul potrivit pentru matrici rare."
+            },
+            {
+              "en": "**Gram–Schmidt.** Orthogonalize the columns of $A$ one by one. Conceptually the simplest, but **classical** Gram–Schmidt is numerically fragile; the **modified** variant is the practical form.",
+              "ro": "**Gram–Schmidt.** Ortogonalizezi coloanele lui $A$ una câte una. Conceptual cea mai simplă, dar Gram–Schmidt **clasic** este fragilă numeric; varianta **modificată** este forma practică."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**All three are orthogonal transformations applied to $A$ from the left.** The common template is: find orthogonal $Q_1, Q_2, \\ldots$ such that $Q_k \\cdots Q_1 A = R$ (upper-triangular), then set $Q = (Q_k \\cdots Q_1)^T$. The three algorithms differ only in how the $Q_i$'s are built.",
+            "ro": "**Toate cele trei sunt transformări ortogonale aplicate lui $A$ din stânga.** Șablonul comun: găsești $Q_1, Q_2, \\ldots$ ortogonale astfel încât $Q_k \\cdots Q_1 A = R$ (superior triunghiulară), apoi setezi $Q = (Q_k \\cdots Q_1)^T$. Algoritmii diferă doar prin modul de construire a lui $Q_i$."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "ALO curs 06 (Anca Ignat & Corina Forăscu). Course page: https://edu.info.uaic.ro/algebra-liniara/",
+            "ro": "ALO curs 06 (Anca Ignat & Corina Forăscu). Pagina cursului: https://edu.info.uaic.ro/algebra-liniara/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-reflection",
+      "title": {
+        "en": "The Householder reflection matrix",
+        "ro": "Matricea de reflexie Householder"
+      },
+      "group": "householder",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Imagine a mirror placed in $\\mathbb{R}^n$ — a hyperplane through the origin perpendicular to a unit vector $v$. Reflection across that mirror takes any vector $x$ to $x$ minus twice its component along $v$. **Write that as a matrix equation.**",
+            "ro": "Imaginează-ți o oglindă plasată în $\\mathbb{R}^n$ — un hiperplan care trece prin origine, perpendicular pe un vector unitar $v$. Reflexia peste acea oglindă duce orice vector $x$ în $x$ minus de două ori componenta sa de-a lungul lui $v$. **Scrie asta ca o ecuație matricială.**"
+          },
+          "answer": {
+            "en": "$x - 2 (v^T x) v = (I_n - 2 v v^T) x$. The matrix $P = I_n - 2 v v^T$ captures the whole reflection. The next blocks prove that $P$ is symmetric, orthogonal, and $P^2 = I$ — the three properties that make it the building block of Householder QR.",
+            "ro": "$x - 2 (v^T x) v = (I_n - 2 v v^T) x$. Matricea $P = I_n - 2 v v^T$ surprinde întreaga reflexie. Blocurile următoare demonstrează că $P$ este simetrică, ortogonală și $P^2 = I$ — cele trei proprietăți care o fac piatra de temelie a QR Householder."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Householder reflection matrix",
+            "ro": "Matricea de reflexie Householder"
+          },
+          "content": {
+            "en": "For a unit vector $v \\in \\mathbb{R}^n$ ($\\|v\\|_2 = 1$), the reflection through the hyperplane orthogonal to $v$ is",
+            "ro": "Pentru un vector unitar $v \\in \\mathbb{R}^n$ ($\\|v\\|_2 = 1$), reflexia prin hiperplanul ortogonal pe $v$ este"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "P = I_n - 2 v v^T"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The outer product $v v^T$ is the $n \\times n$ matrix with entries $(v v^T)_{ij} = v_i v_j$. Multiplying by $x$ gives $(v v^T) x = v (v^T x) = (v^T x) v$ — the component of $x$ along $v$.",
+            "ro": "Produsul exterior $v v^T$ este matricea $n \\times n$ cu intrările $(v v^T)_{ij} = v_i v_j$. Înmulțirea cu $x$ dă $(v v^T) x = v (v^T x) = (v^T x) v$ — componenta lui $x$ de-a lungul lui $v$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Three properties, proven in one page.**\n\n- **Symmetric:** $P^T = (I_n - 2 v v^T)^T = I_n - 2 (v^T)^T v^T = I_n - 2 v v^T = P$.\n- **Involutive:** $P^2 = (I_n - 2 v v^T)^2 = I_n - 4 v v^T + 4 v (v^T v) v^T = I_n - 4 v v^T + 4 v v^T = I_n$ (since $v^T v = 1$).\n- **Orthogonal:** $P P^T = P^2 = I_n$, so $P^{-1} = P^T = P$.\n\nGeometrically: reflecting twice gives you back where you started.",
+            "ro": "**Trei proprietăți, demonstrate într-o pagină.**\n\n- **Simetrică:** $P^T = (I_n - 2 v v^T)^T = I_n - 2 (v^T)^T v^T = I_n - 2 v v^T = P$.\n- **Involutivă:** $P^2 = (I_n - 2 v v^T)^2 = I_n - 4 v v^T + 4 v (v^T v) v^T = I_n - 4 v v^T + 4 v v^T = I_n$ (deoarece $v^T v = 1$).\n- **Ortogonală:** $P P^T = P^2 = I_n$, deci $P^{-1} = P^T = P$.\n\nGeometric: reflectezi de două ori și ajungi înapoi de unde ai plecat."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Concrete example in 2D.** Take $v = (1, 0)^T$. Then $v v^T = \\begin{pmatrix} 1 & 0 \\\\ 0 & 0 \\end{pmatrix}$ and $P = \\begin{pmatrix} -1 & 0 \\\\ 0 & 1 \\end{pmatrix}$. Applied to $x = (x_1, x_2)^T$ we get $P x = (-x_1, x_2)^T$ — a reflection across the $y$-axis. That's exactly what \"hyperplane orthogonal to $v = e_1$\" looks like in the plane.",
+            "ro": "**Exemplu concret în 2D.** Ia $v = (1, 0)^T$. Atunci $v v^T = \\begin{pmatrix} 1 & 0 \\\\ 0 & 0 \\end{pmatrix}$ și $P = \\begin{pmatrix} -1 & 0 \\\\ 0 & 1 \\end{pmatrix}$. Aplicată pe $x = (x_1, x_2)^T$ dă $P x = (-x_1, x_2)^T$ — o reflexie peste axa $y$. Exact cum arată \"hiperplanul ortogonal pe $v = e_1$\" în plan."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Historical note.** Alston S. Householder introduced reflection-based QR in *Unitary triangularization of a nonsymmetric matrix* (J. ACM 5, 1958). The algorithm has been the numerical standard ever since; LAPACK's `dgeqrf` still uses it under the hood.",
+            "ro": "**Notă istorică.** Alston S. Householder a introdus QR bazat pe reflexii în *Unitary triangularization of a nonsymmetric matrix* (J. ACM 5, 1958). Algoritmul este standardul numeric de atunci; `dgeqrf` din LAPACK îl folosește încă sub capotă."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Why is Householder's $P = I_n - 2 v v^T$ exactly orthogonal (not just approximately)?",
+                "ro": "De ce este $P = I_n - 2 v v^T$ al lui Householder **exact** ortogonală (nu doar aproximativ)?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Because $v$ is a unit vector.", "ro": "Pentru că $v$ este un vector unitar." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $P^2 = I_n - 4 v v^T + 4 v (v^T v) v^T$; the cross term collapses to $4 v v^T$ precisely because $v^T v = \\|v\\|_2^2 = 1$. Drop the unit-norm assumption and $P$ is no longer orthogonal.",
+                    "ro": "Corect. $P^2 = I_n - 4 v v^T + 4 v (v^T v) v^T$; termenul încrucișat se colapsează la $4 v v^T$ exact pentru că $v^T v = \\|v\\|_2^2 = 1$. Elimini ipoteza normei unitare și $P$ nu mai este ortogonală."
+                  }
+                },
+                {
+                  "text": { "en": "Because the identity $I_n$ is orthogonal.", "ro": "Pentru că identitatea $I_n$ este ortogonală." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Subtracting $2 v v^T$ from $I_n$ doesn't automatically preserve orthogonality; the subtraction has to cancel exactly, which requires $\\|v\\|_2 = 1$.",
+                    "ro": "Scăderea $2 v v^T$ din $I_n$ nu păstrează automat ortogonalitatea; scăderea trebuie să se anuleze exact, ceea ce cere $\\|v\\|_2 = 1$."
+                  }
+                },
+                {
+                  "text": { "en": "Because $v v^T$ is symmetric.", "ro": "Pentru că $v v^T$ este simetrică." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Symmetry makes $P$ symmetric, which is separate from orthogonal. Orthogonality needs $P^T P = I$, and that's what the $\\|v\\|_2 = 1$ algebra delivers.",
+                    "ro": "Simetria face $P$ simetrică, ceea ce este separat de ortogonalitate. Ortogonalitatea cere $P^T P = I$, iar asta dă algebra $\\|v\\|_2 = 1$."
+                  }
+                },
+                {
+                  "text": { "en": "Because the determinant of a reflection is $-1$.", "ro": "Pentru că determinantul unei reflexii este $-1$." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$\\det P = -1$ (reflections flip orientation) is a consequence of orthogonality, not its cause.",
+                    "ro": "$\\det P = -1$ (reflexiile inversează orientarea) este o consecință a ortogonalității, nu cauza ei."
+                  }
+                }
+              ],
+              "explanation": { "en": "Unit-norm $v$ is the lynchpin: it makes the cross-term in $P^2$ collapse to $4 v v^T$.", "ro": "Norma unitate a lui $v$ este piatra de temelie: face termenul încrucișat din $P^2$ să colapseze la $4 v v^T$." },
+              "reviewStep": "alo-c6-reflection"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 4–6 of ALO curs 06 — Householder reflection matrix.",
+            "ro": "Slide-urile 4–6 din ALO curs 06 — matricea de reflexie Householder."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-householder-overview",
+      "title": {
+        "en": "Householder QR: n−1 reflections, one per column",
+        "ro": "QR Householder: n−1 reflexii, una pe coloană"
+      },
+      "group": "householder",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The big picture.** Apply $n-1$ reflection matrices $P_1, P_2, \\ldots, P_{n-1}$ to $A$ such that stage $r$ **zeros out column $r$ below the diagonal** without disturbing the first $r-1$ columns. After all stages, the result is upper-triangular:",
+            "ro": "**Imaginea de ansamblu.** Aplici $n-1$ matrici de reflexie $P_1, P_2, \\ldots, P_{n-1}$ pe $A$ astfel încât etapa $r$ să **anuleze coloana $r$ sub diagonală** fără a perturba primele $r-1$ coloane. După toate etapele, rezultatul este superior triunghiular:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "P_{n-1} \\cdots P_2 P_1 \\, A \\;=\\; R"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Set $\\tilde{Q} = P_{n-1} \\cdots P_2 P_1$. Because each $P_r$ is orthogonal and the product of orthogonals is orthogonal, $\\tilde{Q}$ itself is orthogonal, so",
+            "ro": "Setează $\\tilde{Q} = P_{n-1} \\cdots P_2 P_1$. Pentru că fiecare $P_r$ este ortogonală și produsul de matrici ortogonale este ortogonal, $\\tilde{Q}$ însăși este ortogonală, deci"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A \\;=\\; \\tilde{Q}^T R \\;=\\; Q R, \\qquad Q \\;:=\\; \\tilde{Q}^T \\;=\\; P_1 P_2 \\cdots P_{n-1}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Nice algebraic bonus.** Because each $P_r$ is its own inverse ($P_r^{-1} = P_r$), transposing the product just reverses the order. We don't need to invert anything explicitly — the two formulas read off immediately from the factorization.",
+            "ro": "**Bonus algebric frumos.** Pentru că fiecare $P_r$ este propria sa inversă ($P_r^{-1} = P_r$), transpunerea produsului doar inversează ordinea. Nu trebuie să inversăm nimic explicit — cele două formule se citesc imediat din factorizare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The design question left.** At stage $r$ we need a **specific** $P_r$ that does two jobs: (a) zero every entry below the diagonal in column $r$ of the current matrix, and (b) leave the first $r-1$ columns of the current matrix unchanged. The next step constructs such a $P_r$ explicitly — the formula for the reflecting vector $v$ is the only real calculation in the algorithm.",
+            "ro": "**Întrebarea rămasă.** La etapa $r$ avem nevoie de un $P_r$ **specific** care face două lucruri: (a) anulează fiecare intrare sub diagonală în coloana $r$ a matricei curente și (b) lasă primele $r-1$ coloane ale matricei curente neschimbate. Pasul următor construiește un astfel de $P_r$ explicit — formula pentru vectorul de reflexie $v$ este singurul calcul real din algoritm."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 7–10 of ALO curs 06 — Householder stages overview.",
+            "ro": "Slide-urile 7–10 din ALO curs 06 — prezentarea generală a etapelor Householder."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-householder-detailed",
+      "title": {
+        "en": "Building the stage-r reflection vector",
+        "ro": "Construirea vectorului de reflexie la etapa r"
+      },
+      "group": "householder",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "At stage $r$, the first $r-1$ columns are already triangular. The $r$-th column has entries $(a_{1r}, \\ldots, a_{r-1, r}, a_{rr}, a_{r+1, r}, \\ldots, a_{nr})^T$. You want a reflection $P_r$ that sends this column to $(a_{1r}, \\ldots, a_{r-1, r}, k, 0, \\ldots, 0)^T$ for some scalar $k$. **What must $k$ equal, and why?**",
+            "ro": "La etapa $r$, primele $r-1$ coloane sunt deja triunghiulare. Coloana $r$ are intrările $(a_{1r}, \\ldots, a_{r-1, r}, a_{rr}, a_{r+1, r}, \\ldots, a_{nr})^T$. Vrei o reflexie $P_r$ care să trimită această coloană în $(a_{1r}, \\ldots, a_{r-1, r}, k, 0, \\ldots, 0)^T$ pentru un scalar $k$. **Cu ce trebuie să fie egal $k$ și de ce?**"
+          },
+          "answer": {
+            "en": "Reflections preserve Euclidean length. The squared length of the input's tail ($a_{rr}^2 + a_{r+1,r}^2 + \\cdots + a_{nr}^2 = \\sigma$) must equal the squared length of the output's tail ($k^2$). So $k^2 = \\sigma$ and $k = \\pm \\sqrt{\\sigma}$ — two choices of sign. The next blocks derive the formula for $v$ and then pick the sign that maximizes a division denominator for numerical stability.",
+            "ro": "Reflexiile păstrează lungimea euclidiană. Pătratul lungimii cozii intrării ($a_{rr}^2 + a_{r+1,r}^2 + \\cdots + a_{nr}^2 = \\sigma$) trebuie să fie egal cu pătratul lungimii cozii ieșirii ($k^2$). Deci $k^2 = \\sigma$ și $k = \\pm \\sqrt{\\sigma}$ — două alegeri de semn. Blocurile următoare derivă formula pentru $v$ și apoi aleg semnul care maximizează un numitor pentru stabilitate numerică."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Derive the reflection vector.** Write the goal as $P_r A e_r = \\bar{A} e_r$ where $\\bar{A} e_r$ is the shortened column. Plug in $P_r = I_n - 2 v v^T$ and expand:",
+            "ro": "**Derivăm vectorul de reflexie.** Scrie scopul ca $P_r A e_r = \\bar{A} e_r$ unde $\\bar{A} e_r$ este coloana scurtată. Înlocuiește $P_r = I_n - 2 v v^T$ și dezvoltă:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "P_r A e_r \\;=\\; A e_r - 2 \\, (v^T A e_r) \\, v \\;=\\; A e_r - (2\\alpha) \\, v, \\qquad \\alpha := v^T A e_r"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Match that to the target $\\bar{A} e_r$. Define $u := (2\\alpha) v = A e_r - \\bar{A} e_r$ — a vector whose top $r-1$ entries are zero, and whose bottom entries are",
+            "ro": "Potrivește asta cu ținta $\\bar{A} e_r$. Definește $u := (2\\alpha) v = A e_r - \\bar{A} e_r$ — un vector cu primele $r-1$ intrări zero și cu intrările de jos"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "u_r = a_{rr} - k, \\quad u_i = a_{ir} \\ (i = r+1, \\ldots, n)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Because $v = u / (2\\alpha)$ and $\\|v\\|_2 = 1$ give $\\|u\\|_2^2 = 4 \\alpha^2$, the whole reflection matrix reorganizes into the **implementable form**:",
+            "ro": "Pentru că $v = u / (2\\alpha)$ și $\\|v\\|_2 = 1$ dau $\\|u\\|_2^2 = 4 \\alpha^2$, întreaga matrice de reflexie se reorganizează în **forma implementabilă**:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "P_r \\;=\\; I_n - \\frac{1}{\\beta} u u^T, \\qquad \\beta \\;:=\\; 2 \\alpha^2 \\;=\\; \\tfrac{1}{2} \\|u\\|_2^2"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Computing $\\beta$ without $v$.** Expand $\\|u\\|_2^2$ directly:",
+            "ro": "**Calcularea lui $\\beta$ fără $v$.** Dezvoltă $\\|u\\|_2^2$ direct:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\|u\\|_2^2 \\;=\\; (a_{rr} - k)^2 + a_{r+1,r}^2 + \\cdots + a_{nr}^2 \\;=\\; 2 (\\sigma - k \\, a_{rr})"
+        },
+        {
+          "type": "equation",
+          "tex": "\\Longrightarrow \\ \\beta \\;=\\; \\sigma - k \\, a_{rr}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Sign of $k$ for stability.** We will divide by $\\beta$ in the update, so we want $\\beta$ as **large** as possible. Since $\\sigma \\geq 0$, picking $\\text{sign}(k) = -\\text{sign}(a_{rr})$ makes $-k a_{rr} \\geq 0$ and $\\beta \\geq \\sigma$ — the best case. Choosing the opposite sign can make $\\beta$ tiny (or zero) and explode rounding error. This sign choice is the **one trick** that keeps Householder stable.",
+            "ro": "**Semnul lui $k$ pentru stabilitate.** Vom împărți la $\\beta$ în actualizare, deci vrem $\\beta$ cât mai **mare**. Cum $\\sigma \\geq 0$, alegerea $\\text{sign}(k) = -\\text{sign}(a_{rr})$ face $-k a_{rr} \\geq 0$ și $\\beta \\geq \\sigma$ — cazul cel mai bun. Alegerea semnului opus poate face $\\beta$ minuscul (sau zero) și exploda eroarea de rotunjire. Această alegere de semn este **singurul truc** care menține Householder stabilă."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Degenerate case: $\\beta = 0$.** If $\\beta = 0$ then $u = 0$, which forces $a_{rr} = k$ and all $a_{ir} = 0$ for $i > r$. Column $r$ is already upper-triangular; skip the reflection and move to stage $r+1$. If this happens on a truly singular matrix, every subsequent column will also give $\\beta = 0$ — report singularity.",
+            "ro": "**Caz degenerat: $\\beta = 0$.** Dacă $\\beta = 0$ atunci $u = 0$, ceea ce forțează $a_{rr} = k$ și toate $a_{ir} = 0$ pentru $i > r$. Coloana $r$ este deja superior triunghiulară; sari peste reflexie și treci la etapa $r+1$. Dacă se întâmplă pe o matrice într-adevăr singulară, fiecare coloană ulterioară va da la fel $\\beta = 0$ — raportează singularitate."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "The sign of $k$ in Householder is chosen so that…",
+                "ro": "Semnul lui $k$ în Householder este ales astfel încât…"
+              },
+              "options": [
+                {
+                  "text": { "en": "…$k = +\\sqrt{\\sigma}$ always (positive convention).", "ro": "…$k = +\\sqrt{\\sigma}$ mereu (convenție pozitivă)." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "A fixed sign can make $\\beta = \\sigma - k a_{rr}$ near zero when $a_{rr}$ has the same sign as $k$ — division by tiny $\\beta$ then wrecks stability.",
+                    "ro": "Un semn fix poate face $\\beta = \\sigma - k a_{rr}$ aproape zero când $a_{rr}$ are același semn ca $k$ — împărțirea la un $\\beta$ minuscul distruge apoi stabilitatea."
+                  }
+                },
+                {
+                  "text": { "en": "…$\\text{sign}(k) = -\\text{sign}(a_{rr})$, so $\\beta$ is as large as possible.", "ro": "…$\\text{sign}(k) = -\\text{sign}(a_{rr})$, astfel ca $\\beta$ să fie cât mai mare." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Opposite signs give $-k a_{rr} \\geq 0$, so $\\beta = \\sigma - k a_{rr} \\geq \\sigma$. The division $u/\\beta$ then stays well-conditioned.",
+                    "ro": "Corect. Semne opuse dau $-k a_{rr} \\geq 0$, deci $\\beta = \\sigma - k a_{rr} \\geq \\sigma$. Împărțirea $u/\\beta$ rămâne apoi bine condiționată."
+                  }
+                },
+                {
+                  "text": { "en": "…$k$ matches $a_{rr}$, to minimize the reflection angle.", "ro": "…$k$ se potrivește cu $a_{rr}$, pentru a minimiza unghiul reflexiei." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "That is the classic unstable choice. A \"small angle\" reflection has $u \\to 0$ and $\\beta \\to 0$ — catastrophic cancellation.",
+                    "ro": "Aceea este alegerea clasică instabilă. O reflexie \"cu unghi mic\" are $u \\to 0$ și $\\beta \\to 0$ — anulare catastrofală."
+                  }
+                },
+                {
+                  "text": { "en": "…$k = 0$, to kill the diagonal entry.", "ro": "…$k = 0$, pentru a anula elementul diagonal." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$k$ is the new diagonal entry; setting it to zero would make the matrix singular. $|k| = \\sqrt{\\sigma}$, not zero.",
+                    "ro": "$k$ este noul element diagonal; setarea sa la zero ar face matricea singulară. $|k| = \\sqrt{\\sigma}$, nu zero."
+                  }
+                }
+              ],
+              "explanation": { "en": "Opposite-sign rule keeps $\\beta$ large so division doesn't amplify rounding.", "ro": "Regula semnului opus menține $\\beta$ mare astfel încât împărțirea să nu amplifice rotunjirea." },
+              "reviewStep": "alo-c6-householder-detailed"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 11–16 of ALO curs 06 — deriving $v$, $\\beta$, $u$ at stage $r$.",
+            "ro": "Slide-urile 11–16 din ALO curs 06 — derivarea lui $v$, $\\beta$, $u$ la etapa $r$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-householder-algorithm",
+      "title": {
+        "en": "Householder algorithm and its 2n³/3 cost",
+        "ro": "Algoritmul Householder și costul său 2n³/3"
+      },
+      "group": "householder",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The operation $P_r A$, column by column.** Instead of forming $P_r$ as a dense matrix (that would cost $O(n^2)$ storage and $O(n^3)$ multiplication per stage), exploit the rank-one structure $P_r = I - u u^T / \\beta$ and apply it to each column directly:",
+            "ro": "**Operația $P_r A$, coloană cu coloană.** În loc să formezi $P_r$ ca o matrice densă (ar costa $O(n^2)$ stocare și $O(n^3)$ înmulțire per etapă), exploatează structura de rang unu $P_r = I - u u^T / \\beta$ și aplic-o fiecărei coloane direct:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "(P_r A) e_j \\;=\\; A e_j - \\frac{\\gamma_j}{\\beta} \\, u, \\qquad \\gamma_j := u^T A e_j"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Sparsity gift.** For the already-triangularized columns $j < r$, $u$ has zeros in the positions where the column has nonzeros, so $\\gamma_j = 0$ and the column is unchanged. Only columns $j \\geq r$ need updating — exactly the \"don't disturb previous work\" property we wanted.",
+            "ro": "**Cadou de rarime.** Pentru coloanele deja triangularizate $j < r$, $u$ are zerouri în pozițiile unde coloana are intrări nenule, deci $\\gamma_j = 0$, iar coloana rămâne neschimbată. Doar coloanele $j \\geq r$ trebuie actualizate — exact proprietatea \"nu perturba munca anterioară\" pe care o vroiam."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Householder QR on A (also updates b = Q^T b and builds Q^T)\n// Inputs: A (n x n), b (n), epsilon (singularity threshold)\n// Outputs: A becomes R; b becomes Q^T b; Qt holds Q^T\nQt = I_n;\nfor (int r = 0; r < n - 1; r++) {\n    // ---- build the reflection P_r: u and beta ----\n    double sigma = 0;\n    for (int i = r; i < n; i++) sigma += A[i][r] * A[i][r];\n    if (sigma <= epsilon) break;          // A is singular at this pivot\n    double k = sqrt(sigma);\n    if (A[r][r] > 0) k = -k;              // sign rule: sign(k) = -sign(a_rr)\n    double beta = sigma - k * A[r][r];\n    double u[n];\n    for (int i = 0;   i < r; i++) u[i] = 0;\n    u[r] = A[r][r] - k;\n    for (int i = r + 1; i < n; i++) u[i] = A[i][r];\n\n    // ---- apply P_r to columns j >= r+1 of A ----\n    for (int j = r + 1; j < n; j++) {\n        double g = 0;\n        for (int i = r; i < n; i++) g += u[i] * A[i][j];\n        g /= beta;\n        for (int i = r; i < n; i++) A[i][j] -= g * u[i];\n    }\n    // ---- rewrite column r of A explicitly ----\n    A[r][r] = k;\n    for (int i = r + 1; i < n; i++) A[i][r] = 0;\n\n    // ---- apply P_r to b and Qt ----\n    double g = 0;\n    for (int i = r; i < n; i++) g += u[i] * b[i];\n    g /= beta;\n    for (int i = r; i < n; i++) b[i] -= g * u[i];\n\n    for (int j = 0; j < n; j++) {\n        double gq = 0;\n        for (int i = r; i < n; i++) gq += u[i] * Qt[i][j];\n        gq /= beta;\n        for (int i = r; i < n; i++) Qt[i][j] -= gq * u[i];\n    }\n}\n// On exit: A = R (upper-triangular), b = Q^T b, Qt = Q^T."
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Operation counts.** Summing the inner loops over all stages:",
+            "ro": "**Numărarea operațiilor.** Însumând buclele interioare peste toate etapele:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A_{\\pm} \\;=\\; \\tfrac{2}{3} n^3 + O(n^2), \\qquad M_{\\times/\\div} \\;=\\; \\tfrac{2}{3} n^3 + O(n^2), \\qquad R_{\\sqrt{\\ }} \\;=\\; n - 1"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why Householder costs about twice LU.** LU elimination touches each below-diagonal entry once (~$n^3/3$ total). Householder touches each entry once to form $u$ and once to update via $g \\cdot u$ — twice the constant. The price buys **numerical stability**: Householder is backward-stable with a tiny, dimension-independent error constant, while plain LU without pivoting is unstable.",
+            "ro": "**De ce Householder costă aproximativ de două ori cât LU.** Eliminarea LU atinge fiecare intrare sub diagonală o dată (~$n^3/3$ total). Householder atinge fiecare intrare o dată pentru a forma $u$ și o dată pentru a actualiza prin $g \\cdot u$ — dublă constantă. Prețul cumpără **stabilitate numerică**: Householder este stabilă înapoi cu o constantă de eroare mică și independentă de dimensiune, în timp ce LU simplu fără pivotare este instabilă."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "In the inner loop of Householder, what does $\\gamma_j = u^T A e_j$ represent, and why do we need it?",
+                "ro": "În bucla interioară a lui Householder, ce reprezintă $\\gamma_j = u^T A e_j$ și de ce avem nevoie de el?"
+              },
+              "options": [
+                {
+                  "text": { "en": "The determinant of the $j$-th leading submatrix.", "ro": "Determinantul submatricei principale de dimensiune $j$." },
+                  "correct": false,
+                  "explanation": { "en": "Determinants aren't computed in Householder. $\\gamma_j$ is a simple dot product.", "ro": "Determinanții nu se calculează în Householder. $\\gamma_j$ este un produs scalar simplu." }
+                },
+                {
+                  "text": { "en": "The inner product of $u$ with column $j$ of $A$ — the scalar that tells us how much of $u$ to subtract to zero out below-diagonal entries.", "ro": "Produsul scalar dintre $u$ și coloana $j$ din $A$ — scalarul care ne spune cât din $u$ să scădem pentru a anula intrările sub diagonală." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Applying $P_r = I - u u^T/\\beta$ to column $j$ gives $A e_j - (\\gamma_j/\\beta) u$. Compute $\\gamma_j$ once per column in $O(n)$, then update the column in $O(n)$.", "ro": "Corect. Aplicarea $P_r = I - u u^T/\\beta$ pe coloana $j$ dă $A e_j - (\\gamma_j/\\beta) u$. Calculezi $\\gamma_j$ o dată pe coloană în $O(n)$, apoi actualizezi coloana în $O(n)$." }
+                },
+                {
+                  "text": { "en": "The $L^T$ factor's diagonal entry.", "ro": "Elementul diagonal al factorului $L^T$." },
+                  "correct": false,
+                  "explanation": { "en": "Householder produces $Q$ and $R$, not $L$. Mixing factorizations.", "ro": "Householder produce $Q$ și $R$, nu $L$. Amestec de factorizări." }
+                },
+                {
+                  "text": { "en": "The norm of $u$.", "ro": "Norma lui $u$." },
+                  "correct": false,
+                  "explanation": { "en": "That's $\\|u\\|_2^2$, which determines $\\beta$. $\\gamma_j$ is different per column $j$ and depends on $A e_j$.", "ro": "Aceea este $\\|u\\|_2^2$, care determină $\\beta$. $\\gamma_j$ este diferit per coloană $j$ și depinde de $A e_j$." }
+                }
+              ],
+              "explanation": { "en": "Two-step rank-one update: compute $\\gamma_j$ (dot product), then subtract $(\\gamma_j/\\beta) u$ from the column.", "ro": "Actualizare în doi pași de rang unu: calculezi $\\gamma_j$ (produs scalar), apoi scazi $(\\gamma_j/\\beta) u$ din coloană." },
+              "reviewStep": "alo-c6-householder-algorithm"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 17–23 of ALO curs 06 — full Householder algorithm and cost.",
+            "ro": "Slide-urile 17–23 din ALO curs 06 — algoritmul Householder complet și costul."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-givens-rotation",
+      "title": {
+        "en": "Givens rotation matrices",
+        "ro": "Matricile de rotație Givens"
+      },
+      "group": "givens",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Householder kills an entire column in one shot. What if the matrix is **sparse** — most entries are already zero? Then reflecting a whole column would touch many zeros and scatter them. Is there an orthogonal operation that **zeros just one entry at a time**, leaving other zeros untouched?",
+            "ro": "Householder anulează o coloană întreagă într-o lovitură. Dacă matricea este **rară** — majoritatea intrărilor sunt deja zero? Atunci reflectarea unei coloane întregi ar atinge multe zerouri și le-ar împrăștia. Există o operație ortogonală care **anulează o singură intrare pe rând**, lăsând celelalte zerouri netatinse?"
+          },
+          "answer": {
+            "en": "**Yes — plane rotations.** A Givens rotation acts in the 2D subspace spanned by two coordinate axes $p$ and $q$ and is the identity on all other coordinates. Applied to a matrix, it only modifies rows $p$ and $q$ (or columns $p$ and $q$) — surgical. That's why Givens dominates on sparse matrices and parallel architectures, even though it is more expensive than Householder on dense problems.",
+            "ro": "**Da — rotațiile plane.** O rotație Givens acționează în subspațiul 2D generat de două axe de coordonate $p$ și $q$ și este identitatea pe toate celelalte coordonate. Aplicată pe o matrice, modifică doar liniile $p$ și $q$ (sau coloanele $p$ și $q$) — chirurgicală. De aceea Givens domină pe matrici rare și arhitecturi paralele, chiar dacă este mai scumpă decât Householder pe probleme dense."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Givens rotation matrix",
+            "ro": "Matricea de rotație Givens"
+          },
+          "content": {
+            "en": "For indices $p < q$ and angle $\\theta$, the Givens matrix $R_{pq}(\\theta) \\in \\mathbb{R}^{n \\times n}$ is the identity **except** at the four positions $(p,p), (p,q), (q,p), (q,q)$, where it acts as a 2D rotation by $\\theta$. Writing $c = \\cos\\theta$ and $s = \\sin\\theta$:",
+            "ro": "Pentru indicii $p < q$ și unghiul $\\theta$, matricea Givens $R_{pq}(\\theta) \\in \\mathbb{R}^{n \\times n}$ este identitatea **cu excepția** celor patru poziții $(p,p), (p,q), (q,p), (q,q)$, unde acționează ca o rotație 2D cu $\\theta$. Notând $c = \\cos\\theta$ și $s = \\sin\\theta$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "(R_{pq})_{ij} = \\begin{cases} 1 & i = j \\text{ and } i \\notin \\{p, q\\} \\\\ c & i = j \\in \\{p, q\\} \\\\ s & i = p,\\ j = q \\\\ -s & i = q,\\ j = p \\\\ 0 & \\text{otherwise} \\end{cases}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why $c^2 + s^2 = 1$ makes $R_{pq}$ orthogonal.** The only nontrivial $2 \\times 2$ block embedded in $R_{pq}$ is the standard rotation $\\begin{pmatrix} c & s \\\\ -s & c \\end{pmatrix}$. Its transpose times itself is $\\begin{pmatrix} c^2 + s^2 & 0 \\\\ 0 & c^2 + s^2 \\end{pmatrix} = I_2$ precisely because $c^2 + s^2 = 1$. The rest of $R_{pq}$ is the identity, so $R_{pq}^T R_{pq} = I_n$.",
+            "ro": "**De ce $c^2 + s^2 = 1$ face $R_{pq}$ ortogonală.** Singurul bloc $2 \\times 2$ nebanal din $R_{pq}$ este rotația standard $\\begin{pmatrix} c & s \\\\ -s & c \\end{pmatrix}$. Transpusa sa înmulțită cu ea însăși este $\\begin{pmatrix} c^2 + s^2 & 0 \\\\ 0 & c^2 + s^2 \\end{pmatrix} = I_2$ exact pentru că $c^2 + s^2 = 1$. Restul lui $R_{pq}$ este identitatea, deci $R_{pq}^T R_{pq} = I_n$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Applying $R_{pq}$ to a matrix $A$.** Left-multiplication $R_{pq} A$ modifies only rows $p$ and $q$. If $A_i = e_i^T A$ is the $i$-th row of $A$ and $B_i = e_i^T (R_{pq} A)$:",
+            "ro": "**Aplicarea $R_{pq}$ pe o matrice $A$.** Înmulțirea la stânga $R_{pq} A$ modifică doar liniile $p$ și $q$. Dacă $A_i = e_i^T A$ este linia $i$ a lui $A$ și $B_i = e_i^T (R_{pq} A)$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "B_i = A_i \\ (i \\neq p, q), \\qquad B_p = c A_p + s A_q, \\qquad B_q = -s A_p + c A_q"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Surgical zeroing.** Choose the angle $\\theta$ so that one specific entry $b_{qr}$ becomes zero — the formula is $c = a_{pr}/\\rho$, $s = a_{qr}/\\rho$ with $\\rho = \\sqrt{a_{pr}^2 + a_{qr}^2}$ (to avoid computing arctan, never mind the angle). One entry killed, all other zeros preserved, and the update touches only 2n entries. Repeat $O(n^2)$ times to triangularize.",
+            "ro": "**Anulare chirurgicală.** Alege unghiul $\\theta$ astfel încât o anumită intrare $b_{qr}$ să devină zero — formula este $c = a_{pr}/\\rho$, $s = a_{qr}/\\rho$ cu $\\rho = \\sqrt{a_{pr}^2 + a_{qr}^2}$ (pentru a evita calculul lui arctan, nu are rost unghiul). O intrare anulată, toate celelalte zerouri păstrate, iar actualizarea atinge doar 2n intrări. Repetă de $O(n^2)$ ori pentru triangularizare."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 25–28 of ALO curs 06 — Givens rotation definition and row update.",
+            "ro": "Slide-urile 25–28 din ALO curs 06 — definiția rotației Givens și actualizarea liniilor."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-givens-algorithm",
+      "title": {
+        "en": "Givens QR: one entry at a time",
+        "ro": "QR Givens: o intrare la un pas"
+      },
+      "group": "givens",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The algorithm.** In $n-1$ stages, zero column $r$ below the diagonal using Givens rotations in planes $(r, r+1), (r, r+2), \\ldots, (r, n)$:",
+            "ro": "**Algoritmul.** În $n-1$ etape, anulează coloana $r$ sub diagonală folosind rotații Givens în planele $(r, r+1), (r, r+2), \\ldots, (r, n)$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A^{(r)} \\;=\\; R_{r,n}(\\theta_{r,n}) \\cdots R_{r, r+2}(\\theta_{r, r+2}) R_{r, r+1}(\\theta_{r, r+1}) \\, A^{(r-1)}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each rotation $R_{r, i}$ picks $c, s$ to make the $(i, r)$ entry of the output zero, without disturbing already-zeroed entries. The full product gives",
+            "ro": "Fiecare rotație $R_{r, i}$ alege $c, s$ pentru a face intrarea $(i, r)$ a ieșirii zero, fără a perturba intrările deja anulate. Produsul complet dă"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "Q^T A \\;=\\; R, \\qquad Q^T \\;=\\; \\prod_{r=1}^{n-1} R_{r,n} R_{r, n-1} \\cdots R_{r, r+1}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Cost on dense matrices.** $O(n^2)$ rotations, each costing $O(n)$ work in the row update, gives $O(n^3)$ total — with a constant **twice** Householder's. On dense problems, Householder wins. Givens earns its keep on:\n\n- **Sparse matrices.** A rotation that zeros one entry only touches two rows; dense reflections would scatter zeros.\n- **Rank-one updates** (adding a row to an existing QR factorization).\n- **Parallel architectures.** Rotations in non-overlapping planes commute and can run concurrently.",
+            "ro": "**Costul pe matrici dense.** $O(n^2)$ rotații, fiecare costând $O(n)$ muncă la actualizarea liniilor, dă $O(n^3)$ total — cu o constantă de **două** ori cât Householder. Pe probleme dense, Householder câștigă. Givens își câștigă locul pe:\n\n- **Matrici rare.** O rotație care anulează o intrare atinge doar două linii; reflexiile dense ar împrăștia zerouri.\n- **Actualizări de rang unu** (adăugarea unei linii la o factorizare QR existentă).\n- **Arhitecturi paralele.** Rotațiile în plane care nu se suprapun comută și pot rula concurent."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "You need QR of a large **sparse** banded matrix (nonzeros only within a few entries of the diagonal). Which algorithm fits best?",
+                "ro": "Ai nevoie de QR pentru o matrice **rară** cu bandă (intrări nenule doar la câteva poziții de diagonală). Care algoritm se potrivește cel mai bine?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Householder — it's the modern default, so always pick it.", "ro": "Householder — este implicitul modern, deci îl alegi mereu." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Householder applies a reflection to an entire column, turning the bandwidth structure into dense fill-in — and your sparse matrix becomes dense overnight.",
+                    "ro": "Householder aplică o reflexie unei coloane întregi, transformând structura benzii în fill-in dens — iar matricea ta rară devine densă peste noapte."
+                  }
+                },
+                {
+                  "text": { "en": "Givens — each rotation only touches two rows, so the band structure is preserved.", "ro": "Givens — fiecare rotație atinge doar două linii, deci structura benzii este păstrată." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Banded matrices have $O(n \\cdot k)$ nonzeros (where $k$ = bandwidth). Givens needs only $O(n \\cdot k)$ rotations, each $O(k)$ work, for an $O(n k^2)$ total — linear in $n$ for fixed bandwidth.",
+                    "ro": "Corect. Matricile cu bandă au $O(n \\cdot k)$ intrări nenule (unde $k$ = bandă). Givens are nevoie doar de $O(n \\cdot k)$ rotații, fiecare $O(k)$ muncă, pentru un total de $O(n k^2)$ — liniar în $n$ pentru bandă fixă."
+                  }
+                },
+                {
+                  "text": { "en": "Gram–Schmidt — it's conceptually simpler.", "ro": "Gram–Schmidt — este conceptual mai simplă." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Gram–Schmidt inner-products columns against each other, destroying any local sparsity pattern immediately.",
+                    "ro": "Gram–Schmidt face produse scalare între coloane, distrugând imediat orice tipar local de raritate."
+                  }
+                },
+                {
+                  "text": { "en": "All three cost the same on sparse inputs.", "ro": "Toate cele trei costă la fel pe intrări rare." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "They differ enormously. On a tridiagonal matrix, Givens is $O(n)$; Householder and Gram–Schmidt are still $O(n^3)$.",
+                    "ro": "Diferă enorm. Pe o matrice tridiagonală, Givens este $O(n)$; Householder și Gram–Schmidt sunt tot $O(n^3)$."
+                  }
+                }
+              ],
+              "explanation": { "en": "Sparse structure ⇒ Givens. Dense ⇒ Householder. Conceptual clarity ⇒ modified Gram–Schmidt.", "ro": "Structură rară ⇒ Givens. Densă ⇒ Householder. Claritate conceptuală ⇒ Gram–Schmidt modificat." },
+              "reviewStep": "alo-c6-givens-algorithm"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 29–33 of ALO curs 06 — Givens algorithm stages.",
+            "ro": "Slide-urile 29–33 din ALO curs 06 — etapele algoritmului Givens."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-gram-schmidt",
+      "title": {
+        "en": "Classical Gram–Schmidt: the conceptual path",
+        "ro": "Gram–Schmidt clasic: drumul conceptual"
+      },
+      "group": "gramschmidt",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Forget matrices for a moment. You have $n$ linearly-independent vectors $a_1, a_2, \\ldots, a_n$ — the columns of $A$. How would you turn them into an **orthonormal** basis $q_1, q_2, \\ldots, q_n$ spanning the same space?",
+            "ro": "Uită pentru o clipă matricile. Ai $n$ vectori liniar independenți $a_1, a_2, \\ldots, a_n$ — coloanele lui $A$. Cum îi transformi într-o bază **ortonormată** $q_1, q_2, \\ldots, q_n$ care generează același spațiu?"
+          },
+          "answer": {
+            "en": "The Gram–Schmidt recipe: start with $q_1 = a_1 / \\|a_1\\|$. For each subsequent $a_k$, **subtract its components along the already-orthonormal $q_1, \\ldots, q_{k-1}$**, then normalize what's left. The subtracted coefficients form the upper-triangular $R$, and the $q_k$'s form $Q$ — so this produces a QR factorization directly from the column interpretation of $A$.",
+            "ro": "Rețeta Gram–Schmidt: începe cu $q_1 = a_1 / \\|a_1\\|$. Pentru fiecare $a_k$ ulterior, **scade componentele sale de-a lungul lui $q_1, \\ldots, q_{k-1}$ deja ortonormați**, apoi normează ce rămâne. Coeficienții scăzuți formează $R$ superior triunghiulară, iar $q_k$-urile formează $Q$ — deci se obține o factorizare QR direct din interpretarea pe coloane a lui $A$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The classical Gram–Schmidt (CGS) procedure.** For $k = 1, 2, \\ldots, n$:",
+            "ro": "**Procedura Gram–Schmidt clasică (CGS).** Pentru $k = 1, 2, \\ldots, n$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "r_{ik} = q_i^T a_k \\ \\ (i = 1, \\ldots, k-1), \\qquad \\tilde{q}_k = a_k - \\sum_{i=1}^{k-1} r_{ik} \\, q_i, \\qquad r_{kk} = \\|\\tilde{q}_k\\|_2, \\qquad q_k = \\tilde{q}_k / r_{kk}"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Classical Gram-Schmidt: A (n columns a_1..a_n) -> Q, R\nfor (int k = 0; k < n; k++) {\n    for (int i = 0; i < k; i++) {\n        R[i][k] = 0;                            // r_ik = q_i^T a_k\n        for (int j = 0; j < n; j++) R[i][k] += Q[j][i] * A[j][k];\n    }\n    double qt[n];                               // tilde q_k\n    for (int j = 0; j < n; j++) {\n        qt[j] = A[j][k];\n        for (int i = 0; i < k; i++) qt[j] -= R[i][k] * Q[j][i];\n    }\n    R[k][k] = 0;\n    for (int j = 0; j < n; j++) R[k][k] += qt[j] * qt[j];\n    R[k][k] = sqrt(R[k][k]);\n    for (int j = 0; j < n; j++) Q[j][k] = qt[j] / R[k][k];\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**The stability problem with CGS.** All $r_{ik}$ for $i < k$ are computed from the **original** $a_k$, using already-stored $q_i$'s whose earlier rounding has **not** been propagated into $r_{ik}$. When the columns of $A$ are nearly linearly dependent, $\\tilde{q}_k$ is a small difference of large vectors — catastrophic cancellation — and the resulting $q_k$ drifts far from orthogonal to the earlier $q_i$'s. In practice, orthogonality loss in CGS grows like $\\kappa_2(A)^2 \\cdot \\varepsilon$.",
+            "ro": "**Problema de stabilitate a CGS.** Toate $r_{ik}$ pentru $i < k$ sunt calculate din $a_k$ **original**, folosind $q_i$-urile deja stocate a căror rotunjire anterioară **nu** s-a propagat în $r_{ik}$. Când coloanele lui $A$ sunt aproape liniar dependente, $\\tilde{q}_k$ este o diferență mică a unor vectori mari — anulare catastrofală — iar $q_k$ rezultat se îndepărtează de ortogonalitatea cu $q_i$-urile anterioare. În practică, pierderea de ortogonalitate în CGS crește ca $\\kappa_2(A)^2 \\cdot \\varepsilon$."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Classical Gram–Schmidt reference. ALO curs 06 discusses the instability motivating the modified form in the next step.",
+            "ro": "Referință Gram–Schmidt clasic. ALO curs 06 discută instabilitatea care motivează forma modificată în pasul următor."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-modified-gs",
+      "title": {
+        "en": "Modified Gram–Schmidt: the stability fix",
+        "ro": "Gram–Schmidt modificat: soluția de stabilitate"
+      },
+      "group": "gramschmidt",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Classical GS subtracts **all** projections of $a_k$ onto $q_1, \\ldots, q_{k-1}$ using the **original** $a_k$ everywhere. Suppose you subtracted them **one at a time**, and each subsequent projection used the **partially-orthogonalized** intermediate vector. Would that change anything mathematically? Would it change anything numerically?",
+            "ro": "GS clasic scade **toate** proiecțiile lui $a_k$ pe $q_1, \\ldots, q_{k-1}$ folosind peste tot $a_k$ **original**. Presupune că le scazi **una câte una**, iar fiecare proiecție ulterioară folosește vectorul intermediar **parțial ortogonalizat**. S-ar schimba ceva matematic? S-ar schimba ceva numeric?"
+          },
+          "answer": {
+            "en": "**Mathematically: identical.** The final $q_k$ is the same vector, and the coefficients $r_{ik}$ are identical — subtraction is subtraction. **Numerically: worlds apart.** Each intermediate subtraction uses the already-updated state, so rounding errors are measured against what the algorithm **actually has**, not against what it started with. Orthogonality loss drops from $\\kappa_2(A)^2 \\cdot \\varepsilon$ to $\\kappa_2(A) \\cdot \\varepsilon$ — one full factor of conditioning back. This is the **modified** Gram–Schmidt.",
+            "ro": "**Matematic: identic.** $q_k$ final este același vector, iar coeficienții $r_{ik}$ sunt identici — scăderea e scădere. **Numeric: lumi diferite.** Fiecare scădere intermediară folosește starea deja actualizată, deci erorile de rotunjire sunt măsurate față de ce algoritmul **are de fapt**, nu față de ce a început. Pierderea de ortogonalitate scade de la $\\kappa_2(A)^2 \\cdot \\varepsilon$ la $\\kappa_2(A) \\cdot \\varepsilon$ — un factor complet de condiționare recuperat. Aceasta este Gram–Schmidt **modificată**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Modified Gram–Schmidt (MGS).** For $k = 1, 2, \\ldots, n$: start with $v^{(0)} = a_k$. For each $i = 1, \\ldots, k-1$, update in place:",
+            "ro": "**Gram–Schmidt modificat (MGS).** Pentru $k = 1, 2, \\ldots, n$: începe cu $v^{(0)} = a_k$. Pentru fiecare $i = 1, \\ldots, k-1$, actualizează pe loc:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "r_{ik} \\;=\\; q_i^T v^{(i-1)}, \\qquad v^{(i)} \\;=\\; v^{(i-1)} - r_{ik} \\, q_i"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "After $k-1$ steps, $v^{(k-1)} = \\tilde{q}_k$, and normalize as before: $r_{kk} = \\|v^{(k-1)}\\|_2$, $q_k = v^{(k-1)} / r_{kk}$.",
+            "ro": "După $k-1$ pași, $v^{(k-1)} = \\tilde{q}_k$, iar normează ca înainte: $r_{kk} = \\|v^{(k-1)}\\|_2$, $q_k = v^{(k-1)} / r_{kk}$."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Modified Gram-Schmidt: subtract projections one at a time\nfor (int k = 0; k < n; k++) {\n    double v[n];\n    for (int j = 0; j < n; j++) v[j] = A[j][k];\n    for (int i = 0; i < k; i++) {\n        R[i][k] = 0;                            // r_ik = q_i^T v (current v!)\n        for (int j = 0; j < n; j++) R[i][k] += Q[j][i] * v[j];\n        for (int j = 0; j < n; j++) v[j] -= R[i][k] * Q[j][i];   // update v\n    }\n    R[k][k] = 0;\n    for (int j = 0; j < n; j++) R[k][k] += v[j] * v[j];\n    R[k][k] = sqrt(R[k][k]);\n    for (int j = 0; j < n; j++) Q[j][k] = v[j] / R[k][k];\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**The diff is one line.** MGS moves the update `v -= R[i][k] * Q[:, i]` **inside** the inner loop, so each subsequent $r_{ik}$ is computed against the **already-orthogonalized** $v$, not the original $a_k$. Two swapped lines of code; one squared factor of conditioning tamed. That's why every numerical-algebra textbook says \"use MGS, never CGS.\"",
+            "ro": "**Diferența este o singură linie.** MGS mută actualizarea `v -= R[i][k] * Q[:, i]` **în interiorul** buclei interioare, deci fiecare $r_{ik}$ ulterior este calculat față de $v$ **deja ortogonalizat**, nu față de $a_k$ original. Două linii de cod schimbate; un factor pătrat de condiționare îmblânzit. De aceea fiecare manual de algebră numerică spune \"folosește MGS, niciodată CGS\"."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Where does MGS still fall short?** Even MGS can lose orthogonality on ill-conditioned matrices; **reorthogonalization** (running the projection loop twice) or a **Householder-based** QR is needed when orthogonality to machine precision is required. In practice: MGS for readable code, Householder for production numerics.",
+            "ro": "**Unde încă pierde MGS?** Chiar și MGS poate pierde ortogonalitatea pe matrici prost condiționate; **reortogonalizarea** (rularea buclei de proiecție de două ori) sau un QR **bazat pe Householder** este necesar când se cere ortogonalitate la precizia mașinii. În practică: MGS pentru cod lizibil, Householder pentru calcul numeric de producție."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What's the key numerical advantage of **modified** vs **classical** Gram–Schmidt?",
+                "ro": "Care este avantajul numeric cheie al lui Gram–Schmidt **modificat** vs **clasic**?"
+              },
+              "options": [
+                {
+                  "text": { "en": "MGS is asymptotically faster ($O(n^2)$ vs $O(n^3)$).", "ro": "MGS este asimptotic mai rapid ($O(n^2)$ vs $O(n^3)$)." },
+                  "correct": false,
+                  "explanation": { "en": "Both are $O(n^3)$ in flop count; they differ only in the order of operations.", "ro": "Ambele sunt $O(n^3)$ în numărul de flop-uri; diferă doar în ordinea operațiilor." }
+                },
+                {
+                  "text": { "en": "Orthogonality loss scales with $\\kappa_2(A)$ instead of $\\kappa_2(A)^2$.", "ro": "Pierderea de ortogonalitate se scalează cu $\\kappa_2(A)$ în loc de $\\kappa_2(A)^2$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. By working against the already-orthogonalized intermediate instead of the original column, MGS avoids one multiplication of conditioning into the error.", "ro": "Corect. Lucrând împotriva intermediarului deja ortogonalizat în loc de coloana originală, MGS evită o înmulțire a condiționării în eroare." }
+                },
+                {
+                  "text": { "en": "MGS works for complex matrices; CGS doesn't.", "ro": "MGS funcționează pentru matrici complexe; CGS nu." },
+                  "correct": false,
+                  "explanation": { "en": "Both variants generalize to complex by replacing transposes with conjugate transposes. Stability is the real issue.", "ro": "Ambele variante se generalizează la complex prin înlocuirea transpunerilor cu transpuneri conjugate. Stabilitatea este problema reală." }
+                },
+                {
+                  "text": { "en": "MGS produces a sparser $Q$.", "ro": "MGS produce un $Q$ mai rar." },
+                  "correct": false,
+                  "explanation": { "en": "Both produce the same mathematical $Q$ in exact arithmetic; density is identical.", "ro": "Ambele produc același $Q$ matematic în aritmetică exactă; densitatea este identică." }
+                }
+              ],
+              "explanation": { "en": "MGS's in-place update measures rounding against the current state, not the original. One factor of $\\kappa_2$ saved.", "ro": "Actualizarea pe loc a MGS măsoară rotunjirea față de starea curentă, nu față de original. Un factor de $\\kappa_2$ economisit." },
+              "reviewStep": "alo-c6-modified-gs"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "ALO curs 06 — modified Gram–Schmidt, the practical variant.",
+            "ro": "ALO curs 06 — Gram–Schmidt modificat, varianta practică."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c6-quiz",
+      "title": {
+        "en": "Self-test: course 6 retrieval",
+        "ro": "Auto-test: retenție cursul 6"
+      },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Eight questions spanning the three QR algorithms. Target: **6 or more correct** on the first pass.",
+            "ro": "Opt întrebări peste cele trei algoritmi QR. Țintă: **6 sau mai multe corecte** din prima."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Householder's $P = I_n - 2 v v^T$ requires which condition on $v$?",
+                "ro": "$P = I_n - 2 v v^T$ din Householder cere ce condiție asupra lui $v$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$v$ is nonzero.", "ro": "$v$ este nenul." },
+                  "correct": false,
+                  "explanation": { "en": "Nonzero is necessary but not sufficient. The $P^2 = I$ algebra needs $\\|v\\|_2 = 1$ exactly.", "ro": "Nenul este necesar, dar nu suficient. Algebra $P^2 = I$ cere $\\|v\\|_2 = 1$ exact." }
+                },
+                {
+                  "text": { "en": "$\\|v\\|_2 = 1$ (unit vector).", "ro": "$\\|v\\|_2 = 1$ (vector unitar)." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Unit norm makes $P$ orthogonal and involutive.", "ro": "Corect. Norma unitate face $P$ ortogonală și involutivă." }
+                },
+                {
+                  "text": { "en": "$v$ has zero components beyond position $n/2$.", "ro": "$v$ are componente zero dincolo de poziția $n/2$." },
+                  "correct": false,
+                  "explanation": { "en": "$v$ can be any unit vector. In Householder QR it happens to have zeros above the current diagonal, but that's a consequence of the algorithm, not a requirement of the reflection formula.", "ro": "$v$ poate fi orice vector unitar. În QR Householder se întâmplă să aibă zerouri deasupra diagonalei curente, dar asta este o consecință a algoritmului, nu o cerință a formulei reflexiei." }
+                },
+                {
+                  "text": { "en": "$v$ is an eigenvector of $A$.", "ro": "$v$ este un vector propriu al lui $A$." },
+                  "correct": false,
+                  "explanation": { "en": "Eigenvectors are irrelevant to Householder — $v$ is built to align with a specific column of the working matrix, not to diagonalize $A$.", "ro": "Vectorii proprii sunt irelevanți pentru Householder — $v$ este construit să se alinieze cu o coloană specifică a matricei de lucru, nu să diagonalizeze $A$." }
+                }
+              ],
+              "explanation": { "en": "Householder's formula is an orthogonal involution iff $\\|v\\|_2 = 1$.", "ro": "Formula Householder este o involuție ortogonală dacă și numai dacă $\\|v\\|_2 = 1$." },
+              "reviewStep": "alo-c6-reflection"
+            },
+            {
+              "question": {
+                "en": "After $n-1$ Householder reflections, $P_{n-1} \\cdots P_1 A = R$. What's $Q$?",
+                "ro": "După $n-1$ reflexii Householder, $P_{n-1} \\cdots P_1 A = R$. Cât este $Q$?"
+              },
+              "options": [
+                {
+                  "text": "$Q = P_1 P_2 \\cdots P_{n-1}$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. $\\tilde{Q} = P_{n-1} \\cdots P_1$ is orthogonal, so $Q = \\tilde{Q}^T$, and transposing a product reverses the order. Also, since each $P_r$ is self-inverse, $P_r^T = P_r$.", "ro": "Corect. $\\tilde{Q} = P_{n-1} \\cdots P_1$ este ortogonală, deci $Q = \\tilde{Q}^T$, iar transpunerea unui produs inversează ordinea. De asemenea, cum fiecare $P_r$ este propria inversă, $P_r^T = P_r$." }
+                },
+                {
+                  "text": "$Q = P_{n-1} \\cdots P_1$",
+                  "correct": false,
+                  "explanation": { "en": "That's $\\tilde{Q}$, which gives $\\tilde{Q} A = R$. We need $A = Q R$, so $Q = \\tilde{Q}^T$ — order reversed.", "ro": "Acela este $\\tilde{Q}$, care dă $\\tilde{Q} A = R$. Avem nevoie de $A = Q R$, deci $Q = \\tilde{Q}^T$ — ordinea inversată." }
+                },
+                {
+                  "text": "$Q = I_n$",
+                  "correct": false,
+                  "explanation": { "en": "Only if $A$ is already upper-triangular (no reflections needed).", "ro": "Doar dacă $A$ este deja superior triunghiulară (nu e nevoie de reflexii)." }
+                },
+                {
+                  "text": "$Q = A - R$",
+                  "correct": false,
+                  "explanation": { "en": "Addition/subtraction of matrices has nothing to do with the QR identity. $Q$ is defined by the orthogonal product.", "ro": "Adunarea/scăderea matricilor nu are legătură cu identitatea QR. $Q$ este definit de produsul ortogonal." }
+                }
+              ],
+              "explanation": { "en": "Transpose the product of reflections; reverse order gives $P_1 P_2 \\cdots P_{n-1}$.", "ro": "Transpune produsul de reflexii; ordinea inversă dă $P_1 P_2 \\cdots P_{n-1}$." },
+              "reviewStep": "alo-c6-householder-overview"
+            },
+            {
+              "question": {
+                "en": "Householder picks $k = \\pm\\sqrt{\\sigma}$ with which sign?",
+                "ro": "Householder alege $k = \\pm\\sqrt{\\sigma}$ cu ce semn?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Always positive.", "ro": "Mereu pozitiv." },
+                  "correct": false,
+                  "explanation": { "en": "Fixed sign can make $\\beta = \\sigma - k a_{rr}$ small — division by tiny $\\beta$ wrecks stability.", "ro": "Semnul fix poate face $\\beta = \\sigma - k a_{rr}$ mic — împărțirea la $\\beta$ minuscul distruge stabilitatea." }
+                },
+                {
+                  "text": { "en": "$\\text{sign}(k) = -\\text{sign}(a_{rr})$, so $\\beta$ is large.", "ro": "$\\text{sign}(k) = -\\text{sign}(a_{rr})$, astfel ca $\\beta$ să fie mare." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Opposite signs give $\\beta \\geq \\sigma$, keeping the downstream division well-conditioned.", "ro": "Corect. Semne opuse dau $\\beta \\geq \\sigma$, menținând împărțirea bine condiționată." }
+                },
+                {
+                  "text": { "en": "Always negative.", "ro": "Mereu negativ." },
+                  "correct": false,
+                  "explanation": { "en": "Same stability problem as always-positive — mismatches with $a_{rr}$ will shrink $\\beta$ half the time.", "ro": "Aceeași problemă de stabilitate ca mereu-pozitiv — nepotrivirile cu $a_{rr}$ vor micșora $\\beta$ jumătate din timp." }
+                },
+                {
+                  "text": { "en": "Whichever sign makes $k$ an integer.", "ro": "Orice semn face $k$ întreg." },
+                  "correct": false,
+                  "explanation": { "en": "$k = \\sqrt{\\sigma}$ is almost never integer, and integrality has no role in stability.", "ro": "$k = \\sqrt{\\sigma}$ aproape niciodată nu este întreg, iar integritatea nu are rol în stabilitate." }
+                }
+              ],
+              "explanation": { "en": "Opposite-sign rule maximizes $\\beta$ and tames the division.", "ro": "Regula semnului opus maximizează $\\beta$ și îmblânzește împărțirea." },
+              "reviewStep": "alo-c6-householder-detailed"
+            },
+            {
+              "question": {
+                "en": "What's the dominant cost of Householder QR on a dense $n \\times n$ matrix?",
+                "ro": "Care este costul dominant al QR Householder pe o matrice densă $n \\times n$?"
+              },
+              "options": [
+                {
+                  "text": "$\\sim n^3 / 3$ flops",
+                  "correct": false,
+                  "explanation": { "en": "That's LU. Householder is about twice that.", "ro": "Acela este LU. Householder este aproximativ de două ori mai mult." }
+                },
+                {
+                  "text": "$\\sim 2 n^3 / 3$ flops",
+                  "correct": true,
+                  "explanation": { "en": "Correct. The $2\\times$ factor over LU buys backward stability without pivoting tricks.", "ro": "Corect. Factorul $2\\times$ față de LU cumpără stabilitate înapoi fără trucuri de pivotare." }
+                },
+                {
+                  "text": "$\\sim n^4$ flops",
+                  "correct": false,
+                  "explanation": { "en": "That's what you'd pay if you formed $P_r$ explicitly as a dense matrix. Rank-one updates avoid that.", "ro": "Aceea ar fi plata dacă ai forma $P_r$ explicit ca matrice densă. Actualizările de rang unu evită asta." }
+                },
+                {
+                  "text": "$\\sim n^2$ flops",
+                  "correct": false,
+                  "explanation": { "en": "Triangular solve is $n^2$; factorization itself is inherently cubic.", "ro": "Rezolvarea triunghiulară este $n^2$; factorizarea însăși este inerent cubică." }
+                }
+              ],
+              "explanation": { "en": "Householder = 2× LU's cost for backward stability.", "ro": "Householder = de 2 ori costul LU pentru stabilitate înapoi." },
+              "reviewStep": "alo-c6-householder-algorithm"
+            },
+            {
+              "question": {
+                "en": "A Givens rotation $R_{pq}(\\theta)$ modifies which rows of $A$ when applied as $R_{pq} A$?",
+                "ro": "O rotație Givens $R_{pq}(\\theta)$ modifică ce linii ale lui $A$ când se aplică $R_{pq} A$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "All rows.", "ro": "Toate liniile." },
+                  "correct": false,
+                  "explanation": { "en": "The non-trivial block of $R_{pq}$ sits only at rows/columns $p$ and $q$.", "ro": "Blocul nebanal al lui $R_{pq}$ stă doar la liniile/coloanele $p$ și $q$." }
+                },
+                {
+                  "text": { "en": "Only rows $p$ and $q$.", "ro": "Doar liniile $p$ și $q$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Rows $\\neq p, q$ multiply by the identity block and are unchanged.", "ro": "Corect. Liniile $\\neq p, q$ se înmulțesc cu blocul identitate și rămân neschimbate." }
+                },
+                {
+                  "text": { "en": "Only row $p$.", "ro": "Doar linia $p$." },
+                  "correct": false,
+                  "explanation": { "en": "Both rows in the plane $(p, q)$ mix. The update formulas involve $A_p$ and $A_q$ symmetrically.", "ro": "Ambele linii din planul $(p, q)$ se amestecă. Formulele de actualizare implică $A_p$ și $A_q$ simetric." }
+                },
+                {
+                  "text": { "en": "Rows $p$ through $q$.", "ro": "Liniile de la $p$ la $q$." },
+                  "correct": false,
+                  "explanation": { "en": "Just the two endpoints, not the range between. Intermediate rows are unaffected.", "ro": "Doar cele două capete, nu intervalul dintre ele. Liniile intermediare nu sunt afectate." }
+                }
+              ],
+              "explanation": { "en": "Givens: surgical on rows $p, q$. Everything else is fixed.", "ro": "Givens: chirurgicală pe liniile $p, q$. Restul este fix." },
+              "reviewStep": "alo-c6-givens-rotation"
+            },
+            {
+              "question": {
+                "en": "On a large dense random matrix, **which QR algorithm is fastest?**",
+                "ro": "Pe o matrice densă aleatoare mare, **care algoritm QR este cel mai rapid?**"
+              },
+              "options": [
+                {
+                  "text": { "en": "Givens.", "ro": "Givens." },
+                  "correct": false,
+                  "explanation": { "en": "Givens is $\\sim 2\\times$ more flops than Householder on dense matrices — each rotation zeros only one entry.", "ro": "Givens are $\\sim 2\\times$ mai multe flop-uri decât Householder pe matrici dense — fiecare rotație anulează doar o intrare." }
+                },
+                {
+                  "text": { "en": "Householder.", "ro": "Householder." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Reflections zero whole columns in one shot; the $\\sim 2n^3/3$ constant is the best-known for dense QR.", "ro": "Corect. Reflexiile anulează coloane întregi într-o lovitură; constanta $\\sim 2n^3/3$ este cea mai bună cunoscută pentru QR dens." }
+                },
+                {
+                  "text": { "en": "Classical Gram–Schmidt.", "ro": "Gram–Schmidt clasic." },
+                  "correct": false,
+                  "explanation": { "en": "CGS has similar asymptotic cost but loses orthogonality dramatically; no one uses it in production for dense QR.", "ro": "CGS are cost asimptotic similar, dar pierde ortogonalitatea dramatic; nimeni nu o folosește în producție pentru QR dens." }
+                },
+                {
+                  "text": { "en": "All three run at the same speed on modern hardware.", "ro": "Toate cele trei rulează cu aceeași viteză pe hardware modern." },
+                  "correct": false,
+                  "explanation": { "en": "Constant factors differ by $\\sim 2\\times$ between Householder and Givens/GS; on large $n$, that's a genuine wall-clock gap.", "ro": "Factorii de constantă diferă cu $\\sim 2\\times$ între Householder și Givens/GS; pe $n$ mare, acela este un gol real la ceas." }
+                }
+              ],
+              "explanation": { "en": "Dense QR: Householder wins. Sparse/parallel: Givens wins. Conceptual: MGS.", "ro": "QR dens: Householder câștigă. Rar/paralel: Givens câștigă. Conceptual: MGS." },
+              "reviewStep": "alo-c6-givens-algorithm"
+            },
+            {
+              "question": {
+                "en": "Why should you prefer **modified** Gram–Schmidt over the classical version?",
+                "ro": "De ce ar trebui să preferi Gram–Schmidt **modificat** în locul versiunii clasice?"
+              },
+              "options": [
+                {
+                  "text": { "en": "It produces a smaller $R$.", "ro": "Produce un $R$ mai mic." },
+                  "correct": false,
+                  "explanation": { "en": "$R$ is uniquely determined up to sign; both algorithms produce the same $R$ mathematically.", "ro": "$R$ este unic determinat până la semn; ambii algoritmi produc același $R$ matematic." }
+                },
+                {
+                  "text": { "en": "It preserves orthogonality much better on ill-conditioned $A$.", "ro": "Păstrează ortogonalitatea mult mai bine pe $A$ prost condiționată." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Orthogonality loss scales as $\\kappa_2(A) \\cdot \\varepsilon$ for MGS vs $\\kappa_2(A)^2 \\cdot \\varepsilon$ for CGS.", "ro": "Corect. Pierderea ortogonalității se scalează ca $\\kappa_2(A) \\cdot \\varepsilon$ pentru MGS vs $\\kappa_2(A)^2 \\cdot \\varepsilon$ pentru CGS." }
+                },
+                {
+                  "text": { "en": "It is $O(n^2)$ instead of $O(n^3)$.", "ro": "Este $O(n^2)$ în loc de $O(n^3)$." },
+                  "correct": false,
+                  "explanation": { "en": "Both variants are $O(n^3)$ in flop count; the only difference is the order of operations inside the inner loop.", "ro": "Ambele variante sunt $O(n^3)$ în numărul de flop-uri; singura diferență este ordinea operațiilor din bucla interioară." }
+                },
+                {
+                  "text": { "en": "It works on rectangular matrices; CGS doesn't.", "ro": "Funcționează pe matrici dreptunghiulare; CGS nu." },
+                  "correct": false,
+                  "explanation": { "en": "Both generalize to rectangular (thin) QR without modification. Stability is the distinguishing feature, not applicability.", "ro": "Ambele se generalizează la QR dreptunghiular (subțire) fără modificare. Stabilitatea este caracteristica distinctivă, nu aplicabilitatea." }
+                }
+              ],
+              "explanation": { "en": "MGS saves one factor of conditioning by subtracting one projection at a time.", "ro": "MGS economisește un factor de condiționare scăzând câte o proiecție pe rând." },
+              "reviewStep": "alo-c6-modified-gs"
+            },
+            {
+              "question": {
+                "en": "A colleague argues: \"Since Householder is the fastest dense algorithm, always use it — even for sparse matrices.\" What do you say?",
+                "ro": "Un coleg argumentează: \"Cum Householder este cel mai rapid algoritm dens, folosește-l mereu — chiar și pentru matrici rare.\" Ce spui?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Agree — Householder's stability constant is universally the best.", "ro": "De acord — constanta de stabilitate a lui Householder este universal cea mai bună." },
+                  "correct": false,
+                  "explanation": { "en": "Fast on dense doesn't mean fast on sparse. Householder's reflection touches an entire column; on a sparse matrix it introduces fill-in, destroying the sparsity savings.", "ro": "Rapid pe dens nu înseamnă rapid pe rar. Reflexia Householder atinge o coloană întreagă; pe o matrice rară introduce fill-in, distrugând economiile de raritate." }
+                },
+                {
+                  "text": { "en": "Disagree — on sparse matrices, Householder introduces fill-in that destroys sparsity; Givens preserves it.", "ro": "Nu sunt de acord — pe matrici rare, Householder introduce fill-in care distruge raritatea; Givens o păstrează." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Givens rotations act on only two rows, so structural zeros outside those rows survive. On a banded matrix Givens runs in $O(n k^2)$ while Householder runs in $O(n^3)$ after fill-in.", "ro": "Corect. Rotațiile Givens acționează doar pe două linii, deci zerourile structurale din afara acelor linii supraviețuiesc. Pe o matrice cu bandă Givens rulează în $O(n k^2)$ în timp ce Householder rulează în $O(n^3)$ după fill-in." }
+                },
+                {
+                  "text": { "en": "Agree if $n > 10000$, otherwise use Givens.", "ro": "De acord dacă $n > 10000$, altfel Givens." },
+                  "correct": false,
+                  "explanation": { "en": "The crossover isn't about size; it's about sparsity pattern. A sparse $100000 \\times 100000$ matrix still wants Givens.", "ro": "Trecerea nu este despre dimensiune; este despre tiparul de raritate. O matrice rară $100000 \\times 100000$ încă preferă Givens." }
+                },
+                {
+                  "text": { "en": "Agree — sparsity is handled by the BLAS automatically.", "ro": "De acord — raritatea este gestionată de BLAS automat." },
+                  "correct": false,
+                  "explanation": { "en": "BLAS/LAPACK assume dense storage. Sparse QR needs a different library (SuiteSparseQR, PETSc) precisely because Householder isn't sparse-friendly.", "ro": "BLAS/LAPACK presupun stocare densă. QR rar are nevoie de o bibliotecă diferită (SuiteSparseQR, PETSc) tocmai pentru că Householder nu este prietenoasă cu raritatea." }
+                }
+              ],
+              "explanation": { "en": "Match the algorithm to the structure: dense → Householder, sparse/banded → Givens.", "ro": "Potrivește algoritmul cu structura: dens → Householder, rar/cu bandă → Givens." },
+              "reviewStep": "alo-c6-givens-algorithm"
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Next up.** Course 7 lifts QR to non-square matrices and fleshes out **least squares** — the problem where QR's stability edge really pays for itself.",
+            "ro": "**Urmează.** Cursul 7 ridică QR la matrici non-pătratice și detaliază **cele mai mici pătrate** — problema unde avantajul de stabilitate al QR își plătește cu adevărat nota."
+          }
+        }
+      ]
+    }
+  ]
+}
