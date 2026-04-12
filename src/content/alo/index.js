@@ -23,6 +23,10 @@ const alo = {
       title: { en: 'Course 3: Floating point, errors, conditioning, and stability', ro: 'Cursul 3: Virgulă mobilă, erori, condiționare și stabilitate' },
       shortTitle: { en: 'C3: Errors', ro: 'C3: Erori' },
       sectionCount: 13 },
+    { id: 'alo-c4', src: 'alo/courses/course-04.json', metaId: 'alo-c4',
+      title: { en: 'Course 4: Solving linear systems — from Cramer to Gauss', ro: 'Cursul 4: Rezolvarea sistemelor liniare — de la Cramer la Gauss' },
+      shortTitle: { en: 'C4: Gauss', ro: 'C4: Gauss' },
+      sectionCount: 10 },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };

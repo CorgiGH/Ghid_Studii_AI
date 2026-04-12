@@ -1,0 +1,1179 @@
+{
+  "meta": {
+    "id": "alo-c4",
+    "title": {
+      "en": "Course 4: Solving linear systems — from Cramer to Gauss",
+      "ro": "Cursul 4: Rezolvarea sistemelor liniare — de la Cramer la Gauss"
+    },
+    "shortTitle": {
+      "en": "C4: Gauss",
+      "ro": "C4: Gauss"
+    },
+    "slug": "alo-c4",
+    "source": "ALO curs 04.pdf (Anca Ignat & Corina Forăscu)"
+  },
+  "steps": [
+    {
+      "id": "alo-c4-intro",
+      "title": {
+        "en": "Solving Ax = b: two algorithms, two eras",
+        "ro": "Rezolvarea lui Ax = b: doi algoritmi, două ere"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You need to solve a $14 \\times 14$ linear system $Ax = b$. Your first instinct is Cramer's rule — one determinant per unknown. On a modern laptop, Gauss elimination finishes in **0 ms**. Cramer finishes in **26 hours**. Why is Cramer so catastrophically slower, and why does every numerics course warn against it?",
+            "ro": "Trebuie să rezolvi un sistem liniar $14 \\times 14$ sub forma $Ax = b$. Primul instinct este regula lui Cramer — un determinant per necunoscută. Pe un laptop modern, eliminarea Gauss termină în **0 ms**. Cramer termină în **26 de ore**. De ce este Cramer atât de catastrofal de lentă și de ce fiecare curs de calcul numeric avertizează împotriva ei?"
+          },
+          "answer": {
+            "en": "Two different orders of growth. Computing an $n \\times n$ determinant by cofactor expansion costs $O(n!)$; you do it $n+1$ times for Cramer, so the total is $\\Theta(n \\cdot n!) \\approx 10^{12}$ operations at $n = 14$. Gauss elimination finishes the same system in $\\Theta(n^3) \\approx 3000$ operations. Same problem, two algorithms — the gap is pure **stability + complexity**, and this course is about why Gauss wins on both.",
+            "ro": "Două ordine de creștere diferite. Calculul unui determinant $n \\times n$ prin dezvoltare cofactor costă $O(n!)$; îl faci de $n+1$ ori pentru Cramer, deci totalul este $\\Theta(n \\cdot n!) \\approx 10^{12}$ operații la $n = 14$. Eliminarea Gauss termină același sistem în $\\Theta(n^3) \\approx 3000$ operații. Aceeași problemă, doi algoritmi — golul este pură **stabilitate + complexitate**, iar cursul acesta explică de ce Gauss câștigă pe ambele."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Course 3 taught us the vocabulary — conditioning and stability.** Course 4 applies it to the most common task in numerical linear algebra: **solve $Ax = b$**. The matrix $A$ is square, non-singular, real. The answer exists and is unique; the only question is **how** you compute it.\n\nThe course walks through three algorithms in chronological order:",
+            "ro": "**Cursul 3 ne-a învățat vocabularul — condiționare și stabilitate.** Cursul 4 îl aplică pe cea mai comună sarcină din algebra liniară numerică: **rezolvarea $Ax = b$**. Matricea $A$ este pătratică, nesingulară, reală. Răspunsul există și este unic; singura întrebare este **cum** îl calculezi.\n\nCursul parcurge trei algoritmi în ordine cronologică:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Cramer's rule** (1750, Gabriel Cramer). Mathematically elegant, computationally hopeless. We'll see *how* hopeless.",
+              "ro": "**Regula lui Cramer** (1750, Gabriel Cramer). Matematic elegantă, computațional fără speranță. Vom vedea *cât de* fără speranță."
+            },
+            {
+              "en": "**Forward + back substitution.** The foundation: if $A$ is already triangular, you're done in $\\Theta(n^2)$.",
+              "ro": "**Substituție directă + inversă.** Fundația: dacă $A$ este deja triunghiulară, ai terminat în $\\Theta(n^2)$."
+            },
+            {
+              "en": "**Gaussian elimination** (published 1810 by Gauss, known in China 200–100 BC). Transform $A$ into a triangular matrix in $\\Theta(n^3)$, then substitute.",
+              "ro": "**Eliminarea Gauss** (publicată 1810 de Gauss, cunoscută în China 200–100 î.Hr.). Transformă $A$ într-o matrice triunghiulară în $\\Theta(n^3)$, apoi substituie."
+            },
+            {
+              "en": "**Pivoting strategies** — without them, Gauss is unstable even on well-conditioned matrices.",
+              "ro": "**Strategii de pivotare** — fără ele, Gauss este instabilă chiar și pe matrici bine condiționate."
+            },
+            {
+              "en": "**Self-test** covering all the above.",
+              "ro": "**Auto-test** care acoperă toate cele de mai sus."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**What this course is NOT about.** Iterative methods (Jacobi, Gauss–Seidel, conjugate gradients) come in later courses. LU decomposition — the modern view of what Gauss elimination really computes — is course 5. Today we stay with the direct, \"school-book\" algorithm and build the complexity and stability story underneath it.",
+            "ro": "**Despre ce NU este acest curs.** Metodele iterative (Jacobi, Gauss–Seidel, gradienți conjugați) vin în cursuri ulterioare. Descompunerea LU — perspectiva modernă asupra a ceea ce calculează eliminarea Gauss — este cursul 5. Astăzi rămânem la algoritmul direct, \"de manual\" și construim povestea complexității și a stabilității de sub el."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 1–3 of ALO curs 04 (Anca Ignat & Corina Forăscu). Course page: https://edu.info.uaic.ro/algebra-liniara/",
+            "ro": "Slide-urile 1–3 din ALO curs 04 (Anca Ignat & Corina Forăscu). Pagina cursului: https://edu.info.uaic.ro/algebra-liniara/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-cramer",
+      "title": {
+        "en": "Cramer's rule: elegant on paper",
+        "ro": "Regula lui Cramer: elegantă pe hârtie"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Setup.** Let $A \\in \\mathbb{R}^{n \\times n}$ be non-singular and $b \\in \\mathbb{R}^n$. Cramer (1750) showed that every component of the unique solution can be written as a ratio of two determinants:",
+            "ro": "**Setare.** Fie $A \\in \\mathbb{R}^{n \\times n}$ nesingulară și $b \\in \\mathbb{R}^n$. Cramer (1750) a arătat că fiecare componentă a soluției unice se poate scrie ca raportul a doi determinanți:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x_i = \\frac{\\det A_i(b)}{\\det A}, \\quad i = 1, \\ldots, n"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "where $A_i(b)$ is the matrix obtained from $A$ by **replacing column $i$ with $b$**. Nothing to solve — just $n+1$ determinants.",
+            "ro": "unde $A_i(b)$ este matricea obținută din $A$ prin **înlocuirea coloanei $i$ cu $b$**. Nimic de rezolvat — doar $n+1$ determinanți."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why is this beautiful?** It's a **closed-form** solution. Each $x_i$ depends symbolically on the entries of $A$ and $b$, which makes it wonderful for theoretical arguments (e.g., proving that the solution is continuous in $A$ and $b$). Use Cramer to *reason*, not to *compute*.",
+            "ro": "**De ce este frumoasă?** Este o soluție **în formă închisă**. Fiecare $x_i$ depinde simbolic de intrările lui $A$ și $b$, ceea ce o face minunată pentru argumente teoretice (ex. demonstrarea că soluția este continuă în $A$ și $b$). Folosește Cramer ca să *raționezi*, nu ca să *calculezi*."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Replacement matrix $A_i(b)$",
+            "ro": "Matricea de înlocuire $A_i(b)$"
+          },
+          "content": {
+            "en": "The matrix formed by taking $A$ and overwriting its $i$-th column with the vector $b$. The other $n-1$ columns are unchanged.",
+            "ro": "Matricea obținută luând $A$ și suprascriindu-i coloana $i$ cu vectorul $b$. Celelalte $n-1$ coloane rămân neschimbate."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**The algorithmic trap.** The formula says nothing about *how to compute* the determinants. Naive cofactor expansion costs $O(n!)$ per determinant, and you need $n+1$ of them. The next step shows concrete timings — brace yourself.",
+            "ro": "**Capcana algoritmică.** Formula nu spune nimic despre *cum să calculezi* determinanții. Dezvoltarea cofactor naivă costă $O(n!)$ per determinant, iar ai nevoie de $n+1$ dintre ei. Pasul următor arată timpi concreți — pregătește-te."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slide 4 of ALO curs 04 — Cramer's rule statement.",
+            "ro": "Slide-ul 4 din ALO curs 04 — enunțul regulii lui Cramer."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-cramer-cost",
+      "title": {
+        "en": "Cramer vs Gauss: the benchmark that ends the argument",
+        "ro": "Cramer vs Gauss: benchmark-ul care închide discuția"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Cramer and Gauss both return the exact same answer on paper. For an $n \\times n$ system, **predict** roughly how many floating-point operations each performs. Try $n = 10$ and $n = 20$ before scrolling.",
+            "ro": "Cramer și Gauss întorc exact același răspuns pe hârtie. Pentru un sistem $n \\times n$, **prezice** aproximativ câte operații în virgulă mobilă face fiecare. Încearcă $n = 10$ și $n = 20$ înainte să derulezi."
+          },
+          "answer": {
+            "en": "Naive Cramer: $(n+1) \\cdot n!$ operations. At $n = 10$ that's $\\approx 4 \\times 10^7$; at $n = 20$ it's $\\approx 5 \\times 10^{19}$. Gauss: $\\approx n^3/3$ — at $n = 10$ it's $\\approx 333$, at $n = 20$ it's $\\approx 2670$. The scales are separated by **many orders of magnitude**; the next table gives the lab-measured wall-clock.",
+            "ro": "Cramer naiv: $(n+1) \\cdot n!$ operații. La $n = 10$ asta înseamnă $\\approx 4 \\times 10^7$; la $n = 20$ asta înseamnă $\\approx 5 \\times 10^{19}$. Gauss: $\\approx n^3/3$ — la $n = 10$ asta înseamnă $\\approx 333$, la $n = 20$ asta înseamnă $\\approx 2670$. Scalele sunt separate de **multe ordine de mărime**; tabelul următor dă timpul de ceas măsurat în laborator."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Lab measurements on the same machine.** Wall-clock milliseconds needed to solve one $n \\times n$ random non-singular system using naive Cramer vs Gauss elimination:",
+            "ro": "**Măsurători de laborator pe aceeași mașină.** Milisecunde de ceas necesare pentru a rezolva un sistem $n \\times n$ aleator, nesingular, folosind Cramer naiv vs eliminare Gauss:"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "$n$", "ro": "$n$" },
+            { "en": "Gauss (ms)", "ro": "Gauss (ms)" },
+            { "en": "Cramer (ms)", "ro": "Cramer (ms)" },
+            { "en": "Ratio", "ro": "Raport" }
+          ],
+          "rows": [
+            [
+              "$10$",
+              "$0$",
+              "$1\\,712$",
+              "— "
+            ],
+            [
+              "$11$",
+              "$0$",
+              "$21\\,274$ (~$21$ s)",
+              "$\\sim 12\\times$ over $n=10$"
+            ],
+            [
+              "$12$",
+              "$0$",
+              "$329\\,717$ (~$5.5$ min)",
+              "$\\sim 15\\times$ over $n=11$"
+            ],
+            [
+              "$13$",
+              "$0$",
+              "$11\\,338\\,760$ (~$3.1$ h)",
+              "$\\sim 34\\times$ over $n=12$"
+            ],
+            [
+              "$14$",
+              "$0$",
+              "$95\\,010\\,871$ (~$26.4$ h)",
+              "$\\sim 8\\times$ over $n=13$"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Read that row again.** At $n = 14$, Cramer takes **more than a day**. Each increment of $n$ multiplies the runtime by a further factor of $n+1$. Meanwhile Gauss stays at \"0 ms\" — the chrono resolution can't even measure it. At $n = 10\\,000$, Gauss finishes in ~$31$ minutes; Cramer is unthinkable (the factorial $10\\,000!$ has more than $35\\,000$ digits).",
+            "ro": "**Citește rândul ăla din nou.** La $n = 14$, Cramer ia **mai mult de o zi**. Fiecare increment al lui $n$ înmulțește timpul cu încă un factor de $n+1$. Între timp Gauss rămâne la \"0 ms\" — rezoluția cronometrului nici măcar nu o poate măsura. La $n = 10\\,000$, Gauss termină în ~$31$ minute; Cramer este de neconceput (factorialul $10\\,000!$ are mai mult de $35\\,000$ de cifre)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Accuracy check.** Even when Cramer finishes, it is less accurate. On the $n = 10$ random system above:\n\n- Gauss: $\\|Ax - b\\| \\approx 10^{-15}$ (machine epsilon).\n- Cramer: $\\|Ax - b\\| \\approx 4 \\times 10^{-12}$ (three extra digits lost).\n\nThe $n+1$ determinant evaluations each accumulate rounding — Cramer is worse on **both** axes.",
+            "ro": "**Verificare de acuratețe.** Chiar și când Cramer termină, este mai puțin precisă. Pe sistemul aleator $n = 10$ de mai sus:\n\n- Gauss: $\\|Ax - b\\| \\approx 10^{-15}$ (epsilon-ul mașinii).\n- Cramer: $\\|Ax - b\\| \\approx 4 \\times 10^{-12}$ (trei cifre suplimentare pierdute).\n\nCele $n+1$ evaluări de determinant acumulează fiecare rotunjire — Cramer este mai slabă pe **ambele** axe."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "You are asked to solve a $30 \\times 30$ linear system. A colleague suggests Cramer's rule \"because the formula is exact.\" What do you tell them?",
+                "ro": "Ți se cere să rezolvi un sistem liniar $30 \\times 30$. Un coleg sugerează regula lui Cramer \"pentru că formula este exactă\". Ce îi spui?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Cramer is exact **on paper**, but naive evaluation is $\\Theta(n \\cdot n!) \\approx 10^{34}$ ops at $n = 30$ — infeasible. Use Gauss ($\\Theta(n^3) \\approx 9000$ ops).",
+                    "ro": "Cramer este exactă **pe hârtie**, dar evaluarea naivă este $\\Theta(n \\cdot n!) \\approx 10^{34}$ operații la $n = 30$ — imposibil. Folosește Gauss ($\\Theta(n^3) \\approx 9000$ operații)."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. At $n = 30$, $30!$ alone is roughly $2.65 \\times 10^{32}$. Even at $10^{10}$ ops/s, one determinant would take $\\sim 10^{22}$ s — vastly longer than the age of the universe.",
+                    "ro": "Corect. La $n = 30$, $30!$ singur este aproximativ $2.65 \\times 10^{32}$. Chiar și la $10^{10}$ operații/s, un determinant ar lua $\\sim 10^{22}$ s — incomparabil mai mult decât vârsta universului."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Great idea — we'll get the symbolic formula and substitute at the end.",
+                    "ro": "Idee bună — obținem formula simbolică și substituim la sfârșit."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Symbolic manipulation of a $30 \\times 30$ determinant also blows up factorially. \"Symbolic\" does not escape the complexity.",
+                    "ro": "Manipularea simbolică a unui determinant $30 \\times 30$ explodează la fel factorial. \"Simbolic\" nu scapă de complexitate."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Cramer is fine — modern compilers will optimize the repeated work.",
+                    "ro": "Cramer e ok — compilatoarele moderne vor optimiza munca repetată."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Compilers cannot turn $O(n!)$ into $O(n^3)$; that's an algorithmic, not a low-level, gap. You need a different algorithm.",
+                    "ro": "Compilatoarele nu pot transforma $O(n!)$ în $O(n^3)$; acesta este un gol algoritmic, nu unul de nivel scăzut. Ai nevoie de un algoritm diferit."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Cramer is fine if we use `binary128` for the determinants.",
+                    "ro": "Cramer e ok dacă folosim `binary128` pentru determinanți."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Higher precision makes each operation slower, not fewer. The $O(n!)$ operation count stays.",
+                    "ro": "Precizia mai mare face fiecare operație mai lentă, nu mai puține. Numărul de operații $O(n!)$ rămâne."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Complexity, not precision or symbolic-vs-numeric choice, kills Cramer at modest $n$.",
+                "ro": "Complexitatea, nu precizia sau alegerea simbolic-vs-numeric, omoară Cramer la $n$ modest."
+              },
+              "reviewStep": "alo-c4-cramer-cost"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slide 5 of ALO curs 04 — benchmark of Cramer vs Gauss runtimes.",
+            "ro": "Slide-ul 5 din ALO curs 04 — benchmark Cramer vs Gauss."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-forward-substitution",
+      "title": {
+        "en": "Forward substitution: the easy case",
+        "ro": "Substituția directă: cazul ușor"
+      },
+      "group": "triangular",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Suppose the matrix $A$ is **lower-triangular** (every entry above the diagonal is zero). The first equation reads $a_{11} x_1 = b_1$. Read it: what does this immediately tell you about $x_1$?",
+            "ro": "Presupune că matricea $A$ este **inferior triunghiulară** (fiecare intrare de deasupra diagonalei este zero). Prima ecuație se citește $a_{11} x_1 = b_1$. Citește-o: ce îți spune imediat despre $x_1$?"
+          },
+          "answer": {
+            "en": "The first equation has only **one** unknown, so $x_1 = b_1 / a_{11}$ — instant. The second equation has two unknowns but the first is already known, so $x_2 = (b_2 - a_{21} x_1) / a_{22}$ — also instant. In lower-triangular form, **each equation adds exactly one new unknown**, and you can walk top-to-bottom solving one unknown at a time. No inversion, no elimination.",
+            "ro": "Prima ecuație are doar **o** necunoscută, deci $x_1 = b_1 / a_{11}$ — imediat. A doua are două necunoscute, dar prima este deja cunoscută, deci $x_2 = (b_2 - a_{21} x_1) / a_{22}$ — de asemenea imediat. În formă inferior triunghiulară, **fiecare ecuație adaugă exact o necunoscută nouă** și poți merge de sus în jos rezolvând una câte una. Fără inversare, fără eliminare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The system.** Lower-triangular $A$:",
+            "ro": "**Sistemul.** $A$ inferior triunghiular:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\begin{cases} a_{11} x_1 = b_1 \\\\ a_{21} x_1 + a_{22} x_2 = b_2 \\\\ \\vdots \\\\ a_{n1} x_1 + a_{n2} x_2 + \\cdots + a_{nn} x_n = b_n \\end{cases}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Non-singular iff all diagonal entries are nonzero** — because $\\det A = a_{11} a_{22} \\cdots a_{nn}$ for a triangular matrix. Assume that from here on.\n\nSolve top-to-bottom. At equation $i$, $x_1, \\ldots, x_{i-1}$ are already known:",
+            "ro": "**Nesingulară dacă și numai dacă toate elementele diagonale sunt nenule** — pentru că $\\det A = a_{11} a_{22} \\cdots a_{nn}$ pentru o matrice triunghiulară. Presupunem asta de aici înainte.\n\nRezolvi de sus în jos. La ecuația $i$, $x_1, \\ldots, x_{i-1}$ sunt deja cunoscute:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x_i = \\frac{b_i - \\sum_{j=1}^{i-1} a_{ij} x_j}{a_{ii}}, \\quad i = 1, 2, \\ldots, n"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Forward substitution",
+            "ro": "Substituție directă"
+          },
+          "content": {
+            "en": "The algorithm that solves a lower-triangular system by computing $x_1, x_2, \\ldots, x_n$ **in that order**, using already-computed values on the right-hand side.",
+            "ro": "Algoritmul care rezolvă un sistem inferior triunghiular calculând $x_1, x_2, \\ldots, x_n$ **în această ordine**, folosind pe partea dreaptă valorile deja calculate."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Forward substitution: lower-triangular A, produces x\nfor (int i = 0; i < n; i++) {\n    double s = b[i];\n    for (int j = 0; j < i; j++) {          // subtract known terms\n        s -= A[i][j] * x[j];\n    }\n    x[i] = s / A[i][i];                    // divide by diagonal pivot\n}"
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-back-substitution",
+      "title": {
+        "en": "Back substitution + the cost of a triangular solve",
+        "ro": "Substituția inversă + costul unei rezolvări triunghiulare"
+      },
+      "group": "triangular",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Upper-triangular case.** If $A$ is upper-triangular, the *last* equation has a single unknown ($a_{nn} x_n = b_n$), not the first. So we walk **bottom-to-top**.",
+            "ro": "**Cazul superior triunghiular.** Dacă $A$ este superior triunghiulară, *ultima* ecuație are o singură necunoscută ($a_{nn} x_n = b_n$), nu prima. Deci mergi **de jos în sus**."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x_n = \\frac{b_n}{a_{nn}}, \\qquad x_i = \\frac{b_i - \\sum_{j=i+1}^n a_{ij} x_j}{a_{ii}}, \\quad i = n-1, n-2, \\ldots, 1"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Back substitution",
+            "ro": "Substituție inversă"
+          },
+          "content": {
+            "en": "The algorithm that solves an upper-triangular system by computing $x_n, x_{n-1}, \\ldots, x_1$ in that reverse order.",
+            "ro": "Algoritmul care rezolvă un sistem superior triunghiular calculând $x_n, x_{n-1}, \\ldots, x_1$ în această ordine inversă."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Cost.** Count the expensive operations. Let $M$ = number of multiplications + divisions, $A$ = number of additions + subtractions. At row $i$ of forward substitution there are $i - 1$ multiplications in the sum, plus one division; adding these up:",
+            "ro": "**Cost.** Numără operațiile scumpe. Fie $M$ = numărul de înmulțiri + împărțiri, $A$ = numărul de adunări + scăderi. La linia $i$ a substituției directe sunt $i - 1$ înmulțiri în sumă, plus o împărțire; însumând:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "M = \\sum_{i=1}^n i = \\frac{n(n+1)}{2}, \\qquad A = \\sum_{i=1}^n (i - 1) = \\frac{n(n-1)}{2}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**So triangular = $\\Theta(n^2)$.** Back substitution has the same count by symmetry. A full non-triangular system will cost $\\Theta(n^3)$ because the hard work is transforming $A$ into triangular form — the substitution that follows is the cheap phase.",
+            "ro": "**Deci triunghiular = $\\Theta(n^2)$.** Substituția inversă are același număr prin simetrie. Un sistem complet nontriunghiular va costa $\\Theta(n^3)$ pentru că munca grea este transformarea lui $A$ în formă triunghiulară — substituția care urmează este faza ieftină."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "For $n = 1000$, forward substitution does $\\approx 500\\,500$ multiplications. A general Gauss elimination does $\\approx n^3/3 \\approx 333\\,000\\,000$. Ratio is roughly $660\\times$. Which phase dominates total cost — the elimination or the substitution?",
+            "ro": "Pentru $n = 1000$, substituția directă face $\\approx 500\\,500$ înmulțiri. O eliminare Gauss generală face $\\approx n^3/3 \\approx 333\\,000\\,000$. Raportul este aproximativ $660\\times$. Care fază domină costul total — eliminarea sau substituția?"
+          },
+          "answer": {
+            "en": "**Elimination dominates by two orders of magnitude.** Any constant-factor speedup of the substitution phase is invisible on profiles; optimization effort belongs on the $n^3$ elimination. This ranks a big algorithmic lesson: **cheap phases don't matter for asymptotic cost.**",
+            "ro": "**Eliminarea domină cu două ordine de mărime.** Orice accelerare de constantă a fazei de substituție este invizibilă pe profile; efortul de optimizare aparține eliminării $n^3$. Asta oferă o lecție algoritmică mare: **fazele ieftine nu contează pentru costul asimptotic.**"
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "You are handed an **upper-triangular** system of size $n = 5$. Which order produces $x_5$ first?",
+                "ro": "Ți se dă un sistem **superior triunghiular** de dimensiune $n = 5$. Ce ordine produce întâi $x_5$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Forward substitution ($x_1, x_2, \\ldots, x_5$).", "ro": "Substituție directă ($x_1, x_2, \\ldots, x_5$)." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Forward substitution is for **lower**-triangular. On upper-triangular the first equation has $n$ unknowns — you can't isolate $x_1$ without knowing the others.",
+                    "ro": "Substituția directă este pentru matrici **inferior** triunghiulare. Pe superior triunghiular prima ecuație are $n$ necunoscute — nu poți izola $x_1$ fără să le știi pe celelalte."
+                  }
+                },
+                {
+                  "text": { "en": "Back substitution ($x_5, x_4, \\ldots, x_1$).", "ro": "Substituție inversă ($x_5, x_4, \\ldots, x_1$)." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The last equation of an upper-triangular system is $a_{55} x_5 = b_5$ — one unknown — so $x_5$ falls out first.",
+                    "ro": "Corect. Ultima ecuație a unui sistem superior triunghiular este $a_{55} x_5 = b_5$ — o necunoscută — deci $x_5$ cade primul."
+                  }
+                },
+                {
+                  "text": { "en": "Either order works — the triangle structure lets you solve any unknown first.", "ro": "Orice ordine merge — structura triunghiulară îți permite să rezolvi orice necunoscută prima." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "The direction matters: upper-triangular forces bottom-to-top; lower-triangular forces top-to-bottom. Only the equation with a single unknown can be solved first.",
+                    "ro": "Direcția contează: superior triunghiular impune de jos în sus; inferior triunghiular impune de sus în jos. Doar ecuația cu o singură necunoscută se poate rezolva prima."
+                  }
+                },
+                {
+                  "text": { "en": "Neither — you must first convert it to lower-triangular.", "ro": "Niciuna — trebuie mai întâi convertită la inferior triunghiulară." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Converting upper-to-lower would be wasted work ($\\Theta(n^3)$). Upper-triangular systems are solved directly by back substitution in $\\Theta(n^2)$.",
+                    "ro": "Conversia superior-la-inferior ar fi muncă irosită ($\\Theta(n^3)$). Sistemele superior triunghiulare se rezolvă direct prin substituție inversă în $\\Theta(n^2)$."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Rule of thumb: solve toward the equation with a single unknown.",
+                "ro": "Regulă empirică: rezolvi spre ecuația cu o singură necunoscută."
+              },
+              "reviewStep": "alo-c4-back-substitution"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 6–8 of ALO curs 04 — forward and back substitution, complexity count.",
+            "ro": "Slide-urile 6–8 din ALO curs 04 — substituție directă și inversă, numărarea complexității."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-gauss-idea",
+      "title": {
+        "en": "Gaussian elimination: the big idea",
+        "ro": "Eliminarea Gauss: ideea centrală"
+      },
+      "group": "gauss",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You can solve a triangular system in $\\Theta(n^2)$. Your system $Ax = b$ is a dense matrix — not triangular. **What would you like to do to $A$ to reduce the problem to the case you already know?** Propose a high-level strategy before reading on.",
+            "ro": "Poți rezolva un sistem triunghiular în $\\Theta(n^2)$. Sistemul tău $Ax = b$ este o matrice densă — nu triunghiulară. **Ce ai vrea să faci cu $A$ pentru a reduce problema la cazul pe care deja îl știi?** Propune o strategie la nivel înalt înainte să citești mai departe."
+          },
+          "answer": {
+            "en": "Transform $A$ into a triangular matrix by **combining rows** in a way that doesn't change the solution set. Repeatedly subtract multiples of one row from the others to **zero out entries below the diagonal**, one column at a time. What's left is an upper-triangular system $\\tilde{A} x = \\tilde{b}$ with the same $x$ — and now back substitution finishes it.",
+            "ro": "Transformă $A$ într-o matrice triunghiulară **combinând linii** într-un mod care nu schimbă mulțimea soluțiilor. Scade repetat multipli ai unei linii din celelalte pentru a **anula intrările sub diagonală**, o coloană la un pas. Ce rămâne este un sistem superior triunghiular $\\tilde{A} x = \\tilde{b}$ cu același $x$ — iar substituția inversă îl termină."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Formal statement.**",
+            "ro": "**Enunț formal.**"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A x = b \\ \\Longleftrightarrow\\ \\tilde{A} x = \\tilde{b} \\quad \\text{with } \\tilde{A} \\text{ upper-triangular}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The transformation is called **elimination**. The final system is solved by back substitution. The two-phase recipe:",
+            "ro": "Transformarea se numește **eliminare**. Sistemul final este rezolvat prin substituție inversă. Rețeta în două faze:"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Elimination phase** ($\\Theta(n^3)$). Column by column, use row operations to zero out every entry below the current diagonal element (the **pivot**).",
+              "ro": "**Faza de eliminare** ($\\Theta(n^3)$). Coloană cu coloană, folosește operații pe linii pentru a anula fiecare intrare sub elementul diagonal curent (**pivotul**)."
+            },
+            {
+              "en": "**Back-substitution phase** ($\\Theta(n^2)$). Solve the resulting upper-triangular system.",
+              "ro": "**Faza de substituție inversă** ($\\Theta(n^2)$). Rezolvă sistemul superior triunghiular rezultat."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Which row operations preserve the solution?** Three are safe: (1) swap two rows, (2) multiply a row by a nonzero scalar, (3) replace a row with itself plus a multiple of another row. Gauss uses only (3). These are the same operations you learned in school — applied systematically with a complexity budget.",
+            "ro": "**Ce operații pe linii păstrează soluția?** Trei sunt sigure: (1) schimbă două linii, (2) înmulțește o linie cu un scalar nenul, (3) înlocuiește o linie cu ea plus un multiplu al alteia. Gauss folosește doar (3). Acestea sunt aceleași operații pe care le-ai învățat la școală — aplicate sistematic cu un buget de complexitate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-gauss-algorithm",
+      "title": {
+        "en": "Gaussian elimination: step by step",
+        "ro": "Eliminarea Gauss: pas cu pas"
+      },
+      "group": "gauss",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The algorithm runs in $n - 1$ stages.** At stage $r$, all columns $1, \\ldots, r-1$ have already been zeroed below their diagonals. We now zero column $r$ below the pivot $a_{rr}^{(r-1)}$.",
+            "ro": "**Algoritmul rulează în $n - 1$ etape.** La etapa $r$, toate coloanele $1, \\ldots, r-1$ au fost deja anulate sub diagonalele lor. Acum anulăm coloana $r$ sub pivotul $a_{rr}^{(r-1)}$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Row operation at stage $r$.** For each row $i = r+1, \\ldots, n$, subtract a multiple of row $r$:",
+            "ro": "**Operația pe linie la etapa $r$.** Pentru fiecare linie $i = r+1, \\ldots, n$, scade un multiplu al liniei $r$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "E_i^{(r)} = E_i^{(r-1)} - \\left( \\frac{a_{ir}^{(r-1)}}{a_{rr}^{(r-1)}} \\right) \\cdot E_r^{(r-1)}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The multiplier $f_{ir} = a_{ir}^{(r-1)} / a_{rr}^{(r-1)}$ is chosen **exactly** so that $a_{ir}^{(r)} = 0$. Apply the same row operation to both $A$ and the right-hand side $b$.",
+            "ro": "Multiplicatorul $f_{ir} = a_{ir}^{(r-1)} / a_{rr}^{(r-1)}$ este ales **exact** astfel încât $a_{ir}^{(r)} = 0$. Aplică aceeași operație pe linie atât asupra lui $A$, cât și asupra părții drepte $b$."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Gaussian elimination (no pivoting; see next step for why that's dangerous)\nfor (int r = 0; r < n - 1; r++) {\n    // Stage r: zero column r below row r\n    for (int i = r + 1; i < n; i++) {\n        double f = -A[i][r] / A[r][r];   // multiplier; divides by pivot\n        for (int j = r + 1; j < n; j++) {\n            A[i][j] += f * A[r][j];       // update row i\n        }\n        A[i][r] = 0.0;                    // enforce the zero (was ~eps)\n        b[i]    += f * b[r];              // update RHS the same way\n    }\n}\n// Now A is upper-triangular; solve by back substitution.\nback_substitute(A, b, x);"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why we only touch columns $j > r$.** Everything in column $r$ is about to become zero; we know the result analytically, so we just assign it. Everything in columns $< r$ is already zero from previous stages. Both facts save us from computing values we already know.",
+            "ro": "**De ce atingem doar coloanele $j > r$.** Tot ce este în coloana $r$ devine zero; știm rezultatul analitic, deci îl atribuim direct. Tot ce este în coloanele $< r$ este deja zero din etapele anterioare. Ambele fapte ne scutesc de calcularea valorilor pe care le știm deja."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Complexity.** Triple loop depth $\\Theta(n \\cdot n \\cdot n) = \\Theta(n^3)$. Exact counts:",
+            "ro": "**Complexitate.** Adâncime triplă de bucle $\\Theta(n \\cdot n \\cdot n) = \\Theta(n^3)$. Numărări exacte:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "M = \\frac{n^3}{3} + O(n^2), \\qquad A = \\frac{n^3}{3} + O(n^2)"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Memory trick.** The multipliers $f_{ir}$ can be stored in the $(i, r)$ entries of $A$ that we're about to set to zero anyway — they encode exactly the $L$ factor of the **LU decomposition** (course 5). Gaussian elimination is secretly computing $A = LU$ the whole time.",
+            "ro": "**Truc de memorie.** Multiplicatorii $f_{ir}$ se pot stoca în pozițiile $(i, r)$ ale lui $A$ pe care oricum le-am seta la zero — aceștia codifică exact factorul $L$ al **descompunerii LU** (cursul 5). Eliminarea Gauss calculează în secret $A = LU$ tot timpul."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "At stage $r$, which rows of $A$ change?",
+                "ro": "La etapa $r$, ce linii ale lui $A$ se schimbă?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Only row $r$.", "ro": "Doar linia $r$." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Row $r$ is the **pivot** row and is used **unchanged** to update the rows below it.",
+                    "ro": "Linia $r$ este linia **pivot** și este folosită **nemodificată** pentru a actualiza liniile de sub ea."
+                  }
+                },
+                {
+                  "text": { "en": "Rows $r+1, r+2, \\ldots, n$.", "ro": "Liniile $r+1, r+2, \\ldots, n$." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Each of those rows loses a multiple of the pivot row and gains a zero in column $r$.",
+                    "ro": "Corect. Fiecare dintre acele linii pierde un multiplu al liniei pivot și câștigă un zero în coloana $r$."
+                  }
+                },
+                {
+                  "text": { "en": "All $n$ rows.", "ro": "Toate cele $n$ linii." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Rows $1, \\ldots, r$ stay fixed at stage $r$. Their work was done in earlier stages; touching them again would undo previous zeros.",
+                    "ro": "Liniile $1, \\ldots, r$ rămân fixe la etapa $r$. Munca lor a fost făcută în etapele anterioare; a le atinge din nou ar strica zerourile precedente."
+                  }
+                },
+                {
+                  "text": { "en": "Rows $1, \\ldots, r-1$.", "ro": "Liniile $1, \\ldots, r-1$." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Those are the already-triangularized rows above the pivot. They are not modified again.",
+                    "ro": "Acelea sunt liniile deja triangularizate de deasupra pivotului. Nu mai sunt modificate."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "The pivot row drives; the rows below it are transformed; the rows above are frozen.",
+                "ro": "Linia pivot conduce; liniile de sub ea sunt transformate; liniile de deasupra sunt înghețate."
+              },
+              "reviewStep": "alo-c4-gauss-algorithm"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 9–12 of ALO curs 04 — algorithm, pseudocode, complexity.",
+            "ro": "Slide-urile 9–12 din ALO curs 04 — algoritm, pseudocod, complexitate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-pivoting",
+      "title": {
+        "en": "Pivoting: why plain Gauss is unstable",
+        "ro": "Pivotarea: de ce eliminarea Gauss simplă este instabilă"
+      },
+      "group": "gauss",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "The algorithm divides by the pivot $a_{rr}^{(r-1)}$ at every stage. What could go wrong if the pivot happens to be a **very small** number (say $10^{-16}$) while the rest of the column has entries of order $1$?",
+            "ro": "Algoritmul împarte la pivotul $a_{rr}^{(r-1)}$ la fiecare etapă. Ce se poate întâmpla dacă pivotul se întâmplă să fie un **număr foarte mic** (să zicem $10^{-16}$) în timp ce restul coloanei are intrări de ordinul $1$?"
+          },
+          "answer": {
+            "en": "The multiplier $f_{ir} = a_{ir} / a_{rr}$ becomes enormous — roughly $10^{16}$. When you compute $E_i - f_{ir} \\cdot E_r$, every entry of row $i$ gets dominated by $f_{ir}$ times the pivot row's entries. Rounding error in row $r$ is amplified by $10^{16}$ in row $i$. Even though the problem may be well-conditioned, the algorithm destroys accuracy — a pure **stability** failure (course 3).",
+            "ro": "Multiplicatorul $f_{ir} = a_{ir} / a_{rr}$ devine enorm — aproximativ $10^{16}$. Când calculezi $E_i - f_{ir} \\cdot E_r$, fiecare intrare a liniei $i$ devine dominată de $f_{ir}$ înmulțit cu intrările liniei pivot. Eroarea de rotunjire din linia $r$ este amplificată de $10^{16}$ în linia $i$. Chiar dacă problema este bine condiționată, algoritmul distruge acuratețea — un eșec pur de **stabilitate** (cursul 3)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Numerical demonstration.** For $n = 20$ with a deliberately-placed pivot $a_{11} = 10 \\cdot \\varepsilon$ (machine epsilon scale):\n\n- **Without pivoting:** relative error $\\approx 10^0$ — **zero correct digits**.\n- **With partial pivoting:** relative error $\\approx 10^{-13}$.\n\nSame problem. Thirteen digits of accuracy, destroyed by one bad pivot choice.",
+            "ro": "**Demonstrație numerică.** Pentru $n = 20$ cu un pivot plasat deliberat $a_{11} = 10 \\cdot \\varepsilon$ (la scara epsilon-ului mașinii):\n\n- **Fără pivotare:** eroare relativă $\\approx 10^0$ — **zero cifre corecte**.\n- **Cu pivotare parțială:** eroare relativă $\\approx 10^{-13}$.\n\nAceeași problemă. Treisprezece cifre de acuratețe, distruse de o alegere proastă de pivot."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The fix: choose a large pivot.** At each stage, **before** dividing, swap rows (or rows + columns) so the pivot is as large in magnitude as possible. Three strategies, ordered from weakest to strongest:",
+            "ro": "**Soluția: alege un pivot mare.** La fiecare etapă, **înainte** de a împărți, schimbă liniile (sau liniile + coloanele) astfel încât pivotul să fie cât mai mare în modul. Trei strategii, de la cea mai slabă la cea mai tare:"
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "No pivoting",
+            "ro": "Fără pivotare"
+          },
+          "content": {
+            "en": "Use $a_{rr}^{(r-1)}$ as-is. Only swap rows if the pivot is literally zero (necessary for the algorithm to continue). **Unstable** in general.",
+            "ro": "Folosește $a_{rr}^{(r-1)}$ așa cum este. Schimbă liniile doar dacă pivotul este literalmente zero (necesar pentru ca algoritmul să continue). **Instabilă** în general."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Partial pivoting",
+            "ro": "Pivotare parțială"
+          },
+          "content": {
+            "en": "Search column $r$ at rows $r, r+1, \\ldots, n$ for the element with the **largest absolute value**, then swap that row with row $r$:",
+            "ro": "Caută în coloana $r$ pe liniile $r, r+1, \\ldots, n$ elementul cu **cea mai mare valoare absolută**, apoi schimbă acea linie cu linia $r$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "|a_{i_0 r}^{(r-1)}| = \\max \\{\\, |a_{ir}^{(r-1)}| : i = r, r+1, \\ldots, n \\,\\}"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Total (full) pivoting",
+            "ro": "Pivotare totală"
+          },
+          "content": {
+            "en": "Search the entire remaining $(n - r + 1) \\times (n - r + 1)$ submatrix for the largest absolute entry; swap both the row and the column into pivot position:",
+            "ro": "Caută în întreaga submatrice rămasă de dimensiune $(n - r + 1) \\times (n - r + 1)$ intrarea cu cea mai mare valoare absolută; schimbă atât linia cât și coloana în poziția de pivot:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "|a_{i_0 j_0}^{(r-1)}| = \\max \\{\\, |a_{ij}^{(r-1)}| : i, j = r, r+1, \\ldots, n \\,\\}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Cost/benefit.** Partial pivoting adds $O(n)$ comparisons per stage ($O(n^2)$ total — negligible vs $n^3/3$). Total pivoting adds $O(n^2)$ per stage ($O(n^3)$ total — same order as the elimination itself). In practice, **partial pivoting is the default** in every serious library (LAPACK's `dgesv` uses it): near-LAPACK-level stability at essentially zero extra cost.",
+            "ro": "**Cost/beneficiu.** Pivotarea parțială adaugă $O(n)$ comparații per etapă ($O(n^2)$ total — neglijabil vs $n^3/3$). Pivotarea totală adaugă $O(n^2)$ per etapă ($O(n^3)$ total — același ordin ca eliminarea însăși). În practică, **pivotarea parțială este implicită** în orice bibliotecă serioasă (`dgesv` din LAPACK o folosește): stabilitate aproape maximă cu cost suplimentar practic zero."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**If after pivoting the pivot is still zero, then $\\det A = 0$** and the matrix $A$ is **singular** — the system has either no solution or infinitely many. Your algorithm should detect this and report `SINGULAR MATRIX`, not divide by zero.",
+            "ro": "**Dacă după pivotare pivotul este tot zero, atunci $\\det A = 0$** și matricea $A$ este **singulară** — sistemul nu are soluție sau are o infinitate. Algoritmul tău ar trebui să detecteze acest lucru și să raporteze `MATRICE SINGULARA`, nu să împartă la zero."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "You are implementing Gaussian elimination and must choose a pivoting strategy. The problem: dense $500 \\times 500$ matrices, no special structure. What should you pick?",
+                "ro": "Implementezi eliminarea Gauss și trebuie să alegi o strategie de pivotare. Problema: matrici dense $500 \\times 500$, fără structură specială. Ce alegi?"
+              },
+              "options": [
+                {
+                  "text": { "en": "No pivoting — fastest, and modern hardware is precise enough.", "ro": "Fără pivotare — cea mai rapidă, iar hardware-ul modern este suficient de precis." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Precision (`binary64`) doesn't save you from a bad pivot. A single near-zero pivot amplifies rounding by an arbitrary factor, wiping out the algorithm's accuracy.",
+                    "ro": "Precizia (`binary64`) nu te salvează de un pivot prost. Un singur pivot aproape de zero amplifică rotunjirea cu un factor arbitrar, ștergând acuratețea algoritmului."
+                  }
+                },
+                {
+                  "text": { "en": "Partial pivoting — the standard choice in LAPACK and textbooks.", "ro": "Pivotare parțială — alegerea standard în LAPACK și manuale." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Partial pivoting adds $O(n^2)$ work on top of $\\Theta(n^3)$ elimination (invisible) and gives near-LAPACK stability. This is the universally accepted default.",
+                    "ro": "Corect. Pivotarea parțială adaugă muncă $O(n^2)$ peste eliminarea $\\Theta(n^3)$ (invizibilă) și dă stabilitate aproape de LAPACK. Este implicitul universal acceptat."
+                  }
+                },
+                {
+                  "text": { "en": "Total pivoting — the most accurate, so always use it.", "ro": "Pivotare totală — cea mai precisă, deci folosește-o mereu." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Total pivoting gives marginal extra accuracy on pathological matrices at $\\Theta(n^3)$ extra cost — it doubles the runtime for a gain invisible on well-behaved problems. Not the default.",
+                    "ro": "Pivotarea totală dă acuratețe suplimentară marginală pe matrici patologice cu cost suplimentar $\\Theta(n^3)$ — dublează timpul pentru un câștig invizibil pe probleme bine comportate. Nu este implicitul."
+                  }
+                },
+                {
+                  "text": { "en": "No pivoting, with `binary128` arithmetic to compensate.", "ro": "Fără pivotare, cu aritmetica `binary128` pentru compensare." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Precision doesn't fix unstable algorithms (course 3 lesson). You trade constant-factor precision for an unbounded amplification — a bad deal.",
+                    "ro": "Precizia nu repară algoritmii instabili (lecția cursului 3). Schimbi precizie cu factor constant pentru o amplificare nemărginită — o afacere proastă."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Partial pivoting is the cost-minimal way to convert unstable Gauss into stable Gauss.",
+                "ro": "Pivotarea parțială este modul cel mai ieftin de a converti Gauss instabilă în Gauss stabilă."
+              },
+              "reviewStep": "alo-c4-pivoting"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 11–13 of ALO curs 04 — pivoting strategies, numerical demonstration.",
+            "ro": "Slide-urile 11–13 din ALO curs 04 — strategii de pivotare, demonstrație numerică."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-chinese",
+      "title": {
+        "en": "Bonus: the Chinese elimination (200 BC)",
+        "ro": "Bonus: eliminarea chinezească (200 î.Hr.)"
+      },
+      "group": "gauss",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Gauss elimination is 2000+ years old.** The Chinese text *The Nine Chapters on the Mathematical Art* (九章算術, ~200–100 BC) records a method formally identical to Gauss's, applied to rod-calculus on counting boards. The problem that still appears in every Chinese math-history book:\n\n*\"Three types of wheat. One pile of type 1, two of type 2, and three of type 3 together weigh 26 measures. Two of type 1, three of type 2, one of type 3 weigh 34. Three of type 1, two of type 2, one of type 3 weigh 39. How much does each type weigh?\"*\n\nIn modern notation:",
+            "ro": "**Eliminarea Gauss are peste 2000 de ani.** Textul chinezesc *Cele nouă capitole despre arta matematică* (九章算術, ~200–100 î.Hr.) înregistrează o metodă formal identică cu a lui Gauss, aplicată la calculul cu bețișoare pe tăblițe de numărare. Problema care încă apare în orice carte de istorie a matematicii chineze:\n\n*\"Trei tipuri de grâu. O grămadă de tip 1, două de tip 2 și trei de tip 3 cântăresc împreună 26 de măsuri. Două de tip 1, trei de tip 2, una de tip 3 cântăresc 34. Trei de tip 1, două de tip 2, una de tip 3 cântăresc 39. Cât cântărește fiecare tip?\"*\n\nÎn notație modernă:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\begin{cases} 3 x_1 + 2 x_2 + x_3 = 39 \\\\ 2 x_1 + 3 x_2 + x_3 = 34 \\\\ x_1 + 2 x_2 + 3 x_3 = 26 \\end{cases}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The clever convention.** The Chinese wrote equations in **columns** on the counting board, not rows. So our system looks like this on the board (rows = coefficients of $x_1, x_2, x_3$, then constants; columns = equations):",
+            "ro": "**Convenția isteață.** Chinezii scriau ecuațiile pe **coloane** pe tăbliță, nu pe linii. Deci sistemul nostru arată așa pe tăbliță (liniile = coeficienții lui $x_1, x_2, x_3$, apoi constantele; coloanele = ecuațiile):"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Eq 3", "ro": "Ec 3" },
+            { "en": "Eq 2", "ro": "Ec 2" },
+            { "en": "Eq 1", "ro": "Ec 1" }
+          ],
+          "rows": [
+            [ "$1$", "$2$", "$3$" ],
+            [ "$2$", "$3$", "$2$" ],
+            [ "$3$", "$1$", "$1$" ],
+            [ "$26$", "$34$", "$39$" ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The procedure.** Multiply a column by a scalar and subtract from another column to zero entries — exactly Gauss, rotated 90°. After two steps, the board is in triangular form:",
+            "ro": "**Procedura.** Înmulțește o coloană cu un scalar și scade dintr-o altă coloană pentru a anula intrările — exact Gauss, rotită la 90°. După doi pași, tabla este în formă triunghiulară:"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Eq 3'", "ro": "Ec 3'" },
+            { "en": "Eq 2'", "ro": "Ec 2'" },
+            { "en": "Eq 1'", "ro": "Ec 1'" }
+          ],
+          "rows": [
+            [ "$0$", "$0$", "$3$" ],
+            [ "$0$", "$5$", "$2$" ],
+            [ "$36$", "$1$", "$1$" ],
+            [ "$99$", "$24$", "$39$" ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Then back substitution: $x_3 = 99/36 = 11/4$, substitute upward, find $x_2 = 17/4$, $x_1 = 37/4$. Same algorithm, same accuracy, different orientation — **two thousand years before Gauss published**.",
+            "ro": "Apoi substituție inversă: $x_3 = 99/36 = 11/4$, substituie în sus, găsește $x_2 = 17/4$, $x_1 = 37/4$. Același algoritm, aceeași acuratețe, altă orientare — **cu două mii de ani înainte ca Gauss să publice**."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Why we call it \"Gauss elimination.\"** Gauss (1810) gave a careful error analysis for surveying computations, and his name stuck in the Western literature. The Chinese algorithm was independently rediscovered and formalized; both descriptions converge on the same recipe. Historiographically, \"column-reduction on a counting board\" and \"row-reduction on paper\" are the same idea.",
+            "ro": "**De ce o numim \"eliminarea Gauss\".** Gauss (1810) a dat o analiză atentă a erorilor pentru calcule topografice, iar numele său a rămas în literatura occidentală. Algoritmul chinezesc a fost redescoperit și formalizat independent; ambele descrieri converg spre aceeași rețetă. Istoriografic, \"reducerea pe coloane pe o tăbliță de numărare\" și \"reducerea pe linii pe hârtie\" sunt aceeași idee."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 14–15 of ALO curs 04 — Chinese elimination, historical context.",
+            "ro": "Slide-urile 14–15 din ALO curs 04 — eliminarea chinezească, context istoric."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c4-quiz",
+      "title": {
+        "en": "Self-test: course 4 retrieval",
+        "ro": "Auto-test: retenție cursul 4"
+      },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Eight questions covering the full course. Target: **6 or more correct** on the first pass. Wrong answers will point you back to the step that teaches the concept.",
+            "ro": "Opt întrebări care acoperă tot cursul. Țintă: **6 sau mai multe corecte** din prima. Răspunsurile greșite te vor îndrepta spre pasul care predă conceptul."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What is the asymptotic cost of naive Cramer's rule applied to an $n \\times n$ system?",
+                "ro": "Care este costul asimptotic al regulii lui Cramer naive aplicată unui sistem $n \\times n$?"
+              },
+              "options": [
+                {
+                  "text": "$\\Theta(n^3)$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "$\\Theta(n^3)$ is **Gauss**. Cramer's rule evaluates $n + 1$ determinants, and naive cofactor expansion of a determinant is $\\Theta(n!)$.",
+                    "ro": "$\\Theta(n^3)$ este **Gauss**. Regula lui Cramer evaluează $n + 1$ determinanți, iar dezvoltarea cofactor naivă a unui determinant este $\\Theta(n!)$."
+                  }
+                },
+                {
+                  "text": "$\\Theta(n \\cdot n!)$",
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Each determinant costs $\\Theta(n!)$ via cofactor expansion, and Cramer uses $n + 1$ of them.",
+                    "ro": "Corect. Fiecare determinant costă $\\Theta(n!)$ prin dezvoltare cofactor, iar Cramer folosește $n + 1$ dintre ei."
+                  }
+                },
+                {
+                  "text": "$\\Theta(2^n)$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "Exponential is already bad but factorial is worse. $2^n$ grows slower than $n!$ for $n \\geq 4$.",
+                    "ro": "Exponențialul este deja rău, dar factorialul este mai rău. $2^n$ crește mai lent decât $n!$ pentru $n \\geq 4$."
+                  }
+                },
+                {
+                  "text": "$\\Theta(n^2)$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "$\\Theta(n^2)$ is the cost of back/forward substitution on a triangular system, not of Cramer.",
+                    "ro": "$\\Theta(n^2)$ este costul substituției inverse/directe pe un sistem triunghiular, nu al lui Cramer."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Naive Cramer is factorial — infeasible past $n \\approx 15$.",
+                "ro": "Cramer naivă este factorială — imposibilă peste $n \\approx 15$."
+              },
+              "reviewStep": "alo-c4-cramer-cost"
+            },
+            {
+              "question": {
+                "en": "For a lower-triangular system of size $n$, which unknown does forward substitution solve **first**?",
+                "ro": "Pentru un sistem inferior triunghiular de dimensiune $n$, ce necunoscută rezolvă **prima** substituția directă?"
+              },
+              "options": [
+                {
+                  "text": "$x_n$",
+                  "correct": false,
+                  "explanation": { "en": "That's back substitution (upper-triangular).", "ro": "Aceea este substituția inversă (superior triunghiular)." }
+                },
+                {
+                  "text": "$x_1$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. The first equation has just one unknown, $a_{11} x_1 = b_1$.", "ro": "Corect. Prima ecuație are o singură necunoscută, $a_{11} x_1 = b_1$." }
+                },
+                {
+                  "text": { "en": "Any, in any order.", "ro": "Oricare, în orice ordine." },
+                  "correct": false,
+                  "explanation": { "en": "The triangular structure forces the order: you can only solve the equation with one unknown.", "ro": "Structura triunghiulară impune ordinea: poți rezolva doar ecuația cu o singură necunoscută." }
+                }
+              ],
+              "explanation": { "en": "Lower-triangular → top-down, starting with $x_1$.", "ro": "Inferior triunghiular → de sus în jos, începând cu $x_1$." },
+              "reviewStep": "alo-c4-forward-substitution"
+            },
+            {
+              "question": {
+                "en": "The triangular substitution phase costs how many multiplications?",
+                "ro": "Faza de substituție triunghiulară costă câte înmulțiri?"
+              },
+              "options": [
+                {
+                  "text": "$\\frac{n(n+1)}{2}$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. Summing $i$ for $i = 1, \\ldots, n$ gives $n(n+1)/2 = \\Theta(n^2)$.", "ro": "Corect. Suma lui $i$ pentru $i = 1, \\ldots, n$ dă $n(n+1)/2 = \\Theta(n^2)$." }
+                },
+                {
+                  "text": "$\\frac{n^3}{3}$",
+                  "correct": false,
+                  "explanation": { "en": "That's the elimination phase. Substitution alone is $\\Theta(n^2)$.", "ro": "Aceea este faza de eliminare. Doar substituția este $\\Theta(n^2)$." }
+                },
+                {
+                  "text": "$n!$",
+                  "correct": false,
+                  "explanation": { "en": "Factorial is Cramer's, not substitution's.", "ro": "Factorialul este al lui Cramer, nu al substituției." }
+                },
+                {
+                  "text": "$n$",
+                  "correct": false,
+                  "explanation": { "en": "Linear would be impossible — each row performs up to $n$ multiplications.", "ro": "Liniar ar fi imposibil — fiecare linie face până la $n$ înmulțiri." }
+                }
+              ],
+              "explanation": { "en": "Triangular substitution is $\\Theta(n^2)$; counted exactly as $n(n+1)/2$.", "ro": "Substituția triunghiulară este $\\Theta(n^2)$; numărată exact ca $n(n+1)/2$." },
+              "reviewStep": "alo-c4-back-substitution"
+            },
+            {
+              "question": {
+                "en": "What's the total cost of Gaussian elimination (elimination + back substitution combined)?",
+                "ro": "Care este costul total al eliminării Gauss (eliminare + substituție inversă)?"
+              },
+              "options": [
+                {
+                  "text": "$\\Theta(n^2)$",
+                  "correct": false,
+                  "explanation": { "en": "Substitution alone is $\\Theta(n^2)$, but elimination — the dominant phase — is $\\Theta(n^3)$.", "ro": "Doar substituția este $\\Theta(n^2)$, dar eliminarea — faza dominantă — este $\\Theta(n^3)$." }
+                },
+                {
+                  "text": "$\\Theta(n^3)$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. Both multiplication and addition counts are $n^3/3 + O(n^2)$. The $\\Theta(n^2)$ substitution phase is negligible.", "ro": "Corect. Și numărul de înmulțiri și cel de adunări sunt $n^3/3 + O(n^2)$. Faza de substituție $\\Theta(n^2)$ este neglijabilă." }
+                },
+                {
+                  "text": "$\\Theta(n^4)$",
+                  "correct": false,
+                  "explanation": { "en": "The triple-nested loop is $\\Theta(n \\cdot n \\cdot n) = \\Theta(n^3)$, not $n^4$.", "ro": "Bucla triplă este $\\Theta(n \\cdot n \\cdot n) = \\Theta(n^3)$, nu $n^4$." }
+                },
+                {
+                  "text": "$\\Theta(n \\cdot n!)$",
+                  "correct": false,
+                  "explanation": { "en": "That's Cramer; Gauss avoids factorial growth by transforming once, not per-unknown.", "ro": "Aceea este Cramer; Gauss evită creșterea factorială prin transformare o singură dată, nu per necunoscută." }
+                }
+              ],
+              "explanation": { "en": "Gauss: $n^3/3$ elimination + $n^2/2$ substitution = $\\Theta(n^3)$.", "ro": "Gauss: $n^3/3$ eliminare + $n^2/2$ substituție = $\\Theta(n^3)$." },
+              "reviewStep": "alo-c4-gauss-algorithm"
+            },
+            {
+              "question": {
+                "en": "During stage $r$ of Gaussian elimination, the algorithm divides by…",
+                "ro": "În timpul etapei $r$ a eliminării Gauss, algoritmul împarte la…"
+              },
+              "options": [
+                {
+                  "text": { "en": "…the current pivot $a_{rr}^{(r-1)}$.", "ro": "…pivotul curent $a_{rr}^{(r-1)}$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. The multiplier $f_{ir} = a_{ir} / a_{rr}$ is how we zero out column $r$ below the diagonal.", "ro": "Corect. Multiplicatorul $f_{ir} = a_{ir} / a_{rr}$ este cum anulăm coloana $r$ sub diagonală." }
+                },
+                {
+                  "text": { "en": "…the determinant of $A$.", "ro": "…determinantul lui $A$." },
+                  "correct": false,
+                  "explanation": { "en": "That's Cramer's rule. Gauss never computes the full determinant (though its product falls out as the product of pivots).", "ro": "Aceea este regula lui Cramer. Gauss nu calculează niciodată determinantul complet (deși produsul pivoților îl dă)." }
+                },
+                {
+                  "text": { "en": "…the last diagonal element $a_{nn}$.", "ro": "…ultimul element diagonal $a_{nn}$." },
+                  "correct": false,
+                  "explanation": { "en": "Division by $a_{nn}$ happens only during back substitution, after elimination finishes.", "ro": "Împărțirea la $a_{nn}$ are loc doar în timpul substituției inverse, după ce eliminarea se termină." }
+                },
+                {
+                  "text": { "en": "…the norm of row $r$.", "ro": "…norma liniei $r$." },
+                  "correct": false,
+                  "explanation": { "en": "Gauss does not normalize rows — it scales them by multipliers. Normalization is a different preconditioning technique.", "ro": "Gauss nu normalizează liniile — le scalează cu multiplicatori. Normalizarea este o altă tehnică de precondiționare." }
+                }
+              ],
+              "explanation": { "en": "The diagonal element at stage $r$ — the pivot — divides every multiplier.", "ro": "Elementul diagonal la etapa $r$ — pivotul — împarte fiecare multiplicator." },
+              "reviewStep": "alo-c4-gauss-algorithm"
+            },
+            {
+              "question": {
+                "en": "Without pivoting, Gaussian elimination on a well-conditioned matrix can…",
+                "ro": "Fără pivotare, eliminarea Gauss pe o matrice bine condiționată poate…"
+              },
+              "options": [
+                {
+                  "text": { "en": "…never fail; pivoting only matters for ill-conditioned problems.", "ro": "…să nu eșueze niciodată; pivotarea contează doar pentru probleme prost condiționate." },
+                  "correct": false,
+                  "explanation": { "en": "Conditioning is a problem property (course 3). Stability is an algorithm property. No-pivoting Gauss is unstable even on well-conditioned matrices if a small pivot arises.", "ro": "Condiționarea este o proprietate a problemei (cursul 3). Stabilitatea este o proprietate a algoritmului. Gauss fără pivotare este instabilă chiar și pe matrici bine condiționate dacă apare un pivot mic." }
+                },
+                {
+                  "text": { "en": "…lose all its digits of accuracy when a small pivot appears.", "ro": "…pierde toate cifrele de acuratețe când apare un pivot mic." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. The demonstration: $n = 20$, pivot $\\approx 10\\,\\varepsilon$ — relative error becomes $\\approx 10^0$. Pivoting fixes it to $\\approx 10^{-13}$.", "ro": "Corect. Demonstrația: $n = 20$, pivot $\\approx 10\\,\\varepsilon$ — eroarea relativă devine $\\approx 10^0$. Pivotarea o repară la $\\approx 10^{-13}$." }
+                },
+                {
+                  "text": { "en": "…take $\\Theta(n^4)$ time because it has to retry.", "ro": "…lua timp $\\Theta(n^4)$ pentru că trebuie să reîncerce." },
+                  "correct": false,
+                  "explanation": { "en": "No-pivoting Gauss doesn't retry; it silently produces a bad answer at the same $\\Theta(n^3)$ cost.", "ro": "Gauss fără pivotare nu reîncearcă; produce tacit un răspuns prost la același cost $\\Theta(n^3)$." }
+                },
+                {
+                  "text": { "en": "…always detect its own numerical failure.", "ro": "…detecta întotdeauna eșecul său numeric." },
+                  "correct": false,
+                  "explanation": { "en": "Without pivoting there's no built-in sanity check. The output looks normal, just wrong.", "ro": "Fără pivotare nu există verificare internă. Ieșirea arată normal, doar că este greșită." }
+                }
+              ],
+              "explanation": { "en": "Pivoting is a stability safeguard, independent of problem conditioning.", "ro": "Pivotarea este o protecție de stabilitate, independentă de condiționarea problemei." },
+              "reviewStep": "alo-c4-pivoting"
+            },
+            {
+              "question": {
+                "en": "The extra cost of **partial pivoting** added to $\\Theta(n^3)$ Gauss elimination is…",
+                "ro": "Costul suplimentar al **pivotării parțiale** adăugat la eliminarea Gauss $\\Theta(n^3)$ este…"
+              },
+              "options": [
+                {
+                  "text": "$\\Theta(n^2)$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. Each stage scans a column of $O(n)$ entries to find the max, over $n-1$ stages = $\\Theta(n^2)$. Invisible on the profile.", "ro": "Corect. Fiecare etapă scanează o coloană cu $O(n)$ intrări pentru max, peste $n-1$ etape = $\\Theta(n^2)$. Invizibilă pe profil." }
+                },
+                {
+                  "text": "$\\Theta(n^3)$",
+                  "correct": false,
+                  "explanation": { "en": "That's total pivoting (which scans an entire submatrix each stage). Partial pivoting is cheaper.", "ro": "Aceea este pivotarea totală (care scanează întreaga submatrice la fiecare etapă). Pivotarea parțială este mai ieftină." }
+                },
+                {
+                  "text": "$\\Theta(n \\log n)$",
+                  "correct": false,
+                  "explanation": { "en": "Finding the max in a list is linear, not logarithmic, without a sorted structure.", "ro": "Găsirea maximului într-o listă este liniară, nu logaritmică, fără structură sortată." }
+                },
+                {
+                  "text": "$\\Theta(1)$",
+                  "correct": false,
+                  "explanation": { "en": "Even a single scan of a column is $\\Theta(n)$; repeated $n-1$ times, it is $\\Theta(n^2)$.", "ro": "Chiar și o singură scanare a unei coloane este $\\Theta(n)$; repetată de $n-1$ ori, este $\\Theta(n^2)$." }
+                }
+              ],
+              "explanation": { "en": "Partial pivoting: $n - 1$ linear scans → $\\Theta(n^2)$, dominated by the $\\Theta(n^3)$ elimination.", "ro": "Pivotare parțială: $n - 1$ scanări liniare → $\\Theta(n^2)$, dominată de eliminarea $\\Theta(n^3)$." },
+              "reviewStep": "alo-c4-pivoting"
+            },
+            {
+              "question": {
+                "en": "After applying all pivoting strategies, the pivot at stage $r$ is **still zero**. What does that tell you about $A$?",
+                "ro": "După aplicarea tuturor strategiilor de pivotare, pivotul la etapa $r$ este **tot zero**. Ce îți spune asta despre $A$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$A$ is ill-conditioned but still invertible.", "ro": "$A$ este prost condiționată, dar încă inversabilă." },
+                  "correct": false,
+                  "explanation": { "en": "Ill-conditioning produces small-but-nonzero pivots. A truly zero pivot means zero determinant.", "ro": "Condiționarea proastă produce pivoți mici dar nenuli. Un pivot literalmente zero înseamnă determinant zero." }
+                },
+                {
+                  "text": { "en": "$A$ is singular ($\\det A = 0$) — the system has no unique solution.", "ro": "$A$ este singulară ($\\det A = 0$) — sistemul nu are soluție unică." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. After full pivoting, if every candidate pivot in the submatrix is zero, the column is linearly dependent on the previous ones. Your algorithm should report `SINGULAR MATRIX`.", "ro": "Corect. După pivotare totală, dacă fiecare candidat de pivot din submatrice este zero, coloana este liniar dependentă de cele anterioare. Algoritmul tău ar trebui să raporteze `MATRICE SINGULARA`." }
+                },
+                {
+                  "text": { "en": "`binary64` underflowed — retry in `binary128`.", "ro": "`binary64` a avut depășire inferioară — reîncearcă în `binary128`." },
+                  "correct": false,
+                  "explanation": { "en": "Underflow replaces tiny values with zero, but that only happens for subnormal inputs. A structural zero pivot is an algebraic fact, not a precision issue.", "ro": "Depășirea inferioară înlocuiește valorile foarte mici cu zero, dar asta se întâmplă doar pentru intrări subnormale. Un pivot zero structural este un fapt algebric, nu o problemă de precizie." }
+                },
+                {
+                  "text": { "en": "You picked the wrong pivoting strategy; try Gauss–Jordan.", "ro": "Ai ales strategia de pivotare greșită; încearcă Gauss–Jordan." },
+                  "correct": false,
+                  "explanation": { "en": "Gauss–Jordan is a variant with the same singularity detection. Zero-pivot-after-full-pivoting is a definitive answer about $A$, not a choice of algorithm.", "ro": "Gauss–Jordan este o variantă cu aceeași detectare a singularității. Pivot-zero-după-pivotare-totală este un răspuns definitiv despre $A$, nu o alegere de algoritm." }
+                }
+              ],
+              "explanation": { "en": "Zero pivot after all pivoting strategies = $\\det A = 0$ = singular.", "ro": "Pivot zero după toate strategiile de pivotare = $\\det A = 0$ = singulară." },
+              "reviewStep": "alo-c4-pivoting"
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Next up — course 5.** We'll see that Gaussian elimination silently computes a matrix decomposition: $A = LU$, with $L$ lower-triangular (the multipliers) and $U$ upper-triangular (the eliminated $A$). That factorization lets us reuse the work across multiple right-hand sides $b$ and connects to the condition number $\\kappa(A)$ from course 2.",
+            "ro": "**Urmează — cursul 5.** Vom vedea că eliminarea Gauss calculează tacit o descompunere matricială: $A = LU$, cu $L$ inferior triunghiulară (multiplicatorii) și $U$ superior triunghiulară ($A$ eliminat). Această factorizare ne permite să reutilizăm munca pe mai multe părți drepte $b$ și se conectează cu numărul de condiționare $\\kappa(A)$ din cursul 2."
+          }
+        }
+      ]
+    }
+  ]
+}
