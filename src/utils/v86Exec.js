@@ -119,17 +119,22 @@ export async function injectFiles(exec, files) {
  * Returns { passed: boolean, feedback: string }.
  * The check script should exit 0 for pass, non-zero for fail.
  */
-export async function runCheck(exec, checkScript) {
+export async function runCheck(exec, checkScript, timeout = 5000) {
   const id = ++cmdId;
   const passMark = `__PASS_${id}__`;
   const failMark = `__FAIL_${id}__`;
-  const result = await exec(
-    `( ${checkScript} ) 2>&1 && echo ${passMark} || echo ${failMark}`,
-    5000
-  );
-  const passed = result.includes(passMark);
-  const marker = passed ? passMark : failMark;
-  const feedbackEnd = result.lastIndexOf(marker);
-  const feedback = result.slice(0, feedbackEnd).trim();
-  return { passed, feedback };
+  try {
+    const result = await exec(
+      `( ${checkScript} ) 2>&1 && echo ${passMark} || echo ${failMark}`,
+      timeout
+    );
+    const passed = result.includes(passMark);
+    const marker = passed ? passMark : failMark;
+    const feedbackEnd = result.lastIndexOf(marker);
+    const feedback = result.slice(0, feedbackEnd).trim();
+    return { passed, feedback, timedOut: false };
+  } catch (err) {
+    const isTimeout = err && err.message && err.message.includes('timeout');
+    return { passed: false, feedback: '', timedOut: !!isTimeout, error: err };
+  }
 }

@@ -156,11 +156,13 @@ export default function useV86(containerRef) {
   useEffect(() => {
     if (globalBooted) {
       setBooted(true);
+      setBootStage('ready');
       emulatorRef.current = globalEmulator;
       execRef.current = globalExec;
     } else {
       const listener = () => {
         safeSetBooted(true);
+        safeSetBootStage('ready');
         emulatorRef.current = globalEmulator;
         execRef.current = globalExec;
       };

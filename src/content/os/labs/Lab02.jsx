@@ -8,22 +8,33 @@ export default function Lab02() {
 
   // ── Interactive terminal exercises (chained commands) ──────────
   const terminalExercises = [
-    // Interleaving: combines Lab01 (mkdir/touch) + Lab02 (pipeline/wc) skills
+    // Interleaving: combines Lab01 (mkdir/touch/ls) + Lab02 (pipeline/wc) skills
     {
       description: t(
-        'Review: Create directory ~/work, then create 3 empty files inside it (a.txt, b.txt, c.txt). Then count how many .txt files exist in ~/work and save the number to count.txt.',
-        'Recapitulare: Creați directorul ~/work, apoi creați 3 fișiere goale în el (a.txt, b.txt, c.txt). Apoi numărați câte fișiere .txt există în ~/work și salvați numărul în count.txt.'
+        '~/work already contains a mix of .txt, .log and .bak files. Without opening them, count only the .txt files and save that number to count.txt. Then list just the .bak filenames to bakfiles.txt.',
+        '~/work conține deja un amestec de fișiere .txt, .log și .bak. Fără a le deschide, numără doar fișierele .txt și salvează acel număr în count.txt. Apoi listează doar numele fișierelor .bak în bakfiles.txt.'
       ),
       courseRef: t('Review: Lab 1 + pipelines', 'Recapitulare: Lab 1 + pipeline-uri'),
       topic: t('review', 'recap'),
-      files: {},
-      checkScript: 'test -f /root/work/a.txt && test -f /root/work/b.txt && test -f /root/work/c.txt && test -f /root/count.txt && test "$(tr -d "[:space:]" < /root/count.txt)" = "3"',
-      failureHint: (t) => t('Check all three: ~/work exists with exactly a.txt, b.txt, c.txt inside. count.txt must contain only the number 3 — not a listing or file names.', 'Verifică toate trei: ~/work există cu exact a.txt, b.txt, c.txt în el. count.txt trebuie să conțină doar numărul 3 — nu o listare sau nume de fișiere.'),
+      files: {
+        '/root/work/notes.txt': 'foo',
+        '/root/work/readme.txt': 'bar',
+        '/root/work/todo.txt': 'baz',
+        '/root/work/draft.txt': 'qux',
+        '/root/work/app.log': 'log',
+        '/root/work/error.log': 'log',
+        '/root/work/old.bak': 'backup',
+        '/root/work/config.bak': 'backup',
+      },
+      // 4 .txt files, 2 .bak files. Hardcoding won't work — student must actually count.
+      checkScript: 'test -f /root/count.txt && test "$(tr -d "[:space:]" < /root/count.txt)" = "4" && test -f /root/bakfiles.txt && test "$(wc -l < /root/bakfiles.txt)" = "2" && grep -q "old.bak" /root/bakfiles.txt && grep -q "config.bak" /root/bakfiles.txt && ! grep -qE "\\.txt|\\.log" /root/bakfiles.txt',
+      failureHint: (t) => t('count.txt must contain only a single number: the count of .txt files in ~/work. bakfiles.txt must list the .bak filenames (one per line), no other extensions. Hint: ls with a glob can restrict what you list.', 'count.txt trebuie să conțină doar un număr: numărul fișierelor .txt din ~/work. bakfiles.txt trebuie să listeze numele fișierelor .bak (câte unul pe linie), fără alte extensii. Indiciu: ls cu un glob poate restrânge ce listezi.'),
       hints: [
-        t('You need two commands from Lab 1 — one creates the directory, one creates empty files', 'Ai nevoie de două comenzi din Lab 1 — una creează directorul, una creează fișiere goale'),
-        t('For counting, pipe a listing of matching files into a line counter', 'Pentru numărare, trimite prin pipe o listare a fișierelor potrivite într-un contor de linii'),
+        t('Globs: *.txt matches only files ending in .txt', 'Globs: *.txt potrivește doar fișiere care se termină în .txt'),
+        t('ls produces one name per line when stdout is a pipe or file', 'ls produce un nume pe linie când stdout este un pipe sau fișier'),
+        t('wc -l counts lines — pipe a listing into it and redirect with <', 'wc -l numără linii — trimite o listare în el și redirectează cu <'),
       ],
-      solution: 'mkdir work\ntouch work/a.txt work/b.txt work/c.txt\nls work/*.txt | wc -l > count.txt',
+      solution: 'ls work/*.txt | wc -l > count.txt\nls work/ | grep "\\.bak$" > bakfiles.txt',
     },
     {
       description: t(
@@ -72,7 +83,7 @@ export default function Lab02() {
       files: {
         '/root/data.txt': 'ana.popescu\ndiana.ionescu\nioana.stan\nroxana.marin\nmihai.popa\nstefana.dinu\ndiana.vasile\nbogdana.rusu\nana.voicu\nadrian.ganea\n',
       },
-      checkScript: 'test -f /root/filtered.txt && grep -q "ana" /root/filtered.txt && ! grep -q "diana" /root/filtered.txt && test "$(wc -l < /root/filtered.txt)" -ge 4',
+      checkScript: 'test -f /root/filtered.txt && ! grep -q "diana" /root/filtered.txt && test "$(wc -l < /root/filtered.txt)" = "6" && test "$(sort /root/filtered.txt | head -1)" = "ana.popescu" && test "$(sort /root/filtered.txt | tail -1)" = "stefana.dinu"',
       hints: [
         t('Start with "cat data.txt | grep ana" to select lines with "ana"', 'Începeți cu "cat data.txt | grep ana" pentru a selecta liniile cu "ana"'),
         t('Pipe to "grep -v diana" to exclude lines containing "diana"', 'Pipe la "grep -v diana" pentru a exclude liniile cu "diana"'),

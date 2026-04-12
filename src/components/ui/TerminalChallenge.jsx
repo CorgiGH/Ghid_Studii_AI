@@ -195,24 +195,36 @@ export default function TerminalChallenge({ exercises }) {
     const minDelay = new Promise(r => setTimeout(r, 300));
     try {
       const [result] = await Promise.all([
-        runCheck(exec.current, ex.checkScript),
+        runCheck(exec.current, ex.checkScript, ex.checkTimeout || 5000),
         minDelay,
       ]);
       // Bail if user switched exercises during the check
       if (idxRef.current !== checkIdx) return;
-      setCheckResult(result);
-      if (result.passed) {
-        setCompleted(prev => ({ ...prev, [checkIdx]: true }));
+      // Surface timeouts distinctly so students don't think correct work "failed"
+      if (result.timedOut) {
+        setCheckResult({
+          passed: false,
+          feedback: t(
+            'Check timed out — the VM took too long to respond. Try again; if this persists, use Reset VM.',
+            'Verificarea a expirat — VM-ul a răspuns prea încet. Încearcă din nou; dacă persistă, folosește Reset VM.'
+          ),
+          timedOut: true,
+        });
       } else {
-        // Only count GENUINE failed attempts — the check ran and reported a real result
-        setAttempts(prev => ({ ...prev, [checkIdx]: (prev[checkIdx] || 0) + 1 }));
+        setCheckResult(result);
+        if (result.passed) {
+          setCompleted(prev => ({ ...prev, [checkIdx]: true }));
+        } else {
+          // Only count GENUINE failed attempts — check ran and reported a real result
+          setAttempts(prev => ({ ...prev, [checkIdx]: (prev[checkIdx] || 0) + 1 }));
+        }
       }
     } catch {
       if (idxRef.current !== checkIdx) return;
       setCheckResult({ passed: false, feedback: '' });
     }
     if (idxRef.current === checkIdx) setChecking(false);
-  }, [ex, currentIdx]);
+  }, [ex, currentIdx, t]);
 
   const resetExercise = useCallback(async () => {
     if (!exec.current || !ex?.files || Object.keys(ex.files).length === 0) return;
@@ -266,6 +278,9 @@ export default function TerminalChallenge({ exercises }) {
             if (e.key === 'Home') next = 0;
             if (e.key === 'End') next = exercises.length - 1;
             switchExercise(next);
+            // Move focus to the newly-selected tab button
+            const newTab = e.currentTarget.children[next];
+            if (newTab) requestAnimationFrame(() => newTab.focus());
           }
         }}
       >
