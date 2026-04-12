@@ -28,8 +28,8 @@
             "ro": "Trebuie să rezolvi un sistem liniar $14 \\times 14$ sub forma $Ax = b$. Primul instinct este regula lui Cramer — un determinant per necunoscută. Pe un laptop modern, eliminarea Gauss termină în **0 ms**. Cramer termină în **26 de ore**. De ce este Cramer atât de catastrofal de lentă și de ce fiecare curs de calcul numeric avertizează împotriva ei?"
           },
           "answer": {
-            "en": "Two different orders of growth. Computing an $n \\times n$ determinant by cofactor expansion costs $O(n!)$; you do it $n+1$ times for Cramer, so the total is $\\Theta(n \\cdot n!) \\approx 10^{12}$ operations at $n = 14$. Gauss elimination finishes the same system in $\\Theta(n^3) \\approx 3000$ operations. Same problem, two algorithms — the gap is pure **stability + complexity**, and this course is about why Gauss wins on both.",
-            "ro": "Două ordine de creștere diferite. Calculul unui determinant $n \\times n$ prin dezvoltare cofactor costă $O(n!)$; îl faci de $n+1$ ori pentru Cramer, deci totalul este $\\Theta(n \\cdot n!) \\approx 10^{12}$ operații la $n = 14$. Eliminarea Gauss termină același sistem în $\\Theta(n^3) \\approx 3000$ operații. Aceeași problemă, doi algoritmi — golul este pură **stabilitate + complexitate**, iar cursul acesta explică de ce Gauss câștigă pe ambele."
+            "en": "Two radically different growth rates. One algorithm's work explodes factorially with $n$; the other's grows like $n^3$. We'll put numbers to both in step 3 — for now just hold the shape: **polynomial vs factorial**, and one of them stops being a viable algorithm around $n = 15$.",
+            "ro": "Două rate de creștere radical diferite. Munca unui algoritm explodează factorial cu $n$; a celuilalt crește ca $n^3$. Vom pune numere pe ambele în pasul 3 — deocamdată ține doar forma: **polinomial vs factorial**, iar unul dintre ei încetează să fie un algoritm viabil în jurul lui $n = 15$."
           }
         },
         {
@@ -136,6 +136,56 @@
           }
         },
         {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "How does $A_i(b)$ differ from $A$?",
+                "ro": "Cum diferă $A_i(b)$ de $A$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Row $i$ of $A$ is replaced by $b$.", "ro": "Linia $i$ din $A$ este înlocuită cu $b$." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Cramer's rule is **column**-oriented — the substitution goes into column $i$, not row $i$.",
+                    "ro": "Regula lui Cramer este orientată pe **coloane** — substituția merge în coloana $i$, nu în linia $i$."
+                  }
+                },
+                {
+                  "text": { "en": "Column $i$ of $A$ is replaced by $b$; the other $n-1$ columns are unchanged.", "ro": "Coloana $i$ din $A$ este înlocuită cu $b$; celelalte $n-1$ coloane rămân neschimbate." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The ratio $\\det A_i(b) / \\det A$ measures how much the $i$-th coordinate \"rotates\" under that column swap — which is exactly $x_i$.",
+                    "ro": "Corect. Raportul $\\det A_i(b) / \\det A$ măsoară cât de mult se \"rotește\" coordonata $i$ sub acea schimbare de coloană — ceea ce este exact $x_i$."
+                  }
+                },
+                {
+                  "text": { "en": "$A$ is scaled by $b$ componentwise.", "ro": "$A$ este scalată cu $b$ pe componente." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Componentwise scaling changes $\\det A$ multiplicatively and doesn't encode the linear-system solution at all.",
+                    "ro": "Scalarea pe componente schimbă $\\det A$ multiplicativ și nu codifică deloc soluția sistemului liniar."
+                  }
+                },
+                {
+                  "text": { "en": "The diagonal of $A$ is replaced by $b$.", "ro": "Diagonala lui $A$ este înlocuită cu $b$." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This would destroy the column structure that makes the determinant ratio work. Cramer swaps a whole column.",
+                    "ro": "Aceasta ar distruge structura de coloane care face ca raportul de determinanți să funcționeze. Cramer schimbă o coloană întreagă."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Whole column $i$ → $b$. Everything else stays put.",
+                "ro": "Coloana $i$ întreagă → $b$. Restul rămâne pe loc."
+              },
+              "reviewStep": "alo-c4-cramer"
+            }
+          ]
+        },
+        {
           "type": "lecture",
           "note": {
             "en": "Slide 4 of ALO curs 04 — Cramer's rule statement.",
@@ -159,8 +209,8 @@
             "ro": "Cramer și Gauss întorc exact același răspuns pe hârtie. Pentru un sistem $n \\times n$, **prezice** aproximativ câte operații în virgulă mobilă face fiecare. Încearcă $n = 10$ și $n = 20$ înainte să derulezi."
           },
           "answer": {
-            "en": "Naive Cramer: $(n+1) \\cdot n!$ operations. At $n = 10$ that's $\\approx 4 \\times 10^7$; at $n = 20$ it's $\\approx 5 \\times 10^{19}$. Gauss: $\\approx n^3/3$ — at $n = 10$ it's $\\approx 333$, at $n = 20$ it's $\\approx 2670$. The scales are separated by **many orders of magnitude**; the next table gives the lab-measured wall-clock.",
-            "ro": "Cramer naiv: $(n+1) \\cdot n!$ operații. La $n = 10$ asta înseamnă $\\approx 4 \\times 10^7$; la $n = 20$ asta înseamnă $\\approx 5 \\times 10^{19}$. Gauss: $\\approx n^3/3$ — la $n = 10$ asta înseamnă $\\approx 333$, la $n = 20$ asta înseamnă $\\approx 2670$. Scalele sunt separate de **multe ordine de mărime**; tabelul următor dă timpul de ceas măsurat în laborator."
+            "en": "One scales polynomially ($n^3$-ish), the other factorially ($n!$-ish, repeated $n+1$ times). The scales diverge **many orders of magnitude** apart, and the table below measures the consequence on a real laptop. Commit to a rough guess for $n = 20$ before scrolling.",
+            "ro": "Unul se scalează polinomial ($n^3$-ish), celălalt factorial ($n!$-ish, repetat de $n+1$ ori). Scalele diverg cu **multe ordine de mărime** și tabelul de mai jos măsoară consecința pe un laptop real. Comitează-te la o estimare aproximativă pentru $n = 20$ înainte să derulezi."
           }
         },
         {
@@ -183,7 +233,7 @@
               "$10$",
               "$0$",
               "$1\\,712$",
-              "— "
+              { "en": "baseline", "ro": "referință" }
             ],
             [
               "$11$",
@@ -353,6 +403,63 @@
           "type": "code",
           "language": "c",
           "code": "// Forward substitution: lower-triangular A, produces x\nfor (int i = 0; i < n; i++) {\n    double s = b[i];\n    for (int j = 0; j < i; j++) {          // subtract known terms\n        s -= A[i][j] * x[j];\n    }\n    x[i] = s / A[i][i];                    // divide by diagonal pivot\n}"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "While solving row $i$ of a lower-triangular system by forward substitution, the right-hand side uses which of $x_1, \\ldots, x_n$?",
+                "ro": "În timpul rezolvării liniei $i$ a unui sistem inferior triunghiular prin substituție directă, partea dreaptă folosește care dintre $x_1, \\ldots, x_n$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Only $x_1, \\ldots, x_{i-1}$ — all already computed.", "ro": "Doar $x_1, \\ldots, x_{i-1}$ — toate deja calculate." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. That's why forward substitution works in one pass: when you reach row $i$, every $x_j$ with $j < i$ is already known.",
+                    "ro": "Corect. De aceea substituția directă merge într-o singură trecere: când ajungi la linia $i$, fiecare $x_j$ cu $j < i$ este deja cunoscut."
+                  }
+                },
+                {
+                  "text": { "en": "All of $x_1, \\ldots, x_n$.", "ro": "Toate $x_1, \\ldots, x_n$." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "The lower-triangular structure means row $i$ only has nonzero $a_{ij}$ for $j \\leq i$, so $x_{i+1}, \\ldots, x_n$ don't appear in the row.",
+                    "ro": "Structura inferior triunghiulară înseamnă că linia $i$ are doar $a_{ij}$ nenule pentru $j \\leq i$, deci $x_{i+1}, \\ldots, x_n$ nu apar în linie."
+                  }
+                },
+                {
+                  "text": { "en": "Only $x_i$ — it's the only unknown.", "ro": "Doar $x_i$ — este singura necunoscută." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$x_i$ is the **unknown being solved for**, so it can't also appear on the right. The right-hand side uses the earlier, already-known values.",
+                    "ro": "$x_i$ este **necunoscuta pe care o rezolvăm**, deci nu poate apărea și în dreapta. Partea dreaptă folosește valorile anterioare, deja cunoscute."
+                  }
+                },
+                {
+                  "text": { "en": "Only $x_{i+1}, \\ldots, x_n$.", "ro": "Doar $x_{i+1}, \\ldots, x_n$." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "That's **back** substitution on an upper-triangular system. Direction matters.",
+                    "ro": "Aceea este substituție **inversă** pe un sistem superior triunghiular. Direcția contează."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "At row $i$: you know $x_1, \\ldots, x_{i-1}$; you're solving for $x_i$; $x_{i+1}, \\ldots, x_n$ are not referenced.",
+                "ro": "La linia $i$: cunoști $x_1, \\ldots, x_{i-1}$; rezolvi pentru $x_i$; $x_{i+1}, \\ldots, x_n$ nu sunt referite."
+              },
+              "reviewStep": "alo-c4-forward-substitution"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 6–7 of ALO curs 04 — forward substitution.",
+            "ro": "Slide-urile 6–7 din ALO curs 04 — substituție directă."
+          }
         }
       ]
     },
@@ -490,8 +597,8 @@
             "ro": "Poți rezolva un sistem triunghiular în $\\Theta(n^2)$. Sistemul tău $Ax = b$ este o matrice densă — nu triunghiulară. **Ce ai vrea să faci cu $A$ pentru a reduce problema la cazul pe care deja îl știi?** Propune o strategie la nivel înalt înainte să citești mai departe."
           },
           "answer": {
-            "en": "Transform $A$ into a triangular matrix by **combining rows** in a way that doesn't change the solution set. Repeatedly subtract multiples of one row from the others to **zero out entries below the diagonal**, one column at a time. What's left is an upper-triangular system $\\tilde{A} x = \\tilde{b}$ with the same $x$ — and now back substitution finishes it.",
-            "ro": "Transformă $A$ într-o matrice triunghiulară **combinând linii** într-un mod care nu schimbă mulțimea soluțiilor. Scade repetat multipli ai unei linii din celelalte pentru a **anula intrările sub diagonală**, o coloană la un pas. Ce rămâne este un sistem superior triunghiular $\\tilde{A} x = \\tilde{b}$ cu același $x$ — iar substituția inversă îl termină."
+            "en": "**Triangularize it.** If you can rewrite $Ax = b$ as an equivalent triangular system $\\tilde{A} x = \\tilde{b}$ — same solution, just a different matrix — then the easy case takes over. The next block shows the three row operations that preserve solutions; Gaussian elimination is what happens when you apply one of them systematically.",
+            "ro": "**Triangularizează-l.** Dacă poți rescrie $Ax = b$ ca un sistem triunghiular echivalent $\\tilde{A} x = \\tilde{b}$ — aceeași soluție, doar o altă matrice — atunci cazul ușor preia controlul. Blocul următor arată cele trei operații pe linii care păstrează soluțiile; eliminarea Gauss este ce se întâmplă când aplici una dintre ele sistematic."
           }
         },
         {
@@ -530,8 +637,50 @@
           "type": "callout",
           "variant": "info",
           "content": {
-            "en": "**Which row operations preserve the solution?** Three are safe: (1) swap two rows, (2) multiply a row by a nonzero scalar, (3) replace a row with itself plus a multiple of another row. Gauss uses only (3). These are the same operations you learned in school — applied systematically with a complexity budget.",
-            "ro": "**Ce operații pe linii păstrează soluția?** Trei sunt sigure: (1) schimbă două linii, (2) înmulțește o linie cu un scalar nenul, (3) înlocuiește o linie cu ea plus un multiplu al alteia. Gauss folosește doar (3). Acestea sunt aceleași operații pe care le-ai învățat la școală — aplicate sistematic cu un buget de complexitate."
+            "en": "**Which row operations preserve the solution?** Three are safe: **(1)** swap two rows, **(2)** multiply a row by a nonzero scalar, **(3)** replace a row with itself plus a multiple of another row. **Plain Gauss** uses only (3); the pivoting strategies in the next step add (1) to stabilize the algorithm. Operation (2) never shows up because the multiplier in (3) already absorbs any scaling.",
+            "ro": "**Ce operații pe linii păstrează soluția?** Trei sunt sigure: **(1)** schimbă două linii, **(2)** înmulțește o linie cu un scalar nenul, **(3)** înlocuiește o linie cu ea plus un multiplu al alteia. **Gauss simplu** folosește doar (3); strategiile de pivotare din pasul următor adaugă (1) pentru a stabiliza algoritmul. Operația (2) nu apare pentru că multiplicatorul din (3) absoarbe deja orice scalare."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which of these row operations does **plain** Gaussian elimination (without pivoting) use?",
+                "ro": "Care dintre aceste operații pe linii folosește Gauss **simplu** (fără pivotare)?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Only row swaps.", "ro": "Doar schimbări de linii." },
+                  "correct": false,
+                  "explanation": { "en": "Row swaps are what pivoting adds; plain Gauss uses the replace operation.", "ro": "Schimbările de linii sunt ce adaugă pivotarea; Gauss simplu folosește operația de înlocuire." }
+                },
+                {
+                  "text": { "en": "Only scaling a row by a nonzero scalar.", "ro": "Doar scalarea unei linii cu un scalar nenul." },
+                  "correct": false,
+                  "explanation": { "en": "Scaling is never used by Gauss — the multiplier in the replace operation already absorbs any scaling factor.", "ro": "Scalarea nu este folosită de Gauss — multiplicatorul din operația de înlocuire absoarbe deja orice factor de scalare." }
+                },
+                {
+                  "text": { "en": "Only replace row $i$ with itself plus a multiple of row $r$.", "ro": "Doar înlocuire a liniei $i$ cu ea însăși plus un multiplu al liniei $r$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. That single operation — repeated $\\Theta(n^2)$ times — triangularizes the matrix.", "ro": "Corect. Acea singură operație — repetată de $\\Theta(n^2)$ ori — triangularizează matricea." }
+                },
+                {
+                  "text": { "en": "All three operations equally.", "ro": "Toate cele trei operații în egală măsură." },
+                  "correct": false,
+                  "explanation": { "en": "Plain Gauss uses only one. Pivoting adds a second (swap); scaling is skipped entirely.", "ro": "Gauss simplu folosește doar una. Pivotarea adaugă o a doua (schimbare); scalarea este omisă complet." }
+                }
+              ],
+              "explanation": { "en": "Plain Gauss = operation (3) only. Pivoted Gauss = (3) + (1).", "ro": "Gauss simplu = doar operația (3). Gauss cu pivotare = (3) + (1)." },
+              "reviewStep": "alo-c4-gauss-idea"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slide 9 of ALO curs 04 — the triangularization strategy.",
+            "ro": "Slide-ul 9 din ALO curs 04 — strategia de triangularizare."
           }
         }
       ]
@@ -675,16 +824,16 @@
             "ro": "Algoritmul împarte la pivotul $a_{rr}^{(r-1)}$ la fiecare etapă. Ce se poate întâmpla dacă pivotul se întâmplă să fie un **număr foarte mic** (să zicem $10^{-16}$) în timp ce restul coloanei are intrări de ordinul $1$?"
           },
           "answer": {
-            "en": "The multiplier $f_{ir} = a_{ir} / a_{rr}$ becomes enormous — roughly $10^{16}$. When you compute $E_i - f_{ir} \\cdot E_r$, every entry of row $i$ gets dominated by $f_{ir}$ times the pivot row's entries. Rounding error in row $r$ is amplified by $10^{16}$ in row $i$. Even though the problem may be well-conditioned, the algorithm destroys accuracy — a pure **stability** failure (course 3).",
-            "ro": "Multiplicatorul $f_{ir} = a_{ir} / a_{rr}$ devine enorm — aproximativ $10^{16}$. Când calculezi $E_i - f_{ir} \\cdot E_r$, fiecare intrare a liniei $i$ devine dominată de $f_{ir}$ înmulțit cu intrările liniei pivot. Eroarea de rotunjire din linia $r$ este amplificată de $10^{16}$ în linia $i$. Chiar dacă problema este bine condiționată, algoritmul distruge acuratețea — un eșec pur de **stabilitate** (cursul 3)."
+            "en": "The multiplier $f_{ir} = a_{ir}/a_{rr}$ explodes when $a_{rr}$ is tiny. Think about what multiplying row $r$ by that huge number — and subtracting from row $i$ — does to rounding error. The next section quantifies it; the stability failure is *structural*, not about precision.",
+            "ro": "Multiplicatorul $f_{ir} = a_{ir}/a_{rr}$ explodează când $a_{rr}$ este minuscul. Gândește-te ce face înmulțirea liniei $r$ cu acel număr uriaș — și scăderea din linia $i$ — pentru eroarea de rotunjire. Secțiunea următoare o cuantifică; eșecul de stabilitate este *structural*, nu despre precizie."
           }
         },
         {
           "type": "callout",
           "variant": "warning",
           "content": {
-            "en": "**Numerical demonstration.** For $n = 20$ with a deliberately-placed pivot $a_{11} = 10 \\cdot \\varepsilon$ (machine epsilon scale):\n\n- **Without pivoting:** relative error $\\approx 10^0$ — **zero correct digits**.\n- **With partial pivoting:** relative error $\\approx 10^{-13}$.\n\nSame problem. Thirteen digits of accuracy, destroyed by one bad pivot choice.",
-            "ro": "**Demonstrație numerică.** Pentru $n = 20$ cu un pivot plasat deliberat $a_{11} = 10 \\cdot \\varepsilon$ (la scara epsilon-ului mașinii):\n\n- **Fără pivotare:** eroare relativă $\\approx 10^0$ — **zero cifre corecte**.\n- **Cu pivotare parțială:** eroare relativă $\\approx 10^{-13}$.\n\nAceeași problemă. Treisprezece cifre de acuratețe, distruse de o alegere proastă de pivot."
+            "en": "**Numerical demonstration (from the lecture slides).** For $n = 50$ with a deliberately small pivot controlled by parameter $p$ (smaller $p$ = worse pivot):\n\n- **$p = 10$ (pivot $\\approx 10^{-10}$):** no pivoting gives $\\|x_G - x_{\\text{ex}}\\| \\approx 1.69 \\times 10^{-10}$; partial pivoting gives $\\approx 9.8 \\times 10^{-13}$ — roughly **three digits** lost.\n- **$p = 8$ (pivot $\\approx 10^{-8}$):** no pivoting gives absolute error $\\approx 22$ — the answer is **meaningless**; partial pivoting still delivers $\\approx 10^{-11}$.\n\nDegradation is gradual as the pivot shrinks and catastrophic once it gets small enough. Pivoting is the cheap insurance that keeps you in the first regime.",
+            "ro": "**Demonstrație numerică (din slide-urile lecției).** Pentru $n = 50$ cu un pivot mic controlat de parametrul $p$ (cu cât $p$ mai mic, cu atât pivotul mai prost):\n\n- **$p = 10$ (pivot $\\approx 10^{-10}$):** fără pivotare $\\|x_G - x_{\\text{ex}}\\| \\approx 1.69 \\times 10^{-10}$; pivotare parțială $\\approx 9.8 \\times 10^{-13}$ — aproximativ **trei cifre** pierdute.\n- **$p = 8$ (pivot $\\approx 10^{-8}$):** fără pivotare eroare absolută $\\approx 22$ — răspunsul este **fără sens**; pivotarea parțială livrează totuși $\\approx 10^{-11}$.\n\nDegradarea este graduală pe măsură ce pivotul scade și devine catastrofală odată ce ajunge suficient de mic. Pivotarea este asigurarea ieftină care te menține în primul regim."
           }
         },
         {
@@ -860,9 +1009,9 @@
         {
           "type": "table",
           "headers": [
-            { "en": "Eq 3'", "ro": "Ec 3'" },
-            { "en": "Eq 2'", "ro": "Ec 2'" },
-            { "en": "Eq 1'", "ro": "Ec 1'" }
+            { "en": "Eq 3 (after)", "ro": "Ec 3 (după)" },
+            { "en": "Eq 2 (after)", "ro": "Ec 2 (după)" },
+            { "en": "Eq 1 (after)", "ro": "Ec 1 (după)" }
           ],
           "rows": [
             [ "$0$", "$0$", "$3$" ],
@@ -885,6 +1034,41 @@
             "en": "**Why we call it \"Gauss elimination.\"** Gauss (1810) gave a careful error analysis for surveying computations, and his name stuck in the Western literature. The Chinese algorithm was independently rediscovered and formalized; both descriptions converge on the same recipe. Historiographically, \"column-reduction on a counting board\" and \"row-reduction on paper\" are the same idea.",
             "ro": "**De ce o numim \"eliminarea Gauss\".** Gauss (1810) a dat o analiză atentă a erorilor pentru calcule topografice, iar numele său a rămas în literatura occidentală. Algoritmul chinezesc a fost redescoperit și formalizat independent; ambele descrieri converg spre aceeași rețetă. Istoriografic, \"reducerea pe coloane pe o tăbliță de numărare\" și \"reducerea pe linii pe hârtie\" sunt aceeași idee."
           }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "On a Chinese counting-board layout where equations sit in **columns**, \"multiply a column by a scalar and subtract from another column\" corresponds to which modern row operation?",
+                "ro": "Pe o tăbliță de numărare chineză unde ecuațiile stau pe **coloane**, \"înmulțește o coloană cu un scalar și scade dintr-o altă coloană\" corespunde cărei operații moderne pe linii?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Replace row $i$ with row $i$ plus a multiple of row $r$.", "ro": "Înlocuiește linia $i$ cu linia $i$ plus un multiplu al liniei $r$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Transposing the board swaps \"column\" and \"row\" — the Chinese column-combine operation is exactly Gauss's row-replace.", "ro": "Corect. Transpunerea tăbliței schimbă \"coloana\" cu \"linia\" — operația chineză de combinare a coloanelor este exact înlocuirea de linii a lui Gauss." }
+                },
+                {
+                  "text": { "en": "Swap two rows.", "ro": "Schimbă două linii." },
+                  "correct": false,
+                  "explanation": { "en": "Swapping a column with another column (no scaling, no combination) doesn't correspond to this operation.", "ro": "Schimbul a două coloane (fără scalare, fără combinare) nu corespunde acestei operații." }
+                },
+                {
+                  "text": { "en": "Multiply a row by a nonzero scalar.", "ro": "Înmulțește o linie cu un scalar nenul." },
+                  "correct": false,
+                  "explanation": { "en": "Pure scaling uses only *one* column — the Chinese operation involves **two** columns.", "ro": "Scalarea pură folosește doar *o* coloană — operația chineză implică **două** coloane." }
+                },
+                {
+                  "text": { "en": "It's a different algorithm — counting-board math doesn't map to matrix operations.", "ro": "Este un algoritm diferit — calculul pe tăbliță nu se mapează la operații matriciale." },
+                  "correct": false,
+                  "explanation": { "en": "It does map exactly — the layouts are transposed. Gauss and the Chinese algorithm are the same algorithm in different orientations.", "ro": "Se mapează exact — aspectele sunt transpuse. Gauss și algoritmul chinezesc sunt același algoritm în orientări diferite." }
+                }
+              ],
+              "explanation": { "en": "Board rotated 90° ⇒ \"column-combine\" = \"row-replace\". Same algorithm, two names.", "ro": "Tăblița rotită 90° ⇒ \"combinare de coloane\" = \"înlocuire de linii\". Același algoritm, două nume." },
+              "reviewStep": "alo-c4-chinese"
+            }
+          ]
         },
         {
           "type": "lecture",
@@ -975,9 +1159,14 @@
                   "explanation": { "en": "Correct. The first equation has just one unknown, $a_{11} x_1 = b_1$.", "ro": "Corect. Prima ecuație are o singură necunoscută, $a_{11} x_1 = b_1$." }
                 },
                 {
-                  "text": { "en": "Any, in any order.", "ro": "Oricare, în orice ordine." },
+                  "text": { "en": "Any — first invert $A$, then any order works.", "ro": "Oricare — mai întâi inversezi $A$, apoi orice ordine merge." },
                   "correct": false,
-                  "explanation": { "en": "The triangular structure forces the order: you can only solve the equation with one unknown.", "ro": "Structura triunghiulară impune ordinea: poți rezolva doar ecuația cu o singură necunoscută." }
+                  "explanation": { "en": "Inverting $A$ is $\\Theta(n^3)$ work to throw away the very structure (triangularity) that lets you solve in $\\Theta(n^2)$. Don't invert what you can substitute.", "ro": "Inversarea lui $A$ este muncă $\\Theta(n^3)$ doar ca să arunci structura (triunghiularitatea) care îți permite să rezolvi în $\\Theta(n^2)$. Nu inversa ce poți substitui." }
+                },
+                {
+                  "text": { "en": "$x_2$, because $a_{11}$ is often $1$ and gets skipped.", "ro": "$x_2$, pentru că $a_{11}$ este adesea $1$ și se sare peste el." },
+                  "correct": false,
+                  "explanation": { "en": "$a_{11} = 1$ makes the first step a trivial $x_1 = b_1$ — not a skip. $x_1$ is still computed first.", "ro": "$a_{11} = 1$ face primul pas un trivial $x_1 = b_1$ — nu un skip. $x_1$ este totuși calculat primul." }
                 }
               ],
               "explanation": { "en": "Lower-triangular → top-down, starting with $x_1$.", "ro": "Inferior triunghiular → de sus în jos, începând cu $x_1$." },
@@ -1085,9 +1274,9 @@
                   "explanation": { "en": "Conditioning is a problem property (course 3). Stability is an algorithm property. No-pivoting Gauss is unstable even on well-conditioned matrices if a small pivot arises.", "ro": "Condiționarea este o proprietate a problemei (cursul 3). Stabilitatea este o proprietate a algoritmului. Gauss fără pivotare este instabilă chiar și pe matrici bine condiționate dacă apare un pivot mic." }
                 },
                 {
-                  "text": { "en": "…lose all its digits of accuracy when a small pivot appears.", "ro": "…pierde toate cifrele de acuratețe când apare un pivot mic." },
+                  "text": { "en": "…lose many digits of accuracy — and as the pivot shrinks, degrade from a few lost digits all the way to a meaningless answer.", "ro": "…pierde multe cifre de acuratețe — iar pe măsură ce pivotul scade, degradarea trece de la câteva cifre pierdute până la un răspuns fără sens." },
                   "correct": true,
-                  "explanation": { "en": "Correct. The demonstration: $n = 20$, pivot $\\approx 10\\,\\varepsilon$ — relative error becomes $\\approx 10^0$. Pivoting fixes it to $\\approx 10^{-13}$.", "ro": "Corect. Demonstrația: $n = 20$, pivot $\\approx 10\\,\\varepsilon$ — eroarea relativă devine $\\approx 10^0$. Pivotarea o repară la $\\approx 10^{-13}$." }
+                  "explanation": { "en": "Correct. Demonstration ($n = 50$): pivot $\\approx 10^{-10}$ costs ~3 digits (manageable); pivot $\\approx 10^{-8}$ balloons absolute error to $\\approx 22$ (catastrophic). Pivoting fixes both.", "ro": "Corect. Demonstrația ($n = 50$): pivot $\\approx 10^{-10}$ costă ~3 cifre (gestionabil); pivot $\\approx 10^{-8}$ face eroarea absolută să urce la $\\approx 22$ (catastrofal). Pivotarea repară ambele." }
                 },
                 {
                   "text": { "en": "…take $\\Theta(n^4)$ time because it has to retry.", "ro": "…lua timp $\\Theta(n^4)$ pentru că trebuie să reîncerce." },
@@ -1155,9 +1344,9 @@
                   "explanation": { "en": "Underflow replaces tiny values with zero, but that only happens for subnormal inputs. A structural zero pivot is an algebraic fact, not a precision issue.", "ro": "Depășirea inferioară înlocuiește valorile foarte mici cu zero, dar asta se întâmplă doar pentru intrări subnormale. Un pivot zero structural este un fapt algebric, nu o problemă de precizie." }
                 },
                 {
-                  "text": { "en": "You picked the wrong pivoting strategy; try Gauss–Jordan.", "ro": "Ai ales strategia de pivotare greșită; încearcă Gauss–Jordan." },
+                  "text": { "en": "You picked the wrong algorithm; try Gauss–Jordan or QR instead.", "ro": "Ai ales algoritmul greșit; încearcă Gauss–Jordan sau QR." },
                   "correct": false,
-                  "explanation": { "en": "Gauss–Jordan is a variant with the same singularity detection. Zero-pivot-after-full-pivoting is a definitive answer about $A$, not a choice of algorithm.", "ro": "Gauss–Jordan este o variantă cu aceeași detectare a singularității. Pivot-zero-după-pivotare-totală este un răspuns definitiv despre $A$, nu o alegere de algoritm." }
+                  "explanation": { "en": "Gauss–Jordan, LU, QR — every direct method encounters the same zero, because $\\det A = 0$ is a property of $A$, not of the algorithm. Switching algorithms cannot rescue a singular system.", "ro": "Gauss–Jordan, LU, QR — fiecare metodă directă întâlnește același zero, pentru că $\\det A = 0$ este o proprietate a lui $A$, nu a algoritmului. Schimbarea algoritmului nu poate salva un sistem singular." }
                 }
               ],
               "explanation": { "en": "Zero pivot after all pivoting strategies = $\\det A = 0$ = singular.", "ro": "Pivot zero după toate strategiile de pivotare = $\\det A = 0$ = singulară." },
