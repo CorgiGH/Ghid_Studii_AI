@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../../contexts/AppContext';
+import formatMarkdown from '../formatMarkdown';
 
 export default function ThinkBlock({ question, answer }) {
   const { t } = useApp();
@@ -31,9 +32,11 @@ export default function ThinkBlock({ question, answer }) {
       >
         {t('\uD83D\uDCA1 Think about it', '\uD83D\uDCA1 Gândește-te')}
       </div>
-      <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--theme-content-text)' }}>
-        {t(question.en, question.ro)}
-      </p>
+      <p
+        className="text-sm leading-relaxed mb-3"
+        style={{ color: 'var(--theme-content-text)' }}
+        dangerouslySetInnerHTML={{ __html: formatMarkdown(t(question.en, question.ro)) }}
+      />
 
       {/* Reveal button — always rendered, hidden when revealed */}
       <div
@@ -74,9 +77,8 @@ export default function ThinkBlock({ question, answer }) {
               backgroundColor: 'color-mix(in srgb, #f59e0b 4%, var(--theme-card-bg))',
               color: 'var(--theme-content-text)',
             }}
-          >
-            {t(answer.en, answer.ro)}
-          </div>
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(t(answer.en, answer.ro)) }}
+          />
           <button
             onClick={() => setRevealed(false)}
             className="w-full text-center text-xs py-1 mt-2 cursor-pointer"

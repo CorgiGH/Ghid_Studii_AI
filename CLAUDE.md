@@ -75,6 +75,13 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 - `SubjectCard` — Home page subject card (themed with CSS vars)
 - `PalettePicker` — Popover with 5 flat color circles for theme switching
 
+### Math rendering + PDF-to-image pipeline
+- **KaTeX** is installed for math rendering. Inline `$...$` and display `$$...$$` syntax works inside `learn`, `callout`, `definition`, and `think` blocks (routed through `formatMarkdown`)
+- **`equation` block type** — standalone centered equation block; takes a TeX string, renders via KaTeX display mode
+- **`scripts/extract-pdf-pages.mjs`** — rasterizes lecture PDFs into `public/course-media/<subject>/<course>/page-NN.png` (uses pdfjs + canvas). Run once per lecture PDF; delete unreferenced pages before commit
+- **Image references in JSON** — use relative path `course-media/<subject>/<course>/page-NN.png` inside `image`/`figure` blocks
+- **`ImageBlock`** — resolves paths against Vite's `BASE_URL` so they work both locally and under the GitHub Pages subpath
+
 ### Code execution (Judge0 CE)
 - API: `POST https://ce.judge0.com/submissions?wait=true`
 - No API key needed. C language_id = 50.

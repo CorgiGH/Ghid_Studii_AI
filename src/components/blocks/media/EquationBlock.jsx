@@ -6,6 +6,10 @@ import { useApp } from '../../../contexts/AppContext';
  * Standalone centered math equation. JSON shape:
  *   { "type": "equation", "tex": "Ax = \\lambda x", "label": { "en": "(1)", "ro": "(1)" } }
  * `label` is optional.
+ *
+ * Visual: left accent-rail + subtle tint (whiteboard metaphor), no card border.
+ * Label sits in a right gutter via CSS grid, italic serif to match KaTeX typography.
+ * KaTeX output is htmlAndMathml for screen-reader accessibility.
  */
 export default function EquationBlock({ tex, label }) {
   const { t } = useApp();
@@ -13,24 +17,35 @@ export default function EquationBlock({ tex, label }) {
 
   let html;
   try {
-    html = katex.renderToString(tex, { displayMode: true, throwOnError: false, output: 'html' });
+    html = katex.renderToString(tex, { displayMode: true, throwOnError: false, output: 'htmlAndMathml' });
   } catch {
-    html = `<span style="color:#ef4444">[math error: ${tex}]</span>`;
+    html = `<span style="color:var(--theme-error, #ef4444)">[math error: ${tex}]</span>`;
   }
 
   return (
     <div
-      className="my-4 py-3 px-4 rounded-lg flex items-center justify-between gap-4"
+      className="my-4 py-3 pl-4 pr-4 rounded-r-lg"
       style={{
-        backgroundColor: 'var(--theme-card-bg)',
-        border: '1px solid var(--theme-border)',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto',
+        alignItems: 'center',
+        columnGap: '1rem',
+        borderLeft: '3px solid #3b82f6',
+        background: 'color-mix(in srgb, var(--theme-content-text) 3%, transparent)',
       }}
     >
-      <div className="flex-1 overflow-x-auto" dangerouslySetInnerHTML={{ __html: html }} />
+      <div
+        className="math-display-wrap"
+        style={{ fontSize: '1.05em' }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
       {label && (
         <div
-          className="text-xs font-mono flex-shrink-0"
-          style={{ color: 'var(--theme-muted-text)' }}
+          className="text-sm italic flex-shrink-0"
+          style={{
+            color: 'var(--theme-muted-text)',
+            fontFamily: 'Georgia, "Times New Roman", serif',
+          }}
         >
           {t(label.en, label.ro)}
         </div>

@@ -2,14 +2,15 @@ import katex from 'katex';
 
 /**
  * Inline markdown + LaTeX math:
- *   $$...$$  → KaTeX display (block)
- *   $...$    → KaTeX inline
+ *   $$...$$  → KaTeX display (block) — wrapped in .math-display-wrap for overflow
+ *   $...$    → KaTeX inline (tight regex: won't match currency like $5 or $ 10, supports \$ as escape)
  *   **bold** → <strong>
  *   `code`   → <code>
  *   \n       → <br/>
  *
  * Math is processed first so KaTeX output isn't corrupted by the bold/code passes.
  * Uses stashed placeholders to protect rendered HTML from later regex passes.
+ * KaTeX output is 'htmlAndMathml' for screen-reader accessibility.
  */
 export default function formatMarkdown(text) {
   if (!text) return '';
@@ -26,18 +27,22 @@ export default function formatMarkdown(text) {
   // 1. Display math — $$...$$  (non-greedy, allow multi-line)
   out = out.replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => {
     try {
-      return tuck(katex.renderToString(tex, { displayMode: true, throwOnError: false, output: 'html' }));
+      const rendered = katex.renderToString(tex, { displayMode: true, throwOnError: false, output: 'htmlAndMathml' });
+      return tuck(`<span class="math-display-wrap">${rendered}</span>`);
     } catch {
-      return tuck(`<span style="color:#ef4444">[math error]</span>`);
+      return tuck(`<span style="color:var(--theme-error, #ef4444)">[math error]</span>`);
     }
   });
 
-  // 2. Inline math — $...$  (not allowing newline or $ inside)
-  out = out.replace(/\$([^$\n]+?)\$/g, (_, tex) => {
+  // 2. Inline math — $...$  (tight: no currency, no newline, \$ escape supported)
+  //    Group 1: preceding char (not \ or word char). Group 2: tex body.
+  //    Negative lookahead (?!\d) prevents matching $10 style currency.
+  out = out.replace(/(^|[^\\\w])\$([^$\n]+?)\$(?!\d)/g, (match, pre, tex) => {
     try {
-      return tuck(katex.renderToString(tex, { displayMode: false, throwOnError: false, output: 'html' }));
+      const rendered = katex.renderToString(tex, { displayMode: false, throwOnError: false, output: 'htmlAndMathml' });
+      return pre + tuck(rendered);
     } catch {
-      return tuck(`<span style="color:#ef4444">[math error]</span>`);
+      return pre + tuck(`<span style="color:var(--theme-error, #ef4444)">[math error]</span>`);
     }
   });
 
@@ -49,6 +54,9 @@ export default function formatMarkdown(text) {
 
   // 4. Unstash math
   out = out.replace(/\u0001STASH(\d+)\u0001/g, (_, i) => stash[Number(i)]);
+
+  // 5. Unescape literal dollars: \$ → $
+  out = out.replace(/\\\$/g, '$');
 
   return out;
 }

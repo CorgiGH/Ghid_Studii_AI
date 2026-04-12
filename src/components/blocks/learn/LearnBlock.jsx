@@ -21,7 +21,7 @@ export default function LearnBlock({ content }) {
         {t('Learn', 'Învață')}
       </div>
       <div
-        className="text-sm leading-relaxed"
+        className="text-[15px] leading-relaxed"
         style={{ color: 'var(--theme-content-text)' }}
         dangerouslySetInnerHTML={{ __html: formatMarkdown(text) }}
       />
