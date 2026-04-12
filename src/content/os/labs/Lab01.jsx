@@ -19,7 +19,7 @@ export default function Lab01() {
       files: {
         '/root/programe/tema2/sub-temaA/.marker': 'rename-me',
       },
-      checkScript: 'test -d /root/programe/tema1 && test -f /root/programe/tema2/tema2_sub-temaA/.marker && ! test -d /root/programe/tema2/sub-temaA',
+      checkScript: 'test -d /root/programe/tema1 && grep -q "rename-me" /root/programe/tema2/tema2_sub-temaA/.marker 2>/dev/null && ! test -d /root/programe/tema2/sub-temaA',
       failureHint: (t) => t('Rename the pre-existing sub-temaA directory (with mv) so its contents move to tema2_sub-temaA. Don\'t just mkdir a new directory.', 'Redenumește directorul sub-temaA (cu mv) astfel încât conținutul său să se mute în tema2_sub-temaA. Nu crea un director nou cu mkdir.'),
       hints: [
         t('Use "mkdir" to create directories', 'Folosiți "mkdir" pentru a crea directoare'),
@@ -40,7 +40,7 @@ export default function Lab01() {
         '/root/programe/tema1': null,
       },
       checkScript: 'for n in 1 2 3 4 5; do test -f /root/programe/tema1/exercise$n.c || exit 1; done; test "$(ls /root/programe/tema1 | wc -l)" = "5"',
-      failureHint: (t) => t('All 5 files (exercise1.c through exercise5.c) must exist in ~/programe/tema1, and nothing else. Try: touch programe/tema1/exercise{1..5}.c', 'Toate 5 fișiere (exercise1.c până la exercise5.c) trebuie să existe în ~/programe/tema1, și nimic altceva. Încearcă: touch programe/tema1/exercise{1..5}.c'),
+      failureHint: (t) => t('All 5 files must exist, named exactly exercise1.c through exercise5.c, and the directory must contain nothing else. If that\'s tedious to type, there\'s a shell feature for generating sequences.', 'Toate 5 fișiere trebuie să existe, numite exact exercise1.c până la exercise5.c, iar directorul nu trebuie să conțină altceva. Dacă scrierea e plictisitoare, există o funcție shell pentru a genera secvențe.'),
       hints: [
         t('touch creates empty files', 'touch creează fișiere goale'),
         t('Brace expansion: {1..5} expands to 1 2 3 4 5', 'Expansiune acolade: {1..5} se extinde la 1 2 3 4 5'),
@@ -84,7 +84,7 @@ export default function Lab01() {
         '/root/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully\n',
       },
       checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && grep -qi "error" /root/errors.txt && ! grep -q "INFO" /root/errors.txt && test -f /root/total.txt && test "$(tr -d "[:space:]" < /root/total.txt)" = "9"',
-      failureHint: (t) => t('errors.txt should have 4 lines (all containing error, no INFO). total.txt should contain just the number 9 — use "wc -l < server.log > total.txt" to avoid the filename in output.', 'errors.txt trebuie să aibă 4 linii (toate cu error, fără INFO). total.txt trebuie să conțină doar numărul 9 — folosește "wc -l < server.log > total.txt" pentru a evita numele fișierului în output.'),
+      failureHint: (t) => t('errors.txt must have 4 lines — all containing "error" (case-insensitive), none containing "INFO". total.txt must contain only the number 9 with no filename. If wc prints the filename alongside the number, think about what kind of input makes it NOT do that.', 'errors.txt trebuie să aibă 4 linii — toate conținând "error" (fără a ține cont de majuscule), niciuna "INFO". total.txt trebuie să conțină doar numărul 9 fără nume de fișier. Dacă wc afișează și numele fișierului, gândește-te ce tip de intrare îl face să NU facă asta.'),
       hints: [
         t('"grep -i pattern file" searches case-insensitively', '"grep -i pattern file" caută fără a ține cont de litere mari/mici'),
         t('Redirect output with > filename.txt', 'Redirectați output-ul cu > fisier.txt'),

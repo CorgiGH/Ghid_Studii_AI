@@ -115,16 +115,26 @@ export default function useV86(containerRef) {
       };
       emulator.add_listener('serial0-output-byte', onBootByte);
 
-      // Fallback: consider booted after 20 seconds regardless
-      setTimeout(() => {
+      // Fallback: consider booted after 20 seconds regardless — but still warm up
+      setTimeout(async () => {
         if (!globalBooted) {
           bootTriggered = true;
           emulator.remove_listener('serial0-output-byte', onBootByte);
           if (!globalExec) {
             globalExec = createSerialExecutor(emulator);
           }
+          // Attempt a warm-up even on the fallback path so we know exec works
+          try {
+            const result = await globalExec('echo v86ok', 5000);
+            if (!result.includes('v86ok')) {
+              console.warn('v86Exec fallback warm-up: unexpected result:', result);
+            }
+          } catch (e) {
+            console.warn('v86Exec fallback warm-up failed:', e);
+          }
           notifyBoot();
           execRef.current = globalExec;
+          safeSetBootStage('ready');
           safeSetBooted(true);
           safeSetBooting(false);
         }

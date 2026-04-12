@@ -127,19 +127,36 @@ export default function TerminalChallenge({ exercises }) {
     if (screenRef.current && !booted && !booting) boot();
   }, [boot, booted, booting]);
 
-  // Inject files when exercise changes or VM boots — clean /root first for deterministic state
+  // Track previous exercise's manifest so we only remove its files, not user work
+  const prevManifestRef = useRef(null);
+
+  // Inject files when exercise changes or VM boots — scoped cleanup (not blanket rm -rf)
   useEffect(() => {
     if (!booted || !exec.current) return;
     let cancelled = false;
     setInjecting(true);
-    // Clean /root (but not system files) before injecting, for reproducible exercise state
-    const cleanup = exec.current('cd /root && rm -rf ./* ./.[!.]* 2>/dev/null; cd /root').catch(() => {});
+
+    // Remove ONLY the previous exercise's seeded files/dirs (if any).
+    // User-created files outside the previous manifest are preserved.
+    const prevManifest = prevManifestRef.current;
+    const cleanupCmds = [];
+    if (prevManifest) {
+      for (const path of Object.keys(prevManifest)) {
+        cleanupCmds.push(`rm -rf "${path}"`);
+      }
+    }
+    const cleanup = cleanupCmds.length
+      ? exec.current(cleanupCmds.join(' && ') + ' 2>/dev/null; cd /root').catch(() => {})
+      : Promise.resolve();
+
     cleanup.then(() => {
       if (cancelled) return;
       if (!ex?.files || Object.keys(ex.files).length === 0) {
+        prevManifestRef.current = null;
         setInjecting(false);
         return;
       }
+      prevManifestRef.current = ex.files;
       return injectFiles(exec.current, ex.files);
     }).then(() => {
       if (!cancelled) setInjecting(false);
@@ -164,14 +181,6 @@ export default function TerminalChallenge({ exercises }) {
     setShowSolution(false);
     setResetMenuOpen(false);
     setResetVMConfirming(false);
-    // Files get wiped+re-injected on switch, so the completion mark no longer
-    // reflects VM state — clear it so the user re-verifies.
-    setCompleted(prev => {
-      if (!prev[idx]) return prev;
-      const next = { ...prev };
-      delete next[idx];
-      return next;
-    });
   };
 
   // Track current index via ref so async check can detect stale results
@@ -183,7 +192,6 @@ export default function TerminalChallenge({ exercises }) {
     const checkIdx = currentIdx;
     setChecking(true);
     setCheckResult(null);
-    setAttempts(prev => ({ ...prev, [currentIdx]: (prev[currentIdx] || 0) + 1 }));
     const minDelay = new Promise(r => setTimeout(r, 300));
     try {
       const [result] = await Promise.all([
@@ -193,7 +201,12 @@ export default function TerminalChallenge({ exercises }) {
       // Bail if user switched exercises during the check
       if (idxRef.current !== checkIdx) return;
       setCheckResult(result);
-      if (result.passed) setCompleted(prev => ({ ...prev, [checkIdx]: true }));
+      if (result.passed) {
+        setCompleted(prev => ({ ...prev, [checkIdx]: true }));
+      } else {
+        // Only count GENUINE failed attempts — the check ran and reported a real result
+        setAttempts(prev => ({ ...prev, [checkIdx]: (prev[checkIdx] || 0) + 1 }));
+      }
     } catch {
       if (idxRef.current !== checkIdx) return;
       setCheckResult({ passed: false, feedback: '' });
@@ -469,18 +482,24 @@ export default function TerminalChallenge({ exercises }) {
               )}
             </div>
 
-            {/* P5: gate solution behind at least one attempt (skip gate if no checkScript) */}
-            {ex.solution && (
-              <button
-                onClick={() => setShowSolution(!showSolution)}
-                disabled={!hasAttempted && !showSolution && !!ex.checkScript}
-                className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                style={{ borderColor: 'var(--theme-border)', background: 'transparent', color: 'var(--theme-text)' }}
-                title={!hasAttempted ? t('Try at least twice before revealing the solution', 'Încearcă de cel puțin două ori înainte de a vedea soluția') : ''}
-              >
-                {showSolution ? t('Hide Solution', 'Ascunde soluția') : t('Show Solution', 'Arată soluția')}
-              </button>
-            )}
+            {/* Solution gated behind 2 genuine attempts (skip gate if no checkScript) */}
+            {ex.solution && (() => {
+              const gated = !hasAttempted && !showSolution && !!ex.checkScript;
+              const baseLabel = showSolution ? t('Hide Solution', 'Ascunde soluția') : t('Show Solution', 'Arată soluția');
+              const label = gated ? `${baseLabel} (${attemptCount}/2)` : baseLabel;
+              return (
+                <button
+                  onClick={() => setShowSolution(!showSolution)}
+                  disabled={gated}
+                  className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  style={{ borderColor: 'var(--theme-border)', background: 'transparent', color: 'var(--theme-text)' }}
+                  aria-label={gated ? t('Show Solution (locked — try twice first)', 'Arată soluția (blocat — încearcă de două ori mai întâi)') : baseLabel}
+                >
+                  {gated && <span aria-hidden="true" className="mr-1">🔒</span>}
+                  {label}
+                </button>
+              );
+            })()}
           </div>
         </div>
       </div>

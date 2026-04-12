@@ -17,18 +17,18 @@ export default function Lab02() {
       courseRef: t('Review: Lab 1 + pipelines', 'Recapitulare: Lab 1 + pipeline-uri'),
       topic: t('review', 'recap'),
       files: {},
-      checkScript: 'test -f /root/work/a.txt && test -f /root/work/b.txt && test -f /root/work/c.txt && test -f /root/count.txt && test "$(grep -oE "[0-9]+" /root/count.txt | head -1)" = "3"',
-      failureHint: (t) => t('Create ~/work, touch the 3 .txt files inside, then pipe ls | wc -l or similar to count.txt.', 'Creează ~/work, fă touch la cele 3 fișiere .txt în el, apoi pipe ls | wc -l sau similar în count.txt.'),
+      checkScript: 'test -f /root/work/a.txt && test -f /root/work/b.txt && test -f /root/work/c.txt && test -f /root/count.txt && test "$(tr -d "[:space:]" < /root/count.txt)" = "3"',
+      failureHint: (t) => t('Check all three: ~/work exists with exactly a.txt, b.txt, c.txt inside. count.txt must contain only the number 3 — not a listing or file names.', 'Verifică toate trei: ~/work există cu exact a.txt, b.txt, c.txt în el. count.txt trebuie să conțină doar numărul 3 — nu o listare sau nume de fișiere.'),
       hints: [
-        t('mkdir and touch from Lab 1', 'mkdir și touch din Lab 1'),
-        t('ls ~/work/*.txt | wc -l counts matching files', 'ls ~/work/*.txt | wc -l numără fișierele potrivite'),
+        t('You need two commands from Lab 1 — one creates the directory, one creates empty files', 'Ai nevoie de două comenzi din Lab 1 — una creează directorul, una creează fișiere goale'),
+        t('For counting, pipe a listing of matching files into a line counter', 'Pentru numărare, trimite prin pipe o listare a fișierelor potrivite într-un contor de linii'),
       ],
       solution: 'mkdir work\ntouch work/a.txt work/b.txt work/c.txt\nls work/*.txt | wc -l > count.txt',
     },
     {
       description: t(
-        'The file passwd (in your home directory) contains user account data. Write a pipeline that extracts all unique login shells and saves them to shells.txt. Then display the contents.',
-        'Fișierul passwd (în directorul home) conține date despre conturile de utilizatori. Scrieți un pipeline care extrage toate shell-urile de login unice și le salvează în shells.txt. Apoi afișați conținutul.'
+        'The file passwd (in your home directory) contains user account data. Write a pipeline that extracts all unique login shells and saves them to shells.txt. (You can cat shells.txt afterward to inspect it, but only the saved file is checked.)',
+        'Fișierul passwd (în directorul home) conține date despre conturile de utilizatori. Scrieți un pipeline care extrage toate shell-urile de login unice și le salvează în shells.txt. (Puteți să afișați shells.txt cu cat după aceea pentru a inspecta, dar doar fișierul salvat este verificat.)'
       ),
       courseRef: t('Course 2: Pipelines, cut, sort', 'Cursul 2: Pipeline-uri, cut, sort'),
       topic: t('cut/sort', 'cut/sort'),
@@ -36,7 +36,7 @@ export default function Lab02() {
         '/root/passwd': 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/bash\nstudent:x:1001:1001:Student:/home/student:/bin/bash\npostgres:x:108:114:PostgreSQL:/var/lib/postgresql:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsshd:x:109:65534::/run/sshd:/usr/sbin/nologin\n',
       },
       checkScript: 'test -f /root/shells.txt && ! grep -q ":" /root/shells.txt && awk "NF && !/^\\//{exit 1}" /root/shells.txt && test "$(wc -l < /root/shells.txt)" = "$(sort -u /root/shells.txt | wc -l)" && grep -q "/bin/bash" /root/shells.txt && grep -q "nologin" /root/shells.txt',
-      failureHint: (t) => t('shells.txt must contain only shell paths (starting with /), already deduplicated. Use: cut -f7 -d: passwd | sort -u > shells.txt', 'shells.txt trebuie să conțină doar căi de shell (începând cu /), deja deduplicate. Folosește: cut -f7 -d: passwd | sort -u > shells.txt'),
+      failureHint: (t) => t('shells.txt must contain only shell paths (each starting with /), with no colons, and already deduplicated. Three transformations are needed: extract the right field, make lines unique, redirect to the file.', 'shells.txt trebuie să conțină doar căi de shell (fiecare începând cu /), fără două puncte, și deja deduplicate. Sunt necesare trei transformări: extragerea câmpului corect, unicizarea liniilor, redirectarea în fișier.'),
       hints: [
         t('Use "cut -f7 -d: passwd" to extract the shell field', 'Folosiți "cut -f7 -d: passwd" pentru a extrage câmpul shell'),
         t('Pipe to "sort -u" to get unique values', 'Pipe la "sort -u" pentru valori unice'),

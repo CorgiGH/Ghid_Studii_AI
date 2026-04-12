@@ -101,22 +101,22 @@ export default function Practice() {
     },
     {
       description: t(
-        'Save all "error" lines (case-insensitive) from server.log to errors.txt. Then save the total line count of server.log to total.txt.',
-        'Salvează toate liniile cu "error" (fără a ține cont de litere mari/mici) din server.log în errors.txt. Apoi salvează numărul total de linii din server.log în total.txt.'
+        'Extract all WARN and DEBUG lines from app.log into warnings.txt (both levels together, in original order). Then count the UNIQUE log levels in app.log and save the count to levels.txt.',
+        'Extrage toate liniile WARN și DEBUG din app.log în warnings.txt (ambele nivele împreună, în ordinea originală). Apoi numără nivelurile UNICE de log din app.log și salvează numărul în levels.txt.'
       ),
       courseRef: t('Course 1: File processing', 'Cursul 1: Procesare fișiere'),
-      topic: t('grep/wc', 'grep/wc'),
+      topic: t('grep/pipe', 'grep/pipe'),
       files: {
-        '/root/server.log': 'INFO: Server started on port 8080\nERROR: Connection refused from 192.168.1.5\nINFO: Request received from 10.0.0.1\nerror: failed to parse JSON body\nINFO: Response sent 200 OK\nERROR: Disk space running low\nINFO: Backup completed successfully\nerror: timeout waiting for database\nINFO: Server shutting down gracefully\n',
+        '/root/app.log': 'INFO: service booted\nWARN: config file missing, using defaults\nDEBUG: loaded module auth\nINFO: listening on 443\nWARN: deprecated API called\nERROR: db connection refused\nDEBUG: retry scheduled\nINFO: user login success\nWARN: rate limit near threshold\nDEBUG: cache miss\nERROR: request timeout\n',
       },
-      checkScript: 'test -f /root/errors.txt && test "$(grep -c . /root/errors.txt)" = "4" && grep -qi "error" /root/errors.txt && ! grep -q "INFO" /root/errors.txt && test -f /root/total.txt && test "$(tr -d "[:space:]" < /root/total.txt)" = "9"',
-      failureHint: (t) => t('errors.txt should have 4 lines (all containing error, no INFO). total.txt should contain just the number 9 — use "wc -l < server.log > total.txt" to avoid the filename in output.', 'errors.txt trebuie să aibă 4 linii (toate cu error, fără INFO). total.txt trebuie să conțină doar numărul 9 — folosește "wc -l < server.log > total.txt" pentru a evita numele fișierului în output.'),
+      checkScript: 'test -f /root/warnings.txt && test "$(grep -cE "^(WARN|DEBUG)" /root/warnings.txt)" = "5" && ! grep -qE "^(INFO|ERROR)" /root/warnings.txt && test -f /root/levels.txt && test "$(tr -d "[:space:]" < /root/levels.txt)" = "4"',
+      failureHint: (t) => t('warnings.txt must contain 5 lines, all starting with WARN or DEBUG, none starting with INFO or ERROR. levels.txt must contain only the number 4 (there are 4 unique log levels: INFO, WARN, DEBUG, ERROR). Think: cut the level prefix, then find uniques, then count.', 'warnings.txt trebuie să conțină 5 linii, toate începând cu WARN sau DEBUG, niciuna cu INFO sau ERROR. levels.txt trebuie să conțină doar numărul 4 (există 4 nivele unice: INFO, WARN, DEBUG, ERROR). Gândește: extrage prefixul, găsește unicele, numără.'),
       hints: [
-        t('"grep -i pattern file" searches case-insensitively', '"grep -i pattern file" caută fără a ține cont de litere mari/mici'),
-        t('Redirect output with > filename.txt', 'Redirectează output-ul cu > fisier.txt'),
-        t('"wc -l file" counts just lines', '"wc -l file" numără doar liniile'),
+        t('grep -E enables extended regex — you can match multiple patterns with |', 'grep -E activează regex extins — poți potrivi mai multe pattern-uri cu |'),
+        t('Unique values: sort -u or sort | uniq', 'Valori unice: sort -u sau sort | uniq'),
+        t('To count without the filename, feed stdin: cmd < file', 'Pentru a număra fără numele fișierului, folosește stdin: cmd < file'),
       ],
-      solution: 'grep -i error server.log > errors.txt\nwc -l < server.log > total.txt',
+      solution: 'grep -E "^(WARN|DEBUG)" app.log > warnings.txt\ncut -d: -f1 app.log | sort -u | wc -l > levels.txt',
     },
     {
       description: t(

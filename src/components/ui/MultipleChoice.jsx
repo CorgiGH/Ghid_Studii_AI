@@ -6,6 +6,24 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
   const [answers, setAnswers] = useState({});
   const [revealed, setRevealed] = useState({});
 
+  // Arrow-key nav for single-select radio groups
+  const onRadioKeyDown = (e, qIdx, oIdx, total) => {
+    if (multiSelect) return;
+    if (revealed[qIdx]) return;
+    let next = null;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (oIdx + 1) % total;
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = (oIdx - 1 + total) % total;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = total - 1;
+    if (next !== null) {
+      e.preventDefault();
+      setAnswers(prev => ({ ...prev, [qIdx]: next }));
+      // Focus the new selection
+      const btn = e.currentTarget.parentNode.children[next];
+      if (btn) btn.focus();
+    }
+  };
+
   const select = (qIdx, oIdx) => {
     if (revealed[qIdx]) return;
     if (multiSelect) {
@@ -43,7 +61,13 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
         const selectedIndices = multiSelect
           ? [...(picked instanceof Set ? picked : [])]
           : (picked !== undefined ? [picked] : []);
+        const selectedSet = new Set(selectedIndices);
         const wrongSelected = shown ? selectedIndices.filter(i => !q.options[i]?.correct) : [];
+        const missedCorrect = shown && multiSelect
+          ? q.options.map((o, i) => (o.correct && !selectedSet.has(i) ? i : -1)).filter(i => i >= 0)
+          : [];
+        // For roving tabindex: first selected option gets tabIndex=0, else first option
+        const focusableIdx = picked !== undefined && !multiSelect ? picked : 0;
 
         return (
           <div
@@ -82,8 +106,10 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
                     type="button"
                     role={multiSelect ? 'checkbox' : 'radio'}
                     aria-checked={isSelected}
+                    tabIndex={multiSelect ? 0 : (oIdx === focusableIdx ? 0 : -1)}
                     disabled={shown}
                     onClick={() => select(qIdx, oIdx)}
+                    onKeyDown={(e) => onRadioKeyDown(e, qIdx, oIdx, q.options.length)}
                     className="w-full text-left border rounded-lg p-2 transition text-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-default"
                     style={{ background: bg, borderColor, color: 'var(--theme-text)' }}
                   >
@@ -110,11 +136,24 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
                   const label = typeof opt.text === 'object' ? opt.text[lang] : opt.text;
                   return (
                     <p
-                      key={idx}
+                      key={`wrong-${idx}`}
                       className="mt-3 text-sm p-2 rounded border"
                       style={{ borderColor: '#ef4444', background: 'color-mix(in srgb, var(--theme-content-bg), #ef4444 8%)', color: 'var(--theme-text)' }}
                     >
                       <strong>"{label}" — </strong>{msg}
+                    </p>
+                  );
+                })}
+                {/* Multi-select: callout for correct options the user missed */}
+                {missedCorrect.map(idx => {
+                  const label = typeof q.options[idx].text === 'object' ? q.options[idx].text[lang] : q.options[idx].text;
+                  return (
+                    <p
+                      key={`missed-${idx}`}
+                      className="mt-3 text-sm p-2 rounded border"
+                      style={{ borderColor: '#f59e0b', background: 'color-mix(in srgb, var(--theme-content-bg), #f59e0b 8%)', color: 'var(--theme-text)' }}
+                    >
+                      <strong>{t('Also needed: ', 'De asemenea era necesar: ')}</strong>"{label}"
                     </p>
                   );
                 })}
