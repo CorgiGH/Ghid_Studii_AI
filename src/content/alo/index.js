@@ -34,7 +34,7 @@ const alo = {
     { id: 'alo-c6', src: 'alo/courses/course-06.json', metaId: 'alo-c6',
       title: { en: 'Course 6: Three roads to QR — Householder, Givens, Gram–Schmidt', ro: 'Cursul 6: Trei drumuri spre QR — Householder, Givens, Gram–Schmidt' },
       shortTitle: { en: 'C6: QR algorithms', ro: 'C6: Algoritmi QR' },
-      sectionCount: 10 },
+      sectionCount: 11 },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };

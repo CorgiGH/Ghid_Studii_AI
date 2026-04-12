@@ -203,6 +203,17 @@
       "group": "householder",
       "blocks": [
         {
+          "type": "think",
+          "question": {
+            "en": "You just proved that one reflection $P$ is orthogonal. If you apply $n-1$ different reflections $P_1, P_2, \\ldots, P_{n-1}$ one after another to $A$, what guarantees that the **combined** transformation $P_{n-1} \\cdots P_1$ is still an orthogonal matrix?",
+            "ro": "Tocmai ai demonstrat că o singură reflexie $P$ este ortogonală. Dacă aplici $n-1$ reflexii diferite $P_1, P_2, \\ldots, P_{n-1}$ una după alta pe $A$, ce garantează că transformarea **combinată** $P_{n-1} \\cdots P_1$ rămâne o matrice ortogonală?"
+          },
+          "answer": {
+            "en": "**Products of orthogonal matrices are orthogonal** — a property you saw in course 5: $(Q_1 Q_2)^T (Q_1 Q_2) = Q_2^T Q_1^T Q_1 Q_2 = Q_2^T Q_2 = I$. Chaining $n-1$ reflections is therefore still an orthogonal transformation; call it $\\tilde{Q}$. The next blocks use this to read off $Q = \\tilde{Q}^T$ without any extra computation.",
+            "ro": "**Produsele de matrici ortogonale sunt ortogonale** — o proprietate pe care ai văzut-o în cursul 5: $(Q_1 Q_2)^T (Q_1 Q_2) = Q_2^T Q_1^T Q_1 Q_2 = Q_2^T Q_2 = I$. Înlănțuirea a $n-1$ reflexii rămâne deci o transformare ortogonală; numește-o $\\tilde{Q}$. Blocurile următoare folosesc asta pentru a citi $Q = \\tilde{Q}^T$ fără calcule suplimentare."
+          }
+        },
+        {
           "type": "learn",
           "content": {
             "en": "**The big picture.** Apply $n-1$ reflection matrices $P_1, P_2, \\ldots, P_{n-1}$ to $A$ such that stage $r$ **zeros out column $r$ below the diagonal** without disturbing the first $r-1$ columns. After all stages, the result is upper-triangular:",
@@ -427,7 +438,14 @@
         },
         {
           "type": "equation",
-          "tex": "A_{\\pm} \\;=\\; \\tfrac{2}{3} n^3 + O(n^2), \\qquad M_{\\times/\\div} \\;=\\; \\tfrac{2}{3} n^3 + O(n^2), \\qquad R_{\\sqrt{\\ }} \\;=\\; n - 1"
+          "tex": "A_{\\pm} \\;=\\; \\tfrac{2}{3} n^3 + O(n^2), \\qquad M_{\\times/\\div} \\;=\\; \\tfrac{2}{3} n^3 + O(n^2), \\qquad R_{\\sqrt{\\ }} \\;\\leq\\; n - 1"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The sqrt count is **at most** $n-1$ (one per non-degenerate stage). If an early stage hits $\\sigma \\leq \\varepsilon$ — i.e., the current column is already upper-triangular or the matrix is rank-deficient — that stage skips the reflection and the running total drops below $n-1$.",
+            "ro": "Numărul de radicali este **cel mult** $n-1$ (unul per etapă nedegenerată). Dacă o etapă timpurie întâlnește $\\sigma \\leq \\varepsilon$ — adică coloana curentă este deja superior triunghiulară sau matricea are rang deficitar — acea etapă sare peste reflexie și totalul cumulativ scade sub $n-1$."
+          }
         },
         {
           "type": "callout",
@@ -580,6 +598,11 @@
         {
           "type": "equation",
           "tex": "Q^T A \\;=\\; R, \\qquad Q^T \\;=\\; \\prod_{r=1}^{n-1} R_{r,n} R_{r, n-1} \\cdots R_{r, r+1}"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Givens QR: applies rotations in planes (p, q) to kill entries one at a time\nfor (int r = 0; r < n - 1; r++) {\n    for (int q = r + 1; q < n; q++) {\n        // Rotation in plane (r, q) to zero entry A[q][r]\n        double apr = A[r][r], aqr = A[q][r];\n        double rho = hypot(apr, aqr);           // sqrt(apr^2 + aqr^2), safer\n        if (rho == 0.0) continue;                // already zero, skip\n        double c = apr / rho, s = aqr / rho;\n\n        // Update rows p = r and q: B_p = c*A_p + s*A_q, B_q = -s*A_p + c*A_q\n        for (int j = r; j < n; j++) {\n            double ar = A[r][j], aq = A[q][j];\n            A[r][j] =  c * ar + s * aq;\n            A[q][j] = -s * ar + c * aq;\n        }\n        // Same update on the RHS b (and cumulatively on Q^T)\n        double br = b[r], bq = b[q];\n        b[r] =  c * br + s * bq;\n        b[q] = -s * br + c * bq;\n    }\n}\n// On exit: A = R, b = Q^T b."
         },
         {
           "type": "callout",
@@ -800,6 +823,76 @@
       ]
     },
     {
+      "id": "alo-c6-comparison",
+      "title": {
+        "en": "Side-by-side: which algorithm for which job?",
+        "ro": "Comparație: ce algoritm pentru ce sarcină?"
+      },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**All three algorithms produce the same $A = QR$ in exact arithmetic.** In finite precision they differ in cost, stability, and sparsity behaviour. The decision tree below captures the production rules.",
+            "ro": "**Toți trei algoritmii produc aceeași $A = QR$ în aritmetică exactă.** În precizie finită diferă în cost, stabilitate și comportament pe raritate. Arborele de decizie de mai jos surprinde regulile de producție."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Algorithm", "ro": "Algoritm" },
+            { "en": "Cost (dense)", "ro": "Cost (dens)" },
+            { "en": "Stability", "ro": "Stabilitate" },
+            { "en": "Sparse-friendly?", "ro": "Prietenos rarime?" },
+            { "en": "Parallel?", "ro": "Paralel?" },
+            { "en": "Typical use", "ro": "Utilizare tipică" }
+          ],
+          "rows": [
+            [
+              { "en": "**Householder**", "ro": "**Householder**" },
+              "$\\sim 2n^3/3$",
+              { "en": "Backward-stable", "ro": "Stabilă înapoi" },
+              { "en": "No (fill-in)", "ro": "Nu (fill-in)" },
+              { "en": "Limited", "ro": "Limitat" },
+              { "en": "Default dense QR (LAPACK `dgeqrf`)", "ro": "Implicit pentru QR dens (`dgeqrf` din LAPACK)" }
+            ],
+            [
+              { "en": "**Givens**", "ro": "**Givens**" },
+              "$\\sim 4n^3/3$",
+              { "en": "Backward-stable", "ro": "Stabilă înapoi" },
+              { "en": "**Yes**", "ro": "**Da**" },
+              { "en": "**Embarrassingly**", "ro": "**Trivial**" },
+              { "en": "Banded / sparse / QR updates", "ro": "Cu bandă / rară / actualizări QR" }
+            ],
+            [
+              { "en": "**Classical GS**", "ro": "**GS clasic**" },
+              "$\\sim 2n^3/3$",
+              { "en": "Orthogonality loss $\\sim \\kappa_2(A)^2 \\varepsilon$", "ro": "Pierdere ortogonalitate $\\sim \\kappa_2(A)^2 \\varepsilon$" },
+              { "en": "No", "ro": "Nu" },
+              { "en": "No", "ro": "Nu" },
+              { "en": "Avoid in production", "ro": "Evită în producție" }
+            ],
+            [
+              { "en": "**Modified GS**", "ro": "**GS modificat**" },
+              "$\\sim 2n^3/3$",
+              { "en": "Orthogonality loss $\\sim \\kappa_2(A) \\varepsilon$", "ro": "Pierdere ortogonalitate $\\sim \\kappa_2(A) \\varepsilon$" },
+              { "en": "No", "ro": "Nu" },
+              { "en": "No", "ro": "Nu" },
+              { "en": "Teaching / moderately-conditioned problems", "ro": "Predare / probleme moderat condiționate" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Decision rule.** Dense + needs the best stability → **Householder**. Sparse, banded, or incremental (add a row) → **Givens**. Code needs to be readable and $\\kappa_2(A)$ is modest → **MGS**. Never ship CGS to production — its extra stability cost pays no dividend.",
+            "ro": "**Regulă de decizie.** Dens + cere cea mai bună stabilitate → **Householder**. Rar, cu bandă sau incremental (adaugă o linie) → **Givens**. Codul trebuie să fie lizibil și $\\kappa_2(A)$ este modest → **MGS**. Nu trimite niciodată CGS în producție — costul suplimentar de stabilitate nu aduce beneficii."
+          }
+        }
+      ]
+    },
+    {
       "id": "alo-c6-quiz",
       "title": {
         "en": "Self-test: course 6 retrieval",
@@ -939,32 +1032,32 @@
             },
             {
               "question": {
-                "en": "A Givens rotation $R_{pq}(\\theta)$ modifies which rows of $A$ when applied as $R_{pq} A$?",
-                "ro": "O rotație Givens $R_{pq}(\\theta)$ modifică ce linii ale lui $A$ când se aplică $R_{pq} A$?"
+                "en": "To zero the entry $(q, r)$ of $A$ via a Givens rotation in plane $(p, q)$ with $p = r$, with $\\rho = \\sqrt{a_{pr}^2 + a_{qr}^2}$, the right choice of $(c, s)$ is:",
+                "ro": "Pentru a anula intrarea $(q, r)$ a lui $A$ printr-o rotație Givens în planul $(p, q)$ cu $p = r$, cu $\\rho = \\sqrt{a_{pr}^2 + a_{qr}^2}$, alegerea corectă a lui $(c, s)$ este:"
               },
               "options": [
                 {
-                  "text": { "en": "All rows.", "ro": "Toate liniile." },
-                  "correct": false,
-                  "explanation": { "en": "The non-trivial block of $R_{pq}$ sits only at rows/columns $p$ and $q$.", "ro": "Blocul nebanal al lui $R_{pq}$ stă doar la liniile/coloanele $p$ și $q$." }
-                },
-                {
-                  "text": { "en": "Only rows $p$ and $q$.", "ro": "Doar liniile $p$ și $q$." },
+                  "text": "$c = a_{pr}/\\rho,\\ s = a_{qr}/\\rho$",
                   "correct": true,
-                  "explanation": { "en": "Correct. Rows $\\neq p, q$ multiply by the identity block and are unchanged.", "ro": "Corect. Liniile $\\neq p, q$ se înmulțesc cu blocul identitate și rămân neschimbate." }
+                  "explanation": { "en": "Correct. The new $(q, r)$ entry is $B_{qr} = -s\\,a_{pr} + c\\,a_{qr} = -(a_{qr}/\\rho) a_{pr} + (a_{pr}/\\rho) a_{qr} = 0$. The normalization by $\\rho$ is what keeps $c^2 + s^2 = 1$.", "ro": "Corect. Noua intrare $(q, r)$ este $B_{qr} = -s\\,a_{pr} + c\\,a_{qr} = -(a_{qr}/\\rho) a_{pr} + (a_{pr}/\\rho) a_{qr} = 0$. Normalizarea cu $\\rho$ este ce menține $c^2 + s^2 = 1$." }
                 },
                 {
-                  "text": { "en": "Only row $p$.", "ro": "Doar linia $p$." },
+                  "text": "$c = a_{qr}/\\rho,\\ s = a_{pr}/\\rho$",
                   "correct": false,
-                  "explanation": { "en": "Both rows in the plane $(p, q)$ mix. The update formulas involve $A_p$ and $A_q$ symmetrically.", "ro": "Ambele linii din planul $(p, q)$ se amestecă. Formulele de actualizare implică $A_p$ și $A_q$ simetric." }
+                  "explanation": { "en": "Swapped $c$ and $s$. The update would make $B_{qr} = -(a_{pr}^2 - a_{qr}^2)/\\rho$, generally nonzero.", "ro": "$c$ și $s$ schimbate. Actualizarea ar face $B_{qr} = -(a_{pr}^2 - a_{qr}^2)/\\rho$, în general nenul." }
                 },
                 {
-                  "text": { "en": "Rows $p$ through $q$.", "ro": "Liniile de la $p$ la $q$." },
+                  "text": "$c = a_{pr},\\ s = a_{qr}$ (without normalization)",
                   "correct": false,
-                  "explanation": { "en": "Just the two endpoints, not the range between. Intermediate rows are unaffected.", "ro": "Doar cele două capete, nu intervalul dintre ele. Liniile intermediare nu sunt afectate." }
+                  "explanation": { "en": "Without dividing by $\\rho$, we'd have $c^2 + s^2 = \\rho^2 \\neq 1$ in general, so the matrix is not orthogonal and the factorization breaks.", "ro": "Fără împărțirea la $\\rho$, am avea $c^2 + s^2 = \\rho^2 \\neq 1$ în general, deci matricea nu este ortogonală și factorizarea se strică." }
+                },
+                {
+                  "text": "$c = \\cos(\\arctan(a_{qr}/a_{pr})),\\ s = \\sin(\\arctan(a_{qr}/a_{pr}))$",
+                  "correct": false,
+                  "explanation": { "en": "Mathematically this gives the right answer, but computing $\\arctan$ is needlessly expensive and loses precision when $a_{pr} \\approx 0$. The $a_{\\cdot}/\\rho$ form avoids trigonometry entirely — that's its point.", "ro": "Matematic dă răspunsul corect, dar calculul $\\arctan$ este inutil de scump și pierde precizie când $a_{pr} \\approx 0$. Forma $a_{\\cdot}/\\rho$ evită complet trigonometria — acesta este rostul ei." }
                 }
               ],
-              "explanation": { "en": "Givens: surgical on rows $p, q$. Everything else is fixed.", "ro": "Givens: chirurgicală pe liniile $p, q$. Restul este fix." },
+              "explanation": { "en": "Givens: $c = a_{pr}/\\rho, s = a_{qr}/\\rho$. No $\\arctan$, no angle — just normalize the column's two entries.", "ro": "Givens: $c = a_{pr}/\\rho, s = a_{qr}/\\rho$. Fără $\\arctan$, fără unghi — doar normalizează cele două intrări ale coloanei." },
               "reviewStep": "alo-c6-givens-rotation"
             },
             {
