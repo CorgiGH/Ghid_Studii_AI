@@ -117,8 +117,8 @@
                 },
                 {
                   "text": {
-                    "en": "\"Using `binary128` reduces rounding error per operation.\"",
-                    "ro": "\"Folosirea `binary128` reduce eroarea de rotunjire per operație.\""
+                    "en": "\"Using `binary128` reduces the unit roundoff $\\varepsilon$ per operation.\"",
+                    "ro": "\"Folosirea `binary128` reduce eroarea unitară $\\varepsilon$ per operație.\""
                   },
                   "correct": false,
                   "explanation": {
@@ -324,7 +324,6 @@
         },
         {
           "type": "code",
-          "language": "text",
           "code": "0  10000000011  1011100100010000000000000000000000000000000000000000\n^  ^----------  ^--------------------------------------------------\n|  |           |\n|  |           fraction f (52 bits)\n|  exponent c (11 bits, biased)\nsign s (1 bit)"
         },
         {
@@ -529,6 +528,14 @@
                   "explanation": {
                     "en": "15–16 digits is `binary64` (double precision) with 52 fraction bits — far more than `binary16`.",
                     "ro": "15–16 cifre este `binary64` (double precision) cu 52 de biți fracție — mult mai mult decât `binary16`."
+                  }
+                },
+                {
+                  "text": { "en": "About 10 — one per fraction bit.", "ro": "Aproximativ 10 — una per bit fracție." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is the common \"1 bit = 1 decimal digit\" misread. The actual conversion is $\\log_{10} 2 \\approx 0.3$ digits per bit, so 10 fraction bits give ~3 digits, not 10.",
+                    "ro": "Aceasta este concepția greșită frecventă \"1 bit = 1 cifră zecimală\". Conversia reală este $\\log_{10} 2 \\approx 0.3$ cifre per bit, deci 10 biți fracție dau ~3 cifre, nu 10."
                   }
                 }
               ],
@@ -783,17 +790,6 @@
           }
         },
         {
-          "type": "definition",
-          "term": {
-            "en": "$t$ exact digits",
-            "ro": "$t$ cifre exacte"
-          },
-          "content": {
-            "en": "An approximation $r^*$ of $r$ has $t$ exact digits if $t$ is the largest non-negative integer such that $\\frac{|r - r^*|}{|r|} \\leq 5 \\times 10^{-t}$.",
-            "ro": "O aproximare $r^*$ a lui $r$ are $t$ cifre exacte dacă $t$ este cel mai mare întreg nenegativ pentru care $\\frac{|r - r^*|}{|r|} \\leq 5 \\times 10^{-t}$."
-          }
-        },
-        {
           "type": "learn",
           "content": {
             "en": "**Relative error bounds for keeping $k$ digits.** These are the core inequalities of floating-point analysis:",
@@ -834,11 +830,11 @@
                   }
                 },
                 {
-                  "text": "$0.3750 \\times 10^2$",
+                  "text": "$0.37 \\times 10^2$",
                   "correct": false,
                   "explanation": {
-                    "en": "That rounds to 3 digits, not 4. The task is to keep 4 significant digits.",
-                    "ro": "Asta rotunjește la 3 cifre, nu 4. Sarcina este să păstrezi 4 cifre semnificative."
+                    "en": "That keeps only 2 significant digits, not 4 — the common misread is confusing \"4 digits after the decimal point\" with \"4 significant digits\". The leading $3$ is the first significant digit, so we need four starting from there.",
+                    "ro": "Aceasta păstrează doar 2 cifre semnificative, nu 4 — confuzia clasică este între \"4 cifre după virgulă\" și \"4 cifre semnificative\". Cifra $3$ de la început este prima cifră semnificativă, deci avem nevoie de patru de acolo."
                   }
                 }
               ],
@@ -897,22 +893,22 @@
           ]
         },
         {
-          "type": "callout",
-          "variant": "trap",
-          "content": {
-            "en": "**Floating-point addition is not associative.** In general $(x +_c y) +_c z \\neq x +_c (y +_c z)$ because each addition rounds independently. This breaks algebraic identities you take for granted: reordering a sum can change the answer by many ULPs.",
-            "ro": "**Adunarea în virgulă mobilă nu este asociativă.** În general $(x +_c y) +_c z \\neq x +_c (y +_c z)$ pentru că fiecare adunare rotunjește independent. Asta strică identitățile algebrice pe care le iei de bune: rearanjarea unei sume poate schimba răspunsul cu multe ULP-uri."
+          "type": "think",
+          "question": {
+            "en": "Sum $10^{20}, 1, -10^{20}$ in `binary64` in the order given. Then sum them as $10^{20} + (-10^{20}) + 1$. Predict both outcomes before reading on.",
+            "ro": "Însumează $10^{20}, 1, -10^{20}$ în `binary64` în ordinea dată. Apoi însumează-le ca $10^{20} + (-10^{20}) + 1$. Prezice ambele rezultate înainte să citești mai departe."
+          },
+          "answer": {
+            "en": "**Order 1:** $10^{20} +_c 1$ rounds to $10^{20}$ (the $1$ is below the precision of $10^{20}$). Then $10^{20} +_c (-10^{20}) = 0$. **Order 2:** $10^{20} +_c (-10^{20}) = 0$ exactly, then $0 +_c 1 = 1$. The true answer is $1$ — only the second order recovers it. Feel surprised? The next callout names the principle you just ran into.",
+            "ro": "**Ordinea 1:** $10^{20} +_c 1$ se rotunjește la $10^{20}$ (cifra $1$ este sub precizia lui $10^{20}$). Apoi $10^{20} +_c (-10^{20}) = 0$. **Ordinea 2:** $10^{20} +_c (-10^{20}) = 0$ exact, apoi $0 +_c 1 = 1$. Răspunsul corect este $1$ — doar a doua ordine îl recuperează. Te surprinde? Callout-ul următor denumește principiul pe care tocmai l-ai întâlnit."
           }
         },
         {
-          "type": "think",
-          "question": {
-            "en": "Sum $10^{20}, 1, -10^{20}$ in `binary64` in the order given. Then sum them as $10^{20} + (-10^{20}) + 1$. Explain what each order produces and why.",
-            "ro": "Însumează $10^{20}, 1, -10^{20}$ în `binary64` în ordinea dată. Apoi însumează-le ca $10^{20} + (-10^{20}) + 1$. Explică ce produce fiecare ordine și de ce."
-          },
-          "answer": {
-            "en": "**Order 1:** $10^{20} +_c 1$ rounds to $10^{20}$ (the $1$ is below the precision of $10^{20}$). Then $10^{20} +_c (-10^{20}) = 0$. **Order 2:** $10^{20} +_c (-10^{20}) = 0$ exactly, then $0 +_c 1 = 1$. The true answer is $1$ — only the second order recovers it. This is the classic **catastrophic cancellation** warning: large magnitudes should be combined first so you don't lose the small contributions.",
-            "ro": "**Ordinea 1:** $10^{20} +_c 1$ se rotunjește la $10^{20}$ (cifra $1$ este sub precizia lui $10^{20}$). Apoi $10^{20} +_c (-10^{20}) = 0$. **Ordinea 2:** $10^{20} +_c (-10^{20}) = 0$ exact, apoi $0 +_c 1 = 1$. Răspunsul corect este $1$ — doar a doua ordine îl recuperează. Acesta este avertismentul clasic despre **anularea catastrofală**: magnitudinile mari ar trebui combinate primele ca să nu pierzi contribuțiile mici."
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Floating-point addition is not associative.** In general $(x +_c y) +_c z \\neq x +_c (y +_c z)$ because each addition rounds independently. This breaks algebraic identities you take for granted: reordering a sum can change the answer by many ULPs — and large magnitudes should be combined first so the small contributions don't vanish (catastrophic cancellation).",
+            "ro": "**Adunarea în virgulă mobilă nu este asociativă.** În general $(x +_c y) +_c z \\neq x +_c (y +_c z)$ pentru că fiecare adunare rotunjește independent. Asta strică identitățile algebrice pe care le iei de bune: rearanjarea unei sume poate schimba răspunsul cu multe ULP-uri — iar magnitudinile mari ar trebui combinate primele, astfel încât contribuțiile mici să nu dispară (anulare catastrofală)."
           }
         },
         {
@@ -1192,8 +1188,8 @@
             "ro": "Ți se cere să rezolvi un sistem liniar $Ax = b$ și știi să faci eliminarea Gauss perfect. Este posibil ca o modificare de $0.01\\%$ în $b$ să dea un răspuns care diferă cu $50\\%$ — *fără niciun bug în algoritmul tău*?"
           },
           "answer": {
-            "en": "**Yes** — if the matrix $A$ is nearly singular, the problem itself is **ill-conditioned**. Any perturbation of $b$ gets enormously amplified in $x$, regardless of how accurately you solve. This is not an algorithm bug; it is a property of the mathematical problem. Some problems are simply fragile.",
-            "ro": "**Da** — dacă matricea $A$ este aproape singulară, problema în sine este **prost condiționată**. Orice perturbare a lui $b$ se amplifică enorm în $x$, indiferent de cât de precis rezolvi. Nu este un bug al algoritmului; este o proprietate a problemei matematice. Unele probleme sunt pur și simplu fragile."
+            "en": "**Yes** — if $A$ is nearly singular, tiny perturbations of $b$ can be enormously amplified in $x$, no matter how you solve. This is not something a better algorithm can fix. What should we call this property? Read on — the next blocks give it a name and a number.",
+            "ro": "**Da** — dacă $A$ este aproape singulară, perturbări minuscule ale lui $b$ pot fi amplificate enorm în $x$, oricum ai rezolva. Nu este ceva ce un algoritm mai bun poate repara. Cum să numim această proprietate? Citește mai departe — blocurile următoare îi dau un nume și un număr."
           }
         },
         {
@@ -1281,13 +1277,13 @@
               "options": [
                 {
                   "text": {
-                    "en": "Higher precision always solves numerical problems — no argument against.",
-                    "ro": "Precizia mai mare rezolvă întotdeauna problemele numerice — niciun argument împotrivă."
+                    "en": "`binary128` reduces the unit roundoff from $\\approx 10^{-16}$ to $\\approx 10^{-34}$, so the $k(x) \\cdot \\varepsilon$ product drops to $\\approx 10^{-28}$ — more than enough.",
+                    "ro": "`binary128` reduce eroarea unitară de rotunjire de la $\\approx 10^{-16}$ la $\\approx 10^{-34}$, deci produsul $k(x) \\cdot \\varepsilon$ scade la $\\approx 10^{-28}$ — mai mult decât suficient."
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Precision helps only up to the conditioning ceiling. Spending precision on an ill-conditioned problem is like buying a sharper pencil to fix a fragile vase.",
-                    "ro": "Precizia ajută doar până la plafonul condiționării. Să cheltui precizie pe o problemă prost condiționată e ca și cum ai cumpăra un creion mai ascuțit ca să repari o vază fragilă."
+                    "en": "Numerically right — but it misses the point. You buy 18 more digits of *input* precision; if the model data came in at 4-digit accuracy, those extra digits decode zero new signal. For truly ill-conditioned problems, `binary128` on garbage data is still garbage. Reformulation (conditioning the problem) gives real leverage.",
+                    "ro": "Numeric corect — dar ratează ideea. Câștigi 18 cifre în plus de precizie la *intrare*; dacă datele modelului au venit la 4 cifre acuratețe, cifrele suplimentare decodează zero semnal nou. Pentru probleme într-adevăr prost condiționate, `binary128` pe date proaste rămâne tot date proaste. Reformularea (condiționarea problemei) dă pârghie reală."
                   }
                 },
                 {
@@ -1362,7 +1358,6 @@
         },
         {
           "type": "code",
-          "language": "text",
           "code": "1.00000  2.00000  3.00000  4.00000  5.00000  6.00001\n6.99970  8.00727  8.91725  20.84691\n\n10.09527 +/- i * 0.64350\n11.79363 +/- i * 1.65233\n13.99236 +/- i * 2.51883\n16.73074 +/- i * 2.81262\n19.50244 +/- i * 1.94033"
         },
         {
@@ -1415,8 +1410,8 @@
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Correct. The structural sensitivity comes from root clustering, not the degree. Pairs like $(10, 11)$ sit close enough that a tiny coefficient bump collapses them into complex conjugates with nonzero imaginary parts.",
-                    "ro": "Corect. Sensibilitatea structurală vine din gruparea rădăcinilor, nu din grad. Perechile ca $(10, 11)$ sunt suficient de apropiate încât o denivelare minusculă a coeficientului le prăbușește în conjugate complexe cu părți imaginare nenule."
+                    "en": "Correct. The structural sensitivity comes from root clustering, not the degree. Near-equal integer roots (say $10$ and $11$) sit close enough that a tiny coefficient bump can pull them off the real axis as a conjugate pair around their average — exactly what the numerical output shows.",
+                    "ro": "Corect. Sensibilitatea structurală vine din gruparea rădăcinilor, nu din grad. Rădăcini întregi aproape egale (să zicem $10$ și $11$) sunt suficient de apropiate încât o denivelare minusculă a coeficientului le poate extrage de pe axa reală ca o pereche conjugată în jurul mediei lor — exact ce arată rezultatul numeric."
                   }
                 },
                 {
@@ -1571,6 +1566,17 @@
               "ro": "$P(\\tilde{x})$ — soluția exactă cu date perturbate $\\tilde{x}$ (ce măsoară condiționarea)."
             }
           ]
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Classify: **Gaussian elimination without pivoting**, applied to a **well-conditioned** matrix. Is the problem well/ill-conditioned? Is the algorithm stable/unstable? What do you expect to happen?",
+            "ro": "Clasifică: **eliminarea Gauss fără pivotare**, aplicată pe o matrice **bine condiționată**. Problema este bine/prost condiționată? Algoritmul este stabil/instabil? La ce te aștepți?"
+          },
+          "answer": {
+            "en": "**Well-conditioned problem** (by assumption) + **unstable algorithm** (elimination without pivoting divides by whatever happens to sit on the diagonal — a tiny pivot blows up later rows). Expected outcome: a fragile execution that loses many digits despite the problem being solvable. Fix the algorithm (add pivoting), don't blame the problem. The two properties are orthogonal, which is why the comparison table below matters.",
+            "ro": "**Problemă bine condiționată** (prin ipoteză) + **algoritm instabil** (eliminarea fără pivotare împarte la ce se nimerește pe diagonală — un pivot mic explodează liniile următoare). Rezultat așteptat: o execuție fragilă care pierde multe cifre, deși problema este rezolvabilă. Repară algoritmul (adaugă pivotare), nu da vina pe problemă. Cele două proprietăți sunt ortogonale, de asta contează tabelul de comparație de mai jos."
+          }
         },
         {
           "type": "learn",
@@ -1735,28 +1741,48 @@
             },
             {
               "question": {
-                "en": "Approximately how many decimal digits of precision does `binary32` provide?",
-                "ro": "Aproximativ câte cifre zecimale de precizie oferă `binary32`?"
+                "en": "A `binary64` number has sign bit $s = 0$, biased exponent $c = 10000000100_2 = 1028$, and fraction $f = 0$. What real value does it represent?",
+                "ro": "Un număr `binary64` are bitul de semn $s = 0$, exponentul deplasat $c = 10000000100_2 = 1028$ și fracția $f = 0$. Ce valoare reală reprezintă?"
               },
               "options": [
                 {
-                  "text": { "en": "~7", "ro": "~7" },
+                  "text": "$2^{1028}$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "Forgets to subtract the `binary64` bias of $1023$. $c$ is the **biased** exponent, not the true one.",
+                    "ro": "A uitat să scadă deplasarea `binary64` de $1023$. $c$ este exponentul **deplasat**, nu cel real."
+                  }
+                },
+                {
+                  "text": "$32$",
                   "correct": true,
-                  "explanation": { "en": "Correct. 23 fraction bits + 1 implicit $\\approx 24 \\cdot 0.301 \\approx 7.2$ digits.", "ro": "Corect. 23 biți fracție + 1 implicit $\\approx 24 \\cdot 0.301 \\approx 7.2$ cifre." }
+                  "explanation": {
+                    "en": "Correct. Value $= (-1)^0 \\cdot 2^{1028-1023} \\cdot (1 + 0) = 2^5 = 32$.",
+                    "ro": "Corect. Valoarea $= (-1)^0 \\cdot 2^{1028-1023} \\cdot (1 + 0) = 2^5 = 32$."
+                  }
                 },
                 {
-                  "text": { "en": "~15", "ro": "~15" },
+                  "text": "$5$",
                   "correct": false,
-                  "explanation": { "en": "15 digits is `binary64`, not `binary32`.", "ro": "15 cifre este `binary64`, nu `binary32`." }
+                  "explanation": {
+                    "en": "You got the true exponent right ($5 = 1028 - 1023$) but forgot to raise $2$ to it. The mantissa multiplies by $2^5 = 32$, not by $5$.",
+                    "ro": "Exponentul real e corect ($5 = 1028 - 1023$), dar ai uitat să ridici pe $2$ la el. Mantisa se înmulțește cu $2^5 = 32$, nu cu $5$."
+                  }
                 },
                 {
-                  "text": { "en": "~32", "ro": "~32" },
+                  "text": "$0$",
                   "correct": false,
-                  "explanation": { "en": "That confuses bit count with decimal-digit count.", "ro": "Asta confundă numărul de biți cu numărul de cifre zecimale." }
+                  "explanation": {
+                    "en": "$f = 0$ does not make the value $0$ — the mantissa is $1 + f = 1$ because of the implicit leading $1$. The value is $2^{c - 1023} \\cdot 1$.",
+                    "ro": "$f = 0$ nu face valoarea $0$ — mantisa este $1 + f = 1$ datorită cifrei $1$ implicite de la început. Valoarea este $2^{c - 1023} \\cdot 1$."
+                  }
                 }
               ],
-              "explanation": { "en": "Decimal precision $\\approx$ fraction bits $\\cdot \\log_{10} 2$.", "ro": "Precizia zecimală $\\approx$ biți fracție $\\cdot \\log_{10} 2$." },
-              "reviewStep": "alo-c3-binary-formats"
+              "explanation": {
+                "en": "Decoding formula: $(-1)^s \\cdot 2^{c - 1023} \\cdot (1 + f)$. Three moving parts: sign, bias subtraction, implicit leading $1$.",
+                "ro": "Formula de decodare: $(-1)^s \\cdot 2^{c - 1023} \\cdot (1 + f)$. Trei părți mobile: semn, scăderea deplasării, cifra $1$ implicită."
+              },
+              "reviewStep": "alo-c3-binary64"
             },
             {
               "question": {
@@ -1770,7 +1796,7 @@
                   "explanation": { "en": "That describes **forward** stability, and only under well-conditioning. Backward stability is a statement about the input, not the output.", "ro": "Aceasta descrie stabilitatea **înainte**, și doar sub condiționare bună. Stabilitatea înapoi este o afirmație despre intrare, nu despre ieșire." }
                 },
                 {
-                  "text": { "en": "…there exists a slightly perturbed input $\\tilde{x}$ such that the computed answer equals $P(\\tilde{x})$ exactly.", "ro": "…există o intrare ușor perturbată $\\tilde{x}$ astfel încât răspunsul calculat să fie egal cu $P(\\tilde{x})$ exact." },
+                  "text": { "en": "…the computed answer can be interpreted as $P(\\tilde{x})$ — the exact answer to a slightly perturbed nearby input.", "ro": "…răspunsul calculat poate fi interpretat ca $P(\\tilde{x})$ — răspunsul exact pentru o intrare ușor perturbată vecină." },
                   "correct": true,
                   "explanation": { "en": "Correct. Backward stability reframes rounding as \"the exact answer to a nearby problem.\" Combined with good conditioning, it implies forward accuracy.", "ro": "Corect. Stabilitatea înapoi reformulează rotunjirea ca \"răspunsul exact la o problemă vecină\". Combinată cu condiționare bună, implică acuratețe înainte." }
                 },
@@ -1808,6 +1834,11 @@
                   "text": "$\\leq 10^{-k}$",
                   "correct": false,
                   "explanation": { "en": "Wrong exponent. The bound scales as $10^{-k+1}$, not $10^{-k}$.", "ro": "Exponent greșit. Limita se scalează ca $10^{-k+1}$, nu $10^{-k}$." }
+                },
+                {
+                  "text": "$\\leq 5 \\times 10^{-k}$",
+                  "correct": false,
+                  "explanation": { "en": "The constant $5$ comes from the \"$t$ exact digits\" rule, not the per-operation bound. The rounding error bound is half the truncation bound, which is $10^{-k+1}$ — so $0.5 \\times 10^{-k+1}$, not $5 \\times 10^{-k}$ (even though those are numerically equal, the convention uses the smaller coefficient).", "ro": "Constanta $5$ vine din regula \"$t$ cifre exacte\", nu din limita per-operație. Limita erorii de rotunjire este jumătate din limita trunchierii, adică $10^{-k+1}$ — deci $0.5 \\times 10^{-k+1}$, nu $5 \\times 10^{-k}$ (deși sunt numeric egale, convenția folosește coeficientul mai mic)." }
                 }
               ],
               "explanation": { "en": "Rounding halves the truncation bound.", "ro": "Rotunjirea înjumătățește limita trunchierii." },
