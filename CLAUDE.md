@@ -51,7 +51,7 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 
 ### Navigation layout
 - **TopBar** (`src/components/layout/TopBar.jsx`) — Persistent header with: brand, subject switcher dropdown (pill chips), language toggle, palette picker (🎨), dark mode toggle
-- **ContentTypeBar** (`src/components/ui/ContentTypeBar.jsx`) — Secondary nav row below TopBar, replaces old TabBar. Data-driven: only shows content types the subject actually has
+- **ContentTypeBar** (`src/components/ui/ContentTypeBar.jsx`) — Secondary nav row below TopBar. Data-driven: only shows content types the subject actually has
 - **Breadcrumbs** (`src/components/layout/Breadcrumbs.jsx`) — Clickable trail: Home / Year Sem / Subject / Tab / Item
 - **Sidebar** (`src/components/layout/Sidebar.jsx`) — Course list with inline progress rings, hover-zone triggered on desktop, lockable. No auto-peek on completion.
 
@@ -70,9 +70,8 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 - `MultipleChoice` — Multiple choice quiz with answer checking
 - `CodeEditor` — CodeMirror 6 wrapper with C syntax highlighting and dark mode
 - `CodeChallenge` — Interactive coding problem: editor + Judge0 API execution + answer checking
-- `LinuxTerminal` — Simulated Linux terminal (xterm.js UI + bash-emulator engine, virtual filesystem, auto-check)
 - `V86Terminal` — Real Linux terminal via v86 x86 emulator (boots Buildroot Linux in browser, ~7MB)
-- `TerminalChallenge` — W3Schools-style "Try It / Submit" layout: v86 for practice, bash-emulator for auto-check
+- `TerminalChallenge` — Unified terminal exercise component: v86 for practice, serial-exec for auto-check
 - `SubjectCard` — Home page subject card (themed with CSS vars)
 - `PalettePicker` — Popover with 5 flat color circles for theme switching
 
