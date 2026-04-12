@@ -35,6 +35,10 @@ const alo = {
       title: { en: 'Course 6: Three roads to QR — Householder, Givens, Gram–Schmidt', ro: 'Cursul 6: Trei drumuri spre QR — Householder, Givens, Gram–Schmidt' },
       shortTitle: { en: 'C6: QR algorithms', ro: 'C6: Algoritmi QR' },
       sectionCount: 11 },
+    { id: 'alo-c7', src: 'alo/courses/course-07.json', metaId: 'alo-c7',
+      title: { en: 'Course 7: Iterative methods for linear systems', ro: 'Cursul 7: Metode iterative pentru sisteme liniare' },
+      shortTitle: { en: 'C7: Iterative', ro: 'C7: Iterative' },
+      sectionCount: 9 },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };

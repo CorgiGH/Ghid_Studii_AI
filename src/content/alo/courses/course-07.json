@@ -1,0 +1,1028 @@
+{
+  "meta": {
+    "id": "alo-c7",
+    "title": {
+      "en": "Course 7: Iterative methods for linear systems",
+      "ro": "Cursul 7: Metode iterative pentru sisteme liniare"
+    },
+    "shortTitle": {
+      "en": "C7: Iterative",
+      "ro": "C7: Iterative"
+    },
+    "slug": "alo-c7",
+    "source": "ALO curs 07.pdf (Anca Ignat & Corina Forăscu)"
+  },
+  "steps": [
+    {
+      "id": "alo-c7-intro",
+      "title": {
+        "en": "Why iterate when you can factor?",
+        "ro": "De ce să iterezi când poți factoriza?"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Courses 4–6 gave you three direct factorizations (LU, Cholesky, QR), all costing $\\Theta(n^3)$. Suppose $A$ is $10^6 \\times 10^6$ but has only $\\sim 10$ nonzero entries per row (a typical finite-element matrix). What happens when you apply direct Gauss elimination?",
+            "ro": "Cursurile 4–6 ți-au dat trei factorizări directe (LU, Cholesky, QR), toate costând $\\Theta(n^3)$. Presupune că $A$ este $10^6 \\times 10^6$, dar are doar $\\sim 10$ intrări nenule per linie (o matrice tipică de elemente finite). Ce se întâmplă când aplici eliminarea Gauss directă?"
+          },
+          "answer": {
+            "en": "**Disaster on two axes.** (1) $\\Theta(n^3) = 10^{18}$ ops — years of compute. (2) Gauss fills in the zero entries, so $L$ and $U$ become dense — $10^{12}$ doubles of memory, roughly $8$ terabytes. The matrix fits easily; the factorization doesn't. Iterative methods sidestep both: they **never modify $A$** (so sparsity is preserved), and each iteration only costs $\\Theta(\\text{nonzeros})$, not $\\Theta(n^3)$. The tradeoff is convergence: you get an approximation that improves with each step, not an exact answer in one shot.",
+            "ro": "**Dezastru pe două axe.** (1) $\\Theta(n^3) = 10^{18}$ operații — ani de calcul. (2) Gauss umple intrările zero, deci $L$ și $U$ devin dense — $10^{12}$ double-uri de memorie, aproximativ $8$ terabytes. Matricea încape ușor; factorizarea nu. Metodele iterative evită ambele: **nu modifică niciodată $A$** (deci raritatea se păstrează), iar fiecare iterație costă doar $\\Theta(\\text{nonzeros})$, nu $\\Theta(n^3)$. Compromisul este convergența: obții o aproximare care se îmbunătățește cu fiecare pas, nu un răspuns exact într-o lovitură."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Setup.** We want to solve $A x = b$ where $A \\in \\mathbb{R}^{n \\times n}$ is non-singular. Direct methods produce the exact solution $x^* = A^{-1} b$ in finitely many steps. **Iterative methods** build a sequence $\\{ x^{(k)} \\} \\subset \\mathbb{R}^n$ that (in favourable cases) converges to $x^*$:",
+            "ro": "**Setare.** Vrem să rezolvăm $A x = b$ unde $A \\in \\mathbb{R}^{n \\times n}$ este nesingulară. Metodele directe produc soluția exactă $x^* = A^{-1} b$ în număr finit de pași. **Metodele iterative** construiesc un șir $\\{ x^{(k)} \\} \\subset \\mathbb{R}^n$ care (în cazuri favorabile) converge la $x^*$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x^{(k)} \\ \\longrightarrow\\ x^* \\quad \\text{as}\\ k \\to \\infty"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**When iterative beats direct.**",
+            "ro": "**Când iterative bate direct.**"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "en": "**Large $n$, sparse $A$.** Direct methods' $\\Theta(n^3)$ blows past your time budget; iterative methods scale with $n \\cdot \\text{nnz}$ per iteration.",
+              "ro": "**$n$ mare, $A$ rară.** $\\Theta(n^3)$ al metodelor directe depășește bugetul de timp; metodele iterative se scalează cu $n \\cdot \\text{nnz}$ pe iterație."
+            },
+            {
+              "en": "**Fill-in explosion.** Direct factors typically have many more nonzeros than $A$. Iteration preserves sparsity exactly.",
+              "ro": "**Explozie de fill-in.** Factorii direcți au de obicei mult mai multe intrări nenule decât $A$. Iterația păstrează raritatea exact."
+            },
+            {
+              "en": "**Approximate answer is enough.** Many applications (simulations, ML training) tolerate $10^{-4}$-level residuals and don't need the last few digits direct methods deliver.",
+              "ro": "**Răspuns aproximativ e suficient.** Multe aplicații (simulări, antrenare ML) tolerează rezidualuri la nivelul $10^{-4}$ și nu au nevoie de ultimele cifre pe care metodele directe le livrează."
+            },
+            {
+              "en": "**Warm-starting.** When solving a family of similar systems (e.g., Newton's method), a good initial $x^{(0)}$ from a previous solve slashes the iteration count.",
+              "ro": "**Warm-start.** Când rezolvi o familie de sisteme similare (ex. metoda lui Newton), un $x^{(0)}$ inițial bun dintr-o rezolvare anterioară reduce dramatic numărul de iterații."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Course roadmap.** First we'll learn how to **store** sparse matrices compactly (CSR, diagonal), then build a **general splitting scheme** $A = B - C$ that generates iterations, prove the fundamental **convergence theorem** ($\\rho(M) < 1$), and apply it to three classical methods: **Jacobi**, **Gauss–Seidel**, and **SOR** (successive over-relaxation).",
+            "ro": "**Harta cursului.** Mai întâi învățăm cum să **stocăm** matricile rare compact (CSR, diagonale), apoi construim o **schemă de descompunere generală** $A = B - C$ care generează iterații, demonstrăm **teorema fundamentală de convergență** ($\\rho(M) < 1$) și o aplicăm la trei metode clasice: **Jacobi**, **Gauss–Seidel** și **SOR** (supra-relaxare succesivă)."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 1–5 of ALO curs 07 (Anca Ignat & Corina Forăscu).",
+            "ro": "Slide-urile 1–5 din ALO curs 07 (Anca Ignat & Corina Forăscu)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c7-sparse-csr",
+      "title": {
+        "en": "Sparse storage: CSR (Compressed Sparse Row)",
+        "ro": "Stocare rară: CSR (Compressed Sparse Row)"
+      },
+      "group": "storage",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "The $5 \\times 5$ matrix $A$ below has 12 nonzero entries out of 25 positions. A dense array costs 25 doubles. Can you design a storage scheme that uses only the 12 nonzero values plus enough index information to reconstruct the matrix?",
+            "ro": "Matricea $5 \\times 5$ $A$ de mai jos are 12 intrări nenule din 25 de poziții. Un array dens costă 25 de double-uri. Poți proiecta o schemă de stocare care să folosească doar cele 12 valori nenule plus suficiente informații despre indici pentru a reconstrui matricea?"
+          },
+          "answer": {
+            "en": "**Yes — three parallel arrays.** Store all nonzero values in one array (size `nnz`), their column indices in a second array (size `nnz`), and the position where each row starts in a third array (size `n+1`). For the example: 12 + 12 + 6 = 30 ints/doubles vs 25 doubles dense. The win is marginal here (dense is small); on a $10^6 \\times 10^6$ matrix with $10^7$ nonzeros, you save $10^{12} - 10^7 \\approx 10^{12}$ doubles — the difference between \"fits on a laptop\" and \"requires a datacenter.\"",
+            "ro": "**Da — trei array-uri paralele.** Stochezi toate valorile nenule într-un array (dimensiune `nnz`), indicii lor de coloană într-un al doilea array (dimensiune `nnz`) și poziția unde începe fiecare linie într-un al treilea array (dimensiune `n+1`). Pentru exemplu: 12 + 12 + 6 = 30 int-uri/double-uri vs 25 double-uri dens. Câștigul este marginal aici (densul e mic); pe o matrice $10^6 \\times 10^6$ cu $10^7$ intrări nenule, economisești $10^{12} - 10^7 \\approx 10^{12}$ double-uri — diferența dintre \"încape pe un laptop\" și \"are nevoie de un centru de date\"."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Compressed Sparse Row (CSR)",
+            "ro": "Compressed Sparse Row (CSR)"
+          },
+          "content": {
+            "en": "A sparse matrix $A$ with $NN$ nonzero entries is stored as three arrays: `valori` (length $NN$, the nonzero values row by row), `ind_col` (length $NN$, matching column indices), and `inceput_linii` (length $n+1$, with `inceput_linii[i]` = position in `valori` where row $i$ starts; `inceput_linii[n+1] = NN + 1`).",
+            "ro": "O matrice rară $A$ cu $NN$ intrări nenule se stochează ca trei array-uri: `valori` (lungime $NN$, valorile nenule linie cu linie), `ind_col` (lungime $NN$, indicii de coloană corespunzători) și `inceput_linii` (lungime $n+1$, cu `inceput_linii[i]` = poziția în `valori` unde începe linia $i$; `inceput_linii[n+1] = NN + 1`)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Example.** The $5 \\times 5$ matrix",
+            "ro": "**Exemplu.** Matricea $5 \\times 5$"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A = \\begin{pmatrix} 102.5 & 0 & 2.5 & 0 & 0 \\\\ 3.5 & 104.88 & 1.05 & 0 & 0.33 \\\\ 0 & 0 & 100 & 0 & 0 \\\\ 0 & 1.3 & 0 & 101.3 & 0 \\\\ 0.73 & 0 & 0 & 1.5 & 102.23 \\end{pmatrix}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "with $n = 5, NN = 12$ is stored as:",
+            "ro": "cu $n = 5, NN = 12$ se stochează ca:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "valori         = [102.5, 2.5,  3.5, 104.88, 1.05, 0.33,  100,  1.3, 101.3,  0.73, 1.5, 102.23]\nind_col        = [  1,    3,    1,    2,     3,    5,     3,    2,    4,      1,   4,    5  ]\ninceput_linii  = [  1,                4,                 7,    8,        10,          13  ]\n//                row 1            row 2              row 3 row 4     row 5      end+1"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why $n+1$ and not $n$?** The final entry `inceput_linii[n+1] = NN + 1` lets you compute the number of nonzeros in row $i$ as `inceput_linii[i+1] - inceput_linii[i]` **without a special case for the last row**. Every row is handled uniformly — a common trick in array-of-offsets schemes.",
+            "ro": "**De ce $n+1$ și nu $n$?** Ultima intrare `inceput_linii[n+1] = NN + 1` îți permite să calculezi numărul de intrări nenule pe linia $i$ ca `inceput_linii[i+1] - inceput_linii[i]` **fără un caz special pentru ultima linie**. Fiecare linie se tratează uniform — un truc comun în schemele de array-uri de offseturi."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Accessing entry $A_{ij}$** requires a linear scan of row $i$'s segment in `ind_col`:",
+            "ro": "**Accesarea intrării $A_{ij}$** cere o scanare liniară a segmentului liniei $i$ în `ind_col`:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Return A[i][j] from CSR storage (returns 0 if not stored)\ndouble csr_get(int i, int j, double* valori, int* ind_col, int* inceput_linii) {\n    for (int k = inceput_linii[i]; k < inceput_linii[i + 1]; k++) {\n        if (ind_col[k] == j) return valori[k];\n    }\n    return 0.0;\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**The key operation.** Iterative methods don't need random access $A_{ij}$. They need **matrix–vector products** $y = A x$, which CSR computes in one sweep:\n\n```\nfor i = 1 to n:\n    y[i] = 0\n    for k = inceput_linii[i] to inceput_linii[i+1]-1:\n        y[i] += valori[k] * x[ind_col[k]]\n```\n\nCost: $\\Theta(NN)$, linear in the number of nonzeros. This is why CSR is the dominant sparse format in LAPACK's sparse siblings and in every finite-element code.",
+            "ro": "**Operația cheie.** Metodele iterative nu au nevoie de acces aleator $A_{ij}$. Au nevoie de **produse matrice–vector** $y = A x$, pe care CSR le calculează într-o singură trecere. Cost: $\\Theta(NN)$, liniar în numărul de intrări nenule. De aceea CSR este formatul dominant de rărime în echivalenții rari ai LAPACK și în orice cod de elemente finite."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "For the example matrix with `inceput_linii = [1, 3, 7, 8, 10, 13]`, how many nonzeros are on **row 2**?",
+                "ro": "Pentru matricea exemplu cu `inceput_linii = [1, 3, 7, 8, 10, 13]`, câte intrări nenule sunt pe **linia 2**?"
+              },
+              "options": [
+                {
+                  "text": "$3$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "That's row 1 ($3 - 1 = 2$ ... wait, $\\texttt{inceput\\_linii}[2] - \\texttt{inceput\\_linii}[1] = 3 - 1 = 2$, so row 1 has 2 entries). Row 2: $\\texttt{inceput\\_linii}[3] - \\texttt{inceput\\_linii}[2] = 7 - 3 = 4$.",
+                    "ro": "Aceea este linia 1 ($3 - 1 = 2$). Linia 2: $\\texttt{inceput\\_linii}[3] - \\texttt{inceput\\_linii}[2] = 7 - 3 = 4$."
+                  }
+                },
+                {
+                  "text": "$4$",
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `inceput_linii[3] - inceput_linii[2] = 7 - 3 = 4`. Verify against the original matrix: row 2 = $(3.5, 104.88, 1.05, 0, 0.33)$ has 4 nonzeros.",
+                    "ro": "Corect. `inceput_linii[3] - inceput_linii[2] = 7 - 3 = 4`. Verifică pe matricea originală: linia 2 = $(3.5, 104.88, 1.05, 0, 0.33)$ are 4 intrări nenule."
+                  }
+                },
+                {
+                  "text": "$7$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "That's the **starting position** of row 3 in `valori`, not a count. Row-count needs a subtraction.",
+                    "ro": "Aceea este **poziția de start** a liniei 3 în `valori`, nu un număr. Numărătoarea liniei cere o scădere."
+                  }
+                },
+                {
+                  "text": "$12$",
+                  "correct": false,
+                  "explanation": {
+                    "en": "$12 = NN$ is the total number of nonzeros in the whole matrix, not row 2.",
+                    "ro": "$12 = NN$ este numărul total de intrări nenule în toată matricea, nu linia 2."
+                  }
+                }
+              ],
+              "explanation": { "en": "Row $i$'s nonzero count = `inceput_linii[i+1] - inceput_linii[i]`.", "ro": "Numărul de intrări nenule ale liniei $i$ = `inceput_linii[i+1] - inceput_linii[i]`." },
+              "reviewStep": "alo-c7-sparse-csr"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 6–9 of ALO curs 07 — CSR storage layout.",
+            "ro": "Slide-urile 6–9 din ALO curs 07 — aspectul stocării CSR."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c7-sparse-other",
+      "title": {
+        "en": "Other sparse layouts: bounded-row and diagonal",
+        "ro": "Alte aspecte rare: linie-mărginită și diagonale"
+      },
+      "group": "storage",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**CSR is not always the best choice.** Two common alternatives exploit more structure:",
+            "ro": "**CSR nu este întotdeauna cea mai bună alegere.** Două alternative comune exploatează mai multă structură:"
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Bounded-row storage (n × n_max)",
+            "ro": "Stocare cu linie mărginită (n × n_max)"
+          },
+          "content": {
+            "en": "If every row has at most $n\\_max$ nonzeros, store a dense $n \\times n\\_max$ value matrix and a matching $n \\times n\\_max$ column-index matrix. Row-by-row access is $O(n\\_max)$ with no pointer chasing.",
+            "ro": "Dacă fiecare linie are cel mult $n\\_max$ intrări nenule, stochezi o matrice densă $n \\times n\\_max$ de valori și o matrice $n \\times n\\_max$ potrivită de indici de coloană. Accesul linie cu linie este $O(n\\_max)$ fără urmărire de pointeri."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Diagonal storage",
+            "ro": "Stocare pe diagonale"
+          },
+          "content": {
+            "en": "If all nonzeros live on $n\\_d$ specific diagonals, store a `diag` matrix of shape $n \\times n\\_d$ (columns = diagonals) and a `diag_no` vector of offsets identifying which diagonal each column represents. Access: `diag(i, j) = A[i, i + diag_no[j]]`.",
+            "ro": "Dacă toate intrările nenule stau pe $n\\_d$ diagonale specifice, stochezi o matrice `diag` de formă $n \\times n\\_d$ (coloanele = diagonalele) și un vector `diag_no` de offseturi care identifică ce diagonală reprezintă fiecare coloană. Acces: `diag(i, j) = A[i, i + diag_no[j]]`."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Diagonal-storage example.** The tridiagonal-plus-one-offset matrix",
+            "ro": "**Exemplu de stocare pe diagonale.** Matricea tridiagonală-plus-un-offset"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A = \\begin{pmatrix} 20.5 & 2.0 & 0 & 0 & 0 \\\\ 0 & 40.5 & 3.0 & 0 & 0 \\\\ 1.0 & 0 & 100 & 0 & 0 \\\\ 0 & 2.3 & 0 & 101.5 & 4.0 \\\\ 0 & 0 & 3.0 & 0 & 102.5 \\end{pmatrix}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "has nonzeros only on diagonals $-2, 0, +1$, so $n\\_d = 3$. Store as:",
+            "ro": "are intrări nenule doar pe diagonalele $-2, 0, +1$, deci $n\\_d = 3$. Se stochează ca:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "diag     = [ *,   20.5,  2.0 ]      diag_no = [-2, 0, +1]\n           [ *,   40.5,  3.0 ]\n           [ 1.0, 100,   0.0 ]\n           [ 2.3, 101.5, 4.0 ]\n           [ 3.0, 102.5,  *  ]\n// * = unused (row i has no diagonal-j entry)"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Rule of thumb.** CSR is the universal default; bounded-row wins on PDE discretizations where `n_max` is small and constant; diagonal wins on banded matrices (tridiagonal, pentadiagonal) from finite-difference stencils. Modern sparse libraries (Intel MKL, cuSPARSE) provide all three plus several others.",
+            "ro": "**Regulă empirică.** CSR este implicitul universal; linie-mărginită câștigă pe discretizări PDE unde `n_max` este mic și constant; diagonale câștigă pe matrici cu bandă (tridiagonale, pentadiagonale) din stencil-urile de diferențe finite. Bibliotecile moderne de rărime (Intel MKL, cuSPARSE) oferă toate trei plus câteva altele."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 10–13 of ALO curs 07 — bounded-row and diagonal storage. See also http://netlib.org/linalg/html_templates/node90.html",
+            "ro": "Slide-urile 10–13 din ALO curs 07 — stocare linie-mărginită și diagonale. Vezi și http://netlib.org/linalg/html_templates/node90.html"
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c7-splitting",
+      "title": {
+        "en": "The splitting idea: A = B − C",
+        "ro": "Ideea descompunerii: A = B − C"
+      },
+      "group": "framework",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You want to solve $A x = b$ iteratively. Suppose you could split $A = B - C$ where **$B$ is cheap to invert** (diagonal, triangular, etc.). Can you turn the equation $A x^* = b$ into an iteration $x^{(k+1)} = f(x^{(k)})$ that only requires solves with $B$, never with $A$?",
+            "ro": "Vrei să rezolvi $A x = b$ iterativ. Presupune că poți descompune $A = B - C$ unde **$B$ este ușor de inversat** (diagonală, triunghiulară etc.). Poți transforma ecuația $A x^* = b$ într-o iterație $x^{(k+1)} = f(x^{(k)})$ care cere doar rezolvări cu $B$, niciodată cu $A$?"
+          },
+          "answer": {
+            "en": "**Yes.** Rearrange $A x^* = b$ as $(B - C) x^* = b$, so $B x^* = C x^* + b$. That invites the iteration $B x^{(k+1)} = C x^{(k)} + b$ — plug in the current guess on the right, solve a system with $B$ to produce the next guess. Equivalently, $x^{(k+1)} = B^{-1} C x^{(k)} + B^{-1} b = M x^{(k)} + d$. Every iterative method in this course picks a different splitting; Jacobi takes $B = \\text{diag}(A)$, Gauss–Seidel takes $B = $ lower triangular part of $A$, and SOR interpolates.",
+            "ro": "**Da.** Rearanjează $A x^* = b$ ca $(B - C) x^* = b$, deci $B x^* = C x^* + b$. Asta invită iterația $B x^{(k+1)} = C x^{(k)} + b$ — introduci estimarea curentă în dreapta, rezolvi un sistem cu $B$ pentru a produce următoarea estimare. Echivalent, $x^{(k+1)} = B^{-1} C x^{(k)} + B^{-1} b = M x^{(k)} + d$. Fiecare metodă iterativă din cursul acesta alege o altă descompunere; Jacobi ia $B = \\text{diag}(A)$, Gauss–Seidel ia $B$ = partea inferior triunghiulară a lui $A$, iar SOR interpolează."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Splitting of $A$",
+            "ro": "Descompunere a lui $A$"
+          },
+          "content": {
+            "en": "A pair $(B, C)$ with $A = B - C$, $B$ non-singular, and **$B$ cheap to invert** — meaning the system $B x = f$ can be solved quickly (diagonal, lower-triangular, or factorized once).",
+            "ro": "O pereche $(B, C)$ cu $A = B - C$, $B$ nesingulară și **$B$ ușor de inversat** — adică sistemul $B x = f$ se rezolvă rapid (diagonal, inferior triunghiular sau factorizat o dată)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The iteration, in two equivalent forms.**",
+            "ro": "**Iterația, în două forme echivalente.**"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x^{(k+1)} \\;=\\; M \\, x^{(k)} + d, \\qquad M := B^{-1} C, \\ \\ d := B^{-1} b"
+        },
+        {
+          "type": "equation",
+          "tex": "\\text{(or equivalently)} \\qquad B \\, x^{(k+1)} \\;=\\; C \\, x^{(k)} + b"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **iteration matrix** $M$ captures the entire dynamics: given $x^{(k)}$, the next vector is a linear function of it. Convergence will depend entirely on how $M^k$ behaves as $k \\to \\infty$.",
+            "ro": "**Matricea iterației** $M$ surprinde toată dinamica: dat $x^{(k)}$, vectorul următor este o funcție liniară a sa. Convergența va depinde complet de cum se comportă $M^k$ când $k \\to \\infty$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Fixed-point perspective.** The exact solution $x^*$ satisfies $x^* = M x^* + d$ — it's a **fixed point** of the map $f(x) = M x + d$. Iterative methods are just fixed-point iteration on this linear map, and their convergence theorems are the linear case of Banach's contraction principle: $M^k \\to 0$ iff $f$ is a contraction in some norm.",
+            "ro": "**Perspectiva punctului fix.** Soluția exactă $x^*$ satisface $x^* = M x^* + d$ — este un **punct fix** al aplicației $f(x) = M x + d$. Metodele iterative sunt doar iterație de punct fix pe această aplicație liniară, iar teoremele lor de convergență sunt cazul liniar al principiului contracției Banach: $M^k \\to 0$ dacă și numai dacă $f$ este o contracție într-o normă."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 14–17 of ALO curs 07 — general splitting framework.",
+            "ro": "Slide-urile 14–17 din ALO curs 07 — cadrul general de descompunere."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c7-convergence",
+      "title": {
+        "en": "Convergence: ρ(M) < 1 is everything",
+        "ro": "Convergența: ρ(M) < 1 este totul"
+      },
+      "group": "framework",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Subtract the fixed-point equation from the iteration.** Let $e^{(k)} := x^{(k)} - x^*$ be the error. Then",
+            "ro": "**Scade ecuația punctului fix din iterație.** Fie $e^{(k)} := x^{(k)} - x^*$ eroarea. Atunci"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x^{(k+1)} - x^* \\;=\\; M (x^{(k)} - x^*) \\quad \\Longrightarrow \\quad e^{(k+1)} \\;=\\; M \\, e^{(k)}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Iterating backward to the initial guess:",
+            "ro": "Iterând înapoi la estimarea inițială:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "e^{(k)} \\;=\\; M^k \\, e^{(0)}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**The whole convergence story is a question about $M^k$.** The error after $k$ steps is exactly $M^k$ applied to the initial error $e^{(0)}$. For $x^{(k)} \\to x^*$ to hold **for every starting guess**, we need $M^k \\to 0$.",
+            "ro": "**Toată povestea convergenței este o întrebare despre $M^k$.** Eroarea după $k$ pași este exact $M^k$ aplicată pe eroarea inițială $e^{(0)}$. Pentru ca $x^{(k)} \\to x^*$ să țină **pentru orice estimare inițială**, avem nevoie de $M^k \\to 0$."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Convergence theorem (iterative methods)",
+            "ro": "Teorema de convergență (metode iterative)"
+          },
+          "content": {
+            "en": "For any splitting $A = B - C$ with $B$ non-singular, the iteration $x^{(k+1)} = M x^{(k)} + d$ with $M = B^{-1} C$ converges to $x^* = A^{-1} b$ for **every** initial guess $x^{(0)}$ **if and only if** the spectral radius of $M$ is strictly less than $1$:",
+            "ro": "Pentru orice descompunere $A = B - C$ cu $B$ nesingulară, iterația $x^{(k+1)} = M x^{(k)} + d$ cu $M = B^{-1} C$ converge la $x^* = A^{-1} b$ pentru **orice** estimare inițială $x^{(0)}$ **dacă și numai dacă** raza spectrală a lui $M$ este strict mai mică decât $1$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x^{(k)} \\to x^*,\\ \\forall x^{(0)} \\ \\Longleftrightarrow \\ \\rho(M) < 1"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Why $\\rho(M) < 1$?** From course 2, $\\rho(M) < 1$ iff $M^k \\to 0$. That's exactly what we need for $e^{(k)} = M^k e^{(0)} \\to 0$.\n\n**Sufficient criterion via norms.** If any induced matrix norm satisfies $\\|M\\| < 1$, then $\\rho(M) \\leq \\|M\\| < 1$, so the iteration converges — and you get a concrete **rate**:",
+            "ro": "**De ce $\\rho(M) < 1$?** Din cursul 2, $\\rho(M) < 1$ dacă și numai dacă $M^k \\to 0$. Exact asta avem nevoie pentru $e^{(k)} = M^k e^{(0)} \\to 0$.\n\n**Criteriu suficient prin norme.** Dacă orice normă matricială indusă satisface $\\|M\\| < 1$, atunci $\\rho(M) \\leq \\|M\\| < 1$, deci iterația converge — și obții o **rată** concretă:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\|e^{(k)}\\| \\;\\leq\\; \\|M\\|^k \\, \\|e^{(0)}\\|"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Practical meaning.** If $\\|M\\| = 0.9$, you lose one digit of error roughly every $\\lceil 1 / \\log_{10}(1/0.9) \\rceil = 22$ iterations. If $\\|M\\| = 0.1$, one digit every iteration. Smaller $\\rho(M)$ or $\\|M\\|$ → faster convergence. The whole game of iterative-method design is picking a splitting that keeps $\\rho(M)$ small.",
+            "ro": "**Semnificație practică.** Dacă $\\|M\\| = 0.9$, pierzi o cifră de eroare aproximativ la fiecare $\\lceil 1 / \\log_{10}(1/0.9) \\rceil = 22$ iterații. Dacă $\\|M\\| = 0.1$, o cifră la fiecare iterație. $\\rho(M)$ sau $\\|M\\|$ mai mici → convergență mai rapidă. Tot jocul proiectării metodelor iterative este alegerea unei descompuneri care menține $\\rho(M)$ mică."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Two iterations converge to the same $x^*$. Iteration A has $\\rho(M_A) = 0.5$, iteration B has $\\rho(M_B) = 0.95$. Which converges faster?",
+                "ro": "Două iterații converg la același $x^*$. Iterația A are $\\rho(M_A) = 0.5$, iterația B are $\\rho(M_B) = 0.95$. Care converge mai rapid?"
+              },
+              "options": [
+                {
+                  "text": { "en": "A — smaller spectral radius means faster error contraction each step.", "ro": "A — raza spectrală mai mică înseamnă contracție mai rapidă a erorii la fiecare pas." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. After $k$ steps, $\\|e^{(k)}\\| \\sim \\rho(M)^k \\|e^{(0)}\\|$. To lose $d$ digits, A needs $\\sim d / \\log_{10}(2) \\approx 3.3 d$ iterations; B needs $\\sim d / \\log_{10}(1/0.95) \\approx 45 d$ iterations — B is **14× slower**.",
+                    "ro": "Corect. După $k$ pași, $\\|e^{(k)}\\| \\sim \\rho(M)^k \\|e^{(0)}\\|$. Pentru a pierde $d$ cifre, A are nevoie de $\\sim d / \\log_{10}(2) \\approx 3.3 d$ iterații; B are nevoie de $\\sim d / \\log_{10}(1/0.95) \\approx 45 d$ iterații — B este de **14× mai lentă**."
+                  }
+                },
+                {
+                  "text": { "en": "B — larger spectral radius means more aggressive updates.", "ro": "B — raza spectrală mai mare înseamnă actualizări mai agresive." },
+                  "correct": false,
+                  "explanation": { "en": "\"More aggressive\" is the wrong mental model. Large $\\rho(M)$ means the error shrinks slowly each step — closer to stationary.", "ro": "\"Mai agresiv\" este modelul mental greșit. $\\rho(M)$ mare înseamnă că eroarea scade lent la fiecare pas — mai aproape de staționar." }
+                },
+                {
+                  "text": { "en": "Same speed — both have $\\rho(M) < 1$, so both converge.", "ro": "Aceeași viteză — ambele au $\\rho(M) < 1$, deci ambele converg." },
+                  "correct": false,
+                  "explanation": { "en": "Convergence is binary (yes/no); **rate** is continuous. Smaller $\\rho$ = faster rate.", "ro": "Convergența este binară (da/nu); **rata** este continuă. $\\rho$ mai mic = rată mai rapidă." }
+                },
+                {
+                  "text": { "en": "Depends on $x^{(0)}$; can't tell without knowing the initial guess.", "ro": "Depinde de $x^{(0)}$; nu se poate spune fără a cunoaște estimarea inițială." },
+                  "correct": false,
+                  "explanation": { "en": "$\\rho(M) < 1$ means convergence from **every** $x^{(0)}$, and the asymptotic rate is always $\\rho(M)$. Initial guess only shifts the constant.", "ro": "$\\rho(M) < 1$ înseamnă convergență din **orice** $x^{(0)}$, iar rata asimptotică este mereu $\\rho(M)$. Estimarea inițială schimbă doar constanta." }
+                }
+              ],
+              "explanation": { "en": "Rate of convergence is asymptotically $\\rho(M)^k$. Smaller $\\rho$, faster.", "ro": "Rata de convergență este asimptotic $\\rho(M)^k$. $\\rho$ mai mic, mai rapid." },
+              "reviewStep": "alo-c7-convergence"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 18–22 of ALO curs 07 — convergence theorem.",
+            "ro": "Slide-urile 18–22 din ALO curs 07 — teorema de convergență."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c7-jacobi",
+      "title": {
+        "en": "The Jacobi method",
+        "ro": "Metoda Jacobi"
+      },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Pick the **simplest possible** splitting: let $B = \\text{diag}(A)$ (only the diagonal of $A$). What does the resulting iteration look like equation-by-equation, and when would you expect it to converge?",
+            "ro": "Alege descompunerea **cea mai simplă posibil**: fie $B = \\text{diag}(A)$ (doar diagonala lui $A$). Cum arată iterația rezultată ecuație cu ecuație și când te-ai aștepta să convergă?"
+          },
+          "answer": {
+            "en": "The $i$-th equation of $A x = b$ reads $\\sum_j a_{ij} x_j = b_i$. Solve for $x_i$ using the **current** estimates of the others: $x_i = (b_i - \\sum_{j \\neq i} a_{ij} x_j) / a_{ii}$. At iteration $k+1$, the right side uses $x^{(k)}$, giving the **Jacobi update**. It converges when $A$ is diagonally dominant enough that $a_{ii}$ \"outweighs\" the off-diagonal sum — we'll make that precise.",
+            "ro": "A $i$-a ecuație a lui $A x = b$ se citește $\\sum_j a_{ij} x_j = b_i$. Rezolvă pentru $x_i$ folosind estimările **curente** ale celorlalte: $x_i = (b_i - \\sum_{j \\neq i} a_{ij} x_j) / a_{ii}$. La iterația $k+1$, partea dreaptă folosește $x^{(k)}$, dând **actualizarea Jacobi**. Converge când $A$ este suficient de diagonal dominantă încât $a_{ii}$ \"să învingă\" suma off-diagonală — vom preciza asta."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Jacobi iteration",
+            "ro": "Iterația Jacobi"
+          },
+          "content": {
+            "en": "Splitting $A = D - (L + U)$ where $D = \\text{diag}(A)$, $L$ = strictly-lower-triangular part of $-A$, $U$ = strictly-upper-triangular part of $-A$. The Jacobi iteration takes $B = D, C = L + U$:",
+            "ro": "Descompunerea $A = D - (L + U)$ unde $D = \\text{diag}(A)$, $L$ = partea strict inferior triunghiulară a lui $-A$, $U$ = partea strict superior triunghiulară a lui $-A$. Iterația Jacobi ia $B = D, C = L + U$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x^{(k+1)} \\;=\\; D^{-1}(L + U) \\, x^{(k)} + D^{-1} b, \\qquad M_J := D^{-1}(L + U)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Entry-wise.** For each $i = 1, \\ldots, n$:",
+            "ro": "**Element cu element.** Pentru fiecare $i = 1, \\ldots, n$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x_i^{(k+1)} \\;=\\; \\frac{1}{a_{ii}} \\left( b_i - \\sum_{j \\neq i} a_{ij} \\, x_j^{(k)} \\right)"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Jacobi iteration: needs two arrays (old and new) to avoid overwrite\nwhile (!converged) {\n    for (int i = 0; i < n; i++) {\n        double s = b[i];\n        for (int j = 0; j < n; j++) {\n            if (j != i) s -= A[i][j] * x_old[j];    // uses x^(k)\n        }\n        x_new[i] = s / A[i][i];                     // produces x^(k+1)\n    }\n    swap(x_old, x_new);\n    converged = (norm(x_new - x_old) < tol);\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Jacobi is embarrassingly parallel.** Every $x_i^{(k+1)}$ depends only on $x^{(k)}$ (not on any $x_j^{(k+1)}$). You can compute all $n$ updates **simultaneously** on different processors. On GPUs and distributed-memory clusters, this is Jacobi's main appeal.",
+            "ro": "**Jacobi este paralelizabilă trivial.** Fiecare $x_i^{(k+1)}$ depinde doar de $x^{(k)}$ (nu de niciun $x_j^{(k+1)}$). Poți calcula toate cele $n$ actualizări **simultan** pe procesoare diferite. Pe GPU-uri și clustere cu memorie distribuită, aceasta este principala atracție a lui Jacobi."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Strict diagonal dominance",
+            "ro": "Dominantă diagonal strictă"
+          },
+          "content": {
+            "en": "$A$ is **strictly diagonally dominant by rows** if $|a_{ii}| > \\sum_{j \\neq i} |a_{ij}|$ for every $i$. The diagonal entry beats the sum of off-diagonal magnitudes in its row.",
+            "ro": "$A$ este **strict diagonal dominantă pe linii** dacă $|a_{ii}| > \\sum_{j \\neq i} |a_{ij}|$ pentru fiecare $i$. Elementul diagonal bate suma magnitudinilor off-diagonale pe linia sa."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Sufficient condition for Jacobi.** If $A$ is strictly diagonally dominant, then $\\|M_J\\|_\\infty < 1$ (the induced infinity norm of the Jacobi iteration matrix is just $\\max_i \\sum_{j \\neq i} |a_{ij}| / |a_{ii}|$, which is $< 1$ by diagonal dominance). So $\\rho(M_J) < 1$ and Jacobi converges from every starting point. PDE-discretization matrices from common finite-element/finite-difference schemes are almost always diagonally dominant, which is why Jacobi works there.",
+            "ro": "**Condiție suficientă pentru Jacobi.** Dacă $A$ este strict diagonal dominantă, atunci $\\|M_J\\|_\\infty < 1$ (norma infinit indusă a matricei iterației Jacobi este doar $\\max_i \\sum_{j \\neq i} |a_{ij}| / |a_{ii}|$, care este $< 1$ prin dominanță diagonală). Deci $\\rho(M_J) < 1$ și Jacobi converge din orice punct de pornire. Matricile din discretizări PDE prin scheme comune de elemente finite/diferențe finite sunt aproape întotdeauna diagonal dominante, de aceea Jacobi funcționează acolo."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 23–27 of ALO curs 07 — Jacobi method and sufficient conditions.",
+            "ro": "Slide-urile 23–27 din ALO curs 07 — metoda Jacobi și condiții suficiente."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c7-gauss-seidel",
+      "title": {
+        "en": "Gauss–Seidel: use updates as soon as you have them",
+        "ro": "Gauss–Seidel: folosește actualizările de îndată ce le ai"
+      },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "In Jacobi's update for $x_i^{(k+1)}$, you use $x_1^{(k)}, \\ldots, x_{i-1}^{(k)}$ on the right-hand side — even though by the time you reach equation $i$ within iteration $k+1$, you have **already computed** $x_1^{(k+1)}, \\ldots, x_{i-1}^{(k+1)}$. **What happens if you use those newer values instead?**",
+            "ro": "În actualizarea Jacobi pentru $x_i^{(k+1)}$, folosești $x_1^{(k)}, \\ldots, x_{i-1}^{(k)}$ în partea dreaptă — deși până când ajungi la ecuația $i$ în iterația $k+1$, **ai calculat deja** $x_1^{(k+1)}, \\ldots, x_{i-1}^{(k+1)}$. **Ce se întâmplă dacă folosești acele valori mai noi?**"
+          },
+          "answer": {
+            "en": "**You get Gauss–Seidel.** Using the freshest available values usually halves the iteration count vs Jacobi, and needs only **one** vector in memory (the update happens in place). The price: the inner loop is now sequential — $x_i^{(k+1)}$ depends on $x_1^{(k+1)}, \\ldots, x_{i-1}^{(k+1)}$, so you can't parallelize across equations. Convergence also usually improves: if Jacobi converges, Gauss–Seidel often does so faster (sometimes dramatically).",
+            "ro": "**Obții Gauss–Seidel.** Folosirea celor mai proaspete valori disponibile înjumătățește de obicei numărul de iterații vs Jacobi și are nevoie de un singur vector în memorie (actualizarea se face pe loc). Prețul: bucla interioară este acum secvențială — $x_i^{(k+1)}$ depinde de $x_1^{(k+1)}, \\ldots, x_{i-1}^{(k+1)}$, deci nu poți paraleliza pe ecuații. Convergența de obicei se îmbunătățește: dacă Jacobi converge, Gauss–Seidel o face adesea mai rapid (uneori dramatic)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Gauss–Seidel iteration",
+            "ro": "Iterația Gauss–Seidel"
+          },
+          "content": {
+            "en": "Splitting $A = (D - L) - U$, taking $B = D - L$ (lower-triangular, so solvable by forward substitution) and $C = U$:",
+            "ro": "Descompunerea $A = (D - L) - U$, luând $B = D - L$ (inferior triunghiulară, deci rezolvabilă prin substituție directă) și $C = U$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x^{(k+1)} \\;=\\; (D - L)^{-1} \\, U \\, x^{(k)} + (D - L)^{-1} b, \\qquad M_{GS} := (D - L)^{-1} U"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Entry-wise.** Updating $i = 1, 2, \\ldots, n$ in order, each step uses the already-updated $x_j^{(k+1)}$ for $j < i$ and the old $x_j^{(k)}$ for $j > i$:",
+            "ro": "**Element cu element.** Actualizând $i = 1, 2, \\ldots, n$ în ordine, fiecare pas folosește $x_j^{(k+1)}$ deja actualizat pentru $j < i$ și $x_j^{(k)}$ vechi pentru $j > i$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x_i^{(k+1)} \\;=\\; \\frac{1}{a_{ii}} \\left( b_i - \\sum_{j < i} a_{ij} \\, x_j^{(k+1)} - \\sum_{j > i} a_{ij} \\, x_j^{(k)} \\right)"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Gauss-Seidel: single array, update in place\nwhile (!converged) {\n    double max_delta = 0;\n    for (int i = 0; i < n; i++) {\n        double s = b[i];\n        for (int j = 0; j < n; j++) {\n            if (j != i) s -= A[i][j] * x[j];       // j < i uses x^(k+1), j > i uses x^(k)\n        }\n        double new_xi = s / A[i][i];\n        max_delta = fmax(max_delta, fabs(new_xi - x[i]));\n        x[i] = new_xi;                              // overwrite immediately\n    }\n    converged = (max_delta < tol);\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Sufficient convergence conditions.** Gauss–Seidel converges if **either**:\n\n- $A$ is strictly diagonally dominant (same condition as Jacobi), **or**\n- $A$ is symmetric positive-definite (SPD).\n\nThe SPD case is important: for Poisson-like PDE discretizations, $A$ is SPD, both Jacobi and Gauss–Seidel converge, and Gauss–Seidel typically has $\\rho(M_{GS}) = \\rho(M_J)^2$ — **asymptotically twice as fast**.",
+            "ro": "**Condiții suficiente de convergență.** Gauss–Seidel converge dacă **fie**:\n\n- $A$ este strict diagonal dominantă (aceeași condiție ca Jacobi), **fie**\n- $A$ este simetrică pozitiv definită (SPD).\n\nCazul SPD este important: pentru discretizări PDE de tip Poisson, $A$ este SPD, atât Jacobi cât și Gauss–Seidel converg, iar Gauss–Seidel are de obicei $\\rho(M_{GS}) = \\rho(M_J)^2$ — **asimptotic de două ori mai rapid**."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "You want to parallelize a linear-system solve on a 64-core machine. $A$ is SPD and both Jacobi and Gauss–Seidel converge on it, with Gauss–Seidel $\\rho = 0.81$ and Jacobi $\\rho = 0.9$. Which do you pick?",
+                "ro": "Vrei să paralelizezi rezolvarea unui sistem liniar pe o mașină cu 64 de nuclee. $A$ este SPD, iar atât Jacobi cât și Gauss–Seidel converg pe ea, cu Gauss–Seidel $\\rho = 0.81$ și Jacobi $\\rho = 0.9$. Ce alegi?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Gauss–Seidel — smaller $\\rho$ means fewer iterations.", "ro": "Gauss–Seidel — $\\rho$ mai mic înseamnă mai puține iterații." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Gauss–Seidel has a sequential inner loop (each $x_i^{(k+1)}$ needs the updated $x_{<i}^{(k+1)}$). On 64 cores, you waste 63 of them at every iteration. The 2× iteration reduction doesn't recoup the 64× parallel slowdown.",
+                    "ro": "Gauss–Seidel are bucla interioară secvențială (fiecare $x_i^{(k+1)}$ are nevoie de $x_{<i}^{(k+1)}$ actualizat). Pe 64 de nuclee, irosești 63 din ele la fiecare iterație. Reducerea 2× în iterații nu recuperează încetinirea 64× în paralelism."
+                  }
+                },
+                {
+                  "text": { "en": "Jacobi — embarrassingly parallel, so 64 cores help linearly despite the larger $\\rho$.", "ro": "Jacobi — paralelizabilă trivial, deci 64 de nuclee ajută liniar în ciuda unui $\\rho$ mai mare." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Jacobi's $x^{(k+1)}$ depends only on $x^{(k)}$, so each equation can be updated independently — perfect strong scaling up to $n$ cores. Gauss–Seidel needs colouring schemes (red–black) to regain parallelism and even then loses half the cores.",
+                    "ro": "Corect. $x^{(k+1)}$ al lui Jacobi depinde doar de $x^{(k)}$, deci fiecare ecuație se poate actualiza independent — scaling perfect tare până la $n$ nuclee. Gauss–Seidel are nevoie de scheme de colorare (roșu-negru) pentru a recâștiga paralelismul și chiar atunci pierde jumătate din nuclee."
+                  }
+                },
+                {
+                  "text": { "en": "Either — $\\rho$ values are close enough that they perform identically.", "ro": "Oricare — valorile $\\rho$ sunt suficient de apropiate încât să performeze identic." },
+                  "correct": false,
+                  "explanation": { "en": "They differ by $0.09$ in $\\rho$, which on hundreds of iterations becomes a real runtime gap. And parallelism dominates either way.", "ro": "Diferă cu $0.09$ în $\\rho$, ceea ce pe sute de iterații devine un decalaj real de timp. Iar paralelismul domină oricum." }
+                },
+                {
+                  "text": { "en": "Neither — use a direct factorization on 64 cores.", "ro": "Niciuna — folosește o factorizare directă pe 64 de nuclee." },
+                  "correct": false,
+                  "explanation": { "en": "The question premise assumes iterative methods are chosen because $A$ is too large/sparse for direct factorization. A direct method on the same system would already be ruled out.", "ro": "Premisa întrebării presupune că metodele iterative sunt alese pentru că $A$ este prea mare/rară pentru factorizare directă. O metodă directă pe același sistem ar fi deja exclusă." }
+                }
+              ],
+              "explanation": { "en": "On highly parallel hardware, Jacobi's wider parallelism beats Gauss–Seidel's faster rate.", "ro": "Pe hardware masiv paralel, paralelismul mai larg al Jacobi bate rata mai rapidă a lui Gauss–Seidel." },
+              "reviewStep": "alo-c7-gauss-seidel"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 28–32 of ALO curs 07 — Gauss–Seidel and its convergence conditions.",
+            "ro": "Slide-urile 28–32 din ALO curs 07 — Gauss–Seidel și condițiile sale de convergență."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c7-sor",
+      "title": {
+        "en": "Successive over-relaxation (SOR)",
+        "ro": "Supra-relaxare succesivă (SOR)"
+      },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Gauss–Seidel takes each update $x_i^{(k+1)} = \\text{GS-formula}$ at face value. What if the update is \"too conservative\" — always moving a bit too little toward the solution? Could you **scale the step** by some factor $\\omega > 1$ and converge even faster?",
+            "ro": "Gauss–Seidel ia fiecare actualizare $x_i^{(k+1)} = \\text{formula-GS}$ la valoarea ei nominală. Dacă actualizarea este \"prea conservatoare\" — se mișcă mereu puțin prea puțin spre soluție? Ai putea **scala pasul** cu un factor $\\omega > 1$ și converge și mai rapid?"
+          },
+          "answer": {
+            "en": "**Yes — this is the SOR idea.** Let $\\tilde{x}_i$ be the Gauss–Seidel update and take $x_i^{(k+1)} = x_i^{(k)} + \\omega (\\tilde{x}_i - x_i^{(k)})$. For $\\omega = 1$, you recover Gauss–Seidel. For $\\omega > 1$ (over-relaxation), you **extrapolate** past the GS answer; for $\\omega < 1$ (under-relaxation), you dampen. On many problems the optimal $\\omega^* \\in (1, 2)$ cuts the iteration count by **an order of magnitude** compared to plain Gauss–Seidel.",
+            "ro": "**Da — aceasta este ideea SOR.** Fie $\\tilde{x}_i$ actualizarea Gauss–Seidel și ia $x_i^{(k+1)} = x_i^{(k)} + \\omega (\\tilde{x}_i - x_i^{(k)})$. Pentru $\\omega = 1$, recuperezi Gauss–Seidel. Pentru $\\omega > 1$ (supra-relaxare), **extrapolezi** dincolo de răspunsul GS; pentru $\\omega < 1$ (sub-relaxare), amortizezi. Pe multe probleme $\\omega^*$ optim din $(1, 2)$ taie numărul de iterații cu **un ordin de mărime** comparativ cu Gauss–Seidel simplu."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "SOR iteration",
+            "ro": "Iterația SOR"
+          },
+          "content": {
+            "en": "For a relaxation parameter $\\omega \\in (0, 2)$:",
+            "ro": "Pentru un parametru de relaxare $\\omega \\in (0, 2)$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "x_i^{(k+1)} \\;=\\; (1 - \\omega) \\, x_i^{(k)} + \\frac{\\omega}{a_{ii}} \\left( b_i - \\sum_{j < i} a_{ij} \\, x_j^{(k+1)} - \\sum_{j > i} a_{ij} \\, x_j^{(k)} \\right)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Matrix form.** The splitting takes $B = \\frac{1}{\\omega}(D - \\omega L)$, giving:",
+            "ro": "**Forma matricială.** Descompunerea ia $B = \\frac{1}{\\omega}(D - \\omega L)$, dând:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "M_\\omega \\;=\\; (D - \\omega L)^{-1} \\bigl[ (1 - \\omega) D + \\omega U \\bigr]"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Kahan's theorem.** SOR can converge **only if** $\\omega \\in (0, 2)$ — outside that range $\\rho(M_\\omega) \\geq 1$ regardless of $A$. The best $\\omega^*$ depends on $A$'s spectrum; for PDE discretizations there are formulas (e.g., $\\omega^* = 2 / (1 + \\sqrt{1 - \\rho(M_J)^2})$ for consistently-ordered matrices). In practice, tune $\\omega$ empirically or use an adaptive scheme.",
+            "ro": "**Teorema lui Kahan.** SOR poate converge **doar dacă** $\\omega \\in (0, 2)$ — în afara acestui interval $\\rho(M_\\omega) \\geq 1$ indiferent de $A$. Cel mai bun $\\omega^*$ depinde de spectrul lui $A$; pentru discretizări PDE există formule (ex. $\\omega^* = 2 / (1 + \\sqrt{1 - \\rho(M_J)^2})$ pentru matrici consecvent ordonate). În practică, reglează $\\omega$ empiric sau folosește o schemă adaptivă."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Summary of the three methods.**\n\n- **Jacobi** ($B = D$): parallel, slowest.\n- **Gauss–Seidel** ($B = D - L$): sequential, ~2× faster rate when both converge.\n- **SOR** ($B = \\frac{1}{\\omega}(D - \\omega L)$): tuneable, potentially $10\\times$ faster than GS for the right $\\omega$.\n\nFor modern solvers you'd reach for **preconditioned conjugate gradients** (later courses) on SPD systems and **GMRES** on general ones — but all of them still use Jacobi/GS/SOR as **smoothers** inside multigrid and as warm-start preconditioners.",
+            "ro": "**Sumarul celor trei metode.**\n\n- **Jacobi** ($B = D$): paralelă, cea mai lentă.\n- **Gauss–Seidel** ($B = D - L$): secvențială, rată ~2× mai rapidă când ambele converg.\n- **SOR** ($B = \\frac{1}{\\omega}(D - \\omega L)$): reglabil, potențial $10\\times$ mai rapid decât GS pentru $\\omega$ potrivit.\n\nPentru solvere moderne ai apela la **gradienți conjugați precondiționați** (cursuri ulterioare) pe sisteme SPD și **GMRES** pe cele generale — dar toate folosesc încă Jacobi/GS/SOR ca **smoothere** în multigrid și ca precondiționere de warm-start."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 33–38 of ALO curs 07 — SOR and relaxation parameter.",
+            "ro": "Slide-urile 33–38 din ALO curs 07 — SOR și parametrul de relaxare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c7-quiz",
+      "title": {
+        "en": "Self-test: course 7 retrieval",
+        "ro": "Auto-test: retenție cursul 7"
+      },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Eight questions spanning sparse storage, the splitting framework, and the three classical iterative methods. Target: **6 or more correct**.",
+            "ro": "Opt întrebări peste stocarea rară, cadrul de descompunere și cele trei metode iterative clasice. Țintă: **6 sau mai multe corecte**."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Why do iterative methods beat direct factorization on a $10^6 \\times 10^6$ sparse matrix?",
+                "ro": "De ce bat metodele iterative factorizarea directă pe o matrice rară $10^6 \\times 10^6$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "They use less CPU cache.", "ro": "Folosesc mai puțin cache CPU." },
+                  "correct": false,
+                  "explanation": { "en": "Cache usage isn't the dominant factor. The real reasons are complexity ($\\Theta(\\text{nnz})$ per iteration vs $\\Theta(n^3)$ total) and fill-in (direct methods densify sparse factors).", "ro": "Utilizarea cache nu este factorul dominant. Motivele reale sunt complexitatea ($\\Theta(\\text{nnz})$ pe iterație vs $\\Theta(n^3)$ total) și fill-in-ul (metodele directe densifică factorii rari)." }
+                },
+                {
+                  "text": { "en": "They preserve $A$'s sparsity and cost $\\Theta(\\text{nnz})$ per iteration, not $\\Theta(n^3)$.", "ro": "Ele păstrează raritatea lui $A$ și costă $\\Theta(\\text{nnz})$ pe iterație, nu $\\Theta(n^3)$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Iterative methods read $A$ but never modify it, so the 10-nonzeros-per-row structure survives, and each matrix–vector product costs only $10n$ flops.", "ro": "Corect. Metodele iterative citesc $A$ dar nu îl modifică niciodată, deci structura de 10-nenule-pe-linie supraviețuiește, iar fiecare produs matrice-vector costă doar $10n$ flops." }
+                },
+                {
+                  "text": { "en": "They produce exact answers faster than LU.", "ro": "Produc răspunsuri exacte mai rapid decât LU." },
+                  "correct": false,
+                  "explanation": { "en": "Iterative methods produce **approximations** that get better with iterations; they rarely reach the exact answer. Their advantage is complexity per iteration, not exactness.", "ro": "Metodele iterative produc **aproximări** care se îmbunătățesc cu iterațiile; rareori ajung la răspunsul exact. Avantajul lor este complexitatea pe iterație, nu exactitatea." }
+                },
+                {
+                  "text": { "en": "Modern CPUs are optimized for matrix-vector products over factorizations.", "ro": "Procesoarele moderne sunt optimizate pentru produse matrice-vector decât pentru factorizări." },
+                  "correct": false,
+                  "explanation": { "en": "Actually BLAS-3 (matrix-matrix in factorizations) is the fastest kernel on modern hardware. The iterative win is algorithmic, not hardware-specific.", "ro": "De fapt BLAS-3 (matrice-matrice în factorizări) este kernelul cel mai rapid pe hardware modern. Câștigul iterativ este algoritmic, nu specific hardware-ului." }
+                }
+              ],
+              "explanation": { "en": "Sparsity preservation + linear-in-nnz cost per iteration.", "ro": "Păstrarea rarității + cost liniar în nnz pe iterație." },
+              "reviewStep": "alo-c7-intro"
+            },
+            {
+              "question": {
+                "en": "In CSR format, how do you find the number of nonzeros on row $i$?",
+                "ro": "În formatul CSR, cum găsești numărul de intrări nenule pe linia $i$?"
+              },
+              "options": [
+                {
+                  "text": "`inceput_linii[i+1] - inceput_linii[i]`",
+                  "correct": true,
+                  "explanation": { "en": "Correct. The $n+1$-th entry is padded specifically so this formula works for every row, including the last one.", "ro": "Corect. Intrarea a $n+1$-a este completată special astfel încât formula să funcționeze pentru orice linie, inclusiv ultima." }
+                },
+                {
+                  "text": "`ind_col.length / n`",
+                  "correct": false,
+                  "explanation": { "en": "That's the average count, not the per-row count. Rows can have very different densities.", "ro": "Aceea este media, nu numărul pe linie. Liniile pot avea densități foarte diferite." }
+                },
+                {
+                  "text": "`valori[inceput_linii[i]]`",
+                  "correct": false,
+                  "explanation": { "en": "That's the first nonzero value of row $i$, not a count.", "ro": "Aceea este prima valoare nenulă a liniei $i$, nu un număr." }
+                },
+                {
+                  "text": { "en": "You can't — CSR loses per-row counts.", "ro": "Nu poți — CSR pierde numărarea pe linii." },
+                  "correct": false,
+                  "explanation": { "en": "CSR is specifically designed to answer this question in $O(1)$. That's why `inceput_linii` exists.", "ro": "CSR este proiectat special pentru a răspunde acestei întrebări în $O(1)$. De aceea există `inceput_linii`." }
+                }
+              ],
+              "explanation": { "en": "Adjacent-pointer subtraction gives per-row nonzero count in $O(1)$.", "ro": "Scăderea pointerilor adiacenți dă numărul de nenule pe linie în $O(1)$." },
+              "reviewStep": "alo-c7-sparse-csr"
+            },
+            {
+              "question": {
+                "en": "Given $A = B - C$ with $B$ easy to invert, the iteration matrix is:",
+                "ro": "Dată $A = B - C$ cu $B$ ușor de inversat, matricea iterației este:"
+              },
+              "options": [
+                {
+                  "text": "$M = B^{-1} C$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. From $B x^{(k+1)} = C x^{(k)} + b$, solve to $x^{(k+1)} = B^{-1} C x^{(k)} + B^{-1} b = M x^{(k)} + d$.", "ro": "Corect. Din $B x^{(k+1)} = C x^{(k)} + b$, rezolvi la $x^{(k+1)} = B^{-1} C x^{(k)} + B^{-1} b = M x^{(k)} + d$." }
+                },
+                {
+                  "text": "$M = C B^{-1}$",
+                  "correct": false,
+                  "explanation": { "en": "Matrix multiplication is non-commutative. $C B^{-1}$ generally differs from $B^{-1} C$.", "ro": "Înmulțirea matriceală este necomutativă. $C B^{-1}$ diferă în general de $B^{-1} C$." }
+                },
+                {
+                  "text": "$M = A^{-1}$",
+                  "correct": false,
+                  "explanation": { "en": "That's the solution operator, not the iteration matrix. If you had $A^{-1}$, you wouldn't need to iterate.", "ro": "Acela este operatorul de soluție, nu matricea iterației. Dacă ai avea $A^{-1}$, nu ai avea nevoie să iterezi." }
+                },
+                {
+                  "text": "$M = B - C$",
+                  "correct": false,
+                  "explanation": { "en": "$B - C = A$, the original matrix, not the iteration matrix.", "ro": "$B - C = A$, matricea originală, nu matricea iterației." }
+                }
+              ],
+              "explanation": { "en": "$M = B^{-1} C$, derived from the fixed-point rearrangement of $(B-C)x^* = b$.", "ro": "$M = B^{-1} C$, derivat din rearanjarea punctului fix a lui $(B-C)x^* = b$." },
+              "reviewStep": "alo-c7-splitting"
+            },
+            {
+              "question": {
+                "en": "The iteration $x^{(k+1)} = M x^{(k)} + d$ converges for every initial $x^{(0)}$ if and only if…",
+                "ro": "Iterația $x^{(k+1)} = M x^{(k)} + d$ converge pentru orice $x^{(0)}$ inițial dacă și numai dacă…"
+              },
+              "options": [
+                {
+                  "text": "$\\rho(M) < 1$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. The error satisfies $e^{(k)} = M^k e^{(0)}$, and $M^k \\to 0$ for every $e^{(0)}$ iff $\\rho(M) < 1$ (course 2).", "ro": "Corect. Eroarea satisface $e^{(k)} = M^k e^{(0)}$, iar $M^k \\to 0$ pentru orice $e^{(0)}$ dacă și numai dacă $\\rho(M) < 1$ (cursul 2)." }
+                },
+                {
+                  "text": "$\\det M = 0$",
+                  "correct": false,
+                  "explanation": { "en": "A singular $M$ makes the map degenerate. Convergence is about eigenvalue **magnitudes**, not zero determinant.", "ro": "Un $M$ singular face aplicația degenerată. Convergența este despre **magnitudinile** valorilor proprii, nu despre determinantul zero." }
+                },
+                {
+                  "text": "$\\|M\\| < 1$ in any norm", "correct": false,
+                  "explanation": { "en": "$\\|M\\| < 1$ in some induced norm is **sufficient** (gives $\\rho(M) \\leq \\|M\\| < 1$) but not necessary. Some convergent iterations have $\\|M\\| > 1$ in every natural norm.", "ro": "$\\|M\\| < 1$ într-o normă indusă este **suficient** (dă $\\rho(M) \\leq \\|M\\| < 1$), dar nu necesar. Unele iterații convergente au $\\|M\\| > 1$ în fiecare normă naturală." }
+                },
+                {
+                  "text": "$A$ is symmetric.",
+                  "correct": false,
+                  "explanation": { "en": "Symmetry of $A$ is irrelevant to this general statement. Convergence is governed entirely by $M = B^{-1} C$.", "ro": "Simetria lui $A$ este irelevantă pentru această afirmație generală. Convergența este guvernată complet de $M = B^{-1} C$." }
+                }
+              ],
+              "explanation": { "en": "Spectral radius < 1 is iff; norm < 1 is only sufficient.", "ro": "Raza spectrală < 1 este echivalență; norma < 1 este doar suficient." },
+              "reviewStep": "alo-c7-convergence"
+            },
+            {
+              "question": {
+                "en": "Which splitting defines the Jacobi method?",
+                "ro": "Care descompunere definește metoda Jacobi?"
+              },
+              "options": [
+                {
+                  "text": "$B = D$ (diagonal part of $A$), $C = -(L_A + U_A)$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. Writing $A = D - L - U$ (with $L, U$ the strictly lower/upper parts of $-A$), Jacobi takes $B = D$.", "ro": "Corect. Scriind $A = D - L - U$ (cu $L, U$ părțile strict inferioară/superioară ale lui $-A$), Jacobi ia $B = D$." }
+                },
+                {
+                  "text": "$B = D - L$ (lower-triangular), $C = U$",
+                  "correct": false,
+                  "explanation": { "en": "That's Gauss–Seidel.", "ro": "Aceea este Gauss–Seidel." }
+                },
+                {
+                  "text": "$B = A$, $C = 0$",
+                  "correct": false,
+                  "explanation": { "en": "That makes $M = 0$, so one iteration gives $x^* = A^{-1} b$ directly — which means solving the original system, not iterating.", "ro": "Asta face $M = 0$, deci o iterație dă $x^* = A^{-1} b$ direct — ceea ce înseamnă rezolvarea sistemului original, nu iterarea." }
+                },
+                {
+                  "text": "$B = L$ (strictly lower-triangular), $C = U + D$",
+                  "correct": false,
+                  "explanation": { "en": "A strictly lower-triangular $B$ has zero diagonal, hence singular — can't use as a splitting matrix.", "ro": "Un $B$ strict inferior triunghiular are diagonala zero, deci este singular — nu poate fi folosit ca matrice de descompunere." }
+                }
+              ],
+              "explanation": { "en": "Jacobi = diagonal splitting.", "ro": "Jacobi = descompunere diagonală." },
+              "reviewStep": "alo-c7-jacobi"
+            },
+            {
+              "question": {
+                "en": "Under what structural condition on $A$ does **strict diagonal dominance** guarantee Jacobi converges?",
+                "ro": "Sub ce condiție structurală asupra lui $A$ garantează **dominanța diagonală strictă** că Jacobi converge?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Only if $A$ is symmetric.", "ro": "Doar dacă $A$ este simetrică." },
+                  "correct": false,
+                  "explanation": { "en": "Symmetry is not required. Diagonal dominance alone suffices.", "ro": "Simetria nu este necesară. Dominanța diagonală singură este suficientă." }
+                },
+                {
+                  "text": { "en": "No extra condition — diagonal dominance alone implies $\\|M_J\\|_\\infty < 1$.", "ro": "Nicio condiție suplimentară — dominanța diagonală singură implică $\\|M_J\\|_\\infty < 1$." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. The $\\infty$-norm of $M_J = D^{-1}(L + U)$ is exactly $\\max_i \\sum_{j \\neq i} |a_{ij}| / |a_{ii}|$, which is $< 1$ by the diagonal dominance definition.", "ro": "Corect. Norma $\\infty$ a lui $M_J = D^{-1}(L + U)$ este exact $\\max_i \\sum_{j \\neq i} |a_{ij}| / |a_{ii}|$, care este $< 1$ prin definiția dominanței diagonale." }
+                },
+                {
+                  "text": { "en": "Only if $A$ is positive-definite.", "ro": "Doar dacă $A$ este pozitiv definită." },
+                  "correct": false,
+                  "explanation": { "en": "PD is another sufficient condition (for Gauss–Seidel especially), but strict diagonal dominance alone already forces convergence.", "ro": "PD este o altă condiție suficientă (pentru Gauss–Seidel în special), dar dominanța diagonală strictă singură deja forțează convergența." }
+                },
+                {
+                  "text": { "en": "Only for $n \\leq 3$.", "ro": "Doar pentru $n \\leq 3$." },
+                  "correct": false,
+                  "explanation": { "en": "Dimension plays no role in the theorem.", "ro": "Dimensiunea nu joacă niciun rol în teoremă." }
+                }
+              ],
+              "explanation": { "en": "Strict diag dominance alone ⇒ $\\|M_J\\|_\\infty < 1$ ⇒ Jacobi converges.", "ro": "Dominanța diagonală strictă singură ⇒ $\\|M_J\\|_\\infty < 1$ ⇒ Jacobi converge." },
+              "reviewStep": "alo-c7-jacobi"
+            },
+            {
+              "question": {
+                "en": "Which is the main pedagogical difference between Jacobi and Gauss–Seidel?",
+                "ro": "Care este principala diferență pedagogică între Jacobi și Gauss–Seidel?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Gauss–Seidel uses newly-computed values within the same sweep; Jacobi uses only values from the previous iteration.", "ro": "Gauss–Seidel folosește valorile nou-calculate în aceeași trecere; Jacobi folosește doar valori din iterația anterioară." },
+                  "correct": true,
+                  "explanation": { "en": "Correct. Jacobi keeps $x^{(k)}$ and $x^{(k+1)}$ separate; Gauss–Seidel overwrites in place, so later equations in the sweep benefit from earlier updates.", "ro": "Corect. Jacobi păstrează $x^{(k)}$ și $x^{(k+1)}$ separat; Gauss–Seidel suprascrie pe loc, deci ecuațiile ulterioare din trecere beneficiază de actualizările anterioare." }
+                },
+                {
+                  "text": { "en": "Jacobi handles non-square matrices; Gauss–Seidel doesn't.", "ro": "Jacobi gestionează matricile non-pătratice; Gauss–Seidel nu." },
+                  "correct": false,
+                  "explanation": { "en": "Both methods are defined only for square $A$ (and assume $a_{ii} \\neq 0$).", "ro": "Ambele metode sunt definite doar pentru $A$ pătratică (și presupun $a_{ii} \\neq 0$)." }
+                },
+                {
+                  "text": { "en": "Gauss–Seidel requires SPD; Jacobi requires symmetric.", "ro": "Gauss–Seidel cere SPD; Jacobi cere simetrică." },
+                  "correct": false,
+                  "explanation": { "en": "SPD is a **sufficient** condition for Gauss–Seidel, not a requirement; neither method intrinsically requires symmetry.", "ro": "SPD este o condiție **suficientă** pentru Gauss–Seidel, nu o cerință; niciuna dintre metode nu cere intrinsec simetrie." }
+                },
+                {
+                  "text": { "en": "Jacobi converges to $x^* + c$ for some constant $c$; Gauss–Seidel converges to $x^*$ exactly.", "ro": "Jacobi converge la $x^* + c$ pentru o constantă $c$; Gauss–Seidel converge la $x^*$ exact." },
+                  "correct": false,
+                  "explanation": { "en": "Both methods have the same fixed point — the exact solution $x^*$ of $Ax = b$.", "ro": "Ambele metode au același punct fix — soluția exactă $x^*$ a lui $Ax = b$." }
+                }
+              ],
+              "explanation": { "en": "In-place update vs two-buffer update — that's the core difference.", "ro": "Actualizare pe loc vs actualizare cu două buffere — aceea este diferența centrală." },
+              "reviewStep": "alo-c7-gauss-seidel"
+            },
+            {
+              "question": {
+                "en": "Kahan's theorem says SOR can only converge when $\\omega$ is in what range?",
+                "ro": "Teorema lui Kahan spune că SOR poate converge doar când $\\omega$ este în ce interval?"
+              },
+              "options": [
+                {
+                  "text": "$(0, 2)$",
+                  "correct": true,
+                  "explanation": { "en": "Correct. Outside $(0, 2)$, $\\rho(M_\\omega) \\geq 1$ regardless of $A$. The optimum is usually in $(1, 2)$ — \"over-relaxation.\"", "ro": "Corect. În afara $(0, 2)$, $\\rho(M_\\omega) \\geq 1$ indiferent de $A$. Optimul este de obicei în $(1, 2)$ — \"supra-relaxare\"." }
+                },
+                {
+                  "text": "$(0, 1)$",
+                  "correct": false,
+                  "explanation": { "en": "$(0, 1)$ is the under-relaxation range. $\\omega > 1$ is exactly where SOR earns its \"over-relaxation\" name, and it's still convergent up to 2.", "ro": "$(0, 1)$ este intervalul sub-relaxării. $\\omega > 1$ este exact acolo unde SOR își câștigă numele de \"supra-relaxare\" și este încă convergentă până la 2." }
+                },
+                {
+                  "text": "$(-1, 1)$",
+                  "correct": false,
+                  "explanation": { "en": "Negative $\\omega$ is meaningless (would reverse direction); SOR requires positive parameters.", "ro": "$\\omega$ negativ nu are sens (ar inversa direcția); SOR cere parametri pozitivi." }
+                },
+                {
+                  "text": { "en": "Any positive value.", "ro": "Orice valoare pozitivă." },
+                  "correct": false,
+                  "explanation": { "en": "Beyond $\\omega = 2$, the method diverges — that's Kahan's bound and it's tight.", "ro": "Dincolo de $\\omega = 2$, metoda diverge — aceasta este limita lui Kahan și este strânsă." }
+                }
+              ],
+              "explanation": { "en": "$\\omega \\in (0, 2)$ is necessary; the sweet spot for PDE matrices is usually in $(1, 2)$.", "ro": "$\\omega \\in (0, 2)$ este necesar; zona optimă pentru matrici PDE este de obicei în $(1, 2)$." },
+              "reviewStep": "alo-c7-sor"
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**That wraps course 7 — and the ALO curriculum you've seen so far.** With factorizations (courses 5–6), iterative solvers (this one), and error analysis (course 3), you have the full foundation for modern numerical linear algebra. Future topics build on this core: eigenvalue algorithms, SVD, optimization, preconditioning.",
+            "ro": "**Așa se încheie cursul 7 — și curriculumul ALO pe care l-ai văzut până acum.** Cu factorizări (cursurile 5–6), solvere iterative (acesta) și analiza erorilor (cursul 3), ai fundația completă pentru algebra liniară numerică modernă. Subiectele viitoare construiesc pe acest nucleu: algoritmi de valori proprii, SVD, optimizare, precondiționare."
+          }
+        }
+      ]
+    }
+  ]
+}
