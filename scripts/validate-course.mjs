@@ -16,7 +16,7 @@ import { resolve } from 'path';
 const VALID_BLOCK_TYPES = [
   'learn', 'definition', 'think', 'quiz', 'code', 'callout',
   'diagram', 'image', 'table', 'list', 'lecture', 'lecture-video',
-  'lecture-exam', 'animation', 'code-challenge', 'terminal',
+  'lecture-exam', 'animation', 'code-challenge', 'terminal', 'equation',
 ];
 
 // Props that each block type requires
@@ -35,6 +35,7 @@ const REQUIRED_PROPS = {
   diagram: [],
   image: ['src'],
   animation: [],
+  equation: ['tex'],
 };
 
 function isBilingualObject(val) {

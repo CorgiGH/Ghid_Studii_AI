@@ -19,6 +19,43 @@ function repairJSON(str) {
     warnings.push('bare compound numbers');
   }
 
+  // Fix invalid backslash escapes inside strings (common in math/TeX content:
+  // Gemini emits \|, \alpha, \frac instead of \\|, \\alpha, \\frac).
+  // Walks character-by-character tracking string state; doubles any backslash
+  // that is not followed by a valid JSON escape char.
+  {
+    const out = [];
+    const validEscapes = new Set(['"', '\\', '/', 'b', 'f', 'n', 'r', 't', 'u']);
+    let inStr = false;
+    let fixedAny = false;
+    for (let i = 0; i < repaired.length; i++) {
+      const ch = repaired[i];
+      if (ch === '"' && (i === 0 || repaired[i - 1] !== '\\')) {
+        inStr = !inStr;
+        out.push(ch);
+        continue;
+      }
+      if (inStr && ch === '\\') {
+        const next = repaired[i + 1];
+        if (!validEscapes.has(next)) {
+          out.push('\\\\');
+          fixedAny = true;
+          continue;
+        }
+        // Valid escape — copy the pair as-is
+        out.push(ch);
+        out.push(next);
+        i++;
+        continue;
+      }
+      out.push(ch);
+    }
+    if (fixedAny) {
+      repaired = out.join('');
+      warnings.push('invalid backslash escapes (likely TeX)');
+    }
+  }
+
   // Try parsing as-is first
   try { JSON.parse(repaired); return { json: repaired, warnings }; } catch {}
 

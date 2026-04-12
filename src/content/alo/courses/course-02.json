@@ -1,0 +1,1275 @@
+{
+  "meta": {
+    "id": "alo-c2",
+    "title": {
+      "en": "Course 2: Inner products, norms, and a short history of linear systems",
+      "ro": "Cursul 2: Produse scalare, norme și o scurtă istorie a sistemelor liniare"
+    },
+    "shortTitle": { "en": "C2: Norms", "ro": "C2: Norme" },
+    "slug": "alo-c2",
+    "source": "ALO curs 02.pdf (Anca Ignat & Corina Forăscu)"
+  },
+  "steps": [
+    {
+      "id": "alo-c2-intro",
+      "title": { "en": "Why norms? Roadmap of course 2", "ro": "De ce norme? Harta cursului 2" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Two different matrices $A$ and $B$ act on the same input vector $x$. How would you quantify which matrix ''distorts'' $x$ more? Can a single number capture that?",
+            "ro": "Două matrici diferite $A$ și $B$ acționează asupra aceluiași vector de intrare $x$. Cum ai cuantifica care matrice ''distorsionează'' mai mult pe $x$? Poate un singur număr să surprindă asta?"
+          },
+          "answer": {
+            "en": "You need a way to measure the ''size'' of a vector ($\\|Ax\\|$ vs $\\|Bx\\|$) and, ideally, a way to measure the matrix itself — the worst-case stretching it can do over all unit vectors. That is precisely what **vector norms** and **matrix norms** give you. Course 2 builds both, plus the inner product that powers the Euclidean norm.",
+            "ro": "Ai nevoie de o modalitate de a măsura ''mărimea'' unui vector ($\\|Ax\\|$ vs. $\\|Bx\\|$) și, ideal, de o modalitate de a măsura matricea însăși — cea mai defavorabilă întindere peste toți vectorii unitari. Exact asta îți oferă **normele vectoriale** și **normele matriciale**. Cursul 2 construiește ambele, plus produsul scalar care alimentează norma euclidiană."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Linear algebra is the language of modern applied mathematics.** — Gilbert Strang (MIT).\n\nNeural networks, embeddings, linear transformations — they all speak ''matrices and vectors.'' Without the right way to *measure* those objects (size of a vector, distortion from a matrix), we cannot reason about stability, convergence, or error. Course 2 is about measurement.",
+            "ro": "**Algebra liniară este limbajul matematicii aplicate moderne.** — Gilbert Strang (MIT).\n\nRețelele neuronale, embedding-urile, transformările liniare — toate vorbesc ''matrice și vectori''. Fără modalitatea corectă de a *măsura* aceste obiecte (mărimea unui vector, distorsiunea unei matrici), nu putem raționa despre stabilitate, convergență sau eroare. Cursul 2 este despre măsurare."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Recap of course 1:** vector/matrix operations, elementary matrix types, plus three motivating examples (traffic linear systems, betweenness centrality, SVD image compression). Course 2 introduces the *measurement* layer on top.",
+            "ro": "**Recap curs 1:** operații cu vectori și matrice, tipuri elementare de matrici, plus trei exemple motivante (sisteme liniare în trafic, centralitatea de intermediere, compresia SVD a imaginilor). Cursul 2 adaugă stratul de *măsurare* deasupra."
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            { "en": "**Inner products** — the algebraic building block for Euclidean geometry.", "ro": "**Produse scalare** — cărămida algebrică pentru geometria euclidiană." },
+            { "en": "**Vector and matrix norms** — how to measure size and stretching.", "ro": "**Norme vectoriale și matriciale** — cum măsurăm mărimea și întinderea." },
+            { "en": "**History of solving linear systems** — from Babylonian clay tablets to conjugate gradients.", "ro": "**Istoria rezolvării sistemelor liniare** — de la tăblițe babiloniene la gradienți conjugați." }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Slides 1–5 of ALO curs 02 (Anca Ignat & Corina Forăscu). Course page: https://edu.info.uaic.ro/algebra-liniara/",
+            "ro": "Slide-urile 1–5 din ALO curs 02 (Anca Ignat & Corina Forăscu). Pagina cursului: https://edu.info.uaic.ro/algebra-liniara/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-inner-product",
+      "title": { "en": "Inner products: the four axioms", "ro": "Produse scalare: cele patru axiome" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You have two vectors $x = (3, 4)$ and $y = (4, -3)$ in $\\mathbb{R}^2$. Compute $3 \\cdot 4 + 4 \\cdot (-3)$. What does the result (zero) tell you geometrically?",
+            "ro": "Ai vectorii $x = (3, 4)$ și $y = (4, -3)$ în $\\mathbb{R}^2$. Calculează $3 \\cdot 4 + 4 \\cdot (-3)$. Ce îți spune geometric rezultatul (zero)?"
+          },
+          "answer": {
+            "en": "The sum is $12 - 12 = 0$. Geometrically, the two vectors are **perpendicular**. That simple ''sum of componentwise products'' is the inner product on $\\mathbb{R}^n$, and its zero value is the algebraic fingerprint of orthogonality. Everything else — lengths, angles, projections — follows from it.",
+            "ro": "Suma este $12 - 12 = 0$. Geometric, cei doi vectori sunt **perpendiculari**. Această simplă ''sumă de produse pe componente'' este produsul scalar pe $\\mathbb{R}^n$, iar valoarea zero este amprenta algebrică a ortogonalității. Orice altceva — lungimi, unghiuri, proiecții — decurge din ea."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Concrete first.** For $x, y \\in \\mathbb{R}^n$, the standard inner product is the dot product:",
+            "ro": "**Întâi concretul.** Pentru $x, y \\in \\mathbb{R}^n$, produsul scalar standard este produsul scalar clasic:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "(x, y) = \\sum_{i=1}^n x_i y_i = y^T x"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "For complex vectors $x, y \\in \\mathbb{C}^n$, we must conjugate the second argument so that $(x, x) \\geq 0$ stays real and non-negative:",
+            "ro": "Pentru vectori complecși $x, y \\in \\mathbb{C}^n$, conjugăm al doilea argument pentru ca $(x, x) \\geq 0$ să rămână real și nenegativ:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "(x, y) = \\sum_{i=1}^n x_i \\overline{y_i} = y^H x"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Here $y^H = \\overline{y}^T$ is the **conjugate transpose** (Hermitian transpose). In $\\mathbb{R}^n$, conjugation does nothing, so $y^H = y^T$ and we recover the dot product.",
+            "ro": "Aici $y^H = \\overline{y}^T$ este **transpusa conjugată** (transpusa Hermitiană). În $\\mathbb{R}^n$, conjugarea nu schimbă nimic, deci $y^H = y^T$ și recuperăm produsul scalar clasic."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "inner product (scalar product)", "ro": "produs scalar" },
+          "content": {
+            "en": "On a vector space $X$ over $K \\in \\{\\mathbb{R}, \\mathbb{C}\\}$, an **inner product** is a map $(\\cdot, \\cdot): X \\times X \\to K$ satisfying four axioms:\n\n**(a) Positive definite:** $(x, x) \\geq 0$ for all $x$, and $(x, x) = 0 \\iff x = 0$.\n**(b) Conjugate symmetry:** $(x, y) = \\overline{(y, x)}$.\n**(c) Linear in the first argument:** $(\\lambda x, y) = \\lambda (x, y)$.\n**(d) Additive in the first argument:** $(x + y, z) = (x, z) + (y, z)$.",
+            "ro": "Pe un spațiu vectorial $X$ peste $K \\in \\{\\mathbb{R}, \\mathbb{C}\\}$, un **produs scalar** este o aplicație $(\\cdot, \\cdot): X \\times X \\to K$ care satisface patru axiome:\n\n**(a) Pozitiv definit:** $(x, x) \\geq 0$ pentru orice $x$, și $(x, x) = 0 \\iff x = 0$.\n**(b) Simetrie conjugată:** $(x, y) = \\overline{(y, x)}$.\n**(c) Liniar în primul argument:** $(\\lambda x, y) = \\lambda (x, y)$.\n**(d) Aditiv în primul argument:** $(x + y, z) = (x, z) + (y, z)$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Common misconceptions:**\n\n- **Conjugating the wrong argument.** Some textbooks conjugate the first argument. This course conjugates the **second** so that $(\\cdot, \\cdot)$ is linear in the first slot. Pick one convention and stick to it.\n- **Forgetting the conjugate in $\\mathbb{C}^n$.** Without it, $(x, x) = \\sum x_i^2$ can be complex or negative — $(x, x) \\geq 0$ would fail.\n- **Thinking $(x, y)$ is symmetric over $\\mathbb{C}$.** It is only **conjugate** symmetric. Over $\\mathbb{R}$, conjugation is trivial, so it becomes ordinary symmetry.",
+            "ro": "**Confuzii frecvente:**\n\n- **Conjugarea argumentului greșit.** Unele manuale conjugă primul argument. Acest curs conjugă pe al **doilea** astfel încât $(\\cdot, \\cdot)$ să fie liniar în primul slot. Alege o convenție și ține-o.\n- **Omiterea conjugării în $\\mathbb{C}^n$.** Fără ea, $(x, x) = \\sum x_i^2$ poate fi complex sau negativ — $(x, x) \\geq 0$ ar cădea.\n- **Să crezi că $(x, y)$ e simetric pe $\\mathbb{C}$.** Este doar **conjugat** simetric. Pe $\\mathbb{R}$, conjugarea e trivială, deci devine simetrie obișnuită."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Using axiom (c) and axiom (b), can you derive how the inner product behaves when you scale the **second** argument, i.e., $(x, \\lambda y)$?",
+            "ro": "Folosind axioma (c) și axioma (b), poți deduce cum se comportă produsul scalar când scalezi al **doilea** argument, adică $(x, \\lambda y)$?"
+          },
+          "answer": {
+            "en": "Apply (b): $(x, \\lambda y) = \\overline{(\\lambda y, x)}$. Apply (c) inside the conjugate: $= \\overline{\\lambda (y, x)} = \\overline{\\lambda} \\cdot \\overline{(y, x)} = \\overline{\\lambda} (x, y)$. So **scaling the second slot pulls out the conjugate of the scalar**: $(x, \\lambda y) = \\overline{\\lambda} (x, y)$. Over $\\mathbb{R}$ this collapses to plain linearity. This property is why we say the inner product is **sesquilinear** (linear in the first, conjugate-linear in the second).",
+            "ro": "Aplicăm (b): $(x, \\lambda y) = \\overline{(\\lambda y, x)}$. Aplicăm (c) în conjugat: $= \\overline{\\lambda (y, x)} = \\overline{\\lambda} \\cdot \\overline{(y, x)} = \\overline{\\lambda} (x, y)$. Deci **scalarea celui de-al doilea slot scoate conjugatul scalarului**: $(x, \\lambda y) = \\overline{\\lambda} (x, y)$. Pe $\\mathbb{R}$ devine liniaritate simplă. Această proprietate este motivul pentru care spunem că produsul scalar este **sesquiliniar** (liniar în primul argument, conjugat-liniar în al doilea)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "On $\\mathbb{C}^n$ with $(x, y) = \\sum x_i \\overline{y_i}$, what is $(ix, y)$ in terms of $(x, y)$?",
+                "ro": "Pe $\\mathbb{C}^n$ cu $(x, y) = \\sum x_i \\overline{y_i}$, cât este $(ix, y)$ în funcție de $(x, y)$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$-i \\cdot (x, y)$", "ro": "$-i \\cdot (x, y)$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is what you get when you scale the *second* argument by $i$: $(x, iy) = \\overline{i}(x, y) = -i(x, y)$. Here we scaled the first argument, where the scalar pulls out unchanged.",
+                    "ro": "Asta obții când scalezi *al doilea* argument cu $i$: $(x, iy) = \\overline{i}(x, y) = -i(x, y)$. Aici am scalat primul argument, unde scalarul iese neschimbat."
+                  }
+                },
+                {
+                  "text": { "en": "$i \\cdot (x, y)$", "ro": "$i \\cdot (x, y)$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Axiom (c) says linearity in the first argument: $(\\lambda x, y) = \\lambda (x, y)$. With $\\lambda = i$, the scalar passes through unchanged.",
+                    "ro": "Corect. Axioma (c) spune liniaritate în primul argument: $(\\lambda x, y) = \\lambda (x, y)$. Cu $\\lambda = i$, scalarul trece nemodificat."
+                  }
+                },
+                {
+                  "text": { "en": "$|i| \\cdot (x, y) = (x, y)$", "ro": "$|i| \\cdot (x, y) = (x, y)$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Norms scale by absolute value, not inner products. The inner product is linear, not ''absolute-linear'' — the full complex number $\\lambda$ comes out.",
+                    "ro": "Normele se scalează cu valoarea absolută, nu produsele scalare. Produsul scalar este liniar, nu ''absolut-liniar'' — iese întregul număr complex $\\lambda$."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-inner-product"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-adjoint-identity",
+      "title": { "en": "The adjoint identity: $(Ax, y) = (x, A^H y)$", "ro": "Identitatea adjunctului: $(Ax, y) = (x, A^H y)$" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "A matrix $A$ moves $x$ from one inner-product space to another: $Ax \\in \\mathbb{C}^m$, and we pair it with $y \\in \\mathbb{C}^m$. Can you ''push'' $A$ from the left of $x$ to the left of $y$ without changing the value of the inner product? If yes, what modifications does $A$ need?",
+            "ro": "O matrice $A$ mută pe $x$ dintr-un spațiu cu produs scalar în altul: $Ax \\in \\mathbb{C}^m$, iar îl împerechezi cu $y \\in \\mathbb{C}^m$. Poți ''muta'' pe $A$ din stânga lui $x$ în stânga lui $y$ fără să schimbi valoarea produsului scalar? Dacă da, ce modificări are nevoie $A$?"
+          },
+          "answer": {
+            "en": "Yes — but only if you replace $A$ with its **conjugate transpose** $A^H$ (or $A^T$ in the real case). This is the **adjoint identity**: $(Ax, y) = (x, A^H y)$. The matrix moves sides, and the ''price'' is swapping for its Hermitian transpose.",
+            "ro": "Da — dar numai dacă înlocuiești pe $A$ cu **transpusa conjugată** $A^H$ (sau $A^T$ în cazul real). Asta este **identitatea adjunctului**: $(Ax, y) = (x, A^H y)$. Matricea își schimbă poziția, iar ''prețul'' este schimbarea cu transpusa hermitiană."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Let $A \\in \\mathbb{C}^{m \\times n}$, $x \\in \\mathbb{C}^n$, $y \\in \\mathbb{C}^m$. The adjoint identity reads:",
+            "ro": "Fie $A \\in \\mathbb{C}^{m \\times n}$, $x \\in \\mathbb{C}^n$, $y \\in \\mathbb{C}^m$. Identitatea adjunctului se scrie:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "(Ax, y)_{\\mathbb{C}^m} = (x, A^H y)_{\\mathbb{C}^n}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Proof — three keystrokes of the matrix algebra:**",
+            "ro": "**Demonstrație — trei pași de algebră matricială:**"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "(Ax, y) = y^H (Ax) = y^H A \\, x = (A^H y)^H x = (x, A^H y)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Subgoal reading:** (1) expand the inner product as $y^H \\cdot$ — **Use the definition**. (2) factor $A$ onto $y^H$ via $(A^H y)^H = y^H A^{HH} = y^H A$ — **Reassociate**. (3) reinterpret the right-hand product as the inner product of $x$ with $A^H y$ — **Repackage**.\n\nIn the real case, $A^H = A^T$, and the identity becomes $(Ax, y) = (x, A^T y)$.",
+            "ro": "**Citire pe subobiective:** (1) desfășurăm produsul scalar ca $y^H \\cdot$ — **Folosim definiția**. (2) factorizăm $A$ pe $y^H$ via $(A^H y)^H = y^H A^{HH} = y^H A$ — **Reasociem**. (3) reinterpretăm produsul din dreapta drept produsul scalar al lui $x$ cu $A^H y$ — **Reîmpachetăm**.\n\nÎn cazul real, $A^H = A^T$, iar identitatea devine $(Ax, y) = (x, A^T y)$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why this identity matters.** It is the workhorse behind: **(1)** deriving the normal equations $A^T A x = A^T b$ for least squares; **(2)** proving the spectral norm formula $\\|A\\|_2 = \\sqrt{\\rho(A^H A)}$; **(3)** defining **self-adjoint** (Hermitian) matrices, which are exactly the matrices for which $A = A^H$ — i.e., the inner-product ''moving'' is free.",
+            "ro": "**De ce contează această identitate.** Este instrumentul principal în spatele: **(1)** deducerii ecuațiilor normale $A^T A x = A^T b$ pentru cele mai mici pătrate; **(2)** demonstrării formulei normei spectrale $\\|A\\|_2 = \\sqrt{\\rho(A^H A)}$; **(3)** definirii matricilor **auto-adjuncte** (hermitiene), adică exact matricile pentru care $A = A^H$ — mutarea în produsul scalar este ''gratis''."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "If $A$ is a real symmetric matrix ($A = A^T$) and $x, y \\in \\mathbb{R}^n$, what does the adjoint identity simplify to? What name do we give such matrices?",
+            "ro": "Dacă $A$ este o matrice reală simetrică ($A = A^T$) și $x, y \\in \\mathbb{R}^n$, la ce se reduce identitatea adjunctului? Ce nume dăm unor astfel de matrici?"
+          },
+          "answer": {
+            "en": "It becomes $(Ax, y) = (x, Ay)$ — the matrix acts ''the same'' on either side of the inner product. These are called **self-adjoint** (in general Hermitian; in the real case, symmetric) matrices, and they have a rich theory: real eigenvalues, orthogonal eigenvectors, spectral decomposition.",
+            "ro": "Devine $(Ax, y) = (x, Ay)$ — matricea acționează ''la fel'' pe oricare parte a produsului scalar. Acestea se numesc matrici **auto-adjuncte** (în general hermitiene; în cazul real, simetrice), iar ele au o teorie bogată: valori proprii reale, vectori proprii ortogonali, descompunere spectrală."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-vector-norms",
+      "title": { "en": "Vector norms: three rules, three classic examples", "ro": "Norme vectoriale: trei reguli, trei exemple clasice" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You're in Manhattan and want to walk from corner $(0, 0)$ to corner $(3, 4)$. The crow flies a distance of $5$. You walk the streets and cover $3 + 4 = 7$. Both numbers describe the ''size'' of the displacement $(3, 4)$. Are they both valid *norms*? What rules does a norm have to satisfy?",
+            "ro": "Ești în Manhattan și vrei să mergi din colțul $(0, 0)$ la colțul $(3, 4)$. Linia dreaptă are lungimea $5$. Mergi pe străzi și parcurgi $3 + 4 = 7$. Ambele numere descriu ''mărimea'' deplasării $(3, 4)$. Sunt ambele *norme* valide? Ce reguli trebuie să satisfacă o normă?"
+          },
+          "answer": {
+            "en": "Both are valid norms! The crow-flies distance is the **$\\ell_2$ (Euclidean) norm**, the streets distance is the **$\\ell_1$ (Manhattan) norm**. A norm just has to be non-negative (zero only at the origin), scale linearly when the vector is stretched, and satisfy the triangle inequality. Many different functions fit — each gives a different ''geometry'' to the same vector space.",
+            "ro": "Ambele sunt norme valide! Distanța în linie dreaptă este **norma $\\ell_2$ (euclidiană)**, distanța pe străzi este **norma $\\ell_1$ (Manhattan)**. O normă trebuie doar să fie nenegativă (zero doar la origine), să se scaleze liniar când vectorul este întins, și să satisfacă inegalitatea triunghiului. Multe funcții diferite se potrivesc — fiecare dă o ''geometrie'' diferită aceluiași spațiu vectorial."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "norm", "ro": "normă" },
+          "content": {
+            "en": "Let $X$ be a real (or complex) vector space. A **norm** is a map $\\|\\cdot\\|: X \\to \\mathbb{R}_+$ satisfying:\n\n**(1) Definiteness:** $\\|x\\| \\geq 0$, and $\\|x\\| = 0 \\iff x = 0$.\n**(2) Triangle inequality:** $\\|x + y\\| \\leq \\|x\\| + \\|y\\|$.\n**(3) Absolute homogeneity:** $\\|\\lambda x\\| = |\\lambda| \\cdot \\|x\\|$.\n\nOn $\\mathbb{R}^n$ or $\\mathbb{C}^n$, these are called **vector norms**.",
+            "ro": "Fie $X$ un spațiu vectorial real (sau complex). O **normă** este o aplicație $\\|\\cdot\\|: X \\to \\mathbb{R}_+$ care satisface:\n\n**(1) Definire:** $\\|x\\| \\geq 0$, și $\\|x\\| = 0 \\iff x = 0$.\n**(2) Inegalitatea triunghiului:** $\\|x + y\\| \\leq \\|x\\| + \\|y\\|$.\n**(3) Omogenitate absolută:** $\\|\\lambda x\\| = |\\lambda| \\cdot \\|x\\|$.\n\nPe $\\mathbb{R}^n$ sau $\\mathbb{C}^n$, se numesc **norme vectoriale**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The three classic vector norms.** All are valid (they satisfy the three axioms).",
+            "ro": "**Cele trei norme vectoriale clasice.** Toate sunt valide (satisfac cele trei axiome)."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Name", "ro": "Nume" },
+            { "en": "Formula", "ro": "Formulă" },
+            { "en": "Intuition", "ro": "Intuiție" }
+          ],
+          "rows": [
+            [
+              { "en": "**$\\ell_1$** (Manhattan, city-block)", "ro": "**$\\ell_1$** (Manhattan, cvartal)" },
+              { "en": "$\\|x\\|_1 = \\sum_{i=1}^n |x_i|$", "ro": "$\\|x\\|_1 = \\sum_{i=1}^n |x_i|$" },
+              { "en": "Total taxicab distance along axis-aligned streets.", "ro": "Distanța totală de taxi pe străzi aliniate cu axele." }
+            ],
+            [
+              { "en": "**$\\ell_2$** (Euclidean)", "ro": "**$\\ell_2$** (euclidiană)" },
+              { "en": "$\\|x\\|_2 = \\sqrt{\\sum_{i=1}^n |x_i|^2}$", "ro": "$\\|x\\|_2 = \\sqrt{\\sum_{i=1}^n |x_i|^2}$" },
+              { "en": "Straight-line distance (Pythagoras).", "ro": "Distanța în linie dreaptă (Pitagora)." }
+            ],
+            [
+              { "en": "**$\\ell_\\infty$** (Chebyshev, chessboard)", "ro": "**$\\ell_\\infty$** (Cebyshev, tabla de șah)" },
+              { "en": "$\\|x\\|_\\infty = \\max_i |x_i|$", "ro": "$\\|x\\|_\\infty = \\max_i |x_i|$" },
+              { "en": "Largest single coordinate — a chess king's minimum moves.", "ro": "Cea mai mare coordonată — mutările minime ale regelui la șah." }
+            ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Geometry sanity check.** In $\\mathbb{R}^2$, the unit ball $\\{x : \\|x\\| \\leq 1\\}$ takes a different shape for each norm: a **diamond** (rotated square) for $\\ell_1$, a **circle** for $\\ell_2$, a **square** for $\\ell_\\infty$. Same space, different ''geometry'' — and the choice affects which optimization algorithms are natural.",
+            "ro": "**Verificare geometrică.** În $\\mathbb{R}^2$, bila unitate $\\{x : \\|x\\| \\leq 1\\}$ are forme diferite pentru fiecare normă: un **romb** (pătrat rotit) pentru $\\ell_1$, un **cerc** pentru $\\ell_2$, un **pătrat** pentru $\\ell_\\infty$. Același spațiu, ''geometrii'' diferite — iar alegerea afectează ce algoritmi de optimizare sunt naturali."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Changing coordinates.** If $P$ is any invertible matrix ($\\det P \\neq 0$) and $\\|\\cdot\\|_v$ is a norm, then $\\|x\\|_{v, P} := \\|Px\\|_v$ is also a norm. This lets us ''reweight'' coordinates — handy when some components are naturally larger (e.g., lengths vs. counts). *Exercise: verify the three axioms.*",
+            "ro": "**Schimbarea coordonatelor.** Dacă $P$ este o matrice inversabilă ($\\det P \\neq 0$) și $\\|\\cdot\\|_v$ este o normă, atunci $\\|x\\|_{v, P} := \\|Px\\|_v$ este tot o normă. Ne permite să ''reponderăm'' coordonatele — util când unele componente sunt natural mai mari (de ex., lungimi vs. numărători). *Exercițiu: verifică cele trei axiome.*"
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "For $x = (3, -4, 0)$ in $\\mathbb{R}^3$, compute $\\|x\\|_1$, $\\|x\\|_2$, $\\|x\\|_\\infty$. Which one is the largest?",
+                "ro": "Pentru $x = (3, -4, 0)$ în $\\mathbb{R}^3$, calculează $\\|x\\|_1$, $\\|x\\|_2$, $\\|x\\|_\\infty$. Care este cea mai mare?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\|x\\|_1 = 7$ is the largest", "ro": "$\\|x\\|_1 = 7$ este cea mai mare" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct: $\\|x\\|_1 = 3 + 4 + 0 = 7$, $\\|x\\|_2 = \\sqrt{9 + 16} = 5$, $\\|x\\|_\\infty = \\max(3, 4, 0) = 4$. The $\\ell_1$ norm is always the biggest of the three (inequality: $\\|x\\|_\\infty \\leq \\|x\\|_2 \\leq \\|x\\|_1$).",
+                    "ro": "Corect: $\\|x\\|_1 = 3 + 4 + 0 = 7$, $\\|x\\|_2 = \\sqrt{9 + 16} = 5$, $\\|x\\|_\\infty = \\max(3, 4, 0) = 4$. Norma $\\ell_1$ este mereu cea mai mare dintre cele trei (inegalitatea: $\\|x\\|_\\infty \\leq \\|x\\|_2 \\leq \\|x\\|_1$)."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|x\\|_2 = 5$ is the largest", "ro": "$\\|x\\|_2 = 5$ este cea mai mare" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "The Euclidean norm equals 5, but the $\\ell_1$ norm ($7$) is larger. A common mistake is to assume the Euclidean (''real'') distance is always biggest — it is actually sandwiched between $\\ell_\\infty$ and $\\ell_1$.",
+                    "ro": "Norma euclidiană este 5, dar norma $\\ell_1$ ($7$) este mai mare. O greșeală comună este să presupui că distanța euclidiană (''reală'') e mereu cea mai mare — de fapt, e între $\\ell_\\infty$ și $\\ell_1$."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|x\\|_\\infty = 4$ is the largest", "ro": "$\\|x\\|_\\infty = 4$ este cea mai mare" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$\\|x\\|_\\infty = 4$ is in fact the **smallest** of the three. A useful inequality to memorize: $\\|x\\|_\\infty \\leq \\|x\\|_2 \\leq \\|x\\|_1$ in $\\mathbb{R}^n$.",
+                    "ro": "$\\|x\\|_\\infty = 4$ este de fapt **cea mai mică** dintre cele trei. Inegalitatea utilă de memorat: $\\|x\\|_\\infty \\leq \\|x\\|_2 \\leq \\|x\\|_1$ în $\\mathbb{R}^n$."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-vector-norms"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-euclidean-norm",
+      "title": { "en": "Euclidean norm and Cauchy–Schwarz", "ro": "Norma euclidiană și Cauchy–Schwarz" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You just saw that $\\|x\\|_2 = \\sqrt{\\sum |x_i|^2}$. Notice the square root of the sum of squares looks suspiciously like $\\sqrt{(x, x)}$ — the inner product of $x$ with itself. Could every inner product *generate* a norm?",
+            "ro": "Ai văzut că $\\|x\\|_2 = \\sqrt{\\sum |x_i|^2}$. Observă: rădăcina sumei pătratelor seamănă suspect cu $\\sqrt{(x, x)}$ — produsul scalar al lui $x$ cu el însuși. Fiecare produs scalar ar putea *genera* o normă?"
+          },
+          "answer": {
+            "en": "Yes. On any space with an inner product, $\\|x\\|_2 := \\sqrt{(x, x)}$ satisfies all three norm axioms — it is called the **Euclidean** (or inner-product-induced) norm. The only non-obvious axiom to verify is the triangle inequality, which falls out of the **Cauchy–Schwarz inequality**.",
+            "ro": "Da. Pe orice spațiu cu produs scalar, $\\|x\\|_2 := \\sqrt{(x, x)}$ satisface toate cele trei axiome ale normei — se numește norma **euclidiană** (sau indusă de produsul scalar). Singura axiomă non-evidentă de verificat este inegalitatea triunghiului, care iese din **inegalitatea Cauchy–Schwarz**."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Euclidean norm (inner-product-induced)", "ro": "norma euclidiană (indusă de produsul scalar)" },
+          "content": {
+            "en": "On a space $X$ with inner product $(\\cdot, \\cdot)$, the **Euclidean norm** is $\\|x\\|_2 = \\sqrt{(x, x)}$. On $\\mathbb{R}^n$ and $\\mathbb{C}^n$ with the standard inner products, it reduces to $\\|x\\|_2 = \\sqrt{\\sum_{i=1}^n |x_i|^2}$.",
+            "ro": "Pe un spațiu $X$ cu produs scalar $(\\cdot, \\cdot)$, **norma euclidiană** este $\\|x\\|_2 = \\sqrt{(x, x)}$. Pe $\\mathbb{R}^n$ și $\\mathbb{C}^n$ cu produsele scalare standard, se reduce la $\\|x\\|_2 = \\sqrt{\\sum_{i=1}^n |x_i|^2}$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The Cauchy–Buniakovski–Schwarz (CBS) inequality** bounds the inner product by the product of norms:",
+            "ro": "**Inegalitatea Cauchy–Buniakovski–Schwarz (CBS)** mărginește produsul scalar cu produsul normelor:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "|(x, y)| \\leq \\sqrt{(x, x)} \\cdot \\sqrt{(y, y)} = \\|x\\|_2 \\cdot \\|y\\|_2, \\quad \\forall x, y \\in X"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Geometric reading.** On $\\mathbb{R}^n$, $(x, y) = \\|x\\|_2 \\|y\\|_2 \\cos\\theta$, so CBS is exactly $|\\cos\\theta| \\leq 1$ — trivially true. Equality holds iff $x, y$ are collinear.\n\n**Payoff.** With CBS we can prove the triangle inequality for $\\|\\cdot\\|_2$ (exercise), confirming Euclidean is a norm. CBS is also the engine behind variance–covariance bounds, correlation coefficients in $[-1, 1]$, and the angle formula in $\\mathbb{R}^n$ for $n > 3$.",
+            "ro": "**Interpretare geometrică.** Pe $\\mathbb{R}^n$, $(x, y) = \\|x\\|_2 \\|y\\|_2 \\cos\\theta$, deci CBS este exact $|\\cos\\theta| \\leq 1$ — trivial adevărat. Egalitate are loc dacă și numai dacă $x, y$ sunt coliniari.\n\n**Câștiguri.** Cu CBS putem demonstra inegalitatea triunghiului pentru $\\|\\cdot\\|_2$ (exercițiu), confirmând că euclidiana este normă. CBS este și motorul din spatele marginilor varianță–covarianță, al coeficienților de corelație în $[-1, 1]$ și al formulei unghiului în $\\mathbb{R}^n$ pentru $n > 3$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**CBS names vary by textbook.** French and Russian schools say Cauchy–Buniakovski; Anglo-American texts say Cauchy–Schwarz. Buniakovski (1859) and Schwarz (1885) both extended Cauchy's original 1821 finite sum version to integrals. Use whatever name your exam uses — the inequality is the same.",
+            "ro": "**Numele CBS variază în funcție de manual.** Școlile franceză și rusă spun Cauchy–Buniakovski; manualele anglo-americane spun Cauchy–Schwarz. Buniakovski (1859) și Schwarz (1885) au extins ambii versiunea originală a lui Cauchy din 1821 pentru sume finite la integrale. Folosește denumirea folosită de examenul tău — inegalitatea este aceeași."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "When does CBS attain *equality*? Use the geometric reading to guess, then think about what algebraic condition on $x, y$ gives $\\cos\\theta = \\pm 1$.",
+            "ro": "Când atinge CBS *egalitatea*? Folosește interpretarea geometrică pentru a ghici, apoi gândește ce condiție algebrică asupra lui $x, y$ dă $\\cos\\theta = \\pm 1$."
+          },
+          "answer": {
+            "en": "When $x$ and $y$ point in the same or opposite directions — i.e., when $y = \\lambda x$ for some scalar $\\lambda$ (and the zero-vector case trivially). Equality fails as soon as there is any ''perpendicular'' component between $x$ and $y$.",
+            "ro": "Când $x$ și $y$ sunt pe aceeași direcție sau pe direcții opuse — adică când $y = \\lambda x$ pentru un scalar $\\lambda$ (plus cazul trivial al vectorului zero). Egalitatea cade de îndată ce există orice componentă ''perpendiculară'' între $x$ și $y$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-matrix-norms",
+      "title": { "en": "Matrix norms: four axioms and the Frobenius example", "ro": "Norme matriciale: patru axiome și exemplul Frobenius" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You already have a definition for vector norms. What extra property should a *matrix* norm satisfy that vectors don't need — given that matrices can be *multiplied*?",
+            "ro": "Ai deja o definiție pentru normele vectoriale. Ce proprietate suplimentară ar trebui să satisfacă o normă *matricială* pe care vectorii nu o au — dat fiind că matricile pot fi *înmulțite*?"
+          },
+          "answer": {
+            "en": "**Sub-multiplicativity:** $\\|AB\\| \\leq \\|A\\| \\cdot \\|B\\|$. We want composing two linear maps to not ''explode'' the measured size. Without this, we couldn't bound errors through a chain of matrix products — a must-have for stability analysis.",
+            "ro": "**Submultiplicativitatea:** $\\|AB\\| \\leq \\|A\\| \\cdot \\|B\\|$. Vrem ca combinarea a două aplicații liniare să nu ''explodeze'' mărimea măsurată. Fără asta nu am putea margini erorile printr-un lanț de produse matriciale — esențial pentru analiza stabilității."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "matrix norm", "ro": "normă matriceală" },
+          "content": {
+            "en": "A map $\\|\\cdot\\|: \\mathbb{R}^{n \\times n} \\to \\mathbb{R}_+$ is a **matrix norm** iff it satisfies:\n\n**(1) Definiteness:** $\\|A\\| \\geq 0$, and $\\|A\\| = 0 \\iff A = 0$.\n**(2) Absolute homogeneity:** $\\|\\alpha A\\| = |\\alpha| \\cdot \\|A\\|$.\n**(3) Triangle inequality:** $\\|A + B\\| \\leq \\|A\\| + \\|B\\|$.\n**(4) Sub-multiplicativity:** $\\|AB\\| \\leq \\|A\\| \\cdot \\|B\\|$.\n\nThe first three match the vector norm axioms; (4) is the matrix-specific extra.",
+            "ro": "O aplicație $\\|\\cdot\\|: \\mathbb{R}^{n \\times n} \\to \\mathbb{R}_+$ este **normă matriceală** dacă satisface:\n\n**(1) Definire:** $\\|A\\| \\geq 0$, și $\\|A\\| = 0 \\iff A = 0$.\n**(2) Omogenitate absolută:** $\\|\\alpha A\\| = |\\alpha| \\cdot \\|A\\|$.\n**(3) Inegalitatea triunghiului:** $\\|A + B\\| \\leq \\|A\\| + \\|B\\|$.\n**(4) Submultiplicativitate:** $\\|AB\\| \\leq \\|A\\| \\cdot \\|B\\|$.\n\nPrimele trei sunt axiomele normei vectoriale; (4) este suplimentul specific matricilor."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Classic example — the Frobenius norm.** Treat the $n \\times n$ matrix as an $n^2$-vector and take its Euclidean norm:",
+            "ro": "**Exemplul clasic — norma Frobenius.** Tratăm matricea $n \\times n$ ca pe un vector de $n^2$ componente și luăm norma ei euclidiană:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\|A\\|_F = \\sqrt{\\sum_{i=1}^n \\sum_{j=1}^n |a_{ij}|^2}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Frobenius satisfies all four axioms — the first three inherit from the vector Euclidean norm, and sub-multiplicativity follows from Cauchy–Schwarz applied row-by-column.",
+            "ro": "Frobenius satisface toate cele patru axiome — primele trei se moștenesc din norma euclidiană vectorială, iar submultiplicativitatea rezultă din Cauchy–Schwarz aplicat rând-coloană."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Counter-example: $\\|A\\|_{\\max} = \\max_{i,j} |a_{ij}|$ is NOT a matrix norm.** It passes the first three axioms but **fails sub-multiplicativity**. Take",
+            "ro": "**Contra-exemplu: $\\|A\\|_{\\max} = \\max_{i,j} |a_{ij}|$ NU este normă matriceală.** Trece primele trei axiome dar **cade la submultiplicativitate**. Ia"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "A = \\begin{pmatrix} \\tfrac{1}{\\sqrt{2}} & -\\tfrac{1}{\\sqrt{2}} \\\\ \\tfrac{1}{\\sqrt{2}} & \\tfrac{1}{\\sqrt{2}} \\end{pmatrix}, \\quad B = A^T, \\quad AB = I_2."
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Then $\\|A\\|_{\\max} = \\|B\\|_{\\max} = 1/\\sqrt{2}$, but $\\|AB\\|_{\\max} = \\|I_2\\|_{\\max} = 1$. So $\\|AB\\|_{\\max} = 1 > 1/2 = \\|A\\|_{\\max} \\cdot \\|B\\|_{\\max}$. Axiom (4) fails. Max-of-entries is a *vector* norm on the flattened matrix, but it does not interact correctly with matrix multiplication.",
+            "ro": "Atunci $\\|A\\|_{\\max} = \\|B\\|_{\\max} = 1/\\sqrt{2}$, dar $\\|AB\\|_{\\max} = \\|I_2\\|_{\\max} = 1$. Deci $\\|AB\\|_{\\max} = 1 > 1/2 = \\|A\\|_{\\max} \\cdot \\|B\\|_{\\max}$. Axioma (4) cade. Maxul intrărilor este o normă *vectorială* pe matricea aplatizată, dar nu interacționează corect cu înmulțirea de matrici."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which of the four matrix-norm axioms does $\\|A\\|_{\\max} = \\max_{i,j} |a_{ij}|$ fail?",
+                "ro": "Care dintre cele patru axiome ale normei matriceale cade pentru $\\|A\\|_{\\max} = \\max_{i,j} |a_{ij}|$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Definiteness (1)", "ro": "Definire (1)" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Definiteness holds: $\\|A\\|_{\\max} \\geq 0$ always, and $\\max |a_{ij}| = 0$ forces every entry to zero, i.e., $A = 0$.",
+                    "ro": "Definirea se verifică: $\\|A\\|_{\\max} \\geq 0$ oricum, iar $\\max |a_{ij}| = 0$ forțează fiecare element să fie zero, deci $A = 0$."
+                  }
+                },
+                {
+                  "text": { "en": "Triangle inequality (3)", "ro": "Inegalitatea triunghiului (3)" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Triangle inequality holds: $\\max_{i,j} |a_{ij} + b_{ij}| \\leq \\max_{i,j} (|a_{ij}| + |b_{ij}|) \\leq \\|A\\|_{\\max} + \\|B\\|_{\\max}$.",
+                    "ro": "Inegalitatea triunghiului se verifică: $\\max_{i,j} |a_{ij} + b_{ij}| \\leq \\max_{i,j} (|a_{ij}| + |b_{ij}|) \\leq \\|A\\|_{\\max} + \\|B\\|_{\\max}$."
+                  }
+                },
+                {
+                  "text": { "en": "Sub-multiplicativity (4)", "ro": "Submultiplicativitate (4)" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The counter-example with $A = \\big(\\begin{smallmatrix} 1/\\sqrt{2} & -1/\\sqrt{2} \\\\ 1/\\sqrt{2} & 1/\\sqrt{2} \\end{smallmatrix}\\big)$, $B = A^T$ gives $\\|AB\\|_{\\max} = 1 > 1/2 = \\|A\\|_{\\max} \\cdot \\|B\\|_{\\max}$.",
+                    "ro": "Corect. Contra-exemplul cu $A = \\big(\\begin{smallmatrix} 1/\\sqrt{2} & -1/\\sqrt{2} \\\\ 1/\\sqrt{2} & 1/\\sqrt{2} \\end{smallmatrix}\\big)$, $B = A^T$ dă $\\|AB\\|_{\\max} = 1 > 1/2 = \\|A\\|_{\\max} \\cdot \\|B\\|_{\\max}$."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-matrix-norms"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-induced-norms",
+      "title": { "en": "Induced (natural) matrix norms", "ro": "Norme matriciale naturale (induse)" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You have a favorite vector norm $\\|\\cdot\\|_v$. Can you *manufacture* a matrix norm from it — one that measures, literally, how much $A$ stretches a worst-case vector?",
+            "ro": "Ai o normă vectorială preferată $\\|\\cdot\\|_v$. Poți *fabrica* o normă matriceală din ea — una care măsoară, literal, cât de mult întinde $A$ un vector în cel mai rău caz?"
+          },
+          "answer": {
+            "en": "Yes. The **induced (natural) norm** $\\|A\\|_i$ is the largest stretching ratio $\\|Ax\\|_v / \\|x\\|_v$ over all nonzero $x$. It automatically inherits sub-multiplicativity and gives the compatibility bound $\\|Ax\\|_v \\leq \\|A\\|_i \\|x\\|_v$ for free — which is exactly what you need to chain bounds through products.",
+            "ro": "Da. **Norma indusă (naturală)** $\\|A\\|_i$ este cel mai mare raport de întindere $\\|Ax\\|_v / \\|x\\|_v$ peste toți vectorii nenuli $x$. Moștenește automat submultiplicativitatea și dă margine de compatibilitate $\\|Ax\\|_v \\leq \\|A\\|_i \\|x\\|_v$ gratis — exact ce îți trebuie pentru a lega margini prin produse."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "induced (natural) matrix norm", "ro": "normă matriceală indusă (naturală)" },
+          "content": {
+            "en": "Given a vector norm $\\|\\cdot\\|_v$ on $\\mathbb{R}^n$, the **induced matrix norm** $\\|\\cdot\\|_i: \\mathbb{R}^{n \\times n} \\to \\mathbb{R}_+$ is",
+            "ro": "Dată o normă vectorială $\\|\\cdot\\|_v$ pe $\\mathbb{R}^n$, **norma matriceală indusă** $\\|\\cdot\\|_i: \\mathbb{R}^{n \\times n} \\to \\mathbb{R}_+$ este"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\|A\\|_i = \\max_{x \\neq 0} \\frac{\\|Ax\\|_v}{\\|x\\|_v} = \\max_{\\|x\\|_v = 1} \\|Ax\\|_v"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The three equivalent formulations: (a) max over all nonzero $x$ of the stretching ratio; (b) max over the closed unit ball; (c) max over the unit sphere. All yield the same value, because the ratio is scale-invariant. The **compatibility inequality** follows by rearrangement:",
+            "ro": "Cele trei formulări echivalente: (a) max peste toți vectorii nenuli al raportului de întindere; (b) max peste bila unitate închisă; (c) max peste sfera unitate. Toate dau aceeași valoare, deoarece raportul este invariant la scalare. **Inegalitatea de compatibilitate** rezultă prin rearanjare:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\|Ax\\|_v \\leq \\|A\\|_i \\cdot \\|x\\|_v, \\quad \\forall A \\in \\mathbb{R}^{n \\times n}, \\forall x \\in \\mathbb{R}^n."
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Closed-form examples.** The two induced norms you will use most are the column-sum and row-sum norms:",
+            "ro": "**Exemple în formă închisă.** Cele două norme induse pe care le vei folosi cel mai des sunt suma pe coloane și suma pe rânduri:"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Vector norm", "ro": "Norma vectorială" },
+            { "en": "Induced matrix norm", "ro": "Norma matriceală indusă" },
+            { "en": "Intuition", "ro": "Intuiție" }
+          ],
+          "rows": [
+            [
+              { "en": "$\\|x\\|_1 = \\sum_{i=1}^n |x_i|$", "ro": "$\\|x\\|_1 = \\sum_{i=1}^n |x_i|$" },
+              { "en": "$\\|A\\|_1 = \\max_j \\sum_{i=1}^n |a_{ij}|$", "ro": "$\\|A\\|_1 = \\max_j \\sum_{i=1}^n |a_{ij}|$" },
+              { "en": "Largest **column** absolute sum.", "ro": "Cea mai mare sumă absolută pe **coloană**." }
+            ],
+            [
+              { "en": "$\\|x\\|_\\infty = \\max_i |x_i|$", "ro": "$\\|x\\|_\\infty = \\max_i |x_i|$" },
+              { "en": "$\\|A\\|_\\infty = \\max_i \\sum_{j=1}^n |a_{ij}|$", "ro": "$\\|A\\|_\\infty = \\max_i \\sum_{j=1}^n |a_{ij}|$" },
+              { "en": "Largest **row** absolute sum.", "ro": "Cea mai mare sumă absolută pe **rând**." }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Mnemonic.** Subscript 1 ↔ columns, subscript infinity ↔ rows. Why? With $\\|x\\|_1$, each *column* of $A$ gets loaded with the unit budget of $x_i$; with $\\|x\\|_\\infty$, each *row* is attacked by at most one coordinate of magnitude 1. The worst case picks the heaviest column (resp. row).",
+            "ro": "**Mnemonic.** Indicele 1 ↔ coloane, indicele infinit ↔ rânduri. De ce? Cu $\\|x\\|_1$, fiecare *coloană* a lui $A$ este ''încărcată'' cu bugetul unitate al lui $x_i$; cu $\\|x\\|_\\infty$, fiecare *rând* este atacat cu cel mult o coordonată de magnitudine 1. Cazul cel mai defavorabil alege cea mai grea coloană (respectiv rând)."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why is the induced norm **automatically** sub-multiplicative? (Hint: chain the compatibility inequality twice.)",
+            "ro": "De ce este norma indusă **automat** submultiplicativă? (Indiciu: înlănțuie de două ori inegalitatea de compatibilitate.)"
+          },
+          "answer": {
+            "en": "Take any unit-norm $x$. Then $\\|ABx\\|_v \\leq \\|A\\|_i \\|Bx\\|_v \\leq \\|A\\|_i \\|B\\|_i \\|x\\|_v = \\|A\\|_i \\|B\\|_i$. Taking the sup over $\\|x\\|_v = 1$ gives $\\|AB\\|_i \\leq \\|A\\|_i \\|B\\|_i$. **Sub-multiplicativity is baked into the definition.**",
+            "ro": "Ia orice $x$ cu normă unitate. Atunci $\\|ABx\\|_v \\leq \\|A\\|_i \\|Bx\\|_v \\leq \\|A\\|_i \\|B\\|_i \\|x\\|_v = \\|A\\|_i \\|B\\|_i$. Luând supremul peste $\\|x\\|_v = 1$ dă $\\|AB\\|_i \\leq \\|A\\|_i \\|B\\|_i$. **Submultiplicativitatea este încorporată în definiție.**"
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Compute $\\|A\\|_\\infty$ for $A = \\begin{pmatrix} 1 & -3 \\\\ 2 & 4 \\end{pmatrix}$.",
+                "ro": "Calculează $\\|A\\|_\\infty$ pentru $A = \\begin{pmatrix} 1 & -3 \\\\ 2 & 4 \\end{pmatrix}$."
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\|A\\|_\\infty = 4$", "ro": "$\\|A\\|_\\infty = 4$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$4$ is the largest **entry**, not the largest row sum. $\\|A\\|_\\infty$ asks for the max absolute row sum.",
+                    "ro": "$4$ este cea mai mare **intrare**, nu cea mai mare sumă pe rând. $\\|A\\|_\\infty$ cere maxul sumelor absolute pe rânduri."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|A\\|_\\infty = 6$", "ro": "$\\|A\\|_\\infty = 6$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Row 1: $|1| + |-3| = 4$. Row 2: $|2| + |4| = 6$. Max is $6$.",
+                    "ro": "Corect. Rândul 1: $|1| + |-3| = 4$. Rândul 2: $|2| + |4| = 6$. Maxul este $6$."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|A\\|_\\infty = 7$", "ro": "$\\|A\\|_\\infty = 7$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$7$ is the max **column** sum (column 2: $|-3| + |4| = 7$) — that is $\\|A\\|_1$, not $\\|A\\|_\\infty$. Columns ↔ subscript 1; rows ↔ subscript infinity.",
+                    "ro": "$7$ este maxul **coloanei** (coloana 2: $|-3| + |4| = 7$) — aceea este $\\|A\\|_1$, nu $\\|A\\|_\\infty$. Coloane ↔ indice 1; rânduri ↔ indice infinit."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-induced-norms"
+            },
+            {
+              "question": {
+                "en": "Recall: which matrix-norm axiom was the *hard* one to earn? The induced construction hands us which axiom for free?",
+                "ro": "Amintire: care axiomă a normei matriceale a fost cea *grea* de obținut? Construcția indusă ne oferă gratis care axiomă?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Triangle inequality (3)", "ro": "Inegalitatea triunghiului (3)" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Triangle inequality is also given by the induced construction, but it was not the discriminating axiom — $\\|A\\|_{\\max}$ satisfied it. The defining problem was sub-multiplicativity.",
+                    "ro": "Inegalitatea triunghiului este și ea dată de construcția indusă, dar nu a fost axioma discriminatoare — $\\|A\\|_{\\max}$ o satisfăcea. Problema cheie a fost submultiplicativitatea."
+                  }
+                },
+                {
+                  "text": { "en": "Sub-multiplicativity (4)", "ro": "Submultiplicativitate (4)" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Sub-multiplicativity was exactly where $\\|A\\|_{\\max}$ broke, and the induced norm fixes it by construction.",
+                    "ro": "Corect. Submultiplicativitatea era exact locul unde $\\|A\\|_{\\max}$ pica, iar norma indusă o rezolvă prin construcție."
+                  }
+                },
+                {
+                  "text": { "en": "Homogeneity (2)", "ro": "Omogenitate (2)" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Homogeneity is easy — it holds for any reasonable size function including $\\|A\\|_{\\max}$. The discriminating axiom was sub-multiplicativity.",
+                    "ro": "Omogenitatea este ușoară — se verifică pentru orice funcție rezonabilă de mărime, inclusiv pentru $\\|A\\|_{\\max}$. Axioma discriminatoare a fost submultiplicativitatea."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-matrix-norms"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-norm-change-P",
+      "title": { "en": "Reweighting coordinates: norms under similarity", "ro": "Reponderarea coordonatelor: norme sub similaritate" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You change the way you measure vectors via an invertible $P$: $\\|x\\|_{v, P} := \\|Px\\|_v$. If this changes the vector norm, how will the **induced matrix norm** change? Guess before you read on.",
+            "ro": "Schimbi modul în care măsori vectorii prin $P$ inversabilă: $\\|x\\|_{v, P} := \\|Px\\|_v$. Dacă asta schimbă norma vectorială, cum se va schimba **norma matriceală indusă**? Ghicește înainte să citești."
+          },
+          "answer": {
+            "en": "The induced matrix norm of $A$ becomes the old induced norm of the **conjugate/similar matrix** $PAP^{-1}$: $\\|A\\|_{i, P} = \\|PAP^{-1}\\|_i$. Changing vector coordinates by $P$ forces matrices to transform by *similarity* — a fact you will meet again when diagonalizing.",
+            "ro": "Norma matriceală indusă a lui $A$ devine norma indusă veche a **matricei conjugate/similare** $PAP^{-1}$: $\\|A\\|_{i, P} = \\|PAP^{-1}\\|_i$. Schimbarea coordonatelor vectoriale prin $P$ forțează matricile să se transforme prin *similaritate* — un fapt pe care îl vei reîntâlni la diagonalizare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The derivation — one substitution.** Using $\\|x\\|_{v, P} = \\|Px\\|_v$:",
+            "ro": "**Deducerea — o singură substituție.** Folosind $\\|x\\|_{v, P} = \\|Px\\|_v$:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\|A\\|_{i, P} = \\max_{x \\neq 0} \\frac{\\|Ax\\|_{v, P}}{\\|x\\|_{v, P}} = \\max_{x \\neq 0} \\frac{\\|PAx\\|_v}{\\|Px\\|_v} \\overset{y = Px}{=} \\max_{y \\neq 0} \\frac{\\|PAP^{-1} y\\|_v}{\\|y\\|_v} = \\|PAP^{-1}\\|_i"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Diagonal reweighting is the workhorse.** Take $P = \\operatorname{diag}(p_1, \\dots, p_n)$ with $p_i > 0$. Then",
+            "ro": "**Reponderarea diagonală este instrumentul principal.** Ia $P = \\operatorname{diag}(p_1, \\dots, p_n)$ cu $p_i > 0$. Atunci"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "PAP^{-1} = \\left( \\frac{p_i}{p_j} \\, a_{ij} \\right)_{i, j = \\overline{1, n}}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each entry $a_{ij}$ gets reweighted by $p_i / p_j$. **Application:** pick the $p_i$ to *deliberately shrink* the induced norm — a classical trick for proving convergence of iterative solvers (Jacobi, Gauss–Seidel).",
+            "ro": "Fiecare intrare $a_{ij}$ este reponderată cu $p_i / p_j$. **Aplicație:** alegi $p_i$-urile pentru a *deliberat micșora* norma indusă — un truc clasic pentru a demonstra convergența solverilor iterativi (Jacobi, Gauss–Seidel)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Takeaway.** Changing norm ≡ similarity-transforming the matrix. This is the algebraic fingerprint of ''choose your coordinate system wisely.'' When we diagonalize $A$ later, similarity will show up again as the act that reveals eigenvalues.",
+            "ro": "**Concluzie.** Schimbarea normei ≡ transformarea prin similaritate a matricei. Aceasta este amprenta algebrică a ''alege-ți sistemul de coordonate cu grijă.'' Când vom diagonaliza $A$ mai târziu, similaritatea va reapărea ca actul care dezvăluie valorile proprii."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-spectral-norm",
+      "title": { "en": "The spectral norm: eigenvalues step onto the stage", "ro": "Norma spectrală: valorile proprii intră în scenă" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "The induced $\\ell_2$ norm $\\|A\\|_2 = \\max_{x \\neq 0} \\|Ax\\|_2 / \\|x\\|_2$ has a beautiful closed form involving a ''new'' object. Before we reveal it: what property of $A$ should dominate this worst-case stretching — the rows, the columns, or something intrinsic?",
+            "ro": "Norma indusă $\\ell_2$ $\\|A\\|_2 = \\max_{x \\neq 0} \\|Ax\\|_2 / \\|x\\|_2$ are o formă închisă frumoasă implicând un obiect ''nou''. Înainte de a-l dezvălui: ce proprietate a lui $A$ ar trebui să domine această întindere în cel mai rău caz — rândurile, coloanele sau ceva intrinsec?"
+          },
+          "answer": {
+            "en": "Something intrinsic — an **eigenvalue** of the symmetric ''correlation'' matrix $A^T A$. Concretely, $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$, where $\\rho$ is the **spectral radius** (largest $|\\lambda|$ among eigenvalues). The spectral norm is rotation-invariant — it does not privilege rows or columns.",
+            "ro": "Ceva intrinsec — o **valoare proprie** a matricei simetrice ''de corelație'' $A^T A$. Concret, $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$, unde $\\rho$ este **raza spectrală** (cel mai mare $|\\lambda|$ dintre valorile proprii). Norma spectrală este invariantă la rotație — nu privilegiază rândurile sau coloanele."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "eigenvalue and eigenvector", "ro": "valoare proprie și vector propriu" },
+          "content": {
+            "en": "For $A \\in \\mathbb{R}^{n \\times n}$, a scalar $\\lambda \\in \\mathbb{C}$ is an **eigenvalue** if there exists a nonzero $x \\in \\mathbb{C}^n$ (the **eigenvector**) with $Ax = \\lambda x$. Equivalently, $(\\lambda I_n - A)$ is singular: $\\det(\\lambda I_n - A) = 0$. The polynomial $p_A(\\lambda) = \\det(\\lambda I_n - A)$ is the **characteristic polynomial**, degree $n$, with $n$ complex roots counted with multiplicity.",
+            "ro": "Pentru $A \\in \\mathbb{R}^{n \\times n}$, un scalar $\\lambda \\in \\mathbb{C}$ este **valoare proprie** dacă există un $x \\in \\mathbb{C}^n$ nenul (**vectorul propriu**) cu $Ax = \\lambda x$. Echivalent, $(\\lambda I_n - A)$ este singulară: $\\det(\\lambda I_n - A) = 0$. Polinomul $p_A(\\lambda) = \\det(\\lambda I_n - A)$ este **polinomul caracteristic**, de grad $n$, cu $n$ rădăcini complexe numărate cu multiplicitate."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Textbook errata.** Slide 20 of the source PDF reads ''deci matricea $(\\lambda I_n - A)$ este **nesingulară**.'' This is a typo — it should be **singulară**. A matrix is singular iff its determinant is zero, which is exactly the defining equation for eigenvalues.",
+            "ro": "**Erată din slide.** Slide-ul 20 al PDF-ului sursă scrie ''deci matricea $(\\lambda I_n - A)$ este **nesingulară**.'' Aceasta este o greșeală de tipar — ar trebui **singulară**. O matrice este singulară dacă și numai dacă determinantul ei este zero, exact ecuația definitorie a valorilor proprii."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "spectral radius", "ro": "rază spectrală" },
+          "content": {
+            "en": "The **spectral radius** of $A$ is $\\rho(A) = \\max \\{ |\\lambda_i| : \\lambda_i \\text{ eigenvalue of } A \\}$ — the largest eigenvalue in absolute value. Note $\\rho(A) \\in \\mathbb{R}_+$ even though eigenvalues may be complex.",
+            "ro": "**Raza spectrală** a lui $A$ este $\\rho(A) = \\max \\{ |\\lambda_i| : \\lambda_i \\text{ valoare proprie a lui } A \\}$ — cea mai mare valoare proprie în modul. Observă că $\\rho(A) \\in \\mathbb{R}_+$ chiar dacă valorile proprii pot fi complexe."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The spectral norm formula.** Starting from $\\|x\\|_2 = \\sqrt{x^T x}$,",
+            "ro": "**Formula normei spectrale.** Pornind de la $\\|x\\|_2 = \\sqrt{x^T x}$,"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\|A\\|_2 = \\max_{x \\neq 0} \\frac{\\|Ax\\|_2}{\\|x\\|_2} = \\max_{x \\neq 0} \\sqrt{\\frac{x^T A^T A \\, x}{x^T x}} = \\sqrt{\\rho(A^T A)}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The middle expression is a **Rayleigh quotient** of the symmetric positive-semidefinite matrix $A^T A$; its maximum is the largest eigenvalue $\\lambda_{\\max}(A^T A)$. Taking the square root gives the spectral norm. Interpreted physically: *the spectral norm is how much $A$ can stretch a unit-length vector, measured with the Euclidean ruler.*",
+            "ro": "Expresia din mijloc este un **cât Rayleigh** al matricei simetrice pozitiv semidefinite $A^T A$; maximul ei este cea mai mare valoare proprie $\\lambda_{\\max}(A^T A)$. Luând rădăcina pătrată obținem norma spectrală. Fizic: *norma spectrală este cât de mult poate $A$ întinde un vector de lungime unitate, măsurat cu rigla euclidiană.*"
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Proposition.** For **any** natural (induced) matrix norm $\\|\\cdot\\|$ and any square matrix $A$: $\\rho(A) \\leq \\|A\\|$.\n\nThe spectral radius is the *infimum* over all induced norms — no matter which induced norm you pick, eigenvalues cannot exceed it. This is why spectral radius governs asymptotic behavior of iterations $x_{k+1} = Ax_k$: if $\\rho(A) < 1$, there exists a norm in which $A$ is a contraction, and iteration converges.",
+            "ro": "**Propoziție.** Pentru **orice** normă matriceală naturală (indusă) $\\|\\cdot\\|$ și orice matrice pătratică $A$: $\\rho(A) \\leq \\|A\\|$.\n\nRaza spectrală este *infimul* peste toate normele induse — indiferent ce normă indusă alegi, valorile proprii nu o pot depăși. De aceea raza spectrală guvernează comportamentul asimptotic al iterațiilor $x_{k+1} = Ax_k$: dacă $\\rho(A) < 1$, există o normă în care $A$ este contracție, iar iterația converge."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "For a **symmetric** $A$ (i.e., $A^T = A$), show that $\\|A\\|_2 = \\rho(A)$. (Hint: what is $A^T A$?)",
+            "ro": "Pentru $A$ **simetric** (adică $A^T = A$), arată că $\\|A\\|_2 = \\rho(A)$. (Indiciu: ce este $A^T A$?)"
+          },
+          "answer": {
+            "en": "If $A = A^T$, then $A^T A = A^2$. Eigenvalues of $A^2$ are $\\{\\lambda_i^2\\}$, so $\\rho(A^T A) = \\max \\lambda_i^2 = (\\max |\\lambda_i|)^2 = \\rho(A)^2$. Thus $\\|A\\|_2 = \\sqrt{\\rho(A)^2} = \\rho(A)$. For symmetric matrices the spectral radius *is* the spectral norm.",
+            "ro": "Dacă $A = A^T$, atunci $A^T A = A^2$. Valorile proprii ale lui $A^2$ sunt $\\{\\lambda_i^2\\}$, deci $\\rho(A^T A) = \\max \\lambda_i^2 = (\\max |\\lambda_i|)^2 = \\rho(A)^2$. Astfel $\\|A\\|_2 = \\sqrt{\\rho(A)^2} = \\rho(A)$. Pentru matricile simetrice, raza spectrală *este* norma spectrală."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "You compute $\\|A\\|_1 = 7$, $\\|A\\|_\\infty = 5$, and $\\|A\\|_F = 6$ for some matrix $A$. Which of the following is **guaranteed** to hold?",
+                "ro": "Calculezi $\\|A\\|_1 = 7$, $\\|A\\|_\\infty = 5$ și $\\|A\\|_F = 6$ pentru o matrice $A$. Care dintre următoarele este **garantat** să fie adevărat?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\rho(A) \\leq 5$", "ro": "$\\rho(A) \\leq 5$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct: $\\rho(A) \\leq \\|A\\|$ for **every** induced norm, so $\\rho(A) \\leq \\min(\\|A\\|_1, \\|A\\|_\\infty) = 5$. (Frobenius is not induced — use it only as an upper bound to spectral norm: $\\|A\\|_2 \\leq \\|A\\|_F$.)",
+                    "ro": "Corect: $\\rho(A) \\leq \\|A\\|$ pentru **orice** normă indusă, deci $\\rho(A) \\leq \\min(\\|A\\|_1, \\|A\\|_\\infty) = 5$. (Frobenius nu este indusă — folosește-o doar ca margine superioară pentru norma spectrală: $\\|A\\|_2 \\leq \\|A\\|_F$.)"
+                  }
+                },
+                {
+                  "text": { "en": "$\\rho(A) = 6$", "ro": "$\\rho(A) = 6$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "The Frobenius norm does **not** equal the spectral radius. Worse, $\\|A\\|_F$ is not an induced norm, so it does not even give you a *bound* of the standard form (you only get $\\|A\\|_2 \\leq \\|A\\|_F$).",
+                    "ro": "Norma Frobenius **nu** este egală cu raza spectrală. Mai rău, $\\|A\\|_F$ nu este indusă, deci nici măcar nu dă margine de forma standard (obții doar $\\|A\\|_2 \\leq \\|A\\|_F$)."
+                  }
+                },
+                {
+                  "text": { "en": "$\\rho(A) \\leq 7$ only", "ro": "$\\rho(A) \\leq 7$ doar" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is true but weaker — $\\rho(A) \\leq 7$ holds, yet the sharper bound $\\rho(A) \\leq 5$ also holds because $\\|A\\|_\\infty = 5 < 7$. Always pick the tightest induced norm.",
+                    "ro": "Este adevărat dar mai slab — $\\rho(A) \\leq 7$ se verifică, dar și marginea mai strânsă $\\rho(A) \\leq 5$ se verifică pentru că $\\|A\\|_\\infty = 5 < 7$. Alege întotdeauna cea mai strânsă normă indusă."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-spectral-norm"
+            },
+            {
+              "question": {
+                "en": "Recall (spaced retrieval). Which identity proved in an earlier step is the reason $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$?",
+                "ro": "Recap (retenție spațiată). Care identitate demonstrată într-un pas anterior este motivul pentru care $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "The adjoint identity $(Ax, y) = (x, A^T y)$", "ro": "Identitatea adjunctului $(Ax, y) = (x, A^T y)$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $\\|Ax\\|_2^2 = (Ax, Ax) = (x, A^T A x)$ uses the adjoint identity; maximizing this Rayleigh quotient gives $\\rho(A^T A)$.",
+                    "ro": "Corect. $\\|Ax\\|_2^2 = (Ax, Ax) = (x, A^T A x)$ folosește identitatea adjunctului; maximizarea câtului Rayleigh dă $\\rho(A^T A)$."
+                  }
+                },
+                {
+                  "text": { "en": "Cauchy–Schwarz inequality", "ro": "Inegalitatea Cauchy–Schwarz" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "CBS bounds an inner product by a product of norms — useful elsewhere (e.g., triangle inequality), but the spectral formula comes from the adjoint identity, not CBS.",
+                    "ro": "CBS mărginește un produs scalar printr-un produs de norme — util altundeva (de ex. la inegalitatea triunghiului), dar formula spectrală vine din identitatea adjunctului, nu din CBS."
+                  }
+                },
+                {
+                  "text": { "en": "Sub-multiplicativity $\\|AB\\| \\leq \\|A\\|\\|B\\|$", "ro": "Submultiplicativitatea $\\|AB\\| \\leq \\|A\\|\\|B\\|$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Sub-multiplicativity is a *consequence* of being an induced norm, not the reason for the spectral formula.",
+                    "ro": "Submultiplicativitatea este o *consecință* a faptului că norma este indusă, nu motivul formulei spectrale."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-adjoint-identity"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-history",
+      "title": { "en": "A short history of solving linear systems", "ro": "O scurtă istorie a rezolvării sistemelor liniare" },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The next few pages zoom out from norms to the **problem norms help us analyze** — solving $Ax = b$. The history spans 4000 years and anticipates almost every theme of this course: determinants, matrices, eigenvalues, iterative methods, conditioning.",
+            "ro": "Următoarele pagini ies din subiectul normelor spre **problema pe care normele ne ajută să o analizăm** — rezolvarea $Ax = b$. Istoria se întinde pe 4000 de ani și anticipează aproape fiecare temă a acestui curs: determinanți, matrici, valori proprii, metode iterative, condiționare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Antiquity.** Around **1900–1800 BCE** Babylonian scribes engaged with simultaneous linear equations. The tablet **YBC4652** poses a ''stone-weighing'' riddle equivalent to $8x + 3 + \\tfrac{21}{39}(8x + 3) = 60$. A slightly later tablet **VAT 8389** writes out a two-equation system: $x + y = 1800, \\; \\tfrac{2}{3}x - \\tfrac{1}{2}y = 500$.",
+            "ro": "**Antichitate.** În jurul anilor **1900–1800 î.Hr.** cărturarii babilonieni lucrau cu ecuații liniare simultane. Tăblița **YBC4652** propune o ghicitoare de ''cântărire a unei pietre'' echivalentă cu $8x + 3 + \\tfrac{21}{39}(8x + 3) = 60$. O tăbliță ceva mai târzie, **VAT 8389**, scrie un sistem cu două ecuații: $x + y = 1800, \\; \\tfrac{2}{3}x - \\tfrac{1}{2}y = 500$."
+          }
+        },
+        {
+          "type": "image",
+          "src": "course-media/alo/c02/page-22.png",
+          "alt": {
+            "en": "Photograph and line drawing of the Babylonian tablet YBC4652",
+            "ro": "Fotografie și desen în linie al tăbliței babiloniene YBC4652"
+          },
+          "caption": {
+            "en": "The stone-weighing tablet YBC4652 — one of the earliest surviving artefacts of linear equation solving.",
+            "ro": "Tăblița YBC4652 a cântăririi pietrei — unul dintre cele mai vechi artefacte păstrate ale rezolvării de ecuații liniare."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**China, c. 900–100 BCE.** The *Jiuzhang suanshu* (''Nine Chapters on the Mathematical Art'') — chapter ''Fangcheng'' — describes an algorithm using counting rods on a tabular layout that is essentially **Gaussian elimination** on a matrix of coefficients. Two millennia before Gauss.",
+            "ro": "**China, cca. 900–100 î.Hr.** *Jiuzhang suanshu* (''Cele nouă capitole despre arta matematică'') — capitolul ''Fangcheng'' — descrie un algoritm cu bețișoare de numărare pe un tablou care este, în esență, **eliminarea gaussiană** pe o matrice de coeficienți. Două milenii înainte de Gauss."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Determinants are born (17th–18th c.).** In **1683**, both **Seki Kowa** in Japan and **Gottfried Leibniz** in Europe independently developed the idea of what would become the **determinant**. Leibniz, writing to L'Hôpital, described 3-equation system solvability via a determinant condition. **Gabriel Cramer (1750)** publishes the rule that bears his name.",
+            "ro": "**Se nasc determinanții (sec. XVII–XVIII).** În **1683**, atât **Seki Kowa** în Japonia cât și **Gottfried Leibniz** în Europa dezvoltă independent ideea a ceea ce va deveni **determinantul**. Leibniz, într-o scrisoare către L'Hôpital, descrie rezolvabilitatea unui sistem cu 3 ecuații prin condiția asupra determinantului. **Gabriel Cramer (1750)** publică regula care-i poartă numele."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The 19th century — matrices as objects.** **Gauss (1800–1801)** introduces the word ''determinant'' and describes matrix multiplication and inversion while analysing the orbit of the asteroid Pallas. **Legendre (1805)** and **Gauss (1809)** invent **least squares** for overdetermined systems. **Cauchy (1826)** finds eigenvalues, defines similar matrices, and proves that real symmetric matrices diagonalize. **Sylvester (1850)** coins the word ''matrix.'' **Cayley (1855)** gives the first abstract definition of a matrix with its full algebraic operations.",
+            "ro": "**Secolul al XIX-lea — matricile ca obiecte.** **Gauss (1800–1801)** introduce termenul de ''determinant'' și descrie înmulțirea și inversarea de matrici în timp ce analiza orbita asteroidului Pallas. **Legendre (1805)** și **Gauss (1809)** inventează **metoda celor mai mici pătrate** pentru sisteme supradeterminate. **Cauchy (1826)** găsește valori proprii, definește matrici similare și demonstrează că matricile reale simetrice se diagonalizează. **Sylvester (1850)** introduce termenul de ''matrice''. **Cayley (1855)** dă prima definiție abstractă a unei matrice, cu toate operațiile algebrice."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The 20th century — numerical analysis takes off.** **Jordan (1870)** — canonical form. **Gauss–Seidel (Seidel 1874)** — iterative solvers. **Frobenius (1878)** — matrix rank. **Cholesky (c. 1910)** — factorization for symmetric positive-definite systems. **Heisenberg (1925)** rediscovers matrix algebra for quantum mechanics. **von Neumann & Goldstine (1947)** — condition numbers. **Turing (1948)** — LU decomposition. **Hestenes & Stiefel (1952)** — the conjugate gradient method. **Wilkinson (1958)** — QR factorization.",
+            "ro": "**Secolul al XX-lea — analiza numerică decolează.** **Jordan (1870)** — forma canonică. **Gauss–Seidel (Seidel 1874)** — solveri iterativi. **Frobenius (1878)** — rangul matricei. **Cholesky (cca. 1910)** — factorizare pentru sisteme simetrice pozitiv definite. **Heisenberg (1925)** redescoperă algebra matricială pentru mecanica cuantică. **von Neumann & Goldstine (1947)** — numere de condiționare. **Turing (1948)** — descompunerea LU. **Hestenes & Stiefel (1952)** — metoda gradienților conjugați. **Wilkinson (1958)** — factorizarea QR."
+          }
+        },
+        {
+          "type": "image",
+          "src": "course-media/alo/c02/page-38.png",
+          "alt": {
+            "en": "Timeline of key figures in the history of solving linear systems",
+            "ro": "Cronologia figurilor cheie din istoria rezolvării sistemelor liniare"
+          },
+          "caption": {
+            "en": "Four millennia on one timeline — Leibniz, Cramer, Legendre, Cayley, Cholesky, Hestenes & Stiefel.",
+            "ro": "Patru milenii pe o singură cronologie — Leibniz, Cramer, Legendre, Cayley, Cholesky, Hestenes & Stiefel."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Why this history matters.** Every technique in this course — Gaussian elimination, least squares, LU/QR/Cholesky factorizations, iterative methods, spectral analysis — has a known origin and a known problem it solved. When you use $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$, you are standing on Cauchy's (1826) eigenvalue theory. When you run Gauss–Seidel, you are iterating on Seidel's (1874) idea, *measured* by norms Frobenius and Cauchy formalized.",
+            "ro": "**De ce contează această istorie.** Fiecare tehnică din acest curs — eliminarea gaussiană, cele mai mici pătrate, factorizările LU/QR/Cholesky, metodele iterative, analiza spectrală — are o origine cunoscută și o problemă cunoscută pe care a rezolvat-o. Când folosești $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$, stai pe teoria valorilor proprii a lui Cauchy (1826). Când rulezi Gauss–Seidel, iterezi pe ideea lui Seidel (1874), *măsurată* cu norme formalizate de Frobenius și Cauchy."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c2-selftest",
+      "title": { "en": "Self-test: putting it all together", "ro": "Auto-test: punând totul laolaltă" },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "Comprehensive retrieval across course 2. Aim for ≥ 75% correct. Each question links back to the step where the concept was taught — follow those links on anything you miss.",
+            "ro": "Retenție cuprinzătoare pe cursul 2. Țintește ≥ 75% corect. Fiecare întrebare linkează înapoi la pasul unde a fost predat conceptul — urmează linkurile pentru tot ce greșești."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which of the four inner-product axioms implies $(x, 0) = 0$ for every $x$?",
+                "ro": "Care dintre cele patru axiome ale produsului scalar implică $(x, 0) = 0$ pentru orice $x$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Positive definiteness (a)", "ro": "Pozitivitatea (a)" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Positive definiteness controls $(x, x)$, not $(x, 0)$. The vanishing of $(x, 0)$ comes from scaling: $0 = 0 \\cdot y$, so $(x, 0) = \\overline{0} \\cdot (x, y) = 0$ (using conjugate-linearity in the second slot, derived from (c)+(b)).",
+                    "ro": "Pozitivitatea controlează $(x, x)$, nu $(x, 0)$. Anularea lui $(x, 0)$ vine din scalare: $0 = 0 \\cdot y$, deci $(x, 0) = \\overline{0} \\cdot (x, y) = 0$ (folosind conjugat-liniaritatea în al doilea slot, dedusă din (c)+(b))."
+                  }
+                },
+                {
+                  "text": { "en": "Linearity in the first argument (c), combined with symmetry (b)", "ro": "Liniaritatea în primul argument (c), combinată cu simetria (b)" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $0 = 0 \\cdot y$ for any $y$, so $(x, 0) = (x, 0 \\cdot y)$. Using $(x, \\lambda y) = \\overline{\\lambda}(x, y)$ with $\\lambda = 0$: $(x, 0) = 0$.",
+                    "ro": "Corect. $0 = 0 \\cdot y$ pentru orice $y$, deci $(x, 0) = (x, 0 \\cdot y)$. Folosind $(x, \\lambda y) = \\overline{\\lambda}(x, y)$ cu $\\lambda = 0$: $(x, 0) = 0$."
+                  }
+                },
+                {
+                  "text": { "en": "Additivity (d) alone", "ro": "Aditivitatea (d) singură" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Additivity by itself gives $(x, y + z) = (x, y) + (x, z)$ but not the scaling needed to produce a zero. You need the linearity/scaling axiom.",
+                    "ro": "Aditivitatea singură dă $(x, y + z) = (x, y) + (x, z)$ dar nu scalarea necesară pentru a obține zero. Ai nevoie de axioma de liniaritate/scalare."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-inner-product"
+            },
+            {
+              "question": {
+                "en": "For $x = (1, 2, 2, 0)$, what is $\\|x\\|_2$?",
+                "ro": "Pentru $x = (1, 2, 2, 0)$, cât este $\\|x\\|_2$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\|x\\|_2 = 3$", "ro": "$\\|x\\|_2 = 3$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct: $\\|x\\|_2 = \\sqrt{1 + 4 + 4 + 0} = \\sqrt{9} = 3$.",
+                    "ro": "Corect: $\\|x\\|_2 = \\sqrt{1 + 4 + 4 + 0} = \\sqrt{9} = 3$."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|x\\|_2 = 5$", "ro": "$\\|x\\|_2 = 5$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$5$ is $\\|x\\|_1 = |1| + |2| + |2| + |0|$, not $\\|x\\|_2$. The Euclidean norm takes the square root of the sum of squares.",
+                    "ro": "$5$ este $\\|x\\|_1 = |1| + |2| + |2| + |0|$, nu $\\|x\\|_2$. Norma euclidiană ia rădăcina sumei pătratelor."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|x\\|_2 = 9$", "ro": "$\\|x\\|_2 = 9$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$9$ is $\\|x\\|_2^2$ (the sum of squares). The norm itself is the square root: $\\sqrt{9} = 3$.",
+                    "ro": "$9$ este $\\|x\\|_2^2$ (suma pătratelor). Norma însăși este rădăcina: $\\sqrt{9} = 3$."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-vector-norms"
+            },
+            {
+              "question": {
+                "en": "Why is $\\|A\\|_{\\max} = \\max_{i,j} |a_{ij}|$ not a matrix norm?",
+                "ro": "De ce nu este $\\|A\\|_{\\max} = \\max_{i,j} |a_{ij}|$ normă matriceală?"
+              },
+              "options": [
+                {
+                  "text": { "en": "It fails the triangle inequality.", "ro": "Cade la inegalitatea triunghiului." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Triangle inequality actually holds for $\\|\\cdot\\|_{\\max}$. The axiom it fails is sub-multiplicativity.",
+                    "ro": "Inegalitatea triunghiului se verifică pentru $\\|\\cdot\\|_{\\max}$. Axioma care cade este submultiplicativitatea."
+                  }
+                },
+                {
+                  "text": { "en": "It fails sub-multiplicativity $\\|AB\\| \\leq \\|A\\|\\|B\\|$.", "ro": "Cade la submultiplicativitatea $\\|AB\\| \\leq \\|A\\|\\|B\\|$." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Counter-example: $A$ and $B = A^T$ both with entries $\\pm 1/\\sqrt{2}$ give $AB = I_2$ but $\\|AB\\|_{\\max} = 1 > 1/2 = \\|A\\|_{\\max}\\|B\\|_{\\max}$.",
+                    "ro": "Corect. Contra-exemplu: $A$ și $B = A^T$ ambele cu intrări $\\pm 1/\\sqrt{2}$ dau $AB = I_2$ dar $\\|AB\\|_{\\max} = 1 > 1/2 = \\|A\\|_{\\max}\\|B\\|_{\\max}$."
+                  }
+                },
+                {
+                  "text": { "en": "It fails definiteness.", "ro": "Cade la definire." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Definiteness is fine — $\\max |a_{ij}| = 0$ forces all entries to zero. The failure is elsewhere.",
+                    "ro": "Definirea este în regulă — $\\max |a_{ij}| = 0$ forțează toate intrările la zero. Eșecul este în altă parte."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-matrix-norms"
+            },
+            {
+              "question": {
+                "en": "For $A = \\begin{pmatrix} 2 & -1 \\\\ 0 & 3 \\end{pmatrix}$, what is $\\|A\\|_1$?",
+                "ro": "Pentru $A = \\begin{pmatrix} 2 & -1 \\\\ 0 & 3 \\end{pmatrix}$, cât este $\\|A\\|_1$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\|A\\|_1 = 3$", "ro": "$\\|A\\|_1 = 3$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "You probably computed $\\max_i \\sum_j |a_{ij}|$ (row sums: $3, 3$) — that's $\\|A\\|_\\infty$. $\\|A\\|_1$ is column sums.",
+                    "ro": "Probabil ai calculat $\\max_i \\sum_j |a_{ij}|$ (sume pe rânduri: $3, 3$) — aceea este $\\|A\\|_\\infty$. $\\|A\\|_1$ este sume pe coloane."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|A\\|_1 = 4$", "ro": "$\\|A\\|_1 = 4$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Columns: col 1 sum $= |2|+|0|=2$; col 2 sum $= |-1|+|3|=4$. Max is $4$.",
+                    "ro": "Corect. Coloane: suma coloanei 1 $= |2|+|0|=2$; suma coloanei 2 $= |-1|+|3|=4$. Maxul este $4$."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|A\\|_1 = 6$", "ro": "$\\|A\\|_1 = 6$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$6$ would be the sum of absolute values of **all** entries $(|2|+|-1|+|0|+|3|)$ — that is the sum norm on $\\mathbb{R}^4$, not the induced $\\|A\\|_1$.",
+                    "ro": "$6$ ar fi suma valorilor absolute a **tuturor** intrărilor $(|2|+|-1|+|0|+|3|)$ — aceea este norma sumă pe $\\mathbb{R}^4$, nu $\\|A\\|_1$ indusă."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-induced-norms"
+            },
+            {
+              "question": {
+                "en": "If $A$ is real symmetric, which identity holds?",
+                "ro": "Dacă $A$ este real simetrică, care identitate se verifică?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\|A\\|_2 = \\rho(A)$", "ro": "$\\|A\\|_2 = \\rho(A)$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. For $A = A^T$: $A^T A = A^2$, whose eigenvalues are $\\lambda_i^2$, so $\\|A\\|_2 = \\sqrt{\\max \\lambda_i^2} = \\max |\\lambda_i| = \\rho(A)$.",
+                    "ro": "Corect. Pentru $A = A^T$: $A^T A = A^2$, ale cărui valori proprii sunt $\\lambda_i^2$, deci $\\|A\\|_2 = \\sqrt{\\max \\lambda_i^2} = \\max |\\lambda_i| = \\rho(A)$."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|A\\|_2 = \\rho(A)^2$", "ro": "$\\|A\\|_2 = \\rho(A)^2$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "You forgot the square root. $\\rho(A^T A) = \\rho(A)^2$ for symmetric $A$, and the spectral norm is the *square root* of that: $\\rho(A)$.",
+                    "ro": "Ai uitat rădăcina. $\\rho(A^T A) = \\rho(A)^2$ pentru $A$ simetric, iar norma spectrală este *rădăcina* din asta: $\\rho(A)$."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|A\\|_2 = \\|A\\|_F$", "ro": "$\\|A\\|_2 = \\|A\\|_F$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This holds only for rank-1 matrices. In general $\\|A\\|_2 \\leq \\|A\\|_F \\leq \\sqrt{n}\\|A\\|_2$, but rarely equality.",
+                    "ro": "Asta se verifică doar pentru matrici de rang 1. În general $\\|A\\|_2 \\leq \\|A\\|_F \\leq \\sqrt{n}\\|A\\|_2$, dar rareori egalitate."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-spectral-norm"
+            },
+            {
+              "question": {
+                "en": "Changing coordinates by an invertible $P$ transforms the induced norm of $A$ into the induced norm of which matrix?",
+                "ro": "Schimbarea coordonatelor printr-o matrice inversabilă $P$ transformă norma indusă a lui $A$ în norma indusă a cărei matrice?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$P^T A P$ — a congruence transformation.", "ro": "$P^T A P$ — o transformare prin congruență." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Congruence $P^T A P$ is used for quadratic forms, not for matrix norms under vector-norm reweighting. The right transformation here is similarity.",
+                    "ro": "Congruența $P^T A P$ se folosește pentru forme pătratice, nu pentru norme matriciale sub reponderarea normei vectoriale. Transformarea corectă aici este similaritatea."
+                  }
+                },
+                {
+                  "text": { "en": "$PAP^{-1}$ — a similarity transformation.", "ro": "$PAP^{-1}$ — o transformare prin similaritate." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $\\|A\\|_{i, P} = \\|PAP^{-1}\\|_i$. Similarity preserves eigenvalues, which is why this transformation is central in spectral theory.",
+                    "ro": "Corect. $\\|A\\|_{i, P} = \\|PAP^{-1}\\|_i$. Similaritatea păstrează valorile proprii, de aceea această transformare este centrală în teoria spectrală."
+                  }
+                },
+                {
+                  "text": { "en": "$P^{-1} A$ — one-sided rescaling.", "ro": "$P^{-1} A$ — rescalare pe o parte." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "One-sided multiplication does not match — the full derivation cancels the $\\|x\\|$ denominator and the $\\|Ax\\|$ numerator symmetrically, producing both $P$ and $P^{-1}$.",
+                    "ro": "Înmulțirea pe o singură parte nu se potrivește — derivarea completă anulează numitorul $\\|x\\|$ și numărătorul $\\|Ax\\|$ simetric, producând atât $P$ cât și $P^{-1}$."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-norm-change-P"
+            },
+            {
+              "question": {
+                "en": "Cauchy–Schwarz says $|(x, y)| \\leq$ ?",
+                "ro": "Cauchy–Schwarz spune $|(x, y)| \\leq$ ?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\|x\\|_2 + \\|y\\|_2$", "ro": "$\\|x\\|_2 + \\|y\\|_2$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "That looks like the triangle inequality for norms — a different statement. CBS multiplies, it doesn't add.",
+                    "ro": "Asta seamănă cu inegalitatea triunghiului pentru norme — o afirmație diferită. CBS înmulțește, nu adună."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|x\\|_2 \\cdot \\|y\\|_2$", "ro": "$\\|x\\|_2 \\cdot \\|y\\|_2$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $|(x, y)| \\leq \\sqrt{(x,x)} \\cdot \\sqrt{(y,y)} = \\|x\\|_2 \\|y\\|_2$, with equality iff $x, y$ collinear.",
+                    "ro": "Corect. $|(x, y)| \\leq \\sqrt{(x,x)} \\cdot \\sqrt{(y,y)} = \\|x\\|_2 \\|y\\|_2$, cu egalitate dacă și numai dacă $x, y$ coliniari."
+                  }
+                },
+                {
+                  "text": { "en": "$\\|xy\\|_2$", "ro": "$\\|xy\\|_2$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$xy$ is not defined for two column vectors (unless you mean the outer product). CBS bounds the *scalar* $|(x,y)|$ by the *product of scalar norms*.",
+                    "ro": "$xy$ nu este definit pentru doi vectori coloană (dacă nu te referi la produsul exterior). CBS mărginește *scalarul* $|(x,y)|$ prin *produsul de scalari de normă*."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-euclidean-norm"
+            },
+            {
+              "question": {
+                "en": "Which 20th-century algorithm for solving $Ax = b$ is due to **Hestenes and Stiefel** (1952)?",
+                "ro": "Care algoritm din secolul XX pentru rezolvarea $Ax = b$ îi aparține lui **Hestenes și Stiefel** (1952)?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Cholesky factorization", "ro": "Factorizarea Cholesky" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Cholesky is from around 1910, by the French officer André-Louis Cholesky.",
+                    "ro": "Cholesky datează din jurul lui 1910, de la ofițerul francez André-Louis Cholesky."
+                  }
+                },
+                {
+                  "text": { "en": "Conjugate gradients", "ro": "Gradienți conjugați" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Magnus Hestenes and Eduard Stiefel published the **conjugate gradient method** in 1952, now a workhorse for large sparse symmetric positive-definite systems.",
+                    "ro": "Corect. Magnus Hestenes și Eduard Stiefel au publicat **metoda gradienților conjugați** în 1952, acum un instrument esențial pentru sisteme mari, rare, simetrice pozitiv definite."
+                  }
+                },
+                {
+                  "text": { "en": "QR factorization", "ro": "Factorizarea QR" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "QR is associated with Wilkinson (1958) in the numerical-analysis lineage. Earlier Gram–Schmidt orthogonalization is the mathematical ancestor.",
+                    "ro": "QR este asociat lui Wilkinson (1958) în linia analizei numerice. Ortogonalizarea Gram–Schmidt mai veche este strămoșul matematic."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-history"
+            },
+            {
+              "question": {
+                "en": "Which inequality lets you bound $\\rho(A)$ by an easy-to-compute quantity?",
+                "ro": "Care inegalitate îți permite să margini pe $\\rho(A)$ printr-o cantitate ușor de calculat?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$\\rho(A) \\leq \\|A\\|$ for every induced norm $\\|\\cdot\\|$.", "ro": "$\\rho(A) \\leq \\|A\\|$ pentru orice normă indusă $\\|\\cdot\\|$." },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $\\|A\\|_1$ and $\\|A\\|_\\infty$ are computed in $O(n^2)$ by row/column sums and both upper-bound $\\rho(A)$. Pick the smaller of the two for a sharper bound.",
+                    "ro": "Corect. $\\|A\\|_1$ și $\\|A\\|_\\infty$ se calculează în $O(n^2)$ prin sume pe rânduri/coloane și ambele mărginesc superior pe $\\rho(A)$. Alege-o pe cea mai mică pentru o margine mai strânsă."
+                  }
+                },
+                {
+                  "text": { "en": "$\\rho(A) \\leq \\|A\\|_F$ always, and Frobenius is the sharpest bound.", "ro": "$\\rho(A) \\leq \\|A\\|_F$ întotdeauna, iar Frobenius este marginea cea mai strânsă." },
+                  "correct": false,
+                  "explanation": {
+                    "en": "The bound $\\rho(A) \\leq \\|A\\|_F$ does hold (Frobenius is compatible), but it is generally *not* the sharpest — and Frobenius is not an induced norm, so the general theorem is stated for induced norms.",
+                    "ro": "Marginea $\\rho(A) \\leq \\|A\\|_F$ se verifică (Frobenius este compatibilă), dar în general *nu* este cea mai strânsă — iar Frobenius nu este normă indusă, deci teorema generală se enunță pentru norme induse."
+                  }
+                },
+                {
+                  "text": { "en": "$\\rho(A) \\leq \\det(A)$", "ro": "$\\rho(A) \\leq \\det(A)$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "False in general — $\\det(A) = \\prod \\lambda_i$ can be zero, negative, or much larger than $\\max|\\lambda_i|$. No such inequality holds.",
+                    "ro": "Fals în general — $\\det(A) = \\prod \\lambda_i$ poate fi zero, negativ sau mult mai mare decât $\\max|\\lambda_i|$. O astfel de inegalitate nu are loc."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c2-spectral-norm"
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Recap of course 2.** (1) Inner products — four axioms, $\\mathbb{R}^n$ vs $\\mathbb{C}^n$. (2) Adjoint identity $(Ax, y) = (x, A^H y)$. (3) Vector norms $\\ell_1, \\ell_2, \\ell_\\infty$. (4) Euclidean norm + CBS. (5) Matrix norms and Frobenius; the $\\|\\cdot\\|_{\\max}$ counter-example. (6) Induced norms with their column/row closed forms. (7) Norms under similarity. (8) Spectral norm $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$ and $\\rho(A) \\leq \\|A\\|$. (9) History from Babylon to conjugate gradients.",
+            "ro": "**Recap curs 2.** (1) Produse scalare — patru axiome, $\\mathbb{R}^n$ vs $\\mathbb{C}^n$. (2) Identitatea adjunctului $(Ax, y) = (x, A^H y)$. (3) Norme vectoriale $\\ell_1, \\ell_2, \\ell_\\infty$. (4) Norma euclidiană + CBS. (5) Norme matriceale și Frobenius; contra-exemplul $\\|\\cdot\\|_{\\max}$. (6) Norme induse cu formele lor închise pe coloane/rânduri. (7) Norme sub similaritate. (8) Norma spectrală $\\|A\\|_2 = \\sqrt{\\rho(A^T A)}$ și $\\rho(A) \\leq \\|A\\|$. (9) Istorie din Babilon până la gradienți conjugați."
+          }
+        }
+      ]
+    }
+  ]
+}

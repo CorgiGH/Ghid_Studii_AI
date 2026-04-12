@@ -15,6 +15,10 @@ const alo = {
       title: { en: 'Course 1: Introduction & Motivating Examples', ro: 'Cursul 1: Introducere și exemple motivante' },
       shortTitle: { en: 'C1: Intro', ro: 'C1: Intro' },
       sectionCount: 7 },
+    { id: 'alo-c2', src: 'alo/courses/course-02.json', metaId: 'alo-c2',
+      title: { en: 'Course 2: Inner products, norms, and a short history of linear systems', ro: 'Cursul 2: Produse scalare, norme și o scurtă istorie a sistemelor liniare' },
+      shortTitle: { en: 'C2: Norms', ro: 'C2: Norme' },
+      sectionCount: 11 },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
