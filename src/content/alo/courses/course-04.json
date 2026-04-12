@@ -35,8 +35,8 @@
         {
           "type": "learn",
           "content": {
-            "en": "**Course 3 taught us the vocabulary — conditioning and stability.** Course 4 applies it to the most common task in numerical linear algebra: **solve $Ax = b$**. The matrix $A$ is square, non-singular, real. The answer exists and is unique; the only question is **how** you compute it.\n\nThe course walks through three algorithms in chronological order:",
-            "ro": "**Cursul 3 ne-a învățat vocabularul — condiționare și stabilitate.** Cursul 4 îl aplică pe cea mai comună sarcină din algebra liniară numerică: **rezolvarea $Ax = b$**. Matricea $A$ este pătratică, nesingulară, reală. Răspunsul există și este unic; singura întrebare este **cum** îl calculezi.\n\nCursul parcurge trei algoritmi în ordine cronologică:"
+            "en": "**Course 3 taught us the vocabulary — conditioning and stability.** Course 4 applies it to the most common task in numerical linear algebra: **solve $Ax = b$**. The matrix $A$ is square, non-singular, real. The answer exists and is unique; the only question is **how** you compute it.\n\nThe course walks through the classical algorithms in chronological order, then adds the stability layer and a self-test:",
+            "ro": "**Cursul 3 ne-a învățat vocabularul — condiționare și stabilitate.** Cursul 4 îl aplică pe cea mai comună sarcină din algebra liniară numerică: **rezolvarea $Ax = b$**. Matricea $A$ este pătratică, nesingulară, reală. Răspunsul există și este unic; singura întrebare este **cum** îl calculezi.\n\nCursul parcurge algoritmii clasici în ordine cronologică, apoi adaugă stratul de stabilitate și un auto-test:"
           }
         },
         {
@@ -721,7 +721,7 @@
         {
           "type": "code",
           "language": "c",
-          "code": "// Gaussian elimination (no pivoting; see next step for why that's dangerous)\nfor (int r = 0; r < n - 1; r++) {\n    // Stage r: zero column r below row r\n    for (int i = r + 1; i < n; i++) {\n        double f = -A[i][r] / A[r][r];   // multiplier; divides by pivot\n        for (int j = r + 1; j < n; j++) {\n            A[i][j] += f * A[r][j];       // update row i\n        }\n        A[i][r] = 0.0;                    // enforce the zero (was ~eps)\n        b[i]    += f * b[r];              // update RHS the same way\n    }\n}\n// Now A is upper-triangular; solve by back substitution.\nback_substitute(A, b, x);"
+          "code": "// Gaussian elimination (no pivoting; see next step for why that's dangerous)\nfor (int r = 0; r < n - 1; r++) {\n    // Stage r: zero column r below row r\n    for (int i = r + 1; i < n; i++) {\n        double f = A[i][r] / A[r][r];    // the multiplier f_ir from the equation\n        for (int j = r + 1; j < n; j++) {\n            A[i][j] -= f * A[r][j];       // E_i := E_i - f_ir * E_r\n        }\n        A[i][r] = 0.0;                    // enforce the zero (was ~eps)\n        b[i]    -= f * b[r];              // apply the same op to RHS\n    }\n}\n// Now A is upper-triangular; solve by back substitution.\nback_substitute(A, b, x);"
         },
         {
           "type": "callout",
@@ -832,8 +832,8 @@
           "type": "callout",
           "variant": "warning",
           "content": {
-            "en": "**Numerical demonstration (from the lecture slides).** For $n = 50$ with a deliberately small pivot controlled by parameter $p$ (smaller $p$ = worse pivot):\n\n- **$p = 10$ (pivot $\\approx 10^{-10}$):** no pivoting gives $\\|x_G - x_{\\text{ex}}\\| \\approx 1.69 \\times 10^{-10}$; partial pivoting gives $\\approx 9.8 \\times 10^{-13}$ — roughly **three digits** lost.\n- **$p = 8$ (pivot $\\approx 10^{-8}$):** no pivoting gives absolute error $\\approx 22$ — the answer is **meaningless**; partial pivoting still delivers $\\approx 10^{-11}$.\n\nDegradation is gradual as the pivot shrinks and catastrophic once it gets small enough. Pivoting is the cheap insurance that keeps you in the first regime.",
-            "ro": "**Demonstrație numerică (din slide-urile lecției).** Pentru $n = 50$ cu un pivot mic controlat de parametrul $p$ (cu cât $p$ mai mic, cu atât pivotul mai prost):\n\n- **$p = 10$ (pivot $\\approx 10^{-10}$):** fără pivotare $\\|x_G - x_{\\text{ex}}\\| \\approx 1.69 \\times 10^{-10}$; pivotare parțială $\\approx 9.8 \\times 10^{-13}$ — aproximativ **trei cifre** pierdute.\n- **$p = 8$ (pivot $\\approx 10^{-8}$):** fără pivotare eroare absolută $\\approx 22$ — răspunsul este **fără sens**; pivotarea parțială livrează totuși $\\approx 10^{-11}$.\n\nDegradarea este graduală pe măsură ce pivotul scade și devine catastrofală odată ce ajunge suficient de mic. Pivotarea este asigurarea ieftină care te menține în primul regim."
+            "en": "**Numerical demonstration (from the lecture slides).** For $n = 50$, running Gaussian elimination with a deliberately small pivot and comparing two scenarios measured by the slides:\n\n- **Moderate pivot (lecture parameter $p = 10$):** no pivoting gives $\\|x_G - x_{\\text{ex}}\\| \\approx 1.69 \\times 10^{-10}$; partial pivoting gives $\\approx 9.8 \\times 10^{-13}$ — roughly **three digits lost** without pivoting.\n- **Very small pivot (lecture parameter $p = 8$, pivot near $\\varepsilon$):** no pivoting gives absolute error $\\approx 22$ — the answer is **meaningless**; partial pivoting still delivers $\\approx 10^{-11}$.\n\nThe degradation is **continuous** in how close the pivot sits to $\\varepsilon$: a few digits lost in the moderate case, catastrophic failure once the pivot approaches machine precision. Partial pivoting compresses the entire range back into the $10^{-11}$ neighborhood.",
+            "ro": "**Demonstrație numerică (din slide-urile lecției).** Pentru $n = 50$ cu un pivot forțat de magnitudine $\\approx 10^{-p}$:\n\n- **$p = 10$ (pivot $\\approx 10^{-10}$):** fără pivotare $\\|x_G - x_{\\text{ex}}\\| \\approx 1.69 \\times 10^{-10}$; pivotare parțială $\\approx 9.8 \\times 10^{-13}$ — aproximativ **trei cifre** pierdute.\n- **$p = 8$ (pivot apropiat de $\\varepsilon$ al mașinii):** fără pivotare eroare absolută $\\approx 22$ — răspunsul este **fără sens**; pivotarea parțială livrează totuși $\\approx 10^{-11}$.\n\nIdeea rămâne: degradarea este **continuă** în cât de aproape se află pivotul forțat de $\\varepsilon$, iar pivotarea parțială comprimă tot intervalul înapoi în vecinătatea $10^{-11}$."
           }
         },
         {
@@ -1028,6 +1028,17 @@
           }
         },
         {
+          "type": "think",
+          "question": {
+            "en": "Before accepting the result, verify it by hand. Plug $x_1 = 37/4,\\ x_2 = 17/4,\\ x_3 = 11/4$ back into the three original equations. Do all three balance?",
+            "ro": "Înainte să accepți rezultatul, verifică-l de mână. Înlocuiește $x_1 = 37/4,\\ x_2 = 17/4,\\ x_3 = 11/4$ în cele trei ecuații originale. Se verifică toate trei?"
+          },
+          "answer": {
+            "en": "Yes:\n- Eq 1: $3 \\cdot 37/4 + 2 \\cdot 17/4 + 11/4 = (111 + 34 + 11)/4 = 156/4 = 39$. ✓\n- Eq 2: $2 \\cdot 37/4 + 3 \\cdot 17/4 + 11/4 = (74 + 51 + 11)/4 = 136/4 = 34$. ✓\n- Eq 3: $37/4 + 2 \\cdot 17/4 + 3 \\cdot 11/4 = (37 + 34 + 33)/4 = 104/4 = 26$. ✓\n\nAll three balance — the algorithm works. This 30-second hand check is what every numerical-algebra implementation should include as a sanity test after solving.",
+            "ro": "Da:\n- Ec 1: $3 \\cdot 37/4 + 2 \\cdot 17/4 + 11/4 = (111 + 34 + 11)/4 = 156/4 = 39$. ✓\n- Ec 2: $2 \\cdot 37/4 + 3 \\cdot 17/4 + 11/4 = (74 + 51 + 11)/4 = 136/4 = 34$. ✓\n- Ec 3: $37/4 + 2 \\cdot 17/4 + 3 \\cdot 11/4 = (37 + 34 + 33)/4 = 104/4 = 26$. ✓\n\nToate cele trei se verifică — algoritmul funcționează. Această verificare de 30 de secunde făcută manual este ceea ce orice implementare de algebră liniară numerică ar trebui să includă ca test de sănătate după rezolvare."
+          }
+        },
+        {
           "type": "callout",
           "variant": "info",
           "content": {
@@ -1164,9 +1175,9 @@
                   "explanation": { "en": "Inverting $A$ is $\\Theta(n^3)$ work to throw away the very structure (triangularity) that lets you solve in $\\Theta(n^2)$. Don't invert what you can substitute.", "ro": "Inversarea lui $A$ este muncă $\\Theta(n^3)$ doar ca să arunci structura (triunghiularitatea) care îți permite să rezolvi în $\\Theta(n^2)$. Nu inversa ce poți substitui." }
                 },
                 {
-                  "text": { "en": "$x_2$, because $a_{11}$ is often $1$ and gets skipped.", "ro": "$x_2$, pentru că $a_{11}$ este adesea $1$ și se sare peste el." },
+                  "text": { "en": "$x_{\\lceil n/2 \\rceil}$ — the middle unknown, to balance numerical accuracy.", "ro": "$x_{\\lceil n/2 \\rceil}$ — necunoscuta din mijloc, pentru a echilibra acuratețea numerică." },
                   "correct": false,
-                  "explanation": { "en": "$a_{11} = 1$ makes the first step a trivial $x_1 = b_1$ — not a skip. $x_1$ is still computed first.", "ro": "$a_{11} = 1$ face primul pas un trivial $x_1 = b_1$ — nu un skip. $x_1$ este totuși calculat primul." }
+                  "explanation": { "en": "Substitution is structural, not statistical — there is no \"balancing\" choice. You solve the equation that already has one unknown; that's always at an end of a triangular system.", "ro": "Substituția este structurală, nu statistică — nu există o alegere \"de echilibrare\". Rezolvi ecuația care are deja o singură necunoscută; aceea este mereu la un capăt al unui sistem triunghiular." }
                 }
               ],
               "explanation": { "en": "Lower-triangular → top-down, starting with $x_1$.", "ro": "Inferior triunghiular → de sus în jos, începând cu $x_1$." },
@@ -1251,7 +1262,7 @@
                 {
                   "text": { "en": "…the last diagonal element $a_{nn}$.", "ro": "…ultimul element diagonal $a_{nn}$." },
                   "correct": false,
-                  "explanation": { "en": "Division by $a_{nn}$ happens only during back substitution, after elimination finishes.", "ro": "Împărțirea la $a_{nn}$ are loc doar în timpul substituției inverse, după ce eliminarea se termină." }
+                  "explanation": { "en": "Stage $r$ divides by $a_{rr}^{(r-1)}$, not $a_{nn}$. At the last elimination stage ($r = n-1$) the pivot is $a_{n-1, n-1}$; $a_{nn}$ only gets divided during back substitution.", "ro": "Etapa $r$ împarte la $a_{rr}^{(r-1)}$, nu la $a_{nn}$. La ultima etapă de eliminare ($r = n-1$) pivotul este $a_{n-1, n-1}$; $a_{nn}$ se împarte doar în substituția inversă." }
                 },
                 {
                   "text": { "en": "…the norm of row $r$.", "ro": "…norma liniei $r$." },
