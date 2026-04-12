@@ -322,6 +322,18 @@
           "tex": "M_{\\times/\\div} = \\sum_{r=1}^n \\bigl[(n-r) r + (r-1)\\bigr] = \\frac{n(n+4)(n-1)}{6} = \\frac{n^3}{6} + O(n^2)"
         },
         {
+          "type": "equation",
+          "tex": "R_{\\sqrt{\\ }} = n \\text{ (one per diagonal pivot)}"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Why square roots deserve their own line.** A single `sqrt` on modern hardware costs $\\sim 5$–$10$ single-cycle flops of throughput — much more than a `+` or `×`. For large $n$ the $O(n)$ sqrt term is dwarfed by the $O(n^3)$ multiplications, but on small blocks (sparse Cholesky, tile algorithms) the sqrt count can dominate.",
+            "ro": "**De ce radicalii merită linia lor proprie.** Un singur `sqrt` pe hardware modern costă $\\sim 5$–$10$ flops la throughput cu o ciclă — mult mai mult decât un `+` sau `×`. Pentru $n$ mari, termenul $O(n)$ al sqrt este eclipsat de înmulțirile $O(n^3)$, dar pe blocuri mici (Cholesky rar, algoritmi pe tile-uri) numărarea sqrt poate domina."
+          }
+        },
+        {
           "type": "callout",
           "variant": "tip",
           "content": {
@@ -393,8 +405,8 @@
             "ro": "Eliminarea Gauss (fără pivotare) transformă $A$ într-o matrice superior triunghiulară $U$ scăzând multipli ai liniilor anterioare din cele ulterioare. Fiecare astfel de operație este o transformare liniară a lui $A$. Poți exprima **întreaga** eliminare ca o singură ecuație matricială între $A$ și $U$?"
           },
           "answer": {
-            "en": "**Yes.** Each stage $r$ is captured by a single lower-triangular matrix $T_r$ — an identity matrix with the stage's multipliers in column $r$ below the diagonal. The whole elimination becomes $T_{n-1} \\cdots T_2 T_1 \\, A = U$. Invert to get $A = T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1} \\, U$, name the product $L$, and you have $A = L U$ — the LU decomposition. Gauss was computing it the whole time.",
-            "ro": "**Da.** Fiecare etapă $r$ este capturată de o singură matrice inferior triunghiulară $T_r$ — o matrice identitate cu multiplicatorii etapei pe coloana $r$ sub diagonală. Întreaga eliminare devine $T_{n-1} \\cdots T_2 T_1 \\, A = U$. Inversează pentru a obține $A = T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1} \\, U$, denumește produsul $L$ și ai $A = L U$ — descompunerea LU. Gauss o calcula tot timpul."
+            "en": "**Yes** — each elimination stage can be captured as left-multiplication by a single lower-triangular matrix, and stacking the stages gives one equation relating $A$ and $U$. The next two steps build that matrix explicitly, invert the product, and read off a factorization you've been computing all along without naming it.",
+            "ro": "**Da** — fiecare etapă de eliminare poate fi capturată ca înmulțire la stânga cu o singură matrice inferior triunghiulară, iar stivuirea etapelor dă o singură ecuație între $A$ și $U$. Pașii următori construiesc acea matrice explicit, inversează produsul și citesc o factorizare pe care o calculai de mult timp fără s-o numești."
           }
         },
         {
@@ -579,8 +591,8 @@
           "type": "callout",
           "variant": "tip",
           "content": {
-            "en": "**The gift of the $T_r$ algebra.** Each $T_r^{-1} = I_n - t^{(r)} e_r^T$, and the product $T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1}$ collapses to a single matrix — no actual multiplication needed — because the cross-terms vanish (adjacent-column outer products kill each other). The result is",
-            "ro": "**Darul algebrei $T_r$.** Fiecare $T_r^{-1} = I_n - t^{(r)} e_r^T$, iar produsul $T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1}$ se colapsează într-o singură matrice — fără înmulțire efectivă — pentru că termenii încrucișați dispar (produsele exterioare de coloane adiacente se anulează reciproc). Rezultatul este"
+            "en": "**The gift of the $T_r$ algebra.** Each $T_r^{-1} = I_n - t^{(r)} e_r^T$, and the product $T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1}$ collapses to a single matrix — no actual multiplication needed — because every cross-term in the expansion contains a factor $e_r^T t^{(s)}$ with $s > r$, which is zero (component $r$ of $t^{(s)}$ is zero by construction). The result is",
+            "ro": "**Darul algebrei $T_r$.** Fiecare $T_r^{-1} = I_n - t^{(r)} e_r^T$, iar produsul $T_1^{-1} T_2^{-1} \\cdots T_{n-1}^{-1}$ se colapsează într-o singură matrice — fără înmulțire efectivă — pentru că fiecare termen încrucișat din dezvoltare conține un factor $e_r^T t^{(s)}$ cu $s > r$, care este zero (componenta $r$ a lui $t^{(s)}$ este zero prin construcție). Rezultatul este"
           }
         },
         {
@@ -826,6 +838,14 @@
           "content": {
             "en": "where $Q$ is orthogonal ($Q^T Q = I_n$) and $R$ is upper-triangular. Two classical constructions produce it: **Gram–Schmidt** (conceptually simple, numerically fragile) and **Householder reflections** (numerically excellent, the modern default). We'll cover the algorithms in later courses; today's focus is *why QR exists and what we do with it*.",
             "ro": "unde $Q$ este ortogonală ($Q^T Q = I_n$) și $R$ este superior triunghiulară. Două construcții clasice o produc: **Gram–Schmidt** (simplă conceptual, fragilă numeric) și **reflexiile Householder** (excelente numeric, implicitul modern). Vom acoperi algoritmii în cursuri ulterioare; astăzi ne concentrăm pe *de ce există QR și ce facem cu ea*."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Uniqueness caveat.** QR exists for every real square $A$, but the pair $(Q, R)$ is unique (with $R$'s diagonal positive and $Q$'s column signs fixed) only when $A$ has **full column rank**. If it doesn't, you can still compute a QR, but multiple valid answers exist — that's why two libraries' `qr(A)` outputs can look different for rank-deficient input.",
+            "ro": "**Avertisment despre unicitate.** QR există pentru orice $A$ real pătratic, dar perechea $(Q, R)$ este unică (cu diagonala lui $R$ pozitivă și semnele coloanelor lui $Q$ fixate) doar când $A$ are **rang complet pe coloane**. Dacă nu, poți totuși calcula o QR, dar există mai multe răspunsuri valide — de aceea ieșirile `qr(A)` ale două biblioteci pot arăta diferit pentru intrare cu rang deficitar."
           }
         },
         {
@@ -1107,7 +1127,7 @@
                 {
                   "text": "$Q^{-1} = \\bar{Q}^T$ (complex conjugate transpose)",
                   "correct": false,
-                  "explanation": { "en": "That's the definition of **unitary** (the complex analog). For real $Q$, conjugation is a no-op, so it reduces to $Q^T$ — true, but the question asked about real orthogonal.", "ro": "Aceea este definiția **unitară** (analogul complex). Pentru $Q$ real, conjugarea este identitate, deci se reduce la $Q^T$ — adevărat, dar întrebarea era despre ortogonalitatea reală." }
+                  "explanation": { "en": "That's the definition of **unitary** — the complex analog of orthogonal. For a real matrix, conjugation does nothing, so the cleaner statement is $Q^{-1} = Q^T$ (option 1). Picking the conjugate-transpose form here is like writing $\\sqrt{x^2}$ for $|x|$: technically equivalent for reals, but unnecessarily heavy.", "ro": "Aceea este definiția **unitară** — analogul complex al ortogonalității. Pentru o matrice reală, conjugarea nu face nimic, deci afirmația mai curată este $Q^{-1} = Q^T$ (opțiunea 1). A alege forma cu transpusă conjugată aici este ca a scrie $\\sqrt{x^2}$ pentru $|x|$: tehnic echivalent pentru reali, dar inutil de greoi." }
                 },
                 {
                   "text": "$Q^{-1} = Q$",
@@ -1137,7 +1157,7 @@
                 {
                   "text": { "en": "LU doesn't exist for rectangular matrices.", "ro": "LU nu există pentru matrici dreptunghiulare." },
                   "correct": false,
-                  "explanation": { "en": "LU does generalize to rectangular via row-reduced echelon form; it just isn't a natural fit for least-squares.", "ro": "LU se generalizează pentru matrici dreptunghiulare prin forma echelon redusă; pur și simplu nu se potrivește natural pentru cele mai mici pătrate." }
+                  "explanation": { "en": "LU does generalize: for $m \\times n$ with $m > n$ you get $L$ ($m \\times m$, unit lower-triangular) times $U$ ($m \\times n$, upper-trapezoidal), typically with partial pivoting. It's the **stability** that pushes least-squares toward QR, not existence.", "ro": "LU se generalizează: pentru $m \\times n$ cu $m > n$ obții $L$ ($m \\times m$, unitate inferior triunghiulară) ori $U$ ($m \\times n$, superior trapezoidală), de obicei cu pivotare parțială. **Stabilitatea** este ce împinge cele mai mici pătrate spre QR, nu existența." }
                 },
                 {
                   "text": { "en": "LU produces a non-triangular result for $m \\neq n$.", "ro": "LU produce un rezultat non-triunghiular pentru $m \\neq n$." },
@@ -1162,7 +1182,7 @@
                 {
                   "text": { "en": "Cholesky factor $A$ once, solve each $b_k$ in $\\Theta(n^2)$.", "ro": "Factorizează Cholesky $A$ o dată, rezolvă fiecare $b_k$ în $\\Theta(n^2)$." },
                   "correct": true,
-                  "explanation": { "en": "Correct. $A$ is SPD → Cholesky is cheapest. Factor cost $\\approx n^3/6 \\approx 2 \\times 10^7$ ops; each solve $\\approx 2 n^2 = 5 \\times 10^5$ ops; total $\\approx 5 \\times 10^{10}$ — 100× faster than naive.", "ro": "Corect. $A$ este SPD → Cholesky este cea mai ieftină. Cost factorizare $\\approx n^3/6 \\approx 2 \\times 10^7$ operații; fiecare rezolvare $\\approx 2 n^2 = 5 \\times 10^5$ operații; total $\\approx 5 \\times 10^{10}$ — de 100 de ori mai rapid decât naiv." }
+                  "explanation": { "en": "Correct. $A$ is SPD → Cholesky is cheapest. Factor cost $\\approx n^3/6 \\approx 2 \\times 10^7$ ops; each solve $\\approx 2 n^2 = 5 \\times 10^5$ ops; total $\\approx 5 \\times 10^{10}$ — nearly two orders of magnitude faster than refactoring every time.", "ro": "Corect. $A$ este SPD → Cholesky este cea mai ieftină. Cost factorizare $\\approx n^3/6 \\approx 2 \\times 10^7$ operații; fiecare rezolvare $\\approx 2 n^2 = 5 \\times 10^5$ operații; total $\\approx 5 \\times 10^{10}$ — aproape două ordine de mărime mai rapid decât refactorizarea de fiecare dată." }
                 },
                 {
                   "text": { "en": "QR factor $A$ once, solve each $b_k$ via $Rx = Q^T b_k$.", "ro": "Factorizează QR $A$ o dată, rezolvă fiecare $b_k$ via $Rx = Q^T b_k$." },
