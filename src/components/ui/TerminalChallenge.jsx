@@ -455,14 +455,16 @@ export default function TerminalChallenge({ exercises }) {
             {ex.solution && (() => {
               const gated = !hasAttempted && !showSolution && !!ex.checkScript;
               const baseLabel = showSolution ? t('Hide Solution', 'Ascunde soluția') : t('Show Solution', 'Arată soluția');
-              const gatedLabel = t(`Solution unlocks after ${2 - attemptCount} more attempt${2 - attemptCount === 1 ? '' : 's'}`, `Soluția se deblochează după încă ${2 - attemptCount} încercar${2 - attemptCount === 1 ? 'e' : 'i'}`);
+              const remaining = 2 - attemptCount;
+              const gatedLabel = t(`🔒 Try ${remaining} more`, `🔒 Încearcă încă ${remaining}`);
+              const gatedAria = t(`Solution unlocks after ${remaining} more attempt${remaining === 1 ? '' : 's'}`, `Soluția se deblochează după încă ${remaining} încercări`);
               return (
                 <button
                   onClick={() => setShowSolution(!showSolution)}
                   disabled={gated}
                   className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition border disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   style={{ borderColor: 'var(--theme-border)', background: 'transparent', color: 'var(--theme-text)' }}
-                  aria-label={gated ? gatedLabel : baseLabel}
+                  aria-label={gated ? gatedAria : baseLabel}
                 >
                   {gated ? gatedLabel : baseLabel}
                 </button>
