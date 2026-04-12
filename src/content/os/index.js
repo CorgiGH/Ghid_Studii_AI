@@ -76,9 +76,6 @@ const os = {
   ],
   tests: [
     { id: 'test-lab1-7', title: { en: 'Test: Labs 1–7', ro: 'Test: Laboratoarele 1–7' }, shortTitle: { en: 'Labs 1–7', ro: 'Lab 1–7' }, component: lazy(() => import('./tests/TestLab1_7.jsx')) },
-    { id: 'os-test-sample', src: 'os/tests/test-sample.json',
-      title: { en: 'Sample Test: Linux Basics', ro: 'Test exemplu: Bazele Linux' },
-      shortTitle: { en: 'Sample', ro: 'Exemplu' } },
 
     // 2023-2024
     { id: 'os-examen2023-2024-tp2-2024-varianta-1', src: 'os/tests/examen2023-2024-tp2-2024-varianta-1.json',
