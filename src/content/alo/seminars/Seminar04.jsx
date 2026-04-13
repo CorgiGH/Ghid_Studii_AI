@@ -113,18 +113,18 @@ export default function Seminar04() {
 
   const mc3swapD = [{
     question: {
-      en: 'In (d) A = [[2,0,0,0],[1,1.5,0,0],[0,−3,0.5,0],[2,−2,1,1]], after clearing column 1 the column-2 sub-diagonal entries are 1.5, −3, −2. Partial pivoting then swaps',
-      ro: 'În (d) A = [[2,0,0,0],[1,1.5,0,0],[0,−3,0.5,0],[2,−2,1,1]], după eliminarea coloanei 1, intrările sub-diagonale ale coloanei 2 sunt 1.5, −3, −2. Pivotarea parțială schimbă',
+      en: 'In (d) A = [[2,0,0,0],[1,1.5,0,0],[0,−3,0.5,0],[2,−2,1,1]], after the first elimination pass (clearing column 1), which row swap does partial pivoting trigger for the column-2 pivot?',
+      ro: 'În (d) A = [[2,0,0,0],[1,1.5,0,0],[0,−3,0.5,0],[2,−2,1,1]], după prima etapă de eliminare (coloana 1), ce schimb de linii declanșează pivotarea parțială pentru pivotul coloanei 2?',
     },
     options: [
-      { text: 'R2 ↔ R3 (pivot = −3, largest modulus)', correct: true },
-      { text: 'R2 ↔ R4 (pivot = −2)', correct: false },
-      { text: { en: 'no swap (pivot 1.5 is usable)', ro: 'fără schimb (pivot 1.5 e utilizabil)' }, correct: false },
+      { text: 'R2 ↔ R3', correct: true },
+      { text: 'R2 ↔ R4', correct: false },
+      { text: { en: 'no swap', ro: 'fără schimb' }, correct: false },
       { text: 'R3 ↔ R4', correct: false },
     ],
     explanation: {
-      en: 'Partial pivoting on column 2 chooses the entry with largest |·| among rows 2…n. Here |−3| > |1.5|, |−2|, so R3 goes to row 2 via swap. Later, the column-3 pivot choice between 0.25 and 2/3 triggers a second swap R3 ↔ R4.',
-      ro: 'Pivotarea parțială pe coloana 2 alege intrarea cu |·| maxim între liniile 2…n. Aici |−3| > |1.5|, |−2|, deci R3 urcă în poziția 2 prin schimb. Apoi, alegerea pivotului coloanei 3 între 0.25 și 2/3 declanșează un al doilea schimb R3 ↔ R4.',
+      en: 'After clearing column 1, the column-2 sub-diagonal entries are 1.5, −3, −2. Partial pivoting chooses the largest in absolute value: |−3| > |−2| > |1.5|, so R3 becomes the new row-2 pivot — swap R2 ↔ R3. Later, the column-3 choice between 0.25 and 2/3 triggers a second swap R3 ↔ R4.',
+      ro: 'După eliminarea coloanei 1, intrările sub-diagonale ale coloanei 2 sunt 1.5, −3, −2. Pivotarea parțială alege cel mai mare în modul: |−3| > |−2| > |1.5|, deci R3 devine noul pivot în linia 2 — schimb R2 ↔ R3. Ulterior, alegerea coloanei 3 între 0.25 și 2/3 declanșează al doilea schimb R3 ↔ R4.',
     },
   }];
 

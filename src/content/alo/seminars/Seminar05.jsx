@@ -270,8 +270,10 @@ export default function Seminar05() {
     -4/5   3/5`}</Code>
 
             <p className="font-bold mt-4 mb-1">{t('Apply P to A', 'Aplicăm P lui A')}</p>
-            <Code>{`P·A = -5   -11/5       R = P·A (already upper-triangular)
-       0    2/5`}</Code>
+            <p className="text-sm mb-1">{t('The product P·A is already upper-triangular, so we take R = P·A.', 'Produsul P·A este deja triunghiular superior, deci R = P·A.')}</p>
+            <p className="text-sm mb-1 font-semibold">P·A</p>
+            <Code>{`-5   -11/5
+ 0     2/5`}</Code>
 
             <p className="font-bold mt-4 mb-1">{t('Q = Pᵀ = P (P is symmetric)', 'Q = Pᵀ = P (P este simetrică)')}</p>
             <p className="text-sm mb-1 font-semibold">Q</p>

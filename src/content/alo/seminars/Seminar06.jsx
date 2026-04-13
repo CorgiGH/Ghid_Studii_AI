@@ -123,8 +123,8 @@ export default function Seminar06() {
       { text: '(1, −1, 2)ᵀ', correct: false },
     ],
     explanation: {
-      en: 'Row-by-row: 2·1 + 1·(−1) + 1·2 = 3;  1·1 + 2·(−1) + 1·2 = 1;  1·1 + 1·(−1) + 2·2 = 4. Normalising by ‖·‖∞ = 4 gives x⁽¹⁾ = (3/4, 1/4, 1)ᵀ.',
-      ro: 'Linie cu linie: 2·1 + 1·(−1) + 1·2 = 3;  1·1 + 2·(−1) + 1·2 = 1;  1·1 + 1·(−1) + 2·2 = 4. Normalizat la ‖·‖∞ = 4 dă x⁽¹⁾ = (3/4, 1/4, 1)ᵀ.',
+      en: 'Row-by-row: 2·1 + 1·(−1) + 1·2 = 3;  1·1 + 2·(−1) + 1·2 = 1;  1·1 + 1·(−1) + 2·2 = 4.',
+      ro: 'Linie cu linie: 2·1 + 1·(−1) + 1·2 = 3;  1·1 + 2·(−1) + 1·2 = 1;  1·1 + 1·(−1) + 2·2 = 4.',
     },
   }];
 
@@ -255,9 +255,14 @@ export default function Seminar06() {
       </h3>
       <Box type="definition">
         <p className="text-sm">{t(
-          'Two matrices A, B are similar iff B = P⁻¹AP for some invertible P. Disprove similarity by exhibiting a mismatched invariant.',
-          'Două matrice A, B sunt asemenea dacă și numai dacă B = P⁻¹AP pentru o P inversabilă. Respinge similaritatea arătând un invariant diferit.',
+          'Two matrices A, B are similar iff B = P⁻¹AP for some invertible P. Show the following three pairs are NOT similar by exhibiting a mismatched invariant:',
+          'Două matrice A, B sunt asemenea dacă și numai dacă B = P⁻¹AP pentru o P inversabilă. Arătați că următoarele trei perechi NU sunt asemenea, exhibând un invariant diferit:',
         )}</p>
+        <ul className="text-sm list-disc ml-4 mt-1">
+          <li>(a) A = [[2, 1],[1, 2]] ;  B = [[1, 2],[2, 1]]</li>
+          <li>(b) A = [[1, 2, 1],[0, 1, 2],[0, 0, 2]] ;  B = [[1, 2, 0],[0, 1, 2],[1, 0, 2]]</li>
+          <li>(c) A = [[1, 1, −1],[−1, 0, 1],[0, 1, 2]] ;  B = [[2, −2, 0],[−2, 0, 2],[2, 2, −2]]</li>
+        </ul>
       </Box>
 
       <p className="text-sm font-semibold mt-3 mb-1">{t('Which is NOT a similarity invariant?', 'Care NU este invariant la similaritate?')}</p>
@@ -324,8 +329,8 @@ A·x⁽⁰⁾      = (3, 1, 4)                →  x⁽¹⁾ = (3/4, 1/4, 1)
 A·x⁽¹⁾      = (2.75, 2.25, 3)          →  x⁽²⁾ = (11/12, 3/4, 1)
 A·x⁽²⁾      = (43/12, 41/12, 44/12)    →  x⁽³⁾ = (43/44, 41/44, 1)`}</Code>
             <p className="text-sm mt-2 mb-2">{t(
-              'λ-estimate ≈ 44/12 ≈ 3.67, heading to λ = 4. Eigenvector direction approaches (1, 1, 1)ᵀ.',
-              'Estimare λ ≈ 44/12 ≈ 3.67, apropiindu-se de λ = 4. Direcția vectorului propriu se apropie de (1, 1, 1)ᵀ.',
+              'Eigenvalue estimate at step 2: ‖A·x⁽²⁾‖∞ ≈ 44/12 ≈ 3.67. The iterate direction is clearly approaching a constant-vector direction.',
+              'Estimare valoare proprie la pasul 2: ‖A·x⁽²⁾‖∞ ≈ 44/12 ≈ 3.67. Direcția iteratei se apropie clar de o direcție cu componente constante.',
             )}</p>
 
             <p className="font-bold mt-4 mb-1">(b)</p>
@@ -369,14 +374,20 @@ A·x⁽²⁾      = (-2, -2, -1)             →  x⁽³⁾ = (-1, -1, -1/2)`}</
           <div>
             <p className="font-bold mb-1">{t('QR by a single Givens in plane (1, 2)', 'QR printr-o singură rotație Givens în planul (1, 2)')}</p>
             <p className="text-sm mb-2">ρ = 10, c = 0.6, s = −0.8. {t('Same derivation as Seminar 5, Problem 4.', 'Aceeași derivare ca în Seminar 5, Problema 4.')}</p>
-            <Code>{`Q = 0.6   0.8   0       R = 10    0   15
-   -0.8   0.6   0            0   10    5
-     0     0    1            0    0   10`}</Code>
+            <p className="text-sm mb-1 font-semibold">Q</p>
+            <Code>{` 0.6   0.8   0
+-0.8   0.6   0
+   0     0   1`}</Code>
+            <p className="text-sm mb-1 mt-2 font-semibold">R</p>
+            <Code>{`10    0   15
+ 0   10    5
+ 0    0   10`}</Code>
 
             <p className="font-bold mt-4 mb-1">{t('Multiply R·Q', 'Înmulțim R·Q')}</p>
-            <Code>{`A⁽¹⁾ = R·Q =  6   8  15
-              -8   6   5
-               0   0  10`}</Code>
+            <p className="text-sm mb-1 font-semibold">A⁽¹⁾ = R·Q</p>
+            <Code>{` 6   8  15
+-8   6   5
+ 0   0  10`}</Code>
 
             <p className="text-sm mt-2 mb-2">{t(
               'The trailing (3, 3) entry stays at 10 — one eigenvalue already converged. The top-left 2×2 block comes back to its original [[6, 8],[−8, 6]], because this block has complex eigenvalues 6 ± 8i: Givens/Householder over ℝ cannot drive a 2×2 with complex conjugate eigenvalues to triangular. Real-Schur form keeps such blocks.',

@@ -62,8 +62,8 @@ export default function Seminar01() {
       { text: '5', correct: false },
     ],
     explanation: {
-      en: '‖A‖∞ is the max absolute row sum. Row sums: 4+1+7=12, 1+4+0=5, 7+0+4=11. Max = 12.',
-      ro: '‖A‖∞ este maximul sumei absolute pe linii. Sume: 4+1+7=12, 1+4+0=5, 7+0+4=11. Max = 12.',
+      en: '‖A‖∞ is the max absolute row sum. Summing |entries| in each row and taking the largest gives 12 (from the first row).',
+      ro: '‖A‖∞ este maximul sumei absolute pe linii. Însumând |elementele| pe fiecare linie și luând maximul obținem 12 (de pe prima linie).',
     },
   }];
 
@@ -238,8 +238,8 @@ export default function Seminar01() {
       { text: { en: 'No — ⟨a₁, a₂⟩ = 2', ro: 'Nu — ⟨a₁, a₂⟩ = 2' }, correct: false },
     ],
     explanation: {
-      en: 'a₂ᴴ = (1, i, 0) (row, entries conjugated). ⟨a₁, a₂⟩ = a₂ᴴ·a₁ = 1·1 + i·i + 0·0 = 1 − 1 = 0. (Note: linear independence does not imply orthogonality.)',
-      ro: 'a₂ᴴ = (1, i, 0) (vector linie, componente conjugate). ⟨a₁, a₂⟩ = a₂ᴴ·a₁ = 1·1 + i·i + 0·0 = 1 − 1 = 0. (Observație: independența liniară nu implică ortogonalitatea.)',
+      en: 'a₂ᴴ = (1, i, 0) (row, entries conjugated). ⟨a₁, a₂⟩ = a₂ᴴa₁ = 1·1 + i·i + 0 = 1 − 1 = 0. (Note: linear independence does not imply orthogonality.)',
+      ro: 'a₂ᴴ = (1, i, 0) (vector linie, componente conjugate). ⟨a₁, a₂⟩ = a₂ᴴa₁ = 1·1 + i·i + 0 = 1 − 1 = 0. (Observație: independența liniară nu implică ortogonalitatea.)',
     },
   }];
   const mc11c = [{

@@ -458,7 +458,7 @@ R = [ √2   √2   2√2 ]
        1/2  -1/2   0`}</Code>
             <Box type="theorem">
               <p className="text-sm">{t(
-                'QR preserves the linear system: solving Ax = b costs one Qᵀb matrix-vector product plus one triangular back-substitution. This is numerically more stable than computing A⁻¹ explicitly when A is ill-conditioned (Course 5/6).',
+                'QR preserves the linear system: solving Ax = b costs one Qᵀb matrix-vector product plus one triangular back-substitution. This is numerically more stable than computing A⁻¹ explicitly when A is ill-conditioned (see the course material on conditioning and QR).',
                 'QR conservă sistemul: rezolvarea Ax = b costă un produs Qᵀb și o substituție triunghiulară. Numeric e mai stabil decât calculul explicit al A⁻¹ când A e rău-condiționată (Curs 5/6).',
               )}</p>
             </Box>

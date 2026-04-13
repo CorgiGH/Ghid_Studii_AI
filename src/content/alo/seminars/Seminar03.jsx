@@ -88,8 +88,8 @@ export default function Seminar03() {
       { text: { en: 'no such α', ro: 'nicio astfel de α' }, correct: false },
     ],
     explanation: {
-      en: 'Adding Eq1 + Eq2 gives x₂ = 1. Eliminating x₁ leads to x₃·(1 − α²) = 1 + α. At α = 1 the left side is 0 but the right side is 2 — contradiction, so no solution.',
-      ro: 'Adunând Eq1 + Eq2 obținem x₂ = 1. Eliminând x₁ ajungem la x₃·(1 − α²) = 1 + α. La α = 1 partea stângă este 0 dar cea dreaptă este 2 — contradicție, deci fără soluție.',
+      en: 'Adding Eq1 + Eq2 gives x₂ = 1. At α = 1 the reduced system forces the coefficient of x₃ to vanish while the right side does not — contradiction, so no solution. (See the Toggle for the full reduction.)',
+      ro: 'Adunând Eq1 + Eq2 obținem x₂ = 1. La α = 1 sistemul redus face ca coeficientul lui x₃ să se anuleze, dar partea dreaptă nu — contradicție, deci fără soluție. (Vezi Toggle-ul pentru reducerea completă.)',
     },
   }];
 
@@ -332,7 +332,7 @@ export default function Seminar03() {
             <Box type="theorem">
               <p className="text-sm">{t(
                 'The three behaviours correspond to rank(A) vs rank([A|b]). At α = 1, rank(A) = 2 but rank([A|b]) = 3 — inconsistent. At α = −1 both ranks drop to 2 — infinite solutions. Generic α keeps rank 3 — unique solution.',
-                'Cele trei comportamente corespund rang(A) vs rang([A|b]). La α = 1, rang(A) = 2 dar rang([A|b]) = 3 — inconsistent. La α = −1 ambele rânduri scad la 2 — infinitate. α generic păstrează rangul 3 — soluție unică.',
+                'Cele trei comportamente corespund rang(A) vs rang([A|b]). La α = 1, rang(A) = 2 dar rang([A|b]) = 3 — inconsistent. La α = −1 ambele ranguri scad la 2 — infinitate. α generic păstrează rangul 3 — soluție unică.',
               )}</p>
             </Box>
           </div>
