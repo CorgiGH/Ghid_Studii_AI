@@ -40,6 +40,9 @@ const alo = {
       shortTitle: { en: 'C7: Iterative', ro: 'C7: Iterative' },
       sectionCount: 9 },
   ],
+  seminars: [
+    { id: 'alo-s1', title: { en: 'Week 1: Vector & matrix norms, complex inner product', ro: 'Săptămâna 1: Norme vectoriale și matriciale, produs scalar complex' }, shortTitle: { en: 'W1: Norms', ro: 'S1: Norme' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
+  ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
 
