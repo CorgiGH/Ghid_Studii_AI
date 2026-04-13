@@ -199,8 +199,8 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'x = y = e₁ (first standard basis vector)', ro: 'x = y = e₁ (primul vector din baza canonică)' }, correct: true },
-      { text: { en: 'x = e₁, y = e₂', ro: 'x = e₁, y = e₂' }, correct: false },
-      { text: { en: 'x = (1,1,…,1), y = e₁', ro: 'x = (1,1,…,1), y = e₁' }, correct: false },
+      { text: 'x = e₁, y = e₂', correct: false },
+      { text: 'x = (1,1,…,1), y = e₁', correct: false },
       { text: { en: 'Any x, y ∈ ℂⁿ', ro: 'Orice x, y ∈ ℂⁿ' }, correct: false },
     ],
     explanation: {
@@ -254,8 +254,8 @@ export default function Seminar01() {
       { text: { en: 'No — U is not Hermitian', ro: 'Nu — U nu este hermitiană' }, correct: false },
     ],
     explanation: {
-      en: 'Unitary ⇔ columns orthonormal. P11(b) showed the columns of A are pairwise orthogonal; dividing by their ‖·‖₂ gives unit columns. Therefore UᴴU = I. Determinant = 1 is neither necessary (only |det U| = 1) nor sufficient, and unitary ≠ Hermitian.',
-      ro: 'Unitară ⇔ coloanele ortonormale. P11(b) a arătat că coloanele lui A sunt ortogonale două câte două; împărțind la ‖·‖₂ obținem coloane unitare. Deci UᴴU = I. Determinant = 1 nu e nici necesar (doar |det U| = 1) nici suficient, iar unitară ≠ hermitiană.',
+      en: 'Unitary ⇔ columns orthonormal. Direct check: ⟨aᵢ, aⱼ⟩ = 0 for i ≠ j and ‖aᵢ‖₂ = √2 for each column, so uᵢ = aᵢ/√2 are unit and pairwise orthogonal ⇒ UᴴU = I. Determinant = 1 is neither necessary (only |det U| = 1) nor sufficient, and unitary ≠ Hermitian.',
+      ro: 'Unitară ⇔ coloanele ortonormale. Verificare directă: ⟨aᵢ, aⱼ⟩ = 0 pentru i ≠ j și ‖aᵢ‖₂ = √2 pentru fiecare coloană, deci uᵢ = aᵢ/√2 sunt unitare și ortogonale ⇒ UᴴU = I. Determinantul = 1 nu e nici necesar (doar |det U| = 1) nici suficient, iar unitară ≠ hermitiană.',
     },
   }];
 
@@ -353,26 +353,32 @@ export default function Seminar01() {
             <p className="font-bold mb-1">(a) x = (−2, 2, 1)ᵀ</p>
             <p className="text-sm mb-2">‖·‖₁ = 5, ‖·‖₂ = 3, ‖·‖∞ = 2.</p>
 
-            <p className="font-bold mt-3 mb-1">(b) x = (2, −1, 3, 4)ᵀ</p>
+            <p className="font-bold mt-4 mb-1">(b) x = (2, −1, 3, 4)ᵀ</p>
             <p className="text-sm mb-2">‖·‖₁ = 10, ‖·‖₂ = √30, ‖·‖∞ = 4.</p>
 
-            <p className="font-bold mt-3 mb-1">(c) x = (3, −4, 0, 3/2)ᵀ</p>
+            <p className="font-bold mt-4 mb-1">(c) x = (3, −4, 0, 3/2)ᵀ</p>
             <p className="text-sm mb-2">‖·‖₁ = 17/2, ‖·‖₂ = √109/2, ‖·‖∞ = 4.</p>
 
-            <p className="font-bold mt-3 mb-1">(d) x = (sin k, cos k, 2ᵏ)ᵀ, k ∈ ℕ*</p>
-            <p className="text-sm mb-2">
-              ‖·‖₁ = |sin k| + |cos k| + 2ᵏ; ‖·‖₂ = √(sin²k + cos²k + 4ᵏ) = √(1 + 4ᵏ); ‖·‖∞ = 2ᵏ (since 2ᵏ ≥ 2 &gt; 1 ≥ |sin k|, |cos k|).
-            </p>
+            <p className="font-bold mt-4 mb-1">(d) x = (sin k, cos k, 2ᵏ)ᵀ, k ∈ ℕ*</p>
+            <ul className="text-sm list-disc ml-4 mb-2">
+              <li>‖·‖₁ = |sin k| + |cos k| + 2ᵏ</li>
+              <li>‖·‖₂ = √(sin²k + cos²k + 4ᵏ) = √(1 + 4ᵏ)</li>
+              <li>‖·‖∞ = 2ᵏ (since 2ᵏ ≥ 2 &gt; 1 ≥ |sin k|, |cos k|)</li>
+            </ul>
 
-            <p className="font-bold mt-3 mb-1">(e) x = (4/(k+1), 2/k², k²e⁻ᵏ)ᵀ</p>
-            <p className="text-sm mb-2">
-              ‖·‖₁ = 4/(k+1) + 2/k² + k²e⁻ᵏ; ‖·‖₂ = √(16/(k+1)² + 4/k⁴ + k⁴e⁻²ᵏ); ‖·‖∞ = max of the three (for k = 1: 2 vs 2 vs 1/e ⇒ 2; for k large all terms are small, but 4/(k+1) dominates eventually).
-            </p>
+            <p className="font-bold mt-4 mb-1">(e) x = (4/(k+1), 2/k², k²e⁻ᵏ)ᵀ</p>
+            <ul className="text-sm list-disc ml-4 mb-2">
+              <li>‖·‖₁ = 4/(k+1) + 2/k² + k²e⁻ᵏ</li>
+              <li>‖·‖₂ = √(16/(k+1)² + 4/k⁴ + k⁴e⁻²ᵏ)</li>
+              <li>‖·‖∞ = max of the three (for k = 1: 2 vs 2 vs 1/e ⇒ 2; 4/(k+1) dominates for large k)</li>
+            </ul>
 
-            <p className="font-bold mt-3 mb-1">(f) x = ((2+k)/k, 1/√k, 0, −3)ᵀ</p>
-            <p className="text-sm mb-2">
-              ‖·‖₁ = (2+k)/k + 1/√k + 3; ‖·‖₂ = √((1 + 2/k)² + 1/k + 9); ‖·‖∞ = 3 for all k ≥ 1 (since (2+k)/k ≤ 3, reached only at k = 1).
-            </p>
+            <p className="font-bold mt-4 mb-1">(f) x = ((2+k)/k, 1/√k, 0, −3)ᵀ</p>
+            <ul className="text-sm list-disc ml-4 mb-2">
+              <li>‖·‖₁ = (2+k)/k + 1/√k + 3</li>
+              <li>‖·‖₂ = √((1 + 2/k)² + 1/k + 9)</li>
+              <li>‖·‖∞ = 3 for all k ≥ 1 (since (2+k)/k ≤ 3, reached only at k = 1)</li>
+            </ul>
 
             <Box type="warning">
               <p className="text-sm">{t(
@@ -390,8 +396,8 @@ export default function Seminar01() {
       </h3>
       <Box type="definition">
         <p className="text-sm">{t(
-          '‖A‖∞ = max_i Σⱼ |aᵢⱼ| (max absolute row sum). Compute for:',
-          '‖A‖∞ = max_i Σⱼ |aᵢⱼ| (maximul sumei absolute pe linii). Calculați pentru:',
+          'Compute ‖A‖∞ for each of the six matrices below.',
+          'Calculați ‖A‖∞ pentru fiecare dintre cele șase matrice de mai jos.',
         )}</p>
         <ul className="text-sm list-disc ml-4 mt-1">
           <li>a. A = [[10,15],[0,1]]</li>
@@ -450,7 +456,7 @@ export default function Seminar01() {
               <li>{t('Sub-multiplicativity: Σᵢ |(AB)ᵢⱼ| = Σᵢ |Σₖ aᵢₖ bₖⱼ| ≤ Σₖ |bₖⱼ| · (Σᵢ |aᵢₖ|) ≤ ‖A‖₁ · Σₖ |bₖⱼ|. Taking max_j gives ‖AB‖₁ ≤ ‖A‖₁ · ‖B‖₁.', 'Submultiplicativitate: Σᵢ |(AB)ᵢⱼ| = Σᵢ |Σₖ aᵢₖ bₖⱼ| ≤ Σₖ |bₖⱼ| · (Σᵢ |aᵢₖ|) ≤ ‖A‖₁ · Σₖ |bₖⱼ|. Maximul pe j dă ‖AB‖₁ ≤ ‖A‖₁ · ‖B‖₁.')}</li>
             </ul>
 
-            <p className="font-bold mt-3 mb-1">{t('(b) Values (column sums)', '(b) Valori (sume pe coloane)')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(b) Values (column sums)', '(b) Valori (sume pe coloane)')}</p>
             <ul className="text-sm list-disc ml-4">
               <li>a. cols 10, 16 ⇒ ‖A‖₁ = 16</li>
               <li>b. cols 25, 1 ⇒ ‖A‖₁ = 25</li>
@@ -486,11 +492,12 @@ export default function Seminar01() {
         hideLabel={t('Hide', 'Ascunde')}
         answer={
           <div>
+            <p className="font-bold mb-1">{t('Positivity, homogeneity, triangle inequality', 'Pozitivitate, omogenitate, inegalitatea triunghiului')}</p>
             <p className="text-sm mb-2">{t(
-              'Positivity, homogeneity, triangle inequality follow directly from |·| on scalars (summing over i, j preserves each inequality).',
-              'Pozitivitatea, omogenitatea, inegalitatea triunghiului urmează direct din |·| pe scalari (sumarea pe i, j păstrează inegalitatea).',
+              'All three follow directly from |·| on scalars (summing over i, j preserves each inequality).',
+              'Toate trei urmează direct din |·| pe scalari (sumarea pe i, j păstrează inegalitatea).',
             )}</p>
-            <p className="font-bold mt-3 mb-1">{t('Sub-multiplicativity', 'Submultiplicativitate')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Sub-multiplicativity', 'Submultiplicativitate')}</p>
             <p className="text-sm mb-2">
               ‖AB‖⬚₁ = Σᵢⱼ |Σₖ aᵢₖ bₖⱼ| ≤ Σᵢⱼₖ |aᵢₖ||bₖⱼ| = Σₖ (Σᵢ |aᵢₖ|)(Σⱼ |bₖⱼ|) ≤ (Σᵢₖ |aᵢₖ|)(Σₖⱼ |bₖⱼ|) = ‖A‖⬚₁ · ‖B‖⬚₁.
             </p>
@@ -529,7 +536,7 @@ export default function Seminar01() {
               <li>{t('Positivity and homogeneity: inherited from Euclidean norm.', 'Pozitivitate și omogenitate: moștenite de la norma euclidiană.')}</li>
               <li>{t('Triangle: ‖A + B‖_F = ‖vec(A) + vec(B)‖₂ ≤ ‖vec(A)‖₂ + ‖vec(B)‖₂ = ‖A‖_F + ‖B‖_F.', 'Triunghi: ‖A + B‖_F = ‖vec(A) + vec(B)‖₂ ≤ ‖vec(A)‖₂ + ‖vec(B)‖₂ = ‖A‖_F + ‖B‖_F.')}</li>
             </ul>
-            <p className="font-bold mt-3 mb-1">{t('Sub-multiplicativity (Cauchy–Schwarz)', 'Submultiplicativitate (Cauchy–Schwarz)')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Sub-multiplicativity (Cauchy–Schwarz)', 'Submultiplicativitate (Cauchy–Schwarz)')}</p>
             <p className="text-sm mb-2">
               ‖AB‖_F² = Σᵢⱼ |Σₖ aᵢₖ bₖⱼ|² ≤ Σᵢⱼ (Σₖ |aᵢₖ|²)(Σₖ |bₖⱼ|²) = (Σᵢₖ |aᵢₖ|²)(Σₖⱼ |bₖⱼ|²) = ‖A‖_F² · ‖B‖_F².
             </p>
@@ -688,11 +695,11 @@ export default function Seminar01() {
               ⟨y, x⟩ = xᴴy = Σᵢ yᵢ x̄ᵢ = conj(Σᵢ xᵢ ȳᵢ) = conj(⟨x, y⟩).
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('(b-i) Example with |⟨x, y⟩| = ‖x‖₁ · ‖y‖∞', '(b-i) Exemplu cu |⟨x, y⟩| = ‖x‖₁ · ‖y‖∞')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(b-i) Example with |⟨x, y⟩| = ‖x‖₁ · ‖y‖∞', '(b-i) Exemplu cu |⟨x, y⟩| = ‖x‖₁ · ‖y‖∞')}</p>
             <p className="text-sm mb-2">
               x = e₁ = (1, 0, …, 0)ᵀ, y = (1, 1, …, 1)ᵀ. Then ⟨x, y⟩ = 1, ‖x‖₁ = 1, ‖y‖∞ = 1; |⟨x, y⟩| = 1 = 1 · 1.
             </p>
-            <p className="font-bold mt-3 mb-1">{t('(b-ii) Example with |⟨x, y⟩| = ‖x‖₂ · ‖y‖₂', '(b-ii) Exemplu cu |⟨x, y⟩| = ‖x‖₂ · ‖y‖₂')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(b-ii) Example with |⟨x, y⟩| = ‖x‖₂ · ‖y‖₂', '(b-ii) Exemplu cu |⟨x, y⟩| = ‖x‖₂ · ‖y‖₂')}</p>
             <p className="text-sm mb-2">
               x = y = e₁. Then ⟨x, y⟩ = 1, ‖x‖₂ = ‖y‖₂ = 1; equality. More generally, any x = αy achieves Cauchy–Schwarz equality.
             </p>
@@ -738,7 +745,7 @@ export default function Seminar01() {
               'Verificăm aᵢⱼ = conj(aⱼᵢ) element cu element. Aici a₁₂ = 1 și conj(a₂₁) = conj(i) = −i. Cum 1 ≠ −i, A nu este hermitiană.',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">{t('(b) Orthogonality of columns', '(b) Ortogonalitatea coloanelor')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(b) Orthogonality of columns', '(b) Ortogonalitatea coloanelor')}</p>
             <p className="text-sm mb-2">
               a₁ = (1, i, 0)ᵀ, a₂ = (1, −i, 0)ᵀ, a₃ = (0, 0, √2)ᵀ.
             </p>
@@ -748,7 +755,7 @@ export default function Seminar01() {
               <li>⟨a₂, a₃⟩ = a₃ᴴ a₂ = (0, 0, √2) · (1, −i, 0)ᵀ = 0</li>
             </ul>
 
-            <p className="font-bold mt-3 mb-1">{t('(c) Normalization', '(c) Normalizare')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(c) Normalization', '(c) Normalizare')}</p>
             <p className="text-sm mb-2">
               ‖a₁‖₂ = ‖a₂‖₂ = √2; ‖a₃‖₂ = √2. Hence
               u₁ = (1/√2, i/√2, 0)ᵀ, u₂ = (1/√2, −i/√2, 0)ᵀ, u₃ = (0, 0, 1)ᵀ.
@@ -790,20 +797,20 @@ export default function Seminar01() {
               )}
             </p>
 
-            <p className="font-bold mt-3 mb-1">(Aᴴ)</p>
+            <p className="font-bold mt-4 mb-1">(Aᴴ)</p>
             <p className="text-sm mb-2">
               {t('(Aᴴ)ᴴ · Aᴴ = A · Aᴴ = I, so Aᴴ is unitary.', '(Aᴴ)ᴴ · Aᴴ = A · Aᴴ = I, deci Aᴴ este unitară.')}
             </p>
 
-            <p className="font-bold mt-3 mb-1">(Aᵀ)</p>
+            <p className="font-bold mt-4 mb-1">(Aᵀ)</p>
             <p className="text-sm mb-2">
               {t(
-                'Take the complex conjugate of AᴴA = I: (Aᴴ)ᵀ · A = conj(AᴴA) = Ā · A. Wait — a cleaner route: conj(AAᴴ) = ĀAᵀ = I, so ĀAᵀ = I. Therefore (Aᵀ)ᴴ · Aᵀ = (conj(A))·Aᵀ is not what we need; use (Aᵀ)ᴴ = Ā, so (Aᵀ)ᴴ · Aᵀ = Ā · Aᵀ = I. Hence Aᵀ is unitary.',
+                'Take conj of AAᴴ = I: ĀAᵀ = I. Since (Aᵀ)ᴴ = Ā, we get (Aᵀ)ᴴ · Aᵀ = Ā · Aᵀ = I. Hence Aᵀ is unitary.',
                 'Luăm conjugata lui AAᴴ = I: ĀAᵀ = I. Cum (Aᵀ)ᴴ = Ā, rezultă (Aᵀ)ᴴ · Aᵀ = Ā · Aᵀ = I. Deci Aᵀ este unitară.',
               )}
             </p>
 
-            <p className="font-bold mt-3 mb-1">(Ā)</p>
+            <p className="font-bold mt-4 mb-1">(Ā)</p>
             <p className="text-sm mb-2">
               {t(
                 '(Ā)ᴴ = Aᵀ. Taking conj of AᴴA = I gives AᵀĀ = I, so (Ā)ᴴ · Ā = Aᵀ · Ā = I. Hence Ā is unitary.',

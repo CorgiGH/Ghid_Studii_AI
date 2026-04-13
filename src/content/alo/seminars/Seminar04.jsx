@@ -53,8 +53,8 @@ export default function Seminar04() {
       { text: '176', correct: false },
     ],
     explanation: {
-      en: 'Ly = b: y₁ = 4, y₂ = 6 − 8 = −2, y₃ = 8 − (−12) − (−4) = 24. Then Ux = y gives x₃ = y₃ / u₃₃ = 24 / 1 = 24.',
-      ro: 'Ly = b: y₁ = 4, y₂ = 6 − 8 = −2, y₃ = 8 − (−12) − (−4) = 24. Apoi Ux = y dă x₃ = y₃ / u₃₃ = 24 / 1 = 24.',
+      en: 'Ly = b: y₁ = 4; y₂ = 6 − 2·4 = −2; y₃ = 8 − (−3)·4 − 2·(−2) = 8 + 12 + 4 = 24. Then Ux = y gives x₃ = y₃ / u₃₃ = 24 / 1 = 24.',
+      ro: 'Ly = b: y₁ = 4; y₂ = 6 − 2·4 = −2; y₃ = 8 − (−3)·4 − 2·(−2) = 8 + 12 + 4 = 24. Apoi Ux = y dă x₃ = y₃ / u₃₃ = 24 / 1 = 24.',
     },
   }];
 
@@ -91,6 +91,40 @@ export default function Seminar04() {
     explanation: {
       en: 'Plain A = LU exists only when every leading principal minor is non-zero. Partial pivoting (swap to put the largest |·| pivot on top) always succeeds for non-singular A and gives PA = LU. The solution is the same — the pivoting is a reordering.',
       ro: 'A = LU simplă există doar când toți minorii principali sunt nenuli. Pivotarea parțială (aduce cel mai mare pivot în modul sus) reușește întotdeauna pentru A nesingulară și dă PA = LU. Soluția este aceeași — pivotarea e o reordonare.',
+    },
+  }];
+
+  const mc3swap = [{
+    question: {
+      en: 'In (a) A = [[0,1,1],[1,−2,−1],[1,−1,1]], the first pivoting step swaps',
+      ro: 'În (a) A = [[0,1,1],[1,−2,−1],[1,−1,1]], primul pas de pivotare schimbă',
+    },
+    options: [
+      { text: 'R1 ↔ R2', correct: true },
+      { text: 'R1 ↔ R3', correct: false },
+      { text: 'R2 ↔ R3', correct: false },
+      { text: { en: 'no swap — first pivot is usable', ro: 'fără schimb — primul pivot e utilizabil' }, correct: false },
+    ],
+    explanation: {
+      en: 'a₁₁ = 0 so we cannot use it as a pivot. Partial pivoting picks the largest-modulus entry in column 1 below row 1: rows 2 and 3 both have |1|; swapping R1 ↔ R2 brings a non-zero pivot to (1, 1) and matches the worked solution.',
+      ro: 'a₁₁ = 0 deci nu-l putem folosi ca pivot. Pivotarea parțială alege cea mai mare intrare în modul de pe coloana 1 sub linia 1: liniile 2 și 3 au ambele |1|; schimbând R1 ↔ R2 aducem un pivot nenul la (1, 1) și potrivim soluția.',
+    },
+  }];
+
+  const mc3swapD = [{
+    question: {
+      en: 'In (d) A = [[2,0,0,0],[1,1.5,0,0],[0,−3,0.5,0],[2,−2,1,1]], after clearing column 1 the column-2 sub-diagonal entries are 1.5, −3, −2. Partial pivoting then swaps',
+      ro: 'În (d) A = [[2,0,0,0],[1,1.5,0,0],[0,−3,0.5,0],[2,−2,1,1]], după eliminarea coloanei 1, intrările sub-diagonale ale coloanei 2 sunt 1.5, −3, −2. Pivotarea parțială schimbă',
+    },
+    options: [
+      { text: 'R2 ↔ R3 (pivot = −3, largest modulus)', correct: true },
+      { text: 'R2 ↔ R4 (pivot = −2)', correct: false },
+      { text: { en: 'no swap (pivot 1.5 is usable)', ro: 'fără schimb (pivot 1.5 e utilizabil)' }, correct: false },
+      { text: 'R3 ↔ R4', correct: false },
+    ],
+    explanation: {
+      en: 'Partial pivoting on column 2 chooses the entry with largest |·| among rows 2…n. Here |−3| > |1.5|, |−2|, so R3 goes to row 2 via swap. Later, the column-3 pivot choice between 0.25 and 2/3 triggers a second swap R3 ↔ R4.',
+      ro: 'Pivotarea parțială pe coloana 2 alege intrarea cu |·| maxim între liniile 2…n. Aici |−3| > |1.5|, |−2|, deci R3 urcă în poziția 2 prin schimb. Apoi, alegerea pivotului coloanei 3 între 0.25 și 2/3 declanșează un al doilea schimb R3 ↔ R4.',
     },
   }];
 
@@ -155,7 +189,7 @@ export default function Seminar04() {
             <p className="text-sm mb-2">{t('Forward on Ly = b', 'Substituție directă pe Ly = b')}: y = (2, −5, 3)ᵀ.</p>
             <p className="text-sm mb-2">{t('Back on Ux = y', 'Substituție inversă pe Ux = y')}: x = (−3, 3, 1)ᵀ.</p>
 
-            <p className="font-bold mt-3 mb-1">(b)</p>
+            <p className="font-bold mt-4 mb-1">(b)</p>
             <p className="text-sm mb-2">{t('Forward on Ly = b', 'Substituție directă pe Ly = b')}: y = (4, −2, 24)ᵀ.</p>
             <p className="text-sm mb-2">{t('Back on Ux = y', 'Substituție inversă pe Ux = y')}: x = (176, −50, 24)ᵀ.</p>
             <Box type="theorem">
@@ -194,12 +228,12 @@ export default function Seminar04() {
               'Toți pivoții sunt 1 în U, deci factorizarea Crout coincide cu Doolittle aici (D = diag(U) = I).',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">A₂ — Doolittle</p>
+            <p className="font-bold mt-4 mb-1">A₂ — Doolittle</p>
             <Code>{`L = 1   0   0      U = 2   3  -1
     2   1   0          0  -2   1
    -1   0   1          0   0   3`}</Code>
 
-            <p className="font-bold mt-3 mb-1">A₂ — Crout</p>
+            <p className="font-bold mt-4 mb-1">A₂ — Crout</p>
             <Code>{`L = 2   0   0      U = 1   3/2  -1/2
     4  -2   0          0    1   -1/2
    -2   0   3          0    0    1`}</Code>
@@ -234,6 +268,13 @@ export default function Seminar04() {
         </ul>
       </Box>
       <MultipleChoice questions={mc3why} />
+
+      <p className="text-sm font-semibold mt-3 mb-1">{t('First swap in (a)', 'Primul schimb în (a)')}</p>
+      <MultipleChoice questions={mc3swap} />
+
+      <p className="text-sm font-semibold mt-3 mb-1">{t('Column-2 pivot in (d)', 'Pivotul coloanei 2 în (d)')}</p>
+      <MultipleChoice questions={mc3swapD} />
+
       <Toggle
         question={t('Show P, L, U for all four matrices', 'Arată P, L, U pentru toate patru matricile')}
         showLabel={t('Show', 'Arată')}
@@ -245,21 +286,32 @@ export default function Seminar04() {
      1  0  0        0  1  0        0  1  1
      0  0  1        1  1  1        0  0  1`}</Code>
 
-            <p className="font-bold mt-3 mb-1">(b) {t('Two swaps: R1 ↔ R2 (pivot 2), then R2 ↔ R3 (pivot 4 beats 0)', 'Două schimburi: R1 ↔ R2 (pivot 2), apoi R2 ↔ R3 (pivot 4 > 0)')}</p>
+            <p className="font-bold mt-4 mb-1">(b) {t('Two swaps: R1 ↔ R2 (pivot 2), then R2 ↔ R3 (pivot 4 beats 0)', 'Două schimburi: R1 ↔ R2 (pivot 2), apoi R2 ↔ R3 (pivot 4 > 0)')}</p>
             <Code>{`P =  0  1  0    L =  1      0    0    U = 2   4   7
      0  0  1       -1/2    1    0        0   4  17/2
      1  0  0        1/2    0    1        0   0  -9/2`}</Code>
 
-            <p className="font-bold mt-3 mb-1">(c) {t('Swap R1 ↔ R2 (zero pivot)', 'Schimbăm R1 ↔ R2 (pivot zero)')}</p>
+            <p className="font-bold mt-4 mb-1">(c) {t('Swap R1 ↔ R2 (zero pivot)', 'Schimbăm R1 ↔ R2 (pivot zero)')}</p>
             <Code>{`P =  0  1  0    L = 1  0  0    U = 1 -1  2
      1  0  0        0  1  0        0  2 -1
      0  0  1        1  0  1        0  0  2`}</Code>
 
-            <p className="font-bold mt-3 mb-1">(d) {t('Two swaps: R2 ↔ R3 (pivot −3), then R3 ↔ R4 (pivot 2/3 beats 1/4)', 'Două schimburi: R2 ↔ R3 (pivot −3), apoi R3 ↔ R4 (pivot 2/3 > 1/4)')}</p>
-            <Code>{`P =  1  0  0  0    L =  1     0      0    0    U = 2   0    0    0
-     0  0  1  0         0     1      0    0        0  -3   1/2   0
-     0  0  0  1         1    2/3     1    0        0   0   2/3   1
-     0  1  0  0        1/2  -1/2    3/8   1        0   0    0   -3/8`}</Code>
+            <p className="font-bold mt-4 mb-1">(d) {t('Two swaps: R2 ↔ R3 (pivot −3), then R3 ↔ R4 (pivot 2/3 beats 1/4)', 'Două schimburi: R2 ↔ R3 (pivot −3), apoi R3 ↔ R4 (pivot 2/3 > 1/4)')}</p>
+            <p className="text-sm mb-1 font-semibold">P</p>
+            <Code>{`1  0  0  0
+0  0  1  0
+0  0  0  1
+0  1  0  0`}</Code>
+            <p className="text-sm mb-1 mt-2 font-semibold">L</p>
+            <Code>{`  1      0      0    0
+  0      1      0    0
+  1     2/3     1    0
+ 1/2   -1/2   3/8    1`}</Code>
+            <p className="text-sm mb-1 mt-2 font-semibold">U</p>
+            <Code>{`2    0      0      0
+0   -3    1/2      0
+0    0    2/3      1
+0    0      0   -3/8`}</Code>
             <Box type="theorem">
               <p className="text-sm">{t(
                 'After PA = LU is computed, solving PA·x = P·b is again two triangular solves: Ly = Pb, then Ux = y. P is trivial to invert — it just permutes the entries of b.',
@@ -293,12 +345,12 @@ export default function Seminar04() {
    -3   1   0           -1   1   1            0   0   2`}</Code>
             <p className="text-sm mt-2 mb-2">{t('No pivoting needed — (1,1), (2,2), (3,3) pivots are 3, 1, 2, all non-zero.', 'Fără pivotare — pivoții (1,1), (2,2), (3,3) sunt 3, 1, 2, toți nenuli.')}</p>
 
-            <p className="font-bold mt-3 mb-1">{t('Step 1: Ly = b', 'Pasul 1: Ly = b')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Step 1: Ly = b', 'Pasul 1: Ly = b')}</p>
             <p className="text-sm mb-2">
               y₁ = 2;  2·2 + y₂ = 2 ⇒ y₂ = −2;  −2 + (−2) + y₃ = 5 ⇒ y₃ = 9.
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('Step 2: Ux = y', 'Pasul 2: Ux = y')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Step 2: Ux = y', 'Pasul 2: Ux = y')}</p>
             <p className="text-sm mb-2">
               2x₃ = 9 ⇒ x₃ = 9/2;  x₂ − 9/2 = −2 ⇒ x₂ = 5/2;  3x₁ + 9/2 = 2 ⇒ x₁ = −5/6.
             </p>

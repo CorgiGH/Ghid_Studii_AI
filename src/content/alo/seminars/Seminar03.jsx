@@ -7,6 +7,40 @@ export default function Seminar03() {
   const { t } = useApp();
 
   /* ─── P1: graphical interpretation ─── */
+  const mc1a = [{
+    question: {
+      en: 'Geometrically, the system { x₁ + 2x₂ = 0;  x₁ − x₂ = 0 } has',
+      ro: 'Geometric, sistemul { x₁ + 2x₂ = 0;  x₁ − x₂ = 0 } are',
+    },
+    options: [
+      { text: { en: 'a unique solution x = (0, 0)ᵀ — two lines through the origin with different slopes', ro: 'soluție unică x = (0, 0)ᵀ — două drepte prin origine cu pante diferite' }, correct: true },
+      { text: { en: 'no solution — parallel lines', ro: 'fără soluție — drepte paralele' }, correct: false },
+      { text: { en: 'infinitely many solutions — coincident lines', ro: 'infinitate de soluții — drepte suprapuse' }, correct: false },
+      { text: 'x = (1, 1)ᵀ', correct: false },
+    ],
+    explanation: {
+      en: 'Both lines pass through (0, 0). Their slopes (−1/2 and 1) differ, so they intersect only at the origin — the unique solution.',
+      ro: 'Ambele drepte trec prin (0, 0). Pantele lor (−1/2 și 1) diferă, deci se intersectează doar la origine — soluția unică.',
+    },
+  }];
+
+  const mc1c = [{
+    question: {
+      en: 'Geometrically, the system { 2x₁ + x₂ = −1;  x₁ + x₂ = 2;  x₁ − 3x₂ = 5 } has',
+      ro: 'Geometric, sistemul { 2x₁ + x₂ = −1;  x₁ + x₂ = 2;  x₁ − 3x₂ = 5 } are',
+    },
+    options: [
+      { text: { en: 'no solution — three lines with no common point', ro: 'fără soluție — trei drepte fără punct comun' }, correct: true },
+      { text: { en: 'a unique solution at (−3, 5)', ro: 'soluție unică în (−3, 5)' }, correct: false },
+      { text: { en: 'infinitely many solutions', ro: 'infinitate de soluții' }, correct: false },
+      { text: { en: 'exactly two solutions', ro: 'exact două soluții' }, correct: false },
+    ],
+    explanation: {
+      en: 'The first two lines meet at (−3, 5). Substituting into the third: −3 − 15 = −18 ≠ 5. The third line does not pass through the meeting point, so the three lines share no common point.',
+      ro: 'Primele două drepte se întâlnesc în (−3, 5). Substituind în a treia: −3 − 15 = −18 ≠ 5. A treia dreaptă nu trece prin acest punct, deci cele trei drepte nu au punct comun.',
+    },
+  }];
+
   const mc1b = [{
     question: {
       en: 'Geometrically, the system { x₁ + 2x₂ = 3;  −2x₁ − 4x₂ = 6 } has',
@@ -54,8 +88,8 @@ export default function Seminar03() {
       { text: { en: 'no such α', ro: 'nicio astfel de α' }, correct: false },
     ],
     explanation: {
-      en: 'Adding Eq1 + Eq2 gives x₂ = 1. Substituting into Eq1: x₁ − αx₃ = −1. Substituting into Eq3: αx₁ + x₃ = 1. Solving for x₁ yields x₃(1 − α²) = 1 + α. At α = 1 the left side is 0 but the right side is 2 — contradiction. At α = −1 both sides are 0 (infinite solutions).',
-      ro: 'Adunând Eq1 + Eq2 obținem x₂ = 1. În Eq1: x₁ − αx₃ = −1. În Eq3: αx₁ + x₃ = 1. Rezolvând pentru x₁ obținem x₃(1 − α²) = 1 + α. La α = 1 LHS = 0 dar RHS = 2 — contradicție. La α = −1 ambele laturi sunt 0 (infinitate).',
+      en: 'Adding Eq1 + Eq2 gives x₂ = 1. Eliminating x₁ leads to x₃·(1 − α²) = 1 + α. At α = 1 the left side is 0 but the right side is 2 — contradiction, so no solution.',
+      ro: 'Adunând Eq1 + Eq2 obținem x₂ = 1. Eliminând x₁ ajungem la x₃·(1 − α²) = 1 + α. La α = 1 partea stângă este 0 dar cea dreaptă este 2 — contradicție, deci fără soluție.',
     },
   }];
 
@@ -189,8 +223,14 @@ export default function Seminar03() {
         </ul>
       </Box>
 
+      <p className="text-sm font-semibold mt-3 mb-1">{t('Part (a) — two lines through the origin', 'Partea (a) — două drepte prin origine')}</p>
+      <MultipleChoice questions={mc1a} />
+
       <p className="text-sm font-semibold mt-3 mb-1">{t('Part (b) — two lines', 'Partea (b) — două drepte')}</p>
       <MultipleChoice questions={mc1b} />
+
+      <p className="text-sm font-semibold mt-3 mb-1">{t('Part (c) — three lines', 'Partea (c) — trei drepte')}</p>
+      <MultipleChoice questions={mc1c} />
 
       <p className="text-sm font-semibold mt-3 mb-1">{t('Part (d) — two planes', 'Partea (d) — două plane')}</p>
       <MultipleChoice questions={mc1d} />
@@ -207,19 +247,19 @@ export default function Seminar03() {
               'Ambele drepte trec prin (0, 0). Pantele diferă (−1/2 vs 1), deci se intersectează doar acolo. Soluție unică: x = (0, 0).',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">(b) {t('Two parallel lines', 'Două drepte paralele')}</p>
+            <p className="font-bold mt-4 mb-1">(b) {t('Two parallel lines', 'Două drepte paralele')}</p>
             <p className="text-sm mb-2">{t(
               'Dividing the second equation by −2 gives x₁ + 2x₂ = −3; the first is x₁ + 2x₂ = 3. Same slope, different intercepts. No solution.',
               'Împărțind a doua ecuație la −2 obținem x₁ + 2x₂ = −3; prima este x₁ + 2x₂ = 3. Aceeași pantă, intercepți diferiți. Fără soluție.',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">(c) {t('Three lines, inconsistent', 'Trei drepte, inconsistent')}</p>
+            <p className="font-bold mt-4 mb-1">(c) {t('Three lines, inconsistent', 'Trei drepte, inconsistent')}</p>
             <p className="text-sm mb-2">{t(
               'The first two give x₁ = −3, x₂ = 5. Substitution into the third: −3 − 15 = −18 ≠ 5. The three lines do not share a common point — no solution.',
               'Primele două dau x₁ = −3, x₂ = 5. Substituind în a treia: −3 − 15 = −18 ≠ 5. Cele trei drepte nu au punct comun — fără soluție.',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">(d) {t('Two planes in ℝ³', 'Două plane în ℝ³')}</p>
+            <p className="font-bold mt-4 mb-1">(d) {t('Two planes in ℝ³', 'Două plane în ℝ³')}</p>
             <p className="text-sm mb-2">
               {t('Non-parallel planes meet along a line. Parametrise x₃ = t:', 'Plane ne-paralele se intersectează după o dreaptă. Parametrizăm x₃ = t:')}
             </p>
@@ -240,9 +280,17 @@ export default function Seminar03() {
       </h3>
       <Box type="definition">
         <p className="text-sm">{t(
-          'Consider the system  x₁ − x₂ + αx₃ = −2;  −x₁ + 2x₂ − αx₃ = 3;  αx₁ + x₂ + x₃ = 2.  (a) Find α for no solution. (b) Find α for infinite solutions. (c) Find the unique solution when it exists.',
-          'Considerăm sistemul  x₁ − x₂ + αx₃ = −2;  −x₁ + 2x₂ − αx₃ = 3;  αx₁ + x₂ + x₃ = 2.  (a) Găsiți α fără soluții. (b) Găsiți α cu infinitate de soluții. (c) Găsiți soluția unică când există.',
+          'Consider the linear system depending on α ∈ ℝ:',
+          'Considerăm sistemul liniar depinzând de α ∈ ℝ:',
         )}</p>
+        <Code>{`  x₁ -  x₂ + α x₃ = -2
+ -x₁ + 2x₂ - α x₃ =  3
+ α x₁ +  x₂ +  x₃ =  2`}</Code>
+        <ul className="text-sm list-disc ml-4 mt-2">
+          <li>{t('(a) Find the value(s) of α for which the system has no solution.', '(a) Găsiți valoarea (valorile) lui α pentru care sistemul nu are soluție.')}</li>
+          <li>{t('(b) Find the value(s) of α for which the system has infinitely many solutions.', '(b) Găsiți valoarea (valorile) lui α pentru care sistemul are o infinitate de soluții.')}</li>
+          <li>{t('(c) Determine the unique solution when it exists.', '(c) Determinați soluția unică atunci când există.')}</li>
+        </ul>
       </Box>
 
       <p className="text-sm font-semibold mt-3 mb-1">{t('Part (a)', 'Partea (a)')}</p>
@@ -265,17 +313,17 @@ export default function Seminar03() {
               {t('Adding Eq1 + Eq2 gives x₂ = 1.', 'Adunând Eq1 + Eq2 obținem x₂ = 1.')}
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('Step 2: substitute x₂ = 1', 'Pasul 2: substituim x₂ = 1')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Step 2: substitute x₂ = 1', 'Pasul 2: substituim x₂ = 1')}</p>
             <p className="text-sm mb-2">
               Eq1: x₁ + αx₃ = −1;  Eq3: αx₁ + x₃ = 1.
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('Step 3: eliminate x₁', 'Pasul 3: eliminăm x₁')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Step 3: eliminate x₁', 'Pasul 3: eliminăm x₁')}</p>
             <p className="text-sm mb-2">
               {t('α·Eq1 − Eq3: (α² − 1)x₃ = α·(−1) − (1) = −α − 1, i.e., (1 − α²)·x₃ = 1 + α.', 'α·Eq1 − Eq3: (α² − 1)x₃ = α·(−1) − (1) = −α − 1, adică (1 − α²)·x₃ = 1 + α.')}
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('Case analysis', 'Analiza cazurilor')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Case analysis', 'Analiza cazurilor')}</p>
             <ul className="text-sm list-disc ml-4 mb-2">
               <li>{t('α = 1: (0)·x₃ = 2 — contradiction. No solution.', 'α = 1: (0)·x₃ = 2 — contradicție. Fără soluție.')}</li>
               <li>{t('α = −1: (0)·x₃ = 0 — always true. 1-parameter family (infinite solutions).', 'α = −1: (0)·x₃ = 0 — întotdeauna adevărat. Familie 1-parametrică (infinitate).')}</li>
@@ -324,21 +372,21 @@ export default function Seminar03() {
             )}</p>
             <Code>{`x₁ = 19/16,  x₂ = 29/16,  x₃ = 7/8.`}</Code>
 
-            <p className="font-bold mt-3 mb-1">(b)</p>
+            <p className="font-bold mt-4 mb-1">(b)</p>
             <p className="text-sm mb-2">{t(
               'Partial pivot keeps R1 (pivot 2). Eliminate, then back-substitute:',
               'Pivotarea parțială păstrează R1 (pivot 2). Eliminăm, apoi substituție inversă:',
             )}</p>
             <Code>{`x₁ = −1,  x₂ = 0,  x₃ = 1.`}</Code>
 
-            <p className="font-bold mt-3 mb-1">(c)</p>
+            <p className="font-bold mt-4 mb-1">(c)</p>
             <p className="text-sm mb-2">{t(
               'The coefficient matrix is already lower-triangular — forward substitution is immediate:',
               'Matricea coeficienților e deja triunghiulară inferior — substituția directă este imediată:',
             )}</p>
             <Code>{`x₁ = 1.5,  x₂ = 2,  x₃ = −1.2,  x₄ = 3.`}</Code>
 
-            <p className="font-bold mt-3 mb-1">(d)</p>
+            <p className="font-bold mt-4 mb-1">(d)</p>
             <p className="text-sm mb-2">{t(
               'During elimination, two derived equations contradict each other: x₁ − x₃ = −1 and x₁ − x₃ = 3. The system has no solution.',
               'În timpul eliminării, două ecuații derivate se contrazic: x₁ − x₃ = −1 și x₁ − x₃ = 3. Sistemul nu are soluție.',
@@ -386,13 +434,13 @@ x₂ = (1,  1,  1,  1)ᵀ   for b₂`}</Code>
               'Verificare x₂: A·(1,1,1,1)ᵀ = (1−1+2−1, 1+0−1+1, 2+1+3−4, 0−1+1−1) = (1, 1, 2, −1) = b₂. ✓',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">{t('(b) Via A⁻¹', '(b) Via A⁻¹')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(b) Via A⁻¹', '(b) Via A⁻¹')}</p>
             <p className="text-sm mb-2">{t(
               'Compute A⁻¹ (four triangular back-solves after Gauss), then xᵢ = A⁻¹bᵢ for each RHS. Same numerical answers as (a).',
               'Calculăm A⁻¹ (patru substituții inverse triunghiulare după Gauss), apoi xᵢ = A⁻¹bᵢ pentru fiecare RHS. Aceleași răspunsuri ca (a).',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">{t('(c) Cost comparison', '(c) Comparație de cost')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(c) Cost comparison', '(c) Comparație de cost')}</p>
             <ul className="text-sm list-disc ml-4 mb-2">
               <li>{t('Gauss + two back-solves: ≈ n³/3 + 2n² multiplications.', 'Gauss + două substituții inverse: ≈ n³/3 + 2n² înmulțiri.')}</li>
               <li>{t('A⁻¹ explicit + two matrix-vector products: ≈ n³ + 2n² multiplications.', 'A⁻¹ explicit + două produse matrice-vector: ≈ n³ + 2n² înmulțiri.')}</li>

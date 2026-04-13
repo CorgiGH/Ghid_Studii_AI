@@ -24,6 +24,23 @@ export default function Seminar06() {
     },
   }];
 
+  const mc1b = [{
+    question: {
+      en: 'For A = [[2,0,1],[0,2,0],[1,0,2]], the spectrum (set of eigenvalues) is',
+      ro: 'Pentru A = [[2,0,1],[0,2,0],[1,0,2]], spectrul (mulțimea valorilor proprii) este',
+    },
+    options: [
+      { text: '{1, 2, 3}', correct: true },
+      { text: '{2, 2, 2}', correct: false },
+      { text: '{0, 2, 4}', correct: false },
+      { text: '{1, 1, 3}', correct: false },
+    ],
+    explanation: {
+      en: 'Expand det(A − λI) along row 2: (2 − λ)·[(2 − λ)² − 1] = (2 − λ)(1 − λ)(3 − λ), giving λ ∈ {1, 2, 3}. Three distinct eigenvalues ⇒ diagonalisable.',
+      ro: 'Dezvoltăm det(A − λI) pe linia 2: (2 − λ)·[(2 − λ)² − 1] = (2 − λ)(1 − λ)(3 − λ), dând λ ∈ {1, 2, 3}. Trei valori proprii distincte ⇒ diagonalizabilă.',
+    },
+  }];
+
   const mc1c = [{
     question: {
       en: 'For A = [[2,1,−1],[0,2,1],[0,0,3]], how many linearly independent eigenvectors does A have?',
@@ -36,8 +53,8 @@ export default function Seminar06() {
       { text: '0', correct: false },
     ],
     explanation: {
-      en: 'Upper-triangular ⇒ eigenvalues are diagonal: {2, 2, 3}. For λ = 2: (A − 2I) has rank 2, so null(A − 2I) is 1-D — only one eigenvector. For λ = 3 one more. Total 2 < 3 ⇒ A is not diagonalisable (defective).',
-      ro: 'Triunghi superior ⇒ valorile proprii sunt pe diagonală: {2, 2, 3}. Pentru λ = 2: (A − 2I) are rang 2, deci nucleul are dim 1 — un singur vector propriu. Pentru λ = 3 încă unul. Total 2 < 3 ⇒ A nu este diagonalizabilă (defectivă).',
+      en: 'Upper-triangular ⇒ eigenvalues are diagonal: {2, 2, 3}. For λ = 2: (A − 2I) has rank 2, so null(A − 2I) is 1-D — only one eigenvector. For λ = 3 one more. Total 2 < 3 ⇒ A is not diagonalisable (defective = non-diagonalisable).',
+      ro: 'Triunghi superior ⇒ valorile proprii sunt pe diagonală: {2, 2, 3}. Pentru λ = 2: (A − 2I) are rang 2, deci nucleul are dim 1 — un singur vector propriu. Pentru λ = 3 încă unul. Total 2 < 3 ⇒ A nu este diagonalizabilă (defectivă = ne-diagonalizabilă).',
     },
   }];
 
@@ -175,6 +192,9 @@ export default function Seminar06() {
       <p className="text-sm font-semibold mt-3 mb-1">{t('Spectrum of (a)', 'Spectrul lui (a)')}</p>
       <MultipleChoice questions={mc1a} />
 
+      <p className="text-sm font-semibold mt-3 mb-1">{t('Spectrum of (b)', 'Spectrul lui (b)')}</p>
+      <MultipleChoice questions={mc1b} />
+
       <p className="text-sm font-semibold mt-3 mb-1">{t('Eigenvector count of (c)', 'Numărul de vectori proprii pentru (c)')}</p>
       <MultipleChoice questions={mc1c} />
 
@@ -194,7 +214,7 @@ export default function Seminar06() {
               <li>λ = −1:  v = (−1, 1, 1)ᵀ</li>
             </ul>
 
-            <p className="font-bold mt-3 mb-1">(b) λ = 1, 2, 3 — {t('diagonalisable', 'diagonalizabilă')}</p>
+            <p className="font-bold mt-4 mb-1">(b) λ = 1, 2, 3 — {t('diagonalisable', 'diagonalizabilă')}</p>
             <ul className="text-sm list-disc ml-4 mb-2">
               <li>λ = 1:  v = (−1, 0, 1)ᵀ</li>
               <li>λ = 2:  v = (0, 1, 0)ᵀ</li>
@@ -205,13 +225,13 @@ export default function Seminar06() {
               'Obținute din det(A − λI) = (2 − λ)·[(2 − λ)² − 1] = (2 − λ)(1 − λ)(3 − λ).',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">(c) λ = 2 (algebraic 2), λ = 3 — {t('defective (not diagonalisable)', 'defectivă (ne-diagonalizabilă)')}</p>
+            <p className="font-bold mt-4 mb-1">(c) λ = 2 (algebraic 2), λ = 3 — {t('defective (not diagonalisable)', 'defectivă (ne-diagonalizabilă)')}</p>
             <ul className="text-sm list-disc ml-4 mb-2">
               <li>λ = 2:  v = (1, 0, 0)ᵀ — only one eigenvector (geometric 1 &lt; 2)</li>
               <li>λ = 3:  v = (0, 1, 1)ᵀ</li>
             </ul>
 
-            <p className="font-bold mt-3 mb-1">(d) λ = 1 (algebraic 3) — {t('defective', 'defectivă')}</p>
+            <p className="font-bold mt-4 mb-1">(d) λ = 1 (algebraic 3) — {t('defective', 'defectivă')}</p>
             <p className="text-sm mb-2">{t(
               'A − I has rank 1, so null space is 2-D:',
               'A − I are rang 1, deci nucleul are dim 2:',
@@ -255,12 +275,12 @@ export default function Seminar06() {
             <p className="font-bold mb-1">{t('(a) Trace', '(a) Urma')}</p>
             <p className="text-sm mb-2">tr(A) = 2 + 2 = 4; tr(B) = 1 + 1 = 2. {t('Different ⇒ not similar.', 'Diferite ⇒ nu sunt asemenea.')}</p>
 
-            <p className="font-bold mt-3 mb-1">{t('(b) Determinant', '(b) Determinantul')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(b) Determinant', '(b) Determinantul')}</p>
             <p className="text-sm mb-2">
               det(A) = 1 · 1 · 2 = 2 {t('(upper-triangular)', '(triunghi superior)')}; det(B) = 6 ({t('expand row 3', 'dezvoltă linia 3')}). {t('Different ⇒ not similar.', 'Diferite ⇒ nu sunt asemenea.')}
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('(c) Trace', '(c) Urma')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(c) Trace', '(c) Urma')}</p>
             <p className="text-sm mb-2">
               tr(A) = 1 + 0 + 2 = 3; tr(B) = 2 + 0 + (−2) = 0. {t('Different ⇒ not similar.', 'Diferite ⇒ nu sunt asemenea.')}
             </p>
@@ -292,9 +312,6 @@ export default function Seminar06() {
       <p className="text-sm font-semibold mt-3 mb-1">{t('First product for (a)', 'Primul produs pentru (a)')}</p>
       <MultipleChoice questions={mc3a} />
 
-      <p className="text-sm font-semibold mt-3 mb-1">{t('Dominant eigenvalue of (a)', 'Valoarea proprie dominantă pentru (a)')}</p>
-      <MultipleChoice questions={mc3converge} />
-
       <Toggle
         question={t('Show three iterations for both matrices', 'Arată trei iterații pentru ambele matrice')}
         showLabel={t('Show', 'Arată')}
@@ -302,20 +319,20 @@ export default function Seminar06() {
         answer={
           <div>
             <p className="font-bold mb-1">(a)</p>
-            <Code>{`x⁽⁰⁾ = (1, -1, 2)
-A·x⁽⁰⁾ = (3, 1, 4)          →  x⁽¹⁾ = (3/4, 1/4, 1)
-A·x⁽¹⁾ = (2.75, 2.25, 3)    →  x⁽²⁾ = (11/12, 3/4, 1)
-A·x⁽²⁾ = (43/12, 41/12, 44/12)  →  x⁽³⁾ = (43/44, 41/44, 1)`}</Code>
+            <Code>{`x⁽⁰⁾        = (1, -1, 2)
+A·x⁽⁰⁾      = (3, 1, 4)                →  x⁽¹⁾ = (3/4, 1/4, 1)
+A·x⁽¹⁾      = (2.75, 2.25, 3)          →  x⁽²⁾ = (11/12, 3/4, 1)
+A·x⁽²⁾      = (43/12, 41/12, 44/12)    →  x⁽³⁾ = (43/44, 41/44, 1)`}</Code>
             <p className="text-sm mt-2 mb-2">{t(
               'λ-estimate ≈ 44/12 ≈ 3.67, heading to λ = 4. Eigenvector direction approaches (1, 1, 1)ᵀ.',
               'Estimare λ ≈ 44/12 ≈ 3.67, apropiindu-se de λ = 4. Direcția vectorului propriu se apropie de (1, 1, 1)ᵀ.',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">(b)</p>
-            <Code>{`x⁽⁰⁾ = (-1, 0, 1)
-A·x⁽⁰⁾ = (0, -1, 0)         →  x⁽¹⁾ = (0, -1, 0)
-A·x⁽¹⁾ = (-1, -1, 0)        →  x⁽²⁾ = (-1, -1, 0)
-A·x⁽²⁾ = (-2, -2, -1)       →  x⁽³⁾ = (-1, -1, -1/2)`}</Code>
+            <p className="font-bold mt-4 mb-1">(b)</p>
+            <Code>{`x⁽⁰⁾        = (-1, 0, 1)
+A·x⁽⁰⁾      = (0, -1, 0)               →  x⁽¹⁾ = (0, -1, 0)
+A·x⁽¹⁾      = (-1, -1, 0)              →  x⁽²⁾ = (-1, -1, 0)
+A·x⁽²⁾      = (-2, -2, -1)             →  x⁽³⁾ = (-1, -1, -1/2)`}</Code>
             <p className="text-sm mt-2 mb-2">{t(
               'True dominant λ = 1 + √2 ≈ 2.414 with eigenvector (√2, 1, 1)ᵀ. Iterates converge slowly because λ₂ = 1 has ratio |λ₂/λ₁| = 1/2.414 ≈ 0.41.',
               'Valoarea dominantă adevărată λ = 1 + √2 ≈ 2.414 cu vector propriu (√2, 1, 1)ᵀ. Iterațiile converg lent pentru că λ₂ = 1 are raport |λ₂/λ₁| = 1/2.414 ≈ 0.41.',
@@ -329,6 +346,9 @@ A·x⁽²⁾ = (-2, -2, -1)       →  x⁽³⁾ = (-1, -1, -1/2)`}</Code>
           </div>
         }
       />
+
+      <p className="text-sm font-semibold mt-3 mb-1">{t('Consolidation: dominant eigenvalue of (a)', 'Consolidare: valoarea proprie dominantă pentru (a)')}</p>
+      <MultipleChoice questions={mc3converge} />
 
       {/* ══════════ Problem 4 ══════════ */}
       <h3 className="text-lg font-bold mt-8 mb-2">
@@ -353,7 +373,7 @@ A·x⁽²⁾ = (-2, -2, -1)       →  x⁽³⁾ = (-1, -1, -1/2)`}</Code>
    -0.8   0.6   0            0   10    5
      0     0    1            0    0   10`}</Code>
 
-            <p className="font-bold mt-3 mb-1">{t('Multiply R·Q', 'Înmulțim R·Q')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Multiply R·Q', 'Înmulțim R·Q')}</p>
             <Code>{`A⁽¹⁾ = R·Q =  6   8  15
               -8   6   5
                0   0  10`}</Code>

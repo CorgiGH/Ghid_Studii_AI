@@ -108,6 +108,23 @@ export default function Seminar02() {
     },
   }];
 
+  const mc3cos23 = [{
+    question: {
+      en: 'With the modification x³ = (1, 0, 1)ᵀ (choosing α = 0), cos(x², x³) equals',
+      ro: 'Cu modificarea x³ = (1, 0, 1)ᵀ (alegând α = 0), cos(x², x³) este',
+    },
+    options: [
+      { text: '1/2', correct: true },
+      { text: '0', correct: false },
+      { text: '1', correct: false },
+      { text: '1/√2', correct: false },
+    ],
+    explanation: {
+      en: '⟨x², x³⟩ = 0·1 + 1·0 + 1·1 = 1. ‖x²‖₂ = ‖x³‖₂ = √2. cos = 1/(√2·√2) = 1/2. The value depends on the α you chose — if you picked a different α, recompute.',
+      ro: '⟨x², x³⟩ = 0·1 + 1·0 + 1·1 = 1. ‖x²‖₂ = ‖x³‖₂ = √2. cos = 1/(√2·√2) = 1/2. Valoarea depinde de α-ul ales — dacă alegeți alt α, recalculați.',
+    },
+  }];
+
   /* ─── P4: Gram–Schmidt on x¹, x², x³ ─── */
   const mc4indep = [{
     question: {
@@ -176,8 +193,8 @@ export default function Seminar02() {
       </h3>
       <Box type="definition">
         <p className="text-sm">{t(
-          'Solve Ax = b for the four triangular matrices below. Use forward substitution for lower-triangular, back substitution for upper-triangular.',
-          'Rezolvă Ax = b pentru cele patru matrici triunghiulare de mai jos. Folosește substituția directă pentru triunghi inferior, substituția inversă pentru triunghi superior.',
+          'Solve Ax = b for the four triangular matrices below.',
+          'Rezolvă Ax = b pentru cele patru matrici triunghiulare de mai jos.',
         )}</p>
         <ul className="text-sm list-disc ml-4 mt-1">
           <li>(a) A lower, rows (1,0,0), (1.5,2,0), (1,1,2.5); b = (0, 2, 3.5)ᵀ</li>
@@ -202,13 +219,13 @@ export default function Seminar02() {
             <p className="font-bold mb-1">(a) {t('Forward substitution', 'Substituție directă')}</p>
             <p className="text-sm mb-2">x₁ = 0; 2x₂ = 2 ⇒ x₂ = 1; 2.5x₃ = 3.5 − 0 − 1 = 2.5 ⇒ x₃ = 1. Solution: (0, 1, 1)ᵀ.</p>
 
-            <p className="font-bold mt-3 mb-1">(b) {t('Forward substitution, all-ones lower-triangular', 'Substituție directă, triunghiulară inferior cu toți 1')}</p>
+            <p className="font-bold mt-4 mb-1">(b) {t('Forward substitution, all-ones lower-triangular', 'Substituție directă, triunghiulară inferior cu toți 1')}</p>
             <p className="text-sm mb-2">xₖ = bₖ − (x₁ + ⋯ + xₖ₋₁). With b = (1,2,3,4): x = (1, 1, 1, 1)ᵀ.</p>
 
-            <p className="font-bold mt-3 mb-1">(c) {t('Back substitution', 'Substituție inversă')}</p>
+            <p className="font-bold mt-4 mb-1">(c) {t('Back substitution', 'Substituție inversă')}</p>
             <p className="text-sm mb-2">x₃ = 1; 4x₂ + 1 = 5 ⇒ x₂ = 1; 2x₁ + 1 + 3 = 8 ⇒ x₁ = 2. Solution: (2, 1, 1)ᵀ.</p>
 
-            <p className="font-bold mt-3 mb-1">(d) {t('Back substitution', 'Substituție inversă')}</p>
+            <p className="font-bold mt-4 mb-1">(d) {t('Back substitution', 'Substituție inversă')}</p>
             <p className="text-sm mb-2">x₄ = 4; x₃ + 4 = 7 ⇒ x₃ = 3; x₂ + 3 + 4 = 9 ⇒ x₂ = 2; x₁ + 2 + 3 + 0 = 6 ⇒ x₁ = 1. Solution: (1, 2, 3, 4)ᵀ.</p>
 
             <Box type="theorem">
@@ -248,12 +265,12 @@ export default function Seminar02() {
               'Verifică rezolvând Aeⱼ coloană cu coloană, sau observă că A este operatorul sumei cumulative iar A⁻¹ este inversul său — operatorul diferenței finite.',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">{t('General n × n formula', 'Formula generală n × n')}</p>
+            <p className="font-bold mt-4 mb-1">{t('General n × n formula', 'Formula generală n × n')}</p>
             <p className="text-sm mb-2">
               (A⁻¹)ᵢⱼ = 1 if i = j, −1 if i = j + 1, 0 otherwise. Equivalently A⁻¹ = I − S where S is the shift-by-one matrix (Sᵢⱼ = 1 if i = j + 1, else 0).
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('(d) Inverse of the 4×4 upper-triangular matrix', '(d) Inversa matricei triunghiular superior 4×4')}</p>
+            <p className="font-bold mt-4 mb-1">{t('(d) Inverse of the 4×4 upper-triangular matrix', '(d) Inversa matricei triunghiular superior 4×4')}</p>
             <Code>{`A⁻¹ =  1 -1  0  1
         0  1 -1  0
         0  0  1 -1
@@ -289,8 +306,11 @@ export default function Seminar02() {
       <p className="text-sm font-semibold mt-3 mb-1">{t('Modification condition', 'Condiția de modificare')}</p>
       <MultipleChoice questions={mc3modify} />
 
-      <p className="text-sm font-semibold mt-3 mb-1">{t('Angle computation', 'Calculul unghiului')}</p>
+      <p className="text-sm font-semibold mt-3 mb-1">{t('Angle computation — cos(x¹, x²)', 'Calculul unghiului — cos(x¹, x²)')}</p>
       <MultipleChoice questions={mc3cos} />
+
+      <p className="text-sm font-semibold mt-3 mb-1">{t('Angle after modification — cos(x², x³)', 'Unghiul după modificare — cos(x², x³)')}</p>
+      <MultipleChoice questions={mc3cos23} />
 
       <Toggle
         question={t('Show full reasoning and cos(x², x³) after modification', 'Arată raționamentul complet și cos(x², x³) după modificare')}
@@ -301,16 +321,16 @@ export default function Seminar02() {
             <p className="font-bold mb-1">{t('Dependence', 'Dependență')}</p>
             <p className="text-sm mb-2">x¹ + x² = (1, 2, 1)ᵀ = x³, so the three are linearly dependent.</p>
 
-            <p className="font-bold mt-3 mb-1">{t('Modification', 'Modificare')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Modification', 'Modificare')}</p>
             <p className="text-sm mb-2">{t(
               'Write x³ = (1, α, 1)ᵀ. Dependence means a·x¹ + b·x² = x³; matching gives a = 1, b = 1, α = 2. Any α ≠ 2 makes the set independent — e.g., take α = 0, so x³ = (1, 0, 1)ᵀ.',
               'Scrie x³ = (1, α, 1)ᵀ. Dependența cere a·x¹ + b·x² = x³; egalând obținem a = 1, b = 1, α = 2. Orice α ≠ 2 face mulțimea independentă — de exemplu α = 0, deci x³ = (1, 0, 1)ᵀ.',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">{t('Orthogonality', 'Ortogonalitate')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Orthogonality', 'Ortogonalitate')}</p>
             <p className="text-sm mb-2">⟨x¹, x²⟩ = 1 ≠ 0, so the vectors are not pairwise orthogonal.</p>
 
-            <p className="font-bold mt-3 mb-1">{t('Cosines', 'Cosinusuri')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Cosines', 'Cosinusuri')}</p>
             <ul className="text-sm list-disc ml-4 mb-2">
               <li>cos(x¹, x²) = ⟨x¹, x²⟩ / (‖x¹‖₂ · ‖x²‖₂) = 1 / (√2 · √2) = 1/2.</li>
               <li>{t('Using the modified x³ = (1, 0, 1)ᵀ', 'Folosind modificatul x³ = (1, 0, 1)ᵀ')}: ⟨x², x³⟩ = 0 + 0 + 1 = 1, ‖x²‖ = ‖x³‖ = √2 ⇒ cos(x², x³) = 1/2.</li>
@@ -351,17 +371,17 @@ export default function Seminar02() {
             <p className="font-bold mb-1">{t('Independence', 'Independență')}</p>
             <p className="text-sm mb-2">det([x¹|x²|x³]) = −1 ≠ 0.</p>
 
-            <p className="font-bold mt-3 mb-1">{t('Non-orthogonality', 'Non-ortogonalitate')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Non-orthogonality', 'Non-ortogonalitate')}</p>
             <p className="text-sm mb-2">⟨x¹, x²⟩ = 1 ≠ 0.</p>
 
-            <p className="font-bold mt-3 mb-1">{t('Gram–Schmidt', 'Gram–Schmidt')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Gram–Schmidt', 'Gram–Schmidt')}</p>
             <ul className="text-sm list-disc ml-4 mb-2">
               <li>q₁ = x¹ / ‖x¹‖ = (1/√2, 1/√2, 0)ᵀ.</li>
               <li>v₂ = x² − ⟨x², q₁⟩ q₁ = (1,0,1) − (1/√2)·q₁ = (1/2, −1/2, 1) ⇒ q₂ = (1/√6, −1/√6, 2/√6)ᵀ.</li>
               <li>v₃ = x³ − ⟨x³, q₁⟩ q₁ − ⟨x³, q₂⟩ q₂ = (0,0,1) − 0 − (2/√6)·q₂ = (−1/3, 1/3, 1/3) ⇒ q₃ = (−1/√3, 1/√3, 1/√3)ᵀ.</li>
             </ul>
 
-            <p className="font-bold mt-3 mb-1">{t('Q and R', 'Q și R')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Q and R', 'Q și R')}</p>
             <Code>{`Q = [ 1/√2   1/√6   -1/√3 ]
     [ 1/√2  -1/√6    1/√3 ]
     [  0     2/√6    1/√3 ]
@@ -370,12 +390,12 @@ R = [ √2    1/√2     0   ]
     [  0   √6/2    2/√6  ]
     [  0    0     1/√3   ]`}</Code>
 
-            <p className="font-bold mt-3 mb-1">{t('Solve Ax = b via A = QR', 'Rezolvă Ax = b via A = QR')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Solve Ax = b via A = QR', 'Rezolvă Ax = b via A = QR')}</p>
             <p className="text-sm mb-2">
               y = Qᵀb = (3/√2, 3/√6, 0)ᵀ. Back substitution on Rx = y gives x₃ = 0, x₂ = 1, x₁ = 1.
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('Inverse (via Aeⱼ)', 'Inversa (via Aeⱼ)')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Inverse (via Aeⱼ)', 'Inversa (via Aeⱼ)')}</p>
             <Code>{`A⁻¹ =  0  1  0
         1 -1  0
        -1  1  1`}</Code>
@@ -411,14 +431,14 @@ R = [ √2    1/√2     0   ]
               det(A) = 2 ≠ 0; ⟨y¹, y²⟩ = 2 ≠ 0 — linearly independent but not pairwise orthogonal.
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('Gram–Schmidt', 'Gram–Schmidt')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Gram–Schmidt', 'Gram–Schmidt')}</p>
             <ul className="text-sm list-disc ml-4 mb-2">
               <li>q₁ = (1/√2, 1/√2, 0)ᵀ (‖y¹‖ = √2).</li>
               <li>v₂ = y² − √2·q₁ = (0, 0, 1)ᵀ ⇒ q₂ = (0, 0, 1)ᵀ.</li>
               <li>v₃ = y³ − 2√2·q₁ − 1·q₂ = (1, −1, 0)ᵀ ⇒ q₃ = (1/√2, −1/√2, 0)ᵀ.</li>
             </ul>
 
-            <p className="font-bold mt-3 mb-1">{t('Q and R', 'Q și R')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Q and R', 'Q și R')}</p>
             <Code>{`Q = [ 1/√2   0    1/√2 ]
     [ 1/√2   0   -1/√2 ]
     [  0    1     0   ]
@@ -427,12 +447,12 @@ R = [ √2   √2   2√2 ]
     [  0   1     1   ]
     [  0   0    √2   ]`}</Code>
 
-            <p className="font-bold mt-3 mb-1">{t('Solve via Qᵀb then Rx = y', 'Rezolvă via Qᵀb apoi Rx = y')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Solve via Qᵀb then Rx = y', 'Rezolvă via Qᵀb apoi Rx = y')}</p>
             <p className="text-sm mb-2">
               Qᵀb = (3√2, 2, √2)ᵀ. Back-solve: √2·x₃ = √2 ⇒ x₃ = 1; x₂ + 1 = 2 ⇒ x₂ = 1; √2·x₁ + √2 + 2√2 = 3√2 ⇒ x₁ = 0.
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('Inverse', 'Inversa')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Inverse', 'Inversa')}</p>
             <Code>{`A⁻¹ =   0     1    -1
       -1/2   1/2   1
        1/2  -1/2   0`}</Code>

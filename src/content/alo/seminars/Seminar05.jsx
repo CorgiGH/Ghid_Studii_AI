@@ -155,7 +155,7 @@ export default function Seminar05() {
      = (25, 35, 15)ᵀ`}</Code>
             <p className="text-sm mt-2 mb-2">{t('Back-solve R·x = (25, 35, 15)ᵀ: x₃ = 3, x₂ = 2, x₁ = 1. So x = (1, 2, 3)ᵀ.', 'Substituție inversă R·x = (25, 35, 15)ᵀ: x₃ = 3, x₂ = 2, x₁ = 1. Deci x = (1, 2, 3)ᵀ.')}</p>
 
-            <p className="font-bold mt-3 mb-1">(b)</p>
+            <p className="font-bold mt-4 mb-1">(b)</p>
             <Code>{`Qᵀ·b = (0.6·27 +      0·35 + (−0.8)·(−11),
              0·27 +     1·35 +        0·(−11),
            0.8·27 +     0·35 +      0.6·(−11))
@@ -168,6 +168,13 @@ export default function Seminar05() {
                 'Q ortogonală conservă norma 2: ‖Q·R·x‖₂ = ‖R·x‖₂. Deci ‖Ax − b‖₂ = ‖Rx − Qᵀb‖₂ — substituția inversă R·x = Qᵀb dă soluția celor mai mici pătrate a lui Ax = b când A are rang complet pe coloane.',
               )}</p>
             </Box>
+
+            <p className="text-sm mt-2 italic opacity-80">
+              {t(
+                '→ Problem 2 derives this (Q, R) pair from scratch via a single Givens rotation — here we only used it.',
+                '→ Problema 2 derivează perechea (Q, R) de la zero printr-o singură rotație Givens — aici doar am folosit-o.',
+              )}
+            </p>
           </div>
         }
       />
@@ -193,21 +200,31 @@ export default function Seminar05() {
             <p className="text-sm mb-2">
               ρ = √(3² + (−4)²) = 5;  c = 3/5 = 0.6,  s = −4/5 = −0.8.  G₁₂ has (G[1,1], G[1,2], G[2,1], G[2,2]) = (0.6, −0.8, 0.8, 0.6).
             </p>
-            <Code>{`Q = G₁₂ᵀ = 0.6   0.8   0       R = G₁₂·A₁ = 5  10  0
-            -0.8   0.6   0                      0  10  5
-             0     0    1                       0   0  5`}</Code>
+            <p className="text-sm mb-1 font-semibold">Q = G₁₂ᵀ</p>
+            <Code>{` 0.6   0.8   0
+-0.8   0.6   0
+ 0     0     1`}</Code>
+            <p className="text-sm mb-1 mt-2 font-semibold">R = G₁₂·A₁</p>
+            <Code>{`5   10   0
+0   10   5
+0    0   5`}</Code>
             <p className="text-sm mt-2 mb-2">{t(
               'This is exactly the (Q, R) pair of Problem 1(a): P1(a) hands you the factorisation to use; here we derive it.',
               'Exact perechea (Q, R) din Problema 1(a): P1(a) ne dădea factorizarea; aici o deducem.',
             )}</p>
 
-            <p className="font-bold mt-3 mb-1">A₂ — {t('single Givens in plane (1, 3)', 'o singură rotație Givens în planul (1, 3)')}</p>
+            <p className="font-bold mt-4 mb-1">A₂ — {t('single Givens in plane (1, 3)', 'o singură rotație Givens în planul (1, 3)')}</p>
             <p className="text-sm mb-2">
               ρ = √(3² + (−4)²) = 5;  c = 0.6,  s = −0.8.  G₁₃ has (G[1,1], G[1,3], G[3,1], G[3,3]) = (0.6, −0.8, 0.8, 0.6).
             </p>
-            <Code>{`Q = G₁₃ᵀ = 0.6    0    0.8     R = G₁₃·A₂ = 5  10  0
-             0     1    0                        0  10  5
-            -0.8   0    0.6                      0   0  5`}</Code>
+            <p className="text-sm mb-1 font-semibold">Q = G₁₃ᵀ</p>
+            <Code>{` 0.6    0    0.8
+ 0      1    0
+-0.8    0    0.6`}</Code>
+            <p className="text-sm mb-1 mt-2 font-semibold">R = G₁₃·A₂</p>
+            <Code>{`5   10   0
+0   10   5
+0    0   5`}</Code>
             <p className="text-sm mt-2 mb-2">{t(
               'Matches Problem 1(b). Same R in both cases because the eliminated column was (3, ∗, −4)ᵀ in both (just in different rows).',
               'Potrivește Problema 1(b). Același R în ambele cazuri pentru că prima coloană eliminată a fost (3, ∗, −4)ᵀ în ambele (doar pe linii diferite).',
@@ -247,25 +264,29 @@ export default function Seminar05() {
           <div>
             <p className="font-bold mb-1">{t('Householder step on column 1', 'Pasul Householder pe coloana 1')}</p>
             <p className="text-sm mb-2">
-              a = (3, 4)ᵀ, ρ = −5, v = a − ρ·e₁ = (8, 4)ᵀ. ‖v‖² = 80, v̂ = v/‖v‖ = (2/√5, 1/√5)ᵀ. P = I − 2·v̂·v̂ᵀ.
+              a = (3, 4)ᵀ, ρ = −5, v = a − ρ·e₁ = (8, 4)ᵀ. ‖v‖₂² = 80, v̂ = v/‖v‖₂ = (2/√5, 1/√5)ᵀ. P = I − 2·v̂·v̂ᵀ.
             </p>
             <Code>{`P = -3/5  -4/5
     -4/5   3/5`}</Code>
 
-            <p className="font-bold mt-3 mb-1">{t('Apply P to A', 'Aplicăm P lui A')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Apply P to A', 'Aplicăm P lui A')}</p>
             <Code>{`P·A = -5   -11/5       R = P·A (already upper-triangular)
        0    2/5`}</Code>
 
-            <p className="font-bold mt-3 mb-1">{t('Q = Pᵀ = P (P is symmetric)', 'Q = Pᵀ = P (P este simetrică)')}</p>
-            <Code>{`Q = -3/5  -4/5         R = -5   -11/5
-    -4/5   3/5              0    2/5`}</Code>
+            <p className="font-bold mt-4 mb-1">{t('Q = Pᵀ = P (P is symmetric)', 'Q = Pᵀ = P (P este simetrică)')}</p>
+            <p className="text-sm mb-1 font-semibold">Q</p>
+            <Code>{`-3/5  -4/5
+-4/5   3/5`}</Code>
+            <p className="text-sm mb-1 mt-2 font-semibold">R</p>
+            <Code>{`-5   -11/5
+ 0     2/5`}</Code>
 
-            <p className="font-bold mt-3 mb-1">{t('Solve via QR', 'Rezolvare via QR')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Solve via QR', 'Rezolvare via QR')}</p>
             <p className="text-sm mb-2">
               y = Qᵀb = Q·b = (−14/5, −2/5)ᵀ. Back-solve R·z = y: (2/5)·z₂ = −2/5 ⇒ z₂ = −1; −5·z₁ − 11/5·(−1) = −14/5 ⇒ z₁ = 1. So z = (1, −1)ᵀ.
             </p>
 
-            <p className="font-bold mt-3 mb-1">{t('Residual', 'Rezidualul')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Residual', 'Rezidualul')}</p>
             <p className="text-sm mb-2">
               A·z = (3 − 1, 4 − 2)ᵀ = (2, 2)ᵀ = b. Therefore ‖Az − b‖₁ = 0 — an exact solution.
             </p>
@@ -300,15 +321,20 @@ export default function Seminar05() {
             <p className="text-sm mb-2">
               Zero a₂₁ = −8. ρ = √(36 + 64) = 10; c = 0.6, s = −0.8.
             </p>
-            <Code>{`G₁₂ = 0.6  -0.8   0       Q = G₁₂ᵀ = 0.6   0.8   0
-      0.8   0.6   0                  -0.8   0.6   0
-       0     0    1                    0     0    1
+            <p className="text-sm mb-1 font-semibold">G₁₂</p>
+            <Code>{`0.6  -0.8   0
+0.8   0.6   0
+  0     0   1`}</Code>
+            <p className="text-sm mb-1 mt-2 font-semibold">Q = G₁₂ᵀ</p>
+            <Code>{` 0.6   0.8   0
+-0.8   0.6   0
+   0     0   1`}</Code>
+            <p className="text-sm mb-1 mt-2 font-semibold">R = G₁₂ · A</p>
+            <Code>{`10    0   15
+ 0   10    5
+ 0    0   10`}</Code>
 
-R = G₁₂ · A = 10    0   15
-               0   10    5
-               0    0   10`}</Code>
-
-            <p className="font-bold mt-3 mb-1">{t('Solve', 'Rezolvare')}</p>
+            <p className="font-bold mt-4 mb-1">{t('Solve', 'Rezolvare')}</p>
             <p className="text-sm mb-2">
               Qᵀ·b = G₁₂·b = (0.6·21 − 0.8·(−3),  0.8·21 + 0.6·(−3),  10)ᵀ = (15, 15, 10)ᵀ.
             </p>
