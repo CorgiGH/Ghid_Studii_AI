@@ -45,6 +45,7 @@ const alo = {
     { id: 'alo-s2', title: { en: 'Week 2: Triangular systems, inverses, Gram–Schmidt', ro: 'Săptămâna 2: Sisteme triunghiulare, inverse, Gram–Schmidt' }, shortTitle: { en: 'W2: GS + QR', ro: 'S2: GS + QR' }, component: lazy(() => import('./seminars/Seminar02.jsx')) },
     { id: 'alo-s3', title: { en: 'Week 3: Graphical methods, parametric systems, Gauss with pivoting', ro: 'Săptămâna 3: Metode grafice, sisteme parametrice, Gauss cu pivotare' }, shortTitle: { en: 'W3: Pivoting', ro: 'S3: Pivotare' }, component: lazy(() => import('./seminars/Seminar03.jsx')) },
     { id: 'alo-s4', title: { en: 'Week 4: LU decomposition — Doolittle, Crout, PA = LU', ro: 'Săptămâna 4: Descompunerea LU — Doolittle, Crout, PA = LU' }, shortTitle: { en: 'W4: LU', ro: 'S4: LU' }, component: lazy(() => import('./seminars/Seminar04.jsx')) },
+    { id: 'alo-s5', title: { en: 'Week 5: QR decomposition — Givens and Householder', ro: 'Săptămâna 5: Descompunerea QR — Givens și Householder' }, shortTitle: { en: 'W5: QR', ro: 'S5: QR' }, component: lazy(() => import('./seminars/Seminar05.jsx')) },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
