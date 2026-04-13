@@ -46,6 +46,7 @@ const alo = {
     { id: 'alo-s3', title: { en: 'Week 3: Graphical methods, parametric systems, Gauss with pivoting', ro: 'Săptămâna 3: Metode grafice, sisteme parametrice, Gauss cu pivotare' }, shortTitle: { en: 'W3: Pivoting', ro: 'S3: Pivotare' }, component: lazy(() => import('./seminars/Seminar03.jsx')) },
     { id: 'alo-s4', title: { en: 'Week 4: LU decomposition — Doolittle, Crout, PA = LU', ro: 'Săptămâna 4: Descompunerea LU — Doolittle, Crout, PA = LU' }, shortTitle: { en: 'W4: LU', ro: 'S4: LU' }, component: lazy(() => import('./seminars/Seminar04.jsx')) },
     { id: 'alo-s5', title: { en: 'Week 5: QR decomposition — Givens and Householder', ro: 'Săptămâna 5: Descompunerea QR — Givens și Householder' }, shortTitle: { en: 'W5: QR', ro: 'S5: QR' }, component: lazy(() => import('./seminars/Seminar05.jsx')) },
+    { id: 'alo-s6', title: { en: 'Week 6: Eigenvalues, similarity, power method, QR iteration', ro: 'Săptămâna 6: Valori proprii, similaritate, metoda puterii, iterație QR' }, shortTitle: { en: 'W6: Eigenvalues', ro: 'S6: Val. proprii' }, component: lazy(() => import('./seminars/Seminar06.jsx')) },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
