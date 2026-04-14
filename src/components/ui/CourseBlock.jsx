@@ -2,12 +2,15 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CompletionVignette from './CompletionVignette';
 import { useApp } from '../../contexts/AppContext';
 
-const CourseBlock = ({ title, id, children, forceOpen, searchState, courseId, sectionCount }) => {
-  const [userOpen, setUserOpen] = useState(false);
+const CourseBlock = ({ title, id, children, forceOpen, defaultOpen, searchState, courseId, sectionCount }) => {
+  const [userOpen, setUserOpen] = useState(!!defaultOpen);
   const ref = useRef(null);
   const contentRef = useRef(null);
   const innerRef = useRef(null);
-  const [maxHeight, setMaxHeight] = useState('0px');
+  // When starting open, skip the 0 → scrollHeight animation — the open-close
+  // effect only fires on state changes, so without this the block would stay
+  // visually collapsed even though `open === true`.
+  const [maxHeight, setMaxHeight] = useState(defaultOpen ? 'none' : '0px');
   const [transitioning, setTransitioning] = useState(false);
   const { checked } = useApp();
   const [vignetteActive, setVignetteActive] = useState(false);

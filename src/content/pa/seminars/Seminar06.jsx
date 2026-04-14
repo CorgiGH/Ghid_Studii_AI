@@ -784,8 +784,12 @@ export default function Seminar06() {
         )}
       </p>
 
+      <h2 className="text-xs font-bold uppercase tracking-wider mt-6 mb-1 pb-1" style={{ color: 'var(--theme-muted-text)', borderBottom: '1px solid var(--theme-border)' }}>
+        {t('Rabin-Karp', 'Rabin-Karp')}
+      </h2>
+
       {/* ── Problem 1 ── */}
-      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 1: Rabin-Karp Implementation', 'Problema 1: Implementarea Rabin-Karp')}
       </h3>
       <Box type="definition">
@@ -963,8 +967,12 @@ pos 10: "bab" = 1`}</Code>
         }
       />
 
+      <h2 className="text-xs font-bold uppercase tracking-wider mt-8 mb-1 pb-1" style={{ color: 'var(--theme-muted-text)', borderBottom: '1px solid var(--theme-border)' }}>
+        {t('String algorithms', 'Algoritmi pe șiruri')}
+      </h2>
+
       {/* ── Problem 7 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 7: Longest Substring Appearing K Times', 'Problema 7: Cel mai lung subșir care apare de K ori')}
       </h3>
       <Box type="definition">
@@ -1283,8 +1291,12 @@ These are equal regardless of z!`}</Code>
         }
       />
 
+      <h2 className="text-xs font-bold uppercase tracking-wider mt-8 mb-1 pb-1" style={{ color: 'var(--theme-muted-text)', borderBottom: '1px solid var(--theme-border)' }}>
+        {t('Boyer-Moore', 'Boyer-Moore')}
+      </h2>
+
       {/* ── Problem 17 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {t('Problem 17: Boyer-Moore BC & GS Tables', 'Problema 17: Tabelele BC & GS Boyer-Moore')}
       </h3>
       <Box type="definition">

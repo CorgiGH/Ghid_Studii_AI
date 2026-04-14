@@ -660,10 +660,25 @@ export default function Practice() {
     { id: 'pa-practice-np', title: t('6. NP-Completeness', '6. NP-Completitudine'), questions: npQuestions },
   ];
 
+  const totalQuestions = sections.reduce((sum, s) => sum + s.questions.length, 0);
+
   return (
     <div>
-      {sections.map((s) => (
-        <CourseBlock key={s.id} title={`${s.title} (${s.questions.length})`} id={s.id}>
+      <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: 'var(--theme-card-bg)', border: '1px solid var(--theme-border)' }}>
+        <p className="text-sm" style={{ color: 'var(--theme-content-text)' }}>
+          {t(
+            `${totalQuestions} multiple-choice questions across 6 topics, with elaborated feedback on every option. No timer — take your time. The first section is open below; expand the rest as you work through them.`,
+            `${totalQuestions} întrebări cu răspuns multiplu pe 6 teme, cu feedback detaliat pentru fiecare opțiune. Fără cronometru — ia-ți timpul necesar. Prima secțiune e deschisă mai jos; extinde-le pe celelalte pe măsură ce avansezi.`
+          )}
+        </p>
+      </div>
+      {sections.map((s, i) => (
+        <CourseBlock
+          key={s.id}
+          title={`${s.title} (${s.questions.length})`}
+          id={s.id}
+          defaultOpen={i === 0}
+        >
           <MultipleChoice questions={s.questions} />
         </CourseBlock>
       ))}

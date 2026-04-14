@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 
-const Toggle = ({ question, answer, hideLabel = 'Hide', showLabel = 'Show Answer' }) => {
+const Toggle = ({ question, answer, hideLabel = 'Hide', showLabel = 'Reveal' }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
   const hasFiredEvent = useRef(false);
