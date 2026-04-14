@@ -52,7 +52,16 @@ const Toggle = ({ question, answer, hideLabel = 'Hide', showLabel = 'Show Answer
         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
       >
         <span className="font-sans text-sm flex-1 pr-3">{question}</span>
-        <button className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:translate-y-px active:scale-[0.97] whitespace-nowrap flex-shrink-0">
+        <button
+          className="text-xs px-3 py-1.5 rounded-lg transition-all duration-150 hover:-translate-y-0.5 active:translate-y-px active:scale-[0.97] whitespace-nowrap flex-shrink-0"
+          style={{
+            backgroundColor: 'transparent',
+            color: 'var(--theme-muted-text)',
+            border: '1px solid var(--theme-border)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--theme-card-bg)'; e.currentTarget.style.color = 'var(--theme-text)'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--theme-muted-text)'; }}
+        >
           {open ? hideLabel : showLabel}
         </button>
       </div>

@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function QuestionFeedback({ result }) {
   if (!result) return null;
-  const { score, maxScore, feedback, verdict, explanation } = result;
+  const { score, maxScore, feedback, verdict, explanation, rubric } = result;
 
   const isGradeFormat = score !== undefined;
   const pct = isGradeFormat ? (maxScore > 0 ? score / maxScore : 0) : (verdict === 'correct' ? 1 : verdict === 'partial' ? 0.5 : 0);
@@ -23,7 +23,7 @@ export default function QuestionFeedback({ result }) {
       </div>
 
       {/* Grade format: structured feedback */}
-      {isGradeFormat && feedback && (
+      {isGradeFormat && feedback && typeof feedback === 'object' && (
         <div className="space-y-1">
           {feedback.correct?.length > 0 && (
             <div style={{ color: '#22c55e' }}>
@@ -41,6 +41,21 @@ export default function QuestionFeedback({ result }) {
             </div>
           )}
         </div>
+      )}
+
+      {/* Plain-string feedback (used by the self-score fallback) */}
+      {isGradeFormat && typeof feedback === 'string' && (
+        <div style={{ color: 'var(--theme-content-text)' }}>{feedback}</div>
+      )}
+
+      {/* Rubric (surfaced when auto-grading is skipped so the learner can self-assess) */}
+      {rubric && (
+        <details className="mt-2">
+          <summary className="cursor-pointer text-[11px] font-semibold" style={{ color: 'var(--theme-muted-text)' }}>
+            Rubric
+          </summary>
+          <div className="mt-1 whitespace-pre-wrap" style={{ color: 'var(--theme-content-text)' }}>{rubric}</div>
+        </details>
       )}
 
       {/* Verify format: plain explanation */}

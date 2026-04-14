@@ -61,7 +61,41 @@ export default function OpenEndedQuestion({ question, onAnswer }) {
         </button>
       )}
 
-      {error && <div className="mt-2 text-xs" style={{ color: '#ef4444' }}>{error}</div>}
+      {error && (
+        <div className="mt-2 text-xs" style={{ color: '#ef4444' }}>
+          <div>{t('Auto-grading failed', 'Corectarea automată a eșuat')}: {error}</div>
+          <div className="mt-2 flex gap-2 flex-wrap">
+            <button
+              onClick={handleSubmit}
+              disabled={grading}
+              className="px-3 py-1 rounded text-[11px] font-semibold cursor-pointer"
+              style={{ backgroundColor: '#3b82f6', color: '#fff' }}
+            >
+              {t('Retry', 'Reîncearcă')}
+            </button>
+            <button
+              onClick={() => {
+                // Self-score escape hatch: record 0/max so the test remains completable
+                // when the grading proxy is unavailable. Rubric is still visible for review.
+                const skipRes = {
+                  score: 0,
+                  maxScore: question.points,
+                  feedback: lang === 'ro'
+                    ? 'Răspuns trimis fără corectare automată. Auto-evaluează folosind rubrica.'
+                    : 'Answer submitted without auto-grading. Self-assess using the rubric.',
+                  rubric: lang === 'ro' ? question.rubric?.ro : question.rubric?.en,
+                };
+                setResult(skipRes);
+                onAnswer?.(question.id, skipRes.score, skipRes.maxScore);
+              }}
+              className="px-3 py-1 rounded text-[11px] font-semibold cursor-pointer"
+              style={{ backgroundColor: 'var(--theme-card-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-muted-text)' }}
+            >
+              {t('Skip & self-score', 'Sari peste & auto-evaluează')}
+            </button>
+          </div>
+        </div>
+      )}
       {result && <QuestionFeedback result={result} />}
     </div>
   );

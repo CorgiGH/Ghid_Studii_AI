@@ -16,6 +16,10 @@ export default function QuickQuizFAB({ onQuiz, lang }) {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
+  // On mobile the BottomTabBar already surfaces Tests one tap away — the FAB
+  // becomes redundant visual noise competing for the same corner.
+  if (isMobile) return null;
+
   return (
     <button
       onClick={onQuiz}
@@ -25,7 +29,7 @@ export default function QuickQuizFAB({ onQuiz, lang }) {
       style={{
         width: '56px',
         height: '56px',
-        bottom: isMobile ? 'calc(80px + env(safe-area-inset-bottom, 0px))' : '24px',
+        bottom: '24px',
         right: '16px',
         backgroundColor: '#3b82f6',
         color: 'white',

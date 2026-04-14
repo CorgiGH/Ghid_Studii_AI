@@ -1,4 +1,5 @@
-import React, { useState, Suspense, useCallback } from 'react';
+import React, { useState, Suspense, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import { generateTest } from '../../services/api';
 import { loadJson } from '../../content/jsonLoader';
@@ -17,8 +18,27 @@ function LoadingFallback() {
 
 export default function TestsTab({ tests, courses }) {
   const { t, lang, testProgress } = useApp();
-  const [activeTest, setActiveTest] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTest = searchParams.get('test');
+  // Validate against known tests so a stale/shared link doesn't surface "not found"
+  const validUrlTest = urlTest && tests.some(tst => tst.id === urlTest) ? urlTest : null;
+  const [activeTest, setActiveTestState] = useState(validUrlTest);
   const [generatedTest, setGeneratedTest] = useState(null);
+
+  // Keep local state and URL in sync when either side changes.
+  useEffect(() => {
+    if (validUrlTest !== activeTest) setActiveTestState(validUrlTest);
+  }, [validUrlTest]);
+
+  const setActiveTest = useCallback((testId) => {
+    setActiveTestState(testId);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (testId) next.set('test', testId);
+      else next.delete('test');
+      return next;
+    }, { replace: false });
+  }, [setSearchParams]);
   const [generating, setGenerating] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiError, setAiError] = useState(null);
