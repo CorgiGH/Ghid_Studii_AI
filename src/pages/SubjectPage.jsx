@@ -200,8 +200,9 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
       </div>
 
       <div className="flex flex-1">
-        {/* Left sidebar */}
-        {tab === 'courses' && subject.courses.length > 0 && (
+        {/* Left sidebar — hide on CourseMap (no active course) because it would
+            just duplicate the tile grid. Reappears as soon as a course opens. */}
+        {tab === 'courses' && subject.courses.length > 0 && activeCourse && (
           <Sidebar
             items={subject.courses}
             activeCourseId={activeCourse?.id || null}

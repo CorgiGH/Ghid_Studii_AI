@@ -52,6 +52,8 @@ const CourseMap = ({ subject, onCourseClick }) => {
     return null;
   })();
 
+  const subjectDescription = subject.description?.[lang] || '';
+
   return (
     <div className="mb-8">
       <div className="flex items-center gap-3 mb-5">
@@ -60,16 +62,24 @@ const CourseMap = ({ subject, onCourseClick }) => {
             <span className="font-bold text-sm min-w-0" style={{ color: 'var(--theme-content-text)' }}>
               {subject.title[lang]}
             </span>
-            <span className="text-xs font-semibold flex-shrink-0" style={{ color: overallPercent > 0 ? '#3b82f6' : 'var(--theme-muted-text)' }}>
-              {overallPercent}% {t('complete', 'complet')}
-            </span>
+            {overallPercent > 0 && (
+              <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#3b82f6' }}>
+                {overallPercent}% {t('complete', 'complet')}
+              </span>
+            )}
           </div>
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-border)' }}>
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${overallPercent}%`, background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)' }}
-            />
-          </div>
+          {overallPercent > 0 ? (
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-border)' }}>
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${overallPercent}%`, background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)' }}
+              />
+            </div>
+          ) : subjectDescription ? (
+            <div className="text-xs leading-relaxed" style={{ color: 'var(--theme-muted-text)' }}>
+              {subjectDescription}
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -103,13 +113,28 @@ const CourseMap = ({ subject, onCourseClick }) => {
         </button>
       )}
 
-      {/* Total subject progress — research §2: Khan Academy 120px dashboard ring */}
-      <div className="flex flex-col items-center mb-6">
-        <ProgressRing size={120} completed={totalCompleted} total={totalSections} />
-        <p className="mt-2" style={{ fontSize: 'var(--type-body)', color: 'var(--theme-muted-text)' }}>
-          {totalCompleted}/{totalSections} {t('sections', 'secțiuni')}
-        </p>
-      </div>
+      {/* Once a learner has started, a large central ring motivates; on a fresh
+          subject it would just display a giant grey "0", so skip it until there
+          is progress to celebrate. */}
+      {totalCompleted > 0 && (
+        <div className="flex flex-col items-center mb-6">
+          <ProgressRing size={120} completed={totalCompleted} total={totalSections} />
+          <p className="mt-2" style={{ fontSize: 'var(--type-body)', color: 'var(--theme-muted-text)' }}>
+            {totalCompleted}/{totalSections} {t('sections', 'secțiuni')}
+          </p>
+        </div>
+      )}
+      {totalCompleted === 0 && (
+        <div className="mb-6 text-center py-5 px-4 rounded-xl" style={{ backgroundColor: 'var(--theme-card-bg)', border: '1px dashed var(--theme-border)' }}>
+          <div className="text-3xl mb-1">{subject.icon}</div>
+          <p className="text-xs font-semibold" style={{ color: 'var(--theme-content-text)' }}>
+            {t('Ready to start?', 'Gata de început?')}
+          </p>
+          <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-muted-text)' }}>
+            {courses.length} {t('courses', 'cursuri')} · {totalSections} {t('sections total', 'secțiuni în total')}
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {courseProgress.map(({ course, completed, total }, index) => {
@@ -150,22 +175,32 @@ const CourseMap = ({ subject, onCourseClick }) => {
               <div className="flex justify-center mb-1.5">
                 <ProgressRing size={40} completed={completed} total={total} />
               </div>
-              <div
-                className="font-bold text-xs"
-                style={{ color: isComplete ? '#16a34a' : hasProgress ? '#2563eb' : 'var(--theme-muted-text)' }}
-              >
-                {course.shortTitle[lang].split(':')[0]}
-              </div>
-              <div className="text-xs mt-0.5 truncate" style={{ color: 'var(--theme-muted-text)' }}>
-                {course.shortTitle[lang].split(':').slice(1).join(':').trim() || course.shortTitle[lang]}
+              {(() => {
+                const full = course.shortTitle[lang];
+                const [headRaw, ...tailParts] = full.split(':');
+                const tail = tailParts.join(':').trim();
+                const titleColor = isComplete ? '#16a34a' : hasProgress ? '#2563eb' : 'var(--theme-content-text)';
+                return tail ? (
+                  <div className="text-xs leading-tight" style={{ color: titleColor }}>
+                    <span className="font-bold">{headRaw.trim()}</span>
+                    <span className="opacity-80"> · {tail}</span>
+                  </div>
+                ) : (
+                  <div className="text-xs leading-tight font-bold" style={{ color: titleColor }}>
+                    {full}
+                  </div>
+                );
+              })()}
+              <div className="text-[10px] mt-1" style={{ color: 'var(--theme-muted-text)' }}>
+                {total > 0 ? <>{total} {t('sections', 'secțiuni')}</> : null}
               </div>
               {totalCompleted === 0 && index === 0 && (
-                <div className="text-[10px] mt-1 font-semibold" style={{ color: '#3b82f6' }}>
+                <div className="text-[10px] mt-0.5 font-semibold" style={{ color: '#3b82f6' }}>
                   {t('Start here →', 'Începe aici →')}
                 </div>
               )}
               {totalCompleted > 0 && isNext && (
-                <div className="text-[10px] mt-1 font-semibold" style={{ color: '#10b981' }}>
+                <div className="text-[10px] mt-0.5 font-semibold" style={{ color: '#10b981' }}>
                   {t('Up next →', 'Urmează →')}
                 </div>
               )}
