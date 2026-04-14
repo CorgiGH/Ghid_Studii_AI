@@ -77,7 +77,7 @@
           "type": "learn",
           "content": {
             "en": "String matching is one of the most fundamental problems in computer science. Given a **text** and a **pattern**, we want to find where (if anywhere) the pattern occurs inside the text.\n\nThis problem appears everywhere: text editors (Ctrl+F), search engines, DNA sequence analysis, plagiarism detection, network intrusion detection, and more.",
-            "ro": "Împotrivirea șirurilor este una dintre cele mai fundamentale probleme din informatică. Dat un **text** și un **pattern**, vrem să găsim unde (dacă undeva) apare pattern-ul în text.\n\nAceastă problemă apare peste tot: editoare text (Ctrl+F), motoare de căutare, analiza secvențelor ADN, detectarea plagiatului, detectarea intruziunilor în rețele și altele."
+            "ro": "Potrivirea șirurilor este una dintre cele mai fundamentale probleme din informatică. Dat un **text** și un **pattern**, vrem să găsim unde (dacă undeva) apare pattern-ul în text.\n\nAceastă problemă apare peste tot: editoare text (Ctrl+F), motoare de căutare, analiza secvențelor ADN, detectarea plagiatului, detectarea intruziunilor în rețele și altele."
           }
         },
         {
@@ -470,8 +470,8 @@
             "ro": "Provocare de scriere: Algoritmul KMP raportează prima potrivire și poate fi modificat pentru a găsi toate potrivirile. Ce singură modificare ai face pentru a continua căutarea după găsirea unei potriviri?"
           },
           "answer": {
-            "en": "Instead of returning when j equals m (full match), set j = F[j] and continue the loop. This is exactly what the failure function was designed for — F[m] gives the longest proper prefix of the pattern that is also a suffix, so we skip back to the next possible match position without re-examining characters.",
-            "ro": "În loc să returnezi când j egalează m (potrivire completă), setează j = F[j] și continuă bucla. Exact pentru asta a fost proiectată funcția de eșec — F[m] dă cel mai lung prefix propriu al patternului care este și sufix, deci sărim înapoi la următoarea poziție posibilă de potrivire fără a reexamina caractere."
+            "en": "Instead of returning when j equals m (full match), set j = F[j] and continue the loop. This is exactly what the failure function was designed for — F[m] gives the longest proper prefix of the pattern that is also a suffix, so we skip back to the next possible match position without re-examining characters. Note: F must be allocated with size m+1 and computeF must run one extra iteration (through i = m−1 inclusive) so that F[m] is defined.",
+            "ro": "În loc să returnezi când j egalează m (potrivire completă), setează j = F[j] și continuă bucla. Exact pentru asta a fost proiectată funcția de eșec — F[m] dă cel mai lung prefix propriu al patternului care este și sufix, deci sărim înapoi la următoarea poziție posibilă de potrivire fără a reexamina caractere. Notă: F trebuie alocat cu dimensiunea m+1 iar computeF trebuie să ruleze o iterație în plus (până la i = m−1 inclusiv) astfel încât F[m] să fie definit."
           }
         },
         {
@@ -481,7 +481,7 @@
             "en": "KMP: find all occurrences",
             "ro": "KMP: găsește toate aparițiile"
           },
-          "code": "kmp_find_all(T, n, P, m, F):\n  # F[0] = -1 sentinel (professor's convention)\n  results = []\n  i = 0\n  j = 0\n  while i < n:\n    if j == -1 or T[i] == P[j]:\n      i = i + 1\n      j = j + 1\n      if j == m:\n        # full match ends at i-1, starts at i - m\n        results.append(i - m)\n        j = F[j]        # continue searching (no return)\n    else:\n      j = F[j]          # standard fall-back on mismatch\n  return results"
+          "code": "kmp_find_all(T, n, P, m, F):\n  # F is sized m+1 so that F[m] is valid here.\n  # F[0] = -1 sentinel (professor's convention);\n  # F[m] = longest proper border of the full pattern P,\n  # produced by running one more computeF iteration past m-1.\n  results = []\n  i = 0\n  j = 0\n  while i < n:\n    if j == -1 or T[i] == P[j]:\n      i = i + 1\n      j = j + 1\n      if j == m:\n        # full match ends at i-1, starts at i - m\n        results.append(i - m)\n        j = F[j]        # continue searching (no return)\n    else:\n      j = F[j]          # standard fall-back on mismatch\n  return results"
         },
         {
           "type": "callout",
@@ -608,7 +608,7 @@
           "type": "learn",
           "content": {
             "en": "**How it works step by step:**\n\n1. Initialize F[0] = -1, i = 0, j = -1\n2. While i < m-1:\n   - If j == -1 or P[i] == P[j]: advance both (i++, j++), store F[i] = j\n   - Otherwise: fall back j = F[j]\n\nThe amortized analysis shows this is **O(m)**: j increases at most m times total, and each fall-back decreases j, so the total number of fall-backs across all iterations is also at most m.",
-            "ro": "**Cum funcționează pas cu pas:**\n\n1. Inițializăm F[0] = -1, i = 0, j = -1\n2. Cât timp i < m-1:\n   - Daca j == -1 sau P[i] == P[j]: avansam ambele (i++, j++), stocam F[i] = j\n   - Altfel: revenim j = F[j]\n\nAnaliza amortizata arata ca este **O(m)**: j creste cel mult de m ori în total, si fiecare revenire scade j, deci numarul total de reveniri pe toate iteratiile este de asemenea cel mult m."
+            "ro": "**Cum funcționează pas cu pas:**\n\n1. Inițializăm F[0] = -1, i = 0, j = -1\n2. Cât timp i < m-1:\n   - Dacă j == -1 sau P[i] == P[j]: avansăm ambele (i++, j++), stocăm F[i] = j\n   - Altfel: revenim j = F[j]\n\nAnaliza amortizată arată că este **O(m)**: j crește cel mult de m ori în total, și fiecare revenire scade j, deci numărul total de reveniri pe toate iterațiile este de asemenea cel mult m."
           }
         },
         {

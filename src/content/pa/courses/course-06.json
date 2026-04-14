@@ -243,7 +243,7 @@
         {
           "type": "code",
           "language": "pseudocode",
-          "code": "// gs[k] = shift when mismatch occurs at P[k], so the matched\n//         good suffix is G = P[k+1..m-1] (length L = m-1-k).\n\nfor k = 0 to m-1:\n  L = m - 1 - k\n  G = P[k+1..m-1]             // the matched suffix (empty if k = m-1)\n  gs[k] = m                   // default: shift past the whole pattern\n\n  // --- Case 1: G reappears earlier in P, preceded by a DIFFERENT char ---\n  for j = k-1 down to 0:\n    // Is P[j-L+1 .. j] == G  and  P[j-L] != P[k] ?\n    if j-L+1 >= 0 and P[j-L+1 .. j] == G and (j-L < 0 or P[j-L] != P[k]):\n      gs[k] = (k+1) - (j-L+1) // shift so that occurrence aligns under G\n      break\n\n  if gs[k] < m: continue       // Case 1 found, done\n\n  // --- Case 2: only a proper prefix of P matches a suffix of G ---\n  for len = L-1 down to 1:\n    if P[0..len-1] == G[L-len..L-1]:   // prefix of P == suffix of G\n      gs[k] = m - len\n      break\n  // else gs[k] stays m (shift whole pattern)"
+          "code": "// gs[k] = shift when mismatch occurs at P[k], so the matched\n//         good suffix is G = P[k+1..m-1] (length L = m-1-k).\n\nfor k = 0 to m-1:\n  L = m - 1 - k\n  G = P[k+1..m-1]             // the matched suffix (empty if k = m-1)\n\n  // Special case: rightmost mismatch (G empty). No matched suffix to\n  // leverage, so fall back on the bad-character rule — convention: 1.\n  if k == m-1:\n    gs[k] = 1\n    continue\n\n  gs[k] = m                   // default: shift past the whole pattern\n\n  // --- Case 1: G reappears in P at an earlier alignment, with the\n  //     preceding character different from P[k]. Scan j = k..0 so that\n  //     an occurrence of G aligned at the very start of P (j = k,\n  //     j-L = -1, \"no previous char\") is considered too.\n  for j = k down to 0:\n    // Is P[j-L+1 .. j] == G  and  P[j-L] != P[k] ?\n    if j-L+1 >= 0 and P[j-L+1 .. j] == G and (j-L < 0 or P[j-L] != P[k]):\n      gs[k] = (k+1) - (j-L+1) // shift so that occurrence aligns under G\n      break\n\n  if gs[k] < m: continue       // Case 1 found, done\n\n  // --- Case 2: only a proper prefix of P matches a suffix of G ---\n  for len = L-1 down to 1:\n    if P[0..len-1] == G[L-len..L-1]:   // prefix of P == suffix of G\n      gs[k] = m - len\n      break\n  // else gs[k] stays m (shift whole pattern)"
         },
         {
           "type": "table",
@@ -261,20 +261,20 @@
             [
               { "en": "5", "ro": "5" },
               { "en": "`\"\"` (empty)", "ro": "`\"\"` (vid)" },
-              { "en": "no suffix matched — rely on bad-char", "ro": "niciun sufix potrivit — se folosește regula caracterului rău" },
-              { "en": "1 (default step)", "ro": "1 (pas implicit)" }
+              { "en": "special case: no matched suffix — fall back on bad-char (convention)", "ro": "caz special: niciun sufix potrivit — se folosește regula caracterului rău (convenție)" },
+              { "en": "1", "ro": "1" }
             ],
             [
               { "en": "4", "ro": "4" },
               { "en": "`\"C\"`", "ro": "`\"C\"`" },
-              { "en": "Case 1: `\"C\"` also at P[2], preceded by `B` ≠ `B`? same — falls to Case 2; prefix `\"\"` matches suffix of G", "ro": "Caz 1: `\"C\"` apare și la P[2], precedat de `B` = `B` — trece la Cazul 2; prefixul `\"\"` corespunde sufixului G" },
-              { "en": "6 (shift past pattern)", "ro": "6 (deplasare peste pattern)" }
+              { "en": "Case 1 rejected: only earlier `C` is P[2], preceded by `B = P[k]`. Case 2: `L−1 = 0`, no valid `len ≥ 1`. Default applies.", "ro": "Cazul 1 respins: singurul `C` anterior este P[2], precedat de `B = P[k]`. Cazul 2: `L−1 = 0`, niciun `len ≥ 1` valid. Se aplică implicitul." },
+              { "en": "6 (default — shift past pattern)", "ro": "6 (implicit — deplasare peste pattern)" }
             ],
             [
               { "en": "2", "ro": "2" },
               { "en": "`\"ABC\"`", "ro": "`\"ABC\"`" },
-              { "en": "Case 2: prefix `\"ABC\"` of P matches G itself", "ro": "Caz 2: prefixul `\"ABC\"` al lui P corespunde lui G" },
-              { "en": "3 (m − 3)", "ro": "3 (m − 3)" }
+              { "en": "Case 1 (prefix alignment): `G = \"ABC\"` reappears as `P[0..2]` with no preceding character (j = k = 2, j−L = −1 treated as different). Shift = (k+1) − 0 = 3.", "ro": "Cazul 1 (aliniere cu prefixul): `G = \"ABC\"` reapare ca `P[0..2]` fără caracter precedent (j = k = 2, j−L = −1 tratat ca diferit). Deplasare = (k+1) − 0 = 3." },
+              { "en": "3", "ro": "3" }
             ]
           ]
         },
