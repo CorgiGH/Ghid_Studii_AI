@@ -428,7 +428,7 @@ export default function Seminar02() {
               'Împărțim fiecare număr în două jumătăți: x = x₁·10^(n/2) + x₀. Atunci x·y = z₂·10^n + z₁·10^(n/2) + z₀ unde z₂ = x₁·y₁, z₀ = x₀·y₀, z₁ = (x₁+x₀)·(y₁+y₀) − z₂ − z₀. Doar 3 înmulțiri recursive în loc de 4.'
             )}</p>
             <Code>{`Algorithm Karatsuba(x, y, n)
-  if n = 1 then return x · y
+  if n ≤ 2 then return x · y    // base case: naive multiply for 1–2 digit inputs
   m ← ⌈n/2⌉
   x₁, x₀ ← split x at position m
   y₁, y₀ ← split y at position m

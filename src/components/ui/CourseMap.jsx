@@ -100,7 +100,7 @@ const CourseMap = ({ subject, onCourseClick }) => {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs font-semibold text-white/70">
-                {t('Continue where you left off', 'Continuă de unde ai rămas')}
+                {t('Jump to your last course', 'Deschide ultimul curs')}
               </div>
               <div className="text-sm font-bold text-white truncate">
                 {resumeCourse.course.shortTitle[lang]}

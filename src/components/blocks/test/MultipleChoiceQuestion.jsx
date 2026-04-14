@@ -42,7 +42,7 @@ export default function MultipleChoiceQuestion({ question, onAnswer, suppressFee
             <button
               key={i}
               onClick={() => !submitted && setSelected(i)}
-              className="w-full text-left p-3 rounded-lg text-sm transition-colors cursor-pointer flex items-center gap-2 min-h-[44px]"
+              className={`w-full text-left p-3 rounded-lg text-sm transition-colors flex items-center gap-2 min-h-[44px] ${submitted ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               style={{ border: `1.5px solid ${borderColor}`, backgroundColor: bg, color: 'var(--theme-content-text)' }}
               disabled={submitted}
             >
@@ -60,7 +60,7 @@ export default function MultipleChoiceQuestion({ question, onAnswer, suppressFee
         <button
           onClick={handleSubmit}
           disabled={selected === null}
-          className="mt-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors cursor-pointer min-h-[40px]"
+          className={`mt-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors min-h-[40px] ${selected === null ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           style={{
             backgroundColor: selected !== null ? '#3b82f6' : 'var(--theme-border)',
             color: selected !== null ? '#fff' : 'var(--theme-muted-text)',
