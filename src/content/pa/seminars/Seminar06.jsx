@@ -654,14 +654,14 @@ export default function Seminar06() {
         ro: 'Care este formalizarea I/O pentru verificarea dacă s este o subsecvență a lui S?',
       },
       options: [
-        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a subsequence of S (can be obtained by deleting characters from S)', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true dacă s este o subecvență a lui S (poate fi obținută prin ștergerea de caractere din S)' }, correct: true },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a subsequence of S (can be obtained by deleting characters from S)', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true dacă s este o subsecvență a lui S (poate fi obținută prin ștergerea de caractere din S)' }, correct: true },
         { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a substring of S', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true dacă s este un subșir al lui S' }, correct: false },
         { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: positions of s in S', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: pozițiile lui s în S' }, correct: false },
-        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: longest common subsequence', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: cea mai lungă subecvență comună' }, correct: false },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: longest common subsequence', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: cea mai lungă subsecvență comună' }, correct: false },
       ],
       explanation: {
-        en: 'A subsequence preserves order but not contiguity: "abcd" is a subsequence of "cdaaacbbacccda" because we can pick a(4), b(8), c(9), d(12). This is different from a substring which must be contiguous.',
-        ro: 'O subsecvență păstrează ordinea dar nu contiguitatea: "abcd" este o subsecvență a "cdaaacbbacccda" deoarece putem alege a(4), b(8), c(9), d(12). Aceasta diferă de un subșir care trebuie să fie contiguu.',
+        en: 'A subsequence preserves order but not contiguity: "abcd" is a subsequence of "cdaaacbbacccda" because we can pick a(4), b(6), c(9), d(12). This is different from a substring which must be contiguous.',
+        ro: 'O subsecvență păstrează ordinea dar nu contiguitatea: "abcd" este o subsecvență a "cdaaacbbacccda" deoarece putem alege a(4), b(6), c(9), d(12). Aceasta diferă de un subșir care trebuie să fie contiguu.',
       },
     },
   ];

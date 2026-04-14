@@ -439,8 +439,8 @@ return 0;`}</Code>
           <div>
             <p className="font-bold mb-1">{t('(a) Problem 1 — Max tracking, i.i.d.', '(a) Problema 1 — Urmărirea maximului, i.i.d.')}</p>
             <p className="text-sm mb-2">
-              {t('With i.i.d. values from {0,...,n−1}, the probability that v[i] is a strict new maximum given i previous values can be computed. For large n, P(new max at position i) → 1/(i+1), same as the permutation case. The expected number of max updates remains Hₙ, so the average complexity is still Θ(n · ln n).',
-                'Cu valori i.i.d. din {0,...,n−1}, probabilitatea ca v[i] să fie un nou maxim strict dat fiind i valori anterioare poate fi calculată. Pentru n mare, P(nou maxim la poziția i) → 1/(i+1), la fel ca în cazul permutărilor. Numărul așteptat de actualizări ale maximului rămâne Hₙ, deci complexitatea medie este tot Θ(n · ln n).')}
+              {t('With i.i.d. values from {0,...,n−1}, the probability that v[i] is a strict new maximum given i previous values can be computed. For large n, P(new max at position i) → 1/(i+1), same as the permutation case. The expected number of max updates remains Hₙ − 1 (the initial assignment to v[0] is not counted as an update), and the total work n + n·(Hₙ − 1) = n·Hₙ gives average complexity Θ(n · ln n).',
+                'Cu valori i.i.d. din {0,...,n−1}, probabilitatea ca v[i] să fie un nou maxim strict dat fiind i valori anterioare poate fi calculată. Pentru n mare, P(nou maxim la poziția i) → 1/(i+1), la fel ca în cazul permutărilor. Numărul așteptat de actualizări ale maximului rămâne Hₙ − 1 (atribuirea inițială pentru v[0] nu se numără ca actualizare), iar lucrul total n + n·(Hₙ − 1) = n·Hₙ dă complexitatea medie Θ(n · ln n).')}
             </p>
 
             <p className="font-bold mt-4 mb-1">{t('(b) Problem 2 — Inversions, i.i.d.', '(b) Problema 2 — Inversiuni, i.i.d.')}</p>

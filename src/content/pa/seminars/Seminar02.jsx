@@ -35,8 +35,8 @@ export default function Seminar02() {
       { text: { en: 'No — the initialization is wrong', ro: 'Nu — inițializarea este greșită' }, correct: false },
     ],
     explanation: {
-      en: 'The algorithm only updates nxtsml when a new global minimum is found. If a[i] is smaller than a[nxtsml] but not smaller than a[sml], it is never recorded. Example: [3, 5, 2, 7, 4, 1] — when processing 4, it\'s smaller than 5 (nxtsml) but not smaller than current sml, so nxtsml stays wrong.',
-      ro: 'Algoritmul actualizează nxtsml doar când se găsește un nou minim global. Dacă a[i] este mai mic decât a[nxtsml] dar nu mai mic decât a[sml], nu este înregistrat. Exemplu: [3, 5, 2, 7, 4, 1] — la procesarea lui 4, e mai mic decât 5 (nxtsml) dar nu mai mic decât sml curent, deci nxtsml rămâne greșit.',
+      en: 'The algorithm only updates nxtsml when a new global minimum is found. If a[i] is smaller than a[nxtsml] but not smaller than a[sml], it is never recorded. Counter-example: [5, 1, 4, 2]. Initialization: sml=1 (a[1]=1), nxtsml=0 (a[0]=5). i=2: a[2]=4, not less than a[sml]=1, so skipped. i=3: a[3]=2, not less than a[sml]=1, so skipped. Final nxtsml=0 (value 5) — WRONG. The true second-smallest is a[3]=2.',
+      ro: 'Algoritmul actualizează nxtsml doar când se găsește un nou minim global. Dacă a[i] este mai mic decât a[nxtsml] dar nu mai mic decât a[sml], nu este înregistrat. Contraexemplu: [5, 1, 4, 2]. Inițializare: sml=1 (a[1]=1), nxtsml=0 (a[0]=5). i=2: a[2]=4, nu este mai mic decât a[sml]=1, deci se sare. i=3: a[3]=2, nu este mai mic decât a[sml]=1, deci se sare. nxtsml final=0 (valoarea 5) — GREȘIT. Al doilea minim real este a[3]=2.',
     },
   }];
 

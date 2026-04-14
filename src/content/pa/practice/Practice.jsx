@@ -556,7 +556,7 @@ const npQuestions = [
   {
     question: { en: '4. INDEPENDENT-SET: "∃ V\' ⊆ V, |V\'| ≥ k, such that for every edge {u,v} ∈ E, u ∉ V\' AND v ∉ V\'." What does this mean?', ro: '4. INDEPENDENT-SET: „∃ V\' ⊆ V, |V\'| ≥ k, a.î. pentru orice muchie {u,v} ∈ E, u ∉ V\' ȘI v ∉ V\'." Ce înseamnă aceasta?' },
     options: [
-      { text: { en: 'No two selected nodes are connected by an edge', ro: 'Niciun două noduri selectate nu sunt conectate printr-o muchie' }, correct: true },
+      { text: { en: 'No two selected nodes are connected by an edge', ro: 'Nicio pereche de noduri selectate nu este conectată printr-o muchie' }, correct: true },
       { text: { en: 'Every edge has at least one endpoint in V\'', ro: 'Fiecare muchie are cel puțin un capăt în V\'' }, correct: false },
       { text: { en: 'All selected nodes form a complete subgraph', ro: 'Toate nodurile selectate formează un subgraf complet' }, correct: false },
       { text: { en: 'V\' contains all nodes of degree ≥ k', ro: 'V\' conține toate nodurile de grad ≥ k' }, correct: false },

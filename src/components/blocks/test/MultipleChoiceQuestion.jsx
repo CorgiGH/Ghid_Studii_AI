@@ -81,8 +81,8 @@ export default function MultipleChoiceQuestion({ question, onAnswer, suppressFee
           score: selected === question.correctIndex ? question.points : 0,
           maxScore: question.points,
           feedback: selected === question.correctIndex
-            ? { correct: [t(question.explanation?.en, question.explanation?.ro) || 'Correct!'] }
-            : { incorrect: [t(question.explanation?.en, question.explanation?.ro) || 'Incorrect.'] },
+            ? { correct: [t(question.explanation?.en, question.explanation?.ro) || t('Correct!', 'Corect!')] }
+            : { incorrect: [t(question.explanation?.en, question.explanation?.ro) || t('Incorrect.', 'Incorect.')] },
         }} />
       )}
     </div>

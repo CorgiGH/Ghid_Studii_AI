@@ -412,13 +412,14 @@ Algorithm CountHexagonal(a[1..n])
             )}</p>
             <p className="font-bold mb-1">{t('Pseudocode', 'Pseudocod')}</p>
             <Code>{`Algorithm ShortestPathBounded(G, s, d, k)
-  dist[v][j] \u2190 \u221E for all v \u2208 V, j \u2208 {0..k}
+  // k = max NODES on path  =>  k-1 = max EDGES
+  dist[v][j] \u2190 \u221E for all v \u2208 V, j \u2208 {0..k-1}
   dist[s][0] \u2190 0
-  for j = 1 to k do
+  for j = 1 to k-1 do
     for each edge (u, v, w) \u2208 E do
       if dist[u][j-1] + w < dist[v][j] then
         dist[v][j] \u2190 dist[u][j-1] + w
-  return min(dist[d][0], dist[d][1], \u2026, dist[d][k])`}</Code>
+  return min(dist[d][0], dist[d][1], \u2026, dist[d][k-1])`}</Code>
           </div>
         }
       />

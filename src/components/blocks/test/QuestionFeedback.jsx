@@ -1,6 +1,8 @@
 import React from 'react';
+import { useApp } from '../../../contexts/AppContext';
 
 export default function QuestionFeedback({ result }) {
+  const { t } = useApp();
   if (!result) return null;
   const { score, maxScore, feedback, verdict, explanation, rubric } = result;
 
@@ -52,7 +54,7 @@ export default function QuestionFeedback({ result }) {
       {rubric && (
         <details className="mt-2">
           <summary className="cursor-pointer text-[11px] font-semibold" style={{ color: 'var(--theme-muted-text)' }}>
-            Rubric
+            {t('Rubric', 'Barem')}
           </summary>
           <div className="mt-1 whitespace-pre-wrap" style={{ color: 'var(--theme-content-text)' }}>{rubric}</div>
         </details>
