@@ -582,6 +582,17 @@ f[i]: -1  0  0  1  1  2  3  2  3  4`}</Code>
       <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 8: Complete the Prefix Function', 'Problema 8: Completați funcția prefix')}
       </h3>
+      <Box type="warning">
+        <p className="text-sm font-semibold mb-1">
+          {t('Convention note', 'Notă privind convenția')}
+        </p>
+        <p className="text-sm">
+          {t(
+            'Problem 8 uses f[i] = length of the longest proper prefix of P[0..i] that is also a suffix (so f has m entries indexed 0..m-1, and f[0] = -1 as the single-character sentinel). This differs from Problems 5 and 7, which index by prefix-length (f has m+1 entries, f[0] = -1 for the empty prefix). Verify which convention a problem uses before applying f-values.',
+            'Problema 8 folosește f[i] = lungimea celui mai lung prefix propriu al lui P[0..i] care este și sufix (deci f are m intrări indexate 0..m-1, iar f[0] = -1 ca santinelă pentru caracterul unic). Aceasta diferă de Problemele 5 și 7, care indexează după lungimea prefixului (f are m+1 intrări, f[0] = -1 pentru prefixul vid). Verificați ce convenție folosește o problemă înainte de a aplica valorile f.',
+          )}
+        </p>
+      </Box>
       <Box type="definition">
         <p className="text-sm">
           {t(
