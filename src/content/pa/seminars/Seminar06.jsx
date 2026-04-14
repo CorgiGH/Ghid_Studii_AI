@@ -603,8 +603,8 @@ export default function Seminar06() {
       options: [
         {
           text: {
-            en: '≈ 498 — P[4]="0" matches, P[3]="1" mismatches, bad character shifts by 2 (next "0" is at P[2]), giving ~2 comparisons every 2 positions',
-            ro: '≈ 498 — P[4]="0" se potrivește, P[3]="1" nu se potrivește, deplasare cu 2 (următorul "0" e la P[2]), dând ~2 comparații la fiecare 2 poziții',
+            en: '≈ 498 — P[4]="0" matches, P[3]="1" mismatches, good-suffix shift of 4 (pattern realigns so P[0]="0" meets a previously-matched "0"), giving ~2 comparisons per 4 text positions → ≈ 996/2 = 498',
+            ro: '≈ 498 — P[4]="0" se potrivește, P[3]="1" nu se potrivește, deplasare de sufix bun cu 4 (pattern-ul se realiniază astfel încât P[0]="0" se potrivește cu un "0" deja confirmat), dând ~2 comparații la fiecare 4 poziții din text → ≈ 996/2 = 498',
           },
           correct: true,
         },

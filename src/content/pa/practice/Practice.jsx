@@ -554,7 +554,7 @@ const npQuestions = [
     explanation: { en: 'NP = {X | X is a (1) decision problem AND there exists a (2) nondeterministic algorithm that is (3) polynomial in the worst case for X}.', ro: 'NP = {X | X este o (1) problemă de decizie ȘI există un (2) algoritm nedeterminist (3) polinomial în cazul cel mai nefavorabil pentru X}.' },
   },
   {
-    question: { en: '4. INDEPENDENT-SET: "∃ V\' ⊆ V, |V\'| ≥ k, such that for every edge {u,v} ∈ E, u ∉ V\' AND v ∉ V\'." What does this mean?', ro: '4. INDEPENDENT-SET: „∃ V\' ⊆ V, |V\'| ≥ k, a.î. pentru orice muchie {u,v} ∈ E, u ∉ V\' ȘI v ∉ V\'." Ce înseamnă aceasta?' },
+    question: { en: '4. INDEPENDENT-SET: "∃ V\' ⊆ V, |V\'| ≥ k, such that for every edge {u,v} ∈ E, u ∉ V\' OR v ∉ V\'." What does this mean?', ro: '4. INDEPENDENT-SET: „∃ V\' ⊆ V, |V\'| ≥ k, a.î. pentru orice muchie {u,v} ∈ E, u ∉ V\' sau v ∉ V\'." Ce înseamnă aceasta?' },
     options: [
       { text: { en: 'No two selected nodes are connected by an edge', ro: 'Nicio pereche de noduri selectate nu este conectată printr-o muchie' }, correct: true },
       { text: { en: 'Every edge has at least one endpoint in V\'', ro: 'Fiecare muchie are cel puțin un capăt în V\'' }, correct: false },
