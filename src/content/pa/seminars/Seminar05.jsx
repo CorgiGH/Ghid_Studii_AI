@@ -241,14 +241,28 @@ export default function Seminar05() {
       ro: 'Continuând pattern-ul "xyxxyxxyxyxyyxyyxyyxyxyyxyy": care este f[8] (prefixul "xyxxyxxyx")?',
     },
     options: [
-      { text: { en: '3', ro: '3' }, correct: true },
+      {
+        text: { en: '3', ro: '3' },
+        correct: false,
+        explanation: {
+          en: 'Too low. "xyx" (P[0..2]) does match the suffix "xyx" (P[6..8]), but there is a longer proper prefix-suffix: "xyxxyx" (P[0..5] = P[3..8]) of length 6.',
+          ro: 'Prea mic. "xyx" (P[0..2]) chiar se potrivește cu sufixul "xyx" (P[6..8]), dar există un prefix-sufix propriu mai lung: "xyxxyx" (P[0..5] = P[3..8]) de lungime 6.',
+        },
+      },
       { text: { en: '2', ro: '2' }, correct: false },
       { text: { en: '4', ro: '4' }, correct: false },
-      { text: { en: '1', ro: '1' }, correct: false },
+      {
+        text: { en: '6', ro: '6' },
+        correct: true,
+        explanation: {
+          en: 'P[0..8] = "xyxxyxxyx". The longest proper prefix that is also a suffix is "xyxxyx" (P[0..5] = P[3..8]), of length 6.',
+          ro: 'P[0..8] = "xyxxyxxyx". Cel mai lung prefix propriu care este și sufix este "xyxxyx" (P[0..5] = P[3..8]), de lungime 6.',
+        },
+      },
     ],
     explanation: {
-      en: '"xyxxyxxyx": the longest proper prefix that is also a suffix is "xyx" (length 3). Check: prefix "xyx" = suffix "xyx" ✓.',
-      ro: '"xyxxyxxyx": cel mai lung prefix propriu care este și sufix este "xyx" (lungime 3). Verificare: prefix "xyx" = sufix "xyx" ✓.',
+      en: 'P[0..8] = "xyxxyxxyx". The longest proper prefix that is also a suffix is "xyxxyx" (P[0..5] = P[3..8]), of length 6. So f[8] = 6.',
+      ro: 'P[0..8] = "xyxxyxxyx". Cel mai lung prefix propriu care este și sufix este "xyxxyx" (P[0..5] = P[3..8]), de lungime 6. Deci f[8] = 6.',
     },
   }];
 
@@ -486,11 +500,17 @@ i=7: T[7]='a' = P[0]='a' ✓, j=1
 i=8: T[8]='b' = P[1]='b' ✓, j=2
 i=9: T[9]='c' = P[2]='c' ✓, j=3
 i=10: T[10]='a' = P[3]='a' ✓, j=4
-i=11: T[11]='b' = P[4]='b' ✓, j=5 = m → MATCH at position 7`}</Code>
+i=11: T[11]='b' = P[4]='b' ✓, j=5 = m → MATCH at position 7
+      record match, j ← f[5] = 2 (continue searching)
+i=12: T[12]='c' = P[2]='c' ✓, j=3
+i=13: T[13]='a' = P[3]='a' ✓, j=4
+i=14: T[14]='b' = P[4]='b' ✓, j=5 = m → MATCH at position 10
+      record match, j ← f[5] = 2 (continue searching)
+i=15: T[15]='c' = P[2]='c' ✓, j=3 (end of text, no further matches)`}</Code>
             <Box type="theorem">
               <p className="text-sm">
-                {t('Match found at position 7 (0-indexed). T[7..11] = "abcab".',
-                  'Potrivire găsită la poziția 7 (indexat de la 0). T[7..11] = "abcab".')}
+                {t('Matches found at positions 7 and 10 (0-indexed). T[7..11] = T[10..14] = "abcab".',
+                  'Potriviri găsite la pozițiile 7 și 10 (indexat de la 0). T[7..11] = T[10..14] = "abcab".')}
               </p>
             </Box>
           </div>
@@ -572,7 +592,7 @@ f[i]: -1  0  0  1  1  2  3  2  3  4`}</Code>
       </Box>
       <Code>{`i:    0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
 p[i]: x  y  x  x  y  x  x  y  x  y  x  y  y  x  y  y  x  y  y  x  y  x  y  y  x  y  y
-f[i]:-1  0  0  1  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?`}</Code>
+f[i]:-1  0  1  1  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?`}</Code>
       <p className="text-sm font-semibold mt-3 mb-1">{t('Part A: f[4]', 'Partea A: f[4]')}</p>
       <MultipleChoice questions={mc8a} />
       <p className="text-sm font-semibold mt-3 mb-1">{t('Part B: f[8]', 'Partea B: f[8]')}</p>
@@ -591,8 +611,8 @@ p[i]: x  y  x  x  y  x  x  y  x  y  x  y  y  x  y  y  x  y  y  x  y  x  y  y  x 
 f[i]:-1  0  1  1  2  3  4  5  6  2  3  2  0  1  2  0  1  2  0  1  2  3  2  0  1  2  0`}</Code>
             <p className="text-sm mb-2">
               {t(
-                'Computed step by step using the KMP prefix function algorithm. Each f[i] represents the length of the longest proper prefix of P[0..i-1] that is also a suffix.',
-                'Calculat pas cu pas folosind algoritmul funcției prefix KMP. Fiecare f[i] reprezintă lungimea celui mai lung prefix propriu al lui P[0..i-1] care este și sufix.',
+                'Computed step by step using the KMP prefix function algorithm. Each f[i] represents the length of the longest proper prefix of P[0..i] that is also a suffix.',
+                'Calculat pas cu pas folosind algoritmul funcției prefix KMP. Fiecare f[i] reprezintă lungimea celui mai lung prefix propriu al lui P[0..i] care este și sufix.',
               )}
             </p>
           </div>

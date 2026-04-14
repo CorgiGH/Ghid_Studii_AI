@@ -34,7 +34,14 @@ export default function Seminar06() {
         ro: 'Dat p = "aba", s = "aabbababbabab", q = 3, d = 3 (dimensiunea alfabetului), care este hash(p) mod q?\nFolosind h = (d·h + char) mod q, cu a=0, b=1:\nh = ((3·((3·0+0) mod 3)+1) mod 3·3+0) mod 3',
       },
       options: [
-        { text: { en: '0', ro: '0' }, correct: false },
+        {
+          text: { en: '−1', ro: '−1' },
+          correct: false,
+          explanation: {
+            en: 'Hash values are non-negative (they come from a mod-q operation with q > 0), so −1 is not a valid Rabin-Karp hash.',
+            ro: 'Valorile hash sunt nenegative (rezultă din operația mod q cu q > 0), deci −1 nu este o valoare de hash Rabin-Karp validă.',
+          },
+        },
         { text: { en: '1', ro: '1' }, correct: false },
         { text: { en: '2', ro: '2' }, correct: false },
         {
@@ -561,18 +568,28 @@ export default function Seminar06() {
       options: [
         {
           text: {
-            en: '≈ 4·996 = 3984 — at each alignment, chars 4,3,2,1 match ("0"s), char 0 mismatches ("1" vs "0"), then bad character shifts by 1',
-            ro: '≈ 4·996 = 3984 — la fiecare aliniere, caracterele 4,3,2,1 se potrivesc ("0"), caracterul 0 nu se potrivește ("1" vs "0"), apoi deplasare cu 1',
+            en: '≈ 4·996 = 3984 — miscounts the comparisons: only the 4 matching chars are counted, ignoring that the mismatch itself is also a comparison',
+            ro: '≈ 4·996 = 3984 — numără greșit comparațiile: sunt numărate doar cele 4 caractere potrivite, ignorând faptul că și nepotrivirea este o comparație',
           },
-          correct: true,
+          correct: false,
+          explanation: {
+            en: 'Incorrect: the mismatch at P[0] vs T[j] still counts as a comparison. It\'s 5 comparisons per alignment, not 4.',
+            ro: 'Incorect: nepotrivirea la P[0] vs T[j] se numără tot ca o comparație. Sunt 5 comparații per aliniere, nu 4.',
+          },
         },
         { text: { en: '996', ro: '996' }, correct: false },
         { text: { en: '200', ro: '200' }, correct: false },
-        { text: { en: '4980', ro: '4980' }, correct: false },
+        {
+          text: {
+            en: '≈ 5·996 = 4980 — at each alignment, chars 4,3,2,1 match ("0"s) and char 0 mismatches ("1" vs "0"), totaling 5 comparisons; then bad-character shifts by 1',
+            ro: '≈ 5·996 = 4980 — la fiecare aliniere, caracterele 4,3,2,1 se potrivesc ("0") și caracterul 0 nu se potrivește ("1" vs "0"), rezultând 5 comparații; apoi deplasare cu 1',
+          },
+          correct: true,
+        },
       ],
       explanation: {
-        en: 'Pattern "10000": starting from the right, P[4]="0",P[3]="0",P[2]="0",P[1]="0" all match the text\'s zeros. Then P[0]="1" mismatches T[j]="0". Bad character: "0" appears at P[4], but we\'re at P[0], so shift by 1. That\'s ~4 comparisons per position × 996 positions ≈ 3984.',
-        ro: 'Pattern "10000": de la dreapta, P[4]="0",P[3]="0",P[2]="0",P[1]="0" se potrivesc toate cu zerourile din text. Apoi P[0]="1" nu se potrivește cu T[j]="0". Deplasare cu 1. Aceasta înseamnă ~4 comparații per poziție × 996 poziții ≈ 3984.',
+        en: 'Pattern "10000": starting from the right, P[4]="0", P[3]="0", P[2]="0", P[1]="0" all match the text\'s zeros (4 comparisons). Then P[0]="1" mismatches T[j]="0" — that is a 5th comparison. Bad character: "0" last occurs at P[4], but we\'re at P[0], so shift by 1. That\'s 5 comparisons per alignment × 996 alignments = 4980.',
+        ro: 'Pattern "10000": de la dreapta, P[4]="0", P[3]="0", P[2]="0", P[1]="0" se potrivesc toate cu zerourile din text (4 comparații). Apoi P[0]="1" nu se potrivește cu T[j]="0" — aceasta este a 5-a comparație. Regula caracterului rău: "0" apare ultima dată la P[4], dar suntem la P[0], deci deplasare cu 1. Rezultă 5 comparații per aliniere × 996 alinieri = 4980.',
       },
     },
   ];
