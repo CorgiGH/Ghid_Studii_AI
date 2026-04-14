@@ -295,7 +295,7 @@ export default function Seminar05() {
       </p>
 
       {/* ─── Problem 1 ─── */}
-      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 1: Editor Search Performance', 'Problema 1: Performanța căutării în editor')}
       </h3>
       <Box type="definition">
@@ -309,7 +309,7 @@ export default function Seminar05() {
       <MultipleChoice questions={mc1} />
 
       {/* ─── Problem 2 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 2: Worst Case for Naive Search', 'Problema 2: Cazul cel mai nefavorabil pentru căutarea naivă')}
       </h3>
       <Box type="definition">
@@ -350,7 +350,7 @@ export default function Seminar05() {
       />
 
       {/* ─── Problem 3 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 3: Best Case for Naive Search', 'Problema 3: Cazul cel mai favorabil pentru căutarea naivă')}
       </h3>
       <Box type="definition">
@@ -386,7 +386,7 @@ export default function Seminar05() {
       />
 
       {/* ─── Problem 4 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 4: Pattern with All Distinct Characters', 'Problema 4: Pattern cu toate caracterele distincte')}
       </h3>
       <Box type="definition">
@@ -441,7 +441,7 @@ export default function Seminar05() {
       />
 
       {/* ─── Problem 5 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 5: KMP Prefix Function & Simulation', 'Problema 5: Funcția prefix KMP și simulare')}
       </h3>
       <Box type="definition">
@@ -498,7 +498,7 @@ i=11: T[11]='b' = P[4]='b' ✓, j=5 = m → MATCH at position 7`}</Code>
       />
 
       {/* ─── Problem 6 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 6: KMP Mismatch Handling', 'Problema 6: Gestionarea nepotrivirilor în KMP')}
       </h3>
       <Box type="definition">
@@ -518,7 +518,7 @@ i=11: T[11]='b' = P[4]='b' ✓, j=5 = m → MATCH at position 7`}</Code>
       <MultipleChoice questions={mc6count} />
 
       {/* ─── Problem 7 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 7: Prefix Function — Two While Iterations', 'Problema 7: Funcția prefix — Două iterații while')}
       </h3>
       <Box type="definition">
@@ -559,7 +559,7 @@ f[i]: -1  0  0  1  1  2  3  2  3  4`}</Code>
       />
 
       {/* ─── Problem 8 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 8: Complete the Prefix Function', 'Problema 8: Completați funcția prefix')}
       </h3>
       <Box type="definition">
@@ -600,7 +600,7 @@ f[i]:-1  0  0  1  2  1  2  1  2  3  4  3  4  0  1  0  1  0  1  0  1  2  3  4  0 
       />
 
       {/* ─── Problem 9 ─── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 9: KMP — Find All Occurrences', 'Problema 9: KMP — Găsirea tuturor aparițiilor')}
       </h3>
       <Box type="definition">

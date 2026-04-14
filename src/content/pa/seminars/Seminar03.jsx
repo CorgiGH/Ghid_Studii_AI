@@ -294,7 +294,7 @@ export default function Seminar03() {
       </p>
 
       {/* ═══ Problem 1 ═══ */}
-      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 1: Biased Coin Simulation', 'Problema 1: Simularea unui ban măsluit')}</h3>
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 1: Biased Coin Simulation', 'Problema 1: Simularea unui ban măsluit')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Write a probabilistic algorithm that simulates a biased coin flip: "heads" with probability 5/9 and "tails" with probability 4/9.',
@@ -327,7 +327,7 @@ export default function Seminar03() {
       />
 
       {/* ═══ Problem 2 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 2: Geometric Stopping', 'Problema 2: Oprire geometrică')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 2: Geometric Stopping', 'Problema 2: Oprire geometrică')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Consider a probabilistic algorithm (no input) that flips a fair coin in a loop, incrementing a counter. It stops when the coin shows 0, and prints the counter. (a) Execute it a few times. (b) What is the probability that it stops? Hint: compute the probability of stopping after exactly i iterations.',
@@ -361,7 +361,7 @@ print(i);`}</Code>
       />
 
       {/* ═══ Problem 3 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 3: Majority Element — Three Approaches', 'Problema 3: Element majoritar — Trei abordări')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 3: Majority Element — Three Approaches', 'Problema 3: Element majoritar — Trei abordări')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given a, an array of natural numbers that contains a majority element (an element appearing on more than half the indices), find the majority element. (a) Write a nondeterministic algorithm. (b) Write a Las Vegas algorithm. (c) Write a Monte Carlo algorithm with error probability < 1/2⁵⁰.',
@@ -437,7 +437,7 @@ print(i);`}</Code>
       />
 
       {/* ═══ Problem 4 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 4: Sum of Random Bits', 'Problema 4: Suma de biți aleatori')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 4: Sum of Random Bits', 'Problema 4: Suma de biți aleatori')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Consider a probabilistic algorithm that takes n as input, sums n uniform random bits from {0,1}, and prints the sum. (a) Execute it a few times. (b) What is the expected value of the output for arbitrary n ∈ ℕ?',
@@ -467,7 +467,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 5 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 5: Fair Die from rand2', 'Problema 5: Zar echiprobabil din rand2')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 5: Fair Die from rand2', 'Problema 5: Zar echiprobabil din rand2')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given a function rand2 that returns 0 or 1 each with probability 0.5, write a function zar (no arguments) that returns a number from {0,1,2,3,4,5} each with equal probability 1/6. You may only use rand2 — no other random source.',
@@ -503,7 +503,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 6 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 6: Fair Bit from Biased Coin', 'Problema 6: Bit echiprobabil din monedă măsluită')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 6: Fair Bit from Biased Coin', 'Problema 6: Bit echiprobabil din monedă măsluită')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given rand2p (returns 0 with unknown probability p ∈ (0,1) and 1 with probability 1−p), write rand2corect (no arguments) that returns 0 or 1 each with probability exactly 0.5. You may only use rand2p — no other random source.',
@@ -540,7 +540,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 7 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 7: Uniform Random from rand2', 'Problema 7: Aleator uniform din rand2')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 7: Uniform Random from rand2', 'Problema 7: Aleator uniform din rand2')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Using only rand2 (fair bit), write a function random(n) that returns a number from {0, 1, …, n−1} each with probability exactly 1/n.',
@@ -579,7 +579,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 8 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 8: Subset Sum Variants (SSD1, SSD2, SSD3)', 'Problema 8: Variante ale sumei de submulțime (SSD1, SSD2, SSD3)')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 8: Subset Sum Variants (SSD1, SSD2, SSD3)', 'Problema 8: Variante ale sumei de submulțime (SSD1, SSD2, SSD3)')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Write nondeterministic algorithms for three variants of the subset sum problem:',
@@ -650,7 +650,7 @@ print(sum);`}</Code>
       />
 
       {/* ═══ Problem 9 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 9: 3-SAT and Related Problems', 'Problema 9: 3-SAT și probleme conexe')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 9: 3-SAT and Related Problems', 'Problema 9: 3-SAT și probleme conexe')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A 3-CNF formula (e.g., (x₁ ∨ ¬x₂ ∨ x₃) ∧ (¬x₁ ∨ x₅ ∨ ¬x₂)) is represented as a matrix v[n][3]. (a) Write a nondeterministic algorithm for 3-satisfiability. (b) Describe 3-DNF validity as I/O. (c) Write a nondeterministic algorithm for 3-non-equivalence. (d) Write a deterministic brute-force for 3-SAT.',

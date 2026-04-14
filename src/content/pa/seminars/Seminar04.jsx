@@ -233,7 +233,7 @@ export default function Seminar04() {
       </p>
 
       {/* ═══════ Problem 1 ═══════ */}
-      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 1: Max-Tracking with Inner Loop', 'Problema 1: Urmărirea maximului cu buclă interioară')}
       </h3>
       <Box type="definition">
@@ -294,7 +294,7 @@ return sum;`}</Code>
       />
 
       {/* ═══════ Problem 2 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 2: Inversion-Counting with Inner Loop', 'Problema 2: Numărarea inversiunilor cu buclă interioară')}
       </h3>
       <Box type="definition">
@@ -353,7 +353,7 @@ return sum;`}</Code>
       />
 
       {/* ═══════ Problem 3 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 3: Break on First Even Element', 'Problema 3: Oprire la primul element par')}
       </h3>
       <Box type="definition">
@@ -409,7 +409,7 @@ return 0;`}</Code>
       />
 
       {/* ═══════ Problem 4 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 4: i.i.d. Uniform Model (Not Permutations)', 'Problema 4: Modelul i.i.d. uniform (nu permutări)')}
       </h3>
       <Box type="definition">
@@ -465,7 +465,7 @@ return 0;`}</Code>
       />
 
       {/* ═══════ Problem 5 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 5: Permutation Generation Algorithms', 'Problema 5: Algoritmi de generare a permutărilor')}
       </h3>
       <Box type="definition">
@@ -589,7 +589,7 @@ Permutation  | Count | Probability
       />
 
       {/* ═══════ Problem 6 ═══════ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 6: Min-Finding with Fisher-Yates Shuffle', 'Problema 6: Găsirea minimului cu amestecarea Fisher-Yates')}
       </h3>
       <Box type="definition">

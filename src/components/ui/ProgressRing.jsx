@@ -59,16 +59,17 @@ const ProgressRing = ({ size = 24, completed = 0, total = 0, isActive = false })
           style={{ transition: 'stroke-dashoffset 0.6s ease-in-out, stroke 0.4s ease' }}
         />
       )}
-      <text
-        x={center} y={center + fontSize * 0.35}
-        textAnchor="middle"
-        fontSize={fontSize}
-        fontWeight="bold"
-        fill={textColor}
-        opacity={(!isComplete && !hasProgress) ? 0.5 : 1}
-      >
-        {isComplete ? '\u2713' : (total > 0 ? Math.round(percent * 100) : '')}
-      </text>
+      {(isComplete || hasProgress) && (
+        <text
+          x={center} y={center + fontSize * 0.35}
+          textAnchor="middle"
+          fontSize={fontSize}
+          fontWeight="bold"
+          fill={textColor}
+        >
+          {isComplete ? '\u2713' : Math.round(percent * 100)}
+        </text>
+      )}
     </svg>
   );
 };

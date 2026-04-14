@@ -124,8 +124,12 @@ const CourseMap = ({ subject, onCourseClick }) => {
           </p>
         </div>
       )}
-      {totalCompleted === 0 && (
-        <div className="mb-6 text-center py-5 px-4 rounded-xl" style={{ backgroundColor: 'var(--theme-card-bg)', border: '1px dashed var(--theme-border)' }}>
+      {totalCompleted === 0 && courses[0] && (
+        <button
+          onClick={() => onCourseClick(courses[0].id)}
+          className="w-full mb-6 text-center py-5 px-4 rounded-xl cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-px"
+          style={{ backgroundColor: 'var(--theme-card-bg)', border: '1px dashed var(--theme-border)' }}
+        >
           <div className="text-3xl mb-1">{subject.icon}</div>
           <p className="text-xs font-semibold" style={{ color: 'var(--theme-content-text)' }}>
             {t('Ready to start?', 'Gata de început?')}
@@ -133,7 +137,10 @@ const CourseMap = ({ subject, onCourseClick }) => {
           <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-muted-text)' }}>
             {courses.length} {t('courses', 'cursuri')} · {totalSections} {t('sections total', 'secțiuni în total')}
           </p>
-        </div>
+          <p className="text-[11px] mt-1.5 font-semibold" style={{ color: '#3b82f6' }}>
+            {t('Start with', 'Începe cu')} {courses[0].shortTitle[lang].split(':')[0]} →
+          </p>
+        </button>
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">

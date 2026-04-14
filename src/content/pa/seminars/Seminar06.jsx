@@ -789,7 +789,7 @@ export default function Seminar06() {
       </h2>
 
       {/* ── Problem 1 ── */}
-      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 1: Rabin-Karp Implementation', 'Problema 1: Implementarea Rabin-Karp')}
       </h3>
       <Box type="definition">
@@ -841,7 +841,7 @@ export default function Seminar06() {
       />
 
       {/* ── Problem 2 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 2: Hash Computation Example', 'Problema 2: Exemplu de calcul hash')}
       </h3>
       <Box type="definition">
@@ -893,7 +893,7 @@ pos 10: "bab" = 1`}</Code>
       />
 
       {/* ── Problem 3 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 3: Rabin-Karp Worst Case', 'Problema 3: Cazul defavorabil Rabin-Karp')}
       </h3>
       <Box type="definition">
@@ -907,7 +907,7 @@ pos 10: "bab" = 1`}</Code>
       <MultipleChoice questions={mc3} />
 
       {/* ── Problems 4-6: Matrix Search ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problems 4–6: Matrix Pattern Matching', 'Problemele 4–6: Căutarea matricilor')}
       </h3>
       <Box type="definition">
@@ -972,7 +972,7 @@ pos 10: "bab" = 1`}</Code>
       </h2>
 
       {/* ── Problem 7 ── */}
-      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 7: Longest Substring Appearing K Times', 'Problema 7: Cel mai lung subșir care apare de K ori')}
       </h3>
       <Box type="definition">
@@ -1014,7 +1014,7 @@ existsSubstringOfLengthAppearingKTimes(s, L, K)
       />
 
       {/* ── Problem 8 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 8: Minimum Prepend for Palindrome', 'Problema 8: Minim de caractere adăugate pentru palindrom')}
       </h3>
       <Box type="definition">
@@ -1056,7 +1056,7 @@ existsSubstringOfLengthAppearingKTimes(s, L, K)
       />
 
       {/* ── Problem 9 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 9: Longest Palindromic Substring', 'Problema 9: Cel mai lung subșir palindromic')}
       </h3>
       <Box type="definition">
@@ -1109,7 +1109,7 @@ existsSubstringOfLengthAppearingKTimes(s, L, K)
       />
 
       {/* ── Problem 10 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 10: Java hashCode Collisions', 'Problema 10: Coliziuni Java hashCode')}
       </h3>
       <Box type="definition">
@@ -1157,7 +1157,7 @@ These are equal regardless of z!`}</Code>
       />
 
       {/* ── Problem 11 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 11: String Rotation Detection', 'Problema 11: Detectarea rotației de șiruri')}
       </h3>
       <Box type="definition">
@@ -1171,7 +1171,7 @@ These are equal regardless of z!`}</Code>
       <MultipleChoice questions={mc11} />
 
       {/* ── Problem 12 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 12: Anagram Search', 'Problema 12: Căutarea anagramelor')}
       </h3>
       <Box type="definition">
@@ -1213,7 +1213,7 @@ These are equal regardless of z!`}</Code>
       />
 
       {/* ── Problems 13–14: Boyer-Moore Comparisons ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problems 13–14: Boyer-Moore Comparison Counts', 'Problemele 13–14: Numărul de comparații Boyer-Moore')}
       </h3>
       <Box type="definition">
@@ -1238,7 +1238,7 @@ These are equal regardless of z!`}</Code>
       <MultipleChoice questions={mc14c} />
 
       {/* ── Problem 15 & 20 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problems 15 & 20: Repeated Substring Pattern', 'Problemele 15 & 20: Subșir repetat')}
       </h3>
       <Box type="definition">
@@ -1252,7 +1252,7 @@ These are equal regardless of z!`}</Code>
       <MultipleChoice questions={mc15} />
 
       {/* ── Problem 16 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 16: Subsequence Check', 'Problema 16: Verificarea subsecvenței')}
       </h3>
       <Box type="definition">
@@ -1296,7 +1296,7 @@ These are equal regardless of z!`}</Code>
       </h2>
 
       {/* ── Problem 17 ── */}
-      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-4 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 17: Boyer-Moore BC & GS Tables', 'Problema 17: Tabelele BC & GS Boyer-Moore')}
       </h3>
       <Box type="definition">
@@ -1362,7 +1362,7 @@ Search proceeds right-to-left within pattern:
       />
 
       {/* ── Problem 18: Boyer-Moore Case III ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 18: Boyer-Moore Bad Character — Case III', 'Problema 18: Boyer-Moore Caracter rău — Cazul III')}
       </h3>
       <Box type="definition">
@@ -1399,7 +1399,7 @@ Search proceeds right-to-left within pattern:
       />
 
       {/* ── Problem 19 ── */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>
         {t('Problem 19: Prefix Function & h[] Vector', 'Problema 19: Funcția prefix & vectorul h[]')}
       </h3>
       <Box type="definition">

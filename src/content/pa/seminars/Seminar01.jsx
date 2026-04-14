@@ -159,7 +159,7 @@ export default function Seminar01() {
       </p>
 
       {/* ═══ Problem 1 ═══ */}
-      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 1: First n Primes', 'Problema 1: Primele n numere prime')}</h3>
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 1: First n Primes', 'Problema 1: Primele n numere prime')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given a positive integer n, find the first n prime numbers.',
@@ -197,7 +197,7 @@ export default function Seminar01() {
       />
 
       {/* ═══ Problem 2 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 2: Sieve of Eratosthenes', 'Problema 2: Ciurul lui Eratostene')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 2: Sieve of Eratosthenes', 'Problema 2: Ciurul lui Eratostene')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Write an algorithm that generates all prime numbers less than a given number n using the Sieve of Eratosthenes.',
@@ -235,7 +235,7 @@ export default function Seminar01() {
       />
 
       {/* ═══ Problem 3 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 3: Square Palindromes', 'Problema 3: Palindromuri pătrate')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 3: Square Palindromes', 'Problema 3: Palindromuri pătrate')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A square palindrome is a number where both the number and its square are palindromes (e.g. 11\u00B2 = 121). Given n, find all square palindromes \u2264 n.',
@@ -274,7 +274,7 @@ Algorithm SquarePalindromes(n)
       />
 
       {/* ═══ Problem 4 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 4: Happy Number', 'Problema 4: Număr fericit')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 4: Happy Number', 'Problema 4: Număr fericit')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A happy number reaches 1 when repeatedly replaced by the sum of squares of its digits. If it enters a cycle not including 1, it is unhappy. Example: 19 is happy, 4 is not.',
@@ -313,7 +313,7 @@ Algorithm IsHappy(n)
       />
 
       {/* ═══ Problem 5 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 5: Even Fibonacci Sum', 'Problema 5: Suma Fibonacci pară')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 5: Even Fibonacci Sum', 'Problema 5: Suma Fibonacci pară')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Starting with 1 and 2, each Fibonacci term is the sum of the two preceding ones. Find the sum of even-valued Fibonacci terms not exceeding 4,000,000.',
@@ -351,7 +351,7 @@ Algorithm IsHappy(n)
       />
 
       {/* ═══ Problem 6 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 6: Hexagonal Numbers', 'Problema 6: Numere hexagonale')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 6: Hexagonal Numbers', 'Problema 6: Numere hexagonale')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'The n-th hexagonal number is h\u2099 = n(2n\u22121). First values: 1, 6, 15, 28, 45, 66, 91, 120, \u2026 Given an array, count how many elements are hexagonal numbers.',
@@ -391,7 +391,7 @@ Algorithm CountHexagonal(a[1..n])
       />
 
       {/* ═══ Problem 7 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 7: Shortest Path with \u2264 k Nodes', 'Problema 7: Drum de cost minim cu \u2264 k noduri')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 7: Shortest Path with \u2264 k Nodes', 'Problema 7: Drum de cost minim cu \u2264 k noduri')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given a weighted directed graph with positive edge costs, find the minimum cost path between a source and destination, such that the path visits at most k nodes.',
@@ -424,7 +424,7 @@ Algorithm CountHexagonal(a[1..n])
       />
 
       {/* ═══ Problem 8 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 8: N-Queens Problem', 'Problema 8: Problema celor N regine')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 8: N-Queens Problem', 'Problema 8: Problema celor N regine')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'State the N-Queens problem. Give an example of a problem instance.',

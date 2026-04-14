@@ -242,7 +242,7 @@ export default function Seminar02() {
       </p>
 
       {/* ═══ Problem 1 ═══ */}
-      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 1: Two Smallest Indices', 'Problema 1: Indicii celor mai mici două elemente')}</h3>
+      <h3 className="text-lg font-bold mt-6 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 1: Two Smallest Indices', 'Problema 1: Indicii celor mai mici două elemente')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given an array of natural numbers with at least two elements, display two indices for the two smallest elements, ordered by value. Example: for [3, 5, 2, 7, 4, 1] output 5, 2.',
@@ -287,7 +287,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 2 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 2: Fixed Point in Sorted Array', 'Problema 2: Punct fix într-un vector sortat')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 2: Fixed Point in Sorted Array', 'Problema 2: Punct fix într-un vector sortat')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A fixed point in an array is an index i such that arr[i] == i. Given a sorted array of distinct integers, design an algorithm to find a fixed point if one exists, or return -1. Can you do better than O(n)?',
@@ -326,7 +326,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 3 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 3: Majority Element (Boyer-Moore)', 'Problema 3: Element majoritar (Boyer-Moore)')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 3: Majority Element (Boyer-Moore)', 'Problema 3: Element majoritar (Boyer-Moore)')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'A majority element in an array of size n is an element that appears more than n/2 times. Given an array of n natural numbers, return the majority element if it exists, or -1 otherwise.',
@@ -381,7 +381,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 4 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 4: Big Number Operations', 'Problema 4: Operații pe numere mari')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 4: Big Number Operations', 'Problema 4: Operații pe numere mari')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'State the problems of adding/multiplying two natural numbers represented as digit arrays. Write algorithms and analyze their worst-case time complexity. Harder: write the Karatsuba multiplication algorithm with O(n^log₂(3)) complexity.',
@@ -447,7 +447,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 5 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 5: Sorting — Bubble Sort & Selection Sort', 'Problema 5: Sortare — Bubble Sort și Selection Sort')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 5: Sorting — Bubble Sort & Selection Sort', 'Problema 5: Sortare — Bubble Sort și Selection Sort')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'State and formalize the sorting problem. Write bubble sort and selection sort. Prove their correctness. Compute their execution time for inputs 1,2,…,n and n,n−1,…,1.',
@@ -502,7 +502,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 6 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 6: Missing Number', 'Problema 6: Numărul lipsă')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 6: Missing Number', 'Problema 6: Numărul lipsă')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Given n and n−1 distinct natural numbers between 1 and n, determine the missing number. Find the most efficient solution in terms of time and space.',
@@ -545,7 +545,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 7 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 7: Duplicate & Missing Number', 'Problema 7: Număr duplicat și lipsă')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 7: Duplicate & Missing Number', 'Problema 7: Număr duplicat și lipsă')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Same setup as above, but now one number appears twice and one number is missing. Formalize the problem and find both.',
@@ -580,7 +580,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 8 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 8: Reductions', 'Problema 8: Reduceri')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 8: Reductions', 'Problema 8: Reduceri')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Formalize the following reductions: (a) LCM to GCD, (b) set equality to sorting, (c) set disjunction to sorting.',
@@ -619,7 +619,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problems 9-11: Complexity definitions ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problems 9-11: Complexity Definitions', 'Problemele 9-11: Definiții de complexitate')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problems 9-11: Complexity Definitions', 'Problemele 9-11: Definiții de complexitate')}</h3>
 
       <Toggle
         question={t('Problem 9: How do we define O(f(n)) and Ω(f(n)) complexity of a problem?', 'Problema 9: Cum definim complexitatea O(f(n)) și Ω(f(n)) a unei probleme?')}
@@ -668,7 +668,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 12 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 12: Prove 0.5n² − 3n = Θ(n²)', 'Problema 12: Demonstrați că 0.5n² − 3n = Θ(n²)')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 12: Prove 0.5n² − 3n = Θ(n²)', 'Problema 12: Demonstrați că 0.5n² − 3n = Θ(n²)')}</h3>
       <MultipleChoice questions={mc12} />
       <Toggle
         question={t('Show proof', 'Arată demonstrația')}
@@ -692,7 +692,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problems 13-14: Asymptotic proofs ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problems 13-14: Asymptotic Properties', 'Problemele 13-14: Proprietăți asimptotice')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problems 13-14: Asymptotic Properties', 'Problemele 13-14: Proprietăți asimptotice')}</h3>
 
       <Toggle
         question={t('Problem 13: If f is a polynomial of degree k, then f(n) ∈ Θ(nᵏ)', 'Problema 13: Dacă f este polinom de grad k, atunci f(n) ∈ Θ(nᵏ)')}
@@ -738,7 +738,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 15 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 15: Recurrence T(n) = 2T(n/2) + Θ(n)', 'Problema 15: Recurența T(n) = 2T(n/2) + Θ(n)')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 15: Recurrence T(n) = 2T(n/2) + Θ(n)', 'Problema 15: Recurența T(n) = 2T(n/2) + Θ(n)')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Let T(n) = Θ(1) if n = 1, and T(n) = 2T(n/2) + Θ(n) if n > 1. Prove that T(n) = Θ(n log n).',
@@ -775,7 +775,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 16 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 16: Induction Proof — f(n) = 3ⁿ − 2ⁿ', 'Problema 16: Demonstrație prin inducție — f(n) = 3ⁿ − 2ⁿ')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 16: Induction Proof — f(n) = 3ⁿ − 2ⁿ', 'Problema 16: Demonstrație prin inducție — f(n) = 3ⁿ − 2ⁿ')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Prove by induction that the following function returns 3ⁿ − 2ⁿ:',
@@ -821,7 +821,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 17 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 17: Fibonacci Search', 'Problema 17: Căutarea Fibonacci')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 17: Fibonacci Search', 'Problema 17: Căutarea Fibonacci')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Write the Fibonacci search algorithm for searching a value in a sorted array. Analyze its complexity relative to binary search. Are they asymptotically equivalent in the worst case?',
@@ -876,7 +876,7 @@ export default function Seminar02() {
       />
 
       {/* ═══ Problem 18 ═══ */}
-      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('Problem 18: Heapsort', 'Problema 18: Heapsort')}</h3>
+      <h3 className="text-lg font-bold mt-8 mb-2" style={{ color: 'var(--theme-content-text)' }}>{t('Problem 18: Heapsort', 'Problema 18: Heapsort')}</h3>
       <Box type="definition">
         <p className="text-sm">{t(
           'Implement the heapsort algorithm and write relevant tests showing it works correctly.',
