@@ -3,7 +3,7 @@ import { useApp } from '../../../contexts/AppContext';
 import { gradeAnswer } from '../../../services/api';
 import QuestionFeedback from './QuestionFeedback';
 
-export default function OpenEndedQuestion({ question, onAnswer }) {
+export default function OpenEndedQuestion({ question, onAnswer, suppressFeedback = false }) {
   const { t, lang } = useApp();
   const [answer, setAnswer] = useState('');
   const [grading, setGrading] = useState(false);
@@ -96,7 +96,12 @@ export default function OpenEndedQuestion({ question, onAnswer }) {
           </div>
         </div>
       )}
-      {result && <QuestionFeedback result={result} />}
+      {result && !suppressFeedback && <QuestionFeedback result={result} />}
+      {result && suppressFeedback && (
+        <div className="mt-2 text-[11px] italic" style={{ color: 'var(--theme-muted-text)' }}>
+          {t('Answer recorded. Feedback shown after you finish.', 'Răspuns înregistrat. Vei vedea feedback-ul la finalul testului.')}
+        </div>
+      )}
     </div>
   );
 }

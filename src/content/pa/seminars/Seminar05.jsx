@@ -149,18 +149,18 @@ export default function Seminar05() {
 
   const mc5sim = [{
     question: {
-      en: 'When running KMP to search for "abcab" in "aabcbcbabcabcabc", at which position(s) is a full match found?',
-      ro: 'La rularea KMP pentru a căuta "abcab" în "aabcbcbabcabcabc", la ce poziție(i) se găsește o potrivire completă?',
+      en: 'When running KMP to search for "abcab" in "aabcbcbabcabcabc", at which position(s) is a full match found (find-all variant)?',
+      ro: 'La rularea KMP pentru a căuta "abcab" în "aabcbcbabcabcabc", la ce poziție(i) se găsește o potrivire completă (varianta find-all)?',
     },
     options: [
-      { text: { en: 'Position 8 (0-indexed: T[8..12] = "abcab")', ro: 'Poziția 8 (indexat de la 0: T[8..12] = "abcab")' }, correct: false },
-      { text: { en: 'Positions 8 and 11 (0-indexed)', ro: 'Pozițiile 8 și 11 (indexat de la 0)' }, correct: false },
-      { text: { en: 'Position 7 (0-indexed: T[7..11] = "abcab")', ro: 'Poziția 7 (indexat de la 0: T[7..11] = "abcab")' }, correct: true },
+      { text: { en: 'Positions 7 and 10 (0-indexed)', ro: 'Pozițiile 7 și 10 (indexat de la 0)' }, correct: true },
+      { text: { en: 'Position 7 only (T[7..11] = "abcab")', ro: 'Doar poziția 7 (T[7..11] = "abcab")' }, correct: false },
+      { text: { en: 'Position 8 (T[8..12] = "bcabc")', ro: 'Poziția 8 (T[8..12] = "bcabc")' }, correct: false },
       { text: { en: 'No match found', ro: 'Nu s-a găsit nicio potrivire' }, correct: false },
     ],
     explanation: {
-      en: 'Text: "aabcbcbabcabcabc". Starting at index 7: T[7..11] = "abcab" ✓. After using the prefix function, we can also find T[10..14] = "bcabc" which does NOT match. So only position 7.',
-      ro: 'Text: "aabcbcbabcabcabc". Începând de la indexul 7: T[7..11] = "abcab" ✓. După folosirea funcției prefix, verificăm și T[10..14] = "bcabc" care NU se potrivește. Deci doar poziția 7.',
+      en: 'Text: "aabcbcbabcabcabc". T[7..11] = "abcab" ✓ (first match). The find-all variant then sets j = f[m] and continues, finding T[10..14] = "abcab" ✓ (second match). Find-first KMP would stop at 7; find-all reports both.',
+      ro: 'Text: "aabcbcbabcabcabc". T[7..11] = "abcab" ✓ (prima potrivire). Varianta find-all setează apoi j = f[m] și continuă, găsind T[10..14] = "abcab" ✓ (a doua potrivire). KMP find-first s-ar opri la 7; find-all le raportează pe amândouă.',
     },
   }];
 
@@ -220,7 +220,7 @@ export default function Seminar05() {
   /* ─── Problem 8: Complete prefix function table ─── */
   const mc8a = [{
     question: {
-      en: 'For pattern "xyxxyxxyxyxyyxyyxyyxyxyyx yy", what is f[4] (prefix "xyxxy")?',
+      en: 'For pattern "xyxxyxxyxyxyyxyyxyyxyxyyxyy", what is f[4] (prefix "xyxxy")?',
       ro: 'Pentru pattern-ul "xyxxyxxyxyxyyxyyxyyxyxyyxyy", care este f[4] (prefixul "xyxxy")?',
     },
     options: [
@@ -542,8 +542,8 @@ Char:  a  b  a  a  b  a  b  a  a  b
 f[i]: -1  0  0  1  1  2  3  2  3  4`}</Code>
             <p className="text-sm mb-2">
               {t(
-                'At position 9 (character "b"): f[8] = 3, try P[3] = "a" ≠ "b" → first while iteration. Fall to f[3] = 1, try P[1] = "b" = "b" ✓ → second while iteration finds match. f[9] = 2.',
-                'La poziția 9 (caracterul "b"): f[8] = 3, încercăm P[3] = "a" ≠ "b" → prima iterație while. Cădem la f[3] = 1, încercăm P[1] = "b" = "b" ✓ → a doua iterație while găsește potrivire. f[9] = 2.',
+                'The two-iteration event happens while computing f[7] (current char P[6] = "b"): we start with j = f[6] = 3, try P[j] = P[3] = "a" ≠ P[6] = "b" → first while iteration falls j to f[3] = 1. Then we try P[1] = "b" = P[6] = "b" ✓ → second while-check exits, the if-branch advances, f[7] = 2 (matches the table). This is the pattern\'s only position where the fall-back chain traverses two links before succeeding.',
+                'Evenimentul cu două iterații se produce la calculul lui f[7] (caracterul curent P[6] = "b"): pornim cu j = f[6] = 3, încercăm P[j] = P[3] = "a" ≠ P[6] = "b" → prima iterație while face j = f[3] = 1. Apoi încercăm P[1] = "b" = P[6] = "b" ✓ → a doua verificare while iese, ramura if avansează, f[7] = 2 (corespunde cu tabelul). Este singura poziție din pattern unde lanțul de fall-back parcurge două verigi înainte să reușească.',
               )}
             </p>
             <Box type="warning">

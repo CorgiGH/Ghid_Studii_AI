@@ -596,8 +596,8 @@ export default function Seminar06() {
         { text: { en: '1992', ro: '1992' }, correct: false },
       ],
       explanation: {
-        en: 'Pattern "01010": compare from right — P[4]="0" matches T[i]="0", then P[3]="1" mismatches T[i−1]="0". Bad character: "0" appears at P[2], shift = max(1, 3−2) = 1… but the good suffix rule may give shift 2. Either way, ~2 comparisons per ~2 positions ≈ 996 comparisons total, or fewer with good suffix optimization.',
-        ro: 'Pattern "01010": comparare de la dreapta — P[4]="0" se potrivește cu T[i]="0", apoi P[3]="1" nu se potrivește cu T[i−1]="0". Caracterul rău: "0" apare la P[2], deplasare = max(1, 3−2) = 1... dar regula sufixului bun poate da deplasare 2. În total, ~2 comparații per ~2 poziții ≈ 996 comparații total, sau mai puține cu optimizarea sufixului bun.',
+        en: 'Pattern "01010": compare from right — P[4]="0" matches T[i+4]="0", then P[3]="1" mismatches T[i+3]="0" (≈ 2 comparisons per alignment). Bad character gives shift 1, but the good suffix rule aligns the matched "0" with the leftmost "0" at P[0] (the preceding-char condition holds by convention since no char precedes P[0]), giving shift 4. With ~996/4 ≈ 249 alignments × 2 comparisons each ≈ 498 total. Without good-suffix (shift 1 only) the count jumps to ~1992.',
+        ro: 'Pattern "01010": comparare de la dreapta — P[4]="0" se potrivește cu T[i+4]="0", apoi P[3]="1" nu se potrivește cu T[i+3]="0" (≈ 2 comparații per aliniere). Caracterul rău dă deplasare 1, dar regula sufixului bun aliniază "0"-ul potrivit cu "0" de la P[0] (condiția caracterului precedent se verifică prin convenție pentru că nu există caracter înainte de P[0]), dând deplasare 4. Cu ~996/4 ≈ 249 alinieri × 2 comparații fiecare ≈ 498 total. Fără sufixul bun (doar deplasare 1), numărul ar urca la ~1992.',
       },
     },
   ];

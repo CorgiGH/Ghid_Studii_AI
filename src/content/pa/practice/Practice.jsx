@@ -383,7 +383,7 @@ const stringQuestions = [
       { text: '4', correct: false },
       { text: '6', correct: false },
     ],
-    explanation: { en: 'salt[A] = m - position of last A in pattern. Pattern ARATAT (0-5): last A is at position 4. salt[A] = 6-1-4 = 1.', ro: 'salt[A] = m - poziția ultimei apariții a lui A în pattern. Pattern ARATAT (0-5): ultimul A este pe poziția 4. salt[A] = 6-1-4 = 1.' },
+    explanation: { en: 'salt[c] = m − 1 − last_position(c) for each character in the pattern. Pattern "ARATAT" has m = 6; the last A is at position 4. salt[A] = 6 − 1 − 4 = 1.', ro: 'salt[c] = m − 1 − ultima_poziție(c) pentru fiecare caracter din pattern. Pattern "ARATAT" are m = 6; ultimul A este la poziția 4. salt[A] = 6 − 1 − 4 = 1.' },
   },
   {
     question: { en: '8. What is the time complexity of computing the Boyer-Moore salt (shift) function for alphabet size k?', ro: '8. Care este complexitatea timp a calculului funcției de salt Boyer-Moore pentru un alfabet de dimensiune k?' },

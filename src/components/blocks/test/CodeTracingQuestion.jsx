@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import QuestionFeedback from './QuestionFeedback';
 
-export default function CodeTracingQuestion({ question, onAnswer }) {
+export default function CodeTracingQuestion({ question, onAnswer, suppressFeedback = false }) {
   const { t } = useApp();
   const [userOutput, setUserOutput] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -104,7 +104,12 @@ export default function CodeTracingQuestion({ question, onAnswer }) {
         </button>
       )}
 
-      {result && <QuestionFeedback result={result} />}
+      {result && !suppressFeedback && <QuestionFeedback result={result} />}
+      {result && suppressFeedback && (
+        <div className="mt-2 text-[11px] italic" style={{ color: "var(--theme-muted-text)" }}>
+          {t("Answer recorded. Feedback shown after you finish.", "Răspuns înregistrat. Vei vedea feedback-ul la finalul testului.")}
+        </div>
+      )}
     </div>
   );
 }

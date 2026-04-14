@@ -3,7 +3,7 @@ import { useApp } from '../../../contexts/AppContext';
 import { gradeAnswer } from '../../../services/api';
 import QuestionFeedback from './QuestionFeedback';
 
-export default function DiagramQuestion({ question, onAnswer }) {
+export default function DiagramQuestion({ question, onAnswer, suppressFeedback = false }) {
   const { t, lang } = useApp();
   const [description, setDescription] = useState('');
   const [grading, setGrading] = useState(false);
@@ -65,7 +65,12 @@ export default function DiagramQuestion({ question, onAnswer }) {
       )}
 
       {error && <div className="mt-2 text-xs" style={{ color: '#ef4444' }}>{error}</div>}
-      {result && <QuestionFeedback result={result} />}
+      {result && !suppressFeedback && <QuestionFeedback result={result} />}
+      {result && suppressFeedback && (
+        <div className="mt-2 text-[11px] italic" style={{ color: "var(--theme-muted-text)" }}>
+          {t("Answer recorded. Feedback shown after you finish.", "Răspuns înregistrat. Vei vedea feedback-ul la finalul testului.")}
+        </div>
+      )}
     </div>
   );
 }

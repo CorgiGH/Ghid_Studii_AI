@@ -177,7 +177,14 @@
               { "en": "max(1, 5 − 1) = **4**", "ro": "max(1, 5 − 1) = **4**" }
             ],
             [
-              { "en": "i = 6 (after match at i = 5)", "ro": "i = 6 (după potrivire la i = 5)" },
+              { "en": "(match at i = 5)", "ro": "(potrivire la i = 5)" },
+              { "en": "—", "ro": "—" },
+              { "en": "T[5..12] = P", "ro": "T[5..12] = P" },
+              { "en": "—", "ro": "—" },
+              { "en": "find-all: shift +1 → i = 6", "ro": "find-all: deplasare +1 → i = 6" }
+            ],
+            [
+              { "en": "i = 6 (fresh mismatch)", "ro": "i = 6 (nepotrivire nouă)" },
               { "en": "k = 7", "ro": "k = 7" },
               { "en": "`T`", "ro": "`T`" },
               { "en": "−1 (absent)", "ro": "−1 (absent)" },
@@ -369,7 +376,7 @@
         {
           "type": "code",
           "language": "pseudocode",
-          "code": "// Rabin-Karp with modular hashing\nq = prime_number\nh = |Σ|^(m-1) mod q            // precomputed high-order coefficient\nx = hash(P[0..m-1]) mod q\ny = hash(T[0..m-1]) mod q\n\nfor i = 0 to n-m:\n  if y == x:\n    if P[0..m-1] == T[i..i+m-1]:   // verify (avoid false positives)\n      return i\n  // Rolling hash update (add + q to keep the intermediate non-negative):\n  y = (((y - T[i] * h) mod q + q) * |Σ| + T[i+m]) mod q\n\nreturn -1"
+          "code": "// Rabin-Karp with modular hashing\nq = prime_number\nh = |Σ|^(m-1) mod q             // precomputed high-order coefficient\nx = hash(P[0..m-1]) mod q\ny = hash(T[0..m-1]) mod q\n\nfor i = 0 to n-m:\n  if y == x:\n    if P[0..m-1] == T[i..i+m-1]:   // verify (avoid false positives)\n      return i\n  // Skip the rolling update on the final window — T[i+m] would read past the end.\n  if i < n-m:\n    // Add + q to keep the intermediate non-negative under C-style mod:\n    y = (((y - T[i] * h) mod q + q) * |Σ| + T[i+m]) mod q\n\nreturn -1"
         },
         {
           "type": "definition",
@@ -596,8 +603,8 @@
               "options": [
                 {
                   "text": {
-                    "en": "…the already-matched suffix G = P[k+1..m-1] appears earlier in P as a substring (ideally preceded by a different character than P[k]).",
-                    "ro": "…sufixul deja potrivit G = P[k+1..m-1] apare şi mai devreme în P ca subşir (ideal, precedat de un caracter diferit de P[k])."
+                    "en": "…the already-matched suffix G = P[k+1..m-1] appears earlier in P as a substring preceded by a character different from P[k] (required — otherwise shifting would re-trigger the same mismatch).",
+                    "ro": "…sufixul deja potrivit G = P[k+1..m-1] apare şi mai devreme în P ca subşir precedat de un caracter diferit de P[k] (condiție necesară — altfel deplasarea ar redeclanșa aceeași nepotrivire)."
                   },
                   "correct": true,
                   "explanation": {

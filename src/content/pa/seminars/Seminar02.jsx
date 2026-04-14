@@ -813,8 +813,8 @@ export default function Seminar02() {
               </p>
             </Box>
             <p className="text-sm mt-2">{t(
-              'Note: The recurrence 5x − 6 = 0 has roots 3 and 2 (since 5 = 3+2 and 6 = 3·2), which is why the closed form involves 3ⁿ and 2ⁿ.',
-              'Notă: Recurența 5x − 6 = 0 are rădăcinile 3 și 2 (deoarece 5 = 3+2 și 6 = 3·2), de aceea forma închisă implică 3ⁿ și 2ⁿ.'
+              'Note: The characteristic equation x² − 5x + 6 = 0 has roots 3 and 2 (since 5 = 3+2 and 6 = 3·2), which is why the closed form involves 3ⁿ and 2ⁿ.',
+              'Notă: Ecuația caracteristică x² − 5x + 6 = 0 are rădăcinile 3 și 2 (deoarece 5 = 3+2 și 6 = 3·2), de aceea forma închisă implică 3ⁿ și 2ⁿ.'
             )}</p>
           </div>
         }
@@ -922,10 +922,14 @@ Algorithm HeapSort(a[0..n−1])
               </p>
             </Box>
             <p className="font-bold mt-3 mb-1">{t('Test cases', 'Cazuri de test')}</p>
-            <p className="text-sm">{t(
-              '1) Already sorted: [1, 2, 3, 4, 5] → [1, 2, 3, 4, 5]\n2) Reverse sorted: [5, 4, 3, 2, 1] → [1, 2, 3, 4, 5]\n3) Duplicates: [3, 1, 3, 2, 1] → [1, 1, 2, 3, 3]\n4) Single element: [42] → [42]\n5) Two elements: [2, 1] → [1, 2]\n6) All equal: [7, 7, 7] → [7, 7, 7]',
-              '1) Deja sortat: [1, 2, 3, 4, 5] → [1, 2, 3, 4, 5]\n2) Sortat invers: [5, 4, 3, 2, 1] → [1, 2, 3, 4, 5]\n3) Duplicate: [3, 1, 3, 2, 1] → [1, 1, 2, 3, 3]\n4) Un element: [42] → [42]\n5) Două elemente: [2, 1] → [1, 2]\n6) Toate egale: [7, 7, 7] → [7, 7, 7]'
-            )}</p>
+            <ul className="text-sm list-disc pl-5 space-y-1">
+              <li>{t('Already sorted: [1, 2, 3, 4, 5] → [1, 2, 3, 4, 5]', 'Deja sortat: [1, 2, 3, 4, 5] → [1, 2, 3, 4, 5]')}</li>
+              <li>{t('Reverse sorted: [5, 4, 3, 2, 1] → [1, 2, 3, 4, 5]', 'Sortat invers: [5, 4, 3, 2, 1] → [1, 2, 3, 4, 5]')}</li>
+              <li>{t('Duplicates: [3, 1, 3, 2, 1] → [1, 1, 2, 3, 3]', 'Duplicate: [3, 1, 3, 2, 1] → [1, 1, 2, 3, 3]')}</li>
+              <li>{t('Single element: [42] → [42]', 'Un element: [42] → [42]')}</li>
+              <li>{t('Two elements: [2, 1] → [1, 2]', 'Două elemente: [2, 1] → [1, 2]')}</li>
+              <li>{t('All equal: [7, 7, 7] → [7, 7, 7]', 'Toate egale: [7, 7, 7] → [7, 7, 7]')}</li>
+            </ul>
           </div>
         }
       />
