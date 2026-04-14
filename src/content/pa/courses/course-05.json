@@ -452,6 +452,18 @@
           "code": "int kmp(char *T, int n, char *P, int m, int *F) {\n  int i = 0, j = 0;\n  while (i < n) {\n    if (j == -1 || T[i] == P[j]) {\n      i++; j++;\n      if (j == m)\n        return i - m;  // match found\n    } else {\n      j = F[j];        // fall back using failure function\n    }\n  }\n  return -1;\n}\n// Time: O(n) -- each character of T examined at most twice"
         },
         {
+          "type": "callout",
+          "variant": "formula",
+          "title": {
+            "en": "Why KMP search is O(n)",
+            "ro": "De ce căutarea KMP este O(n)"
+          },
+          "content": {
+            "en": "Search is O(n) because `i + j` increases at most 2n times (bounded by the text pointer, which never moves backward) and fall-backs are bounded by increases. No character of T is ever re-examined after it is matched.",
+            "ro": "Căutarea este O(n) deoarece `i + j` crește cel mult de 2n ori (mărginit de indicele din text, care nu se mișcă niciodată înapoi) și fall-backs sunt mărginite de creșteri. Niciun caracter din T nu este re-examinat după ce a fost potrivit."
+          }
+        },
+        {
           "type": "think",
           "question": {
             "en": "Write challenge: The KMP algorithm reports the first match and could be modified to find all matches. What single change would you make to continue searching after finding a match?",
@@ -461,6 +473,15 @@
             "en": "Instead of returning when j equals m (full match), set j = F[j] and continue the loop. This is exactly what the failure function was designed for — F[m] gives the longest proper prefix of the pattern that is also a suffix, so we skip back to the next possible match position without re-examining characters.",
             "ro": "În loc să returnezi când j egalează m (potrivire completă), setează j = F[j] și continuă bucla. Exact pentru asta a fost proiectată funcția de eșec — F[m] dă cel mai lung prefix propriu al patternului care este și sufix, deci sărim înapoi la următoarea poziție posibilă de potrivire fără a reexamina caractere."
           }
+        },
+        {
+          "type": "code",
+          "language": "pseudocode",
+          "title": {
+            "en": "KMP: find all occurrences",
+            "ro": "KMP: găsește toate aparițiile"
+          },
+          "code": "kmp_find_all(T, n, P, m, F):\n  # F[0] = -1 sentinel (professor's convention)\n  results = []\n  i = 0\n  j = 0\n  while i < n:\n    if j == -1 or T[i] == P[j]:\n      i = i + 1\n      j = j + 1\n      if j == m:\n        # full match ends at i-1, starts at i - m\n        results.append(i - m)\n        j = F[j]        # continue searching (no return)\n    else:\n      j = F[j]          # standard fall-back on mismatch\n  return results"
         },
         {
           "type": "callout",
@@ -477,8 +498,8 @@
             "ro": "Înainte de a parcurge animația: când patternul 'ABABX' nu se potrivește la poziția 4 (după ce a potrivit ABAB), unde va sări KMP? Ce ne spune F[4]=2?"
           },
           "answer": {
-            "en": "Think about it, then step through the animation below to check your prediction!",
-            "ro": "Gândește-te, apoi parcurge animația de mai jos pentru a-ți verifica predicția!"
+            "en": "Think about it, then step through the animation below to check your prediction! F[4] = 2 tells us the longest proper border of \"ABAB\" is \"AB\" (length 2). So on mismatch at j = 4: j falls back from 4 to F[4] = 2; i stays fixed (we re-test T[i] against P[F[j]] = P[2]). This is the key difference from naive matching — we never reread characters of T we already matched, because the first 2 characters of the pattern are already known to align with T[i-2..i-1].",
+            "ro": "Gândește-te, apoi parcurge animația de mai jos pentru a-ți verifica predicția! F[4] = 2 ne spune că cel mai lung border propriu al lui \"ABAB\" este \"AB\" (lungime 2). Deci la nepotrivirea la j = 4: j revine de la 4 la F[4] = 2; i rămâne fix (re-testăm T[i] contra P[F[j]] = P[2]). Aceasta este diferența cheie față de potrivirea naivă — nu recitim niciodată caractere din T deja potrivite, deoarece primele 2 caractere ale pattern-ului sunt deja cunoscute ca aliniate cu T[i-2..i-1]."
           }
         },
         {
@@ -513,6 +534,75 @@
           "type": "code",
           "language": "c",
           "code": "void computeF(char *P, int m, int *F) {\n  int i = 0, j = -1;\n  F[0] = -1;\n  while (i < m - 1) {\n    if (j == -1 || P[i] == P[j]) {\n      i++; j++;\n      F[i] = j;\n    } else {\n      j = F[j];\n    }\n  }\n}\n// Time: O(m)"
+        },
+        {
+          "type": "table",
+          "caption": {
+            "en": "Worked trace: computeF on P = \"ABABXABABY\" (first 5 iterations). F[0] = -1 is set before the loop.",
+            "ro": "Trasare pas cu pas: computeF pe P = \"ABABXABABY\" (primele 5 iterații). F[0] = -1 este setat înaintea buclei."
+          },
+          "headers": [
+            { "en": "i", "ro": "i" },
+            { "en": "j", "ro": "j" },
+            { "en": "P[i]", "ro": "P[i]" },
+            { "en": "P[j]", "ro": "P[j]" },
+            { "en": "action", "ro": "acțiune" },
+            { "en": "F[i+1]", "ro": "F[i+1]" }
+          ],
+          "rows": [
+            [
+              { "en": "0", "ro": "0" },
+              { "en": "-1", "ro": "-1" },
+              { "en": "A", "ro": "A" },
+              { "en": "— (j = -1)", "ro": "— (j = -1)" },
+              { "en": "match: advance both", "ro": "potrivire: avansează ambele" },
+              { "en": "F[1] = 0", "ro": "F[1] = 0" }
+            ],
+            [
+              { "en": "1", "ro": "1" },
+              { "en": "0", "ro": "0" },
+              { "en": "B", "ro": "B" },
+              { "en": "A", "ro": "A" },
+              { "en": "mismatch: j = F[j] fallback", "ro": "nepotrivire: j = F[j] fallback" },
+              { "en": "(unchanged)", "ro": "(neschimbat)" }
+            ],
+            [
+              { "en": "1", "ro": "1" },
+              { "en": "-1", "ro": "-1" },
+              { "en": "B", "ro": "B" },
+              { "en": "— (j = -1)", "ro": "— (j = -1)" },
+              { "en": "match: advance both", "ro": "potrivire: avansează ambele" },
+              { "en": "F[2] = 0", "ro": "F[2] = 0" }
+            ],
+            [
+              { "en": "2", "ro": "2" },
+              { "en": "0", "ro": "0" },
+              { "en": "A", "ro": "A" },
+              { "en": "A", "ro": "A" },
+              { "en": "match: advance both", "ro": "potrivire: avansează ambele" },
+              { "en": "F[3] = 1", "ro": "F[3] = 1" }
+            ],
+            [
+              { "en": "3", "ro": "3" },
+              { "en": "1", "ro": "1" },
+              { "en": "B", "ro": "B" },
+              { "en": "B", "ro": "B" },
+              { "en": "match: advance both", "ro": "potrivire: avansează ambele" },
+              { "en": "F[4] = 2", "ro": "F[4] = 2" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "formula",
+          "title": {
+            "en": "Why computeF is O(m)",
+            "ro": "De ce computeF este O(m)"
+          },
+          "content": {
+            "en": "The potential function `i + j` only ever increases by 1 per match step (bounded by 2m total increases) and decreases by at least 1 per fall-back. Total fall-backs ≤ total increases ≤ 2m, so the loop runs O(m) times.",
+            "ro": "Funcția de potențial `i + j` crește cu doar 1 la fiecare pas de potrivire (mărginită de 2m creșteri totale) și scade cu cel puțin 1 la fiecare fall-back. Total fall-backs ≤ total creșteri ≤ 2m, deci bucla rulează de O(m) ori."
+          }
         },
         {
           "type": "learn",
@@ -995,6 +1085,62 @@
               "explanation": {
                 "en": "n+m grows linearly while n·m grows quadratically. For a 10,000-char text with a 100-char pattern: KMP does ~10,100 operations, naive does up to ~1,000,000. This connects Course 2's asymptotic analysis to Course 5's string matching.",
                 "ro": "n+m crește liniar în timp ce n·m crește pătratic. Pentru un text de 10.000 caractere cu un pattern de 100 caractere: KMP face ~10.100 operații, naivul face până la ~1.000.000. Aceasta conectează analiza asimptotică din Cursul 2 cu potrivirea șirurilor din Cursul 5."
+              }
+            },
+            {
+              "question": {
+                "en": "What is the time complexity of computing the failure function F?",
+                "ro": "Care este complexitatea de timp a calculului funcției de eșec F?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "O(m²)",
+                    "ro": "O(m²)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "A common misconception: the visible fall-back loop `j = F[j]` inside the main while makes it look nested, suggesting O(m²). But amortized analysis shows this is wrong — the potential `i + j` bounds total fall-backs by total increases.",
+                    "ro": "O concepție greșită frecventă: bucla de fall-back vizibilă `j = F[j]` din interiorul while-ului principal o face să pară imbricată, sugerând O(m²). Dar analiza amortizată arată că acest lucru este greșit — potențialul `i + j` mărginește totalul de fall-backs prin totalul de creșteri."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "O(m log m)",
+                    "ro": "O(m log m)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "There is no divide-and-conquer or logarithmic structure in computeF. It is a single linear pass with amortized O(1) work per iteration, giving O(m) — strictly better than O(m log m).",
+                    "ro": "Nu există o structură divide-and-conquer sau logaritmică în computeF. Este o singură parcurgere liniară cu lucru amortizat O(1) per iterație, dând O(m) — strict mai bun decât O(m log m)."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "O(m)",
+                    "ro": "O(m)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Even though the inner fall-back loop `j = F[j]` looks nested, amortized analysis via the potential function `i + j` shows total work is O(m). j increases at most m times (each paired with i++), and every fall-back decreases j by at least 1, so total fall-backs ≤ total increases ≤ 2m. See the callout in step 3.",
+                    "ro": "Chiar dacă bucla internă de fall-back `j = F[j]` pare imbricată, analiza amortizată prin funcția de potențial `i + j` arată că lucrul total este O(m). j crește cel mult de m ori (fiecare împerecheat cu i++), și fiecare fall-back scade j cu cel puțin 1, deci total fall-backs ≤ total creșteri ≤ 2m. Vezi callout-ul din pasul 3."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "O(1)",
+                    "ro": "O(1)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Constant time is impossible — computeF must at least write all m entries of F[0..m-1], which requires Ω(m) work. The lower bound is Ω(m) and KMP's preprocessing matches it exactly.",
+                    "ro": "Timp constant este imposibil — computeF trebuie cel puțin să scrie toate cele m intrări din F[0..m-1], ceea ce necesită Ω(m) muncă. Limita inferioară este Ω(m) și preprocesarea KMP o atinge exact."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Even though the inner fall-back loop looks nested, amortized analysis via the potential function `i + j` shows total work is O(m). See the callout in step 3.",
+                "ro": "Chiar dacă bucla internă de fall-back pare imbricată, analiza amortizată prin funcția de potențial `i + j` arată că lucrul total este O(m). Vezi callout-ul din pasul 3."
               }
             }
           ]

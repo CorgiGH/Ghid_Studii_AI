@@ -149,6 +149,43 @@
           "code": "// Precompute: last occurrence of each character in pattern\nint lastOcc[ALPHABET_SIZE];\nfor (int c = 0; c < ALPHABET_SIZE; c++)\n  lastOcc[c] = -1;  // not in pattern\nfor (int j = 0; j < m; j++)\n  lastOcc[P[j]] = j;  // rightmost occurrence\n\n// Bad character shift at position k:\n// shift = k - lastOcc[T[i+k]]  (if > 0, else 1)"
         },
         {
+          "type": "table",
+          "caption": {
+            "en": "Worked trace — bad-character rule on T = \"GCATCGCAGAGAGTATACAGTACG\", P = \"GCAGAGAG\" (lastOcc: G→7, A→6, C→1, else −1)",
+            "ro": "Urmărire pas-cu-pas — regula caracterului rău pe T = \"GCATCGCAGAGAGTATACAGTACG\", P = \"GCAGAGAG\" (lastOcc: G→7, A→6, C→1, altfel −1)"
+          },
+          "headers": [
+            { "en": "alignment i", "ro": "aliniere i" },
+            { "en": "mismatch at k", "ro": "mismatch la k" },
+            { "en": "T[i+k]", "ro": "T[i+k]" },
+            { "en": "lastOcc[T[i+k]]", "ro": "lastOcc[T[i+k]]" },
+            { "en": "shift = max(1, k − lastOcc)", "ro": "deplasare = max(1, k − lastOcc)" }
+          ],
+          "rows": [
+            [
+              { "en": "i = 0", "ro": "i = 0" },
+              { "en": "k = 7", "ro": "k = 7" },
+              { "en": "`A`", "ro": "`A`" },
+              { "en": "6", "ro": "6" },
+              { "en": "max(1, 7 − 6) = **1**", "ro": "max(1, 7 − 6) = **1**" }
+            ],
+            [
+              { "en": "i = 1", "ro": "i = 1" },
+              { "en": "k = 5", "ro": "k = 5" },
+              { "en": "`C`", "ro": "`C`" },
+              { "en": "1", "ro": "1" },
+              { "en": "max(1, 5 − 1) = **4**", "ro": "max(1, 5 − 1) = **4**" }
+            ],
+            [
+              { "en": "i = 6 (after match at i = 5)", "ro": "i = 6 (după potrivire la i = 5)" },
+              { "en": "k = 7", "ro": "k = 7" },
+              { "en": "`T`", "ro": "`T`" },
+              { "en": "−1 (absent)", "ro": "−1 (absent)" },
+              { "en": "max(1, 7 − (−1)) = **8**", "ro": "max(1, 7 − (−1)) = **8**" }
+            ]
+          ]
+        },
+        {
           "type": "think",
           "question": {
             "en": "When does the bad character rule give the largest shifts? Think about the relationship between alphabet size and shift distance.",
@@ -195,6 +232,51 @@
             "en": "**Case 2: Only a prefix of the good suffix reappears**\n\nIf no full reoccurrence exists, look for the longest suffix of the good suffix that is also a prefix of the pattern. Shift to align that prefix.",
             "ro": "**Cazul 2: Doar un prefix al sufixului bun reapare**\n\nDacă nu există o reapariție completă, căutați cel mai lung sufix al sufixului bun care este și un prefix al pattern-ului. Deplasați pentru a alinia acel prefix."
           }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Good-suffix shift table (sketch).** The two cases above can be turned into an explicit preprocessing routine `gs[0..m-1]`, where `gs[k]` is the shift to apply when the mismatch happens at position k of P (so the already-matched suffix is `G = P[k+1..m-1]`). The sketch below is O(m²); an optimal O(m) version exists but is not needed to understand the rule.",
+            "ro": "**Tabelul de deplasare bun-sufix (schiță).** Cele două cazuri de mai sus pot fi transformate într-o rutină explicită de preprocesare `gs[0..m-1]`, unde `gs[k]` este deplasarea aplicată când mismatch-ul apare la poziția k din P (deci sufixul deja potrivit este `G = P[k+1..m-1]`). Schița de mai jos este O(m²); versiunea optimă O(m) există, dar nu e necesară pentru înțelegerea regulii."
+          }
+        },
+        {
+          "type": "code",
+          "language": "pseudocode",
+          "code": "// gs[k] = shift when mismatch occurs at P[k], so the matched\n//         good suffix is G = P[k+1..m-1] (length L = m-1-k).\n\nfor k = 0 to m-1:\n  L = m - 1 - k\n  G = P[k+1..m-1]             // the matched suffix (empty if k = m-1)\n  gs[k] = m                   // default: shift past the whole pattern\n\n  // --- Case 1: G reappears earlier in P, preceded by a DIFFERENT char ---\n  for j = k-1 down to 0:\n    // Is P[j-L+1 .. j] == G  and  P[j-L] != P[k] ?\n    if j-L+1 >= 0 and P[j-L+1 .. j] == G and (j-L < 0 or P[j-L] != P[k]):\n      gs[k] = (k+1) - (j-L+1) // shift so that occurrence aligns under G\n      break\n\n  if gs[k] < m: continue       // Case 1 found, done\n\n  // --- Case 2: only a proper prefix of P matches a suffix of G ---\n  for len = L-1 down to 1:\n    if P[0..len-1] == G[L-len..L-1]:   // prefix of P == suffix of G\n      gs[k] = m - len\n      break\n  // else gs[k] stays m (shift whole pattern)"
+        },
+        {
+          "type": "table",
+          "caption": {
+            "en": "Good-suffix shifts for P = \"ABCABC\" (m = 6). k is the mismatch position from the left; G is the already-matched suffix.",
+            "ro": "Deplasările bun-sufix pentru P = \"ABCABC\" (m = 6). k este poziția mismatch-ului de la stânga; G este sufixul deja potrivit."
+          },
+          "headers": [
+            { "en": "k", "ro": "k" },
+            { "en": "good suffix G", "ro": "sufix bun G" },
+            { "en": "case", "ro": "caz" },
+            { "en": "gs[k]", "ro": "gs[k]" }
+          ],
+          "rows": [
+            [
+              { "en": "5", "ro": "5" },
+              { "en": "`\"\"` (empty)", "ro": "`\"\"` (vid)" },
+              { "en": "no suffix matched — rely on bad-char", "ro": "niciun sufix potrivit — se folosește regula caracterului rău" },
+              { "en": "1 (default step)", "ro": "1 (pas implicit)" }
+            ],
+            [
+              { "en": "4", "ro": "4" },
+              { "en": "`\"C\"`", "ro": "`\"C\"`" },
+              { "en": "Case 1: `\"C\"` also at P[2], preceded by `B` ≠ `B`? same — falls to Case 2; prefix `\"\"` matches suffix of G", "ro": "Caz 1: `\"C\"` apare și la P[2], precedat de `B` = `B` — trece la Cazul 2; prefixul `\"\"` corespunde sufixului G" },
+              { "en": "6 (shift past pattern)", "ro": "6 (deplasare peste pattern)" }
+            ],
+            [
+              { "en": "2", "ro": "2" },
+              { "en": "`\"ABC\"`", "ro": "`\"ABC\"`" },
+              { "en": "Case 2: prefix `\"ABC\"` of P matches G itself", "ro": "Caz 2: prefixul `\"ABC\"` al lui P corespunde lui G" },
+              { "en": "3 (m − 3)", "ro": "3 (m − 3)" }
+            ]
+          ]
         },
         {
           "type": "definition",
@@ -259,6 +341,13 @@
           "code": "// Convert string to number (Horner's rule)\nf(S) {\n  result = 0\n  for i = 0 to m-1:\n    result = result * |Σ| + S[i]\n  return result\n}\n// Example: f(\"BABX\") = 1·26³ + 0·26² + 1·26 + 23 = 17625"
         },
         {
+          "type": "learn",
+          "content": {
+            "en": "**Derivation of the rolling hash.** Define `f(S) = Σ_{k=0}^{m-1} S[k] · |Σ|^(m-1-k)` — a positional-number hash treating the string like a base-|Σ| numeral. For the next window starting at i+1, three things happen compared to the window at i: (1) the leading digit `T[i] · |Σ|^(m-1)` drops out; (2) every remaining coefficient shifts up by one power of |Σ| (because each character moves one position to the left inside the window); (3) the new trailing digit `T[i+m] · |Σ|^0` is appended. Writing this out:\n\n`f(T[i+1..i+m]) = |Σ| · (f(T[i..i+m-1]) − T[i] · |Σ|^(m-1)) + T[i+m]`\n\nwhich simplifies to\n\n`f(T[i+1..i+m]) = |Σ| · f(T[i..i+m-1]) − T[i] · |Σ|^m + T[i+m]`\n\nSo each window update costs a constant number of arithmetic operations — O(1) — instead of O(m).",
+            "ro": "**Derivarea rolling hash-ului.** Definim `f(S) = Σ_{k=0}^{m-1} S[k] · |Σ|^(m-1-k)` — un hash poziţional care tratează şirul ca un număr în baza |Σ|. Pentru fereastra următoare, care începe la i+1, faţă de fereastra de la i se întâmplă trei lucruri: (1) cifra de rang cel mai mare `T[i] · |Σ|^(m-1)` dispare; (2) fiecare coeficient rămas urcă cu o putere de |Σ| (pentru că fiecare caracter se mută cu o poziţie la stânga în interiorul ferestrei); (3) noua cifră de rang cel mai mic `T[i+m] · |Σ|^0` se adaugă. Scris explicit:\n\n`f(T[i+1..i+m]) = |Σ| · (f(T[i..i+m-1]) − T[i] · |Σ|^(m-1)) + T[i+m]`\n\nceea ce se simplifică la\n\n`f(T[i+1..i+m]) = |Σ| · f(T[i..i+m-1]) − T[i] · |Σ|^m + T[i+m]`\n\nDeci fiecare actualizare de fereastră costă un număr constant de operaţii aritmetice — O(1) — în loc de O(m)."
+          }
+        },
+        {
           "type": "definition",
           "term": {
             "en": "Rolling Hash",
@@ -291,6 +380,14 @@
           "content": {
             "en": "Since we work modulo q, different strings can have the same hash (**collision**). When hashes match, we **must** verify the actual strings character by character. A position where hashes match but strings differ is called a **false positive**.",
             "ro": "Deoarece lucrăm modulo q, șiruri diferite pot avea același hash (**coliziune**). Când hash-urile se potrivesc, **trebuie** să verificăm șirurile reale caracter cu caracter. O poziție unde hash-urile se potrivesc dar șirurile diferă se numește **false positive**."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Monte Carlo vs Las Vegas RK.** The standard algorithm *verifies* every hash match against the actual strings — this is the **Las Vegas** variant: always correct, expected O(n+m), but O(n·m) worst case if collisions pile up. Skipping verification gives a **Monte Carlo** variant: guaranteed O(n+m) running time but with a small false-positive probability (may report a match where strings actually differ). The choice depends on whether occasional wrong answers are acceptable — e.g., a first-pass filter that is later verified by another pass can safely use Monte Carlo.",
+            "ro": "**RK Monte Carlo vs Las Vegas.** Algoritmul standard *verifică* fiecare potrivire de hash prin comparaţie caracter-cu-caracter — aceasta este varianta **Las Vegas**: întotdeauna corectă, O(n+m) aşteptat, dar O(n·m) în cazul defavorabil dacă se adună coliziuni. Dacă sărim verificarea, obţinem varianta **Monte Carlo**: timp garantat O(n+m), dar cu o mică probabilitate de false positive (poate raporta o potrivire acolo unde şirurile diferă). Alegerea depinde de toleranţa la răspunsuri greşite ocazionale — de ex., un filtru preliminar verificat ulterior de o altă trecere poate folosi în siguranţă Monte Carlo."
           }
         },
         {
@@ -340,8 +437,8 @@
         {
           "type": "learn",
           "content": {
-            "en": "Here is a summary comparison of all four string matching algorithms we have studied. Note that Boyer-Moore has the best **average** case — it is the only one that achieves sublinear performance.\n\n*Note: Boyer-Moore worst case becomes O(n) with Galil's optimization.*",
-            "ro": "Iată o comparație sintetică a tuturor celor patru algoritmi de potrivire a șirurilor pe care i-am studiat. Rețineți că Boyer-Moore are cel mai bun caz **mediu** — este singurul care atinge performanță subliniară.\n\n*Notă: Cazul defavorabil al Boyer-Moore devine O(n) cu optimizarea lui Galil.*"
+            "en": "Here is a summary comparison of all four string matching algorithms we have studied. Note that Boyer-Moore has the best **average** case — it is the only one that achieves sublinear performance. See the note under the table for the meaning of the † marker.",
+            "ro": "Iată o comparație sintetică a tuturor celor patru algoritmi de potrivire a șirurilor pe care i-am studiat. Rețineți că Boyer-Moore are cel mai bun caz **mediu** — este singurul care atinge performanță subliniară. Vedeți nota de sub tabel pentru semnificația marcajului †."
           }
         },
         {
@@ -423,12 +520,12 @@
                 "ro": "O(m+|Σ|)"
               },
               {
-                "en": "O(n·m)*",
-                "ro": "O(n·m)*"
+                "en": "O(n·m)†",
+                "ro": "O(n·m)†"
               },
               {
-                "en": "**O(n/m)**",
-                "ro": "**O(n/m)**"
+                "en": "O(n/m)",
+                "ro": "O(n/m)"
               },
               {
                 "en": "R→L",
@@ -460,6 +557,14 @@
           ]
         },
         {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Read the averages carefully.** Boyer-Moore's average `O(n/m)` is **sublinear** — it examines fewer than n text characters in total, because each shift can skip up to m positions. No other algorithm in this table beats `O(n)` on average. † marks the BM worst case: with Galil's optimization this drops to `O(n)` while the sublinear average is preserved.",
+            "ro": "**Citiți mediile cu atenție.** Media Boyer-Moore `O(n/m)` este **subliniară** — examinează mai puţin de n caractere din text în total, pentru că fiecare deplasare poate sări până la m poziţii. Niciun alt algoritm din acest tabel nu bate `O(n)` în medie. † marchează cazul defavorabil BM: cu optimizarea lui Galil scade la `O(n)`, păstrând media subliniară."
+          }
+        },
+        {
           "type": "think",
           "question": {
             "en": "If KMP guarantees O(n) worst case while Boyer-Moore has O(n·m) worst case, why is Boyer-Moore preferred in practice (e.g., in grep)?",
@@ -485,58 +590,58 @@
           "questions": [
             {
               "question": {
-                "en": "Why does Boyer-Moore compare the pattern against the text from right to left?",
-                "ro": "De ce Boyer-Moore compară pattern-ul cu textul de la dreapta la stânga?"
+                "en": "When applying the good-suffix rule on a mismatch at position k of P (from the right), Case 1 applies when…",
+                "ro": "La aplicarea regulii sufixului bun pentru un mismatch la poziţia k din P (numărând de la dreapta), Cazul 1 se aplică atunci când…"
               },
               "options": [
                 {
                   "text": {
-                    "en": "It makes the algorithm simpler to implement",
-                    "ro": "Face algoritmul mai simplu de implementat"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Boyer-Moore is actually more complex to implement than left-to-right algorithms like KMP. The right-to-left comparison is a deliberate design choice for performance, not simplicity.",
-                    "ro": "Boyer-Moore este de fapt mai complex de implementat decât algoritmii de la stânga la dreapta precum KMP. Comparația de la dreapta la stânga este o alegere deliberată de design pentru performanță, nu simplicitate."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "It enables the bad character rule to skip large portions of text, achieving sublinear performance",
-                    "ro": "Permite regulii caracterului rău să sară porțiuni mari de text, atingând performanță subliniară"
+                    "en": "…the already-matched suffix G = P[k+1..m-1] appears earlier in P as a substring (ideally preceded by a different character than P[k]).",
+                    "ro": "…sufixul deja potrivit G = P[k+1..m-1] apare şi mai devreme în P ca subşir (ideal, precedat de un caracter diferit de P[k])."
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "When the rightmost character mismatches a character absent from the pattern, the entire pattern shifts past that position — skipping m characters at once. This yields O(n/m) average performance, which is sublinear.",
-                    "ro": "Când cel mai din dreapta caracter nu se potrivește cu un caracter absent din pattern, întregul pattern se deplasează dincolo de acea poziție — sărind m caractere deodată. Aceasta produce performanță medie O(n/m), care este subliniară."
+                    "en": "That's the definition of Case 1: reuse an earlier occurrence of the good suffix inside the pattern and shift so it aligns with the text characters we already matched.",
+                    "ro": "Aceasta este definiţia Cazului 1: se reutilizează o apariţie mai devreme a sufixului bun din pattern şi se deplasează astfel încât să se alinieze cu caracterele deja potrivite din text."
                   }
                 },
                 {
                   "text": {
-                    "en": "It avoids the need for preprocessing",
-                    "ro": "Evită necesitatea preprocesării"
+                    "en": "…no proper prefix of P matches any suffix of G.",
+                    "ro": "…niciun prefix propriu al lui P nu corespunde vreunui sufix al lui G."
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Boyer-Moore requires preprocessing to build both the bad character table and the good suffix table. Right-to-left comparison increases the need for preprocessing, not eliminates it.",
-                    "ro": "Boyer-Moore necesită preprocesare pentru a construi atât tabela caracterului rău cât și tabela sufixului bun. Comparația de la dreapta la stânga crește nevoia de preprocesare, nu o elimină."
+                    "en": "That description belongs to the fallback inside Case 2 (where only a prefix of P matches a suffix of G, or nothing matches at all). Case 1 is about a full reoccurrence of G elsewhere in P.",
+                    "ro": "Această descriere corespunde de fapt Cazului 2 (unde doar un prefix al lui P corespunde unui sufix al lui G, sau nimic nu se potriveşte). Cazul 1 se referă la o reapariţie completă a lui G în altă parte din P."
                   }
                 },
                 {
                   "text": {
-                    "en": "It guarantees O(n) worst case complexity",
-                    "ro": "Garantează complexitate O(n) în cazul defavorabil"
+                    "en": "…the bad-character shift is larger than the good-suffix shift.",
+                    "ro": "…deplasarea caracterului rău este mai mare decât cea a sufixului bun."
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Boyer-Moore's worst case is O(n·m) without the good suffix rule. Even with it, the basic version doesn't guarantee O(n). The Galil rule optimization is needed to achieve O(n) worst case.",
-                    "ro": "Cazul defavorabil al Boyer-Moore este O(n·m) fără regula sufixului bun. Chiar și cu ea, versiunea de bază nu garantează O(n). Optimizarea cu regula Galil este necesară pentru a atinge O(n) în cazul defavorabil."
+                    "en": "Comparing the two shifts is how BM picks the final step (it takes the max), but it does not decide which *case* of the good-suffix rule applies. The case split depends only on P and the matched suffix.",
+                    "ro": "Compararea celor două deplasări decide pasul final (BM ia maximul), dar nu stabileşte care *caz* al regulii sufixului bun se aplică. Împărţirea pe cazuri depinde doar de P şi de sufixul potrivit."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "…k = m (the mismatch happened past the end of the pattern).",
+                    "ro": "…k = m (mismatch-ul a avut loc dincolo de sfârşitul pattern-ului)."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "k ranges over positions inside P (0 to m−1); k = m would mean the entire pattern already matched — there is no mismatch to resolve.",
+                    "ro": "k ia valori în interiorul lui P (0 la m−1); k = m ar însemna că întregul pattern s-a potrivit deja — nu există mismatch de rezolvat."
                   }
                 }
               ],
               "explanation": {
-                "en": "Right-to-left comparison allows the bad character rule to produce large shifts when the mismatched character doesn't appear in the pattern. If the last character mismatches a character absent from the pattern, the entire pattern shifts past that position — this is what yields O(n/m) average performance.",
-                "ro": "Comparația de la dreapta la stânga permite regulii caracterului rău să producă deplasări mari când caracterul nepotrivit nu apare în pattern. Dacă ultimul caracter nu se potrivește cu un caracter absent din pattern, întregul pattern se deplasează dincolo de acea poziție — aceasta produce performanța medie O(n/m)."
+                "en": "Case 1 of the good-suffix rule triggers when the matched suffix G reappears somewhere earlier inside P; we then shift so that earlier occurrence lines up under G in the text. Case 2 is the fallback when no such full reoccurrence exists and only a proper prefix of P can match a suffix of G.",
+                "ro": "Cazul 1 al regulii sufixului bun se declanşează când sufixul potrivit G reapare mai devreme în P; atunci se deplasează astfel încât acea apariţie anterioară să se alinieze sub G în text. Cazul 2 este alternativa când nu există o reapariţie completă şi doar un prefix propriu al lui P poate corespunde unui sufix al lui G."
               }
             },
             {
@@ -918,6 +1023,62 @@
               "explanation": {
                 "en": "F[0]=-1 is the sentinel that tells KMP 'you've exhausted all fallback options — move to the next text position.' Without it, the algorithm would loop infinitely at position 0. This connects to Course 5's failure function construction.",
                 "ro": "F[0]=-1 este santinela care spune KMP-ului 'ai epuizat toate opțiunile de revenire — treci la următoarea poziție din text.' Fără ea, algoritmul ar cicla infinit la poziția 0. Aceasta se conectează cu construcția funcției de eșec din Cursul 5."
+              }
+            },
+            {
+              "question": {
+                "en": "Which of the following distinguishes the Monte Carlo variant of Rabin-Karp from the Las Vegas variant?",
+                "ro": "Care dintre următoarele deosebeşte varianta Monte Carlo a Rabin-Karp de varianta Las Vegas?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Monte Carlo may report a false match because it skips the character-by-character verification; Las Vegas always verifies and is always correct.",
+                    "ro": "Monte Carlo poate raporta o potrivire falsă pentru că sare peste verificarea caracter-cu-caracter; Las Vegas verifică întotdeauna şi este mereu corect."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Exactly the distinction from the callout: Monte Carlo trades correctness for a deterministic O(n+m) bound, while Las Vegas keeps correctness and pays an expected O(n+m) (with O(n·m) worst case if collisions pile up).",
+                    "ro": "Exact distincţia din callout: Monte Carlo schimbă corectitudinea pe o margine deterministă O(n+m), în timp ce Las Vegas păstrează corectitudinea la un cost aşteptat O(n+m) (cu O(n·m) în cazul defavorabil dacă se adună coliziuni)."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Monte Carlo is always O(n+m) while Las Vegas is Θ(n·m) in the worst case.",
+                    "ro": "Monte Carlo este întotdeauna O(n+m), iar Las Vegas este Θ(n·m) în cazul defavorabil."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Half-right: Monte Carlo is indeed O(n+m) deterministically and Las Vegas can hit O(n·m) in the worst case, but that is a *consequence* of the real distinction — whether verification is skipped. The defining difference is correctness vs. possible false matches.",
+                    "ro": "Pe jumătate adevărat: Monte Carlo este într-adevăr O(n+m) determinist, iar Las Vegas poate atinge O(n·m) în cazul defavorabil, dar aceasta este o *consecinţă* a distincţiei reale — dacă se sare sau nu verificarea. Diferenţa definitorie este corectitudine vs. potriviri false posibile."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Monte Carlo uses a different hash function than Las Vegas.",
+                    "ro": "Monte Carlo foloseşte o funcţie hash diferită faţă de Las Vegas."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Both variants use the same rolling hash modulo q. The difference is only whether matching hashes are verified against the actual strings.",
+                    "ro": "Ambele variante folosesc acelaşi rolling hash modulo q. Diferenţa este doar dacă potrivirile de hash sunt verificate faţă de şirurile reale."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Las Vegas does not use a rolling hash.",
+                    "ro": "Las Vegas nu foloseşte rolling hash."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Both variants rely on the rolling hash — that is what makes Rabin-Karp efficient in the first place. They differ only in the post-hash verification step.",
+                    "ro": "Ambele variante se bazează pe rolling hash — acesta este motivul pentru care Rabin-Karp este eficient. Diferă doar la etapa de verificare de după potrivirea de hash-uri."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "As the Monte Carlo vs Las Vegas callout explained: the Las Vegas variant verifies every hash match against the real strings — always correct, expected O(n+m), O(n·m) worst case. The Monte Carlo variant skips verification — guaranteed O(n+m), but may report a false match whenever two different strings hash to the same value mod q.",
+                "ro": "Aşa cum a explicat callout-ul Monte Carlo vs Las Vegas: varianta Las Vegas verifică fiecare potrivire de hash faţă de şirurile reale — mereu corectă, aşteptat O(n+m), O(n·m) în cazul defavorabil. Varianta Monte Carlo sare peste verificare — garantat O(n+m), dar poate raporta o potrivire falsă ori de câte ori două şiruri diferite au acelaşi hash modulo q."
               }
             }
           ]
