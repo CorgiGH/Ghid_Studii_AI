@@ -30,8 +30,8 @@ export default function Seminar04() {
       { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
     ],
     explanation: {
-      en: 'The inner loop runs n times each time a new maximum is found. The expected number of new-max updates is Hₙ = Σᵢ₌₁ⁿ 1/i ≈ ln n. Total average cost = n · Hₙ + n = Θ(n · ln n).',
-      ro: 'Bucla interioară se execută de n ori la fiecare actualizare a maximului. Numărul mediu de actualizări ale maximului este Hₙ = Σᵢ₌₁ⁿ 1/i ≈ ln n. Costul mediu total = n · Hₙ + n = Θ(n · ln n).',
+      en: 'The inner loop runs n times each time a new maximum is found. The expected number of new-max updates is Hₙ − 1 = 1/2 + 1/3 + … + 1/n ≈ ln n − 1 (the i = 0 position does not count as an update). Total average cost = n · (Hₙ − 1) + n = n · Hₙ = Θ(n · ln n).',
+      ro: 'Bucla interioară se execută de n ori la fiecare actualizare a maximului. Numărul mediu de actualizări este Hₙ − 1 = 1/2 + 1/3 + … + 1/n ≈ ln n − 1 (poziția i = 0 nu se numără ca actualizare). Costul mediu total = n · (Hₙ − 1) + n = n · Hₙ = Θ(n · ln n).',
     },
   }];
 
@@ -220,8 +220,8 @@ export default function Seminar04() {
       { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
     ],
     explanation: {
-      en: 'Fisher-Yates produces a uniform random permutation, so a[p[0]], a[p[1]], ... is a random ordering of distinct elements. The analysis is identical to Problem 1: expected min updates = Hₙ, each costs n. Total = Θ(n · ln n).',
-      ro: 'Fisher-Yates produce o permutare aleatorie uniformă, deci a[p[0]], a[p[1]], ... este o ordine aleatorie a elementelor distincte. Analiza este identică cu Problema 1: actualizări de minim așteptate = Hₙ, fiecare costă n. Total = Θ(n · ln n).',
+      en: 'Fisher-Yates produces a uniform random permutation, so a[p[0]], a[p[1]], ... is a random ordering of distinct elements. The analysis is identical to Problem 1: expected min updates = Hₙ − 1, each costs n. Total = n + n · (Hₙ − 1) = n · Hₙ = Θ(n · ln n).',
+      ro: 'Fisher-Yates produce o permutare aleatorie uniformă, deci a[p[0]], a[p[1]], ... este o ordine aleatorie a elementelor distincte. Analiza este identică cu Problema 1: actualizări de minim așteptate = Hₙ − 1, fiecare costă n. Total = n + n · (Hₙ − 1) = n · Hₙ = Θ(n · ln n).',
     },
   }];
 
@@ -274,20 +274,20 @@ return sum;`}</Code>
 
             <p className="font-bold mb-1">{t('Derivation', 'Derivare')}</p>
             <p className="text-sm mb-2">
-              {t('Let Xᵢ be the indicator variable: Xᵢ = 1 if v[i] > max(v[0],...,v[i−1]). In a random permutation, v[i] is the maximum of v[0],...,v[i] with probability 1/(i+1). Therefore:',
-                'Fie Xᵢ variabila indicator: Xᵢ = 1 dacă v[i] > max(v[0],...,v[i−1]). Într-o permutare aleatorie, v[i] este maximul lui v[0],...,v[i] cu probabilitate 1/(i+1). Prin urmare:')}
+              {t('Let Xᵢ be the indicator: Xᵢ = 1 if v[i] > max(v[0],...,v[i−1]) (defined for i ≥ 1; X₀ is not counted because max is initialized to v[0] with no update). In a random permutation, v[i] is the maximum of v[0],...,v[i] with probability 1/(i+1). Therefore:',
+                'Fie Xᵢ indicatorul: Xᵢ = 1 dacă v[i] > max(v[0],...,v[i−1]) (definit pentru i ≥ 1; X₀ nu se numără deoarece max este inițializat cu v[0], fără actualizare). Într-o permutare aleatorie, v[i] este maximul lui v[0],...,v[i] cu probabilitate 1/(i+1). Prin urmare:')}
             </p>
-            <Code>{`E[number of max updates] = Σᵢ₌₀ⁿ⁻¹ P(Xᵢ = 1)
-                        = Σᵢ₌₀ⁿ⁻¹ 1/(i+1)
-                        = Σₖ₌₁ⁿ 1/k
-                        = Hₙ  (n-th harmonic number)
-                        ≈ ln n`}</Code>
+            <Code>{`E[number of max updates] = Σᵢ₌₁ⁿ⁻¹ P(Xᵢ = 1)
+                        = Σᵢ₌₁ⁿ⁻¹ 1/(i+1)
+                        = 1/2 + 1/3 + ... + 1/n
+                        = Hₙ − 1
+                        ≈ ln n − 1`}</Code>
             <p className="text-sm mb-2">
               {t('Each max update triggers n inner loop iterations. The outer loop itself does n iterations. Total average cost:',
                 'Fiecare actualizare a maximului declanșează n iterații ale buclei interioare. Bucla exterioară face ea însăși n iterații. Costul mediu total:')}
             </p>
             <Box type="theorem">
-              <p className="text-sm">T(n) = n + n · Hₙ = n + n · (ln n + γ) = Θ(n · ln n)</p>
+              <p className="text-sm">T(n) = n + n · (Hₙ − 1) = n · Hₙ ≈ n · (ln n + γ) = Θ(n · ln n)</p>
             </Box>
           </div>
         }

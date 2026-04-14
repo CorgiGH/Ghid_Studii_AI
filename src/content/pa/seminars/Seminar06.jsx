@@ -432,8 +432,8 @@ export default function Seminar06() {
         },
       ],
       explanation: {
-        en: 'If t = "BAAB", then t+t = "BAABBAAB". Any rotation of t is a substring of t+t. So search for s = "ABBA" in "BAABBAAB" — found at position 1! Using KMP or Rabin-Karp, this runs in O(n).',
-        ro: 'Dacă t = "BAAB", atunci t+t = "BAABBAAB". Orice rotație a lui t este un subșir al lui t+t. Deci căutăm s = "ABBA" în "BAABBAAB" — găsit la poziția 1! Folosind KMP sau Rabin-Karp, rulează în O(n).',
+        en: 'If t = "BAAB", then t+t = "BAABBAAB". Any rotation of t is a substring of t+t. So search for s = "ABBA" in "BAABBAAB" — found at position 2 (characters at indices 2..5 = A,B,B,A)! Using KMP or Rabin-Karp, this runs in O(n).',
+        ro: 'Dacă t = "BAAB", atunci t+t = "BAABBAAB". Orice rotație a lui t este un subșir al lui t+t. Deci căutăm s = "ABBA" în "BAABBAAB" — găsit la poziția 2 (caracterele la indecșii 2..5 = A,B,B,A)! Folosind KMP sau Rabin-Karp, rulează în O(n).',
       },
     },
   ];

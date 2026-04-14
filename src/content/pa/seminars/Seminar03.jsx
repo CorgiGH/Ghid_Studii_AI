@@ -105,8 +105,8 @@ export default function Seminar03() {
       { text: { en: '100', ro: '100' }, correct: false },
     ],
     explanation: {
-      en: 'Each trial picks a random element. Since the majority appears > n/2 times, each trial has P > 1/2 of picking it. If we verify and it fails, P(error per trial) < 1/2. After k independent trials, P(all fail) < (1/2)ᵏ. For (1/2)ᵏ < 1/2⁵⁰, we need k = 50.',
-      ro: 'Fiecare încercare alege un element aleator. Deoarece majoritarul apare de > n/2 ori, fiecare încercare are P > 1/2 de a-l alege. Dacă verificăm și eșuează, P(eroare per încercare) < 1/2. După k încercări independente, P(toate eșuează) < (1/2)ᵏ. Pentru (1/2)ᵏ < 1/2⁵⁰, avem nevoie de k = 50.',
+      en: 'Each trial picks a random element. Since the majority appears strictly more than n/2 times, each trial has P > 1/2 of picking it, so P(error per trial) is strictly less than 1/2. After k independent trials, P(all fail) is strictly less than (1/2)ᵏ. At k = 50 this gives P(error) < 1/2⁵⁰ exactly, so 50 trials suffice.',
+      ro: 'Fiecare încercare alege un element aleator. Deoarece majoritarul apare strict mai mult decât n/2 ori, fiecare încercare are P > 1/2 să-l aleagă, deci P(eroare per încercare) este strict mai mic decât 1/2. După k încercări independente, P(toate eșuează) este strict mai mic decât (1/2)ᵏ. La k = 50 obținem exact P(eroare) < 1/2⁵⁰, deci 50 de încercări sunt suficiente.',
     },
   }];
 

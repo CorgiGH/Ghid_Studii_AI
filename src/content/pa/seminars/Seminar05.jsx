@@ -212,8 +212,8 @@ export default function Seminar05() {
       { text: { en: '"aabaaab"', ro: '"aabaaab"' }, correct: false },
     ],
     explanation: {
-      en: 'Consider "abaababaab": at position 9 (the last "b"), f[8] = 4 ("abaa" → try extending with "b": P[4]="a" ≠ "b"), fall to f[4] = 1 ("a" → try extending: P[1]="b" = "b" ✓). The while loop ran twice before finding a match on the third prefix-suffix.',
-      ro: 'Considerați "abaababaab": la poziția 9 (ultimul "b"), f[8] = 4 ("abaa" → încercăm extinderea cu "b": P[4]="a" ≠ "b"), cădem la f[4] = 1 ("a" → încercăm extinderea: P[1]="b" = "b" ✓). Bucla while a rulat de două ori înainte de a găsi o potrivire la al treilea prefix-sufix.',
+      en: 'Consider "abaababaab": while computing f[7] (current char P[6]="b"), we start with j = f[6] = 3, try P[3] = "a" ≠ "b" → first while iteration falls j to f[3] = 1. Then P[1] = "b" = "b" ✓ → second while-check exits. f[7] = 2, matching the table below.',
+      ro: 'Considerăm "abaababaab": la calculul lui f[7] (caracterul curent P[6]="b"), pornim cu j = f[6] = 3, încercăm P[3] = "a" ≠ "b" → prima iterație while face j = f[3] = 1. Apoi P[1] = "b" = "b" ✓ → a doua verificare while iese. f[7] = 2, conform tabelului de mai jos.',
     },
   }];
 
