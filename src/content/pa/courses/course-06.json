@@ -280,7 +280,7 @@
         {
           "type": "code",
           "language": "pseudocode",
-          "code": "// Rabin-Karp with modular hashing\nq = prime_number\nx = hash(P[0..m-1]) mod q\ny = hash(T[0..m-1]) mod q\n\nfor i = 0 to n-m:\n  if y == x:\n    if P[0..m-1] == T[i..i+m-1]:  // verify (avoid false positives)\n      return i\n  // Rolling hash update:\n  y = ((y - T[i] * |Σ|^(m-1) mod q) * |Σ| + T[i+m]) mod q\n\nreturn -1"
+          "code": "// Rabin-Karp with modular hashing\nq = prime_number\nh = |Σ|^(m-1) mod q            // precomputed high-order coefficient\nx = hash(P[0..m-1]) mod q\ny = hash(T[0..m-1]) mod q\n\nfor i = 0 to n-m:\n  if y == x:\n    if P[0..m-1] == T[i..i+m-1]:   // verify (avoid false positives)\n      return i\n  // Rolling hash update (add + q to keep the intermediate non-negative):\n  y = (((y - T[i] * h) mod q + q) * |Σ| + T[i+m]) mod q\n\nreturn -1"
         },
         {
           "type": "definition",
