@@ -204,10 +204,6 @@ export default function TestsTab({ tests, courses }) {
       ? (pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444')
       : null;
 
-    // Extract year from id
-    const yearMatch = test.id.match(/\d{4}/);
-    const year = yearMatch ? yearMatch[0] : '';
-
     return (
       <button
         key={test.id}
@@ -219,16 +215,8 @@ export default function TestsTab({ tests, courses }) {
           minHeight: '120px',
         }}
       >
-        {/* Top: year badge + status */}
-        <div className="flex items-start justify-between gap-2">
-          {year && (
-            <span
-              className="text-[11px] font-bold px-2 py-0.5 rounded-md"
-              style={{ backgroundColor: 'var(--theme-border)', color: 'var(--theme-content-text)' }}
-            >
-              {year}
-            </span>
-          )}
+        {/* Top: status only (the year is already carried by shortTitle, e.g. "2025 A") */}
+        <div className="flex items-start justify-end gap-2">
           {prev ? (
             <span
               className="text-[11px] font-bold px-2 py-0.5 rounded-md"
@@ -291,59 +279,66 @@ export default function TestsTab({ tests, courses }) {
 
   return (
     <div>
-      {/* Generate buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-        <button
-          onClick={generatePracticeTest}
-          disabled={generating}
-          className="p-4 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.005]"
-          style={{
-            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-            opacity: generating ? 0.7 : 1,
-          }}
-        >
-          <div className="text-white text-sm font-bold">
-            {generating
-              ? t('Generating...', 'Se genereaz\u0103...')
-              : t('Random Mix', 'Mix aleatoriu')
-            }
-          </div>
-          <div className="text-white/70 text-[11px] mt-1">
-            {t('8-12 questions sampled from past exams', '8-12 \u00eentreb\u0103ri din examenele anterioare')}
-          </div>
-        </button>
-
-        <button
-          onClick={generateAITest}
-          disabled={aiGenerating}
-          className="p-4 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.005]"
-          style={{
-            background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-            opacity: aiGenerating ? 0.7 : 1,
-          }}
-        >
-          <div className="text-white text-sm font-bold">
-            {aiGenerating
-              ? t('AI is thinking...', 'AI-ul genereaz\u0103...')
-              : t('AI Generate from Courses', 'Genereaz\u0103 cu AI din cursuri')
-            }
-          </div>
-          <div className="text-white/70 text-[11px] mt-1">
-            {t('New original questions based on course content', '\u00centreb\u0103ri originale bazate pe con\u021binutul cursurilor')}
-          </div>
-        </button>
-      </div>
-
       {aiError && (
         <div className="mb-4 p-3 rounded-lg text-xs" style={{ backgroundColor: '#ef444420', color: '#ef4444', border: '1px solid #ef444440' }}>
           {t('Generation failed', 'Generarea a e\u0219uat')}: {aiError}
         </div>
       )}
 
+      {/* Real past exams lead — that's why most students visit this tab. */}
       {renderGroup(t('Midterms', 'Par\u021biale'), midterms)}
       {renderGroup(t('Final Exams', 'Examene'), finals)}
       {renderGroup(t('Retakes', 'Restan\u021be'), retakes)}
       {renderGroup(t('Other', 'Altele'), other)}
+
+      {/* Generators live below the real exams — still one-click, no longer
+          dominating above-the-fold on a tab whose purpose is past papers. */}
+      <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--theme-border)' }}>
+        <h3 className="text-sm font-bold mb-3 uppercase tracking-wide" style={{ color: 'var(--theme-muted-text)' }}>
+          {t('Generate practice', 'Generează practică')}
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            onClick={generatePracticeTest}
+            disabled={generating}
+            className="p-3 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.005]"
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              opacity: generating ? 0.7 : 1,
+            }}
+          >
+            <div className="text-white text-sm font-bold">
+              {generating
+                ? t('Generating...', 'Se genereaz\u0103...')
+                : t('Random Mix', 'Mix aleatoriu')
+              }
+            </div>
+            <div className="text-white/70 text-[11px] mt-0.5">
+              {t('8-12 questions sampled from past exams', '8-12 \u00eentreb\u0103ri din examenele anterioare')}
+            </div>
+          </button>
+
+          <button
+            onClick={generateAITest}
+            disabled={aiGenerating}
+            className="p-3 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.005]"
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+              opacity: aiGenerating ? 0.7 : 1,
+            }}
+          >
+            <div className="text-white text-sm font-bold">
+              {aiGenerating
+                ? t('AI is thinking...', 'AI-ul genereaz\u0103...')
+                : t('AI Generate from Courses', 'Genereaz\u0103 cu AI din cursuri')
+              }
+            </div>
+            <div className="text-white/70 text-[11px] mt-0.5">
+              {t('New original questions based on course content', '\u00centreb\u0103ri originale bazate pe con\u021binutul cursurilor')}
+            </div>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

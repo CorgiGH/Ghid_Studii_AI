@@ -161,8 +161,8 @@ export default function TestRenderer({ src }) {
     }
   }, [timeLeft, testMode, showResults]);
 
-  const handleAnswer = useCallback((questionId, score, maxScore) => {
-    setAnswers(prev => ({ ...prev, [questionId]: { score, maxScore } }));
+  const handleAnswer = useCallback((questionId, score, maxScore, meta) => {
+    setAnswers(prev => ({ ...prev, [questionId]: { score, maxScore, ...(meta || {}) } }));
   }, []);
 
   const visibleQuestionCount = reviewMode
@@ -309,8 +309,13 @@ export default function TestRenderer({ src }) {
                 </span>
               </div>
 
-              {/* Question body */}
-              <QuestionComp question={q} onAnswer={handleAnswer} />
+              {/* Question body. Timed mode holds feedback until the test finishes
+                  (exam simulation); Tutor mode keeps the current inline feedback. */}
+              <QuestionComp
+                question={q}
+                onAnswer={handleAnswer}
+                suppressFeedback={testMode === 'timed' && !showResults}
+              />
             </div>
           );
         })}
