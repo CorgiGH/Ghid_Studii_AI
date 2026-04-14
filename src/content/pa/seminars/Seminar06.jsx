@@ -30,8 +30,8 @@ export default function Seminar06() {
   const mc2hash = [
     {
       question: {
-        en: 'Given p = "aba", s = "aabbababbabab", q = 3, d = 3 (alphabet size), what is hash(p) mod q?\nUsing h = (d·h + char) mod q, with a=0, b=1:\nh = ((3·((3·0+0) mod 3)+1) mod 3·3+0) mod 3',
-        ro: 'Dat p = "aba", s = "aabbababbabab", q = 3, d = 3 (dimensiunea alfabetului), care este hash(p) mod q?\nFolosind h = (d·h + char) mod q, cu a=0, b=1:\nh = ((3·((3·0+0) mod 3)+1) mod 3·3+0) mod 3',
+        en: 'Given p = "aba", s = "aabbababbabab", q = 3, d = 3 (alphabet size), what is hash(p) mod q?\nUsing h = (d·h + char) mod q, with a=0, b=1:\nh₀ = 0\nh₁ = (h₀·3 + 0) mod 3 = 0    (after \'a\')\nh₂ = (h₁·3 + 1) mod 3 = 1    (after \'b\')\nh₃ = (h₂·3 + 0) mod 3 = 0    (after \'a\')',
+        ro: 'Dat p = "aba", s = "aabbababbabab", q = 3, d = 3 (dimensiunea alfabetului), care este hash(p) mod q?\nFolosind h = (d·h + char) mod q, cu a=0, b=1:\nh₀ = 0\nh₁ = (h₀·3 + 0) mod 3 = 0    (după \'a\')\nh₂ = (h₁·3 + 1) mod 3 = 1    (după \'b\')\nh₃ = (h₂·3 + 0) mod 3 = 0    (după \'a\')',
       },
       options: [
         {

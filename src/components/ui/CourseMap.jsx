@@ -149,7 +149,7 @@ const CourseMap = ({ subject, onCourseClick }) => {
           const hasProgress = completed > 0;
 
           const isNext = !isComplete && !hasProgress &&
-            courseProgress.slice(0, index).every(cp => cp.total > 0 && cp.completed >= cp.total);
+            courseProgress.slice(0, index).every(cp => cp.total === 0 || cp.completed >= cp.total);
 
           let borderLeftColor, tileBorder;
           if (isComplete) {

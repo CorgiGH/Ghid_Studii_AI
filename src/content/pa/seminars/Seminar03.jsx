@@ -413,8 +413,8 @@ print(i);`}</Code>
 
             <p className="font-bold mt-4 mb-1">{t('(c) Monte Carlo Algorithm', '(c) Algoritm Monte Carlo')}</p>
             <p className="text-sm mb-2">{t(
-              'Run at most 50 random trials. Each trial: pick a random element, verify if majority. P(error) = P(all 50 trials miss) < (1/2)⁵⁰ < 1/2⁵⁰.',
-              'Rulăm cel mult 50 de încercări aleatorii. Fiecare încercare: alegem un element aleator, verificăm dacă e majoritar. P(eroare) = P(toate 50 de încercări ratează) < (1/2)⁵⁰ < 1/2⁵⁰.'
+              'Run at most 50 random trials. Each trial: pick a random element, verify if majority. P(error) = P(all 50 trials miss) < (1/2)⁵⁰ = 1/2⁵⁰.',
+              'Rulăm cel mult 50 de încercări aleatorii. Fiecare încercare: alegem un element aleator, verificăm dacă e majoritar. P(eroare) = P(toate 50 de încercări ratează) < (1/2)⁵⁰ = 1/2⁵⁰.'
             )}</p>
             <Code>{`Algorithm MajorityMonteCarlo(a[0..n−1])
   for trial ← 1 to 50 do
@@ -428,8 +428,8 @@ print(i);`}</Code>
   return a[0]    // fallback (may be wrong)`}</Code>
             <Box type="theorem">
               <p className="text-sm">{t(
-                'Error probability: P(all 50 trials miss) < (1/2)⁵⁰ ≈ 8.9 × 10⁻¹⁶ ≪ 1/2⁵⁰.',
-                'Probabilitate de eroare: P(toate 50 de încercări ratează) < (1/2)⁵⁰ ≈ 8.9 × 10⁻¹⁶ ≪ 1/2⁵⁰.'
+                'Error probability: P(all 50 trials miss) < (1/2)⁵⁰ = 1/2⁵⁰ ≈ 8.9 × 10⁻¹⁶.',
+                'Probabilitate de eroare: P(toate 50 de încercări ratează) < (1/2)⁵⁰ = 1/2⁵⁰ ≈ 8.9 × 10⁻¹⁶.'
               )}</p>
             </Box>
           </div>
