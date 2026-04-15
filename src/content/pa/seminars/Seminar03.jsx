@@ -147,6 +147,23 @@ export default function Seminar03() {
   }];
 
   /* ─── Problem 6: Fair bit from biased coin ─── */
+  const mc6sym = [{
+    question: {
+      en: 'We call `rand2p(p)` twice and get an ordered pair (a,b). Which pair of outcomes has the same probability regardless of p?',
+      ro: 'Apelăm `rand2p(p)` de două ori și obținem perechea ordonată (a,b). Ce pereche de rezultate are aceeași probabilitate indiferent de p?',
+    },
+    options: [
+      { text: { en: '(0,0) and (1,1)', ro: '(0,0) și (1,1)' }, correct: false },
+      { text: { en: '(0,1) and (1,0)', ro: '(0,1) și (1,0)' }, correct: true },
+      { text: { en: '(0,1) and (1,1)', ro: '(0,1) și (1,1)' }, correct: false },
+      { text: { en: 'no such pair exists', ro: 'nicio pereche nu are' }, correct: false },
+    ],
+    explanation: {
+      en: "P(0,1) = p(1−p) and P(1,0) = (1−p)·p are equal for every p. This symmetry is exactly what von Neumann's trick exploits: throw away (0,0) and (1,1), keep only (0,1)/(1,0), output the first bit — a fair coin from any biased one.",
+      ro: 'P(0,1) = p(1−p) și P(1,0) = (1−p)·p sunt egale pentru orice p. Această simetrie e exact ceea ce exploatează trucul lui von Neumann: aruncăm (0,0) și (1,1), păstrăm doar (0,1)/(1,0), emitem primul bit — o monedă corectă din una oarecare părtinitoare.',
+    },
+  }];
+
   const mc6 = [{
     question: {
       en: 'Which is the correct I/O formalization for "Given rand2p (returns 0 with unknown probability p, 1 with probability 1−p), write rand2corect returning 0 or 1 each with probability 0.5"?',
@@ -511,6 +528,7 @@ print(sum);`}</Code>
         )}</p>
       </Box>
       <MultipleChoice questions={mc6} />
+      <MultipleChoice questions={mc6sym} />
       <Toggle
         question={t('Show algorithm & pseudocode', 'Arată algoritmul și pseudocodul')}
         showLabel={t('Show', 'Arată')}

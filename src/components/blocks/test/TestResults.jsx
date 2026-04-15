@@ -65,6 +65,7 @@ export default function TestResults({ questions, answers, totalPoints, onRetake,
           const pickedOpt = isMC && typeof a.selectedIndex === 'number' ? q.options[a.selectedIndex] : null;
           const topExplanation = q.explanation ? t(q.explanation.en, q.explanation.ro) : null;
           const rubric = q.rubric ? t(q.rubric.en, q.rubric.ro) : null;
+          const commonErrors = q.commonErrors ? t(q.commonErrors.en, q.commonErrors.ro) : null;
 
           return (
             <details
@@ -134,6 +135,18 @@ export default function TestResults({ questions, answers, totalPoints, onRetake,
                       {t('Rubric', 'Barem')}
                     </div>
                     <div className="whitespace-pre-wrap">{rubric}</div>
+                  </div>
+                )}
+
+                {/* Common mistakes / misconceptions — shown when provided, especially on wrong/partial answers */}
+                {commonErrors && (
+                  <div className="p-2 rounded" style={{ backgroundColor: 'color-mix(in srgb, #f59e0b 6%, var(--theme-card-bg))', border: '1px dashed color-mix(in srgb, #f59e0b 35%, var(--theme-border))' }}>
+                    <div className="text-[10px] font-semibold uppercase tracking-wide mb-1" style={{ color: '#b45309' }}>
+                      {t('Common mistakes', 'Greșeli frecvente')}
+                    </div>
+                    <div className="prose-sm" style={{ color: 'var(--theme-content-text)' }}>
+                      <ReactMarkdown>{commonErrors}</ReactMarkdown>
+                    </div>
                   </div>
                 )}
 

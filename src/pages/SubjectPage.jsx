@@ -292,16 +292,23 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
                     <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
                   </div>
                 ) : (
-                  subject.seminars.map(sem => {
-                    const SemContent = sem.component;
-                    return (
-                      <CourseBlock key={sem.id} title={sem.title[lang]} id={sem.id}>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <SemContent />
-                        </Suspense>
-                      </CourseBlock>
-                    );
-                  })
+                  <>
+                    {subject.slug === 'pa' && (
+                      <p className="mb-4 text-xs" style={{ color: 'var(--theme-muted-text)' }}>
+                        {t(`${subject.seminars.length} weeks`, `${subject.seminars.length} săptămâni`)}
+                      </p>
+                    )}
+                    {subject.seminars.map(sem => {
+                      const SemContent = sem.component;
+                      return (
+                        <CourseBlock key={sem.id} title={sem.title[lang]} id={sem.id}>
+                          <Suspense fallback={<LoadingFallback />}>
+                            <SemContent />
+                          </Suspense>
+                        </CourseBlock>
+                      );
+                    })}
+                  </>
                 )}
               </div>
             )}

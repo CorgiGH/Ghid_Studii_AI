@@ -59,8 +59,8 @@ export default function Seminar04() {
       { text: { en: 'Θ(n⁴)', ro: 'Θ(n⁴)' }, correct: false },
     ],
     explanation: {
-      en: 'For any pair (i,j) with i < j, P(v[i] > v[j]) = 1/2. Expected inversions = C(n,2) · 1/2 = n(n−1)/4. Each inversion triggers n inner iterations. Total = n · n(n−1)/4 = Θ(n³).',
-      ro: 'Pentru orice pereche (i,j) cu i < j, P(v[i] > v[j]) = 1/2. Inversiuni așteptate = C(n,2) · 1/2 = n(n−1)/4. Fiecare inversiune declanșează n iterații interioare. Total = n · n(n−1)/4 = Θ(n³).',
+      en: 'Expected inversions = C(n,2) · 1/2 = n(n−1)/4. Each inversion triggers n inner iterations, and the outer double-loop always does C(n,2) comparisons. Total = C(n,2) + n · n(n−1)/4 = Θ(n³).',
+      ro: 'Inversiuni așteptate = C(n,2) · 1/2 = n(n−1)/4. Fiecare inversiune declanșează n iterații interioare, iar bucla exterioară dublă face mereu C(n,2) comparații. Total = C(n,2) + n · n(n−1)/4 = Θ(n³).',
     },
   }];
 
@@ -88,8 +88,8 @@ export default function Seminar04() {
       { text: { en: 'Θ(√n)', ro: 'Θ(√n)' }, correct: false },
     ],
     explanation: {
-      en: 'In a permutation of {0,...,n−1}, about half the elements are even. The expected position of the first even element is (n+1)/(⌈n/2⌉+1) ≈ 2 for large n. This is constant, so Θ(1).',
-      ro: 'Într-o permutare a {0,...,n−1}, aproximativ jumătate din elemente sunt pare. Poziția așteptată a primului element par este (n+1)/(⌈n/2⌉+1) ≈ 2 pentru n mare. Aceasta este constantă, deci Θ(1).',
+      en: 'In a permutation of {0,...,n−1}, about half the elements are even. The expected position of the first even element is (n+1)/(⌈n/2⌉+1) ≈ 2 for large n. This is constant, so Θ(1). (This is the permutation-model argument; the i.i.d. analogue used in Problem 4c arrives at the same Θ(1) via the geometric distribution, E[trials] = 1/p.)',
+      ro: 'Într-o permutare a {0,...,n−1}, aproximativ jumătate din elemente sunt pare. Poziția așteptată a primului element par este (n+1)/(⌈n/2⌉+1) ≈ 2 pentru n mare. Aceasta este constantă, deci Θ(1). (Acesta e argumentul pentru modelul permutărilor; analogul i.i.d. folosit în Problema 4c ajunge la același Θ(1) prin distribuția geometrică, E[încercări] = 1/p.)',
     },
   }];
 
@@ -220,8 +220,8 @@ export default function Seminar04() {
       { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
     ],
     explanation: {
-      en: 'Fisher-Yates produces a uniform random permutation, so a[p[0]], a[p[1]], ... is a random ordering of distinct elements. The analysis is identical to Problem 1: expected min updates = Hₙ − 1, each costs n. Total = n + n · (Hₙ − 1) = n · Hₙ = Θ(n · ln n).',
-      ro: 'Fisher-Yates produce o permutare aleatorie uniformă, deci a[p[0]], a[p[1]], ... este o ordine aleatorie a elementelor distincte. Analiza este identică cu Problema 1: actualizări de minim așteptate = Hₙ − 1, fiecare costă n. Total = n + n · (Hₙ − 1) = n · Hₙ = Θ(n · ln n).',
+      en: 'Fisher-Yates produces a uniform random permutation, so a[p[0]], a[p[1]], ... is a random ordering of distinct elements. The analysis is identical to Problem 1: outer loop runs n−1 iterations; expected min updates = H_n − 1, each costs n inner steps. Total = (n−1) + n·(H_n − 1) = n·H_n − 1 = Θ(n log n).',
+      ro: 'Fisher-Yates produce o permutare aleatorie uniformă, deci a[p[0]], a[p[1]], ... este o ordine aleatorie a elementelor distincte. Analiza este identică cu Problema 1: bucla exterioară face n−1 iterații; actualizări min așteptate = H_n − 1, fiecare costând n pași interiori. Total = (n−1) + n·(H_n − 1) = n·H_n − 1 = Θ(n log n).',
     },
   }];
 
@@ -391,6 +391,10 @@ return 0;`}</Code>
             <p className="text-sm mb-2">
               {t('Let m = ⌈n/2⌉ be the number of even elements among {0,...,n−1}. Consider the n−m = ⌊n/2⌋ odd elements as "failures" and the m even elements as "successes". The expected position of the first success among n elements with m successes is:',
                 'Fie m = ⌈n/2⌉ numărul de elemente pare din {0,...,n−1}. Considerăm cele n−m = ⌊n/2⌋ elemente impare ca „eșecuri" și cele m elemente pare ca „succese". Poziția așteptată a primului succes printre n elemente cu m succese este:')}
+            </p>
+            <p className="text-sm mb-2">
+              {t('By symmetry, the m successes partition the n−m failures into m+1 gaps of equal expected size (n−m)/(m+1); the first success sits at position 1 plus the first gap\'s size:',
+                'Prin simetrie, cele m succese împart cele n−m eșecuri în m+1 goluri de dimensiune așteptată egală (n−m)/(m+1); primul succes se află la poziția 1 plus dimensiunea primului gol:')}
             </p>
             <Code>{`E[iterations] = (n + 1) / (m + 1)
               = (n + 1) / (⌈n/2⌉ + 1)
@@ -637,8 +641,8 @@ print(sum);`}</Code>
             <Code>{`E[min updates] = Σᵢ₌₁ⁿ⁻¹ 1/(i+1) = Hₙ − 1`}</Code>
             <Box type="theorem">
               <p className="text-sm">
-                {t('Average complexity (excluding Fisher-Yates): n · (Hₙ − 1) + n = n · Hₙ = Θ(n · ln n). Including Fisher-Yates: O(n) + Θ(n · ln n) = Θ(n · ln n).',
-                  'Complexitatea medie (excluzând Fisher-Yates): n · (Hₙ − 1) + n = n · Hₙ = Θ(n · ln n). Incluzând Fisher-Yates: O(n) + Θ(n · ln n) = Θ(n · ln n).')}
+                {t('Outer loop runs n−1 iterations; expected min updates = H_n − 1, each costs n inner steps. Total = (n−1) + n·(H_n − 1) = n·H_n − 1 = Θ(n log n). Including Fisher-Yates: O(n) + Θ(n log n) = Θ(n log n).',
+                  'Bucla exterioară face n−1 iterații; actualizări min așteptate = H_n − 1, fiecare costând n pași interiori. Total = (n−1) + n·(H_n − 1) = n·H_n − 1 = Θ(n log n). Incluzând Fisher-Yates: O(n) + Θ(n log n) = Θ(n log n).')}
               </p>
             </Box>
           </div>

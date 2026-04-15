@@ -58,7 +58,7 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {questions.map((q, qIdx) => {
         const picked = answers[qIdx];
         const shown = revealed[qIdx];
@@ -114,7 +114,7 @@ export default function MultipleChoice({ questions, multiSelect = false, onScore
                     disabled={shown}
                     onClick={() => { select(qIdx, oIdx); setFocusedIdx(prev => ({ ...prev, [qIdx]: oIdx })); }}
                     onKeyDown={(e) => onOptionKeyDown(e, qIdx, oIdx, q.options.length)}
-                    className="w-full text-left border rounded-lg p-2 transition text-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-default"
+                    className="w-full text-left border rounded-lg px-3 py-3 transition text-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-default flex items-center min-h-[2.75rem]"
                     style={{ background: bg, borderColor, color: 'var(--theme-text)' }}
                   >
                     {typeof opt.text === 'object' ? opt.text[lang] : opt.text}

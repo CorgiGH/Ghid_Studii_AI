@@ -66,7 +66,7 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
         willChange: 'transform',
       }}
     >
-      <div className="flex items-center gap-3 px-4 py-2.5">
+      <div className="flex items-center gap-x-4 px-4 py-2.5">
         {!isHome && (
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -81,7 +81,7 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
 
         <span
           onClick={() => navigate('/')}
-          className="font-bold text-sm cursor-pointer hover:opacity-80 transition"
+          className="font-bold text-sm cursor-pointer hover:opacity-80 transition ml-2"
         >
           {t('Study Guide', 'Ghid de Studiu')}
         </span>

@@ -30,7 +30,7 @@ export default function QuickQuizFAB({ onQuiz, lang }) {
         width: '56px',
         height: '56px',
         bottom: '24px',
-        right: '16px',
+        right: '24px',
         backgroundColor: '#3b82f6',
         color: 'white',
         boxShadow: hovered

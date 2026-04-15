@@ -197,7 +197,7 @@ export default function TestsTab({ tests, courses }) {
   const retakes = tests.filter(t => categorize(t) === 'restanta');
   const other = tests.filter(t => categorize(t) === 'other');
 
-  const renderCard = (test) => {
+  const renderCard = (test, { promoted = false } = {}) => {
     const prev = testProgress?.[test.id];
     const pct = prev ? Math.round(prev.score / prev.totalPoints * 100) : null;
     const statusColor = pct !== null
@@ -208,10 +208,11 @@ export default function TestsTab({ tests, courses }) {
       <button
         key={test.id}
         onClick={() => setActiveTest(test.id)}
-        className="flex flex-col justify-between p-4 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md"
+        className={`flex flex-col justify-between p-4 rounded-xl text-left cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md ${promoted ? 'border-l-4 pl-3' : ''}`}
         style={{
           backgroundColor: 'var(--theme-card-bg)',
           border: `2px solid ${statusColor || 'var(--theme-border)'}`,
+          borderLeft: promoted ? '4px solid #3b82f6' : undefined,
           minHeight: '120px',
         }}
       >
@@ -263,15 +264,18 @@ export default function TestsTab({ tests, courses }) {
     );
   };
 
-  const renderGroup = (title, items) => {
+  const renderGroup = (title, items, { promoted = false } = {}) => {
     if (!items.length) return null;
     return (
       <div className="mb-8">
-        <h3 className="text-sm font-bold mb-3 uppercase tracking-wide" style={{ color: 'var(--theme-muted-text)' }}>
+        <h3
+          className={`font-bold mb-3 uppercase tracking-wide ${promoted ? 'text-base' : 'text-sm'}`}
+          style={{ color: promoted ? 'var(--theme-content-text)' : 'var(--theme-muted-text)' }}
+        >
           {title}
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {items.map(renderCard)}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          {items.map(t => renderCard(t, { promoted }))}
         </div>
       </div>
     );
@@ -287,7 +291,7 @@ export default function TestsTab({ tests, courses }) {
 
       {/* Real past exams lead — that's why most students visit this tab. */}
       {renderGroup(t('Midterms', 'Par\u021biale'), midterms)}
-      {renderGroup(t('Final Exams', 'Examene'), finals)}
+      {renderGroup(t('Final Exams', 'Examene'), finals, { promoted: true })}
       {renderGroup(t('Retakes', 'Restan\u021be'), retakes)}
       {renderGroup(t('Other', 'Altele'), other)}
 

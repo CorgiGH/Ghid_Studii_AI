@@ -7,7 +7,7 @@ const pa = {
   shortTitle: { en: 'PA', ro: 'PA' },
   description: {
     en: 'Computational problems, algorithm analysis, nondeterministic & probabilistic algorithms, string matching (KMP, Boyer-Moore, Rabin-Karp)',
-    ro: 'Probleme computaționale, analiza algoritmilor, algoritmi nedeterministici și probabilistici, potrivirea șirurilor (KMP, Boyer-Moore, Rabin-Karp)',
+    ro: 'Probleme computaționale, analiza algoritmilor, algoritmi nedeterminiști și probabilistici, potrivirea șirurilor (KMP, Boyer-Moore, Rabin-Karp)',
   },
   icon: '\u2699\uFE0F',
   courses: [
@@ -20,7 +20,7 @@ const pa = {
       src: 'pa/courses/course-01.json'
     },
     { id: 'pa-c2', title: { en: 'Course 2: Algorithm Efficiency Analysis', ro: 'Cursul 2: Analiza eficienței algoritmilor' }, shortTitle: { en: 'C2: Efficiency Analysis', ro: 'C2: Analiza eficienței' }, sectionCount: 13, metaId: 'pa-c2', src: 'pa/courses/course-02.json' },
-    { id: 'pa-c3', title: { en: 'Course 3: Nondeterministic & Probabilistic Algorithms', ro: 'Cursul 3: Algoritmi nedeterministici și probabilistici' }, shortTitle: { en: 'C3: Nondet/Prob', ro: 'C3: Nedet/Prob' }, sectionCount: 13, metaId: 'pa-c3', src: 'pa/courses/course-03.json' },
+    { id: 'pa-c3', title: { en: 'Course 3: Nondeterministic & Probabilistic Algorithms', ro: 'Cursul 3: Algoritmi nedeterminiști și probabilistici' }, shortTitle: { en: 'C3: Nondet/Prob', ro: 'C3: Nedet/Prob' }, sectionCount: 13, metaId: 'pa-c3', src: 'pa/courses/course-03.json' },
     { id: 'pa-c4', title: { en: 'Course 4: Probabilistic Analysis', ro: 'Cursul 4: Analiză probabilistică' }, shortTitle: { en: 'C4: Prob. Analysis', ro: 'C4: Analiză prob.' }, sectionCount: 6, metaId: 'pa-c4', src: 'pa/courses/course-04.json' },
     { id: 'pa-c5', title: { en: 'Course 5: KMP Algorithm', ro: 'Cursul 5: Algoritmul KMP' }, shortTitle: { en: 'C5: KMP', ro: 'C5: KMP' }, sectionCount: 5, metaId: 'pa-c5', src: 'pa/courses/course-05.json' },
     { id: 'pa-c6', title: { en: 'Course 6: Boyer-Moore & Rabin-Karp', ro: 'Cursul 6: Boyer-Moore și Rabin-Karp' }, shortTitle: { en: 'C6: BM/RK', ro: 'C6: BM/RK' }, sectionCount: 6, metaId: 'pa-c6', src: 'pa/courses/course-06.json' },

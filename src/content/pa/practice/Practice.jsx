@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import MultipleChoice from '../../../components/ui/MultipleChoice';
 import CourseBlock from '../../../components/ui/CourseBlock';
+import Code from '../../../components/ui/Code';
 
 /* ═══════════════════════════════════════════════════════════
    Section 1: Algorithm Design & Analysis
@@ -18,7 +19,7 @@ const designQuestions = [
     explanation: { en: 'Strictly increasing requires < (not ≤). The elements are integers (ℤ), not just naturals (ℕ). The output is a boolean, not a sorted array.', ro: 'Strict crescător necesită < (nu ≤). Elementele sunt numere întregi (ℤ), nu doar naturale (ℕ). Output-ul este boolean, nu tabloul sortat.' },
   },
   {
-    question: { en: '2. What is the loop invariant of isinc(a, m) { i=0; while(i<m-1) { if(a[i]>=a[i+1]) return false; i=i+1; } return true; }?', ro: '2. Care este invariantul buclei while din isinc(a, m) { i=0; while(i<m-1) { if(a[i]>=a[i+1]) return false; i=i+1; } return true; }?' },
+    question: { en: '2. What is the loop invariant of the `isinc` algorithm (strictly-increasing check)?', ro: '2. Care este invariantul buclei din algoritmul `isinc` (verificarea strictă crescător)?' },
     options: [
       { text: { en: 'a[0..i] is sorted in non-decreasing order', ro: 'a[0..i] este ordonat nedescrescător' }, correct: false },
       { text: { en: 'a[0..i] is sorted in strictly increasing order and i ≤ m-1', ro: 'a[0..i] este ordonat strict crescător și i ≤ m-1' }, correct: true },
@@ -672,16 +673,45 @@ export default function Practice() {
           )}
         </p>
       </div>
-      {sections.map((s, i) => (
-        <CourseBlock
-          key={s.id}
-          title={`${s.title} (${s.questions.length})`}
-          id={s.id}
-          defaultOpen={i === 0}
-        >
-          <MultipleChoice questions={s.questions} />
-        </CourseBlock>
-      ))}
+      {sections.map((s, i) => {
+        // Design section Q2 renders with a Code block above it showing the
+        // isinc function body (previously inlined into the stem).
+        if (s.id === 'pa-practice-design') {
+          const q1 = s.questions.slice(0, 1);
+          const q2 = s.questions.slice(1, 2);
+          const rest = s.questions.slice(2);
+          return (
+            <CourseBlock
+              key={s.id}
+              title={`${s.title} (${s.questions.length})`}
+              id={s.id}
+              defaultOpen={i === 0}
+            >
+              <MultipleChoice questions={q1} />
+              <Code>{`isinc(a, m) {
+  i = 0;
+  while (i < m - 1) {
+    if (a[i] >= a[i + 1]) return false;
+    i = i + 1;
+  }
+  return true;
+}`}</Code>
+              <MultipleChoice questions={q2} />
+              <MultipleChoice questions={rest} />
+            </CourseBlock>
+          );
+        }
+        return (
+          <CourseBlock
+            key={s.id}
+            title={`${s.title} (${s.questions.length})`}
+            id={s.id}
+            defaultOpen={i === 0}
+          >
+            <MultipleChoice questions={s.questions} />
+          </CourseBlock>
+        );
+      })}
     </div>
   );
 }

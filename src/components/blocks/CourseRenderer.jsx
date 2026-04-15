@@ -162,7 +162,7 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
             >
               {currentStep + 1}
             </span>
-            <span className="text-xs truncate" style={{ color: 'var(--theme-muted-text)' }}>
+            <span className="text-xs truncate leading-none" style={{ color: 'var(--theme-muted-text)' }}>
               {t(
                 `Step ${currentStep + 1} of ${totalSteps}`,
                 `Pasul ${currentStep + 1} din ${totalSteps}`
