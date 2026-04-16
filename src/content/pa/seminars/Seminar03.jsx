@@ -14,9 +14,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Input: (none); Output: "heads" with P = 5/9, "tails" with P = 4/9', ro: 'Input: (niciunul); Output: "cap" cu P = 5/9, "pajură" cu P = 4/9' }, correct: true },
-      { text: { en: 'Input: p ∈ (0,1); Output: "heads" with P = p, "tails" with P = 1−p', ro: 'Input: p ∈ (0,1); Output: "cap" cu P = p, "pajură" cu P = 1−p' }, correct: false },
-      { text: { en: 'Input: (none); Output: "heads" with P = 1/2, "tails" with P = 1/2', ro: 'Input: (niciunul); Output: "cap" cu P = 1/2, "pajură" cu P = 1/2' }, correct: false },
-      { text: { en: 'Input: n — number of flips; Output: array of n results', ro: 'Input: n — numărul de aruncări; Output: vector de n rezultate' }, correct: false },
+      { text: { en: 'Input: p ∈ (0,1); Output: "heads" with P = p, "tails" with P = 1−p', ro: 'Input: p ∈ (0,1); Output: "cap" cu P = p, "pajură" cu P = 1−p' }, correct: false, feedback: { en: 'The probabilities 5/9 and 4/9 are fixed by the problem; p is not an input parameter.', ro: 'Probabilitățile 5/9 și 4/9 sunt fixate de enunț; p nu e parametru de intrare.' } },
+      { text: { en: 'Input: (none); Output: "heads" with P = 1/2, "tails" with P = 1/2', ro: 'Input: (niciunul); Output: "cap" cu P = 1/2, "pajură" cu P = 1/2' }, correct: false, feedback: { en: 'That is a fair coin; the problem asks for a biased coin (5/9 vs 4/9).', ro: 'Aceea e o monedă corectă; problema cere una măsluită (5/9 vs 4/9).' } },
+      { text: { en: 'Input: n — number of flips; Output: array of n results', ro: 'Input: n — numărul de aruncări; Output: vector de n rezultate' }, correct: false, feedback: { en: 'The algorithm models a *single* flip; batching into n flips is a separate wrapper problem.', ro: 'Algoritmul modelează o *singură* aruncare; gruparea în n aruncări e o problemă-wrapper separată.' } },
     ],
     explanation: {
       en: 'The algorithm takes no input — the probabilities 5/9 and 4/9 are fixed by the problem. It outputs a single result with the specified bias, not a fair coin and not a parameterized one.',
@@ -32,9 +32,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'P(stop after i iterations) = (1/2)ⁱ', ro: 'P(oprire după i iterații) = (1/2)ⁱ' }, correct: true },
-      { text: { en: 'P(stop after i iterations) = 1/i', ro: 'P(oprire după i iterații) = 1/i' }, correct: false },
-      { text: { en: 'P(stop after i iterations) = (1/2)ⁱ⁻¹', ro: 'P(oprire după i iterații) = (1/2)ⁱ⁻¹' }, correct: false },
-      { text: { en: 'P(stop after i iterations) = i · (1/2)ⁱ', ro: 'P(oprire după i iterații) = i · (1/2)ⁱ' }, correct: false },
+      { text: { en: 'P(stop after i iterations) = 1/i', ro: 'P(oprire după i iterații) = 1/i' }, correct: false, feedback: { en: 'The distribution is geometric, not uniform over i: stopping requires i−1 misses (each 1/2) and then a hit, giving (1/2)ⁱ.', ro: 'Distribuția e geometrică, nu uniformă în i: oprirea cere i−1 ratări (fiecare 1/2) și apoi un succes, deci (1/2)ⁱ.' } },
+      { text: { en: 'P(stop after i iterations) = (1/2)ⁱ⁻¹', ro: 'P(oprire după i iterații) = (1/2)ⁱ⁻¹' }, correct: false, feedback: { en: 'Off by one: this counts i−1 flips (just the misses), forgetting that the final stopping flip also has probability 1/2.', ro: 'Off-by-one: numeri i−1 aruncări (doar ratările), uitând că și aruncarea finală de oprire are probabilitate 1/2.' } },
+      { text: { en: 'P(stop after i iterations) = i · (1/2)ⁱ', ro: 'P(oprire după i iterații) = i · (1/2)ⁱ' }, correct: false, feedback: { en: 'The factor i belongs in E[i] = Σ i·(1/2)ⁱ (expected iterations), not in the point probability.', ro: 'Factorul i apare în E[i] = Σ i·(1/2)ⁱ (nr. de iterații așteptat), nu în probabilitatea punctuală.' } },
     ],
     explanation: {
       en: 'To stop after exactly i iterations: we need x=1 for the first i−1 iterations (each with P=1/2) and x=0 on iteration i (P=1/2). Total: (1/2)ⁱ.',
@@ -49,8 +49,8 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Yes — Σᵢ₌₁^∞ (1/2)ⁱ = 1, so it stops almost surely', ro: 'Da — Σᵢ₌₁^∞ (1/2)ⁱ = 1, deci se oprește aproape sigur' }, correct: true },
-      { text: { en: 'No — there is always a chance it runs forever', ro: 'Nu — există mereu o șansă să ruleze la infinit' }, correct: false },
-      { text: { en: 'Yes — it stops after at most 100 iterations', ro: 'Da — se oprește după cel mult 100 de iterații' }, correct: false },
+      { text: { en: 'No — there is always a chance it runs forever', ro: 'Nu — există mereu o șansă să ruleze la infinit' }, correct: false, feedback: { en: 'The probability of never stopping is lim_{n→∞} (1/2)ⁿ = 0. The sum of stopping probabilities converges to 1.', ro: 'Probabilitatea de a nu se opri niciodată este lim_{n→∞} (1/2)ⁿ = 0. Suma probabilităților de oprire converge la 1.' } },
+      { text: { en: 'Yes — it stops after at most 100 iterations', ro: 'Da — se oprește după cel mult 100 de iterații' }, correct: false, feedback: { en: 'There is no hard upper bound; termination is only *almost sure*, not guaranteed within any fixed number of iterations.', ro: 'Nu există o limită superioară fermă; terminarea e doar *aproape sigură*, nu garantată într-un număr fix de iterații.' } },
     ],
     explanation: {
       en: 'The probability of stopping is Σᵢ₌₁^∞ (1/2)ⁱ = 1. This is a geometric series. Although any single run could theoretically go on, the probability of never stopping is 0.',
@@ -66,9 +66,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Input: a[0..n−1], a[i] ∈ ℕ, ∃x: #{i : a[i]=x} > ⌊n/2⌋; Output: x (the majority element)', ro: 'Input: a[0..n−1], a[i] ∈ ℕ, ∃x: #{i : a[i]=x} > ⌊n/2⌋; Output: x (elementul majoritar)' }, correct: true },
-      { text: { en: 'Input: a[0..n−1]; Output: x if majority exists, else −1', ro: 'Input: a[0..n−1]; Output: x dacă există majoritar, altfel −1' }, correct: false },
-      { text: { en: 'Input: a[0..n−1]; Output: the element that appears most often', ro: 'Input: a[0..n−1]; Output: elementul care apare cel mai des' }, correct: false },
-      { text: { en: 'Input: a[0..n−1], x; Output: true if x is the majority element', ro: 'Input: a[0..n−1], x; Output: true dacă x este elementul majoritar' }, correct: false },
+      { text: { en: 'Input: a[0..n−1]; Output: x if majority exists, else −1', ro: 'Input: a[0..n−1]; Output: x dacă există majoritar, altfel −1' }, correct: false, feedback: { en: 'Drops the precondition that a majority element exists; with that precondition, no "-1" branch is needed.', ro: 'Pierde precondiția că există majoritar; cu ea nu mai e nevoie de ramura „-1".' } },
+      { text: { en: 'Input: a[0..n−1]; Output: the element that appears most often', ro: 'Input: a[0..n−1]; Output: elementul care apare cel mai des' }, correct: false, feedback: { en: 'That is the *mode*, not majority. Mode always exists; majority needs strictly > n/2.', ro: 'Acela e *modul*, nu majoritarul. Modul există mereu; majoritarul cere strict > n/2.' } },
+      { text: { en: 'Input: a[0..n−1], x; Output: true if x is the majority element', ro: 'Input: a[0..n−1], x; Output: true dacă x este elementul majoritar' }, correct: false, feedback: { en: 'That is the *verification* variant (x is given); the problem asks us to *find* x.', ro: 'Aceea e varianta de *verificare* (x e dat); problema cere să *găsim* x.' } },
     ],
     explanation: {
       en: 'The precondition guarantees a majority element exists — no need to handle the "not found" case. We must find the element itself, not just check a candidate. "Most frequent" ≠ majority (majority requires > n/2).',
@@ -83,9 +83,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Las Vegas always returns the correct answer (may take variable time); Monte Carlo may return a wrong answer (bounded error probability)', ro: 'Las Vegas returnează mereu răspunsul corect (poate dura timp variabil); Monte Carlo poate returna un răspuns greșit (probabilitate de eroare mărginită)' }, correct: true },
-      { text: { en: 'Las Vegas is deterministic; Monte Carlo is probabilistic', ro: 'Las Vegas este determinist; Monte Carlo este probabilistic' }, correct: false },
-      { text: { en: 'Las Vegas is faster; Monte Carlo is slower but more accurate', ro: 'Las Vegas este mai rapid; Monte Carlo este mai lent dar mai precis' }, correct: false },
-      { text: { en: 'They are the same — both names refer to randomized algorithms that always halt', ro: 'Sunt la fel — ambele denumiri se referă la algoritmi randomizați care se opresc mereu' }, correct: false },
+      { text: { en: 'Las Vegas is deterministic; Monte Carlo is probabilistic', ro: 'Las Vegas este determinist; Monte Carlo este probabilistic' }, correct: false, feedback: { en: 'Both are randomized. The split is on what is variable: *time* (Las Vegas) vs *correctness* (Monte Carlo).', ro: 'Ambele sunt randomizate. Distincția e pe ce variază: *timpul* (Las Vegas) vs *corectitudinea* (Monte Carlo).' } },
+      { text: { en: 'Las Vegas is faster; Monte Carlo is slower but more accurate', ro: 'Las Vegas este mai rapid; Monte Carlo este mai lent dar mai precis' }, correct: false, feedback: { en: 'Monte Carlo is usually *faster* with a fixed time budget but may be wrong; Las Vegas is always correct but with variable runtime.', ro: 'Monte Carlo e de obicei *mai rapid* cu buget fix de timp dar poate greși; Las Vegas e mereu corect dar cu timp variabil.' } },
+      { text: { en: 'They are the same — both names refer to randomized algorithms that always halt', ro: 'Sunt la fel — ambele denumiri se referă la algoritmi randomizați care se opresc mereu' }, correct: false, feedback: { en: 'Las Vegas may *not* halt within a fixed bound (only almost surely); that is precisely what Monte Carlo fixes — by accepting bounded error instead.', ro: 'Las Vegas poate *să nu* se oprească într-o limită fixă (doar aproape sigur); Monte Carlo remediază asta acceptând în schimb eroare mărginită.' } },
     ],
     explanation: {
       en: 'Las Vegas algorithms are always correct but have random running time. Monte Carlo algorithms always terminate in bounded time but may be incorrect with bounded probability. Both are probabilistic.',
@@ -100,9 +100,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: '50', ro: '50' }, correct: true },
-      { text: { en: '250', ro: '250' }, correct: false },
-      { text: { en: '25', ro: '25' }, correct: false },
-      { text: { en: '100', ro: '100' }, correct: false },
+      { text: { en: '250', ro: '250' }, correct: false, feedback: { en: 'Way more than needed: each miss carries probability < 1/2, so 50 trials already give error < 1/2⁵⁰.', ro: 'Mult mai mult decât e nevoie: fiecare ratare are probabilitate < 1/2, deci 50 de încercări dau deja eroare < 1/2⁵⁰.' } },
+      { text: { en: '25', ro: '25' }, correct: false, feedback: { en: 'Only 25 trials give < 1/2²⁵, not 1/2⁵⁰; we need 50 independent trials to hit the (1/2)⁵⁰ ceiling.', ro: 'Doar 25 de încercări dau < 1/2²⁵, nu 1/2⁵⁰; avem nevoie de 50 de încercări independente pentru plafon (1/2)⁵⁰.' } },
+      { text: { en: '100', ro: '100' }, correct: false, feedback: { en: '100 gives error < 1/2¹⁰⁰ — correct but wasteful: 50 is already enough.', ro: '100 dă eroare < 1/2¹⁰⁰ — corect dar risipitor: 50 sunt suficiente.' } },
     ],
     explanation: {
       en: 'Each trial picks a random element. Since the majority appears strictly more than n/2 times, each trial has P > 1/2 of picking it, so P(error per trial) is strictly less than 1/2. After k independent trials, P(all fail) is strictly less than (1/2)ᵏ. At k = 50 this gives P(error) < 1/2⁵⁰ exactly, so 50 trials suffice.',
@@ -118,9 +118,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'E[sum] = n/2', ro: 'E[sumă] = n/2' }, correct: true },
-      { text: { en: 'E[sum] = n', ro: 'E[sumă] = n' }, correct: false },
-      { text: { en: 'E[sum] = n²/4', ro: 'E[sumă] = n²/4' }, correct: false },
-      { text: { en: 'E[sum] = √n', ro: 'E[sumă] = √n' }, correct: false },
+      { text: { en: 'E[sum] = n', ro: 'E[sumă] = n' }, correct: false, feedback: { en: 'That is the *maximum* (all bits = 1), not the mean. The average bit is 1/2, so the mean sum is n·½.', ro: 'Acela e *maximul* (toți biții = 1), nu media. Bitul mediu e 1/2, deci suma medie e n·½.' } },
+      { text: { en: 'E[sum] = n²/4', ro: 'E[sumă] = n²/4' }, correct: false, feedback: { en: 'n²/4 is the *variance* of a Binomial(n, 1/2), not the expectation. E[·] is linear: n terms of 1/2 each.', ro: 'n²/4 e *varianța* binomialei(n, 1/2), nu speranța. E[·] e liniară: n termeni de câte 1/2.' } },
+      { text: { en: 'E[sum] = √n', ro: 'E[sumă] = √n' }, correct: false, feedback: { en: '√n is the order of the *standard deviation*; the mean grows linearly with n at rate 1/2.', ro: '√n e ordinul *deviației standard*; media crește liniar cu n, la rata 1/2.' } },
     ],
     explanation: {
       en: 'Each bit xᵢ has E[xᵢ] = 0·(1/2) + 1·(1/2) = 1/2. By linearity of expectation, E[sum] = Σᵢ₌₁ⁿ E[xᵢ] = n · (1/2) = n/2.',
@@ -136,9 +136,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Input: (none, uses rand2); Output: x ∈ {0,1,2,3,4,5} with P(x) = 1/6 for each x', ro: 'Input: (niciunul, folosește rand2); Output: x ∈ {0,1,2,3,4,5} cu P(x) = 1/6 pentru fiecare x' }, correct: true },
-      { text: { en: 'Input: n; Output: x ∈ {0..n−1} with P(x) = 1/n', ro: 'Input: n; Output: x ∈ {0..n−1} cu P(x) = 1/n' }, correct: false },
-      { text: { en: 'Input: (none); Output: x ∈ {1..6} with P(x) = 1/6', ro: 'Input: (niciunul); Output: x ∈ {1..6} cu P(x) = 1/6' }, correct: false },
-      { text: { en: 'Input: (none); Output: x ∈ {0..5} with P(x) ≈ 1/6 (approximate)', ro: 'Input: (niciunul); Output: x ∈ {0..5} cu P(x) ≈ 1/6 (aproximativ)' }, correct: false },
+      { text: { en: 'Input: n; Output: x ∈ {0..n−1} with P(x) = 1/n', ro: 'Input: n; Output: x ∈ {0..n−1} cu P(x) = 1/n' }, correct: false, feedback: { en: 'Generalises to arbitrary n; this problem fixes n = 6 (a die) and takes no input.', ro: 'Generalizează pentru n oarecare; problema fixează n = 6 (zar) și nu primește input.' } },
+      { text: { en: 'Input: (none); Output: x ∈ {1..6} with P(x) = 1/6', ro: 'Input: (niciunul); Output: x ∈ {1..6} cu P(x) = 1/6' }, correct: false, feedback: { en: 'Off-by-one on the range: the problem specifies {0..5}, not {1..6}.', ro: 'Off-by-one pe interval: problema specifică {0..5}, nu {1..6}.' } },
+      { text: { en: 'Input: (none); Output: x ∈ {0..5} with P(x) ≈ 1/6 (approximate)', ro: 'Input: (niciunul); Output: x ∈ {0..5} cu P(x) ≈ 1/6 (aproximativ)' }, correct: false, feedback: { en: 'Must be *exactly* 1/6 — rejection sampling achieves this; approximations fail the uniform requirement.', ro: 'Trebuie să fie *exact* 1/6 — eșantionarea prin respingere atinge asta; aproximările nu îndeplinesc cerința.' } },
     ],
     explanation: {
       en: 'The output range is {0..5} (not {1..6}). The distribution must be exactly uniform (not approximate). No input parameter — the range 0-5 is fixed.',
@@ -153,10 +153,10 @@ export default function Seminar03() {
       ro: 'Apelăm `rand2p(p)` de două ori și obținem perechea ordonată (a,b). Ce pereche de rezultate are aceeași probabilitate indiferent de p?',
     },
     options: [
-      { text: { en: '(0,0) and (1,1)', ro: '(0,0) și (1,1)' }, correct: false },
+      { text: { en: '(0,0) and (1,1)', ro: '(0,0) și (1,1)' }, correct: false, feedback: { en: 'P(0,0) = p² and P(1,1) = (1−p)² — equal only when p = 1/2 (the unbiased case).', ro: 'P(0,0) = p² și P(1,1) = (1−p)² — egale doar când p = 1/2 (cazul neparțial).' } },
       { text: { en: '(0,1) and (1,0)', ro: '(0,1) și (1,0)' }, correct: true },
-      { text: { en: '(0,1) and (1,1)', ro: '(0,1) și (1,1)' }, correct: false },
-      { text: { en: 'no such pair exists', ro: 'nicio pereche nu are' }, correct: false },
+      { text: { en: '(0,1) and (1,1)', ro: '(0,1) și (1,1)' }, correct: false, feedback: { en: 'P(0,1) = p(1−p) and P(1,1) = (1−p)² do not match for general p.', ro: 'P(0,1) = p(1−p) și P(1,1) = (1−p)² nu se potrivesc pentru p generic.' } },
+      { text: { en: 'no such pair exists', ro: 'nicio pereche nu are' }, correct: false, feedback: { en: 'The mixed pair (0,1)/(1,0) both have probability p(1−p) — exactly the symmetry Von Neumann exploits.', ro: 'Perechea mixtă (0,1)/(1,0) au ambele probabilitate p(1−p) — exact simetria pe care o exploatează Von Neumann.' } },
     ],
     explanation: {
       en: "P(0,1) = p(1−p) and P(1,0) = (1−p)·p are equal for every p. This symmetry is exactly what von Neumann's trick exploits: throw away (0,0) and (1,1), keep only (0,1)/(1,0), output the first bit — a fair coin from any biased one.",
@@ -171,9 +171,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Input: (none, uses rand2p); Output: x ∈ {0,1} with P(x=0) = P(x=1) = 0.5', ro: 'Input: (niciunul, folosește rand2p); Output: x ∈ {0,1} cu P(x=0) = P(x=1) = 0.5' }, correct: true },
-      { text: { en: 'Input: p ∈ (0,1); Output: x ∈ {0,1} with P(x) = 0.5', ro: 'Input: p ∈ (0,1); Output: x ∈ {0,1} cu P(x) = 0.5' }, correct: false },
-      { text: { en: 'Input: (none); Output: x ∈ {0,1} with P(x=0) = p', ro: 'Input: (niciunul); Output: x ∈ {0,1} cu P(x=0) = p' }, correct: false },
-      { text: { en: 'Input: (none); Output: x ∈ {0,1} with P(x) ≈ 0.5 (approximate)', ro: 'Input: (niciunul); Output: x ∈ {0,1} cu P(x) ≈ 0.5 (aproximativ)' }, correct: false },
+      { text: { en: 'Input: p ∈ (0,1); Output: x ∈ {0,1} with P(x) = 0.5', ro: 'Input: p ∈ (0,1); Output: x ∈ {0,1} cu P(x) = 0.5' }, correct: false, feedback: { en: 'p is *unknown*; the whole point is that the fix works without knowing p, so p cannot be an input.', ro: 'p e *necunoscut*; tocmai ideea e că remedierea funcționează fără a ști p, deci p nu poate fi input.' } },
+      { text: { en: 'Input: (none); Output: x ∈ {0,1} with P(x=0) = p', ro: 'Input: (niciunul); Output: x ∈ {0,1} cu P(x=0) = p' }, correct: false, feedback: { en: 'That just reproduces the biased source; we want the *corrected* (fair) output, P = 0.5.', ro: 'Aceea doar reproduce sursa părtinitoare; vrem output-ul *corectat* (echiprobabil), P = 0.5.' } },
+      { text: { en: 'Input: (none); Output: x ∈ {0,1} with P(x) ≈ 0.5 (approximate)', ro: 'Input: (niciunul); Output: x ∈ {0,1} cu P(x) ≈ 0.5 (aproximativ)' }, correct: false, feedback: { en: 'Von Neumann\'s trick gives *exactly* 0.5, not an approximation; the symmetry p(1−p) = (1−p)p is exact.', ro: 'Trucul lui Von Neumann dă *exact* 0.5, nu o aproximare; simetria p(1−p) = (1−p)p este exactă.' } },
     ],
     explanation: {
       en: 'We don\'t know p, so it cannot be an input. The output must be exactly fair (P = 0.5), not approximate. The function uses rand2p internally but takes no arguments.',
@@ -189,9 +189,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Input: n ∈ ℕ, n ≥ 1 (uses rand2); Output: x ∈ {0,1,…,n−1} with P(x) = 1/n for each x', ro: 'Input: n ∈ ℕ, n ≥ 1 (folosește rand2); Output: x ∈ {0,1,…,n−1} cu P(x) = 1/n pentru fiecare x' }, correct: true },
-      { text: { en: 'Input: n; Output: x ∈ {1..n} with P(x) = 1/n', ro: 'Input: n; Output: x ∈ {1..n} cu P(x) = 1/n' }, correct: false },
-      { text: { en: 'Input: (none); Output: x ∈ {0..n−1}', ro: 'Input: (niciunul); Output: x ∈ {0..n−1}' }, correct: false },
-      { text: { en: 'Input: n, k (number of bits); Output: x ∈ {0..n−1} with P(x) ≈ 1/n', ro: 'Input: n, k (numărul de biți); Output: x ∈ {0..n−1} cu P(x) ≈ 1/n' }, correct: false },
+      { text: { en: 'Input: n; Output: x ∈ {1..n} with P(x) = 1/n', ro: 'Input: n; Output: x ∈ {1..n} cu P(x) = 1/n' }, correct: false, feedback: { en: 'Off-by-one on range: the problem specifies {0..n−1} (0-indexed), not {1..n}.', ro: 'Off-by-one pe interval: problema specifică {0..n−1} (0-indexat), nu {1..n}.' } },
+      { text: { en: 'Input: (none); Output: x ∈ {0..n−1}', ro: 'Input: (niciunul); Output: x ∈ {0..n−1}' }, correct: false, feedback: { en: 'Without n as input, the output range is undefined; n must be an explicit parameter.', ro: 'Fără n la intrare, intervalul de output e nedefinit; n trebuie parametru explicit.' } },
+      { text: { en: 'Input: n, k (number of bits); Output: x ∈ {0..n−1} with P(x) ≈ 1/n', ro: 'Input: n, k (numărul de biți); Output: x ∈ {0..n−1} cu P(x) ≈ 1/n' }, correct: false, feedback: { en: 'k is *derived* from n (k = ⌈log₂ n⌉), not an extra input; also the distribution is exactly 1/n via rejection, not approximate.', ro: 'k se *derivă* din n (k = ⌈log₂ n⌉), nu e input în plus; iar distribuția e exact 1/n prin respingere, nu aproximativă.' } },
     ],
     explanation: {
       en: 'The range is {0..n−1} (not {1..n}). n is an input parameter. The distribution must be exactly 1/n (not approximate). No extra parameter k is needed.',
@@ -207,9 +207,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Optimization problem — it asks for the maximum M* satisfying a constraint', ro: 'Problemă de optimizare — cere maximul M* care satisface o constrângere' }, correct: true },
-      { text: { en: 'Decision problem — it asks yes/no', ro: 'Problemă de decizie — cere da/nu' }, correct: false },
-      { text: { en: 'Search problem — it asks for any valid subset', ro: 'Problemă de căutare — cere orice submulțime validă' }, correct: false },
-      { text: { en: 'Counting problem — it asks how many subsets sum to M', ro: 'Problemă de numărare — cere câte submulțimi au suma M' }, correct: false },
+      { text: { en: 'Decision problem — it asks yes/no', ro: 'Problemă de decizie — cere da/nu' }, correct: false, feedback: { en: 'SSD1 returns a *value* M*, not yes/no. The yes/no siblings are SSD2 and SSD3.', ro: 'SSD1 returnează o *valoare* M*, nu da/nu. Variantele da/nu sunt SSD2 și SSD3.' } },
+      { text: { en: 'Search problem — it asks for any valid subset', ro: 'Problemă de căutare — cere orice submulțime validă' }, correct: false, feedback: { en: 'Returns M* (the *largest* achievable sum), not just any satisfying subset — that is optimization, not search.', ro: 'Returnează M* (cea mai *mare* sumă realizabilă), nu orice submulțime care satisface — e optimizare, nu căutare.' } },
+      { text: { en: 'Counting problem — it asks how many subsets sum to M', ro: 'Problemă de numărare — cere câte submulțimi au suma M' }, correct: false, feedback: { en: 'Counting variants (#SubsetSum) return a cardinality; SSD1 returns the extremal value M*.', ro: 'Variantele de numărare (#SubsetSum) returnează cardinalul; SSD1 returnează valoarea extremă M*.' } },
     ],
     explanation: {
       en: 'SSD1 asks for the largest integer M* ≤ M achievable as a subset sum. This is optimization: we want the best (maximum) value satisfying the constraint. SSD2 and SSD3 are decision problems (yes/no answers).',
@@ -224,9 +224,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Guess a subset S\' ⊆ S, then verify deterministically that Σ S\' = M', ro: 'Ghicește o submulțime S\' ⊆ S, apoi verifică determinist că Σ S\' = M' }, correct: true },
-      { text: { en: 'Try all 2ⁿ subsets and check each one', ro: 'Încearcă toate cele 2ⁿ submulțimi și verifică fiecare' }, correct: false },
-      { text: { en: 'Use dynamic programming to solve it in polynomial time', ro: 'Folosește programare dinamică pentru a rezolva în timp polinomial' }, correct: false },
-      { text: { en: 'Randomly sample subsets until one works', ro: 'Eșantionează aleator submulțimi până când una funcționează' }, correct: false },
+      { text: { en: 'Try all 2ⁿ subsets and check each one', ro: 'Încearcă toate cele 2ⁿ submulțimi și verifică fiecare' }, correct: false, feedback: { en: 'That describes a *deterministic* brute-force; nondeterminism guesses *one* subset and only verifies it.', ro: 'Aceea descrie un brute-force *determinist*; nedeterminismul ghicește *o* submulțime și doar o verifică.' } },
+      { text: { en: 'Use dynamic programming to solve it in polynomial time', ro: 'Folosește programare dinamică pentru a rezolva în timp polinomial' }, correct: false, feedback: { en: 'DP yields pseudo-polynomial deterministic algorithms; it is unrelated to the nondeterministic (guess+verify) model.', ro: 'DP dă algoritmi pseudo-polinomiali deterministici; nu are legătură cu modelul nedeterminist (ghicește+verifică).' } },
+      { text: { en: 'Randomly sample subsets until one works', ro: 'Eșantionează aleator submulțimi până când una funcționează' }, correct: false, feedback: { en: 'That is a *probabilistic* (Las Vegas) approach; nondeterminism is an angelic-choice model, not randomness.', ro: 'Aceea e abordare *probabilistă* (Las Vegas); nedeterminismul e model cu alegere angelică, nu randomizare.' } },
     ],
     explanation: {
       en: 'A nondeterministic algorithm has two phases: (1) guess phase — nondeterministically choose a subset S\', (2) verify phase — deterministically compute Σ S\' and compare with M. The verify phase runs in O(n). Random sampling is a probabilistic approach, not nondeterministic.',
@@ -242,9 +242,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Input: v[n][3] — 3-CNF formula matrix, n — number of clauses; Output: "yes" if satisfiable, "no" otherwise', ro: 'Input: v[n][3] — matrice formulă 3-FNC, n — numărul de clauze; Output: "da" dacă este satisfiabilă, "nu" altfel' }, correct: true },
-      { text: { en: 'Input: v[n][3], n; Output: a satisfying assignment if one exists', ro: 'Input: v[n][3], n; Output: o asignare satisfăcătoare dacă există' }, correct: false },
-      { text: { en: 'Input: a boolean formula; Output: the number of satisfying assignments', ro: 'Input: o formulă booleană; Output: numărul de asignări satisfăcătoare' }, correct: false },
-      { text: { en: 'Input: v[n][3], n; Output: "yes" if all assignments satisfy the formula', ro: 'Input: v[n][3], n; Output: "da" dacă toate asignările satisfac formula' }, correct: false },
+      { text: { en: 'Input: v[n][3], n; Output: a satisfying assignment if one exists', ro: 'Input: v[n][3], n; Output: o asignare satisfăcătoare dacă există' }, correct: false, feedback: { en: 'That is the *search* variant; classical 3-SAT is a *decision* problem (yes/no) — finding the witness is a different question.', ro: 'Aceea e varianta de *căutare*; 3-SAT clasic e problemă de *decizie* (da/nu) — găsirea martorului e altă întrebare.' } },
+      { text: { en: 'Input: a boolean formula; Output: the number of satisfying assignments', ro: 'Input: o formulă booleană; Output: numărul de asignări satisfăcătoare' }, correct: false, feedback: { en: 'That is #SAT (counting), which is #P-complete — strictly harder than SAT decision.', ro: 'Aceea e #SAT (numărare), care e #P-completă — strict mai grea decât decizia SAT.' } },
+      { text: { en: 'Input: v[n][3], n; Output: "yes" if all assignments satisfy the formula', ro: 'Input: v[n][3], n; Output: "da" dacă toate asignările satisfac formula' }, correct: false, feedback: { en: 'That is *validity* (∀), not satisfiability (∃); for CNF, validity is trivially easy but not what SAT asks.', ro: 'Aceea e *validitatea* (∀), nu satisfiabilitatea (∃); pentru CNF, validitatea e trivial ușoară, dar nu e ce cere SAT.' } },
     ],
     explanation: {
       en: 'The 3-SAT decision problem asks only whether the formula is satisfiable (yes/no), not to find or count assignments. "All assignments satisfy" would be validity, not satisfiability.',
@@ -259,8 +259,8 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: '3-CNF SAT asks "∃ assignment that makes all clauses true"; 3-DNF validity asks "∀ assignments, at least one term is true"', ro: '3-CNF SAT întreabă „∃ asignare care face toate clauzele adevărate"; validitatea 3-DNF întreabă „∀ asignările, cel puțin un termen este adevărat"' }, correct: true },
-      { text: { en: 'They are equivalent problems — just different notation', ro: 'Sunt probleme echivalente — doar notație diferită' }, correct: false },
-      { text: { en: '3-CNF SAT is hard (NP-complete) but 3-DNF SAT is easy; vice versa for validity', ro: '3-CNF SAT este greu (NP-complet) dar 3-DNF SAT este ușor; invers pentru validitate' }, correct: false },
+      { text: { en: 'They are equivalent problems — just different notation', ro: 'Sunt probleme echivalente — doar notație diferită' }, correct: false, feedback: { en: '∃ vs ∀ makes them duals, not equivalents: one is in NP, the other in co-NP.', ro: '∃ vs ∀ le face duale, nu echivalente: una e în NP, cealaltă în co-NP.' } },
+      { text: { en: '3-CNF SAT is hard (NP-complete) but 3-DNF SAT is easy; vice versa for validity', ro: '3-CNF SAT este greu (NP-complet) dar 3-DNF SAT este ușor; invers pentru validitate' }, correct: false, feedback: { en: 'Close to correct in spirit (the difficulty does flip between CNF/DNF per question), but this answer conflates SAT-vs-validity — the previous choice states the actual logical structure.', ro: 'Aproape corect ca idee (dificultatea se inversează CNF/DNF pe întrebare), dar amestecă SAT cu validitate — răspunsul precedent exprimă structura logică reală.' } },
     ],
     explanation: {
       en: 'For CNF: satisfiability = ∃ assignment making the AND of ORs true (NP-complete). For DNF: satisfiability is easy (just satisfy one term), but validity (∀ assignments → true) is co-NP-complete. The difficulty flips between satisfiability and validity when switching CNF/DNF.',
@@ -275,8 +275,8 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Not directly — but 3-non-equivalence has a nondeterministic algorithm (guess an assignment where they differ)', ro: 'Nu direct — dar 3-non-echivalența are un algoritm nedeterminist (ghicește o asignare unde diferă)' }, correct: true },
-      { text: { en: 'Yes — guess an assignment and check both formulas agree on it', ro: 'Da — ghicește o asignare și verifică că ambele formule sunt de acord' }, correct: false },
-      { text: { en: 'Yes — 3-equivalence and 3-non-equivalence are both in NP', ro: 'Da — 3-echivalența și 3-non-echivalența sunt ambele în NP' }, correct: false },
+      { text: { en: 'Yes — guess an assignment and check both formulas agree on it', ro: 'Da — ghicește o asignare și verifică că ambele formule sunt de acord' }, correct: false, feedback: { en: 'Equivalence needs agreement on *every* assignment (∀); a single guess can never certify a ∀ statement.', ro: 'Echivalența cere acord pe *orice* asignare (∀); o singură ghicire nu poate certifica o afirmație ∀.' } },
+      { text: { en: 'Yes — 3-equivalence and 3-non-equivalence are both in NP', ro: 'Da — 3-echivalența și 3-non-echivalența sunt ambele în NP' }, correct: false, feedback: { en: 'Non-equivalence is in NP (∃ disagreeing assignment); equivalence is in co-NP (∀), not known to be in NP.', ro: 'Non-echivalența e în NP (∃ asignare diferită); echivalența e în co-NP (∀), nu știută în NP.' } },
     ],
     explanation: {
       en: 'For 3-non-equivalence: guess an assignment, evaluate both formulas, check they give different results. For equivalence: you\'d need to verify that ALL assignments give the same result — a nondeterministic guess of one agreeing assignment doesn\'t prove equivalence. This is why equivalence is in co-NP, not obviously in NP.',
@@ -291,9 +291,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'O(n · 2ᵏ)', ro: 'O(n · 2ᵏ)' }, correct: true },
-      { text: { en: 'O(2ⁿ)', ro: 'O(2ⁿ)' }, correct: false },
-      { text: { en: 'O(n · k)', ro: 'O(n · k)' }, correct: false },
-      { text: { en: 'O(3ⁿ)', ro: 'O(3ⁿ)' }, correct: false },
+      { text: { en: 'O(2ⁿ)', ro: 'O(2ⁿ)' }, correct: false, feedback: { en: 'Exponential in the wrong parameter: the search space is 2ᵏ (assignments over k variables), not 2ⁿ.', ro: 'Exponențial pe parametrul greșit: spațiul de căutare e 2ᵏ (asignări peste k variabile), nu 2ⁿ.' } },
+      { text: { en: 'O(n · k)', ro: 'O(n · k)' }, correct: false, feedback: { en: 'Polynomial — impossible without a SAT polynomial-time algorithm (P = NP). Brute-force has to enumerate 2ᵏ assignments.', ro: 'Polinomial — imposibil fără un algoritm polinomial pentru SAT (P = NP). Brute-force enumeră 2ᵏ asignări.' } },
+      { text: { en: 'O(3ⁿ)', ro: 'O(3ⁿ)' }, correct: false, feedback: { en: '3ⁿ would come from trying 3 values per clause, but assignments are boolean (2 states) over k variables.', ro: '3ⁿ ar veni din încercarea a 3 valori per clauză, dar asignările sunt booleene (2 stări) peste k variabile.' } },
     ],
     explanation: {
       en: 'Enumerate all 2ᵏ possible truth assignments for k variables. For each assignment, evaluate the formula in O(n) (check each of the n clauses). Total: O(n · 2ᵏ). The exponential is in the number of variables, not clauses.',
