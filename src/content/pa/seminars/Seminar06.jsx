@@ -15,9 +15,9 @@ export default function Seminar06() {
       },
       options: [
         { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: {i ∈ ℕ | s[i..i+|p|−1] = p}', ro: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: {i ∈ ℕ | s[i..i+|p|−1] = p}' }, correct: true },
-        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*; Output: i ∈ ℕ (first occurrence of p in s)', ro: 'Input: s ∈ Σ*, p ∈ Σ*; Output: i ∈ ℕ (prima apariție a lui p în s)' }, correct: false },
-        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: hash(p)', ro: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: hash(p)' }, correct: false },
-        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*; Output: true/false (p is substring of s)', ro: 'Input: s ∈ Σ*, p ∈ Σ*; Output: true/false (p este subșir al lui s)' }, correct: false },
+        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*; Output: i ∈ ℕ (first occurrence of p in s)', ro: 'Input: s ∈ Σ*, p ∈ Σ*; Output: i ∈ ℕ (prima apariție a lui p în s)' }, correct: false, feedback: { en: 'First-occurrence variant, and drops the prime q needed for the rolling hash.', ro: 'Varianta prima-apariție și omite primul q necesar rolling hash-ului.' } },
+        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: hash(p)', ro: 'Input: s ∈ Σ*, p ∈ Σ*, q ∈ ℤ⁺; Output: hash(p)' }, correct: false, feedback: { en: 'hash(p) is an internal helper; the problem asks for the match positions.', ro: 'hash(p) e un ajutor intern; problema cere pozițiile de potrivire.' } },
+        { text: { en: 'Input: s ∈ Σ*, p ∈ Σ*; Output: true/false (p is substring of s)', ro: 'Input: s ∈ Σ*, p ∈ Σ*; Output: true/false (p este subșir al lui s)' }, correct: false, feedback: { en: 'Decision variant; we want the full set of match positions.', ro: 'Varianta de decizie; vrem setul complet al pozițiilor de potrivire.' } },
       ],
       explanation: {
         en: 'Rabin-Karp takes a text s, pattern p, and a prime q for hashing. It outputs all positions where p occurs in s.',
@@ -42,8 +42,8 @@ export default function Seminar06() {
             ro: 'Valorile hash sunt nenegative (rezultă din operația mod q cu q > 0), deci −1 nu este o valoare de hash Rabin-Karp validă.',
           },
         },
-        { text: { en: '1', ro: '1' }, correct: false },
-        { text: { en: '2', ro: '2' }, correct: false },
+        { text: { en: '1', ro: '1' }, correct: false, feedback: { en: 'Arithmetic slip: 0·9 + 1·3 + 0·1 = 3, and 3 mod 3 = 0 (not 1).', ro: 'Eroare de calcul: 0·9 + 1·3 + 0·1 = 3, iar 3 mod 3 = 0 (nu 1).' } },
+        { text: { en: '2', ro: '2' }, correct: false, feedback: { en: 'Arithmetic slip: the residue of 3 modulo 3 is 0; 2 is not a valid intermediate here.', ro: 'Eroare de calcul: restul lui 3 mod 3 e 0; 2 nu e o valoare intermediară validă.' } },
         {
           text: {
             en: '0 — because hash("aba") = (0·9 + 1·3 + 0·1) mod 3 = 3 mod 3 = 0',
@@ -80,6 +80,7 @@ export default function Seminar06() {
             ro: 's = "abcdef...xyz", p = "abc", q = 101 — caractere distincte minimizează coliziunile',
           },
           correct: false,
+          feedback: { en: 'That is a *best* case: distinct chars + large prime eliminate spurious hits, yielding O(n+m).', ro: 'Acela e cazul *cel mai bun*: caractere distincte + prim mare elimină coliziunile, dând O(n+m).' },
         },
         {
           text: {
@@ -87,6 +88,7 @@ export default function Seminar06() {
             ro: 's = "aaa...a", p = "b", q = 7 — nu apar coliziuni de hash',
           },
           correct: false,
+          feedback: { en: 'Hash(p) ≠ any substring hash, so every window shortcuts out — this is the best case.', ro: 'Hash(p) ≠ orice hash de subșir, deci fiecare fereastră e scurtată — e cazul cel mai bun.' },
         },
         {
           text: {
@@ -94,6 +96,7 @@ export default function Seminar06() {
             ro: 'Orice intrare cu un q prim mare evită cazul cel mai defavorabil',
           },
           correct: false,
+          feedback: { en: 'Overstatement: a large prime *reduces* spurious hits in expectation, but pathological inputs (e.g., actual matches) still force O(n·m).', ro: 'Exagerat: un prim mare *reduce* coliziunile în medie, dar intrări patologice (ex. potriviri reale) tot forțează O(n·m).' },
         },
       ],
       explanation: {
@@ -112,9 +115,9 @@ export default function Seminar06() {
       },
       options: [
         { text: { en: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: {(i,j) | T[i..i+m₁−1][j..j+m₂−1] = P}', ro: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: {(i,j) | T[i..i+m₁−1][j..j+m₂−1] = P}' }, correct: true },
-        { text: { en: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: true/false', ro: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: true/false' }, correct: false },
-        { text: { en: 'Input: T ∈ Σⁿˣⁿ, P ∈ Σᵐˣᵐ; Output: count of occurrences', ro: 'Input: T ∈ Σⁿˣⁿ, P ∈ Σᵐˣᵐ; Output: numărul de apariții' }, correct: false },
-        { text: { en: 'Input: T ∈ Σ*, P ∈ Σ*; Output: {(i,j) | T[i][j] = P[0][0]}', ro: 'Input: T ∈ Σ*, P ∈ Σ*; Output: {(i,j) | T[i][j] = P[0][0]}' }, correct: false },
+        { text: { en: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: true/false', ro: 'Input: T ∈ Σⁿ¹ˣⁿ², P ∈ Σᵐ¹ˣᵐ²; Output: true/false' }, correct: false, feedback: { en: 'Decision variant; the problem asks to *enumerate* all top-left corners of matches.', ro: 'Variantă de decizie; problema cere *enumerarea* tuturor colțurilor stânga-sus ale potrivirilor.' } },
+        { text: { en: 'Input: T ∈ Σⁿˣⁿ, P ∈ Σᵐˣᵐ; Output: count of occurrences', ro: 'Input: T ∈ Σⁿˣⁿ, P ∈ Σᵐˣᵐ; Output: numărul de apariții' }, correct: false, feedback: { en: 'Forces square matrices and returns a count; original problem allows rectangles and asks for positions.', ro: 'Forțează matrici pătrate și returnează un număr; problema originală admite dreptunghiuri și cere poziții.' } },
+        { text: { en: 'Input: T ∈ Σ*, P ∈ Σ*; Output: {(i,j) | T[i][j] = P[0][0]}', ro: 'Input: T ∈ Σ*, P ∈ Σ*; Output: {(i,j) | T[i][j] = P[0][0]}' }, correct: false, feedback: { en: 'Only checks the top-left character; a real match requires all m₁·m₂ cells to agree.', ro: 'Verifică doar caracterul stânga-sus; o potrivire reală cere toate cele m₁·m₂ celule să coincidă.' } },
       ],
       explanation: {
         en: 'We search for all top-left corners (i,j) where the m₁×m₂ submatrix of T starting at (i,j) equals P. The matrices need not be square.',
@@ -132,9 +135,9 @@ export default function Seminar06() {
       },
       options: [
         { text: { en: 'O(n₁·n₂·m₁·m₂)', ro: 'O(n₁·n₂·m₁·m₂)' }, correct: true },
-        { text: { en: 'O((n₁−m₁)·(n₂−m₂)·m₁·m₂)', ro: 'O((n₁−m₁)·(n₂−m₂)·m₁·m₂)' }, correct: false },
-        { text: { en: 'O(n₁·n₂ + m₁·m₂)', ro: 'O(n₁·n₂ + m₁·m₂)' }, correct: false },
-        { text: { en: 'O(n₁²·m₁²)', ro: 'O(n₁²·m₁²)' }, correct: false },
+        { text: { en: 'O((n₁−m₁)·(n₂−m₂)·m₁·m₂)', ro: 'O((n₁−m₁)·(n₂−m₂)·m₁·m₂)' }, correct: false, feedback: { en: 'Technically tighter (n₁−m₁+1)·(n₂−m₂+1) positions, but that is Θ(n₁·n₂) asymptotically — same big-O.', ro: 'Tehnic mai strâns (n₁−m₁+1)·(n₂−m₂+1) poziții, dar asimptotic e Θ(n₁·n₂) — același big-O.' } },
+        { text: { en: 'O(n₁·n₂ + m₁·m₂)', ro: 'O(n₁·n₂ + m₁·m₂)' }, correct: false, feedback: { en: 'Additive bound implies a hash/FFT-based algorithm; naive is multiplicative.', ro: 'Marginea aditivă presupune un algoritm cu hash/FFT; naivul e multiplicativ.' } },
+        { text: { en: 'O(n₁²·m₁²)', ro: 'O(n₁²·m₁²)' }, correct: false, feedback: { en: 'Collapses the two dimensions into one; the correct count factors over both n and m axes.', ro: 'Colapsează cele două dimensiuni într-una; numărul corect factorizează peste ambele axe.' } },
       ],
       explanation: {
         en: 'For each of the O(n₁·n₂) possible positions, we compare all m₁·m₂ elements. The precise count is (n₁−m₁+1)·(n₂−m₂+1)·m₁·m₂, which is O(n₁·n₂·m₁·m₂).',
@@ -164,6 +167,7 @@ export default function Seminar06() {
             ro: 'Aplatizează matricea într-un șir 1D și aplică Rabin-Karp standard',
           },
           correct: false,
+          feedback: { en: 'Flattening breaks the row-adjacency structure; a match in 2D does not correspond to a contiguous substring in the flattened form.', ro: 'Aplatizarea strică structura de adiacență pe rânduri; o potrivire 2D nu corespunde unui subșir contiguu în forma aplatizată.' },
         },
         {
           text: {
@@ -171,6 +175,7 @@ export default function Seminar06() {
             ro: 'Hash-uiește fiecare rând independent și compară rând cu rând',
           },
           correct: false,
+          feedback: { en: 'Works correctly but loses the rolling update when sliding vertically — blows up to O(n·m).', ro: 'Funcționează corect, dar pierde actualizarea rolling la deplasare verticală — ajunge la O(n·m).' },
         },
         {
           text: {
@@ -178,6 +183,7 @@ export default function Seminar06() {
             ro: 'Folosește un singur hash peste toate cele m₁·m₂ elemente fără structură',
           },
           correct: false,
+          feedback: { en: 'Cannot roll incrementally when shifting the window by one cell; each new window costs O(m₁·m₂).', ro: 'Nu poate actualiza rolling la deplasarea ferestrei cu o celulă; fiecare fereastră nouă costă O(m₁·m₂).' },
         },
       ],
       explanation: {
@@ -195,9 +201,9 @@ export default function Seminar06() {
       },
       options: [
         { text: { en: 'O(n₁·n₂)', ro: 'O(n₁·n₂)' }, correct: true },
-        { text: { en: 'O(n₁·n₂·m₁)', ro: 'O(n₁·n₂·m₁)' }, correct: false },
-        { text: { en: 'O(n₁·n₂·m₂)', ro: 'O(n₁·n₂·m₂)' }, correct: false },
-        { text: { en: 'O(n₁·n₂·m₁·m₂)', ro: 'O(n₁·n₂·m₁·m₂)' }, correct: false },
+        { text: { en: 'O(n₁·n₂·m₁)', ro: 'O(n₁·n₂·m₁)' }, correct: false, feedback: { en: 'Includes a full column rehash per step; rolling update brings it down to O(1) amortized per column.', ro: 'Include un rehash complet de coloană per pas; actualizarea rolling îl aduce la O(1) amortizat per coloană.' } },
+        { text: { en: 'O(n₁·n₂·m₂)', ro: 'O(n₁·n₂·m₂)' }, correct: false, feedback: { en: 'Includes a full row rehash; the two-level rolling hash avoids both dimensions separately.', ro: 'Include un rehash complet de rând; rolling hash-ul pe două niveluri evită ambele dimensiuni separat.' } },
+        { text: { en: 'O(n₁·n₂·m₁·m₂)', ro: 'O(n₁·n₂·m₁·m₂)' }, correct: false, feedback: { en: 'That is the *naive* bound; the rolling hash removes both m₁ and m₂ factors.', ro: 'Aceea e marginea *naivă*; rolling hash elimină ambii factori m₁ și m₂.' } },
       ],
       explanation: {
         en: 'With a good hash function and few collisions, each position is processed in O(1) amortized time (rolling hash update), giving O(n₁·n₂) expected time. Preprocessing column hashes takes O(n₁·n₂) as well.',
@@ -227,6 +233,7 @@ export default function Seminar06() {
             ro: 'Verifică toate cele O(N²) subșiruri și numără aparițiile cu un hash map — O(N³)',
           },
           correct: false,
+          feedback: { en: 'Correct algorithm but cubic; the binary-search + hash combination brings it to O(N log N).', ro: 'Algoritm corect, dar cubic; combinația căutare binară + hash îl aduce la O(N log N).' },
         },
         {
           text: {
@@ -234,6 +241,7 @@ export default function Seminar06() {
             ro: 'Folosește KMP pentru fiecare lungime posibilă de subșir — O(N³)',
           },
           correct: false,
+          feedback: { en: 'KMP needs a fixed pattern, forcing you to try each substring as pattern — again cubic.', ro: 'KMP are nevoie de un pattern fix, deci trebuie încercate toate subșirurile ca pattern — tot cubic.' },
         },
         {
           text: {
@@ -241,6 +249,7 @@ export default function Seminar06() {
             ro: 'Sortează toate subșirurile lexicografic și scanează — O(N² log N)',
           },
           correct: false,
+          feedback: { en: 'That is the suffix-array idea and works, but slower than binary-search + hash and harder to implement.', ro: 'Aceea e ideea suffix array, funcționează, dar mai lentă decât binary search + hash și mai complicată.' },
         },
       ],
       explanation: {
@@ -259,9 +268,9 @@ export default function Seminar06() {
       },
       options: [
         { text: { en: '2', ro: '2' }, correct: true },
-        { text: { en: '3', ro: '3' }, correct: false },
-        { text: { en: '1', ro: '1' }, correct: false },
-        { text: { en: '4', ro: '4' }, correct: false },
+        { text: { en: '3', ro: '3' }, correct: false, feedback: { en: 'The longest palindromic prefix is "aceca" (length 5), leaving 2 chars ("xy") to mirror, not 3.', ro: 'Cel mai lung prefix palindromic e "aceca" (lungime 5), deci rămân 2 caractere de oglindit, nu 3.' } },
+        { text: { en: '1', ro: '1' }, correct: false, feedback: { en: 'Prepending just 1 char cannot account for both "x" and "y" at the tail.', ro: 'Adăugarea unui singur caracter nu acoperă atât "x" cât și "y" de la coadă.' } },
+        { text: { en: '4', ro: '4' }, correct: false, feedback: { en: 'Overshoots: you do not need to mirror the palindromic part "aceca"; the prepend length equals n − (longest palindromic prefix).', ro: 'Prea mult: nu e nevoie să oglindești partea palindromică "aceca"; lungimea adăugată = n − (cel mai lung prefix palindromic).' } },
       ],
       explanation: {
         en: 'We need to prepend "yx" → "yxacecaxy" which is a palindrome. The key insight: find the longest prefix of s that is a palindrome. Here "aceca" (length 5) is a palindromic prefix, so we prepend the reverse of the remaining suffix "xy" → "yx". Answer: 7 − 5 = 2.',
@@ -290,6 +299,7 @@ export default function Seminar06() {
             ro: 'Folosește programare dinamică pe toate subșirurile — O(n²)',
           },
           correct: false,
+          feedback: { en: 'Works but quadratic; KMP on s+$+reverse(s) solves it in O(n).', ro: 'Funcționează dar e pătratic; KMP pe s+$+reverse(s) rezolvă în O(n).' },
         },
         {
           text: {
@@ -297,6 +307,7 @@ export default function Seminar06() {
             ro: 'Inversează șirul și folosește Rabin-Karp pentru a găsi prefixe potrivite',
           },
           correct: false,
+          feedback: { en: 'Vague — you still need to try every prefix length, which lands back at O(n²).', ro: 'Vag — tot trebuie încercată fiecare lungime de prefix, ajungând la O(n²).' },
         },
         {
           text: {
@@ -304,6 +315,7 @@ export default function Seminar06() {
             ro: 'Verifică toate prefixele unul câte unul — O(n²)',
           },
           correct: false,
+          feedback: { en: 'Correct but quadratic; KMP solves it in linear time.', ro: 'Corect, dar pătratic; KMP rezolvă în timp liniar.' },
         },
       ],
       explanation: {
@@ -334,6 +346,7 @@ export default function Seminar06() {
             ro: 'Expandare în jurul fiecărui centru — O(n²) caz defavorabil',
           },
           correct: false,
+          feedback: { en: 'Correct approach but quadratic; Manacher re-uses previously computed radii to hit O(n).', ro: 'Abordare corectă, dar pătratică; Manacher refolosește razele deja calculate pentru O(n).' },
         },
         {
           text: {
@@ -341,6 +354,7 @@ export default function Seminar06() {
             ro: 'Programare dinamică pe toate perechile (i,j) — O(n²) timp și spațiu',
           },
           correct: false,
+          feedback: { en: 'Works but quadratic; Manacher is both faster and more space-efficient.', ro: 'Funcționează dar e pătratic; Manacher e mai rapid și mai economic ca spațiu.' },
         },
         {
           text: {
@@ -348,6 +362,7 @@ export default function Seminar06() {
             ro: 'Inversare șir + LCS — O(n²)',
           },
           correct: false,
+          feedback: { en: 'LCS(s, reverse(s)) finds the longest palindromic *subsequence*, not *substring*; also slower than Manacher.', ro: 'LCS(s, reverse(s)) găsește cel mai lung *subșir* palindromic, nu *subșir continuu*; și mai lent decât Manacher.' },
         },
       ],
       explanation: {
@@ -378,6 +393,7 @@ export default function Seminar06() {
             ro: 'Folosim forță brută pentru a enumera toate șirurile de lungime 2N — O(|Σ|²ᴺ)',
           },
           correct: false,
+          feedback: { en: 'Exponential in the *wrong* thing: we want 2ᴺ strings, not |Σ|²ᴺ; exploit the 2-char collision instead.', ro: 'Exponențial în locul greșit: vrem 2ᴺ șiruri, nu |Σ|²ᴺ; exploatăm coliziunea de 2 caractere.' },
         },
         {
           text: {
@@ -385,6 +401,7 @@ export default function Seminar06() {
             ro: 'Generăm șiruri aleatorii și filtrăm după hashCode — abordare probabilistică',
           },
           correct: false,
+          feedback: { en: 'Birthday-paradox expected cost ~√(range) per collision; enumerating 2ᴺ of them would be prohibitively slow.', ro: 'Costul birthday-paradox ~√(interval) per coliziune; enumerând 2ᴺ ar fi prohibitiv de lent.' },
         },
         {
           text: {
@@ -392,6 +409,7 @@ export default function Seminar06() {
             ro: 'Acest lucru este imposibil datorită proprietăților hashing-ului polinomial',
           },
           correct: false,
+          feedback: { en: 'Precisely the opposite: polynomial hashing *enables* this because hash(xy) decomposes as hash(x)·31^|y| + hash(y).', ro: 'Exact opusul: hashing-ul polinomial *permite* asta pentru că hash(xy) se descompune ca hash(x)·31^|y| + hash(y).' },
         },
       ],
       explanation: {
@@ -422,6 +440,7 @@ export default function Seminar06() {
             ro: 'Sortează ambele șiruri și compară — dacă se potrivesc, s este o rotație',
           },
           correct: false,
+          feedback: { en: 'Sorting loses the order; e.g., "abc" and "bac" sort the same but are not rotations.', ro: 'Sortarea pierde ordinea; ex., "abc" și "bac" au aceeași sortare dar nu sunt rotații.' },
         },
         {
           text: {
@@ -429,6 +448,7 @@ export default function Seminar06() {
             ro: 'Încearcă toate cele n rotații ale lui t și compară cu s — O(n²)',
           },
           correct: false,
+          feedback: { en: 'Correct but quadratic; searching s in t+t solves it in O(n) with KMP.', ro: 'Corect dar pătratic; căutarea lui s în t+t rezolvă în O(n) cu KMP.' },
         },
         {
           text: {
@@ -436,6 +456,7 @@ export default function Seminar06() {
             ro: 'Compară hash(s) cu hash(t) — dacă sunt egale, sunt rotații',
           },
           correct: false,
+          feedback: { en: 'Hash equality is neither necessary (rotations have different hashes) nor sufficient (collisions); use substring search instead.', ro: 'Egalitatea hash-urilor nu e nici necesară (rotațiile au hash-uri diferite) nici suficientă (coliziuni); folosește căutarea de subșir.' },
         },
       ],
       explanation: {
@@ -466,6 +487,7 @@ export default function Seminar06() {
             ro: 'Sortează p, apoi sortează fiecare subșir de lungime |p| din s și compară — O(n·m·log m)',
           },
           correct: false,
+          feedback: { en: 'Correct but wastefully resorts each window; the sliding frequency count is O(n) total.', ro: 'Corect dar resortează fiecare fereastră; contorul glisant dă O(n) total.' },
         },
         {
           text: {
@@ -473,6 +495,7 @@ export default function Seminar06() {
             ro: 'Folosește Rabin-Karp unde funcția hash este suma codurilor caracterelor',
           },
           correct: false,
+          feedback: { en: 'Summing chars collides trivially (any permutation hashes the same), so you\'d verify every position — back to O(n·m).', ro: 'Suma caracterelor coincide trivial (orice permutare are același hash), deci verifici fiecare poziție — tot O(n·m).' },
         },
         {
           text: {
@@ -480,6 +503,7 @@ export default function Seminar06() {
             ro: 'Generează toate permutările lui p și caută fiecare — O(m!·n)',
           },
           correct: false,
+          feedback: { en: 'Factorial-in-m is catastrophic; the frequency-count trick sidesteps enumeration entirely.', ro: 'Factorial în m e catastrofal; trucul cu contor de frecvență evită enumerarea complet.' },
         },
       ],
       explanation: {
@@ -510,6 +534,7 @@ export default function Seminar06() {
             ro: 'Pattern = "01", Text = "010101..." — caractere alternante',
           },
           correct: false,
+          feedback: { en: 'Matches constantly; every position is a match, so you pay m comparisons each step — not minimal.', ro: 'Se potrivește constant; fiecare poziție e potrivire, deci plătești m comparații per pas — nu minim.' },
         },
         {
           text: {
@@ -517,6 +542,7 @@ export default function Seminar06() {
             ro: 'Pattern = Text — se potrivește mereu, fără comparații irosite',
           },
           correct: false,
+          feedback: { en: 'Pattern must fit inside text; with pattern = text there is one match but it takes m comparisons, not n/m.', ro: 'Pattern-ul trebuie să încapă; cu pattern = text există o potrivire care ia m comparații, nu n/m.' },
         },
         {
           text: {
@@ -524,6 +550,7 @@ export default function Seminar06() {
             ro: 'Orice caz cu pattern-uri scurte — minimul este mereu O(n)',
           },
           correct: false,
+          feedback: { en: 'Boyer-Moore is *sublinear* on good inputs (like the correct answer), reaching ≈ n/m comparisons, not always Θ(n).', ro: 'Boyer-Moore e *subliniar* pe intrări bune (ca răspunsul corect), atingând ≈ n/m comparații, nu mereu Θ(n).' },
         },
       ],
       explanation: {
@@ -548,9 +575,9 @@ export default function Seminar06() {
           },
           correct: true,
         },
-        { text: { en: '200', ro: '200' }, correct: false },
-        { text: { en: '1000', ro: '1000' }, correct: false },
-        { text: { en: '4980', ro: '4980' }, correct: false },
+        { text: { en: '200', ro: '200' }, correct: false, feedback: { en: 'That would require shift = 5 per step, but bad-char shifts by only 1 here because "0" is in pattern.', ro: 'Ar necesita deplasare = 5 per pas, dar bad-char deplasează cu 1 pentru că "0" e în pattern.' } },
+        { text: { en: '1000', ro: '1000' }, correct: false, feedback: { en: 'Text length, not comparison count; the last 4 positions cannot host the pattern, so it is 996.', ro: 'Lungimea textului, nu numărul de comparații; ultimele 4 poziții nu pot găzdui pattern-ul, deci 996.' } },
+        { text: { en: '4980', ro: '4980' }, correct: false, feedback: { en: 'That would be 5 comparisons per alignment — matches the pattern "10000", not "00001".', ro: 'Acela ar fi 5 comparații per aliniere — se potrivește pentru "10000", nu pentru "00001".' } },
       ],
       explanation: {
         en: 'Pattern "00001": last char is "1", text is all "0"s. At each position, we compare P[4]="1" with T[i]="0" — mismatch. Bad character rule: "0" last occurs at P[3], so shift = max(1, 4−3) = 1. We make 1 comparison per position, for 996 positions (1000−5+1).',
@@ -577,8 +604,8 @@ export default function Seminar06() {
             ro: 'Incorect: nepotrivirea la P[0] vs T[j] se numără tot ca o comparație. Sunt 5 comparații per aliniere, nu 4.',
           },
         },
-        { text: { en: '996', ro: '996' }, correct: false },
-        { text: { en: '200', ro: '200' }, correct: false },
+        { text: { en: '996', ro: '996' }, correct: false, feedback: { en: 'One comparison per alignment — that is the "00001" case, not "10000" (which has 5 per step).', ro: 'O comparație per aliniere — cazul "00001", nu "10000" (care are 5 per pas).' } },
+        { text: { en: '200', ro: '200' }, correct: false, feedback: { en: 'Way too few; bad-char shift is only 1 here because "0" appears in the pattern.', ro: 'Prea puține; deplasarea bad-char e doar 1 pentru că "0" apare în pattern.' } },
         {
           text: {
             en: '≈ 5·996 = 4980 — at each alignment, chars 4,3,2,1 match ("0"s) and char 0 mismatches ("1" vs "0"), totaling 5 comparisons; then bad-character shifts by 1',
@@ -608,9 +635,9 @@ export default function Seminar06() {
           },
           correct: true,
         },
-        { text: { en: '996', ro: '996' }, correct: false },
-        { text: { en: '200', ro: '200' }, correct: false },
-        { text: { en: '1992', ro: '1992' }, correct: false },
+        { text: { en: '996', ro: '996' }, correct: false, feedback: { en: 'Assumes 1 comparison per alignment; the first match of P[4]="0" takes an extra comparison before the mismatch.', ro: 'Presupune 1 comparație per aliniere; potrivirea lui P[4]="0" adaugă o comparație înainte de nepotrivire.' } },
+        { text: { en: '200', ro: '200' }, correct: false, feedback: { en: 'Too few; good-suffix shift is 4, not 5, so the count is ~996/4·2 ≈ 498, not 200.', ro: 'Prea puține; deplasarea good-suffix e 4, nu 5, deci ~996/4·2 ≈ 498, nu 200.' } },
+        { text: { en: '1992', ro: '1992' }, correct: false, feedback: { en: 'Without good-suffix (i.e., shift-by-1 only) we would get ~1992; good-suffix cuts it in half to ≈ 498.', ro: 'Fără good-suffix (doar deplasare cu 1) am obține ~1992; good-suffix înjumătățește la ≈ 498.' } },
       ],
       explanation: {
         en: 'Pattern "01010": compare from right — P[4]="0" matches T[i+4]="0", then P[3]="1" mismatches T[i+3]="0" (≈ 2 comparisons per alignment). Bad character gives shift 1, but the good suffix rule aligns the matched "0" with the leftmost "0" at P[0] (the preceding-char condition holds by convention since no char precedes P[0]), giving shift 4. With ~996/4 ≈ 249 alignments × 2 comparisons each ≈ 498 total. Without good-suffix (shift 1 only) the count jumps to ~1992.',
@@ -640,6 +667,7 @@ export default function Seminar06() {
             ro: 'Încearcă toți divizorii d ai lui N: verifică dacă T[0..d−1] repetat de N/d ori este egal cu T — O(N·d(N))',
           },
           correct: false,
+          feedback: { en: 'Works but expensive; KMP gives the period directly from f[N−1] in O(N).', ro: 'Funcționează dar e scump; KMP dă perioada direct din f[N−1] în O(N).' },
         },
         {
           text: {
@@ -647,6 +675,7 @@ export default function Seminar06() {
             ro: 'Caută T în T+T; dacă e găsit la poziție ≠ 0, atunci T este periodic',
           },
           correct: false,
+          feedback: { en: 'Good intuition, but you must exclude both position 0 AND position N to avoid the trivial wrap; the KMP formulation is cleaner.', ro: 'Intuiție bună, dar trebuie exclusă atât poziția 0 cât și N pentru a evita împachetarea trivială; formularea KMP e mai curată.' },
         },
         {
           text: {
@@ -654,6 +683,7 @@ export default function Seminar06() {
             ro: 'Inversează T și verifică dacă T = reverse(T) — funcționează doar pentru palindroame',
           },
           correct: false,
+          feedback: { en: 'That tests palindrome-ness, not periodicity — different problem entirely.', ro: 'Aceea testează dacă e palindrom, nu periodicitate — problemă total diferită.' },
         },
       ],
       explanation: {
@@ -672,9 +702,9 @@ export default function Seminar06() {
       },
       options: [
         { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a subsequence of S (can be obtained by deleting characters from S)', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true dacă s este o subsecvență a lui S (poate fi obținută prin ștergerea de caractere din S)' }, correct: true },
-        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a substring of S', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true dacă s este un subșir al lui S' }, correct: false },
-        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: positions of s in S', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: pozițiile lui s în S' }, correct: false },
-        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: longest common subsequence', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: cea mai lungă subsecvență comună' }, correct: false },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true iff s is a substring of S', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: true dacă s este un subșir al lui S' }, correct: false, feedback: { en: 'Substring requires *contiguous* chars; subsequence allows gaps. Different problems.', ro: 'Subșirul cere caractere *contigue*; subsecvența admite goluri. Probleme diferite.' } },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: positions of s in S', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: pozițiile lui s în S' }, correct: false, feedback: { en: 'Positions are ill-defined for a subsequence (characters are non-contiguous); we want a yes/no answer.', ro: 'Pozițiile nu au sens pentru o subsecvență (caractere necontigue); vrem răspuns da/nu.' } },
+        { text: { en: 'Input: s ∈ Σ*, S ∈ Σ*; Output: longest common subsequence', ro: 'Input: s ∈ Σ*, S ∈ Σ*; Output: cea mai lungă subsecvență comună' }, correct: false, feedback: { en: 'That is the LCS problem — harder and unrelated; we only check containment.', ro: 'Aceea e problema LCS — mai grea și fără legătură; noi doar verificăm incluziunea.' } },
       ],
       explanation: {
         en: 'A subsequence preserves order but not contiguity: "abcd" is a subsequence of "cdaaacbbacccda" because we can pick a(4), b(6), c(9), d(12). This is different from a substring which must be contiguous.',
@@ -703,6 +733,7 @@ export default function Seminar06() {
             ro: 'Programare dinamică pe ambele șiruri — O(n·m)',
           },
           correct: false,
+          feedback: { en: 'Correct but overkill; DP is needed for LCS, not for subsequence containment. Two-pointer greedy is strictly better.', ro: 'Corect, dar excesiv; DP e necesar pentru LCS, nu pentru incluziunea de subsecvență. Greedy cu doi pointeri e strict mai bun.' },
         },
         {
           text: {
@@ -710,6 +741,7 @@ export default function Seminar06() {
             ro: 'Folosește KMP pentru a găsi s în S — O(n+m) dar rezolvă subșir nu subsecvență',
           },
           correct: false,
+          feedback: { en: 'The option states its own problem — KMP solves substring matching, not subsequence containment.', ro: 'Opțiunea recunoaște ea însăși problema — KMP rezolvă potrivirea de subșir, nu incluziunea de subsecvență.' },
         },
         {
           text: {
@@ -717,6 +749,7 @@ export default function Seminar06() {
             ro: 'Căutare binară pentru fiecare caracter al lui s în S — O(n·log m)',
           },
           correct: false,
+          feedback: { en: 'Needs a precomputed index per character, and even then needs to enforce order — the linear greedy is simpler and faster.', ro: 'Necesită un index precomputat per caracter și apoi enforcement al ordinii — greedy-ul liniar e mai simplu și mai rapid.' },
         },
       ],
       explanation: {
@@ -747,6 +780,7 @@ export default function Seminar06() {
             ro: 'BC[i] = prima poziție a lui P[i] de la stânga. GS[i] = lungimea celui mai lung sufix începând la i.',
           },
           correct: false,
+          feedback: { en: 'Direction reversed on BC (rightmost, not leftmost) and GS stores shift amounts, not suffix lengths.', ro: 'Direcție greșită pe BC (cea mai din dreapta, nu din stânga), iar GS stochează deplasări, nu lungimi de sufix.' },
         },
         {
           text: {
@@ -754,6 +788,7 @@ export default function Seminar06() {
             ro: 'BC și GS stochează ambele cantități de deplasare bazate doar pe caracterele textului',
           },
           correct: false,
+          feedback: { en: 'BC is indexed by alphabet (text-char), GS by pattern-position; only BC depends on a text char at query time.', ro: 'BC e indexată pe alfabet (caracter text), GS pe poziția din pattern; doar BC depinde de un caracter text la interogare.' },
         },
         {
           text: {
@@ -761,6 +796,7 @@ export default function Seminar06() {
             ro: 'BC[c] = numărul de apariții ale lui c în pattern. GS[i] = funcția de eșec KMP la i.',
           },
           correct: false,
+          feedback: { en: 'BC needs a *position*, not a count, to compute the alignment shift; GS is Boyer-Moore\'s own table, not KMP\'s failure function.', ro: 'BC are nevoie de o *poziție*, nu de un număr, pentru a calcula deplasarea; GS e tabela Boyer-Moore, nu funcția de eșec KMP.' },
         },
       ],
       explanation: {
@@ -779,9 +815,9 @@ export default function Seminar06() {
       },
       options: [
         { text: { en: '5', ro: '5' }, correct: true },
-        { text: { en: '0', ro: '0' }, correct: false },
-        { text: { en: 'm − 5', ro: 'm − 5' }, correct: false },
-        { text: { en: '1', ro: '1' }, correct: false },
+        { text: { en: '0', ro: '0' }, correct: false, feedback: { en: 'Would imply no overlap between a prefix and a suffix of P; but f[m] = 5 guarantees one of length 5.', ro: 'Ar presupune că nu există nicio suprapunere prefix-sufix; dar f[m] = 5 garantează una de lungime 5.' } },
+        { text: { en: 'm − 5', ro: 'm − 5' }, correct: false, feedback: { en: 'That is the distance from 5 to m, not a prefix-length; the mirrored function gives the same length 5.', ro: 'Aceea e distanța de la 5 la m, nu o lungime de prefix; funcția oglindită dă aceeași lungime 5.' } },
+        { text: { en: '1', ro: '1' }, correct: false, feedback: { en: 'Would mean only the first character overlaps; but f[m] = 5 already establishes a length-5 prefix-suffix.', ro: 'Ar însemna că se suprapune doar primul caracter; dar f[m] = 5 stabilește deja un prefix-sufix de lungime 5.' } },
       ],
       explanation: {
         en: 'f[m] = 5 means the longest proper prefix of P that is also a suffix has length 5. Since h[] mirrors g[] (prefix function of reversed P), h[0] = g[m−1] which corresponds to the longest suffix of P that is also a prefix — which is exactly f[m] = 5.',
