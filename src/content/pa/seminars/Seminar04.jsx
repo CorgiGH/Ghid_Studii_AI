@@ -11,9 +11,9 @@ export default function Seminar04() {
     question: { en: 'Which I/O formalization best describes Problem 1?', ro: 'Care formalizare I/O descrie cel mai bine Problema 1?' },
     options: [
       { text: { en: 'Input: n ∈ ℕ, v: permutation of {1,...,n}; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ, v: permutare a lui {1,...,n}; Output: sumă ∈ ℕ₀' }, correct: true },
-      { text: { en: 'Input: n ∈ ℕ, v: array of n reals; Output: max ∈ ℝ', ro: 'Input: n ∈ ℕ, v: vector de n reale; Output: max ∈ ℝ' }, correct: false },
-      { text: { en: 'Input: n ∈ ℕ, v: permutation of {1,...,n}; Output: max ∈ ℕ', ro: 'Input: n ∈ ℕ, v: permutare a lui {1,...,n}; Output: max ∈ ℕ' }, correct: false },
-      { text: { en: 'Input: n ∈ ℕ; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ; Output: sumă ∈ ℕ₀' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: array of n reals; Output: max ∈ ℝ', ro: 'Input: n ∈ ℕ, v: vector de n reale; Output: max ∈ ℝ' }, correct: false, feedback: { en: 'Two mistakes: the input is a *permutation of {1..n}*, not arbitrary reals; and the algorithm returns `sum`, not `max`.', ro: 'Două greșeli: input-ul e o *permutare a {1..n}*, nu reale oarecare; iar algoritmul returnează `sum`, nu `max`.' } },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {1,...,n}; Output: max ∈ ℕ', ro: 'Input: n ∈ ℕ, v: permutare a lui {1,...,n}; Output: max ∈ ℕ' }, correct: false, feedback: { en: '`max` is only an internal variable; the algorithm returns `sum`.', ro: '`max` e doar o variabilă internă; algoritmul returnează `sum`.' } },
+      { text: { en: 'Input: n ∈ ℕ; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ; Output: sumă ∈ ℕ₀' }, correct: false, feedback: { en: 'The algorithm reads v throughout, so v must be an input in addition to n.', ro: 'Algoritmul citește v peste tot, deci v trebuie să fie input pe lângă n.' } },
     ],
     explanation: {
       en: 'The algorithm takes n and a vector v (permutation of {1,...,n}) and returns sum — a counter incremented in the inner loop. The max variable is internal, not returned.',
@@ -25,9 +25,9 @@ export default function Seminar04() {
     question: { en: 'What is the average-case time complexity of Problem 1\'s algorithm?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 1?' },
     options: [
       { text: { en: 'Θ(n · ln n)', ro: 'Θ(n · ln n)' }, correct: true },
-      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
-      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
-      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false, feedback: { en: 'That would be the worst case (every element is a new maximum); on average only Hₙ ≈ ln n updates happen.', ro: 'Acela ar fi cazul cel mai rău (fiecare element e nou maxim); în medie apar doar Hₙ ≈ ln n actualizări.' } },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false, feedback: { en: 'Ignores the inner loop cost; each of the Hₙ ≈ ln n updates triggers n extra iterations.', ro: 'Ignoră costul buclei interioare; fiecare din cele Hₙ ≈ ln n actualizări declanșează n iterații în plus.' } },
+      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false, feedback: { en: 'One factor of n too many: the outer loop is n, not n²; the Hₙ factor comes from the expected update count.', ro: 'Un factor n în plus: bucla exterioară e n, nu n²; factorul Hₙ vine din numărul așteptat de actualizări.' } },
     ],
     explanation: {
       en: 'The inner loop runs n times each time a new maximum is found. The expected number of new-max updates is Hₙ − 1 = 1/2 + 1/3 + … + 1/n ≈ ln n − 1 (the i = 0 position does not count as an update). Total average cost = n · (Hₙ − 1) + n = n · Hₙ = Θ(n · ln n).',
@@ -40,9 +40,9 @@ export default function Seminar04() {
     question: { en: 'Which I/O formalization best describes Problem 2?', ro: 'Care formalizare I/O descrie cel mai bine Problema 2?' },
     options: [
       { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: sumă ∈ ℕ₀' }, correct: true },
-      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: number of inversions ∈ ℕ₀', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: numărul de inversiuni ∈ ℕ₀' }, correct: false },
-      { text: { en: 'Input: n ∈ ℕ, v: array of n integers; Output: sorted array', ro: 'Input: n ∈ ℕ, v: vector de n întregi; Output: vector sortat' }, correct: false },
-      { text: { en: 'Input: n ∈ ℕ; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ; Output: sumă ∈ ℕ₀' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: number of inversions ∈ ℕ₀', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: numărul de inversiuni ∈ ℕ₀' }, correct: false, feedback: { en: 'Close but off by a factor: sum adds n (not 1) per inversion, so sum = n · (#inversions).', ro: 'Aproape, dar greșit cu un factor: sum adună n (nu 1) per inversiune, deci sum = n · (#inversiuni).' } },
+      { text: { en: 'Input: n ∈ ℕ, v: array of n integers; Output: sorted array', ro: 'Input: n ∈ ℕ, v: vector de n întregi; Output: vector sortat' }, correct: false, feedback: { en: 'The algorithm never sorts; it only compares and counts, returning a single number.', ro: 'Algoritmul nu sortează niciodată; doar compară și numără, returnând un număr.' } },
+      { text: { en: 'Input: n ∈ ℕ; Output: sum ∈ ℕ₀', ro: 'Input: n ∈ ℕ; Output: sumă ∈ ℕ₀' }, correct: false, feedback: { en: 'Forgot v: the algorithm reads v[i] and v[j], so v must be part of the input.', ro: 'A uitat v: algoritmul citește v[i] și v[j], deci v trebuie input.' } },
     ],
     explanation: {
       en: 'The algorithm returns sum, which counts n for each inversion found (not the number of inversions itself). The input is n and a permutation of {0,...,n−1}.',
@@ -54,9 +54,9 @@ export default function Seminar04() {
     question: { en: 'What is the average-case time complexity of Problem 2\'s algorithm?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 2?' },
     options: [
       { text: { en: 'Θ(n³)', ro: 'Θ(n³)' }, correct: true },
-      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
-      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
-      { text: { en: 'Θ(n⁴)', ro: 'Θ(n⁴)' }, correct: false },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false, feedback: { en: 'Only the outer double-loop; forgets the n-iteration inner loop fired ~n²/4 times on average.', ro: 'Doar bucla exterioară dublă; omite bucla interioară de n iterații, declanșată în medie de ~n²/4 ori.' } },
+      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false, feedback: { en: 'No ln factor here — the expected inversion count is Θ(n²), a constant fraction of all pairs.', ro: 'Nu există factor ln — numărul așteptat de inversiuni e Θ(n²), o fracție constantă din perechi.' } },
+      { text: { en: 'Θ(n⁴)', ro: 'Θ(n⁴)' }, correct: false, feedback: { en: 'Too much: the double-loop is n², not n³; adding one more n-inner-loop gives n³, not n⁴.', ro: 'Prea mult: bucla dublă e n², nu n³; adăugând o buclă interioară de n obținem n³, nu n⁴.' } },
     ],
     explanation: {
       en: 'Expected inversions = C(n,2) · 1/2 = n(n−1)/4. Each inversion triggers n inner iterations, and the outer double-loop always does C(n,2) comparisons. Total = C(n,2) + n · n(n−1)/4 = Θ(n³).',
@@ -69,9 +69,9 @@ export default function Seminar04() {
     question: { en: 'Which I/O formalization best describes Problem 3?', ro: 'Care formalizare I/O descrie cel mai bine Problema 3?' },
     options: [
       { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: 0', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: 0' }, correct: true },
-      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: index of first even element', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: indicele primului element par' }, correct: false },
-      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: v[i] (first even element)', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: v[i] (primul element par)' }, correct: false },
-      { text: { en: 'Input: n ∈ ℕ; Output: boolean', ro: 'Input: n ∈ ℕ; Output: boolean' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: index of first even element', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: indicele primului element par' }, correct: false, feedback: { en: 'The algorithm never returns i — only `return 0`; the early exit is `break`, not `return i`.', ro: 'Algoritmul nu returnează i — doar `return 0`; ieșirea timpurie e `break`, nu `return i`.' } },
+      { text: { en: 'Input: n ∈ ℕ, v: permutation of {0,...,n−1}; Output: v[i] (first even element)', ro: 'Input: n ∈ ℕ, v: permutare a lui {0,...,n−1}; Output: v[i] (primul element par)' }, correct: false, feedback: { en: 'Same confusion: the function returns 0, not v[i]. The "first even" aspect only affects runtime, not output.', ro: 'Aceeași confuzie: funcția returnează 0, nu v[i]. „Primul par" afectează doar timpul de execuție, nu rezultatul.' } },
+      { text: { en: 'Input: n ∈ ℕ; Output: boolean', ro: 'Input: n ∈ ℕ; Output: boolean' }, correct: false, feedback: { en: 'Drops v and gets the output type wrong: 0 is an integer, not a boolean.', ro: 'Omite v și greșește tipul de output: 0 e întreg, nu boolean.' } },
     ],
     explanation: {
       en: 'The algorithm always returns 0 regardless of input. The interesting aspect is the execution time, not the output — it breaks early when finding the first even element.',
@@ -83,9 +83,9 @@ export default function Seminar04() {
     question: { en: 'What is the average-case time complexity of Problem 3\'s algorithm?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 3?' },
     options: [
       { text: { en: 'Θ(1)', ro: 'Θ(1)' }, correct: true },
-      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
-      { text: { en: 'Θ(ln n)', ro: 'Θ(ln n)' }, correct: false },
-      { text: { en: 'Θ(√n)', ro: 'Θ(√n)' }, correct: false },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false, feedback: { en: 'That is the worst case (all odd first); with ~n/2 even elements, we expect to hit one after ~2 steps.', ro: 'Acela e cazul cel mai rău (toate impare la început); cu ~n/2 pare, apucăm unul după ~2 pași în medie.' } },
+      { text: { en: 'Θ(ln n)', ro: 'Θ(ln n)' }, correct: false, feedback: { en: 'No logarithm here — the first hit arrives in O(1) expected steps because the hit probability is a constant ~1/2.', ro: 'Fără logaritm — prima potrivire vine în O(1) pași așteptați pentru că probabilitatea e constantă ~1/2.' } },
+      { text: { en: 'Θ(√n)', ro: 'Θ(√n)' }, correct: false, feedback: { en: '√n would arise from balls-and-bins collisions; here the event probability per step is constant, giving Θ(1).', ro: '√n apare la coliziuni tip bile-și-coșuri; aici probabilitatea per pas e constantă, deci Θ(1).' } },
     ],
     explanation: {
       en: 'In a permutation of {0,...,n−1}, about half the elements are even. The expected position of the first even element is (n+1)/(⌈n/2⌉+1) ≈ 2 for large n. This is constant, so Θ(1). (This is the permutation-model argument; the i.i.d. analogue used in Problem 4c arrives at the same Θ(1) via the geometric distribution, E[trials] = 1/p.)',
@@ -101,9 +101,9 @@ export default function Seminar04() {
     },
     options: [
       { text: { en: 'In the i.i.d. model, values can repeat and positions are independent; in permutations, values are distinct and positions are dependent', ro: 'În modelul i.i.d., valorile se pot repeta și pozițiile sunt independente; în permutări, valorile sunt distincte și pozițiile sunt dependente' }, correct: true },
-      { text: { en: 'The i.i.d. model always gives worse complexity', ro: 'Modelul i.i.d. dă întotdeauna complexitate mai proastă' }, correct: false },
-      { text: { en: 'The permutation model has independent positions too', ro: 'Modelul cu permutări are și el poziții independente' }, correct: false },
-      { text: { en: 'There is no difference — the analyses give the same results', ro: 'Nu există diferență — analizele dau aceleași rezultate' }, correct: false },
+      { text: { en: 'The i.i.d. model always gives worse complexity', ro: 'Modelul i.i.d. dă întotdeauna complexitate mai proastă' }, correct: false, feedback: { en: 'For Problems 1-3 the asymptotic result is the same; the models differ in *structure*, not always in the final bound.', ro: 'Pentru Problemele 1-3 rezultatul asimptotic e același; modelele diferă ca *structură*, nu întotdeauna ca margine finală.' } },
+      { text: { en: 'The permutation model has independent positions too', ro: 'Modelul cu permutări are și el poziții independente' }, correct: false, feedback: { en: 'The exact opposite: in a permutation, knowing v[0] removes that value from the remaining positions — they are *dependent*.', ro: 'Exact opusul: într-o permutare, cunoașterea lui v[0] scoate valoarea din restul pozițiilor — sunt *dependente*.' } },
+      { text: { en: 'There is no difference — the analyses give the same results', ro: 'Nu există diferență — analizele dau aceleași rezultate' }, correct: false, feedback: { en: 'Although the asymptotic bounds coincide here, the *argument* is different: geometric r.v. (i.i.d.) vs symmetry over permutations.', ro: 'Deși marginile asimptotice coincid aici, *argumentul* diferă: v.a. geometrică (i.i.d.) vs simetrie pe permutări.' } },
     ],
     explanation: {
       en: 'In the i.i.d. model, each v[i] is drawn independently and uniformly from {0,...,n−1}, so repeats are possible. In permutations, all values are distinct and knowing some values constrains the rest.',
@@ -115,9 +115,9 @@ export default function Seminar04() {
     question: { en: 'What is the average complexity of Problem 1\'s algorithm under the i.i.d. uniform model?', ro: 'Care este complexitatea medie a algoritmului din Problema 1 sub modelul i.i.d. uniform?' },
     options: [
       { text: { en: 'Θ(n · ln n)', ro: 'Θ(n · ln n)' }, correct: true },
-      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
-      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
-      { text: { en: 'Θ(n · ln² n)', ro: 'Θ(n · ln² n)' }, correct: false },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false, feedback: { en: 'The number of new maxima is Θ(ln n) in expectation under i.i.d. too, not Θ(n).', ro: 'Numărul de noi maxime e Θ(ln n) în medie și la i.i.d., nu Θ(n).' } },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false, feedback: { en: 'Ignores the inner loop: each of the ~ln n new maxima triggers n extra iterations.', ro: 'Ignoră bucla interioară: fiecare din cele ~ln n noi maxime declanșează n iterații în plus.' } },
+      { text: { en: 'Θ(n · ln² n)', ro: 'Θ(n · ln² n)' }, correct: false, feedback: { en: 'One extra ln factor: the expected number of records is Hₙ (not Hₙ²).', ro: 'Un factor ln în plus: numărul așteptat de recorduri e Hₙ (nu Hₙ²).' } },
     ],
     explanation: {
       en: 'With i.i.d. uniform values on {0,...,n−1}, P(v[i] > max(v[0],...,v[i−1])) is close to 1/(i+1) for large n. The expected number of max updates remains Θ(ln n), giving Θ(n · ln n) total.',
@@ -129,9 +129,9 @@ export default function Seminar04() {
     question: { en: 'What is the average complexity of Problem 2\'s algorithm under the i.i.d. uniform model?', ro: 'Care este complexitatea medie a algoritmului din Problema 2 sub modelul i.i.d. uniform?' },
     options: [
       { text: { en: 'Θ(n³)', ro: 'Θ(n³)' }, correct: true },
-      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
-      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
-      { text: { en: 'Θ(n⁴)', ro: 'Θ(n⁴)' }, correct: false },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false, feedback: { en: 'Counts only the outer pair comparisons; forgets the n-wide inner loop fired for each of the Θ(n²) inversions.', ro: 'Numără doar comparațiile din bucla exterioară; omite bucla interioară de n pentru cele Θ(n²) inversiuni.' } },
+      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false, feedback: { en: 'No ln factor — P(inversion) is constant in the i.i.d. model, so the expected count is Θ(n²), not Θ(n² log n).', ro: 'Fără factor ln — P(inversiune) e constantă în modelul i.i.d., deci numărul așteptat e Θ(n²), nu Θ(n² log n).' } },
+      { text: { en: 'Θ(n⁴)', ro: 'Θ(n⁴)' }, correct: false, feedback: { en: 'Too much: the nested loops give at most Θ(n³); Θ(n⁴) would need another layer.', ro: 'Prea mult: buclele imbricate dau cel mult Θ(n³); Θ(n⁴) ar cere încă un nivel.' } },
     ],
     explanation: {
       en: 'P(v[i] > v[j]) = (n−1)/(2n) for i.i.d. uniform on {0,...,n−1}. Expected "inversions" = C(n,2) · (n−1)/(2n) = (n−1)²/4 ≈ n²/4. Each triggers n inner iterations: total ≈ n³/4 = Θ(n³).',
@@ -143,9 +143,9 @@ export default function Seminar04() {
     question: { en: 'What is the average complexity of Problem 3\'s algorithm under the i.i.d. uniform model?', ro: 'Care este complexitatea medie a algoritmului din Problema 3 sub modelul i.i.d. uniform?' },
     options: [
       { text: { en: 'Θ(1)', ro: 'Θ(1)' }, correct: true },
-      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
-      { text: { en: 'Θ(ln n)', ro: 'Θ(ln n)' }, correct: false },
-      { text: { en: 'Θ(n / ln n)', ro: 'Θ(n / ln n)' }, correct: false },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false, feedback: { en: 'That is the worst case; expected value of a geometric(1/2) is 2 = Θ(1).', ro: 'Acela e cazul cel mai rău; media unei geometrice(1/2) e 2 = Θ(1).' } },
+      { text: { en: 'Θ(ln n)', ro: 'Θ(ln n)' }, correct: false, feedback: { en: 'No ln: when the per-step success probability is a *constant*, E[trials] is a constant.', ro: 'Fără ln: când probabilitatea de succes per pas e *constantă*, E[încercări] e constantă.' } },
+      { text: { en: 'Θ(n / ln n)', ro: 'Θ(n / ln n)' }, correct: false, feedback: { en: 'Not related to any quantity here; the geometric-distribution mean is 1/p, which does not depend on n asymptotically.', ro: 'Fără legătură cu nimic aici; media geometricei e 1/p, care nu depinde asimptotic de n.' } },
     ],
     explanation: {
       en: 'Each position independently has P(even) = ⌈n/2⌉/n ≈ 1/2. The number of iterations follows a geometric distribution with expected value 1/p ≈ 2. This is Θ(1).',
@@ -158,9 +158,9 @@ export default function Seminar04() {
     question: { en: 'Why does the naive shuffle algorithm (swap with uniform j from [0..n-1]) NOT produce each permutation with equal probability?', ro: 'De ce algoritmul naiv de amestecare (swap cu j uniform din [0..n-1]) NU produce fiecare permutare cu probabilitate egală?' },
     options: [
       { text: { en: 'There are nⁿ equally likely execution paths but n! permutations, and nⁿ is not divisible by n! for n ≥ 3', ro: 'Există nⁿ căi de execuție echiprobabile dar n! permutări, iar nⁿ nu este divizibil cu n! pentru n ≥ 3' }, correct: true },
-      { text: { en: 'The algorithm never swaps an element with itself', ro: 'Algoritmul nu interschimbă niciodată un element cu el însuși' }, correct: false },
-      { text: { en: 'The algorithm only produces sorted permutations', ro: 'Algoritmul produce doar permutări sortate' }, correct: false },
-      { text: { en: 'The algorithm runs in O(n²) which is too slow to be correct', ro: 'Algoritmul rulează în O(n²) ceea ce este prea lent pentru a fi corect' }, correct: false },
+      { text: { en: 'The algorithm never swaps an element with itself', ro: 'Algoritmul nu interschimbă niciodată un element cu el însuși' }, correct: false, feedback: { en: 'It can — j = i is allowed, producing a self-swap (identity). That would not by itself cause bias.', ro: 'Poate — j = i este admis, producând un self-swap (identitate). Asta în sine nu ar cauza un bias.' } },
+      { text: { en: 'The algorithm only produces sorted permutations', ro: 'Algoritmul produce doar permutări sortate' }, correct: false, feedback: { en: 'It produces every permutation with positive probability; the bug is uneven probabilities, not missing outcomes.', ro: 'Produce orice permutare cu probabilitate pozitivă; bug-ul e în probabilitățile inegale, nu în rezultatele lipsă.' } },
+      { text: { en: 'The algorithm runs in O(n²) which is too slow to be correct', ro: 'Algoritmul rulează în O(n²) ceea ce este prea lent pentru a fi corect' }, correct: false, feedback: { en: 'Complexity has nothing to do with distributional correctness; it is actually O(n). The bug is statistical.', ro: 'Complexitatea nu are legătură cu corectitudinea distribuțională; de fapt e O(n). Bug-ul e statistic.' } },
     ],
     explanation: {
       en: 'Each iteration picks j uniformly from n choices, giving nⁿ total paths. Since nⁿ mod n! ≠ 0 for n ≥ 3, some permutations must appear more often than others. For n=3: 3³=27 paths but 3!=6 permutations, and 27/6 = 4.5.',
@@ -172,9 +172,9 @@ export default function Seminar04() {
     question: { en: 'What is the time complexity of the original Fisher-Yates algorithm?', ro: 'Care este complexitatea de timp a algoritmului Fisher-Yates original?' },
     options: [
       { text: { en: 'O(n²)', ro: 'O(n²)' }, correct: true },
-      { text: { en: 'O(n)', ro: 'O(n)' }, correct: false },
-      { text: { en: 'O(n · ln n)', ro: 'O(n · ln n)' }, correct: false },
-      { text: { en: 'O(n³)', ro: 'O(n³)' }, correct: false },
+      { text: { en: 'O(n)', ro: 'O(n)' }, correct: false, feedback: { en: 'The inner while scan is not O(1) — it walks the used[] array up to n times per outer iteration.', ro: 'Scanarea while interioară nu e O(1) — parcurge used[] până la n ori per iterație exterioară.' } },
+      { text: { en: 'O(n · ln n)', ro: 'O(n · ln n)' }, correct: false, feedback: { en: 'No logarithm here; the inner scan is linear in the remaining unused count.', ro: 'Fără logaritm aici; scanarea interioară e liniară în nr. rămase.' } },
+      { text: { en: 'O(n³)', ro: 'O(n³)' }, correct: false, feedback: { en: 'Too much: only the inner while adds an extra O(n); the outer loop already has n iterations.', ro: 'Prea mult: doar while-ul interior adaugă O(n); bucla exterioară are deja n iterații.' } },
     ],
     explanation: {
       en: 'In each iteration i, the while loop scans the used[] array to find the k-th unused element. In the worst case it scans up to n elements. Over n iterations, total scans ≈ n + (n−1) + ... + 1 = n(n+1)/2 = O(n²).',
@@ -186,9 +186,9 @@ export default function Seminar04() {
     question: { en: 'What is the time complexity of the optimized Fisher-Yates algorithm?', ro: 'Care este complexitatea de timp a algoritmului Fisher-Yates optimizat?' },
     options: [
       { text: { en: 'O(n)', ro: 'O(n)' }, correct: true },
-      { text: { en: 'O(n²)', ro: 'O(n²)' }, correct: false },
-      { text: { en: 'O(n · ln n)', ro: 'O(n · ln n)' }, correct: false },
-      { text: { en: 'O(1)', ro: 'O(1)' }, correct: false },
+      { text: { en: 'O(n²)', ro: 'O(n²)' }, correct: false, feedback: { en: 'That is the *original* Fisher-Yates; the optimized version avoids the inner scan by swapping with a random prior position.', ro: 'Aceea e Fisher-Yates *original*; versiunea optimizată evită scanarea interioară prin swap cu o poziție anterioară aleatoare.' } },
+      { text: { en: 'O(n · ln n)', ro: 'O(n · ln n)' }, correct: false, feedback: { en: 'No log factor — just two linear passes.', ro: 'Fără factor log — doar două parcurgeri liniare.' } },
+      { text: { en: 'O(1)', ro: 'O(1)' }, correct: false, feedback: { en: 'Cannot be sublinear: we must write n output positions.', ro: 'Nu poate fi subliniar: trebuie scrise n poziții de output.' } },
     ],
     explanation: {
       en: 'The optimized version does two passes of n iterations each: one to initialize p[i] = i, one to perform swaps. Each swap is O(1). Total = O(n).',
@@ -201,9 +201,9 @@ export default function Seminar04() {
     question: { en: 'Which I/O formalization best describes Problem 6?', ro: 'Care formalizare I/O descrie cel mai bine Problema 6?' },
     options: [
       { text: { en: 'Input: n ∈ ℕ, a: array of n distinct elements; Output: sum ∈ ℕ₀ (printed)', ro: 'Input: n ∈ ℕ, a: vector de n elemente distincte; Output: sumă ∈ ℕ₀ (afișată)' }, correct: true },
-      { text: { en: 'Input: n ∈ ℕ, a: array of n distinct elements; Output: min ∈ ℝ', ro: 'Input: n ∈ ℕ, a: vector de n elemente distincte; Output: min ∈ ℝ' }, correct: false },
-      { text: { en: 'Input: n ∈ ℕ; Output: permutation p', ro: 'Input: n ∈ ℕ; Output: permutare p' }, correct: false },
-      { text: { en: 'Input: n ∈ ℕ, a: array; Output: sorted array', ro: 'Input: n ∈ ℕ, a: vector; Output: vector sortat' }, correct: false },
+      { text: { en: 'Input: n ∈ ℕ, a: array of n distinct elements; Output: min ∈ ℝ', ro: 'Input: n ∈ ℕ, a: vector de n elemente distincte; Output: min ∈ ℝ' }, correct: false, feedback: { en: '`min` is internal; the algorithm prints `sum` (the counter), not `min`.', ro: '`min` e internă; algoritmul afișează `sum` (contorul), nu `min`.' } },
+      { text: { en: 'Input: n ∈ ℕ; Output: permutation p', ro: 'Input: n ∈ ℕ; Output: permutare p' }, correct: false, feedback: { en: 'The Fisher-Yates call produces p, but it is an internal step; the final output is `sum`.', ro: 'Apelul Fisher-Yates produce p, dar e un pas intern; output-ul final e `sum`.' } },
+      { text: { en: 'Input: n ∈ ℕ, a: array; Output: sorted array', ro: 'Input: n ∈ ℕ, a: vector; Output: vector sortat' }, correct: false, feedback: { en: 'Never sorts; only scans a in a shuffled order while tracking the running min.', ro: 'Nu sortează niciodată; doar parcurge a într-o ordine amestecată urmărind min-ul curent.' } },
     ],
     explanation: {
       en: 'The algorithm takes an array a of n distinct elements, shuffles access order via Fisher-Yates, and prints sum — a counter incremented n times for each new minimum found.',
@@ -215,9 +215,9 @@ export default function Seminar04() {
     question: { en: 'What is the average-case time complexity of Problem 6\'s algorithm (excluding the Fisher-Yates call)?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 6 (excluzând apelul Fisher-Yates)?' },
     options: [
       { text: { en: 'Θ(n · ln n)', ro: 'Θ(n · ln n)' }, correct: true },
-      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false },
-      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false },
-      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false, feedback: { en: 'That is the worst case (already-sorted-descending order); a random order gives Hₙ ≈ ln n updates on average.', ro: 'Acela e cazul cel mai rău (ordine deja descrescătoare); o ordine aleatorie dă Hₙ ≈ ln n actualizări în medie.' } },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false, feedback: { en: 'Ignores the inner loop; each expected update triggers n extra steps.', ro: 'Ignoră bucla interioară; fiecare actualizare așteptată declanșează n pași în plus.' } },
+      { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false, feedback: { en: 'Only one n factor from the outer loop — the number of inner-loop triggers is Θ(ln n), not Θ(n log n).', ro: 'Doar un factor n din bucla exterioară — numărul de declanșări al buclei interioare e Θ(ln n), nu Θ(n log n).' } },
     ],
     explanation: {
       en: 'Fisher-Yates produces a uniform random permutation, so a[p[0]], a[p[1]], ... is a random ordering of distinct elements. The analysis is identical to Problem 1: outer loop runs n−1 iterations; expected min updates = H_n − 1, each costs n inner steps. Total = (n−1) + n·(H_n − 1) = n·H_n − 1 = Θ(n log n).',
