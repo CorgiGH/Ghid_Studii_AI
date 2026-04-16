@@ -14,9 +14,9 @@ export default function Seminar04() {
     },
     options: [
       { text: 'x = (−3, 3, 1)ᵀ', correct: true },
-      { text: 'x = (1, 1, 1)ᵀ', correct: false },
-      { text: 'x = (2, −5, 3)ᵀ', correct: false },
-      { text: 'x = (3, −3, 1)ᵀ', correct: false },
+      { text: 'x = (1, 1, 1)ᵀ', correct: false, feedback: { en: 'Row 1 of A = LU: test Ax — gives (2·1 + 3·1 − 1·1) = 4 ≠ 2 (b₁). The intermediate y would have to be (4, 6, 3), not (2, −5, 3).', ro: 'Linia 1 a A = LU: test Ax — dă (2·1 + 3·1 − 1·1) = 4 ≠ 2 (b₁). Intermediarul y ar fi (4, 6, 3), nu (2, −5, 3).' } },
+      { text: 'x = (2, −5, 3)ᵀ', correct: false, feedback: { en: 'That is y (solution of Ly = b), not x. You stopped at the forward-substitution stage; now solve Ux = y.', ro: 'Acela e y (soluția Ly = b), nu x. Te-ai oprit la substituția directă; acum rezolvă Ux = y.' } },
+      { text: 'x = (3, −3, 1)ᵀ', correct: false, feedback: { en: 'Sign error on x₁: back-substitution gives 2x₁ + 9 − 1 = 2 ⇒ x₁ = −3, not +3.', ro: 'Eroare de semn pe x₁: substituția inversă dă 2x₁ + 9 − 1 = 2 ⇒ x₁ = −3, nu +3.' } },
     ],
     explanation: {
       en: 'Two-stage solve. Forward on Ly = b: y = (2, −5, 3). Back on Ux = y: 3x₃ = 3 ⇒ x₃ = 1; −2x₂ + 1 = −5 ⇒ x₂ = 3; 2x₁ + 9 − 1 = 2 ⇒ x₁ = −3.',
@@ -31,9 +31,9 @@ export default function Seminar04() {
     },
     options: [
       { text: { en: 'Ly = b by forward substitution, then Ux = y by back substitution', ro: 'Ly = b prin substituție directă, apoi Ux = y prin substituție inversă' }, correct: true },
-      { text: { en: 'Forming A⁻¹ = U⁻¹L⁻¹ then multiplying', ro: 'Calculul A⁻¹ = U⁻¹L⁻¹ apoi înmulțire' }, correct: false },
-      { text: { en: 'Ux = b by back substitution, then Ly = x by forward substitution', ro: 'Ux = b prin substituție inversă, apoi Ly = x prin substituție directă' }, correct: false },
-      { text: { en: 'Gauss elimination from scratch', ro: 'Eliminare Gauss de la zero' }, correct: false },
+      { text: { en: 'Forming A⁻¹ = U⁻¹L⁻¹ then multiplying', ro: 'Calculul A⁻¹ = U⁻¹L⁻¹ apoi înmulțire' }, correct: false, feedback: { en: 'Correct result but wasteful: explicit inverses cost Θ(n³) extra; the two triangular solves are Θ(n²) total.', ro: 'Rezultat corect dar risipitor: inversele explicite costă Θ(n³) în plus; cele două rezolvări triunghiulare sunt Θ(n²) total.' } },
+      { text: { en: 'Ux = b by back substitution, then Ly = x by forward substitution', ro: 'Ux = b prin substituție inversă, apoi Ly = x prin substituție directă' }, correct: false, feedback: { en: 'Wrong direction: A·x = LU·x, so the outer factor L acts first on b (Ly = b gives intermediate y), then U acts on x. The order cannot be swapped.', ro: 'Direcție greșită: A·x = LU·x, deci factorul exterior L acționează întâi pe b (Ly = b dă y intermediar), apoi U pe x. Ordinea nu poate fi inversată.' } },
+      { text: { en: 'Gauss elimination from scratch', ro: 'Eliminare Gauss de la zero' }, correct: false, feedback: { en: 'Wastes the LU factorisation you already have. The whole point of storing LU is to amortise Θ(n³) over many RHSs at Θ(n²) each.', ro: 'Risipește factorizarea LU pe care deja o ai. Scopul stocării LU este amortizarea Θ(n³) peste mai multe RHS la Θ(n²) fiecare.' } },
     ],
     explanation: {
       en: 'A·x = (LU)x = L(Ux). Set y = Ux. Then Ly = b is triangular (forward-solve), giving y, and Ux = y is triangular (back-solve), giving x. Two Θ(n²) solves — much cheaper than Θ(n³) re-elimination.',
@@ -48,9 +48,9 @@ export default function Seminar04() {
     },
     options: [
       { text: '24', correct: true },
-      { text: '8', correct: false },
-      { text: '−2', correct: false },
-      { text: '176', correct: false },
+      { text: '8', correct: false, feedback: { en: 'You read b₃ directly as x₃ — forgot the L cascade. y₃ = 8 − (−3)·4 − 2·(−2) = 24 (not 8).', ro: 'Ai citit b₃ direct ca x₃ — ai uitat cascada L. y₃ = 8 − (−3)·4 − 2·(−2) = 24 (nu 8).' } },
+      { text: '−2', correct: false, feedback: { en: 'That is y₂, an intermediate value in the forward pass. y₃ and x₃ come later.', ro: 'Acela e y₂, o valoare intermediară din substituția directă. y₃ și x₃ vin ulterior.' } },
+      { text: '176', correct: false, feedback: { en: 'That is x₁ in the full solution — you returned the wrong coordinate. x₃ = 24 (= y₃ / u₃₃ = 24/1).', ro: 'Acela e x₁ din soluția completă — ai returnat coordonata greșită. x₃ = 24 (= y₃ / u₃₃ = 24/1).' } },
     ],
     explanation: {
       en: 'Ly = b: y₁ = 4; y₂ = 6 − 2·4 = −2; y₃ = 8 − (−3)·4 − 2·(−2) = 8 + 12 + 4 = 24. Then Ux = y gives x₃ = y₃ / u₃₃ = 24 / 1 = 24.',
@@ -66,9 +66,9 @@ export default function Seminar04() {
     },
     options: [
       { text: { en: 'a diagonal factor D: if (L, U) is Doolittle then (LD, D⁻¹U) is Crout, where D = diag(U)', ro: 'un factor diagonal D: dacă (L, U) este Doolittle atunci (LD, D⁻¹U) este Crout, unde D = diag(U)' }, correct: true },
-      { text: { en: 'a permutation matrix', ro: 'o matrice de permutare' }, correct: false },
-      { text: { en: 'nothing — they are the same decomposition', ro: 'nimic — sunt aceeași descompunere' }, correct: false },
-      { text: { en: 'swapping the roles of L and U', ro: 'schimbarea rolurilor lui L și U' }, correct: false },
+      { text: { en: 'a permutation matrix', ro: 'o matrice de permutare' }, correct: false, feedback: { en: 'Permutations come with PA = LU (partial pivoting), a different variant. Doolittle ↔ Crout differ by *scaling*, not reordering.', ro: 'Permutările apar la PA = LU (pivotare parțială), altă variantă. Doolittle ↔ Crout diferă prin *scalare*, nu reordonare.' } },
+      { text: { en: 'nothing — they are the same decomposition', ro: 'nimic — sunt aceeași descompunere' }, correct: false, feedback: { en: 'They coincide only when diag(U_Doolittle) = I (e.g., A₁ in the worked example). For A₂ with pivots (2, −2, 3), they differ.', ro: 'Coincid doar când diag(U_Doolittle) = I (ex. A₁ în exemplu). Pentru A₂ cu pivoți (2, −2, 3), diferă.' } },
+      { text: { en: 'swapping the roles of L and U', ro: 'schimbarea rolurilor lui L și U' }, correct: false, feedback: { en: 'No: in both flavours L is lower-triangular and U is upper. Only which one carries the "unit diagonal" convention changes.', ro: 'Nu: în ambele variante L e inferior și U e superior. Doar ce matrice poartă convenția „diagonală unitară" se schimbă.' } },
     ],
     explanation: {
       en: 'Both satisfy A = LU; the factorisation is unique once we fix one diagonal. Let D = diag(U_Doolittle). Then U_Crout = D⁻¹·U_Doolittle (unit diagonal) and L_Crout = L_Doolittle·D (diagonal = pivots).',
@@ -84,9 +84,9 @@ export default function Seminar04() {
     },
     options: [
       { text: { en: 'some matrices need row swaps (partial pivoting) to produce non-zero pivots, and P records them', ro: 'unele matrici au nevoie de schimburi de linii (pivotare parțială) pentru pivoți nenuli, iar P le înregistrează' }, correct: true },
-      { text: { en: 'P is always the identity', ro: 'P este întotdeauna identitatea' }, correct: false },
-      { text: { en: 'Without P, L would be upper-triangular', ro: 'Fără P, L ar fi triunghiulară superior' }, correct: false },
-      { text: { en: 'It changes the solution x', ro: 'Schimbă soluția x' }, correct: false },
+      { text: { en: 'P is always the identity', ro: 'P este întotdeauna identitatea' }, correct: false, feedback: { en: 'If P = I always, PA = LU would be the same as A = LU — but A = LU fails for e.g. A = [[0,1],[1,0]] (zero pivot at start).', ro: 'Dacă P = I mereu, PA = LU ar fi același lucru cu A = LU — dar A = LU eșuează pentru ex. A = [[0,1],[1,0]] (pivot zero la start).' } },
+      { text: { en: 'Without P, L would be upper-triangular', ro: 'Fără P, L ar fi triunghiulară superior' }, correct: false, feedback: { en: 'L stays lower-triangular in both variants; P only permutes rows, it doesn\'t flip triangularity.', ro: 'L rămâne inferior în ambele variante; P doar permută linii, nu schimbă triunghiularitatea.' } },
+      { text: { en: 'It changes the solution x', ro: 'Schimbă soluția x' }, correct: false, feedback: { en: 'PA x = Pb has the same x as A x = b; permuting rows of the system doesn\'t change the unknown vector.', ro: 'PA x = Pb are același x ca A x = b; permutarea liniilor sistemului nu schimbă vectorul necunoscut.' } },
     ],
     explanation: {
       en: 'Plain A = LU exists only when every leading principal minor is non-zero. Partial pivoting (swap to put the largest |·| pivot on top) always succeeds for non-singular A and gives PA = LU. The solution is the same — the pivoting is a reordering.',
@@ -101,9 +101,9 @@ export default function Seminar04() {
     },
     options: [
       { text: 'R1 ↔ R2', correct: true },
-      { text: 'R1 ↔ R3', correct: false },
-      { text: 'R2 ↔ R3', correct: false },
-      { text: { en: 'no swap — first pivot is usable', ro: 'fără schimb — primul pivot e utilizabil' }, correct: false },
+      { text: 'R1 ↔ R3', correct: false, feedback: { en: 'Also valid in principle (both R2 and R3 have |a₁₁| = 1), but partial pivoting conventionally picks the *first* max-absolute-value row to avoid unnecessary reordering. The worked solution uses R2.', ro: 'Valid în principiu (și R2 și R3 au |a₁₁| = 1), dar pivotarea parțială alege convențional *prima* linie cu max — soluția folosește R2.' } },
+      { text: 'R2 ↔ R3', correct: false, feedback: { en: 'That leaves the zero at (1,1) untouched — the pivot is still unusable. The swap must bring a non-zero into position (1,1).', ro: 'Acela lasă zero-ul la (1,1) neschimbat — pivotul rămâne inutilizabil. Schimbul trebuie să aducă un nenul la (1,1).' } },
+      { text: { en: 'no swap — first pivot is usable', ro: 'fără schimb — primul pivot e utilizabil' }, correct: false, feedback: { en: 'a₁₁ = 0 is the textbook unusable pivot — you cannot divide by zero during Gaussian elimination.', ro: 'a₁₁ = 0 este pivotul clasic inutilizabil — nu poți împărți la zero în eliminarea Gauss.' } },
     ],
     explanation: {
       en: 'a₁₁ = 0 so we cannot use it as a pivot. Partial pivoting picks the largest-modulus entry in column 1 below row 1: rows 2 and 3 both have |1|; swapping R1 ↔ R2 brings a non-zero pivot to (1, 1) and matches the worked solution.',
@@ -118,9 +118,9 @@ export default function Seminar04() {
     },
     options: [
       { text: 'R2 ↔ R3', correct: true },
-      { text: 'R2 ↔ R4', correct: false },
-      { text: { en: 'no swap', ro: 'fără schimb' }, correct: false },
-      { text: 'R3 ↔ R4', correct: false },
+      { text: 'R2 ↔ R4', correct: false, feedback: { en: 'After column-1 elimination the sub-diagonal column-2 values are 1.5, −3, −2. |−3| > |−2|, so R3 wins over R4.', ro: 'După eliminarea coloanei 1, valorile sub-diagonale ale coloanei 2 sunt 1.5, −3, −2. |−3| > |−2|, deci R3 câștigă.' } },
+      { text: { en: 'no swap', ro: 'fără schimb' }, correct: false, feedback: { en: 'Current (2,2) = 1.5 is smaller than |−3|, so partial pivoting *does* swap to use the larger pivot for numerical stability.', ro: '(2,2) = 1.5 e mai mic decât |−3|, deci pivotarea parțială *chiar* schimbă pentru a folosi pivotul mai mare pentru stabilitate numerică.' } },
+      { text: 'R3 ↔ R4', correct: false, feedback: { en: 'That is the *second* swap (column-3 pivot choice between 0.25 and 2/3) — not the first column-2 swap.', ro: 'Acela e al *doilea* schimb (alegerea pivotului coloanei 3 între 0.25 și 2/3) — nu primul schimb de coloană 2.' } },
     ],
     explanation: {
       en: 'After clearing column 1, the column-2 sub-diagonal entries are 1.5, −3, −2. Partial pivoting chooses the largest in absolute value: |−3| > |−2| > |1.5|, so R3 becomes the new row-2 pivot — swap R2 ↔ R3. Later, the column-3 choice between 0.25 and 2/3 triggers a second swap R3 ↔ R4.',
@@ -136,9 +136,9 @@ export default function Seminar04() {
     },
     options: [
       { text: 'x = (−5/6, 5/2, 9/2)ᵀ', correct: true },
-      { text: 'x = (5/6, −5/2, 9/2)ᵀ', correct: false },
-      { text: 'x = (0, 5, 2)ᵀ', correct: false },
-      { text: 'x = (−1, 2, 5)ᵀ', correct: false },
+      { text: 'x = (5/6, −5/2, 9/2)ᵀ', correct: false, feedback: { en: 'Sign error on x₁ and x₂. Verify: 3·(5/6) + 9/2 = 5/2 + 9/2 = 7 ≠ 2 (Eq 1 fails).', ro: 'Eroare de semn pe x₁ și x₂. Verifică: 3·(5/6) + 9/2 = 5/2 + 9/2 = 7 ≠ 2 (Eq 1 eșuează).' } },
+      { text: 'x = (0, 5, 2)ᵀ', correct: false, feedback: { en: 'Test Eq 1: 3·0 + 2 = 2 ✓, but Eq 2: 6·0 + 5 + 2 = 7 ≠ 2, and Eq 3: 0 + 5 = 5 ✓. One equation fails.', ro: 'Test Eq 1: 3·0 + 2 = 2 ✓, dar Eq 2: 6·0 + 5 + 2 = 7 ≠ 2, iar Eq 3: 0 + 5 = 5 ✓. O ecuație eșuează.' } },
+      { text: 'x = (−1, 2, 5)ᵀ', correct: false, feedback: { en: 'Eq 1: −3 + 5 = 2 ✓, Eq 3: 3 + 2 = 5 ✓, but Eq 2: −6 + 2 + 5 = 1 ≠ 2. Not quite.', ro: 'Eq 1: −3 + 5 = 2 ✓, Eq 3: 3 + 2 = 5 ✓, dar Eq 2: −6 + 2 + 5 = 1 ≠ 2. Aproape.' } },
     ],
     explanation: {
       en: 'With A = [[3,0,1],[6,1,1],[−3,1,0]], Doolittle LU gives L = [[1,0,0],[2,1,0],[−1,1,1]], U = [[3,0,1],[0,1,−1],[0,0,2]]. Solve Ly = b: y = (2, −2, 9). Solve Ux = y: x₃ = 9/2, x₂ = 5/2, x₁ = −5/6.',
