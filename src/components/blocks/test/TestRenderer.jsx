@@ -101,6 +101,7 @@ export default function TestRenderer({ src }) {
   const [reviewQuestionIds, setReviewQuestionIds] = useState([]);
   const [testMode, setTestMode] = useState(null); // null=not started, 'tutor'|'timed'
   const [timeLeft, setTimeLeft] = useState(null);
+  const [attemptId, setAttemptId] = useState(0); // bumped on retake / review-mistakes so child questions remount
 
   // Load test JSON
   useEffect(() => {
@@ -221,6 +222,7 @@ export default function TestRenderer({ src }) {
     setAnswers({});
     setShowResults(false);
     setActiveQ(null);
+    setAttemptId(id => id + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -289,8 +291,29 @@ export default function TestRenderer({ src }) {
             ? (q.points > 0 && a.score / q.points >= 0.7 ? '#22c55e' : q.points > 0 && a.score / q.points >= 0.4 ? '#f59e0b' : '#ef4444')
             : '#3b82f6';
 
+          // Render a group stem once whenever the group changes. In review-mode the previous
+          // question is whatever came before in the filtered list, so grouping still dedups.
+          const prevGroup = i > 0 ? questions[i - 1].group : null;
+          const groupText = q.group && testData?.groupPrompts?.[q.group];
+          const showGroup = groupText && q.group !== prevGroup;
+
           return (
-            <div key={q.id} id={`q-${q.id}`} className="rounded-xl p-4" style={{ backgroundColor: 'var(--theme-card-bg)', border: `1px solid ${activeQ === q.id ? '#3b82f6' : 'var(--theme-border)'}` }}>
+            <React.Fragment key={q.id}>
+              {showGroup && (
+                <div
+                  className="rounded-xl p-4 text-sm prose-sm"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--theme-card-bg), #3b82f6 6%)',
+                    border: '1px solid color-mix(in srgb, var(--theme-border), #3b82f6 30%)',
+                    color: 'var(--theme-content-text)',
+                  }}
+                >
+                  <ReactMarkdown components={promptMarkdown}>
+                    {t(groupText.en, groupText.ro)}
+                  </ReactMarkdown>
+                </div>
+              )}
+            <div id={`q-${q.id}`} className="rounded-xl p-4" style={{ backgroundColor: 'var(--theme-card-bg)', border: `1px solid ${activeQ === q.id ? '#3b82f6' : 'var(--theme-border)'}` }}>
               {/* Question header */}
               <div className="flex items-start gap-2 mb-3">
                 <span
@@ -312,11 +335,13 @@ export default function TestRenderer({ src }) {
               {/* Question body. Timed mode holds feedback until the test finishes
                   (exam simulation); Tutor mode keeps the current inline feedback. */}
               <QuestionComp
+                key={`${q.id}-${attemptId}`}
                 question={q}
                 onAnswer={handleAnswer}
                 suppressFeedback={testMode === 'timed' && !showResults}
               />
             </div>
+            </React.Fragment>
           );
         })}
       </div>
@@ -353,6 +378,7 @@ export default function TestRenderer({ src }) {
             setReviewQuestionIds([]);
             setTestMode(null);
             setTimeLeft(null);
+            setAttemptId(id => id + 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onReviewMistakes={!reviewMode ? startReviewMistakes : undefined}
