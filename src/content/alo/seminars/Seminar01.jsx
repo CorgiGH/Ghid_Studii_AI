@@ -14,9 +14,9 @@ export default function Seminar01() {
     },
     options: [
       { text: 'n(n+1)/2', correct: true },
-      { text: 'n²', correct: false },
-      { text: 'n(n+1)(2n+1)/6', correct: false },
-      { text: 'n', correct: false },
+      { text: 'n²', correct: false, feedback: { en: 'That is the count of *entries in an n×n matrix*, not the sum of 1..n. Σᵢ=1..n i = n(n+1)/2, not n².', ro: 'Acela e numărul de *elemente dintr-o matrice n×n*, nu suma 1..n. Σᵢ=1..n i = n(n+1)/2, nu n².' } },
+      { text: 'n(n+1)(2n+1)/6', correct: false, feedback: { en: 'That is Σᵢ² (sum of squares); ‖x‖₁ sums |xᵢ| = i, not i².', ro: 'Aceea e Σᵢ² (suma pătratelor); ‖x‖₁ sumează |xᵢ| = i, nu i².' } },
+      { text: 'n', correct: false, feedback: { en: 'That is just the largest entry (‖x‖∞), not the sum of all entries.', ro: 'Acela e doar elementul cel mai mare (‖x‖∞), nu suma tuturor elementelor.' } },
     ],
     explanation: {
       en: '‖x‖₁ = Σᵢ|xᵢ| = 1+2+⋯+n = n(n+1)/2.',
@@ -29,9 +29,9 @@ export default function Seminar01() {
     question: { en: 'For x = (−2, 2, 1)ᵀ, compute (‖x‖₂, ‖x‖₁, ‖x‖∞).', ro: 'Pentru x = (−2, 2, 1)ᵀ, calculați (‖x‖₂, ‖x‖₁, ‖x‖∞).' },
     options: [
       { text: '(3, 5, 2)', correct: true },
-      { text: '(5, 3, 2)', correct: false },
-      { text: '(3, 5, 3)', correct: false },
-      { text: '(√5, 5, 2)', correct: false },
+      { text: '(5, 3, 2)', correct: false, feedback: { en: 'Swapped ‖·‖₁ and ‖·‖₂: the 1-norm (sum of |entries|) is 5, the 2-norm (Euclidean) is 3.', ro: 'Ai inversat ‖·‖₁ cu ‖·‖₂: norma-1 (suma |elementelor|) e 5, norma-2 (euclidiană) e 3.' } },
+      { text: '(3, 5, 3)', correct: false, feedback: { en: '‖x‖∞ = max{|−2|, |2|, |1|} = 2, not 3. Off-by-one on the max.', ro: '‖x‖∞ = max{|−2|, |2|, |1|} = 2, nu 3. Off-by-one la maxim.' } },
+      { text: '(√5, 5, 2)', correct: false, feedback: { en: 'Forgot to square all entries: ‖x‖₂² = 4+4+1 = 9, so ‖x‖₂ = 3, not √5. √5 would come from 4+1 only.', ro: 'Ai uitat să ridici toate elementele la pătrat: ‖x‖₂² = 4+4+1 = 9, deci ‖x‖₂ = 3, nu √5.' } },
     ],
     explanation: {
       en: '‖x‖₂ = √(4+4+1) = 3; ‖x‖₁ = 2+2+1 = 5; ‖x‖∞ = max{2,2,1} = 2.',
@@ -42,9 +42,9 @@ export default function Seminar01() {
     question: { en: 'For x = (3, −4, 0, 3/2)ᵀ, ‖x‖₂ equals', ro: 'Pentru x = (3, −4, 0, 3/2)ᵀ, ‖x‖₂ este' },
     options: [
       { text: '√109 / 2', correct: true },
-      { text: '17/2', correct: false },
-      { text: '4', correct: false },
-      { text: '√(109/2)', correct: false },
+      { text: '17/2', correct: false, feedback: { en: 'That is ‖x‖₁ = |3|+|−4|+|0|+|3/2| = 8.5 = 17/2. The 2-norm squares first.', ro: 'Aceea e ‖x‖₁ = |3|+|−4|+|0|+|3/2| = 8.5 = 17/2. Norma-2 ridică la pătrat întâi.' } },
+      { text: '4', correct: false, feedback: { en: 'You likely computed √(9+16) = 5 or similar; dropped the 9/4 contribution from the last entry 3/2.', ro: 'Probabil ai calculat √(9+16) = 5 sau similar; ai omis contribuția 9/4 de la ultima componentă 3/2.' } },
+      { text: '√(109/2)', correct: false, feedback: { en: 'Off-by-factor-of-2 under the square root: ‖x‖₂² = 109/4 (not 109/2), so ‖x‖₂ = √(109/4) = √109/2.', ro: 'Factor de 2 greșit sub radical: ‖x‖₂² = 109/4 (nu 109/2), deci ‖x‖₂ = √(109/4) = √109/2.' } },
     ],
     explanation: {
       en: '‖x‖₂² = 9+16+0+9/4 = 109/4; thus ‖x‖₂ = √109/2 ≈ 5.22.',
@@ -57,9 +57,9 @@ export default function Seminar01() {
     question: { en: 'For matrix (d) A with rows (4,−1,7), (−1,4,0), (−7,0,4), ‖A‖∞ = ?', ro: 'Pentru matricea (d) A cu liniile (4,−1,7), (−1,4,0), (−7,0,4), ‖A‖∞ = ?' },
     options: [
       { text: '12', correct: true },
-      { text: '11', correct: false },
-      { text: '7', correct: false },
-      { text: '5', correct: false },
+      { text: '11', correct: false, feedback: { en: 'Off-by-one on the first row: |4|+|−1|+|7| = 4+1+7 = 12, not 11.', ro: 'Off-by-one pe prima linie: |4|+|−1|+|7| = 4+1+7 = 12, nu 11.' } },
+      { text: '7', correct: false, feedback: { en: 'That is just the largest single entry; ‖A‖∞ sums |entries| across a row, then takes the max.', ro: 'Acela e doar cel mai mare element; ‖A‖∞ sumează |elementele| pe linie, apoi ia maximul.' } },
+      { text: '5', correct: false, feedback: { en: 'You stopped after two entries of the first row (|4|+|−1|); include the third entry |7| too.', ro: 'Te-ai oprit după două elemente din prima linie (|4|+|−1|); include și al treilea element |7|.' } },
     ],
     explanation: {
       en: '‖A‖∞ is the max absolute row sum. Summing |entries| in each row and taking the largest gives 12 (from the first row).',
@@ -75,9 +75,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'column', ro: 'coloană' }, correct: true },
-      { text: { en: 'row', ro: 'linie' }, correct: false },
-      { text: { en: 'diagonal', ro: 'diagonală' }, correct: false },
-      { text: { en: 'main entries', ro: 'elementele diagonale' }, correct: false },
+      { text: { en: 'row', ro: 'linie' }, correct: false, feedback: { en: 'That is ‖A‖∞ (max row-sum). ‖A‖₁ fixes j (the column) in the inner sum.', ro: 'Aceea e ‖A‖∞ (max sumă pe linie). ‖A‖₁ fixează j (coloana) în suma interioară.' } },
+      { text: { en: 'diagonal', ro: 'diagonală' }, correct: false, feedback: { en: 'Diagonal sums don\'t define any standard matrix norm (they don\'t even give a norm in general).', ro: 'Sumele pe diagonală nu definesc nicio normă matricială standard (nici măcar nu dau o normă în general).' } },
+      { text: { en: 'main entries', ro: 'elementele diagonale' }, correct: false, feedback: { en: 'Same as the diagonal option — diagonal entries alone don\'t define ‖A‖₁.', ro: 'La fel ca opțiunea diagonală — elementele diagonale singure nu definesc ‖A‖₁.' } },
     ],
     explanation: {
       en: 'The index i runs over rows inside the sum, while j (the column) is fixed; the outer max is over columns — so ‖A‖₁ is the maximum column-sum of absolute values.',
@@ -93,9 +93,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Sub-multiplicativity ‖AB‖⬚₁ ≤ ‖A‖⬚₁ · ‖B‖⬚₁', ro: 'Submultiplicativitatea ‖AB‖⬚₁ ≤ ‖A‖⬚₁ · ‖B‖⬚₁' }, correct: true },
-      { text: { en: 'Triangle inequality', ro: 'Inegalitatea triunghiului' }, correct: false },
-      { text: { en: '‖0‖⬚₁ = 0', ro: '‖0‖⬚₁ = 0' }, correct: false },
-      { text: { en: 'Positive-definiteness', ro: 'Pozitiv-definirea' }, correct: false },
+      { text: { en: 'Triangle inequality', ro: 'Inegalitatea triunghiului' }, correct: false, feedback: { en: 'Triangle inequality follows directly from |a+b| ≤ |a|+|b| on scalars plus linearity of Σ — no multi-index gymnastics needed.', ro: 'Inegalitatea triunghiului urmează direct din |a+b| ≤ |a|+|b| la scalari plus liniaritatea lui Σ — fără gimnastică pe indici.' } },
+      { text: { en: '‖0‖⬚₁ = 0', ro: '‖0‖⬚₁ = 0' }, correct: false, feedback: { en: 'Trivial: the sum of |0| over all entries is 0. This is the easiest axiom.', ro: 'Trivial: suma |0| peste toate elementele este 0. Cea mai simplă axiomă.' } },
+      { text: { en: 'Positive-definiteness', ro: 'Pozitiv-definirea' }, correct: false, feedback: { en: 'Also follows directly from |·| on scalars: if every |aᵢⱼ| = 0 then A = 0. Nothing matrix-specific here.', ro: 'Urmează direct din |·| scalar: dacă fiecare |aᵢⱼ| = 0 atunci A = 0. Nimic specific matricelor.' } },
     ],
     explanation: {
       en: 'Triangle/positivity follow from the scalar |·|. Sub-multiplicativity needs the inequality |Σₖ aᵢₖbₖⱼ| ≤ Σₖ|aᵢₖ||bₖⱼ| summed over i,j and then factored as (Σᵢₖ|aᵢₖ|)(Σₖⱼ|bₖⱼ|).',
@@ -111,9 +111,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Cauchy–Schwarz on each entry (AB)ᵢⱼ = Σₖ aᵢₖ bₖⱼ', ro: 'Cauchy–Schwarz pe fiecare element (AB)ᵢⱼ = Σₖ aᵢₖ bₖⱼ' }, correct: true },
-      { text: { en: 'The triangle inequality in ℝ', ro: 'Inegalitatea triunghiului în ℝ' }, correct: false },
-      { text: { en: 'Hölder with p = ∞, q = 1', ro: 'Hölder cu p = ∞, q = 1' }, correct: false },
-      { text: { en: 'Jensen’s inequality', ro: 'Inegalitatea lui Jensen' }, correct: false },
+      { text: { en: 'The triangle inequality in ℝ', ro: 'Inegalitatea triunghiului în ℝ' }, correct: false, feedback: { en: 'Triangle gives |Σaᵢₖbₖⱼ| ≤ Σ|aᵢₖ||bₖⱼ| — useful but not the load-bearing step; the factorisation into a product of norms needs Cauchy–Schwarz.', ro: 'Triunghiul dă |Σaᵢₖbₖⱼ| ≤ Σ|aᵢₖ||bₖⱼ| — util dar nu pasul de bază; factorizarea ca produs de norme cere Cauchy–Schwarz.' } },
+      { text: { en: 'Hölder with p = ∞, q = 1', ro: 'Hölder cu p = ∞, q = 1' }, correct: false, feedback: { en: 'Hölder p=∞,q=1 gives ‖·‖₁ · ‖·‖∞ bounds (column-sum vs row-sum), not the 2-norm style needed for Frobenius. Cauchy–Schwarz is Hölder with p=q=2.', ro: 'Hölder p=∞,q=1 dă margini ‖·‖₁ · ‖·‖∞ (suma pe coloană vs linie), nu stilul 2-normă necesar pentru Frobenius. Cauchy–Schwarz e Hölder cu p=q=2.' } },
+      { text: { en: 'Jensen’s inequality', ro: 'Inegalitatea lui Jensen' }, correct: false, feedback: { en: 'Jensen is for convex functions + probability/averaging; unrelated to the product-of-norms bound we need here.', ro: 'Jensen e pentru funcții convexe + medii/probabilitate; fără legătură cu marginea produs-de-norme necesară aici.' } },
     ],
     explanation: {
       en: 'Cauchy–Schwarz gives |Σₖ aᵢₖbₖⱼ|² ≤ (Σₖ|aᵢₖ|²)(Σₖ|bₖⱼ|²). Summing over i,j and factoring yields ‖AB‖_F² ≤ ‖A‖_F² · ‖B‖_F².',
@@ -129,9 +129,9 @@ export default function Seminar01() {
     },
     options: [
       { text: '|z̄| = |z| for every z ∈ ℂ', correct: true },
-      { text: { en: 'Triangle inequality in ℂ', ro: 'Inegalitatea triunghiului în ℂ' }, correct: false },
-      { text: 'z + z̄ = 2·Re(z)', correct: false },
-      { text: { en: 'Cauchy–Schwarz in ℂⁿ', ro: 'Cauchy–Schwarz în ℂⁿ' }, correct: false },
+      { text: { en: 'Triangle inequality in ℂ', ro: 'Inegalitatea triunghiului în ℂ' }, correct: false, feedback: { en: 'Triangle gives an upper bound, not the *equality* ‖x*‖₂ = ‖x‖₂ we need. The key is |z̄|=|z| applied entrywise.', ro: 'Triunghiul dă o margine superioară, nu *egalitatea* ‖x*‖₂ = ‖x‖₂ cerută. Cheia e |z̄|=|z| aplicată pe fiecare component.' } },
+      { text: 'z + z̄ = 2·Re(z)', correct: false, feedback: { en: 'True identity but about Re(z), not |z|. We need to equate *absolute values*, not real parts.', ro: 'Identitate adevărată dar despre Re(z), nu |z|. Avem nevoie să egalăm *modulele*, nu părțile reale.' } },
+      { text: { en: 'Cauchy–Schwarz in ℂⁿ', ro: 'Cauchy–Schwarz în ℂⁿ' }, correct: false, feedback: { en: 'Overkill: CS is an inner-product bound. The claim ‖x*‖₂ = ‖x‖₂ is just the scalar fact |z̄|=|z| applied to each entry.', ro: 'Prea tare: CS e o margine pentru produsul scalar. Afirmația ‖x*‖₂ = ‖x‖₂ e doar faptul scalar |z̄|=|z| aplicat pe fiecare element.' } },
     ],
     explanation: {
       en: 'x* is the conjugate transpose (a row vector). ‖x*‖₂² = Σᵢ|x̄ᵢ|² = Σᵢ|xᵢ|² = ‖x‖₂², using |z̄| = |z|.',
@@ -147,9 +147,9 @@ export default function Seminar01() {
     },
     options: [
       { text: '√(2n)', correct: true },
-      { text: 'n√2', correct: false },
-      { text: '2√n', correct: false },
-      { text: 'n', correct: false },
+      { text: 'n√2', correct: false, feedback: { en: 'You summed |1−i| n times (= n·√2) instead of summing |1−i|² and taking the square root. ‖·‖₂ is √Σ|xᵢ|², not Σ|xᵢ|.', ro: 'Ai sumat |1−i| de n ori (= n·√2) în loc să sumezi |1−i|² și apoi radical. ‖·‖₂ e √Σ|xᵢ|², nu Σ|xᵢ|.' } },
+      { text: '2√n', correct: false, feedback: { en: 'Close: |1−i|² = 2, so Σ = 2n, and √(2n) = √2·√n, not 2√n. Off by a factor of √2.', ro: 'Aproape: |1−i|² = 2, deci Σ = 2n, iar √(2n) = √2·√n, nu 2√n. Factor √2 în plus.' } },
+      { text: 'n', correct: false, feedback: { en: 'That treats each entry as having modulus 1; but |1−i| = √2, not 1.', ro: 'Aceea presupune fiecare element cu modul 1; dar |1−i| = √2, nu 1.' } },
     ],
     explanation: {
       en: '|1 − i|² = 1² + 1² = 2, so ‖x‖₂² = n · 2 and ‖x‖₂ = √(2n).',
@@ -165,9 +165,9 @@ export default function Seminar01() {
     },
     options: [
       { text: '|xᵢ|² ≤ |xᵢ| · max_k |x_k|', correct: true },
-      { text: '|xᵢ|² ≤ (Σ|xⱼ|)²', correct: false },
-      { text: '|xᵢ|² ≤ ‖x‖₂²', correct: false },
-      { text: '|xᵢ|² ≤ |xᵢ|²', correct: false },
+      { text: '|xᵢ|² ≤ (Σ|xⱼ|)²', correct: false, feedback: { en: 'True but too loose: summing gives ‖x‖₂² ≤ n·‖x‖₁², a weaker bound than ‖x‖₁·‖x‖∞.', ro: 'Adevărat dar prea slab: sumând obținem ‖x‖₂² ≤ n·‖x‖₁², margine mai slabă decât ‖x‖₁·‖x‖∞.' } },
+      { text: '|xᵢ|² ≤ ‖x‖₂²', correct: false, feedback: { en: 'Tautological: summing both sides over i gives ‖x‖₂² ≤ n·‖x‖₂² — doesn\'t combine the two different norms we want to relate.', ro: 'Tautologic: sumând ambele laturi pe i dă ‖x‖₂² ≤ n·‖x‖₂² — nu leagă cele două norme diferite.' } },
+      { text: '|xᵢ|² ≤ |xᵢ|²', correct: false, feedback: { en: 'Literal equality; sums to ‖x‖₂² ≤ ‖x‖₂². No information gained.', ro: 'Egalitate literală; se sumează la ‖x‖₂² ≤ ‖x‖₂². Nu câștigăm nimic.' } },
     ],
     explanation: {
       en: 'Bound each term: |xᵢ|² = |xᵢ|·|xᵢ| ≤ |xᵢ|·‖x‖∞. Summing over i: ‖x‖₂² ≤ ‖x‖∞·Σᵢ|xᵢ| = ‖x‖∞·‖x‖₁.',
@@ -183,9 +183,9 @@ export default function Seminar01() {
     },
     options: [
       { text: '⟨y, x⟩ = conj(⟨x, y⟩)', correct: true },
-      { text: '⟨y, x⟩ = ⟨x, y⟩', correct: false },
-      { text: '⟨y, x⟩ = −⟨x, y⟩', correct: false },
-      { text: '⟨y, x⟩ = ‖x‖₂ · ‖y‖₂', correct: false },
+      { text: '⟨y, x⟩ = ⟨x, y⟩', correct: false, feedback: { en: 'That is *real* symmetry (the ℝⁿ case). Complex IPs are Hermitian-symmetric: swapping arguments takes the conjugate.', ro: 'Aceea e simetria *reală* (cazul ℝⁿ). Produsul scalar complex e hermitian-simetric: schimbarea argumentelor dă conjugata.' } },
+      { text: '⟨y, x⟩ = −⟨x, y⟩', correct: false, feedback: { en: 'Antisymmetry describes wedge/cross products, not inner products.', ro: 'Antisimetria descrie produse exterioare/vectoriale, nu produse scalare.' } },
+      { text: '⟨y, x⟩ = ‖x‖₂ · ‖y‖₂', correct: false, feedback: { en: 'That is the Cauchy–Schwarz equality case — only when x, y are colinear. Not a property of swapping arguments in general.', ro: 'Acela e cazul de egalitate Cauchy–Schwarz — doar pentru x, y coliniare. Nu e o proprietate a schimbării argumentelor în general.' } },
     ],
     explanation: {
       en: '⟨y, x⟩ = xᴴy = Σᵢyᵢx̄ᵢ = conj(Σᵢxᵢȳᵢ) = conj(⟨x, y⟩). This is Hermitian symmetry.',
@@ -199,9 +199,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'x = y = e₁ (first standard basis vector)', ro: 'x = y = e₁ (primul vector din baza canonică)' }, correct: true },
-      { text: 'x = e₁, y = e₂', correct: false },
-      { text: 'x = (1,1,…,1), y = e₁', correct: false },
-      { text: { en: 'Any x, y ∈ ℂⁿ', ro: 'Orice x, y ∈ ℂⁿ' }, correct: false },
+      { text: 'x = e₁, y = e₂', correct: false, feedback: { en: '⟨e₁, e₂⟩ = 0, excluded by the "⟨x, y⟩ ≠ 0" premise. Orthogonal vectors trivially fail the CS-equality conditions.', ro: '⟨e₁, e₂⟩ = 0, exclus de premisa "⟨x, y⟩ ≠ 0". Vectorii ortogonali nu pot satisface egalitatea CS.' } },
+      { text: 'x = (1,1,…,1), y = e₁', correct: false, feedback: { en: '|⟨x, y⟩| = 1 but ‖x‖₂·‖y‖₂ = √n·1 = √n, so strict inequality for n ≥ 2. CS-equality needs x, y linearly dependent (x = αy).', ro: '|⟨x, y⟩| = 1 dar ‖x‖₂·‖y‖₂ = √n·1 = √n, deci inegalitate strictă pentru n ≥ 2. Egalitatea CS cere x, y liniar dependente (x = αy).' } },
+      { text: { en: 'Any x, y ∈ ℂⁿ', ro: 'Orice x, y ∈ ℂⁿ' }, correct: false, feedback: { en: 'Cauchy–Schwarz gives ≤, not =, in general; equality is a special case (linear dependence).', ro: 'Cauchy–Schwarz dă ≤, nu = în general; egalitatea e un caz special (dependență liniară).' } },
     ],
     explanation: {
       en: 'Equality in Cauchy–Schwarz needs x, y linearly dependent (x = αy). With x = y = e₁: ⟨x, y⟩ = 1 and ‖x‖₂‖y‖₂ = 1 · 1 = 1. x = e₁, y = e₂ gives ⟨x, y⟩ = 0 (excluded). x = (1,…,1), y = e₁ gives 1 vs √n — strict inequality.',
@@ -217,9 +217,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'No — entry (1,2) = 1 but (2,1) = i, so A ≠ Aᴴ', ro: 'Nu — elementul (1,2) = 1 dar (2,1) = i, deci A ≠ Aᴴ' }, correct: true },
-      { text: { en: 'Yes — the diagonal is real', ro: 'Da — diagonala este reală' }, correct: false },
-      { text: { en: 'Yes — det(A) is real', ro: 'Da — det(A) este real' }, correct: false },
-      { text: { en: 'No — because √2 ∉ ℤ', ro: 'Nu — pentru că √2 ∉ ℤ' }, correct: false },
+      { text: { en: 'Yes — the diagonal is real', ro: 'Da — diagonala este reală' }, correct: false, feedback: { en: 'Real diagonal is *necessary* for Hermitian but not sufficient; the off-diagonal entries must also satisfy aᵢⱼ = conj(aⱼᵢ).', ro: 'Diagonala reală e *necesară* pentru hermitian dar nu suficientă; și elementele off-diagonală trebuie să satisfacă aᵢⱼ = conj(aⱼᵢ).' } },
+      { text: { en: 'Yes — det(A) is real', ro: 'Da — det(A) este real' }, correct: false, feedback: { en: 'det being real is a *consequence* for Hermitian matrices, not a defining property. Many non-Hermitian matrices also have real determinants.', ro: 'Determinantul real e o *consecință* pentru matricile hermitiene, nu o proprietate care le definește. Multe matrici non-hermitiene au și ele determinant real.' } },
+      { text: { en: 'No — because √2 ∉ ℤ', ro: 'Nu — pentru că √2 ∉ ℤ' }, correct: false, feedback: { en: 'Hermitian matrices can have any *real* entries (including √2); the integer constraint is irrelevant.', ro: 'Matricile hermitiene pot avea orice elemente *reale* (inclusiv √2); constrângerea întreagă e irelevantă.' } },
     ],
     explanation: {
       en: 'Hermitian requires aᵢⱼ = conj(aⱼᵢ). Here a₁₂ = 1 but conj(a₂₁) = conj(i) = −i. Since 1 ≠ −i, A is not Hermitian.',
@@ -233,9 +233,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Yes — ⟨a₁, a₂⟩ = a₂ᴴa₁ = 1·1 + i·i + 0 = 1 + i² = 0', ro: 'Da — ⟨a₁, a₂⟩ = a₂ᴴa₁ = 1·1 + i·i + 0 = 1 + i² = 0' }, correct: true },
-      { text: { en: 'No — they both start with 1', ro: 'Nu — amândouă încep cu 1' }, correct: false },
-      { text: { en: 'Yes — because they are linearly independent', ro: 'Da — pentru că sunt liniar independente' }, correct: false },
-      { text: { en: 'No — skipping conjugation gives ⟨a₁, a₂⟩ = 1·1 + i·(−i) + 0 = 2', ro: 'Nu — fără conjugare ⟨a₁, a₂⟩ = 1·1 + i·(−i) + 0 = 2' }, correct: false },
+      { text: { en: 'No — they both start with 1', ro: 'Nu — amândouă încep cu 1' }, correct: false, feedback: { en: 'Orthogonality is determined by the full inner product, not the first entry — x = (1, 0) and y = (1, 2) also share a "1" yet ⟨x, y⟩ = 1 ≠ 0.', ro: 'Ortogonalitatea se determină din produsul scalar complet, nu din prima componentă — x = (1, 0) și y = (1, 2) încep și ele cu „1" dar ⟨x, y⟩ = 1 ≠ 0.' } },
+      { text: { en: 'Yes — because they are linearly independent', ro: 'Da — pentru că sunt liniar independente' }, correct: false, feedback: { en: 'Independence ≠ orthogonality. (1,0) and (1,1) are independent but ⟨x, y⟩ = 1. Orthogonal ⇒ independent, not the converse.', ro: 'Independență ≠ ortogonalitate. (1,0) și (1,1) sunt independente dar ⟨x, y⟩ = 1. Ortogonal ⇒ independent, nu reciproc.' } },
+      { text: { en: 'No — skipping conjugation gives ⟨a₁, a₂⟩ = 1·1 + i·(−i) + 0 = 2', ro: 'Nu — fără conjugare ⟨a₁, a₂⟩ = 1·1 + i·(−i) + 0 = 2' }, correct: false, feedback: { en: 'The Hermitian inner product conjugates the second argument: a₂ᴴ = (1, i, 0), so ⟨a₁, a₂⟩ = 1·1 + i·i + 0 = 0.', ro: 'Produsul scalar hermitian conjugă al doilea argument: a₂ᴴ = (1, i, 0), deci ⟨a₁, a₂⟩ = 1·1 + i·i + 0 = 0.' } },
     ],
     explanation: {
       en: 'a₂ᴴ = (1, i, 0) (row, entries conjugated). ⟨a₁, a₂⟩ = a₂ᴴa₁ = 1·1 + i·i + 0 = 1 − 1 = 0. (Note: linear independence does not imply orthogonality.)',
@@ -249,9 +249,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Yes — columns are orthonormal, so UᴴU = I', ro: 'Da — coloanele sunt ortonormale, deci UᴴU = I' }, correct: true },
-      { text: { en: 'Yes — det(U) = 1', ro: 'Da — det(U) = 1' }, correct: false },
-      { text: { en: 'No — U contains i', ro: 'Nu — U conține i' }, correct: false },
-      { text: { en: 'No — U is not Hermitian', ro: 'Nu — U nu este hermitiană' }, correct: false },
+      { text: { en: 'Yes — det(U) = 1', ro: 'Da — det(U) = 1' }, correct: false, feedback: { en: 'Unitary needs |det U| = 1, not det = 1 specifically — and |det| = 1 is a *consequence* of unitarity, not the definition.', ro: 'Unitară cere |det U| = 1, nu det = 1 în mod specific — iar |det| = 1 e *consecință* a unitarității, nu definiția.' } },
+      { text: { en: 'No — U contains i', ro: 'Nu — U conține i' }, correct: false, feedback: { en: 'Unitary matrices often have complex entries; that\'s precisely why they generalise orthogonal matrices from ℝ to ℂ.', ro: 'Matricile unitare au adesea elemente complexe; tocmai asta le generalizează pe cele ortogonale din ℝ în ℂ.' } },
+      { text: { en: 'No — U is not Hermitian', ro: 'Nu — U nu este hermitiană' }, correct: false, feedback: { en: 'Unitary and Hermitian are *different* classes (the only matrices that are both are involutions, e.g. reflections). Being non-Hermitian doesn\'t prevent being unitary.', ro: 'Unitară și hermitiană sunt clase *diferite* (singurele matrici ambele sunt involuții, ex. reflexii). A nu fi hermitiană nu împiedică unitaritatea.' } },
     ],
     explanation: {
       en: 'Unitary ⇔ columns orthonormal. Direct check: ⟨aᵢ, aⱼ⟩ = 0 for i ≠ j and ‖aᵢ‖₂ = √2 for each column, so uᵢ = aᵢ/√2 are unit and pairwise orthogonal ⇒ UᴴU = I. Determinant = 1 is neither necessary (only |det U| = 1) nor sufficient, and unitary ≠ Hermitian.',
@@ -267,9 +267,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'AAᴴ = I (so Aᴴ is unitary)', ro: 'AAᴴ = I (deci Aᴴ este unitară)' }, correct: true },
-      { text: { en: '(Aᴴ)ᴴ = Aᵀ', ro: '(Aᴴ)ᴴ = Aᵀ' }, correct: false },
-      { text: { en: 'Aᴴ = A', ro: 'Aᴴ = A' }, correct: false },
-      { text: { en: 'Aᴴ = A⁻¹ᵀ', ro: 'Aᴴ = A⁻¹ᵀ' }, correct: false },
+      { text: { en: '(Aᴴ)ᴴ = Aᵀ', ro: '(Aᴴ)ᴴ = Aᵀ' }, correct: false, feedback: { en: 'Wrong involution: (Aᴴ)ᴴ = A (double conjugate-transpose). Aᵀ would be (Aᴴ)-bar, not (Aᴴ)ᴴ.', ro: 'Involuție greșită: (Aᴴ)ᴴ = A (dublă transpusă-conjugată). Aᵀ ar fi conjugata lui Aᴴ, nu (Aᴴ)ᴴ.' } },
+      { text: { en: 'Aᴴ = A', ro: 'Aᴴ = A' }, correct: false, feedback: { en: 'Aᴴ = A defines *Hermitian* matrices, not unitary. Unitary means Aᴴ = A⁻¹.', ro: 'Aᴴ = A definește matricile *hermitiene*, nu unitare. Unitară înseamnă Aᴴ = A⁻¹.' } },
+      { text: { en: 'Aᴴ = A⁻¹ᵀ', ro: 'Aᴴ = A⁻¹ᵀ' }, correct: false, feedback: { en: 'Mangled: A⁻¹ᵀ = (A⁻¹)ᵀ = (Aᴴ·inverse)ᵀ — not simply Aᴴ. The clean identity is Aᴴ = A⁻¹, from which AAᴴ = I follows immediately.', ro: 'Deformat: A⁻¹ᵀ = (A⁻¹)ᵀ — nu doar Aᴴ. Identitatea curată e Aᴴ = A⁻¹, din care AAᴴ = I rezultă imediat.' } },
     ],
     explanation: {
       en: 'From AᴴA = I we get Aᴴ = A⁻¹, so AAᴴ = A·A⁻¹ = I. Applying conjugate to AᴴA = I gives AᵀĀ = I and Ā·Aᵀ = I — these handle Aᵀ and Ā.',
