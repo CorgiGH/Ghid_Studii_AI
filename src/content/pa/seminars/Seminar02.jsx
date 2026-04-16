@@ -14,9 +14,9 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'Input: a[0..n−1], n ≥ 2, a[i] ∈ ℕ; Output: (i, j) where a[i] ≤ a[j] ≤ a[k] ∀k ≠ i,j and i ≠ j', ro: 'Input: a[0..n−1], n ≥ 2, a[i] ∈ ℕ; Output: (i, j) unde a[i] ≤ a[j] ≤ a[k] ∀k ≠ i,j și i ≠ j' }, correct: true },
-      { text: { en: 'Input: a[0..n−1]; Output: (min₁, min₂) — the two smallest values', ro: 'Input: a[0..n−1]; Output: (min₁, min₂) — cele două valori minime' }, correct: false },
-      { text: { en: 'Input: a[0..n−1], n ≥ 2; Output: index of the smallest element', ro: 'Input: a[0..n−1], n ≥ 2; Output: indicele celui mai mic element' }, correct: false },
-      { text: { en: 'Input: a[0..n−1]; Output: (i, j) where a[i] and a[j] are the two largest elements', ro: 'Input: a[0..n−1]; Output: (i, j) unde a[i] și a[j] sunt cele două elemente maxime' }, correct: false },
+      { text: { en: 'Input: a[0..n−1]; Output: (min₁, min₂) — the two smallest values', ro: 'Input: a[0..n−1]; Output: (min₁, min₂) — cele două valori minime' }, correct: false, feedback: { en: 'Returns the two values, but the problem asks for their *indices* (the positions i, j).', ro: 'Returnează cele două valori, dar problema cere *indicii* (pozițiile i, j).' } },
+      { text: { en: 'Input: a[0..n−1], n ≥ 2; Output: index of the smallest element', ro: 'Input: a[0..n−1], n ≥ 2; Output: indicele celui mai mic element' }, correct: false, feedback: { en: 'Returns only one index; we need indices for *both* smallest elements.', ro: 'Returnează un singur indice; avem nevoie de indicii pentru *ambele* elemente minime.' } },
+      { text: { en: 'Input: a[0..n−1]; Output: (i, j) where a[i] and a[j] are the two largest elements', ro: 'Input: a[0..n−1]; Output: (i, j) unde a[i] și a[j] sunt cele două elemente maxime' }, correct: false, feedback: { en: 'Swaps min and max; the problem targets the two smallest, not the two largest.', ro: 'Inversează min cu max; problema vizează cele mai mici două, nu cele mai mari.' } },
     ],
     explanation: {
       en: 'The problem asks for indices (not values), of the two smallest elements, ordered by value. We need both indices, not just the minimum.',
@@ -31,8 +31,8 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'No — it misses the case when a[i] is between a[sml] and a[nxtsml]', ro: 'Nu — ratează cazul când a[i] este între a[sml] și a[nxtsml]' }, correct: true },
-      { text: { en: 'Yes — it correctly tracks the two smallest', ro: 'Da — urmărește corect cele mai mici două' }, correct: false },
-      { text: { en: 'No — the initialization is wrong', ro: 'Nu — inițializarea este greșită' }, correct: false },
+      { text: { en: 'Yes — it correctly tracks the two smallest', ro: 'Da — urmărește corect cele mai mici două' }, correct: false, feedback: { en: 'Counter-example: [5, 1, 4, 2]. The algorithm leaves nxtsml = 0 (value 5) because 2 is never smaller than a[sml] = 1; the real second smallest is 2.', ro: 'Contra-exemplu: [5, 1, 4, 2]. Algoritmul lasă nxtsml = 0 (valoarea 5) pentru că 2 nu e niciodată mai mic decât a[sml] = 1; al doilea minim real e 2.' } },
+      { text: { en: 'No — the initialization is wrong', ro: 'Nu — inițializarea este greșită' }, correct: false, feedback: { en: 'The initialization from a[0], a[1] is fine; the bug is in the update rule, which never records values that sit between sml and nxtsml.', ro: 'Inițializarea din a[0], a[1] e corectă; bug-ul e în regula de actualizare, care nu înregistrează niciodată valorile aflate între sml și nxtsml.' } },
     ],
     explanation: {
       en: 'The algorithm only updates nxtsml when a new global minimum is found. If a[i] is smaller than a[nxtsml] but not smaller than a[sml], it is never recorded. Counter-example: [5, 1, 4, 2]. Initialization: sml=1 (a[1]=1), nxtsml=0 (a[0]=5). i=2: a[2]=4, not less than a[sml]=1, so skipped. i=3: a[3]=2, not less than a[sml]=1, so skipped. Final nxtsml=0 (value 5) — WRONG. The true second-smallest is a[3]=2.',
@@ -48,9 +48,9 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'Input: a[0..n−1] sorted, distinct, a[i] ∈ ℤ; Output: i such that a[i] = i, or −1 if none exists', ro: 'Input: a[0..n−1] sortat, distinct, a[i] ∈ ℤ; Output: i astfel încât a[i] = i, sau −1 dacă nu există' }, correct: true },
-      { text: { en: 'Input: a[0..n−1]; Output: all indices i where a[i] = i', ro: 'Input: a[0..n−1]; Output: toți indicii i unde a[i] = i' }, correct: false },
-      { text: { en: 'Input: a[0..n−1] sorted; Output: true if a fixed point exists', ro: 'Input: a[0..n−1] sortat; Output: true dacă există un punct fix' }, correct: false },
-      { text: { en: 'Input: a[0..n−1], target value v; Output: index where a[i] = v', ro: 'Input: a[0..n−1], valoare țintă v; Output: indicele unde a[i] = v' }, correct: false },
+      { text: { en: 'Input: a[0..n−1]; Output: all indices i where a[i] = i', ro: 'Input: a[0..n−1]; Output: toți indicii i unde a[i] = i' }, correct: false, feedback: { en: 'Enumerates all fixed points, and drops the sorted/distinct constraints that make the O(log n) solution possible.', ro: 'Enumeră toate punctele fixe și pierde constrângerile sortat/distinct care fac posibilă soluția O(log n).' } },
+      { text: { en: 'Input: a[0..n−1] sorted; Output: true if a fixed point exists', ro: 'Input: a[0..n−1] sortat; Output: true dacă există un punct fix' }, correct: false, feedback: { en: 'A decision (exists?); the problem asks to *locate* the fixed point (return its index, or −1).', ro: 'O decizie (există?); problema cere *localizarea* punctului fix (indicele, sau −1).' } },
+      { text: { en: 'Input: a[0..n−1], target value v; Output: index where a[i] = v', ro: 'Input: a[0..n−1], valoare țintă v; Output: indicele unde a[i] = v' }, correct: false, feedback: { en: 'Standard search for a given target; a fixed point uses i *itself* as the target, no external v.', ro: 'Căutare standard pentru o țintă dată; un punct fix folosește *i* ca țintă, fără un v extern.' } },
     ],
     explanation: {
       en: 'The problem asks for a single fixed point index (or -1), not all of them, not a boolean, and not a standard search. The key constraints are: sorted and distinct elements.',
@@ -66,9 +66,9 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'Input: a[0..n−1], a[i] ∈ ℕ; Output: x if #{i : a[i]=x} > ⌊n/2⌋, else −1', ro: 'Input: a[0..n−1], a[i] ∈ ℕ; Output: x dacă #{i : a[i]=x} > ⌊n/2⌋, altfel −1' }, correct: true },
-      { text: { en: 'Input: a[0..n−1]; Output: the element that appears most often', ro: 'Input: a[0..n−1]; Output: elementul care apare cel mai des' }, correct: false },
-      { text: { en: 'Input: a[0..n−1]; Output: all elements appearing more than once', ro: 'Input: a[0..n−1]; Output: toate elementele care apar de mai mult de o dată' }, correct: false },
-      { text: { en: 'Input: a[0..n−1], threshold k; Output: elements appearing > k times', ro: 'Input: a[0..n−1], prag k; Output: elementele care apar de > k ori' }, correct: false },
+      { text: { en: 'Input: a[0..n−1]; Output: the element that appears most often', ro: 'Input: a[0..n−1]; Output: elementul care apare cel mai des' }, correct: false, feedback: { en: 'That is the *mode*, not majority. The mode always exists; a majority needs strictly more than n/2 copies and may not exist.', ro: 'Acela e *modul*, nu majoritarul. Modul există mereu; majoritarul necesită strict > n/2 copii și poate lipsi.' } },
+      { text: { en: 'Input: a[0..n−1]; Output: all elements appearing more than once', ro: 'Input: a[0..n−1]; Output: toate elementele care apar de mai mult de o dată' }, correct: false, feedback: { en: 'Returns every duplicate; majority requires a *single* element that dominates more than half the array.', ro: 'Returnează fiecare duplicat; majoritarul cere un *singur* element care domină mai mult de jumătate din vector.' } },
+      { text: { en: 'Input: a[0..n−1], threshold k; Output: elements appearing > k times', ro: 'Input: a[0..n−1], prag k; Output: elementele care apar de > k ori' }, correct: false, feedback: { en: 'The threshold is fixed at n/2 for majority; it is not an input parameter k.', ro: 'Pragul e fix la n/2 pentru majoritate, nu un parametru k de intrare.' } },
     ],
     explanation: {
       en: 'A majority element must appear strictly more than n/2 times — not just "most often" (which is the mode). The threshold n/2 is fixed, not a parameter k.',
@@ -83,8 +83,8 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'The first pass finds a candidate, but the candidate might not actually be a majority — the second pass verifies', ro: 'Prima parcurgere găsește un candidat, dar candidatul ar putea să nu fie de fapt majoritar — a doua parcurgere verifică' }, correct: true },
-      { text: { en: 'Two passes are needed to sort the array first', ro: 'Două parcurgeri sunt necesare pentru a sorta vectorul mai întâi' }, correct: false },
-      { text: { en: 'The first pass counts occurrences, the second finds the maximum count', ro: 'Prima parcurgere numără aparițiile, a doua găsește contorul maxim' }, correct: false },
+      { text: { en: 'Two passes are needed to sort the array first', ro: 'Două parcurgeri sunt necesare pentru a sorta vectorul mai întâi' }, correct: false, feedback: { en: 'Boyer-Moore does not sort; it uses O(1) extra space. Sorting would cost O(n log n) and defeat the whole point.', ro: 'Boyer-Moore nu sortează; folosește O(1) memorie în plus. Sortarea ar costa O(n log n) și ar anula ideea.' } },
+      { text: { en: 'The first pass counts occurrences, the second finds the maximum count', ro: 'Prima parcurgere numără aparițiile, a doua găsește contorul maxim' }, correct: false, feedback: { en: 'That describes a mode-finder (O(n) space). Boyer-Moore tracks a single candidate + count via cancellations, then verifies once.', ro: 'Aceea descrie un detector de mod (O(n) spațiu). Boyer-Moore ține un singur candidat + contor prin anulări, apoi verifică o dată.' } },
     ],
     explanation: {
       en: 'Boyer-Moore\'s first pass eliminates candidates by pairing different elements. The surviving candidate is guaranteed to be majority IF one exists, but if no majority exists, the candidate is arbitrary. The second pass counts actual occurrences to verify.',
@@ -99,9 +99,9 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'O(n)', ro: 'O(n)' }, correct: true },
-      { text: { en: 'O(n log n)', ro: 'O(n log n)' }, correct: false },
-      { text: { en: 'O(n²)', ro: 'O(n²)' }, correct: false },
-      { text: { en: 'O(1)', ro: 'O(1)' }, correct: false },
+      { text: { en: 'O(n log n)', ro: 'O(n log n)' }, correct: false, feedback: { en: 'Sort-based bound; Boyer-Moore never sorts — two linear scans suffice.', ro: 'Margine din sortare; Boyer-Moore nu sortează niciodată — două parcurgeri liniare sunt suficiente.' } },
+      { text: { en: 'O(n²)', ro: 'O(n²)' }, correct: false, feedback: { en: 'That would be the naive "count every element pairwise" approach; Boyer-Moore eliminates that with a single-pass cancellation trick.', ro: 'Aceea e abordarea naivă „numără fiecare element per pereche"; Boyer-Moore o elimină printr-o parcurgere cu anulări.' } },
+      { text: { en: 'O(1)', ro: 'O(1)' }, correct: false, feedback: { en: 'O(1) would not even look at every element; you must scan the array at least once to know anything about it.', ro: 'O(1) nu ar privi fiecare element; trebuie parcurs vectorul cel puțin o dată ca să știi ceva despre el.' } },
     ],
     explanation: {
       en: 'Two sequential linear passes: O(n) + O(n) = O(n). Each pass goes through the array exactly once. Space is O(1) — only candidate and count variables.',
@@ -117,9 +117,9 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'Input: a[1..n], b[1..m] where a[i], b[j] ∈ {0..9}; Output: c[1..max(n,m)+1] representing a + b', ro: 'Input: a[1..n], b[1..m] unde a[i], b[j] ∈ {0..9}; Output: c[1..max(n,m)+1] reprezentând a + b' }, correct: true },
-      { text: { en: 'Input: two integers a, b; Output: a + b', ro: 'Input: două numere întregi a, b; Output: a + b' }, correct: false },
-      { text: { en: 'Input: a[1..n], b[1..n] (same length); Output: c[1..n] representing a + b', ro: 'Input: a[1..n], b[1..n] (aceeași lungime); Output: c[1..n] reprezentând a + b' }, correct: false },
-      { text: { en: 'Input: a[1..n], b[1..m]; Output: true if a + b overflows', ro: 'Input: a[1..n], b[1..m]; Output: true dacă a + b depășește limita' }, correct: false },
+      { text: { en: 'Input: two integers a, b; Output: a + b', ro: 'Input: două numere întregi a, b; Output: a + b' }, correct: false, feedback: { en: 'Defeats the premise: the numbers are too large to fit in a machine word — that is why they are given as digit arrays.', ro: 'Anulează premisa: numerele sunt prea mari pentru un cuvânt mașină — de aceea sunt date ca șiruri de cifre.' } },
+      { text: { en: 'Input: a[1..n], b[1..n] (same length); Output: c[1..n] representing a + b', ro: 'Input: a[1..n], b[1..n] (aceeași lungime); Output: c[1..n] reprezentând a + b' }, correct: false, feedback: { en: 'Forces equal length and drops the carry-out digit. General addition must handle n ≠ m and `max(n,m)+1` output length.', ro: 'Impune lungimi egale și elimină cifra de transport. Adunarea generală trebuie să trateze n ≠ m și lungimea `max(n,m)+1`.' } },
+      { text: { en: 'Input: a[1..n], b[1..m]; Output: true if a + b overflows', ro: 'Input: a[1..n], b[1..m]; Output: true dacă a + b depășește limita' }, correct: false, feedback: { en: 'Overflow-decision; we want the actual sum as a digit array, not a boolean.', ro: 'Decizie-depășire; vrem suma efectivă ca șir de cifre, nu un boolean.' } },
     ],
     explanation: {
       en: 'Numbers are represented as digit arrays (not native integers — they\'re too large). Arrays can have different lengths. The result may have one extra digit due to carry (e.g. 999 + 1 = 1000).',
@@ -135,9 +135,9 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'Input: a[1..n], a[i] ∈ ℕ; Output: a permutation a\'[1..n] of a such that a\'[1] ≤ a\'[2] ≤ … ≤ a\'[n]', ro: 'Input: a[1..n], a[i] ∈ ℕ; Output: o permutare a\'[1..n] a lui a astfel încât a\'[1] ≤ a\'[2] ≤ … ≤ a\'[n]' }, correct: true },
-      { text: { en: 'Input: a[1..n]; Output: the sorted array (without specifying it\'s a permutation)', ro: 'Input: a[1..n]; Output: vectorul sortat (fără a specifica că este o permutare)' }, correct: false },
-      { text: { en: 'Input: a[1..n]; Output: the indices that would sort the array', ro: 'Input: a[1..n]; Output: indicii care ar sorta vectorul' }, correct: false },
-      { text: { en: 'Input: a[1..n]; Output: true if the array is already sorted', ro: 'Input: a[1..n]; Output: true dacă vectorul este deja sortat' }, correct: false },
+      { text: { en: 'Input: a[1..n]; Output: the sorted array (without specifying it\'s a permutation)', ro: 'Input: a[1..n]; Output: vectorul sortat (fără a specifica că este o permutare)' }, correct: false, feedback: { en: 'Without the "permutation of a" clause, the spec allows any sorted array (including totally different elements) — incomplete.', ro: 'Fără clauza „permutare a lui a", specificația admite orice vector sortat (inclusiv cu alte elemente) — incomplet.' } },
+      { text: { en: 'Input: a[1..n]; Output: the indices that would sort the array', ro: 'Input: a[1..n]; Output: indicii care ar sorta vectorul' }, correct: false, feedback: { en: 'That is *argsort* — related but different. Sorting returns the reordered values, not a permutation of indices.', ro: 'Acela este *argsort* — înrudit dar diferit. Sortarea returnează valorile reordonate, nu o permutare de indici.' } },
+      { text: { en: 'Input: a[1..n]; Output: true if the array is already sorted', ro: 'Input: a[1..n]; Output: true dacă vectorul este deja sortat' }, correct: false, feedback: { en: 'That is *is-sorted* (a decision problem); sorting must actually produce the sorted output.', ro: 'Aceea e *is-sorted* (decizie); sortarea trebuie să producă efectiv output-ul sortat.' } },
     ],
     explanation: {
       en: 'The output must be a permutation of the input (same elements, reordered). Just saying "sorted array" is incomplete — we must specify it contains exactly the same elements. Argsort and checking sortedness are different problems.',
@@ -153,9 +153,9 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'Input: n ∈ ℤ⁺, a[1..n−1] where a[i] ∈ {1..n} all distinct; Output: x ∈ {1..n} \\ {a[1], …, a[n−1]}', ro: 'Input: n ∈ ℤ⁺, a[1..n−1] unde a[i] ∈ {1..n} toți distincți; Output: x ∈ {1..n} \\ {a[1], …, a[n−1]}' }, correct: true },
-      { text: { en: 'Input: a[1..n]; Output: the smallest missing positive integer', ro: 'Input: a[1..n]; Output: cel mai mic număr natural pozitiv lipsă' }, correct: false },
-      { text: { en: 'Input: n, a[1..n−1]; Output: true if a number is missing', ro: 'Input: n, a[1..n−1]; Output: true dacă lipsește un număr' }, correct: false },
-      { text: { en: 'Input: a[1..n−1] sorted; Output: the missing number', ro: 'Input: a[1..n−1] sortat; Output: numărul lipsă' }, correct: false },
+      { text: { en: 'Input: a[1..n]; Output: the smallest missing positive integer', ro: 'Input: a[1..n]; Output: cel mai mic număr natural pozitiv lipsă' }, correct: false, feedback: { en: 'A different (harder) problem: unbounded input, no guarantee of {1..n}. Our problem guarantees the domain is exactly {1..n}.', ro: 'O altă problemă (mai grea): input nemărginit, fără garanție că e din {1..n}. Problema noastră garantează domeniul exact {1..n}.' } },
+      { text: { en: 'Input: n, a[1..n−1]; Output: true if a number is missing', ro: 'Input: n, a[1..n−1]; Output: true dacă lipsește un număr' }, correct: false, feedback: { en: 'Trivially true by the problem setup (n−1 from n distinct values); we want to *identify* the missing value.', ro: 'Trivial adevărat din enunț (n−1 din n valori distincte); vrem să *identificăm* valoarea lipsă.' } },
+      { text: { en: 'Input: a[1..n−1] sorted; Output: the missing number', ro: 'Input: a[1..n−1] sortat; Output: numărul lipsă' }, correct: false, feedback: { en: 'Adds an unneeded "sorted" constraint and drops n from the input; the problem does not assume a sorted array and n is essential.', ro: 'Adaugă o constrângere „sortat" inutilă și omite n din input; problema nu presupune vectorul sortat iar n este esențial.' } },
     ],
     explanation: {
       en: 'The input is n and an array of n−1 distinct values from {1..n}. The output is the single missing value. The array is not necessarily sorted. "Smallest missing positive" is a different, harder problem.',
@@ -171,9 +171,9 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'Input: a[1..n], a[i] ∈ {1..n}, exactly one value appears twice; Output: (duplicate, missing)', ro: 'Input: a[1..n], a[i] ∈ {1..n}, exact o valoare apare de două ori; Output: (duplicat, lipsă)' }, correct: true },
-      { text: { en: 'Input: a[1..n]; Output: the duplicate value only', ro: 'Input: a[1..n]; Output: doar valoarea duplicat' }, correct: false },
-      { text: { en: 'Input: a[1..n]; Output: all values that appear more than once', ro: 'Input: a[1..n]; Output: toate valorile care apar de mai mult de o dată' }, correct: false },
-      { text: { en: 'Input: a[1..n−1]; Output: (duplicate, missing)', ro: 'Input: a[1..n−1]; Output: (duplicat, lipsă)' }, correct: false },
+      { text: { en: 'Input: a[1..n]; Output: the duplicate value only', ro: 'Input: a[1..n]; Output: doar valoarea duplicat' }, correct: false, feedback: { en: 'Returns only half the answer; we need both the duplicate *and* the missing value.', ro: 'Returnează doar jumătate din răspuns; avem nevoie atât de duplicat *cât* și de valoarea lipsă.' } },
+      { text: { en: 'Input: a[1..n]; Output: all values that appear more than once', ro: 'Input: a[1..n]; Output: toate valorile care apar de mai mult de o dată' }, correct: false, feedback: { en: 'Misses the missing-value part, and the problem guarantees *exactly one* duplicate (no need for "all").', ro: 'Ratează partea cu valoarea lipsă, iar problema garantează *exact un* duplicat (nu e nevoie de „toate").' } },
+      { text: { en: 'Input: a[1..n−1]; Output: (duplicate, missing)', ro: 'Input: a[1..n−1]; Output: (duplicat, lipsă)' }, correct: false, feedback: { en: 'Array length is n, not n−1: n slots, one duplicated, one missing — that is how the duplicate + missing setup works.', ro: 'Lungimea vectorului e n, nu n−1: n poziții, una duplicată, una lipsă — așa funcționează configurația duplicat + lipsă.' } },
     ],
     explanation: {
       en: 'The array has exactly n elements (not n−1): one value from {1..n} appears twice, one is missing. We need to find both the duplicate and the missing value.',
@@ -189,8 +189,8 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'All three: LCM reduces to GCD, set equality reduces to sorting, set disjunction reduces to sorting', ro: 'Toate trei: cmmmc se reduce la cmmdc, egalitatea de mulțimi se reduce la sortare, disjuncția de mulțimi se reduce la sortare' }, correct: true },
-      { text: { en: 'Only LCM → GCD is valid; set operations cannot use sorting', ro: 'Doar cmmmc → cmmdc este validă; operațiile pe mulțimi nu pot folosi sortarea' }, correct: false },
-      { text: { en: 'GCD reduces to LCM (not the other way around)', ro: 'Cmmdc se reduce la cmmmc (nu invers)' }, correct: false },
+      { text: { en: 'Only LCM → GCD is valid; set operations cannot use sorting', ro: 'Doar cmmmc → cmmdc este validă; operațiile pe mulțimi nu pot folosi sortarea' }, correct: false, feedback: { en: 'Sorting is exactly what enables the O(n log n) linear scan for set equality and disjunction — it is the standard reduction.', ro: 'Sortarea este tocmai ce permite scanarea liniară O(n log n) pentru egalitate/disjuncție de mulțimi — e reducerea standard.' } },
+      { text: { en: 'GCD reduces to LCM (not the other way around)', ro: 'Cmmdc se reduce la cmmmc (nu invers)' }, correct: false, feedback: { en: 'The identity LCM·GCD = a·b goes both ways, but by convention we reduce LCM → GCD because Euclid gives GCD in O(log min(a,b)).', ro: 'Identitatea cmmmc·cmmdc = a·b merge în ambele sensuri, dar prin convenție reducem cmmmc → cmmdc pentru că Euclid dă cmmdc în O(log min(a,b)).' } },
     ],
     explanation: {
       en: 'LCM(a,b) = a·b / GCD(a,b). For set equality: sort both sets, then compare element by element — O(n log n). For set disjunction: sort the union, then check for duplicates — O(n log n). All three are valid reductions.',
@@ -206,8 +206,8 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'There exist constants c₁, c₂ > 0 and n₀ such that c₁·n² ≤ 0.5n² − 3n ≤ c₂·n² for all n ≥ n₀', ro: 'Există constante c₁, c₂ > 0 și n₀ astfel încât c₁·n² ≤ 0.5n² − 3n ≤ c₂·n² pentru orice n ≥ n₀' }, correct: true },
-      { text: { en: '0.5n² − 3n grows exactly as fast as n²', ro: '0.5n² − 3n crește exact la fel de repede ca n²' }, correct: false },
-      { text: { en: '0.5n² − 3n ≤ n² for all n', ro: '0.5n² − 3n ≤ n² pentru orice n' }, correct: false },
+      { text: { en: '0.5n² − 3n grows exactly as fast as n²', ro: '0.5n² − 3n crește exact la fel de repede ca n²' }, correct: false, feedback: { en: 'Close in spirit, but imprecise. Θ allows any constant-factor slack (c₁ ≤ ratio ≤ c₂), not literal equality of growth.', ro: 'Apropiat ca idee, dar imprecis. Θ admite orice interval de constante (c₁ ≤ raport ≤ c₂), nu egalitate literală de creștere.' } },
+      { text: { en: '0.5n² − 3n ≤ n² for all n', ro: '0.5n² − 3n ≤ n² pentru orice n' }, correct: false, feedback: { en: 'That is only the upper bound (O(n²)); Θ also requires a matching lower bound c₁·n² ≤ 0.5n² − 3n eventually.', ro: 'Aceea e doar marginea superioară (O(n²)); Θ cere și o margine inferioară corespunzătoare c₁·n² ≤ 0.5n² − 3n de la un n₀.' } },
     ],
     explanation: {
       en: 'Θ(n²) means bounded both above AND below by n² (up to constants). Choose c₁ = 0.25, c₂ = 0.5, n₀ = 12. Then for n ≥ 12: 0.25n² ≤ 0.5n² − 3n ≤ 0.5n².',
@@ -223,8 +223,8 @@ export default function Seminar02() {
     },
     options: [
       { text: { en: 'Both are O(log n) — asymptotically equivalent in the worst case', ro: 'Ambele sunt O(log n) — echivalente asimptotic în cazul cel mai nefavorabil' }, correct: true },
-      { text: { en: 'Fibonacci search is O(n), slower than binary search', ro: 'Căutarea Fibonacci este O(n), mai lentă decât căutarea binară' }, correct: false },
-      { text: { en: 'Fibonacci search is O(log log n), faster than binary search', ro: 'Căutarea Fibonacci este O(log log n), mai rapidă decât căutarea binară' }, correct: false },
+      { text: { en: 'Fibonacci search is O(n), slower than binary search', ro: 'Căutarea Fibonacci este O(n), mai lentă decât căutarea binară' }, correct: false, feedback: { en: 'Fibonacci search still halves the range (roughly by the golden ratio); it is log-time, not linear.', ro: 'Căutarea Fibonacci tot înjumătățește intervalul (aproximativ cu raportul de aur); e timp logaritmic, nu liniar.' } },
+      { text: { en: 'Fibonacci search is O(log log n), faster than binary search', ro: 'Căutarea Fibonacci este O(log log n), mai rapidă decât căutarea binară' }, correct: false, feedback: { en: 'O(log log n) is interpolation search on uniformly distributed data; Fibonacci search is plain O(log n).', ro: 'O(log log n) e căutarea prin interpolare pe date uniform distribuite; căutarea Fibonacci este simplu O(log n).' } },
     ],
     explanation: {
       en: 'Both binary search and Fibonacci search are O(log n) in the worst case. Fibonacci search may have practical advantages on systems where comparison is cheaper than division, since it uses only addition and subtraction.',
