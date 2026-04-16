@@ -659,8 +659,8 @@ print(sum);`}</Code>
     fail`}</Code>
             <Box type="warning">
               <p className="text-sm">{t(
-                'The nondeterministic model assumes "angelic" choice — it always guesses correctly if a correct guess exists. For SSD1, among all valid M* values, it picks the largest one.',
-                'Modelul nedeterminist presupune alegere „angelică" — ghicește mereu corect dacă există o ghicire corectă. Pentru SSD1, dintre toate valorile M* valide, o alege pe cea mai mare.'
+                'The nondeterministic model assumes "angelic" choice — it always guesses correctly if a correct guess exists. For SSD1 (an optimization problem) we then interpret the accepting computation with the largest valid M* as the answer; the pseudocode above accepts any valid M*, so making the choice deterministic at the end requires the optimization-problem convention layered on top of the nondeterministic model.',
+                'Modelul nedeterminist presupune alegere „angelică" — ghicește mereu corect dacă există o ghicire corectă. Pentru SSD1 (problemă de optimizare) interpretăm apoi calculul acceptor cu cea mai mare valoare M* validă drept răspuns; pseudocodul de mai sus acceptă orice M* valid, deci fixarea alegerii la final cere convenția pentru probleme de optimizare suprapusă peste modelul nedeterminist.'
               )}</p>
             </Box>
           </div>
