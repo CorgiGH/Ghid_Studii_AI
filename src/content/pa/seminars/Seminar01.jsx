@@ -14,9 +14,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Input: n \u2208 \u2124\u207A; Output: (p\u2081, p\u2082, \u2026, p\u2099) where p\u1D62 is the i-th prime number', ro: 'Input: n \u2208 \u2124\u207A; Output: (p\u2081, p\u2082, \u2026, p\u2099) unde p\u1D62 este al i-lea număr prim' }, correct: true },
-      { text: { en: 'Input: a list of numbers; Output: which of them are prime', ro: 'Input: o listă de numere; Output: care dintre ele sunt prime' }, correct: false },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is prime, false otherwise', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este prim, false altfel' }, correct: false },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the n-th prime number only', ro: 'Input: n \u2208 \u2124\u207A; Output: doar al n-lea număr prim' }, correct: false },
+      { text: { en: 'Input: a list of numbers; Output: which of them are prime', ro: 'Input: o listă de numere; Output: care dintre ele sunt prime' }, correct: false, feedback: { en: 'That is primality testing over a given list, not generating the first n primes. The input here is a single integer n, and the output is an ordered tuple of primes.', ro: 'Aceea este testarea primalității pe o listă dată, nu generarea primelor n prime. Input-ul este un singur întreg n, iar output-ul un tuplu ordonat de prime.' } },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is prime, false otherwise', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este prim, false altfel' }, correct: false, feedback: { en: 'That is a decision problem on n itself (is n prime?); the task is to generate n primes as a sequence.', ro: 'Aceea este o problemă de decizie pentru n însuși (este n prim?); sarcina cere generarea a n numere prime ca secvență.' } },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the n-th prime number only', ro: 'Input: n \u2208 \u2124\u207A; Output: doar al n-lea număr prim' }, correct: false, feedback: { en: 'Returns only the n-th prime; the problem asks for the first n primes as an ordered tuple, not just the last one.', ro: 'Returnează doar al n-lea prim; problema cere primele n prime ca tuplu ordonat, nu doar ultimul.' } },
     ],
     explanation: {
       en: 'The problem asks for the first n primes as a sequence, not a single number or a primality test. Input is a positive integer n, output is an ordered tuple of the first n primes.',
@@ -32,9 +32,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Input: n \u2208 \u2124\u207A; Output: all prime numbers in {2, 3, \u2026, n\u22121}', ro: 'Input: n \u2208 \u2124\u207A; Output: toate numerele prime din {2, 3, \u2026, n\u22121}' }, correct: true },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the first n prime numbers', ro: 'Input: n \u2208 \u2124\u207A; Output: primele n numere prime' }, correct: false },
-      { text: { en: 'Input: a range [a, b]; Output: primes in that range', ro: 'Input: un interval [a, b]; Output: numerele prime din acel interval' }, correct: false },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: composite numbers less than n', ro: 'Input: n \u2208 \u2124\u207A; Output: numerele compuse mai mici decât n' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the first n prime numbers', ro: 'Input: n \u2208 \u2124\u207A; Output: primele n numere prime' }, correct: false, feedback: { en: 'That conflates the Sieve with the previous problem. The Sieve bounds primes by *value* (< n), not by *count* (first n).', ro: 'Confunzi ciurul cu problema anterioară. Ciurul limitează primele după *valoare* (< n), nu după *număr* (primele n).' } },
+      { text: { en: 'Input: a range [a, b]; Output: primes in that range', ro: 'Input: un interval [a, b]; Output: numerele prime din acel interval' }, correct: false, feedback: { en: 'The Sieve takes a single upper bound n (implicitly [2, n\u22121]), not an arbitrary range.', ro: 'Ciurul primește o singură limită superioară n (implicit [2, n\u22121]), nu un interval arbitrar.' } },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: composite numbers less than n', ro: 'Input: n \u2208 \u2124\u207A; Output: numerele compuse mai mici decât n' }, correct: false, feedback: { en: 'The Sieve marks composites to eliminate them, but returns the *unmarked* (prime) indices \u2014 the output is primes, not composites.', ro: 'Ciurul marchează compusele ca să le elimine, dar returnează indicii *nemarcați* (prime) \u2014 output-ul e format din prime, nu din compuse.' } },
     ],
     explanation: {
       en: 'The Sieve finds all primes strictly less than n (in the set {2, \u2026, n\u22121}). It does not find the first n primes \u2014 that would be a different problem.',
@@ -50,9 +50,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x is a palindrome AND x\u00B2 is a palindrome}', ro: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x este palindrom \u0218I x\u00B2 este palindrom}' }, correct: true },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x\u00B2 \u2264 n, x\u00B2 is a palindrome}', ro: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x\u00B2 \u2264 n, x\u00B2 este palindrom}' }, correct: false },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is a square palindrome', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este un palindrom pătrat' }, correct: false },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x is a palindrome}', ro: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x este palindrom}' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x\u00B2 \u2264 n, x\u00B2 is a palindrome}', ro: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x\u00B2 \u2264 n, x\u00B2 este palindrom}' }, correct: false, feedback: { en: 'Bounds x\u00B2 by n instead of bounding x, and drops the requirement that x itself be a palindrome \u2014 both conditions matter.', ro: 'Limitează x\u00B2 cu n în loc de x și omite cerința ca x să fie palindrom \u2014 ambele condiții contează.' } },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is a square palindrome', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este un palindrom pătrat' }, correct: false, feedback: { en: 'A yes/no decision on n itself; the problem asks to *enumerate* every square palindrome \u2264 n.', ro: 'O decizie da/nu pentru n însuși; problema cere *enumerarea* tuturor palindromurilor pătrate \u2264 n.' } },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x is a palindrome}', ro: 'Input: n \u2208 \u2124\u207A; Output: {x \u2208 \u2124\u207A | x \u2264 n, x este palindrom}' }, correct: false, feedback: { en: 'Only checks that x is a palindrome; a square palindrome requires x\u00B2 to also be a palindrome (e.g., 11\u00B2 = 121).', ro: 'Verifică doar că x e palindrom; un palindrom pătrat cere și ca x\u00B2 să fie palindrom (ex. 11\u00B2 = 121).' } },
     ],
     explanation: {
       en: 'A square palindrome x requires BOTH x and x\u00B2 to be palindromes (e.g. 11\u00B2 = 121). The last option only checks if x is a palindrome, ignoring x\u00B2.',
@@ -68,8 +68,8 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Input: n \u2208 \u2124\u207A; Output: "happy" if repeated digit-square-sum reaches 1, "unhappy" otherwise', ro: 'Input: n \u2208 \u2124\u207A; Output: "fericit" dacă suma repetată a pătratelor cifrelor ajunge la 1, "nefericit" altfel' }, correct: true },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the sequence of sums until a cycle is found', ro: 'Input: n \u2208 \u2124\u207A; Output: secvența sumelor până la găsirea unui ciclu' }, correct: false },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the sum of squares of digits of n', ro: 'Input: n \u2208 \u2124\u207A; Output: suma pătratelor cifrelor lui n' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the sequence of sums until a cycle is found', ro: 'Input: n \u2208 \u2124\u207A; Output: secvența sumelor până la găsirea unui ciclu' }, correct: false, feedback: { en: 'Returns the intermediate trace; the problem asks for the *verdict* (happy or not), not the sequence of sums.', ro: 'Returnează urma intermediară; problema cere *verdictul* (fericit sau nu), nu secvența sumelor.' } },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the sum of squares of digits of n', ro: 'Input: n \u2208 \u2124\u207A; Output: suma pătratelor cifrelor lui n' }, correct: false, feedback: { en: 'Computes only one step of the iteration; happiness is a property of the *fixed-point* behaviour, not a single sum.', ro: 'Calculează doar un pas al iterației; fericirea e o proprietate a *punctului fix*, nu a unei sume singulare.' } },
     ],
     explanation: {
       en: 'The problem asks for a decision (happy or not), not the intermediate sequence. A happy number eventually reaches 1; an unhappy one enters a cycle that never includes 1.',
@@ -85,9 +85,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Input: limit = 4,000,000; Output: \u03A3{f \u2208 Fibonacci | f \u2264 limit AND f is even}', ro: 'Input: limit = 4.000.000; Output: \u03A3{f \u2208 Fibonacci | f \u2264 limit \u0218I f este par}' }, correct: true },
-      { text: { en: 'Input: none; Output: all even Fibonacci numbers up to 4,000,000', ro: 'Input: niciunul; Output: toate numerele Fibonacci pare până la 4.000.000' }, correct: false },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the n-th even Fibonacci number', ro: 'Input: n \u2208 \u2124\u207A; Output: al n-lea număr Fibonacci par' }, correct: false },
-      { text: { en: 'Input: limit = 4,000,000; Output: count of even Fibonacci numbers \u2264 limit', ro: 'Input: limit = 4.000.000; Output: numărul de Fibonacci pare \u2264 limit' }, correct: false },
+      { text: { en: 'Input: none; Output: all even Fibonacci numbers up to 4,000,000', ro: 'Input: niciunul; Output: toate numerele Fibonacci pare până la 4.000.000' }, correct: false, feedback: { en: 'Returns the list of matching terms; the problem asks for their *sum* (a single number). Also, the limit is an input, not a hardcoded constant.', ro: 'Returnează lista termenilor care se potrivesc; problema cere *suma* lor (un singur număr). Limita e și ea input, nu o constantă.' } },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the n-th even Fibonacci number', ro: 'Input: n \u2208 \u2124\u207A; Output: al n-lea număr Fibonacci par' }, correct: false, feedback: { en: 'Different problem: a cardinal index n, not a value bound. We want the sum up to a *value* limit, not the n-th term.', ro: 'Problemă diferită: indice n cardinal, nu o limită de valoare. Vrem suma până la o limită de *valoare*, nu al n-lea termen.' } },
+      { text: { en: 'Input: limit = 4,000,000; Output: count of even Fibonacci numbers \u2264 limit', ro: 'Input: limit = 4.000.000; Output: numărul de Fibonacci pare \u2264 limit' }, correct: false, feedback: { en: 'Counts the matching terms; the problem asks for the sum of their values.', ro: 'Numără termenii care se potrivesc; problema cere suma valorilor lor.' } },
     ],
     explanation: {
       en: 'The output is a single number (the sum), not a list or a count. The input is the upper bound (4,000,000). Starting sequence: 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, \u2026',
@@ -103,9 +103,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Input: (a\u2081, \u2026, a\u2099) where a\u1D62 \u2208 \u2124\u207A; Output: |{a\u1D62 | \u2203k: a\u1D62 = k(2k\u22121)}|', ro: 'Input: (a\u2081, \u2026, a\u2099) unde a\u1D62 \u2208 \u2124\u207A; Output: |{a\u1D62 | \u2203k: a\u1D62 = k(2k\u22121)}|' }, correct: true },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the first n hexagonal numbers', ro: 'Input: n \u2208 \u2124\u207A; Output: primele n numere hexagonale' }, correct: false },
-      { text: { en: 'Input: (a\u2081, \u2026, a\u2099); Output: the hexagonal numbers in the array', ro: 'Input: (a\u2081, \u2026, a\u2099); Output: numerele hexagonale din vector' }, correct: false },
-      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is hexagonal', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este hexagonal' }, correct: false },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: the first n hexagonal numbers', ro: 'Input: n \u2208 \u2124\u207A; Output: primele n numere hexagonale' }, correct: false, feedback: { en: 'Generates hexagonal numbers from scratch; the problem takes an *existing array* and counts how many entries are hexagonal.', ro: 'Generează numere hexagonale de la zero; problema primește un *vector existent* și numără câte elemente sunt hexagonale.' } },
+      { text: { en: 'Input: (a\u2081, \u2026, a\u2099); Output: the hexagonal numbers in the array', ro: 'Input: (a\u2081, \u2026, a\u2099); Output: numerele hexagonale din vector' }, correct: false, feedback: { en: 'Returns the filtered list; the problem asks for the *count* (a single integer).', ro: 'Returnează lista filtrată; problema cere *numărul* (un singur întreg).' } },
+      { text: { en: 'Input: n \u2208 \u2124\u207A; Output: true if n is hexagonal', ro: 'Input: n \u2208 \u2124\u207A; Output: true dacă n este hexagonal' }, correct: false, feedback: { en: 'A decision problem on a single n; the task takes an array and counts matching entries.', ro: 'O problemă de decizie pentru un singur n; sarcina primește un vector și numără elementele care se potrivesc.' } },
     ],
     explanation: {
       en: 'The output is a count (how many), not the list itself. A number h is hexagonal iff h = k(2k\u22121) for some positive integer k. First hexagonal numbers: 1, 6, 15, 28, 45, 66, 91, 120, \u2026',
@@ -121,9 +121,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: min cost path from s to d using \u2264 k nodes', ro: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: drumul de cost minim de la s la d folosind \u2264 k noduri' }, correct: true },
-      { text: { en: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V; Output: shortest path from s to d', ro: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V; Output: drumul cel mai scurt de la s la d' }, correct: false },
-      { text: { en: 'Input: G = (V, E, w), k \u2208 \u2124\u207A; Output: all paths with \u2264 k nodes', ro: 'Input: G = (V, E, w), k \u2208 \u2124\u207A; Output: toate drumurile cu \u2264 k noduri' }, correct: false },
-      { text: { en: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: true if a path with \u2264 k nodes exists', ro: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: true dacă există un drum cu \u2264 k noduri' }, correct: false },
+      { text: { en: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V; Output: shortest path from s to d', ro: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V; Output: drumul cel mai scurt de la s la d' }, correct: false, feedback: { en: 'Drops the \u2264 k node constraint \u2014 that is standard shortest path, not the bounded variant this problem asks for.', ro: 'Omite constrângerea \u2264 k noduri \u2014 aceea este drumul minim standard, nu varianta limitată cerută aici.' } },
+      { text: { en: 'Input: G = (V, E, w), k \u2208 \u2124\u207A; Output: all paths with \u2264 k nodes', ro: 'Input: G = (V, E, w), k \u2208 \u2124\u207A; Output: toate drumurile cu \u2264 k noduri' }, correct: false, feedback: { en: 'Missing source/destination, and enumerates paths instead of taking the minimum cost. Both (s, d) and the minimisation are essential.', ro: 'Lipsesc sursa/destinația și enumeră drumurile în loc de a lua costul minim. Atât (s, d) cât și minimizarea sunt esențiale.' } },
+      { text: { en: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: true if a path with \u2264 k nodes exists', ro: 'Input: G = (V, E, w), s \u2208 V, d \u2208 V, k \u2208 \u2124\u207A; Output: true dacă există un drum cu \u2264 k noduri' }, correct: false, feedback: { en: 'The decision variant (existence). The problem is an optimization: return the *minimum cost* such path.', ro: 'Varianta decizională (existența). Problema e de optimizare: returnează drumul de cost *minim*.' } },
     ],
     explanation: {
       en: 'The problem requires finding the minimum cost path (not just existence), from a specific source to destination, with the constraint of visiting at most k nodes. All four inputs (graph, source, destination, k) are needed.',
@@ -139,9 +139,9 @@ export default function Seminar01() {
     },
     options: [
       { text: { en: 'Input: N \u2208 \u2124\u207A; Output: all placements of N queens on an N\u00D7N board such that no two queens attack each other', ro: 'Input: N \u2208 \u2124\u207A; Output: toate plasările a N regine pe o tablă N\u00D7N astfel încât nicio pereche de regine să nu se atace' }, correct: true },
-      { text: { en: 'Input: an N\u00D7N board with queens placed; Output: true if no two queens attack each other', ro: 'Input: o tablă N\u00D7N cu regine plasate; Output: true dacă nicio pereche de regine nu se atacă' }, correct: false },
-      { text: { en: 'Input: N \u2208 \u2124\u207A; Output: the maximum number of queens that can be placed on an N\u00D7N board', ro: 'Input: N \u2208 \u2124\u207A; Output: numărul maxim de regine care pot fi plasate pe o tablă N\u00D7N' }, correct: false },
-      { text: { en: 'Input: N \u2208 \u2124\u207A; Output: one valid placement of N non-attacking queens', ro: 'Input: N \u2208 \u2124\u207A; Output: o plasare validă a N regine care nu se atacă' }, correct: false },
+      { text: { en: 'Input: an N\u00D7N board with queens placed; Output: true if no two queens attack each other', ro: 'Input: o tablă N\u00D7N cu regine plasate; Output: true dacă nicio pereche de regine nu se atacă' }, correct: false, feedback: { en: 'That is the *validation* problem (check a given placement); N-Queens asks to *produce* all valid placements given only N.', ro: 'Aceea e problema de *validare* (verifici o plasare dată); N-regine cere să *produci* toate plasările valide pornind doar de la N.' } },
+      { text: { en: 'Input: N \u2208 \u2124\u207A; Output: the maximum number of queens that can be placed on an N\u00D7N board', ro: 'Input: N \u2208 \u2124\u207A; Output: numărul maxim de regine care pot fi plasate pe o tablă N\u00D7N' }, correct: false, feedback: { en: 'The name fixes the count at N; the real task is to *place* those N queens without mutual attacks \u2014 not to count them.', ro: 'Numele fixează cardinalul la N; sarcina reală e să *plasezi* cele N regine fără atacuri, nu să le numeri.' } },
+      { text: { en: 'Input: N \u2208 \u2124\u207A; Output: one valid placement of N non-attacking queens', ro: 'Input: N \u2208 \u2124\u207A; Output: o plasare validă a N regine care nu se atacă' }, correct: false, feedback: { en: 'Returns a single solution; the classical N-Queens problem asks for *all* distinct valid placements.', ro: 'Returnează o singură soluție; problema N-regine clasică cere *toate* plasările valide distincte.' } },
     ],
     explanation: {
       en: 'The N-Queens problem asks for ALL valid arrangements, not just one. The answer N is always N queens (trivially), so max-queens makes no sense. The input is the board size N, not a pre-placed board.',
