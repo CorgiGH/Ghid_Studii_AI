@@ -22,6 +22,10 @@
       "rubric": {
         "en": "Input: a, b numere întregi.\nOutput: q = câtul împărțirii întregi a lui a la b, i.e. a = bq + r cu 0 ≤ r < |b|, dacă b ≠ 0, eroare dacă b == 0.",
         "ro": "Input: a, b numere întregi.\nOutput: q = câtul împărțirii întregi a lui a la b, i.e. a = bq + r cu 0 ≤ r < |b|, dacă b ≠ 0, eroare dacă b == 0."
+      },
+      "commonErrors": {
+        "en": "- If you restricted the domain to `a, b ∈ ℕ` — you excluded negative operands and sidestepped the sign handling the algorithm must perform.\n- If you forgot the `b ≠ 0` precondition / error output — division by zero is undefined and the spec must state how the algorithm signals it.\n- If you returned only `q` without constraining the remainder (`0 ≤ r < |b|`) — the quotient is not uniquely determined without that condition (e.g. `-7 / 2` could be `-3` or `-4`).",
+        "ro": "- Dacă ai restrâns domeniul la `a, b ∈ ℕ` — ai exclus operanzii negativi și ai ocolit tratarea semnului pe care algoritmul trebuie să o facă.\n- Dacă ai omis precondiția `b ≠ 0` / cazul de eroare — împărțirea la zero este nedefinită și specificația trebuie să spună cum o semnalează algoritmul.\n- Dacă ai întors doar `q` fără constrângerea asupra restului (`0 ≤ r < |b|`) — câtul nu este unic determinat fără această condiție (ex. `-7 / 2` poate fi `-3` sau `-4`)."
       }
     },
     {
@@ -36,6 +40,10 @@
         "en": "Expected code/algorithm:\ndiv(a, b) {\n  if (b == 0) return \"eroare\";\n  if (sign(a) + sign(b) == 0) s = -1;\n  else s = 1;\n  if (a < 0) a = -a;\n  if (b < 0) b = -b;\n  q = 0;\n  while (a >= b) {\n    a = a-b; q = q + 1;\n  }\n  return s*q;\n}",
         "ro": "Expected code/algorithm:\ndiv(a, b) {\n  if (b == 0) return \"eroare\";\n  if (sign(a) + sign(b) == 0) s = -1;\n  else s = 1;\n  if (a < 0) a = -a;\n  if (b < 0) b = -b;\n  q = 0;\n  while (a >= b) {\n    a = a-b; q = q + 1;\n  }\n  return s*q;\n}"
       },
+      "commonErrors": {
+        "en": "- If you skipped the zero-divisor guard — the loop condition `a >= b` with `b = 0` never terminates (infinite subtraction of zero).\n- If you tested `a > b` instead of `a >= b` — you stop one iteration early when `a == b`, returning `q-1` instead of `q`.\n- If you didn't take absolute values before the loop — a negative `a` or `b` makes `a >= b` either always true or always false, giving a wrong quotient; sign must be recovered separately.\n- If you ignored sign bookkeeping (`s`) entirely — you returned `|q|` for inputs with opposite signs, losing the negative result.",
+        "ro": "- Dacă ai omis protecția pentru `b = 0` — condiția `a >= b` cu `b = 0` nu se termină niciodată (scăderi infinite din zero).\n- Dacă ai testat `a > b` în loc de `a >= b` — te oprești cu o iterație mai devreme când `a == b`, întorcând `q-1` în loc de `q`.\n- Dacă nu ai luat valorile absolute înainte de buclă — un `a` sau `b` negativ face `a >= b` permanent adevărat sau fals, dând un cât greșit; semnul trebuie recuperat separat.\n- Dacă ai ignorat complet gestionarea semnului (`s`) — ai întors `|q|` pentru intrări cu semne opuse, pierzând rezultatul negativ."
+      },
       "language": "pseudocode"
     },
     {
@@ -49,6 +57,10 @@
       "rubric": {
         "en": "Configurația inițială: <div(a,b), a|→a₀ b|→b₀>\nConfigurația finală: <., a|→a₁ b|→b₁ q|→q₀ s|→s₁>, a₀ = b₀*q₀ + a₁, a₁ < b",
         "ro": "Configurația inițială: <div(a,b), a|→a₀ b|→b₀>\nConfigurația finală: <., a|→a₁ b|→b₁ q|→q₀ s|→s₁>, a₀ = b₀*q₀ + a₁, a₁ < b"
+      },
+      "commonErrors": {
+        "en": "- If your initial configuration listed variables not yet bound (e.g. `q|→0`) — `q` doesn't exist until the algorithm introduces it; the initial store only contains the input bindings.\n- If you forgot the relation `a₀ = b₀·q₀ + a₁` between the initial and final values — you just described the final state, not the *specification* the configuration is supposed to capture.\n- If you confused the remainder `a₁` with the original `a₀` — the loop destroys `a`, so the final store holds the remainder, not the dividend.",
+        "ro": "- Dacă în configurația inițială ai listat variabile încă nelegate (ex. `q|→0`) — `q` nu există până ce algoritmul o introduce; magazia inițială conține doar legăturile de intrare.\n- Dacă ai omis relația `a₀ = b₀·q₀ + a₁` între valorile inițiale și finale — ai descris doar starea finală, nu *specificația* pe care configurațiile trebuie să o surprindă.\n- Dacă ai confundat restul `a₁` cu `a₀` original — bucla distruge `a`, deci magazia finală conține restul, nu deîmpărțitul."
       }
     },
     {
@@ -62,6 +74,10 @@
       "rubric": {
         "en": "Relația a < b este dată de terminarea instrucțiunii while. La începutul și la sfârșitul buclei while avem relația a + b*q = |a₀| (invariantul).",
         "ro": "Relația a < b este dată de terminarea instrucțiunii while. La începutul și la sfârșitul buclei while avem relația a + b*q = |a₀| (invariantul)."
+      },
+      "commonErrors": {
+        "en": "- If your invariant was just `a >= 0` — that's a loop precondition, not a relation tying `a`, `b`, `q` back to the original input; correctness needs `a + b·q = |a₀|`.\n- If you stated `a + b·q = a₀` (without absolute value) — you ignored that `a` was replaced by `|a|` at the start, so the invariant must use `|a₀|`.\n- If you concluded correctness without using loop termination (`a < b`) — you only proved the invariant holds, not that the final `a` is the remainder; termination is what pins down `0 ≤ a < b`.",
+        "ro": "- Dacă invariantul tău era doar `a >= 0` — asta e o precondiție a buclei, nu o relație care leagă `a`, `b`, `q` de intrarea originală; corectitudinea cere `a + b·q = |a₀|`.\n- Dacă ai scris `a + b·q = a₀` (fără valoare absolută) — ai ignorat că `a` a fost înlocuit cu `|a|` la început, deci invariantul trebuie să folosească `|a₀|`.\n- Dacă ai concluzionat corectitudinea fără a folosi terminarea buclei (`a < b`) — ai demonstrat doar că invariantul se păstrează, nu că `a` final este restul; terminarea e cea care fixează `0 ≤ a < b`."
       }
     },
     {
@@ -75,6 +91,10 @@
       "rubric": {
         "en": "Valoarea cea mai mare a lui a pe n biți este 2ⁿ-1. Cazul cel mai nefavorabil: a maxim (2ⁿ-1) și b minim (b=1). Bucla while se execută de 2ⁿ-1 ori. Complexitate: O(2ⁿ).",
         "ro": "Valoarea cea mai mare a lui a pe n biți este 2ⁿ-1. Cazul cel mai nefavorabil: a maxim (2ⁿ-1) și b minim (b=1). Bucla while se execută de 2ⁿ-1 ori. Complexitate: O(2ⁿ)."
+      },
+      "commonErrors": {
+        "en": "- If you answered O(a) or O(a/b) — you measured time in the *value* of the input, not in its bit-size `n`; with `n` bits the value is up to `2ⁿ-1`, so the loop is exponential in `n`.\n- If you said O(n) — you confused the number of bits with the number of iterations; subtracting `b=1` from `a=2ⁿ-1` takes `2ⁿ-1` steps, not `n`.\n- If you picked `b` large as the worst case — large `b` *reduces* iterations; worst case is `b=1`, which makes each subtraction peel off only one unit.",
+        "ro": "- Dacă ai răspuns O(a) sau O(a/b) — ai măsurat timpul în *valoarea* intrării, nu în numărul de biți `n`; cu `n` biți valoarea ajunge la `2ⁿ-1`, deci bucla e exponențială în `n`.\n- Dacă ai spus O(n) — ai confundat numărul de biți cu numărul de iterații; scăderea lui `b=1` din `a=2ⁿ-1` cere `2ⁿ-1` pași, nu `n`.\n- Dacă ai ales `b` mare drept cazul cel mai nefavorabil — un `b` mare *reduce* iterațiile; cazul cel mai nefavorabil este `b=1`, care face fiecare scădere să scoată doar o unitate."
       }
     },
     {
@@ -88,6 +108,10 @@
       "rubric": {
         "en": "Intrare: O mulțime S cu n puncte în plan.\nIeșire: Cel mai apropiat vecin din S pentru fiecare punct din S.",
         "ro": "Intrare: O mulțime S cu n puncte în plan.\nIeșire: Cel mai apropiat vecin din S pentru fiecare punct din S."
+      },
+      "commonErrors": {
+        "en": "- If you described only one output point — that's the single-query NEAREST NEIGHBOR problem, not ALL NEAREST NEIGHBORS; the output must be `n` pairs, one per input point.\n- If you wrote 'nearest neighbor in S ∪ {P}' for some external P — you conflated this with the standalone NEAREST NEIGHBOR; here each point's neighbor comes from `S` itself (excluding the point).\n- If you omitted the 'in the plane' domain — you left the metric unspecified; the reduction to Voronoi depends on Euclidean distance.",
+        "ro": "- Dacă ai descris un singur punct de ieșire — aceea e problema NEAREST NEIGHBOR cu o singură interogare, nu CEI MAI APROPIAȚI VECINI; ieșirea trebuie să fie `n` perechi, câte una pentru fiecare punct de intrare.\n- Dacă ai scris „cel mai apropiat vecin din S ∪ {P}” pentru un P extern — ai confundat problema cu NEAREST NEIGHBOR standalone; aici vecinul fiecărui punct provine din `S` însuși (exclusiv punctul).\n- Dacă ai omis domeniul „în plan” — ai lăsat metrica nespecificată; reducerea la Voronoi depinde de distanța euclidiană."
       }
     },
     {
@@ -101,6 +125,10 @@
       "rubric": {
         "en": "Intrare: O mulțime S cu n puncte în plan.\nIeșire: Pentru fiecare punct P din S, locul geometric al celor mai apropiate puncte (diagrama Voronoi).",
         "ro": "Intrare: O mulțime S cu n puncte în plan.\nIeșire: Pentru fiecare punct P din S, locul geometric al celor mai apropiate puncte (diagrama Voronoi)."
+      },
+      "commonErrors": {
+        "en": "- If you described the output as the list of nearest neighbors — that's CEI MAI APROPIAȚI VECINI; the locus problem outputs *regions* (cells), not discrete neighbors.\n- If you said the output is a single region — you forgot the diagram has one Voronoi region per input point; the output is a partition of the plane.\n- If you omitted that the regions are locuses of points closer to P than to any other point of S — you described a partition without its defining property, which is what makes it 'Voronoi'.",
+        "ro": "- Dacă ai descris ieșirea ca lista celor mai apropiați vecini — aceea e CEI MAI APROPIAȚI VECINI; problema locurilor geometrice produce *regiuni* (celule), nu vecini discreți.\n- Dacă ai spus că ieșirea este o singură regiune — ai uitat că diagrama are câte o regiune Voronoi pentru fiecare punct de intrare; ieșirea e o partiție a planului.\n- Dacă ai omis că regiunile sunt locurile punctelor mai apropiate de P decât de orice alt punct din S — ai descris o partiție fără proprietatea care o definește, exact ce o face „Voronoi”."
       }
     },
     {
@@ -114,6 +142,10 @@
       "rubric": {
         "en": "1. Se construiește diagrama Voronoi, reprezentată cu PSLG.\n2. Se parcurge structura PSLG și pentru fiecare regiune se investigează regiunile vecine.\nPostprocesarea necesită timpul O(n).",
         "ro": "1. Se construiește diagrama Voronoi, reprezentată cu PSLG.\n2. Se parcurge structura PSLG și pentru fiecare regiune se investigează regiunile vecine.\nPostprocesarea necesită timpul O(n)."
+      },
+      "commonErrors": {
+        "en": "- If you reduced in the wrong direction (LOCUL GEOMETRIC ∝ₙ CEI MAI APROPIAȚI VECINI) — you can't recover region boundaries from discrete neighbor pairs; the reduction must go from the simpler problem to the harder one, using the harder one as an oracle.\n- If you claimed O(n²) postprocessing — you ignored that PSLG has O(n) edges total (planar graph), so scanning neighbors of every region costs O(n), not O(n²).\n- If you skipped the PSLG structure entirely and said 'just read the output' — you didn't explain how to extract each point's nearest neighbor, which requires inspecting the geometric edges of each cell.",
+        "ro": "- Dacă ai redus în direcția greșită (LOCUL GEOMETRIC ∝ₙ CEI MAI APROPIAȚI VECINI) — nu poți reconstrui frontierele de regiuni din perechi discrete de vecini; reducerea merge de la problema mai simplă la cea mai grea, folosind-o pe cea grea ca oracol.\n- Dacă ai afirmat post-procesare O(n²) — ai ignorat că PSLG are O(n) muchii în total (graf planar), deci parcurgerea vecinilor fiecărei regiuni costă O(n), nu O(n²).\n- Dacă ai sărit peste structura PSLG și ai spus „se citește doar ieșirea” — nu ai explicat cum se extrage cel mai apropiat vecin al fiecărui punct, care cere inspectarea muchiilor geometrice ale fiecărei celule."
       }
     },
     {
@@ -127,6 +159,10 @@
       "rubric": {
         "en": "Se știe că LOCUL GEOMETRIC are complexitatea O(n log n). Se aplică teorema reducerilor: dacă Q are O(f(n)) și P ∝ₙ Q, atunci P are O(f(n) + n).",
         "ro": "Se știe că LOCUL GEOMETRIC are complexitatea O(n log n). Se aplică teorema reducerilor: dacă Q are O(f(n)) și P ∝ₙ Q, atunci P are O(f(n) + n)."
+      },
+      "commonErrors": {
+        "en": "- If you concluded O(n log n) by re-deriving from scratch — you missed the point of the reduction theorem; the whole argument is that *once you have the reduction*, the bound transfers for free.\n- If you wrote O(f(n) · n) — you multiplied complexities; the reduction theorem adds the postprocessing cost, giving O(f(n) + n) = O(n log n) since f(n) dominates.\n- If you cited Ω(n log n) here — that's the lower-bound direction (part e); for an upper bound you use the O(·) version of the theorem.",
+        "ro": "- Dacă ai obținut O(n log n) rederivând de la zero — ai ratat rostul teoremei de reducere; întregul argument este că *odată ce ai reducerea*, marginea se transferă gratuit.\n- Dacă ai scris O(f(n) · n) — ai înmulțit complexitățile; teorema de reducere *adaugă* costul post-procesării, rezultând O(f(n) + n) = O(n log n) pentru că f(n) domină.\n- Dacă ai citat Ω(n log n) aici — aceea e direcția de margine inferioară (partea e); pentru o margine superioară se folosește varianta O(·) a teoremei."
       }
     },
     {
@@ -140,6 +176,10 @@
       "rubric": {
         "en": "Se știe că LOCUL GEOMETRIC are complexitatea Ω(n log n) și se aplică din nou teorema.",
         "ro": "Se știe că LOCUL GEOMETRIC are complexitatea Ω(n log n) și se aplică din nou teorema."
+      },
+      "commonErrors": {
+        "en": "- If you said Ω(n) — that's the trivial lower bound from reading the input; the reduction gives the stronger Ω(n log n) inherited from LOCUL GEOMETRIC.\n- If you tried to use the reduction P ∝ₙ Q again to transfer a *lower* bound from Q to P — the direction flips: a lower bound on the *harder* problem (Q) transfers to the *easier* one (P) only through the reverse reduction Q ∝ₙ P.\n- If you confused Ω with Θ — a matching Θ(n log n) needs both the upper bound from (d) and the lower bound here; stating Ω alone leaves the upper bound unproven in isolation.",
+        "ro": "- Dacă ai spus Ω(n) — aceea e marginea inferioară trivială din citirea intrării; reducerea oferă marginea mai tare Ω(n log n) moștenită de la LOCUL GEOMETRIC.\n- Dacă ai încercat să refolosești reducerea P ∝ₙ Q pentru a transfera o margine *inferioară* de la Q la P — direcția se inversează: o margine inferioară a problemei *mai grele* (Q) se transferă la cea *mai ușoară* (P) doar prin reducerea inversă Q ∝ₙ P.\n- Dacă ai confundat Ω cu Θ — o Θ(n log n) reciprocă cere atât marginea superioară de la (d) cât și pe cea inferioară de aici; doar Ω nu demonstrează singur marginea superioară."
       }
     },
     {
@@ -153,6 +193,10 @@
       "rubric": {
         "en": "Se calculează mediana absciselor. Se duce o verticală la stânga sau la dreapta medianii. S₁ = punctele din stânga, S₂ = punctele din dreapta.",
         "ro": "Se calculează mediana absciselor. Se duce o verticală la stânga sau la dreapta medianii. S₁ = punctele din stânga, S₂ = punctele din dreapta."
+      },
+      "commonErrors": {
+        "en": "- If you split by the *mean* of x-coordinates — the mean doesn't guarantee a balanced partition; the median does, which is what divide-and-conquer requires for O(n log n).\n- If you split by the y-coordinate — the merge step's polygonal chain σ(S₁, S₂) is built against a *vertical* line, so the split must use x, not y.\n- If you used the geometric midpoint `(xmin + xmax)/2` — with skewed distributions |S₁| and |S₂| can differ wildly, breaking the balanced recursion and inflating the depth beyond log n.",
+        "ro": "- Dacă ai împărțit după *media* absciselor — media nu garantează o partiție echilibrată; mediana o face, ceea ce cere divide-et-impera pentru O(n log n).\n- Dacă ai împărțit după ordonată — linia poligonală σ(S₁, S₂) din pasul de combinare se construiește față de o *verticală*, deci împărțirea trebuie făcută după x, nu după y.\n- Dacă ai folosit mijlocul geometric `(xmin + xmax)/2` — cu distribuții asimetrice |S₁| și |S₂| pot diferi mult, stricând recursiunea echilibrată și mărind adâncimea peste log n."
       }
     },
     {
@@ -166,6 +210,10 @@
       "rubric": {
         "en": "Fiind mulțimi cu puține puncte, se pot construi direct. Se duc mediatoarele segmentelor care unesc punctele.",
         "ro": "Fiind mulțimi cu puține puncte, se pot construi direct. Se duc mediatoarele segmentelor care unesc punctele."
+      },
+      "commonErrors": {
+        "en": "- If you drew the Voronoi edges as the *segments* between points instead of their perpendicular bisectors — you confused the Delaunay dual edge with its Voronoi edge; Voronoi boundaries are perpendicular bisectors.\n- If you drew only *some* bisectors — every pair of adjacent sites contributes an edge fragment; you must compute all pairwise bisectors and clip each to the closer half-plane intersection.\n- If you skipped the base case and tried to recurse further with |S| ≤ 2 — the recursion bottoms out at small sets where direct construction is trivial; that's the whole point of the divide-et-impera base.",
+        "ro": "- Dacă ai trasat muchiile Voronoi ca *segmente* între puncte în loc de mediatoare — ai confundat muchia duală Delaunay cu muchia Voronoi; frontierele Voronoi sunt mediatoare perpendiculare.\n- Dacă ai trasat doar *unele* mediatoare — fiecare pereche de situri adiacente contribuie cu o porțiune de muchie; trebuie calculate toate mediatoarele și clipate la intersecția semiplanelor mai apropiate.\n- Dacă ai sărit peste cazul de bază și ai încercat să recurezi pentru |S| ≤ 2 — recursia se oprește pe mulțimi mici unde construcția directă este trivială; acesta e chiar scopul bazei divide-et-impera."
       }
     },
     {
@@ -179,6 +227,10 @@
       "rubric": {
         "en": "1. Se construiesc înfășurătorile convexe.\n2. Se determină dreptele suport.\n3. Se duce perpendiculara pe dreapta suport superioară până întâlnește prima muchie Voronoi.\n4. Se continuă cu perpendicularele pe dreptele suport.",
         "ro": "1. Se construiesc înfășurătorile convexe.\n2. Se determină dreptele suport.\n3. Se duce perpendiculara pe dreapta suport superioară până întâlnește prima muchie Voronoi.\n4. Se continuă cu perpendicularele pe dreptele suport."
+      },
+      "commonErrors": {
+        "en": "- If you started from the *lower* supporting line (bottom tangent) — the chain is traditionally built top-to-bottom; starting from the bottom inverts the chain's orientation and breaks the merge logic.\n- If you used perpendiculars to the dividing vertical line instead of perpendiculars to the *supporting tangents* — σ is built from bisectors of consecutive pairs of hull vertices, not from horizontal strips.\n- If you skipped the convex-hull step — you lose the identification of which pairs contribute to σ; only pairs of points on the two hulls that share a tangent face each other across the chain.",
+        "ro": "- Dacă ai pornit de la dreapta suport *inferioară* (tangenta de jos) — lanțul se construiește clasic de sus în jos; pornirea de jos inversează orientarea și strică logica fuzionării.\n- Dacă ai folosit perpendiculare pe verticala de separare în loc de perpendiculare pe *tangentele suport* — σ se construiește din mediatoarele perechilor consecutive de vârfuri de înfășurătoare, nu din benzi orizontale.\n- Dacă ai sărit peste construirea înfășurătorilor convexe — pierzi identificarea perechilor care contribuie la σ; doar perechile de puncte de pe cele două înfășurători care împart o tangentă se „văd” reciproc prin lanț."
       }
     },
     {
@@ -192,6 +244,10 @@
       "rubric": {
         "en": "Se fac intersecțiile dintre diagramele Voronoi pentru S₁ și S₂ și linia poligonală. Se șterge din Vor(S₂) ce e la stânga liniei și din Vor(S₁) ce e la dreapta liniei.",
         "ro": "Se fac intersecțiile dintre diagramele Voronoi pentru S₁ și S₂ și linia poligonală. Se șterge din Vor(S₂) ce e la stânga liniei și din Vor(S₁) ce e la dreapta liniei."
+      },
+      "commonErrors": {
+        "en": "- If you reversed the deletion rule (kept Vor(S₁) on the right and Vor(S₂) on the left) — you kept the wrong halves; points in S₁ own the left side and their Voronoi edges only survive there.\n- If you unioned Vor(S₁) ∪ Vor(S₂) ∪ σ without trimming — you kept spurious edges that cross σ, violating the Voronoi property that each cell contains only points closest to its site.\n- If you forgot to stitch σ itself into the output — the polygonal chain *is* part of Vor(S): it's exactly the set of points equidistant to a site in S₁ and a site in S₂; omitting it leaves holes in the diagram.",
+        "ro": "- Dacă ai inversat regula de ștergere (ai păstrat Vor(S₁) în dreapta și Vor(S₂) în stânga) — ai păstrat jumătățile greșite; punctele din S₁ dețin partea stângă și muchiile lor Voronoi supraviețuiesc doar acolo.\n- Dacă ai făcut reuniunea Vor(S₁) ∪ Vor(S₂) ∪ σ fără a tunde — ai păstrat muchii străine care traversează σ, încălcând proprietatea Voronoi că fiecare celulă conține doar puncte mai apropiate de situl ei.\n- Dacă ai uitat să incluzi σ însuși în ieșire — linia poligonală *face parte* din Vor(S): este exact mulțimea punctelor echidistante între un sit din S₁ și unul din S₂; omiterea ei lasă goluri în diagramă."
       }
     }
   ]

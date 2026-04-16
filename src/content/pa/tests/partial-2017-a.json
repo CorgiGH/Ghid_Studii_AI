@@ -22,6 +22,10 @@
       "rubric": {
         "en": "Input: L = (a₀, a₁, ..., aₙ₋₁), n ≥ 0, aᵢ ∈ A\nOutput: true dacă (∀i,j) i ≠ j ⟹ aᵢ ≠ aⱼ\nfalse, altfel, i.e. (∃i,j ∈ {0..n-1}) i ≠ j ∧ aᵢ = aⱼ",
         "ro": "Input: L = (a₀, a₁, ..., aₙ₋₁), n ≥ 0, aᵢ ∈ A\nOutput: true dacă (∀i,j) i ≠ j ⟹ aᵢ ≠ aⱼ\nfalse, altfel, i.e. (∃i,j ∈ {0..n-1}) i ≠ j ∧ aᵢ = aⱼ"
+      },
+      "commonErrors": {
+        "en": "- If you returned a deduplicated list instead of a boolean — you described the task of building a set, not *testing* whether the input already is one; ST is a decision problem.\n- If you omitted the element domain (`aᵢ ∈ A`) — the spec is ambiguous about what equality means; the algorithm needs a well-defined comparison.\n- If you required `i < j` in the output condition — you stated the algorithm's scan order, not the mathematical property; the formulation must be symmetric in `i` and `j`.",
+        "ro": "- Dacă ai întors o listă fără duplicate în loc de boolean — ai descris construirea unei mulțimi, nu *testarea* faptului că intrarea e deja una; ST e problemă de decizie.\n- Dacă ai omis domeniul elementelor (`aᵢ ∈ A`) — specificația e ambiguă asupra semnificației egalității; algoritmul are nevoie de o comparație bine definită.\n- Dacă ai cerut `i < j` în condiția de ieșire — ai enunțat ordinea de parcurgere a algoritmului, nu proprietatea matematică; formularea trebuie să fie simetrică în `i` și `j`."
       }
     },
     {
@@ -36,6 +40,10 @@
         "en": "Expected code/algorithm:\nST(L) {\n  if (L.size() == 0) return true;\n  for (i=0; i < L.size()-1; ++i)\n    for (j=i+1; j < L.size(); ++j)\n      if (L[i] == L[j]) return false;\n  return true;\n}",
         "ro": "Expected code/algorithm:\nST(L) {\n  if (L.size() == 0) return true;\n  for (i=0; i < L.size()-1; ++i)\n    for (j=i+1; j < L.size(); ++j)\n      if (L[i] == L[j]) return false;\n  return true;\n}"
       },
+      "commonErrors": {
+        "en": "- If your inner loop started at `j=0` — you compared each element with itself (`L[i] == L[i]` is always true) and returned false for any non-empty list.\n- If you iterated `j` over the whole list from `0` — you re-tested each pair twice, doubling the work without changing correctness.\n- If you forgot the `L.size() == 0` guard — the outer loop bound `L.size()-1` underflows or runs incorrectly on the empty list, which should return true.",
+        "ro": "- Dacă bucla interioară pornea de la `j=0` — ai comparat fiecare element cu el însuși (`L[i] == L[i]` e mereu adevărat) și ai întors false pentru orice listă nevidă.\n- Dacă ai parcurs `j` pe toată lista de la `0` — ai retestat fiecare pereche de două ori, dublând munca fără a schimba corectitudinea.\n- Dacă ai omis garda `L.size() == 0` — marginea externă `L.size()-1` se comportă greșit pe lista vidă, care ar trebui să întoarcă true."
+      },
       "language": "pseudocode"
     },
     {
@@ -49,6 +57,10 @@
       "rubric": {
         "en": "Invariantul primului for: (∀k ∈ {0..i-1}, ℓ ∈ {0..n-1}) k ≠ ℓ ⟹ L[k] ≠ L[ℓ]\nProgramul se termină dacă i ≠ j și L[i] == L[j], sau dacă se termină ambele instrucțiuni for, caz în care i == n == L.size(); aceasta împreună cu invariantul asigură faptul că valoarea true este corect calculată.",
         "ro": "Invariantul primului for: (∀k ∈ {0..i-1}, ℓ ∈ {0..n-1}) k ≠ ℓ ⟹ L[k] ≠ L[ℓ]\nProgramul se termină dacă i ≠ j și L[i] == L[j], sau dacă se termină ambele instrucțiuni for, caz în care i == n == L.size(); aceasta împreună cu invariantul asigură faptul că valoarea true este corect calculată."
+      },
+      "commonErrors": {
+        "en": "- If your invariant only mentioned `k < i` — you restricted the property to a triangle; the prefix `L[0..i-1]` must be distinct from the *entire* list, since the inner loop compared it with everything from `i+1` onward.\n- If you argued correctness only for the `return false` branch — you omitted the case where both loops terminate; that case requires the invariant to conclude the whole list is duplicate-free.\n- If you skipped the initialization case (`i = 0`, prefix empty) — the induction has no base; a vacuous truth must be explicitly noted.",
+        "ro": "- Dacă invariantul tău menționa doar `k < i` — ai restrâns proprietatea la un triunghi; prefixul `L[0..i-1]` trebuie să fie distinct față de *întreaga* listă, pentru că bucla interioară l-a comparat cu tot ce urmează de la `i+1`.\n- Dacă ai argumentat corectitudinea doar pentru ramura `return false` — ai omis cazul în care ambele bucle se termină; acolo invariantul trebuie să conducă la concluzia că toată lista nu are duplicate.\n- Dacă ai sărit peste inițializare (`i = 0`, prefix vid) — inducția nu are bază; adevărul vid trebuie notat explicit."
       }
     },
     {
@@ -62,6 +74,10 @@
       "rubric": {
         "en": "Dimensiunea unei instanțe: n = dimensiunea listei L\nOperații numărate: comparații în care apar elemente ale listei L\nCazul cel mai nefavorabil: L reprezintă o mulțime (instrucțiunile for se execută complet).\nTimp: n(n-1)/2 = O(n²)",
         "ro": "Dimensiunea unei instanțe: n = dimensiunea listei L\nOperații numărate: comparații în care apar elemente ale listei L\nCazul cel mai nefavorabil: L reprezintă o mulțime (instrucțiunile for se execută complet).\nTimp: n(n-1)/2 = O(n²)"
+      },
+      "commonErrors": {
+        "en": "- If you said the worst case is when a duplicate appears immediately — that's the *best* case; the algorithm short-circuits and returns false in O(1).\n- If you answered O(n) — you counted only the outer loop; each outer iteration runs an inner loop of length up to n-1-i, giving a quadratic total.\n- If you wrote O(n²) without identifying the worst-case input — full credit requires stating *which* input (a duplicate-free list) forces the quadratic bound.",
+        "ro": "- Dacă ai spus că cazul cel mai nefavorabil e când duplicatul apare imediat — acela e cazul *cel mai favorabil*; algoritmul scurt-circuitează și întoarce false în O(1).\n- Dacă ai răspuns O(n) — ai numărat doar bucla exterioară; fiecare iterație externă rulează una internă de lungime până la n-1-i, rezultând un total pătratic.\n- Dacă ai scris O(n²) fără a identifica intrarea cea mai nefavorabilă — pentru punctaj complet trebuie precizat *ce* intrare (o listă fără duplicate) forțează marginea pătratică."
       }
     },
     {
@@ -76,6 +92,10 @@
         "en": "Expected code/algorithm:\nunulDinTrei() {\n  n = random(2);\n  if (n == 0) return 0;\n  else return 1 - unulDinTrei();\n}",
         "ro": "Expected code/algorithm:\nunulDinTrei() {\n  n = random(2);\n  if (n == 0) return 0;\n  else return 1 - unulDinTrei();\n}"
       },
+      "commonErrors": {
+        "en": "- If you called `random(3)` — you changed the sample space; the spec says one draw from `{0,1}`, not from three values.\n- If you wrote `return unulDinTrei()` instead of `1 - unulDinTrei()` — you lost the bit-flip; the flip is what alternates 0s and 1s across recursion levels and produces the `1/3` tail behaviour.\n- If you made the recursion iterative with a fixed loop bound — you capped termination and changed the distribution; the algorithm is genuinely unbounded (possibly infinite execution).",
+        "ro": "- Dacă ai apelat `random(3)` — ai schimbat spațiul de eșantionare; specificația cere o extragere din `{0,1}`, nu din trei valori.\n- Dacă ai scris `return unulDinTrei()` în loc de `1 - unulDinTrei()` — ai pierdut inversarea bitului; tocmai inversarea alternează 0 și 1 pe nivelurile recursiei și produce comportamentul asimptotic `1/3`.\n- Dacă ai transformat recursia în iterație cu limită fixă — ai plafonat terminarea și ai schimbat distribuția; algoritmul e genuin nemărginit (execuția poate fi infinită)."
+      },
       "language": "pseudocode"
     },
     {
@@ -89,6 +109,10 @@
       "rubric": {
         "en": "Primul apel recursiv se face cu probabilitatea p₁ = 1/2. Acest apel se termină dacă random întoarce 0, cu probabilitatea 1/2. Probabilitatea este 1/2 · 1/2 = 1/2².",
         "ro": "Primul apel recursiv se face cu probabilitatea p₁ = 1/2. Acest apel se termină dacă random întoarce 0, cu probabilitatea 1/2. Probabilitatea este 1/2 · 1/2 = 1/2²."
+      },
+      "commonErrors": {
+        "en": "- If you answered 1/2 — you counted only the probability of *entering* the recursion and forgot that the recursive call must also *end* there (random returns 0), giving another 1/2 factor.\n- If you answered 1/2³ — you added an extra level; 'exactly one recursive call' means depth 1, not depth 2.\n- If you treated the two random draws as dependent — they are independent uniform bits, so their joint probability is the product 1/2 · 1/2.",
+        "ro": "- Dacă ai răspuns 1/2 — ai numărat doar probabilitatea de a *intra* în recursie și ai uitat că apelul trebuie să și *se termine* acolo (random întoarce 0), ceea ce dă un alt factor 1/2.\n- Dacă ai răspuns 1/2³ — ai adăugat un nivel în plus; „exact un apel recursiv” înseamnă adâncime 1, nu 2.\n- Dacă ai tratat cele două extrageri aleatoare ca dependente — sunt biți uniformi independenți, deci probabilitatea comună e produsul 1/2 · 1/2."
       }
     },
     {
@@ -102,6 +126,10 @@
       "rubric": {
         "en": "Al doilea apel recursiv apare numai dacă apare și primul (probabilitate condiționată): p₂ = 1/2² · 1/2 = 1/2³",
         "ro": "Al doilea apel recursiv apare numai dacă apare și primul (probabilitate condiționată): p₂ = 1/2² · 1/2 = 1/2³"
+      },
+      "commonErrors": {
+        "en": "- If you answered 1/2² — you forgot that the second call needs the first call to *also* have recursed; that's one more factor of 1/2.\n- If you multiplied by 1/3 anywhere — you mixed in the overall return-value distribution (the Pr[return 1] = 1/3 outcome) with the depth probability; the two are different random variables.\n- If you wrote p₂ = p₁ · p₁ = 1/4 — you assumed the two levels are independent events of the same type, but p₂ is *conditional* on p₁, so only one new 1/2 factor multiplies.",
+        "ro": "- Dacă ai răspuns 1/2² — ai uitat că al doilea apel cere ca și primul să *fi* recurs; mai apare un factor 1/2.\n- Dacă ai înmulțit undeva cu 1/3 — ai amestecat distribuția valorii întoarse (probabilitatea Pr[return 1] = 1/3) cu probabilitatea adâncimii; sunt variabile aleatoare diferite.\n- Dacă ai scris p₂ = p₁ · p₁ = 1/4 — ai presupus că cele două niveluri sunt evenimente independente de același tip, dar p₂ e *condiționat* de p₁, așa că se adaugă un singur factor 1/2."
       }
     },
     {
@@ -115,6 +143,10 @@
       "rubric": {
         "en": "pₙ = 1/2ⁿ⁺¹ (se verifică prin inducție)",
         "ro": "pₙ = 1/2ⁿ⁺¹ (se verifică prin inducție)"
+      },
+      "commonErrors": {
+        "en": "- If you wrote pₙ = 1/2ⁿ — you forgot the final 1/2 for the innermost call *terminating* with random = 0; the chain has n 'recurse' bits plus one 'stop' bit.\n- If you wrote pₙ = 1/2ⁿ⁻¹ — you off-by-oned the exponent; check by plugging n=1 and comparing with p₁ = 1/4.\n- If you skipped the induction step and only plugged two small values — pattern-spotting is not a proof; the exam asks to verify the formula holds for all n ≥ 1.",
+        "ro": "- Dacă ai scris pₙ = 1/2ⁿ — ai uitat ultimul factor 1/2 pentru apelul cel mai interior care *se termină* cu random = 0; lanțul are n biți „recurge” plus un bit „oprește”.\n- Dacă ai scris pₙ = 1/2ⁿ⁻¹ — ai greșit cu 1 exponentul; verifică punând n=1 și comparând cu p₁ = 1/4.\n- Dacă ai sărit peste pasul de inducție și ai înlocuit doar două valori mici — identificarea unui tipar nu e demonstrație; problema cere verificarea formulei pentru orice n ≥ 1."
       }
     },
     {
@@ -128,6 +160,10 @@
       "rubric": {
         "en": "Numărul mediu de apeluri recursive = Σₙ≥₁ n · pₙ = 1 · 1/2² + 2 · 1/2³ + ... + n · 1/2ⁿ⁺¹ + ...",
         "ro": "Numărul mediu de apeluri recursive = Σₙ≥₁ n · pₙ = 1 · 1/2² + 2 · 1/2³ + ... + n · 1/2ⁿ⁺¹ + ..."
+      },
+      "commonErrors": {
+        "en": "- If you wrote Σ pₙ (without the `n` factor) — you summed probabilities, which gives Pr[at least one recursive call] = 1/2, not the expected *count* of calls.\n- If you started the sum at n=0 — you included the zero-call case, but E[X] = Σ n · Pr[X=n] and the n=0 term contributes 0; not wrong but clutters the expression.\n- If you already summed to a closed form (e.g. 1) without being asked — the question specifically asks for the infinite sum expression; evaluating it pre-empts the next subquestion.",
+        "ro": "- Dacă ai scris Σ pₙ (fără factorul `n`) — ai sumat probabilități, ceea ce dă Pr[cel puțin un apel recursiv] = 1/2, nu *numărul mediu* de apeluri.\n- Dacă ai pornit suma de la n=0 — ai inclus cazul fără apeluri, dar E[X] = Σ n · Pr[X=n] și termenul n=0 contribuie cu 0; nu e greșit, dar încarcă expresia.\n- Dacă ai calculat deja forma închisă (ex. 1) fără să ți se ceară — enunțul cere explicit expresia sub formă de sumă infinită; evaluarea anticipează subpunctul următor."
       }
     },
     {
@@ -139,8 +175,11 @@
         "ro": "**Problem 3: Computational Geometry**\n\n**a)** Să se scrie în Alk o funcție cmp(P, Q, R) pentru compararea coordonatelor polare."
       },
       "rubric": {
-        "en": "dist2(P, Q) calculează pătratul distanței de la P la Q.\n\nExpected code/algorithm:\ncmp(P, Q, R) {\n  if (ccw(P, Q, R) > 0) return -1;\n  if (ccw(P, Q, R) < 0) return 1;\n  d1 = dist2(P, Q);\n  d2 = dist2(P, R);\n  if (d1 == d2) return 0;\n  if (d1 < d2) return -1;\n  else return 1;\n}",
-        "ro": "dist2(P, Q) calculează pătratul distanței de la P la Q.\n\nExpected code/algorithm:\ncmp(P, Q, R) {\n  if (ccw(P, Q, R) > 0) return -1;\n  if (ccw(P, Q, R) < 0) return 1;\n  d1 = dist2(P, Q);\n  d2 = dist2(P, R);\n  if (d1 == d2) return 0;\n  if (d1 < d2) return -1;\n  else return 1;\n}"
+        "en": "dist2(P, Q) calculează pătratul distanței de la P la Q.\n\nExpected code/algorithm:\ncmp(P, Q, R) {\n  if (ccw(P, Q, R) > 0) return -1;\n  if (ccw(P, Q, R) < 0) return 1;\n  d1 = dist2(P, Q);\n  d2 = dist2(P, R);\n  if (d1 == d2) return 0;\n  if (d1 < d2) return -1;\n  else return 1;\n}"
+      },
+      "commonErrors": {
+        "en": "- If you computed actual distances with `sqrt` — squared distances preserve the order and avoid floating-point error; the spec explicitly provides `dist2`.\n- If you returned `1` when `ccw > 0` — you inverted the turn sign; a left turn (ccw > 0) means Q is *before* R in counter-clockwise order, so cmp must return -1.\n- If you ignored the collinear case (`ccw == 0`) — your comparator returns inconsistent values when the three points are on a line, breaking the stable sort downstream.",
+        "ro": "- Dacă ai calculat distanțele reale cu `sqrt` — pătratele distanțelor păstrează ordinea și evită erorile de virgulă mobilă; enunțul oferă deja `dist2`.\n- Dacă ai întors `1` pentru `ccw > 0` — ai inversat semnul virajului; un viraj la stânga (ccw > 0) înseamnă că Q e *înaintea* lui R în ordine trigonometrică, deci cmp trebuie să întoarcă -1.\n- Dacă ai ignorat cazul coliniar (`ccw == 0`) — comparatorul dă rezultate inconsistente când cele trei puncte sunt pe aceeași dreaptă, ceea ce strică sortarea stabilă ulterior."
       }
     },
     {
@@ -154,6 +193,10 @@
       "rubric": {
         "en": "1. P={x→2,y→2}, Q={x→4,y→3}, R={x→3,y→4}: ccw(P,Q,R)=3, deci cmp întoarce -1.\n2. P={x→2,y→2}, Q={x→4,y→6}, R={x→3,y→4}: ccw(P,Q,R)=0, dist2(P,Q)=20 > 5=dist2(P,R), deci cmp întoarce 1.",
         "ro": "1. P={x→2,y→2}, Q={x→4,y→3}, R={x→3,y→4}: ccw(P,Q,R)=3, deci cmp întoarce -1.\n2. P={x→2,y→2}, Q={x→4,y→6}, R={x→3,y→4}: ccw(P,Q,R)=0, dist2(P,Q)=20 > 5=dist2(P,R), deci cmp întoarce 1."
+      },
+      "commonErrors": {
+        "en": "- If both your examples hit the `ccw != 0` branch — you only exercised half of `cmp`; the question says *two* examples and typically wants at least one collinear case to demonstrate the distance tiebreaker.\n- If you computed ccw by `(qx−px)(ry−py) − (qy−py)(rx−px)` with the wrong sign — you flipped the orientation; double-check with a simple right-turn instance first.\n- If you used unsquared distances in the second example — the sorting comparator uses `dist2`; your numbers must match what the function actually computes.",
+        "ro": "- Dacă ambele exemple au atins ramura `ccw != 0` — ai exersat doar jumătate din `cmp`; enunțul cere *două* exemple și de obicei vrea cel puțin un caz coliniar pentru a demonstra departajarea pe distanță.\n- Dacă ai calculat ccw cu `(qx−px)(ry−py) − (qy−py)(rx−px)` cu semnul greșit — ai inversat orientarea; verifică întâi pe o instanță simplă de viraj la dreapta.\n- Dacă ai folosit distanțe ne-pătrate în al doilea exemplu — comparatorul de sortare folosește `dist2`; numerele tale trebuie să corespundă cu ce calculează efectiv funcția."
       }
     },
     {
@@ -167,6 +210,10 @@
       "rubric": {
         "en": "Expected code/algorithm:\nlowermost(S) {\n  if (S.size() == 0) return \"error\";\n  min = S[0];\n  for (i=1; i < S.size(); ++i)\n    if (min.y > S[i].y) min = S[i];\n  return min;\n}",
         "ro": "Expected code/algorithm:\nlowermost(S) {\n  if (S.size() == 0) return \"error\";\n  min = S[0];\n  for (i=1; i < S.size(); ++i)\n    if (min.y > S[i].y) min = S[i];\n  return min;\n}"
+      },
+      "commonErrors": {
+        "en": "- If you compared `min.x` instead of `min.y` — you computed the leftmost point, not the lowermost; Graham's scan picks the anchor by minimum y.\n- If you initialized `min = 0` (numeric) instead of `min = S[0]` (a point) — you have no point to compare against, and assigning coordinates later breaks the structure.\n- If you skipped the empty-input guard — returning `S[0]` on an empty list is undefined; the spec expects an explicit error/sentinel.",
+        "ro": "- Dacă ai comparat `min.x` în loc de `min.y` — ai calculat punctul cel mai din stânga, nu cel mai de jos; scanarea Graham alege ancora după y minim.\n- Dacă ai inițializat `min = 0` (număr) în loc de `min = S[0]` (punct) — nu ai cu ce compara, iar atribuirea ulterioară a coordonatelor strică structura.\n- Dacă ai omis garda pentru intrare vidă — a întoarce `S[0]` pe o listă vidă e nedefinit; specificația cere eroare/valoare santinelă explicită."
       },
       "language": "pseudocode"
     },
@@ -182,6 +229,10 @@
         "en": "Expected code/algorithm:\nsort(out S) {\n  P = lowermost(S);\n  for (i=0; i < S.size(); ++i)\n    for (j=i+1; j < S.size(); ++j)\n      if (cmp(P, S[i], S[j]) == 1)\n        swap(S, i, j);\n}",
         "ro": "Expected code/algorithm:\nsort(out S) {\n  P = lowermost(S);\n  for (i=0; i < S.size(); ++i)\n    for (j=i+1; j < S.size(); ++j)\n      if (cmp(P, S[i], S[j]) == 1)\n        swap(S, i, j);\n}"
       },
+      "commonErrors": {
+        "en": "- If you passed `S[0]` instead of `lowermost(S)` as the anchor — the polar sort is centered on an arbitrary point; it must be the extremal point on the hull.\n- If you swapped when `cmp == -1` — you sorted in reverse polar order; the convention is ascending angle, so swap when `cmp` says the left element is greater (== 1).\n- If you sorted `S` by value instead of by index (using `swap(S, i, j)`) — missing `out S` or returning a new list leaves the caller with an unsorted list; the exercise requires in-place mutation.",
+        "ro": "- Dacă ai trecut `S[0]` în loc de `lowermost(S)` drept ancoră — sortarea polară se centrează pe un punct arbitrar; trebuie să fie punctul extrem de pe înfășurătoare.\n- Dacă ai schimbat valorile când `cmp == -1` — ai sortat în ordine polară inversă; convenția e unghi crescător, deci schimbi când `cmp` spune că elementul din stânga e mai mare (== 1).\n- Dacă ai sortat `S` după valoare în loc de după index (folosind `swap(S, i, j)`) — fără `out S` sau întorcând o nouă listă, apelantul rămâne cu lista nesortată; exercițiul cere modificare in-place."
+      },
       "language": "pseudocode"
     },
     {
@@ -195,6 +246,10 @@
       "rubric": {
         "en": "Dimensiunea: n = S.size(). Complexitatea timp a lowermost(S) este O(n). Cele două instrucțiuni for realizează n(n-1)/2 = O(n²) comparații.",
         "ro": "Dimensiunea: n = S.size(). Complexitatea timp a lowermost(S) este O(n). Cele două instrucțiuni for realizează n(n-1)/2 = O(n²) comparații."
+      },
+      "commonErrors": {
+        "en": "- If you answered O(n log n) — you assumed a fast comparison sort; the given algorithm is an explicit O(n²) nested loop with `swap`.\n- If you forgot to account for `lowermost(S)` — the total is `O(n) + O(n²) = O(n²)`, but you must show why the linear term is absorbed.\n- If you said O(n²) without stating the instance size — the answer must define `n = S.size()` so the bound is meaningful.",
+        "ro": "- Dacă ai răspuns O(n log n) — ai presupus o sortare prin comparație rapidă; algoritmul dat este o buclă dublă explicită O(n²) cu `swap`.\n- Dacă ai uitat să incluzi `lowermost(S)` — totalul este `O(n) + O(n²) = O(n²)`, dar trebuie argumentat de ce termenul liniar e absorbit.\n- Dacă ai spus O(n²) fără a preciza dimensiunea instanței — răspunsul trebuie să definească `n = S.size()` pentru ca marginea să aibă sens."
       }
     }
   ]

@@ -22,6 +22,10 @@
       "rubric": {
         "en": "Dacă p[j] ≠ s[i] = C:\n1. dacă apariția cea mai din dreapta a lui C în p este k < j, p[k] și s[i] sunt aliniate\n2. dacă apariția cea mai din dreapta a lui C în p este k > j, p este translatat la dreapta cu o poziție\n3. dacă C nu apare în p, patternul p este aliniat cu s[i+1..i+m]",
         "ro": "Dacă p[j] ≠ s[i] = C:\n1. dacă apariția cea mai din dreapta a lui C în p este k < j, p[k] și s[i] sunt aliniate\n2. dacă apariția cea mai din dreapta a lui C în p este k > j, p este translatat la dreapta cu o poziție\n3. dacă C nu apare în p, patternul p este aliniat cu s[i+1..i+m]"
+      },
+      "commonErrors": {
+        "en": "- If you forgot to split by the position of C's rightmost occurrence k relative to j — you collapsed three distinct cases into one and your rule can't decide whether the shift is a real alignment or a backwards move.\n- If you allowed k > j to align p[k] with s[i] — you would shift p to the left; the rule forbids this, so we default to a shift by 1.\n- If you omitted the 'C not in p' case — you have no defined shift when the mismatched character never appears in the pattern, which is precisely when the biggest shift (by m) is possible.",
+        "ro": "- Dacă ai uitat să împarți după poziția k a ultimei apariții a lui C față de j — ai contopit trei cazuri distincte într-unul, iar regula nu mai decide dacă saltul e o aliniere reală sau un pas înapoi.\n- Dacă ai permis ca pentru k > j să aliniezi p[k] cu s[i] — ar însemna o deplasare la stânga a patternului; regula interzice asta, de aceea se face un salt cu doar o poziție.\n- Dacă ai omis cazul „C nu apare în p” — nu ai definit saltul când caracterul nepotrivit nu apare deloc în pattern, tocmai cazul în care se poate face cel mai mare salt (cu m)."
       }
     },
     {
@@ -35,6 +39,10 @@
       "rubric": {
         "en": "salt: A=1, C=6, D=6, E=6, N=6, R=4, T=2, U=6\n(salt[X] = m - 1 - poziția ultimei apariții a lui X în P[0..m-2], sau m dacă X nu apare; aici P=\"ARATAT\", m=6, ultimul A în P[0..4]=\"ARATA\" la poziția 4 ⇒ salt[A] = 6 - 1 - 4 = 1)",
         "ro": "salt: A=1, C=6, D=6, E=6, N=6, R=4, T=2, U=6\n(salt[X] = m - 1 - poziția ultimei apariții a lui X în P[0..m-2], sau m dacă X nu apare; aici P=\"ARATAT\", m=6, ultimul A în P[0..4]=\"ARATA\" la poziția 4 ⇒ salt[A] = 6 - 1 - 4 = 1)"
+      },
+      "commonErrors": {
+        "en": "- If you scanned the full pattern P[0..m-1] instead of P[0..m-2] — you picked up the final T at position 5 and got salt[T]=0, which would never advance the window; we must exclude the last character.\n- If you got salt[T]=1 — you probably spotted the T at position 3 but missed that the rule takes the rightmost occurrence in P[0..m-2], which is position 3 here so salt[T] = 6-1-3 = 2.\n- If you set salt for letters not in the alphabet (like Q, Z) to something other than m — you under-shifted on characters that never appear in P; for any absent character the correct entry is m = 6.",
+        "ro": "- Dacă ai parcurs tot patternul P[0..m-1] în loc de P[0..m-2] — ai prins T-ul final de pe poziția 5 și ai obținut salt[T]=0, care nu ar mai avansa niciodată fereastra; ultimul caracter trebuie exclus.\n- Dacă ai obținut salt[T]=1 — probabil ai văzut T-ul de pe poziția 3 dar nu ai aplicat formula m-1-k cu k ultima apariție în P[0..m-2], adică 3, deci salt[T] = 6-1-3 = 2.\n- Dacă ai pus pentru litere care nu apar în pattern (Q, Z) altceva decât m — ai subdimensionat saltul pe caractere care nu apar deloc în P; pentru orice caracter absent valoarea corectă este m = 6."
       }
     },
     {
@@ -48,6 +56,10 @@
       "rubric": {
         "en": "Presupunem că p[j-1] nu se potrivește (după ce s-au potrivit p[j..m-1]).\n1. dacă goodSuff(j) > 0, face un salt egal cu m - goodSuff(j)\n2. dacă goodSuff(j) = 0, face un salt egal cu m - lp(j)",
         "ro": "Presupunem că p[j-1] nu se potrivește (după ce s-au potrivit p[j..m-1]).\n1. dacă goodSuff(j) > 0, face un salt egal cu m - goodSuff(j)\n2. dacă goodSuff(j) = 0, face un salt egal cu m - lp(j)"
+      },
+      "commonErrors": {
+        "en": "- If you wrote the suffix as p[j+1..m-1] — you shifted the matched range by one and changed what 'good suffix' means; the already-matched suffix is p[j..m-1], and the mismatch is at p[j-1].\n- If you used the same shift m - goodSuff(j) in both cases — you forgot that goodSuff(j)=0 signals 'no other occurrence of the good suffix inside P', so you must fall back to lp(j), the longest prefix of P that is also a suffix of the matched suffix.\n- If you confused goodSuff with the KMP failure function — goodSuff records occurrences of a *suffix* of P, while KMP's F[j] records the longest proper prefix-that-is-a-suffix of P[0..j-1]; they are different tables.",
+        "ro": "- Dacă ai scris sufixul ca p[j+1..m-1] — ai deplasat cu o poziție zona deja potrivită și ai schimbat sensul noțiunii de „sufix bun”; zona potrivită este p[j..m-1], iar nepotrivirea este la p[j-1].\n- Dacă ai folosit același salt m - goodSuff(j) în ambele cazuri — ai uitat că goodSuff(j)=0 semnalează „sufixul bun nu mai apare în altă parte a lui P”, deci trebuie să treci pe lp(j), cel mai lung prefix al lui P care e și sufix al sufixului deja potrivit.\n- Dacă ai confundat goodSuff cu funcția de eșec din KMP — goodSuff se referă la aparițiile unui *sufix* al lui P, iar F[j] din KMP se referă la cel mai lung prefix-și-sufix propriu al lui P[0..j-1]; sunt tabele diferite."
       }
     },
     {
@@ -61,6 +73,10 @@
       "rubric": {
         "en": "ARATAT (poziții 0-5): goodSuff = [0, 0, 0, 0, 3, 0]",
         "ro": "ARATAT (poziții 0-5): goodSuff = [0, 0, 0, 0, 3, 0]"
+      },
+      "commonErrors": {
+        "en": "- If you found another match of the suffix and forgot the condition P[k-1] ≠ P[j-1] — you included internal occurrences that can't correspond to a useful shift; the next character before the repeated suffix must differ from the mismatched character.\n- If you searched for the suffix inside ARATAT from left to right and stopped at the first hit — you did not take the *rightmost* internal occurrence; goodSuff(j) must be the largest such k < j.\n- If you filled goodSuff(j) for j=0 — that entry is undefined because there is no mismatch position p[-1]; by convention the table is indexed j = 1..m.",
+        "ro": "- Dacă ai găsit o altă apariție a sufixului dar ai uitat condiția P[k-1] ≠ P[j-1] — ai inclus apariții interne care nu corespund unui salt util; caracterul dinaintea sufixului reapărut trebuie să difere de caracterul nepotrivit.\n- Dacă ai căutat sufixul în ARATAT de la stânga la dreapta și te-ai oprit la prima potrivire — nu ai luat apariția *cea mai din dreapta*; goodSuff(j) este cel mai mare k < j cu proprietatea dorită.\n- Dacă ai completat goodSuff(j) pentru j=0 — acea valoare nu e definită deoarece nu există poziția p[-1] a nepotrivirii; prin convenție tabela e indexată j = 1..m."
       }
     },
     {
@@ -72,8 +88,11 @@
         "ro": "**Problem 1: Boyer-Moore Algorithm**\nÎn contextul algoritmului Boyer-Moore se consideră subiectul \"E CARATA DAR NU E ARATATA\" și patternul \"ARATAT\".\n\n**e)** Să se explice cum se aplică algoritmul Boyer-Moore pentru exemplul considerat."
       },
       "rubric": {
-        "en": "Se compară de la dreapta la stânga.\nPas 1: A vs T — nepotrivire, salt[A]=1 (1 comparație)\nPas 2: R,A,T vs T,A,T — nepotrivire la R vs T, salt[R]=4 (3 comparații)\n...se continuă aplicând maximul dintre salt-ul caracterului rău și sufixul bun.",
-        "ro": "Se compară de la dreapta la stânga.\nPas 1: A vs T — nepotrivire, salt[A]=1 (1 comparație)\nPas 2: R,A,T vs T,A,T — nepotrivire la R vs T, salt[R]=4 (3 comparații)\n...se continuă aplicând maximul dintre salt-ul caracterului rău și sufixul bun."
+        "en": "Se compară de la dreapta la stânga.\nPas 1: A vs T — nepotrivire, salt[A]=1 (1 comparație)\nPas 2: R,A,T vs T,A,T — nepotrivire la R vs T, salt[R]=4 (3 comparații)\n...se continuă aplicând maximul dintre salt-ul caracterului rău și sufixul bun."
+      },
+      "commonErrors": {
+        "en": "- If you compared characters left to right — that's the naive algorithm; Boyer-Moore always scans the pattern from right to left, which is what lets the bad-character and good-suffix rules kick in.\n- If you only used the bad character table and ignored good suffix — on runs like matching 'ATAT' then failing, good suffix often gives a bigger shift; the rule is to take max(badChar, goodSuff).\n- If you counted only the positions where the window lands and not the per-step comparisons — you reported window moves instead of character comparisons; the grading counts comparisons done until either a full match or the next shift.",
+        "ro": "- Dacă ai comparat caracterele de la stânga la dreapta — acela este algoritmul naiv; Boyer-Moore parcurge întotdeauna patternul de la dreapta la stânga, tocmai pentru ca regulile caracterului rău și sufixului bun să poată acționa.\n- Dacă ai folosit doar tabela caracterului rău și ai ignorat sufixul bun — pe secvențe gen „se potrivesc ATAT apoi eșec”, sufixul bun dă adesea un salt mai mare; regula corectă este max(badChar, goodSuff).\n- Dacă ai numărat doar pozițiile ferestrei și nu comparațiile per pas — ai raportat mutări de fereastră, nu comparații de caractere; notarea ține cont de comparațiile efectuate până la o potrivire completă sau la următorul salt."
       }
     },
     {
@@ -85,8 +104,11 @@
         "ro": "**Problem 2: Greedy Algorithms — Huffman Coding**\n\n**a)** Să se enunțe problema codurilor Huffman."
       },
       "rubric": {
-        "en": "Intrare: n mesaje M₀,...,Mₙ₋₁ cu frecvențele w₀,...,wₙ₋₁ codificate a.î. cod(Mᵢ) ∈ {0,1}*, ∀i,j: i≠j ⟹ cod(Mᵢ) nu este prefix al cod(Mⱼ).\nIeșire: codificare cu lungimea medie minimă.",
-        "ro": "Intrare: n mesaje M₀,...,Mₙ₋₁ cu frecvențele w₀,...,wₙ₋₁ codificate a.î. cod(Mᵢ) ∈ {0,1}*, ∀i,j: i≠j ⟹ cod(Mᵢ) nu este prefix al cod(Mⱼ).\nIeșire: codificare cu lungimea medie minimă."
+        "en": "Intrare: n mesaje M₀,...,Mₙ₋₁ cu frecvențele w₀,...,wₙ₋₁ codificate a.î. cod(Mᵢ) ∈ {0,1}*, ∀i,j: i≠j ⟹ cod(Mᵢ) nu este prefix al cod(Mⱼ).\nIeșire: codificare cu lungimea medie minimă."
+      },
+      "commonErrors": {
+        "en": "- If you dropped the prefix-free condition — you allowed codes like {0, 01}, which are not uniquely decodable; the whole point of Huffman is to produce a prefix code.\n- If you asked for minimum *maximum* codeword length — that's a different problem (bounded-length coding); Huffman minimizes the *weighted average* Σ wᵢ · |cod(Mᵢ)|.\n- If you forgot to state that frequencies wᵢ are part of the input — an encoder without frequencies has no basis for choosing an optimal code; the wᵢ drive every greedy combine step.",
+        "ro": "- Dacă ai omis condiția de cod prefix — ai permis coduri precum {0, 01}, care nu sunt unic decodabile; tocmai scopul lui Huffman este să producă un cod prefix.\n- Dacă ai cerut minimizarea *lungimii maxime* a unui cod — aceea e o problemă diferită (coduri cu lungime mărginită); Huffman minimizează *media ponderată* Σ wᵢ · |cod(Mᵢ)|.\n- Dacă ai uitat că frecvențele wᵢ fac parte din intrare — fără frecvențe, algoritmul nu are pe ce baza alegerea codului optim; wᵢ sunt ceea ce ghidează fiecare combinare greedy."
       }
     },
     {
@@ -98,8 +120,11 @@
         "ro": "**Problem 2: Greedy Algorithms — Huffman Coding**\n\n**b)** Să se explice legătura dintre codurile Huffman și arborii binari."
       },
       "rubric": {
-        "en": "Codurile pot fi memorate de un arbore binar a.î. orice cod descrie unic un drum de la rădăcină la frontieră. Regula: cod=0 → copilul stâng; cod=1 → copilul drept.",
-        "ro": "Codurile pot fi memorate de un arbore binar a.î. orice cod descrie unic un drum de la rădăcină la frontieră. Regula: cod=0 → copilul stâng; cod=1 → copilul drept."
+        "en": "Codurile pot fi memorate de un arbore binar a.î. orice cod descrie unic un drum de la rădăcină la frontieră. Regula: cod=0 → copilul stâng; cod=1 → copilul drept."
+      },
+      "commonErrors": {
+        "en": "- If you placed messages at internal nodes — you broke the prefix-free property; messages must sit only at leaves (the frontier) so no code is a prefix of another.\n- If you stopped at 'binary tree' without specifying the bit-to-child mapping — you lost the link between a path in the tree and the actual binary code; 0 → left, 1 → right is what makes the tree encode the codewords.\n- If you said the depth of a leaf equals the frequency — no, the *depth* is the code length for that message; the frequency wᵢ only weighs how costly that depth is in the average.",
+        "ro": "- Dacă ai pus mesajele pe noduri interne — ai încălcat proprietatea de cod prefix; mesajele trebuie să fie doar în frunze (la frontieră), astfel încât niciun cod să nu fie prefix al altuia.\n- Dacă te-ai oprit la „arbore binar” fără să precizezi corespondența bit → copil — ai pierdut legătura dintre un drum în arbore și codul binar efectiv; convenția 0 → stânga, 1 → dreapta este cea care face ca arborele să codifice cuvintele.\n- Dacă ai spus că adâncimea frunzei e egală cu frecvența — nu, *adâncimea* este lungimea codului pentru acel mesaj; frecvența wᵢ doar ponderează cât de costisitoare e acea adâncime în medie."
       }
     },
     {
@@ -111,8 +136,11 @@
         "ro": "**Problem 2: Greedy Algorithms — Huffman Coding**\n\n**c)** Să se explice cine sunt mulțimea de stări S și colecția de submulțimi C."
       },
       "rubric": {
-        "en": "S – cea mai mică mulțime de arbori construită cu operația ⊕ (combinare).\nX ∈ C dacă elementele sunt incomparabile și X este finită.",
-        "ro": "S – cea mai mică mulțime de arbori construită cu operația ⊕ (combinare).\nX ∈ C dacă elementele sunt incomparabile și X este finită."
+        "en": "S – cea mai mică mulțime de arbori construită cu operația ⊕ (combinare).\nX ∈ C dacă elementele sunt incomparabile și X este finită."
+      },
+      "commonErrors": {
+        "en": "- If you described S as 'all binary trees' — that's too large; S is the *smallest* set of trees closed under the combine operation ⊕, starting from the single-leaf trees for each message.\n- If you forgot the 'incomparable' condition on X ∈ C — you allowed families where one tree is a subtree of another, which breaks the greedy invariant that states in a configuration are disjoint candidates.\n- If you left out 'X finite' — C could contain infinite forests and the algorithm would have nothing to iterate over; finiteness guarantees termination.",
+        "ro": "- Dacă ai descris S ca „toți arborii binari” — e prea mult; S este *cea mai mică* mulțime de arbori închisă la operația ⊕, pornind de la arborii-frunză asociați fiecărui mesaj.\n- Dacă ai uitat condiția de „elemente incomparabile” pentru X ∈ C — ai permis familii unde un arbore e subarbore al altuia, ceea ce strică invariantul greedy că stările sunt candidați disjuncți.\n- Dacă ai omis „X finită” — C ar putea conține păduri infinite, iar algoritmul nu ar mai avea peste ce itera; finitudinea e cea care asigură terminarea."
       }
     },
     {
@@ -124,8 +152,11 @@
         "ro": "**Problem 2: Greedy Algorithms — Huffman Coding**\n\n**d)** Să se descrie pasul de alegere locală."
       },
       "rubric": {
-        "en": "Alege T₁, T₂ cu rădăcini minime în B și T₁⊕T₂ nu este în B.\nB = B – {T₁, T₂} ∪ {T₁⊕T₂}",
-        "ro": "Alege T₁, T₂ cu rădăcini minime în B și T₁⊕T₂ nu este în B.\nB = B – {T₁, T₂} ∪ {T₁⊕T₂}"
+        "en": "Alege T₁, T₂ cu rădăcini minime în B și T₁⊕T₂ nu este în B.\nB = B – {T₁, T₂} ∪ {T₁⊕T₂}"
+      },
+      "commonErrors": {
+        "en": "- If you picked the two trees with *maximum* root weights — you would produce the worst possible code; Huffman is greedy on *minimum* root weights.\n- If you forgot to remove T₁ and T₂ from B after combining — you'd double-count them in subsequent steps, breaking the invariant that B is a valid configuration in C.\n- If you didn't check T₁⊕T₂ ∉ B — you might try to add a tree that's already present, which can happen when ties in frequencies create duplicate candidate combinations.",
+        "ro": "- Dacă ai ales cei doi arbori cu rădăcinile *maxime* — ai produce cel mai prost cod posibil; Huffman e greedy pe *minimul* rădăcinilor.\n- Dacă ai uitat să scoți T₁ și T₂ din B după combinare — i-ai număra dublu la pașii următori, încălcând invariantul că B e o configurație validă în C.\n- Dacă nu ai verificat T₁⊕T₂ ∉ B — ai putea încerca să adaugi un arbore care deja e în B, lucru care poate apărea când frecvențele egale produc aceeași combinație candidat."
       }
     },
     {
@@ -137,8 +168,11 @@
         "ro": "**Problem 2: Greedy Algorithms — Huffman Coding**\n\n**e)** Să se construiască o codificare Huffman pentru textul \"streets are never stars\"."
       },
       "rubric": {
-        "en": "Frecvențe: a=2, e=5, n=1, r=4, s=4, t=3, v=1, ♭=3\nSe construiește arborele Huffman combinând mereu cele două elemente cu frecvențe minime.\nPas 1: combină v(1) și n(1) → nod(2)\nPas 2: combină nod(2) și a(2) → nod(4)\n...etc.",
-        "ro": "Frecvențe: a=2, e=5, n=1, r=4, s=4, t=3, v=1, ♭=3\nSe construiește arborele Huffman combinând mereu cele două elemente cu frecvențe minime.\nPas 1: combină v(1) și n(1) → nod(2)\nPas 2: combină nod(2) și a(2) → nod(4)\n...etc."
+        "en": "Frecvențe: a=2, e=5, n=1, r=4, s=4, t=3, v=1, ♭=3\nSe construiește arborele Huffman combinând mereu cele două elemente cu frecvențe minime.\nPas 1: combină v(1) și n(1) → nod(2)\nPas 2: combină nod(2) și a(2) → nod(4)\n...etc."
+      },
+      "commonErrors": {
+        "en": "- If you forgot to count the spaces — the text has 3 spaces and they must be treated as a symbol (here ♭=3); skipping them gives wrong frequencies and a wrong tree.\n- If you miscounted letter frequencies (e.g. e=4 instead of 5) — every later combine step propagates the error; always recount on the actual string 'streets are never stars' before combining.\n- If at each step you combined the two *largest* frequencies instead of the two smallest — you built a tree that maximizes weighted average length; Huffman is greedy on minima, not maxima.",
+        "ro": "- Dacă ai uitat să numeri spațiile — textul are 3 spații și ele trebuie tratate ca simbol (aici ♭=3); ignorarea lor dă frecvențe greșite și un arbore greșit.\n- Dacă ai greșit numărarea frecvențelor literelor (ex. e=4 în loc de 5) — eroarea se propagă la fiecare combinare ulterioară; renumără pe șirul efectiv „streets are never stars” înainte de a combina.\n- Dacă la fiecare pas ai combinat cele mai *mari* frecvențe în loc de cele mai mici — ai construit un arbore care maximizează lungimea medie ponderată; Huffman e greedy pe minime, nu pe maxime."
       }
     },
     {
@@ -150,8 +184,11 @@
         "ro": "**Problem 3: NP — Subset Sum**\nSe consideră problema Submulțime de sumă dată (SSD):\nIntrare: o mulțime A cu mărimi s[a] ∈ ℤ⁺ și un număr M ∈ ℤ⁺.\nIeșire: cel mai mare M* ≤ M a.î. există A' ⊆ A cu Σ(s[a] | a ∈ A') = M*.\n\n**a)** Să se arate că SSD este în NP."
       },
       "rubric": {
-        "en": "Se consideră varianta ca problemă de decizie (M* = M).\n\nExpected code/algorithm:\nnondetSSDDec(A, s, M) {\n  foreach (a in A) x[a] = choice(2);\n  mStar = 0;\n  foreach (a in A) mStar = mStar + x[a] * s[a];\n  if (mStar == M) return succes;\n  else return failure;\n}",
-        "ro": "Se consideră varianta ca problemă de decizie (M* = M).\n\nExpected code/algorithm:\nnondetSSDDec(A, s, M) {\n  foreach (a in A) x[a] = choice(2);\n  mStar = 0;\n  foreach (a in A) mStar = mStar + x[a] * s[a];\n  if (mStar == M) return succes;\n  else return failure;\n}"
+        "en": "Se consideră varianta ca problemă de decizie (M* = M).\n\nExpected code/algorithm:\nnondetSSDDec(A, s, M) {\n  foreach (a in A) x[a] = choice(2);\n  mStar = 0;\n  foreach (a in A) mStar = mStar + x[a] * s[a];\n  if (mStar == M) return succes;\n  else return failure;\n}"
+      },
+      "commonErrors": {
+        "en": "- If you tried to show NP for the optimization version directly — NP is a class of decision problems; you first recast SSD as 'is there A' ⊆ A with sum = M?' and show that.\n- If you wrote a deterministic algorithm that tries all 2ⁿ subsets — that proves only that SSD ∈ EXP, not NP; the NP certificate must be produced via a nondeterministic choice, not enumerated.\n- If you omitted the success/failure return — a nondeterministic algorithm must explicitly accept or reject on the chosen path; otherwise the acceptance semantics is undefined.",
+        "ro": "- Dacă ai încercat să demonstrezi apartenența la NP direct pentru varianta de optimizare — NP este o clasă de probleme de decizie; întâi reformulezi SSD ca „există A' ⊆ A cu suma = M?” și demonstrezi acea variantă.\n- Dacă ai scris un algoritm determinist care încearcă toate cele 2ⁿ submulțimi — asta arată doar SSD ∈ EXP, nu NP; certificatul NP se obține prin alegere nedeterministă, nu prin enumerare.\n- Dacă ai omis return-ul succes/failure — un algoritm nedeterminist trebuie să accepte sau să respingă explicit pe calea aleasă; altfel semantica de acceptare nu e definită."
       }
     },
     {
@@ -165,6 +202,10 @@
       "rubric": {
         "en": "Oricare din cele două variante este problemă NP-completă. Deoarece nu se știe dacă P = NP, nu se poate da un răspuns exact.",
         "ro": "Oricare din cele două variante este problemă NP-completă. Deoarece nu se știe dacă P = NP, nu se poate da un răspuns exact."
+      },
+      "commonErrors": {
+        "en": "- If you answered 'yes, there is a polynomial algorithm' — you asserted P = NP; SSD is NP-complete, so a polynomial deterministic solver would collapse P and NP, which is an open problem.\n- If you pointed at the pseudo-polynomial DP (O(n·M)) as proof of 'yes' — that is not polynomial in the input size; M is written in log M bits, so the DP is exponential in input length.\n- If you answered a flat 'no' — that also isn't proven; the honest answer is 'unknown' because P vs NP is open.",
+        "ro": "- Dacă ai răspuns „da, există un algoritm polinomial” — ai afirmat implicit P = NP; SSD este NP-completă, așa că un rezolvator determinist polinomial ar colapsa P și NP, ceea ce este o problemă deschisă.\n- Dacă ai invocat DP-ul pseudo-polinomial (O(n·M)) ca dovadă a lui „da” — nu este polinomial în dimensiunea intrării; M se scrie pe log M biți, deci DP-ul este exponențial în lungimea intrării.\n- Dacă ai răspuns pur și simplu „nu” — nici aceasta nu e demonstrată; răspunsul onest este „nu se știe”, pentru că P vs NP este deschisă."
       }
     },
     {
@@ -176,8 +217,11 @@
         "ro": "**Problem 3: NP — Subset Sum**\nSe consideră problema Submulțime de sumă dată (SSD):\nIntrare: o mulțime A cu mărimi s[a] ∈ ℤ⁺ și un număr M ∈ ℤ⁺.\nIeșire: cel mai mare M* ≤ M a.î. există A' ⊆ A cu Σ(s[a] | a ∈ A') = M*.\n\n**c)** Să se dea un exemplu de algoritm care calculează o aproximare a soluției optime."
       },
       "rubric": {
-        "en": "Este o schemă de aproximare polinomial completă, eroarea relativă marginită de ε.\n\nExpected code/algorithm:\nssdAprox(n, s, M, ε) {\n  L[0] = (0);\n  for (i = 1; i <= n; ++i) {\n    Ltemp = merge(L[i-1], L[i-1] + s[i]);\n    curata(Ltemp, ε/n, L[i]);\n    elimina din L[i] valorile mai mari decât M;\n  }\n  return cea mai mare valoare din L[n];\n}",
-        "ro": "Este o schemă de aproximare polinomial completă, eroarea relativă marginită de ε.\n\nExpected code/algorithm:\nssdAprox(n, s, M, ε) {\n  L[0] = (0);\n  for (i = 1; i <= n; ++i) {\n    Ltemp = merge(L[i-1], L[i-1] + s[i]);\n    curata(Ltemp, ε/n, L[i]);\n    elimina din L[i] valorile mai mari decât M;\n  }\n  return cea mai mare valoare din L[n];\n}"
+        "en": "Este o schemă de aproximare polinomial completă, eroarea relativă marginită de ε.\n\nExpected code/algorithm:\nssdAprox(n, s, M, ε) {\n  L[0] = (0);\n  for (i = 1; i <= n; ++i) {\n    Ltemp = merge(L[i-1], L[i-1] + s[i]);\n    curata(Ltemp, ε/n, L[i]);\n    elimina din L[i] valorile mai mari decât M;\n  }\n  return cea mai mare valoare din L[n];\n}"
+      },
+      "commonErrors": {
+        "en": "- If you skipped the 'curata' (trim) step with tolerance ε/n — you kept the exact DP and the list length blows up exponentially in M; trimming is what makes the scheme polynomial.\n- If you used tolerance ε instead of ε/n per step — the errors compound across the n iterations and the total relative error exceeds ε; dividing by n keeps the product of local errors bounded.\n- If you forgot to prune values > M before storing L[i] — the list grows with irrelevant sums; since we want the largest M* ≤ M, anything above M cannot contribute.",
+        "ro": "- Dacă ai sărit pasul „curata” (trim) cu toleranță ε/n — ai păstrat DP-ul exact și lungimea listei explodează exponențial în M; tocmai trim-ul face schema polinomială.\n- Dacă ai folosit toleranța ε în loc de ε/n la fiecare pas — erorile se acumulează peste cele n iterații și eroarea relativă totală depășește ε; împărțirea la n ține produsul erorilor locale mărginit.\n- Dacă ai uitat să elimini din L[i] valorile > M — lista crește cu sume irelevante; cum căutăm cel mai mare M* ≤ M, valorile peste M nu pot contribui."
       }
     },
     {
@@ -191,6 +235,10 @@
       "rubric": {
         "en": "Complexitatea timp va fi O(n · maxᵢ L[i].length()). Se știe că L[i].length() = O(n ln M / ε).",
         "ro": "Complexitatea timp va fi O(n · maxᵢ L[i].length()). Se știe că L[i].length() = O(n ln M / ε)."
+      },
+      "commonErrors": {
+        "en": "- If you reported O(n · M) — that's the exact DP's cost; after trimming, the list size is only O(n ln M / ε), so the bound is O(n² ln M / ε), polynomial in both n and 1/ε.\n- If you forgot the 1/ε factor — you ignored that a smaller ε means finer trimming and therefore a longer list; the whole point of an FPTAS is that runtime scales polynomially in 1/ε.\n- If you stated O(n log n) — you applied a sorting bound that doesn't belong here; the dominant cost is iterating over L[i], not sorting it.",
+        "ro": "- Dacă ai raportat O(n · M) — acela e costul DP-ului exact; după trim, dimensiunea listei este O(n ln M / ε), deci marginea devine O(n² ln M / ε), polinomial în n și 1/ε.\n- Dacă ai uitat factorul 1/ε — ai ignorat că un ε mai mic înseamnă trim mai fin și deci listă mai lungă; tocmai asta definește un FPTAS — timp polinomial în 1/ε.\n- Dacă ai dat O(n log n) — ai aplicat o margine de sortare care nu intervine aici; costul dominant este parcurgerea lui L[i], nu sortarea ei."
       }
     }
   ]

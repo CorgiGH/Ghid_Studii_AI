@@ -22,6 +22,10 @@
       "rubric": {
         "en": "D(0) = 0. Dacă m > 0, D(m) = D(m - i³) + 1, 0 < i³ ≤ m, ∀j. 0 < j³ ≤ m ⟹ j ≤ i.\nInput: m număr întreg, m ≥ 0\nOutput: D(m)",
         "ro": "D(0) = 0. Dacă m > 0, D(m) = D(m - i³) + 1, 0 < i³ ≤ m, ∀j. 0 < j³ ≤ m ⟹ j ≤ i.\nInput: m număr întreg, m ≥ 0\nOutput: D(m)"
+      },
+      "commonErrors": {
+        "en": "- If you forgot the base case `D(0) = 0` — the recurrence has no termination and the formula is ill-defined.\n- If you wrote `D(m) = D(m - i³) + 1` without the maximality constraint on `i` — any cube subtraction would satisfy it; the problem requires the *largest* cube ≤ m, so you must state `∀j, j³ ≤ m ⟹ j ≤ i`.\n- If you listed the Input as a set of cubes rather than the integer `m` — you described an intermediate table, not P1's input.",
+        "ro": "- Dacă ai omis cazul de bază `D(0) = 0` — recurența nu se termină și formula nu e bine definită.\n- Dacă ai scris `D(m) = D(m - i³) + 1` fără constrângerea de maximalitate a lui `i` — orice scădere de cub ar satisface-o; problema cere cel *mai mare* cub ≤ m, deci trebuie scris `∀j, j³ ≤ m ⟹ j ≤ i`.\n- Dacă ai pus ca Input o mulțime de cuburi în loc de întregul `m` — ai descris un tabel intermediar, nu intrarea lui P1."
       }
     },
     {
@@ -35,6 +39,10 @@
       "rubric": {
         "en": "Expected code/algorithm:\na[0] = 0;\ni3 = 1;\ni = 1;\nwhile (i3 <= m) {\n  a[i] = i3;\n  i = i+1;\n  i3 = i*i*i;\n}",
         "ro": "Expected code/algorithm:\na[0] = 0;\ni3 = 1;\ni = 1;\nwhile (i3 <= m) {\n  a[i] = i3;\n  i = i+1;\n  i3 = i*i*i;\n}"
+      },
+      "commonErrors": {
+        "en": "- If you tested `i3 < m` — you dropped the case `i³ = m` even though the problem includes `j³ ≤ m`; the bound must be `i3 <= m`.\n- If you recomputed `i*i*i` before incrementing `i` — you stored the same cube twice; update `i` first, then refresh `i3`.\n- If you forgot `a[0] = 0` — the next algorithm (q3) relies on `a` indexed from 1, and the cube-decomposition loop reads a sentinel at index 0 when walking down.",
+        "ro": "- Dacă ai testat `i3 < m` — ai exclus cazul `i³ = m`, deși problema cere `j³ ≤ m`; limita trebuie să fie `i3 <= m`.\n- Dacă ai recalculat `i*i*i` înainte de incrementarea lui `i` — ai stocat același cub de două ori; întâi incrementează `i`, apoi reîmprospătează `i3`.\n- Dacă ai omis `a[0] = 0` — algoritmul următor (q3) folosește `a` indexat de la 1, iar bucla de descompunere accesează o santinelă la poziția 0 când coboară."
       },
       "language": "pseudocode"
     },
@@ -50,6 +58,10 @@
         "en": "Expected code/algorithm:\ni = a.size()-1;\nD = 0;\nwhile (m > 0) {\n  while (m >= a[i]) {\n    m = m - a[i];\n    D = D + 1;\n  }\n  i = i - 1;\n}",
         "ro": "Expected code/algorithm:\ni = a.size()-1;\nD = 0;\nwhile (m > 0) {\n  while (m >= a[i]) {\n    m = m - a[i];\n    D = D + 1;\n  }\n  i = i - 1;\n}"
       },
+      "commonErrors": {
+        "en": "- If you started at `i = 0` and walked up — you'd subtract `a[0] = 0` forever; the greedy rule requires scanning from the *largest* cube downward.\n- If you used a single `while (m >= a[i])` loop without the outer `while (m > 0)` — you stop after the largest cube is exhausted and never consume the remainder with smaller cubes (e.g., 100 = 64 + 36 needs multiple cube sizes).\n- If you decremented `i` inside the inner loop — you'd try each cube at most once per round and miss repeated subtractions of the same cube (e.g., `23 = 2×8 + 7×1` needs `a[2] = 8` used twice).",
+        "ro": "- Dacă ai pornit de la `i = 0` în sus — ai scădea `a[0] = 0` la infinit; regula greedy cere parcurgerea de la cel *mai mare* cub în jos.\n- Dacă ai folosit un singur `while (m >= a[i])` fără bucla exterioară `while (m > 0)` — te oprești după epuizarea celui mai mare cub și nu consumi restul cu cuburi mai mici (ex. `100 = 64 + 36` cere mai multe dimensiuni de cub).\n- Dacă ai decrementat `i` în bucla interioară — ai încerca fiecare cub cel mult o dată pe rundă și ai rata scăderile repetate ale aceluiași cub (ex. `23 = 2×8 + 7×1` folosește `a[2] = 8` de două ori)."
+      },
       "language": "pseudocode"
     },
     {
@@ -63,6 +75,10 @@
       "rubric": {
         "en": "Bucla while din primul algoritm păstrează invariantul: a include primele i-1 cuburi ≤ m.\nDacă m₀ este valoarea inițială a variabilei m, atunci bucla while exterioară a celui de-al doilea algoritm păstrează invariantul D(m) + D = D(m₀) și a[0..i] include primele i+1 cuburi ≤ m.",
         "ro": "Bucla while din primul algoritm păstrează invariantul: a include primele i-1 cuburi ≤ m.\nDacă m₀ este valoarea inițială a variabilei m, atunci bucla while exterioară a celui de-al doilea algoritm păstrează invariantul D(m) + D = D(m₀) și a[0..i] include primele i+1 cuburi ≤ m."
+      },
+      "commonErrors": {
+        "en": "- If your invariant was just `m ≥ 0` — you stated a trivial bound; the useful invariant must tie the current `D + D(m)` sum back to the original `D(m₀)`.\n- If you only argued termination without partial correctness — you showed the loop halts, but not that the value of `D` at the end equals `D(m₀)`.\n- If you reused the q2 invariant for q3 — different loops maintain different properties; q2 builds `a`, q3 consumes `a` to accumulate `D`, so the invariants differ.",
+        "ro": "- Dacă invariantul tău era doar `m ≥ 0` — ai enunțat o margine trivială; invariantul util trebuie să lege suma curentă `D + D(m)` de valoarea inițială `D(m₀)`.\n- Dacă ai argumentat doar terminarea fără corectitudine parțială — ai arătat că bucla se oprește, dar nu că valoarea finală a lui `D` este `D(m₀)`.\n- Dacă ai refolosit invariantul de la q2 pentru q3 — bucle diferite mențin proprietăți diferite; q2 construiește `a`, q3 consumă `a` pentru a acumula `D`, deci invarianții diferă."
       }
     },
     {
@@ -76,6 +92,10 @@
       "rubric": {
         "en": "Dimensiunea: n = ⌈log₂ m⌉\nOperații: D = D+1\nCazul cel mai nefavorabil pentru n=5: m = 23 = 2×2³ + 7×1 (D = 9)\nTimp: T(n) = O(∛m) = O(∛2ⁿ)",
         "ro": "Dimensiunea: n = ⌈log₂ m⌉\nOperații: D = D+1\nCazul cel mai nefavorabil pentru n=5: m = 23 = 2×2³ + 7×1 (D = 9)\nTimp: T(n) = O(∛m) = O(∛2ⁿ)"
+      },
+      "commonErrors": {
+        "en": "- If you answered O(log m) — you forgot that each cube can be subtracted many times; the worst case is bounded by `m / a[i]`, which is O(∛m), not O(log m).\n- If you kept the bound O(∛m) instead of re-expressing in `n = ⌈log₂ m⌉` — you didn't use the problem's input size in bits; the answer in `n` is `O(∛2ⁿ) = O(2^(n/3))`, showing exponential blow-up.\n- If you picked `m = 2ⁿ - 1` as the worst case without checking — the actual worst case is the remainder-maximizing value (e.g., `m = 23` for n = 5 gives D = 9); blindly assuming `m = 2ⁿ` may give a smaller D.",
+        "ro": "- Dacă ai răspuns O(log m) — ai uitat că fiecare cub poate fi scăzut de multe ori; cazul cel mai nefavorabil este limitat de `m / a[i]`, adică O(∛m), nu O(log m).\n- Dacă ai păstrat marginea O(∛m) fără a o rescrie în funcție de `n = ⌈log₂ m⌉` — nu ai folosit dimensiunea intrării în biți; răspunsul în `n` este `O(∛2ⁿ) = O(2^(n/3))`, ceea ce evidențiază explozia exponențială.\n- Dacă ai ales `m = 2ⁿ - 1` ca cel mai nefavorabil fără verificare — cazul real este valoarea care maximizează restul (ex. `m = 23` pentru n = 5 dă D = 9); presupunerea oarbă `m = 2ⁿ` poate da un D mai mic."
       }
     },
     {
@@ -89,6 +109,10 @@
       "rubric": {
         "en": "pᵢ este egal cu probabilitatea cu care este ales s[i] == z, adică 1/n.",
         "ro": "pᵢ este egal cu probabilitatea cu care este ales s[i] == z, adică 1/n."
+      },
+      "commonErrors": {
+        "en": "- If you answered `1/2` — you confused a binary outcome (match / no match) with a uniform choice over `n` symbols; each position independently equals `z` with probability `1/n`.\n- If you gave `1 - (1 - 1/n)ⁿ` — you computed the probability of *at least one* match in the whole array, not the per-position probability `pᵢ = P(Xᵢ = 1)`.\n- If you said `pᵢ` depends on `i` — the array entries are i.i.d. uniform over the alphabet, so `pᵢ` is the same for every position.",
+        "ro": "- Dacă ai răspuns `1/2` — ai confundat rezultatul binar (se potrivește / nu) cu o alegere uniformă dintr-un alfabet de `n` simboluri; fiecare poziție egalează `z` independent, cu probabilitatea `1/n`.\n- Dacă ai dat `1 - (1 - 1/n)ⁿ` — ai calculat probabilitatea de *cel puțin o* potrivire în tot tabloul, nu probabilitatea pe poziție `pᵢ = P(Xᵢ = 1)`.\n- Dacă ai afirmat că `pᵢ` depinde de `i` — intrările tabloului sunt i.i.d. uniforme în alfabet, deci `pᵢ` este aceeași pentru fiecare poziție."
       }
     },
     {
@@ -102,6 +126,10 @@
       "rubric": {
         "en": "C(n) = E(Σᵢ₌₀ⁿ⁻¹ Xᵢ) = Σᵢ₌₀ⁿ⁻¹ E(Xᵢ) = Σᵢ₌₀ⁿ⁻¹ 1/n = 1",
         "ro": "C(n) = E(Σᵢ₌₀ⁿ⁻¹ Xᵢ) = Σᵢ₌₀ⁿ⁻¹ E(Xᵢ) = Σᵢ₌₀ⁿ⁻¹ 1/n = 1"
+      },
+      "commonErrors": {
+        "en": "- If you argued you needed `Xᵢ` independent to apply E(Σ) = ΣE — linearity of expectation holds *without* independence; that's the whole point of using indicator variables here.\n- If you got `n` — you summed `n` copies of `1` instead of `n` copies of `1/n`; double-check the substitution `E(Xᵢ) = pᵢ = 1/n`.\n- If you got `1/n` — you computed `E(X₀)` (one indicator) rather than `E(k) = E(ΣXᵢ)` (the sum over all positions).",
+        "ro": "- Dacă ai argumentat că îți trebuie `Xᵢ` independente pentru a aplica E(Σ) = ΣE — liniaritatea mediei este valabilă *fără* independență; ăsta e tocmai avantajul folosirii variabilelor indicator aici.\n- Dacă ai obținut `n` — ai adunat `n` copii de `1` în loc de `n` copii de `1/n`; verifică substituția `E(Xᵢ) = pᵢ = 1/n`.\n- Dacă ai obținut `1/n` — ai calculat `E(X₀)` (un singur indicator) în loc de `E(k) = E(ΣXᵢ)` (suma pe toate pozițiile)."
       }
     },
     {
@@ -115,6 +143,10 @@
       "rubric": {
         "en": "DA, dacă se consideră ca input doar tabloul s. Timpul așteptat se calculează ca media variabilei aleatorii timp corespunzătoare unei execuții cu input aleatoriu.",
         "ro": "DA, dacă se consideră ca input doar tabloul s. Timpul așteptat se calculează ca media variabilei aleatorii timp corespunzătoare unei execuții cu input aleatoriu."
+      },
+      "commonErrors": {
+        "en": "- If you said 'NO, because ransearch is probabilistic' — the average-case time of a *deterministic* algorithm over a uniform input distribution is exactly what `ransearch` simulates; probabilistic choice of input models the average case.\n- If you required `z` to be random too — the fixed-pattern, random-text setup is what models `search(s, z)` averaged over `s` with `z` held constant.\n- If you conflated expected time with worst-case time — worst case fixes the input adversarially, while `E[T(X)]` with `X` random gives the average.",
+        "ro": "- Dacă ai spus „NU, pentru că ransearch e probabilist” — timpul mediu al unui algoritm *determinist* peste o distribuție uniformă de intrări este exact ceea ce simulează `ransearch`; alegerea aleatoare a intrării modelează cazul mediu.\n- Dacă ai cerut ca și `z` să fie aleator — setarea cu `z` fix și text aleator modelează `search(s, z)` mediat peste `s`, cu `z` constant.\n- Dacă ai confundat timpul așteptat cu cazul cel mai nefavorabil — cazul nefavorabil fixează intrarea adversarial, pe când `E[T(X)]` cu `X` aleator dă media."
       }
     },
     {
@@ -128,6 +160,10 @@
       "rubric": {
         "en": "Presupunem că z este fixat. pₖ = Cₙᵏ · (n-1)ⁿ⁻ᵏ / nⁿ.\nT(n) = Σₖ₌₀ⁿ k · Cₙᵏ · (n-1)ⁿ⁻ᵏ / nⁿ = 1",
         "ro": "Presupunem că z este fixat. pₖ = Cₙᵏ · (n-1)ⁿ⁻ᵏ / nⁿ.\nT(n) = Σₖ₌₀ⁿ k · Cₙᵏ · (n-1)ⁿ⁻ᵏ / nⁿ = 1"
+      },
+      "commonErrors": {
+        "en": "- If you wrote `pₖ = 1/nᵏ` — you forgot the binomial coefficient `Cₙᵏ` (positions of matches) and the `(n-1)ⁿ⁻ᵏ` factor for the non-matching positions.\n- If you summed `Σ pₖ` and got `1` — that's a sanity check on the distribution, not the expected value `E[k] = Σ k·pₖ`.\n- If your final answer wasn't `1` — recognize this is the mean of Binomial(n, 1/n), which is `n · (1/n) = 1`; the explicit sum is a longer derivation of the same fact.",
+        "ro": "- Dacă ai scris `pₖ = 1/nᵏ` — ai uitat coeficientul binomial `Cₙᵏ` (pozițiile potrivirilor) și factorul `(n-1)ⁿ⁻ᵏ` pentru pozițiile care nu se potrivesc.\n- Dacă ai calculat `Σ pₖ` și ai obținut `1` — e o verificare a distribuției, nu valoarea medie `E[k] = Σ k·pₖ`.\n- Dacă răspunsul tău final nu a fost `1` — recunoaște că e media unei Binomial(n, 1/n), adică `n · (1/n) = 1`; suma explicită e doar o derivare mai lungă a aceluiași rezultat."
       }
     },
     {
@@ -141,6 +177,10 @@
       "rubric": {
         "en": "NP = {X | X este o problemă de (1) decizie și există un (2) algoritm nedeterminist (3) polinomial în cazul cel mai nefavorabil pentru X.}",
         "ro": "NP = {X | X este o problemă de (1) decizie și există un (2) algoritm nedeterminist (3) polinomial în cazul cel mai nefavorabil pentru X.}"
+      },
+      "commonErrors": {
+        "en": "- If you left off 'decision problem' — NP is defined only over yes/no problems; optimization versions don't live in NP directly.\n- If you wrote 'deterministic polynomial' — that's P, not NP; the key feature of NP is *nondeterministic* acceptance in polynomial time.\n- If you said 'polynomial on average' — the bound is worst-case polynomial for the nondeterministic machine, not average-case.",
+        "ro": "- Dacă ai omis „problemă de decizie” — NP e definită doar pe probleme cu răspuns da/nu; variantele de optimizare nu sunt direct în NP.\n- Dacă ai scris „determinist polinomial” — asta e clasa P, nu NP; esența lui NP este acceptarea *nedeterministă* în timp polinomial.\n- Dacă ai spus „polinomial în medie” — marginea e în cazul cel mai nefavorabil pentru mașina nedeterministă, nu în cazul mediu."
       }
     },
     {
@@ -154,6 +194,10 @@
       "rubric": {
         "en": "CLIQUE: Input: G=(V,E), k∈ℕ. Output: există V'⊆V a.î. |V'|≥k și ∀u,v∈V', u≠v → {u,v}∈E?\nMAXIMUM-INDEPENDENT-SET: Input: G=(V,E), k∈ℕ. Output: există V'⊆V a.î. |V'|≥k și ∀u,v∈V' → {u,v}∉E?",
         "ro": "CLIQUE: Input: G=(V,E), k∈ℕ. Output: există V'⊆V a.î. |V'|≥k și ∀u,v∈V', u≠v → {u,v}∈E?\nMAXIMUM-INDEPENDENT-SET: Input: G=(V,E), k∈ℕ. Output: există V'⊆V a.î. |V'|≥k și ∀u,v∈V' → {u,v}∉E?"
+      },
+      "commonErrors": {
+        "en": "- If you defined CLIQUE with `|V'| = k` instead of `|V'| ≥ k` — you described the exact-size variant; the standard decision version asks for a clique of size *at least* `k`.\n- If you made CLIQUE ask for a maximum clique — that's an optimization problem; the decision version takes `k` as input and returns yes/no.\n- If your independent-set condition was `∃u,v ∈ V', {u,v} ∉ E` instead of `∀u,v` — you required just one non-edge; an independent set requires *no* edges between any two members.",
+        "ro": "- Dacă ai definit CLIQUE cu `|V'| = k` în loc de `|V'| ≥ k` — ai descris varianta cu dimensiune exactă; varianta de decizie standard cere o clică de dimensiune *cel puțin* `k`.\n- Dacă ai cerut clica maximă — asta e o problemă de optimizare; varianta de decizie primește `k` ca input și răspunde da/nu.\n- Dacă ai scris `∃u,v ∈ V', {u,v} ∉ E` în loc de `∀u,v` — ai cerut doar o singură non-muchie; o mulțime independentă cere *nicio* muchie între oricare două elemente."
       }
     },
     {
@@ -167,6 +211,10 @@
       "rubric": {
         "en": "i. alege nedeterminist k noduri din G.\nii. verifică dacă oricare două noduri dintre cele k ghicite sunt conectate direct.",
         "ro": "i. alege nedeterminist k noduri din G.\nii. verifică dacă oricare două noduri dintre cele k ghicite sunt conectate direct."
+      },
+      "commonErrors": {
+        "en": "- If you enumerated all `Cₙᵏ` subsets and checked each — that's a deterministic exponential algorithm, not a nondeterministic polynomial one; nondeterminism *guesses* a single subset in one step.\n- If you skipped the verification step — guessing alone is not enough; the nondeterministic algorithm must deterministically verify the guess in polynomial time.\n- If you guessed only `k-1` vertices or an arbitrary number — the guess must be exactly `k` vertices to match the `|V'| ≥ k` requirement (and you check all `k(k-1)/2` pairs).",
+        "ro": "- Dacă ai enumerat toate `Cₙᵏ` submulțimile și le-ai verificat — acela e un algoritm determinist exponențial, nu unul nedeterminist polinomial; nedeterminismul *ghicește* o submulțime într-un singur pas.\n- Dacă ai omis pasul de verificare — doar ghicitul nu e suficient; algoritmul nedeterminist trebuie să verifice determinist ghicitul în timp polinomial.\n- Dacă ai ghicit doar `k-1` noduri sau un număr arbitrar — ghicitul trebuie să fie exact `k` noduri pentru a respecta cerința `|V'| ≥ k` (și verifici toate cele `k(k-1)/2` perechi)."
       }
     },
     {
@@ -180,6 +228,10 @@
       "rubric": {
         "en": "i. Se calculează complementul grafului.\nii. Parametrul k se păstrează.\nO mulțime stabilă de noduri în graful inițial este o clică în graful complement.",
         "ro": "i. Se calculează complementul grafului.\nii. Parametrul k se păstrează.\nO mulțime stabilă de noduri în graful inițial este o clică în graful complement."
+      },
+      "commonErrors": {
+        "en": "- If you said the reduction is a Turing reduction — a single complement-and-keep-`k` call is Karp; Karp is the *stricter* classification and is required here.\n- If you transformed `k` as well (e.g., `k' = n - k`) — the correspondence 'independent set in G ↔ clique in complement(G)' preserves the size; `k` must stay untouched.\n- If you didn't argue the correctness equivalence — a Karp reduction needs `G has an independent set of size ≥ k ⟺ complement(G) has a clique of size ≥ k`, which follows because edge ↔ non-edge under complementation.",
+        "ro": "- Dacă ai afirmat că e o reducere Turing — un singur apel de tip „complement + păstrează `k`” este Karp; Karp e clasificarea *mai strictă* și se aplică aici.\n- Dacă ai transformat și `k` (ex. `k' = n - k`) — corespondența „mulțime independentă în G ↔ clică în complement(G)” păstrează dimensiunea; `k` rămâne neschimbat.\n- Dacă nu ai argumentat echivalența corectitudinii — o reducere Karp cere `G are mulțime independentă de dim ≥ k ⟺ complement(G) are clică de dim ≥ k`, fapt care rezultă din comutarea muchie ↔ non-muchie la complementare."
       }
     }
   ]

@@ -22,6 +22,10 @@
       "rubric": {
         "en": "Input: s = (x₀, x₁, ..., xₙ₋₁), n > 0, xᵢ ∈ ℕ\nOutput: true dacă există i,j cu 0 ≤ i < j < n a.î. isHexagonal(xᵢ) ∧ isHexagonal(xⱼ).\nfalse dacă pentru orice i,j cu 0 ≤ i < j < n avem ¬isHexagonal(xᵢ) ∨ ¬isHexagonal(xⱼ).",
         "ro": "Input: s = (x₀, x₁, ..., xₙ₋₁), n > 0, xᵢ ∈ ℕ\nOutput: true dacă există i,j cu 0 ≤ i < j < n a.î. isHexagonal(xᵢ) ∧ isHexagonal(xⱼ).\nfalse dacă pentru orice i,j cu 0 ≤ i < j < n avem ¬isHexagonal(xᵢ) ∨ ¬isHexagonal(xⱼ)."
+      },
+      "commonErrors": {
+        "en": "- If you required `i ≠ j` without `i < j` — you allowed the same unordered pair to be counted twice; the ordered convention `0 ≤ i < j < n` is cleaner and unambiguous.\n- If you returned the pair of hexagonal numbers rather than a boolean — you described a search problem, not the decision problem P1 asks for.\n- If you omitted the domain `xᵢ ∈ ℕ` — the specification doesn't constrain the input, yet the `isHexagonal` test and the generating formula assume natural numbers.",
+        "ro": "- Dacă ai cerut `i ≠ j` fără `i < j` — ai permis ca aceeași pereche neordonată să fie numărată de două ori; convenția ordonată `0 ≤ i < j < n` e mai curată și fără ambiguitate.\n- Dacă ai întors perechea de numere hexagonale în loc de un boolean — ai descris o problemă de căutare, nu problema de decizie cerută de P1.\n- Dacă ai omis domeniul `xᵢ ∈ ℕ` — specificația nu restricționează intrarea, deși testul `isHexagonal` și formula generatoare presupun numere naturale."
       }
     },
     {
@@ -35,6 +39,10 @@
       "rubric": {
         "en": "Expected code/algorithm:\nisHexagonal(x) {\n  if (x <= 0) failure;\n  a = 1 + 8 * x;\n  b = int(sqrt(a));\n  if (b*b == a && (1+b)%4 == 0)\n    return true;\n  else\n    return false;\n}",
         "ro": "Expected code/algorithm:\nisHexagonal(x) {\n  if (x <= 0) failure;\n  a = 1 + 8 * x;\n  b = int(sqrt(a));\n  if (b*b == a && (1+b)%4 == 0)\n    return true;\n  else\n    return false;\n}"
+      },
+      "commonErrors": {
+        "en": "- If you only checked `b*b == a` without `(1+b) % 4 == 0` — you accepted any x where 1+8x is a perfect square; but that includes triangular numbers, not just hexagonals. The second test ensures n = (1+b)/4 is an integer.\n- If you iterated n = 1, 2, ... until n(2n-1) ≥ x — your algorithm is O(√x) instead of O(1); the closed-form inverse is what makes this constant-time.\n- If you used floating-point `sqrt` without re-verifying `b*b == a` — rounding can make `int(sqrt(a))` off by one for large x, yielding false positives/negatives.",
+        "ro": "- Dacă ai verificat doar `b*b == a` fără `(1+b) % 4 == 0` — ai acceptat orice x pentru care 1+8x e pătrat perfect; dar asta include și numerele triunghiulare, nu doar cele hexagonale. Al doilea test asigură că n = (1+b)/4 e întreg.\n- Dacă ai iterat n = 1, 2, ... până când n(2n-1) ≥ x — algoritmul e O(√x) în loc de O(1); forma închisă inversă e cea care dă timpul constant.\n- Dacă ai folosit `sqrt` în virgulă mobilă fără reverificarea `b*b == a` — rotunjirea poate face `int(sqrt(a))` eronat cu ±1 pentru x mari, cauzând rezultate fals pozitive/negative."
       },
       "language": "pseudocode"
     },
@@ -50,6 +58,10 @@
         "en": "Expected code/algorithm:\nhasHexaPairs(s) {\n  i = -1;\n  for (k=0; k < s.size(); ++k)\n    if (isHexagonal(s[k])) {\n      if (i < 0)\n        i = k;\n      else\n        return true;\n    }\n  return false;\n}",
         "ro": "Expected code/algorithm:\nhasHexaPairs(s) {\n  i = -1;\n  for (k=0; k < s.size(); ++k)\n    if (isHexagonal(s[k])) {\n      if (i < 0)\n        i = k;\n      else\n        return true;\n    }\n  return false;\n}"
       },
+      "commonErrors": {
+        "en": "- If you used nested for-loops over all pairs (i,j) — you got O(n²) when a single pass suffices; the key insight is that finding *any two* hexagonal numbers means remembering only whether you saw one already.\n- If you returned `true` at the first hexagonal found — you miscounted: the task requires *at least two*, so you must continue after the first and confirm a second.\n- If you used a counter `count ≥ 2` then scanned the whole array — that works but doesn't short-circuit; returning `true` as soon as the second hit appears is strictly better.",
+        "ro": "- Dacă ai folosit două for-uri imbricate peste toate perechile (i,j) — ai obținut O(n²) când o singură parcurgere e suficientă; ideea cheie e că pentru a găsi *oricare două* numere hexagonale e de ajuns să reții dacă ai văzut deja unul.\n- Dacă ai întors `true` la primul număr hexagonal găsit — ai greșit numărătoarea: sarcina cere *cel puțin două*, deci trebuie să continui după primul și să confirmi al doilea.\n- Dacă ai folosit un contor `count ≥ 2` și ai parcurs tot tabloul — merge, dar nu scurt-circuitează; a întoarce `true` imediat ce apare a doua potrivire e strict mai bine."
+      },
       "language": "pseudocode"
     },
     {
@@ -63,6 +75,10 @@
       "rubric": {
         "en": "x = n(2n-1) este echivalent cu 2n²-n-x = 0. x este hexagonal ddacă ecuația are o rădăcină număr natural, egală cu (1+√(1+8x))/4. Funcția isHexagonal(x) verifică asta. Corectitudinea funcției hasHexaPairs(s) rezultă din invariantul menținut de for: subșirul s[0..k-1] include cel mult un număr ce este hexagonal.",
         "ro": "x = n(2n-1) este echivalent cu 2n²-n-x = 0. x este hexagonal ddacă ecuația are o rădăcină număr natural, egală cu (1+√(1+8x))/4. Funcția isHexagonal(x) verifică asta. Corectitudinea funcției hasHexaPairs(s) rezultă din invariantul menținut de for: subșirul s[0..k-1] include cel mult un număr ce este hexagonal."
+      },
+      "commonErrors": {
+        "en": "- If you argued only from test cases — that shows plausibility, not correctness; rigorous justification requires deriving the closed-form inverse and a loop invariant.\n- If your invariant was `k < n` — that's a loop bound, not a data property; the invariant must talk about what has been seen in `s[0..k-1]`.\n- If you skipped the termination case — you didn't explain why returning `false` after the loop is correct: exactly when at most one hexagonal was seen in all of `s`.",
+        "ro": "- Dacă ai argumentat doar pe exemple — asta arată plauzibilitate, nu corectitudine; o justificare riguroasă cere derivarea formei închise inverse și un invariant de buclă.\n- Dacă invariantul tău era `k < n` — e o margine a buclei, nu o proprietate a datelor; invariantul trebuie să spună ceva despre ce s-a văzut în `s[0..k-1]`.\n- Dacă ai omis cazul de terminare — n-ai explicat de ce întoarcerea `false` după buclă e corectă: exact când s-a văzut cel mult un hexagonal în tot `s`."
       }
     },
     {
@@ -76,6 +92,10 @@
       "rubric": {
         "en": "Dimensiunea: n = s.size()\nOperații: isHexagonal(s[k]) cu timpul O(1)\nCazul cel mai nefavorabil: s include cel mult un număr hexagonal\nTimp: T(n) = n · O(1) = O(n)",
         "ro": "Dimensiunea: n = s.size()\nOperații: isHexagonal(s[k]) cu timpul O(1)\nCazul cel mai nefavorabil: s include cel mult un număr hexagonal\nTimp: T(n) = n · O(1) = O(n)"
+      },
+      "commonErrors": {
+        "en": "- If you said the worst case is 'the array has two hexagonals at the start' — that's the *best* case because the algorithm returns on the second hit; worst case is when it scans everything without finding two.\n- If you got O(n · √M) or similar — you forgot that `isHexagonal` runs in O(1) with the closed-form test, not O(√x).\n- If you counted `isHexagonal` as the bit-cost of the integer operations — for this problem the basic op is assumed constant; only switch to the bit model if the problem explicitly sets `n = |s| · log M`.",
+        "ro": "- Dacă ai spus că cazul cel mai nefavorabil e „tabloul are două hexagonale la început” — acela e cazul *cel mai favorabil*, algoritmul se întoarce la a doua potrivire; cazul nefavorabil e când parcurge tot fără să găsească două.\n- Dacă ai obținut O(n · √M) sau similar — ai uitat că `isHexagonal` rulează în O(1) cu testul în formă închisă, nu O(√x).\n- Dacă ai numărat `isHexagonal` la costul în biți al operațiilor întregi — pentru această problemă operația de bază e considerată constantă; treci la modelul în biți doar dacă problema stabilește explicit `n = |s| · log M`."
       }
     },
     {
@@ -89,6 +109,10 @@
       "rubric": {
         "en": "Input: O mulțime S = {a₀, a₁, ..., aₙ₋₁} cu elemente dintr-o mulțime total ordonată.\nOutput: Cel mai mic element x din S: ∀a.a ∈ S ⟹ x ≤ a, când S este nevidă.",
         "ro": "Input: O mulțime S = {a₀, a₁, ..., aₙ₋₁} cu elemente dintr-o mulțime total ordonată.\nOutput: Cel mai mic element x din S: ∀a.a ∈ S ⟹ x ≤ a, când S este nevidă."
+      },
+      "commonErrors": {
+        "en": "- If you said the input was 'an array' — `alg2` is specified on *sets*; the distinction matters because sets have no duplicates and no order, which is precisely what the probabilistic analysis exploits.\n- If you dropped the 'totally ordered' clause — the spec `x ≤ a` makes no sense for a partial order; comparability of every pair is required.\n- If you forgot the non-empty precondition — returning 'the minimum of ∅' is undefined; the problem must state S ≠ ∅.",
+        "ro": "- Dacă ai spus că intrarea e „un tablou” — `alg2` e specificat pe *mulțimi*; distincția contează fiindcă mulțimile nu au duplicate și nu au ordine, exact ce exploatează analiza probabilistă.\n- Dacă ai omis clauza „total ordonată” — specificația `x ≤ a` nu are sens pentru o ordine parțială; comparabilitatea oricărei perechi e obligatorie.\n- Dacă ai uitat precondiția de nevid — „minimul lui ∅” e nedefinit; problema trebuie să precizeze S ≠ ∅."
       }
     },
     {
@@ -102,6 +126,10 @@
       "rubric": {
         "en": "T = Σₖ₌₁ⁿ⁻¹ Xₖ, unde Xₖ este variabila aleatorie indicator.\npₖ = 1/(k+1) (probabilitatea de a alege cel mai mic element dintre primele k+1 alese).\nTimp mediu: exp-time(n) = E(T) = Σₖ₌₁ⁿ⁻¹ 1/(k+1) = Θ(ln n)",
         "ro": "T = Σₖ₌₁ⁿ⁻¹ Xₖ, unde Xₖ este variabila aleatorie indicator.\npₖ = 1/(k+1) (probabilitatea de a alege cel mai mic element dintre primele k+1 alese).\nTimp mediu: exp-time(n) = E(T) = Σₖ₌₁ⁿ⁻¹ 1/(k+1) = Θ(ln n)"
+      },
+      "commonErrors": {
+        "en": "- If you got Θ(n) — you forgot that the probability of updating the minimum at step k is 1/(k+1), not 1; by linearity of expectation E[T] sums these probabilities, giving Hₙ.\n- If you computed Hₙ = Σₖ₌₁ⁿ 1/k ≈ ln n + γ but wrote Θ(log n) without specifying base — still correct up to constants, but the natural log is the tight form from harmonic sums.\n- If you used pₖ = 1/k instead of 1/(k+1) — you confused the indexing; at the k-th *new* element seen, there are k+1 candidates for minimum so the update probability is 1/(k+1).",
+        "ro": "- Dacă ai obținut Θ(n) — ai uitat că probabilitatea de a actualiza minimul la pasul k este 1/(k+1), nu 1; prin liniaritatea mediei E[T] adună aceste probabilități, dând Hₙ.\n- Dacă ai calculat Hₙ = Σₖ₌₁ⁿ 1/k ≈ ln n + γ dar ai scris Θ(log n) fără să precizezi baza — e corect până la constante, dar logaritmul natural este forma strânsă din sumele armonice.\n- Dacă ai folosit pₖ = 1/k în loc de 1/(k+1) — ai confundat indexarea; la al k-lea element *nou* văzut, sunt k+1 candidați pentru minim, deci probabilitatea de actualizare e 1/(k+1)."
       }
     },
     {
@@ -115,6 +143,10 @@
       "rubric": {
         "en": "Da este potrivită. Comportarea algoritmului probabilist peste mulțimi este echivalentă cu cea a algoritmului determinist când datele de intrare sunt date aleatoriu uniform și oricare două elemente ale tabloului sunt distincte.",
         "ro": "Da este potrivită. Comportarea algoritmului probabilist peste mulțimi este echivalentă cu cea a algoritmului determinist când datele de intrare sunt date aleatoriu uniform și oricare două elemente ale tabloului sunt distincte."
+      },
+      "commonErrors": {
+        "en": "- If you said 'no, the method doesn't apply to arrays' — you missed the equivalence: a deterministic scan over a *uniformly random permutation* has the same distribution of x=y updates as the probabilistic selection from a set.\n- If you ignored the distinctness condition — with duplicates the update probability changes because some draws leave x unchanged even when y ≠ x was possible; the clean 1/(k+1) analysis needs distinct values.\n- If you claimed average-case = worst-case for this problem — you conflated two measures; the average over random inputs is Θ(log n), while the worst case (decreasing array for deterministic) is Θ(n).",
+        "ro": "- Dacă ai spus „nu, metoda nu se aplică pentru tablouri” — ai ratat echivalența: o parcurgere deterministă peste o *permutare uniform aleatoare* are aceeași distribuție a actualizărilor x=y ca selecția probabilistă dintr-o mulțime.\n- Dacă ai ignorat condiția de distincte — cu duplicate, probabilitatea de actualizare se schimbă pentru că unele extrageri lasă x neschimbat chiar și când y ≠ x era posibil; analiza curată 1/(k+1) cere valori distincte.\n- Dacă ai afirmat că media = cazul cel mai nefavorabil pentru această problemă — ai confundat două măsuri; media pe intrări aleatoare e Θ(log n), în timp ce cazul nefavorabil (tablou descrescător pentru determinist) e Θ(n)."
       }
     },
     {
@@ -128,6 +160,10 @@
       "rubric": {
         "en": "DA.\nPresupunem prin reducere la absurd că o problemă X care este NP-completă ar fi în clasa P. Prin definiția NP-completitudinii lui X, orice problemă din NP se reduce în timp polinomial la X. Combinând reducerea polinomială cu algoritmul polinomial pentru X, obținem o rezolvare polinomială pentru orice problemă din NP. Și obținem P = NP (contradicție!).",
         "ro": "DA.\nPresupunem prin reducere la absurd că o problemă X care este NP-completă ar fi în clasa P. Prin definiția NP-completitudinii lui X, orice problemă din NP se reduce în timp polinomial la X. Combinând reducerea polinomială cu algoritmul polinomial pentru X, obținem o rezolvare polinomială pentru orice problemă din NP. Și obținem P = NP (contradicție!)."
+      },
+      "commonErrors": {
+        "en": "- If you answered NO — you're contradicting the contrapositive; if even *one* NP-complete problem were in P, all of NP would collapse to P, making P = NP.\n- If you forgot the 'NP-hard' half of NP-completeness in your proof — the reduction step needs *every* NP problem to reduce to X, which requires NP-hardness, not just membership in NP.\n- If you claimed the argument shows 'P = NP is impossible' — it shows only the conditional: *assuming* P ≠ NP, no NP-complete problem can be in P; the unconditional question remains open.",
+        "ro": "- Dacă ai răspuns NU — contrazici contrapositiva; dacă chiar *o singură* problemă NP-completă ar fi în P, tot NP s-ar prăbuși în P, dând P = NP.\n- Dacă ai uitat partea de „NP-hard” din NP-completitudine în demonstrație — pasul de reducere cere ca *orice* problemă din NP să se reducă la X, ceea ce înseamnă NP-hardness, nu doar apartenență la NP.\n- Dacă ai afirmat că argumentul arată „P = NP e imposibil” — el arată doar condiționala: *presupunând* P ≠ NP, nicio problemă NP-completă nu poate fi în P; întrebarea necondiționată rămâne deschisă."
       }
     },
     {
@@ -141,6 +177,10 @@
       "rubric": {
         "en": "INDEPENDENT-SET\nInput: G = (V,E), k ∈ ℕ\nOutput: există V' ⊆ V a.î. |V'| ≥ k și pentru orice muchie {u,v} ∈ E avem u ∉ V' or v ∉ V'?\n\nCLIQUE\nInput: G = (V,E), k ∈ ℕ\nOutput: există V' ⊆ V a.î. |V'| ≥ k și pentru orice u ∈ V', v ∈ V', u ≠ v avem muchia {u,v} ∈ E?",
         "ro": "INDEPENDENT-SET\nInput: G = (V,E), k ∈ ℕ\nOutput: există V' ⊆ V a.î. |V'| ≥ k și pentru orice muchie {u,v} ∈ E avem u ∉ V' sau v ∉ V'?\n\nCLIQUE\nInput: G = (V,E), k ∈ ℕ\nOutput: există V' ⊆ V a.î. |V'| ≥ k și pentru orice u ∈ V', v ∈ V', u ≠ v avem muchia {u,v} ∈ E?"
+      },
+      "commonErrors": {
+        "en": "- If you defined INDEPENDENT-SET with `|V'| = k` instead of `|V'| ≥ k` — you created a distinct problem; the decision variant asks for *at least* k, since a larger independent set obviously contains a k-sized one.\n- If you wrote CLIQUE's condition as 'all pairs u,v ∈ V' are in E' without excluding u = v — the self-loop case is ill-defined; edges in simple graphs require u ≠ v.\n- If you asked for the optimal V' rather than a yes/no decision — both problems in NP-completeness theory are formulated as *decision* problems (existence of V' of size ≥ k), not optimization.",
+        "ro": "- Dacă ai definit INDEPENDENT-SET cu `|V'| = k` în loc de `|V'| ≥ k` — ai creat o problemă distinctă; varianta de decizie cere *cel puțin* k, deoarece o mulțime independentă mai mare o conține pe una de k elemente.\n- Dacă ai scris condiția CLIQUE ca „toate perechile u,v ∈ V' sunt în E” fără a exclude u = v — cazul cu bucla proprie e nedefinit; muchiile în grafuri simple cer u ≠ v.\n- Dacă ai cerut V' optim în loc de o decizie da/nu — ambele probleme în teoria NP-completitudinii se formulează ca probleme de *decizie* (existența unui V' de dimensiune ≥ k), nu de optimizare."
       }
     },
     {
@@ -154,6 +194,10 @@
       "rubric": {
         "en": "Algoritmul nedeterminist rezolvă CLIQUE în O(n²):\ni. ghicim o submulțime V' ⊆ V de noduri (în timp O(n));\nii. verificăm dacă |V'| ≥ k și ∀u ∈ V', ∀v ∈ V', u ≠ v → {u,v} ∈ E (două for-uri imbricate; timp O(n²)).",
         "ro": "Algoritmul nedeterminist rezolvă CLIQUE în O(n²):\ni. ghicim o submulțime V' ⊆ V de noduri (în timp O(n));\nii. verificăm dacă |V'| ≥ k și ∀u ∈ V', ∀v ∈ V', u ≠ v → {u,v} ∈ E (două for-uri imbricate; timp O(n²))."
+      },
+      "commonErrors": {
+        "en": "- If you tried to prove CLIQUE ∈ P — you took the wrong direction; membership in NP only requires a polynomial *verifier* (or equivalently a nondeterministic polynomial algorithm), not a deterministic one.\n- If you skipped the 'guess' step and iterated over all 2ⁿ subsets — that's exponential and wouldn't show NP membership via nondeterminism; the nondeterministic model *guesses* a certificate in one step.\n- If you verified only `|V'| ≥ k` without checking all pairs are edges — you showed the size condition but not the clique property; both must be verifiable in polynomial time.",
+        "ro": "- Dacă ai încercat să arăți CLIQUE ∈ P — ai luat direcția greșită; apartenența la NP cere doar un *verificator* polinomial (sau echivalent un algoritm nedeterminist polinomial), nu unul determinist.\n- Dacă ai sărit peste pasul de „ghicire” și ai iterat peste toate 2ⁿ submulțimi — acela e exponențial și n-ar arăta apartenența la NP prin nedeterminism; modelul nedeterminist *ghicește* un certificat într-un singur pas.\n- Dacă ai verificat doar `|V'| ≥ k` fără a verifica toate perechile că sunt muchii — ai demonstrat condiția de dimensiune, dar nu proprietatea de clică; ambele trebuie verificabile în timp polinomial."
       }
     },
     {
@@ -167,6 +211,10 @@
       "rubric": {
         "en": "Fie G = (V,E) și k date de intrare pentru CLIQUE.\nCalculăm G' = (V, Ē), unde Ē este complementul lui E.\nCLIQUE(G, k) = INDEPENDENT-SET(G', k)\n(orice clică în G corespunde unei mulțimi stabile în G')",
         "ro": "Fie G = (V,E) și k date de intrare pentru CLIQUE.\nCalculăm G' = (V, Ē), unde Ē este complementul lui E.\nCLIQUE(G, k) = INDEPENDENT-SET(G', k)\n(orice clică în G corespunde unei mulțimi stabile în G')"
+      },
+      "commonErrors": {
+        "en": "- If you kept G unchanged and just re-labeled — you described the same problem, not a reduction; the key transform is taking the *complement graph* G' where edges become non-edges.\n- If you changed k too (e.g., k' = n - k) — that's the wrong reduction; CLIQUE ↔ INDEPENDENT-SET via complement keeps k the same, while k' = n - k is the reduction to VERTEX-COVER.\n- If you called multiple times the INDEPENDENT-SET oracle — that would be a Turing reduction; Karp reductions are many-one: *one* call, same answer returned directly.",
+        "ro": "- Dacă ai lăsat G neschimbat și doar ai redenumit — ai descris aceeași problemă, nu o reducere; transformarea cheie e *graful complement* G', în care muchiile devin non-muchii.\n- Dacă ai schimbat și k (ex. k' = n - k) — e reducerea greșită; CLIQUE ↔ INDEPENDENT-SET prin complement păstrează k, în timp ce k' = n - k e reducerea la VERTEX-COVER.\n- Dacă ai apelat de mai multe ori oracolul INDEPENDENT-SET — aceea ar fi o reducere Turing; reducerile Karp sunt „many-one”: *un* singur apel, răspunsul se întoarce direct."
       }
     }
   ]

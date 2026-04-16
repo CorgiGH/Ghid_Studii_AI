@@ -22,6 +22,10 @@
       "rubric": {
         "en": "Input: s = (x₀, x₁, ..., xₙ₋₁), n > 0, xᵢ ∈ ℕ\nOutput: true dacă pentru orice i cu 0 ≤ i < n, isPentagonal(xᵢ). Predicatul isPentagonal(x) are loc ddacă ∃n ∈ ℕ. x = n(3n-1)/2.\nfalse dacă există i cu 0 ≤ i < n a.î. ¬isPentagonal(xᵢ).",
         "ro": "Input: s = (x₀, x₁, ..., xₙ₋₁), n > 0, xᵢ ∈ ℕ\nOutput: true dacă pentru orice i cu 0 ≤ i < n, isPentagonal(xᵢ). Predicatul isPentagonal(x) are loc ddacă ∃n ∈ ℕ. x = n(3n-1)/2.\nfalse dacă există i cu 0 ≤ i < n a.î. ¬isPentagonal(xᵢ)."
+      },
+      "commonErrors": {
+        "en": "- If you wrote the output as a count or list of pentagonal elements — you described a different problem; P1 is a decision problem returning true/false.\n- If you omitted `xᵢ ∈ ℕ` — the predicate `isPentagonal` only makes sense for naturals, so you left the input domain ambiguous.\n- If you defined `isPentagonal(x)` by listing the first few values — that's an enumeration, not a definition; the crisp form is `∃n ∈ ℕ. x = n(3n-1)/2`.",
+        "ro": "- Dacă ai scris ieșirea ca număr sau listă de elemente pentagonale — ai descris altă problemă; P1 este o problemă de decizie care întoarce true/false.\n- Dacă ai omis `xᵢ ∈ ℕ` — predicatul `isPentagonal` are sens doar pentru numere naturale, deci ai lăsat domeniul intrării ambiguu.\n- Dacă ai definit `isPentagonal(x)` prin enumerarea primelor valori — e o enumerare, nu o definiție; forma clară este `∃n ∈ ℕ. x = n(3n-1)/2`."
       }
     },
     {
@@ -35,6 +39,10 @@
       "rubric": {
         "en": "Expected code/algorithm:\nisPentagonalNat(x) {\n  if (x <= 0) failure;\n  a = 1 + 24 * x;\n  b = int(sqrt(a));\n  if (b*b == a && (1+b)%6 == 0)\n    return true;\n  else\n    return false;\n}",
         "ro": "Expected code/algorithm:\nisPentagonalNat(x) {\n  if (x <= 0) failure;\n  a = 1 + 24 * x;\n  b = int(sqrt(a));\n  if (b*b == a && (1+b)%6 == 0)\n    return true;\n  else\n    return false;\n}"
+      },
+      "commonErrors": {
+        "en": "- If you iterated `n = 1, 2, 3, ...` until `P(n) >= x` — you got a correct but slow O(√x) check; the closed-form uses the quadratic `3n²-n-2x=0` for O(1) arithmetic.\n- If you dropped the `(1+b) % 6 == 0` test — you accepted any x where `1+24x` is a perfect square, but n must be a positive integer, which requires `6 | (1+b)`.\n- If you skipped the `b*b == a` check — `int(sqrt(a))` truncates, so you'd falsely accept non-squares whose floor-root happens to satisfy the mod test.",
+        "ro": "- Dacă ai iterat `n = 1, 2, 3, ...` până când `P(n) >= x` — ai un test corect dar lent în O(√x); forma închisă folosește ecuația de gradul 2 `3n²-n-2x=0` pentru aritmetică O(1).\n- Dacă ai eliminat testul `(1+b) % 6 == 0` — ai acceptat orice x cu `1+24x` pătrat perfect, dar n trebuie să fie întreg pozitiv, ceea ce cere `6 | (1+b)`.\n- Dacă ai sărit peste verificarea `b*b == a` — `int(sqrt(a))` trunchiază, deci ai accepta fals ne-pătrate a căror parte întreagă de rădăcină satisface accidental testul modulo."
       },
       "language": "pseudocode"
     },
@@ -50,6 +58,10 @@
         "en": "Expected code/algorithm:\nisPentagonalStr(s) {\n  for (i=0; i < s.size(); ++i)\n    if (! isPentagonalNat(s[i]))\n      return false;\n  return true;\n}",
         "ro": "Expected code/algorithm:\nisPentagonalStr(s) {\n  for (i=0; i < s.size(); ++i)\n    if (! isPentagonalNat(s[i]))\n      return false;\n  return true;\n}"
       },
+      "commonErrors": {
+        "en": "- If you returned `true` inside the loop on the first pentagonal hit — you short-circuited the wrong way; the property must hold for *every* element, not just one.\n- If you inlined the quadratic test instead of reusing `isPentagonalNat` — you duplicated logic and lost modularity; the point of part b) is to compose it here.\n- If you accumulated results and returned at the end — you wasted time scanning past the first counterexample; early `return false` is the correct optimization.",
+        "ro": "- Dacă ai întors `true` înăuntrul buclei la primul număr pentagonal — ai scurt-circuitat greșit; proprietatea trebuie să fie adevărată pentru *fiecare* element, nu doar pentru unul.\n- Dacă ai inclus testul pătratic direct în loc să reutilizezi `isPentagonalNat` — ai duplicat logica și ai pierdut modularitatea; scopul părții b) este compunerea.\n- Dacă ai acumulat rezultatele și ai întors la final — ai pierdut timp parcurgând după primul contraexemplu; `return false` devreme este optimizarea corectă."
+      },
       "language": "pseudocode"
     },
     {
@@ -63,6 +75,10 @@
       "rubric": {
         "en": "x = n(3n-1)/2 este echivalent cu 3n²-n-2x = 0. x este pentagonal ddacă ecuația are o rădăcină număr natural, egală cu (1+√(1+24x))/6. Funcția isPentagonalNat(x) verifică asta. Corectitudinea funcției isPentagonalStr(s) rezultă din invariantul menținut de for: pentru orice j cu 0 ≤ j < i, s[j] este pentagonal.",
         "ro": "x = n(3n-1)/2 este echivalent cu 3n²-n-2x = 0. x este pentagonal ddacă ecuația are o rădăcină număr natural, egală cu (1+√(1+24x))/6. Funcția isPentagonalNat(x) verifică asta. Corectitudinea funcției isPentagonalStr(s) rezultă din invariantul menținut de for: pentru orice j cu 0 ≤ j < i, s[j] este pentagonal."
+      },
+      "commonErrors": {
+        "en": "- If you skipped the quadratic-formula derivation — you never justified *why* `isPentagonalNat` is correct; the equivalence `x = n(3n-1)/2 ⇔ n = (1+√(1+24x))/6` is the core argument.\n- If your loop invariant was just `i ≤ n` — that's a bound, not a property; the invariant must state that all prefix elements `s[0..i-1]` are pentagonal.\n- If you forgot to address the `return false` branch — you only proved correctness on all-pentagonal inputs; you also need the early-exit to correctly reject any sequence with a non-pentagonal element.",
+        "ro": "- Dacă ai sărit peste derivarea cu formula pătratică — nu ai justificat *de ce* `isPentagonalNat` este corect; echivalența `x = n(3n-1)/2 ⇔ n = (1+√(1+24x))/6` este argumentul esențial.\n- Dacă invariantul buclei era doar `i ≤ n` — e o margine, nu o proprietate; invariantul trebuie să afirme că toate elementele din prefix `s[0..i-1]` sunt pentagonale.\n- Dacă ai uitat să tratezi ramura `return false` — ai demonstrat corectitudinea doar pe intrări complet pentagonale; trebuie să arăți și că ieșirea devreme respinge corect orice șir cu un element ne-pentagonal."
       }
     },
     {
@@ -76,6 +92,10 @@
       "rubric": {
         "en": "Dimensiunea: n = s.size()\nOperații: isPentagonalNat(s[i]) cu timpul O(1)\nCazul cel mai nefavorabil: toate numerele din s sunt pentagonale\nTimp: T(n) = n · O(1) = O(n)",
         "ro": "Dimensiunea: n = s.size()\nOperații: isPentagonalNat(s[i]) cu timpul O(1)\nCazul cel mai nefavorabil: toate numerele din s sunt pentagonale\nTimp: T(n) = n · O(1) = O(n)"
+      },
+      "commonErrors": {
+        "en": "- If you said the worst case is 's contains a non-pentagonal at position 0' — that's the *best* case; early return on the first element is O(1).\n- If you treated `isPentagonalNat` as O(√x) or O(log x) — with the closed-form formula it's O(1) in the word-RAM model; only a linear scan of a `n = 1, 2, ...` loop would be O(√x).\n- If you reported O(n²) — you probably nested the outer loop inside the per-element check; the calls are sequential, not cross-producted.",
+        "ro": "- Dacă ai spus că cel mai nefavorabil caz e „s conține un non-pentagonal pe poziția 0” — acela e cazul *cel mai favorabil*; ieșirea devreme pe primul element e O(1).\n- Dacă ai tratat `isPentagonalNat` drept O(√x) sau O(log x) — cu formula închisă e O(1) în modelul word-RAM; doar o buclă liniară `n = 1, 2, ...` ar fi O(√x).\n- Dacă ai raportat O(n²) — probabil ai imbricat bucla externă în verificarea per-element; apelurile sunt secvențiale, nu produs cartezian."
       }
     },
     {
@@ -89,6 +109,10 @@
       "rubric": {
         "en": "Input: O mulțime S = {x₀,...,xₙ₋₁} cu elementele xᵢ numere naturale. S poate fi și mulțimea vidă.\nOutput: A cu proprietatea că există o submulțime B ⊆ S a.î. A = {x | x ∈ B, x par} ∪ {x+1 | x ∈ B, x impar}.",
         "ro": "Input: O mulțime S = {x₀,...,xₙ₋₁} cu elementele xᵢ numere naturale. S poate fi și mulțimea vidă.\nOutput: A cu proprietatea că există o submulțime B ⊆ S a.î. A = {x | x ∈ B, x par} ∪ {x+1 | x ∈ B, x impar}."
+      },
+      "commonErrors": {
+        "en": "- If you said the output is `A ⊆ S` — you missed that odd x get replaced by x+1, which may not be in S; A can contain values outside S.\n- If you treated the algorithm as deterministic (output = S or fixed set) — you ignored the uniform draws of k and x; the output is *any* such A, existentially quantified.\n- If you forgot that S can be empty — your specification fails the `k = 0` degenerate case where A = ∅ is the only possible output.",
+        "ro": "- Dacă ai spus că ieșirea este `A ⊆ S` — ai ratat că elementele impare x sunt înlocuite cu x+1, care pot să nu fie în S; A poate conține valori din afara lui S.\n- Dacă ai tratat algoritmul ca determinist (ieșire = S sau mulțime fixă) — ai ignorat alegerile uniforme ale lui k și x; ieșirea este *orice* A cu această proprietate, cuantificat existențial.\n- Dacă ai uitat că S poate fi vidă — specificația pică la cazul degenerat `k = 0` unde A = ∅ este singura ieșire posibilă."
       }
     },
     {
@@ -102,6 +126,10 @@
       "rubric": {
         "en": "Presupunând S ⊆ {0,1,2,...,N}, se va considera reprezentarea lui S prin vectorul caracteristic: S[i] = 1 dacă i ∈ S, S[i] = 0 altfel.",
         "ro": "Presupunând S ⊆ {0,1,2,...,N}, se va considera reprezentarea lui S prin vectorul caracteristic: S[i] = 1 dacă i ∈ S, S[i] = 0 altfel."
+      },
+      "commonErrors": {
+        "en": "- If you answered 'hash table' — average O(1) is amortized/expected; the question asks for deterministic O(1), which the characteristic-vector bitmap provides.\n- If you said 'linked list' — insert is O(1) but delete-by-value is O(n) for the search; both operations must be O(1).\n- If you forgot to bound the universe (`S ⊆ {0,...,N}`) — the characteristic-vector trick requires a known finite domain; otherwise you can't index into the array.",
+        "ro": "- Dacă ai răspuns „tabelă hash” — O(1) mediu este amortizat/așteptat; întrebarea cere O(1) determinist, care se obține cu vectorul caracteristic.\n- Dacă ai spus „listă înlănțuită” — inserția e O(1), dar ștergerea după valoare e O(n) din cauza căutării; ambele operații trebuie să fie O(1).\n- Dacă ai uitat să delimitezi universul (`S ⊆ {0,...,N}`) — trucul cu vectorul caracteristic cere un domeniu finit cunoscut; altfel nu poți indexa în tablou."
       }
     },
     {
@@ -115,6 +143,10 @@
       "rubric": {
         "en": "Valorile tᵢ posibile pentru timp: 0, 3, 6, ..., 3·S.size().\nPresupunem n = S.size(), n > 0.\npₖ = 1/(n+1) (= probabilitatea alegerii lui k).\nTimp mediu: exp-time(n) = Σₖ₌₁ⁿ tₖ·pₖ = 3/(n+1)·(1+2+...+n) = 3n/2",
         "ro": "Valorile tᵢ posibile pentru timp: 0, 3, 6, ..., 3·S.size().\nPresupunem n = S.size(), n > 0.\npₖ = 1/(n+1) (= probabilitatea alegerii lui k).\nTimp mediu: exp-time(n) = Σₖ₌₁ⁿ tₖ·pₖ = 3/(n+1)·(1+2+...+n) = 3n/2"
+      },
+      "commonErrors": {
+        "en": "- If you used pₖ = 1/n instead of 1/(n+1) — you forgot that `uniformNat(S.size()+1)` draws from {0,1,...,n}, giving n+1 outcomes, not n.\n- If you reported the worst case O(n) — the question asks *expected* time E[T], which averages over k, not the max; the answer must be 3n/2.\n- If you dropped the per-iteration cost (factor 3) — you computed E[k] = n/2 instead of E[T] = 3·E[k]; the body does a constant amount of work but keep the constant explicit when the rubric spells it out.",
+        "ro": "- Dacă ai folosit pₖ = 1/n în loc de 1/(n+1) — ai uitat că `uniformNat(S.size()+1)` extrage din {0,1,...,n}, deci n+1 rezultate, nu n.\n- Dacă ai raportat cazul cel mai nefavorabil O(n) — întrebarea cere timpul *mediu* E[T], care mediază după k, nu maximul; răspunsul trebuie să fie 3n/2.\n- Dacă ai eliminat costul per-iterație (factor 3) — ai calculat E[k] = n/2 în loc de E[T] = 3·E[k]; corpul face muncă constantă, dar păstrează constanta explicit când rubricul o cere."
       }
     },
     {
@@ -128,6 +160,10 @@
       "rubric": {
         "en": "NU.\nContraexemplu: Fie problema 2-SAT, care are o rezolvare polinomială. Fie problema 3-SAT, care este NP-completă (Cook, 1971). 3-SAT nu are rezolvare polinomială, deși este în NP (dacă 3-SAT ar avea o rezolvare polinomială, cum orice problemă din NP se reduce în timp polinomial la 3-SAT, obținem P = NP, contradicție).",
         "ro": "NU.\nContraexemplu: Fie problema 2-SAT, care are o rezolvare polinomială. Fie problema 3-SAT, care este NP-completă (Cook, 1971). 3-SAT nu are rezolvare polinomială, deși este în NP (dacă 3-SAT ar avea o rezolvare polinomială, cum orice problemă din NP se reduce în timp polinomial la 3-SAT, obținem P = NP, contradicție)."
+      },
+      "commonErrors": {
+        "en": "- If you answered YES — you conflated 'one problem in NP is in P' with 'all of NP is in P'; only solving an NP-complete problem in polynomial time collapses NP to P.\n- If your counterexample was 'sorting is in P but some NP problems aren't' — sorting isn't NP-complete either, so it's not a useful witness; 2-SAT vs 3-SAT is the canonical pair.\n- If you skipped the `P ≠ NP` assumption in your argument — the whole question presupposes P ≠ NP; under P = NP the answer would trivially be YES.",
+        "ro": "- Dacă ai răspuns DA — ai confundat „o problemă din NP e în P” cu „toată NP e în P”; doar rezolvarea polinomială a unei probleme NP-complete ar colapsa NP la P.\n- Dacă contraexemplul tău a fost „sortarea e în P, dar unele probleme NP nu sunt” — sortarea nu e NP-completă, deci nu e un martor util; perechea canonică e 2-SAT vs 3-SAT.\n- Dacă ai sărit peste ipoteza `P ≠ NP` în argument — întreaga întrebare presupune P ≠ NP; sub P = NP răspunsul ar fi trivial DA."
       }
     },
     {
@@ -141,6 +177,10 @@
       "rubric": {
         "en": "VERTEX-COVER\nInput: G = (V,E), k ∈ ℕ\nOutput: există V' ⊆ V a.î. |V'| ≤ k și pentru orice muchie {u,v} ∈ E avem u ∈ V' or v ∈ V'?\n\nINDEPENDENT-SET\nInput: G = (V,E), k ∈ ℕ\nOutput: există V' ⊆ V a.î. |V'| ≥ k și pentru orice muchie {u,v} ∈ E avem u ∉ V' or v ∉ V'?",
         "ro": "VERTEX-COVER\nInput: G = (V,E), k ∈ ℕ\nOutput: există V' ⊆ V a.î. |V'| ≤ k și pentru orice muchie {u,v} ∈ E avem u ∈ V' sau v ∈ V'?\n\nINDEPENDENT-SET\nInput: G = (V,E), k ∈ ℕ\nOutput: există V' ⊆ V a.î. |V'| ≥ k și pentru orice muchie {u,v} ∈ E avem u ∉ V' sau v ∉ V'?"
+      },
+      "commonErrors": {
+        "en": "- If you flipped the inequalities (`|V'| ≥ k` for VC, `|V'| ≤ k` for IS) — you swapped the problems; VERTEX-COVER asks for a *small* hitting set, INDEPENDENT-SET for a *large* pairwise-non-adjacent set.\n- If you stated the output as the set V' itself — these are decision problems; the output is true/false, i.e. 'does such a V' exist?'.\n- If you wrote INDEPENDENT-SET's edge condition as `u ∈ V' ∧ v ∈ V'` — you required both endpoints inside V', the opposite of independence; the correct form is `u ∉ V' ∨ v ∉ V'` (no edge has both endpoints in V').",
+        "ro": "- Dacă ai inversat inegalitățile (`|V'| ≥ k` pentru VC, `|V'| ≤ k` pentru IS) — ai schimbat problemele; VERTEX-COVER cere o mulțime *mică* de acoperire, INDEPENDENT-SET o mulțime *mare* cu vârfuri două-câte-două neadiacente.\n- Dacă ai scris ieșirea ca mulțimea V' — acestea sunt probleme de decizie; ieșirea este true/false, adică „există o astfel de V'?”.\n- Dacă ai scris condiția INDEPENDENT-SET ca `u ∈ V' ∧ v ∈ V'` — ai cerut ca ambele capete să fie în V', opusul independenței; forma corectă este `u ∉ V' ∨ v ∉ V'` (nicio muchie nu are ambele capete în V')."
       }
     },
     {
@@ -154,6 +194,10 @@
       "rubric": {
         "en": "Algoritmul nedeterminist rezolvă VERTEX-COVER în O(n²):\ni. ghicim o submulțime V' ⊆ V de noduri (în timp O(n));\nii. verificăm dacă |V'| ≤ k și ∀u ∈ V · ∀v ∈ V · {u,v} ∈ E → u ∈ V' ∨ v ∈ V' (două for-uri imbricate; timp O(n²)).",
         "ro": "Algoritmul nedeterminist rezolvă VERTEX-COVER în O(n²):\ni. ghicim o submulțime V' ⊆ V de noduri (în timp O(n));\nii. verificăm dacă |V'| ≤ k și ∀u ∈ V · ∀v ∈ V · {u,v} ∈ E → u ∈ V' ∨ v ∈ V' (două for-uri imbricate; timp O(n²))."
+      },
+      "commonErrors": {
+        "en": "- If you tried to give a deterministic polynomial algorithm — you conflated 'in NP' with 'in P'; NP membership only requires a polynomial-time *verifier*, not a solver.\n- If you skipped the guess step — you described verification alone; NP = nondeterministic polynomial, so the 'guess V'' step is essential.\n- If you claimed exponential time in the verification — checking `|V'| ≤ k` and the edge condition is polynomial (O(n²) or O(n+m)); the only exponential component is the *nondeterministic* guess, which is allowed.",
+        "ro": "- Dacă ai încercat să dai un algoritm determinist polinomial — ai confundat „în NP” cu „în P”; apartenența la NP cere doar un *verificator* în timp polinomial, nu un solver.\n- Dacă ai sărit peste pasul de ghicire — ai descris doar verificarea; NP = nedeterminist polinomial, deci pasul „ghicește V'” este esențial.\n- Dacă ai afirmat că verificarea e exponențială — verificarea condiției `|V'| ≤ k` și a celei pe muchii e polinomială (O(n²) sau O(n+m)); singura componentă exponențială e ghicirea *nedeterministă*, care e permisă."
       }
     },
     {
@@ -167,6 +211,10 @@
       "rubric": {
         "en": "Considerăm G = (V,E), k ∈ ℕ date de intrare pentru VERTEX-COVER.\nCalculăm k' = |V| - k.\nVERTEX-COVER(G, k) = INDEPENDENT-SET(G, k')\n(complementul unei mulțimi stabile este o acoperire)",
         "ro": "Considerăm G = (V,E), k ∈ ℕ date de intrare pentru VERTEX-COVER.\nCalculăm k' = |V| - k.\nVERTEX-COVER(G, k) = INDEPENDENT-SET(G, k')\n(complementul unei mulțimi stabile este o acoperire)"
+      },
+      "commonErrors": {
+        "en": "- If you set k' = k — you missed the complement trick; the reduction hinges on `|V'| ≤ k ⇔ |V \\ V'| ≥ |V| - k`, so k' must be `|V| - k`.\n- If you also modified the graph (e.g., passed the complement graph) — the transformation leaves G unchanged; only k is rescaled.\n- If you called INDEPENDENT-SET more than once — that's a Turing reduction; Karp requires exactly one call and returning its answer directly (no post-processing beyond mapping inputs).",
+        "ro": "- Dacă ai luat k' = k — ai ratat trucul de complementare; reducerea se bazează pe `|V'| ≤ k ⇔ |V \\ V'| ≥ |V| - k`, deci k' trebuie să fie `|V| - k`.\n- Dacă ai modificat și graful (ex. ai trecut graful complement) — transformarea lasă G neschimbat; doar k este reescalat.\n- Dacă ai apelat INDEPENDENT-SET de mai multe ori — este o reducere Turing; Karp cere exact un apel, al cărui răspuns este returnat direct (fără post-procesare peste maparea intrărilor)."
       }
     }
   ]

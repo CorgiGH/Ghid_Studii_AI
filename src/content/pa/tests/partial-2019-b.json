@@ -22,6 +22,10 @@
       "rubric": {
         "en": "Input: M, M ∈ ℕ ∧ M % 2 == 0 ∧ M % 5 == 0\nOutput: N = min{x | ∀i. 1 ≤ i ≤ M → x % i == 0}",
         "ro": "Input: M, M ∈ ℕ ∧ M % 2 == 0 ∧ M % 5 == 0\nOutput: N = min{x | ∀i. 1 ≤ i ≤ M → x % i == 0}"
+      },
+      "commonErrors": {
+        "en": "- If you dropped the `min` — you described *some* multiple of 1..M (e.g. M!), not the *smallest*; the problem asks for the minimum.\n- If you wrote `∃i` instead of `∀i` — you only required divisibility by one of 1..M; the spec demands divisibility by *all* of them.\n- If you omitted the preconditions `M % 2 == 0 ∧ M % 5 == 0` — you accepted inputs outside the stated domain, so the spec is too permissive.",
+        "ro": "- Dacă ai omis `min` — ai descris *un* multiplu al lui 1..M (ex. M!), nu pe *cel mai mic*; problema cere minimul.\n- Dacă ai scris `∃i` în loc de `∀i` — ai cerut divizibilitatea cu doar unul dintre 1..M; specificația cere divizibilitate cu *toate*.\n- Dacă ai omis precondițiile `M % 2 == 0 ∧ M % 5 == 0` — ai acceptat intrări în afara domeniului, deci specificația e prea permisivă."
       }
     },
     {
@@ -36,6 +40,10 @@
         "en": "Expected code/algorithm:\nD1M(M) {\n  N = 1;\n  do {\n    ismult = true;\n    for (i = 1; i <= M && ismult; ++i) {\n      if (N % i != 0) ismult = false;\n    }\n    if (! ismult) ++N;\n  } while (!ismult);\n  return N;\n}",
         "ro": "Expected code/algorithm:\nD1M(M) {\n  N = 1;\n  do {\n    ismult = true;\n    for (i = 1; i <= M && ismult; ++i) {\n      if (N % i != 0) ismult = false;\n    }\n    if (! ismult) ++N;\n  } while (!ismult);\n  return N;\n}"
       },
+      "commonErrors": {
+        "en": "- If you started with N = 0 — `0 % i == 0` for every i, so you'd return 0, which is not a *positive* divisor candidate.\n- If you iterated `i < M` instead of `i <= M` — you never tested divisibility by M itself; the spec demands divisibility through M inclusive.\n- If you jumped N by arbitrary steps (e.g. N += 2) — you may skip the true minimum; the naive algorithm must increment N by 1 to guarantee the smallest N.\n- If you returned N inside the `for` loop — you exited before confirming divisibility by *all* of 1..M; acceptance must happen only after the full inner loop passes.",
+        "ro": "- Dacă ai pornit cu N = 0 — `0 % i == 0` pentru orice i, deci ai returna 0, care nu e candidat *pozitiv*.\n- Dacă ai iterat `i < M` în loc de `i <= M` — nu ai testat divizibilitatea cu M însuși; specificația cere divizibilitatea până la M inclusiv.\n- Dacă ai incrementat N cu pași arbitrari (ex. N += 2) — poți sări peste minimul real; algoritmul naiv trebuie să crească N cu 1 pentru a garanta cel mai mic N.\n- Dacă ai returnat N în interiorul `for` — ai ieșit înainte să confirmi divizibilitatea cu *toate* 1..M; acceptarea trebuie să se facă doar după ce bucla interioară trece în întregime."
+      },
       "language": "pseudocode"
     },
     {
@@ -49,6 +57,10 @@
       "rubric": {
         "en": "La începutul unei iterații do niciun număr între 1 și N-1 nu satisface cerința problemei (invariant). La terminarea instrucțiunii do ismult are valoarea true, adică N se divide prin toate numerele 1 și M. Invariantul ne asigură că e cel mai mic cu această proprietate.",
         "ro": "La începutul unei iterații do niciun număr între 1 și N-1 nu satisface cerința problemei (invariant). La terminarea instrucțiunii do ismult are valoarea true, adică N se divide prin toate numerele 1 și M. Invariantul ne asigură că e cel mai mic cu această proprietate."
+      },
+      "commonErrors": {
+        "en": "- If your invariant was 'ismult is true' — that only holds at loop exit; the invariant must describe the state at the *start of each iteration*.\n- If you forgot the minimality clause ('no smaller number works') — you proved the algorithm returns *a* solution, not *the minimum* required by the spec.\n- If you skipped the termination argument — you must show N eventually reaches a valid multiple (it does, because N = lcm(1..M) or smaller always satisfies ismult).",
+        "ro": "- Dacă invariantul tău era „ismult este true” — asta se păstrează doar la ieșirea buclei; invariantul trebuie să descrie starea la *începutul fiecărei iterații*.\n- Dacă ai omis clauza de minimalitate („niciun număr mai mic nu merge”) — ai demonstrat că algoritmul întoarce *o* soluție, nu *minimul* cerut de specificație.\n- Dacă ai sărit peste argumentul de terminare — trebuie să arăți că N ajunge la un multiplu valid (ajunge, pentru că N = lcm(1..M) sau mai mic satisface mereu ismult)."
       }
     },
     {
@@ -62,6 +74,10 @@
       "rubric": {
         "en": "Dimensiunea: M. Operații numărate: Comparații N % i != 0.\nTimp: O(N · M), unde N este valoarea întoarsă de algoritm. N ≤ M!.",
         "ro": "Dimensiunea: M. Operații numărate: Comparații N % i != 0.\nTimp: O(N · M), unde N este valoarea întoarsă de algoritm. N ≤ M!."
+      },
+      "commonErrors": {
+        "en": "- If you answered O(M) — you counted only the inner loop; the outer `do…while` runs up to N times, giving O(N·M).\n- If you answered O(M²) — you used M as the outer bound; the outer loop is bounded by the *returned value* N, not by M.\n- If you gave a bit-size bound like O(log M · …) — the exercise fixes the input size as M itself, not log M, so the cost is polynomial in M.\n- If you omitted the upper bound on N (N ≤ M!) — you left the complexity open-ended; you must relate N to the input to get a concrete bound.",
+        "ro": "- Dacă ai răspuns O(M) — ai numărat doar bucla interioară; `do…while` exterior rulează până la N ori, deci O(N·M).\n- Dacă ai răspuns O(M²) — ai folosit M ca margine exterioară; bucla exterioară e mărginită de *valoarea întoarsă* N, nu de M.\n- Dacă ai dat o margine în biți O(log M · …) — exercițiul fixează dimensiunea intrării ca M însuși, nu log M, deci costul e polinomial în M.\n- Dacă ai omis marginea superioară pentru N (N ≤ M!) — ai lăsat complexitatea neîncheiată; trebuie legat N de intrare pentru o margine concretă."
       }
     },
     {
@@ -76,6 +92,10 @@
         "en": "Expected code/algorithm:\nprod3cons(M) {\n  choose x in {1..M};\n  if (M == (x-1)*x*(x+1))\n    print(\"success\");\n  else\n    print(\"failure\");\n}",
         "ro": "Expected code/algorithm:\nprod3cons(M) {\n  choose x in {1..M};\n  if (M == (x-1)*x*(x+1))\n    print(\"success\");\n  else\n    print(\"failure\");\n}"
       },
+      "commonErrors": {
+        "en": "- If you looped over all x instead of using `choose` — you wrote a deterministic algorithm; nondeterministic algorithms make one guess, not a scan.\n- If you used `x*(x+1)*(x+2)` — that works with a shifted meaning of x; with `choose x` representing the *middle* number, the product must be (x-1)·x·(x+1).\n- If you chose x in {1..∞} or a range independent of M — the guess must live in a bounded domain of size polynomial in the input, typically {1..M}.\n- If you forgot to print 'failure' on the else branch — the nondeterministic verdict must be explicit on both branches.",
+        "ro": "- Dacă ai iterat peste toți x în loc să folosești `choose` — ai scris un algoritm determinist; algoritmii nedeterminiști fac o singură alegere, nu o parcurgere.\n- Dacă ai folosit `x*(x+1)*(x+2)` — merge cu o altă interpretare a lui x; aici `choose x` e numărul *din mijloc*, deci produsul e (x-1)·x·(x+1).\n- Dacă ai ales x în {1..∞} sau într-un domeniu neindependent de M — ghicirea trebuie să fie într-un domeniu mărginit de dimensiune polinomială, uzual {1..M}.\n- Dacă ai uitat să afișezi „failure” pe ramura else — verdictul nedeterminist trebuie explicit pe ambele ramuri."
+      },
       "language": "pseudocode"
     },
     {
@@ -89,6 +109,10 @@
       "rubric": {
         "en": "prod3cons(60): choose x in 1..M; alege 4 și 3*4*5 = 60, așa că algoritmul se termină cu succes.\nprod3cons(60): choose x in 1..M; alege 7 și deoarece 6*7*8 ≠ 60 algoritmul se termină cu eșec.",
         "ro": "prod3cons(60): choose x in 1..M; alege 4 și 3*4*5 = 60, așa că algoritmul se termină cu succes.\nprod3cons(60): choose x in 1..M; alege 7 și deoarece 6*7*8 ≠ 60 algoritmul se termină cu eșec."
+      },
+      "commonErrors": {
+        "en": "- If you used a different M for success and failure — nondeterministic failure means *this specific choice* fails; keep M = 60 fixed and vary only x.\n- If you picked x = 5 for success — 4·5·6 = 120 ≠ 60; success needs x = 4 so that (x-1)·x·(x+1) = 3·4·5 = 60.\n- If you described only the success computation — the question asks for *both*; you must exhibit one accepting and one rejecting branch on the same instance.",
+        "ro": "- Dacă ai folosit un M diferit pentru succes și eșec — eșecul nedeterminist înseamnă că *această alegere* eșuează; păstrează M = 60 și variază doar x.\n- Dacă ai ales x = 5 pentru succes — 4·5·6 = 120 ≠ 60; succesul cere x = 4 pentru ca (x-1)·x·(x+1) = 3·4·5 = 60.\n- Dacă ai descris doar calculul de succes — cerința e *ambele*; trebuie exhibate o ramură de acceptare și una de respingere pe aceeași instanță."
       }
     },
     {
@@ -102,6 +126,10 @@
       "rubric": {
         "en": "Deoarece atât execuția lui choose cât și cea a lui if se fac în O(1), rezultă că timpul de execuție a întregului algoritm este O(1).",
         "ro": "Deoarece atât execuția lui choose cât și cea a lui if se fac în O(1), rezultă că timpul de execuție a întregului algoritm este O(1)."
+      },
+      "commonErrors": {
+        "en": "- If you got O(M) — you treated `choose` as a loop over {1..M}; by definition a nondeterministic choice takes O(1).\n- If you got O(log M) — you counted the bit-cost of arithmetic on x; in the standard nondeterministic RAM model, the multiplication (x-1)·x·(x+1) is O(1).\n- If you said 'depends on the guess' — nondeterministic complexity is measured along the *shortest accepting path*, which is just one choice plus one test.",
+        "ro": "- Dacă ai obținut O(M) — ai tratat `choose` ca pe o buclă peste {1..M}; prin definiție alegerea nedeterministă e O(1).\n- Dacă ai obținut O(log M) — ai numărat costul în biți al aritmeticii pe x; în modelul RAM nedeterminist standard, înmulțirea (x-1)·x·(x+1) e O(1).\n- Dacă ai spus „depinde de alegere” — complexitatea nedeterministă se măsoară pe *cel mai scurt calcul acceptant*, care e o singură alegere plus un singur test."
       }
     },
     {
@@ -116,6 +144,10 @@
         "en": "Expected code/algorithm:\nmodm(m, n) {\n  a = [];\n  for (i = 0; i < n; ++i)\n    a[i] = random(m-2)+2;\n  for (i = 0; i < n; ++i)\n    if (m % a[i] == 0)\n      return <a, i>;\n  return <[], -1>;\n}",
         "ro": "Expected code/algorithm:\nmodm(m, n) {\n  a = [];\n  for (i = 0; i < n; ++i)\n    a[i] = random(m-2)+2;\n  for (i = 0; i < n; ++i)\n    if (m % a[i] == 0)\n      return <a, i>;\n  return <[], -1>;\n}"
       },
+      "commonErrors": {
+        "en": "- If you sampled from {1..m-1} — you included 1, which trivially divides m and biases the algorithm; the spec requires elements ∈ {2..m-1}.\n- If you used `random(m)` without the `+2` shift — you can produce 0 or 1, which are outside the required element range.\n- If you returned on the empty array instead of returning `<[], -1>` — callers can't distinguish 'no divisor found' from 'found at index -1'; the sentinel pair is the required failure output.\n- If you combined generation and testing in one loop — you lost the 'generate full array first' semantics; the problem output demands the complete array a be returned on success.",
+        "ro": "- Dacă ai eșantionat din {1..m-1} — l-ai inclus pe 1, care divide trivial m și biasează algoritmul; specificația cere elemente ∈ {2..m-1}.\n- Dacă ai folosit `random(m)` fără deplasarea `+2` — poți produce 0 sau 1, în afara domeniului cerut pentru elemente.\n- Dacă ai returnat pe tabloul gol în loc de `<[], -1>` — apelantul nu poate distinge „niciun divizor găsit” de „găsit la indexul -1”; perechea sentinelă e ieșirea de eșec cerută.\n- Dacă ai combinat generarea și testarea într-o singură buclă — ai pierdut semantica „generează întâi tot tabloul”; ieșirea cere întoarcerea întregului tablou a la succes."
+      },
       "language": "pseudocode"
     },
     {
@@ -129,6 +161,10 @@
       "rubric": {
         "en": "Probabilitatea ca \"a[i] divide m\" este 2/(m-2). Probabilitatea ca \"a[i] să nu dividă m\" este (m-4)/(m-2). Probabilitatea ca Xᵢ = 1 este (2/(m-2)) · ((m-4)/(m-2))ⁱ.",
         "ro": "Probabilitatea ca \"a[i] divide m\" este 2/(m-2). Probabilitatea ca \"a[i] să nu dividă m\" este (m-4)/(m-2). Probabilitatea ca Xᵢ = 1 este (2/(m-2)) · ((m-4)/(m-2))ⁱ."
+      },
+      "commonErrors": {
+        "en": "- If you wrote P(Xᵢ = 1) = 2/(m-2) — you ignored 'cel mai mic index'; you must also require that a[0], …, a[i-1] did *not* divide m, contributing the factor ((m-4)/(m-2))ⁱ.\n- If the denominator was m — you forgot that the sampling range is {2..m-1}, which has m-2 values, not m.\n- If you got 2/m (probability a prime factor divides m among 1..m) — you included 1, which always divides m and isn't part of the sample space.\n- If you treated draws as *without replacement* — `random(m-2)+2` is i.i.d. with replacement; a[i] are independent, not a permutation.",
+        "ro": "- Dacă ai scris P(Xᵢ = 1) = 2/(m-2) — ai ignorat „cel mai mic index”; trebuie cerut și ca a[0], …, a[i-1] să *nu* dividă m, ceea ce aduce factorul ((m-4)/(m-2))ⁱ.\n- Dacă ai pus numitorul m — ai uitat că domeniul de eșantionare este {2..m-1}, care are m-2 valori, nu m.\n- Dacă ai obținut 2/m — l-ai inclus pe 1, care divide mereu m și nu face parte din spațiul eșantionului.\n- Dacă ai tratat extragerile *fără revenire* — `random(m-2)+2` e i.i.d. cu revenire; a[i] sunt independente, nu o permutare."
       }
     },
     {
@@ -142,6 +178,10 @@
       "rubric": {
         "en": "Deoarece se fac i+1 teste până avem \"a[i] divide m\", rezultă T = Σᵢ₌₀ⁿ⁻¹ (i+1)Xᵢ.",
         "ro": "Deoarece se fac i+1 teste până avem \"a[i] divide m\", rezultă T = Σᵢ₌₀ⁿ⁻¹ (i+1)Xᵢ."
+      },
+      "commonErrors": {
+        "en": "- If you wrote T = Σ Xᵢ — you counted only successful events, not all tests performed; the weighting (i+1) records how many divisibility checks ran before success.\n- If you used i instead of (i+1) — you forgot 0-based indexing: a match at i = 0 still costs one test, not zero.\n- If you summed to i = n — you went beyond the array; the second `for` runs for i = 0..n-1, so the upper bound is n-1.\n- If you omitted the fallback (no divisor found) case — that's fine here because `Xᵢ` sum doesn't count it; but don't claim T always equals (i+1) when no divisor exists.",
+        "ro": "- Dacă ai scris T = Σ Xᵢ — ai numărat doar evenimentele de succes, nu toate testele; ponderarea cu (i+1) contorizează câte verificări de divizibilitate au rulat până la succes.\n- Dacă ai folosit i în loc de (i+1) — ai uitat indexarea de la 0: succes la i = 0 tot costă un test, nu zero.\n- Dacă ai însumat până la i = n — ai depășit tabloul; al doilea `for` rulează i = 0..n-1, deci limita superioară e n-1.\n- Dacă ai omis cazul de rezervă (niciun divizor găsit) — aici e ok deoarece suma Xᵢ nu-l numără; dar nu afirma că T = (i+1) când nu există divizor."
       }
     },
     {
@@ -155,6 +195,10 @@
       "rubric": {
         "en": "exp-time(n) = M(T) = Σᵢ₌₀ⁿ⁻¹ (i+1)·(2/(m-2))·((m-4)/(m-2))ⁱ",
         "ro": "exp-time(n) = M(T) = Σᵢ₌₀ⁿ⁻¹ (i+1)·(2/(m-2))·((m-4)/(m-2))ⁱ"
+      },
+      "commonErrors": {
+        "en": "- If you wrote E[T] = Σ (i+1)·E[Xᵢ] without substituting the closed form for E[Xᵢ] = P(Xᵢ=1) — you stopped at linearity of expectation; the question asks for the explicit expression in m and n.\n- If you used 2/(m-2) alone for E[Xᵢ] — you dropped the geometric factor ((m-4)/(m-2))ⁱ coming from 'smallest index' independence.\n- If you replaced the upper bound by ∞ — the sum is finite over i = 0..n-1; turning it into a geometric series to infinity changes the answer for small n.",
+        "ro": "- Dacă ai scris M(T) = Σ (i+1)·M(Xᵢ) fără să substitui forma închisă pentru M(Xᵢ) = P(Xᵢ=1) — te-ai oprit la liniaritatea mediei; cerința e expresia explicită în m și n.\n- Dacă ai folosit 2/(m-2) singur pentru M(Xᵢ) — ai omis factorul geometric ((m-4)/(m-2))ⁱ care vine din independența pentru „cel mai mic index”.\n- Dacă ai înlocuit limita superioară cu ∞ — suma e finită pe i = 0..n-1; transformarea ei într-o serie geometrică până la ∞ schimbă rezultatul pentru n mic."
       }
     },
     {
@@ -169,6 +213,10 @@
         "en": "Expected code/algorithm:\ndetsalt(k, a, out salt) {\n  n = a.size();\n  for (i = 0; i < k; ++i)\n    salt[i] = n;\n  for (i = n-1; i >= 0; --i)\n    if (salt[a[i]] == n) salt[a[i]] = n-1-i;\n}",
         "ro": "Expected code/algorithm:\ndetsalt(k, a, out salt) {\n  n = a.size();\n  for (i = 0; i < k; ++i)\n    salt[i] = n;\n  for (i = n-1; i >= 0; --i)\n    if (salt[a[i]] == n) salt[a[i]] = n-1-i;\n}"
       },
+      "commonErrors": {
+        "en": "- If you scanned the pattern left-to-right without the 'first-seen' guard — you overwrote earlier rightmost occurrences with earlier indices, breaking the Boyer–Moore shift; the algorithm must keep the *rightmost* position of each character.\n- If you initialized salt to 0 instead of n — characters not appearing in the pattern would get a shift of 0, causing no progress on mismatches; missing characters need a full pattern-length shift.\n- If you used a loop over the pattern inside a loop over the alphabet — you wrote O(k·n); the exercise requires O(k) after the O(n) pattern pass, giving O(k+n), still linear in the alphabet.\n- If you stored salt[a[i]] = i — you computed position from the left; the shift needed by Boyer–Moore is the distance from the right, i.e. n-1-i.",
+        "ro": "- Dacă ai parcurs patternul de la stânga la dreapta fără garda „prima dată văzut” — ai suprascris aparițiile mai din dreapta cu indici mai din stânga, stricând deplasarea Boyer–Moore; algoritmul trebuie să păstreze *ultima* poziție a fiecărui caracter.\n- Dacă ai inițializat salt cu 0 în loc de n — caracterele care nu apar în pattern ar primi o deplasare 0, împiedicând progresul la mismatch; caracterele lipsă au nevoie de deplasare egală cu lungimea patternului.\n- Dacă ai folosit o buclă peste pattern înăuntrul unei bucle peste alfabet — ai scris O(k·n); exercițiul cere O(k) după parcurgerea în O(n), deci O(k+n), liniar în alfabet.\n- Dacă ai stocat salt[a[i]] = i — ai calculat poziția de la stânga; deplasarea cerută de Boyer–Moore e distanța de la dreapta, adică n-1-i."
+      },
       "language": "pseudocode"
     },
     {
@@ -182,6 +230,10 @@
       "rubric": {
         "en": "Saltul pentru un caracter C este acum m-1-salt1(C).\nif ((m-j) > m-salt1[s[i]]) i = i+m-j;\nelse i = i+(m-1-salt1[s[i]]);",
         "ro": "Saltul pentru un caracter C este acum m-1-salt1(C).\nif ((m-j) > m-salt1[s[i]]) i = i+m-j;\nelse i = i+(m-1-salt1[s[i]]);"
+      },
+      "commonErrors": {
+        "en": "- If you kept the original `m-salt(C)` formula — you ignored that salt1 returns a *position index* (not a distance), so the shift must be `m-1-salt1(C)`, not `m-salt1(C)`.\n- If you forgot the comparison with `m-j` — you could shift backwards when the character occurs *after* position j; the rule takes the maximum of the bad-character shift and the already-matched suffix length.\n- If you dropped the `{0}` in the definition of salt1 — characters not in the pattern would be undefined; the `{0} ∪ …` clause gives them value 0, which yields a full pattern-length shift.",
+        "ro": "- Dacă ai păstrat formula originală `m-salt(C)` — ai ignorat că salt1 întoarce un *indice de poziție* (nu o distanță), deci deplasarea trebuie să fie `m-1-salt1(C)`, nu `m-salt1(C)`.\n- Dacă ai uitat comparația cu `m-j` — poți deplasa înapoi când caracterul apare *după* poziția j; regula ia maximul dintre deplasarea de caracter rău și lungimea sufixului deja potrivit.\n- Dacă ai omis `{0}` din definiția salt1 — caracterele care nu apar în pattern ar fi nedefinite; clauza `{0} ∪ …` le dă valoarea 0, care dă o deplasare egală cu lungimea patternului."
       }
     },
     {
@@ -195,6 +247,10 @@
       "rubric": {
         "en": "Când patternul nu include subșiruri repetate.",
         "ro": "Când patternul nu include subșiruri repetate."
+      },
+      "commonErrors": {
+        "en": "- If you said 'when the pattern is short' — length alone isn't the issue; what matters is the *structure* of repeated substrings inside the pattern.\n- If you said 'when the text is random' — the good-suffix rule depends only on the pattern; text randomness doesn't affect its effectiveness.\n- If you said 'when the alphabet is large' — a large alphabet actually *helps* the bad-character rule; the good-suffix rule is weak precisely when patterns lack repeated substrings, so the extra shift it provides is minimal.",
+        "ro": "- Dacă ai spus „când patternul este scurt” — lungimea singură nu e problema; ce contează e *structura* subșirurilor repetate din pattern.\n- Dacă ai spus „când textul este aleator” — regula sufixului bun depinde doar de pattern; aleatorismul textului nu afectează eficacitatea.\n- Dacă ai spus „când alfabetul este mare” — un alfabet mare *ajută* regula caracterului rău; regula sufixului bun e slabă tocmai când patternul nu are subșiruri repetate, deci deplasarea suplimentară oferită e minimă."
       }
     },
     {
@@ -208,6 +264,10 @@
       "rubric": {
         "en": "Automatul nedeterminist cu 12 stări. Automatul determinist echivalent: 0→1(a), 1→3(b/c), 3→6(c)/3→4(a), 6→8(a), 8→9(b), 9→11(c).",
         "ro": "Automatul nedeterminist cu 12 stări. Automatul determinist echivalent: 0→1(a), 1→3(b/c), 3→6(c)/3→4(a), 6→8(a), 8→9(b), 9→11(c)."
+      },
+      "commonErrors": {
+        "en": "- If you built the NFA with fewer than 12 states — you likely merged the Kleene-star loops with the main chain; Thompson's construction adds explicit ε-branches that count as separate states for each `*`.\n- If your DFA has a single transition on 'c' from the first star's exit — you missed that 'c' must terminate the first `(ba)*` *and* begin the literal c, so the state after `a(ba)*` needs both a loopback (on b) and an exit (on c).\n- If you omitted the final 'c' transition — you described the automaton for `a(ba)*c(ab)*`, not for the full `a(ba)*c(ab)*c`; the regex has two literal 'c's.",
+        "ro": "- Dacă ai construit NFA cu mai puțin de 12 stări — probabil ai unit buclele Kleene cu lanțul principal; construcția Thompson adaugă ramuri ε explicite care sunt stări separate pentru fiecare `*`.\n- Dacă DFA-ul tău are o singură tranziție pe „c” din ieșirea primei stele — ai ratat că „c” trebuie să închidă primul `(ba)*` *și* să înceapă c-ul literal, deci starea de după `a(ba)*` are nevoie de bucla (pe b) și de ieșirea (pe c).\n- Dacă ai omis ultima tranziție pe „c” — ai descris automatul pentru `a(ba)*c(ab)*`, nu pentru întreg `a(ba)*c(ab)*c`; expresia are doi „c” literali."
       }
     },
     {
@@ -221,6 +281,10 @@
       "rubric": {
         "en": "Se parcurge textul urmărind stările automatului deterministic. Nu există potrivire în textul \"abbacababaa\" — expresia a(ba)*c(ab)*c cere două caractere 'c', dar textul conține doar unul (la poziția 4), deci automatul nu ajunge niciodată în starea finală.",
         "ro": "Se parcurge textul urmărind stările automatului deterministic. Nu există potrivire în textul \"abbacababaa\" — expresia a(ba)*c(ab)*c cere două caractere 'c', dar textul conține doar unul (la poziția 4), deci automatul nu ajunge niciodată în starea finală."
+      },
+      "commonErrors": {
+        "en": "- If you claimed a match exists — you miscounted 'c's; the regex requires two literal 'c's but `abbacababaa` contains only one, so no accepting run is possible.\n- If you restarted the automaton at every position instead of running one DFA scan — you described the naive matcher, not the regex-automaton approach; the point of the DFA is a single left-to-right pass.\n- If you blocked on the first 'bb' — the DFA must transition to a dead state on a character that doesn't fit, not stall; from state 1, reading 'b' goes nowhere that leads to the accepting state, so you conclude no match and move the start position.",
+        "ro": "- Dacă ai afirmat că există potrivire — ai numărat greșit „c”-urile; expresia cere doi „c” literali, dar `abbacababaa` conține doar unul, deci nicio rulare acceptantă nu e posibilă.\n- Dacă ai repornit automatul la fiecare poziție în loc de o singură parcurgere DFA — ai descris algoritmul naiv, nu abordarea cu automat; scopul DFA e o parcurgere unică stânga-dreapta.\n- Dacă te-ai blocat la primul „bb” — DFA-ul trebuie să treacă într-o stare moartă pe un caracter care nu se potrivește, nu să stagneze; din starea 1, citirea lui „b” nu duce nicăieri către starea finală, deci se concluzionează „fără potrivire” și se avansează poziția de start."
       }
     }
   ]

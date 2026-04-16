@@ -22,6 +22,10 @@
       "rubric": {
         "en": "Problem domain: IsOcto(k) ≡ ∃x. Nat(x) ∧ x = (1+√(1+3k))/3\nInput: v = (v₀, v₁, ..., vₙ₋₁), vᵢ ∈ ℕ, n ≥ 1\nOutput: nr = Σᵢ₌₀..ₙ₋₁ [IsOcto(vᵢ) ∧ vᵢ par]",
         "ro": "Domeniul problemei: IsOcto(k) ≡ ∃x. Nat(x) ∧ x = (1+√(1+3k))/3\nInput: v = (v₀, v₁, ..., vₙ₋₁), vᵢ ∈ ℕ, n ≥ 1\nOutput: nr = Σᵢ₌₀..ₙ₋₁ [IsOcto(vᵢ) ∧ vᵢ par]"
+      },
+      "commonErrors": {
+        "en": "- If you returned the list of octagonal-even values instead of their count — you solved a listing problem; P1 asks for a single number `nr`.\n- If you omitted `n ≥ 1` or the domain `vᵢ ∈ ℕ` — your spec admits empty or negative inputs that the problem explicitly excludes.\n- If you defined IsOcto purely via the formula `n² + 4·Σk` without characterizing the inverse — you gave a generator, not a predicate usable as an input test.",
+        "ro": "- Dacă ai întors lista valorilor octogonale pare în loc de numărul lor — ai rezolvat o problemă de listare; P1 cere un singur număr `nr`.\n- Dacă ai omis `n ≥ 1` sau domeniul `vᵢ ∈ ℕ` — specificația admite intrări vide sau negative pe care problema le exclude explicit.\n- Dacă ai definit IsOcto doar prin formula `n² + 4·Σk` fără a caracteriza inversa — ai dat un generator, nu un predicat utilizabil pentru testare."
       }
     },
     {
@@ -35,6 +39,9 @@
       "rubric": {
         "en": "Expected code/algorithm:\nIsOctogonal(x) {\n  d = int(sqrt(1+3*x));\n  if (d*d != 1+3*x)\n    return false;\n  if ((1+d)%3 != 0)\n    return false;\n  return true;\n}",
         "ro": "Expected code/algorithm:\nIsOctogonal(x) {\n  d = int(sqrt(1+3*x));\n  if (d*d != 1+3*x)\n    return false;\n  if ((1+d)%3 != 0)\n    return false;\n  return true;\n}"
+      },
+      "commonErrors": {
+        "en": "- If you compared `sqrt(1+3*x)` to an integer without casting first — floating-point rounding will accept non-perfect squares; you must take `int(sqrt(...))` and re-square.\n- If you skipped the `(1+d)%3 == 0` check — you accepted every `x` of the form `(d²-1)/3` including those where the inverse isn't a natural, e.g. d=3 gives `x=8/3` type errors.\n- If you iterated `n = 0, 1, 2, ...` computing `Nₙ` until it reaches `x` — the algorithm runs in O(√x) instead of O(1); the closed-form inverse is the whole point."
       },
       "language": "pseudocode"
     },
@@ -50,6 +57,10 @@
         "en": "Expected code/algorithm:\ngetOctoPar(v) {\n  n = v.size();\n  nr = 0;\n  for (i = 0; i < n; ++i)\n    if (v[i]%2 == 0 && IsOctogonal(v[i]))\n      nr = nr + 1;\n  return nr;\n}",
         "ro": "Expected code/algorithm:\ngetOctoPar(v) {\n  n = v.size();\n  nr = 0;\n  for (i = 0; i < n; ++i)\n    if (v[i]%2 == 0 && IsOctogonal(v[i]))\n      nr = nr + 1;\n  return nr;\n}"
       },
+      "commonErrors": {
+        "en": "- If you wrote `if (IsOctogonal(v[i]) && v[i]%2 == 0)` — correctness is fine but you lose the `&&` short-circuit optimization; checking parity first skips the expensive IsOctogonal call on odd values.\n- If you initialized `nr = 1` or counted from `i = 1` — off-by-one: the first element `v[0]` is a valid input, and the counter must start at 0.\n- If you returned `nr` *inside* the loop on the first match — you counted only the first octagonal-even, not all of them; the return belongs after the loop.",
+        "ro": "- Dacă ai scris `if (IsOctogonal(v[i]) && v[i]%2 == 0)` — corectitudinea e ok, dar pierzi scurt-circuitarea `&&`; verificând întâi paritatea eviți apelul costisitor IsOctogonal pe valori impare.\n- Dacă ai inițializat `nr = 1` sau ai pornit de la `i = 1` — eroare de unu: primul element `v[0]` este o intrare validă, iar contorul trebuie să pornească de la 0.\n- Dacă ai întors `nr` *în interiorul* buclei la prima potrivire — ai numărat doar primul octogonal-par, nu pe toate; `return` trebuie după buclă."
+      },
       "language": "pseudocode"
     },
     {
@@ -63,6 +74,10 @@
       "rubric": {
         "en": "Bucla for păstrează invariantul nr = numărul de valori octogonale pare din subvectorul v[0..i].",
         "ro": "Bucla for păstrează invariantul nr = numărul de valori octogonale pare din subvectorul v[0..i]."
+      },
+      "commonErrors": {
+        "en": "- If your invariant was `nr = i` — that only holds if every element is octagonal-even; the invariant must describe the *counted subset*, not the iteration index.\n- If you skipped the base case (`i = 0`, `nr = 0`) — induction has no anchor, so the proof is incomplete.\n- If you didn't argue termination from `i` reaching `n` — you proved partial correctness only; a full argument also needs the loop to halt.",
+        "ro": "- Dacă invariantul tău era `nr = i` — acesta e adevărat doar dacă toate elementele sunt octogonale pare; invariantul trebuie să descrie *submulțimea numărată*, nu indicele iterației.\n- Dacă ai omis cazul de bază (`i = 0`, `nr = 0`) — inducția nu are ancoră, demonstrația e incompletă.\n- Dacă nu ai argumentat terminarea prin atingerea lui `n` de către `i` — ai demonstrat doar corectitudinea parțială; argumentul complet cere și oprirea buclei."
       }
     },
     {
@@ -76,6 +91,10 @@
       "rubric": {
         "en": "Dimensiunea: n\nOperații: v[i]%2 == 0 && IsOctogonal(v[i]), O(1)\nToate cazurile au același timp asimptotic: O(n)",
         "ro": "Dimensiunea: n\nOperații: v[i]%2 == 0 && IsOctogonal(v[i]), O(1)\nToate cazurile au același timp asimptotic: O(n)"
+      },
+      "commonErrors": {
+        "en": "- If you answered O(n·√x) — you treated IsOctogonal as a linear scan over candidates; but the closed-form uses `sqrt` which is O(1) in the unit-cost model.\n- If you gave best/worst/average cases that differ — they don't: the loop always performs n iterations regardless of input, so all cases are Θ(n).\n- If you forgot to name the input-size parameter — without stating 'n = v.size()' your Big-O is unanchored; always tie the bound to the declared input size.",
+        "ro": "- Dacă ai răspuns O(n·√x) — ai tratat IsOctogonal ca o parcurgere liniară peste candidați; dar forma închisă folosește `sqrt`, care e O(1) în modelul cost unitar.\n- Dacă ai dat cazuri best/worst/average diferite — nu există diferență: bucla face mereu n iterații, indiferent de intrare, deci toate cazurile sunt Θ(n).\n- Dacă ai omis numirea parametrului de dimensiune — fără „n = v.size()” marginea Big-O nu e ancorată; leagă întotdeauna marginea de dimensiunea declarată."
       }
     },
     {
@@ -89,6 +108,10 @@
       "rubric": {
         "en": "Xₖ = 1 dacă 0 ≤ k < n și v[k] = z și v[j] ≠ z ∀0 ≤ j < k\nXₖ = 1 dacă k = n și v[j] ≠ z ∀0 ≤ j < n\nXₖ = 0 altfel",
         "ro": "Xₖ = 1 dacă 0 ≤ k < n și v[k] = z și v[j] ≠ z ∀0 ≤ j < k\nXₖ = 1 dacă k = n și v[j] ≠ z ∀0 ≤ j < n\nXₖ = 0 altfel"
+      },
+      "commonErrors": {
+        "en": "- If you defined Xₖ = 1 when `v[k] = z` (only) — you counted *all* occurrences of z, not the *first*; you must also require `v[j] ≠ z` for every j < k.\n- If you omitted the `k = n` sentinel case — your indicator doesn't cover the outcome 'z is absent from v', so the sum Σ Xₖ can be 0 with no indicator firing.\n- If you wrote `X` as a single variable instead of a family indexed by k — you collapsed the per-position structure needed to compute E[Y(n)] by linearity.",
+        "ro": "- Dacă ai definit Xₖ = 1 când `v[k] = z` (doar atât) — ai numărat *toate* aparițiile lui z, nu *prima*; trebuie cerut și `v[j] ≠ z` pentru orice j < k.\n- Dacă ai omis cazul-sentinelă `k = n` — indicatorul nu acoperă situația „z lipsește din v”, deci suma Σ Xₖ poate fi 0 fără ca vreun indicator să se activeze.\n- Dacă ai scris `X` ca o singură variabilă în loc de familie indexată după k — ai colapsat structura pe poziții necesară pentru a calcula E[Y(n)] prin liniaritate."
       }
     },
     {
@@ -102,6 +125,10 @@
       "rubric": {
         "en": "p = 1/n",
         "ro": "p = 1/n"
+      },
+      "commonErrors": {
+        "en": "- If you answered `1/n²` — you double-counted by also dividing over the position; the position is fixed, and only the value v[position] is random over {1..n}.\n- If you said `1/2` — you treated it as a yes/no coin flip rather than a uniform draw from n distinct outcomes.\n- If you said `(n-1)/n` — you gave the probability that z is *not* at the position; p is the complement.",
+        "ro": "- Dacă ai răspuns `1/n²` — ai numărat de două ori împărțind și pe poziție; poziția e fixată, doar valoarea v[poziție] e aleatorie uniform în {1..n}.\n- Dacă ai spus `1/2` — ai tratat ca aruncare de monedă da/nu, nu ca extragere uniformă dintre n rezultate distincte.\n- Dacă ai spus `(n-1)/n` — ai dat probabilitatea ca z să *nu* fie pe poziție; p e complementul."
       }
     },
     {
@@ -115,6 +142,10 @@
       "rubric": {
         "en": "pₖ = (1-1/n)ᵏ · 1/n, dacă 0 ≤ k < n\npₖ = ((n-1)/n)ⁿ, dacă k = n",
         "ro": "pₖ = (1-1/n)ᵏ · 1/n, dacă 0 ≤ k < n\npₖ = ((n-1)/n)ⁿ, dacă k = n"
+      },
+      "commonErrors": {
+        "en": "- If you wrote pₖ = 1/n for all k — you ignored independence: the first hit at position k requires k previous misses, each with probability (n-1)/n.\n- If you used `(1-1/n)^(k-1) · 1/n` — you shifted by one; position k is preceded by exactly k positions (0..k-1), so the exponent is k, not k-1.\n- If you forgot the sentinel case k = n — the distribution doesn't sum to 1 without the `((n-1)/n)ⁿ` tail covering 'z never appears'.",
+        "ro": "- Dacă ai scris pₖ = 1/n pentru orice k — ai ignorat independența: prima potrivire pe poziția k cere k eșecuri anterioare, fiecare cu probabilitate (n-1)/n.\n- Dacă ai folosit `(1-1/n)^(k-1) · 1/n` — ai decalat cu unu; poziția k e precedată de exact k poziții (0..k-1), deci exponentul e k, nu k-1.\n- Dacă ai omis cazul-sentinelă k = n — distribuția nu însumează 1 fără coada `((n-1)/n)ⁿ` care acoperă „z nu apare niciodată”."
       }
     },
     {
@@ -128,6 +159,10 @@
       "rubric": {
         "en": "E[Y(n)] = Σᵢ₌₀ⁿ⁻¹ (i+1)·(1-1/n)ⁱ·1/n + (n+1)·((n-1)/n)ⁿ",
         "ro": "E[Y(n)] = Σᵢ₌₀ⁿ⁻¹ (i+1)·(1-1/n)ⁱ·1/n + (n+1)·((n-1)/n)ⁿ"
+      },
+      "commonErrors": {
+        "en": "- If you computed E[Y(n)] = Σ (k+1)·1/n — you skipped the `(1-1/n)ᵏ` miss-factor; only the *first* hit at position k carries weight pₖ, not 1/n.\n- If you dropped the `k = n` term — you lost the contribution from arrays where z is absent; that branch contributes `(n+1)·((n-1)/n)ⁿ`.\n- If you treated `(k+1)·Xₖ` as if the Xₖ were independent and summed expectations with a product rule — linearity of expectation applies directly without any independence assumption, and the `(k+1)` stays inside the sum.",
+        "ro": "- Dacă ai calculat E[Y(n)] = Σ (k+1)·1/n — ai sărit factorul de ratare `(1-1/n)ᵏ`; doar *prima* potrivire pe poziția k are ponderea pₖ, nu 1/n.\n- Dacă ai omis termenul `k = n` — ai pierdut contribuția cazurilor în care z lipsește; acea ramură aduce `(n+1)·((n-1)/n)ⁿ`.\n- Dacă ai tratat `(k+1)·Xₖ` ca și cum Xₖ ar fi independente și ai însumat speranțele cu o regulă de produs — liniaritatea speranței se aplică direct fără ipoteza independenței, iar `(k+1)` rămâne în sumă."
       }
     },
     {
@@ -141,6 +176,10 @@
       "rubric": {
         "en": "PARTITION: Input: S ⊆ ℕ. Output: există A,B ⊆ S a.î. A∩B=∅, A∪B=S și ΣA = ΣB?\nZEROSUM-SUBSET: Input: T ⊆ ℤ. Output: există U ⊆ T, U≠∅ a.î. Σx∈U x = 0?\n\ni. dacă ΣS este impar: T = {42} (nicio partiție posibilă)\nii. altfel: T = S\\{0} ∪ {-ΣS/2}\n→: Dacă S poate fi partiționată în A,B cu sume egale, alegem U = A\\{0} ∪ {-ΣS/2}, suma este 0.\n←: Dacă există U ⊆ T de sumă zero, U conține -ΣS/2. Fie A = U\\{-ΣS/2} și B = S\\A.",
         "ro": "PARTITION: Input: S ⊆ ℕ. Output: există A,B ⊆ S a.î. A∩B=∅, A∪B=S și ΣA = ΣB?\nZEROSUM-SUBSET: Input: T ⊆ ℤ. Output: există U ⊆ T, U≠∅ a.î. Σx∈U x = 0?\n\ni. dacă ΣS este impar: T = {42} (nicio partiție posibilă)\nii. altfel: T = S\\{0} ∪ {-ΣS/2}\n→: Dacă S poate fi partiționată în A,B cu sume egale, alegem U = A\\{0} ∪ {-ΣS/2}, suma este 0.\n←: Dacă există U ⊆ T de sumă zero, U conține -ΣS/2. Fie A = U\\{-ΣS/2} și B = S\\A."
+      },
+      "commonErrors": {
+        "en": "- If you set `T = S` directly — the empty sum is excluded (`U ≠ ∅`) and without `-ΣS/2` no non-empty subset has sum 0 in general; the negative element is what forces balanced halves.\n- If you skipped the parity check (`ΣS odd`) — you'd claim a solution exists for, e.g., S = {1, 2}, which can't be partitioned; you need a NO-gadget like `T = {42}`.\n- If you only proved one direction (→) — a Karp reduction requires the equivalence `yes ↔ yes`; the (←) direction ensures a spurious zero-sum subset can't map back to a phantom partition.\n- If you called it a Turing reduction — Karp uses a *single* instance transformation plus at most one oracle call on output equality; this problem matches Karp exactly.",
+        "ro": "- Dacă ai setat `T = S` direct — suma vidă e exclusă (`U ≠ ∅`), iar fără `-ΣS/2` nicio submulțime nevidă nu are suma 0 în general; elementul negativ forțează jumătățile echilibrate.\n- Dacă ai sărit verificarea de paritate (`ΣS impar`) — ai pretinde că există soluție pentru, de ex., S = {1, 2}, care nu poate fi partiționată; ai nevoie de un gadget-NU precum `T = {42}`.\n- Dacă ai demonstrat doar o implicație (→) — o reducere Karp cere echivalența `da ↔ da`; direcția (←) asigură că o submulțime de sumă zero parazită nu se mapează înapoi la o partiție fantomă.\n- Dacă ai numit-o reducere Turing — Karp folosește o *singură* transformare de instanță plus cel mult un apel-oracol pe egalitatea de ieșire; problema se încadrează exact în Karp."
       }
     },
     {
@@ -154,6 +193,10 @@
       "rubric": {
         "en": "Se construiește: (1p) truth gadget; (1p) variable gadgets; (3p) porțile sau. Vezi curs.",
         "ro": "Se construiește: (1p) truth gadget; (1p) variable gadgets; (3p) porțile sau. Vezi curs."
+      },
+      "commonErrors": {
+        "en": "- If you drew only the three literal nodes x, y, ¬z without the T/F/B truth-gadget triangle — 3-coloring has nothing to anchor 'true' to, so the reduction breaks.\n- If you omitted the `x` — `¬x` variable-gadget edge — assignments become inconsistent; x and ¬x could receive the same color, violating the logical negation.\n- If you wired the OR-gadget directly between literals and T without the internal 5-node gadget — you lose the property that the clause is satisfiable ↔ 3-colorable.\n- If you reused the same `¬z` node across multiple clauses without a dedicated copy — you conflate occurrences; each clause gets its own OR-gadget attached to the shared literal node.",
+        "ro": "- Dacă ai desenat doar cele trei noduri-literali x, y, ¬z fără triunghiul T/F/B al gadgetului de adevăr — 3-colorarea nu are de ce să ancoreze „adevăr”, deci reducerea se sparge.\n- Dacă ai omis muchia `x` — `¬x` din gadgetul de variabilă — atribuirile devin inconsistente; x și ¬x pot primi aceeași culoare, încălcând negația logică.\n- Dacă ai conectat gadgetul SAU direct între literali și T fără cele 5 noduri interne — pierzi proprietatea că clauza e satisfiabilă ↔ 3-colorabilă.\n- Dacă ai refolosit același nod `¬z` în mai multe clauze fără o copie dedicată — confunzi aparițiile; fiecare clauză primește gadgetul SAU propriu, atașat la nodul-literal partajat."
       }
     }
   ]

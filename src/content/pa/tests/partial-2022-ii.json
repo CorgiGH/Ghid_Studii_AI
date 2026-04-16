@@ -22,6 +22,10 @@
       "rubric": {
         "en": "D(0) = 0. Dacă m > 0, D(m) = D(m-(2i+1)³)+1, 0 < (2i+1)³ ≤ m, ∀j. 0 < (2j+1)³ ≤ m ⟹ j ≤ i.\nInput: m ≥ 0\nOutput: D(m)",
         "ro": "D(0) = 0. Dacă m > 0, D(m) = D(m-(2i+1)³)+1, 0 < (2i+1)³ ≤ m, ∀j. 0 < (2j+1)³ ≤ m ⟹ j ≤ i.\nInput: m ≥ 0\nOutput: D(m)"
+      },
+      "commonErrors": {
+        "en": "- If you wrote only the base case `D(0)=0` without the recursive step — you defined a constant, not the decomposition count; the recurrence must subtract the largest odd cube ≤ m.\n- If you picked the largest odd integer (not its cube) `≤ m` — you confused the index `2i+1` with the value `(2i+1)³`; the greedy choice is the largest cube that fits.\n- If you specified the input domain as `m > 0` only — you broke the base case; the recursion needs `m = 0` to be a valid input returning 0.",
+        "ro": "- Dacă ai scris doar cazul de bază `D(0)=0` fără pasul recursiv — ai definit o constantă, nu numărul de descompuneri; recurența trebuie să scadă cel mai mare cub impar ≤ m.\n- Dacă ai ales cel mai mare număr impar (nu cubul lui) `≤ m` — ai confundat indicele `2i+1` cu valoarea `(2i+1)³`; alegerea greedy este cel mai mare cub care încape.\n- Dacă ai restrâns domeniul de intrare la `m > 0` — ai rupt cazul de bază; recursia are nevoie ca `m = 0` să fie intrare validă ce întoarce 0."
       }
     },
     {
@@ -35,6 +39,10 @@
       "rubric": {
         "en": "Expected code/algorithm:\na[0] = 0; i3 = 1; i = 1; k = 1;\nwhile (i3 <= m) {\n  a[k] = i3;\n  i = i+2;\n  k = k+1;\n  i3 = i*i*i;\n}",
         "ro": "Expected code/algorithm:\na[0] = 0; i3 = 1; i = 1; k = 1;\nwhile (i3 <= m) {\n  a[k] = i3;\n  i = i+2;\n  k = k+1;\n  i3 = i*i*i;\n}"
+      },
+      "commonErrors": {
+        "en": "- If you incremented `i = i+1` — you enumerated all integers, including even ones; odd-only requires `i = i+2` starting from `i = 1`.\n- If you stored `a[k] = i` instead of `a[k] = i*i*i` — you stored the odd numbers themselves, not their cubes, and later subtractions in part (c) would be wrong.\n- If your loop guard was `i <= m` — you'll overshoot, since the cube `i³` grows much faster than `i`; the guard must be on the cube, not the base.",
+        "ro": "- Dacă ai incrementat `i = i+1` — ai enumerat toate numerele întregi, inclusiv cele pare; pentru doar impare se folosește `i = i+2` pornind de la `i = 1`.\n- Dacă ai stocat `a[k] = i` în loc de `a[k] = i*i*i` — ai salvat numerele impare, nu cuburile lor, iar scăderile din (c) ar fi greșite.\n- Dacă ai folosit garda `i <= m` — depășești, fiindcă `i³` crește mult mai repede decât `i`; garda trebuie pusă pe cub, nu pe baza."
       },
       "language": "pseudocode"
     },
@@ -50,6 +58,10 @@
         "en": "Expected code/algorithm:\ni = a.size()-1;\nD = 0;\nwhile (m > 0) {\n  while (m >= a[i]) {\n    m = m - a[i];\n    D = D + 1;\n  }\n  i = i - 1;\n}",
         "ro": "Expected code/algorithm:\ni = a.size()-1;\nD = 0;\nwhile (m > 0) {\n  while (m >= a[i]) {\n    m = m - a[i];\n    D = D + 1;\n  }\n  i = i - 1;\n}"
       },
+      "commonErrors": {
+        "en": "- If you started with `i = 0` — you began with the smallest cube and never leveraged the greedy choice of the largest-fitting cube; the scan must go from top down.\n- If you used a single `if (m >= a[i])` instead of the inner `while` — you subtracted each cube at most once, but the same cube can be used multiple times (e.g. m=2 = 1³+1³).\n- If you decremented `i` inside the inner loop — you abandoned a cube that could still fit; `i` must drop only after the inner `while` exits.",
+        "ro": "- Dacă ai pornit cu `i = 0` — ai început cu cel mai mic cub și nu ai profitat de alegerea greedy a celui mai mare cub ce încape; parcurgerea se face de sus în jos.\n- Dacă ai folosit un singur `if (m >= a[i])` în locul lui `while` intern — ai scăzut fiecare cub cel mult o dată, dar același cub poate fi folosit de mai multe ori (ex. m=2 = 1³+1³).\n- Dacă ai decrementat `i` înăuntrul buclei interioare — ai abandonat un cub care încă încăpea; `i` scade doar după ieșirea din `while`-ul interior."
+      },
       "language": "pseudocode"
     },
     {
@@ -63,6 +75,10 @@
       "rubric": {
         "en": "Bucla while din primul algoritm păstrează invariantul: a include primele i-1 cuburi de numere impare ≤ m.\nBucla while exterioară a celui de-al doilea algoritm păstrează D(m) + D = D(m₀).",
         "ro": "Bucla while din primul algoritm păstrează invariantul: a include primele i-1 cuburi de numere impare ≤ m.\nBucla while exterioară a celui de-al doilea algoritm păstrează D(m) + D = D(m₀)."
+      },
+      "commonErrors": {
+        "en": "- If your invariant was just a loop bound (e.g. `i ≥ 0`) — you stated termination data, not the property relating current state to the final answer; the correct invariant links `m` and the accumulated `D` to `D(m₀)`.\n- If you ignored the initial `m₀` — you couldn't express what's preserved; the invariant `D(m) + D = D(m₀)` hinges on remembering the original value.\n- If you argued correctness only via termination (m reaches 0) — you showed the loop stops, not that the result equals `D(m₀)`; correctness needs both the invariant and the exit condition together.",
+        "ro": "- Dacă invariantul tău era doar o margine de buclă (ex. `i ≥ 0`) — ai enunțat date de terminare, nu proprietatea care leagă starea curentă de răspunsul final; invariantul corect leagă `m` și `D` acumulat de `D(m₀)`.\n- Dacă ai ignorat valoarea inițială `m₀` — nu puteai exprima ce se păstrează; invariantul `D(m) + D = D(m₀)` depinde de reținerea valorii originale.\n- Dacă ai argumentat corectitudinea doar prin terminare (m ajunge la 0) — ai arătat că bucla se oprește, nu că rezultatul egalează `D(m₀)`; corectitudinea cere și invariantul, și condiția de ieșire."
       }
     },
     {
@@ -76,6 +92,10 @@
       "rubric": {
         "en": "Dimensiunea: n = ⌈log₂ m⌉\nCazul cel mai nefavorabil pentru n=6: m = 53 = 1×3³ + 26×1³ (D = 27)\nTimp: T(n) = O(∛m) = O(∛2ⁿ)",
         "ro": "Dimensiunea: n = ⌈log₂ m⌉\nCazul cel mai nefavorabil pentru n=6: m = 53 = 1×3³ + 26×1³ (D = 27)\nTimp: T(n) = O(∛m) = O(∛2ⁿ)"
+      },
+      "commonErrors": {
+        "en": "- If you took `n = m` as the input size — you forgot that numeric inputs are measured in bits; the correct size is `⌈log₂ m⌉` and the bound must be in terms of that.\n- If you answered `O(log m)` — you confused the cost with the *number of distinct cubes* (roughly `∛m` of them); the worst case does many `1³` subtractions, pushing iterations up to `∛m`.\n- If you wrote `O(∛m)` without re-expressing in `n` — you didn't close the loop; plugging `m = 2ⁿ` yields `O(∛2ⁿ) = O(2^{n/3})`, which is exponential in bit-size.",
+        "ro": "- Dacă ai luat `n = m` ca dimensiune a intrării — ai uitat că intrările numerice se măsoară în biți; dimensiunea corectă este `⌈log₂ m⌉` și marginea trebuie exprimată în funcție de ea.\n- Dacă ai răspuns `O(log m)` — ai confundat costul cu *numărul de cuburi distincte* (aproximativ `∛m`); în cazul cel mai nefavorabil se fac multe scăderi cu `1³`, urcând numărul de iterații până la `∛m`.\n- Dacă ai scris `O(∛m)` fără a reexprima în `n` — nu ai închis raționamentul; substituind `m = 2ⁿ` obții `O(∛2ⁿ) = O(2^{n/3})`, exponențial în dimensiunea în biți."
       }
     },
     {
@@ -89,6 +109,10 @@
       "rubric": {
         "en": "pᵢ = 1/n",
         "ro": "pᵢ = 1/n"
+      },
+      "commonErrors": {
+        "en": "- If you answered `1/n!` — you computed the probability of a specific full permutation; the event `Xᵢ = 1` concerns only position `i`, which has marginal probability `1/n`.\n- If you answered `1/2` — you treated `Xᵢ` as a coin flip; it's a uniform choice over `n` positions for `z`, not a binary one.\n- If you said it depends on `i` — you misread uniformity; every index is equally likely, so `pᵢ` is the same `1/n` for all `i`.",
+        "ro": "- Dacă ai răspuns `1/n!` — ai calculat probabilitatea unei permutări complete specifice; evenimentul `Xᵢ = 1` se referă doar la poziția `i`, cu probabilitate marginală `1/n`.\n- Dacă ai răspuns `1/2` — ai tratat `Xᵢ` ca pe o monedă; e o alegere uniformă între `n` poziții pentru `z`, nu una binară.\n- Dacă ai spus că depinde de `i` — ai interpretat greșit uniformitatea; fiecare indice e la fel de probabil, deci `pᵢ` este aceeași `1/n` pentru orice `i`."
       }
     },
     {
@@ -102,6 +126,10 @@
       "rubric": {
         "en": "C(n) = Σᵢ₌₀ⁿ⁻¹ 1/n = 1",
         "ro": "C(n) = Σᵢ₌₀ⁿ⁻¹ 1/n = 1"
+      },
+      "commonErrors": {
+        "en": "- If you got `n/2` — you used the average-case for *sequential search*, not `E[k]` where `k` is the number of matches; with exactly one occurrence of `z`, expected match count is 1.\n- If you summed `i · pᵢ` from 0 to n-1 — you computed an expected index, not an expected count; here `k = Σ Xᵢ`, so `E[k] = Σ E[Xᵢ] = Σ pᵢ`.\n- If you forgot linearity of expectation and tried to count dependencies — the `Xᵢ` aren't independent, but linearity doesn't need independence; the sum of `1/n` over n terms is 1.",
+        "ro": "- Dacă ai obținut `n/2` — ai folosit cazul mediu al *căutării secvențiale*, nu `E[k]` unde `k` e numărul de potriviri; cu exact o apariție a lui `z`, numărul mediu de potriviri este 1.\n- Dacă ai sumat `i · pᵢ` de la 0 la n-1 — ai calculat un indice mediu, nu un număr mediu de potriviri; aici `k = Σ Xᵢ`, deci `E[k] = Σ E[Xᵢ] = Σ pᵢ`.\n- Dacă ai uitat liniaritatea speranței și ai încercat să tratezi dependențele — `Xᵢ` nu sunt independente, dar liniaritatea nu cere independență; suma `1/n` peste n termeni este 1."
       }
     },
     {
@@ -115,6 +143,10 @@
       "rubric": {
         "en": "DA, dacă se consideră ca input doar tabloul s.",
         "ro": "DA, dacă se consideră ca input doar tabloul s."
+      },
+      "commonErrors": {
+        "en": "- If you answered a flat 'NO' — you ignored that randomizing the position of `z` matches the assumption of uniform input in the deterministic average-case analysis.\n- If you answered 'YES' unconditionally — you skipped the domain restriction; the equivalence holds only when `s` (not `z`) is the input being averaged over.\n- If you confused Las Vegas with Monte Carlo semantics — `ransearch` is LV (always correct, random runtime), so its E[T] *can* serve as an estimator for the deterministic average; an MC algorithm couldn't.",
+        "ro": "- Dacă ai răspuns simplu „NU” — ai ignorat că randomizarea poziției lui `z` corespunde ipotezei de intrare uniformă din analiza average-case a algoritmului determinist.\n- Dacă ai răspuns „DA” necondiționat — ai omis restricția de domeniu; echivalența ține doar când `s` (nu `z`) e intrarea peste care se mediază.\n- Dacă ai confundat semantica Las Vegas cu Monte Carlo — `ransearch` e LV (mereu corect, timp aleator), deci `E[T]` *poate* servi ca estimator pentru media deterministului; un algoritm MC nu ar putea."
       }
     },
     {
@@ -128,6 +160,10 @@
       "rubric": {
         "en": "T(n) = Σₖ₌₀ⁿ k · Cₙᵏ · (n-1)ⁿ⁻ᵏ / nⁿ = 1",
         "ro": "T(n) = Σₖ₌₀ⁿ k · Cₙᵏ · (n-1)ⁿ⁻ᵏ / nⁿ = 1"
+      },
+      "commonErrors": {
+        "en": "- If you dropped the binomial factor `Cₙᵏ` — you counted only one arrangement of the k hits, not all `C(n,k)` of them; the weighting must account for which positions hold `z`.\n- If you used `nⁿ⁻ᵏ` in the numerator instead of `(n-1)ⁿ⁻ᵏ` — you let the non-hit positions also be `z`, contradicting the premise that exactly k positions equal `z`.\n- If you divided by `n!` — you assumed permutations; here each of the n positions is chosen independently from n values, so the sample space has size `nⁿ`.",
+        "ro": "- Dacă ai omis factorul binomial `Cₙᵏ` — ai numărat o singură aranjare a celor k potriviri, nu toate `C(n,k)`; ponderarea trebuie să țină cont de care poziții conțin `z`.\n- Dacă ai folosit `nⁿ⁻ᵏ` la numărător în loc de `(n-1)ⁿ⁻ᵏ` — ai permis ca și pozițiile fără potrivire să conțină `z`, contrazicând ipoteza că exact k poziții egalează `z`.\n- Dacă ai împărțit la `n!` — ai presupus permutări; aici fiecare din cele n poziții e aleasă independent din n valori, deci spațiul de eșantionare are dimensiunea `nⁿ`."
       }
     },
     {
@@ -141,6 +177,10 @@
       "rubric": {
         "en": "NP = {X | X este o problemă de (1) decizie și există un (2) algoritm nedeterminist (3) polinomial în cazul cel mai nefavorabil pentru X.}",
         "ro": "NP = {X | X este o problemă de (1) decizie și există un (2) algoritm nedeterminist (3) polinomial în cazul cel mai nefavorabil pentru X.}"
+      },
+      "commonErrors": {
+        "en": "- If you dropped the 'decision problem' requirement — you included optimization/search problems, but NP is defined only for yes/no questions; use NPO or FNP for those.\n- If you wrote 'deterministic polynomial' — that defines P, not NP; NP requires a *nondeterministic* machine (or equivalently a polynomial-time verifier of certificates).\n- If you said 'polynomial in average case' — you weakened the class; NP bounds the worst case of the nondeterministic algorithm, not the average.",
+        "ro": "- Dacă ai omis cerința de „problemă de decizie” — ai inclus probleme de optimizare/căutare, dar NP e definită doar pentru întrebări da/nu; pentru acelea folosești NPO sau FNP.\n- Dacă ai scris „polinomial determinist” — aceea e definiția lui P, nu NP; NP cere o mașină *nedeterministă* (sau echivalent un verificator polinomial de certificate).\n- Dacă ai spus „polinomial în medie” — ai slăbit clasa; NP mărginește cazul cel mai nefavorabil al algoritmului nedeterminist, nu media."
       }
     },
     {
@@ -154,6 +194,10 @@
       "rubric": {
         "en": "CLIQUE: Input: G=(V,E), k∈ℕ. Output: există V'⊆V a.î. |V'|≥k și ∀u,v∈V', u≠v → {u,v}∈E?\nMAXIMUM-INDEPENDENT-SET: Input: G=(V,E), k∈ℕ. Output: există V'⊆V a.î. |V'|≥k și ∀u,v∈V' → {u,v}∉E?",
         "ro": "CLIQUE: Input: G=(V,E), k∈ℕ. Output: există V'⊆V a.î. |V'|≥k și ∀u,v∈V', u≠v → {u,v}∈E?\nMAXIMUM-INDEPENDENT-SET: Input: G=(V,E), k∈ℕ. Output: există V'⊆V a.î. |V'|≥k și ∀u,v∈V' → {u,v}∉E?"
+      },
+      "commonErrors": {
+        "en": "- If you asked for `|V'| = k` (equality) rather than `|V'| ≥ k` — you defined the exact-size variant; the standard decision form uses `≥ k` so it's monotone and reduces cleanly.\n- If you swapped the edge conditions — CLIQUE needs *all pairs* connected (`∈ E`), IS needs *no pair* connected (`∉ E`); a sign flip here inverts the reduction in part (d).\n- If you returned `V'` itself as the output — these are decision problems; output is a boolean, and `V'` is the certificate, not the answer.",
+        "ro": "- Dacă ai cerut `|V'| = k` (egalitate) în loc de `|V'| ≥ k` — ai definit varianta cu dimensiune exactă; forma standard de decizie folosește `≥ k` ca să fie monotonă și să se reducă curat.\n- Dacă ai inversat condițiile pe muchii — CLIQUE cere *toate perechile* conectate (`∈ E`), IS cere *nicio pereche* conectată (`∉ E`); o inversare aici strică reducerea de la (d).\n- Dacă ai întors chiar `V'` ca ieșire — sunt probleme de decizie; ieșirea e un boolean, iar `V'` e certificatul, nu răspunsul."
       }
     },
     {
@@ -167,6 +211,10 @@
       "rubric": {
         "en": "i. alege nedeterminist k noduri din G.\nii. verifică dacă nu există nicio muchie între nodurile ghicite.",
         "ro": "i. alege nedeterminist k noduri din G.\nii. verifică dacă nu există nicio muchie între nodurile ghicite."
+      },
+      "commonErrors": {
+        "en": "- If you iterated over all `C(n,k)` subsets deterministically — you wrote an exponential algorithm; the nondeterministic machine *guesses* one k-subset in one step.\n- If you checked for edges *existing* between the guessed nodes — that's CLIQUE verification; for IS, the verifier must reject when any edge is present.\n- If you skipped the verification step — nondeterminism alone isn't an algorithm; after the guess you must run a polynomial-time deterministic check on the certificate.",
+        "ro": "- Dacă ai iterat determinist peste toate cele `C(n,k)` submulțimi — ai scris un algoritm exponențial; mașina nedeterministă *ghicește* o k-submulțime într-un singur pas.\n- Dacă ai verificat *existența* muchiilor între nodurile ghicite — aceea e verificarea pentru CLIQUE; pentru IS, verificatorul respinge când apare orice muchie.\n- Dacă ai sărit peste pasul de verificare — nedeterminismul singur nu e algoritm; după ghicire trebuie un test determinist polinomial pe certificat."
       }
     },
     {
@@ -180,6 +228,10 @@
       "rubric": {
         "en": "Se calculează complementul grafului. Parametrul k se păstrează.\nO mulțime stabilă de noduri în graful complement corespunde unei clici în graful inițial.",
         "ro": "Se calculează complementul grafului. Parametrul k se păstrează.\nO mulțime stabilă de noduri în graful complement corespunde unei clici în graful inițial."
+      },
+      "commonErrors": {
+        "en": "- If you also modified `k` — you broke correctness; the reduction keeps `k` because a k-clique in G is exactly a k-IS in the complement G̅.\n- If you built the line graph or some other transformation — you overcomplicated it; the edge-complement is the minimal and standard construction.\n- If you called MAXIMUM-INDEPENDENT-SET multiple times — that's a Turing reduction; Karp requires exactly one call plus polynomial-time input/output massaging.",
+        "ro": "- Dacă ai modificat și `k` — ai rupt corectitudinea; reducerea păstrează `k` fiindcă o k-clică în G este exact o k-mulțime independentă în complementul G̅.\n- Dacă ai construit graful muchiilor sau altă transformare — ai complicat inutil; complementul muchiilor e construcția minimă și standard.\n- Dacă ai apelat MAXIMUM-INDEPENDENT-SET de mai multe ori — aia e reducere Turing; Karp cere un singur apel plus prelucrare polinomială a intrării/ieșirii."
       }
     }
   ]

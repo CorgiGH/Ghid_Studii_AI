@@ -20,8 +20,11 @@
         "ro": "**Problem 1: Design and Analysis — Multiset Membership**\nUn element-multiplu este o pereche formată dintr-un element x și numărul de apariții ale acestuia. O multi-mulțime este o mulțime de elemente-multiple cu proprietatea că nu există două elemente-multiple care se referă la același element x. Se consideră problema determinării apartenenței unui element-multiplu la o multi-mulțime. Notăm această problemă cu INM.\n\n**a)** Să se formuleze INM ca pereche (input, output)."
       },
       "rubric": {
-        "en": "Input: S = {(x₀,k₀),...,(xₙ₋₁,kₙ₋₁)}, a = (y,k), a.î. (∀i,j ∈ {0..n-1}) i ≠ j ⟹ xᵢ ≠ xⱼ\nOutput: true dacă a ∈ S, i.e. (∃i) 0 ≤ i < n ∧ y == xᵢ ∧ kᵢ ≥ k\nfalse altfel",
-        "ro": "Input: S = {(x₀,k₀),...,(xₙ₋₁,kₙ₋₁)}, a = (y,k), a.î. (∀i,j ∈ {0..n-1}) i ≠ j ⟹ xᵢ ≠ xⱼ\nOutput: true dacă a ∈ S, i.e. (∃i) 0 ≤ i < n ∧ y == xᵢ ∧ kᵢ ≥ k\nfalse altfel"
+        "en": "Input: S = {(x₀,k₀),...,(xₙ₋₁,kₙ₋₁)}, a = (y,k), a.î. (∀i,j ∈ {0..n-1}) i ≠ j ⟹ xᵢ ≠ xⱼ\nOutput: true dacă a ∈ S, i.e. (∃i) 0 ≤ i < n ∧ y == xᵢ ∧ kᵢ ≥ k\nfalse altfel"
+      },
+      "commonErrors": {
+        "en": "- If you required `kᵢ == k` instead of `kᵢ ≥ k` — you misread 'contains at least k copies'; a multiset with 5 copies of x does contain (x, 3).\n- If you omitted the uniqueness constraint on the xᵢ (`i ≠ j ⟹ xᵢ ≠ xⱼ`) — you described a bag, not a multiset; the definition forbids two multi-elements referring to the same x.\n- If you returned a count or an index instead of a boolean — INM is a decision problem; the output is true/false.",
+        "ro": "- Dacă ai cerut `kᵢ == k` în loc de `kᵢ ≥ k` — ai interpretat greșit „conține cel puțin k copii”; o multi-mulțime cu 5 copii ale lui x conține și (x, 3).\n- Dacă ai omis constrângerea de unicitate pe xᵢ (`i ≠ j ⟹ xᵢ ≠ xⱼ`) — ai descris un bag, nu o multi-mulțime; definiția interzice două elemente-multiple pentru același x.\n- Dacă ai întors un număr sau un index în loc de un boolean — INM e o problemă de decizie; ieșirea este true/false."
       }
     },
     {
@@ -36,6 +39,10 @@
         "en": "Expected code/algorithm:\nINM(S, a) {\n  for (i=0; i < S.size(); ++i)\n    if (S[i].x == a.y && S[i].k >= a.k) return true;\n  return false;\n}",
         "ro": "Expected code/algorithm:\nINM(S, a) {\n  for (i=0; i < S.size(); ++i)\n    if (S[i].x == a.y && S[i].k >= a.k) return true;\n  return false;\n}"
       },
+      "commonErrors": {
+        "en": "- If you tested `S[i].k == a.k` — you rejected entries with more copies than required; the condition must be `>=` to match 'at least k copies'.\n- If you returned `false` inside the loop on the first mismatch — you stopped too early; `false` may only be returned after scanning the whole array.\n- If you forgot to compare the element `S[i].x == a.y` and checked only the multiplicity — you'd accept any entry with enough copies, regardless of which x it refers to.",
+        "ro": "- Dacă ai testat `S[i].k == a.k` — ai respins intrările cu mai multe copii decât cere întrebarea; condiția trebuie să fie `>=` pentru „cel puțin k copii”.\n- Dacă ai întors `false` în interiorul buclei la prima nepotrivire — te-ai oprit prea repede; `false` poate fi întors doar după parcurgerea întregului tablou.\n- Dacă ai uitat să compari elementul `S[i].x == a.y` și ai verificat doar multiplicitatea — ai accepta orice intrare cu suficiente copii, indiferent de x."
+      },
       "language": "pseudocode"
     },
     {
@@ -47,8 +54,11 @@
         "ro": "**Problem 1: Design and Analysis — Multiset Membership**\nUn element-multiplu este o pereche formată dintr-un element x și numărul de apariții ale acestuia. O multi-mulțime este o mulțime de elemente-multiple cu proprietatea că nu există două elemente-multiple care se referă la același element x. Se consideră problema determinării apartenenței unui element-multiplu la o multi-mulțime. Notăm această problemă cu INM.\n\n**c)** Să se justifice că algoritmul rezolvă corect problema."
       },
       "rubric": {
-        "en": "Invariantul buclei for: (∀j ∈ {0..i-1}) y ≠ xⱼ ∨ kⱼ < k\nFuncția întoarce true numai dacă S[i].x == a.y && S[i].k >= a.k, adică a ∈ S.\nFuncția întoarce false numai dacă execuția instrucțiunii for se termină normal.",
-        "ro": "Invariantul buclei for: (∀j ∈ {0..i-1}) y ≠ xⱼ ∨ kⱼ < k\nFuncția întoarce true numai dacă S[i].x == a.y && S[i].k >= a.k, adică a ∈ S.\nFuncția întoarce false numai dacă execuția instrucțiunii for se termină normal."
+        "en": "Invariantul buclei for: (∀j ∈ {0..i-1}) y ≠ xⱼ ∨ kⱼ < k\nFuncția întoarce true numai dacă S[i].x == a.y && S[i].k >= a.k, adică a ∈ S.\nFuncția întoarce false numai dacă execuția instrucțiunii for se termină normal."
+      },
+      "commonErrors": {
+        "en": "- If your invariant only said 'i < n' — that's a loop bound, not a property about processed entries; the invariant must say that no earlier j matched.\n- If you wrote the invariant as `y ≠ xⱼ ∧ kⱼ < k` — you required both parts, but the match condition is an AND, so its negation is an OR (`y ≠ xⱼ ∨ kⱼ < k`).\n- If you skipped the `return false` branch in the justification — you proved only soundness of `true`; you must also argue that normal loop termination means `a ∉ S`.",
+        "ro": "- Dacă invariantul tău spunea doar „i < n” — e o margine a buclei, nu o proprietate a datelor parcurse; invariantul trebuie să afirme că niciun j anterior nu a satisfăcut condiția.\n- Dacă ai scris invariantul ca `y ≠ xⱼ ∧ kⱼ < k` — ai cerut ambele părți, dar condiția de potrivire e AND, deci negația ei este OR (`y ≠ xⱼ ∨ kⱼ < k`).\n- Dacă ai sărit peste ramura `return false` în justificare — ai dovedit doar corectitudinea lui `true`; trebuie argumentat și că terminarea normală a buclei înseamnă `a ∉ S`."
       }
     },
     {
@@ -62,6 +72,10 @@
       "rubric": {
         "en": "n = S.size(). Cazul cel mai nefavorabil: când a nu apare în S. Bucla for se execută de n ori. Timpul = n = O(n).",
         "ro": "n = S.size(). Cazul cel mai nefavorabil: când a nu apare în S. Bucla for se execută de n ori. Timpul = n = O(n)."
+      },
+      "commonErrors": {
+        "en": "- If you answered O(1) — that's the best case (the match is found on the first entry); worst case requires scanning the whole array.\n- If you said O(n²) — you confused this linear scan with nested loops; there is no inner loop over S.\n- If you named 'a is the last element of S' as worst case — a last-position match still takes n iterations, but so does a 'not present' input; both are worst cases, and 'not present' is the canonical answer.",
+        "ro": "- Dacă ai răspuns O(1) — acela e cazul cel mai favorabil (potrivirea se găsește la prima intrare); cazul cel mai nefavorabil cere parcurgerea întregului tablou.\n- Dacă ai spus O(n²) — ai confundat această parcurgere liniară cu bucle imbricate; nu există o buclă internă peste S.\n- Dacă ai numit „a este ultimul element din S” drept cel mai nefavorabil — o potrivire pe ultima poziție face tot n iterații, la fel ca un input „absent”; ambele sunt cazuri cele mai nefavorabile, iar „absent” este răspunsul canonic."
       }
     },
     {
@@ -76,6 +90,10 @@
         "en": "Expected code/algorithm:\nminim(a,n) {\n  min = ∞;\n  S = { 0 .. n-1 };\n  while (n > 0) {\n    i = uniform(S);\n    S = S \\ singletonSet(i);\n    if (a[i] < min) min = a[i];\n    n = S.size();\n  }\n}",
         "ro": "Expected code/algorithm:\nminim(a,n) {\n  min = ∞;\n  S = { 0 .. n-1 };\n  while (n > 0) {\n    i = uniform(S);\n    S = S \\ singletonSet(i);\n    if (a[i] < min) min = a[i];\n    n = S.size();\n  }\n}"
       },
+      "commonErrors": {
+        "en": "- If you drew from `uniform(0..n-1)` without removing the index — you'd sample with replacement and potentially visit the same position twice; the problem specifies each element is chosen 'on its turn'.\n- If you initialized `min` with `a[0]` — the random-sampling analysis assumes `min = ∞` so the first element always triggers (*); seeding with `a[0]` changes the probability of the first iteration.\n- If you omitted the set `S` and used a counter only — you lost the 'pick an as-yet-unseen index' invariant, which is what makes the indices a uniform permutation.",
+        "ro": "- Dacă ai extras cu `uniform(0..n-1)` fără să elimini indicele — ai eșantiona cu înlocuire, putând vizita aceeași poziție de două ori; problema specifică că fiecare element se alege „pe rând”.\n- Dacă ai inițializat `min` cu `a[0]` — analiza probabilistă presupune `min = ∞`, astfel încât primul element să declanșeze întotdeauna (*); inițializarea cu `a[0]` schimbă probabilitatea primei iterații.\n- Dacă ai omis mulțimea `S` și ai folosit doar un contor — ai pierdut invariantul „alege un indice încă nevizitat”, ceea ce face ca indicii să formeze o permutare uniformă."
+      },
       "language": "pseudocode"
     },
     {
@@ -89,6 +107,10 @@
       "rubric": {
         "en": "a[iₙ] trebuie să fie elementul minim din a. Echivalent, minimul apare pe poziția n-1 în tabloul permutat.\npₙ = (n-1)!/n! = 1/n",
         "ro": "a[iₙ] trebuie să fie elementul minim din a. Echivalent, minimul apare pe poziția n-1 în tabloul permutat.\npₙ = (n-1)!/n! = 1/n"
+      },
+      "commonErrors": {
+        "en": "- If you answered 1/n! — you computed the probability of a *specific* permutation, not the event 'the global min lands on the n-th draw'.\n- If you wrote 1/(n-1) — you counted the positions other than the last; but the min must land exactly on the last draw, which is 1 out of n equally likely positions.\n- If you argued via independence of iterations (e.g. `(1 − 1/n)^(n−1) · something`) — the samples are without replacement, so the relevant counting is permutations, not independent trials.",
+        "ro": "- Dacă ai răspuns 1/n! — ai calculat probabilitatea unei permutări *specifice*, nu a evenimentului „minimul global pică pe extragerea a n-a”.\n- Dacă ai scris 1/(n-1) — ai numărat pozițiile diferite de ultima; dar minimul trebuie să pice exact pe ultima extragere, adică 1 din n poziții echiprobabile.\n- Dacă ai argumentat prin independența iterațiilor (ex. `(1 − 1/n)^(n−1) · ceva`) — extragerile sunt fără înlocuire, deci numărarea corectă e prin permutări, nu prin încercări independente."
       }
     },
     {
@@ -102,6 +124,10 @@
       "rubric": {
         "en": "a[iₙ₋₁] trebuie să fie cel mai mic din a[i₁..iₙ₋₁].\npₙ₋₁ = (n-2)!/(n-1)! = 1/(n-1)",
         "ro": "a[iₙ₋₁] trebuie să fie cel mai mic din a[i₁..iₙ₋₁].\npₙ₋₁ = (n-2)!/(n-1)! = 1/(n-1)"
+      },
+      "commonErrors": {
+        "en": "- If you reused pₙ = 1/n — you ignored that the (n-1)-th iteration conditions on a *smaller* prefix (n-1 elements), so the denominator drops by one.\n- If you computed the probability that the minimum lands in the first n-1 draws — that's the complement event; the question asks for the probability the (*) assignment *fires* at step n-1, i.e. the new arrival is the min of the prefix so far.\n- If you multiplied pₙ by pₙ₋₁ — you conflated independent events; each iteration's probability is computed in isolation relative to its own prefix, not compounded.",
+        "ro": "- Dacă ai reutilizat pₙ = 1/n — ai ignorat că iterația (n-1) condiționează pe un prefix *mai mic* (n-1 elemente), deci numitorul scade cu unu.\n- Dacă ai calculat probabilitatea ca minimul să pice în primele n-1 extrageri — acela e evenimentul complementar; întrebarea cere probabilitatea ca atribuirea (*) să *se execute* la pasul n-1, adică noul element să fie minimul prefixului de până atunci.\n- Dacă ai înmulțit pₙ cu pₙ₋₁ — ai confundat evenimente independente; probabilitatea fiecărei iterații se calculează izolat, relativ la propriul prefix, nu compus."
       }
     },
     {
@@ -115,6 +141,10 @@
       "rubric": {
         "en": "pᵢ = (i-1)!/i! = 1/i",
         "ro": "pᵢ = (i-1)!/i! = 1/i"
+      },
+      "commonErrors": {
+        "en": "- If you answered 1/n — you used the full array size instead of the prefix size i; only the first i elements have been drawn by iteration i.\n- If you answered i/n — you computed the probability the min of the whole array is among the first i draws, not the probability it is the very latest one.\n- If you skipped the combinatorial step (`(i-1)!/i!`) — you missed that among the i! orderings of the first i elements, only (i-1)! place the minimum last.",
+        "ro": "- Dacă ai răspuns 1/n — ai folosit dimensiunea totală a tabloului în loc de dimensiunea prefixului i; până la iterația i s-au extras doar primele i elemente.\n- Dacă ai răspuns i/n — ai calculat probabilitatea ca minimul întregului tablou să fie printre primele i extrageri, nu probabilitatea ca el să fie cel mai recent.\n- Dacă ai sărit peste pasul combinatoric (`(i-1)!/i!`) — ai ratat că dintre cele i! ordonări ale primelor i elemente, doar (i-1)! îl plasează pe minim pe ultima poziție."
       }
     },
     {
@@ -128,6 +158,10 @@
       "rubric": {
         "en": "M(A) = Σⁿᵢ₌₁ 1·pᵢ = 1 + 1/2 + ... + 1/(n-1) + 1/n",
         "ro": "M(A) = Σⁿᵢ₌₁ 1·pᵢ = 1 + 1/2 + ... + 1/(n-1) + 1/n"
+      },
+      "commonErrors": {
+        "en": "- If you got n (the number of iterations) — you counted the `if` *test*, not the assignment; (*) fires only when the incoming element is a new minimum.\n- If you used Σ i·pᵢ — you weighted by i, but linearity of expectation for an indicator `Xᵢ = [(*) fires at step i]` gives E[X] = Σ pᵢ, not Σ i·pᵢ.\n- If you started the sum from i=0 or truncated to n-1 — you miscounted the iteration range; steps are indexed 1..n and every one contributes a 1/i term.",
+        "ro": "- Dacă ai obținut n (numărul de iterații) — ai numărat *testul* `if`, nu atribuirea; (*) se execută doar când noul element este un nou minim.\n- Dacă ai folosit Σ i·pᵢ — ai ponderat cu i, dar liniaritatea speranței pentru indicatorul `Xᵢ = [(*) se execută la pasul i]` dă E[X] = Σ pᵢ, nu Σ i·pᵢ.\n- Dacă ai pornit suma de la i=0 sau ai trunchiat la n-1 — ai greșit domeniul de iterare; pașii sunt indexați 1..n și fiecare contribuie cu un termen 1/i."
       }
     },
     {
@@ -142,6 +176,10 @@
         "en": "Expected code/algorithm:\nCHLPS(P) {\n  n = P.size();\n  if (P[0] != P[n-1]) {\n    P[n] = P[0];\n    n = n+1;\n  }\n  L[0] = P[0]; L[1] = P[1]; k = 2;\n  for (i = 2; i < n; ++i) {\n    while (k >= 2 && ccw(L[k-2], L[k-1], P[i]) < 0) {\n      --k;\n    }\n    L[k] = P[i];\n    ++k;\n  }\n  return L;\n}",
         "ro": "Expected code/algorithm:\nCHLPS(P) {\n  n = P.size();\n  if (P[0] != P[n-1]) {\n    P[n] = P[0];\n    n = n+1;\n  }\n  L[0] = P[0]; L[1] = P[1]; k = 2;\n  for (i = 2; i < n; ++i) {\n    while (k >= 2 && ccw(L[k-2], L[k-1], P[i]) < 0) {\n      --k;\n    }\n    L[k] = P[i];\n    ++k;\n  }\n  return L;\n}"
       },
+      "commonErrors": {
+        "en": "- If you re-sorted the input by angle — you lost the O(n) bound and effectively re-ran Graham's scan; a simple polyline's vertices are already in scan order.\n- If you skipped the close-the-loop step (`if P[0] != P[n-1] then P[n] = P[0]`) — the final edge isn't checked, and a non-convex wrap-around can slip through.\n- If your `while` condition was `ccw ≤ 0` — you'd also pop *collinear* points, which should usually be kept (strict `< 0` pops only right turns).",
+        "ro": "- Dacă ai resortat intrarea după unghi — ai pierdut bariera O(n) și practic ai rulat din nou scanarea Graham; vârfurile unei linii poligonale simple sunt deja în ordinea scanării.\n- Dacă ai sărit peste pasul de închidere (`if P[0] != P[n-1] then P[n] = P[0]`) — ultima muchie nu e verificată și o ondulare neconvexă poate trece neobservată.\n- Dacă ai folosit condiția `while` ca `ccw ≤ 0` — ai fi eliminat și puncte *coliniare*, care de regulă trebuie păstrate (strict `< 0` elimină doar virajele la dreapta)."
+      },
       "language": "pseudocode"
     },
     {
@@ -155,6 +193,10 @@
       "rubric": {
         "en": "Invariant for: Toate punctele din linia P se află în stânga liniei poligonale convexe L[0..k-1].\nLa sfârșit L devine poligon convex și toate punctele din P se află pe L sau în interior.",
         "ro": "Invariant for: Toate punctele din linia P se află în stânga liniei poligonale convexe L[0..k-1].\nLa sfârșit L devine poligon convex și toate punctele din P se află pe L sau în interior."
+      },
+      "commonErrors": {
+        "en": "- If your invariant was just 'L is convex' — you omitted the containment half (all input points lie on L or inside); both halves are needed to conclude L = CH(P) at the end.\n- If you didn't handle the while-pop in the argument — you proved the invariant is maintained only by the push; you also need to show that each pop preserves convexity of the prefix.\n- If you assumed the polyline was closed — the algorithm closes it via the `P[n] = P[0]` step; arguing without this case leaves the final edge unverified.",
+        "ro": "- Dacă invariantul tău spunea doar „L este convex” — ai omis cealaltă jumătate (toate punctele de intrare sunt pe L sau în interior); ambele jumătăți sunt necesare pentru a concluziona L = CH(P) la final.\n- Dacă nu ai tratat pop-ul din while în argument — ai demonstrat că invariantul se păstrează doar la push; trebuie arătat și că fiecare pop păstrează convexitatea prefixului.\n- Dacă ai presupus că linia este deja închisă — algoritmul o închide prin `P[n] = P[0]`; argumentarea fără acest caz lasă ultima muchie neverificată."
       }
     },
     {
@@ -168,6 +210,10 @@
       "rubric": {
         "en": "Numărul de puncte din L[0..k-1] ∪ P[i..n-1] scade cu o unitate la fiecare iterație for + while.",
         "ro": "Numărul de puncte din L[0..k-1] ∪ P[i..n-1] scade cu o unitate la fiecare iterație for + while."
+      },
+      "commonErrors": {
+        "en": "- If you bounded the while by n — you got O(n²); the amortized argument is that each point is pushed once and popped at most once across all iterations, so the total while-work is O(n).\n- If you ignored the potential/charging argument — you can't see why the inner while doesn't blow up the bound; the key fact is that `L[0..k-1] ∪ P[i..n-1]` has n+1 points initially and decreases monotonically.\n- If you concluded O(n log n) by analogy with Graham's scan — there's no sort here; the input is already a simple polyline, so sorting is skipped and the bound drops to O(n).",
+        "ro": "- Dacă ai mărginit while-ul cu n — ai obținut O(n²); argumentul amortizat spune că fiecare punct este împins o dată și eliminat cel mult o dată peste toate iterațiile, deci munca totală a while-ului este O(n).\n- Dacă ai ignorat argumentul de potențial/contabilizare — nu se vede de ce while-ul intern nu strică marginea; cheia este că `L[0..k-1] ∪ P[i..n-1]` are inițial n+1 puncte și scade monoton.\n- Dacă ai concluzionat O(n log n) prin analogie cu scanarea Graham — aici nu există sortare; intrarea e deja o linie poligonală simplă, deci sortarea se omite și marginea scade la O(n)."
       }
     }
   ]

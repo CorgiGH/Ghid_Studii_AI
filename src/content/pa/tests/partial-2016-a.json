@@ -22,6 +22,10 @@
       "rubric": {
         "en": "Input: L = ⟨x₀,x₁,...,xₙ₋₁⟩, xᵢ ∈ ℤ, i=1,...n\nOutput: true dacă (∃i) 0 ≤ i < n și 3 divide xᵢ și 5 nu divide xᵢ\nfalse dacă (∀i) 0 ≤ i < n implică 3 nu divide xᵢ sau 5 divide xᵢ",
         "ro": "Input: L = ⟨x₀,x₁,...,xₙ₋₁⟩, xᵢ ∈ ℤ, i=1,...n\nOutput: true dacă (∃i) 0 ≤ i < n și 3 divide xᵢ și 5 nu divide xᵢ\nfalse dacă (∀i) 0 ≤ i < n implică 3 nu divide xᵢ sau 5 divide xᵢ"
+      },
+      "commonErrors": {
+        "en": "- If you required 3 divides xᵢ *and* 5 divides xᵢ — you described the opposite set; the problem wants divisible by 3 and **not** divisible by 5 (so 15 must be rejected).\n- If you omitted the existential quantifier and wrote a condition about a single element — your output ignores that the problem is about the *whole* list; true must mean 'at least one such element exists'.\n- If you returned the element itself instead of a boolean — you described a search problem, not a yes/no decision problem.",
+        "ro": "- Dacă ai cerut 3 divide xᵢ *și* 5 divide xᵢ — ai descris mulțimea opusă; problema cere divizibil cu 3 și **nu** divizibil cu 5 (deci 15 trebuie respins).\n- Dacă ai omis cuantificatorul existențial și ai scris o condiție despre un singur element — ieșirea ta ignoră că problema e despre *întreaga* listă; true înseamnă „există cel puțin un astfel de element”.\n- Dacă ai întors elementul însuși în loc de boolean — ai descris o problemă de căutare, nu una de decizie da/nu."
       }
     },
     {
@@ -36,6 +40,10 @@
         "en": "Expected code/algorithm:\np35(L) {\n  for (i = 0; i < L.size(); ++i)\n    if (L.at(i) % 3 == 0 && L.at(i) % 5 != 0) return true;\n  return false;\n}",
         "ro": "Expected code/algorithm:\np35(L) {\n  for (i = 0; i < L.size(); ++i)\n    if (L.at(i) % 3 == 0 && L.at(i) % 5 != 0) return true;\n  return false;\n}"
       },
+      "commonErrors": {
+        "en": "- If you wrote `L.at(i) % 3 == 0 && L.at(i) % 5 == 0` — you tested divisibility by 15, not by 3-but-not-5; the second clause must be `!= 0`.\n- If you placed `return false` inside the loop — you rejected on the first element that fails, so a valid later element is never found; `return false` must come *after* the loop.\n- If you used `||` instead of `&&` between the two divisibility tests — any multiple of 3 *or* not-multiple-of-5 would qualify, including numbers that aren't divisible by 3 at all.",
+        "ro": "- Dacă ai scris `L.at(i) % 3 == 0 && L.at(i) % 5 == 0` — ai testat divizibilitatea cu 15, nu „cu 3 dar nu cu 5”; a doua clauză trebuie să fie `!= 0`.\n- Dacă ai pus `return false` în interiorul buclei — respingi la primul element care nu se potrivește, deci un element valid de mai târziu nu mai e găsit; `return false` trebuie *după* buclă.\n- Dacă ai folosit `||` în loc de `&&` între cele două teste — orice multiplu de 3 *sau* ne-multiplu de 5 ar califica, inclusiv numere care nu sunt deloc divizibile cu 3."
+      },
       "language": "pseudocode"
     },
     {
@@ -49,6 +57,10 @@
       "rubric": {
         "en": "Invariantul pentru for: pentru orice j cu 0 ≤ j < i, L.at(j) % 3 != 0 sau L.at(j) % 5 == 0.\nLa terminarea lui for are loc invariantul și i == L.size().\nDimensiunea unei instanțe: n = L.size().\nCazul cel mai nefavorabil: când returnează false. T(n) = O(n).",
         "ro": "Invariantul pentru for: pentru orice j cu 0 ≤ j < i, L.at(j) % 3 != 0 sau L.at(j) % 5 == 0.\nLa terminarea lui for are loc invariantul și i == L.size().\nDimensiunea unei instanțe: n = L.size().\nCazul cel mai nefavorabil: când returnează false. T(n) = O(n)."
+      },
+      "commonErrors": {
+        "en": "- If your invariant said `i < L.size()` — that's the loop bound, not a property of the scanned prefix; the invariant must say that *all* j < i already failed the test.\n- If you claimed the worst case is when true is returned early — that's the best case (first element matches); worst case is scanning the whole list, i.e., returning false.\n- If you wrote T(n) = O(1) because 'each iteration is constant' — you ignored the Θ(n) iteration count; per-iteration cost and total cost are different quantities.",
+        "ro": "- Dacă invariantul tău era `i < L.size()` — e marginea buclei, nu o proprietate a prefixului parcurs; invariantul trebuie să spună că *toate* j < i deja au eșuat testul.\n- Dacă ai afirmat că worst-case e când se întoarce true devreme — acela e best-case (primul element se potrivește); worst-case e parcurgerea întregii liste, adică return false.\n- Dacă ai scris T(n) = O(1) pentru că „fiecare iterație e constantă” — ai ignorat numărul de iterații Θ(n); costul pe iterație și costul total sunt mărimi diferite."
       }
     },
     {
@@ -63,6 +75,10 @@
         "en": "Expected code/algorithm:\np35nedet(L) {\n  choose i in 0..L.size() - 1;\n  if (L.at(i) % 3 == 0 && L.at(i) % 5 != 0) success;\n  else failure;\n}",
         "ro": "Expected code/algorithm:\np35nedet(L) {\n  choose i in 0..L.size() - 1;\n  if (L.at(i) % 3 == 0 && L.at(i) % 5 != 0) success;\n  else failure;\n}"
       },
+      "commonErrors": {
+        "en": "- If you wrote a loop `for (i = 0; i < n; i++)` — that's the deterministic algorithm; a nondeterministic algorithm uses a single `choose` to guess the witness i in one step.\n- If your `choose` range was `1..L.size()` — you indexed off-by-one and may read past the last element; the 0-indexed range is `0..L.size()-1`.\n- If you returned true/false instead of success/failure — you confused the ND machine's termination semantics with a deterministic boolean return; ND uses success/failure verdicts across the computation tree.",
+        "ro": "- Dacă ai scris o buclă `for (i = 0; i < n; i++)` — e algoritmul determinist; unul nedeterminist folosește un singur `choose` pentru a ghici martorul i dintr-un pas.\n- Dacă intervalul lui `choose` a fost `1..L.size()` — ai indexat cu off-by-one și poți citi dincolo de ultimul element; intervalul 0-indexat e `0..L.size()-1`.\n- Dacă ai întors true/false în loc de success/failure — ai confundat semantica de terminare a mașinii ND cu un retur boolean determinist; ND folosește verdicte success/failure în arborele de calcul."
+      },
       "language": "pseudocode"
     },
     {
@@ -76,6 +92,10 @@
       "rubric": {
         "en": "Dacă (∃i) 0 ≤ i < n și 3 divide L.at(i) și 5 nu divide L.at(i), atunci există un calcul care se termină cu succes, cel în care instrucțiunea choose atribuie lui i o valoare care satisface condiția.\nDeoarece alegerea lui i se face în timpul O(1) și oricare din ramurile lui if necesită timpul O(1), rezultă T(n) = O(1).",
         "ro": "Dacă (∃i) 0 ≤ i < n și 3 divide L.at(i) și 5 nu divide L.at(i), atunci există un calcul care se termină cu succes, cel în care instrucțiunea choose atribuie lui i o valoare care satisface condiția.\nDeoarece alegerea lui i se face în timpul O(1) și oricare din ramurile lui if necesită timpul O(1), rezultă T(n) = O(1)."
+      },
+      "commonErrors": {
+        "en": "- If you argued 'choose always picks the right i' — `choose` is nondeterministic, not oracular; the correctness condition is that *some* computation path succeeds when a witness exists.\n- If you claimed T(n) = O(n) — you counted the cost of trying all branches; nondeterministic time measures the *shortest* accepting computation, which here is O(1).\n- If you forgot the 'if (∃i)…' precondition — you skipped the existence witness step and jumped straight to runtime; correctness needs the existence argument before the complexity claim.",
+        "ro": "- Dacă ai argumentat „choose alege întotdeauna i corect” — `choose` e nedeterminist, nu oracol; condiția de corectitudine e că *există* o cale de calcul care reușește când există martor.\n- Dacă ai afirmat T(n) = O(n) — ai numărat costul explorării tuturor ramurilor; timpul nedeterminist măsoară *cea mai scurtă* calcul acceptator, care aici e O(1).\n- Dacă ai omis precondiția „dacă (∃i)…” — ai sărit peste pasul de martor și ai trecut direct la runtime; corectitudinea cere argumentul de existență înaintea afirmației de complexitate."
       }
     },
     {
@@ -89,6 +109,10 @@
       "rubric": {
         "en": "Fie d dreapta orizontală care trece prin P.\nlineIntersection(line(L[0], L[1]), d) = L[1] și L[1] < P.x => count() întoarce 0;\nlineIntersection(line(L[1], L[2]), d) = L[1] și L[1] < P.x => count() întoarce 0;\nlineIntersection(line(L[2], L[3]), d) = L[3]; primul punct care nu e pe d este L[4]; L[2] și L[4] de aceeași parte a lui d => count() întoarce 0;\nlineIntersection(line(L[4], L[5]), d) = Q și Q între L[4], L[5] => count() întoarce 1;\nlineIntersection(line(L[5], L[6]), d) = Q și Q între L[5], L[6] => count() întoarce 1;\nlineIntersection(line(L[6], L[7]), d) = Q și Q.x < P.x => count() întoarce 0;\nlineIntersection(line(L[7], L[0]), d) = Q și Q.x < P.x => count() întoarce 0;",
         "ro": "Fie d dreapta orizontală care trece prin P.\nlineIntersection(line(L[0], L[1]), d) = L[1] și L[1] < P.x => count() întoarce 0;\nlineIntersection(line(L[1], L[2]), d) = L[1] și L[1] < P.x => count() întoarce 0;\nlineIntersection(line(L[2], L[3]), d) = L[3]; primul punct care nu e pe d este L[4]; L[2] și L[4] de aceeași parte a lui d => count() întoarce 0;\nlineIntersection(line(L[4], L[5]), d) = Q și Q între L[4], L[5] => count() întoarce 1;\nlineIntersection(line(L[5], L[6]), d) = Q și Q între L[5], L[6] => count() întoarce 1;\nlineIntersection(line(L[6], L[7]), d) = Q și Q.x < P.x => count() întoarce 0;\nlineIntersection(line(L[7], L[0]), d) = Q și Q.x < P.x => count() întoarce 0;"
+      },
+      "commonErrors": {
+        "en": "- If you counted any intersection with x < P.x — you used the whole line through P instead of the ray going right; only intersections with Q.x ≥ P.x count.\n- If you counted vertex L[1] or L[3] as a crossing — you didn't apply the 'look at the next non-on-d point' rule; a vertex on d counts only if the polyline actually crosses d there (neighbors on opposite sides).\n- If you got an odd total — you likely double-counted a vertex touched by two adjacent edges or forgot that the segments L[4]L[5] and L[5]L[6] each contribute a *single* genuine crossing.",
+        "ro": "- Dacă ai numărat o intersecție cu x < P.x — ai folosit întreaga dreaptă prin P în loc de semidreapta spre dreapta; numai intersecțiile cu Q.x ≥ P.x contează.\n- Dacă ai numărat vârful L[1] sau L[3] ca intersecție — nu ai aplicat regula „se ia primul punct care nu e pe d”; un vârf pe d contează doar dacă linia chiar traversează d acolo (vecinii de părți opuse).\n- Dacă ai obținut un total impar — probabil ai numărat dublu un vârf atins de două muchii adiacente sau ai uitat că segmentele L[4]L[5] și L[5]L[6] contribuie fiecare cu *o singură* intersecție reală."
       }
     },
     {
@@ -102,6 +126,10 @@
       "rubric": {
         "en": "counter = numărul de intersecții ale lui d cu L[0..i] care schimbă starea intermediară de interior sau exterior a lui P",
         "ro": "counter = numărul de intersecții ale lui d cu L[0..i] care schimbă starea intermediară de interior sau exterior a lui P"
+      },
+      "commonErrors": {
+        "en": "- If your invariant said 'counter = number of intersections of d with L' — you stated the post-condition, not the invariant; at step i only L[0..i] has been processed.\n- If you wrote 'counter is even iff P is outside' — that's the termination decision rule, not the maintained invariant; the invariant must hold at *every* iteration.\n- If you counted every intersection (including degenerate vertex touches that don't change side) — the invariant specifically counts state-changing crossings, so tangent vertex touches must be excluded.",
+        "ro": "- Dacă invariantul tău spunea „counter = numărul de intersecții ale lui d cu L” — ai enunțat postcondiția, nu invariantul; la pasul i s-a procesat doar L[0..i].\n- Dacă ai scris „counter e par ⇔ P exterior” — e regula de decizie la terminare, nu invariantul menținut; invariantul trebuie să fie adevărat la *fiecare* iterație.\n- Dacă ai numărat orice intersecție (inclusiv atingerile degenerate în vârf care nu schimbă partea) — invariantul numără doar intersecțiile care schimbă starea, deci atingerile tangențiale trebuie excluse."
       }
     },
     {
@@ -115,6 +143,10 @@
       "rubric": {
         "en": "Dacă valoarea finală a lui counter este pară, P este exterior.\nDacă valoarea finală a lui counter este impară, P este interior.\nPentru S avem counter = 2, rezultă că P este exterior.",
         "ro": "Dacă valoarea finală a lui counter este pară, P este exterior.\nDacă valoarea finală a lui counter este impară, P este interior.\nPentru S avem counter = 2, rezultă că P este exterior."
+      },
+      "commonErrors": {
+        "en": "- If you swapped the parity rule (odd = exterior, even = interior) — you inverted the Jordan curve test; an exterior ray from outside crosses the boundary an *even* number of times.\n- If you concluded P is interior because counter = 2 — you forgot that 2 is even, so P is exterior; don't misread the parity at the finish line.\n- If you didn't carry the numerical answer from part (a) to a concrete verdict — half an answer; the question asks for both the rule *and* the decision for P=(4,4).",
+        "ro": "- Dacă ai inversat regula de paritate (impar = exterior, par = interior) — ai inversat testul Jordan; o semidreaptă dinspre exterior traversează frontiera de un număr *par* de ori.\n- Dacă ai concluzionat că P e interior pentru că counter = 2 — ai uitat că 2 e par, deci P e exterior; nu confunda paritatea la final.\n- Dacă nu ai dus răspunsul numeric din (a) până la un verdict concret — răspuns incomplet; problema cere atât regula *cât și* decizia pentru P=(4,4)."
       }
     },
     {
@@ -128,6 +160,10 @@
       "rubric": {
         "en": "Input: O mulțime finită de puncte în plan S.\nOutput: o pereche de puncte din S aflate la distanța cea mai mare.",
         "ro": "Input: O mulțime finită de puncte în plan S.\nOutput: o pereche de puncte din S aflate la distanța cea mai mare."
+      },
+      "commonErrors": {
+        "en": "- If you returned only the distance value — you produced half the output; the diameter problem returns the *pair* realizing the maximum, not just its length.\n- If you said 'the two farthest points of CH(S)' in the specification — you mixed the solution method into the problem statement; the problem is defined on S, the hull is an implementation detail.\n- If you omitted 'in the plane' — without a metric the problem is ambiguous; Euclidean distance in ℝ² is assumed.",
+        "ro": "- Dacă ai întors doar valoarea distanței — ai produs doar jumătate din ieșire; problema diametrului întoarce *perechea* care realizează maximul, nu doar lungimea.\n- Dacă ai spus „cele două puncte cele mai depărtate din CH(S)” în specificație — ai amestecat metoda de rezolvare cu enunțul; problema e definită pe S, înfășurătoarea e un detaliu de implementare.\n- Dacă ai omis „în plan” — fără o metrică problema e ambiguă; se presupune distanța euclidiană în ℝ²."
       }
     },
     {
@@ -141,6 +177,10 @@
       "rubric": {
         "en": "Se calculează înfășurătoarea convexă a lui S, CH(S)= ⟨P0, P2, P4, P5, P7⟩.\nSe pleacă din P7P0.\n- punctele antipodale cu P0: P4\n- punctele antipodale cu P2: P5\n- punctele antipodale cu P4: P0\n- punctele antipodale cu P5: P2\n- punctele antipodale cu P7: P4\nLista de perechi antipodale: AP(S) = ⟨(P0, P4), (P2, P5), (P4, P0), (P5, P2), (P7, P4)⟩",
         "ro": "Se calculează înfășurătoarea convexă a lui S, CH(S)= ⟨P0, P2, P4, P5, P7⟩.\nSe pleacă din P7P0.\n- punctele antipodale cu P0: P4\n- punctele antipodale cu P2: P5\n- punctele antipodale cu P4: P0\n- punctele antipodale cu P5: P2\n- punctele antipodale cu P7: P4\nLista de perechi antipodale: AP(S) = ⟨(P0, P4), (P2, P5), (P4, P0), (P5, P2), (P7, P4)⟩"
+      },
+      "commonErrors": {
+        "en": "- If you considered antipodal pairs over all of S (including interior points like P1, P3, P6) — antipodes are defined only on the *convex hull*; interior points can't realize the diameter.\n- If you enumerated every pair of hull vertices — that's O(h²) brute force; rotating calipers walks both pointers monotonically, visiting only O(h) antipodal pairs.\n- If you started the rotation from the wrong edge — you must start from an edge whose antipode is the vertex maximizing distance to it (here P7P0 ↔ P4), otherwise the pointer invariant is broken from step 1.",
+        "ro": "- Dacă ai considerat perechi antipodale peste tot S (inclusiv puncte interioare precum P1, P3, P6) — antipodele se definesc numai pe *înfășurătoarea convexă*; punctele interioare nu pot realiza diametrul.\n- Dacă ai enumerat toate perechile de vârfuri ale înfășurătorii — e brute-force O(h²); rotating calipers avansează ambele pointere monoton, vizitând doar O(h) perechi antipodale.\n- Dacă ai pornit rotația de la muchia greșită — trebuie să pornești de la o muchie a cărei antipod e vârful cu distanța maximă (aici P7P0 ↔ P4), altfel invariantul pointerelor e încălcat de la primul pas."
       }
     },
     {
@@ -154,6 +194,10 @@
       "rubric": {
         "en": "Se caută perechea aflată la distanța cea mai mare din AP(S): (P2, P5)",
         "ro": "Se caută perechea aflată la distanța cea mai mare din AP(S): (P2, P5)"
+      },
+      "commonErrors": {
+        "en": "- If you searched over all pairs in S — you threw away the point of computing AP(S); the diameter is guaranteed to be *among the antipodal pairs*, so scan only AP(S).\n- If you picked the pair with the longest hull edge — the diameter isn't necessarily a hull edge; (P2, P5) here crosses the hull interior as a chord.\n- If you computed √(distance) and claimed a non-integer diameter — comparing squared distances is equivalent and avoids floating-point; the *pair* is the answer, the numeric distance is secondary.",
+        "ro": "- Dacă ai căutat peste toate perechile din S — ai anulat scopul calculării lui AP(S); diametrul e garantat *printre perechile antipodale*, deci se scanează doar AP(S).\n- Dacă ai ales perechea cu cea mai lungă muchie a înfășurătorii — diametrul nu e neapărat o muchie; (P2, P5) aici e o coardă care taie interiorul înfășurătorii.\n- Dacă ai calculat √(distanță) și ai raportat un diametru ne-întreg — compararea pătratelor distanțelor e echivalentă și evită erorile de virgulă mobilă; *perechea* e răspunsul, valoarea e secundară."
       }
     },
     {
@@ -167,6 +211,10 @@
       "rubric": {
         "en": "Dacă se utilizează pentru CH(S) algoritmul lui Jarvis, atunci complexitatea timp este O(n²). Dacă se utilizează scanarea Graham, atunci complexitatea timp este O(n log n).",
         "ro": "Dacă se utilizează pentru CH(S) algoritmul lui Jarvis, atunci complexitatea timp este O(n²). Dacă se utilizează scanarea Graham, atunci complexitatea timp este O(n log n)."
+      },
+      "commonErrors": {
+        "en": "- If you reported O(n log n) for Jarvis — Jarvis march is O(nh) which is O(n²) in the worst case (h = n); you confused it with Graham.\n- If you said the antipodal-pair scan is the bottleneck — rotating calipers runs in O(h) = O(n); the dominant cost is the hull construction, not the diameter extraction.\n- If you reported O(n²) flat without mentioning which hull algorithm — the worst-case time depends on the choice; the answer must condition on Jarvis vs Graham.",
+        "ro": "- Dacă ai raportat O(n log n) pentru Jarvis — marșul Jarvis e O(nh), adică O(n²) în cazul cel mai nefavorabil (h = n); l-ai confundat cu Graham.\n- Dacă ai spus că scanarea perechilor antipodale e gâtuirea — rotating calipers rulează în O(h) = O(n); costul dominant e construcția înfășurătorii, nu extragerea diametrului.\n- Dacă ai raportat O(n²) fix fără să menționezi algoritmul — timpul cel mai nefavorabil depinde de alegere; răspunsul trebuie condiționat pe Jarvis vs Graham."
       }
     }
   ]

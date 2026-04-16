@@ -23,6 +23,10 @@
         "en": "Expected code/algorithm:\neqTest(a, b) {\n  n = a.size();\n  i = uniformNat(n);\n  for (j = 0; j < n-1; ++j)\n    if (a[i] == b[j]) return <i,j>;\n  return <i, n-1>;\n}",
         "ro": "Expected code/algorithm:\neqTest(a, b) {\n  n = a.size();\n  i = uniformNat(n);\n  for (j = 0; j < n-1; ++j)\n    if (a[i] == b[j]) return <i,j>;\n  return <i, n-1>;\n}"
       },
+      "commonErrors": {
+        "en": "- If you also drew `j` with `uniformNat(n)` — you made it doubly randomized and lost the indicator-per-position structure needed in parts (b)–(d).\n- If you iterated `j < n` and omitted the fallback `return <i, n-1>` — on the last position the final match (guaranteed because `b` is a permutation) is never returned, so correctness fails.\n- If you compared `a[j] == b[j]` — you dropped the fixed random pivot `i`; the algorithm searches for `a[i]` *inside* `b`, not for a coincidence at the same index.",
+        "ro": "- Dacă ai tras și `j` cu `uniformNat(n)` — ai dublat randomizarea și ai pierdut structura de indicator pe poziție cerută la (b)–(d).\n- Dacă ai iterat `j < n` și ai omis `return <i, n-1>` — pe ultima poziție potrivirea finală (garantată pentru că `b` e permutare) nu mai e returnată, deci corectitudinea pică.\n- Dacă ai comparat `a[j] == b[j]` — ai eliminat pivotul aleator fixat `i`; algoritmul caută `a[i]` *în* `b`, nu o coincidență la același index."
+      },
       "language": "pseudocode"
     },
     {
@@ -36,6 +40,10 @@
       "rubric": {
         "en": "Probabilitatea ca Xⱼ = 1 este 1/n.",
         "ro": "Probabilitatea ca Xⱼ = 1 este 1/n."
+      },
+      "commonErrors": {
+        "en": "- If you answered `1/n!` — you computed the probability of a specific permutation of `a`, not the probability that the random index `i` lands on the value equal to `b[j]`.\n- If you answered `j/n` or `(n-j)/n` — you confused position-of-stopping with the marginal probability at position `j`; each `Xⱼ` is Bernoulli(1/n) individually.\n- If you said the `Xⱼ` are independent — they are not; since `b` is a permutation exactly one `Xⱼ` equals 1, so they are strongly correlated even though each has mean 1/n.",
+        "ro": "- Dacă ai răspuns `1/n!` — ai calculat probabilitatea unei permutări anume a lui `a`, nu probabilitatea ca indexul aleator `i` să cadă exact pe valoarea egală cu `b[j]`.\n- Dacă ai răspuns `j/n` sau `(n-j)/n` — ai confundat poziția de oprire cu probabilitatea marginală la poziția `j`; fiecare `Xⱼ` este Bernoulli(1/n) individual.\n- Dacă ai afirmat că variabilele `Xⱼ` sunt independente — nu sunt; cum `b` e permutare, exact un `Xⱼ` este 1, deci sunt puternic corelate deși fiecare are media 1/n."
       }
     },
     {
@@ -49,6 +57,10 @@
       "rubric": {
         "en": "T = Σⱼ₌₀ⁿ⁻² (j+1)Xⱼ",
         "ro": "T = Σⱼ₌₀ⁿ⁻² (j+1)Xⱼ"
+      },
+      "commonErrors": {
+        "en": "- If you wrote `T = Σ Xⱼ` (without the `(j+1)` weight) — you counted whether a match occurs at position `j`, not the number of tests performed up to and including it.\n- If you summed to `n-1` instead of `n-2` — you double-counted the fallback branch; the loop explicitly checks `j < n-1`, so the random part covers `j = 0..n-2`.\n- If you wrote `T = j+1` (deterministic) — you forgot the randomness; `T` is a random variable built as a weighted sum of indicators, not a constant.",
+        "ro": "- Dacă ai scris `T = Σ Xⱼ` (fără ponderea `(j+1)`) — ai numărat dacă apare potrivire la poziția `j`, nu câte teste se fac până la ea inclusiv.\n- Dacă ai sumat până la `n-1` în loc de `n-2` — ai numărat de două ori ramura de rezervă; bucla testează explicit `j < n-1`, deci partea aleatoare acoperă `j = 0..n-2`.\n- Dacă ai scris `T = j+1` (determinist) — ai omis aleatorul; `T` este variabilă aleatoare construită ca sumă ponderată de indicatori, nu o constantă."
       }
     },
     {
@@ -62,6 +74,10 @@
       "rubric": {
         "en": "exp-time(n) = Σⱼ₌₀ⁿ⁻² (j+1)·1/n = 1/n · (n-1)n/2 = (n-1)/2",
         "ro": "exp-time(n) = Σⱼ₌₀ⁿ⁻² (j+1)·1/n = 1/n · (n-1)n/2 = (n-1)/2"
+      },
+      "commonErrors": {
+        "en": "- If you got `n/2` — you used the identity `1+2+...+n = n(n+1)/2` instead of `1+2+...+(n-1) = (n-1)n/2`; the sum has `n-1` terms, not `n`.\n- If you got `(n+1)/2` — you replaced E[Xⱼ] with `1/(n-1)` or shifted the index; `P(Xⱼ=1) = 1/n` and linearity of expectation does not change the normalization.\n- If you treated `E[T]` as the worst case — you conflated average-case and worst-case; `(n-1)/2 ∈ Θ(n)` is E[T], while worst-case is `n-1`.",
+        "ro": "- Dacă ai obținut `n/2` — ai folosit identitatea `1+2+...+n = n(n+1)/2` în loc de `1+2+...+(n-1) = (n-1)n/2`; suma are `n-1` termeni, nu `n`.\n- Dacă ai obținut `(n+1)/2` — ai înlocuit E[Xⱼ] cu `1/(n-1)` sau ai decalat indicele; `P(Xⱼ=1) = 1/n` iar liniaritatea mediei nu schimbă normalizarea.\n- Dacă ai tratat `E[T]` drept cazul nefavorabil — ai confundat cazul mediu cu cel mai nefavorabil; `(n-1)/2 ∈ Θ(n)` este E[T], iar cazul nefavorabil este `n-1`."
       }
     },
     {
@@ -75,6 +91,10 @@
       "rubric": {
         "en": "Clasa NP este clasa tuturor problemelor de decizie care pot fi rezolvate de un algoritm nedeterminist în timp polinomial.\nClasa P este clasa tuturor problemelor de decizie care pot fi rezolvate de un algoritm determinist în timp polinomial.\nP ⊆ NP. Nu se știe dacă NP ⊆ P.",
         "ro": "Clasa NP este clasa tuturor problemelor de decizie care pot fi rezolvate de un algoritm nedeterminist în timp polinomial.\nClasa P este clasa tuturor problemelor de decizie care pot fi rezolvate de un algoritm determinist în timp polinomial.\nP ⊆ NP. Nu se știe dacă NP ⊆ P."
+      },
+      "commonErrors": {
+        "en": "- If you defined NP as 'problems that cannot be solved in polynomial time' — that is a common myth; NP means *verifiable* (or nondeterministically solvable) in polynomial time, and P ⊆ NP is strict containment on the 'inside', not the opposite.\n- If you wrote `NP ⊆ P` as a known fact — that is exactly the P vs NP open problem; only `P ⊆ NP` is proved.\n- If you conflated decision problems with optimization — both classes are defined for *decision* problems (yes/no output); optimization variants need separate reductions.",
+        "ro": "- Dacă ai definit NP ca „problemele care nu pot fi rezolvate în timp polinomial” — e un mit comun; NP înseamnă *verificabil* (sau rezolvabil nedeterminist) în timp polinomial, iar P ⊆ NP este o incluziune demonstrată, nu inversa.\n- Dacă ai scris `NP ⊆ P` ca fapt cunoscut — exact asta e problema deschisă P vs NP; doar `P ⊆ NP` e demonstrat.\n- Dacă ai amestecat problemele de decizie cu cele de optimizare — ambele clase sunt definite pentru probleme de *decizie* (ieșire da/nu); variantele de optimizare necesită reduceri separate."
       }
     },
     {
@@ -89,6 +109,10 @@
         "en": "Expected code/algorithm:\nvertexcover(V, E, k) {\n  count = 0;\n  foreach v from V {\n    choose x[v] from { 0, 1 };\n    count = count + x[v];\n  }\n  if (count > k) failure;\n  foreach e from E {\n    if ((x[e[0]] == 0) && (x[e[1]] == 0)) failure;\n  }\n  success;\n}",
         "ro": "Expected code/algorithm:\nvertexcover(V, E, k) {\n  count = 0;\n  foreach v from V {\n    choose x[v] from { 0, 1 };\n    count = count + x[v];\n  }\n  if (count > k) failure;\n  foreach e from E {\n    if ((x[e[0]] == 0) && (x[e[1]] == 0)) failure;\n  }\n  success;\n}"
       },
+      "commonErrors": {
+        "en": "- If you enumerated all `C(|V|, k)` subsets deterministically — that is exponential, not polynomial; the nondeterministic `choose` guesses the subset in one polynomial pass.\n- If you omitted the `count > k` check — any cover of size `> k` would still be accepted, but the problem asks for a cover of size *at most* `k`.\n- If you checked only `(x[e[0]] == 1) || (x[e[1]] == 1)` with `||` and no failure branch — you computed a boolean but never rejected; the verifier must `failure` on any uncovered edge.",
+        "ro": "- Dacă ai enumerat toate submulțimile `C(|V|, k)` determinist — asta e exponențial, nu polinomial; `choose`-ul nedeterminist ghicește submulțimea într-o singură trecere polinomială.\n- Dacă ai omis verificarea `count > k` — orice acoperire de dimensiune `> k` ar fi acceptată, dar problema cere acoperire de dimensiune *cel mult* `k`.\n- Dacă ai testat doar `(x[e[0]] == 1) || (x[e[1]] == 1)` cu `||` fără ramură de eșec — ai calculat un boolean dar n-ai respins nimic; verificatorul trebuie să dea `failure` pe orice muchie neacoperită."
+      },
       "language": "pseudocode"
     },
     {
@@ -102,6 +126,10 @@
       "rubric": {
         "en": "Trebuie să găsim o reducere polinomială de la INDEPENDENT-SET la VERTEX-COVER. INDEPENDENT-SET fiind NP-dificilă, orice problemă din NP se reduce polinomial la INDEPENDENT-SET. Reducerea polinomială fiind tranzitivă, rezultă că orice problemă din NP se reduce polinomial la VERTEX-COVER.",
         "ro": "Trebuie să găsim o reducere polinomială de la INDEPENDENT-SET la VERTEX-COVER. INDEPENDENT-SET fiind NP-dificilă, orice problemă din NP se reduce polinomial la INDEPENDENT-SET. Reducerea polinomială fiind tranzitivă, rezultă că orice problemă din NP se reduce polinomial la VERTEX-COVER."
+      },
+      "commonErrors": {
+        "en": "- If you picked `VERTEX-COVER ≤ₚ INDEPENDENT-SET` — you reduced the *wrong* way; that shows INDEPENDENT-SET is at least as hard as VC, not that VC is hard.\n- If you said 'both directions are equivalent so either works' — for NP-hardness of VC you must reduce *from* a known-hard problem *to* VC; direction matters.\n- If you quoted Cook's theorem directly without using IS — you skipped the point of the exercise; the transitive argument through a known NP-hard problem (IS) is what's asked.",
+        "ro": "- Dacă ai ales `VERTEX-COVER ≤ₚ INDEPENDENT-SET` — ai redus în sensul *greșit*; asta arată că INDEPENDENT-SET e cel puțin la fel de grea ca VC, nu că VC e dificilă.\n- Dacă ai spus „ambele direcții sunt echivalente, e la fel” — pentru NP-dificultatea lui VC trebuie să reduci *dinspre* o problemă cunoscut-grea *către* VC; direcția contează.\n- Dacă ai citat teorema lui Cook direct fără a folosi IS — ai ratat esența exercițiului; argumentul tranzitiv printr-o problemă NP-dificilă cunoscută (IS) este cel cerut."
       }
     },
     {
@@ -115,6 +143,10 @@
       "rubric": {
         "en": "VERTEX-COVER ∈ NP (punct b). Arătăm că INDEPENDENT-SET se reduce polinomial la VERTEX-COVER:\n\nExpected code/algorithm:\nAlgIS(V,E,k) {\n  return AlgVertexCover(V,E,|V|-k);\n}",
         "ro": "VERTEX-COVER ∈ NP (punct b). Arătăm că INDEPENDENT-SET se reduce polinomial la VERTEX-COVER:\n\nExpected code/algorithm:\nAlgIS(V,E,k) {\n  return AlgVertexCover(V,E,|V|-k);\n}"
+      },
+      "commonErrors": {
+        "en": "- If you only showed VC ∈ NP and stopped — NP-completeness requires *both* membership in NP and NP-hardness; you showed half the proof.\n- If you passed `k` instead of `|V|-k` to `AlgVertexCover` — you broke the key identity `S is IS iff V\\S is VC`; the cover size is the complement size, not `k` itself.\n- If you claimed the reduction takes `O(|V|+|E|)` for copying the graph — that's fine, but if you claimed `O(1)` you ignored that even a pass-through reduction must forward the instance, and the graph must exist for both sides.",
+        "ro": "- Dacă ai arătat doar VC ∈ NP și te-ai oprit — NP-completitudinea cere *ambele*: apartenența la NP și NP-dificultatea; ai arătat doar jumătate din demonstrație.\n- Dacă ai transmis `k` în loc de `|V|-k` lui `AlgVertexCover` — ai stricat identitatea cheie `S este IS dacă și numai dacă V\\S este VC`; dimensiunea acoperirii e dimensiunea complementului, nu `k`.\n- Dacă ai afirmat că reducerea se face în `O(1)` — ai ignorat că chiar și o reducere de tip pass-through trebuie să transmită instanța, iar graful trebuie să existe pentru ambele părți; `O(|V|+|E|)` ar fi corect."
       }
     }
   ]
