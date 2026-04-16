@@ -235,7 +235,7 @@ export default function Seminar01() {
       { text: { en: 'Yes — ⟨a₁, a₂⟩ = a₂ᴴa₁ = 1·1 + i·i + 0 = 1 + i² = 0', ro: 'Da — ⟨a₁, a₂⟩ = a₂ᴴa₁ = 1·1 + i·i + 0 = 1 + i² = 0' }, correct: true },
       { text: { en: 'No — they both start with 1', ro: 'Nu — amândouă încep cu 1' }, correct: false },
       { text: { en: 'Yes — because they are linearly independent', ro: 'Da — pentru că sunt liniar independente' }, correct: false },
-      { text: { en: 'No — ⟨a₁, a₂⟩ = 2', ro: 'Nu — ⟨a₁, a₂⟩ = 2' }, correct: false },
+      { text: { en: 'No — skipping conjugation gives ⟨a₁, a₂⟩ = 1·1 + i·(−i) + 0 = 2', ro: 'Nu — fără conjugare ⟨a₁, a₂⟩ = 1·1 + i·(−i) + 0 = 2' }, correct: false },
     ],
     explanation: {
       en: 'a₂ᴴ = (1, i, 0) (row, entries conjugated). ⟨a₁, a₂⟩ = a₂ᴴa₁ = 1·1 + i·i + 0 = 1 − 1 = 0. (Note: linear independence does not imply orthogonality.)',

@@ -348,6 +348,10 @@ export default function Seminar03() {
           'Solve four linear systems with Gauss elimination, trying all three pivoting strategies when instructive.',
           'Rezolvați patru sisteme liniare prin eliminare Gauss, încercând toate cele trei strategii de pivotare când este instructiv.',
         )}</p>
+        <p className="text-sm mt-2 opacity-80">{t(
+          'The four systems (a)–(d) are defined in the paired exercise sheet. The MCs below reference them by letter; the Toggle at the bottom gives the solutions in full.',
+          'Cele patru sisteme (a)–(d) sunt definite în fișa de exerciții pereche. MC-urile de mai jos le referențiază după literă; Toggle-ul de la sfârșit dă soluțiile complete.',
+        )}</p>
       </Box>
 
       <p className="text-sm font-semibold mt-3 mb-1">{t('Why pivoting matters — system (a)', 'De ce contează pivotarea — sistemul (a)')}</p>

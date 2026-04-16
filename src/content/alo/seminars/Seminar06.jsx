@@ -344,8 +344,8 @@ A·x⁽²⁾      = (-2, -2, -1)             →  x⁽³⁾ = (-1, -1, -1/2)`}</
             )}</p>
             <Box type="theorem">
               <p className="text-sm">{t(
-                'Convergence rate of the power method is geometric with ratio |λ₂/λ₁| (second-largest over largest). A good Rayleigh-quotient eigenvalue estimate at step k is λ ≈ ⟨x⁽ᵏ⁾, A·x⁽ᵏ⁾⟩ / ‖x⁽ᵏ⁾‖²; alternatively, if we normalise to ‖·‖∞, the dividing factor used at each step is itself a λ estimate.',
-                'Rata de convergență a metodei puterii este geometrică cu raportul |λ₂/λ₁| (a doua valoare ca mărime / prima). O estimare bună a valorii proprii prin coeficientul Rayleigh la pasul k este λ ≈ ⟨x⁽ᵏ⁾, A·x⁽ᵏ⁾⟩ / ‖x⁽ᵏ⁾‖²; alternativ, dacă normalizăm la ‖·‖∞, factorul de împărțire folosit la fiecare pas este chiar o estimare a lui λ.',
+                'Convergence rate of the power method is geometric with ratio |λ₂/λ₁| (second-largest over largest). A good Rayleigh-quotient eigenvalue estimate at step k is λ ≈ ⟨x⁽ᵏ⁾, A·x⁽ᵏ⁾⟩ / ‖x⁽ᵏ⁾‖₂² (the 2-norm squared, equivalently (x⁽ᵏ⁾)ᵀx⁽ᵏ⁾); alternatively, if we normalise to ‖·‖∞, the dividing factor used at each step is itself a λ estimate.',
+                'Rata de convergență a metodei puterii este geometrică cu raportul |λ₂/λ₁| (a doua valoare ca mărime / prima). O estimare bună a valorii proprii prin coeficientul Rayleigh la pasul k este λ ≈ ⟨x⁽ᵏ⁾, A·x⁽ᵏ⁾⟩ / ‖x⁽ᵏ⁾‖₂² (norma-2 la pătrat, echivalent (x⁽ᵏ⁾)ᵀx⁽ᵏ⁾); alternativ, dacă normalizăm la ‖·‖∞, factorul de împărțire folosit la fiecare pas este chiar o estimare a lui λ.',
               )}</p>
             </Box>
           </div>
