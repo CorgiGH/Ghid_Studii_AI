@@ -14,9 +14,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'a unique solution x = (0, 0)ᵀ — two lines through the origin with different slopes', ro: 'soluție unică x = (0, 0)ᵀ — două drepte prin origine cu pante diferite' }, correct: true },
-      { text: { en: 'no solution — parallel lines', ro: 'fără soluție — drepte paralele' }, correct: false },
-      { text: { en: 'infinitely many solutions — coincident lines', ro: 'infinitate de soluții — drepte suprapuse' }, correct: false },
-      { text: 'x = (1, 1)ᵀ', correct: false },
+      { text: { en: 'no solution — parallel lines', ro: 'fără soluție — drepte paralele' }, correct: false, feedback: { en: 'Parallel would require equal slopes; here slopes are −1/2 and 1, so the lines intersect.', ro: 'Paralele ar cere pante egale; aici pantele sunt −1/2 și 1, deci dreptele se intersectează.' } },
+      { text: { en: 'infinitely many solutions — coincident lines', ro: 'infinitate de soluții — drepte suprapuse' }, correct: false, feedback: { en: 'Coincident means the two equations are scalar multiples — not the case here (different slopes).', ro: 'Suprapuse înseamnă că ecuațiile sunt multipli scalari — nu e cazul aici (pante diferite).' } },
+      { text: 'x = (1, 1)ᵀ', correct: false, feedback: { en: 'Test: 1 + 2 = 3 ≠ 0 (b₁). Only x = (0,0) satisfies both homogeneous equations.', ro: 'Test: 1 + 2 = 3 ≠ 0 (b₁). Doar x = (0,0) satisface ambele ecuații omogene.' } },
     ],
     explanation: {
       en: 'Both lines pass through (0, 0). Their slopes (−1/2 and 1) differ, so they intersect only at the origin — the unique solution.',
@@ -31,9 +31,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'no solution — three lines with no common point', ro: 'fără soluție — trei drepte fără punct comun' }, correct: true },
-      { text: { en: 'a unique solution at (−3, 5)', ro: 'soluție unică în (−3, 5)' }, correct: false },
-      { text: { en: 'infinitely many solutions', ro: 'infinitate de soluții' }, correct: false },
-      { text: { en: 'exactly two solutions', ro: 'exact două soluții' }, correct: false },
+      { text: { en: 'a unique solution at (−3, 5)', ro: 'soluție unică în (−3, 5)' }, correct: false, feedback: { en: 'That point satisfies the first two lines but not the third (−3 − 15 = −18 ≠ 5). An overdetermined system needs *all* equations to pass.', ro: 'Acel punct satisface primele două drepte dar nu a treia (−3 − 15 = −18 ≠ 5). Un sistem supradeterminat cere ca *toate* ecuațiile să se verifice.' } },
+      { text: { en: 'infinitely many solutions', ro: 'infinitate de soluții' }, correct: false, feedback: { en: 'Infinitely many requires the three lines to coincide (all scalar multiples of one equation). Here they don\'t even all pass through a single point.', ro: 'Infinit de multe cere cele trei drepte să coincidă (toate multipli scalari ai unei ecuații). Aici nici măcar nu trec toate printr-un punct comun.' } },
+      { text: { en: 'exactly two solutions', ro: 'exact două soluții' }, correct: false, feedback: { en: 'Linear systems have 0, 1, or infinitely many solutions — never a finite number > 1.', ro: 'Sistemele liniare au 0, 1 sau infinit de soluții — niciodată un număr finit > 1.' } },
     ],
     explanation: {
       en: 'The first two lines meet at (−3, 5). Substituting into the third: −3 − 15 = −18 ≠ 5. The third line does not pass through the meeting point, so the three lines share no common point.',
@@ -48,9 +48,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'no solutions — two parallel distinct lines', ro: 'nicio soluție — două drepte paralele distincte' }, correct: true },
-      { text: { en: 'a unique solution — two intersecting lines', ro: 'soluție unică — două drepte secante' }, correct: false },
-      { text: { en: 'infinitely many solutions — the same line twice', ro: 'infinitate de soluții — aceeași dreaptă de două ori' }, correct: false },
-      { text: { en: 'exactly two solutions', ro: 'exact două soluții' }, correct: false },
+      { text: { en: 'a unique solution — two intersecting lines', ro: 'soluție unică — două drepte secante' }, correct: false, feedback: { en: 'Same slope (x₁+2x₂=const) means parallel, not intersecting. Divide Eq2 by −2 to see this.', ro: 'Aceeași pantă (x₁+2x₂=const) înseamnă paralele, nu secante. Împarte Eq2 la −2 ca să vezi.' } },
+      { text: { en: 'infinitely many solutions — the same line twice', ro: 'infinitate de soluții — aceeași dreaptă de două ori' }, correct: false, feedback: { en: 'Coincident requires same slope AND same intercept. Here slopes match but intercepts differ (3 vs −3 after scaling), so parallel-distinct, not coincident.', ro: 'Suprapuse cere aceeași pantă ȘI aceeași ordonată la origine. Aici pantele se potrivesc dar ordonatele nu (3 vs −3 după scalare), deci paralele-distincte.' } },
+      { text: { en: 'exactly two solutions', ro: 'exact două soluții' }, correct: false, feedback: { en: 'Linear systems never have a finite number > 1 solutions — only 0, 1, or infinitely many.', ro: 'Sistemele liniare nu au niciodată un număr finit > 1 de soluții — doar 0, 1 sau infinit.' } },
     ],
     explanation: {
       en: 'Divide the second equation by −2: x₁ + 2x₂ = −3. Same slope as the first (x₁ + 2x₂ = 3) but different intercept, so the two lines are parallel and distinct — no intersection.',
@@ -65,9 +65,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'two non-parallel planes in ℝ³ — a line of solutions', ro: 'două plane ne-paralele în ℝ³ — o dreaptă de soluții' }, correct: true },
-      { text: { en: 'two parallel planes — no solutions', ro: 'două plane paralele — fără soluții' }, correct: false },
-      { text: { en: 'the same plane twice — a plane of solutions', ro: 'același plan de două ori — un plan de soluții' }, correct: false },
-      { text: { en: 'three planes — unique solution', ro: 'trei plane — soluție unică' }, correct: false },
+      { text: { en: 'two parallel planes — no solutions', ro: 'două plane paralele — fără soluții' }, correct: false, feedback: { en: 'Parallel planes would need proportional normals (2,1,1) ∝ (2,4,−1) — they aren\'t (1 ≠ 4/1, etc.).', ro: 'Planele paralele ar cere normale proporționale (2,1,1) ∝ (2,4,−1) — nu sunt (1 ≠ 4/1 etc.).' } },
+      { text: { en: 'the same plane twice — a plane of solutions', ro: 'același plan de două ori — un plan de soluții' }, correct: false, feedback: { en: 'Coincident requires one equation to be a scalar multiple of the other. These two are not.', ro: 'Suprapuse cere ca o ecuație să fie multiplu scalar al celeilalte. Aceste două nu sunt.' } },
+      { text: { en: 'three planes — unique solution', ro: 'trei plane — soluție unică' }, correct: false, feedback: { en: 'Only *two* equations are given. A unique solution in ℝ³ needs three independent equations.', ro: 'Sunt date doar *două* ecuații. Soluția unică în ℝ³ cere trei ecuații independente.' } },
     ],
     explanation: {
       en: 'Two independent equations in ℝ³ define two planes. Their normal vectors (2,1,1) and (2,4,−1) are non-parallel, so the planes meet along a line — the solution set is 1-parameter.',
@@ -83,9 +83,9 @@ export default function Seminar03() {
     },
     options: [
       { text: 'α = 1', correct: true },
-      { text: 'α = −1', correct: false },
-      { text: 'α = 0', correct: false },
-      { text: { en: 'no such α', ro: 'nicio astfel de α' }, correct: false },
+      { text: 'α = −1', correct: false, feedback: { en: 'α = −1 gives infinitely many solutions (0·x₃ = 0 is always true), not "no solution".', ro: 'α = −1 dă infinitate de soluții (0·x₃ = 0 mereu adevărat), nu "fără soluție".' } },
+      { text: 'α = 0', correct: false, feedback: { en: 'α = 0 gives a unique solution x = (−1, 1, 1). Substitute and verify.', ro: 'α = 0 dă soluția unică x = (−1, 1, 1). Substituie și verifică.' } },
+      { text: { en: 'no such α', ro: 'nicio astfel de α' }, correct: false, feedback: { en: 'α = 1 breaks consistency — the last reduced equation becomes 0·x₃ = nonzero.', ro: 'α = 1 strică compatibilitatea — ultima ecuație redusă devine 0·x₃ = nenul.' } },
     ],
     explanation: {
       en: 'Adding Eq1 + Eq2 gives x₂ = 1. At α = 1 the reduced system forces the coefficient of x₃ to vanish while the right side does not — contradiction, so no solution. (See the Toggle for the full reduction.)',
@@ -100,9 +100,9 @@ export default function Seminar03() {
     },
     options: [
       { text: 'α = −1', correct: true },
-      { text: 'α = 1', correct: false },
-      { text: { en: 'every α ≠ ±1', ro: 'orice α ≠ ±1' }, correct: false },
-      { text: { en: 'no such α', ro: 'nicio astfel de α' }, correct: false },
+      { text: 'α = 1', correct: false, feedback: { en: 'α = 1 gives NO solution (inconsistency), not infinitely many. The distinction: at α = −1 the bad equation becomes 0 = 0; at α = 1 it becomes 0 = nonzero.', ro: 'α = 1 dă FĂRĂ soluție (inconsistență), nu infinit de multe. Distincția: la α = −1 ecuația problematică devine 0 = 0; la α = 1 devine 0 = nenul.' } },
+      { text: { en: 'every α ≠ ±1', ro: 'orice α ≠ ±1' }, correct: false, feedback: { en: 'For α ≠ ±1 the coefficient (1 − α²) is nonzero, so x₃ is uniquely determined — a *unique* solution, not infinitely many.', ro: 'Pentru α ≠ ±1 coeficientul (1 − α²) e nenul, deci x₃ e unic determinat — soluție *unică*, nu infinit.' } },
+      { text: { en: 'no such α', ro: 'nicio astfel de α' }, correct: false, feedback: { en: 'α = −1 works: the 0 = 0 collapse leaves one free parameter.', ro: 'α = −1 merge: colapsul 0 = 0 lasă un parametru liber.' } },
     ],
     explanation: {
       en: 'At α = −1 the reduced equation becomes 0·x₃ = 0, which is always true, and the first two equations collapse to the third via addition — so there is a 1-parameter family of solutions.',
@@ -117,9 +117,9 @@ export default function Seminar03() {
     },
     options: [
       { text: 'x = (−1/(1 − α), 1, 1/(1 − α))ᵀ', correct: true },
-      { text: 'x = (1/(1 − α), 1, −1/(1 − α))ᵀ', correct: false },
-      { text: 'x = (0, 1, 0)ᵀ', correct: false },
-      { text: 'x = (1, 0, 1)ᵀ', correct: false },
+      { text: 'x = (1/(1 − α), 1, −1/(1 − α))ᵀ', correct: false, feedback: { en: 'Sign error on x₁ and x₃. Check at α = 0: this gives (1, 1, −1), which fails the first equation.', ro: 'Eroare de semn pe x₁ și x₃. Verifică la α = 0: dă (1, 1, −1), care eșuează prima ecuație.' } },
+      { text: 'x = (0, 1, 0)ᵀ', correct: false, feedback: { en: 'Constant in α, but the correct solution depends on α via 1/(1−α). (0,1,0) doesn\'t even satisfy the system at α = 0.', ro: 'Constant în α, dar soluția corectă depinde de α prin 1/(1−α). (0,1,0) nu satisface sistemul nici la α = 0.' } },
+      { text: 'x = (1, 0, 1)ᵀ', correct: false, feedback: { en: 'Also α-independent (and wrong). x₂ must be 1 from Eq1 + Eq2, not 0.', ro: 'Și ea α-independentă (și greșită). x₂ trebuie 1 din Eq1 + Eq2, nu 0.' } },
     ],
     explanation: {
       en: 'From x₃(1 − α²) = 1 + α with α ≠ ±1: x₃ = 1/(1 − α). Back-substitution gives x₂ = 1 and x₁ = −1/(1 − α). Sanity check α = 0: x = (−1, 1, 1), which satisfies all three equations.',
@@ -134,10 +134,10 @@ export default function Seminar03() {
       ro: 'Pentru sistemul (a), eliminarea Gauss FĂRĂ pivotare eșuează la primul pas deoarece',
     },
     options: [
-      { text: { en: 'after row 3 − row 1, the (2, 2) entry is 0 (no usable pivot)', ro: 'după linia 3 − linia 1, elementul (2, 2) este 0 (fără pivot utilizabil)' }, correct: false },
+      { text: { en: 'after row 3 − row 1, the (2, 2) entry is 0 (no usable pivot)', ro: 'după linia 3 − linia 1, elementul (2, 2) este 0 (fără pivot utilizabil)' }, correct: false, feedback: { en: 'Wrong elimination step: naive Gauss does row 2 − (pivot ratio)·row 1 first, not row 3. Row 3 is touched only after row 2 is cleared.', ro: 'Pas de eliminare greșit: Gauss naiv face linia 2 − (raport pivot)·linia 1 primul, nu linia 3. Linia 3 se atinge după ce linia 2 e curățată.' } },
       { text: { en: 'after row 2 − 3·row 1, the (2, 2) entry is 0 (no usable pivot for x₂)', ro: 'după linia 2 − 3·linia 1, elementul (2, 2) este 0 (fără pivot utilizabil pentru x₂)' }, correct: true },
-      { text: { en: 'the right-hand side is inconsistent', ro: 'partea dreaptă este inconsistentă' }, correct: false },
-      { text: { en: 'the determinant is zero', ro: 'determinantul este zero' }, correct: false },
+      { text: { en: 'the right-hand side is inconsistent', ro: 'partea dreaptă este inconsistentă' }, correct: false, feedback: { en: 'System (a) has a unique solution after partial pivoting — it\'s consistent, the issue is only with the naive pivoting strategy.', ro: 'Sistemul (a) are soluție unică după pivotare parțială — e compatibil, problema e doar strategia naivă.' } },
+      { text: { en: 'the determinant is zero', ro: 'determinantul este zero' }, correct: false, feedback: { en: 'det ≠ 0 (the system has a unique solution). The failure is algorithmic, not structural.', ro: 'det ≠ 0 (sistemul are soluție unică). Eșecul e algoritmic, nu structural.' } },
     ],
     explanation: {
       en: 'Row 2 − 3·Row 1 = (0, 0, −8 | −7). The x₂-pivot in row 2 collapses to zero, so naïve elimination cannot continue without swapping rows. Partial pivoting would have put the 3 from row 2 on top first.',
@@ -152,9 +152,9 @@ export default function Seminar03() {
     },
     options: [
       { text: 'x = (1.5, 2, −1.2, 3)ᵀ', correct: true },
-      { text: 'x = (3, 3, −6.6, 0.8)ᵀ', correct: false },
-      { text: 'x = (1.5, 2, −6.6, 3)ᵀ', correct: false },
-      { text: 'x = (3/2, 3, −1.2, 3)ᵀ', correct: false },
+      { text: 'x = (3, 3, −6.6, 0.8)ᵀ', correct: false, feedback: { en: 'You copied the RHS b directly as x. Forward substitution divides each row by its pivot Lᵢᵢ.', ro: 'Ai copiat b direct ca x. Substituția directă împarte fiecare linie la pivotul Lᵢᵢ.' } },
+      { text: 'x = (1.5, 2, −6.6, 3)ᵀ', correct: false, feedback: { en: 'Forgot to divide row 3 by 0.5: −6 + 0.5·x₃ = −6.6 ⇒ 0.5·x₃ = −0.6 ⇒ x₃ = −1.2, not −6.6.', ro: 'Ai uitat să împarți linia 3 la 0.5: −6 + 0.5·x₃ = −6.6 ⇒ 0.5·x₃ = −0.6 ⇒ x₃ = −1.2, nu −6.6.' } },
+      { text: 'x = (3/2, 3, −1.2, 3)ᵀ', correct: false, feedback: { en: 'x₂ should be 2: after x₁ = 1.5, row 2 gives 1·1.5 + 1.5·x₂ = 4.5 ⇒ 1.5·x₂ = 3 ⇒ x₂ = 2, not 3.', ro: 'x₂ trebuie 2: după x₁ = 1.5, linia 2 dă 1·1.5 + 1.5·x₂ = 4.5 ⇒ 1.5·x₂ = 3 ⇒ x₂ = 2, nu 3.' } },
     ],
     explanation: {
       en: 'Forward-substitute row by row: 2x₁ = 3 ⇒ x₁ = 1.5; then 1.5 + 1.5x₂ = 4.5 ⇒ x₂ = 2; then −6 + 0.5x₃ = −6.6 ⇒ x₃ = −1.2; finally 3 − 4 − 1.2 + x₄ = 0.8 ⇒ x₄ = 3.',
@@ -169,9 +169,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'it is inconsistent — no solution', ro: 'este inconsistent — fără soluție' }, correct: true },
-      { text: { en: 'it has a unique solution x = (1, 1, 1, −1)ᵀ', ro: 'are soluție unică x = (1, 1, 1, −1)ᵀ' }, correct: false },
-      { text: { en: 'it has infinitely many solutions', ro: 'are o infinitate de soluții' }, correct: false },
-      { text: { en: 'the coefficient matrix is singular but the system is consistent', ro: 'matricea coeficienților este singulară dar sistemul este compatibil' }, correct: false },
+      { text: { en: 'it has a unique solution x = (1, 1, 1, −1)ᵀ', ro: 'are soluție unică x = (1, 1, 1, −1)ᵀ' }, correct: false, feedback: { en: 'Any proposed x must satisfy all rows; elimination derives both x₁ − x₃ = −1 and x₁ − x₃ = 3, so no x can work.', ro: 'Orice x propus trebuie să satisfacă toate liniile; eliminarea derivă atât x₁ − x₃ = −1 cât și x₁ − x₃ = 3, deci niciun x nu merge.' } },
+      { text: { en: 'it has infinitely many solutions', ro: 'are o infinitate de soluții' }, correct: false, feedback: { en: 'Inconsistency excludes any solutions, finite or infinite. The derived 0 = ±4 contradiction rules out all x.', ro: 'Inconsistența exclude orice soluție, finită sau infinită. Contradicția derivată 0 = ±4 exclude orice x.' } },
+      { text: { en: 'the coefficient matrix is singular but the system is consistent', ro: 'matricea coeficienților este singulară dar sistemul este compatibil' }, correct: false, feedback: { en: 'Singular A is compatible with either 0 or ∞ solutions depending on b; here b forces the inconsistent case.', ro: 'A singulară e compatibilă cu 0 sau ∞ soluții în funcție de b; aici b forțează cazul inconsistent.' } },
     ],
     explanation: {
       en: 'Row 2 − Row 1 gives x₁ − x₃ = −1. Row 4 − Row 3 gives x₁ − x₃ = 3. These two consequences of the system contradict each other, so the system is inconsistent.',
@@ -187,9 +187,9 @@ export default function Seminar03() {
     },
     options: [
       { text: { en: 'Computing A⁻¹ explicitly (≈ 3× the cost of one Gauss elimination)', ro: 'Calculul A⁻¹ explicit (≈ 3× costul unei eliminări Gauss)' }, correct: true },
-      { text: { en: 'Gauss elimination on the extended matrix', ro: 'Eliminarea Gauss pe matricea extinsă' }, correct: false },
-      { text: { en: 'They cost the same', ro: 'Ambele au același cost' }, correct: false },
-      { text: { en: 'Depends on the right-hand side', ro: 'Depinde de partea dreaptă' }, correct: false },
+      { text: { en: 'Gauss elimination on the extended matrix', ro: 'Eliminarea Gauss pe matricea extinsă' }, correct: false, feedback: { en: 'Gauss on [A | b₁ b₂] is the *cheaper* option — one elimination plus two back-substitutions ≈ n³/3 + 2n².', ro: 'Gauss pe [A | b₁ b₂] e opțiunea *mai ieftină* — o eliminare plus două substituții ≈ n³/3 + 2n².' } },
+      { text: { en: 'They cost the same', ro: 'Ambele au același cost' }, correct: false, feedback: { en: 'The inverse approach does ≈ n³ work just to build A⁻¹; Gauss on the augmented system skips that entirely.', ro: 'Abordarea cu inversa face ≈ n³ doar pentru a construi A⁻¹; Gauss pe matricea extinsă sare peste asta.' } },
+      { text: { en: 'Depends on the right-hand side', ro: 'Depinde de partea dreaptă' }, correct: false, feedback: { en: 'Both costs are b-independent (up to O(n²) contributions). The structural difference dominates.', ro: 'Ambele costuri sunt independente de b (până la contribuții O(n²)). Diferența structurală domină.' } },
     ],
     explanation: {
       en: 'Gauss on [A | b₁ b₂] does the elimination once and back-solves twice: ≈ n³/3 + 2n² = 32 + 32 ≈ 64 mults. Computing A⁻¹ needs ≈ n³ (≈ 64) plus two matrix-vector products (≈ 32 total). So: (a) ≈ 64, (b) ≈ 96. Inverse is worse by the usual factor ≈ 3.',
