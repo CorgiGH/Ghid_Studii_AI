@@ -256,7 +256,7 @@ const probabilisticQuestions = [
       { text: '1/2ⁿ', correct: false, feedback: { en: 'Off by one: n recursive calls require n "keep going" + 1 "stop" flips = n+1 flips.', ro: 'Off-by-one: n apeluri cer n flip-uri „continuă" + 1 flip „stop" = n+1.' } },
       { text: '1/2ⁿ⁺¹', correct: true },
       { text: '1/n', correct: false, feedback: { en: 'Uniform over n ignores the geometric structure: each flip is independent.', ro: 'Uniform peste n ignoră structura geometrică: fiecare flip e independent.' } },
-      { text: '(1/2)ⁿ · (1/2)', correct: false, feedback: { en: 'Algebraically equal to 1/2ⁿ⁺¹ — but this option is marked as a "wrong" form not matching the canonical answer.', ro: 'Algebric egal cu 1/2ⁿ⁺¹ — dar această opțiune e marcată ca formă „greșită" care nu coincide cu răspunsul canonic.' } },
+      { text: '(n+1) / 2ⁿ⁺¹', correct: false, feedback: { en: 'Over-counts by a factor of (n+1): the flips are a *specific* sequence (n ones then a zero), not any ordering — no multinomial coefficient applies.', ro: 'Supra-numără cu un factor (n+1): flip-urile sunt o secvență *specifică* (n de unu apoi un zero), nu o ordine oarecare — nu apare un coeficient multinomial.' } },
     ],
     explanation: { en: 'Each recursive call requires random to return 1 (prob 1/2), and the last call requires random to return 0 (prob 1/2). So pₙ = (1/2)ⁿ · (1/2) = 1/2ⁿ⁺¹.', ro: 'Fiecare apel recursiv necesită ca random să returneze 1 (prob 1/2), iar ultimul apel necesită ca random să returneze 0 (prob 1/2). Deci pₙ = (1/2)ⁿ · (1/2) = 1/2ⁿ⁺¹.' },
   },
