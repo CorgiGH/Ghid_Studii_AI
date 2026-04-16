@@ -117,7 +117,7 @@ export default function Seminar04() {
       { text: { en: 'Θ(n · ln n)', ro: 'Θ(n · ln n)' }, correct: true },
       { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false, feedback: { en: 'The number of new maxima is Θ(ln n) in expectation under i.i.d. too, not Θ(n).', ro: 'Numărul de noi maxime e Θ(ln n) în medie și la i.i.d., nu Θ(n).' } },
       { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false, feedback: { en: 'Ignores the inner loop: each of the ~ln n new maxima triggers n extra iterations.', ro: 'Ignoră bucla interioară: fiecare din cele ~ln n noi maxime declanșează n iterații în plus.' } },
-      { text: { en: 'Θ(n · ln² n)', ro: 'Θ(n · ln² n)' }, correct: false, feedback: { en: 'One extra ln factor: the expected number of records is Hₙ (not Hₙ²).', ro: 'Un factor ln în plus: numărul așteptat de recorduri e Hₙ (nu Hₙ²).' } },
+      { text: { en: 'Θ(n · ln² n)', ro: 'Θ(n · ln² n)' }, correct: false, feedback: { en: 'Likely doubled the log factor — once for "number of new maxima" and once for "cost per update." But the inner loop here is n (linear), not ln n; only the update-count contributes the log.', ro: 'Probabil ai dublat factorul log — o dată pentru „numărul de noi maxime" și o dată pentru „cost per actualizare". Dar bucla interioară aici e n (liniară), nu ln n; doar numărul de actualizări contribuie cu log-ul.' } },
     ],
     explanation: {
       en: 'With i.i.d. uniform values on {0,...,n−1}, P(v[i] > max(v[0],...,v[i−1])) is close to 1/(i+1) for large n. The expected number of max updates remains Θ(ln n), giving Θ(n · ln n) total.',
