@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { generateMatrixInputInstance } from './instances/matrixInput';
+import { generateNormVisualizerInstance } from './instances/normVisualizer';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -39,6 +40,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'quick-eye',     label: { en: 'Quick eye — correct in <5s', ro: 'Ochi rapid — corect în <5s' }, condition: (h) => h.feats?.includes?.('quick-eye') },
       { id: 'flawless-five', label: { en: 'Flawless five — 5 correct in a session', ro: 'Impecabil — 5 corecte într-o sesiune' }, condition: (h) => h.feats?.includes?.('flawless-five') },
+    ],
+  },
+  {
+    id: 'norm-visualizer',
+    title: { en: 'W2 · Norm Visualizer', ro: 'W2 · Vizualizator norme' },
+    courseRef: 'alo-c2',
+    groupId: 'foundations',
+    mode: 'exercise',
+    Component: lazy(() => import('./widgets/NormVisualizer')),
+    generateInstance: generateNormVisualizerInstance,
+    pbMetric: { id: 'distance', label: { en: 'Distance from optimal', ro: 'Distanță de la optim' }, lowerIsBetter: true },
+    feats: [
+      { id: 'corner-shot',    label: { en: 'Corner shot — hit an exact ‖·‖₁ corner', ro: 'La colț — atins un colț exact al ‖·‖₁' },   condition: (h) => h.feats?.includes?.('corner-shot') },
+      { id: 'triple-tangent', label: { en: 'Triple tangent — point on all three balls', ro: 'Triplu tangent — punct pe toate bilele' }, condition: (h) => h.feats?.includes?.('triple-tangent') },
     ],
   },
 ];
