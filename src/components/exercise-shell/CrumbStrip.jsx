@@ -36,7 +36,7 @@ export default function CrumbStrip({ problems, activeIndex, states, onJump }) {
               border: `1px solid ${isActive ? '#3b82f6' : 'var(--theme-border)'}`,
             }}
           >
-            {i + 1}{state === 'complete' ? ' ✓' : ''}
+            {p.id?.startsWith('prob-') ? 'W' : 'P'}{i + 1}{state === 'complete' ? ' ✓' : ''}
           </button>
         );
       })}

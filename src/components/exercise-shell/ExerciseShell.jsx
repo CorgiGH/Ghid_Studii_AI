@@ -61,10 +61,10 @@ export default function ExerciseShell({ problems, mode = 'practice' }) {
   const problem = problems[activeIndex];
 
   return (
-    <div className="flex h-full" style={{ minHeight: 600 }}>
+    <div className="flex min-h-[70vh]">
       <aside
         className="hidden lg:block flex-shrink-0 overflow-y-auto border-r"
-        style={{ width: 260, borderColor: 'var(--theme-border)', background: 'var(--theme-sidebar-bg, var(--theme-content-bg))' }}
+        style={{ width: 288, borderColor: 'var(--theme-border)', background: 'var(--theme-sidebar-bg, var(--theme-content-bg))' }}
         aria-label={t('Problems', 'Probleme')}
       >
         <SidebarList problems={problems} states={states} activeIndex={activeIndex} onSelect={setActiveIndex} />
@@ -77,7 +77,7 @@ export default function ExerciseShell({ problems, mode = 'practice' }) {
           states={states}
           onJump={setActiveIndex}
         />
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden max-w-full">
           <ProblemDetailPane
             problem={problem}
             seed={seedsByIndex[activeIndex]}
@@ -124,7 +124,7 @@ function SidebarList({ problems, states, activeIndex, onSelect }) {
       {groups.map((g, gi) => (
         <li key={gi}>
           {g.label && (
-            <div className="px-4 py-1 text-xs uppercase tracking-wide font-medium opacity-60"
+            <div className="px-3 py-1 text-xs uppercase tracking-wide font-medium opacity-60"
                  style={{ color: 'var(--theme-content-text)' }}>
               {g.label}
             </div>
@@ -152,7 +152,7 @@ function SidebarList({ problems, states, activeIndex, onSelect }) {
                       isActive={isActive}
                     />
                     <span className="text-xs font-mono flex-shrink-0 w-6">{i + 1}.</span>
-                    <span className="flex-1 truncate">
+                    <span className="flex-1 line-clamp-2 leading-snug">
                       {t(p.title.en, p.title.ro)}
                     </span>
                   </button>

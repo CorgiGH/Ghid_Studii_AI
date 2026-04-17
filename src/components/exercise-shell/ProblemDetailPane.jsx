@@ -47,7 +47,7 @@ export default function ProblemDetailPane({
         transition={{ duration: 0.15 }}
         role="region"
         aria-labelledby={`problem-title-${problem.id}`}
-        className="p-6 max-w-4xl mx-auto"
+        className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto w-full overflow-x-hidden"
       >
         <h2
           id={`problem-title-${problem.id}`}

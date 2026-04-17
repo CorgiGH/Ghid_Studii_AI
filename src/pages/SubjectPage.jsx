@@ -263,7 +263,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         )}
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col min-h-[calc(100vh-120px)]">
+        <div className="flex-1 flex flex-col">
           {/* Inline progress bar — sticky below TopBar (legacy JSX courses only; JSON courses have their own sticky header in CourseRenderer) */}
           {activeItem && activeItem.sectionCount > 0 && !activeItem.src && (
             <InlineProgress
@@ -274,7 +274,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             />
           )}
 
-          <main ref={contentRef} className="flex-1 flex flex-col mx-auto p-4 lg:p-8" style={{ maxWidth: 'var(--content-max-width)', fontSize: 'var(--type-body)', lineHeight: 'var(--type-body-lh)' }}>
+          <main ref={contentRef} className={`flex-1 flex flex-col mx-auto ${tab === 'practice' || tab === 'seminars' ? 'py-4 lg:py-6 px-0' : 'p-4 lg:p-8'}`} style={{ maxWidth: tab === 'practice' || tab === 'seminars' ? 'none' : 'var(--content-max-width)', fontSize: 'var(--type-body)', lineHeight: 'var(--type-body-lh)' }}>
             {tab === 'courses' && (
               <>
                 {activeCourse ? (
@@ -336,17 +336,19 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
                       <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-3 px-4 lg:px-8" style={{ maxWidth: 'var(--content-max-width)' }}>
                       {subject.seminars.map((sem, idx) => (
-                        <div
+                        <button
                           key={sem.id}
+                          type="button"
                           onClick={() => navigate(`/${yearSem}/${subjectSlug}/sem_${idx + 1}`)}
-                          className="p-4 rounded border cursor-pointer transition-shadow hover:shadow-md"
+                          aria-label={`${t('Open seminar', 'Deschide seminarul')}: ${sem.title[lang]}`}
+                          className="w-full text-left p-4 rounded border transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-card-bg)', color: 'var(--theme-content-text)' }}
                         >
                           <h3 className="font-semibold mb-1">{sem.title[lang]}</h3>
                           <p className="text-xs opacity-70">{t('Click to open', 'Click pentru a deschide')}</p>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   )
