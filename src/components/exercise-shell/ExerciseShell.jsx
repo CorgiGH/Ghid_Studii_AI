@@ -27,7 +27,6 @@ export default function ExerciseShell({ problems, mode = 'practice' }) {
   const { t } = useApp();
   const [seedsByIndex, setSeedsByIndex] = useState(() => problems.map(() => Date.now() + Math.floor(Math.random() * 1e6)));
 
-  const active = null; // resolved via state
   const { activeIndex, setActiveIndex, showCheatSheet, setShowCheatSheet, revealSolution, setRevealSolution } =
     useExerciseShell({
       problems,
