@@ -18,7 +18,7 @@ export default function FeatTray({ allFeats, earnedFeatIds = [] }) {
 
   return (
     <div className="rounded-md border text-sm"
-         style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-content-bg-alt, #f8fafc)' }}>
+         style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-content-bg)' }}>
       <button
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}

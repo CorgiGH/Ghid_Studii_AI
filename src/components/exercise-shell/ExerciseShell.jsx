@@ -140,7 +140,7 @@ function SidebarList({ problems, states, activeIndex, onSelect }) {
                     aria-current={isActive ? 'true' : undefined}
                     className="w-full flex items-center gap-2 px-4 py-2 text-left"
                     style={{
-                      background: isActive ? 'var(--theme-content-bg-alt, #eff6ff)' : 'transparent',
+                      background: isActive ? 'var(--theme-hover-bg)' : 'transparent',
                       color: 'var(--theme-content-text)',
                       borderLeft: `3px solid ${isActive ? '#3b82f6' : 'transparent'}`,
                     }}
