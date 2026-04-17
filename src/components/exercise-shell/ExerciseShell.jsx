@@ -104,9 +104,12 @@ function handleSubmit(problem) {
 
 function SidebarList({ problems, states, activeIndex, onSelect }) {
   const { t } = useApp();
-  // Group by problem.groupLabel.en if provided
+  // Group by problem.groupLabel.en if provided.
+  // Sentinel: the initial value must never equal any real label (including null),
+  // so the first iteration always seeds a group — otherwise seminar problems
+  // (no groupLabel → label === null) would push into groups[-1].
   const groups = [];
-  let currentGroup = null;
+  let currentGroup = Symbol('init');
   problems.forEach((p, i) => {
     const label = p.groupLabel ? t(p.groupLabel.en, p.groupLabel.ro) : null;
     if (label !== currentGroup) {
