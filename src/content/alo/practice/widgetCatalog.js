@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+import { generateMatrixInputInstance } from './instances/matrixInput';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -25,11 +26,21 @@ export function groupLabel(groupId) {
   return GROUPS.find(g => g.id === groupId)?.label ?? null;
 }
 
-/** @type {WidgetSpec[]} — populated by tasks in Batch 1 and later plans */
 export const widgetCatalog = [
-  // W1 — filled by Task 22
-  // W2 — filled by Task 24
-  // W3 — filled by Task 26
+  {
+    id: 'matrix-input',
+    title: { en: 'W1 · Matrix Input + Properties', ro: 'W1 · Input și proprietăți matriciale' },
+    courseRef: 'alo-c1',
+    groupId: 'foundations',
+    mode: 'tool-with-qa',
+    Component: lazy(() => import('./widgets/MatrixInput')),
+    generateInstance: generateMatrixInputInstance,
+    pbMetric: { id: 'time', label: { en: 'Time (s)', ro: 'Timp (s)' }, lowerIsBetter: true },
+    feats: [
+      { id: 'quick-eye',     label: { en: 'Quick eye — correct in <5s', ro: 'Ochi rapid — corect în <5s' }, condition: (h) => h.feats?.includes?.('quick-eye') },
+      { id: 'flawless-five', label: { en: 'Flawless five — 5 correct in a session', ro: 'Impecabil — 5 corecte într-o sesiune' }, condition: (h) => h.feats?.includes?.('flawless-five') },
+    ],
+  },
 ];
 
 /**
