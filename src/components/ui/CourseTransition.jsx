@@ -53,7 +53,7 @@ export default function CourseTransition({ courseIndex, children }) {
   }, [courseIndex]);
 
   return (
-    <div ref={containerRef} className={`course-transition ${animClass}`}>
+    <div ref={containerRef} className={`course-transition ${animClass} w-full min-w-0`}>
       {displayChildren}
       <style>{`
         .course-transition {

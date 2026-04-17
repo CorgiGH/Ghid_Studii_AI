@@ -263,7 +263,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         )}
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Inline progress bar — sticky below TopBar (legacy JSX courses only; JSON courses have their own sticky header in CourseRenderer) */}
           {activeItem && activeItem.sectionCount > 0 && !activeItem.src && (
             <InlineProgress
@@ -274,7 +274,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             />
           )}
 
-          <main ref={contentRef} className={`flex-1 flex flex-col mx-auto ${tab === 'practice' || tab === 'seminars' ? 'py-4 lg:py-6 px-0' : 'p-4 lg:p-8'}`} style={{ maxWidth: tab === 'practice' || tab === 'seminars' ? 'none' : 'var(--content-max-width)', fontSize: 'var(--type-body)', lineHeight: 'var(--type-body-lh)' }}>
+          <main ref={contentRef} className={`flex-1 flex flex-col mx-auto w-full min-w-0 ${tab === 'practice' || tab === 'seminars' ? 'py-4 lg:py-6 px-0' : 'p-4 lg:p-8'}`} style={{ maxWidth: tab === 'practice' || tab === 'seminars' ? 'none' : 'var(--content-max-width)', fontSize: 'var(--type-body)', lineHeight: 'var(--type-body-lh)' }}>
             {tab === 'courses' && (
               <>
                 {activeCourse ? (
@@ -343,7 +343,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
                           type="button"
                           onClick={() => navigate(`/${yearSem}/${subjectSlug}/sem_${idx + 1}`)}
                           aria-label={`${t('Open seminar', 'Deschide seminarul')}: ${sem.title[lang]}`}
-                          className="w-full text-left p-4 rounded border transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full text-left p-4 rounded border transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                           style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-card-bg)', color: 'var(--theme-content-text)' }}
                         >
                           <h3 className="font-semibold mb-1">{sem.title[lang]}</h3>
