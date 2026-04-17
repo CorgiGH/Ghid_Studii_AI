@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { useApp } from '../../contexts/AppContext';
 import { useWidgetProgress } from '../../hooks/useWidgetProgress';
 import { FeatTray } from '../widgets-core';
+import SeminarBlockRenderer from './SeminarBlockRenderer';
 
 /**
  * Renders a single problem.
@@ -70,6 +71,8 @@ export default function ProblemDetailPane({
             onGenerateInstance={onGenerateInstance}
           />
         )}
+
+        {problem.blocks && <SeminarBlockRenderer blocks={problem.blocks} />}
 
         <div className="mt-4 flex items-center gap-3 flex-wrap">
           {showNewInstance && widget && (
