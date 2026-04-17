@@ -4,6 +4,7 @@ import { generateNormVisualizerInstance } from './instances/normVisualizer';
 import { generateGaussElimInstance } from './instances/gaussElim';
 import { generateLuDecompInstance } from './instances/luDecomp';
 import { generateGramSchmidtInstance } from './instances/gramSchmidt';
+import { generateGivensQrInstance } from './instances/givensQr';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -99,6 +100,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'clean-norm',        label: { en: 'Clean norm — every ‖uᵢ‖ = 1 within 1e-9', ro: 'Normă curată — fiecare ‖uᵢ‖ = 1 cu eroare 1e-9' }, condition: (h) => h.feats?.includes?.('clean-norm') },
       { id: 'parallel-spotter',  label: { en: 'Parallel spotter — flagged a dependent set', ro: 'Detector paralele — marcat un set dependent' }, condition: (h) => h.feats?.includes?.('parallel-spotter') },
+    ],
+  },
+  {
+    id: 'givens-qr',
+    title: { en: 'W5 · Givens QR', ro: 'W5 · QR cu Givens' },
+    courseRef: 'alo-c6',
+    groupId: 'factorizations',
+    mode: 'exercise',
+    Component: lazy(() => import('./widgets/GivensQr')),
+    generateInstance: generateGivensQrInstance,
+    pbMetric: { id: 'rotations', label: { en: 'Rotations', ro: 'Rotații' }, lowerIsBetter: true },
+    feats: [
+      { id: 'minimal-rotations', label: { en: 'Minimal rotations — exactly n(n−1)/2', ro: 'Rotații minimale — exact n(n−1)/2' }, condition: (h) => h.feats?.includes?.('minimal-rotations') },
+      { id: 'unit-q',            label: { en: 'Unit Q — orthogonality residual < 1e-6', ro: 'Q unitar — reziduu ortogonalitate < 1e-6' }, condition: (h) => h.feats?.includes?.('unit-q') },
     ],
   },
 ];
