@@ -3,6 +3,7 @@ import { generateMatrixInputInstance } from './instances/matrixInput';
 import { generateNormVisualizerInstance } from './instances/normVisualizer';
 import { generateGaussElimInstance } from './instances/gaussElim';
 import { generateLuDecompInstance } from './instances/luDecomp';
+import { generateGramSchmidtInstance } from './instances/gramSchmidt';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -84,6 +85,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'doolittle-clean',     label: { en: 'Doolittle clean — denominators ≤ 8', ro: 'Doolittle curat — numitori ≤ 8' }, condition: (h) => h.feats?.includes?.('doolittle-clean') },
       { id: 'permuted-lu-master',  label: { en: 'Permuted LU master — handled a permuted seed', ro: 'Maestru LU permutat — instanță permutată gestionată' }, condition: (h) => h.feats?.includes?.('permuted-lu-master') },
+    ],
+  },
+  {
+    id: 'gram-schmidt',
+    title: { en: 'W7 · Gram–Schmidt', ro: 'W7 · Gram–Schmidt' },
+    courseRef: 'alo-c2',
+    groupId: 'factorizations',
+    mode: 'exercise',
+    Component: lazy(() => import('./widgets/GramSchmidt')),
+    generateInstance: generateGramSchmidtInstance,
+    pbMetric: { id: 'steps', label: { en: 'Step count', ro: 'Număr pași' }, lowerIsBetter: true },
+    feats: [
+      { id: 'clean-norm',        label: { en: 'Clean norm — every ‖uᵢ‖ = 1 within 1e-9', ro: 'Normă curată — fiecare ‖uᵢ‖ = 1 cu eroare 1e-9' }, condition: (h) => h.feats?.includes?.('clean-norm') },
+      { id: 'parallel-spotter',  label: { en: 'Parallel spotter — flagged a dependent set', ro: 'Detector paralele — marcat un set dependent' }, condition: (h) => h.feats?.includes?.('parallel-spotter') },
     ],
   },
 ];
