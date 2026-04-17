@@ -6,6 +6,7 @@ import { generateLuDecompInstance } from './instances/luDecomp';
 import { generateGramSchmidtInstance } from './instances/gramSchmidt';
 import { generateGivensQrInstance } from './instances/givensQr';
 import { generateHouseholderQrInstance } from './instances/householderQr';
+import { generatePowerMethodInstance } from './instances/powerMethod';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -129,6 +130,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'single-shot', label: { en: 'Single shot — ‖QR − A‖∞ < 1e-9', ro: 'Dintr-o lovitură — ‖QR − A‖∞ < 1e-9' }, condition: (h) => h.feats?.includes?.('single-shot') },
       { id: 'orthogonal', label: { en: 'Orthogonal — ‖QᵀQ − I‖∞ < 1e-9', ro: 'Ortogonal — ‖QᵀQ − I‖∞ < 1e-9' }, condition: (h) => h.feats?.includes?.('orthogonal') },
+    ],
+  },
+  {
+    id: 'power-method',
+    title: { en: 'W8 · Power Method', ro: 'W8 · Metoda puterii' },
+    courseRef: 'alo-c7',
+    groupId: 'iterative-spectral',
+    mode: 'tool-with-qa',
+    Component: lazy(() => import('./widgets/PowerMethod')),
+    generateInstance: generatePowerMethodInstance,
+    pbMetric: { id: 'iterations', label: { en: 'Iterations', ro: 'Iterații' }, lowerIsBetter: true },
+    feats: [
+      { id: 'fast-converge', label: { en: 'Fast converge — correct in ≤5 iterations', ro: 'Convergență rapidă — corect în ≤5 iterații' }, condition: (h) => h.feats?.includes?.('fast-converge') },
+      { id: 'gap-spotter',   label: { en: 'Gap spotter — identified |λ₁/λ₂| within 0.15', ro: 'Detector de gap — identificat |λ₁/λ₂| cu eroare 0.15' }, condition: (h) => h.feats?.includes?.('gap-spotter') },
     ],
   },
 ];
