@@ -196,8 +196,8 @@
           "type": "table",
           "headers": [
             {
-              "en": "Member \\\\ Inheritance",
-              "ro": "Membru \\\\ Mostenire"
+              "en": "Member / Inheritance",
+              "ro": "Membru / Mostenire"
             },
             {
               "en": "`public`",
@@ -484,8 +484,8 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "The signatures differ (int vs char), so B creates a NEW virtual method instead of overriding A's.",
-                    "ro": "Semnaturile difera (int vs char), deci B creeaza o metoda virtuala NOUA in loc sa o suprascrie pe a lui A."
+                    "en": "Same name is not enough. For an override the full signature (parameter types, constness, ref-qualifiers) must match; otherwise B just adds a *new* virtual method.",
+                    "ro": "Acelasi nume nu este suficient. Pentru o suprascriere semnatura completa (tipurile parametrilor, constness, calificatori de referinta) trebuie sa coincida; altfel B doar adauga o metoda virtuala *noua*."
                   }
                 },
                 {
@@ -495,8 +495,8 @@
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Correct! B has Odd(int) inherited from A and its own Odd(char). Through an A* pointer, Odd(int) is called -- the A version.",
-                    "ro": "Corect! B are Odd(int) mostenit de la A si propriul Odd(char). Printr-un pointer A*, Odd(int) este apelat -- versiunea A."
+                    "en": "Correct. B inherits Odd(int) from A and adds its own Odd(char). Through an A* pointer, A::Odd(int) is called because the types do not match.",
+                    "ro": "Corect. B mosteneste Odd(int) de la A si adauga propriul Odd(char). Printr-un pointer A*, se apeleaza A::Odd(int) pentru ca tipurile nu coincid."
                   }
                 },
                 {
@@ -506,14 +506,60 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "It compiles fine -- it's just not an override. Using the `override` keyword would catch this as an error.",
-                    "ro": "Se compileaza fara probleme -- doar ca nu este o suprascriere. Folosirea cuvantului cheie `override` ar prinde aceasta ca eroare."
+                    "en": "It compiles fine. Different signatures are legal; it is simply not an override.",
+                    "ro": "Se compileaza fara probleme. Semnaturi diferite sunt legale; pur si simplu nu este o suprascriere."
                   }
                 }
               ],
               "explanation": {
-                "en": "Use `override` to let the compiler verify your intent. Without it, signature mismatches silently create new methods.",
-                "ro": "Folositi `override` pentru a lasa compilatorul sa va verifice intentia. Fara el, nepotrivirile de semnatura creeaza silentios metode noi."
+                "en": "Override requires an *exact* signature match; name alone is never enough.",
+                "ro": "Suprascrierea cere o potrivire *exacta* a semnaturii; numele singur nu este niciodata suficient."
+              },
+              "reviewStep": "oop-c5-override-final"
+            },
+            {
+              "question": {
+                "en": "You write `virtual bool Odd(char x) override;` in class B, where A declares `virtual bool Odd(int x)`. What does the `override` keyword do here?",
+                "ro": "Scrii `virtual bool Odd(char x) override;` in clasa B, unde A declara `virtual bool Odd(int x)`. Ce face cuvantul cheie `override` aici?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "It forces B::Odd(char) to override A::Odd(int) by inserting a conversion",
+                    "ro": "Forteaza B::Odd(char) sa suprascrie A::Odd(int) introducand o conversie"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "`override` never rewrites signatures; it only verifies them. If they do not already match, the code does not compile.",
+                    "ro": "`override` nu rescrie niciodata semnaturi; doar le verifica. Daca nu se potrivesc deja, codul nu compileaza."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It causes a compile error because no matching virtual exists in the base",
+                    "ro": "Provoaca o eroare de compilare pentru ca nu exista o metoda virtuala potrivita in baza"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `override` turns the silent \"new virtual\" bug into a compile-time error, which is exactly what catches the int-vs-char mismatch.",
+                    "ro": "Corect. `override` transforma bug-ul silentios de \"metoda virtuala noua\" intr-o eroare la compilare, exact ce prinde confuzia int-vs-char."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It has no effect; it is just documentation",
+                    "ro": "Nu are niciun efect; este doar documentatie"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "`override` is enforced by the compiler since C++11. It looks like a comment but fails the build if no matching base virtual is found.",
+                    "ro": "`override` este verificat de compilator incepand cu C++11. Arata ca un comentariu dar esueaza build-ul daca nu gaseste o metoda virtuala de baza care sa se potriveasca."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "`override` is a compile-time assertion: \"I intend to override -- if I'm wrong, fail fast.\"",
+                "ro": "`override` este o asertiune la compilare: \"am intentia sa suprascriu -- daca gresesc, esueaza imediat\"."
               },
               "reviewStep": "oop-c5-override-final"
             }

@@ -25,8 +25,8 @@ export default function Seminar04() {
     question: { en: 'What is the average-case time complexity of Problem 1\'s algorithm?', ro: 'Care este complexitatea medie de timp a algoritmului din Problema 1?' },
     options: [
       { text: { en: 'Θ(n · ln n)', ro: 'Θ(n · ln n)' }, correct: true },
-      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false, feedback: { en: 'That would be the worst case (every element is a new maximum); on average only Hₙ ≈ ln n updates happen.', ro: 'Acela ar fi cazul cel mai rău (fiecare element e nou maxim); în medie apar doar Hₙ ≈ ln n actualizări.' } },
-      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false, feedback: { en: 'Ignores the inner loop cost; each of the Hₙ ≈ ln n updates triggers n extra iterations.', ro: 'Ignoră costul buclei interioare; fiecare din cele Hₙ ≈ ln n actualizări declanșează n iterații în plus.' } },
+      { text: { en: 'Θ(n²)', ro: 'Θ(n²)' }, correct: false, feedback: { en: 'That would be the worst case (every element is a new maximum); on average only Hₙ − 1 ≈ ln n updates happen (the i = 0 position does not count as an update).', ro: 'Acela ar fi cazul cel mai rău (fiecare element e nou maxim); în medie apar doar Hₙ − 1 ≈ ln n actualizări (poziția i = 0 nu se numără ca actualizare).' } },
+      { text: { en: 'Θ(n)', ro: 'Θ(n)' }, correct: false, feedback: { en: 'Ignores the inner loop cost; each of the Hₙ − 1 ≈ ln n updates triggers n extra iterations.', ro: 'Ignoră costul buclei interioare; fiecare din cele Hₙ − 1 ≈ ln n actualizări declanșează n iterații în plus.' } },
       { text: { en: 'Θ(n² · ln n)', ro: 'Θ(n² · ln n)' }, correct: false, feedback: { en: 'One factor of n too many: the outer loop is n, not n²; the Hₙ factor comes from the expected update count.', ro: 'Un factor n în plus: bucla exterioară e n, nu n²; factorul Hₙ vine din numărul așteptat de actualizări.' } },
     ],
     explanation: {
