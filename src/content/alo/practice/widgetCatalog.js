@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { generateMatrixInputInstance } from './instances/matrixInput';
 import { generateNormVisualizerInstance } from './instances/normVisualizer';
 import { generateGaussElimInstance } from './instances/gaussElim';
+import { generateLuDecompInstance } from './instances/luDecomp';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -69,6 +70,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'no-swap',     label: { en: 'No-swap — reached REF with zero row swaps', ro: 'Fără permutări — REF atins cu zero permutări' }, condition: (h) => h.feats?.includes?.('no-swap') },
       { id: 'clean-pivot', label: { en: 'Clean pivot — no denominator explosion', ro: 'Pivot curat — fără explozie de numitori' },       condition: (h) => h.feats?.includes?.('clean-pivot') },
+    ],
+  },
+  {
+    id: 'lu-decomp',
+    title: { en: 'W4 · LU Decomposition', ro: 'W4 · Descompunere LU' },
+    courseRef: 'alo-c5',
+    groupId: 'linear-systems',
+    mode: 'exercise',
+    Component: lazy(() => import('./widgets/LuDecomp')),
+    generateInstance: generateLuDecompInstance,
+    pbMetric: { id: 'residual', label: { en: 'Residual ‖A−LU‖∞', ro: 'Reziduu ‖A−LU‖∞' }, lowerIsBetter: true },
+    feats: [
+      { id: 'doolittle-clean',     label: { en: 'Doolittle clean — denominators ≤ 8', ro: 'Doolittle curat — numitori ≤ 8' }, condition: (h) => h.feats?.includes?.('doolittle-clean') },
+      { id: 'permuted-lu-master',  label: { en: 'Permuted LU master — handled a permuted seed', ro: 'Maestru LU permutat — instanță permutată gestionată' }, condition: (h) => h.feats?.includes?.('permuted-lu-master') },
     ],
   },
 ];
