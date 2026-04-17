@@ -8,6 +8,7 @@ import { generateGivensQrInstance } from './instances/givensQr';
 import { generateHouseholderQrInstance } from './instances/householderQr';
 import { generatePowerMethodInstance } from './instances/powerMethod';
 import { generateIterativeSolversInstance } from './instances/iterativeSolvers';
+import { generateConditionNumberInstance } from './instances/conditionNumber';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -159,6 +160,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'omega-tuner',       label: { en: 'Omega tuner — within 0.05 of ω*', ro: 'Reglaj ω — în limita 0.05 de ω*' }, condition: (h) => h.feats?.includes?.('omega-tuner') },
       { id: 'gs-beats-jacobi',   label: { en: 'Predicted fastest method correctly', ro: 'Metoda cea mai rapidă prezisă corect' }, condition: (h) => h.feats?.includes?.('gs-beats-jacobi') },
+    ],
+  },
+  {
+    id: 'condition-number',
+    title: { en: 'W10 · Condition Number', ro: 'W10 · Numărul de condiționare' },
+    courseRef: 'alo-c3',
+    groupId: 'stability',
+    mode: 'tool-with-qa',
+    Component: lazy(() => import('./widgets/ConditionNumber')),
+    generateInstance: generateConditionNumberInstance,
+    pbMetric: undefined,
+    feats: [
+      { id: 'hilbert-spotter', label: { en: 'Hilbert spotter — flagged a Hilbert variant', ro: 'Detector Hilbert — recunoscut o variantă Hilbert' }, condition: (h) => h.feats?.includes?.('hilbert-spotter') },
+      { id: 'near-singular',   label: { en: 'Near-singular — induced a sign flip in x', ro: 'Aproape singular — provocat schimbare de semn în x' }, condition: (h) => h.feats?.includes?.('near-singular') },
     ],
   },
 ];
