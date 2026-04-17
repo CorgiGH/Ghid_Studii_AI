@@ -51,11 +51,16 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   const labMatch = wildcard?.match(/^lab_(\d+)$/);
   const labNum = labMatch ? parseInt(labMatch[1], 10) : null;
 
+  const semMatch = wildcard?.match(/^sem_(\d+)$/);
+  const semNum = semMatch ? parseInt(semMatch[1], 10) : null;
+
   const tab = courseNum
     ? 'courses'
     : labNum
       ? 'labs'
-      : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
+      : semNum
+        ? 'seminars'
+        : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
 
   const activeCourse = useMemo(() => {
     if (!courseNum || !subject) return null;
@@ -83,6 +88,16 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
   }, [activeLab, subject]);
 
   const labSectionIds = useMemo(() => activeLab?.sections?.map(s => s.id) || [], [activeLab]);
+
+  const activeSem = useMemo(() => {
+    if (!semNum || !subject) return null;
+    return subject.seminars?.[semNum - 1] || null;
+  }, [semNum, subject]);
+
+  const activeSemIndex = useMemo(() => {
+    if (!activeSem || !subject) return -1;
+    return subject.seminars.findIndex(s => s.id === activeSem.id);
+  }, [activeSem, subject]);
 
   // Page context extraction for chat
   const contentRef = useRef(null);
@@ -163,7 +178,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
     }
   };
 
-  const activeItem = activeCourse || activeLab;
+  const activeItem = activeCourse || activeLab || activeSem;
   const activeItemSectionIds = activeCourse ? sectionIds : labSectionIds;
 
   return (
@@ -179,7 +194,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
               yearSem={yearSem}
               subject={subject}
               tab={tab}
-              activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : undefined}
+              activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : activeSem ? activeSem.shortTitle[lang] : undefined}
             />
           </div>
           {tab === 'courses' && activeCourse && (
@@ -226,6 +241,21 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             yearSem={yearSem}
             subjectSlug={subjectSlug}
             routePrefix="lab_"
+            locked={sidebarLocked}
+            onToggleLock={toggleSidebarLock}
+            sidebarTop={sidebarTop}
+          />
+        )}
+
+        {tab === 'seminars' && subject.seminars?.length > 0 && activeSem && (
+          <Sidebar
+            items={subject.seminars}
+            activeCourseId={activeSem?.id || null}
+            open={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            yearSem={yearSem}
+            subjectSlug={subjectSlug}
+            routePrefix="sem_"
             locked={sidebarLocked}
             onToggleLock={toggleSidebarLock}
             sidebarTop={sidebarTop}
@@ -285,32 +315,43 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             )}
 
             {tab === 'seminars' && subject.seminars && (
-              <div>
-                {subject.seminars.length === 0 ? (
-                  <div className="text-center py-12 opacity-60">
-                    <p className="text-4xl mb-4">{subject.icon}</p>
-                    <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
-                  </div>
+              <>
+                {activeSem ? (
+                  <CourseTransition courseIndex={activeSemIndex}>
+                    <Suspense fallback={<LoadingFallback />}>
+                      {React.createElement(activeSem.component)}
+                    </Suspense>
+                    <CourseNavigation
+                      items={subject.seminars}
+                      currentIndex={activeSemIndex}
+                      yearSem={yearSem}
+                      subjectSlug={subjectSlug}
+                      routePrefix="sem_"
+                    />
+                  </CourseTransition>
                 ) : (
-                  <>
-                    {subject.slug === 'pa' && (
-                      <p className="mb-4 text-xs" style={{ color: 'var(--theme-muted-text)' }}>
-                        {t(`${subject.seminars.length} weeks`, `${subject.seminars.length} săptămâni`)}
-                      </p>
-                    )}
-                    {subject.seminars.map(sem => {
-                      const SemContent = sem.component;
-                      return (
-                        <CourseBlock key={sem.id} title={sem.title[lang]} id={sem.id}>
-                          <Suspense fallback={<LoadingFallback />}>
-                            <SemContent />
-                          </Suspense>
-                        </CourseBlock>
-                      );
-                    })}
-                  </>
+                  subject.seminars.length === 0 ? (
+                    <div className="text-center py-12 opacity-60">
+                      <p className="text-4xl mb-4">{subject.icon}</p>
+                      <p className="text-lg font-medium">{t('Coming soon', 'În curând')}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {subject.seminars.map((sem, idx) => (
+                        <div
+                          key={sem.id}
+                          onClick={() => navigate(`/${yearSem}/${subjectSlug}/sem_${idx + 1}`)}
+                          className="p-4 rounded border cursor-pointer transition-shadow hover:shadow-md"
+                          style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-card-bg)', color: 'var(--theme-content-text)' }}
+                        >
+                          <h3 className="font-semibold mb-1">{sem.title[lang]}</h3>
+                          <p className="text-xs opacity-70">{t('Click to open', 'Click pentru a deschide')}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )
                 )}
-              </div>
+              </>
             )}
 
             {tab === 'labs' && subject.labs && (
@@ -363,7 +404,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         </div>
 
         {/* Right chat panel — only show when a course or lab is active (not on CourseMap overview) */}
-        {chatOpen && (activeCourse || activeLab) && (
+        {chatOpen && (activeCourse || activeLab || activeSem) && (
           <ChatPanel
             pageContext={pageContext}
             subjectSyllabus={subject.description?.[lang] || ''}
@@ -371,7 +412,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
         )}
 
         {/* Chat reopen button when collapsed */}
-        {!chatOpen && (activeCourse || activeLab) && (
+        {!chatOpen && (activeCourse || activeLab || activeSem) && (
           <button
             className="hidden lg:flex items-center justify-center fixed right-0 top-1/2 -translate-y-1/2 z-30 transition-colors hover:brightness-125"
             style={{

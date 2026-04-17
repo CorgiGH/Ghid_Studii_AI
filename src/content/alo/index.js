@@ -1,4 +1,16 @@
-import { lazy } from 'react';
+import React, { lazy } from 'react';
+
+function makeSeminarComponent(jsonLoader, displayName) {
+  const Component = lazy(async () => {
+    const [{ default: Shell }, { default: data }] = await Promise.all([
+      import('./seminars/SeminarShell'),
+      jsonLoader(),
+    ]);
+    return { default: () => React.createElement(Shell, { seminarData: data }) };
+  });
+  Component.displayName = displayName;
+  return Component;
+}
 
 const alo = {
   slug: 'alo',
@@ -41,12 +53,12 @@ const alo = {
       sectionCount: 9 },
   ],
   seminars: [
-    { id: 'alo-s1', title: { en: 'Week 1: Vector & matrix norms, complex inner product', ro: 'Săptămâna 1: Norme vectoriale și matriciale, produs scalar complex' }, shortTitle: { en: 'W1: Norms', ro: 'S1: Norme' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
-    { id: 'alo-s2', title: { en: 'Week 2: Triangular systems, inverses, Gram–Schmidt', ro: 'Săptămâna 2: Sisteme triunghiulare, inverse, Gram–Schmidt' }, shortTitle: { en: 'W2: GS + QR', ro: 'S2: GS + QR' }, component: lazy(() => import('./seminars/Seminar02.jsx')) },
-    { id: 'alo-s3', title: { en: 'Week 3: Graphical methods, parametric systems, Gauss with pivoting', ro: 'Săptămâna 3: Metode grafice, sisteme parametrice, Gauss cu pivotare' }, shortTitle: { en: 'W3: Pivoting', ro: 'S3: Pivotare' }, component: lazy(() => import('./seminars/Seminar03.jsx')) },
-    { id: 'alo-s4', title: { en: 'Week 4: LU decomposition — Doolittle, Crout, PA = LU', ro: 'Săptămâna 4: Descompunerea LU — Doolittle, Crout, PA = LU' }, shortTitle: { en: 'W4: LU', ro: 'S4: LU' }, component: lazy(() => import('./seminars/Seminar04.jsx')) },
-    { id: 'alo-s5', title: { en: 'Week 5: QR decomposition — Givens and Householder', ro: 'Săptămâna 5: Descompunerea QR — Givens și Householder' }, shortTitle: { en: 'W5: QR', ro: 'S5: QR' }, component: lazy(() => import('./seminars/Seminar05.jsx')) },
-    { id: 'alo-s6', title: { en: 'Week 6: Eigenvalues, similarity, power method, QR iteration', ro: 'Săptămâna 6: Valori proprii, similaritate, metoda puterii, iterație QR' }, shortTitle: { en: 'W6: Eigenvalues', ro: 'S6: Val. proprii' }, component: lazy(() => import('./seminars/Seminar06.jsx')) },
+    { id: 'alo-s1', title: { en: 'Week 1: Vector & matrix norms, complex inner product', ro: 'Săptămâna 1: Norme vectoriale și matriciale, produs scalar complex' }, shortTitle: { en: 'W1: Norms', ro: 'S1: Norme' }, component: makeSeminarComponent(() => import('./seminars/seminar-01.json'), 'Seminar01') },
+    { id: 'alo-s2', title: { en: 'Week 2: Triangular systems, inverses, Gram–Schmidt', ro: 'Săptămâna 2: Sisteme triunghiulare, inverse, Gram–Schmidt' }, shortTitle: { en: 'W2: GS + QR', ro: 'S2: GS + QR' }, component: makeSeminarComponent(() => import('./seminars/seminar-02.json'), 'Seminar02') },
+    { id: 'alo-s3', title: { en: 'Week 3: Graphical methods, parametric systems, Gauss with pivoting', ro: 'Săptămâna 3: Metode grafice, sisteme parametrice, Gauss cu pivotare' }, shortTitle: { en: 'W3: Pivoting', ro: 'S3: Pivotare' }, component: makeSeminarComponent(() => import('./seminars/seminar-03.json'), 'Seminar03') },
+    { id: 'alo-s4', title: { en: 'Week 4: LU decomposition — Doolittle, Crout, PA = LU', ro: 'Săptămâna 4: Descompunerea LU — Doolittle, Crout, PA = LU' }, shortTitle: { en: 'W4: LU', ro: 'S4: LU' }, component: makeSeminarComponent(() => import('./seminars/seminar-04.json'), 'Seminar04') },
+    { id: 'alo-s5', title: { en: 'Week 5: QR decomposition — Givens and Householder', ro: 'Săptămâna 5: Descompunerea QR — Givens și Householder' }, shortTitle: { en: 'W5: QR', ro: 'S5: QR' }, component: makeSeminarComponent(() => import('./seminars/seminar-05.json'), 'Seminar05') },
+    { id: 'alo-s6', title: { en: 'Week 6: Eigenvalues, similarity, power method, QR iteration', ro: 'Săptămâna 6: Valori proprii, similaritate, metoda puterii, iterație QR' }, shortTitle: { en: 'W6: Eigenvalues', ro: 'S6: Val. proprii' }, component: makeSeminarComponent(() => import('./seminars/seminar-06.json'), 'Seminar06') },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
