@@ -5,6 +5,7 @@ import { generateGaussElimInstance } from './instances/gaussElim';
 import { generateLuDecompInstance } from './instances/luDecomp';
 import { generateGramSchmidtInstance } from './instances/gramSchmidt';
 import { generateGivensQrInstance } from './instances/givensQr';
+import { generateHouseholderQrInstance } from './instances/householderQr';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -114,6 +115,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'minimal-rotations', label: { en: 'Minimal rotations — exactly n(n−1)/2', ro: 'Rotații minimale — exact n(n−1)/2' }, condition: (h) => h.feats?.includes?.('minimal-rotations') },
       { id: 'unit-q',            label: { en: 'Unit Q — orthogonality residual < 1e-6', ro: 'Q unitar — reziduu ortogonalitate < 1e-6' }, condition: (h) => h.feats?.includes?.('unit-q') },
+    ],
+  },
+  {
+    id: 'householder-qr',
+    title: { en: 'W6 · Householder QR', ro: 'W6 · QR cu Householder' },
+    courseRef: 'alo-c6',
+    groupId: 'factorizations',
+    mode: 'exercise',
+    Component: lazy(() => import('./widgets/HouseholderQr')),
+    generateInstance: generateHouseholderQrInstance,
+    pbMetric: { id: 'residual', label: { en: 'Residual ‖QR − A‖∞', ro: 'Reziduu ‖QR − A‖∞' }, lowerIsBetter: true },
+    feats: [
+      { id: 'single-shot', label: { en: 'Single shot — ‖QR − A‖∞ < 1e-9', ro: 'Dintr-o lovitură — ‖QR − A‖∞ < 1e-9' }, condition: (h) => h.feats?.includes?.('single-shot') },
+      { id: 'orthogonal', label: { en: 'Orthogonal — ‖QᵀQ − I‖∞ < 1e-9', ro: 'Ortogonal — ‖QᵀQ − I‖∞ < 1e-9' }, condition: (h) => h.feats?.includes?.('orthogonal') },
     ],
   },
 ];
