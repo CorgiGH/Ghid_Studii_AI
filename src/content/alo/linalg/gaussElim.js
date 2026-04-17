@@ -63,7 +63,7 @@ export function runGaussElim(inputMatrix, { pivoting = 'none' } = {}) {
         matrix: cloneFrac(M),
         highlights: {
           cells: [[pivotRow, col]],
-          rows: [r],
+          rows: [pivotRow, r],
         },
         label: {
           en: `R${r + 1} ← R${r + 1} + (${formatFraction(mult)}) · R${pivotRow + 1}`,
@@ -89,8 +89,9 @@ function cloneFrac(M) {
 }
 
 function diagCells(M) {
+  const cols = M[0]?.length ?? 0;
   const out = [];
-  for (let i = 0; i < Math.min(M.length, M[0]?.length ?? 0); i++) out.push([i, i]);
+  for (let i = 0; i < Math.min(M.length, cols); i++) out.push([i, i]);
   return out;
 }
 
