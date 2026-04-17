@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { AnimatePresence } from 'motion/react';
 // motion.article below requires motion import for JSX transform
 // eslint-disable-next-line no-unused-vars
@@ -103,7 +103,14 @@ function WidgetHost({ widget, seed, onSubmit, onGenerateInstance }) {
   const { history } = useWidgetProgress(widget.id, {
     pbLowerIsBetter: widget.pbMetric?.lowerIsBetter ?? true,
   });
-  const instance = widget.generateInstance(seed, widget.difficulty ?? 'medium');
+  // Memoize instance to prevent re-running expensive generateInstance (which may
+  // call the full algorithm internally, e.g. LU decomp loops up to 50 times) on
+  // every render. Without this, React Strict Mode's double-render causes
+  // setState-during-render warnings in child widgets.
+  const instance = useMemo(
+    () => widget.generateInstance(seed, widget.difficulty ?? 'medium'),
+    [widget, seed],
+  );
   const Component = widget.Component;
 
   return (

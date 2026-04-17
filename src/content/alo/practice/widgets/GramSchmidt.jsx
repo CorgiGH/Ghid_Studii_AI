@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../../../../contexts/AppContext';
 import { StepPlayer } from '../../../../components/widgets-core';
 import { useWidgetProgress } from '../../../../hooks/useWidgetProgress';
@@ -16,9 +16,11 @@ function w2s(x, y) {
 export default function GramSchmidt({ instance, onSubmit, onGenerateInstance }) {
   const { t } = useApp();
   const [submitted, setSubmitted] = useState(false);
-  const [flaggedDependent, setFlaggedDependent] = useState(false);
-  const startAt = useRef(Date.now());
+  const [flaggedDependent, setFlaggedDependent] = useState(null);
+  const startAt = useRef(0);
   const opCount = useRef(0);
+  // Initialize startAt on mount (Date.now is impure so not allowed in render body)
+  useEffect(() => { startAt.current = Date.now(); }, []);
   const { submit } = useWidgetProgress('gram-schmidt', { pbLowerIsBetter: true });
 
   const { steps, orthonormal, dependent } = useMemo(
@@ -27,7 +29,7 @@ export default function GramSchmidt({ instance, onSubmit, onGenerateInstance }) 
   );
 
   const onCheck = () => {
-    if (submitted) return;
+    if (submitted || flaggedDependent === null) return;
     setSubmitted(true);
     const correct = flaggedDependent === dependent;
     const feats = [];
@@ -43,7 +45,7 @@ export default function GramSchmidt({ instance, onSubmit, onGenerateInstance }) 
 
   const onNext = () => {
     setSubmitted(false);
-    setFlaggedDependent(false);
+    setFlaggedDependent(null);
     startAt.current = Date.now();
     opCount.current = 0;
     onGenerateInstance?.();
@@ -90,16 +92,27 @@ export default function GramSchmidt({ instance, onSubmit, onGenerateInstance }) 
           aria-pressed={flaggedDependent === false}
           className="px-3 py-1 rounded text-sm border"
           style={{
-            borderColor: flaggedDependent === false && submitted ? '#3b82f6' : 'var(--theme-border)',
-            background: flaggedDependent === false && submitted ? '#3b82f6' : 'transparent',
-            color: flaggedDependent === false && submitted ? '#fff' : 'var(--theme-content-text)',
+            borderColor: flaggedDependent === false ? '#3b82f6' : 'var(--theme-border)',
+            background: flaggedDependent === false ? '#3b82f6' : 'transparent',
+            color: flaggedDependent === false ? '#fff' : 'var(--theme-content-text)',
           }}
         >{t('No', 'Nu')}</button>
       </div>
 
       <div className="flex gap-2 items-center">
         {!submitted ? (
-          <button onClick={onCheck} className="px-4 py-1.5 rounded font-medium text-sm" style={{ background: '#3b82f6', color: '#fff' }}>
+          <button
+            onClick={onCheck}
+            disabled={flaggedDependent === null}
+            title={flaggedDependent === null ? t('Pick Yes or No first', 'Alege Da sau Nu mai întâi') : undefined}
+            className="px-4 py-1.5 rounded font-medium text-sm"
+            style={{
+              background: flaggedDependent === null ? 'var(--theme-border)' : '#3b82f6',
+              color: flaggedDependent === null ? 'var(--theme-content-text)' : '#fff',
+              opacity: flaggedDependent === null ? 0.55 : 1,
+              cursor: flaggedDependent === null ? 'not-allowed' : 'pointer',
+            }}
+          >
             {t('Check (Enter)', 'Verifică (Enter)')}
           </button>
         ) : (
