@@ -40,7 +40,6 @@ export function useExerciseShell({ problems, allowReveal = true, allowGenerate =
         const target = n === 0 ? 9 : n - 1; // '1'→0, '9'→8, '0'→9
         if (target < problems.length) { e.preventDefault(); setActiveIndex(target); }
       }
-      else if (e.key === 'r' && allowReveal) { e.preventDefault(); setRevealSolution(v => !v); }
       else if (e.key === 'n' && allowGenerate && onGenerate) { e.preventDefault(); onGenerate(); }
       else if (e.key === '?') { e.preventDefault(); setShowCheatSheet(v => !v); }
       else if (e.key === 'Escape') { setShowCheatSheet(false); }

@@ -84,15 +84,6 @@ export default function ProblemDetailPane({
               {t('Generate new instance (n)', 'Generează instanță nouă (n)')}
             </button>
           )}
-          <button
-            onClick={() => onReveal(!revealSolution)}
-            className="px-3 py-1.5 text-sm rounded border"
-            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-content-text)' }}
-          >
-            {revealSolution
-              ? t('Hide solution (r)', 'Ascunde soluția (r)')
-              : t('Show solution (r)', 'Arată soluția (r)')}
-          </button>
           {widget?.feats?.length > 0 && (
             <FeatsForWidget widgetId={widget.id} allFeats={widget.feats} />
           )}
