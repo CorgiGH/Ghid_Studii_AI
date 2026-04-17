@@ -31,7 +31,7 @@ const CourseNavigation = ({ items, currentIndex, yearSem, subjectSlug, routePref
         >
           <span>{'\u2190'}</span>
           <div className="text-left">
-            <div className="text-[10px] opacity-60">{t('Previous', 'Anteriorul')}</div>
+            <div className="text-[10px]" style={{ color: 'var(--theme-muted-text)' }}>{t('Previous', 'Anteriorul')}</div>
             <div className="font-medium text-xs">{prev.shortTitle[lang]}</div>
           </div>
         </button>
@@ -44,7 +44,7 @@ const CourseNavigation = ({ items, currentIndex, yearSem, subjectSlug, routePref
           style={{ color: '#3b82f6' }}
         >
           <div>
-            <div className="text-[10px] opacity-60">{t('Next', 'Următorul')}</div>
+            <div className="text-[10px]" style={{ color: 'var(--theme-muted-text)' }}>{t('Next', 'Următorul')}</div>
             <div className="font-semibold text-xs">{next.shortTitle[lang]}</div>
           </div>
           <span>{'\u2192'}</span>

@@ -347,7 +347,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
                           style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-card-bg)', color: 'var(--theme-content-text)' }}
                         >
                           <h3 className="font-semibold mb-1">{sem.title[lang]}</h3>
-                          <p className="text-xs opacity-70">{t('Click to open', 'Click pentru a deschide')}</p>
+                          <p className="text-xs" style={{ color: 'var(--theme-muted-text)' }}>{t('Click to open', 'Click pentru a deschide')}</p>
                         </button>
                       ))}
                     </div>

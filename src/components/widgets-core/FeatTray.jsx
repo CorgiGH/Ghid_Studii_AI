@@ -37,7 +37,7 @@ export default function FeatTray({ allFeats, earnedFeatIds = [] }) {
             return (
               <li key={f.id}
                   className="flex items-center gap-2"
-                  style={{ opacity: got ? 1 : 0.5, color: 'var(--theme-content-text)' }}>
+                  style={{ color: got ? 'var(--theme-content-text)' : 'var(--theme-muted-text)' }}>
                 <span>{got ? '✓' : '○'}</span>
                 <span>{t(f.label.en, f.label.ro)}</span>
               </li>

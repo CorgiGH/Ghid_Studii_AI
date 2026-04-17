@@ -124,8 +124,8 @@ function SidebarList({ problems, states, activeIndex, onSelect }) {
       {groups.map((g, gi) => (
         <li key={gi}>
           {g.label && (
-            <div className="px-3 py-1 text-xs uppercase tracking-wide font-medium opacity-60"
-                 style={{ color: 'var(--theme-content-text)' }}>
+            <div className="px-3 py-1 text-xs uppercase tracking-wide font-medium"
+                 style={{ color: 'var(--theme-muted-text)' }}>
               {g.label}
             </div>
           )}

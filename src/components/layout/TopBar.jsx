@@ -95,7 +95,7 @@ const TopBar = ({ sidebarOpen, setSidebarOpen }) => {
             >
               <span>{currentSubject.icon}</span>
               <span>{currentSubject.shortTitle[lang]}</span>
-              <span className="text-[10px] opacity-60">{'\u25BC'}</span>
+              <span className="text-[10px] opacity-80">{'\u25BC'}</span>
             </button>
 
             {switcherOpen && (
