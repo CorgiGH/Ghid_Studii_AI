@@ -7,6 +7,7 @@ import { generateGramSchmidtInstance } from './instances/gramSchmidt';
 import { generateGivensQrInstance } from './instances/givensQr';
 import { generateHouseholderQrInstance } from './instances/householderQr';
 import { generatePowerMethodInstance } from './instances/powerMethod';
+import { generateIterativeSolversInstance } from './instances/iterativeSolvers';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -144,6 +145,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'fast-converge', label: { en: 'Fast converge — correct in ≤5 iterations', ro: 'Convergență rapidă — corect în ≤5 iterații' }, condition: (h) => h.feats?.includes?.('fast-converge') },
       { id: 'gap-spotter',   label: { en: 'Gap spotter — identified |λ₁/λ₂| within 0.15', ro: 'Detector de gap — identificat |λ₁/λ₂| cu eroare 0.15' }, condition: (h) => h.feats?.includes?.('gap-spotter') },
+    ],
+  },
+  {
+    id: 'iterative-solvers',
+    title: { en: 'W9 · Iterative Solvers', ro: 'W9 · Rezolvatori iterativi' },
+    courseRef: 'alo-c7',
+    groupId: 'iterative-spectral',
+    mode: 'tool-with-qa',
+    Component: lazy(() => import('./widgets/IterativeSolvers')),
+    generateInstance: generateIterativeSolversInstance,
+    pbMetric: { id: 'iterations', label: { en: 'Iterations (chosen method)', ro: 'Iterații (metoda aleasă)' }, lowerIsBetter: true },
+    feats: [
+      { id: 'omega-tuner',       label: { en: 'Omega tuner — within 0.05 of ω*', ro: 'Reglaj ω — în limita 0.05 de ω*' }, condition: (h) => h.feats?.includes?.('omega-tuner') },
+      { id: 'gs-beats-jacobi',   label: { en: 'Predicted fastest method correctly', ro: 'Metoda cea mai rapidă prezisă corect' }, condition: (h) => h.feats?.includes?.('gs-beats-jacobi') },
     ],
   },
 ];
