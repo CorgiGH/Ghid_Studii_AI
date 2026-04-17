@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { generateMatrixInputInstance } from './instances/matrixInput';
 import { generateNormVisualizerInstance } from './instances/normVisualizer';
+import { generateGaussElimInstance } from './instances/gaussElim';
 
 /**
  * @typedef {Object} WidgetSpec
@@ -54,6 +55,20 @@ export const widgetCatalog = [
     feats: [
       { id: 'corner-shot',    label: { en: 'Corner shot — hit an exact ‖·‖₁ corner', ro: 'La colț — atins un colț exact al ‖·‖₁' },   condition: (h) => h.feats?.includes?.('corner-shot') },
       { id: 'triple-tangent', label: { en: 'Triple tangent — point on all three balls', ro: 'Triplu tangent — punct pe toate bilele' }, condition: (h) => h.feats?.includes?.('triple-tangent') },
+    ],
+  },
+  {
+    id: 'gauss-elim',
+    title: { en: 'W3 · Gauss Elimination', ro: 'W3 · Eliminare Gauss' },
+    courseRef: 'alo-c4',
+    groupId: 'linear-systems',
+    mode: 'exercise',
+    Component: lazy(() => import('./widgets/GaussElim')),
+    generateInstance: generateGaussElimInstance,
+    pbMetric: { id: 'row-ops', label: { en: 'Row operations', ro: 'Operații pe linii' }, lowerIsBetter: true },
+    feats: [
+      { id: 'no-swap',     label: { en: 'No-swap — reached REF with zero row swaps', ro: 'Fără permutări — REF atins cu zero permutări' }, condition: (h) => h.feats?.includes?.('no-swap') },
+      { id: 'clean-pivot', label: { en: 'Clean pivot — no denominator explosion', ro: 'Pivot curat — fără explozie de numitori' },       condition: (h) => h.feats?.includes?.('clean-pivot') },
     ],
   },
 ];
