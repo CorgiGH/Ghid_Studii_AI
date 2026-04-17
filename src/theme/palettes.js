@@ -17,6 +17,9 @@ export const PALETTES = {
       border: '#e2e8f0',
       cardBg: '#ffffff',
       hoverBg: '#f1f5f9',
+      cellPivot: '#f59e0b',
+      cellStrike: '#94a3b8',
+      cellTarget: '#22c55e',
     },
     dark: {
       navBg: '#12122a',
@@ -32,6 +35,9 @@ export const PALETTES = {
       border: '#2a2a4a',
       cardBg: '#1e1e38',
       hoverBg: '#2a2a4a',
+      cellPivot: '#fbbf24',
+      cellStrike: '#64748b',
+      cellTarget: '#4ade80',
     },
   },
   stone: {
@@ -52,6 +58,9 @@ export const PALETTES = {
       border: '#e7e5e4',
       cardBg: '#fafaf9',
       hoverBg: '#f5f5f4',
+      cellPivot: '#f59e0b',
+      cellStrike: '#94a3b8',
+      cellTarget: '#22c55e',
     },
     dark: {
       navBg: '#1c1917',
@@ -67,6 +76,9 @@ export const PALETTES = {
       border: '#44403c',
       cardBg: '#292524',
       hoverBg: '#44403c',
+      cellPivot: '#fbbf24',
+      cellStrike: '#64748b',
+      cellTarget: '#4ade80',
     },
   },
   ocean: {
@@ -87,6 +99,9 @@ export const PALETTES = {
       border: '#dbe4f0',
       cardBg: '#f8faff',
       hoverBg: '#edf2fa',
+      cellPivot: '#f59e0b',
+      cellStrike: '#94a3b8',
+      cellTarget: '#22c55e',
     },
     dark: {
       navBg: '#0f172a',
@@ -102,6 +117,9 @@ export const PALETTES = {
       border: '#1e3050',
       cardBg: '#1a2540',
       hoverBg: '#1e3050',
+      cellPivot: '#fbbf24',
+      cellStrike: '#64748b',
+      cellTarget: '#4ade80',
     },
   },
   zinc: {
@@ -122,6 +140,9 @@ export const PALETTES = {
       border: '#e4e4e7',
       cardBg: '#ffffff',
       hoverBg: '#f4f4f5',
+      cellPivot: '#f59e0b',
+      cellStrike: '#94a3b8',
+      cellTarget: '#22c55e',
     },
     dark: {
       navBg: '#18181b',
@@ -137,6 +158,9 @@ export const PALETTES = {
       border: '#3f3f46',
       cardBg: '#27272a',
       hoverBg: '#3f3f46',
+      cellPivot: '#fbbf24',
+      cellStrike: '#64748b',
+      cellTarget: '#4ade80',
     },
   },
   forest: {
@@ -157,6 +181,9 @@ export const PALETTES = {
       border: '#d8e5dc',
       cardBg: '#f8fbf8',
       hoverBg: '#ecf2ed',
+      cellPivot: '#f59e0b',
+      cellStrike: '#94a3b8',
+      cellTarget: '#22c55e',
     },
     dark: {
       navBg: '#121a16',
@@ -172,6 +199,9 @@ export const PALETTES = {
       border: '#2a3e30',
       cardBg: '#1d2a22',
       hoverBg: '#2a3e30',
+      cellPivot: '#fbbf24',
+      cellStrike: '#64748b',
+      cellTarget: '#4ade80',
     },
   },
 };
