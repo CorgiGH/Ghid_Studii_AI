@@ -5,7 +5,7 @@ import CrumbStrip from './CrumbStrip';
 import ProblemDetailPane from './ProblemDetailPane';
 import ShortcutCheatSheet from './ShortcutCheatSheet';
 import { useExerciseShell } from './useExerciseShell';
-import { useWidgetProgress, computeState, readAllHistories } from '../../hooks/useWidgetProgress';
+import { computeState, readAllHistories } from '../../hooks/useWidgetProgress';
 
 /**
  * Generic exercise shell — sidebar + crumb strip + detail pane.
@@ -84,7 +84,7 @@ export default function ExerciseShell({ problems, mode = 'practice' }) {
             revealSolution={revealSolution}
             onReveal={setRevealSolution}
             onGenerateInstance={regenerateActive}
-            onSubmit={(result) => handleSubmit(problem, result)}
+            onSubmit={() => handleSubmit(problem)}
             showNewInstance={mode === 'practice'}
           />
         </div>
@@ -95,7 +95,7 @@ export default function ExerciseShell({ problems, mode = 'practice' }) {
   );
 }
 
-function handleSubmit(problem, result) {
+function handleSubmit(problem) {
   // Progress events fire via useWidgetProgress.submit when called from inside the widget.
   // This top-level handler is a pass-through for widgets that don't own a progress hook.
   if (!problem?.widget?.id) return;

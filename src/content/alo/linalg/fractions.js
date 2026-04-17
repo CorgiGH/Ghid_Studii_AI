@@ -18,15 +18,21 @@ export function fractionsToNumbers(matrix) {
 export function formatFraction(f, { mode = 'fraction' } = {}) {
   const frac = toFraction(f);
   if (mode === 'decimal') return frac.valueOf().toFixed(3).replace(/\.?0+$/, '');
-  if (frac.d === 1n || frac.d === 1) return frac.s * Number(frac.n) + '';
-  return `${frac.s * Number(frac.n)}/${Number(frac.d)}`;
+  const sign = Number(frac.s);
+  const num = Number(frac.n);
+  const den = Number(frac.d);
+  if (den === 1) return `${sign * num}`;
+  return `${sign * num}/${den}`;
 }
 
 export function fractionToKatex(f) {
   const frac = toFraction(f);
-  if (frac.d === 1n || frac.d === 1) return `${frac.s * Number(frac.n)}`;
-  const sign = frac.s < 0 ? '-' : '';
-  return `${sign}\\frac{${Number(frac.n)}}{${Number(frac.d)}}`;
+  const sign = Number(frac.s);
+  const num = Number(frac.n);
+  const den = Number(frac.d);
+  if (den === 1) return `${sign * num}`;
+  const sgn = sign < 0 ? '-' : '';
+  return `${sgn}\\frac{${num}}{${den}}`;
 }
 
 export function parseFraction(text) {

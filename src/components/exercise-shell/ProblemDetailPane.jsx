@@ -1,5 +1,8 @@
 import React, { Suspense } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
+// motion.article below requires motion import for JSX transform
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'motion/react';
 import { useApp } from '../../contexts/AppContext';
 import { useWidgetProgress } from '../../hooks/useWidgetProgress';
 import { FeatTray } from '../widgets-core';

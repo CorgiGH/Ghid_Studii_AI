@@ -16,6 +16,7 @@ export function useExerciseShell({ problems, allowReveal = true, allowGenerate =
   const [revealSolution, setRevealSolution] = useState(false);
 
   // Reset reveal on problem change
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setRevealSolution(false); }, [activeIndex]);
 
   const advance = useCallback((delta) => {

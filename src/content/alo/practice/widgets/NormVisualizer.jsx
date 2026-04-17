@@ -76,7 +76,7 @@ export default function NormVisualizer({ instance, onSubmit, onGenerateInstance 
   const r = SIZE / (2 * RANGE);
   const linfRect = (() => {
     const [sx1, sy1] = worldToScreen(-1, 1);
-    return { x: sx1, y: sy1, w: 2 * r, h: 2 * r };
+    return { x: sx1, y: sy1, width: 2 * r, height: 2 * r };
   })();
 
   return (

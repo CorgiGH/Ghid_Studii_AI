@@ -1,4 +1,5 @@
-export { default as MatrixGrid, emptyMatrixValue, readMatrixValue } from './MatrixGrid';
+export { default as MatrixGrid } from './MatrixGrid';
+export { emptyMatrixValue, readMatrixValue } from './matrixGridUtils';
 export { default as MatrixDisplay } from './MatrixDisplay';
 export { default as VectorInput } from './VectorInput';
 export { default as StepPlayer } from './StepPlayer';
