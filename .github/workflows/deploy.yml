@@ -21,10 +21,6 @@ jobs:
       url: ${{ github.event.deployment.payload.web_url || steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          # depth 2 lets the content-truth diff see the previous commit on main
-          # so it only re-asks the LLM about questions that actually changed.
-          fetch-depth: 2
 
       - uses: actions/setup-node@v4
         with:
@@ -44,15 +40,12 @@ jobs:
       # unknown block types before they white-screen the live site.
       - run: npm run smoke
 
-      # Content-truth gate (advisory): asks Gemini independently to answer each
-      # *changed* MC question; surfaces disagreements as warnings. Catches the
-      # one failure mode that delivery gates can't: a wrong answer key. Skips
-      # silently if GEMINI_API_KEYS / GEMINI_API_KEY isn't configured. Flip to
-      # blocking by adding `--strict` once the warning stream is calibrated.
-      - run: npm run content-truth -- --base=HEAD~1 --max=80
-        continue-on-error: true
-        env:
-          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+      # Note: a content-truth gate (LLM second-grader for MC answer keys) was
+      # tried in 2026-04-27 but pulled per council 1777313729 — advisory +
+      # same-model-family + silently-skipped-without-secret was strictly worse
+      # than absence (laundered confidence). Run `npm run content-truth -- --all`
+      # locally for manual audits. Re-add to CI only with a real secret + a
+      # strict, blocking config + an out-of-family verifier.
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

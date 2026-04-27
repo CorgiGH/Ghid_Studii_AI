@@ -170,20 +170,26 @@ async function smoke(routes) {
     noteFailure(current, 'consoleError', text.slice(0, 300));
   });
 
-  // First load picks up the SPA shell + hash. Subsequent routes flip the hash
-  // so we don't pay the bundle-eval cost 100+ times.
+  // First load picks up the SPA shell. Subsequent routes use history.pushState
+  // + popstate so we don't pay the bundle-eval cost 100+ times. BrowserRouter
+  // listens for popstate to trigger React-side navigation.
   const baseUrl = `http://localhost:${PORT}${BASE_PATH}`;
-  await page.goto(baseUrl + '#/', { waitUntil: 'networkidle0', timeout: 30000 });
+  const baseNoSlash = BASE_PATH.replace(/\/$/, '');
+  await page.goto(baseUrl, { waitUntil: 'networkidle0', timeout: 30000 });
 
   for (const route of routes) {
     current = route;
-    const target = '#' + route;
+    const target = baseNoSlash + route;
     try {
       await page.evaluate(t => {
-        // Force a real navigation even when the hash equals current — covers
-        // routes that fire side effects only on hashchange.
-        if (window.location.hash === t) window.location.hash = '#__smoke_reset__';
-        window.location.hash = t;
+        // Reset to a junk path first so even an identical pushState still
+        // triggers popstate listeners and re-renders the route.
+        if (window.location.pathname + window.location.search === t) {
+          window.history.pushState({}, '', '/__smoke_reset__');
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
+        window.history.pushState({}, '', t);
+        window.dispatchEvent(new PopStateEvent('popstate'));
       }, target);
       // Settle: KaTeX, Suspense, JSON loaders. 350ms is plenty in headless prod build.
       await new Promise(r => setTimeout(r, 350));

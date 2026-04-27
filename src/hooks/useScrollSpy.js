@@ -26,7 +26,7 @@ export default function useScrollSpy(sectionIds = [], { rootMargin = '-80px 0px 
           const id = topEntry.target.id;
           setActiveId(id);
           if (updateHash) {
-            const base = window.location.href.split('#').slice(0, 2).join('#');
+            const base = window.location.pathname + window.location.search;
             window.history.replaceState(null, '', `${base}#${id}`);
           }
         }

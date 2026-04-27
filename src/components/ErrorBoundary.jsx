@@ -16,8 +16,9 @@ export default class ErrorBoundary extends React.Component {
   };
 
   handleGoHome = () => {
-    window.location.hash = '#/';
-    window.location.reload();
+    // Redirect to base path. Works under both BrowserRouter (Vite BASE_URL)
+    // and the dev server (`/`).
+    window.location.assign((import.meta.env.BASE_URL || '/'));
   };
 
   render() {

@@ -6,6 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>os-study-guide</title>
     <script>
+    // SPA path decode (paired with public/404.html). GH Pages serves 404.html
+    // for unknown paths; that file rewrites e.g. /Ghid_Studii_AI/y1s2/os/c1
+    // into /Ghid_Studii_AI/?/y1s2/os/c1 and bounces here. Decode back to the
+    // real path before BrowserRouter mounts.
+    (function(l){
+      if (l.search[1] === '/') {
+        var decoded = l.search.slice(1).split('&').map(function(s){
+          return s.replace(/~and~/g, '&');
+        }).join('?');
+        window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + decoded + l.hash);
+      }
+    })(window.location);
+
+    // Legacy bookmark redirect: /#/y1s2/... → /y1s2/... (HashRouter holdover).
+    // Only fires when the URL hash starts with /  — true for old shareable
+    // links — and never matches in-page anchor hashes like #intro.
+    (function(){
+      var h = window.location.hash;
+      if (h.length > 2 && h.charAt(1) === '/') {
+        var path = h.slice(1);
+        var base = window.location.pathname.replace(/\/$/, '');
+        window.history.replaceState(null, '', base + path);
+      }
+    })();
+
     (function(){try{
       var raw=localStorage.getItem('themeMode');
       var mode=raw?JSON.parse(raw):'system';

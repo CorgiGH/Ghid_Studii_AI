@@ -4,7 +4,7 @@
 A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS v4). Deployed on GitHub Pages at https://corgigh.github.io/Ghid_Studii_AI/
 
 ## Tech stack
-- **React 19** with `react-router-dom` v7 (HashRouter for GitHub Pages)
+- **React 19** with `react-router-dom` v7 (BrowserRouter; GitHub Pages SPA fallback via `public/404.html` shim — see Routing)
 - **Vite 8** with `@tailwindcss/vite`
 - **Tailwind CSS v4** (CSS-first config, dark mode via `@custom-variant`)
 - No other dependencies. No state management library — uses React Context.
@@ -12,9 +12,12 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 ## Architecture
 
 ### Routing
-- `/#/` — Home (subject picker cards by year/semester)
-- `/#/y1s2/os` — Subject page, Courses tab
-- `/#/y1s2/os/practice` — Subject page, Practice tab
+BrowserRouter with `basename={import.meta.env.BASE_URL}` (see `src/main.jsx`). URLs are real paths, no `#/`:
+- `/` (or `/Ghid_Studii_AI/` in production) — Home
+- `/y1s2/os` — Subject page, Courses tab
+- `/y1s2/os/practice` — Subject page, Practice tab
+
+GitHub Pages doesn't natively support SPA deep-link refresh. `public/404.html` (rafgraf SPA shim) catches unknown paths and rewrites them into `/?/<path>` query strings; a decode block in `index.html` runs before BrowserRouter mounts and `replaceState`s the URL back to the real path. A second block in `index.html` handles legacy `/#/<path>` bookmarks (HashRouter holdovers from before 2026-04-27) and rewrites them to the BrowserRouter form.
 
 ### Key files
 - `src/main.jsx` — Entry: HashRouter + AppProvider wrapping
@@ -31,8 +34,42 @@ A multi-subject university study guide web app (React 19 + Vite 8 + Tailwind CSS
 4. Each course entry must include `sectionCount` (number of `<Section>` components in that course file)
 
 ### Adding a course to an existing subject
-1. Create `src/content/<slug>/courses/CourseNN.jsx` — React component using `useApp()` for `t`, `checked`, `toggleCheck`
-2. Add lazy import entry to `src/content/<slug>/index.js` courses array with `sectionCount`
+1. **New courses are JSON.** Create `src/content/<slug>/courses/course-NN.json` matching the canonical course shape (see Content shapes below).
+2. Add an entry to `src/content/<slug>/index.js` with `id`, `src` (relative path), `metaId`, `title`, `shortTitle`, `sectionCount`. Loaded via `loadJson(src)` in `CourseRenderer`.
+3. Run `npm run validate` to confirm schema + bilingual gaps are clean.
+
+### Content shapes (canonical — freeze unless explicitly migrating)
+
+**Why this section exists:** as of 2026-04-27 the corpus has 3 coexisting shapes (legacy JSX, JSON courses, ALO-style JSON seminars). New content uses JSON; JSX is acceptable maintenance state but no new JSX should be added.
+
+| Type | Canonical shape | Path | Example |
+|---|---|---|---|
+| Course | JSON `{ meta, steps[].blocks[] }` | `src/content/<slug>/courses/course-NN.json` | `os/courses/course-01.json` |
+| Test | JSON `{ meta, questions[] }` | `src/content/<slug>/tests/<slug>.json` | `pa/tests/partial-2025-a.json` |
+| Seminar (ALO style) | JSON `{ id, title, problems[] }` | `src/content/<slug>/seminars/seminar-NN.json` | `alo/seminars/seminar-01.json` |
+| Lab | **JSX** (legacy — no JSON migration scheduled) | `src/content/<slug>/labs/LabNN.jsx` | `os/labs/Lab01.jsx` |
+| Seminar (OS / PA style, legacy) | **JSX** | `src/content/<slug>/seminars/SeminarNN.jsx` | `os/seminars/Seminar01.jsx` |
+| Practice tab | JSX | `src/content/<slug>/practice/Practice.jsx` | `os/practice/Practice.jsx` |
+
+**Course block types** (consumed by `CourseRenderer`): `learn`, `callout`, `info`, `tip`, `warning`, `danger`, `example`, `definition`, `quiz`, `code`, `think`, `table`, `list`, `figure`, `image`, `equation`, `video`. Every new block type needs a registered renderer in `src/components/blocks/`.
+
+**Test question types** (consumed by `TestRenderer`): `multiple-choice`, `fill-in`, `code-writing`, `bash-scripting`, `open-ended`. Open-ended/code-writing should include a `commonErrors` field (lint rule R5).
+
+**Bilingual rule:** every user-facing string is `{ en, ro }`. Code/commands stay in English. Validators (`scripts/validate-bilingual.mjs`) flag any one-sided object.
+
+**Parked work** (do not extend, do not delete; revisit when subject reaches priority):
+- prob-stat: placeholder. Empty `courses: []` in registry. Adding it follows the canonical course-JSON shape above.
+- PA KaTeX rewrite (courses 2-6): partial — see `project_pa_full_review_2026_04_14` memory.
+
+**Mechanical gates** (run via `npm run validate` — wired into `.github/workflows/deploy.yml`):
+- `scripts/validate-bilingual.mjs` — `{en, ro}` completeness
+- `scripts/validate-course-json.mjs` — course schema (meta + steps + blocks)
+- `scripts/validate-test-json.mjs` — test schema (meta + questions)
+- `scripts/lint-site.mjs` — 8 cross-file rules (advisory, see header for rule list)
+- `scripts/smoke-test.mjs` — Puppeteer route walker, blocks deploy on ErrorBoundary / pageerror / console.error / empty content / stuck-Suspense
+
+**Manual gate** (no CI hook):
+- `scripts/content-truth-check.mjs` — LLM second-grader for MC answer keys, comparing against an out-of-band Gemini call. Run locally for audits (`node scripts/content-truth-check.mjs --all`). Was wired to CI as advisory then pulled per council 1777313729 (advisory + same-model-family + silently-skipped-without-secret laundered confidence).
 
 ### Bilingual system
 - `t(en, ro)` helper returns Romanian when `lang === 'ro'`, English otherwise

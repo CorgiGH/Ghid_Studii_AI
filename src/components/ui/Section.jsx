@@ -65,7 +65,7 @@ const Section = ({ title, id, children, checked, onCheck }) => {
           title="Copy link"
           onClick={(e) => {
             e.stopPropagation();
-            const url = window.location.href.split('#').slice(0, 2).join('#') + '#' + id;
+            const url = window.location.origin + window.location.pathname + window.location.search + '#' + id;
             navigator.clipboard.writeText(url).catch(() => {});
             e.currentTarget.textContent = '\u2713';
             setTimeout(() => { e.currentTarget.textContent = '#'; }, 2000);
