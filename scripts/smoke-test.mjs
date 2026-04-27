@@ -145,17 +145,29 @@ async function smoke(routes) {
   const failures = [];
   const noteFailure = (route, kind, detail) => failures.push({ route, kind, detail });
 
+  // Known-noise console.error patterns. Anything matching is dropped to avoid
+  // false positives. Anything else is treated as a real failure — production
+  // builds shouldn't be screaming on render unless something's wrong.
+  const CONSOLE_ERROR_NOISE = [
+    /Failed to load resource.*favicon/i,
+    /\bfavicon\b.*404/i,
+    /\bDevTools\b/i,
+    /chrome-extension:/i,
+  ];
+
   page.on('pageerror', err => {
     if (current) noteFailure(current, 'pageerror', err.message);
   });
   page.on('console', msg => {
     if (msg.type() !== 'error') return;
+    if (!current) return;
     const text = msg.text();
-    // Tighten signal: only the ErrorBoundary breadcrumb counts as a hard fail.
-    // Plain console.error from app code (network blips, etc.) is too noisy.
-    if (current && text.includes('ErrorBoundary caught:')) {
+    if (text.includes('ErrorBoundary caught:')) {
       noteFailure(current, 'errorBoundary', text.slice(0, 300));
+      return;
     }
+    if (CONSOLE_ERROR_NOISE.some(re => re.test(text))) return;
+    noteFailure(current, 'consoleError', text.slice(0, 300));
   });
 
   // First load picks up the SPA shell + hash. Subsequent routes flip the hash
@@ -177,12 +189,23 @@ async function smoke(routes) {
       await new Promise(r => setTimeout(r, 350));
 
       const probe = await page.evaluate(() => {
-        const txt = document.body.innerText || '';
+        const txt = (document.body.innerText || '').trim();
+        // "Skeleton-only" detection: if every non-whitespace child is a
+        // skeleton-shimmer placeholder, we're stuck in Suspense. The bundle
+        // is fast in headless preview so this should never trigger unless a
+        // lazy chunk legitimately failed to resolve.
+        const skeletons = document.querySelectorAll('.skeleton-shimmer').length;
+        const headings = document.querySelectorAll('h1, h2, h3').length;
+        const buttons = document.querySelectorAll('button').length;
         return {
           crashed: txt.includes('Something went wrong'),
           unknownBlock: /Unknown (?:block type|seminar block type)/.test(txt),
           notFound: txt.includes('Subject not found'),
           jsonMissing: /JSON content not found:/.test(txt),
+          textLen: txt.length,
+          skeletons,
+          headings,
+          buttons,
           firstLine: txt.slice(0, 160).replace(/\s+/g, ' ').trim(),
         };
       });
@@ -191,6 +214,21 @@ async function smoke(routes) {
       if (probe.unknownBlock) noteFailure(route, 'unknownBlock', probe.firstLine);
       if (probe.notFound) noteFailure(route, 'notFound', probe.firstLine);
       if (probe.jsonMissing) noteFailure(route, 'jsonMissing', probe.firstLine);
+
+      // Content-presence assertions. Skip the home and bare-subject overview
+      // routes (CourseMap may render only buttons) — focus on the leaf routes
+      // that load JSON/JSX and should produce real content.
+      const isLeaf = /\/(course|lab|sem)_\d+$/.test(route)
+        || (route.includes('/tests') && route.includes('?test='))
+        || /\/(seminars|labs|practice)$/.test(route);
+      if (isLeaf) {
+        if (probe.textLen < 80) {
+          noteFailure(route, 'emptyContent', `body text=${probe.textLen}c, headings=${probe.headings}, buttons=${probe.buttons}`);
+        }
+        if (probe.skeletons > 0 && probe.headings === 0 && probe.buttons === 0) {
+          noteFailure(route, 'stuckInSuspense', `skeletons=${probe.skeletons}, no headings/buttons`);
+        }
+      }
     } catch (e) {
       noteFailure(route, 'navError', e.message);
     }

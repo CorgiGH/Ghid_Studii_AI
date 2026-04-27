@@ -21,6 +21,10 @@ jobs:
       url: ${{ github.event.deployment.payload.web_url || steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # depth 2 lets the content-truth diff see the previous commit on main
+          # so it only re-asks the LLM about questions that actually changed.
+          fetch-depth: 2
 
       - uses: actions/setup-node@v4
         with:
@@ -28,12 +32,27 @@ jobs:
           cache: npm
 
       - run: npm install
+
+      # Mechanical gate: schema, bilingual, lint-site (advisory). Runs before
+      # build because schema breaks should fail fast, before paying bundle cost.
+      - run: npm run validate
+
       - run: npm run build
 
-      # Pre-deploy gate: walk every registry route in headless Chrome and fail
-      # the deploy if any page hits the ErrorBoundary or throws. Catches bad
-      # JSON / unknown block types before they white-screen the live site.
+      # Smoke gate: walk every registry route in headless Chrome and fail the
+      # deploy if any page hits the ErrorBoundary or throws. Catches bad JSON /
+      # unknown block types before they white-screen the live site.
       - run: npm run smoke
+
+      # Content-truth gate (advisory): asks Gemini independently to answer each
+      # *changed* MC question; surfaces disagreements as warnings. Catches the
+      # one failure mode that delivery gates can't: a wrong answer key. Skips
+      # silently if GEMINI_API_KEYS / GEMINI_API_KEY isn't configured. Flip to
+      # blocking by adding `--strict` once the warning stream is calibrated.
+      - run: npm run content-truth -- --base=HEAD~1 --max=80
+        continue-on-error: true
+        env:
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
