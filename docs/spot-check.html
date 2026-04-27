@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Content spot-check — seed 42</title>
+<style>
+  :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --card:#1e293b; --border:#334155;
+          --accent:#3b82f6; --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f8fafc; --fg:#0f172a; --muted:#475569; --card:#fff; --border:#cbd5e1; }
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, sans-serif;
+         margin: 0; padding: 24px; line-height: 1.5; max-width: 900px; margin-inline: auto; }
+  h1 { margin: 0 0 8px; font-size: 24px; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .progress { position: sticky; top: 0; background: var(--bg); padding: 12px 0; border-bottom: 1px solid var(--border);
+              z-index: 10; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .progress .bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; min-width: 200px; }
+  .progress .fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+  .stats { font-size: 13px; color: var(--muted); }
+  .stats .ok { color: var(--ok); } .stats .bad { color: var(--bad); } .stats .warn { color: var(--warn); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+          padding: 20px; margin: 16px 0; }
+  .card.done { opacity: 0.55; }
+  .card .head { display: flex; justify-content: space-between; gap: 12px; font-size: 12px;
+                color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
+  .card .file { font-family: ui-monospace, monospace; }
+  .card .subj { padding: 2px 8px; border-radius: 4px; background: var(--accent); color: #fff; font-weight: 600; }
+  .card .test-badge { padding: 2px 8px; border-radius: 4px; background: var(--warn); color: #000; font-weight: 600; }
+  .prompt { font-size: 16px; margin: 12px 0; }
+  .opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 6px 0;
+         font-family: ui-monospace, monospace; font-size: 14px; }
+  .opt.recorded { border-color: var(--accent); background: rgba(59,130,246,0.1); }
+  .opt.recorded::before { content: '✓ recorded → '; color: var(--accent); font-family: inherit; font-weight: 600; }
+  .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  button { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card);
+           color: var(--fg); cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s; }
+  button:hover { transform: translateY(-1px); }
+  button.ok    { border-color: var(--ok);   } button.ok.active    { background: var(--ok);   color: #000; }
+  button.bad   { border-color: var(--bad);  } button.bad.active   { background: var(--bad);  color: #fff; }
+  button.warn  { border-color: var(--warn); } button.warn.active  { background: var(--warn); color: #000; }
+  .extras { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 10px; }
+  .extras input, .extras textarea { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+           background: var(--bg); color: var(--fg); font-family: inherit; font-size: 14px; }
+  .extras textarea { min-height: 32px; resize: vertical; }
+  .toolbar { display: flex; gap: 8px; margin: 24px 0 16px; flex-wrap: wrap; }
+  .toolbar button { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .toolbar button.danger { background: transparent; color: var(--bad); border-color: var(--bad); }
+  textarea#exportBox { width: 100%; min-height: 200px; margin-top: 12px; padding: 12px;
+        background: var(--bg); border: 1px solid var(--border); color: var(--fg); border-radius: 6px;
+        font-family: ui-monospace, monospace; font-size: 12px; }
+  details { margin: 8px 0; }
+  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Content spot-check</h1>
+<div class="meta">Seed <code>42</code> · 50 questions · pool 404 · biased ~60% toward exam tests · state saved to localStorage key <code>spot-42</code></div>
+
+<div class="progress">
+  <div class="bar"><div class="fill" id="bar"></div></div>
+  <div id="stats" class="stats">0 / 50</div>
+</div>
+
+<div class="toolbar">
+  <button id="exportBtn">Export markdown</button>
+  <button id="copyBtn">Copy markdown</button>
+  <button id="resetBtn" class="danger">Reset all (clears localStorage)</button>
+</div>
+
+<details><summary>Source PDF lookup</summary>
+<p style="font-size:13px;color:var(--muted)">Hints map to <code>wiki/raw/pdfs/</code>. Examples: <code>os-c7-...</code> → <code>OS-Course-7.pdf</code>; <code>alo-c2-...</code> → ALO course 2 PDF; OOP courses use <code>Course-N.pdf</code> (no prefix). For test questions the hint usually names the lecture/topic.</p>
+</details>
+
+<div id="cards"></div>
+
+<textarea id="exportBox" placeholder="Click 'Export markdown' to populate" readonly></textarea>
+
+<script>
+const data = [{"file":"src/content/os/courses/course-07.json","subject":"os","isTest":false,"qid":"os-c7-example-open-files-b3-q0","prompt":"What happens to unflushed printf() buffers when exec() is called?","options":["They are automatically flushed before exec","They are saved and restored in the new program","The buffered data is lost","They cause exec to fail"],"recordedIdx":2,"sourceHint":"os-c7-example-open-files"},{"file":"src/content/oop/courses/course-02.json","subject":"oop","isTest":false,"qid":"oop-c2-null-b4-q0","prompt":"Why does `Print(NULL)` call `Print(int)` instead of `Print(const char*)`?","options":["Because NULL is defined as 0 (an integer) in C++","Because Print(int) is declared first","Because const char* has lower priority than int"],"recordedIdx":0,"sourceHint":"oop-c2-null"},{"file":"src/content/oop/courses/course-03.json","subject":"oop","isTest":false,"qid":"oop-c3-quiz-b0-q4","prompt":"What does `= delete` on a constructor do compared to making it private?","options":["Same effect -- both prevent external instantiation","Delete prevents ALL callers, private allows class internals","Delete is weaker -- it only prevents implicit calls"],"recordedIdx":1,"sourceHint":"oop-c3-constraints"},{"file":"src/content/os/tests/examen2021-2022-restanta-curs-partea-1.json","subject":"os","isTest":true,"qid":"q10","prompt":"Which allocation method is used by the ext4fs file system in Linux?","options":["contiguous allocation","none of the mentioned methods","linked allocation","indexed allocation"],"recordedIdx":3,"sourceHint":"Operating Systems - Theoretical Retake Exam"},{"file":"src/content/pa/courses/course-05.json","subject":"pa","isTest":false,"qid":"pa-c5-quiz-b0-q4","prompt":"What is the total time complexity of KMP (search + preprocessing)?","options":["$O(n \\cdot m)$","O(n + m)","$O(n \\cdot \\log m)$","$O(n^2)$"],"recordedIdx":1,"sourceHint":"pa-c5-quiz"},{"file":"src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json","subject":"os","isTest":true,"qid":"q4","prompt":"Which POSIX file I/O call is used to create a directory type file?","options":["creat","makedir","mkdir","mkfolder","chroot"],"recordedIdx":2,"sourceHint":"Operating Systems Quiz Bank - Theory and POSIX"},{"file":"src/content/os/tests/examen2021-2022-restanta-curs-partea-1.json","subject":"os","isTest":true,"qid":"q12","prompt":"What is the name of the algorithm used for dynamic memory allocation that selects the free space of maximum size that is large enough for the received request?","options":["FFA","WFA","BFA","Buddy-system allocator","None of the mentioned"],"recordedIdx":1,"sourceHint":"Operating Systems - Theoretical Retake Exam"},{"file":"src/content/os/tests/examen2021-2022-test-2-lab-so-t2-1.json","subject":"os","isTest":true,"qid":"q10","prompt":"What happens if a process executes a write call to an anonymous communication channel at a time when no process has the read end of that channel open?","options":["the write call remains blocked until another process opens the read end of that channel","the write call returns immediately and the program continues its execution","the system notifies the process about this situation through a SIGPIPE signal","the process is forcibly terminated and the message \"Segmentation fault\" is displayed","the system notifies the process about this situation through a SIGFIFO signal"],"recordedIdx":2,"sourceHint":"Operating Systems - Lab Test 2"},{"file":"src/content/pa/courses/course-06.json","subject":"pa","isTest":false,"qid":"pa-c6-quiz-b0-q8","prompt":"Which of the following distinguishes the Monte Carlo variant of Rabin-Karp from the Las Vegas variant?","options":["Monte Carlo may report a false match because it skips the character-by-character verification; Las Vegas always verifies and is always correct.","Monte Carlo is always O(n+m) while Las Vegas is $\\Theta(n\\cdot m)$ in the worst case.","Monte Carlo uses a different hash function than Las Vegas.","Las Vegas does not use a rolling hash."],"recordedIdx":0,"sourceHint":"pa-c6-quiz"},{"file":"src/content/os/courses/course-05.json","subject":"os","isTest":false,"qid":"os-c5-advisory-b4-q1","prompt":"Can multiple processes hold read locks (F_RDLCK) on the same file region simultaneously?","options":["No, only one process can lock a region at a time","Yes, read locks are shared (CREW model)","Only if they are from the same user","Only with F_SETLKW"],"recordedIdx":1,"sourceHint":"os-c5-advisory"},{"file":"src/content/os/tests/examen2020-2021-part-1.json","subject":"os","isTest":true,"qid":"q6","prompt":"What is the name of the algorithm used for page-swapping that selects as a victim a page that has not been accessed in the recent past?","options":["LRU","FIFO","LFU","NRU","MFU"],"recordedIdx":0,"sourceHint":"Operating Systems – Theoretical Exam"},{"file":"src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json","subject":"os","isTest":true,"qid":"q81","prompt":"What is the name of the algorithm used for page-swapping that selects as a victim a page that has not been accessed in the recent past?","options":["LRU","LFU","MFU","FIFO","NRU"],"recordedIdx":0,"sourceHint":"Operating Systems Quiz Bank - Theory and POSIX"},{"file":"src/content/oop/courses/course-06.json","subject":"oop","isTest":false,"qid":"oop-c6-quiz-b0-q3","prompt":"Which cast checks RTTI at runtime to verify validity?","options":["static_cast","dynamic_cast","reinterpret_cast"],"recordedIdx":1,"sourceHint":"oop-c6-cast-keywords"},{"file":"src/content/pa/courses/course-06.json","subject":"pa","isTest":false,"qid":"pa-c6-quiz-b0-q1","prompt":"In the Rabin-Karp algorithm, what is a rolling hash?","options":["A hash function that uses a circular buffer","A technique to compute the next window's hash from the previous one in O(1)","A hash function that never produces collisions","A method to hash 2D matrices"],"recordedIdx":1,"sourceHint":"pa-c6-quiz"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab.json","subject":"os","isTest":true,"qid":"q9","prompt":"[C] What is the POSIX file I/O call that we use to read information from a regular file?","options":["fscanf","fprintf","read","scanf","fread"],"recordedIdx":2,"sourceHint":"Operating Systems - Laboratory Test 1 (2022)"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot2-2021.json","subject":"os","isTest":true,"qid":"q2","prompt":"[bash] What is the find command option to search by filenames that match a given pattern, ignoring case (case insensitive)?","options":["-name","-iname","-Iname","-igname"],"recordedIdx":1,"sourceHint":"Operating Systems Evaluation Test – Application Questions"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab.json","subject":"os","isTest":true,"qid":"q26","prompt":"[C] What does the `l_whence` field from the `flock` structure, defined in the `fcntl.h` header file (for using locks), indicate?","options":["the type of locking by the corresponding lock","position relative to the origin, of the start of the zone where the blocking is done","the relative position (origin) of locking using that lock","the length of the portion blocked by the corresponding lock","the file descriptor on which the lock is placed","the PID of the process owner of that lock"],"recordedIdx":2,"sourceHint":"Operating Systems - Laboratory Test 1 (2022)"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot2-2021.json","subject":"os","isTest":true,"qid":"q9","prompt":"[bash] What is the command that displays the first 15 lines of text from the program prg1.c located on the desktop of the current user?","options":["firstlines -15 Desktop/prg1.c","head --lines=15 ~/Desktop/prg1.c","cat --lines=15 Desktop/prg*.c","head -n -15 ~Desktop/prg1.c"],"recordedIdx":1,"sourceHint":"Operating Systems Evaluation Test – Application Questions"},{"file":"src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json","subject":"os","isTest":true,"qid":"q16","prompt":"Which of the following algorithms is used to solve the critical section problem, in the particular case n=2?","options":["Peterson's Algorithm","Dijkstra's Algorithm","Banker's Algorithm","Courtois, Heymans and Parnas Algorithm","None of those mentioned"],"recordedIdx":0,"sourceHint":"Operating Systems Quiz Bank - Theory and POSIX"},{"file":"src/content/os/tests/examen2021-2022-curs-partea-1.json","subject":"os","isTest":true,"qid":"q13","prompt":"What is the disk allocation unit for a file in general-purpose file systems? (0.5p)","options":["Cluster","Bit","None of the mentioned","Byte (8 bits)","Sector (disk block)"],"recordedIdx":0,"sourceHint":"\"Operating Systems\" - Theoretical Exam"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot2-2021.json","subject":"os","isTest":true,"qid":"q10","prompt":"[bash] What is the command that displays ONLY the commands, including their received arguments, of processes running under the root account context?","options":["ps aux -u root -o comm=","ps aux -U root -o command","ps -u 0 -o command=","ps -u root -o comm="],"recordedIdx":2,"sourceHint":"Operating Systems Evaluation Test – Application Questions"},{"file":"src/content/os/tests/examen2021-2022-curs-partea-1.json","subject":"os","isTest":true,"qid":"q5","prompt":"In what context is the Bakery algorithm used (i.e., what problem does this algorithm solve)? (0.5p)","options":["deadlock prevention","deadlock detection","bakery operations","mutual exclusion (i.e., the critical section problem)","deadlock avoidance","solving the starved sets problem"],"recordedIdx":3,"sourceHint":"\"Operating Systems\" - Theoretical Exam"},{"file":"src/content/pa/courses/course-02.json","subject":"pa","isTest":false,"qid":"pa-c2-intro-b0-q0","prompt":"Diagnostic question: why might one sorting algorithm be better than another, even if both produce the same correct output?","options":["One uses fewer lines of code","One uses fewer computational resources (time or memory) for large inputs","One was invented more recently"],"recordedIdx":1,"sourceHint":"pa-c2-intro"},{"file":"src/content/os/tests/examen2021-2022-curs-partea-1.json","subject":"os","isTest":true,"qid":"q4","prompt":"Which scheduler is responsible for allocating CPU time to processes in the 'ready' state? (0.5p)","options":["None of the mentioned","Short-term scheduler","Long-term scheduler","Medium-term scheduler"],"recordedIdx":1,"sourceHint":"\"Operating Systems\" - Theoretical Exam"},{"file":"src/content/os/courses/course-01.json","subject":"os","isTest":false,"qid":"os-c1-mounting-b3-q0","prompt":"Which command is used to attach a filesystem to the directory tree?","options":["attach","mount","link","connect"],"recordedIdx":1,"sourceHint":"os-c1-mounting"},{"file":"src/content/os/courses/course-06.json","subject":"os","isTest":false,"qid":"os-c6-fork-b6-q0","prompt":"What value does fork() return in the child process on success?","options":["-1","The parent's PID","0","1"],"recordedIdx":2,"sourceHint":"os-c6-fork"},{"file":"src/content/os/tests/examen2021-2022-curs-partea-1.json","subject":"os","isTest":true,"qid":"q7","prompt":"What allocation method does the btrfs file system use in Linux? (0.5p)","options":["Contiguous allocation","Linked allocation","None of the mentioned methods","Indexed allocation"],"recordedIdx":3,"sourceHint":"\"Operating Systems\" - Theoretical Exam"},{"file":"src/content/oop/courses/course-02.json","subject":"oop","isTest":false,"qid":"oop-c2-quiz-b0-q4","prompt":"Can a mutable member be modified inside a const method?","options":["Yes -- that's the purpose of mutable","No -- const methods cannot modify any member","Only if the method is also static"],"recordedIdx":0,"sourceHint":"oop-c2-const"},{"file":"src/content/os/courses/course-08.json","subject":"os","isTest":false,"qid":"os-c8-msync-b5-q0","prompt":"What happens if you call munmap without first calling msync?","options":["All changes are automatically saved to disk","Recent changes may be lost (not propagated to disk)","The program crashes with SIGSEGV","munmap fails and returns -1"],"recordedIdx":1,"sourceHint":"os-c8-msync"},{"file":"src/content/oop/courses/course-03.json","subject":"oop","isTest":false,"qid":"oop-c3-quiz-b0-q2","prompt":"Can a delegating constructor also initialize other members in its initializer list?","options":["Yes, after the delegation call","No -- delegation must be the only initializer","Yes, but only const members"],"recordedIdx":1,"sourceHint":"oop-c3-delegating"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot1-2021.json","subject":"os","isTest":true,"qid":"q8","prompt":"[C] Which is the POSIX I/O file call, used to create a fifo type file? (0.5p)","options":["creat","makefifo","mkfifo","fifomake","chroot"],"recordedIdx":2,"sourceHint":"Operating Systems Theoretical Test - Bash and POSIX I/O"},{"file":"src/content/os/courses/course-01.json","subject":"os","isTest":false,"qid":"os-c1-files-filesystems-b3-q0","prompt":"How many file types does UNIX recognize?","options":["3","4","6","8"],"recordedIdx":2,"sourceHint":"os-c1-files-filesystems"},{"file":"src/content/os/tests/examen2020-2021-part-1.json","subject":"os","isTest":true,"qid":"q7","prompt":"What is the name of the algorithm used for dynamic memory allocation that selects the smallest free memory space that is sufficiently large relative to the received request?","options":["WFA","None of the mentioned","BFA","Buddy-system allocator","FFA"],"recordedIdx":2,"sourceHint":"Operating Systems – Theoretical Exam"},{"file":"src/content/oop/courses/course-04.json","subject":"oop","isTest":false,"qid":"oop-c4-quiz-b0-q5","prompt":"When does the compiler use the move constructor instead of the copy constructor?","options":["Always, because move is faster","For temporary (rvalue) objects; named objects use copy","Only when explicitly called with std::move()"],"recordedIdx":1,"sourceHint":"oop-c4-move-semantics"},{"file":"src/content/os/tests/examen2020-2021-part-1.json","subject":"os","isTest":true,"qid":"q5","prompt":"Which RAID level provides better data access performance but does not provide better data storage safety?","options":["RAID 0","RAID 4","RAID 2","RAID 1","RAID 6","RAID 3","RAID 5"],"recordedIdx":0,"sourceHint":"Operating Systems – Theoretical Exam"},{"file":"src/content/pa/courses/course-05.json","subject":"pa","isTest":false,"qid":"pa-c5-problem-b0-q0","prompt":"Diagnostic question: how would you search for a word in a text file?","options":["Compare the word against every possible position in the text, character by character","Sort the text first, then use binary search","Read the entire text into memory and use a hash table"],"recordedIdx":0,"sourceHint":"pa-c5-problem"},{"file":"src/content/os/tests/examen2021-2022-test-2-lab-so-t2-1.json","subject":"os","isTest":true,"qid":"q8","prompt":"A process has opened the read end of a FIFO communication channel for reading only, without other additional flags, and then, at a time when the channel is empty and another process has the write end open in that channel, the process executes a POSIX read call from the channel. What happens to that read call?","options":["the read call returns immediately with value -1 and the errno variable is set according to the cause of the error","the read call remains blocked until another process writes enough information into that channel","the read call returns immediately with value 0 and the program continues its execution","the system notifies the process about this situation through a SIGPIPE signal","the process is forcibly terminated and the message \"Broken pipe\" is displayed"],"recordedIdx":1,"sourceHint":"Operating Systems - Lab Test 2"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab.json","subject":"os","isTest":true,"qid":"q6","prompt":"[bash] What is the special variable that has the value of the number of positional parameters in the call line?","options":["$@","$$","$#","$?","$!","$*"],"recordedIdx":2,"sourceHint":"Operating Systems - Laboratory Test 1 (2022)"},{"file":"src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json","subject":"os","isTest":true,"qid":"q30","prompt":"Which POSIX file I/O call do we use to read information from a regular file?","options":["fscanf","fprintf","read","scanf","fread"],"recordedIdx":2,"sourceHint":"Operating Systems Quiz Bank - Theory and POSIX"},{"file":"src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json","subject":"os","isTest":true,"qid":"q8","prompt":"What happens if a process executes a write call into an anonymous communication channel at a time when no process has the reading end of that channel open?","options":["the write call stays blocked until another process opens the reading end","the system notifies the process via a SIGPIPE signal","the write call returns immediately and program execution continues","the system notifies the process via a SIGFIFO signal","the process is forcefully terminated with 'Segmentation fault'"],"recordedIdx":1,"sourceHint":"Operating Systems Quiz Bank - Theory and POSIX"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot1-2021.json","subject":"os","isTest":true,"qid":"q6","prompt":"[bash] Which is the special variable that holds the termination code of the last command executed in the foreground? (0.5p)","options":["$@","$$","$#","$?","$!","$*"],"recordedIdx":3,"sourceHint":"Operating Systems Theoretical Test - Bash and POSIX I/O"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab.json","subject":"os","isTest":true,"qid":"q20","prompt":"[bash] What is the command that displays the owner's name, permissions in symbolic format, and file type of `myscript.sh` from the `Scripturi` subdirectory in the current user's home directory?","options":["stat -c \"%U %a %n\" Scripturi/myscript.sh","stat --format=\"%U %A %F\" ~/Scripturi/myscript.sh","stat -c \"%u %A %f\" ~Scripturi/myscript.sh","stat --format=%u\\ %a\\ %F ~/Scripturi/myscript.sh"],"recordedIdx":1,"sourceHint":"Operating Systems - Laboratory Test 1 (2022)"},{"file":"src/content/os/courses/course-05.json","subject":"os","isTest":false,"qid":"os-c5-optimized-b4-q0","prompt":"What is the race condition in access_v3.c?","options":["Two processes might try to open the same file","Between finding '#' and acquiring the lock, another process might overwrite it","The file descriptor might become invalid","The lock structure might be corrupted"],"recordedIdx":1,"sourceHint":"os-c5-optimized"},{"file":"src/content/os/tests/examen2020-2021-part-1.json","subject":"os","isTest":true,"qid":"q4","prompt":"In what context is the Banker's algorithm used (i.e., what problem does this algorithm solve)?","options":["Deadlock avoidance","Deadlock prevention","Deadlock detection","Mutual exclusion (i.e., critical section problem)","Granting a bank loan"],"recordedIdx":0,"sourceHint":"Operating Systems – Theoretical Exam"},{"file":"src/content/os/courses/course-11.json","subject":"os","isTest":false,"qid":"os-c11-terminals-pseudoterminals-b3-q0","prompt":"Which command shows the terminal device you are connected to?","options":["stty","tty","terminal","who"],"recordedIdx":1,"sourceHint":"os-c11-terminals-pseudoterminals"},{"file":"src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot3-2021.json","subject":"os","isTest":true,"qid":"q1","prompt":"[bash] Specify the correct order for chaining the 4 commands below so that the resulting pipeline displays 1 only if the file `test.so` can be read by other users in the owner's group, and 0 otherwise.\n\nCommands:\n- `stat --format \"%A\" test.so` \n- `cut -c5-7` \n- `grep r` \n- `wc -l`","options":["1: stat, 2: cut, 3: grep, 4: wc","1: stat, 2: grep, 3: cut, 4: wc"],"recordedIdx":0,"sourceHint":"Operating Systems - Application Exercises (Evaluation Form 3)"},{"file":"src/content/os/tests/examen2021-2022-restanta-curs-partea-1.json","subject":"os","isTest":true,"qid":"q7","prompt":"Which of the following algorithms used for disk access optimization has a name similar to that of a processor scheduling algorithm?","options":["C-LOOK","SCAN","SSTF","C-SCAN","FCFS","LOOK"],"recordedIdx":2,"sourceHint":"Operating Systems - Theoretical Retake Exam"},{"file":"src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json","subject":"os","isTest":true,"qid":"q6","prompt":"What is the POSIX call used to find the ID of the effective owner of the calling process?","options":["getpid","getppid","getgid","getuid","geteuid","getegid"],"recordedIdx":4,"sourceHint":"Operating Systems Quiz Bank - Theory and POSIX"},{"file":"src/content/pa/courses/course-05.json","subject":"pa","isTest":false,"qid":"pa-c5-quiz-b0-q6","prompt":"Why does the computeF function resemble the KMP search function?","options":["It is a coincidence of the implementation","Computing F is matching the pattern against itself","Both use dynamic programming","They share the same loop structure by convention"],"recordedIdx":1,"sourceHint":"pa-c5-quiz"},{"file":"src/content/os/tests/examen2020-2021-part-4.json","subject":"os","isTest":true,"qid":"q8","prompt":"Which process has the highest penalty rate?","options":["A","B","C","D","E"],"recordedIdx":3,"sourceHint":"Operating Systems - Theoretical Exam, CPU Scheduling"}];
+const SEED = 42;
+const KEY = 'spot-' + SEED;
+const state = JSON.parse(localStorage.getItem(KEY) || '{}');
+
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); render(); }
+function render() {
+  const cards = document.getElementById('cards');
+  cards.innerHTML = '';
+  let done = 0, ok = 0, bad = 0, warn = 0;
+  data.forEach((q, i) => {
+    const s = state[i] || {};
+    if (s.verdict) {
+      done++;
+      if (s.verdict === 'ok') ok++;
+      else if (s.verdict === 'bad') bad++;
+      else if (s.verdict === 'warn') warn++;
+    }
+    const card = document.createElement('div');
+    card.className = 'card' + (s.verdict ? ' done' : '');
+    card.innerHTML = `
+      <div class="head">
+        <div><span class="subj">${q.subject}</span> ${q.isTest ? '<span class="test-badge">EXAM</span>' : ''} <span class="file">${q.file}</span></div>
+        <div>${i+1}/${data.length} · ${q.qid}</div>
+      </div>
+      ${q.sourceHint ? `<div style="font-size:12px;color:var(--muted)">Source hint: <em>${q.sourceHint}</em></div>` : ''}
+      <div class="prompt">${escapeHtml(q.prompt)}</div>
+      ${q.options.map((o, k) => `<div class="opt ${k===q.recordedIdx ? 'recorded' : ''}">${k}) ${escapeHtml(o)}</div>`).join('')}
+      <div class="actions">
+        <button class="ok ${s.verdict==='ok'?'active':''}" data-i="${i}" data-v="ok">✅ correct</button>
+        <button class="bad ${s.verdict==='bad'?'active':''}" data-i="${i}" data-v="bad">❌ wrong</button>
+        <button class="warn ${s.verdict==='warn'?'active':''}" data-i="${i}" data-v="warn">⚠ ambiguous</button>
+      </div>
+      <div class="extras">
+        <input type="text" placeholder="source page (e.g. 12)" data-i="${i}" data-f="page" value="${s.page || ''}">
+        <textarea placeholder="notes (only when ❌ or ⚠)" data-i="${i}" data-f="notes">${s.notes || ''}</textarea>
+      </div>
+    `;
+    cards.appendChild(card);
+  });
+  document.getElementById('bar').style.width = (done / data.length * 100) + '%';
+  document.getElementById('stats').innerHTML =
+    `<span class="ok">✅ ${ok}</span> · <span class="bad">❌ ${bad}</span> · <span class="warn">⚠ ${warn}</span> · ${done}/${data.length}`;
+}
+function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]); }
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-i]');
+  if (!btn) return;
+  const i = +btn.dataset.i, v = btn.dataset.v;
+  state[i] = state[i] || {};
+  state[i].verdict = state[i].verdict === v ? null : v;
+  save();
+});
+document.addEventListener('input', e => {
+  const el = e.target.closest('[data-i][data-f]');
+  if (!el) return;
+  const i = +el.dataset.i, f = el.dataset.f;
+  state[i] = state[i] || {};
+  state[i][f] = el.value;
+  localStorage.setItem(KEY, JSON.stringify(state)); // skip render to keep focus
+});
+
+function buildMarkdown() {
+  const lines = [];
+  lines.push('# Content spot-check — graded');
+  lines.push('');
+  lines.push('Seed: `' + SEED + '`');
+  let ok=0, bad=0, warn=0;
+  for (const k in state) {
+    const v = state[k]?.verdict;
+    if (v === 'ok') ok++;
+    if (v === 'bad') bad++;
+    if (v === 'warn') warn++;
+  }
+  lines.push('');
+  lines.push('## Tally');
+  lines.push('- ✅ Correct: ' + ok + ' / ' + data.length);
+  lines.push('- ❌ Wrong: ' + bad + ' / ' + data.length);
+  lines.push('- ⚠ Ambiguous: ' + warn + ' / ' + data.length);
+  lines.push('');
+  if (bad === 0 && warn < 3) lines.push('**Decision:** <2 wrong → fears overblown.');
+  else if (bad <= 5) lines.push('**Decision:** 2-5 wrong → audit similar files.');
+  else lines.push('**Decision:** >5 wrong → laundering risk realized; broaden audit.');
+  lines.push('');
+  lines.push('## Wrong / ambiguous detail');
+  data.forEach((q, i) => {
+    const s = state[i] || {};
+    if (s.verdict === 'ok' || !s.verdict) return;
+    lines.push('### ' + (i+1) + '. `' + q.file + '` — `' + q.qid + '` — ' + (s.verdict === 'bad' ? '❌ wrong' : '⚠ ambiguous'));
+    lines.push('**Q:** ' + q.prompt.replace(/\n+/g, ' '));
+    q.options.forEach((o, k) => lines.push('- ' + k + ') ' + o + (k===q.recordedIdx?' ← recorded':'')));
+    if (s.page) lines.push('Source page: ' + s.page);
+    if (s.notes) lines.push('Notes: ' + s.notes);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+document.getElementById('exportBtn').onclick = () => {
+  document.getElementById('exportBox').value = buildMarkdown();
+};
+document.getElementById('copyBtn').onclick = async () => {
+  const md = buildMarkdown();
+  try { await navigator.clipboard.writeText(md); alert('Copied to clipboard.'); }
+  catch { document.getElementById('exportBox').value = md; alert('Clipboard blocked — markdown shown in textarea.'); }
+};
+document.getElementById('resetBtn').onclick = () => {
+  if (confirm('Clear all marks for this seed?')) { localStorage.removeItem(KEY); for (const k in state) delete state[k]; render(); }
+};
+
+render();
+</script>
+</body>
+</html>
