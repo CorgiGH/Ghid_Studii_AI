@@ -163,9 +163,9 @@ for (const [subj, items] of Object.entries(bySubject)) {
       lines.push(`- ${i}) ${opt.replace(/\n+/g, ' ')}${mark}`);
     });
     lines.push('');
-    lines.push('| Verdict | Source page | Notes |');
-    lines.push('|---|---|---|');
-    lines.push('|       |             |       |');
+    lines.push('- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous');
+    lines.push('- Source page: ');
+    lines.push('- Notes: ');
     lines.push('');
   }
 }

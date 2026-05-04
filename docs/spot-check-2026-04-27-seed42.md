@@ -18,9 +18,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) The buffered data is lost ← **recorded correct**
 - 3) They cause exec to fail
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 2. `src/content/os/tests/examen2021-2022-restanta-curs-partea-1.json` — `q10`
 *Source hint: Operating Systems - Theoretical Retake Exam*
@@ -32,9 +32,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) linked allocation
 - 3) indexed allocation ← **recorded correct**
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 3. `src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json` — `q4`
 *Source hint: Operating Systems Quiz Bank - Theory and POSIX*
@@ -47,9 +47,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) mkfolder
 - 4) chroot
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 4. `src/content/os/tests/examen2021-2022-restanta-curs-partea-1.json` — `q12`
 *Source hint: Operating Systems - Theoretical Retake Exam*
@@ -62,9 +62,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) Buddy-system allocator
 - 4) None of the mentioned
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 5. `src/content/os/tests/examen2021-2022-test-2-lab-so-t2-1.json` — `q10`
 *Source hint: Operating Systems - Lab Test 2*
@@ -77,9 +77,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) the process is forcibly terminated and the message "Segmentation fault" is displayed
 - 4) the system notifies the process about this situation through a SIGFIFO signal
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 6. `src/content/os/courses/course-05.json` — `os-c5-advisory-b4-q1`
 *Source hint: os-c5-advisory*
@@ -91,9 +91,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) Only if they are from the same user
 - 3) Only with F_SETLKW
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 7. `src/content/os/tests/examen2020-2021-part-1.json` — `q6`
 *Source hint: Operating Systems – Theoretical Exam*
@@ -106,9 +106,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) NRU
 - 4) MFU
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 8. `src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json` — `q81`
 *Source hint: Operating Systems Quiz Bank - Theory and POSIX*
@@ -121,9 +121,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) FIFO
 - 4) NRU
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 9. `src/content/os/tests/examen2021-2022-test-1-lab.json` — `q9`
 *Source hint: Operating Systems - Laboratory Test 1 (2022)*
@@ -136,9 +136,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) scanf
 - 4) fread
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 10. `src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot2-2021.json` — `q2`
 *Source hint: Operating Systems Evaluation Test – Application Questions*
@@ -150,9 +150,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) -Iname
 - 3) -igname
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 11. `src/content/os/tests/examen2021-2022-test-1-lab.json` — `q26`
 *Source hint: Operating Systems - Laboratory Test 1 (2022)*
@@ -166,9 +166,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 4) the file descriptor on which the lock is placed
 - 5) the PID of the process owner of that lock
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 12. `src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot2-2021.json` — `q9`
 *Source hint: Operating Systems Evaluation Test – Application Questions*
@@ -180,9 +180,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) cat --lines=15 Desktop/prg*.c
 - 3) head -n -15 ~Desktop/prg1.c
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 13. `src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json` — `q16`
 *Source hint: Operating Systems Quiz Bank - Theory and POSIX*
@@ -195,9 +195,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) Courtois, Heymans and Parnas Algorithm
 - 4) None of those mentioned
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 14. `src/content/os/tests/examen2021-2022-curs-partea-1.json` — `q13`
 *Source hint: "Operating Systems" - Theoretical Exam*
@@ -210,9 +210,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) Byte (8 bits)
 - 4) Sector (disk block)
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 15. `src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot2-2021.json` — `q10`
 *Source hint: Operating Systems Evaluation Test – Application Questions*
@@ -224,9 +224,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) ps -u 0 -o command= ← **recorded correct**
 - 3) ps -u root -o comm=
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 16. `src/content/os/tests/examen2021-2022-curs-partea-1.json` — `q5`
 *Source hint: "Operating Systems" - Theoretical Exam*
@@ -240,9 +240,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 4) deadlock avoidance
 - 5) solving the starved sets problem
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 17. `src/content/os/tests/examen2021-2022-curs-partea-1.json` — `q4`
 *Source hint: "Operating Systems" - Theoretical Exam*
@@ -254,9 +254,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) Long-term scheduler
 - 3) Medium-term scheduler
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 18. `src/content/os/courses/course-01.json` — `os-c1-mounting-b3-q0`
 *Source hint: os-c1-mounting*
@@ -268,9 +268,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) link
 - 3) connect
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 19. `src/content/os/courses/course-06.json` — `os-c6-fork-b6-q0`
 *Source hint: os-c6-fork*
@@ -282,9 +282,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) 0 ← **recorded correct**
 - 3) 1
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 20. `src/content/os/tests/examen2021-2022-curs-partea-1.json` — `q7`
 *Source hint: "Operating Systems" - Theoretical Exam*
@@ -296,9 +296,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) None of the mentioned methods
 - 3) Indexed allocation ← **recorded correct**
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 21. `src/content/os/courses/course-08.json` — `os-c8-msync-b5-q0`
 *Source hint: os-c8-msync*
@@ -310,9 +310,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) The program crashes with SIGSEGV
 - 3) munmap fails and returns -1
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 22. `src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot1-2021.json` — `q8`
 *Source hint: Operating Systems Theoretical Test - Bash and POSIX I/O*
@@ -325,9 +325,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) fifomake
 - 4) chroot
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 23. `src/content/os/courses/course-01.json` — `os-c1-files-filesystems-b3-q0`
 *Source hint: os-c1-files-filesystems*
@@ -339,9 +339,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) 6 ← **recorded correct**
 - 3) 8
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 24. `src/content/os/tests/examen2020-2021-part-1.json` — `q7`
 *Source hint: Operating Systems – Theoretical Exam*
@@ -354,9 +354,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) Buddy-system allocator
 - 4) FFA
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 25. `src/content/os/tests/examen2020-2021-part-1.json` — `q5`
 *Source hint: Operating Systems – Theoretical Exam*
@@ -371,9 +371,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 5) RAID 3
 - 6) RAID 5
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 26. `src/content/os/tests/examen2021-2022-test-2-lab-so-t2-1.json` — `q8`
 *Source hint: Operating Systems - Lab Test 2*
@@ -386,9 +386,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) the system notifies the process about this situation through a SIGPIPE signal
 - 4) the process is forcibly terminated and the message "Broken pipe" is displayed
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 27. `src/content/os/tests/examen2021-2022-test-1-lab.json` — `q6`
 *Source hint: Operating Systems - Laboratory Test 1 (2022)*
@@ -402,9 +402,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 4) $!
 - 5) $*
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 28. `src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json` — `q30`
 *Source hint: Operating Systems Quiz Bank - Theory and POSIX*
@@ -417,9 +417,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) scanf
 - 4) fread
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 29. `src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json` — `q8`
 *Source hint: Operating Systems Quiz Bank - Theory and POSIX*
@@ -432,9 +432,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) the system notifies the process via a SIGFIFO signal
 - 4) the process is forcefully terminated with 'Segmentation fault'
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 30. `src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot1-2021.json` — `q6`
 *Source hint: Operating Systems Theoretical Test - Bash and POSIX I/O*
@@ -448,9 +448,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 4) $!
 - 5) $*
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 31. `src/content/os/tests/examen2021-2022-test-1-lab.json` — `q20`
 *Source hint: Operating Systems - Laboratory Test 1 (2022)*
@@ -462,9 +462,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) stat -c "%u %A %f" ~Scripturi/myscript.sh
 - 3) stat --format=%u\ %a\ %F ~/Scripturi/myscript.sh
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 32. `src/content/os/courses/course-05.json` — `os-c5-optimized-b4-q0`
 *Source hint: os-c5-optimized*
@@ -476,9 +476,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) The file descriptor might become invalid
 - 3) The lock structure might be corrupted
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 33. `src/content/os/tests/examen2020-2021-part-1.json` — `q4`
 *Source hint: Operating Systems – Theoretical Exam*
@@ -491,9 +491,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) Mutual exclusion (i.e., critical section problem)
 - 4) Granting a bank loan
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 34. `src/content/os/courses/course-11.json` — `os-c11-terminals-pseudoterminals-b3-q0`
 *Source hint: os-c11-terminals-pseudoterminals*
@@ -505,9 +505,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) terminal
 - 3) who
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 35. `src/content/os/tests/examen2021-2022-test-1-lab-2021-partialsot3-2021.json` — `q1`
 *Source hint: Operating Systems - Application Exercises (Evaluation Form 3)*
@@ -517,9 +517,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 0) 1: stat, 2: cut, 3: grep, 4: wc ← **recorded correct**
 - 1) 1: stat, 2: grep, 3: cut, 4: wc
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 36. `src/content/os/tests/examen2021-2022-restanta-curs-partea-1.json` — `q7`
 *Source hint: Operating Systems - Theoretical Retake Exam*
@@ -533,9 +533,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 4) FCFS
 - 5) LOOK
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 37. `src/content/os/tests/examen2023-2024-examen-teoretic-2023-2024.json` — `q6`
 *Source hint: Operating Systems Quiz Bank - Theory and POSIX*
@@ -549,9 +549,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 4) geteuid ← **recorded correct**
 - 5) getegid
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 38. `src/content/os/tests/examen2020-2021-part-4.json` — `q8`
 *Source hint: Operating Systems - Theoretical Exam, CPU Scheduling*
@@ -564,9 +564,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 3) D ← **recorded correct**
 - 4) E
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ## PA (6)
 
@@ -580,9 +580,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) $O(n \cdot \log m)$
 - 3) $O(n^2)$
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 40. `src/content/pa/courses/course-06.json` — `pa-c6-quiz-b0-q8`
 *Source hint: pa-c6-quiz*
@@ -594,9 +594,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) Monte Carlo uses a different hash function than Las Vegas.
 - 3) Las Vegas does not use a rolling hash.
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 41. `src/content/pa/courses/course-06.json` — `pa-c6-quiz-b0-q1`
 *Source hint: pa-c6-quiz*
@@ -608,9 +608,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) A hash function that never produces collisions
 - 3) A method to hash 2D matrices
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 42. `src/content/pa/courses/course-02.json` — `pa-c2-intro-b0-q0`
 *Source hint: pa-c2-intro*
@@ -621,9 +621,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 1) One uses fewer computational resources (time or memory) for large inputs ← **recorded correct**
 - 2) One was invented more recently
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 43. `src/content/pa/courses/course-05.json` — `pa-c5-problem-b0-q0`
 *Source hint: pa-c5-problem*
@@ -634,9 +634,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 1) Sort the text first, then use binary search
 - 2) Read the entire text into memory and use a hash table
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 44. `src/content/pa/courses/course-05.json` — `pa-c5-quiz-b0-q6`
 *Source hint: pa-c5-quiz*
@@ -648,9 +648,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 2) Both use dynamic programming
 - 3) They share the same loop structure by convention
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ## OOP (6)
 
@@ -663,9 +663,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 1) Because Print(int) is declared first
 - 2) Because const char* has lower priority than int
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 46. `src/content/oop/courses/course-03.json` — `oop-c3-quiz-b0-q4`
 *Source hint: oop-c3-constraints*
@@ -676,9 +676,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 1) Delete prevents ALL callers, private allows class internals ← **recorded correct**
 - 2) Delete is weaker -- it only prevents implicit calls
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 47. `src/content/oop/courses/course-06.json` — `oop-c6-quiz-b0-q3`
 *Source hint: oop-c6-cast-keywords*
@@ -689,9 +689,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 1) dynamic_cast ← **recorded correct**
 - 2) reinterpret_cast
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 48. `src/content/oop/courses/course-02.json` — `oop-c2-quiz-b0-q4`
 *Source hint: oop-c2-const*
@@ -702,9 +702,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 1) No -- const methods cannot modify any member
 - 2) Only if the method is also static
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 49. `src/content/oop/courses/course-03.json` — `oop-c3-quiz-b0-q2`
 *Source hint: oop-c3-delegating*
@@ -715,9 +715,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 1) No -- delegation must be the only initializer ← **recorded correct**
 - 2) Yes, but only const members
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ### 50. `src/content/oop/courses/course-04.json` — `oop-c4-quiz-b0-q5`
 *Source hint: oop-c4-move-semantics*
@@ -728,9 +728,9 @@ Sample seed: `42` (rerun with `--seed=42` to reproduce). Source pool: 404 MC que
 - 1) For temporary (rvalue) objects; named objects use copy ← **recorded correct**
 - 2) Only when explicitly called with std::move()
 
-| Verdict | Source page | Notes |
-|---|---|---|
-|       |             |       |
+- Verdict: [ ] ✅ correct  [ ] ❌ wrong  [ ] ⚠ ambiguous
+- Source page: 
+- Notes: 
 
 ---
 
