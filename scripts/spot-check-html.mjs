@@ -187,6 +187,14 @@ function tokens(s) {
     .split(/\s+/)
     .filter(t => t.length >= 4 && !STOP.has(t));
 }
+// rankPages — score every page in `pageTexts` against the question/option
+// terms, return top-K hits above a confidence threshold. Returning an empty
+// array (rather than the page with score=1) is intentional: graders reported
+// that low-confidence hints are *worse* than no hint, because they get
+// trusted as "the source page" and lead to spurious ⚠ ambiguous verdicts.
+const RANK_TOP_K = 5;            // was 3 — broader coverage when right page barely loses tie
+const RANK_MIN_SCORE = 4;        // require at least one option-token (3) + one prompt-token (1), or any bigram (8)
+const RANK_MIN_RATIO = 0.4;      // suppress pages whose score is < 40% of the top hit (long tail noise)
 function rankPages(pageTexts, prompt, correctOpt) {
   const pTok = tokens(prompt);
   const oTok = tokens(correctOpt);
@@ -205,10 +213,12 @@ function rankPages(pageTexts, prompt, correctOpt) {
     for (const t of oTok) if (txt.includes(t)) s += 3;
     for (const t of pTok) if (txt.includes(t)) s += 1;
     for (const bg of bigrams) if (txt.includes(bg)) s += 8;
-    if (s > 0) scored.push({ page: i, score: s });
+    if (s >= RANK_MIN_SCORE) scored.push({ page: i, score: s });
   }
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, 3);
+  if (scored.length === 0) return [];
+  const cutoff = scored[0].score * RANK_MIN_RATIO;
+  return scored.filter(s => s.score >= cutoff).slice(0, RANK_TOP_K);
 }
 
 // Resolve hints for every sampled question whose PDF is mapped.
