@@ -1,0 +1,368 @@
+{
+  "meta": {
+    "id": "pa-c8",
+    "title": {
+      "en": "Course 11: Backtracking & Branch and Bound",
+      "ro": "Cursul 11: Backtracking și Branch & Bound"
+    },
+    "shortTitle": {
+      "en": "C8: Backtracking/B&B",
+      "ro": "C8: Backtracking/B&B"
+    },
+    "source": {
+      "en": "Algorithm Design — Lecture 11 Exercise Sheet, UAIC 2025-2026",
+      "ro": "Proiectarea Algoritmilor — Fișă de exerciții Cursul 11, UAIC 2025-2026"
+    }
+  },
+  "steps": [
+    {
+      "id": "pa-c8-backtracking-intro",
+      "title": {
+        "en": "Backtracking — Introduction",
+        "ro": "Backtracking — Introducere"
+      },
+      "group": "backtracking",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Backtracking** is a systematic algorithmic technique for solving problems that require exhaustive search over a space of partial solutions. It incrementally builds candidates for the solution and abandons a candidate (backtracks) as soon as it determines the candidate cannot lead to a valid complete solution.\n\nBacktracking is applicable when:\n- The solution can be built step by step.\n- Partial solutions can be checked for validity early (pruning).\n- The search space is too large for brute force but structured enough for pruning to help.\n\nThe key efficiency gain: **pruning**. By checking viability at each step, large subtrees of the search space are eliminated without exploration.",
+            "ro": "**Backtracking** este o tehnică algoritmică sistematică pentru rezolvarea problemelor care necesită căutare exhaustivă în spațiul soluțiilor parțiale. Construiește incremental candidați pentru soluție și abandonează un candidat (face backtrack) de îndată ce determină că acesta nu poate duce la o soluție completă validă.\n\nBacktracking-ul este aplicabil când:\n- Soluția poate fi construită pas cu pas.\n- Soluțiile parțiale pot fi verificate timpuriu pentru validitate (pruning).\n- Spațiul de căutare este prea mare pentru forță brută, dar suficient de structurat pentru ca pruning-ul să ajute.\n\nCâștigul cheie de eficiență: **pruning-ul**. Verificând viabilitatea la fiecare pas, subtreii mari ai spațiului de căutare sunt eliminați fără explorare."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Backtracking Algorithm Design",
+            "ro": "Proiectarea unui algoritm backtracking"
+          },
+          "content": {
+            "en": "To design a backtracking algorithm, specify:\n(a) **How a solution is represented** — what data structure encodes a complete solution;\n(b) **What partial solutions are** — prefixes or incomplete assignments that may extend to a solution;\n(c) **What the direct successors of a partial solution are** — how to extend a partial solution by one step;\n(d) **When a partial solution is viable** — condition that must hold for the partial solution to potentially lead to a complete solution (the pruning condition).",
+            "ro": "Pentru a proiecta un algoritm backtracking, specificați:\n(a) **Cum este reprezentată o soluție** — ce structură de date codifică o soluție completă;\n(b) **Care sunt soluțiile parțiale** — prefixe sau atribuiri incomplete care se pot extinde la o soluție;\n(c) **Care sunt succesorii direcți ai unei soluții parțiale** — cum se extinde o soluție parțială cu un pas;\n(d) **Când o soluție parțială este viabilă** — condiția care trebuie să fie îndeplinită pentru ca soluția parțială să conducă potențial la o soluție completă (condiția de pruning)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Example: N-Queens (4×4 chessboard)**\n\nThe `backtracking(int level)` function has 17 recursive calls for $n = 4$, compared to 341 for exhaustive search. Validating partial solutions (checking attack positions at each level) reduces the call count dramatically.\n\n- Exhaustive search: tests attack restrictions only at the very end.\n- Backtracking: prunes invalid placements early — each call validates the current board state.",
+            "ro": "**Exemplu: N-Regine (tabla de șah 4×4)**\n\nFuncția `backtracking(int level)` are 17 apeluri recursive pentru $n = 4$, față de 341 pentru căutarea exhaustivă. Validarea soluțiilor parțiale (verificarea pozițiilor de atac la fiecare nivel) reduce dramatic numărul de apeluri.\n\n- Căutare exhaustivă: testează restricțiile de atac doar la final.\n- Backtracking: elimină plasările invalide timpuriu — fiecare apel validează starea curentă a tablei."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "For the N-Queens problem with n=3, how many recursive calls does backtracking make compared to exhaustive search? How do you expect the ratio to change for n=5,6,...?",
+                "ro": "Pentru problema N-Regine cu n=3, câte apeluri recursive face backtracking față de căutarea exhaustivă? Cum vă așteptați să se modifice raportul pentru n=5,6,...?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Backtracking makes fewer calls for n=3, and the ratio (backtracking/exhaustive) decreases as n grows — pruning becomes relatively more effective",
+                    "ro": "Backtracking face mai puține apeluri pentru n=3, iar raportul (backtracking/exhaustiv) scade pe măsură ce n crește — pruning-ul devine relativ mai eficient"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "For n=4: backtracking=17, exhaustive=341 (ratio ≈1/20). As n grows, the exhaustive search tree grows as n^n while backtracking prunes increasingly large subtrees early — the ratio drops dramatically, showing backtracking's asymptotic superiority for structured constraint problems.",
+                    "ro": "Pentru n=4: backtracking=17, exhaustiv=341 (raport ≈1/20). Pe măsură ce n crește, arborele căutării exhaustive crește ca n^n în timp ce backtracking elimină subtreii tot mai mari devreme — raportul scade dramatic, arătând superioritatea asimptotică a backtracking-ului pentru problemele cu constrângeri structurate."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Backtracking makes more calls for n=3 because it does extra validity checks at each step",
+                    "ro": "Backtracking face mai multe apeluri pentru n=3 deoarece face verificări suplimentare de validitate la fiecare pas"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Validity checks add O(1) or O(n) overhead per node but eliminate entire subtrees. Even for small n, backtracking explores strictly fewer nodes than exhaustive search.",
+                    "ro": "Verificările de validitate adaugă overhead O(1) sau O(n) per nod, dar elimină subtreii întregi. Chiar și pentru n mic, backtracking explorează strict mai puține noduri decât căutarea exhaustivă."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The ratio stays constant regardless of n",
+                    "ro": "Raportul rămâne constant indiferent de n"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "The ratio decreases as n grows. Exhaustive search grows exponentially/factorially while backtracking with effective pruning grows much more slowly for structured problems.",
+                    "ro": "Raportul scade pe măsură ce n crește. Căutarea exhaustivă crește exponențial/factorial în timp ce backtracking-ul cu pruning eficient crește mult mai lent pentru probleme structurate."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Both methods make the same number of calls — backtracking only avoids revisiting complete solutions",
+                    "ro": "Ambele metode fac același număr de apeluri — backtracking evită doar revizitarea soluțiilor complete"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Backtracking prunes entire subtrees at partial solution nodes, not just at complete solutions. This is the core difference — pruning happens at every level of the tree.",
+                    "ro": "Backtracking elimină subtreii întregi la nodurile soluțiilor parțiale, nu doar la soluțiile complete. Aceasta este diferența fundamentală — pruning-ul are loc la fiecare nivel al arborelui."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Backtracking systematically prunes non-viable partial solutions. For N-Queens with n=4, this cuts 341 exhaustive calls to just 17. As n grows, the ratio backtracking/exhaustive drops further — exponential savings for well-constrained problems.",
+                "ro": "Backtracking elimină sistematic soluțiile parțiale neviabile. Pentru N-Regine cu n=4, aceasta reduce 341 de apeluri exhaustive la doar 17. Pe măsură ce n crește, raportul backtracking/exhaustiv scade mai mult — economii exponențiale pentru probleme bine constrânse."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pa-c8-backtracking-sat",
+      "title": {
+        "en": "Backtracking for SAT",
+        "ro": "Backtracking pentru SAT"
+      },
+      "group": "backtracking",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Consider the formula $f = (\\neg x_1 \\vee x_2) \\wedge (x_2 \\vee \\neg x_3) \\wedge (\\neg x_3 \\vee x_3)$.\n\nThe exhaustive traversal tree has $2^4 - 1$ nodes. A backtracking procedure that eliminates partial solutions that cannot lead to satisfiability visits far fewer nodes.\n\n**Viability condition for a partial assignment:** a partial assignment is viable if no clause is already falsified — i.e., every clause with all its literals assigned has at least one literal set to true. If a clause becomes all-false under the partial assignment, we prune that branch immediately.",
+            "ro": "Considerați formula $f = (\\neg x_1 \\vee x_2) \\wedge (x_2 \\vee \\neg x_3) \\wedge (\\neg x_3 \\vee x_3)$.\n\nArborele parcurgerii exhaustive are $2^4 - 1$ noduri. O procedură backtracking care elimină soluțiile parțiale care sigur nu pot duce la satisfiabilitate vizitează mult mai puține noduri.\n\n**Condiția de viabilitate pentru o atribuire parțială:** o atribuire parțială este viabilă dacă nicio clauză nu este deja falsificată — adică orice clauză cu toți literalii atribuiți are cel puțin un literal setat la adevărat. Dacă o clauză devine complet falsă sub atribuirea parțială, eliminăm acea ramură imediat."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "For f = (¬x₁ ∨ x₂) ∧ (x₂ ∨ ¬x₃) ∧ (¬x₃ ∨ x₃), the exhaustive tree has 2⁴−1 nodes. Which pruning condition eliminates the most branches in backtracking for SAT?",
+                "ro": "Pentru f = (¬x₁ ∨ x₂) ∧ (x₂ ∨ ¬x₃) ∧ (¬x₃ ∨ x₃), arborele exhaustiv are 2⁴−1 noduri. Care condiție de pruning elimină cele mai multe ramuri în backtracking pentru SAT?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Prune if any fully-assigned clause is false (all its literals are 0)",
+                    "ro": "Eliminăm dacă orice clauză complet atribuită este falsă (toți literalii sunt 0)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "This is the standard SAT backtracking pruning: a partial assignment is non-viable the moment any clause becomes fully assigned and evaluates to false. We don't need to wait until all variables are assigned — as soon as one clause is falsified, the entire subtree can be pruned.",
+                    "ro": "Aceasta este pruning-ul standard al backtracking-ului SAT: o atribuire parțială este neviabilă în momentul în care orice clauză devine complet atribuită și evaluează la fals. Nu trebuie să așteptăm până sunt atribuite toate variabilele — de îndată ce o clauză este falsificată, întreg subtreele poate fi eliminat."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Prune if the number of variables assigned so far exceeds n/2",
+                    "ro": "Eliminăm dacă numărul de variabile atribuite depășește n/2"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is not a valid pruning condition — it has no relation to whether the partial assignment can be extended to a satisfying assignment.",
+                    "ro": "Aceasta nu este o condiție de pruning validă — nu are nicio legătură cu posibilitatea de a extinde atribuirea parțială la o atribuire satisfăcătoare."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Prune if the partial assignment has more true values than false",
+                    "ro": "Eliminăm dacă atribuirea parțială are mai multe valori adevărate decât false"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "The number of true vs false assignments in the partial solution has no bearing on satisfiability of the remaining clauses.",
+                    "ro": "Numărul de atribuiri adevărate vs false în soluția parțială nu are nicio legătură cu satisfiabilitatea clauzelor rămase."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Prune only when all variables are assigned and the formula is false",
+                    "ro": "Eliminăm doar când toate variabilele sunt atribuite și formula este falsă"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is exhaustive search, not backtracking. Backtracking's power comes from pruning at partial solution nodes, before all variables are assigned.",
+                    "ro": "Aceasta este căutare exhaustivă, nu backtracking. Puterea backtracking-ului vine din eliminarea la nodurile soluțiilor parțiale, înainte de atribuirea tuturor variabilelor."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "SAT backtracking prunes a branch the moment any clause evaluates to false under the current partial assignment. This is sound (we never prune a branch containing a solution) and often eliminates huge subtrees early.",
+                "ro": "Backtracking-ul SAT elimină o ramură în momentul în care orice clauză evaluează la fals sub atribuirea parțială curentă. Aceasta este corectă (nu eliminăm niciodată o ramură care conține o soluție) și adesea elimină subtreii mari devreme."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pa-c8-backtracking-applications",
+      "title": {
+        "en": "Backtracking Applications",
+        "ro": "Aplicații Backtracking"
+      },
+      "group": "backtracking",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Subset Sum (Backtracking)**\n\n(a) **Solution representation:** a subset $S' \\subseteq S$, or equivalently a boolean vector $b[1..n]$ where $b[i] = 1$ means element $i$ is included.\n\n(b) **Partial solutions:** vectors $b[1..k]$ for $k < n$ — the first $k$ inclusion decisions made.\n\n(c) **Direct successors:** extend $b[1..k]$ to $b[1..k+1]$ by choosing $b[k+1] \\in \\{0, 1\\}$.\n\n(d) **Viability condition:** a partial solution $b[1..k]$ is viable if:\n- The current partial sum $\\le t$ (we haven't already exceeded the target), AND\n- The current partial sum + (sum of all remaining elements) $\\ge t$ (we can still reach the target).\n\nThis two-sided condition allows pruning both when we've overshot and when we can no longer reach the target.",
+            "ro": "**Subset Sum (Backtracking)**\n\n(a) **Reprezentarea soluției:** o submulțime $S' \\subseteq S$, sau echivalent un vector boolean $b[1..n]$ unde $b[i] = 1$ înseamnă că elementul $i$ este inclus.\n\n(b) **Soluții parțiale:** vectori $b[1..k]$ pentru $k < n$ — primele $k$ decizii de includere luate.\n\n(c) **Succesori direcți:** extinderea lui $b[1..k]$ la $b[1..k+1]$ prin alegerea $b[k+1] \\in \\{0, 1\\}$.\n\n(d) **Condiția de viabilitate:** o soluție parțială $b[1..k]$ este viabilă dacă:\n- Suma parțială curentă $\\le t$ (nu am depășit deja ținta), ȘI\n- Suma parțială curentă + (suma tuturor elementelor rămase) $\\ge t$ (putem ancora să atingem ținta).\n\nAceastă condiție bilaterală permite pruning atât când am depășit cât și când nu mai putem atinge ținta."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Sudoku (Backtracking)**\n\n(a) **Solution representation:** a 9×9 grid with digits 1–9 in each cell.\n\n(b) **Partial solutions:** grids with some cells filled and some empty (value 0).\n\n(c) **Direct successors:** choose the next empty cell (e.g., left-to-right, top-to-bottom) and try each digit 1–9.\n\n(d) **Viability condition:** a partial solution is viable if no row, column, or 3×3 box contains the same digit twice among its filled cells.\n\nPruning is very effective for Sudoku: a single constraint violation immediately eliminates the digit from that cell's branch.",
+            "ro": "**Sudoku (Backtracking)**\n\n(a) **Reprezentarea soluției:** o grilă 9×9 cu cifre 1–9 în fiecare celulă.\n\n(b) **Soluții parțiale:** grile cu unele celule completate și altele goale (valoare 0).\n\n(c) **Succesori direcți:** alegem următoarea celulă goală (de ex., stânga-dreapta, sus-jos) și încercăm fiecare cifră 1–9.\n\n(d) **Condiția de viabilitate:** o soluție parțială este viabilă dacă niciun rând, coloană sau pătrat 3×3 nu conține aceeași cifră de două ori printre celulele completate.\n\nPruning-ul este foarte eficient pentru Sudoku: o singură violare a constrângerii elimină imediat cifra din ramura acelei celule."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "For the Subset Sum backtracking, which two-sided viability condition is correct?",
+                "ro": "Pentru backtracking-ul Subset Sum, care condiție de viabilitate bilaterală este corectă?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "partial_sum ≤ t AND partial_sum + remaining_sum ≥ t",
+                    "ro": "sumă_parțială ≤ t ȘI sumă_parțială + sumă_rămasă ≥ t"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "The left condition prunes branches that already exceed t. The right condition prunes branches where even adding all remaining elements cannot reach t. Together they bound the search from both sides.",
+                    "ro": "Condiția stângă elimină ramurile care depășesc deja t. Condiția dreaptă elimină ramurile unde chiar adăugând toate elementele rămase nu se poate atinge t. Împreună limitează căutarea din ambele direcții."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "partial_sum = t (stop as soon as we hit the target)",
+                    "ro": "sumă_parțială = t (oprim imediat ce atingem ținta)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is only a termination condition (success), not a viability pruning condition. We also need to prune when partial_sum > t (overshot) or when partial_sum + remaining < t (can't reach).",
+                    "ro": "Aceasta este doar o condiție de terminare (succes), nu o condiție de pruning pentru viabilitate. Trebuie să eliminăm și când sumă_parțială > t (am depășit) sau când sumă_parțială + rest < t (nu putem atinge)."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "partial_sum ≤ t only (never exceeds target so far)",
+                    "ro": "sumă_parțială ≤ t doar (nu depășește ținta până acum)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is only the upper-bound pruning. Without the lower-bound condition (partial + remaining ≥ t), we explore branches where the target is unreachable, wasting work.",
+                    "ro": "Aceasta este doar pruning-ul cu limita superioară. Fără condiția cu limita inferioară (parțial + rest ≥ t), explorăm ramuri unde ținta nu poate fi atinsă, irosind efort."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The number of elements chosen so far ≤ |S|/2",
+                    "ro": "Numărul de elemente alese până acum ≤ |S|/2"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is not a valid viability condition for Subset Sum — the number of elements has no bearing on whether sum t is achievable.",
+                    "ro": "Aceasta nu este o condiție de viabilitate validă pentru Subset Sum — numărul de elemente nu are legătură cu posibilitatea de a atinge suma t."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Subset Sum backtracking uses a two-sided bound: prune when partial_sum > t (overshot), and prune when partial_sum + remaining_sum < t (can no longer reach target). Both conditions ensure we only explore viable branches.",
+                "ro": "Backtracking-ul Subset Sum folosește o limită bilaterală: eliminăm când sumă_parțială > t (am depășit), și eliminăm când sumă_parțială + sumă_rămasă < t (nu mai putem atinge ținta). Ambele condiții asigură că explorăm doar ramuri viabile."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pa-c8-branch-bound",
+      "title": {
+        "en": "Branch and Bound",
+        "ro": "Branch and Bound"
+      },
+      "group": "branch-and-bound",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Branch and Bound",
+            "ro": "Branch and Bound"
+          },
+          "content": {
+            "en": "**Branch and Bound** is an extension of backtracking for **optimization problems**. It maintains the best complete solution found so far and prunes partial solutions that provably cannot improve upon it.\n\nThe key ingredient: a **bound function** `maxRest(partial)` that estimates the maximum additional gain achievable from a partial solution. A branch is pruned if:\n\n`currentCost(partial) + maxRest(partial) ≤ bestSoFar`\n\nFor maximization problems. A correct bound must always be **optimistic** (it overestimates or exactly estimates the true remaining gain — never underestimates), ensuring we never prune a branch that contains the optimal solution.",
+            "ro": "**Branch and Bound** este o extensie a backtracking-ului pentru **probleme de optimizare**. Menține cea mai bună soluție completă găsită până acum și elimină soluțiile parțiale care demonstrabil nu pot îmbunătăți-o.\n\nIngredientul cheie: o **funcție de estimare** `maxRest(partial)` care estimează câștigul suplimentar maxim realizabil dintr-o soluție parțială. O ramură este eliminată dacă:\n\n`costCurent(partial) + maxRest(partial) ≤ celMaiBunPânăAcum`\n\nPentru probleme de maximizare. O estimare corectă trebuie să fie întotdeauna **optimistă** (supraestimează sau estimează exact câștigul rămas real — nu subestimează niciodată), asigurând că nu eliminăm niciodată o ramură care conține soluția optimă."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Branch and Bound for Maximum Independent Set**\n\nRecall: MAXIMUM-INDEPENDENT-SET (MIS) — given graph $G=(V,E)$, find the largest subset $V' \\subseteq V$ such that no two vertices in $V'$ are adjacent.\n\nMIS is NP-complete, so no polynomial algorithm is known. Branch and bound explores the solution space with pruning.\n\n**A non-trivial estimation function for `maxRest`:**\n\nA simple (but weak) bound: `maxRest(partial) = |remaining vertices|` — any subset of remaining vertices could be independent.\n\nA stronger bound: for the subgraph induced by the remaining vertices, `maxRest(partial) ≤ |V_rem| − |E_rem_minimum_vertex_cover|`. But computing minimum vertex cover is also NP-hard.\n\nA practical bound: `maxRest(partial) ≤ chromatic_number_upper_bound(remaining_subgraph)` — the size of the largest independent set is at most the number of color classes in any coloring, which is at most the number of vertices minus the number of edges in a matching found greedily.\n\n**Argument for correctness:** `maxRest` must upper-bound the true maximum remaining independent set. The bound `|remaining vertices|` is trivially correct (the whole remaining set could be independent). A stronger bound based on a greedy matching gives: MIS ≤ |V_rem| − |matching size|, because every matching edge can contribute at most one vertex to an independent set.",
+            "ro": "**Branch and Bound pentru Maximum Independent Set**\n\nMIS — dat un graf $G=(V,E)$, găsiți cel mai mare subset $V' \\subseteq V$ astfel încât niciun două vârfuri din $V'$ să nu fie adiacente.\n\nMIS este NP-completă, deci nu se cunoaște niciun algoritm polinomial. Branch and bound explorează spațiul soluțiilor cu pruning.\n\n**O funcție de estimare ne-trivială pentru `maxRest`:**\n\nO estimare simplă (dar slabă): `maxRest(partial) = |vârfuri rămase|` — orice subset al vârfurilor rămase ar putea fi independent.\n\nO estimare mai puternică: pentru subgraful indus de vârfurile rămase, `maxRest(partial) ≤ |V_rem| − |E_rem_acoperire_minimă_vârfuri|`. Dar calculul acoperirii minime prin vârfuri este de asemenea NP-dificil.\n\nO estimare practică: `maxRest(partial) ≤ upper_bound_chromatic_number(subgraf_rămas)` — dimensiunea celui mai mare set independent este cel mult numărul claselor de culori în orice colorare.\n\n**Argument pentru corectitudine:** `maxRest` trebuie să fie o limită superioară a adevăratei MIS rămase. Estimarea `|vârfuri rămase|` este trivial corectă. O estimare mai puternică bazată pe un matching greedy dă: MIS ≤ |V_rem| − |dimensiune_matching|, deoarece fiecare muchie de matching poate contribui cel mult un vârf la un set independent."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "For a Branch and Bound algorithm solving Maximum Independent Set, which property MUST the `maxRest` estimation function satisfy to guarantee correctness?",
+                "ro": "Pentru un algoritm Branch and Bound care rezolvă Maximum Independent Set, ce proprietate TREBUIE să satisfacă funcția de estimare `maxRest` pentru a garanta corectitudinea?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "maxRest must always be ≥ the true remaining optimum (optimistic/admissible bound)",
+                    "ro": "maxRest trebuie să fie întotdeauna ≥ optimul rămas real (estimare optimistă/admisibilă)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "An admissible bound never underestimates the true remaining gain. This ensures we never prune a branch that contains the optimal solution: if a branch actually contains a solution better than bestSoFar, then currentCost + maxRest ≥ currentCost + trueRest > bestSoFar, so the branch is never pruned.",
+                    "ro": "O estimare admisibilă nu subestimează niciodată câștigul rămas real. Aceasta asigură că nu eliminăm niciodată o ramură care conține soluția optimă: dacă o ramură conține de fapt o soluție mai bună decât celMaiBunPânăAcum, atunci costCurent + maxRest ≥ costCurent + restReal > celMaiBunPânăAcum, deci ramura nu este eliminată niciodată."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "maxRest must be exactly equal to the true remaining optimum",
+                    "ro": "maxRest trebuie să fie exact egal cu optimul rămas real"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Exact computation would require solving the subproblem optimally — defeating the purpose. We only need an upper bound (overestimate). Tight bounds improve efficiency (more pruning) but are not required for correctness.",
+                    "ro": "Calculul exact ar necesita rezolvarea optimă a subproblemei — contraproductiv. Avem nevoie doar de o limită superioară (supraestimare). Estimările mai strânse îmbunătățesc eficiența (mai mult pruning), dar nu sunt necesare pentru corectitudine."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "maxRest must always be ≤ the true remaining optimum (pessimistic bound)",
+                    "ro": "maxRest trebuie să fie întotdeauna ≤ optimul rămas real (estimare pesimistă)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "A pessimistic bound (underestimate) would incorrectly prune branches containing the optimal solution. If maxRest < trueRest, then currentCost + maxRest < actualSolutionValue, and we might prune the optimal branch — making the algorithm incorrect.",
+                    "ro": "O estimare pesimistă (subestimare) ar elimina incorect ramuri care conțin soluția optimă. Dacă maxRest < restReal, atunci costCurent + maxRest < valoareaSoluțieiActuale, și am putea elimina ramura optimă — făcând algoritmul incorect."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "maxRest can be any value — it only affects speed, not correctness",
+                    "ro": "maxRest poate fi orice valoare — afectează doar viteza, nu corectitudinea"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "maxRest critically affects correctness. An underestimating maxRest can prune branches containing the optimal solution, giving a wrong answer. Only overestimates (admissible bounds) preserve correctness.",
+                    "ro": "maxRest afectează critic corectitudinea. Un maxRest subestimator poate elimina ramuri care conțin soluția optimă, dând un răspuns greșit. Doar supraestimările (estimări admisibile) păstrează corectitudinea."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "For Branch and Bound to be correct, the estimation function maxRest must be an admissible (optimistic) bound — it must never underestimate the true remaining optimum. This guarantees no optimal branch is pruned. The bound |remaining vertices| is trivially admissible; tighter bounds (like |V_rem| − |matching|) are also admissible and prune more.",
+                "ro": "Pentru ca Branch and Bound să fie corect, funcția de estimare maxRest trebuie să fie o estimare admisibilă (optimistă) — nu trebuie să subestimeze niciodată optimul rămas real. Aceasta garantează că nicio ramură optimă nu este eliminată. Estimarea |vârfuri rămase| este trivial admisibilă; estimările mai strânse (ca |V_rem| − |matching|) sunt de asemenea admisibile și elimină mai mult."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -24,6 +24,8 @@ const pa = {
     { id: 'pa-c4', title: { en: 'Course 4: Probabilistic Analysis', ro: 'Cursul 4: Analiză probabilistică' }, shortTitle: { en: 'C4: Prob. Analysis', ro: 'C4: Analiză prob.' }, sectionCount: 6, metaId: 'pa-c4', src: 'pa/courses/course-04.json' },
     { id: 'pa-c5', title: { en: 'Course 5: KMP Algorithm', ro: 'Cursul 5: Algoritmul KMP' }, shortTitle: { en: 'C5: KMP', ro: 'C5: KMP' }, sectionCount: 5, metaId: 'pa-c5', src: 'pa/courses/course-05.json' },
     { id: 'pa-c6', title: { en: 'Course 6: Boyer-Moore & Rabin-Karp', ro: 'Cursul 6: Boyer-Moore și Rabin-Karp' }, shortTitle: { en: 'C6: BM/RK', ro: 'C6: BM/RK' }, sectionCount: 6, metaId: 'pa-c6', src: 'pa/courses/course-06.json' },
+    { id: 'pa-c7', title: { en: 'Courses 9 & 10: NP-Complete Problems', ro: 'Cursurile 9, 10: Probleme NP-complete' }, shortTitle: { en: 'C7: NP-Complete', ro: 'C7: NP-complete' }, sectionCount: 8, metaId: 'pa-c7', src: 'pa/courses/course-07.json' },
+    { id: 'pa-c8', title: { en: 'Course 11: Backtracking & Branch and Bound', ro: 'Cursul 11: Backtracking și Branch & Bound' }, shortTitle: { en: 'C8: Backtracking/B&B', ro: 'C8: Backtracking/B&B' }, sectionCount: 4, metaId: 'pa-c8', src: 'pa/courses/course-08.json' },
   ],
   seminars: [
     { id: 'pa-s1', title: { en: 'Week 1: Computational Problems', ro: 'Săptămâna 1: Probleme computaționale' }, shortTitle: { en: 'W1: Comp. Problems', ro: 'S1: Probleme comp.' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
@@ -32,6 +34,8 @@ const pa = {
     { id: 'pa-s4', title: { en: 'Week 4: Probabilistic Algorithms — Average Complexity (Cont.)', ro: 'Săptămâna 4: Algoritmi probabiliști — Complexitatea medie (cont.)' }, shortTitle: { en: 'W4: Avg. Complexity', ro: 'S4: Complex. medie' }, component: lazy(() => import('./seminars/Seminar04.jsx')) },
     { id: 'pa-s5', title: { en: 'Week 5: String Searching', ro: 'Săptămâna 5: Căutarea peste șiruri' }, shortTitle: { en: 'W5: Strings', ro: 'S5: Șiruri' }, component: lazy(() => import('./seminars/Seminar05.jsx')) },
     { id: 'pa-s6', title: { en: 'Week 6: String Searching (Cont.)', ro: 'Săptămâna 6: Căutarea peste șiruri (cont.)' }, shortTitle: { en: 'W6: Strings II', ro: 'S6: Șiruri II' }, component: lazy(() => import('./seminars/Seminar06.jsx')) },
+    { id: 'pa-s9', title: { en: 'Week 9: NP-Complete Problems', ro: 'Săptămâna 9: Probleme NP-complete' }, shortTitle: { en: 'W9: NP-Complete', ro: 'S9: NP-complete' }, component: lazy(() => import('./seminars/Seminar09.jsx')) },
+    { id: 'pa-s10', title: { en: 'Week 10: Backtracking & Branch and Bound', ro: 'Săptămâna 10: Backtracking și Branch & Bound' }, shortTitle: { en: 'W10: Backtracking/B&B', ro: 'S10: Backtracking/B&B' }, component: lazy(() => import('./seminars/Seminar10.jsx')) },
   ],
   labs: [],
   tests: [

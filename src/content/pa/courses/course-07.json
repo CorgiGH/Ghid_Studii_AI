@@ -1,0 +1,541 @@
+{
+  "meta": {
+    "id": "pa-c7",
+    "title": {
+      "en": "Courses 9 & 10: NP-Complete Problems",
+      "ro": "Cursurile 9, 10: Probleme NP-complete"
+    },
+    "shortTitle": {
+      "en": "C7: NP-Complete",
+      "ro": "C7: NP-complete"
+    },
+    "source": {
+      "en": "Algorithm Design — Lectures 9 & 10, UAIC 2022-2023",
+      "ro": "Proiectarea Algoritmilor — Cursurile 9, 10, UAIC 2022-2023"
+    }
+  },
+  "steps": [
+    {
+      "id": "pa-c7-motivation",
+      "title": {
+        "en": "Motivation",
+        "ro": "Motivare"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In this course we will understand:\n\n1. what the classes P, NP, and NP-complete problems are;\n2. why it matters for a computer scientist to be able to identify such problems;\n3. how to show that a problem is NP-complete;\n4. how to approach such problems in practice.\n\nComputers were once thought to be very fast calculators. But it turned out that the number of steps required to solve many computational problems can be enormous, making running times very large.\n\nFor some problems — like PATH (finding a path between two nodes in a graph, solvable in $O(n)$ where $n = |V| + |E|$) — efficient algorithms exist. For others, like PRIMES (is $k$ prime?), an efficient deterministic algorithm was only found in 2002 (the AKS algorithm, running in $O(n^{12})$ where $n = \\log_2 k$).\n\nFor yet other problems, such as the halting problem in $k$ steps, any algorithm has exponential complexity. This motivates the search for the most efficient algorithms for practical computational problems.",
+            "ro": "În acest curs vom înțelege:\n\n1. ce sunt clasele P, NP și problemele NP-complete;\n2. de ce e important pentru un informatician să fie capabil să identifice astfel de probleme;\n3. cum putem arăta că o problemă este NP-completă;\n4. cum abordăm astfel de probleme în practică.\n\nCalculatoarele aveau reputația de a efectua calcule foarte rapid. Dar s-a dovedit că numărul de pași necesari pentru rezolvarea unor probleme computaționale poate fi foarte mare și astfel timpul de rulare al programelor să fie mare.\n\nPentru unele probleme — ca PATH (găsirea unui drum între două noduri dintr-un graf, rezolvabilă în $O(n)$ unde $n = |V| + |E|$) — există algoritmi eficienți. Pentru altele, ca PRIMES (este $k$ prim?), un algoritm determinist eficient a fost găsit abia în 2002 (algoritmul AKS, în $O(n^{12})$ unde $n = \\log_2 k$).\n\nPentru alte probleme, ca oprirea în $k$ pași, orice algoritm are complexitate cel puțin exponențială. Din acest motiv a apărut necesitatea de a proiecta algoritmi cât mai eficienți."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**PATH**\nInput: a graph $G = (V, E)$, two nodes $s, t \\in V$;\nOutput: Is there a path between $s$ and $t$ in G?\n\n**PRIMES**\nInput: a number $k \\in \\mathbb{N}$;\nOutput: Is $k$ prime?\n\n**BOUNDED HALTING**\nInput: an algorithm $A$, a natural number $k$;\nOutput: Does $A$ halt in at most $k$ steps?",
+            "ro": "**PATH**\nInput: Un graf $G = (V, E)$, două noduri $s, t \\in V$;\nOutput: Există drum între $s$ și $t$ în graful G?\n\n**PRIMES**\nInput: Un număr $k \\in \\mathbb{N}$;\nOutput: Este $k$ număr prim?\n\n**BOUNDED HALTING**\nInput: Un algoritm $A$, un număr natural $k$;\nOutput: Se oprește $A$ în cel mult $k$ pași?"
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Trying to understand these problems, computer scientists discovered a class called **NP-complete problems**. This class includes satisfiability of propositional logic, the longest simple path in a graph, the clique problem, the travelling salesman problem, the subset-sum problem, and many others.\n\nWe do not know if these problems have polynomial algorithms (we just haven't found one yet), but we do know they are **polynomially equivalent**: if any one of them is solvable in polynomial time, all of them are.\n\nFor a programmer it is important to recognize an NP-complete problem. If a problem is NP-complete, it makes no sense to look for a polynomial algorithm; instead one should:\n\n- accept a less efficient worst-case algorithm (often backtracking);\n- use an approximation algorithm;\n- look for efficient solutions for special cases;\n- analyse whether a reformulation of the problem avoids NP-completeness.",
+            "ro": "Încercând să înțeleagă aceste probleme, informaticienii au descoperit o clasă importantă numite **probleme NP-complete**. Această clasă include satisfiabilitatea pentru logica propozițională, cel mai lung drum simplu în graf, problema clicii, problema comis-voiajorului, problema submulțimii de sumă dată și multe altele.\n\nNu știm dacă aceste probleme au algoritmi polinomiali (doar întâmplător nu i-am găsit), dar știm că sunt echivalente polinomial: dacă vreuna dintre ele este rezolvabilă în timp polinomial, toate sunt.\n\nPentru un programator este important să identifice o problemă NP-completă. Dacă este NP-completă, nu are sens să caute un algoritm polinomial, ci trebuie să găsească o metodă alternativă:\n\n- să accepte folosirea unui algoritm mai puțin eficient (de cele mai multe ori, bazat pe backtracking);\n- să folosească un algoritm de aproximare;\n- să caute rezolvări eficiente pentru cazuri particulare;\n- să analizeze dacă o reformulare nu ar putea evita NP-completitudinea."
+          }
+        }
+      ]
+    },
+    {
+      "id": "pa-c7-decision-optimization",
+      "title": {
+        "en": "Computational, Decision, and Optimization Problems",
+        "ro": "Probleme computaționale, de decizie și de optim"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Decision Problem",
+            "ro": "Problemă de decizie"
+          },
+          "content": {
+            "en": "A **decision problem** is a computational problem where the output is a single bit (yes/no, true/false, 1/0).\n\nInput: $d$\nOutput: yes/no, depending on a predicate $P(d)$.",
+            "ro": "O **problemă de decizie** este o problemă computațională în care outputul este un singur bit (da/nu, true/false, 1/0).\n\nInput: $d$\nOutput: da/nu, în funcție de un predicat $P(d)$."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Optimization Problem",
+            "ro": "Problemă de optim"
+          },
+          "content": {
+            "en": "In an **optimization problem** (or problem of optimum), the output is the best solution from a solution space:\n\n- the minimum-cost solution for minimization problems;\n- the maximum-gain solution for maximization problems.\n\nGeneral schema for a minimization problem:\nInput: $d$\nOutput: $s \\in S(d)$ such that $\\text{cost}(s)$ is minimum (or a special marker, e.g. $-1$, if no solution exists).",
+            "ro": "Într-o **problemă de optim** (sau de optimizare), outputul este cea mai bună soluție dintr-un spațiu de soluții:\n\n- soluția cu costul minim pentru probleme de minimizare;\n- soluția cu câștigul maxim pentru probleme de maximizare.\n\nSchema generală pentru o problemă de minimizare:\nInput: $d$\nOutput: $s \\in S(d)$ a.i. $\\text{cost}(s)$ este minim (sau un marker special, e.g. $-1$, în caz că nu există soluții)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "Examples:\n\n**SHORTEST-PATH** (minimization problem)\nInput: graph $G = (V, E)$, nodes $s, t \\in V$;\nOutput: shortest path from $s$ to $t$ in $G$.\n\n**LONGEST-PATH** (maximization problem)\nInput: graph $G = (V, E)$, nodes $s, t \\in V$;\nOutput: longest simple path from $s$ to $t$ in $G$.",
+            "ro": "Exemple:\n\n**SHORTEST-PATH** (problemă de minimizare)\nInput: Un graf $G = (V, E)$, două noduri $s, t \\in V$;\nOutput: Cel mai scurt drum între $s$ și $t$ în G.\n\n**LONGEST-PATH** (problemă de maximizare)\nInput: Un graf $G = (V, E)$, două noduri $s, t \\in V$;\nOutput: Cel mai lung drum simplu între $s$ și $t$ în G."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "In the context of NP-complete problems we work only with **decision problems** (not optimization). This is not a restriction because every optimization problem has an associated decision problem that is polynomially equivalent.\n\nFor a minimization problem:\n- Original: Input $d$, Output: $s \\in S(d)$ with minimum cost\n- Decision version: Input $d, k \\in \\mathbb{N}$, Output: $\\exists s \\in S(d)$ with $\\text{cost}(s) \\le k$?\n\nThe two problems are polynomially equivalent: if we can solve one in polynomial time, we can solve the other. This means we can restrict attention to decision problems without loss of generality.",
+            "ro": "În contextul problemelor NP-complete, lucrăm doar cu **probleme de decizie** (nu de optimizare). Acest lucru nu este o restricție, deoarece orice problemă de optimizare are o problemă de decizie asociată care este echivalentă polinomial.\n\nPentru o problemă de minimizare:\n- Originală: Input $d$, Output: $s \\in S(d)$ cu costul minim\n- Varianta de decizie: Input $d, k \\in \\mathbb{N}$, Output: $\\exists s \\in S(d)$ cu $\\text{cost}(s) \\le k$?\n\nCele două probleme sunt echivalente polinomial: dacă știm să rezolvăm una în timp polinomial, știm să rezolvăm și cealaltă. Deci putem lucra fără pierdere de generalitate doar cu probleme de decizie."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Diagnostic: SHORTEST-PATH is in P. What does this tell us about LONGEST-PATH?",
+                "ro": "Diagnostic: SHORTEST-PATH este în P. Ce ne spune asta despre LONGEST-PATH?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "LONGEST-PATH is also in P because the two are symmetric",
+                    "ro": "LONGEST-PATH este și el în P deoarece cele două sunt simetrice"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Symmetry between minimization and maximization does not imply same complexity. LONGEST-PATH is NP-complete while SHORTEST-PATH is in P — these are genuinely different problems with different structure.",
+                    "ro": "Simetria dintre minimizare și maximizare nu implică aceeași complexitate. LONGEST-PATH este NP-completă în timp ce SHORTEST-PATH este în P — sunt probleme cu structuri fundamental diferite."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Nothing — the two problems have very different computational complexity despite looking similar",
+                    "ro": "Nimic — cele două probleme au complexitate computațională foarte diferită, deși par similare"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "SHORTEST-PATH ∈ P (solvable by Dijkstra or BFS). LONGEST-PATH is NP-complete. This is a key lesson: apparently similar problems can belong to completely different complexity classes. Complexity theory tells us *why* — shortest path has optimal substructure (greedy/DP works), longest simple path does not.",
+                    "ro": "SHORTEST-PATH ∈ P (rezolvabilă prin Dijkstra sau BFS). LONGEST-PATH este NP-completă. Aceasta este o lecție cheie: probleme aparent similare pot aparține unor clase de complexitate complet diferite. Teoria complexității ne spune *de ce* — drumul cel mai scurt are substructură optimală (greedy/PD funcționează), cel mai lung drum simplu nu."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "LONGEST-PATH can be solved by negating edge weights and running SHORTEST-PATH",
+                    "ro": "LONGEST-PATH poate fi rezolvată negând ponderile muchiilor și rulând SHORTEST-PATH"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This trick works for DAGs (acyclic graphs) but not for general graphs. With negative cycles, Dijkstra fails and Bellman-Ford loops. LONGEST-PATH in general graphs is NP-complete.",
+                    "ro": "Trucul funcționează pentru DAG-uri (grafuri aciclice), dar nu pentru grafuri generale. Cu cicluri negative, Dijkstra eșuează și Bellman-Ford ciclează. LONGEST-PATH în grafuri generale este NP-completă."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "LONGEST-PATH ∈ P because we can use DP after negating weights",
+                    "ro": "LONGEST-PATH ∈ P deoarece putem folosi PD după negarea ponderilor"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "DP for shortest path requires no negative cycles. Negating weights to find the longest path introduces negative cycles in the original graph, breaking DP. This only works for DAGs, not general graphs.",
+                    "ro": "PD pentru drumul cel mai scurt necesită lipsa ciclurilor negative. Negarea ponderilor pentru cel mai lung drum introduce cicluri negative în graful original, stricând PD. Funcționează doar pentru DAG-uri, nu grafuri generale."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "This pair — SHORTEST-PATH (in P) vs LONGEST-PATH (NP-complete) — is one of the canonical examples showing how small changes in a problem formulation can shift it between tractable and intractable. Along with 2-SAT (P) vs 3-SAT (NP-complete), it illustrates why understanding complexity classes matters.",
+                "ro": "Această pereche — SHORTEST-PATH (în P) vs LONGEST-PATH (NP-completă) — este unul dintre exemplele canonice care arată cum mici modificări în formularea problemei o pot muta între tractabilă și intractabilă. Împreună cu 2-SAT (P) vs 3-SAT (NP-completă), ilustrează de ce înțelegerea claselor de complexitate contează."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pa-c7-nondeterministic",
+      "title": {
+        "en": "Nondeterministic Algorithms",
+        "ro": "Algoritmi nedeterminiști"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Nondeterministic Algorithm",
+            "ro": "Algoritm nedeterminist"
+          },
+          "content": {
+            "en": "A **nondeterministic algorithm** is an algorithm that has access to an additional instruction `choose`:\n\n`choose x from { ... }`\n\nIn this model, an algorithm has one or more executions. Each execution terminates with success or infinite failure. The nondeterministic model **prefers executions that terminate with success**: if any execution terminates with success, the algorithm returns TRUE/YES/DA/1.\n\nEvery nondeterministic polynomial algorithm can be reorganized into two phases:\n1. **Guessing phase** (a number of bits are guessed);\n2. **Verification phase** (a deterministic algorithm verifies that the guessed object has the expected properties and returns 1/0).",
+            "ro": "Un **algoritm nedeterminist** este un algoritm în care avem la dispoziție suplimentar instrucțiunea `choose`:\n\n`choose x from { ... }`\n\nÎn acest model de calcul, un algoritm are una sau mai multe execuții. Fiecare execuție se termină cu succes sau eșec infinit. Modelul nedeterminist **preferă execuțiile care se termină cu succes**: dacă există o execuție care se termină cu succes, algoritmul returnează TRUE/YES/DA/1.\n\nOrice algoritm nedeterminist polinomial poate fi reorganizat în două etape:\n1. **Etapa de ghicire** (un număr de biți ghiciți);\n2. **Etapa de verificare** (un algoritm determinist care verifică că obiectul ghicit are proprietățile așteptate și întoarce 1/0)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "// Example 1: nondeterministic algorithm that returns TRUE\nchoose x from { 0, 1, 2 };\nchoose y from { 0, 1, 2 };\nif (x + y == 3) {\n  success;    // 2 executions reach success → returns TRUE\n} else {\n  failure;\n}\n\n// Example 2: algorithm that returns FALSE\nchoose x from { 0, 1, 2 };\nchoose y from { 0, 1, 2 };\nif (x + y == 5) {\n  success;\n} else {\n  failure;    // all 9 executions fail → returns FALSE\n}\n\n// Example: COMPUS — nondeterministic compositeness test\ncompus(n)\n{\n  choose k from { 2 .. n-1 };  // O(log n) in logarithmic model\n  if (n mod k == 0) {\n    success;\n  } else {\n    failure;\n  }\n}"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "The `choose` instruction \"magically\" picks the execution leading to success. Why is this called nondeterministic? Why is this model useful even though no real computer implements it?",
+            "ro": "Instrucțiunea `choose` alege \"ca prin magie\" execuția care conduce la succes. De ce se numește nedeterminist? De ce este util acest model deși nicio implementare practică nu îl implementează eficient?"
+          },
+          "answer": {
+            "en": "It is nondeterministic because different executions can follow different paths — there is no fixed, single path of computation (unlike a deterministic algorithm). The model is useful theoretically because it captures the power of **guessing + verifying**: a nondeterministic algorithm can guess a solution and verify it, separating the hard part (finding a solution) from the easy part (checking it). This separation is the foundation of the NP complexity class.",
+            "ro": "Se numește nedeterminist deoarece execuțiile diferite pot urma căi diferite — nu există o singură cale fixă de calcul (spre deosebire de un algoritm determinist). Modelul este util teoretic deoarece captează puterea **ghicirii + verificării**: un algoritm nedeterminist poate ghici o soluție și o verifică, separând partea dificilă (găsirea unei soluții) de cea ușoară (verificarea ei). Această separare este fundamentul clasei de complexitate NP."
+          }
+        }
+      ]
+    },
+    {
+      "id": "pa-c7-karp-reductions",
+      "title": {
+        "en": "Karp Reductions",
+        "ro": "Reduceri Karp"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Karp Reduction (Many-one Polynomial Reduction)",
+            "ro": "Reducere Karp (reducere many-one polinomială)"
+          },
+          "content": {
+            "en": "Given two problems X and Y, a **Karp reduction** from X to Y is an algorithm $A$ that transforms an input $x$ for problem X into an input $y = A(x)$ for problem Y such that $f(x) = g(y)$ (i.e., $f(x) = g(A(x))$).\n\nEquivalently, a Karp reduction from X to Y is an algorithm for X that preprocesses its input $x$ and then calls an algorithm for Y exactly once at the end:\n\n```\nAlgX(x) {\n  y = ...;          // compute y from x (algorithm A)\n  return AlgY(y);   // one call, at the end\n}\n```\n\nWe write $X \\propto Y$ to denote that X Karp-reduces to Y.",
+            "ro": "Fie două probleme X și Y. O **reducere Karp** de la X la Y este un algoritm $A$ care transformă un input $x$ pentru problema X într-un input $y = A(x)$ pentru problema Y astfel încât $f(x) = g(y)$ (adică $f(x) = g(A(x))$).\n\nÎn mod echivalent, o reducere Karp de la X la Y este un algoritm pentru X care realizează o preprocesare a inputului $x$ și apoi apelează un algoritm pentru Y exact o singură dată la sfârșit:\n\n```\nAlgX(x) {\n  y = ...;          // calculează y în funcție de x (algoritmul A)\n  return AlgY(y);   // un singur apel, chiar la sfârșit\n}\n```\n\nNotăm $X \\propto Y$ pentru a denota că X se reduce Karp la Y."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Karp reductions are mostly used to derive **negative results** about problem Y starting from a negative result for X.\n\nFor example, if:\n1. problem X is not computable, and\n2. we find a reduction from X to Y,\n\nthen problem Y is not computable either.\n\nOr: if X has no efficient (polynomial) solution and there exists a polynomial reduction from X to Y, then Y has no efficient solution either.\n\nProof by contradiction: if Y had a polynomial solution, coupling it with the efficient reduction would give a polynomial algorithm for X — contradiction.\n\nIn principle, the existence of a (efficient) reduction from X to Y ensures that X is no (much) harder computationally than Y.",
+            "ro": "Reducerile Karp sunt folosite mai ales pentru a deriva **rezultate negative** despre problema Y pornind de la un rezultat negativ pentru problema X.\n\nDe exemplu, dacă:\n1. problema X nu este calculabilă, și\n2. găsim o reducere de la X la Y,\n\natunci sigur nici problema Y nu este calculabilă.\n\nSau: dacă X nu are o rezolvare eficientă (polinomială) și există o reducere polinomială de la X la Y, atunci sigur nici Y nu are o rezolvare eficientă.\n\nDemonstrație prin reducere la absurd: dacă Y ar avea o rezolvare polinomială, cuplând algoritmul eficient pentru Y cu reducerea eficientă obținem un algoritm eficient pentru X — contradicție.\n\nÎn principiu, existența unei reduceri (eficiente) de la X la Y asigură că problema X nu este (cu mult) mai dificilă computational decât problema Y."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which of the following is a valid Karp reduction from PARITY (is $n$ even?) to ODDNESS (is $m$ odd?)?",
+                "ro": "Care dintre următoarele este o reducere Karp validă de la PARITATE (este $n$ par?) la IMPARITATE (este $m$ impar?)?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "AlgPARITY(n) { m = n; return !AlgIMPARITY(m); }",
+                    "ro": "AlgPARITY(n) { m = n; return !AlgIMPARITY(m); }"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is NOT a Karp reduction. Although it calls AlgIMPARITY once, it negates the result — that is **post-processing**, which Karp reductions forbid. The output of AlgY must be returned directly, without any transformation.",
+                    "ro": "Aceasta NU este o reducere Karp. Deși apelează AlgIMPARITY o singură dată, neagă rezultatul — aceasta este **postprocesare**, pe care reducerile Karp nu o permit. Outputul lui AlgY trebuie returnat direct, fără nicio transformare."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "AlgPARITY(n) { m = n + 1; return AlgIMPARITY(m); }",
+                    "ro": "AlgPARITY(n) { m = n + 1; return AlgIMPARITY(m); }"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "$n$ is even iff $n+1$ is odd. So setting $m = n+1$ and calling AlgIMPARITY($m$) directly gives the correct answer for PARITY. The input is preprocessed (n+1), the oracle for Y is called exactly once at the end, and the result is returned without modification — a valid Karp reduction.",
+                    "ro": "$n$ este par dacă și numai dacă $n+1$ este impar. Deci setând $m = n+1$ și apelând AlgIMPARITY($m$) direct obținem răspunsul corect pentru PARITATE. Inputul este preprocesate (n+1), oracolul pentru Y este apelat exact o dată la sfârșit, iar rezultatul este returnat fără modificare — o reducere Karp validă."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "AlgPARITY(n) { return AlgIMPARITY(n); }",
+                    "ro": "AlgPARITY(n) { return AlgIMPARITY(n); }"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This calls AlgIMPARITY with the same input and returns its result directly, but that gives the wrong answer: PARITY(n) = ($n$ is even) while IMPARITATE(n) = ($n$ is odd). These are opposite — so this is an incorrect (wrong-answer) reduction, not just invalid form.",
+                    "ro": "Aceasta apelează AlgIMPARITY cu același input și returnează rezultatul direct, dar dă răspunsul greșit: PARITATE(n) = ($n$ este par) în timp ce IMPARITATE(n) = ($n$ este impar). Acestea sunt opuse — deci aceasta este o reducere incorectă (răspuns greșit), nu doar formă invalidă."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "AlgPARITY(n) { return AlgIMPARITY(n) && AlgIMPARITY(n+2); }",
+                    "ro": "AlgPARITY(n) { return AlgIMPARITY(n) && AlgIMPARITY(n+2); }"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "A Karp reduction allows only **one** call to AlgY. Calling it twice violates the definition.",
+                    "ro": "O reducere Karp permite doar **un singur** apel la AlgY. Apelarea de două ori violează definiția."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "A Karp reduction from X to Y: preprocess the input, call AlgY exactly once at the very end, return its result unchanged. The canonical example: n is even iff n+1 is odd, so PARITY ∝ ODDNESS via m = n+1.",
+                "ro": "O reducere Karp de la X la Y: preprocesează inputul, apelează AlgY exact o dată la final, returnează rezultatul nemodificat. Exemplul canonic: n este par dacă și numai dacă n+1 este impar, deci PARITATE ∝ IMPARITATE prin m = n+1."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pa-c7-class-p",
+      "title": {
+        "en": "The Class P",
+        "ro": "Clasa P"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Class P (PTIME)",
+            "ro": "Clasa P (PTIME)"
+          },
+          "content": {
+            "en": "$$P = \\{X \\mid X \\text{ is a decision problem and there exists a deterministic polynomial algorithm in the worst case for } X\\}$$\n\nIn general, class P is viewed as the class of **tractable** (efficiently solvable) problems.\n\nExamples: 2-SAT ∈ P, BIPARTIT ∈ P, SORT ∈ P, PRIMES ∈ P (since 2002, AKS algorithm).\n\nFor many problems — like 3-SAT, HAMILTONIAN-CIRCUIT, TSP (Travelling Salesman Problem) — we do not know if they are in P or not.",
+            "ro": "$$P = \\{X \\mid X \\text{ este o problemă de decizie și există un algoritm determinist polinomial în cazul cel mai nefavorabil pentru } X\\}$$\n\nÎn general, clasa P este privită ca fiind clasa problemelor **tractabile** (rezolvabile eficient).\n\nExemple: 2-SAT ∈ P, BIPARTIT ∈ P, SORT ∈ P, PRIMES ∈ P (din 2002, algoritmul AKS).\n\nPentru multe probleme — ca 3-SAT, HAMILTONIAN-CIRCUIT, TSP (problema comis-voiajorului) — nu știm dacă sunt în P sau nu."
+          }
+        }
+      ]
+    },
+    {
+      "id": "pa-c7-class-np",
+      "title": {
+        "en": "The Class NP",
+        "ro": "Clasa NP"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Class NP (NPTIME)",
+            "ro": "Clasa NP (NPTIME)"
+          },
+          "content": {
+            "en": "$$NP = \\{X \\mid X \\text{ is a decision problem and there exists a nondeterministic polynomial algorithm in the worst case for } X\\}$$\n\nThe only difference from P is that a **nondeterministic** algorithm is allowed instead of a deterministic one.\n\n**Important:** NP does NOT stand for non-polynomial; it stands for **nondeterministic polynomial**.",
+            "ro": "$$NP = \\{X \\mid X \\text{ este o problemă de decizie și există un algoritm nedeterminist polinomial în cazul cel mai nefavorabil pentru } X\\}$$\n\nSingura diferență față de P este că se permite un algoritm **nedeterminist** în loc de unul determinist.\n\n**Atenție:** NP nu este o prescurtare pentru non-polinomial, ci pentru **nondeterministic polynomial**."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Common misconception!**\nNP is NOT an abbreviation for non-polynomial. It stands for **nondeterministic polynomial**.",
+            "ro": "**Eroare frecventă!**\nNP nu este o prescurtare pentru non-polynomial, ci este o prescurtare pentru **nondeterministic polynomial**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Every problem in P is also in NP, because a deterministic algorithm is a special case of a nondeterministic algorithm (a deterministic algorithm is a nondeterministic algorithm with exactly one execution). So $P \\subseteq NP$.\n\nIn addition (most probably), NP contains other interesting problems:\n\n**SAT** is in NP. A nondeterministic algorithm:\n```\nAlgSAT(phi) {\n  for (i = 0; i < n; ++i) {     // phase 1: guess an assignment\n    choose sigma[i] from { 0, 1 };  // n = number of propositional variables\n  }\n  if (eval(phi, sigma) == 1) {   // phase 2: verification\n    success;\n  } else {\n    failure;\n  }\n}\n```\n\n**3-COL** (is graph G 3-colorable?) is also in NP by a similar two-phase algorithm.\n\nThe open question: is $P = NP$? Most computer scientists believe $P \\subsetneq NP$ (strict inclusion), but no proof exists yet.",
+            "ro": "Orice problemă din P este și în NP, deoarece un algoritm determinist este un caz particular de algoritm nedeterminist (un algoritm determinist este un algoritm nedeterminist cu exact o execuție). Deci $P \\subseteq NP$.\n\nÎn plus (cel mai probabil), clasa NP conține și alte probleme interesante:\n\n**SAT** face parte din NP. Un algoritm nedeterminist:\n```\nAlgSAT(phi) {\n  for (i = 0; i < n; ++i) {     // faza 1: ghicirea unei atribuiri\n    choose sigma[i] from { 0, 1 };  // n = numărul de variabile propoziționale\n  }\n  if (eval(phi, sigma) == 1) {   // faza 2: verificarea\n    success;\n  } else {\n    failure;\n  }\n}\n```\n\n**3-COL** (este graful G 3-colorabil?) este de asemenea în NP printr-un algoritm similar în două faze.\n\nÎntrebarea deschisă: este $P = NP$? Cei mai mulți informaticieni cred că $P \\subsetneq NP$ (incluziune strictă), dar nu avem încă o demonstrație a acestui fapt."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which statement correctly describes the relationship between P and NP?",
+                "ro": "Care afirmație descrie corect relația dintre P și NP?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "P ⊆ NP, and most researchers believe P ≠ NP, but this is unproven",
+                    "ro": "P ⊆ NP, și cei mai mulți cercetători cred că P ≠ NP, dar aceasta este nedemonstrată"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "P ⊆ NP because any deterministic algorithm is a nondeterministic algorithm with one execution. Whether P = NP is the most famous open problem in computer science — most believe P ≠ NP but no proof exists.",
+                    "ro": "P ⊆ NP deoarece orice algoritm determinist este un algoritm nedeterminist cu o singură execuție. Dacă P = NP este cea mai faimoasă problemă deschisă din informatică — cei mai mulți cred că P ≠ NP, dar nu există o demonstrație."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "NP stands for non-polynomial, so NP problems have no polynomial algorithm",
+                    "ro": "NP înseamnă non-polinomial, deci problemele NP nu au algoritm polinomial"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "NP means nondeterministic polynomial, NOT non-polynomial. If P = NP (which is possible), all NP problems would have polynomial algorithms.",
+                    "ro": "NP înseamnă nondeterministic polynomial, NU non-polinomial. Dacă P = NP (ceea ce este posibil), toate problemele NP ar avea algoritmi polinomiali."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "P = NP has been proven for specific problem families",
+                    "ro": "P = NP a fost dovedit pentru familii specifice de probleme"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No. The P vs NP question is a Millennium Prize Problem — completely open. No general proof in either direction exists.",
+                    "ro": "Nu. Întrebarea P vs NP este o Problemă Millennium Prize — complet deschisă. Nu există nicio demonstrație generală în niciuna din direcții."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "NP ⊆ P because nondeterministic algorithms can always be simulated deterministically in polynomial time",
+                    "ro": "NP ⊆ P deoarece algoritmii nedeterminiști pot fi întotdeauna simulați determinist în timp polinomial"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Deterministic simulation of nondeterminism requires exploring all branches — exponential overhead. This is exactly the P vs NP question: can we simulate nondeterminism efficiently? Most believe we cannot.",
+                    "ro": "Simularea deterministă a nedeterminismului necesită explorarea tuturor ramurilor — overhead exponențial. Acesta este exact întrebarea P vs NP: putem simula nedeterminismul eficient? Cei mai mulți cred că nu."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "$P \\subseteq NP$ is proven (deterministic ⊂ nondeterministic). $P = NP$ vs $P \\subsetneq NP$ is an open problem. NP = nondeterministic polynomial, not non-polynomial.",
+                "ro": "$P \\subseteq NP$ este demonstrat (determinist ⊂ nedeterminist). $P = NP$ vs $P \\subsetneq NP$ este o problemă deschisă. NP = nondeterministic polynomial, nu non-polinomial."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pa-c7-np-complete",
+      "title": {
+        "en": "NP-Complete Problems",
+        "ro": "Probleme NP-complete"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "NP-Complete Problem",
+            "ro": "Problemă NP-completă"
+          },
+          "content": {
+            "en": "A problem X is **NP-complete** if:\n1. $X \\in NP$, and\n2. every problem $Y \\in NP$ reduces in polynomial time to X.\n\nIn other words, if we have a polynomial solution for an NP-complete problem, there are polynomial solutions for all problems in NP.\n\nNP-complete problems are the **hardest** problems in NP from a computational standpoint.\n\n- A problem satisfying only condition 1 is **NP-easy** (NP-easy).\n- A problem satisfying only condition 2 is **NP-hard** (NP-hard).",
+            "ro": "O problemă X este **NP-completă** dacă:\n1. $X \\in NP$, și\n2. orice problemă $Y \\in NP$ se reduce în timp polinomial la X.\n\nCu alte cuvinte, dacă avem o rezolvare polinomială pentru o problemă NP-completă, există rezolvări polinomiale pentru toate problemele din NP.\n\nProblemele NP-complete sunt cele mai dificile din punct de vedere computational din NP.\n\n- O problemă care respectă prima condiție se numește **NP-facile** (NP-easy).\n- O problemă care respectă a doua condiție se numește **NP-dificile** (NP-hard)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The first NP-complete problems known (Cook, 1971) are variants of SAT (e.g., SAT, 3-SAT, CIRCUIT-SAT).\n\n**Theorem 1 (Cook, 1971):** The problem CIRCUIT-SAT is NP-complete.\n\nOnce we know one NP-complete problem, we can show that other problems are NP-complete more easily:\n\nTo show that problem Z is NP-complete, it suffices to:\n1. Show $Z \\in NP$.\n2. Reduce a **known** NP-complete problem (e.g., 3-SAT) to Z polynomially.\n\nThis works because polynomial reductions are transitive: if every $Y \\in NP$ reduces to 3-SAT, and 3-SAT reduces to Z, then every $Y \\in NP$ reduces to Z.\n\n**Pay attention to the direction of the reduction!** To show Z is hard, reduce from a known hard problem TO Z (not from Z to something else).",
+            "ro": "Primele probleme despre care am aflat că sunt NP-complete (Cook, 1971) sunt variații ale problemei SAT (de ex., SAT, 3-SAT, CIRCUIT-SAT).\n\n**Teorema 1 (Cook, 1971):** Problema CIRCUIT-SAT este NP-completă.\n\nOdată ce cunoaștem o problemă NP-completă, putem arăta că alte probleme sunt NP-complete mai simplu:\n\nPentru a arăta că problema Z este NP-completă, este suficient să:\n1. Arătăm că $Z \\in NP$.\n2. Reducem o problemă **cunoscut** NP-completă (de ex., 3-SAT) la Z polinomial.\n\nAceasta funcționează deoarece reducerile polinomiale sunt tranzitive: dacă orice $Y \\in NP$ se reduce la 3-SAT, iar 3-SAT se reduce la Z, atunci orice $Y \\in NP$ se reduce la Z.\n\n**Atenție la direcția reducerii!** Pentru a arăta că Z este dificilă, reducem dinspre o problemă dificilă cunoscută SPRE Z (nu dinspre Z spre altceva)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "pa-c7-3sat-3col",
+      "title": {
+        "en": "3-SAT ∝ 3-COL",
+        "ro": "3-SAT ∝ 3-COL"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "We already know 3-COL ∈ NP. It remains to show that every $Y \\in NP$ reduces to 3-COL. We use transitivity:\n\n1. Every $Y \\in NP$ reduces to 3-SAT (known from Cook's theorem).\n2. We show: $\\text{3-SAT} \\propto \\text{3-COL}$ (this section).\n\nTherefore every $Y \\in NP \\propto$ 3-COL, so 3-COL is NP-complete.\n\n**Construction:** Given a formula $\\varphi$ in 3-CNF, we build a graph $G$ in polynomial time such that:\n\n$$\\varphi \\text{ is satisfiable } \\iff G \\text{ is 3-colorable}$$\n\nThe graph is built in three steps:\n\n**Step 1 — Truth gadget:** Create a triangle with three special nodes: T (True), F (False), O (Other). In any 3-coloring, these nodes get 3 distinct colors. WLOG we call the colors T, F, O. A node $x$ with the same color as T is said to have value T.\n\n**Step 2 — Variable gadgets:** For each propositional variable $x_i$, add two nodes labeled $x_i$ and $\\neg x_i$, connected to each other and both connected to node O. Since both are adjacent to O, they can only be colored T or F. Since they are adjacent to each other, they must be colored with opposite values — this models the truth assignment.\n\n**Step 3 — Clause gadgets:** For each clause, add a clause gadget that forces node R (the clause result) to have color T only if at least one literal is T. Each clause gadget is built from two triangles chained together, simulating an OR gate. If X and Y both have color F, node R cannot be colored T — making the graph non-3-colorable, which means the formula is unsatisfiable.",
+            "ro": "Știm deja că 3-COL ∈ NP. Rămâne de arătat că orice $Y \\in NP$ se reduce în timp polinomial la 3-COL. Folosim faptul că 3-SAT este deja NP-completă:\n\n1. Orice problemă $Y \\in NP$ se reduce în timp polinomial la 3-SAT.\n2. Arătăm că: $\\text{3-SAT} \\propto \\text{3-COL}$ (această secțiune).\n\nDeci orice $Y \\in NP \\propto$ 3-COL, deci 3-COL este NP-completă.\n\n**Construcție:** Fie o formulă $\\varphi$ aflată în 3-CNF. Construim în timp polinomial un graf $G$ cu proprietatea că:\n\n$$\\varphi \\text{ este satisfiabilă } \\iff G \\text{ este 3-colorabil}$$\n\nGraful se construiește în trei pași:\n\n**Pasul 1 — Truth gadget:** Creăm un triunghi cu trei noduri speciale: T (Adevărat), F (Fals), O (Altul). În orice 3-colorare, aceste noduri primesc 3 culori distincte. Fără pierdere de generalitate numim T culoarea nodului T, F culoarea nodului F, O culoarea nodului O. Un nod $x$ cu aceeași culoare cu T are valoarea T.\n\n**Pasul 2 — Variable gadgets:** Pentru fiecare variabilă propozițională $x_i$, adăugăm două noduri etichetate $x_i$ și $\\neg x_i$, legate între ele și ambele conectate la nodul O. Deoarece ambele sunt adiacente cu O, pot fi colorate doar cu T sau F. Deoarece sunt adiacente și între ele, trebuie colorate cu valori opuse — modelând atribuirea de valori de adevăr.\n\n**Pasul 3 — Clause gadgets:** Pentru fiecare clauză, adăugăm un clause gadget care forțează nodul R (rezultatul clauzei) să aibă culoarea T doar dacă cel puțin un literal este T. Fiecare clause gadget este construit din două triunghiuri înlănțuite, simulând o poartă OR. Dacă X și Y au ambele culoarea F, nodul R nu poate fi colorat cu T — făcând graful ne-3-colorabil, ceea ce înseamnă că formula nu este satisfiabilă."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "In the 3-SAT ∝ 3-COL construction, what is the purpose of the 'truth gadget' (triangle with nodes T, F, O)?",
+                "ro": "În construcția 3-SAT ∝ 3-COL, care este scopul 'truth gadget'-ului (triunghiul cu nodurile T, F, O)?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "It forces the three colors to be used at least once, ensuring a valid 3-coloring exists",
+                    "ro": "Forțează cele trei culori să fie folosite cel puțin o dată, asigurând existența unei 3-colorări valide"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "The truth gadget does more than just force 3 colors — it anchors the semantic meaning of the colors. Node O forces adjacent variable nodes to take only T or F colors, which is the key structural role.",
+                    "ro": "Truth gadget-ul face mai mult decât să forțeze 3 culori — ancorează semnificația semantică a culorilor. Nodul O forțează nodurile variabilelor adiacente să ia doar culorile T sau F, care este rolul structural cheie."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It anchors the semantics: node O forces adjacent variable nodes to be colored only T or F, modeling boolean truth values",
+                    "ro": "Ancorează semantica: nodul O forțează nodurile variabilelor adiacente să fie colorate doar cu T sau F, modelând valorile de adevăr booleene"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "The truth gadget establishes a reference coloring: T=true, F=false, O=other. Node O is adjacent to every variable node x_i and ¬x_i, so those nodes cannot receive color O — only T or F. This is how the graph encodes boolean variable assignments.",
+                    "ro": "Truth gadget-ul stabilește o colorare de referință: T=adevărat, F=fals, O=altul. Nodul O este adiacent cu fiecare nod variabilă x_i și ¬x_i, deci acele noduri nu pot primi culoarea O — doar T sau F. Astfel graful codifică atribuirile variabilelor booleene."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It represents one clause of the formula",
+                    "ro": "Reprezintă o clauză a formulei"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Clauses are represented by clause gadgets (Step 3), not by the truth gadget. The truth gadget (Step 1) provides the global true/false/other color anchor.",
+                    "ro": "Clauzele sunt reprezentate de clause gadget-uri (Pasul 3), nu de truth gadget. Truth gadget-ul (Pasul 1) furnizează ancora globală de culori adevărat/fals/altul."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It ensures the graph is connected",
+                    "ro": "Asigură că graful este conex"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Connectivity is not the purpose here. The truth gadget's role is semantic: establishing which color means 'true' and which means 'false', via the O node that constrains variable node colors.",
+                    "ro": "Conexitatea nu este scopul aici. Rolul truth gadget-ului este semantic: stabilirea culorii care înseamnă 'adevărat' și a celei care înseamnă 'fals', prin nodul O care constrânge culorile nodurilor variabilelor."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "The truth gadget (T-F-O triangle) anchors the color semantics. T=true color, F=false color, O=other. Every variable node is adjacent to O, so it can only receive T or F — modeling a boolean variable assignment. This is the structural backbone of the 3-SAT → 3-COL reduction.",
+                "ro": "Truth gadget-ul (triunghiul T-F-O) ancorează semantica culorilor. T=culoarea adevărat, F=culoarea fals, O=altul. Fiecare nod variabilă este adiacent cu O, deci poate primi doar T sau F — modelând o atribuire de variabilă booleană. Acesta este scheletul structural al reducerii 3-SAT → 3-COL."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pa-c7-known-np",
+      "title": {
+        "en": "Canonical NP-Complete Problems",
+        "ro": "Probleme NP-complete canonice"
+      },
+      "group": "np-complete",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**CIRCUIT-SAT** (canonical NP-complete, Cook 1971)\nInput: a combinational circuit C\nOutput: are there inputs such that the circuit produces output 1?\n\n**SAT** — NP-complete (via CIRCUIT-SAT ∝ SAT, Tseitin's algorithm)\nInput: a propositional formula $\\varphi$\nOutput: is $\\varphi$ satisfiable?\n\n**3-SAT** — NP-complete (via SAT ∝ 3-SAT)\nInput: a propositional formula $\\varphi$ in 3-CNF\nOutput: is $\\varphi$ satisfiable?\n\n**3-COL** — NP-complete (via 3-SAT ∝ 3-COL, as shown above)\nInput: $G = (V, E)$\nOutput: is G 3-colorable?\n\n**SUBSET-SUM** — NP-complete (via 3-SAT ∝ SUBSET-SUM)\nInput: $S \\subseteq \\mathbb{N}$, $t \\in \\mathbb{N}$\nOutput: is there $S' \\subseteq S$ with $\\Sigma_{x \\in S'} x = t$?\n\nNote: SUBSET-SUM is *weakly* NP-complete — solvable in pseudo-polynomial time $O(|S| \\times t)$ with dynamic programming when numbers are given in unary.",
+            "ro": "**CIRCUIT-SAT** (canonical NP-completă, Cook 1971)\nInput: un circuit combinational C\nOutput: există date de intrare astfel încât circuitul să producă output-ul 1?\n\n**SAT** — NP-completă (prin CIRCUIT-SAT ∝ SAT, algoritmul Tseitin)\nInput: o formulă propozițională $\\varphi$\nOutput: este $\\varphi$ satisfiabilă?\n\n**3-SAT** — NP-completă (prin SAT ∝ 3-SAT)\nInput: o formulă propozițională $\\varphi$ în 3-CNF\nOutput: este $\\varphi$ satisfiabilă?\n\n**3-COL** — NP-completă (prin 3-SAT ∝ 3-COL, cum s-a arătat mai sus)\nInput: $G = (V, E)$\nOutput: este G 3-colorabil?\n\n**SUBSET-SUM** — NP-completă (prin 3-SAT ∝ SUBSET-SUM)\nInput: $S \\subseteq \\mathbb{N}$, $t \\in \\mathbb{N}$\nOutput: există $S' \\subseteq S$ cu $\\Sigma_{x \\in S'} x = t$?\n\nNotă: SUBSET-SUM este *weakly* NP-completă — rezolvabilă în timp pseudo-polinomial $O(|S| \\times t)$ cu programare dinamică când numerele sunt date în baza 1."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**More NP-complete problems:**\n\n**VERTEX-COVER:** Given undirected graph $G=(V,E)$, $k \\in \\mathbb{N}$; is there $V' \\subseteq V$ with $|V'| \\le k$ such that for every edge $\\{u,v\\} \\in E$, $u \\in V'$ or $v \\in V'$?\n\n**MAXIMUM-INDEPENDENT-SET:** Given undirected graph $G=(V,E)$, $k \\in \\mathbb{N}$; is there $V' \\subseteq V$ with $|V'| \\ge k$ such that for all $u,v \\in V'$, $\\{u,v\\} \\notin E$?\n\n**CLIQUE:** Given undirected graph $G=(V,E)$, $k \\in \\mathbb{N}$; is there $V' \\subseteq V$ with $|V'| \\ge k$ where every two distinct nodes are connected?\n\n**HAMILTONIAN-CIRCUIT:** Given directed graph $G=(V,E)$; does G have a Hamiltonian circuit?\n\n**TSP:** Given complete graph $G=(V,E)$ with cost function $c: E \\to \\mathbb{N}$, $k \\in \\mathbb{N}$; is there a Hamiltonian circuit in G of cost $\\le k$? (TSP is *strongly* NP-complete.)",
+            "ro": "**Mai multe probleme NP-complete:**\n\n**VERTEX-COVER:** Dat un graf neorientat $G=(V,E)$, $k \\in \\mathbb{N}$; există $V' \\subseteq V$ cu $|V'| \\le k$ astfel încât pentru orice muchie $\\{u,v\\} \\in E$, $u \\in V'$ sau $v \\in V'$?\n\n**MAXIMUM-INDEPENDENT-SET:** Dat un graf neorientat $G=(V,E)$, $k \\in \\mathbb{N}$; există $V' \\subseteq V$ cu $|V'| \\ge k$ astfel încât pentru orice $u,v \\in V'$, $\\{u,v\\} \\notin E$?\n\n**CLIQUE:** Dat un graf neorientat $G=(V,E)$, $k \\in \\mathbb{N}$; există $V' \\subseteq V$ cu $|V'| \\ge k$ unde oricare două noduri distincte sunt conectate?\n\n**HAMILTONIAN-CIRCUIT:** Dat un graf orientat $G=(V,E)$; există un circuit hamiltonian în G?\n\n**TSP:** Dat un graf complet $G=(V,E)$ cu funcție de cost $c: E \\to \\mathbb{N}$, $k \\in \\mathbb{N}$; există un circuit hamiltonian în G de cost $\\le k$? (TSP este *strongly* NP-completă.)"
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Weakly vs. Strongly NP-complete:**\n\nSome NP-complete problems become tractable when numbers are given in unary (base 1). These are called **weakly NP-complete** (NP-complete in the weak sense).\n\nOther problems remain NP-complete even with unary input representation. These are **strongly NP-complete** (NP-complete in the strong sense).\n\nExample: SUBSET-SUM is weakly NP-complete (DP in $O(|S| \\times t)$ is polynomial when $t$ is small). TSP is strongly NP-complete.\n\n**Conclusion:** Very many combinatorial optimization problems that appear in practice are NP-complete. Since most computer scientists believe no polynomial algorithms exist for NP-complete problems, when facing an NP-complete problem one must:\n1. Use approximation algorithms;\n2. Use exponential algorithms (e.g., backtracking) for small instances;\n3. Exploit special structure for efficient solutions in specific cases;\n4. Check: SHORTEST-PATH (P) vs LONGEST-PATH (NP-complete); 2-SAT (P) vs 3-SAT (NP-complete).",
+            "ro": "**Weakly vs Strongly NP-complete:**\n\nUnele probleme NP-complete devin tractabile când numerele sunt date în baza 1 (unar). Acestea se numesc **weakly NP-complete** (NP-complete în sens slab).\n\nAlte probleme rămân NP-complete chiar și cu reprezentare unară a inputului. Acestea sunt **strongly NP-complete** (NP-complete în sens tare).\n\nExemplu: SUBSET-SUM este weakly NP-complete (PD în $O(|S| \\times t)$ este polinomială când $t$ este mic). TSP este strongly NP-complete.\n\n**Concluzie:** Foarte multe probleme de optimizare combinatorială care apar în practică sunt NP-complete. Deoarece cei mai mulți informaticieni cred că nu există algoritmi polinomiali pentru problemele NP-complete, când întâlnim o problemă NP-completă trebuie să:\n1. Folosim algoritmi de aproximare;\n2. Folosim algoritmi exponențiali (ex. backtracking) pentru instanțe mici;\n3. Exploatăm structura specială pentru soluții eficiente în cazuri particulare;\n4. Reținem: SHORTEST-PATH (P) vs LONGEST-PATH (NP-complete); 2-SAT (P) vs 3-SAT (NP-complete)."
+          }
+        }
+      ]
+    }
+  ]
+}
