@@ -66,9 +66,16 @@ export default function CodeChallenge({ description, starterCode, expectedOutput
         if (result.stderr) setError(result.stderr);
       }
     } catch (e) {
-      setError(e.message.startsWith('API error') || e.message.startsWith('some ')
-        ? e.message
-        : t('Network error — check your connection or try again later.', 'Eroare de rețea — verifică conexiunea sau încearcă mai târziu.'));
+      const isApi = e.message.startsWith('API error') || e.message.startsWith('some ');
+      setError(isApi
+        ? e.message + '\n\n' + t(
+            'Judge0 may be down or rate-limited. You can run this locally: save code as ex.c, then `gcc ex.c && ./a.out`.',
+            'Judge0 e posibil sa fie picat sau limitat. Poti rula local: salveaza codul ca ex.c, apoi `gcc ex.c && ./a.out`.'
+          )
+        : t(
+            'Network error — check your connection or try again later. Fallback: run locally with `gcc ex.c && ./a.out`.',
+            'Eroare de retea — verifica conexiunea sau incearca mai tarziu. Alternativa: ruleaza local cu `gcc ex.c && ./a.out`.'
+          ));
     }
     setLoading(false);
   };
