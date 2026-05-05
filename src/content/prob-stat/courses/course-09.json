@@ -1,0 +1,244 @@
+{
+  "meta": {
+    "id": "ps-c9",
+    "title": { "en": "Course 9: Randomized Algorithms and the Probabilistic Method", "ro": "Cursul 9: Algoritmi Randomizați și Metoda Probabilistică" },
+    "shortTitle": { "en": "C9: Randomized Algorithms", "ro": "C9: Algoritmi Randomizați" },
+    "source": { "en": "Prob & Stat — Lecture 9 slides (27 April 2026)", "ro": "Prob & Stat — Curs 9 (27 aprilie 2026)" }
+  },
+  "steps": [
+    {
+      "id": "ps-c9-intro",
+      "title": { "en": "Randomized Algorithms — Overview", "ro": "Algoritmi Randomizați — Prezentare generală" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A **randomized algorithm** uses random choices during execution. Two main types:\n- **Las Vegas:** always correct, but runtime is a random variable (e.g., randomized QuickSort).\n- **Monte Carlo:** always terminates in fixed time, but may give an incorrect answer with some probability (e.g., Freivalds' matrix multiplication check).\n\nRandomized algorithms can be simpler, faster, or more space-efficient than their deterministic counterparts.",
+            "ro": "Un **algoritm randomizat** folosește alegeri aleatoare în timpul execuției. Două tipuri principale:\n- **Las Vegas:** întotdeauna corect, dar timpul de execuție este o variabilă aleatoare (ex: QuickSort randomizat).\n- **Monte Carlo:** se termină întotdeauna în timp fix, dar poate da un răspuns incorect cu o anumită probabilitate (ex: verificarea înmulțirii matricelor a lui Freivalds).\n\nAlgoritmii randomizați pot fi mai simpli, mai rapizi sau mai eficienți din punct de vedere al spațiului față de variantele deterministe."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c9-randqs",
+      "title": { "en": "Randomized QuickSort", "ro": "QuickSort Randomizat" },
+      "group": "las-vegas",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Randomized QuickSort:** choose a pivot uniformly at random from the array, partition, recurse. Expected number of comparisons is $\\Theta(n \\log n)$ for any input — no adversarial worst case possible.\n\nKey analysis: let $X_{ij}$ = indicator that elements $z_i$ and $z_j$ (with $z_i < z_j$) are compared. $P(X_{ij} = 1) = \\dfrac{2}{j - i + 1}$. Thus $\\mathbb{E}[\\text{comparisons}] = \\sum_{i < j} \\dfrac{2}{j-i+1} = O(n \\log n)$.",
+            "ro": "**QuickSort Randomizat:** se alege un pivot uniform aleator din tablou, se partiționează, se recurge. Numărul așteptat de comparații este $\\Theta(n \\log n)$ pentru orice intrare — nu există un caz adversarial.\n\nAnaliza cheie: fie $X_{ij}$ = indicatorul că elementele $z_i$ și $z_j$ (cu $z_i < z_j$) sunt comparate. $P(X_{ij} = 1) = \\dfrac{2}{j - i + 1}$. Astfel $\\mathbb{E}[\\text{comparații}] = \\sum_{i < j} \\dfrac{2}{j-i+1} = O(n \\log n)$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Elements $z_i$ and $z_j$ are compared if and only if one of them is the first element chosen as pivot from the set $\\{z_i, z_{i+1}, \\ldots, z_j\\}$ — hence probability $2/(j-i+1)$.",
+            "ro": "Elementele $z_i$ și $z_j$ sunt comparate dacă și numai dacă unul dintre ele este primul element ales ca pivot din mulțimea $\\{z_i, z_{i+1}, \\ldots, z_j\\}$ — de unde probabilitatea $2/(j-i+1)$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c9-randmedian",
+      "title": { "en": "Randomized Median Selection", "ro": "Selecția Mediană Randomizată" },
+      "group": "las-vegas",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Problem:** find the median of $n$ elements. Deterministic: $O(n)$ (complex). Randomized approach: sample a random subset, use it to identify a small range containing the median, then scan. Expected comparisons: $\\approx 2n + o(n)$.\n\nAlternatively, repeatedly pick a random pivot; if rank is in the middle half, we are done. The expected number of rounds is $O(1)$ (geometric distribution with $p = 1/2$).",
+            "ro": "**Problemă:** găsiți mediana a $n$ elemente. Determinist: $O(n)$ (complex). Abordare randomizată: eșantionați un subset aleator, folosiți-l pentru a identifica un interval mic care conține mediana, apoi scanați. Comparații așteptate: $\\approx 2n + o(n)$.\n\nAlternativ, alegeți repetat un pivot aleator; dacă rangul este în jumătatea mediană, suntem gata. Numărul așteptat de runde este $O(1)$ (distribuție geometrică cu $p = 1/2$)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c9-monte-carlo-algs",
+      "title": { "en": "Monte Carlo Algorithms", "ro": "Algoritmi Monte Carlo" },
+      "group": "monte-carlo",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Freivalds' Matrix Multiplication Check:** Given matrices $A, B, C$ ($n \\times n$), verify $AB = C$ without multiplying. Pick $r \\in \\{0,1\\}^n$ uniformly at random; compute $ABr$ (two matrix-vector products: $O(n^2)$) and $Cr$; check equality. If $AB \\neq C$: $P(ABr = Cr) \\leq 1/2$. Repeat $k$ times to get error probability $\\leq 2^{-k}$. Runs in $O(kn^2)$ vs. $O(n^3)$ for full multiplication.",
+            "ro": "**Verificarea înmulțirii matricelor (Freivalds):** Date matricele $A, B, C$ ($n \\times n$), verificați $AB = C$ fără a înmulți. Alegeți $r \\in \\{0,1\\}^n$ uniform aleator; calculați $ABr$ (două produse matrice-vector: $O(n^2)$) și $Cr$; verificați egalitatea. Dacă $AB \\neq C$: $P(ABr = Cr) \\leq 1/2$. Repetați de $k$ ori pentru probabilitate de eroare $\\leq 2^{-k}$. Rulează în $O(kn^2)$ față de $O(n^3)$ pentru înmulțire completă."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Karger's Min-Cut Algorithm", "ro": "Algoritmul de tăietură minimă Karger" },
+          "content": {
+            "en": "For a graph $G$ with $n$ vertices: randomly contract edges (merge endpoints) until 2 vertices remain; the remaining edges form a cut. The probability that a specific min-cut (of size $k$) survives is $\\geq \\binom{n}{2}^{-1}$. Repeating $\\Theta(n^2 \\log n)$ times finds the min-cut with high probability. Runs in $O(n^2 \\log^3 n)$.",
+            "ro": "Pentru un graf $G$ cu $n$ vârfuri: contractați aleator muchii (uniți capetele) până rămân 2 vârfuri; muchiile rămase formează o tăietură. Probabilitatea că o tăietură minimă specifică (de dimensiune $k$) supraviețuiește este $\\geq \\binom{n}{2}^{-1}$. Repetând de $\\Theta(n^2 \\log n)$ ori se găsește tăietura minimă cu probabilitate mare. Rulează în $O(n^2 \\log^3 n)$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c9-prob-method",
+      "title": { "en": "The Probabilistic Method", "ro": "Metoda Probabilistică" },
+      "group": "prob-method",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "The Probabilistic Method", "ro": "Metoda Probabilistică" },
+          "content": {
+            "en": "A non-constructive proof technique: to show that an object with some property exists, define a probability space over candidate objects and show the probability of the property is $> 0$. If $P(\\text{property}) > 0$, then at least one object with the property must exist.",
+            "ro": "O tehnică de demonstrație neconstructivă: pentru a arăta că există un obiect cu o anumită proprietate, se definește un spațiu de probabilitate peste obiectele candidate și se arată că probabilitatea proprietății este $> 0$. Dacă $P(\\text{proprietate}) > 0$, atunci trebuie să existe cel puțin un obiect cu proprietatea."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Theorem 4.1 (MAX-SAT lower bound):** For a formula with $m$ clauses, there exists a truth assignment satisfying at least $m/2$ clauses.\n\n**Proof:** Assign each Boolean variable independently to 1 (true) or 0 (false) with probability $1/2$. Let $X_i = 1$ if clause $C_i$ is satisfied. For a clause with $|C_i|$ literals, $P(X_i = 1) = 1 - 2^{-|C_i|} \\geq 1/2$. By linearity: $\\mathbb{E}[X] = \\sum \\mathbb{E}[X_i] \\geq m/2$. Since expected $\\geq m/2$, some assignment achieves $\\geq m/2$.",
+            "ro": "**Teorema 4.1 (limită inferioară MAX-SAT):** Pentru o formulă cu $m$ clauze, există o atribuire de adevăr care satisface cel puțin $m/2$ clauze.\n\n**Demonstrație:** Atribuim fiecărei variabile booleene independent valoarea 1 (adevărat) sau 0 (fals) cu probabilitatea $1/2$. Fie $X_i = 1$ dacă clauza $C_i$ este satisfăcută. Pentru o clauză cu $|C_i|$ literali, $P(X_i = 1) = 1 - 2^{-|C_i|} \\geq 1/2$. Prin liniaritate: $\\mathbb{E}[X] = \\sum \\mathbb{E}[X_i] \\geq m/2$. Deoarece valoarea așteptată $\\geq m/2$, există o atribuire care realizează $\\geq m/2$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Corollary 4.1 (k-SAT satisfiability):** Any instance of k-SAT with fewer than $2^k$ clauses is satisfiable. **Proof:** With $|C_i| = k$ for all clauses, $\\mathbb{E}[X] = m(1 - 2^{-k}) > m - 1$, so $P\\{X \\geq m\\} > 0$ — some assignment satisfies all $m$ clauses.\n\n**Proposition 4.2:** A clause family $\\mathcal{F} = \\{C_1, \\ldots, C_m\\}$ is satisfiable if $\\sum_{i=1}^m 2^{-|C_i|} < 1$.",
+            "ro": "**Corolarul 4.1 (satisfiabilitate k-SAT):** Orice instanță a problemei k-SAT cu mai puțin de $2^k$ clauze este satisfiabilă. **Demonstrație:** Cu $|C_i| = k$ pentru toate clauzeele, $\\mathbb{E}[X] = m(1 - 2^{-k}) > m - 1$, deci $P\\{X \\geq m\\} > 0$ — există o atribuire care satisface toate $m$ clauze.\n\n**Propoziția 4.2:** O familie de clauze $\\mathcal{F} = \\{C_1, \\ldots, C_m\\}$ este satisfiabilă dacă $\\sum_{i=1}^m 2^{-|C_i|} < 1$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c9-quiz",
+      "title": { "en": "Self-Test Quiz", "ro": "Test de Autoevaluare" },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What distinguishes a Las Vegas algorithm from a Monte Carlo algorithm?",
+                "ro": "Ce deosebește un algoritm Las Vegas de un algoritm Monte Carlo?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Las Vegas always returns the correct answer; Monte Carlo may be wrong with some probability", "ro": "Las Vegas returnează întotdeauna răspunsul corect; Monte Carlo poate fi greșit cu o anumită probabilitate" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Las Vegas algorithms are always correct but have random runtime. Monte Carlo algorithms always terminate in fixed time but may give wrong answers.",
+                    "ro": "Corect. Algoritmii Las Vegas sunt întotdeauna corecți dar au timp de rulare aleator. Algoritmii Monte Carlo se termină întotdeauna în timp fix dar pot da răspunsuri greșite."
+                  }
+                },
+                {
+                  "text": { "en": "Monte Carlo always returns the correct answer; Las Vegas may be wrong", "ro": "Monte Carlo returnează întotdeauna răspunsul corect; Las Vegas poate fi greșit" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. This is reversed. Monte Carlo = fixed time but possibly wrong. Las Vegas = always correct but random time.",
+                    "ro": "Incorect. Aceasta este inversat. Monte Carlo = timp fix dar posibil greșit. Las Vegas = întotdeauna corect dar timp aleator."
+                  }
+                },
+                {
+                  "text": { "en": "Las Vegas uses Monte Carlo simulation internally", "ro": "Las Vegas folosește simularea Monte Carlo intern" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. These are two independent classification categories for randomized algorithms based on correctness vs. runtime guarantees.",
+                    "ro": "Incorect. Acestea sunt două categorii independente de clasificare pentru algoritmii randomizați bazate pe garanții de corectitudine vs. timp de rulare."
+                  }
+                },
+                {
+                  "text": { "en": "Both always terminate in $O(n \\log n)$ expected time", "ro": "Ambii se termină întotdeauna în $O(n \\log n)$ timp așteptat" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Runtime bounds vary per algorithm. Monte Carlo terminates in fixed (deterministic) time; Las Vegas has a random runtime.",
+                    "ro": "Incorect. Limitele de timp variază per algoritm. Monte Carlo se termină în timp fix (determinist); Las Vegas are un timp de rulare aleator."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "In Freivalds' algorithm to check if $AB = C$, what is the probability of a false positive (incorrectly concluding $AB = C$) per round?",
+                "ro": "În algoritmul lui Freivalds pentru a verifica dacă $AB = C$, care este probabilitatea unui fals pozitiv (concluzie incorectă că $AB = C$) per rundă?"
+              },
+              "options": [
+                {
+                  "text": { "en": "At most $1/2$", "ro": "Cel mult $1/2$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. If $AB \\neq C$, then $P(ABr = Cr) \\leq 1/2$. After $k$ independent rounds, the error probability drops to $2^{-k}$.",
+                    "ro": "Corect. Dacă $AB \\neq C$, atunci $P(ABr = Cr) \\leq 1/2$. După $k$ runde independente, probabilitatea de eroare scade la $2^{-k}$."
+                  }
+                },
+                {
+                  "text": { "en": "Exactly $1/n$", "ro": "Exact $1/n$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The bound is $1/2$ per round, independent of $n$. The $1/n$ bound requires amplification over $O(\\log n)$ rounds.",
+                    "ro": "Incorect. Limita este $1/2$ per rundă, independent de $n$. Limita $1/n$ necesită amplificare pe $O(\\log n)$ runde."
+                  }
+                },
+                {
+                  "text": { "en": "0 — the algorithm never makes a mistake", "ro": "0 — algoritmul nu face niciodată greșeli" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Freivalds is a Monte Carlo algorithm — it can make errors. Per round, $P(\\text{false positive}) \\leq 1/2$.",
+                    "ro": "Incorect. Freivalds este un algoritm Monte Carlo — poate face erori. Per rundă, $P(\\text{fals pozitiv}) \\leq 1/2$."
+                  }
+                },
+                {
+                  "text": { "en": "At most $1/n^2$", "ro": "Cel mult $1/n^2$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The single-round bound is $1/2$. To get $1/n^2$ error probability, you need $2 \\log_2 n$ repeated rounds.",
+                    "ro": "Incorect. Limita per rundă este $1/2$. Pentru probabilitate de eroare $1/n^2$, sunt necesare $2 \\log_2 n$ runde repetate."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "By the probabilistic method (Theorem 4.1), any CNF formula with $m$ clauses has a truth assignment satisfying at least how many clauses?",
+                "ro": "Prin metoda probabilistică (Teorema 4.1), orice formulă CNF cu $m$ clauze are o atribuire de adevăr care satisface cel puțin câte clauze?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$m/4$", "ro": "$m/4$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The bound is $m/2$. Each clause has probability $\\geq 1 - 2^{-|C_i|} \\geq 1/2$ of being satisfied, giving $\\mathbb{E}[X] \\geq m/2$.",
+                    "ro": "Incorect. Limita este $m/2$. Fiecare clauză are probabilitate $\\geq 1 - 2^{-|C_i|} \\geq 1/2$ de a fi satisfăcută, dând $\\mathbb{E}[X] \\geq m/2$."
+                  }
+                },
+                {
+                  "text": { "en": "$m/2$", "ro": "$m/2$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Each clause $C_i$ with $|C_i| \\geq 1$ literals is satisfied with probability $\\geq 1/2$ under a random uniform assignment. By linearity of expectation, $\\mathbb{E}[\\text{satisfied clauses}] \\geq m/2$.",
+                    "ro": "Corect. Fiecare clauză $C_i$ cu $|C_i| \\geq 1$ literali este satisfăcută cu probabilitate $\\geq 1/2$ sub o atribuire uniform aleatoare. Prin liniaritatea valorii așteptate, $\\mathbb{E}[\\text{clauze satisfăcute}] \\geq m/2$."
+                  }
+                },
+                {
+                  "text": { "en": "$m - 1$", "ro": "$m - 1$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. $m - 1$ would require almost all clauses to be satisfied, which is not guaranteed. The probabilistic method gives $m/2$ as a lower bound.",
+                    "ro": "Incorect. $m - 1$ ar necesita satisfacerea aproape tuturor clauzeelor, ceea ce nu este garantat. Metoda probabilistică dă $m/2$ ca limită inferioară."
+                  }
+                },
+                {
+                  "text": { "en": "$2^m$", "ro": "$2^m$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. $2^m$ is larger than $m$ for $m \\geq 2$, so it cannot be the number of satisfied clauses. The correct bound is $m/2$.",
+                    "ro": "Incorect. $2^m$ este mai mare decât $m$ pentru $m \\geq 2$, deci nu poate fi numărul de clauze satisfăcute. Limita corectă este $m/2$."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

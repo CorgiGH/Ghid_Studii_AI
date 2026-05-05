@@ -1,0 +1,301 @@
+{
+  "meta": {
+    "id": "ps-c8",
+    "title": { "en": "Course 8: Monte Carlo Simulation Methods", "ro": "Cursul 8: Metode de Simulare Monte Carlo" },
+    "shortTitle": { "en": "C8: Monte Carlo", "ro": "C8: Monte Carlo" },
+    "source": { "en": "Prob & Stat — Lecture 8 slides (20 April 2026)", "ro": "Prob & Stat — Curs 8 (20 aprilie 2026)" }
+  },
+  "steps": [
+    {
+      "id": "ps-c8-mc-intro",
+      "title": { "en": "Introduction to Monte Carlo Methods", "ro": "Introducere în Metodele Monte Carlo" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Monte Carlo Method", "ro": "Metodă Monte Carlo" },
+          "content": {
+            "en": "Any method that solves a problem by generating specific random values and observing the fraction of those values that have a certain property. Useful for numerical approximations of analytically intractable problems. A value of a random variable (or of a density) is called a **quantile** or **random value** (in English: *variate*).",
+            "ro": "Orice metodă care rezolvă o problemă prin generarea unor valori aleatoare specifice și observând fracțiunea acestor valori care au o anumită proprietate. Utilă pentru aproximații numerice ale problemelor intractabile analitic. O valoare a unei variabile aleatoare (sau care urmează o densitate) se numește **cuantilă** sau **valoare aleatoare** (în engleză: *variate*)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "A Monte Carlo method generates many (sometimes millions) random values associated with a probability distribution, and this process is called **simulating** that distribution. Quality depends on the random number generator — the best pseudo-random generator is the **Mersenne Twister** (default in R). All MC methods ultimately rely on a uniform generator $U(0,1)$.",
+            "ro": "O metodă Monte Carlo generează foarte multe (câteodată milioane) valori aleatoare asociate unei distribuții de probabilitate, iar acest proces se numește **simularea** acelei distribuții. Calitatea depinde de generatorul de numere aleatoare — cel mai bun generator pseudo-aleator este **Mersenne Twister** (implicit în R). Toate metodele MC se bazează în final pe un generator uniform $U(0,1)$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c8-mc-mean",
+      "title": { "en": "Estimating the Mean by Monte Carlo", "ro": "Estimarea Mediei cu Metoda Monte Carlo" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "To estimate $\\mu = \\mathbb{E}[X]$: generate a Monte Carlo sequence $X_1, X_2, \\ldots, X_N$ from the distribution of $X$ (i.i.d. copies). An **unbiased estimator** for $\\mu$ is $\\bar{X} = (X_1 + \\ldots + X_N)/N$, since $\\mathbb{E}[\\bar{X}] = \\mu$. If $\\text{Var}[X] = \\sigma^2$ then $\\text{Var}[\\bar{X}] = \\sigma^2/N \\to 0$ as $N \\to \\infty$.",
+            "ro": "Pentru a estima $\\mu = \\mathbb{E}[X]$: se generează un șir Monte Carlo $X_1, X_2, \\ldots, X_N$ din distribuția lui $X$ (copii i.i.d.). Un **estimator nedeplasat** pentru $\\mu$ este $\\bar{X} = (X_1 + \\ldots + X_N)/N$, deoarece $\\mathbb{E}[\\bar{X}] = \\mu$. Dacă $\\text{Var}[X] = \\sigma^2$ atunci $\\text{Var}[\\bar{X}] = \\sigma^2/N \\to 0$ când $N \\to \\infty$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Example:** A vendor sells a perishable product (100 units/day, profit 55¢/unit sold, loss 40¢/unit unsold). Daily demand $X \\sim U[80, 140]$. Profit $P = 55$ if $X \\geq 100$, else $P = 0.55X - 0.4(100-X)$. Five independent MC runs with $N=10000$ give: $51.78, 51.83, 51.87, 51.84, 51.89$. Exact mean = $51.833\\overline{3}$.",
+            "ro": "**Exemplu:** Un vânzător comercializează un produs perisabil (100 unități/zi, profit 55¢/unitate vândută, pierdere 40¢/unitate nevândută). Cererea zilnică $X \\sim U[80, 140]$. Profitul $P = 55$ dacă $X \\geq 100$, altfel $P = 0.55X - 0.4(100-X)$. Cinci rulări MC independente cu $N=10000$ dau: $51.78, 51.83, 51.87, 51.84, 51.89$. Media exactă = $51.833\\overline{3}$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c8-mc-lengths-areas",
+      "title": { "en": "Estimating Lengths, Areas, and Volumes", "ro": "Estimarea Lungimilor, Ariilor și Volumelor" },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Estimating lengths (1D):** Let $U \\sim U(0,1)$ and $A \\subseteq [0,1]$. Then $P(U \\in A) = $ length of $A$. Generate $N$ uniform points; the proportion in $A$ estimates its length.\n\n**Estimating areas (2D):** For $B \\subseteq [a_1,b_1] \\times [a_2,b_2]$, generate $N$ uniform pairs $(U_i, V_i)$; let $N_B$ = count in $B$. Estimate = $(b_1-a_1)(b_2-a_2) \\cdot N_B/N$.\n\n**Estimating volumes (3D):** Extend similarly — generate $N$ uniform triples; estimate = $(b_1-a_1)(b_2-a_2)(b_3-a_3) \\cdot N_C/N$.",
+            "ro": "**Estimarea lungimilor (1D):** Fie $U \\sim U(0,1)$ și $A \\subseteq [0,1]$. Atunci $P(U \\in A) = $ lungimea lui $A$. Se generează $N$ puncte uniforme; proporția din $A$ estimează lungimea.\n\n**Estimarea ariilor (2D):** Pentru $B \\subseteq [a_1,b_1] \\times [a_2,b_2]$, se generează $N$ perechi uniforme $(U_i, V_i)$; fie $N_B$ = numărul din $B$. Estimare = $(b_1-a_1)(b_2-a_2) \\cdot N_B/N$.\n\n**Estimarea volumelor (3D):** Se extinde similar — se generează $N$ triplete uniforme; estimare = $(b_1-a_1)(b_2-a_2)(b_3-a_3) \\cdot N_C/N$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Area examples:** Unit disk $B = \\{(u,v): u^2+v^2 \\leq 1\\} \\subseteq [-1,1]^2$. With $N=10000$ points in $[-1,1]^2$, estimate $\\approx 3.1368$ (true value $\\pi \\approx 3.14159$). Ellipse $a=4, b=3$: estimate $\\approx 37.4528$ (true $\\pi ab = 12\\pi \\approx 37.699$).",
+            "ro": "**Exemple de arii:** Discul unitate $B = \\{(u,v): u^2+v^2 \\leq 1\\} \\subseteq [-1,1]^2$. Cu $N=10000$ puncte în $[-1,1]^2$, estimare $\\approx 3.1368$ (valoare reală $\\pi \\approx 3.14159$). Elipsă $a=4, b=3$: estimare $\\approx 37.4528$ (reală $\\pi ab = 12\\pi \\approx 37.699$)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Curse of dimensionality:** As the number of dimensions increases, we need exponentially more random values to approximate well. A unit ball in 8D has volume $\\pi^4/24 \\approx 4.0587$. With $N=1000$ runs, estimates vary wildly (2.8 to 4.9); with $N=100000$, estimates converge to $\\approx 4.036$.",
+            "ro": "**Blestemul dimensionalității:** Pe măsură ce numărul de dimensiuni crește, avem nevoie de exponențial mai multe valori aleatoare pentru a aproxima bine. O bilă unitară în 8D are volumul $\\pi^4/24 \\approx 4.0587$. Cu $N=1000$ rulări, estimările variază mult (2.8 la 4.9); cu $N=100000$, estimările converg la $\\approx 4.036$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c8-mc-integration",
+      "title": { "en": "Monte Carlo Integration", "ro": "Integrarea Monte Carlo" },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Monte Carlo Integration", "ro": "Integrarea Monte Carlo" },
+          "content": {
+            "en": "To compute $H = \\int_a^b h(u)\\,du$, note that lengths, areas, and volumes are special cases of definite integrals. Generate $U_1, \\ldots, U_N \\sim U(a,b)$. The Monte Carlo estimator is $F_N = \\dfrac{b-a}{N} \\sum_{i=1}^N h(U_i)$. This works because $\\mathbb{E}[h(U)] = \\dfrac{1}{b-a} \\int_a^b h(u)\\,du = \\dfrac{H}{b-a}$.",
+            "ro": "Pentru a calcula $H = \\int_a^b h(u)\\,du$, observăm că lungimile, ariile și volumele sunt cazuri speciale de integrale definite. Se generează $U_1, \\ldots, U_N \\sim U(a,b)$. Estimatorul Monte Carlo este $F_N = \\dfrac{b-a}{N} \\sum_{i=1}^N h(U_i)$. Aceasta funcționează deoarece $\\mathbb{E}[h(U)] = \\dfrac{1}{b-a} \\int_a^b h(u)\\,du = \\dfrac{H}{b-a}$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Unknown frontiers:** For MC area/volume estimation, we do NOT need to know the boundary of the region analytically — we only need a membership test (can we check if a point belongs to the region?). This makes MC uniquely powerful for regions defined by measurements or sensor data.",
+            "ro": "**Frontiere necunoscute:** Pentru estimarea MC a ariei/volumului, NU trebuie să cunoaștem frontiera regiunii analitic — avem nevoie doar de un test de apartenență (putem verifica dacă un punct aparține regiunii?). Aceasta face MC unic de puternic pentru regiuni definite prin măsurători sau date senzoriale."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c8-mc-probability",
+      "title": { "en": "Estimating Probabilities by Monte Carlo", "ro": "Estimarea Probabilităților cu Monte Carlo" },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "To estimate $P(E)$ for event $E$: generate $N$ random outcomes; count $N_E$ outcomes where $E$ occurs. Estimator: $\\hat{P}(E) = N_E/N$. This is a special case of mean estimation with $X = \\mathbf{1}_E$ (indicator), $\\mathbb{E}[X] = P(E)$.",
+            "ro": "Pentru a estima $P(E)$ pentru evenimentul $E$: se generează $N$ rezultate aleatoare; se numără $N_E$ rezultate unde $E$ are loc. Estimator: $\\hat{P}(E) = N_E/N$. Acesta este un caz special al estimării mediei cu $X = \\mathbf{1}_E$ (indicator), $\\mathbb{E}[X] = P(E)$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Server example:** 250 independent users each launch $X \\sim B(250, 0.3)$ active jobs. Each active user $i$ launches $Y_i \\sim G(0.15)$ jobs, each taking $\\Gamma(10,3)$ minutes. Three independent MC estimates for total server use time: $1494.9$, $1492.2$, $1489.7$ minutes — just under 24 hours (1440 min).",
+            "ro": "**Exemplu server:** 250 de utilizatori independenți, fiecare lansează $X \\sim B(250, 0.3)$ job-uri active. Fiecare utilizator activ $i$ lansează $Y_i \\sim G(0.15)$ job-uri, fiecare necesitând $\\Gamma(10,3)$ minute. Trei estimări MC independente pentru timpul total de utilizare server: $1494.9$, $1492.2$, $1489.7$ minute — puțin sub 24 de ore (1440 min)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c8-quiz",
+      "title": { "en": "Self-Test Quiz", "ro": "Test de Autoevaluare" },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "The Monte Carlo estimator for $\\mathbb{E}[X]$ is $\\bar{X} = (X_1 + \\ldots + X_N)/N$ where $X_i$ are i.i.d. copies of $X$. What happens to $\\text{Var}[\\bar{X}]$ as $N$ increases?",
+                "ro": "Estimatorul Monte Carlo pentru $\\mathbb{E}[X]$ este $\\bar{X} = (X_1 + \\ldots + X_N)/N$ unde $X_i$ sunt copii i.i.d. ale lui $X$. Ce se întâmplă cu $\\text{Var}[\\bar{X}]$ pe măsură ce $N$ crește?"
+              },
+              "options": [
+                {
+                  "text": { "en": "It stays constant at $\\sigma^2$", "ro": "Rămâne constantă la $\\sigma^2$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. $\\text{Var}[\\bar{X}] = \\sigma^2/N$, which shrinks as $N$ grows — this is why more simulations give better estimates.",
+                    "ro": "Incorect. $\\text{Var}[\\bar{X}] = \\sigma^2/N$, care scade pe măsură ce $N$ crește — de aceea mai multe simulări dau estimări mai bune."
+                  }
+                },
+                {
+                  "text": { "en": "It decreases as $\\sigma^2/N$", "ro": "Scade ca $\\sigma^2/N$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $\\text{Var}[\\bar{X}] = \\text{Var}[X_1+\\ldots+X_N]/N^2 = N\\sigma^2/N^2 = \\sigma^2/N \\to 0$ as $N \\to \\infty$.",
+                    "ro": "Corect. $\\text{Var}[\\bar{X}] = \\text{Var}[X_1+\\ldots+X_N]/N^2 = N\\sigma^2/N^2 = \\sigma^2/N \\to 0$ când $N \\to \\infty$."
+                  }
+                },
+                {
+                  "text": { "en": "It increases as $N\\sigma^2$", "ro": "Crește ca $N\\sigma^2$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The variance of the SUM $\\sum X_i$ grows as $N\\sigma^2$, but we divide by $N$, so the variance of the MEAN is $\\sigma^2/N$.",
+                    "ro": "Incorect. Dispersia SUMEI $\\sum X_i$ crește ca $N\\sigma^2$, dar împărțim la $N$, deci dispersia MEDIEI este $\\sigma^2/N$."
+                  }
+                },
+                {
+                  "text": { "en": "It converges to the mean $\\mu$", "ro": "Converge la media $\\mu$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The ESTIMATOR $\\bar{X}$ converges to $\\mu$ (by LLN), but the variance of $\\bar{X}$ converges to 0, not to $\\mu$.",
+                    "ro": "Incorect. ESTIMATORUL $\\bar{X}$ converge la $\\mu$ (prin LNM), dar dispersia lui $\\bar{X}$ converge la 0, nu la $\\mu$."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "To estimate the area of a 2D region $B \\subseteq [0,1]^2$ by MC, we generate $N$ uniform points and count $N_B$ in $B$. What is the estimator?",
+                "ro": "Pentru a estima aria unei regiuni 2D $B \\subseteq [0,1]^2$ prin MC, generăm $N$ puncte uniforme și numărăm $N_B$ în $B$. Care este estimatorul?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$N_B \\cdot N$", "ro": "$N_B \\cdot N$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. This would grow unboundedly with $N$. The area should be between 0 and 1.",
+                    "ro": "Incorect. Aceasta ar crește nemărginit cu $N$. Aria ar trebui să fie între 0 și 1."
+                  }
+                },
+                {
+                  "text": { "en": "$N_B / N$", "ro": "$N_B / N$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Since $[0,1]^2$ has area 1, the proportion $N_B/N$ directly estimates the area of $B$. For general rectangles, multiply by the rectangle area.",
+                    "ro": "Corect. Deoarece $[0,1]^2$ are aria 1, proporția $N_B/N$ estimează direct aria lui $B$. Pentru dreptunghiuri generale, se înmulțește cu aria dreptunghiului."
+                  }
+                },
+                {
+                  "text": { "en": "$\\sqrt{N_B / N}$", "ro": "$\\sqrt{N_B / N}$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Square roots appear in standard deviation calculations, not in area estimators.",
+                    "ro": "Incorect. Rădăcinile pătrate apar în calculele deviației standard, nu în estimatoarele de arie."
+                  }
+                },
+                {
+                  "text": { "en": "$N / N_B$", "ro": "$N / N_B$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. This is inverted — it would give values $\\geq 1$, not a fraction of the unit square.",
+                    "ro": "Incorect. Aceasta este inversată — ar da valori $\\geq 1$, nu o fracție din pătratul unitate."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "Which property makes MC methods applicable to regions with **unknown analytical boundaries**?",
+                "ro": "Care proprietate face metodele MC aplicabile regiunilor cu **frontiere analitice necunoscute**?"
+              },
+              "options": [
+                {
+                  "text": { "en": "We only need to know the centroid of the region", "ro": "Trebuie să cunoaștem doar centrul de greutate al regiunii" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The centroid is not required. MC only needs a membership test — can we tell if a point is inside the region?",
+                    "ro": "Incorect. Centrul de greutate nu este necesar. MC necesită doar un test de apartenență — putem determina dacă un punct este în interiorul regiunii?"
+                  }
+                },
+                {
+                  "text": { "en": "We only need a membership test (check if a point belongs to the region)", "ro": "Avem nevoie doar de un test de apartenență (verificare dacă un punct aparține regiunii)" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. MC is powerful precisely because it only requires evaluating whether each random point is inside the region — no analytical boundary needed.",
+                    "ro": "Corect. MC este puternic tocmai pentru că necesită doar evaluarea dacă fiecare punct aleator este în interiorul regiunii — nu este nevoie de frontiera analitică."
+                  }
+                },
+                {
+                  "text": { "en": "The region must be convex", "ro": "Regiunea trebuie să fie convexă" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. MC works for any shape — convex, concave, disconnected — as long as we can test membership.",
+                    "ro": "Incorect. MC funcționează pentru orice formă — convexă, concavă, deconectată — atâta timp cât putem testa apartenența."
+                  }
+                },
+                {
+                  "text": { "en": "The boundary must be described by a polynomial", "ro": "Frontiera trebuie descrisă printr-un polinom" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. No polynomial or any specific formula is needed. Membership can be determined by sensors, measurements, or any computational test.",
+                    "ro": "Incorect. Nu este nevoie de un polinom sau de nicio formulă specifică. Apartenența poate fi determinată prin senzori, măsurători sau orice test computațional."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "As the number of dimensions $d$ increases in a MC volume estimation, what happens to the accuracy for a fixed $N$?",
+                "ro": "Pe măsură ce numărul de dimensiuni $d$ crește într-o estimare MC a volumului, ce se întâmplă cu precizia pentru un $N$ fix?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Accuracy improves because more coordinates are sampled", "ro": "Precizia crește deoarece sunt eșantionate mai multe coordonate" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. More dimensions actually hurt accuracy for fixed $N$. The volume of the unit ball shrinks rapidly with dimension, so most random points fall outside it.",
+                    "ro": "Incorect. Mai multe dimensiuni scad de fapt precizia pentru $N$ fix. Volumul bilei unitate scade rapid cu dimensiunea, deci cele mai multe puncte aleatoare cad în afara ei."
+                  }
+                },
+                {
+                  "text": { "en": "Accuracy stays the same", "ro": "Precizia rămâne aceeași" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. This is the curse of dimensionality — accuracy degrades as dimension grows, requiring exponentially more samples.",
+                    "ro": "Incorect. Acesta este blestemul dimensionalității — precizia scade pe măsură ce dimensiunea crește, necesitând exponențial mai multe eșantioane."
+                  }
+                },
+                {
+                  "text": { "en": "Accuracy decreases — this is the curse of dimensionality", "ro": "Precizia scade — acesta este blestemul dimensionalității" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. As dimension grows, we need exponentially more samples to achieve the same accuracy. This is the 'curse of dimensionality' — evident when estimating the unit ball volume in 8D.",
+                    "ro": "Corect. Pe măsură ce dimensiunea crește, avem nevoie de exponențial mai multe eșantioane pentru aceeași precizie. Acesta este 'blestemul dimensionalității' — evident la estimarea volumului bilei unitate în 8D."
+                  }
+                },
+                {
+                  "text": { "en": "Accuracy depends only on $N$, not on dimension", "ro": "Precizia depinde doar de $N$, nu de dimensiune" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Both $N$ and the dimension $d$ affect accuracy. Higher $d$ for fixed $N$ means fewer points actually land in the target region, worsening the estimate.",
+                    "ro": "Incorect. Atât $N$ cât și dimensiunea $d$ afectează precizia. Un $d$ mai mare pentru $N$ fix înseamnă că mai puține puncte ajung în regiunea țintă, înrăutățind estimarea."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
