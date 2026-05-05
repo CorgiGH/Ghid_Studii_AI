@@ -1,0 +1,227 @@
+{
+  "meta": {
+    "id": "rc-c3",
+    "title": { "en": "RC Course 3: Advanced Socket Patterns (Concurrent Servers, select, UDP)", "ro": "RC Cursul 3: Tipare avansate de socket-uri (Servere concurente, select, UDP)" },
+    "shortTitle": { "en": "RC C3: Concurrent & UDP", "ro": "RC C3: Concurenta & UDP" },
+    "source": { "en": "Prof. UAIC — RC Lecture 3", "ro": "Prof. UAIC — RC Curs 3" }
+  },
+  "steps": [
+    {
+      "id": "rc-c3-iterative-vs-concurrent",
+      "title": { "en": "Iterative vs Concurrent Server Models", "ro": "Modele de server iterativ vs. concurent" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "An iterative TCP server handles one client at a time. Client A connects, sends a large file (takes 30 seconds), then disconnects. Client B waits the entire 30 seconds before being served. How would you fix this for a real-world server?",
+            "ro": "Un server TCP iterativ gestioneaza un client la un moment dat. Clientul A se conecteaza, trimite un fisier mare (dureaza 30 secunde), apoi se deconecteaza. Clientul B asteapta toate cele 30 de secunde inainte de a fi servit. Cum ai rezolva aceasta pentru un server din lumea reala?"
+          },
+          "answer": {
+            "en": "Three main approaches: (1) **fork() per client** — spawn a child process for each connection (handles isolation but expensive), (2) **thread per client** — spawn a thread per connection (cheaper than fork, shared memory), (3) **I/O multiplexing with select()/epoll()** — single process monitors many fds and handles whichever is ready (most scalable, used in nginx/Redis).",
+            "ro": "Trei abordari principale: (1) **fork() per client** — lanseaza un proces copil pentru fiecare conexiune (ofera izolare dar este costisitor), (2) **thread per client** — lanseaza un thread per conexiune (mai ieftin decat fork, memorie partajata), (3) **multiplexare I/O cu select()/epoll()** — un singur proces monitorizeaza multi fd-i si gestioneaza oricare este gata (cel mai scalabil, folosit in nginx/Redis)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Iterative server**: handles one client completely before calling `accept()` again. Simple but blocks all other clients during processing. Suitable only for very fast requests.\n\n**Concurrent server (fork-based)**: after `accept()`, calls `fork()`. The **child** handles the client (closes the listening socket, does read/write, then exits). The **parent** closes the connected socket and immediately calls `accept()` again.\n\nCritical: parent must close `connfd` after fork, and child must close `listenfd` after fork — both must close the fd they don't own to prevent descriptor leaks and ensure proper connection teardown.",
+            "ro": "**Server iterativ**: gestioneaza complet un client inainte de a apela `accept()` din nou. Simplu dar blocheaza toti ceilalti clienti in timpul procesarii. Potrivit doar pentru cereri foarte rapide.\n\n**Server concurent (bazat pe fork)**: dupa `accept()`, apeleaza `fork()`. **Copilul** gestioneaza clientul (inchide socket-ul de ascultare, face read/write, apoi iese). **Parintele** inchide socket-ul conectat si imediat apeleaza `accept()` din nou.\n\nCritic: parintele trebuie sa inchida `connfd` dupa fork, si copilul trebuie sa inchida `listenfd` dupa fork — ambii trebuie sa inchida fd-ul pe care nu il detin pentru a preveni scurgerile de descriptori si a asigura inchiderea corespunzatoare a conexiunii."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Concurrent TCP server using fork()\n// Each client gets its own child process\n\nwhile (1) {\n    // Accept new client connection\n    connfd = accept(listenfd, (struct sockaddr*)&cliaddr, &clilen);\n    if (connfd < 0) {\n        if (errno == EINTR) continue;  // Interrupted by signal, retry\n        perror(\"accept\"); break;\n    }\n\n    pid_t pid = fork();\n    if (pid < 0) {\n        perror(\"fork\");\n        close(connfd);\n        continue;\n    }\n\n    if (pid == 0) {\n        // CHILD: handle this client\n        close(listenfd);  // Child does not need the listening socket\n\n        serve_client(connfd);  // Exchange data with client\n\n        close(connfd);\n        exit(0);  // Child exits when done\n\n    } else {\n        // PARENT: go back to accepting\n        close(connfd);  // Parent gives up this connection (child owns it)\n        // Reap zombie children (simplified)\n        waitpid(-1, NULL, WNOHANG);\n    }\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Zombie processes!** When a child exits, it becomes a zombie until the parent calls `wait()`/`waitpid()`. In a server that forks per client, always reap children: use `waitpid(-1, NULL, WNOHANG)` in the parent's accept loop, or install a `SIGCHLD` handler that calls `waitpid()`. Never use blocking `wait()` in the accept loop — it would block the parent from accepting new clients.",
+            "ro": "**Procese zombie!** Cand un copil iese, devine zombie pana cand parintele apeleaza `wait()`/`waitpid()`. Intr-un server care face fork per client, recolta intotdeauna copiii: foloseste `waitpid(-1, NULL, WNOHANG)` in bucla de accept a parintelui, sau instaleaza un handler `SIGCHLD` care apeleaza `waitpid()`. Nu folosi niciodata `wait()` blocant in bucla de accept — ar bloca parintele sa accepte noi clienti."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "In a fork-based concurrent server, why must the parent close(connfd) after fork()?", "ro": "Intr-un server concurent bazat pe fork, de ce trebuie parintele sa close(connfd) dupa fork()?" },
+              "options": [
+                { "text": { "en": "To save memory", "ro": "Pentru a economisi memorie" }, "correct": false, "explanation": { "en": "Memory is not the primary reason. Each fd takes minimal memory. The real issue is reference counting — closing the parent's copy decrements the reference count so the connection can properly terminate when the child closes.", "ro": "Memoria nu este motivul principal. Fiecare fd consuma memorie minimala. Problema reala este numararea referintelor — inchiderea copiei parintelui decrementeaza numarul de referinte astfel incat conexiunea sa se poata termina corespunzator cand copilul inchide." } },
+                { "text": { "en": "So the connection's reference count drops to 1, allowing proper close when the child exits", "ro": "Ca numarul de referinte al conexiunii sa scada la 1, permitand inchiderea corespunzatoare cand copilul iese" }, "correct": true, "explanation": { "en": "Correct! After fork(), connfd has refcount=2. If the parent does not close it, when the child exits (refcount→1), TCP never sends FIN (refcount never reaches 0). The client sees a connection that stays open forever with no more data — a resource leak.", "ro": "Corect! Dupa fork(), connfd are refcount=2. Daca parintele nu il inchide, cand copilul iese (refcount→1), TCP nu trimite niciodata FIN (refcount nu ajunge niciodata la 0). Clientul vede o conexiune care ramane deschisa pentru totdeauna fara mai multe date — o scurgere de resurse." } },
+                { "text": { "en": "Because accept() will fail if connfd is still open", "ro": "Deoarece accept() va esua daca connfd este inca deschis" }, "correct": false, "explanation": { "en": "accept() has nothing to do with connfd being open. accept() operates on the listening socket (listenfd), not on connected sockets. The parent can have many connfds open simultaneously without affecting accept().", "ro": "accept() nu are nicio legatura cu connfd-ul care este deschis. accept() opereaza pe socket-ul de ascultare (listenfd), nu pe socket-urile conectate. Parintele poate avea multi connfd-i deschisi simultan fara a afecta accept()." } }
+              ],
+              "explanation": { "en": "Reference counting. Parent must close connfd so refcount drops to 1 (child only), enabling proper TCP FIN when child closes.", "ro": "Numararea referintelor. Parintele trebuie sa inchida connfd pentru ca refcount sa scada la 1 (doar copilul), permitand TCP FIN corespunzator cand copilul inchide." },
+              "reviewStep": "rc-c3-iterative-vs-concurrent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rc-c3-select",
+      "title": { "en": "I/O Multiplexing with select()", "ro": "Multiplexarea I/O cu select()" },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You have a server that needs to handle 1000 simultaneous clients. fork()-per-client would create 1000 processes — too expensive. How can a SINGLE process efficiently handle 1000 connections without blocking on any one of them?",
+            "ro": "Ai un server care trebuie sa gestioneze 1000 de clienti simultani. fork()-per-client ar crea 1000 de procese — prea costisitor. Cum poate un SINGUR proces sa gestioneze eficient 1000 de conexiuni fara sa se blocheze pe niciuna?"
+          },
+          "answer": {
+            "en": "Use I/O multiplexing: tell the OS 'watch these 1000 fds and wake me up when any of them has data ready'. The process sleeps efficiently in the kernel while waiting, then processes whichever fd is ready. This is event-driven programming — the foundation of high-performance servers like nginx, Node.js, and Redis.",
+            "ro": "Foloseste multiplexarea I/O: spune OS-ului 'supravegheaza acesti 1000 de fd-i si trezeste-ma cand oricare are date gata'. Procesul doarme eficient in kernel in timp ce asteapta, apoi proceseaza oricare fd este gata. Acesta este programarea bazata pe evenimente — fundamentul serverelor de inalta performanta precum nginx, Node.js si Redis."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**`select(nfds, readfds, writefds, exceptfds, timeout)`** blocks until one or more file descriptors become ready for I/O:\n- `nfds` — highest fd number + 1 (tells kernel how far to scan)\n- `readfds` — set of fds to watch for **read readiness** (data available, new connection, EOF)\n- `writefds` — set of fds to watch for **write readiness** (buffer not full)\n- `exceptfds` — set of fds to watch for **exceptions** (OOB data)\n- `timeout` — NULL=block forever, {0,0}=non-blocking poll, else wait up to that duration\n\nReturns: number of ready fds (>0), 0 (timeout), -1 (error).\n\n**select() MODIFIES the fd_sets** — you must reinitialize them before each call.",
+            "ro": "**`select(nfds, readfds, writefds, exceptfds, timeout)`** blocheaza pana cand unul sau mai multi descriptori de fisier devin gata pentru I/O:\n- `nfds` — cel mai mare numar fd + 1 (spune kernel-ului cat sa scaneze)\n- `readfds` — setul de fd-i de urmarit pentru **disponibilitate la citire** (date disponibile, conexiune noua, EOF)\n- `writefds` — setul de fd-i de urmarit pentru **disponibilitate la scriere** (buffer neplasat)\n- `exceptfds` — setul de fd-i de urmarit pentru **exceptii** (date OOB)\n- `timeout` — NULL=blocare pentru totdeauna, {0,0}=poll non-blocant, altfel asteapta pana la acea durata\n\nReturneaza: numarul de fd-i gata (>0), 0 (timeout), -1 (eroare).\n\n**select() MODIFICA fd_sets** — trebuie sa le reinitializezi inainte de fiecare apel."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**fd_set macros:**\n`FD_ZERO(set)` — clear all fds from set\n`FD_SET(fd, set)` — add fd to set\n`FD_CLR(fd, set)` — remove fd from set\n`FD_ISSET(fd, set)` — test if fd is in set (use AFTER select() returns)\n\nThe **select-based server loop**:\n1. Initialize master_set with listenfd and all connected client fds\n2. Copy master_set to working_set (select modifies it)\n3. Call select() with working_set\n4. If listenfd is in working_set after select: accept new client, add to master_set\n5. For each client fd in working_set: read data, process, send reply; if read returns 0 = client disconnected, remove from master_set",
+            "ro": "**Macrouri fd_set:**\n`FD_ZERO(set)` — elimina toti fd-ii din set\n`FD_SET(fd, set)` — adauga fd la set\n`FD_CLR(fd, set)` — elimina fd din set\n`FD_ISSET(fd, set)` — testeaza daca fd este in set (foloseste DUPA ce select() returneaza)\n\n**Bucla server bazata pe select:**\n1. Initializeaza master_set cu listenfd si toti fd-ii clientilor conectati\n2. Copiaza master_set in working_set (select il modifica)\n3. Apeleaza select() cu working_set\n4. Daca listenfd este in working_set dupa select: accepta noul client, adauga la master_set\n5. Pentru fiecare fd client in working_set: citeste date, proceseaza, trimite raspuns; daca read returneaza 0 = clientul s-a deconectat, elimina din master_set"
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/select.h>\n#include <sys/socket.h>\n#include <stdio.h>\n#include <string.h>\n#include <unistd.h>\n\nvoid run_select_server(int listenfd) {\n    fd_set master_set, working_set;\n    int maxfd = listenfd;\n    char buf[1024];\n\n    FD_ZERO(&master_set);\n    FD_SET(listenfd, &master_set);  // Watch the listening socket\n\n    while (1) {\n        // Copy master to working (select() will modify working)\n        working_set = master_set;\n\n        // Block until at least one fd is ready\n        int ready = select(maxfd + 1, &working_set, NULL, NULL, NULL);\n        if (ready < 0) { perror(\"select\"); break; }\n\n        // Check all fds from 0 to maxfd\n        for (int fd = 0; fd <= maxfd; fd++) {\n            if (!FD_ISSET(fd, &working_set)) continue;  // Not ready\n\n            if (fd == listenfd) {\n                // New connection arriving\n                int connfd = accept(listenfd, NULL, NULL);\n                FD_SET(connfd, &master_set);  // Add client to set\n                if (connfd > maxfd) maxfd = connfd;\n                printf(\"New client: fd=%d\\n\", connfd);\n\n            } else {\n                // Existing client has data (or disconnected)\n                int n = read(fd, buf, sizeof(buf) - 1);\n                if (n <= 0) {\n                    // n==0: client closed; n<0: error\n                    printf(\"Client fd=%d disconnected\\n\", fd);\n                    close(fd);\n                    FD_CLR(fd, &master_set);  // Remove from set\n                } else {\n                    buf[n] = '\\0';\n                    // Echo back\n                    write(fd, buf, n);\n                }\n            }\n        }\n    }\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**select() scalability limit:** The `fd_set` type has a fixed size — typically FD_SETSIZE=1024 bits. You cannot monitor more than 1024 file descriptors with select(). For high-performance servers (10K+ connections), use `poll()` (no fd limit) or `epoll()` (Linux, O(1) per event) instead. For this course, select() is sufficient.",
+            "ro": "**Limita de scalabilitate a select():** Tipul `fd_set` are o dimensiune fixa — de obicei FD_SETSIZE=1024 biti. Nu poti monitoriza mai mult de 1024 de descriptori de fisier cu select(). Pentru servere de inalta performanta (10K+ conexiuni), foloseste `poll()` (fara limita fd) sau `epoll()` (Linux, O(1) per eveniment) in schimb. Pentru acest curs, select() este suficient."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Why must you copy master_set into a working_set before each call to select()?", "ro": "De ce trebuie sa copiezi master_set intr-un working_set inainte de fiecare apel la select()?" },
+              "options": [
+                { "text": { "en": "For performance — copying is faster than reinitializing", "ro": "Pentru performanta — copierea este mai rapida decat reinitializarea" }, "correct": false, "explanation": { "en": "Performance is not the reason. The reason is correctness — select() destructively modifies the fd_set to show which fds are ready. After select() returns, only the ready fds remain in the set; all others are cleared.", "ro": "Performanta nu este motivul. Motivul este corectitudinea — select() modifica distructiv fd_set pentru a arata care fd-i sunt gata. Dupa ce select() returneaza, doar fd-ii gata raman in set; toti ceilalti sunt sterse." } },
+                { "text": { "en": "Because select() modifies the fd_set in-place, destroying the original", "ro": "Deoarece select() modifica fd_set-ul in loc, distrugand originalul" }, "correct": true, "explanation": { "en": "Correct! select() overwrites the fd_set with only the ready fds. If you pass master_set directly, after select() it only contains the ready fds and you lose track of all other monitored fds. The copy preserves master_set across iterations.", "ro": "Corect! select() suprascrie fd_set-ul cu doar fd-ii gata. Daca transmiti master_set direct, dupa select() contine doar fd-ii gata si pierzi evidenta tuturor celorlalti fd-i monitorizati. Copia pastreaza master_set de-a lungul iteratiilor." } },
+                { "text": { "en": "Because select() only works on copies, not originals", "ro": "Deoarece select() functioneaza doar pe copii, nu pe originale" }, "correct": false, "explanation": { "en": "select() works on whatever pointer you pass — it does not distinguish originals from copies. The issue is that it modifies the passed-in fd_set, so you must provide a fresh copy each time to preserve your complete set of monitored fds.", "ro": "select() functioneaza pe orice pointer transmiti — nu distinge originalele de copii. Problema este ca modifica fd_set-ul transmis, deci trebuie sa furnizezi o copie proaspata de fiecare data pentru a pastra setul complet de fd-i monitorizati." } }
+              ],
+              "explanation": { "en": "select() modifies the fd_set in-place. Use a copy as input; the original serves as the master list of all monitored fds.", "ro": "select() modifica fd_set-ul in loc. Foloseste o copie ca input; originalul serveste ca lista principala a tuturor fd-ilor monitorizati." },
+              "reviewStep": "rc-c3-select"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rc-c3-udp",
+      "title": { "en": "UDP Client/Server Programming", "ro": "Programarea client/server UDP" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "UDP socket programming differs from TCP:\n- **No connection** — no `listen()`, no `accept()`, no `connect()` required\n- **No stream** — each `sendto()`/`recvfrom()` is one independent datagram\n- **Server**: `socket(AF_INET, SOCK_DGRAM, 0)` → `bind()` → loop with `recvfrom()` + `sendto()`\n- **Client**: `socket(AF_INET, SOCK_DGRAM, 0)` → `sendto()` + `recvfrom()` → `close()`\n\nThe client does NOT call `connect()` — instead it passes the destination address to each `sendto()` call.",
+            "ro": "Programarea socket-urilor UDP difera de TCP:\n- **Fara conexiune** — nu sunt necesare `listen()`, `accept()`, `connect()`\n- **Fara stream** — fiecare `sendto()`/`recvfrom()` este o singura datagrama independenta\n- **Server**: `socket(AF_INET, SOCK_DGRAM, 0)` → `bind()` → bucla cu `recvfrom()` + `sendto()`\n- **Client**: `socket(AF_INET, SOCK_DGRAM, 0)` → `sendto()` + `recvfrom()` → `close()`\n\nClientul NU apeleaza `connect()` — in schimb transmite adresa destinatie la fiecare apel `sendto()`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "recvfrom() and sendto()", "ro": "recvfrom() si sendto()" },
+          "content": {
+            "en": "`recvfrom(s, buf, len, flags, from, fromlen)` — receives a datagram. `from` is filled with the sender's address (useful to reply back). Returns bytes received.\n`sendto(s, buf, len, flags, to, tolen)` — sends a datagram to the specified `to` address. Returns bytes sent.\nBoth are like `read()`/`write()` but include address parameters since there is no persistent connection.",
+            "ro": "`recvfrom(s, buf, len, flags, from, fromlen)` — primeste o datagrama. `from` este completat cu adresa expeditorului (util pentru a raspunde inapoi). Returneaza bytes primiti.\n`sendto(s, buf, len, flags, to, tolen)` — trimite o datagrama la adresa `to` specificata. Returneaza bytes trimisi.\nAmbele sunt ca `read()`/`write()` dar includ parametri de adresa deoarece nu exista o conexiune persistenta."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// UDP Echo Server\n#include <sys/socket.h>\n#include <netinet/in.h>\n#include <stdio.h>\n#include <string.h>\n\n#define PORT 9000\n\nint main() {\n    int sockfd;\n    struct sockaddr_in servaddr, cliaddr;\n    char buf[1024];\n    socklen_t clilen = sizeof(cliaddr);\n\n    // Create UDP socket\n    sockfd = socket(AF_INET, SOCK_DGRAM, 0);\n\n    // Bind to port\n    memset(&servaddr, 0, sizeof(servaddr));\n    servaddr.sin_family = AF_INET;\n    servaddr.sin_addr.s_addr = INADDR_ANY;\n    servaddr.sin_port = htons(PORT);\n    bind(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr));\n\n    printf(\"UDP server listening on port %d\\n\", PORT);\n\n    while (1) {\n        // Block until datagram arrives, learn who sent it\n        int n = recvfrom(sockfd, buf, sizeof(buf)-1, 0,\n                         (struct sockaddr*)&cliaddr, &clilen);\n        buf[n] = '\\0';\n        printf(\"Received: %s\\n\", buf);\n\n        // Send the datagram BACK to the same sender\n        sendto(sockfd, buf, n, 0,\n               (struct sockaddr*)&cliaddr, clilen);\n    }\n    return 0;\n}"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "A UDP server receives a datagram from client A, then from client B, then A again. In what order does recvfrom() return them? What if the network reorders them?",
+            "ro": "Un server UDP primeste o datagrama de la clientul A, apoi de la clientul B, apoi A din nou. In ce ordine le returneaza recvfrom()? Ce se intampla daca reteaua le reordoneza?"
+          },
+          "answer": {
+            "en": "recvfrom() returns datagrams in the order they arrive at the server — which may not be the order they were sent. UDP provides no ordering guarantees. If A sends D1 then D2, they may arrive as D2, D1 at the server. Applications that need ordering must implement sequence numbers themselves (as QUIC and DTLS do).",
+            "ro": "recvfrom() returneaza datagramele in ordinea in care ajung la server — care poate sa nu fie ordinea in care au fost trimise. UDP nu ofera garantii de ordonare. Daca A trimite D1 apoi D2, acestea pot ajunge ca D2, D1 la server. Aplicatiile care au nevoie de ordonare trebuie sa implementeze ele insele numere de secventa (asa cum fac QUIC si DTLS)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "A UDP server calls recvfrom() and receives 500 bytes. The client actually sent 1000 bytes in a single sendto(). Where are the other 500 bytes?", "ro": "Un server UDP apeleaza recvfrom() si primeste 500 de bytes. Clientul a trimis efectiv 1000 de bytes intr-un singur sendto(). Unde sunt ceilalti 500 de bytes?" },
+              "options": [
+                { "text": { "en": "They will arrive in the next recvfrom() call", "ro": "Vor sosi in urmatorul apel recvfrom()" }, "correct": false, "explanation": { "en": "Unlike TCP, UDP does not split datagrams. If the recvfrom() buffer is smaller than the datagram, the excess data is LOST, not buffered for the next call. This is why you must size your UDP buffer to accommodate the largest possible datagram.", "ro": "Spre deosebire de TCP, UDP nu imparte datagramele. Daca bufferul recvfrom() este mai mic decat datagrama, datele in exces sunt PIERDUTE, nu stocate in buffer pentru urmatorul apel. De aceea trebuie sa dimensionezi bufferul UDP pentru a acomoda cea mai mare posibila datagrama." } },
+                { "text": { "en": "They are lost — UDP datagrams are truncated if the buffer is too small", "ro": "Sunt pierduti — datagramele UDP sunt trunchiate daca bufferul este prea mic" }, "correct": true, "explanation": { "en": "Correct! UDP is datagram-based — each recvfrom() call reads exactly one datagram. If the receive buffer is smaller than the datagram, the excess bytes are discarded. Always use a buffer large enough for the maximum datagram you expect (up to 65507 bytes for IPv4 UDP).", "ro": "Corect! UDP este bazat pe datagrame — fiecare apel recvfrom() citeste exact o datagrama. Daca bufferul de receptie este mai mic decat datagrama, bytes-ii in exces sunt eliminati. Foloseste intotdeauna un buffer suficient de mare pentru datagrama maxima pe care o astepti (pana la 65507 bytes pentru UDP IPv4)." } },
+                { "text": { "en": "TCP retransmits them automatically", "ro": "TCP le retransmite automat" }, "correct": false, "explanation": { "en": "This is a UDP socket, not TCP. UDP has no retransmission mechanism. Also, TCP and UDP are separate protocols — a UDP socket cannot suddenly become TCP.", "ro": "Acesta este un socket UDP, nu TCP. UDP nu are mecanism de retransmitere. De asemenea, TCP si UDP sunt protocoale separate — un socket UDP nu poate deveni brusc TCP." } }
+              ],
+              "explanation": { "en": "UDP truncates on small buffers. Size your buffer to fit the largest possible datagram.", "ro": "UDP truncheza pe buffere mici. Dimensioneaza bufferul sa incapa cea mai mare datagrama posibila." },
+              "reviewStep": "rc-c3-udp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rc-c3-send-recv",
+      "title": { "en": "send() and recv() Flags", "ro": "Flag-urile send() si recv()" },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**`send(sockfd, buf, len, flags)`** and **`recv(sockfd, buf, len, flags)`** are socket-specific alternatives to `write()`/`read()` that support additional flags:\n\n`MSG_PEEK` (recv) — read data without consuming it; next recv sees same data\n`MSG_WAITALL` (recv) — block until exactly `len` bytes are received\n`MSG_DONTWAIT` (send/recv) — non-blocking; fails with EAGAIN if would block\n`MSG_OOB` (send/recv) — send/receive out-of-band (urgent) data\n`MSG_EOR` (send) — marks end of record (SCTP/SOCK_SEQPACKET)\n`MSG_NOSIGNAL` (send) — suppress SIGPIPE on broken connection\n\nFor basic TCP communication, flags=0 and `write()`/`read()` are equivalent to `send()`/`recv()` with flags=0.",
+            "ro": "**`send(sockfd, buf, len, flags)`** si **`recv(sockfd, buf, len, flags)`** sunt alternative specifice socket-ului la `write()`/`read()` care suporta flag-uri suplimentare:\n\n`MSG_PEEK` (recv) — citeste date fara a le consuma; urmatorul recv vede aceleasi date\n`MSG_WAITALL` (recv) — blocheaza pana cand exact `len` bytes sunt primiti\n`MSG_DONTWAIT` (send/recv) — non-blocant; esueaza cu EAGAIN daca ar bloca\n`MSG_OOB` (send/recv) — trimite/primeste date out-of-band (urgente)\n`MSG_EOR` (send) — marcheaza sfarsitul inregistrarii (SCTP/SOCK_SEQPACKET)\n`MSG_NOSIGNAL` (send) — suprima SIGPIPE la conexiune intrerupta\n\nPentru comunicatia TCP de baza, flags=0 si `write()`/`read()` sunt echivalente cu `send()`/`recv()` cu flags=0."
+          }
+        }
+      ]
+    },
+    {
+      "id": "rc-c3-quiz",
+      "title": { "en": "Self-Test: RC Course 3", "ro": "Autoevaluare: RC Cursul 3" },
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": { "en": "Which server model can serve 1000 clients with a single process and no threads?", "ro": "Care model de server poate servi 1000 de clienti cu un singur proces si fara thread-uri?" },
+              "options": [
+                { "text": { "en": "Iterative server", "ro": "Server iterativ" }, "correct": false, "explanation": { "en": "An iterative server handles one client at a time. While serving client #1, all other 999 clients block. It cannot serve them concurrently.", "ro": "Un server iterativ gestioneaza un client la un moment dat. In timp ce serveste clientul #1, toti ceilalti 999 de clienti blocheaza. Nu poate sa ii serveasca in mod concurent." } },
+                { "text": { "en": "select()-based I/O multiplexing server", "ro": "Server cu multiplexare I/O bazata pe select()" }, "correct": true, "explanation": { "en": "Correct! A select()-based server uses one process to monitor many fds simultaneously. When any fd has data, it processes that fd, then returns to select(). This serves thousands of clients concurrently in one process.", "ro": "Corect! Un server bazat pe select() foloseste un singur proces pentru a monitoriza multi fd-i simultan. Cand oricare fd are date, il proceseaza pe acela, apoi se intoarce la select(). Acesta serveste mii de clienti in mod concurent intr-un singur proces." } },
+                { "text": { "en": "fork()-based concurrent server", "ro": "Server concurent bazat pe fork()" }, "correct": false, "explanation": { "en": "A fork()-based server creates one process per client. 1000 clients = 1000 processes. This is expensive and does not fit 'single process'.", "ro": "Un server bazat pe fork() creeaza un proces per client. 1000 de clienti = 1000 de procese. Aceasta este costisitor si nu se potriveste cu 'un singur proces'." } }
+              ],
+              "explanation": { "en": "select() allows one process to multiplex I/O across many fds concurrently.", "ro": "select() permite unui singur proces sa multiplexeze I/O pe multi fd-i in mod concurent." },
+              "reviewStep": "rc-c3-select"
+            },
+            {
+              "question": { "en": "In a UDP client, which function provides the server's address for each send operation?", "ro": "Intr-un client UDP, ce functie furnizeaza adresa serverului pentru fiecare operatie de trimitere?" },
+              "options": [
+                { "text": { "en": "connect() sets the default destination permanently", "ro": "connect() seteaza destinatia implicita permanent" }, "correct": false, "explanation": { "en": "While a UDP socket CAN call connect() to set a default destination, this is optional. The standard UDP approach passes the address to each sendto() call. Without connect(), you must specify the address in every sendto().", "ro": "Desi un socket UDP POATE apela connect() pentru a seta o destinatie implicita, aceasta este optionala. Abordarea UDP standard transmite adresa la fiecare apel sendto(). Fara connect(), trebuie sa specifici adresa in fiecare sendto()." } },
+                { "text": { "en": "sendto() includes the destination address as a parameter", "ro": "sendto() include adresa destinatiei ca parametru" }, "correct": true, "explanation": { "en": "Correct! sendto(fd, buf, len, flags, dest_addr, addrlen) — the destination address is passed directly to sendto(). Each call can go to a different destination, which is what makes UDP connectionless.", "ro": "Corect! sendto(fd, buf, len, flags, dest_addr, addrlen) — adresa destinatie este transmisa direct la sendto(). Fiecare apel poate merge la o destinatie diferita, ceea ce face UDP fara conexiune." } },
+                { "text": { "en": "bind() specifies where to send data", "ro": "bind() specifica unde sa trimita date" }, "correct": false, "explanation": { "en": "bind() specifies the LOCAL address/port to use for sending (optional for clients). It does not specify the remote destination. The remote address goes in sendto().", "ro": "bind() specifica adresa/portul LOCAL de folosit pentru trimitere (optional pentru clienti). Nu specifica destinatia remotata. Adresa remotata merge in sendto()." } }
+              ],
+              "explanation": { "en": "UDP is connectionless. Destination address is passed to each sendto() call.", "ro": "UDP este fara conexiune. Adresa destinatie este transmisa la fiecare apel sendto()." },
+              "reviewStep": "rc-c3-udp"
+            },
+            {
+              "question": { "en": "What is the maximum number of file descriptors select() can monitor by default?", "ro": "Care este numarul maxim de descriptori de fisiere pe care select() le poate monitoriza implicit?" },
+              "options": [
+                { "text": { "en": "Unlimited", "ro": "Nelimitat" }, "correct": false, "explanation": { "en": "select() is limited by FD_SETSIZE, which is typically 1024 on Linux. Descriptors >= FD_SETSIZE cause undefined behavior with fd_set operations. Use poll() or epoll() for more than 1024 fds.", "ro": "select() este limitat de FD_SETSIZE, care este de obicei 1024 pe Linux. Descriptorii >= FD_SETSIZE cauzeaza comportament nedefinit cu operatiile fd_set. Foloseste poll() sau epoll() pentru mai mult de 1024 fd-i." } },
+                { "text": { "en": "1024 (FD_SETSIZE)", "ro": "1024 (FD_SETSIZE)" }, "correct": true, "explanation": { "en": "Correct! FD_SETSIZE=1024 is the default limit. fd_set is a bitmap of 1024 bits. Trying to monitor fd >= 1024 overflows the bitmap. For more connections, use poll() (soft limit) or epoll() (Linux, O(1) scalability).", "ro": "Corect! FD_SETSIZE=1024 este limita implicita. fd_set este un bitmap de 1024 biti. Incercarea de a monitoriza fd >= 1024 produce depasire de bitmap. Pentru mai multe conexiuni, foloseste poll() (limita flexibila) sau epoll() (Linux, scalabilitate O(1))." } },
+                { "text": { "en": "65535 (same as max port number)", "ro": "65535 (la fel ca numarul maxim de port)" }, "correct": false, "explanation": { "en": "65535 is the maximum port number, unrelated to fd_set size. select()'s fd_set is typically limited to 1024 entries. Port numbers and file descriptor numbers are entirely different concepts.", "ro": "65535 este numarul maxim de port, fara legatura cu dimensiunea fd_set. fd_set-ul select() este de obicei limitat la 1024 intrari. Numerele de port si numerele de descriptor de fisier sunt concepte complet diferite." } }
+              ],
+              "explanation": { "en": "select() is limited to FD_SETSIZE=1024 fds by default. Use epoll for high-performance servers.", "ro": "select() este limitat la FD_SETSIZE=1024 fd-i implicit. Foloseste epoll pentru servere de inalta performanta." },
+              "reviewStep": "rc-c3-select"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
