@@ -342,14 +342,16 @@ Rules:
 - Questions should be at exam difficulty level — not trivial
 - Do NOT copy questions verbatim from the content — create original questions that test the same concepts`;
 
-    const userContent = `Generate ${count} exam questions based on this course material:\n\n${courseContent.slice(0, 12000)}`;
+    // Groq llama-3.3-70b TPM cap = 12000 (input + reserved max_tokens). Keep
+    // input slice tight so max_tokens has room. ~6000 chars ≈ 1500 tokens.
+    const userContent = `Generate ${count} exam questions based on this course material:\n\n${courseContent.slice(0, 6000)}`;
 
     const messages = [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userContent },
     ];
 
-    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false, { temperature: 0.7, max_tokens: 8192 });
+    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false, { temperature: 0.7, max_tokens: 6000 });
     const data = await llmRes.json();
     const raw = data.choices?.[0]?.message?.content || '';
     recordUsage(key, provider, inputEstimate, Math.ceil(raw.length / 4));
