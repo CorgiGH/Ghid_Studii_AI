@@ -149,20 +149,76 @@
             {
               "question": { "en": "Which flag must be specified to create a shared mapping visible to other processes?", "ro": "Ce flag trebuie specificat pentru a crea o mapare partajata vizibila celorlalte procese?" },
               "options": [
-                { "text": { "en": "MAP_PRIVATE", "ro": "MAP_PRIVATE" }, "correct": false },
-                { "text": { "en": "MAP_SHARED", "ro": "MAP_SHARED" }, "correct": true },
-                { "text": { "en": "MAP_ANONYMOUS", "ro": "MAP_ANONYMOUS" }, "correct": false },
-                { "text": { "en": "MAP_FIXED", "ro": "MAP_FIXED" }, "correct": false }
+                {
+                  "text": { "en": "MAP_PRIVATE", "ro": "MAP_PRIVATE" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. MAP_PRIVATE creates a copy-on-write mapping: writes are **not** visible to other processes mapping the same file and are **not** propagated to disk — only to the swap area. It is the opposite of sharing.",
+                    "ro": "Capcana. MAP_PRIVATE creeaza o mapare de tip copy-on-write: scrierile **nu** sunt vizibile celorlalte procese ce mapeaza acelasi fisier si **nu** sunt propagate pe disc — ci doar in zona de swap. Este opusul partajarii."
+                  }
+                },
+                {
+                  "text": { "en": "MAP_SHARED", "ro": "MAP_SHARED" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. MAP_SHARED creates a shared mapping: writes by any process are visible to all other processes mapping the same file and are propagated to the file on disk (flushed by the kernel's dirty-page algorithm, or explicitly via `msync`).",
+                    "ro": "Corect. MAP_SHARED creeaza o mapare partajata: scrierile oricarui proces sunt vizibile tuturor celorlalte procese ce mapeaza acelasi fisier si sunt propagate in fisierul de pe disc (prin algoritmul de gestionare a paginilor dirty al nucleului, sau explicit prin `msync`)."
+                  }
+                },
+                {
+                  "text": { "en": "MAP_ANONYMOUS", "ro": "MAP_ANONYMOUS" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. MAP_ANONYMOUS is a flag that specifies a non-persistent (anonymous) mapping — one with no backing file on disk. It controls the **backing store**, not the visibility of writes to other processes.",
+                    "ro": "Capcana. MAP_ANONYMOUS este un flag care specifica o mapare nepersistenta (anonima) — fara fisier asociat pe disc. Controleaza **suportul de stocare**, nu vizibilitatea scrierilor catre alte procese."
+                  }
+                },
+                {
+                  "text": { "en": "MAP_FIXED", "ro": "MAP_FIXED" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. MAP_FIXED forces the mapping to be placed at the exact address given as `addr`. It controls the **placement** of the mapping in virtual memory, not the sharing semantics.",
+                    "ro": "Capcana. MAP_FIXED forteaza plasarea maparii exact la adresa data ca `addr`. Controleaza **plasarea** maparii in spatiul virtual de adrese, nu semantica de partajare."
+                  }
+                }
               ],
               "explanation": { "en": "`MAP_SHARED` creates a mapping where writes are visible to other processes mapping the same file and are propagated to disk. `MAP_PRIVATE` creates a copy-on-write mapping where writes are not visible to others.", "ro": "`MAP_SHARED` creeaza o mapare in care scrierile sunt vizibile celorlalte procese ce mapeaza acelasi fisier si sunt propagate pe disc. `MAP_PRIVATE` creeaza o mapare copy-on-write in care scrierile nu sunt vizibile celorlalti." }
             },
             {
               "question": { "en": "What does PROT_NONE mean for a memory mapping?", "ro": "Ce inseamna PROT_NONE pentru o mapare de memorie?" },
               "options": [
-                { "text": { "en": "Pages can only be read", "ro": "Paginile pot fi doar citite" }, "correct": false },
-                { "text": { "en": "Pages cannot be accessed at all", "ro": "Paginile nu pot fi accesate deloc" }, "correct": true },
-                { "text": { "en": "Pages have no protection", "ro": "Paginile nu au protectie" }, "correct": false },
-                { "text": { "en": "Pages can be read and written", "ro": "Paginile pot fi citite si scrise" }, "correct": false }
+                {
+                  "text": { "en": "Pages can only be read", "ro": "Paginile pot fi doar citite" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Read-only access is expressed with `PROT_READ`, not `PROT_NONE`. `PROT_NONE` is stricter: it denies **all** access — not even reads are permitted.",
+                    "ro": "Capcana. Accesul de citire este exprimat cu `PROT_READ`, nu cu `PROT_NONE`. `PROT_NONE` este mai restrictiv: interzice **orice** acces — nici macar citirile nu sunt permise."
+                  }
+                },
+                {
+                  "text": { "en": "Pages cannot be accessed at all", "ro": "Paginile nu pot fi accesate deloc" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `PROT_NONE` means the mapping's pages grant no access rights whatsoever. Any attempt to read, write, or execute those pages triggers a `SIGSEGV` signal, terminating the process with a segmentation fault.",
+                    "ro": "Corect. `PROT_NONE` inseamna ca paginile maparii nu acorda niciun drept de acces. Orice incercare de citire, scriere sau executie a acelor pagini declansaza semnalul `SIGSEGV`, terminand procesul cu un segmentation fault."
+                  }
+                },
+                {
+                  "text": { "en": "Pages have no protection", "ro": "Paginile nu au protectie" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. \"No protection\" would imply unrestricted access — the opposite of what `PROT_NONE` does. `PROT_NONE` means **maximum restriction**: zero access permissions on those pages.",
+                    "ro": "Capcana. \"Fara protectie\" ar implica acces nerestrictionat — opusul a ceea ce face `PROT_NONE`. `PROT_NONE` inseamna **restrictie maxima**: zero permisiuni de acces pe acele pagini."
+                  }
+                },
+                {
+                  "text": { "en": "Pages can be read and written", "ro": "Paginile pot fi citite si scrise" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Read and write access is expressed with `PROT_READ | PROT_WRITE`. `PROT_NONE` is the exact opposite — it removes all permissions from the pages.",
+                    "ro": "Capcana. Accesul de citire si scriere este exprimat cu `PROT_READ | PROT_WRITE`. `PROT_NONE` este exact opusul — elimina toate permisiunile de pe pagini."
+                  }
+                }
               ],
               "explanation": { "en": "`PROT_NONE` means the pages of the mapping cannot be accessed in any way. Any access attempt will cause a segmentation fault.", "ro": "`PROT_NONE` inseamna ca paginile maparii nu pot fi accesate in niciun mod. Orice incercare de acces va cauza un segmentation fault." }
             }
@@ -286,10 +342,38 @@
             {
               "question": { "en": "What happens if you call munmap without first calling msync?", "ro": "Ce se intampla daca apelati munmap fara a apela mai intai msync?" },
               "options": [
-                { "text": { "en": "All changes are automatically saved to disk", "ro": "Toate modificarile sunt salvate automat pe disc" }, "correct": false },
-                { "text": { "en": "Recent changes may be lost (not propagated to disk)", "ro": "Modificarile recente pot fi pierdute (nepropagare pe disc)" }, "correct": true },
-                { "text": { "en": "The program crashes with SIGSEGV", "ro": "Programul se opreste cu SIGSEGV" }, "correct": false },
-                { "text": { "en": "munmap fails and returns -1", "ro": "munmap esueaza si returneaza -1" }, "correct": false }
+                {
+                  "text": { "en": "All changes are automatically saved to disk", "ro": "Toate modificarile sunt salvate automat pe disc" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `munmap` does **not** perform an implicit `msync`. The lecture states explicitly: \"apelul `munmap` nu efectueaza si un apel `msync` implicit\". Dirty pages that have not been flushed may never reach the file on disk.",
+                    "ro": "Capcana. `munmap` **nu** efectueaza un `msync` implicit. Cursul precizeaza explicit: \"apelul `munmap` nu efectueaza si un apel `msync` implicit\". Paginile dirty care nu au fost scrise pot sa nu ajunga niciodata in fisierul de pe disc."
+                  }
+                },
+                {
+                  "text": { "en": "Recent changes may be lost (not propagated to disk)", "ro": "Modificarile recente pot fi pierdute (nepropagare pe disc)" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Since `munmap` does not call `msync` implicitly, any dirty pages still in memory at the time of `munmap` may never be written to the backing file. Always call `msync` before `munmap` to guarantee persistence.",
+                    "ro": "Corect. Deoarece `munmap` nu apeleaza `msync` implicit, paginile dirty inca in memorie la momentul `munmap` pot sa nu fie niciodata scrise in fisierul asociat. Apelati intotdeauna `msync` inainte de `munmap` pentru a garanta persistenta."
+                  }
+                },
+                {
+                  "text": { "en": "The program crashes with SIGSEGV", "ro": "Programul se opreste cu SIGSEGV" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `SIGSEGV` is raised when a process accesses a memory address **after** `munmap` removes it — not by the `munmap` call itself. The call completes successfully (returns 0) without crashing.",
+                    "ro": "Capcana. `SIGSEGV` este generat cand un proces acceseaza o adresa de memorie **dupa** ce `munmap` o elimina — nu de catre apelul `munmap` in sine. Apelul se incheie cu succes (returneaza 0) fara a provoca o eroare."
+                  }
+                },
+                {
+                  "text": { "en": "munmap fails and returns -1", "ro": "munmap esueaza si returneaza -1" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `munmap` does not fail because `msync` was not called first; those are independent operations. `munmap` returns -1 only for invalid address/length arguments, not because of unsynchronized dirty pages.",
+                    "ro": "Capcana. `munmap` nu esueaza din cauza ca `msync` nu a fost apelat inainte; acestea sunt operatii independente. `munmap` returneaza -1 doar pentru argumente de adresa/lungime invalide, nu din cauza paginilor dirty nesincronizate."
+                  }
+                }
               ],
               "explanation": { "en": "`munmap` does NOT perform an implicit `msync`. Dirty pages that have not yet been flushed to disk may be lost. Always call `msync` before `munmap` if you need to ensure data persistence.", "ro": "`munmap` NU efectueaza un `msync` implicit. Paginile dirty care nu au fost inca scrise pe disc pot fi pierdute. Apelati intotdeauna `msync` inainte de `munmap` daca trebuie sa asigurati persistenta datelor." }
             }
@@ -452,10 +536,38 @@
             {
               "question": { "en": "In the shared-memory IPC model, who controls the communication?", "ro": "In modelul IPC prin memorie partajata, cine controleaza comunicarea?" },
               "options": [
-                { "text": { "en": "The operating system kernel", "ro": "Nucleul sistemului de operare" }, "correct": false },
-                { "text": { "en": "The user processes themselves", "ro": "Procesele utilizator insele" }, "correct": true },
-                { "text": { "en": "The hardware (MMU)", "ro": "Hardware-ul (MMU)" }, "correct": false },
-                { "text": { "en": "The network stack", "ro": "Stiva de retea" }, "correct": false }
+                {
+                  "text": { "en": "The operating system kernel", "ro": "Nucleul sistemului de operare" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. In the shared-memory model the kernel only **provides** the shared region and synchronization primitives (e.g., semaphores); the actual coordination of reads and writes is the responsibility of the user processes. Kernel-controlled communication describes the **message-passing** model.",
+                    "ro": "Capcana. In modelul de memorie partajata, nucleul doar **ofera** regiunea partajata si primitivele de sincronizare (de ex., semafoare); coordonarea efectiva a citirilor si scrierilor este responsabilitatea proceselor utilizator. Comunicarea controlata de nucleu descrie modelul de **schimb de mesaje**."
+                  }
+                },
+                {
+                  "text": { "en": "The user processes themselves", "ro": "Procesele utilizator insele" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. In the shared-memory IPC model, communication is under the control of the user processes: they read and write the shared region directly, using synchronization primitives (like POSIX semaphores) to coordinate access. The OS only sets up the shared memory area.",
+                    "ro": "Corect. In modelul IPC prin memorie partajata, comunicarea se afla sub controlul proceselor utilizator: acestea citesc si scriu direct in regiunea partajata, folosind primitive de sincronizare (precum semafoarele POSIX) pentru a coordona accesul. SO-ul doar configureaza zona de memorie partajata."
+                  }
+                },
+                {
+                  "text": { "en": "The hardware (MMU)", "ro": "Hardware-ul (MMU)" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The MMU enforces page-level access permissions (read/write/execute) but does not orchestrate IPC communication. It cannot decide which process reads or writes to the shared region and when.",
+                    "ro": "Capcana. MMU-ul aplica permisiunile de acces la nivel de pagina (citire/scriere/executie), dar nu orchestreaza comunicarea IPC. Nu poate decide care proces citeste sau scrie in regiunea partajata si cand."
+                  }
+                },
+                {
+                  "text": { "en": "The network stack", "ro": "Stiva de retea" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The network stack is used in the message-passing model for remote communication (via sockets). Shared-memory IPC is a local mechanism that does not involve the network stack at all.",
+                    "ro": "Capcana. Stiva de retea este folosita in modelul de schimb de mesaje pentru comunicatie la distanta (prin socket-uri). IPC prin memorie partajata este un mecanism local care nu implica deloc stiva de retea."
+                  }
+                }
               ],
               "explanation": { "en": "In the shared-memory model, communication is under the control of user processes. The OS only provides the shared memory region and synchronization primitives (like semaphores). In contrast, in the message-passing model, the OS mediates all communication.", "ro": "In modelul de memorie partajata, comunicarea se realizeaza sub controlul proceselor utilizator. SO-ul ofera doar regiunea de memorie partajata si primitivele de sincronizare (ca semafoarele). In schimb, in modelul de schimb de mesaje, SO-ul mediaza toata comunicarea." }
             }
@@ -536,20 +648,76 @@
             {
               "question": { "en": "What happens when sem_wait is called on a semaphore with value 0?", "ro": "Ce se intampla cand sem_wait este apelat pe un semafor cu valoarea 0?" },
               "options": [
-                { "text": { "en": "It returns immediately with value -1", "ro": "Returneaza imediat cu valoarea -1" }, "correct": false },
-                { "text": { "en": "It blocks until the value becomes greater than 0", "ro": "Se blocheaza pana cand valoarea devine mai mare decat 0" }, "correct": true },
-                { "text": { "en": "It sets the semaphore value to -1", "ro": "Seteaza valoarea semaforului la -1" }, "correct": false },
-                { "text": { "en": "It destroys the semaphore", "ro": "Distruge semaforul" }, "correct": false }
+                {
+                  "text": { "en": "It returns immediately with value -1", "ro": "Returneaza imediat cu valoarea -1" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `sem_wait` does **not** return -1 when the semaphore value is 0. Returning -1 would describe `sem_trywait` (the non-blocking variant). `sem_wait` blocks the calling process until the value rises above 0.",
+                    "ro": "Capcana. `sem_wait` **nu** returneaza -1 cand valoarea semaforului este 0. Returnarea -1 ar descrie `sem_trywait` (varianta neblocanta). `sem_wait` blocheaza procesul apelant pana cand valoarea creste peste 0."
+                  }
+                },
+                {
+                  "text": { "en": "It blocks until the value becomes greater than 0", "ro": "Se blocheaza pana cand valoarea devine mai mare decat 0" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A semaphore value is never permitted to go below zero. When `sem_wait` finds the value is 0, it blocks the calling process until another process or thread calls `sem_post`, which increments the value; `sem_wait` then decrements it and returns.",
+                    "ro": "Corect. Valoarea unui semafor nu este niciodata permisa sa scada sub zero. Cand `sem_wait` gaseste valoarea 0, blocheaza procesul apelant pana cand un alt proces sau fir apeleaza `sem_post`, care incrementeaza valoarea; `sem_wait` o decrementeaza apoi si returneaza."
+                  }
+                },
+                {
+                  "text": { "en": "It sets the semaphore value to -1", "ro": "Seteaza valoarea semaforului la -1" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. A POSIX semaphore's value is defined to never be negative — it is a non-negative integer. `sem_wait` cannot set it to -1; instead it blocks when the value is 0 to preserve this invariant.",
+                    "ro": "Capcana. Valoarea unui semafor POSIX este definita sa nu fie niciodata negativa — este un intreg nenegativ. `sem_wait` nu o poate seta la -1; in schimb se blocheaza cand valoarea este 0 pentru a pastra aceasta invarianta."
+                  }
+                },
+                {
+                  "text": { "en": "It destroys the semaphore", "ro": "Distruge semaforul" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Destroying a semaphore is done with `sem_destroy` (unnamed) or `sem_unlink` (named). `sem_wait` is purely a **decrement-and-block** operation; it does not alter the semaphore's existence.",
+                    "ro": "Capcana. Distrugerea unui semafor se face cu `sem_destroy` (anonim) sau `sem_unlink` (cu nume). `sem_wait` este pur o operatie de **decrementare-si-blocare**; nu modifica existenta semaforului."
+                  }
+                }
               ],
               "explanation": { "en": "`sem_wait` decrements the semaphore value. If the value is already 0, the operation blocks until another process/thread calls `sem_post` to increment the value above 0.", "ro": "`sem_wait` decrementeaza valoarea semaforului. Daca valoarea este deja 0, operatia se blocheaza pana cand un alt proces/fir apeleaza `sem_post` pentru a incrementa valoarea peste 0." }
             },
             {
               "question": { "en": "Where are named POSIX semaphores stored in the Linux filesystem?", "ro": "Unde sunt stocate semafoarele POSIX cu nume in sistemul de fisiere Linux?" },
               "options": [
-                { "text": { "en": "/tmp/sem/", "ro": "/tmp/sem/" }, "correct": false },
-                { "text": { "en": "/dev/shm/", "ro": "/dev/shm/" }, "correct": true },
-                { "text": { "en": "/var/run/sem/", "ro": "/var/run/sem/" }, "correct": false },
-                { "text": { "en": "/proc/semaphores/", "ro": "/proc/semaphores/" }, "correct": false }
+                {
+                  "text": { "en": "/tmp/sem/", "ro": "/tmp/sem/" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `/tmp` is a general-purpose temporary directory, typically backed by disk or a separate `tmpfs`. Named POSIX semaphores are not stored there; they live in `/dev/shm` as files of the form `sem.<name>`.",
+                    "ro": "Capcana. `/tmp` este un director temporar de uz general, de obicei sustinut de disc sau un `tmpfs` separat. Semafoarele POSIX cu nume nu sunt stocate acolo; ele se afla in `/dev/shm` ca fisiere de forma `sem.<name>`."
+                  }
+                },
+                {
+                  "text": { "en": "/dev/shm/", "ro": "/dev/shm/" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. In Linux, named POSIX semaphores are created in a `tmpfs` virtual filesystem mounted at `/dev/shm`. The semaphore named `/mysem` appears as the file `/dev/shm/sem.mysem`. This is also where POSIX shared memory objects (`shm_open`) reside.",
+                    "ro": "Corect. In Linux, semafoarele POSIX cu nume sunt create intr-un sistem de fisiere virtual `tmpfs` montat la `/dev/shm`. Semaforul numit `/mysem` apare ca fisierul `/dev/shm/sem.mysem`. Aceasta este si locatia obiectelor de memorie partajata POSIX (`shm_open`)."
+                  }
+                },
+                {
+                  "text": { "en": "/var/run/sem/", "ro": "/var/run/sem/" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `/var/run` stores runtime data for system services (PID files, sockets), not POSIX semaphores. There is no standard `/var/run/sem/` path for named semaphores.",
+                    "ro": "Capcana. `/var/run` stocheaza date de rulare pentru serviciile sistemului (fisiere PID, socket-uri), nu semafoare POSIX. Nu exista o cale standard `/var/run/sem/` pentru semafoarele cu nume."
+                  }
+                },
+                {
+                  "text": { "en": "/proc/semaphores/", "ro": "/proc/semaphores/" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `/proc` is a virtual filesystem exposing kernel state (processes, hardware info). While `/proc/sysvipc/sem` lists **System V** semaphores, there is no `/proc/semaphores/` path, and POSIX named semaphores live in `/dev/shm`, not `/proc`.",
+                    "ro": "Capcana. `/proc` este un sistem de fisiere virtual care expune starea nucleului (procese, info hardware). Desi `/proc/sysvipc/sem` listeaza semafoarele **System V**, nu exista o cale `/proc/semaphores/`, iar semafoarele POSIX cu nume se afla in `/dev/shm`, nu in `/proc`."
+                  }
+                }
               ],
               "explanation": { "en": "Named POSIX semaphores are created in a `tmpfs` virtual filesystem mounted at `/dev/shm`, with filenames of the form `sem.<name>`.", "ro": "Semafoarele POSIX cu nume sunt create intr-un sistem de fisiere virtual `tmpfs` montat la `/dev/shm`, cu nume de fisiere de forma `sem.<name>`." }
             }

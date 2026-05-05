@@ -71,10 +71,38 @@
             {
               "question": { "en": "What does the EUID of a process determine?", "ro": "Ce determina EUID-ul unui proces?" },
               "options": [
-                { "text": { "en": "The user who launched the process", "ro": "Utilizatorul care a lansat procesul" }, "correct": false },
-                { "text": { "en": "The resource access rights of the process", "ro": "Drepturile de acces la resurse ale procesului" }, "correct": true },
-                { "text": { "en": "The parent process identity", "ro": "Identitatea procesului parinte" }, "correct": false },
-                { "text": { "en": "The process priority", "ro": "Prioritatea procesului" }, "correct": false }
+                {
+                  "text": { "en": "The user who launched the process", "ro": "Utilizatorul care a lansat procesul" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. That describes the **real UID** (UID), not the EUID. The real UID records who launched the process but does not control resource access rights.",
+                    "ro": "Capcana. Aceasta descrie **UID-ul real**, nu EUID-ul. UID-ul real inregistreaza cine a lansat procesul, dar nu controleaza drepturile de acces la resurse."
+                  }
+                },
+                {
+                  "text": { "en": "The resource access rights of the process", "ro": "Drepturile de acces la resurse ale procesului" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The **EUID** (Effective User ID) is what the kernel checks for every resource access decision. It equals the real UID in normal processes but differs when the executable has the **setuid** bit set — in that case the EUID becomes the file owner's UID.",
+                    "ro": "Corect. **EUID** (Effective User ID) este ceea ce nucleul verifica la fiecare decizie de acces la resurse. Coincide cu UID-ul real in procesele obisnuite, dar difera cand executabilul are bitul **setuid** setat — in acel caz EUID devine UID-ul proprietarului fisierului."
+                  }
+                },
+                {
+                  "text": { "en": "The parent process identity", "ro": "Identitatea procesului parinte" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The parent process identity is stored as the **PPID** field in the PCB, not the EUID. EUID is a user-identity concept, not a process-relationship concept.",
+                    "ro": "Capcana. Identitatea procesului parinte este stocata in campul **PPID** din PCB, nu in EUID. EUID este un concept de identitate a utilizatorului, nu de relatie intre procese."
+                  }
+                },
+                {
+                  "text": { "en": "The process priority", "ro": "Prioritatea procesului" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Process priority (scheduling priority / nice value) is a separate PCB field unrelated to user identity. The EUID governs **who** the process acts as for access control, not when the scheduler runs it.",
+                    "ro": "Capcana. Prioritatea procesului (prioritatea de planificare / valoarea nice) este un camp separat din PCB, fara legatura cu identitatea utilizatorului. EUID guverneaza **cine** reprezinta procesul in controlul accesului, nu cand il executa planificatorul."
+                  }
+                }
               ],
               "explanation": { "en": "EUID (Effective User ID) determines the actual access rights the process has. It may differ from the real UID when the setuid bit is set on the executable.", "ro": "EUID (Effective User ID) determina drepturile efective de acces ale procesului. Poate diferi de UID-ul real cand bitul setuid este setat pe executabil." }
             }
@@ -137,10 +165,38 @@
             {
               "question": { "en": "Which sleep primitive is the most efficient and recommended by POSIX?", "ro": "Care primitiva de sleep este cea mai eficienta si recomandata de POSIX?" },
               "options": [
-                { "text": { "en": "sleep", "ro": "sleep" }, "correct": false },
-                { "text": { "en": "usleep", "ro": "usleep" }, "correct": false },
-                { "text": { "en": "nanosleep", "ro": "nanosleep" }, "correct": true },
-                { "text": { "en": "pause", "ro": "pause" }, "correct": false }
+                {
+                  "text": { "en": "sleep", "ro": "sleep" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `sleep` only offers **second-level** precision (`unsigned int nr_seconds`). It is the coarsest of the three primitives and is not singled out by POSIX as the most efficient.",
+                    "ro": "Capcana. `sleep` ofera doar precizie la nivel de **secunde** (`unsigned int nr_seconds`). Este cea mai grosiera dintre cele trei primitive si nu este evidentiata de POSIX ca fiind cea mai eficienta."
+                  }
+                },
+                {
+                  "text": { "en": "usleep", "ro": "usleep" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `usleep` gives **microsecond** precision (`useconds_t nr_microseconds`), which is finer than `sleep`, but it is older and lacks the ability to recover remaining time when interrupted by a signal.",
+                    "ro": "Capcana. `usleep` ofera precizie la nivel de **microsecunde** (`useconds_t nr_microseconds`), mai fina decat `sleep`, dar este mai veche si nu poate recupera timpul ramas daca este intrerupta de un semnal."
+                  }
+                },
+                {
+                  "text": { "en": "nanosleep", "ro": "nanosleep" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `nanosleep` provides **nanosecond** precision (`struct timespec`), was introduced in more recent POSIX versions, and uniquely stores remaining time in its `rem` argument when interrupted by a signal so the sleep can be resumed.",
+                    "ro": "Corect. `nanosleep` ofera precizie la nivel de **nanosecunde** (`struct timespec`), a fost introdusa in versiuni mai recente ale standardului POSIX si, in mod unic, salveaza timpul ramas in argumentul `rem` cand este intrerupta de un semnal, permitand reluarea pauzei."
+                  }
+                },
+                {
+                  "text": { "en": "pause", "ro": "pause" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `pause` is not a timed-sleep primitive at all — it suspends the process **indefinitely** until any signal arrives. It has no duration argument and is unrelated to the sleep family discussed in the lecture.",
+                    "ro": "Capcana. `pause` nu este deloc o primitiva de suspendare temporara — suspenda procesul **la nesfarsit** pana la sosirea oricarui semnal. Nu are argument de durata si nu face parte din familia de sleep discutata in curs."
+                  }
+                }
               ],
               "explanation": { "en": "`nanosleep` provides nanosecond precision and is the most efficient. It was introduced in more recent POSIX versions and can save the remaining time if interrupted by a signal.", "ro": "`nanosleep` ofera precizie de nanosecunde si este cea mai eficienta. A fost introdusa in versiuni mai recente ale standardului POSIX si poate salva timpul ramas daca este intrerupta de un semnal." }
             }
@@ -248,20 +304,76 @@
             {
               "question": { "en": "What value does fork() return in the child process on success?", "ro": "Ce valoare returneaza fork() in procesul fiu in caz de succes?" },
               "options": [
-                { "text": { "en": "-1", "ro": "-1" }, "correct": false },
-                { "text": { "en": "The parent's PID", "ro": "PID-ul parintelui" }, "correct": false },
-                { "text": { "en": "0", "ro": "0" }, "correct": true },
-                { "text": { "en": "1", "ro": "1" }, "correct": false }
+                {
+                  "text": { "en": "-1", "ro": "-1" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. **-1** is the error return — it means `fork` failed and no child was created. It appears only in the calling (parent) process, never in the child.",
+                    "ro": "Capcana. **-1** este valoarea de eroare — inseamna ca `fork` a esuat si niciun copil nu a fost creat. Apare doar in procesul apelant (parinte), niciodata in copil."
+                  }
+                },
+                {
+                  "text": { "en": "The parent's PID", "ro": "PID-ul parintelui" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The parent's PID is not what `fork` returns. The **parent** receives the **child's PID** (a positive n); the child can find the parent's PID any time via `getppid`, but that is a separate call, not the `fork` return value.",
+                    "ro": "Capcana. PID-ul parintelui nu este ceea ce returneaza `fork`. **Parintele** primeste **PID-ul copilului** (un n pozitiv); copilul poate afla oricand PID-ul parintelui prin `getppid`, dar acela este un apel separat, nu valoarea returnata de `fork`."
+                  }
+                },
+                {
+                  "text": { "en": "0", "ro": "0" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `fork` returns **0** in the child process. This is how the child can identify itself and branch to its own code. PID 0 cannot be a real process PID (it is the kernel scheduler root), so 0 unambiguously signals \"you are the child\".",
+                    "ro": "Corect. `fork` returneaza **0** in procesul fiu. Asa poate fiul sa se identifice si sa ramifice executia catre propriul cod. PID 0 nu poate fi un PID real de proces (este radacina planificatorului kernel), deci 0 semnaleaza fara ambiguitate \"esti copilul\"."
+                  }
+                },
+                {
+                  "text": { "en": "1", "ro": "1" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. PID 1 is reserved for the `init` process and is never returned by `fork`. The child gets 0; the parent gets the child's actual PID (which is always > 1 on a running system).",
+                    "ro": "Capcana. PID 1 este rezervat pentru procesul `init` si nu este niciodata returnat de `fork`. Copilul primeste 0; parintele primeste PID-ul real al copilului (intotdeauna > 1 pe un sistem in executie)."
+                  }
+                }
               ],
               "explanation": { "en": "`fork()` returns 0 in the child process. In the parent, it returns the child's PID (a positive number). A return of -1 indicates an error.", "ro": "`fork()` returneaza 0 in procesul fiu. In parinte, returneaza PID-ul copilului (un numar pozitiv). Returnarea -1 indica o eroare." }
             },
             {
               "question": { "en": "How many processes exist after a single successful fork() call?", "ro": "Cate procese exista dupa un singur apel fork() reusit?" },
               "options": [
-                { "text": { "en": "1", "ro": "1" }, "correct": false },
-                { "text": { "en": "2", "ro": "2" }, "correct": true },
-                { "text": { "en": "3", "ro": "3" }, "correct": false },
-                { "text": { "en": "It depends on the system", "ro": "Depinde de sistem" }, "correct": false }
+                {
+                  "text": { "en": "1", "ro": "1" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Before `fork` there is 1 process; after a successful `fork` both the **parent** and the **child** continue running — that is 2 processes. The original process is not replaced.",
+                    "ro": "Capcana. Inainte de `fork` exista 1 proces; dupa un `fork` reusit atat **parintele** cat si **copilul** continua executia — adica 2 procese. Procesul original nu este inlocuit."
+                  }
+                },
+                {
+                  "text": { "en": "2", "ro": "2" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `fork` creates **one copy** of the calling process, so there are 2 processes: the original parent and the new child. Both continue execution from the instruction immediately after the `fork` call.",
+                    "ro": "Corect. `fork` creeaza **o copie** a procesului apelant, deci exista 2 procese: parintele original si copilul nou. Ambele continua executia de la instructiunea imediat dupa apelul `fork`."
+                  }
+                },
+                {
+                  "text": { "en": "3", "ro": "3" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. A single `fork` call produces exactly one child. To get 3 processes you would need a second `fork` call (e.g., one called by the parent or the child after the first `fork`).",
+                    "ro": "Capcana. Un singur apel `fork` produce exact un copil. Pentru a obtine 3 procese ai nevoie de un al doilea apel `fork` (de exemplu, unul apelat de parinte sau de copil dupa primul `fork`)."
+                  }
+                },
+                {
+                  "text": { "en": "It depends on the system", "ro": "Depinde de sistem" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The number of processes created by a single `fork` call is **always exactly 1 new process** (total 2 including the caller) — this is a POSIX guarantee, not a system-dependent value.",
+                    "ro": "Capcana. Numarul de procese create de un singur apel `fork` este **intotdeauna exact 1 proces nou** (total 2 incluzand apelantul) — aceasta este o garantie POSIX, nu o valoare dependenta de sistem."
+                  }
+                }
               ],
               "explanation": { "en": "A successful `fork()` creates exactly one new process (the child), so there are 2 processes total: the original parent and the new child.", "ro": "Un `fork()` reusit creeaza exact un proces nou (copilul), deci exista 2 procese in total: parintele original si copilul nou." }
             }
@@ -382,20 +494,76 @@
             {
               "question": { "en": "What does wait() return when there are no child processes?", "ro": "Ce returneaza wait() cand nu exista procese fiu?" },
               "options": [
-                { "text": { "en": "0", "ro": "0" }, "correct": false },
-                { "text": { "en": "-1 with errno = ECHILD", "ro": "-1 cu errno = ECHILD" }, "correct": true },
-                { "text": { "en": "It blocks forever", "ro": "Se blocheaza la nesfarsit" }, "correct": false },
-                { "text": { "en": "The parent's PID", "ro": "PID-ul parintelui" }, "correct": false }
+                {
+                  "text": { "en": "0", "ro": "0" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `wait` never returns 0 to signal \"no children\". **0** is what `waitpid` returns when `WNOHANG` is set and no child has terminated yet — a completely different scenario.",
+                    "ro": "Capcana. `wait` nu returneaza niciodata 0 pentru a semnala \"nu exista copii\". **0** este ceea ce returneaza `waitpid` cand `WNOHANG` este setat si niciun copil nu s-a terminat inca — un scenariu complet diferit."
+                  }
+                },
+                {
+                  "text": { "en": "-1 with errno = ECHILD", "ro": "-1 cu errno = ECHILD" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. When the caller has no child processes, `wait` returns **-1** and sets `errno` to `ECHILD`. This is the standard POSIX error path: always check the return value and `errno` after `wait`.",
+                    "ro": "Corect. Cand apelantul nu are procese fiu, `wait` returneaza **-1** si seteaza `errno` la `ECHILD`. Acesta este calea de eroare standard POSIX: verifica intotdeauna valoarea returnata si `errno` dupa `wait`."
+                  }
+                },
+                {
+                  "text": { "en": "It blocks forever", "ro": "Se blocheaza la nesfarsit" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `wait` blocks only if at least one child **exists but has not yet terminated**. With no children at all, it cannot block — the kernel knows immediately there is nothing to wait for and returns -1 / `ECHILD` right away.",
+                    "ro": "Capcana. `wait` se blocheaza doar daca exista cel putin un copil **care nu s-a terminat inca**. Fara niciun copil, nu poate bloca — nucleul stie imediat ca nu exista nimic de asteptat si returneaza -1 / `ECHILD` imediat."
+                  }
+                },
+                {
+                  "text": { "en": "The parent's PID", "ro": "PID-ul parintelui" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `wait` returns the **child's PID** on success, never the parent's PID. Returning the parent's own PID would be meaningless in this context.",
+                    "ro": "Capcana. `wait` returneaza **PID-ul copilului** in caz de succes, niciodata PID-ul parintelui. Returnarea propriului PID al parintelui nu ar avea sens in acest context."
+                  }
+                }
               ],
               "explanation": { "en": "When the caller has no children, `wait()` returns -1 and sets `errno` to `ECHILD` (Error: no child processes).", "ro": "Cand apelantul nu are procii fiu, `wait()` returneaza -1 si seteaza `errno` la `ECHILD` (Eroare: nu exista procese copil)." }
             },
             {
               "question": { "en": "What is the purpose of the WNOHANG option in waitpid()?", "ro": "Care este scopul optiunii WNOHANG in waitpid()?" },
               "options": [
-                { "text": { "en": "Wait for all children to terminate", "ro": "Asteapta terminarea tuturor copiilor" }, "correct": false },
-                { "text": { "en": "Return immediately if no child has terminated", "ro": "Returneaza imediat daca niciun copil nu s-a terminat" }, "correct": true },
-                { "text": { "en": "Ignore zombie processes", "ro": "Ignora procesele zombie" }, "correct": false },
-                { "text": { "en": "Wait for a specific child only", "ro": "Asteapta doar un copil specific" }, "correct": false }
+                {
+                  "text": { "en": "Wait for all children to terminate", "ro": "Asteapta terminarea tuturor copiilor" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Neither `wait` nor `waitpid` waits for **all** children in a single call — each call reaps one child. Waiting for all children requires looping until `wait` returns -1 / `ECHILD`. `WNOHANG` does not change this loop behaviour; it only removes blocking.",
+                    "ro": "Capcana. Nici `wait`, nici `waitpid` nu asteapta **toti** copiii intr-un singur apel — fiecare apel culege un singur copil. Asteptarea tuturor copiilor necesita o bucla pana cand `wait` returneaza -1 / `ECHILD`. `WNOHANG` nu schimba acest comportament de bucla; elimina doar blocarea."
+                  }
+                },
+                {
+                  "text": { "en": "Return immediately if no child has terminated", "ro": "Returneaza imediat daca niciun copil nu s-a terminat" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `WNOHANG` makes `waitpid` **non-blocking**: if no child matching the PID argument has terminated, it returns **0** immediately instead of suspending the caller. This lets the parent do other work and poll children's status periodically.",
+                    "ro": "Corect. `WNOHANG` face `waitpid` **ne-blocant**: daca niciun copil corespunzator argumentului PID nu s-a terminat, returneaza **0** imediat in loc sa suspende apelantul. Astfel parintele poate face alte lucrari si poate verifica periodic statusul copiilor."
+                  }
+                },
+                {
+                  "text": { "en": "Ignore zombie processes", "ro": "Ignora procesele zombie" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `WNOHANG` does not ignore zombies — when a zombie child exists, `waitpid` with `WNOHANG` still reaps it and returns its PID immediately. Zombies are only truly cleared when the parent (or `init`) calls `wait`/`waitpid` to collect the exit status.",
+                    "ro": "Capcana. `WNOHANG` nu ignora zombie-urile — cand exista un copil zombie, `waitpid` cu `WNOHANG` tot il culege si returneaza imediat PID-ul sau. Zombie-urile sunt cu adevarat eliminate doar cand parintele (sau `init`) apeleaza `wait`/`waitpid` pentru a colecta statusul de iesire."
+                  }
+                },
+                {
+                  "text": { "en": "Wait for a specific child only", "ro": "Asteapta doar un copil specific" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Waiting for a **specific** child is controlled by the **PID argument** of `waitpid`, not by `WNOHANG`. Pass a concrete PID to target one child; pass -1 to wait for any child. `WNOHANG` only affects whether the call blocks.",
+                    "ro": "Capcana. Asteptarea unui **copil specific** este controlata de **argumentul PID** al `waitpid`, nu de `WNOHANG`. Transmite un PID concret pentru a viza un copil; transmite -1 pentru a astepta orice copil. `WNOHANG` afecteaza doar daca apelul blocheaza sau nu."
+                  }
+                }
               ],
               "explanation": { "en": "`WNOHANG` makes `waitpid()` non-blocking. It returns 0 if no child has terminated yet, instead of suspending the caller.", "ro": "`WNOHANG` face `waitpid()` ne-blocant. Returneaza 0 daca niciun copil nu s-a terminat inca, in loc sa suspende apelantul." }
             }

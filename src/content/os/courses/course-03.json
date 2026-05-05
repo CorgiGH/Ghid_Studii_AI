@@ -184,10 +184,38 @@
             {
               "question": { "en": "What is wrong with the command `v = 123`?", "ro": "Ce este gresit la comanda `v = 123`?" },
               "options": [
-                { "text": { "en": "Nothing, it assigns 123 to v", "ro": "Nimic, atribuie 123 lui v" }, "correct": false },
-                { "text": { "en": "The spaces around = make bash interpret v as a command name", "ro": "Spatiile in jurul = fac bash sa interpreteze v ca un nume de comanda" }, "correct": true },
-                { "text": { "en": "Variables must start with $", "ro": "Variabilele trebuie sa inceapa cu $" }, "correct": false },
-                { "text": { "en": "123 is not a valid string value", "ro": "123 nu este o valoare valida de sir" }, "correct": false }
+                {
+                  "text": { "en": "Nothing, it assigns 123 to v", "ro": "Nimic, atribuie 123 lui v" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Assignment in bash has the strict form `var=expr` with no spaces. The moment you add spaces, bash no longer sees an assignment — it sees a command invocation.",
+                    "ro": "Capcana. Atribuirea in bash are forma stricta `var=expr` fara spatii. In momentul in care adaugi spatii, bash nu mai vede o atribuire — vede o invocare de comanda."
+                  }
+                },
+                {
+                  "text": { "en": "The spaces around = make bash interpret v as a command name", "ro": "Spatiile in jurul = fac bash sa interpreteze v ca un nume de comanda" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The lecture states: the `=` character must NOT be preceded or followed by whitespace. With spaces, bash parses `v` as a command name and `=` and `123` as its arguments, producing a \"command not found\" error.",
+                    "ro": "Corect. Cursul precizeaza: caracterul `=` nu trebuie sa fie precedat ori urmat de spatii albe. Cu spatii, bash parseaza `v` ca un nume de comanda si `=` si `123` ca argumente ale sale, producand eroarea \"command not found\"."
+                  }
+                },
+                {
+                  "text": { "en": "Variables must start with $", "ro": "Variabilele trebuie sa inceapa cu $" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The `$` prefix is used to *read* (substitute) a variable's value, not to assign it. On the left side of `=`, you write the bare name: `v=123`, not `$v=123`.",
+                    "ro": "Capcana. Prefixul `$` se foloseste pentru a *citi* (substitui) valoarea unei variabile, nu pentru a o atribui. Pe partea stanga a `=`, se scrie numele gol: `v=123`, nu `$v=123`."
+                  }
+                },
+                {
+                  "text": { "en": "123 is not a valid string value", "ro": "123 nu este o valoare valida de sir" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Shell variables hold strings by default, and `123` is a perfectly valid string. `v=123` (no spaces) would succeed and store the string `\"123\"` in `v`.",
+                    "ro": "Capcana. Variabilele shell au implicit valori de tip sir, iar `123` este un sir complet valid. `v=123` (fara spatii) ar reusi si ar stoca sirul `\"123\"` in `v`."
+                  }
+                }
               ],
               "explanation": { "en": "In bash, the assignment syntax `var=expr` must have NO spaces around `=`. With spaces, bash interprets `v` as a command to execute with `=` and `123` as arguments.", "ro": "In bash, sintaxa de atribuire `var=expr` nu trebuie sa aiba spatii in jurul `=`. Cu spatii, bash interpreteaza `v` ca o comanda de executat cu `=` si `123` ca argumente." }
             }
@@ -236,10 +264,38 @@
             {
               "question": { "en": "Given `f=/home/user/docs/report.txt`, what does `${f##*/}` return?", "ro": "Dat fiind `f=/home/user/docs/report.txt`, ce returneaza `${f##*/}`?" },
               "options": [
-                { "text": { "en": "report.txt", "ro": "report.txt" }, "correct": true },
-                { "text": { "en": "/home/user/docs/", "ro": "/home/user/docs/" }, "correct": false },
-                { "text": { "en": "report", "ro": "report" }, "correct": false },
-                { "text": { "en": "home/user/docs/report.txt", "ro": "home/user/docs/report.txt" }, "correct": false }
+                {
+                  "text": { "en": "report.txt", "ro": "report.txt" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `##*/` removes the **longest** prefix matching `*/` — that is, everything up to and including the last `/` — leaving only `report.txt`. This is equivalent to `basename $f`.",
+                    "ro": "Corect. `##*/` elimina **cel mai lung** prefix potrivit cu `*/` — adica totul pana la si inclusiv ultimul `/` — lasand doar `report.txt`. Echivalent cu `basename $f`."
+                  }
+                },
+                {
+                  "text": { "en": "/home/user/docs/", "ro": "/home/user/docs/" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. This would be closer to what `dirname $f` returns (the directory part), not `##*/`. The `##` operator removes a prefix from the value, not the suffix.",
+                    "ro": "Capcana. Aceasta ar corespunde mai degraba lui `dirname $f` (partea de director), nu `##*/`. Operatorul `##` elimina un prefix din valoare, nu un sufix."
+                  }
+                },
+                {
+                  "text": { "en": "report", "ro": "report" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Stripping the extension `.txt` would require a separate suffix removal: `${f%.txt}`. The `##*/` form only removes the directory prefix, leaving the full filename including extension.",
+                    "ro": "Capcana. Eliminarea extensiei `.txt` ar necesita o operatie suplimentara de eliminare a sufixului: `${f%.txt}`. Forma `##*/` elimina doar prefixul de director, lasand numele complet al fisierului inclusiv extensia."
+                  }
+                },
+                {
+                  "text": { "en": "home/user/docs/report.txt", "ro": "home/user/docs/report.txt" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The form `${f#*/}` (single `#`) removes only the **shortest** prefix matching `*/`, which strips just the leading `/`, giving `home/user/docs/report.txt`. The double `##` removes the longest match.",
+                    "ro": "Capcana. Forma `${f#*/}` (`#` simplu) elimina doar **cel mai scurt** prefix potrivit cu `*/`, adica doar `/`-ul initial, rezultand `home/user/docs/report.txt`. Dublu `##` elimina potrivirea cea mai lunga."
+                  }
+                }
               ],
               "explanation": { "en": "`${f##*/}` removes the longest prefix matching `*/`, which removes everything up to and including the last `/`, leaving just the filename `report.txt`. This is equivalent to `basename $f`.", "ro": "`${f##*/}` elimina cel mai lung prefix potrivit cu `*/`, ceea ce elimina totul pana la si inclusiv ultimul `/`, lasand doar numele fisierului `report.txt`. Echivalent cu `basename $f`." }
             }
@@ -271,10 +327,38 @@
             {
               "question": { "en": "If a script is called with `./script.sh a b c`, what is the value of `$#`?", "ro": "Daca un script este apelat cu `./script.sh a b c`, care este valoarea lui `$#`?" },
               "options": [
-                { "text": { "en": "4", "ro": "4" }, "correct": false },
-                { "text": { "en": "3", "ro": "3" }, "correct": true },
-                { "text": { "en": "0", "ro": "0" }, "correct": false },
-                { "text": { "en": "a b c", "ro": "a b c" }, "correct": false }
+                {
+                  "text": { "en": "4", "ro": "4" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Counting `$0` (the script name `./script.sh`) as a positional parameter is the classic off-by-one. The lecture explicitly states that `$#` is the number of positional parameters **without** counting `$0`.",
+                    "ro": "Capcana. A numara `$0` (numele scriptului `./script.sh`) ca parametru pozitional este eroarea clasica de indice. Cursul precizeaza explicit ca `$#` este numarul parametrilor pozitionali **fara** a-l numara pe `$0`."
+                  }
+                },
+                {
+                  "text": { "en": "3", "ro": "3" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `$#` counts positional parameters starting from `$1`. Here `$1=a`, `$2=b`, `$3=c`, so `$#=3`. `$0` (the script name) is excluded from the count.",
+                    "ro": "Corect. `$#` numara parametrii pozitionali incepand de la `$1`. Aici `$1=a`, `$2=b`, `$3=c`, deci `$#=3`. `$0` (numele scriptului) este exclus din numaratoare."
+                  }
+                },
+                {
+                  "text": { "en": "0", "ro": "0" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `$#` is 0 only when the script is called with no arguments. Three arguments were passed, so `$#=3`.",
+                    "ro": "Capcana. `$#` este 0 doar cand scriptul este apelat fara argumente. Trei argumente au fost transmise, deci `$#=3`."
+                  }
+                },
+                {
+                  "text": { "en": "a b c", "ro": "a b c" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `a b c` is the value of `$*` (or `$@`), which is the *list* of parameters. `$#` is the *count* — a number, not the parameter values themselves.",
+                    "ro": "Capcana. `a b c` este valoarea lui `$*` (sau `$@`), adica *lista* parametrilor. `$#` este *numarul* — un numar, nu valorile parametrilor in sine."
+                  }
+                }
               ],
               "explanation": { "en": "`$#` counts the positional parameters starting from `$1`. Here `$1=a`, `$2=b`, `$3=c`, so `$#=3`. Note that `$0` (the script name) is NOT counted.", "ro": "`$#` numara parametrii pozitionali incepand de la `$1`. Aici `$1=a`, `$2=b`, `$3=c`, deci `$#=3`. Nota: `$0` (numele scriptului) NU este numarat." }
             }
@@ -368,10 +452,38 @@
             {
               "question": { "en": "What is the result of `echo $((2 ** 10))`?", "ro": "Care este rezultatul lui `echo $((2 ** 10))`?" },
               "options": [
-                { "text": { "en": "20", "ro": "20" }, "correct": false },
-                { "text": { "en": "1024", "ro": "1024" }, "correct": true },
-                { "text": { "en": "1000", "ro": "1000" }, "correct": false },
-                { "text": { "en": "Error", "ro": "Eroare" }, "correct": false }
+                {
+                  "text": { "en": "20", "ro": "20" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `2 ** 10` means 2 raised to the power 10, not 2 multiplied by 10. The `**` operator inside `$((...))` is exponentiation, as the lecture shows with `let \"v *= 2 ** 3\"` = multiply by 8.",
+                    "ro": "Capcana. `2 ** 10` inseamna 2 la puterea 10, nu 2 inmultit cu 10. Operatorul `**` in interiorul `$((...))` este exponentierea, asa cum cursul arata cu `let \"v *= 2 ** 3\"` = inmultire cu 8."
+                  }
+                },
+                {
+                  "text": { "en": "1024", "ro": "1024" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `**` is the exponentiation operator in bash arithmetic expansion. `2 ** 10 = 2^10 = 1024`.",
+                    "ro": "Corect. `**` este operatorul de exponentiare in expansiunea aritmetica bash. `2 ** 10 = 2^10 = 1024`."
+                  }
+                },
+                {
+                  "text": { "en": "1000", "ro": "1000" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. 1000 is not a power of 2. `2^10 = 1024`, not 1000. A common confusion with the decimal \"kilo\" prefix.",
+                    "ro": "Capcana. 1000 nu este o putere a lui 2. `2^10 = 1024`, nu 1000. O confuzie frecventa cu prefixul zecimal \"kilo\"."
+                  }
+                },
+                {
+                  "text": { "en": "Error", "ro": "Eroare" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `$((...))` is the arithmetic expansion construct introduced in the lecture — it is valid bash syntax and `**` is a supported operator inside it. There is no error.",
+                    "ro": "Capcana. `$((...))` este constructul de expansiune aritmetica introdus in curs — este sintaxa bash valida iar `**` este un operator suportat in interiorul sau. Nu exista nicio eroare."
+                  }
+                }
               ],
               "explanation": { "en": "`**` is the exponentiation operator in bash arithmetic. `2 ** 10 = 1024`.", "ro": "`**` este operatorul de exponentiare in aritmetica bash. `2 ** 10 = 1024`." }
             }
@@ -410,10 +522,38 @@
             {
               "question": { "en": "Which command checks if variable `n` is greater than 10?", "ro": "Care comanda verifica daca variabila `n` este mai mare decat 10?" },
               "options": [
-                { "text": { "en": "test $n > 10", "ro": "test $n > 10" }, "correct": false },
-                { "text": { "en": "test $n -gt 10", "ro": "test $n -gt 10" }, "correct": true },
-                { "text": { "en": "test $n -lt 10", "ro": "test $n -lt 10" }, "correct": false },
-                { "text": { "en": "test $n == 10", "ro": "test $n == 10" }, "correct": false }
+                {
+                  "text": { "en": "test $n > 10", "ro": "test $n > 10" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `>` is not an integer comparison operator for `test`. The lecture shows integer operators use flag names: `-gt`, `-ge`, `-lt`, `-le`, `-eq`, `-ne`. Worse, the shell parses `> 10` as I/O redirection, creating a file named `10`.",
+                    "ro": "Capcana. `>` nu este un operator de comparatie intreaga pentru `test`. Cursul arata ca operatorii intregi folosesc nume de flag-uri: `-gt`, `-ge`, `-lt`, `-le`, `-eq`, `-ne`. Mai rau, shell-ul parseaza `> 10` ca redirectare I/O, creand un fisier numit `10`."
+                  }
+                },
+                {
+                  "text": { "en": "test $n -gt 10", "ro": "test $n -gt 10" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `-gt` is the integer relational operator for \"greater than\" in `test`. The lecture lists: `-eq` (equal), `-ne` (not equal), `-gt` (greater), `-ge` (greater-or-equal), `-lt` (less), `-le` (less-or-equal).",
+                    "ro": "Corect. `-gt` este operatorul relational de intregi pentru \"mai mare decat\" in `test`. Cursul listeaza: `-eq` (egal), `-ne` (diferit), `-gt` (mai mare), `-ge` (mai mare sau egal), `-lt` (mai mic), `-le` (mai mic sau egal)."
+                  }
+                },
+                {
+                  "text": { "en": "test $n -lt 10", "ro": "test $n -lt 10" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `-lt` means \"less than\", the opposite of what is asked. This tests whether `n` is *below* 10, not above it.",
+                    "ro": "Capcana. `-lt` inseamna \"mai mic decat\", opusul a ceea ce se cere. Aceasta testeaza daca `n` este *sub* 10, nu deasupra."
+                  }
+                },
+                {
+                  "text": { "en": "test $n == 10", "ro": "test $n == 10" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `==` is not a valid operator for `test`. For integer equality use `-eq`; for string equality use a single `=`. The `==` syntax is only valid inside `[[ ... ]]` or `(( ... ))`.",
+                    "ro": "Capcana. `==` nu este un operator valid pentru `test`. Pentru egalitate intreaga se foloseste `-eq`; pentru egalitate de siruri se foloseste `=` simplu. Sintaxa `==` este valida doar in interiorul `[[ ... ]]` sau `(( ... ))`."
+                  }
+                }
               ],
               "explanation": { "en": "For integer comparison, use `-gt` (greater than). The `>` operator in `test` is for lexicographic string comparison, and `> 10` would also be interpreted as output redirection to a file named `10`.", "ro": "Pentru comparatia de intregi, se foloseste `-gt` (mai mare decat). Operatorul `>` in `test` este pentru comparatie lexicografica de siruri, si `> 10` ar fi interpretat si ca redirectare de output intr-un fisier numit `10`." }
             }
@@ -674,10 +814,38 @@
             {
               "question": { "en": "What does `$0` refer to inside a shell function?", "ro": "La ce se refera `$0` in interiorul unei functii shell?" },
               "options": [
-                { "text": { "en": "The function name", "ro": "Numele functiei" }, "correct": false },
-                { "text": { "en": "The script name (or shell name)", "ro": "Numele scriptului (sau al shell-ului)" }, "correct": true },
-                { "text": { "en": "The first argument to the function", "ro": "Primul argument al functiei" }, "correct": false },
-                { "text": { "en": "Nothing (undefined)", "ro": "Nimic (nedefinit)" }, "correct": false }
+                {
+                  "text": { "en": "The function name", "ro": "Numele functiei" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Shell functions look like command calls but `$0` is **not** rebound to the function name on entry. The lecture notes that functions use `$1`, `$2`, ... for their call parameters, but `$0` retains its original meaning: the current process (script) name.",
+                    "ro": "Capcana. Functiile shell arata ca apeluri de comanda, dar `$0` **nu** este redenumit la intrarea in functie. Cursul precizeaza ca functiile folosesc `$1`, `$2`, ... pentru parametrii de apel, dar `$0` isi pastreaza sensul original: numele procesului (scriptului) curent."
+                  }
+                },
+                {
+                  "text": { "en": "The script name (or shell name)", "ro": "Numele scriptului (sau al shell-ului)" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `$0` always holds the name of the current process — inside a function that is still the script name (or the shell name if run interactively). Only `$1`, `$2`, etc. are rebound to the function's call arguments.",
+                    "ro": "Corect. `$0` contine intotdeauna numele procesului curent — in interiorul unei functii, acesta ramane in continuare numele scriptului (sau al shell-ului daca ruleaza interactiv). Doar `$1`, `$2`, etc. sunt reboundati la argumentele de apel ale functiei."
+                  }
+                },
+                {
+                  "text": { "en": "The first argument to the function", "ro": "Primul argument al functiei" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The first argument to the function is `$1`, not `$0`. This confuses the positional parameter indexing: `$0` is always the process/script name, and argument numbering starts at `$1`.",
+                    "ro": "Capcana. Primul argument al functiei este `$1`, nu `$0`. Aceasta confunda indexarea parametrilor pozitionali: `$0` este intotdeauna numele procesului/scriptului, iar numerotarea argumentelor incepe de la `$1`."
+                  }
+                },
+                {
+                  "text": { "en": "Nothing (undefined)", "ro": "Nimic (nedefinit)" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `$0` is always defined — it is a special variable maintained by the shell throughout execution. It is not reset or unset when entering a function.",
+                    "ro": "Capcana. `$0` este intotdeauna definit — este o variabila speciala mentinuta de shell pe tot parcursul executiei. Nu este resetat sau sters la intrarea intr-o functie."
+                  }
+                }
               ],
               "explanation": { "en": "Inside a function, `$1`, `$2`, etc. refer to the function's arguments, but `$0` still refers to the script name (or shell name if interactive). The function name is not accessible via a special variable.", "ro": "In interiorul unei functii, `$1`, `$2`, etc. se refera la argumentele functiei, dar `$0` se refera in continuare la numele scriptului (sau al shell-ului daca e interactiv). Numele functiei nu este accesibil printr-o variabila speciala." }
             }

@@ -1,14 +1,26 @@
 {
   "meta": {
     "id": "os-c4",
-    "title": { "en": "Course 4: POSIX File I/O Primitives", "ro": "Cursul 4: Primitivele I/O POSIX pentru fisiere" },
-    "shortTitle": { "en": "C4: File I/O", "ro": "C4: I/O Fisiere" },
-    "source": { "en": "Prof. C. Vidrascu — Lecture 4 slides", "ro": "Prof. C. Vidrascu — Curs 4" }
+    "title": {
+      "en": "Course 4: POSIX File I/O Primitives",
+      "ro": "Cursul 4: Primitivele I/O POSIX pentru fisiere"
+    },
+    "shortTitle": {
+      "en": "C4: File I/O",
+      "ro": "C4: I/O Fisiere"
+    },
+    "source": {
+      "en": "Prof. C. Vidrascu — Lecture 4 slides",
+      "ro": "Prof. C. Vidrascu — Curs 4"
+    }
   },
   "steps": [
     {
       "id": "os-c4-intro",
-      "title": { "en": "Introduction: Two Approaches to File I/O", "ro": "Introducere: Doua abordari pentru I/O cu fisiere" },
+      "title": {
+        "en": "Introduction: Two Approaches to File I/O",
+        "ro": "Introducere: Doua abordari pentru I/O cu fisiere"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -19,7 +31,10 @@
         },
         {
           "type": "definition",
-          "term": { "en": "POSIX API", "ro": "API-ul POSIX" },
+          "term": {
+            "en": "POSIX API",
+            "ro": "API-ul POSIX"
+          },
           "content": {
             "en": "Provides **wrapper functions** for kernel **system calls** supplied by Linux. These functions can be included in C programs compiled for the Linux platform and, more generally, for any UNIX-family OS that implements the POSIX standard. **Advantage:** access to all Linux kernel functionality exported to user-space. **Disadvantage:** programs using these functions are not portable (e.g., they cannot be fully compiled for Windows, though WSL partially supports them).",
             "ro": "Ofera **functii wrapper** pentru **apelurile de sistem** furnizate de nucleul Linux. Aceste functii pot fi apelate din programele C compilate pentru platforma Linux si, mai general, pentru orice sistem de operare din familia UNIX ce implementeaza standardul POSIX. **Avantaj:** acces la toate functionalitatile din nucleul Linux exportate catre user-space. **Dezavantaj:** programele care folosesc aceste functii nu sunt portabile (de ex., nu pot fi compilate complet pentru platforma Windows, desi WSL le suporta partial)."
@@ -27,7 +42,10 @@
         },
         {
           "type": "definition",
-          "term": { "en": "C Standard Library", "ro": "Biblioteca standard de C" },
+          "term": {
+            "en": "C Standard Library",
+            "ro": "Biblioteca standard de C"
+          },
           "content": {
             "en": "Provides a set of **higher-level** functions, including file I/O. These functions can be included in C programs compiled for **any platform** that offers a C compiler plus a standard library implementation. For Linux, the most common implementation is **GLIBC** (the GNU C library) from the GCC suite. **Advantage:** portable programs across diverse platforms (Windows, UNIX/Linux, etc.). **Disadvantage:** limited OS resource control; restricted to synchronous I/O only.",
             "ro": "Ofera o serie de functii de **nivel mai inalt**, inclusiv pentru lucrul cu fisiere. Aceste functii pot fi apelate din programele C compilate pentru **orice platforma** ce ofera un compilator de C plus o implementare a bibliotecii standard de C. Pentru Linux, cea mai folosita implementare este **GLIBC** (biblioteca GNU C) din suita GCC. **Avantaj:** permite scrierea de programe portabile, intre diverse platforme (Windows, UNIX/Linux, etc.). **Dezavantaj:** control limitat al resurselor SO; restrictionata doar la operatii I/O sincrone."
@@ -48,7 +66,10 @@
     },
     {
       "id": "os-c4-categories",
-      "title": { "en": "Main Categories of I/O Primitives", "ro": "Principalele categorii de primitive I/O" },
+      "title": {
+        "en": "Main Categories of I/O Primitives",
+        "ro": "Principalele categorii de primitive I/O"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -83,24 +104,116 @@
           "type": "quiz",
           "questions": [
             {
-              "question": { "en": "Which primitive is used to delete a directory in UNIX/Linux?", "ro": "Care primitiva este folosita pentru stergerea unui director in UNIX/Linux?" },
+              "question": {
+                "en": "Which primitive is used to delete a directory in UNIX/Linux?",
+                "ro": "Care primitiva este folosita pentru stergerea unui director in UNIX/Linux?"
+              },
               "options": [
-                { "text": { "en": "unlink", "ro": "unlink" }, "correct": false },
-                { "text": { "en": "rmdir", "ro": "rmdir" }, "correct": true },
-                { "text": { "en": "remove", "ro": "remove" }, "correct": false },
-                { "text": { "en": "delete", "ro": "delete" }, "correct": false }
+                {
+                  "text": {
+                    "en": "unlink",
+                    "ro": "unlink"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `unlink` removes **all non-directory** file types (regular files, symlinks, fifos, etc.) — not directories. The lecture (slide 5) explicitly lists `rmdir` and `unlink` in separate deletion categories.",
+                    "ro": "Capcana. `unlink` sterge **toate tipurile de fisiere non-director** (fisiere obisnuite, legaturi simbolice, fifos etc.) — nu directoare. Cursul (slide 5) listeaza explicit `rmdir` si `unlink` in categorii de stergere separate."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "rmdir",
+                    "ro": "rmdir"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. `rmdir` is the POSIX primitive for deleting directories. The lecture (slide 5) defines two deletion primitives: `rmdir` for directories and `unlink` for all other file types.",
+                    "ro": "Corect. `rmdir` este primitiva POSIX pentru stergerea directoarelor. Cursul (slide 5) defineste doua primitive de stergere: `rmdir` pentru directoare si `unlink` pentru toate celelalte tipuri de fisiere."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "remove",
+                    "ro": "remove"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `remove` is a C Standard Library function, not a POSIX primitive. The lecture covers only POSIX API system calls in this section; `remove` is not listed among the deletion primitives.",
+                    "ro": "Capcana. `remove` este o functie din Biblioteca standard de C, nu o primitiva POSIX. Cursul acopera doar apelurile de sistem din API-ul POSIX in aceasta sectiune; `remove` nu este listata printre primitivele de stergere."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "delete",
+                    "ro": "delete"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `delete` does not exist as a POSIX system call. Neither POSIX nor the C Standard Library defines a function with this name for file deletion.",
+                    "ro": "Capcana. `delete` nu exista ca apel de sistem POSIX. Nici POSIX si nici Biblioteca standard de C nu definesc o functie cu acest nume pentru stergerea fisierelor."
+                  }
+                }
               ],
-              "explanation": { "en": "`rmdir` is used specifically for directories. `unlink` is used for all other file types (regular files, symbolic links, etc.).", "ro": "`rmdir` este folosit specific pentru directoare. `unlink` este folosit pentru toate celelalte tipuri de fisiere (fisiere obisnuite, legaturi simbolice, etc.)." }
+              "explanation": {
+                "en": "`rmdir` is used specifically for directories. `unlink` is used for all other file types (regular files, symbolic links, etc.).",
+                "ro": "`rmdir` este folosit specific pentru directoare. `unlink` este folosit pentru toate celelalte tipuri de fisiere (fisiere obisnuite, legaturi simbolice, etc.)."
+              }
             },
             {
-              "question": { "en": "What does every POSIX I/O primitive return on error?", "ro": "Ce returneaza fiecare primitiva I/O POSIX in caz de eroare?" },
+              "question": {
+                "en": "What does every POSIX I/O primitive return on error?",
+                "ro": "Ce returneaza fiecare primitiva I/O POSIX in caz de eroare?"
+              },
               "options": [
-                { "text": { "en": "0", "ro": "0" }, "correct": false },
-                { "text": { "en": "-1", "ro": "-1" }, "correct": true },
-                { "text": { "en": "NULL", "ro": "NULL" }, "correct": false },
-                { "text": { "en": "EOF", "ro": "EOF" }, "correct": false }
+                {
+                  "text": {
+                    "en": "0",
+                    "ro": "0"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Returning **0** is the success value for many POSIX calls (e.g., `close`, `access`), not the error indicator. The lecture (slide 6 footnote) states the error value is **-1**, not 0.",
+                    "ro": "Capcana. Returnarea **0** este valoarea de succes pentru multe apeluri POSIX (de ex., `close`, `access`), nu indicatorul de eroare. Cursul (nota slide 6) precizeaza ca valoarea de eroare este **-1**, nu 0."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "-1",
+                    "ro": "-1"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. All POSIX primitives return **-1** on error and set `errno` to a specific error code. The lecture (slide 6) states this rule applies universally to all primitives in this API.",
+                    "ro": "Corect. Toate primitivele POSIX returneaza **-1** in caz de eroare si seteaza `errno` la un cod de eroare specific. Cursul (slide 6) precizeaza ca aceasta regula se aplica universal tuturor primitivelor din acest API."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "NULL",
+                    "ro": "NULL"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `NULL` is the error indicator used by **C Standard Library** functions (e.g., `fopen` returns `NULL` on failure). POSIX primitives use integer file descriptors, not pointers, so they return **-1** on error.",
+                    "ro": "Capcana. `NULL` este indicatorul de eroare folosit de functiile **Bibliotecii standard de C** (de ex., `fopen` returneaza `NULL` la esec). Primitivele POSIX folosesc descriptori de fisier intregi, nu pointeri, deci returneaza **-1` la eroare."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "EOF",
+                    "ro": "EOF"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `EOF` is a C Standard Library constant used only with stdio stream functions like `fgetc`. POSIX primitives signal errors by returning the integer **-1** and setting `errno`, independently of the EOF concept.",
+                    "ro": "Capcana. `EOF` este o constanta a Bibliotecii standard de C folosita doar cu functiile de stream stdio precum `fgetc`. Primitivele POSIX semnaleaza erorile returnand intregul **-1** si setand `errno`, independent de conceptul EOF."
+                  }
+                }
               ],
-              "explanation": { "en": "All POSIX primitives return **-1** on error and set the global variable `errno` with a specific error code. Use `perror()` to print a human-readable error message.", "ro": "Toate primitivele POSIX returneaza **-1** in caz de eroare si seteaza variabila globala `errno` cu un cod de eroare specific. Folositi `perror()` pentru a afisa un mesaj de eroare inteligibil." }
+              "explanation": {
+                "en": "All POSIX primitives return **-1** on error and set the global variable `errno` with a specific error code. Use `perror()` to print a human-readable error message.",
+                "ro": "Toate primitivele POSIX returneaza **-1** in caz de eroare si seteaza variabila globala `errno` cu un cod de eroare specific. Folositi `perror()` pentru a afisa un mesaj de eroare inteligibil."
+              }
             }
           ]
         }
@@ -108,7 +221,10 @@
     },
     {
       "id": "os-c4-access",
-      "title": { "en": "The access Primitive", "ro": "Primitiva access" },
+      "title": {
+        "en": "The access Primitive",
+        "ro": "Primitiva access"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -145,7 +261,10 @@
     },
     {
       "id": "os-c4-creat",
-      "title": { "en": "The creat Primitive", "ro": "Primitiva creat" },
+      "title": {
+        "en": "The creat Primitive",
+        "ro": "Primitiva creat"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -171,14 +290,60 @@
           "type": "quiz",
           "questions": [
             {
-              "question": { "en": "What happens when you call creat() on a file that already exists?", "ro": "Ce se intampla cand apelati creat() pe un fisier care deja exista?" },
+              "question": {
+                "en": "What happens when you call creat() on a file that already exists?",
+                "ro": "Ce se intampla cand apelati creat() pe un fisier care deja exista?"
+              },
               "options": [
-                { "text": { "en": "An error is returned (-1)", "ro": "Se returneaza o eroare (-1)" }, "correct": false },
-                { "text": { "en": "The file is truncated to zero and opened for writing", "ro": "Fisierul este trunchiat la zero si deschis in scriere" }, "correct": true },
-                { "text": { "en": "The file content is preserved and opened for appending", "ro": "Continutul fisierului este pastrat si deschis pentru adaugare" }, "correct": false },
-                { "text": { "en": "A new file with a different name is created", "ro": "Se creeaza un fisier nou cu alt nume" }, "correct": false }
+                {
+                  "text": {
+                    "en": "An error is returned (-1)",
+                    "ro": "Se returneaza o eroare (-1)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `creat` does **not** return -1 when the file already exists. The lecture (slide 8) explicitly states: if the file exists it is truncated to zero and the call succeeds, returning a valid file descriptor.",
+                    "ro": "Capcana. `creat` **nu** returneaza -1 cand fisierul deja exista. Cursul (slide 8) precizeaza explicit: daca fisierul exista, este trunchiat la zero si apelul reuseste, returnand un descriptor de fisier valid."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The file is truncated to zero and opened for writing",
+                    "ro": "Fisierul este trunchiat la zero si deschis in scriere"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The lecture (slide 8) states: when `creat` is called on an existing file, it is truncated to zero length while its access permissions are preserved, then opened for writing.",
+                    "ro": "Corect. Cursul (slide 8) precizeaza: cand `creat` este apelat pe un fisier existent, acesta este trunchiat la zero pastrand permisiunile de acces, apoi deschis in scriere."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The file content is preserved and opened for appending",
+                    "ro": "Continutul fisierului este pastrat si deschis pentru adaugare"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. This describes `O_APPEND` behavior. `creat` is equivalent to `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)` — the `O_TRUNC` flag destroys existing content; it does **not** preserve or append.",
+                    "ro": "Capcana. Aceasta descrie comportamentul `O_APPEND`. `creat` este echivalent cu `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)` — flag-ul `O_TRUNC` distruge continutul existent; **nu** il pastreaza si nu face append."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "A new file with a different name is created",
+                    "ro": "Se creeaza un fisier nou cu alt nume"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `creat` never creates a new name. It operates on exactly the path given. If the file exists, it is truncated in place; no renaming or alternative naming occurs.",
+                    "ro": "Capcana. `creat` nu creeaza niciodata un nume nou. Opereaza exact pe calea data. Daca fisierul exista, este trunchiat pe loc; nu are loc nicio redenumire sau numire alternativa."
+                  }
+                }
               ],
-              "explanation": { "en": "When `creat()` is called on an existing file, the file is truncated to zero length (all content is deleted) while its permissions are preserved. The file is then opened for writing.", "ro": "Cand `creat()` este apelat pe un fisier existent, fisierul este trunchiat la zero (tot continutul este sters) iar permisiunile sunt pastrate. Fisierul este apoi deschis in scriere." }
+              "explanation": {
+                "en": "When `creat()` is called on an existing file, the file is truncated to zero length (all content is deleted) while its permissions are preserved. The file is then opened for writing.",
+                "ro": "Cand `creat()` este apelat pe un fisier existent, fisierul este trunchiat la zero (tot continutul este sters) iar permisiunile sunt pastrate. Fisierul este apoi deschis in scriere."
+              }
             }
           ]
         }
@@ -186,7 +351,10 @@
     },
     {
       "id": "os-c4-open",
-      "title": { "en": "The open Primitive", "ro": "Primitiva open" },
+      "title": {
+        "en": "The open Primitive",
+        "ro": "Primitiva open"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -202,7 +370,10 @@
         },
         {
           "type": "definition",
-          "term": { "en": "File Descriptor", "ro": "Descriptor de fisier" },
+          "term": {
+            "en": "File Descriptor",
+            "ro": "Descriptor de fisier"
+          },
           "content": {
             "en": "A non-negative integer that serves as an index into the per-process local file descriptor table. Each entry in this table points to an entry in the kernel's global open file table. File descriptors 0, 1, and 2 are conventionally reserved for **stdin**, **stdout**, and **stderr** respectively.",
             "ro": "Un intreg non-negativ care serveste ca index in tabela locala de descriptori de fisiere a procesului. Fiecare intrare din aceasta tabela pointeaza catre o intrare in tabela globala de fisiere deschise a nucleului. Descriptorii de fisier 0, 1 si 2 sunt rezervati conventional pentru **stdin**, **stdout** si respectiv **stderr**."
@@ -210,35 +381,171 @@
         },
         {
           "type": "table",
-          "caption": { "en": "Common open() Flags", "ro": "Flag-uri comune open()" },
+          "caption": {
+            "en": "Common open() Flags",
+            "ro": "Flag-uri comune open()"
+          },
           "headers": [
-            { "en": "Flag", "ro": "Flag" },
-            { "en": "Description", "ro": "Descriere" }
+            {
+              "en": "Flag",
+              "ro": "Flag"
+            },
+            {
+              "en": "Description",
+              "ro": "Descriere"
+            }
           ],
           "rows": [
-            [{ "en": "`O_RDONLY`", "ro": "`O_RDONLY`" }, { "en": "Open for reading only", "ro": "Deschide doar pentru citire" }],
-            [{ "en": "`O_WRONLY`", "ro": "`O_WRONLY`" }, { "en": "Open for writing only", "ro": "Deschide doar pentru scriere" }],
-            [{ "en": "`O_RDWR`", "ro": "`O_RDWR`" }, { "en": "Open for reading and writing", "ro": "Deschide pentru citire si scriere" }],
-            [{ "en": "`O_CREAT`", "ro": "`O_CREAT`" }, { "en": "Create the file if it does not exist", "ro": "Creeaza fisierul daca nu exista" }],
-            [{ "en": "`O_TRUNC`", "ro": "`O_TRUNC`" }, { "en": "Truncate file to zero length", "ro": "Trunchiaza fisierul la lungime zero" }],
-            [{ "en": "`O_APPEND`", "ro": "`O_APPEND`" }, { "en": "Append writes to end of file", "ro": "Scrierile se adauga la sfarsitul fisierului" }],
-            [{ "en": "`O_EXCL`", "ro": "`O_EXCL`" }, { "en": "With O_CREAT, fail if file exists", "ro": "Cu O_CREAT, esueaza daca fisierul exista" }],
-            [{ "en": "`O_SYNC`", "ro": "`O_SYNC`" }, { "en": "Synchronous writes (bypass cache)", "ro": "Scrieri sincrone (ocoleste cache-ul)" }],
-            [{ "en": "`O_DIRECT`", "ro": "`O_DIRECT`" }, { "en": "Direct I/O (bypass file-system cache)", "ro": "I/O direct (ocoleste cache-ul file-system)" }]
+            [
+              {
+                "en": "`O_RDONLY`",
+                "ro": "`O_RDONLY`"
+              },
+              {
+                "en": "Open for reading only",
+                "ro": "Deschide doar pentru citire"
+              }
+            ],
+            [
+              {
+                "en": "`O_WRONLY`",
+                "ro": "`O_WRONLY`"
+              },
+              {
+                "en": "Open for writing only",
+                "ro": "Deschide doar pentru scriere"
+              }
+            ],
+            [
+              {
+                "en": "`O_RDWR`",
+                "ro": "`O_RDWR`"
+              },
+              {
+                "en": "Open for reading and writing",
+                "ro": "Deschide pentru citire si scriere"
+              }
+            ],
+            [
+              {
+                "en": "`O_CREAT`",
+                "ro": "`O_CREAT`"
+              },
+              {
+                "en": "Create the file if it does not exist",
+                "ro": "Creeaza fisierul daca nu exista"
+              }
+            ],
+            [
+              {
+                "en": "`O_TRUNC`",
+                "ro": "`O_TRUNC`"
+              },
+              {
+                "en": "Truncate file to zero length",
+                "ro": "Trunchiaza fisierul la lungime zero"
+              }
+            ],
+            [
+              {
+                "en": "`O_APPEND`",
+                "ro": "`O_APPEND`"
+              },
+              {
+                "en": "Append writes to end of file",
+                "ro": "Scrierile se adauga la sfarsitul fisierului"
+              }
+            ],
+            [
+              {
+                "en": "`O_EXCL`",
+                "ro": "`O_EXCL`"
+              },
+              {
+                "en": "With O_CREAT, fail if file exists",
+                "ro": "Cu O_CREAT, esueaza daca fisierul exista"
+              }
+            ],
+            [
+              {
+                "en": "`O_SYNC`",
+                "ro": "`O_SYNC`"
+              },
+              {
+                "en": "Synchronous writes (bypass cache)",
+                "ro": "Scrieri sincrone (ocoleste cache-ul)"
+              }
+            ],
+            [
+              {
+                "en": "`O_DIRECT`",
+                "ro": "`O_DIRECT`"
+              },
+              {
+                "en": "Direct I/O (bypass file-system cache)",
+                "ro": "I/O direct (ocoleste cache-ul file-system)"
+              }
+            ]
           ]
         },
         {
           "type": "quiz",
           "questions": [
             {
-              "question": { "en": "Which combination of flags in open() is equivalent to calling creat()?", "ro": "Care combinatie de flag-uri in open() este echivalenta cu apelarea creat()?" },
+              "question": {
+                "en": "Which combination of flags in open() is equivalent to calling creat()?",
+                "ro": "Care combinatie de flag-uri in open() este echivalenta cu apelarea creat()?"
+              },
               "options": [
-                { "text": { "en": "O_RDONLY | O_CREAT", "ro": "O_RDONLY | O_CREAT" }, "correct": false },
-                { "text": { "en": "O_WRONLY | O_CREAT | O_TRUNC", "ro": "O_WRONLY | O_CREAT | O_TRUNC" }, "correct": true },
-                { "text": { "en": "O_RDWR | O_CREAT", "ro": "O_RDWR | O_CREAT" }, "correct": false },
-                { "text": { "en": "O_WRONLY | O_APPEND", "ro": "O_WRONLY | O_APPEND" }, "correct": false }
+                {
+                  "text": {
+                    "en": "O_RDONLY | O_CREAT",
+                    "ro": "O_RDONLY | O_CREAT"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `O_RDONLY` opens for **reading only**, but `creat` opens for **writing**. Also, `O_CREAT` alone does not truncate an existing file — `O_TRUNC` is required for that behavior.",
+                    "ro": "Capcana. `O_RDONLY` deschide **doar pentru citire**, dar `creat` deschide pentru **scriere**. De asemenea, `O_CREAT` singur nu trunchiaza un fisier existent — `O_TRUNC` este necesar pentru acel comportament."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "O_WRONLY | O_CREAT | O_TRUNC",
+                    "ro": "O_WRONLY | O_CREAT | O_TRUNC"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The lecture (slide 8) states: `creat(path, perms)` is equivalent to `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)`. This combination writes only, creates if absent, and truncates if present.",
+                    "ro": "Corect. Cursul (slide 8) precizeaza: `creat(path, perms)` este echivalent cu `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)`. Aceasta combinatie deschide doar in scriere, creeaza daca lipseste si trunchiaza daca exista."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "O_RDWR | O_CREAT",
+                    "ro": "O_RDWR | O_CREAT"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `O_RDWR` opens for **both reading and writing**, but `creat` opens for **writing only** (`O_WRONLY`). Missing `O_TRUNC` also means an existing file would not be truncated.",
+                    "ro": "Capcana. `O_RDWR` deschide **atat pentru citire cat si scriere**, dar `creat` deschide **doar in scriere** (`O_WRONLY`). Lipsa `O_TRUNC` inseamna ca un fisier existent nu ar fi trunchiat."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "O_WRONLY | O_APPEND",
+                    "ro": "O_WRONLY | O_APPEND"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. This describes append mode — data is added at the end without truncating. `creat` uses `O_TRUNC` to destroy existing content, not `O_APPEND`. Also missing `O_CREAT` means the file must already exist.",
+                    "ro": "Capcana. Aceasta descrie modul append — datele sunt adaugate la sfarsit fara a trunchia. `creat` foloseste `O_TRUNC` pentru a distruge continutul existent, nu `O_APPEND`. De asemenea, lipsa `O_CREAT` inseamna ca fisierul trebuie sa existe deja."
+                  }
+                }
               ],
-              "explanation": { "en": "`creat(path, perms)` is equivalent to `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)` — it opens for writing only, creates if needed, and truncates if the file exists.", "ro": "`creat(path, perms)` este echivalent cu `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)` — deschide doar pentru scriere, creeaza daca e nevoie si trunchiaza daca fisierul exista." }
+              "explanation": {
+                "en": "`creat(path, perms)` is equivalent to `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)` — it opens for writing only, creates if needed, and truncates if the file exists.",
+                "ro": "`creat(path, perms)` este echivalent cu `open(path, O_WRONLY | O_CREAT | O_TRUNC, perms)` — deschide doar pentru scriere, creeaza daca e nevoie si trunchiaza daca fisierul exista."
+              }
             }
           ]
         }
@@ -246,7 +553,10 @@
     },
     {
       "id": "os-c4-read",
-      "title": { "en": "The read Primitive", "ro": "Primitiva read" },
+      "title": {
+        "en": "The read Primitive",
+        "ro": "Primitiva read"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -283,7 +593,10 @@
     },
     {
       "id": "os-c4-write",
-      "title": { "en": "The write Primitive", "ro": "Primitiva write" },
+      "title": {
+        "en": "The write Primitive",
+        "ro": "Primitiva write"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -309,14 +622,60 @@
           "type": "quiz",
           "questions": [
             {
-              "question": { "en": "When can write() return fewer bytes than requested?", "ro": "Cand poate write() sa returneze mai putini octeti decat cei ceruti?" },
+              "question": {
+                "en": "When can write() return fewer bytes than requested?",
+                "ro": "Cand poate write() sa returneze mai putini octeti decat cei ceruti?"
+              },
               "options": [
-                { "text": { "en": "When the file is opened in read-only mode", "ro": "Cand fisierul este deschis in modul doar-citire" }, "correct": false },
-                { "text": { "en": "When there is insufficient disk space or quota is exceeded", "ro": "Cand nu exista suficient spatiu pe disc sau cota este depasita" }, "correct": true },
-                { "text": { "en": "When the buffer is too small", "ro": "Cand bufferul este prea mic" }, "correct": false },
-                { "text": { "en": "This never happens; write always writes all bytes or fails", "ro": "Nu se intampla niciodata; write scrie intotdeauna toti octetii sau esueaza" }, "correct": false }
+                {
+                  "text": {
+                    "en": "When the file is opened in read-only mode",
+                    "ro": "Cand fisierul este deschis in modul doar-citire"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Attempting to `write` to a read-only file descriptor returns **-1** (error), not a partial count. A partial write (positive count less than requested) is a distinct success case that occurs only when the write partially succeeds.",
+                    "ro": "Capcana. Incercarea de a `write` pe un descriptor deschis doar in citire returneaza **-1** (eroare), nu un contor partial. O scriere partiala (contor pozitiv mai mic decat cel cerut) este un caz de succes distinct care apare doar cand scrierea reuseste partial."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "When there is insufficient disk space or quota is exceeded",
+                    "ro": "Cand nu exista suficient spatiu pe disc sau cota este depasita"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The lecture (slide 11) states: the number of bytes actually written can be less than requested if growing the file would require more disk space and this cannot be done — due to insufficient free space or exceeded quota.",
+                    "ro": "Corect. Cursul (slide 11) precizeaza: numarul de octeti efectiv scrisi poate fi mai mic decat cel cerut daca marirea fisierului ar provoca cresterea spatiului alocat, iar aceasta nu se poate face din diverse motive — lipsa de spatiu liber sau depasire quota."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "When the buffer is too small",
+                    "ro": "Cand bufferul este prea mic"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The size of the user-space buffer has no bearing on partial writes. `write` receives a pointer and a byte count; the kernel copies directly from that memory region regardless of how that buffer was allocated.",
+                    "ro": "Capcana. Dimensiunea bufferului din user-space nu influenteaza scrierile partiale. `write` primeste un pointer si un numar de octeti; nucleul copiaza direct din acea zona de memorie indiferent de cum a fost alocat bufferul."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "This never happens; write always writes all bytes or fails",
+                    "ro": "Nu se intampla niciodata; write scrie intotdeauna toti octetii sau esueaza"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The lecture (slide 11) explicitly notes that the count of bytes written **can** be less than requested. Assuming all bytes are always written is a common programming error; programs must always check the return value.",
+                    "ro": "Capcana. Cursul (slide 11) noteaza explicit ca numarul de octeti scrisi **poate** fi mai mic decat cel cerut. A presupune ca toti octetii sunt intotdeauna scrisi este o eroare frecventa de programare; programele trebuie sa verifice intotdeauna valoarea returnata."
+                  }
+                }
               ],
-              "explanation": { "en": "A partial write occurs when the system cannot grow the file to accommodate all the data, typically due to insufficient disk space or exceeding the user's disk quota. The program should check the return value and handle partial writes.", "ro": "O scriere partiala apare cand sistemul nu poate mari fisierul pentru a gazdui toate datele, de obicei din cauza spatiului insuficient pe disc sau depasirii cotei utilizatorului. Programul trebuie sa verifice valoarea returnata si sa trateze scrierile partiale." }
+              "explanation": {
+                "en": "A partial write occurs when the system cannot grow the file to accommodate all the data, typically due to insufficient disk space or exceeding the user's disk quota. The program should check the return value and handle partial writes.",
+                "ro": "O scriere partiala apare cand sistemul nu poate mari fisierul pentru a gazdui toate datele, de obicei din cauza spatiului insuficient pe disc sau depasirii cotei utilizatorului. Programul trebuie sa verifice valoarea returnata si sa trateze scrierile partiale."
+              }
             }
           ]
         }
@@ -324,7 +683,10 @@
     },
     {
       "id": "os-c4-lseek",
-      "title": { "en": "The lseek Primitive", "ro": "Primitiva lseek" },
+      "title": {
+        "en": "The lseek Primitive",
+        "ro": "Primitiva lseek"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -340,16 +702,67 @@
         },
         {
           "type": "table",
-          "caption": { "en": "lseek Modes", "ro": "Modurile lseek" },
+          "caption": {
+            "en": "lseek Modes",
+            "ro": "Modurile lseek"
+          },
           "headers": [
-            { "en": "Mode", "ro": "Mod" },
-            { "en": "Constant", "ro": "Constanta" },
-            { "en": "Meaning", "ro": "Semnificatie" }
+            {
+              "en": "Mode",
+              "ro": "Mod"
+            },
+            {
+              "en": "Constant",
+              "ro": "Constanta"
+            },
+            {
+              "en": "Meaning",
+              "ro": "Semnificatie"
+            }
           ],
           "rows": [
-            [{ "en": "0", "ro": "0" }, { "en": "`SEEK_SET`", "ro": "`SEEK_SET`" }, { "en": "Offset from the beginning of the file", "ro": "Deplasament fata de inceputul fisierului" }],
-            [{ "en": "1", "ro": "1" }, { "en": "`SEEK_CUR`", "ro": "`SEEK_CUR`" }, { "en": "Offset from the current cursor position", "ro": "Deplasament fata de pozitia curenta a cursorului" }],
-            [{ "en": "2", "ro": "2" }, { "en": "`SEEK_END`", "ro": "`SEEK_END`" }, { "en": "Offset from the end of the file", "ro": "Deplasament fata de sfarsitul fisierului" }]
+            [
+              {
+                "en": "0",
+                "ro": "0"
+              },
+              {
+                "en": "`SEEK_SET`",
+                "ro": "`SEEK_SET`"
+              },
+              {
+                "en": "Offset from the beginning of the file",
+                "ro": "Deplasament fata de inceputul fisierului"
+              }
+            ],
+            [
+              {
+                "en": "1",
+                "ro": "1"
+              },
+              {
+                "en": "`SEEK_CUR`",
+                "ro": "`SEEK_CUR`"
+              },
+              {
+                "en": "Offset from the current cursor position",
+                "ro": "Deplasament fata de pozitia curenta a cursorului"
+              }
+            ],
+            [
+              {
+                "en": "2",
+                "ro": "2"
+              },
+              {
+                "en": "`SEEK_END`",
+                "ro": "`SEEK_END`"
+              },
+              {
+                "en": "Offset from the end of the file",
+                "ro": "Deplasament fata de sfarsitul fisierului"
+              }
+            ]
           ]
         },
         {
@@ -367,7 +780,10 @@
     },
     {
       "id": "os-c4-close",
-      "title": { "en": "The close Primitive", "ro": "Primitiva close" },
+      "title": {
+        "en": "The close Primitive",
+        "ro": "Primitiva close"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -392,7 +808,10 @@
     },
     {
       "id": "os-c4-demo-cp",
-      "title": { "en": "Demo: POSIX File Copy Program", "ro": "Demo: Program de copiere cu POSIX" },
+      "title": {
+        "en": "Demo: POSIX File Copy Program",
+        "ro": "Demo: Program de copiere cu POSIX"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -421,7 +840,10 @@
     },
     {
       "id": "os-c4-demo-lseek",
-      "title": { "en": "Demo: Reading with lseek", "ro": "Demo: Citire cu lseek" },
+      "title": {
+        "en": "Demo: Reading with lseek",
+        "ro": "Demo: Citire cu lseek"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -455,7 +877,10 @@
     },
     {
       "id": "os-c4-other-primitives",
-      "title": { "en": "Other File I/O Primitives", "ro": "Alte primitive I/O pentru fisiere" },
+      "title": {
+        "en": "Other File I/O Primitives",
+        "ro": "Alte primitive I/O pentru fisiere"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -466,7 +891,10 @@
         },
         {
           "type": "definition",
-          "term": { "en": "mkfifo", "ro": "mkfifo" },
+          "term": {
+            "en": "mkfifo",
+            "ro": "mkfifo"
+          },
           "content": {
             "en": "Creates a **FIFO file** (named pipe), which is a special file type for inter-process communication. Interface: `int mkfifo(char* nume_cale, mode_t perm_acces)`. Returns 0 on success, -1 on error. The `perm_acces` parameter specifies the access permissions for the created FIFO.",
             "ro": "Creeaza un **fisier FIFO** (pipe cu nume), care este un tip special de fisier pentru comunicare intre procese. Interfata: `int mkfifo(char* nume_cale, mode_t perm_acces)`. Returneaza 0 in caz de succes, -1 in caz de eroare. Parametrul `perm_acces` specifica drepturile de acces pentru FIFO-ul creat."
@@ -476,7 +904,10 @@
     },
     {
       "id": "os-c4-directory-io",
-      "title": { "en": "Directory I/O Primitives", "ro": "Primitive I/O pentru directoare" },
+      "title": {
+        "en": "Directory I/O Primitives",
+        "ro": "Primitive I/O pentru directoare"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -501,7 +932,10 @@
     },
     {
       "id": "os-c4-directory-template",
-      "title": { "en": "Directory Work Template", "ro": "Sablonul de lucru cu directoare" },
+      "title": {
+        "en": "Directory Work Template",
+        "ro": "Sablonul de lucru cu directoare"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -527,14 +961,60 @@
           "type": "quiz",
           "questions": [
             {
-              "question": { "en": "What is the correct order of operations for traversing a directory?", "ro": "Care este ordinea corecta a operatiilor pentru parcurgerea unui director?" },
+              "question": {
+                "en": "What is the correct order of operations for traversing a directory?",
+                "ro": "Care este ordinea corecta a operatiilor pentru parcurgerea unui director?"
+              },
               "options": [
-                { "text": { "en": "readdir -> opendir -> closedir", "ro": "readdir -> opendir -> closedir" }, "correct": false },
-                { "text": { "en": "opendir -> readdir (loop) -> closedir", "ro": "opendir -> readdir (bucla) -> closedir" }, "correct": true },
-                { "text": { "en": "open -> read -> close", "ro": "open -> read -> close" }, "correct": false },
-                { "text": { "en": "mkdir -> readdir -> rmdir", "ro": "mkdir -> readdir -> rmdir" }, "correct": false }
+                {
+                  "text": {
+                    "en": "readdir -> opendir -> closedir",
+                    "ro": "readdir -> opendir -> closedir"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. You cannot call `readdir` before `opendir` — there is no `DIR*` handle yet. The lecture (slide 18) shows the template always starts with `opendir` to obtain the directory handle.",
+                    "ro": "Capcana. Nu puteti apela `readdir` inainte de `opendir` — nu exista inca un handle `DIR*`. Cursul (slide 18) arata ca sablonul incepe intotdeauna cu `opendir` pentru a obtine handle-ul de director."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "opendir -> readdir (loop) -> closedir",
+                    "ro": "opendir -> readdir (bucla) -> closedir"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The lecture (slide 18) shows this exact template: `opendir` obtains a `DIR*` handle, `readdir` is called in a loop until it returns `NULL`, then `closedir` releases the handle.",
+                    "ro": "Corect. Cursul (slide 18) prezinta exact acest sablon: `opendir` obtine un handle `DIR*`, `readdir` este apelat intr-o bucla pana returneaza `NULL`, apoi `closedir` elibereaza handle-ul."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "open -> read -> close",
+                    "ro": "open -> read -> close"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `open`/`read`/`close` are POSIX primitives for **regular files**, using integer file descriptors. Directories require the distinct `opendir`/`readdir`/`closedir` API that returns `DIR*` handles and `struct dirent*` entries.",
+                    "ro": "Capcana. `open`/`read`/`close` sunt primitive POSIX pentru **fisiere obisnuite**, folosind descriptori de fisier intregi. Directoarele necesita API-ul distinct `opendir`/`readdir`/`closedir` care returneaza handle-uri `DIR*` si intrari `struct dirent*`."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "mkdir -> readdir -> rmdir",
+                    "ro": "mkdir -> readdir -> rmdir"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `mkdir` creates a new directory and `rmdir` removes one — neither is part of directory traversal. The lecture (slide 17) covers `mkdir`/`rmdir` as creation/deletion primitives, completely separate from the traversal template.",
+                    "ro": "Capcana. `mkdir` creeaza un director nou si `rmdir` sterge unul — niciunul nu face parte din parcurgerea unui director. Cursul (slide 17) acopera `mkdir`/`rmdir` ca primitive de creare/stergere, complet separate de sablonul de parcurgere."
+                  }
+                }
               ],
-              "explanation": { "en": "The correct pattern is: `opendir` to get a `DIR*` handle, then `readdir` in a loop until it returns `NULL`, then `closedir` to release the handle. Using `open`/`read`/`close` is for regular files, not directories.", "ro": "Sablonul corect este: `opendir` pentru a obtine un handle `DIR*`, apoi `readdir` intr-o bucla pana returneaza `NULL`, apoi `closedir` pentru a elibera handle-ul. Folosirea `open`/`read`/`close` este pentru fisiere obisnuite, nu directoare." }
+              "explanation": {
+                "en": "The correct pattern is: `opendir` to get a `DIR*` handle, then `readdir` in a loop until it returns `NULL`, then `closedir` to release the handle. Using `open`/`read`/`close` is for regular files, not directories.",
+                "ro": "Sablonul corect este: `opendir` pentru a obtine un handle `DIR*`, apoi `readdir` intr-o bucla pana returneaza `NULL`, apoi `closedir` pentru a elibera handle-ul. Folosirea `open`/`read`/`close` este pentru fisiere obisnuite, nu directoare."
+              }
             }
           ]
         }
@@ -542,7 +1022,10 @@
     },
     {
       "id": "os-c4-filesystem-cache",
-      "title": { "en": "The Linux File-System Cache", "ro": "Cache-ul file-system gestionat de nucleul Linux" },
+      "title": {
+        "en": "The Linux File-System Cache",
+        "ro": "Cache-ul file-system gestionat de nucleul Linux"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -581,7 +1064,10 @@
     },
     {
       "id": "os-c4-stdlib-overview",
-      "title": { "en": "C Standard Library: Overview", "ro": "Biblioteca standard de C: Prezentare generala" },
+      "title": {
+        "en": "C Standard Library: Overview",
+        "ro": "Biblioteca standard de C: Prezentare generala"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -601,7 +1087,10 @@
     },
     {
       "id": "os-c4-stdlib-io-functions",
-      "title": { "en": "C Standard Library I/O Functions", "ro": "Functiile I/O din biblioteca standard de C" },
+      "title": {
+        "en": "C Standard Library I/O Functions",
+        "ro": "Functiile I/O din biblioteca standard de C"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -629,14 +1118,60 @@
           "type": "quiz",
           "questions": [
             {
-              "question": { "en": "What is the key difference between POSIX read/write and C library fread/fwrite?", "ro": "Care este diferenta cheie intre read/write POSIX si fread/fwrite din biblioteca C?" },
+              "question": {
+                "en": "What is the key difference between POSIX read/write and C library fread/fwrite?",
+                "ro": "Care este diferenta cheie intre read/write POSIX si fread/fwrite din biblioteca C?"
+              },
               "options": [
-                { "text": { "en": "fread/fwrite are faster because they bypass the kernel", "ro": "fread/fwrite sunt mai rapide pentru ca ocolesc nucleul" }, "correct": false },
-                { "text": { "en": "fread/fwrite add a user-space buffer layer on top of the kernel cache", "ro": "fread/fwrite adauga un strat de buffer in user-space peste cache-ul nucleului" }, "correct": true },
-                { "text": { "en": "read/write work with FILE* pointers while fread/fwrite use file descriptors", "ro": "read/write lucreaza cu pointeri FILE* iar fread/fwrite folosesc descriptori de fisier" }, "correct": false },
-                { "text": { "en": "There is no difference; they are aliases for the same functions", "ro": "Nu exista diferenta; sunt aliasuri pentru aceleasi functii" }, "correct": false }
+                {
+                  "text": {
+                    "en": "fread/fwrite are faster because they bypass the kernel",
+                    "ro": "fread/fwrite sunt mai rapide pentru ca ocolesc nucleul"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. `fread`/`fwrite` do **not** bypass the kernel — they ultimately invoke kernel system calls. The lecture (slides 22-23) explains they add a **user-space buffer on top of** the kernel file-system cache, which is the opposite of bypassing it.",
+                    "ro": "Capcana. `fread`/`fwrite` **nu** ocolesc nucleul — in final invoca apeluri de sistem ale nucleului. Cursul (slide-urile 22-23) explica ca adauga un **buffer in user-space deasupra** cache-ului file-system al nucleului, ceea ce este opusul ocolirii acestuia."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "fread/fwrite add a user-space buffer layer on top of the kernel cache",
+                    "ro": "fread/fwrite adauga un strat de buffer in user-space peste cache-ul nucleului"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The lecture (slides 22-23) states: C library functions are buffered — they use a cache at the standard library level, placed **above** the kernel file-system cache. This user-space buffer is per-process, not system-wide.",
+                    "ro": "Corect. Cursul (slide-urile 22-23) precizeaza: functiile bibliotecii C lucreaza buffer-izat — folosesc un cache la nivelul bibliotecii standard, plasat **deasupra** cache-ului file-system al nucleului. Acest buffer user-space este per-proces, nu la nivel de sistem."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "read/write work with FILE* pointers while fread/fwrite use file descriptors",
+                    "ro": "read/write lucreaza cu pointeri FILE* iar fread/fwrite folosesc descriptori de fisier"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. This is exactly backwards. POSIX `read`/`write` use **integer file descriptors** (`int`). C library `fread`/`fwrite` use **`FILE*` pointers**. The lecture (slide 22) explicitly notes that file sessions in the C library are identified by `FILE*` pointers, not `int` descriptors.",
+                    "ro": "Capcana. Aceasta este exact invers. POSIX `read`/`write` folosesc **descriptori de fisier intregi** (`int`). `fread`/`fwrite` din biblioteca C folosesc **pointeri `FILE*`**. Cursul (slide 22) noteaza explicit ca sesiunile de lucru cu fisiere in biblioteca C sunt identificate prin pointeri `FILE*`, nu descriptori `int`."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "There is no difference; they are aliases for the same functions",
+                    "ro": "Nu exista diferenta; sunt aliasuri pentru aceleasi functii"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The lecture (slides 21-23) dedicates an entire section to their differences: POSIX primitives interact directly with the kernel cache, while C library functions add a second buffering layer in user-space, making data potentially invisible to other processes between flushes.",
+                    "ro": "Capcana. Cursul (slide-urile 21-23) dedica o sectiune intreaga diferentelor lor: primitivele POSIX interactioneaza direct cu cache-ul nucleului, in timp ce functiile bibliotecii C adauga un al doilea strat de buffering in user-space, facand datele potential invizibile altor procese intre operatii de flush."
+                  }
+                }
               ],
-              "explanation": { "en": "POSIX `read`/`write` interact directly with the kernel's file-system cache. C library `fread`/`fwrite` add an additional **user-space buffer** (per-process, in the stdio library) on top of the kernel cache. This extra buffering reduces the number of system calls but means data may not be immediately visible to other processes.", "ro": "POSIX `read`/`write` interactioneaza direct cu cache-ul file-system al nucleului. `fread`/`fwrite` din biblioteca C adauga un **buffer suplimentar in user-space** (per-proces, in biblioteca stdio) peste cache-ul nucleului. Acest buffering suplimentar reduce numarul de apeluri de sistem dar inseamna ca datele pot sa nu fie imediat vizibile altor procese." }
+              "explanation": {
+                "en": "POSIX `read`/`write` interact directly with the kernel's file-system cache. C library `fread`/`fwrite` add an additional **user-space buffer** (per-process, in the stdio library) on top of the kernel cache. This extra buffering reduces the number of system calls but means data may not be immediately visible to other processes.",
+                "ro": "POSIX `read`/`write` interactioneaza direct cu cache-ul file-system al nucleului. `fread`/`fwrite` din biblioteca C adauga un **buffer suplimentar in user-space** (per-proces, in biblioteca stdio) peste cache-ul nucleului. Acest buffering suplimentar reduce numarul de apeluri de sistem dar inseamna ca datele pot sa nu fie imediat vizibile altor procese."
+              }
             }
           ]
         }
@@ -644,7 +1179,10 @@
     },
     {
       "id": "os-c4-formatted-io",
-      "title": { "en": "Formatted I/O Library Functions", "ro": "Functiile de biblioteca pentru I/O formatat" },
+      "title": {
+        "en": "Formatted I/O Library Functions",
+        "ro": "Functiile de biblioteca pentru I/O formatat"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -655,29 +1193,161 @@
         },
         {
           "type": "table",
-          "caption": { "en": "Common Format Specifiers", "ro": "Specificatori de format comuni" },
+          "caption": {
+            "en": "Common Format Specifiers",
+            "ro": "Specificatori de format comuni"
+          },
           "headers": [
-            { "en": "Specifier", "ro": "Specificator" },
-            { "en": "Type", "ro": "Tip" },
-            { "en": "Description", "ro": "Descriere" }
+            {
+              "en": "Specifier",
+              "ro": "Specificator"
+            },
+            {
+              "en": "Type",
+              "ro": "Tip"
+            },
+            {
+              "en": "Description",
+              "ro": "Descriere"
+            }
           ],
           "rows": [
-            [{ "en": "`%c`", "ro": "`%c`" }, { "en": "`char`", "ro": "`char`" }, { "en": "A single character", "ro": "Un singur caracter" }],
-            [{ "en": "`%d` / `%i`", "ro": "`%d` / `%i`" }, { "en": "`int`", "ro": "`int`" }, { "en": "Signed integer in base 10", "ro": "Intreg cu semn in baza 10" }],
-            [{ "en": "`%u`", "ro": "`%u`" }, { "en": "`unsigned int`", "ro": "`unsigned int`" }, { "en": "Unsigned integer in base 10", "ro": "Intreg fara semn in baza 10" }],
-            [{ "en": "`%ld`", "ro": "`%ld`" }, { "en": "`long`", "ro": "`long`" }, { "en": "Long integer in base 10", "ro": "Intreg lung in baza 10" }],
-            [{ "en": "`%f`", "ro": "`%f`" }, { "en": "`float`/`double`", "ro": "`float`/`double`" }, { "en": "Floating point in decimal notation", "ro": "Virgula mobila in notatie zecimala" }],
-            [{ "en": "`%e`", "ro": "`%e`" }, { "en": "`float`/`double`", "ro": "`float`/`double`" }, { "en": "Floating point in scientific notation (E)", "ro": "Virgula mobila in notatia cu mantisa E" }],
-            [{ "en": "`%x` / `%X`", "ro": "`%x` / `%X`" }, { "en": "`unsigned int`", "ro": "`unsigned int`" }, { "en": "Unsigned integer in base 16", "ro": "Intreg fara semn in baza 16" }],
-            [{ "en": "`%o`", "ro": "`%o`" }, { "en": "`unsigned int`", "ro": "`unsigned int`" }, { "en": "Unsigned integer in base 8", "ro": "Intreg fara semn in baza 8" }],
-            [{ "en": "`%s`", "ro": "`%s`" }, { "en": "`char*`", "ro": "`char*`" }, { "en": "A string (null-terminated)", "ro": "Un sir de caractere (null-terminated)" }]
+            [
+              {
+                "en": "`%c`",
+                "ro": "`%c`"
+              },
+              {
+                "en": "`char`",
+                "ro": "`char`"
+              },
+              {
+                "en": "A single character",
+                "ro": "Un singur caracter"
+              }
+            ],
+            [
+              {
+                "en": "`%d` / `%i`",
+                "ro": "`%d` / `%i`"
+              },
+              {
+                "en": "`int`",
+                "ro": "`int`"
+              },
+              {
+                "en": "Signed integer in base 10",
+                "ro": "Intreg cu semn in baza 10"
+              }
+            ],
+            [
+              {
+                "en": "`%u`",
+                "ro": "`%u`"
+              },
+              {
+                "en": "`unsigned int`",
+                "ro": "`unsigned int`"
+              },
+              {
+                "en": "Unsigned integer in base 10",
+                "ro": "Intreg fara semn in baza 10"
+              }
+            ],
+            [
+              {
+                "en": "`%ld`",
+                "ro": "`%ld`"
+              },
+              {
+                "en": "`long`",
+                "ro": "`long`"
+              },
+              {
+                "en": "Long integer in base 10",
+                "ro": "Intreg lung in baza 10"
+              }
+            ],
+            [
+              {
+                "en": "`%f`",
+                "ro": "`%f`"
+              },
+              {
+                "en": "`float`/`double`",
+                "ro": "`float`/`double`"
+              },
+              {
+                "en": "Floating point in decimal notation",
+                "ro": "Virgula mobila in notatie zecimala"
+              }
+            ],
+            [
+              {
+                "en": "`%e`",
+                "ro": "`%e`"
+              },
+              {
+                "en": "`float`/`double`",
+                "ro": "`float`/`double`"
+              },
+              {
+                "en": "Floating point in scientific notation (E)",
+                "ro": "Virgula mobila in notatia cu mantisa E"
+              }
+            ],
+            [
+              {
+                "en": "`%x` / `%X`",
+                "ro": "`%x` / `%X`"
+              },
+              {
+                "en": "`unsigned int`",
+                "ro": "`unsigned int`"
+              },
+              {
+                "en": "Unsigned integer in base 16",
+                "ro": "Intreg fara semn in baza 16"
+              }
+            ],
+            [
+              {
+                "en": "`%o`",
+                "ro": "`%o`"
+              },
+              {
+                "en": "`unsigned int`",
+                "ro": "`unsigned int`"
+              },
+              {
+                "en": "Unsigned integer in base 8",
+                "ro": "Intreg fara semn in baza 8"
+              }
+            ],
+            [
+              {
+                "en": "`%s`",
+                "ro": "`%s`"
+              },
+              {
+                "en": "`char*`",
+                "ro": "`char*`"
+              },
+              {
+                "en": "A string (null-terminated)",
+                "ro": "Un sir de caractere (null-terminated)"
+              }
+            ]
           ]
         }
       ]
     },
     {
       "id": "os-c4-demo-stdlib-cp",
-      "title": { "en": "Demo: C Library File Copy", "ro": "Demo: Copiere cu biblioteca standard C" },
+      "title": {
+        "en": "Demo: C Library File Copy",
+        "ro": "Demo: Copiere cu biblioteca standard C"
+      },
       "blocks": [
         {
           "type": "learn",
@@ -695,14 +1365,60 @@
           "type": "quiz",
           "questions": [
             {
-              "question": { "en": "In the C library version, what does fopen(argv[1], \"rb\") do?", "ro": "In versiunea cu biblioteca C, ce face fopen(argv[1], \"rb\")?" },
+              "question": {
+                "en": "In the C library version, what does fopen(argv[1], \"rb\") do?",
+                "ro": "In versiunea cu biblioteca C, ce face fopen(argv[1], \"rb\")?"
+              },
               "options": [
-                { "text": { "en": "Opens the file for reading in text mode", "ro": "Deschide fisierul pentru citire in modul text" }, "correct": false },
-                { "text": { "en": "Opens the file for reading in binary mode", "ro": "Deschide fisierul pentru citire in modul binar" }, "correct": true },
-                { "text": { "en": "Opens the file for reading and writing in binary mode", "ro": "Deschide fisierul pentru citire si scriere in modul binar" }, "correct": false },
-                { "text": { "en": "Creates a new file for reading in binary mode", "ro": "Creeaza un fisier nou pentru citire in modul binar" }, "correct": false }
+                {
+                  "text": {
+                    "en": "Opens the file for reading in text mode",
+                    "ro": "Deschide fisierul pentru citire in modul text"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Text mode is opened with `\"r\"` alone, without the `b` suffix. The `b` flag explicitly selects binary mode, suppressing newline translation. The lecture demo (slide 25) uses `\"rb\"` precisely for binary file copying.",
+                    "ro": "Capcana. Modul text se deschide cu `\"r\"` singur, fara sufixul `b`. Flag-ul `b` selecteaza explicit modul binar, suprimand conversia newline. Demo-ul din curs (slide 25) foloseste `\"rb\"` tocmai pentru copierea binara a fisierelor."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Opens the file for reading in binary mode",
+                    "ro": "Deschide fisierul pentru citire in modul binar"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. In the C Standard Library, `fopen` mode `\"rb\"` means: `r` = open for reading (file must exist, returns `NULL` on failure), `b` = binary mode (no text-mode conversions). The lecture demo (slide 25) uses this exact call.",
+                    "ro": "Corect. In Biblioteca standard de C, modul `\"rb\"` al `fopen` inseamna: `r` = deschide pentru citire (fisierul trebuie sa existe, returneaza `NULL` la esec), `b` = mod binar (fara conversii in mod text). Demo-ul din curs (slide 25) foloseste exact acest apel."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Opens the file for reading and writing in binary mode",
+                    "ro": "Deschide fisierul pentru citire si scriere in modul binar"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Reading and writing simultaneously requires mode `\"r+b\"` or `\"rb+\"`. The `\"rb\"` mode is strictly **read-only** binary. Attempting to `fwrite` on a stream opened with `\"rb\"` results in an error.",
+                    "ro": "Capcana. Citirea si scrierea simultana necesita modul `\"r+b\"` sau `\"rb+\"`. Modul `\"rb\"` este strict **doar citire** binar. Incercarea de a `fwrite` pe un stream deschis cu `\"rb\"` rezulta intr-o eroare."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Creates a new file for reading in binary mode",
+                    "ro": "Creeaza un fisier nou pentru citire in modul binar"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Creating a new file uses `\"wb\"` (write + binary). The `r` flag means the file **must already exist** — `fopen` returns `NULL` if it does not. The lecture demo (slide 25) opens the output file with `\"wb\"`, not `\"rb\"`.",
+                    "ro": "Capcana. Crearea unui fisier nou foloseste `\"wb\"` (scriere + binar). Flag-ul `r` inseamna ca fisierul **trebuie sa existe deja** — `fopen` returneaza `NULL` daca nu exista. Demo-ul din curs (slide 25) deschide fisierul de iesire cu `\"wb\"`, nu `\"rb\"`."
+                  }
+                }
               ],
-              "explanation": { "en": "The mode string `\"rb\"` means: `r` = open for reading (file must exist), `b` = binary mode (no text conversions). For writing a new file, you would use `\"wb\"` (write + binary).", "ro": "Sirul de mod `\"rb\"` inseamna: `r` = deschide pentru citire (fisierul trebuie sa existe), `b` = mod binar (fara conversii de text). Pentru scrierea unui fisier nou, se foloseste `\"wb\"` (scriere + binar)." }
+              "explanation": {
+                "en": "The mode string `\"rb\"` means: `r` = open for reading (file must exist), `b` = binary mode (no text conversions). For writing a new file, you would use `\"wb\"` (write + binary).",
+                "ro": "Sirul de mod `\"rb\"` inseamna: `r` = deschide pentru citire (fisierul trebuie sa existe), `b` = mod binar (fara conversii de text). Pentru scrierea unui fisier nou, se foloseste `\"wb\"` (scriere + binar)."
+              }
             }
           ]
         }

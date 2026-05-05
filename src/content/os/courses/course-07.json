@@ -157,20 +157,76 @@
             {
               "question": { "en": "What happens when an exec() call succeeds?", "ro": "Ce se intampla cand un apel exec() reuseste?" },
               "options": [
-                { "text": { "en": "It returns 0", "ro": "Returneaza 0" }, "correct": false },
-                { "text": { "en": "It returns the PID of the new program", "ro": "Returneaza PID-ul noului program" }, "correct": false },
-                { "text": { "en": "It does not return at all", "ro": "Nu returneaza deloc" }, "correct": true },
-                { "text": { "en": "It returns 1", "ro": "Returneaza 1" }, "correct": false }
+                {
+                  "text": { "en": "It returns 0", "ro": "Returneaza 0" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Returning 0 is the success convention for ordinary C functions and `main`. exec() on success does **not** return at all — the calling code is destroyed by the overlay. Only on **failure** does exec() return, and it returns -1 (not 0).",
+                    "ro": "Capcana. Returnarea 0 este conventia de succes pentru functiile C obisnuite si pentru `main`. exec() in caz de succes nu returneaza deloc — codul apelant este distrus de reacoperire. Doar in caz de **esec** exec() returneaza, si returneaza -1 (nu 0)."
+                  }
+                },
+                {
+                  "text": { "en": "It returns the PID of the new program", "ro": "Returneaza PID-ul noului program" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. exec() is not fork() — it does not create a new process and has no PID to return. The process keeps its existing PID after the overlay. Returning a PID is what fork() does in the parent.",
+                    "ro": "Capcana. exec() nu este fork() — nu creeaza un proces nou si nu are un PID de returnat. Procesul isi pastreaza PID-ul existent dupa reacoperire. Returnarea unui PID este ceea ce face fork() in procesul parinte."
+                  }
+                },
+                {
+                  "text": { "en": "It does not return at all", "ro": "Nu returneaza deloc" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. On success, exec() replaces the process image with the new program, so the calling code no longer exists — there is nowhere to return to. The lecture states: \"in case of success, exec calls do not return (!)\".",
+                    "ro": "Corect. In caz de succes, exec() inlocuieste imaginea procesului cu noul program, deci codul apelant nu mai exista — nu exista unde sa se intoarca. Cursul precizeaza: \"in caz de succes, apelurile exec nu returneaza (!)\"."
+                  }
+                },
+                {
+                  "text": { "en": "It returns 1", "ro": "Returneaza 1" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. exec() never returns 1. On failure it returns -1 (and sets `errno`); on success it does not return at all. Returning 1 from `main` or `exit(1)` signals an error to the shell, but that is a different convention.",
+                    "ro": "Capcana. exec() nu returneaza niciodata 1. In caz de esec returneaza -1 (si seteaza `errno`); in caz de succes nu returneaza deloc. Returnarea 1 din `main` sau `exit(1)` semnaleaza o eroare shell-ului, dar aceasta este o alta conventie."
+                  }
+                }
               ],
               "explanation": { "en": "On success, exec() replaces the entire program image, so the calling code no longer exists — there is nowhere to return to. exec() only returns (with -1) on failure.", "ro": "In caz de succes, exec() inlocuieste intreaga imagine a programului, deci codul apelant nu mai exista — nu exista unde sa se intoarca. exec() returneaza (cu -1) doar in caz de esec." }
             },
             {
               "question": { "en": "Which exec function is the actual system call, while the others are library wrappers?", "ro": "Care functie exec este apelul de sistem propriu-zis, in timp ce celelalte sunt wrappere de biblioteca?" },
               "options": [
-                { "text": { "en": "execl", "ro": "execl" }, "correct": false },
-                { "text": { "en": "execve", "ro": "execve" }, "correct": true },
-                { "text": { "en": "execvp", "ro": "execvp" }, "correct": false },
-                { "text": { "en": "execlp", "ro": "execlp" }, "correct": false }
+                {
+                  "text": { "en": "execl", "ro": "execl" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. execl is a C standard library wrapper (man 3 exec) that accepts a variable-length argument list and internally calls execve. It is not a kernel system call.",
+                    "ro": "Capcana. execl este un wrapper din biblioteca standard C (man 3 exec) care accepta o lista variabila de argumente si apeleaza intern execve. Nu este un apel de sistem kernel."
+                  }
+                },
+                {
+                  "text": { "en": "execve", "ro": "execve" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. execve is the only real system call (man 2 execve). All other exec variants — execl, execv, execle, execlp, execvp — are C library wrappers that build the argument array and call execve. The lecture states this explicitly.",
+                    "ro": "Corect. execve este singurul apel de sistem real (man 2 execve). Toate celelalte variante exec — execl, execv, execle, execlp, execvp — sunt wrappere de biblioteca C care construiesc tabloul de argumente si apeleaza execve. Cursul precizeaza aceasta explicit."
+                  }
+                },
+                {
+                  "text": { "en": "execvp", "ro": "execvp" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. execvp is a C library wrapper (man 3 exec) that adds PATH searching: if the `ref` argument contains no '/', it searches the directories in the `PATH` environment variable. Internally it calls execve.",
+                    "ro": "Capcana. execvp este un wrapper de biblioteca C (man 3 exec) care adauga cautarea in PATH: daca argumentul `ref` nu contine '/', cauta in directoarele din variabila de mediu `PATH`. Intern apeleaza execve."
+                  }
+                },
+                {
+                  "text": { "en": "execlp", "ro": "execlp" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. execlp combines the list-argument style of execl with the PATH searching of execvp. Like all non-ve exec functions, it is a C library wrapper that ultimately calls execve.",
+                    "ro": "Capcana. execlp combina stilul cu argumente lista al lui execl cu cautarea in PATH a lui execvp. Ca toate functiile exec non-ve, este un wrapper de biblioteca C care in final apeleaza execve."
+                  }
+                }
               ],
               "explanation": { "en": "execve is the actual system call (man 2 execve). All other exec functions (execl, execv, execlp, execvp, execle) are C standard library wrappers that internally call execve (man 3 exec).", "ro": "execve este apelul de sistem propriu-zis (man 2 execve). Toate celelalte functii exec (execl, execv, execlp, execvp, execle) sunt wrappere din biblioteca standard C ce apeleaza intern execve (man 3 exec)." }
             }
@@ -253,10 +309,38 @@
             {
               "question": { "en": "Which of the following is preserved after an exec() call?", "ro": "Care dintre urmatoarele se pastreaza dupa un apel exec()?" },
               "options": [
-                { "text": { "en": "Signal handlers for intercepted signals", "ro": "Handler-ele de semnale pentru semnale interceptate" }, "correct": false },
-                { "text": { "en": "The process PID", "ro": "PID-ul procesului" }, "correct": true },
-                { "text": { "en": "File descriptors with FD_CLOEXEC set", "ro": "Descriptorii de fisiere cu FD_CLOEXEC setat" }, "correct": false },
-                { "text": { "en": "The program's code segment", "ro": "Segmentul de cod al programului" }, "correct": false }
+                {
+                  "text": { "en": "Signal handlers for intercepted signals", "ro": "Handler-ele de semnale pentru semnale interceptate" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The lecture table explicitly lists signal handlers as **not preserved**: after exec(), handlers for intercepted (\"corrupted\") signals are reset to their default (implicit) action. The new program starts with a clean signal disposition.",
+                    "ro": "Capcana. Tabelul din curs listeaza explicit handler-ele de semnale ca **neconservate**: dupa exec(), handler-ele pentru semnalele interceptate (\"corupte\") sunt resetate la actiunea implicita. Noul program porneste cu o dispozitie curata a semnalelor."
+                  }
+                },
+                {
+                  "text": { "en": "The process PID", "ro": "PID-ul procesului" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. exec() does not create a new process — it replaces the program image inside the existing process. From the OS point of view it is the same process, so the PID, parent PID, priority, and open file descriptors (without FD_CLOEXEC) are all inherited.",
+                    "ro": "Corect. exec() nu creeaza un proces nou — inlocuieste imaginea programului in cadrul procesului existent. Din punct de vedere al SO este acelasi proces, deci PID-ul, PID-ul parintelui, prioritatea si descriptorii de fisiere deschise (fara FD_CLOEXEC) sunt toti mosteniti."
+                  }
+                },
+                {
+                  "text": { "en": "File descriptors with FD_CLOEXEC set", "ro": "Descriptorii de fisiere cu FD_CLOEXEC setat" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. FD_CLOEXEC (close-on-exec) is the exact mechanism **designed** to close a descriptor at exec. If a descriptor has this flag set via `fcntl`, exec closes it. Descriptors **without** FD_CLOEXEC remain open and are inherited.",
+                    "ro": "Capcana. FD_CLOEXEC (close-on-exec) este exact mecanismul **proiectat** pentru a inchide un descriptor la exec. Daca un descriptor are acest flag setat prin `fcntl`, exec il inchide. Descriptorii **fara** FD_CLOEXEC raman deschisi si sunt mosteniti."
+                  }
+                },
+                {
+                  "text": { "en": "The program's code segment", "ro": "Segmentul de cod al programului" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. The whole point of exec() is to **replace** the program image — code, data, stack, and heap are all overwritten with the new program. Only process metadata (PID, priority, open files without FD_CLOEXEC, etc.) is inherited.",
+                    "ro": "Capcana. Scopul exec() este tocmai sa **inlocuiasca** imaginea programului — codul, datele, stiva si heap-ul sunt toate suprascrise cu noul program. Doar metadatele procesului (PID, prioritate, fisiere deschise fara FD_CLOEXEC, etc.) sunt mostenite."
+                  }
+                }
               ],
               "explanation": { "en": "The PID is always preserved because exec() does not create a new process — it replaces the program image within the existing process. Signal handlers are reset, FD_CLOEXEC descriptors are closed, and the code segment is replaced entirely.", "ro": "PID-ul se pastreaza intotdeauna deoarece exec() nu creeaza un proces nou — inlocuieste imaginea programului in cadrul procesului existent. Handler-ele de semnale sunt resetate, descriptorii cu FD_CLOEXEC sunt inchisi, iar segmentul de cod este inlocuit in totalitate." }
             }
@@ -356,10 +440,37 @@
             {
               "question": { "en": "What happens to unflushed printf() buffers when exec() is called?", "ro": "Ce se intampla cu buffer-ele printf() neflushuite cand se apeleaza exec()?" },
               "options": [
-                { "text": { "en": "They are automatically flushed before exec", "ro": "Sunt golite automat inainte de exec" }, "correct": false },
-                { "text": { "en": "They are saved and restored in the new program", "ro": "Sunt salvate si restaurate in noul program" }, "correct": false },
-                { "text": { "en": "The buffered data is lost", "ro": "Datele din buffer se pierd" }, "correct": true },
-                { "text": { "en": "They cause exec to fail", "ro": "Provoaca esecul exec-ului" }, "correct": false }
+                {
+                  "text": { "en": "They are automatically flushed before exec", "ro": "Sunt golite automat inainte de exec" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. exec() does **not** flush C library buffers automatically. Automatic flushing only happens when the buffer is full, when `\\n` is written (line-buffered mode), or when `fflush()` / `exit()` is called explicitly. The lecture (Example #4) shows this with the `com-1.c` demo.",
+                    "ro": "Capcana. exec() **nu** goleste automat buffer-ele bibliotecii C. Golirea automata are loc doar cand buffer-ul e plin, la scrierea unui `\\n` (mod line-buffered), sau la apelul explicit al `fflush()` / `exit()`. Cursul (Exemplul #4) arata aceasta cu demo-ul `com-1.c`."
+                  }
+                },
+                {
+                  "text": { "en": "They are saved and restored in the new program", "ro": "Sunt salvate si restaurate in noul program" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. C library buffers are user-space memory structures. exec() replaces the entire address space with the new program's image — there is no mechanism to transfer or restore them. The new program starts with its own fresh I/O buffers.",
+                    "ro": "Capcana. Buffer-ele bibliotecii C sunt structuri de memorie din spatiul utilizator. exec() inlocuieste intregul spatiu de adrese cu imaginea noului program — nu exista niciun mecanism de transfer sau restaurare. Noul program porneste cu propriile buffer-e I/O proaspete."
+                  }
+                },
+                {
+                  "text": { "en": "The buffered data is lost", "ro": "Datele din buffer se pierd" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. C library buffers live in user-space memory. exec() overwrites the entire process image, so any data sitting in printf/fprintf buffers that was not yet written to the file descriptor is permanently lost. The fix: always call `fflush()` or use `setvbuf` to disable buffering before exec().",
+                    "ro": "Corect. Buffer-ele bibliotecii C traiesc in memoria spatiului utilizator. exec() suprascrie intreaga imagine a procesului, deci orice date din buffer-ele printf/fprintf care nu au fost inca scrise la descriptorul de fisier se pierd permanent. Solutia: apelati intotdeauna `fflush()` sau folositi `setvbuf` pentru a dezactiva buffering-ul inainte de exec()."
+                  }
+                },
+                {
+                  "text": { "en": "They cause exec to fail", "ro": "Provoaca esecul exec-ului" }, "correct": false,
+                  "explanation": {
+                    "en": "Trap. Unflushed buffers have no effect on whether exec() succeeds or fails. exec() fails only due to OS-level errors (file not found, permission denied, insufficient memory, etc.). The buffer content is simply discarded silently on success.",
+                    "ro": "Capcana. Buffer-ele neflushuite nu au niciun efect asupra succesului sau esecului exec(). exec() esueaza doar din cauza erorilor la nivel OS (fisier negasit, permisiuni refuzate, memorie insuficienta, etc.). Continutul buffer-ului este pur si simplu ignorat in tacere in caz de succes."
+                  }
+                }
               ],
               "explanation": { "en": "C library buffers (used by printf, fprintf, etc.) exist in user space memory. When exec() replaces the process image, this memory is overwritten with the new program's data, and the unflushed buffer content is permanently lost. Always call fflush() before exec().", "ro": "Buffer-ele bibliotecii C (folosite de printf, fprintf, etc.) exista in memoria spatiului utilizator. Cand exec() inlocuieste imaginea procesului, aceasta memorie este suprascrisa cu datele noului program, iar continutul neflushuit al buffer-ului se pierde permanent. Apelati intotdeauna fflush() inainte de exec()." }
             }
@@ -489,10 +600,38 @@
             {
               "question": { "en": "What is the key difference between exec() and system()?", "ro": "Care este diferenta cheie intre exec() si system()?" },
               "options": [
-                { "text": { "en": "exec() is faster", "ro": "exec() este mai rapid" }, "correct": false },
-                { "text": { "en": "system() replaces the process, exec() does not", "ro": "system() inlocuieste procesul, exec() nu" }, "correct": false },
-                { "text": { "en": "exec() replaces the process, system() creates a child and returns", "ro": "exec() inlocuieste procesul, system() creeaza un fiu si returneaza" }, "correct": true },
-                { "text": { "en": "They are identical in behavior", "ro": "Sunt identice ca si comportament" }, "correct": false }
+                {
+                  "text": { "en": "exec() is faster", "ro": "exec() este mai rapid" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Speed is not the defining difference. The fundamental distinction is **what happens to the calling process**: exec() destroys it (replaces the image), while system() preserves it (spawns a child). Comparing them on speed misses the point entirely.",
+                    "ro": "Capcana. Viteza nu este diferenta definitorie. Distinctia fundamentala este **ce se intampla cu procesul apelant**: exec() il distruge (inlocuieste imaginea), in timp ce system() il pastreaza (lanseaza un fiu). Compararea lor pe viteza rateza complet punctul."
+                  }
+                },
+                {
+                  "text": { "en": "system() replaces the process, exec() does not", "ro": "system() inlocuieste procesul, exec() nu" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. This is the exact **reverse** of the truth. exec() is the one that replaces the process image and never returns on success. system() calls fork+exec+wait internally — the calling process continues after system() returns, having waited for the child to finish.",
+                    "ro": "Capcana. Acesta este exact **inversul** adevarului. exec() este cel care inlocuieste imaginea procesului si nu returneaza niciodata in caz de succes. system() apeleaza intern fork+exec+wait — procesul apelant continua dupa ce system() returneaza, dupa ce a asteptat terminarea fiului."
+                  }
+                },
+                {
+                  "text": { "en": "exec() replaces the process, system() creates a child and returns", "ro": "exec() inlocuieste procesul, system() creeaza un fiu si returneaza" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. exec() replaces the current process image entirely — the calling code is gone on success. system(cmd) is equivalent to fork + exec(\"/bin/sh -c cmd\") + wait: the caller survives and receives the child's exit status as the return value.",
+                    "ro": "Corect. exec() inlocuieste complet imaginea procesului curent — codul apelant dispare in caz de succes. system(cmd) este echivalent cu fork + exec(\"/bin/sh -c cmd\") + wait: apelantul supravietuieste si primeste statusul de iesire al fiului ca valoare returnata."
+                  }
+                },
+                {
+                  "text": { "en": "They are identical in behavior", "ro": "Sunt identice ca si comportament" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. They are fundamentally different: exec() is a process-replacement primitive (no return on success, no child created), while system() is a convenience function that forks a child, runs a shell command, and returns the exit status to the unchanged caller.",
+                    "ro": "Capcana. Sunt fundamental diferite: exec() este o primitiva de inlocuire a procesului (fara returnare in caz de succes, fara fiu creat), in timp ce system() este o functie de comoditate care forkeaza un fiu, ruleaza o comanda shell si returneaza statusul de iesire apelantului nemodificat."
+                  }
+                }
               ],
               "explanation": { "en": "exec() replaces the current process image entirely (it never returns on success). system() internally calls fork+exec+wait: it creates a child process, the child runs the command via exec, and the parent waits and returns control to the caller.", "ro": "exec() inlocuieste complet imaginea procesului curent (nu returneaza niciodata in caz de succes). system() apeleaza intern fork+exec+wait: creeaza un proces fiu, fiul ruleaza comanda prin exec, iar parintele asteapta si returneaza controlul apelantului." }
             }
