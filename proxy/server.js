@@ -349,7 +349,7 @@ Rules:
       { role: 'user', content: userContent },
     ];
 
-    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false, { temperature: 0.7, max_tokens: 4096 });
+    const { res: llmRes, key, provider, inputEstimate } = await callLLM(messages, false, { temperature: 0.7, max_tokens: 8192 });
     const data = await llmRes.json();
     const raw = data.choices?.[0]?.message?.content || '';
     recordUsage(key, provider, inputEstimate, Math.ceil(raw.length / 4));
@@ -362,7 +362,20 @@ Rules:
     try {
       questions = JSON.parse(cleaned);
     } catch {
-      return res.status(500).json({ error: 'Failed to parse generated questions', raw: cleaned.slice(0, 500) });
+      // Salvage truncated arrays: trim to the last balanced `}`, close the array.
+      // Common when LLM hits max_tokens mid-question — better to ship N-1 valid
+      // questions than reject the whole batch.
+      const lastClose = cleaned.lastIndexOf('}');
+      if (lastClose > 0) {
+        const salvage = cleaned.slice(0, lastClose + 1).replace(/,\s*$/, '') + ']';
+        try {
+          questions = JSON.parse(salvage);
+        } catch {
+          return res.status(500).json({ error: 'Failed to parse generated questions', raw: cleaned.slice(0, 500) });
+        }
+      } else {
+        return res.status(500).json({ error: 'Failed to parse generated questions', raw: cleaned.slice(0, 500) });
+      }
     }
 
     // Assign IDs and validate
