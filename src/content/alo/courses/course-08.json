@@ -1,0 +1,242 @@
+{
+  "meta": {
+    "id": "alo-c8",
+    "title": { "en": "Course 8: Numerical Optimization", "ro": "Cursul 8: Optimizare Numerică" },
+    "shortTitle": { "en": "C8: Optimization", "ro": "C8: Optimizare" },
+    "source": { "en": "Conf. dr. Anca Ignat, Conf. dr. Corina Forăscu — ALO Lecture 8, UAIC 2026.", "ro": "Conf. dr. Anca Ignat, Conf. dr. Corina Forăscu — ALO Curs 8, UAIC 2026." }
+  },
+  "steps": [
+    {
+      "id": "alo-c8-intro",
+      "title": { "en": "1. Optimization Problems", "ro": "1. Probleme de optimizare" },
+      "group": "foundations",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Numerical optimization studies methods for finding minima (or maxima) of real-valued functions. Every maximization problem reduces to minimization: $\\max\\{f(x); x \\in D\\} = -\\min\\{-f(x); x \\in D\\}$.",
+            "ro": "Optimizarea numerică studiază metode pentru găsirea minimelor (sau maximelor) funcțiilor reale. Orice problemă de maximizare se reduce la minimizare: $\\max\\{f(x); x \\in D\\} = -\\min\\{-f(x); x \\in D\\}$."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Type", "ro": "Tip" },
+            { "en": "Meaning", "ro": "Semnificație" }
+          ],
+          "rows": [
+            [{ "en": "Linear / Nonlinear", "ro": "Liniară / Neliniară" }, { "en": "Shape of objective function f", "ro": "Forma funcției obiectiv f" }],
+            [{ "en": "Quadratic", "ro": "Pătratică" }, { "en": "f is a quadratic function", "ro": "f este funcție pătratică" }],
+            [{ "en": "Convex", "ro": "Convexă" }, { "en": "f is convex — local minima are global", "ro": "f convexă — minimele locale sunt globale" }],
+            [{ "en": "Unconstrained / Constrained", "ro": "Fără / Cu restricții" }, { "en": "$D \\subseteq \\mathbb{R}^n$ or $D = \\{x: g(x)\\le 0\\}$", "ro": "$D \\subseteq \\mathbb{R}^n$ sau $D = \\{x: g(x)\\le 0\\}$" }],
+            [{ "en": "Continuous / Discrete / Integer", "ro": "Continuă / Discretă / Întreagă" }, { "en": "Nature of the domain D", "ro": "Natura domeniului D" }]
+          ]
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Global / Local / Strict Local Minimum", "ro": "Minim global / local / strict local" },
+          "content": {
+            "en": "A point $x^* \\in \\mathbb{R}^n$ is a **global minimum** if $f(x^*) \\le f(x)$ for all $x \\in \\mathbb{R}^n$; a **local minimum** if $f(x^*) \\le f(x)$ for all $x$ in some neighborhood $V = S(x^*, r)$; a **strict local minimum** if $f(x^*) < f(x)$ for all $x \\in V$, $x \\ne x^*$.",
+            "ro": "Punctul $x^* \\in \\mathbb{R}^n$ este **minim global** dacă $f(x^*) \\le f(x)$ pentru orice $x \\in \\mathbb{R}^n$; **minim local** dacă $f(x^*) \\le f(x)$ pentru orice $x$ dintr-o vecinătate $V = S(x^*, r)$; **minim strict local** dacă $f(x^*) < f(x)$ pentru orice $x \\in V$, $x \\ne x^*$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c8-optimality",
+      "title": { "en": "2. Optimality Conditions", "ro": "2. Condiții de optim" },
+      "group": "foundations",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Gradient and Hessian", "ro": "Gradient și Hessiană" },
+          "content": {
+            "en": "For $f \\in C^1(\\mathbb{R}^n)$, the **gradient** is $\\nabla f(x) = \\left(\\frac{\\partial f}{\\partial x_1}, \\ldots, \\frac{\\partial f}{\\partial x_n}\\right)^T$. For $f \\in C^2(\\mathbb{R}^n)$, the **Hessian** is $H_f(x) = \\nabla^2 f(x) = \\left(\\frac{\\partial^2 f}{\\partial x_i \\partial x_j}\\right)_{i,j=1,\\ldots,n} \\in \\mathbb{R}^{n \\times n}$.",
+            "ro": "Pentru $f \\in C^1(\\mathbb{R}^n)$, **gradientul** este $\\nabla f(x) = \\left(\\frac{\\partial f}{\\partial x_1}, \\ldots, \\frac{\\partial f}{\\partial x_n}\\right)^T$. Pentru $f \\in C^2(\\mathbb{R}^n)$, **Hessiana** este $H_f(x) = \\nabla^2 f(x) = \\left(\\frac{\\partial^2 f}{\\partial x_i \\partial x_j}\\right)_{i,j=1,\\ldots,n} \\in \\mathbb{R}^{n \\times n}$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Theorem 1 (1st-order necessary):** If $x^*$ is a local minimum and $f \\in C^1$, then $\\nabla f(x^*) = 0$ (stationary/critical point). **Theorem 2 (2nd-order necessary):** If $x^*$ is a local minimum and $f \\in C^2$, then also $H_f(x^*)$ is positive semidefinite. **Theorem 3 (2nd-order sufficient):** If $\\nabla f(x^*) = 0$ and $H_f(x^*)$ is positive definite, then $x^*$ is a strict local minimum.",
+            "ro": "**Teorema 1 (necesară ord. 1):** Dacă $x^*$ este minim local și $f \\in C^1$, atunci $\\nabla f(x^*) = 0$ (punct staționar). **Teorema 2 (necesară ord. 2):** Dacă $x^*$ este minim local și $f \\in C^2$, atunci și $H_f(x^*)$ este pozitiv semidefinită. **Teorema 3 (suficientă ord. 2):** Dacă $\\nabla f(x^*) = 0$ și $H_f(x^*)$ este pozitiv definită, atunci $x^*$ este minim strict local."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Convex functions** satisfy $f(ax_1 + (1-a)x_2) \\le af(x_1) + (1-a)f(x_2)$ for all $x_1, x_2 \\in \\mathbb{R}^n$, $a \\in [0,1]$. For convex $f$: any local minimum is also global; if $f \\in C^1$ any stationary point is global minimum (Theorem 4).",
+            "ro": "**Funcțiile convexe** satisfac $f(ax_1 + (1-a)x_2) \\le af(x_1) + (1-a)f(x_2)$ pentru orice $x_1, x_2 \\in \\mathbb{R}^n$, $a \\in [0,1]$. Pentru $f$ convexă: orice minim local este și global; dacă $f \\in C^1$, orice punct staționar este minim global (Teorema 4)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c8-descent",
+      "title": { "en": "3. Descent Methods & Line Search", "ro": "3. Metode de descreștere și ajustarea pasului" },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Descent direction", "ro": "Direcție de descreștere" },
+          "content": {
+            "en": "A vector $d \\in \\mathbb{R}^n$ is a **descent direction** for $f$ at $x$ if $f(x + \\alpha d) \\le f(x)$ for all small $\\alpha > 0$. Theorem 5: $d$ is a descent direction iff $\\nabla f(x)^T d < 0$.",
+            "ro": "Vectorul $d \\in \\mathbb{R}^n$ este **direcție de descreștere** pentru $f$ în $x$ dacă $f(x + \\alpha d) \\le f(x)$ pentru orice $\\alpha > 0$ mic. Teorema 5: $d$ este direcție de descreștere dpdv $\\nabla f(x)^T d < 0$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**General descent algorithm:** Start with $x \\in \\mathbb{R}^n$. Repeat: find a descent direction $d$; find step size $\\tilde{\\alpha} > 0$ (line search) minimizing $f(x + \\alpha d)$; update $x \\leftarrow x + \\tilde{\\alpha} d$. The **exact line search** solves $\\min_\\alpha f(x_k + \\alpha d_k)$.",
+            "ro": "**Algoritm general de descreștere:** Pornind cu $x \\in \\mathbb{R}^n$: găsește o direcție de descreștere $d$; găsește pasul $\\tilde{\\alpha} > 0$ (ajustarea pasului) ce minimizează $f(x + \\alpha d)$; actualizează $x \\leftarrow x + \\tilde{\\alpha} d$. **Ajustarea exactă** rezolvă $\\min_\\alpha f(x_k + \\alpha d_k)$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Inexact line search** criteria avoid the cost of exact minimization. **Armijo rule:** $\\bar{a}$ is acceptable if $g(\\bar{a}) \\le g(0) + \\epsilon g'(0)$ and $g(\\sigma\\bar{a}) \\ge g(\\sigma\\bar{a})$ with $\\sigma = 2$ or $10$, $\\epsilon = 0.2$. **Wolfe conditions:** additionally require $g'(\\bar{\\alpha}) \\ge (1-\\epsilon)g'(0)$ ensuring the step is not too small.",
+            "ro": "Criteriile de **ajustare inexactă** evită costul minimizării exacte. **Regula Armijo:** $\\bar{a}$ este acceptabil dacă $g(\\bar{a}) \\le g(0) + \\epsilon g'(0)$ și $g(\\sigma\\bar{a}) \\ge g(\\sigma\\bar{a})$ cu $\\sigma = 2$ sau $10$, $\\epsilon = 0.2$. **Condițiile Wolfe:** impun suplimentar $g'(\\bar{\\alpha}) \\ge (1-\\epsilon)g'(0)$ pentru a evita pași prea mici."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c8-quadratic",
+      "title": { "en": "4. Quadratic Forms", "ro": "4. Forme pătratice" },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Quadratic form", "ro": "Formă pătratică" },
+          "content": {
+            "en": "For $A \\in \\mathbb{R}^{n \\times n}$ symmetric positive (semi)definite and $b \\in \\mathbb{R}^n$, a quadratic form is $f(x) = \\frac{1}{2}x^T A x - x^T b + c$. Its gradient is $\\nabla f(x) = Ax - b$ and Hessian is $H_f(x) = A$. If $A$ is positive definite, $f$ is strictly convex with unique global minimum $x^* = A^{-1}b$.",
+            "ro": "Pentru $A \\in \\mathbb{R}^{n \\times n}$ simetrică pozitiv (semi)definită și $b \\in \\mathbb{R}^n$, o formă pătratică este $f(x) = \\frac{1}{2}x^T A x - x^T b + c$. Gradientul este $\\nabla f(x) = Ax - b$ iar Hessiana $H_f(x) = A$. Dacă $A$ este pozitiv definită, $f$ este strict convexă cu minim global unic $x^* = A^{-1}b$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c8-steepest",
+      "title": { "en": "5. Steepest Descent", "ro": "5. Metoda pantei maxime" },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Steepest descent (gradient descent)** uses the negative gradient as the descent direction: $d_k = -\\nabla f(x_k)$. For quadratic forms, the optimal step is $\\alpha_k = \\frac{g_k^T g_k}{g_k^T A g_k}$ where $g_k = Ax_k - b$. The iteration is: $x_{k+1} = x_k - \\alpha_k g_k$.",
+            "ro": "**Metoda pantei maxime (gradient descendent)** folosește gradientul negativ ca direcție: $d_k = -\\nabla f(x_k)$. Pentru forme pătratice, pasul optim este $\\alpha_k = \\frac{g_k^T g_k}{g_k^T A g_k}$ unde $g_k = Ax_k - b$. Iterația: $x_{k+1} = x_k - \\alpha_k g_k$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Convergence (Theorem 6 & 7):** For quadratic forms, steepest descent converges with rate $E(x_{k+1}) \\le \\left(\\frac{C-c}{C+c}\\right)^2 E(x_k)$ where $c, C$ are smallest/largest eigenvalues of $A$. When $C/c$ (condition number) is large, convergence is **very slow**. For general $f \\in C^2$, the same bound holds near $x^*$ (Theorem 7).",
+            "ro": "**Convergență (Teoremele 6 & 7):** Pentru forme pătratice, convergența are rata $E(x_{k+1}) \\le \\left(\\frac{C-c}{C+c}\\right)^2 E(x_k)$ unde $c, C$ sunt valorile proprii minimă/maximă ale lui $A$. Când $C/c$ (numărul de condiționare) este mare, convergența este **foarte lentă**. Pentru $f \\in C^2$ generală, aceeași limitare se menține în vecinătatea lui $x^*$ (Teorema 7)."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Gradient descent** (fixed learning rate): $x_{k+1} = x_k - \\eta \\nabla f(x_k)$ with $\\eta$ small (e.g. $10^{-1}, 10^{-2}$). The learning rate $\\eta$ replaces the adaptive line search. Ascending variant: $x_{k+1} = x_k + \\eta \\nabla f(x_k)$ for maximization.",
+            "ro": "**Gradientul descendent** (rată fixă de învățare): $x_{k+1} = x_k - \\eta \\nabla f(x_k)$ cu $\\eta$ mic (ex. $10^{-1}, 10^{-2}$). Rata de învățare $\\eta$ înlocuiește ajustarea adaptivă a pasului. Varianta ascendentă: $x_{k+1} = x_k + \\eta \\nabla f(x_k)$ pentru maximizare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c8-newton",
+      "title": { "en": "6. Newton & Quasi-Newton Methods", "ro": "6. Metoda Newton și metode cvasi-Newton" },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Newton's method** approximates $f$ around $x_k$ by its 2nd-order Taylor expansion and minimizes that quadratic model. The recurrence is: $x_{k+1} = x_k - [\\nabla^2 f(x_k)]^{-1} \\nabla f(x_k)$. Convergence is at least quadratic near $x^*$ (Theorem 8), but requires computing and inverting the Hessian.",
+            "ro": "**Metoda Newton** aproximează $f$ în jurul lui $x_k$ prin expansiunea Taylor de ord. 2 și minimizează modelul pătratic. Recurența: $x_{k+1} = x_k - [\\nabla^2 f(x_k)]^{-1} \\nabla f(x_k)$. Convergența este cel puțin pătratică în vecinătatea lui $x^*$ (Teorema 8), dar necesită calculul și inversarea Hessianei."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "BFGS (Quasi-Newton)", "ro": "BFGS (Cvasi-Newton)" },
+          "content": {
+            "en": "The **Broyden–Fletcher–Goldfarb–Shanno (BFGS)** method builds iterative approximations $H_k$ of the inverse Hessian. Direction: $p_k = -H_k \\nabla f(x_k)$; update: $H_{k+1} = (I - \\rho_k y_k s_k^T) H_k (I - \\rho_k s_k y_k^T) + \\rho_k s_k s_k^T$ where $s_k = x_{k+1} - x_k$, $y_k = \\nabla f(x_{k+1}) - \\nabla f(x_k)$, $\\rho_k = 1/(y_k^T s_k)$.",
+            "ro": "Metoda **BFGS** construiește aproximații iterative $H_k$ ale inversei Hessianei. Direcție: $p_k = -H_k \\nabla f(x_k)$; actualizare: $H_{k+1} = (I - \\rho_k y_k s_k^T) H_k (I - \\rho_k s_k y_k^T) + \\rho_k s_k s_k^T$ unde $s_k = x_{k+1} - x_k$, $y_k = \\nabla f(x_{k+1}) - \\nabla f(x_k)$, $\\rho_k = 1/(y_k^T s_k)$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c8-cg",
+      "title": { "en": "7. Conjugate Gradient Method", "ro": "7. Metoda gradienților conjugați" },
+      "group": "methods",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "A-conjugate / A-orthogonal vectors", "ro": "Vectori A-conjugați / A-ortogonali" },
+          "content": {
+            "en": "For symmetric $A$, vectors $d_1, d_2$ are **A-conjugate** if $d_1^T A d_2 = 0$. A set of $n$ nonzero A-conjugate vectors forms a basis of $\\mathbb{R}^n$ (when $A$ is positive definite). The minimum of $f(x) = \\frac{1}{2}x^T Ax - x^T b$ can then be written as $x^* = \\sum_{i=0}^{n-1} \\frac{\\langle b, d_i \\rangle}{\\langle Ad_i, d_i \\rangle} d_i$.",
+            "ro": "Pentru $A$ simetrică, vectorii $d_1, d_2$ sunt **A-conjugați** dacă $d_1^T A d_2 = 0$. O mulțime de $n$ vectori A-conjugați nenuli formează o bază în $\\mathbb{R}^n$ (când $A$ e pozitiv definită). Minimul lui $f(x) = \\frac{1}{2}x^T Ax - x^T b$ se poate scrie $x^* = \\sum_{i=0}^{n-1} \\frac{\\langle b, d_i \\rangle}{\\langle Ad_i, d_i \\rangle} d_i$."
+          }
+        },
+        {
+          "type": "code",
+          "language": "pseudocode",
+          "code": "// Conjugate Gradient (practical form)\nx0 ∈ R^n, g0 = Ax0 - b, d0 = -g0\nwhile (gk ≠ 0)\n    αk = -(gk^T gk) / (dk^T A dk)\n    x_{k+1} = xk + αk dk\n    g_{k+1} = gk + αk A dk\n    βk = (g_{k+1}^T g_{k+1}) / (gk^T gk)\n    d_{k+1} = -g_{k+1} + βk dk\n    k = k + 1"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Convergence:** CG converges in at most $n$ steps (or $r$ steps if $A$ has only $r$ distinct eigenvalues). Error bound: $\\|x_{k+1} - x^*\\|_A^2 \\le \\left(\\frac{\\lambda_{n-k} - \\lambda_1}{\\lambda_{n-k} + \\lambda_1}\\right)^2 \\|x_0 - x^*\\|_A^2$.",
+            "ro": "**Convergență:** CG converge în cel mult $n$ pași (sau $r$ pași dacă $A$ are doar $r$ valori proprii distincte). Limitare eroare: $\\|x_{k+1} - x^*\\|_A^2 \\le \\left(\\frac{\\lambda_{n-k} - \\lambda_1}{\\lambda_{n-k} + \\lambda_1}\\right)^2 \\|x_0 - x^*\\|_A^2$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Nonlinear CG — Fletcher-Reeves:** Replaces $g_k$ with $\\nabla f(x_k)$ and uses $\\beta_k^{FR} = \\|g_{k+1}\\|^2 / \\|g_k\\|^2$. With exact line search, $d_k$ are descent directions. **Polak-Ribière variant:** $\\beta_k^{PR} = g_{k+1}^T(g_{k+1}-g_k)/\\|g_k\\|^2$. **Hestenes-Stiefel:** $\\beta_k^{HS} = g_{k+1}^T(g_{k+1}-g_k)/((g_{k+1}-g_k)^T d_k)$.",
+            "ro": "**CG neliniar — Fletcher-Reeves:** Înlocuiește $g_k$ cu $\\nabla f(x_k)$ și folosește $\\beta_k^{FR} = \\|g_{k+1}\\|^2 / \\|g_k\\|^2$. Cu ajustare exactă, $d_k$ sunt direcții de descreștere. **Varianta Polak-Ribière:** $\\beta_k^{PR} = g_{k+1}^T(g_{k+1}-g_k)/\\|g_k\\|^2$. **Hestenes-Stiefel:** $\\beta_k^{HS} = g_{k+1}^T(g_{k+1}-g_k)/((g_{k+1}-g_k)^T d_k)$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c8-quiz",
+      "title": { "en": "Self-Test", "ro": "Autoevaluare" },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "For a quadratic form $f(x) = \\frac{1}{2}x^T Ax - x^T b$ with $A$ positive definite, the optimal steepest descent step size is:",
+                "ro": "Pentru forma pătratică $f(x) = \\frac{1}{2}x^T Ax - x^T b$ cu $A$ pozitiv definită, pasul optim în metoda pantei maxime este:"
+              },
+              "options": [
+                { "text": { "en": "$\\alpha_k = \\|g_k\\|^2 / (g_k^T A g_k)$", "ro": "$\\alpha_k = \\|g_k\\|^2 / (g_k^T A g_k)$" }, "correct": true, "explanation": { "en": "Minimizing $f(x_k - \\alpha g_k)$ in $\\alpha$ gives $\\alpha_k = g_k^T g_k / (g_k^T A g_k)$. This is the exact line search result for quadratic objectives.", "ro": "Minimizând $f(x_k - \\alpha g_k)$ în $\\alpha$ rezultă $\\alpha_k = g_k^T g_k / (g_k^T A g_k)$. Acesta este rezultatul căutării exacte pe linie pentru obiective pătratice." } },
+                { "text": { "en": "$\\alpha_k = 1/\\|A\\|$", "ro": "$\\alpha_k = 1/\\|A\\|$" }, "correct": false, "explanation": { "en": "This is not the optimal step — it ignores the gradient direction.", "ro": "Nu este pasul optim — ignoră direcția gradientului." } },
+                { "text": { "en": "$\\alpha_k = g_k^T A g_k / \\|g_k\\|^2$", "ro": "$\\alpha_k = g_k^T A g_k / \\|g_k\\|^2$" }, "correct": false, "explanation": { "en": "This is the reciprocal of the correct formula.", "ro": "Aceasta este inversa formulei corecte." } },
+                { "text": { "en": "$\\alpha_k = \\eta$ (fixed learning rate)", "ro": "$\\alpha_k = \\eta$ (rată de învățare fixă)" }, "correct": false, "explanation": { "en": "A fixed learning rate is gradient descent, not exact line search steepest descent.", "ro": "O rată fixă este gradient descendent, nu metoda pantei maxime cu căutare exactă." } }
+              ]
+            },
+            {
+              "question": {
+                "en": "Conjugate Gradient converges in at most $n$ steps because:",
+                "ro": "Metoda gradienților conjugați converge în cel mult $n$ pași deoarece:"
+              },
+              "options": [
+                { "text": { "en": "After $n$ A-conjugate directions, we span all of $\\mathbb{R}^n$, so $x_n = x^*$ exactly.", "ro": "După $n$ direcții A-conjugate, acoperim tot $\\mathbb{R}^n$, deci $x_n = x^*$ exact." }, "correct": true, "explanation": { "en": "The $n$ A-conjugate directions form a basis. CG accumulates the exact optimal coefficient along each direction, so after $n$ steps the solution is exact (in exact arithmetic).", "ro": "Cele $n$ direcții A-conjugate formează o bază. CG acumulează coeficientul optim exact pe fiecare direcție, deci după $n$ pași soluția este exactă (în aritmetică exactă)." } },
+                { "text": { "en": "The step size formula guarantees convergence in $n$ steps.", "ro": "Formula pasului garantează convergența în $n$ pași." }, "correct": false, "explanation": { "en": "The step size alone is not the reason; it's the A-conjugate basis property.", "ro": "Pasul singur nu este motivul; proprietatea bazei A-conjugate este." } },
+                { "text": { "en": "The eigenvalues cluster after $n$ steps.", "ro": "Valorile proprii se grupează după $n$ pași." }, "correct": false, "explanation": { "en": "Clustering helps convergence but is not the finite-step reason.", "ro": "Gruparea ajută convergența dar nu este motivul finit." } },
+                { "text": { "en": "The Hessian becomes diagonal after $n$ steps.", "ro": "Hessiana devine diagonală după $n$ pași." }, "correct": false, "explanation": { "en": "The Hessian does not change; it is $A$ throughout.", "ro": "Hessiana nu se schimbă; ea este $A$ pe tot parcursul." } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

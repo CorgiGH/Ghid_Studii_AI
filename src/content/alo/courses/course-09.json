@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "id": "alo-c9",
+    "title": { "en": "Course 9: Eigenvalues — Theory, Power Method, Inverse Iteration, QR Algorithm", "ro": "Cursul 9: Valori proprii — Teorie, metoda puterii, iterație inversă, algoritmul QR" },
+    "shortTitle": { "en": "C9: Eigenvalues", "ro": "C9: Valori proprii" },
+    "source": { "en": "Conf. dr. Anca Ignat, Conf. dr. Corina Forăscu — ALO Lecture 9, UAIC 2026.", "ro": "Conf. dr. Anca Ignat, Conf. dr. Corina Forăscu — ALO Curs 9, UAIC 2026." }
+  },
+  "steps": [
+    {
+      "id": "alo-c9-eigdef",
+      "title": { "en": "1. Eigenvalues & Eigenvectors", "ro": "1. Valori și vectori proprii" },
+      "group": "foundations",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Eigenvalue / Eigenvector", "ro": "Valoare proprie / Vector propriu" },
+          "content": {
+            "en": "A complex number $\\lambda \\in \\mathbb{C}$ is an **eigenvalue** of $A \\in \\mathbb{R}^{n \\times n}$ if there exists $u \\in \\mathbb{C}^n$, $u \\ne 0$, such that $Au = \\lambda u$. Equivalently, $\\det(\\lambda I_n - A) = 0$. The polynomial $p_A(\\lambda) = \\det(\\lambda I_n - A)$ of degree $n$ is called the **characteristic polynomial**.",
+            "ro": "Numărul complex $\\lambda \\in \\mathbb{C}$ este **valoare proprie** a lui $A \\in \\mathbb{R}^{n \\times n}$ dacă există $u \\in \\mathbb{C}^n$, $u \\ne 0$, cu $Au = \\lambda u$. Echivalent, $\\det(\\lambda I_n - A) = 0$. Polinomul $p_A(\\lambda) = \\det(\\lambda I_n - A)$ de grad $n$ se numește **polinomul caracteristic**."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Proposition 1:** If the $n$ eigenvalues $\\lambda_1, \\ldots, \\lambda_n$ are distinct, the corresponding eigenvectors $u_1, \\ldots, u_n$ are linearly independent. **Proposition 2:** Consequently, there exists a nonsingular $T$ with $T^{-1}AT = \\operatorname{diag}(\\lambda_1, \\ldots, \\lambda_n)$ (diagonalization via eigenvectors as columns of $T$).",
+            "ro": "**Propoziția 1:** Dacă cele $n$ valori proprii $\\lambda_1, \\ldots, \\lambda_n$ sunt distincte, vectorii proprii corespunzători $u_1, \\ldots, u_n$ sunt liniar independenți. **Propoziția 2:** În consecință, există $T$ nesingulară cu $T^{-1}AT = \\operatorname{diag}(\\lambda_1, \\ldots, \\lambda_n)$ (diagonalizare prin vectorii proprii ca coloane ale lui $T$)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "Similar matrices", "ro": "Matrice asemenea" },
+          "content": {
+            "en": "Matrices $A$ and $B$ are **similar** ($A \\sim B$) if $A = TBT^{-1}$ for some nonsingular $T$. **Proposition 3:** Similar matrices have the same characteristic polynomial and hence the same eigenvalues.",
+            "ro": "Matricele $A$ și $B$ sunt **asemenea** ($A \\sim B$) dacă $A = TBT^{-1}$ pentru o $T$ nesingulară. **Propoziția 3:** Matricele asemenea au același polinom caracteristic și deci aceleași valori proprii."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Gershgorin's Theorem:** Every eigenvalue $\\lambda$ of $A$ lies in at least one Gershgorin disc: $|\\lambda - a_{i_0 i_0}| \\le r_{i_0}$ where $r_i = \\sum_{j \\ne i} |a_{ij}|$. This gives quick inclusion regions for eigenvalues without solving $\\det(\\lambda I - A) = 0$.",
+            "ro": "**Teorema lui Gershgorin:** Orice valoare proprie $\\lambda$ a lui $A$ se află în cel puțin un disc Gershgorin: $|\\lambda - a_{i_0 i_0}| \\le r_{i_0}$ unde $r_i = \\sum_{j \\ne i} |a_{ij}|$. Oferă regiuni de includere rapide fără a rezolva $\\det(\\lambda I - A) = 0$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c9-symmetric",
+      "title": { "en": "2. Symmetric Matrices — Real Eigenvalues", "ro": "2. Matrice simetrice — valori proprii reale" },
+      "group": "foundations",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "For $A = A^T$: (1) All eigenvalues are **real**. (2) There exists an **orthonormal eigenbasis**: $U^T A U = \\Lambda = \\operatorname{diag}(\\lambda_1, \\ldots, \\lambda_n)$ with $U$ orthogonal ($U^T U = I$). The **Rayleigh quotient** $r(u) = u^T Au / u^T u$ satisfies $r(u) = \\lambda$ when $u$ is an eigenvector.",
+            "ro": "Pentru $A = A^T$: (1) Toate valorile proprii sunt **reale**. (2) Există o **bază ortonormată de vectori proprii**: $U^T A U = \\Lambda = \\operatorname{diag}(\\lambda_1, \\ldots, \\lambda_n)$ cu $U$ ortogonală ($U^T U = I$). **Coeficientul Rayleigh** $r(u) = u^T Au / u^T u$ satisface $r(u) = \\lambda$ când $u$ este vector propriu."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c9-power",
+      "title": { "en": "3. Power Method", "ro": "3. Metoda puterii" },
+      "group": "algorithms",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Power method** approximates the dominant eigenvalue $\\lambda_1$ (largest in modulus) and its eigenvector. Starting from $u^{(0)}$, $\\|u^{(0)}\\|_2 = 1$: iterate $u^{(k)} = Au^{(k-1)} / \\|Au^{(k-1)}\\|_2$. The Rayleigh quotient $r(u^{(k)}) \\to \\lambda_1$. Convergence requires $|\\lambda_1| > |\\lambda_2|$ and $u^{(0)}$ not orthogonal to $u_1$.",
+            "ro": "**Metoda puterii** aproximează valoarea proprie dominantă $\\lambda_1$ (de modul maxim) și vectorul propriu asociat. Pornind de la $u^{(0)}$, $\\|u^{(0)}\\|_2 = 1$: iterăm $u^{(k)} = Au^{(k-1)} / \\|Au^{(k-1)}\\|_2$. Coeficientul Rayleigh $r(u^{(k)}) \\to \\lambda_1$. Convergența necesită $|\\lambda_1| > |\\lambda_2|$ și $u^{(0)}$ neortogonal pe $u_1$."
+          }
+        },
+        {
+          "type": "code",
+          "language": "pseudocode",
+          "code": "// Power Method\nu(0) ∈ R^n, ||u(0)||_2 = 1; k = 0\ndo\n    k++\n    w = A * u(k-1)\n    u(k) = w / ||w||_2\n    λk = r(u(k)) = (A*u(k), u(k))    // Rayleigh quotient\nwhile (||A*u(k) - λk*u(k)|| > ε  and  k ≤ kmax)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Convergence proof sketch:** Write $u^{(0)} = \\sum_i a_i u_i$. Then $u^{(k)} \\propto A^k u^{(0)} = \\sum_i a_i \\lambda_i^k u_i = \\lambda_1^k [a_1 u_1 + \\sum_{i\\ge 2} a_i (\\lambda_i/\\lambda_1)^k u_i]$. Since $|\\lambda_i/\\lambda_1| < 1$ for $i \\ge 2$, the higher-order terms vanish, leaving only $u_1$.",
+            "ro": "**Schița demonstrației convergentei:** Scriem $u^{(0)} = \\sum_i a_i u_i$. Atunci $u^{(k)} \\propto A^k u^{(0)} = \\lambda_1^k [a_1 u_1 + \\sum_{i\\ge 2} a_i (\\lambda_i/\\lambda_1)^k u_i]$. Deoarece $|\\lambda_i/\\lambda_1| < 1$ pentru $i \\ge 2$, termenii de ordin superior dispar, rămânând doar $u_1$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c9-inverse-iter",
+      "title": { "en": "4. Inverse Iteration", "ro": "4. Metoda iterației inverse" },
+      "group": "algorithms",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Inverse iteration** finds the eigenvalue closest to a given shift $\\mu$ (not an eigenvalue). Apply the power method to $(A - \\mu I)^{-1}$: its eigenvalues are $1/(\\lambda_i - \\mu)$, so the dominant one corresponds to the $\\lambda_i$ nearest $\\mu$. Each step solves the linear system $(A - \\mu I)w = u^{(k-1)}$.",
+            "ro": "**Iterația inversă** găsește valoarea proprie cea mai apropiată de un shift $\\mu$ dat (care nu este valoare proprie). Se aplică metoda puterii lui $(A - \\mu I)^{-1}$: valorile sale proprii sunt $1/(\\lambda_i - \\mu)$, cea dominantă corespunde lui $\\lambda_i$ cel mai apropiat de $\\mu$. Fiecare pas rezolvă sistemul $(A - \\mu I)w = u^{(k-1)}$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c9-hessenberg",
+      "title": { "en": "5. Hessenberg Reduction", "ro": "5. Reducerea la forma Hessenberg" },
+      "group": "algorithms",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Upper Hessenberg form", "ro": "Forma Hessenberg superioară" },
+          "content": {
+            "en": "Matrix $H \\in \\mathbb{R}^{n \\times n}$ is in **upper Hessenberg form** if $h_{ij} = 0$ for $i > j+1$ (i.e., all entries more than one position below the diagonal are zero). It is nearly triangular — only one extra subdiagonal.",
+            "ro": "Matricea $H \\in \\mathbb{R}^{n \\times n}$ este în **formă Hessenberg superioară** dacă $h_{ij} = 0$ pentru $i > j+1$ (toate elementele cu mai mult de o poziție sub diagonală sunt zero). Este aproape triunghiulară — o singură subdiagonală în plus."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Any square matrix $A$ can be reduced to Hessenberg form via an orthogonal similarity: $H = \\tilde{P}A\\tilde{P}^{-1} \\sim A$, using $n-2$ Householder reflections. **Algorithm:** At step $r = 1, \\ldots, n-2$ apply $A^{(r)} = P_r A^{(r-1)} P_r$ where $P_r = I - \\beta^{-1} uu^T$ zeros out entries $r+2, \\ldots, n$ in column $r$.",
+            "ro": "Orice matrice pătratică $A$ poate fi redusă la formă Hessenberg printr-o asemănare ortogonală: $H = \\tilde{P}A\\tilde{P}^{-1} \\sim A$, folosind $n-2$ reflexii Householder. **Algoritm:** La pasul $r = 1, \\ldots, n-2$ se aplică $A^{(r)} = P_r A^{(r-1)} P_r$ unde $P_r = I - \\beta^{-1} uu^T$ anulează elementele $r+2, \\ldots, n$ din coloana $r$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c9-qr-algo",
+      "title": { "en": "6. QR Algorithm for Eigenvalues", "ro": "6. Algoritmul QR pentru valori proprii" },
+      "group": "algorithms",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The **QR iteration** builds a sequence of similar matrices $A^{(k+1)} = R^{(k)} Q^{(k)}$ (note: R then Q) where $A^{(k)} = Q^{(k)} R^{(k)}$ is the QR decomposition. All $A^{(k)}$ are similar to $A$ and hence have the same eigenvalues. Under mild conditions, $A^{(k)}$ converges to **real Schur form**: block-upper-triangular with 1×1 blocks for real eigenvalues and 2×2 blocks for complex conjugate pairs.",
+            "ro": "**Iterația QR** construiește o succesiune de matrice asemenea $A^{(k+1)} = R^{(k)} Q^{(k)}$ (R înainte de Q) unde $A^{(k)} = Q^{(k)} R^{(k)}$ este descompunerea QR. Toate $A^{(k)}$ sunt asemenea cu $A$ și deci au aceleași valori proprii. În condiții ușoare, $A^{(k)}$ converge la **forma Schur reală**: bloc-triunghiulară superior cu blocuri 1×1 pentru valori proprii reale și blocuri 2×2 pentru perechi complex-conjugate."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**In practice:** (1) Reduce $A$ to Hessenberg form first (preserves structure through iterations). (2) Apply shifts $A^{(k)} - \\mu_k I = Q^{(k)} R^{(k)}$, then $A^{(k+1)} = R^{(k)} Q^{(k)} + \\mu_k I$ — this accelerates convergence dramatically.",
+            "ro": "**În practică:** (1) Se reduce mai întâi $A$ la forma Hessenberg (păstrează structura prin iterații). (2) Se aplică shifturi $A^{(k)} - \\mu_k I = Q^{(k)} R^{(k)}$, apoi $A^{(k+1)} = R^{(k)} Q^{(k)} + \\mu_k I$ — accelerează convergența dramatic."
+          }
+        }
+      ]
+    },
+    {
+      "id": "alo-c9-quiz",
+      "title": { "en": "Self-Test", "ro": "Autoevaluare" },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Gershgorin's theorem guarantees that every eigenvalue of $A$ lies in:",
+                "ro": "Teorema lui Gershgorin garantează că fiecare valoare proprie a lui $A$ se află în:"
+              },
+              "options": [
+                { "text": { "en": "The union of the $n$ Gershgorin discs", "ro": "Reuniunea celor $n$ discuri Gershgorin" }, "correct": true, "explanation": { "en": "Each disc is centered at $a_{ii}$ with radius $r_i = \\sum_{j\\ne i}|a_{ij}|$. The union is the Gershgorin region — a guaranteed bounding set for all eigenvalues.", "ro": "Fiecare disc are centrul $a_{ii}$ și raza $r_i = \\sum_{j\\ne i}|a_{ij}|$. Reuniunea este regiunea Gershgorin — o mulțime garantată care conține toate valorile proprii." } },
+                { "text": { "en": "The interior of the disc centered at $\\text{tr}(A)/n$", "ro": "Interiorul discului centrat la $\\text{tr}(A)/n$" }, "correct": false, "explanation": { "en": "There is no single disc centered at the mean eigenvalue that bounds all eigenvalues.", "ro": "Nu există un singur disc centrat la media valorilor proprii care să le cuprindă pe toate." } },
+                { "text": { "en": "A ball of radius $\\|A\\|_F$", "ro": "O bilă de rază $\\|A\\|_F$" }, "correct": false, "explanation": { "en": "The Frobenius norm bounds $|\\lambda| \\le \\|A\\|_F$ but Gershgorin gives sharper per-entry bounds.", "ro": "Norma Frobenius limitează $|\\lambda| \\le \\|A\\|_F$ dar Gershgorin dă limite mai precise pe intrare." } },
+                { "text": { "en": "The interval $[\\min a_{ii}, \\max a_{ii}]$ on the real line", "ro": "Intervalul $[\\min a_{ii}, \\max a_{ii}]$ pe linia reală" }, "correct": false, "explanation": { "en": "Eigenvalues can be complex and the diagonal interval ignores off-diagonal entries.", "ro": "Valorile proprii pot fi complexe iar intervalul diagonal ignoră elementele extradiagonale." } }
+              ]
+            },
+            {
+              "question": {
+                "en": "The power method converges to the eigenvector of the **dominant** eigenvalue. If $|\\lambda_1| = |\\lambda_2| > |\\lambda_3| \\ge \\ldots$, what happens?",
+                "ro": "Metoda puterii converge la vectorul propriu al valorii proprii **dominante**. Dacă $|\\lambda_1| = |\\lambda_2| > |\\lambda_3| \\ge \\ldots$, ce se întâmplă?"
+              },
+              "options": [
+                { "text": { "en": "The method fails to converge to a single eigenvector", "ro": "Metoda nu converge la un singur vector propriu" }, "correct": true, "explanation": { "en": "When two eigenvalues tie for largest modulus, iterates oscillate or rotate between the two eigenvectors — no convergence to a unique direction. A shift or deflation is needed.", "ro": "Când două valori proprii au același modul maxim, iteratele oscilează sau se rotesc între cei doi vectori proprii — fără convergență la o direcție unică. Este nevoie de un shift sau deflație." } },
+                { "text": { "en": "It converges to the average of the two eigenvectors", "ro": "Converge la media celor doi vectori proprii" }, "correct": false, "explanation": { "en": "Iterates cycle, not average.", "ro": "Iteratele ciclează, nu fac media." } },
+                { "text": { "en": "It converges twice as fast", "ro": "Converge de două ori mai repede" }, "correct": false, "explanation": { "en": "Equal dominant eigenvalues impede convergence, not accelerate it.", "ro": "Valorile proprii egale dominante împiedică convergența, nu o accelerează." } },
+                { "text": { "en": "It converges to zero", "ro": "Converge la zero" }, "correct": false, "explanation": { "en": "The iterate always has norm 1 (we normalize each step).", "ro": "Iterata are întotdeauna norma 1 (normalizăm la fiecare pas)." } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
