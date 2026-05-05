@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "id": "oop-c10",
+    "title": { "en": "Course 10: Lambda Expressions in C++", "ro": "Cursul 10: Expresii Lambda in C++" },
+    "shortTitle": { "en": "C10: Lambdas", "ro": "C10: Lambda" },
+    "source": { "en": "OOP -- Lecture 10, Prof. Gavrilut Dragos, UAIC 2024-2025", "ro": "POO -- Cursul 10, Prof. Gavrilut Dragos, UAIC 2024-2025" }
+  },
+  "steps": [
+    {
+      "id": "oop-c10-intro",
+      "title": { "en": "Introduction & Syntax", "ro": "Introducere si Sintaxa" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Lambda Expression", "ro": "Expresie Lambda" },
+          "content": {
+            "en": "A lambda is an anonymous inline function. The compiler models it as an instance of a unique unnamed class (functor) that overloads `operator()`. Introduced in C++11, extended in C++14, C++17, and C++20.",
+            "ro": "Un lambda este o functie anonima inlinie. Compilatorul o modeleaza ca o instanta a unei clase anonime unice (functor) care suprascrie `operator()`. Introdus in C++11, extins in C++14, C++17 si C++20."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Lambda syntax variants:**\n- `[captures] (params) -> return_type { body }` — full form\n- `[captures] (params) { body }` — return type deduced\n- `[captures] { body }` — no parameters\n\nIf no variables are captured, the lambda object is typically **1 byte** in size. A no-capture lambda can be implicitly converted to a plain function pointer.",
+            "ro": "**Variante de sintaxa lambda:**\n- `[captures] (params) -> return_type { body }` — forma completa\n- `[captures] (params) { body }` — tip returnat dedus\n- `[captures] { body }` — fara parametri\n\nDaca nu sunt capturate variabile, obiectul lambda are de obicei **1 byte**. Un lambda fara capturi poate fi convertit implicit la un pointer de functie simplu."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    // Basic lambda\n    auto add = [](int x, int y) { return x + y; };\n    cout << add(10, 20) << endl; // 30\n\n    // With explicit return type\n    auto divide = [](double a, double b) -> double { return a / b; };\n\n    // No-parameter lambda\n    auto greet = [] { cout << \"Hello!\" << endl; };\n    greet();\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c10-captures",
+      "title": { "en": "Capture Mechanisms", "ro": "Mecanisme de Captura" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The capture clause defines which local variables are accessible inside the lambda body:\n\n- `[]` — captures nothing\n- `[a, b]` — capture `a` and `b` by value (copy made at lambda definition)\n- `[&a, &b]` — capture `a` and `b` by reference\n- `[this]` — capture the current object pointer\n- `[&]` — capture all used local variables by reference\n- `[=]` — capture all used local variables by value\n- `[=, &a]` — all by value except `a` by reference\n- `[&, a]` — all by reference except `a` by value",
+            "ro": "Clauza de captura defineste ce variabile locale sunt accesibile in corpul lambda:\n\n- `[]` — nu captureaza nimic\n- `[a, b]` — captureaza `a` si `b` prin valoare (copie facuta la definirea lambda)\n- `[&a, &b]` — captureaza `a` si `b` prin referinta\n- `[this]` — captureaza pointerul obiectului curent\n- `[&]` — captureaza toate variabilele locale folosite prin referinta\n- `[=]` — captureaza toate variabilele locale folosite prin valoare\n- `[=, &a]` — toate prin valoare exceptand `a` prin referinta\n- `[&, a]` — toate prin referinta exceptand `a` prin valoare"
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Dangling reference trap:** Capturing a local variable by reference (`&`) and executing the lambda after the variable goes out of scope causes **undefined behavior**. The lambda may silently corrupt a different variable that occupies the same stack location.",
+            "ro": "**Capcana referintei agatate:** Capturarea unei variabile locale prin referinta (`&`) si executarea lambda-ului dupa ce variabila iese din domeniu cauzeaza **comportament nedefinit**. Lambda-ul poate corupe silentios o alta variabila care ocupa aceeasi locatie pe stiva."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <functional>\nusing namespace std;\n\nfunction<int()> createCounter() {\n    int count = 0;\n    // UNSAFE: captures count by reference -- count will be destroyed!\n    return [&count]() { return ++count; };\n    // SAFE: capture by value\n    // return [count]() mutable { return ++count; };\n}\n\nint main() {\n    int x = 10, y = 20;\n\n    auto sumXY = [x, y]() { return x + y; }; // captures copies\n    x = 99; // does NOT affect sumXY's copy\n    cout << sumXY() << endl; // still 30\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c10-functor-model",
+      "title": { "en": "Lambda as Functor — Compiler Model", "ro": "Lambda ca Functor — Modelul Compilatorului" },
+      "group": "internals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The compiler translates a lambda into an anonymous struct with `operator() const`. Captured variables become **data members** of this struct. Understanding this model clarifies why:\n- Captured-by-value lambdas cannot modify their captures by default (`operator()` is `const`)\n- No-capture lambdas convert to function pointers (no `this` needed)\n- Each distinct lambda has a **unique type** — even if they look identical",
+            "ro": "Compilatorul traduce un lambda intr-un struct anonim cu `operator() const`. Variabilele capturate devin **membri de date** ai acestui struct. Intelegerea acestui model clarifica de ce:\n- Lambdas capturate prin valoare nu pot modifica capturile implicit (`operator()` este `const`)\n- Lambdas fara capturi se convertesc la pointeri de functie (nu este nevoie de `this`)\n- Fiecare lambda distinct are un **tip unic** — chiar daca arata identic"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// Equivalent compiler-generated struct for: [x](int y) { return x + y; }\nstruct __lambda_unique_type {\n    int x; // captured variable becomes data member\n    int operator()(int y) const { return x + y; }\n};\n\n// The compiler then instantiates:\n// __lambda_unique_type lambda_instance = {x_value};\n// lambda_instance(some_y);"
+        }
+      ]
+    },
+    {
+      "id": "oop-c10-mutable-init-capture",
+      "title": { "en": "mutable & Initialized Capture (C++14)", "ro": "mutable si Captura Initializata (C++14)" },
+      "group": "advanced",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "- **`mutable`**: Removes the `const` qualifier from the generated `operator()`, allowing modification of by-value captured variables inside the lambda body.\n- **Initialized capture** (C++14): Allows defining and initializing new variables in the capture block, even renaming captures: `[counter = 0]() mutable { return counter++; }`",
+            "ro": "- **`mutable`**: Elimina calificatorul `const` din `operator()` generat, permitand modificarea variabilelor capturate prin valoare in corpul lambda.\n- **Captura initializata** (C++14): Permite definirea si initializarea de noi variabile in blocul de captura, chiar si redenumirea capturilor: `[counter = 0]() mutable { return counter++; }`"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int x = 10;\n\n    // Without mutable: x inside lambda is const -- cannot modify\n    // auto f = [x]() { x++; }; // ERROR\n\n    // With mutable: OK to modify the lambda's internal copy\n    auto counter = [x]() mutable {\n        return ++x; // modifies lambda's copy, not outer x\n    };\n    cout << counter() << endl; // 11\n    cout << counter() << endl; // 12\n    cout << x << endl;         // still 10!\n\n    // Initialized capture (C++14)\n    auto gen = [n = 0]() mutable { return n++; };\n    cout << gen() << endl; // 0\n    cout << gen() << endl; // 1\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c10-stl-integration",
+      "title": { "en": "Lambdas with STL Algorithms", "ro": "Lambda cu Algoritmi STL" },
+      "group": "advanced",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Lambdas are the idiomatic way to supply predicates and operations to STL algorithms like `std::for_each`, `std::sort`, `std::count_if`, `std::remove_if`.\n\n`std::function<ReturnType(Args...)>` is a type-erased wrapper that can store any callable (lambdas, function pointers, functors). It is more flexible but slower than direct function pointers due to type erasure overhead.",
+            "ro": "Lambdas reprezinta modul idiom de a furniza predicate si operatii algoritmilor STL ca `std::for_each`, `std::sort`, `std::count_if`, `std::remove_if`.\n\n`std::function<TipReturnat(Args...)>` este un wrapper cu stergere de tip care poate stoca orice apelabil (lambdas, pointeri de functii, functori). Este mai flexibil dar mai lent decat pointerii de functii directi din cauza overhead-ului stergerii de tip."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <vector>\n#include <algorithm>\n#include <functional>\n#include <iostream>\nusing namespace std;\n\nint main() {\n    vector<int> v = {3, 1, 4, 1, 5, 9, 2, 6};\n\n    // sort with custom comparator\n    sort(v.begin(), v.end(), [](int a, int b) { return a > b; });\n\n    // double each element in-place\n    for_each(v.begin(), v.end(), [](int& x) { x *= 2; });\n\n    // count elements > 10\n    int threshold = 10;\n    int count = count_if(v.begin(), v.end(),\n        [threshold](int x) { return x > threshold; });\n    cout << \"Elements > 10: \" << count << endl;\n\n    // std::function wrapper\n    function<int(int, int)> add = [](int a, int b) { return a + b; };\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c10-generic-constexpr",
+      "title": { "en": "Generic & constexpr Lambdas (C++14/17/20)", "ro": "Lambda Generic & constexpr (C++14/17/20)" },
+      "group": "advanced",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "- **C++14 Generic Lambda**: `auto` parameters — acts like a template: `auto f = [](auto x, auto y) { return x + y; };`\n- **C++20 Template Lambda**: Explicit template parameter for stricter constraints: `auto f = []<typename T>(T v1, T v2) { return v1 + v2; };`\n- **C++17 `constexpr` Lambda**: Allows compile-time evaluation: `constexpr auto f = [](int a, int b) { return a + b; };`\n- **C++17 `[*this]` Capture**: Captures a copy of `*this` (safe for async — original object may be destroyed).",
+            "ro": "- **Lambda Generic C++14**: Parametri `auto` — actioneaza ca un sablon: `auto f = [](auto x, auto y) { return x + y; };`\n- **Lambda Template C++20**: Parametru de sablon explicit pentru constrangeri mai stricte: `auto f = []<typename T>(T v1, T v2) { return v1 + v2; };`\n- **Lambda `constexpr` C++17**: Permite evaluarea la compilare: `constexpr auto f = [](int a, int b) { return a + b; };`\n- **Captura `[*this]` C++17**: Captureaza o copie a `*this` (sigur pentru async — obiectul original poate fi distrus)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    // C++14: generic lambda with auto params\n    auto add = [](auto x, auto y) { return x + y; };\n    cout << add(1, 2) << endl;       // int + int = 3\n    cout << add(1.5, 2.5) << endl;   // double + double = 4.0\n\n    // C++17: constexpr lambda\n    constexpr auto square = [](int n) { return n * n; };\n    constexpr int s = square(5); // evaluated at compile time -> 25\n    int arr[s];                  // valid array size\n\n    // C++20: template lambda for type constraints\n    // auto strict_add = []<typename T>(T a, T b) { return a + b; };\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c10-quiz",
+      "title": { "en": "Self-Test", "ro": "Autoevaluare" },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Why can a lambda that captures nothing be converted to a plain function pointer?",
+                "ro": "De ce poate un lambda fara capturi sa fie convertit la un pointer de functie simplu?"
+              },
+              "options": [
+                { "text": { "en": "Because it has no return type", "ro": "Pentru ca nu are tip de returnare" }, "correct": false, "explanation": { "en": "Return type is unrelated. A lambda can have any return type and still convert to a function pointer if it has no captures.", "ro": "Tipul de returnare nu are legatura. Un lambda poate avea orice tip de returnare si tot se poate converti la pointer de functie daca nu are capturi." } },
+                { "text": { "en": "Because no captured variables means the functor struct has no data members, so it behaves identically to a free function", "ro": "Pentru ca fara variabile capturate structul functor nu are membri de date, deci se comporta identic cu o functie libera" }, "correct": true, "explanation": { "en": "Without captures, the lambda's operator() needs no this pointer. The compiler can provide an implicit conversion to a function pointer.", "ro": "Fara capturi, operator() al lambda-ului nu are nevoie de pointerul this. Compilatorul poate furniza o conversie implicita la un pointer de functie." } },
+                { "text": { "en": "All lambdas can be converted to function pointers", "ro": "Toate lambdas pot fi convertite la pointeri de functii" }, "correct": false, "explanation": { "en": "Only no-capture lambdas can be implicitly converted. A lambda with captures stores data members and cannot be represented as a plain function pointer.", "ro": "Doar lambdas fara capturi pot fi convertite implicit. Un lambda cu capturi stocheaza membri de date si nu poate fi reprezentat ca un pointer de functie simplu." } },
+                { "text": { "en": "Because function pointers are deprecated in modern C++", "ro": "Pentru ca pointerii de functii sunt deprecati in C++ modern" }, "correct": false, "explanation": { "en": "Function pointers are not deprecated. They are still widely used as callback arguments in C APIs.", "ro": "Pointerii de functii nu sunt deprecati. Sunt inca larg folositi ca argumente callback in API-urile C." } }
+              ]
+            },
+            {
+              "question": {
+                "en": "What does the `mutable` keyword do when applied to a lambda?",
+                "ro": "Ce face cuvantul cheie `mutable` cand este aplicat unui lambda?"
+              },
+              "options": [
+                { "text": { "en": "Allows the lambda to modify captured-by-reference variables", "ro": "Permite lambda-ului sa modifice variabilele capturate prin referinta" }, "correct": false, "explanation": { "en": "Captured-by-reference variables can always be modified — they are already aliases to the originals. mutable affects by-value captures.", "ro": "Variabilele capturate prin referinta pot fi intotdeauna modificate — sunt deja aliasuri ale originalelor. mutable afecteaza capturile prin valoare." } },
+                { "text": { "en": "Removes the const qualifier from the generated operator(), allowing modification of by-value captured copies", "ro": "Elimina calificatorul const din operator() generat, permitand modificarea copiilor capturate prin valoare" }, "correct": true, "explanation": { "en": "By default, the lambda's operator() is const, preventing modification of by-value captures. mutable removes this restriction.", "ro": "In mod implicit, operator() al lambda-ului este const, prevenind modificarea capturilor prin valoare. mutable elimina aceasta restrictie." } },
+                { "text": { "en": "Makes the lambda thread-safe", "ro": "Face lambda-ul thread-safe" }, "correct": false, "explanation": { "en": "mutable has nothing to do with thread safety. It only affects const-ness of the generated operator().", "ro": "mutable nu are nimic de-a face cu siguranta thread-urilor. Afecteaza doar const-itatea lui operator() generat." } },
+                { "text": { "en": "Allows the lambda to be called multiple times", "ro": "Permite lambda-ului sa fie apelat de mai multe ori" }, "correct": false, "explanation": { "en": "Lambdas can always be called multiple times regardless of mutable.", "ro": "Lambdas pot fi intotdeauna apelate de mai multe ori indiferent de mutable." } }
+              ]
+            },
+            {
+              "question": {
+                "en": "You have `auto f = [&x]() { return x++; };` where `x` is a local variable. The lambda is returned from the function and called later. What happens?",
+                "ro": "Ai `auto f = [&x]() { return x++; };` unde `x` este o variabila locala. Lambda-ul este returnat din functie si apelat mai tarziu. Ce se intampla?"
+              },
+              "options": [
+                { "text": { "en": "It works correctly — the lambda keeps the variable alive", "ro": "Functioneaza corect — lambda-ul mentine variabila in viata" }, "correct": false, "explanation": { "en": "Lambdas do NOT extend the lifetime of captured references. The variable is destroyed when the function returns.", "ro": "Lambdas NU extind durata de viata a referintelor capturate. Variabila este distrusa cand functia returneaza." } },
+                { "text": { "en": "Undefined behavior — the lambda holds a dangling reference to the destroyed variable", "ro": "Comportament nedefinit — lambda-ul detine o referinta agata la variabila distrusa" }, "correct": true, "explanation": { "en": "The stack frame is gone after the function returns. Accessing x through the captured reference is undefined behavior.", "ro": "Cadrul de stiva dispare dupa ce functia returneaza. Accesarea lui x prin referinta capturata este comportament nedefinit." } },
+                { "text": { "en": "Compile error — you cannot return a lambda that captures by reference", "ro": "Eroare de compilare — nu puteti returna un lambda care captureaza prin referinta" }, "correct": false, "explanation": { "en": "The compiler does NOT detect this as an error. It is a runtime undefined behavior trap.", "ro": "Compilatorul NU detecteaza aceasta ca o eroare. Este o capcana cu comportament nedefinit la runtime." } },
+                { "text": { "en": "The lambda makes a copy of x when returned", "ro": "Lambda-ul face o copie a lui x cand este returnat" }, "correct": false, "explanation": { "en": "Capture by reference stores a reference (address), not a copy. To get a copy, use [x] or [x = x] (initialized capture).", "ro": "Captura prin referinta stocheaza o referinta (adresa), nu o copie. Pentru a obtine o copie, folositi [x] sau [x = x] (captura initializata)." } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

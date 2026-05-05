@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "id": "oop-c9",
+    "title": { "en": "Course 9: Modern C++ Features & Static Polymorphism", "ro": "Cursul 9: Facilitati Moderne C++ si Polimorfism Static" },
+    "shortTitle": { "en": "C9: Modern C++", "ro": "C9: C++ Modern" },
+    "source": { "en": "OOP -- Lecture 9, Prof. Gavrilut Dragos, UAIC 2024-2025", "ro": "POO -- Cursul 9, Prof. Gavrilut Dragos, UAIC 2024-2025" }
+  },
+  "steps": [
+    {
+      "id": "oop-c9-intro",
+      "title": { "en": "Overview", "ro": "Privire de ansamblu" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Course 9 explores modern C++ features that improve code clarity, safety, and performance:\n\n1. **`constexpr`** — compile-time constant expressions\n2. **Range-based `for`** — cleaner iteration over containers\n3. **Type inference** — `auto` and `decltype`\n4. **Structured bindings** (C++17) — destructuring aggregates\n5. **CRTP** — Curiously Recurring Template Pattern for static polymorphism\n6. **POD types** — Plain Old Data and memory layout guarantees",
+            "ro": "Cursul 9 exploreaza facilitatile moderne C++ care imbunatatesc claritatea, siguranta si performanta codului:\n\n1. **`constexpr`** — expresii constante la compilare\n2. **`for` bazat pe range** — iteratie mai curata peste containere\n3. **Inferenta de tip** — `auto` si `decltype`\n4. **Legare structurata** (C++17) — destructurarea agregatelor\n5. **CRTP** — Pattern-ul Template Recuriv Curios pentru polimorfism static\n6. **Tipuri POD** — Plain Old Data si garantii de layout al memoriei"
+          }
+        }
+      ]
+    },
+    {
+      "id": "oop-c9-constexpr",
+      "title": { "en": "constexpr — Compile-Time Computation", "ro": "constexpr — Calcul la Compilare" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "constexpr", "ro": "constexpr" },
+          "content": {
+            "en": "The `constexpr` keyword (C++11) tells the compiler to evaluate an expression at **compile time** and replace it with the computed value. Unlike `const` (which prevents modification after init), `constexpr` guarantees the value is a compile-time constant.",
+            "ro": "Cuvantul cheie `constexpr` (C++11) spune compilatorului sa evalueze o expresie la **timpul compilarii** si sa o inlocuiasca cu valoarea calculata. Spre deosebire de `const` (care previne modificarea dupa initializare), `constexpr` garanteaza ca valoarea este o constanta la compilare."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Rules for `constexpr` functions:**\n- Must not be `void`\n- Must not have uninitialized local variables\n- C++11: only one `return` statement\n- C++14: relaxed — allows loops, multiple statements\n- Parameters must be constant values for pre-computation to occur",
+            "ro": "**Reguli pentru functii `constexpr`:**\n- Nu trebuie sa fie `void`\n- Nu trebuie sa aiba variabile locale neinitializate\n- C++11: un singur return\n- C++14: relaxat — permite bucle, instructiuni multiple\n- Parametrii trebuie sa fie valori constante pentru ca pre-calculul sa aiba loc"
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "constexpr int fibonacci(int n) {\n    if (n == 0) return 0;\n    if (n == 1) return 1;\n    return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nint main() {\n    constexpr int x = fibonacci(10); // computed at compile time -> 55\n    int arr[x];                       // valid: x is a compile-time constant\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c9-range-for",
+      "title": { "en": "Range-Based for Loop", "ro": "Bucla for Bazata pe Range" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Introduced in C++11, the range-based `for` iterates over any range: `for (variable_declaration : range_expression) { ... }`\n\nThe range expression can be:\n- A fixed-size array\n- An object with `begin()` and `end()` member functions (all STL containers qualify)\n- An initializer list\n\nTo make a **custom class** compatible, implement `operator++`, `operator!=`, and `operator*`.",
+            "ro": "Introdusa in C++11, bucla `for` bazata pe range itereaza peste orice interval: `for (declaratie_variabila : expresie_interval) { ... }`\n\nExpresiile interval pot fi:\n- Un tablou cu dimensiune fixa\n- Un obiect cu functiile membre `begin()` si `end()` (toate containerele STL se califica)\n- O lista de initializare\n\nPentru a face o **clasa personalizata** compatibila, implementati `operator++`, `operator!=` si `operator*`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <vector>\n#include <map>\nusing namespace std;\n\nint main() {\n    vector<int> v = {1, 2, 3, 4, 5};\n\n    // By value (copy)\n    for (int x : v) printf(\"%d \", x);\n\n    // By reference (modify in place)\n    for (int& x : v) x *= 2;\n\n    // By const reference (read-only, no copy)\n    for (const int& x : v) printf(\"%d \", x);\n\n    map<string, int> m = {{\"a\", 1}, {\"b\", 2}};\n    for (auto& [key, val] : m) // structured binding\n        printf(\"%s=%d \", key.c_str(), val);\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c9-auto-decltype",
+      "title": { "en": "Type Inference: auto & decltype", "ro": "Inferenta de Tip: auto & decltype" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "- **`auto`**: Deduces the variable type from its initializer. Especially useful for complex template types and iterator types.\n- **`decltype`**: Returns the declared type of an expression. Used to declare a variable of the same type as another.",
+            "ro": "- **`auto`**: Deduce tipul variabilei din initializatorul sau. Deosebit de util pentru tipuri de sabloane complexe si tipuri de iteratori.\n- **`decltype`**: Returneaza tipul declarat al unei expresii. Folosit pentru a declara o variabila de acelasi tip cu alta."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Nuance:** `decltype(v[0])` on a vector yields a reference type `int&`, not `int`. This requires immediate initialization: `decltype(v[0]) ref = v[0];` is valid, `decltype(v[0]) ref;` is not.",
+            "ro": "**Nuanta:** `decltype(v[0])` pe un vector produce un tip referinta `int&`, nu `int`. Aceasta necesita initializare imediata: `decltype(v[0]) ref = v[0];` este valid, `decltype(v[0]) ref;` nu este."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <vector>\n#include <map>\nusing namespace std;\n\nvoid processMap(map<string, vector<int>>& data) {\n    // Without auto: map<string, vector<int>>::iterator it = ...\n    auto it = data.begin(); // much cleaner\n\n    // decltype example\n    int x = 42;\n    decltype(x) y = 100; // y is int\n\n    // auto with function pointer\n    auto add = [](int a, int b) { return a + b; };\n    auto result = add(3, 4); // result is int = 7\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c9-structured-binding",
+      "title": { "en": "Structured Binding (C++17)", "ro": "Legare Structurata (C++17)" },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Structured Binding", "ro": "Legare Structurata" },
+          "content": {
+            "en": "C++17 structured bindings allow splitting a struct, pair, or array into its individual components: `auto [v1, v2, ..., vn] = expression;`. All members must be `public` for binding to work. Highly effective when iterating over maps.",
+            "ro": "Legarile structurate C++17 permit divizarea unui struct, pair sau tablou in componentele sale individuale: `auto [v1, v2, ..., vn] = expresie;`. Toti membrii trebuie sa fie `public` pentru ca legarea sa functioneze. Deosebit de eficiente la iterarea hartilor."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <map>\n#include <tuple>\nusing namespace std;\n\nstruct Point { int x, y, z; };\n\nint main() {\n    // Binding a struct\n    Point p = {1, 2, 3};\n    auto [px, py, pz] = p;\n\n    // Binding a pair\n    pair<string, int> kv = {\"score\", 100};\n    auto [key, val] = kv;\n\n    // Most useful: iterating a map\n    map<string, int> grades = {{\"Alice\", 9}, {\"Bob\", 10}};\n    for (auto& [name, grade] : grades)\n        printf(\"%s: %d\\n\", name.c_str(), grade);\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c9-crtp",
+      "title": { "en": "CRTP — Static Polymorphism", "ro": "CRTP — Polimorfism Static" },
+      "group": "patterns",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Curiously Recurring Template Pattern (CRTP)", "ro": "Pattern-ul Template Recuriv Curios (CRTP)" },
+          "content": {
+            "en": "CRTP: a class `Derived` inherits from a template base using itself as the template argument: `class Derived : public Base<Derived>`. The base class can call `Derived`'s methods via `static_cast<T&>(*this)` without a virtual table.",
+            "ro": "CRTP: o clasa `Derived` mosteneste dintr-o baza sablonata folosind ea insasi ca argument de sablon: `class Derived : public Base<Derived>`. Clasa de baza poate apela metodele `Derived`-ului prin `static_cast<T&>(*this)` fara un tabel virtual."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Advantages over dynamic polymorphism:**\n- No `vtable` overhead — methods resolved at compile time\n- Better inlining and optimization by the compiler\n- No `vptr` stored in each object\n\n**Limitation:** `Base<A>` and `Base<B>` are distinct types. You cannot have a single `Base*` array holding both — unlike dynamic polymorphism.",
+            "ro": "**Avantaje fata de polimorfismul dinamic:**\n- Fara overhead vtable — metodele sunt rezolvate la compilare\n- Inlining si optimizari mai bune de catre compilator\n- Niciun `vptr` stocat in fiecare obiect\n\n**Limitare:** `Base<A>` si `Base<B>` sunt tipuri distincte. Nu puteti avea un singur tablou `Base*` care sa contina ambele — spre deosebire de polimorfismul dinamic."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// CRTP base: method chaining example\ntemplate<typename T>\nclass Printable {\npublic:\n    T& print() {\n        printf(\"%s\\n\", static_cast<T*>(this)->toString());\n        return static_cast<T&>(*this); // return derived type\n    }\n};\n\nclass MyClass : public Printable<MyClass> {\npublic:\n    const char* toString() const { return \"MyClass instance\"; }\n    MyClass& doSomething() { printf(\"doing something\\n\"); return *this; }\n};\n\nint main() {\n    MyClass obj;\n    obj.print().doSomething(); // method chaining works!\n    return 0;\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Barton-Nackman trick:** Use CRTP with inner friend functions to automatically define comparison operators (`==`, `<`, etc.) for derived classes — write once in the base, get it for free in all derived classes.",
+            "ro": "**Trucul Barton-Nackman:** Folositi CRTP cu functii friend interne pentru a defini automat operatorii de comparare (`==`, `<`, etc.) pentru clasele derivate — scrieti o data in baza, obtineti gratuit in toate clasele derivate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "oop-c9-pod",
+      "title": { "en": "POD Types & Empty Base Optimization", "ro": "Tipuri POD si Optimizarea Bazei Goale" },
+      "group": "patterns",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "Plain Old Data (POD)", "ro": "Plain Old Data (POD)" },
+          "content": {
+            "en": "POD types have a C-compatible memory layout. Divided into:\n- **Trivial types**: Compiler-provided default constructors/destructors/assignment. Can be safely copied with `memcpy`.\n- **Standard Layout**: No virtual functions, no virtual inheritance, all non-static data members have the same access control.",
+            "ro": "Tipurile POD au un layout de memorie compatibil cu C. Impartite in:\n- **Tipuri triviale**: Constructori/destructori/atribuiri furnizate de compilator. Pot fi copiate in siguranta cu `memcpy`.\n- **Layout standard**: Fara functii virtuale, fara mostenire virtuala, toti membrii de date non-statici au acelasi control de acces."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Empty Base Optimization (EBO):** A class with no data members normally occupies 1 byte (to ensure unique addresses). When used as a base, the compiler can merge this with the derived class — saving the 1 byte. However, if the first derived member has the same type as the empty base, alignment padding may negate this optimization.",
+            "ro": "**Optimizarea Bazei Goale (EBO):** O clasa fara membri de date ocupa normal 1 byte (pentru a asigura adrese unice). Cand este folosita ca baza, compilatorul poate fuziona aceasta cu clasa derivata — economisind 1 byte. Totusi, daca primul membru derivat are acelasi tip cu baza goala, umplerea de aliniere poate anula aceasta optimizare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "oop-c9-quiz",
+      "title": { "en": "Self-Test", "ro": "Autoevaluare" },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What is the key difference between `const` and `constexpr`?",
+                "ro": "Care este diferenta cheie dintre `const` si `constexpr`?"
+              },
+              "options": [
+                { "text": { "en": "const prevents modification; constexpr guarantees compile-time evaluation", "ro": "const previne modificarea; constexpr garanteaza evaluarea la compilare" }, "correct": true, "explanation": { "en": "const only prevents the variable from being changed after initialization. constexpr goes further — the value must be computable at compile time.", "ro": "const previne doar schimbarea variabilei dupa initializare. constexpr merge mai departe — valoarea trebuie sa fie calculabila la compilare." } },
+                { "text": { "en": "They are identical — constexpr is just an alias for const", "ro": "Sunt identice — constexpr este doar un alias pentru const" }, "correct": false, "explanation": { "en": "Not identical. const int x = someFunction(); is valid even if someFunction() runs at runtime. constexpr int x = someFunction(); requires someFunction() to be constexpr too.", "ro": "Nu sunt identice. const int x = someFunction(); este valid chiar daca someFunction() ruleaza la runtime. constexpr int x = someFunction(); necesita ca someFunction() sa fie si ea constexpr." } },
+                { "text": { "en": "constexpr is only for variables, not functions", "ro": "constexpr este doar pentru variabile, nu pentru functii" }, "correct": false, "explanation": { "en": "constexpr can be applied to both variables AND functions. A constexpr function can be evaluated at compile time if called with constant arguments.", "ro": "constexpr poate fi aplicat atat variabilelor CAT SI functiilor. O functie constexpr poate fi evaluata la compilare daca este apelata cu argumente constante." } },
+                { "text": { "en": "constexpr is faster at runtime than const", "ro": "constexpr este mai rapid la runtime decat const" }, "correct": false, "explanation": { "en": "constexpr is not faster at runtime — it eliminates runtime computation entirely by moving it to compile time.", "ro": "constexpr nu este mai rapid la runtime — elimina complet calculul la runtime mutandu-l la compilare." } }
+              ]
+            },
+            {
+              "question": {
+                "en": "Which of the following is a key limitation of CRTP compared to dynamic polymorphism?",
+                "ro": "Care dintre urmatoarele este o limitare cheie a CRTP comparativ cu polimorfismul dinamic?"
+              },
+              "options": [
+                { "text": { "en": "CRTP requires virtual functions", "ro": "CRTP necesita functii virtuale" }, "correct": false, "explanation": { "en": "CRTP specifically avoids virtual functions — that's its primary advantage.", "ro": "CRTP evita specific functiile virtuale — acesta este avantajul sau principal." } },
+                { "text": { "en": "Base<A> and Base<B> are distinct types — you cannot store them polymorphically in a single array", "ro": "Base<A> si Base<B> sunt tipuri distincte — nu le puteti stoca polimorfic intr-un singur tablou" }, "correct": true, "explanation": { "en": "With dynamic polymorphism, Shape* can point to Circle or Rectangle. With CRTP, Base<Circle> and Base<Rectangle> are unrelated types.", "ro": "Cu polimorfismul dinamic, Shape* poate indica spre Circle sau Rectangle. Cu CRTP, Base<Circle> si Base<Rectangle> sunt tipuri neinrudite." } },
+                { "text": { "en": "CRTP cannot be used with templates", "ro": "CRTP nu poate fi folosit cu sabloane" }, "correct": false, "explanation": { "en": "CRTP IS a template pattern — it is entirely built on templates.", "ro": "CRTP ESTE un pattern de sabloane — este construit integral pe sabloane." } },
+                { "text": { "en": "CRTP is slower than virtual function dispatch", "ro": "CRTP este mai lent decat dispatch-ul functiilor virtuale" }, "correct": false, "explanation": { "en": "CRTP is faster — static dispatch at compile time, no vtable lookup.", "ro": "CRTP este mai rapid — dispatch static la compilare, fara cautare vtable." } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

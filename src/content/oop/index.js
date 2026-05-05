@@ -27,6 +27,9 @@ const oop = {
         { id: 'oop-course_7-iterators', title: { en: '6. Iterators', ro: '6. Iteratori' } },
       ],
       component: lazy(() => import('./courses/Course07.jsx')) },
+    { id: 'oop-c8', title: { en: 'Course 8: STL Associative Containers & Smart Pointers', ro: 'Cursul 8: Containere Asociative STL si Pointeri Inteligenti' }, shortTitle: { en: 'C8: Assoc. & Smart Ptrs', ro: 'C8: Asoc. & Smart Ptrs' }, sectionCount: 8, metaId: 'oop-c8', src: 'oop/courses/course-08.json' },
+    { id: 'oop-c9', title: { en: 'Course 9: Modern C++ Features & Static Polymorphism', ro: 'Cursul 9: Facilitati Moderne C++ si Polimorfism Static' }, shortTitle: { en: 'C9: Modern C++', ro: 'C9: C++ Modern' }, sectionCount: 8, metaId: 'oop-c9', src: 'oop/courses/course-09.json' },
+    { id: 'oop-c10', title: { en: 'Course 10: Lambda Expressions in C++', ro: 'Cursul 10: Expresii Lambda in C++' }, shortTitle: { en: 'C10: Lambdas', ro: 'C10: Lambda' }, sectionCount: 7, metaId: 'oop-c10', src: 'oop/courses/course-10.json' },
   ],
   seminars: [],
   labs: [
@@ -43,6 +46,9 @@ const oop = {
     { id: 'oop-lab_6e', title: { en: 'Lab 06 Extra: JSON Classes', ro: 'Lab 06 Extra: Clase JSON' }, shortTitle: { en: 'L6E: JSON', ro: 'L6E: JSON' }, component: lazy(() => import('./labs/Lab06Extra.jsx')) },
     { id: 'oop-lab_7', title: { en: 'Lab 07: Literals & Templates', ro: 'Lab 07: Literali & Șabloane' }, shortTitle: { en: 'L7: Templates', ro: 'L7: Șabloane' }, component: lazy(() => import('./labs/Lab07.jsx')) },
     { id: 'oop-lab_7e', title: { en: 'Lab 07 Extra: Vector Template', ro: 'Lab 07 Extra: Șablon Vector' }, shortTitle: { en: 'L7E: Vector', ro: 'L7E: Vector' }, component: lazy(() => import('./labs/Lab07Extra.jsx')) },
+    { id: 'oop-lab_8', title: { en: 'Lab 08: Word Frequency (map + priority_queue)', ro: 'Lab 08: Frecvență Cuvinte (map + priority_queue)' }, shortTitle: { en: 'L8: Word Freq', ro: 'L8: Frecv. Cuv.' }, component: lazy(() => import('./labs/Lab08.jsx')) },
+    { id: 'oop-lab_9', title: { en: 'Lab 09: Custom Template Map', ro: 'Lab 09: Map Template Personalizat' }, shortTitle: { en: 'L9: Template Map', ro: 'L9: Map Template' }, component: lazy(() => import('./labs/Lab09.jsx')) },
+    { id: 'oop-lab_10', title: { en: 'Lab 10: Exceptions & Template Array', ro: 'Lab 10: Excepții & Tablou Template' }, shortTitle: { en: 'L10: Exceptions', ro: 'L10: Excepții' }, component: lazy(() => import('./labs/Lab10.jsx')) },
   ],
   tests: [
     { id: 'examen2023-2024-t1-p1', src: 'oop/tests/examen2023-2024-t1-p1.json',

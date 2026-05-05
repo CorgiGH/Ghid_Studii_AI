@@ -1,0 +1,254 @@
+{
+  "meta": {
+    "id": "oop-c8",
+    "title": { "en": "Course 8: STL Associative Containers & Smart Pointers", "ro": "Cursul 8: Containere Asociative STL si Pointeri Inteligenti" },
+    "shortTitle": { "en": "C8: Assoc. & Smart Ptrs", "ro": "C8: Asoc. & Smart Ptrs" },
+    "source": { "en": "OOP -- Lecture 8, Prof. Gavrilut Dragos, UAIC 2024-2025", "ro": "POO -- Cursul 8, Prof. Gavrilut Dragos, UAIC 2024-2025" }
+  },
+  "steps": [
+    {
+      "id": "oop-c8-intro",
+      "title": { "en": "Overview", "ro": "Privire de ansamblu" },
+      "group": "associative",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Course 8 covers two major themes:\n\n1. **STL Associative Containers** — `pair`, `map`, `multimap`, `set`, `multiset`, and their unordered counterparts\n2. **Smart Pointers** — `unique_ptr`, `shared_ptr`, `weak_ptr` for automatic memory management (RAII)",
+            "ro": "Cursul 8 acopera doua teme majore:\n\n1. **Containere Asociative STL** — `pair`, `map`, `multimap`, `set`, `multiset` si variantele lor neordonate\n2. **Pointeri Inteligenti** — `unique_ptr`, `shared_ptr`, `weak_ptr` pentru gestionarea automata a memoriei (RAII)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "oop-c8-pair-map",
+      "title": { "en": "pair and map", "ro": "pair si map" },
+      "group": "associative",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "std::pair", "ro": "std::pair" },
+          "content": {
+            "en": "The `pair` template (from `<utility>`) stores two values of potentially different types. It is used internally by associative containers as key-value storage.",
+            "ro": "Sablonul `pair` (din `<utility>`) stocheaza doua valori de tipuri potentiale diferite. Este utilizat intern de containerele asociative ca stocare cheie-valoare."
+          }
+        },
+        {
+          "type": "definition",
+          "term": { "en": "std::map", "ro": "std::map" },
+          "content": {
+            "en": "The `map` container (from `<map>`) stores key/value pairs where keys are **unique** and sorted. Internally implemented as a red-black tree. After insertion, only the value can be modified, not the key.",
+            "ro": "Containerul `map` (din `<map>`) stocheaza perechi cheie/valoare unde cheile sunt **unice** si sortate. Implementat intern ca un arbore rosu-negru. Dupa insertie, doar valoarea poate fi modificata, nu cheia."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Trap:** Accessing a non-existent key with `operator[]` on a `map` silently creates a new element using the default constructor (e.g., `int` becomes `0`). Use `find()` to check for existence first.",
+            "ro": "**Capcana:** Accesarea unei chei inexistente cu `operator[]` pe un `map` creeaza silentios un element nou folosind constructorul implicit (ex: `int` devine `0`). Folositi `find()` pentru a verifica existenta mai intai."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <map>\n#include <string>\nusing namespace std;\n\nint main() {\n    map<string, int> grades;\n    grades[\"Popescu\"] = 10;\n    grades[\"Ionescu\"] = 9;\n\n    // Iterate with range-based for\n    for (auto& [name, grade] : grades) {\n        printf(\"%s: %d\\n\", name.c_str(), grade);\n    }\n\n    // Safe lookup\n    auto it = grades.find(\"Ionescu\");\n    if (it != grades.end())\n        printf(\"Found: %d\\n\", it->second);\n\n    grades.erase(\"Popescu\");\n    return 0;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            { "en": "`find(key)` — returns iterator to element, or `end()` if not found", "ro": "`find(key)` — returneaza iterator la element, sau `end()` daca nu exista" },
+            { "en": "`count(key)` — returns 1 if key exists, 0 otherwise (map has unique keys)", "ro": "`count(key)` — returneaza 1 daca cheia exista, 0 altfel (map are chei unice)" },
+            { "en": "`erase(key)` — removes the element with the given key", "ro": "`erase(key)` — sterge elementul cu cheia data" },
+            { "en": "`clear()` — removes all elements", "ro": "`clear()` — sterge toate elementele" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "oop-c8-multimap-set",
+      "title": { "en": "multimap, set, multiset", "ro": "multimap, set, multiset" },
+      "group": "associative",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "- **`multimap`**: Like `map` but allows duplicate keys. `operator[]` and `.at()` cannot be used. Use `upper_bound()`, `lower_bound()`, `equal_range()` to access ranges of equal keys.\n- **`set`**: Stores unique elements in sorted order. Custom comparators can be provided via a struct overloading `operator()`.\n- **`multiset`**: Like `set` but allows duplicate elements.",
+            "ro": "- **`multimap`**: Ca `map` dar permite chei duplicate. `operator[]` si `.at()` nu pot fi folosite. Folositi `upper_bound()`, `lower_bound()`, `equal_range()` pentru a accesa intervale de chei egale.\n- **`set`**: Stocheaza elemente unice in ordine sortata. Comparatoare personalizate pot fi furnizate printr-un struct care suprascrie `operator()`.\n- **`multiset`**: Ca `set` dar permite elemente duplicate."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <set>\n#include <multimap>\nusing namespace std;\n\n// Custom comparator for set\nstruct DescendingOrder {\n    bool operator()(int a, int b) const { return a > b; }\n};\n\nint main() {\n    set<int, DescendingOrder> s = {5, 3, 8, 1};\n    // Iterates: 8, 5, 3, 1\n\n    multimap<string, int> mm;\n    mm.insert({\"Popescu\", 9});\n    mm.insert({\"Popescu\", 10}); // duplicate key allowed\n\n    auto range = mm.equal_range(\"Popescu\");\n    for (auto it = range.first; it != range.second; ++it)\n        printf(\"%d\\n\", it->second);\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c8-unordered",
+      "title": { "en": "Unordered Containers & Hashing", "ro": "Containere Neordonate si Hashing" },
+      "group": "associative",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`unordered_map` and `unordered_set` (C++11) store elements in hash tables for O(1) average access vs O(log n) for tree-based containers. However, hash collisions and rehashing can degrade performance. Use `reserve()` to pre-allocate buckets and avoid rehashing.",
+            "ro": "`unordered_map` si `unordered_set` (C++11) stocheaza elementele in tabele de dispersie pentru acces mediu O(1) fata de O(log n) pentru containerele bazate pe arbori. Totusi, coliziunile hash si rehashing-ul pot degrada performanta. Folositi `reserve()` pentru a pre-aloca bucket-uri si a evita rehashing-ul."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Container", "ro": "Container" },
+            { "en": "Structure", "ro": "Structura" },
+            { "en": "Insert (1M ints, ms)", "ro": "Inserare (1M int, ms)" }
+          ],
+          "rows": [
+            [{ "en": "std::map", "ro": "std::map" }, { "en": "Red-black tree", "ro": "Arbore rosu-negru" }, "~19,901"],
+            [{ "en": "Raw int array", "ro": "Tablou int brut" }, { "en": "Array", "ro": "Tablou" }, "~6"],
+            [{ "en": "std::unordered_map", "ro": "std::unordered_map" }, { "en": "Hash table", "ro": "Tabel hash" }, "~15,310"],
+            [{ "en": "unordered_map + reserve", "ro": "unordered_map + reserve" }, { "en": "Hash table (preallocated)", "ro": "Tabel hash (preallocat)" }, "~10,006"],
+            [{ "en": "unordered_set + reserve", "ro": "unordered_set + reserve" }, { "en": "Hash table (preallocated)", "ro": "Tabel hash (preallocat)" }, "~6,582"]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <unordered_map>\nusing namespace std;\n\n// Custom hash function\nint HashFunction(const char* s) {\n    int sum = 0;\n    while ((*s) != 0) { sum += (*s); s++; }\n    return sum % 12;\n}\n\nint main() {\n    unordered_map<string, int> umap;\n    umap.reserve(1000); // prevent rehashing\n    umap[\"hello\"] = 42;\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c8-unique-ptr",
+      "title": { "en": "Smart Pointers: unique_ptr", "ro": "Pointeri Inteligenti: unique_ptr" },
+      "group": "smart-pointers",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "std::unique_ptr", "ro": "std::unique_ptr" },
+          "content": {
+            "en": "`unique_ptr` exclusively owns a dynamically allocated object. It is **move-only** — it cannot be copied. The object is automatically destroyed when the `unique_ptr` goes out of scope (RAII).",
+            "ro": "`unique_ptr` detine exclusiv un obiect alocat dinamic. Este **move-only** — nu poate fi copiat. Obiectul este distrus automat cand `unique_ptr` iese din domeniu (RAII)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <memory>\nusing namespace std;\n\nint main() {\n    // C++11 constructor\n    unique_ptr<int> a(new int(10));\n\n    // C++14 make_unique (preferred - exception safe)\n    auto b = make_unique<int>(20);\n\n    // Key methods\n    int* raw = a.get();   // raw pointer (don't delete!)\n    a.reset();            // delete and set to nullptr\n    int* r = a.release(); // give up ownership, you must delete r\n\n    // Move semantics\n    auto c = move(b);     // b is now nullptr\n    return 0;\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Never call `delete` on a pointer retrieved from `.get()` — the `unique_ptr` will also try to delete it, causing a double-free crash.",
+            "ro": "Nu apelati niciodata `delete` pe un pointer obtinut din `.get()` — `unique_ptr`-ul va incerca de asemenea sa il stearga, cauzand un crash double-free."
+          }
+        }
+      ]
+    },
+    {
+      "id": "oop-c8-shared-ptr",
+      "title": { "en": "Smart Pointers: shared_ptr", "ro": "Pointeri Inteligenti: shared_ptr" },
+      "group": "smart-pointers",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "std::shared_ptr", "ro": "std::shared_ptr" },
+          "content": {
+            "en": "`shared_ptr` uses **reference counting** to manage shared ownership. The managed object is destroyed only when the last `shared_ptr` pointing to it goes out of scope (count reaches 0). Internally stores a pointer to the object AND a pointer to a control block (shared count + weak count).",
+            "ro": "`shared_ptr` foloseste **numararea referintelor** pentru a gestiona proprietatea partajata. Obiectul gestionat este distrus doar cand ultimul `shared_ptr` care indica spre el iese din domeniu (contorul ajunge la 0). Intern stocheaza un pointer la obiect SI un pointer la un bloc de control (contor partajat + contor slab)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <memory>\nusing namespace std;\n\nint main() {\n    auto sp1 = make_shared<int>(42);\n    auto sp2 = sp1; // both own the int\n    printf(\"Count: %ld\\n\", sp1.use_count()); // 2\n    sp1.reset(); // sp1 released; count = 1\n    printf(\"Count: %ld\\n\", sp2.use_count()); // 1\n    // sp2 goes out of scope -> object deleted\n    return 0;\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Counter increments/decrements in `shared_ptr` are **atomic**, making it thread-safe for the reference count itself. However, accessing the underlying object is NOT thread-safe.",
+            "ro": "Incrementele/decrementele contorului in `shared_ptr` sunt **atomice**, facandu-l thread-safe pentru contorul de referinte in sine. Totusi, accesarea obiectului subiacent NU este thread-safe."
+          }
+        }
+      ]
+    },
+    {
+      "id": "oop-c8-weak-ptr",
+      "title": { "en": "Smart Pointers: weak_ptr & Circular References", "ro": "Pointeri Inteligenti: weak_ptr si Referinte Circulare" },
+      "group": "smart-pointers",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": { "en": "std::weak_ptr", "ro": "std::weak_ptr" },
+          "content": {
+            "en": "`weak_ptr` holds a non-owning reference to a `shared_ptr`-managed object. It does NOT increment the reference count. Use `.lock()` to get a `shared_ptr` from a `weak_ptr` (returns `nullptr` if the object was already deleted).",
+            "ro": "`weak_ptr` detine o referinta care nu are proprietate a unui obiect gestionat de `shared_ptr`. Nu incrementeaza contorul de referinte. Folositi `.lock()` pentru a obtine un `shared_ptr` dintr-un `weak_ptr` (returneaza `nullptr` daca obiectul a fost deja sters)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Circular Reference Memory Leak:** If struct A holds `shared_ptr<B>` and struct B holds `shared_ptr<A>`, and they point to each other, neither reference count ever reaches 0 — causing a memory leak. **Fix:** Replace one of the `shared_ptr` members with `weak_ptr`.",
+            "ro": "**Scurgere de memorie din referinta circulara:** Daca struct A contine `shared_ptr<B>` si struct B contine `shared_ptr<A>`, si indica unul catre altul, niciun contor de referinte nu ajunge vreodata la 0 — cauzand o scurgere de memorie. **Solutie:** Inlocuiti unul dintre membrii `shared_ptr` cu `weak_ptr`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <memory>\nusing namespace std;\n\nstruct B; // forward declaration\nstruct A {\n    shared_ptr<B> b_ptr;\n};\nstruct B {\n    weak_ptr<A> a_ptr; // weak_ptr breaks the cycle!\n};\n\nint main() {\n    auto a = make_shared<A>();\n    auto b = make_shared<B>();\n    a->b_ptr = b;\n    b->a_ptr = a; // does NOT increment a's refcount\n    // Both objects will be properly destroyed\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "id": "oop-c8-quiz",
+      "title": { "en": "Self-Test", "ro": "Autoevaluare" },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What happens when you access a non-existent key in a `std::map` using `operator[]`?",
+                "ro": "Ce se intampla cand accesati o cheie inexistenta intr-un `std::map` folosind `operator[]`?"
+              },
+              "options": [
+                { "text": { "en": "An exception is thrown", "ro": "Se arunca o exceptie" }, "correct": false, "explanation": { "en": "No exception — this is the trap. Use find() or at() for safe access.", "ro": "Nu se arunca nicio exceptie — aceasta este capcana. Folositi find() sau at() pentru acces sigur." } },
+                { "text": { "en": "A new element is created with a default-constructed value", "ro": "Un element nou este creat cu o valoare construita implicit" }, "correct": true, "explanation": { "en": "operator[] inserts a default-constructed value (e.g., int=0) for a missing key, which can silently corrupt your map.", "ro": "operator[] insereaza o valoare construita implicit (ex: int=0) pentru o cheie lipsa, ceea ce poate corupe silentios harta ta." } },
+                { "text": { "en": "It returns nullptr", "ro": "Returneaza nullptr" }, "correct": false, "explanation": { "en": "map::operator[] returns a reference, not a pointer. It cannot return nullptr.", "ro": "map::operator[] returneaza o referinta, nu un pointer. Nu poate returna nullptr." } },
+                { "text": { "en": "The map remains unchanged and returns 0", "ro": "Harta ramane neschimbata si returneaza 0" }, "correct": false, "explanation": { "en": "The map IS changed — a new key-value pair is inserted.", "ro": "Harta ESTE modificata — o noua pereche cheie-valoare este inserata." } }
+              ]
+            },
+            {
+              "question": {
+                "en": "Which smart pointer type should be used to break a circular reference between two `shared_ptr`-managed objects?",
+                "ro": "Ce tip de pointer inteligent trebuie folosit pentru a rupe o referinta circulara intre doua obiecte gestionate de `shared_ptr`?"
+              },
+              "options": [
+                { "text": { "en": "unique_ptr", "ro": "unique_ptr" }, "correct": false, "explanation": { "en": "unique_ptr cannot be shared — it has exclusive ownership, which does not help here.", "ro": "unique_ptr nu poate fi partajat — are proprietate exclusiva, ceea ce nu ajuta aici." } },
+                { "text": { "en": "shared_ptr", "ro": "shared_ptr" }, "correct": false, "explanation": { "en": "Using shared_ptr on both sides IS the problem — it creates the cycle.", "ro": "Folosirea shared_ptr pe ambele parti ESTE problema — creeaza ciclul." } },
+                { "text": { "en": "weak_ptr", "ro": "weak_ptr" }, "correct": true, "explanation": { "en": "weak_ptr does not increment the reference count, breaking the cycle. Use .lock() to access the object if it still exists.", "ro": "weak_ptr nu incrementeaza contorul de referinte, rupand ciclul. Folositi .lock() pentru a accesa obiectul daca mai exista." } },
+                { "text": { "en": "Raw pointer", "ro": "Pointer brut" }, "correct": false, "explanation": { "en": "Raw pointers work technically but lose all RAII guarantees and risk dangling pointer access.", "ro": "Pointerii bruti functioneaza tehnic dar pierd toate garantiile RAII si risca accesul la pointer agatatoare." } }
+              ]
+            },
+            {
+              "question": {
+                "en": "What is the key advantage of `unordered_map` over `std::map`?",
+                "ro": "Care este avantajul principal al `unordered_map` fata de `std::map`?"
+              },
+              "options": [
+                { "text": { "en": "Elements are always sorted", "ro": "Elementele sunt intotdeauna sortate" }, "correct": false, "explanation": { "en": "unordered_map does NOT sort elements — that's map's advantage.", "ro": "unordered_map NU sorteaza elementele — acesta este avantajul lui map." } },
+                { "text": { "en": "O(1) average-case access time via hashing", "ro": "Timp de acces mediu O(1) prin dispersie" }, "correct": true, "explanation": { "en": "Hash tables provide O(1) average access vs O(log n) for the red-black tree in map.", "ro": "Tabelele hash ofera acces mediu O(1) fata de O(log n) pentru arborele rosu-negru din map." } },
+                { "text": { "en": "Allows duplicate keys", "ro": "Permite chei duplicate" }, "correct": false, "explanation": { "en": "unordered_map still requires unique keys. Use unordered_multimap for duplicates.", "ro": "unordered_map necesita in continuare chei unice. Folositi unordered_multimap pentru duplicate." } },
+                { "text": { "en": "Uses less memory than map", "ro": "Foloseste mai putina memorie decat map" }, "correct": false, "explanation": { "en": "Hash tables often use MORE memory than red-black trees due to bucket overhead.", "ro": "Tabelele hash folosesc adesea MAI MULTA memorie decat arborii rosu-negru din cauza overhead-ului bucket-urilor." } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
