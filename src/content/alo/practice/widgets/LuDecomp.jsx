@@ -85,7 +85,7 @@ export default function LuDecomp({ instance, onSubmit, onGenerateInstance }) {
       <div className="flex gap-2">
         {!submitted ? (
           <button onClick={onCheck} className="px-4 py-1.5 rounded font-medium text-sm" style={{ background: '#3b82f6', color: '#fff' }}>
-            {t('Mark as reviewed (Enter)', 'Marchează ca revizuit (Enter)')}
+            {t('Mark as reviewed', 'Marchează ca revizuit')} <kbd className="ml-1 px-1 py-0.5 rounded text-xs font-mono" style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)' }}>Enter</kbd>
           </button>
         ) : (
           <button onClick={onNext} className="px-4 py-1.5 rounded font-medium text-sm" style={{ background: '#3b82f6', color: '#fff' }}>

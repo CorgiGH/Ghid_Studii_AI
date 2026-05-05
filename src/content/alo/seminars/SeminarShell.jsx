@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import ExerciseShell from '../../../components/exercise-shell/ExerciseShell';
 import { widgetCatalog } from '../practice/widgetCatalog';
+import { useApp } from '../../../contexts/AppContext';
 
 /**
  * Renders a single seminar's problems via the shared ExerciseShell.
@@ -13,6 +14,7 @@ import { widgetCatalog } from '../practice/widgetCatalog';
  * which tells ExerciseShell to disable the "Generate new instance" control.
  */
 export default function SeminarShell({ seminarData }) {
+  const { t } = useApp();
   const problems = useMemo(
     () => (seminarData?.problems ?? []).map(p => ({
       id: p.id,
@@ -24,6 +26,14 @@ export default function SeminarShell({ seminarData }) {
     })),
     [seminarData],
   );
+
+  if (problems.length === 0) {
+    return (
+      <div className="p-12 text-center" style={{ color: 'var(--theme-content-text)' }}>
+        <p className="text-lg">{t('No problems in this seminar yet.', 'Nicio problemă în acest seminar deocamdată.')}</p>
+      </div>
+    );
+  }
 
   return <ExerciseShell problems={problems} mode="seminar" />;
 }

@@ -81,7 +81,7 @@ export default function ProblemDetailPane({
               className="px-3 py-1.5 text-sm rounded font-medium"
               style={{ background: '#3b82f6', color: '#fff' }}
             >
-              {t('Generate new instance (n)', 'Generează instanță nouă (n)')}
+              {t('Generate new instance', 'Generează instanță nouă')} <kbd className="ml-1 px-1 py-0.5 rounded text-xs font-mono" style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)' }}>n</kbd>
             </button>
           )}
           {widget?.feats?.length > 0 && (

@@ -74,8 +74,8 @@ function SeminarBlock({ block, t }) {
 
     case 'learn':
       return (
-        <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-content-text)' }}
-           dangerouslySetInnerHTML={{ __html: formatMarkdown(t(block.content.en, block.content.ro)) }} />
+        <div className="text-sm leading-relaxed" style={{ color: 'var(--theme-content-text)' }}
+             dangerouslySetInnerHTML={{ __html: formatMarkdown(t(block.content.en, block.content.ro)) }} />
       );
 
     default:

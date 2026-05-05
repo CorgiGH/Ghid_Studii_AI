@@ -30,7 +30,7 @@ export default function Practice() {
         <div className="flex items-center gap-2">
           <ProgressRing size={32} completed={today.totalFluent} total={widgetCatalog.length} />
           <span className="text-sm font-medium" style={{ color: 'var(--theme-content-text)' }}>
-            {today.totalFluent}/{widgetCatalog.length} {t('fluent', 'fluent')}
+            {today.totalFluent}/{widgetCatalog.length} {t('fluent', 'fluenți')}
           </span>
         </div>
         {today.count > 0 && (
