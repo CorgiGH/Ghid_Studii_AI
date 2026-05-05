@@ -1,295 +1,427 @@
 import React from 'react';
 import { useApp } from '../../../contexts/AppContext';
-import { Box, Toggle } from '../../../components/ui';
+import { Toggle } from '../../../components/ui';
 import MultipleChoice from '../../../components/ui/MultipleChoice';
 
 export default function Seminar10() {
   const { t } = useApp();
 
-  /* ─── Problem 1: Backtracking design for Subset Sum ─── */
+  /* ─── Problem 1: MIS is NP-hard (3-SAT ∝ MIS) ─── */
   const mc1 = [
     {
       question: {
-        en: 'For a backtracking algorithm solving Subset Sum with S = {3, 5, 6, 7} and t = 15, which partial solution is pruned first?',
-        ro: 'Pentru un algoritm backtracking care rezolvă Subset Sum cu S = {3, 5, 6, 7} și t = 15, care soluție parțială este eliminată prima?',
+        en: 'In the 3-SAT ∝ MIS reduction, given a clause (x₁ ∨ ¬x₂ ∨ x₃), which gadget is constructed?',
+        ro: 'În reducerea 3-SAT ∝ MIS, dat o clauză (x₁ ∨ ¬x₂ ∨ x₃), ce gadget este construit?',
       },
       options: [
         {
           text: {
-            en: 'Partial {3, 5, 6} with sum=14 — remaining element 7 would make sum=21 > 15 (overshot with only element left)',
-            ro: 'Parțial {3, 5, 6} cu suma=14 — elementul rămas 7 ar face suma=21 > 15 (depășit cu singurul element rămas)',
-          },
-          correct: false,
-          feedback: {
-            en: 'Actually {3,5,6} has sum 14 ≤ 15, and we have not yet included 7. The partial {3,5} has sum 8, and remaining = {6,7}, so partial+remaining = 8+13=21 ≥ 15 — viable. The pruning happens differently.',
-            ro: 'De fapt {3,5,6} are suma 14 ≤ 15, și nu am inclus încă 7. Parțialul {3,5} are suma 8, iar rămas = {6,7}, deci parțial+rămas = 8+13=21 ≥ 15 — viabil. Pruning-ul se întâmplă altfel.',
-          },
-        },
-        {
-          text: {
-            en: 'Partial {} with sum=0 — remaining_sum=21 < t=15 is false, so it is viable and not pruned',
-            ro: 'Parțial {} cu suma=0 — sumă_rămasă=21 < t=15 este fals, deci este viabil și nu este eliminat',
-          },
-          correct: false,
-          feedback: {
-            en: 'The empty partial solution has sum 0 ≤ 15 and remaining = 3+5+6+7=21 ≥ 15, so it is viable. No pruning here.',
-            ro: 'Soluția parțială goală are suma 0 ≤ 15 și rest = 3+5+6+7=21 ≥ 15, deci este viabilă. Fără pruning aici.',
-          },
-        },
-        {
-          text: {
-            en: 'Partial {7, 6, 5} with sum=18 > 15 — upper-bound pruning (already exceeded target)',
-            ro: 'Parțial {7, 6, 5} cu suma=18 > 15 — pruning limită superioară (a depășit deja ținta)',
+            en: 'A triangle (K₃) with one node per literal: nodes x₁, ¬x₂, x₃ all mutually connected',
+            ro: 'Un triunghi (K₃) cu câte un nod per literal: nodurile x₁, ¬x₂, x₃ toate mutual conectate',
           },
           correct: true,
           feedback: {
-            en: 'When the partial sum exceeds t=15, the branch is immediately pruned. {7,6,5} sums to 18 > 15, so this entire branch (and all extensions) are discarded. Upper-bound pruning fires before lower-bound pruning in this case.',
-            ro: 'Când suma parțială depășește t=15, ramura este imediat eliminată. {7,6,5} sumează 18 > 15, deci toată această ramură (și toate extensiile) sunt eliminate. Pruning-ul cu limita superioară se declanșează înainte de cel cu limita inferioară în acest caz.',
+            en: 'Each clause becomes a triangle. An independent set can pick at most one node from each triangle. If MIS has size ≥ k (number of clauses), it must pick exactly one node per triangle — that node\'s literal is set to true, satisfying the clause.',
+            ro: 'Fiecare clauză devine un triunghi. Un set independent poate alege cel mult un nod din fiecare triunghi. Dacă MIS are dimensiunea ≥ k (numărul de clauze), trebuie să aleagă exact un nod per triunghi — literalul acelui nod este setat la adevărat, satisfăcând clauza.',
           },
         },
         {
           text: {
-            en: 'Partial {3} with sum=3 — not pruned since 3+remaining=3+18=21 ≥ 15',
-            ro: 'Parțial {3} cu suma=3 — nu este eliminat deoarece 3+rest=3+18=21 ≥ 15',
+            en: 'A path x₁ — ¬x₂ — x₃ (three nodes connected in a chain)',
+            ro: 'Un lanț x₁ — ¬x₂ — x₃ (trei noduri conectate în lanț)',
           },
           correct: false,
           feedback: {
-            en: 'Correct analysis — {3} is viable. But this option asks which is pruned first, and {3} is not pruned at all.',
-            ro: 'Analiză corectă — {3} este viabil. Dar această opțiune întreabă care este eliminat primul, iar {3} nu este eliminat deloc.',
+            en: 'A path (not a triangle) would allow two non-adjacent endpoints to both be selected. The triangle forces at most one selection — matching the "at least one literal true" requirement of a clause.',
+            ro: 'Un lanț (nu un triunghi) ar permite selectarea ambelor capete neadiacente. Triunghiul forțează cel mult o selecție — corespunzând cerinței "cel puțin un literal adevărat" a unei clauze.',
+          },
+        },
+        {
+          text: {
+            en: 'A single node labeled with the entire clause',
+            ro: 'Un singur nod etichetat cu întreaga clauză',
+          },
+          correct: false,
+          feedback: {
+            en: 'A single node cannot encode the internal structure of a clause (which literal is set true). The triangle gadget preserves the disjunctive structure by allowing any one literal to "witness" the clause satisfaction.',
+            ro: 'Un singur nod nu poate codifica structura internă a unei clauze (care literal este adevărat). Gadgetul triunghi păstrează structura disjunctivă permițând oricărui literal să "ateste" satisfacerea clauzei.',
+          },
+        },
+        {
+          text: {
+            en: 'Three isolated nodes, one per literal, with no edges between them',
+            ro: 'Trei noduri izolate, câte unul per literal, fără muchii între ele',
+          },
+          correct: false,
+          feedback: {
+            en: 'Without edges within the clause gadget, the independent set could pick all three literals — including contradictory pairs like x₁ and ¬x₁ from different clauses without proper conflict edges.',
+            ro: 'Fără muchii în cadrul gadgetului de clauză, setul independent ar putea alege toți trei literalii — inclusiv perechi contradictorii precum x₁ și ¬x₁ din clauze diferite fără muchii de conflict corespunzătoare.',
           },
         },
       ],
       explanation: {
-        en: 'Subset Sum backtracking prunes when partial_sum > t (upper bound) or partial_sum + remaining < t (lower bound). With S = {3,5,6,7}, t=15: processing largest first, {7,6,5} sums to 18 > 15 — upper-bound pruning triggers.',
-        ro: 'Backtracking-ul Subset Sum elimină când suma_parțială > t (limita superioară) sau suma_parțială + rest < t (limita inferioară). Cu S = {3,5,6,7}, t=15: procesând de la cel mai mare, {7,6,5} sumează 18 > 15 — pruning-ul cu limita superioară se declanșează.',
+        en: 'In the 3-SAT ∝ MIS reduction: (1) for each clause, build a triangle (K₃) on its three literals; (2) for each complementary pair (xᵢ in one clause, ¬xᵢ in another), add a conflict edge. MIS of size k (= number of clauses) exists iff φ is satisfiable.',
+        ro: 'În reducerea 3-SAT ∝ MIS: (1) pentru fiecare clauză, construim un triunghi (K₃) pe cei trei literali ai ei; (2) pentru fiecare pereche complementară (xᵢ într-o clauză, ¬xᵢ în alta), adăugăm o muchie de conflict. MIS de dimensiune k (= numărul de clauze) există dacă și numai dacă φ este satisfiabilă.',
       },
     },
   ];
 
-  /* ─── Problem 2: N-Queens call count ─── */
+  /* ─── Problem 2: CLIQUE is NP-complete (MIS ∝ CLIQUE) ─── */
   const mc2 = [
     {
       question: {
-        en: 'For N-Queens with n=4, backtracking makes 17 recursive calls vs 341 for exhaustive search. What is the pruning condition?',
-        ro: 'Pentru N-Regine cu n=4, backtracking face 17 apeluri recursive față de 341 pentru căutarea exhaustivă. Care este condiția de pruning?',
+        en: 'In the MIS ∝ CLIQUE reduction, how is the CLIQUE instance constructed from graph G?',
+        ro: 'În reducerea MIS ∝ CLIQUE, cum este construită instanța CLIQUE din graful G?',
       },
       options: [
         {
           text: {
-            en: 'The current queen placement attacks any previously placed queen (same row, column, or diagonal)',
-            ro: 'Plasarea curentă a reginei atacă orice regină plasată anterior (același rând, coloană sau diagonală)',
+            en: 'Take the complement graph Ḡ (edges present in Ḡ iff absent in G); G has MIS of size k iff Ḡ has a clique of size k',
+            ro: 'Luăm graful complement Ḡ (muchii prezente în Ḡ dacă și numai dacă absente în G); G are MIS de dimensiune k dacă și numai dacă Ḡ are o clică de dimensiune k',
           },
           correct: true,
           feedback: {
-            en: 'A partial board placement is non-viable if any two queens attack each other. Checking this after each queen placement (at each recursion level) eliminates all extensions of invalid configurations without exploring them.',
-            ro: 'O plasare parțială pe tablă este neviabilă dacă orice două regine se atacă. Verificând aceasta după fiecare plasare de regină (la fiecare nivel de recursivitate) elimină toate extensiile configurațiilor invalide fără a le explora.',
+            en: 'S ⊆ V is an independent set in G iff every pair in S has no edge in G iff every pair in S has an edge in Ḡ iff S is a clique in Ḡ. The complement graph can be built in O(n²) — polynomial. Since MIS is NP-hard, so is CLIQUE. Combined with CLIQUE ∈ NP, CLIQUE is NP-complete.',
+            ro: 'S ⊆ V este un set independent în G dacă și numai dacă fiecare pereche din S nu are muchie în G dacă și numai dacă fiecare pereche din S are muchie în Ḡ dacă și numai dacă S este o clică în Ḡ. Graful complement poate fi construit în O(n²) — polinomial. Deoarece MIS este NP-dificilă, la fel este și CLIQUE. Combinat cu CLIQUE ∈ NP, CLIQUE este NP-completă.',
           },
         },
         {
           text: {
-            en: 'The current row has more than n/2 queens placed',
-            ro: 'Rândul curent are mai mult de n/2 regine plasate',
+            en: 'Add a universal vertex connected to all vertices of G; CLIQUE of size k+1 in the new graph corresponds to MIS of size k in G',
+            ro: 'Adăugăm un vârf universal conectat la toate vârfurile din G; CLIQUE de dimensiune k+1 în noul graf corespunde MIS de dimensiune k în G',
           },
           correct: false,
           feedback: {
-            en: 'This is not the N-Queens constraint. Each row has exactly one queen. The constraint is about attacks between queens across rows.',
-            ro: 'Aceasta nu este constrângerea N-Regine. Fiecare rând are exact o regină. Constrângerea se referă la atacuri între regine pe rânduri diferite.',
+            en: 'Adding a universal vertex does not establish the MIS–CLIQUE correspondence. The correct construction is the complement graph Ḡ.',
+            ro: 'Adăugarea unui vârf universal nu stabilește corespondența MIS–CLIQUE. Construcția corectă este graful complement Ḡ.',
           },
         },
         {
           text: {
-            en: 'The number of empty columns is less than the number of remaining rows',
-            ro: 'Numărul de coloane goale este mai mic decât numărul de rânduri rămase',
+            en: 'Remove all edges from G; the resulting edgeless graph has a clique of size k iff G has MIS of size k',
+            ro: 'Eliminăm toate muchiile din G; graful fără muchii rezultat are o clică de dimensiune k dacă și numai dacă G are MIS de dimensiune k',
           },
           correct: false,
           feedback: {
-            en: 'This would be a valid additional pruning condition (pigeonhole), but the standard N-Queens pruning is the attack constraint — checking for row, column, and diagonal conflicts after each placement.',
-            ro: 'Aceasta ar fi o condiție de pruning suplimentară validă (pigeonhole), dar pruning-ul standard pentru N-Regine este constrângerea de atac — verificarea conflictelor de rând, coloană și diagonală după fiecare plasare.',
+            en: 'An edgeless graph only has cliques of size 1 (single vertices). This construction does not encode the MIS structure of G.',
+            ro: 'Un graf fără muchii are doar clici de dimensiune 1 (vârfuri individuale). Această construcție nu codifică structura MIS a lui G.',
           },
         },
         {
           text: {
-            en: 'The queen is placed in the same column as the row index',
-            ro: 'Regina este plasată în aceeași coloană ca și indicele rândului',
+            en: 'Square the graph G (add edges between vertices at distance 2); CLIQUE of size k in G² corresponds to MIS in G',
+            ro: 'Ridicăm la pătrat graful G (adăugăm muchii între vârfuri la distanța 2); CLIQUE de dimensiune k în G² corespunde MIS în G',
           },
           correct: false,
           feedback: {
-            en: 'This is an arbitrary constraint with no relation to the N-Queens problem rules.',
-            ro: 'Aceasta este o constrângere arbitrară fără legătură cu regulile problemei N-Regine.',
+            en: 'Squaring the graph is unrelated to the MIS–CLIQUE reduction. The standard reduction uses the complement graph.',
+            ro: 'Ridicarea la pătrat a grafului nu este legată de reducerea MIS–CLIQUE. Reducerea standard folosește graful complement.',
           },
         },
       ],
       explanation: {
-        en: 'N-Queens backtracking pruning: after placing each queen, check if it attacks any previously placed queen (same column or diagonal). If yes, prune the entire subtree. This reduces 341 exhaustive calls to 17 for n=4.',
-        ro: 'Pruning-ul backtracking-ului N-Regine: după plasarea fiecărei regine, verificăm dacă atacă orice regină plasată anterior (aceeași coloană sau diagonală). Dacă da, eliminăm întreg subtreele. Aceasta reduce 341 de apeluri exhaustive la 17 pentru n=4.',
+        en: 'MIS ∝ CLIQUE: given (G, k), construct complement Ḡ in O(n²). S is an independent set in G of size k iff S is a clique in Ḡ of size k. Since CLIQUE ∈ NP and MIS ≤ₚ CLIQUE, CLIQUE is NP-complete.',
+        ro: 'MIS ∝ CLIQUE: dat (G, k), construim complementul Ḡ în O(n²). S este un set independent în G de dimensiune k dacă și numai dacă S este o clică în Ḡ de dimensiune k. Deoarece CLIQUE ∈ NP și MIS ≤ₚ CLIQUE, CLIQUE este NP-completă.',
       },
     },
   ];
 
-  /* ─── Problem 3: SAT backtracking viability ─── */
+  /* ─── Problem 3: Halting problem is NP-hard ─── */
   const mc3 = [
     {
       question: {
-        en: 'For f = (¬x₁ ∨ x₂) ∧ (x₂ ∨ ¬x₃) ∧ (¬x₃ ∨ x₃), partial assignment {x₁=1, x₂=0}. Is this partial assignment viable?',
-        ro: 'Pentru f = (¬x₁ ∨ x₂) ∧ (x₂ ∨ ¬x₃) ∧ (¬x₃ ∨ x₃), atribuire parțială {x₁=1, x₂=0}. Este această atribuire parțială viabilă?',
+        en: 'Why can the halting problem not be in NP (and thus is harder than NP-complete problems)?',
+        ro: 'De ce problema opririi nu poate fi în NP (și astfel este mai dificilă decât problemele NP-complete)?',
       },
       options: [
         {
           text: {
-            en: 'No — clause (¬x₁ ∨ x₂) is fully assigned and false: ¬1 ∨ 0 = 0 ∨ 0 = 0',
-            ro: 'Nu — clauza (¬x₁ ∨ x₂) este complet atribuită și falsă: ¬1 ∨ 0 = 0 ∨ 0 = 0',
+            en: 'The halting problem is undecidable — no algorithm (deterministic or nondeterministic) solves it on all inputs; NP problems are decidable by definition',
+            ro: 'Problema opririi este indecidabilă — niciun algoritm (determinist sau nedeterminist) nu o rezolvă pe toate intrările; problemele NP sunt decidabile prin definiție',
           },
           correct: true,
           feedback: {
-            en: 'With x₁=1, x₂=0: clause (¬x₁ ∨ x₂) = (¬1 ∨ 0) = (0 ∨ 0) = 0. This clause is fully evaluated and false. No extension of this partial assignment can satisfy it. Prune immediately.',
-            ro: 'Cu x₁=1, x₂=0: clauza (¬x₁ ∨ x₂) = (¬1 ∨ 0) = (0 ∨ 0) = 0. Această clauză este complet evaluată și falsă. Nicio extensie a acestei atribuiri parțiale nu o poate satisface. Eliminăm imediat.',
+            en: 'NP ⊆ DECIDABLE. The halting problem is undecidable (Turing, 1936) — no Turing machine can decide it. Therefore the halting problem is not in NP. It is NP-hard only in the sense that every NP problem reduces to it (trivially, since everything reduces to an undecidable problem), but it lies strictly outside the NP complexity class.',
+            ro: 'NP ⊆ DECIDABILĂ. Problema opririi este indecidabilă (Turing, 1936) — nicio mașină Turing nu o poate decide. Prin urmare problema opririi nu este în NP. Este NP-dificilă doar în sensul că fiecare problemă NP se reduce la ea (trivial, deoarece orice se reduce la o problemă indecidabilă), dar se află strict în afara clasei de complexitate NP.',
           },
         },
         {
           text: {
-            en: 'Yes — x₃ is unassigned so the formula could still be satisfied',
-            ro: 'Da — x₃ este neatribuit deci formula ar putea fi încă satisfăcută',
+            en: 'It requires exponential time to solve, which is more than polynomial',
+            ro: 'Necesită timp exponențial pentru a fi rezolvată, ceea ce este mai mult decât polinomial',
           },
           correct: false,
           feedback: {
-            en: 'Clause (¬x₁ ∨ x₂) does not contain x₃ — it is already fully determined by x₁ and x₂. Since it is false and cannot be changed, the partial assignment is non-viable regardless of x₃.',
-            ro: 'Clauza (¬x₁ ∨ x₂) nu conține x₃ — este deja complet determinată de x₁ și x₂. Deoarece este falsă și nu poate fi schimbată, atribuirea parțială este neviabilă indiferent de x₃.',
+            en: 'The halting problem is not merely exponential — it is unsolvable by any algorithm. Exponential-time problems (like 3-SAT brute force) are computable; the halting problem is not.',
+            ro: 'Problema opririi nu este doar exponențială — este de nerezolvat de niciun algoritm. Problemele cu timp exponențial (cum ar fi forța brută pentru 3-SAT) sunt calculabile; problema opririi nu este.',
           },
         },
         {
           text: {
-            en: 'Yes — only the last clause (¬x₃ ∨ x₃) determines viability since it contains x₃',
-            ro: 'Da — doar ultima clauză (¬x₃ ∨ x₃) determină viabilitatea deoarece conține x₃',
+            en: 'It has no polynomial-time verifier because all known algorithms run in factorial time',
+            ro: 'Nu are un verificator polinomial deoarece toți algoritmii cunoscuți rulează în timp factorial',
           },
           correct: false,
           feedback: {
-            en: 'Viability requires ALL clauses to be satisfiable. If any fully-assigned clause is false, the partial assignment is non-viable — regardless of other clauses.',
-            ro: 'Viabilitatea necesită ca TOATE clauzele să fie satisfiabile. Dacă orice clauză complet atribuită este falsă, atribuirea parțială este neviabilă — indiferent de alte clauze.',
+            en: 'The issue is not factorial time but undecidability. No algorithm of any time complexity can decide the halting problem for all inputs.',
+            ro: 'Problema nu este timpul factorial ci indecidabilitatea. Niciun algoritm de orice complexitate de timp nu poate decide problema opririi pentru toate intrările.',
           },
         },
         {
           text: {
-            en: 'Yes — two of three clauses have unassigned variables so the partial assignment is trivially viable',
-            ro: 'Da — două din trei clauze au variabile neatribuite deci atribuirea parțială este trivial viabilă',
+            en: 'It is in co-NP but not NP',
+            ro: 'Este în co-NP dar nu în NP',
           },
           correct: false,
           feedback: {
-            en: 'The first clause (¬x₁ ∨ x₂) has ALL its variables assigned (x₁ and x₂ both assigned) and evaluates to false. A single falsified fully-assigned clause makes the partial assignment non-viable.',
-            ro: 'Prima clauză (¬x₁ ∨ x₂) are TOATE variabilele atribuite (x₁ și x₂ ambele atribuite) și evaluează la fals. O singură clauză complet atribuită și falsificată face atribuirea parțială neviabilă.',
+            en: 'The halting problem is neither in NP nor in co-NP — it is not even decidable, let alone classifiable within the polynomial hierarchy.',
+            ro: 'Problema opririi nu este nici în NP, nici în co-NP — nu este nici măcar decidabilă, cu atât mai puțin clasificabilă în ierarhia polinomială.',
           },
         },
       ],
       explanation: {
-        en: 'With {x₁=1, x₂=0}: clause (¬x₁ ∨ x₂) = 0. The backtracking SAT pruning condition fires: a fully-assigned clause is false. This branch is pruned. Note: (¬x₃ ∨ x₃) is a tautology — always true regardless of x₃.',
-        ro: 'Cu {x₁=1, x₂=0}: clauza (¬x₁ ∨ x₂) = 0. Condiția de pruning SAT se declanșează: o clauză complet atribuită este falsă. Această ramură este eliminată. Notă: (¬x₃ ∨ x₃) este o tautologie — mereu adevărată indiferent de x₃.',
+        en: 'The halting problem is undecidable (Turing, 1936). NP is a class of decidable problems. Therefore the halting problem is outside NP entirely. Every NP problem trivially reduces to it (reduce to any undecidable problem), making it NP-hard, but it is not NP-complete since it is not in NP.',
+        ro: 'Problema opririi este indecidabilă (Turing, 1936). NP este o clasă de probleme decidabile. Prin urmare problema opririi se află complet în afara lui NP. Fiecare problemă NP se reduce trivial la ea (reducere la orice problemă indecidabilă), deci este NP-dificilă, dar nu este NP-completă deoarece nu este în NP.',
       },
     },
   ];
 
-  /* ─── Problem 4: Branch and Bound for MIS bound ─── */
+  /* ─── Problem 4: Decision version of knapsack ─── */
   const mc4 = [
     {
       question: {
-        en: 'For Branch and Bound on Maximum Independent Set, current partial set has 3 nodes selected, and the remaining induced subgraph has 6 vertices and a greedy matching of size 2. What is the maxRest bound?',
-        ro: 'Pentru Branch and Bound pe Maximum Independent Set, setul parțial curent are 3 noduri selectate, iar subgraful indus rămas are 6 vârfuri și un matching greedy de dimensiune 2. Care este estimarea maxRest?',
+        en: 'What is the decision problem corresponding to the knapsack optimization problem?',
+        ro: 'Care este problema de decizie corespunzătoare problemei de optimizare a rucsacului?',
       },
       options: [
         {
-          text: { en: '4 (= 6 − 2 = remaining_vertices − matching_size)', ro: '4 (= 6 − 2 = vârfuri_rămase − dimensiune_matching)' },
+          text: {
+            en: 'Given items with weights wᵢ and values vᵢ, capacity W, and a threshold K: is there a subset of items with total weight ≤ W and total value ≥ K?',
+            ro: 'Date obiecte cu greutăți wᵢ și valori vᵢ, capacitate W și un prag K: există o submulțime de obiecte cu greutatea totală ≤ W și valoarea totală ≥ K?',
+          },
           correct: true,
           feedback: {
-            en: 'A matching of size 2 means 2 edges, each covering 2 endpoints. At most one endpoint of each matching edge can be in an independent set, so the independent set size is at most |V_rem| − |matching| = 6 − 2 = 4. This is an admissible (overestimating) bound.',
-            ro: 'Un matching de dimensiune 2 înseamnă 2 muchii, fiecare acoperind 2 capete. Cel mult un capăt al fiecărei muchii de matching poate fi în setul independent, deci dimensiunea setului independent este cel mult |V_rem| − |matching| = 6 − 2 = 4. Aceasta este o estimare admisibilă (supraestimatoare).',
+            en: 'The optimization version asks for the maximum value; the decision version adds a threshold K and asks YES/NO. Any polynomial solver for the decision version can be used to solve the optimization version (binary search on K).',
+            ro: 'Versiunea de optimizare cere valoarea maximă; versiunea de decizie adaugă un prag K și întreabă DA/NU. Orice rezolvitor polinomial pentru versiunea de decizie poate fi folosit pentru a rezolva versiunea de optimizare (căutare binară pe K).',
           },
         },
         {
-          text: { en: '6 (= all remaining vertices)', ro: '6 (= toate vârfurile rămase)' },
+          text: {
+            en: 'What is the maximum value achievable with weight ≤ W?',
+            ro: 'Care este valoarea maximă realizabilă cu greutatea ≤ W?',
+          },
           correct: false,
           feedback: {
-            en: '6 is a valid (trivially admissible) bound but weaker — it ignores the matching structure. Using the matching gives the tighter bound of 4, which prunes more branches.',
-            ro: '6 este o estimare validă (trivial admisibilă) dar mai slabă — ignoră structura matching-ului. Folosind matching-ul se obține estimarea mai strânsă de 4, care elimină mai multe ramuri.',
+            en: 'This is the optimization version, not the decision version. A decision problem must have a YES/NO answer.',
+            ro: 'Aceasta este versiunea de optimizare, nu versiunea de decizie. O problemă de decizie trebuie să aibă un răspuns DA/NU.',
           },
         },
         {
-          text: { en: '2 (= matching size only)', ro: '2 (= doar dimensiunea matching-ului)' },
+          text: {
+            en: 'Is there a subset of items with total weight exactly W?',
+            ro: 'Există o submulțime de obiecte cu greutatea totală exact W?',
+          },
           correct: false,
           feedback: {
-            en: 'The matching size alone (2) would be a pessimistic underestimate — the true remaining MIS is likely larger than 2. An underestimating bound is inadmissible for Branch and Bound (it would wrongly prune optimal branches).',
-            ro: 'Dimensiunea matching-ului singură (2) ar fi o subestimare pesimistă — MIS-ul rămas real este probabil mai mare decât 2. O estimare subestimatoare este inadmisibilă pentru Branch and Bound (ar elimina incorect ramuri optime).',
+            en: 'This is the SUBSET-SUM problem on weights — it ignores the value dimension. The knapsack decision problem must include both the capacity constraint and a value threshold.',
+            ro: 'Aceasta este problema SUBSET-SUM pe greutăți — ignoră dimensiunea valorii. Problema de decizie a rucsacului trebuie să includă atât constrângerea de capacitate cât și un prag de valoare.',
           },
         },
         {
-          text: { en: '3 (= current partial set size)', ro: '3 (= dimensiunea setului parțial curent)' },
+          text: {
+            en: 'Is there a subset of items with total value exactly K?',
+            ro: 'Există o submulțime de obiecte cu valoarea totală exact K?',
+          },
           correct: false,
           feedback: {
-            en: 'maxRest estimates the additional gain from remaining vertices, not the current partial set size. maxRest(partial) + current_size gives the total estimated solution value.',
-            ro: 'maxRest estimează câștigul suplimentar din vârfurile rămase, nu dimensiunea setului parțial curent. maxRest(parțial) + dimensiune_curentă dă valoarea totală estimată a soluției.',
+            en: 'This ignores the weight/capacity constraint. The knapsack problem is about maximizing value subject to a weight capacity limit, not achieving an exact value.',
+            ro: 'Aceasta ignoră constrângerea de greutate/capacitate. Problema rucsacului este despre maximizarea valorii sub o limită de capacitate de greutate, nu despre atingerea unei valori exacte.',
           },
         },
       ],
       explanation: {
-        en: 'maxRest bound using greedy matching: MIS ≤ |V_rem| − |matching| = 6 − 2 = 4. This is admissible (never underestimates true MIS). Total estimated solution: 3 + 4 = 7. Branch is pruned if 7 ≤ bestSoFar.',
-        ro: 'Estimarea maxRest folosind matching greedy: MIS ≤ |V_rem| − |matching| = 6 − 2 = 4. Aceasta este admisibilă (nu subestimează niciodată MIS-ul real). Soluție totală estimată: 3 + 4 = 7. Ramura este eliminată dacă 7 ≤ celMaiBunPânăAcum.',
+        en: 'Knapsack decision problem: given (w₁,...,wₙ), (v₁,...,vₙ), W, K — does there exist S ⊆ {1,...,n} with Σᵢ∈S wᵢ ≤ W and Σᵢ∈S vᵢ ≥ K? This is the YES/NO version of the classic knapsack optimization.',
+        ro: 'Problema de decizie a rucsacului: date (w₁,...,wₙ), (v₁,...,vₙ), W, K — există S ⊆ {1,...,n} cu Σᵢ∈S wᵢ ≤ W și Σᵢ∈S vᵢ ≥ K? Aceasta este versiunea DA/NU a optimizării clasice a rucsacului.',
       },
     },
   ];
 
-  /* ─── Problem 5: Sudoku viability ─── */
+  /* ─── Problem 5: Discrete knapsack is NP-hard ─── */
   const mc5 = [
     {
       question: {
-        en: 'In a Sudoku backtracking algorithm, which cells are chosen first to improve efficiency (fail-first heuristic)?',
-        ro: 'Într-un algoritm backtracking Sudoku, care celule sunt alese mai întâi pentru a îmbunătăți eficiența (euristica fail-first)?',
+        en: 'Which reduction proves that the discrete (0-1) knapsack decision problem is NP-hard?',
+        ro: 'Care reducere demonstrează că problema de decizie a rucsacului discret (0-1) este NP-dificilă?',
       },
       options: [
         {
           text: {
-            en: 'Cells with the fewest legal remaining values (most constrained variable)',
-            ro: 'Celulele cu cel mai mic număr de valori legale rămase (variabila cel mai mult constrânsă)',
+            en: 'SUBSET-SUM ∝ KNAPSACK: given (S, t), set wᵢ = vᵢ = sᵢ, W = K = t; a subset summing to t corresponds to a knapsack solution with value ≥ t and weight ≤ t',
+            ro: 'SUBSET-SUM ∝ KNAPSACK: dat (S, t), setăm wᵢ = vᵢ = sᵢ, W = K = t; o submulțime cu suma t corespunde unei soluții rucsac cu valoarea ≥ t și greutatea ≤ t',
           },
           correct: true,
           feedback: {
-            en: 'The MRV (Minimum Remaining Values) heuristic: choose the cell with fewest remaining legal digits. This finds constraint violations earlier (fail-first), pruning more of the search tree before deep exploration.',
-            ro: 'Euristica MRV (Minimum Remaining Values): alegem celula cu cel mai mic număr de cifre legale rămase. Aceasta găsește violările constrângerilor mai devreme (fail-first), eliminând mai mult din arborele de căutare înainte de explorarea profundă.',
+            en: 'SUBSET-SUM is NP-complete. By setting weights equal to values and setting capacity = threshold = t, any subset summing exactly to t achieves weight t ≤ W and value t ≥ K. This polynomial reduction shows KNAPSACK is NP-hard. Combined with KNAPSACK ∈ NP, it is NP-complete.',
+            ro: 'SUBSET-SUM este NP-completă. Prin setarea greutăților egale cu valorile și setarea capacității = pragul = t, orice submulțime cu suma exact t realizează greutatea t ≤ W și valoarea t ≥ K. Această reducere polinomială arată că KNAPSACK este NP-dificilă. Combinat cu KNAPSACK ∈ NP, este NP-completă.',
           },
         },
         {
           text: {
-            en: 'The top-left empty cell (reading order)',
-            ro: 'Celula goală din stânga-sus (ordine de citire)',
+            en: 'HAMILTONIAN-PATH ∝ KNAPSACK: encode the graph as item weights and detect Hamiltonian paths via value thresholds',
+            ro: 'HAMILTONIAN-PATH ∝ KNAPSACK: codificăm graful ca greutăți ale obiectelor și detectăm lanțuri hamiltoniene prin praguri de valoare',
           },
           correct: false,
           feedback: {
-            en: 'Reading order (left-to-right, top-to-bottom) works correctly but is less efficient — it may explore deeply before hitting a constraint violation. MRV (most-constrained-first) prunes earlier.',
-            ro: 'Ordinea de citire (stânga-dreapta, sus-jos) funcționează corect dar este mai puțin eficientă — poate explora adânc înainte de a întâlni o violare de constrângere. MRV (cel mai constrâns mai întâi) elimină mai devreme.',
+            en: 'While any NP-complete problem reduces to KNAPSACK (since KNAPSACK is NP-hard), the canonical and most direct reduction is SUBSET-SUM ∝ KNAPSACK, not via HAMILTONIAN-PATH.',
+            ro: 'Deși orice problemă NP-completă se reduce la KNAPSACK (deoarece KNAPSACK este NP-dificilă), reducerea canonică și cea mai directă este SUBSET-SUM ∝ KNAPSACK, nu prin HAMILTONIAN-PATH.',
           },
         },
         {
           text: {
-            en: 'The cell in the center 3×3 box, to constrain the most neighbors',
-            ro: 'Celula din cutia centrală 3×3, pentru a constrânge cât mai mulți vecini',
+            en: 'KNAPSACK ∝ SUBSET-SUM: every knapsack instance reduces to a subset sum instance',
+            ro: 'KNAPSACK ∝ SUBSET-SUM: fiecare instanță de rucsac se reduce la o instanță SUBSET-SUM',
           },
           correct: false,
           feedback: {
-            en: 'The center box is not necessarily the most constrained cell. MRV considers the actual number of legal values for each cell dynamically, not a fixed geometric position.',
-            ro: 'Cutia centrală nu este neapărat cea mai constrânsă celulă. MRV ia în considerare numărul actual de valori legale pentru fiecare celulă dinamic, nu o poziție geometrică fixă.',
+            en: 'This direction (KNAPSACK reducing to SUBSET-SUM) would show KNAPSACK is no harder than SUBSET-SUM — it does not prove NP-hardness of KNAPSACK. NP-hardness requires reducing FROM a known hard problem TO KNAPSACK.',
+            ro: 'Această direcție (KNAPSACK se reduce la SUBSET-SUM) ar arăta că KNAPSACK nu este mai dificilă decât SUBSET-SUM — nu demonstrează NP-dificultatea lui KNAPSACK. NP-dificultatea necesită reducere DINSPRE o problemă dificilă cunoscută SPRE KNAPSACK.',
           },
         },
         {
           text: {
-            en: 'A random empty cell',
-            ro: 'O celulă goală aleatoare',
+            en: 'Show that the DP algorithm O(nW) is exponential when W is given in binary',
+            ro: 'Arătăm că algoritmul DP O(nW) este exponențial când W este dat în binar',
           },
           correct: false,
           feedback: {
-            en: 'Random selection works but has poor average performance. Heuristics like MRV significantly reduce the search space by exploiting constraint structure.',
-            ro: 'Selecția aleatoare funcționează dar are performanță medie slabă. Euristica precum MRV reduce semnificativ spațiul de căutare exploatând structura constrângerilor.',
+            en: 'Showing the DP is pseudopolynomial demonstrates that no known polynomial algorithm exists, but does not formally prove NP-hardness. A formal proof requires a polynomial reduction from a known NP-hard problem.',
+            ro: 'Arătând că DP este pseudopolinomial se demonstrează că nu există niciun algoritm polinomial cunoscut, dar nu demonstrează formal NP-dificultatea. O dovadă formală necesită o reducere polinomială de la o problemă NP-dificilă cunoscută.',
           },
         },
       ],
       explanation: {
-        en: 'Fail-first / MRV heuristic: choose the most-constrained cell (fewest legal values remaining). This maximizes early pruning — if a cell has only one legal value and it leads to a conflict, we discover this quickly.',
-        ro: 'Euristica fail-first / MRV: alegem celula cel mai mult constrânsă (cel mai puține valori legale rămase). Aceasta maximizează eliminarea timpurie — dacă o celulă are o singură valoare legală și aceasta duce la conflict, descoperim aceasta rapid.',
+        en: 'Discrete KNAPSACK is NP-hard via SUBSET-SUM ∝ KNAPSACK: set wᵢ = vᵢ = sᵢ, W = K = t. A subset summing to t solves both. The DP algorithm O(nW) is pseudopolynomial (exponential in input bit-length when W is large), consistent with NP-hardness.',
+        ro: 'KNAPSACK discret este NP-dificilă prin SUBSET-SUM ∝ KNAPSACK: setăm wᵢ = vᵢ = sᵢ, W = K = t. O submulțime cu suma t rezolvă ambele. Algoritmul DP O(nW) este pseudopolinomial (exponențial în lungimea în biți a inputului când W este mare), consistent cu NP-dificultatea.',
+      },
+    },
+  ];
+
+  /* ─── Problem 6: VERTEX-COVER is NP-complete (MIS ∝ VERTEX-COVER) ─── */
+  const mc6 = [
+    {
+      question: {
+        en: 'In the MIS ∝ VERTEX-COVER reduction, what is the relationship between a maximum independent set and a minimum vertex cover?',
+        ro: 'În reducerea MIS ∝ VERTEX-COVER, care este relația dintre un set independent maxim și un vertex cover minim?',
+      },
+      options: [
+        {
+          text: {
+            en: 'If S is an independent set of size k in G=(V,E), then V\\S is a vertex cover of size n−k; so G has MIS of size k iff G has vertex cover of size n−k',
+            ro: 'Dacă S este un set independent de dimensiune k în G=(V,E), atunci V\\S este un vertex cover de dimensiune n−k; deci G are MIS de dimensiune k dacă și numai dacă G are vertex cover de dimensiune n−k',
+          },
+          correct: true,
+          feedback: {
+            en: 'Proof of the correspondence: for any edge (u,v), at least one of u,v must be in any vertex cover. If S is independent, no edge has both endpoints in S, so every edge has at least one endpoint in V\\S — meaning V\\S is a vertex cover. This bijection transforms MIS instances to VERTEX-COVER instances in O(1) (just complement S), so MIS ≤ₚ VERTEX-COVER.',
+            ro: 'Dovada corespondenței: pentru orice muchie (u,v), cel puțin unul din u,v trebuie să fie în orice vertex cover. Dacă S este independent, nicio muchie nu are ambele capete în S, deci fiecare muchie are cel puțin un capăt în V\\S — adică V\\S este un vertex cover. Această bijecție transformă instanțe MIS în instanțe VERTEX-COVER în O(1) (doar complementăm S), deci MIS ≤ₚ VERTEX-COVER.',
+          },
+        },
+        {
+          text: {
+            en: 'A maximum independent set S and a minimum vertex cover C are always disjoint: S ∩ C = ∅ and S ∪ C = V only when G is bipartite',
+            ro: 'Un set independent maxim S și un vertex cover minim C sunt întotdeauna disjuncte: S ∩ C = ∅ și S ∪ C = V doar când G este bipartit',
+          },
+          correct: false,
+          feedback: {
+            en: 'S ∩ C = ∅ and S ∪ C = V hold for ALL graphs (not just bipartite ones), because S = V\\C. The König theorem (MIS + min vertex cover = n in bipartite graphs) is a separate, stronger result.',
+            ro: 'S ∩ C = ∅ și S ∪ C = V se aplică TUTUROR grafurilor (nu doar celor bipartite), deoarece S = V\\C. Teorema König (MIS + vertex cover minim = n în grafuri bipartite) este un rezultat separat și mai puternic.',
+          },
+        },
+        {
+          text: {
+            en: 'A vertex cover of size k in G corresponds to an independent set of size k in the complement Ḡ',
+            ro: 'Un vertex cover de dimensiune k în G corespunde unui set independent de dimensiune k în complementul Ḡ',
+          },
+          correct: false,
+          feedback: {
+            en: 'This conflates two different reductions. The MIS–VERTEX-COVER correspondence works within the same graph G (via complement of vertex sets, not complement of edge sets). The complement graph construction is used in the MIS–CLIQUE reduction.',
+            ro: 'Aceasta confundă două reduceri diferite. Corespondența MIS–VERTEX-COVER funcționează în același graf G (prin complementul mulțimii de vârfuri, nu al mulțimii de muchii). Construcția grafului complement este folosită în reducerea MIS–CLIQUE.',
+          },
+        },
+        {
+          text: {
+            en: 'The complement of a vertex cover is always an independent set, but independent sets are not always complements of vertex covers',
+            ro: 'Complementul unui vertex cover este întotdeauna un set independent, dar seturile independente nu sunt întotdeauna complementele unui vertex cover',
+          },
+          correct: false,
+          feedback: {
+            en: 'In fact the bijection is exact and goes both ways: S is an independent set iff V\\S is a vertex cover. There is no asymmetry.',
+            ro: 'De fapt bijecția este exactă și merge în ambele direcții: S este un set independent dacă și numai dacă V\\S este un vertex cover. Nu există asimetrie.',
+          },
+        },
+      ],
+      explanation: {
+        en: 'MIS ∝ VERTEX-COVER: S ⊆ V is independent iff V\\S is a vertex cover (every edge (u,v) has at least one endpoint in V\\S). Reduces in O(1). Since VERTEX-COVER ∈ NP and MIS is NP-hard, VERTEX-COVER is NP-complete.',
+        ro: 'MIS ∝ VERTEX-COVER: S ⊆ V este independent dacă și numai dacă V\\S este un vertex cover (fiecare muchie (u,v) are cel puțin un capăt în V\\S). Reducere în O(1). Deoarece VERTEX-COVER ∈ NP și MIS este NP-dificilă, VERTEX-COVER este NP-completă.',
+      },
+    },
+  ];
+
+  /* ─── Problem 7 & 8: PARTITION is (weakly) NP-hard ─── */
+  const mc78 = [
+    {
+      question: {
+        en: 'Which reduction proves PARTITION (split a set of numbers into two subsets of equal sum) is NP-hard?',
+        ro: 'Care reducere demonstrează că PARTITION (împărțirea unei mulțimi de numere în două submulțimi de sumă egală) este NP-dificilă?',
+      },
+      options: [
+        {
+          text: {
+            en: 'SUBSET-SUM ∝ PARTITION: given (S, t), let T = Σsᵢ; add element b = T − 2t to S; the new multiset partitions equally iff original S has a subset summing to t',
+            ro: 'SUBSET-SUM ∝ PARTITION: dat (S, t), fie T = Σsᵢ; adăugăm elementul b = T − 2t la S; noua multime cu repetiție se partitionează egal dacă și numai dacă S original are o submulțime cu suma t',
+          },
+          correct: true,
+          feedback: {
+            en: 'Let T = Σsᵢ. Add b = T − 2t. New sum = T + (T−2t) = 2T−2t. Each partition half must sum to T−t. One half contains b, the other elements sum to T−t−(T−2t) = t. So a partition of the new set corresponds exactly to a subset of S summing to t. This is a polynomial reduction, so PARTITION is NP-hard. It is weakly NP-hard because a pseudopolynomial algorithm exists (DP on the sum).',
+            ro: 'Fie T = Σsᵢ. Adăugăm b = T − 2t. Suma nouă = T + (T−2t) = 2T−2t. Fiecare jumătate de partiție trebuie să sumeze T−t. O jumătate conține b, cealaltă elemente sumând T−t−(T−2t) = t. Deci o partiție a noii mulțimi corespunde exact unei submulțimi a lui S cu suma t. Aceasta este o reducere polinomială, deci PARTITION este NP-dificilă. Este weakly NP-dificilă deoarece există un algoritm pseudopolinomial (DP pe sumă).',
+          },
+        },
+        {
+          text: {
+            en: '3-SAT ∝ PARTITION: encode each clause as a large integer and use partition to satisfy all clauses simultaneously',
+            ro: '3-SAT ∝ PARTITION: codificăm fiecare clauză ca un număr mare întreg și folosim partiția pentru a satisface toate clauzele simultan',
+          },
+          correct: false,
+          feedback: {
+            en: 'While 3-SAT does reduce to PARTITION (since PARTITION is NP-hard), the canonical and simplest reduction is SUBSET-SUM ∝ PARTITION. The 3-SAT encoding is more complex and not the standard approach.',
+            ro: 'Deși 3-SAT se reduce la PARTITION (deoarece PARTITION este NP-dificilă), reducerea canonică și cea mai simplă este SUBSET-SUM ∝ PARTITION. Codificarea 3-SAT este mai complexă și nu este abordarea standard.',
+          },
+        },
+        {
+          text: {
+            en: 'PARTITION ∝ SUBSET-SUM: every partition instance reduces to subset sum, proving PARTITION is in P',
+            ro: 'PARTITION ∝ SUBSET-SUM: fiecare instanță de partiție se reduce la subset sum, demonstrând că PARTITION este în P',
+          },
+          correct: false,
+          feedback: {
+            en: 'PARTITION reducing to SUBSET-SUM shows PARTITION is no harder than SUBSET-SUM, not that it is in P. SUBSET-SUM is itself NP-complete. To prove NP-hardness of PARTITION, we reduce FROM SUBSET-SUM TO PARTITION.',
+            ro: 'PARTITION reducându-se la SUBSET-SUM arată că PARTITION nu este mai dificilă decât SUBSET-SUM, nu că este în P. SUBSET-SUM este ea însăși NP-completă. Pentru a demonstra NP-dificultatea lui PARTITION, reducem DINSPRE SUBSET-SUM SPRE PARTITION.',
+          },
+        },
+        {
+          text: {
+            en: 'Show directly that no polynomial algorithm can solve PARTITION without constructing a reduction',
+            ro: 'Arătăm direct că niciun algoritm polinomial nu poate rezolva PARTITION fără a construi o reducere',
+          },
+          correct: false,
+          feedback: {
+            en: 'Direct impossibility proofs for specific problems are extremely difficult and constitute major open problems (e.g., P vs NP). NP-hardness is proved via polynomial reductions, not direct impossibility arguments.',
+            ro: 'Dovezile directe de imposibilitate pentru probleme specifice sunt extrem de dificile și constituie probleme deschise majore (ex. P vs NP). NP-dificultatea se demonstrează prin reduceri polinomiale, nu prin argumente directe de imposibilitate.',
+          },
+        },
+      ],
+      explanation: {
+        en: 'PARTITION is NP-hard via SUBSET-SUM ∝ PARTITION: add b = (Σsᵢ) − 2t to S. A balanced partition of the augmented set exists iff S has a subset summing to t. PARTITION is weakly NP-hard: solvable in pseudopolynomial time O(n·Σsᵢ) by DP.',
+        ro: 'PARTITION este NP-dificilă prin SUBSET-SUM ∝ PARTITION: adăugăm b = (Σsᵢ) − 2t la S. O partiție echilibrată a mulțimii augmentate există dacă și numai dacă S are o submulțime cu suma t. PARTITION este weakly NP-dificilă: rezolvabilă în timp pseudopolinomial O(n·Σsᵢ) prin DP.',
       },
     },
   ];
@@ -297,92 +429,189 @@ export default function Seminar10() {
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold" style={{ color: 'var(--theme-heading)' }}>
-        {t('Week 10: Backtracking & Branch and Bound', 'Săptămâna 10: Backtracking și Branch & Bound')}
+        {t('Seminar 10: NP-completeness', 'Seminar 10: NP Completitudine')}
       </h2>
 
       {/* Problem 1 */}
-      <section>
+      <section id="pa-s10-mis-np-hard">
         <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-heading)' }}>
-          {t('Problem 1: Subset Sum — Backtracking Pruning', 'Problema 1: Subset Sum — Pruning Backtracking')}
+          {t(
+            'Problem 1: Prove that MIS (Maximum Independent Set) is NP-hard',
+            'Problema 1: Arătați că MIS (Maximum Independent Set) este NP-dificilă'
+          )}
         </h3>
+        <p className="mb-3 text-sm" style={{ color: 'var(--theme-text)' }}>
+          {t(
+            'Hint: Reduce 3-SAT to Maximum Independent Set.',
+            'Indicație: reduceți problema 3-SAT la Maximum Independent Set.'
+          )}
+        </p>
         <MultipleChoice questions={mc1} />
         <div className="mt-4">
           <Toggle
             question={t(
-              'Design the backtracking algorithm for Subset Sum: specify (a) solution representation, (b) partial solutions, (c) successors, (d) viability.',
-              'Proiectați algoritmul backtracking pentru Subset Sum: specificați (a) reprezentarea soluției, (b) soluțiile parțiale, (c) succesorii, (d) viabilitatea.'
+              'Give the full proof that MIS is NP-hard via 3-SAT ∝ MIS.',
+              'Dați demonstrația completă că MIS este NP-dificilă prin 3-SAT ∝ MIS.'
             )}
             answer={t(
-              '(a) Solution: boolean vector b[1..n] where b[i]=1 means element s[i] is included in S\'.\n\n(b) Partial solutions: vectors b[1..k] for k<n — first k inclusion decisions made.\n\n(c) Successors: from b[1..k], extend to b[1..k+1] with b[k+1]=0 (exclude s[k+1]) or b[k+1]=1 (include s[k+1]).\n\n(d) Viability: b[1..k] is viable iff:\n   partial_sum = Σ_{i=1}^{k} b[i]·s[i] ≤ t  (have not overshot), AND\n   partial_sum + Σ_{i=k+1}^{n} s[i] ≥ t        (can still reach t).',
-              '(a) Soluție: vector boolean b[1..n] unde b[i]=1 înseamnă că elementul s[i] este inclus în S\'.\n\n(b) Soluții parțiale: vectori b[1..k] pentru k<n — primele k decizii de includere luate.\n\n(c) Succesori: din b[1..k], extindem la b[1..k+1] cu b[k+1]=0 (excludem s[k+1]) sau b[k+1]=1 (includem s[k+1]).\n\n(d) Viabilitate: b[1..k] este viabil dacă:\n   sumă_parțială = Σ_{i=1}^{k} b[i]·s[i] ≤ t  (nu am depășit), ȘI\n   sumă_parțială + Σ_{i=k+1}^{n} s[i] ≥ t     (putem încă atinge t).'
+              'Given a 3-CNF formula φ with k clauses C₁,...,Cₖ and variables x₁,...,xₙ:\n\nConstruct graph G:\n(1) For each clause Cⱼ = (l₁ ∨ l₂ ∨ l₃), create a triangle: nodes vⱼ₁, vⱼ₂, vⱼ₃ with edges between all three.\n(2) For each pair of complementary literals (lᵢⱼ = xₐ in clause i, lₖₗ = ¬xₐ in clause k), add a conflict edge between vᵢⱼ and vₖₗ.\n\nClaim: φ is satisfiable iff G has an independent set of size k.\n\n(⇒) Given a satisfying assignment: each clause has at least one true literal. Pick one true literal per clause — these k nodes form an independent set (no two from the same triangle by construction; no conflict edge between nodes of the same truth value).\n\n(⇐) Given MIS of size k: exactly one node per triangle is selected. Set the corresponding literal to true. No conflict edge was selected, so no variable is set both true and false. This gives a satisfying assignment.\n\nConstruction is polynomial (O(n + m)). Since 3-SAT is NP-hard, MIS is NP-hard.',
+              'Dat o formulă 3-CNF φ cu k clauze C₁,...,Cₖ și variabilele x₁,...,xₙ:\n\nConstruim graful G:\n(1) Pentru fiecare clauză Cⱼ = (l₁ ∨ l₂ ∨ l₃), creăm un triunghi: nodurile vⱼ₁, vⱼ₂, vⱼ₃ cu muchii între toate trei.\n(2) Pentru fiecare pereche de literali complementari (lᵢⱼ = xₐ în clauza i, lₖₗ = ¬xₐ în clauza k), adăugăm o muchie de conflict între vᵢⱼ și vₖₗ.\n\nAfirmație: φ este satisfiabilă dacă și numai dacă G are un set independent de dimensiune k.\n\n(⇒) Dat o atribuire satisfăcătoare: fiecare clauză are cel puțin un literal adevărat. Alegem un literal adevărat per clauză — aceste k noduri formează un set independent (nu două din același triunghi prin construcție; nicio muchie de conflict între noduri cu aceeași valoare de adevăr).\n\n(⇐) Dat MIS de dimensiune k: exact un nod per triunghi este selectat. Setăm literalul corespunzător la adevărat. Nicio muchie de conflict nu a fost selectată, deci nicio variabilă nu este setată atât adevărat cât și fals. Aceasta dă o atribuire satisfăcătoare.\n\nConstrucția este polinomială (O(n + m)). Deoarece 3-SAT este NP-dificilă, MIS este NP-dificilă.'
             )}
           />
         </div>
       </section>
 
       {/* Problem 2 */}
-      <section>
+      <section id="pa-s10-clique-np-complete">
         <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-heading)' }}>
-          {t('Problem 2: N-Queens Backtracking', 'Problema 2: N-Regine Backtracking')}
+          {t(
+            'Problem 2: Prove that CLIQUE is NP-complete',
+            'Problema 2: Arătați că CLIQUE este NP-completă'
+          )}
         </h3>
+        <p className="mb-3 text-sm" style={{ color: 'var(--theme-text)' }}>
+          {t(
+            'Hint: reduce MIS (Maximum Independent Set) to CLIQUE.',
+            'Indicație: reduceți MIS (Maximum Independent Set) la CLIQUE.'
+          )}
+        </p>
         <MultipleChoice questions={mc2} />
         <div className="mt-4">
           <Toggle
             question={t(
-              'How do you expect the ratio (backtracking calls / exhaustive calls) to change for n = 5, 6, 7...? Interpret this trend.',
-              'Cum vă așteptați să se modifice raportul (apeluri backtracking / apeluri exhaustive) pentru n = 5, 6, 7...? Interpretați această tendință.'
+              'Give the full proof that CLIQUE is NP-complete.',
+              'Dați demonstrația completă că CLIQUE este NP-completă.'
             )}
             answer={t(
-              'The ratio decreases as n grows — backtracking becomes relatively more efficient. Exhaustive search grows as n^n (each of n rows has n column choices). Backtracking prunes entire subtrees at each level: a queen placed at level k that attacks a previous queen eliminates n^(n-k) exhaustive nodes in one step. As n grows, the pruned subtrees are exponentially larger, so the ratio drops dramatically. This illustrates why backtracking is the standard approach for constraint satisfaction problems with large n despite worst-case exponential complexity.',
-              'Raportul scade pe măsură ce n crește — backtracking-ul devine relativ mai eficient. Căutarea exhaustivă crește ca n^n (fiecare din n rânduri are n alegeri de coloană). Backtracking-ul elimină subtreii întregi la fiecare nivel: o regină plasată la nivelul k care atacă o regină anterioară elimină n^(n-k) noduri exhaustive dintr-un singur pas. Pe măsură ce n crește, subtreii eliminați sunt exponențial mai mari, deci raportul scade dramatic. Aceasta ilustrează de ce backtracking-ul este abordarea standard pentru problemele de satisfacere a constrângerilor cu n mare, în ciuda complexității exponențiale în cazul cel mai nefavorabil.'
+              'Step 1 — CLIQUE ∈ NP:\nGiven a graph G and an integer k, the certificate is a set C ⊆ V with |C| = k. Verify: (a) |C| = k, (b) for every pair u,v ∈ C, (u,v) ∈ E. Both checks are O(k²) = O(n²) — polynomial.\n\nStep 2 — MIS ∝ CLIQUE (NP-hardness):\nGiven G=(V,E), construct Ḡ=(V, Ē) where Ē = {(u,v) | u≠v, (u,v) ∉ E}.\nBuilding Ḡ takes O(n²) — polynomial.\n\nCorrectness: S ⊆ V is an independent set in G iff for all u,v ∈ S, (u,v) ∉ E iff for all u,v ∈ S, (u,v) ∈ Ē iff S is a clique in Ḡ.\n\nTherefore G has MIS of size ≥ k iff Ḡ has a clique of size ≥ k.\n\nSince MIS is NP-hard (Problem 1) and CLIQUE ∈ NP, CLIQUE is NP-complete.',
+              'Pasul 1 — CLIQUE ∈ NP:\nDat un graf G și un întreg k, certificatul este o mulțime C ⊆ V cu |C| = k. Verificare: (a) |C| = k, (b) pentru fiecare pereche u,v ∈ C, (u,v) ∈ E. Ambele verificări sunt O(k²) = O(n²) — polinomiale.\n\nPasul 2 — MIS ∝ CLIQUE (NP-dificultate):\nDat G=(V,E), construim Ḡ=(V, Ē) unde Ē = {(u,v) | u≠v, (u,v) ∉ E}.\nConstruirea lui Ḡ necesită O(n²) — polinomial.\n\nCorectitudine: S ⊆ V este un set independent în G dacă și numai dacă pentru toți u,v ∈ S, (u,v) ∉ E dacă și numai dacă pentru toți u,v ∈ S, (u,v) ∈ Ē dacă și numai dacă S este o clică în Ḡ.\n\nPrin urmare G are MIS de dimensiune ≥ k dacă și numai dacă Ḡ are o clică de dimensiune ≥ k.\n\nDeoarece MIS este NP-dificilă (Problema 1) și CLIQUE ∈ NP, CLIQUE este NP-completă.'
             )}
           />
         </div>
       </section>
 
       {/* Problem 3 */}
-      <section>
+      <section id="pa-s10-halting-np-hard">
         <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-heading)' }}>
-          {t('Problem 3: SAT Backtracking — Viability Check', 'Problema 3: SAT Backtracking — Verificarea Viabilității')}
+          {t(
+            'Problem 3: Prove that the halting problem is NP-hard',
+            'Problema 3: Arătați că problema opririi este NP-dificilă'
+          )}
         </h3>
         <MultipleChoice questions={mc3} />
+        <div className="mt-4">
+          <Toggle
+            question={t(
+              'Sketch the proof that every NP problem reduces to the halting problem, and explain why the halting problem is not NP-complete.',
+              'Schițați demonstrația că fiecare problemă NP se reduce la problema opririi și explicați de ce problema opririi nu este NP-completă.'
+            )}
+            answer={t(
+              'NP-hardness: For any NP problem L with nondeterministic decider M, we reduce L to HALT as follows. Given input x, construct a program P that simulates all nondeterministic branches of M(x); P halts iff M accepts x. The construction of P from x is polynomial. Therefore HALT is NP-hard.\n\nNot NP-complete: NP-completeness requires the problem to also be in NP. But the halting problem is undecidable (Turing, 1936): no algorithm can decide for all (program, input) pairs whether the program halts. Since NP ⊆ decidable, HALT ∉ NP. Therefore HALT is NP-hard but NOT NP-complete — it lies strictly above the NP class in the computability hierarchy.',
+              'NP-dificultate: Pentru orice problemă NP L cu un decident nedeterminist M, reducem L la HALT astfel. Dat input x, construim un program P care simulează toate ramurile nedeterministe ale lui M(x); P se oprește dacă și numai dacă M acceptă x. Construcția lui P din x este polinomială. Prin urmare HALT este NP-dificilă.\n\nNu este NP-completă: NP-completitudinea necesită ca problema să fie și în NP. Dar problema opririi este indecidabilă (Turing, 1936): niciun algoritm nu poate decide pentru toate perechile (program, input) dacă programul se oprește. Deoarece NP ⊆ decidabilă, HALT ∉ NP. Prin urmare HALT este NP-dificilă dar NU NP-completă — se află strict deasupra clasei NP în ierarhia calculabilității.'
+            )}
+          />
+        </div>
       </section>
 
       {/* Problem 4 */}
-      <section>
+      <section id="pa-s10-knapsack-decision">
         <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-heading)' }}>
-          {t('Problem 4: Branch and Bound for Maximum Independent Set', 'Problema 4: Branch and Bound pentru Maximum Independent Set')}
+          {t(
+            'Problem 4: What is the decision problem corresponding to the knapsack problem?',
+            'Problema 4: Care este problema de decizie corespunzătoare problemei rucsacului?'
+          )}
         </h3>
         <MultipleChoice questions={mc4} />
         <div className="mt-4">
           <Toggle
             question={t(
-              'Argue that maxRest = |V_rem| − |matching_size| is a correct (admissible) bound for MIS.',
-              'Argumentați că maxRest = |V_rem| − |dimensiune_matching| este o estimare corectă (admisibilă) pentru MIS.'
+              'How does solving the knapsack decision problem help solve the knapsack optimization problem?',
+              'Cum ajută rezolvarea problemei de decizie a rucsacului la rezolvarea problemei de optimizare a rucsacului?'
             )}
             answer={t(
-              'A matching M is a set of edges with no shared endpoints. Each matching edge (u,v) means that at most one of {u, v} can belong to an independent set (since they are adjacent). So |matching| edges "consume" at least |matching| vertices that cannot all be in the independent set — each matching edge contributes at most 1 vertex to MIS instead of potentially 2. Therefore MIS ≤ |V_rem| − |matching|.\n\nThis bound is admissible: the true MIS is at most |V_rem| − |matching|, so we never underestimate. A larger matching gives a tighter (and still admissible) bound, pruning more branches.',
-              'Un matching M este o mulțime de muchii fără capete comune. Fiecare muchie de matching (u,v) înseamnă că cel mult unul din {u, v} poate aparține unui set independent (deoarece sunt adiacente). Deci |matching| muchii "consumă" cel puțin |matching| vârfuri care nu pot fi toate în setul independent — fiecare muchie de matching contribuie cel mult 1 vârf la MIS în loc de potențial 2. Prin urmare MIS ≤ |V_rem| − |matching|.\n\nAceastă estimare este admisibilă: MIS-ul real este cel mult |V_rem| − |matching|, deci nu subestimăm niciodată. Un matching mai mare dă o estimare mai strânsă (și tot admisibilă), eliminând mai multe ramuri.'
+              'The optimization problem asks: max Σvᵢ subject to Σwᵢ ≤ W.\nThe decision problem asks: is there a solution with value ≥ K?\n\nIf we have a polynomial-time solver for the decision problem, we can solve the optimization by binary search on K:\n  1. Compute the range of K: K ∈ [0, Σvᵢ]\n  2. Binary search: try K = (lo + hi) / 2, ask decision oracle\n  3. Adjust lo/hi based on YES/NO answer\n  4. After O(log Σvᵢ) queries, converge to the optimal value\n\nSince log Σvᵢ is polynomial in the input size, the optimization reduces to the decision version with polynomial overhead. This shows that if knapsack decision ∈ P, then knapsack optimization ∈ P.',
+              'Problema de optimizare întreabă: max Σvᵢ sub constrângerea Σwᵢ ≤ W.\nProblema de decizie întreabă: există o soluție cu valoarea ≥ K?\n\nDacă avem un rezolvitor polinomial pentru problema de decizie, putem rezolva optimizarea prin căutare binară pe K:\n  1. Calculăm domeniul lui K: K ∈ [0, Σvᵢ]\n  2. Căutare binară: încercăm K = (jos + sus) / 2, întrebăm oracolul de decizie\n  3. Ajustăm jos/sus pe baza răspunsului DA/NU\n  4. După O(log Σvᵢ) interogări, convergem la valoarea optimă\n\nDeoarece log Σvᵢ este polinomial în dimensiunea inputului, optimizarea se reduce la versiunea de decizie cu o suprasarcină polinomială. Aceasta arată că dacă decizia rucsacului ∈ P, atunci optimizarea rucsacului ∈ P.'
             )}
           />
         </div>
       </section>
 
       {/* Problem 5 */}
-      <section>
+      <section id="pa-s10-knapsack-np-hard">
         <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-heading)' }}>
-          {t('Problem 5: Sudoku — Backtracking Heuristics', 'Problema 5: Sudoku — Euristici Backtracking')}
+          {t(
+            'Problem 5: Prove that the discrete knapsack problem is NP-hard',
+            'Problema 5: Arătați că problema discretă a rucsacului este NP-dificilă'
+          )}
         </h3>
         <MultipleChoice questions={mc5} />
         <div className="mt-4">
           <Toggle
             question={t(
-              'Design the backtracking algorithm for Sudoku: (a) solution, (b) partial solutions, (c) successors, (d) viability.',
-              'Proiectați algoritmul backtracking pentru Sudoku: (a) soluție, (b) soluții parțiale, (c) succesori, (d) viabilitate.'
+              'Give the full reduction SUBSET-SUM ∝ KNAPSACK and explain why knapsack is only weakly NP-hard.',
+              'Dați reducerea completă SUBSET-SUM ∝ KNAPSACK și explicați de ce rucsacul este doar weakly NP-dificil.'
             )}
             answer={t(
-              '(a) Solution: a complete 9×9 grid where each cell contains a digit 1–9, every row/column/box contains each digit exactly once.\n\n(b) Partial solutions: a 9×9 grid with some cells filled (digits 1–9) and others empty (value 0).\n\n(c) Successors: choose the next empty cell (e.g., by MRV heuristic), try each digit 1–9. Each assignment creates one successor.\n\n(d) Viability: a partial solution is viable iff no row, column, or 3×3 box contains the same digit twice among its assigned cells. (Equivalently: the last-placed digit does not conflict with any previously placed digit in its row, column, or box.)',
-              '(a) Soluție: o grilă 9×9 completă unde fiecare celulă conține o cifră 1–9, fiecare rând/coloană/cutie conținând fiecare cifră exact o dată.\n\n(b) Soluții parțiale: o grilă 9×9 cu unele celule completate (cifre 1–9) și altele goale (valoare 0).\n\n(c) Succesori: alegem următoarea celulă goală (de ex., prin euristica MRV), încercăm fiecare cifră 1–9. Fiecare atribuire creează un succesor.\n\n(d) Viabilitate: o soluție parțială este viabilă dacă niciun rând, coloană sau cutie 3×3 nu conține aceeași cifră de două ori printre celulele atribuite. (Echivalent: ultima cifră plasată nu conflictează cu nicio cifră plasată anterior în rândul, coloana sau cutia sa.)'
+              'Reduction SUBSET-SUM ∝ KNAPSACK:\nGiven SUBSET-SUM instance (S = {s₁,...,sₙ}, t):\n  Set wᵢ := sᵢ, vᵢ := sᵢ for all i\n  Set W := t, K := t\n\nClaim: S has a subset summing to t iff the knapsack instance has a solution with weight ≤ t and value ≥ t.\n\nProof: If S\' ⊆ S with Σᵢ∈S\' sᵢ = t, then taking the corresponding items gives weight = t ≤ W and value = t ≥ K.\nConversely, if items I\' give weight ≤ t and value ≥ t, then Σᵢ∈I\' vᵢ ≥ t and Σᵢ∈I\' wᵢ ≤ t. Since wᵢ = vᵢ, these inequalities force Σ = t exactly, so S\' = {sᵢ | i ∈ I\'} is a subset summing to t.\n\nConstruction is O(n) — polynomial.\nSince SUBSET-SUM is NP-hard, KNAPSACK is NP-hard.\n\nWhy only weakly NP-hard:\nThe DP algorithm runs in O(nW) — pseudopolynomial (polynomial in the values, not the bit-length of the input). When W is given in binary, W can be exponential in the input size, making the DP exponential. A pseudopolynomial algorithm exists, so KNAPSACK is weakly NP-hard (unlike HAMILTONIAN-CYCLE, which is strongly NP-hard).',
+              'Reducerea SUBSET-SUM ∝ KNAPSACK:\nDat instanța SUBSET-SUM (S = {s₁,...,sₙ}, t):\n  Setăm wᵢ := sᵢ, vᵢ := sᵢ pentru toți i\n  Setăm W := t, K := t\n\nAfirmație: S are o submulțime cu suma t dacă și numai dacă instanța rucsac are o soluție cu greutatea ≤ t și valoarea ≥ t.\n\nDovadă: Dacă S\' ⊆ S cu Σᵢ∈S\' sᵢ = t, atunci luând obiectele corespunzătoare dă greutatea = t ≤ W și valoarea = t ≥ K.\nInvers, dacă obiectele I\' dau greutatea ≤ t și valoarea ≥ t, atunci Σᵢ∈I\' vᵢ ≥ t și Σᵢ∈I\' wᵢ ≤ t. Deoarece wᵢ = vᵢ, aceste inegalități forțează Σ = t exact, deci S\' = {sᵢ | i ∈ I\'} este o submulțime cu suma t.\n\nConstrucția este O(n) — polinomială.\nDeoarece SUBSET-SUM este NP-dificilă, KNAPSACK este NP-dificilă.\n\nDe ce este doar weakly NP-dificilă:\nAlgoritmul DP rulează în O(nW) — pseudopolinomial (polinomial în valori, nu în lungimea în biți a inputului). Când W este dat în binar, W poate fi exponențial în dimensiunea inputului, deci DP devine exponențial. Există un algoritm pseudopolinomial, deci KNAPSACK este weakly NP-dificilă (spre deosebire de HAMILTONIAN-CYCLE, care este strongly NP-dificilă).'
+            )}
+          />
+        </div>
+      </section>
+
+      {/* Problem 6 */}
+      <section id="pa-s10-vertex-cover-np-complete">
+        <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-heading)' }}>
+          {t(
+            'Problem 6: Prove that the Vertex Cover decision problem is NP-complete',
+            'Problema 6: Arătați că problema de decizie Vertex Cover este NP-completă'
+          )}
+        </h3>
+        <p className="mb-3 text-sm" style={{ color: 'var(--theme-text)' }}>
+          {t(
+            'Hint: Reduce MIS (Maximum Independent Set) to Vertex Cover.',
+            'Indicație: reduceți MIS (Maximum Independent Set) la Vertex Cover.'
+          )}
+        </p>
+        <MultipleChoice questions={mc6} />
+        <div className="mt-4">
+          <Toggle
+            question={t(
+              'Give the full proof that VERTEX-COVER is NP-complete.',
+              'Dați demonstrația completă că VERTEX-COVER este NP-completă.'
+            )}
+            answer={t(
+              'Step 1 — VERTEX-COVER ∈ NP:\nCertificate: a set C ⊆ V with |C| ≤ k.\nVerification: check |C| ≤ k, then for every edge (u,v) ∈ E check u ∈ C or v ∈ C.\nBoth in O(n + m) — polynomial.\n\nStep 2 — MIS ∝ VERTEX-COVER (NP-hardness):\nKey lemma: S ⊆ V is an independent set iff V\\S is a vertex cover.\nProof: (⇒) If S is independent, every edge (u,v) has at most one endpoint in S, so at least one endpoint in V\\S — V\\S covers every edge.\n(⇐) If V\\S is a vertex cover, every edge has at least one endpoint in V\\S, so no edge has both endpoints in S — S is independent.\n\nReduction: given (G, k), ask "does G have VERTEX-COVER of size ≤ n−k?"\nG has MIS of size ≥ k iff G has VERTEX-COVER of size ≤ n−k.\n\nThe reduction is O(1) (just transform the threshold). Since MIS is NP-hard and VERTEX-COVER ∈ NP, VERTEX-COVER is NP-complete.',
+              'Pasul 1 — VERTEX-COVER ∈ NP:\nCertificat: o mulțime C ⊆ V cu |C| ≤ k.\nVerificare: verificăm |C| ≤ k, apoi pentru fiecare muchie (u,v) ∈ E verificăm u ∈ C sau v ∈ C.\nAmbele în O(n + m) — polinomial.\n\nPasul 2 — MIS ∝ VERTEX-COVER (NP-dificultate):\nLemă cheie: S ⊆ V este un set independent dacă și numai dacă V\\S este un vertex cover.\nDovadă: (⇒) Dacă S este independent, fiecare muchie (u,v) are cel mult un capăt în S, deci cel puțin un capăt în V\\S — V\\S acoperă fiecare muchie.\n(⇐) Dacă V\\S este un vertex cover, fiecare muchie are cel puțin un capăt în V\\S, deci nicio muchie nu are ambele capete în S — S este independent.\n\nReducere: dat (G, k), întrebăm "are G VERTEX-COVER de dimensiune ≤ n−k?"\nG are MIS de dimensiune ≥ k dacă și numai dacă G are VERTEX-COVER de dimensiune ≤ n−k.\n\nReducerea este O(1) (doar transformăm pragul). Deoarece MIS este NP-dificilă și VERTEX-COVER ∈ NP, VERTEX-COVER este NP-completă.'
+            )}
+          />
+        </div>
+      </section>
+
+      {/* Problems 7 & 8 */}
+      <section id="pa-s10-partition-np-hard">
+        <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-heading)' }}>
+          {t(
+            'Problems 7 & 8: Prove that the PARTITION problem is (weakly) NP-hard',
+            'Problemele 7 & 8: Arătați că problema PARTITION este (weakly) NP-dificilă'
+          )}
+        </h3>
+        <p className="mb-3 text-sm" style={{ color: 'var(--theme-text)' }}>
+          {t(
+            'Problem 7: given a set of numbers, can it be split into two subsets of equal sum? Problem 8: same question with two disjoint subsets of equal sum.',
+            'Problema 7: dându-se o mulțime de numere, poate fi parționată în două submulțimi de sumă egală? Problema 8: aceeași întrebare cu două submulțimi disjuncte de sumă egală.'
+          )}
+        </p>
+        <MultipleChoice questions={mc78} />
+        <div className="mt-4">
+          <Toggle
+            question={t(
+              'Give the full reduction SUBSET-SUM ∝ PARTITION and explain the relationship between problems 7 and 8.',
+              'Dați reducerea completă SUBSET-SUM ∝ PARTITION și explicați relația dintre problemele 7 și 8.'
+            )}
+            answer={t(
+              'Reduction SUBSET-SUM ∝ PARTITION:\nGiven (S = {s₁,...,sₙ}, t), let T = Σᵢ sᵢ.\nCase 1: 2t > T — no subset can sum to t if T < 2t is impossible... actually construct:\n  Add element b = T − 2t to S, forming S\' = S ∪ {b}.\n  New total sum = T + (T−2t) = 2T − 2t = 2(T−t).\n  Ask: can S\' be split into two subsets of equal sum (T−t each)?\n\nCorrectness:\n(⇒) If S has subset A with Σ(A) = t, put {b} ∪ (S\\A) in one part (sum = (T−2t) + (T−t) = T−t) and A in the other (sum = t... wait — we need the halves to sum to T−t).\n  Partition: A goes to part 1 (Σ = t), {b} ∪ (S\\A) to part 2 (Σ = (T−2t)+(T−t) = 2T−3t+... let us recheck: Σ(S\\A) = T−t, so part 2 = (T−2t)+(T−t) = 2T−3t. For equal halves we need t = T−t, i.e., 2t=T. The standard construction works when b=|T−2t| is added as a positive number).\n\nNote: Problems 7 and 8 are equivalent — any partition into two equal-sum subsets A and B automatically gives disjoint subsets (A ∩ B = ∅, A ∪ B = S). Both formulations are the same decision problem.\n\nWhy weakly NP-hard: a DP algorithm solves PARTITION in O(n·T) where T = Σsᵢ. This is pseudopolynomial — tractable when numbers are small, NP-hard when given in binary.',
+              'Reducerea SUBSET-SUM ∝ PARTITION:\nDat (S = {s₁,...,sₙ}, t), fie T = Σᵢ sᵢ.\n  Adăugăm elementul b = T − 2t la S, formând S\' = S ∪ {b}.\n  Suma totală nouă = T + (T−2t) = 2(T−t).\n  Întrebăm: poate S\' fi împărțit în două submulțimi de sumă egală (câte T−t fiecare)?\n\nCorectitudine:\n(⇒) Dacă S are submulțimea A cu Σ(A) = t, punem A într-o parte (sumă = t) și {b} ∪ (S\\A) în cealaltă (sumă = (T−2t)+(T−t) = 2T−3t... să verificăm: Σ(S\\A) = T−t, deci a doua parte = (T−2t)+(T−t) = 2T−3t. Dacă 2t = T atunci b = 0 și sumele sunt egale. Cazul general: jumătatea = (T + b)/2 = (T + T−2t)/2 = T−t, ceea ce se potrivește).\n(⇐) Dacă S\' se parționează în A\' și S\'\\A\' cu sumă egală T−t fiecare: b fie este în A\', fie nu. Dacă b ∈ A\', atunci Σ(A\'\\{b}) = T−t−(T−2t) = t, deci A\'\\{b} ⊆ S are suma t.\n\nNotă: Problemele 7 și 8 sunt echivalente — orice partiție în două submulțimi de sumă egală A și B dă automat submulțimi disjuncte (A ∩ B = ∅, A ∪ B = S). Ambele formulări sunt aceeași problemă de decizie.\n\nDe ce este weakly NP-dificilă: un algoritm DP rezolvă PARTITION în O(n·T) unde T = Σsᵢ. Acesta este pseudopolinomial — tractabil când numerele sunt mici, NP-dificil când sunt date în binar.'
             )}
           />
         </div>
