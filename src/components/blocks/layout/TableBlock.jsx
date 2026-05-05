@@ -16,6 +16,8 @@ export default function TableBlock({ headers, rows }) {
   const { t } = useApp();
   // Support both array format and bilingual object format { en: [], ro: [] }
   const resolvedHeaders = headers && !Array.isArray(headers) && headers.en ? (t(headers.en, headers.ro) || headers.en) : headers;
+  // rows can be: [...] | [{en:[], ro:[]}, ...] | {en: [[]], ro: [[]]}  (whole-table bilingual)
+  const resolvedRows = (rows && !Array.isArray(rows) && rows.en) ? (t(rows.en, rows.ro) || rows.en) : rows;
   const resolveRow = (row) => {
     if (!Array.isArray(row) && row?.en) return t(row.en, row.ro) || row.en;
     return row;
@@ -42,7 +44,7 @@ export default function TableBlock({ headers, rows }) {
           </thead>
         )}
         <tbody>
-          {rows?.map((row, ri) => {
+          {resolvedRows?.map((row, ri) => {
             const cells = resolveRow(row);
             return (
               <tr key={ri} style={ri % 2 ? { backgroundColor: 'var(--theme-card-bg)' } : {}}>
