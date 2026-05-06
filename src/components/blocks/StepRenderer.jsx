@@ -10,7 +10,7 @@ export default function StepRenderer({ step, lectureVisible, isUnderstood, onTog
   return (
     <div>
       {step.blocks.map((block, i) => (
-        <BlockRenderer key={i} block={block} lectureVisible={lectureVisible} />
+        <BlockRenderer key={`${step.id}:${i}`} block={block} lectureVisible={lectureVisible} />
       ))}
 
       {/* "I understand" button */}
