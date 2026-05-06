@@ -138,17 +138,6 @@
               "options": [
                 {
                   "text": {
-                    "en": "Prune if any fully-assigned clause is false (all its literals are 0)",
-                    "ro": "Eliminăm dacă orice clauză complet atribuită este falsă (toți literalii sunt 0)"
-                  },
-                  "correct": true,
-                  "explanation": {
-                    "en": "This is the standard SAT backtracking pruning: a partial assignment is non-viable the moment any clause becomes fully assigned and evaluates to false. We don't need to wait until all variables are assigned — as soon as one clause is falsified, the entire subtree can be pruned.",
-                    "ro": "Aceasta este pruning-ul standard al backtracking-ului SAT: o atribuire parțială este neviabilă în momentul în care orice clauză devine complet atribuită și evaluează la fals. Nu trebuie să așteptăm până sunt atribuite toate variabilele — de îndată ce o clauză este falsificată, întreg subtreele poate fi eliminat."
-                  }
-                },
-                {
-                  "text": {
                     "en": "Prune if the number of variables assigned so far exceeds n/2",
                     "ro": "Eliminăm dacă numărul de variabile atribuite depășește n/2"
                   },
@@ -156,6 +145,17 @@
                   "explanation": {
                     "en": "This is not a valid pruning condition — it has no relation to whether the partial assignment can be extended to a satisfying assignment.",
                     "ro": "Aceasta nu este o condiție de pruning validă — nu are nicio legătură cu posibilitatea de a extinde atribuirea parțială la o atribuire satisfăcătoare."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Prune if any fully-assigned clause is false (all its literals are 0)",
+                    "ro": "Eliminăm dacă orice clauză complet atribuită este falsă (toți literalii sunt 0)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "This is the standard SAT backtracking pruning: a partial assignment is non-viable the moment any clause becomes fully assigned and evaluates to false. We don't need to wait until all variables are assigned — as soon as one clause is falsified, the entire subtree can be pruned.",
+                    "ro": "Aceasta este pruning-ul standard al backtracking-ului SAT: o atribuire parțială este neviabilă în momentul în care orice clauză devine complet atribuită și evaluează la fals. Nu trebuie să așteptăm până sunt atribuite toate variabilele — de îndată ce o clauză este falsificată, întreg subtreele poate fi eliminat."
                   }
                 },
                 {
@@ -223,13 +223,13 @@
               "options": [
                 {
                   "text": {
-                    "en": "partial_sum ≤ t AND partial_sum + remaining_sum ≥ t",
-                    "ro": "sumă_parțială ≤ t ȘI sumă_parțială + sumă_rămasă ≥ t"
+                    "en": "partial_sum ≤ t only (never exceeds target so far)",
+                    "ro": "sumă_parțială ≤ t doar (nu depășește ținta până acum)"
                   },
-                  "correct": true,
+                  "correct": false,
                   "explanation": {
-                    "en": "The left condition prunes branches that already exceed t. The right condition prunes branches where even adding all remaining elements cannot reach t. Together they bound the search from both sides.",
-                    "ro": "Condiția stângă elimină ramurile care depășesc deja t. Condiția dreaptă elimină ramurile unde chiar adăugând toate elementele rămase nu se poate atinge t. Împreună limitează căutarea din ambele direcții."
+                    "en": "This is only the upper-bound pruning. Without the lower-bound condition (partial + remaining ≥ t), we explore branches where the target is unreachable, wasting work.",
+                    "ro": "Aceasta este doar pruning-ul cu limita superioară. Fără condiția cu limita inferioară (parțial + rest ≥ t), explorăm ramuri unde ținta nu poate fi atinsă, irosind efort."
                   }
                 },
                 {
@@ -245,13 +245,13 @@
                 },
                 {
                   "text": {
-                    "en": "partial_sum ≤ t only (never exceeds target so far)",
-                    "ro": "sumă_parțială ≤ t doar (nu depășește ținta până acum)"
+                    "en": "partial_sum ≤ t AND partial_sum + remaining_sum ≥ t",
+                    "ro": "sumă_parțială ≤ t ȘI sumă_parțială + sumă_rămasă ≥ t"
                   },
-                  "correct": false,
+                  "correct": true,
                   "explanation": {
-                    "en": "This is only the upper-bound pruning. Without the lower-bound condition (partial + remaining ≥ t), we explore branches where the target is unreachable, wasting work.",
-                    "ro": "Aceasta este doar pruning-ul cu limita superioară. Fără condiția cu limita inferioară (parțial + rest ≥ t), explorăm ramuri unde ținta nu poate fi atinsă, irosind efort."
+                    "en": "The left condition prunes branches that already exceed t. The right condition prunes branches where even adding all remaining elements cannot reach t. Together they bound the search from both sides.",
+                    "ro": "Condiția stângă elimină ramurile care depășesc deja t. Condiția dreaptă elimină ramurile unde chiar adăugând toate elementele rămase nu se poate atinge t. Împreună limitează căutarea din ambele direcții."
                   }
                 },
                 {
@@ -312,13 +312,13 @@
               "options": [
                 {
                   "text": {
-                    "en": "maxRest must always be ≥ the true remaining optimum (optimistic/admissible bound)",
-                    "ro": "maxRest trebuie să fie întotdeauna ≥ optimul rămas real (estimare optimistă/admisibilă)"
+                    "en": "maxRest can be any value — it only affects speed, not correctness",
+                    "ro": "maxRest poate fi orice valoare — afectează doar viteza, nu corectitudinea"
                   },
-                  "correct": true,
+                  "correct": false,
                   "explanation": {
-                    "en": "An admissible bound never underestimates the true remaining gain. This ensures we never prune a branch that contains the optimal solution: if a branch actually contains a solution better than bestSoFar, then currentCost + maxRest ≥ currentCost + trueRest > bestSoFar, so the branch is never pruned.",
-                    "ro": "O estimare admisibilă nu subestimează niciodată câștigul rămas real. Aceasta asigură că nu eliminăm niciodată o ramură care conține soluția optimă: dacă o ramură conține de fapt o soluție mai bună decât celMaiBunPânăAcum, atunci costCurent + maxRest ≥ costCurent + restReal > celMaiBunPânăAcum, deci ramura nu este eliminată niciodată."
+                    "en": "maxRest critically affects correctness. An underestimating maxRest can prune branches containing the optimal solution, giving a wrong answer. Only overestimates (admissible bounds) preserve correctness.",
+                    "ro": "maxRest afectează critic corectitudinea. Un maxRest subestimator poate elimina ramuri care conțin soluția optimă, dând un răspuns greșit. Doar supraestimările (estimări admisibile) păstrează corectitudinea."
                   }
                 },
                 {
@@ -345,13 +345,13 @@
                 },
                 {
                   "text": {
-                    "en": "maxRest can be any value — it only affects speed, not correctness",
-                    "ro": "maxRest poate fi orice valoare — afectează doar viteza, nu corectitudinea"
+                    "en": "maxRest must always be ≥ the true remaining optimum (optimistic/admissible bound)",
+                    "ro": "maxRest trebuie să fie întotdeauna ≥ optimul rămas real (estimare optimistă/admisibilă)"
                   },
-                  "correct": false,
+                  "correct": true,
                   "explanation": {
-                    "en": "maxRest critically affects correctness. An underestimating maxRest can prune branches containing the optimal solution, giving a wrong answer. Only overestimates (admissible bounds) preserve correctness.",
-                    "ro": "maxRest afectează critic corectitudinea. Un maxRest subestimator poate elimina ramuri care conțin soluția optimă, dând un răspuns greșit. Doar supraestimările (estimări admisibile) păstrează corectitudinea."
+                    "en": "An admissible bound never underestimates the true remaining gain. This ensures we never prune a branch that contains the optimal solution: if a branch actually contains a solution better than bestSoFar, then currentCost + maxRest ≥ currentCost + trueRest > bestSoFar, so the branch is never pruned.",
+                    "ro": "O estimare admisibilă nu subestimează niciodată câștigul rămas real. Aceasta asigură că nu eliminăm niciodată o ramură care conține soluția optimă: dacă o ramură conține de fapt o soluție mai bună decât celMaiBunPânăAcum, atunci costCurent + maxRest ≥ costCurent + restReal > celMaiBunPânăAcum, deci ramura nu este eliminată niciodată."
                   }
                 }
               ],

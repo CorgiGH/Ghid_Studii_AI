@@ -107,17 +107,6 @@
               "options": [
                 {
                   "text": {
-                    "en": "Anonymous pipes only",
-                    "ro": "Doar canale anonime"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Trap. Anonymous pipes have **no filesystem name** — the only way another process can access them is by inheriting the file descriptors through `fork`/`exec`. Unrelated processes have no such inheritance path.",
-                    "ro": "Capcana. Canalele anonime **nu au nume in sistemul de fisiere** — singurul mod prin care alt proces le poate accesa este prin mostenirea descriptorilor de fisiere prin `fork`/`exec`. Procesele neinrudite nu au aceasta cale de mostenire."
-                  }
-                },
-                {
-                  "text": {
                     "en": "Named pipes (FIFO) only",
                     "ro": "Doar canale cu nume (FIFO)"
                   },
@@ -125,6 +114,17 @@
                   "explanation": {
                     "en": "Correct. A named pipe has a **fifo file** in the filesystem, so any process that knows the path and has the right permissions can open it — no `fork`/`exec` relationship is required.",
                     "ro": "Corect. Un canal cu nume are un **fisier fifo** in sistemul de fisiere, astfel orice proces care cunoaste calea si are permisiunile necesare il poate deschide — nu este necesara nicio relatie de tip `fork`/`exec`."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Anonymous pipes only",
+                    "ro": "Doar canale anonime"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Trap. Anonymous pipes have **no filesystem name** — the only way another process can access them is by inheriting the file descriptors through `fork`/`exec`. Unrelated processes have no such inheritance path.",
+                    "ro": "Capcana. Canalele anonime **nu au nume in sistemul de fisiere** — singurul mod prin care alt proces le poate accesa este prin mostenirea descriptorilor de fisiere prin `fork`/`exec`. Procesele neinrudite nu au aceasta cale de mostenire."
                   }
                 },
                 {
@@ -674,13 +674,13 @@
                 },
                 {
                   "text": {
-                    "en": "Messages can be interleaved (corrupted)",
-                    "ro": "Mesajele pot fi intercalate (corupte)"
+                    "en": "The pipe capacity doubles",
+                    "ro": "Capacitatea canalului se dubleaza"
                   },
-                  "correct": true,
+                  "correct": false,
                   "explanation": {
-                    "en": "Correct. When multiple processes write variable-length messages, a message larger than the atomic write limit (`PIPE_BUF`) may be split across multiple kernel operations. Bytes from different writers interleave in the channel, corrupting the receiver's data. The lecture solution is `HEADER + PAYLOAD` written as one atomic `write`.",
-                    "ro": "Corect. Cand mai multe procese scriu mesaje de lungime variabila, un mesaj mai mare decat limita de scriere atomica (`PIPE_BUF`) poate fi fragmentat in mai multe operatii de kernel. Octetii de la scriitori diferiti se intercaleaza in canal, corupand datele receptorului. Solutia din curs este `HEADER + PAYLOAD` scris printr-un singur `write` atomic."
+                    "en": "Trap. Pipe capacity is a fixed, configurable kernel buffer (e.g., 4–64 KB on Linux). It does not change based on how many writers are present — it remains the same size regardless.",
+                    "ro": "Capcana. Capacitatea canalului este un buffer de kernel fix si configurabil (ex. 4–64 KB pe Linux). Nu se modifica in functie de cati scriitori sunt prezenti — ramane aceeasi dimensiune indiferent."
                   }
                 },
                 {
@@ -696,13 +696,13 @@
                 },
                 {
                   "text": {
-                    "en": "The pipe capacity doubles",
-                    "ro": "Capacitatea canalului se dubleaza"
+                    "en": "Messages can be interleaved (corrupted)",
+                    "ro": "Mesajele pot fi intercalate (corupte)"
                   },
-                  "correct": false,
+                  "correct": true,
                   "explanation": {
-                    "en": "Trap. Pipe capacity is a fixed, configurable kernel buffer (e.g., 4–64 KB on Linux). It does not change based on how many writers are present — it remains the same size regardless.",
-                    "ro": "Capcana. Capacitatea canalului este un buffer de kernel fix si configurabil (ex. 4–64 KB pe Linux). Nu se modifica in functie de cati scriitori sunt prezenti — ramane aceeasi dimensiune indiferent."
+                    "en": "Correct. When multiple processes write variable-length messages, a message larger than the atomic write limit (`PIPE_BUF`) may be split across multiple kernel operations. Bytes from different writers interleave in the channel, corrupting the receiver's data. The lecture solution is `HEADER + PAYLOAD` written as one atomic `write`.",
+                    "ro": "Corect. Cand mai multe procese scriu mesaje de lungime variabila, un mesaj mai mare decat limita de scriere atomica (`PIPE_BUF`) poate fi fragmentat in mai multe operatii de kernel. Octetii de la scriitori diferiti se intercaleaza in canal, corupand datele receptorului. Solutia din curs este `HEADER + PAYLOAD` scris printr-un singur `write` atomic."
                   }
                 }
               ],
@@ -818,13 +818,13 @@
               "options": [
                 {
                   "text": {
-                    "en": "Named pipes are faster",
-                    "ro": "Canalele cu nume sunt mai rapide"
+                    "en": "Server and client are not related processes (no fork/exec)",
+                    "ro": "Serverul si clientul nu sunt procese inrudite (fara fork/exec)"
                   },
-                  "correct": false,
+                  "correct": true,
                   "explanation": {
-                    "en": "Trap. Named and anonymous pipes use the **same kernel buffer mechanism** and have identical throughput for local IPC. Speed is not why named pipes are required in a client/server design.",
-                    "ro": "Capcana. Canalele cu nume si cele anonime folosesc **acelasi mecanism de buffer de kernel** si au acelasi debit pentru IPC local. Viteza nu este motivul pentru care sunt necesare canalele cu nume intr-un design client/server."
+                    "en": "Correct. Anonymous pipes can only be accessed via **inherited file descriptors** — the creating process must call `fork`/`exec` to share them. In a client/server architecture, the server and clients are **independent programs** (potentially run by different users), so there is no inheritance path. Named pipes, accessible by filesystem path, solve this.",
+                    "ro": "Corect. Canalele anonime pot fi accesate doar prin **descriptori de fisiere mosteniti** — procesul creator trebuie sa apeleze `fork`/`exec` pentru a le partaja. Intr-o arhitectura client/server, serverul si clientii sunt **programe independente** (potential rulate de utilizatori diferiti), deci nu exista cale de mostenire. Canalele cu nume, accesibile prin calea din sistemul de fisiere, rezolva aceasta problema."
                   }
                 },
                 {
@@ -840,13 +840,13 @@
                 },
                 {
                   "text": {
-                    "en": "Server and client are not related processes (no fork/exec)",
-                    "ro": "Serverul si clientul nu sunt procese inrudite (fara fork/exec)"
+                    "en": "Named pipes are faster",
+                    "ro": "Canalele cu nume sunt mai rapide"
                   },
-                  "correct": true,
+                  "correct": false,
                   "explanation": {
-                    "en": "Correct. Anonymous pipes can only be accessed via **inherited file descriptors** — the creating process must call `fork`/`exec` to share them. In a client/server architecture, the server and clients are **independent programs** (potentially run by different users), so there is no inheritance path. Named pipes, accessible by filesystem path, solve this.",
-                    "ro": "Corect. Canalele anonime pot fi accesate doar prin **descriptori de fisiere mosteniti** — procesul creator trebuie sa apeleze `fork`/`exec` pentru a le partaja. Intr-o arhitectura client/server, serverul si clientii sunt **programe independente** (potential rulate de utilizatori diferiti), deci nu exista cale de mostenire. Canalele cu nume, accesibile prin calea din sistemul de fisiere, rezolva aceasta problema."
+                    "en": "Trap. Named and anonymous pipes use the **same kernel buffer mechanism** and have identical throughput for local IPC. Speed is not why named pipes are required in a client/server design.",
+                    "ro": "Capcana. Canalele cu nume si cele anonime folosesc **acelasi mecanism de buffer de kernel** si au acelasi debit pentru IPC local. Viteza nu este motivul pentru care sunt necesare canalele cu nume intr-un design client/server."
                   }
                 },
                 {
