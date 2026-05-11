@@ -1,0 +1,1547 @@
+{
+  "meta": {
+    "id": "rc-c4",
+    "title": {
+      "en": "RC Course 4: I/O Multiplexing Alternatives, Threads & TCP Design Patterns",
+      "ro": "RC Cursul 4: Alternative de multiplexare I/O, fire de execuție și tipare TCP"
+    },
+    "shortTitle": {
+      "en": "RC C4: I/O Mux & Threads",
+      "ro": "RC C4: Mux I/O & Thread-uri"
+    },
+    "source": {
+      "en": "Prof. UAIC — RC Lecture 4 (Programarea în rețea III). Refs: Stevens/Fenner/Rudoff — Unix Network Programming; llnl.gov pthreads tutorial",
+      "ro": "Prof. UAIC — RC Cursul 4 (Programarea în rețea III). Bibliografie: Stevens/Fenner/Rudoff — Unix Network Programming; tutorialul pthreads llnl.gov"
+    }
+  },
+  "steps": [
+    {
+      "id": "rc-c4-multiplexing-intro",
+      "title": {
+        "en": "Why I/O Multiplexing? Four Alternatives Compared",
+        "ro": "De ce multiplexare I/O? Patru alternative comparate"
+      },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "A TCP client reads commands from stdin and forwards them to a server, then echoes the server's reply back to stdout. You write it with two blocking read() calls in a loop: one on stdin, one on the socket. What goes wrong the first time the user goes idle?",
+            "ro": "Un client TCP citește comenzi de la stdin și le transmite unui server, apoi afișează răspunsul serverului la stdout. Îl scrii cu două apeluri read() blocante într-o buclă: unul pe stdin, unul pe socket. Ce nu funcționează corect prima dată când utilizatorul stă inactiv?"
+          },
+          "answer": {
+            "en": "While the client is blocked on read(stdin), it cannot notice anything happening on the socket — including the server closing the connection, sending unsolicited data, or crashing. The single-threaded blocking model can only watch one fd at a time. We need a way to say: 'wake me up when ANY of these fds becomes ready', or have multiple independent flows of execution.",
+            "ro": "În timp ce clientul este blocat pe read(stdin), nu poate sesiza nimic ce se întâmplă pe socket — inclusiv închiderea conexiunii de către server, trimiterea de date nesolicitate sau căderea acestuia. Modelul blocant cu un singur fir de execuție poate supraveghea un singur fd la un moment dat. Avem nevoie de un mod prin care să spunem: 'trezește-mă când ORICARE dintre acești fd-i devine gata', sau să avem mai multe fluxuri independente de execuție."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**I/O multiplexing** is the ability of a single process to monitor multiple I/O descriptors at once. It is needed by:\n- a **generic TCP client** like telnet (must watch both stdin and the socket)\n- an **interactive client** (ftp, scp, web browser)\n- a **server handling multiple protocols** (TCP and UDP on the same process)\n- any program that must react to **unexpected events** (server crashed mid-conversation)\n\nThe five common solutions:",
+            "ro": "**Multiplexarea I/O** este capacitatea unui singur proces de a monitoriza simultan mai mulți descriptori I/O. Este necesară pentru:\n- un **client TCP generic** precum telnet (trebuie să supravegheze atât stdin cât și socket-ul)\n- un **client interactiv** (ftp, scp, browser web)\n- un **server care gestionează mai multe protocoale** (TCP și UDP în același proces)\n- orice program care trebuie să reacționeze la **evenimente neașteptate** (server căzut în mijlocul conversației)\n\nCele cinci soluții uzuale:"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Solution", "ro": "Soluție" },
+            { "en": "Mechanism", "ro": "Mecanism" },
+            { "en": "Trade-off", "ro": "Compromis" }
+          ],
+          "rows": [
+            [
+              { "en": "**Non-blocking**", "ro": "**Neblocant**" },
+              { "en": "`fcntl(O_NONBLOCK)` / `ioctl(FIOSNBIO)` — calls return immediately with `EWOULDBLOCK`", "ro": "`fcntl(O_NONBLOCK)` / `ioctl(FIOSNBIO)` — apelurile se întorc imediat cu `EWOULDBLOCK`" },
+              { "en": "Forces busy-polling — burns CPU", "ro": "Forțează busy-polling — consumă CPU" }
+            ],
+            [
+              { "en": "**Asynchronous**", "ro": "**Asincron**" },
+              { "en": "`fcntl(O_ASYNC)` — kernel sends `SIGIO` when data ready", "ro": "`fcntl(O_ASYNC)` — kernel-ul trimite `SIGIO` când datele sunt gata" },
+              { "en": "Signal-based logic is hard to compose; not portable", "ro": "Logica bazată pe semnale e greu de compus; nu e portabilă" }
+            ],
+            [
+              { "en": "**Alarm timeout**", "ro": "**Timeout cu alarm**" },
+              { "en": "Wrap blocking call with `alarm(MAX_TIME)` + `SIGALRM` handler", "ro": "Înconjoară apelul blocant cu `alarm(MAX_TIME)` + handler `SIGALRM`" },
+              { "en": "MAX_TIME impossible to tune well", "ro": "MAX_TIME imposibil de calibrat corect" }
+            ],
+            [
+              { "en": "**select() / poll()**", "ro": "**select() / poll()**" },
+              { "en": "Kernel-level wait on a SET of descriptors", "ro": "Așteptare la nivel de kernel pe un SET de descriptori" },
+              { "en": "Scales well, portable — the recommended choice", "ro": "Scalează bine, portabil — alegerea recomandată" }
+            ],
+            [
+              { "en": "**Multi-process / multi-thread**", "ro": "**Multi-proces / multi-thread**" },
+              { "en": "One flow per fd; each can block freely", "ro": "Un flux per fd; fiecare se poate bloca liber" },
+              { "en": "Synchronisation overhead; works at any scale", "ro": "Suprasarcină de sincronizare; merge la orice scară" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Common misconception:** non-blocking I/O alone is NOT multiplexing — it just lets a single read() fail fast instead of waiting. You still have to poll the fds in a loop, which wastes CPU. True multiplexing needs the kernel to do the waiting (select/poll/epoll) or it needs multiple execution flows (fork/threads).",
+            "ro": "**Concepție greșită frecventă:** I/O neblocant singur NU este multiplexare — doar permite ca un read() să eșueze rapid în loc să aștepte. Tot trebuie să interoghezi fd-ii într-o buclă, ceea ce consumă CPU. Multiplexarea reală cere kernel-ului să facă așteptarea (select/poll/epoll) sau cere mai multe fluxuri de execuție (fork/thread-uri)."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Why is the alarm() + SIGALRM approach considered a poor multiplexing technique?",
+                "ro": "De ce abordarea alarm() + SIGALRM este considerată o tehnică de multiplexare slabă?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "alarm() does not work on sockets at all",
+                    "ro": "alarm() nu funcționează deloc pe socket-uri"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "alarm() does work — it interrupts the current blocking syscall with EINTR. The problem isn't that it fails, it's that picking MAX_TIME is unsolvable: too small wastes CPU and steals real I/O time; too large defeats responsiveness.",
+                    "ro": "alarm() funcționează — întrerupe apelul de sistem blocant curent cu EINTR. Problema nu este că eșuează, ci că alegerea MAX_TIME este de nerezolvat: prea mic risipește CPU și fură timp real de I/O; prea mare strică reactivitatea."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Choosing a good MAX_TIME value is impossible — it's a trade-off with no good answer",
+                    "ro": "Alegerea unei valori bune MAX_TIME este imposibilă — este un compromis fără un răspuns bun"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Small MAX_TIME wakes the process constantly even with no data, wasting CPU. Large MAX_TIME makes the program slow to react to real events. select()/poll() avoid the trade-off entirely by waking up exactly when something happens.",
+                    "ro": "Corect. MAX_TIME mic trezește procesul constant chiar fără date, irosind CPU. MAX_TIME mare face programul lent în reacții la evenimente reale. select()/poll() evită complet compromisul, trezindu-se exact când se întâmplă ceva."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "POSIX deprecated alarm() in 2008",
+                    "ro": "POSIX a depreciat alarm() în 2008"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "alarm() is still in POSIX and still works. It is just the wrong tool for multiplexing because the timeout cannot be tuned correctly. It remains useful for other things (single-shot timeouts, watchdog timers).",
+                    "ro": "alarm() există încă în POSIX și încă funcționează. Pur și simplu este instrumentul greșit pentru multiplexare deoarece timeout-ul nu poate fi calibrat corect. Rămâne util pentru alte lucruri (timeout-uri unice, watchdog-uri)."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "alarm() forces the programmer to pick a polling interval — and there is no universally good interval.",
+                "ro": "alarm() obligă programatorul să aleagă un interval de interogare — și nu există un interval bun universal."
+              },
+              "reviewStep": "rc-c4-multiplexing-intro"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Source slides: pages 2–6 of the lecture deck (Cuprins, Multiplexare I/O, Mecanismul neblocant).",
+            "ro": "Slide-uri sursă: paginile 2–6 din suportul de curs (Cuprins, Multiplexare I/O, Mecanismul neblocant)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-nonblocking",
+      "title": {
+        "en": "Non-blocking I/O — fcntl, ioctl and EWOULDBLOCK",
+        "ro": "I/O neblocant — fcntl, ioctl și EWOULDBLOCK"
+      },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You set a TCP socket to non-blocking and call connect(server, ...). The server is reachable but the handshake takes 50 ms. What does connect() return — success, failure, or something else?",
+            "ro": "Setezi un socket TCP ca neblocant și apelezi connect(server, ...). Server-ul e accesibil dar handshake-ul durează 50 ms. Ce returnează connect() — succes, eșec sau altceva?"
+          },
+          "answer": {
+            "en": "It returns -1 with errno=EINPROGRESS. The handshake started but is not finished. To learn when it completes, you wait for the socket to become **writable** (via select() or poll()), then call `getsockopt(SO_ERROR)` to check whether the connection succeeded or failed.",
+            "ro": "Returnează -1 cu errno=EINPROGRESS. Handshake-ul a început dar nu s-a terminat. Pentru a afla când se încheie, aștepți socket-ul să devină **disponibil pentru scriere** (prin select() sau poll()), apoi apelezi `getsockopt(SO_ERROR)` pentru a verifica dacă conexiunea a reușit sau a eșuat."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "A descriptor is by default in **blocking mode**: read/write/accept/connect wait until they can complete. Switching to **non-blocking mode** is done with `fcntl()` (portable) or `ioctl()` (BSD heritage).\n\nWith `fcntl()` we **read-modify-write** the file status flags so we do not clobber unrelated flags (like `O_APPEND`):",
+            "ro": "Un descriptor este implicit în **mod blocant**: read/write/accept/connect așteaptă până se pot finaliza. Trecerea la **mod neblocant** se face cu `fcntl()` (portabil) sau `ioctl()` (moștenire BSD).\n\nCu `fcntl()` facem **citește-modifică-scrie** pe flag-urile de stare ca să nu suprascriem flag-uri nelegate (precum `O_APPEND`):"
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <fcntl.h>\n\n// Initialize: switch a socket to non-blocking via fcntl\nint flags = fcntl(sd, F_GETFL, 0);          // Read current flags\nif (flags < 0) { perror(\"F_GETFL\"); exit(1); }\nif (fcntl(sd, F_SETFL, flags | O_NONBLOCK) < 0) {\n    perror(\"F_SETFL\"); exit(1);\n}\n\n// Alternative: ioctl with FIOSNBIO (BSD style)\n#include <sys/ioctl.h>\nint on = 1;                                 // 1 = non-blocking, 0 = blocking\nioctl(sd, FIOSNBIO, &on);"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Once a socket is non-blocking, these calls change behaviour:**\n- `accept()` with no pending connection → returns -1 with `errno = EWOULDBLOCK`\n- `connect()` if handshake cannot complete instantly → returns -1 with `errno = EINPROGRESS`\n- `recv()` / `read()` with no buffered data → returns -1 with `errno = EWOULDBLOCK`\n- `send()` / `write()` with full send buffer → returns -1 with `errno = EWOULDBLOCK`\n\nYou MUST check `errno` against `EWOULDBLOCK` (== `EAGAIN` on Linux) before treating -1 as a real error.",
+            "ro": "**Odată socket-ul setat ca neblocant, aceste apeluri își schimbă comportamentul:**\n- `accept()` fără conexiune în așteptare → returnează -1 cu `errno = EWOULDBLOCK`\n- `connect()` dacă handshake-ul nu se poate finaliza instantaneu → returnează -1 cu `errno = EINPROGRESS`\n- `recv()` / `read()` fără date în buffer → returnează -1 cu `errno = EWOULDBLOCK`\n- `send()` / `write()` cu buffer-ul de trimitere plin → returnează -1 cu `errno = EWOULDBLOCK`\n\nTREBUIE să verifici `errno` față de `EWOULDBLOCK` (== `EAGAIN` pe Linux) înainte de a trata -1 ca eroare reală."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Idiom: non-blocking read in a loop, distinguishing 'no data yet' from real errors\nchar buf[1024];\nfor (;;) {\n    ssize_t n = recv(sd, buf, sizeof buf, 0);\n    if (n > 0) {\n        process(buf, n);                         // Got data\n    } else if (n == 0) {\n        // Peer closed connection cleanly\n        close(sd); break;\n    } else {                                     // n < 0\n        if (errno == EWOULDBLOCK || errno == EAGAIN) {\n            // No data right now — do something useful, then retry\n            do_other_work();\n            continue;\n        }\n        if (errno == EINTR) continue;            // Interrupted, retry\n        perror(\"recv\"); close(sd); break;        // Real error\n    }\n}"
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "After fcntl(sd, F_SETFL, O_NONBLOCK), the socket is non-blocking but the program no longer appends to the file (O_APPEND was lost). Why?",
+                "ro": "După fcntl(sd, F_SETFL, O_NONBLOCK), socket-ul este neblocant dar programul nu mai adaugă la fișier (O_APPEND s-a pierdut). De ce?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "F_SETFL ignores O_APPEND for socket descriptors",
+                    "ro": "F_SETFL ignoră O_APPEND pentru descriptori de socket"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "F_SETFL handles all status flags uniformly. The issue is the call replaces the flag set entirely — every flag that was previously on is wiped unless you OR it back in.",
+                    "ro": "F_SETFL gestionează toate flag-urile de stare uniform. Problema e că apelul înlocuiește complet setul de flag-uri — fiecare flag care era activ înainte este șters dacă nu îl pui înapoi cu OR."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "F_SETFL replaces all status flags with the new value; you must read flags first and OR in O_NONBLOCK",
+                    "ro": "F_SETFL înlocuiește toate flag-urile de stare cu noua valoare; trebuie să citești întâi flag-urile și să adaugi O_NONBLOCK cu OR"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The right idiom is `int flags = fcntl(sd, F_GETFL, 0); fcntl(sd, F_SETFL, flags | O_NONBLOCK);` — read-modify-write. Passing bare O_NONBLOCK clears O_APPEND, O_ASYNC, and any other status flag that was set.",
+                    "ro": "Corect. Idiom-ul corect este `int flags = fcntl(sd, F_GETFL, 0); fcntl(sd, F_SETFL, flags | O_NONBLOCK);` — citește-modifică-scrie. Trecerea singurului O_NONBLOCK șterge O_APPEND, O_ASYNC și orice alt flag de stare care era setat."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Non-blocking sockets cannot use O_APPEND simultaneously",
+                    "ro": "Socket-urile neblocante nu pot folosi O_APPEND simultan"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "There is no kernel rule preventing both flags from being on at once. The flag was lost because the previous F_SETFL call overwrote the flag mask without preserving it.",
+                    "ro": "Nu există nicio regulă în kernel care să împiedice ambele flag-uri să fie active simultan. Flag-ul s-a pierdut deoarece apelul F_SETFL anterior a suprascris masca de flag-uri fără a o păstra."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "F_SETFL is a 'set whole word' operation, not 'set this bit'. Always F_GETFL first.",
+                "ro": "F_SETFL este operație 'setează tot cuvântul', nu 'setează acest bit'. Întotdeauna întâi F_GETFL."
+              },
+              "reviewStep": "rc-c4-nonblocking"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-async-io",
+      "title": {
+        "en": "Asynchronous I/O — SIGIO and O_ASYNC",
+        "ro": "I/O asincron — SIGIO și O_ASYNC"
+      },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "Your program is busy computing a long simulation. A packet arrives on its UDP socket. With non-blocking I/O the program would never notice unless it periodically polled. With select() it would have to be inside select() at the right moment. Is there a way to be 'interrupted' by the kernel?",
+            "ro": "Programul tău este ocupat să calculeze o simulare lungă. Un pachet ajunge pe socket-ul său UDP. Cu I/O neblocant programul n-ar observa decât dacă ar interoga periodic. Cu select() ar trebui să fie în interiorul select() la momentul potrivit. Există un mod de a fi 'întrerupt' de kernel?"
+          },
+          "answer": {
+            "en": "Yes — asynchronous I/O. Mark the socket as `O_ASYNC` and the kernel will send `SIGIO` to the process whenever the socket becomes ready. The signal handler reads (or otherwise handles) the data, and the main code resumes its simulation. This decouples 'socket activity' from 'main-thread polling'.",
+            "ro": "Da — I/O asincron. Marchează socket-ul cu `O_ASYNC` și kernel-ul va trimite `SIGIO` procesului ori de câte ori socket-ul devine gata. Handler-ul de semnal citește (sau gestionează altfel) datele, iar codul principal își reia simularea. Aceasta decuplează 'activitatea pe socket' de 'interogarea în firul principal'."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Asynchronous (signal-driven) I/O** lets the kernel signal the process whenever a socket becomes ready. You set the socket to `O_ASYNC` and (usually) tell the kernel which process should receive the signal via `F_SETOWN`. When the socket has work, the kernel delivers `SIGIO`.\n\nThe rules for when SIGIO is generated depend on the protocol:",
+            "ro": "**I/O asincron (driven de semnale)** permite kernel-ului să semnaleze procesul ori de câte ori un socket devine gata. Setezi socket-ul cu `O_ASYNC` și (de obicei) spui kernel-ului care proces ar trebui să primească semnalul prin `F_SETOWN`. Când socket-ul are de lucru, kernel-ul livrează `SIGIO`.\n\nRegulile pentru când SIGIO este generat depind de protocol:"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Protocol", "ro": "Protocol" },
+            { "en": "SIGIO fires when…", "ro": "SIGIO se declanșează când…" }
+          ],
+          "rows": [
+            [
+              { "en": "**TCP**", "ro": "**TCP**" },
+              { "en": "Connection fully established, disconnect requested, disconnect fully completed, `shutdown()` on one direction, new data arrived from peer, send buffer flushed, or error", "ro": "Conexiunea complet stabilită, deconectare solicitată, deconectare finalizată complet, `shutdown()` pe o direcție, au ajuns date noi de la peer, buffer-ul de trimitere a fost golit, sau eroare" }
+            ],
+            [
+              { "en": "**UDP**", "ro": "**UDP**" },
+              { "en": "A datagram was received, or an error occurred", "ro": "A fost recepționată o datagramă, sau a apărut o eroare" }
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <signal.h>\n#include <fcntl.h>\n#include <unistd.h>\n#include <sys/socket.h>\n\n// SIGIO handler: read whatever is available\nvoid on_socket_ready(int signo) {\n    // Inside a signal handler, only async-signal-safe calls are allowed.\n    // recv() is async-signal-safe; printf() is NOT.\n    char buf[512];\n    ssize_t n = recv(global_sd, buf, sizeof buf, 0);\n    if (n > 0) write(STDOUT_FILENO, buf, n);\n}\n\nint main(void) {\n    int sd = socket(AF_INET, SOCK_STREAM, 0);\n    // ... connect / bind etc.\n\n    // 1) Install the SIGIO handler\n    struct sigaction sa = { .sa_handler = on_socket_ready };\n    sigaction(SIGIO, &sa, NULL);\n\n    // 2) Tell the kernel WHO owns the socket for SIGIO delivery\n    fcntl(sd, F_SETOWN, getpid());\n\n    // 3) Enable async signalling on this descriptor\n    int flags = fcntl(sd, F_GETFL, 0);\n    fcntl(sd, F_SETFL, flags | O_ASYNC);\n\n    // 4) Main loop is now free to do other work\n    while (1) do_simulation_step();\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Signal handlers are a minefield.** Only async-signal-safe functions may run inside them (see `man 7 signal-safety`). You cannot call `printf()`, `malloc()`, or anything that takes a non-trivial lock. SIGIO is also a single signal — if two sockets fire simultaneously you may lose the second one (signals do not queue with classic semantics). Production code overwhelmingly uses `select()` / `poll()` / `epoll()` instead.",
+            "ro": "**Handler-ele de semnal sunt un câmp minat.** Doar funcții async-signal-safe pot rula în interior (vezi `man 7 signal-safety`). Nu poți apela `printf()`, `malloc()` sau orice ia un lock netrivial. SIGIO este și un singur semnal — dacă două socket-uri se declanșează simultan poți pierde al doilea (semnalele nu se pun la coadă cu semantica clasică). Codul de producție folosește copleșitor `select()` / `poll()` / `epoll()` în schimb."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "What does setting O_ASYNC + F_SETOWN on a socket actually configure?",
+                "ro": "Ce configurează efectiv setarea O_ASYNC + F_SETOWN pe un socket?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "It makes recv() return immediately like O_NONBLOCK",
+                    "ro": "Face ca recv() să se întoarcă imediat ca la O_NONBLOCK"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "O_ASYNC does not affect blocking semantics of recv(). It only arranges for SIGIO to be delivered when activity happens. To also make calls non-blocking you would OR in O_NONBLOCK additionally.",
+                    "ro": "O_ASYNC nu afectează semantica blocării lui recv(). Doar aranjează ca SIGIO să fie livrat când se petrece activitate. Pentru ca apelurile să fie și neblocante ai aduga O_NONBLOCK adițional cu OR."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It tells the kernel to deliver SIGIO to a specific process when the socket becomes ready",
+                    "ro": "Spune kernel-ului să livreze SIGIO unui anumit proces când socket-ul devine gata"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. O_ASYNC enables signal-driven I/O on the descriptor; F_SETOWN names the recipient process (or process group). Without F_SETOWN no signal is delivered. Without O_ASYNC the kernel never generates SIGIO for that descriptor.",
+                    "ro": "Corect. O_ASYNC activează I/O bazat pe semnale pe descriptor; F_SETOWN denumește procesul (sau grupul de procese) destinatar. Fără F_SETOWN niciun semnal nu este livrat. Fără O_ASYNC kernel-ul nu generează niciodată SIGIO pentru acel descriptor."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It registers a callback function that the kernel calls directly",
+                    "ro": "Înregistrează o funcție callback pe care kernel-ul o apelează direct"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Kernels do not call user functions directly. The mechanism is a signal — the kernel delivers SIGIO, the userspace signal handler runs at the next signal-safe moment. The handler is your code, not a kernel callback.",
+                    "ro": "Kernel-urile nu apelează direct funcții utilizator. Mecanismul este un semnal — kernel-ul livrează SIGIO, iar handler-ul de semnal din userspace rulează la următorul moment signal-safe. Handler-ul este codul tău, nu un callback al kernel-ului."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "O_ASYNC arms signal delivery; F_SETOWN picks the target. Together they enable signal-driven I/O.",
+                "ro": "O_ASYNC armează livrarea semnalului; F_SETOWN alege ținta. Împreună activează I/O bazat pe semnale."
+              },
+              "reviewStep": "rc-c4-async-io"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-alarm",
+      "title": {
+        "en": "alarm() — Timing Out Slow System Calls",
+        "ro": "alarm() — Timeout pe apeluri de sistem lente"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Before `select()` was widespread, a common trick to avoid blocking forever on a slow syscall was to wrap it with `alarm()`. The kernel sends `SIGALRM` after the given number of seconds; the signal handler returns, and the blocked syscall fails with `EINTR`.",
+            "ro": "Înainte ca `select()` să fie răspândit, un truc comun pentru a evita blocarea pentru totdeauna pe un apel de sistem lent era încadrarea lui cu `alarm()`. Kernel-ul trimite `SIGALRM` după numărul dat de secunde; handler-ul de semnal se întoarce, iar apelul de sistem blocat eșuează cu `EINTR`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <signal.h>\n#include <unistd.h>\n#define MAX_TIME 5\n\nvoid alarmHandler(int signo) { /* nothing; just unblock the syscall */ }\n\nwhile (running) {\n    signal(SIGALRM, alarmHandler);\n    alarm(MAX_TIME);                 // Arm timer for 5s\n    int n = read(STDIN_FILENO, buf, sizeof buf);\n    // If 5s passed, read() returns -1 with errno = EINTR\n\n    signal(SIGALRM, alarmHandler);\n    alarm(MAX_TIME);\n    int m = read(tcpsock, buf, sizeof buf);\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Why this is a poor multiplexing technique:**\n1. **CPU waste** — if you also make the calls non-blocking and busy-poll between alarms, you burn cycles.\n2. **MAX_TIME tuning hell** — too low = constant wake-ups for nothing; too high = sluggish responses to real events.\n3. **Signal interactions** — every blocking syscall in the program must be aware that it could return EINTR and must restart correctly.\n4. **No information about which fd is ready** — `SIGALRM` does not tell you whether stdin, the socket, or both have data.\n\n`select()` solves all four problems at once.",
+            "ro": "**De ce este o tehnică slabă de multiplexare:**\n1. **Risipă CPU** — dacă faci și apelurile neblocante și busy-poll între alarme, arzi cicluri.\n2. **Iadul calibrării MAX_TIME** — prea mic = trezire constantă degeaba; prea mare = răspunsuri lente la evenimente reale.\n3. **Interacțiuni cu semnale** — fiecare apel de sistem blocant din program trebuie să fie conștient că poate returna EINTR și trebuie să repornească corect.\n4. **Nicio informație despre care fd e gata** — `SIGALRM` nu îți spune dacă stdin, socket-ul sau ambele au date.\n\n`select()` rezolvă toate cele patru probleme simultan."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Given the four problems above, can you describe how select() avoids each one in a single sentence?",
+            "ro": "Având în vedere cele patru probleme de mai sus, poți descrie cum select() le evită pe fiecare într-o singură propoziție?"
+          },
+          "answer": {
+            "en": "(1) The process sleeps inside the kernel during the wait — no CPU used. (2) The timeout is optional and the call returns as soon as ANY fd is ready, so no 'good MAX_TIME' is needed. (3) EINTR can still happen but there is exactly one place to restart — the select() call itself, not every individual read. (4) After return, FD_ISSET on each fd tells you precisely which descriptors are ready.",
+            "ro": "(1) Procesul doarme în interiorul kernel-ului în timpul așteptării — nu se folosește CPU. (2) Timeout-ul este opțional și apelul se întoarce imediat ce ORICARE fd este gata, deci niciun 'MAX_TIME bun' nu este necesar. (3) EINTR încă poate apărea dar există exact un loc de repornire — apelul select() însuși, nu fiecare read individual. (4) După întoarcere, FD_ISSET pe fiecare fd îți spune precis care descriptori sunt gata."
+          }
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-select-conditions",
+      "title": {
+        "en": "select() Deep Dive — Readiness Conditions",
+        "ro": "select() în profunzime — Condițiile de disponibilitate"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "We saw `select()` in RC Course 3 as the heart of a concurrent server. Now we look at the precise **readiness conditions** the kernel uses to decide that a descriptor 'is ready'. Knowing them is what separates correct event-loop code from buggy code.\n\nThe signature, for reference:",
+            "ro": "Am văzut `select()` în RC Cursul 3 ca inima unui server concurent. Acum ne uităm la **condițiile de disponibilitate** precise pe care kernel-ul le folosește pentru a decide că un descriptor 'este gata'. Cunoașterea lor este ceea ce desparte codul corect de bucla de evenimente de codul cu bug-uri."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <sys/select.h>\n\nint select(int nfds,                 // Highest fd in any set, + 1\n           fd_set *readfds,          // Watch for read readiness\n           fd_set *writefds,         // Watch for write readiness\n           fd_set *exceptfds,        // Watch for exceptional conditions\n           struct timeval *timeout); // NULL = block forever, {0,0} = poll, else wait this long\n\n// timeval (sys/time.h):\nstruct timeval {\n    long tv_sec;    // seconds\n    long tv_usec;   // microseconds\n};\n\n// fd_set macros:\nFD_ZERO(set);            // empty the set\nFD_SET(fd, set);         // add fd\nFD_CLR(fd, set);         // remove fd\nFD_ISSET(fd, set);       // test membership (call AFTER select returns)"
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Read-ready when…", "ro": "Gata de citire când…" },
+            { "en": "Detail", "ro": "Detaliu" }
+          ],
+          "rows": [
+            [
+              { "en": "Bytes are buffered for reading", "ro": "Există octeți în buffer pentru citire" },
+              { "en": "`read()` returns > 0", "ro": "`read()` returnează > 0" }
+            ],
+            [
+              { "en": "Peer's half of TCP connection received FIN", "ro": "Partea de TCP a peer-ului a primit FIN" },
+              { "en": "`read()` returns 0 (clean EOF)", "ro": "`read()` returnează 0 (EOF curat)" }
+            ],
+            [
+              { "en": "Socket is a listening socket with at least one completed connection", "ro": "Socket-ul este de ascultare și are cel puțin o conexiune finalizată" },
+              { "en": "`accept()` is ready", "ro": "`accept()` este gata" }
+            ],
+            [
+              { "en": "Pending socket error", "ro": "Eroare pendentă pe socket" },
+              { "en": "`read()` returns -1; inspect `getsockopt(SO_ERROR)`", "ro": "`read()` returnează -1; inspectează `getsockopt(SO_ERROR)`" }
+            ]
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Write-ready when…", "ro": "Gata de scriere când…" },
+            { "en": "Detail", "ro": "Detaliu" }
+          ],
+          "rows": [
+            [
+              { "en": "Send buffer has free space", "ro": "Buffer-ul de trimitere are spațiu liber" },
+              { "en": "`write()` returns > 0", "ro": "`write()` returnează > 0" }
+            ],
+            [
+              { "en": "Write half of connection is closed", "ro": "Jumătatea de scriere a conexiunii este închisă" },
+              { "en": "next `write()` raises SIGPIPE", "ro": "următorul `write()` declanșează SIGPIPE" }
+            ],
+            [
+              { "en": "Pending write error", "ro": "Eroare pendentă pe scriere" },
+              { "en": "`write()` returns -1; inspect `getsockopt(SO_ERROR)`", "ro": "`write()` returnează -1; inspectează `getsockopt(SO_ERROR)`" }
+            ]
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Exception-ready when…", "ro": "Gata pentru excepție când…" },
+            { "en": "Detail", "ro": "Detaliu" }
+          ],
+          "rows": [
+            [
+              { "en": "Out-of-band data is present", "ro": "Există date out-of-band" },
+              { "en": "Or socket marked as OOB", "ro": "Sau socket-ul este marcat ca OOB" }
+            ],
+            [
+              { "en": "Remote TCP endpoint closed with data still in flight", "ro": "Capătul remote TCP s-a închis cu date încă pe canal" },
+              { "en": "Next read/write returns ECONNRESET", "ro": "Următorul read/write returnează ECONNRESET" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Practical consequence of these conditions:** after `select()` reports a read-ready socket, you must still inspect `read()`'s return value to distinguish three cases: data (>0), clean close (==0), or error (-1). 'Ready' does not mean 'has bytes' — it means 'a read() will not block'.",
+            "ro": "**Consecință practică a acestor condiții:** după ce `select()` raportează un socket gata de citire, tot trebuie să inspectezi valoarea de retur a `read()` pentru a distinge trei cazuri: date (>0), închidere curată (==0) sau eroare (-1). 'Gata' nu înseamnă 'are octeți' — înseamnă 'un read() nu se va bloca'."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "select() marks a connected client socket as read-ready. You call read() and it returns 0. What happened?",
+                "ro": "select() marchează un socket de client conectat ca gata de citire. Apelezi read() și returnează 0. Ce s-a întâmplat?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "An error — select() was wrong",
+                    "ro": "O eroare — select() a greșit"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "select() was right: the socket WAS ready in the sense that read() would not block. The 0 return value is a legitimate read-ready event indicating peer closed the connection. Treating it as an error misreads the API contract.",
+                    "ro": "select() a avut dreptate: socket-ul ERA gata în sensul că read() nu s-ar fi blocat. Valoarea 0 de retur este un eveniment legitim de citire indicând că peer-ul a închis conexiunea. A o trata ca eroare interpretează greșit contractul API."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The peer closed the connection (sent FIN); you should close your end too",
+                    "ro": "Peer-ul a închis conexiunea (a trimis FIN); trebuie să închizi și capătul tău"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. read() returning 0 on a TCP socket is the clean-EOF signal — the peer's FIN reached you. The proper action is `close(fd); FD_CLR(fd, &master_set);` so you stop watching it.",
+                    "ro": "Corect. read() returnează 0 pe un socket TCP este semnalul de EOF curat — FIN-ul peer-ului a ajuns la tine. Acțiunea corectă este `close(fd); FD_CLR(fd, &master_set);` ca să nu îl mai supraveghezi."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The socket buffer was empty — try again later",
+                    "ro": "Buffer-ul socket-ului era gol — încearcă din nou mai târziu"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "An empty buffer on a non-blocking socket returns -1 with EWOULDBLOCK, not 0. A return value of exactly 0 from a TCP read means the peer cleanly closed the connection.",
+                    "ro": "Un buffer gol pe un socket neblocant returnează -1 cu EWOULDBLOCK, nu 0. O valoare de retur exact 0 de la un read TCP înseamnă că peer-ul a închis conexiunea curat."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "read() returning 0 on TCP is clean EOF — the peer sent FIN. You must close and remove the fd.",
+                "ro": "read() care returnează 0 pe TCP este EOF curat — peer-ul a trimis FIN. Trebuie să închizi și să elimini fd-ul."
+              },
+              "reviewStep": "rc-c4-select-conditions"
+            },
+            {
+              "question": {
+                "en": "Why must select() be given `nfds = highest_fd + 1` rather than just the count of fds in the sets?",
+                "ro": "De ce trebuie ca select() să primească `nfds = cel_mai_mare_fd + 1` în loc de simplul număr de fd-i din seturi?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "It tells the kernel how many bits of the bitmap to scan",
+                    "ro": "Spune kernel-ului câți biți din bitmap să scaneze"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. fd_set is a bitmap indexed by fd number, not a list. The kernel scans bits 0..nfds-1. Passing the count would be ambiguous because fd numbers are sparse — you might watch fd=5 and fd=20 but never use fd 0..4.",
+                    "ro": "Corect. fd_set este un bitmap indexat după numărul fd-ului, nu o listă. Kernel-ul scanează biții 0..nfds-1. Trecerea numărului ar fi ambiguă deoarece numerele fd-urilor sunt împrăștiate — ai putea supraveghea fd=5 și fd=20 dar să nu folosești niciodată fd 0..4."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Historical reasons; the value is ignored on modern Linux",
+                    "ro": "Motive istorice; valoarea este ignorată pe Linux modern"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "It is not ignored. Pass too small a value and the kernel will not scan your highest fd. Pass too large and you waste cycles scanning unused bits but still get correct results.",
+                    "ro": "Nu este ignorată. Trimite o valoare prea mică și kernel-ul nu îți va scana cel mai mare fd. Trimite o valoare prea mare și risipești cicluri scanând biți nefolosiți dar tot obții rezultate corecte."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It is the maximum number of ready fds select() will return",
+                    "ro": "Este numărul maxim de fd-i gata pe care select() îi va returna"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "select()'s return value is the count of ready fds, but nfds is unrelated to that limit — nfds is the scan range. The actual ready count is whatever it is, capped only by the size of the fd_set itself (FD_SETSIZE).",
+                    "ro": "Valoarea de retur a select() este numărul de fd-i gata, dar nfds nu are legătură cu acea limită — nfds este intervalul de scanare. Numărul real de fd-i gata este oricare, limitat doar de dimensiunea fd_set-ului în sine (FD_SETSIZE)."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "fd_set is a bitmap; nfds is the upper bound of bits to scan, not a list length.",
+                "ro": "fd_set este un bitmap; nfds este limita superioară a biților de scanat, nu o lungime de listă."
+              },
+              "reviewStep": "rc-c4-select-conditions"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Source slides: pages 19–37 (Primitiva select, condiții de stare).",
+            "ro": "Slide-uri sursă: paginile 19–37 (Primitiva select, condiții de stare)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-threads-intro",
+      "title": {
+        "en": "Threads vs Processes — Why fork() Is Often Too Heavy",
+        "ro": "Thread-uri vs procese — De ce fork() e adesea prea greu"
+      },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "A server forks a new process for each connection. Each process is largely a duplicate of the parent — same code, same heap. On modern Linux, what optimisation makes this cheaper than naive copying, and what is its limit?",
+            "ro": "Un server face fork pentru fiecare conexiune nouă. Fiecare proces este în mare parte un duplicat al părintelui — același cod, același heap. Pe Linux modern, ce optimizare face acest lucru mai ieftin decât copierea naivă și care este limita ei?"
+          },
+          "answer": {
+            "en": "**Copy-on-Write (CoW)**: at fork() time the child does NOT get a physical copy of the parent's memory; instead both processes share the same physical pages marked read-only. Only when one of them tries to WRITE a page is a real copy made. This makes fork() fast when most pages stay shared. The limit: as soon as you actually need IPC to coordinate (sockets, signals, shared memory), processes pay overhead that threads avoid — and even with CoW, fork creates a new page table and PID, both kernel-side costs.",
+            "ro": "**Copy-on-Write (CoW)**: la momentul fork() copilul NU primește o copie fizică a memoriei părintelui; în schimb ambele procese împart aceleași pagini fizice marcate doar-citire. Doar când unul încearcă să SCRIE o pagină se face o copie reală. Aceasta face fork() rapid când majoritatea paginilor rămân partajate. Limita: imediat ce ai nevoie efectiv de IPC pentru coordonare (socket-uri, semnale, memorie partajată), procesele plătesc o suprasarcină pe care thread-urile o evită — și chiar cu CoW, fork-ul creează o nouă tabelă de pagini și un PID, ambele costuri în kernel."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Thread (Lightweight Process, LWP)",
+            "ro": "Thread (Lightweight Process, LWP)"
+          },
+          "content": {
+            "en": "A thread is a flow of execution within a process. All threads of one process **share**: the code, global data, heap, and open file descriptors. Each thread has its **own**: stack, CPU registers, and (typically) thread-local storage. Creating a thread does not duplicate memory or descriptors — it allocates a new stack and registers the new flow with the scheduler.",
+            "ro": "Un thread este un flux de execuție în interiorul unui proces. Toate thread-urile unui proces **partajează**: codul, datele globale, heap-ul și descriptorii de fișiere deschiși. Fiecare thread are **propriile**: stivă, regiștri CPU și (de obicei) stocare locală thread-ului. Crearea unui thread nu duplichează memoria sau descriptorii — alocă o nouă stivă și înregistrează noul flux cu planificatorul."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Property", "ro": "Proprietate" },
+            { "en": "Process (fork)", "ro": "Proces (fork)" },
+            { "en": "Thread (pthread_create)", "ro": "Thread (pthread_create)" }
+          ],
+          "rows": [
+            [
+              { "en": "Address space", "ro": "Spațiu de adrese" },
+              { "en": "Own (CoW initially)", "ro": "Propriu (CoW inițial)" },
+              { "en": "Shared with siblings", "ro": "Partajat cu frații" }
+            ],
+            [
+              { "en": "File descriptors", "ro": "Descriptori de fișiere" },
+              { "en": "Duplicated, then independent", "ro": "Duplicate, apoi independente" },
+              { "en": "Shared", "ro": "Partajat" }
+            ],
+            [
+              { "en": "Communication needs", "ro": "Nevoi de comunicare" },
+              { "en": "IPC: pipe, socketpair, shm, signals", "ro": "IPC: pipe, socketpair, shm, semnale" },
+              { "en": "Shared variables + mutex/cond", "ro": "Variabile partajate + mutex/cond" }
+            ],
+            [
+              { "en": "Crash isolation", "ro": "Izolare la crash" },
+              { "en": "One crashes — others survive", "ro": "Unul cade — ceilalți supraviețuiesc" },
+              { "en": "One crashes — process dies", "ro": "Unul cade — procesul moare" }
+            ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Measured cost of creating one flow of execution**, in microseconds, on several historical platforms (LLNL benchmarks). 'user' = user-CPU time, 'sys' = kernel-CPU time. Lower is faster.",
+            "ro": "**Costul măsurat al creării unui flux de execuție**, în microsecunde, pe câteva platforme istorice (benchmark-uri LLNL). 'user' = timp CPU utilizator, 'sys' = timp CPU kernel. Mai mic = mai rapid."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Platform", "ro": "Platformă" },
+            { "en": "fork() user", "ro": "fork() user" },
+            { "en": "fork() sys", "ro": "fork() sys" },
+            { "en": "pthread_create() user", "ro": "pthread_create() user" },
+            { "en": "pthread_create() sys", "ro": "pthread_create() sys" }
+          ],
+          "rows": [
+            ["AMD 2.4 GHz Opteron (8 cpus/node)", "2.2", "15.7", "0.3", "1.3"],
+            ["IBM 1.9 GHz POWER5 p5-575", "30.7", "27.6", "0.6", "1.1"],
+            ["IBM 1.5 GHz POWER4", "48.6", "47.2", "1.0", "1.5"],
+            ["INTEL 2.4 GHz Xeon (2 cpus/node)", "1.5", "20.8", "0.7", "0.9"],
+            ["INTEL 1.4 GHz Itanium2", "1.1", "22.2", "1.2", "0.6"]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Order-of-magnitude rule of thumb:** creating a thread is roughly 10–50× cheaper than creating a process on the same hardware. For a server that accepts a fresh connection every few milliseconds, that difference compounds quickly.",
+            "ro": "**Regulă empirică, ordin de mărime:** crearea unui thread este aproximativ de 10–50× mai ieftină decât crearea unui proces pe aceeași mașină. Pentru un server care acceptă o conexiune nouă la fiecare câteva milisecunde, diferența se acumulează rapid."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "A bug in a thread causes a SIGSEGV. What happens to the rest of the server?",
+                "ro": "Un bug într-un thread cauzează SIGSEGV. Ce se întâmplă cu restul server-ului?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Only the buggy thread is killed; the others continue serving clients",
+                    "ro": "Doar thread-ul cu bug este omorât; ceilalți continuă să servească clienți"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "All threads share the same address space and the same process. SIGSEGV is delivered to the whole process; by default it terminates the process and therefore all of its threads. This is the trade-off threads make for cheap creation: weaker fault isolation.",
+                    "ro": "Toate thread-urile partajează același spațiu de adrese și același proces. SIGSEGV este livrat întregului proces; implicit termină procesul și deci toate thread-urile sale. Acesta este compromisul pe care thread-urile îl fac pentru creare ieftină: izolare slabă la defecte."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The entire server process dies, taking all client connections with it",
+                    "ro": "Întregul proces server moare, luând cu el toate conexiunile clienților"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Threads have no fault isolation. A segfault, divide-by-zero, or other fatal signal in one thread kills the process — and every connection it was serving. This is the strongest argument for forked workers in code that has not been carefully audited.",
+                    "ro": "Corect. Thread-urile nu au izolare la defecte. Un segfault, împărțire la zero sau alt semnal fatal într-un thread omoară procesul — și fiecare conexiune pe care o servea. Acesta este cel mai puternic argument pentru worker-i prin fork în cod care nu a fost auditat cu atenție."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The thread is automatically restarted by pthreads",
+                    "ro": "Thread-ul este repornit automat de pthreads"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "There is no automatic restart in pthreads. After a fatal signal the process is gone unless you have installed a custom signal handler — and even then a SIGSEGV handler is extremely tricky to write correctly.",
+                    "ro": "Nu există repornire automată în pthreads. După un semnal fatal procesul este pierdut decât dacă ai instalat un handler de semnal personalizat — și chiar și atunci un handler SIGSEGV este extrem de delicat de scris corect."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Threads share crash fate. Fork isolates; threads don't.",
+                "ro": "Thread-urile împart soarta la crash. Fork izolează; thread-urile nu."
+              },
+              "reviewStep": "rc-c4-threads-intro"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-pthreads-api",
+      "title": {
+        "en": "Pthreads API — create, join, detach, exit",
+        "ro": "API-ul Pthreads — create, join, detach, exit"
+      },
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You want a worker thread that runs handle_client(connfd) and frees itself when done — no parent ever waits for it. Which two pthread calls do you NOT need, and which one is essential?",
+            "ro": "Vrei un thread worker care rulează handle_client(connfd) și se eliberează singur când termină — niciun părinte nu așteaptă vreodată după el. Care două apeluri pthread NU îți trebuie și care unul este esențial?"
+          },
+          "answer": {
+            "en": "You do not need `pthread_join()` (no one is waiting) and you do not need `pthread_exit()` if the worker simply returns from its function. What you DO need is `pthread_detach()` (either by the parent immediately after create, or by the thread itself at startup), otherwise the OS keeps the thread's exit status alive forever waiting for a join — a classic resource leak.",
+            "ro": "Nu ai nevoie de `pthread_join()` (nimeni nu așteaptă) și nu ai nevoie de `pthread_exit()` dacă worker-ul pur și simplu returnează din funcția lui. CE ai nevoie este `pthread_detach()` (fie de către părinte imediat după create, fie de către thread însuși la pornire), altfel OS-ul păstrează statusul de ieșire al thread-ului viu pentru totdeauna așteptând un join — o scurgere clasică de resurse."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**POSIX Threads (Pthreads)** is the portable thread API on FreeBSD, NetBSD, GNU/Linux, macOS, Solaris. On Windows the equivalent is *pthreads-w32*. Five core calls cover 90% of what you write:",
+            "ro": "**POSIX Threads (Pthreads)** este API-ul portabil de thread-uri pe FreeBSD, NetBSD, GNU/Linux, macOS, Solaris. Pe Windows echivalentul este *pthreads-w32*. Cinci apeluri principale acoperă 90% din ce scrii:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "#include <pthread.h>\n\n// 1. Create a thread\nint pthread_create(pthread_t *tid,                   // OUT: thread id\n                   const pthread_attr_t *attr,       // IN: NULL = defaults\n                   void *(*func)(void *),            // IN: thread start routine\n                   void *arg);                       // IN: arg passed to func\n// Returns 0 on success, positive Exxx error code on failure.\n\n// 2. Wait for a thread to finish and collect its return value\nint pthread_join(pthread_t tid, void **status);\n\n// 3. Detach: tell the system to reclaim resources automatically on exit\nint pthread_detach(pthread_t tid);\n\n// 4. Get current thread's id\npthread_t pthread_self(void);\n\n// 5. Terminate the current thread (returning from func does the same)\nvoid pthread_exit(void *status);"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// Worked example: server that spawns a detached worker per client\n#include <pthread.h>\n#include <unistd.h>\n\nvoid *worker(void *arg) {\n    int connfd = *(int *)arg;\n    free(arg);                               // arg was malloc'd by caller\n    serve_client(connfd);\n    close(connfd);\n    return NULL;                             // implicit pthread_exit(NULL)\n}\n\nvoid accept_loop(int listenfd) {\n    while (1) {\n        int connfd = accept(listenfd, NULL, NULL);\n        if (connfd < 0) continue;\n\n        // Heap-allocate the arg so it outlives the stack frame\n        int *parg = malloc(sizeof *parg);\n        *parg = connfd;\n\n        pthread_t tid;\n        if (pthread_create(&tid, NULL, worker, parg) != 0) {\n            close(connfd); free(parg); continue;\n        }\n        pthread_detach(tid);                 // We will never join — reclaim on exit\n    }\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "**Compilation:** pthreads is not in libc by default. Use `gcc server.c -o server -lpthread` (or `-pthread`, which also sets the right preprocessor flags). Forgetting `-lpthread` is one of the most common 'undefined reference to pthread_create' errors students hit.",
+            "ro": "**Compilare:** pthreads nu este în libc implicit. Folosește `gcc server.c -o server -lpthread` (sau `-pthread`, care setează și flag-urile de preprocesor corecte). Uitarea `-lpthread` este una dintre cele mai comune erori 'undefined reference to pthread_create' pe care studenții le întâlnesc."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Don't pass the address of a stack variable to pthread_create():** the calling function may return before the new thread reads it. Either pass an integer cast to `(void*)` (when the value fits), or `malloc()` a struct and let the worker `free()` it after copying out the fields.",
+            "ro": "**Nu transmite adresa unei variabile de stivă lui pthread_create():** funcția apelantă poate returna înainte ca noul thread să o citească. Fie transmite un întreg convertit la `(void*)` (când valoarea încape), fie `malloc()` un struct și lasă worker-ul să-l `free()` după ce copiază câmpurile."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "After pthread_create() succeeds, the parent ignores tid forever. What problem will appear over time, and how do you fix it?",
+                "ro": "După ce pthread_create() reușește, părintele ignoră tid pentru totdeauna. Ce problemă va apărea în timp și cum o rezolvi?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "No problem — exited threads release their resources automatically",
+                    "ro": "Nicio problemă — thread-urile ieșite își eliberează resursele automat"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "By default, threads are JOINABLE: the kernel keeps their exit status and thread struct alive until someone calls pthread_join(). If nobody joins, that state accumulates forever — a memory/handle leak proportional to the number of threads ever created.",
+                    "ro": "Implicit, thread-urile sunt JOINABLE: kernel-ul păstrează statusul lor de ieșire și structura thread-ului în viață până cineva apelează pthread_join(). Dacă nimeni nu face join, starea aceea se acumulează pentru totdeauna — o scurgere de memorie/handle proporțională cu numărul de thread-uri create vreodată."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Each exited thread keeps a small bookkeeping struct alive forever — call pthread_detach() to opt-out of joining",
+                    "ro": "Fiecare thread ieșit păstrează o structură mică de evidență vie pentru totdeauna — apelează pthread_detach() pentru a renunța la join"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Use pthread_detach(tid) right after pthread_create(), or have the worker call pthread_detach(pthread_self()) at its start. Detached threads release everything when they exit.",
+                    "ro": "Corect. Folosește pthread_detach(tid) imediat după pthread_create(), sau lasă worker-ul să apeleze pthread_detach(pthread_self()) la început. Thread-urile detașate eliberează totul când ies."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The thread ids are reused, so eventually the loop crashes with EAGAIN",
+                    "ro": "Id-urile de thread sunt reutilizate, deci în cele din urmă bucla crapă cu EAGAIN"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Thread ids are opaque values, not a small fixed pool. pthread_create() can fail with EAGAIN if you exhaust user thread limits or memory, but that is downstream of the actual leak — unjoined joinable threads keeping resources pinned.",
+                    "ro": "Id-urile de thread sunt valori opace, nu un set mic fix. pthread_create() poate eșua cu EAGAIN dacă epuizezi limitele de thread-uri de utilizator sau memoria, dar aceea este consecința scurgerii reale — thread-uri joinable nealăturate care țin resursele blocate."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Joinable threads leak until joined. Detach them if you will never join.",
+                "ro": "Thread-urile joinable se scurg până sunt alăturate. Detașează-le dacă nu vei face join niciodată."
+              },
+              "reviewStep": "rc-c4-pthreads-api"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-client-tcp-variants",
+      "title": {
+        "en": "TCP Client Design Alternatives — stop-and-wait, select, fork, pthread",
+        "ro": "Alternative de proiectare client TCP — stop-and-wait, select, fork, pthread"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are four classic patterns for writing a TCP client that must talk to both a user (stdin/stdout) and a network peer (socket):",
+            "ro": "Există patru tipare clasice pentru scrierea unui client TCP care trebuie să comunice atât cu un utilizator (stdin/stdout) cât și cu un peer de rețea (socket):"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Pattern", "ro": "Tipar" },
+            { "en": "How it works", "ro": "Cum funcționează" },
+            { "en": "Best for", "ro": "Util pentru" }
+          ],
+          "rows": [
+            [
+              { "en": "**Stop-and-wait** (naive)", "ro": "**Stop-and-wait** (naiv)" },
+              { "en": "Read user input, send to server, wait for reply, print. Blocks on whichever fd it reads first.", "ro": "Citește input utilizator, trimite la server, așteaptă răspuns, afișează. Blochează pe oricare fd citește primul." },
+              { "en": "Batch jobs where order is strict and there is no async server traffic.", "ro": "Joburi batch unde ordinea e strictă și nu există trafic asincron de la server." }
+            ],
+            [
+              { "en": "**select() loop**", "ro": "**Buclă select()**" },
+              { "en": "select() watches stdin AND the socket; whichever fires is handled, then loop. Single process, single thread.", "ro": "select() supraveghează stdin ȘI socket-ul; care se declanșează este gestionat, apoi buclă. Un singur proces, un singur thread." },
+              { "en": "Most interactive clients — telnet, ftp control channel.", "ro": "Majoritatea clienților interactivi — telnet, canalul de control ftp." }
+            ],
+            [
+              { "en": "**fork() split**", "ro": "**Split prin fork()**" },
+              { "en": "Parent does stdin→socket; child does socket→stdout (or vice-versa). They share the socket fd.", "ro": "Părintele face stdin→socket; copilul face socket→stdout (sau invers). Împart fd-ul socket-ului." },
+              { "en": "When the two flows are large and benefit from parallel CPU, but isolation is needed.", "ro": "Când cele două fluxuri sunt mari și beneficiază de CPU paralel, dar e nevoie de izolare." }
+            ],
+            [
+              { "en": "**pthread split**", "ro": "**Split prin pthread**" },
+              { "en": "Same idea as fork() but with two threads instead of two processes — cheaper, shares memory naturally.", "ro": "Aceeași idee ca fork() dar cu două thread-uri în loc de două procese — mai ieftin, partajează memoria natural." },
+              { "en": "Modern default when both flows are non-trivial.", "ro": "Implicitul modern când ambele fluxuri sunt netriviale." }
+            ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Performance comparison** from the source lecture (bulk-transfer benchmark, lower seconds = faster):",
+            "ro": "**Comparație de performanță** din cursul sursă (benchmark de transfer masiv, mai puține secunde = mai rapid):"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Client pattern", "ro": "Tipar client" },
+            { "en": "Time (seconds)", "ro": "Timp (secunde)" }
+          ],
+          "rows": [
+            [
+              { "en": "Stop-and-wait (naive blocking)", "ro": "Stop-and-wait (blocant naiv)" },
+              { "en": "— (slowest; sample data omitted in source)", "ro": "— (cel mai lent; date eșantion omise în sursă)" }
+            ],
+            [
+              { "en": "select() + blocking I/O", "ro": "select() + I/O blocant" },
+              { "en": "12.3", "ro": "12.3" }
+            ],
+            [
+              { "en": "select() + non-blocking I/O", "ro": "select() + I/O neblocant" },
+              { "en": "6.9", "ro": "6.9" }
+            ],
+            [
+              { "en": "fork() split", "ro": "Split prin fork()" },
+              { "en": "8.7", "ro": "8.7" }
+            ],
+            [
+              { "en": "pthread split", "ro": "Split prin pthread" },
+              { "en": "8.5", "ro": "8.5" }
+            ]
+          ]
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "select() with non-blocking I/O beats both fork-split and pthread-split in the benchmark above. Yet many textbooks recommend pthread-split for 'modern' clients. Reconcile these two facts.",
+            "ro": "select() cu I/O neblocant bate atât split-ul prin fork cât și split-ul prin pthread în benchmark-ul de mai sus. Totuși multe manuale recomandă split-ul prin pthread pentru clienții 'moderni'. Reconciliază aceste două fapte."
+          },
+          "answer": {
+            "en": "Benchmark numbers measure a single thing — raw throughput on a specific workload — and select+non-blocking IS the fastest because there is zero context-switch overhead. But threads buy you simpler code when the two flows have independent state and synchronisation patterns: writing 'while not done, react to whichever fd' inside select() can balloon into a state machine for any non-trivial protocol. The textbook recommendation is about engineering cost, not microbenchmarks. For a high-throughput client where the protocol is simple, prefer select(); for a complex one, prefer threads.",
+            "ro": "Numerele de benchmark măsoară un singur lucru — debit brut pe o sarcină specifică — și select+neblocant ESTE cel mai rapid pentru că suprasarcina de schimbare de context este zero. Dar thread-urile îți cumpără cod mai simplu când cele două fluxuri au stare independentă și tipare de sincronizare diferite: scrierea 'cât timp nu e gata, reacționează la oricare fd' în interiorul select() se poate transforma într-o mașină de stări pentru orice protocol netrivial. Recomandarea din manual e despre costul de inginerie, nu microbenchmark-uri. Pentru un client cu debit mare unde protocolul e simplu, preferă select(); pentru unul complex, preferă thread-uri."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "In a fork()-split TCP client, the parent reads stdin and writes to the socket; the child reads the socket and writes to stdout. The user types EOF (Ctrl-D). The parent exits. What happens to the child?",
+                "ro": "Într-un client TCP cu split prin fork(), părintele citește stdin și scrie pe socket; copilul citește socket-ul și scrie pe stdout. Utilizatorul tastează EOF (Ctrl-D). Părintele iese. Ce se întâmplă cu copilul?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "The child is automatically killed by the kernel",
+                    "ro": "Copilul este omorât automat de kernel"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Killing the child is not automatic on parent exit. The child becomes a child of init (PID 1) and continues running until either the socket closes (server-side disconnect) or someone signals it. The parent should typically signal the child or shutdown(socket, SHUT_WR) before exiting.",
+                    "ro": "Omorârea copilului nu este automată la ieșirea părintelui. Copilul devine copil al init (PID 1) și continuă să ruleze până când fie socket-ul se închide (deconectare server-side), fie cineva îl semnalează. Părintele ar trebui de obicei să semnaleze copilul sau să facă shutdown(socket, SHUT_WR) înainte de a ieși."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The child keeps running, possibly forever, until the server closes the socket or something signals it",
+                    "ro": "Copilul continuă să ruleze, posibil pentru totdeauna, până când server-ul închide socket-ul sau ceva îl semnalează"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. This is one of the practical gotchas of the fork-split design: you must explicitly coordinate shutdown. Common solutions: parent does shutdown(socket, SHUT_WR) so the server FINs back, which makes the child's read return 0 and exit cleanly; or parent sends SIGTERM to the child.",
+                    "ro": "Corect. Aceasta e una dintre capcanele practice ale designului split prin fork: trebuie să coordonezi explicit închiderea. Soluții comune: părintele face shutdown(socket, SHUT_WR) ca server-ul să trimită FIN înapoi, ceea ce face read-ul copilului să returneze 0 și să iasă curat; sau părintele trimite SIGTERM copilului."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The socket fd becomes invalid in the child and read() returns -1 immediately",
+                    "ro": "Fd-ul socket-ului devine invalid în copil și read() returnează -1 imediat"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "After fork() each process has its own copy of the fd. The parent's exit closes the parent's copy, decrementing the socket's reference count, but the child's copy is still valid. The kernel keeps the socket open as long as any process references it.",
+                    "ro": "După fork() fiecare proces are propria copie a fd-ului. Ieșirea părintelui închide copia părintelui, decrementând numărul de referințe al socket-ului, dar copia copilului este încă validă. Kernel-ul ține socket-ul deschis cât timp orice proces îl referențiază."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Forked children survive parent exit. Coordinate shutdown explicitly, e.g. via shutdown() or a signal.",
+                "ro": "Copiii prin fork supraviețuiesc ieșirii părintelui. Coordonează închiderea explicit, ex. prin shutdown() sau un semnal."
+              },
+              "reviewStep": "rc-c4-client-tcp-variants"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-server-tcp-variants",
+      "title": {
+        "en": "TCP Server Design Alternatives — Seven Patterns",
+        "ro": "Alternative de proiectare server TCP — Șapte tipare"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "There are seven canonical server patterns. They differ on **when** workers are created, **how** they are isolated, and **who** accepts new connections.",
+            "ro": "Există șapte tipare canonice de server. Diferă prin **când** sunt creați worker-ii, **cum** sunt izolați și **cine** acceptă noile conexiuni."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Pattern", "ro": "Tipar" },
+            { "en": "Workers created…", "ro": "Worker-i creați…" },
+            { "en": "Accept called by…", "ro": "Accept apelat de…" },
+            { "en": "Note", "ro": "Notă" }
+          ],
+          "rows": [
+            [
+              { "en": "**1. Iterative**", "ro": "**1. Iterativ**" },
+              { "en": "No workers — main loop", "ro": "Fără worker-i — bucla principală" },
+              { "en": "Main loop", "ro": "Bucla principală" },
+              { "en": "One client at a time. Rare in practice.", "ro": "Un client odată. Rar în practică." }
+            ],
+            [
+              { "en": "**2. fork per client**", "ro": "**2. fork per client**" },
+              { "en": "On demand at accept()", "ro": "La cerere la accept()" },
+              { "en": "Main loop", "ro": "Bucla principală" },
+              { "en": "Simple, isolated, but per-client cost.", "ro": "Simplu, izolat, dar cost per client." }
+            ],
+            [
+              { "en": "**3. Preforking, no accept lock**", "ro": "**3. Preforking, fără lock pe accept**" },
+              { "en": "N at startup", "ro": "N la pornire" },
+              { "en": "Each child", "ro": "Fiecare copil" },
+              { "en": "Children race on accept(). Works only on kernels that serialize accept().", "ro": "Copiii concurează pe accept(). Merge doar pe kernel-uri care serializează accept()." }
+            ],
+            [
+              { "en": "**4. Preforking, with accept lock**", "ro": "**4. Preforking, cu lock pe accept**" },
+              { "en": "N at startup", "ro": "N la pornire" },
+              { "en": "One child at a time (mutex/fcntl)", "ro": "Un copil odată (mutex/fcntl)" },
+              { "en": "Avoids 'thundering herd' on older kernels.", "ro": "Evită 'thundering herd' pe kernel-uri mai vechi." }
+            ],
+            [
+              { "en": "**5. Preforking, descriptor passing**", "ro": "**5. Preforking, transmitere descriptor**" },
+              { "en": "N at startup", "ro": "N la pornire" },
+              { "en": "Parent accepts, hands fd to a child via socketpair()", "ro": "Părintele acceptă, transmite fd unui copil prin socketpair()" },
+              { "en": "Most precise load distribution; most complex.", "ro": "Distribuție de încărcare cea mai precisă; cel mai complex." }
+            ],
+            [
+              { "en": "**6. Thread per client**", "ro": "**6. Thread per client**" },
+              { "en": "On demand at accept()", "ro": "La cerere la accept()" },
+              { "en": "Main loop", "ro": "Bucla principală" },
+              { "en": "Cheaper than fork-per-client; shared memory.", "ro": "Mai ieftin decât fork-per-client; memorie partajată." }
+            ],
+            [
+              { "en": "**7. Prethreaded, accept lock**", "ro": "**7. Prethreaded, lock pe accept**" },
+              { "en": "N at startup", "ro": "N la pornire" },
+              { "en": "One thread at a time (mutex)", "ro": "Un thread odată (mutex)" },
+              { "en": "Modern default for high-concurrency servers.", "ro": "Implicitul modern pentru servere de concurență mare." }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Thundering herd:** when N preforked children all block in accept() on the same listening socket and the kernel wakes ALL of them on a new connection, then N-1 immediately go back to sleep. On Linux ≥ 2.6 the kernel only wakes one, but on older systems this was a real CPU sink. That is why pattern 4 (lock-protected accept) was historically common.",
+            "ro": "**Thundering herd:** când N copii prefork-ați se blochează cu toții în accept() pe același socket de ascultare și kernel-ul îi trezește pe TOȚI la o conexiune nouă, apoi N-1 se întorc imediat la somn. Pe Linux ≥ 2.6 kernel-ul trezește doar unul, dar pe sisteme mai vechi era o pierdere reală de CPU. De aceea tiparul 4 (accept protejat cu lock) a fost istoric comun."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Pattern 5 (descriptor passing) needs Unix-domain socketpair() between parent and each child. What advantage does this buy over pattern 4 (each child does its own accept under a lock)?",
+            "ro": "Tiparul 5 (transmitere descriptor) are nevoie de socketpair() de domeniu Unix între părinte și fiecare copil. Ce avantaj cumpără acest lucru față de tiparul 4 (fiecare copil face propriul accept sub un lock)?"
+          },
+          "answer": {
+            "en": "Pattern 4 distributes connections by whichever child wins the lock — load can be uneven (one fast child grabs disproportionately many). Pattern 5 lets the parent see ALL connections and route each one to whichever child it knows is idle (e.g. round-robin or least-busy). It also lets the parent reject overload uniformly. Cost: every connection goes through a socketpair hop, which adds latency, and the descriptor-passing protocol (sendmsg with SCM_RIGHTS) is finicky to get right.",
+            "ro": "Tiparul 4 distribuie conexiunile după care copil câștigă lock-ul — încărcarea poate fi inegală (un copil rapid prinde disproporționat de multe). Tiparul 5 lasă părintele să vadă TOATE conexiunile și să rutică fiecare către copilul pe care îl știe inactiv (ex. round-robin sau cel mai puțin ocupat). De asemenea, lasă părintele să respingă supraîncărcarea uniform. Cost: fiecare conexiune trece printr-un hop socketpair, ceea ce adaugă latență, iar protocolul de transmitere a descriptorului (sendmsg cu SCM_RIGHTS) este migălos."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "A web server expects sustained 10k req/s. Each request is short (~5 ms). Which pattern is the strongest first-line choice?",
+                "ro": "Un server web așteaptă 10k cereri/s susținute. Fiecare cerere e scurtă (~5 ms). Ce tipar este cel mai bun ca primă alegere?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "fork per client (pattern 2)",
+                    "ro": "fork per client (tiparul 2)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "10k forks/sec means 10k page-table setups per second — even with CoW the bookkeeping crushes throughput. fork-per-client tops out around hundreds to low thousands of req/s on typical hardware.",
+                    "ro": "10k fork-uri/sec înseamnă 10k setări de tabele de pagini pe secundă — chiar cu CoW evidența distruge debitul. fork-per-client atinge plafonul la sute sau câteva mii de cereri/s pe hardware tipic."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Prethreaded with accept lock (pattern 7)",
+                    "ro": "Prethreaded cu lock pe accept (tiparul 7)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A fixed pool of threads created at startup, each looping accept()→serve→accept() under a mutex, eliminates per-request creation cost and bounds resource use. This is the design used by nginx workers and Apache's worker MPM.",
+                    "ro": "Corect. Un pool fix de thread-uri create la pornire, fiecare în buclă accept()→servește→accept() sub un mutex, elimină costul de creare per cerere și limitează utilizarea resurselor. Acesta este designul folosit de worker-ii nginx și de MPM-ul worker din Apache."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Iterative (pattern 1) because each request is short",
+                    "ro": "Iterativ (tiparul 1) pentru că fiecare cerere e scurtă"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Even at 5 ms per request, an iterative server caps at 200 req/s on a single core. The arrival rate (10k/s) far exceeds the service rate, so the listen backlog fills and clients are dropped.",
+                    "ro": "Chiar și la 5 ms per cerere, un server iterativ se limitează la 200 cereri/s pe un singur core. Rata de sosire (10k/s) depășește mult rata de serviciu, deci backlog-ul de ascultare se umple și clienții sunt aruncați."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Prethreading amortises worker-creation cost and bounds concurrency — the standard pattern for high-throughput servers.",
+                "ro": "Prethreading amortizează costul de creare a worker-ilor și limitează concurența — tiparul standard pentru servere de debit mare."
+              },
+              "reviewStep": "rc-c4-server-tcp-variants"
+            }
+          ]
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Source slides: pages 43–48 (Alternative de proiectare server TCP, tipare 1–7).",
+            "ro": "Slide-uri sursă: paginile 43–48 (Alternative de proiectare server TCP, tipare 1–7)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-demo-select-server",
+      "title": {
+        "en": "Demo — A select()-based Echo Server, End to End",
+        "ro": "Demo — Un server echo bazat pe select(), de la cap la coadă"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Putting the pieces together: a small concurrent echo server that uses **only `select()`** — no fork, no threads. It handles up to FD_SETSIZE simultaneous clients in a single process.",
+            "ro": "Punând piesele împreună: un mic server echo concurent care folosește **doar `select()`** — fără fork, fără thread-uri. Gestionează până la FD_SETSIZE clienți simultani într-un singur proces."
+          }
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// select_echo_server.c — compile: gcc select_echo_server.c -o sserv\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <unistd.h>\n#include <errno.h>\n#include <sys/select.h>\n#include <sys/socket.h>\n#include <netinet/in.h>\n#include <arpa/inet.h>\n\n#define PORT      9000\n#define BACKLOG    16\n\nint main(void) {\n    // 1. Listening socket\n    int listenfd = socket(AF_INET, SOCK_STREAM, 0);\n    int yes = 1;\n    setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);\n\n    struct sockaddr_in addr = {\n        .sin_family = AF_INET,\n        .sin_addr.s_addr = htonl(INADDR_ANY),\n        .sin_port = htons(PORT),\n    };\n    if (bind(listenfd, (struct sockaddr*)&addr, sizeof addr) < 0) { perror(\"bind\"); exit(1); }\n    if (listen(listenfd, BACKLOG) < 0) { perror(\"listen\"); exit(1); }\n    printf(\"echo server listening on :%d\\n\", PORT);\n\n    // 2. Master fd_set tracks every socket we care about\n    fd_set master, working;\n    FD_ZERO(&master);\n    FD_SET(listenfd, &master);\n    int maxfd = listenfd;\n\n    char buf[1024];\n    while (1) {\n        working = master;                           // select() will mutate working\n        int n = select(maxfd + 1, &working, NULL, NULL, NULL);\n        if (n < 0) {\n            if (errno == EINTR) continue;           // signal interrupted the wait\n            perror(\"select\"); break;\n        }\n\n        // 3. New connection?\n        if (FD_ISSET(listenfd, &working)) {\n            int connfd = accept(listenfd, NULL, NULL);\n            if (connfd >= 0) {\n                FD_SET(connfd, &master);\n                if (connfd > maxfd) maxfd = connfd;\n                printf(\"+ client fd=%d\\n\", connfd);\n            }\n        }\n\n        // 4. Data from any existing client?\n        for (int fd = 0; fd <= maxfd; fd++) {\n            if (fd == listenfd || !FD_ISSET(fd, &working)) continue;\n            ssize_t r = read(fd, buf, sizeof buf);\n            if (r <= 0) {                           // EOF or error\n                printf(\"- client fd=%d (%s)\\n\", fd, r == 0 ? \"closed\" : strerror(errno));\n                close(fd);\n                FD_CLR(fd, &master);\n            } else {\n                write(fd, buf, r);                  // echo\n            }\n        }\n    }\n    return 0;\n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**To test:** in one terminal run `./sserv`. In another, run `telnet 127.0.0.1 9000` (or `nc 127.0.0.1 9000`) — type anything and it echoes back. Open several telnet sessions; one server process handles them all concurrently.",
+            "ro": "**Pentru testare:** într-un terminal rulează `./sserv`. În altul, rulează `telnet 127.0.0.1 9000` (sau `nc 127.0.0.1 9000`) — tastează orice și se întoarce. Deschide mai multe sesiuni telnet; un singur proces server le gestionează pe toate simultan."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "The inner for-loop scans every fd from 0 to maxfd. For 1000 clients with sparse fd numbers, this is wasteful. Name one structural change that would make the scan cheaper, and one POSIX API that does this automatically.",
+            "ro": "Bucla for interioară scanează fiecare fd de la 0 la maxfd. Pentru 1000 de clienți cu numere de fd împrăștiate, este risipitor. Numește o schimbare structurală care ar face scanarea mai ieftină și un API POSIX care face acest lucru automat."
+          },
+          "answer": {
+            "en": "**Structural change:** keep a separate array or list of the currently-watched client fds; iterate that list rather than every integer in [0..maxfd]. **POSIX API:** `poll()` takes an explicit array of `pollfd` structs and returns events indexed into that array — no scanning of unused fds. Linux-only: `epoll()` is even better (O(1) per ready event regardless of how many fds are registered).",
+            "ro": "**Schimbare structurală:** menține un array sau o listă separată cu fd-urile clienților supravegheați curent; iterează acea listă în loc de fiecare întreg din [0..maxfd]. **API POSIX:** `poll()` ia un array explicit de struct-uri `pollfd` și returnează evenimentele indexate în acel array — fără scanarea fd-urilor nefolosite. Doar pe Linux: `epoll()` este și mai bun (O(1) per eveniment gata indiferent de câte fd-uri sunt înregistrate)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "rc-c4-quiz",
+      "title": {
+        "en": "Self-Test — RC Course 4",
+        "ro": "Autoevaluare — RC Cursul 4"
+      },
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Which mechanism puts the process to sleep at zero CPU cost while waiting for ANY of multiple sockets to become ready?",
+                "ro": "Care mecanism adoarme procesul cu zero cost CPU în timp ce așteaptă ca ORICARE din mai multe socket-uri să devină gata?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Non-blocking I/O + busy-polling in a loop",
+                    "ro": "I/O neblocant + busy-polling într-o buclă"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Busy-polling actively consumes CPU asking the kernel 'any data?' on each fd in a tight loop. select()/poll()/epoll() let the process sleep in the kernel until events arrive.",
+                    "ro": "Busy-polling consumă activ CPU întrebând kernel-ul 'există date?' pe fiecare fd într-o buclă strânsă. select()/poll()/epoll() lasă procesul să doarmă în kernel până ajung evenimente."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "select() with a NULL timeout",
+                    "ro": "select() cu timeout NULL"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. select(NULL) blocks indefinitely inside the kernel. The CPU is not used during the wait; the kernel wakes the process exactly when one of the watched descriptors changes state.",
+                    "ro": "Corect. select(NULL) blochează nedefinit în interiorul kernel-ului. CPU-ul nu este folosit în timpul așteptării; kernel-ul trezește procesul exact când unul dintre descriptorii supravegheați își schimbă starea."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "alarm() with a 1-second interval",
+                    "ro": "alarm() cu un interval de 1 secundă"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "alarm() wakes the process unconditionally every second, whether or not any fd has activity. CPU is used for the wake-and-check cycle and the wake is independent of actual I/O events.",
+                    "ro": "alarm() trezește procesul necondiționat la fiecare secundă, indiferent dacă vreun fd are activitate. CPU-ul este folosit pentru ciclul de trezire-și-verificare iar trezirea este independentă de evenimentele reale de I/O."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "select()/poll() block in the kernel and wake on real events — the only zero-CPU multiplexing option.",
+                "ro": "select()/poll() blochează în kernel și se trezesc la evenimente reale — singura opțiune de multiplexare cu cost zero CPU."
+              },
+              "reviewStep": "rc-c4-multiplexing-intro"
+            },
+            {
+              "question": {
+                "en": "After connect() on a non-blocking socket, you see errno=EINPROGRESS. What is the correct next step to find out when the connection finishes?",
+                "ro": "După connect() pe un socket neblocant, vezi errno=EINPROGRESS. Care este pasul următor corect pentru a afla când se finalizează conexiunea?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Call connect() again in a loop until it returns 0",
+                    "ro": "Apelează connect() din nou într-o buclă până returnează 0"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Re-issuing connect() on a socket that already has one in flight returns EALREADY, not progress. The kernel is already doing the work; you only need to detect WHEN it finishes.",
+                    "ro": "Reluarea connect() pe un socket care deja are unul în desfășurare returnează EALREADY, nu progres. Kernel-ul deja face treaba; trebuie doar să detectezi CÂND se termină."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "select() with the socket in writefds; when ready, call getsockopt(SO_ERROR) to verify success",
+                    "ro": "select() cu socket-ul în writefds; când e gata, apelează getsockopt(SO_ERROR) pentru a verifica succesul"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A non-blocking connect() completion is signalled by the socket becoming WRITABLE. getsockopt(SO_ERROR) then returns 0 on success or the failure errno (ECONNREFUSED, ETIMEDOUT, etc.).",
+                    "ro": "Corect. Finalizarea unui connect() neblocant este semnalată prin socket-ul devenind DISPONIBIL DE SCRIERE. getsockopt(SO_ERROR) returnează apoi 0 la succes sau errno-ul de eșec (ECONNREFUSED, ETIMEDOUT, etc.)."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Read from the socket and check whether the read succeeds",
+                    "ro": "Citește de la socket și verifică dacă citirea reușește"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Reading before the handshake completes doesn't tell you when it completes; it just adds another EWOULDBLOCK error. The handshake completion is a separate event signalled by write-readiness.",
+                    "ro": "Citirea înainte ca handshake-ul să se finalizeze nu îți spune când se finalizează; doar adaugă altă eroare EWOULDBLOCK. Finalizarea handshake-ului este un eveniment separat semnalat prin disponibilitatea pentru scriere."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Non-blocking connect: wait for write-readiness, then getsockopt(SO_ERROR).",
+                "ro": "Connect neblocant: așteaptă disponibilitatea de scriere, apoi getsockopt(SO_ERROR)."
+              },
+              "reviewStep": "rc-c4-nonblocking"
+            },
+            {
+              "question": {
+                "en": "You write `fcntl(sd, F_SETFL, O_NONBLOCK)` and recv() now blocks even though it shouldn't. Earlier the code did `fcntl(sd, F_GETFL, 0)`. What is the most likely bug?",
+                "ro": "Scrii `fcntl(sd, F_SETFL, O_NONBLOCK)` și recv() blochează acum chiar dacă n-ar trebui. Anterior codul făcea `fcntl(sd, F_GETFL, 0)`. Care este cel mai probabil bug?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "F_SETFL replaces the flags; you forgot to OR with the result of F_GETFL",
+                    "ro": "F_SETFL înlocuiește flag-urile; ai uitat să faci OR cu rezultatul F_GETFL"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The right idiom is `int flags = fcntl(sd, F_GETFL, 0); fcntl(sd, F_SETFL, flags | O_NONBLOCK);`. If the existing flags happened to include something that overrides O_NONBLOCK (or this is a path where the wrong fd is being set), you would see the symptom described.",
+                    "ro": "Corect. Idiom-ul corect este `int flags = fcntl(sd, F_GETFL, 0); fcntl(sd, F_SETFL, flags | O_NONBLOCK);`. Dacă flag-urile existente includeau ceva ce suprascrie O_NONBLOCK (sau aceasta e o cale unde se setează fd-ul greșit), ai vedea simptomul descris."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "O_NONBLOCK doesn't work on TCP sockets — only on pipes",
+                    "ro": "O_NONBLOCK nu funcționează pe socket-uri TCP — doar pe pipe-uri"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "O_NONBLOCK is fully supported on all socket types on POSIX systems. The issue is in the fcntl() call pattern, not in O_NONBLOCK itself.",
+                    "ro": "O_NONBLOCK este complet suportat pe toate tipurile de socket pe sisteme POSIX. Problema e în tiparul apelului fcntl(), nu în O_NONBLOCK în sine."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "recv() ignores file-status flags; you must use MSG_DONTWAIT",
+                    "ro": "recv() ignoră flag-urile de stare; trebuie să folosești MSG_DONTWAIT"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "recv() honours O_NONBLOCK on the socket. MSG_DONTWAIT is an alternative that makes a single recv() non-blocking without changing the socket's flags, but it is not a fix for a broken fcntl() — both work if used correctly.",
+                    "ro": "recv() respectă O_NONBLOCK pe socket. MSG_DONTWAIT este o alternativă care face un singur recv() neblocant fără a schimba flag-urile socket-ului, dar nu este un fix pentru un fcntl() rupt — ambele funcționează dacă sunt folosite corect."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "F_SETFL is whole-word; preserve existing flags by OR-ing with F_GETFL result. (Spaced retrieval from earlier in the course.)",
+                "ro": "F_SETFL este pe cuvântul întreg; păstrează flag-urile existente prin OR cu rezultatul F_GETFL. (Retrieval distanțat de mai devreme din curs.)"
+              },
+              "reviewStep": "rc-c4-nonblocking"
+            },
+            {
+              "question": {
+                "en": "FD_SETSIZE is 1024 on most Linux systems. A server using select() must serve 5000 long-lived clients. What is the most idiomatic fix?",
+                "ro": "FD_SETSIZE este 1024 pe majoritatea sistemelor Linux. Un server care folosește select() trebuie să servească 5000 de clienți de lungă durată. Care este fix-ul cel mai idiomatic?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Recompile with -DFD_SETSIZE=8192",
+                    "ro": "Recompilează cu -DFD_SETSIZE=8192"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This 'works' on some systems but is fragile: glibc warns against it, library code may have been built with the original size, and it doesn't fix the O(n) scan cost. The cure for both problems is a different API.",
+                    "ro": "Acest lucru 'funcționează' pe unele sisteme dar e fragil: glibc avertizează împotrivă, codul de bibliotecă poate fi compilat cu dimensiunea originală, și nu repară costul de scanare O(n). Leacul pentru ambele probleme este un alt API."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Switch to poll() (no fd-number limit) or epoll() (O(1) per ready event on Linux)",
+                    "ro": "Schimbă la poll() (fără limită pe numărul de fd) sau epoll() (O(1) per eveniment gata pe Linux)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. poll() takes an explicit array of pollfd, so it has no FD_SETSIZE limit. epoll() also removes the O(n) scan of select(): you receive only the fds that fired. For 5k clients, epoll on Linux is the standard answer; for portability, poll().",
+                    "ro": "Corect. poll() ia un array explicit de pollfd, deci nu are limită FD_SETSIZE. epoll() elimină și scanarea O(n) a select(): primești doar fd-urile care s-au declanșat. Pentru 5k clienți, epoll pe Linux este răspunsul standard; pentru portabilitate, poll()."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Use multiple processes, each running its own select() on at most 1024 fds",
+                    "ro": "Folosește mai multe procese, fiecare rulând propriul select() pe cel mult 1024 fd-uri"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "This is a valid architectural choice but it sidesteps the question instead of answering it directly — and it adds IPC complexity to migrate fds between processes when one fills up. poll/epoll solve the technical limit cleanly.",
+                    "ro": "Aceasta e o alegere arhitecturală validă dar evită întrebarea în loc să o rezolve direct — și adaugă complexitate IPC pentru a migra fd-urile între procese când unul se umple. poll/epoll rezolvă limita tehnică curat."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "select()'s FD_SETSIZE is a real wall — poll() removes it; epoll() also makes the scan O(1). (Spaced retrieval — select limits from RC C3.)",
+                "ro": "FD_SETSIZE al select() este un zid real — poll() îl elimină; epoll() face și scanarea O(1). (Retrieval distanțat — limitele select din RC C3.)"
+              },
+              "reviewStep": "rc-c4-select-conditions"
+            },
+            {
+              "question": {
+                "en": "fork() and pthread_create() both produce a new flow of execution. Which difference matters MOST when you need to share a large in-memory cache between the original flow and the new one?",
+                "ro": "fork() și pthread_create() produc ambele un flux nou de execuție. Care diferență contează CEL MAI MULT când trebuie să împărtășești un cache mare în memorie între fluxul original și cel nou?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Thread creation is faster",
+                    "ro": "Crearea de thread-uri e mai rapidă"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Speed of creation is real but not the main reason here. The decisive point is address-space sharing: a thread sees the same cache without any IPC; a forked child gets a COW copy and any update needs explicit shm/pipe/socketpair to communicate.",
+                    "ro": "Viteza de creare e reală dar nu motivul principal aici. Punctul decisiv este partajarea spațiului de adrese: un thread vede același cache fără IPC; un copil prin fork primește o copie CoW și orice actualizare are nevoie de shm/pipe/socketpair explicit pentru a comunica."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Threads share the same address space — the cache is reachable as a normal variable",
+                    "ro": "Thread-urile împart același spațiu de adrese — cache-ul este accesibil ca variabilă normală"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. This is the central reason multi-threaded servers dominate cache-heavy workloads: lookup is a pointer dereference, not an IPC round-trip. The cost is that you must synchronise concurrent updates (mutex/rwlock) — but the data is already there.",
+                    "ro": "Corect. Acesta este motivul central pentru care server-ele multi-threaded domină sarcinile cu mult cache: căutarea este o dereferențiere de pointer, nu un round-trip IPC. Costul este că trebuie să sincronizezi actualizările concurente (mutex/rwlock) — dar datele sunt deja acolo."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Threads can use pthread_mutex_t while processes cannot",
+                    "ro": "Thread-urile pot folosi pthread_mutex_t în timp ce procesele nu pot"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Processes CAN share a pthread_mutex_t if the mutex lives in shared memory and is initialised with PTHREAD_PROCESS_SHARED. The point is moot anyway — sharing memory between processes requires extra setup (shm/mmap) that threads get for free.",
+                    "ro": "Procesele POT împărtăși un pthread_mutex_t dacă mutex-ul trăiește în memorie partajată și este inițializat cu PTHREAD_PROCESS_SHARED. Punctul e oricum irelevant — partajarea memoriei între procese cere setup suplimentar (shm/mmap) pe care thread-urile îl primesc gratis."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Threads share address space → cache is a normal variable. Processes need IPC for the same effect.",
+                "ro": "Thread-urile împart spațiul de adrese → cache-ul e variabilă normală. Procesele au nevoie de IPC pentru același efect."
+              },
+              "reviewStep": "rc-c4-threads-intro"
+            },
+            {
+              "question": {
+                "en": "After pthread_create(&tid, NULL, worker, arg) the worker exits. The parent never calls pthread_join. Memory usage grows over time. Which line of code at the top of worker() fixes this without any change to the parent?",
+                "ro": "După pthread_create(&tid, NULL, worker, arg) worker-ul iese. Părintele nu apelează niciodată pthread_join. Utilizarea de memorie crește în timp. Care linie de cod la începutul worker() rezolvă acest lucru fără nicio schimbare la părinte?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "pthread_exit(NULL);",
+                    "ro": "pthread_exit(NULL);"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "pthread_exit just terminates the thread — it does not release the joinable-state bookkeeping. A joinable thread that has 'exited' still holds a struct waiting for someone to call join.",
+                    "ro": "pthread_exit doar termină thread-ul — nu eliberează evidența stării joinable. Un thread joinable care a 'ieșit' tot ține o structură așteptând ca cineva să apeleze join."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "pthread_detach(pthread_self());",
+                    "ro": "pthread_detach(pthread_self());"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Self-detaching is the idiomatic 'fire-and-forget worker' pattern. After this call the thread's resources are reclaimed automatically when worker() returns or pthread_exit() is called.",
+                    "ro": "Corect. Auto-detașarea este tiparul idiomatic de 'worker fire-and-forget'. După acest apel resursele thread-ului sunt recuperate automat când worker() returnează sau este apelat pthread_exit()."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "free(pthread_self());",
+                    "ro": "free(pthread_self());"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "pthread_self() returns an opaque thread id, not a heap pointer. free()-ing it is undefined behaviour. Use pthread_detach() instead.",
+                    "ro": "pthread_self() returnează un id de thread opac, nu un pointer de heap. free()-ul lui este comportament nedefinit. Folosește pthread_detach() în schimb."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Unjoined joinable threads leak. pthread_detach(pthread_self()) makes the worker self-cleaning.",
+                "ro": "Thread-urile joinable nealăturate se scurg. pthread_detach(pthread_self()) face worker-ul să se auto-curețe."
+              },
+              "reviewStep": "rc-c4-pthreads-api"
+            },
+            {
+              "question": {
+                "en": "Which server pattern relies on the parent receiving every accept() and then handing the new descriptor to a chosen worker via Unix-domain sockets?",
+                "ro": "Care tipar de server se bazează pe părinte primind fiecare accept() și apoi transmițând noul descriptor unui worker ales prin socket-uri de domeniu Unix?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Preforking with descriptor passing (pattern 5)",
+                    "ro": "Preforking cu transmitere descriptor (tiparul 5)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The parent accept()s on the listening socket and uses sendmsg() with SCM_RIGHTS to ship the new fd to whichever child it picks. Gives precise load control at the cost of a more complex protocol.",
+                    "ro": "Corect. Părintele face accept() pe socket-ul de ascultare și folosește sendmsg() cu SCM_RIGHTS pentru a expedia noul fd către copilul ales. Oferă control precis al încărcării cu costul unui protocol mai complex."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "fork per client (pattern 2)",
+                    "ro": "fork per client (tiparul 2)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "fork-per-client forks AFTER accept(), so the descriptor is already inside the child. No descriptor passing is needed — the child inherits the fd through fork.",
+                    "ro": "fork-per-client face fork DUPĂ accept(), deci descriptorul este deja în copil. Nu este nevoie de transmiterea descriptorului — copilul moștenește fd-ul prin fork."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Preforking with lock-protected accept (pattern 4)",
+                    "ro": "Preforking cu accept protejat de lock (tiparul 4)"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "In pattern 4 each child calls accept() itself under a mutex/file lock. The parent never sees the connections; nothing is passed via Unix-domain sockets.",
+                    "ro": "În tiparul 4 fiecare copil apelează el însuși accept() sub un mutex/lock de fișier. Părintele nu vede niciodată conexiunile; nimic nu este transmis prin socket-uri de domeniu Unix."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Pattern 5 (preforking + descriptor passing) is the one where the parent accept()s and hands fds to children.",
+                "ro": "Tiparul 5 (preforking + transmitere descriptor) este cel în care părintele face accept() și predă fd-uri copiilor."
+              },
+              "reviewStep": "rc-c4-server-tcp-variants"
+            },
+            {
+              "question": {
+                "en": "True or false: an iterative TCP server can scale to thousands of concurrent users if each request is very fast (sub-millisecond).",
+                "ro": "Adevărat sau fals: un server TCP iterativ poate scala la mii de utilizatori simultani dacă fiecare cerere e foarte rapidă (sub-milisecundă)."
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "True — short requests amortise the iterative cost",
+                    "ro": "Adevărat — cererile scurte amortizează costul iterativ"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Even sub-millisecond requests block other clients during processing. With true concurrency requirements (many SIMULTANEOUSLY connected users), an iterative server serialises everything and the listen backlog fills under load.",
+                    "ro": "Chiar și cererile sub-milisecundă blochează alți clienți în timpul procesării. Cu cerințe reale de concurență (mulți utilizatori conectați SIMULTAN), un server iterativ serializează totul și backlog-ul de ascultare se umple sub încărcare."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "False — iterative serialises one client at a time regardless of speed",
+                    "ro": "Fals — iterativul serializează un client odată indiferent de viteză"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Iterative servers are inherently single-stream. Per-request speed only matters for throughput, not concurrency. To handle many concurrent users you need fork-per-client, thread-per-client, prethreading, or an event-loop with select/epoll.",
+                    "ro": "Corect. Server-ele iterative sunt inerent un singur flux. Viteza per cerere contează doar pentru debit, nu pentru concurență. Pentru a gestiona mulți utilizatori simultani ai nevoie de fork-per-client, thread-per-client, prethreading sau o buclă de evenimente cu select/epoll."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Only if the OS supports kernel-level event scheduling",
+                    "ro": "Doar dacă OS-ul suportă programare la nivel de kernel"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Kernel event scheduling (epoll, kqueue) is exactly what an iterative server does NOT use. By definition an iterative server runs accept→serve→accept on a single flow. Concurrency requires either multiple flows or kernel-driven multiplexing — both move the server out of the iterative pattern.",
+                    "ro": "Programarea evenimentelor la nivel de kernel (epoll, kqueue) este exact ceea ce un server iterativ NU folosește. Prin definiție un server iterativ rulează accept→servește→accept pe un singur flux. Concurența cere fie fluxuri multiple, fie multiplexare condusă de kernel — ambele scot server-ul din tiparul iterativ."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Iterative = one client at a time. Speed helps throughput, not concurrency. Use fork/thread/select for concurrent clients.",
+                "ro": "Iterativ = un client odată. Viteza ajută debitul, nu concurența. Folosește fork/thread/select pentru clienți simultani."
+              },
+              "reviewStep": "rc-c4-server-tcp-variants"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

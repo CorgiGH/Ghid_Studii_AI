@@ -67,6 +67,10 @@ const os = {
       title: { en: 'RC Course 3: Servers & UDP', ro: 'RC Cursul 3: Servere și UDP' },
       shortTitle: { en: 'RC3: Servers & UDP', ro: 'RC3: Servere & UDP' },
       sectionCount: 5 },
+    { id: 'rc-c4', src: 'os/courses/rc-course-04.json', metaId: 'rc-c4',
+      title: { en: 'RC Course 4: I/O Multiplexing Alternatives, Threads & TCP Design Patterns', ro: 'RC Cursul 4: Alternative de multiplexare I/O, fire de execuție și tipare TCP' },
+      shortTitle: { en: 'RC C4: I/O Mux & Threads', ro: 'RC C4: Mux I/O & Thread-uri' },
+      sectionCount: 11 },
   ],
   seminars: [
     { id: 's1', title: { en: 'Week 1: Basic Linux Commands (Solved)', ro: 'Săptămâna 1: Comenzi de bază Linux (Rezolvate)' }, shortTitle: { en: 'W1: Commands', ro: 'S1: Comenzi' }, component: lazy(() => import('./seminars/Seminar01.jsx')) },
