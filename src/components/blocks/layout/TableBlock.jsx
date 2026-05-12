@@ -25,9 +25,16 @@ export default function TableBlock({ headers, rows }) {
   return (
     <div
       className="overflow-x-auto mb-3 rounded-xl max-w-prose mx-auto"
-      style={{ border: '1px solid var(--theme-border)' }}
+      style={{
+        border: '1px solid var(--theme-border)',
+        // Soft right-edge fade signals horizontal scroll on narrow viewports.
+        maskImage: 'linear-gradient(to right, black 0%, black 96%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to right, black 0%, black 96%, transparent 100%)',
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'var(--theme-muted-text) transparent',
+      }}
     >
-      <table className="w-full text-sm" style={{ color: 'var(--theme-content-text)' }}>
+      <table className="w-full text-sm" style={{ color: 'var(--theme-content-text)', minWidth: '0' }}>
         {resolvedHeaders && (
           <thead>
             <tr style={{ backgroundColor: 'var(--theme-border)' }}>
@@ -47,7 +54,17 @@ export default function TableBlock({ headers, rows }) {
           {resolvedRows?.map((row, ri) => {
             const cells = resolveRow(row);
             return (
-              <tr key={ri} style={ri % 2 ? { backgroundColor: 'var(--theme-card-bg)' } : {}}>
+              <tr
+                key={ri}
+                style={{
+                  // Stronger zebra: every row gets a thin bottom border so wrapped
+                  // cells stay visually grouped on narrow viewports.
+                  backgroundColor: ri % 2
+                    ? 'color-mix(in srgb, var(--theme-content-text) 6%, var(--theme-card-bg))'
+                    : 'var(--theme-card-bg)',
+                  borderBottom: '1px solid color-mix(in srgb, var(--theme-border) 50%, transparent)',
+                }}
+              >
                 {cells.map((cell, ci) => {
                   // Cells that resolve to just an em-dash are structural
                   // placeholders (e.g. lower triangle of a divided-difference

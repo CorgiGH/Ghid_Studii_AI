@@ -45,6 +45,13 @@ export default function EquationBlock({ tex, label }) {
           overflowX: 'auto',
           overflowY: 'hidden',
           WebkitOverflowScrolling: 'touch',
+          // Soft right-edge fade signals 'scroll for more' when content overflows;
+          // invisible when content fits inside the container (centred KaTeX).
+          maskImage: 'linear-gradient(to right, black 0%, black 92%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to right, black 0%, black 92%, transparent 100%)',
+          // Always-visible thin scrollbar — affordance for touch + desktop.
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'var(--theme-muted-text) transparent',
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />

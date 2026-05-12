@@ -49,6 +49,19 @@ export default function QuizBlock({ questions }) {
     >
       <div
         className="flex items-center justify-between mb-3"
+        style={questions.length > 3 ? {
+          position: 'sticky',
+          top: 'var(--topbar-offset, 0)',
+          zIndex: 5,
+          backgroundColor: 'color-mix(in srgb, #a855f7 12%, var(--theme-card-bg))',
+          padding: '0.5rem 0',
+          marginTop: '-1rem',
+          marginLeft: '-1rem',
+          marginRight: '-1rem',
+          paddingLeft: '1rem',
+          paddingRight: '1rem',
+          borderBottom: '1px solid color-mix(in srgb, #a855f7 25%, var(--theme-border))',
+        } : undefined}
       >
         <div
           className="text-xs font-semibold uppercase tracking-wide"
@@ -58,14 +71,16 @@ export default function QuizBlock({ questions }) {
         </div>
         {questions.length > 3 && (
           <div
-            className="text-xs font-medium px-2 py-0.5 rounded-full"
+            className="text-xs font-bold px-2.5 py-1 rounded-full"
             style={{
+              // Solid card background so the chip reads against the tinted
+              // quiz container (round-2 contrast fix).
               color: '#a855f7',
-              backgroundColor: 'color-mix(in srgb, #a855f7 12%, transparent)',
-              border: '1px solid color-mix(in srgb, #a855f7 25%, transparent)',
+              backgroundColor: 'var(--theme-card-bg)',
+              border: '1.5px solid #a855f7',
             }}
           >
-            {t(`${answeredCount} / ${questions.length}`, `${answeredCount} / ${questions.length}`)}
+            {`${answeredCount} / ${questions.length}`}
           </div>
         )}
       </div>
