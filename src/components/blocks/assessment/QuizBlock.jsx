@@ -65,8 +65,10 @@ export default function QuizBlock({ questions }) {
             className="text-sm font-bold px-3 py-1 rounded-full"
             style={{
               // Status pill (no border) so it doesn't read as a clickable button.
-              color: '#a855f7',
-              backgroundColor: 'color-mix(in srgb, #a855f7 14%, var(--theme-card-bg))',
+              // Text uses deeper purple (purple-700) to meet WCAG AA 4.5:1 against
+              // the 14% tint background across all 5 palettes × light/dark modes.
+              color: '#6b21a8',
+              backgroundColor: 'color-mix(in srgb, #a855f7 22%, var(--theme-card-bg))',
             }}
           >
             {`${answeredCount} / ${questions.length}`}

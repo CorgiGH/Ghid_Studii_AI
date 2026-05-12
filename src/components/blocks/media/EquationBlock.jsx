@@ -89,7 +89,6 @@ export default function EquationBlock({ tex, label }) {
           WebkitOverflowScrolling: 'touch',
           maskImage: mask,
           WebkitMaskImage: mask,
-          transition: 'mask-image 0.15s ease, -webkit-mask-image 0.15s ease',
           scrollbarWidth: overflowState.overflows ? 'thin' : 'none',
           scrollbarColor: 'var(--theme-muted-text) transparent',
         }}

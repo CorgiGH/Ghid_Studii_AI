@@ -77,7 +77,13 @@ export default function TableBlock({ headers, rows }) {
                 <th
                   key={i}
                   className="px-2 py-2 text-left font-bold text-xs"
-                  style={{ verticalAlign: 'top', minWidth: '70px' }}
+                  style={{
+                    verticalAlign: 'top',
+                    // Conditional min-width: only apply when there are >4 columns,
+                    // otherwise single-char header cells (like $x_i$) get forced
+                    // to wide widths and trigger needless horizontal scroll.
+                    minWidth: (resolvedHeaders && resolvedHeaders.length > 4) ? '60px' : 'auto',
+                  }}
                 >
                   {resolveCell(h, t)}
                 </th>
@@ -115,7 +121,9 @@ export default function TableBlock({ headers, rows }) {
                         verticalAlign: 'top',
                         textAlign: 'left',
                         opacity: isPlaceholder ? 0.3 : 1,
-                        minWidth: '70px',
+                        // No min-width on td — let cell content drive width.
+                        // Headers carry the column min-width so short single-char
+                        // cells (e.g., x_i) don't force overflow on small tables.
                       }}
                     >
                       {resolveCell(cell, t)}
