@@ -64,9 +64,9 @@ export default function QuizBlock({ questions }) {
           <div
             className="text-sm font-bold px-3 py-1 rounded-full"
             style={{
+              // Status pill (no border) so it doesn't read as a clickable button.
               color: '#a855f7',
-              backgroundColor: 'var(--theme-card-bg)',
-              border: '1.5px solid #a855f7',
+              backgroundColor: 'color-mix(in srgb, #a855f7 14%, var(--theme-card-bg))',
             }}
           >
             {`${answeredCount} / ${questions.length}`}
@@ -197,7 +197,7 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
 
   return (
     <div className={index < total - 1 ? 'mb-4 pb-4' : ''} style={index < total - 1 ? { borderBottom: '1px solid var(--theme-border)' } : {}}>
-      <p className="text-sm font-medium mb-2" style={{ color: 'var(--theme-content-text)' }}>
+      <p className="text-sm font-medium mb-4" style={{ color: 'var(--theme-content-text)', lineHeight: 1.45 }}>
         {total > 1 && <span style={{ color: 'var(--theme-muted-text)' }}>Q{index + 1}. </span>}
         <span dangerouslySetInnerHTML={{ __html: formatMarkdown(t(q.question.en, q.question.ro)) }} />
       </p>
@@ -232,6 +232,7 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
                   border: `1px solid ${border}`,
                   color: textColor,
                   pointerEvents: submitted ? 'none' : 'auto',
+                  lineHeight: 1.45,
                   transition: 'background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease',
                 }}
               >

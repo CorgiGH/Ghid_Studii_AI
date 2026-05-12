@@ -24,15 +24,23 @@ export default function EquationBlock({ tex, label }) {
     const el = wrapRef.current;
     if (!el) return;
     const measure = () => {
-      const overflows = el.scrollWidth > el.clientWidth + 1;
+      // +4 px threshold absorbs subpixel rounding + KaTeX font-load reflow.
+      const overflows = el.scrollWidth > el.clientWidth + 4;
       const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
       setOverflowState({ overflows, atEnd });
     };
     measure();
+    // Re-measure after web fonts paint — KaTeX reflows on font load.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measure).catch(() => {});
+    }
+    // Also re-measure on next animation frame for layout settling.
+    const rafId = requestAnimationFrame(measure);
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     el.addEventListener('scroll', measure, { passive: true });
     return () => {
+      cancelAnimationFrame(rafId);
       ro.disconnect();
       el.removeEventListener('scroll', measure);
     };
@@ -81,6 +89,7 @@ export default function EquationBlock({ tex, label }) {
           WebkitOverflowScrolling: 'touch',
           maskImage: mask,
           WebkitMaskImage: mask,
+          transition: 'mask-image 0.15s ease, -webkit-mask-image 0.15s ease',
           scrollbarWidth: overflowState.overflows ? 'thin' : 'none',
           scrollbarColor: 'var(--theme-muted-text) transparent',
         }}

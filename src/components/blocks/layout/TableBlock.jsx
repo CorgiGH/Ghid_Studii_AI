@@ -21,15 +21,20 @@ export default function TableBlock({ headers, rows }) {
     const el = wrapRef.current;
     if (!el) return;
     const measure = () => {
-      const overflows = el.scrollWidth > el.clientWidth + 1;
+      const overflows = el.scrollWidth > el.clientWidth + 4;
       const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
       setOverflowState({ overflows, atEnd });
     };
     measure();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measure).catch(() => {});
+    }
+    const rafId = requestAnimationFrame(measure);
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     el.addEventListener('scroll', measure, { passive: true });
     return () => {
+      cancelAnimationFrame(rafId);
       ro.disconnect();
       el.removeEventListener('scroll', measure);
     };
@@ -71,8 +76,8 @@ export default function TableBlock({ headers, rows }) {
               {resolvedHeaders.map((h, i) => (
                 <th
                   key={i}
-                  className="px-3 py-2 text-left font-bold text-xs"
-                  style={{ verticalAlign: 'top' }}
+                  className="px-2 py-2 text-left font-bold text-xs"
+                  style={{ verticalAlign: 'top', minWidth: '70px' }}
                 >
                   {resolveCell(h, t)}
                 </th>
@@ -110,6 +115,7 @@ export default function TableBlock({ headers, rows }) {
                         verticalAlign: 'top',
                         textAlign: 'left',
                         opacity: isPlaceholder ? 0.3 : 1,
+                        minWidth: '70px',
                       }}
                     >
                       {resolveCell(cell, t)}
