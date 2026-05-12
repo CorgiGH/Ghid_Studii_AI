@@ -48,15 +48,27 @@ export default function TableBlock({ headers, rows }) {
             const cells = resolveRow(row);
             return (
               <tr key={ri} style={ri % 2 ? { backgroundColor: 'var(--theme-card-bg)' } : {}}>
-                {cells.map((cell, ci) => (
-                  <td
-                    key={ci}
-                    className="px-3 py-2 text-xs"
-                    style={{ verticalAlign: 'top', textAlign: 'left' }}
-                  >
-                    {resolveCell(cell, t)}
-                  </td>
-                ))}
+                {cells.map((cell, ci) => {
+                  // Cells that resolve to just an em-dash are structural
+                  // placeholders (e.g. lower triangle of a divided-difference
+                  // table). Render at reduced opacity so the populated cells
+                  // form the visual figure.
+                  const raw = typeof cell === 'object' ? t(cell.en, cell.ro) : cell;
+                  const isPlaceholder = typeof raw === 'string' && raw.trim() === '—';
+                  return (
+                    <td
+                      key={ci}
+                      className="px-3 py-2 text-xs"
+                      style={{
+                        verticalAlign: 'top',
+                        textAlign: 'left',
+                        opacity: isPlaceholder ? 0.3 : 1,
+                      }}
+                    >
+                      {resolveCell(cell, t)}
+                    </td>
+                  );
+                })}
               </tr>
             );
           })}

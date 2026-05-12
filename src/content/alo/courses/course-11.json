@@ -27,7 +27,7 @@
           "type": "think",
           "question": {
             "en": "Suppose you've located a root of $f$ inside $[a,b]$ and want to converge faster than bisection. You know how to draw a tangent line. Can you turn the slope of $f$ at one point into a much better next guess — without halving the interval?",
-            "ro": "Presupune că ai localizat o rădăcină a lui $f$ în $[a,b]$ și vrei să converg mai rapid decât bisecția. Știi să desenezi o tangentă. Poți transforma panta lui $f$ într-un punct într-o estimare mult mai bună — fără să înjumătățești intervalul?"
+            "ro": "Presupune că ai localizat o rădăcină a lui $f$ în $[a,b]$ și vrei convergență mai rapidă decât bisecția. Știi să desenezi o tangentă. Poți transforma panta lui $f$ într-un punct într-o estimare mult mai bună — fără să înjumătățești intervalul?"
           },
           "answer": {
             "en": "Yes — that's the geometric idea behind Newton–Raphson. From an iterate $x_k$, draw the tangent at $(x_k, f(x_k))$ and let $x_{k+1}$ be where that tangent crosses the $x$-axis. Each step uses local slope information ($f'(x_k)$), which is why convergence jumps from linear (bisection) to quadratic.",
@@ -89,6 +89,48 @@
             "en": "The tangent at the wrong endpoint can overshoot past the root, landing $x_1$ outside $[a,b]$ entirely. From there, convergence is no longer guaranteed — the sequence may diverge, oscillate, or wander to a different root. That's why the side condition $f(x_0)f''(x_0) > 0$ matters: it pins the tangent on the correct side.",
             "ro": "Tangenta în capătul greșit poate trece dincolo de rădăcină, plasând $x_1$ în afara intervalului $[a,b]$. De acolo, convergența nu mai este garantată — șirul poate diverge, oscila sau ajunge la altă rădăcină. Tocmai de aceea contează condiția $f(x_0)f''(x_0) > 0$: fixează tangenta pe partea corectă."
           }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Newton's tangent step $x_{k+1} = x_k - f(x_k)/f'(x_k)$ fails when which condition holds?",
+                "ro": "Pasul Newton $x_{k+1} = x_k - f(x_k)/f'(x_k)$ eșuează când are loc care condiție?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$f(x_k) = 0$ — the formula divides by zero", "ro": "$f(x_k) = 0$ — formula împarte la zero" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "If $f(x_k) = 0$, we already found the root: $x_{k+1} = x_k - 0/f'(x_k) = x_k$. That's success, not failure.",
+                    "ro": "Dacă $f(x_k) = 0$, am găsit deja rădăcina: $x_{k+1} = x_k - 0/f'(x_k) = x_k$. Aceasta este reușită, nu eșec."
+                  }
+                },
+                {
+                  "text": { "en": "$f'(x_k) = 0$ — the tangent is horizontal and never crosses the $x$-axis", "ro": "$f'(x_k) = 0$ — tangenta este orizontală și nu intersectează axa $Ox$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Division by $f'(x_k) = 0$ is undefined. Geometrically the tangent runs parallel to $Ox$, so its intersection with the axis is at infinity.",
+                    "ro": "Corect. Împărțirea la $f'(x_k) = 0$ nu este definită. Geometric, tangenta este paralelă cu $Ox$, deci intersecția cu axa este la infinit."
+                  }
+                },
+                {
+                  "text": { "en": "$f''(x_k) = 0$ — convergence stops being quadratic", "ro": "$f''(x_k) = 0$ — convergența nu mai este pătratică" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$f'' = 0$ can slow convergence near the root (an inflection point can even *boost* the order beyond 2) but doesn't make the formula undefined.",
+                    "ro": "$f'' = 0$ poate încetini convergența lângă rădăcină (un punct de inflexiune poate chiar *crește* ordinul peste 2), dar nu face formula nedefinită."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Newton breaks down exactly where the tangent is flat. Workaround: reuse the previous good $f'(\\bar{x}_{k-1})$ for a few steps.",
+                "ro": "Newton se strică exact unde tangenta este plată. Soluție: refolosim $f'(\\bar{x}_{k-1})$ pentru câteva iterații."
+              },
+              "reviewStep": "alo-c11-newton"
+            }
+          ]
         }
       ]
     },
@@ -155,6 +197,48 @@
             "en": "With a fixed anchor on the convex side, every chord stays on the same side of $x^*$ as the iterate moves towards it — geometry forces monotonicity. The secant method discards the older iterate, so the chord can flip sides, allowing larger jumps (faster, order ≈ 1.618) but losing the monotone bracket.",
             "ro": "Cu ancora fixă pe partea convexă, fiecare coardă rămâne de aceeași parte a lui $x^*$ pe măsură ce iterația se apropie — geometria forțează monotonia. Metoda secantei renunță la iterația mai veche, deci coarda își poate schimba partea, permițând salturi mai mari (mai rapide, ordin ≈ 1,618) dar pierzând încadrarea monotonă."
           }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "False position keeps one anchor $\\tilde{x}$ fixed forever. Which property is the price you pay for that simplicity?",
+                "ro": "Falsa poziție păstrează un capăt $\\tilde{x}$ fix mereu. Care proprietate este prețul plătit pentru această simplitate?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Loss of the bracketing guarantee — iterates can leave $[a, b]$", "ro": "Pierderea încadrării — iterațiile pot ieși din $[a, b]$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Wrong direction: the *fixed* anchor is what keeps every chord crossing inside $[a, b]$. False position never leaves the bracket — that's its main selling point.",
+                    "ro": "Direcție greșită: tocmai *ancora fixă* face ca fiecare coardă să rămână în $[a, b]$. Falsa poziție nu iese niciodată din interval — acesta este principalul avantaj."
+                  }
+                },
+                {
+                  "text": { "en": "Convergence rate drops to linear ($q = 1$), slower than Newton or secant", "ro": "Rata de convergență scade la liniară ($q = 1$), mai lentă ca Newton sau secanta" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Anchoring one endpoint means the chord's slope changes slowly — error shrinks by a constant factor each step. Secant beats this by letting *both* endpoints move (golden-ratio order).",
+                    "ro": "Corect. Fixarea unui capăt face ca panta coardei să se schimbe încet — eroarea scade cu un factor constant per pas. Secanta este mai bună permițând *ambele* capete să se miște (ordin = raportul de aur)."
+                  }
+                },
+                {
+                  "text": { "en": "Need for the derivative $f'$ at the anchor", "ro": "Nevoia de derivata $f'$ în ancoră" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "False position is **derivative-free** — that's the *upside*, not the cost. Only Newton needs $f'$.",
+                    "ro": "Falsa poziție este **fără derivată** — acesta este *avantajul*, nu costul. Doar Newton are nevoie de $f'$."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Bracketed + derivative-free + monotone, but only linear. Trade safety for speed depending on the problem.",
+                "ro": "Încadrat + fără derivată + monoton, dar doar liniar. Schimbi siguranța cu viteza în funcție de problemă."
+              },
+              "reviewStep": "alo-c11-false-position"
+            }
+          ]
         }
       ]
     },
@@ -166,6 +250,17 @@
       },
       "group": "nonlinear",
       "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "False position keeps one endpoint $\\tilde{x}$ fixed forever. What might go wrong if the fixed anchor is far from the root, and how could you fix that without giving up the chord idea?",
+            "ro": "Falsa poziție păstrează un capăt $\\tilde{x}$ fix mereu. Ce s-ar putea să meargă prost dacă ancora fixă este departe de rădăcină și cum ai repara fără să renunți la ideea de coardă?"
+          },
+          "answer": {
+            "en": "A far-away anchor produces nearly the same chord every step — the slope barely changes, so the iterate creeps towards $x^*$ at linear rate. **Fix:** discard the older of the two endpoints each step instead of keeping one frozen. Both endpoints move; the chord rotates as fast as the iterates approach the root. That's the **secant method**, and it pushes the order up to $q \\approx 1.618$.",
+            "ro": "O ancoră îndepărtată produce aproape aceeași coardă la fiecare pas — panta abia se schimbă, deci iterația se apropie de $x^*$ cu rată liniară. **Soluție:** renunțăm la cel mai vechi dintre cele două capete în loc să fixăm unul. Ambele capete se mișcă; coarda se rotește la fel de rapid cum se apropie iterațiile. Aceasta este **metoda secantei**, care urcă ordinul la $q \\approx 1{,}618$."
+          }
+        },
         {
           "type": "learn",
           "content": {
@@ -239,6 +334,12 @@
               { "en": "No", "ro": "Nu" },
               { "en": "$\\approx 1.618$", "ro": "$\\approx 1{,}618$" },
               { "en": "No — local convergence", "ro": "Nu — convergență locală" }
+            ],
+            [
+              { "en": "**Laguerre** (polynomial)", "ro": "**Laguerre** (polinom)" },
+              { "en": "Yes ($p', p''$)", "ro": "Da ($p', p''$)" },
+              { "en": "3 (cubic, simple roots)", "ro": "3 (cubic, rădăcini simple)" },
+              { "en": "No — but very robust globally", "ro": "Nu — dar foarte robust global" }
             ]
           ]
         },
@@ -283,6 +384,17 @@
               "reviewStep": "alo-c11-false-position"
             }
           ]
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "**Why** does the secant order come out as the golden ratio $\\phi$ instead of a round number like 2 or 3?",
+            "ro": "**De ce** ordinul secantei iese exact raportul de aur $\\phi$ în loc de un număr rotund ca 2 sau 3?"
+          },
+          "answer": {
+            "en": "Near the root, the error analysis gives $e_{k+1} \\approx C \\, e_k \\, e_{k-1}$ — the next error depends on *two* previous errors, not one. If we ask for $e_{k+1} \\sim |e_k|^q$ to be consistent, we get $q = q \\cdot 1 + 1/q$, i.e., $q^2 = q + 1$. The positive root of this quadratic is $(1 + \\sqrt 5)/2 = \\phi$. Newton, by contrast, uses one previous iterate ($e_{k+1} \\sim e_k^2$ directly), giving $q = 2$. The Fibonacci-style recurrence is what forces $\\phi$.",
+            "ro": "Lângă rădăcină, analiza erorii dă $e_{k+1} \\approx C \\, e_k \\, e_{k-1}$ — eroarea următoare depinde de *două* erori anterioare, nu una. Cerând $e_{k+1} \\sim |e_k|^q$ consistent, obținem $q = q \\cdot 1 + 1/q$, adică $q^2 = q + 1$. Rădăcina pozitivă a acestei ecuații pătratice este $(1 + \\sqrt 5)/2 = \\phi$. Newton, în schimb, folosește o singură iterație anterioară ($e_{k+1} \\sim e_k^2$ direct), dând $q = 2$. Recurența tip Fibonacci forțează apariția lui $\\phi$."
+          }
         }
       ]
     },
@@ -315,7 +427,7 @@
         },
         {
           "type": "equation",
-          "tex": "H(x) = \\frac{[p'(x)]^2 - p(x) p''(x)}{[p(x)]^2} = \\sum_{i=1}^n \\frac{1}{(x - x_i)^2}"
+          "tex": "H(x) = \\dfrac{[p'(x)]^2 - p(x)\\,p''(x)}{[p(x)]^2} = \\sum_{i=1}^n \\dfrac{1}{(x - x_i)^2}"
         },
         {
           "type": "learn",
@@ -369,6 +481,48 @@
             "en": "**Stopping.** Halt when $|a|$ falls below tolerance. **Cubic convergence** for simple roots — far faster than Newton's quadratic. Works on **complex** polynomials and finds **complex roots** too.",
             "ro": "**Oprire.** Ne oprim când $|a|$ scade sub toleranță. **Convergență cubică** pentru rădăcini simple — mult mai rapid decât Newton pătratic. Funcționează pe polinoame **complexe** și găsește rădăcini **complexe**."
           }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "In Laguerre's $\\pm$-sign rule, you pick the sign that makes the **denominator largest in magnitude**. What is the effect on the correction $a$?",
+                "ro": "În regula de semn $\\pm$ a lui Laguerre, alegi semnul care face **numitorul cel mai mare în modul**. Care este efectul asupra corecției $a$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$|a|$ becomes maximal — aggressive step, fastest descent", "ro": "$|a|$ devine maxim — pas agresiv, descreștere maximă" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Wrong direction: a *larger* denominator gives a *smaller* quotient $a$. Aggressive steps would overshoot past the root.",
+                    "ro": "Direcție greșită: un numitor *mai mare* dă un cât *mai mic* $a$. Pașii agresivi ar trece dincolo de rădăcină."
+                  }
+                },
+                {
+                  "text": { "en": "$|a|$ becomes minimal — conservative step, stays inside one root's basin of attraction", "ro": "$|a|$ devine minim — pas conservator, rămâne în bazinul de atracție al unei rădăcini" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Smaller $a$ means a careful step. Cubic convergence is already built in — no need for aggressive jumps. The sign rule prevents jumping *out* of one root's basin into another's.",
+                    "ro": "Corect. $a$ mai mic înseamnă pas atent. Convergența cubică este deja încorporată — nu sunt necesari pași agresivi. Regula de semn previne saltul *afară* din bazinul unei rădăcini în altul."
+                  }
+                },
+                {
+                  "text": { "en": "It forces $a$ to be real even for complex polynomials", "ro": "Forțează $a$ să fie real chiar și pentru polinoame complexe" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Laguerre handles complex inputs end-to-end via complex arithmetic — the sign rule is about *step size*, not about realness. Pick the branch with larger modulus.",
+                    "ro": "Laguerre tratează intrările complexe complet prin aritmetică complexă — regula de semn este despre *mărimea pasului*, nu despre realitate. Alegem ramura cu modul mai mare."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Larger denominator ⇒ smaller $|a|$ ⇒ safer step. The trick keeps the cubic-convergence pay-off without overshooting.",
+                "ro": "Numitor mai mare ⇒ $|a|$ mai mic ⇒ pas mai sigur. Trucul păstrează câștigul cubic fără supra-salt."
+              },
+              "reviewStep": "alo-c11-laguerre"
+            }
+          ]
         },
         {
           "type": "think",
@@ -453,6 +607,48 @@
           "content": {
             "en": "Matrix of the system = Jacobian at $X^{(k)}$. Right-hand side = $-F(X^{(k)})$. Solve with Gauss / LU / QR (Course 4–6), then update $X^{(k+1)} = X^{(k)} + \\Delta^{(k)}$. For $n = 1$, this reduces exactly to the scalar Newton–Raphson formula.",
             "ro": "Matricea sistemului = jacobianul în $X^{(k)}$. Termenul liber = $-F(X^{(k)})$. Rezolvăm cu Gauss / LU / QR (Cursurile 4–6), apoi actualizăm $X^{(k+1)} = X^{(k)} + \\Delta^{(k)}$. Pentru $n = 1$, formula se reduce exact la Newton–Raphson scalar."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Worked example — one step on a 2×2 system.** Solve $F(x,y) = (\\,x^2 + y^2 - 4,\\;\\;xy - 1\\,)^T = 0$ starting from $X^{(0)} = (1, 1)^T$.",
+            "ro": "**Exemplu lucrat — un pas pe sistem 2×2.** Rezolvăm $F(x,y) = (\\,x^2 + y^2 - 4,\\;\\;xy - 1\\,)^T = 0$ pornind de la $X^{(0)} = (1, 1)^T$."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "F(X^{(0)}) = \\begin{pmatrix} 1 + 1 - 4 \\\\ 1 \\cdot 1 - 1 \\end{pmatrix} = \\begin{pmatrix} -2 \\\\ 0 \\end{pmatrix}, \\quad \\nabla F(X^{(0)}) = \\begin{pmatrix} 2x & 2y \\\\ y & x \\end{pmatrix}\\bigg|_{(1,1)} = \\begin{pmatrix} 2 & 2 \\\\ 1 & 1 \\end{pmatrix}"
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Watch out.** $\\det \\nabla F(X^{(0)}) = 2 \\cdot 1 - 2 \\cdot 1 = 0$ — the Jacobian is singular at $(1, 1)$. Newton's step is undefined here. We must restart from a different $X^{(0)}$. Try $X^{(0)} = (2, 0.5)^T$ (which keeps $xy = 1$ but breaks the symmetry).",
+            "ro": "**Atenție.** $\\det \\nabla F(X^{(0)}) = 2 \\cdot 1 - 2 \\cdot 1 = 0$ — jacobianul este singular în $(1, 1)$. Pasul Newton este nedefinit aici. Trebuie să reluăm cu alt $X^{(0)}$. Încercăm $X^{(0)} = (2,\\, 0{,}5)^T$ (păstrează $xy = 1$ dar rupe simetria)."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "F\\bigl((2,\\, 0.5)^T\\bigr) = \\begin{pmatrix} 4 + 0.25 - 4 \\\\ 2 \\cdot 0.5 - 1 \\end{pmatrix} = \\begin{pmatrix} 0.25 \\\\ 0 \\end{pmatrix}, \\quad \\nabla F = \\begin{pmatrix} 4 & 1 \\\\ 0.5 & 2 \\end{pmatrix}"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Solve the 2×2 linear system** $\\nabla F \\cdot \\Delta = -F$: $\\det = 4 \\cdot 2 - 1 \\cdot 0.5 = 7.5$. By Cramer's rule, $\\Delta_1 = (-0.25 \\cdot 2 - 1 \\cdot 0)/7.5 = -1/15$ and $\\Delta_2 = (4 \\cdot 0 - (-0.25) \\cdot 0.5)/7.5 = 1/60$.",
+            "ro": "**Rezolvăm sistemul liniar 2×2** $\\nabla F \\cdot \\Delta = -F$: $\\det = 4 \\cdot 2 - 1 \\cdot 0{,}5 = 7{,}5$. Prin regula lui Cramer, $\\Delta_1 = (-0{,}25 \\cdot 2 - 1 \\cdot 0)/7{,}5 = -1/15$ și $\\Delta_2 = (4 \\cdot 0 - (-0{,}25) \\cdot 0{,}5)/7{,}5 = 1/60$."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "X^{(1)} = X^{(0)} + \\Delta = \\begin{pmatrix} 2 \\\\ 0.5 \\end{pmatrix} + \\begin{pmatrix} -1/15 \\\\ 1/60 \\end{pmatrix} \\approx \\begin{pmatrix} 1.933 \\\\ 0.517 \\end{pmatrix}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Check the residual.** $F(X^{(1)}) \\approx (-0.005,\\, -0.001)^T$ — already three orders of magnitude smaller than $F(X^{(0)})$ on the first coordinate. **One Newton step squared the error**, as the convergence theorem predicted.",
+            "ro": "**Verifică reziduul.** $F(X^{(1)}) \\approx (-0{,}005,\\, -0{,}001)^T$ — deja cu trei ordine de mărime mai mic decât $F(X^{(0)})$ pe prima coordonată. **Un pas Newton a ridicat eroarea la pătrat**, exact cum prezice teorema."
           }
         },
         {
@@ -569,6 +765,48 @@
             "en": "**Why polynomials?** They are easy to evaluate (Horner), easy to differentiate and integrate, dense in $C[a,b]$ (Weierstrass), and — crucially — **uniquely determined** by $n + 1$ data points if we fix the degree at $n$ (proved later in this course).",
             "ro": "**De ce polinoame?** Sunt ușor de evaluat (Horner), ușor de derivat și integrat, dense în $C[a,b]$ (Weierstrass) și — crucial — **unic determinate** de $n + 1$ puncte dacă fixăm gradul la $n$ (vezi mai jos în curs)."
           }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "Why does the interpolation problem require all interpolation nodes to be **distinct** ($x_i \\ne x_j$ for $i \\ne j$)?",
+                "ro": "De ce problema de interpolare cere ca toate nodurile să fie **distincte** ($x_i \\ne x_j$ pentru $i \\ne j$)?"
+              },
+              "options": [
+                {
+                  "text": { "en": "If two nodes coincide, the data $(x_i, y_i)$ and $(x_j, y_j)$ would generally give two different values at the same $x$, making the function $f$ ill-defined", "ro": "Dacă două noduri coincid, datele $(x_i, y_i)$ și $(x_j, y_j)$ ar da în general două valori diferite la același $x$, făcând funcția $f$ neclar definită" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A function value at one $x$ is unique. Also: every interpolation formula divides by node-difference factors like $(x_i - x_j)$, which would be zero — the system becomes singular.",
+                    "ro": "Corect. Valoarea unei funcții la un $x$ este unică. De asemenea: orice formulă de interpolare împarte la factori de diferență $(x_i - x_j)$, care ar fi zero — sistemul devine singular."
+                  }
+                },
+                {
+                  "text": { "en": "To keep the polynomial degree as low as possible", "ro": "Pentru a menține gradul polinomului cât mai mic" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Degree is set by node *count*, not by distinctness. We pick degree $\\le n$ because we have $n + 1$ data points, regardless of where they lie.",
+                    "ro": "Gradul este dat de *numărul* de noduri, nu de distinctitate. Alegem gradul $\\le n$ pentru că avem $n + 1$ puncte, indiferent unde sunt."
+                  }
+                },
+                {
+                  "text": { "en": "Equally-spaced nodes are required for stability", "ro": "Nodurile echidistante sunt necesare pentru stabilitate" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "False — *equally spaced* nodes actually cause **Runge's phenomenon**. Chebyshev nodes (clustered near endpoints) are better. The distinctness requirement is independent of spacing.",
+                    "ro": "Fals — *echidistante* este chiar ce produce **fenomenul Runge**. Nodurile Cebîșev (aglomerate lângă capete) sunt mai bune. Distinctitatea este independentă de spațiere."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Distinctness = single-valuedness + nonzero denominators. Spacing is a separate question (Runge / Chebyshev).",
+                "ro": "Distinctitate = univocitate + numitori nenuli. Spațierea este altă întrebare (Runge / Cebîșev)."
+              },
+              "reviewStep": "alo-c11-interpolation-intro"
+            }
+          ]
         }
       ]
     },
@@ -650,6 +888,48 @@
             "en": "**Almost none.** Every basis polynomial $p_i$ depends on *all* the nodes through its product $\\prod_{j \\ne i}(x - x_j)$, so adding a node changes every $p_i$. You have to recompute the whole sum. This is the main reason the **Newton form** (next step) exists: it lets you extend a degree-$n$ interpolant to degree $n+1$ by *adding a single new term*.",
             "ro": "**Aproape nimic.** Fiecare polinom de bază $p_i$ depinde de *toate* nodurile prin produsul $\\prod_{j \\ne i}(x - x_j)$, deci adăugarea unui nod schimbă fiecare $p_i$. Trebuie să recalculezi întreaga sumă. Tocmai de aceea există **forma Newton** (pasul următor): permite extinderea interpolantului de grad $n$ la grad $n+1$ *adăugând un singur termen nou*."
           }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "The Lagrange basis polynomial $p_i$ satisfies $p_i(x_j) = \\delta_{ij}$. What is the **degree** of $p_i$?",
+                "ro": "Polinomul de bază Lagrange $p_i$ satisface $p_i(x_j) = \\delta_{ij}$. Care este **gradul** lui $p_i$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$n - 1$ — one less than the number of zeros it has", "ro": "$n - 1$ — cu unu mai puțin decât numărul rădăcinilor sale" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$p_i$ has $n$ zeros (at $x_0, \\dots, x_n$ except $x_i$), so its degree is at least $n$. Off by one.",
+                    "ro": "$p_i$ are $n$ rădăcini (la $x_0, \\dots, x_n$ exceptând $x_i$), deci gradul este cel puțin $n$. Greșit cu unu."
+                  }
+                },
+                {
+                  "text": { "en": "Exactly $n$ — it has $n$ distinct zeros and a normalisation factor $c_i$", "ro": "Exact $n$ — are $n$ rădăcini distincte și un factor de normalizare $c_i$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The product $\\prod_{j \\ne i}(x - x_j)$ has $n$ factors, giving degree $n$. $c_i = 1/\\prod_{j \\ne i}(x_i - x_j)$ is a constant and doesn't change the degree.",
+                    "ro": "Corect. Produsul $\\prod_{j \\ne i}(x - x_j)$ are $n$ factori, dând gradul $n$. $c_i = 1/\\prod_{j \\ne i}(x_i - x_j)$ este constantă și nu schimbă gradul."
+                  }
+                },
+                {
+                  "text": { "en": "$n + 1$ — same as the number of nodes", "ro": "$n + 1$ — același ca numărul de noduri" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "A polynomial of degree $n + 1$ would have $n + 1$ roots, but $p_i$ only vanishes at $n$ of the nodes (not at $x_i$ itself). One too many.",
+                    "ro": "Un polinom de grad $n + 1$ ar avea $n + 1$ rădăcini, dar $p_i$ se anulează doar la $n$ dintre noduri (nu la $x_i$). Cu unu prea multe."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "$p_i$ has exactly $n$ zeros and degree $n$. The interpolant $\\ell_n = \\sum_i y_i p_i$ then has degree $\\le n$, as required.",
+                "ro": "$p_i$ are exact $n$ rădăcini și gradul $n$. Interpolantul $\\ell_n = \\sum_i y_i p_i$ are atunci gradul $\\le n$, după cum se cere."
+              },
+              "reviewStep": "alo-c11-lagrange"
+            }
+          ]
         }
       ]
     },
@@ -661,6 +941,17 @@
       },
       "group": "interpolation",
       "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "You already know $\\ell_n(x_i) = f(x_i)$ exactly at the $n+1$ nodes — so the error $f - \\ell_n$ vanishes at $x_0, \\dots, x_n$. Now pick any other point $\\bar{x}$. Can you cook up an auxiliary function $F$, built from $f$, $\\ell_n$, and the node polynomial $w_{n+1}$, that vanishes at $\\bar{x}$ **and** at all the nodes — giving you $n + 2$ zeros to feed to Rolle's theorem?",
+            "ro": "Știi deja că $\\ell_n(x_i) = f(x_i)$ exact la cele $n+1$ noduri — deci eroarea $f - \\ell_n$ se anulează în $x_0, \\dots, x_n$. Alege un alt punct $\\bar{x}$. Poți construi o funcție auxiliară $F$, formată din $f$, $\\ell_n$ și polinomul nodurilor $w_{n+1}$, care să se anuleze și în $\\bar{x}$ **și** în toate nodurile — dându-ți $n + 2$ zerouri pentru teorema lui Rolle?"
+          },
+          "answer": {
+            "en": "Yes — try $F(x) = f(x) - \\ell_n(x) - c \\cdot w_{n+1}(x)$. At every node $x_i$: $f(x_i) = \\ell_n(x_i)$ and $w_{n+1}(x_i) = 0$, so $F(x_i) = 0$ no matter what $c$ is. Now *choose* $c$ to also force $F(\\bar{x}) = 0$ — that gives $c = (f(\\bar{x}) - \\ell_n(\\bar{x}))/w_{n+1}(\\bar{x})$, the very quantity we want to bound. With $n + 2$ zeros, Rolle gives one zero of $F^{(n+1)}$; computing $F^{(n+1)}$ explicitly pins $c$ down in terms of $f^{(n+1)}$.",
+            "ro": "Da — încercăm $F(x) = f(x) - \\ell_n(x) - c \\cdot w_{n+1}(x)$. La orice nod $x_i$: $f(x_i) = \\ell_n(x_i)$ și $w_{n+1}(x_i) = 0$, deci $F(x_i) = 0$ indiferent de $c$. Acum *alegem* $c$ ca să forțăm și $F(\\bar{x}) = 0$ — asta dă $c = (f(\\bar{x}) - \\ell_n(\\bar{x}))/w_{n+1}(\\bar{x})$, exact mărimea pe care vrem să o estimăm. Cu $n + 2$ zerouri, Rolle dă un zero al $F^{(n+1)}$; calculul lui $F^{(n+1)}$ fixează $c$ în funcție de $f^{(n+1)}$."
+          }
+        },
         {
           "type": "learn",
           "content": {
@@ -773,6 +1064,17 @@
       "group": "interpolation",
       "blocks": [
         {
+          "type": "think",
+          "question": {
+            "en": "You already have $\\ell_n$ — the Lagrange interpolant on $\\{x_0, \\dots, x_n\\}$. The professor hands you one more data point $(x_{n+1}, y_{n+1})$. **What's the maximum fraction of your previous work you'd hope to reuse**, and what structure of the answer would let you keep it?",
+            "ro": "Ai deja $\\ell_n$ — interpolantul Lagrange pe $\\{x_0, \\dots, x_n\\}$. Profesorul îți dă încă un punct $(x_{n+1}, y_{n+1})$. **Ce fracțiune maximă din munca anterioară ai vrea să refolosești** și ce structură a răspunsului ar permite asta?"
+          },
+          "answer": {
+            "en": "Ideally **all of it** — extend $\\ell_n$ to $\\ell_{n+1}$ by appending one new term. Lagrange-basis form can't do this: every $p_i$ changes when you add a node. We need a representation where the first $n + 1$ terms describe $\\ell_n$ exactly and the $(n + 2)$-th term only contributes at the new node. That's the **Newton form**: $\\ell_n(x) = c_0 + c_1 (x - x_0) + c_2 (x - x_0)(x - x_1) + \\dots$, where each new term vanishes at all previous nodes by construction. Adding a node costs one divided-difference computation, not $O(n^2)$.",
+            "ro": "Ideal **toată** — extinde $\\ell_n$ la $\\ell_{n+1}$ adăugând un termen. Forma Lagrange nu poate: fiecare $p_i$ se schimbă când adaugi un nod. Avem nevoie de o reprezentare unde primii $n + 1$ termeni descriu exact $\\ell_n$ și termenul $(n + 2)$ contribuie doar la nodul nou. Aceasta este **forma Newton**: $\\ell_n(x) = c_0 + c_1 (x - x_0) + c_2 (x - x_0)(x - x_1) + \\dots$, unde fiecare termen nou se anulează în toate nodurile anterioare prin construcție. Adăugarea unui nod costă o singură diferență divizată, nu $O(n^2)$."
+          }
+        },
+        {
           "type": "callout",
           "variant": "info",
           "content": {
@@ -847,6 +1149,48 @@
             "en": "**Adding a node** $(x_{n+1}, y_{n+1})$: keep $\\ell_n$ as-is and append one new term $[x_0, \\dots, x_{n+1}]_f \\cdot (x - x_0) \\cdots (x - x_n)$. **Removing** a node is a different story — Newton form is asymmetric in the nodes.",
             "ro": "**Adăugarea unui nod** $(x_{n+1}, y_{n+1})$: păstrăm $\\ell_n$ neschimbat și adăugăm un singur termen nou $[x_0, \\dots, x_{n+1}]_f \\cdot (x - x_0) \\cdots (x - x_n)$. **Eliminarea** unui nod este altă poveste — forma Newton este asimetrică în noduri."
           }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "The order-$k$ divided difference $[x_0, x_1, \\dots, x_k]_f$ equals which coefficient in the Newton form of $\\ell_k$?",
+                "ro": "Diferența divizată de ordin $k$ $[x_0, x_1, \\dots, x_k]_f$ este egală cu care coeficient în forma Newton a lui $\\ell_k$?"
+              },
+              "options": [
+                {
+                  "text": { "en": "The constant term — i.e., $\\ell_k(x_0) = y_0$", "ro": "Termenul liber — adică $\\ell_k(x_0) = y_0$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "$y_0$ is the order-**0** divided difference $[x_0]_f$. The order-$k$ difference sits much later in the formula.",
+                    "ro": "$y_0$ este diferența divizată de ordin **0** $[x_0]_f$. Diferența de ordin $k$ se află mult mai târziu în formulă."
+                  }
+                },
+                {
+                  "text": { "en": "The leading coefficient $A_k$ — i.e., the highest-degree coefficient when $\\ell_k$ is expanded in monomials", "ro": "Coeficientul director $A_k$ — adică coeficientul de grad cel mai mare când $\\ell_k$ este dezvoltat în monoame" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The recursive build $\\ell_k = \\ell_{k-1} + A_k \\prod_{j<k}(x - x_j)$ gives the new top-degree term coefficient $A_k$, and the closed form $A_k = \\sum y_i / \\prod_{j \\ne i}(x_i - x_j)$ is exactly the order-$k$ divided difference.",
+                    "ro": "Corect. Construcția recursivă $\\ell_k = \\ell_{k-1} + A_k \\prod_{j<k}(x - x_j)$ dă noul coeficient de grad maxim $A_k$, iar forma închisă $A_k = \\sum y_i / \\prod_{j \\ne i}(x_i - x_j)$ este exact diferența divizată de ordin $k$."
+                  }
+                },
+                {
+                  "text": { "en": "The coefficient of $(x - x_0)^k$ — same as a Taylor expansion around $x_0$", "ro": "Coeficientul lui $(x - x_0)^k$ — la fel ca o dezvoltare Taylor în jurul lui $x_0$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Newton form uses *factors of distinct shifted monomials* $(x - x_0)(x - x_1) \\dots (x - x_{k-1})$, not pure powers of $(x - x_0)$. Taylor is about derivatives at one point; Newton is about node-spanned products.",
+                    "ro": "Forma Newton folosește *factori de monoame deplasate distincte* $(x - x_0)(x - x_1) \\dots (x - x_{k-1})$, nu puteri pure ale lui $(x - x_0)$. Taylor folosește derivate într-un punct; Newton folosește produse de factori distincți."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Divided difference of order $k$ = leading coefficient of the degree-$k$ Lagrange interpolant. That's the bridge.",
+                "ro": "Diferența divizată de ordin $k$ = coeficientul director al interpolantului Lagrange de grad $k$. Aceasta este puntea."
+              },
+              "reviewStep": "alo-c11-newton-form"
+            }
+          ]
         }
       ]
     },
@@ -921,7 +1265,51 @@
         {
           "type": "code",
           "language": "c",
-          "code": "// Aitken's scheme — full 2D table\nfor (i = 0; i <= n; i++) dd[i][0] = y[i];\n\nfor (k = 1; k <= n; k++)\n  for (i = 0; i <= n - k; i++)\n    dd[i][k] = (dd[i + 1][k - 1] - dd[i][k - 1]) / (x[i + k] - x[i]);\n\n// Coefficients of Newton form: dd[0][0], dd[0][1], ..., dd[0][n]"
+          "code": "// Aitken's scheme — full 2D table\n\n// Initialize: order-0 column = data y values\nfor (i = 0; i <= n; i++) dd[i][0] = y[i];\n\n// Process: build successive orders from recursive definition\nfor (k = 1; k <= n; k++)\n  for (i = 0; i <= n - k; i++)\n    dd[i][k] = (dd[i + 1][k - 1] - dd[i][k - 1]) / (x[i + k] - x[i]);\n\n// Return: top row holds the Newton form coefficients\n//   dd[0][0], dd[0][1], ..., dd[0][n]"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Traced example — 3 nodes.** Take $x = (0, 1, 3)$, $y = (1, 2, 26)$. Apply the recursion:",
+            "ro": "**Exemplu trasat — 3 noduri.** Luăm $x = (0, 1, 3)$, $y = (1, 2, 26)$. Aplicăm recurența:"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "$x_i$", "ro": "$x_i$" },
+            { "en": "$dd[i,0] = y_i$", "ro": "$dd[i,0] = y_i$" },
+            { "en": "$dd[i,1]$", "ro": "$dd[i,1]$" },
+            { "en": "$dd[0,2]$", "ro": "$dd[0,2]$" }
+          ],
+          "rows": [
+            [
+              { "en": "$x_0 = 0$", "ro": "$x_0 = 0$" },
+              { "en": "$1$", "ro": "$1$" },
+              { "en": "$(2 - 1)/(1 - 0) = 1$", "ro": "$(2 - 1)/(1 - 0) = 1$" },
+              { "en": "$(12 - 1)/(3 - 0) = 11/3$", "ro": "$(12 - 1)/(3 - 0) = 11/3$" }
+            ],
+            [
+              { "en": "$x_1 = 1$", "ro": "$x_1 = 1$" },
+              { "en": "$2$", "ro": "$2$" },
+              { "en": "$(26 - 2)/(3 - 1) = 12$", "ro": "$(26 - 2)/(3 - 1) = 12$" },
+              { "en": "—", "ro": "—" }
+            ],
+            [
+              { "en": "$x_2 = 3$", "ro": "$x_2 = 3$" },
+              { "en": "$26$", "ro": "$26$" },
+              { "en": "—", "ro": "—" },
+              { "en": "—", "ro": "—" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "**Read off the answer.** Top row: $dd[0,0] = 1$, $dd[0,1] = 1$, $dd[0,2] = 11/3$. Newton form: $\\ell_2(x) = 1 + 1 \\cdot (x - 0) + \\tfrac{11}{3}(x - 0)(x - 1) = 1 + x + \\tfrac{11}{3}x(x - 1)$. Sanity-check: $\\ell_2(0) = 1$ ✓, $\\ell_2(1) = 1 + 1 + 0 = 2$ ✓, $\\ell_2(3) = 1 + 3 + \\tfrac{11}{3} \\cdot 6 = 26$ ✓.",
+            "ro": "**Citim răspunsul.** Rândul de sus: $dd[0,0] = 1$, $dd[0,1] = 1$, $dd[0,2] = 11/3$. Forma Newton: $\\ell_2(x) = 1 + 1 \\cdot (x - 0) + \\tfrac{11}{3}(x - 0)(x - 1) = 1 + x + \\tfrac{11}{3}x(x - 1)$. Verificare: $\\ell_2(0) = 1$ ✓, $\\ell_2(1) = 1 + 1 + 0 = 2$ ✓, $\\ell_2(3) = 1 + 3 + \\tfrac{11}{3} \\cdot 6 = 26$ ✓."
+          }
         },
         {
           "type": "callout",
@@ -934,7 +1322,7 @@
         {
           "type": "code",
           "language": "c",
-          "code": "// Aitken's scheme — in place, one vector\nfor (k = 1; k <= n; k++)\n  for (i = n; i >= k; i--)\n    y[i] = (y[i] - y[i - 1]) / (x[i] - x[i - k]);\n\n// After this loop: y[k] == [x_0, x_1, ..., x_k]_f for k = 0..n\n// These are exactly the Newton form coefficients."
+          "code": "// Aitken's scheme — in place, one vector\n\n// Process: each pass computes one higher divided-difference order\nfor (k = 1; k <= n; k++)\n  // Initialize: sweep right-to-left so y[i-1] still holds the previous round\n  for (i = n; i >= k; i--)\n    y[i] = (y[i] - y[i - 1]) / (x[i] - x[i - k]);\n\n// Return: y[k] == [x_0, x_1, ..., x_k]_f for k = 0..n\n//   These are exactly the Newton form coefficients."
         },
         {
           "type": "learn",
@@ -984,6 +1372,59 @@
             "en": "**When to use which?** Forward is best for $\\bar{x}$ near $x_0$ (start of the table); backward for $\\bar{x}$ near $x_n$ (end of the table). Aitken's scheme adapts trivially: the recursion $\\Delta^k f(x_i) = \\Delta^{k-1} f(x_{i+1}) - \\Delta^{k-1} f(x_i)$ avoids the division by $(x_{i+k} - x_i)$ entirely.",
             "ro": "**Când folosim care?** Progresivă pentru $\\bar{x}$ aproape de $x_0$ (începutul tabelului); regresivă pentru $\\bar{x}$ aproape de $x_n$ (sfârșitul tabelului). Schema Aitken se adaptează trivial: recurența $\\Delta^k f(x_i) = \\Delta^{k-1} f(x_{i+1}) - \\Delta^{k-1} f(x_i)$ evită cu totul împărțirea la $(x_{i+k} - x_i)$."
           }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "**Why** does the in-place Aitken loop sweep $i$ **right-to-left** (from $n$ down to $k$) instead of left-to-right?",
+            "ro": "**De ce** bucla Aitken in-place parcurge $i$ **de la dreapta la stânga** (de la $n$ la $k$) în loc de stânga la dreapta?"
+          },
+          "answer": {
+            "en": "At pass $k$, the formula `y[i] = (y[i] - y[i-1]) / (x[i] - x[i-k])` reads the *old* value of `y[i-1]` — the result of the previous pass. If we swept left-to-right, by the time we reached `y[i]`, `y[i-1]` would already have been overwritten with this pass's value, corrupting the result. Sweeping right-to-left guarantees `y[i-1]` still holds last pass's value when we use it.",
+            "ro": "La pasul $k$, formula `y[i] = (y[i] - y[i-1]) / (x[i] - x[i-k])` citește valoarea *veche* a lui `y[i-1]` — rezultatul pasului anterior. Dacă am parcurge de la stânga la dreapta, când am ajunge la `y[i]`, `y[i-1]` ar fi deja suprascris cu valoarea acestui pas, corupând rezultatul. Parcurgerea de la dreapta la stânga garantează că `y[i-1]` mai conține valoarea pasului anterior când o folosim."
+          }
+        },
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "For equally-spaced nodes $x_i = x_0 + ih$, the order-$k$ divided difference relates to the forward finite difference $\\Delta^k f(x_i)$ how?",
+                "ro": "Pentru noduri echidistante $x_i = x_0 + ih$, diferența divizată de ordin $k$ este legată de diferența finită progresivă $\\Delta^k f(x_i)$ cum?"
+              },
+              "options": [
+                {
+                  "text": { "en": "$[x_i, \\dots, x_{i+k}]_f = \\Delta^k f(x_i)$ — they are the same on uniform grids", "ro": "$[x_i, \\dots, x_{i+k}]_f = \\Delta^k f(x_i)$ — sunt aceleași pe grile uniforme" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "They differ by the normalisation $k! \\, h^k$. Divided differences scale like $h^{-k}$ (denominators are node differences); finite differences scale like $h^0$.",
+                    "ro": "Diferă prin normalizarea $k! \\, h^k$. Diferențele divizate se scalează ca $h^{-k}$ (numitorii sunt diferențe de noduri); diferențele finite ca $h^0$."
+                  }
+                },
+                {
+                  "text": { "en": "$[x_i, \\dots, x_{i+k}]_f = \\Delta^k f(x_i) / (k! \\, h^k)$", "ro": "$[x_i, \\dots, x_{i+k}]_f = \\Delta^k f(x_i) / (k! \\, h^k)$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The denominator products $(x_{i+k} - x_i) \\cdot (x_{i+k-1} - x_{i-1}) \\dots$ collapse to $k! \\, h^k$ on a uniform grid. Newton's forward formula then folds the constants into the binomial-style $t(t-1)\\dots/k!$ shape.",
+                    "ro": "Corect. Produsele numitorilor $(x_{i+k} - x_i) \\cdot (x_{i+k-1} - x_{i-1}) \\dots$ se simplifică la $k! \\, h^k$ pe o grilă uniformă. Formula progresivă Newton încorporează apoi constantele în forma binomială $t(t-1)\\dots/k!$."
+                  }
+                },
+                {
+                  "text": { "en": "$[x_i, \\dots, x_{i+k}]_f = h^k \\cdot \\Delta^k f(x_i)$", "ro": "$[x_i, \\dots, x_{i+k}]_f = h^k \\cdot \\Delta^k f(x_i)$" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Wrong direction — multiplication by $h^k$ would make divided differences scale like $h^0$, but they actually scale like $h^{-k}$ (denominators of differences).",
+                    "ro": "Direcție greșită — înmulțirea cu $h^k$ ar face diferențele divizate să se scaleze ca $h^0$, dar de fapt se scalează ca $h^{-k}$ (numitori de diferențe)."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Divide $\\Delta^k f$ by $k! \\, h^k$ to recover the divided difference on a uniform grid. That's the bridge to Newton's forward formula.",
+                "ro": "Împărțim $\\Delta^k f$ la $k! \\, h^k$ ca să recuperăm diferența divizată pe grilă uniformă. Aceasta este puntea către formula progresivă Newton."
+              },
+              "reviewStep": "alo-c11-aitken"
+            }
+          ]
         }
       ]
     },
@@ -993,8 +1434,15 @@
         "en": "Self-Test",
         "ro": "Autoevaluare"
       },
-      "group": "assessment",
+      "group": "review",
       "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Final check.** Ten questions covering every method in this course — Newton–Raphson, false position, secant, Laguerre, Newton-systems, Lagrange interpolation, the remainder theorem, Newton form with divided differences, and Aitken's scheme. Take your time; each wrong option has a 1–3 sentence explanation that names the misconception, and every question links back to the step where the concept was first introduced. Aim for ≥7/10 before moving on to W7 seminar exercises.",
+            "ro": "**Verificare finală.** Zece întrebări care acoperă fiecare metodă din acest curs — Newton–Raphson, falsa poziție, secanta, Laguerre, sisteme Newton, interpolare Lagrange, teorema restului, forma Newton cu diferențe divizate și schema Aitken. Nu te grăbi; fiecare opțiune greșită are o explicație de 1–3 propoziții care numește concepția eronată, iar fiecare întrebare are link înapoi la pasul în care a fost introdus subiectul. Țintește ≥7/10 înainte de seminarul S7."
+          }
+        },
         {
           "type": "quiz",
           "questions": [
@@ -1330,6 +1778,43 @@
                 "ro": "Noduri echidistante + grad mare = oscilații Runge lângă capete. Folosește în schimb nodurile Cebîșev."
               },
               "reviewStep": "alo-c11-error"
+            },
+            {
+              "question": {
+                "en": "False position keeps one endpoint $\\tilde{x}$ fixed while the secant method moves both. Which property is **lost** when you switch from false position to secant?",
+                "ro": "Falsa poziție păstrează un capăt $\\tilde{x}$ fix, iar metoda secantei le mișcă pe ambele. Care proprietate se **pierde** la trecerea de la falsa poziție la secantă?"
+              },
+              "options": [
+                {
+                  "text": { "en": "Speed: secant is slower than false position", "ro": "Viteza: secanta este mai lentă decât falsa poziție" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Backwards. Secant is **faster** ($q \\approx 1.618$) than false position ($q = 1$). The price for that speed is what the right answer names.",
+                    "ro": "Invers. Secanta este **mai rapidă** ($q \\approx 1{,}618$) decât falsa poziție ($q = 1$). Prețul vitezei este ceea ce numește răspunsul corect."
+                  }
+                },
+                {
+                  "text": { "en": "Guaranteed bracketing of the root — secant iterates can leave $[a, b]$ entirely", "ro": "Încadrarea garantată a rădăcinii — iterațiile secantei pot ieși din $[a, b]$" },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The fixed anchor in false position keeps every chord crossing inside $[a, b]$; once both endpoints move, the chord can flip sign and the iterate can fly outside the original bracket. Secant has only **local** convergence near the root.",
+                    "ro": "Corect. Ancora fixă din falsa poziție menține fiecare coardă să intersecteze în $[a, b]$; odată ce ambele capete se mișcă, coarda își poate schimba semnul și iterația poate ieși din intervalul inițial. Secanta are doar convergență **locală** lângă rădăcină."
+                  }
+                },
+                {
+                  "text": { "en": "Derivative-free evaluation — secant needs $f'$ but false position does not", "ro": "Evaluarea fără derivată — secanta are nevoie de $f'$ dar falsa poziție nu" },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Both methods are derivative-free. They differ in *how* they construct the chord, not in whether they use the derivative. Only Newton–Raphson requires $f'$.",
+                    "ro": "Ambele metode sunt fără derivată. Diferă prin *cum* construiesc coarda, nu prin folosirea derivatei. Doar Newton–Raphson are nevoie de $f'$."
+                  }
+                }
+              ],
+              "explanation": {
+                "en": "Trade-off: false position is slow but always bracketed; secant is fast but only locally convergent.",
+                "ro": "Compromis: falsa poziție este lentă dar mereu încadrată; secanta este rapidă dar doar local convergentă."
+              },
+              "reviewStep": "alo-c11-false-position"
             }
           ]
         }

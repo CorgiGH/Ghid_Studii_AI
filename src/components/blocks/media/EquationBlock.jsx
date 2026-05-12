@@ -37,7 +37,15 @@ export default function EquationBlock({ tex, label }) {
     >
       <div
         className="math-display-wrap"
-        style={{ fontSize: '1.05em', textAlign: 'center', width: '100%' }}
+        style={{
+          fontSize: '1.05em',
+          textAlign: 'center',
+          width: '100%',
+          maxWidth: '100%',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          WebkitOverflowScrolling: 'touch',
+        }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
       {label && (

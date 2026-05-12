@@ -48,10 +48,26 @@ export default function QuizBlock({ questions }) {
       }}
     >
       <div
-        className="text-xs font-semibold uppercase tracking-wide mb-3"
-        style={{ color: '#a855f7' }}
+        className="flex items-center justify-between mb-3"
       >
-        {t('Quick Check', 'Verificare rapidă')}
+        <div
+          className="text-xs font-semibold uppercase tracking-wide"
+          style={{ color: '#a855f7' }}
+        >
+          {t('Quick Check', 'Verificare rapidă')}
+        </div>
+        {questions.length > 3 && (
+          <div
+            className="text-xs font-medium px-2 py-0.5 rounded-full"
+            style={{
+              color: '#a855f7',
+              backgroundColor: 'color-mix(in srgb, #a855f7 12%, transparent)',
+              border: '1px solid color-mix(in srgb, #a855f7 25%, transparent)',
+            }}
+          >
+            {t(`${answeredCount} / ${questions.length}`, `${answeredCount} / ${questions.length}`)}
+          </div>
+        )}
       </div>
       {questions.map((q, qi) => (
         <QuizQuestion
@@ -272,11 +288,12 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
         <button
           onClick={handleCheck}
           disabled={selected === null}
-          className="mt-2 px-4 py-1.5 rounded-lg text-xs font-medium text-white transition-opacity"
+          className="mt-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
           style={{
-            backgroundColor: '#a855f7',
+            backgroundColor: selected === null ? '#a855f7' : '#3b82f6',
             opacity: selected === null ? 0.4 : 1,
             cursor: selected === null ? 'not-allowed' : 'pointer',
+            boxShadow: selected === null ? 'none' : '0 2px 8px rgba(59, 130, 246, 0.35)',
           }}
         >
           {t('Check Answer', 'Verifică')}
