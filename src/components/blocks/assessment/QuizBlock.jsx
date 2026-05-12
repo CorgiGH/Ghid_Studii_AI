@@ -62,15 +62,28 @@ export default function QuizBlock({ questions }) {
         </div>
         {questions.length > 3 && (
           <div
-            className="text-sm font-bold px-3 py-1 rounded-full"
+            className="text-sm font-extrabold px-3 py-1 rounded-full"
             style={{
-              // Status pill (no border) so it doesn't read as a clickable button.
-              // Text uses deeper purple (purple-700) to meet WCAG AA 4.5:1 against
-              // the 14% tint background across all 5 palettes × light/dark modes.
-              color: '#6b21a8',
-              backgroundColor: 'color-mix(in srgb, #a855f7 22%, var(--theme-card-bg))',
+              // Status pill — text inherits theme foreground so contrast
+              // automatically passes WCAG AA on every palette × light/dark
+              // combo. Purple chrome lives on the tint + accent dot.
+              color: 'var(--theme-content-text)',
+              backgroundColor: 'color-mix(in srgb, #a855f7 18%, var(--theme-card-bg))',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
             }}
           >
+            <span
+              aria-hidden="true"
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: '#a855f7',
+                flexShrink: 0,
+              }}
+            />
             {`${answeredCount} / ${questions.length}`}
           </div>
         )}

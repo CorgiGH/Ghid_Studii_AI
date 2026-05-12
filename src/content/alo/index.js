@@ -66,7 +66,7 @@ const alo = {
     { id: 'alo-c11', src: 'alo/courses/course-11.json', metaId: 'alo-c11',
       title: { en: 'Course 11: Nonlinear Equations Continued & Polynomial Interpolation', ro: 'Cursul 11: Ecuații neliniare (continuare) și interpolare polinomială' },
       shortTitle: { en: 'C11: Newton & Lagrange', ro: 'C11: Newton & Lagrange' },
-      sectionCount: 11 },
+      sectionCount: 12 },
   ],
   seminars: [
     { id: 'alo-s1', title: { en: 'Week 1: Vector & matrix norms, complex inner product', ro: 'Săptămâna 1: Norme vectoriale și matriciale, produs scalar complex' }, shortTitle: { en: 'W1: Norms', ro: 'S1: Norme' }, component: makeSeminarComponent(() => import('./seminars/seminar-01.json'), 'Seminar01') },

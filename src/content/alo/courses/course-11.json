@@ -434,8 +434,8 @@
           "questions": [
             {
               "question": {
-                "en": "**Across all three derivative-free methods you've seen** (bisection, false position, secant), which should you reach for first when $f'$ is unavailable or expensive, you have a tight bracket, and you can tolerate a linear rate?",
-                "ro": "**Dintre toate cele trei metode fără derivată pe care le-ai văzut** (bisecție, falsa poziție, secanta), pe care o alegi prima când $f'$ nu este disponibilă sau este costisitoare, ai un interval de încadrare strâns și accepți o rată liniară?"
+                "en": "When $f'$ is unavailable or expensive, you have a tight bracket, and you can tolerate a linear convergence rate — which method do you reach for first?",
+                "ro": "Când $f'$ nu este disponibilă sau este costisitoare, ai un interval de încadrare strâns și accepți o rată liniară de convergență — ce metodă alegi prima?"
               },
               "options": [
                 {
@@ -556,10 +556,10 @@
         },
         {
           "type": "callout",
-          "variant": "tip",
+          "variant": "warning",
           "content": {
-            "en": "**Stopping criterion.** Halt when $|a|$ falls below tolerance. **Cubic convergence** for simple roots — far faster than Newton's quadratic. Works on **complex** polynomials and finds **complex roots** too.",
-            "ro": "**Criteriu de oprire.** Ne oprim când $|a|$ scade sub toleranță. **Convergență cubică** pentru rădăcini simple — mult mai rapid decât Newton pătratic. Funcționează pe polinoame **complexe** și găsește rădăcini **complexe**."
+            "en": "**Stopping criterion.** Halt when $|a|$ falls below tolerance. The procedure is **cubic** for simple roots — far faster than Newton's quadratic — and works on **complex** polynomials and **complex** roots too.",
+            "ro": "**Criteriu de oprire.** Ne oprim când $|a|$ scade sub toleranță. Procedura este **cubică** pentru rădăcini simple — mult mai rapid decât Newton pătratic — și funcționează pe polinoame **complexe** și rădăcini **complexe**."
           }
         },
         {
@@ -632,8 +632,8 @@
     {
       "id": "alo-c11-newton-systems",
       "title": {
-        "en": "5. Newton's method for nonlinear systems",
-        "ro": "5. Metoda Newton pentru sisteme neliniare"
+        "en": "5a. Newton on nonlinear systems — theory",
+        "ro": "5a. Newton pe sisteme neliniare — teorie"
       },
       "group": "nonlinear",
       "blocks": [
@@ -644,8 +644,8 @@
             "ro": "Newton scalar folosește $1/f'(x_k)$ ca pantă inversă. Pentru un sistem $F: \\mathbb{R}^n \\to \\mathbb{R}^n$ panta locală devine o **matrice** — jacobianul $\\nabla F$. Ce înseamnă operațional *împărțirea la* o matrice $n \\times n$ — și ce poate merge prost cum nu se întâmplă în cazul scalar?"
           },
           "answer": {
-            "en": "*Dividing by* $\\nabla F$ means solving the linear system $\\nabla F \\cdot \\Delta = -F$. Two new things can go wrong: **(1) the Jacobian can be singular** (det = 0) at the current iterate — the inverse doesn't exist, the linear system has no unique solution, and Newton breaks; **(2) even when nonsingular, $\\nabla F$ can be ill-conditioned**, amplifying floating-point error in $\\Delta$. Both are matrix-only failure modes — the scalar case only sees them as $f'(x_k) = 0$ (a single number).",
-            "ro": "*Împărțirea la* $\\nabla F$ înseamnă rezolvarea sistemului liniar $\\nabla F \\cdot \\Delta = -F$. Două lucruri noi pot merge prost: **(1) jacobianul poate fi singular** (det = 0) la iterația curentă — inversa nu există, sistemul liniar nu are soluție unică, iar Newton se strică; **(2) chiar nesingular, $\\nabla F$ poate fi prost condiționat**, amplificând eroarea de virgulă mobilă în $\\Delta$. Ambele sunt moduri de eșec specifice matricelor — cazul scalar le vede doar ca $f'(x_k) = 0$ (un singur număr)."
+            "en": "*Dividing by* $\\nabla F$ means solving the linear system $\\nabla F \\cdot \\Delta = -F$. Two new failure modes appear that the scalar case never sees — both rooted in matrix structure rather than just \"derivative is zero\". The worked example below hits one of them live; the other shows up when you choose a linear-solver (Course 4–6).",
+            "ro": "*Împărțirea la* $\\nabla F$ înseamnă rezolvarea sistemului liniar $\\nabla F \\cdot \\Delta = -F$. Apar două moduri noi de eșec pe care cazul scalar nu le vede — ambele apărute din structura matricei, nu doar din \"derivata este zero\". Exemplul lucrat de mai jos lovește unul dintre ele live; celălalt apare la alegerea solverului liniar (Cursurile 4–6)."
           }
         },
         {
@@ -713,6 +713,63 @@
           }
         },
         {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "At each Newton step on a nonlinear system $F(X) = 0$, what is the most numerically sound way to compute the correction $\\Delta^{(k)}$?",
+                "ro": "La fiecare pas Newton pentru sistemul $F(X) = 0$, care este modul cel mai sigur numeric de a calcula corecția $\\Delta^{(k)}$?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Solve the linear system $\\nabla F(X^{(k)}) \\Delta^{(k)} = -F(X^{(k)})$ with Gauss/LU/QR",
+                    "ro": "Rezolvăm sistemul liniar $\\nabla F(X^{(k)}) \\Delta^{(k)} = -F(X^{(k)})$ cu Gauss/LU/QR"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. One LU or QR factorisation per step gives $\\Delta^{(k)}$ directly with the conditioning of $\\nabla F$, not its inverse.",
+                    "ro": "Corect. O factorizare LU sau QR pe pas dă $\\Delta^{(k)}$ direct cu condiționarea lui $\\nabla F$, nu a inversei sale."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Form $[\\nabla F(X^{(k)})]^{-1}$ explicitly, then multiply by $-F(X^{(k)})$",
+                    "ro": "Formăm $[\\nabla F(X^{(k)})]^{-1}$ explicit, apoi înmulțim cu $-F(X^{(k)})$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Explicit inversion costs $O(n^3)$ per step *and* loses precision — every entry of $J^{-1}$ accumulates rounding error. Solving the linear system directly is both faster and more stable.",
+                    "ro": "Inversarea explicită costă $O(n^3)$ pe pas *și* pierde precizie — fiecare element din $J^{-1}$ acumulează erori de rotunjire. Rezolvarea directă a sistemului este mai rapidă și mai stabilă."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Skip the Jacobian — just use $\\Delta^{(k)} = -F(X^{(k)})$",
+                    "ro": "Sărim peste matricea jacobiană — folosim doar $\\Delta^{(k)} = -F(X^{(k)})$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "That's Picard / fixed-point iteration, which converges only linearly *and* only under contraction conditions on $F$. It throws away Newton's local linear model and its quadratic rate.",
+                    "ro": "Asta este iterație Picard / punct fix, care converge doar liniar *și* doar sub condiții de contracție pe $F$. Aruncă modelul liniar local al lui Newton și rata sa pătratică."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c11-newton-systems"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alo-c11-newton-systems-example",
+      "title": {
+        "en": "5b. Newton-systems — worked example",
+        "ro": "5b. Sisteme Newton — exemplu lucrat"
+      },
+      "group": "nonlinear",
+      "blocks": [
+        {
           "type": "callout",
           "variant": "info",
           "content": {
@@ -774,25 +831,18 @@
           }
         },
         {
-          "type": "learn",
-          "content": {
-            "en": "**Optional aside — the system you'd solve.** $\\nabla F(x, y) = \\begin{pmatrix} 2x & 2y \\\\ y & x \\end{pmatrix}$, so at $(1.933, 0.517)$: $\\nabla F \\approx \\begin{pmatrix} 3.867 & 1.033 \\\\ 0.517 & 1.933 \\end{pmatrix}$. The next linear system reads $3.867\\,\\Delta_1 + 1.033\\,\\Delta_2 = -0.005$ and $0.517\\,\\Delta_1 + 1.933\\,\\Delta_2 = +0.001$. Solve with Cramer's rule / LU / QR — never invert $\\nabla F$.",
-            "ro": "**Notă opțională — sistemul de rezolvat.** $\\nabla F(x, y) = \\begin{pmatrix} 2x & 2y \\\\ y & x \\end{pmatrix}$, deci în $(1{,}933,\\, 0{,}517)$: $\\nabla F \\approx \\begin{pmatrix} 3{,}867 & 1{,}033 \\\\ 0{,}517 & 1{,}933 \\end{pmatrix}$. Sistemul liniar este $3{,}867\\,\\Delta_1 + 1{,}033\\,\\Delta_2 = -0{,}005$ și $0{,}517\\,\\Delta_1 + 1{,}933\\,\\Delta_2 = +0{,}001$. Rezolvă cu regula lui Cramer / LU / QR — niciodată nu inversa $\\nabla F$."
-          }
-        },
-        {
           "type": "callout",
           "variant": "info",
           "content": {
-            "en": "**End of worked example.**",
-            "ro": "**Sfârșitul exemplului lucrat.**"
+            "en": "**Optional drill — skip if your prediction satisfied you.** $\\nabla F(x, y) = \\begin{pmatrix} 2x & 2y \\\\ y & x \\end{pmatrix}$, so at $(1.933, 0.517)$: $\\nabla F \\approx \\begin{pmatrix} 3.867 & 1.033 \\\\ 0.517 & 1.933 \\end{pmatrix}$. The next linear system reads $3.867\\,\\Delta_1 + 1.033\\,\\Delta_2 = -0.005$ and $0.517\\,\\Delta_1 + 1.933\\,\\Delta_2 = +0.001$. Solve with Cramer's rule / LU / QR — never invert $\\nabla F$.",
+            "ro": "**Exercițiu opțional — sări peste dacă predicția te-a satisfăcut.** $\\nabla F(x, y) = \\begin{pmatrix} 2x & 2y \\\\ y & x \\end{pmatrix}$, deci în $(1{,}933,\\, 0{,}517)$: $\\nabla F \\approx \\begin{pmatrix} 3{,}867 & 1{,}033 \\\\ 0{,}517 & 1{,}933 \\end{pmatrix}$. Sistemul liniar este $3{,}867\\,\\Delta_1 + 1{,}033\\,\\Delta_2 = -0{,}005$ și $0{,}517\\,\\Delta_1 + 1{,}933\\,\\Delta_2 = +0{,}001$. Rezolvă cu regula lui Cramer / LU / QR — niciodată nu inversa $\\nabla F$."
           }
         },
         {
           "type": "learn",
           "content": {
-            "en": "**General algorithm.** The same recipe in pseudocode for arbitrary $n$. Lines 7–10 (`Build local linear model` / `Solve for correction` / `Update iterate`) are the only ones that change between problems — the surrounding scaffold (init, loop guard, residual check) stays fixed. Compare against the 2×2 trace above to see the same structure on a concrete instance.",
-            "ro": "**Algoritm general.** Aceeași rețetă în pseudocod pentru un $n$ oarecare. Liniile 7–10 (`Build local linear model` / `Solve for correction` / `Update iterate`) sunt singurele care se schimbă între probleme — restul (inițializare, gardă de buclă, verificare reziduu) rămâne fix. Compară cu urmărirea 2×2 de mai sus pentru a vedea aceeași structură pe o instanță concretă."
+            "en": "**General algorithm** (the worked example above wraps up here). The same recipe in pseudocode for arbitrary $n$. Lines 7–10 (`Build local linear model` / `Solve for correction` / `Update iterate`) are the only ones that change between problems — the surrounding scaffold (init, loop guard, residual check) stays fixed. Compare against the 2×2 trace above to see the same structure on a concrete instance.",
+            "ro": "**Algoritm general** (exemplul lucrat de mai sus se încheie aici). Aceeași rețetă în pseudocod pentru un $n$ oarecare. Liniile 7–10 (`Build local linear model` / `Solve for correction` / `Update iterate`) sunt singurele care se schimbă între probleme — restul (inițializare, gardă de buclă, verificare reziduu) rămâne fix. Compară cu urmărirea 2×2 de mai sus pentru a vedea aceeași structură pe o instanță concretă."
           }
         },
         {
@@ -805,45 +855,56 @@
           "questions": [
             {
               "question": {
-                "en": "At each Newton step on a nonlinear system $F(X) = 0$, what is the most numerically sound way to compute the correction $\\Delta^{(k)}$?",
-                "ro": "La fiecare pas Newton pentru sistemul $F(X) = 0$, care este modul cel mai sigur numeric de a calcula corecția $\\Delta^{(k)}$?"
+                "en": "After the first Newton step on the 2×2 system, the residual dropped from $|F(X^{(0)})| \\approx 0.25$ to $|F(X^{(1)})| \\approx 5 \\times 10^{-3}$. Newton has quadratic convergence — what magnitude should you expect for $|F(X^{(2)})|$?",
+                "ro": "După primul pas Newton pe sistemul 2×2, reziduul a scăzut de la $|F(X^{(0)})| \\approx 0{,}25$ la $|F(X^{(1)})| \\approx 5 \\times 10^{-3}$. Newton are convergență pătratică — ce magnitudine aștepți pentru $|F(X^{(2)})|$?"
               },
               "options": [
                 {
                   "text": {
-                    "en": "Solve the linear system $\\nabla F(X^{(k)}) \\Delta^{(k)} = -F(X^{(k)})$ with Gauss/LU/QR",
-                    "ro": "Rezolvăm sistemul liniar $\\nabla F(X^{(k)}) \\Delta^{(k)} = -F(X^{(k)})$ cu Gauss/LU/QR"
+                    "en": "$\\approx 5 \\times 10^{-4}$ — one order of magnitude better, linear scaling",
+                    "ro": "$\\approx 5 \\times 10^{-4}$ — cu un ordin de mărime mai mic, scalare liniară"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "That would be **linear** convergence, characteristic of bisection or false position. Newton with $f \\in C^2$ near a simple root squares the error each step — not just halves it.",
+                    "ro": "Aceasta ar fi convergență **liniară**, caracteristică bisecției sau falsei poziții. Newton cu $f \\in C^2$ lângă o rădăcină simplă ridică eroarea la pătrat la fiecare pas — nu doar înjumătățește."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$\\approx 2.5 \\times 10^{-5}$ — squared, two more orders of magnitude smaller",
+                    "ro": "$\\approx 2{,}5 \\times 10^{-5}$ — la pătrat, încă două ordine de mărime mai mic"
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Correct. One LU or QR factorisation per step gives $\\Delta^{(k)}$ directly with the conditioning of $\\nabla F$, not its inverse.",
-                    "ro": "Corect. O factorizare LU sau QR pe pas dă $\\Delta^{(k)}$ direct cu condiționarea lui $\\nabla F$, nu a inversei sale."
+                    "en": "Correct. Quadratic convergence means $|F(X^{(k+1)})| \\sim C \\cdot |F(X^{(k)})|^2$, so $(5 \\times 10^{-3})^2 = 2.5 \\times 10^{-5}$. Each step roughly doubles the number of correct digits.",
+                    "ro": "Corect. Convergența pătratică înseamnă $|F(X^{(k+1)})| \\sim C \\cdot |F(X^{(k)})|^2$, deci $(5 \\times 10^{-3})^2 = 2{,}5 \\times 10^{-5}$. Fiecare pas aproape dublează numărul de cifre corecte."
                   }
                 },
                 {
                   "text": {
-                    "en": "Form $[\\nabla F(X^{(k)})]^{-1}$ explicitly, then multiply by $-F(X^{(k)})$",
-                    "ro": "Formăm $[\\nabla F(X^{(k)})]^{-1}$ explicit, apoi înmulțim cu $-F(X^{(k)})$"
+                    "en": "$\\approx 10^{-7}$ — cubed, three more orders of magnitude smaller",
+                    "ro": "$\\approx 10^{-7}$ — la cub, încă trei ordine de mărime mai mic"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Explicit inversion costs $O(n^3)$ per step *and* loses precision — every entry of $J^{-1}$ accumulates rounding error. Solving the linear system directly is both faster and more stable.",
-                    "ro": "Inversarea explicită costă $O(n^3)$ pe pas *și* pierde precizie — fiecare element din $J^{-1}$ acumulează erori de rotunjire. Rezolvarea directă a sistemului este mai rapidă și mai stabilă."
+                    "en": "That would be **cubic** convergence — what Laguerre achieves for simple polynomial roots, not Newton on a general nonlinear system. Newton is quadratic ($\\ge 2$) only.",
+                    "ro": "Aceasta ar fi convergență **cubică** — ce realizează Laguerre pentru rădăcini simple polinomiale, nu Newton pe un sistem neliniar general. Newton este doar pătratic ($\\ge 2$)."
                   }
                 },
                 {
                   "text": {
-                    "en": "Skip the Jacobian — just use $\\Delta^{(k)} = -F(X^{(k)})$",
-                    "ro": "Sărim peste matricea jacobiană — folosim doar $\\Delta^{(k)} = -F(X^{(k)})$"
+                    "en": "$\\approx 5 \\times 10^{-3}$ — same magnitude, convergence stalls because we already nailed it",
+                    "ro": "$\\approx 5 \\times 10^{-3}$ — aceeași magnitudine, convergența stagnează pentru că deja am atins-o"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "That's Picard / fixed-point iteration, which converges only linearly *and* only under contraction conditions on $F$. It throws away Newton's local linear model and its quadratic rate.",
-                    "ro": "Asta este iterație Picard / punct fix, care converge doar liniar *și* doar sub condiții de contracție pe $F$. Aruncă modelul liniar local al lui Newton și rata sa pătratică."
+                    "en": "Stalling happens only when $\\nabla F$ becomes singular or ill-conditioned. With a well-behaved Jacobian and $|F|$ already small, every Newton step squares the error — convergence accelerates, not stalls.",
+                    "ro": "Stagnarea apare doar când $\\nabla F$ devine singular sau prost condiționat. Cu un jacobian bine comportat și $|F|$ deja mic, fiecare pas Newton ridică eroarea la pătrat — convergența accelerează, nu stagnează."
                   }
                 }
               ],
-              "reviewStep": "alo-c11-newton-systems"
+              "reviewStep": "alo-c11-newton-systems-example"
             }
           ]
         }
@@ -1190,6 +1251,17 @@
         {
           "type": "equation",
           "tex": "0 = F^{(n+1)}(y) = f^{(n+1)}(y) - c \\cdot (n+1)! \\quad \\Rightarrow \\quad c = \\frac{f^{(n+1)}(y)}{(n+1)!}."
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "**Mid-proof checkpoint.** Why is $\\ell_n^{(n+1)}(x) \\equiv 0$ on the whole interval, while $w_{n+1}^{(n+1)}(x) = (n+1)!$? Which polynomial-degree fact controls each side?",
+            "ro": "**Punct de control mid-demonstrație.** De ce este $\\ell_n^{(n+1)}(x) \\equiv 0$ pe tot intervalul, în timp ce $w_{n+1}^{(n+1)}(x) = (n+1)!$? Ce fapt despre gradul polinomului controlează fiecare parte?"
+          },
+          "answer": {
+            "en": "$\\ell_n$ has degree $\\le n$, so its $(n+1)$-th derivative is identically zero (every monomial $x^k$ with $k \\le n$ becomes 0 after $n+1$ differentiations). $w_{n+1}$ has degree exactly $n+1$ with leading coefficient 1, so the $(n+1)$-th derivative collapses to the constant $(n+1)!$ (the standard $d^{n+1}/dx^{n+1}\\, x^{n+1} = (n+1)!$ result). Same proof tool, opposite outcomes — the difference is degree.",
+            "ro": "$\\ell_n$ are grad $\\le n$, deci derivata sa de ordin $(n+1)$ este identic zero (orice monom $x^k$ cu $k \\le n$ devine 0 după $n+1$ derivări). $w_{n+1}$ are grad exact $n+1$ cu coeficient director 1, deci derivata $(n+1)$ se reduce la constanta $(n+1)!$ (rezultatul standard $d^{n+1}/dx^{n+1}\\, x^{n+1} = (n+1)!$). Același instrument, rezultate opuse — diferența este gradul."
+          }
         },
         {
           "type": "learn",
@@ -1876,17 +1948,6 @@
                 },
                 {
                   "text": {
-                    "en": "$\\ell_n(x) = \\prod_{i=0}^n y_i \\, p_i(x)$",
-                    "ro": "$\\ell_n(x) = \\prod_{i=0}^n y_i \\, p_i(x)$"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "A product makes $\\ell_n$ have degree $n(n+1)$, not $n$, and the value at $x_k$ becomes 0 (since one factor $p_i(x_k) = 0$ for $i \\ne k$). Not interpolation.",
-                    "ro": "Un produs face ca $\\ell_n$ să aibă grad $n(n+1)$, nu $n$, iar valoarea în $x_k$ devine 0 (cum un factor $p_i(x_k) = 0$ pentru $i \\ne k$). Nu este interpolare."
-                  }
-                },
-                {
-                  "text": {
                     "en": "$\\ell_n(x) = \\sum_{i=0}^n y_i \\, p_i(x)$",
                     "ro": "$\\ell_n(x) = \\sum_{i=0}^n y_i \\, p_i(x)$"
                   },
@@ -1895,9 +1956,73 @@
                     "en": "Correct. Evaluating at $x_k$: $\\sum_i y_i p_i(x_k) = y_k \\cdot 1 + \\sum_{i \\ne k} y_i \\cdot 0 = y_k$, so the interpolation condition is satisfied.",
                     "ro": "Corect. Evaluând în $x_k$: $\\sum_i y_i p_i(x_k) = y_k \\cdot 1 + \\sum_{i \\ne k} y_i \\cdot 0 = y_k$, deci condiția de interpolare este satisfăcută."
                   }
+                },
+                {
+                  "text": {
+                    "en": "$\\ell_n(x) = \\prod_{i=0}^n y_i \\, p_i(x)$",
+                    "ro": "$\\ell_n(x) = \\prod_{i=0}^n y_i \\, p_i(x)$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "A product makes $\\ell_n$ have degree $n(n+1)$, not $n$, and the value at $x_k$ becomes 0 (since one factor $p_i(x_k) = 0$ for $i \\ne k$). Not interpolation.",
+                    "ro": "Un produs face ca $\\ell_n$ să aibă grad $n(n+1)$, nu $n$, iar valoarea în $x_k$ devine 0 (cum un factor $p_i(x_k) = 0$ pentru $i \\ne k$). Nu este interpolare."
+                  }
                 }
               ],
               "reviewStep": "alo-c11-lagrange"
+            },
+            {
+              "question": {
+                "en": "What is the order of convergence of the secant method to a simple root, assuming $f \\in C^2$ with $f', f'' \\ne 0$?",
+                "ro": "Care este ordinul de convergență al metodei secantei la o rădăcină simplă, presupunând $f \\in C^2$ cu $f', f'' \\ne 0$?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "$1$ (linear) — same as bisection and false position",
+                    "ro": "$1$ (liniar) — la fel ca bisecția și falsa poziție"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Bisection and false position are linear, but secant beats them. The recurrence on errors gives a Fibonacci-like rate, not pure halving.",
+                    "ro": "Bisecția și falsa poziție sunt liniare, dar secanta le bate. Recurența erorilor dă o rată tip Fibonacci, nu înjumătățire pură."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$2$ (quadratic) — same as Newton–Raphson",
+                    "ro": "$2$ (pătratic) — la fel ca Newton–Raphson"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Secant uses only $f$ values (no derivative), so it can't quite match Newton's quadratic rate. It pays a small order penalty for not needing $f'$.",
+                    "ro": "Secanta folosește doar valori ale lui $f$ (fără derivată), deci nu poate atinge rata pătratică a lui Newton. Plătește o mică pierdere de ordin pentru a nu avea nevoie de $f'$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$1.5$ — exactly halfway between linear and quadratic",
+                    "ro": "$1{,}5$ — exact la jumătatea dintre liniar și pătratic"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Plausible-sounding but wrong. The recurrence $e_{k+1} \\sim C \\, e_k \\, e_{k-1}$ forces $q^2 = q + 1$, whose positive root is $(1+\\sqrt 5)/2 \\approx 1.618$, not $1.5$.",
+                    "ro": "Plauzibil dar greșit. Recurența $e_{k+1} \\sim C \\, e_k \\, e_{k-1}$ forțează $q^2 = q + 1$, a cărui rădăcină pozitivă este $(1+\\sqrt 5)/2 \\approx 1{,}618$, nu $1{,}5$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$q = (1 + \\sqrt{5})/2 \\approx 1.618$ (the golden ratio)",
+                    "ro": "$q = (1 + \\sqrt{5})/2 \\approx 1{,}618$ (raportul de aur)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Solving $q^2 = q + 1$ — derived from $e_{k+1} \\approx C \\, e_k \\, e_{k-1}$ — gives the golden ratio.",
+                    "ro": "Corect. Rezolvând $q^2 = q + 1$ — derivat din $e_{k+1} \\approx C \\, e_k \\, e_{k-1}$ — obținem raportul de aur."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c11-secant"
             },
             {
               "question": {
@@ -1960,13 +2085,13 @@
               "options": [
                 {
                   "text": {
-                    "en": "Per-iteration cost — secant evaluates $f$ twice per step, false position once",
-                    "ro": "Cost per iterație — secanta evaluează $f$ de două ori pe pas, falsa poziție o singură dată"
+                    "en": "Guaranteed bracketing of the root — secant iterates can leave $[a, b]$ entirely",
+                    "ro": "Încadrarea garantată a rădăcinii — iterațiile secantei pot ieși din $[a, b]$"
                   },
-                  "correct": false,
+                  "correct": true,
                   "explanation": {
-                    "en": "Both methods need one new $f$ evaluation per step. False position keeps the anchor value $f(\\tilde x)$ cached and reuses it; secant caches the older iterate's $f$ value and reuses it. Per-iteration cost is identical — the speed difference comes from the chord rotation rate, not function-call count.",
-                    "ro": "Ambele metode au nevoie de o singură evaluare nouă a lui $f$ pe pas. Falsa poziție păstrează în cache valoarea ancorei $f(\\tilde x)$ și o refolosește; secanta păstrează valoarea $f$ a iterației mai vechi. Costul pe iterație este identic — diferența de viteză vine din rata de rotație a coardei, nu din numărul de apeluri de funcție."
+                    "en": "Correct. The fixed anchor in false position keeps every chord crossing inside $[a, b]$; once both endpoints move, the chord can flip sign and the iterate can fly outside the original bracket. Secant has only **local** convergence near the root.",
+                    "ro": "Corect. Ancora fixă din falsa poziție menține fiecare coardă să intersecteze în $[a, b]$; odată ce ambele capete se mișcă, coarda își poate schimba semnul și iterația poate ieși din intervalul inițial. Secanta are doar convergență **locală** lângă rădăcină."
                   }
                 },
                 {
@@ -1982,13 +2107,13 @@
                 },
                 {
                   "text": {
-                    "en": "Guaranteed bracketing of the root — secant iterates can leave $[a, b]$ entirely",
-                    "ro": "Încadrarea garantată a rădăcinii — iterațiile secantei pot ieși din $[a, b]$"
+                    "en": "Per-iteration cost — secant evaluates $f$ twice per step, false position once",
+                    "ro": "Cost per iterație — secanta evaluează $f$ de două ori pe pas, falsa poziție o singură dată"
                   },
-                  "correct": true,
+                  "correct": false,
                   "explanation": {
-                    "en": "Correct. The fixed anchor in false position keeps every chord crossing inside $[a, b]$; once both endpoints move, the chord can flip sign and the iterate can fly outside the original bracket. Secant has only **local** convergence near the root.",
-                    "ro": "Corect. Ancora fixă din falsa poziție menține fiecare coardă să intersecteze în $[a, b]$; odată ce ambele capete se mișcă, coarda își poate schimba semnul și iterația poate ieși din intervalul inițial. Secanta are doar convergență **locală** lângă rădăcină."
+                    "en": "Both methods need one new $f$ evaluation per step. False position keeps the anchor value $f(\\tilde x)$ cached and reuses it; secant caches the older iterate's $f$ value and reuses it. Per-iteration cost is identical — the speed difference comes from the chord rotation rate, not function-call count.",
+                    "ro": "Ambele metode au nevoie de o singură evaluare nouă a lui $f$ pe pas. Falsa poziție păstrează în cache valoarea ancorei $f(\\tilde x)$ și o refolosește; secanta păstrează valoarea $f$ a iterației mai vechi. Costul pe iterație este identic — diferența de viteză vine din rata de rotație a coardei, nu din numărul de apeluri de funcție."
                   }
                 },
                 {
@@ -2007,21 +2132,63 @@
             },
             {
               "question": {
-                "en": "Why must the interpolation nodes $\\{x_0, \\dots, x_n\\}$ all be **distinct** ($x_i \\ne x_j$ for $i \\ne j$)?",
-                "ro": "De ce nodurile de interpolare $\\{x_0, \\dots, x_n\\}$ trebuie să fie toate **distincte** ($x_i \\ne x_j$ pentru $i \\ne j$)?"
+                "en": "Laguerre's method derives the correction $a = y_k - x_1$ assuming $y_k$ is equidistant from all *other* roots. Why pick the **sign** in the $\\pm$ so the **denominator is maximal in magnitude**?",
+                "ro": "Metoda Laguerre obține corecția $a = y_k - x_1$ presupunând că $y_k$ este la egală distanță de toate *celelalte* rădăcini. De ce alegem **semnul** din $\\pm$ astfel încât **numitorul să fie maxim în modul**?"
               },
               "options": [
                 {
                   "text": {
-                    "en": "To force the nodes to be equally spaced — necessary for stability",
-                    "ro": "Ca nodurile să fie echidistante — necesar pentru stabilitate"
+                    "en": "It enables the formula to handle multiple roots without modification",
+                    "ro": "Permite formulei să trateze rădăcini multiple fără modificări"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Distinct ≠ equally spaced. In fact equally-spaced nodes *cause* Runge's phenomenon; Chebyshev nodes (clustered near endpoints) are more stable. Distinctness is independent of spacing.",
-                    "ro": "Distincte ≠ echidistante. De fapt nodurile echidistante *produc* fenomenul Runge; Cebîșev (aglomerate lângă capete) sunt mai stabile. Distinctitatea este independentă de spațiere."
+                    "en": "Multiple roots are actually the case where Laguerre slows down (the cubic-convergence proof assumes a simple root). The sign rule is about step-size control, not multiplicity handling. Modified Laguerre exists for multiple roots.",
+                    "ro": "Rădăcinile multiple sunt cazul în care Laguerre încetinește (demonstrația convergenței cubice presupune o rădăcină simplă). Regula de semn este despre controlul pasului, nu despre multiplicitate. Laguerre modificată tratează rădăcinile multiple."
                   }
                 },
+                {
+                  "text": {
+                    "en": "It avoids division by zero — the alternative sign always produces zero denominator",
+                    "ro": "Evităm împărțirea la zero — semnul alternativ produce mereu numitor zero"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Both signs are generally nonzero; the choice is about *which* nonzero value to use, not avoiding zero.",
+                    "ro": "Ambele semne sunt în general nenule; alegerea este despre *care* valoare nenulă, nu despre evitarea lui zero."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Maximising the denominator minimises $|a|$, so the step is conservative and avoids overshooting past the targeted root",
+                    "ro": "Maximizarea numitorului minimizează $|a|$, deci pasul este conservator și evită supra-saltul peste rădăcina țintă"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A small $a$ means a careful step. With cubic convergence already, you don't need aggressive steps — you need to stay inside the basin of attraction of one root.",
+                    "ro": "Corect. Un $a$ mic înseamnă un pas atent. Având deja convergență cubică, nu ai nevoie de pași agresivi — ai nevoie să rămâi în bazinul de atracție al unei rădăcini."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It makes the formula real-valued even for complex roots",
+                    "ro": "Face formula reală chiar și pentru rădăcini complexe"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Laguerre handles complex inputs by complex arithmetic throughout — the sign choice is about step size, not realness. (One actually picks the branch with larger modulus.)",
+                    "ro": "Laguerre tratează intrările complexe prin aritmetică complexă peste tot — alegerea semnului este despre mărimea pasului, nu despre realitate. (De fapt, alegem ramura cu modul mai mare.)"
+                  }
+                }
+              ],
+              "reviewStep": "alo-c11-laguerre"
+            },
+            {
+              "question": {
+                "en": "Why must the interpolation nodes $\\{x_0, \\dots, x_n\\}$ all be **distinct** ($x_i \\ne x_j$ for $i \\ne j$)?",
+                "ro": "De ce nodurile de interpolare $\\{x_0, \\dots, x_n\\}$ trebuie să fie toate **distincte** ($x_i \\ne x_j$ pentru $i \\ne j$)?"
+              },
+              "options": [
                 {
                   "text": {
                     "en": "To make every interpolation formula well-defined: denominators in $\\prod_{j \\ne i}(x_i - x_j)$ are nonzero, and a function $f$ has a single value at each $x$",
@@ -2031,6 +2198,17 @@
                   "explanation": {
                     "en": "Correct. Two equal nodes would either contradict single-valuedness of $f$ (if $y_i \\ne y_j$) or divide by zero in Lagrange / Newton-form coefficients. Both kill the setup.",
                     "ro": "Corect. Două noduri egale ar contrazice univocitatea lui $f$ (dacă $y_i \\ne y_j$) sau ar duce la împărțire la zero în coeficienții Lagrange / Newton. Ambele anulează construcția."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "To force the nodes to be equally spaced — necessary for stability",
+                    "ro": "Ca nodurile să fie echidistante — necesar pentru stabilitate"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Distinct ≠ equally spaced. In fact equally-spaced nodes *cause* Runge's phenomenon; Chebyshev nodes (clustered near endpoints) are more stable. Distinctness is independent of spacing.",
+                    "ro": "Distincte ≠ echidistante. De fapt nodurile echidistante *produc* fenomenul Runge; Cebîșev (aglomerate lângă capete) sunt mai stabile. Distinctitatea este independentă de spațiere."
                   }
                 },
                 {
@@ -2057,112 +2235,6 @@
                 }
               ],
               "reviewStep": "alo-c11-interpolation-intro"
-            },
-            {
-              "question": {
-                "en": "What is the order of convergence of the secant method to a simple root, assuming $f \\in C^2$ with $f', f'' \\ne 0$?",
-                "ro": "Care este ordinul de convergență al metodei secantei la o rădăcină simplă, presupunând $f \\in C^2$ cu $f', f'' \\ne 0$?"
-              },
-              "options": [
-                {
-                  "text": {
-                    "en": "$1$ (linear) — same as bisection and false position",
-                    "ro": "$1$ (liniar) — la fel ca bisecția și falsa poziție"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Bisection and false position are linear, but secant beats them. The recurrence on errors gives a Fibonacci-like rate, not pure halving.",
-                    "ro": "Bisecția și falsa poziție sunt liniare, dar secanta le bate. Recurența erorilor dă o rată tip Fibonacci, nu înjumătățire pură."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "$2$ (quadratic) — same as Newton–Raphson",
-                    "ro": "$2$ (pătratic) — la fel ca Newton–Raphson"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Secant uses only $f$ values (no derivative), so it can't quite match Newton's quadratic rate. It pays a small order penalty for not needing $f'$.",
-                    "ro": "Secanta folosește doar valori ale lui $f$ (fără derivată), deci nu poate atinge rata pătratică a lui Newton. Plătește o mică pierdere de ordin pentru a nu avea nevoie de $f'$."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "$q = (1 + \\sqrt{5})/2 \\approx 1.618$ (the golden ratio)",
-                    "ro": "$q = (1 + \\sqrt{5})/2 \\approx 1{,}618$ (raportul de aur)"
-                  },
-                  "correct": true,
-                  "explanation": {
-                    "en": "Correct. Solving $q^2 = q + 1$ — derived from $e_{k+1} \\approx C \\, e_k \\, e_{k-1}$ — gives the golden ratio.",
-                    "ro": "Corect. Rezolvând $q^2 = q + 1$ — derivat din $e_{k+1} \\approx C \\, e_k \\, e_{k-1}$ — obținem raportul de aur."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "$1.5$ — exactly halfway between linear and quadratic",
-                    "ro": "$1{,}5$ — exact la jumătatea dintre liniar și pătratic"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Plausible-sounding but wrong. The recurrence $e_{k+1} \\sim C \\, e_k \\, e_{k-1}$ forces $q^2 = q + 1$, whose positive root is $(1+\\sqrt 5)/2 \\approx 1.618$, not $1.5$.",
-                    "ro": "Plauzibil dar greșit. Recurența $e_{k+1} \\sim C \\, e_k \\, e_{k-1}$ forțează $q^2 = q + 1$, a cărui rădăcină pozitivă este $(1+\\sqrt 5)/2 \\approx 1{,}618$, nu $1{,}5$."
-                  }
-                }
-              ],
-              "reviewStep": "alo-c11-secant"
-            },
-            {
-              "question": {
-                "en": "Laguerre's method derives the correction $a = y_k - x_1$ assuming $y_k$ is equidistant from all *other* roots. Why pick the **sign** in the $\\pm$ so the **denominator is maximal in magnitude**?",
-                "ro": "Metoda Laguerre obține corecția $a = y_k - x_1$ presupunând că $y_k$ este la egală distanță de toate *celelalte* rădăcini. De ce alegem **semnul** din $\\pm$ astfel încât **numitorul să fie maxim în modul**?"
-              },
-              "options": [
-                {
-                  "text": {
-                    "en": "Maximising the denominator minimises $|a|$, so the step is conservative and avoids overshooting past the targeted root",
-                    "ro": "Maximizarea numitorului minimizează $|a|$, deci pasul este conservator și evită supra-saltul peste rădăcina țintă"
-                  },
-                  "correct": true,
-                  "explanation": {
-                    "en": "Correct. A small $a$ means a careful step. With cubic convergence already, you don't need aggressive steps — you need to stay inside the basin of attraction of one root.",
-                    "ro": "Corect. Un $a$ mic înseamnă un pas atent. Având deja convergență cubică, nu ai nevoie de pași agresivi — ai nevoie să rămâi în bazinul de atracție al unei rădăcini."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "It avoids division by zero — the alternative sign always produces zero denominator",
-                    "ro": "Evităm împărțirea la zero — semnul alternativ produce mereu numitor zero"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Both signs are generally nonzero; the choice is about *which* nonzero value to use, not avoiding zero.",
-                    "ro": "Ambele semne sunt în general nenule; alegerea este despre *care* valoare nenulă, nu despre evitarea lui zero."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "It enables the formula to handle multiple roots without modification",
-                    "ro": "Permite formulei să trateze rădăcini multiple fără modificări"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Multiple roots are actually the case where Laguerre slows down (the cubic-convergence proof assumes a simple root). The sign rule is about step-size control, not multiplicity handling. Modified Laguerre exists for multiple roots.",
-                    "ro": "Rădăcinile multiple sunt cazul în care Laguerre încetinește (demonstrația convergenței cubice presupune o rădăcină simplă). Regula de semn este despre controlul pasului, nu despre multiplicitate. Laguerre modificată tratează rădăcinile multiple."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "It makes the formula real-valued even for complex roots",
-                    "ro": "Face formula reală chiar și pentru rădăcini complexe"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Laguerre handles complex inputs by complex arithmetic throughout — the sign choice is about step size, not realness. (One actually picks the branch with larger modulus.)",
-                    "ro": "Laguerre tratează intrările complexe prin aritmetică complexă peste tot — alegerea semnului este despre mărimea pasului, nu despre realitate. (De fapt, alegem ramura cu modul mai mare.)"
-                  }
-                }
-              ],
-              "reviewStep": "alo-c11-laguerre"
             },
             {
               "question": {
@@ -2219,59 +2291,6 @@
             },
             {
               "question": {
-                "en": "For Newton's method on a system $F(X) = 0$ with $X \\in \\mathbb{R}^n$, the correction $\\Delta^{(k)}$ satisfies which equation?",
-                "ro": "Pentru metoda Newton pe sistemul $F(X) = 0$ cu $X \\in \\mathbb{R}^n$, corecția $\\Delta^{(k)}$ satisface care ecuație?"
-              },
-              "options": [
-                {
-                  "text": {
-                    "en": "$\\Delta^{(k)} = -F(X^{(k)})$",
-                    "ro": "$\\Delta^{(k)} = -F(X^{(k)})$"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "That's Picard / fixed-point iteration — linear convergence at best, ignores the Jacobian.",
-                    "ro": "Aceasta este iterația Picard / punct fix — convergență liniară în cel mai bun caz, ignoră jacobianul."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "Use scalar Newton independently on each $f_i(x_1, \\dots, x_n) = 0$, then average the resulting $x_i$ candidates",
-                    "ro": "Aplicăm Newton scalar independent pe fiecare $f_i(x_1, \\dots, x_n) = 0$, apoi mediem candidații $x_i$"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Each $f_i$ is a function of *all* $n$ variables jointly — there is no way to apply scalar Newton to one equation at a time without picking a variable to vary, holding the rest fixed. That\\'s Gauss–Seidel iteration, not Newton, and it converges much more slowly (linear, not quadratic).",
-                    "ro": "Fiecare $f_i$ depinde de *toate* cele $n$ variabile împreună — nu se poate aplica Newton scalar la o singură ecuație fără a alege o variabilă, restul fix. Aceasta este iterația Gauss–Seidel, nu Newton, și converge mult mai încet (liniar, nu pătratic)."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "$\\Delta^{(k)} = -\\nabla F(X^{(k)}) \\, F(X^{(k)})$ — a matrix-vector product",
-                    "ro": "$\\Delta^{(k)} = -\\nabla F(X^{(k)}) \\, F(X^{(k)})$ — un produs matrice-vector"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Wrong direction. Newton needs $[\\nabla F]^{-1} F$, not $\\nabla F \\cdot F$. Multiplying by $\\nabla F$ moves *away* from the linearised solution.",
-                    "ro": "Direcție greșită. Newton are nevoie de $[\\nabla F]^{-1} F$, nu $\\nabla F \\cdot F$. Înmulțirea cu $\\nabla F$ se îndepărtează de soluția liniarizată."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "$\\nabla F(X^{(k)}) \\Delta^{(k)} = -F(X^{(k)})$ — a linear system of size $n$",
-                    "ro": "$\\nabla F(X^{(k)}) \\Delta^{(k)} = -F(X^{(k)})$ — un sistem liniar de mărime $n$"
-                  },
-                  "correct": true,
-                  "explanation": {
-                    "en": "Correct. The linearisation $F(X^{(k)} + \\Delta) \\approx F(X^{(k)}) + \\nabla F(X^{(k)}) \\Delta = 0$ gives this $n \\times n$ linear system. Solve with Gauss/LU/QR — do not invert.",
-                    "ro": "Corect. Liniarizarea $F(X^{(k)} + \\Delta) \\approx F(X^{(k)}) + \\nabla F(X^{(k)}) \\Delta = 0$ dă acest sistem liniar $n \\times n$. Rezolvăm cu Gauss/LU/QR — nu inversăm."
-                  }
-                }
-              ],
-              "reviewStep": "alo-c11-newton-systems"
-            },
-            {
-              "question": {
                 "en": "For equally-spaced nodes $x_i = x_0 + ih$, divided differences relate to **finite differences** $\\Delta^k f$ by which formula?",
                 "ro": "Pentru noduri echidistante $x_i = x_0 + ih$, diferențele divizate sunt legate de **diferențele finite** $\\Delta^k f$ prin ce formulă?"
               },
@@ -2322,6 +2341,59 @@
                 }
               ],
               "reviewStep": "alo-c11-aitken"
+            },
+            {
+              "question": {
+                "en": "For Newton's method on a system $F(X) = 0$ with $X \\in \\mathbb{R}^n$, the correction $\\Delta^{(k)}$ satisfies which equation?",
+                "ro": "Pentru metoda Newton pe sistemul $F(X) = 0$ cu $X \\in \\mathbb{R}^n$, corecția $\\Delta^{(k)}$ satisface care ecuație?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "$\\Delta^{(k)} = -F(X^{(k)})$",
+                    "ro": "$\\Delta^{(k)} = -F(X^{(k)})$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "That's Picard / fixed-point iteration — linear convergence at best, ignores the Jacobian.",
+                    "ro": "Aceasta este iterația Picard / punct fix — convergență liniară în cel mai bun caz, ignoră jacobianul."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Use scalar Newton independently on each $f_i(x_1, \\dots, x_n) = 0$, then average the resulting $x_i$ candidates",
+                    "ro": "Aplicăm Newton scalar independent pe fiecare $f_i(x_1, \\dots, x_n) = 0$, apoi mediem candidații $x_i$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Each $f_i$ is a function of *all* $n$ variables jointly — there is no way to apply scalar Newton to one equation at a time without picking a variable to vary, holding the rest fixed. That\\'s Gauss–Seidel iteration, not Newton, and it converges much more slowly (linear, not quadratic).",
+                    "ro": "Fiecare $f_i$ depinde de *toate* cele $n$ variabile împreună — nu se poate aplica Newton scalar la o singură ecuație fără a alege o variabilă, restul fix. Aceasta este iterația Gauss–Seidel, nu Newton, și converge mult mai încet (liniar, nu pătratic)."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$\\Delta^{(k)} = -\\nabla F(X^{(k)}) \\, F(X^{(k)})$ — a matrix-vector product",
+                    "ro": "$\\Delta^{(k)} = -\\nabla F(X^{(k)}) \\, F(X^{(k)})$ — un produs matrice-vector"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Wrong direction. Newton needs $[\\nabla F]^{-1} F$, not $\\nabla F \\cdot F$. Multiplying by $\\nabla F$ moves *away* from the linearised solution.",
+                    "ro": "Direcție greșită. Newton are nevoie de $[\\nabla F]^{-1} F$, nu $\\nabla F \\cdot F$. Înmulțirea cu $\\nabla F$ se îndepărtează de soluția liniarizată."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$\\nabla F(X^{(k)}) \\Delta^{(k)} = -F(X^{(k)})$ — a linear system of size $n$",
+                    "ro": "$\\nabla F(X^{(k)}) \\Delta^{(k)} = -F(X^{(k)})$ — un sistem liniar de mărime $n$"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The linearisation $F(X^{(k)} + \\Delta) \\approx F(X^{(k)}) + \\nabla F(X^{(k)}) \\Delta = 0$ gives this $n \\times n$ linear system. Solve with Gauss/LU/QR — do not invert.",
+                    "ro": "Corect. Liniarizarea $F(X^{(k)} + \\Delta) \\approx F(X^{(k)}) + \\nabla F(X^{(k)}) \\Delta = 0$ dă acest sistem liniar $n \\times n$. Rezolvăm cu Gauss/LU/QR — nu inversăm."
+                  }
+                }
+              ],
+              "reviewStep": "alo-c11-newton-systems"
             }
           ]
         }
