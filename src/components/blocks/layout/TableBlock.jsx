@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import formatMarkdown from '../formatMarkdown';
 
@@ -14,6 +14,27 @@ function resolveCell(cell, t) {
 
 export default function TableBlock({ headers, rows }) {
   const { t } = useApp();
+  const wrapRef = useRef(null);
+  const [overflowState, setOverflowState] = useState({ overflows: false, atEnd: false });
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const measure = () => {
+      const overflows = el.scrollWidth > el.clientWidth + 1;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+      setOverflowState({ overflows, atEnd });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    el.addEventListener('scroll', measure, { passive: true });
+    return () => {
+      ro.disconnect();
+      el.removeEventListener('scroll', measure);
+    };
+  }, [rows]);
+
   // Support both array format and bilingual object format { en: [], ro: [] }
   const resolvedHeaders = headers && !Array.isArray(headers) && headers.en ? (t(headers.en, headers.ro) || headers.en) : headers;
   // rows can be: [...] | [{en:[], ro:[]}, ...] | {en: [[]], ro: [[]]}  (whole-table bilingual)
@@ -22,15 +43,24 @@ export default function TableBlock({ headers, rows }) {
     if (!Array.isArray(row) && row?.en) return t(row.en, row.ro) || row.en;
     return row;
   };
+
+  // Edge-fade only when there is content past the right edge AND the user
+  // hasn't scrolled to it. Eliminates the static fade-eats-content bug on
+  // non-overflowing tables and on tables scrolled to their end.
+  const showFade = overflowState.overflows && !overflowState.atEnd;
+  const mask = showFade
+    ? 'linear-gradient(to right, black 0%, black 96%, transparent 100%)'
+    : 'none';
+
   return (
     <div
+      ref={wrapRef}
       className="overflow-x-auto mb-3 rounded-xl max-w-prose mx-auto"
       style={{
         border: '1px solid var(--theme-border)',
-        // Soft right-edge fade signals horizontal scroll on narrow viewports.
-        maskImage: 'linear-gradient(to right, black 0%, black 96%, transparent 100%)',
-        WebkitMaskImage: 'linear-gradient(to right, black 0%, black 96%, transparent 100%)',
-        scrollbarWidth: 'thin',
+        maskImage: mask,
+        WebkitMaskImage: mask,
+        scrollbarWidth: overflowState.overflows ? 'thin' : 'none',
         scrollbarColor: 'var(--theme-muted-text) transparent',
       }}
     >
@@ -75,7 +105,7 @@ export default function TableBlock({ headers, rows }) {
                   return (
                     <td
                       key={ci}
-                      className="px-3 py-2 text-xs"
+                      className="px-2 py-2 text-xs"
                       style={{
                         verticalAlign: 'top',
                         textAlign: 'left',

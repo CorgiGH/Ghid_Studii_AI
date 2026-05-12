@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import katex from 'katex';
 import { useApp } from '../../../contexts/AppContext';
 
@@ -10,9 +10,34 @@ import { useApp } from '../../../contexts/AppContext';
  * Visual: left accent-rail + subtle tint (whiteboard metaphor), no card border.
  * Label sits in a right gutter via CSS grid, italic serif to match KaTeX typography.
  * KaTeX output is htmlAndMathml for screen-reader accessibility.
+ *
+ * Overflow handling: the math-display wrap detects scrollable content and shows
+ * an edge-fade + thin scrollbar only while there is more content past the right
+ * edge. Short equations that fit inside the column render with no fade.
  */
 export default function EquationBlock({ tex, label }) {
   const { t } = useApp();
+  const wrapRef = useRef(null);
+  const [overflowState, setOverflowState] = useState({ overflows: false, atEnd: false });
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const measure = () => {
+      const overflows = el.scrollWidth > el.clientWidth + 1;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+      setOverflowState({ overflows, atEnd });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    el.addEventListener('scroll', measure, { passive: true });
+    return () => {
+      ro.disconnect();
+      el.removeEventListener('scroll', measure);
+    };
+  }, [tex]);
+
   if (!tex) return null;
 
   let html;
@@ -21,6 +46,14 @@ export default function EquationBlock({ tex, label }) {
   } catch {
     html = `<span style="color:var(--theme-error, #ef4444)">[math error: ${tex}]</span>`;
   }
+
+  // Apply edge-fade ONLY when there is still content to the right of the
+  // visible viewport. When the user scrolls to the end, drop the fade so
+  // trailing characters/closing brackets aren't permanently obscured.
+  const showFade = overflowState.overflows && !overflowState.atEnd;
+  const mask = showFade
+    ? 'linear-gradient(to right, black 0%, black 92%, transparent 100%)'
+    : 'none';
 
   return (
     <div
@@ -36,6 +69,7 @@ export default function EquationBlock({ tex, label }) {
       }}
     >
       <div
+        ref={wrapRef}
         className="math-display-wrap"
         style={{
           fontSize: '1.05em',
@@ -45,12 +79,9 @@ export default function EquationBlock({ tex, label }) {
           overflowX: 'auto',
           overflowY: 'hidden',
           WebkitOverflowScrolling: 'touch',
-          // Soft right-edge fade signals 'scroll for more' when content overflows;
-          // invisible when content fits inside the container (centred KaTeX).
-          maskImage: 'linear-gradient(to right, black 0%, black 92%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to right, black 0%, black 92%, transparent 100%)',
-          // Always-visible thin scrollbar — affordance for touch + desktop.
-          scrollbarWidth: 'thin',
+          maskImage: mask,
+          WebkitMaskImage: mask,
+          scrollbarWidth: overflowState.overflows ? 'thin' : 'none',
           scrollbarColor: 'var(--theme-muted-text) transparent',
         }}
         dangerouslySetInnerHTML={{ __html: html }}
