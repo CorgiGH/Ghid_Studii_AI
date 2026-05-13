@@ -112,6 +112,29 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
     prevUnderstoodRef.current = understoodCount;
   }, [understoodCount, courseData?.steps]);
 
+  // Measure sticky stepper height + expose as --stepper-offset for nested
+  // sticky elements (e.g. QuizBlock counter chip on long self-test pages).
+  // IMPORTANT: this ref + effect MUST live above the early returns below,
+  // otherwise the hook count differs between the loading and loaded renders
+  // (React hooks-order invariant — produces "Rendered more hooks than during
+  // the previous render." in ErrorBoundary).
+  const stepperRef = useRef(null);
+  useEffect(() => {
+    const el = stepperRef.current;
+    if (!el) return;
+    const measure = () => {
+      const h = Math.round(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--stepper-offset', `${h}px`);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty('--stepper-offset');
+    };
+  }, [courseData, currentStep]);
+
   if (loading) {
     return (
       <div className="p-4 space-y-3">
@@ -138,25 +161,6 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
       </div>
     );
   }
-
-  // Measure sticky stepper height + expose as --stepper-offset for nested
-  // sticky elements (e.g. QuizBlock counter chip on long self-test pages).
-  const stepperRef = useRef(null);
-  useEffect(() => {
-    const el = stepperRef.current;
-    if (!el) return;
-    const measure = () => {
-      const h = Math.round(el.getBoundingClientRect().height);
-      document.documentElement.style.setProperty('--stepper-offset', `${h}px`);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => {
-      ro.disconnect();
-      document.documentElement.style.removeProperty('--stepper-offset');
-    };
-  }, [courseData, currentStep]);
 
   return (
     <CourseNavContext.Provider value={courseNavValue}>
