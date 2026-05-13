@@ -139,11 +139,31 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
     );
   }
 
+  // Measure sticky stepper height + expose as --stepper-offset for nested
+  // sticky elements (e.g. QuizBlock counter chip on long self-test pages).
+  const stepperRef = useRef(null);
+  useEffect(() => {
+    const el = stepperRef.current;
+    if (!el) return;
+    const measure = () => {
+      const h = Math.round(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--stepper-offset', `${h}px`);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty('--stepper-offset');
+    };
+  }, [courseData, currentStep]);
+
   return (
     <CourseNavContext.Provider value={courseNavValue}>
     <div>
       {/* ===== Sticky progress header ===== */}
       <div
+        ref={stepperRef}
         className="sticky z-10 -mx-4 lg:-mx-8 px-4 lg:px-8"
         style={{
           top: 'var(--topbar-offset, 0px)',

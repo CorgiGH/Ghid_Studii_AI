@@ -47,13 +47,25 @@ export default function QuizBlock({ questions }) {
         border: '1px solid color-mix(in srgb, #a855f7 25%, var(--theme-border))',
       }}
     >
-      {/* Header with optional counter chip for multi-question quizzes.
-          Sticky was tried in R2 but collided with the app's existing sticky
-          course-progress bar (lower z-index, no offset for cumulative bar
-          heights). Dropping sticky and keeping a prominent non-sticky chip
-          is cleaner — the chip lives at the top of the quiz card alongside
-          per-question progress (Q{i+1}. ...) already shown by QuizQuestion. */}
-      <div className="flex items-center justify-between mb-3">
+      {/* Header — sticky on long quizzes so the counter chip remains visible
+          while scrolling. Stack offset: topbar + stepper (CourseRenderer
+          exposes both as CSS vars). Falls back to non-sticky for short
+          quizzes (≤3 Qs) where orientation is not at risk. */}
+      <div
+        className="flex items-center justify-between mb-3 -mx-4 px-4 py-2 rounded-t-xl"
+        style={
+          questions.length > 3
+            ? {
+                position: 'sticky',
+                top: 'calc(var(--topbar-offset, 0px) + var(--stepper-offset, 0px))',
+                zIndex: 5,
+                backgroundColor: 'color-mix(in srgb, #a855f7 12%, var(--theme-card-bg))',
+                borderBottom: '1px solid color-mix(in srgb, #a855f7 25%, var(--theme-border))',
+                marginBottom: '0.75rem',
+              }
+            : {}
+        }
+      >
         <div
           className="text-xs font-semibold uppercase tracking-wide"
           style={{ color: '#a855f7' }}
@@ -88,16 +100,48 @@ export default function QuizBlock({ questions }) {
           </div>
         )}
       </div>
-      {questions.map((q, qi) => (
-        <QuizQuestion
-          key={qi}
-          q={q}
-          index={qi}
-          total={questions.length}
-          resetSignal={resetSignal}
-          onAnswered={(correct) => recordResult(qi, correct)}
-        />
-      ))}
+      {questions.map((q, qi) => {
+        // Insert a chunk break every 3 questions on long quizzes to relieve
+        // the monotone-purple wall and give the eye a landmark.
+        const showChunkBreak = questions.length > 6 && qi > 0 && qi % 3 === 0;
+        const chunkLabel = `${qi + 1}–${Math.min(qi + 3, questions.length)}`;
+        return (
+          <React.Fragment key={qi}>
+            {showChunkBreak && (
+              <div
+                className="flex items-center gap-2 my-4 select-none"
+                aria-hidden="true"
+              >
+                <div
+                  className="flex-1 h-px"
+                  style={{ backgroundColor: 'color-mix(in srgb, #a855f7 25%, var(--theme-border))' }}
+                />
+                <span
+                  className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+                  style={{
+                    color: 'color-mix(in srgb, #a855f7 60%, var(--theme-muted-text))',
+                    backgroundColor: 'color-mix(in srgb, #a855f7 8%, var(--theme-card-bg))',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  {t(`Q ${chunkLabel}`, `Î ${chunkLabel}`)}
+                </span>
+                <div
+                  className="flex-1 h-px"
+                  style={{ backgroundColor: 'color-mix(in srgb, #a855f7 25%, var(--theme-border))' }}
+                />
+              </div>
+            )}
+            <QuizQuestion
+              q={q}
+              index={qi}
+              total={questions.length}
+              resetSignal={resetSignal}
+              onAnswered={(correct) => recordResult(qi, correct)}
+            />
+          </React.Fragment>
+        );
+      })}
 
       {allAnswered && (
         <div
