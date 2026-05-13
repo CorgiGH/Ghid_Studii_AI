@@ -49,17 +49,22 @@ export default function ThinkBlock({ question, answer }) {
       >
         <button
           onClick={() => setRevealed(true)}
-          className="w-full flex items-center justify-center gap-2 text-sm font-medium py-2.5 rounded-lg transition-colors cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition-all cursor-pointer"
           style={{
             backgroundColor: 'color-mix(in srgb, #f59e0b 18%, var(--theme-card-bg))',
-            border: 'none',
+            border: '1px solid color-mix(in srgb, #f59e0b 45%, var(--theme-border))',
             color: 'var(--theme-content-text)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.backgroundColor = 'color-mix(in srgb, #f59e0b 28%, var(--theme-card-bg))';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(245, 158, 11, 0.25)';
+            e.currentTarget.style.borderColor = '#f59e0b';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.backgroundColor = 'color-mix(in srgb, #f59e0b 18%, var(--theme-card-bg))';
+            e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+            e.currentTarget.style.borderColor = 'color-mix(in srgb, #f59e0b 45%, var(--theme-border))';
           }}
         >
           <span>{t('Click to reveal answer', 'Click pentru răspuns')}</span>
