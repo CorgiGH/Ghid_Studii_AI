@@ -30,15 +30,15 @@
             "ro": "O functie aflata adanc in stiva de apeluri descopera o eroare nerecuperabila (de ex. fisier lipsa, alocare esuata). Cum propagi eroarea pana la apelantul care poate reactiona — fara sa umpli fiecare functie intermediara cu verificari `if (error) return error;`?"
           },
           "answer": {
-            "en": "C++ exceptions: `throw` an object at the error site, and the runtime unwinds the stack until it finds a matching `catch`. Intermediate frames need zero error-handling code; only the producer and the consumer participate.",
-            "ro": "Exceptii C++: `throw` arunca un obiect la locul erorii, iar runtime-ul deruleaza stiva pana gaseste un `catch` potrivit. Cadrele intermediare nu au nevoie de cod de tratare a erorilor; doar producatorul si consumatorul participa."
+            "en": "C++ exceptions: a `throw` flings an object up the stack; the runtime finds a matching `catch`. Intermediate frames need no error-handling code. The how-it-works comes next.",
+            "ro": "Exceptii C++: un `throw` arunca un obiect in sus pe stiva; runtime-ul gaseste un `catch` care se potriveste. Cadrele intermediare nu au nevoie de cod de tratare. Detaliile vin in pasii urmatori."
           }
         },
         {
           "type": "learn",
           "content": {
-            "en": "Course 11 covers six interlocking topics:\n- **Basic exceptions** — `try`/`catch`/`throw` syntax and matching rules\n- **Standard exceptions** — the `std::exception` hierarchy and how to extend it\n- **`noexcept`** — declaring functions that never throw, and how the STL uses this\n- **`std::nothrow`** — making `new` return `nullptr` instead of throwing\n- **Modeling exception behavior** — what the compiler emits under the hood\n- **SEH** — Windows OS-level Structured Exception Handling (hardware faults)\n- **RAII** — the idiom that makes exception-safe resource management possible",
-            "ro": "Cursul 11 acopera sase teme interdependente:\n- **Exceptii de baza** — sintaxa `try`/`catch`/`throw` si reguli de potrivire\n- **Exceptii standard** — ierarhia `std::exception` si cum o extinzi\n- **`noexcept`** — declararea functiilor care nu arunca, si cum o foloseste STL-ul\n- **`std::nothrow`** — `new` returneaza `nullptr` in loc sa arunce\n- **Modelarea comportamentului exceptiilor** — ce emite compilatorul in spate\n- **SEH** — Structured Exception Handling al Windows (defecte hardware)\n- **RAII** — idiomul care face posibila gestionarea exception-safe a resurselor"
+            "en": "Course 11 covers seven interlocking topics:\n- **Basic exceptions** — `try`/`catch`/`throw` syntax and matching rules\n- **Standard exceptions** — the `std::exception` hierarchy and how to extend it\n- **`noexcept`** — declaring functions that never throw, and how the STL uses this\n- **`std::nothrow`** — making `new` return `nullptr` instead of throwing\n- **Modeling exception behavior** — what the compiler emits under the hood\n- **SEH** — Windows OS-level Structured Exception Handling (hardware faults)\n- **RAII** — the idiom that makes exception-safe resource management possible",
+            "ro": "Cursul 11 acopera sapte teme interdependente:\n- **Exceptii de baza** — sintaxa `try`/`catch`/`throw` si reguli de potrivire\n- **Exceptii standard** — ierarhia `std::exception` si cum o extinzi\n- **`noexcept`** — declararea functiilor care nu arunca, si cum o foloseste STL-ul\n- **`std::nothrow`** — `new` returneaza `nullptr` in loc sa arunce\n- **Modelarea comportamentului exceptiilor** — ce emite compilatorul in spate\n- **SEH** — Structured Exception Handling al Windows (defecte hardware)\n- **RAII** — idiomul care face posibila gestionarea exception-safe a resurselor"
           }
         },
         {
@@ -81,7 +81,7 @@
         {
           "type": "code",
           "language": "cpp",
-          "code": "#include <iostream>\n\nint main() {\n    try {\n        for (int tr = 0; tr < 10; ++tr) {\n            if (tr == 5) throw \"Reached 5\";   // throws const char*\n        }\n    }\n    catch (const char* msg) {\n        std::cout << \"Error: \" << msg;        // \"Error: Reached 5\"\n    }\n    return 0;\n}"
+          "code": "#include <iostream>\n\nint main() {\n    // 1. Guard region: any throw inside is candidate for catch below\n    try {\n        for (int tr = 0; tr < 10; ++tr) {\n            // 2. Signal error condition (string literal as exception value)\n            if (tr == 5) throw \"Reached 5\";\n        }\n    }\n    // 3. Match on exact type (const char*) -- promotion rules do NOT apply\n    catch (const char* msg) {\n        std::cout << \"Error: \" << msg;\n    }\n    return 0;\n}"
         },
         {
           "type": "list",
@@ -148,25 +148,55 @@
         {
           "type": "table",
           "headers": [
-            { "en": "Standard exception", "ro": "Exceptie standard" },
-            { "en": "Used when…", "ro": "Folosita cand…" }
+            {
+              "en": "Standard exception",
+              "ro": "Exceptie standard"
+            },
+            {
+              "en": "Used when…",
+              "ro": "Folosita cand…"
+            }
           ],
           "rows": [
             [
-              { "en": "`bad_alloc`", "ro": "`bad_alloc`" },
-              { "en": "`new` fails to allocate memory", "ro": "`new` esueaza sa aloce memorie" }
+              {
+                "en": "`bad_alloc`",
+                "ro": "`bad_alloc`"
+              },
+              {
+                "en": "`new` fails to allocate memory",
+                "ro": "`new` esueaza sa aloce memorie"
+              }
             ],
             [
-              { "en": "`bad_cast`", "ro": "`bad_cast`" },
-              { "en": "`dynamic_cast` to a reference fails", "ro": "`dynamic_cast` la o referinta esueaza" }
+              {
+                "en": "`bad_cast`",
+                "ro": "`bad_cast`"
+              },
+              {
+                "en": "`dynamic_cast` to a reference fails",
+                "ro": "`dynamic_cast` la o referinta esueaza"
+              }
             ],
             [
-              { "en": "`logic_error`", "ro": "`logic_error`" },
-              { "en": "Generic logic-bug error (base of `length_error`, `invalid_argument`, `out_of_range`, …)", "ro": "Eroare generica de logica (baza pentru `length_error`, `invalid_argument`, `out_of_range`, …)" }
+              {
+                "en": "`logic_error`",
+                "ro": "`logic_error`"
+              },
+              {
+                "en": "Generic logic-bug error (base of `length_error`, `invalid_argument`, `out_of_range`, …)",
+                "ro": "Eroare generica de logica (baza pentru `length_error`, `invalid_argument`, `out_of_range`, …)"
+              }
             ],
             [
-              { "en": "`runtime_error`", "ro": "`runtime_error`" },
-              { "en": "Generic runtime error (base of `overflow_error`, `range_error`, `system_error`, `underflow_error`, …)", "ro": "Eroare generica de runtime (baza pentru `overflow_error`, `range_error`, `system_error`, `underflow_error`, …)" }
+              {
+                "en": "`runtime_error`",
+                "ro": "`runtime_error`"
+              },
+              {
+                "en": "Generic runtime error (base of `overflow_error`, `range_error`, `system_error`, `underflow_error`, …)",
+                "ro": "Eroare generica de runtime (baza pentru `overflow_error`, `range_error`, `system_error`, `underflow_error`, …)"
+              }
             ]
           ]
         },
@@ -180,7 +210,7 @@
         {
           "type": "code",
           "language": "cpp",
-          "code": "#include <exception>\n\nstruct DivisionBy0 : public std::exception {\n    int value;\n    DivisionBy0(int v) : value(v) {}\n    const char* what() const noexcept override {\n        return \"Division by zero\";\n    }\n};\n\ndouble divide(int a, int b) {\n    if (b == 0) throw DivisionBy0(a);\n    return a / (double)b;\n}"
+          "code": "#include <exception>\n\n// 1. Derive from the standard exception base\nstruct DivisionBy0 : public std::exception {\n    int value;\n    DivisionBy0(int v) : value(v) {}\n    // 2. Override what() to return a domain-specific message\n    const char* what() const noexcept override {\n        return \"Division by zero\";\n    }\n};\n\n// 3. Throw at the error site, carry context (value) for the catch\ndouble divide(int a, int b) {\n    if (b == 0) throw DivisionBy0(a);\n    return a / (double)b;\n}\n"
         },
         {
           "type": "think",
@@ -235,34 +265,70 @@
         {
           "type": "code",
           "language": "cpp",
-          "code": "// Specifier (promise about the function)\nint compute(int x) noexcept;            // never throws\nint risky(int x)   noexcept(false);     // may throw (explicit)\n\n// Operator (compile-time query about an expression)\nstatic_assert(noexcept(compute(0)));    // ok\nstatic_assert(!noexcept(risky(0)));     // ok"
+          "code": "// 1. Specifier on a declaration: promise about throw behavior\nint compute(int x) noexcept;            // never throws\nint risky(int x)   noexcept(false);     // may throw (explicit)\n\n// 2. Operator on an expression: compile-time query about throw behavior\nstatic_assert(noexcept(compute(0)));    // ok\nstatic_assert(!noexcept(risky(0)));     // ok"
         },
         {
           "type": "table",
           "headers": [
-            { "en": "Type trait", "ro": "Type trait" },
-            { "en": "True when…", "ro": "True cand…" }
+            {
+              "en": "Type trait",
+              "ro": "Type trait"
+            },
+            {
+              "en": "True when…",
+              "ro": "True cand…"
+            }
           ],
           "rows": [
             [
-              { "en": "`std::is_nothrow_constructible<T, Args...>`", "ro": "`std::is_nothrow_constructible<T, Args...>`" },
-              { "en": "`T` can be built from `Args...` without throwing", "ro": "`T` poate fi construit din `Args...` fara a arunca" }
+              {
+                "en": "`std::is_nothrow_constructible<T, Args...>`",
+                "ro": "`std::is_nothrow_constructible<T, Args...>`"
+              },
+              {
+                "en": "`T` can be built from `Args...` without throwing",
+                "ro": "`T` poate fi construit din `Args...` fara a arunca"
+              }
             ],
             [
-              { "en": "`std::is_nothrow_default_constructible<T>`", "ro": "`std::is_nothrow_default_constructible<T>`" },
-              { "en": "`T()` is `noexcept`", "ro": "`T()` este `noexcept`" }
+              {
+                "en": "`std::is_nothrow_default_constructible<T>`",
+                "ro": "`std::is_nothrow_default_constructible<T>`"
+              },
+              {
+                "en": "`T()` is `noexcept`",
+                "ro": "`T()` este `noexcept`"
+              }
             ],
             [
-              { "en": "`std::is_nothrow_copy_constructible<T>`", "ro": "`std::is_nothrow_copy_constructible<T>`" },
-              { "en": "`T(const T&)` is `noexcept`", "ro": "`T(const T&)` este `noexcept`" }
+              {
+                "en": "`std::is_nothrow_copy_constructible<T>`",
+                "ro": "`std::is_nothrow_copy_constructible<T>`"
+              },
+              {
+                "en": "`T(const T&)` is `noexcept`",
+                "ro": "`T(const T&)` este `noexcept`"
+              }
             ],
             [
-              { "en": "`std::is_nothrow_move_constructible<T>`", "ro": "`std::is_nothrow_move_constructible<T>`" },
-              { "en": "`T(T&&)` is `noexcept`", "ro": "`T(T&&)` este `noexcept`" }
+              {
+                "en": "`std::is_nothrow_move_constructible<T>`",
+                "ro": "`std::is_nothrow_move_constructible<T>`"
+              },
+              {
+                "en": "`T(T&&)` is `noexcept`",
+                "ro": "`T(T&&)` este `noexcept`"
+              }
             ],
             [
-              { "en": "`std::is_nothrow_assignable<T, U>`", "ro": "`std::is_nothrow_assignable<T, U>`" },
-              { "en": "`T = U` is `noexcept`", "ro": "`T = U` este `noexcept`" }
+              {
+                "en": "`std::is_nothrow_assignable<T, U>`",
+                "ro": "`std::is_nothrow_assignable<T, U>`"
+              },
+              {
+                "en": "`T = U` is `noexcept`",
+                "ro": "`T = U` este `noexcept`"
+              }
             ]
           ]
         },
@@ -272,6 +338,17 @@
           "content": {
             "en": "If a function marked `noexcept` does throw at runtime, the program calls `std::terminate` — no unwinding, no catch. Mark `noexcept` only when you are sure.",
             "ro": "Daca o functie marcata `noexcept` arunca la runtime, programul cheama `std::terminate` — fara derulare, fara catch. Marcheaza `noexcept` doar cand esti sigur."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Java has checked `throws` clauses enforced at compile time; C++ has `noexcept` enforced at runtime via `std::terminate`. Why might the C++ designers have rejected the Java-style compile-time enforcement?",
+            "ro": "Java are clauze `throws` verificate la compilare; C++ are `noexcept` impus la runtime via `std::terminate`. De ce ar fi respins designerii C++ varianta de impunere la compilare in stil Java?"
+          },
+          "answer": {
+            "en": "Three reasons in tension with C++'s priorities. First, **generic programming**: a template instantiated with an arbitrary `T` cannot know up-front which operations on `T` throw — forcing the author to annotate every template with the union of possible `throws` clauses would be unwritable. Second, **backwards compatibility**: pre-existing C and C++ code has no annotations, and a checked system would invalidate it overnight. Third, **annotation cost**: Java's experience showed that checked exceptions push developers to over-broad `throws Exception` or empty-catch hacks; the noise often exceeds the benefit. C++ trades compile-time enforcement for opt-in `noexcept` plus runtime termination — pay only where you assert a guarantee.",
+            "ro": "Trei motive in conflict cu prioritatile C++. Intai, **programarea generica**: un template instantiat cu un `T` arbitrar nu poate sti dinainte care operatii pe `T` arunca — sa fortezi autorul sa adnoteze fiecare template cu reuniunea posibilelor clauze `throws` ar fi imposibil de scris. Doi, **compatibilitatea inapoi**: codul C si C++ existent nu are adnotari, iar un sistem verificat l-ar invalida peste noapte. Trei, **costul adnotarii**: experienta Java arata ca exceptiile verificate impingt dezvoltatorii spre `throws Exception` prea larg sau hack-uri cu catch gol; zgomotul depaseste adesea beneficiul. C++ schimba impunerea la compilare cu `noexcept` opt-in plus terminate la runtime — platesti doar acolo unde garantezi explicit."
           }
         },
         {
@@ -292,6 +369,17 @@
       "group": "standard-library",
       "blocks": [
         {
+          "type": "think",
+          "question": {
+            "en": "You are writing a piece of code where allocation failure is a normal, recoverable condition — e.g., an OS-style memory probe or a tight embedded loop where unwinding the stack on `bad_alloc` is unaffordable. What language hook lets `new` behave more like C's `malloc` (return null on failure)?",
+            "ro": "Scrii cod in care esecul alocarii este o conditie normala, recuperabila — de ex. o sondare de memorie in stil OS sau o bucla embedded stransa unde derularea stivei la `bad_alloc` este inacceptabila. Ce hook de limbaj face ca `new` sa se comporte mai mult ca `malloc` din C (returneaza null la esec)?"
+          },
+          "answer": {
+            "en": "`new (std::nothrow) T[…]` — the placement-`std::nothrow` overload of `operator new` returns `nullptr` on failure instead of throwing `std::bad_alloc`.",
+            "ro": "`new (std::nothrow) T[…]` — supraincarcarea de placement `std::nothrow` a lui `operator new` returneaza `nullptr` la esec in loc sa arunce `std::bad_alloc`."
+          }
+        },
+        {
           "type": "learn",
           "content": {
             "en": "By default, `new` throws `std::bad_alloc` when allocation fails. If you prefer the older C-style 'return null on failure' contract, pass `std::nothrow` as a placement argument: `new (std::nothrow) T[…]`. The expression now returns `nullptr` instead of throwing.\n\nUse it when the caller can sensibly continue on allocation failure (e.g., shrinking a cache).",
@@ -302,6 +390,25 @@
           "type": "code",
           "language": "cpp",
           "code": "#include <iostream>\n#include <new>   // for std::nothrow\n\nint main() {\n    int* x = new (std::nothrow) int[1000000000000];\n    if (x == nullptr) {\n        std::cout << \"Unable to allocate memory!\";\n        return 1;\n    }\n    delete[] x;\n    return 0;\n}"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "When would you prefer `std::nothrow` over the throwing `new` in a server-style codebase where allocation failure is recoverable?",
+            "ro": "Cand ai prefera `std::nothrow` in locul `new` care arunca, intr-un cod de tip server unde un esec de alocare este recuperabil?"
+          },
+          "answer": {
+            "en": "When the caller has a local fallback plan (shrink a cache, drop a request, retry with a smaller buffer) and unwinding the entire stack would lose useful in-flight state. The default throwing `new` is preferred in most code because callers rarely have a meaningful response to `bad_alloc` — letting it unwind to a top-level handler that logs and exits is simpler than threading null-checks through every allocation site.",
+            "ro": "Cand apelantul are un plan local de rezerva (micsorare cache, abandon cerere, reincercare cu un buffer mai mic) si derularea intregii stive ar pierde stare utila in zbor. `new` implicit (cu aruncare) este preferat in majoritatea codului pentru ca apelantii rareori au un raspuns util la `bad_alloc` — sa-l lasi sa se deruleze la un handler global care logheaza si iese este mai simplu decat sa strecori verificari de null prin fiecare loc de alocare."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "Don't mix `new(std::nothrow) T[…]` with `delete[]` written assuming throw semantics — you still must NULL-check before `delete[]`, otherwise dereference of `nullptr` on cleanup is UB. Also: `new(std::nothrow)` only disables the **allocation** throw — your `T` constructor may still throw and that exception propagates normally.",
+            "ro": "Nu amesteca `new(std::nothrow) T[…]` cu un `delete[]` scris ca si cum semantica ar fi cu aruncare — tot trebuie sa verifici NULL inainte de `delete[]`, altfel dereferentierea unui `nullptr` la curatare este UB. Atentie: `new(std::nothrow)` dezactiveaza doar aruncarea de la **alocare** — constructorul tipului `T` poate inca arunca, iar acea exceptie se propaga normal."
+          }
         },
         {
           "type": "lecture",
@@ -333,20 +440,23 @@
           "code": "// What 'throw obj;' becomes under MSVC, approximately\n_CxxThrowException(&obj, &__ThrowInfo);"
         },
         {
+          "type": "think",
+          "question": {
+            "en": "Looking at that two-argument call shape — if `throw obj;` is just `_CxxThrowException(&obj, &__ThrowInfo)`, what TWO pieces of information must those arguments encode for the runtime to (a) match a `catch` clause and (b) destroy in-scope locals correctly during unwinding?",
+            "ro": "Privind acea forma de apel cu doua argumente — daca `throw obj;` este doar `_CxxThrowException(&obj, &__ThrowInfo)`, ce DOUA informatii trebuie sa codifice acele argumente pentru ca runtime-ul sa (a) potriveasca o clauza `catch` si (b) sa distruga corect localii din scope in timpul derularii?"
+          },
+          "answer": {
+            "en": "(a) The thrown object's **runtime type information** — so the dispatcher can compare it against each `catch` clause's declared type and pick the first match (or a public base). (b) A description of the **destructors of automatic locals and the catch offsets** — so unwinding can run those destructors in reverse construction order and then jump to the matching handler. Under MSVC both are bundled into the `__ThrowInfo` struct passed as the second argument to `_CxxThrowException`.",
+            "ro": "(a) **Informatiile de tip la runtime** ale obiectului aruncat — ca dispecerul sa le compare cu tipul declarat al fiecarei clauze `catch` si sa aleaga prima potrivire (sau o baza publica). (b) O descriere a **destructorilor localilor automati si a offset-urilor catch** — ca derularea sa apeleze acei destructori in ordine inversa constructiei si apoi sa sara la handler-ul potrivit. Sub MSVC, ambele sunt impachetate in structul `__ThrowInfo` trimis ca al doilea argument catre `_CxxThrowException`."
+          }
+        },
+        {
           "type": "list",
           "ordered": false,
           "items": [
             {
-              "en": "**`_CxxThrowException`** — runtime entry point that hands control to the dispatcher.",
-              "ro": "**`_CxxThrowException`** — punct de intrare runtime care preda controlul dispecerului."
-            },
-            {
-              "en": "**`__ThrowInfo`** — compiler-emitted struct describing the thrown type (for matching), destructors needed during unwinding, and the table of `catch` offsets.",
-              "ro": "**`__ThrowInfo`** — struct emis de compilator care descrie tipul aruncat (pentru potrivire), destructorii necesari in timpul derularii si tabelul cu offset-urile `catch`."
-            },
-            {
-              "en": "The dispatcher walks the stack, calls destructors of in-scope automatic objects, and jumps to the first matching `catch` offset.",
-              "ro": "Dispecerul parcurge stiva, cheama destructorii obiectelor automate in scope si sare la primul offset `catch` care se potriveste."
+              "en": "Itanium ABI (Linux/macOS via GCC/Clang) uses the parallel pair: `__cxa_throw` plus per-function LSDA (Language-Specific Data Area) tables instead of `__ThrowInfo`.",
+              "ro": "ABI-ul Itanium (Linux/macOS via GCC/Clang) foloseste perechea paralela: `__cxa_throw` plus tabele LSDA (Language-Specific Data Area) per functie in loc de `__ThrowInfo`."
             }
           ]
         },
@@ -356,6 +466,17 @@
           "content": {
             "en": "`_CxxThrowException` and `__ThrowInfo` are MSVC-specific names. Itanium ABI (Linux/macOS via GCC/Clang) uses `__cxa_throw` and a parallel set of tables. The mechanism is the same, only the symbols differ.",
             "ro": "`_CxxThrowException` si `__ThrowInfo` sunt nume specifice MSVC. ABI-ul Itanium (Linux/macOS via GCC/Clang) foloseste `__cxa_throw` si un set paralel de tabele. Mecanismul este acelasi, doar simbolurile difera."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Without scrolling back — what TWO responsibilities does `__ThrowInfo` (or `__cxa_throw`'s equivalent on Itanium) carry, and why is each one needed?",
+            "ro": "Fara sa derulezi inapoi — ce DOUA responsabilitati duce `__ThrowInfo` (sau echivalentul pentru `__cxa_throw` pe Itanium), si de ce este nevoie de fiecare?"
+          },
+          "answer": {
+            "en": "(1) The thrown object's dynamic type information — needed to match a `catch` clause whose type is decided at compile time but checked against an at-runtime value. (2) A description of the destructors and `catch` offsets per scope — needed to unwind locals correctly without re-deriving the layout at runtime.",
+            "ro": "(1) Informatia de tip dinamic a obiectului aruncat — necesara pentru a potrivi o clauza `catch` al carei tip este decis la compilare dar verificat la runtime. (2) O descriere a destructorilor si offset-urilor `catch` per scope — necesara pentru a derula localii corect fara sa redescoperim layout-ul la runtime."
           }
         },
         {
@@ -390,55 +511,58 @@
         {
           "type": "table",
           "headers": [
-            { "en": "Filter return value", "ro": "Valoarea returnata de filtru" },
-            { "en": "Effect", "ro": "Efect" }
+            {
+              "en": "Filter return value",
+              "ro": "Valoarea returnata de filtru"
+            },
+            {
+              "en": "Effect",
+              "ro": "Efect"
+            }
           ],
           "rows": [
             [
-              { "en": "`EXCEPTION_EXECUTE_HANDLER`", "ro": "`EXCEPTION_EXECUTE_HANDLER`" },
-              { "en": "Run the `__except` block.", "ro": "Executa blocul `__except`." }
+              {
+                "en": "`EXCEPTION_EXECUTE_HANDLER`",
+                "ro": "`EXCEPTION_EXECUTE_HANDLER`"
+              },
+              {
+                "en": "Run the `__except` block.",
+                "ro": "Executa blocul `__except`."
+              }
             ],
             [
-              { "en": "`EXCEPTION_CONTINUE_SEARCH`", "ro": "`EXCEPTION_CONTINUE_SEARCH`" },
-              { "en": "Pass the exception to the next handler up the chain.", "ro": "Trece exceptia la urmatorul handler din lant." }
+              {
+                "en": "`EXCEPTION_CONTINUE_SEARCH`",
+                "ro": "`EXCEPTION_CONTINUE_SEARCH`"
+              },
+              {
+                "en": "Pass the exception to the next handler up the chain.",
+                "ro": "Trece exceptia la urmatorul handler din lant."
+              }
             ],
             [
-              { "en": "`EXCEPTION_CONTINUE_EXECUTION`", "ro": "`EXCEPTION_CONTINUE_EXECUTION`" },
-              { "en": "Resume at the faulting instruction. **Dangerous — generally not recommended.**", "ro": "Reia executia la instructiunea care a esuat. **Periculos — in general nerecomandat.**" }
+              {
+                "en": "`EXCEPTION_CONTINUE_EXECUTION`",
+                "ro": "`EXCEPTION_CONTINUE_EXECUTION`"
+              },
+              {
+                "en": "Resume at the faulting instruction. **Dangerous — generally not recommended.**",
+                "ro": "Reia executia la instructiunea care a esuat. **Periculos — in general nerecomandat.**"
+              }
             ]
           ]
         },
         {
-          "type": "learn",
-          "content": {
-            "en": "SEH handlers are stored as a **singly-linked list of records**, with the head at `fs:[0]` on 32-bit Windows. Each `__try` block pushes a new record at the head; on block exit the record is popped.\n\nUnlike C++ exceptions, SEH is **not zero-overhead** — entering `__try` always emits instructions to install and later remove the record.",
-            "ro": "Handler-ele SEH sunt stocate ca o **lista simplu inlantuita de inregistrari**, cu capul la `fs:[0]` pe Windows 32-bit. Fiecare bloc `__try` adauga o noua inregistrare in cap; la iesirea din bloc inregistrarea este scoasa.\n\nSpre deosebire de exceptiile C++, SEH **nu are overhead zero** — intrarea in `__try` emite mereu instructiuni pentru a instala si ulterior a scoate inregistrarea."
+          "type": "think",
+          "question": {
+            "en": "Microsoft introduced `__try` and `__except` as separate keywords from C++'s `try` and `catch`. Why not just overload the existing keywords to cover both software throws and hardware faults?",
+            "ro": "Microsoft a introdus `__try` si `__except` ca cuvinte cheie separate fata de `try` si `catch` din C++. De ce nu pur si simplu sa supraincarce cuvintele cheie existente pentru a acoperi atat throw-urile software cat si defectele hardware?"
+          },
+          "answer": {
+            "en": "The mechanisms differ: SEH handlers register themselves on every entry (non-zero overhead) and route OS-delivered faults, while C++ `try` is zero-overhead and only catches in-language `throw`s. Conflating them would either tax every `try` with SEH-style bookkeeping or hide the OS path inside a portable construct that has no obligation to deliver hardware faults. Separate keywords keep semantics + cost explicit.",
+            "ro": "Mecanismele difera: handler-ele SEH se inregistreaza la fiecare intrare (cost ne-zero) si rutează defectele livrate de OS, in timp ce `try` din C++ are cost zero si prinde doar `throw`-urile din limbaj. Combinarea lor ar incarca fiecare `try` cu bookkeeping in stil SEH sau ar ascunde calea OS intr-o constructie portabila care nu are obligatia de a livra defecte hardware. Cuvintele cheie separate pastreaza semantica + costul explicite."
           }
-        },
-        {
-          "type": "table",
-          "headers": [
-            { "en": "Stack state", "ro": "Starea stivei" },
-            { "en": "fs:[0] points to", "ro": "fs:[0] indica spre" },
-            { "en": "Records in chain", "ro": "Inregistrari in lant" }
-          ],
-          "rows": [
-            [
-              { "en": "**Before `__try`**", "ro": "**Inainte de `__try`**" },
-              { "en": "Original record", "ro": "Inregistrarea originala" },
-              { "en": "Original → … → end", "ro": "Originala → … → sfarsit" }
-            ],
-            [
-              { "en": "**Inside `__try`**", "ro": "**In `__try`**" },
-              { "en": "New record (just pushed)", "ro": "Inregistrarea noua (tocmai adaugata)" },
-              { "en": "New → Original → … → end", "ro": "Noua → Originala → … → sfarsit" }
-            ],
-            [
-              { "en": "**After block exit**", "ro": "**Dupa iesirea din bloc**" },
-              { "en": "Original record (popped back)", "ro": "Inregistrarea originala (re-pop-uita)" },
-              { "en": "Original → … → end", "ro": "Originala → … → sfarsit" }
-            ]
-          ]
         },
         {
           "type": "callout",
@@ -449,10 +573,111 @@
           }
         },
         {
+          "type": "learn",
+          "content": {
+            "en": "Next: the per-thread handler chain at `fs:[0]` that Windows uses to dispatch these exceptions.",
+            "ro": "Mai departe: lantul de handler-e per fir de la `fs:[0]` pe care Windows il foloseste pentru a livra aceste exceptii."
+          }
+        }
+      ]
+    },
+    {
+      "id": "oop-c11-seh-internals",
+      "group": "platform",
+      "title": {
+        "en": "SEH Internals: fs:[0] Chain",
+        "ro": "Interne SEH: Lantul fs:[0]"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "SEH handlers are stored as a **singly-linked list of records**, with the head at `fs:[0]` on 32-bit Windows. Each `__try` block pushes a new record at the head; on block exit the record is popped.\n\nUnlike C++ exceptions, SEH is **not zero-overhead** — entering `__try` always emits instructions to install and later remove the record.",
+            "ro": "Handler-ele SEH sunt stocate ca o **lista simplu inlantuita de inregistrari**, cu capul la `fs:[0]` pe Windows 32-bit. Fiecare bloc `__try` adauga o noua inregistrare in cap; la iesirea din bloc inregistrarea este scoasa.\n\nSpre deosebire de exceptiile C++, SEH **nu are overhead zero** — intrarea in `__try` emite mereu instructiuni pentru a instala si ulterior a scoate inregistrarea."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "// fs:[0] is offset 0 of the Thread Information Block (TIB) -- head of the per-thread SEH chain\n// 1. Link new record to current head (push to chain)\nnew_record.next         = fs:[0];\n// 2. Install handler pointer\nnew_record.handler      = &__except_filter;\n// 3. Point TIB at new record (atomic enough on this thread)\nfs:[0]                  = &new_record;\n\n// 4. On clean exit: unlink (pop from chain)\nfs:[0]                  = new_record.next;"
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Before reading the stack-state table — if `__try` is entered and then exited normally (no exception), what should `fs:[0]` point to compared with before entry, and what does this tell you about whether SEH is zero-overhead?",
+            "ro": "Inainte de a citi tabelul cu starea stivei — daca `__try` este intrat si apoi parasit normal (fara exceptie), spre ce trebuie sa indice `fs:[0]` comparativ cu inainte de intrare, si ce iti spune asta despre faptul ca SEH ar fi zero-overhead?"
+          },
+          "answer": {
+            "en": "After a clean exit, `fs:[0]` must point to exactly the same record it pointed to before entering `__try` — the new record pushed on entry has been popped. That means SEH always emits instructions on entry to push and on exit to pop, regardless of whether an exception ever fires. Therefore SEH is **not** zero-overhead: every `__try` pays bookkeeping, in contrast to C++ exceptions whose tables are static metadata only.",
+            "ro": "Dupa o iesire curata, `fs:[0]` trebuie sa indice spre exact aceeasi inregistrare ca inainte de intrarea in `__try` — inregistrarea noua adaugata la intrare a fost scoasa. Asta inseamna ca SEH emite mereu instructiuni la intrare pentru push si la iesire pentru pop, indiferent daca se arunca vreo exceptie sau nu. Prin urmare, SEH **nu** este zero-overhead: fiecare `__try` plateste bookkeeping, spre deosebire de exceptiile C++ ale caror tabele sunt doar metadate statice."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "en": "Stack state",
+              "ro": "Starea stivei"
+            },
+            {
+              "en": "fs:[0] points to",
+              "ro": "fs:[0] indica spre"
+            },
+            {
+              "en": "Records in chain",
+              "ro": "Inregistrari in lant"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "en": "**Before `__try`**",
+                "ro": "**Inainte de `__try`**"
+              },
+              {
+                "en": "Original record",
+                "ro": "Inregistrarea originala"
+              },
+              {
+                "en": "Original → … → end",
+                "ro": "Originala → … → sfarsit"
+              }
+            ],
+            [
+              {
+                "en": "**Inside `__try`**",
+                "ro": "**In `__try`**"
+              },
+              {
+                "en": "New record (just pushed)",
+                "ro": "Inregistrarea noua (tocmai adaugata)"
+              },
+              {
+                "en": "New → Original → … → end",
+                "ro": "Noua → Originala → … → sfarsit"
+              }
+            ],
+            [
+              {
+                "en": "**After block exit**",
+                "ro": "**Dupa iesirea din bloc**"
+              },
+              {
+                "en": "Original record (popped back)",
+                "ro": "Inregistrarea originala (re-pop-uita)"
+              },
+              {
+                "en": "Original → … → end",
+                "ro": "Originala → … → sfarsit"
+              }
+            ]
+          ]
+        },
+        {
           "type": "lecture",
           "note": {
-            "en": "Slides 56-78 of Lecture 11 (includes the linked-list and stack-state diagrams).",
-            "ro": "Slide-urile 56-78 ale Cursului 11 (include diagramele cu lista inlantuita si starea stivei)."
+            "en": "Slides 56-78 of Lecture 11 — filter mechanism, linked list, and stack-state diagrams.",
+            "ro": "Slide-urile 56-78 ale Cursului 11 — mecanismul filtrului, lista inlantuita si diagramele de stare a stivei."
           }
         }
       ]
@@ -490,7 +715,7 @@
         {
           "type": "code",
           "language": "cpp",
-          "code": "#include <memory>\n#include <fstream>\n#include <mutex>\n\nstd::mutex g_mtx;\n\nvoid processFile(const char* path) {\n    std::lock_guard<std::mutex> lock(g_mtx);   // mutex released on scope exit\n    std::ifstream in(path);                    // file closed on scope exit\n    auto buf = std::make_unique<char[]>(4096); // buffer freed on scope exit\n\n    if (!in) throw std::runtime_error(\"open failed\");\n    // ... work that may throw ...\n}\n// Order of destruction (reverse of construction): buf, in, lock"
+          "code": "#include <memory>\n#include <fstream>\n#include <mutex>\n\nstd::mutex g_mtx;\n\nvoid processFile(const char* path) {\n    // 1. Acquire lock (RAII -- released at scope exit)\n    std::lock_guard<std::mutex> lock(g_mtx);\n    // 2. Open file (RAII -- closed at scope exit)\n    std::ifstream in(path);\n    // 3. Allocate work buffer (RAII -- freed at scope exit)\n    auto buf = std::make_unique<char[]>(4096);\n    // 4. Do work -- exceptions now safe; locals unwind in reverse\n    if (!in) throw std::runtime_error(\"open failed\");\n    // ... work that may throw ...\n}\n// Order of destruction (reverse of construction): buf, in, lock"
         },
         {
           "type": "callout",
@@ -541,52 +766,52 @@
           "questions": [
             {
               "question": {
-                "en": "A function throws a `char` but the only catch in scope is `catch (int e)`. What happens?",
-                "ro": "O functie arunca un `char` dar singurul catch din scope este `catch (int e)`. Ce se intampla?"
+                "en": "A library throws a `MyDerivedError` value (publicly derived from `std::runtime_error`). The user code has only `catch (const std::exception& e) { ... }`. Does this catch match?",
+                "ro": "O biblioteca arunca o valoare `MyDerivedError` (derivata public din `std::runtime_error`). Codul utilizator are doar `catch (const std::exception& e) { ... }`. Se potriveste acest catch?"
               },
               "options": [
                 {
                   "text": {
-                    "en": "The char is implicitly promoted to int and caught",
-                    "ro": "Char-ul este promovat implicit la int si prins"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Exception matching does NOT apply standard type promotions. Only exact type match or public base-class relation count.",
-                    "ro": "Potrivirea exceptiilor NU aplica promovarile de tip standard. Doar tipul exact sau o relatie de clasa de baza publica conteaza."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "Compile error — types don't match",
-                    "ro": "Eroare de compilare — tipurile nu se potrivesc"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "The compiler cannot prove at compile time that the wrong type will reach this catch — the throw type is a runtime property. The error appears at runtime.",
-                    "ro": "Compilatorul nu poate dovedi la compilare ca tipul gresit va ajunge la acest catch — tipul aruncat este o proprietate de runtime. Eroarea apare la runtime."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "Runtime crash (uncaught exception → std::terminate)",
-                    "ro": "Crash la runtime (exceptie neprinsa → std::terminate)"
+                    "en": "Yes — public derived-class catches match a base-class clause; `e.what()` dispatches virtually to the derived message",
+                    "ro": "Da — un catch pe o clasa derivata public se potriveste cu o clauza de baza; `e.what()` se dispecereaza virtual la mesajul derivat"
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "No handler matches, the exception propagates out of main, and `std::terminate` is called.",
-                    "ro": "Niciun handler nu se potriveste, exceptia se propaga din main si `std::terminate` este apelat."
+                    "en": "Correct — exception matching uses the public base-class relation, mirroring how RTTI walks the inheritance chain.",
+                    "ro": "Corect — potrivirea exceptiilor foloseste relatia publica de baza, similar cu modul in care RTTI parcurge lantul de mostenire."
                   }
                 },
                 {
                   "text": {
-                    "en": "The catch silently runs with e = 0",
-                    "ro": "Catch-ul ruleaza silentios cu e = 0"
+                    "en": "No — the catch must name `MyDerivedError` explicitly; the runtime does not consult inheritance for matching",
+                    "ro": "Nu — catch-ul trebuie sa numeasca `MyDerivedError` explicit; runtime-ul nu consulta mostenirea pentru potrivire"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "There is no default-value behaviour. Mismatched types are simply not caught.",
-                    "ro": "Nu exista comportament cu valoare implicita. Tipurile nepotrivite pur si simplu nu sunt prinse."
+                    "en": "No — exception matching DOES walk the public-base chain. It is the same machinery RTTI uses; otherwise inheriting from `std::exception` would be pointless.",
+                    "ro": "Nu — potrivirea exceptiilor PARCURGE lantul de baze publice. Este acelasi mecanism folosit de RTTI; altfel mostenirea din `std::exception` nu ar avea sens."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Yes, but `e.what()` returns the generic `std::exception` message because of slicing",
+                    "ro": "Da, dar `e.what()` returneaza mesajul generic `std::exception` din cauza slicing-ului"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — catching by `const&` preserves the dynamic type. Slicing happens on catch-by-value, not catch-by-reference.",
+                    "ro": "Nu — prinderea prin `const&` pastreaza tipul dinamic. Slicing-ul are loc la prindere prin valoare, nu prin referinta."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Compile error — `MyDerivedError` was not declared in a `throw()` spec",
+                    "ro": "Eroare de compilare — `MyDerivedError` nu a fost declarata intr-o specificatie `throw()`"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — `throw()` (and the C++17 `throw(...)`) were exception SPECIFICATIONS for declaring what a function may throw, never a registration requirement for catchability. Even in their heyday, omitting them did not block matching. Both are deprecated/removed in modern C++.",
+                    "ro": "Nu — `throw()` (si `throw(...)` din C++17) erau SPECIFICATII de exceptii pentru a declara ce poate arunca o functie, nu o cerinta de inregistrare pentru a putea fi prinsa. Chiar si in perioada lor de varf, omiterea lor nu bloca potrivirea. Ambele sunt deprecate/eliminate in C++ modern."
                   }
                 }
               ],
@@ -605,19 +830,19 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "It is not stylistic. Placing `catch(...)` earlier is a hard compile error (MSVC: C2311) because it would swallow every exception, making the catches below unreachable.",
-                    "ro": "Nu este stilistic. Plasarea `catch(...)` mai devreme este eroare dura de compilare (MSVC: C2311) pentru ca ar inghiti orice exceptie, facand catch-urile de sub el inaccesibile."
+                    "en": "No — it is not stylistic. Placing `catch(...)` earlier is a hard compile error (MSVC: C2311) because it would swallow every exception, making the catches below unreachable.",
+                    "ro": "Nu — nu este stilistic. Plasarea `catch(...)` mai devreme este eroare dura de compilare (MSVC: C2311) pentru ca ar inghiti orice exceptie, facand catch-urile de sub el inaccesibile."
                   }
                 },
                 {
                   "text": {
-                    "en": "Compile error — catch(...) matches everything, so following clauses would be unreachable",
-                    "ro": "Eroare de compilare — catch(...) potriveste totul, deci clauzele urmatoare ar fi inaccesibile"
+                    "en": "Compile-time constraint — the compiler proves the wildcard would shadow any catch below it and rejects the program (MSVC: error C2311)",
+                    "ro": "Constrangere la compilare — compilatorul demonstreaza ca clauza generica ar ascunde orice catch de sub ea si respinge programul (MSVC: eroare C2311)"
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Exactly. The compiler enforces that the wildcard catch cannot shadow specific catches.",
-                    "ro": "Exact. Compilatorul impune ca clauza generica nu poate ascunde clauzele specifice."
+                    "en": "Correct — the rejection happens before runtime, distinguishing this from any runtime-crash scenario: the compiler sees that `catch(...)` would shadow all subsequent clauses, makes them unreachable, and diagnoses the error statically.",
+                    "ro": "Corect — respingerea are loc inainte de runtime, distingand acest caz de orice scenariu de crash la runtime: compilatorul vede ca `catch(...)` ar ascunde toate clauzele urmatoare, le face inaccesibile si diagnosticheaza eroarea static."
                   }
                 },
                 {
@@ -627,8 +852,19 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "There is no speed reason; the table is built in source order regardless. The constraint is correctness, not performance.",
-                    "ro": "Nu este motiv de viteza; tabelul este construit in ordinea din sursa indiferent. Constrangerea este de corectitudine, nu de performanta."
+                    "en": "No — there is no speed reason; the table is built in source order regardless. The constraint is correctness, not performance.",
+                    "ro": "Nu — nu este motiv de viteza; tabelul este construit in ordinea din sursa indiferent. Constrangerea este de corectitudine, nu de performanta."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Runtime crash — the catch order is checked dynamically and crashes if `(...)` is not last",
+                    "ro": "Crash la runtime — ordinea catch este verificata dinamic si crapa daca `(...)` nu este ultima"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — catch order is resolved at COMPILE time. Misordering produces a compile-time error (C2311), not a runtime crash.",
+                    "ro": "Nu — ordinea catch este rezolvata la COMPILARE. Ordinea gresita produce eroare la compilare (C2311), nu crash la runtime."
                   }
                 }
               ],
@@ -636,52 +872,52 @@
             },
             {
               "question": {
-                "en": "You catch `std::exception` by VALUE, but the thrown object was a `std::out_of_range` with a custom `what()`. What does `e.what()` return inside the catch?",
-                "ro": "Prinzi `std::exception` prin VALOARE, dar obiectul aruncat era un `std::out_of_range` cu un `what()` propriu. Ce returneaza `e.what()` in catch?"
+                "en": "After `throw new std::out_of_range(\"bad index\");` you catch with `catch (const std::exception* e)`. Which statement is correct?",
+                "ro": "Dupa `throw new std::out_of_range(\"bad index\");` prinzi cu `catch (const std::exception* e)`. Ce afirmatie este corecta?"
               },
               "options": [
                 {
                   "text": {
-                    "en": "The custom out_of_range message (virtual dispatch resolves to the derived class)",
-                    "ro": "Mesajul propriu out_of_range (dispatch-ul virtual rezolva la clasa derivata)"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Catching by VALUE slices the object — only the std::exception subobject is copied. The derived part (including the overridden what) is gone.",
-                    "ro": "Prinderea prin VALOARE taie obiectul (slicing) — doar subobiectul std::exception este copiat. Partea derivata (inclusiv what suprascris) dispare."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "The generic std::exception message — object slicing dropped the derived part",
-                    "ro": "Mesajul generic std::exception — slicing-ul a aruncat partea derivata"
+                    "en": "You get the derived message (no slicing on pointers), but `new` of an exception is a memory-leak waiting to happen — the catch has no obvious owner to `delete` the pointer",
+                    "ro": "Primesti mesajul derivat (nu exista slicing pe pointeri), dar `new` pe o exceptie este un memory leak in asteptare — catch-ul nu are un proprietar evident care sa `delete` pointerul"
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Correct. Always catch standard exceptions by const& to preserve the dynamic type.",
-                    "ro": "Corect. Mereu prinde exceptiile standard prin const& pentru a pastra tipul dinamic."
+                    "en": "Correct — pointer catches preserve dynamic type, but anyone who `throw`s a `new`'d exception forces the catch site into manual cleanup. Idiomatic C++: `throw std::out_of_range(...)` and catch by `const&`.",
+                    "ro": "Corect — capturile prin pointer pastreaza tipul dinamic, dar oricine arunca o exceptie alocata cu `new` forteaza locul de catch sa faca curatare manuala. C++ idiomatic: `throw std::out_of_range(...)` si catch prin `const&`."
                   }
                 },
                 {
                   "text": {
-                    "en": "Empty string — what() is reset on copy",
-                    "ro": "Sir gol — what() este resetat la copiere"
+                    "en": "You get the base-class message — slicing applies to pointers too",
+                    "ro": "Primesti mesajul clasei de baza — slicing-ul se aplica si la pointeri"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "std::exception::what is not 'reset'. It just returns the base-class default message because the derived override is unreachable on the sliced copy.",
-                    "ro": "std::exception::what nu este 'resetat'. Returneaza mesajul implicit al clasei de baza pentru ca suprascrierea derivata este inaccesibila pe copia taiata."
+                    "en": "No — slicing only happens when you copy the object. Pointers carry the dynamic type intact.",
+                    "ro": "Nu — slicing-ul are loc doar cand copiezi obiectul. Pointerii pastreaza intact tipul dinamic."
                   }
                 },
                 {
                   "text": {
-                    "en": "Compile error",
-                    "ro": "Eroare de compilare"
+                    "en": "Compile error — you cannot catch a pointer-to-exception",
+                    "ro": "Eroare de compilare — nu poti prinde un pointer-la-exceptie"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Catching a base by value is legal C++. The defect is semantic (slicing), not syntactic.",
-                    "ro": "Prinderea unei clase de baza prin valoare este C++ legal. Defectul este semantic (slicing), nu sintactic."
+                    "en": "No — it compiles fine; pointer catches are legal, just not idiomatic.",
+                    "ro": "Nu — se compileaza fara probleme; capturile prin pointer sunt legale, doar ca nu sunt idiomatice."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "You get the derived message AND the catch automatically deletes the pointer when the block exits",
+                    "ro": "Primesti mesajul derivat SI catch-ul sterge automat pointerul cand blocul se termina"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — there is no auto-delete for catch-by-pointer. The thrown `new`'d exception leaks unless your catch handler explicitly calls `delete`. Idiomatic C++ avoids this by throwing values, not pointers.",
+                    "ro": "Nu — nu exista auto-delete pentru catch prin pointer. Exceptia alocata cu `new` pierde memorie decat daca handler-ul catch apeleaza explicit `delete`. C++ idiomatic evita asta aruncand valori, nu pointeri."
                   }
                 }
               ],
@@ -700,8 +936,8 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "noexcept is a hard promise, not a hint. Violating it is a fatal contract break.",
-                    "ro": "noexcept este o promisiune dura, nu o sugestie. Incalcarea este o rupere fatala de contract."
+                    "en": "No — noexcept is a hard promise, not a hint. Violating it is a fatal contract break.",
+                    "ro": "Nu — noexcept este o promisiune dura, nu o sugestie. Incalcarea este o rupere fatala de contract."
                   }
                 },
                 {
@@ -711,8 +947,8 @@
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Throwing from a noexcept function bypasses normal unwinding and terminates the program. Mark noexcept only when you are certain.",
-                    "ro": "Aruncarea dintr-o functie noexcept ocoleste derularea normala si termina programul. Marcheaza noexcept doar cand esti sigur."
+                    "en": "Correct — throwing from a noexcept function bypasses normal unwinding and terminates the program. Mark noexcept only when you are certain.",
+                    "ro": "Corect — aruncarea dintr-o functie noexcept ocoleste derularea normala si termina programul. Marcheaza noexcept doar cand esti sigur."
                   }
                 },
                 {
@@ -722,8 +958,8 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "The compiler does not prove a function never throws. It trusts your annotation and enforces it via std::terminate at runtime.",
-                    "ro": "Compilatorul nu dovedeste ca o functie nu arunca. Are incredere in adnotare si o impune via std::terminate la runtime."
+                    "en": "No — the compiler does not prove a function never throws. It trusts your annotation and enforces it via std::terminate at runtime.",
+                    "ro": "Nu — compilatorul nu dovedeste ca o functie nu arunca. Are incredere in adnotare si o impune via std::terminate la runtime."
                   }
                 },
                 {
@@ -733,8 +969,8 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Nothing in C++ silently swallows escaped exceptions. noexcept-violation is loud: terminate.",
-                    "ro": "Nimic in C++ nu inghite silentios exceptiile scapate. Incalcarea noexcept este zgomotoasa: terminate."
+                    "en": "No — nothing in C++ silently swallows escaped exceptions. noexcept-violation is loud: terminate.",
+                    "ro": "Nu — nimic in C++ nu inghite silentios exceptiile scapate. Incalcarea noexcept este zgomotoasa: terminate."
                   }
                 }
               ],
@@ -753,19 +989,19 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Generated assembly for a move is the same whether noexcept or not. The benefit is correctness, not speed.",
-                    "ro": "Codul generat pentru un move este acelasi indiferent daca este noexcept sau nu. Beneficiul este de corectitudine, nu de viteza."
+                    "en": "No — generated assembly for a move is the same whether noexcept or not. The benefit is correctness, not speed.",
+                    "ro": "Nu — codul generat pentru un move este acelasi indiferent daca este noexcept sau nu. Beneficiul este de corectitudine, nu de viteza."
                   }
                 },
                 {
                   "text": {
-                    "en": "It needs the strong exception guarantee — if a move can throw mid-reallocation, half the elements would be in the new buffer and half destroyed in the old. With noexcept, vector knows it can safely move; otherwise it falls back to copy",
-                    "ro": "Are nevoie de garantia tare a exceptiilor — daca un move poate arunca la mijlocul realocarii, jumatate din elemente ar fi in noul buffer si jumatate distruse in cel vechi. Cu noexcept, vector stie ca poate face move in siguranta; altfel revine la copy"
+                    "en": "Strong exception guarantee — vector chooses move only when it provably cannot throw; otherwise it falls back to copy.",
+                    "ro": "Garantia tare a exceptiilor — vector alege move doar cand poate dovedi ca nu arunca; altfel cade pe copy."
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Right. The check is `std::is_nothrow_move_constructible<T>`. Without it, copy is used to preserve the original buffer if anything throws.",
-                    "ro": "Corect. Verificarea este `std::is_nothrow_move_constructible<T>`. Fara ea, copy este folosit pentru a pastra buffer-ul original daca ceva arunca."
+                    "en": "Correct — the check is `std::is_nothrow_move_constructible<T>`. With `noexcept`, vector can move directly without preserving the old buffer. Without that promise, vector keeps the old buffer alive and copies elements into the new one, so a throw mid-copy leaves the original intact and the new buffer is discarded. A throw mid-move would otherwise leave half the elements in the new buffer and half destroyed in the old, corrupting the container irrecoverably.",
+                    "ro": "Corect — verificarea este `std::is_nothrow_move_constructible<T>`. Cu `noexcept`, vector poate face move direct fara sa pastreze buffer-ul vechi. Fara acea promisiune, vector pastreaza buffer-ul vechi viu si copiaza elementele in cel nou, astfel incat o aruncare la mijlocul copierii lasa originalul intact si noul buffer este aruncat. Altfel, o aruncare la mijlocul mutarii ar lasa jumatate din elemente in noul buffer si jumatate distruse in cel vechi, corupand iremediabil containerul."
                   }
                 },
                 {
@@ -775,8 +1011,19 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "noexcept has no effect on object size. The choice is about exception-safety guarantees.",
-                    "ro": "noexcept nu afecteaza dimensiunea obiectului. Alegerea tine de garantiile de exception-safety."
+                    "en": "No — noexcept has no effect on object size. The choice is about exception-safety guarantees.",
+                    "ro": "Nu — noexcept nu afecteaza dimensiunea obiectului. Alegerea tine de garantiile de exception-safety."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "noexcept is purely a documentation hint — the compiler ignores it; vector always tries move first regardless",
+                    "ro": "noexcept este doar o adnotare de documentatie — compilatorul o ignora; vector incearca intotdeauna move-ul mai intai, indiferent"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — noexcept is queried at compile time via `std::is_nothrow_move_constructible<T>`. Vector's choice between move and copy is determined by that query.",
+                    "ro": "Nu — noexcept este interogat la timpul compilarii prin `std::is_nothrow_move_constructible<T>`. Alegerea vector-ului intre move si copy este determinata de acea interogare."
                   }
                 }
               ],
@@ -784,8 +1031,8 @@
             },
             {
               "question": {
-                "en": "What is the visible behaviour of `new (std::nothrow) int[HUGE_NUMBER]` when allocation fails?",
-                "ro": "Care este comportamentul vizibil al `new (std::nothrow) int[HUGE_NUMBER]` cand alocarea esueaza?"
+                "en": "What is the visible behaviour of `new (std::nothrow) int[1'000'000'000'000]` when allocation fails?",
+                "ro": "Care este comportamentul vizibil al `new (std::nothrow) int[1'000'000'000'000]` cand alocarea esueaza?"
               },
               "options": [
                 {
@@ -795,8 +1042,8 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "That is the whole point of std::nothrow — it disables the throw and substitutes a nullptr return.",
-                    "ro": "Exact acesta este scopul std::nothrow — dezactiveaza aruncarea si pune in loc un return nullptr."
+                    "en": "No — that is the whole point of std::nothrow — it disables the throw and substitutes a nullptr return.",
+                    "ro": "Nu — exact acesta este scopul std::nothrow — dezactiveaza aruncarea si pune in loc un return nullptr."
                   }
                 },
                 {
@@ -806,8 +1053,8 @@
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Correct. The placement std::nothrow overload swaps a throw for a nullptr return.",
-                    "ro": "Corect. Supraincarcarea std::nothrow inlocuieste o aruncare cu un return nullptr."
+                    "en": "Correct — the placement std::nothrow overload swaps a throw for a nullptr return.",
+                    "ro": "Corect — supraincarcarea std::nothrow inlocuieste o aruncare cu un return nullptr."
                   }
                 },
                 {
@@ -817,8 +1064,19 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "No. std::nothrow precisely avoids terminate by avoiding the throw in the first place.",
-                    "ro": "Nu. std::nothrow evita exact terminate prin evitarea aruncarii din start."
+                    "en": "No — std::nothrow precisely avoids terminate by avoiding the throw in the first place.",
+                    "ro": "Nu — std::nothrow evita exact terminate prin evitarea aruncarii din start."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Allocates a smaller block automatically as fallback",
+                    "ro": "Aloca automat un bloc mai mic ca rezerva"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — `std::nothrow` does not retry with a smaller size — it just reports failure via `nullptr`. Adaptive shrinking is the caller's job.",
+                    "ro": "Nu — `std::nothrow` nu reincearca cu o dimensiune mai mica — doar raporteaza esecul prin `nullptr`. Micsorarea adaptiva este treaba apelantului."
                   }
                 }
               ],
@@ -837,19 +1095,19 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Only C++ exceptions aim for zero-overhead. SEH installs a record on every __try entry, so it costs even when no exception fires.",
-                    "ro": "Doar exceptiile C++ tintesc cost zero. SEH instaleaza o inregistrare la fiecare intrare in __try, deci costa si cand nu se arunca."
+                    "en": "No — only C++ exceptions aim for zero-overhead. SEH installs a record on every __try entry, so it costs even when no exception fires.",
+                    "ro": "Nu — doar exceptiile C++ tintesc cost zero. SEH instaleaza o inregistrare la fiecare intrare in __try, deci costa si cand nu se arunca."
                   }
                 },
                 {
                   "text": {
-                    "en": "C++ exceptions are zero-overhead on the happy path; SEH always pays bookkeeping to maintain its fs:[0] linked list",
-                    "ro": "Exceptiile C++ au cost zero pe drumul fericit; SEH plateste mereu bookkeeping pentru a mentine lista sa de la fs:[0]"
+                    "en": "C++ exceptions are zero-overhead on the happy path; SEH always pushes a record at `fs:[0]` on every `__try` entry.",
+                    "ro": "Exceptiile C++ au cost zero pe drumul fericit; SEH adauga mereu o inregistrare la `fs:[0]` la fiecare intrare in `__try`."
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Right. SEH always pushes/pops a record into the chain at fs:[0]; C++ exception tables are static metadata only.",
-                    "ro": "Corect. SEH mereu pune/scoate o inregistrare in lantul de la fs:[0]; tabelele exceptiilor C++ sunt doar metadate statice."
+                    "en": "Correct — SEH always pushes/pops a record into the singly-linked chain at `fs:[0]` to maintain its handler list, so every `__try` entry/exit pair pays bookkeeping instructions; C++ exception tables are static metadata only, consulted by the runtime exclusively when a `throw` actually fires.",
+                    "ro": "Corect — SEH adauga/scoate mereu o inregistrare in lantul simplu inlantuit de la `fs:[0]` pentru a mentine lista sa de handlere, deci fiecare pereche intrare/iesire de `__try` plateste instructiuni de bookkeeping; tabelele exceptiilor C++ sunt doar metadate statice, consultate de runtime exclusiv cand un `throw` chiar se executa."
                   }
                 },
                 {
@@ -859,19 +1117,19 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Inverted. SEH is what catches hardware faults (div-by-zero, access violation, stack overflow); C++ exceptions come from throw statements.",
-                    "ro": "Inversat. SEH este cel ce prinde defectele hardware (impartire la zero, violare de acces, depasire de stiva); exceptiile C++ vin din instructiuni throw."
+                    "en": "No — SEH is what catches hardware faults (div-by-zero, access violation, stack overflow); C++ exceptions come from throw statements.",
+                    "ro": "Nu — SEH este cel ce prinde defectele hardware (impartire la zero, violare de acces, depasire de stiva); exceptiile C++ vin din instructiuni throw."
                   }
                 },
                 {
                   "text": {
-                    "en": "SEH is cross-platform; C++ exceptions are Windows-only",
-                    "ro": "SEH este multiplatforma; exceptiile C++ sunt doar pentru Windows"
+                    "en": "SEH is the cross-platform standard, while C++ exceptions only work on Windows compilers using the MSVC ABI",
+                    "ro": "SEH este standardul multiplatforma, iar exceptiile C++ functioneaza doar pe compilatoare de Windows care folosesc ABI-ul MSVC"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Reversed. C++ exceptions are part of the language standard. SEH is a Windows-specific OS extension.",
-                    "ro": "Inversat. Exceptiile C++ fac parte din standardul limbajului. SEH este o extensie de OS specifica Windows-ului."
+                    "en": "No — the reality is reversed. C++ exceptions are part of the ISO language standard and work on every conforming compiler (Itanium ABI on Linux/macOS uses `__cxa_throw`; MSVC uses `_CxxThrowException`). SEH is a Windows-specific OS extension.",
+                    "ro": "Nu — realitatea este inversa. Exceptiile C++ fac parte din standardul ISO al limbajului si functioneaza pe orice compilator conform (ABI-ul Itanium pe Linux/macOS foloseste `__cxa_throw`; MSVC foloseste `_CxxThrowException`). SEH este o extensie de OS specifica Windows-ului."
                   }
                 }
               ],
@@ -890,8 +1148,8 @@
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Right. Only sub-members already constructed are destroyed. The raw pointer is on its own. Wrap it in std::unique_ptr (RAII) so it self-cleans.",
-                    "ro": "Corect. Doar sub-membrii deja construiti sunt distrusi. Pointerul brut ramane pe cont propriu. Incapsuleaza-l in std::unique_ptr (RAII) ca sa se curete singur."
+                    "en": "Correct — only sub-members already constructed are destroyed. The raw pointer is on its own. Wrap it in `std::unique_ptr` (RAII) so it self-cleans.",
+                    "ro": "Corect — doar sub-membrii deja construiti sunt distrusi. Pointerul brut ramane pe cont propriu. Incapsuleaza-l in `std::unique_ptr` (RAII) ca sa se curete singur."
                   }
                 },
                 {
@@ -901,8 +1159,8 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Destructors run only for fully-constructed objects. A constructor that throws leaves the object unborn.",
-                    "ro": "Destructorii ruleaza doar pentru obiecte complet construite. Un constructor care arunca lasa obiectul ne-nascut."
+                    "en": "No — destructors run only for fully-constructed objects. A constructor that throws leaves the object unborn.",
+                    "ro": "Nu — destructorii ruleaza doar pentru obiecte complet construite. Un constructor care arunca lasa obiectul ne-nascut."
                   }
                 },
                 {
@@ -912,8 +1170,8 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "The compiler only cleans up sub-members and base subobjects already constructed — not arbitrary heap pointers you allocated manually.",
-                    "ro": "Compilatorul curata doar sub-membrii si subobiectele de baza deja construite — nu pointeri arbitrari de heap pe care i-ai alocat manual."
+                    "en": "No — the compiler only cleans up sub-members and base subobjects already constructed — not arbitrary heap pointers you allocated manually.",
+                    "ro": "Nu — compilatorul curata doar sub-membrii si subobiectele de baza deja construite — nu pointeri arbitrari de heap pe care i-ai alocat manual."
                   }
                 },
                 {
@@ -923,8 +1181,8 @@
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "No. The exception propagates normally; the leaked memory is just lost.",
-                    "ro": "Nu. Exceptia se propaga normal; memoria pierduta este pur si simplu pierduta."
+                    "en": "No — the exception propagates normally; the leaked memory is just lost.",
+                    "ro": "Nu — exceptia se propaga normal; memoria pierduta este pur si simplu pierduta."
                   }
                 }
               ],
@@ -932,41 +1190,105 @@
             },
             {
               "question": {
-                "en": "Why is throwing an exception from a destructor a dangerous practice?",
-                "ro": "De ce este periculos sa arunci o exceptie dintr-un destructor?"
+                "en": "After a `__try { ... } __except(...) { ... }` block exits NORMALLY (no exception was raised), what is the net change to the `fs:[0]` chain head pointer compared with before the `__try` was entered?",
+                "ro": "Dupa ce un bloc `__try { ... } __except(...) { ... }` iese NORMAL (nicio exceptie nu a fost ridicata), care este modificarea neta a pointerului de cap al lantului `fs:[0]` comparativ cu inainte de intrarea in `__try`?"
               },
               "options": [
                 {
                   "text": {
-                    "en": "It is fine if the destructor is marked noexcept(false)",
-                    "ro": "Este in regula daca destructorul este marcat noexcept(false)"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "Even with noexcept(false), if the destructor is invoked during stack unwinding from another exception, two-in-flight triggers std::terminate.",
-                    "ro": "Chiar si cu noexcept(false), daca destructorul este apelat in timpul derularii pentru alta exceptie, doua-in-zbor declanseaza std::terminate."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "If a destructor throws while the stack is already unwinding from another exception, the program calls std::terminate immediately",
-                    "ro": "Daca un destructor arunca in timp ce stiva se deruleaza deja pentru alta exceptie, programul cheama std::terminate imediat"
+                    "en": "`fs:[0]` is restored to its original value — the per-`__try` record was pushed on entry and popped on exit, so the net change is zero.",
+                    "ro": "`fs:[0]` este restaurat la valoarea sa originala — inregistrarea per-`__try` a fost adaugata la intrare si scoasa la iesire, deci modificarea neta este zero."
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Right. Two simultaneous exceptions in flight is undefined behaviour avoided by aborting. Always make destructors no-throw.",
-                    "ro": "Corect. Doua exceptii simultane in zbor este comportament nedefinit evitat prin abort. Mereu fa destructorii fara aruncare."
+                    "en": "Correct — SEH always installs the record on entry and unlinks it on exit, even on the happy path. This is precisely why SEH is not zero-overhead, unlike C++ exceptions.",
+                    "ro": "Corect — SEH instaleaza intotdeauna inregistrarea la intrare si o deconecteaza la iesire, chiar si pe drumul fericit. Tocmai de aceea SEH nu are cost zero, spre deosebire de exceptiile C++."
                   }
                 },
                 {
                   "text": {
-                    "en": "The exception is swallowed silently and the program continues",
-                    "ro": "Exceptia este inghitita silentios si programul continua"
+                    "en": "`fs:[0]` now points to the new record that the `__try` block installed — Windows leaves it in place for later use.",
+                    "ro": "`fs:[0]` indica acum noua inregistrare pe care a instalat-o blocul `__try` — Windows o lasa in loc pentru utilizare ulterioara."
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "C++ does not silently swallow escaped exceptions. The two-exception case is loud: terminate.",
-                    "ro": "C++ nu inghite silentios exceptiile scapate. Cazul cu doua exceptii este zgomotos: terminate."
+                    "en": "No — Windows is required to unlink the record at block exit; leaving it would corrupt the chain for the rest of the thread.",
+                    "ro": "Nu — Windows este obligat sa deconecteze inregistrarea la iesirea din bloc; daca ar lasa-o, ar corupe lantul pentru restul firului."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "`fs:[0]` is nulled — the OS clears the chain head whenever a `__try` completes cleanly.",
+                    "ro": "`fs:[0]` este pus pe null — OS-ul curata capul lantului oricand un `__try` se termina curat."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — the chain is per-thread global state; clearing it would discard all other handlers active in the thread.",
+                    "ro": "Nu — lantul este stare globala per fir; curatarea lui ar elimina toate celelalte handler-e active in fir."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "There is no change — `__try` only manipulates `fs:[0]` when an exception fires; on the happy path it is a no-op.",
+                    "ro": "Nu exista nicio modificare — `__try` manipuleaza `fs:[0]` doar cand o exceptie se executa; pe drumul fericit este un no-op."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — that is the C++ exception model, not SEH. SEH always pushes and pops, which is why it has non-zero overhead on the happy path.",
+                    "ro": "Nu — acela este modelul exceptiilor C++, nu SEH. SEH adauga si scoate intotdeauna, motiv pentru care are cost ne-zero pe drumul fericit."
+                  }
+                }
+              ],
+              "reviewStep": "oop-c11-seh-internals"
+            },
+            {
+              "question": {
+                "en": "Given this function: `void f() { Lock g(m); Buffer b(4096); File r(\"x\"); throw 1; }` — in what ORDER do destructors run when the exception unwinds the frame?",
+                "ro": "Data functia: `void f() { Lock g(m); Buffer b(4096); File r(\"x\"); throw 1; }` — in ce ORDINE ruleaza destructorii cand exceptia deruleaza cadrul?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "`r`, then `b`, then `g` — reverse construction order",
+                    "ro": "`r`, apoi `b`, apoi `g` — ordine inversa constructiei"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct — destruction of automatic locals is strict reverse construction order, both on normal return and on stack unwinding.",
+                    "ro": "Corect — distrugerea localilor automati este in ordine strict inversa constructiei, atat la return normal cat si la derularea stivei."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "`g`, then `b`, then `r` — construction order",
+                    "ro": "`g`, apoi `b`, apoi `r` — ordinea constructiei"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — forward order is the construction order, not destruction. Destructors run in REVERSE construction order.",
+                    "ro": "Nu — ordinea inainte este ordinea de constructie, nu de distrugere. Destructorii ruleaza in ordine INVERSA constructiei."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Only `r` runs — `throw` only unwinds the most-recently-constructed local before transferring control",
+                    "ro": "Doar `r` se executa — `throw` deruleaza doar localul cel mai recent construit inainte de a transfera controlul"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — stack unwinding is exhaustive within the enclosing function: every fully-constructed local automatic object up to the catch (or the function boundary) is destroyed, in reverse construction order. Not just the most recent one.",
+                    "ro": "Nu — derularea stivei este exhaustiva in interiorul functiei care contine: fiecare obiect local automatic complet construit pana la catch (sau pana la marginea functiei) este distrus, in ordine inversa constructiei. Nu doar cel mai recent."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "`r`, then `b`, then `g`, then the global mutex `m`",
+                    "ro": "`r`, apoi `b`, apoi `g`, apoi mutexul global `m`"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — only AUTOMATIC (local) objects unwind. Globals/statics have program-lifetime storage and are not destroyed during stack unwinding.",
+                    "ro": "Nu — doar obiectele AUTOMATICE (locale) sunt derulate. Globalii/staticii au durata de viata a programului si nu sunt distrusi in timpul derularii stivei."
                   }
                 }
               ],
@@ -974,56 +1296,162 @@
             },
             {
               "question": {
-                "en": "Pick the best summary of RAII.",
-                "ro": "Alege cel mai bun rezumat al RAII."
+                "en": "An intermediate function in a call chain calls a deeper function that might throw, but the intermediate function itself does NOT handle the exception. What must the intermediate function do to allow the exception to propagate through it?",
+                "ro": "O functie intermediara dintr-un lant de apeluri cheama o functie mai adanca ce poate arunca, dar functia intermediara nu trateaza exceptia. Ce trebuie sa faca functia intermediara pentru a permite exceptiei sa se propage prin ea?"
               },
               "options": [
                 {
                   "text": {
-                    "en": "A library called RAII that wraps system calls",
-                    "ro": "O biblioteca numita RAII care incapsuleaza apeluri de sistem"
-                  },
-                  "correct": false,
-                  "explanation": {
-                    "en": "RAII is an idiom (pattern), not a library. Many library types (unique_ptr, lock_guard, fstream) implement the idiom.",
-                    "ro": "RAII este un idiom (model), nu o biblioteca. Multe tipuri de biblioteca (unique_ptr, lock_guard, fstream) implementeaza idiomul."
-                  }
-                },
-                {
-                  "text": {
-                    "en": "An idiom where a resource's lifetime is bound to an object's lifetime — acquire in the constructor, release in the destructor, automatic cleanup on every scope exit (including exceptions)",
-                    "ro": "Un idiom in care durata de viata a unei resurse este legata de durata de viata a unui obiect — achizitionezi in constructor, eliberezi in destructor, curatare automata la fiecare iesire din scope (inclusiv exceptii)"
+                    "en": "Nothing — propagation is automatic. The compiler emits unwind tables for the function; intermediate frames need no error-handling code.",
+                    "ro": "Nimic — propagarea este automata. Compilatorul emite tabele de derulare pentru functie; cadrele intermediare nu au nevoie de cod de tratare a erorilor."
                   },
                   "correct": true,
                   "explanation": {
-                    "en": "Exactly. Destructors run deterministically on scope exit, including during stack unwinding, which is what makes exception-safe code possible without try/catch noise everywhere.",
-                    "ro": "Exact. Destructorii ruleaza determinist la iesirea din scope, inclusiv in derulare, ceea ce face posibil codul exception-safe fara zgomot try/catch peste tot."
+                    "en": "Correct — propagation is transparent. Contrast with C error codes, where every intermediate frame must check the return value and forward it (`if (rc != 0) return rc;`); with C++ exceptions, only the producer (throw) and the consumer (catch) participate.",
+                    "ro": "Corect — propagarea este transparenta. Contrast cu codurile de eroare din C, unde fiecare cadru intermediar trebuie sa verifice valoarea returnata si sa o propage (`if (rc != 0) return rc;`); cu exceptii C++, doar producatorul (throw) si consumatorul (catch) participa."
                   }
                 },
                 {
                   "text": {
-                    "en": "A compiler optimization that removes redundant copies",
-                    "ro": "O optimizare a compilatorului care elimina copiile redundante"
+                    "en": "Add an `if (exception_pending) return;` check after every call that might throw",
+                    "ro": "Sa adauge o verificare `if (exception_pending) return;` dupa fiecare apel ce poate arunca"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "Wrong concept — that describes copy elision / RVO. RAII is about resource lifetime, not copy elimination.",
-                    "ro": "Concept gresit — aceea descrie copy elision / RVO. RAII tine de durata de viata a resurselor, nu de eliminarea copiilor."
+                    "en": "No — C++ does not expose an `exception_pending` flag. The runtime walks the stack on `throw` without cooperation from intermediate frames.",
+                    "ro": "Nu — C++ nu expune un flag `exception_pending`. Runtime-ul parcurge stiva la `throw` fara cooperare din partea cadrelor intermediare."
                   }
                 },
                 {
                   "text": {
-                    "en": "A keyword used to mark non-throwing functions",
-                    "ro": "Un cuvant cheie folosit pentru a marca functiile fara aruncare"
+                    "en": "Declare `noexcept(false)` on its signature to opt into propagation",
+                    "ro": "Sa declare `noexcept(false)` in semnatura pentru a opta pentru propagare"
                   },
                   "correct": false,
                   "explanation": {
-                    "en": "That is noexcept, not RAII. RAII is not a keyword at all.",
-                    "ro": "Acela este noexcept, nu RAII. RAII nu este deloc un cuvant cheie."
+                    "en": "No — `noexcept(false)` is the default. No annotation is required for a function to allow exceptions to pass through.",
+                    "ro": "Nu — `noexcept(false)` este implicit. Nu este nevoie de nicio adnotare pentru ca o functie sa permita trecerea exceptiilor prin ea."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Register itself with the SEH chain at `fs:[0]` on entry, unregister on exit",
+                    "ro": "Sa se inregistreze in lantul SEH de la `fs:[0]` la intrare si sa se dezinregistreze la iesire"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — SEH is a Windows OS mechanism for hardware faults. C++ exceptions use static unwind tables emitted by the compiler, not runtime registration.",
+                    "ro": "Nu — SEH este un mecanism OS Windows pentru defecte hardware. Exceptiile C++ folosesc tabele statice de derulare emise de compilator, nu inregistrare la runtime."
                   }
                 }
               ],
-              "reviewStep": "oop-c11-raii"
+              "reviewStep": "oop-c11-overview"
+            },
+            {
+              "question": {
+                "en": "The Itanium ABI used by GCC/Clang on Linux exposes a `__cxa_throw` entry point with a different argument layout than MSVC's `_CxxThrowException(&obj, &__ThrowInfo)`. Despite the symbol differences, what TWO responsibilities must both ABIs cover for unwinding to work?",
+                "ro": "ABI-ul Itanium folosit de GCC/Clang pe Linux expune un punct de intrare `__cxa_throw` cu un alt layout de argumente decat `_CxxThrowException(&obj, &__ThrowInfo)` din MSVC. In ciuda diferentei de simboluri, ce DOUA responsabilitati trebuie sa acopere ambele ABI-uri pentru ca derularea sa functioneze?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Carry the dynamic type info for catch-matching, AND describe the destructors / catch offsets for stack unwinding",
+                    "ro": "Sa transporte informatia de tip dinamic pentru potrivirea catch, SI sa descrie destructorii / offset-urile catch pentru derularea stivei"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct — both are needed regardless of ABI: type info answers 'does this catch match?', the offset/destructor list answers 'which automatic locals do I destroy on the way out?'. The two ABIs only differ in symbol names and argument layout, not in these obligations.",
+                    "ro": "Corect — ambele sunt necesare indiferent de ABI: info de tip raspunde la 'se potriveste acest catch?', lista offset/destructor raspunde la 'ce locale automate distrug pe drumul de iesire?'. Cele doua ABI-uri difera doar prin nume de simboluri si layout-ul argumentelor, nu prin aceste obligatii."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Only the address of the exception object — the runtime walks the stack and figures out which destructors to call by inspecting each frame's local variable layout at the moment of the throw",
+                    "ro": "Doar adresa obiectului exceptiei — runtime-ul parcurge stiva si determina destructorii apeland inspectarea layout-ului variabilelor locale al fiecarui cadru in momentul aruncarii"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — neither ABI can deduce destructors on the fly; both require compiler-emitted per-function tables describing which locals are in scope at each call site. RTTI alone does not encode scope.",
+                    "ro": "Nu — niciun ABI nu poate deduce destructorii din mers; ambele cer tabele per-functie emise de compilator care descriu ce locale sunt in scop la fiecare loc de apel. RTTI singur nu codifica scope-ul."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Carry the destructor list only — the catch clause is decided at link time, so type info is unnecessary at throw time",
+                    "ro": "Doar lista de destructori — clauza catch este aleasa la link, deci info de tip nu este necesara la momentul throw"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — catch matching is fundamentally dynamic (a base-class catch may receive any derived type). Both ABIs carry runtime type info in the throw payload.",
+                    "ro": "Nu — potrivirea catch este fundamental dinamica (un catch de baza poate primi orice tip derivat). Ambele ABI-uri poarta info de tip la runtime in payload-ul throw-ului."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Carry the full source-line location for stack-trace generation",
+                    "ro": "Sa transporte locatia completa din sursa pentru generarea de stack-trace"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — neither ABI requires source location for unwinding. Stack traces (if any) come from separate debug-info sections, not the exception ABI itself.",
+                    "ro": "Nu — niciun ABI nu cere locatie din sursa pentru derulare. Stack trace-urile (daca exista) vin din sectiuni separate de debug-info, nu din ABI-ul exceptiilor."
+                  }
+                }
+              ],
+              "reviewStep": "oop-c11-internals"
+            },
+            {
+              "question": {
+                "en": "An `__except` filter expression evaluates and returns `EXCEPTION_CONTINUE_SEARCH`. What does Windows do next?",
+                "ro": "O expresie de filtru `__except` se evalueaza si returneaza `EXCEPTION_CONTINUE_SEARCH`. Ce face Windows in continuare?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Passes the exception to the next SEH handler higher in the chain, leaving this `__except` block unexecuted",
+                    "ro": "Trece exceptia la urmatorul handler SEH mai sus in lant, lasand acest bloc `__except` neexecutat"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct — `CONTINUE_SEARCH` is the 'not my problem' return; the dispatcher walks to the next record in the `fs:[0]` chain.",
+                    "ro": "Corect — `CONTINUE_SEARCH` este raspunsul 'nu e problema mea'; dispecerul merge la urmatoarea inregistrare din lantul `fs:[0]`."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Executes the `__except` block immediately, then resumes after it",
+                    "ro": "Executa imediat blocul `__except`, apoi reia executia dupa el"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — that is the effect of `EXCEPTION_EXECUTE_HANDLER`, not `CONTINUE_SEARCH`.",
+                    "ro": "Nu — acela este efectul lui `EXCEPTION_EXECUTE_HANDLER`, nu al lui `CONTINUE_SEARCH`."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Resumes execution at the instruction that raised the exception",
+                    "ro": "Reia executia la instructiunea care a ridicat exceptia"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — that is `EXCEPTION_CONTINUE_EXECUTION`, which is rarely safe; `CONTINUE_SEARCH` propagates the exception instead.",
+                    "ro": "Nu — acela este `EXCEPTION_CONTINUE_EXECUTION`, rareori sigur; `CONTINUE_SEARCH` propaga exceptia in schimb."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Terminates the process via the default unhandled-exception filter",
+                    "ro": "Termina procesul prin filtrul implicit de exceptii netratate"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — termination only happens after the entire chain has been searched and no handler matched.",
+                    "ro": "Nu — terminarea are loc doar dupa ce intregul lant a fost cautat si niciun handler nu s-a potrivit."
+                  }
+                }
+              ],
+              "reviewStep": "oop-c11-seh"
             }
           ]
         }
