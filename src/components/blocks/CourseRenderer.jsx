@@ -164,7 +164,7 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
 
   return (
     <CourseNavContext.Provider value={courseNavValue}>
-    <div>
+    <div data-testid="course-renderer">
       {/* ===== Sticky progress header ===== */}
       <div
         ref={stepperRef}
@@ -262,7 +262,7 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
 
 
       {/* Step content */}
-      <div style={examMode && step.examRelevant === false ? { opacity: 0.3, pointerEvents: 'none', transition: 'opacity 0.2s' } : { transition: 'opacity 0.2s' }}>
+      <div data-testid="step-content" style={examMode && step.examRelevant === false ? { opacity: 0.3, pointerEvents: 'none', transition: 'opacity 0.2s' } : { transition: 'opacity 0.2s' }}>
         <CourseTransition courseIndex={currentStep}>
           <StepRenderer
             step={step}
@@ -279,6 +279,7 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
         style={{ borderTop: '1px solid var(--theme-border)' }}
       >
         <button
+          data-testid="step-nav-prev"
           onClick={() => goToStep(currentStep - 1)}
           className="text-sm px-4 py-2 rounded-lg transition-colors cursor-pointer"
           style={{
@@ -289,6 +290,7 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
           {t('\u2190 Previous', '\u2190 Anterior')}
         </button>
         <button
+          data-testid="step-nav-next"
           onClick={() => goToStep(currentStep + 1)}
           className="text-sm px-4 py-2 rounded-lg transition-colors cursor-pointer"
           style={{

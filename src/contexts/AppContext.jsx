@@ -36,6 +36,31 @@ function migrateLabKeys(obj) {
   return changed ? out : null;
 }
 
+/** One-time migration: legacy oop-course_7-* section checks → oop-c7-* progress entries.
+ *  Mapping is by topic, captured during the Course 7 JSON migration (2026-05-13).
+ *  Returns { removeFromChecked, addToProgress } or null if no legacy keys present. */
+function migrateOopC7Keys(checked) {
+  const map = {
+    'oop-course_7-sequence':   'oop-c7-vector',
+    'oop-course_7-adaptors':   'oop-c7-adaptors',
+    'oop-course_7-streams':    'oop-c7-io-streams',
+    'oop-course_7-strings':    'oop-c7-strings',
+    'oop-course_7-init-lists': 'oop-c7-init-lists',
+    'oop-course_7-iterators':  'oop-c7-iterators',
+  };
+  const removeFromChecked = [];
+  const addToProgress = {};
+  let any = false;
+  for (const [oldK, newK] of Object.entries(map)) {
+    if (oldK in checked) {
+      if (checked[oldK]) addToProgress[newK] = { visited: true, understood: true };
+      removeFromChecked.push(oldK);
+      any = true;
+    }
+  }
+  return any ? { removeFromChecked, addToProgress } : null;
+}
+
 // Migrate dark boolean → themeMode string (one-time)
 try {
   const rawDark = localStorage.getItem('dark');
@@ -137,6 +162,31 @@ export function AppProvider({ children }) {
     }
     if (changed) setProgress(newProgress);
     localStorage.setItem('progress_v1_migrated', '1');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // One-time migration: legacy oop-course_7-* checked keys → oop-c7-* progress entries.
+  // Added 2026-05-13 with the Course 7 JSON migration. Sentinel-gated. Idempotent.
+  useEffect(() => {
+    if (localStorage.getItem('migrated_oop_c7') === '1') return;
+    try {
+      const result = migrateOopC7Keys(checked);
+      if (result) {
+        const { removeFromChecked, addToProgress } = result;
+        if (removeFromChecked.length > 0) {
+          setChecked(prev => {
+            const next = { ...prev };
+            for (const k of removeFromChecked) delete next[k];
+            return next;
+          });
+        }
+        if (Object.keys(addToProgress).length > 0) {
+          setProgress(prev => ({ ...prev, ...addToProgress }));
+        }
+      }
+      localStorage.setItem('migrated_oop_c7', '1');
+    } catch (e) {
+      console.error('oop-c7 shim failed', e);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const t = useCallback((en, ro) => lang === 'ro' ? ro : en, [lang]);

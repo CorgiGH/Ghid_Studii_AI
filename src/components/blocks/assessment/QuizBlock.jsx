@@ -41,6 +41,7 @@ export default function QuizBlock({ questions }) {
   return (
     <div
       ref={containerRef}
+      data-testid="quiz-block"
       className="rounded-xl p-4 mb-3"
       style={{
         backgroundColor: 'color-mix(in srgb, #a855f7 12%, var(--theme-card-bg))',
@@ -284,6 +285,7 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
           return (
             <div key={oi}>
               <button
+                data-testid="quiz-option"
                 onClick={() => handleSelect(oi)}
                 className="flex items-center gap-3 p-3.5 rounded-lg text-left text-sm cursor-pointer w-full"
                 style={{
@@ -311,6 +313,7 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
               {/* Per-option explanation (new format) */}
               {submitted && hasPerOptionExplanations && opt.explanation && (oi === selected || opt.correct) && (
                 <div
+                  data-testid="quiz-feedback"
                   className="mt-1.5 ml-9 p-2.5 rounded-lg text-xs leading-relaxed"
                   style={{
                     backgroundColor: opt.correct
@@ -376,6 +379,7 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
         >
           <div ref={explanationRef}>
             <div
+              data-testid="quiz-feedback"
               className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
               style={{
                 backgroundColor: 'color-mix(in srgb, #10b981 8%, var(--theme-card-bg))',
