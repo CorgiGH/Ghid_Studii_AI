@@ -56,8 +56,8 @@ Output must use only these block types (must match `src/components/blocks/` regi
 
 ### Quiz coverage rule
 
-- Every step has ≥1 `quiz` block.
-- Each `quiz` option: `{ en, ro, correct, explanation: { en, ro } }`. Per-option explanation is non-optional (lint rule R5 + memory `feedback_curate_gotchas` rule on explanations).
+- Every content step has ≥1 `quiz` block. (An optional `intro`/overview step at position 0 is exempt — c8 pattern.) If curate emits a content step without a quiz, hand-add one before ship.
+- Each `quiz` option matches the c11 quiz schema shape: `{ en, ro, correct, explanation: { en, ro } }`. Per-option `explanation` is non-optional (lint rule R5 + memory `feedback_curate_gotchas` rule on explanations).
 - Trap callouts precede quizzes on the known pitfalls from the PDF and the JSX content:
   - `vector` push_back reallocation cost without `reserve()`
   - `priority_queue` underlying container constraint (no `list` — needs random access)
@@ -80,7 +80,7 @@ Output must use only these block types (must match `src/components/blocks/` regi
 | `src/contexts/AppContext.jsx` | **Modify** — add one-shot localStorage shim |
 | `src/content/oop/courses/Course07.jsx` | **Delete** |
 | `scripts/review-gemini-oop-c7.mjs` | **New** — clone of `review-gemini-oop-c11.mjs` |
-| `wiki/sources/OOP Course 7.md` | **Modify** — update `updated:` field; note format migration |
+| `wiki/sources/OOP Course 7.md` | **Modify** — bump `updated:` to 2026-05-13; append one-line note "Migrated to JSON 2026-05-13; see `src/content/oop/courses/course-07.json`." No content rewrite. |
 
 ## ID normalization + shim
 
@@ -244,7 +244,7 @@ Single revert per commit. Revert restores `Course07.jsx`, registry entry, remove
 |---|---|
 | Curate emits <6 or >8 steps (different chunking than JSX sections) | Shim mapping is ordinal, not name-based; works at any N. Unmapped legacy keys stay (acceptable). |
 | Curate output loses critical JSX content (perf numbers, IgnoreCase, Toggle Qs) | Accepted per Approach A. Review round flags gaps; manual patch as needed. |
-| Quiz block schema drift (c8 vs c11 shapes) | Validator catches. Mirror c11 exactly — latest reference. |
+| Quiz block schema drift (c8 vs c11 shapes) | Validator catches. Match c11 quiz schema (option fields: `en`, `ro`, `correct`, `explanation: {en, ro}`) — latest reference. |
 | Curate pipeline 503 / quota / 402 | 3 Gemini + 3 OpenRouter keys with rotation. Retry-with-backoff exists. If both exhausted: defer ship. |
 | Section ID collision (legacy + new live momentarily) | `delete next[oldK]` in shim removes legacy keys on first load. |
 | Build base-path issue with new JSON | `loadJson()` already handles `BASE_URL` — same code path as c1-c11. No new path. |
