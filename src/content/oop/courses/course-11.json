@@ -420,6 +420,107 @@
       ]
     },
     {
+      "id": "oop-c11-safety-levels",
+      "title": {
+        "en": "Exception-Safety Guarantees",
+        "ro": "Garantiile de Exception-Safety"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "`std::vector<MyType>::push_back` triggers a reallocation. The `MyType` copy constructor throws halfway through copying the old elements to the new buffer. What state should the vector be in when `push_back` returns control to the caller (via the exception)?",
+            "ro": "`std::vector<MyType>::push_back` declanseaza o realocare. Constructorul de copiere al `MyType` arunca la jumatatea drumului prin copierea elementelor vechi in noul buffer. In ce stare ar trebui sa fie vectorul cand `push_back` returneaza controlul apelantului (via exceptie)?"
+          },
+          "answer": {
+            "en": "Identical to its state BEFORE `push_back` was called — old elements present in the original buffer, no leaks, capacity unchanged. This is the **strong exception guarantee**: the operation either succeeds completely or has no effect. `std::vector` achieves this by allocating + copying into the new buffer FIRST and only releasing the old buffer once every copy has succeeded. If a copy throws, the new buffer is discarded and the original is preserved."
+          ,
+            "ro": "Identica cu starea de DINAINTE de apelul `push_back` — elementele vechi prezente in buffer-ul original, nicio scurgere, capacitatea neschimbata. Aceasta este **garantia tare a exceptiilor**: operatia fie reuseste complet, fie nu are niciun efect. `std::vector` o obtine alocand + copiind in noul buffer MAI INTAI si eliberand buffer-ul vechi doar dupa ce fiecare copiere a reusit. Daca o copiere arunca, noul buffer este aruncat si originalul este pastrat."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Exception-safety levels",
+            "ro": "Niveluri de exception-safety"
+          },
+          "content": {
+            "en": "A four-tier ladder describing what an operation promises if an exception escapes from it. Higher levels are harder to provide but cheaper for callers to reason about. The standard library (Stroustrup; Eckel) defines the top three; `no-leak` is the unwritten floor.",
+            "ro": "O ierarhie pe patru niveluri care descrie ce promite o operatie daca o exceptie scapa din ea. Nivelurile mai inalte sunt mai greu de oferit dar mai ieftine pentru apelant de rationat. Biblioteca standard (Stroustrup; Eckel) defineste primele trei; `no-leak` este pragul minim implicit."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Level", "ro": "Nivel" },
+            { "en": "Promise", "ro": "Promisiune" },
+            { "en": "Typical example", "ro": "Exemplu tipic" }
+          ],
+          "rows": [
+            [
+              { "en": "**No-leak** (minimum)", "ro": "**Fara scurgere** (minim)" },
+              { "en": "No resources leak even if the operation throws. State of objects may be unspecified.", "ro": "Nicio resursa nu se pierde chiar daca operatia arunca. Starea obiectelor poate fi nedefinita." },
+              { "en": "Any RAII-wrapped operation that doesn't otherwise guarantee state.", "ro": "Orice operatie incapsulata RAII care nu garanteaza altfel starea." }
+            ],
+            [
+              { "en": "**Basic** (Stroustrup's *basic guarantee*)", "ro": "**De baza** (garantia *basic* a lui Stroustrup)" },
+              { "en": "Object stays in a valid but unspecified state — invariants hold, destructor can run safely, but data may have changed.", "ro": "Obiectul ramane intr-o stare valida dar nedefinita — invariantii sunt respectati, destructorul poate rula in siguranta, dar datele pot fi modificate." },
+              { "en": "`std::list::push_back` — list invariants intact, possibly with the new node missing.", "ro": "`std::list::push_back` — invariantii listei intacti, posibil fara nodul nou." }
+            ],
+            [
+              { "en": "**Strong** (*commit-or-rollback*)", "ro": "**Tare** (*commit-or-rollback*)" },
+              { "en": "Operation either completes fully OR has zero observable effect. State is exactly as it was before.", "ro": "Operatia fie se completeaza integral, fie nu are niciun efect observabil. Starea este exact ca inainte." },
+              { "en": "`std::vector::push_back` during reallocation; `copy-and-swap` idiom.", "ro": "`std::vector::push_back` in timpul realocarii; idiomul `copy-and-swap`." }
+            ],
+            [
+              { "en": "**Nothrow** (*noexcept*)", "ro": "**Fara aruncare** (*noexcept*)" },
+              { "en": "Operation provably cannot throw. The compiler can rely on this; the STL queries it.", "ro": "Operatia se poate dovedi ca nu arunca. Compilatorul poate conta pe asta; STL-ul o interogheaza." },
+              { "en": "Move constructors marked `noexcept`; `std::swap` on built-in types; destructors.", "ro": "Move constructor-i marcati `noexcept`; `std::swap` pe tipuri primitive; destructori." }
+            ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**How to layer guarantees in your own classes:**\n\n- Hold every resource via an RAII member (`std::unique_ptr`, `std::vector`, `std::string`, …) — this gives you `no-leak` for free.\n- Make destructors `noexcept` (the default since C++11) and make swap operations `noexcept` — these are your `nothrow` primitives.\n- Build mutating operations on top of swap using **copy-and-swap**: build the new state in a local copy, then `swap(*this, copy)` at the end. The swap is `noexcept`, so once it runs the operation is committed; if any step before it throws, the original is untouched. This is the canonical recipe for the **strong** guarantee.\n- If you cannot afford the copy cost, settle for **basic** and document it explicitly. The STL itself mostly settles for basic — strong is expensive when the copy is heavy.",
+            "ro": "**Cum sa stratifici garantiile in propriile clase:**\n\n- Pastreaza fiecare resursa via un membru RAII (`std::unique_ptr`, `std::vector`, `std::string`, …) — asta iti ofera `no-leak` gratuit.\n- Fa destructorii `noexcept` (implicit din C++11) si fa operatiile de swap `noexcept` — acestea sunt primitivele tale `nothrow`.\n- Construieste operatii mutante peste swap folosind **copy-and-swap**: construieste noua stare intr-o copie locala, apoi `swap(*this, copie)` la final. Swap-ul este `noexcept`, deci odata ce ruleaza operatia este comisa; daca vreun pas dinainte arunca, originalul ramane intact. Aceasta este reteta canonica pentru garantia **tare**.\n- Daca nu iti permiti costul copierii, accepta garantia **de baza** si documenteaza-o explicit. STL-ul insusi se multumeste in mare parte cu basic — strong este scump cand copierea este grea."
+          }
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "code": "#include <utility>   // std::swap\n\nclass Buffer {\n    int*   data_;\n    size_t size_;\npublic:\n    // 1. swap is noexcept -- the nothrow primitive we build strong guarantees on\n    friend void swap(Buffer& a, Buffer& b) noexcept {\n        std::swap(a.data_, b.data_);\n        std::swap(a.size_, b.size_);\n    }\n\n    // 2. copy-and-swap assignment: STRONG guarantee\n    Buffer& operator=(const Buffer& other) {\n        Buffer tmp(other);   // may throw -- *this is still untouched\n        swap(*this, tmp);    // noexcept -- commit point\n        return *this;\n    }\n\n    // 3. Move constructor noexcept -- enables vector to use move on resize\n    Buffer(Buffer&& src) noexcept\n        : data_(src.data_), size_(src.size_) {\n        src.data_ = nullptr;\n        src.size_ = 0;\n    }\n\n    // 4. Destructor noexcept by default -- the floor every RAII type provides\n    ~Buffer() { delete[] data_; }\n};"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Why the STL settles for the basic guarantee in many places:** the strong guarantee usually requires either (a) the operation to be small enough that copy-and-swap is cheap, or (b) the type to be cheaply copyable. For `std::list::splice` or `std::map::insert` on heavy value types, building a full snapshot would dominate the operation's cost. The basic guarantee is a deliberate engineering trade-off — not an oversight.",
+            "ro": "**De ce STL se multumeste cu garantia de baza in multe locuri:** garantia tare necesita de obicei fie (a) operatia sa fie suficient de mica incat copy-and-swap sa fie ieftin, fie (b) tipul sa fie ieftin copiat. Pentru `std::list::splice` sau `std::map::insert` pe tipuri de valoare grele, construirea unei imagini complete ar domina costul operatiei. Garantia de baza este un compromis deliberat de inginerie — nu o omisiune."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does providing the **strong** guarantee usually require the type's copy/move operations to be either `noexcept` or genuinely committable in one step?",
+            "ro": "De ce oferirea garantiei **tari** necesita de obicei ca operatiile de copiere/mutare ale tipului sa fie fie `noexcept`, fie cu adevarat comisibile intr-un singur pas?"
+          },
+          "answer": {
+            "en": "Strong = commit-or-rollback. The rollback path must NOT itself throw — otherwise you'd be unwinding from one exception and trigger a second one, hitting `std::terminate`. So the operation needs a `noexcept` 'commit' primitive (typically swap) that runs only after every fallible step has succeeded. If the only way to assemble the new state involves a copy/move that may throw, you can still get strong as long as the copy/move runs BEFORE the commit point — failure before commit just throws away the in-progress copy, leaving `*this` untouched.",
+            "ro": "Tare = commit-or-rollback. Calea de rollback nu trebuie sa arunce ea insasi — altfel ai derula dintr-o exceptie si ai declansa una a doua, lovind `std::terminate`. Deci operatia are nevoie de o primitiva `noexcept` de 'commit' (de obicei swap) care ruleaza doar dupa ce fiecare pas faliibil a reusit. Daca singura cale de a asambla noua stare implica o copiere/mutare ce poate arunca, poti totusi obtine tare atata timp cat copierea/mutarea ruleaza INAINTE de punctul de commit — esecul inainte de commit pur si simplu arunca copia in progres, lasand `*this` intact."
+          }
+        },
+        {
+          "type": "lecture",
+          "note": {
+            "en": "Extends slide 47 with Stroustrup ch. 14.4 and Eckel vol. 2 ch. 1 (exception-safety guarantees).",
+            "ro": "Extinde slide-ul 47 cu Stroustrup cap. 14.4 si Eckel vol. 2 cap. 1 (garantiile de exception-safety)."
+          }
+        }
+      ]
+    },
+    {
       "id": "oop-c11-internals",
       "title": {
         "en": "Under the Hood: How throw is Compiled",
@@ -1452,6 +1553,59 @@
                 }
               ],
               "reviewStep": "oop-c11-seh"
+            },
+            {
+              "question": {
+                "en": "You write `Buffer& operator=(const Buffer& other) { Buffer tmp(other); swap(*this, tmp); return *this; }` where `swap` is `noexcept`. Which exception-safety level does this assignment provide?",
+                "ro": "Scrii `Buffer& operator=(const Buffer& other) { Buffer tmp(other); swap(*this, tmp); return *this; }` unde `swap` este `noexcept`. Ce nivel de exception-safety ofera aceasta asignare?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Strong — if `Buffer(other)` throws, `*this` is untouched; once `swap` runs the operation is committed",
+                    "ro": "Tare — daca `Buffer(other)` arunca, `*this` ramane intact; odata ce `swap` ruleaza operatia este comisa"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct — this is the textbook `copy-and-swap` recipe. The only fallible step (copy construction of `tmp`) runs before the `noexcept` swap; failure there throws away `tmp` with `*this` unchanged.",
+                    "ro": "Corect — aceasta este reteta de manual `copy-and-swap`. Singurul pas faliibil (constructia prin copiere a lui `tmp`) ruleaza inainte de swap-ul `noexcept`; un esec acolo arunca `tmp` cu `*this` neschimbat."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Basic — `*this` may be left in a valid but unspecified state if `Buffer(other)` throws",
+                    "ro": "De baza — `*this` poate ramane intr-o stare valida dar nedefinita daca `Buffer(other)` arunca"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — `*this` is not touched until `swap` runs. If `Buffer(other)` throws, the exception propagates out before `swap` is ever called, so `*this` remains in its original state.",
+                    "ro": "Nu — `*this` nu este atins pana cand ruleaza `swap`. Daca `Buffer(other)` arunca, exceptia se propaga inainte ca `swap` sa fie apelat, deci `*this` ramane in starea originala."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Nothrow — `swap` is `noexcept`, so the whole assignment is `noexcept`",
+                    "ro": "Fara aruncare — `swap` este `noexcept`, deci toata asignarea este `noexcept`"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — the inner `Buffer(other)` copy construction may throw `bad_alloc` or whatever the type's copy ctor allows. Nothrow applies only to operations PROVABLY incapable of throwing end-to-end.",
+                    "ro": "Nu — constructia prin copiere `Buffer(other)` poate arunca `bad_alloc` sau orice altceva permite copy ctor-ul tipului. Nothrow se aplica doar operatiilor demonstrabil incapabile de a arunca cap-la-cap."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "No-leak only — there is no guarantee about `*this`'s state if the copy throws",
+                    "ro": "Doar fara scurgere — nu exista nicio garantie despre starea lui `*this` daca copierea arunca"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "No — there is a concrete state guarantee: if the copy throws, `*this` is exactly as it was. That is stronger than no-leak; it is the strong guarantee.",
+                    "ro": "Nu — exista o garantie concreta de stare: daca copierea arunca, `*this` ramane exact cum era. Asta este mai puternic decat fara scurgere; este garantia tare."
+                  }
+                }
+              ],
+              "reviewStep": "oop-c11-safety-levels"
             }
           ]
         }

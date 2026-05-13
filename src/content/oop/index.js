@@ -30,7 +30,7 @@ const oop = {
     { id: 'oop-c8', title: { en: 'Course 8: STL Associative Containers & Smart Pointers', ro: 'Cursul 8: Containere Asociative STL si Pointeri Inteligenti' }, shortTitle: { en: 'C8: Assoc. & Smart Ptrs', ro: 'C8: Asoc. & Smart Ptrs' }, sectionCount: 8, metaId: 'oop-c8', src: 'oop/courses/course-08.json' },
     { id: 'oop-c9', title: { en: 'Course 9: Modern C++ Features & Static Polymorphism', ro: 'Cursul 9: Facilitati Moderne C++ si Polimorfism Static' }, shortTitle: { en: 'C9: Modern C++', ro: 'C9: C++ Modern' }, sectionCount: 8, metaId: 'oop-c9', src: 'oop/courses/course-09.json' },
     { id: 'oop-c10', title: { en: 'Course 10: Lambda Expressions in C++', ro: 'Cursul 10: Expresii Lambda in C++' }, shortTitle: { en: 'C10: Lambdas', ro: 'C10: Lambda' }, sectionCount: 7, metaId: 'oop-c10', src: 'oop/courses/course-10.json' },
-    { id: 'oop-c11', title: { en: 'Course 11: Exceptions, SEH & RAII', ro: 'Cursul 11: Exceptii, SEH si RAII' }, shortTitle: { en: 'C11: Exceptions', ro: 'C11: Exceptii' }, sectionCount: 10, metaId: 'oop-c11', src: 'oop/courses/course-11.json' },
+    { id: 'oop-c11', title: { en: 'Course 11: Exceptions, SEH & RAII', ro: 'Cursul 11: Exceptii, SEH si RAII' }, shortTitle: { en: 'C11: Exceptions', ro: 'C11: Exceptii' }, sectionCount: 11, metaId: 'oop-c11', src: 'oop/courses/course-11.json' },
   ],
   seminars: [],
   labs: [
