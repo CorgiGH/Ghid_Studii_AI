@@ -110,12 +110,18 @@ export default function QuizBlock({ questions }) {
           <React.Fragment key={qi}>
             {showChunkBreak && (
               <div
-                className="flex items-center gap-2 my-4 select-none"
+                className="flex items-center gap-2 mt-8 mb-4 select-none"
                 aria-hidden="true"
               >
                 <div
-                  className="flex-1 h-px"
-                  style={{ backgroundColor: 'color-mix(in srgb, #a855f7 25%, var(--theme-border))' }}
+                  // R2: chunk-break gets visual weight upgrade — 2px solid
+                  // with stronger tint so it reads as a landmark, not just
+                  // another card border. Was 1px @ 25%.
+                  className="flex-1"
+                  style={{
+                    height: '2px',
+                    backgroundColor: 'color-mix(in srgb, #a855f7 45%, var(--theme-border))',
+                  }}
                 />
                 <span
                   className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
@@ -128,8 +134,11 @@ export default function QuizBlock({ questions }) {
                   {t(`Q ${chunkLabel}`, `Î ${chunkLabel}`)}
                 </span>
                 <div
-                  className="flex-1 h-px"
-                  style={{ backgroundColor: 'color-mix(in srgb, #a855f7 25%, var(--theme-border))' }}
+                  className="flex-1"
+                  style={{
+                    height: '2px',
+                    backgroundColor: 'color-mix(in srgb, #a855f7 45%, var(--theme-border))',
+                  }}
                 />
               </div>
             )}
@@ -255,8 +264,39 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
   // Detect per-option explanations (new format) vs single explanation (old format)
   const hasPerOptionExplanations = q.options.some(opt => opt.explanation);
 
+  // R2: cross-course retrieval flag. If reviewStep is set but points at a
+  // step outside the current course's step set, this is a spaced-retrieval
+  // item from earlier material — surface a "Review" badge so the learner
+  // recognises it isn't fresh material from this course.
+  const isCrossCourseReview =
+    !!q.reviewStep &&
+    !!courseNav?.courseStepIds &&
+    !courseNav.courseStepIds.has(q.reviewStep);
+
   return (
     <div className={index < total - 1 ? 'mb-4 pb-4' : ''} style={index < total - 1 ? { borderBottom: '1px solid var(--theme-border)' } : {}}>
+      {isCrossCourseReview && (
+        <div
+          className="inline-flex items-center gap-1 mb-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+          style={{
+            backgroundColor: 'color-mix(in srgb, #f59e0b 18%, var(--theme-card-bg))',
+            color: 'color-mix(in srgb, #f59e0b 70%, var(--theme-content-text))',
+            border: '1px solid color-mix(in srgb, #f59e0b 40%, var(--theme-border))',
+            letterSpacing: '0.08em',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              width: '5px',
+              height: '5px',
+              borderRadius: '50%',
+              backgroundColor: '#f59e0b',
+            }}
+          />
+          {t('Review', 'Recapitulare')}
+        </div>
+      )}
       <p className="text-sm font-medium mb-4" style={{ color: 'var(--theme-content-text)', lineHeight: 1.55 }}>
         {total > 1 && <span style={{ color: 'var(--theme-muted-text)' }}>Q{index + 1}. </span>}
         <span dangerouslySetInnerHTML={{ __html: formatMarkdown(t(q.question.en, q.question.ro)) }} />

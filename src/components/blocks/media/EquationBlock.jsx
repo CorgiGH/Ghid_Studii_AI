@@ -58,9 +58,11 @@ export default function EquationBlock({ tex, label }) {
   // Apply edge-fade ONLY when there is still content to the right of the
   // visible viewport. When the user scrolls to the end, drop the fade so
   // trailing characters/closing brackets aren't permanently obscured.
+  // R2: stop at 80% (was 92%) so the fade is loud enough to register on
+  // light-card palettes where the gradient was almost invisible.
   const showFade = overflowState.overflows && !overflowState.atEnd;
   const mask = showFade
-    ? 'linear-gradient(to right, black 0%, black 92%, transparent 100%)'
+    ? 'linear-gradient(to right, black 0%, black 80%, transparent 100%)'
     : 'none';
 
   return (
@@ -78,6 +80,7 @@ export default function EquationBlock({ tex, label }) {
         columnGap: '1rem',
         borderLeft: '4px solid #3b82f6',
         background: 'color-mix(in srgb, var(--theme-content-text) 5%, transparent)',
+        position: 'relative',
       }}
     >
       <div
@@ -98,6 +101,31 @@ export default function EquationBlock({ tex, label }) {
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      {/* R2: persistent right-edge chevron hint when scrollable content
+          remains. Pure decoration (aria-hidden, no pointer events) — the
+          actual scroll affordance is the wrap itself. Hides as soon as
+          the user reaches the end. */}
+      {showFade && (
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            right: '0.5rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'var(--theme-muted-text)',
+            opacity: 0.5,
+            fontSize: '1.1rem',
+            lineHeight: 1,
+            pointerEvents: 'none',
+            userSelect: 'none',
+            // Stay above the masked content so the glyph is fully opaque.
+            zIndex: 1,
+          }}
+        >
+          ›
+        </span>
+      )}
       {label && (
         <div
           className="equation-label text-sm italic flex-shrink-0"

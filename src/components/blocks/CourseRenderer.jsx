@@ -96,7 +96,17 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
     if (idx !== -1) goToStep(idx);
   }, [courseData?.steps, goToStep]);
 
-  const courseNavValue = useMemo(() => ({ navigateToStep }), [navigateToStep]);
+  // R2: expose the set of step IDs that belong to this course so consumers
+  // (QuizBlock) can detect cross-course retrieval references (reviewStep
+  // pointing at a step outside this course) and flag them as review items.
+  const courseStepIds = useMemo(
+    () => new Set((courseData?.steps || []).map((s) => s.id)),
+    [courseData?.steps]
+  );
+  const courseNavValue = useMemo(
+    () => ({ navigateToStep, courseStepIds }),
+    [navigateToStep, courseStepIds]
+  );
 
   // Completion celebration — modal (research §4)
   const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -197,8 +207,14 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
             </span>
           </div>
 
-          {/* Progress strip segments */}
-          <div className="flex gap-0.5 flex-1 h-[5px]">
+          {/* Progress strip segments. R2: at >9 steps on <sm viewports the
+              per-dot strip becomes too dense to read and crowds the row.
+              Collapse to a single continuous fill bar in that regime. */}
+          <div
+            className={`gap-0.5 flex-1 h-[5px] ${
+              totalSteps > 9 ? 'hidden sm:flex' : 'flex'
+            }`}
+          >
             {courseData.steps.map((s, i) => {
               const sp = progress[s.id];
               const isUnderstood = sp?.understood;
@@ -223,6 +239,26 @@ export default function CourseRenderer({ src, examMode = false, onNextCourse }) 
               );
             })}
           </div>
+
+          {/* R2: compact mobile fallback for dense step counts (>9). One
+              thin progress bar; the [N/M] chip already lives in the label
+              column to the left, so no extra chip is needed here. */}
+          {totalSteps > 9 && (
+            <div
+              className="sm:hidden flex-1 h-[5px] rounded-full overflow-hidden"
+              style={{ backgroundColor: 'var(--theme-border)' }}
+              aria-hidden="true"
+            >
+              <div
+                className="h-full transition-all"
+                style={{
+                  width: `${((currentStep + 1) / totalSteps) * 100}%`,
+                  backgroundColor: allUnderstood ? '#22c55e' : '#3b82f6',
+                  boxShadow: allUnderstood ? 'none' : '0 0 6px rgba(59,130,246,0.4)',
+                }}
+              />
+            </div>
+          )}
 
           {/* Lecture toggle */}
           <button
