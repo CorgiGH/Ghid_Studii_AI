@@ -91,6 +91,30 @@ const probStat = {
       shortTitle: { en: 'C10: Descriptive Stats', ro: 'C10: Statistică Descriptivă' },
       sectionCount: 6,
     },
+    {
+      id: 'ps-c11',
+      src: 'prob-stat/courses/course-11.json',
+      metaId: 'ps-c11',
+      title: { en: 'Course 11: Inferential Statistics — Estimation and Hypothesis Testing', ro: 'Cursul 11: Statistică Inferențială — Estimare și Testarea Ipotezelor' },
+      shortTitle: { en: 'C11: Inference', ro: 'C11: Inferență' },
+      sectionCount: 12,
+    },
+    {
+      id: 'ps-c12',
+      src: 'prob-stat/courses/course-12.json',
+      metaId: 'ps-c12',
+      title: { en: 'Course 12: Significance Tests — Z, T, Chi-Squared, F', ro: 'Cursul 12: Teste de Semnificație — Z, T, Hi-Pătrat, F' },
+      shortTitle: { en: 'C12: Significance Tests', ro: 'C12: Teste de Semnificație' },
+      sectionCount: 9,
+    },
+    {
+      id: 'ps-c13',
+      src: 'prob-stat/courses/course-13.json',
+      metaId: 'ps-c13',
+      title: { en: 'Course 13: Linear Correlation and Regression', ro: 'Cursul 13: Corelație Liniară și Regresie' },
+      shortTitle: { en: 'C13: Correlation & Regression', ro: 'C13: Corelație și Regresie' },
+      sectionCount: 7,
+    },
   ],
   labs: [
     {

@@ -1,0 +1,862 @@
+{
+  "meta": {
+    "id": "ps-c12",
+    "title": {
+      "en": "Course 12: Significance Tests — Z, T, Chi-Squared, F",
+      "ro": "Cursul 12: Teste de Semnificație — Z, T, Hi-Pătrat, F"
+    },
+    "shortTitle": {
+      "en": "C12: Significance Tests",
+      "ro": "C12: Teste de Semnificație"
+    },
+    "source": {
+      "en": "Prob & Stat — Lecture 12 slides (18 May 2026)",
+      "ro": "Prob & Stat — Curs 12 (18 mai 2026)"
+    }
+  },
+  "steps": [
+    {
+      "id": "ps-c12-workflow",
+      "title": {
+        "en": "The Significance-Testing Workflow",
+        "ro": "Procedura unui Test de Semnificație"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Every significance test follows the same five-step recipe — the variation between tests is only in the **distribution of the score** and the **formula for the score**. Master the recipe once and the specific tests fall in line.",
+            "ro": "Orice test de semnificație urmează aceeași rețetă în cinci pași — diferența între teste este doar **distribuția scorului** și **formula scorului**. Stăpânește rețeta o dată și testele specifice se așază firesc."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Step", "ro": "Pas" },
+            { "en": "Action", "ro": "Acțiune" }
+          ],
+          "rows": [
+            [
+              { "en": "1", "ro": "1" },
+              { "en": "State $H_0$ and $H_a$ — $H_a$ is accepted only if $H_0$ is rejected", "ro": "Formulează $H_0$ și $H_a$ — $H_a$ este acceptată doar dacă $H_0$ este respinsă" }
+            ],
+            [
+              { "en": "2", "ro": "2" },
+              { "en": "Pick a significance level $\\alpha$ (how strong must the evidence be?)", "ro": "Alege nivelul de semnificație $\\alpha$ (cât de puternice trebuie să fie dovezile?)" }
+            ],
+            [
+              { "en": "3", "ro": "3" },
+              { "en": "Compute the test statistic (score) from the sample", "ro": "Calculează statistica testului (scorul) din eșantion" }
+            ],
+            [
+              { "en": "4", "ro": "4" },
+              { "en": "Determine the critical value for that $\\alpha$ and the distribution under $H_0$", "ro": "Determină valoarea critică pentru acel $\\alpha$ și distribuția sub $H_0$" }
+            ],
+            [
+              { "en": "5", "ro": "5" },
+              { "en": "Compare score to critical value — if score is in the rejection region, reject $H_0$ and accept $H_a$; otherwise fail to reject $H_0$", "ro": "Compară scorul cu valoarea critică — dacă scorul este în zona de respingere, respinge $H_0$ și acceptă $H_a$; altfel nu poți respinge $H_0$" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "The four tests in this lecture (Z, T, Chi-squared, F) plug into this exact workflow. The only changes are: what score formula to use, what distribution the score follows under $H_0$, and how to compute the critical value.",
+            "ro": "Cele patru teste din această lecție (Z, T, Hi-pătrat, F) se conectează exact în acest flux. Singurele schimbări sunt: ce formulă de scor să folosești, ce distribuție urmează scorul sub $H_0$, și cum se calculează valoarea critică."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c12-z-test",
+      "title": {
+        "en": "Z Test — Mean with Known $\\sigma$",
+        "ro": "Testul Z — Media cu $\\sigma$ Cunoscut"
+      },
+      "group": "ztest",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Z Test for the Population Mean",
+            "ro": "Testul Z pentru media populației"
+          },
+          "content": {
+            "en": "Used when the population is Normal (or $n \\geq 30$ via the CLT) **and** the population standard deviation $\\sigma$ is known. Under $H_0: \\mu = \\mu_0$ the score\n\n$z = \\dfrac{\\bar{x}_n - \\mu_0}{\\sigma/\\sqrt{n}}$\n\nfollows the standard Normal $N(0, 1)$.",
+            "ro": "Folosit când populația este Normală (sau $n \\geq 30$ prin TLC) **și** deviația standard a populației $\\sigma$ este cunoscută. Sub $H_0: \\mu = \\mu_0$ scorul\n\n$z = \\dfrac{\\bar{x}_n - \\mu_0}{\\sigma/\\sqrt{n}}$\n\nurmează Normala standard $N(0, 1)$."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Alternative $H_a$", "ro": "Alternativa $H_a$" },
+            { "en": "Critical value (in R)", "ro": "Valoarea critică (în R)" },
+            { "en": "Rejection region", "ro": "Zona de respingere" }
+          ],
+          "rows": [
+            [
+              { "en": "$\\mu > \\mu_0$ (right)", "ro": "$\\mu > \\mu_0$ (dreapta)" },
+              { "en": "$z^* = \\text{qnorm}(1 - \\alpha)$", "ro": "$z^* = \\text{qnorm}(1 - \\alpha)$" },
+              { "en": "$z \\in [z^*, +\\infty)$", "ro": "$z \\in [z^*, +\\infty)$" }
+            ],
+            [
+              { "en": "$\\mu < \\mu_0$ (left)", "ro": "$\\mu < \\mu_0$ (stânga)" },
+              { "en": "$z^* = \\text{qnorm}(\\alpha)$", "ro": "$z^* = \\text{qnorm}(\\alpha)$" },
+              { "en": "$z \\in (-\\infty, z^*]$", "ro": "$z \\in (-\\infty, z^*]$" }
+            ],
+            [
+              { "en": "$\\mu \\neq \\mu_0$ (two-tailed)", "ro": "$\\mu \\neq \\mu_0$ (bilateral)" },
+              { "en": "$z^* = \\text{qnorm}(1 - \\alpha/2)$", "ro": "$z^* = \\text{qnorm}(1 - \\alpha/2)$" },
+              { "en": "$|z| \\geq z^*$", "ro": "$|z| \\geq z^*$" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked example.** Lab mice are believed to weigh on average $30$ g with $\\sigma = 5$ g (Normal). A sample of $n = 25$ gives $\\bar{x} = 32$ g. Test $H_0: \\mu = 30$ vs $H_a: \\mu \\neq 30$.\n\nScore: $z = (32 - 30)/(5/\\sqrt{25}) = 2$.\n\n- $\\alpha = 0.05$: $z^* = 1.96$. $|z| = 2 > 1.96$ → reject $H_0$.\n- $\\alpha = 0.01$: $z^* = 2.576$. $|z| = 2 < 2.576$ → fail to reject.",
+            "ro": "**Exemplu rezolvat.** Șoarecii de laborator se crede că au greutatea medie $30$ g cu $\\sigma = 5$ g (Normal). Un eșantion de $n = 25$ dă $\\bar{x} = 32$ g. Testați $H_0: \\mu = 30$ vs $H_a: \\mu \\neq 30$.\n\nScorul: $z = (32 - 30)/(5/\\sqrt{25}) = 2$.\n\n- $\\alpha = 0.05$: $z^* = 1.96$. $|z| = 2 > 1.96$ → respinge $H_0$.\n- $\\alpha = 0.01$: $z^* = 2.576$. $|z| = 2 < 2.576$ → nu poți respinge."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "If $H_0$ cannot be rejected at $\\alpha = 5\\%$, it cannot be rejected at $\\alpha = 1\\%$ either (the rejection region for $\\alpha = 1\\%$ is strictly contained in that for $\\alpha = 5\\%$). The converse is **not** true.",
+            "ro": "Dacă $H_0$ nu poate fi respinsă la $\\alpha = 5\\%$, nu poate fi respinsă nici la $\\alpha = 1\\%$ (zona de respingere pentru $\\alpha = 1\\%$ este strict conținută în cea pentru $\\alpha = 5\\%$). Reciproca **nu** este adevărată."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c12-t-test",
+      "title": {
+        "en": "T Test — Mean with Unknown $\\sigma$",
+        "ro": "Testul T — Media cu $\\sigma$ Necunoscut"
+      },
+      "group": "ttest",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Student's t Test for the Population Mean",
+            "ro": "Testul t al lui Student pentru media populației"
+          },
+          "content": {
+            "en": "Used when the population is Normal (or close to Normal for small $n$), and $\\sigma$ is **unknown** so we estimate it by the sample standard deviation $s$. Under $H_0: \\mu = \\mu_0$\n\n$t = \\dfrac{\\bar{x}_n - \\mu_0}{s/\\sqrt{n}}$\n\nfollows a Student t distribution with $n - 1$ degrees of freedom: $t(n - 1)$.",
+            "ro": "Folosit când populația este Normală (sau aproape de Normal pentru $n$ mic), iar $\\sigma$ este **necunoscută** deci o estimăm prin deviația standard a eșantionului $s$. Sub $H_0: \\mu = \\mu_0$\n\n$t = \\dfrac{\\bar{x}_n - \\mu_0}{s/\\sqrt{n}}$\n\nurmează o distribuție Student t cu $n - 1$ grade de libertate: $t(n - 1)$."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Alternative", "ro": "Alternativa" },
+            { "en": "Critical value (in R)", "ro": "Valoarea critică (în R)" }
+          ],
+          "rows": [
+            [
+              { "en": "$\\mu > \\mu_0$ (right)", "ro": "$\\mu > \\mu_0$ (dreapta)" },
+              { "en": "$t^* = \\text{qt}(1 - \\alpha, n-1)$", "ro": "$t^* = \\text{qt}(1 - \\alpha, n-1)$" }
+            ],
+            [
+              { "en": "$\\mu < \\mu_0$ (left)", "ro": "$\\mu < \\mu_0$ (stânga)" },
+              { "en": "$t^* = \\text{qt}(\\alpha, n-1)$", "ro": "$t^* = \\text{qt}(\\alpha, n-1)$" }
+            ],
+            [
+              { "en": "$\\mu \\neq \\mu_0$ (two-tailed)", "ro": "$\\mu \\neq \\mu_0$ (bilateral)" },
+              { "en": "$t^* = \\text{qt}(1 - \\alpha/2, n-1)$", "ro": "$t^* = \\text{qt}(1 - \\alpha/2, n-1)$" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked example: CO spectrophotometer.** Calibration uses gas with $\\mu_0 = 70$ ppm (Normal, $\\sigma$ unknown). Measurements: $58, 71, 67, 64, 62$. Need: $n = 5$, $\\bar{x} = 64.4$, $s = 4.9295$.\n\nScore $t = (64.4 - 70)/(4.9295/\\sqrt{5}) = -2.5402$.\n\nFor $H_a: \\mu \\neq 70$ at $\\alpha = 5\\%$: $t^* = \\text{qt}(0.975, 4) = 2.7764$. $|t| = 2.5402 < 2.7764$ → fail to reject (insufficient evidence).\n\nBut for $H_a: \\mu < 70$ at $\\alpha = 5\\%$: $t^* = \\text{qt}(0.05, 4) = -2.1318$. $t = -2.5402 < -2.1318$ → reject $H_0$. **Different alternatives can give different conclusions.**",
+            "ro": "**Exemplu rezolvat: spectrofotometru CO.** Calibrarea folosește gaz cu $\\mu_0 = 70$ ppm (Normal, $\\sigma$ necunoscută). Măsurători: $58, 71, 67, 64, 62$. Avem: $n = 5$, $\\bar{x} = 64.4$, $s = 4.9295$.\n\nScorul $t = (64.4 - 70)/(4.9295/\\sqrt{5}) = -2.5402$.\n\nPentru $H_a: \\mu \\neq 70$ la $\\alpha = 5\\%$: $t^* = \\text{qt}(0.975, 4) = 2.7764$. $|t| = 2.5402 < 2.7764$ → nu poți respinge (dovezi insuficiente).\n\nDar pentru $H_a: \\mu < 70$ la $\\alpha = 5\\%$: $t^* = \\text{qt}(0.05, 4) = -2.1318$. $t = -2.5402 < -2.1318$ → respinge $H_0$. **Alternative diferite pot duce la concluzii diferite.**"
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "Don't snoop the data to choose between one-sided and two-sided alternatives — that inflates Type I error. The choice should be made based on the **research question**, before computing the sample mean.",
+            "ro": "Nu inspectați datele pentru a alege între alternative unilaterale și bilaterale — asta umflă eroarea de tip I. Alegerea trebuie făcută pe baza **întrebării de cercetare**, înainte de a calcula media eșantionului."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why does Z become unsafe and T become required for small samples (e.g. $n = 5$) when $\\sigma$ is unknown?",
+            "ro": "De ce devine Z nesigur și T necesar pentru eșantioane mici (ex. $n = 5$) când $\\sigma$ este necunoscută?"
+          },
+          "answer": {
+            "en": "With small $n$, the sample standard deviation $s$ is itself a noisy estimate of $\\sigma$. Using $z = (\\bar{x} - \\mu_0)/(s/\\sqrt{n})$ as if it were Normal ignores that extra noise — making the test too eager to reject. The t distribution has heavier tails that compensate exactly for using $s$ in place of $\\sigma$.",
+            "ro": "Cu $n$ mic, deviația standard a eșantionului $s$ este ea însăși o estimare zgomotoasă a lui $\\sigma$. Folosirea $z = (\\bar{x} - \\mu_0)/(s/\\sqrt{n})$ ca și cum ar fi Normală ignoră acel zgomot suplimentar — făcând testul prea dornic să respingă. Distribuția t are cozi mai grele care compensează exact pentru folosirea $s$ în locul lui $\\sigma$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c12-chi-square-fit",
+      "title": {
+        "en": "Chi-Squared Goodness-of-Fit Test",
+        "ro": "Testul Hi-Pătrat de Concordanță"
+      },
+      "group": "chisquare",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When data are **categorical**, the question \"does the observed distribution match a theoretical one?\" is answered by comparing observed counts $o_i$ to expected counts $e_i$ across $k$ categories.",
+            "ro": "Când datele sunt **categorice**, întrebarea \"se potrivește distribuția observată cu una teoretică?\" se rezolvă comparând frecvențele observate $o_i$ cu cele așteptate $e_i$ peste $k$ categorii."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\chi^2 = \\sum_{i=1}^k \\frac{(o_i - e_i)^2}{e_i} = \\sum_{i=1}^k \\frac{o_i^2}{e_i} - m, \\quad m = \\sum_i o_i"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Goodness-of-Fit Test ($\\chi^2$)",
+            "ro": "Testul de concordanță ($\\chi^2$)"
+          },
+          "content": {
+            "en": "Under $H_0$ (the data follow the theoretical distribution), the statistic above approximately follows a $\\chi^2$ distribution with $df = k - 1 - s$ degrees of freedom, where $s$ is the number of population parameters you had to estimate from the sample to compute the $e_i$.\n\n**Right-tailed test:** reject $H_0$ when $\\chi^2 > \\chi^{2*}$ with $\\chi^{2*} = \\text{qchisq}(1 - \\alpha, df)$.",
+            "ro": "Sub $H_0$ (datele urmează distribuția teoretică), statistica de mai sus urmează aproximativ o distribuție $\\chi^2$ cu $df = k - 1 - s$ grade de libertate, unde $s$ este numărul de parametri ai populației pe care a trebuit să-i estimați din eșantion pentru a calcula $e_i$.\n\n**Test unilateral dreapta:** respinge $H_0$ când $\\chi^2 > \\chi^{2*}$ cu $\\chi^{2*} = \\text{qchisq}(1 - \\alpha, df)$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked: Labby's dice.** In 2009, Zacariah Labby rolled a die $315{,}672$ times to check uniformity. Observed face counts (1..6): 53222, 52118, 52465, 52338, 52224, 52285. Under uniform $H_0$, each expected count is $52612$.\n\n$\\chi^2 \\approx 24.73$. With $df = 5$: critical values $\\chi^{2*}_{0.05} = 11.07$, $\\chi^{2*}_{0.01} = 15.08$. Both exceeded → reject uniformity at both levels. Faces 1 and 6 (opposite on a standard die) appear slightly more often.",
+            "ro": "**Rezolvat: zarurile lui Labby.** În 2009, Zacariah Labby a aruncat un zar $315{,}672$ ori pentru a verifica uniformitatea. Frecvențele observate pe fețe (1..6): 53222, 52118, 52465, 52338, 52224, 52285. Sub $H_0$ uniformă, fiecare frecvență așteptată este $52612$.\n\n$\\chi^2 \\approx 24.73$. Cu $df = 5$: valorile critice $\\chi^{2*}_{0.05} = 11.07$, $\\chi^{2*}_{0.01} = 15.08$. Ambele depășite → respinge uniformitatea la ambele niveluri. Fețele 1 și 6 (opuse pe un zar standard) apar puțin mai des."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "Rule of thumb: the $\\chi^2$ approximation is reliable only when every expected count $e_i \\geq 5$. With small expected counts, the discreteness of $o_i$ shows through and the $\\chi^2$ table loses accuracy.",
+            "ro": "Regulă empirică: aproximarea $\\chi^2$ este de încredere doar când fiecare frecvență așteptată $e_i \\geq 5$. Cu frecvențe așteptate mici, discreția lui $o_i$ devine vizibilă iar tabelul $\\chi^2$ pierde precizie."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c12-chi-square-independence",
+      "title": {
+        "en": "Chi-Squared Independence Test",
+        "ro": "Testul Hi-Pătrat de Independență"
+      },
+      "group": "chisquare",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A second use of $\\chi^2$ — checking whether two categorical variables $X$ (with $p$ levels) and $Y$ (with $r$ levels) are **statistically independent**. Observations $o_{ij}$ are arranged in a $p \\times r$ **contingency table** with row totals $O_{i\\cdot}$, column totals $O_{\\cdot j}$, grand total $m$.",
+            "ro": "Un al doilea uz al lui $\\chi^2$ — verificarea dacă două variabile categorice $X$ (cu $p$ niveluri) și $Y$ (cu $r$ niveluri) sunt **statistic independente**. Observațiile $o_{ij}$ sunt aranjate într-un **tabel de contingență** $p \\times r$ cu totalurile rândurilor $O_{i\\cdot}$, totalurile coloanelor $O_{\\cdot j}$, totalul general $m$."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "e_{ij} = \\frac{O_{i\\cdot} \\cdot O_{\\cdot j}}{m}, \\quad \\chi^2 = \\sum_{i=1}^p \\sum_{j=1}^r \\frac{(o_{ij} - e_{ij})^2}{e_{ij}}, \\quad df = (p - 1)(r - 1)"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked: hair vs eye color (Snee 1974).** A $4 \\times 4$ contingency table with $m = 592$ subjects. $H_0$: hair color and eye color are independent. Score: $\\chi^2 = 138.29$. With $df = (4-1)(4-1) = 9$: $\\chi^{2*}_{0.05} = 16.92$, $\\chi^{2*}_{0.01} = 21.66$. $138.29$ blows past both → reject $H_0$. The two variables are dependent.",
+            "ro": "**Rezolvat: culoare păr vs ochi (Snee 1974).** Un tabel de contingență $4 \\times 4$ cu $m = 592$ subiecți. $H_0$: culoarea părului și a ochilor sunt independente. Scorul: $\\chi^2 = 138.29$. Cu $df = (4-1)(4-1) = 9$: $\\chi^{2*}_{0.05} = 16.92$, $\\chi^{2*}_{0.01} = 21.66$. $138.29$ trece de ambele → respinge $H_0$. Cele două variabile sunt dependente."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "When you reject independence, you can say **\"there is a dependence\"** but you cannot say **what kind** of dependence (linear, monotone, particular categories). The $\\chi^2$ test detects deviation from independence — describing the shape of that deviation requires additional analysis (e.g. residuals, correspondence analysis).",
+            "ro": "Când respingeți independența, puteți spune **\"există o dependență\"** dar nu puteți spune **ce fel** de dependență (liniară, monotonă, categorii particulare). Testul $\\chi^2$ detectează abaterea de la independență — descrierea formei acestei abateri necesită analiză suplimentară (ex. reziduuri, analiza corespondențelor)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c12-multinomial",
+      "title": {
+        "en": "Multinomial Test (Specified Probabilities)",
+        "ro": "Testul Multinomial (Probabilități Specificate)"
+      },
+      "group": "chisquare",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "An extension of the goodness-of-fit idea: the experiment has $k$ outcomes with **specified** probabilities $p_1, \\ldots, p_k$ ($\\sum p_i = 1$). Expected counts $e_i = m \\cdot p_i$. Statistic:",
+            "ro": "O extensie a ideii de concordanță: experimentul are $k$ rezultate cu probabilități **specificate** $p_1, \\ldots, p_k$ ($\\sum p_i = 1$). Frecvențe așteptate $e_i = m \\cdot p_i$. Statistica:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\chi^2 = \\sum_{i=1}^k \\frac{(o_i - m p_i)^2}{m p_i} = \\sum_{i=1}^k \\frac{o_i^2}{m p_i} - m"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked: roulette wheel slots.** Slots: 6 red, 5 black, 7 orange, 10 blue, 8 yellow, 7 brown, 2 green → expected proportions $p_i = (6, 5, 7, 10, 8, 7, 2)/45$. After 1000 spins, observed counts: 119, 117, 140, 204, 165, 136, 19. Expected: 120, 100, 140, 200, 160, 140, 40.\n\n$\\chi^2 = 14.27$. With $df = 6$: $\\chi^{2*}_{0.05} = 12.59$, $\\chi^{2*}_{0.01} = 16.81$.\n\nAt 5%: reject $H_0$ (wheel may be miscalibrated). At 1%: fail to reject. The big contributor was the green slot — only 19 hits vs 40 expected.",
+            "ro": "**Rezolvat: rulete.** Sloturi: 6 roșu, 5 negru, 7 portocaliu, 10 albastru, 8 galben, 7 maro, 2 verde → proporții așteptate $p_i = (6, 5, 7, 10, 8, 7, 2)/45$. După 1000 învârtiri, frecvențe observate: 119, 117, 140, 204, 165, 136, 19. Așteptate: 120, 100, 140, 200, 160, 140, 40.\n\n$\\chi^2 = 14.27$. Cu $df = 6$: $\\chi^{2*}_{0.05} = 12.59$, $\\chi^{2*}_{0.01} = 16.81$.\n\nLa 5%: respinge $H_0$ (ruleta poate fi necalibrată). La 1%: nu poți respinge. Contribuția mare a venit din slotul verde — doar 19 apariții vs 40 așteptate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c12-f-test",
+      "title": {
+        "en": "F Test — Comparing Two Variances",
+        "ro": "Testul F — Compararea a Două Dispersii"
+      },
+      "group": "ftest",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "F Test for Equality of Variances",
+            "ro": "Testul F pentru egalitatea dispersiilor"
+          },
+          "content": {
+            "en": "Two **independent** samples from two **Normal** populations, with sample sizes $n_1, n_2$ and sample variances $s_1^2, s_2^2$. Under $H_0: \\sigma_1^2 = \\sigma_2^2$ the statistic\n\n$F = \\dfrac{s_1^2}{s_2^2}$\n\nfollows a Fisher distribution $F(n_1 - 1, n_2 - 1)$.",
+            "ro": "Două eșantioane **independente** din două populații **Normale**, cu dimensiunile $n_1, n_2$ și dispersiile $s_1^2, s_2^2$. Sub $H_0: \\sigma_1^2 = \\sigma_2^2$ statistica\n\n$F = \\dfrac{s_1^2}{s_2^2}$\n\nurmează o distribuție Fisher $F(n_1 - 1, n_2 - 1)$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Convention: put the **larger** (or expected-larger) sample variance in the numerator. This keeps $F \\geq 1$ and the right-tail comparison straightforward.",
+            "ro": "Convenție: pune dispersia **mai mare** (sau cea așteptată mai mare) la numărător. Asta menține $F \\geq 1$ și comparația cu coada dreaptă simplă."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Alternative", "ro": "Alternativa" },
+            { "en": "Critical values (R)", "ro": "Valori critice (R)" },
+            { "en": "Rejection region", "ro": "Zona de respingere" }
+          ],
+          "rows": [
+            [
+              { "en": "$\\sigma_1^2 / \\sigma_2^2 > 1$", "ro": "$\\sigma_1^2 / \\sigma_2^2 > 1$" },
+              { "en": "$F^* = \\text{qf}(1-\\alpha, n_1-1, n_2-1)$", "ro": "$F^* = \\text{qf}(1-\\alpha, n_1-1, n_2-1)$" },
+              { "en": "$[F^*, +\\infty)$", "ro": "$[F^*, +\\infty)$" }
+            ],
+            [
+              { "en": "$\\sigma_1^2 / \\sigma_2^2 \\neq 1$", "ro": "$\\sigma_1^2 / \\sigma_2^2 \\neq 1$" },
+              { "en": "$F^*_L = \\text{qf}(\\alpha/2, \\ldots)$, $F^*_R = \\text{qf}(1-\\alpha/2, \\ldots)$", "ro": "$F^*_L = \\text{qf}(\\alpha/2, \\ldots)$, $F^*_R = \\text{qf}(1-\\alpha/2, \\ldots)$" },
+              { "en": "$(0, F^*_L] \\cup [F^*_R, +\\infty)$", "ro": "$(0, F^*_L] \\cup [F^*_R, +\\infty)$" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked: bottling machines.** New machine: $n_1 = 25$, $s_1^2 = 0.0018$. Old machine: $n_2 = 22$, $s_2^2 = 0.0008$. $F = 0.0018/0.0008 = 2.25$.\n\nTwo-tailed at $\\alpha = 5\\%$: $F^*_L = 0.433$, $F^*_R = 2.368$. $F = 2.25 \\in (0.433, 2.368)$ → fail to reject equality of variances.\n\nOne-tailed (right) at $\\alpha = 5\\%$: $F^* = \\text{qf}(0.95, 24, 21) = 2.054$. $F = 2.25 > 2.054$ → reject $H_0$; the new machine has larger variance. **Same data, different alternatives, different conclusions.**",
+            "ro": "**Rezolvat: mașini de îmbuteliere.** Mașina nouă: $n_1 = 25$, $s_1^2 = 0.0018$. Mașina veche: $n_2 = 22$, $s_2^2 = 0.0008$. $F = 0.0018/0.0008 = 2.25$.\n\nBilateral la $\\alpha = 5\\%$: $F^*_L = 0.433$, $F^*_R = 2.368$. $F = 2.25 \\in (0.433, 2.368)$ → nu poți respinge egalitatea dispersiilor.\n\nUnilateral (dreapta) la $\\alpha = 5\\%$: $F^* = \\text{qf}(0.95, 24, 21) = 2.054$. $F = 2.25 > 2.054$ → respinge $H_0$; mașina nouă are dispersie mai mare. **Aceleași date, alternative diferite, concluzii diferite.**"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c12-comparison",
+      "title": {
+        "en": "Which Test to Use?",
+        "ro": "Ce Test Folosesc?"
+      },
+      "group": "applications",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Situation", "ro": "Situația" },
+            { "en": "Use", "ro": "Folosește" },
+            { "en": "Distribution of score under $H_0$", "ro": "Distribuția scorului sub $H_0$" }
+          ],
+          "rows": [
+            [
+              { "en": "One mean, $\\sigma$ known, Normal (or $n \\geq 30$)", "ro": "O medie, $\\sigma$ cunoscut, Normal (sau $n \\geq 30$)" },
+              { "en": "Z test", "ro": "Test Z" },
+              { "en": "$N(0,1)$", "ro": "$N(0,1)$" }
+            ],
+            [
+              { "en": "One mean, $\\sigma$ unknown, Normal", "ro": "O medie, $\\sigma$ necunoscut, Normal" },
+              { "en": "T test", "ro": "Test T" },
+              { "en": "$t(n-1)$", "ro": "$t(n-1)$" }
+            ],
+            [
+              { "en": "Categorical data vs theoretical distribution", "ro": "Date categorice vs distribuție teoretică" },
+              { "en": "$\\chi^2$ goodness-of-fit", "ro": "$\\chi^2$ de concordanță" },
+              { "en": "$\\chi^2(df)$ where $df = k - 1 - s$", "ro": "$\\chi^2(df)$ cu $df = k - 1 - s$" }
+            ],
+            [
+              { "en": "Two categorical variables, dependence?", "ro": "Două variabile categorice, dependență?" },
+              { "en": "$\\chi^2$ independence", "ro": "$\\chi^2$ de independență" },
+              { "en": "$\\chi^2((p-1)(r-1))$", "ro": "$\\chi^2((p-1)(r-1))$" }
+            ],
+            [
+              { "en": "Compare two variances, independent Normal samples", "ro": "Compară două dispersii, eșantioane Normale independente" },
+              { "en": "F test", "ro": "Test F" },
+              { "en": "$F(n_1-1, n_2-1)$", "ro": "$F(n_1-1, n_2-1)$" }
+            ]
+          ]
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why is the F test conducted only with the larger variance in the numerator, but the Z and T tests symmetric on both tails?",
+            "ro": "De ce testul F se face doar cu dispersia mai mare la numărător, dar testele Z și T sunt simetrice pe ambele cozi?"
+          },
+          "answer": {
+            "en": "The Fisher distribution is **not symmetric** — values are non-negative and clustered near 1, with a heavy right tail. Computing both tail quantiles is awkward. Putting the larger variance at the top guarantees $F \\geq 1$, so a single right-tailed comparison suffices for the one-sided test. Z and T are symmetric about 0, so both tails behave the same.",
+            "ro": "Distribuția Fisher **nu este simetrică** — valorile sunt nenegative și grupate aproape de 1, cu o coadă dreaptă grea. Calculul ambelor cuantile e incomod. Punând dispersia mai mare la numărător garantăm $F \\geq 1$, deci o singură comparație unilaterală dreapta este suficientă pentru testul unilateral. Z și T sunt simetrice în jurul lui 0, deci ambele cozi se comportă la fel."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c12-quiz",
+      "title": {
+        "en": "Self-Test Quiz",
+        "ro": "Test de Autoevaluare"
+      },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "You want to test whether a coin is fair from 100 tosses with 58 heads. The most appropriate test is:",
+                "ro": "Vreți să testați dacă o monedă este corectă din 100 aruncări cu 58 steme. Cel mai potrivit test este:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Z test for a proportion ($H_0: p = 0.5$)",
+                    "ro": "Test Z pentru o proporție ($H_0: p = 0.5$)"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A binomial proportion with large $n$ uses the Normal approximation — the Z test. Here $np = np(1-p) = 25 \\geq 5$, so the approximation is valid.",
+                    "ro": "Corect. O proporție binomială cu $n$ mare folosește aproximarea Normală — testul Z. Aici $np = np(1-p) = 25 \\geq 5$, deci aproximarea este validă."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "F test for variances",
+                    "ro": "Test F pentru dispersii"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The F test compares variances of two Normal samples — there is no second sample here, and the parameter of interest is a proportion, not a variance.",
+                    "ro": "Incorect. Testul F compară dispersiile a două eșantioane Normale — aici nu există un al doilea eșantion, iar parametrul de interes este o proporție, nu o dispersie."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Chi-squared independence test",
+                    "ro": "Test $\\chi^2$ de independență"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Independence tests need two categorical variables. Here there is only one (head/tail outcome). The right framing is a single proportion, not a $2 \\times 2$ table.",
+                    "ro": "Incorect. Testele de independență au nevoie de două variabile categorice. Aici există doar una (rezultat stema/banul). Cadrul corect este o singură proporție, nu un tabel $2 \\times 2$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "T test for the mean",
+                    "ro": "Test T pentru medie"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. T tests apply to a quantitative mean from a Normal population with unknown variance. Coin tosses give Bernoulli outcomes — a proportion, not a continuous mean.",
+                    "ro": "Incorect. Testele T se aplică pentru o medie cantitativă dintr-o populație Normală cu dispersie necunoscută. Aruncările de monedă dau rezultate Bernoulli — o proporție, nu o medie continuă."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "A small sample ($n = 8$) drawn from a Normal population gives $\\bar{x}$ and $s$. To test $H_0: \\mu = \\mu_0$, which test should you use?",
+                "ro": "Un eșantion mic ($n = 8$) dintr-o populație Normală dă $\\bar{x}$ și $s$. Pentru a testa $H_0: \\mu = \\mu_0$, ce test ar trebui să folosiți?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Chi-squared test",
+                    "ro": "Test $\\chi^2$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Chi-squared targets categorical-data problems (goodness-of-fit, independence). It does not directly test a population mean.",
+                    "ro": "Incorect. Testul $\\chi^2$ se adresează problemelor cu date categorice (concordanță, independență). Nu testează direct o medie de populație."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Student's t test with $df = n - 1 = 7$",
+                    "ro": "Test Student t cu $df = n - 1 = 7$"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The population is Normal but $\\sigma$ is unknown (we use $s$). For small $n$ this exactly matches the T setting. Critical value comes from $t(7)$, not $N(0,1)$.",
+                    "ro": "Corect. Populația este Normală dar $\\sigma$ este necunoscută (folosim $s$). Pentru $n$ mic se potrivește exact cadrului T. Valoarea critică vine din $t(7)$, nu $N(0,1)$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Z test using $s$ instead of $\\sigma$",
+                    "ro": "Test Z folosind $s$ în loc de $\\sigma$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Substituting $s$ into a Z test ignores the extra noise from estimating $\\sigma$. With small $n$ this makes the test too eager to reject. Use T instead.",
+                    "ro": "Incorect. Înlocuirea $s$ într-un test Z ignoră zgomotul suplimentar din estimarea lui $\\sigma$. Cu $n$ mic asta face testul prea grăbit să respingă. Folosiți T în schimb."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "F test for variance",
+                    "ro": "Test F pentru dispersie"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. F tests compare variances of two samples. The question here is about a single mean, not a variance comparison.",
+                    "ro": "Incorect. Testele F compară dispersiile a două eșantioane. Întrebarea aici este despre o singură medie, nu o comparație de dispersii."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "In a chi-squared goodness-of-fit test, you computed expected counts and got $e_1 = 8$, $e_2 = 2$, $e_3 = 15$. What is the main concern?",
+                "ro": "Într-un test $\\chi^2$ de concordanță, ați calculat frecvențele așteptate și ați obținut $e_1 = 8$, $e_2 = 2$, $e_3 = 15$. Care este îngrijorarea principală?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "There are too many categories for the test",
+                    "ro": "Sunt prea multe categorii pentru test"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Three categories are fine. The issue is not the number of categories but their expected sizes.",
+                    "ro": "Incorect. Trei categorii sunt în regulă. Problema nu este numărul de categorii ci dimensiunile lor așteptate."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The expected count $e_2 = 2$ is too small (below 5), so the $\\chi^2$ approximation is unreliable",
+                    "ro": "Frecvența așteptată $e_2 = 2$ este prea mică (sub 5), deci aproximarea $\\chi^2$ este nesigură"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The standard rule of thumb requires every expected count $\\geq 5$ for the asymptotic $\\chi^2$ approximation to be reliable. Combine sparse categories or use an exact test.",
+                    "ro": "Corect. Regula empirică standard cere ca fiecare frecvență așteptată $\\geq 5$ pentru ca aproximarea asimptotică $\\chi^2$ să fie de încredere. Combinați categoriile rare sau folosiți un test exact."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Expected counts must always be integers",
+                    "ro": "Frecvențele așteptate trebuie să fie întotdeauna întregi"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Expected counts $e_i = m p_i$ are typically non-integer values — that's perfectly fine. The $\\chi^2$ statistic does not need integer expectations.",
+                    "ro": "Incorect. Frecvențele așteptate $e_i = m p_i$ sunt de obicei valori neîntregi — asta este perfect în regulă. Statistica $\\chi^2$ nu are nevoie de așteptări întregi."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The expected counts should sum to 1, not to the sample size",
+                    "ro": "Frecvențele așteptate ar trebui să se sume la 1, nu la dimensiunea eșantionului"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Expected counts $e_i = m p_i$ sum to the total sample size $m$, not to 1. Probabilities $p_i$ sum to 1, but the counts they imply sum to $m$.",
+                    "ro": "Incorect. Frecvențele așteptate $e_i = m p_i$ se sumează la dimensiunea totală a eșantionului $m$, nu la 1. Probabilitățile $p_i$ se sumează la 1, dar frecvențele pe care le implică se sumează la $m$."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "In a $\\chi^2$ test for independence on a $3 \\times 4$ contingency table, the degrees of freedom are:",
+                "ro": "Într-un test $\\chi^2$ de independență pe un tabel de contingență $3 \\times 4$, gradele de libertate sunt:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "$3 \\cdot 4 = 12$",
+                    "ro": "$3 \\cdot 4 = 12$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The total number of cells is 12, but several linear constraints (row and column marginals) reduce the effective degrees of freedom.",
+                    "ro": "Incorect. Numărul total de celule este 12, dar mai multe constrângeri liniare (totalurile rândurilor și coloanelor) reduc gradele efective de libertate."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$3 + 4 - 1 = 6$",
+                    "ro": "$3 + 4 - 1 = 6$"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. $df = (p - 1)(r - 1) = (3-1)(4-1) = 6$. The (alternative) form $p + r - 1$ also equals 6 in this case but the standard formula is the product.",
+                    "ro": "Corect. $df = (p - 1)(r - 1) = (3-1)(4-1) = 6$. Forma (alternativă) $p + r - 1$ este tot 6 în acest caz dar formula standard este produsul."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$3 - 1 = 2$",
+                    "ro": "$3 - 1 = 2$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. That formula applies to a one-way goodness-of-fit test with 3 categories, not a $3 \\times 4$ contingency table.",
+                    "ro": "Incorect. Acea formulă se aplică unui test de concordanță unidimensional cu 3 categorii, nu unui tabel de contingență $3 \\times 4$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$3 \\cdot 4 - 1 = 11$",
+                    "ro": "$3 \\cdot 4 - 1 = 11$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Total cells minus 1 is used in a goodness-of-fit test where only the grand total is constrained. Independence tests constrain both row and column marginals — more constraints, fewer df.",
+                    "ro": "Incorect. Totalul celulelor minus 1 se folosește într-un test de concordanță unde doar totalul general este constrâns. Testele de independență constrâng atât totalurile rândurilor cât și ale coloanelor — mai multe constrângeri, mai puține df."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "Two independent Normal samples have variances $s_1^2 = 9$ ($n_1 = 16$) and $s_2^2 = 4$ ($n_2 = 21$). The F score is:",
+                "ro": "Două eșantioane Normale independente au dispersiile $s_1^2 = 9$ ($n_1 = 16$) și $s_2^2 = 4$ ($n_2 = 21$). Scorul F este:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "$F = 2.25$ on $(15, 20)$ degrees of freedom",
+                    "ro": "$F = 2.25$ pe $(15, 20)$ grade de libertate"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Convention puts the larger variance on top: $F = s_1^2/s_2^2 = 9/4 = 2.25$, on $(n_1 - 1, n_2 - 1) = (15, 20)$ df.",
+                    "ro": "Corect. Convenția pune dispersia mai mare la numărător: $F = s_1^2/s_2^2 = 9/4 = 2.25$, pe $(n_1 - 1, n_2 - 1) = (15, 20)$ df."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$F = 0.444$ on $(15, 20)$ df",
+                    "ro": "$F = 0.444$ pe $(15, 20)$ df"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Convention is to put the larger variance on top so that $F \\geq 1$. The reciprocal $4/9 \\approx 0.444$ is technically a valid F value but inconvenient for one-sided testing.",
+                    "ro": "Incorect. Convenția este să pui dispersia mai mare la numărător astfel ca $F \\geq 1$. Reciproca $4/9 \\approx 0.444$ este tehnic o valoare F validă dar incomodă pentru testarea unilaterală."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$F = 2.25$ on $(16, 21)$ df",
+                    "ro": "$F = 2.25$ pe $(16, 21)$ df"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Degrees of freedom are $n - 1$ for each sample, not $n$.",
+                    "ro": "Incorect. Gradele de libertate sunt $n - 1$ pentru fiecare eșantion, nu $n$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$F = 5$ on $(15, 20)$ df",
+                    "ro": "$F = 5$ pe $(15, 20)$ df"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The F statistic is the ratio of variances, not the difference: $F = s_1^2/s_2^2$, not $s_1^2 - s_2^2$.",
+                    "ro": "Incorect. Statistica F este raportul dispersiilor, nu diferența: $F = s_1^2/s_2^2$, nu $s_1^2 - s_2^2$."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "After rejecting $H_0$ in a $\\chi^2$ independence test, you can correctly claim:",
+                "ro": "După respingerea $H_0$ într-un test $\\chi^2$ de independență, puteți afirma corect:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "The two variables are positively correlated.",
+                    "ro": "Cele două variabile sunt corelate pozitiv."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. $\\chi^2$ detects dependence but says nothing about direction (positive vs negative) — and for categorical variables, direction is often not even defined.",
+                    "ro": "Incorect. $\\chi^2$ detectează dependența dar nu spune nimic despre direcție (pozitivă vs negativă) — iar pentru variabile categorice, direcția adesea nu este nici măcar definită."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The two variables are not independent.",
+                    "ro": "Cele două variabile nu sunt independente."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Rejecting independence means: the joint distribution differs significantly from the product of the marginals. We cannot say more without further analysis.",
+                    "ro": "Corect. Respingerea independenței înseamnă: distribuția comună diferă semnificativ de produsul marginalelor. Nu putem spune mai mult fără analiză suplimentară."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Variable $X$ causes variable $Y$.",
+                    "ro": "Variabila $X$ cauzează variabila $Y$."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The $\\chi^2$ test detects statistical association, not causation. Causal claims require experimental design (randomization), not just observational data.",
+                    "ro": "Incorect. Testul $\\chi^2$ detectează asocierea statistică, nu cauzalitatea. Afirmațiile cauzale necesită design experimental (randomizare), nu doar date observaționale."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "All cell counts differ from their expected values.",
+                    "ro": "Toate frecvențele celulelor diferă de valorile așteptate."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The test aggregates discrepancy across cells; some cells may match their expected counts while others drive the rejection.",
+                    "ro": "Incorect. Testul agregă discrepanțele peste celule; unele celule pot să se potrivească cu frecvențele așteptate în timp ce altele duc la respingere."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "An F statistic computed from $(s_1^2/s_2^2)$ near 1 generally suggests:",
+                "ro": "O statistică F calculată din $(s_1^2/s_2^2)$ aproape de 1 sugerează în general:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "The two population variances differ greatly.",
+                    "ro": "Cele două dispersii ale populațiilor diferă mult."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. F near 1 means the sample variances are similar — the opposite of a large discrepancy.",
+                    "ro": "Incorect. F aproape de 1 înseamnă că dispersiile eșantioanelor sunt similare — opusul unei discrepanțe mari."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The two population variances are similar (insufficient evidence to reject $H_0$).",
+                    "ro": "Cele două dispersii ale populațiilor sunt similare (dovezi insuficiente pentru a respinge $H_0$)."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Under $H_0$ of equal variances, F clusters near 1. Values far from 1 (either tail) push the score into the rejection region.",
+                    "ro": "Corect. Sub $H_0$ al dispersiilor egale, F se grupează aproape de 1. Valorile departe de 1 (oricare coadă) împing scorul în zona de respingere."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The sample sizes are too small to apply the F test.",
+                    "ro": "Eșantioanele sunt prea mici pentru a aplica testul F."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The F value itself does not depend on sample-size adequacy — that is a separate diagnostic. F near 1 reflects the variance ratio, not the sample size.",
+                    "ro": "Incorect. Valoarea F însăși nu depinde de adecvarea dimensiunii eșantionului — aceea este o diagnostică separată. F aproape de 1 reflectă raportul dispersiilor, nu dimensiunea eșantionului."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The data are not Normally distributed.",
+                    "ro": "Datele nu sunt distribuite Normal."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Normality is an assumption of the F test — violations are diagnosed via residual plots or normality tests, not via the F value itself.",
+                    "ro": "Incorect. Normalitatea este o presupunere a testului F — încălcările sunt diagnosticate prin grafice de reziduuri sau teste de normalitate, nu prin valoarea F însăși."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "Conducting a Z test for a one-tailed alternative $H_a: \\mu > \\mu_0$ at $\\alpha = 0.05$ — the critical value is:",
+                "ro": "Efectuați un test Z cu alternativă unilaterală $H_a: \\mu > \\mu_0$ la $\\alpha = 0.05$ — valoarea critică este:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "$z^* \\approx 1.645$",
+                    "ro": "$z^* \\approx 1.645$"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. For a one-tailed test, the entire $\\alpha = 0.05$ sits in one tail, so $z^* = \\Phi^{-1}(0.95) \\approx 1.645$.",
+                    "ro": "Corect. Pentru un test unilateral, întregul $\\alpha = 0.05$ stă într-o coadă, deci $z^* = \\Phi^{-1}(0.95) \\approx 1.645$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$z^* \\approx 1.960$",
+                    "ro": "$z^* \\approx 1.960$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. 1.960 is the critical value for a **two-tailed** test at $\\alpha = 0.05$, with $\\alpha/2 = 0.025$ in each tail.",
+                    "ro": "Incorect. 1.960 este valoarea critică pentru un test **bilateral** la $\\alpha = 0.05$, cu $\\alpha/2 = 0.025$ în fiecare coadă."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$z^* \\approx 2.326$",
+                    "ro": "$z^* \\approx 2.326$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. 2.326 corresponds to a one-tailed test at $\\alpha = 0.01$, not $\\alpha = 0.05$.",
+                    "ro": "Incorect. 2.326 corespunde unui test unilateral la $\\alpha = 0.01$, nu $\\alpha = 0.05$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$z^* \\approx 0.05$",
+                    "ro": "$z^* \\approx 0.05$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. $\\alpha = 0.05$ is the tail probability, not the critical value. We need $z^*$ such that $P(Z > z^*) = 0.05$, which is about 1.645.",
+                    "ro": "Incorect. $\\alpha = 0.05$ este probabilitatea cozii, nu valoarea critică. Avem nevoie de $z^*$ astfel ca $P(Z > z^*) = 0.05$, care este aproximativ 1.645."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

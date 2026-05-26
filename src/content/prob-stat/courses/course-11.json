@@ -1,0 +1,1011 @@
+{
+  "meta": {
+    "id": "ps-c11",
+    "title": {
+      "en": "Course 11: Inferential Statistics — Estimation and Hypothesis Testing",
+      "ro": "Cursul 11: Statistică Inferențială — Estimare și Testarea Ipotezelor"
+    },
+    "shortTitle": {
+      "en": "C11: Inference",
+      "ro": "C11: Inferență"
+    },
+    "source": {
+      "en": "Prob & Stat — Lecture 11 slides (11 May 2026)",
+      "ro": "Prob & Stat — Curs 11 (11 mai 2026)"
+    }
+  },
+  "steps": [
+    {
+      "id": "ps-c11-intro",
+      "title": {
+        "en": "From Description to Inference",
+        "ro": "De la Descriere la Inferență"
+      },
+      "group": "fundamentals",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Inferential Statistics",
+            "ro": "Statistică inferențială"
+          },
+          "content": {
+            "en": "The branch of statistics that draws conclusions about a **population** from results obtained on a **sample**, using probability theory (Law of Large Numbers, Central Limit Theorem) as its backbone. Without probability theory, we might mistake **random fluctuation** for a real pattern, or miss a real pattern hidden behind noise.",
+            "ro": "Ramura statisticii care trage concluzii despre o **populație** folosind rezultate obținute pe un **eșantion**, având ca bază teoria probabilităților (Legea Numerelor Mari, Teorema Limită Centrală). Fără teoria probabilităților am putea confunda **variația întâmplătoare** cu un tipar real sau am putea rata un tipar real ascuns sub zgomot."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Two fundamental inference techniques you will meet in this course:\n\n1. **Confidence intervals** — estimate an unknown parameter (e.g. the population mean) by a range of plausible values.\n2. **Significance tests** — decide between two competing claims about the population (e.g. is the mean equal to a stated value, or not?).\n\nBoth rely on the **sampling distribution** of the statistic involved — usually the sample mean, which by the CLT behaves like a Normal random variable for large $n$.",
+            "ro": "Două tehnici fundamentale de inferență pe care le veți întâlni în acest curs:\n\n1. **Intervale de încredere** — estimează un parametru necunoscut (ex. media populației) printr-un interval de valori plauzibile.\n2. **Teste de semnificație** — decid între două afirmații concurente despre populație (ex. media este egală cu o valoare dată sau nu?).\n\nAmbele se bazează pe **distribuția de eșantionare** a statisticii implicate — de obicei media de selecție, care prin TLC se comportă ca o variabilă aleatoare Normală pentru $n$ mare."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "Common misconception: a sample statistic is the same as the population parameter. It is **not**. The sample mean $\\bar{x}_n$ is a random variable that *estimates* the (fixed but unknown) population mean $\\mu$. Different samples give different estimates — quantifying that variability is the whole point of inference.",
+            "ro": "Concepție greșită frecventă: o statistică de eșantion este același lucru cu parametrul populației. **Nu este**. Media de selecție $\\bar{x}_n$ este o variabilă aleatoare care *estimează* media (fixă dar necunoscută) a populației $\\mu$. Eșantioane diferite dau estimări diferite — cuantificarea acestei variabilități este miza inferenței."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-point-estimation",
+      "title": {
+        "en": "Point Estimation",
+        "ro": "Estimarea Punctuală"
+      },
+      "group": "estimation",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "If you must report a single number as your best guess for the population mean $\\mu$, which sample statistic would you choose, and why?",
+            "ro": "Dacă trebuie să raportați un singur număr ca cea mai bună estimare a mediei populației $\\mu$, ce statistică de eșantion ați alege și de ce?"
+          },
+          "answer": {
+            "en": "Most natural choice: the sample mean $\\bar{x}_n$. It is unbiased ($\\mathbb{E}[\\bar{x}_n] = \\mu$) and its variability $\\sigma^2/n$ shrinks as $n$ grows. Other candidates exist — median, mode — but they have larger variance for Normal-like populations.",
+            "ro": "Cea mai naturală alegere: media de selecție $\\bar{x}_n$. Este nedeplasată ($\\mathbb{E}[\\bar{x}_n] = \\mu$) iar variabilitatea ei $\\sigma^2/n$ scade pe măsură ce $n$ crește. Alți candidați există — mediana, modul — dar au dispersie mai mare pentru populații apropiate de Normal."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Point Estimate vs Interval Estimate",
+            "ro": "Estimare punctuală vs estimare cu interval"
+          },
+          "content": {
+            "en": "A **point estimate** of a parameter $\\theta$ is a single number $\\hat{\\theta}_n = \\hat{\\theta}_n(x)$ computed from a sample $x$ of size $n$, designed to estimate $\\theta$. An **interval estimate** of $\\theta$ is an interval $(L, U)$ whose endpoints are statistics computed from the sample. The **confidence level** $1 - \\alpha$ is the proportion of such intervals (across hypothetical repeated sampling) that contain $\\theta$.",
+            "ro": "O **estimare punctuală** a unui parametru $\\theta$ este un singur număr $\\hat{\\theta}_n = \\hat{\\theta}_n(x)$ calculat dintr-un eșantion $x$ de dimensiune $n$, conceput pentru a estima $\\theta$. O **estimare cu interval** a lui $\\theta$ este un interval $(L, U)$ ale cărui capete sunt statistici calculate din eșantion. **Nivelul de încredere** $1 - \\alpha$ este proporția acelor intervale (peste eșantionări repetate ipotetice) care conțin $\\theta$."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Unbiased Statistic",
+            "ro": "Statistică nedeplasată"
+          },
+          "content": {
+            "en": "$\\hat{\\theta}_n$ is an **unbiased** estimator of $\\theta$ if $\\mathbb{E}[\\hat{\\theta}_n] = \\theta$. Otherwise it is **biased** (it systematically over- or under-shoots). Among unbiased estimators, the one with the smallest variance is called **efficient**.",
+            "ro": "$\\hat{\\theta}_n$ este un estimator **nedeplasat** al lui $\\theta$ dacă $\\mathbb{E}[\\hat{\\theta}_n] = \\theta$. Altfel este **deplasat** (supra- sau sub-estimează sistematic). Dintre estimatorii nedeplasați, cel cu cea mai mică dispersie se numește **eficient**."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Parameter", "ro": "Parametru" },
+            { "en": "Common Point Estimator", "ro": "Estimator punctual comun" },
+            { "en": "Unbiased?", "ro": "Nedeplasat?" }
+          ],
+          "rows": [
+            [
+              { "en": "Population mean $\\mu$", "ro": "Media populației $\\mu$" },
+              { "en": "Sample mean $\\bar{x}_n$", "ro": "Media de selecție $\\bar{x}_n$" },
+              { "en": "Yes", "ro": "Da" }
+            ],
+            [
+              { "en": "Population variance $\\sigma^2$", "ro": "Dispersia populației $\\sigma^2$" },
+              { "en": "Sample variance $s^2$ (with $n-1$)", "ro": "Dispersia eșantionului $s^2$ (cu $n-1$)" },
+              { "en": "Yes", "ro": "Da" }
+            ],
+            [
+              { "en": "Population std dev $\\sigma$", "ro": "Deviația standard a populației $\\sigma$" },
+              { "en": "Sample std dev $s$", "ro": "Deviația standard a eșantionului $s$" },
+              { "en": "No (slightly biased)", "ro": "Nu (ușor deplasat)" }
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-sample-mean-distribution",
+      "title": {
+        "en": "Distribution of the Sample Mean",
+        "ro": "Distribuția Mediei de Selecție"
+      },
+      "group": "estimation",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Let $X$ be the attribute of a population with mean $\\mu$ and variance $\\sigma^2$. Draw a sample $x = (x_1, \\ldots, x_n)$ where each $x_i$ has the same distribution as $X$. Then the sample mean $\\bar{x}_n = \\frac{1}{n}\\sum_{j=1}^n x_j$ is itself a random variable. **Key result:**",
+            "ro": "Fie $X$ atributul unei populații cu media $\\mu$ și dispersia $\\sigma^2$. Extragem un eșantion $x = (x_1, \\ldots, x_n)$ unde fiecare $x_i$ are aceeași distribuție ca $X$. Atunci media de selecție $\\bar{x}_n = \\frac{1}{n}\\sum_{j=1}^n x_j$ este ea însăși o variabilă aleatoare. **Rezultatul cheie:**"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\mathbb{E}[\\bar{x}_n] = \\mu, \\quad \\text{Var}[\\bar{x}_n] = \\frac{\\sigma^2}{n}"
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Plus, by the **Central Limit Theorem**, for large $n$ ($n \\geq 30$) the sample mean is approximately Normal:\n\n$\\bar{x}_n \\sim N(\\mu, \\sigma^2/n)$\n\nIf the population itself is Normal, this is exact for every $n$. The quantity $\\sigma/\\sqrt{n}$ is called the **standard error of the mean** (SEM) — when $\\sigma$ is unknown, we estimate the SEM by $s/\\sqrt{n}$.",
+            "ro": "În plus, prin **Teorema Limită Centrală**, pentru $n$ mare ($n \\geq 30$) media de selecție este aproximativ Normală:\n\n$\\bar{x}_n \\sim N(\\mu, \\sigma^2/n)$\n\nDacă populația însăși este Normală, acest lucru este exact pentru orice $n$. Cantitatea $\\sigma/\\sqrt{n}$ se numește **eroarea standard a mediei** (SEM) — când $\\sigma$ este necunoscută, estimăm SEM prin $s/\\sqrt{n}$."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Doubling the sample size $n$ — by how much does the standard deviation of the sample mean shrink?",
+            "ro": "Dublarea dimensiunii eșantionului $n$ — cu cât se reduce deviația standard a mediei de selecție?"
+          },
+          "answer": {
+            "en": "Variance halves ($\\sigma^2/(2n)$), so the standard deviation shrinks by a factor of $\\sqrt{2} \\approx 1.41$. To **halve** the standard deviation you need to **quadruple** the sample size. Precision grows only with $\\sqrt{n}$ — diminishing returns.",
+            "ro": "Dispersia se înjumătățește ($\\sigma^2/(2n)$), deci deviația standard scade cu un factor de $\\sqrt{2} \\approx 1.41$. Pentru a **înjumătăți** deviația standard trebuie să **cuadruplați** dimensiunea eșantionului. Precizia crește doar cu $\\sqrt{n}$ — randament descrescător."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-z-interval",
+      "title": {
+        "en": "Confidence Interval for the Mean — $\\sigma$ Known (Z)",
+        "ro": "Interval de Încredere pentru Medie — $\\sigma$ Cunoscut (Z)"
+      },
+      "group": "intervals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Suppose we know the population standard deviation $\\sigma$ and want a $(1-\\alpha)$ confidence interval for $\\mu$ from a sample of size $n$. By the CLT, $\\bar{x}_n \\sim N(\\mu, \\sigma^2/n)$. Standardizing:\n\n$Z = \\dfrac{\\bar{x}_n - \\mu}{\\sigma/\\sqrt{n}} \\sim N(0, 1).$\n\nWe seek a **critical value** $z^*$ so that the probability that $Z$ lies in $[-z^*, z^*]$ equals $1 - \\alpha$.",
+            "ro": "Să presupunem că știm deviația standard a populației $\\sigma$ și dorim un interval de încredere de nivel $(1-\\alpha)$ pentru $\\mu$ dintr-un eșantion de dimensiune $n$. Prin TLC, $\\bar{x}_n \\sim N(\\mu, \\sigma^2/n)$. Standardizând:\n\n$Z = \\dfrac{\\bar{x}_n - \\mu}{\\sigma/\\sqrt{n}} \\sim N(0, 1).$\n\nCăutăm o **valoare critică** $z^*$ astfel încât probabilitatea ca $Z$ să se afle în $[-z^*, z^*]$ să fie $1 - \\alpha$."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "P(-z^* \\leq Z \\leq z^*) = 1 - \\alpha \\iff P(Z \\geq z^*) = \\alpha/2"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Equivalently, $z^* = -\\Phi^{-1}(\\alpha/2)$ where $\\Phi$ is the standard Normal CDF. Reading off the inequality gives the **two-sided confidence interval**:",
+            "ro": "Echivalent, $z^* = -\\Phi^{-1}(\\alpha/2)$ unde $\\Phi$ este funcția de repartiție Normală standard. Rezultatul este **intervalul de încredere bilateral**:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "\\left(\\bar{x}_n - z^*\\frac{\\sigma}{\\sqrt{n}}, \\;\\bar{x}_n + z^*\\frac{\\sigma}{\\sqrt{n}}\\right)"
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Confidence level $1-\\alpha$", "ro": "Nivel de încredere $1-\\alpha$" },
+            { "en": "$\\alpha/2$", "ro": "$\\alpha/2$" },
+            { "en": "$z^*$", "ro": "$z^*$" }
+          ],
+          "rows": [
+            [
+              { "en": "90%", "ro": "90%" },
+              { "en": "0.05", "ro": "0.05" },
+              { "en": "1.645", "ro": "1.645" }
+            ],
+            [
+              { "en": "95%", "ro": "95%" },
+              { "en": "0.025", "ro": "0.025" },
+              { "en": "1.960", "ro": "1.960" }
+            ],
+            [
+              { "en": "99%", "ro": "99%" },
+              { "en": "0.005", "ro": "0.005" },
+              { "en": "2.576", "ro": "2.576" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The half-width $z^*\\sigma/\\sqrt{n}$ is called the **margin of error**. The full interval length is $2z^*\\sigma/\\sqrt{n}$. To make the interval length at most $w$ you need sample size $n = (2z^*\\sigma/w)^2$.",
+            "ro": "Jumătatea de lungime $z^*\\sigma/\\sqrt{n}$ se numește **eroare marginală**. Lungimea totală a intervalului este $2z^*\\sigma/\\sqrt{n}$. Pentru ca lungimea intervalului să fie cel mult $w$ aveți nevoie de dimensiunea $n = (2z^*\\sigma/w)^2$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "Common mistake: interpreting a 95% CI as \"there is a 95% chance that $\\mu$ lies in this specific interval.\" Wrong — $\\mu$ is fixed; the interval is random. The correct interpretation: 95% of intervals constructed this way (over hypothetical repetitions) will contain $\\mu$.",
+            "ro": "Greșeală frecventă: a interpreta un IC de 95% ca \"există 95% șanse ca $\\mu$ să se afle în acest interval specific.\" Greșit — $\\mu$ este fix; intervalul este aleator. Interpretarea corectă: 95% din intervalele construite astfel (peste repetări ipotetice) vor conține $\\mu$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-z-example",
+      "title": {
+        "en": "Worked Example: Drug Concentration CI",
+        "ro": "Exemplu Rezolvat: IC pentru Concentrația Medicamentului"
+      },
+      "group": "intervals",
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "A drug is analyzed three times for its active substance, yielding concentrations 0.8403, 0.8636, 0.8447 g/l. The concentration is known to follow a Normal law with $\\sigma = 0.0068$ g/l. Build a 99% confidence interval for the true mean concentration $\\mu$.",
+            "ro": "Un medicament este analizat de trei ori pentru substanța activă, obținând concentrațiile 0.8403, 0.8636, 0.8447 g/l. Concentrația urmează o lege Normală cu $\\sigma = 0.0068$ g/l. Construiți un interval de încredere de 99% pentru media adevărată $\\mu$."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Step 1 — Sample mean.** $\\bar{x}_3 = (0.8403 + 0.8636 + 0.8447)/3 = 0.8495$ g/l.\n\n**Step 2 — Critical value.** For $1-\\alpha = 0.99$, $\\alpha/2 = 0.005$, so $z^* = 2.576$.\n\n**Step 3 — Margin of error.** $z^* \\cdot \\sigma/\\sqrt{n} = 2.576 \\cdot 0.0068/\\sqrt{3} \\approx 0.0101$.\n\n**Step 4 — Interval.** $(0.8495 - 0.0101, \\;0.8495 + 0.0101) = (0.8394, 0.8596)$.",
+            "ro": "**Pasul 1 — Media eșantionului.** $\\bar{x}_3 = (0.8403 + 0.8636 + 0.8447)/3 = 0.8495$ g/l.\n\n**Pasul 2 — Valoarea critică.** Pentru $1-\\alpha = 0.99$, $\\alpha/2 = 0.005$, deci $z^* = 2.576$.\n\n**Pasul 3 — Eroarea marginală.** $z^* \\cdot \\sigma/\\sqrt{n} = 2.576 \\cdot 0.0068/\\sqrt{3} \\approx 0.0101$.\n\n**Pasul 4 — Intervalul.** $(0.8495 - 0.0101, \\;0.8495 + 0.0101) = (0.8394, 0.8596)$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Even with only $n = 3$, the Normality of the population lets us use the Z procedure exactly. With non-Normal data and a tiny sample, neither $Z$ nor $T$ would be reliable.",
+            "ro": "Chiar și cu $n = 3$, Normalitatea populației ne permite să folosim procedura Z exact. Cu date ne-Normale și un eșantion foarte mic, nici $Z$ nici $T$ nu ar fi de încredere."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-t-interval",
+      "title": {
+        "en": "Confidence Interval — $\\sigma$ Unknown (Student t)",
+        "ro": "Interval de Încredere — $\\sigma$ Necunoscut (Student t)"
+      },
+      "group": "intervals",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When $\\sigma$ is unknown — the common case in practice — we replace it by the sample standard deviation $s$. The resulting **Studentized** statistic is\n\n$T = \\dfrac{\\bar{x}_n - \\mu}{s/\\sqrt{n}}$\n\nwhich follows a **Student t distribution** with $n - 1$ degrees of freedom, provided the population is Normal.",
+            "ro": "Când $\\sigma$ este necunoscută — cazul comun în practică — o înlocuim cu deviația standard a eșantionului $s$. Statistica **Studentizată** rezultată este\n\n$T = \\dfrac{\\bar{x}_n - \\mu}{s/\\sqrt{n}}$\n\ncare urmează o **distribuție Student t** cu $n - 1$ grade de libertate, presupunând populația Normală."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Confidence Interval — t version",
+            "ro": "Interval de încredere — versiunea t"
+          },
+          "content": {
+            "en": "For confidence level $1 - \\alpha$, choose $t^*$ so that $P(-t^* \\leq T \\leq t^*) = 1 - \\alpha$ with $T \\sim t(n-1)$. Then\n\n$\\left(\\bar{x}_n - t^*\\dfrac{s}{\\sqrt{n}}, \\;\\bar{x}_n + t^*\\dfrac{s}{\\sqrt{n}}\\right)$\n\nis the desired confidence interval for $\\mu$.",
+            "ro": "Pentru nivelul de încredere $1 - \\alpha$, alegeți $t^*$ astfel încât $P(-t^* \\leq T \\leq t^*) = 1 - \\alpha$ cu $T \\sim t(n-1)$. Atunci\n\n$\\left(\\bar{x}_n - t^*\\dfrac{s}{\\sqrt{n}}, \\;\\bar{x}_n + t^*\\dfrac{s}{\\sqrt{n}}\\right)$\n\neste intervalul de încredere dorit pentru $\\mu$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Why Student t and not Z?** Because we estimated $\\sigma$ from the same data, there is extra uncertainty. The t distribution has heavier tails than the Normal, especially for small $n$. As $n \\to \\infty$, $t(n-1) \\to N(0,1)$ — that's why for large samples either procedure gives similar results.",
+            "ro": "**De ce Student t și nu Z?** Pentru că am estimat $\\sigma$ din aceleași date, există incertitudine suplimentară. Distribuția t are cozi mai grele decât Normala, mai ales pentru $n$ mic. Pe măsură ce $n \\to \\infty$, $t(n-1) \\to N(0,1)$ — de aceea pentru eșantioane mari ambele proceduri dau rezultate similare."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked example.** 250 randomly-chosen tenants in a city of 10000 rentals report mean rent $\\bar{x}_{250} = 568\\$$ with $s = 385\\$$. For 95% confidence: $\\alpha/2 = 0.025$, $t^* = 1.9695$. Margin = $1.9695 \\cdot 385/\\sqrt{250} \\approx 48.05$. CI: $(519.95, \\;616.05)$.",
+            "ro": "**Exemplu rezolvat.** 250 chiriași aleși aleator dintr-un oraș cu 10000 locuințe închiriate raportează media chiriei $\\bar{x}_{250} = 568\\$$ cu $s = 385\\$$. Pentru 95% încredere: $\\alpha/2 = 0.025$, $t^* = 1.9695$. Marja = $1.9695 \\cdot 385/\\sqrt{250} \\approx 48.05$. IC: $(519.95, \\;616.05)$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-hypothesis-intro",
+      "title": {
+        "en": "Hypothesis Testing — The Setup",
+        "ro": "Testarea Ipotezelor — Configurarea"
+      },
+      "group": "hypothesis",
+      "blocks": [
+        {
+          "type": "think",
+          "question": {
+            "en": "A dairy buys milk from various suppliers. Pure milk freezes at $\\mu_0 = -0.545^\\circ$C; adding water raises this temperature. Five samples from one supplier give a mean of $-0.538^\\circ$C. Is this evidence of dilution, or just chance variation?",
+            "ro": "O lactărie cumpără lapte de la mai mulți furnizori. Laptele pur îngheață la $\\mu_0 = -0.545^\\circ$C; adăugarea apei ridică această temperatură. Cinci probe de la un furnizor dau o medie de $-0.538^\\circ$C. Este aceasta dovadă de diluare sau doar variație întâmplătoare?"
+          },
+          "answer": {
+            "en": "We cannot tell without a probability model. Hypothesis testing gives us a formal way to ask: assuming pure milk ($\\mu = \\mu_0$), how unlikely is a sample mean as extreme as $-0.538$? If the answer is \"very unlikely\", we doubt the assumption — i.e., we reject the hypothesis of pure milk.",
+            "ro": "Nu putem spune fără un model probabilistic. Testarea ipotezelor ne dă o cale formală pentru a întreba: presupunând lapte pur ($\\mu = \\mu_0$), cât de improbabilă este o medie de selecție atât de extremă ca $-0.538$? Dacă răspunsul este \"foarte improbabilă\", punem la îndoială ipoteza — adică respingem ipoteza laptelui pur."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Statistical Hypothesis Testing",
+            "ro": "Testarea ipotezelor statistice"
+          },
+          "content": {
+            "en": "A formal procedure that decides between two opposing claims about a population based on sample data. The two claims are arranged so that exactly one is true:\n\n- **Null hypothesis** $H_0$: the status-quo claim — \"nothing special is happening,\" usually formulated so it can be precisely calculated under.\n- **Alternative hypothesis** $H_a$: the research claim — what we hope to find evidence for.",
+            "ro": "O procedură formală care decide între două afirmații opuse despre o populație pe baza datelor din eșantion. Cele două afirmații sunt aranjate astfel încât exact una este adevărată:\n\n- **Ipoteza nulă** $H_0$: afirmația status-quo — \"nu se întâmplă nimic special\", formulată de obicei astfel încât să se poată calcula precis sub ea.\n- **Ipoteza alternativă** $H_a$: afirmația de cercetare — pentru ce sperăm să găsim dovezi."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Tests are designed to try to **disprove** $H_0$. We never \"prove $H_0$ true\"; the best we can say is \"we failed to reject $H_0$ at significance level $\\alpha$.\" The asymmetry mirrors how courts treat \"innocent until proven guilty.\"",
+            "ro": "Testele sunt concepute să încerce să **infirme** $H_0$. Nu \"dovedim niciodată $H_0$ adevărată\"; cel mai mult putem spune \"am eșuat în respingerea $H_0$ la nivelul de semnificație $\\alpha$.\" Asimetria reflectă tratamentul juridic \"nevinovat până la dovedirea vinovăției\"."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Step", "ro": "Pas" },
+            { "en": "What you do", "ro": "Ce faci" }
+          ],
+          "rows": [
+            [
+              { "en": "1", "ro": "1" },
+              { "en": "State $H_0$ and $H_a$", "ro": "Formulează $H_0$ și $H_a$" }
+            ],
+            [
+              { "en": "2", "ro": "2" },
+              { "en": "Pick a significance level $\\alpha$ (typically 5% or 1%)", "ro": "Alege un nivel de semnificație $\\alpha$ (de obicei 5% sau 1%)" }
+            ],
+            [
+              { "en": "3", "ro": "3" },
+              { "en": "Compute the test statistic (a score) from the sample", "ro": "Calculează statistica testului (un scor) din eșantion" }
+            ],
+            [
+              { "en": "4", "ro": "4" },
+              { "en": "Determine the critical value or the p-value", "ro": "Determină valoarea critică sau valoarea P" }
+            ],
+            [
+              { "en": "5", "ro": "5" },
+              { "en": "Reject $H_0$ if the score lands in the rejection region; otherwise fail to reject", "ro": "Respinge $H_0$ dacă scorul intră în zona de respingere; altfel nu poți respinge" }
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-errors",
+      "title": {
+        "en": "Type I / Type II Errors and Test Power",
+        "ro": "Erori de Tip I / II și Puterea Testului"
+      },
+      "group": "hypothesis",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Decisions based on data can be wrong in two distinct ways. The standard $2 \\times 2$ table:",
+            "ro": "Deciziile bazate pe date pot fi greșite în două moduri distincte. Tabelul standard $2 \\times 2$:"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Decision", "ro": "Decizia" },
+            { "en": "$H_0$ true", "ro": "$H_0$ adevărată" },
+            { "en": "$H_0$ false", "ro": "$H_0$ falsă" }
+          ],
+          "rows": [
+            [
+              { "en": "Reject $H_0$", "ro": "Respinge $H_0$" },
+              { "en": "**Type I error** (false positive)", "ro": "**Eroare de tip I** (fals pozitiv)" },
+              { "en": "Correct (true positive)", "ro": "Corect (adevărat pozitiv)" }
+            ],
+            [
+              { "en": "Fail to reject $H_0$", "ro": "Nu respinge $H_0$" },
+              { "en": "Correct (true negative)", "ro": "Corect (adevărat negativ)" },
+              { "en": "**Type II error** (false negative)", "ro": "**Eroare de tip II** (fals negativ)" }
+            ]
+          ]
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Significance Level $\\alpha$",
+            "ro": "Nivelul de semnificație $\\alpha$"
+          },
+          "content": {
+            "en": "$\\alpha$ is the maximum probability of a Type I error that we are willing to accept. Setting $\\alpha = 0.05$ means \"reject $H_0$ only if the data would happen at most 5% of the time when $H_0$ is true.\" Chosen **before** collecting data so the test cannot be tuned to a desired conclusion.",
+            "ro": "$\\alpha$ este probabilitatea maximă de eroare de tip I pe care suntem dispuși să o acceptăm. Setând $\\alpha = 0.05$ înseamnă \"respinge $H_0$ doar dacă datele s-ar întâmpla în cel mult 5% din cazuri când $H_0$ este adevărată.\" Ales **înaintea** colectării datelor pentru ca testul să nu poată fi ajustat la o concluzie dorită."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Power of a Test",
+            "ro": "Puterea testului"
+          },
+          "content": {
+            "en": "**Power** $= 1 - P(\\text{Type II error})$ — the probability of correctly rejecting $H_0$ when it is actually false. High power means the test is good at **detecting** a real effect. Power grows with sample size, effect size, and a higher (more lenient) $\\alpha$.",
+            "ro": "**Puterea** $= 1 - P(\\text{eroare tip II})$ — probabilitatea de a respinge corect $H_0$ când este de fapt falsă. Putere mare înseamnă că testul este bun la **detectarea** unui efect real. Puterea crește cu dimensiunea eșantionului, dimensiunea efectului și un $\\alpha$ mai mare (mai permisiv)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "There is a tension between Type I and Type II errors: making $\\alpha$ smaller (stricter) reduces false positives but raises the chance of missing a real effect (lower power). You cannot drive both to zero simultaneously without unbounded data.",
+            "ro": "Există o tensiune între erorile de tip I și II: micșorarea lui $\\alpha$ (mai strict) reduce falsele pozitive dar crește șansa de a rata un efect real (putere mai mică). Nu puteți reduce ambele la zero simultan fără date nelimitate."
+          }
+        },
+        {
+          "type": "think",
+          "question": {
+            "en": "Why do clinical trials of life-saving drugs sometimes use a more lenient $\\alpha$ (e.g. 10%) for early phases?",
+            "ro": "De ce studiile clinice ale medicamentelor care salvează vieți folosesc uneori un $\\alpha$ mai permisiv (ex. 10%) în fazele timpurii?"
+          },
+          "answer": {
+            "en": "A Type II error (failing to detect a real benefit) means a potentially life-saving treatment never advances. The cost of a Type II error in this setting can outweigh the cost of a Type I (false hope leading to a confirmatory trial). Trade-offs depend on the consequences of each error.",
+            "ro": "O eroare de tip II (nedetectarea unui beneficiu real) înseamnă că un tratament potențial salvator de vieți nu avansează niciodată. Costul unei erori de tip II în acest cadru poate depăși costul unei erori de tip I (speranță falsă care duce la un studiu confirmator). Compromisul depinde de consecințele fiecărei erori."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-pvalue",
+      "title": {
+        "en": "p-value and Test Score",
+        "ro": "Valoarea P și Scorul Testului"
+      },
+      "group": "hypothesis",
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "p-value",
+            "ro": "Valoarea P"
+          },
+          "content": {
+            "en": "The **p-value** is the probability — computed assuming $H_0$ is true — of observing a test statistic at least as extreme as the one actually observed. Small p-values are evidence against $H_0$.\n\n- $p \\leq \\alpha$: reject $H_0$.\n- $p > \\alpha$: fail to reject $H_0$.",
+            "ro": "**Valoarea P** este probabilitatea — calculată presupunând $H_0$ adevărată — de a observa o statistică a testului cel puțin la fel de extremă ca cea observată efectiv. Valori P mici sunt dovezi împotriva lui $H_0$.\n\n- $p \\leq \\alpha$: respinge $H_0$.\n- $p > \\alpha$: nu poți respinge $H_0$."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked: milk example.** Under $H_0: \\mu = -0.545$, the score is $z = \\dfrac{-0.538 - (-0.545)}{0.008/\\sqrt{5}} \\approx 1.957$. The p-value (right tail) is $P(Z > 1.957) \\approx 0.0250$.\n\n- At $\\alpha = 0.05$: $0.025 < 0.05$ → reject $H_0$.\n- At $\\alpha = 0.01$: $0.025 > 0.01$ → fail to reject.",
+            "ro": "**Rezolvat: exemplul laptelui.** Sub $H_0: \\mu = -0.545$, scorul este $z = \\dfrac{-0.538 - (-0.545)}{0.008/\\sqrt{5}} \\approx 1.957$. Valoarea P (coada dreaptă) este $P(Z > 1.957) \\approx 0.0250$.\n\n- La $\\alpha = 0.05$: $0.025 < 0.05$ → respinge $H_0$.\n- La $\\alpha = 0.01$: $0.025 > 0.01$ → nu poți respinge."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "Common misinterpretation: \"p-value is the probability that $H_0$ is true.\" Wrong. The p-value is computed **under** $H_0$, not about $H_0$. A p-value of 0.04 does **not** mean \"there is a 4% chance $H_0$ is true.\"",
+            "ro": "Interpretare greșită comună: \"valoarea P este probabilitatea ca $H_0$ să fie adevărată.\" Greșit. Valoarea P este calculată **sub** $H_0$, nu despre $H_0$. O valoare P de 0.04 **nu** înseamnă \"există 4% șanse ca $H_0$ să fie adevărată\"."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-proportion-test",
+      "title": {
+        "en": "The Proportion Test",
+        "ro": "Testul Proporției"
+      },
+      "group": "applications",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When the variable of interest is binary (success/failure), the parameter is the success probability $p$. With $n$ trials yielding $x$ successes, the **sample proportion** is $p' = x/n$. Provided $n \\geq 20$ and $np \\geq 5$, we can use the Normal approximation:",
+            "ro": "Când variabila de interes este binară (succes/eșec), parametrul este probabilitatea succesului $p$. Cu $n$ încercări producând $x$ succese, **proporția eșantionului** este $p' = x/n$. Cu condiția $n \\geq 20$ și $np \\geq 5$, putem folosi aproximarea Normală:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "p' \\sim N\\!\\left(p, \\frac{p(1-p)}{n}\\right), \\quad z = \\frac{p' - p}{\\sqrt{p(1-p)/n}}"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "**Worked: library membership.** A 2008 Harris poll claims $p = 0.68$ of US adults have a library card. A sample of 1000 yields 651 with cards. Test $H_0: p = 0.68$ vs $H_a: p < 0.68$ at $\\alpha = 0.05$.\n\n$z = \\dfrac{0.651 - 0.68}{\\sqrt{0.68 \\cdot 0.32 / 1000}} = -1.965$\n\np-value $= P(Z < -1.965) = 0.0246 < 0.05$ → reject $H_0$ at 5%, but at $\\alpha = 0.01$: $0.0246 > 0.01$ → fail to reject.",
+            "ro": "**Rezolvat: abonament la bibliotecă.** Un sondaj Harris din 2008 susține $p = 0.68$ dintre adulții americani au abonament la bibliotecă. Un eșantion de 1000 produce 651 cu abonament. Testați $H_0: p = 0.68$ vs $H_a: p < 0.68$ la $\\alpha = 0.05$.\n\n$z = \\dfrac{0.651 - 0.68}{\\sqrt{0.68 \\cdot 0.32 / 1000}} = -1.965$\n\nValoarea P $= P(Z < -1.965) = 0.0246 < 0.05$ → respinge $H_0$ la 5%, dar la $\\alpha = 0.01$: $0.0246 > 0.01$ → nu poți respinge."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-tailed-tests",
+      "title": {
+        "en": "One-tailed vs Two-tailed Alternatives",
+        "ro": "Teste Unilaterale vs Bilaterale"
+      },
+      "group": "applications",
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The alternative hypothesis can take three shapes — each changes how the critical value is computed and where the rejection region sits.",
+            "ro": "Ipoteza alternativă poate lua trei forme — fiecare schimbă cum se calculează valoarea critică și unde se află zona de respingere."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            { "en": "Alternative", "ro": "Alternativa" },
+            { "en": "Name", "ro": "Nume" },
+            { "en": "Critical value (in R)", "ro": "Valoare critică (în R)" },
+            { "en": "Rejection region", "ro": "Zona de respingere" }
+          ],
+          "rows": [
+            [
+              { "en": "$H_a: p > p_0$", "ro": "$H_a: p > p_0$" },
+              { "en": "Right-tailed (one-sided)", "ro": "Unilateral dreapta" },
+              { "en": "$z^* = \\text{qnorm}(1 - \\alpha)$", "ro": "$z^* = \\text{qnorm}(1 - \\alpha)$" },
+              { "en": "$[z^*, +\\infty)$", "ro": "$[z^*, +\\infty)$" }
+            ],
+            [
+              { "en": "$H_a: p < p_0$", "ro": "$H_a: p < p_0$" },
+              { "en": "Left-tailed (one-sided)", "ro": "Unilateral stânga" },
+              { "en": "$z^* = \\text{qnorm}(\\alpha)$", "ro": "$z^* = \\text{qnorm}(\\alpha)$" },
+              { "en": "$(-\\infty, z^*]$", "ro": "$(-\\infty, z^*]$" }
+            ],
+            [
+              { "en": "$H_a: p \\neq p_0$", "ro": "$H_a: p \\neq p_0$" },
+              { "en": "Two-tailed", "ro": "Bilateral" },
+              { "en": "$z^* = \\text{qnorm}(1 - \\alpha/2)$", "ro": "$z^* = \\text{qnorm}(1 - \\alpha/2)$" },
+              { "en": "$(-\\infty, -|z^*|] \\cup [|z^*|, +\\infty)$", "ro": "$(-\\infty, -|z^*|] \\cup [|z^*|, +\\infty)$" }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Choose the alternative **before** seeing the data, based on the scientific question. Snooping the data to pick a one-sided alternative that makes the test \"significant\" doubles your Type I error rate — a serious form of p-hacking.",
+            "ro": "Alegeți alternativa **înaintea** examinării datelor, în funcție de întrebarea științifică. Inspectarea datelor pentru a alege o alternativă unilaterală care face testul \"semnificativ\" dublează rata erorilor de tip I — o formă serioasă de p-hacking."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ps-c11-quiz",
+      "title": {
+        "en": "Self-Test Quiz",
+        "ro": "Test de Autoevaluare"
+      },
+      "group": "assessment",
+      "blocks": [
+        {
+          "type": "quiz",
+          "questions": [
+            {
+              "question": {
+                "en": "An estimator $\\hat{\\theta}_n$ is called **unbiased** when:",
+                "ro": "Un estimator $\\hat{\\theta}_n$ este numit **nedeplasat** când:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "$\\hat{\\theta}_n = \\theta$ for every sample",
+                    "ro": "$\\hat{\\theta}_n = \\theta$ pentru orice eșantion"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. A point estimator is a random variable — it varies sample to sample. We do not require it to equal $\\theta$ exactly; we require its average across all possible samples to equal $\\theta$.",
+                    "ro": "Incorect. Un estimator punctual este o variabilă aleatoare — variază de la un eșantion la altul. Nu cerem să fie egal cu $\\theta$ exact; cerem ca media lui peste toate eșantioanele posibile să fie $\\theta$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$\\mathbb{E}[\\hat{\\theta}_n] = \\theta$",
+                    "ro": "$\\mathbb{E}[\\hat{\\theta}_n] = \\theta$"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Unbiasedness means the estimator has the right value **on average** across hypothetical repeated sampling.",
+                    "ro": "Corect. Nedeplasarea înseamnă că estimatorul are valoarea corectă **în medie** peste eșantionări repetate ipotetice."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$\\text{Var}[\\hat{\\theta}_n] = 0$",
+                    "ro": "$\\text{Var}[\\hat{\\theta}_n] = 0$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Zero variance would mean the estimator is constant. Unbiasedness concerns the expected value, not the variance.",
+                    "ro": "Incorect. Dispersie zero ar însemna că estimatorul este constant. Nedeplasarea se referă la valoarea așteptată, nu la dispersie."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$\\hat{\\theta}_n > \\theta$ on average",
+                    "ro": "$\\hat{\\theta}_n > \\theta$ în medie"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. That describes a biased (over-)estimator. Unbiasedness requires equality of expectations, not a bias in either direction.",
+                    "ro": "Incorect. Aceasta descrie un estimator deplasat (supraestimator). Nedeplasarea cere egalitatea așteptărilor, nu o deplasare într-o direcție."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "A 95% confidence interval for $\\mu$ is computed from a sample. Which interpretation is correct?",
+                "ro": "Un interval de încredere de 95% pentru $\\mu$ este calculat dintr-un eșantion. Care interpretare este corectă?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "There is a 95% probability that $\\mu$ lies in this specific interval.",
+                    "ro": "Există o probabilitate de 95% ca $\\mu$ să se afle în acest interval specific."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. $\\mu$ is a fixed (unknown) constant — once the interval is computed, either it contains $\\mu$ or it does not. Probability statements describe the **procedure**, not a specific interval.",
+                    "ro": "Incorect. $\\mu$ este o constantă fixă (necunoscută) — odată intervalul calculat, ori îl conține pe $\\mu$, ori nu. Afirmațiile de probabilitate descriu **procedura**, nu un interval specific."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "95% of the data values in the sample fall inside this interval.",
+                    "ro": "95% din valorile datelor din eșantion se află în acest interval."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. A confidence interval is about the **parameter** $\\mu$, not about individual data points. CIs are typically much narrower than 95% of the data range.",
+                    "ro": "Incorect. Un interval de încredere este despre **parametrul** $\\mu$, nu despre puncte de date individuale. Intervalele de încredere sunt de obicei mult mai înguste decât 95% din intervalul datelor."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "If we repeated this procedure many times, 95% of resulting intervals would contain $\\mu$.",
+                    "ro": "Dacă am repeta această procedură de multe ori, 95% din intervalele rezultate ar conține $\\mu$."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The 95% refers to the long-run coverage rate of the construction method, not to the single interval at hand.",
+                    "ro": "Corect. 95% se referă la rata de acoperire pe termen lung a metodei de construcție, nu la intervalul singular în mână."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "There is at most a 5% chance the sample is misleading.",
+                    "ro": "Există cel mult o șansă de 5% ca eșantionul să fie înșelător."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. This is too vague and conflates several distinct concepts. The 5% refers specifically to the long-run failure rate of the interval construction, not to whether a single sample is \"misleading.\"",
+                    "ro": "Incorect. Este prea vag și amestecă mai multe concepte distincte. 5% se referă specific la rata de eșec pe termen lung a construcției intervalului, nu la dacă un eșantion individual este \"înșelător\"."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "You compute a 95% CI using the t procedure with $n = 10$. Compared to the Z procedure (if $\\sigma$ were known), the t-based CI will be:",
+                "ro": "Calculați un IC de 95% folosind procedura t cu $n = 10$. Comparat cu procedura Z (dacă $\\sigma$ ar fi cunoscut), IC bazat pe t va fi:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Wider, because $t^* > z^*$ for the same confidence level",
+                    "ro": "Mai larg, pentru că $t^* > z^*$ la același nivel de încredere"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The t distribution has heavier tails than the standard Normal, so $t^*_{n-1, \\alpha/2} > z^*_{\\alpha/2}$. This widening reflects the extra uncertainty from estimating $\\sigma$ by $s$.",
+                    "ro": "Corect. Distribuția t are cozi mai grele decât Normala standard, deci $t^*_{n-1, \\alpha/2} > z^*_{\\alpha/2}$. Această lărgire reflectă incertitudinea suplimentară din estimarea lui $\\sigma$ prin $s$."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Narrower, because the t distribution is more concentrated",
+                    "ro": "Mai îngust, pentru că distribuția t este mai concentrată"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The t distribution is **less** concentrated than the Normal — heavier tails, more probability away from zero — which makes critical values larger, not smaller.",
+                    "ro": "Incorect. Distribuția t este **mai puțin** concentrată decât Normala — cozi mai grele, mai multă probabilitate departe de zero — ceea ce face valorile critice mai mari, nu mai mici."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Identical, because both procedures use the same formula",
+                    "ro": "Identic, pentru că ambele proceduri folosesc aceeași formulă"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Although the formula structure is similar (estimate $\\pm$ critical $\\cdot$ standard error), the critical values and the standard error differ ($\\sigma$ vs $s$).",
+                    "ro": "Incorect. Deși structura formulei este similară (estimare $\\pm$ critică $\\cdot$ eroare standard), valorile critice și eroarea standard diferă ($\\sigma$ vs $s$)."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "It depends only on the sample mean",
+                    "ro": "Depinde doar de media eșantionului"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The interval depends on the sample mean, the (estimated) standard error, the sample size, and the chosen confidence level — multiple inputs.",
+                    "ro": "Incorect. Intervalul depinde de media eșantionului, eroarea standard (estimată), dimensiunea eșantionului și nivelul de încredere ales — mai multe intrări."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "A study reports a p-value of $p = 0.03$ for testing $H_0$ at $\\alpha = 0.05$. What is the correct conclusion?",
+                "ro": "Un studiu raportează o valoare P de $p = 0.03$ pentru testarea $H_0$ la $\\alpha = 0.05$. Care este concluzia corectă?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "There is a 3% chance $H_0$ is true.",
+                    "ro": "Există 3% șanse ca $H_0$ să fie adevărată."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The p-value is computed **assuming** $H_0$, so it cannot equal a probability about $H_0$. This is one of the most common p-value misinterpretations.",
+                    "ro": "Incorect. Valoarea P este calculată **presupunând** $H_0$, deci nu poate fi egală cu o probabilitate despre $H_0$. Una dintre cele mai comune interpretări greșite ale valorii P."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Reject $H_0$, since $p < \\alpha$.",
+                    "ro": "Respinge $H_0$, întrucât $p < \\alpha$."
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. The decision rule is: reject $H_0$ when $p \\leq \\alpha$. Here $0.03 < 0.05$, so we reject $H_0$ at the 5% level.",
+                    "ro": "Corect. Regula de decizie este: respinge $H_0$ când $p \\leq \\alpha$. Aici $0.03 < 0.05$, deci respingem $H_0$ la nivelul 5%."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Accept $H_0$, since $p > 0$.",
+                    "ro": "Acceptă $H_0$, întrucât $p > 0$."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. We never \"accept\" $H_0$ — at most we fail to reject it. And here $p < \\alpha$, which points to rejection.",
+                    "ro": "Incorect. Nu \"acceptăm\" niciodată $H_0$ — cel mult eșuăm să-l respingem. Iar aici $p < \\alpha$, ceea ce indică respingere."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "The result is too small to interpret.",
+                    "ro": "Rezultatul este prea mic pentru a fi interpretat."
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. A small p-value is precisely what hypothesis testing is designed to find — strong evidence against $H_0$. There is no \"too small\".",
+                    "ro": "Incorect. O valoare P mică este exact ceea ce testarea ipotezelor este concepută să găsească — dovadă puternică împotriva $H_0$. Nu există \"prea mic\"."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "A Type II error in a clinical drug trial would correspond to:",
+                "ro": "O eroare de tip II într-un studiu clinic ar corespunde:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Concluding the drug works when in fact it does not",
+                    "ro": "Concluzia că medicamentul funcționează când de fapt nu funcționează"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. That is a Type I error (false positive) — rejecting a true $H_0$ of no effect.",
+                    "ro": "Incorect. Aceea este o eroare de tip I (fals pozitiv) — respingerea unui $H_0$ adevărat de absența efectului."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Concluding the drug does not work when in fact it does",
+                    "ro": "Concluzia că medicamentul nu funcționează când de fapt funcționează"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A Type II error (false negative) is failing to reject $H_0$ when $H_0$ is actually false — i.e., missing a real effect.",
+                    "ro": "Corect. O eroare de tip II (fals negativ) este eșecul de a respinge $H_0$ când $H_0$ este de fapt fals — adică, ratarea unui efect real."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Picking the wrong significance level",
+                    "ro": "Alegerea greșită a nivelului de semnificație"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Choosing $\\alpha$ is a design decision, not an error outcome. Type I/II errors are statistical decision errors made after data are collected.",
+                    "ro": "Incorect. Alegerea $\\alpha$ este o decizie de design, nu un rezultat de eroare. Erorile tip I/II sunt erori de decizie statistică făcute după colectarea datelor."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Recording a value incorrectly during measurement",
+                    "ro": "Înregistrarea incorectă a unei valori în timpul măsurării"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. That is a measurement error, unrelated to the formal definition of statistical Type II error.",
+                    "ro": "Incorect. Aceea este o eroare de măsurare, fără legătură cu definiția formală a erorii statistice de tip II."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "Increasing sample size $n$ in a Z confidence interval (with $\\sigma$ fixed and confidence level fixed) does what to the margin of error?",
+                "ro": "Mărirea dimensiunii eșantionului $n$ într-un interval de încredere Z (cu $\\sigma$ fix și nivel de încredere fix) face ce cu eroarea marginală?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Increases it linearly in $n$",
+                    "ro": "O mărește liniar în $n$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Margin of error is $z^* \\sigma/\\sqrt{n}$, which shrinks as $n$ grows.",
+                    "ro": "Incorect. Eroarea marginală este $z^* \\sigma/\\sqrt{n}$, care scade pe măsură ce $n$ crește."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Decreases it proportionally to $1/\\sqrt{n}$",
+                    "ro": "O reduce proporțional cu $1/\\sqrt{n}$"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Margin = $z^* \\sigma/\\sqrt{n}$. To halve the margin you must quadruple $n$. Precision grows with the square root, not linearly.",
+                    "ro": "Corect. Marja = $z^* \\sigma/\\sqrt{n}$. Pentru a înjumătăți marja, trebuie să cuadruplați $n$. Precizia crește cu rădăcina pătrată, nu liniar."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Has no effect",
+                    "ro": "Nu are niciun efect"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Larger samples reduce sampling variability, which is exactly what shrinks the margin of error.",
+                    "ro": "Incorect. Eșantioanele mai mari reduc variabilitatea de eșantionare, ceea ce reduce eroarea marginală."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Decreases it proportionally to $1/n$",
+                    "ro": "O reduce proporțional cu $1/n$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. That is the rate at which **variance** of the sample mean decreases. The margin (a standard error) shrinks like $1/\\sqrt{n}$.",
+                    "ro": "Incorect. Aceea este rata cu care **dispersia** mediei de selecție scade. Marja (o eroare standard) scade ca $1/\\sqrt{n}$."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "In a two-tailed test at $\\alpha = 0.05$, the rejection region (in terms of the standardized Z statistic) is:",
+                "ro": "Într-un test bilateral la $\\alpha = 0.05$, zona de respingere (în termenii statisticii standardizate Z) este:"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "$|z| > 1.645$",
+                    "ro": "$|z| > 1.645$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. 1.645 is the critical value for a **one-tailed** test at $\\alpha = 0.05$ (or two-tailed at $\\alpha = 0.10$).",
+                    "ro": "Incorect. 1.645 este valoarea critică pentru un test **unilateral** la $\\alpha = 0.05$ (sau bilateral la $\\alpha = 0.10$)."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$z > 1.960$",
+                    "ro": "$z > 1.960$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. This would be a right-tailed region. A two-tailed test rejects in **both** tails, not just one.",
+                    "ro": "Incorect. Aceasta ar fi o zonă unilaterală dreapta. Un test bilateral respinge în **ambele** cozi, nu doar într-una."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$|z| > 1.960$",
+                    "ro": "$|z| > 1.960$"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. Two-tailed at $\\alpha = 0.05$ splits the rejection area into two: $\\alpha/2 = 0.025$ in each tail. The critical value is $z^* = 1.960$ (since $\\Phi(1.960) = 0.975$).",
+                    "ro": "Corect. Bilateral la $\\alpha = 0.05$ împarte zona de respingere în două: $\\alpha/2 = 0.025$ în fiecare coadă. Valoarea critică este $z^* = 1.960$ (deoarece $\\Phi(1.960) = 0.975$)."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "$|z| > 2.576$",
+                    "ro": "$|z| > 2.576$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. 2.576 corresponds to a two-tailed test at $\\alpha = 0.01$, not $\\alpha = 0.05$.",
+                    "ro": "Incorect. 2.576 corespunde unui test bilateral la $\\alpha = 0.01$, nu $\\alpha = 0.05$."
+                  }
+                }
+              ]
+            },
+            {
+              "question": {
+                "en": "Choosing a smaller significance level $\\alpha$ (e.g. moving from 5% to 1%) does what to the **power** of the test, holding everything else constant?",
+                "ro": "Alegerea unui nivel de semnificație $\\alpha$ mai mic (ex. trecerea de la 5% la 1%) face ce **puterii** testului, păstrând restul constant?"
+              },
+              "options": [
+                {
+                  "text": {
+                    "en": "Increases power",
+                    "ro": "Crește puterea"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. The two error rates trade off: making $\\alpha$ smaller shrinks the rejection region, so we are **less** likely to reject even when $H_0$ is false. Power decreases.",
+                    "ro": "Incorect. Cele două rate de eroare se compensează: micșorarea lui $\\alpha$ reduce zona de respingere, deci suntem **mai puțin** probabil să respingem chiar și când $H_0$ este fals. Puterea scade."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Decreases power",
+                    "ro": "Scade puterea"
+                  },
+                  "correct": true,
+                  "explanation": {
+                    "en": "Correct. A stricter $\\alpha$ shrinks the rejection region, which lowers the probability of correctly rejecting a false $H_0$. To restore power you must compensate, e.g. by increasing $n$ or studying a larger effect.",
+                    "ro": "Corect. Un $\\alpha$ mai strict reduce zona de respingere, ceea ce scade probabilitatea de a respinge corect un $H_0$ fals. Pentru a restaura puterea trebuie să compensați, ex. mărind $n$ sau studiind un efect mai mare."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Leaves power unchanged",
+                    "ro": "Lasă puterea neschimbată"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Power depends directly on the rejection region, which is determined by $\\alpha$. Changing $\\alpha$ shifts power.",
+                    "ro": "Incorect. Puterea depinde direct de zona de respingere, care este determinată de $\\alpha$. Schimbarea $\\alpha$ deplasează puterea."
+                  }
+                },
+                {
+                  "text": {
+                    "en": "Power becomes equal to $\\alpha$",
+                    "ro": "Puterea devine egală cu $\\alpha$"
+                  },
+                  "correct": false,
+                  "explanation": {
+                    "en": "Incorrect. Power and significance level measure different things. Power $= 1 - P(\\text{Type II})$, $\\alpha = P(\\text{Type I})$. They are not generally equal.",
+                    "ro": "Incorect. Puterea și nivelul de semnificație măsoară lucruri diferite. Puterea $= 1 - P(\\text{tip II})$, $\\alpha = P(\\text{tip I})$. Nu sunt în general egale."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
