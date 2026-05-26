@@ -162,8 +162,22 @@ body {
 /* Tame KaTeX inline math so it doesn't blow up line-height in text-sm prose */
 .katex { font-size: 1.0em; }
 .katex-display { font-size: 1.1em; margin: 0.5em 0; }
-/* Ensure display math can scroll on narrow screens */
-.math-display-wrap { display: block; overflow-x: auto; padding: 0.25em 0; }
+/* Ensure display math can scroll on narrow screens. Inner .katex-display keeps
+   its natural width (no max-width: 100%) so the overflow can scroll. The
+   scrollbar is forced to be thin and always rendered when overflow is present,
+   which is the scroll affordance on mobile. EquationBlock has a JS-driven
+   right-edge fade for a stronger hint; this bare wrap is used by
+   formatMarkdown inside learn/callout/definition/think prose where a
+   permanent fade would be noisy. */
+.math-display-wrap {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25em 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.math-display-wrap > .katex-display { max-width: none; }
 
 /* EquationBlock: stack label under equation on narrow viewports */
 @media (max-width: 640px) {

@@ -50,21 +50,25 @@ export default function ThinkBlock({ question, answer }) {
         <button
           onClick={() => setRevealed(true)}
           className="w-full flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition-all cursor-pointer"
+          // The button sits inside a think callout whose own surface is the
+          // amber tint at 12%. The button's tint is lifted to 32% so it
+          // reads as a clear, raised affordance rather than blending into
+          // the callout background. Hover bumps to 42% for a noticeable lift.
           style={{
-            backgroundColor: 'color-mix(in srgb, #f59e0b 18%, var(--theme-card-bg))',
-            border: '1px solid color-mix(in srgb, #f59e0b 45%, var(--theme-border))',
+            backgroundColor: 'color-mix(in srgb, #f59e0b 32%, var(--theme-card-bg))',
+            border: '1px solid color-mix(in srgb, #f59e0b 55%, var(--theme-border))',
             color: 'var(--theme-content-text)',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, #f59e0b 28%, var(--theme-card-bg))';
-            e.currentTarget.style.boxShadow = '0 2px 8px rgba(245, 158, 11, 0.25)';
+            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, #f59e0b 42%, var(--theme-card-bg))';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(245, 158, 11, 0.3)';
             e.currentTarget.style.borderColor = '#f59e0b';
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, #f59e0b 18%, var(--theme-card-bg))';
-            e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
-            e.currentTarget.style.borderColor = 'color-mix(in srgb, #f59e0b 45%, var(--theme-border))';
+            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, #f59e0b 32%, var(--theme-card-bg))';
+            e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.06)';
+            e.currentTarget.style.borderColor = 'color-mix(in srgb, #f59e0b 55%, var(--theme-border))';
           }}
         >
           <span>{t('Click to reveal answer', 'Click pentru răspuns')}</span>

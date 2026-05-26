@@ -68,7 +68,11 @@ export default function EquationBlock({ tex, label }) {
       className="equation-grid my-4 py-3 pl-4 pr-4 rounded-r-lg"
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr auto',
+        // minmax(0, 1fr) — without the 0 min, the column's intrinsic min-width
+        // is the natural width of the equation, which blows out the grid on
+        // narrow viewports and defeats the inner overflow-x: auto. Forcing the
+        // min to 0 lets the column shrink so the math wrap actually scrolls.
+        gridTemplateColumns: 'minmax(0, 1fr) auto',
         alignItems: 'center',
         justifyItems: 'center',
         columnGap: '1rem',

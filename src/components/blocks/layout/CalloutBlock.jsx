@@ -2,11 +2,15 @@ import React from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import formatMarkdown from '../formatMarkdown';
 
+// Light: 500-shade (border accent + chip text on near-white card).
+// Dark:  200-shade chip text — 300-shade was borderline-AA on dark slate
+// cards; bumped a step lighter for headroom on every palette. Border
+// accent stays at full 500 chroma so the rail still pops.
 const VARIANTS = {
-  tip:     { color: '#3b82f6', darkColor: '#93c5fd', icon: '\uD83D\uDCA1', label: { en: 'Tip', ro: 'Sfat' } },
-  warning: { color: '#f59e0b', darkColor: '#fcd34d', icon: '\u26A0\uFE0F', label: { en: 'Warning', ro: 'Atenție' } },
-  trap:    { color: '#ef4444', darkColor: '#fca5a5', icon: '\uD83D\uDEA8', label: { en: 'Trap', ro: 'Capcană' } },
-  info:    { color: '#10b981', darkColor: '#6ee7b7', icon: '\u2139\uFE0F', label: { en: 'Note', ro: 'Notă' } },
+  tip:     { color: '#3b82f6', darkColor: '#bfdbfe', icon: '\uD83D\uDCA1', label: { en: 'Tip', ro: 'Sfat' } },
+  warning: { color: '#f59e0b', darkColor: '#fde68a', icon: '\u26A0\uFE0F', label: { en: 'Warning', ro: 'Atenție' } },
+  trap:    { color: '#ef4444', darkColor: '#fecaca', icon: '\uD83D\uDEA8', label: { en: 'Trap', ro: 'Capcană' } },
+  info:    { color: '#10b981', darkColor: '#a7f3d0', icon: '\u2139\uFE0F', label: { en: 'Note', ro: 'Notă' } },
 };
 
 export default function CalloutBlock({ variant = 'info', content }) {

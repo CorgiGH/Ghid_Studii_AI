@@ -257,7 +257,7 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
 
   return (
     <div className={index < total - 1 ? 'mb-4 pb-4' : ''} style={index < total - 1 ? { borderBottom: '1px solid var(--theme-border)' } : {}}>
-      <p className="text-sm font-medium mb-4" style={{ color: 'var(--theme-content-text)', lineHeight: 1.45 }}>
+      <p className="text-sm font-medium mb-4" style={{ color: 'var(--theme-content-text)', lineHeight: 1.55 }}>
         {total > 1 && <span style={{ color: 'var(--theme-muted-text)' }}>Q{index + 1}. </span>}
         <span dangerouslySetInnerHTML={{ __html: formatMarkdown(t(q.question.en, q.question.ro)) }} />
       </p>
@@ -287,13 +287,18 @@ function QuizQuestion({ q, index, total, resetSignal, onAnswered }) {
               <button
                 data-testid="quiz-option"
                 onClick={() => handleSelect(oi)}
+                // items-center on the flex row: lifts the A/B/C/D bubble out
+                // of top-aligned on multi-line options so the bubble sits
+                // visually centered against the text — softer touch target.
+                // lineHeight 1.55 ≈ Tailwind leading-relaxed; gives multi-line
+                // mobile options enough vertical breathing room.
                 className="flex items-center gap-3 p-3.5 rounded-lg text-left text-sm cursor-pointer w-full"
                 style={{
                   backgroundColor: bg,
                   border: `1px solid ${border}`,
                   color: textColor,
                   pointerEvents: submitted ? 'none' : 'auto',
-                  lineHeight: 1.45,
+                  lineHeight: 1.55,
                   transition: 'background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease',
                 }}
               >

@@ -33,7 +33,9 @@ export default function BottomTabBar({ subject, activeTab, onTabChange, lang }) 
       document.body.style.paddingBottom = '';
       return;
     }
-    document.body.style.paddingBottom = 'calc(64px + env(safe-area-inset-bottom, 0px))';
+    // 64px nav + 16px breathing room — last line of body text was clipping
+    // against the top edge of the floating tab bar on 375px screens.
+    document.body.style.paddingBottom = 'calc(80px + env(safe-area-inset-bottom, 0px))';
     return () => { document.body.style.paddingBottom = ''; };
   }, [visibleTabs.length, isMobile]);
 
