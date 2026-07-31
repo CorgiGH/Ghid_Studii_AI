@@ -1,16 +1,60 @@
-# React + Vite
+# Ghid Universitar de Studiu
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Live: https://corgigh.github.io/Ghid_Studii_AI/
 
-Currently, two official plugins are available:
+Study guide for year 1, semester 2 of the Artificial Intelligence programme at the Faculty of Computer Science, Alexandru Ioan Cuza University of Iasi. Five subjects, 59 courses, each with course material, worked exercises, practice and tests.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Contents
 
-## React Compiler
+- Sisteme de operare si retele de calculatoare, 15 courses, 183 sections
+- Probabilitati si statistica, 13 courses
+- Programare orientata pe obiecte, 12 courses
+- Algebra liniara si optimizari, 11 courses
+- Proiectarea algoritmilor, 8 courses
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Every subject has five modes:
 
-## Expanding the ESLint configuration
+- Cursuri: course material
+- Exercitii rezolvate: worked solutions
+- Exercitii: practice problems
+- Practica: interactive practice
+- Teste: test material
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Features
+
+- Romanian and English interface toggle
+- Light and dark theme
+- Client side routing with per lesson progress tracking
+- Mathematical notation rendered with KaTeX
+- In browser C++ editor built on CodeMirror 6
+- 3D visualisations built on three.js through react-three-fiber
+- Data visualisations built on d3
+- x86 emulation in the browser through v86
+
+## Stack
+
+React 19, React Router 7, Vite 8, Tailwind CSS 4, KaTeX, CodeMirror 6 with lang-cpp, three.js with react-three-fiber and drei, d3, ml-matrix, fraction.js, motion, react-markdown, pdf-to-img, v86, ESLint, Puppeteer.
+
+## Running locally
+
+```bash
+npm install
+npm run dev
+```
+
+Other scripts:
+
+- npm run build: production build
+- npm run lint: ESLint
+- npm run preview: serve the production build
+- npm run smoke: smoke tests
+- npm run validate: content validation
+- npm run content-truth: content accuracy checks
+
+## Deployment
+
+GitHub Pages, served from this repository.
+
+## Notes
+
+Developed with heavy use of AI tooling.
