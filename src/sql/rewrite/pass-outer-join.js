@@ -10,7 +10,7 @@ function convertBlock(ts, notes) {
   const fromI = depth0Index(ts, (x) => isWord(x, 'FROM'));
   const whereI = depth0Index(ts, (x) => isWord(x, 'WHERE'));
   if (fromI < 0 || whereI < 0 || !hasPlus(ts.slice(whereI))) return ts;
-  const tailI = depth0Index(ts, (x) => isWord(x, 'GROUP') || isWord(x, 'ORDER') || isWord(x, 'HAVING') || isWord(x, 'CONNECT'), whereI + 1);
+  const tailI = depth0Index(ts, (x) => isWord(x, 'GROUP') || isWord(x, 'ORDER') || isWord(x, 'HAVING') || isWord(x, 'CONNECT') || isWord(x, 'LIMIT'), whereI + 1);
   const head = ts.slice(0, fromI + 1);
   const fromT = ts.slice(fromI + 1, whereI);
   const whereT = ts.slice(whereI + 1, tailI < 0 ? ts.length : tailI);

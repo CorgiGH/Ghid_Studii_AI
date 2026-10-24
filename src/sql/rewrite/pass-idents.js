@@ -35,10 +35,15 @@ export function naturalJoinCheck(ts) {
 
 const FROM_STOP = new Set(['JOIN', 'NATURAL', 'ON', 'WHERE', 'LEFT', 'RIGHT', 'FULL', 'INNER', 'CROSS', 'OUTER', 'ORDER', 'GROUP', 'HAVING', 'UNION', 'EXCEPT', 'INTERSECT', 'MINUS', 'USING', 'CONNECT', 'START', 'FOR'])
 
-// Names a query can qualify a column with: the table name, or its alias when it has one (any table, not only the dataset's).
-function tableQualifiers(ts) {
+// Names the query block ts[s, e) can qualify a column with: the table name, or its alias when it has one. Only the block's
+// own FROM / JOIN items count (depth 0 of the slice), not those of the subqueries inside it.
+function tableQualifiers(ts, s, e) {
   const names = new Set()
-  for (let i = 0; i < ts.length; i++) {
+  let depth = 0
+  for (let i = s; i < e; i++) {
+    if (isSym(ts[i], '(')) { depth++; continue }
+    if (isSym(ts[i], ')')) { depth--; continue }
+    if (depth !== 0) continue
     const isFrom = isWord(ts[i], 'FROM') && !isSym(ts[i - 1], '.')
     if (!isFrom && !isWord(ts[i], 'JOIN')) continue
     let j = i + 1
@@ -64,23 +69,61 @@ function tableQualifiers(ts) {
   return names
 }
 
-// JOIN ... USING (col): the column cannot carry a table qualifier anywhere in the statement (ORA-25154). `ts` holds
-// significant tokens only. Returns { idx, code, message } for the first qualified use, or null.
+const SET_WORDS = new Set(['UNION', 'INTERSECT', 'MINUS', 'EXCEPT'])
+
+// JOIN ... USING (col): the column cannot carry a table qualifier in the query block that holds the USING join (ORA-25154),
+// nor in a subquery of that block unless the subquery binds the same qualifier to a table of its own. Another block (a
+// subquery with its own FROM, a later arm of a set operation) may use the same names freely (checked on Oracle 11g).
+// `ts` holds significant tokens only. Returns { idx, code, message } for the first qualified use, or null.
 export function usingQualifierProblem(ts) {
-  const cols = new Set()
-  for (let i = 0; i + 1 < ts.length; i++) {
-    if (!isWord(ts[i], 'USING') || !isSym(ts[i + 1], '(')) continue
-    const c = matchParen(ts, i + 1)
-    if (c < 0) continue
-    for (const part of splitTop(ts.slice(i + 2, c))) if (part.length === 1 && part[0].type === 'word') cols.add(part[0].text.toLowerCase())
+  let first = null
+  // inherited: [{ quals, cols }] of the enclosing blocks' USING joins
+  function walk(from, to, inherited) {
+    // cut [from, to) into the arms of a set operation
+    const arms = []
+    let d = 0
+    let armStart = from
+    for (let i = from; i < to; i++) {
+      if (isSym(ts[i], '(')) d++
+      else if (isSym(ts[i], ')')) d--
+      else if (d === 0 && ts[i].type === 'word' && SET_WORDS.has(ts[i].text.toUpperCase())) { arms.push([armStart, i]); armStart = i + 1 }
+    }
+    arms.push([armStart, to])
+    for (const [s, e] of arms) {
+      const cols = new Set()
+      const groups = []   // [open, close] of the parenthesised groups at depth 0 of the arm
+      for (let i = s; i < e; i++) {
+        if (!isSym(ts[i], '(')) continue
+        const c = matchParen(ts, i)
+        if (c < 0 || c >= e) break
+        groups.push([i, c])
+        if (i - 1 >= s && isWord(ts[i - 1], 'USING')) {
+          for (const part of splitTop(ts.slice(i + 1, c))) if (part.length === 1 && part[0].type === 'word') cols.add(part[0].text.toLowerCase())
+        }
+        i = c
+      }
+      const quals = tableQualifiers(ts, s, e)
+      const rules = inherited.map((r) => ({ quals: new Set([...r.quals].filter((q) => !quals.has(q))), cols: r.cols }))
+      if (cols.size) rules.push({ quals, cols })
+      if (rules.length) {
+        let g = 0
+        for (let i = s; i + 2 < e; i++) {
+          while (g < groups.length && groups[g][1] < i) g++
+          if (g < groups.length && groups[g][0] <= i) { i = groups[g][1]; continue }
+          if (ts[i].type === 'word' && isSym(ts[i + 1], '.') && ts[i + 2].type === 'word' && !isSym(ts[i - 1], '.')) {
+            const q = ts[i].text.toLowerCase()
+            const c = ts[i + 2].text.toLowerCase()
+            if (rules.some((r) => r.quals.has(q) && r.cols.has(c)) && (!first || i < first.idx)) {
+              first = { idx: i, code: 'ORA-25154', message: 'column part of USING clause cannot have qualifier' }
+            }
+          }
+        }
+      }
+      for (const [o, c] of groups) walk(o + 1, c, rules)
+    }
   }
-  if (!cols.size) return null
-  const quals = tableQualifiers(ts)
-  for (let i = 0; i + 2 < ts.length; i++) {
-    if (ts[i].type === 'word' && isSym(ts[i + 1], '.') && ts[i + 2].type === 'word' && !isSym(ts[i - 1], '.') && quals.has(ts[i].text.toLowerCase()) && cols.has(ts[i + 2].text.toLowerCase()))
-      return { idx: i, code: 'ORA-25154', message: 'column part of USING clause cannot have qualifier' }
-  }
-  return null
+  walk(0, ts.length, [])
+  return first
 }
 
 // Quoted identifiers written in capitals ("NUME") name the same thing as the unquoted NUME, which the PostgreSQL side keeps in

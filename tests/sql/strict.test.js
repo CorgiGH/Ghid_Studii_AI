@@ -53,6 +53,7 @@ describe('Oracle rejects what PostgreSQL accepts (fix 18)', () => {
     ['MINUS ALL', 'SELECT nume FROM studenti MINUS ALL SELECT nume FROM studenti', 'ORA-00928'],
     ['qualified USING column in the select list', 'SELECT s.nr_matricol FROM studenti s JOIN note n USING (nr_matricol)', 'ORA-25154'],
     ['qualified USING column, other table', 'SELECT n.nr_matricol FROM studenti s JOIN note n USING (nr_matricol)', 'ORA-25154'],
+    ['qualified USING column used by a correlated subquery', 'SELECT nume FROM studenti s JOIN note n USING (nr_matricol) WHERE EXISTS (SELECT 1 FROM cursuri c WHERE s.nr_matricol = 1)', 'ORA-25154'],
     ['qualified USING column in WHERE', 'SELECT s.nume FROM studenti s JOIN note n USING (nr_matricol) WHERE n.nr_matricol = 111', 'ORA-25154'],
     ['PostgreSQL catalog table', 'SELECT datname FROM pg_database', 'ORA-00942'],
     ['PostgreSQL system function', 'SELECT pg_sleep(0) FROM dual', 'ORA-00904'],
@@ -90,6 +91,11 @@ describe('Oracle rejects what PostgreSQL accepts (fix 18)', () => {
       'SELECT s.nume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol',
       'SELECT nr_matricol FROM studenti s JOIN note n USING (nr_matricol)',
       'SELECT s.nume FROM studenti s JOIN note n USING (nr_matricol)',
+      // another block may use the USING column's name with its own alias (Oracle: 27 rows)
+      'SELECT nume FROM studenti JOIN note USING (nr_matricol) WHERE nr_matricol IN (SELECT n2.nr_matricol FROM note n2 WHERE n2.valoare = 10)',
+      'SELECT (SELECT COUNT(*) FROM studenti s JOIN note n USING (nr_matricol)) FROM studenti s WHERE s.nr_matricol = 111',
+      "SELECT nume FROM studenti s UNION SELECT s.nume FROM profesori s JOIN didactic USING (id_prof) WHERE s.nume = 'x'",
+      'SELECT s.nume FROM studenti s JOIN note n USING (nr_matricol) UNION SELECT s.nume FROM studenti s',
     ]) {
       expect(await codeOf(sql), sql).toBeUndefined()
     }
@@ -133,6 +139,22 @@ describe('Oracle accepts what PostgreSQL does not (fix 19)', () => {
   it('a table alias keeps working after the cut', async () => {
     const r = await rows('SELECT s.nume FROM studenti s WHERE s.an = 1 AND ROWNUM <= 2')
     expect(r.rowCount).toBe(2)
+  })
+  it('ROWNUM on a join cuts the joined rows before aggregate and ORDER BY (Oracle: 3, and Popescu 10/9/8)', async () => {
+    expect((await rows('SELECT COUNT(*) FROM studenti s, note n WHERE s.nr_matricol = n.nr_matricol AND ROWNUM <= 3')).rows).toEqual([['3']])
+    const r = await rows('SELECT s.nume, n.valoare FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol WHERE ROWNUM <= 3 ORDER BY n.valoare DESC')
+    expect(r.rows.map((x) => x[0].trim())).toEqual(['Popescu', 'Popescu', 'Popescu'])
+    expect(r.rows.map((x) => x[1])).toEqual(['10', '9', '8'])
+    expect((await rows('SELECT s.nume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol WHERE ROWNUM = 1')).rowCount).toBe(1)
+    expect((await rows('SELECT s.nume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol WHERE ROWNUM <= 0')).rowCount).toBe(0)
+  })
+  it('ROWNUM together with (+) still converts the outer join (Oracle: 3)', async () => {
+    expect((await rows('SELECT COUNT(*) FROM studenti s, note n WHERE s.nr_matricol = n.nr_matricol(+) AND ROWNUM <= 3')).rows).toEqual([['3']])
+    expect((await rows('SELECT COUNT(*) FROM studenti s, note n WHERE s.nr_matricol = n.nr_matricol(+) AND s.an = 1 AND ROWNUM < 5')).rows).toEqual([['4']])
+  })
+  it('ROWNUM on a join of inline views is refused with a clear message, not answered differently', async () => {
+    const r = await exec('SELECT COUNT(*) FROM studenti s, (SELECT * FROM note) n WHERE s.nr_matricol = n.nr_matricol AND ROWNUM <= 3')
+    expect(r.error.message).toMatch(/ROWNUM.*not supported/)
   })
   it('a quoted upper-case identifier names the same column as the unquoted one', async () => {
     const r = await rows('SELECT "NUME" FROM studenti')

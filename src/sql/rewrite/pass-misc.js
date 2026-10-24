@@ -1,5 +1,6 @@
 // Misc pass: SELECT UNIQUE, USER, VARCHAR2 / NVARCHAR2, CAST(.. AS NUMBER), ANY/SOME/ALL (list).
-import { isSig, isSym, isWord, matchParen, nextSig, prevSig, raw, splitTop, trimSpace } from './tokens.js'
+import { isSig, isSym, isWord, matchParen, nextSig, prevSig, raw, splitTop, tokenize, trimSpace } from './tokens.js'
+import { OracleError } from '../engine/errors.js'
 
 const CMP = ['=', '<', '>', '<=', '>=', '<>', '!=', '^=']
 
@@ -170,7 +171,11 @@ export function textLiterals(ts) {
 // When the FROM clause is one table or one inline view, the cut is a derived table that keeps the table's alias, so every
 // qualified column still resolves:  FROM studenti s WHERE an = 1 AND ROWNUM <= 3
 //                                -> FROM (SELECT * FROM studenti s WHERE an = 1 LIMIT 3) s
-// For joins the LIMIT goes at the end of the block instead (right unless ORDER BY or an aggregate follows).
+// For joins the cut is a condition on the row identities of the joined tables (ctid), taken from a copy of the join that
+// carries the LIMIT:  WHERE .. AND EXISTS (SELECT 1 FROM (SELECT s.ctid c0, n.ctid c1 FROM s JOIN n .. WHERE .. LIMIT 3) z
+//                                           WHERE z.c0 IS NOT DISTINCT FROM s.ctid AND z.c1 IS NOT DISTINCT FROM n.ctid)
+// so ORDER BY, GROUP BY and aggregates still run on the cut rows only, as in Oracle. Everything this pass writes is real
+// tokens, so the passes after it still see the query structure.
 const SET_OP_WORDS = new Set(['UNION', 'INTERSECT', 'MINUS', 'EXCEPT'])
 const AFTER_WHERE = new Set(['GROUP', 'HAVING', 'ORDER', 'CONNECT', 'START', 'FOR'])
 const FROM_KEYWORDS = new Set(['JOIN', 'NATURAL', 'LEFT', 'RIGHT', 'FULL', 'INNER', 'CROSS', 'OUTER', 'ON', 'USING'])
@@ -242,11 +247,37 @@ function singleFactor(fromToks) {
 
 function joinWith(parts, sep) {
   const out = []
-  parts.forEach((p, i) => out.push(...(i ? [raw(sep)] : []), ...p))
+  parts.forEach((p, i) => out.push(...(i ? tokenize(sep) : []), ...p))
   return out
 }
 
-function rownumSegment(seg, multi) {
+// Names (alias, else table name) of the tables of a FROM clause that lists plain tables only, or null (derived tables).
+function fromTableNames(fromToks) {
+  const sig = fromToks.filter(isSig)
+  const names = []
+  let expect = true
+  let d = 0
+  for (let i = 0; i < sig.length; i++) {
+    const x = sig[i]
+    if (isSym(x, '(')) { if (d === 0 && expect) return null; d++; continue }
+    if (isSym(x, ')')) { d--; continue }
+    if (d > 0) continue
+    if (isWord(x, 'JOIN') || isSym(x, ',')) { expect = true; continue }
+    if (!expect) continue
+    if (x.type !== 'word' && x.type !== 'qident') return null
+    let name = x.text
+    let j = i + 1
+    while (isSym(sig[j], '.') && sig[j + 1]) { name = sig[j + 1].text; j += 2 }
+    if (isWord(sig[j], 'AS') && sig[j + 1]) { name = sig[j + 1].text; j += 2 }
+    else if (sig[j] && sig[j].type === 'word' && !FROM_KEYWORDS.has(sig[j].text.toUpperCase())) { name = sig[j].text; j++ }
+    names.push(name)
+    expect = false
+    i = j - 1
+  }
+  return names.length ? names : null
+}
+
+function rownumSegment(seg) {
   const first = seg.findIndex(isSig)
   if (first < 0 || !isWord(seg[first], 'SELECT')) return seg
   const fromIdx = depth0(seg, (u) => u === 'FROM')
@@ -263,24 +294,30 @@ function rownumSegment(seg, multi) {
     const cond = rownumCondition(c)
     if (!cond) { rest.push(c); continue }
     touched = true
-    if (cond.never) rest.push([raw(' 1 = 0 ')])
+    if (cond.never) rest.push(tokenize(' 1 = 0 '))
     else if (cond.limit !== undefined) limit = limit === null ? cond.limit : Math.min(limit, cond.limit)
   }
   if (!touched) return seg
-  const restWhere = rest.length ? [raw(' WHERE '), ...joinWith(rest, ' AND ')] : []
+  const restWhere = rest.length ? [...tokenize(' WHERE '), ...joinWith(rest, ' AND ')] : []
   const tail = seg.slice(tailIdx)
   const head = seg.slice(0, fromIdx + 1)
   const fromToks = seg.slice(fromIdx + 1, whereIdx)
-  if (limit === null) return [...head, ...fromToks, ...restWhere, raw(' '), ...tail]
+  if (limit === null) return [...head, ...fromToks, ...restWhere, ...tokenize(' '), ...tail]
   const one = singleFactor(fromToks)
   if (one) {
     const alias = one.alias || one.name || 'ora_v'
     const innerAlias = one.alias ? ` ${one.alias}` : one.paren ? ' ora_v' : ''
-    const inner = [raw('(SELECT * FROM '), ...one.factor, raw(innerAlias), ...restWhere, raw(` LIMIT ${limit}) ${alias} `)]
-    return [...head, raw(' '), ...inner, ...tail]
+    const inner = [...tokenize('(SELECT * FROM '), ...one.factor, ...tokenize(innerAlias), ...restWhere, ...tokenize(` LIMIT ${limit}) ${alias} `)]
+    return [...head, ...tokenize(' '), ...inner, ...tail]
   }
-  const body = [...head, ...fromToks, ...restWhere, raw(' '), ...tail, raw(` LIMIT ${limit}`)]
-  return multi ? [raw('('), ...body, raw(')')] : body
+  const names = fromTableNames(fromToks)
+  if (!names) throw new OracleError('ORA-?', 'ROWNUM together with a join of inline views is not supported by this practice engine')
+  const ids = names.map((n, k) => `c${k}`)
+  const inner = [...tokenize(`SELECT ${names.map((n, k) => `${n}.ctid ${ids[k]}`).join(', ')} FROM `), ...fromToks, ...restWhere]
+  const same = names.map((n, k) => `ora_z.${ids[k]} IS NOT DISTINCT FROM ${n}.ctid`).join(' AND ')
+  const cond = [...tokenize('EXISTS (SELECT 1 FROM ('), ...inner, ...tokenize(` LIMIT ${limit}) ora_z WHERE ${same})`)]
+  const where = [...tokenize(' WHERE '), ...(rest.length ? [...joinWith(rest, ' AND '), ...tokenize(' AND ')] : []), ...cond]
+  return [...head, ...fromToks, ...where, ...tokenize(' '), ...tail]
 }
 
 function rownumLevel(ts) {
@@ -304,18 +341,18 @@ function rownumLevel(ts) {
     else if (isSym(x, ')')) d--
     else if (d === 0 && x.type === 'word' && SET_OP_WORDS.has(x.text.toUpperCase())) cuts.push(i)
   })
-  if (!cuts.length) return rownumSegment(out, false)
+  if (!cuts.length) return rownumSegment(out)
   const res = []
   let from = 0
   for (const c of cuts) {
-    res.push(...rownumSegment(out.slice(from, c), true))
+    res.push(...rownumSegment(out.slice(from, c)))
     let opEnd = c + 1
     const n = nextSig(out, c)
     if (n >= 0 && isWord(out[n], 'ALL')) opEnd = n + 1
     res.push(...out.slice(c, opEnd))
     from = opEnd
   }
-  res.push(...rownumSegment(out.slice(from), true))
+  res.push(...rownumSegment(out.slice(from)))
   return res
 }
 
