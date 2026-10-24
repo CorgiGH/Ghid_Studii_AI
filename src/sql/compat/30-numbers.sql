@@ -100,6 +100,20 @@ CREATE FUNCTION ora_avg_acc(st numeric[], v text) RETURNS numeric[] LANGUAGE sql
 --;;
 CREATE AGGREGATE avg(text) (SFUNC = ora_avg_acc, STYPE = numeric[], FINALFUNC = ora_avg_fin, INITCOND = '{0,0}');
 --;;
+-- STDDEV / VARIANCE family of text (same implicit VARCHAR2 -> NUMBER conversion): collect the converted values, let the built-in
+-- aggregate do the arithmetic in the final function.
+CREATE FUNCTION ora_collect_text(st numeric[], v text) RETURNS numeric[] LANGUAGE sql IMMUTABLE AS
+$$ SELECT CASE WHEN v IS NULL THEN st ELSE array_append(st, v::numeric) END $$;
+--;;
+DO $$
+DECLARE f text;
+BEGIN
+  FOREACH f IN ARRAY ARRAY['stddev','stddev_samp','stddev_pop','variance','var_samp','var_pop'] LOOP
+    EXECUTE format('CREATE FUNCTION %I(st numeric[]) RETURNS numeric LANGUAGE sql IMMUTABLE AS $f$ SELECT pg_catalog.%s(x) FROM unnest(st) x $f$', 'ora_fin_'||f, f);
+    EXECUTE format('CREATE AGGREGATE %I(text) (SFUNC = ora_collect_text, STYPE = numeric[], FINALFUNC = %I, INITCOND = %L)', f, 'ora_fin_'||f, '{}');
+  END LOOP;
+END $$;
+--;;
 -- ---------------------------------------------------------------- integer division -> NUMBER division (7/2 = 3.5)
 DO $$
 DECLARE t1 text; t2 text; nm text;
