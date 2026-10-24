@@ -20,6 +20,8 @@ const registry = {
   'animation':      lazy(() => import('./interactive/AnimationBlock.jsx')),
   'code-challenge': lazy(() => import('./interactive/CodeChallengeBlock.jsx')),
   'terminal':       lazy(() => import('./interactive/TerminalBlock.jsx')),
+  // Lesson blocks
+  'viz':            lazy(() => import('../lesson/blocks/VizBlock.jsx')),
 };
 
 export default registry;
