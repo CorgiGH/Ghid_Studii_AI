@@ -98,3 +98,12 @@ export function parseTransactionControl(sql) {
   }
   return null
 }
+
+// Words that would end or restart the outer PostgreSQL transaction of a run (END, ABORT, BEGIN, START, RELEASE, PREPARE), and
+// any COMMIT / ROLLBACK / SAVEPOINT that parseTransactionControl did not recognise. Oracle has no such statement (a lone END
+// is what a PL/SQL block leaves behind once it is cut at its inner ';'), so the engine answers ORA-00900 instead of sending it.
+const FOREIGN_FIRST_WORDS = ['END', 'ABORT', 'BEGIN', 'START', 'RELEASE', 'PREPARE', 'COMMIT', 'ROLLBACK', 'SAVEPOINT']
+export function isForeignTransactionStatement(sql) {
+  const ts = sigTokens(sql)
+  return ts.length > 0 && FOREIGN_FIRST_WORDS.some((w) => isWord(ts[0], w))
+}

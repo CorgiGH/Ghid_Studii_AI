@@ -18,7 +18,7 @@ import { rewriteOracle } from '../rewrite/index.js'
 import { dmlTarget } from '../rewrite/pass-ddl.js'
 import { mapPgError, OracleError } from './errors.js'
 import { displayNames, formatCell } from './format.js'
-import { parseDescribe, parseTransactionControl, splitScript } from './script.js'
+import { isForeignTransactionStatement, parseDescribe, parseTransactionControl, splitScript } from './script.js'
 
 // Compat files as raw text, sorted by file name (00-base ... 70-ddl). Vite inlines them into this (lazy) chunk.
 const COMPAT_FILES = import.meta.glob('../compat/*.sql', { query: '?raw', import: 'default', eager: true })
@@ -102,7 +102,7 @@ export async function createEngine(pg, { clock, datasets }) {
     }
     if (lang !== null) session.lang = lang
     if (dateFormat !== null) session.dateFormat = dateFormat
-    await pg.query('UPDATE ora_session SET lang = $1, datefmt = $2', [session.lang, session.dateFormat])
+    await writeSession()
   }
 
   // DATE cells of a non-default session: one query formats every distinct value
@@ -127,10 +127,12 @@ export async function createEngine(pg, { clock, datasets }) {
   // ora_c is "the last COMMIT": ROLLBACK goes back to it, COMMIT (and a DDL statement) moves it forward. Every statement runs
   // under ora_s, so a statement that fails undoes only itself, as in Oracle (PostgreSQL would abort the whole transaction).
   // A run never leaves anything behind: the session's NLS settings live in JS and are written into the fresh transaction.
+  // ALTER SESSION is not transactional: the JS session is the truth and is written back after every ROLLBACK
+  const writeSession = () => pg.query('UPDATE ora_session SET lang = $1, datefmt = $2', [session.lang, session.dateFormat])
   async function begin() {
     await pg.query('BEGIN')
+    if (!sessionIsDefault()) await writeSession() // before ora_c, so ROLLBACK keeps it
     await pg.query('SAVEPOINT ora_c')
-    if (!sessionIsDefault()) await pg.query('UPDATE ora_session SET lang = $1, datefmt = $2', [session.lang, session.dateFormat])
   }
   async function commitPoint(tx) {
     await pg.query('RELEASE SAVEPOINT ora_c')
@@ -216,6 +218,7 @@ export async function createEngine(pg, { clock, datasets }) {
         await transactionControl(control, tx)
         return textResult('tx')
       }
+      if (isForeignTransactionStatement(sql)) throw new OracleError('ORA-00900', 'invalid SQL statement')
     } catch (err) {
       // an OracleError or a PostgreSQL error (it carries a SQLSTATE code) is the learner's answer; anything else is our bug
       if (!(err instanceof OracleError) && !(err && err.code)) throw err
@@ -265,6 +268,7 @@ export async function createEngine(pg, { clock, datasets }) {
     if (op === 'rollback') {
       await pg.query('ROLLBACK TO SAVEPOINT ora_c')
       tx.savepoints = []
+      await writeSession()
       return undefined
     }
     if (op === 'savepoint') {
@@ -277,6 +281,7 @@ export async function createEngine(pg, { clock, datasets }) {
     if (at < 0) throw new OracleError('ORA-01086', `savepoint '${name.toUpperCase()}' never established in this session or is invalid`)
     await pg.query(`ROLLBACK TO SAVEPOINT "u_${name}"`)
     tx.savepoints.length = at + 1
+    await writeSession()
     return undefined
   }
 

@@ -418,3 +418,40 @@ describe('snapshot: table contents after a run', () => {
     expect(await engine.describe('studenti', DS)).toEqual(STUDENTI)
   })
 })
+
+describe('ALTER SESSION is not transactional', () => {
+  const reset = () => run("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MON-RR'")
+  const both = "SELECT TO_CHAR(SYSDATE), SYSDATE FROM dual"
+  it('survives a ROLLBACK in the same run', async () => {
+    const r = await script(`ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'; ROLLBACK; ${both}`)
+    await reset()
+    expect(r.rows).toEqual([['2026-10-26', '2026-10-26']])
+  })
+  it('survives ROLLBACK after an earlier run set it', async () => {
+    await run("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'")
+    const r = await script(`INSERT INTO note VALUES (NULL, NULL, 1, NULL); ROLLBACK; ${both}`)
+    await reset()
+    expect(r.rows).toEqual([['2026-10-26', '2026-10-26']])
+  })
+  it('survives ROLLBACK TO a savepoint taken before the ALTER SESSION', async () => {
+    const r = await script(`SAVEPOINT a; ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'; ROLLBACK TO a; ${both}`)
+    await reset()
+    expect(r.rows).toEqual([['2026-10-26', '2026-10-26']])
+  })
+})
+
+describe('PostgreSQL-only transaction words never reach PostgreSQL', () => {
+  it.each(['END', 'ABORT', 'BEGIN', 'START TRANSACTION', 'RELEASE SAVEPOINT x', 'PREPARE TRANSACTION', 'COMMIT AND CHAIN', 'ROLLBACK AND CHAIN'])('%s is ORA-00900', async (sql) => {
+    const r = await run(sql)
+    expect(r.error?.code).toBe('ORA-00900')
+  })
+  it('a lone END after an INSERT does not leak the INSERT into later runs', async () => {
+    const r = await script('INSERT INTO note VALUES (NULL, NULL, 1, NULL); END')
+    expect(r.statements[1].error.code).toBe('ORA-00900')
+    expect(await cell('SELECT COUNT(*) FROM note')).toBe('42')
+  })
+  it('a PL/SQL block cut at its inner semicolon does not leak either', async () => {
+    await script("INSERT INTO note VALUES (NULL, NULL, 1, NULL);\nBEGIN\n NULL;\nEND;\n/")
+    expect(await cell('SELECT COUNT(*) FROM note')).toBe('42')
+  })
+})
