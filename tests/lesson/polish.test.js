@@ -308,6 +308,7 @@ describe('table-map arrow fired from a key cell', () => {
     expect(w.from.endsWith(`:${cols[cols.length - 1]}`)).toBe(cols[cols.length - 1] === 'nr_matricol');
     expect(w.to).toBe(`to:${m.toRows.indexOf(m.target)}:nr_matricol`);
     expect(m.target.nume).toBe('Popescu');
+    expect(w.under).toBe(true); // routed along the row's gridline, not across its values
   });
 
   it('falls back to the picked row for no or a bad click, and gives nothing without a target', () => {

@@ -23,9 +23,10 @@ export default function NumberLine({ props, predict }) {
   // picks: `${step}:${line}` -> the mark chosen; shownSteps: steps whose answers were asked for.
   const [picks, setPicks] = useState({});
   const [shownSteps, setShownSteps] = useState({});
-  const asking = (li) => predict && k >= 1 && picks[`${k}:${li}`] === undefined && !shownSteps[k];
-  const anyAsking = N.lines.some((_, li) => asking(li));
-  // Next waits while a line still asks for its pick; "Show" is the skip.
+  // A pick only marks the line; every line stays unanswered until "Show", which is also the skip.
+  const asking = () => predict && k >= 1 && !shownSteps[k];
+  const anyAsking = asking();
+  // Next waits until Show has been pressed.
   const stepper = { ...s, canNext: s.canNext && !anyAsking, reset: () => { setPicks({}); setShownSteps({}); s.reset(); } };
   const dText = digits === 0 ? '' : `, ${digits}`;
   const hint = {
@@ -56,12 +57,12 @@ export default function NumberLine({ props, predict }) {
               <div className="viz-line-track" role="img" aria-label={`${ln.value}`}>
                 <div className="viz-line-axis" />
                 {ticks.map((x, i) => {
-                  const mark = picked !== undefined && pickIsRight(ln.value, fnAt, digits, x) ? ' right' : picked === x ? ' wrong' : '';
+                  const mark = asking(li) ? (picked === x ? ' sel' : '') : picked !== undefined && pickIsRight(ln.value, fnAt, digits, x) ? ' right' : picked === x ? ' wrong' : '';
                   return asking(li)
                     ? (
-                      <button key={i} type="button" className="viz-tick can-pick" style={{ left: `${(i / span) * 100}%` }}
+                      <button key={i} type="button" className={`viz-tick can-pick${mark}`} aria-pressed={picked === x} style={{ left: `${(i / span) * 100}%` }}
                         aria-label={t(`${ln.value} lands on ${label(x, Math.max(0, digits))}`, `${ln.value} ajunge la ${label(x, Math.max(0, digits))}`)}
-                        onClick={() => { setPicks(p => ({ ...p, [`${k}:${li}`]: x })); s.settle(); }}>
+                        onClick={() => setPicks(p => ({ ...p, [`${k}:${li}`]: x }))}>
                         <i /><span>{label(x, Math.max(0, digits))}</span>
                       </button>
                     )

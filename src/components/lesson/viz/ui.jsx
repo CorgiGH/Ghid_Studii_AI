@@ -94,12 +94,12 @@ export function MiniTable({ columns, rows, rowClass, cellClass, cellButton, wire
   );
 }
 
-// SVG wires between elements marked data-wire="id" inside `boxRef`. pairs: [{ id, from, to, cls }].
+// SVG wires between elements marked data-wire="id" inside `boxRef`. pairs: [{ id, from, to, cls, under }]; `under` runs the side-by-side wire along the source row's bottom gridline.
 // Re-measures after layout, on resize and once the entrance animations have settled.
 export function Wires({ boxRef, pairs, settle = 0 }) {
   const m = useVizMotion();
   const [paths, setPaths] = useState([]);
-  const sig = pairs.map(p => `${p.id}|${p.from}|${p.to}`).join(';');
+  const sig = pairs.map(p => `${p.id}|${p.from}|${p.to}|${p.under ? 1 : 0}`).join(';');
   const measure = useCallback(() => {
     const box = boxRef.current;
     if (!box) return;
@@ -120,12 +120,21 @@ export function Wires({ boxRef, pairs, settle = 0 }) {
         d = `M${x1} ${y1} C${x1} ${y1 + dy} ${x2} ${y2 - dy} ${x2} ${y2}`;
       } else {
         const leftToRight = ra.left < rz.left;
-        x1 = (leftToRight ? ra.right : ra.left) - b.left;
         x2 = (leftToRight ? rz.left : rz.right) - b.left;
-        y1 = ra.top + ra.height / 2 - b.top;
         y2 = rz.top + rz.height / 2 - b.top;
-        const dx = Math.max(24, Math.abs(x2 - x1) * 0.45) * (leftToRight ? 1 : -1);
-        d = `M${x1} ${y1} C${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`;
+        const row = p.under ? a.closest('tr')?.getBoundingClientRect() : null;
+        if (row) {
+          // Leave the clicked cell by its bottom edge and run along the row's bottom gridline, so the wire never crosses the row's values.
+          x1 = ra.left + ra.width / 2 - b.left; y1 = ra.bottom - b.top;
+          const xr = (leftToRight ? row.right : row.left) - b.left;
+          const dx = Math.max(24, Math.abs(x2 - xr) * 0.45) * (leftToRight ? 1 : -1);
+          d = `M${x1} ${y1} L${xr} ${y1} C${xr + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`;
+        } else {
+          x1 = (leftToRight ? ra.right : ra.left) - b.left;
+          y1 = ra.top + ra.height / 2 - b.top;
+          const dx = Math.max(24, Math.abs(x2 - x1) * 0.45) * (leftToRight ? 1 : -1);
+          d = `M${x1} ${y1} C${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`;
+        }
       }
       out.push({ id: p.id, cls: p.cls || '', d, x2, y2 });
     }

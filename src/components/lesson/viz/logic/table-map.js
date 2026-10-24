@@ -33,5 +33,5 @@ export function tableMap({ from, to, question, answerKey, dataset = 'facultate' 
 export function mapWire(m, fromRow) {
   if (!m.target) return null;
   const row = Number.isInteger(fromRow) && fromRow >= 0 && fromRow < m.fromRows.length ? fromRow : m.pick;
-  return { id: 'k', from: `from:${row}:${m.fromCol}`, to: `to:${m.toRows.indexOf(m.target)}:${m.toCol}`, cls: 'keep', row };
+  return { id: 'k', from: `from:${row}:${m.fromCol}`, to: `to:${m.toRows.indexOf(m.target)}:${m.toCol}`, cls: 'keep', under: true, row };
 }
