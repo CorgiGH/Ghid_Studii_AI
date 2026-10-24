@@ -27,12 +27,14 @@
  {
   "id": "sol:L2.4",
   "sql": "SELECT nume || ' ' || prenume || ', ' || an AS \"Studenți pe ani de studiu\" FROM studenti ORDER BY an",
-  "note": "name + first name + comma + year, sorted by year, one column with quoted alias (space between nume and prenume = assumption)"
+  "note": "name + first name + comma + year, sorted by year, one column with quoted alias (space between nume and prenume = assumption)",
+  "orderKeySql": "SELECT an FROM studenti ORDER BY an"
  },
  {
   "id": "sol:L2.5",
   "sql": "SELECT nume, prenume, data_nastere FROM studenti\nWHERE data_nastere BETWEEN TO_DATE('01/01/1995','dd/mm/yyyy') AND TO_DATE('10/06/1997','dd/mm/yyyy')\nORDER BY an DESC",
-  "note": "born 1995-01-01 .. 1997-06-10, order by year DESC (ties unspecified)"
+  "note": "born 1995-01-01 .. 1997-06-10, order by year DESC (ties unspecified)",
+  "orderKeySql": "SELECT an FROM studenti WHERE data_nastere BETWEEN TO_DATE('01/01/1995','dd/mm/yyyy') AND TO_DATE('10/06/1997','dd/mm/yyyy') ORDER BY an DESC"
  },
  {
   "id": "sol:L2.6",
@@ -202,12 +204,14 @@
  {
   "id": "sol:L4.7",
   "sql": "SELECT s1.nume, s2.nume, TRIM(TO_CHAR(s1.data_nastere, 'Day')) AS \"Ziua\"\nFROM studenti s1 JOIN studenti s2 ON TO_CHAR(s1.data_nastere, 'D') = TO_CHAR(s2.data_nastere, 'D')\n AND (s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol))\nORDER BY TO_CHAR(s1.data_nastere, 'D'), s1.nume",
-  "note": "pairs born on the same weekday, alphabetical pair (same-surname pairs kept via nr_matricol tie-break)"
+  "note": "pairs born on the same weekday, alphabetical pair (same-surname pairs kept via nr_matricol tie-break)",
+  "orderKeySql": "SELECT TO_CHAR(s1.data_nastere, 'D'), s1.nume FROM studenti s1 JOIN studenti s2 ON TO_CHAR(s1.data_nastere, 'D') = TO_CHAR(s2.data_nastere, 'D') AND (s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol)) ORDER BY TO_CHAR(s1.data_nastere, 'D'), s1.nume"
  },
  {
   "id": "sol:L4.7b",
   "sql": "SELECT s1.nume, s2.nume, TRIM(TO_CHAR(s1.data_nastere, 'Day')) AS \"Ziua\"\nFROM studenti s1 JOIN studenti s2 ON TRIM(TO_CHAR(s1.data_nastere, 'Day')) = TRIM(TO_CHAR(s2.data_nastere, 'Day')) AND s1.nume < s2.nume\nORDER BY TO_CHAR(s1.data_nastere, 'D'), s1.nume",
-  "note": "classmates' variant: strict s1.nume < s2.nume (drops same-surname pairs)"
+  "note": "classmates' variant: strict s1.nume < s2.nume (drops same-surname pairs)",
+  "orderKeySql": "SELECT TO_CHAR(s1.data_nastere, 'D'), s1.nume FROM studenti s1 JOIN studenti s2 ON TRIM(TO_CHAR(s1.data_nastere, 'Day')) = TRIM(TO_CHAR(s2.data_nastere, 'Day')) AND s1.nume < s2.nume ORDER BY TO_CHAR(s1.data_nastere, 'D'), s1.nume"
  },
  {
   "id": "sol:L4.8",
@@ -217,7 +221,8 @@
  {
   "id": "sol:L4.9",
   "sql": "SELECT s1.nume, s1.prenume, s2.nume AS nume2, s2.prenume AS prenume2, ABS(s1.data_nastere - s2.data_nastere) AS \"Diferenta (zile)\"\nFROM studenti s1 JOIN studenti s2 ON s1.nr_matricol < s2.nr_matricol\nORDER BY 5",
-  "note": "pairs with age difference (days), ascending"
+  "note": "pairs with age difference (days), ascending",
+  "orderKeySql": "SELECT ABS(s1.data_nastere - s2.data_nastere) FROM studenti s1 JOIN studenti s2 ON s1.nr_matricol < s2.nr_matricol ORDER BY 1"
  },
  {
   "id": "sol:L4.10",

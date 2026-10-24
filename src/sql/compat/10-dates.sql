@@ -1,4 +1,6 @@
--- 60-dates.sql : DATE arithmetic, TO_DATE/TO_CHAR for dates, ADD_MONTHS, MONTHS_BETWEEN, LAST_DAY, NEXT_DAY, TRUNC, ROUND.
+-- 10-dates.sql : DATE arithmetic, TO_DATE, DATE display (TO_CHAR(date)), ADD_MONTHS, MONTHS_BETWEEN, LAST_DAY, NEXT_DAY, TRUNC/ROUND of dates.
+CREATE FUNCTION to_char(d timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_d2t(d) $$;
+--;;
 -- ---------------------------------------------------------------- DATE arithmetic (days as NUMBER)
 CREATE FUNCTION ora_dsub(a timestamp, b timestamp) RETURNS numeric LANGUAGE sql IMMUTABLE AS
 $$ SELECT (extract(epoch FROM a) - extract(epoch FROM b)) / 86400 $$;
@@ -19,7 +21,6 @@ CREATE OPERATOR + (LEFTARG=timestamp, RIGHTARG=numeric,   FUNCTION=ora_dadd);
 --;;
 CREATE OPERATOR + (LEFTARG=numeric,   RIGHTARG=timestamp, FUNCTION=ora_dadd2);
 --;;
-
 -- ---------------------------------------------------------------- dates
 -- TO_DATE returns a timestamp (PG's returns date); 1-arg form uses default NLS_DATE_FORMAT DD-MON-RR
 -- PG cannot PARSE the RR format element (it silently yields year 0001) and reads YY as 70-99=19xx / 00-69=20xx.
@@ -39,23 +40,6 @@ BEGIN
 END $$;
 --;;
 CREATE FUNCTION to_date(s text) RETURNS timestamp LANGUAGE sql IMMUTABLE AS $$ SELECT to_date(s, 'DD-MON-RR') $$;
---;;
--- TO_CHAR(date, fmt, nlsparam) : only ENGLISH (default) and ROMANIAN day/month names
-CREATE FUNCTION to_char(d timestamp, f text, nls text) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
-DECLARE r text; ro_days text[] := ARRAY['duminica','luni','marti','miercuri','joi','vineri','sambata'];
-        ro_mon text[] := ARRAY['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'];
-        fu text := upper(f); nm text;
-BEGIN
-  r := pg_catalog.to_char(d, f);
-  IF upper(nls) LIKE '%ROMANIAN%' THEN
-    IF fu = 'DAY' THEN nm := ro_days[extract(dow FROM d)::int + 1]; ELSIF fu = 'MONTH' THEN nm := ro_mon[extract(month FROM d)::int]; END IF;
-    IF nm IS NOT NULL THEN
-      nm := pg_catalog.rpad(nm, 9);   -- Oracle pads to the longest name of the language; 9 INFERRED
-      IF f = fu THEN RETURN upper(nm); ELSIF f = lower(f) THEN RETURN nm; ELSE RETURN pg_catalog.initcap(nm); END IF;
-    END IF;
-  END IF;
-  RETURN r;
-END $$;
 --;;
 CREATE FUNCTION add_months(d timestamp, n numeric) RETURNS timestamp LANGUAGE plpgsql IMMUTABLE AS $$
 DECLARE tgt date; lastsrc boolean; ld int; dd int; tod time;

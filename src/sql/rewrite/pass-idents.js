@@ -1,4 +1,4 @@
-// Pass 5: a NATURAL JOIN column used with a qualifier is ORA-25155 in Oracle; PostgreSQL silently accepts it.
+// Identifier pass: a NATURAL JOIN column used with a qualifier is ORA-25155 in Oracle; PostgreSQL silently accepts it.
 import { isSig, isWord } from './tokens.js'
 import { OracleError } from '../engine/errors.js'
 

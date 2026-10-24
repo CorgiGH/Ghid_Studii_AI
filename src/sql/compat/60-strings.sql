@@ -1,24 +1,4 @@
--- 40-strings.sql : LENGTH, UPPER/LOWER/INITCAP, SUBSTR, INSTR, REPLACE, LPAD/RPAD.
--- ---------------------------------------------------------------- strings
--- LENGTH : Oracle counts CHAR padding, returns NUMBER, ''=NULL
-CREATE FUNCTION length(s text)   RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT nullif(char_length(s),0)::numeric $$;
---;;
-CREATE FUNCTION length(s bpchar) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT char_length(ora_p(s))::numeric $$;
---;;
-CREATE FUNCTION length(n numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT length(ora_n2t(n)) $$;
---;;
--- UPPER/LOWER/INITCAP on CHAR(n): keep the padding (LENGTH(UPPER(nume)) = 10).
--- !! Result TYPE of UPPER(CHAR) is "real Oracle check" item #1: lab3 says UPPER(nume)='BREABAN' returns 0 rows, which
--- !! implies VARCHAR2 comparison; Oracle docs (from memory) say the type stays CHAR (would return the row). Returning text
--- !! (padding kept, non-padded comparison) follows the lab page.  Change RETURNS text -> bpchar to follow the docs.
-CREATE FUNCTION upper(b bpchar)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.upper(ora_p(b)) $$;
---;;
-CREATE FUNCTION lower(b bpchar)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.lower(ora_p(b)) $$;
---;;
-CREATE FUNCTION initcap(b bpchar) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.initcap(ora_p(b)) $$;
---;;
-CREATE FUNCTION upper(n numeric)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(n) $$;
---;;
+-- 60-strings.sql : SUBSTR, INSTR, REPLACE, LPAD, RPAD.
 -- SUBSTR : Oracle semantics (start 0 = 1, negative start counts from the END, length<1 -> NULL, ''=NULL)
 CREATE FUNCTION substr(s text, m numeric, n numeric) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
 DECLARE len int; st int; ln int;

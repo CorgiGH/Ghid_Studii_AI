@@ -7,6 +7,10 @@
 // Two passes: values come from a run with the fixed clock substituted for SYSDATE / CURRENT_DATE; column headers come
 // from a run without substitution (Oracle prints the expression as typed, so the substituted text must not leak into
 // a header). A result stores at most SNAPSHOT_MAX_ROWS rows; rowCount keeps the real count and truncated says so.
+//
+// An entry with `orderKeySql` (the same query reduced to its ORDER BY key columns, same FROM/WHERE/ORDER BY) also gets
+// `orderKeys` in the snapshot: the key values of every result row, in Oracle's order. Rows whose keys are equal are
+// tied, and Oracle's order inside a tie is unspecified, so tests/sql/compare.js accepts any permutation inside a tie.
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -43,12 +47,18 @@ function flatten(entries) {
     statements.push(e.sql)
     if (e.pre) statements.push(NLS_RESET)
   }
-  return { statements, slot }
+  const keySlot = new Map()
+  entries.forEach((e) => {
+    if (!e.orderKeySql) return
+    keySlot.set(e.id, statements.length)
+    statements.push(e.orderKeySql)
+  })
+  return { statements, slot, keySlot }
 }
 
 async function main() {
   const entries = loadCorpus()
-  const { statements, slot } = flatten(entries)
+  const { statements, slot, keySlot } = flatten(entries)
   const valued = await runOnOracle(statements, { clock: CLOCK, dataset: 'facultate' })
   const plain = await runOnOracle(statements, { clock: null, dataset: 'facultate' })
 
@@ -62,6 +72,11 @@ async function main() {
     }
     const res = { kind: v.kind, columns: v.error ? [] : (h.error ? v.columns : h.columns), rows: v.error ? [] : v.rows.slice(0, SNAPSHOT_MAX_ROWS), rowCount: v.error ? 0 : v.rowCount, truncated: !v.error && v.rowCount > SNAPSHOT_MAX_ROWS }
     if (v.error) res.error = v.error
+    if (e.orderKeySql) {
+      const k = valued[keySlot.get(e.id)]
+      if (k.error || v.error || k.rowCount !== v.rowCount || k.truncated) harness.push(`${e.id}: orderKeySql does not return one key row per result row`)
+      else res.orderKeys = k.rows
+    }
     snapshot[e.id] = res
   })
   if (harness.length) {

@@ -15,11 +15,14 @@
 // Known gaps are listed in tests/sql/known-gaps.json together with the fix that closes each.
 import { OracleError } from '../engine/errors.js'
 import { isSig, isSym, tokenize, untokenize } from './tokens.js'
-import { simpleMap } from './pass-simple.js'
+import { emptyStringToNull, trimBlanksToNull } from './pass-empty-string.js'
+import { clockPass } from './pass-clock.js'
+import { minusToExcept } from './pass-setops.js'
+import { miscMap, anyList } from './pass-misc.js'
 import { likeEscape } from './pass-like.js'
-import { callTransforms } from './pass-calls.js'
+import { decodePass } from './pass-decode.js'
 import { outerJoinPass } from './pass-outer-join.js'
-import { naturalJoinCheck } from './pass-natural-join.js'
+import { naturalJoinCheck } from './pass-idents.js'
 
 export { tokenize, untokenize }
 
@@ -32,12 +35,17 @@ export function rewriteOracle(sql, opts = {}) {
   let ts = tokenize(sql)
   // strip the SQL*Plus terminators (; or /) after the statement
   while (ts.length && (!isSig(ts[ts.length - 1]) || isSym(ts[ts.length - 1], ';') || isSym(ts[ts.length - 1], '/'))) ts.pop()
-  // one statement per run, like Oracle's own parser
-  if (ts.some((t) => isSym(t, ';'))) throw new OracleError('ORA-00933', 'SQL command not properly ended')
+  // one statement per run; Oracle 11g (DBMS_SQL, measured) answers ORA-00911 for a second statement, not ORA-00933
+  if (ts.some((t) => isSym(t, ';'))) throw new OracleError('ORA-00911', 'invalid character')
   naturalJoinCheck(ts)
-  ts = simpleMap(ts, clock)
+  ts = emptyStringToNull(ts)
+  ts = clockPass(ts, clock)
+  ts = miscMap(ts)
+  ts = minusToExcept(ts)
   ts = likeEscape(ts)
-  ts = callTransforms(ts)
+  ts = anyList(ts)
+  ts = decodePass(ts)
+  ts = trimBlanksToNull(ts)
   ts = outerJoinPass(ts, notes)
   return { sql: untokenize(ts), notes }
 }

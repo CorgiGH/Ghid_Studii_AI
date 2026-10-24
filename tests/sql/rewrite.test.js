@@ -11,8 +11,8 @@ describe('rewrite', () => {
     expect(r.sql).toBe("select nume from studenti where prenume = 'Ștefan'")
   })
 
-  it('rejects two statements with ORA-00933', () => {
-    expect(() => rewriteOracle('select 1 from dual; select 2 from dual')).toThrowError(expect.objectContaining({ code: 'ORA-00933' }))
+  it('rejects two statements with ORA-00911 (what Oracle 11g answers, see corpus syntax:two-statements)', () => {
+    expect(() => rewriteOracle('select 1 from dual; select 2 from dual')).toThrowError(expect.objectContaining({ code: 'ORA-00911' }))
   })
 
   it('a semicolon inside a literal or a comment is not a second statement', () => {
@@ -43,5 +43,12 @@ describe('rewrite', () => {
 
   it('NATURAL JOIN with a qualified common column is ORA-25155', () => {
     expect(() => rewriteOracle('select s.nr_matricol from studenti s natural join note n')).toThrowError(expect.objectContaining({ code: 'ORA-25155' }))
+  })
+})
+
+describe('rewrite passes compose', () => {
+  it('DECODE, TRIM and ANY inside each other are all rewritten', () => {
+    const r = rewriteOracle("select decode(trim(nume), 'a', 1, 2) from studenti where an = any (decode(1, 1, 2, 3), 4)").sql
+    expect(r).toBe("select CASE WHEN (NULLIF(trim(nume), '')) IS NOT DISTINCT FROM ('a') THEN (1) ELSE (2) END from studenti where an = ANY (ARRAY[CASE WHEN (1) IS NOT DISTINCT FROM (1) THEN (2) ELSE (3) END, 4])")
   })
 })

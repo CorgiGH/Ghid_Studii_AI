@@ -29,9 +29,10 @@ afterAll(() => {
 })
 
 describe('corpus is consistent with the snapshot', () => {
-  it('has 458 entries, each with a frozen Oracle result and a valid gap entry', () => {
-    expect(corpus).toHaveLength(458)
+  it('has 459 entries, each with a frozen Oracle result and a valid gap entry', () => {
+    expect(corpus).toHaveLength(459)
     for (const e of corpus) expect(snapshot[e.id], e.id).toBeDefined()
+    for (const e of corpus) if (e.orderKeySql) expect(snapshot[e.id].orderKeys, `${e.id} needs frozen orderKeys`).toHaveLength(snapshot[e.id].rowCount)
     expect(Object.keys(snapshot)).toHaveLength(corpus.length)
     const ids = new Set(corpus.map((e) => e.id))
     for (const id of Object.keys(knownGaps)) {
