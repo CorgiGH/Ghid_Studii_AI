@@ -23,3 +23,9 @@ export function restoredReflect(attempts, id) {
 }
 
 export const REFLECT_TEXT_MAX = 600;
+
+// Whether a block that was restored from a stored attempt may record a new one. A restored
+// question is final: recording again would reset the review schedule it already earned.
+export function shouldRecordAttempt({ record = true, ref, restored = false }) {
+  return !!record && !!ref && !restored;
+}

@@ -5,7 +5,7 @@ import formatMarkdown from '../../blocks/formatMarkdown';
 import { useScreenGate } from '../ScreenGate';
 import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
-import { restoredMcqPick } from '../../../lesson/restore.js';
+import { restoredMcqPick, shouldRecordAttempt } from '../../../lesson/restore.js';
 
 const LETTERS = 'ABCDEFGH';
 const Html = ({ as = 'span', className, text, id }) => (
@@ -34,7 +34,7 @@ export default function McqBlock({ id, question, options, record = true, onAnswe
     answered.current = true;
     const opt = options[i];
     setPicked(i);
-    if (record && ref) {
+    if (shouldRecordAttempt({ record, ref, restored: restored !== null })) {
       store.recordAttempt(id, { ok: !!opt.correct, hints: 0, kind: 'mcq', item: id, option: i, misconception: opt.misconception || null, ref, at: nowMs() });
     }
     complete();

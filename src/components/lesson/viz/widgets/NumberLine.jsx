@@ -14,7 +14,7 @@ export default function NumberLine({ props, predict }) {
   const m = useVizMotion();
   const digits = props.digits ?? 0;
   const N = numberLines(props);
-  const s = useStepper(N.count, { predict });
+  const s = useStepper(N.count, { predict, own: true });
   const k = s.step;
   const sql = numberLineSql(props);
   const oracle = useOracleValues(sql, 'facultate');
@@ -25,6 +25,8 @@ export default function NumberLine({ props, predict }) {
   const [shownSteps, setShownSteps] = useState({});
   const asking = (li) => predict && k >= 1 && picks[`${k}:${li}`] === undefined && !shownSteps[k];
   const anyAsking = N.lines.some((_, li) => asking(li));
+  // Next waits while a line still asks for its pick; "Show" is the skip.
+  const stepper = { ...s, canNext: s.canNext && !anyAsking, reset: () => { setPicks({}); setShownSteps({}); s.reset(); } };
   const dText = digits === 0 ? '' : `, ${digits}`;
   const hint = {
     CEIL: t('CEIL goes up to the next whole number.', 'CEIL urcă la următorul număr întreg.'),
@@ -33,12 +35,12 @@ export default function NumberLine({ props, predict }) {
     TRUNC: t('TRUNC cuts the extra digits off, toward zero.', 'TRUNC taie cifrele în plus, spre zero.'),
   };
   const caption = anyAsking
-    ? t(`Where does the number land with ${fnAt}? Click a mark on each line, or press Show.`, `Unde ajunge numărul cu ${fnAt}? Apasă pe o gradație la fiecare axă sau apasă Arată.`)
+    ? t(`Where does the number land with ${fnAt}? Click a mark on each line, then press Show.`, `Unde ajunge numărul cu ${fnAt}? Apasă pe o gradație la fiecare axă, apoi apasă Arată.`)
     : k === 0
     ? (digits === 0 ? t('Each number sits between two whole numbers.', 'Fiecare număr stă între doi întregi.') : t(`The marks are ${digits > 0 ? `${Math.pow(10, -digits)} apart` : `${Math.pow(10, -digits)} apart (the digits left of the point)`}.`, `Gradațiile sunt la distanță de ${Math.pow(10, -digits)}${digits < 0 ? ' (cifrele din stânga virgulei)' : ''}.`))
     : hint[fnAt];
   return (
-    <VizFrame widget="number-line" stepper={{ ...s, reset: () => { setPicks({}); setShownSteps({}); s.reset(); } }} caption={caption} label={t('Rounding functions on a number line', 'Funcțiile de rotunjire pe axa numerelor')}>
+    <VizFrame widget="number-line" stepper={stepper} caption={caption} label={t('Rounding functions on a number line', 'Funcțiile de rotunjire pe axa numerelor')}>
       <div className="viz-lines">
         {N.lines.map((ln, li) => {
           const { lo, hi, ticks } = ln.window;
@@ -59,7 +61,7 @@ export default function NumberLine({ props, predict }) {
                     ? (
                       <button key={i} type="button" className="viz-tick can-pick" style={{ left: `${(i / span) * 100}%` }}
                         aria-label={t(`${ln.value} lands on ${label(x, Math.max(0, digits))}`, `${ln.value} ajunge la ${label(x, Math.max(0, digits))}`)}
-                        onClick={() => setPicks(p => ({ ...p, [`${k}:${li}`]: x }))}>
+                        onClick={() => { setPicks(p => ({ ...p, [`${k}:${li}`]: x })); s.settle(); }}>
                         <i /><span>{label(x, Math.max(0, digits))}</span>
                       </button>
                     )
@@ -85,7 +87,7 @@ export default function NumberLine({ props, predict }) {
         })}
       </div>
       {anyAsking && (
-        <button type="button" className="viz-btn viz-numline-show" onClick={() => setShownSteps(v => ({ ...v, [k]: true }))}>{t('Show', 'Arată')}</button>
+        <button type="button" className="viz-btn viz-numline-show" onClick={() => { setShownSteps(v => ({ ...v, [k]: true })); s.settle(); }}>{t('Show', 'Arată')}</button>
       )}
     </VizFrame>
   );

@@ -6,10 +6,10 @@ export const personName = (s) => `${s.nume} ${s.prenume}`;
 // `condition` is the COUNTEREXAMPLE test (lesson 23: "a grade below 7 removes the student").
 // Left list = students who have grades. A grade that meets the condition is a counterexample;
 // a student with any counterexample is out (SOME), a student with none qualifies (ALL passing).
-export function allVsSome({ studentsFrom, condition, showMinusByName }) {
-  const students = (DATA[studentsFrom] || [])
+export function allVsSome({ studentsFrom, condition, showMinusByName }, data = DATA) {
+  const students = (data[studentsFrom] || [])
     .map(s => {
-      const grades = DATA.note.filter(n => n.nr_matricol === s.nr_matricol).map(n => n.valoare);
+      const grades = data.note.filter(n => n.nr_matricol === s.nr_matricol).map(n => n.valoare);
       const bad = grades.map(g => evalWhere(condition, { valoare: g }) === true);
       const some = bad.some(Boolean);
       return { student: s, grades, bad, some, all: !some };

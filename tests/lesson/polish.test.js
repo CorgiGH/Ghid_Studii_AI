@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { FACULTATE } from '../../src/components/lesson/viz/logic/facultate.js';
 import { ARC_AT, ticksLit } from '../../src/components/lesson/viz/logic/age-timeline.js';
@@ -11,7 +11,7 @@ import { charStripsSql } from '../../src/components/lesson/viz/logic/oracle.js';
 import { validateViz } from '../../src/components/lesson/viz/vizSpec.js';
 import { lessonOrder, validateMcq } from '../../src/components/lesson/blocks/choiceSpec.js';
 import { OUTLINE_TAGS, STAGED_TAGS, TRAP_TAGS } from '../../src/components/lesson/blocks/trapTags.js';
-import { REFLECT_TEXT_MAX, restoredMcqPick, restoredReflect } from '../../src/lesson/restore.js';
+import { REFLECT_TEXT_MAX, restoredMcqPick, restoredReflect, shouldRecordAttempt } from '../../src/lesson/restore.js';
 import { calendarDaysUntil, collectMcqPool, dueLabel, furthestVisited, isPracticeOnly, pickVariant } from '../../src/lesson/review.js';
 import { createLessonStore } from '../../src/lesson/store.js';
 import { fallbackTable } from '../../src/components/lesson/blocks/reflectTable.js';
@@ -72,14 +72,35 @@ describe('restoring a question from stored attempts', () => {
     expect(REFLECT_TEXT_MAX).toBeGreaterThan(100);
   });
 
-  it('works end to end through the store: attemptsAt feeds the restore and records nothing new', () => {
+  it('a restored question never records again; a fresh one records once', () => {
+    const ref = { src: 's', screen: 4 };
+    expect(shouldRecordAttempt({ record: true, ref, restored: true })).toBe(false);
+    expect(shouldRecordAttempt({ record: true, ref, restored: false })).toBe(true);
+    expect(shouldRecordAttempt({ record: false, ref, restored: false })).toBe(false); // review tab
+    expect(shouldRecordAttempt({ record: true, ref: null, restored: false })).toBe(false); // no lesson screen
+    expect(shouldRecordAttempt({ ref, restored: false })).toBe(true); // record defaults on
+  });
+
+  it('the decision the blocks make: a stored answer restores, then answering again calls recordAttempt zero times', () => {
     const store = createLessonStore(memStorage());
     store.recordAttempt('q1', { ok: false, hints: 0, kind: 'mcq', item: 'q1', option: 3, ref: { src: 's', screen: 4 }, at: 1 });
-    store.recordAttempt('q2', { ok: true, hints: 0, kind: 'mcq', item: 'q2', option: 1, ref: { src: 's', screen: 5 }, at: 2 });
-    const before = JSON.stringify(store.attemptsAt('s', 4));
-    expect(restoredMcqPick(store.attemptsAt('s', 4), 'q1', 4)).toBe(3);
-    expect(restoredMcqPick(store.attemptsAt('s', 4), 'q2', 4)).toBeNull();
-    expect(JSON.stringify(store.attemptsAt('s', 4))).toBe(before);
+    const ref = { src: 's', screen: 4 };
+    const spy = vi.spyOn(store, 'recordAttempt');
+    // what McqBlock does on mount, then on a click
+    const pick = restoredMcqPick(store.attemptsAt(ref.src, ref.screen), 'q1', 4);
+    expect(pick).toBe(3);
+    if (shouldRecordAttempt({ ref, restored: pick !== null })) store.recordAttempt('q1', { ok: true, kind: 'mcq', item: 'q1', option: 0, ref, at: 2 });
+    // what ReflectBlock does for a stored reflect
+    store.recordAttempt('r1', { ok: true, hints: 0, kind: 'reflect', item: 'r1', text: 't', ref, at: 3 });
+    spy.mockClear();
+    const back = restoredReflect(store.attemptsAt(ref.src, ref.screen), 'r1');
+    expect(back).toEqual({ text: 't' });
+    if (shouldRecordAttempt({ ref, restored: back !== null })) store.recordAttempt('r1', { ok: true, kind: 'reflect', item: 'r1', ref, at: 4 });
+    expect(spy).not.toHaveBeenCalled();
+    // and a block with nothing stored does record
+    const none = restoredMcqPick(store.attemptsAt(ref.src, ref.screen), 'q9', 4);
+    if (shouldRecordAttempt({ ref, restored: none !== null })) store.recordAttempt('q9', { ok: true, kind: 'mcq', item: 'q9', option: 0, ref, at: 5 });
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -242,11 +263,36 @@ describe('all-vs-some compares nume and prenume', () => {
     expect(personName({ nume: 'Bodnar', prenume: 'Ioana' })).toBe('Bodnar Ioana');
   });
 
-  it('two students with the same nume but different prenume stay apart', () => {
-    const r = allVsSome({ studentsFrom: 'studenti', condition: 'valoare < 0', showMinusByName: true });
-    const arhire = r.students.filter(s => s.student.nume === 'Arhire');
-    // Arhire Raluca / Arhire Alexandra, if they have grades, are two different names
-    expect(new Set(arhire.map(s => personName(s.student))).size).toBe(arhire.length);
+  it('two students with the same nume and different prenume, both qualifying, stay separate', () => {
+    // The official data has no such pair with grades (Arhire Alexandra has none), so use rows
+    // that do: two Arhire with different prenume, both with only passing grades.
+    const data = {
+      studenti: [
+        { nr_matricol: '1', nume: 'Arhire', prenume: 'Raluca' },
+        { nr_matricol: '2', nume: 'Arhire', prenume: 'Alexandra' },
+        { nr_matricol: '3', nume: 'Bodnar', prenume: 'Ioana' },
+        { nr_matricol: '4', nume: 'Bodnar', prenume: 'Ioana' },
+      ],
+      note: ['1', '2', '3', '4'].map(n => ({ nr_matricol: n, valoare: 9 })),
+    };
+    const r = allVsSome({ studentsFrom: 'studenti', condition: 'valoare < 7', showMinusByName: true }, data);
+    expect(r.students.every(s => s.all)).toBe(true);
+    expect(r.minus.byName).toEqual(['Arhire Alexandra', 'Arhire Raluca', 'Bodnar Ioana']);
+    expect(r.minus.byName).not.toContain('Arhire');
+    // the key keeps all four; the two Bodnar Ioana are one row to MINUS
+    expect(r.minus.byKey).toEqual(['1', '2', '3', '4']);
+  });
+
+  it('a student who fails removes only their own (nume, prenume), not a namesake with another prenume', () => {
+    const data = {
+      studenti: [
+        { nr_matricol: '1', nume: 'Arhire', prenume: 'Raluca' },
+        { nr_matricol: '2', nume: 'Arhire', prenume: 'Alexandra' },
+      ],
+      note: [{ nr_matricol: '1', valoare: 4 }, { nr_matricol: '2', valoare: 9 }],
+    };
+    const r = allVsSome({ studentsFrom: 'studenti', condition: 'valoare < 7', showMinusByName: true }, data);
+    expect(r.minus.byName).toEqual(['Arhire Alexandra']);
   });
 });
 
@@ -255,17 +301,19 @@ describe('table-map arrow fired from a key cell', () => {
   const cols = Object.keys(m.fromRows[0]);
 
   it('leads from the clicked row to the studenti row with the same key', () => {
-    const w = mapWire(m, 2, cols);
+    const w = mapWire(m, 2);
     expect(w.row).toBe(2);
-    expect(w.from.startsWith('from:2:')).toBe(true);
+    expect(w.from).toBe(`from:2:${m.fromCol}`); // starts at the clicked nr_matricol cell
+    expect(w.from.endsWith(':nr_matricol')).toBe(true);
+    expect(w.from.endsWith(`:${cols[cols.length - 1]}`)).toBe(cols[cols.length - 1] === 'nr_matricol');
     expect(w.to).toBe(`to:${m.toRows.indexOf(m.target)}:nr_matricol`);
     expect(m.target.nume).toBe('Popescu');
   });
 
   it('falls back to the picked row for no or a bad click, and gives nothing without a target', () => {
-    expect(mapWire(m, null, cols).row).toBe(m.pick);
-    expect(mapWire(m, 99, cols).row).toBe(m.pick);
-    expect(mapWire({ ...m, target: null }, 0, cols)).toBeNull();
+    expect(mapWire(m, null).row).toBe(m.pick);
+    expect(mapWire(m, 99).row).toBe(m.pick);
+    expect(mapWire({ ...m, target: null }, 0)).toBeNull();
   });
 });
 
@@ -297,5 +345,16 @@ describe('calendar-clock shows what Oracle shows', () => {
   it('DD-MON-RR carries the date only, the time is given separately', () => {
     expect(oracleDisplay('2026-11-05 17:30')).toEqual({ date: '05-NOV-26', time: '17:30' });
     expect(oracleDisplay('2026-11-05')).toEqual({ date: '05-NOV-26', time: null });
+  });
+});
+
+describe('block loaders are one list', () => {
+  it('the preload starts every loader the registry exports', async () => {
+    const { blockLoaders } = await import('../../src/components/blocks/registry.js');
+    const src = readFileSync(new URL('../../src/components/lesson/preload.js', import.meta.url), 'utf8');
+    expect(Object.keys(blockLoaders)).toEqual(expect.arrayContaining(['mcq', 'reflect', 'viz', 'learn']));
+    expect(Object.values(blockLoaders).every(f => typeof f === 'function')).toBe(true);
+    expect(src).toMatch(/blockLoaders/);
+    expect(src).not.toMatch(/import\('\.\.?\/.*Block\.jsx'\)/); // no hand-kept second list
   });
 });

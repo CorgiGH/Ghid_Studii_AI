@@ -15,7 +15,7 @@ export default function TableMap({ props, predict }) {
   const toCols = ['nr_matricol', 'nume', 'prenume'];
   const showPick = s.step >= 1;
   const showWire = s.step >= 2;
-  const wire = showWire ? mapWire(m, fired, fromCols) : null;
+  const wire = showWire ? mapWire(m, fired) : null;
   const pairs = wire ? [wire] : [];
   const srcRow = wire ? wire.row : m.pick;
   // Clicking a key cell fires the arrow: it unlocks a predict frame and jumps to the arrow step.

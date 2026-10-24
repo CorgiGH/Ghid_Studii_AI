@@ -12,10 +12,15 @@ export const BOUNCE = { type: 'spring', stiffness: 520, damping: 20 };
 // useStepper(n, { predict }) -> { step, next, back, canNext, reveal, ... }
 // Step 0 is the setup frame. With predict, Next stays locked until reveal(), which
 // also tells the lesson player the screen is done.
+// With `own: true` the widget asks for the pick itself (marks, rows to click): the stepper
+// shows no "Show me" gate of its own, and the widget calls settle() on the first pick or
+// its own reveal button, which is what completes the screen. One gate, not two.
 export function useStepper(n, o = {}) {
   const predict = !!o.predict;
+  const own = predict && !!o.own;
   const gate = useScreenGate();
-  const [s, dispatch] = useReducer(stepperReducer, { predict }, initialStepper);
+  const gated = predict && !own;
+  const [s, dispatch] = useReducer(stepperReducer, { predict: gated }, initialStepper);
   const next = useCallback(() => dispatch({ type: 'next', n }), [n]);
   const back = useCallback(() => dispatch({ type: 'back', n }), [n]);
   const goto = useCallback((to) => dispatch({ type: 'goto', to, n }), [n]);
@@ -23,11 +28,12 @@ export function useStepper(n, o = {}) {
     dispatch({ type: 'reveal', n });
     if (predict) gate.complete();
   }, [n, predict, gate]);
-  const reset = useCallback(() => dispatch({ type: 'reset', revealed: !predict }), [predict]);
+  const settle = useCallback(() => { if (predict) gate.complete(); }, [predict, gate]);
+  const reset = useCallback(() => dispatch({ type: 'reset', revealed: !gated }), [gated]);
   const step = Math.min(s.step, Math.max(0, n - 1));
   return {
-    n, step, revealed: s.revealed, predicting: predict && !s.revealed,
-    next, back, goto, reveal, reset,
+    n, step, revealed: s.revealed, predicting: gated && !s.revealed,
+    next, back, goto, reveal, settle, reset,
     canNext: s.revealed && step < n - 1,
     canBack: step > 0,
     last: step >= n - 1,
