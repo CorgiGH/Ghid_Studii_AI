@@ -89,6 +89,17 @@ CREATE FUNCTION ora_avg_acc(st numeric[], v int2) RETURNS numeric[] LANGUAGE sql
 --;;
 CREATE AGGREGATE avg(int2) (SFUNC = ora_avg_acc, STYPE = numeric[], FINALFUNC = ora_avg_fin, INITCOND = '{0,0}');
 --;;
+-- SUM / AVG of text: Oracle converts VARCHAR2 to NUMBER implicitly (SUM(DECODE(an, 1, NULL, bursa)) is typed text when the first
+-- value is NULL); bad text raises ORA-01722 as to_number does.
+CREATE FUNCTION ora_sum_acc_text(st numeric, v text) RETURNS numeric LANGUAGE sql IMMUTABLE AS
+$$ SELECT CASE WHEN v IS NULL THEN st WHEN st IS NULL THEN v::numeric ELSE ora_nadd(st, v::numeric) END $$;
+--;;
+CREATE AGGREGATE sum(text) (SFUNC = ora_sum_acc_text, STYPE = numeric);
+--;;
+CREATE FUNCTION ora_avg_acc(st numeric[], v text) RETURNS numeric[] LANGUAGE sql IMMUTABLE STRICT AS $$ SELECT ora_avg_acc(st, v::numeric) $$;
+--;;
+CREATE AGGREGATE avg(text) (SFUNC = ora_avg_acc, STYPE = numeric[], FINALFUNC = ora_avg_fin, INITCOND = '{0,0}');
+--;;
 -- ---------------------------------------------------------------- integer division -> NUMBER division (7/2 = 3.5)
 DO $$
 DECLARE t1 text; t2 text; nm text;
