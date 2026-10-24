@@ -97,6 +97,33 @@ function inListOperands(ts) {
   return found
 }
 
+// token indexes of the string literals that are a whole WHEN value of a simple CASE (CASE expr WHEN 'lit' THEN)
+function simpleCaseOperands(ts) {
+  const found = new Set()
+  ts.forEach((x, i) => {
+    if (!isWord(x, 'CASE')) return
+    const first = nextSig(ts, i)
+    if (first < 0 || isWord(ts[first], 'WHEN')) return
+    let depth = 0
+    let nested = 0
+    for (let j = first; j < ts.length; j++) {
+      if (isSym(ts[j], '(')) depth++
+      else if (isSym(ts[j], ')')) {
+        if (--depth < 0) break
+      } else if (depth === 0 && isWord(ts[j], 'CASE')) nested++
+      else if (depth === 0 && isWord(ts[j], 'END')) {
+        if (nested === 0) break
+        nested--
+      } else if (depth === 0 && nested === 0 && isWord(ts[j], 'WHEN')) {
+        const a = nextSig(ts, j)
+        const t = a < 0 ? -1 : nextSig(ts, a)
+        if (a >= 0 && ts[a].type === 'string' && t >= 0 && isWord(ts[t], 'THEN')) found.add(a)
+      }
+    }
+  })
+  return found
+}
+
 const ARITH = ['+', '-', '*', '/']
 const TYPED = ['DATE', 'TIMESTAMP', 'INTERVAL']
 
@@ -105,6 +132,7 @@ export function textLiterals(ts) {
   const isUpdate = isWord(first, 'UPDATE')
   const between = betweenOperands(ts)
   const inLists = inListOperands(ts)
+  const caseWhens = simpleCaseOperands(ts)
   const out = []
   let depth = 0
   let inSet = false
@@ -122,7 +150,7 @@ export function textLiterals(ts) {
     const typed = p >= 0 && ts[p].type === 'word' && TYPED.includes(ts[p].text.toUpperCase())
     const arith = ARITH.some((c) => isSym(ts[p], c) || isSym(ts[n], c))
     const compared =
-      COMPARISONS.some((c) => isSym(ts[p], c) || isSym(ts[n], c)) || between.has(i) || inLists.has(i)
+      COMPARISONS.some((c) => isSym(ts[p], c) || isSym(ts[n], c)) || between.has(i) || inLists.has(i) || caseWhens.has(i)
     if (typed) return
     if (besideConcat || (compared && !arith && !inSet && DATE_SHAPE.test(x.text))) out.push(raw('::text'))
   })
