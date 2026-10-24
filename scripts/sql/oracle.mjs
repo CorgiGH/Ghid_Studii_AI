@@ -8,8 +8,8 @@
 // Results use the same shape as the engine's `Engine.run`:
 //   { kind: 'rows'|'ddl'|'dml'|'tx', columns, rows, rowCount, truncated, error?: { code, message } }
 //
-// `clock` ('YYYY-MM-DD HH24:MI:SS') replaces SYSDATE / CURRENT_DATE outside literals, quoted identifiers and comments
-// with a fixed TO_DATE(..). Pass `clock: null` to run the text untouched; column headers then show the real SYSDATE
+// `clock` ('YYYY-MM-DD HH24:MI:SS') replaces SYSDATE / CURRENT_DATE (fixed TO_DATE), SYSTIMESTAMP / CURRENT_TIMESTAMP
+// (fixed TO_TIMESTAMP_TZ at +00:00) and LOCALTIMESTAMP (fixed TO_TIMESTAMP) outside literals, quoted identifiers and comments. Pass `clock: null` to run the text untouched; column headers then show the real SYSDATE
 // text, which is what Oracle prints (the substituted text would leak into the header).
 // `dataset` names the schema the container holds; the only one loaded is `facultate` (the STUDENT tables).
 import { execFileSync } from 'node:child_process'
@@ -21,9 +21,13 @@ const CLOCK_RE = /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/
 export const NLS_RESET =
   "ALTER SESSION SET NLS_LANGUAGE=AMERICAN NLS_TERRITORY=AMERICA NLS_DATE_FORMAT='DD-MON-RR' NLS_DATE_LANGUAGE=AMERICAN NLS_NUMERIC_CHARACTERS='.,'"
 
-// Replace SYSDATE / CURRENT_DATE tokens outside '...' literals, "..." identifiers and comments.
+// Replace the clock-function tokens outside '...' literals, "..." identifiers and comments.
 export function substituteClock(sql, clock) {
-  const fixed = `TO_DATE('${clock}','YYYY-MM-DD HH24:MI:SS')`
+  const fixed = {
+    date: `TO_DATE('${clock}','YYYY-MM-DD HH24:MI:SS')`,
+    tstz: `TO_TIMESTAMP_TZ('${clock} +00:00','YYYY-MM-DD HH24:MI:SS TZH:TZM')`,
+    ts: `TO_TIMESTAMP('${clock}','YYYY-MM-DD HH24:MI:SS')`,
+  }
   let out = ''
   let i = 0
   while (i < sql.length) {
@@ -56,8 +60,12 @@ export function substituteClock(sql, clock) {
       out += sql.slice(i, end); i = end; continue
     }
     const prev = sql[i - 1] || ' '
-    const m = /^(sysdate|current_date)(?![A-Za-z0-9_$#])/i.exec(sql.slice(i))
-    if (m && !/[A-Za-z0-9_$#.]/.test(prev)) { out += fixed; i += m[0].length; continue }
+    const m = /^(sysdate|current_date|systimestamp|current_timestamp|localtimestamp)(?![A-Za-z0-9_$#])/i.exec(sql.slice(i))
+    if (m && !/[A-Za-z0-9_$#.]/.test(prev)) {
+      const w = m[1].toLowerCase()
+      out += w === 'systimestamp' || w === 'current_timestamp' ? fixed.tstz : w === 'localtimestamp' ? fixed.ts : fixed.date
+      i += m[0].length; continue
+    }
     out += c; i++
   }
   return out

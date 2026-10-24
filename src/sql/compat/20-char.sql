@@ -29,8 +29,10 @@ CREATE OPERATOR || (LEFTARG=text,      RIGHTARG=numeric,   FUNCTION=ora_cat_tn);
 --;;
 CREATE OPERATOR || (LEFTARG=numeric,   RIGHTARG=text,      FUNCTION=ora_cat_nt);
 --;;
--- NOTE: no (numeric || numeric) operator on purpose: with it, PG resolves 'abc' || bursa as numeric||numeric
--- ("unknown literal takes the other operand's type") and fails.  Consequence: `an || bursa` (two typed NUMBERs) errors.
+-- (numeric || numeric) exists: an unknown-typed literal next to || would resolve to it ("an unknown literal takes the other
+-- operand's type"), so the rewriter (pass-misc) casts string literals beside || to text.
+CREATE OPERATOR || (LEFTARG=numeric,   RIGHTARG=numeric,   FUNCTION=ora_cat_nn);
+--;;
 CREATE OPERATOR || (LEFTARG=text,      RIGHTARG=timestamp, FUNCTION=ora_cat_td);
 --;;
 CREATE OPERATOR || (LEFTARG=timestamp, RIGHTARG=text,      FUNCTION=ora_cat_dt);
@@ -44,6 +46,45 @@ CREATE OPERATOR || (LEFTARG=text,      RIGHTARG=bpchar,    FUNCTION=ora_cat_tb);
 CREATE OPERATOR || (LEFTARG=bpchar,    RIGHTARG=numeric,   FUNCTION=ora_cat_bn);
 --;;
 CREATE OPERATOR || (LEFTARG=numeric,   RIGHTARG=bpchar,    FUNCTION=ora_cat_nb);
+--;;
+-- DATE operands: implicit DATE -> text through DD-MON-RR (ora_d2t)
+CREATE FUNCTION ora_cat_dn(a timestamp, b numeric) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_d2t(a), ora_n2t(b)) $$;
+--;;
+CREATE FUNCTION ora_cat_nd(a numeric, b timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_n2t(a), ora_d2t(b)) $$;
+--;;
+CREATE FUNCTION ora_cat_dd(a timestamp, b timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_d2t(a), ora_d2t(b)) $$;
+--;;
+CREATE FUNCTION ora_cat_bd(a bpchar, b timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_p(a), ora_d2t(b)) $$;
+--;;
+CREATE FUNCTION ora_cat_db(a timestamp, b bpchar) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_d2t(a), ora_p(b)) $$;
+--;;
+CREATE OPERATOR || (LEFTARG=timestamp, RIGHTARG=numeric,   FUNCTION=ora_cat_dn);
+--;;
+CREATE OPERATOR || (LEFTARG=numeric,   RIGHTARG=timestamp, FUNCTION=ora_cat_nd);
+--;;
+CREATE OPERATOR || (LEFTARG=timestamp, RIGHTARG=timestamp, FUNCTION=ora_cat_dd);
+--;;
+CREATE OPERATOR || (LEFTARG=bpchar,    RIGHTARG=timestamp, FUNCTION=ora_cat_bd);
+--;;
+CREATE OPERATOR || (LEFTARG=timestamp, RIGHTARG=bpchar,    FUNCTION=ora_cat_db);
+--;;
+-- Integer operands (COUNT(*) is a bigint, an integer literal is an int4): PostgreSQL's own  text || anynonarray  and
+-- anynonarray || text  compete with the NUMBER operators above through an implicit cast, so the pairs that meet
+-- them are spelled out; an exact match wins.
+DO $$
+DECLARE i text; t text; conv text;
+BEGIN
+  FOREACH i IN ARRAY ARRAY['int4','int8'] LOOP
+    FOREACH t IN ARRAY ARRAY['text','bpchar'] LOOP
+      conv := CASE t WHEN 'bpchar' THEN 'ora_p(a)' ELSE 'a' END;
+      EXECUTE format('CREATE FUNCTION ora_cat_%s_%s(a %s, b %s) RETURNS text LANGUAGE sql IMMUTABLE AS $f$ SELECT ora_cat(%s, ora_n2t(b)) $f$', t, i, t, i, conv);
+      EXECUTE format('CREATE OPERATOR || (LEFTARG=%s, RIGHTARG=%s, FUNCTION=ora_cat_%s_%s)', t, i, t, i);
+      conv := CASE t WHEN 'bpchar' THEN 'ora_p(b)' ELSE 'b' END;
+      EXECUTE format('CREATE FUNCTION ora_cat_%s_%s(a %s, b %s) RETURNS text LANGUAGE sql IMMUTABLE AS $f$ SELECT ora_cat(ora_n2t(a), %s) $f$', i, t, i, t, conv);
+      EXECUTE format('CREATE OPERATOR || (LEFTARG=%s, RIGHTARG=%s, FUNCTION=ora_cat_%s_%s)', i, t, i, t);
+    END LOOP;
+  END LOOP;
+END $$;
 --;;
 -- CONCAT(a,b): exactly 2 args in Oracle, NULL-tolerant, numbers converted the Oracle way
 CREATE FUNCTION concat(a text, b text)       RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(a,b) $$;
@@ -63,6 +104,20 @@ CREATE FUNCTION concat(a text, b bpchar)     RETURNS text LANGUAGE sql IMMUTABLE
 CREATE FUNCTION concat(a bpchar, b numeric)  RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_bn(a,b) $$;
 --;;
 CREATE FUNCTION concat(a numeric, b bpchar)  RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_nb(a,b) $$;
+--;;
+CREATE FUNCTION concat(a text, b timestamp)      RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_td(a,b) $$;
+--;;
+CREATE FUNCTION concat(a timestamp, b text)      RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_dt(a,b) $$;
+--;;
+CREATE FUNCTION concat(a timestamp, b numeric)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_dn(a,b) $$;
+--;;
+CREATE FUNCTION concat(a numeric, b timestamp)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_nd(a,b) $$;
+--;;
+CREATE FUNCTION concat(a timestamp, b timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_dd(a,b) $$;
+--;;
+CREATE FUNCTION concat(a bpchar, b timestamp)    RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_bd(a,b) $$;
+--;;
+CREATE FUNCTION concat(a timestamp, b bpchar)    RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_db(a,b) $$;
 --;;
 -- ---------------------------------------------------------------- comparisons with implicit conversion
 -- (a) CHAR vs VARCHAR2 : Oracle uses NON-padded comparison, PG strips the CHAR padding -> restore it

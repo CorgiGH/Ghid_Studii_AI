@@ -44,3 +44,55 @@ export function anyList(ts) {
   }
   return out
 }
+
+// Implicit conversions that need the literal to be typed text (PostgreSQL would otherwise type an unknown literal
+// like the other operand):
+//   - a string literal beside ||                      'x' || bursa      (text || NUMBER, not NUMBER || NUMBER)
+//   - a date-shaped literal compared with something   data_nastere > '01-JAN-60'   (DATE vs text goes through TO_DATE)
+// A date-shaped literal in an UPDATE ... SET clause or an INSERT list stays unknown: it is assigned, not compared.
+const DATE_SHAPE = /^'\s*\d{1,4}\s*[-/.]\s*[0-9A-Za-z]{1,9}\s*[-/.]\s*\d{1,4}/
+const COMPARISONS = ['=', '<>', '!=', '^=', '<', '>', '<=', '>=']
+
+// token indexes of the string literals that stand right after BETWEEN or after the AND that closes it
+function betweenOperands(ts) {
+  const found = new Set()
+  ts.forEach((x, i) => {
+    if (!isWord(x, 'BETWEEN')) return
+    const a = nextSig(ts, i)
+    if (a >= 0 && ts[a].type === 'string') found.add(a)
+    let depth = 0
+    for (let j = a < 0 ? ts.length : a; j < ts.length; j++) {
+      if (isSym(ts[j], '(')) depth++
+      else if (isSym(ts[j], ')')) depth--
+      else if (depth === 0 && isWord(ts[j], 'AND')) {
+        const b = nextSig(ts, j)
+        if (b >= 0 && ts[b].type === 'string') found.add(b)
+        break
+      }
+    }
+  })
+  return found
+}
+
+export function textLiterals(ts) {
+  const first = ts.find(isSig)
+  const isUpdate = isWord(first, 'UPDATE')
+  const between = betweenOperands(ts)
+  const out = []
+  let depth = 0
+  let inSet = false
+  ts.forEach((x, i) => {
+    out.push(x)
+    if (isSym(x, '(')) depth++
+    else if (isSym(x, ')')) depth--
+    else if (isUpdate && depth === 0 && isWord(x, 'SET')) inSet = true
+    else if (isUpdate && depth === 0 && isWord(x, 'WHERE')) inSet = false
+    if (x.type !== 'string') return
+    const p = prevSig(ts, i)
+    const n = nextSig(ts, i)
+    const besideConcat = isSym(ts[p], '||') || isSym(ts[n], '||')
+    const compared = COMPARISONS.some((c) => isSym(ts[p], c) || isSym(ts[n], c)) || between.has(i)
+    if (besideConcat || (compared && !inSet && DATE_SHAPE.test(x.text))) out.push(raw('::text'))
+  })
+  return out
+}

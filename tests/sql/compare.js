@@ -48,3 +48,17 @@ export function diffResults(expected, actual, sql, { skipColumns = false } = {})
   for (let i = 0; i < sa.length; i++) if (sa[i] !== sb[i]) return `rows differ (unordered): Oracle ${sa[i]}, engine ${sb[i]}`
   return null
 }
+
+// The kind of a difference, with the values stripped: a known gap has to keep its category while later work edits the
+// same files, so a gap that changes shape (or an engine bug that turns into 'ORA-?') is noticed.
+//   'columns' | 'row count' | 'rows' | 'error code ORA-a -> ORA-b' | 'Oracle raises ORA-a' | 'engine raises ORA-b'
+export function diffCategory(diff) {
+  let m
+  if (diff.startsWith('columns:')) return 'columns'
+  if (diff.startsWith('row count:')) return 'row count'
+  if (/^rows? /.test(diff)) return 'rows'
+  if ((m = /^error code: Oracle (\S+), engine (\S+)/.exec(diff))) return `error code ${m[1]} -> ${m[2]}`
+  if ((m = /^Oracle raises ([^,\s]+)/.exec(diff))) return `Oracle raises ${m[1]}`
+  if ((m = /^engine raises (\S+)/.exec(diff))) return `engine raises ${m[1]}`
+  return diff
+}

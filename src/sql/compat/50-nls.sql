@@ -5,7 +5,7 @@ DECLARE r text; ro_days text[] := ARRAY['duminica','luni','marti','miercuri','jo
         ro_mon text[] := ARRAY['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'];
         fu text := upper(f); nm text;
 BEGIN
-  r := pg_catalog.to_char(d, f);
+  r := to_char(d, f);
   IF upper(nls) LIKE '%ROMANIAN%' THEN
     IF fu = 'DAY' THEN nm := ro_days[extract(dow FROM d)::int + 1]; ELSIF fu = 'MONTH' THEN nm := ro_mon[extract(month FROM d)::int]; END IF;
     IF nm IS NOT NULL THEN

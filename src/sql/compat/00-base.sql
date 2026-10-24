@@ -47,5 +47,5 @@ $$ SELECT CASE WHEN n IS NULL THEN NULL ELSE
 --;;
 -- Oracle timestamp -> VARCHAR2 with default NLS_DATE_FORMAT DD-MON-RR
 CREATE FUNCTION ora_d2t(d timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS
-$$ SELECT upper(to_char(d,'DD-Mon-RR')) $$;
+$$ SELECT pg_catalog.to_char(d,'DD-MON-YY') $$;
 --;;

@@ -10,6 +10,7 @@
 //   MINUS              -> EXCEPT;   SELECT UNIQUE -> SELECT DISTINCT;   VARCHAR2 / CAST(.. AS NUMBER) -> VARCHAR / NUMERIC
 //   LIKE 'pat'         -> LIKE 'pat' ESCAPE ''     (Oracle has no default escape char; PG defaults to backslash)
 //   DECODE / GREATEST / LEAST / ANY / TRIM          -> PostgreSQL forms with Oracle NULL behaviour
+//   'x' || n, d > '01-JAN-60' -> 'x'::text || n, d > '01-JAN-60'::text   (implicit conversions go through the compat operators)
 //   a.x = b.y(+)       -> LEFT/RIGHT JOIN ... ON
 //   NATURAL JOIN + qualified common column          -> ORA-25155
 // Known gaps are listed in tests/sql/known-gaps.json together with the fix that closes each.
@@ -18,7 +19,7 @@ import { isSig, isSym, tokenize, untokenize } from './tokens.js'
 import { emptyStringToNull, trimBlanksToNull } from './pass-empty-string.js'
 import { clockPass } from './pass-clock.js'
 import { minusToExcept } from './pass-setops.js'
-import { miscMap, anyList } from './pass-misc.js'
+import { miscMap, anyList, textLiterals } from './pass-misc.js'
 import { likeEscape } from './pass-like.js'
 import { decodePass } from './pass-decode.js'
 import { outerJoinPass } from './pass-outer-join.js'
@@ -46,6 +47,7 @@ export function rewriteOracle(sql, opts = {}) {
   ts = anyList(ts)
   ts = decodePass(ts)
   ts = trimBlanksToNull(ts)
+  ts = textLiterals(ts)
   ts = outerJoinPass(ts, notes)
   return { sql: untokenize(ts), notes }
 }

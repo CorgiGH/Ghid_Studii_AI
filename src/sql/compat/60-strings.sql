@@ -1,4 +1,4 @@
--- 60-strings.sql : SUBSTR, INSTR, REPLACE, LPAD, RPAD.
+-- 60-strings.sql : SUBSTR, INSTR, REPLACE, LPAD, RPAD, and the implicit NUMBER / DATE -> text of LIKE, SUBSTR and LENGTH.
 -- SUBSTR : Oracle semantics (start 0 = 1, negative start counts from the END, length<1 -> NULL, ''=NULL)
 CREATE FUNCTION substr(s text, m numeric, n numeric) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
 DECLARE len int; st int; ln int;
@@ -110,4 +110,49 @@ CREATE FUNCTION rpad(s numeric, n numeric) RETURNS text LANGUAGE sql IMMUTABLE A
 CREATE FUNCTION rpad(s text, n int, f text) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(s, n::numeric, f) $$;
 --;;
 CREATE FUNCTION rpad(s text, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(s, n::numeric, ' ') $$;
+--;;
+-- ---------------------------------------------------------------- implicit NUMBER / DATE -> text
+CREATE FUNCTION substr(s timestamp, m numeric, n numeric) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT substr(ora_d2t(s), m, n) $$;
+--;;
+CREATE FUNCTION substr(s timestamp, m numeric) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT substr(ora_d2t(s), m) $$;
+--;;
+CREATE FUNCTION length(d timestamp) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT length(ora_d2t(d)) $$;
+--;;
+CREATE FUNCTION upper(d timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_d2t(d) $$;
+--;;
+CREATE FUNCTION lower(d timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT lower(ora_d2t(d)) $$;
+--;;
+-- x LIKE y with a NUMBER or DATE operand: the operand becomes text first. PostgreSQL's LIKE is the operator ~~ / !~~
+-- (the pattern arrives already prepared by like_escape when the statement has ESCAPE).
+CREATE FUNCTION ora_like_nt(a numeric, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(a) LIKE b $$;
+--;;
+CREATE FUNCTION ora_like_nn(a numeric, b numeric) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(a) LIKE ora_n2t(b) $$;
+--;;
+CREATE FUNCTION ora_like_tn(a text, b numeric) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT a LIKE ora_n2t(b) $$;
+--;;
+CREATE FUNCTION ora_like_dt(a timestamp, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_d2t(a) LIKE b $$;
+--;;
+CREATE FUNCTION ora_nlike_nt(a numeric, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(a) NOT LIKE b $$;
+--;;
+CREATE FUNCTION ora_nlike_nn(a numeric, b numeric) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(a) NOT LIKE ora_n2t(b) $$;
+--;;
+CREATE FUNCTION ora_nlike_tn(a text, b numeric) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT a NOT LIKE ora_n2t(b) $$;
+--;;
+CREATE FUNCTION ora_nlike_dt(a timestamp, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_d2t(a) NOT LIKE b $$;
+--;;
+CREATE OPERATOR ~~  (LEFTARG=numeric,   RIGHTARG=text,    FUNCTION=ora_like_nt);
+--;;
+CREATE OPERATOR ~~  (LEFTARG=numeric,   RIGHTARG=numeric, FUNCTION=ora_like_nn);
+--;;
+CREATE OPERATOR ~~  (LEFTARG=text,      RIGHTARG=numeric, FUNCTION=ora_like_tn);
+--;;
+CREATE OPERATOR ~~  (LEFTARG=timestamp, RIGHTARG=text,    FUNCTION=ora_like_dt);
+--;;
+CREATE OPERATOR !~~ (LEFTARG=numeric,   RIGHTARG=text,    FUNCTION=ora_nlike_nt);
+--;;
+CREATE OPERATOR !~~ (LEFTARG=numeric,   RIGHTARG=numeric, FUNCTION=ora_nlike_nn);
+--;;
+CREATE OPERATOR !~~ (LEFTARG=text,      RIGHTARG=numeric, FUNCTION=ora_nlike_tn);
+--;;
+CREATE OPERATOR !~~ (LEFTARG=timestamp, RIGHTARG=text,    FUNCTION=ora_nlike_dt);
 --;;

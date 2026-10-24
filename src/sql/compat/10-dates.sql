@@ -1,4 +1,4 @@
--- 10-dates.sql : DATE arithmetic, TO_DATE, DATE display (TO_CHAR(date)), ADD_MONTHS, MONTHS_BETWEEN, LAST_DAY, NEXT_DAY, TRUNC/ROUND of dates.
+-- 10-dates.sql : DATE arithmetic, TO_DATE (formats, defaults, implicit text -> DATE), TO_CHAR(date) with RR, ADD_MONTHS, MONTHS_BETWEEN, LAST_DAY, NEXT_DAY, TRUNC/ROUND of dates.
 CREATE FUNCTION to_char(d timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_d2t(d) $$;
 --;;
 -- ---------------------------------------------------------------- DATE arithmetic (days as NUMBER)
@@ -22,24 +22,110 @@ CREATE OPERATOR + (LEFTARG=timestamp, RIGHTARG=numeric,   FUNCTION=ora_dadd);
 CREATE OPERATOR + (LEFTARG=numeric,   RIGHTARG=timestamp, FUNCTION=ora_dadd2);
 --;;
 -- ---------------------------------------------------------------- dates
--- TO_DATE returns a timestamp (PG's returns date); 1-arg form uses default NLS_DATE_FORMAT DD-MON-RR
+-- TO_CHAR(date, fmt): PostgreSQL prints RR / RRRR literally; Oracle prints the year (2 / 4 digits). Text inside "..." is left alone.
+CREATE FUNCTION to_char(d timestamp, f text) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
+DECLARE parts text[]; i int;
+BEGIN
+  IF d IS NULL OR f IS NULL THEN RETURN NULL; END IF;
+  parts := string_to_array(f, '"');
+  FOR i IN 1..coalesce(array_length(parts, 1), 0) BY 2 LOOP
+    parts[i] := regexp_replace(regexp_replace(parts[i], 'RRRR', 'YYYY', 'gi'), 'RR', 'YY', 'gi');
+  END LOOP;
+  RETURN pg_catalog.to_char(d, array_to_string(parts, '"'));
+END $$;
+--;;
+-- Two-digit year -> Oracle RR: against the clock year, 00-49 and 50-99 land in the current century when the clock
+-- year is 00-49 (20xx / 19xx) and one century later / in the current century when it is 50-99.
+CREATE FUNCTION ora_rr(y int) RETURNS int LANGUAGE sql STABLE AS $$
+  SELECT CASE WHEN y >= 100 THEN y
+              ELSE (c.cy - c.cy % 100) + y + CASE WHEN y < 50 AND c.cy % 100 >= 50 THEN 100
+                                                 WHEN y >= 50 AND c.cy % 100 < 50 THEN -100 ELSE 0 END END
+  FROM (SELECT extract(year FROM ora_sysdate())::int AS cy) c $$;
+--;;
+-- TO_DATE returns a timestamp (PG's returns date).
 -- PG cannot PARSE the RR format element (it silently yields year 0001) and reads YY as 70-99=19xx / 00-69=20xx.
--- Oracle: RR -> 00-49 = 20xx, 50-99 = 19xx (current year 2026); YY -> always the current century (20xx).
-CREATE FUNCTION to_date(s text, f text) RETURNS timestamp LANGUAGE plpgsql IMMUTABLE AS $$
-DECLARE r timestamp; fx text := regexp_replace(f, 'RRRR', 'YYYY', 'gi'); y int; rr boolean; yy boolean;
+-- Oracle: RR / RRRR -> a year of one or two digits goes through the RR pivot, a longer one is taken as it is;
+-- YY -> always the current century (20xx). Fields the format does not mention default to the clock's year and month and
+-- to day 1 (PG defaults to 0001-01-01): the missing fields are appended to both the input and the format.
+CREATE FUNCTION to_date(s text, f text) RETURNS timestamp LANGUAGE plpgsql STABLE AS $$
+DECLARE r timestamp; clk timestamp := ora_sysdate(); body text := regexp_replace(f, '"[^"]*"', '', 'g');
+        tk text[]; fx text; sx text := s; rr boolean; yy boolean; y int;
 BEGIN
   IF s IS NULL OR f IS NULL THEN RETURN NULL; END IF;
-  rr := fx ~* 'RR';
-  yy := fx ~* '(^|[^Y])YY([^Y]|$)';
-  fx := regexp_replace(fx, 'RR', 'YY', 'gi');
-  r := pg_catalog.to_timestamp(s, fx) AT TIME ZONE 'UTC';
+  SELECT coalesce(array_agg(upper(m[1])), ARRAY[]::text[]) INTO tk FROM regexp_matches(body,
+    '(SYEAR|YEAR|SYYYY|YYYY|YYY|YY|Y|RRRR|RR|MONTH|MON|MM|RM|DDD|DD|DAY|DY|D|J|HH24|HH12|HH|MI|SSSSS|SS|FF[1-9]?|AM|PM|TZH|TZM|TZR|IW|WW|W|Q)', 'gi') m;
+  rr := tk && ARRAY['RR', 'RRRR'];
+  yy := tk && ARRAY['YY'];
+  fx := regexp_replace(f, 'RRRR|RR', 'YYYY', 'gi');
+  IF NOT (tk && ARRAY['SYEAR','YEAR','SYYYY','YYYY','YYY','YY','Y','RRRR','RR','J']) THEN
+    sx := sx || ' ' || extract(year FROM clk)::int::text; fx := fx || ' YYYY';
+  END IF;
+  IF NOT (tk && ARRAY['MONTH','MON','MM','RM','DDD','J']) THEN
+    sx := sx || ' ' || extract(month FROM clk)::int::text; fx := fx || ' MM';
+  END IF;
+  IF NOT (tk && ARRAY['DD','DDD','J']) THEN
+    sx := sx || ' 1'; fx := fx || ' DD';
+  END IF;
+  r := pg_catalog.to_timestamp(sx, fx) AT TIME ZONE 'UTC';
   y := extract(year FROM r)::int;
-  IF rr AND y BETWEEN 2050 AND 2069 THEN r := r - interval '100 years';
+  IF rr AND y < 100 THEN r := r + (ora_rr(y) - y) * interval '1 year';
   ELSIF yy AND y BETWEEN 1970 AND 1999 THEN r := r + interval '100 years'; END IF;
   RETURN r;
 END $$;
 --;;
-CREATE FUNCTION to_date(s text) RETURNS timestamp LANGUAGE sql IMMUTABLE AS $$ SELECT to_date(s, 'DD-MON-RR') $$;
+-- Implicit text -> DATE (and TO_DATE(s) with one argument): the default format DD-MON-RR, read like Oracle's non-FX parser:
+-- blanks and punctuation between the fields are skipped, MON is a month name (3 letters or in full), the year takes
+-- 1-2 digits through RR or 3-4 digits as they are. Anything else raises the Oracle date error.
+CREATE FUNCTION to_date(s text) RETURNS timestamp LANGUAGE plpgsql STABLE AS $$
+DECLARE m text[]; rest text; dd int; mon int; yv int; ld int;
+        names text[] := ARRAY['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        longnames text[] := ARRAY['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+BEGIN
+  IF s IS NULL THEN RETURN NULL; END IF;
+  m := regexp_match(s, '^\s*(\d{1,2})(.*)$', 's');
+  IF m IS NULL THEN
+    IF btrim(s) = '' THEN RAISE EXCEPTION 'ORA-01840: input value not long enough for date format' USING ERRCODE = '22007'; END IF;
+    RAISE EXCEPTION 'ORA-01858: a non-numeric character was found where a numeric was expected' USING ERRCODE = '22007';
+  END IF;
+  dd := m[1]::int; rest := m[2];
+  m := regexp_match(rest, '^([^A-Za-z0-9]*)(.*)$', 's');
+  IF m[1] = '' AND m[2] ~ '^\d' THEN RAISE EXCEPTION 'ORA-01861: literal does not match format string' USING ERRCODE = '22007'; END IF;
+  IF m[2] = '' THEN RAISE EXCEPTION 'ORA-01840: input value not long enough for date format' USING ERRCODE = '22007'; END IF;
+  rest := m[2];
+  m := regexp_match(rest, '^([A-Za-z]+)(.*)$', 's');
+  IF m IS NULL THEN RAISE EXCEPTION 'ORA-01843: not a valid month' USING ERRCODE = '22008'; END IF;
+  mon := coalesce(array_position(names, upper(m[1])), array_position(longnames, upper(m[1])));
+  IF mon IS NULL THEN RAISE EXCEPTION 'ORA-01843: not a valid month' USING ERRCODE = '22008'; END IF;
+  rest := m[2];
+  m := regexp_match(rest, '^([^A-Za-z0-9]*)(.*)$', 's');
+  IF m[2] = '' THEN RAISE EXCEPTION 'ORA-01840: input value not long enough for date format' USING ERRCODE = '22007'; END IF;
+  rest := m[2];
+  m := regexp_match(rest, '^(\d+)(.*)$', 's');
+  IF m IS NULL THEN RAISE EXCEPTION 'ORA-01858: a non-numeric character was found where a numeric was expected' USING ERRCODE = '22007'; END IF;
+  IF btrim(m[2]) <> '' THEN RAISE EXCEPTION 'ORA-01830: date format picture ends before converting entire input string' USING ERRCODE = '22007'; END IF;
+  yv := CASE WHEN length(m[1]) <= 2 THEN ora_rr(m[1]::int) ELSE m[1]::int END;
+  IF dd < 1 OR dd > 31 THEN RAISE EXCEPTION 'ORA-01847: day of month must be between 1 and last day of month' USING ERRCODE = '22008'; END IF;
+  ld := extract(day FROM (make_date(yv, mon, 1) + interval '1 month' - interval '1 day'))::int;
+  IF dd > ld THEN RAISE EXCEPTION 'ORA-01839: date not valid for month specified' USING ERRCODE = '22008'; END IF;
+  RETURN make_timestamp(yv, mon, dd, 0, 0, 0);
+END $$;
+--;;
+-- Implicit text -> DATE in comparisons: DATE <op> text compares after TO_DATE(text) (the rewriter casts the date-shaped
+-- literals to text so that this operator, and not PostgreSQL's own timestamp parser, is picked).
+DO $$
+DECLARE o text; nm text; ops text[] := ARRAY['=','<>','<','>','<=','>='];
+        names text[] := ARRAY['eq','ne','lt','gt','le','ge']; i int;
+BEGIN
+  FOR i IN 1..6 LOOP
+    o := ops[i];
+    nm := 'ora_cmp_dt_'||names[i];
+    EXECUTE format('CREATE FUNCTION %I(a timestamp, b text) RETURNS boolean LANGUAGE sql STABLE AS $f$ SELECT a %s to_date(b) $f$', nm, o);
+    EXECUTE format('CREATE OPERATOR %s (LEFTARG=timestamp, RIGHTARG=text, FUNCTION=%I)', o, nm);
+    nm := 'ora_cmp_td_'||names[i];
+    EXECUTE format('CREATE FUNCTION %I(a text, b timestamp) RETURNS boolean LANGUAGE sql STABLE AS $f$ SELECT to_date(a) %s b $f$', nm, o);
+    EXECUTE format('CREATE OPERATOR %s (LEFTARG=text, RIGHTARG=timestamp, FUNCTION=%I)', o, nm);
+  END LOOP;
+END $$;
 --;;
 CREATE FUNCTION add_months(d timestamp, n numeric) RETURNS timestamp LANGUAGE plpgsql IMMUTABLE AS $$
 DECLARE tgt date; lastsrc boolean; ld int; dd int; tod time;
@@ -114,4 +200,17 @@ BEGIN
   END IF;
   RAISE EXCEPTION 'ORA-01898: invalid precision specifier / format (round %)', f USING ERRCODE='22023';
 END $$;
+--;;
+-- Text arguments where a DATE is expected are converted with TO_DATE(text), as Oracle does.
+CREATE FUNCTION add_months(s text, n numeric) RETURNS timestamp LANGUAGE sql STABLE AS $$ SELECT add_months(to_date(s), n) $$;
+--;;
+CREATE FUNCTION last_day(s text) RETURNS timestamp LANGUAGE sql STABLE AS $$ SELECT last_day(to_date(s)) $$;
+--;;
+CREATE FUNCTION next_day(s text, nm text) RETURNS timestamp LANGUAGE sql STABLE AS $$ SELECT next_day(to_date(s), nm) $$;
+--;;
+CREATE FUNCTION months_between(a text, b text) RETURNS numeric LANGUAGE sql STABLE AS $$ SELECT months_between(to_date(a), to_date(b)) $$;
+--;;
+CREATE FUNCTION months_between(a text, b timestamp) RETURNS numeric LANGUAGE sql STABLE AS $$ SELECT months_between(to_date(a), b) $$;
+--;;
+CREATE FUNCTION months_between(a timestamp, b text) RETURNS numeric LANGUAGE sql STABLE AS $$ SELECT months_between(a, to_date(b)) $$;
 --;;

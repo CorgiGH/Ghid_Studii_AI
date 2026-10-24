@@ -1,6 +1,8 @@
 // Differential test: every corpus query runs on the engine and must equal the frozen Oracle 11g result
 // (tests/sql/oracle-snapshot.json, produced by scripts/sql/snapshot-oracle.mjs), unless its id is listed in
 // known-gaps.json with the fix that will close it. A listed gap that now passes fails the test: delete the entry.
+// A listed gap also has to keep the category of its stored difference (columns / row count / rows / error code), so a
+// gap that gets worse or changes shape is noticed instead of hiding behind "still differs".
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,7 +10,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createEngine } from '../../src/sql/engine/core.js'
 import { loadCorpus, CLOCK, SNAPSHOT_MAX_ROWS } from '../../scripts/sql/snapshot-oracle.mjs'
-import { diffResults } from './compare.js'
+import { diffCategory, diffResults } from './compare.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const readJson = (f) => JSON.parse(fs.readFileSync(path.join(here, f), 'utf8'))
@@ -49,6 +51,7 @@ describe('engine equals Oracle', () => {
     const diff = diffResults(snapshot[id], actual, entry.sql)
     if (id in knownGaps) {
       expect(diff, `${id} now matches Oracle: remove it from known-gaps.json`).not.toBeNull()
+      expect(diffCategory(diff), `${id} is a known gap, but its difference changed kind. Now: ${diff}\nStored: ${knownGaps[id].note}\nFix the engine, or update the stored note if the change is intended.`).toBe(diffCategory(knownGaps[id].note))
       outcome.gap++
     } else {
       expect(diff, `${id} differs from Oracle`).toBeNull()
