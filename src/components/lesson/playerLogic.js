@@ -14,10 +14,14 @@ export function nextScreen(current, dir, total) {
   return Math.min(Math.max(1, total), Math.max(1, current + (dir < 0 ? -1 : 1)));
 }
 
+// A query-machine block gates its screen when any stage asks for a prediction.
+const asksPrediction = (block) => Array.isArray(block.stages) && block.stages.some(s => s && s.predict);
+
 export function isGatingBlock(block) {
   if (!block) return false;
   if (GATING_TYPES.has(block.type)) return true;
-  return (block.type === 'query-machine' || block.type === 'viz') && block.predict === true;
+  if (block.type === 'query-machine') return block.predict === true || asksPrediction(block);
+  return block.type === 'viz' && block.predict === true;
 }
 
 export function isGatingScreen(step) {

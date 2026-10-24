@@ -1,0 +1,986 @@
+[
+ {
+  "type": "query-machine",
+  "id": "bd-l01-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, bursa FROM studenti",
+  "stages": [
+   {
+    "clause": "from"
+   }
+  ],
+  "show": [
+   "nume",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "The `studenti` table has 13 rows. The grey cells in `bursa` are NULL: 8 rows. Five students have an amount (250, 350 or 450).",
+    "ro": "Tabelul `studenti` are 13 rânduri. Celulele gri din `bursa` sunt NULL: 8 rânduri. Cinci studenți au o sumă (250, 350 sau 450)."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l01c-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT table_name FROM user_tables ORDER BY table_name",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "order",
+    "predict": true
+   }
+  ],
+  "show": [
+   "table_name"
+  ],
+  "say": {
+   "from": {
+    "en": "`user_tables` has one row for each table: here 5.",
+    "ro": "`user_tables` are un rând pentru fiecare tabel: aici 5."
+   },
+   "select": {
+    "en": "We keep only the name.",
+    "ro": "Păstrăm doar numele."
+   },
+   "order": {
+    "en": "Without `ORDER BY` the order is not guaranteed; with it, alphabetical: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI`.",
+    "ro": "Fără `ORDER BY` ordinea nu e garantată; cu el, alfabetic: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI`."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l02-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, prenume FROM studenti",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume",
+   "an",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "`FROM studenti`: we start from the whole table, 13 rows.",
+    "ro": "`FROM studenti`: se pornește de la tabelul întreg, 13 rânduri."
+   },
+   "select": {
+    "en": "`SELECT nume, prenume`: two columns remain, still 13 rows. `SELECT` does not remove rows, only columns.",
+    "ro": "`SELECT nume, prenume`: rămân două coloane, tot 13 rânduri. `SELECT` nu scoate rânduri, doar coloane."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l02-qm2",
+  "dataset": "facultate",
+  "sql": "SELECT DISTINCT an FROM studenti",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "distinct"
+   }
+  ],
+  "show": [
+   "an",
+   "nume"
+  ],
+  "say": {
+   "from": {
+    "en": "13 rows.",
+    "ro": "13 rânduri."
+   },
+   "select": {
+    "en": "Only `an` remains: 13 values, with repeats.",
+    "ro": "Rămâne doar `an`: 13 valori, cu repetări."
+   },
+   "distinct": {
+    "en": "`DISTINCT` melts identical rows together: 13 become 3 (1, 2, 3).",
+    "ro": "`DISTINCT` topește rândurile identice: 13 devin 3 (1, 2, 3)."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l02-qm3",
+  "dataset": "facultate",
+  "sql": "SELECT DISTINCT an, grupa FROM studenti",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "distinct",
+    "predict": true
+   }
+  ],
+  "show": [
+   "an",
+   "grupa",
+   "nume"
+  ],
+  "say": {
+   "from": {
+    "en": "13 rows.",
+    "ro": "13 rânduri."
+   },
+   "select": {
+    "en": "`an` and `grupa` remain. Two rows are \"identical\" only if both columns match.",
+    "ro": "Rămân `an` și `grupa`. Două rânduri sunt „identice” doar dacă ambele coloane coincid."
+   },
+   "distinct": {
+    "en": "13 become 7 combinations: (3,A2), (3,A4), (3,B3), (2,A1), (2,B2), (1,B1), (1,B2). Not 3.",
+    "ro": "13 devin 7 combinații: (3,A2), (3,A4), (3,B3), (2,A1), (2,B2), (1,B1), (1,B2). Nu 3."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l03-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, bursa, bursa + 10 FROM studenti WHERE bursa + 10 > 300",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "13 rows; 8 have `bursa` NULL.",
+    "ro": "13 rânduri; 8 au `bursa` NULL."
+   },
+   "where": {
+    "en": "`bursa + 10 > 300` keeps 4 rows: 460 and 360 pass. 260 does not pass. For the 8 NULL rows the result of `bursa + 10` is NULL, the comparison is not TRUE, and they fall away.",
+    "ro": "`bursa + 10 > 300` păstrează 4 rânduri: 460 și 360 trec. 260 nu trece. Pentru cele 8 rânduri cu NULL, `bursa + 10` dă NULL, comparația nu e TRUE și ele cad."
+   },
+   "select": {
+    "en": "`bursa + 10` is computed row by row: 450 becomes 460, 350 becomes 360. Where `bursa` is NULL, the result would stay NULL.",
+    "ro": "`bursa + 10` se calculează rând cu rând: 450 devine 460, 350 devine 360. Unde `bursa` e NULL, rezultatul ar rămâne NULL."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l03-qm2",
+  "dataset": "facultate",
+  "sql": "SELECT nume, 'Bursa: ' || bursa FROM studenti WHERE 'Bursa: ' || bursa = 'Bursa: '",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "The same 13 rows.",
+    "ro": "Aceleași 13 rânduri."
+   },
+   "where": {
+    "en": "8 rows pass: exactly the ones with `bursa` NULL, because `'Bursa: ' || NULL` is `'Bursa: '`, not NULL. The 5 with a scholarship give `Bursa: 450` and so on, and fall away.",
+    "ro": "Trec 8 rânduri: exact cele cu `bursa` NULL, fiindcă `'Bursa: ' || NULL` este `'Bursa: '`, nu NULL. Cele 5 cu bursă dau `Bursa: 450` și așa mai departe, și cad."
+   },
+   "select": {
+    "en": "The 8 rows show `Bursa: ` with nothing after it, not NULL.",
+    "ro": "Cele 8 rânduri arată `Bursa: ` cu nimic după, nu NULL."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l04-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, bursa FROM studenti WHERE an = 1",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume",
+   "an",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "FROM picks the table: we start with all 13 rows.",
+    "ro": "FROM alege tabelul: pornim cu toate cele 13 rânduri."
+   },
+   "where": {
+    "en": "WHERE checks \"an = 1\" on each row. Only the rows where the condition is true stay.",
+    "ro": "WHERE verifică «an = 1» pe fiecare rând. Rămân doar rândurile pentru care condiția e adevărată."
+   },
+   "select": {
+    "en": "SELECT keeps only the requested columns: nume and bursa. The others fade out.",
+    "ro": "SELECT păstrează doar coloanele cerute: nume și bursa. Celelalte se estompează."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l04-qm2",
+  "dataset": "facultate",
+  "sql": "SELECT nume, prenume, an, bursa FROM studenti WHERE an = 1 OR an = 2 AND bursa IS NOT NULL",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume",
+   "an",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "We start with all 13 rows.",
+    "ro": "Pornim cu toate cele 13 rânduri."
+   },
+   "where": {
+    "en": "6 rows stay: the 4 first-years (scholarship or not) and the 2 second-years who have one (Archip, Ciobotariu). AND is evaluated before OR.",
+    "ro": "Rămân 6 rânduri: cei 4 din anul 1 (indiferent de bursă) și cei 2 din anul 2 care au bursă (Archip, Ciobotariu). AND se evaluează înaintea lui OR."
+   },
+   "select": {
+    "en": "We show the requested columns.",
+    "ro": "Afișăm coloanele cerute."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l05-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, an, bursa FROM studenti WHERE bursa > 300",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true,
+    "tri": true
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "an",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "We start with 13 rows.",
+    "ro": "Pornim cu 13 rânduri."
+   },
+   "where": {
+    "en": "Green: the scholarship is above 300 (4 rows). Red: it is known and not above 300 (1 row, Pintescu). Grey: the scholarship is NULL, so the answer is unknown (8 rows). WHERE keeps only the green ones.",
+    "ro": "Verde: bursa e peste 300 (4 rânduri). Roșu: bursa e cunoscută și nu depășește 300 (1 rând, Pintescu). Gri: bursa e NULL, deci răspunsul e necunoscut (8 rânduri). WHERE păstrează doar verdele."
+   },
+   "select": {
+    "en": "We show the requested columns.",
+    "ro": "Afișăm coloanele cerute."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l05-qm2",
+  "dataset": "facultate",
+  "sql": "SELECT nume, an, bursa FROM studenti WHERE NOT (bursa > 300)",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true,
+    "tri": true
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "an",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "The same 13 rows.",
+    "ro": "Aceleași 13 rânduri."
+   },
+   "where": {
+    "en": "NOT turns green into red and red into green, but **grey stays grey**: the opposite of \"unknown\" is still unknown. Only one row passes: Pintescu, with 250. The 8 rows with a NULL scholarship are missing from both results.",
+    "ro": "NOT schimbă verdele în roșu și roșul în verde, dar **gri rămâne gri**: opusul lui «necunoscut» tot necunoscut este. Trece un singur rând: Pintescu, cu 250. Cele 8 rânduri cu bursa NULL lipsesc din ambele rezultate."
+   },
+   "select": {
+    "en": "We show the requested columns.",
+    "ro": "Afișăm coloanele cerute."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l07-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, an FROM studenti WHERE an >= ALL (1, 2)",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume",
+   "an"
+  ],
+  "say": {
+   "from": {
+    "en": "We start with 13 rows.",
+    "ro": "Pornim cu 13 rânduri."
+   },
+   "where": {
+    "en": "`an >= ALL (1, 2)` requires `an >= 1` **and** `an >= 2` to be true. That means `an >= 2`: the 9 students from years 2 and 3 remain.",
+    "ro": "`an >= ALL (1, 2)` cere ca `an >= 1` **și** `an >= 2` să fie adevărate. Asta înseamnă `an >= 2`: rămân cei 9 din anii 2 și 3."
+   },
+   "select": {
+    "en": "We show the name and the year.",
+    "ro": "Afișăm numele și anul."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l08-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, prenume, an FROM studenti ORDER BY an, nume",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "order",
+    "predict": true
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume",
+   "an"
+  ],
+  "say": {
+   "from": {
+    "en": "We start with the 13 rows, in the order they are stored (you have no guarantee about it).",
+    "ro": "Pornim cu cele 13 rânduri, în ordinea în care sunt stocate (nu ai nicio garanție asupra ei)."
+   },
+   "select": {
+    "en": "SELECT picks the columns nume, prenume and an.",
+    "ro": "SELECT alege coloanele nume, prenume și an."
+   },
+   "order": {
+    "en": "First by year (1, 2, 3), then, within each year, alphabetically by surname.",
+    "ro": "Întâi după an (1, 2, 3), apoi, în fiecare an, alfabetic după nume."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l08-qm2",
+  "dataset": "facultate",
+  "sql": "SELECT nume, bursa FROM studenti ORDER BY bursa",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "order"
+   }
+  ],
+  "show": [
+   "nume",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "The 13 rows.",
+    "ro": "Cele 13 rânduri."
+   },
+   "select": {
+    "en": "We keep the name and the scholarship.",
+    "ro": "Păstrăm numele și bursa."
+   },
+   "order": {
+    "en": "Ascending: 250, 350, 350, 350, 450, then the 8 with NULL. In Oracle, NULL sorts as **the largest value**: last with ASC, first with DESC.",
+    "ro": "Crescător: 250, 350, 350, 350, 450, apoi cei 8 cu NULL. În Oracle, NULL se sortează ca **cea mai mare valoare**: ultimul la ASC, primul la DESC."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l08-qm3",
+  "dataset": "facultate",
+  "sql": "SELECT nr_matricol, nume, prenume, an FROM studenti ORDER BY an DESC, nume, nr_matricol",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "order"
+   }
+  ],
+  "show": [
+   "nr_matricol",
+   "nume",
+   "prenume",
+   "an"
+  ],
+  "say": {
+   "from": {
+    "en": "The 13 rows.",
+    "ro": "Cele 13 rânduri."
+   },
+   "select": {
+    "en": "We keep the registration number, surname, first name and year.",
+    "ro": "Păstrăm matricolul, numele, prenumele și anul."
+   },
+   "order": {
+    "en": "The year goes down (3, 2, 1), within each year the surname goes up, and with equal surnames the registration number decides: 116 before 119.",
+    "ro": "Anul coboară (3, 2, 1), în fiecare an numele crește, iar la nume egale decide matricolul: 116 înaintea lui 119."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l10-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, bursa, ROUND(bursa / 100) FROM studenti",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "The `studenti` table has 13 rows. The function has not been called yet.",
+    "ro": "Tabelul `studenti` are 13 rânduri. Funcția nu s-a apelat încă."
+   },
+   "select": {
+    "en": "`ROUND(bursa / 100)` is computed separately for every row: 450 / 100 = 4.5 becomes 5, 350 / 100 = 3.5 becomes 4, 250 / 100 = 2.5 becomes 3. For the 8 students without a grant the grant is NULL and the result stays NULL.",
+    "ro": "`ROUND(bursa / 100)` se calculează separat pentru fiecare rând: 450 / 100 = 4,5 devine 5, 350 / 100 = 3,5 devine 4, 250 / 100 = 2,5 devine 3. La cei 8 studenți fără bursă, bursa e NULL și rezultatul rămâne NULL."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l11-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, prenume FROM profesori WHERE prenume LIKE '%n'",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume"
+  ],
+  "say": {
+   "from": {
+    "en": "`profesori` has 16 rows, and `prenume` is `CHAR(10)`.",
+    "ro": "`profesori` are 16 rânduri, iar `prenume` este `CHAR(10)`."
+   },
+   "where": {
+    "en": "`LIKE '%n'` requires the **last** character to be n. But in `CHAR(10)` the last character is always a space (the longest first name has only 9 letters). Result: 0 rows.",
+    "ro": "`LIKE '%n'` cere ca **ultimul** caracter să fie n. Dar în `CHAR(10)` ultimul caracter este mereu un spațiu (cel mai lung prenume are doar 9 litere). Rezultat: 0 rânduri."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l11-qm2",
+  "dataset": "facultate",
+  "sql": "SELECT nume, prenume FROM profesori WHERE TRIM(prenume) LIKE '%n'",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume"
+  ],
+  "say": {
+   "from": {
+    "en": "The same 16 rows.",
+    "ro": "Aceleași 16 rânduri."
+   },
+   "where": {
+    "en": "`TRIM(prenume)` has no spaces, so the last character is the real letter. 6 rows stay: Cristian (twice), Sabin, Florin, Cosmin, Stefan. \"LUCIAN\" does not stay, because it ends in a capital N and `LIKE` tells n from N.",
+    "ro": "`TRIM(prenume)` e fără spații, deci ultimul caracter este litera adevărată. Rămân 6 rânduri: Cristian (de două ori), Sabin, Florin, Cosmin, Stefan. «LUCIAN» nu rămâne, pentru că se termină cu N mare, iar `LIKE` face diferența între n și N."
+   },
+   "select": {
+    "en": "Only `nume` and `prenume` are shown for the 6 rows.",
+    "ro": "Se afișează doar `nume` și `prenume` pentru cele 6 rânduri."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l12-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, TRANSLATE(nume, 'ae', 'ea') FROM studenti",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "select"
+   }
+  ],
+  "show": [
+   "nume"
+  ],
+  "say": {
+   "from": {
+    "en": "The 13 students, with their names.",
+    "ro": "Cei 13 studenți, cu numele lor."
+   },
+   "select": {
+    "en": "Every name goes through `TRANSLATE`: \"Popescu\" becomes \"Popascu\" and \"Prelipcean\" becomes \"Pralipcaen\" (e and a swap places). \"Archip\" stays \"Archip\": it has no lowercase a and no e, and the capital \"A\" is not touched, because TRANSLATE tells a from A.",
+    "ro": "Fiecare nume trece prin `TRANSLATE`: «Popescu» devine «Popascu», iar «Prelipcean» devine «Pralipcaen» (e și a își schimbă locul). «Archip» rămâne «Archip»: nu are a mic și nici e, iar «A» mare nu se atinge, pentru că TRANSLATE face diferența între a mic și A mare."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l18-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, prenume, valoare FROM studenti JOIN note ON studenti.nr_matricol = note.nr_matricol WHERE prenume = 'Ioana'",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "join"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume",
+   "valoare"
+  ],
+  "say": {
+   "from": {
+    "en": "`FROM studenti JOIN note` starts from every student–grade pair, 13 × 42 = 546.",
+    "ro": "`FROM studenti JOIN note` pornește de la toate perechile student–notă, 13 × 42 = 546."
+   },
+   "join": {
+    "en": "The `ON` condition switches off every pair where the registration number in `studenti` is not the one in `note`. Exactly 42 remain, one for each grade.",
+    "ro": "Condiția din `ON` stinge perechile în care numărul matricol din `studenti` nu este cel din `note`. Rămân exact 42, câte una pentru fiecare notă."
+   },
+   "where": {
+    "en": "Predict: which of the 42 rows have the first name `Ioana`? Click them, then check. (Three students have this first name; one of them, 113, has 6 grades.)",
+    "ro": "Prezice: care dintre cele 42 de rânduri au prenumele `Ioana`? Apasă pe ele, apoi Verifică. (Sunt trei studente cu acest prenume; una dintre ele, 113, are 6 note.)"
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l19-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT s.nume, c.titlu_curs, n.valoare, p.nume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs JOIN didactic d ON d.id_curs = c.id_curs JOIN profesori p ON p.id_prof = d.id_prof WHERE c.titlu_curs = 'BD'",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "join"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   }
+  ],
+  "show": [
+   "s.nume",
+   "c.titlu_curs",
+   "n.valoare",
+   "p.nume"
+  ],
+  "say": {
+   "from": {
+    "en": "We start from `studenti`.",
+    "ro": "Pornim de la `studenti`."
+   },
+   "join": {
+    "en": "The four `JOIN`s apply one after another. Think: the chain starts from 42 grades. How many rows does it return: 42, fewer or more? Think about the courses that have two professors.",
+    "ro": "Cele patru `JOIN`-uri se aplică pe rând. Gândește-te: lanțul pornește de la 42 de note. Câte rânduri întoarce: 42, mai puține sau mai multe? Gândește-te la cursurile care au doi profesori."
+   },
+   "where": {
+    "en": "The chain returned 56 rows, not 42: the 9 grades at Logica and the 5 at BD each appear twice, because those courses have two professors (42 + 9 + 5 = 56). Predict: which of the 56 rows have the course `BD`? There are 5 grades × 2 professors.",
+    "ro": "Lanțul a întors 56 de rânduri, nu 42: cele 9 note de la Logica și cele 5 de la BD apar fiecare de două ori, pentru că acele cursuri au doi profesori (42 + 9 + 5 = 56). Prezice: care dintre cele 56 de rânduri au cursul `BD`? Sunt 5 note × 2 profesori."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l20-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT s.nume, s.prenume, n.valoare FROM studenti s LEFT JOIN note n ON s.nr_matricol = n.nr_matricol WHERE n.nr_matricol IS NULL",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "join"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   }
+  ],
+  "show": [
+   "s.nume",
+   "s.prenume",
+   "n.valoare",
+   "n.nr_matricol"
+  ],
+  "say": {
+   "from": {
+    "en": "We start from all the students.",
+    "ro": "Pornim de la toți studenții."
+   },
+   "join": {
+    "en": "`LEFT JOIN` keeps all 13 people on the left. Those without a grade get NULL in the columns from `note`. Result: 42 + 4 = 46 rows.",
+    "ro": "`LEFT JOIN` păstrează toate cele 13 persoane din stânga. Cei fără notă primesc NULL în coloanele din `note`. Rezultat: 42 + 4 = 46 de rânduri."
+   },
+   "where": {
+    "en": "Predict: which rows remain after `WHERE n.nr_matricol IS NULL`? The key on the right is NULL only when the row in `note` is missing.",
+    "ro": "Prezice: care rânduri rămân după `WHERE n.nr_matricol IS NULL`? Cheia din dreapta e NULL doar când rândul din `note` lipsește."
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l21-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT colegi.nume, colegi.prenume FROM studenti s JOIN studenti colegi ON s.grupa = colegi.grupa AND s.an = colegi.an WHERE s.nume = 'Pintescu' AND s.nr_matricol <> colegi.nr_matricol",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "join"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   }
+  ],
+  "show": [
+   "s.nume",
+   "colegi.nume",
+   "colegi.prenume"
+  ],
+  "say": {
+   "from": {
+    "en": "`studenti s` is the first copy: this is where Pintescu sits.",
+    "ro": "`studenti s` este prima copie: aici stă Pintescu."
+   },
+   "join": {
+    "en": "`studenti colegi` is the second copy. The `ON` condition puts face to face two students from the same group and year. A student also appears next to himself: the diagonal of the pairs.",
+    "ro": "`studenti colegi` este a doua copie. Condiția `ON` pune față în față doi studenți din aceeași grupă și același an. Un student apare și lângă el însuși: diagonala perechilor."
+   },
+   "where": {
+    "en": "Predict: which rows remain if you keep only Pintescu's pairs and remove the pair with himself?",
+    "ro": "Prezice: care rânduri rămân dacă păstrezi doar perechile lui Pintescu și scoți perechea cu el însuși?"
+   }
+  }
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l22-qm",
+  "dataset": "facultate",
+  "sql": "SELECT s1.nume AS mai_slab, n1.valoare AS nota_lui, s2.nume AS mai_bun, n2.valoare AS nota_celuilalt FROM studenti s1 JOIN note n1 ON n1.nr_matricol = s1.nr_matricol AND n1.id_curs = '24' JOIN note n2 ON n2.id_curs = n1.id_curs AND n2.valoare > n1.valoare JOIN studenti s2 ON s2.nr_matricol = n2.nr_matricol ORDER BY s1.nume, n2.valoare",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "join",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "order"
+   }
+  ],
+  "say": {
+   "from": {
+    "en": "We start from `studenti s1` and the first copy of the grades, `n1`, only for course 24 (BD). Each row of `n1` is one student's grade, the one who can be beaten.",
+    "ro": "Pornim de la `studenti s1` și de la prima copie a notelor, `n1`, doar pentru cursul 24 (BD). Fiecare rând din `n1` este nota unui student, „cel care poate fi învins”."
+   },
+   "join": {
+    "en": "Now we put the second copy of the grades, `n2`, next to every grade in `n1`. Only the pairs from the same course where `n2` is strictly higher stay, and `s2` is the student who got the grade in `n2`. Which pairs do you think stay?",
+    "ro": "Acum punem a doua copie a notelor, `n2`, lângă fiecare notă din `n1`. Rămân doar perechile de la același curs în care `n2` e strict mai mare, iar `s2` este studentul care a luat nota din `n2`. Ce perechi crezi că rămân?"
+   },
+   "select": {
+    "en": "9 pairs are left: Popescu is beaten by 2 classmates, Prelipcean by 3, Arhire by 4, and Antonie and Panaite (with 10) never appear as the weaker one. We pick the columns: who lost, with what grade, who won and with what grade.",
+    "ro": "Au rămas 9 perechi: Popescu e depășit de 2 colegi, Prelipcean de 3, Arhire de 4, iar Antonie și Panaite (cu 10) nu apar deloc ca „mai slabi”. Alegem coloanele: cine a pierdut, cu ce notă, cine a câștigat și cu ce notă."
+   },
+   "order": {
+    "en": "We sort by the weaker student's name and then by the other student's grade.",
+    "ro": "Sortăm după numele celui mai slab și apoi după nota celuilalt."
+   }
+  },
+  "show": [
+   "s1.nume",
+   "n1.valoare",
+   "s2.nume",
+   "n2.valoare"
+  ]
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l23-qm",
+  "dataset": "facultate",
+  "sql": "SELECT s.nr_matricol, s.nume, s.prenume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol MINUS SELECT s.nr_matricol, s.nume, s.prenume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol WHERE n.valoare < 8",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "join"
+   },
+   {
+    "clause": "where"
+   },
+   {
+    "clause": "minus"
+   }
+  ],
+  "say": {
+   "from": {
+    "en": "We have to write \"all grades ≥ 8\". We start with the list of those who have at least one grade: students linked to `note`.",
+    "ro": "Avem de scris „toate notele ≥ 8”. Începem cu lista celor care au măcar o notă: studenții legați de `note`."
+   },
+   "join": {
+    "en": "The join links students to their grades: 42 rows, for 9 students. The first-year students have no grades and do not appear. MINUS will remove duplicates, so each student counts only once.",
+    "ro": "Join-ul leagă studenții de notele lor: 42 de rânduri, pentru 9 studenți. Studenții din anul 1 nu au note și nu apar. MINUS va elimina duplicatele, deci fiecare student contează o singură dată."
+   },
+   "where": {
+    "en": "The second list: the students who have at least one grade below 8, that is, the \"counterexamples\". They are 111, 112, 113, 114, 115, 117, 118 and 119: everyone except 116.",
+    "ro": "A doua listă: studenții care au măcar o notă sub 8, adică „contraexemplele”. Sunt 111, 112, 113, 114, 115, 117, 118 și 119: toți în afară de 116."
+   },
+   "minus": {
+    "en": "We take the students of the second list out of the first one. Only one student remains: 116 (Bodnar Ioana), whose lowest grade is 9.",
+    "ro": "Scoatem din prima listă pe cei din a doua. Rămâne un singur student: 116 (Bodnar Ioana), a cărui cea mai mică notă este 9."
+   }
+  },
+  "show": [
+   "s.nr_matricol",
+   "s.nume",
+   "s.prenume",
+   "n.valoare"
+  ]
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l24-qm",
+  "dataset": "facultate",
+  "sql": "SELECT s.nume, s.prenume, n.valoare, n.data_notare FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE c.titlu_curs = 'Logica' AND n.valoare IN (7, 10) AND TO_CHAR(n.data_notare, 'fmDAY', 'NLS_DATE_LANGUAGE=ENGLISH') = 'WEDNESDAY' ORDER BY s.nume",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "join"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "order"
+   }
+  ],
+  "say": {
+   "from": {
+    "en": "First step: the tables. We start from `studenti`, `note` and `cursuri`.",
+    "ro": "Prima etapă: tabelele. Pornim de la `studenti`, `note` și `cursuri`."
+   },
+   "join": {
+    "en": "We link them: each grade gets its student and its course.",
+    "ro": "Le legăm: fiecare notă primește studentul și cursul ei."
+   },
+   "where": {
+    "en": "Second step: the rows. Three conditions with `AND`: the course Logica, grade 7 or 10, the day Wednesday. `IN` (or parentheses) keeps \"7 or 10\" together. How many rows remain?",
+    "ro": "A doua etapă: rândurile. Trei condiții cu `AND`: cursul Logica, nota 7 sau 10, ziua miercuri. `IN` (sau parantezele) ține „7 sau 10” împreună. Câte rânduri rămân?"
+   },
+   "select": {
+    "en": "Third step: the columns. We keep the name, first name, grade and date.",
+    "ro": "A treia etapă: coloanele. Păstrăm numele, prenumele, nota și data."
+   },
+   "order": {
+    "en": "Last step: we sort by name. Result: 3 rows (Archip 7, Bodnar 7, Bodnar 10), all from 18 February 2015.",
+    "ro": "Ultima etapă: ordonăm după nume. Rezultat: 3 rânduri (Archip 7, Bodnar 7, Bodnar 10), toate din 18 februarie 2015."
+   }
+  },
+  "show": [
+   "s.nume",
+   "c.titlu_curs",
+   "n.valoare",
+   "n.data_notare"
+  ]
+ },
+ {
+  "type": "query-machine",
+  "id": "bd-l25-qm1",
+  "dataset": "facultate",
+  "sql": "SELECT nume, prenume FROM studenti WHERE an = 1 AND bursa IS NULL ORDER BY nume",
+  "stages": [
+   {
+    "clause": "from"
+   },
+   {
+    "clause": "where",
+    "predict": true
+   },
+   {
+    "clause": "select"
+   },
+   {
+    "clause": "order"
+   }
+  ],
+  "show": [
+   "nume",
+   "prenume",
+   "an",
+   "bursa"
+  ],
+  "say": {
+   "from": {
+    "en": "`FROM studenti`: 13 rows.",
+    "ro": "`FROM studenti`: 13 rânduri."
+   },
+   "where": {
+    "en": "`an = 1 AND bursa IS NULL`: Arhire Alexandra and Bucur Andreea remain. With `bursa = NULL` none would remain.",
+    "ro": "`an = 1 AND bursa IS NULL`: rămân Arhire Alexandra și Bucur Andreea. Cu `bursa = NULL` nu rămânea niciunul."
+   },
+   "select": {
+    "en": "`nume` and `prenume` remain.",
+    "ro": "Rămân `nume` și `prenume`."
+   },
+   "order": {
+    "en": "Ordered by name: Arhire, then Bucur. 2 rows, not 0.",
+    "ro": "Ordonate după nume: Arhire, apoi Bucur. 2 rânduri, nu 0."
+   }
+  }
+ }
+]

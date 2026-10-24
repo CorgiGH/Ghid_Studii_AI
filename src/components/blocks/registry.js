@@ -26,6 +26,7 @@ export const blockLoaders = {
   'viz':            () => import('../lesson/blocks/VizBlock.jsx'),
   'reflect':        () => import('../lesson/blocks/ReflectBlock.jsx'),
   'mcq':            () => import('../lesson/blocks/McqBlock.jsx'),
+  'query-machine':  () => import('../lesson/blocks/QueryMachineBlock.jsx'),
 };
 
 const registry = Object.fromEntries(
