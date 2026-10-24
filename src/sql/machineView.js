@@ -19,7 +19,9 @@ export function chipStep(steps, i, checked = {}) {
   return ask >= 0 && !checked[i] ? ask : steps.findIndex((x) => x.stage === i && x.phase === 'show')
 }
 
-// Which kind of answer a predicted stage asks for.
+// Which kind of answer a predicted stage asks for. A predicted join asks for the row count, not for surviving
+// pairs: the only predicted join (L22, four tables) has 298116 candidate combinations, which cannot be listed
+// for clicking. Joins small enough to list are shown whole by the join step itself.
 export function predictKind(clause) {
   if (clause === 'where') return 'rows'
   if (clause === 'order') return 'order'

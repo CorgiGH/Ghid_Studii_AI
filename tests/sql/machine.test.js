@@ -140,6 +140,10 @@ describe('planStages against the engine', () => {
     expect(join.rows).toHaveLength(9)
     expect(scoreCount(join, '9').ok).toBe(true)
     expect(scoreCount(join, '8')).toMatchObject({ ok: false, want: 9, got: 8 })
+    // Why a predicted join asks for a row count and not for surviving pairs: the unfiltered product of its four
+    // tables is 13 x 42 x 42 x 13 = 298116 combinations, far too many to put on screen to click.
+    expect(join.tables.map((t) => t.count)).toEqual([13, 42, 42, 13])
+    expect(join.product).toBe(298116)
   })
 
   it('every staged query-machine block plans, and where it ends in a result that result equals the engine', async () => {
