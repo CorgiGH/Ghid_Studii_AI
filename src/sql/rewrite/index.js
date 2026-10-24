@@ -14,17 +14,21 @@
 //   'x' || n, d > '01-JAN-60' -> 'x'::text || n, d > '01-JAN-60'::text   (implicit conversions go through the compat operators)
 //   a.x = b.y(+)       -> LEFT/RIGHT JOIN ... ON
 //   NATURAL JOIN + qualified common column          -> ORA-25155
+//   lint.js: LIMIT / FETCH / OFFSET / AS table alias / ILIKE / :: / EXCEPT / INTERSECT ALL / CONCAT(a,b,c) / JOIN .. USING qualified
+//                                                   -> the ORA code Oracle 11g gives
+//   ROWNUM             -> LIMIT or row_number() over ()      "NUME" -> "nume"      ^= -> <>
 // Known gaps are listed in tests/sql/known-gaps.json together with the fix that closes each.
 import { OracleError } from '../engine/errors.js'
 import { isSig, isSym, tokenize, untokenize } from './tokens.js'
 import { emptyStringToNull, trimBlanksToNull } from './pass-empty-string.js'
 import { clockPass } from './pass-clock.js'
 import { minusToExcept, setOperatorPrecedence, sortSetOperatorOutput } from './pass-setops.js'
-import { miscMap, anyList, textLiterals } from './pass-misc.js'
+import { miscMap, anyList, textLiterals, rownumPass } from './pass-misc.js'
+import { lintOracle } from './lint.js'
 import { likeEscape } from './pass-like.js'
 import { charLiteralArgs, decodePass } from './pass-decode.js'
 import { outerJoinPass } from './pass-outer-join.js'
-import { naturalJoinCheck } from './pass-idents.js'
+import { naturalJoinCheck, upperQuotedIdents } from './pass-idents.js'
 
 export { tokenize, untokenize }
 
@@ -39,10 +43,14 @@ export function rewriteOracle(sql, opts = {}) {
   while (ts.length && (!isSig(ts[ts.length - 1]) || isSym(ts[ts.length - 1], ';') || isSym(ts[ts.length - 1], '/'))) ts.pop()
   // one statement per run; Oracle 11g (DBMS_SQL, measured) answers ORA-00911 for a second statement, not ORA-00933
   if (ts.some((t) => isSym(t, ';'))) throw new OracleError('ORA-00911', 'invalid character')
+  const bad = lintOracle(sql)
+  if (bad) throw new OracleError(bad.code, bad.message)
   naturalJoinCheck(ts)
+  ts = upperQuotedIdents(ts)
   ts = emptyStringToNull(ts)
   ts = clockPass(ts, clock)
   ts = miscMap(ts)
+  ts = rownumPass(ts)
   ts = minusToExcept(ts)
   ts = likeEscape(ts)
   ts = anyList(ts)

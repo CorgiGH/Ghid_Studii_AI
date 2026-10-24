@@ -9,7 +9,9 @@ export class OracleError extends Error {
 }
 
 // PostgreSQL SQLSTATE (or an ORA-nnnnn text raised by the compat layer) -> the closest Oracle 11g error.
-export function mapPgError(err) {
+// `context` is optional: { sql } (the statement as typed) lets 42803 tell ORA-00937 from ORA-00979; { knownFunction } says whether
+// a function of that name exists at all (wrong argument count) or not (unknown name).
+export function mapPgError(err, context = {}) {
   if (err instanceof OracleError) return { code: err.code, message: err.message }
   const m = String((err && err.message) || err)
   const c = (err && err.code) || ''
@@ -18,6 +20,7 @@ export function mapPgError(err) {
     const mm = m.match(/^(ORA-\d+):?\s*(.*)$/s)
     return ora(mm[1], mm[2])
   }
+  const constraint = ((m.match(/constraint "([^"]+)"/) || [])[1] || '').toUpperCase()
   if (c === '42703') {
     const q = (m.match(/column "?([^"]+)"? does not exist/) || [])[1]
     return ora('ORA-00904', `"${(q || '').toUpperCase()}": invalid identifier`)
@@ -27,15 +30,40 @@ export function mapPgError(err) {
     const q = (m.match(/relation "([^"]+)" does not exist/) || [])[1]
     return ora('ORA-00942', `table or view does not exist (${(q || '').toUpperCase()})`)
   }
-  if (c === '42702') return ora('ORA-00918', 'column ambiguously defined')
-  if (c === '42601') return ora('ORA-00933', 'SQL command not properly ended (or ORA-009xx syntax error)')
+  if (c === '42P07') return ora('ORA-00955', 'name is already used by an existing object')
+  if (c === '42702' || c === '42725') return ora('ORA-00918', 'column ambiguously defined')
+  if (c === '42601') return ora('ORA-00933', 'SQL command not properly ended')
   if (c === '22P02') return ora('ORA-01722', 'invalid number')
-  if (c === '22007' || c === '22008') return ora('ORA-01861', 'literal does not match format string (or ORA-018xx date error)')
-  if (c === '42883') return ora(/function/.test(m) ? 'ORA-00904/ORA-00909' : 'ORA-00932', 'invalid identifier or wrong argument types/number')
+  if (c === '22007' || c === '22008') return ora('ORA-01861', 'literal does not match format string')
+  if (c === '42883') {
+    const fn = (m.match(/function ([A-Za-z_0-9]+)\(/) || [])[1]
+    if (fn && context.knownFunction === true) return ora('ORA-00909', 'invalid number of arguments')
+    if (fn && context.knownFunction === false) return ora('ORA-00904', `"${fn.toUpperCase()}": invalid identifier`)
+    if (/operator does not exist/.test(m) && /\b(text|character|unknown)\b/.test(m)) return ora('ORA-01722', 'invalid number')
+    return ora('ORA-00932', 'inconsistent datatypes: expected one type, got another')
+  }
   if (c === '42804' || c === '42846') return ora('ORA-00932', 'inconsistent datatypes')
   if (c === '22012') return ora('ORA-01476', 'divisor is equal to zero')
-  if (c === '42803') return ora('ORA-00979', 'not a GROUP BY expression')
+  if (c === '42803') {
+    if (/aggregate functions are not allowed/.test(m)) return ora('ORA-00934', 'group function is not allowed here')
+    // no GROUP BY at all: a plain column next to an aggregate; with a GROUP BY: a column that is not grouped
+    return /\bGROUP\s+BY\b/i.test(context.sql || '') ? ora('ORA-00979', 'not a GROUP BY expression') : ora('ORA-00937', 'not a single-group group function')
+  }
   if (c === '42P10') return ora('ORA-01791', 'not a SELECTed expression')
-  if (c === '42725') return ora('ORA-00918', 'column ambiguously defined')
+  if (c === '23505') return ora('ORA-00001', `unique constraint (STUDENT.${constraint}) violated`)
+  if (c === '23502') {
+    const col = ((m.match(/column "([^"]+)"/) || [])[1] || '').toUpperCase()
+    const tab = ((m.match(/relation "([^"]+)"/) || [])[1] || '').toUpperCase()
+    return ora('ORA-01400', `cannot insert NULL into ("STUDENT"."${tab}"."${col}")`)
+  }
+  if (c === '23503') {
+    // deleting or updating a parent row that has children is 02292; inserting a child without a parent is 02291
+    return /update or delete on table/.test(m)
+      ? ora('ORA-02292', `integrity constraint (STUDENT.${constraint}) violated - child record found`)
+      : ora('ORA-02291', `integrity constraint (STUDENT.${constraint}) violated - parent key not found`)
+  }
+  if (c === '23514') return ora('ORA-02290', `check constraint (STUDENT.${constraint}) violated`)
+  if (c === '22001') return ora('ORA-12899', 'value too large for column')
+  if (c === '22003') return /integer out of range|bigint out of range/.test(m) ? ora('ORA-01426', 'numeric overflow') : ora('ORA-01438', 'value larger than specified precision allowed for this column')
   return ora('ORA-?', m)
 }

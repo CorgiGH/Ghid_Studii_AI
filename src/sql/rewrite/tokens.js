@@ -109,3 +109,20 @@ export function trimSpace(ts) {
   while (b > a && !isSig(ts[b - 1])) b--
   return ts.slice(a, b)
 }
+
+// ---- select lists ------------------------------------------------------------------------------------------------
+// Bounds of the select list of the SELECT at index `sel`: [start, end) in `ts`. A leading DISTINCT / UNIQUE / ALL is skipped;
+// the list ends at the FROM of the same nesting level, at the parenthesis that closes the subquery, or at the end.
+export function selectListBounds(ts, sel) {
+  let start = sel + 1
+  const k = nextSig(ts, sel)
+  if (k >= 0 && (isWord(ts[k], 'DISTINCT') || isWord(ts[k], 'UNIQUE') || isWord(ts[k], 'ALL'))) start = k + 1
+  let depth = 0
+  for (let j = start; j < ts.length; j++) {
+    if (isSym(ts[j], '(')) depth++
+    else if (isSym(ts[j], ')')) {
+      if (--depth < 0) return { start, end: j }
+    } else if (depth === 0 && isWord(ts[j], 'FROM')) return { start, end: j }
+  }
+  return { start, end: ts.length }
+}

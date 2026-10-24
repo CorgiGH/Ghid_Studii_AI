@@ -5,6 +5,7 @@ const CMP = ['=', '<', '>', '<=', '>=', '<>', '!=', '^=']
 
 export function miscMap(ts) {
   return ts.map((x, i) => {
+    if (x.type === 'op' && x.text === '^=') return raw('<>')
     if (x.type !== 'word') return x
     const pi = prevSig(ts, i)
     if (pi >= 0 && isSym(ts[pi], '.')) return x
@@ -160,4 +161,165 @@ export function textLiterals(ts) {
     if (besideConcat || (compared && !arith && !inSet && DATE_SHAPE.test(x.text))) out.push(raw('::text'))
   })
   return out
+}
+
+// ---- ROWNUM ---------------------------------------------------------------------------------------------------------
+// Oracle numbers the rows that pass WHERE, before ORDER BY / GROUP BY / DISTINCT. So:
+//   WHERE ROWNUM <= n  (or < n, = 1)   keeps the first n rows of the FROM clause, then everything else runs on those n rows
+//   ROWNUM elsewhere                   row_number() over ()   (numbered in scan order, ORDER BY sorts afterwards)
+// When the FROM clause is one table or one inline view, the cut is a derived table that keeps the table's alias, so every
+// qualified column still resolves:  FROM studenti s WHERE an = 1 AND ROWNUM <= 3
+//                                -> FROM (SELECT * FROM studenti s WHERE an = 1 LIMIT 3) s
+// For joins the LIMIT goes at the end of the block instead (right unless ORDER BY or an aggregate follows).
+const SET_OP_WORDS = new Set(['UNION', 'INTERSECT', 'MINUS', 'EXCEPT'])
+const AFTER_WHERE = new Set(['GROUP', 'HAVING', 'ORDER', 'CONNECT', 'START', 'FOR'])
+const FROM_KEYWORDS = new Set(['JOIN', 'NATURAL', 'LEFT', 'RIGHT', 'FULL', 'INNER', 'CROSS', 'OUTER', 'ON', 'USING'])
+const isRownumAt = (ts, i) => isWord(ts[i], 'ROWNUM') && !isSym(ts[prevSig(ts, i)], '.')
+
+function depth0(ts, pred, from = 0, to = ts.length) {
+  let d = 0
+  for (let i = from; i < to; i++) {
+    if (isSym(ts[i], '(')) d++
+    else if (isSym(ts[i], ')')) d--
+    else if (d === 0 && ts[i].type === 'word' && pred(ts[i].text.toUpperCase(), i)) return i
+  }
+  return -1
+}
+
+function splitAnd(ts) {
+  const out = [[]]
+  let d = 0
+  let between = false
+  for (const x of ts) {
+    if (isSym(x, '(')) d++
+    else if (isSym(x, ')')) d--
+    if (d === 0 && isWord(x, 'BETWEEN')) between = true
+    if (d === 0 && isWord(x, 'AND')) {
+      if (between) between = false
+      else { out.push([]); continue }
+    }
+    out[out.length - 1].push(x)
+  }
+  return out
+}
+
+// ROWNUM <op> number -> { limit } | { never } | { always } ; null when the conjunct is something else
+function rownumCondition(conj) {
+  const sig = conj.filter(isSig)
+  if (sig.length !== 3 || !isRownumAt(sig, 0) || sig[2].type !== 'number') return null
+  const op = sig[1].text
+  const n = Number(sig[2].text)
+  if (op === '<=') return n < 1 ? { limit: 0 } : { limit: Math.floor(n) }
+  if (op === '<') return { limit: Math.max(0, Math.ceil(n) - 1) }
+  if (op === '=') return n === 1 ? { limit: 1 } : { never: true }
+  if (op === '>') return n < 1 ? { always: true } : { never: true }
+  if (op === '>=') return n <= 1 ? { always: true } : { never: true }
+  return null
+}
+
+// The FROM clause as one table or one inline view: { factor, alias } or null when it joins several things
+function singleFactor(fromToks) {
+  const toks = trimSpace(fromToks)
+  const at = []
+  toks.forEach((t, k) => { if (isSig(t)) at.push(k) })
+  const sig = at.map((k) => toks[k])
+  let i = 0
+  let name = null
+  if (isSym(sig[0], '(')) {
+    const c = matchParen(sig, 0)
+    if (c < 0) return null
+    i = c + 1
+  } else if (sig[0] && sig[0].type === 'word') {
+    name = sig[0].text
+    i = 1
+    while (isSym(sig[i], '.') && sig[i + 1] && sig[i + 1].type === 'word') { name = sig[i + 1].text; i += 2 }
+  } else return null
+  let alias = null
+  if (sig[i] && sig[i].type === 'word' && !FROM_KEYWORDS.has(sig[i].text.toUpperCase())) { alias = sig[i].text; i++ }
+  if (i !== sig.length) return null
+  return { factor: toks.slice(0, at[alias ? sig.length - 2 : sig.length - 1] + 1), alias, name, paren: isSym(sig[0], '(') }
+}
+
+function joinWith(parts, sep) {
+  const out = []
+  parts.forEach((p, i) => out.push(...(i ? [raw(sep)] : []), ...p))
+  return out
+}
+
+function rownumSegment(seg, multi) {
+  const first = seg.findIndex(isSig)
+  if (first < 0 || !isWord(seg[first], 'SELECT')) return seg
+  const fromIdx = depth0(seg, (u) => u === 'FROM')
+  if (fromIdx < 0) return seg
+  const whereIdx = depth0(seg, (u) => u === 'WHERE', fromIdx)
+  if (whereIdx < 0) return seg
+  let tailIdx = depth0(seg, (u) => AFTER_WHERE.has(u), whereIdx)
+  if (tailIdx < 0) tailIdx = seg.length
+  const conjs = splitAnd(seg.slice(whereIdx + 1, tailIdx))
+  let limit = null
+  let touched = false
+  const rest = []
+  for (const c of conjs) {
+    const cond = rownumCondition(c)
+    if (!cond) { rest.push(c); continue }
+    touched = true
+    if (cond.never) rest.push([raw(' 1 = 0 ')])
+    else if (cond.limit !== undefined) limit = limit === null ? cond.limit : Math.min(limit, cond.limit)
+  }
+  if (!touched) return seg
+  const restWhere = rest.length ? [raw(' WHERE '), ...joinWith(rest, ' AND ')] : []
+  const tail = seg.slice(tailIdx)
+  const head = seg.slice(0, fromIdx + 1)
+  const fromToks = seg.slice(fromIdx + 1, whereIdx)
+  if (limit === null) return [...head, ...fromToks, ...restWhere, raw(' '), ...tail]
+  const one = singleFactor(fromToks)
+  if (one) {
+    const alias = one.alias || one.name || 'ora_v'
+    const innerAlias = one.alias ? ` ${one.alias}` : one.paren ? ' ora_v' : ''
+    const inner = [raw('(SELECT * FROM '), ...one.factor, raw(innerAlias), ...restWhere, raw(` LIMIT ${limit}) ${alias} `)]
+    return [...head, raw(' '), ...inner, ...tail]
+  }
+  const body = [...head, ...fromToks, ...restWhere, raw(' '), ...tail, raw(` LIMIT ${limit}`)]
+  return multi ? [raw('('), ...body, raw(')')] : body
+}
+
+function rownumLevel(ts) {
+  const out = []
+  for (let i = 0; i < ts.length; i++) {
+    if (isSym(ts[i], '(')) {
+      const c = matchParen(ts, i)
+      if (c > 0) {
+        out.push(ts[i], ...rownumLevel(ts.slice(i + 1, c)), ts[c])
+        i = c
+        continue
+      }
+    }
+    out.push(ts[i])
+  }
+  // split into the SELECTs of a set operation, rewrite each
+  const cuts = []
+  let d = 0
+  out.forEach((x, i) => {
+    if (isSym(x, '(')) d++
+    else if (isSym(x, ')')) d--
+    else if (d === 0 && x.type === 'word' && SET_OP_WORDS.has(x.text.toUpperCase())) cuts.push(i)
+  })
+  if (!cuts.length) return rownumSegment(out, false)
+  const res = []
+  let from = 0
+  for (const c of cuts) {
+    res.push(...rownumSegment(out.slice(from, c), true))
+    let opEnd = c + 1
+    const n = nextSig(out, c)
+    if (n >= 0 && isWord(out[n], 'ALL')) opEnd = n + 1
+    res.push(...out.slice(c, opEnd))
+    from = opEnd
+  }
+  res.push(...rownumSegment(out.slice(from), true))
+  return res
+}
+
+export function rownumPass(ts) {
+  if (!ts.some((x, i) => isRownumAt(ts, i))) return ts
+  return rownumLevel(ts).map((x, i, all) => (isRownumAt(all, i) ? raw('row_number() over ()') : x))
 }

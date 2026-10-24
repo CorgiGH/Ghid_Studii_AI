@@ -115,17 +115,31 @@ export async function createEngine(pg, { clock, datasets }) {
   async function run(sql, { dataset, maxRows } = {}) {
     await loadDataset(dataset)
     const kind = statementKind(sql)
-    const failed = (err) => ({ kind, columns: [], rows: [], rowCount: 0, truncated: false, error: mapPgError(err) })
-    let rewritten
+    const failed = async (err) => {
+      const context = { sql }
+      if (err && err.code === '42883') {
+        const fn = (String(err.message).match(/function ([A-Za-z_0-9]+)\(/) || [])[1]
+        if (fn) context.knownFunction = (await pg.query('SELECT 1 FROM pg_proc WHERE proname = $1 LIMIT 1', [fn.toLowerCase()])).rows.length > 0
+      }
+      return { kind, columns: [], rows: [], rowCount: 0, truncated: false, error: mapPgError(err, context) }
+    }
     try {
       const pairs = parseAlterSession(sql)
       if (pairs) {
         await alterSession(pairs)
         return { kind: 'ddl', columns: [], rows: [], rowCount: 0, truncated: false }
       }
-      rewritten = rewriteOracle(sql)
     } catch (err) {
       return failed(err)
+    }
+    let rewritten
+    try {
+      rewritten = rewriteOracle(sql)
+    } catch (err) {
+      // What Oracle rejects arrives as an OracleError and is the learner's answer. Anything else is a bug in a rewrite pass:
+      // let it surface instead of dressing it up as an Oracle error.
+      if (err instanceof OracleError) return failed(err)
+      throw err
     }
     try {
       const r = await pg.query(rewritten.sql, [], { rowMode: 'array', parsers: RAW_TEXT_PARSERS })
