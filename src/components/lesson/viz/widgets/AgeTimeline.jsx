@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame, CountUp } from '../ui.jsx';
-import { ageSteps, ageParts } from '../logic/age-timeline.js';
+import { ageSteps, ageParts, ARC_AT, ticksLit } from '../logic/age-timeline.js';
 import { ageSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 import { parseDT, toUTC } from '../logic/common.js';
@@ -35,17 +35,17 @@ export default function AgeTimeline({ props, predict }) {
         <div className="viz-tl-track" />
         <Motion.div className="viz-tl-fill" initial={false} animate={{ width: k >= 1 ? `${pctOf(t1)}%` : '0%' }} transition={m.reduced ? { duration: 0 } : { duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
         {birthdays.map((x) => (
-          <Motion.i key={x.n} className={`viz-tl-tick${k >= 3 ? ' full' : ''}`} style={{ left: `${pctOf(x.ms)}%` }}
-            initial={false} animate={{ opacity: k >= 3 ? 1 : 0.55, scaleY: k >= 3 ? 1.5 : 1 }} transition={m.reduced ? { duration: 0 } : { delay: k >= 3 ? x.n * 0.025 : 0 }} />
+          <Motion.i key={x.n} className={`viz-tl-tick${ticksLit(k) ? ' full' : ''}`} style={{ left: `${pctOf(x.ms)}%` }}
+            initial={false} animate={{ opacity: ticksLit(k) ? 1 : 0.55, scaleY: ticksLit(k) ? 1.5 : 1 }} transition={m.reduced ? { duration: 0 } : { delay: ticksLit(k) ? x.n * 0.025 : 0 }} />
         ))}
         <div className="viz-tl-pt birth" style={{ left: 0 }}><i /><span>{props.birth}</span></div>
         <div className="viz-tl-pt today" style={{ left: `${pctOf(t1)}%` }}><i /><span>{props.today.slice(0, 10)}</span></div>
       </div>
       <div className="viz-arcs" role="img" aria-label={`${parts.years} ${t('years', 'ani')}, ${parts.months} ${t('months', 'luni')}, ${parts.days} ${t('days', 'zile')}`}>
         {[
-          { key: 'y', at: 2, val: parts.years, unit: t('years', 'ani'), fn: 'TRUNC(MONTHS_BETWEEN / 12)' },
-          { key: 'm', at: 3, val: parts.months, unit: t('months', 'luni'), fn: 'MOD(…, 12)' },
-          { key: 'd', at: 4, val: parts.days, unit: t('days', 'zile'), fn: 'today − ADD_MONTHS' },
+          { key: 'y', at: ARC_AT.y, val: parts.years, unit: t('years', 'ani'), fn: 'TRUNC(MONTHS_BETWEEN / 12)' },
+          { key: 'm', at: ARC_AT.m, val: parts.months, unit: t('months', 'luni'), fn: 'MOD(…, 12)' },
+          { key: 'd', at: ARC_AT.d, val: parts.days, unit: t('days', 'zile'), fn: 'today − ADD_MONTHS' },
         ].map(a => (
           <Motion.div key={a.key} className={`viz-arc ${a.key}${k >= a.at ? ' on' : ''}`} initial={false}
             animate={{ scaleX: k >= a.at ? 1 : 0.94, opacity: k >= a.at ? 1 : 0.55 }} transition={m.spring} style={{ transformOrigin: 'left center' }}>

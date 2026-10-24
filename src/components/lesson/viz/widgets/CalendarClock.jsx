@@ -3,11 +3,10 @@ import { AnimatePresence, animate, motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { calendarSteps, opLabel } from '../logic/calendar-clock.js';
+import { calendarSteps, opLabel, oracleDisplay } from '../logic/calendar-clock.js';
 import { calendarSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 import { parseDT, daysInMonth, weekday, MONTHS } from '../logic/common.js';
-import { formatDate } from '../logic/date-mask.js';
 
 const WD_EN = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const WD_RO = ['Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ', 'Du'];
@@ -77,7 +76,7 @@ export default function CalendarClock({ props, predict }) {
   const stops = C.stops.map((st, i) => (oracle.values && oracle.values[i] ? oracle.values[i] : st));
   const now = parseDT(stops[k]);
   const op = k >= 1 ? props.ops[k - 1] : null;
-  const display = formatDate(stops[k].length > 10 ? stops[k] : `${stops[k]}`, stops[k].length > 10 ? 'DD-MON-RR HH24:MI' : 'DD-MON-RR').text;
+  const display = oracleDisplay(stops[k]);
   const caption = k === 0
     ? t('The starting moment. Dates carry a time of day; the clock shows it.', 'Momentul de plecare. Datele au și o oră; ceasul o arată.')
     : ({
@@ -108,7 +107,12 @@ export default function CalendarClock({ props, predict }) {
           <div className="viz-digital">{now.hasTime ? `${String(now.h).padStart(2, '0')}:${String(now.mi).padStart(2, '0')}` : t('no time', 'fără oră')}</div>
         </div>
       </div>
-      <div className="viz-result"><span className="viz-dim">DD-MON-RR</span><b>{display}</b></div>
+      <div className="viz-resultcol">
+        <div className="viz-result"><span className="viz-dim">DD-MON-RR</span><b>{display.date}</b></div>
+        {display.time && (
+          <div className="viz-result"><span className="viz-dim">{t('the time of day DD-MON-RR does not show', 'ora zilei, pe care DD-MON-RR n-o arată')}</span><b>{display.time}</b></div>
+        )}
+      </div>
     </VizFrame>
   );
 }

@@ -14,6 +14,7 @@ export default function DefinitionBlock({ term, content }) {
       }}
     >
       <div
+        data-block-label
         className="text-xs font-semibold uppercase tracking-wide mb-2"
         style={{ color: '#60a5fa' }}
       >

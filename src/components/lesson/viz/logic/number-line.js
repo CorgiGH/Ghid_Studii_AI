@@ -27,3 +27,10 @@ export function lineWindow(value, digits = 0) {
 export function numberLines({ values, fns, digits = 0 }) {
   return { lines: values.map(v => ({ value: v, window: lineWindow(v, digits), results: fns.map(fn => ({ fn, result: numberLine(v, fn, digits) })) })), count: fns.length + 1 };
 }
+
+// Is `picked` (a mark on the line) where `fn` really sends `value`? Compared on the whole-number
+// grid, so 21.7 and 21.70000000000001 count as the same mark.
+export function pickIsRight(value, fn, digits, picked) {
+  const grid = (x) => Math.round(shift(x, digits));
+  return grid(numberLine(value, fn, digits)) === grid(picked);
+}

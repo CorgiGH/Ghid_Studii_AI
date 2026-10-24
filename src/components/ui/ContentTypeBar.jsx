@@ -1,10 +1,11 @@
 import React from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { useLessonStore } from '../../lesson/useLessonStore';
+import { nowMs } from '../../lesson/clock.js';
 
 const ContentTypeBar = ({ subject, activeTab, onTabChange }) => {
   const { t } = useApp();
-  const pending = useLessonStore().pendingCount();
+  const pending = useLessonStore().dueCount(nowMs());
 
   const tabs = [];
   if (subject.courses?.length > 0) {

@@ -3,6 +3,7 @@
 // Anything fancier (joins, functions, DUAL) returns null and the table is left out
 // unless the SQL engine can run it.
 import { DATA, evalWhere } from '../viz/logic/common.js';
+import { formatDate } from '../viz/logic/date-mask.js';
 
 const cmpVal = (a, b) => {
   if (a === b) return 0;
@@ -11,12 +12,10 @@ const cmpVal = (a, b) => {
   return a < b ? -1 : 1;
 };
 
-const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-// Oracle's default date display (NLS_DATE_FORMAT DD-MON-RR, AMERICAN month names).
-const oracleCell = (v) => {
-  const m = typeof v === 'string' && v.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ].*)?$/);
-  return m ? `${m[3]}-${MONTHS[Number(m[2]) - 1]}-${m[1].slice(2)}` : v;
-};
+// Oracle's default date display (NLS_DATE_FORMAT DD-MON-RR), the same formatter the widgets use.
+const oracleCell = (v) => (
+  typeof v === 'string' && /^\d{4}-\d{2}-\d{2}(?:[T ].*)?$/.test(v) ? formatDate(v.slice(0, 10), 'DD-MON-RR').text : v
+);
 
 export function fallbackTable(sql, tables = DATA) {
   try {

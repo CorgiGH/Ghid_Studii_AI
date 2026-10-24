@@ -60,7 +60,7 @@ else {
           for (const e of validateViz(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'mcq') {
-          for (const e of validateMcq(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+          for (const e of validateMcq(block, { lessonId: json.meta?.id })) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'reflect') {
           for (const e of validateReflect(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);

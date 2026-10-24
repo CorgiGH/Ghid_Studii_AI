@@ -1,3 +1,4 @@
+import { formatDate } from './date-mask.js';
 import { parseDT, fmtDT, toUTC, fromUTC, daysInMonth, weekday, DAYS } from './common.js';
 
 const fraction = (arg) => {
@@ -55,6 +56,17 @@ export function opLabel({ fn, arg }) {
   if (fn === '+') return `+ ${arg}`;
   if (arg === undefined || arg === null) return `${fn}()`;
   return `${fn}(${typeof arg === 'string' ? `'${arg}'` : arg})`;
+}
+
+// How Oracle prints a stop: the default date format DD-MON-RR shows the date only, never the
+// time. The time of day is returned on its own (null for a date without one), so a widget can
+// show it as the part DD-MON-RR hides.
+export function oracleDisplay(stop) {
+  const o = parseDT(stop);
+  return {
+    date: formatDate(stop, 'DD-MON-RR').text,
+    time: o.hasTime ? formatDate(stop, 'HH24:MI').text : null,
+  };
 }
 
 export function calendarSteps({ start, ops }) {

@@ -19,7 +19,10 @@ describe('mcq / reflect validator', () => {
   it('accepts every real staged block', () => {
     expect(realMcq.length).toBeGreaterThan(100);
     expect(realReflect.length).toBeGreaterThan(40);
-    for (const { block } of realMcq) expect(validateMcq(block), block.id).toEqual([]);
+    for (const { src, block } of realMcq) {
+      const lessonId = `bd-l${src.match(/lesson-(\w+)\.json/)[1]}`;
+      expect(validateMcq(block, { lessonId }), block.id).toEqual([]);
+    }
     for (const { block } of realReflect) expect(validateReflect(block), block.id).toEqual([]);
   });
 
@@ -144,10 +147,13 @@ describe('review list helpers', () => {
   const it_ = (itemId, src, due) => ({ itemId, ref: { src, screen: 1 }, kind: 'mcq', due, streak: 0 });
 
   it('labels due dates in both languages', () => {
-    expect(dueLabel(NOW - 5, NOW, 'ro')).toBe('acum');
-    expect(dueLabel(NOW + 3600 * 1000, NOW, 'ro')).toBe('mâine');
-    expect(dueLabel(NOW + 3 * DAY, NOW, 'ro')).toBe('în 3 zile');
-    expect(dueLabel(NOW + 3 * DAY, NOW, 'en')).toBe('in 3 days');
+    const noon = new Date(2026, 9, 26, 12, 0).getTime(); // local time on purpose: labels follow the calendar day
+    expect(dueLabel(noon - 5, noon, 'ro')).toBe('azi');
+    expect(dueLabel(noon + 3600 * 1000, noon, 'ro')).toBe('azi');
+    expect(dueLabel(new Date(2026, 9, 27, 0, 5).getTime(), noon, 'ro')).toBe('mâine');
+    expect(dueLabel(noon + 3 * DAY, noon, 'ro')).toBe('în 3 zile');
+    expect(dueLabel(noon + 3 * DAY, noon, 'en')).toBe('in 3 days');
+    expect(dueLabel(noon - 5, noon, 'en')).toBe('today');
   });
 
   it('groups by lesson with due items first', () => {

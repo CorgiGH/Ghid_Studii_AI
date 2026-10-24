@@ -5,6 +5,7 @@ import formatMarkdown from '../../blocks/formatMarkdown';
 import { useScreenGate } from '../ScreenGate';
 import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
+import { REFLECT_TEXT_MAX, restoredReflect } from '../../../lesson/restore.js';
 import { useSqlRunner } from '../viz/useSqlRunner.js';
 import { MiniTable } from '../viz/ui.jsx';
 import { pickReflectTable, tableFromResult } from './reflectTable.js';
@@ -40,15 +41,17 @@ export default function ReflectBlock({ id, prompt, placeholder, answer, table })
   const { complete, ref } = useScreenGate();
   const store = useLessonStore();
   const reduced = !!useReducedMotion();
-  const [text, setText] = useState('');
-  const [revealed, setRevealed] = useState(false);
-  const recorded = useRef(false);
+  // After a reload or Back the learner's text and the revealed answer come back.
+  const [restored] = useState(() => (ref ? restoredReflect(store.attemptsAt(ref.src, ref.screen), id) : null));
+  const [text, setText] = useState(restored?.text || '');
+  const [revealed, setRevealed] = useState(restored !== null);
+  const recorded = useRef(restored !== null);
 
   const reveal = () => {
     setRevealed(true);
     if (ref && !recorded.current) {
       recorded.current = true;
-      store.recordAttempt(id, { ok: true, hints: 0, kind: 'reflect', ref, at: nowMs() });
+      store.recordAttempt(id, { ok: true, hints: 0, kind: 'reflect', item: id, text: text.slice(0, REFLECT_TEXT_MAX), ref, at: nowMs() });
     }
     complete();
   };

@@ -5,6 +5,7 @@ import formatMarkdown from '../../blocks/formatMarkdown';
 import { useScreenGate } from '../ScreenGate';
 import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
+import { restoredMcqPick } from '../../../lesson/restore.js';
 
 const LETTERS = 'ABCDEFGH';
 const Html = ({ as = 'span', className, text, id }) => (
@@ -19,8 +20,13 @@ export default function McqBlock({ id, question, options, record = true, onAnswe
   const { complete, ref } = useScreenGate();
   const store = useLessonStore();
   const reduced = !!useReducedMotion();
-  const [picked, setPicked] = useState(null);
-  const answered = useRef(false);
+  // After a reload or Back the answer given earlier comes back (and counts as answered, so
+  // no second attempt can reset the review schedule by accident).
+  const [restored] = useState(() => (
+    record && ref ? restoredMcqPick(store.attemptsAt(ref.src, ref.screen), id, options.length) : null
+  ));
+  const [picked, setPicked] = useState(restored);
+  const answered = useRef(restored !== null);
   const qid = `mcq-${id}`;
 
   const pick = (i) => {
@@ -29,7 +35,7 @@ export default function McqBlock({ id, question, options, record = true, onAnswe
     const opt = options[i];
     setPicked(i);
     if (record && ref) {
-      store.recordAttempt(id, { ok: !!opt.correct, hints: 0, kind: 'mcq', misconception: opt.misconception || null, ref, at: nowMs() });
+      store.recordAttempt(id, { ok: !!opt.correct, hints: 0, kind: 'mcq', item: id, option: i, misconception: opt.misconception || null, ref, at: nowMs() });
     }
     complete();
     onAnswer?.({ ok: !!opt.correct, option: opt, index: i });

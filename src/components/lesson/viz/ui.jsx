@@ -61,7 +61,8 @@ export function VizFrame({ widget, stepper, caption, children, label }) {
 
 // Plain table used by several widgets. Rows and cells take class hooks so the widget
 // decides the colour; transitions are CSS so a 40-row table stays cheap.
-export function MiniTable({ columns, rows, rowClass, cellClass, wirePrefix, caption, highlightCols, fmt, maxHeight }) {
+// `cellButton(i, column, row)` may return { label, onClick } to make that cell a button.
+export function MiniTable({ columns, rows, rowClass, cellClass, cellButton, wirePrefix, caption, highlightCols, fmt, maxHeight }) {
   const show = (v) => (fmt ? fmt(v) : displayCell(v));
   return (
     <div className="viz-tablewrap" style={maxHeight ? { maxHeight, overflowY: 'auto' } : undefined}>
@@ -73,13 +74,18 @@ export function MiniTable({ columns, rows, rowClass, cellClass, wirePrefix, capt
         <tbody>
           {rows.map((r, i) => (
             <tr key={i} className={rowClass ? rowClass(i, r) : ''}>
-              {columns.map(c => (
+              {columns.map(c => {
+                const btn = cellButton ? cellButton(i, c, r) : null;
+                return (
                 <td
                   key={c}
                   className={`${r[c] === null || r[c] === undefined ? 'nul ' : ''}${highlightCols?.includes(c) ? 'hl ' : ''}${cellClass ? cellClass(i, c, r) : ''}`}
                   data-wire={wirePrefix ? `${wirePrefix}:${i}:${c}` : undefined}
-                >{show(r[c])}</td>
-              ))}
+                >{btn
+                  ? <button type="button" className="viz-cellbtn" aria-label={btn.label} onClick={btn.onClick}>{show(r[c])}</button>
+                  : show(r[c])}</td>
+                );
+              })}
             </tr>
           ))}
         </tbody>

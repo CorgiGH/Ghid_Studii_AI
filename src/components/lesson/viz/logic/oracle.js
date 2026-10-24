@@ -42,7 +42,7 @@ export const ageSql = ({ birth, today }) => [`SELECT MONTHS_BETWEEN(${dateExpr(t
 
 export function charStripsSql(p) {
   if (p.mode === 'swap') return [`SELECT TRANSLATE(${q(p.input)}, ${q(p.from)}, ${q(p.to)}) FROM dual`];
-  return [`SELECT ${p.fn}(${q(p.input)}, ${p.len}, ${q(p.fill)}) FROM dual`];
+  return [`SELECT ${p.fn}(${q(p.input)}, ${p.len}${p.fill === undefined ? '' : `, ${q(p.fill)}`}) FROM dual`];
 }
 
 export const numberLineSql = ({ values, fns, digits = 0 }) => values.flatMap(v => fns.map(fn => `SELECT ${fn}(${v}${fn === 'CEIL' || fn === 'FLOOR' ? '' : `, ${digits}`}) FROM dual`));

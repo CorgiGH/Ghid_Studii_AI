@@ -34,6 +34,7 @@ export default function CalloutBlock({ variant = 'info', content }) {
       }}
     >
       <div
+        data-block-label
         className="text-xs font-semibold uppercase tracking-wide mb-2"
         style={{ color: chipColor }}
       >

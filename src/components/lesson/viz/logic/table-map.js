@@ -26,3 +26,12 @@ export function tableMap({ from, to, question, answerKey, dataset = 'facultate' 
   const target = toRows.find(r => String(r[toCol]) === String(answerKey)) || null;
   return { fromTable, fromCol, toTable, toCol, fromRows, pick, toRows, target, count: 3 };
 }
+
+// The arrow the learner fires by clicking a key cell: from that row of the "from" table to
+// the matching row of the "to" table. `fromRow` is the clicked row index (the picked row by
+// default). Null when there is no matching row.
+export function mapWire(m, fromRow, fromCols) {
+  if (!m.target) return null;
+  const row = Number.isInteger(fromRow) && fromRow >= 0 && fromRow < m.fromRows.length ? fromRow : m.pick;
+  return { id: 'k', from: `from:${row}:${fromCols[fromCols.length - 1]}`, to: `to:${m.toRows.indexOf(m.target)}:${m.toCol}`, cls: 'keep', row };
+}

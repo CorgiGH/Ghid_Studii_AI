@@ -7,7 +7,7 @@ import formatMarkdown from '../blocks/formatMarkdown';
 import McqBlock from './blocks/McqBlock.jsx';
 import { useLessonStore } from '../../lesson/useLessonStore';
 import { nowMs } from '../../lesson/clock.js';
-import { collectMcqPool, dueLabel, groupReview, pickVariant } from '../../lesson/review.js';
+import { collectMcqPool, dueLabel, furthestVisited, groupReview, isPracticeOnly, pickVariant } from '../../lesson/review.js';
 
 function readLesson(src) {
   try { return loadJson(src); } catch { return null; }
@@ -23,7 +23,7 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
   const seen = useRef({}); // itemId -> variant ids already shown
 
   const lessons = useMemo(
-    () => subject.courses.filter(c => c.src).map((c, i) => ({ src: c.src, index: i, meta: c, course: readLesson(c.src) })),
+    () => subject.courses.map((c, i) => ({ src: c.src, index: i, meta: c, course: c.src ? readLesson(c.src) : null })).filter(l => l.src),
     [subject],
   );
   const pool = useMemo(() => collectMcqPool(lessons.filter(l => l.course)), [lessons]);
@@ -47,10 +47,14 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
   };
 
   const variantFor = useCallback((item) => {
-    const v = pickVariant(item, pool, { avoid: seen.current[item.itemId] || [] });
+    const upTo = Math.max(
+      furthestVisited(lessons.map(l => l.src), src => store.hasPosition(src)),
+      bySrc[item.ref?.src]?.index ?? -1,
+    );
+    const v = pickVariant(item, pool, { avoid: seen.current[item.itemId] || [], upTo });
     if (v) seen.current[item.itemId] = [...(seen.current[item.itemId] || []), v.entry.id];
     return v;
-  }, [pool]);
+  }, [pool, lessons, bySrc, store]);
 
   const start = (item) => {
     if (item.kind === 'mcq') {
@@ -62,9 +66,11 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
 
   const onAnswer = (item) => ({ ok }) => {
     const at = nowMs();
+    const before = store.pendingReview(at).find(i => i.itemId === item.itemId);
+    const practice = ok && isPracticeOnly(before, at);
     store.markReview(item.itemId, ok, at);
     const left = store.pendingReview(at).find(i => i.itemId === item.itemId);
-    setActive(a => (a ? { ...a, result: { ok, gone: !left, due: left?.due ?? null, at } } : a));
+    setActive(a => (a ? { ...a, result: { ok, practice, gone: !left, due: left?.due ?? null, at } } : a));
   };
 
   const another = () => setActive(a => {
@@ -90,7 +96,9 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
           >
             <p>
               {result.ok
-                ? (result.gone
+                ? (result.practice
+                  ? t(`Right. It was not due yet, so this was practice and the schedule did not change. It comes back ${dueLabel(result.due, result.at, 'en')}.`, `Corect. Încă nu venise vremea, deci a fost doar exercițiu și programul nu s-a schimbat. Revine ${dueLabel(result.due, result.at, 'ro')}.`)
+                  : result.gone
                   ? t('Right, and this one is done. It leaves Review.', 'Corect, și gata cu această întrebare. Iese din Recapitulare.')
                   : t(`Right. It comes back ${dueLabel(result.due, result.at, 'en')}.`, `Corect. Revine ${dueLabel(result.due, result.at, 'ro')}.`))
                 : t('Not this time. It stays in Review; try another version.', 'De data asta nu. Rămâne în Recapitulare; încearcă altă variantă.')}

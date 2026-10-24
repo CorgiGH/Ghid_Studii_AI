@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AnimatePresence, motion as Motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion as Motion, useIsPresent, useReducedMotion } from 'motion/react';
 import { useApp } from '../../contexts/AppContext';
 import { loadJson } from '../../content/jsonLoader';
 import BlockRenderer from '../blocks/BlockRenderer';
 import formatMarkdown from '../blocks/formatMarkdown';
 import ScreenGate from './ScreenGate';
+import { preloadLessonBlocks } from './preload';
 import { useLessonStore } from '../../lesson/useLessonStore';
 import { canAdvance, isGatingScreen, mergeGate, nextScreen, screenFromUrl, seedGate, skipAttempt, slideVariants } from './playerLogic';
 
@@ -17,6 +18,18 @@ const Arrow = ({ dir }) => (
     <path d={dir < 0 ? 'M10 3L5 8l5 5' : 'M6 3l5 5-5 5'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
+// One screen's card. While it is leaving (popLayout keeps it in the DOM, overlapping the
+// entering screen) it is inert and hidden from assistive technology, so only one screen is live.
+function Screen({ ref, children, ...rest }) {
+  const present = useIsPresent();
+  return (
+    <Motion.section ref={ref} aria-hidden={present ? undefined : true} inert={present ? undefined : true}
+      data-leaving={present ? undefined : ''} {...rest}>
+      {children}
+    </Motion.section>
+  );
+}
 
 export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   const { t, markVisited, progress, toggleUnderstood, lectureVisible, setCourseContext } = useApp();
@@ -40,11 +53,13 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   const [dir, setDir] = useState(1);
   const firstRender = useRef(true);
 
-  // The heading of a screen that has just entered takes focus once it is mounted, which
-  // (AnimatePresence mode="wait") is after the previous screen has finished leaving.
+  // The heading of a screen that has just entered takes focus as it mounts; the previous
+  // screen is still fading out beside it (popLayout), inert, so focus cannot land on it.
   const headingRef = useCallback((el) => {
     if (el && !firstRender.current) el.focus({ preventScroll: true });
   }, []);
+
+  useEffect(() => { preloadLessonBlocks(); }, []);
 
   // Keep ?s= in sync (replace, so Back leaves the lesson instead of walking screens).
   useEffect(() => {
@@ -169,8 +184,8 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
       </div>
 
       <div className="lp-stage">
-        <AnimatePresence mode="wait" initial={false} custom={dir}>
-          <Motion.section
+        <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+          <Screen
             key={screen}
             className="lp-card"
             data-testid="lesson-screen"
@@ -189,7 +204,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
                 ))}
               </div>
             </ScreenGate>
-          </Motion.section>
+          </Screen>
         </AnimatePresence>
       </div>
 

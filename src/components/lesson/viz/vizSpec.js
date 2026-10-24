@@ -56,7 +56,7 @@ export function validateViz(block) {
     if (block.props.mode !== 'between' && !isArr(props.list)) errs.push('viz (in-between): props.list missing or invalid');
   }
   if (w === 'char-strips') {
-    if (props.mode === 'pad' && !(isStr(props.fn) && isNum(props.len) && isStr(props.fill))) errs.push('viz (char-strips): pad needs props.fn, props.len and props.fill');
+    if (props.mode === 'pad' && !(isStr(props.fn) && isNum(props.len))) errs.push('viz (char-strips): pad needs props.fn and props.len (props.fill is optional)');
     if (props.mode === 'swap' && !(isStr(props.from) && isStr(props.to))) errs.push('viz (char-strips): swap needs props.from and props.to');
   }
   if (w === 'char-boxes' && props.ops?.includes('LIKE') && !isStr(props.likePattern)) errs.push('viz (char-boxes): LIKE needs props.likePattern');

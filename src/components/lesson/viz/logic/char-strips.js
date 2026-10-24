@@ -4,7 +4,8 @@ function padChars(len, fill) {
   return Array.from({ length: len }, (_, i) => f[i % f.length]);
 }
 
-export function padPlan({ input, fn, len, fill }) {
+// `fill` is optional: like Oracle, LPAD and RPAD pad with a blank when no pad string is given.
+export function padPlan({ input, fn, len, fill = ' ' }) {
   const chars = [...input];
   if (len <= chars.length) {
     const kept = chars.slice(0, Math.max(0, len));
@@ -48,8 +49,18 @@ export function replaceChain({ input, from, to }) {
   return { stages, result: cur };
 }
 
+// What step `k` of the swap view shows, for a chain of `n` REPLACE stages: step 0 introduces
+// both ways, steps 1..n are the REPLACEs one by one, the last step is the single TRANSLATE.
+export function swapStep(k, n) {
+  if (k <= 0) return { kind: 'intro' };
+  if (k <= n) return { kind: 'replace', index: k - 1, last: k === n };
+  return { kind: 'translate' };
+}
+
 export function charStrips(p) {
-  return p.mode === 'swap'
-    ? { plan: swapPlan(p), chain: replaceChain(p), count: 4 }
-    : { plan: padPlan(p), count: 3 };
+  if (p.mode === 'swap') {
+    const chain = replaceChain(p);
+    return { plan: swapPlan(p), chain, count: chain.stages.length + 2 };
+  }
+  return { plan: padPlan(p), count: 3 };
 }

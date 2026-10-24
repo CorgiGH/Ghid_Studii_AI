@@ -41,6 +41,10 @@ export function createLessonStore(storage) {
   }
 
   return {
+    // True once the learner has opened this lesson (a position was stored for it).
+    hasPosition(src) {
+      return Number.isInteger(state.positions[src]);
+    },
     getPosition(src) {
       const n = state.positions[src];
       return Number.isInteger(n) && n >= 1 ? n : 1;
@@ -80,6 +84,10 @@ export function createLessonStore(storage) {
     },
     pendingCount() {
       return Object.keys(state.review).length;
+    },
+    // Items due now (the Recapitulare tab badge counts these, not the ones scheduled for later).
+    dueCount(now) {
+      return Object.values(state.review).filter(i => i.due <= now).length;
     },
     // Attempts recorded for a given screen of a lesson file (used to re-open a gate after a reload).
     attemptsAt(src, screen) {

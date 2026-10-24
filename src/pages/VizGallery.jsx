@@ -1,7 +1,14 @@
 import React from 'react';
 import VizBlock from '../components/lesson/blocks/VizBlock.jsx';
 import { validateViz } from '../components/lesson/viz/vizSpec.js';
-import SAMPLES from './vizGalleryData.js';
+
+// The gallery shows the viz blocks the lessons really contain: it reads every lesson file under
+// content/bd/courses, so there is no second copy of the block data to keep in step.
+const lessonFiles = import.meta.glob('../content/bd/courses/*.json', { eager: true });
+const SAMPLES = [...new Map(Object.values(lessonFiles)
+  .flatMap(mod => (mod.default?.steps || []).flatMap(step => step.blocks || []))
+  .filter(b => b.type === 'viz' && b.id)
+  .map(b => [b.id, { id: b.id, widget: b.widget, predict: b.predict, props: b.props }])).values()];
 
 // Dev-only (App.jsx loads it only when import.meta.env.DEV): every visual widget on one page.
 // /?viz-gallery shows all, /?viz-gallery=join-wires one widget, add &predict=0 to skip the gate.

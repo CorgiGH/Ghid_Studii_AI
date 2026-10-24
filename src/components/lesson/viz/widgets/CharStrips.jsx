@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { charStrips } from '../logic/char-strips.js';
+import { charStrips, swapStep } from '../logic/char-strips.js';
 import { charStripsSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -18,17 +18,24 @@ export default function CharStrips({ props, predict }) {
 
   if (props.mode === 'swap') {
     const stages = chain.stages;
-    const shown = k === 0 ? 0 : Math.min(k, stages.length);
+    const n = stages.length;
+    const step = swapStep(k, n);
+    const shown = Math.min(k, n);
     const chainText = shown === 0 ? props.input : stages[shown - 1].text;
     const chainChars = [...chainText];
     const broken = chain.result !== plan.result;
-    const caption = [
-      t(`Two ways to swap the letters of ${props.input}: nested REPLACE calls, one per letter, or one TRANSLATE('${props.from}' to '${props.to}').`, `Două moduri de a schimba literele din ${props.input}: REPLACE imbricat, câte unul pe literă, sau un singur TRANSLATE('${props.from}' în '${props.to}').`),
-      t(`First REPLACE: every '${stages[0]?.from}' becomes '${stages[0]?.to}'. So far so good.`, `Primul REPLACE: fiecare '${stages[0]?.from}' devine '${stages[0]?.to}'. Până aici merge.`),
-      t(`Second REPLACE: every '${stages[1]?.from}' becomes '${stages[1]?.to}', including the ones the first REPLACE just made. The chain gives ${chain.result}${broken ? ': wrong' : ''}.`, `Al doilea REPLACE: fiecare '${stages[1]?.from}' devine '${stages[1]?.to}', inclusiv cele create de primul REPLACE. Lanțul dă ${chain.result}${broken ? ': greșit' : ''}.`),
-      t(`TRANSLATE reads each letter once, in the original text, and swaps in one step: ${result}`, `TRANSLATE citește fiecare literă o singură dată, în textul original, și schimbă într-un singur pas: ${result}`),
-    ][k];
-    const done = k >= 3;
+    const cur = step.kind === 'replace' ? stages[step.index] : null;
+    const caption = step.kind === 'intro'
+      ? t(`Two ways to swap the letters of ${props.input}: nested REPLACE calls, one per letter, or one TRANSLATE('${props.from}' to '${props.to}').`, `Două moduri de a schimba literele din ${props.input}: REPLACE imbricat, câte unul pe literă, sau un singur TRANSLATE('${props.from}' în '${props.to}').`)
+      : step.kind === 'translate'
+        ? t(`TRANSLATE reads each letter once, in the original text, and swaps in one step: ${result}`, `TRANSLATE citește fiecare literă o singură dată, în textul original, și schimbă într-un singur pas: ${result}`)
+        : [
+          step.index === 0
+            ? t(`First REPLACE: every '${cur.from}' becomes '${cur.to}'. So far so good.`, `Primul REPLACE: fiecare '${cur.from}' devine '${cur.to}'. Până aici merge.`)
+            : t(`REPLACE ${step.index + 1}: every '${cur.from}' becomes '${cur.to}', including the ones the earlier REPLACEs just made.`, `REPLACE ${step.index + 1}: fiecare '${cur.from}' devine '${cur.to}', inclusiv cele create de REPLACE-urile dinainte.`),
+          step.last ? t(` The chain gives ${chain.result}${broken ? ': wrong' : ''}.`, ` Lanțul dă ${chain.result}${broken ? ': greșit' : ''}.`) : '',
+        ].join('');
+    const done = step.kind === 'translate';
     return (
       <VizFrame widget="char-strips" stepper={s} caption={caption} label={t('Chained REPLACE against TRANSLATE', 'REPLACE în lanț contra TRANSLATE')}>
         <div className="viz-maps">
@@ -37,7 +44,7 @@ export default function CharStrips({ props, predict }) {
         <div className="viz-dim viz-strip-label"><code>REPLACE(REPLACE(…))</code></div>
         <div className="viz-strip" role="img" aria-label={chainText}>
           {chainChars.map((c, i) => (
-            <span key={i} className={`viz-cell plain${shown >= 2 && broken && c !== plan.chars[i]?.out ? ' wrong' : ''}`}>
+            <span key={i} className={`viz-cell plain${k >= n && n > 0 && broken && c !== plan.chars[i]?.out ? ' wrong' : ''}`}>
               <Motion.span
                 key={`${shown}${c}`}
                 initial={shown > 0 && !m.reduced ? { rotateX: 90, opacity: 0 } : false}
@@ -62,21 +69,23 @@ export default function CharStrips({ props, predict }) {
             </span>
           ))}
         </div>
-        {k >= 2 && <Motion.div className="viz-result" variants={m.v.enter} initial="hidden" animate="show"><span className="viz-dim">REPLACE</span><b>{chain.result}</b>{done && <><span className="viz-dim">TRANSLATE</span><b>{result}</b></>}</Motion.div>}
+        {k >= n && n > 0 && <Motion.div className="viz-result" variants={m.v.enter} initial="hidden" animate="show"><span className="viz-dim">REPLACE</span><b>{chain.result}</b>{done && <><span className="viz-dim">TRANSLATE</span><b>{result}</b></>}</Motion.div>}
       </VizFrame>
     );
   }
 
   const left = props.fn === 'LPAD';
+  const blank = props.fill === undefined; // no pad string given: Oracle pads with a blank
+  const fill = blank ? ' ' : props.fill;
   const cut = plan.cut !== null;
   const padCells = plan.pad.map((ch, i) => ({ ch, i }));
   const caption = [
     cut
       ? t(`${props.fn}('${props.input}', ${props.len}) must be ${props.len} characters long, but the text is ${plan.input.length}.`, `${props.fn}('${props.input}', ${props.len}) trebuie să aibă ${props.len} caractere, dar textul are ${plan.input.length}.`)
-      : t(`${props.fn}('${props.input}', ${props.len}, '${props.fill}'): the result is ${props.len} characters, so ${plan.padCount} places are still empty.`, `${props.fn}('${props.input}', ${props.len}, '${props.fill}'): rezultatul are ${props.len} caractere, deci mai sunt ${plan.padCount} locuri goale.`),
+      : t(`${props.fn}('${props.input}', ${props.len}${blank ? '' : `, '${fill}'`}): the result is ${props.len} characters, so ${plan.padCount} places are still empty.`, `${props.fn}('${props.input}', ${props.len}${blank ? '' : `, '${fill}'`}): rezultatul are ${props.len} caractere, deci mai sunt ${plan.padCount} locuri goale.`),
     cut
       ? t(`Too long: ${props.fn} cuts the text from the right, it never pads. The last ${plan.dropped.length} letters go.`, `Prea lung: ${props.fn} taie textul din dreapta, nu mai adaugă nimic. Ultimele ${plan.dropped.length} litere dispar.`)
-      : t(`The fill ${props.fill.length > 1 ? `'${props.fill}' repeats` : `'${props.fill}'`} on the ${left ? 'left' : 'right'}; the last repeat is cut off when it does not fit.`, `Umplerea ${props.fill.length > 1 ? `'${props.fill}' se repetă` : `'${props.fill}'`} în ${left ? 'stânga' : 'dreapta'}; ultima repetare se taie dacă nu încape.`),
+      : t(`The fill ${blank ? 'is a blank, because no pad string was given' : fill.length > 1 ? `'${fill}' repeats` : `'${fill}'`} on the ${left ? 'left' : 'right'}; the last repeat is cut off when it does not fit.`, `Umplerea ${blank ? 'este un spațiu, fiindcă nu s-a dat niciun șir de umplere' : fill.length > 1 ? `'${fill}' se repetă` : `'${fill}'`} în ${left ? 'stânga' : 'dreapta'}; ultima repetare se taie dacă nu încape.`),
     t(`Result: ${result} (${[...result].length} characters).`, `Rezultat: ${result} (${[...result].length} caractere).`),
   ][k];
   const letters = plan.input.map((ch, i) => ({ ch, i, gone: cut && i >= plan.cut }));

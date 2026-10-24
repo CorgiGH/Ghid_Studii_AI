@@ -365,10 +365,10 @@ describe('all-vs-some', () => {
   it('qualifying students are exactly 111, 115, 116, 118, 119', () => {
     expect(run().qualifying).toEqual(['111', '115', '116', '118', '119']);
   });
-  it('MINUS by name merges the two Bodnar: 4 names for 5 students', () => {
+  it('MINUS on (nume, prenume) merges the two Bodnar Ioana: 4 names for 5 students', () => {
     const r = run();
     expect(r.minus.byKey).toHaveLength(5);
-    expect(r.minus.byName).toEqual(['Bodnar', 'Ciobotariu', 'Panaite', 'Popescu']);
+    expect(r.minus.byName).toEqual(['Bodnar Ioana', 'Ciobotariu Ciprian', 'Panaite Alexandru', 'Popescu Bogdan']);
   });
 });
 

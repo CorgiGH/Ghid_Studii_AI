@@ -22,6 +22,11 @@ export function ageParts({ birth, today }, months = monthsBetween(today, birth))
   return { years: Math.trunc(whole / 12), months: whole % 12, days, wholeMonths: whole, anchor };
 }
 
+// The step on which each arc appears, and the step on which the yearly birthday ticks light up:
+// the same one as the years arc (the ticks are what the years arc counts).
+export const ARC_AT = { y: 2, m: 3, d: 4 };
+export const ticksLit = (step) => step >= ARC_AT.y;
+
 export function ageSteps({ birth, today }) {
   const months = monthsBetween(today, birth);
   const years = months / 12;
