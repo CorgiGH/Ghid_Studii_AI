@@ -48,6 +48,21 @@ describe('text to DATE (fix 8)', () => {
     expect(await cell("SELECT COUNT(*) FROM studenti WHERE data_nastere > '01-JAN-60'")).toBe('13')
     expect(await cell("SELECT COUNT(*) FROM studenti WHERE data_nastere BETWEEN '01-JAN-95' AND '31-DEC-95'")).toBe('5')
   })
+  it('leaves ANSI typed literals alone, also on the left of a comparison', async () => {
+    expect(await cell("SELECT COUNT(*) FROM studenti WHERE DATE '1996-01-01' < data_nastere")).toBe('8')
+    expect(await cell("SELECT COUNT(*) FROM studenti WHERE TIMESTAMP '1996-01-01 00:00:00' <= data_nastere")).toBe('8')
+    expect(await cell("SELECT COUNT(*) FROM studenti WHERE data_nastere > DATE '1996-01-01'")).toBe('8')
+    const r = await run("SELECT COUNT(*) FROM studenti WHERE data_nastere - DATE '1995-01-01' > 30")
+    expect(r.error).toBeUndefined()
+  })
+  it('applies the pivot and the format errors inside IN lists', async () => {
+    const code = async (sql) => (await run(sql)).error?.code
+    expect(await cell("SELECT COUNT(*) FROM studenti WHERE data_nastere IN ('17-FEB-95')")).toBe('1')
+    expect(await cell("SELECT COUNT(*) FROM studenti WHERE data_nastere IN ('17-FEB-55', '17-FEB-95')")).toBe('1')
+    expect(await cell("SELECT COUNT(*) FROM studenti WHERE data_nastere NOT IN ('17-FEB-55')")).not.toBe('0')
+    expect(await code("SELECT COUNT(*) FROM studenti WHERE data_nastere IN ('01/01/1997')")).toBe('ORA-01843')
+    expect(await cell("SELECT COUNT(*) FROM studenti WHERE nume IN ('Popescu', 'x')")).toBe('1')
+  })
   it('converts text arguments of date functions', async () => {
     expect(await cell("SELECT NEXT_DAY('13-OCT-55','TUESDAY') FROM dual")).toBe('18-OCT-55')
     expect(await cell("SELECT ADD_MONTHS('31-JAN-95',1) FROM dual")).toBe('28-FEB-95')

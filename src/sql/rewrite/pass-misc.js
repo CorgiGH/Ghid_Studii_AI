@@ -74,10 +74,37 @@ function betweenOperands(ts) {
   return found
 }
 
+// token indexes of the string literals that are whole elements of an IN ( 'a', 'b' ) list
+function inListOperands(ts) {
+  const found = new Set()
+  ts.forEach((x, i) => {
+    if (!isWord(x, 'IN')) return
+    const o = nextSig(ts, i)
+    if (o < 0 || !isSym(ts[o], '(')) return
+    const c = matchParen(ts, o)
+    if (c < 0) return
+    let depth = 0
+    for (let j = o + 1; j < c; j++) {
+      if (isSym(ts[j], '(')) depth++
+      else if (isSym(ts[j], ')')) depth--
+      else if (depth === 0 && ts[j].type === 'string') {
+        const p = prevSig(ts, j)
+        const n = nextSig(ts, j)
+        if ((p === o || isSym(ts[p], ',')) && (n === c || isSym(ts[n], ','))) found.add(j)
+      }
+    }
+  })
+  return found
+}
+
+const ARITH = ['+', '-', '*', '/']
+const TYPED = ['DATE', 'TIMESTAMP', 'INTERVAL']
+
 export function textLiterals(ts) {
   const first = ts.find(isSig)
   const isUpdate = isWord(first, 'UPDATE')
   const between = betweenOperands(ts)
+  const inLists = inListOperands(ts)
   const out = []
   let depth = 0
   let inSet = false
@@ -91,8 +118,13 @@ export function textLiterals(ts) {
     const p = prevSig(ts, i)
     const n = nextSig(ts, i)
     const besideConcat = isSym(ts[p], '||') || isSym(ts[n], '||')
-    const compared = COMPARISONS.some((c) => isSym(ts[p], c) || isSym(ts[n], c)) || between.has(i)
-    if (besideConcat || (compared && !inSet && DATE_SHAPE.test(x.text))) out.push(raw('::text'))
+    // ANSI typed literal (DATE '..') or part of arithmetic: not a bare string operand
+    const typed = p >= 0 && ts[p].type === 'word' && TYPED.includes(ts[p].text.toUpperCase())
+    const arith = ARITH.some((c) => isSym(ts[p], c) || isSym(ts[n], c))
+    const compared =
+      COMPARISONS.some((c) => isSym(ts[p], c) || isSym(ts[n], c)) || between.has(i) || inLists.has(i)
+    if (typed) return
+    if (besideConcat || (compared && !arith && !inSet && DATE_SHAPE.test(x.text))) out.push(raw('::text'))
   })
   return out
 }
