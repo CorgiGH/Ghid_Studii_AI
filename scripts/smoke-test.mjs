@@ -21,7 +21,7 @@ import puppeteer from 'puppeteer';
 const ROOT = resolve(process.cwd());
 const CONTENT = join(ROOT, 'src', 'content');
 const BASE_PATH = '/Ghid_Studii_AI/'; // must match vite.config.js `base`
-const SUBJECTS = ['os', 'prob-stat', 'alo', 'pa', 'oop'];
+const SUBJECTS = ['os', 'prob-stat', 'alo', 'pa', 'oop', 'bd'];
 
 const args = process.argv.slice(2);
 const PORT = Number(args[args.indexOf('--port') + 1]) || 4173;
@@ -65,8 +65,11 @@ function parseSubject(slug) {
   let src;
   try { src = readFileSync(file, 'utf-8'); }
   catch { return null; }
+  const ys = /\byearSemester\s*:\s*['"]([^'"]+)['"]/.exec(src);
   return {
     slug,
+    yearSemester: ys ? ys[1] : 'y1s2',
+    lessonPlayer: /\bplayer\s*:\s*['"]lesson['"]/.test(src),
     courses: countIds(sliceArray(src, 'courses')),
     labs: countIds(sliceArray(src, 'labs')),
     seminars: countIds(sliceArray(src, 'seminars')),
@@ -74,12 +77,15 @@ function parseSubject(slug) {
   };
 }
 
+const LESSON_ROUTES = [];
+
 function buildRoutes() {
   const routes = ['/'];
   for (const slug of SUBJECTS) {
     const m = parseSubject(slug);
     if (!m) continue;
-    const base = `/${'y1s2'}/${slug}`;
+    const base = `/${m.yearSemester}/${slug}`;
+    if (m.lessonPlayer) LESSON_ROUTES.push(...Array.from({ length: m.courses }, (_, i) => `${base}/course_${i + 1}`));
     routes.push(base);                       // courses tab default (CourseMap)
     routes.push(`${base}/practice`);         // every subject has practice
     if (m.seminars > 0) routes.push(`${base}/seminars`);
@@ -237,6 +243,27 @@ async function smoke(routes) {
       }
     } catch (e) {
       noteFailure(route, 'navError', e.message);
+    }
+  }
+
+  // Lesson player: walk every screen with the Continue button (gated screens use Skip).
+  for (const route of LESSON_ROUTES) {
+    current = route + ' (walk)';
+    try {
+      await page.goto(`http://localhost:${PORT}${baseNoSlash}${route}`, { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.waitForSelector('[data-testid="lesson-screen"]', { timeout: 5000 });
+      const count = await page.evaluate(() => Number((document.querySelector('.lp-count')?.textContent || '').split('/')[1]) || 0);
+      for (let i = 1; i < count; i++) {
+        await page.evaluate(() => {
+          const next = document.querySelector('[data-testid="lesson-next"]');
+          if (next && !next.disabled) next.click(); else document.querySelector('[data-testid="lesson-skip"]')?.click();
+        });
+        await new Promise(r => setTimeout(r, 500));
+        const at = await page.evaluate(() => Number((document.querySelector('.lp-count')?.textContent || '').split('/')[0]));
+        if (at !== i + 1) { noteFailure(current, 'lessonWalk', `expected screen ${i + 1}, at ${at}`); break; }
+      }
+    } catch (e) {
+      noteFailure(current, 'lessonWalk', e.message);
     }
   }
 
