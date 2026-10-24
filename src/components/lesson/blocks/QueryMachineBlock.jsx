@@ -11,7 +11,7 @@ import { useVizMotion } from '../viz/kit.js';
 import { CountUp } from '../viz/ui.jsx';
 import { displayCell } from '../viz/logic/date-mask.js';
 import { planStages, parseQuery, scoreCount, scoreOrder, scorePicks } from '../../../sql/machine.js';
-import { buildSteps, predictKind, viewAt } from '../../../sql/machineView.js';
+import { buildSteps, chipStep, predictKind, viewAt } from '../../../sql/machineView.js';
 
 const CLAUSE_LABEL = {
   from: 'FROM', join: 'JOIN', where: 'WHERE', select: 'SELECT', distinct: 'DISTINCT', order: 'ORDER BY',
@@ -389,7 +389,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
             className={`qm-chip${i === stageIdx ? ' cur' : ''}${i < stageIdx ? ' past' : ''}`}
             aria-current={i === stageIdx ? 'step' : undefined}
             disabled={i > reachedStage}
-            onClick={() => go(steps.findIndex((x) => x.stage === i && x.phase === 'show'))}
+            onClick={() => go(chipStep(steps, i, checked))}
           >
             {CLAUSE_LABEL[s.clause]}
           </button>

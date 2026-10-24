@@ -5,7 +5,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { createEngine } from '../../src/sql/engine/core.js'
 import { planStages } from '../../src/sql/machine.js'
-import { buildSteps, predictKind, settled, viewAt } from '../../src/sql/machineView.js'
+import { buildSteps, chipStep, predictKind, settled, viewAt } from '../../src/sql/machineView.js'
 import { validateQueryMachine } from '../../src/sql/machineSpec.js'
 import { isGatingBlock, isGatingScreen } from '../../src/components/lesson/playerLogic.js'
 import { blockLoaders } from '../../src/components/blocks/registry.js'
@@ -124,5 +124,15 @@ describe('steps and views', () => {
     expect(shown.panels.result).toHaveLength(1)
     expect(shown.panels.right.every((r) => r.status === 'plain')).toBe(true)
     expect(shown.panels.left.filter((r) => r.moved)).toHaveLength(1)
+  })
+})
+
+describe('clause chips never reveal an unanswered prediction', () => {
+  it('jumps to the ask step until the stage is checked, then to the show step', () => {
+    const steps = buildSteps([{ clause: 'from' }, { clause: 'where', predict: true }, { clause: 'order', predict: true }])
+    expect(steps[chipStep(steps, 1, {})]).toEqual({ stage: 1, phase: 'ask' })
+    expect(steps[chipStep(steps, 2, {})]).toEqual({ stage: 2, phase: 'ask' })
+    expect(steps[chipStep(steps, 1, { 1: { correct: 1, total: 1 } })]).toEqual({ stage: 1, phase: 'show' })
+    expect(steps[chipStep(steps, 0, {})]).toEqual({ stage: 0, phase: 'show' })
   })
 })

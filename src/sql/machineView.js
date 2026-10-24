@@ -13,6 +13,12 @@ export function buildSteps(stages) {
   return steps
 }
 
+// Where a clause chip jumps: a stage that asks and has not been checked is entered at its question, never its answer.
+export function chipStep(steps, i, checked = {}) {
+  const ask = steps.findIndex((x) => x.stage === i && x.phase === 'ask')
+  return ask >= 0 && !checked[i] ? ask : steps.findIndex((x) => x.stage === i && x.phase === 'show')
+}
+
 // Which kind of answer a predicted stage asks for.
 export function predictKind(clause) {
   if (clause === 'where') return 'rows'

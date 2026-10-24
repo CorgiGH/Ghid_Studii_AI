@@ -92,6 +92,16 @@ describe('planStages against the engine', () => {
     expect(where.kept.length).toBeGreaterThan(0)
   })
 
+  it('MINUS on names reproduces L4.12: Bodnar x2 merges, 4 rows instead of 5', async () => {
+    const sql = 'SELECT s.nume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol MINUS SELECT s.nume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol WHERE n.valoare < 7'
+    const stages = await planStages(sql, [{ clause: 'minus' }], engine, { dataset: 'facultate', show: ['nume'] })
+    const s = stages[0]
+    const names = s.kept.map((k) => (s.rows.find((r) => r.key === k) || s.right.find((r) => r.key === k)).cells.nume)
+    expect(names).toHaveLength(4)
+    expect([...names].sort()).toEqual(['Bodnar', 'Ciobotariu', 'Panaite', 'Popescu'])
+    expect(names.sort()).toEqual((await rowsOf(sql)).map((r) => r[0]).sort())
+  })
+
   it('homonyms merge: MINUS / UNION / INTERSECT on names equal the engine', async () => {
     for (const [op, clause] of [['MINUS', 'minus'], ['UNION', 'union'], ['INTERSECT', 'intersect'], ['UNION ALL', 'union-all']]) {
       const sql = `SELECT nume FROM studenti WHERE an < 3 ${op} SELECT nume FROM studenti WHERE an > 1`
