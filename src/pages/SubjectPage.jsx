@@ -15,6 +15,7 @@ import LessonPlayer from '../components/lesson/LessonPlayer';
 import TestRenderer from '../components/blocks/test/TestRenderer';
 import TestsTab from '../components/ui/TestsTab';
 import BottomTabBar from '../components/layout/BottomTabBar';
+import ReviewTab from '../components/lesson/ReviewTab';
 import QuickQuizFAB from '../components/ui/QuickQuizFAB';
 import { CourseBlock } from '../components/ui';
 
@@ -61,7 +62,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
       ? 'labs'
       : semNum
         ? 'seminars'
-        : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
+        : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) || (wildcard === 'review' && subject?.player === 'lesson') ? wildcard : 'courses';
 
   const activeCourse = useMemo(() => {
     if (!courseNum || !subject) return null;
@@ -405,6 +406,10 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
               <Suspense fallback={<LoadingFallback />}>
                 <PracticeTab practice={subject.practice} />
               </Suspense>
+            )}
+
+            {tab === 'review' && (
+              <ReviewTab subject={subject} yearSem={yearSem} subjectSlug={subjectSlug} />
             )}
 
             {tab === 'tests' && subject.tests && (

@@ -4,6 +4,7 @@
 export const STORAGE_KEY = 'bdLessonState.v1';
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_ATTEMPTS = 12;
+const REVIEW_GAPS = [1, 3]; // days after the 1st and 2nd right answer
 
 const emptyState = () => ({ v: 1, positions: {}, attempts: {}, review: {} });
 
@@ -54,7 +55,7 @@ export function createLessonStore(storage) {
       const review = { ...state.review };
       const enqueue = (!a.ok && !a.skipped) || (a.hints || 0) >= 3;
       if (enqueue) {
-        review[itemId] = { itemId, ref: a.ref, kind: a.kind, due: a.at, streak: 0 };
+        review[itemId] = { itemId, ref: a.ref, kind: a.kind, tag: a.misconception || null, due: a.at, streak: 0 };
       }
       state = { ...state, attempts: { ...state.attempts, [itemId]: history }, review };
       commit();
@@ -63,15 +64,30 @@ export function createLessonStore(storage) {
       void now;
       return Object.values(state.review).sort((x, y) => x.due - y.due);
     },
+    // Spaced schedule: a miss puts the item due now (streak 0). Right answers move it
+    // to +1 day, then +3 days, and the third right answer removes it. A right answer
+    // on an item that is not due yet is only practice and changes nothing.
     markReview(itemId, ok, now) {
       const item = state.review[itemId];
       if (!item) return;
       const review = { ...state.review };
-      if (ok && item.streak >= 1) delete review[itemId];
-      else if (ok) review[itemId] = { ...item, streak: 1, due: now + DAY };
-      else review[itemId] = { ...item, streak: 0, due: now + DAY };
+      if (!ok) review[itemId] = { ...item, streak: 0, due: now };
+      else if (item.due > now) return;
+      else if (item.streak >= REVIEW_GAPS.length) delete review[itemId];
+      else review[itemId] = { ...item, streak: item.streak + 1, due: now + REVIEW_GAPS[item.streak] * DAY };
       state = { ...state, review };
       commit();
+    },
+    pendingCount() {
+      return Object.keys(state.review).length;
+    },
+    // Attempts recorded for a given screen of a lesson file (used to re-open a gate after a reload).
+    attemptsAt(src, screen) {
+      const out = [];
+      for (const list of Object.values(state.attempts)) {
+        for (const a of list) if (a?.ref?.src === src && a.ref.screen === screen) out.push(a);
+      }
+      return out;
     },
     subscribe(fn) {
       listeners.add(fn);

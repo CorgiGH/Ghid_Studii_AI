@@ -14,6 +14,7 @@ const Breadcrumbs = ({ yearSem, subject, tab, activeItemTitle }) => {
     labs: t('Exercises', 'Exerciții'),
     practice: t('Practice', 'Practică'),
     tests: t('Tests', 'Teste'),
+    review: t('Review', 'Recapitulare'),
   };
 
   const ysShortLabel = ys ? ys.id.toUpperCase() : null;

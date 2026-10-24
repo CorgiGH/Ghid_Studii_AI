@@ -7,7 +7,7 @@ import BlockRenderer from '../blocks/BlockRenderer';
 import formatMarkdown from '../blocks/formatMarkdown';
 import ScreenGate from './ScreenGate';
 import { useLessonStore } from '../../lesson/useLessonStore';
-import { canAdvance, gatingKind, mergeGate, isGatingScreen, nextScreen, screenFromUrl, slideVariants } from './playerLogic';
+import { canAdvance, isGatingScreen, mergeGate, nextScreen, screenFromUrl, seedGate, skipAttempt, slideVariants } from './playerLogic';
 
 const EDITABLE = 'textarea, input, select, [contenteditable=""], [contenteditable="true"], .cm-editor, [data-lesson-editor]';
 const INTERACTIVE = 'button, a, summary, [role="button"], [role="tab"]';
@@ -38,8 +38,13 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
 
   const [gates, setGates] = useState({});
   const [dir, setDir] = useState(1);
-  const headingRef = useRef(null);
   const firstRender = useRef(true);
+
+  // The heading of a screen that has just entered takes focus once it is mounted, which
+  // (AnimatePresence mode="wait") is after the previous screen has finished leaving.
+  const headingRef = useCallback((el) => {
+    if (el && !firstRender.current) el.focus({ preventScroll: true });
+  }, []);
 
   // Keep ?s= in sync (replace, so Back leaves the lesson instead of walking screens).
   useEffect(() => {
@@ -71,14 +76,21 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
     return () => setCourseContext(null);
   }, [step, data.course, setCourseContext, t]);
 
-  // New screen: scroll to the top and move focus to the heading.
+  // New screen: scroll to the top (focus follows in headingRef).
   useEffect(() => {
     if (firstRender.current) { firstRender.current = false; return; }
     window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
-    headingRef.current?.focus({ preventScroll: true });
   }, [screen, reduced]);
 
-  const gate = gates[screen];
+  // After a reload, a screen the learner already answered stays unlocked.
+  const version = store.getVersion();
+  const seeded = useMemo(
+    () => (step ? seedGate(step, store.attemptsAt(src, screen)) : undefined),
+    // version: re-seed whenever the store records something
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [step, src, screen, store, version],
+  );
+  const gate = gates[screen] || seeded;
   const advanceOk = step ? canAdvance(step, gate) : false;
   const gating = step ? isGatingScreen(step) : false;
   const isLast = screen === total;
@@ -107,10 +119,16 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
 
   const skip = useCallback(() => {
     if (!step) return;
+    if (canAdvance(step, gate)) return;
     patchGate(screen, { skipped: true });
-    store.recordAttempt(step.id, { ok: false, hints: 0, skipped: true, kind: gatingKind(step), ref: { src, screen }, at: Date.now() });
+    store.recordAttempt(step.id, skipAttempt(step, src, screen, Date.now()));
     if (isLast) onFinish?.(); else go(nextScreen(screen, 1, total));
-  }, [step, screen, patchGate, store, src, isLast, onFinish, go, total]);
+  }, [step, gate, screen, patchGate, store, src, isLast, onFinish, go, total]);
+
+  // Blocks get a stable skip() that always runs the latest handler above.
+  const skipRef = useRef(skip);
+  useEffect(() => { skipRef.current = skip; }, [skip]);
+  const onSkip = useCallback(() => skipRef.current(), []);
 
   // Keyboard: arrows and Enter, unless the learner is typing or on a control.
   useEffect(() => {
@@ -164,7 +182,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
             transition={reduced ? { duration: 0.15 } : { x: { type: 'spring', stiffness: 380, damping: 34 }, opacity: { duration: 0.18 } }}
           >
             <h2 ref={headingRef} tabIndex={-1} className="lp-title" dangerouslySetInnerHTML={{ __html: formatMarkdown(title) }} />
-            <ScreenGate screen={screen} state={gates[screen]} patchGate={patchGate}>
+            <ScreenGate src={src} screen={screen} state={gate} patchGate={patchGate} onSkip={onSkip}>
               <div className="lp-blocks">
                 {step.blocks.map((block, i) => (
                   <BlockRenderer key={`${step.id}:${i}`} block={block} lectureVisible={lectureVisible} />

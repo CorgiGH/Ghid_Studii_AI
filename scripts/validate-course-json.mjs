@@ -8,6 +8,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { validateViz } from '../src/components/lesson/viz/vizSpec.js';
+import { validateMcq, validateReflect } from '../src/components/lesson/blocks/choiceSpec.js';
 
 const file = process.argv[2];
 if (!file) { console.error('Usage: node validate-course-json.mjs <file>'); process.exit(1); }
@@ -57,6 +58,12 @@ else {
         }
         if (t === 'viz') {
           for (const e of validateViz(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'mcq') {
+          for (const e of validateMcq(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'reflect') {
+          for (const e of validateReflect(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'code') {
           if (!block.code) errors.push(`steps[${si}].blocks[${bi}] (code): missing code field`);

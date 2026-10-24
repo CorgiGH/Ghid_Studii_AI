@@ -1,8 +1,10 @@
 import React from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { useLessonStore } from '../../lesson/useLessonStore';
 
 const ContentTypeBar = ({ subject, activeTab, onTabChange }) => {
   const { t } = useApp();
+  const pending = useLessonStore().pendingCount();
 
   const tabs = [];
   if (subject.courses?.length > 0) {
@@ -19,6 +21,10 @@ const ContentTypeBar = ({ subject, activeTab, onTabChange }) => {
   }
   if (subject.tests?.length > 0) {
     tabs.push({ id: 'tests', label: t('Tests', 'Teste') });
+  }
+
+  if (subject.player === 'lesson') {
+    tabs.push({ id: 'review', label: t('Review', 'Recapitulare'), badge: pending });
   }
 
   return (
@@ -51,6 +57,7 @@ const ContentTypeBar = ({ subject, activeTab, onTabChange }) => {
             }}
           >
             {tab.label}
+            {tab.badge > 0 && <span className="ch-badge" data-testid="review-badge">{tab.badge}</span>}
           </button>
         );
       })}

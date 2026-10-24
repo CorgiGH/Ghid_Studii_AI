@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLessonStore } from '../../lesson/useLessonStore';
 
 const TABS = [
   { key: 'courses', label: 'Courses', labelRo: 'Cursuri', icon: '\uD83D\uDCD6' },
@@ -6,9 +7,11 @@ const TABS = [
   { key: 'labs', label: 'Labs', labelRo: 'Laboratoare', icon: '\uD83E\uDDEA' },
   { key: 'practice', label: 'Practice', labelRo: 'Practic\u0103', icon: '\uD83D\uDCBB' },
   { key: 'tests', label: 'Tests', labelRo: 'Teste', icon: '\uD83D\uDCCB' },
+  { key: 'review', label: 'Review', labelRo: 'Recapitulare', icon: '\uD83D\uDD01' },
 ];
 
 export default function BottomTabBar({ subject, activeTab, onTabChange, lang }) {
+  const pending = useLessonStore().pendingCount();
   // Only show tabs the subject actually has
   const visibleTabs = TABS.filter(t => {
     if (t.key === 'courses') return subject.courses?.length > 0;
@@ -16,6 +19,7 @@ export default function BottomTabBar({ subject, activeTab, onTabChange, lang }) 
     if (t.key === 'labs') return subject.labs?.length > 0;
     if (t.key === 'practice') return !!subject.practice;
     if (t.key === 'tests') return subject.tests?.length > 0;
+    if (t.key === 'review') return subject.player === 'lesson';
     return false;
   });
 
@@ -72,7 +76,7 @@ export default function BottomTabBar({ subject, activeTab, onTabChange, lang }) 
                   }}
                 />
               )}
-              <span className="text-lg relative z-10">{tab.icon}</span>
+              <span className="text-lg relative z-10">{tab.icon}{tab.key === 'review' && pending > 0 && <span className="ch-badge ch-badge-dot">{pending}</span>}</span>
               <span
                 className="relative z-10"
                 style={{

@@ -55,3 +55,19 @@ export function mergeGate(gates, idx, patch) {
   if (Object.keys(patch).every(k => prev[k] === patch[k])) return gates;
   return { ...gates, [idx]: { ...prev, ...patch } };
 }
+
+// The record the player stores when the learner skips a gating screen (footer button or a block's skip()).
+export function skipAttempt(step, src, screen, at) {
+  return { ok: false, hints: 0, skipped: true, kind: gatingKind(step), ref: { src, screen }, at };
+}
+
+// Gate state rebuilt from stored attempts for this screen, so an answered screen stays
+// unlocked after a reload. A sql screen needs a right answer (or a skip); other kinds
+// count any answer, because their gate opens on the first answer.
+export function seedGate(step, attempts) {
+  if (!isGatingScreen(step) || !Array.isArray(attempts) || attempts.length === 0) return undefined;
+  const sql = gatingKind(step) === 'sql';
+  if (attempts.some(a => a.skipped)) return { skipped: true };
+  if (attempts.some(a => (sql ? a.ok === true : true))) return { completed: true };
+  return undefined;
+}

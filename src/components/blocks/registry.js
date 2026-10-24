@@ -22,6 +22,8 @@ const registry = {
   'terminal':       lazy(() => import('./interactive/TerminalBlock.jsx')),
   // Lesson blocks
   'viz':            lazy(() => import('../lesson/blocks/VizBlock.jsx')),
+  'reflect':        lazy(() => import('../lesson/blocks/ReflectBlock.jsx')),
+  'mcq':            lazy(() => import('../lesson/blocks/McqBlock.jsx')),
 };
 
 export default registry;

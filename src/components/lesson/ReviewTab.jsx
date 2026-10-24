@@ -1,0 +1,146 @@
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion as Motion, useReducedMotion } from 'motion/react';
+import { useApp } from '../../contexts/AppContext';
+import { loadJson } from '../../content/jsonLoader';
+import formatMarkdown from '../blocks/formatMarkdown';
+import McqBlock from './blocks/McqBlock.jsx';
+import { useLessonStore } from '../../lesson/useLessonStore';
+import { nowMs } from '../../lesson/clock.js';
+import { collectMcqPool, dueLabel, groupReview, pickVariant } from '../../lesson/review.js';
+
+function readLesson(src) {
+  try { return loadJson(src); } catch { return null; }
+}
+
+// Recapitulare: everything the learner missed and has not yet answered right three times.
+export default function ReviewTab({ subject, yearSem, subjectSlug }) {
+  const { t, lang } = useApp();
+  const store = useLessonStore();
+  const navigate = useNavigate();
+  const reduced = !!useReducedMotion();
+  const [active, setActive] = useState(null); // { item, variant, key, result }
+  const seen = useRef({}); // itemId -> variant ids already shown
+
+  const lessons = useMemo(
+    () => subject.courses.filter(c => c.src).map((c, i) => ({ src: c.src, index: i, meta: c, course: readLesson(c.src) })),
+    [subject],
+  );
+  const pool = useMemo(() => collectMcqPool(lessons.filter(l => l.course)), [lessons]);
+  const bySrc = useMemo(() => Object.fromEntries(lessons.map(l => [l.src, l])), [lessons]);
+
+  const now = nowMs();
+  const groups = groupReview(store.pendingReview(now), now);
+
+  const lessonTitle = (src) => {
+    const l = bySrc[src];
+    return l ? t(l.meta.shortTitle.en, l.meta.shortTitle.ro) : src;
+  };
+  const originalOf = (item) => pool.find(p => p.id === item.itemId) || null;
+
+  const openLesson = (item, hidden) => {
+    const l = bySrc[item.ref?.src];
+    if (!l) return;
+    const q = new URLSearchParams({ s: String(item.ref.screen) });
+    if (hidden) q.set('variant', 'hidden');
+    navigate(`/${yearSem}/${subjectSlug}/course_${l.index + 1}?${q}`);
+  };
+
+  const variantFor = useCallback((item) => {
+    const v = pickVariant(item, pool, { avoid: seen.current[item.itemId] || [] });
+    if (v) seen.current[item.itemId] = [...(seen.current[item.itemId] || []), v.entry.id];
+    return v;
+  }, [pool]);
+
+  const start = (item) => {
+    if (item.kind === 'mcq') {
+      const variant = variantFor(item);
+      if (variant) { setActive({ item, variant, key: 0, result: null }); return; }
+    }
+    openLesson(item, item.kind === 'sql');
+  };
+
+  const onAnswer = (item) => ({ ok }) => {
+    const at = nowMs();
+    store.markReview(item.itemId, ok, at);
+    const left = store.pendingReview(at).find(i => i.itemId === item.itemId);
+    setActive(a => (a ? { ...a, result: { ok, gone: !left, due: left?.due ?? null, at } } : a));
+  };
+
+  const another = () => setActive(a => {
+    const variant = variantFor(a.item);
+    return variant ? { ...a, variant, key: a.key + 1, result: null } : a;
+  });
+
+  if (active) {
+    const { item, variant, key, result } = active;
+    return (
+      <div className="ch-review">
+        <button type="button" className="ch-back" onClick={() => setActive(null)}>← {t('Back to the list', 'Înapoi la listă')}</button>
+        <p className="ch-from">{lessonTitle(item.ref?.src)}</p>
+        <div className="ch-card">
+          <McqBlock key={`${variant.entry.id}:${key}`} id={variant.block.id} question={variant.block.question} options={variant.block.options} record={false} onAnswer={onAnswer(item)} />
+        </div>
+        {result && (
+          <Motion.div
+            className={`ch-result ${result.ok ? 'ok' : 'bad'}`}
+            data-testid="review-result"
+            initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <p>
+              {result.ok
+                ? (result.gone
+                  ? t('Right, and this one is done. It leaves Review.', 'Corect, și gata cu această întrebare. Iese din Recapitulare.')
+                  : t(`Right. It comes back ${dueLabel(result.due, result.at, 'en')}.`, `Corect. Revine ${dueLabel(result.due, result.at, 'ro')}.`))
+                : t('Not this time. It stays in Review; try another version.', 'De data asta nu. Rămâne în Recapitulare; încearcă altă variantă.')}
+            </p>
+            <div className="ch-actions">
+              {!result.ok && <button type="button" className="ch-reveal" data-testid="review-another" onClick={another}>{t('Another version', 'Altă variantă')}</button>}
+              <button type="button" className="ch-reveal ghost" data-testid="review-list" onClick={() => setActive(null)}>{t('Back to the list', 'Înapoi la listă')}</button>
+            </div>
+          </Motion.div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="ch-review" data-testid="review-tab">
+      <h2 className="ch-h">{t('Review', 'Recapitulare')}</h2>
+      {groups.length === 0 ? (
+        <div className="ch-empty" data-testid="review-empty">
+          <p>{t('Nothing to review yet. Questions you miss show up here, and come back until you get them right three times.', 'Nimic de recapitulat deocamdată. Întrebările la care greșești apar aici și revin până le nimerești de trei ori.')}</p>
+        </div>
+      ) : (
+        <>
+          <p className="ch-lead">{t('Questions you missed. Each one comes back as a fresh version until you get it right three times, on different days.', 'Întrebările la care ai greșit. Fiecare revine într-o variantă nouă până o nimerești de trei ori, în zile diferite.')}</p>
+          {groups.map(g => (
+            <section key={g.src} className="ch-group" data-testid="review-group">
+              <h3 className="ch-gh">{lessonTitle(g.src)} <span className="ch-count">{g.items.length}</span></h3>
+              <ul className="ch-list">
+                {g.items.map(item => {
+                  const orig = originalOf(item);
+                  const text = orig
+                    ? t(orig.block.question.en, orig.block.question.ro)
+                    : (bySrc[item.ref?.src]?.course?.steps?.[item.ref.screen - 1]?.title
+                      ? t(bySrc[item.ref.src].course.steps[item.ref.screen - 1].title.en, bySrc[item.ref.src].course.steps[item.ref.screen - 1].title.ro)
+                      : item.itemId);
+                  return (
+                    <li key={item.itemId} className={`ch-item${item.isDue ? ' due' : ''}`} data-testid="review-item" data-item={item.itemId}>
+                      <span className="ch-item-text" dangerouslySetInnerHTML={{ __html: formatMarkdown(text) }} />
+                      <span className="ch-due">{dueLabel(item.due, now, lang)}</span>
+                      <button type="button" className="ch-reveal" onClick={() => start(item)}>
+                        {item.kind === 'mcq' ? t('Practise', 'Exersează') : t('Open the exercise', 'Deschide exercițiul')}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}

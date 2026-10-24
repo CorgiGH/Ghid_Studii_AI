@@ -41,7 +41,7 @@ describe('lesson store', () => {
     expect(st.getPosition('a')).toBe(4);
   });
 
-  it('schedules review: miss due now, right +1 day, right again removes', () => {
+  it('schedules review: miss due now, right +1 day, right +3 days, third right removes', () => {
     const st = createLessonStore(fakeStorage());
     st.recordAttempt('q1', miss());
     const [item] = st.pendingReview(1000);
@@ -49,15 +49,49 @@ describe('lesson store', () => {
     st.markReview('q1', true, 2000);
     expect(st.pendingReview(2000)[0]).toMatchObject({ due: 2000 + DAY, streak: 1 });
     st.markReview('q1', true, 2000 + DAY);
-    expect(st.pendingReview(2000 + DAY)).toEqual([]);
+    expect(st.pendingReview(2000 + DAY)[0]).toMatchObject({ due: 2000 + 4 * DAY, streak: 2 });
+    st.markReview('q1', true, 2000 + 4 * DAY);
+    expect(st.pendingReview(2000 + 4 * DAY)).toEqual([]);
   });
 
-  it('a wrong review answer resets the streak', () => {
+  it('a miss at any point resets the item to due now', () => {
     const st = createLessonStore(fakeStorage());
     st.recordAttempt('q1', miss());
     st.markReview('q1', true, 2000);
-    st.markReview('q1', false, 3000);
-    expect(st.pendingReview(3000)[0].streak).toBe(0);
+    st.markReview('q1', true, 2000 + DAY);
+    st.markReview('q1', false, 3 * DAY);
+    expect(st.pendingReview(3 * DAY)[0]).toMatchObject({ streak: 0, due: 3 * DAY });
+  });
+
+  it('a repeat miss in the lesson on an item already in review restarts it', () => {
+    const st = createLessonStore(fakeStorage());
+    st.recordAttempt('q1', miss());
+    st.markReview('q1', true, 2000);
+    st.recordAttempt('q1', miss({ at: 9000 }));
+    expect(st.pendingReview(9000)[0]).toMatchObject({ streak: 0, due: 9000 });
+  });
+
+  it('a right answer before the item is due is practice only', () => {
+    const st = createLessonStore(fakeStorage());
+    st.recordAttempt('q1', miss());
+    st.markReview('q1', true, 2000);
+    const before = st.pendingReview(2000)[0];
+    st.markReview('q1', true, 2500);
+    expect(st.pendingReview(2500)[0]).toEqual(before);
+  });
+
+  it('remembers the trap tag of the missed answer', () => {
+    const st = createLessonStore(fakeStorage());
+    st.recordAttempt('q1', miss({ misconception: 'null-eq' }));
+    expect(st.pendingReview(1000)[0].tag).toBe('null-eq');
+  });
+
+  it('finds the attempts recorded for one screen of one lesson', () => {
+    const st = createLessonStore(fakeStorage());
+    st.recordAttempt('q1', miss());
+    st.recordAttempt('q2', { ok: true, hints: 0, kind: 'mcq', ref: { src: ref.src, screen: 3 }, at: 5 });
+    expect(st.attemptsAt(ref.src, 2).length).toBe(1);
+    expect(st.attemptsAt(ref.src, 4)).toEqual([]);
   });
 
   it('lists due items before later ones and ignores correct or skipped attempts', () => {

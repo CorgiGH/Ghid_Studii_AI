@@ -64,7 +64,7 @@ describe('slideVariants', () => {
   });
 });
 
-import { mergeGate } from '../../src/components/lesson/playerLogic.js';
+import { mergeGate, seedGate, skipAttempt } from '../../src/components/lesson/playerLogic.js';
 describe('mergeGate', () => {
   it('returns the same object when nothing changes', () => {
     const g = { 2: { completed: true } };
@@ -76,5 +76,34 @@ describe('mergeGate', () => {
     expect(n).not.toBe(g);
     expect(n[2]).toEqual({ completed: true, skipped: true });
     expect(mergeGate({}, 1, { completed: true })).toEqual({ 1: { completed: true } });
+  });
+});
+
+const mcqStep = { id: 's', title: { en: 'a', ro: 'a' }, blocks: [{ type: 'mcq', id: 'q' }] };
+const sqlStep = { id: 's2', title: { en: 'a', ro: 'a' }, blocks: [{ type: 'sql-exercise', id: 'x' }] };
+
+describe('skipAttempt', () => {
+  it('builds the record the player stores for a skip', () => {
+    expect(skipAttempt(mcqStep, 'bd/courses/lesson-01.json', 4, 99)).toEqual({
+      ok: false, hints: 0, skipped: true, kind: 'mcq', ref: { src: 'bd/courses/lesson-01.json', screen: 4 }, at: 99,
+    });
+    expect(skipAttempt(sqlStep, 'x', 1, 5).kind).toBe('sql');
+  });
+});
+
+describe('seedGate', () => {
+  it('opens an answered mcq screen again after a reload', () => {
+    expect(seedGate(mcqStep, [{ ok: false, kind: 'mcq' }])).toEqual({ completed: true });
+  });
+  it('treats a stored skip as a skip', () => {
+    expect(seedGate(mcqStep, [{ ok: false, skipped: true }])).toEqual({ skipped: true });
+  });
+  it('keeps a sql screen locked until a right answer', () => {
+    expect(seedGate(sqlStep, [{ ok: false, kind: 'sql' }])).toBeUndefined();
+    expect(seedGate(sqlStep, [{ ok: false }, { ok: true }])).toEqual({ completed: true });
+  });
+  it('does nothing without attempts or on a non-gating screen', () => {
+    expect(seedGate(mcqStep, [])).toBeUndefined();
+    expect(seedGate({ blocks: [{ type: 'learn' }] }, [{ ok: true }])).toBeUndefined();
   });
 });
