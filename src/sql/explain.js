@@ -275,3 +275,109 @@ export function explainOra(code) {
   const key = /^ORA-\d+$/i.test(String(code)) ? `ORA-${String(code).slice(4).padStart(5, '0')}` : String(code)
   return TABLE[key] ?? GENERIC
 }
+
+// ---- what a verdict and a named mistake mean --------------------------------------------------------------------------
+//   explainVerdict(verdict) -> { ro, en }      one or two sentences about how the learner's result differs from the expected one
+//   explainMistake(id)      -> { ro, en }      what the classic trap is and how to avoid it
+const count = (n, ro1, roN, en1, enN) => ({ ro: `${n} ${n === 1 ? ro1 : roN}`, en: `${n} ${n === 1 ? en1 : enN}` })
+
+export function explainVerdict(v) {
+  const miss = (v.missing ?? []).length
+  const extra = (v.extra ?? []).length
+  switch (v.kind) {
+    case 'correct':
+      return { ro: 'Rezultatul este cel cerut.', en: 'The result is the one asked for.' }
+    case 'rows':
+    case 'rowcount': {
+      const m = count(miss, 'rând așteptat lipsește', 'rânduri așteptate lipsesc', 'expected row is missing', 'expected rows are missing')
+      const x = count(extra, 'rând în plus', 'rânduri în plus', 'extra row', 'extra rows')
+      const ro = miss && extra ? `${m.ro} și ${x.ro}.` : miss ? `${m.ro}.` : extra ? `Ai ${x.ro}.` : 'Rândurile nu sunt cele cerute.'
+      const en = miss && extra ? `${m.en} and ${x.en}.` : miss ? `${m.en}.` : extra ? `You have ${x.en}.` : 'The rows are not the ones asked for.'
+      return { ro, en }
+    }
+    case 'order':
+      return {
+        ro: 'Rândurile sunt cele cerute, dar în altă ordine. Fără ORDER BY, Oracle nu garantează nicio ordine; adaugă ORDER BY cu coloanele cerute.',
+        en: 'The rows are the right ones but in a different order. Without ORDER BY Oracle guarantees no order; add ORDER BY with the requested columns.',
+      }
+    case 'columns':
+      return {
+        ro: 'Numărul de coloane nu este cel cerut. Verifică ce coloane cere enunțul, în ce ordine, și că nu ai lăsat sau adăugat una în plus.',
+        en: 'The number of columns is not the one asked for. Check which columns the statement wants, in which order, and that you did not leave one out or add one.',
+      }
+    case 'alias':
+      return {
+        ro: 'Datele sunt bune, dar numele coloanelor din antet nu sunt cele cerute (sau două coloane au același nume). Dă fiecărei coloane aliasul cerut.',
+        en: 'The data is right, but the column names in the header are not the requested ones (or two columns share a name). Give each column the requested alias.',
+      }
+    case 'error':
+      return explainOra(v.code)
+    case 'not-oracle':
+      return {
+        ro: 'Comanda e scrisă în alt dialect SQL, nu în Oracle 11g. Oracle nu are LIMIT, TOP, ILIKE sau ::; folosește ROWNUM, LIKE cu UPPER, CAST sau TO_CHAR.',
+        en: 'The command is written in another SQL dialect, not Oracle 11g. Oracle has no LIMIT, TOP, ILIKE or ::; use ROWNUM, LIKE with UPPER, CAST or TO_CHAR.',
+      }
+    case 'structure':
+      return {
+        ro: 'După rularea comenzilor, un tabel lipsește sau nu are coloanele cerute (nume, ordine). Verifică numele tabelului și al coloanelor.',
+        en: 'After your commands ran, a table is missing or does not have the requested columns (names, order). Check the names of the table and its columns.',
+      }
+    case 'contents': {
+      const m = count(miss, 'rând așteptat lipsește', 'rânduri așteptate lipsesc', 'expected row is missing', 'expected rows are missing')
+      const x = count(extra, 'rând în plus', 'rânduri în plus', 'extra row', 'extra rows')
+      return {
+        ro: `Tabelul${v.table ? ` ${v.table}` : ''} nu conține datele cerute: ${m.ro}, ${x.ro}.`,
+        en: `The table${v.table ? ` ${v.table}` : ''} does not hold the requested data: ${m.en}, ${x.en}.`,
+      }
+    }
+    default:
+      return GENERIC
+  }
+}
+
+const MISTAKES = {
+  'eq-null': {
+    ro: 'Ai comparat cu NULL folosind = sau <>. NULL înseamnă „necunoscut”, deci orice comparație cu el nu este nici adevărată, nici falsă și nu alege niciun rând. Scrie IS NULL sau IS NOT NULL.',
+    en: 'You compared with NULL using = or <>. NULL means "unknown", so any comparison with it is neither true nor false and picks no row. Write IS NULL or IS NOT NULL.',
+  },
+  'inner-vs-left': {
+    ro: 'Un JOIN obișnuit păstrează doar rândurile care au pereche în celălalt tabel, așa că rândurile fără pereche dispar. Ca să le păstrezi, folosește LEFT JOIN (sau RIGHT JOIN) de la tabelul ale cărui rânduri trebuie să apară toate.',
+    en: 'A plain JOIN keeps only the rows that have a partner in the other table, so rows without a partner disappear. To keep them, use LEFT JOIN (or RIGHT JOIN) starting from the table whose rows must all appear.',
+  },
+  'missing-join-cond': {
+    ro: 'Ai mai multe tabele în FROM, dar nu le-ai legat pe toate între ele: fiecare tabel în plus are nevoie de o condiție de legătură. Fără ea, Oracle face produsul cartezian și fiecare rând se potrivește cu toate rândurile celuilalt tabel.',
+    en: 'You have several tables in FROM but did not tie each one to the others: every extra table needs a join condition. Without it Oracle builds the Cartesian product and every row pairs with all rows of the other table.',
+  },
+  'char-trim': {
+    ro: 'Coloanele CHAR(n) sunt completate cu spații până la n caractere. Textul tău diferă de cel așteptat doar prin spații; taie-le cu TRIM sau RTRIM, sau folosește VARCHAR2 când poți.',
+    en: 'CHAR(n) columns are padded with blanks up to n characters. Your text differs from the expected one only by blanks; cut them with TRIM or RTRIM, or use VARCHAR2 where you can.',
+  },
+  'self-pair-name': {
+    ro: 'Pentru perechi dintr-un singur tabel, condiția < sau <> pe nume pierde perechile cu același nume, tocmai cele care pot fi omonime. Compară cheia (de exemplu s1.nr_matricol < s2.nr_matricol): fiecare pereche apare o singură dată, chiar și când numele coincid.',
+    en: 'For pairs from a single table, a < or <> condition on the name loses the pairs with the same name, exactly the ones that may be homonyms. Compare the key (for example s1.nr_matricol < s2.nr_matricol): each pair appears once, even when the names are equal.',
+  },
+  'minus-name-collapse': {
+    ro: 'MINUS compară rânduri întregi și elimină dublurile. Dacă lista conține doar numele, două persoane cu același nume se contopesc într-un rând, iar dacă una dintre ele e în a doua listă dispar amândouă. Include cheia în SELECT sau folosește NOT IN / NOT EXISTS pe cheie.',
+    en: 'MINUS compares whole rows and removes duplicates. If the list holds only names, two people with the same name merge into one row, and if one of them is in the second list both disappear. Include the key in SELECT or use NOT IN / NOT EXISTS on the key.',
+  },
+  'and-or': {
+    ro: 'AND se evaluează înaintea lui OR. Când amesteci cele două fără paranteze, condiția se grupează altfel decât crezi. Pune între paranteze partea cu OR.',
+    en: 'AND is evaluated before OR. When you mix the two without parentheses, the condition groups differently than you think. Put the OR part in parentheses.',
+  },
+  'dml-no-where': {
+    ro: 'Un UPDATE sau DELETE fără WHERE modifică toate rândurile tabelului. Adaugă WHERE cu condiția care alege doar rândurile dorite.',
+    en: 'An UPDATE or DELETE without WHERE changes every row of the table. Add a WHERE with the condition that picks only the wanted rows.',
+  },
+  'distinct-first-col': {
+    ro: 'DISTINCT se aplică întregului rând, nu primei coloane. Cu mai multe coloane în SELECT, un rând dispare doar dacă toate valorile lui se repetă. Pentru valori distincte ale unei singure coloane, selectează numai acea coloană.',
+    en: 'DISTINCT applies to the whole row, not to the first column. With several columns in SELECT a row disappears only if all its values repeat. For distinct values of a single column, select only that column.',
+  },
+  'case-literal': {
+    ro: 'Valorile text se compară ținând cont de litere mari și mici: \'ioana\' nu este \'Ioana\'. Scrie textul exact ca în date sau compară UPPER(coloana) cu textul în litere mari.',
+    en: 'Text values are compared case-sensitively: \'ioana\' is not \'Ioana\'. Write the text exactly as it is in the data, or compare UPPER(column) with the text in capitals.',
+  },
+}
+
+export function explainMistake(id) {
+  return MISTAKES[id] ?? GENERIC
+}

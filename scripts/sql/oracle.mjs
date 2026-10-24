@@ -11,7 +11,8 @@
 // `clock` ('YYYY-MM-DD HH24:MI:SS') replaces SYSDATE / CURRENT_DATE (fixed TO_DATE), SYSTIMESTAMP / CURRENT_TIMESTAMP
 // (fixed TO_TIMESTAMP_TZ at +00:00) and LOCALTIMESTAMP (fixed TO_TIMESTAMP) outside literals, quoted identifiers and comments. Pass `clock: null` to run the text untouched; column headers then show the real SYSDATE
 // text, which is what Oracle prints (the substituted text would leak into the header).
-// `dataset` names the schema the container holds; the only one loaded is `facultate` (the STUDENT tables).
+// `dataset` names the schema the container holds; the only one in STUDENT is `facultate` (the lab tables). `user` runs the
+// statements as another Oracle schema (default STUDENT).
 import { execFileSync } from 'node:child_process'
 
 const DEFAULT_DOCKER_HOST = 'unix:///run/user/1000/docker.sock'
@@ -132,8 +133,11 @@ SHOW ERRORS
 `
 
 export async function runOnOracle(statements, o = {}) {
-  const { clock, dataset = 'facultate', maxRows = Infinity } = o
-  if (dataset !== 'facultate') throw new Error(`oracle container only holds the 'facultate' dataset, asked for '${dataset}'`)
+  const { clock, dataset = 'facultate', maxRows = Infinity, user = 'student' } = o
+  // The STUDENT schema holds only the lab data. Other datasets live in schemas of their own (scripts/sql/oracle-datasets.mjs):
+  // pass that schema's name as `user`.
+  if (user === 'student' && dataset !== 'facultate') throw new Error(`oracle container only holds the 'facultate' dataset in STUDENT, asked for '${dataset}'`)
+  if (!/^[A-Za-z][A-Za-z0-9_]{0,29}$/.test(user)) throw new Error(`bad oracle user name '${user}'`)
   if (clock != null && !CLOCK_RE.test(clock)) throw new Error(`clock must look like 'YYYY-MM-DD HH24:MI:SS', got '${clock}'`)
   const pw = process.env.ORA_STUDENT_PW
   if (!pw) throw new Error('ORA_STUDENT_PW is not set (run: set -a; . ~/.config/bd-oracle.env; set +a)')
@@ -150,7 +154,7 @@ export async function runOnOracle(statements, o = {}) {
   script += 'DROP PROCEDURE zv_q;\nEXIT\n'
 
   const env = { ...process.env, DOCKER_HOST: process.env.DOCKER_HOST || DEFAULT_DOCKER_HOST }
-  const stdin = `CONNECT student/${pw}@localhost/XE\n${script}`
+  const stdin = `CONNECT ${user}/${pw}@localhost/XE\n${script}`
   const out = execFileSync(
     'docker',
     ['exec', '-i', '-e', 'NLS_LANG=AMERICAN_AMERICA.AL32UTF8', CONTAINER, 'sqlplus', '-s', '/nolog'],

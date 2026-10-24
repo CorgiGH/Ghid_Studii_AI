@@ -1,0 +1,47 @@
+{
+  "id": "fixture",
+  "screens": [
+    { "blocks": [
+      { "type": "sql-exercise", "id": "fx-order", "dataset": "facultate", "kind": "query",
+        "solution": "SELECT nume, prenume FROM studenti WHERE an = 1 ORDER BY nume",
+        "check": { "order": "required", "orderBy": ["NUME"], "mode": "bag" } },
+      { "type": "sql-exercise", "id": "fx-dates", "dataset": "facultate", "kind": "query",
+        "solution": "SELECT nume, data_nastere FROM studenti WHERE an = 3",
+        "check": { "order": "any", "mode": "bag" } },
+      { "type": "sql-exercise", "id": "fx-clock", "dataset": "facultate", "kind": "query", "clock": "2026-08-26",
+        "solution": "SELECT TO_CHAR(SYSDATE, 'DD-MON-YYYY') AS azi FROM dual",
+        "check": { "order": "any", "mode": "bag", "aliases": ["AZI"] } },
+      { "type": "sql-exercise", "id": "fx-header", "dataset": "facultate", "kind": "query", "clock": "2026-08-26",
+        "solution": "SELECT nume, MONTHS_BETWEEN(SYSDATE, data_nastere) FROM studenti WHERE an = 1",
+        "check": { "order": "any", "mode": "bag", "aliases": ["", ""] } },
+      { "type": "sql-exercise", "id": "fx-cosmetic", "dataset": "facultate", "kind": "query",
+        "solution": "SELECT nume, TO_CHAR(data_nastere, 'MONTH') luna FROM studenti WHERE an = 1",
+        "altSolutions": ["SELECT nume, TO_CHAR(data_nastere, 'fmMONTH') luna FROM studenti WHERE an = 1"],
+        "check": { "order": "any", "mode": "bag", "cosmetic": ["", "trim-case"] } },
+      { "type": "sql-exercise", "id": "fx-alt", "dataset": "facultate", "kind": "query",
+        "solution": "SELECT DISTINCT an FROM studenti",
+        "altSolutions": ["SELECT an FROM studenti GROUP BY an"],
+        "check": { "order": "any", "mode": "bag", "aliases": "any-distinct" } },
+      { "type": "sql-exercise", "id": "fx-update", "dataset": "facultate", "kind": "state",
+        "solution": "UPDATE studenti SET bursa = 250, grupa = 'A1' WHERE nr_matricol = '119'",
+        "check": { "order": "any", "mode": "bag", "tables": ["studenti"] } },
+      { "type": "sql-exercise", "id": "fx-create", "dataset": "facultate", "kind": "state",
+        "solution": "CREATE TABLE zt_x (id NUMBER(3), t VARCHAR2(5));\nINSERT INTO zt_x VALUES (1, 'a');\nINSERT INTO zt_x VALUES (2, NULL)",
+        "check": { "order": "any", "mode": "bag", "tables": ["zt_x"] } },
+      { "type": "sql-exercise", "id": "fx-pairs", "dataset": "facultate", "kind": "query",
+        "solution": "SELECT s1.nr_matricol, s2.nr_matricol FROM studenti s1, studenti s2 WHERE s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol",
+        "check": { "order": "any", "mode": "bag" } },
+      { "type": "sql-exercise", "id": "fx-padded", "dataset": "facultate", "kind": "query",
+        "solution": "SELECT nr_matricol, LPAD(bursa, 10, '0') AS suma FROM studenti WHERE bursa = 450",
+        "check": { "order": "any", "mode": "bag" } },
+      { "type": "sql-exercise", "id": "fx-biblio", "dataset": "biblioteca", "kind": "query",
+        "solution": "SELECT c.nume, c.prenume FROM cititori c LEFT JOIN imprumuturi i ON i.id_cititor = c.id_cititor WHERE i.id_cititor IS NULL",
+        "check": { "order": "any", "mode": "bag" } }
+    ] }
+  ],
+  "questions": [
+    { "id": "fx-test-p1", "type": "sql", "points": 3, "dataset": "biblioteca", "kind": "query",
+      "solution": "SELECT DISTINCT nume FROM cititori",
+      "check": { "order": "any", "mode": "set" } }
+  ]
+}
