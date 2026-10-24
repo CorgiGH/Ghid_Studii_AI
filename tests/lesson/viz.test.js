@@ -9,10 +9,10 @@ import { likeSteps } from '../../src/components/lesson/viz/logic/like-slider.js'
 import { inBetween } from '../../src/components/lesson/viz/logic/in-between.js';
 import { numberLine } from '../../src/components/lesson/viz/logic/number-line.js';
 import { charBoxes, charOps } from '../../src/components/lesson/viz/logic/char-boxes.js';
-import { lpad, rpad, translateStr, padPlan, swapPlan } from '../../src/components/lesson/viz/logic/char-strips.js';
+import { lpad, rpad, translateStr, padPlan, swapPlan, replaceChain, charStrips } from '../../src/components/lesson/viz/logic/char-strips.js';
 import { calendar, calendarSteps } from '../../src/components/lesson/viz/logic/calendar-clock.js';
-import { formatDate } from '../../src/components/lesson/viz/logic/date-mask.js';
-import { monthsBetween, ageSteps } from '../../src/components/lesson/viz/logic/age-timeline.js';
+import { formatDate, displayCell } from '../../src/components/lesson/viz/logic/date-mask.js';
+import { monthsBetween, ageSteps, ageParts } from '../../src/components/lesson/viz/logic/age-timeline.js';
 import { decodeRoute } from '../../src/components/lesson/viz/logic/decode-sieve.js';
 import { convert } from '../../src/components/lesson/viz/logic/type-pipes.js';
 import { cartesianGrid } from '../../src/components/lesson/viz/logic/cartesian-grid.js';
@@ -197,6 +197,12 @@ describe('char-strips', () => {
     expect(s.chars.map(c => c.out).join('')).toBe('Caobotirau');
     expect(s.chars.filter(c => c.changed)).toHaveLength(3);
   });
+  it('chained REPLACE breaks the swap that TRANSLATE does in one step', () => {
+    const c = replaceChain({ input: 'Ciobotariu', from: 'ia', to: 'ai' });
+    expect(c.stages.map(x => x.text)).toEqual(['Caobotarau', 'Ciobotiriu']);
+    expect(c.result).not.toBe(translateStr('Ciobotariu', 'ia', 'ai'));
+    expect(charStrips({ mode: 'swap', input: 'Ciobotariu', from: 'ia', to: 'ai' }).count).toBe(4);
+  });
   it('the pad plan counts the pad slots', () => {
     const p = padPlan({ input: 'Pagina', fn: 'LPAD', len: 15, fill: '*.' });
     expect(p.padCount).toBe(9);
@@ -261,6 +267,10 @@ describe('age-timeline', () => {
     expect(s.age).toBe(31);
     expect(s.months).toBeCloseTo(380.30981, 4);
     expect(s.naive).toBeCloseTo(31.7, 0);
+  });
+  it('splits into three arcs: 31 years, 8 months, 9 days', () => {
+    expect(ageParts({ birth: '1995-02-17', today: '2026-10-26 14:30' })).toMatchObject({ years: 31, months: 8, days: 9, wholeMonths: 380 });
+    expect(ageSteps({ birth: '1995-02-17', today: '2026-10-26 14:30' }).count).toBe(5);
   });
 });
 
@@ -343,19 +353,22 @@ describe('self-pairs', () => {
 });
 
 describe('all-vs-some', () => {
-  it('ALL is true for a student with no grades, SOME is not', () => {
-    const r = allVsSome({ studentsFrom: 'studenti', condition: 'valoare < 7', showMinusByName: true });
-    const none = r.students.filter(s => s.grades.length === 0);
-    expect(none.length).toBeGreaterThan(0);
-    for (const s of none) { expect(s.all).toBe(true); expect(s.some).toBe(false); }
-    for (const s of r.students.filter(x => x.grades.length)) {
+  const run = () => allVsSome({ studentsFrom: 'studenti', condition: 'valoare < 7', showMinusByName: true });
+  it('reads the condition as the counterexample and lists only students with grades', () => {
+    const r = run();
+    expect(r.students.every(s => s.grades.length > 0)).toBe(true);
+    for (const s of r.students) {
       expect(s.some).toBe(s.grades.some(g => g < 7));
-      expect(s.all).toBe(s.grades.every(g => g < 7));
+      expect(s.all).toBe(!s.some);
     }
   });
-  it('MINUS by name merges students that share a name', () => {
-    const r = allVsSome({ studentsFrom: 'studenti', condition: 'valoare < 7', showMinusByName: true });
-    expect(r.minus.byName.length).not.toBe(r.minus.byKey.length);
+  it('qualifying students are exactly 111, 115, 116, 118, 119', () => {
+    expect(run().qualifying).toEqual(['111', '115', '116', '118', '119']);
+  });
+  it('MINUS by name merges the two Bodnar: 4 names for 5 students', () => {
+    const r = run();
+    expect(r.minus.byKey).toHaveLength(5);
+    expect(r.minus.byName).toEqual(['Bodnar', 'Ciobotariu', 'Panaite', 'Popescu']);
   });
 });
 
@@ -397,5 +410,14 @@ describe('viz block spec', () => {
     expect(validateViz({ ...ok, props: {} }).join(' ')).toMatch(/pattern/);
     expect(validateViz({ ...ok, predict: 'yes' }).join(' ')).toMatch(/predict/);
     expect(validateViz({ type: 'viz', id: 'x', widget: 'table-map', props: { dataset: 'facultate', from: 'a.b', to: 'c.d', question: { en: 'q' }, answerKey: '1' } }).join(' ')).toMatch(/question/);
+  });
+});
+
+describe('table cells', () => {
+  it('DATE cells show as DD-MON-RR, NULL as NULL', () => {
+    expect(displayCell('2014-02-17')).toBe('17-FEB-14');
+    expect(displayCell(null)).toBe('NULL');
+    expect(displayCell(9)).toBe('9');
+    expect(displayCell('2014')).toBe('2014');
   });
 });

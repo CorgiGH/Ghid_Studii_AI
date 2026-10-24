@@ -32,6 +32,24 @@ export function swapPlan({ input, from, to }) {
   return { chars, from: f, to: t, result: chars.map(c => c.out).join('') };
 }
 
+// REPLACE(s, a, b) for single characters; a missing replacement removes the character.
+export const replaceChar = (s, a, b = '') => [...s].map(c => (c === a ? b : c)).join('');
+
+// Nested REPLACEs, one per (from[i], to[i]) pair, innermost first. Each later REPLACE sees
+// the letters the earlier ones created, which is why the chain cannot swap two letters.
+export function replaceChain({ input, from, to }) {
+  const f = [...from], t = [...to];
+  const stages = [];
+  let cur = input;
+  f.forEach((a, i) => {
+    cur = replaceChar(cur, a, t[i] ?? '');
+    stages.push({ from: a, to: t[i] ?? '', text: cur, chars: [...cur] });
+  });
+  return { stages, result: cur };
+}
+
 export function charStrips(p) {
-  return p.mode === 'swap' ? { plan: swapPlan(p), count: 3 } : { plan: padPlan(p), count: 3 };
+  return p.mode === 'swap'
+    ? { plan: swapPlan(p), chain: replaceChain(p), count: 4 }
+    : { plan: padPlan(p), count: 3 };
 }

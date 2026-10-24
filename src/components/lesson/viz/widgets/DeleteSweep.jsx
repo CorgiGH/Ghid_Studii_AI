@@ -3,6 +3,7 @@ import { AnimatePresence, motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
+import { displayCell } from '../logic/date-mask.js';
 import { deleteSweep } from '../logic/delete-sweep.js';
 
 export default function DeleteSweep({ props, predict }) {
@@ -49,7 +50,7 @@ export default function DeleteSweep({ props, predict }) {
                   exit={m.reduced ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, x: 90, transition: { duration: 0.28, delay: Math.min(i, 24) * 0.012 } }}
                   transition={m.spring}
                 >
-                  {d.columns.map(c => <span key={c} className={r[c] === null ? 'nul' : ''}>{r[c] === null ? 'NULL' : String(r[c])}</span>)}
+                  {d.columns.map(c => <span key={c} className={r[c] === null ? 'nul' : ''}>{displayCell(r[c])}</span>)}
                 </Motion.div>
               ))}
             </AnimatePresence>

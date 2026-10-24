@@ -61,3 +61,11 @@ export function formatDate(dateStr, mask) {
 export function dateMask({ date, masks }) {
   return { date, formats: masks.map(m => formatDate(date, m)), count: masks.length + 1 };
 }
+
+// A table cell as Oracle shows it: DATE values (stored here as ISO text) in the default
+// NLS_DATE_FORMAT DD-MON-RR; NULL as NULL; everything else as text.
+export function displayCell(v) {
+  if (v === null || v === undefined) return 'NULL';
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)) return formatDate(v, 'DD-MON-RR').text;
+  return String(v);
+}

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { AnimatePresence, animate, motion as Motion } from 'motion/react';
 import { useApp } from '../../../contexts/AppContext';
 import { useVizMotion } from './kit.js';
+import { displayCell } from './logic/date-mask.js';
 
 // Frame every widget sits in: stage, live caption, and the manual controls.
 export function VizFrame({ widget, stepper, caption, children, label }) {
@@ -21,9 +22,10 @@ export function VizFrame({ widget, stepper, caption, children, label }) {
             exit={{ opacity: m.reduced ? 1 : 0 }}
             transition={m.reduced ? { duration: 0 } : { duration: 0.16 }}
           >
-            {stepper.predicting
-              ? t('Think first: what comes out? Then press the button.', 'Gândește-te întâi: ce iese? Apoi apasă butonul.')
-              : caption}
+            {caption}
+            {stepper.predicting && (
+              <p className="viz-think">{t('Think first: what comes out? Then press the button.', 'Gândește-te întâi: ce iese? Apoi apasă butonul.')}</p>
+            )}
           </Motion.div>
         </AnimatePresence>
       </div>
@@ -60,7 +62,7 @@ export function VizFrame({ widget, stepper, caption, children, label }) {
 // Plain table used by several widgets. Rows and cells take class hooks so the widget
 // decides the colour; transitions are CSS so a 40-row table stays cheap.
 export function MiniTable({ columns, rows, rowClass, cellClass, wirePrefix, caption, highlightCols, fmt, maxHeight }) {
-  const show = (v) => (fmt ? fmt(v) : v === null || v === undefined ? 'NULL' : String(v));
+  const show = (v) => (fmt ? fmt(v) : displayCell(v));
   return (
     <div className="viz-tablewrap" style={maxHeight ? { maxHeight, overflowY: 'auto' } : undefined}>
       {caption && <div className="viz-tablecap">{caption}</div>}

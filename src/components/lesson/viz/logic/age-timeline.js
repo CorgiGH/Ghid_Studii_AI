@@ -1,4 +1,5 @@
 import { parseDT, daysInMonth, toUTC } from './common.js';
+import { calendar } from './calendar-clock.js';
 
 const dayFrac = (o) => (o.h * 3600 + o.mi * 60 + o.s) / 86400;
 
@@ -12,9 +13,18 @@ export function monthsBetween(a, b) {
   return whole + ((x.d - y.d) + (dayFrac(x) - dayFrac(y))) / 31;
 }
 
+// Age as years, months, days: TRUNC(MONTHS_BETWEEN) gives whole months; ADD_MONTHS moves the
+// birth date forward by them and what is left up to `today` is the days.
+export function ageParts({ birth, today }, months = monthsBetween(today, birth)) {
+  const whole = Math.trunc(months);
+  const anchor = calendar(birth, { fn: 'ADD_MONTHS', arg: whole });
+  const days = Math.floor((toUTC(parseDT(today)) - toUTC(parseDT(anchor))) / 86400000);
+  return { years: Math.trunc(whole / 12), months: whole % 12, days, wholeMonths: whole, anchor };
+}
+
 export function ageSteps({ birth, today }) {
   const months = monthsBetween(today, birth);
   const years = months / 12;
   const days = (toUTC(parseDT(today)) - toUTC(parseDT(birth))) / 86400000;
-  return { birth, today, months, years, age: Math.floor(years), days, naive: days / 365, naiveAge: Math.floor(days / 365), count: 4 };
+  return { birth, today, months, years, age: Math.floor(years), days, naive: days / 365, naiveAge: Math.floor(days / 365), parts: ageParts({ birth, today }, months), count: 5 };
 }

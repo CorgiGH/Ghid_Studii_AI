@@ -10,37 +10,59 @@ import { useOracleValues } from '../useSqlRunner.js';
 export default function CharStrips({ props, predict }) {
   const { t } = useApp();
   const m = useVizMotion();
-  const { plan } = charStrips(props);
-  const s = useStepper(3, { predict });
+  const { plan, chain, count } = charStrips(props);
+  const s = useStepper(count, { predict });
   const k = s.step;
   const oracle = useOracleValues(charStripsSql(props), 'facultate');
   const result = oracle.values && oracle.values[0] != null ? oracle.values[0] : plan.result;
 
   if (props.mode === 'swap') {
+    const stages = chain.stages;
+    const shown = k === 0 ? 0 : Math.min(k, stages.length);
+    const chainText = shown === 0 ? props.input : stages[shown - 1].text;
+    const chainChars = [...chainText];
+    const broken = chain.result !== plan.result;
     const caption = [
-      t(`TRANSLATE(${props.input}, '${props.from}', '${props.to}') replaces letter by letter: each letter of the first list becomes the letter at the same position in the second.`, `TRANSLATE(${props.input}, '${props.from}', '${props.to}') înlocuiește literă cu literă: fiecare literă din prima listă devine litera de pe aceeași poziție din a doua.`),
-      t('These letters are in the first list.', 'Aceste litere sunt în prima listă.'),
-      t(`Letters not in the list stay. Result: ${result}`, `Literele din afara listei rămân. Rezultat: ${result}`),
+      t(`Two ways to swap the letters of ${props.input}: nested REPLACE calls, one per letter, or one TRANSLATE('${props.from}' to '${props.to}').`, `Două moduri de a schimba literele din ${props.input}: REPLACE imbricat, câte unul pe literă, sau un singur TRANSLATE('${props.from}' în '${props.to}').`),
+      t(`First REPLACE: every '${stages[0]?.from}' becomes '${stages[0]?.to}'. So far so good.`, `Primul REPLACE: fiecare '${stages[0]?.from}' devine '${stages[0]?.to}'. Până aici merge.`),
+      t(`Second REPLACE: every '${stages[1]?.from}' becomes '${stages[1]?.to}', including the ones the first REPLACE just made. The chain gives ${chain.result}${broken ? ': wrong' : ''}.`, `Al doilea REPLACE: fiecare '${stages[1]?.from}' devine '${stages[1]?.to}', inclusiv cele create de primul REPLACE. Lanțul dă ${chain.result}${broken ? ': greșit' : ''}.`),
+      t(`TRANSLATE reads each letter once, in the original text, and swaps in one step: ${result}`, `TRANSLATE citește fiecare literă o singură dată, în textul original, și schimbă într-un singur pas: ${result}`),
     ][k];
+    const done = k >= 3;
     return (
-      <VizFrame widget="char-strips" stepper={s} caption={caption} label={t('TRANSLATE swaps letters', 'TRANSLATE schimbă litere')}>
+      <VizFrame widget="char-strips" stepper={s} caption={caption} label={t('Chained REPLACE against TRANSLATE', 'REPLACE în lanț contra TRANSLATE')}>
         <div className="viz-maps">
           {plan.from.map((f, i) => <span key={i} className={`viz-map t${i % 4}`}><b>{f}</b><i>→</i><b>{plan.to[i] ?? '∅'}</b></span>)}
         </div>
-        <div className="viz-strip" role="img" aria-label={props.input}>
-          {plan.chars.map((c, i) => (
-            <span key={i} className={`viz-cell plain${k >= 1 && c.pair >= 0 ? ` hit t${c.pair % 4}` : ''}`}>
+        <div className="viz-dim viz-strip-label"><code>REPLACE(REPLACE(…))</code></div>
+        <div className="viz-strip" role="img" aria-label={chainText}>
+          {chainChars.map((c, i) => (
+            <span key={i} className={`viz-cell plain${shown >= 2 && broken && c !== plan.chars[i]?.out ? ' wrong' : ''}`}>
               <Motion.span
-                key={k >= 2 ? 'out' : 'in'}
-                initial={k >= 2 && !m.reduced ? { rotateX: 90, opacity: 0 } : false}
+                key={`${shown}${c}`}
+                initial={shown > 0 && !m.reduced ? { rotateX: 90, opacity: 0 } : false}
                 animate={{ rotateX: 0, opacity: 1 }}
-                transition={m.reduced ? { duration: 0 } : { ...m.spring, delay: i * 0.04 }}
+                transition={m.reduced ? { duration: 0 } : { ...m.spring, delay: i * 0.03 }}
                 style={{ display: 'inline-block' }}
-              >{k >= 2 ? c.out : c.ch}</Motion.span>
+              >{c}</Motion.span>
             </span>
           ))}
         </div>
-        {k >= 2 && <Motion.div className="viz-result" variants={m.v.enter} initial="hidden" animate="show"><span className="viz-dim">{t('result', 'rezultat')}</span><b>{result}</b></Motion.div>}
+        <div className="viz-dim viz-strip-label"><code>TRANSLATE</code></div>
+        <div className="viz-strip" role="img" aria-label={done ? result : props.input}>
+          {plan.chars.map((c, i) => (
+            <span key={i} className={`viz-cell plain${done && c.pair >= 0 ? ` hit t${c.pair % 4}` : ''}`}>
+              <Motion.span
+                key={done ? 'out' : 'in'}
+                initial={done && !m.reduced ? { rotateX: 90, opacity: 0 } : false}
+                animate={{ rotateX: 0, opacity: 1 }}
+                transition={m.reduced ? { duration: 0 } : { ...m.spring, delay: i * 0.04 }}
+                style={{ display: 'inline-block' }}
+              >{done ? c.out : c.ch}</Motion.span>
+            </span>
+          ))}
+        </div>
+        {k >= 2 && <Motion.div className="viz-result" variants={m.v.enter} initial="hidden" animate="show"><span className="viz-dim">REPLACE</span><b>{chain.result}</b>{done && <><span className="viz-dim">TRANSLATE</span><b>{result}</b></>}</Motion.div>}
       </VizFrame>
     );
   }
