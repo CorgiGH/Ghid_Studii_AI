@@ -19,7 +19,12 @@ function ReflectTable({ dataset, sql }) {
     runner.run(sql, { dataset }).then(r => { if (live) setFromEngine(tableFromResult(r)); }).catch(() => {});
     return () => { live = false; };
   }, [runner, sql, dataset]);
-  const table = useMemo(() => fromEngine || fallbackTable(sql), [fromEngine, sql]);
+  // Nothing while the engine is loading, so the table never visibly swaps; the plain fallback
+  // only when the engine is not there at all.
+  const table = useMemo(
+    () => fromEngine || (runner.status === 'unavailable' ? fallbackTable(sql) : null),
+    [fromEngine, runner.status, sql],
+  );
   if (!table) return null;
   return <div className="viz ch-table"><MiniTable columns={table.columns} rows={table.rows} maxHeight="14rem" /></div>;
 }

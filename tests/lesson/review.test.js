@@ -171,6 +171,12 @@ describe('reflect table fallback', () => {
     const o = fallbackTable('SELECT nume, prenume, an FROM studenti ORDER BY an, nr_matricol');
     expect(o.rows.map(r => r.AN)).toEqual([...o.rows.map(r => r.AN)].sort((a, b) => a - b));
   });
+  it('shows dates the Oracle way, DD-MON-RR', () => {
+    const t = fallbackTable("SELECT nume, prenume, data_nastere FROM studenti WHERE nume = 'Popescu'");
+    expect(t.rows.length).toBeGreaterThan(0);
+    for (const r of t.rows) expect(r.DATA_NASTERE).toMatch(/^\d{2}-[A-Z]{3}-\d{2}$/);
+    expect(fallbackTable('SELECT * FROM studenti').rows.every(r => !/^\d{4}-/.test(String(r.DATA_NASTERE)))).toBe(true);
+  });
   it('gives up on joins and functions', () => {
     expect(fallbackTable('SELECT * FROM dual')).toBeNull();
     expect(fallbackTable('SELECT s.nume FROM studenti s JOIN note n ON 1=1')).toBeNull();

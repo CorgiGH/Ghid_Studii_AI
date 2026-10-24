@@ -11,6 +11,13 @@ const cmpVal = (a, b) => {
   return a < b ? -1 : 1;
 };
 
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+// Oracle's default date display (NLS_DATE_FORMAT DD-MON-RR, AMERICAN month names).
+const oracleCell = (v) => {
+  const m = typeof v === 'string' && v.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ].*)?$/);
+  return m ? `${m[3]}-${MONTHS[Number(m[2]) - 1]}-${m[1].slice(2)}` : v;
+};
+
 export function fallbackTable(sql, tables = DATA) {
   try {
     const m = String(sql).trim().replace(/;$/, '')
@@ -33,7 +40,7 @@ export function fallbackTable(sql, tables = DATA) {
       });
     }
     const head = cols.map(c => c.toUpperCase());
-    return { columns: head, rows: rows.map(r => Object.fromEntries(cols.map((c, i) => [head[i], r[c] ?? null]))) };
+    return { columns: head, rows: rows.map(r => Object.fromEntries(cols.map((c, i) => [head[i], oracleCell(r[c] ?? null)]))) };
   } catch {
     return null;
   }
