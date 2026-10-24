@@ -22,17 +22,7 @@ CREATE OPERATOR + (LEFTARG=timestamp, RIGHTARG=numeric,   FUNCTION=ora_dadd);
 CREATE OPERATOR + (LEFTARG=numeric,   RIGHTARG=timestamp, FUNCTION=ora_dadd2);
 --;;
 -- ---------------------------------------------------------------- dates
--- TO_CHAR(date, fmt): PostgreSQL prints RR / RRRR literally; Oracle prints the year (2 / 4 digits). Text inside "..." is left alone.
-CREATE FUNCTION to_char(d timestamp, f text) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
-DECLARE parts text[]; i int;
-BEGIN
-  IF d IS NULL OR f IS NULL THEN RETURN NULL; END IF;
-  parts := string_to_array(f, '"');
-  FOR i IN 1..coalesce(array_length(parts, 1), 0) BY 2 LOOP
-    parts[i] := regexp_replace(regexp_replace(parts[i], 'RRRR', 'YYYY', 'gi'), 'RR', 'YY', 'gi');
-  END LOOP;
-  RETURN pg_catalog.to_char(d, array_to_string(parts, '"'));
-END $$;
+-- TO_CHAR(date, fmt) lives in 40-formats.sql (it needs the format-model parser and the NLS name tables).
 --;;
 -- Two-digit year -> Oracle RR: against the clock year, 00-49 and 50-99 land in the current century when the clock
 -- year is 00-49 (20xx / 19xx) and one century later / in the current century when it is 50-99.
@@ -47,7 +37,7 @@ CREATE FUNCTION ora_rr(y int) RETURNS int LANGUAGE sql STABLE AS $$
 -- Oracle: RR / RRRR -> a year of one or two digits goes through the RR pivot, a longer one is taken as it is;
 -- YY -> always the current century (20xx). Fields the format does not mention default to the clock's year and month and
 -- to day 1 (PG defaults to 0001-01-01): the missing fields are appended to both the input and the format.
-CREATE FUNCTION to_date(s text, f text) RETURNS timestamp LANGUAGE plpgsql STABLE AS $$
+CREATE FUNCTION ora_to_date_en(s text, f text) RETURNS timestamp LANGUAGE plpgsql STABLE AS $$
 DECLARE r timestamp; clk timestamp := ora_sysdate(); body text := regexp_replace(f, '"[^"]*"', '', 'g');
         tk text[]; fx text; sx text := s; rr boolean; yy boolean; y int;
 BEGIN
@@ -73,6 +63,12 @@ BEGIN
   RETURN r;
 END $$;
 --;;
+-- TO_DATE(text, format): month and day names are read in the session language (ALTER SESSION SET NLS_DATE_LANGUAGE)
+CREATE FUNCTION to_date(s text, f text) RETURNS timestamp LANGUAGE plpgsql STABLE AS $$
+BEGIN
+  RETURN ora_to_date_en(ora_names_to_en(s, ora_lang(), f), f);
+END $$;
+--;;
 -- Implicit text -> DATE (and TO_DATE(s) with one argument): the default format DD-MON-RR, read like Oracle's non-FX parser:
 -- blanks and punctuation between the fields are skipped, MON is a month name (3 letters or in full), the year takes
 -- 1-2 digits through RR or 3-4 digits as they are. Anything else raises the Oracle date error.
@@ -82,6 +78,7 @@ DECLARE m text[]; rest text; dd int; mon int; yv int; ld int;
         longnames text[] := ARRAY['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
 BEGIN
   IF s IS NULL THEN RETURN NULL; END IF;
+  IF ora_datefmt() <> 'DD-MON-RR' THEN RETURN to_date(s, ora_datefmt()); END IF;    -- ALTER SESSION SET NLS_DATE_FORMAT
   m := regexp_match(s, '^\s*(\d{1,2})(.*)$', 's');
   IF m IS NULL THEN
     IF btrim(s) = '' THEN RAISE EXCEPTION 'ORA-01840: input value not long enough for date format' USING ERRCODE = '22007'; END IF;
@@ -155,11 +152,11 @@ END $$;
 CREATE FUNCTION last_day(d timestamp) RETURNS timestamp LANGUAGE sql IMMUTABLE AS
 $$ SELECT date_trunc('month', d) + interval '1 month' - interval '1 day' + d::time::interval $$;
 --;;
-CREATE FUNCTION next_day(d timestamp, nm text) RETURNS timestamp LANGUAGE plpgsql IMMUTABLE AS $$
-DECLARE tgt int; cur int; delta int; k text := upper(substr(trim(nm),1,3));
+CREATE FUNCTION next_day(d timestamp, nm text) RETURNS timestamp LANGUAGE plpgsql STABLE AS $$
+DECLARE tgt int; cur int; delta int;
 BEGIN
   IF d IS NULL OR nm IS NULL THEN RETURN NULL; END IF;
-  tgt := CASE k WHEN 'SUN' THEN 0 WHEN 'MON' THEN 1 WHEN 'TUE' THEN 2 WHEN 'WED' THEN 3 WHEN 'THU' THEN 4 WHEN 'FRI' THEN 5 WHEN 'SAT' THEN 6 END;
+  tgt := ora_day_index(nm);
   IF tgt IS NULL THEN RAISE EXCEPTION 'ORA-01846: not a valid day of the week' USING ERRCODE='22007'; END IF;
   cur := extract(dow FROM d)::int;
   delta := ((tgt - cur + 6) % 7) + 1;
@@ -168,37 +165,80 @@ END $$;
 --;;
 CREATE FUNCTION trunc(d timestamp) RETURNS timestamp LANGUAGE sql IMMUTABLE AS $$ SELECT date_trunc('day', d) $$;
 --;;
--- week start for 'DAY'/'D'/'DY' = Sunday here (NLS_TERRITORY AMERICA) -- INFERRED, real Oracle check
-CREATE FUNCTION trunc(d timestamp, f text) RETURNS timestamp LANGUAGE plpgsql IMMUTABLE AS $$
+-- First day of the ISO year iy (the Monday of the week that holds January 4th)
+CREATE FUNCTION ora_iso_year_start(iy int) RETURNS timestamp LANGUAGE sql IMMUTABLE SET search_path = pg_catalog, public AS
+$$ SELECT date_trunc('week', make_timestamp(iy, 1, 4, 0, 0, 0)) $$;
+--;;
+-- Start of the "week" a format names: DAY / DY / D = Sunday (NLS_TERRITORY AMERICA), IW = Monday, WW = the weekday of
+-- January 1st, W = the weekday of the 1st of the month.
+CREATE FUNCTION ora_week_start(d timestamp, u text) RETURNS timestamp LANGUAGE sql IMMUTABLE SET search_path = pg_catalog, public AS $$
+  SELECT CASE u
+    WHEN 'IW' THEN date_trunc('week', d)
+    WHEN 'WW' THEN date_trunc('day', d) - ((extract(doy FROM d)::int - 1) % 7) * interval '1 day'
+    WHEN 'W'  THEN date_trunc('day', d) - ((extract(day FROM d)::int - 1) % 7) * interval '1 day'
+    ELSE date_trunc('day', d) - extract(dow FROM d)::int * interval '1 day' END $$;
+--;;
+-- A date format element: the family it belongs to, or ORA-01821
+CREATE FUNCTION ora_date_unit(f text) RETURNS text LANGUAGE plpgsql IMMUTABLE SET search_path = pg_catalog, public AS $$
 DECLARE u text := upper(f);
 BEGIN
-  IF d IS NULL THEN RETURN NULL; END IF;
-  IF u IN ('YYYY','YEAR','YY','Y','YYY','SYYYY','SYEAR') THEN RETURN date_trunc('year', d);
-  ELSIF u = 'Q' THEN RETURN date_trunc('quarter', d);
-  ELSIF u IN ('MONTH','MON','MM','RM') THEN RETURN date_trunc('month', d);
-  ELSIF u IN ('DD','DDD','J') THEN RETURN date_trunc('day', d);
-  ELSIF u IN ('HH','HH12','HH24') THEN RETURN date_trunc('hour', d);
-  ELSIF u = 'MI' THEN RETURN date_trunc('minute', d);
-  ELSIF u = 'IW' THEN RETURN date_trunc('week', d);
-  ELSIF u IN ('D','DAY','DY') THEN RETURN date_trunc('day', d) OPERATOR(pg_catalog.-) extract(dow FROM d)::int * interval '1 day';
+  IF u IN ('YYYY','YEAR','YY','Y','YYY','SYYYY','SYEAR','RR','RRRR') THEN RETURN 'YEAR';
+  ELSIF u IN ('IYYY','IYY','IY','I') THEN RETURN 'ISOYEAR';
+  ELSIF u IN ('CC','SCC') THEN RETURN 'CENTURY';
+  ELSIF u = 'Q' THEN RETURN 'Q';
+  ELSIF u IN ('MONTH','MON','MM','RM') THEN RETURN 'MONTH';
+  ELSIF u IN ('WW','W','IW') THEN RETURN u;
+  ELSIF u IN ('D','DAY','DY') THEN RETURN 'DAY';
+  ELSIF u IN ('DD','DDD','J') THEN RETURN 'DD';
+  ELSIF u IN ('HH','HH12','HH24') THEN RETURN 'HH';
+  ELSIF u = 'MI' THEN RETURN 'MI';
   END IF;
-  RAISE EXCEPTION 'ORA-01898: invalid precision specifier / format' USING ERRCODE='22023';
+  RAISE EXCEPTION 'ORA-01821: date format not recognized' USING ERRCODE='22007';
+END $$;
+--;;
+CREATE FUNCTION trunc(d timestamp, f text) RETURNS timestamp LANGUAGE plpgsql IMMUTABLE SET search_path = pg_catalog, public AS $$
+DECLARE u text;
+BEGIN
+  IF d IS NULL OR f IS NULL THEN RETURN NULL; END IF;
+  u := ora_date_unit(f);
+  RETURN CASE u
+    WHEN 'YEAR' THEN date_trunc('year', d)
+    WHEN 'ISOYEAR' THEN ora_iso_year_start(extract(isoyear FROM d)::int)
+    WHEN 'CENTURY' THEN make_timestamp(((extract(year FROM d)::int - 1) / 100) * 100 + 1, 1, 1, 0, 0, 0)
+    WHEN 'Q' THEN date_trunc('quarter', d)
+    WHEN 'MONTH' THEN date_trunc('month', d)
+    WHEN 'DD' THEN date_trunc('day', d)
+    WHEN 'HH' THEN date_trunc('hour', d)
+    WHEN 'MI' THEN date_trunc('minute', d)
+    ELSE ora_week_start(d, u) END;
 END $$;
 --;;
 CREATE FUNCTION round(d timestamp) RETURNS timestamp LANGUAGE sql IMMUTABLE AS $$ SELECT date_trunc('day', d + interval '12 hours') $$;
 --;;
-CREATE FUNCTION round(d timestamp, f text) RETURNS timestamp LANGUAGE plpgsql IMMUTABLE AS $$
-DECLARE u text := upper(f);
+-- ROUND(date, fmt) rounds to the nearest unit start: the half-way point rounds up (a week: Wednesday noon; a year: July 1st;
+-- a month: the 16th; a quarter: the 16th of its second month; a century: year 51).
+CREATE FUNCTION round(d timestamp, f text) RETURNS timestamp LANGUAGE plpgsql IMMUTABLE SET search_path = pg_catalog, public AS $$
+DECLARE u text; base timestamp; qs timestamp; y int;
 BEGIN
-  IF d IS NULL THEN RETURN NULL; END IF;
-  IF u IN ('YYYY','YEAR','YY','Y','YYY','SYYYY','SYEAR') THEN RETURN date_trunc('year', d + interval '6 months');
-  ELSIF u IN ('MONTH','MON','MM','RM') THEN
-    IF extract(day FROM d) >= 16 THEN RETURN date_trunc('month', d) + interval '1 month'; ELSE RETURN date_trunc('month', d); END IF;
-  ELSIF u IN ('DD','DDD','J') THEN RETURN date_trunc('day', d + interval '12 hours');
-  ELSIF u IN ('HH','HH12','HH24') THEN RETURN date_trunc('hour', d + interval '30 minutes');
+  IF d IS NULL OR f IS NULL THEN RETURN NULL; END IF;
+  u := ora_date_unit(f);
+  IF u = 'YEAR' THEN RETURN date_trunc('year', d + interval '6 months');
+  ELSIF u = 'ISOYEAR' THEN
+    RETURN ora_iso_year_start(CASE WHEN extract(month FROM d) >= 7 THEN extract(year FROM d)::int + 1 ELSE extract(isoyear FROM d)::int END);
+  ELSIF u = 'CENTURY' THEN
+    y := ((extract(year FROM d)::int - 1) / 100) * 100 + 1;
+    RETURN make_timestamp(CASE WHEN (extract(year FROM d)::int - 1) % 100 >= 50 THEN y + 100 ELSE y END, 1, 1, 0, 0, 0);
+  ELSIF u = 'Q' THEN
+    qs := date_trunc('quarter', d);
+    RETURN CASE WHEN d >= qs + interval '1 month' + interval '15 days' THEN qs + interval '3 months' ELSE qs END;
+  ELSIF u = 'MONTH' THEN
+    RETURN CASE WHEN extract(day FROM d) >= 16 THEN date_trunc('month', d) + interval '1 month' ELSE date_trunc('month', d) END;
+  ELSIF u = 'DD' THEN RETURN date_trunc('day', d + interval '12 hours');
+  ELSIF u = 'HH' THEN RETURN date_trunc('hour', d + interval '30 minutes');
   ELSIF u = 'MI' THEN RETURN date_trunc('minute', d + interval '30 seconds');
   END IF;
-  RAISE EXCEPTION 'ORA-01898: invalid precision specifier / format (round %)', f USING ERRCODE='22023';
+  base := ora_week_start(d, u);
+  RETURN CASE WHEN d - base >= interval '3 days 12 hours' THEN base + interval '7 days' ELSE base END;
 END $$;
 --;;
 -- Text arguments where a DATE is expected are converted with TO_DATE(text), as Oracle does.

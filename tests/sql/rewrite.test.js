@@ -49,6 +49,6 @@ describe('rewrite', () => {
 describe('rewrite passes compose', () => {
   it('DECODE, TRIM and ANY inside each other are all rewritten', () => {
     const r = rewriteOracle("select decode(trim(nume), 'a', 1, 2) from studenti where an = any (decode(1, 1, 2, 3), 4)").sql
-    expect(r).toBe("select CASE WHEN ora_deq((NULLIF(trim(nume), '')), ('a')) THEN (1) ELSE (2) END from studenti where an = ANY (ARRAY[CASE WHEN ora_deq((1), (1)) THEN (2) ELSE (3) END, 4])")
+    expect(r).toBe("select CASE WHEN ora_deq((NULLIF(trim(nume), '')), ('a')) THEN ora_widen(1) ELSE ora_conv(2, ora_widen(1)) END from studenti where an = ANY (ARRAY[CASE WHEN ora_deq((1), (1)) THEN ora_widen(2) ELSE ora_conv(3, ora_widen(2)) END, 4])")
   })
 })

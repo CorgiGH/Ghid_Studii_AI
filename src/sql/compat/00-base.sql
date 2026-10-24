@@ -27,6 +27,16 @@ CREATE FUNCTION ora_sysdate() RETURNS timestamp LANGUAGE sql STABLE AS $$ SELECT
 --;;
 CREATE FUNCTION ora_systimestamp() RETURNS timestamptz LANGUAGE sql STABLE AS $$ SELECT d AT TIME ZONE 'UTC' FROM ora_clock LIMIT 1 $$;
 --;;
+-- Session NLS state. The engine writes it for ALTER SESSION SET NLS_DATE_LANGUAGE / NLS_LANGUAGE / NLS_DATE_FORMAT; the name
+-- tables are in 40-formats. datefmt is the format DATE <-> text conversions use when none is given.
+CREATE TABLE ora_session(lang text NOT NULL, datefmt text NOT NULL);
+--;;
+INSERT INTO ora_session VALUES ('AMERICAN', 'DD-MON-RR');
+--;;
+CREATE FUNCTION ora_lang() RETURNS text LANGUAGE sql STABLE AS $$ SELECT lang FROM ora_session LIMIT 1 $$;
+--;;
+CREATE FUNCTION ora_datefmt() RETURNS text LANGUAGE sql STABLE AS $$ SELECT datefmt FROM ora_session LIMIT 1 $$;
+--;;
 CREATE TABLE dual(dummy varchar(1));
 --;;
 INSERT INTO dual VALUES ('X');
@@ -45,7 +55,7 @@ $$ SELECT CASE WHEN n IS NULL THEN NULL ELSE
        CASE WHEN n::text LIKE '%.%' THEN rtrim(rtrim(n::text,'0'),'.') ELSE n::text END,
        '^(-?)0\.', '\1.') END $$;
 --;;
--- Oracle timestamp -> VARCHAR2 with default NLS_DATE_FORMAT DD-MON-RR
+-- Oracle timestamp -> VARCHAR2 with default NLS_DATE_FORMAT DD-MON-RR (English month names here; 40-formats replaces it with the session language)
 CREATE FUNCTION ora_d2t(d timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS
 $$ SELECT pg_catalog.to_char(d,'DD-MON-YY') $$;
 --;;

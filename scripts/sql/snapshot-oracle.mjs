@@ -45,11 +45,14 @@ export function loadCorpus() {
 function flatten(entries) {
   const statements = []
   const slot = []
+  const sessionAt = [] // per entry: the indexes of its pre statements and of the NLS reset after it
   for (const e of entries) {
-    for (const p of e.pre || []) statements.push(p)
+    const at = []
+    for (const p of e.pre || []) { at.push(statements.length); statements.push(p) }
     slot.push(statements.length)
     statements.push(e.sql)
-    if (e.pre) statements.push(NLS_RESET)
+    if (e.pre) { at.push(statements.length); statements.push(NLS_RESET) }
+    sessionAt.push(at)
   }
   const keySlot = new Map()
   entries.forEach((e) => {
@@ -57,18 +60,20 @@ function flatten(entries) {
     keySlot.set(e.id, statements.length)
     statements.push(e.orderKeySql)
   })
-  return { statements, slot, keySlot }
+  return { statements, slot, keySlot, sessionAt }
 }
 
 async function main() {
   const entries = loadCorpus()
-  const { statements, slot, keySlot } = flatten(entries)
+  const { statements, slot, keySlot, sessionAt } = flatten(entries)
   const valued = await runOnOracle(statements, { clock: CLOCK, dataset: 'facultate' })
   const plain = await runOnOracle(statements, { clock: null, dataset: 'facultate' })
 
   const snapshot = {}
   const harness = []
   entries.forEach((e, i) => {
+    // a pre statement (ALTER SESSION ...) or the reset after it that Oracle refused would freeze a result of the wrong session
+    for (const at of sessionAt[i]) if (valued[at].error) harness.push(`${e.id}: session statement failed on Oracle: ${valued[at].error.code} ${valued[at].error.message}`)
     const v = valued[slot[i]]
     const h = plain[slot[i]]
     if (v.error && (v.error.code === 'HARNESS' || /^ORA-0(6502|6512|6550)$/.test(v.error.code) || !/^ORA-\d{5}$/.test(v.error.code))) {

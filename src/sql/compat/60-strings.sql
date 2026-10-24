@@ -40,8 +40,8 @@ CREATE FUNCTION instr(s text, sub text, st int, oc int) RETURNS numeric LANGUAGE
 DECLARE len int; sl int; pos int; found int := 0; k int; p int; i int; hits int := 0;
 BEGIN
   IF s IS NULL OR sub IS NULL OR st IS NULL OR oc IS NULL OR sub = '' THEN RETURN NULL; END IF;
-  IF st = 0 THEN RAISE EXCEPTION 'ORA-14412: INSTR position must not be 0' USING ERRCODE='22023'; END IF;
-  IF oc < 1 THEN RAISE EXCEPTION 'ORA-14412: INSTR occurrence must be positive' USING ERRCODE='22023'; END IF;
+  IF st = 0 THEN RETURN 0; END IF;        -- position 0 finds nothing (Oracle 11g answers 0, not an error)
+  IF oc < 1 THEN RAISE EXCEPTION 'ORA-01428: argument ''%'' is out of range', oc USING ERRCODE='22023'; END IF;
   len := char_length(s); sl := char_length(sub);
   IF st > 0 THEN
     pos := st;
@@ -50,11 +50,11 @@ BEGIN
       p := strpos(pg_catalog.substr(s, pos), sub);
       IF p = 0 THEN RETURN 0; END IF;
       found := pos + p - 1;
-      pos := found + sl;      -- INFERRED: occurrences do not overlap (real Oracle check)
+      pos := found + 1;       -- occurrences may overlap: INSTR('AAAA','AA',1,2) is 2 (measured on Oracle 11g)
     END LOOP;
     RETURN found;
   ELSE
-    pos := len + st + 1;      -- last position where a match may START (INFERRED, real Oracle check)
+    pos := len + st + 1;      -- last position where a match may START (measured on Oracle 11g)
     FOR i IN REVERSE LEAST(pos, len - sl + 1)..1 LOOP
       IF pg_catalog.substr(s, i, sl) = sub THEN
         hits := hits + 1;

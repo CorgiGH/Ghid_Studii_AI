@@ -3,6 +3,9 @@
 // known-gaps.json with the fix that will close it. A listed gap that now passes fails the test: delete the entry.
 // A listed gap also has to keep the category of its stored difference (columns / row count / rows / error code), so a
 // gap that gets worse or changes shape is noticed instead of hiding behind "still differs".
+// An entry's `pre` statements (ALTER SESSION ...) run first and must succeed on the engine, as they did on Oracle (the snapshot
+// script refuses to freeze an entry whose session statement failed). A known gap may have a pre statement the engine does not
+// support yet. The NLS defaults are restored after every entry with a `pre`, so nothing leaks into the next one.
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -10,6 +13,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createEngine } from '../../src/sql/engine/core.js'
 import { loadCorpus, CLOCK, SNAPSHOT_MAX_ROWS } from '../../scripts/sql/snapshot-oracle.mjs'
+import { NLS_RESET } from '../../scripts/sql/oracle.mjs'
 import { diffCategory, diffResults, expectsSequence } from './compare.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -47,17 +51,29 @@ describe('corpus is consistent with the snapshot', () => {
 
 describe('engine equals Oracle', () => {
   it.each(corpus.map((e) => [e.id, e]))('%s', async (id, entry) => {
-    for (const p of entry.pre || []) await engine.run(p, { dataset: 'facultate' })
-    // uncapped: a cut snapshot with a digest is compared against the engine's whole result
-    const actual = await engine.run(entry.sql, { dataset: 'facultate' })
-    const diff = diffResults(snapshot[id], actual, entry.sql)
-    if (id in knownGaps) {
-      expect(diff, `${id} now matches Oracle: remove it from known-gaps.json`).not.toBeNull()
-      expect(diffCategory(diff), `${id} is a known gap, but its difference changed kind. Now: ${diff}\nStored: ${knownGaps[id].note}\nFix the engine, or update the stored note if the change is intended.`).toBe(diffCategory(knownGaps[id].note))
-      outcome.gap++
-    } else {
-      expect(diff, `${id} differs from Oracle`).toBeNull()
-      outcome.pass++
+    try {
+      const preErrors = []
+      for (const p of entry.pre || []) {
+        const r = await engine.run(p, { dataset: 'facultate' })
+        if (r.error) preErrors.push(`${p}: ${r.error.code}`)
+      }
+      if (!(id in knownGaps)) expect(preErrors, `${id}: session statements Oracle accepted failed on the engine`).toEqual([])
+      // uncapped: a cut snapshot with a digest is compared against the engine's whole result
+      const actual = await engine.run(entry.sql, { dataset: 'facultate' })
+      const diff = diffResults(snapshot[id], actual, entry.sql)
+      if (id in knownGaps) {
+        expect(diff, `${id} now matches Oracle: remove it from known-gaps.json`).not.toBeNull()
+        expect(diffCategory(diff), `${id} is a known gap, but its difference changed kind. Now: ${diff}\nStored: ${knownGaps[id].note}\nFix the engine, or update the stored note if the change is intended.`).toBe(diffCategory(knownGaps[id].note))
+        outcome.gap++
+      } else {
+        expect(diff, `${id} differs from Oracle`).toBeNull()
+        outcome.pass++
+      }
+    } finally {
+      if (entry.pre) {
+        const reset = await engine.run(NLS_RESET, { dataset: 'facultate' })
+        expect(reset.error, `${id}: restoring the NLS defaults failed`).toBeUndefined()
+      }
     }
   })
 })
