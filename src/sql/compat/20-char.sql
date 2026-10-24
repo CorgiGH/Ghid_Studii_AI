@@ -169,3 +169,19 @@ CREATE FUNCTION initcap(b bpchar) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELE
 --;;
 CREATE FUNCTION upper(n numeric)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(n) $$;
 --;;
+--;;
+-- ---------------------------------------------------------------- simple CASE with a date-shaped string WHEN value
+-- Oracle never converts a WHEN value in a simple CASE: DATE expression with a text WHEN value is ORA-00932. The rewriter
+-- wraps such a literal in ora_when(..), a type that compares only with text / CHAR; any other expression type finds no
+-- operator (42883, mapped to ORA-00932).
+CREATE TYPE ora_when_t AS (v text);
+--;;
+CREATE FUNCTION ora_when(a text) RETURNS ora_when_t LANGUAGE sql IMMUTABLE AS $$ SELECT ROW(a)::ora_when_t $$;
+--;;
+CREATE FUNCTION ora_when_eq_t(a text, b ora_when_t) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT a = b.v $$;
+--;;
+CREATE FUNCTION ora_when_eq_b(a bpchar, b ora_when_t) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT a = b.v::bpchar $$;
+--;;
+CREATE OPERATOR = (LEFTARG=text,   RIGHTARG=ora_when_t, FUNCTION=ora_when_eq_t);
+--;;
+CREATE OPERATOR = (LEFTARG=bpchar, RIGHTARG=ora_when_t, FUNCTION=ora_when_eq_b);

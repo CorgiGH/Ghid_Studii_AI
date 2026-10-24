@@ -63,10 +63,10 @@ describe('text to DATE (fix 8)', () => {
     expect(await code("SELECT COUNT(*) FROM studenti WHERE data_nastere IN ('01/01/1997')")).toBe('ORA-01843')
     expect(await cell("SELECT COUNT(*) FROM studenti WHERE nume IN ('Popescu', 'x')")).toBe('1')
   })
-  it('applies the pivot and the format errors in simple CASE WHEN values', async () => {
+  it('refuses a date-shaped string WHEN value against a DATE in a simple CASE (ORA-00932)', async () => {
     const code = async (sql) => (await run(sql)).error?.code
-    expect(await cell("SELECT CASE TO_DATE('17-02-1955','DD-MM-YYYY') WHEN '17-FEB-55' THEN 1 ELSE 0 END FROM dual")).toBe('1')
-    expect(await code("SELECT CASE data_nastere WHEN '01/01/1997' THEN 1 ELSE 0 END FROM studenti")).toBe('ORA-01843')
+    expect(await code("SELECT CASE TO_DATE('17-02-1955','DD-MM-YYYY') WHEN '17-FEB-55' THEN 1 ELSE 0 END FROM dual")).toBe('ORA-00932')
+    expect(await code("SELECT CASE data_nastere WHEN '01/01/1997' THEN 1 ELSE 0 END FROM studenti")).toBe('ORA-00932')
     expect(await cell("SELECT CASE nume WHEN 'Popescu' THEN 1 ELSE 0 END FROM studenti WHERE nr_matricol='111'")).toBe('1')
   })
   it('converts text arguments of date functions', async () => {

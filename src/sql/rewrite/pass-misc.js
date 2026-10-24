@@ -137,6 +137,11 @@ export function textLiterals(ts) {
   let depth = 0
   let inSet = false
   ts.forEach((x, i) => {
+    if (x.type === 'string' && caseWhens.has(i) && DATE_SHAPE.test(x.text)) {
+      // simple CASE: Oracle never converts the WHEN value to DATE (ORA-00932), see ora_when in 20-char.sql
+      out.push(raw('ora_when('), x, raw(')'))
+      return
+    }
     out.push(x)
     if (isSym(x, '(')) depth++
     else if (isSym(x, ')')) depth--
@@ -150,7 +155,7 @@ export function textLiterals(ts) {
     const typed = p >= 0 && ts[p].type === 'word' && TYPED.includes(ts[p].text.toUpperCase())
     const arith = ARITH.some((c) => isSym(ts[p], c) || isSym(ts[n], c))
     const compared =
-      COMPARISONS.some((c) => isSym(ts[p], c) || isSym(ts[n], c)) || between.has(i) || inLists.has(i) || caseWhens.has(i)
+      COMPARISONS.some((c) => isSym(ts[p], c) || isSym(ts[n], c)) || between.has(i) || inLists.has(i)
     if (typed) return
     if (besideConcat || (compared && !arith && !inSet && DATE_SHAPE.test(x.text))) out.push(raw('::text'))
   })
