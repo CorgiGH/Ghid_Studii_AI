@@ -7,23 +7,28 @@ import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
 import { useSqlRunner } from '../viz/useSqlRunner.js';
 import { MiniTable } from '../viz/ui.jsx';
-import { fallbackTable, tableFromResult } from './reflectTable.js';
+import { pickReflectTable, tableFromResult } from './reflectTable.js';
 
 // The small result table a reflect prompt is about: the engine when it is up, else a plain fallback.
 function ReflectTable({ dataset, sql }) {
   const runner = useSqlRunner();
   const [fromEngine, setFromEngine] = useState(null);
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
     if (runner.status !== 'ready') return undefined;
     let live = true;
-    runner.run(sql, { dataset }).then(r => { if (live) setFromEngine(tableFromResult(r)); }).catch(() => {});
+    // The runner reads the engine status only once, so a run that rejects (engine failed to
+    // start) or gives no table is how a late failure shows; then the fallback takes over.
+    runner.run(sql, { dataset })
+      .then(r => { if (!live) return; const tb = tableFromResult(r); if (tb) setFromEngine(tb); else setFailed(true); })
+      .catch(() => { if (live) setFailed(true); });
     return () => { live = false; };
   }, [runner, sql, dataset]);
   // Nothing while the engine is loading, so the table never visibly swaps; the plain fallback
-  // only when the engine is not there at all.
+  // only when the engine is not there at all or its run failed.
   const table = useMemo(
-    () => fromEngine || (runner.status === 'unavailable' ? fallbackTable(sql) : null),
-    [fromEngine, runner.status, sql],
+    () => pickReflectTable({ fromEngine, unavailable: runner.status === 'unavailable' || failed, sql }),
+    [fromEngine, runner.status, failed, sql],
   );
   if (!table) return null;
   return <div className="viz ch-table"><MiniTable columns={table.columns} rows={table.rows} maxHeight="14rem" /></div>;

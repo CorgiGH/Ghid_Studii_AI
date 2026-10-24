@@ -51,3 +51,9 @@ export function tableFromResult(res) {
   if (!res || res.error || !Array.isArray(res.columns) || !res.columns.length) return null;
   return { columns: res.columns, rows: (res.rows || []).map(r => Object.fromEntries(res.columns.map((c, i) => [c, r[i] ?? null]))) };
 }
+
+// Which table a reflect block shows: the engine's when it answered, the plain fallback when the
+// engine is unavailable or failed, nothing while it is still loading.
+export function pickReflectTable({ fromEngine, unavailable, sql }) {
+  return fromEngine || (unavailable ? fallbackTable(sql) : null);
+}

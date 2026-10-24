@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { validateMcq, validateReflect } from '../../src/components/lesson/blocks/choiceSpec.js';
 import { collectMcqPool, dueLabel, groupReview, itemTag, pickVariant, shuffled } from '../../src/lesson/review.js';
-import { fallbackTable, tableFromResult } from '../../src/components/lesson/blocks/reflectTable.js';
+import { fallbackTable, pickReflectTable, tableFromResult } from '../../src/components/lesson/blocks/reflectTable.js';
 import { createLessonStore } from '../../src/lesson/store.js';
 
 // Real staged lesson content: every mcq and reflect block, with the lesson file and screen it sits on.
@@ -185,5 +185,19 @@ describe('reflect table fallback', () => {
   it('turns an engine result into table rows', () => {
     expect(tableFromResult({ columns: ['A', 'B'], rows: [[1, null]] })).toEqual({ columns: ['A', 'B'], rows: [{ A: 1, B: null }] });
     expect(tableFromResult({ error: { code: 'ORA-00942' }, columns: [], rows: [] })).toBeNull();
+  });
+});
+
+describe('pickReflectTable', () => {
+  const sql = 'SELECT nume FROM studenti';
+  it('shows nothing while the engine loads', () => {
+    expect(pickReflectTable({ fromEngine: null, unavailable: false, sql })).toBeNull();
+  });
+  it('falls back when the engine is unavailable or its run failed', () => {
+    expect(pickReflectTable({ fromEngine: null, unavailable: true, sql }).columns).toEqual(['NUME']);
+  });
+  it('prefers the engine table', () => {
+    const e = { columns: ['X'], rows: [] };
+    expect(pickReflectTable({ fromEngine: e, unavailable: true, sql })).toBe(e);
   });
 });
