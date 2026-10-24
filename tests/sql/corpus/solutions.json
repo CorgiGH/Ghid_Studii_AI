@@ -1,0 +1,262 @@
+[
+ {
+  "id": "sol:L2.A",
+  "sql": "SELECT * FROM studenti",
+  "note": "inline: all rows, all columns of studenti"
+ },
+ {
+  "id": "sol:L2.B",
+  "sql": "SELECT nume, prenume, (bursa + 100) / 2 AS \"Jumatate\" FROM studenti",
+  "note": "inline: half of (bursa + 100) -- precedence needs the parentheses"
+ },
+ {
+  "id": "sol:L2.1",
+  "sql": "SELECT nume, prenume, an, data_nastere FROM studenti",
+  "note": "name, first name, year, birth date"
+ },
+ {
+  "id": "sol:L2.2",
+  "sql": "SELECT DISTINCT bursa FROM studenti",
+  "note": "distinct scholarship values (NULL appears once)"
+ },
+ {
+  "id": "sol:L2.3",
+  "sql": "SELECT nume AS \"Nume\", prenume AS \"Prenume\", an AS \"An\", data_nastere AS \"Data nasterii\" FROM studenti",
+  "note": "aliases on every column of 1"
+ },
+ {
+  "id": "sol:L2.4",
+  "sql": "SELECT nume || ' ' || prenume || ', ' || an AS \"Studenți pe ani de studiu\" FROM studenti ORDER BY an",
+  "note": "name + first name + comma + year, sorted by year, one column with quoted alias (space between nume and prenume = assumption)"
+ },
+ {
+  "id": "sol:L2.5",
+  "sql": "SELECT nume, prenume, data_nastere FROM studenti\nWHERE data_nastere BETWEEN TO_DATE('01/01/1995','dd/mm/yyyy') AND TO_DATE('10/06/1997','dd/mm/yyyy')\nORDER BY an DESC",
+  "note": "born 1995-01-01 .. 1997-06-10, order by year DESC (ties unspecified)"
+ },
+ {
+  "id": "sol:L2.6",
+  "sql": "SELECT nume, prenume, an FROM studenti WHERE TO_CHAR(data_nastere,'YYYY') = '1995'",
+  "note": "born in 1995 via TO_CHAR (text compared with text)"
+ },
+ {
+  "id": "sol:L2.6b",
+  "sql": "SELECT nume, prenume, an FROM studenti WHERE TO_CHAR(data_nastere,'YYYY') = 1995",
+  "note": "same, but number literal: Oracle converts implicitly; PG would error without the compat operator"
+ },
+ {
+  "id": "sol:L2.7",
+  "sql": "SELECT * FROM studenti WHERE bursa IS NULL",
+  "note": "no scholarship"
+ },
+ {
+  "id": "sol:L2.8",
+  "sql": "SELECT nume, prenume FROM studenti WHERE bursa IS NOT NULL AND an IN (2,3) ORDER BY nume ASC, prenume DESC",
+  "note": "scholarship, years 2 and 3, nume ASC, prenume DESC"
+ },
+ {
+  "id": "sol:L2.9",
+  "sql": "SELECT nume, prenume, bursa, bursa * 1.15 AS \"Bursa marita\" FROM studenti WHERE bursa IS NOT NULL",
+  "note": "scholarship raised by 15%"
+ },
+ {
+  "id": "sol:L2.10",
+  "sql": "SELECT * FROM studenti WHERE nume LIKE 'P%' AND an = 1",
+  "note": "name starts with P, year 1"
+ },
+ {
+  "id": "sol:L2.11",
+  "sql": "SELECT * FROM studenti WHERE prenume LIKE '%a%a%'",
+  "note": "two a's in first name (at least two)"
+ },
+ {
+  "id": "sol:L2.11b",
+  "sql": "SELECT * FROM studenti WHERE prenume LIKE '%a%a%' MINUS SELECT * FROM studenti WHERE prenume LIKE '%a%a%a%'",
+  "note": "exactly two a's"
+ },
+ {
+  "id": "sol:L2.12",
+  "sql": "SELECT * FROM studenti WHERE prenume IN ('Alexandru', 'Ioana', 'Marius')",
+  "note": "first name in list"
+ },
+ {
+  "id": "sol:L2.13",
+  "sql": "SELECT * FROM studenti WHERE bursa IS NOT NULL AND grupa LIKE 'A%'",
+  "note": "scholarship holders in half-year A"
+ },
+ {
+  "id": "sol:L2.14",
+  "sql": "SELECT * FROM studenti WHERE prenume LIKE '%a%' MINUS SELECT * FROM studenti WHERE prenume LIKE '%a%a%'",
+  "note": "exactly one lowercase a in first name: contains a MINUS contains two"
+ },
+ {
+  "id": "sol:L2.15",
+  "sql": "SELECT nume, prenume FROM profesori WHERE TRIM(prenume) LIKE '%n'",
+  "note": "trap: profesori.prenume is CHAR(10) -> TRIM before LIKE"
+ },
+ {
+  "id": "sol:L2.15x",
+  "sql": "SELECT nume, prenume FROM profesori WHERE prenume LIKE '%n'",
+  "note": "the trap itself, without TRIM: must return 0 rows in Oracle"
+ },
+ {
+  "id": "sol:L3.1",
+  "sql": "SELECT SYSDATE AS \"Astazi\" FROM DUAL",
+  "note": "today"
+ },
+ {
+  "id": "sol:L3.2",
+  "sql": "SELECT nume, data_nastere, MONTHS_BETWEEN(SYSDATE, data_nastere) AS \"Luni\" FROM studenti",
+  "note": "months between today and birth date"
+ },
+ {
+  "id": "sol:L3.3",
+  "sql": "SELECT nume, prenume, TO_CHAR(data_nastere, 'Day') AS \"Ziua\" FROM studenti",
+  "note": "weekday of birth (TO_CHAR 'Day' is blank-padded to 9 chars)"
+ },
+ {
+  "id": "sol:L3.4",
+  "sql": "SELECT CONCAT(CONCAT(CONCAT('Elevul ', prenume), ' este in grupa '), grupa) AS \"Text\" FROM studenti",
+  "note": "with CONCAT (2 args only -> nested)"
+ },
+ {
+  "id": "sol:L3.4b",
+  "sql": "SELECT 'Elevul ' || prenume || ' este in grupa ' || grupa AS \"Text\" FROM studenti",
+  "note": "with ||"
+ },
+ {
+  "id": "sol:L3.5",
+  "sql": "SELECT nume, LPAD(bursa, 10, '$') AS \"Bursa\" FROM studenti",
+  "note": "scholarship on 10 chars padded with $ (NULL stays NULL)"
+ },
+ {
+  "id": "sol:L3.6",
+  "sql": "SELECT LOWER(SUBSTR(TRIM(nume),1,1)) || UPPER(SUBSTR(TRIM(nume),2)) AS \"Nume\", LENGTH(TRIM(nume)) AS \"Lungime\"\nFROM profesori WHERE nume LIKE 'B%'",
+  "note": "professors whose name starts with B: first letter lower, rest upper, length"
+ },
+ {
+  "id": "sol:L3.7",
+  "sql": "SELECT nume, data_nastere,\n       ADD_MONTHS(data_nastere, 12 * (TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12) + 1)) AS \"Urmatoarea zi\",\n       NEXT_DAY(ADD_MONTHS(data_nastere, 12 * (TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12) + 1)), 'SUNDAY') AS \"Duminica\"\nFROM studenti",
+  "note": "birth date, next birthday (strictly after today), first Sunday after it"
+ },
+ {
+  "id": "sol:L3.8",
+  "sql": "SELECT nume, prenume, TO_CHAR(data_nastere, 'MM') AS \"Luna\" FROM studenti WHERE bursa IS NULL ORDER BY TO_CHAR(data_nastere, 'MM')",
+  "note": "students without scholarship ordered by birth month (number)"
+ },
+ {
+  "id": "sol:L3.9",
+  "sql": "SELECT nume, bursa, DECODE(bursa, 450, 'premiul 1', 350, 'premiul 2', 250, 'premiul 3', 'mentiune') AS \"Premiu\" FROM studenti",
+  "note": "DECODE, NULL falls into the default"
+ },
+ {
+  "id": "sol:L3.10",
+  "sql": "SELECT TRANSLATE(nume, 'ia', 'ai') AS \"Nume\" FROM studenti",
+  "note": "swap i<->a in names"
+ },
+ {
+  "id": "sol:L3.11",
+  "sql": "SELECT nume,\n       TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12) || ' ani ' ||\n       MOD(TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere)), 12) || ' luni și ' ||\n       TRUNC(SYSDATE - ADD_MONTHS(data_nastere, TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere)))) || ' zile' AS \"Varsta\",\n       TRUNC(ADD_MONTHS(data_nastere, 12 * (TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12) + 1)) - SYSDATE) AS \"Zile pana la ziua\"\nFROM studenti",
+  "note": "age as 'x ani y luni și z zile' + days to next birthday"
+ },
+ {
+  "id": "sol:L3.12",
+  "sql": "SELECT nume, TRUNC(ADD_MONTHS(SYSDATE, 1), 'MONTH') AS \"Prima zi\",\n       DECODE(bursa, 450, bursa * 1.10, 350, bursa * 1.15, 250, bursa * 1.20, 0) AS \"Bursa noua\"\nFROM studenti",
+  "note": "next month scholarship, first day of next month, 0 for no scholarship"
+ },
+ {
+  "id": "sol:L3.13",
+  "sql": "SELECT nume, LPAD(RPAD('*', bursa / 50, '*'), 9, ' ') AS \"Stelute\" FROM studenti WHERE bursa IS NOT NULL",
+  "note": "stars (1 star = 50 RON) right aligned (width 9 = 450/50)"
+ },
+ {
+  "id": "sol:L4.1",
+  "sql": "SELECT s.nume, s.prenume, n.valoare, p.nume AS profesor, p.prenume AS prenume_prof\nFROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol\n                JOIN didactic d ON d.id_curs = n.id_curs\n                JOIN profesori p ON p.id_prof = d.id_prof",
+  "note": "students, grades, professors who gave them (via didactic)"
+ },
+ {
+  "id": "sol:L4.2",
+  "sql": "SELECT s.nume, s.prenume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs\nWHERE n.valoare = 10 AND c.titlu_curs = 'BD'",
+  "note": "students with a 10 at BD (only 10 and 'BD' hard-coded)"
+ },
+ {
+  "id": "sol:L4.3",
+  "sql": "SELECT p.nume, p.prenume, c.titlu_curs FROM profesori p JOIN didactic d ON p.id_prof = d.id_prof JOIN cursuri c ON c.id_curs = d.id_curs",
+  "note": "professors with their courses"
+ },
+ {
+  "id": "sol:L4.4",
+  "sql": "SELECT p.nume, p.prenume, c.titlu_curs FROM profesori p LEFT JOIN didactic d ON p.id_prof = d.id_prof LEFT JOIN cursuri c ON c.id_curs = d.id_curs",
+  "note": "+ professors without a course"
+ },
+ {
+  "id": "sol:L4.5",
+  "sql": "SELECT p.nume, p.prenume, c.titlu_curs FROM cursuri c LEFT JOIN didactic d ON c.id_curs = d.id_curs LEFT JOIN profesori p ON p.id_prof = d.id_prof",
+  "note": "+ courses without a professor"
+ },
+ {
+  "id": "sol:L4.6",
+  "sql": "SELECT p.nume, p.prenume, c.titlu_curs FROM profesori p LEFT JOIN didactic d ON p.id_prof = d.id_prof FULL JOIN cursuri c ON c.id_curs = d.id_curs",
+  "note": "both: professors without course and courses without professor"
+ },
+ {
+  "id": "sol:L4.7",
+  "sql": "SELECT s1.nume, s2.nume, TRIM(TO_CHAR(s1.data_nastere, 'Day')) AS \"Ziua\"\nFROM studenti s1 JOIN studenti s2 ON TO_CHAR(s1.data_nastere, 'D') = TO_CHAR(s2.data_nastere, 'D')\n AND (s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol))\nORDER BY TO_CHAR(s1.data_nastere, 'D'), s1.nume",
+  "note": "pairs born on the same weekday, alphabetical pair (same-surname pairs kept via nr_matricol tie-break)"
+ },
+ {
+  "id": "sol:L4.7b",
+  "sql": "SELECT s1.nume, s2.nume, TRIM(TO_CHAR(s1.data_nastere, 'Day')) AS \"Ziua\"\nFROM studenti s1 JOIN studenti s2 ON TRIM(TO_CHAR(s1.data_nastere, 'Day')) = TRIM(TO_CHAR(s2.data_nastere, 'Day')) AND s1.nume < s2.nume\nORDER BY TO_CHAR(s1.data_nastere, 'D'), s1.nume",
+  "note": "classmates' variant: strict s1.nume < s2.nume (drops same-surname pairs)"
+ },
+ {
+  "id": "sol:L4.8",
+  "sql": "SELECT s2.nume || ' ' || s2.prenume || ' a luat nota mai mare ca ' || s1.nume || ' ' || s1.prenume || ' la materia ' || c.titlu_curs || '.' AS \"Comparatie\"\nFROM studenti s1 JOIN note n1 ON s1.nr_matricol = n1.nr_matricol\n                 JOIN note n2 ON n2.id_curs = n1.id_curs AND n2.valoare > n1.valoare\n                 JOIN studenti s2 ON s2.nr_matricol = n2.nr_matricol\n                 JOIN cursuri c ON c.id_curs = n1.id_curs",
+  "note": "sentences: who got a higher grade than whom at the same course (hint on the page: 118 rows)"
+ },
+ {
+  "id": "sol:L4.9",
+  "sql": "SELECT s1.nume, s1.prenume, s2.nume AS nume2, s2.prenume AS prenume2, ABS(s1.data_nastere - s2.data_nastere) AS \"Diferenta (zile)\"\nFROM studenti s1 JOIN studenti s2 ON s1.nr_matricol < s2.nr_matricol\nORDER BY 5",
+  "note": "pairs with age difference (days), ascending"
+ },
+ {
+  "id": "sol:L4.10",
+  "sql": "SELECT s.nume AS student, p.nume AS profesor FROM studenti s JOIN profesori p ON LENGTH(TRIM(s.nume)) = LENGTH(TRIM(p.nume))",
+  "note": "student-professor friendships: surnames with the same number of letters (CHAR(10) trap -> TRIM)"
+ },
+ {
+  "id": "sol:L4.10x",
+  "sql": "SELECT s.nume AS student, p.nume AS profesor FROM studenti s JOIN profesori p ON LENGTH(s.nume) = LENGTH(p.nume)",
+  "note": "the trap itself: without TRIM, LENGTH(p.nume) is always 10"
+ },
+ {
+  "id": "sol:L4.11",
+  "sql": "SELECT DISTINCT c.titlu_curs FROM cursuri c JOIN note n ON c.id_curs = n.id_curs WHERE n.valoare <= 8",
+  "note": "courses with a grade <= 8"
+ },
+ {
+  "id": "sol:L4.12",
+  "sql": "SELECT nume, prenume FROM studenti NATURAL JOIN note WHERE valoare >= 7\nMINUS\nSELECT nume, prenume FROM studenti NATURAL JOIN note WHERE valoare < 7",
+  "note": "students with ALL grades >= 7 (MINUS, as taught)"
+ },
+ {
+  "id": "sol:L4.12b",
+  "sql": "SELECT s.nume, s.prenume FROM studenti s WHERE EXISTS (SELECT 1 FROM note n WHERE n.nr_matricol = s.nr_matricol)\nAND NOT EXISTS (SELECT 1 FROM note n WHERE n.nr_matricol = s.nr_matricol AND n.valoare < 7)",
+  "note": "same via NOT EXISTS by nr_matricol (equal on this data?)"
+ },
+ {
+  "id": "sol:L4.13",
+  "sql": "SELECT DISTINCT s.nume, s.prenume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs\nWHERE c.titlu_curs = 'OOP' AND n.valoare IN (7, 10) AND TRIM(TO_CHAR(n.data_notare, 'Day')) = 'Tuesday'",
+  "note": "7 or 10 at OOP on a Tuesday"
+ },
+ {
+  "id": "sol:L4.14",
+  "sql": "SELECT s.nume, s.prenume, c.titlu_curs, n.valoare,\n       TRIM(TO_CHAR(n.data_notare, 'MONTH')) || ', ' || TO_CHAR(n.data_notare, 'YYYY') AS \"Sesiunea\",\n       CASE WHEN TO_NUMBER(TO_CHAR(LAST_DAY(n.data_notare), 'DD')) < 30 THEN '+' END AS \"Grea\"\nFROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs\nWHERE n.valoare >= 5",
+  "note": "passed (>=5) any course: name, first name, course, grade, session 'MONTH, YYYY', '+' if month has < 30 days"
+ },
+ {
+  "id": "sol:L4.14b",
+  "sql": "SELECT s.nume, TRIM(TO_CHAR(n.data_notare, 'MONTH')) || ', ' || TO_CHAR(n.data_notare, 'YYYY') AS \"Sesiunea\",\n       DECODE(SIGN(30 - TO_CHAR(LAST_DAY(n.data_notare), 'DD')), 1, '+', NULL) AS \"Grea\"\nFROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol WHERE n.valoare >= 5",
+  "note": "same with the implicit text->number comparison (Oracle allows it)"
+ }
+]

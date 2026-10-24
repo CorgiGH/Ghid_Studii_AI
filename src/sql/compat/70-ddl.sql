@@ -1,0 +1,1 @@
+-- 70-ddl.sql : Oracle DDL/DML behaviour for the sandbox (types, constraint errors). Filled in by the DDL/DML work; empty until then.

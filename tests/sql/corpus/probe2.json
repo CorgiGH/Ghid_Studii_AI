@@ -1,0 +1,82 @@
+[
+ {
+  "id": "probe2:oj.union.space",
+  "sql": "SELECT s.nume FROM studenti s, note n WHERE s.nr_matricol = n.nr_matricol(+) UNION SELECT nume FROM profesori"
+ },
+ {
+  "id": "probe2:oj.union.newline",
+  "sql": "SELECT s.nume FROM studenti s, note n WHERE s.nr_matricol = n.nr_matricol(+)\nUNION\nSELECT nume FROM profesori"
+ },
+ {
+  "id": "probe2:oj.minus",
+  "sql": "SELECT s.nume FROM studenti s, note n WHERE s.nr_matricol = n.nr_matricol(+) AND s.an = 1 MINUS SELECT nume FROM studenti WHERE an = 2"
+ },
+ {
+  "id": "probe2:oj.plain.union",
+  "sql": "SELECT s.nume FROM studenti s, note n WHERE s.nr_matricol = n.nr_matricol(+) AND s.an = 1 UNION SELECT nume FROM studenti WHERE an = 2"
+ },
+ {
+  "id": "probe2:oj.orderby",
+  "sql": "SELECT s.nume, n.valoare FROM studenti s, note n WHERE n.nr_matricol(+) = s.nr_matricol ORDER BY s.nume"
+ },
+ {
+  "id": "probe2:oj.fullunion.L4.6",
+  "sql": "SELECT p.nume, p.prenume, c.titlu_curs FROM profesori p, didactic d, cursuri c WHERE p.id_prof = d.id_prof(+) AND d.id_curs = c.id_curs(+)\nUNION\nSELECT p.nume, p.prenume, c.titlu_curs FROM profesori p, didactic d, cursuri c WHERE p.id_prof(+) = d.id_prof AND d.id_curs(+) = c.id_curs"
+ },
+ {
+  "id": "probe2:century (YY gives 2095, shown as 95) [expected-side]",
+  "sql": "SELECT TO_DATE('17-02-1995','DD-MM-YYYY') d FROM dual"
+ },
+ {
+  "id": "probe2:century (YY gives 2095, shown as 95) [actual-side]",
+  "sql": "SELECT TO_DATE('17-02-95','DD-MM-YY') d FROM dual"
+ },
+ {
+  "id": "probe2:century in a filter column [expected-side]",
+  "sql": "SELECT nume, data_nastere FROM studenti WHERE nume='Popescu'"
+ },
+ {
+  "id": "probe2:century in a filter column [actual-side]",
+  "sql": "SELECT nume, ADD_MONTHS(data_nastere, 1200) FROM studenti WHERE nume='Popescu'"
+ },
+ {
+  "id": "probe2:LPAD with zeros vs raw number [expected-side]",
+  "sql": "SELECT nume, LPAD(bursa, 10, '0') b FROM studenti WHERE bursa IS NOT NULL"
+ },
+ {
+  "id": "probe2:LPAD with zeros vs raw number [actual-side]",
+  "sql": "SELECT nume, bursa FROM studenti WHERE bursa IS NOT NULL"
+ },
+ {
+  "id": "probe2:TO_CHAR MM vs EXTRACT [expected-side]",
+  "sql": "SELECT nume, TO_CHAR(data_nastere,'MM') l FROM studenti"
+ },
+ {
+  "id": "probe2:TO_CHAR MM vs EXTRACT [actual-side]",
+  "sql": "SELECT nume, EXTRACT(MONTH FROM data_nastere) l FROM studenti"
+ },
+ {
+  "id": "probe2:trailing blanks: Day padded vs trimmed [expected-side]",
+  "sql": "SELECT nume, TO_CHAR(data_nastere,'Day') z FROM studenti"
+ },
+ {
+  "id": "probe2:trailing blanks: Day padded vs trimmed [actual-side]",
+  "sql": "SELECT nume, TRIM(TO_CHAR(data_nastere,'Day')) z FROM studenti"
+ },
+ {
+  "id": "probe2:wrong order verdict really reachable [expected-side]",
+  "sql": "SELECT nume, prenume FROM studenti WHERE bursa IS NOT NULL AND an IN (2,3) ORDER BY nume ASC, prenume DESC"
+ },
+ {
+  "id": "probe2:wrong order verdict really reachable [actual-side]",
+  "sql": "SELECT nume, prenume FROM studenti WHERE bursa IS NOT NULL AND an IN (2,3) ORDER BY nume DESC"
+ },
+ {
+  "id": "probe2:date with time vs date [expected-side]",
+  "sql": "SELECT TRUNC(SYSDATE) d FROM dual"
+ },
+ {
+  "id": "probe2:date with time vs date [actual-side]",
+  "sql": "SELECT SYSDATE + 1/86400*30 d FROM dual"
+ }
+]
