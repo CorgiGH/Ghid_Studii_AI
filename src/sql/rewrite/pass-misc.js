@@ -356,7 +356,39 @@ function rownumLevel(ts) {
   return res
 }
 
+// DELETE FROM t [alias] WHERE .. AND ROWNUM <= n   /   UPDATE t [alias] SET .. WHERE .. AND ROWNUM <= n
+//   -> the same statement with WHERE ctid IN (SELECT ctid FROM t [alias] WHERE <the other conditions> LIMIT n)
+// (the first n rows that pass the other conditions, as Oracle numbers them). Null when the statement has no such condition.
+function rownumDml(ts) {
+  const sig = ts.filter(isSig)
+  const deleting = isWord(sig[0], 'DELETE')
+  if (!deleting && !isWord(sig[0], 'UPDATE')) return null
+  const whereIdx = depth0(ts, (u) => u === 'WHERE')
+  if (whereIdx < 0) return null
+  const conjs = splitAnd(ts.slice(whereIdx + 1))
+  if (!conjs.some((c) => rownumCondition(c))) return null
+  const head = ts.slice(0, whereIdx)
+  const startIdx = depth0(ts, (u) => u === (deleting ? 'FROM' : 'UPDATE'))
+  const stopIdx = deleting ? whereIdx : depth0(ts, (u) => u === 'SET')
+  if (startIdx < 0 || stopIdx < 0) return null
+  const one = singleFactor(ts.slice(startIdx + 1, stopIdx))
+  if (!one || one.paren) return null
+  let limit = null
+  const rest = []
+  for (const c of conjs) {
+    const cond = rownumCondition(c)
+    if (!cond) rest.push(c)
+    else if (cond.never) rest.push(tokenize(' 1 = 0 '))
+    else if (cond.limit !== undefined) limit = limit === null ? cond.limit : Math.min(limit, cond.limit)
+  }
+  const restWhere = rest.length ? [...tokenize(' WHERE '), ...joinWith(rest, ' AND ')] : []
+  if (limit === null) return [...head, ...(restWhere.length ? restWhere : [])]
+  const inner = [...tokenize('SELECT ctid FROM '), ...one.factor, ...tokenize(one.alias ? ` ${one.alias}` : ''), ...restWhere, ...tokenize(` LIMIT ${limit}`)]
+  return [...head, ...tokenize(' WHERE ctid IN ('), ...inner, ...tokenize(')')]
+}
+
 export function rownumPass(ts) {
   if (!ts.some((x, i) => isRownumAt(ts, i))) return ts
+  ts = rownumDml(ts) ?? ts
   return rownumLevel(ts).map((x, i, all) => (isRownumAt(all, i) ? raw('row_number() over ()') : x))
 }

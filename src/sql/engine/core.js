@@ -2,12 +2,23 @@
 //
 //   const engine = await createEngine(pg, { clock: '2026-10-26 14:30:00', datasets: { facultate: sqlText } })
 //   const result = await engine.run('SELECT nume FROM studenti', { dataset: 'facultate' })
+//   const result = await engine.run(script, { dataset: 'facultate', script: true })   // SQL*Plus style: ; and / end a statement
+//   await engine.describe('studenti', { dataset: 'facultate' })    // [{ name, nullable, type: 'VARCHAR2(10)' }]
+//   await engine.snapshot({ dataset: 'facultate', tables: ['note'] })   // { NOTE: Result }
+//
+// Every run is one transaction that is always rolled back, so nothing a learner does (INSERT, DROP TABLE, COMMIT ...) reaches
+// the next run. Inside a run COMMIT, ROLLBACK, SAVEPOINT and the implicit commit of DDL work like Oracle's, and a failed
+// statement undoes only itself. A script returns the Result of its last statement plus `statements: [{ sql, kind, rowCount,
+// error? }]`; it carries on after an error, as SQL*Plus does. describe() and snapshot() answer for the state the most recent
+// run ended in when that run changed something, else for the untouched dataset.
 //
 // `pg` is a ready PGlite. The compat layer (../compat/*.sql, in file-name order) is installed once; a dataset is
 // loaded the first time a run asks for it. Cells in the Result are already Oracle display text.
 import { rewriteOracle } from '../rewrite/index.js'
+import { dmlTarget } from '../rewrite/pass-ddl.js'
 import { mapPgError, OracleError } from './errors.js'
 import { displayNames, formatCell } from './format.js'
+import { parseDescribe, parseTransactionControl, splitScript } from './script.js'
 
 // Compat files as raw text, sorted by file name (00-base ... 70-ddl). Vite inlines them into this (lazy) chunk.
 const COMPAT_FILES = import.meta.glob('../compat/*.sql', { query: '?raw', import: 'default', eager: true })
@@ -112,8 +123,73 @@ export async function createEngine(pg, { clock, datasets }) {
     loaded = name
   }
 
-  async function run(sql, { dataset, maxRows } = {}) {
-    await loadDataset(dataset)
+  // ---- one run = one transaction, always rolled back -------------------------------------------------------------------
+  // ora_c is "the last COMMIT": ROLLBACK goes back to it, COMMIT (and a DDL statement) moves it forward. Every statement runs
+  // under ora_s, so a statement that fails undoes only itself, as in Oracle (PostgreSQL would abort the whole transaction).
+  // A run never leaves anything behind: the session's NLS settings live in JS and are written into the fresh transaction.
+  async function begin() {
+    await pg.query('BEGIN')
+    await pg.query('SAVEPOINT ora_c')
+    if (!sessionIsDefault()) await pg.query('UPDATE ora_session SET lang = $1, datefmt = $2', [session.lang, session.dateFormat])
+  }
+  async function commitPoint(tx) {
+    await pg.query('RELEASE SAVEPOINT ora_c')
+    await pg.query('SAVEPOINT ora_c')
+    tx.savepoints = []
+  }
+  async function guarded(body) {
+    await pg.query('SAVEPOINT ora_s')
+    try {
+      const r = await body()
+      await pg.query('RELEASE SAVEPOINT ora_s')
+      return r
+    } catch (err) {
+      await pg.query('ROLLBACK TO SAVEPOINT ora_s')
+      await pg.query('RELEASE SAVEPOINT ora_s')
+      throw err
+    }
+  }
+
+  // result presentation shared by run and snapshot
+  async function present(r, kind, sql, maxRows) {
+    const total = r.rows.length
+    const cut = maxRows != null && total > maxRows
+    const kept = cut ? r.rows.slice(0, maxRows) : r.rows
+    const dates = await formatDates(kept, r.fields)
+    const rows = kept.map((row) => row.map((v, i) => (dates && r.fields[i].dataTypeID === TIMESTAMP_OID && v != null ? (dates.get(v) ?? null) : formatCell(v, r.fields[i].dataTypeID, -1))))
+    return { kind, columns: displayNames(r.fields.map((f) => f.name), sql), rows, rowCount: total, truncated: cut }
+  }
+  const query = (text) => pg.query(text, [], { rowMode: 'array', parsers: RAW_TEXT_PARSERS })
+
+  // The tables of the learner as they stand now: { schema: { TABLE: [{ name, nullable, type }] }, tables: { TABLE: Result } }
+  async function inspect() {
+    const cols = await query('SELECT table_name, column_name, data_type, data_length, data_precision, data_scale, nullable, char_length FROM user_tab_columns ORDER BY table_name, column_id')
+    const schema = {}
+    for (const [table, name, type, len, prec, scale, nullable, charLen] of cols.rows) {
+      ;(schema[table] ??= []).push({ name, nullable: nullable === 'Y', type: oracleTypeText(type, len, prec, scale, charLen) })
+    }
+    const rels = await query('SELECT relname FROM ora_rels ORDER BY relname')
+    const tables = {}
+    for (const [rel] of rels.rows) {
+      const text = `SELECT * FROM "${rel}"`
+      tables[rel.toUpperCase()] = await present(await query(text), 'rows', text, null)
+    }
+    return { schema, tables }
+  }
+
+  // state after the most recent run that changed something (null: the last run left the dataset as it was)
+  let lastState = null
+  // runs, describe and snapshot take turns: each one owns the database connection while its transaction is open
+  let queue = Promise.resolve()
+  const exclusive = (fn) => {
+    const p = queue.then(fn)
+    queue = p.catch(() => {})
+    return p
+  }
+
+  const textResult = (kind) => ({ kind, columns: [], rows: [], rowCount: 0, truncated: false })
+
+  async function statement(sql, tx, maxRows) {
     const kind = statementKind(sql)
     const failed = async (err) => {
       const context = { sql }
@@ -121,39 +197,157 @@ export async function createEngine(pg, { clock, datasets }) {
         const fn = (String(err.message).match(/function ([A-Za-z_0-9]+)\(/) || [])[1]
         if (fn) context.knownFunction = (await pg.query('SELECT 1 FROM pg_proc WHERE proname = $1 LIMIT 1', [fn.toLowerCase()])).rows.length > 0
       }
-      return { kind, columns: [], rows: [], rowCount: 0, truncated: false, error: mapPgError(err, context) }
+      return { ...textResult(kind), error: mapPgError(err, context) }
     }
     try {
       const pairs = parseAlterSession(sql)
       if (pairs) {
-        await alterSession(pairs)
-        return { kind: 'ddl', columns: [], rows: [], rowCount: 0, truncated: false }
+        await guarded(() => alterSession(pairs))
+        return textResult('ddl')
+      }
+      const describing = parseDescribe(sql)
+      if (describing !== null) {
+        const cols = await guarded(() => describeNow(describing))
+        if (!cols.length) throw new OracleError('ORA-04043', `object ${describing} does not exist`)
+        return { kind: 'rows', columns: ['Name', 'Null?', 'Type'], rows: cols.map((c) => [c.name, c.nullable ? '' : 'NOT NULL', c.type]), rowCount: cols.length, truncated: false }
+      }
+      const control = parseTransactionControl(sql)
+      if (control) {
+        await transactionControl(control, tx)
+        return textResult('tx')
       }
     } catch (err) {
+      // an OracleError or a PostgreSQL error (it carries a SQLSTATE code) is the learner's answer; anything else is our bug
+      if (!(err instanceof OracleError) && !(err && err.code)) throw err
       return failed(err)
     }
     let rewritten
     try {
-      rewritten = rewriteOracle(sql)
+      const target = dmlTarget(sql)
+      rewritten = rewriteOracle(sql, { columns: target ? await columnsOf(target) : undefined })
     } catch (err) {
       // What Oracle rejects arrives as an OracleError and is the learner's answer. Anything else is a bug in a rewrite pass:
       // let it surface instead of dressing it up as an Oracle error.
       if (err instanceof OracleError) return failed(err)
       throw err
     }
+    if (kind === 'dml' || kind === 'ddl') tx.changed = true
+    // DDL commits what came before it and itself, also when it fails while running; a statement that does not parse commits nothing
+    let result
     try {
-      const r = await pg.query(rewritten.sql, [], { rowMode: 'array', parsers: RAW_TEXT_PARSERS })
-      const total = r.rows.length
-      const cut = maxRows != null && total > maxRows
-      const kept = cut ? r.rows.slice(0, maxRows) : r.rows
-      const dates = await formatDates(kept, r.fields)
-      const rows = kept.map((row) => row.map((v, i) => (dates && r.fields[i].dataTypeID === TIMESTAMP_OID && v != null ? (dates.get(v) ?? null) : formatCell(v, r.fields[i].dataTypeID, -1))))
-      if (kind !== 'rows') return { kind, columns: [], rows: [], rowCount: r.affectedRows ?? 0, truncated: false }
-      return { kind, columns: displayNames(r.fields.map((f) => f.name), sql), rows, rowCount: total, truncated: cut }
+      const r = await guarded(async () => {
+        const out = await pg.query(rewritten.sql, [], { rowMode: 'array', parsers: RAW_TEXT_PARSERS })
+        for (const extra of rewritten.post) await pg.query(extra)
+        return out
+      })
+      result = kind !== 'rows' ? { ...textResult(kind), rowCount: kind === 'dml' ? (r.affectedRows ?? 0) : 0 } : await present(r, kind, sql, maxRows)
     } catch (err) {
-      return failed(err)
+      result = await failed(err)
+      if (kind === 'ddl' && err.code === '42601') return result
     }
+    if (kind === 'ddl') await commitPoint(tx)
+    return result
   }
 
-  return { run }
+  // [{ name, date }] of a table in column order: what the rewriter needs to treat the values an INSERT / UPDATE assigns
+  async function columnsOf(table) {
+    const r = await pg.query(
+      `SELECT a.attname, t.typname = 'ora_date' FROM pg_attribute a JOIN ora_rels r ON r.relid = a.attrelid JOIN pg_type t ON t.oid = a.atttypid
+       WHERE r.relname = $1 AND a.attnum > 0 AND NOT a.attisdropped ORDER BY a.attnum`,
+      [table],
+      { rowMode: 'array' },
+    )
+    return r.rows.map(([name, date]) => ({ name, date }))
+  }
+
+  async function transactionControl({ op, name }, tx) {
+    if (op === 'commit') return commitPoint(tx)
+    if (op === 'rollback') {
+      await pg.query('ROLLBACK TO SAVEPOINT ora_c')
+      tx.savepoints = []
+      return undefined
+    }
+    if (op === 'savepoint') {
+      tx.savepoints = tx.savepoints.filter((n) => n !== name)
+      await pg.query(`SAVEPOINT "u_${name}"`)
+      tx.savepoints.push(name)
+      return undefined
+    }
+    const at = tx.savepoints.lastIndexOf(name)
+    if (at < 0) throw new OracleError('ORA-01086', `savepoint '${name.toUpperCase()}' never established in this session or is invalid`)
+    await pg.query(`ROLLBACK TO SAVEPOINT "u_${name}"`)
+    tx.savepoints.length = at + 1
+    return undefined
+  }
+
+  async function describeNow(table) {
+    const r = await query(`SELECT column_name, data_type, data_length, data_precision, data_scale, nullable, char_length FROM user_tab_columns WHERE table_name = '${table.replace(/'/g, "''")}' ORDER BY column_id`)
+    return r.rows.map(([name, type, len, prec, scale, nullable, charLen]) => ({ name, nullable: nullable === 'Y', type: oracleTypeText(type, len, prec, scale, charLen) }))
+  }
+
+  async function run(sql, { dataset, maxRows, script = false } = {}) {
+    return exclusive(async () => {
+      await loadDataset(dataset)
+      lastState = null
+      await begin()
+      const tx = { savepoints: [], changed: false }
+      try {
+        if (!script) {
+          const result = await statement(sql, tx, maxRows)
+          if (tx.changed) lastState = await inspect()
+          return result
+        }
+        const statements = []
+        let last = textResult('rows')
+        for (const text of splitScript(sql)) {
+          last = await statement(text, tx, maxRows)
+          statements.push({ sql: text, kind: last.kind, rowCount: last.rowCount, ...(last.error ? { error: last.error } : {}) })
+        }
+        if (tx.changed) lastState = await inspect()
+        return { ...last, statements }
+      } finally {
+        await pg.query('ROLLBACK')
+      }
+    })
+  }
+
+  // The column list of a table as DESCRIBE shows it: [{ name, nullable, type }] ([] when there is no such table).
+  // It describes the state the last run ended in when that run changed something, else the untouched dataset.
+  function describe(table, { dataset } = {}) {
+    return exclusive(async () => {
+      await loadDataset(dataset)
+      const key = String(table).toUpperCase()
+      return lastState ? (lastState.schema[key] ?? []) : describeNow(key)
+    })
+  }
+
+  // The contents of the tables after the last run: { TABLE: Result }. `tables` (any case) limits it; a table that does not
+  // exist comes back as a Result carrying ORA-00942.
+  function snapshot({ dataset, tables } = {}) {
+    return exclusive(async () => {
+      await loadDataset(dataset)
+      const state = lastState ?? (await inspect())
+      if (!tables) return state.tables
+      const out = {}
+      for (const t of tables) {
+        const key = String(t).toUpperCase()
+        out[key] = state.tables[key] ?? { ...textResult('rows'), error: { code: 'ORA-00942', message: 'table or view does not exist' } }
+      }
+      return out
+    })
+  }
+
+  return { run, describe, snapshot }
+}
+
+// DESCRIBE's Type column, from the USER_TAB_COLUMNS values
+function oracleTypeText(type, length, precision, scale, charLength) {
+  if (type === 'CHAR' || type === 'VARCHAR2') return `${type}(${charLength || length})`
+  if (type === 'FLOAT') return `FLOAT(${precision})`
+  if (type === 'NUMBER') {
+    if (precision === null && scale === null) return 'NUMBER'
+    if (precision === null) return scale === '0' ? 'NUMBER(38)' : `NUMBER(*,${scale})`
+    return scale === '0' ? `NUMBER(${precision})` : `NUMBER(${precision},${scale})`
+  }
+  return type
 }

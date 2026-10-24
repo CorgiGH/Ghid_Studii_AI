@@ -34,9 +34,20 @@ afterAll(() => {
   console.log(`SQL differential: ${corpus.length} queries, ${outcome.pass} match Oracle, ${outcome.gap} known gaps`)
 })
 
+// An entry with `before` is a scene (DDL / DML) followed by the statement under test, all in one run: a script. The statement
+// under test gives the result that is compared; the scene must do what the entry says (`beforeErrors`: the error codes it raises).
+// `after` is clean-up for the Oracle session only: every engine run is thrown away.
+async function runEntry(entry) {
+  if (!entry.before) return engine.run(entry.sql, { dataset: 'facultate' })
+  const r = await engine.run([...entry.before, entry.sql].join(';\n'), { dataset: 'facultate', script: true })
+  expect(r.statements, `${entry.id}: the script was cut into the wrong statements`).toHaveLength(entry.before.length + 1)
+  expect(r.statements.slice(0, -1).filter((x) => x.error).map((x) => x.error.code), `${entry.id}: errors of the set-up statements`).toEqual(entry.beforeErrors || [])
+  return r
+}
+
 describe('corpus is consistent with the snapshot', () => {
-  it('has 459 entries, each with a frozen Oracle result and a valid gap entry', () => {
-    expect(corpus).toHaveLength(459)
+  it('has 661 entries, each with a frozen Oracle result and a valid gap entry', () => {
+    expect(corpus).toHaveLength(661)
     for (const e of corpus) expect(snapshot[e.id], e.id).toBeDefined()
     for (const e of corpus) if (e.orderKeySql) expect(snapshot[e.id].orderKeys, `${e.id} needs frozen orderKeys, cut like the rows`).toHaveLength(Math.min(snapshot[e.id].rowCount, SNAPSHOT_MAX_ROWS))
     for (const e of corpus) if (snapshot[e.id].truncated && !expectsSequence(e.sql)) expect(snapshot[e.id].digest, `${e.id} is cut and unordered: it needs a digest`).toMatch(/^[0-9a-f]{40}$/)
@@ -59,7 +70,7 @@ describe('engine equals Oracle', () => {
       }
       if (!(id in knownGaps)) expect(preErrors, `${id}: session statements Oracle accepted failed on the engine`).toEqual([])
       // uncapped: a cut snapshot with a digest is compared against the engine's whole result
-      const actual = await engine.run(entry.sql, { dataset: 'facultate' })
+      const actual = await runEntry(entry)
       const diff = diffResults(snapshot[id], actual, entry.sql)
       if (id in knownGaps) {
         expect(diff, `${id} now matches Oracle: remove it from known-gaps.json`).not.toBeNull()

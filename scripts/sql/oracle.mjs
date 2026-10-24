@@ -93,7 +93,7 @@ SET PAGESIZE 0
 SET FEEDBACK OFF
 SET ECHO OFF
 SET VERIFY OFF
-CREATE OR REPLACE PROCEDURE zv_q(p_id VARCHAR2, p_sql VARCHAR2, p_query NUMBER) IS
+CREATE OR REPLACE PROCEDURE zv_q(p_id VARCHAR2, p_sql VARCHAR2, p_query NUMBER) AUTHID CURRENT_USER IS
   c INTEGER; n INTEGER; d DBMS_SQL.DESC_TAB2; v VARCHAR2(4000); x INTEGER; ln VARCHAR2(32767);
   FUNCTION h(t VARCHAR2) RETURN VARCHAR2 IS BEGIN IF t IS NULL THEN RETURN '~'; END IF; RETURN RAWTOHEX(UTL_RAW.CAST_TO_RAW(t)); END;
 BEGIN
@@ -141,7 +141,9 @@ export async function runOnOracle(statements, o = {}) {
   let script = `${PROC}${NLS_RESET};\n`
   const kinds = statements.map(kindOf)
   statements.forEach((raw, i) => {
-    const text = (clock == null ? raw : substituteClock(raw, clock)).replace(/;\s*$/, '')
+    const substituted = clock == null ? raw : substituteClock(raw, clock)
+    // a trailing ; ends a SQL*Plus statement, but is part of a PL/SQL block (BEGIN ... END;)
+    const text = /^\s*(BEGIN|DECLARE)\b/i.test(substituted) ? substituted : substituted.replace(/;\s*$/, '')
     const d = quoteDelim(text)
     script += `BEGIN zv_q('${i}', q'${d}${text}${d}', ${kinds[i] === 'rows' ? 1 : 0}); END;\n/\n`
   })

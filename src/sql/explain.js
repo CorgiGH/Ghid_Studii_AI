@@ -8,6 +8,10 @@ const TABLE = {
     ro: 'Valoarea introdusă există deja într-o coloană care trebuie să fie unică (cheie primară sau UNIQUE). Folosește o valoare nouă sau modifică rândul existent.',
     en: 'The value already exists in a column that must be unique (primary key or UNIQUE). Use a new value or change the existing row.',
   },
+  'ORA-00902': {
+    ro: 'Tipul de date nu există în Oracle (de exemplu TEXT, BOOLEAN sau SERIAL). Folosește VARCHAR2(n), CHAR(n), NUMBER(p,s) sau DATE.',
+    en: 'The data type does not exist in Oracle (for example TEXT, BOOLEAN or SERIAL). Use VARCHAR2(n), CHAR(n), NUMBER(p,s) or DATE.',
+  },
   'ORA-00904': {
     ro: 'Numele unei coloane sau al unei funcții nu există sau este scris greșit. Verifică ortografia și că tabelul din FROM chiar are acea coloană.',
     en: 'The name of a column or function does not exist or is misspelled. Check the spelling and that the table in FROM really has that column.',
@@ -15,6 +19,10 @@ const TABLE = {
   'ORA-00905': {
     ro: 'Lipsește un cuvânt cheie al comenzii (de exemplu VALUES, SET sau INTO). Recitește forma comenzii și completează cuvântul care lipsește.',
     en: 'A keyword of the command is missing (for example VALUES, SET or INTO). Re-read the shape of the command and add the missing word.',
+  },
+  'ORA-00906': {
+    ro: 'Lipsește o paranteză stângă. VARCHAR2 cere lungimea între paranteze: VARCHAR2(20).',
+    en: 'A left parenthesis is missing. VARCHAR2 needs its length in parentheses: VARCHAR2(20).',
   },
   'ORA-00907': {
     ro: 'O paranteză deschisă nu are paranteza de închidere. Numără parantezele și închide-o pe cea care lipsește.',
@@ -24,9 +32,17 @@ const TABLE = {
     ro: 'O funcție primește un număr greșit de argumente (de exemplu CONCAT acceptă exact două). Verifică câte argumente cere funcția; pentru mai multe texte folosește ||.',
     en: 'A function gets the wrong number of arguments (for example CONCAT takes exactly two). Check how many arguments the function wants; to join more texts use ||.',
   },
+  'ORA-00910': {
+    ro: 'Lungimea cerută este prea mare pentru tip: VARCHAR2 are cel mult 4000 de caractere, CHAR cel mult 2000.',
+    en: 'The requested length is too big for the type: VARCHAR2 holds at most 4000 characters, CHAR at most 2000.',
+  },
   'ORA-00911': {
     ro: 'Comanda conține un caracter pe care Oracle nu îl acceptă aici, de pildă un al doilea ; sau o a doua comandă în aceeași rulare. Rulează o singură comandă și scoate caracterul în plus.',
     en: 'The command contains a character Oracle does not accept here, for example a second ; or a second command in the same run. Run one command and remove the extra character.',
+  },
+  'ORA-00913': {
+    ro: 'În VALUES sunt mai multe valori decât coloane în INSERT. Numără coloanele și valorile: trebuie să fie la fel de multe.',
+    en: 'VALUES has more values than the INSERT has columns. Count the columns and the values: there must be as many of one as of the other.',
   },
   'ORA-00918': {
     ro: 'Numele coloanei apare în mai multe tabele din FROM, deci Oracle nu știe pe care o vrei. Pune în față numele tabelului sau al aliasului: s.nr_matricol.',
@@ -68,21 +84,41 @@ const TABLE = {
     ro: 'Tabelul sau view-ul nu există sau nu ai voie să îl vezi. Verifică numele tabelului și că ai creat tabelul înainte.',
     en: 'The table or view does not exist or you are not allowed to see it. Check the table name and that you created the table first.',
   },
+  'ORA-00947': {
+    ro: 'În VALUES sunt mai puține valori decât coloane. Fără listă de coloane, INSERT cere o valoare pentru fiecare coloană a tabelului (poți scrie NULL); sau numește coloanele: INSERT INTO t (c1, c2) VALUES (...).',
+    en: 'VALUES has fewer values than there are columns. Without a column list, INSERT wants a value for every column of the table (you can write NULL); or name the columns: INSERT INTO t (c1, c2) VALUES (...).',
+  },
   'ORA-00955': {
     ro: 'Numele este deja folosit de alt obiect (tabel, view, index). Alege alt nume sau șterge întâi obiectul vechi cu DROP.',
     en: 'The name is already used by another object (table, view, index). Pick another name or drop the old object first with DROP.',
+  },
+  'ORA-00957': {
+    ro: 'Același nume de coloană apare de două ori în CREATE TABLE. Redenumește una dintre ele.',
+    en: 'The same column name appears twice in CREATE TABLE. Rename one of them.',
   },
   'ORA-00979': {
     ro: 'Ai un GROUP BY, dar în SELECT apare o coloană care nu este în GROUP BY și nu este într-o funcție de grup. Adaugă coloana în GROUP BY sau înfășoar-o în MIN, MAX etc.',
     en: 'You have a GROUP BY, but SELECT contains a column that is not in GROUP BY and not inside a group function. Add the column to GROUP BY or wrap it in MIN, MAX, etc.',
   },
+  'ORA-01086': {
+    ro: 'Punctul de salvare nu există: nu l-ai creat cu SAVEPOINT, a dispărut după un ROLLBACK la un punct mai vechi sau după COMMIT.',
+    en: 'The savepoint does not exist: you did not create it with SAVEPOINT, or it went away after a ROLLBACK to an earlier point or after COMMIT.',
+  },
   'ORA-01400': {
     ro: 'Încerci să pui NULL într-o coloană declarată NOT NULL (sau cheie primară). Dă coloanei o valoare în INSERT.',
     en: 'You try to put NULL into a column declared NOT NULL (or a primary key). Give the column a value in the INSERT.',
   },
+  'ORA-01407': {
+    ro: 'UPDATE ar pune NULL într-o coloană care nu acceptă NULL (NOT NULL sau cheie primară). Dă coloanei o valoare.',
+    en: 'UPDATE would put NULL into a column that does not accept NULL (NOT NULL or primary key). Give the column a value.',
+  },
   'ORA-01426': {
     ro: 'Rezultatul unui calcul întreg este prea mare. Folosește numere mai mici sau împarte calculul în pași.',
     en: 'The result of an integer calculation is too large. Use smaller numbers or split the calculation into steps.',
+  },
+  'ORA-01430': {
+    ro: 'Coloana pe care vrei s-o adaugi există deja în tabel. Alege alt nume.',
+    en: 'The column you want to add already exists in the table. Choose another name.',
   },
   'ORA-01438': {
     ro: 'Numărul are mai multe cifre decât permite NUMBER(precizie, scală) al coloanei. Folosește o valoare mai mică sau mărește precizia coloanei.',
@@ -100,6 +136,22 @@ const TABLE = {
     ro: 'Un text nu poate fi transformat în număr (de exemplu \'abc\' + 1). Verifică valorile din coloană sau folosește un format în TO_NUMBER.',
     en: 'A text cannot be turned into a number (for example \'abc\' + 1). Check the values in the column or use a format in TO_NUMBER.',
   },
+  'ORA-01723': {
+    ro: 'Lungimea unei coloane nu poate fi 0. Scrie o lungime de cel puțin 1.',
+    en: 'A column cannot have length 0. Write a length of at least 1.',
+  },
+  'ORA-01727': {
+    ro: 'Precizia din NUMBER(p,s) trebuie să fie între 1 și 38.',
+    en: 'The precision in NUMBER(p,s) must be between 1 and 38.',
+  },
+  'ORA-01728': {
+    ro: 'Scala din NUMBER(p,s) trebuie să fie între -84 și 127.',
+    en: 'The scale in NUMBER(p,s) must be between -84 and 127.',
+  },
+  'ORA-01758': {
+    ro: 'Nu poți adăuga o coloană NOT NULL într-un tabel care are deja rânduri, decât dacă îi dai o valoare implicită: ADD (c NUMBER DEFAULT 0 NOT NULL).',
+    en: 'You cannot add a NOT NULL column to a table that already has rows unless you give it a default: ADD (c NUMBER DEFAULT 0 NOT NULL).',
+  },
   'ORA-01785': {
     ro: 'ORDER BY trimite la o poziție care nu există în lista din SELECT. Folosește un număr între 1 și numărul de coloane selectate sau numele coloanei.',
     en: 'ORDER BY points to a position that is not in the SELECT list. Use a number from 1 to the number of selected columns, or the column name.',
@@ -112,9 +164,25 @@ const TABLE = {
     ro: 'Formatul de dată conține un element necunoscut sau unul care nu se aplică acestui tip (de pildă FF sau TZ pe un DATE). Verifică literele din format: YYYY, MM, DD, HH24, MI, SS.',
     en: 'The date format contains an unknown element or one that does not apply to this type (for example FF or TZ on a DATE). Check the letters in the format: YYYY, MM, DD, HH24, MI, SS.',
   },
+  'ORA-01830': {
+    ro: 'După data scrisă mai rămân caractere pe care formatul nu le folosește (de exemplu ora). Scrie doar ziua, luna și anul sau folosește TO_DATE cu formatul potrivit.',
+    en: 'There are characters left after the date that the format does not use (for example the time). Write only the day, month and year, or use TO_DATE with the right format.',
+  },
+  'ORA-01839': {
+    ro: 'Data nu există în luna aceea (de exemplu 31-FEB). Verifică ziua.',
+    en: 'The date does not exist in that month (for example 31-FEB). Check the day.',
+  },
+  'ORA-01840': {
+    ro: 'Textul este prea scurt pentru formatul de dată (lipsește luna sau anul). Scrie data completă, de exemplu 15-FEB-26, sau folosește TO_DATE.',
+    en: 'The text is too short for the date format (the month or year is missing). Write the whole date, for example 15-FEB-26, or use TO_DATE.',
+  },
   'ORA-01843': {
     ro: 'Luna din textul de dată nu este validă (de exemplu luna 13 sau un nume scris greșit). Verifică luna și limba numelor de luni din sesiune.',
     en: 'The month in the date text is not valid (for example month 13 or a misspelled name). Check the month and the language of month names in the session.',
+  },
+  'ORA-01847': {
+    ro: 'Ziua lunii trebuie să fie între 1 și ultima zi a lunii.',
+    en: 'The day of the month must be between 1 and the last day of the month.',
   },
   'ORA-01858': {
     ro: 'Oracle a găsit o literă acolo unde formatul cerea cifre, sau invers. Potrivește textul datei cu formatul din TO_DATE, caracter cu caracter.',
@@ -128,6 +196,26 @@ const TABLE = {
     ro: 'Argumentul de precizie al lui ROUND sau TRUNC pentru date nu este valid. Folosește un element cunoscut: DD, MM, YYYY, Q, DAY, IW, CC.',
     en: 'The precision argument of ROUND or TRUNC for dates is not valid. Use a known element: DD, MM, YYYY, Q, DAY, IW, CC.',
   },
+  'ORA-02258': {
+    ro: 'NOT NULL sau NULL apare de două ori pentru aceeași coloană, sau cele două se contrazic. Lasă una singură.',
+    en: 'NOT NULL or NULL appears twice for the same column, or the two contradict each other. Keep only one.',
+  },
+  'ORA-02260': {
+    ro: 'Un tabel poate avea o singură cheie primară. Pentru mai multe coloane folosește o cheie compusă: PRIMARY KEY (a, b), iar pentru celelalte UNIQUE.',
+    en: 'A table can have only one primary key. For several columns use a composite key: PRIMARY KEY (a, b), and UNIQUE for the others.',
+  },
+  'ORA-02264': {
+    ro: 'Numele de constrângere este deja folosit în schema ta. Alege alt nume pentru CONSTRAINT.',
+    en: 'The constraint name is already used in your schema. Choose another name for CONSTRAINT.',
+  },
+  'ORA-02266': {
+    ro: 'Tabelul este referit de chei străine și nu poate fi golit cu TRUNCATE. Folosește DELETE sau șterge întâi cheile străine.',
+    en: 'The table is referenced by foreign keys and cannot be emptied with TRUNCATE. Use DELETE or drop the foreign keys first.',
+  },
+  'ORA-02270': {
+    ro: 'Cheia străină trebuie să trimită la o coloană (sau la o listă de coloane) care este cheie primară sau UNIQUE în tabelul părinte. Adaugă PRIMARY KEY sau UNIQUE acolo.',
+    en: 'A foreign key must point to a column (or a list of columns) that is the primary key or UNIQUE in the parent table. Add PRIMARY KEY or UNIQUE there.',
+  },
   'ORA-02290': {
     ro: 'Valoarea încalcă o restricție CHECK a tabelului. Citește condiția CHECK și alege o valoare care o respectă.',
     en: 'The value violates a CHECK constraint of the table. Read the CHECK condition and choose a value that satisfies it.',
@@ -140,6 +228,18 @@ const TABLE = {
     ro: 'Rândul pe care vrei să îl ștergi sau să îl schimbi are rânduri copil care îl folosesc. Șterge întâi rândurile copil sau folosește ON DELETE CASCADE la definirea cheii.',
     en: 'The row you want to delete or change has child rows that use it. Delete the child rows first or use ON DELETE CASCADE when defining the key.',
   },
+  'ORA-02296': {
+    ro: 'Coloana are deja valori NULL, deci nu poate deveni NOT NULL. Completează întâi valorile lipsă.',
+    en: 'The column already has NULL values, so it cannot become NOT NULL. Fill in the missing values first.',
+  },
+  'ORA-02449': {
+    ro: 'Tabelul are o cheie primară sau UNIQUE la care trimit chei străine din alte tabele. Șterge întâi tabelele copil sau folosește DROP TABLE ... CASCADE CONSTRAINTS.',
+    en: 'The table has a primary or UNIQUE key that foreign keys in other tables point to. Drop the child tables first or use DROP TABLE ... CASCADE CONSTRAINTS.',
+  },
+  'ORA-04043': {
+    ro: 'Obiectul nu există: tabelul nu a fost creat sau numele este scris greșit. SELECT table_name FROM user_tables îți arată tabelele tale.',
+    en: 'The object does not exist: the table was not created or the name is misspelled. SELECT table_name FROM user_tables shows your tables.',
+  },
   'ORA-12705': {
     ro: 'Setarea de limbă sau de teritoriu cerută nu este disponibilă în acest mediu de exersare. Folosește AMERICAN, ROMANIAN, FRENCH sau GERMAN pentru limbă.',
     en: 'The requested language or territory setting is not available in this practice environment. Use AMERICAN, ROMANIAN, FRENCH or GERMAN for the language.',
@@ -148,6 +248,10 @@ const TABLE = {
     ro: 'Valoarea este mai lungă decât coloana (de exemplu VARCHAR2(10)). Scurtează textul sau mărește lungimea coloanei.',
     en: 'The value is longer than the column (for example VARCHAR2(10)). Shorten the text or make the column longer.',
   },
+  'ORA-12983': {
+    ro: 'Un tabel nu poate rămâne fără nicio coloană. Păstrează cel puțin una sau șterge tabelul cu DROP TABLE.',
+    en: 'A table cannot be left without any column. Keep at least one or drop the table with DROP TABLE.',
+  },
   'ORA-25154': {
     ro: 'O coloană din USING nu poate avea prefix de tabel, nici în SELECT, nici în WHERE. Scrie-o fără prefix: nr_matricol, nu s.nr_matricol.',
     en: 'A column in USING cannot have a table prefix, neither in SELECT nor in WHERE. Write it without a prefix: nr_matricol, not s.nr_matricol.',
@@ -155,6 +259,10 @@ const TABLE = {
   'ORA-25155': {
     ro: 'O coloană folosită de NATURAL JOIN nu poate avea prefix de tabel. Scrie-o fără prefix sau folosește JOIN ... ON.',
     en: 'A column used by a NATURAL JOIN cannot have a table prefix. Write it without a prefix or use JOIN ... ON.',
+  },
+  'ORA-30088': {
+    ro: 'Precizia unui TIMESTAMP trebuie să fie între 0 și 9.',
+    en: 'The precision of a TIMESTAMP must be between 0 and 9.',
   },
 }
 

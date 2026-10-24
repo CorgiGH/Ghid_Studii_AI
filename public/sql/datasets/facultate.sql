@@ -1,3 +1,5 @@
+-- The lab's facultate script in PostgreSQL spelling. The column types are the ones Oracle 11g reports for the lab tables
+-- (NUMBER(1), NUMBER(6,2), NUMBER(2), DATE); ora_date is the compat layer's DATE (compat/70-ddl.sql).
 
 
 
@@ -6,25 +8,25 @@ CREATE TABLE studenti(
   nr_matricol CHAR(6) NOT NULL,
   nume varchar(10),
   prenume varchar(10),
-  an numeric,
+  an numeric(1,0),
   grupa CHAR(2),
-  bursa numeric,
-  data_nastere timestamp(0)
+  bursa numeric(6,2),
+  data_nastere ora_date
   )
 ;
 CREATE TABLE cursuri(
   id_curs CHAR(4) NOT NULL,
   titlu_curs varchar(15),
-  an numeric,
-  semestru numeric,
-  credite numeric
+  an numeric(1,0),
+  semestru numeric(1,0),
+  credite numeric(2,0)
   )
 ;
 CREATE TABLE note(
   nr_matricol CHAR(6),
   id_curs CHAR(4),
-  valoare numeric,
-  data_notare timestamp(0)
+  valoare numeric(2,0),
+  data_notare ora_date
   )
 ;
 CREATE TABLE profesori(

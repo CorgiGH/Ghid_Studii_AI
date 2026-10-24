@@ -1,7 +1,8 @@
 // Oracle 11g SQL -> PostgreSQL (PGlite) source-to-source rewriter for the BD lab subset.
 // Token based (strings, "quoted ids" and comments are never touched). Pure ES module, runs in node and in the browser.
 //
-//   rewriteOracle(sql, { clock? }) -> { sql, notes }       throws OracleError { code, message } for what Oracle rejects
+//   rewriteOracle(sql, { clock?, columns? }) -> { sql, notes, post }  throws OracleError { code, message } for what Oracle rejects
+//                                                           post: statements to run right after `sql` succeeded (DDL bookkeeping)
 //
 // What the passes do (each is covered by the differential tests):
 //   ''                 -> NULL                     (Oracle: empty string IS NULL)
@@ -17,6 +18,7 @@
 //   lint.js: LIMIT / FETCH / OFFSET / AS table alias / ILIKE / :: / EXCEPT / INTERSECT ALL / CONCAT(a,b,c) / JOIN .. USING qualified
 //                                                   -> the ORA code Oracle 11g gives
 //   ROWNUM             -> LIMIT or row_number() over ()      "NUME" -> "nume"      ^= -> <>
+//   CREATE / ALTER / DROP TABLE, RENAME, DELETE t -> pass-ddl.js (Oracle types, constraint names, CASCADE CONSTRAINTS)
 // Known gaps are listed in tests/sql/known-gaps.json together with the fix that closes each.
 import { OracleError } from '../engine/errors.js'
 import { isSig, isSym, tokenize, untokenize } from './tokens.js'
@@ -29,13 +31,14 @@ import { likeEscape } from './pass-like.js'
 import { charLiteralArgs, decodePass } from './pass-decode.js'
 import { outerJoinPass } from './pass-outer-join.js'
 import { naturalJoinCheck, upperQuotedIdents } from './pass-idents.js'
+import { ddlPass } from './pass-ddl.js'
 
 export { tokenize, untokenize }
 
 const CLOCK_RE = /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/
 
 export function rewriteOracle(sql, opts = {}) {
-  const { clock } = opts
+  const { clock, columns } = opts
   if (clock !== undefined && !CLOCK_RE.test(clock)) throw new Error(`clock must look like 'YYYY-MM-DD HH24:MI:SS', got '${clock}'`)
   const notes = []
   let ts = tokenize(sql)
@@ -47,6 +50,8 @@ export function rewriteOracle(sql, opts = {}) {
   if (bad) throw new OracleError(bad.code, bad.message)
   naturalJoinCheck(ts)
   ts = upperQuotedIdents(ts)
+  const ddl = ddlPass(ts, { columns })
+  ts = ddl.ts
   ts = emptyStringToNull(ts)
   ts = clockPass(ts, clock)
   ts = miscMap(ts)
@@ -61,5 +66,5 @@ export function rewriteOracle(sql, opts = {}) {
   ts = outerJoinPass(ts, notes)
   ts = setOperatorPrecedence(ts)
   ts = sortSetOperatorOutput(ts)
-  return { sql: untokenize(ts), notes }
+  return { sql: untokenize(ts), notes, post: ddl.post }
 }
