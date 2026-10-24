@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WHERE · Baze de date</title>
+<link rel="stylesheet" href="/files/lesson.css">
+</head>
+<body>
+<div class="top"><div class="in"><b>Baze de date</b> · Laboratorul 2 · SELECT, WHERE, ORDER BY</div></div>
+<main>
+  <h1>Filtrarea rândurilor cu WHERE</h1>
+
+  <section>
+    <h2>Cum găsești doar studenții din anul 1?</h2>
+    <p>Secretara vrea lista studenților din anul 1. Ai tabelul de mai jos. Cum i-ai cere asta bazei de date? Scrie cum crezi, chiar dacă n-ai văzut SQL niciodată.</p>
+    <div class="scroll"><table class="t">
+      <tr><th>nume</th><th>prenume</th><th>an</th><th>bursa</th></tr>
+      <tr><td>Popescu</td><td>Ionuț</td><td>2</td><td>450</td></tr>
+      <tr><td>Pavel</td><td>Maria</td><td>3</td><td>250</td></tr>
+      <tr><td>Marinescu</td><td>Alexandru</td><td>1</td><td>350</td></tr>
+      <tr><td>Ionescu</td><td>Ana</td><td>1</td><td class="null">NULL</td></tr>
+    </table></div>
+    <textarea placeholder="Cum ai cere asta?"></textarea>
+    <div class="btns"><button class="btn primary" onclick="show('d1')">Arată-mi</button></div>
+    <div class="reveal hint" id="d1">Pui aceeași întrebare fiecărui rând („e din anul 1?”) și păstrezi doar rândurile unde răspunsul e „da”. Uite cum arată asta în SQL.</div>
+  </section>
+
+  <section>
+    <h2>Ce face WHERE cu fiecare rând</h2>
+    <pre class="code"><span class="kw">SELECT</span> nume, bursa
+<span class="kw">FROM</span> studenti
+<span class="kw">WHERE</span> an = 1
+<span class="kw">ORDER BY</span> nume;</pre>
+    <div class="card" id="m"></div>
+    <div class="trap"><b>Atenție:</b> NULL nu e 0. Bursa Anei e NULL, adică „nu se știe”. Imediat vezi de ce contează.</div>
+  </section>
+
+  <section>
+    <h2>Cum se scrie</h2>
+    <pre class="code"><span class="kw">SELECT</span> coloane
+<span class="kw">FROM</span> tabel
+<span class="kw">WHERE</span> condiție
+<span class="kw">ORDER BY</span> coloană;</pre>
+    <div class="defs">
+      <div><b>condiție</b> = o întrebare cu răspuns „adevărat” sau „fals”, pusă fiecărui rând.</div>
+      <div><b>WHERE</b> păstrează doar rândurile unde răspunsul e „adevărat”.</div>
+      <div>Se scrie începând cu SELECT, dar se execută în ordinea FROM → WHERE → SELECT → ORDER BY.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Capcana NULL</h2>
+    <p>Ana chiar nu are bursă. Atunci de ce <code>WHERE bursa = NULL</code> nu o găsește?</p>
+    <textarea placeholder="Explică în cuvintele tale"></textarea>
+    <div class="btns"><button class="btn primary" onclick="show('d4')">Arată explicația</button></div>
+    <div class="reveal hint" id="d4">Pentru că NULL înseamnă „nu se știe”. „Nu se știe = nu se știe” dă tot „nu se știe”, nu „adevărat”. WHERE păstrează doar „adevărat”, deci Ana iese. De asta există <code>IS NULL</code>: e singura întrebare care primește „da” pentru o valoare lipsă.</div>
+  </section>
+
+  <section class="card" id="q">
+    <p class="problem">Care interogare afișează studenții din anul 1 care nu au bursă?</p>
+    <div class="quiz">
+      <button class="qopt" data-ok="1" data-fb="Amândouă condițiile trebuie să fie adevărate (AND), iar valoarea lipsă se testează cu IS NULL. Rezultat: Ionescu.">WHERE an = 1 AND bursa IS NULL</button>
+      <button class="qopt" data-fb="„bursa = NULL” nu e niciodată adevărat, nici pentru Ana. Dă 0 rânduri.">WHERE an = 1 AND bursa = NULL</button>
+      <button class="qopt" data-fb="OR cere doar una dintre condiții. Ar intra și Marinescu, care e în anul 1 dar are bursă.">WHERE an = 1 OR bursa IS NULL</button>
+      <button class="qopt" data-fb="Condițiile nu se despart prin virgulă, ci cu AND sau OR. Asta e eroare de sintaxă.">WHERE an = 1, bursa IS NULL</button>
+    </div>
+    <div class="fb"></div>
+    <div class="toast" id="t">Adăugat la recapitulare. Revine mâine ca exercițiu nou.</div>
+  </section>
+
+  <section class="card">
+    <p class="problem">Afișați numele studenților din anul 1 care au bursă, ordonați după nume.</p>
+    <textarea placeholder="SELECT ..."></textarea>
+    <div class="btns">
+      <button class="btn" onclick="show('d5a')">Indiciu 1</button>
+      <button class="btn" onclick="show('d5b')">Indiciu 2</button>
+      <button class="btn primary" onclick="show('d5s')">Rezolvare</button>
+    </div>
+    <div class="reveal hint" id="d5a">Două condiții adevărate în același timp, apoi sortare. „Are bursă” e opusul lui „nu se știe”.</div>
+    <div class="reveal hint" id="d5b"><code>AND</code> între condiții, <code>IS NOT NULL</code> pentru „are”, <code>ORDER BY</code> la final.</div>
+    <div class="reveal" id="d5s"><pre class="code"><span class="kw">SELECT</span> nume <span class="kw">FROM</span> studenti
+<span class="kw">WHERE</span> an = 1 <span class="kw">AND</span> bursa <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> nume;</pre><p>Rezultat: Marinescu.</p></div>
+  </section>
+</main>
+<script src="/files/lesson.js"></script>
+<script>
+machine(document.getElementById('m'), { predict: true });
+quiz(document.getElementById('q'), () => show('t'));
+</script>
+</body>
+</html>
