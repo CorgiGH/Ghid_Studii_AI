@@ -7,7 +7,7 @@ import BlockRenderer from '../blocks/BlockRenderer';
 import formatMarkdown from '../blocks/formatMarkdown';
 import ScreenGate from './ScreenGate';
 import { useLessonStore } from '../../lesson/useLessonStore';
-import { canAdvance, gatingKind, isGatingScreen, nextScreen, screenFromUrl, slideVariants } from './playerLogic';
+import { canAdvance, gatingKind, mergeGate, isGatingScreen, nextScreen, screenFromUrl, slideVariants } from './playerLogic';
 
 const EDITABLE = 'textarea, input, select, [contenteditable=""], [contenteditable="true"], .cm-editor, [data-lesson-editor]';
 const INTERACTIVE = 'button, a, summary, [role="button"], [role="tab"]';
@@ -102,7 +102,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   const back = useCallback(() => go(nextScreen(screen, -1, total)), [go, screen, total]);
 
   const patchGate = useCallback((idx, patch) => {
-    setGates(g => ({ ...g, [idx]: { ...g[idx], ...patch } }));
+    setGates(g => mergeGate(g, idx, patch));
   }, []);
 
   const skip = useCallback(() => {
@@ -164,7 +164,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
             transition={reduced ? { duration: 0.15 } : { x: { type: 'spring', stiffness: 380, damping: 34 }, opacity: { duration: 0.18 } }}
           >
             <h2 ref={headingRef} tabIndex={-1} className="lp-title" dangerouslySetInnerHTML={{ __html: formatMarkdown(title) }} />
-            <ScreenGate state={gates[screen]} onChange={(patch) => patchGate(screen, patch)}>
+            <ScreenGate screen={screen} state={gates[screen]} patchGate={patchGate}>
               <div className="lp-blocks">
                 {step.blocks.map((block, i) => (
                   <BlockRenderer key={`${step.id}:${i}`} block={block} lectureVisible={lectureVisible} />

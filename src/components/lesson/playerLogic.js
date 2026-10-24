@@ -47,3 +47,11 @@ export function slideVariants(reduced) {
     exit: dir => ({ x: -dir * dist, opacity: 0 }),
   };
 }
+
+// Gate-state reducer: returns the previous object when the patch changes nothing,
+// so repeated complete()/skip() calls cause no re-render.
+export function mergeGate(gates, idx, patch) {
+  const prev = gates[idx] || {};
+  if (Object.keys(patch).every(k => prev[k] === patch[k])) return gates;
+  return { ...gates, [idx]: { ...prev, ...patch } };
+}

@@ -63,3 +63,18 @@ describe('slideVariants', () => {
     expect(r.exit(-1).x).toBe(0);
   });
 });
+
+import { mergeGate } from '../../src/components/lesson/playerLogic.js';
+describe('mergeGate', () => {
+  it('returns the same object when nothing changes', () => {
+    const g = { 2: { completed: true } };
+    expect(mergeGate(g, 2, { completed: true })).toBe(g);
+  });
+  it('merges new fields into a fresh object', () => {
+    const g = { 2: { completed: true } };
+    const n = mergeGate(g, 2, { skipped: true });
+    expect(n).not.toBe(g);
+    expect(n[2]).toEqual({ completed: true, skipped: true });
+    expect(mergeGate({}, 1, { completed: true })).toEqual({ 1: { completed: true } });
+  });
+});

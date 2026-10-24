@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 
 const noop = () => {};
 const ScreenGateContext = createContext({ complete: noop, skip: noop, isComplete: true });
@@ -10,11 +10,12 @@ export function useScreenGate() {
   return useContext(ScreenGateContext);
 }
 
-export default function ScreenGate({ state, onChange, children }) {
-  const value = useMemo(() => ({
-    complete: () => onChange({ completed: true }),
-    skip: () => onChange({ skipped: true }),
-    isComplete: !!(state && (state.completed || state.skipped)),
-  }), [state, onChange]);
+// complete/skip keep a stable identity per screen (patchGate must be stable), so
+// a block may safely list them in a useEffect dependency array.
+export default function ScreenGate({ screen, state, patchGate, children }) {
+  const complete = useCallback(() => patchGate(screen, { completed: true }), [patchGate, screen]);
+  const skip = useCallback(() => patchGate(screen, { skipped: true }), [patchGate, screen]);
+  const isComplete = !!(state && (state.completed || state.skipped));
+  const value = useMemo(() => ({ complete, skip, isComplete }), [complete, skip, isComplete]);
   return <ScreenGateContext.Provider value={value}>{children}</ScreenGateContext.Provider>;
 }
