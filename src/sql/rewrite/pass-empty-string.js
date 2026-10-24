@@ -1,8 +1,14 @@
 // Empty-string pass: Oracle treats '' as NULL. A '' literal becomes NULL, and TRIM of only blanks (which is '') becomes NULL.
-import { matchParen, nextSig, prevSig, raw } from './tokens.js'
+import { isSym, matchParen, nextSig, prevSig, raw } from './tokens.js'
 
+// Beside || the NULL is typed CHAR: Oracle's '' is a CHAR literal, so  nume || ''  stays a CHAR and compares blank-padded.
 export function emptyStringToNull(ts) {
-  return ts.map((x) => (x.type === 'string' && x.text === "''" ? raw('NULL') : x))
+  return ts.map((x, i) => {
+    if (x.type !== 'string' || x.text !== "''") return x
+    const p = prevSig(ts, i)
+    const n = nextSig(ts, i)
+    return raw(isSym(ts[p], '||') || isSym(ts[n], '||') ? 'NULL::bpchar' : 'NULL')
+  })
 }
 
 // TRIM / LTRIM / RTRIM (...) -> NULLIF(TRIM(...), '')

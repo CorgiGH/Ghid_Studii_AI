@@ -13,7 +13,8 @@ CREATE FUNCTION ora_cat_td(a text, b timestamp) RETURNS text LANGUAGE sql IMMUTA
 --;;
 CREATE FUNCTION ora_cat_dt(a timestamp, b text) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_d2t(a), b) $$;
 --;;
-CREATE FUNCTION ora_cat_bb(a bpchar, b bpchar) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_p(a), ora_p(b)) $$;
+-- CHAR || CHAR is CHAR in Oracle (compared blank-padded afterwards); every other pair below is VARCHAR2
+CREATE FUNCTION ora_cat_bb(a bpchar, b bpchar) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_p(a), ora_p(b))::bpchar $$;
 --;;
 CREATE FUNCTION ora_cat_bt(a bpchar, b text) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat(ora_p(a), b) $$;
 --;;
@@ -95,7 +96,7 @@ CREATE FUNCTION concat(a numeric, b text)    RETURNS text LANGUAGE sql IMMUTABLE
 --;;
 CREATE FUNCTION concat(a numeric, b numeric) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_nn(a,b) $$;
 --;;
-CREATE FUNCTION concat(a bpchar, b bpchar)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_bb(a,b) $$;
+CREATE FUNCTION concat(a bpchar, b bpchar)   RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_bb(a,b) $$;
 --;;
 CREATE FUNCTION concat(a bpchar, b text)     RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_cat_bt(a,b) $$;
 --;;
@@ -157,15 +158,15 @@ CREATE FUNCTION length(s bpchar) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SE
 --;;
 CREATE FUNCTION length(n numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT length(ora_n2t(n)) $$;
 --;;
--- UPPER/LOWER/INITCAP on CHAR(n): keep the padding (LENGTH(UPPER(nume)) = 10).
--- !! Result TYPE of UPPER(CHAR) is "real Oracle check" item #1: lab3 says UPPER(nume)='BREABAN' returns 0 rows, which
--- !! implies VARCHAR2 comparison; Oracle docs (from memory) say the type stays CHAR (would return the row). Returning text
--- !! (padding kept, non-padded comparison) follows the lab page.  Change RETURNS text -> bpchar to follow the docs.
-CREATE FUNCTION upper(b bpchar)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.upper(ora_p(b)) $$;
+-- UPPER/LOWER/INITCAP on CHAR(n): the result is CHAR, padding kept (LENGTH(UPPER(nume)) = 10) and compared blank-padded,
+-- so UPPER(nume) = 'BREABAN' finds 'Breaban   ' (measured on Oracle 11g; the lab 3 page says 0 rows and is wrong).
+-- A string literal is CHAR in Oracle too: the rewriter (pass-decode, charLiteralArgs) types the literal argument of
+-- these functions as bpchar, otherwise UPPER('Breaban') would resolve to the text overload.
+CREATE FUNCTION upper(b bpchar)   RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.upper(ora_p(b))::bpchar $$;
 --;;
-CREATE FUNCTION lower(b bpchar)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.lower(ora_p(b)) $$;
+CREATE FUNCTION lower(b bpchar)   RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.lower(ora_p(b))::bpchar $$;
 --;;
-CREATE FUNCTION initcap(b bpchar) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.initcap(ora_p(b)) $$;
+CREATE FUNCTION initcap(b bpchar) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.initcap(ora_p(b))::bpchar $$;
 --;;
 CREATE FUNCTION upper(n numeric)   RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(n) $$;
 --;;
@@ -185,3 +186,58 @@ CREATE FUNCTION ora_when_eq_b(a bpchar, b ora_when_t) RETURNS boolean LANGUAGE s
 CREATE OPERATOR = (LEFTARG=text,   RIGHTARG=ora_when_t, FUNCTION=ora_when_eq_t);
 --;;
 CREATE OPERATOR = (LEFTARG=bpchar, RIGHTARG=ora_when_t, FUNCTION=ora_when_eq_b);
+--;;
+-- ---------------------------------------------------------------- CHAR padding survives every CHAR -> VARCHAR2 conversion
+-- PostgreSQL strips the blanks of a char(n) in the casts bpchar -> text and bpchar -> varchar (both use text(bpchar));
+-- Oracle keeps them (RPAD, LPAD, REVERSE, TRANSLATE, CAST(.. AS VARCHAR2), UNION / INTERSECT / MINUS of a CHAR and a
+-- VARCHAR2 column, ...). The two catalog rows are pointed at a function that keeps the padding. PostgreSQL's own
+-- bpchar functions never ask for these casts, they read the stored value.
+CREATE FUNCTION ora_char_text(b bpchar) RETURNS text LANGUAGE sql IMMUTABLE STRICT AS $$ SELECT pg_catalog.concat(b) $$;
+--;;
+UPDATE pg_catalog.pg_cast SET castfunc = 'public.ora_char_text(bpchar)'::regprocedure
+ WHERE castsource = 'bpchar'::regtype AND casttarget IN ('text'::regtype, 'varchar'::regtype);
+--;;
+-- UNION / INTERSECT / MINUS of a CHAR and a VARCHAR2 column gives VARCHAR2 in Oracle. PostgreSQL picks the common type
+-- of the two arms; with varchar -> bpchar implicit it could pick bpchar (when the CHAR arm comes first) and compare
+-- padded. Making that direction assignment-only leaves bpchar -> varchar as the only implicit one, so varchar wins.
+UPDATE pg_catalog.pg_cast SET castcontext = 'a'
+ WHERE castsource = 'varchar'::regtype AND casttarget = 'bpchar'::regtype;
+--;;
+-- ---------------------------------------------------------------- LIKE on a CHAR column compares the padded value
+CREATE FUNCTION ora_like_bt(a bpchar, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_p(a) LIKE b $$;
+--;;
+CREATE FUNCTION ora_nlike_bt(a bpchar, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_p(a) NOT LIKE b $$;
+--;;
+CREATE OPERATOR ~~  (LEFTARG=bpchar, RIGHTARG=text, FUNCTION=ora_like_bt);
+--;;
+CREATE OPERATOR !~~ (LEFTARG=bpchar, RIGHTARG=text, FUNCTION=ora_nlike_bt);
+--;;
+-- ---------------------------------------------------------------- DECODE equality
+-- DECODE compares character values without padding semantics and treats two NULLs as equal. The rewriter turns
+-- DECODE(e, s1, r1, ...) into CASE WHEN ora_deq(e, s1) THEN r1 ... END.
+CREATE FUNCTION ora_deq(a text, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT a IS NOT DISTINCT FROM b $$;
+--;;
+CREATE FUNCTION ora_deq(a bpchar, b bpchar) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_p(a) IS NOT DISTINCT FROM ora_p(b) $$;
+--;;
+CREATE FUNCTION ora_deq(a bpchar, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT ora_p(a) IS NOT DISTINCT FROM b $$;
+--;;
+CREATE FUNCTION ora_deq(a text, b bpchar) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT a IS NOT DISTINCT FROM ora_p(b) $$;
+--;;
+CREATE FUNCTION ora_deq(a numeric, b numeric) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT a IS NOT DISTINCT FROM b $$;
+--;;
+CREATE FUNCTION ora_deq(a timestamp, b timestamp) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT a IS NOT DISTINCT FROM b $$;
+--;;
+-- CHAR or VARCHAR2 against NUMBER: the character side is converted to a number (comparison operators of this file)
+CREATE FUNCTION ora_deq(a bpchar, b numeric) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT (a = b) OR (a IS NULL AND b IS NULL) $$;
+--;;
+CREATE FUNCTION ora_deq(a numeric, b bpchar) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT (a = b) OR (a IS NULL AND b IS NULL) $$;
+--;;
+CREATE FUNCTION ora_deq(a text, b numeric) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT (a = b) OR (a IS NULL AND b IS NULL) $$;
+--;;
+CREATE FUNCTION ora_deq(a numeric, b text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT (a = b) OR (a IS NULL AND b IS NULL) $$;
+--;;
+-- TO_CHAR of a CHAR stays CHAR (TO_CHAR(nume) = 'Breaban' finds the padded value, measured)
+CREATE FUNCTION to_char(s bpchar) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT s $$;
+--;;
+-- ---------------------------------------------------------------- TRANSLATE : an empty result is NULL
+CREATE FUNCTION translate(s text, f text, t text) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT nullif(pg_catalog.translate(s, f, t), '') $$;

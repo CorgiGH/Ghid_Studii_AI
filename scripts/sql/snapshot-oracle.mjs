@@ -6,15 +6,19 @@
 //
 // Two passes: values come from a run with the fixed clock substituted for SYSDATE / CURRENT_DATE; column headers come
 // from a run without substitution (Oracle prints the expression as typed, so the substituted text must not leak into
-// a header). A result stores at most SNAPSHOT_MAX_ROWS rows; rowCount keeps the real count and truncated says so.
+// a header). A result stores at most SNAPSHOT_MAX_ROWS rows; rowCount keeps the real count and truncated says so. A cut
+// result that has no defined order (no ORDER BY, no sorted set operator) also stores `digest`, an order-independent hash
+// of all its rows, so the differential test can still compare it as a whole.
 //
 // An entry with `orderKeySql` (the same query reduced to its ORDER BY key columns, same FROM/WHERE/ORDER BY) also gets
-// `orderKeys` in the snapshot: the key values of every result row, in Oracle's order. Rows whose keys are equal are
-// tied, and Oracle's order inside a tie is unspecified, so tests/sql/compare.js accepts any permutation inside a tie.
+// `orderKeys` in the snapshot: the key values of the stored result rows (cut at SNAPSHOT_MAX_ROWS like the rows), in
+// Oracle's order. Rows whose keys are equal are tied, and Oracle's order inside a tie is unspecified, so
+// tests/sql/compare.js accepts any permutation inside a tie.
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runOnOracle, NLS_RESET } from './oracle.mjs'
+import { expectsSequence, rowsDigest } from '../../tests/sql/compare.js'
 
 export const CLOCK = '2026-10-26 14:30:00'
 export const SNAPSHOT_MAX_ROWS = 200
@@ -72,10 +76,11 @@ async function main() {
     }
     const res = { kind: v.kind, columns: v.error ? [] : (h.error ? v.columns : h.columns), rows: v.error ? [] : v.rows.slice(0, SNAPSHOT_MAX_ROWS), rowCount: v.error ? 0 : v.rowCount, truncated: !v.error && v.rowCount > SNAPSHOT_MAX_ROWS }
     if (v.error) res.error = v.error
+    if (res.truncated && !expectsSequence(e.sql)) res.digest = rowsDigest(v.rows)
     if (e.orderKeySql) {
       const k = valued[keySlot.get(e.id)]
       if (k.error || v.error || k.rowCount !== v.rowCount || k.truncated) harness.push(`${e.id}: orderKeySql does not return one key row per result row`)
-      else res.orderKeys = k.rows
+      else res.orderKeys = k.rows.slice(0, SNAPSHOT_MAX_ROWS)
     }
     snapshot[e.id] = res
   })

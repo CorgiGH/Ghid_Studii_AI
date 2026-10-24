@@ -94,17 +94,45 @@ function convertBlock(ts, notes) {
   return out;
 }
 
-export function outerJoinPass(ts, notes) {
-  if (!hasPlus(ts)) return ts;
-  // split on depth-0 set operators, convert each block
-  const out = []; let blockStart = 0; let d = 0;
-  const flush = (end) => { out.push(...convertBlock(ts.slice(blockStart, end), notes)); };
+const SET_WORDS = ['UNION', 'INTERSECT', 'EXCEPT', 'MINUS']
+// MINUS has already become a raw EXCEPT when this pass runs
+const isSetOp = (x) => (x.type === 'word' || x.type === 'raw') && SET_WORDS.includes(x.text.toUpperCase())
+
+// One nesting level: every parenthesised group is converted first (a subquery, a set-operator arm in parentheses), then
+// the level is cut at its depth-0 set operators and each SELECT block is converted on its own. The whitespace around
+// a block and the set operators between the blocks are kept as they were.
+function convertLevel(ts, notes) {
+  const flat = [];
   for (let i = 0; i < ts.length; i++) {
-    const x = ts[i];
-    if (isSym(x, '(')) d++; if (isSym(x, ')')) d--;
-    if (d === 0 && x.type === 'word' && ['UNION', 'INTERSECT', 'EXCEPT'].includes(x.text.toUpperCase())) { flush(i); blockStart = i; }
+    if (isSym(ts[i], '(')) {
+      let d = 0, c = -1;
+      for (let j = i; j < ts.length; j++) { if (isSym(ts[j], '(')) d++; else if (isSym(ts[j], ')') && --d === 0) { c = j; break; } }
+      if (c > 0) { flat.push(ts[i], ...convertLevel(ts.slice(i + 1, c), notes), ts[c]); i = c; continue; }
+    }
+    flat.push(ts[i]);
   }
-  flush(ts.length);
+  const out = []; let blockStart = 0; let d = 0;
+  const flush = (end) => {
+    const block = flat.slice(blockStart, end);
+    const core = trimSpace(block);
+    const a = block.indexOf(core[0]);
+    const startsQuery = core.length && (isWord(core.find(isSig), 'SELECT') || isWord(core.find(isSig), 'WITH'));
+    out.push(...block.slice(0, a), ...(startsQuery ? convertBlock(core, notes) : core), ...block.slice(a + core.length));
+  };
+  for (let i = 0; i < flat.length; i++) {
+    const x = flat[i];
+    if (isSym(x, '(')) d++; else if (isSym(x, ')')) d--;
+    if (d === 0 && isSetOp(x)) {
+      flush(i); out.push(x); blockStart = i + 1;
+      const n = nextSig(flat, i);
+      if (isWord(x, 'UNION') && n >= 0 && isWord(flat[n], 'ALL')) { for (let j = i + 1; j <= n; j++) out.push(flat[j]); blockStart = n + 1; i = n; }
+    }
+  }
+  flush(flat.length);
   return out;
 }
 
+export function outerJoinPass(ts, notes) {
+  if (!hasPlus(ts)) return ts;
+  return convertLevel(ts, notes);
+}

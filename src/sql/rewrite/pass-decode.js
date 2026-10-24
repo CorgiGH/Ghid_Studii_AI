@@ -1,4 +1,4 @@
-// DECODE / GREATEST / LEAST pass: DECODE -> CASE with NULL = NULL, GREATEST/LEAST -> NULL if any argument is NULL.
+// DECODE / GREATEST / LEAST pass: DECODE -> CASE with ora_deq (NULL = NULL, CHAR compared without padding), GREATEST/LEAST -> NULL if any argument is NULL.
 import { matchParen, nextSig, prevSig, raw, splitTop, trimSpace } from './tokens.js'
 
 const joinArgs = (args, sep) => args.flatMap((a, i) => (i ? [raw(sep), ...a] : a))
@@ -19,7 +19,7 @@ export function decodePass(ts) {
             const [e] = args
             out.push(raw('CASE'))
             let k = 1
-            for (; k + 1 < args.length; k += 2) out.push(raw(' WHEN ('), ...e, raw(') IS NOT DISTINCT FROM ('), ...args[k], raw(') THEN ('), ...args[k + 1], raw(')'))
+            for (; k + 1 < args.length; k += 2) out.push(raw(' WHEN ora_deq(('), ...e, raw('), ('), ...args[k], raw(')) THEN ('), ...args[k + 1], raw(')'))
             if (k < args.length) out.push(raw(' ELSE ('), ...args[k], raw(')'))
             out.push(raw(' END'))
             i = c
@@ -38,4 +38,18 @@ export function decodePass(ts) {
     out.push(x)
   }
   return out
+}
+
+// UPPER / LOWER / INITCAP of a string literal: a literal is CHAR in Oracle and so is the result, so UPPER(nume) =
+// UPPER('Breaban') compares blank-padded. Typing the literal bpchar picks the bpchar overloads of 20-char.sql.
+export function charLiteralArgs(ts) {
+  return ts.flatMap((x, i) => {
+    if (x.type !== 'string' || x.text === "''") return [x]
+    const o = prevSig(ts, i)
+    const c = nextSig(ts, i)
+    const f = o >= 0 ? prevSig(ts, o) : -1
+    const isFn = f >= 0 && ts[f].type === 'word' && ['UPPER', 'LOWER', 'INITCAP'].includes(ts[f].text.toUpperCase())
+    const dotted = isFn && prevSig(ts, f) >= 0 && ts[prevSig(ts, f)].text === '.'
+    return isFn && !dotted && ts[o].text === '(' && c >= 0 && ts[c].text === ')' ? [x, raw('::bpchar')] : [x]
+  })
 }

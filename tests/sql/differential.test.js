@@ -10,7 +10,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createEngine } from '../../src/sql/engine/core.js'
 import { loadCorpus, CLOCK, SNAPSHOT_MAX_ROWS } from '../../scripts/sql/snapshot-oracle.mjs'
-import { diffCategory, diffResults } from './compare.js'
+import { diffCategory, diffResults, expectsSequence } from './compare.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const readJson = (f) => JSON.parse(fs.readFileSync(path.join(here, f), 'utf8'))
@@ -34,7 +34,8 @@ describe('corpus is consistent with the snapshot', () => {
   it('has 459 entries, each with a frozen Oracle result and a valid gap entry', () => {
     expect(corpus).toHaveLength(459)
     for (const e of corpus) expect(snapshot[e.id], e.id).toBeDefined()
-    for (const e of corpus) if (e.orderKeySql) expect(snapshot[e.id].orderKeys, `${e.id} needs frozen orderKeys`).toHaveLength(snapshot[e.id].rowCount)
+    for (const e of corpus) if (e.orderKeySql) expect(snapshot[e.id].orderKeys, `${e.id} needs frozen orderKeys, cut like the rows`).toHaveLength(Math.min(snapshot[e.id].rowCount, SNAPSHOT_MAX_ROWS))
+    for (const e of corpus) if (snapshot[e.id].truncated && !expectsSequence(e.sql)) expect(snapshot[e.id].digest, `${e.id} is cut and unordered: it needs a digest`).toMatch(/^[0-9a-f]{40}$/)
     expect(Object.keys(snapshot)).toHaveLength(corpus.length)
     const ids = new Set(corpus.map((e) => e.id))
     for (const id of Object.keys(knownGaps)) {
@@ -47,7 +48,8 @@ describe('corpus is consistent with the snapshot', () => {
 describe('engine equals Oracle', () => {
   it.each(corpus.map((e) => [e.id, e]))('%s', async (id, entry) => {
     for (const p of entry.pre || []) await engine.run(p, { dataset: 'facultate' })
-    const actual = await engine.run(entry.sql, { dataset: 'facultate', maxRows: SNAPSHOT_MAX_ROWS })
+    // uncapped: a cut snapshot with a digest is compared against the engine's whole result
+    const actual = await engine.run(entry.sql, { dataset: 'facultate' })
     const diff = diffResults(snapshot[id], actual, entry.sql)
     if (id in knownGaps) {
       expect(diff, `${id} now matches Oracle: remove it from known-gaps.json`).not.toBeNull()
