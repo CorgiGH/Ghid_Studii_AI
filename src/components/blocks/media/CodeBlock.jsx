@@ -113,6 +113,7 @@ export default function CodeBlock({ language, content, code }) {
     <div className="rounded-xl mb-3 overflow-hidden" style={{ border: '1px solid var(--theme-border)' }}>
       {language && (
         <div
+          data-block-label
           className="px-3 py-1 flex items-center"
           style={{
             backgroundColor: 'color-mix(in srgb, var(--theme-content-text) 6%, var(--theme-card-bg))',

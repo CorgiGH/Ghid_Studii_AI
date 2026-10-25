@@ -11,9 +11,11 @@ import ChatPanel from '../components/ui/ChatPanel';
 import CourseTransition from '../components/ui/CourseTransition';
 import CourseNavigation from '../components/ui/CourseNavigation';
 import CourseRenderer from '../components/blocks/CourseRenderer';
+import LessonPlayer from '../components/lesson/LessonPlayer';
 import TestRenderer from '../components/blocks/test/TestRenderer';
 import TestsTab from '../components/ui/TestsTab';
 import BottomTabBar from '../components/layout/BottomTabBar';
+import ReviewTab from '../components/lesson/ReviewTab';
 import QuickQuizFAB from '../components/ui/QuickQuizFAB';
 import { CourseBlock } from '../components/ui';
 
@@ -60,7 +62,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
       ? 'labs'
       : semNum
         ? 'seminars'
-        : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) ? wildcard : 'courses';
+        : ['seminars', 'labs', 'practice', 'tests'].includes(wildcard) || (wildcard === 'review' && subject?.player === 'lesson') ? wildcard : 'courses';
 
   const activeCourse = useMemo(() => {
     if (!courseNum || !subject) return null;
@@ -197,7 +199,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
               activeItemTitle={activeCourse ? activeCourse.shortTitle[lang] : activeLab ? activeLab.shortTitle[lang] : activeSem ? activeSem.shortTitle[lang] : undefined}
             />
           </div>
-          {tab === 'courses' && activeCourse && (
+          {tab === 'courses' && activeCourse && subject.player !== 'lesson' && (
             <button
               onClick={() => setExamMode(e => !e)}
               className="px-3 py-1.5 rounded-lg text-sm transition-colors mr-4 flex-shrink-0 whitespace-nowrap"
@@ -278,7 +280,14 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             {tab === 'courses' && (
               <>
                 {activeCourse ? (
-                  activeCourse.src ? (
+                  activeCourse.src && subject.player === 'lesson' ? (
+                    <LessonPlayer
+                      key={activeCourse.src}
+                      src={activeCourse.src}
+                      hasNext={courseNum < subject.courses.length}
+                      onFinish={() => navigate(courseNum < subject.courses.length ? `/${yearSem}/${subjectSlug}/course_${courseNum + 1}` : `/${yearSem}/${subjectSlug}`)}
+                    />
+                  ) : activeCourse.src ? (
                     <CourseRenderer
                       src={activeCourse.src}
                       examMode={examMode}
@@ -397,6 +406,10 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
               <Suspense fallback={<LoadingFallback />}>
                 <PracticeTab practice={subject.practice} />
               </Suspense>
+            )}
+
+            {tab === 'review' && (
+              <ReviewTab subject={subject} yearSem={yearSem} subjectSlug={subjectSlug} />
             )}
 
             {tab === 'tests' && subject.tests && (

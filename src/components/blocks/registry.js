@@ -1,25 +1,36 @@
 import { lazy } from 'react';
 
-const registry = {
-  'learn':       lazy(() => import('./learn/LearnBlock.jsx')),
-  'definition':  lazy(() => import('./definition/DefinitionBlock.jsx')),
-  'think':       lazy(() => import('./assessment/ThinkBlock.jsx')),
-  'quiz':        lazy(() => import('./assessment/QuizBlock.jsx')),
-  'code':        lazy(() => import('./media/CodeBlock.jsx')),
-  'equation':    lazy(() => import('./media/EquationBlock.jsx')),
-  'callout':     lazy(() => import('./layout/CalloutBlock.jsx')),
-  'diagram':     lazy(() => import('./diagram/DiagramBlock.jsx')),
-  'image':       lazy(() => import('./media/ImageBlock.jsx')),
-  'table':       lazy(() => import('./layout/TableBlock.jsx')),
-  'list':        lazy(() => import('./layout/ListBlock.jsx')),
+// One list of block loaders: the registry wraps each in lazy(), and the lesson player's
+// preload starts the same imports, so a new block type is preloaded without a second list.
+export const blockLoaders = {
+  'learn':       () => import('./learn/LearnBlock.jsx'),
+  'definition':  () => import('./definition/DefinitionBlock.jsx'),
+  'think':       () => import('./assessment/ThinkBlock.jsx'),
+  'quiz':        () => import('./assessment/QuizBlock.jsx'),
+  'code':        () => import('./media/CodeBlock.jsx'),
+  'equation':    () => import('./media/EquationBlock.jsx'),
+  'callout':     () => import('./layout/CalloutBlock.jsx'),
+  'diagram':     () => import('./diagram/DiagramBlock.jsx'),
+  'image':       () => import('./media/ImageBlock.jsx'),
+  'table':       () => import('./layout/TableBlock.jsx'),
+  'list':        () => import('./layout/ListBlock.jsx'),
   // Lecture overlay blocks (filtered by toggle)
-  'lecture':       lazy(() => import('./lecture/LectureNoteBlock.jsx')),
-  'lecture-video': lazy(() => import('./lecture/LectureVideoBlock.jsx')),
-  'lecture-exam':  lazy(() => import('./lecture/LectureExamBlock.jsx')),
+  'lecture':       () => import('./lecture/LectureNoteBlock.jsx'),
+  'lecture-video': () => import('./lecture/LectureVideoBlock.jsx'),
+  'lecture-exam':  () => import('./lecture/LectureExamBlock.jsx'),
   // Interactive blocks
-  'animation':      lazy(() => import('./interactive/AnimationBlock.jsx')),
-  'code-challenge': lazy(() => import('./interactive/CodeChallengeBlock.jsx')),
-  'terminal':       lazy(() => import('./interactive/TerminalBlock.jsx')),
+  'animation':      () => import('./interactive/AnimationBlock.jsx'),
+  'code-challenge': () => import('./interactive/CodeChallengeBlock.jsx'),
+  'terminal':       () => import('./interactive/TerminalBlock.jsx'),
+  // Lesson blocks
+  'viz':            () => import('../lesson/blocks/VizBlock.jsx'),
+  'reflect':        () => import('../lesson/blocks/ReflectBlock.jsx'),
+  'mcq':            () => import('../lesson/blocks/McqBlock.jsx'),
+  'query-machine':  () => import('../lesson/blocks/QueryMachineBlock.jsx'),
 };
+
+const registry = Object.fromEntries(
+  Object.entries(blockLoaders).map(([type, load]) => [type, lazy(load)]),
+);
 
 export default registry;

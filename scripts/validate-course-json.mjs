@@ -7,6 +7,9 @@
  */
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { validateViz } from '../src/components/lesson/viz/vizSpec.js';
+import { validateMcq, validateReflect } from '../src/components/lesson/blocks/choiceSpec.js';
+import { validateQueryMachine } from '../src/sql/machineSpec.js';
 
 const file = process.argv[2];
 if (!file) { console.error('Usage: node validate-course-json.mjs <file>'); process.exit(1); }
@@ -53,6 +56,18 @@ else {
             errors.push(`steps[${si}].blocks[${bi}] (think): question must have en + ro`);
           if (!block.answer?.en || !block.answer?.ro)
             errors.push(`steps[${si}].blocks[${bi}] (think): answer must have en + ro`);
+        }
+        if (t === 'viz') {
+          for (const e of validateViz(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'mcq') {
+          for (const e of validateMcq(block, { lessonId: json.meta?.id })) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'reflect') {
+          for (const e of validateReflect(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'query-machine') {
+          for (const e of validateQueryMachine(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'code') {
           if (!block.code) errors.push(`steps[${si}].blocks[${bi}] (code): missing code field`);
