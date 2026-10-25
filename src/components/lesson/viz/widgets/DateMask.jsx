@@ -3,20 +3,21 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { dateMask, hasPadding, maskCaption, maskStep, maskStepCount } from '../logic/date-mask.js';
+import { dateMask, hasPadding, maskCaption, maskStep, maskStepCount, outputParts } from '../logic/date-mask.js';
 import { dateMaskSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 import { parseDT } from '../logic/common.js';
 
 // Trailing blanks drawn as small boxes, so the padding Oracle adds can be seen.
 function Padded({ text }) {
+  const { t } = useApp();
   const body = text.replace(/ +$/, '');
   const blanks = text.length - body.length;
   return (
     <span className="viz-padded">
       {body}
       {Array.from({ length: blanks }, (_, i) => <i key={i} className="viz-blankbox" aria-hidden="true" />)}
-      {blanks > 0 && <span className="viz-sr">{` (${blanks} blanks)`}</span>}
+      {blanks > 0 && <span className="viz-sr">{t(` (${blanks} ${blanks === 1 ? 'space' : 'spaces'})`, ` (${blanks === 1 ? '1 spațiu' : `${blanks} spații`})`)}</span>}
     </span>
   );
 }
@@ -59,11 +60,11 @@ export default function DateMask({ props, predict }) {
           </div>
           <div className="viz-arrow" aria-hidden="true">↓</div>
           <div className="viz-maskline out">
-            {cur.parts.map((p, i) => (
+            {outputParts(cur.parts).map((p, i) => (
               shown
                 ? (
                   <Motion.span key={`o${i}`} className={`viz-tok out ${p.kind}${p.source ? ` ${p.source}` : ''}`} variants={m.v.fall} custom={i + 2} initial="hidden" animate="show">
-                    {p.kind === 'fm' ? '' : <Padded text={p.text} />}
+                    <Padded text={p.text} />
                   </Motion.span>
                 )
                 : p.kind === 'literal'

@@ -118,3 +118,7 @@ export function maskCaption(f, kind) {
 
 // True when a text ends in padding blanks (drawn as dotted boxes, which then need the legend).
 export const hasPadding = (text) => / +$/.test(text);
+
+// The pieces drawn on the output line. fm writes nothing, so it gets no box there: an empty dashed box (or a "?" box
+// before the answer) would read as one more piece of output, and next to the "dotted box = one space" legend, as a space.
+export const outputParts = (parts) => parts.filter(p => p.kind !== 'fm');

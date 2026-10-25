@@ -162,7 +162,7 @@ describe('in-between: the condition is printed as valid SQL', () => {
 });
 
 import { guessLegend } from '../../src/components/lesson/viz/logic/number-line.js';
-import { formatDate, maskStep, maskStepCount, maskCaption, hasPadding } from '../../src/components/lesson/viz/logic/date-mask.js';
+import { formatDate, maskStep, maskStepCount, maskCaption, hasPadding, outputParts } from '../../src/components/lesson/viz/logic/date-mask.js';
 import { ageArcCalls, ageCaptions, ageLabels, ageParts, monthsBetween } from '../../src/components/lesson/viz/logic/age-timeline.js';
 import { pipeCaption } from '../../src/components/lesson/viz/logic/type-pipes.js';
 import { decodeSieve, decodeCall, decodeCaption } from '../../src/components/lesson/viz/logic/decode-sieve.js';
@@ -191,6 +191,13 @@ describe('date-mask: each mask is asked, then shown, with its own caption', () =
     expect(maskCaption(day, 'ask').ro).toBe("TO_CHAR(data, 'Day'): ce iese? Gândește-te, apoi apasă «Mai departe».");
     expect(hasPadding(day.text)).toBe(true);
     expect(hasPadding('Friday')).toBe(false);
+  });
+  it('fm gets no box on the output line, so nothing there reads as an extra piece or a space', () => {
+    const fmDay = formatDate('1995-02-17', 'fmDay');
+    expect(fmDay.parts.map(p => p.kind)).toEqual(['fm', 'field']);
+    expect(outputParts(fmDay.parts).map(p => p.text)).toEqual(['Friday']);
+    const plain = formatDate('1995-02-17', 'DD-MON-YY');
+    expect(outputParts(plain.parts)).toEqual(plain.parts);
   });
 });
 
