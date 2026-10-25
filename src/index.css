@@ -399,9 +399,9 @@ body {
 .viz-frame { border: 1.5px solid var(--lt-line); border-radius: 10px; padding: 8px 10px 10px; min-height: 120px; background: var(--theme-card-bg); }
 .viz-frame-title { font-weight: 700; margin-bottom: 8px; }
 .viz-cols { display: flex; flex-wrap: wrap; gap: 6px; }
-.viz-colhead { display: flex; flex-direction: column; gap: 3px; padding: 6px 9px; border-radius: 8px; background: var(--lt-acc-soft); border: 1px solid color-mix(in srgb, var(--lt-acc) 40%, transparent); position: relative; min-width: 84px; }
+.viz-colhead { display: flex; flex-direction: column; gap: 3px; padding: 6px 24px 6px 9px; border-radius: 8px; background: var(--lt-acc-soft); border: 1px solid color-mix(in srgb, var(--lt-acc) 40%, transparent); position: relative; min-width: 84px; }
 .viz-type { font-size: 0.75rem; color: var(--theme-muted-text); font-family: ui-monospace, monospace; }
-.viz-idx { position: absolute; top: 3px; right: 6px; font-size: 0.625rem; color: var(--theme-muted-text); }
+.viz-idx { position: absolute; top: 4px; right: 8px; font-size: 0.6875rem; line-height: 1; color: var(--theme-muted-text); }
 .viz-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--lt-line); background: var(--lt-surface); font-variant-numeric: tabular-nums; }
 .viz-badge.no { color: var(--lt-drop); background: var(--lt-drop-soft); border-color: color-mix(in srgb, var(--lt-drop) 40%, transparent); width: fit-content; }
 .viz-badge.yes { color: var(--lt-keep); background: var(--lt-keep-soft); border-color: color-mix(in srgb, var(--lt-keep) 40%, transparent); }
@@ -409,8 +409,10 @@ body {
 .viz-tally { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 .viz-scrollx { overflow-x: auto; }
-.viz-rowgrid { display: grid; gap: 4px; width: 100%; }
-.viz-rg-head { font-size: 0.75rem; font-weight: 600; color: var(--theme-muted-text); padding: 2px 8px; }
+/* row-insert: one unit per column (name above value); the units wrap instead of scrolling, so no column hides off the edge */
+.viz-rowgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px 4px; width: 100%; }
+.viz-rg-unit { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.viz-rg-head { font-size: 0.75rem; font-weight: 600; color: var(--theme-muted-text); padding: 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .viz-rg-cell { padding: 7px 8px; border-radius: 8px; background: var(--lt-keep-soft); border: 1px solid color-mix(in srgb, var(--lt-keep) 35%, transparent); font-variant-numeric: tabular-nums; min-height: 34px; }
 .viz-rg-cell.empty { background: transparent; border: 1.5px dashed var(--lt-line); }
 .viz-reject { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
@@ -437,8 +439,9 @@ body {
 .viz-pattern { display: flex; gap: 8px; align-items: baseline; font-size: 1rem; }
 .viz-pattern code { font-size: 1.05rem; font-weight: 700; padding: 2px 8px; border-radius: 8px; background: var(--lt-acc-soft); }
 .viz-like-body { display: flex; flex-direction: column; gap: 10px; position: relative; padding-right: 54px; min-height: 96px; }
-.viz-letters { display: flex; flex-wrap: wrap; gap: 4px; }
-.viz-letter { width: 30px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 600; font-size: 1rem; background: var(--lt-surface); border: 1.5px solid var(--lt-line); transition: background 0.3s ease, border-color 0.3s ease; }
+/* one row of letters whatever the name's length: --n letters share the width, each at most 30px */
+.viz-letters { display: grid; grid-template-columns: repeat(var(--n, 10), minmax(16px, 30px)); gap: 4px; }
+.viz-letter { min-width: 0; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 600; font-size: 1rem; background: var(--lt-surface); border: 1.5px solid var(--lt-line); transition: background 0.3s ease, border-color 0.3s ease; }
 .viz-letter.t0 { background: color-mix(in srgb, var(--lt-t0) 18%, transparent); border-color: var(--lt-t0); }
 .viz-letter.t1 { background: color-mix(in srgb, var(--lt-t1) 18%, transparent); border-color: var(--lt-t1); }
 .viz-letter.t2 { background: color-mix(in srgb, var(--lt-t2) 18%, transparent); border-color: var(--lt-t2); }
@@ -529,8 +532,10 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 /* CHAR boxes and strips */
 .viz-boxes-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .viz-op { padding: 2px 8px; border-radius: 8px; background: var(--lt-acc-soft); }
-.viz-boxes { display: flex; flex-wrap: wrap; gap: 4px; }
-.viz-box { position: relative; width: 32px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 700; font-size: 1.05rem; background: var(--lt-acc-soft); border: 1.5px solid var(--lt-acc); }
+.viz-op.pending { background: transparent; border: 1.5px dashed var(--lt-acc); }
+/* CHAR boxes and LPAD/TRANSLATE strips stay on one line: --n cells share the width, each at most 32px (30px for strips) */
+.viz-boxes { display: grid; grid-template-columns: repeat(var(--n, 10), minmax(18px, 32px)); gap: 4px; overflow-x: auto; }
+.viz-box { position: relative; min-width: 0; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 700; font-size: 1.05rem; background: var(--lt-acc-soft); border: 1.5px solid var(--lt-acc); }
 .viz-box.blank { background: transparent; border: 1.5px dashed var(--theme-muted-text); }
 .viz-box.bad { background: var(--lt-drop-soft); border: 1.5px solid var(--lt-drop); }
 .viz-box.good { background: var(--lt-keep-soft); border: 1.5px solid var(--lt-keep); }
@@ -538,14 +543,17 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-boxes:has(.viz-box-n) { padding-bottom: 18px; }
 .viz-result { display: flex; align-items: baseline; gap: 10px; padding: 8px 12px; border-radius: 10px; background: var(--lt-surface); border: 1px solid var(--lt-line); width: fit-content; max-width: 100%; }
 .viz-result b { font-family: ui-monospace, monospace; word-break: break-all; }
+/* label over value pairs, one per line, the value never broken inside a word */
+.viz-result.pairs { display: grid; grid-template-columns: auto auto; column-gap: 10px; row-gap: 4px; align-items: baseline; }
+.viz-result.pairs b { white-space: nowrap; word-break: normal; }
 .viz-resultcol { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 .viz-resultcol .viz-result b { white-space: nowrap; }
 .viz-maps { display: flex; flex-wrap: wrap; gap: 6px; }
 .viz-map { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid var(--lt-line); font-family: ui-monospace, monospace; }
 .viz-map.t0 { border-color: var(--lt-t0); } .viz-map.t1 { border-color: var(--lt-t1); } .viz-map.t2 { border-color: var(--lt-t2); } .viz-map.t3 { border-color: var(--lt-t3); }
 .viz-map i { font-style: normal; color: var(--theme-muted-text); }
-.viz-strip { display: flex; flex-wrap: wrap; gap: 4px; padding-bottom: 14px; }
-.viz-cell { position: relative; width: 30px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-family: ui-monospace, monospace; font-weight: 700; font-size: 1.05rem; background: var(--lt-acc-soft); border: 1.5px solid var(--lt-acc); transition: background 0.3s ease, border-color 0.3s ease, opacity 0.35s ease, transform 0.35s ease; }
+.viz-strip { display: grid; grid-template-columns: repeat(var(--n, 10), minmax(16px, 30px)); gap: 3px; padding-bottom: 16px; overflow-x: auto; }
+.viz-cell { position: relative; min-width: 0; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-family: ui-monospace, monospace; font-weight: 700; font-size: 1.05rem; background: var(--lt-acc-soft); border: 1.5px solid var(--lt-acc); transition: background 0.3s ease, border-color 0.3s ease, opacity 0.35s ease, transform 0.35s ease; }
 .viz-cell.pad { background: var(--lt-keep-soft); border-color: var(--lt-keep); }
 .viz-cell.empty { background: transparent; border: 1.5px dashed var(--theme-muted-text); }
 .viz-cell.gone { opacity: 0.25; text-decoration: line-through; background: var(--lt-drop-soft); border-color: var(--lt-drop); transform: translateY(8px); }
@@ -608,6 +616,8 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-harrow { color: var(--theme-muted-text); }
 .viz-padded { display: inline-flex; align-items: center; }
 .viz-blankbox { display: inline-block; width: 0.55em; height: 0.95em; margin-left: 2px; border: 1px dashed var(--theme-muted-text); border-radius: 2px; }
+.viz-tok.out.pending { border-style: dashed; color: var(--theme-muted-text); font-weight: 400; min-width: 2em; text-align: center; }
+.viz-legend { display: flex; align-items: center; gap: 4px; }
 
 /* age */
 .viz-timeline { position: relative; height: 64px; margin: 14px 8px 6px; }
@@ -666,8 +676,14 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-cgrid-body { flex: 1; min-width: 0; }
 .viz-cgrid-axis { font-size: 0.75rem; color: var(--theme-muted-text); font-weight: 600; }
 .viz-cgrid-axis.y { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; }
-.viz-cgrid { display: grid; gap: 1px; margin-top: 4px; }
-.viz-cg { aspect-ratio: 1; border-radius: 1.5px; background: color-mix(in srgb, var(--lt-line) 55%, transparent); transition: background 0.35s ease, opacity 0.45s ease, transform 0.35s ease; }
+.viz-cgrid { display: grid; gap: 1px; margin-top: 4px; align-items: center; }
+/* the row keys (111 …) on the left and the column groups (111 ×6 …) on top, in the squares' own grid */
+.viz-cg-corner, .viz-cg-col, .viz-cg-row { font-size: 0.5625rem; line-height: 1; color: var(--theme-muted-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.viz-cg-corner { padding-right: 4px; align-self: end; padding-bottom: 3px; }
+.viz-cg-col { text-align: center; padding-bottom: 3px; border-bottom: 1px solid var(--lt-line); margin: 0 1px 2px; overflow: hidden; letter-spacing: -0.02em; }
+.viz-cg-row { text-align: right; padding-right: 4px; }
+.viz-cg-row.empty { color: var(--lt-drop); }
+.viz-cg { height: 12px; border-radius: 1.5px; background: color-mix(in srgb, var(--lt-line) 55%, transparent); transition: background 0.35s ease, opacity 0.45s ease, transform 0.35s ease; }
 .viz-cg.on { background: color-mix(in srgb, var(--lt-acc) 55%, transparent); }
 .viz-cg.on.off { background: color-mix(in srgb, var(--lt-line) 55%, transparent); opacity: 0.25; }
 .viz-cg.on.hit { background: var(--lt-keep); }
@@ -675,6 +691,8 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-matrix { display: grid; gap: 2px; min-width: 300px; }
 .viz-mx-corner, .viz-mx-h { font-size: 0.625rem; color: var(--theme-muted-text); text-align: center; font-variant-numeric: tabular-nums; align-self: center; }
 .viz-mx-corner { white-space: nowrap; padding-right: 4px; }
+.viz-mx-legend { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 8px; font-size: 0.6875rem; }
+.viz-mx-legend b { font-variant-numeric: tabular-nums; }
 .viz-mx { aspect-ratio: 1; border-radius: 3px; background: color-mix(in srgb, var(--lt-acc) 40%, transparent); transition: background 0.35s ease, opacity 0.4s ease, transform 0.35s ease; }
 .viz-mx.gone { background: var(--lt-line); opacity: 0.2; }
 .viz-mx.off { background: color-mix(in srgb, var(--lt-line) 80%, transparent); opacity: 0.3; }
@@ -698,13 +716,20 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-jsetup { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .viz-jbadge { display: flex; flex-direction: column; padding: 8px 14px; border-radius: 10px; background: var(--lt-surface); border: 1.5px solid var(--lt-line); }
 .viz-jbadge span { font-size: 0.75rem; color: var(--theme-muted-text); }
-.viz-jresult { display: flex; flex-wrap: wrap; gap: 4px; max-height: 12rem; overflow-y: auto; }
+.viz-jresult { display: flex; flex-wrap: wrap; gap: 4px; }
+/* the column names over the cards and over the result list */
+.viz-jcols { display: block; font-size: 0.6875rem; font-weight: 400; color: var(--theme-muted-text); }
+.viz-jlist { display: flex; flex-direction: column; gap: 6px; }
+.viz-jgroup { font-size: 0.75rem; font-weight: 700; color: var(--lt-keep); margin-top: 2px; }
+.viz-jgroup.no { color: var(--lt-drop); }
+.viz-jpair.nul { background: transparent; border-style: dashed; color: var(--theme-muted-text); }
+.viz-jpair.dropped.summary { text-decoration: none; opacity: 0.7; }
 .viz-jpair { padding: 2px 8px; border-radius: 8px; font-size: 0.6875rem; background: var(--lt-keep-soft); border: 1px solid color-mix(in srgb, var(--lt-keep) 40%, transparent); transition: opacity 0.4s ease, background 0.4s ease; white-space: nowrap; }
-.viz-jpair.dropped { opacity: 0.35; text-decoration: line-through; background: var(--lt-drop-soft); border-color: color-mix(in srgb, var(--lt-drop) 40%, transparent); }
+.viz-jpair.dropped { opacity: 0.6; text-decoration: line-through; background: var(--lt-drop-soft); border-color: color-mix(in srgb, var(--lt-drop) 40%, transparent); }
 
 /* ALL vs SOME */
 .viz-avs { display: flex; flex-direction: column; gap: 2px; font-size: 0.8125rem; }
-.viz-avs-head, .viz-avs-row { display: grid; grid-template-columns: minmax(104px, 1.1fr) minmax(0, 2fr) 48px 48px; gap: 6px; align-items: center; }
+.viz-avs-head, .viz-avs-row { display: grid; grid-template-columns: minmax(104px, 1.1fr) minmax(0, 2fr) 72px 48px; gap: 6px; align-items: center; }
 .viz-avs-head { font-size: 0.6875rem; color: var(--theme-muted-text); font-weight: 600; text-align: center; }
 .viz-avs-head span:nth-child(2) { text-align: left; }
 .viz-avs-row { padding: 3px 0; border-bottom: 1px solid color-mix(in srgb, var(--lt-line) 45%, transparent); }
@@ -720,8 +745,10 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-avs-pick:focus-visible { outline: 2px solid var(--lt-acc); }
 .viz-avs-pick[aria-pressed="true"] { background: var(--lt-keep-soft); box-shadow: inset 0 0 0 1.5px var(--lt-keep); }
 .viz-avs-row.picked .viz-avs-name { font-weight: 600; }
-.viz-avs-row.guess-ok .viz-avs-name::after { content: ' ✓'; color: var(--lt-keep); font-weight: 800; }
-.viz-avs-row.guess-miss .viz-avs-name::after { content: ' ✗'; color: var(--lt-drop); font-weight: 800; }
+/* the learner's guess, after the reveal: an outline around the name (the legend under the table explains it) */
+.viz-avs-who { display: inline-block; padding: 1px 5px; margin: -1px 0; border-radius: 6px; }
+.viz-avs-row.guess-ok .viz-avs-who { box-shadow: inset 0 0 0 1.5px var(--lt-keep); }
+.viz-avs-row.guess-miss .viz-avs-who { box-shadow: inset 0 0 0 1.5px var(--lt-drop); }
 .viz-avs-switch { margin-top: 12px; }
 .viz-minus { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
 
@@ -748,11 +775,11 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
   .viz-jwires { column-gap: 40px; }
   .viz-like-body { padding-right: 0; padding-top: 52px; }
   .viz-stamp { right: 0; top: -2px; }
-  .viz-avs-head, .viz-avs-row { grid-template-columns: minmax(84px, 1fr) minmax(0, 1.6fr) 36px 36px; }
-  /* nine dots (table-build: a step per column) fit between Back and "Mai departe" on a phone */
-  .viz-progress { gap: 4px; }
-  .viz-dot { width: 6px; height: 6px; }
-  .viz-dot.on { width: 16px; }
+  .viz-avs-head, .viz-avs-row { grid-template-columns: minmax(80px, 1fr) minmax(0, 1.5fr) 50px 40px; }
+  /* up to ten dots (VizFrame shows "3 / 14" beyond that) fit on one line between Back and "Mai departe" on a phone */
+  .viz-progress { gap: 3px; }
+  .viz-dot { width: 5px; height: 5px; }
+  .viz-dot.on { width: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .viz *, .viz *::before, .viz *::after { transition: none !important; animation: none !important; }
@@ -771,9 +798,16 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-arc.y.on { background: var(--lt-acc-soft); border-color: var(--lt-acc); }
 .viz-arc.m.on { background: color-mix(in srgb, var(--lt-t1) 18%, transparent); border-color: var(--lt-t1); }
 .viz-arc.d.on { background: var(--lt-keep-soft); border-color: var(--lt-keep); }
-.viz-arc code { font-size: 0.625rem; color: var(--theme-muted-text); overflow-wrap: anywhere; }
+.viz-arc code { font-size: 0.625rem; color: var(--theme-muted-text); overflow-wrap: break-word; }
 .viz-arc b { font-size: 1.25rem; font-variant-numeric: tabular-nums; min-height: 1.5rem; }
 .viz-arc i { font-style: normal; font-size: 0.75rem; color: var(--theme-muted-text); }
+/* age boxes: one under the other on a phone, so each box's SQL reads on one line instead of breaking inside words */
+@media (max-width: 640px) {
+  .viz-arcs { flex-direction: column; }
+  .viz-arc { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 8px; }
+  .viz-arc code { flex: 1 0 100%; overflow-wrap: break-word; }
+  .viz-arc:first-child { border-radius: 10px 10px 4px 4px; } .viz-arc:last-child { border-radius: 4px 4px 10px 10px; }
+}
 .viz-cell.wrong { background: var(--lt-drop-soft); border-color: var(--lt-drop); }
 .viz-minus > div:last-child { display: flex; align-items: baseline; gap: 8px; }
 

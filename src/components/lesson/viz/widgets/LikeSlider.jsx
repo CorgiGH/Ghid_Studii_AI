@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame, ValueChips } from '../ui.jsx';
-import { likeSlider } from '../logic/like-slider.js';
+import { likeCaption, likeIntro, likeSlider, likeTally } from '../logic/like-slider.js';
 
 // Which token owns each letter, so the letters can be tinted by the pill that took them.
 function owners(trace, len) {
@@ -25,11 +25,9 @@ export default function LikeSlider({ props, predict }) {
   const own = trace ? owners(trace, chars.length) : [];
   const failAt = trace && !trace.match ? trace.steps.at(-1) : null;
   const matches = L.traces.filter(x => x.match).length;
-  const caption = k === 0
-    ? t(`The pattern ${props.pattern} is laid over each name. _ takes exactly one letter, % takes any number of letters, even none.`, `Modelul ${props.pattern} se așază peste fiecare nume. _ ia exact o literă, % ia oricâte litere, chiar niciuna.`)
-    : trace.match
-      ? t(`${value}: every part of the pattern found its letters, and no letter is left over. It matches.`, `${value}: fiecare parte din model și-a găsit literele și nu rămâne nicio literă. Se potrivește.`)
-      : t(`${value}: ${failAt?.leftover ? 'the pattern ended but letters are left over' : 'the pattern stops here, the letter does not fit'}. No match.`, `${value}: ${failAt?.leftover ? 'modelul s-a terminat, dar au rămas litere' : 'modelul se oprește aici, litera nu se potrivește'}. Nu se potrivește.`);
+  const cap = k === 0 ? likeIntro(props.pattern) : likeCaption(props.pattern, value, trace);
+  const caption = t(cap.en, cap.ro);
+  const tally = likeTally(matches, props.values.length);
   const verdicts = L.traces.map(x => x.match);
   return (
     <VizFrame widget="like-slider" stepper={s} caption={caption} label={t('A LIKE pattern sliding over names', 'Un model LIKE peste nume')}>
@@ -40,7 +38,7 @@ export default function LikeSlider({ props, predict }) {
         </div>
         {value !== null && (
           <Motion.div key={`${cur}`} className="viz-like-body" variants={m.v.enter} initial="hidden" animate="show">
-            <div className="viz-letters" role="img" aria-label={value}>
+            <div className="viz-letters" role="img" aria-label={value} style={{ '--n': chars.length }}>
               {chars.map((c, i) => {
                 const bad = failAt && !failAt.leftover && i === failAt.from;
                 const left = failAt && failAt.leftover && i >= failAt.from;
@@ -67,7 +65,7 @@ export default function LikeSlider({ props, predict }) {
         )}
       </div>
       <ValueChips items={props.values} step={k} verdicts={verdicts} onPick={s.goto} />
-      {k === L.count - 1 && <div className="viz-dim viz-note">{t(`${matches} of ${props.values.length} names match.`, `${matches} din ${props.values.length} nume se potrivesc.`)}</div>}
+      {k === L.count - 1 && <div className="viz-dim viz-note">{t(tally.en, tally.ro)}</div>}
     </VizFrame>
   );
 }

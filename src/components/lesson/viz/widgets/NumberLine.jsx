@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { lineCrowded, nearMarks, numberLines, pickIsRight, reachableStep } from '../logic/number-line.js';
+import { guessLegend, lineCrowded, nearMarks, numberLines, pickIsRight, reachableStep } from '../logic/number-line.js';
 import { numberLineSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -38,8 +38,12 @@ export default function NumberLine({ props, predict }) {
   const caption = anyAsking
     ? t(`Where does the number land with ${fnAt}? Click a mark on each line, then press Show.`, `Unde ajunge numărul cu ${fnAt}? Apasă pe o gradație la fiecare axă, apoi apasă Arată.`)
     : k === 0
-    ? (digits === 0 ? t('Each number sits between two whole numbers.', 'Fiecare număr stă între doi întregi.') : t(`The marks are ${digits > 0 ? `${Math.pow(10, -digits)} apart` : `${Math.pow(10, -digits)} apart (the digits left of the point)`}.`, `Gradațiile sunt la distanță de ${Math.pow(10, -digits)}${digits < 0 ? ' (cifrele din stânga virgulei)' : ''}.`))
+    ? (digits === 0 ? t('Each number sits between two whole numbers.', 'Fiecare număr stă între doi întregi.') : t(`The marks are ${digits > 0 ? `${Math.pow(10, -digits)} apart` : `${Math.pow(10, -digits)} apart (the digits left of the point)`}.`, `Gradațiile sunt la distanță de ${Math.pow(10, -digits)}${digits < 0 ? ' (cifrele din stânga punctului zecimal)' : ''}.`))
     : hint[fnAt];
+  // once the answers are shown, a legend for the marks the learner picked on this step
+  const legend = k >= 1 && !anyAsking
+    ? guessLegend(N.lines.map((ln, li) => picks[`${k}:${li}`]).map((x, li) => (x === undefined ? null : pickIsRight(N.lines[li].value, fnAt, digits, x))).filter(v => v !== null))
+    : null;
   return (
     <VizFrame widget="number-line" stepper={stepper} caption={caption} label={t('Rounding functions on a number line', 'Funcțiile de rotunjire pe axa numerelor')}>
       <div className="viz-lines">
@@ -89,6 +93,7 @@ export default function NumberLine({ props, predict }) {
           );
         })}
       </div>
+      {legend && <div className="viz-dim viz-note">{t(legend.en, legend.ro)}</div>}
       {anyAsking && (
         <button type="button" className="viz-btn viz-numline-show" onClick={() => { setShownSteps(v => ({ ...v, [k]: true })); s.settle(); }}>{t('Show', 'Arată')}</button>
       )}

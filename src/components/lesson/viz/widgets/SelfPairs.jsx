@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { selfPairs } from '../logic/self-pairs.js';
+import { axisLegend, rowName, selfPairs } from '../logic/self-pairs.js';
 import { selfPairsSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -28,10 +28,10 @@ export default function SelfPairs({ props, predict }) {
       <div className="viz-matrix-wrap">
         <div className="viz-matrix" style={{ gridTemplateColumns: `auto repeat(${n}, 1fr)` }} role="img" aria-label={`${n} x ${n}`}>
           <span className="viz-mx-corner">a \ b</span>
-          {P.rows.map((r, j) => <span key={j} className="viz-mx-h">{String(r.nr_matricol).slice(-2)}</span>)}
+          {P.rows.map((r, j) => <span key={j} className="viz-mx-h">{String(r[P.key])}</span>)}
           {P.rows.map((r, i) => (
             <React.Fragment key={i}>
-              <span className="viz-mx-h side">{String(r.nr_matricol).slice(-2)}</span>
+              <span className="viz-mx-h side">{String(r[P.key])}</span>
               {P.cells[i].map((c, j) => {
                 let cls = 'in';
                 if (c === 'self') cls = k >= 1 ? 'gone' : 'in';
@@ -44,9 +44,12 @@ export default function SelfPairs({ props, predict }) {
           ))}
         </div>
       </div>
+      <div className="viz-mx-legend viz-dim">
+        {axisLegend(P.rows, P.key).map(x => <span key={x.key}><b>{x.key}</b> {x.name}</span>)}
+      </div>
       {k >= idxMatch && (
         <div className="viz-pairlist">
-          {P.pairs.map((p, i) => <span key={i} className="viz-pairchip" style={{ animationDelay: `${i * 30}ms` }}>{p.a.nume} · {p.b.nume}</span>)}
+          {P.pairs.map((p, i) => <span key={i} className="viz-pairchip" style={{ animationDelay: `${i * 30}ms` }}>{rowName(p.a, P.rows, P.key)} · {rowName(p.b, P.rows, P.key)}</span>)}
         </div>
       )}
     </VizFrame>

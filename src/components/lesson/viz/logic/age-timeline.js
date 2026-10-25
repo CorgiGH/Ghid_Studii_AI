@@ -1,4 +1,5 @@
 import { parseDT, daysInMonth, toUTC } from './common.js';
+import { roCount } from './words.js';
 import { calendar } from './calendar-clock.js';
 import { formatDate } from './date-mask.js';
 
@@ -39,4 +40,31 @@ export function ageSteps({ birth, today }) {
   const years = months / 12;
   const days = (toUTC(parseDT(today)) - toUTC(parseDT(birth))) / 86400000;
   return { birth, today, months, years, age: Math.floor(years), days, naive: days / 365, naiveAge: Math.floor(days / 365), parts: ageParts({ birth, today }, months), count: 5 };
+}
+
+// The SQL over each box, as the learner would write it. Until MONTHS_BETWEEN has run (step 1) the whole months are
+// not known yet and the calls read "luni"; after that they carry the number, as on the next screen (380).
+export function ageArcCalls(parts, known) {
+  const n = { en: known ? String(parts.wholeMonths) : 'months', ro: known ? String(parts.wholeMonths) : 'luni' };
+  const call = (f) => ({ en: f(n.en), ro: f(n.ro) });
+  return {
+    y: call((x) => `TRUNC(${x} / 12)`),
+    m: call((x) => `MOD(${x}, 12)`),
+    d: call((x) => `TRUNC(SYSDATE) - ADD_MONTHS(data_nastere, ${x})`),
+  };
+}
+
+// The caption of each step, with Romanian counts (380 de luni, 31 de ani, 8 luni).
+export function ageCaptions(L, parts, months) {
+  const luni = (n) => roCount(n, 'lună', 'luni');
+  const ani = (n) => roCount(n, 'an', 'ani');
+  const zile = (n) => roCount(n, 'zi', 'zile');
+  const en = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  return [
+    { en: `Born ${L.birth}, today is ${L.today}. How many years, months and days is that? Guess the number in each box.`, ro: `Născut ${L.birth}, azi este ${L.today}. Câți ani, luni și zile sunt? Ghicește numărul din fiecare casetă.` },
+    { en: `MONTHS_BETWEEN(SYSDATE, data_nastere) counts whole months and adds the part of a month that has passed: ${months.toFixed(3)}. TRUNC keeps ${en(parts.wholeMonths, 'whole month', 'whole months')}.`, ro: `MONTHS_BETWEEN(SYSDATE, data_nastere) numără lunile întregi și adaugă partea de lună scursă: ${months.toFixed(3)}. TRUNC păstrează ${luni(parts.wholeMonths)} întregi.` },
+    { en: `First box: ${en(parts.wholeMonths, 'month', 'months')} make ${en(parts.years, 'full year', 'full years')} (${en(parts.years * 12, 'month', 'months')}). A birthday that has not come yet does not count.`, ro: `Prima casetă: ${luni(parts.wholeMonths)} fac ${ani(parts.years)} împliniți (${luni(parts.years * 12)}). O zi de naștere care nu a venit încă nu se numără.` },
+    { en: `Second box: ${en(parts.months, 'month is', 'months are')} left over after the years.`, ro: `A doua casetă: după ani ${parts.months === 1 ? 'rămâne' : 'rămân'} ${luni(parts.months)}.` },
+    { en: `Third box: ADD_MONTHS(data_nastere, ${parts.wholeMonths}) is ${L.anchor}. From there to today ${parts.days === 1 ? 'is 1 day' : `are ${parts.days} days`}. Age: ${en(parts.years, 'year', 'years')}, ${en(parts.months, 'month', 'months')}, ${en(parts.days, 'day', 'days')}.`, ro: `A treia casetă: ADD_MONTHS(data_nastere, ${parts.wholeMonths}) este ${L.anchor}. De acolo până azi ${parts.days === 1 ? 'este 1 zi' : `sunt ${zile(parts.days)}`}. Vârsta: ${ani(parts.years)}, ${luni(parts.months)}, ${zile(parts.days)}.` },
+  ];
 }

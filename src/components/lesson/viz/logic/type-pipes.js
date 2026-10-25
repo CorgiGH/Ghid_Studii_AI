@@ -27,3 +27,10 @@ export const pipeTarget = (item, done) => (done ? item.to : '?');
 export function typePipes({ conversions }) {
   return { items: conversions.map(c => ({ ...c, result: convert(c) })), count: conversions.length + 1 };
 }
+
+// What a pipe's step says: the conversion's own sentence when the lesson gives one ('12' becomes the number 12, then
+// 12 * 2 = 24), else the plain fact; either way, that Oracle did it unasked.
+export function pipeCaption(c) {
+  const say = c.say || { en: `${c.from} becomes ${c.to} inside ${c.fn}.`, ro: `${c.from} devine ${c.to} în ${c.fn}.` };
+  return { en: `${say.en} You never wrote a conversion; Oracle did it.`, ro: `${say.ro} Nu ai scris nicio conversie; a făcut-o Oracle.` };
+}

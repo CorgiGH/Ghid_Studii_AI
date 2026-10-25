@@ -3,7 +3,7 @@ import { AnimatePresence, motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { pipeTarget, typePipes } from '../logic/type-pipes.js';
+import { pipeCaption, pipeTarget, typePipes } from '../logic/type-pipes.js';
 import { typePipesSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -34,7 +34,7 @@ export default function TypePipes({ props, predict }) {
   const resultOf = (i) => (oracle.values && oracle.values[i] != null ? oracle.values[i] : P.items[i].result);
   const caption = k === 0
     ? t('Oracle quietly changes a value from one type to another when an expression needs it. Each pipe is one such change.', 'Oracle schimbă pe tăcute o valoare dintr-un tip în altul când expresia o cere. Fiecare conductă e o astfel de schimbare.')
-    : t(`${props.conversions[k - 1].from} becomes ${props.conversions[k - 1].to} inside ${props.conversions[k - 1].fn}. You never wrote a conversion; Oracle did it.`, `${props.conversions[k - 1].from} devine ${props.conversions[k - 1].to} în ${props.conversions[k - 1].fn}. Nu ai scris nicio conversie; a făcut-o Oracle.`);
+    : t(pipeCaption(props.conversions[k - 1]).en, pipeCaption(props.conversions[k - 1]).ro);
   return (
     <VizFrame widget="type-pipes" stepper={s} caption={caption} label={t('Implicit type conversions as pipes', 'Conversiile implicite de tip ca niște conducte')}>
       <div className="viz-pipes">

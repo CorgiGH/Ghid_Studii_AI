@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { decodeSieve } from '../logic/decode-sieve.js';
+import { decodeCaption, decodeSieve } from '../logic/decode-sieve.js';
 import { decodeSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -21,11 +21,8 @@ export default function DecodeSieve({ props, predict }) {
   const layers = props.pairs.length;
   const target = cur ? (cur.index >= 0 ? cur.index : layers) : 0;
   const show = (v) => (v === null ? 'NULL' : String(v));
-  const caption = k === 0
-    ? t(`DECODE(${props.expr}, ...) checks the value against each layer in order and stops at the first that equals it. If none does, the value falls to the bottom.`, `DECODE(${props.expr}, ...) verifică valoarea pe rând, strat cu strat, și se oprește la primul egal. Dacă niciunul nu e egal, valoarea cade jos.`)
-    : cur.isDefault
-      ? t(`${show(cur.value)} equals no layer, so it falls through to the default${props.default !== undefined ? ` '${props.default}'` : ' (NULL, because no default was given)'}.`, `${show(cur.value)} nu e egal cu niciun strat, deci cade în valoarea implicită${props.default !== undefined ? ` '${props.default}'` : ' (NULL, fiindcă nu s-a dat una)'}.`)
-      : t(`${show(cur.value)} is caught by layer ${cur.index + 1}: ${res(k - 1)}.`, `${show(cur.value)} este oprit de stratul ${cur.index + 1}: ${res(k - 1)}.`);
+  const cap = decodeCaption(props, cur, cur ? res(k - 1) : null);
+  const caption = t(cap.en, cap.ro);
   return (
     <VizFrame widget="decode-sieve" stepper={s} caption={caption} label={t('DECODE as a stack of sieves', 'DECODE ca un teanc de site')}>
       <div className="viz-sieve">
