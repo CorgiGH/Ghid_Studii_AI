@@ -43,7 +43,7 @@
               "ro": "Notele la OOP, cu studenții și datele"
             },
             "dataset": "facultate",
-            "sql": "SELECT s.nume, n.valoare, n.data_notare FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE c.titlu_curs = 'OOP' ORDER BY n.data_notare, s.nume, s.nr_matricol"
+            "sql": "SELECT s.nr_matricol, s.nume, n.valoare, n.data_notare FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE c.titlu_curs = 'OOP' ORDER BY n.data_notare, s.nume, s.nr_matricol"
           }
         }
       ]
@@ -59,7 +59,7 @@
           "type": "query-machine",
           "id": "bd-l24-qm",
           "dataset": "facultate",
-          "sql": "SELECT s.nume, s.prenume, n.valoare, n.data_notare FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE c.titlu_curs = 'Logica' AND n.valoare IN (7, 10) AND TO_CHAR(n.data_notare, 'fmDAY', 'NLS_DATE_LANGUAGE=ENGLISH') = 'WEDNESDAY' ORDER BY s.nume",
+          "sql": "SELECT n.valoare, n.data_notare, s.nr_matricol, s.nume, s.prenume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE c.titlu_curs = 'Logica' AND n.valoare IN (7, 10) AND TO_CHAR(n.data_notare, 'fmDAY', 'NLS_DATE_LANGUAGE=ENGLISH') = 'WEDNESDAY' ORDER BY s.nume, n.valoare",
           "stages": [
             {
               "clause": "from"
@@ -80,8 +80,8 @@
           ],
           "say": {
             "from": {
-              "en": "First step: the tables. We start from `studenti`, `note` and `cursuri`.",
-              "ro": "Prima etapă: tabelele. Pornim de la `studenti`, `note` și `cursuri`."
+              "en": "First step: the tables. Here you see the first table, `studenti` (13 rows); at the `JOIN` step `note` and `cursuri` are added.",
+              "ro": "Prima etapă: tabelele. Aici vezi prima tabelă, `studenti` (13 rânduri); la pasul `JOIN` se adaugă `note` și `cursuri`."
             },
             "join": {
               "en": "We link them: each grade gets its student and its course.",
@@ -92,24 +92,25 @@
               "ro": "A doua etapă: rândurile. Doar 3 rânduri trec de toate cele trei condiții. `IN` (sau parantezele) ține „7 sau 10” împreună."
             },
             "select": {
-              "en": "Third step: the columns. We keep the name, first name, grade and date.",
-              "ro": "A treia etapă: coloanele. Păstrăm numele, prenumele, nota și data."
+              "en": "Third step: the columns. We keep the grade, the date, the registration number, the name and the first name; the course was only needed for the filter, so it fades.",
+              "ro": "A treia etapă: coloanele. Păstrăm nota, data, numărul matricol, numele și prenumele; cursul a servit doar la filtrare, așa că se stinge."
             },
             "order": {
-              "en": "Last step: we sort by name. Result: 3 rows (Archip 7, Bodnar 7, Bodnar 10), all from 18 February 2015.",
-              "ro": "Ultima etapă: ordonăm după nume. Rezultat: 3 rânduri (Archip 7, Bodnar 7, Bodnar 10), toate din 18 februarie 2015."
+              "en": "Last step: we sort by name, then by grade. Result: 3 rows, all from 18 February 2015: Archip (117) with 7 and two different students with the same name, Bodnar Ioana: 119 with 7 and 116 with 10. Only the registration number tells them apart.",
+              "ro": "Ultima etapă: ordonăm după nume, apoi după notă. Rezultat: 3 rânduri, toate din 18 februarie 2015: Archip (117) cu 7 și două studente diferite cu același nume, Bodnar Ioana: 119 cu 7 și 116 cu 10. Doar numărul matricol le deosebește."
             }
           },
           "show": [
-            "s.nume",
             "c.titlu_curs",
             "n.valoare",
-            "n.data_notare"
+            "n.data_notare",
+            "s.nr_matricol",
+            "s.nume"
           ],
           "ask": {
             "where": {
-              "en": "Second step: the rows. Three conditions with `AND`: the course Logica, grade 7 or 10, the day Wednesday. `IN` (or parentheses) keeps \"7 or 10\" together. Which rows remain?",
-              "ro": "A doua etapă: rândurile. Trei condiții cu `AND`: cursul Logica, nota 7 sau 10, ziua miercuri. `IN` (sau parantezele) ține „7 sau 10” împreună. Care rânduri rămân?"
+              "en": "Second step: the rows. Three conditions with `AND`: the course Logica, grade 7 or 10, the day Wednesday. The Logica grades were given on 17-FEB-14 (Monday), 25-FEB-14 (Tuesday), 18-FEB-15 (Wednesday) and 22-FEB-15 (Sunday). `IN` (or parentheses) keeps \"7 or 10\" together. Which rows remain?",
+              "ro": "A doua etapă: rândurile. Trei condiții cu `AND`: cursul Logica, nota 7 sau 10, ziua miercuri. Notele de la Logica s-au dat pe 17-FEB-14 (luni), 25-FEB-14 (marți), 18-FEB-15 (miercuri) și 22-FEB-15 (duminică). `IN` (sau parantezele) ține „7 sau 10” împreună. Care rânduri rămân?"
             }
           }
         }
@@ -158,13 +159,13 @@
         {
           "type": "code",
           "language": "sql",
-          "code": "SELECT TO_CHAR(TO_DATE('21-07-2015', 'DD-MM-YYYY'), 'fmDD Month YYYY', 'NLS_DATE_LANGUAGE=ENGLISH') AS data_text,\n       CASE WHEN LAST_DAY(TO_DATE('21-07-2015', 'DD-MM-YYYY')) - TRUNC(TO_DATE('21-07-2015', 'DD-MM-YYYY'), 'MM') + 1 = 31\n            THEN 'lung' END AS luna_lunga\nFROM DUAL;"
+          "code": "SELECT s.nume, n.valoare,\n  -- 3. coloanele calculate\n  TO_CHAR(n.data_notare,\n    'fmDD Month YYYY',\n    'NLS_DATE_LANGUAGE=ENGLISH')\n    AS data_text,\n  CASE WHEN\n    LAST_DAY(n.data_notare)\n    - TRUNC(n.data_notare, 'MM')\n    + 1 < 30\n  THEN '+' END AS luna_scurta\n-- 1. tabelele și legăturile\nFROM studenti s\nJOIN note n\nON n.nr_matricol = s.nr_matricol\nJOIN cursuri c\nON c.id_curs = n.id_curs\n-- 2. rândurile\nWHERE c.titlu_curs = 'Matematica'\n  AND (n.valoare = 7\n       OR n.valoare = 10)\n-- 4. ordinea\nORDER BY s.nume;"
         },
         {
           "type": "learn",
           "content": {
-            "en": "A compound query is built in four steps: the tables and links, then the rows, then the computed columns, then the order. The execution order is the same: `FROM` (with `JOIN`), `WHERE`, `SELECT`, `ORDER BY`.",
-            "ro": "Interogarea compusă se construiește în patru pași: tabelele și legăturile, apoi rândurile, apoi coloanele calculate, apoi ordinea. Ordinea de execuție este tot aceasta: `FROM` (cu `JOIN`), `WHERE`, `SELECT`, `ORDER BY`."
+            "en": "A compound query is built in four steps: the tables and links, then the rows, then the computed columns, then the order. Oracle runs it in the same order: `FROM` (with `JOIN`), `WHERE`, `SELECT`, `ORDER BY`. `SELECT` is written first, but you fill it in third: that is why comment 3 sits at the top.",
+            "ro": "Interogarea compusă se construiește în patru pași: tabelele și legăturile, apoi rândurile, apoi coloanele calculate, apoi ordinea. Oracle o execută în aceeași ordine: `FROM` (cu `JOIN`), `WHERE`, `SELECT`, `ORDER BY`. `SELECT` se scrie primul, dar îl completezi al treilea: de aceea comentariul 3 stă sus."
           }
         },
         {
@@ -174,8 +175,8 @@
             "ro": "Prefixul fm"
           },
           "content": {
-            "en": "In the `DAY` and `MONTH` masks, the `fm` prefix removes the padding spaces: `fmDD Month YYYY` gives `21 July 2015`, with a single space after the name of the month. The capitals in the mask decide the capitals in the result: `MONTH` → `JULY`, `Month` → `July`.",
-            "ro": "În măștile `DAY` și `MONTH`, prefixul `fm` taie spațiile de umplutură: `fmDD Month YYYY` dă `21 July 2015`, cu un singur spațiu după numele lunii. Majusculele din mască decid majusculele din rezultat: `MONTH` → `JULY`, `Month` → `July`."
+            "en": "In the `DAY` and `MONTH` masks, the `fm` prefix removes the padding spaces: for 20 February 2015, `fmDD Month YYYY` gives `20 February 2015`, with a single space after the name of the month. The capitals in the mask decide the capitals in the result: `MONTH` → `FEBRUARY`, `Month` → `February`.",
+            "ro": "În măștile `DAY` și `MONTH`, prefixul `fm` taie spațiile de umplutură: pentru 20 februarie 2015, `fmDD Month YYYY` dă `20 February 2015`, cu un singur spațiu după numele lunii. Majusculele din mască decid majusculele din rezultat: `MONTH` → `FEBRUARY`, `Month` → `February`."
           }
         },
         {
@@ -519,8 +520,8 @@
     {
       "id": "bd-l24-s11",
       "title": {
-        "en": "The OOP sessions",
-        "ro": "Sesiunile de la OOP"
+        "en": "The OOP and Logica sessions",
+        "ro": "Sesiunile de la OOP și Logica"
       },
       "blocks": [
         {
@@ -529,14 +530,14 @@
           "dataset": "facultate",
           "kind": "query",
           "prompt": {
-            "en": "A session is identified by the month and the year in which it was held. Write the last name and first name of the students who passed a given course, with the grades they got and the session in which the course was passed. The format that identifies the session is \"MONTH, YEAR\", with no extra spaces (e.g. \"JUNE, 2015\" or \"FEBRUARY, 2014\"). If the month in which the session was held had fewer than 30 days, show the symbol \"+\" in an extra column, indicating that the session was harder (having fewer days); otherwise (when the month has more than 29 days) the value of the column will be null.\n\nFor the app: the course is OOP, and \"passed\" means a grade of at least 5. The columns, in order: `nume`, `prenume`, `valoare`, the session and the \"+\" column (alias of your choosing).",
-            "ro": "O sesiune este identificată prin luna și anul în care a fost ținută. Scrieți numele și prenumele studenților ce au promovat o anumită materie, cu notele luate de aceștia și sesiunea în care a fost promovată materia. Formatul ce identifică sesiunea este \"LUNA, AN\", fără alte spații suplimentare (De ex. \"JUNE, 2015\" sau \"FEBRUARY, 2014\"). În cazul în care luna în care s-a ținut sesiunea a avut mai puțin de 30 de zile, afișați simbolul \"+\" pe o coloană suplimentară, indicând faptul că acea sesiune a fost mai grea (având mai puține zile), în caz contrar (când luna are mai mult de 29 de zile) valoarea coloanei va fi null.\n\nPentru aplicație: materia este OOP, iar „a promovat” înseamnă nota cel puțin 5. Coloanele, în ordine: `nume`, `prenume`, `valoare`, sesiunea și coloana cu „+” (alias la alegerea ta)."
+            "en": "A session is identified by the month and the year in which it was held. Write the last name and first name of the students who passed a given course, with the grades they got and the session in which the course was passed. The format that identifies the session is \"MONTH, YEAR\", with no extra spaces (e.g. \"JUNE, 2015\" or \"FEBRUARY, 2014\"). If the month in which the session was held had fewer than 30 days, show the symbol \"+\" in an extra column, indicating that the session was harder (having fewer days); otherwise (when the month has more than 29 days) the value of the column will be null.\n\nFor the app: the courses are OOP and Logica, and \"passed\" means a grade of at least 5. The columns, in order: `nume`, `prenume`, `valoare`, the session and the \"+\" column (alias of your choosing).",
+            "ro": "O sesiune este identificată prin luna și anul în care a fost ținută. Scrieți numele și prenumele studenților ce au promovat o anumită materie, cu notele luate de aceștia și sesiunea în care a fost promovată materia. Formatul ce identifică sesiunea este \"LUNA, AN\", fără alte spații suplimentare (De ex. \"JUNE, 2015\" sau \"FEBRUARY, 2014\"). În cazul în care luna în care s-a ținut sesiunea a avut mai puțin de 30 de zile, afișați simbolul \"+\" pe o coloană suplimentară, indicând faptul că acea sesiune a fost mai grea (având mai puține zile), în caz contrar (când luna are mai mult de 29 de zile) valoarea coloanei va fi null.\n\nPentru aplicație: materiile sunt OOP și Logica, iar „a promovat” înseamnă nota cel puțin 5. Coloanele, în ordine: `nume`, `prenume`, `valoare`, sesiunea și coloana cu „+” (alias la alegerea ta)."
           },
           "official": {
             "lab": 4,
             "ex": 14
           },
-          "solution": "SELECT s.nume, s.prenume, n.valoare,\n       TO_CHAR(n.data_notare, 'fmMONTH, YYYY', 'NLS_DATE_LANGUAGE=ENGLISH') AS sesiune,\n       CASE WHEN LAST_DAY(n.data_notare) - TRUNC(n.data_notare, 'MM') + 1 < 30 THEN '+' END AS mai_grea\nFROM studenti s\n  JOIN note n ON n.nr_matricol = s.nr_matricol\n  JOIN cursuri c ON c.id_curs = n.id_curs\nWHERE c.titlu_curs = 'OOP'\n  AND n.valoare >= 5",
+          "solution": "SELECT s.nume, s.prenume, n.valoare,\n       TO_CHAR(n.data_notare, 'fmMONTH, YYYY', 'NLS_DATE_LANGUAGE=ENGLISH') AS sesiune,\n       CASE WHEN LAST_DAY(n.data_notare) - TRUNC(n.data_notare, 'MM') + 1 < 30 THEN '+' END AS mai_grea\nFROM studenti s\n  JOIN note n ON n.nr_matricol = s.nr_matricol\n  JOIN cursuri c ON c.id_curs = n.id_curs\nWHERE c.titlu_curs IN ('OOP', 'Logica')\n  AND n.valoare >= 5",
           "check": {
             "order": "any",
             "mode": "bag",
@@ -544,12 +545,12 @@
           },
           "hints": [
             {
-              "en": "Pick the tables and link them; filter the course and the pass. Then two computed columns: the session and \"+\".",
-              "ro": "Alege tabelele și leagă-le; filtrează cursul și promovarea. Apoi două coloane calculate: sesiunea și „+”."
+              "en": "Pick the tables and link them; filter the two courses and the pass. Then two computed columns: the session and \"+\".",
+              "ro": "Alege tabelele și leagă-le; filtrează cele două cursuri și promovarea. Apoi două coloane calculate: sesiunea și „+”."
             },
             {
-              "en": "Skeleton: `SELECT s.nume, s.prenume, n.valoare, TO_CHAR(n.data_notare, …) AS sesiune, CASE WHEN … THEN '+' END AS … FROM … WHERE c.titlu_curs = … AND n.valoare …`.",
-              "ro": "Schelet: `SELECT s.nume, s.prenume, n.valoare, TO_CHAR(n.data_notare, …) AS sesiune, CASE WHEN … THEN '+' END AS … FROM … WHERE c.titlu_curs = … AND n.valoare …`."
+              "en": "Skeleton: `SELECT s.nume, s.prenume, n.valoare, TO_CHAR(n.data_notare, …) AS sesiune, CASE WHEN … THEN '+' END AS … FROM … WHERE c.titlu_curs IN (…) AND n.valoare …`.",
+              "ro": "Schelet: `SELECT s.nume, s.prenume, n.valoare, TO_CHAR(n.data_notare, …) AS sesiune, CASE WHEN … THEN '+' END AS … FROM … WHERE c.titlu_curs IN (…) AND n.valoare …`."
             },
             {
               "en": "The session: the mask `fmMONTH, YYYY` (with `fm`, so no spaces are left) and the language fixed with `'NLS_DATE_LANGUAGE=ENGLISH'`. The number of days in the month: `LAST_DAY(d) - TRUNC(d, 'MM') + 1`. `CASE` without `ELSE` gives NULL, exactly what the statement asks for.",
@@ -557,8 +558,8 @@
             }
           ],
           "explain": {
-            "en": "The session comes from `TO_CHAR` with the mask `fmMONTH, YYYY`, and the \"+\" from a `CASE` without `ELSE`, which gives NULL when the month has at least 30 days. For OOP this gives 8 rows (June 2014 ×5, June 2015 ×3) and the \"+\" column is NULL everywhere, because June has 30 days. For Logica, with exams in February, the same query would give 9 rows with \"+\" everywhere.",
-            "ro": "Sesiunea vine din `TO_CHAR` cu masca `fmMONTH, YYYY`, iar „+” dintr-un `CASE` fără `ELSE`, care dă NULL când luna are cel puțin 30 de zile. La OOP rezultă 8 rânduri (iunie 2014 ×5, iunie 2015 ×3) și coloana „+” este NULL peste tot, fiindcă iunie are 30 de zile. La Logica, cu examene în februarie, aceeași interogare ar da 9 rânduri cu „+” peste tot."
+            "en": "The session comes from `TO_CHAR` with the mask `fmMONTH, YYYY`, and the \"+\" from a `CASE` without `ELSE`, which gives NULL when the month has at least 30 days. Result: 17 rows. The 8 OOP rows are from June (2014 and 2015) and have NULL in the \"+\" column, because June has 30 days; the 9 Logica rows are from February (2014 and 2015) and have \"+\", because February has 28 days.",
+            "ro": "Sesiunea vine din `TO_CHAR` cu masca `fmMONTH, YYYY`, iar „+” dintr-un `CASE` fără `ELSE`, care dă NULL când luna are cel puțin 30 de zile. Rezultat: 17 rânduri. Cele 8 rânduri de la OOP sunt din iunie (2014 și 2015) și au NULL în coloana „+”, fiindcă iunie are 30 de zile; cele 9 de la Logica sunt din februarie (2014 și 2015) și au „+”, fiindcă februarie are 28 de zile."
           }
         }
       ]
