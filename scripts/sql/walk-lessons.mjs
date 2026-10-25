@@ -10,7 +10,9 @@
 //   viz (predict) press "Arată-mi" (or pick on the number line, then "Arată"); every widget is then stepped to its last step
 //   query machine step through every stage; on a predicted stage pick rows / type a count / click the order, then Check
 //   sql-exercise  type the reference solution: the verdict must be `correct`; then one named wrong answer (the exercise's classic mistake from
-//                 scripts/sql/named-mistakes.json, via scripts/sql/wrong-answers.mjs): the verdict must not be `correct`
+//                 scripts/sql/named-mistakes.json, via scripts/sql/wrong-answers.mjs): the verdict must not be `correct`. Before that, Run
+//                 is hit-tested at landing scroll and at max scroll: wherever part of it shows above the sticky footer (and the tab
+//                 bar), a tap at the middle of that part must reach Run; at max scroll Run must be fully clear
 // and it checks, on every screen: Continue unlocks, no console errors, no page errors, no horizontal overflow, and the screen is
 // not blank for long after the transition. One screenshot per screen per width goes to <out>/shots, the JSON report to
 // <out>/report.json (default .superpowers/sdd/2026-10-24-bd-lessons/walk, which is gitignored). Exit code 1 on any failure.
@@ -51,7 +53,7 @@ const server = await preview({ root: ROOT, configFile: path.join(ROOT, 'vite.con
 const browser = await puppeteer.launch({ executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, headless: 'new', args: ['--no-sandbox', '--disable-dev-shm-usage'] })
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-const IGNORED_CONSOLE = [/inert/i] // the app shell's own React warning about the `inert` attribute, present before the lessons
+const IGNORED_CONSOLE = [] // console errors that are not the lessons' (none left)
 
 // ---- small page helpers
 async function waitFor(page, fn, arg, timeout = 15000, step = 80) {
@@ -95,6 +97,46 @@ async function clickEl(page, selector) {
     await sleep(100)
   }
   throw new Error(`${selector} stays covered by another element`)
+}
+
+// Where a learner's tap on Run lands, at the current scroll: the part of Run's box between the top bar and the sticky footer (or the
+// bottom tab bar, or the window's bottom edge), and what elementFromPoint finds at the middle of that part.
+function runHit(scope) {
+  const run = [...document.querySelectorAll(`${scope} [data-testid=sql-run]`)].find((e) => e.offsetParent !== null)
+  if (!run) return null
+  const r = run.getBoundingClientRect()
+  const below = [innerHeight]
+  const footer = document.querySelector('.lp-footer')?.getBoundingClientRect()
+  if (footer && footer.height > 0) below.push(footer.top)
+  for (const n of document.querySelectorAll('nav')) {
+    const b = n.getBoundingClientRect()
+    if (getComputedStyle(n).position === 'fixed' && b.height > 0 && b.bottom >= innerHeight - 1) below.push(b.top)
+  }
+  const header = document.querySelector('header')?.getBoundingClientRect()
+  const above = Math.max(0, header && header.bottom > 0 ? header.bottom : 0)
+  const limit = Math.min(...below)
+  const top = Math.max(r.top, above)
+  const bottom = Math.min(r.bottom, limit)
+  const out = { top: Math.round(r.top), bottom: Math.round(r.bottom), limit: Math.round(limit), scrollY: Math.round(scrollY), visible: Math.max(0, Math.round(bottom - top)), clear: r.top >= above && r.bottom <= limit }
+  if (bottom - top < 1) return { ...out, hit: null }
+  const el = document.elementFromPoint(r.left + r.width / 2, (top + bottom) / 2)
+  return { ...out, hit: !!el && (el === run || run.contains(el)), at: el ? `${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]}` : null }
+}
+
+async function checkRunHit(page, scope) {
+  const fails = []
+  const landing = await page.evaluate(runHit, scope)
+  if (!landing) return { fails: ['no Run button'], landing: null, max: null }
+  if (landing.hit === false) fails.push(`Run is covered at landing scroll: a tap on its visible part reaches ${landing.at} (${JSON.stringify(landing)})`)
+  const y0 = await page.evaluate(() => scrollY)
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await sleep(350)
+  const max = await page.evaluate(runHit, scope)
+  if (!max.clear) fails.push(`Run is not fully clear at max scroll (${JSON.stringify(max)})`)
+  else if (!max.hit) fails.push(`a tap on Run at max scroll reaches ${max.at} (${JSON.stringify(max)})`)
+  await page.evaluate((y) => window.scrollTo(0, y), y0)
+  await sleep(200)
+  return { fails, landing, max }
 }
 
 async function typeInto(page, scope, text) {
@@ -200,8 +242,10 @@ async function answerScreen(page, step, ctx) {
       const scope = `[data-testid=lesson-screen] [data-testid=sql-exercise]`
       if (!(await waitFor(page, (s) => !!document.querySelector(`${s} .cm-content`) || !!document.querySelector(`${s} [data-testid=sql-paper-note]`), scope, ENGINE_WAIT_MS))) { fails.push(`sql ${block.id}: editor did not appear`); continue }
       if (await page.$(`${scope} [data-testid=sql-paper-note]`)) { fails.push(`sql ${block.id}: fell back to paper mode (engine failed)`); continue }
+      const hit = await checkRunHit(page, scope)
+      for (const f of hit.fails) fails.push(`sql ${block.id}: ${f}`)
       const good = await runSql(page, scope, block.solution)
-      const rec = { id: block.id, correct: good.kind, wrong: null, wrongName: null }
+      const rec = { id: block.id, correct: good.kind, wrong: null, wrongName: null, runHit: { landing: hit.landing, max: hit.max } }
       if (good.kind !== 'correct') fails.push(`sql ${block.id}: the reference solution gets "${good.kind}" ${good.note ?? ''}`)
       const w = wrong[block.id]
       if (!w) fails.push(`sql ${block.id}: no wrong answer available`)

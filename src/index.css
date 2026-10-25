@@ -232,6 +232,10 @@ body {
   flex: 1;
   width: 100%;
   min-height: calc(100dvh - 210px);
+  /* the sticky footer's height (LessonPlayer measures it) and, below 1024 px, the bottom tab bar under it: the room every control
+     needs to scroll clear of them */
+  --lp-footer-h: 68px;
+  --lp-tabbar-h: 0px;
 }
 .lp-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 0.8125rem; color: var(--theme-muted-text); margin-bottom: 8px; }
 .lp-lesson-name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -248,17 +252,25 @@ body {
   border: 1px solid var(--theme-border);
   border-radius: 16px;
   padding: 24px 26px 28px;
+  padding-bottom: calc(var(--lp-footer-h) + var(--lp-tabbar-h));
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
   will-change: transform, opacity;
 }
 .lp-title { font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem); line-height: 1.25; font-weight: 750; color: var(--theme-content-text); margin: 0 0 18px; outline: none; }
 .lp-blocks > * + * { margin-top: 4px; }
+/* Opaque where it covers the screen (nothing shows through it that a tap would miss), and only its buttons take taps: a tap on the
+   rest of the band reaches the screen under it. */
 .lp-footer {
   position: sticky; bottom: 0; z-index: 15;
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   margin-top: 16px; padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(to top, var(--theme-content-bg) 70%, transparent);
+  background: var(--theme-content-bg);
+  box-shadow: 0 -1px 0 var(--theme-border);
+  pointer-events: none;
 }
+.lp-footer .lp-btn, .lp-footer .lp-skip { pointer-events: auto; }
+/* Run and the editor stop above the footer (and the tab bar) when they are scrolled into view. */
+.lp-root .sx-actions, .lp-root .sx-editor, .lp-root .sx-paper-check { scroll-margin-bottom: calc(var(--lp-footer-h) + var(--lp-tabbar-h) + 12px); }
 .lp-footer-end { display: flex; align-items: center; gap: 14px; }
 .lp-btn {
   display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px;
@@ -278,10 +290,11 @@ body {
 .lp-skip { background: none; border: 0; padding: 8px 4px; font-size: 0.875rem; color: var(--theme-muted-text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .lp-skip:hover { color: var(--theme-content-text); }
 @media (max-width: 1023px) {
+  .lp-root { --lp-tabbar-h: calc(72px + env(safe-area-inset-bottom, 0px)); }
   .lp-footer { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); padding-bottom: 12px; }
 }
 @media (max-width: 640px) {
-  .lp-card { padding: 18px 16px 22px; border-radius: 14px; }
+  .lp-card { padding: 18px 16px 22px; padding-bottom: calc(var(--lp-footer-h) + var(--lp-tabbar-h)); border-radius: 14px; }
   .lp-btn { padding: 0 16px; }
 }
 
