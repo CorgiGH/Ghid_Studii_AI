@@ -26,24 +26,24 @@
           "type": "reflect",
           "id": "bd-l01c-r1",
           "prompt": {
-            "en": "You log in to an account with tables made by someone else. How do you find out which tables it has? And, for one table, how many letters can a student's last name have?",
-            "ro": "Te conectezi la un cont cu tabele făcute de altcineva. Cum afli ce tabele are? Și, pentru un tabel, câte litere poate avea numele de familie al unui student?"
+            "en": "You log in to an account with tables made by someone else. How do you find out which tables it has? And one more thing: below are the students' last names, and the longest one now has 10 letters. Could there be a name with 12 letters? Where is that written?",
+            "ro": "Te conectezi la un cont cu tabele făcute de altcineva. Cum afli ce tabele are? Și încă ceva: mai jos sunt numele de familie ale studenților, iar cel mai lung de acum are 10 litere. Poate exista un nume de 12 litere? Unde scrie asta?"
           },
           "placeholder": {
             "en": "Write how you think it is done",
             "ro": "Scrie cum crezi că se face"
           },
           "answer": {
-            "en": "The list of tables comes from `SELECT table_name FROM user_tables`. The structure of a table (columns, types, lengths) comes from the command `DESCRIBE table_name`: for `nume` in `studenti` you see `VARCHAR2(10)`, so at most 10 letters.",
-            "ro": "Lista tabelelor o dă `SELECT table_name FROM user_tables`. Structura unui tabel (coloane, tipuri, lungimi) o dă comanda `DESCRIBE nume_tabel`: la `nume` din `studenti` vezi `VARCHAR2(10)`, deci cel mult 10 litere."
+            "en": "The list of tables comes from `SELECT table_name FROM user_tables`. The structure of a table (columns, types, lengths) comes from the command `DESCRIBE table_name`: for `nume` in `studenti` you see `VARCHAR2(10)`, so at most 10 letters, and a 12-letter name is rejected (`ORA-12899: value too large for column`). The rows you have now do not tell you the limit; the table's structure does.",
+            "ro": "Lista tabelelor o dă `SELECT table_name FROM user_tables`. Structura unui tabel (coloane, tipuri, lungimi) o dă comanda `DESCRIBE nume_tabel`: la `nume` din `studenti` vezi `VARCHAR2(10)`, deci cel mult 10 litere, iar un nume de 12 litere e respins (`ORA-12899: value too large for column`). Rândurile de acum nu-ți spun limita; o spune structura tabelului."
           },
           "table": {
             "caption": {
-              "en": "The studenti table (all rows)",
-              "ro": "Tabelul studenti (toate rândurile)"
+              "en": "The nume column of studenti (all rows)",
+              "ro": "Coloana nume din studenti (toate rândurile)"
             },
             "dataset": "facultate",
-            "sql": "SELECT * FROM studenti ORDER BY nr_matricol"
+            "sql": "SELECT nume FROM studenti ORDER BY nr_matricol"
           }
         }
       ]
@@ -87,8 +87,8 @@
         {
           "type": "learn",
           "content": {
-            "en": "`user_tables` is a table Oracle keeps itself: it holds one row for each table of your account. You query it like any other table.",
-            "ro": "`user_tables` e un tabel pe care îl ține Oracle însuși: conține câte un rând pentru fiecare tabel al contului tău. Îl interoghezi ca pe orice alt tabel."
+            "en": "`user_tables` is a table Oracle keeps itself: it holds one row for each table of your account. You query it like any other table.\n\nThe query below ends with `ORDER BY table_name`, which sorts the rows by the table's name (you learn `ORDER BY` in lesson 8).",
+            "ro": "`user_tables` e un tabel pe care îl ține Oracle însuși: conține câte un rând pentru fiecare tabel al contului tău. Îl interoghezi ca pe orice alt tabel.\n\nInterogarea de mai jos se termină cu `ORDER BY table_name`, care așază rândurile după numele tabelului (`ORDER BY` îl înveți în lecția 8)."
           }
         },
         {
@@ -113,16 +113,22 @@
           ],
           "say": {
             "from": {
-              "en": "`user_tables` has one row for each table: here 5.",
-              "ro": "`user_tables` are un rând pentru fiecare tabel: aici 5."
+              "en": "`user_tables` has many columns (the table's name, its storage space, its number of rows…); here we show only `table_name`. It has one row for each table: 5.",
+              "ro": "`user_tables` are multe coloane (numele tabelului, spațiul de stocare, numărul de rânduri…); aici arătăm doar `table_name`. Are un rând pentru fiecare tabel: 5."
             },
             "select": {
-              "en": "We keep only the name.",
-              "ro": "Păstrăm doar numele."
+              "en": "`SELECT table_name` keeps only the name column; the other columns of `user_tables` do not reach the result.",
+              "ro": "`SELECT table_name` păstrează doar coloana cu numele; celelalte coloane ale lui `user_tables` nu ajung în rezultat."
             },
             "order": {
               "en": "Without `ORDER BY` the order is not guaranteed; with it, alphabetical: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI`.",
               "ro": "Fără `ORDER BY` ordinea nu e garantată; cu el, alfabetic: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI`."
+            }
+          },
+          "ask": {
+            "order": {
+              "en": "In what order do the names come out after `ORDER BY table_name`? Click the rows in that order, then check.",
+              "ro": "În ce ordine ies numele după `ORDER BY table_name`? Apasă rândurile în acea ordine, apoi verifică."
             }
           }
         }
@@ -150,8 +156,20 @@
         {
           "type": "learn",
           "content": {
-            "en": "For `studenti` it also shows `NOT NULL`: `NR_MATRICOL  NOT NULL  CHAR(6)`. The same thing, as table rows, comes from `SELECT column_name, data_type, data_length, nullable FROM user_tab_columns WHERE table_name = 'STUDENTI'`.",
-            "ro": "La `studenti` apare și `NOT NULL`: `NR_MATRICOL  NOT NULL  CHAR(6)`. Același lucru, ca rânduri de tabel, îl dă `SELECT column_name, data_type, data_length, nullable FROM user_tab_columns WHERE table_name = 'STUDENTI'`."
+            "en": "In `profesori` the `Null?` column shows nothing: every column accepts NULL. In `studenti`, `nr_matricol` is `NOT NULL`. Here is `DESCRIBE studenti`:",
+            "ro": "La `profesori` coloana `Null?` nu arată nimic: toate coloanele acceptă NULL. La `studenti`, `nr_matricol` e `NOT NULL`. Iată `DESCRIBE studenti`:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "Name         Null?    Type\n------------ -------- ------------\nNR_MATRICOL  NOT NULL CHAR(6)\nNUME                  VARCHAR2(10)\nPRENUME               VARCHAR2(10)\nAN                    NUMBER(1)\nGRUPA                 CHAR(2)\nBURSA                 NUMBER(6,2)\nDATA_NASTERE          DATE"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The same thing, as table rows, comes from `SELECT column_name, data_type, data_length, nullable FROM user_tab_columns WHERE table_name = 'STUDENTI'`.",
+            "ro": "Același lucru, ca rânduri de tabel, îl dă `SELECT column_name, data_type, data_length, nullable FROM user_tab_columns WHERE table_name = 'STUDENTI'`."
           }
         }
       ]
@@ -247,12 +265,20 @@
           "type": "reflect",
           "id": "bd-l01c-r2",
           "prompt": {
-            "en": "If `SELECT * FROM studenti` works in lower case, why does `WHERE table_name = 'studenti'` not find the table?",
-            "ro": "Dacă `SELECT * FROM studenti` merge cu litere mici, de ce `WHERE table_name = 'studenti'` nu găsește tabelul?"
+            "en": "Below is `user_tables`. `SELECT * FROM studenti` works, although you wrote `studenti` in lower case. So why does `SELECT table_name FROM user_tables WHERE table_name = 'studenti'` find no row? What do you change so it finds the table's row?",
+            "ro": "Mai jos e `user_tables`. `SELECT * FROM studenti` merge, deși ai scris `studenti` cu litere mici. Atunci de ce `SELECT table_name FROM user_tables WHERE table_name = 'studenti'` nu găsește niciun rând? Ce schimbi ca să găsească rândul tabelului?"
           },
           "answer": {
-            "en": "Table and column names written without quotes are turned into upper case by Oracle and stored that way. But `'studenti'` between apostrophes is a text, and text is compared exactly, upper and lower case included. `'studenti'` is not equal to `'STUDENTI'`.",
-            "ro": "Numele de tabele și coloane scrise fără ghilimele sunt transformate de Oracle în majuscule și așa sunt stocate. `'studenti'` între apostrofuri însă e un text, iar textul se compară exact, cu litere mici și mari. `'studenti'` nu e egal cu `'STUDENTI'`."
+            "en": "Names written without double quotes (`studenti` after `FROM`, `user_tables`, `table_name`) are turned into upper case by Oracle, so they work however you write them; that is also how the table was stored in the dictionary: `STUDENTI`. But `'studenti'` between apostrophes is a text, and text is compared exactly, letter by letter: `'studenti'` is not equal to `'STUDENTI'`. You change only the text: `WHERE table_name = 'STUDENTI'`; the rest of the command can stay in lower case.",
+            "ro": "Numele scrise fără ghilimele (`studenti` de după `FROM`, `user_tables`, `table_name`) Oracle le trece singur în majuscule, deci merg scrise oricum; așa a fost păstrat și tabelul în dicționar: `STUDENTI`. `'studenti'` între apostrofuri însă e un text, iar textul se compară exact, literă cu literă: `'studenti'` nu e egal cu `'STUDENTI'`. Schimbi doar textul: `WHERE table_name = 'STUDENTI'`; restul comenzii poate rămâne cu litere mici."
+          },
+          "table": {
+            "caption": {
+              "en": "The user_tables dictionary view (the names of the account's tables)",
+              "ro": "Dicționarul user_tables (numele tabelelor contului)"
+            },
+            "dataset": "facultate",
+            "sql": "SELECT table_name FROM user_tables ORDER BY table_name"
           }
         }
       ]
@@ -268,86 +294,62 @@
           "type": "mcq",
           "id": "bd-l01c-q1",
           "question": {
-            "en": "After you run the lab script, how many rows does `SELECT table_name FROM user_tables` give?",
-            "ro": "După ce rulezi scriptul laboratorului, câte rânduri dă `SELECT table_name FROM user_tables`?"
+            "en": "Below is `user_tables` after the script ran. Then you insert a new student into `studenti`, as in the previous lesson. How many rows does `SELECT table_name FROM user_tables` give now?",
+            "ro": "Mai jos e `user_tables` după ce a rulat scriptul. Apoi inserezi un student nou în `studenti`, ca în lecția trecută. Câte rânduri dă acum `SELECT table_name FROM user_tables`?"
           },
           "options": [
             {
               "text": {
-                "en": "4: the tables named on the lab page (without `didactic`)",
-                "ro": "4: tabelele numite în pagina laboratorului (fără `didactic`)"
+                "en": "6: the new row is added to `user_tables` too",
+                "ro": "6: rândul nou se adaugă și în `user_tables`"
               },
               "correct": false,
-              "misconception": "page-vs-script",
+              "misconception": "schema-vs-instance",
               "explain": {
-                "en": "The page lists four, then adds `didactic` separately. The script creates five.",
-                "ro": "Pagina enumeră patru, apoi adaugă `didactic` separat. Scriptul creează cinci."
+                "en": "`user_tables` has one row for each table, not for each row of data. A new student changes the content of `studenti` (the instance), not the list of tables (the schema).",
+                "ro": "`user_tables` are un rând pentru fiecare tabel, nu pentru fiecare rând de date. Un student nou schimbă conținutul lui `studenti` (instanța), nu lista de tabele (schema)."
               }
             },
             {
               "text": {
-                "en": "0: the tables are in another account",
-                "ro": "0: tabelele sunt în alt cont"
-              },
-              "correct": false,
-              "misconception": "wrong-account",
-              "explain": {
-                "en": "`user_tables` lists the tables of the current account, which are exactly those created by the script.",
-                "ro": "`user_tables` listează tabelele contului curent, adică exact cele create de script."
-              }
-            },
-            {
-              "text": {
-                "en": "5: `STUDENTI`, `CURSURI`, `NOTE`, `PROFESORI`, `DIDACTIC`",
-                "ro": "5: `STUDENTI`, `CURSURI`, `NOTE`, `PROFESORI`, `DIDACTIC`"
+                "en": "5: a new student does not make a new table",
+                "ro": "5: un student nou nu face un tabel nou"
               },
               "correct": true,
               "explain": {
-                "en": "Correct.",
-                "ro": "Corect."
+                "en": "Correct. Still five tables: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI`. Only `studenti` now has 14 rows instead of 13.",
+                "ro": "Corect. Tot cinci tabele: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI`. Doar `studenti` are acum 14 rânduri în loc de 13."
+              }
+            },
+            {
+              "text": {
+                "en": "14: one row for each student in `studenti`",
+                "ro": "14: câte un rând pentru fiecare student din `studenti`"
+              },
+              "correct": false,
+              "misconception": "schema-vs-instance",
+              "explain": {
+                "en": "`user_tables` holds tables, not students: one row for each table of the account. The students, 14 of them now, are in `studenti`.",
+                "ro": "`user_tables` nu conține studenți, ci tabele: câte un rând pentru fiecare tabel al contului. Studenții, acum 14, sunt în `studenti`."
               }
             }
           ],
           "table": [
             {
               "caption": {
-                "en": "The studenti table (a few rows)",
-                "ro": "Tabelul studenti (câteva rânduri)"
+                "en": "The user_tables dictionary view (the names of the account's tables)",
+                "ro": "Dicționarul user_tables (numele tabelelor contului)"
               },
               "dataset": "facultate",
-              "sql": "SELECT * FROM studenti WHERE nr_matricol IN ('111','112','113') ORDER BY nr_matricol"
+              "sql": "SELECT table_name FROM user_tables ORDER BY table_name"
             },
             {
               "caption": {
-                "en": "The cursuri table (a few rows)",
-                "ro": "Tabelul cursuri (câteva rânduri)"
+                "en": "The studenti table before the insert (all rows, three columns)",
+                "ro": "Tabelul studenti înainte de inserare (toate rândurile, trei coloane)"
               },
               "dataset": "facultate",
-              "sql": "SELECT * FROM cursuri WHERE id_curs IN ('21','22','23') ORDER BY id_curs"
-            },
-            {
-              "caption": {
-                "en": "The note table (a few rows)",
-                "ro": "Tabelul note (câteva rânduri)"
-              },
-              "dataset": "facultate",
-              "sql": "SELECT * FROM note WHERE nr_matricol = '111' AND id_curs IN ('21','22','23') ORDER BY nr_matricol, id_curs"
-            },
-            {
-              "caption": {
-                "en": "The profesori table (a few rows)",
-                "ro": "Tabelul profesori (câteva rânduri)"
-              },
-              "dataset": "facultate",
-              "sql": "SELECT * FROM profesori WHERE id_prof IN ('p1','p2','p3') ORDER BY id_prof"
-            },
-            {
-              "caption": {
-                "en": "The didactic table (a few rows)",
-                "ro": "Tabelul didactic (câteva rânduri)"
-              },
-              "dataset": "facultate",
-              "sql": "SELECT * FROM didactic WHERE id_prof IN ('p1','p2','p3') ORDER BY id_prof, id_curs"
+              "sql": "SELECT nr_matricol, nume, prenume FROM studenti ORDER BY nr_matricol"
             }
           ]
         }
@@ -356,61 +358,61 @@
     {
       "id": "bd-l01c-s9",
       "title": {
-        "en": "Upper case in the dictionary",
-        "ro": "Litere mari în dicționar"
+        "en": "Upper case, lower case",
+        "ro": "Litere mari, litere mici"
       },
       "blocks": [
         {
           "type": "mcq",
           "id": "bd-l01c-q2",
           "question": {
-            "en": "How many rows does `SELECT table_name FROM user_tables WHERE table_name = 'studenti'` give?",
-            "ro": "Câte rânduri dă `SELECT table_name FROM user_tables WHERE table_name = 'studenti'`?"
+            "en": "How many rows does `SELECT nume FROM STUDENTI WHERE nume = 'BODNAR'` give?",
+            "ro": "Câte rânduri dă `SELECT nume FROM STUDENTI WHERE nume = 'BODNAR'`?"
           },
           "options": [
             {
               "text": {
-                "en": "0: the text is compared exactly, and in the dictionary the name is `STUDENTI`",
-                "ro": "0: textul se compară exact, iar în dicționar numele e `STUDENTI`"
-              },
-              "correct": true,
-              "explain": {
-                "en": "Correct.",
-                "ro": "Corect."
-              }
-            },
-            {
-              "text": {
-                "en": "1: Oracle ignores upper and lower case",
-                "ro": "1: Oracle nu ține cont de litere mari și mici"
+                "en": "2: Bodnar appears twice, and Oracle ignores upper and lower case",
+                "ro": "2: Bodnar apare de două ori, iar Oracle nu ține cont de litere mari și mici"
               },
               "correct": false,
               "misconception": "case-sens",
               "explain": {
-                "en": "Keywords and object names, yes; text values between apostrophes, no.",
-                "ro": "Cuvintele-cheie și numele de obiecte, da; valorile text între apostrofuri, nu."
+                "en": "It ignores case in keywords and in the names of tables and columns, which is why `STUDENTI` works. But text values between apostrophes are compared exactly: the table holds `Bodnar`, not `BODNAR`.",
+                "ro": "Nu ține cont la cuvintele-cheie și la numele de tabele și coloane, de aceea merge `STUDENTI`. Valorile text dintre apostrofuri însă se compară exact: în tabel scrie `Bodnar`, nu `BODNAR`."
               }
             },
             {
               "text": {
-                "en": "Error: `studenti` does not exist",
-                "ro": "Eroare: `studenti` nu există"
+                "en": "0: `STUDENTI` works in any case, but `'BODNAR'` is not equal to `'Bodnar'`",
+                "ro": "0: `STUDENTI` merge scris oricum, dar `'BODNAR'` nu e egal cu `'Bodnar'`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Oracle turns the table name into upper case, so `STUDENTI` and `studenti` are the same table. The text `'BODNAR'` is compared letter by letter with the `Bodnar` in the table and does not match. With `'Bodnar'` you would get 2 rows.",
+                "ro": "Corect. Numele tabelului Oracle îl trece în majuscule, deci `STUDENTI` și `studenti` sunt același tabel. Textul `'BODNAR'` se compară literă cu literă cu `Bodnar` din tabel și nu se potrivește. Cu `'Bodnar'` ai primi 2 rânduri."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: the table is called `studenti`, in lower case",
+                "ro": "Eroare: tabelul se numește `studenti`, cu litere mici"
               },
               "correct": false,
-              "misconception": "missing-vs-empty",
+              "misconception": "case-sens",
               "explain": {
-                "en": "It is not an error; the condition is simply true for no row.",
-                "ro": "Nu e eroare; condiția pur și simplu nu e adevărată pentru niciun rând."
+                "en": "Table names written without double quotes ignore case: Oracle turns them into upper case, and in the dictionary the table is in fact called `STUDENTI`.",
+                "ro": "Numele de tabele scrise fără ghilimele nu țin cont de litere mari și mici: Oracle le trece în majuscule, iar în dicționar tabelul chiar se numește `STUDENTI`."
               }
             }
           ],
           "table": {
             "caption": {
-              "en": "The user_tables dictionary view (the names of the account's tables)",
-              "ro": "Dicționarul user_tables (numele tabelelor contului)"
+              "en": "The studenti table (all rows, three columns)",
+              "ro": "Tabelul studenti (toate rândurile, trei coloane)"
             },
             "dataset": "facultate",
-            "sql": "SELECT table_name FROM user_tables ORDER BY table_name"
+            "sql": "SELECT nr_matricol, nume, prenume FROM studenti ORDER BY nr_matricol"
           }
         }
       ]
@@ -481,16 +483,16 @@
     {
       "id": "bd-l01c-s11",
       "title": {
-        "en": "Missing key",
-        "ro": "Cheie lipsă"
+        "en": "p20 twice",
+        "ro": "p20 de două ori"
       },
       "blocks": [
         {
           "type": "mcq",
           "id": "bd-l01c-q4",
           "question": {
-            "en": "In `profesori`, `p20` appears twice and you get no error. Why?",
-            "ro": "În `profesori`, `p20` apare de două ori și nu primești nicio eroare. De ce?"
+            "en": "In `profesori`, `p20` appears twice (PASCARIU GEORGIANA and Nastasa Laura both have `id_prof` `p20`) and you get no error. Why?",
+            "ro": "În `profesori`, `p20` apare de două ori (PASCARIU GEORGIANA și Nastasa Laura au amândouă `id_prof` `p20`) și nu primești nicio eroare. De ce?"
           },
           "options": [
             {
@@ -518,14 +520,14 @@
             },
             {
               "text": {
-                "en": "Oracle ignores the second identical row",
-                "ro": "Oracle ignoră al doilea rând identic"
+                "en": "Oracle keeps only the first row with `p20` and ignores the second",
+                "ro": "Oracle păstrează doar primul rând cu `p20` și îl ignoră pe al doilea"
               },
               "correct": false,
               "misconception": "db-dedups",
               "explain": {
-                "en": "Both rows are stored: `profesori` has 16 rows.",
-                "ro": "Ambele rânduri sunt stocate: `profesori` are 16 rânduri."
+                "en": "Both rows are stored: `profesori` has 16 rows, and the table below shows both `p20` rows.",
+                "ro": "Ambele rânduri sunt stocate: `profesori` are 16 rânduri, iar în tabelul de mai jos se văd amândouă rândurile cu `p20`."
               }
             }
           ],
@@ -680,8 +682,8 @@
           "dataset": "facultate",
           "kind": "query",
           "prompt": {
-            "en": "\"Run the command below to execute a creation script whose job is to create all the tables above and fill them with data. Study the contents of the script.\" (quoted from the lab)\n\nIn the app the script has already run: the tables exist and hold its data. What is left is the check from the lab: display the names of the account's tables.",
-            "ro": "„Executaţi comanda de mai jos pentru a rula un script de creare care are rolul de a crea toate tabelele de mai sus şi de a le popula cu date. Studiati continutul scriptului.”\n\nÎn aplicație scriptul a rulat deja: tabelele există și au datele din el. Rămâne partea de verificare din laborator: afișează numele tabelelor contului."
+            "en": "\"Run the command below to execute a creation script whose job is to create all the tables above and fill them with data. Study the contents of the script.\" (quoted from the lab)\n\n(The command in the lab is `@ C:/temp/facultate.sql`, and \"the tables above\" are the five: `studenti`, `cursuri`, `note`, `profesori`, `didactic`.)\n\nIn the app the script has already run: the tables exist and hold its data. What is left is the check from the lab: display the names of the account's tables.",
+            "ro": "„Executaţi comanda de mai jos pentru a rula un script de creare care are rolul de a crea toate tabelele de mai sus şi de a le popula cu date. Studiati continutul scriptului.”\n\n(Comanda din laborator este `@ C:/temp/facultate.sql`, iar „tabelele de mai sus” sunt cele cinci: `studenti`, `cursuri`, `note`, `profesori`, `didactic`.)\n\nÎn aplicație scriptul a rulat deja: tabelele există și au datele din el. Rămâne partea de verificare din laborator: afișează numele tabelelor contului."
           },
           "official": {
             "lab": 1,
