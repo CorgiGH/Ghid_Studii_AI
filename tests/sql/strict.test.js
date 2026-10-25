@@ -16,7 +16,7 @@ const facultate = fs.readFileSync(path.join(here, '..', '..', 'public', 'sql', '
 let engine
 beforeAll(async () => {
   engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate } })
-})
+}, 60000)
 
 const exec = (sql) => engine.run(sql, { dataset: 'facultate' })
 const codeOf = async (sql) => (await exec(sql)).error?.code
@@ -103,7 +103,7 @@ describe('Oracle rejects what PostgreSQL accepts (fix 18)', () => {
 
   it('lintOracle returns the first problem by position, or null', () => {
     expect(lintOracle('SELECT nume FROM studenti')).toBeNull()
-    expect(lintOracle('SELECT nume FROM studenti LIMIT 5')).toEqual({ code: 'ORA-00933', message: 'SQL command not properly ended', dialect: true })
+    expect(lintOracle('SELECT nume FROM studenti LIMIT 5')).toEqual({ code: 'ORA-00933', message: 'SQL command not properly ended', dialect: true, construct: 'limit' })
     expect(lintOracle("SELECT CONCAT(a, b, c) FROM t WHERE x ILIKE 'a'").code).toBe('ORA-00909')
   })
 })
@@ -154,7 +154,8 @@ describe('Oracle accepts what PostgreSQL does not (fix 19)', () => {
   })
   it('ROWNUM on a join of inline views is refused with a clear message, not answered differently', async () => {
     const r = await exec('SELECT COUNT(*) FROM studenti s, (SELECT * FROM note) n WHERE s.nr_matricol = n.nr_matricol AND ROWNUM <= 3')
-    expect(r.error.message).toMatch(/ROWNUM.*not supported/)
+    expect(r.error.code).toBe('ORA-03001')
+    expect(r.error.message).toMatch(/ROWNUM.*not available in this practice database/)
   })
   it('a quoted upper-case identifier names the same column as the unquoted one', async () => {
     const r = await rows('SELECT "NUME" FROM studenti')
@@ -254,7 +255,9 @@ describe('PostgreSQL errors map to the ORA code Oracle gives', () => {
     expect(await codeOf('SELECT nume, COUNT(*) FROM studenti GROUP BY an')).toBe('ORA-00979')
     expect(await codeOf('SELECT nume FROM studenti WHERE COUNT(*) > 1')).toBe('ORA-00934')
     expect(await codeOf('SELECT nonexistent_fn(nume) FROM studenti')).toBe('ORA-00904')
-    expect(await codeOf('SELECT LPAD(nume) FROM studenti')).toBe('ORA-00909')
+    // LPAD takes 2 or 3 arguments: Oracle 11g answers one with ORA-00938 (corpus ff:args.lpad-one), a fixed-count function ORA-00909
+    expect(await codeOf('SELECT LPAD(nume) FROM studenti')).toBe('ORA-00938')
+    expect(await codeOf('SELECT UPPER(nume, 1) FROM studenti')).toBe('ORA-00909')
   })
   it('an ORA code raised by the compat layer passes through unchanged', () => {
     expect(mapPgError(pg('P0001', 'ORA-01843: not a valid month'))).toEqual({ code: 'ORA-01843', message: 'not a valid month' })
@@ -273,6 +276,18 @@ describe('Romanian explanations', () => {
     for (const code of ['ORA-00911', 'ORA-00934', 'ORA-00955', 'ORA-00979', 'ORA-01426', 'ORA-01476', 'ORA-01481', 'ORA-01785', 'ORA-01791', 'ORA-12705']) {
       expect(explainOra(code).ro, code).not.toBe(explainOra('ORA-99999').ro)
     }
+  })
+  it('the codes of the final fix wave each have their own explanation', () => {
+    const codes = ['ORA-00900', 'ORA-00903', 'ORA-00905', 'ORA-00923', 'ORA-00938', 'ORA-00939', 'ORA-01427', 'ORA-01428', 'ORA-01756', 'ORA-01789',
+      'ORA-01790', 'ORA-01801', 'ORA-01830', 'ORA-01839', 'ORA-01841', 'ORA-01843', 'ORA-01846', 'ORA-01847', 'ORA-01849', 'ORA-01850', 'ORA-01851',
+      'ORA-01852', 'ORA-03001', 'ORA-25137', 'ORA-30483']
+    for (const code of codes) {
+      const e = explainOra(code)
+      expect(e, code).not.toEqual(explainOra('ORA-99999'))
+      expect(e.ro.length, code).toBeGreaterThan(30)
+      expect(e.en.length, code).toBeGreaterThan(30)
+    }
+    expect(new Set(codes.map((c) => explainOra(c).ro)).size).toBe(codes.length)
   })
   it('an unknown code gets a generic pair, and a short code is padded', () => {
     expect(explainOra('ORA-99999').ro.length).toBeGreaterThan(10)

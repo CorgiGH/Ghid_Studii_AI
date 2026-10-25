@@ -5,6 +5,10 @@
 //                                                           post: statements to run right after `sql` succeeded (DDL bookkeeping)
 //
 // What the passes do (each is covered by the differential tests):
+//   CAST(x AS VARCHAR2(n) | CHAR(n) | DATE) -> ora_cast_varchar / ora_cast_char / ora_cast_date (Oracle's text, NLS dates)
+//   a || b + c         -> (a || b) + c             (+ - || have one precedence in Oracle, left to right)
+//   LPAD(bursa, 10, 0) -> lpad(ora_t(bursa), ora_n(10), ora_t(0))   (arguments converted the Oracle way); DATE 'x' || .. typed
+//   FROM t, t          -> FROM t, t ora_r2         (Oracle runs it; a * or t.col is ORA-00918)
 //   ''                 -> NULL                     (Oracle: empty string IS NULL)
 //   SYSDATE, CURRENT_DATE, SYSTIMESTAMP, CURRENT_TIMESTAMP, LOCALTIMESTAMP -> the fixed clock
 //   USER               -> 'STUDENT'
@@ -32,6 +36,10 @@ import { charLiteralArgs, decodePass } from './pass-decode.js'
 import { outerJoinPass } from './pass-outer-join.js'
 import { naturalJoinCheck, upperQuotedIdents } from './pass-idents.js'
 import { ddlPass } from './pass-ddl.js'
+import { castPass } from './pass-cast.js'
+import { concatPrecedence } from './pass-precedence.js'
+import { argConversions, dateLiteralConcat } from './pass-args.js'
+import { repeatedTables } from './pass-repeat.js'
 
 export { tokenize, untokenize }
 
@@ -47,11 +55,16 @@ export function rewriteOracle(sql, opts = {}) {
   // one statement per run; Oracle 11g (DBMS_SQL, measured) answers ORA-00911 for a second statement, not ORA-00933
   if (ts.some((t) => isSym(t, ';'))) throw new OracleError('ORA-00911', 'invalid character')
   const bad = lintOracle(sql)
-  if (bad) throw new OracleError(bad.code, bad.message, bad.dialect)
+  if (bad) throw new OracleError(bad.code, bad.message, bad.dialect, bad.construct)
   naturalJoinCheck(ts)
   ts = upperQuotedIdents(ts)
   const ddl = ddlPass(ts, { columns })
   ts = ddl.ts
+  ts = repeatedTables(ts)
+  ts = castPass(ts)
+  ts = concatPrecedence(ts)
+  ts = dateLiteralConcat(ts)
+  ts = argConversions(ts)
   ts = emptyStringToNull(ts)
   ts = clockPass(ts, clock)
   ts = miscMap(ts)

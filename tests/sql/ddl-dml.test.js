@@ -17,7 +17,7 @@ const DS = { dataset: 'facultate' }
 let engine
 beforeAll(async () => {
   engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate } })
-})
+}, 60000)
 
 const run = (sql) => engine.run(sql, DS)
 const script = (sql) => engine.run(sql, { ...DS, script: true })
@@ -385,7 +385,8 @@ describe('script runs', () => {
     expect(b.rows).toEqual([['42']])
   })
   it('every error code the sandbox raises has its own explanation', () => {
-    for (const code of ['ORA-00001', 'ORA-00902', 'ORA-00906', 'ORA-00910', 'ORA-00913', 'ORA-00947', 'ORA-00955', 'ORA-00957', 'ORA-01086', 'ORA-01400', 'ORA-01407', 'ORA-01430', 'ORA-01438', 'ORA-01723', 'ORA-01727', 'ORA-01728', 'ORA-01758', 'ORA-01839', 'ORA-01861', 'ORA-02258', 'ORA-02260', 'ORA-02264', 'ORA-02266', 'ORA-02270', 'ORA-02290', 'ORA-02291', 'ORA-02292', 'ORA-02296', 'ORA-02449', 'ORA-04043', 'ORA-12899', 'ORA-12983']) {
+    for (const code of ['ORA-00001', 'ORA-00902', 'ORA-00906', 'ORA-00910', 'ORA-00913', 'ORA-00947', 'ORA-00955', 'ORA-00957', 'ORA-01086', 'ORA-01400', 'ORA-01407', 'ORA-01430', 'ORA-01438', 'ORA-01723', 'ORA-01727', 'ORA-01728', 'ORA-01758', 'ORA-01839', 'ORA-01861', 'ORA-02258', 'ORA-02260', 'ORA-02264', 'ORA-02266', 'ORA-02270', 'ORA-02290', 'ORA-02291', 'ORA-02292', 'ORA-02296', 'ORA-02449', 'ORA-04043', 'ORA-12899', 'ORA-12983',
+      'ORA-00900', 'ORA-00903', 'ORA-00938', 'ORA-00939', 'ORA-01427', 'ORA-01428', 'ORA-01756', 'ORA-01789', 'ORA-01790', 'ORA-01801', 'ORA-01841', 'ORA-01846', 'ORA-01849', 'ORA-01850', 'ORA-01851', 'ORA-01852', 'ORA-03001', 'ORA-25137', 'ORA-30483']) {
       expect(explainOra(code), code).not.toEqual(explainOra('ORA-99999'))
     }
   })

@@ -84,9 +84,10 @@ CREATE FUNCTION replace(s text, f text) RETURNS text LANGUAGE sql IMMUTABLE AS $
 --;;
 CREATE FUNCTION replace(s bpchar, f text, t text) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT replace(ora_p(s), f, t) $$;
 --;;
--- LPAD / RPAD : accept NUMBER first argument / NUMBER length (Oracle converts implicitly)
+-- LPAD / RPAD : accept NUMBER first argument / NUMBER length (Oracle converts implicitly). A VARCHAR2 holds at most 4000
+-- characters, so the result stops there (LENGTH(RPAD('a', 5000, 'b')) is 4000).
 CREATE FUNCTION lpad(s text, n numeric, f text) RETURNS text LANGUAGE sql IMMUTABLE AS
-$$ SELECT nullif(pg_catalog.lpad(s, greatest(trunc(n)::int,0), f), '') $$;
+$$ SELECT nullif(pg_catalog.lpad(s, least(greatest(trunc(n), 0), 4000)::int, f), '') $$;
 --;;
 CREATE FUNCTION lpad(s text, n numeric) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT lpad(s, n, ' ') $$;
 --;;
@@ -99,7 +100,7 @@ CREATE FUNCTION lpad(s text, n int, f text) RETURNS text LANGUAGE sql IMMUTABLE 
 CREATE FUNCTION lpad(s text, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT lpad(s, n::numeric, ' ') $$;
 --;;
 CREATE FUNCTION rpad(s text, n numeric, f text) RETURNS text LANGUAGE sql IMMUTABLE AS
-$$ SELECT nullif(pg_catalog.rpad(s, greatest(trunc(n)::int,0), f), '') $$;
+$$ SELECT nullif(pg_catalog.rpad(s, least(greatest(trunc(n), 0), 4000)::int, f), '') $$;
 --;;
 CREATE FUNCTION rpad(s text, n numeric) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(s, n, ' ') $$;
 --;;
@@ -156,3 +157,132 @@ CREATE OPERATOR !~~ (LEFTARG=text,      RIGHTARG=numeric, FUNCTION=ora_nlike_tn)
 --;;
 CREATE OPERATOR !~~ (LEFTARG=timestamp, RIGHTARG=text,    FUNCTION=ora_nlike_dt);
 --;;
+--;;
+-- ---------------------------------------------------------------- implicit conversions in function arguments
+-- Oracle converts an argument to the type the function's parameter has: LPAD(bursa, 10, 0) pads the text of the number with the
+-- text '0', INSTR(data_nastere, 'FEB') searches the date as DD-MON-RR text, LPAD(nume, '10', '*') reads the length '10' as a
+-- number. The rewriter (pass-args.js) wraps such arguments: ora_t(x) = x as Oracle's text (TO_CHAR rules: a number as
+-- ora_n2t, a DATE in the session date format, a CHAR with its padding), ora_n(x) = x as a NUMBER (a text that is not a number
+-- is ORA-01722). A type with no overload here (a date as a length) is ORA-00932.
+CREATE FUNCTION ora_t(v text) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT v $$;
+--;;
+CREATE FUNCTION ora_t(v bpchar) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_p(v) $$;
+--;;
+CREATE FUNCTION ora_t(v numeric) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(v) $$;
+--;;
+CREATE FUNCTION ora_t(v int2) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(v::numeric) $$;
+--;;
+CREATE FUNCTION ora_t(v int4) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(v::numeric) $$;
+--;;
+CREATE FUNCTION ora_t(v int8) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(v::numeric) $$;
+--;;
+CREATE FUNCTION ora_t(v float8) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(v::numeric) $$;
+--;;
+CREATE FUNCTION ora_t(v timestamp) RETURNS text LANGUAGE sql STABLE AS $$ SELECT ora_d2t(v) $$;
+--;;
+CREATE FUNCTION ora_t(v date) RETURNS text LANGUAGE sql STABLE AS $$ SELECT ora_d2t(v::timestamp) $$;
+--;;
+CREATE FUNCTION ora_n(v numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT v $$;
+--;;
+CREATE FUNCTION ora_n(v int2) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT v::numeric $$;
+--;;
+CREATE FUNCTION ora_n(v int4) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT v::numeric $$;
+--;;
+CREATE FUNCTION ora_n(v int8) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT v::numeric $$;
+--;;
+CREATE FUNCTION ora_n(v float8) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT v::numeric $$;
+--;;
+CREATE FUNCTION ora_n(v text) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT v::numeric $$;
+--;;
+CREATE FUNCTION ora_n(v bpchar) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT ora_p(v)::numeric $$;
+--;;
+-- INSTR with NUMBER positions (what ora_n gives): the integer part, as Oracle does
+CREATE FUNCTION instr(s text, sub text, st numeric, oc numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS
+$$ SELECT instr(s, sub, trunc(st)::int, trunc(oc)::int) $$;
+--;;
+CREATE FUNCTION instr(s text, sub text, st numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT instr(s, sub, trunc(st)::int, 1) $$;
+--;;
+-- ---------------------------------------------------------------- CAST(x AS VARCHAR2(n) | CHAR(n) | DATE)
+-- The rewriter (pass-cast.js) turns CAST(x AS VARCHAR2(n)) into ora_cast_varchar(x, n) and CAST(x AS CHAR(n)) into
+-- ora_cast_char(x, n): the text of x as Oracle writes it (a number as ora_n2t, a DATE in the session date format, a TIMESTAMP WITH
+-- TIME ZONE in the session's timestamp format), cut to n characters when it is a text and an error when a number (ORA-25137) or
+-- a date (ORA-01801) does not fit. CHAR(n) pads with blanks to n. CAST(x AS DATE) is ora_cast_date(x): a text goes through the
+-- session date format (TO_DATE with one argument).
+-- Oracle's text of a TIMESTAMP WITH TIME ZONE under the default NLS_TIMESTAMP_TZ_FORMAT 'DD-MON-RR HH.MI.SSXFF AM TZR'
+CREATE FUNCTION ora_tstz2t(v timestamptz) RETURNS text LANGUAGE sql STABLE AS $$
+  SELECT ora_to_char_date(v AT TIME ZONE 'UTC', 'DD-MON-RR HH.MI.SS', ora_lang()) || '.'
+         || rpad(lpad((extract(microseconds FROM v)::bigint % 1000000)::text, 6, '0'), 9, '0') || ' '
+         || ora_to_char_date(v AT TIME ZONE 'UTC', 'AM', ora_lang()) || ' +00:00' $$;
+--;;
+CREATE FUNCTION ora_t(v timestamptz) RETURNS text LANGUAGE sql STABLE AS $$ SELECT ora_tstz2t(v) $$;
+--;;
+CREATE FUNCTION ora_fit_text(t text, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT left(t, n) $$;
+--;;
+CREATE FUNCTION ora_fit_number(t text, n int) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
+BEGIN
+  IF char_length(t) > n THEN RAISE EXCEPTION 'ORA-25137: Data value out of range' USING ERRCODE = '22001'; END IF;
+  RETURN t;
+END $$;
+--;;
+CREATE FUNCTION ora_fit_date(t text, n int) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
+BEGIN
+  IF char_length(t) > n THEN RAISE EXCEPTION 'ORA-01801: date format is too long for internal buffer' USING ERRCODE = '22007'; END IF;
+  RETURN t;
+END $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v text, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_fit_text(v, n) $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v bpchar, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_fit_text(ora_p(v), n) $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v numeric, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_fit_number(ora_n2t(v), n) $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v int4, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_fit_number(ora_n2t(v::numeric), n) $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v int8, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_fit_number(ora_n2t(v::numeric), n) $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v float8, n int) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_fit_number(ora_n2t(v::numeric), n) $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v timestamp, n int) RETURNS text LANGUAGE sql STABLE AS $$ SELECT ora_fit_date(ora_d2t(v), n) $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v date, n int) RETURNS text LANGUAGE sql STABLE AS $$ SELECT ora_fit_date(ora_d2t(v::timestamp), n) $$;
+--;;
+CREATE FUNCTION ora_cast_varchar(v timestamptz, n int) RETURNS text LANGUAGE sql STABLE AS $$ SELECT ora_fit_date(ora_tstz2t(v), n) $$;
+--;;
+CREATE FUNCTION ora_cast_char(v text, n int) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(ora_fit_text(v, n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_char(v bpchar, n int) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(ora_fit_text(ora_p(v), n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_char(v numeric, n int) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(ora_fit_number(ora_n2t(v), n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_char(v int4, n int) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(ora_fit_number(ora_n2t(v::numeric), n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_char(v int8, n int) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(ora_fit_number(ora_n2t(v::numeric), n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_char(v float8, n int) RETURNS bpchar LANGUAGE sql IMMUTABLE AS $$ SELECT rpad(ora_fit_number(ora_n2t(v::numeric), n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_char(v timestamp, n int) RETURNS bpchar LANGUAGE sql STABLE AS $$ SELECT rpad(ora_fit_date(ora_d2t(v), n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_char(v date, n int) RETURNS bpchar LANGUAGE sql STABLE AS $$ SELECT rpad(ora_fit_date(ora_d2t(v::timestamp), n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_char(v timestamptz, n int) RETURNS bpchar LANGUAGE sql STABLE AS $$ SELECT rpad(ora_fit_date(ora_tstz2t(v), n), n)::bpchar $$;
+--;;
+CREATE FUNCTION ora_cast_date(v text) RETURNS timestamp LANGUAGE sql STABLE AS $$ SELECT to_date(v) $$;
+--;;
+CREATE FUNCTION ora_cast_date(v bpchar) RETURNS timestamp LANGUAGE sql STABLE AS $$ SELECT to_date(ora_p(v)) $$;
+--;;
+CREATE FUNCTION ora_cast_date(v timestamp) RETURNS timestamp LANGUAGE sql IMMUTABLE AS $$ SELECT date_trunc('second', v) $$;
+--;;
+CREATE FUNCTION ora_cast_date(v date) RETURNS timestamp LANGUAGE sql IMMUTABLE AS $$ SELECT v::timestamp $$;
+--;;
+CREATE FUNCTION ora_cast_date(v timestamptz) RETURNS timestamp LANGUAGE sql IMMUTABLE AS $$ SELECT date_trunc('second', v AT TIME ZONE 'UTC') $$;
+--;;
+-- ---------------------------------------------------------------- CONVERT between character sets is not built
+CREATE FUNCTION convert(s text, dest text) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
+BEGIN
+  RAISE EXCEPTION 'ORA-03001: unimplemented feature: CONVERT between character sets is not available in this practice database' USING ERRCODE = '0A000';
+END $$;
+--;;
+CREATE FUNCTION convert(s text, dest text, src text) RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
+BEGIN
+  RAISE EXCEPTION 'ORA-03001: unimplemented feature: CONVERT between character sets is not available in this practice database' USING ERRCODE = '0A000';
+END $$;

@@ -48,12 +48,46 @@ CREATE FUNCTION ora_p(b bpchar) RETURNS text LANGUAGE sql IMMUTABLE AS
 $$ SELECT CASE WHEN b IS NULL THEN NULL
        ELSE pg_catalog.concat(b::text, repeat(' ', octet_length(b) - octet_length(b::text))) END $$;
 --;;
--- Oracle NUMBER -> VARCHAR2 : no trailing zeros, no leading zero before the decimal point
-CREATE FUNCTION ora_n2t(n numeric) RETURNS text LANGUAGE sql IMMUTABLE AS
-$$ SELECT CASE WHEN n IS NULL THEN NULL ELSE
-     regexp_replace(
-       CASE WHEN n::text LIKE '%.%' THEN rtrim(rtrim(n::text,'0'),'.') ELSE n::text END,
-       '^(-?)0\.', '\1.') END $$;
+-- Oracle NUMBER -> VARCHAR2 (TO_CHAR(n), n || 'x', CAST(n AS VARCHAR2(k)) ...): the text the result grid shows for the number
+-- (numberText in src/sql/engine/format.js, kept in step with it): no trailing zeros, no leading zero before the decimal point,
+-- at most 40 characters: a longer value is rounded to fit, or written as d.ddd...E+nn when even that does not fit.
+CREATE FUNCTION ora_n2t(n numeric) RETURNS text LANGUAGE plpgsql IMMUTABLE SET search_path = pg_catalog, public AS $$
+DECLARE t text; sgn text := ''; ip text; fp text; ipart text; fixed text; lead int; e int; k int; dig text; v numeric;
+        carry boolean := false; head text; tail text; w int; mant text;
+BEGIN
+  IF n IS NULL THEN RETURN NULL; END IF;
+  t := n::text;
+  IF left(t, 1) = '-' THEN sgn := '-'; t := substr(t, 2); END IF;
+  ip := ltrim(split_part(t, '.', 1), '0'); fp := rtrim(split_part(t, '.', 2), '0');
+  IF ip = '' THEN ip := '0'; END IF;
+  IF ip = '0' AND fp = '' THEN RETURN '0'; END IF;
+  ipart := CASE WHEN ip = '0' THEN '' ELSE ip END;
+  fixed := sgn || ipart || CASE WHEN fp <> '' THEN '.' || fp ELSE '' END;
+  IF length(fixed) <= 40 THEN RETURN fixed; END IF;
+  lead := CASE WHEN ip = '0' THEN length(fp) - length(ltrim(fp, '0')) ELSE 0 END;
+  e := CASE WHEN ip = '0' THEN -lead - 1 ELSE length(ip) - 1 END;
+  IF (ip <> '0' AND length(ip) < 40 - length(sgn)) OR (ip = '0' AND e >= -5) THEN
+    -- fixed notation cut to 40 characters, rounded half away from zero
+    k := length(ipart) + (40 - length(sgn) - 1 - length(ipart));
+    dig := ipart || fp;
+    IF length(dig) > k THEN
+      v := left(dig, k)::numeric + CASE WHEN substr(dig, k + 1, 1) >= '5' THEN 1 ELSE 0 END;
+      IF length(v::text) > k THEN carry := true; dig := left(v::text, k) || '0'; ELSE dig := lpad(v::text, k, '0'); END IF;
+    END IF;
+    head := left(dig, length(ipart) + CASE WHEN carry THEN 1 ELSE 0 END);
+    tail := rtrim(substr(dig, length(head) + 1), '0');
+    RETURN sgn || head || CASE WHEN tail <> '' THEN '.' || tail ELSE '' END;
+  END IF;
+  -- scientific notation with a 40-character field
+  dig := CASE WHEN ip = '0' THEN substr(fp, lead + 1) ELSE ip || fp END;
+  w := 40 - length(sgn) - 1 - (2 + greatest(2, length(abs(e)::text)));
+  IF length(dig) > w THEN
+    v := left(dig, w)::numeric + CASE WHEN substr(dig, w + 1, 1) >= '5' THEN 1 ELSE 0 END;
+    IF length(v::text) > w THEN e := e + 1; dig := left(v::text, w); ELSE dig := lpad(v::text, w, '0'); END IF;
+  END IF;
+  mant := left(rpad(dig, w, '0'), w);
+  RETURN sgn || left(mant, 1) || '.' || substr(mant, 2) || 'E' || CASE WHEN e < 0 THEN '-' ELSE '+' END || lpad(abs(e)::text, 2, '0');
+END $$;
 --;;
 -- Oracle timestamp -> VARCHAR2 with default NLS_DATE_FORMAT DD-MON-RR (English month names here; 40-formats replaces it with the session language)
 CREATE FUNCTION ora_d2t(d timestamp) RETURNS text LANGUAGE sql IMMUTABLE AS

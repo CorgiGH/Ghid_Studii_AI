@@ -20,7 +20,7 @@ const NLS_DEFAULTS = "ALTER SESSION SET NLS_LANGUAGE=AMERICAN NLS_TERRITORY=AMER
 let engine
 beforeAll(async () => {
   engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate } })
-})
+}, 60000)
 afterEach(async () => {
   await engine.run(NLS_DEFAULTS, { dataset: 'facultate' })
 })

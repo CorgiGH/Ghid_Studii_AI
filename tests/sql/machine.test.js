@@ -14,7 +14,7 @@ const byId = Object.fromEntries(blocks.map((b) => [b.id, b]))
 let engine
 beforeAll(async () => {
   engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate } })
-})
+}, 60000)
 
 const plan = (b) => planStages(b.sql, b.stages, engine, { dataset: b.dataset, show: b.show })
 const rowsOf = async (sql) => (await engine.run(sql, { dataset: 'facultate' })).rows

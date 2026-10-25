@@ -175,27 +175,70 @@ CREATE FUNCTION ora_widen(v timestamptz) RETURNS timestamptz LANGUAGE sql IMMUTA
 --;;
 CREATE FUNCTION ora_widen(v anyelement) RETURNS anyelement LANGUAGE sql IMMUTABLE AS $$ SELECT v $$;
 --;;
+-- Oracle's name of a PostgreSQL type, for error messages (never an internal name such as ora_date)
+CREATE FUNCTION ora_type_name(t regtype) RETURNS text LANGUAGE sql STABLE SET search_path = pg_catalog, public AS $$
+  SELECT CASE WHEN b IN ('smallint','integer','bigint','numeric','real','double precision') THEN 'NUMBER'
+              WHEN b IN ('text','character','character varying') THEN 'CHAR'
+              WHEN b IN ('timestamp without time zone','date') THEN 'DATE'
+              WHEN b = 'timestamp with time zone' THEN 'TIMESTAMP WITH TIME ZONE'
+              ELSE 'another type' END
+  FROM (SELECT format_type(CASE WHEN typtype = 'd' THEN typbasetype ELSE oid END, NULL) AS b FROM pg_type WHERE oid = t) x $$;
+--;;
 CREATE FUNCTION ora_conv(v anycompatible, tmpl anyelement) RETURNS anyelement LANGUAGE plpgsql STABLE SET search_path = pg_catalog, public AS $$
 DECLARE tt regtype := pg_typeof(tmpl); vt regtype := pg_typeof(v);
         nums regtype[] := ARRAY['smallint','integer','bigint','numeric','real','double precision']::regtype[];
         txts regtype[] := ARRAY['text','character','character varying']::regtype[];
+        dts regtype[] := ARRAY['timestamp without time zone','timestamp with time zone','date']::regtype[];
 BEGIN
   IF v IS NULL THEN RETURN NULL; END IF;
+  -- a domain (ora_date is a DATE column, ora_integer an INTEGER one) counts as its base type
+  SELECT CASE WHEN typtype = 'd' THEN typbasetype ELSE oid END INTO vt FROM pg_type WHERE oid = vt;
   IF tt = vt THEN RETURN v; END IF;
   IF vt = ANY(nums) THEN
-    IF tt = 'numeric'::regtype THEN RETURN v::numeric;
+    IF tt = ANY(nums) THEN RETURN v::numeric;
     ELSIF tt = ANY(txts) THEN RETURN ora_n2t(v::numeric); END IF;
   ELSIF vt = ANY(txts) THEN
-    IF tt = 'numeric'::regtype THEN RETURN v::text::numeric;
+    IF tt = ANY(nums) THEN RETURN v::text::numeric;
     ELSIF tt = 'timestamp without time zone'::regtype THEN RETURN to_date(v::text);
     ELSIF tt = ANY(txts) THEN RETURN v::text; END IF;
-  ELSIF vt = 'timestamp without time zone'::regtype AND tt = ANY(txts) THEN RETURN ora_d2t(v);
+  ELSIF vt = ANY(dts) THEN
+    -- DATE, TIMESTAMP and TIMESTAMP WITH TIME ZONE widen to one another in either order (GREATEST(SYSDATE, data_nastere))
+    IF tt = 'timestamp without time zone'::regtype THEN
+      RETURN CASE WHEN vt = 'timestamp with time zone'::regtype THEN (v::timestamptz AT TIME ZONE 'UTC') ELSE v::timestamp END;
+    ELSIF tt = 'timestamp with time zone'::regtype THEN
+      RETURN CASE WHEN vt = 'timestamp with time zone'::regtype THEN v::timestamptz ELSE (v::timestamp AT TIME ZONE 'UTC') END;
+    ELSIF tt = ANY(txts) THEN RETURN ora_d2t(v::timestamp); END IF;
   END IF;
-  RAISE EXCEPTION 'ORA-00932: inconsistent datatypes: expected % got %', tt, vt USING ERRCODE = '42804';
+  RAISE EXCEPTION 'ORA-00932: inconsistent datatypes: expected % got %', ora_type_name(tt), ora_type_name(vt) USING ERRCODE = '42804';
 END $$;
 --;;
 -- ---------------------------------------------------------------- number/char conversions
 CREATE FUNCTION to_number(s text) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT s::numeric $$;
+--;;
+-- TO_NUMBER of a NUMBER is the number; of a DATE, its text (which is never a number: ORA-01722)
+CREATE FUNCTION to_number(n numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT n $$;
+--;;
+CREATE FUNCTION to_number(d timestamp) RETURNS numeric LANGUAGE sql STABLE AS $$ SELECT ora_d2t(d)::numeric $$;
+--;;
+-- ROUND, TRUNC and MOD of a text: Oracle converts it to NUMBER first (ROUND('12.5') is 13, ROUND('abc') is ORA-01722)
+CREATE FUNCTION round(s text) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.round(s::numeric) $$;
+--;;
+CREATE FUNCTION round(s text, d numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.round(s::numeric, trunc(d)::int) $$;
+--;;
+CREATE FUNCTION trunc(s text) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.trunc(s::numeric) $$;
+--;;
+CREATE FUNCTION trunc(s text, d numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.trunc(s::numeric, trunc(d)::int) $$;
+--;;
+-- two texts (TRUNC('17-FEB-95', 'MONTH')): the first is still read as a number, as Oracle does (ORA-01722 here)
+CREATE FUNCTION trunc(s text, d text) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.trunc(s::numeric, trunc(d::numeric)::int) $$;
+--;;
+CREATE FUNCTION round(s text, d text) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.round(s::numeric, trunc(d::numeric)::int) $$;
+--;;
+CREATE FUNCTION mod(a text, b numeric) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.mod(a::numeric, b) $$;
+--;;
+CREATE FUNCTION mod(a numeric, b text) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.mod(a, b::numeric) $$;
+--;;
+CREATE FUNCTION mod(a text, b text) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$ SELECT pg_catalog.mod(a::numeric, b::numeric) $$;
 --;;
 CREATE FUNCTION to_char(n numeric) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT ora_n2t(n) $$;
 --;;

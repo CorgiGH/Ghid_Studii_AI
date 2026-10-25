@@ -208,12 +208,23 @@ function splitAnd(ts) {
   return out
 }
 
-// ROWNUM <op> number -> { limit } | { never } | { always } ; null when the conjunct is something else
+const FLIPPED = { '<': '>', '>': '<', '<=': '>=', '>=': '<=', '=': '=' }
+
+// ROWNUM <op> number, also in parentheses or written the other way round (2 >= ROWNUM) -> { limit } | { never } | { always } ;
+// null when the conjunct is something else
 function rownumCondition(conj) {
-  const sig = conj.filter(isSig)
-  if (sig.length !== 3 || !isRownumAt(sig, 0) || sig[2].type !== 'number') return null
-  const op = sig[1].text
-  const n = Number(sig[2].text)
+  let sig = conj.filter(isSig)
+  while (sig.length > 2 && isSym(sig[0], '(') && matchParen(sig, 0) === sig.length - 1) sig = sig.slice(1, -1)
+  if (sig.length !== 3) return null
+  let op = sig[1].text
+  let num = sig[2]
+  if (!isRownumAt(sig, 0)) {
+    if (!isRownumAt(sig, 2) || sig[0].type !== 'number' || !(op in FLIPPED)) return null
+    op = FLIPPED[op]
+    num = sig[0]
+  }
+  if (num.type !== 'number') return null
+  const n = Number(num.text)
   if (op === '<=') return n < 1 ? { limit: 0 } : { limit: Math.floor(n) }
   if (op === '<') return { limit: Math.max(0, Math.ceil(n) - 1) }
   if (op === '=') return n === 1 ? { limit: 1 } : { never: true }
@@ -311,7 +322,7 @@ function rownumSegment(seg) {
     return [...head, ...tokenize(' '), ...inner, ...tail]
   }
   const names = fromTableNames(fromToks)
-  if (!names) throw new OracleError('ORA-?', 'ROWNUM together with a join of inline views is not supported by this practice engine')
+  if (!names) throw new OracleError('ORA-03001', 'unimplemented feature: ROWNUM together with a join of inline views is not available in this practice database')
   const ids = names.map((n, k) => `c${k}`)
   const inner = [...tokenize(`SELECT ${names.map((n, k) => `${n}.ctid ${ids[k]}`).join(', ')} FROM `), ...fromToks, ...restWhere]
   const same = names.map((n, k) => `ora_z.${ids[k]} IS NOT DISTINCT FROM ${n}.ctid`).join(' AND ')

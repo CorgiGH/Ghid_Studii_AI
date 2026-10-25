@@ -13,7 +13,7 @@ const facultate = fs.readFileSync(path.join(here, '..', '..', 'public', 'sql', '
 let engine
 beforeAll(async () => {
   engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate } })
-})
+}, 60000)
 
 const run = (sql) => engine.run(sql, { dataset: 'facultate' })
 const cell = async (sql) => {

@@ -212,8 +212,13 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
     const failed = async (err) => {
       const context = { sql }
       if (err && err.code === '42883') {
+        // a function that exists: the argument counts its versions take tell a wrong count (ORA-00909 / 00938 / 00939) from wrong
+        // types (ORA-00932)
         const fn = (String(err.message).match(/function ([A-Za-z_0-9]+)\(/) || [])[1]
-        if (fn) context.knownFunction = (await pg.query('SELECT 1 FROM pg_proc WHERE proname = $1 LIMIT 1', [fn.toLowerCase()])).rows.length > 0
+        if (fn) {
+          const r = await pg.query('SELECT pronargs, pronargdefaults, provariadic <> 0 AS variadic FROM pg_proc WHERE proname = $1', [fn.toLowerCase()])
+          context.knownFunction = r.rows.length ? { arities: r.rows.map((x) => ({ min: x.pronargs - x.pronargdefaults, max: x.variadic ? Infinity : x.pronargs })) } : false
+        }
       }
       return { ...textResult(kind), error: mapPgError(err, context) }
     }

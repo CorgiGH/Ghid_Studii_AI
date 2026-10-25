@@ -37,11 +37,101 @@ CREATE FUNCTION ora_rr(y int) RETURNS int LANGUAGE sql STABLE AS $$
 -- Oracle: RR / RRRR -> a year of one or two digits goes through the RR pivot, a longer one is taken as it is;
 -- YY -> always the current century (20xx). Fields the format does not mention default to the clock's year and month and
 -- to day 1 (PG defaults to 0001-01-01): the missing fields are appended to both the input and the format.
+-- The field errors of Oracle's TO_DATE parser, which PostgreSQL's to_timestamp reports as one generic error (or not at all): it
+-- reads the input along the format the way Oracle's lenient parser does (blanks and punctuation between fields are skipped, a
+-- number field takes up to its width in digits) and raises
+--   ORA-01830 input left over after the last field      ORA-01847 day not in 1..31     ORA-01839 day not in the month
+--   ORA-01843 month not in 1..12 or not a month name    ORA-01850 HH24 not in 0..23    ORA-01849 HH / HH12 not in 1..12
+--   ORA-01851 minutes not in 0..59                      ORA-01852 seconds not in 0..59
+-- A format element it does not know, or an input it cannot follow, ends the check without an error: the parser below decides.
+CREATE FUNCTION ora_check_date_input(s text, f text) RETURNS void LANGUAGE plpgsql STABLE SET search_path = pg_catalog, public AS $$
+DECLARE fi int := 1; si int := 1; fl int := length(f); sl int := length(s); m text[]; el text; tok text; w int; num text;
+        dd int; mo int; yr int; hh int; mi int; ss int; word text; ld int; clk timestamp := ora_sysdate();
+        months text[] := ARRAY['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        longmonths text[] := ARRAY['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+BEGIN
+  WHILE fi <= fl LOOP
+    IF substr(f, fi, 1) = '"' THEN
+      m := regexp_match(substr(f, fi), '^"([^"]*)"');
+      IF m IS NULL THEN RETURN; END IF;
+      WHILE si <= sl AND substr(s, si, 1) ~ '[^[:alnum:]]' AND substr(s, si, 1) <> left(m[1], 1) LOOP si := si + 1; END LOOP;
+      IF upper(substr(s, si, length(m[1]))) <> upper(m[1]) THEN RETURN; END IF;
+      si := si + length(m[1]); fi := fi + length(m[1]) + 2; CONTINUE;
+    END IF;
+    IF substr(f, fi, 1) !~ '[[:alpha:]]' THEN
+      -- a separator of the format where the input goes on with a letter or a digit: the parser below says what that is
+      IF si <= sl AND substr(s, si, 1) ~ '[[:alnum:]]' THEN RETURN; END IF;
+      fi := fi + 1; CONTINUE;
+    END IF;
+    IF substr(f, fi) ~* '^SSSSS' THEN RETURN; END IF;
+    m := regexp_match(substr(f, fi), '^(YYYY|RRRR|YY|RR|MONTH|MON|MM|DDD|DD|DAY|DY|HH24|HH12|HH|MI|SS|A\.M\.|P\.M\.|AM|PM|FX|FM)', 'i');
+    IF m IS NULL THEN RETURN; END IF;                       -- an element this check does not follow
+    tok := m[1]; el := upper(tok); fi := fi + length(tok);
+    IF el IN ('FX', 'FM') THEN RETURN; END IF;
+    -- skip blanks and punctuation before the field; an input that ends here leaves the rest to the parser
+    WHILE si <= sl AND substr(s, si, 1) ~ '[^[:alnum:]]' LOOP si := si + 1; END LOOP;
+    IF si > sl THEN RETURN; END IF;
+    IF el IN ('MONTH', 'MON', 'DAY', 'DY', 'AM', 'PM', 'A.M.', 'P.M.') THEN
+      word := substring(substr(s, si) FROM '^[[:alpha:].]+');
+      IF word IS NULL THEN RETURN; END IF;
+      si := si + length(word);
+      IF el IN ('MONTH', 'MON') THEN
+        mo := coalesce(array_position(months, upper(word)), array_position(longmonths, upper(word)));
+        IF mo IS NULL THEN RAISE EXCEPTION 'ORA-01843: not a valid month' USING ERRCODE = '22008'; END IF;
+      END IF;
+      CONTINUE;
+    END IF;
+    w := CASE WHEN el IN ('YYYY', 'RRRR', 'YY', 'RR') THEN 4 WHEN el = 'DDD' THEN 3 ELSE 2 END;
+    num := substring(substr(s, si) FROM '^[0-9]{1,' || w || '}');
+    IF num IS NULL THEN
+      -- a month name where MM is asked for is read as the month (Oracle's MM accepts FEB)
+      IF el = 'MM' THEN
+        word := substring(substr(s, si) FROM '^[[:alpha:]]+');
+        IF word IS NOT NULL AND coalesce(array_position(months, upper(word)), array_position(longmonths, upper(word))) IS NOT NULL THEN
+          mo := coalesce(array_position(months, upper(word)), array_position(longmonths, upper(word))); si := si + length(word); CONTINUE;
+        END IF;
+      END IF;
+      RETURN;
+    END IF;
+    si := si + length(num);
+    CASE el
+      WHEN 'DD' THEN dd := num::int;
+        IF dd < 1 OR dd > 31 THEN RAISE EXCEPTION 'ORA-01847: day of month must be between 1 and last day of month' USING ERRCODE = '22008'; END IF;
+      WHEN 'MM' THEN mo := num::int;
+        IF mo < 1 OR mo > 12 THEN RAISE EXCEPTION 'ORA-01843: not a valid month' USING ERRCODE = '22008'; END IF;
+      WHEN 'YYYY' THEN yr := num::int;
+      WHEN 'RRRR', 'RR' THEN yr := CASE WHEN length(num) <= 2 THEN ora_rr(num::int) ELSE num::int END;
+      WHEN 'YY' THEN yr := CASE WHEN length(num) <= 2 THEN (extract(year FROM clk)::int / 100) * 100 + num::int ELSE num::int END;
+      WHEN 'HH24' THEN hh := num::int;
+        IF hh > 23 THEN RAISE EXCEPTION 'ORA-01850: hour must be between 0 and 23' USING ERRCODE = '22008'; END IF;
+      WHEN 'HH', 'HH12' THEN hh := num::int;
+        IF hh < 1 OR hh > 12 THEN RAISE EXCEPTION 'ORA-01849: hour must be between 1 and 12' USING ERRCODE = '22008'; END IF;
+      WHEN 'MI' THEN mi := num::int;
+        IF mi > 59 THEN RAISE EXCEPTION 'ORA-01851: minutes must be between 0 and 59' USING ERRCODE = '22008'; END IF;
+      WHEN 'SS' THEN ss := num::int;
+        IF ss > 59 THEN RAISE EXCEPTION 'ORA-01852: seconds must be between 0 and 59' USING ERRCODE = '22008'; END IF;
+      ELSE NULL;
+    END CASE;
+  END LOOP;
+  IF btrim(substr(s, si)) <> '' THEN
+    RAISE EXCEPTION 'ORA-01830: date format picture ends before converting entire input string' USING ERRCODE = '22007';
+  END IF;
+  IF dd IS NOT NULL THEN
+    IF yr IS NULL THEN yr := extract(year FROM clk)::int; END IF;
+    IF mo IS NULL THEN mo := extract(month FROM clk)::int; END IF;
+    IF yr >= 1 THEN
+      ld := extract(day FROM (make_date(yr, mo, 1) + interval '1 month' - interval '1 day'))::int;
+      IF dd > ld THEN RAISE EXCEPTION 'ORA-01839: date not valid for month specified' USING ERRCODE = '22008'; END IF;
+    END IF;
+  END IF;
+END $$;
+--;;
 CREATE FUNCTION ora_to_date_en(s text, f text) RETURNS timestamp LANGUAGE plpgsql STABLE AS $$
 DECLARE r timestamp; clk timestamp := ora_sysdate(); body text := regexp_replace(f, '"[^"]*"', '', 'g');
         tk text[]; fx text; sx text := s; rr boolean; yy boolean; y int;
 BEGIN
   IF s IS NULL OR f IS NULL THEN RETURN NULL; END IF;
+  PERFORM ora_check_date_input(s, f);
   SELECT coalesce(array_agg(upper(m[1])), ARRAY[]::text[]) INTO tk FROM regexp_matches(body,
     '(SYEAR|YEAR|SYYYY|YYYY|YYY|YY|Y|RRRR|RR|MONTH|MON|MM|RM|DDD|DD|DAY|DY|D|J|HH24|HH12|HH|MI|SSSSS|SS|FF[1-9]?|AM|PM|TZH|TZM|TZR|IW|WW|W|Q)', 'gi') m;
   rr := tk && ARRAY['RR', 'RRRR'];

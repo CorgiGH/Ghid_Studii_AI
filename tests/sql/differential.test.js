@@ -28,7 +28,7 @@ const outcome = { pass: 0, gap: 0 }
 
 beforeAll(async () => {
   engine = await createEngine(new PGlite(), { clock: CLOCK, datasets: { facultate } })
-})
+}, 60000)
 
 afterAll(() => {
   console.log(`SQL differential: ${corpus.length} queries, ${outcome.pass} match Oracle, ${outcome.gap} known gaps`)
@@ -46,8 +46,8 @@ async function runEntry(entry) {
 }
 
 describe('corpus is consistent with the snapshot', () => {
-  it('has 661 entries, each with a frozen Oracle result and a valid gap entry', () => {
-    expect(corpus).toHaveLength(664)
+  it('has 809 entries, each with a frozen Oracle result and a valid gap entry', () => {
+    expect(corpus).toHaveLength(809)
     for (const e of corpus) expect(snapshot[e.id], e.id).toBeDefined()
     for (const e of corpus) if (e.orderKeySql) expect(snapshot[e.id].orderKeys, `${e.id} needs frozen orderKeys, cut like the rows`).toHaveLength(Math.min(snapshot[e.id].rowCount, SNAPSHOT_MAX_ROWS))
     for (const e of corpus) if (snapshot[e.id].truncated && !expectsSequence(e.sql)) expect(snapshot[e.id].digest, `${e.id} is cut and unordered: it needs a digest`).toMatch(/^[0-9a-f]{40}$/)
