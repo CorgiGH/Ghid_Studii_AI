@@ -284,6 +284,12 @@ describe('planStages against the engine', () => {
     // with no show list the expressions (not the aliases) are what the master query selects
     const bare = await planStages('SELECT nume n1 FROM studenti WHERE an = 1', [{ clause: 'where' }], engine, { dataset: 'facultate' })
     expect(bare[0].columns).toEqual(['nume'])
+    // quoted aliases (with and without AS) used in ORDER BY stay valid Oracle in the master query
+    for (const sel of ['nume "Nume Mare"', 'nume AS "Nume Mare"']) {
+      const qsql = `SELECT ${sel} FROM studenti WHERE an = 1 ORDER BY "Nume Mare"`
+      const qs = await planStages(qsql, [{ clause: 'from' }, { clause: 'where' }, { clause: 'select' }, { clause: 'order' }], engine, { dataset: 'facultate', show: ['nume'] })
+      expect(stageOf(qs, 'order').rows.map((r) => r.cells.nume)).toEqual((await rowsOf(qsql)).map((r) => r[0]))
+    }
   })
 
   it('set operator results come out in the engine order: sorted without ORDER BY, UNION ALL keeps the lists', async () => {

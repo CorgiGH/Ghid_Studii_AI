@@ -359,7 +359,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
       return t('How many rows are left after DISTINCT? Type a number, then check.', 'Câte rânduri rămân după DISTINCT? Scrie un număr, apoi verifică.');
     }
     if (cur.phase === 'lists' && !say[`${c}:lists`]) return t('Two lists, one from each query. Press Combine to merge them.', 'Două liste, câte una din fiecare interogare. Apasă Combină ca să le combini.');
-    const s = say[c];
+    const s = (cur.phase === 'lists' && say[`${c}:lists`]) || say[c];
     return s ? t(s.en, s.ro) : null;
   })();
 

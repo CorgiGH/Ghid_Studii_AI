@@ -51,7 +51,9 @@ function resolveOrder(part) {
       const it = part.select[Number(expr) - 1]
       if (it) expr = it.expr
     } else {
-      const byAlias = part.select.find((it) => it.alias && it.alias.toLowerCase() === expr.toLowerCase())
+      const quoted = /^"[^"]*"$/.test(expr)
+      const key = quoted ? expr.slice(1, -1) : expr
+      const byAlias = part.select.find((it) => it.alias && (quoted ? it.alias === key : it.alias.toLowerCase() === key.toLowerCase()))
       if (byAlias) expr = byAlias.expr
     }
     return { expr, mods: o.mods }
