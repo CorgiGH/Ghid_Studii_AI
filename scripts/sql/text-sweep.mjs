@@ -2,9 +2,11 @@
 //
 //   node scripts/sql/text-sweep.mjs [<dir> ...]     (default src/content/bd)
 //
-// 1. Pedagogy labels: the names of the teaching phases and study names, in either language ("pretest", "Faza", "Kapur",
-//    "Dunlosky", "productive failure", "retrieval", a screen titled "Regula" or "De ce?", "Scrie singur", "Încearcă" as a label).
-// 2. English words left in a Romanian string (a stop-list of English function words; code in backticks is ignored).
+// 1. Pedagogy labels: the names of the teaching phases and study names, in either language ("pretest", "Faza", "fază", "Kapur",
+//    "Dunlosky", "productive failure", "retrieval", a screen titled "Regula" or "De ce?", "Scrie singur", "Încearcă" or
+//    "Încearcă singur" as a label).
+// 2. English words left in a Romanian string (a stop-list of English function words in any case but all capitals; code in
+//    backticks is ignored).
 // 3. The mistakes of the official pages (content outline section 4): a sentence that repeats one of them as true, or SQL
 //    that has them built in.
 // Exits non-zero when anything is found; every finding names the file, the JSON path and the text.
@@ -17,7 +19,8 @@ const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 // ---- 1. pedagogy labels (any language)
 const LABEL_RULES = [
   ['pretest', /\bpre-?test/i],
-  ['phase name (faza)', /\bfaz(a|ă|e|ei|ele)\b/i],
+  // \p{L} boundaries, not \b: JS \b is ASCII-only, so it never closes after "ă" ("fază")
+  ['phase name (faza)', /(?<!\p{L})faz(a|ă|e|ei|ele|elor)(?!\p{L})/iu],
   ['phase name (phase)', /\b(phase|stage) ?\d\b|\bphases?\b/i],
   ['Kapur', /\bkapur\b/i],
   ['Dunlosky', /\bdunlosky\b/i],
@@ -37,12 +40,19 @@ const TITLE_RULES = [
   ['title prefix "Scrie singur:"', /^\s*scrie singur\s*:/i],
   ['title prefix "Încearcă:"', /^\s*[iî]ncearc[aă]\s*:/i],
 ]
-// "Încearcă" used as a label in front of a sentence ("Încearcă: ...", "Încearcă singur")
-const LABEL_IN_TEXT = [['"Încearcă" as a label', /(^|\n)\s*(\*\*)?[iî]ncearc[aă](\*\*)?\s*[:.]/i]]
+// "Încearcă" used as a label in front of a sentence ("Încearcă: ...", and "Încearcă singur" in bold, alone on its line, before
+// punctuation or before a new sentence). "Încearcă singur să ..." is an ordinary sentence and passes.
+const LABEL_IN_TEXT = [
+  ['"Încearcă" as a label', /(^|\n)\s*(\*\*)?[iî]ncearc[aă](\*\*)?\s*[:.]/i],
+  ['"Încearcă singur" as a label', /(^|\n)\s*(\*\*)?[IiÎî]ncearc[aă] singur(\*\*|\s*([:.!\n]|$)|\s+(?=\p{Lu}))/u],
+]
 
 // ---- 2. English in Romanian
 const EN_STOP = ['the', 'and', 'with', 'which', 'because', 'when', 'you', 'your', 'is', 'of', 'to', 'for', 'from', 'that', 'this', 'then', 'if', 'how', 'what', 'why', 'does', 'not', 'it', 'was', 'be', 'by', 'but', 'have', 'has', 'will', 'can', 'only', 'each', 'every', 'rows', 'row', 'table', 'column', 'result', 'query', 'answer', 'step', 'next', 'show']
-const EN_RE = new RegExp(`(?<![\\p{L}\\p{N}_])(${EN_STOP.join('|')})(?![\\p{L}\\p{N}_])`, 'u')
+// Case-insensitive, so "The" or "Show" at the start of a sentence is caught; a word written all in capitals is an SQL keyword
+// (AND, NOT, IS NULL, CREATE TABLE) and is allowed in Romanian prose.
+const EN_RE = new RegExp(`(?<![\\p{L}\\p{N}_])(${EN_STOP.join('|')})(?![\\p{L}\\p{N}_])`, 'giu')
+const englishWord = (text) => [...text.matchAll(EN_RE)].map((m) => m[1]).find((w) => w !== w.toUpperCase())
 
 // ---- 3. the official pages' mistakes (content outline section 4.1), as sentences or as built-in SQL
 // [name, pattern, scope, unless]: scope 'text' = prose only, 'sql' = SQL fields only, 'any' = both. A prose sentence that
@@ -59,6 +69,7 @@ const ERROR_RULES = [
   ['4.1.9 "Excepție fac CONCAT, NVL, REPLACE, REGEXP_REPLACE" as the complete list', /Excep[tț]ie fac CONCAT, NVL, REPLACE, REGEXP_REPLACE|exceptions are CONCAT, NVL, REPLACE, REGEXP_REPLACE/i, 'text', CORRECTION],
   ['4.1.10 negative SUBSTR counted left to right', /negative[^.\n]{0,60}(left to right|from the left)|negativ[^.\n]{0,60}(de la st[aâ]nga la dreapta|din st[aâ]nga)/i, 'text', CORRECTION],
   ["4.1.11 UPPER(nume)='BREABAN' gives 0 rows", /UPPER\s*\(\s*nume\s*\)\s*=\s*'BREABAN'[^.\n]{0,40}\b0\b/i, 'text', CORRECTION],
+  ['4.1.12 a text literal followed by TO_CHAR with no ||', /'[^']*'\s+TO_CHAR\s*\(/i, 'sql'],
   ['4.1.13 HH:MI mask with no AM/PM', /'[^']*\bHH:MI(?!:SS)(?![^']*\b(AM|PM|A\.M\.|P\.M\.))[^']*'/, 'sql'],
   ['4.1.14 NEXT_DAY on a bare text date', /NEXT_DAY\s*\(\s*'/i, 'sql'],
   ['4.1.15 NEXT_DAY the next working day / TRUNC the nearest day', /working day|zi lucr[aă]toare|zilei lucr[aă]toare|nearest day|closest day|cea mai apropiat[aă] zi/i, 'text', CORRECTION],
@@ -83,8 +94,8 @@ export function sweepNode(root, file) {
         for (const [name, re] of LABEL_IN_TEXT) if (re.test(node)) add(`pedagogy label: ${name}`, where, node)
         if (isTitle) for (const [name, re] of TITLE_RULES) if (re.test(node)) add(`pedagogy label: ${name}`, where, node)
         if (lang === 'ro') {
-          const m = EN_RE.exec(stripCode(node))
-          if (m) add(`English word in Romanian text: "${m[1]}"`, where, node)
+          const w = englishWord(stripCode(node))
+          if (w) add(`English word in Romanian text: "${w}"`, where, node)
         }
       }
       for (const [name, re, scope, unless] of ERROR_RULES) {
