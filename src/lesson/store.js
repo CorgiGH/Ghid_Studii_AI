@@ -64,6 +64,15 @@ export function createLessonStore(storage) {
       state = { ...state, attempts: { ...state.attempts, [itemId]: history }, review };
       commit();
     },
+    // Changes the most recent attempt of an item (the sql block keeps its latest query, verdict and hints there so a reload can
+    // bring them back). The review pile is not touched: only recordAttempt can enqueue.
+    updateLastAttempt(itemId, patch) {
+      const list = state.attempts[itemId];
+      if (!list || !list.length) return;
+      const history = [...list.slice(0, -1), { ...list[list.length - 1], ...patch }];
+      state = { ...state, attempts: { ...state.attempts, [itemId]: history } };
+      commit();
+    },
     pendingReview(now) {
       void now;
       return Object.values(state.review).sort((x, y) => x.due - y.due);

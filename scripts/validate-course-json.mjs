@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import { validateViz } from '../src/components/lesson/viz/vizSpec.js';
 import { validateMcq, validateReflect } from '../src/components/lesson/blocks/choiceSpec.js';
 import { validateQueryMachine } from '../src/sql/machineSpec.js';
+import { validateSqlExercise } from '../src/components/lesson/blocks/sqlExerciseSpec.js';
 
 const file = process.argv[2];
 if (!file) { console.error('Usage: node validate-course-json.mjs <file>'); process.exit(1); }
@@ -68,6 +69,9 @@ else {
         }
         if (t === 'query-machine') {
           for (const e of validateQueryMachine(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'sql-exercise') {
+          for (const e of validateSqlExercise(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'code') {
           if (!block.code) errors.push(`steps[${si}].blocks[${bi}] (code): missing code field`);
