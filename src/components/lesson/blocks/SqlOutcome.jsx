@@ -8,6 +8,12 @@ import { markRows, statementRows, verdictView } from './sqlExerciseSpec.js';
 const upperKeys = (o) => Object.fromEntries(Object.entries(o ?? {}).map(([k, v]) => [k.toUpperCase(), v]));
 const COMPARE_KINDS = new Set(['rows', 'rowcount', 'order', 'columns', 'alias', 'contents']);
 
+// The one place a screen reader hears results: the note or the verdict headline, in a region that is always in the page. The result
+// tables and the rest of the panel stay outside it.
+export function LiveStatus({ text }) {
+  return <div className="sx-sr" role="status" aria-live="polite" aria-atomic="true" data-testid="sql-live">{text || ''}</div>;
+}
+
 export function VerdictPanel({ verdict, mistake, hidden, t }) {
   const head = verdictView(verdict);
   const why = explainVerdict(verdict);

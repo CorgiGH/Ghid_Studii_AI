@@ -11,6 +11,7 @@ import CodeTracingQuestion from './CodeTracingQuestion';
 import SqlQuestion from './SqlQuestion';
 import TestResults from './TestResults';
 import TestModeSelector from '../../ui/TestModeSelector';
+import { formatClock, showGroupStem, timerChoices, timerSeconds, totalScore } from './testLogic.js';
 
 const promptMarkdown = {
   // react-markdown v9+ no longer passes `inline` prop — detect via className
@@ -91,6 +92,35 @@ const questionComponents = {
   'sql': SqlQuestion,
 };
 
+function TimerChoice({ choices, lang, onSelect }) {
+  const ro = lang === 'ro';
+  const options = [{ min: 0, label: ro ? 'Fără timer' : 'No timer' }, ...choices.map((m) => ({ min: m, label: `${m} min` }))];
+  return (
+    <div className="py-8" style={{ maxWidth: 'var(--content-max-width)', margin: '0 auto' }} data-testid="timer-choice">
+      <h2 className="text-center mb-2" style={{ fontSize: 'var(--type-h2)', fontWeight: 'var(--type-h2-weight)', color: 'var(--theme-content-text)' }}>
+        {ro ? 'Vrei un timer?' : 'Do you want a timer?'}
+      </h2>
+      <p className="text-center mb-6 text-sm" style={{ color: 'var(--theme-muted-text)' }}>
+        {ro ? 'La 0 răspunsurile se predau singure (la întrebările pe hârtie te notezi tu). Poți alege și fără timer.' : 'At 0 your answers are handed in by themselves (you still score paper questions yourself). You can also go without one.'}
+      </p>
+      <div className="flex flex-wrap justify-center gap-3">
+        {options.map((o) => (
+          <button
+            key={o.min}
+            type="button"
+            data-testid={`timer-${o.min}`}
+            onClick={() => onSelect(o.min)}
+            className="px-6 py-3 rounded-xl text-sm font-semibold cursor-pointer"
+            style={{ backgroundColor: 'var(--theme-card-bg)', border: '2px solid var(--theme-border)', color: 'var(--theme-content-text)', minHeight: 44 }}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function TestRenderer({ src }) {
   const { t, lang, saveTestResult, testProgress, setCourseContext } = useApp();
   const [testData, setTestData] = useState(null);
@@ -103,8 +133,19 @@ export default function TestRenderer({ src }) {
   const [reviewQuestionIds, setReviewQuestionIds] = useState([]);
   const [testMode, setTestMode] = useState(null); // null=not started, 'tutor'|'timed'
   const [timeLeft, setTimeLeft] = useState(null);
+  const [timeUp, setTimeUp] = useState(false); // the clock ran out; open questions are being handed in
+  const [finishPending, setFinishPending] = useState(false);
+  const [timerMin, setTimerMin] = useState(null); // optional timer: null = not chosen yet, 0 = none, else minutes
   const [screen, setScreen] = useState(0); // oneQuestionPerScreen: index of the question on show
   const [attemptId, setAttemptId] = useState(0); // bumped on retake / review-mistakes so child questions remount
+  const attemptRef = useRef(0); // current attempt, so a flush from an old attempt cannot touch the new one
+  const [flushing, setFlushing] = useState(false); // time-up hand-in still grading; See Results waits for it
+  const bumpAttempt = () => {
+    attemptRef.current += 1;
+    setAttemptId(attemptRef.current);
+    setFinishPending(false);
+    setFlushing(false);
+  };
 
   // Load test JSON
   useEffect(() => {
@@ -115,6 +156,8 @@ export default function TestRenderer({ src }) {
     setShowResults(false);
     setTestMode(null);
     setTimeLeft(null);
+    setTimeUp(false);
+    setTimerMin(null);
     setReviewMode(false);
     setReviewQuestionIds([]);
     setScreen(0);
@@ -142,10 +185,11 @@ export default function TestRenderer({ src }) {
     return () => setCourseContext(null);
   }, [testData, setCourseContext, t]);
 
-  // Timed mode countdown
+  // Countdown: timed mode, or the optional timer the learner chose at the start. At 0 the test is handed in.
+  const choices = timerChoices(testData?.meta);
+  const totalSeconds = testData ? timerSeconds({ meta: testData.meta, questionCount: testData.questions.length, mode: testMode, chosen: timerMin }) : null;
   useEffect(() => {
-    if (testMode !== 'timed' || showResults || !testData) return;
-    const totalSeconds = (testData.meta.duration || testData.questions.length * 2) * 60;
+    if (totalSeconds === null || showResults || !testData) return undefined;
     setTimeLeft(totalSeconds);
     const interval = setInterval(() => {
       setTimeLeft(prev => {
@@ -157,14 +201,27 @@ export default function TestRenderer({ src }) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [testMode, showResults, testData]);
+  }, [totalSeconds, showResults, testData]);
 
-  // Auto-submit when timer hits 0
+  // When the timer hits 0 every open question is handed in first (flush), so typed work is graded instead of scoring 0. A paper
+  // question that still needs the learner's own score keeps the test open (timeUp); everything else finishes the test.
+  const flushers = useRef(new Map());
+  const registerFlush = useCallback((id, fn) => {
+    flushers.current.set(id, fn);
+    return () => { if (flushers.current.get(id) === fn) flushers.current.delete(id); };
+  }, []);
   useEffect(() => {
-    if (timeLeft === 0 && testMode === 'timed' && !showResults) {
-      handleFinishRef.current?.();
-    }
-  }, [timeLeft, testMode, showResults]);
+    if (timeLeft !== 0 || totalSeconds === null || showResults || timeUp) return;
+    setTimeUp(true);
+    setFlushing(true);
+    const mine = attemptRef.current;
+    (async () => {
+      const outcomes = await Promise.all([...flushers.current.values()].map((fn) => fn().catch(() => 'done')));
+      if (attemptRef.current !== mine) return; // retaken or reviewing meanwhile: drop this flush
+      setFlushing(false);
+      if (!outcomes.includes('needs-score')) setFinishPending(true);
+    })();
+  }, [timeLeft, totalSeconds, showResults, timeUp]);
 
   const handleAnswer = useCallback((questionId, score, maxScore, meta) => {
     setAnswers(prev => ({ ...prev, [questionId]: { score, maxScore, ...(meta || {}) } }));
@@ -178,22 +235,30 @@ export default function TestRenderer({ src }) {
 
   const handleFinish = useCallback(() => {
     if (!testData) return;
-    const totalScore = Object.values(answers).reduce((sum, a) => sum + (a.score || 0), 0);
+    const counted = reviewMode ? testData.questions.filter(q => reviewQuestionIds.includes(q.id)) : testData.questions;
+    const total = totalScore(counted, answers);
     // Only save to persistent progress for full test attempts, not review-mistakes sessions
     if (!reviewMode) {
-      saveTestResult(testData.meta.id, totalScore, testData.meta.totalPoints, answers);
+      saveTestResult(testData.meta.id, total, testData.meta.totalPoints, answers);
     }
     setShowResults(true);
-  }, [testData, answers, saveTestResult, reviewMode]);
+  }, [testData, reviewQuestionIds, answers, saveTestResult, reviewMode]);
 
-  const handleFinishRef = useRef(handleFinish);
-  handleFinishRef.current = handleFinish;
+  // Runs after the render that holds the answers the flush just gave.
+  useEffect(() => {
+    if (finishPending && !showResults) { setFinishPending(false); handleFinish(); }
+  }, [finishPending, showResults, handleFinish]);
 
   const prevBest = testProgress?.[testData?.meta?.id];
 
   // Show mode selector before test starts
   if (!testMode && !reviewMode && testData && !loading) {
     return <TestModeSelector onSelect={setTestMode} lang={lang} only={testData.meta.modes} />;
+  }
+
+  // The optional timer: asked once, after the mode, when the test offers one.
+  if (testMode && testMode !== 'timed' && choices && timerMin === null && !reviewMode && testData && !loading) {
+    return <TimerChoice choices={choices} lang={lang} onSelect={setTimerMin} />;
   }
 
   if (loading) return (
@@ -226,11 +291,13 @@ export default function TestRenderer({ src }) {
     setReviewMode(true);
     setTestMode(null);
     setTimeLeft(null);
+    setTimeUp(false);
+    setTimerMin(null);
     setAnswers({});
     setShowResults(false);
     setActiveQ(null);
     setScreen(0);
-    setAttemptId(id => id + 1);
+    bumpAttempt();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -249,12 +316,12 @@ export default function TestRenderer({ src }) {
           )}
         </div>
         <div className="flex flex-wrap gap-3 mt-2 text-xs" style={{ color: 'var(--theme-muted-text)' }}>
-          {testMode === 'timed' && timeLeft !== null && !showResults && (
-            <span style={{ color: timeLeft < 60 ? '#ef4444' : '#3b82f6', fontWeight: 600 }}>
-              {'\u23F1'} {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+          {totalSeconds !== null && timeLeft !== null && !showResults && (
+            <span style={{ color: timeLeft < 60 ? '#ef4444' : '#3b82f6', fontWeight: 600 }} data-testid="test-timer">
+              {'\u23F1'} {formatClock(timeLeft)}
             </span>
           )}
-          {testMode !== 'timed' && meta.duration > 0 && <span>{'\u23F1'} {meta.duration} min</span>}
+          {totalSeconds === null && meta.duration > 0 && <span>{'\u23F1'} {meta.duration} min</span>}
           <span>{meta.totalPoints} {t('points', 'puncte')}</span>
           <span>{visibleQuestionCount} {t('questions', 'întrebări')}</span>
           {prevBest && (
@@ -304,7 +371,8 @@ export default function TestRenderer({ src }) {
           // question is whatever came before in the filtered list, so grouping still dedups.
           const prevGroup = i > 0 ? questions[i - 1].group : null;
           const groupText = q.group && testData?.groupPrompts?.[q.group];
-          const showGroup = groupText && q.group !== prevGroup;
+          // one question per screen: the stem shows and hides with its question
+          const showGroup = showGroupStem({ perScreen, i, current, group: q.group, prevGroup, hasText: !!groupText });
 
           return (
             <React.Fragment key={q.id}>
@@ -346,9 +414,10 @@ export default function TestRenderer({ src }) {
               <QuestionComp
                 key={`${q.id}-${attemptId}`}
                 question={q}
-                onAnswer={handleAnswer}
+                onAnswer={(...a) => { if (attemptRef.current === attemptId) handleAnswer(...a); }}
                 suppressFeedback={testMode === 'timed' && !showResults}
                 mode={testMode}
+                registerFlush={registerFlush}
               />
             </div>
             </React.Fragment>
@@ -379,18 +448,26 @@ export default function TestRenderer({ src }) {
       )}
 
       {/* Finish button / Results */}
+      {timeUp && !showResults && (
+        <p className="text-sm text-center mt-6" style={{ color: '#ef4444', fontWeight: 600 }} data-testid="test-time-up" role="status">
+          {t('Time is up. Your answers were handed in; score the paper questions yourself, then see the results.',
+            'Timpul a expirat. Răspunsurile au fost predate; notează-te singur la întrebările pe hârtie, apoi vezi rezultatele.')}
+        </p>
+      )}
       {!showResults && (
         <div className="flex justify-center mt-6">
           <button
             onClick={handleFinish}
-            disabled={!allAnswered}
+            disabled={flushing || (!allAnswered && !timeUp)}
             className="px-6 py-2.5 rounded-xl text-sm font-bold transition-colors cursor-pointer"
             style={{
-              backgroundColor: allAnswered ? '#22c55e' : 'var(--theme-border)',
-              color: allAnswered ? '#fff' : 'var(--theme-muted-text)',
+              backgroundColor: ((allAnswered || timeUp) && !flushing) ? '#22c55e' : 'var(--theme-border)',
+              color: ((allAnswered || timeUp) && !flushing) ? '#fff' : 'var(--theme-muted-text)',
             }}
           >
-            {allAnswered
+            {flushing
+              ? t('Grading your answers...', 'Se corectează răspunsurile...')
+              : (allAnswered || timeUp)
               ? t('See Results', 'Vezi rezultatele')
               : t(`${answeredCount}/${visibleQuestionCount} answered`, `${answeredCount}/${visibleQuestionCount} răspunse`)}
           </button>
@@ -410,8 +487,10 @@ export default function TestRenderer({ src }) {
             setReviewQuestionIds([]);
             setTestMode(null);
             setTimeLeft(null);
+            setTimeUp(false);
+            setTimerMin(null);
             setScreen(0);
-            setAttemptId(id => id + 1);
+            bumpAttempt();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onReviewMistakes={!reviewMode ? startReviewMistakes : undefined}
