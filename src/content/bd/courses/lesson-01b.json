@@ -1,0 +1,783 @@
+{
+  "meta": {
+    "id": "bd-l01b",
+    "title": {
+      "en": "Insert, update, delete",
+      "ro": "Inserare, modificare, ștergere"
+    },
+    "shortTitle": {
+      "en": "D2: INSERT, UPDATE, DELETE",
+      "ro": "D2: INSERT, UPDATE, DELETE"
+    },
+    "source": {
+      "en": "Lab 1, Databases, UAIC FII",
+      "ro": "Laboratorul 1, Baze de date, UAIC FII"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l01b-s1",
+      "title": {
+        "en": "A new student",
+        "ro": "Un student nou"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l01b-r1",
+          "prompt": {
+            "en": "Below are the first-year students. Tomorrow one more enrolls. How would you ask the database to add him? And if you notice afterwards that you made a mistake, how do you undo it?",
+            "ro": "Mai jos sunt studenții din anul 1. Mâine se înmatriculează încă unul. Cum i-ai cere bazei de date să-l adauge? Și dacă observi după aceea că ai greșit, cum anulezi?"
+          },
+          "placeholder": {
+            "en": "Write how you think it is done",
+            "ro": "Scrie cum crezi că se face"
+          },
+          "answer": {
+            "en": "The command is `INSERT INTO studenti VALUES (...)`, with one value for each column. If you have not confirmed the change yet, you undo it with `ROLLBACK`; if you confirmed it with `COMMIT`, it no longer works.",
+            "ro": "Comanda e `INSERT INTO studenti VALUES (...)`, cu o valoare pentru fiecare coloană. Dacă n-ai confirmat încă schimbarea, o anulezi cu `ROLLBACK`; dacă ai confirmat-o cu `COMMIT`, nu mai merge."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nr_matricol, nume, prenume, an FROM studenti WHERE an = 1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s2",
+      "title": {
+        "en": "A row goes into the table",
+        "ro": "Un rând intră în tabel"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`INSERT` adds a whole row. Each value lands in its own column, in order. Whatever gets no value stays NULL, and a `NOT NULL` column with no value stops everything.",
+            "ro": "`INSERT` adaugă un rând întreg. Fiecare valoare ajunge în coloana ei, în ordine. Ce nu primește valoare rămâne NULL, iar o coloană `NOT NULL` fără valoare oprește totul."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l01b-viz1",
+          "widget": "row-insert",
+          "predict": false,
+          "props": {
+            "table": "studenti",
+            "row": {
+              "nr_matricol": "126",
+              "nume": "Vasile",
+              "prenume": "Mihai",
+              "an": "2",
+              "grupa": "B2",
+              "bursa": null,
+              "data_nastere": null
+            },
+            "errorCase": {
+              "row": {
+                "nr_matricol": null,
+                "nume": "Vasile",
+                "prenume": "Mihai",
+                "an": "2",
+                "grupa": "B2",
+                "bursa": null,
+                "data_nastere": null
+              },
+              "code": "ORA-01400"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s3",
+      "title": {
+        "en": "The two forms of INSERT",
+        "ro": "Cele două forme de INSERT"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "INSERT INTO studenti\nVALUES ('126', 'Vasile', 'Mihai', 2, 'B2', NULL,\n        TO_DATE('03/09/1996', 'DD/MM/YYYY'));\n\nINSERT INTO studenti (nr_matricol, nume, prenume, an)\nVALUES ('127', 'Marin', 'Ana', 1);"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The first form, without a column list, needs one value for **all** the columns, in the order of the table. The second, with a column list, takes only the values you give; the other columns stay NULL.\n\nText and dates go between apostrophes; numbers do not. A date is written with `TO_DATE('day/month/year', 'DD/MM/YYYY')`, so the database knows which part is the day and which the month.",
+            "ro": "Prima formă, fără listă de coloane, cere câte o valoare pentru **toate** coloanele, în ordinea tabelului. A doua, cu listă de coloane, primește doar valorile pe care le dai; restul coloanelor rămân NULL.\n\nTextul și datele stau între apostrofuri; numerele nu. Data se scrie cu `TO_DATE('zi/lună/an', 'DD/MM/YYYY')`, ca baza să știe ce e ziua și ce e luna."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s4",
+      "title": {
+        "en": "What can go wrong with INSERT",
+        "ro": "Ce poate merge prost la INSERT"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A date as plain text.** `'17/02/1995'` put straight into a `DATE` column gives `ORA-01843: not a valid month`, because the session's default format is `DD-MON-RR` (`17-FEB-95`). Always use `TO_DATE` with the format written out.",
+            "ro": "**Data ca simplu text.** `'17/02/1995'` pus direct în coloana de tip `DATE` dă `ORA-01843: not a valid month`, fiindcă formatul implicit al sesiunii e `DD-MON-RR` (`17-FEB-95`). Folosește mereu `TO_DATE` cu formatul scris."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Too few values.** `INSERT INTO studenti VALUES ('999', 'Test')` gives `ORA-00947: not enough values`: without a column list you must give all 7. With a column list you can leave the rest out.",
+            "ro": "**Prea puține valori.** `INSERT INTO studenti VALUES ('999', 'Test')` dă `ORA-00947: not enough values`: fără listă de coloane trebuie să dai toate cele 7. Cu listă de coloane poți lăsa restul necompletate."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`''` is NULL.** In Oracle an empty string does not exist: `''` inserted into a column becomes NULL.",
+            "ro": "**`''` este NULL.** În Oracle un șir vid nu există: `''` inserat într-o coloană devine NULL."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**No key, no protection.** With no primary key, the same `nr_matricol` goes in a second time with no error.",
+            "ro": "**Fără cheie, fără protecție.** Fără cheie primară, același `nr_matricol` intră a doua oară fără nicio eroare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s5",
+      "title": {
+        "en": "DELETE and UPDATE: only the chosen rows",
+        "ro": "DELETE și UPDATE: doar rândurile alese"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`WHERE` picks the rows the command touches; we learn it in detail later. Here you only need the idea: \"only the rows that satisfy the condition\". With `DELETE FROM note WHERE valoare < 5` the grades below 5 disappear. How many do you think there are?",
+            "ro": "`WHERE` alege rândurile pe care le atinge comanda; despre el învățăm în detaliu mai târziu. Aici îți trebuie ideea: „doar rândurile care respectă condiția”. Cu `DELETE FROM note WHERE valoare < 5` dispar notele sub 5. Câte crezi că sunt?"
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "UPDATE studenti\nSET    bursa = 300, grupa = 'B2'\nWHERE  nr_matricol = '121';\n\nDELETE FROM note\nWHERE  valoare < 5;"
+        },
+        {
+          "type": "viz",
+          "id": "bd-l01b-viz2",
+          "widget": "delete-sweep",
+          "predict": true,
+          "props": {
+            "table": "note",
+            "where": "valoare < 5"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s6",
+      "title": {
+        "en": "Without WHERE: all rows",
+        "ro": "Fără WHERE: toate rândurile"
+      },
+      "blocks": [
+        {
+          "type": "viz",
+          "id": "bd-l01b-viz3",
+          "widget": "delete-sweep",
+          "predict": false,
+          "props": {
+            "table": "note"
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`DELETE` or `UPDATE` without `WHERE` touch the whole table.** `DELETE FROM note;` deletes all 42 rows, without asking. `UPDATE studenti SET an = 2;` changes the year of all 13 students (`13 rows updated`). Always check you wrote `WHERE`.",
+            "ro": "**`DELETE` sau `UPDATE` fără `WHERE` ating tot tabelul.** `DELETE FROM note;` șterge toate cele 42 de rânduri, fără întrebare. `UPDATE studenti SET an = 2;` schimbă anul tuturor celor 13 studenți (`13 rows updated`). Verifică întotdeauna dacă ai scris `WHERE`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s7",
+      "title": {
+        "en": "COMMIT and ROLLBACK",
+        "ro": "COMMIT și ROLLBACK"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The changes made by `INSERT`, `UPDATE` and `DELETE` are not final right away. They stay in a transaction: you can undo them with `ROLLBACK` or make them final with `COMMIT`.",
+            "ro": "Schimbările făcute de `INSERT`, `UPDATE` și `DELETE` nu sunt definitive imediat. Rămân într-o tranzacție: le poți anula cu `ROLLBACK` sau le faci definitive cu `COMMIT`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "DELETE FROM note WHERE valoare < 5;   -- 5 rows deleted\nSELECT COUNT(*) FROM note;            -- 37\nROLLBACK;\nSELECT COUNT(*) FROM note;            -- 42"
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Commands that create or drop tables (`CREATE`, `DROP`) commit by themselves.** If a `CREATE TABLE` shows up between an `INSERT` and a `ROLLBACK`, the `INSERT` stays final. That is also why `DROP TABLE` cannot be undone with `ROLLBACK`. A dropped table still sits in the recycle bin: `FLASHBACK TABLE name TO BEFORE DROP` brings it back, and `DROP TABLE name PURGE` removes it for good.",
+            "ro": "**Comenzile care creează sau șterg tabele (`CREATE`, `DROP`) fac `COMMIT` singure.** Dacă între un `INSERT` și un `ROLLBACK` apare un `CREATE TABLE`, `INSERT`-ul rămâne definitiv. De aceea nici `DROP TABLE` nu se anulează cu `ROLLBACK`. Un tabel șters stă încă în coșul de reciclare: `FLASHBACK TABLE nume TO BEFORE DROP` îl readuce, iar `DROP TABLE nume PURGE` îl elimină definitiv."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "In the exercises here, the tables start again from the original data on every run, so you cannot break anything for good. On a real account, `COMMIT` would be the step that matters.",
+            "ro": "În exercițiile de aici, la fiecare rulare tabelele pornesc din nou din datele originale, așa că nu poți strica nimic definitiv. Pe un cont real, `COMMIT` ar fi pasul care contează."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s8",
+      "title": {
+        "en": "INSERT, UPDATE, DELETE, COMMIT, ROLLBACK",
+        "ro": "INSERT, UPDATE, DELETE, COMMIT, ROLLBACK"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "INSERT INTO tabel [(coloane)] VALUES (valori);\nUPDATE tabel SET coloana = valoare [, ...] [WHERE condiție];\nDELETE FROM tabel [WHERE condiție];\nCOMMIT;\nROLLBACK;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "INSERT",
+            "ro": "INSERT"
+          },
+          "content": {
+            "en": "Adds a row. Without a column list: all the values, in order. With a list: the rest stay NULL.",
+            "ro": "Adaugă un rând. Fără listă de coloane: toate valorile, în ordine. Cu listă: restul rămân NULL."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "UPDATE, DELETE",
+            "ro": "UPDATE, DELETE"
+          },
+          "content": {
+            "en": "Change or delete the rows chosen by `WHERE`. Without `WHERE`, the whole table.",
+            "ro": "Modifică sau șterg rândurile alese de `WHERE`. Fără `WHERE`, tot tabelul."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "COMMIT, ROLLBACK",
+            "ro": "COMMIT, ROLLBACK"
+          },
+          "content": {
+            "en": "`COMMIT` makes the changes so far final; `ROLLBACK` undoes them. `CREATE` and `DROP` commit by themselves.",
+            "ro": "`COMMIT` face definitive schimbările de până acum; `ROLLBACK` le anulează. `CREATE` și `DROP` fac `COMMIT` singure."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s9",
+      "title": {
+        "en": "Why can a DELETE be undone?",
+        "ro": "De ce se poate anula un DELETE?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l01b-r2",
+          "prompt": {
+            "en": "Why can you undo a `DELETE` with `ROLLBACK`, but not a `DROP TABLE`?",
+            "ro": "De ce poți anula un `DELETE` cu `ROLLBACK`, dar nu un `DROP TABLE`?"
+          },
+          "answer": {
+            "en": "`DELETE` is a data command: the change sits in an open transaction until `COMMIT`, so `ROLLBACK` can undo it. `DROP TABLE` changes the structure and commits by itself, before and after, so there is nothing left for `ROLLBACK` to undo (only `FLASHBACK TABLE ... TO BEFORE DROP` can bring the table back).",
+            "ro": "`DELETE` e o comandă de date: schimbarea stă într-o tranzacție deschisă până la `COMMIT`, deci `ROLLBACK` o poate desface. `DROP TABLE` schimbă structura și face `COMMIT` singur înainte și după, deci nu mai e nimic de anulat cu `ROLLBACK` (tabelul se readuce doar cu `FLASHBACK TABLE ... TO BEFORE DROP`)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s10",
+      "title": {
+        "en": "The column list",
+        "ro": "Lista de coloane"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01b-q1",
+          "question": {
+            "en": "What does `INSERT INTO studenti VALUES ('999', 'Test')` give, with no column list?",
+            "ro": "Ce dă `INSERT INTO studenti VALUES ('999', 'Test')`, fără listă de coloane?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`ORA-00947: not enough values`: values are missing for the other columns",
+                "ro": "`ORA-00947: not enough values`: lipsesc valori pentru celelalte coloane"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: without a list all 7 values are required.",
+                "ro": "Corect: fără listă trebuie toate cele 7 valori."
+              }
+            },
+            {
+              "text": {
+                "en": "The row is inserted, and the other columns stay NULL",
+                "ro": "Se inserează rândul, iar restul coloanelor rămân NULL"
+              },
+              "correct": false,
+              "misconception": "missing-is-null",
+              "explain": {
+                "en": "That only works with a column list: `INSERT INTO studenti (nr_matricol, nume) VALUES ...`.",
+                "ro": "Asta merge doar cu listă de coloane: `INSERT INTO studenti (nr_matricol, nume) VALUES ...`."
+              }
+            },
+            {
+              "text": {
+                "en": "The row is inserted, and the other columns become 0",
+                "ro": "Se inserează rândul, iar restul coloanelor devin 0"
+              },
+              "correct": false,
+              "misconception": "null-arith",
+              "explain": {
+                "en": "It is not even inserted. And a missing column would be NULL, not 0.",
+                "ro": "Nici măcar nu se inserează. Iar o coloană lipsă ar fi NULL, nu 0."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s11",
+      "title": {
+        "en": "DELETE without WHERE",
+        "ro": "DELETE fără WHERE"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01b-q2",
+          "question": {
+            "en": "You run `DELETE FROM note;`. What happens?",
+            "ro": "Rulezi `DELETE FROM note;`. Ce se întâmplă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "All 42 rows are deleted",
+                "ro": "Se șterg toate cele 42 de rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Without `WHERE` there is no condition to spare any row.",
+                "ro": "Corect. Fără `WHERE` nu există nicio condiție care să salveze vreun rând."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: `DELETE` requires `WHERE`",
+                "ro": "Eroare: `DELETE` cere `WHERE`"
+              },
+              "correct": false,
+              "misconception": "dml-no-where",
+              "explain": {
+                "en": "`WHERE` is optional. That is exactly why forgetting it is dangerous.",
+                "ro": "`WHERE` e opțional. Tocmai de aceea e periculos să-l uiți."
+              }
+            },
+            {
+              "text": {
+                "en": "Nothing is deleted, the database asks for confirmation",
+                "ro": "Nu se șterge nimic, baza cere confirmare"
+              },
+              "correct": false,
+              "misconception": "dml-no-where",
+              "explain": {
+                "en": "Oracle asks nothing. Only `ROLLBACK` (before `COMMIT`) can still save you.",
+                "ro": "Oracle nu întreabă nimic. Doar `ROLLBACK` (înainte de `COMMIT`) te mai poate salva."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s12",
+      "title": {
+        "en": "After ROLLBACK",
+        "ro": "După ROLLBACK"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01b-q3",
+          "question": {
+            "en": "You run `DELETE FROM note WHERE valoare < 5;`, then `ROLLBACK;`. How many rows does `note` have at the end?",
+            "ro": "Rulezi `DELETE FROM note WHERE valoare < 5;`, apoi `ROLLBACK;`. Câte rânduri are `note` la sfârșit?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "42",
+                "ro": "42"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `ROLLBACK` undid the deletion of the 5 rows.",
+                "ro": "Corect. `ROLLBACK` a desfăcut ștergerea celor 5 rânduri."
+              }
+            },
+            {
+              "text": {
+                "en": "37",
+                "ro": "37"
+              },
+              "correct": false,
+              "misconception": "commit-automatic",
+              "explain": {
+                "en": "37 would be right after the deletion. `ROLLBACK` brought the rows back, because you had not done `COMMIT`.",
+                "ro": "37 ar fi după ștergere. `ROLLBACK` a adus rândurile înapoi, fiindcă nu făcuseși `COMMIT`."
+              }
+            },
+            {
+              "text": {
+                "en": "0",
+                "ro": "0"
+              },
+              "correct": false,
+              "misconception": "delete-all",
+              "explain": {
+                "en": "The condition `valoare < 5` chose only 5 rows, not the whole table. Anyway, after `ROLLBACK` they are all back.",
+                "ro": "Condiția `valoare < 5` a ales doar 5 rânduri, nu tabelul întreg. Oricum, după `ROLLBACK` sunt toate la loc."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s13",
+      "title": {
+        "en": "The empty string",
+        "ro": "Șirul vid"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01b-q4",
+          "question": {
+            "en": "You insert `''` (two apostrophes, nothing between them) into the `bursa` column. What stays in it?",
+            "ro": "Inserezi `''` (două apostrofuri, nimic între ele) în coloana `bursa`. Ce rămâne în ea?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: in Oracle `''` is NULL.",
+                "ro": "Corect: în Oracle `''` este NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "0",
+                "ro": "0"
+              },
+              "correct": false,
+              "misconception": "null-arith",
+              "explain": {
+                "en": "`''` is not a number. Oracle treats it as a missing value, that is NULL.",
+                "ro": "`''` nu e număr. Oracle îl tratează ca lipsa valorii, adică NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "An empty string, different from NULL",
+                "ro": "Un șir vid, diferit de NULL"
+              },
+              "correct": false,
+              "misconception": "empty-str-null",
+              "explain": {
+                "en": "Oracle has no empty string distinct from NULL (other systems do). Here the two are the same thing.",
+                "ro": "Oracle nu are șir vid distinct de NULL (alte sisteme au). Aici cele două sunt același lucru."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s14",
+      "title": {
+        "en": "UPDATE without WHERE",
+        "ro": "UPDATE fără WHERE"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01b-q5",
+          "question": {
+            "en": "You run `UPDATE studenti SET bursa = 100;`, without `WHERE`. What happens?",
+            "ro": "Rulezi `UPDATE studenti SET bursa = 100;`, fără `WHERE`. Ce se întâmplă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Error: `UPDATE` needs `WHERE`",
+                "ro": "Eroare: `UPDATE` cere `WHERE`"
+              },
+              "correct": false,
+              "misconception": "dml-no-where",
+              "explain": {
+                "en": "`WHERE` is optional in `UPDATE` too, as in `DELETE`. Without it, the command works on the whole table.",
+                "ro": "`WHERE` este opțional și la `UPDATE`, ca la `DELETE`. Fără el, comanda lucrează pe tot tabelul."
+              }
+            },
+            {
+              "text": {
+                "en": "All 13 students get a scholarship of 100",
+                "ro": "Toți cei 13 studenți primesc bursa 100"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: `13 rows updated.` Without `WHERE` no condition holds any row back, so the 8 without a scholarship get 100 too.",
+                "ro": "Corect: `13 rows updated.` Fără `WHERE` nicio condiție nu oprește vreun rând, deci și cei 8 fără bursă primesc 100."
+              }
+            },
+            {
+              "text": {
+                "en": "Nothing changes until you confirm",
+                "ro": "Nu se schimbă nimic până nu confirmi"
+              },
+              "correct": false,
+              "misconception": "dml-no-where",
+              "explain": {
+                "en": "Oracle asks for no confirmation: it prints `13 rows updated.` Only `ROLLBACK`, before `COMMIT`, can still undo the change.",
+                "ro": "Oracle nu cere confirmare: afișează `13 rows updated.` Doar `ROLLBACK`, înainte de `COMMIT`, mai anulează schimbarea."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s15",
+      "title": {
+        "en": "What fits in NUMBER(5,2)",
+        "ro": "Ce încape în NUMBER(5,2)"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01b-q6",
+          "question": {
+            "en": "A column is `NUMBER(5,2)`. Which value can you insert into it without an error?",
+            "ro": "O coloană este `NUMBER(5,2)`. Ce valoare poți insera în ea fără eroare?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`12345.67`",
+                "ro": "`12345.67`"
+              },
+              "correct": false,
+              "misconception": "precision-vs-scale",
+              "explain": {
+                "en": "5 is the total number of digits, the 2 decimals included. `12345.67` has 7 digits: `ORA-01438`.",
+                "ro": "5 este numărul total de cifre, cu tot cu cele 2 zecimale. `12345.67` are 7 cifre: `ORA-01438`."
+              }
+            },
+            {
+              "text": {
+                "en": "`99999`",
+                "ro": "`99999`"
+              },
+              "correct": false,
+              "misconception": "scale-forgotten",
+              "explain": {
+                "en": "The 2 decimals take 2 of the 5 digits, so only 3 remain before the point. `99999` gives `ORA-01438`.",
+                "ro": "Cele 2 zecimale ocupă 2 din cele 5 cifre, deci înainte de virgulă rămân doar 3. `99999` dă `ORA-01438`."
+              }
+            },
+            {
+              "text": {
+                "en": "`999.99`",
+                "ro": "`999.99`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: 3 digits before the point and 2 after, 5 in total. It is the largest value that fits.",
+                "ro": "Corect: 3 cifre înainte de virgulă și 2 după, 5 în total. Este chiar cea mai mare valoare care încape."
+              }
+            }
+          ],
+          "review": "bd-l01a"
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s16",
+      "title": {
+        "en": "Update a student",
+        "ro": "Modifică un student"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l01b-ex-x1",
+          "dataset": "facultate",
+          "kind": "state",
+          "prompt": {
+            "en": "Ioana Bodnar from group B2 (`nr_matricol` `119`) gets a scholarship of 250 and moves to group A1. Change her row, without touching other students.",
+            "ro": "Ioana Bodnar din grupa B2 (`nr_matricol` `119`) primește bursă de 250 și trece în grupa A1. Modifică rândul ei, fără să atingi alți studenți."
+          },
+          "solution": "UPDATE studenti SET bursa = 250, grupa = 'A1' WHERE nr_matricol = '119'",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "tables": [
+              "studenti"
+            ]
+          },
+          "hints": [
+            {
+              "en": "A single command that changes two columns on the same row, chosen by number.",
+              "ro": "O singură comandă care modifică două coloane pe același rând, ales după număr."
+            },
+            {
+              "en": "`UPDATE studenti SET column1 = ..., column2 = ... WHERE ...`",
+              "ro": "`UPDATE studenti SET coloana1 = ..., coloana2 = ... WHERE ...`"
+            },
+            {
+              "en": "`nr_matricol` is text (`CHAR(6)`), so `'119'` goes between apostrophes. Without `WHERE` you would change all 13 students.",
+              "ro": "`nr_matricol` e text (`CHAR(6)`), deci `'119'` între apostrofuri. Fără `WHERE` ai schimba toți cei 13 studenți."
+            }
+          ],
+          "explain": {
+            "en": "A single `SET` with two assignments, separated by a comma, and `WHERE` on the key: exactly one row changes.",
+            "ro": "Un singur `SET` cu două atribuiri, separate prin virgulă, și `WHERE` pe cheie: se modifică exact un rând."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s17",
+      "title": {
+        "en": "Delete a grade",
+        "ro": "Șterge o notă"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l01b-ex-x2",
+          "dataset": "facultate",
+          "kind": "state",
+          "prompt": {
+            "en": "Student `113` got 4 at course `25`, and the grade was cancelled. Delete only that grade.",
+            "ro": "Studentul `113` a luat 4 la cursul `25`, iar nota a fost anulată. Șterge doar acea notă."
+          },
+          "solution": "DELETE FROM note WHERE nr_matricol = '113' AND id_curs = '25'",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "tables": [
+              "note"
+            ]
+          },
+          "hints": [
+            {
+              "en": "A row of `note` is chosen by two things: the student and the course.",
+              "ro": "Un rând din `note` se alege după două lucruri: studentul și cursul."
+            },
+            {
+              "en": "`DELETE FROM note WHERE ... AND ...`",
+              "ro": "`DELETE FROM note WHERE ... AND ...`"
+            },
+            {
+              "en": "Both conditions must be true, so `AND`, not `OR`. With `OR` you would delete all grades of student `113` and all grades of course `25`.",
+              "ro": "Ambele condiții trebuie să fie adevărate, deci `AND`, nu `OR`. Cu `OR` ai șterge toate notele studentului `113` și toate notele de la cursul `25`."
+            }
+          ],
+          "explain": {
+            "en": "`AND` keeps only the row that meets both conditions: a single grade.",
+            "ro": "`AND` păstrează doar rândul care îndeplinește ambele condiții: o singură notă."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01b-s18",
+      "title": {
+        "en": "The new student and his grade",
+        "ro": "Studentul nou și nota lui"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l01b-ex-1-2",
+          "dataset": "facultate",
+          "kind": "state",
+          "prompt": {
+            "en": "\"Insert into the newly created database a student Popescu Ionut, just enrolled in year 2, who got a 10 in the subject Logic for Informatics taught by Cristian Masalagiu in the first semester of year 1.\" (quoted from the lab)\n\nIn the app the tables are already filled with the script data, so the course \"Logica\" and the professor Masalagiu exist. Insert only the student and the grade. First look up the `id_curs` in `cursuri` and `didactic` (the year 1, semester 1 course taught by Masalagiu, that is `id_prof` `p1`). Values to use: `nr_matricol` `'124'`, last name `'Popescu'`, first name `'Ionut'` (no diacritics), group `'A1'`, no scholarship and no birth date; the grade has `data_notare` 15.02.2026, written with `TO_DATE`.",
+            "ro": "„Inseraţi în baza de date nou creată un student Popescu Ionut, proaspat înmatriculat în anul 2 care a luat nota 10 la materia Logica pentru informatica predata de Cristian Masalagiu în primul semestru din anul 1.”\n\nÎn aplicație tabelele sunt deja populate cu datele din script, deci cursul „Logica” și profesorul Masalagiu există. Inserează doar studentul și nota. Caută întâi `id_curs` în `cursuri` și `didactic` (cursul din anul 1, semestrul 1, predat de Masalagiu, adică `id_prof` `p1`). Valorile de folosit: `nr_matricol` `'124'`, nume `'Popescu'`, prenume `'Ionut'` (fără diacritice), grupa `'A1'`, fără bursă și fără dată de naștere; nota are `data_notare` 15.02.2026, scrisă cu `TO_DATE`."
+          },
+          "official": {
+            "lab": 1,
+            "ex": 2
+          },
+          "solution": "INSERT INTO studenti VALUES ('124', 'Popescu', 'Ionut', 2, 'A1', NULL, NULL);\nINSERT INTO note VALUES ('124', '21', 10, TO_DATE('15/02/2026', 'DD/MM/YYYY'))",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "tables": [
+              "studenti",
+              "note"
+            ]
+          },
+          "hints": [
+            {
+              "en": "Two new rows: one in `studenti` and one in `note`. The grade needs the course number, which you find with a `SELECT`.",
+              "ro": "Două rânduri noi: unul în `studenti` și unul în `note`. Nota are nevoie de numărul cursului, pe care îl găsești cu un `SELECT`."
+            },
+            {
+              "en": "`INSERT INTO studenti VALUES (7 values);` then `INSERT INTO note VALUES (nr_matricol, id_curs, valoare, date);` For the missing scholarship and birth date you put `NULL`.",
+              "ro": "`INSERT INTO studenti VALUES (7 valori);` apoi `INSERT INTO note VALUES (nr_matricol, id_curs, valoare, data);` Pentru lipsa bursei și a datei de naștere pui `NULL`."
+            },
+            {
+              "en": "The Logica course of year 1, semester 1, taught by `p1`, has `id_curs` `'21'`. Texts and `id_curs` between apostrophes, the grade 10 without. The date: `TO_DATE('15/02/2026', 'DD/MM/YYYY')`.",
+              "ro": "Cursul Logica din anul 1, semestrul 1, predat de `p1`, are `id_curs` `'21'`. Textele și `id_curs` între apostrofuri, nota 10 fără. Data: `TO_DATE('15/02/2026', 'DD/MM/YYYY')`."
+            }
+          ],
+          "explain": {
+            "en": "Two `INSERT`s. In `note` you do not put the student's or the course's name, but their numbers (`'124'` and `'21'`): exactly the link from the lesson on keys. The check compares the final content of the `studenti` and `note` tables with the solution's.",
+            "ro": "Două `INSERT`-uri. În `note` nu pui numele studentului sau al cursului, ci numerele lor (`'124'` și `'21'`): exact legătura din lecția despre chei. Verificarea compară conținutul final al tabelelor `studenti` și `note` cu cel al soluției."
+          }
+        }
+      ]
+    }
+  ]
+}

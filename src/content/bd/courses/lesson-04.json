@@ -1,0 +1,709 @@
+{
+  "meta": {
+    "id": "bd-l04",
+    "title": {
+      "en": "Lesson 4: WHERE, comparisons and AND / OR / NOT",
+      "ro": "Lecția 4: WHERE, comparații și AND / OR / NOT"
+    },
+    "shortTitle": {
+      "en": "L4: WHERE",
+      "ro": "L4: WHERE"
+    },
+    "source": {
+      "en": "Databases lab 2, UAIC (Oracle SQL); queries checked on Oracle 11g",
+      "ro": "Laboratorul 2 de Baze de date, UAIC (Oracle SQL); interogări verificate pe Oracle 11g"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l04-s1",
+      "title": {
+        "en": "How do you ask for only some rows?",
+        "ro": "Cum ceri doar anumite rânduri?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l04-reflect-pre",
+          "prompt": {
+            "en": "The secretary asks for the list of \"first-year students who get a scholarship, plus all second-year students\". Look at the table: how many are there? And how would you describe, in your own words, the condition the database should check for each row?",
+            "ro": "Secretara cere lista cu «studenții din anul 1 care iau bursă, plus toți studenții din anul 2». Uită-te la tabel: câți sunt? Și cum ai descrie, în cuvintele tale, condiția pe care ar trebui s-o verifice baza de date pentru fiecare rând?"
+          },
+          "answer": {
+            "en": "There are 6: Pintescu and Cobzaru (year 1, with a scholarship) and the four from year 2 (Bodnar, Archip, Ciobotariu, Bodnar). The condition has two parts joined by \"or\": \"year 1 AND has a scholarship\" or \"year 2\". The database asks this question for every row and keeps only the rows where the answer is \"yes\". That is exactly what the WHERE clause does.",
+            "ro": "Sunt 6: Pintescu și Cobzaru (anul 1, cu bursă) și cei patru din anul 2 (Bodnar, Archip, Ciobotariu, Bodnar). Condiția are două părți legate prin «sau»: «anul 1 ȘI are bursă» sau «anul 2». Baza de date pune această întrebare fiecărui rând și păstrează doar rândurile la care răspunsul e «da». Exact asta face clauza WHERE."
+          },
+          "placeholder": {
+            "en": "Write your answer here…",
+            "ro": "Scrie-ți răspunsul aici…"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, prenume, an, bursa FROM studenti ORDER BY nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s2",
+      "title": {
+        "en": "WHERE asks every row a question",
+        "ro": "WHERE pune o întrebare fiecărui rând"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The query below asks for the name and scholarship of first-year students. The database reads the table row by row, asks \"an = 1?\" and keeps only the rows where the answer is true. **Before you go on, tick the rows you think stay.**",
+            "ro": "Interogarea de mai jos cere numele și bursa studenților din anul 1. Baza de date citește tabelul rând cu rând, pune întrebarea «an = 1?» și păstrează doar rândurile unde răspunsul e adevărat. **Înainte să mergi mai departe, bifează rândurile care crezi că rămân.**"
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l04-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, bursa FROM studenti WHERE an = 1",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "prenume",
+            "an",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "FROM picks the table: we start with all 13 rows.",
+              "ro": "FROM alege tabelul: pornim cu toate cele 13 rânduri."
+            },
+            "where": {
+              "en": "WHERE checks \"an = 1\" on each row. Only the rows where the condition is true stay.",
+              "ro": "WHERE verifică «an = 1» pe fiecare rând. Rămân doar rândurile pentru care condiția e adevărată."
+            },
+            "select": {
+              "en": "SELECT keeps only the requested columns: nume and bursa. The others fade out.",
+              "ro": "SELECT păstrează doar coloanele cerute: nume și bursa. Celelalte se estompează."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s3",
+      "title": {
+        "en": "Compound conditions: AND and OR",
+        "ro": "Condiții compuse: AND și OR"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Now the condition has two parts: `an = 1` **or** `an = 2` **and** `bursa IS NOT NULL` (meaning \"has a scholarship\"). Tick the rows that pass. Think about each student in turn.",
+            "ro": "Acum condiția are două părți: `an = 1` **sau** `an = 2` **și** `bursa IS NOT NULL` (adică «are bursă»). Bifează rândurile care trec. Gândește-te la fiecare student pe rând."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l04-qm2",
+          "dataset": "facultate",
+          "sql": "SELECT nume, prenume, an, bursa FROM studenti WHERE an = 1 OR an = 2 AND bursa IS NOT NULL",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "prenume",
+            "an",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "We start with all 13 rows.",
+              "ro": "Pornim cu toate cele 13 rânduri."
+            },
+            "where": {
+              "en": "6 rows stay: the 4 first-years (scholarship or not) and the 2 second-years who have one (Archip, Ciobotariu). AND is evaluated before OR.",
+              "ro": "Rămân 6 rânduri: cei 4 din anul 1 (indiferent de bursă) și cei 2 din anul 2 care au bursă (Archip, Ciobotariu). AND se evaluează înaintea lui OR."
+            },
+            "select": {
+              "en": "We show the requested columns.",
+              "ro": "Afișăm coloanele cerute."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s4",
+      "title": {
+        "en": "AND is evaluated before OR",
+        "ro": "AND se evaluează înaintea lui OR"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**AND binds tighter than OR**, the same way multiplication goes before addition. The condition `an = 1 OR an = 2 AND bursa IS NOT NULL` means `an = 1 OR (an = 2 AND bursa IS NOT NULL)`, not \"read left to right\". That is why it returned 6 rows, including first-years with no scholarship.",
+            "ro": "**AND leagă mai strâns decât OR**, la fel cum înmulțirea merge înaintea adunării. Condiția `an = 1 OR an = 2 AND bursa IS NOT NULL` înseamnă `an = 1 OR (an = 2 AND bursa IS NOT NULL)`, nu «citit de la stânga la dreapta». De aceea a adus 6 rânduri, inclusiv studenți din anul 1 fără bursă."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "If you want the scholarship required for year 1 as well, **add parentheses**: `(an = 1 OR an = 2) AND bursa IS NOT NULL` returns only 4 rows. When in doubt about the order, add parentheses: they cost nothing.",
+            "ro": "Dacă vrei ca bursa să fie cerută și pentru anul 1, **pui paranteze**: `(an = 1 OR an = 2) AND bursa IS NOT NULL` aduce doar 4 rânduri. Când nu ești sigur de ordine, pune paranteze: nu costă nimic."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s5",
+      "title": {
+        "en": "Text must match exactly",
+        "ro": "Textul se scrie exact"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Text values are compared exactly, uppercase and lowercase.** `WHERE prenume = 'ioana'` returns 0 rows, while `WHERE prenume = 'Ioana'` returns 3 (113, 116, 119). Keywords (`SELECT`, `where`) ignore case, but column contents do not.",
+            "ro": "**Valorile text se compară exact, cu majuscule și minuscule.** `WHERE prenume = 'ioana'` dă 0 rânduri, iar `WHERE prenume = 'Ioana'` dă 3 (113, 116, 119). Cuvintele-cheie (`SELECT`, `where`) nu țin cont de majuscule, dar conținutul coloanelor da."
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Text goes **between single quotes** (`'Ioana'`). Double quotes (`\"Ioana\"`) mean a column name or alias, so `prenume = \"Ioana\"` fails with ORA-00904, \"\"Ioana\": invalid identifier\".",
+            "ro": "Textul se pune **între apostrofuri simple** (`'Ioana'`). Ghilimelele duble (`\"Ioana\"`) înseamnă nume de coloană sau alias, deci `prenume = \"Ioana\"` dă eroare: ORA-00904, «\"Ioana\": invalid identifier»."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s6",
+      "title": {
+        "en": "A number written as text",
+        "ro": "Număr scris ca text"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "The column `an` is a NUMBER. Still, `WHERE an = '3'` works and returns 5 rows, because Oracle silently converts the text `'3'` into a number. It is a bad habit: if the text does not look like a number (`an = 'x'`), you get ORA-01722 (invalid number). Write numbers without quotes: `an = 3`.",
+            "ro": "Coloana `an` este NUMBER. Totuși `WHERE an = '3'` merge și dă 5 rânduri, fiindcă Oracle convertește singur textul `'3'` în număr. E un obicei prost: dacă textul nu arată a număr (`an = 'x'`), apare ORA-01722 (invalid number). Scrie numerele fără apostrofuri: `an = 3`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s7",
+      "title": {
+        "en": "The syntax of WHERE",
+        "ro": "Sintaxa lui WHERE"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT coloane\nFROM tabel\nWHERE condiție;"
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, grupa\nFROM studenti\nWHERE bursa IS NOT NULL AND (an = 3 OR grupa = 'B1');"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "condition",
+            "ro": "condiție"
+          },
+          "content": {
+            "en": "A question with a true or false answer, asked of every row. WHERE keeps the row only if the answer is true.",
+            "ro": "O întrebare cu răspuns adevărat sau fals, pusă fiecărui rând. WHERE păstrează rândul doar dacă răspunsul e adevărat."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "comparisons",
+            "ro": "comparații"
+          },
+          "content": {
+            "en": "`=`, `<>` (or `!=`), `<`, `<=`, `>`, `>=`. Text goes in single quotes and must match exactly, case included.",
+            "ro": "`=`, `<>` (sau `!=`), `<`, `<=`, `>`, `>=`. Textul se scrie între apostrofuri și se potrivește exact, cu majuscule."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "AND, OR, NOT",
+            "ro": "AND, OR, NOT"
+          },
+          "content": {
+            "en": "The order of evaluation is NOT, then AND, then OR. Parentheses change the order.",
+            "ro": "Ordinea de evaluare este NOT, apoi AND, apoi OR. Parantezele schimbă ordinea."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s8",
+      "title": {
+        "en": "Why do first-year students with no scholarship get in?",
+        "ro": "De ce intră și studenți din anul 1 fără bursă?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l04-reflect-why",
+          "prompt": {
+            "en": "The condition `an = 1 OR an = 2 AND bursa IS NOT NULL` also returns first-year students with no scholarship, for example Arhire Alexandra. Why?",
+            "ro": "Condiția `an = 1 OR an = 2 AND bursa IS NOT NULL` aduce și studenți din anul 1 fără bursă, de exemplu Arhire Alexandra. De ce?"
+          },
+          "answer": {
+            "en": "Because AND is evaluated before OR. Oracle reads the condition as `an = 1 OR (an = 2 AND bursa IS NOT NULL)`. Alexandra passes through the first part (`an = 1`), and the second part no longer matters for her. If you want a different meaning, you write the parentheses yourself.",
+            "ro": "Pentru că AND se evaluează înaintea lui OR. Oracle citește condiția ca `an = 1 OR (an = 2 AND bursa IS NOT NULL)`. Alexandra trece prin prima parte (`an = 1`), iar a doua parte nu mai contează pentru ea. Dacă vrei alt înțeles, scrii parantezele tu."
+          },
+          "placeholder": {
+            "en": "Explain in your own words…",
+            "ro": "Explică în cuvintele tale…"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s9",
+      "title": {
+        "en": "Exact text",
+        "ro": "Text exact"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l04-mcq1",
+          "question": {
+            "en": "How many rows does `WHERE prenume = 'ioana'` return on the table from the lesson?",
+            "ro": "Câte rânduri întoarce `WHERE prenume = 'ioana'` pe tabelul din lecție?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "3 rows (the ones named Ioana)",
+                "ro": "3 rânduri (cele cu prenumele Ioana)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "SQL keywords ignore case, but text values do not. With `'Ioana'` you would have got 3 rows.",
+                "ro": "Cuvintele-cheie SQL nu țin cont de majuscule, dar valorile text da. Cu `'Ioana'` ai fi primit 3 rânduri."
+              },
+              "misconception": "case-sens"
+            },
+            {
+              "text": {
+                "en": "0 rows",
+                "ro": "0 rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Text is compared exactly: `'ioana'` is not the same as `'Ioana'`. There is no error, simply no row matches.",
+                "ro": "Corect. Textul se compară exact: `'ioana'` nu este același lucru cu `'Ioana'`. Nu apare nicio eroare, pur și simplu nu se potrivește niciun rând."
+              }
+            },
+            {
+              "text": {
+                "en": "Error ORA-00904",
+                "ro": "Eroare ORA-00904"
+              },
+              "correct": false,
+              "explain": {
+                "en": "ORA-00904 appears with double quotes or a column that does not exist. Text in single quotes, compared with a text column, never errors, even if nothing matches.",
+                "ro": "Eroarea ORA-00904 apare la ghilimele duble sau la o coloană care nu există. Un text între apostrofuri, comparat cu o coloană de tip text, nu dă eroare, chiar dacă nu se potrivește nimic."
+              },
+              "misconception": "quotes-alias"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s10",
+      "title": {
+        "en": "AND and OR",
+        "ro": "AND și OR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l04-mcq2",
+          "question": {
+            "en": "How many rows does `WHERE an = 1 OR an = 2 AND bursa IS NOT NULL` return?",
+            "ro": "Câte rânduri întoarce `WHERE an = 1 OR an = 2 AND bursa IS NOT NULL`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "6 rows",
+                "ro": "6 rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: the 4 first-years (120, 121, 122, 123) plus the 2 second-years with a scholarship (117, 118).",
+                "ro": "Corect: cei 4 din anul 1 (120, 121, 122, 123) plus cei 2 din anul 2 cu bursă (117, 118)."
+              }
+            },
+            {
+              "text": {
+                "en": "4 rows",
+                "ro": "4 rânduri"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You read the condition left to right, as `(an = 1 OR an = 2) AND bursa IS NOT NULL`. Oracle evaluates AND first, so that is not what happens.",
+                "ro": "Ai citit condiția de la stânga la dreapta, ca `(an = 1 OR an = 2) AND bursa IS NOT NULL`. Oracle evaluează întâi AND, deci nu așa se întâmplă."
+              },
+              "misconception": "and-or"
+            },
+            {
+              "text": {
+                "en": "8 rows (everyone in years 1 and 2)",
+                "ro": "8 rânduri (toți din anii 1 și 2)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You ignored the scholarship condition. It does apply, but only on the `an = 2` branch: the 2 second-years without a scholarship (116, 119) do not pass.",
+                "ro": "Ai ignorat condiția cu bursa. Ea se aplică, dar doar pe ramura `an = 2`: cei 2 din anul 2 fără bursă (116, 119) nu trec."
+              },
+              "misconception": "and-or"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s11",
+      "title": {
+        "en": "A number as text",
+        "ro": "Număr ca text"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l04-mcq3",
+          "question": {
+            "en": "The column `an` is a NUMBER. What does `WHERE an = '3'` do?",
+            "ro": "Coloana `an` este NUMBER. Ce face `WHERE an = '3'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Error ORA-01722, because the types do not match",
+                "ro": "Eroare ORA-01722, fiindcă tipurile nu se potrivesc"
+              },
+              "correct": false,
+              "explain": {
+                "en": "ORA-01722 appears only when the text cannot become a number (`an = 'x'`). `'3'` can, so it works.",
+                "ro": "ORA-01722 apare doar dacă textul nu poate deveni număr (`an = 'x'`). `'3'` poate, deci merge."
+              },
+              "misconception": "implicit-conv"
+            },
+            {
+              "text": {
+                "en": "0 rows, because `'3'` is text, not a number",
+                "ro": "0 rânduri, fiindcă `'3'` este text, nu număr"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Oracle converts the text to a number before comparing, so `'3'` is treated as 3.",
+                "ro": "Oracle convertește textul în număr înainte să compare, deci `'3'` este tratat ca 3."
+              },
+              "misconception": "implicit-conv"
+            },
+            {
+              "text": {
+                "en": "It works: Oracle converts it itself, but it is a bad habit",
+                "ro": "Merge: Oracle convertește singur, dar e un obicei prost"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. You get the 5 third-years. Implicit conversion hides a surprise: write `an = 3`.",
+                "ro": "Corect. Primești cei 5 studenți din anul 3. Conversia implicită ascunde o surpriză: scrie `an = 3`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s12",
+      "title": {
+        "en": "NULL in arithmetic",
+        "ro": "NULL în calcul"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l04-mcq4",
+          "question": {
+            "en": "How many rows does `WHERE bursa + 10 > 0` return? (Think about what you saw about NULL in calculations.)",
+            "ro": "Câte rânduri întoarce `WHERE bursa + 10 > 0`? (Gândește-te la ce ai văzut despre NULL în calcule.)"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "13 rows, all students",
+                "ro": "13 rânduri, toți studenții"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You treated NULL as 0, so `0 + 10 > 0`. But NULL is not 0: added to 10 it stays NULL.",
+                "ro": "Ai tratat NULL ca 0, deci `0 + 10 > 0`. Dar NULL nu e 0: adunat cu 10 rămâne NULL."
+              },
+              "misconception": "null-arith"
+            },
+            {
+              "text": {
+                "en": "5 rows, only students with a scholarship",
+                "ro": "5 rânduri, doar studenții cu bursă"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. For the 8 without a scholarship, `NULL + 10` is NULL, and `NULL > 0` is not true, so the row does not pass.",
+                "ro": "Corect. Pentru cei 8 fără bursă, `NULL + 10` este NULL, iar `NULL > 0` nu e adevărat, deci rândul nu trece."
+              }
+            },
+            {
+              "text": {
+                "en": "Error, you cannot add a number to NULL",
+                "ro": "Eroare, nu poți aduna un număr cu NULL"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no error. Any calculation with NULL gives NULL, and WHERE rejects the row.",
+                "ro": "Nu apare nicio eroare. Orice calcul cu NULL dă NULL, iar WHERE respinge rândul."
+              },
+              "misconception": "null-arith"
+            }
+          ],
+          "review": "bd-l03"
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s13",
+      "title": {
+        "en": "A name that does not exist",
+        "ro": "Un nume care nu există"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l04-mcq5",
+          "question": {
+            "en": "What does `SELECT * FROM studenti WHERE nume = 'Ionescu'` return? (No student is called Ionescu.)",
+            "ro": "Ce întoarce `SELECT * FROM studenti WHERE nume = 'Ionescu'`? (Niciun student nu se numește Ionescu.)"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Error: the value `'Ionescu'` is not in the table",
+                "ro": "Eroare: valoarea `'Ionescu'` nu există în tabel"
+              },
+              "correct": false,
+              "misconception": "missing-vs-empty",
+              "explain": {
+                "en": "It is not an error: the condition is simply false for every row. Oracle prints `no rows selected`.",
+                "ro": "Nu e eroare: condiția e pur și simplu falsă pentru fiecare rând. Oracle afișează `no rows selected`."
+              }
+            },
+            {
+              "text": {
+                "en": "One empty row, with NULL in every column",
+                "ro": "Un rând gol, cu NULL în fiecare coloană"
+              },
+              "correct": false,
+              "misconception": "missing-vs-empty",
+              "explain": {
+                "en": "A result with no matches has no rows at all, not even one with NULLs.",
+                "ro": "Un rezultat fără potriviri nu are niciun rând, nici măcar unul cu NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "0 rows, without an error",
+                "ro": "0 rânduri, fără eroare"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `WHERE` keeps the rows for which the condition is true; here there are none.",
+                "ro": "Corect. `WHERE` păstrează rândurile pentru care condiția e adevărată; aici nu e niciunul."
+              }
+            }
+          ],
+          "review": "bd-l01c"
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s14",
+      "title": {
+        "en": "The same id twice",
+        "ro": "Același id de două ori"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l04-mcq6",
+          "question": {
+            "en": "How many rows does `SELECT * FROM profesori WHERE id_prof = 'p21'` return?",
+            "ro": "Câte rânduri întoarce `SELECT * FROM profesori WHERE id_prof = 'p21'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "2 rows: no constraint forbids repeating `p21`",
+                "ro": "2 rânduri: nicio constrângere nu interzice repetarea lui `p21`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: LAZAR LUCIAN and PASAT Tiberiu. Without a primary key, `id_prof` does not identify a single professor.",
+                "ro": "Corect: LAZAR LUCIAN și PASAT Tiberiu. Fără cheie primară, `id_prof` nu identifică un singur profesor."
+              }
+            },
+            {
+              "text": {
+                "en": "1 row: Oracle keeps a single row per `id_prof`",
+                "ro": "1 rând: Oracle păstrează un singur rând pentru același `id_prof`"
+              },
+              "correct": false,
+              "misconception": "db-dedups",
+              "explain": {
+                "en": "Oracle keeps everything that was inserted. `p21` appears twice: LAZAR LUCIAN and PASAT Tiberiu.",
+                "ro": "Oracle păstrează tot ce s-a inserat. `p21` apare de două ori: LAZAR LUCIAN și PASAT Tiberiu."
+              }
+            },
+            {
+              "text": {
+                "en": "2 rows, because `id_prof` is `CHAR`, and `CHAR` allows repeated values",
+                "ro": "2 rânduri, pentru că `id_prof` e `CHAR`, iar `CHAR` permite valori repetate"
+              },
+              "correct": false,
+              "misconception": "type-allows-dup",
+              "explain": {
+                "en": "The count is right, the reason is not. Every type allows repeats; only a constraint (`PRIMARY KEY`, `UNIQUE`) stops them, and the script sets none.",
+                "ro": "Numărul e bun, motivul nu. Orice tip permite repetări; doar o constrângere (`PRIMARY KEY`, `UNIQUE`) le oprește, iar scriptul nu pune niciuna."
+              }
+            }
+          ],
+          "review": "bd-l01c"
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s15",
+      "title": {
+        "en": "Year 2, not group A1",
+        "ro": "Anul 2, nu grupa A1"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l04-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the surname and first name of second-year students who are not in group A1.",
+            "ro": "Afișează numele și prenumele studenților din anul 2 care nu sunt în grupa A1."
+          },
+          "solution": "SELECT nume, prenume FROM studenti WHERE an = 2 AND grupa <> 'A1'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You need two conditions that are true at the same time: the year and the group. For \"is not in the group\" you use the \"different\" operator.",
+              "ro": "Ai nevoie de două condiții adevărate în același timp: anul și grupa. Pentru «nu este în grupa» folosești operatorul «diferit»."
+            },
+            {
+              "en": "The skeleton: `SELECT nume, prenume FROM studenti WHERE an = ... AND grupa <> ...`. Text values go in single quotes.",
+              "ro": "Scheletul: `SELECT nume, prenume FROM studenti WHERE an = ... AND grupa <> ...`. Valorile text se scriu între apostrofuri."
+            },
+            {
+              "en": "Text is compared exactly, case included: the group is written `'A1'`, not `'a1'`. The `!=` operator works the same as `<>`.",
+              "ro": "Textul se compară exact, cu majuscule: grupa se scrie `'A1'`, nu `'a1'`. Operatorul `!=` merge la fel ca `<>`."
+            }
+          ],
+          "explain": {
+            "en": "`an = 2` keeps the 4 second-years, and `grupa <> 'A1'` removes those in A1. Bodnar Ioana from group B2 remains.",
+            "ro": "`an = 2` păstrează cei 4 studenți din anul 2, iar `grupa <> 'A1'` îi scoate pe cei din A1. Rămâne Bodnar Ioana din grupa B2."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l04-s16",
+      "title": {
+        "en": "Scholarship in year 2 or 3",
+        "ro": "Bursă în anii 2 sau 3"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l04-ex-x2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the surname and first name of students who get a scholarship and are in year 2 or year 3.",
+            "ro": "Afișează numele și prenumele studenților care iau bursă și sunt în anul 2 sau în anul 3."
+          },
+          "solution": "SELECT nume, prenume FROM studenti WHERE bursa IS NOT NULL AND (an = 2 OR an = 3)",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "The condition has two parts: \"has a scholarship\" and \"year 2 or year 3\". The first must be true in every case.",
+              "ro": "Condiția are două părți: «are bursă» și «anul 2 sau anul 3». Prima trebuie să fie adevărată în orice caz."
+            },
+            {
+              "en": "`WHERE bursa IS NOT NULL AND (...)`, and inside the parentheses you put the two years joined by OR.",
+              "ro": "`WHERE bursa IS NOT NULL AND (...)`, iar în paranteză pui cei doi ani legați prin OR."
+            },
+            {
+              "en": "Without parentheses, `bursa IS NOT NULL AND an = 2 OR an = 3` reads as `(bursa IS NOT NULL AND an = 2) OR an = 3` and returns 7 rows, including third-years with no scholarship.",
+              "ro": "Fără paranteze, `bursa IS NOT NULL AND an = 2 OR an = 3` se citește `(bursa IS NOT NULL AND an = 2) OR an = 3` și aduce 7 rânduri, inclusiv studenți din anul 3 fără bursă."
+            }
+          ],
+          "explain": {
+            "en": "The parentheses force the OR between the years to be evaluated first. Antonie, Archip and Ciobotariu remain.",
+            "ro": "Parantezele forțează ca OR-ul dintre ani să fie evaluat primul. Rămân Antonie, Archip și Ciobotariu."
+          }
+        }
+      ]
+    }
+  ]
+}

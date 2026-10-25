@@ -39,4 +39,16 @@ describe('natural answers are graded correct', () => {
     expect(part('bd-mock-l1-p6').prompt.en).toMatch(/rating/);
     expect(part('bd-mock-l1-p6').prompt.ro).toMatch(/apreciere/);
   });
+  it('P4: ORDER BY on the formatted text is not accepted on the hidden data (a March loan in another year)', async () => {
+    const p = part('bd-mock-l1-p4');
+    const wrong = p.solution.replace('ORDER BY data_imprumut', "ORDER BY TO_CHAR(data_imprumut,'DD.MM.YYYY')");
+    expect(wrong).not.toBe(p.solution);
+    const verdictOn = async (ds, sql) => {
+      const result = await engines[ds].run(sql, { dataset: ds });
+      expect(result.error).toBeUndefined();
+      return checkResult(result, expectedOf('bd-mock-l1-p4', ds), { order: 'any', mode: 'bag', ...p.check, kind: 'query' }).kind;
+    };
+    expect(await verdictOn('biblioteca-hidden', p.solution)).toBe('correct');
+    expect(await verdictOn('biblioteca-hidden', wrong)).not.toBe('correct');
+  });
 });

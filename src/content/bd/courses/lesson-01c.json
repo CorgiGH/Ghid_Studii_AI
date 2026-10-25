@@ -1,0 +1,673 @@
+{
+  "meta": {
+    "id": "bd-l01c",
+    "title": {
+      "en": "Look at what you built",
+      "ro": "Uită-te la ce ai construit"
+    },
+    "shortTitle": {
+      "en": "D3: DESCRIBE, user_tables",
+      "ro": "D3: DESCRIBE, user_tables"
+    },
+    "source": {
+      "en": "Lab 1, Databases, UAIC FII",
+      "ro": "Laboratorul 1, Baze de date, UAIC FII"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l01c-s1",
+      "title": {
+        "en": "An account you did not build",
+        "ro": "Un cont pe care nu l-ai făcut tu"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l01c-r1",
+          "prompt": {
+            "en": "You log in to an account with tables made by someone else. How do you find out which tables it has? And, for one table, how many letters can a student's last name have?",
+            "ro": "Te conectezi la un cont cu tabele făcute de altcineva. Cum afli ce tabele are? Și, pentru un tabel, câte litere poate avea numele de familie al unui student?"
+          },
+          "placeholder": {
+            "en": "Write how you think it is done",
+            "ro": "Scrie cum crezi că se face"
+          },
+          "answer": {
+            "en": "The list of tables comes from `SELECT table_name FROM user_tables`. The structure of a table (columns, types, lengths) comes from the command `DESCRIBE table_name`: for `nume` in `studenti` you see `VARCHAR2(10)`, so at most 10 letters.",
+            "ro": "Lista tabelelor o dă `SELECT table_name FROM user_tables`. Structura unui tabel (coloane, tipuri, lungimi) o dă comanda `DESCRIBE nume_tabel`: la `nume` din `studenti` vezi `VARCHAR2(10)`, deci cel mult 10 litere."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT * FROM studenti"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s2",
+      "title": {
+        "en": "What the lab script does",
+        "ro": "Ce face scriptul laboratorului"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The file `facultate.sql` creates everything we use in the lab. In SQL*Plus you run it with `@ C:/temp/facultate.sql`. Read from top to bottom, it does four things:\n\n1. `DROP TABLE` for each of the five tables (on the first run it gives `ORA-00942`, because the tables do not exist yet; that is not a problem);\n2. `CREATE TABLE` for the five tables;\n3. `INSERT` for the data: 13 students, 9 courses, 16 professors, 10 links in `didactic` and 42 grades;\n4. `COMMIT`, so the data is final.",
+            "ro": "Fișierul `facultate.sql` creează tot ce folosim la laborator. În SQL*Plus îl rulezi cu `@ C:/temp/facultate.sql`. Citit de sus în jos, face patru lucruri:\n\n1. `DROP TABLE` pentru fiecare din cele cinci tabele (la prima rulare dă `ORA-00942`, fiindcă tabelele nu există încă; nu e o problemă);\n2. `CREATE TABLE` pentru cele cinci tabele;\n3. `INSERT` pentru date: 13 studenți, 9 cursuri, 16 profesori, 10 legături în `didactic` și 42 de note;\n4. `COMMIT`, ca datele să fie definitive."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "DROP TABLE studenti\n/\n...\nCREATE TABLE studenti(\n  nr_matricol CHAR(6) NOT NULL,\n  nume VARCHAR2(10),\n  ...\n  )\n/\nINSERT INTO studenti VALUES ('111', 'Popescu', 'Bogdan', 3, 'A2', NULL,\n                             TO_DATE('17/02/1995', 'dd/mm/yyyy'));\n...\nCOMMIT;"
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "A `/` on a line of its own tells SQL*Plus to run the command before it. The `INSERT`s end with `;`.",
+            "ro": "Semnul `/` pe o linie singură spune SQL*Plus-ului să execute comanda de dinainte. `INSERT`-urile se termină cu `;`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s3",
+      "title": {
+        "en": "The list of tables: user_tables",
+        "ro": "Lista tabelelor: user_tables"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`user_tables` is a table Oracle keeps itself: it holds one row for each table of your account. You query it like any other table.",
+            "ro": "`user_tables` e un tabel pe care îl ține Oracle însuși: conține câte un rând pentru fiecare tabel al contului tău. Îl interoghezi ca pe orice alt tabel."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l01c-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT table_name FROM user_tables ORDER BY table_name",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "select"
+            },
+            {
+              "clause": "order",
+              "predict": true
+            }
+          ],
+          "show": [
+            "table_name"
+          ],
+          "say": {
+            "from": {
+              "en": "`user_tables` has one row for each table: here 5.",
+              "ro": "`user_tables` are un rând pentru fiecare tabel: aici 5."
+            },
+            "select": {
+              "en": "We keep only the name.",
+              "ro": "Păstrăm doar numele."
+            },
+            "order": {
+              "en": "Without `ORDER BY` the order is not guaranteed; with it, alphabetical: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI`.",
+              "ro": "Fără `ORDER BY` ordinea nu e garantată; cu el, alfabetic: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI`."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s4",
+      "title": {
+        "en": "The structure of a table: DESCRIBE",
+        "ro": "Structura unui tabel: DESCRIBE"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`DESCRIBE` is a SQL*Plus command (not SQL), so it does not need a `;` (with one it works too). It shows each column, whether it accepts NULL, and its type. Here is `DESCRIBE profesori`:",
+            "ro": "`DESCRIBE` e o comandă SQL*Plus (nu SQL), deci nu are nevoie de `;` (cu `;` merge la fel). Arată fiecare coloană, dacă acceptă NULL și tipul ei. Iată `DESCRIBE profesori`:"
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": " Name             Null?    Type\n ---------------- -------- ------------\n ID_PROF                   CHAR(4)\n NUME                      CHAR(10)\n PRENUME                   CHAR(10)\n GRAD_DIDACTIC             VARCHAR2(5)"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "For `studenti` it also shows `NOT NULL`: `NR_MATRICOL  NOT NULL  CHAR(6)`. The same thing, as table rows, comes from `SELECT column_name, data_type, data_length, nullable FROM user_tab_columns WHERE table_name = 'STUDENTI'`.",
+            "ro": "La `studenti` apare și `NOT NULL`: `NR_MATRICOL  NOT NULL  CHAR(6)`. Același lucru, ca rânduri de tabel, îl dă `SELECT column_name, data_type, data_length, nullable FROM user_tab_columns WHERE table_name = 'STUDENTI'`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s5",
+      "title": {
+        "en": "Upper-case names and the script's rough edges",
+        "ro": "Numele cu majuscule și asperitățile scriptului"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Names are upper-case in the dictionary.** `SELECT table_name FROM user_tables WHERE table_name = 'studenti'` finds nothing, because Oracle stores `STUDENTI`. Text values are compared exactly, upper and lower case included. `'STUDENTI'` works.",
+            "ro": "**Numele sunt cu majuscule în dicționar.** `SELECT table_name FROM user_tables WHERE table_name = 'studenti'` nu găsește nimic, fiindcă Oracle păstrează `STUDENTI`. Valorile text se compară exact, cu litere mari și mici. Merge `'STUDENTI'`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Running it a second time wipes what you did.** The script starts with `DROP TABLE`. If you inserted a student or deleted grades and run the script again, the tables return to the original data and your changes disappear.",
+            "ro": "**A doua rulare șterge ce ai făcut tu.** Scriptul începe cu `DROP TABLE`. Dacă ai inserat un student sau ai șters note și rulezi scriptul din nou, tabelele revin la datele originale și schimbările tale dispar."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**The script is not clean everywhere.** `profesori` has 16 rows, and `p20` and `p21` each appear twice (with no primary key there is no error). The lab page says `titlu_curs` has at most 10 characters, but the script makes it `VARCHAR2(15)`, because `Limbaje formale` has 15. When the page and the script disagree, `DESCRIBE` shows the truth.",
+            "ro": "**Scriptul nu e curat peste tot.** `profesori` are 16 rânduri, iar `p20` și `p21` apar de câte două ori (fără cheie primară nu e nicio eroare). Pagina laboratorului spune că `titlu_curs` are cel mult 10 caractere, dar scriptul îl face `VARCHAR2(15)`, fiindcă `Limbaje formale` are 15. Când pagina și scriptul se contrazic, `DESCRIBE` arată adevărul."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s6",
+      "title": {
+        "en": "Scripts, user_tables and DESCRIBE",
+        "ro": "Scripturi, user_tables și DESCRIBE"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "@ C:/temp/facultate.sql\n\nSELECT table_name FROM user_tables;\nDESCRIBE nume_tabel"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Script",
+            "ro": "Script"
+          },
+          "content": {
+            "en": "A file of commands that SQL*Plus runs one after another. `@ path/file.sql` runs it.",
+            "ro": "Un fișier cu comenzi pe care SQL*Plus le execută una după alta. `@ cale/fisier.sql` îl rulează."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "user_tables",
+            "ro": "user_tables"
+          },
+          "content": {
+            "en": "The table of your account's tables. Names are stored in upper case.",
+            "ro": "Tabelul cu tabelele contului tău. Numele sunt stocate cu majuscule."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "DESCRIBE",
+            "ro": "DESCRIBE"
+          },
+          "content": {
+            "en": "Shows a table's columns: name, `NOT NULL` and type. It is a SQL*Plus command, so it needs no `;`.",
+            "ro": "Arată coloanele unui tabel: nume, `NOT NULL` și tip. E comandă SQL*Plus, deci nu are nevoie de `;`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s7",
+      "title": {
+        "en": "Why does 'studenti' find nothing?",
+        "ro": "De ce nu găsește 'studenti'?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l01c-r2",
+          "prompt": {
+            "en": "If `SELECT * FROM studenti` works in lower case, why does `WHERE table_name = 'studenti'` not find the table?",
+            "ro": "Dacă `SELECT * FROM studenti` merge cu litere mici, de ce `WHERE table_name = 'studenti'` nu găsește tabelul?"
+          },
+          "answer": {
+            "en": "Table and column names written without quotes are turned into upper case by Oracle and stored that way. But `'studenti'` between apostrophes is a text, and text is compared exactly, upper and lower case included. `'studenti'` is not equal to `'STUDENTI'`.",
+            "ro": "Numele de tabele și coloane scrise fără ghilimele sunt transformate de Oracle în majuscule și așa sunt stocate. `'studenti'` între apostrofuri însă e un text, iar textul se compară exact, cu litere mici și mari. `'studenti'` nu e egal cu `'STUDENTI'`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s8",
+      "title": {
+        "en": "How many tables",
+        "ro": "Câte tabele"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01c-q1",
+          "question": {
+            "en": "After you run the lab script, how many rows does `SELECT table_name FROM user_tables` give?",
+            "ro": "După ce rulezi scriptul laboratorului, câte rânduri dă `SELECT table_name FROM user_tables`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "5: `STUDENTI`, `CURSURI`, `NOTE`, `PROFESORI`, `DIDACTIC`",
+                "ro": "5: `STUDENTI`, `CURSURI`, `NOTE`, `PROFESORI`, `DIDACTIC`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct.",
+                "ro": "Corect."
+              }
+            },
+            {
+              "text": {
+                "en": "4: the tables named on the lab page (without `didactic`)",
+                "ro": "4: tabelele numite în pagina laboratorului (fără `didactic`)"
+              },
+              "correct": false,
+              "misconception": "page-vs-script",
+              "explain": {
+                "en": "The page lists four, then adds `didactic` separately. The script creates five.",
+                "ro": "Pagina enumeră patru, apoi adaugă `didactic` separat. Scriptul creează cinci."
+              }
+            },
+            {
+              "text": {
+                "en": "0: the tables are in another account",
+                "ro": "0: tabelele sunt în alt cont"
+              },
+              "correct": false,
+              "misconception": "wrong-account",
+              "explain": {
+                "en": "`user_tables` lists the tables of the current account, which are exactly those created by the script.",
+                "ro": "`user_tables` listează tabelele contului curent, adică exact cele create de script."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s9",
+      "title": {
+        "en": "Upper case in the dictionary",
+        "ro": "Litere mari în dicționar"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01c-q2",
+          "question": {
+            "en": "How many rows does `SELECT table_name FROM user_tables WHERE table_name = 'studenti'` give?",
+            "ro": "Câte rânduri dă `SELECT table_name FROM user_tables WHERE table_name = 'studenti'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0: the text is compared exactly, and in the dictionary the name is `STUDENTI`",
+                "ro": "0: textul se compară exact, iar în dicționar numele e `STUDENTI`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct.",
+                "ro": "Corect."
+              }
+            },
+            {
+              "text": {
+                "en": "1: Oracle ignores upper and lower case",
+                "ro": "1: Oracle nu ține cont de litere mari și mici"
+              },
+              "correct": false,
+              "misconception": "case-sens",
+              "explain": {
+                "en": "Keywords and object names, yes; text values between apostrophes, no.",
+                "ro": "Cuvintele-cheie și numele de obiecte, da; valorile text între apostrofuri, nu."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: `studenti` does not exist",
+                "ro": "Eroare: `studenti` nu există"
+              },
+              "correct": false,
+              "misconception": "missing-vs-empty",
+              "explain": {
+                "en": "It is not an error; the condition is simply true for no row.",
+                "ro": "Nu e eroare; condiția pur și simplu nu e adevărată pentru niciun rând."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s10",
+      "title": {
+        "en": "What is lost on the second run",
+        "ro": "Ce se pierde la a doua rulare"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01c-q3",
+          "question": {
+            "en": "You inserted student `124` (previous lesson) and run `facultate.sql` again. What happens to him?",
+            "ro": "Ai inserat studentul `124` (lecția anterioară) și rulezi din nou `facultate.sql`. Ce se întâmplă cu el?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "He disappears: the script drops and recreates the tables",
+                "ro": "Dispare: scriptul șterge și recreează tabelele"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Only the 13 rows from the script remain.",
+                "ro": "Corect. Doar cele 13 rânduri din script rămân."
+              }
+            },
+            {
+              "text": {
+                "en": "He stays, the script's `INSERT`s are added after him",
+                "ro": "Rămâne, `INSERT`-urile din script se adaugă după el"
+              },
+              "correct": false,
+              "misconception": "script-appends",
+              "explain": {
+                "en": "The script starts with `DROP TABLE`, so it starts from empty tables.",
+                "ro": "Scriptul începe cu `DROP TABLE`, deci pornește de la tabele goale."
+              }
+            },
+            {
+              "text": {
+                "en": "He stays, but the script gives `ORA-00001`",
+                "ro": "Rămâne, dar scriptul dă `ORA-00001`"
+              },
+              "correct": false,
+              "misconception": "false-key",
+              "explain": {
+                "en": "There is no primary key that could give `ORA-00001`, and the old table is dropped anyway.",
+                "ro": "Nu există cheie primară care să dea `ORA-00001`, iar tabelul vechi oricum e șters."
+              }
+            }
+          ],
+          "review": "bd-l01b"
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s11",
+      "title": {
+        "en": "Missing key",
+        "ro": "Cheie lipsă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01c-q4",
+          "question": {
+            "en": "In `profesori`, `p20` appears twice and you get no error. Why?",
+            "ro": "În `profesori`, `p20` apare de două ori și nu primești nicio eroare. De ce?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "The script declares no primary key on `id_prof`",
+                "ro": "Scriptul nu declară nicio cheie primară pe `id_prof`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. With no constraint, the database does not check uniqueness.",
+                "ro": "Corect. Fără constrângere, baza nu verifică unicitatea."
+              }
+            },
+            {
+              "text": {
+                "en": "`id_prof` is `CHAR`, and `CHAR` allows duplicates",
+                "ro": "`id_prof` e `CHAR`, iar `CHAR` permite duplicate"
+              },
+              "correct": false,
+              "misconception": "type-allows-dup",
+              "explain": {
+                "en": "The type has nothing to do with uniqueness. Only a constraint (`PRIMARY KEY`, `UNIQUE`) enforces it.",
+                "ro": "Tipul nu are legătură cu unicitatea. Doar o constrângere (`PRIMARY KEY`, `UNIQUE`) o impune."
+              }
+            },
+            {
+              "text": {
+                "en": "Oracle ignores the second identical row",
+                "ro": "Oracle ignoră al doilea rând identic"
+              },
+              "correct": false,
+              "misconception": "db-dedups",
+              "explain": {
+                "en": "Both rows are stored: `profesori` has 16 rows.",
+                "ro": "Ambele rânduri sunt stocate: `profesori` are 16 rânduri."
+              }
+            }
+          ],
+          "review": "bd-l01a"
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s12",
+      "title": {
+        "en": "A missing value in INSERT",
+        "ro": "O valoare lipsă în INSERT"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01c-q5",
+          "question": {
+            "en": "The script inserts the grades with `INSERT INTO note VALUES (...)`, without a column list. What does `INSERT INTO note VALUES ('111', '21')` give?",
+            "ro": "Scriptul inserează notele cu `INSERT INTO note VALUES (...)`, fără listă de coloane. Ce dă `INSERT INTO note VALUES ('111', '21')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "A new row, with `valoare` and `data_notare` NULL",
+                "ro": "Un rând nou, cu `valoare` și `data_notare` NULL"
+              },
+              "correct": false,
+              "misconception": "missing-is-null",
+              "explain": {
+                "en": "That is what a column list gives: `INSERT INTO note (nr_matricol, id_curs) VALUES ('111', '21')`. Without a list, Oracle fills nothing in by itself.",
+                "ro": "Așa ar fi cu listă de coloane: `INSERT INTO note (nr_matricol, id_curs) VALUES ('111', '21')`. Fără listă, Oracle nu completează nimic singur."
+              }
+            },
+            {
+              "text": {
+                "en": "`ORA-00947: not enough values`",
+                "ro": "`ORA-00947: not enough values`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `note` has 4 columns, so without a list all 4 values must be given.",
+                "ro": "Corect. `note` are 4 coloane, deci fără listă trebuie date toate 4 valorile."
+              }
+            },
+            {
+              "text": {
+                "en": "A new row, with `valoare` 0",
+                "ro": "Un rând nou, cu `valoare` 0"
+              },
+              "correct": false,
+              "misconception": "null-arith",
+              "explain": {
+                "en": "The row is not even inserted. And even with a column list, a missing column would be NULL, not 0.",
+                "ro": "Rândul nici nu se inserează. Și chiar cu listă de coloane, o coloană lipsă ar fi NULL, nu 0."
+              }
+            }
+          ],
+          "review": "bd-l01b"
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s13",
+      "title": {
+        "en": "COMMIT, then ROLLBACK",
+        "ro": "COMMIT, apoi ROLLBACK"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01c-q6",
+          "question": {
+            "en": "The script ends with `COMMIT`. After it you run `DELETE FROM studenti WHERE an = 1;` and then `ROLLBACK;`. How many students does the table have?",
+            "ro": "Scriptul se termină cu `COMMIT`. După el rulezi `DELETE FROM studenti WHERE an = 1;` și apoi `ROLLBACK;`. Câți studenți are tabelul?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "13",
+                "ro": "13"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The script's `COMMIT` saved the 13 rows, and `ROLLBACK` brings back the 4 first-year students.",
+                "ro": "Corect. `COMMIT`-ul scriptului a salvat cele 13 rânduri, iar `ROLLBACK` îi aduce înapoi pe cei 4 studenți din anul 1."
+              }
+            },
+            {
+              "text": {
+                "en": "9",
+                "ro": "9"
+              },
+              "correct": false,
+              "misconception": "commit-automatic",
+              "explain": {
+                "en": "9 would remain after the delete. `ROLLBACK` undoes everything done after the last `COMMIT`, this `DELETE` included.",
+                "ro": "9 ar rămâne după ștergere. `ROLLBACK` anulează tot ce s-a făcut după ultimul `COMMIT`, deci și acest `DELETE`."
+              }
+            },
+            {
+              "text": {
+                "en": "0",
+                "ro": "0"
+              },
+              "correct": false,
+              "misconception": "delete-all",
+              "explain": {
+                "en": "The condition `an = 1` picks only 4 rows, not the whole table. And after `ROLLBACK` those are back as well.",
+                "ro": "Condiția `an = 1` alege doar 4 rânduri, nu tot tabelul. Iar după `ROLLBACK` sunt și acestea la loc."
+              }
+            }
+          ],
+          "review": "bd-l01b"
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s14",
+      "title": {
+        "en": "The account's tables",
+        "ro": "Tabelele contului"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l01c-ex-1-3",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "\"Run the command below to execute a creation script whose job is to create all the tables above and fill them with data. Study the contents of the script.\" (quoted from the lab)\n\nIn the app the script has already run: the tables exist and hold its data. What is left is the check from the lab: display the names of the account's tables.",
+            "ro": "„Executaţi comanda de mai jos pentru a rula un script de creare care are rolul de a crea toate tabelele de mai sus şi de a le popula cu date. Studiati continutul scriptului.”\n\nÎn aplicație scriptul a rulat deja: tabelele există și au datele din el. Rămâne partea de verificare din laborator: afișează numele tabelelor contului."
+          },
+          "official": {
+            "lab": 1,
+            "ex": 3
+          },
+          "solution": "SELECT table_name FROM user_tables",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "The table names are kept by Oracle in a table of its own, for your account.",
+              "ro": "Numele tabelelor le ține Oracle într-un tabel propriu, al contului tău."
+            },
+            {
+              "en": "`SELECT column FROM user_tables`, and the column holding the table's name has a name you saw in the lesson.",
+              "ro": "`SELECT coloana FROM user_tables`, iar coloana cu numele tabelului are un nume care se vede în lecție."
+            },
+            {
+              "en": "The column is called `table_name`. You do not need `WHERE`: you want all 5 rows.",
+              "ro": "Coloana se numește `table_name`. Nu ai nevoie de `WHERE`: vrei toate cele 5 rânduri."
+            }
+          ],
+          "explain": {
+            "en": "`user_tables` holds one row per table, and `table_name` is the name. The result: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI` (in any order, without `ORDER BY`).",
+            "ro": "`user_tables` conține câte un rând pe tabel, iar `table_name` este numele. Rezultatul: `CURSURI`, `DIDACTIC`, `NOTE`, `PROFESORI`, `STUDENTI` (în orice ordine, fără `ORDER BY`)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01c-s15",
+      "title": {
+        "en": "The structure as rows",
+        "ro": "Structura în rânduri"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l01c-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display the column name, the data type and the length for the `profesori` table. Use `user_tab_columns`; the table name in the dictionary is in upper case.",
+            "ro": "Afișează numele coloanei, tipul de date și lungimea pentru tabelul `profesori`. Folosește `user_tab_columns`; numele tabelului în dicționar e cu majuscule."
+          },
+          "solution": "SELECT column_name, data_type, data_length FROM user_tab_columns WHERE table_name = 'PROFESORI'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "One row per column; you keep only the columns of the `profesori` table.",
+              "ro": "Un rând pe coloană; păstrezi doar coloanele tabelului `profesori`."
+            },
+            {
+              "en": "`SELECT column_name, data_type, data_length FROM user_tab_columns WHERE table_name = ...`",
+              "ro": "`SELECT column_name, data_type, data_length FROM user_tab_columns WHERE table_name = ...`"
+            },
+            {
+              "en": "The value after `=` is text, in upper case: `'PROFESORI'`. With `'profesori'` you find nothing.",
+              "ro": "Valoarea de după `=` e text, cu majuscule: `'PROFESORI'`. Cu `'profesori'` nu găsești nimic."
+            }
+          ],
+          "explain": {
+            "en": "The result has 4 rows: `ID_PROF` `CHAR` 4, `NUME` `CHAR` 10, `PRENUME` `CHAR` 10, `GRAD_DIDACTIC` `VARCHAR2` 5. `DESCRIBE profesori` shows the same information.",
+            "ro": "Rezultatul are 4 rânduri: `ID_PROF` `CHAR` 4, `NUME` `CHAR` 10, `PRENUME` `CHAR` 10, `GRAD_DIDACTIC` `VARCHAR2` 5. Aceleași informații le arată `DESCRIBE profesori`."
+          }
+        }
+      ]
+    }
+  ]
+}

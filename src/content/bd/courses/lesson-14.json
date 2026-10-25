@@ -1,0 +1,959 @@
+{
+  "meta": {
+    "id": "bd-l14",
+    "title": {
+      "en": "Lesson 14: Dates II — TO_CHAR, TO_DATE, language and masks",
+      "ro": "Lecția 14: Date II — TO_CHAR, TO_DATE, limbă și măști"
+    },
+    "shortTitle": {
+      "en": "L14: Dates II",
+      "ro": "L14: Date II"
+    },
+    "source": {
+      "en": "Labs 2 and 3 — date conversions (UAIC, Databases)",
+      "ro": "Laboratoarele 2 și 3 — conversii pentru date (UAIC, Baze de date)"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l14-s1",
+      "title": {
+        "en": "What day of the week was 17.02.1995?",
+        "ro": "Ce zi a fost 17.02.1995?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l14-r1",
+          "prompt": {
+            "en": "Popescu was born on 17.02.1995. On which day of the week? How would you ask the database for the name of the day, not just the date?",
+            "ro": "Popescu s-a născut pe 17.02.1995. În ce zi din săptămână? Cum ai cere asta bazei de date, ca să-ți dea numele zilei, nu doar data?"
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "Oracle turns a date into text using a **mask**: `TO_CHAR(data_nastere, 'Day')` gives the name of the day, and Popescu turns out to have been born on a Friday. Next you try several masks on the same date, to see exactly what each one writes.",
+            "ro": "Oracle transformă o dată în text după o **mască**: `TO_CHAR(data_nastere, 'Day')` dă numele zilei, iar Popescu s-a născut într-o vineri. Mai jos încerci mai multe măști pe aceeași dată, ca să vezi exact ce scrie fiecare."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, prenume, data_nastere FROM studenti WHERE nume = 'Popescu'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s2",
+      "title": {
+        "en": "A mask over a date",
+        "ro": "O mască peste o dată"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each piece of the mask looks at the date `17-02-1995` and picks out a fragment: `DD` the day, `MM` the month as a number, `YYYY` the year, `MON` the abbreviated month, `Day` the name of the day. Guess what comes out for `Day` and for `fmDay`, then compare.",
+            "ro": "Fiecare bucată a măștii se uită la data `17-02-1995` și scoate un fragment: `DD` ziua, `MM` luna ca număr, `YYYY` anul, `MON` luna abreviată, `Day` numele zilei. Ghicește ce iese pentru `Day` și pentru `fmDay`, apoi compară."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l14-v1",
+          "widget": "date-mask",
+          "predict": true,
+          "props": {
+            "date": "1995-02-17",
+            "masks": [
+              "DD-MM-YYYY",
+              "DD-MON-YY",
+              "Day",
+              "DAY",
+              "fmDay",
+              "Month"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s3",
+      "title": {
+        "en": "TO_DATE for constants",
+        "ro": "TO_DATE pentru constante"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The other way round, `TO_DATE(string, mask)` turns text into a date. For a date constant always write the mask; do not rely on the session's default format, which depends on settings. In the code examples, `n = 8` means that the query returns 8 rows.",
+            "ro": "Invers, `TO_DATE(șir, mască)` transformă un text într-o dată. Pentru o constantă de tip dată scrie mereu masca, nu te baza pe formatul implicit al sesiunii: acela depinde de setări. În exemplele de cod, `n = 8` înseamnă că interogarea întoarce 8 rânduri."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT * FROM studenti\nWHERE data_nastere > TO_DATE('01-01-1996', 'DD-MM-YYYY');\n-- n = 8\n\nSELECT TO_CHAR(data_nastere, 'DD-MM-YYYY') FROM studenti\nWHERE nume = 'Popescu';\n-- 17-02-1995"
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s4",
+      "title": {
+        "en": "YY and the default format",
+        "ro": "YY și formatul implicit"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`YY` uses the current century, `RR` guesses the century.** `TO_DATE('17-02-95','DD-MM-YY')` is in the year 2095, because `YY` takes the century of the current year. With the `RR` mask you get 1995. Even more: if you write `TO_DATE('26-10-2026')` without a mask, Oracle uses the session default format (`DD-MON-RR`) and raises an error.",
+            "ro": "**`YY` pune secolul curent, `RR` ghicește secolul.** `TO_DATE('17-02-95','DD-MM-YY')` este în anul 2095, pentru că `YY` ia secolul anului curent. Cu masca `RR` obții 1995. Mai mult: dacă scrii `TO_DATE('26-10-2026')` fără mască, Oracle folosește formatul implicit al sesiunii (`DD-MON-RR`) și dă eroare."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT TO_CHAR(TO_DATE('17-02-95','DD-MM-YY'), 'YYYY') FROM DUAL;   -- 2095\nSELECT TO_CHAR(TO_DATE('17-02-95','DD-MM-RR'), 'YYYY') FROM DUAL;   -- 1995\nSELECT TO_DATE('26-10-2026') FROM DUAL;   -- ORA-01843: not a valid month"
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s5",
+      "title": {
+        "en": "Padding spaces and the language of names",
+        "ro": "Spațiile de umplere și limba numelor"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`Day` and `Month` are padded with spaces up to the length of the longest name in the session language (9 characters in English).** That is why `TO_CHAR(data_nastere, 'Day') = 'Friday'` finds nobody. The `fm` prefix removes the spaces. The language of the names comes from the session setting (English here); you can change it with the third argument.",
+            "ro": "**`Day` și `Month` sunt completate cu spații până la lungimea celui mai lung nume din limba sesiunii (9 caractere în engleză).** De aceea `TO_CHAR(data_nastere, 'Day') = 'Friday'` nu găsește pe nimeni. Prefixul `fm` scoate spațiile. Limba numelor vine din setarea sesiunii (aici engleză); o poți schimba cu al treilea argument."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT COUNT(*) FROM studenti\nWHERE TO_CHAR(data_nastere, 'Day') = 'Friday';     -- 0\n\nSELECT COUNT(*) FROM studenti\nWHERE TO_CHAR(data_nastere, 'fmDay') = 'Friday';   -- 2\n\nSELECT TO_CHAR(data_nastere, 'fmMonth', 'NLS_DATE_LANGUAGE=FRENCH')\nFROM studenti WHERE nume = 'Popescu';             -- Février"
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s6",
+      "title": {
+        "en": "MM is not minutes",
+        "ro": "MM nu sunt minutele"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`MM` is the month, `MI` is the minutes.** And `HH` is the 12-hour clock; for 24 hours write `HH24`. On 26 October at 14:30, `'HH:MM'` does not give hours and minutes, but the 12-hour hour and the month.",
+            "ro": "**`MM` este luna, `MI` sunt minutele.** Iar `HH` este ora pe 12 ore; pentru 24 de ore scrie `HH24`. La 26 octombrie, ora 14:30, `'HH:MM'` nu dă ora și minutele, ci ora pe 12 ore și luna."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT TO_CHAR(SYSDATE, 'HH:MM')   FROM DUAL;  -- 02:10\nSELECT TO_CHAR(SYSDATE, 'HH24:MI') FROM DUAL;  -- 14:30"
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s7",
+      "title": {
+        "en": "The year of a date",
+        "ro": "Anul dintr-o dată"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A date is not compared with a number.** `data_nastere = 1997` raises an error (ORA-00932). `data_nastere LIKE '1997%'` raises no error but gives 0 rows: LIKE turns the date into text using the default format (`26-AUG-97`), which does not start with 1997. For the year, extract it with `TO_CHAR` and compare the text.",
+            "ro": "**O dată nu se compară cu un număr.** `data_nastere = 1997` dă eroare (ORA-00932). `data_nastere LIKE '1997%'` nu dă eroare, dar dă 0 rânduri: LIKE transformă data în text cu formatul implicit (`26-AUG-97`), care nu începe cu 1997. Pentru an extragi anul cu `TO_CHAR` și compari textul."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT COUNT(*) FROM studenti WHERE data_nastere = 1997;     -- ORA-00932\nSELECT COUNT(*) FROM studenti WHERE data_nastere LIKE '1997%';  -- 0\nSELECT COUNT(*) FROM studenti\nWHERE TO_CHAR(data_nastere, 'YYYY') = '1997';                  -- 4"
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s8",
+      "title": {
+        "en": "Date masks at a glance",
+        "ro": "Măștile de dată, pe scurt"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "TO_CHAR(d, 'fmt')\nTO_DATE('str', 'fmt')\nTO_CHAR(d, 'fmt', 'NLS_DATE_LANGUAGE=ROMANIAN')"
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "en": "Mask",
+              "ro": "Mască"
+            },
+            {
+              "en": "Result for 17-02-1995",
+              "ro": "Rezultat pentru 17-02-1995"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "en": "YYYY",
+                "ro": "YYYY"
+              },
+              {
+                "en": "1995",
+                "ro": "1995"
+              }
+            ],
+            [
+              {
+                "en": "YY",
+                "ro": "YY"
+              },
+              {
+                "en": "95",
+                "ro": "95"
+              }
+            ],
+            [
+              {
+                "en": "MM",
+                "ro": "MM"
+              },
+              {
+                "en": "02",
+                "ro": "02"
+              }
+            ],
+            [
+              {
+                "en": "MON",
+                "ro": "MON"
+              },
+              {
+                "en": "FEB",
+                "ro": "FEB"
+              }
+            ],
+            [
+              {
+                "en": "DD",
+                "ro": "DD"
+              },
+              {
+                "en": "17",
+                "ro": "17"
+              }
+            ],
+            [
+              {
+                "en": "HH24:MI",
+                "ro": "HH24:MI"
+              },
+              {
+                "en": "00:00",
+                "ro": "00:00"
+              }
+            ],
+            [
+              {
+                "en": "Day",
+                "ro": "Day"
+              },
+              {
+                "en": "`Friday␣␣␣` (9 characters, ␣ = space)",
+                "ro": "`Friday␣␣␣` (9 caractere, ␣ = spațiu)"
+              }
+            ],
+            [
+              {
+                "en": "DAY",
+                "ro": "DAY"
+              },
+              {
+                "en": "`FRIDAY␣␣␣`",
+                "ro": "`FRIDAY␣␣␣`"
+              }
+            ],
+            [
+              {
+                "en": "fmDay",
+                "ro": "fmDay"
+              },
+              {
+                "en": "`Friday`",
+                "ro": "`Friday`"
+              }
+            ],
+            [
+              {
+                "en": "Month",
+                "ro": "Month"
+              },
+              {
+                "en": "`February␣` (9 characters)",
+                "ro": "`February␣` (9 caractere)"
+              }
+            ],
+            [
+              {
+                "en": "D",
+                "ro": "D"
+              },
+              {
+                "en": "6 (Sunday = 1)",
+                "ro": "6 (duminica = 1)"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "mask",
+            "ro": "mască"
+          },
+          "content": {
+            "en": "The template that says which fragment of the date is written and where: the case of the letters in the mask sets how names are written (`Day` gives `Friday`, `DAY` gives `FRIDAY`), and `fm` in front removes the padding spaces.",
+            "ro": "Șablonul care spune ce fragment al datei se scrie și unde: felul în care sunt scrise literele din mască hotărăște cum ies numele (`Day` dă `Friday`, `DAY` dă `FRIDAY`), iar `fm` în față scoate spațiile de umplere."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "TO_CHAR / TO_DATE",
+            "ro": "TO_CHAR / TO_DATE"
+          },
+          "content": {
+            "en": "`TO_CHAR` writes a date as text; `TO_DATE` reads text as a date. The same mask describes both.",
+            "ro": "`TO_CHAR` scrie o dată ca text; `TO_DATE` citește un text ca dată. Aceeași mască le descrie pe amândouă."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s9",
+      "title": {
+        "en": "Why are the months mixed up?",
+        "ro": "De ce se amestecă lunile?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l14-r2",
+          "prompt": {
+            "en": "Why does `ORDER BY TO_CHAR(data_nastere, 'MONTH')` put AUGUST before JANUARY?",
+            "ro": "De ce `ORDER BY TO_CHAR(data_nastere, 'MONTH')` pune AUGUST înainte de JANUARY?"
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "Because `TO_CHAR` returns **text**, and text sorts alphabetically: the A of AUGUST comes before the J of JANUARY. To sort in calendar order, sort by the month number, `ORDER BY TO_CHAR(data_nastere, 'MM')`, and display the month name separately.",
+            "ro": "Pentru că `TO_CHAR` întoarce **text**, iar textul se sortează alfabetic: A din AUGUST vine înaintea lui J din JANUARY. Ca să sortezi după ordinea din calendar, sortezi după numărul lunii, `ORDER BY TO_CHAR(data_nastere, 'MM')`, și afișezi numele lunii separat."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s10",
+      "title": {
+        "en": "The day name with the Day mask",
+        "ro": "Numele zilei cu masca Day"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l14-q1",
+          "question": {
+            "en": "What does `TO_CHAR(data_nastere, 'Day')` return for 17-02-1995?",
+            "ro": "Ce întoarce `TO_CHAR(data_nastere, 'Day')` pentru 17-02-1995?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`Friday␣␣␣` (9 characters, ␣ = space)",
+                "ro": "`Friday␣␣␣` (9 caractere, ␣ = spațiu)"
+              },
+              "correct": true,
+              "explain": {
+                "en": "In English the day name is padded with spaces to 9 characters. The `fmDay` mask removes them.",
+                "ro": "În engleză, numele zilei e completat cu spații până la 9 caractere. Masca `fmDay` le scoate."
+              }
+            },
+            {
+              "text": {
+                "en": "Friday",
+                "ro": "Friday"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Without padding you only get that with `fmDay`. With `Day` the trailing spaces stay.",
+                "ro": "Fără umplutură ar fi doar cu `fmDay`. Cu `Day` rămân spațiile din final."
+              },
+              "misconception": "to-char-pad-lang"
+            },
+            {
+              "text": {
+                "en": "FRIDAY",
+                "ro": "FRIDAY"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Capitals appear only with the `DAY` mask. `Day` writes the first letter capital and the rest small.",
+                "ro": "Majusculele apar doar cu masca `DAY`. `Day` scrie prima literă mare și restul mici."
+              },
+              "misconception": "to-char-pad-lang"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s11",
+      "title": {
+        "en": "Students born in a given year",
+        "ro": "Studenții născuți într-un an"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l14-q2",
+          "question": {
+            "en": "How do you filter students born in 1996?",
+            "ro": "Cum filtrezi studenții născuți în 1996?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "WHERE data_nastere = 1996",
+                "ro": "WHERE data_nastere = 1996"
+              },
+              "correct": false,
+              "explain": {
+                "en": "A date is not compared with a number: ORA-00932.",
+                "ro": "O dată nu se compară cu un număr: ORA-00932."
+              },
+              "misconception": "implicit-conv"
+            },
+            {
+              "text": {
+                "en": "WHERE TO_CHAR(data_nastere, 'YYYY') = '1996'",
+                "ro": "WHERE TO_CHAR(data_nastere, 'YYYY') = '1996'"
+              },
+              "correct": true,
+              "explain": {
+                "en": "You extract the year as text and compare it with text. Result: 4 rows.",
+                "ro": "Extragi anul ca text și îl compari cu un text. Rezultat: 4 rânduri."
+              }
+            },
+            {
+              "text": {
+                "en": "WHERE data_nastere LIKE '1996%'",
+                "ro": "WHERE data_nastere LIKE '1996%'"
+              },
+              "correct": false,
+              "explain": {
+                "en": "LIKE turns the date into text with the default format (`26-AUG-96`), which does not start with 1996. Result: 0 rows, no error.",
+                "ro": "LIKE transformă data în text cu formatul implicit (`26-AUG-96`), care nu începe cu 1996. Rezultat: 0 rânduri, fără eroare."
+              },
+              "misconception": "implicit-conv"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s12",
+      "title": {
+        "en": "The time written HH:MM",
+        "ro": "Ora scrisă HH:MM"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l14-q3",
+          "question": {
+            "en": "On 26 October 2026 at 14:30, what does `TO_CHAR(SYSDATE, 'HH:MM')` display?",
+            "ro": "La 26 octombrie 2026, ora 14:30, ce afișează `TO_CHAR(SYSDATE, 'HH:MM')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "02:30",
+                "ro": "02:30"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Minutes are written `MI`. `MM` is the month, so you get 10, not 30.",
+                "ro": "Minutele se scriu `MI`. `MM` este luna, deci iese 10, nu 30."
+              },
+              "misconception": "mm-mi"
+            },
+            {
+              "text": {
+                "en": "02:10",
+                "ro": "02:10"
+              },
+              "correct": true,
+              "explain": {
+                "en": "`HH` is the 12-hour clock (14 becomes 02) and `MM` is the month (October = 10).",
+                "ro": "`HH` este ora pe 12 ore (14 devine 02), iar `MM` este luna (octombrie = 10)."
+              }
+            },
+            {
+              "text": {
+                "en": "14:30",
+                "ro": "14:30"
+              },
+              "correct": false,
+              "explain": {
+                "en": "For 24 hours you need `HH24:MI`. With `HH:MM` the hour uses the 12-hour clock and the second part is the month.",
+                "ro": "Pentru 24 de ore ai nevoie de `HH24:MI`. Cu `HH:MM` ora este pe 12 ore și a doua parte este luna."
+              },
+              "misconception": "mm-mi"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s13",
+      "title": {
+        "en": "The year behind YY",
+        "ro": "Anul din spatele lui YY"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l14-q4",
+          "question": {
+            "en": "In which year does `TO_DATE('17-02-95', 'DD-MM-YY')` fall?",
+            "ro": "În ce an cade `TO_DATE('17-02-95', 'DD-MM-YY')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "2095",
+                "ro": "2095"
+              },
+              "correct": true,
+              "explain": {
+                "en": "`YY` takes the century of the current year (20), so 2095. The `RR` mask would have given 1995.",
+                "ro": "`YY` ia secolul anului curent (20), deci 2095. Masca `RR` ar fi dat 1995."
+              }
+            },
+            {
+              "text": {
+                "en": "1995",
+                "ro": "1995"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is the behaviour of `RR`, not `YY`. The dates in the table are from 1995-1997, so write the full year, `YYYY`.",
+                "ro": "Asta e comportamentul lui `RR`, nu al lui `YY`. Datele din tabel sunt din 1995-1997, deci scrie anul întreg, `YYYY`."
+              },
+              "misconception": "date-format-yy"
+            },
+            {
+              "text": {
+                "en": "Error: the year has only 2 digits",
+                "ro": "Eroare: anul are doar 2 cifre"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no error: the `YY` mask accepts 2-digit years and fills in the century.",
+                "ro": "Nu apare eroare: masca `YY` acceptă ani cu 2 cifre și completează secolul."
+              },
+              "misconception": "date-format-yy"
+            }
+          ],
+          "review": "bd-l13"
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s14",
+      "title": {
+        "en": "The RR mask",
+        "ro": "Masca RR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l14-q5",
+          "question": {
+            "en": "Which year does `TO_DATE('17-02-95', 'DD-MM-RR')` fall in?",
+            "ro": "În ce an cade `TO_DATE('17-02-95', 'DD-MM-RR')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "2095",
+                "ro": "2095"
+              },
+              "correct": false,
+              "misconception": "date-format-yy",
+              "explain": {
+                "en": "That is the result of `YY`, which always uses the current century. `RR`, now in 2026, puts years 50-99 in the previous century.",
+                "ro": "Acesta e rezultatul lui `YY`, care pune mereu secolul curent. `RR` aduce acum, în 2026, anii 50-99 în secolul trecut."
+              }
+            },
+            {
+              "text": {
+                "en": "1995",
+                "ro": "1995"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `RR` picks the century from the year: now, in 2026, years 50-99 fall in the previous century, so 1995. With `YY` it would have been 2095.",
+                "ro": "Corect. `RR` alege secolul după an: acum, în 2026, anii 50-99 cad în secolul trecut, deci 1995. Cu `YY` ar fi fost 2095."
+              }
+            },
+            {
+              "text": {
+                "en": "0095",
+                "ro": "0095"
+              },
+              "correct": false,
+              "misconception": "date-format-yy",
+              "explain": {
+                "en": "The mask does not leave the century empty: both `YY` and `RR` complete the year to 4 digits.",
+                "ro": "Masca nu lasă secolul gol: atât `YY`, cât și `RR` completează anul la 4 cifre."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s15",
+      "title": {
+        "en": "BETWEEN with a time",
+        "ro": "BETWEEN cu o oră"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l14-q6",
+          "question": {
+            "en": "Today, 26.10.2026 at 14:30, is the condition `SYSDATE BETWEEN TO_DATE('20-10-2026','DD-MM-YYYY') AND TO_DATE('26-10-2026','DD-MM-YYYY')` true?",
+            "ro": "Azi, 26.10.2026 la 14:30, este adevărată condiția `SYSDATE BETWEEN TO_DATE('20-10-2026','DD-MM-YYYY') AND TO_DATE('26-10-2026','DD-MM-YYYY')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Yes: BETWEEN includes the upper end, the 26th",
+                "ro": "Da: BETWEEN include capătul de sus, ziua de 26"
+              },
+              "correct": false,
+              "misconception": "between-incl",
+              "explain": {
+                "en": "The upper end is 26.10.2026 at 00:00, not the whole day. 14:30 comes after it, so the condition is false.",
+                "ro": "Capătul de sus este 26.10.2026 la ora 00:00, nu toată ziua. 14:30 vine după el, deci condiția e falsă."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: you cannot compare a date with a time to one without",
+                "ro": "Eroare: nu poți compara o dată cu oră cu una fără oră"
+              },
+              "correct": false,
+              "misconception": "date-time-part",
+              "explain": {
+                "en": "Every DATE value has a time; those written without one have 00:00. The comparison works, only 14:30 comes after 00:00.",
+                "ro": "Orice valoare DATE are oră; cele scrise fără oră au 00:00. Comparația merge, doar că 14:30 vine după 00:00."
+              }
+            },
+            {
+              "text": {
+                "en": "No: the upper end is 26.10 at 00:00, and `SYSDATE` has the time 14:30",
+                "ro": "Nu: capătul de sus e 26.10 la 00:00, iar `SYSDATE` are ora 14:30"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. With `TRUNC(SYSDATE)` instead of `SYSDATE` the condition becomes true.",
+                "ro": "Corect. Cu `TRUNC(SYSDATE)` în loc de `SYSDATE` condiția devine adevărată."
+              }
+            }
+          ],
+          "review": "bd-l07"
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s16",
+      "title": {
+        "en": "Day of birth",
+        "ro": "Ziua nașterii"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l14-ex-3-3",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display the day of the week on which each student was born. (In the app: display the surname, the first name and the day, in this order; trailing spaces and capital or small letters in the day name do not matter.)",
+            "ro": "Afișați ziua din săptămână în care s-a născut fiecare student. (În aplicație: afișați numele, prenumele și ziua, în această ordine; spațiile de la final și literele mari sau mici din numele zilei nu contează.)"
+          },
+          "official": {
+            "lab": 3,
+            "ex": 3
+          },
+          "starter": "SELECT nume, prenume, TO_CHAR(data_nastere, ____) AS zi\nFROM studenti",
+          "solution": "SELECT nume, prenume, TO_CHAR(data_nastere, 'fmDay') AS zi FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "cosmetic": [
+              "",
+              "",
+              "trim-case"
+            ]
+          },
+          "hints": [
+            {
+              "en": "You need the name of the day, not just the date. A function turns a date into text using a mask.",
+              "ro": "Ai nevoie de numele zilei, nu doar de dată. O funcție transformă o dată în text după o mască."
+            },
+            {
+              "en": "`TO_CHAR(data_nastere, '...')`. The mask for the day name has three letters, and the name comes out padded with spaces.",
+              "ro": "`TO_CHAR(data_nastere, '...')`. Masca pentru numele zilei are trei litere, iar numele iese completat cu spații."
+            },
+            {
+              "en": "A two-letter prefix in front of the mask removes the padding spaces. It is the tidier option, not a requirement: the check ignores trailing spaces and letter case. Popescu, born on 17-FEB-95, is a Friday.",
+              "ro": "Un prefix de două litere pus în fața măștii scoate spațiile de umplere. E varianta mai curată, nu o cerință: verificarea ignoră spațiile de la final și diferența dintre litere mari și mici. Popescu, născut pe 17-FEB-95, e vineri (Friday)."
+            }
+          ],
+          "explain": {
+            "en": "`TO_CHAR(data_nastere, 'fmDay')` writes the day name in English, without padding spaces: Popescu was born on a Friday. With `Day` you would have got `Friday␣␣␣`, which the check also accepts (trailing spaces and letter case do not matter), but `fmDay` is the tidier form.",
+            "ro": "`TO_CHAR(data_nastere, 'fmDay')` scrie numele zilei în engleză, fără spațiile de umplere: Popescu s-a născut într-o vineri (Friday). Cu `Day` ai fi primit `Friday␣␣␣`, pe care verificarea o acceptă și ea (spațiile de la final și literele mari sau mici nu contează), dar `fmDay` e forma mai curată."
+          },
+          "altSolutions": [
+            "SELECT nume, prenume, TO_CHAR(data_nastere, 'Day') AS zi FROM studenti",
+            "SELECT nume, prenume, TO_CHAR(data_nastere, 'DAY') AS zi FROM studenti",
+            "SELECT nume, prenume, TO_CHAR(data_nastere, 'fmDAY') AS zi FROM studenti"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s17",
+      "title": {
+        "en": "Born in 1995",
+        "ro": "Născuți în 1995"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l14-ex-2-6",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display the surname and first name, and the years of study, for all students born in 1995.",
+            "ro": "Afișați numele și prenumele precum și anii de studiu pentru toți studenții născuți în 1995."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 6
+          },
+          "starter": "SELECT nume, prenume, an\nFROM studenti\nWHERE ____",
+          "solution": "SELECT nume, prenume, an FROM studenti WHERE TO_CHAR(data_nastere, 'YYYY') = '1995'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You filter rows by the year the student was born. The year is not a column; it has to be extracted from the date.",
+              "ro": "Filtrezi rândurile după anul în care s-a născut studentul. Anul nu este o coloană, trebuie scos din dată."
+            },
+            {
+              "en": "`WHERE TO_CHAR(data_nastere, '...') = '...'`: the mask for the year has four letters, and the result is text.",
+              "ro": "`WHERE TO_CHAR(data_nastere, '...') = '...'`: masca pentru an are patru litere, iar rezultatul e text."
+            },
+            {
+              "en": "The year extracted with `TO_CHAR` is text, so compare it with text between quotes. It also works without quotes around 1995 because Oracle converts by itself, but the text is the clean version.",
+              "ro": "Anul extras cu `TO_CHAR` este text, deci compară-l cu un text între ghilimele. Merge și fără ghilimele în jurul lui 1995, pentru că Oracle convertește singur, dar textul e varianta curată."
+            }
+          ],
+          "explain": {
+            "en": "`TO_CHAR(data_nastere, 'YYYY')` extracts the year as text. The result has 5 rows (Popescu, Prelipcean, Antonie, Arhire Raluca, Panaite). Comparing the date directly with 1995 would have raised an error.",
+            "ro": "`TO_CHAR(data_nastere, 'YYYY')` scoate anul ca text. Rezultatul are 5 rânduri (Popescu, Prelipcean, Antonie, Arhire Raluca, Panaite). O comparație directă a datei cu 1995 ar fi dat eroare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s18",
+      "title": {
+        "en": "Born between two dates",
+        "ro": "Născuți între două date"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l14-ex-2-5",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display the surname, first name and date of birth of the students born between 1 January 1995 and 10 June 1997. Order them descending by year of study.",
+            "ro": "Afișați numele, prenumele și data de naștere a studenților născuți între 1 ianuarie 1995 si 10 iunie 1997. Ordonați descendent după anul de studiu."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 5
+          },
+          "starter": "SELECT nume, prenume, data_nastere\nFROM studenti\nWHERE data_nastere BETWEEN ____ AND ____",
+          "solution": "SELECT nume, prenume, data_nastere FROM studenti WHERE data_nastere BETWEEN TO_DATE('01-01-1995', 'DD-MM-YYYY') AND TO_DATE('10-06-1997', 'DD-MM-YYYY') ORDER BY an DESC",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Two ends of an interval and a sort. The ends are dates, not text.",
+              "ro": "Două capete de interval și o sortare. Capetele sunt date, nu texte."
+            },
+            {
+              "en": "`WHERE data_nastere BETWEEN ... AND ...` with each end written using `TO_DATE`, then `ORDER BY an DESC`. You sort by `an` even though you do not display it.",
+              "ro": "`WHERE data_nastere BETWEEN ... AND ...` cu fiecare capăt scris cu `TO_DATE`, apoi `ORDER BY an DESC`. Sortezi după `an`, chiar dacă nu îl afișezi."
+            },
+            {
+              "en": "The trap is the match between text and mask: the mask must describe the text you wrote, piece by piece, and a two-digit year such as `YY` would put 1995 in the year 2095. BETWEEN includes both ends, and the smaller end goes first.",
+              "ro": "Capcana este potrivirea dintre text și mască: masca trebuie să descrie textul scris de tine, bucată cu bucată, iar un an cu două cifre, ca `YY`, ar pune 1995 în anul 2095. BETWEEN include ambele capete, iar capătul mai mic merge primul."
+            }
+          ],
+          "explain": {
+            "en": "The ends are written with `TO_DATE` and the mask, not as free text. BETWEEN includes both ends; the time does not matter here because the dates in the table are at 00:00. Result: 11 rows. If a date had a time, the upper end (10 June at 00:00) would leave out anyone born on 10 June after midnight.",
+            "ro": "Capetele se scriu cu `TO_DATE` și masca, nu ca text liber. BETWEEN include ambele capete; aici nu contează ora, fiindcă datele din tabel sunt la 00:00. Rezultat: 11 rânduri. Dacă o dată ar avea oră, capătul superior (10 iunie la 00:00) ar lăsa pe dinafară pe cei născuți pe 10 iunie după miezul nopții."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s19",
+      "title": {
+        "en": "Students without a scholarship, by month",
+        "ro": "Studenții fără bursă, după lună"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l14-ex-3-8",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Order the students who do not receive a scholarship by the month in which they were born; display only the surname, the first name and the month corresponding to the date of birth. (In the app: display the name of the month, in English, for example FEBRUARY; name that column luna. Capital or small letters and trailing spaces in the month name do not matter.)",
+            "ro": "Ordonați studenții care nu iau bursă în funcție de luna cand au fost născuți; se va afișa doar numele, prenumele și luna corespunzătoare datei de naștere. (În aplicație: afișați numele lunii, în engleză, de exemplu FEBRUARY; denumiți coloana luna. Literele mari sau mici și spațiile de la final din numele lunii nu contează.)"
+          },
+          "official": {
+            "lab": 3,
+            "ex": 8
+          },
+          "solution": "SELECT nume, prenume, TO_CHAR(data_nastere, 'MONTH') AS luna FROM studenti WHERE bursa IS NULL ORDER BY TO_CHAR(data_nastere, 'MM')",
+          "check": {
+            "order": "required",
+            "orderBy": [
+              "luna"
+            ],
+            "mode": "bag",
+            "aliases": [
+              "",
+              "",
+              "luna"
+            ],
+            "cosmetic": [
+              "",
+              "",
+              "trim-case"
+            ]
+          },
+          "hints": [
+            {
+              "en": "Two steps: pick the students without a scholarship, then sort them by month of birth. Be careful which sort key you choose.",
+              "ro": "Doi pași: alegi studenții fără bursă, apoi îi sortezi după luna nașterii. Atenție la ce cheie de sortare alegi."
+            },
+            {
+              "en": "`WHERE bursa IS NULL`, then `ORDER BY TO_CHAR(data_nastere, '...')`. For calendar order you need the month number, not its name.",
+              "ro": "`WHERE bursa IS NULL`, apoi `ORDER BY TO_CHAR(data_nastere, '...')`. Pentru ordinea din calendar ai nevoie de numărul lunii, nu de numele ei."
+            },
+            {
+              "en": "The column you display and the key you sort by are two different `TO_CHAR` calls with two different masks. If you sorted by the month name, APRIL would come before FEBRUARY, so the sort key must be a number. Give the displayed one the alias `luna`.",
+              "ro": "Coloana pe care o afișezi și cheia după care sortezi sunt două apeluri `TO_CHAR` diferite, cu două măști diferite. Dacă ai sorta după numele lunii, APRIL ar veni înaintea lui FEBRUARY, deci cheia de sortare trebuie să fie un număr. Aliasul `luna` îl primește coloana afișată."
+            }
+          ],
+          "explain": {
+            "en": "The month name is displayed with `'MONTH'`, but the sort uses `'MM'` (a two-digit text, hence calendar order). Letter case and padding spaces in the name do not matter for the check, so `'fmMonth'` is accepted too. Result: 8 rows, from Popescu (February) to Arhire Raluca (December). Prelipcean and Bucur are both in May, in either order.",
+            "ro": "Numele lunii se afișează cu `'MONTH'`, dar sortarea se face după `'MM'` (text de două cifre, deci ordinea din calendar). Majusculele și spațiile de umplere din nume nu contează pentru verificare, deci și `'fmMonth'` este acceptat. Rezultat: 8 rânduri, de la Popescu (februarie) la Arhire Raluca (decembrie). Prelipcean și Bucur sunt amândoi în mai, în orice ordine."
+          },
+          "altSolutions": [
+            "SELECT nume, prenume, TO_CHAR(data_nastere, 'fmMONTH') AS luna FROM studenti WHERE bursa IS NULL ORDER BY TO_CHAR(data_nastere, 'MM')",
+            "SELECT nume, prenume, TO_CHAR(data_nastere, 'Month') AS luna FROM studenti WHERE bursa IS NULL ORDER BY TO_CHAR(data_nastere, 'MM')",
+            "SELECT nume, prenume, TO_CHAR(data_nastere, 'fmMonth') AS luna FROM studenti WHERE bursa IS NULL ORDER BY TO_CHAR(data_nastere, 'MM')"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l14-s20",
+      "title": {
+        "en": "Days in Romanian",
+        "ro": "Zilele în română"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l14-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display each student's surname and the day on which they were born, in Romanian and without trailing spaces.",
+            "ro": "Afișați numele fiecărui student și ziua în care s-a născut, în limba română și fără spații la sfârșit."
+          },
+          "solution": "SELECT nume, TO_CHAR(data_nastere, 'fmDay', 'NLS_DATE_LANGUAGE=ROMANIAN') AS zi FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "The same function as for the English day name, but with one more argument for the language.",
+              "ro": "Aceeași funcție ca pentru ziua în engleză, dar cu un argument în plus pentru limbă."
+            },
+            {
+              "en": "`TO_CHAR(data_nastere, 'fmDay', '...')`; the third argument is an NLS setting.",
+              "ro": "`TO_CHAR(data_nastere, 'fmDay', '...')`; al treilea argument este o setare NLS."
+            },
+            {
+              "en": "The trap is the padding: without the two-letter prefix, `Vineri` would come out followed by spaces, because the names are padded in Romanian too. The third argument is a text of the form `PARAMETER=VALUE`, where the parameter is the NLS one for the language of date names.",
+              "ro": "Capcana este umplutura: fără prefixul de două litere, `Vineri` ar ieși urmat de spații, fiindcă numele se completează și în română. Al treilea argument este un text de forma `PARAMETRU=VALOARE`, unde parametrul este cel NLS pentru limba numelor din date."
+            }
+          ],
+          "explain": {
+            "en": "The third argument of `TO_CHAR` changes the language of day and month names for that expression only. `fm` removes padding, so `Vineri` has no trailing spaces.",
+            "ro": "Al treilea argument al lui `TO_CHAR` schimbă limba numelor de zile și luni doar pentru acea expresie. `fm` scoate spațiile, deci `Vineri` apare fără umplutură."
+          }
+        }
+      ]
+    }
+  ]
+}

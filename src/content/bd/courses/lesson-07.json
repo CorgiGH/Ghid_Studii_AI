@@ -1,0 +1,674 @@
+{
+  "meta": {
+    "id": "bd-l07",
+    "title": {
+      "en": "Lesson 7: IN, BETWEEN, ANY / ALL",
+      "ro": "Lecția 7: IN, BETWEEN, ANY / ALL"
+    },
+    "shortTitle": {
+      "en": "L7: IN, BETWEEN",
+      "ro": "L7: IN, BETWEEN"
+    },
+    "source": {
+      "en": "Databases lab 2, UAIC (Oracle SQL); queries checked on Oracle 11g",
+      "ro": "Laboratorul 2 de Baze de date, UAIC (Oracle SQL); interogări verificate pe Oracle 11g"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l07-s1",
+      "title": {
+        "en": "A list of possible values",
+        "ro": "O listă de valori posibile"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l07-reflect-pre",
+          "prompt": {
+            "en": "You want the students whose first name is Andrei, Radu or Marius. You could write three conditions joined by OR. How would you write it shorter, without repeating the column three times?",
+            "ro": "Vrei studenții al căror prenume este Andrei, Radu sau Marius. Poți scrie trei condiții legate prin OR. Cum ai scrie asta mai scurt, fără să repeți coloana de trei ori?"
+          },
+          "answer": {
+            "en": "You put the values in a list and ask whether the first name **is in the list**: `prenume IN ('Andrei', 'Radu', 'Marius')`. It is exactly the same as the three ORs, just shorter. On our data it returns 2 rows (there is no Marius).",
+            "ro": "Pui valorile într-o listă și întrebi dacă prenumele **se află în listă**: `prenume IN ('Andrei', 'Radu', 'Marius')`. E exact același lucru cu cele trei OR-uri, doar mai scurt. Pe datele noastre aduce 2 rânduri (Marius nu există)."
+          },
+          "placeholder": {
+            "en": "Write your answer here…",
+            "ro": "Scrie-ți răspunsul aici…"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, prenume, an, bursa FROM studenti ORDER BY nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s2",
+      "title": {
+        "en": "IN: the row drops into the list's drawers",
+        "ro": "IN: rândul intră în sertarele listei"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`IN` checks whether the row's value equals **one of** the values in the list. **Guess which first names are in the list, then check.**",
+            "ro": "`IN` verifică dacă valoarea rândului este egală cu **una dintre** valorile din listă. **Ghicește care prenume sunt în listă, apoi verifică.**"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l07-viz1",
+          "widget": "in-between",
+          "predict": true,
+          "props": {
+            "mode": "in",
+            "list": [
+              "Andrei",
+              "Radu",
+              "Marius"
+            ],
+            "values": [
+              "Bogdan",
+              "Radu",
+              "Ioana",
+              "Raluca",
+              "Alexandru",
+              "Ioana",
+              "Andrada",
+              "Ciprian",
+              "Ioana",
+              "Andrei",
+              "Alexandra",
+              "George",
+              "Andreea"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s3",
+      "title": {
+        "en": "BETWEEN: a ruler with ticked ends",
+        "ro": "BETWEEN: o riglă cu capetele bifate"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`BETWEEN x AND y` means \"at least x and at most y\": **both ends are included**. Students without a scholarship (NULL) do not pass, because a NULL is not between anything. **Guess which scholarships pass for `BETWEEN 250 AND 350`.**",
+            "ro": "`BETWEEN x AND y` înseamnă «cel puțin x și cel mult y»: **ambele capete sunt incluse**. Studenții fără bursă (NULL) nu trec, fiindcă un NULL nu e între nimic. **Ghicește care burse trec pentru `BETWEEN 250 AND 350`.**"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l07-viz2",
+          "widget": "in-between",
+          "predict": true,
+          "props": {
+            "mode": "between",
+            "low": 250,
+            "high": 350,
+            "values": [
+              null,
+              null,
+              450,
+              null,
+              null,
+              null,
+              350,
+              350,
+              null,
+              250,
+              null,
+              350,
+              null
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s4",
+      "title": {
+        "en": "ANY and ALL: a comparison with every element",
+        "ro": "ANY și ALL: o comparație cu fiecare element"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`ANY` (or `SOME`) and `ALL` compare the value with **every** element of the list. With `ANY` it is enough that one comparison is true; with `ALL` all of them must be true. That is why `an = ANY (2, 3)` is the same as `an IN (2, 3)`. **With `an >= ALL (1, 2)`, guess which rows pass.**",
+            "ro": "`ANY` (sau `SOME`) și `ALL` compară valoarea cu **fiecare** element al listei. Cu `ANY` ajunge ca o comparație să fie adevărată; cu `ALL` trebuie să fie adevărate toate. De aceea `an = ANY (2, 3)` e același lucru cu `an IN (2, 3)`. **Cu `an >= ALL (1, 2)`, ghicește care rânduri trec.**"
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l07-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, an FROM studenti WHERE an >= ALL (1, 2)",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "prenume",
+            "an"
+          ],
+          "say": {
+            "from": {
+              "en": "We start with 13 rows.",
+              "ro": "Pornim cu 13 rânduri."
+            },
+            "where": {
+              "en": "`an >= ALL (1, 2)` requires `an >= 1` **and** `an >= 2` to be true. That means `an >= 2`: the 9 students from years 2 and 3 remain.",
+              "ro": "`an >= ALL (1, 2)` cere ca `an >= 1` **și** `an >= 2` să fie adevărate. Asta înseamnă `an >= 2`: rămân cei 9 din anii 2 și 3."
+            },
+            "select": {
+              "en": "We show the name and the year.",
+              "ro": "Afișăm numele și anul."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s5",
+      "title": {
+        "en": "NOT IN with NULL in the list",
+        "ro": "NOT IN cu NULL în listă"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "`an NOT IN (1, NULL)` returns **no** rows, not even students from year 2 or 3. `NOT IN` means `an <> 1 AND an <> NULL`, and the second part is unknown for every row. A single NULL in the `NOT IN` list empties the result. (If the list comes from a subquery, the NULL can get there without you seeing it.)",
+            "ro": "`an NOT IN (1, NULL)` nu aduce **niciun** rând, nici măcar studenții din anul 2 sau 3. `NOT IN` înseamnă `an <> 1 AND an <> NULL`, iar a doua parte e necunoscută pentru orice rând. Un singur NULL în lista de la `NOT IN` golește rezultatul. (Dacă lista vine dintr-o subinterogare, NULL-ul poate ajunge acolo fără să-l vezi.)"
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT * FROM studenti WHERE an NOT IN (1);"
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s6",
+      "title": {
+        "en": "BETWEEN includes the ends",
+        "ro": "BETWEEN include capetele"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "`an BETWEEN 1 AND 3` includes both 1 and 3, so it returns all 13 students. If you thought it was exclusive, you would expect only year 2 (4 rows). Order matters: `BETWEEN 3 AND 1` returns nothing, since no number is both ≥ 3 and ≤ 1. With dates that carry a time, the upper end is easy to lose; you will see this in the lessons on dates.",
+            "ro": "`an BETWEEN 1 AND 3` include și 1, și 3, deci aduce toți cei 13 studenți. Dacă ai crede că e exclusiv, ai aștepta doar anul 2 (4 rânduri). Ordinea contează: `BETWEEN 3 AND 1` nu aduce nimic, fiindcă nu există număr care să fie și ≥ 3, și ≤ 1. La date cu oră, capătul de sus se pierde ușor; vei vedea asta la lecțiile despre date."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s7",
+      "title": {
+        "en": "NOT IN is not <> ANY",
+        "ro": "NOT IN nu este <> ANY"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "`NOT IN` is the same as **`<> ALL`**, not `<> ANY`. The lab page writes \"`NOT IN` ≡ `!=ANY`\", but `an <> ANY (1, 2)` returns all 13 (any year differs from at least one of the values), while `an NOT IN (1, 2)` and `an <> ALL (1, 2)` return 5 rows, year 3 only.",
+            "ro": "`NOT IN` este același lucru cu **`<> ALL`**, nu cu `<> ANY`. Pagina laboratorului scrie «`NOT IN` ≡ `!=ANY`», dar `an <> ANY (1, 2)` aduce toți cei 13 (orice an e diferit de cel puțin una dintre valori), pe când `an NOT IN (1, 2)` și `an <> ALL (1, 2)` aduc 5 rânduri, doar anul 3."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT * FROM studenti WHERE an NOT IN (1, 2);"
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s8",
+      "title": {
+        "en": "The syntax of IN, BETWEEN and ANY / ALL",
+        "ro": "Sintaxa pentru IN, BETWEEN și ANY / ALL"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "WHERE coloană [NOT] IN (valoare1, valoare2, ...)\nWHERE coloană [NOT] BETWEEN minim AND maxim\nWHERE coloană operator ANY | SOME | ALL (valoare1, valoare2, ...)"
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT * FROM studenti WHERE an = SOME (2, 3);"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "IN",
+            "ro": "IN"
+          },
+          "content": {
+            "en": "True if the value equals one in the list. Equivalent to `= ANY`. A NULL in the list does not break `IN`, but it breaks `NOT IN`.",
+            "ro": "Adevărat dacă valoarea este egală cu una din listă. Echivalent cu `= ANY`. Un NULL în listă nu strică `IN`, dar strică `NOT IN`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "BETWEEN",
+            "ro": "BETWEEN"
+          },
+          "content": {
+            "en": "`x BETWEEN a AND b` means `x >= a AND x <= b`: the ends are included, and `a` must be the smaller one.",
+            "ro": "`x BETWEEN a AND b` înseamnă `x >= a AND x <= b`: capetele sunt incluse, iar `a` trebuie să fie valoarea mai mică."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "ANY / ALL",
+            "ro": "ANY / ALL"
+          },
+          "content": {
+            "en": "`ANY` (or `SOME`): at least one comparison true. `ALL`: all comparisons true. `NOT IN` is `<> ALL`.",
+            "ro": "`ANY` (sau `SOME`): cel puțin o comparație adevărată. `ALL`: toate comparațiile adevărate. `NOT IN` este `<> ALL`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s9",
+      "title": {
+        "en": "Why does NOT IN with NULL return no rows?",
+        "ro": "De ce NOT IN cu NULL nu aduce niciun rând?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l07-reflect-why",
+          "prompt": {
+            "en": "Why does `an NOT IN (1, NULL)` return no rows, not even the year 3 students?",
+            "ro": "De ce `an NOT IN (1, NULL)` nu aduce niciun rând, nici măcar studenții din anul 3?"
+          },
+          "answer": {
+            "en": "`an NOT IN (1, NULL)` means `an <> 1 AND an <> NULL`. For a year 3 student the first part is true, but `an <> NULL` is unknown. `true AND unknown` is unknown, and WHERE keeps only \"true\". So no row passes.",
+            "ro": "`an NOT IN (1, NULL)` înseamnă `an <> 1 AND an <> NULL`. Pentru un student din anul 3, prima parte e adevărată, dar `an <> NULL` este necunoscută. `adevărat AND necunoscut` este necunoscut, iar WHERE păstrează doar «adevărat». Deci niciun rând nu trece."
+          },
+          "placeholder": {
+            "en": "Explain in your own words…",
+            "ro": "Explică în cuvintele tale…"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s10",
+      "title": {
+        "en": "BETWEEN",
+        "ro": "BETWEEN"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l07-mcq1",
+          "question": {
+            "en": "What does `WHERE an BETWEEN 1 AND 3` do with the values 1 and 3?",
+            "ro": "Ce face `WHERE an BETWEEN 1 AND 3` cu valorile 1 și 3?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "It excludes both: it returns only year 2",
+                "ro": "Le exclude pe amândouă: aduce doar anul 2"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would be `an > 1 AND an < 3`. BETWEEN is inclusive at both ends.",
+                "ro": "Ar fi `an > 1 AND an < 3`. BETWEEN este inclusiv, la ambele capete."
+              },
+              "misconception": "between-incl"
+            },
+            {
+              "text": {
+                "en": "It includes both: it returns all 13 students",
+                "ro": "Le include pe amândouă: aduce toți cei 13 studenți"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `BETWEEN 1 AND 3` is `an >= 1 AND an <= 3`.",
+                "ro": "Corect. `BETWEEN 1 AND 3` este `an >= 1 AND an <= 3`."
+              }
+            },
+            {
+              "text": {
+                "en": "It includes 1 but not 3",
+                "ro": "Îl include pe 1, dar nu pe 3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no excluded end: both the lower and the upper limit are included. That would have been `an >= 1 AND an < 3`.",
+                "ro": "Nu există capăt exclus: și limita de jos, și cea de sus sunt incluse. Ar fi fost `an >= 1 AND an < 3`."
+              },
+              "misconception": "between-incl"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s11",
+      "title": {
+        "en": "NOT IN and NULL",
+        "ro": "NOT IN și NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l07-mcq2",
+          "question": {
+            "en": "How many rows does `WHERE an NOT IN (1, NULL)` return?",
+            "ro": "Câte rânduri întoarce `WHERE an NOT IN (1, NULL)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0 rows",
+                "ro": "0 rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The condition becomes `an <> 1 AND an <> NULL`, and the second part is unknown for everybody.",
+                "ro": "Corect. Condiția devine `an <> 1 AND an <> NULL`, iar a doua parte e necunoscută pentru toți."
+              }
+            },
+            {
+              "text": {
+                "en": "9 rows, that is the students from years 2 and 3",
+                "ro": "9 rânduri, adică cei din anii 2 și 3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You ignored the NULL in the list. That is how `NOT IN (1)` works, but a NULL in the list makes every row unknown.",
+                "ro": "Ai ignorat NULL-ul din listă. Așa ar merge `NOT IN (1)`, dar un NULL în listă face fiecare rând necunoscut."
+              },
+              "misconception": "not-in-null"
+            },
+            {
+              "text": {
+                "en": "An error, because the list contains NULL",
+                "ro": "Eroare, fiindcă lista conține NULL"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Oracle does not complain: the query runs and returns 0 rows, which makes it hard to notice.",
+                "ro": "Oracle nu se plânge: interogarea rulează și întoarce 0 rânduri, ceea ce o face greu de observat."
+              },
+              "misconception": "not-in-null"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s12",
+      "title": {
+        "en": "Equivalent of = SOME",
+        "ro": "Echivalentul lui = SOME"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l07-mcq3",
+          "question": {
+            "en": "What is `an = SOME (2, 3)` equivalent to?",
+            "ro": "Cu ce este echivalent `an = SOME (2, 3)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`an = 2 AND an = 3`",
+                "ro": "`an = 2 AND an = 3`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would require `an` to be 2 and 3 at once, so 0 rows. `ANY` means \"at least one\", not \"all\".",
+                "ro": "Asta ar cere ca `an` să fie 2 și 3 în același timp, deci 0 rânduri. `ANY` înseamnă «cel puțin una», nu «toate»."
+              },
+              "misconception": "all-vs-some"
+            },
+            {
+              "text": {
+                "en": "`an <> ALL (2, 3)`",
+                "ro": "`an <> ALL (2, 3)`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is `an NOT IN (2, 3)`, the opposite: it returns 4 rows (year 1). `= ANY` and `<> ALL` are opposites.",
+                "ro": "Asta e `an NOT IN (2, 3)`, opusul: aduce 4 rânduri (anul 1). `= ANY` și `<> ALL` sunt contrare."
+              },
+              "misconception": "all-vs-some"
+            },
+            {
+              "text": {
+                "en": "`an IN (2, 3)`",
+                "ro": "`an IN (2, 3)`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `= ANY` and `= SOME` mean \"equal to at least one of the values\", that is `IN`. It returns 9 rows.",
+                "ro": "Corect. `= ANY` și `= SOME` înseamnă «egal cu cel puțin una dintre valori», adică `IN`. Aduce 9 rânduri."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s13",
+      "title": {
+        "en": "IN with NULL",
+        "ro": "IN cu NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l07-mcq4",
+          "question": {
+            "en": "How many rows does `WHERE bursa IN (250, NULL)` return?",
+            "ro": "Câte rânduri întoarce `WHERE bursa IN (250, NULL)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "9 rows: Pintescu and the 8 without a scholarship",
+                "ro": "9 rânduri: Pintescu și cei 8 fără bursă"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You believed the `NULL` in the list matches the missing values. The comparison `bursa = NULL` is unknown, not true.",
+                "ro": "Ai crezut că `NULL` din listă se potrivește cu valorile lipsă. Comparația `bursa = NULL` e necunoscută, nu adevărată."
+              },
+              "misconception": "eq-null"
+            },
+            {
+              "text": {
+                "en": "1 row, the student with scholarship 250",
+                "ro": "1 rând, studentul cu bursa 250"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `IN` is a chain of ORs: `bursa = 250 OR bursa = NULL`. The first part is true for Pintescu; the second brings nothing, but does no harm.",
+                "ro": "Corect. `IN` e un șir de OR: `bursa = 250 OR bursa = NULL`. Prima parte e adevărată pentru Pintescu; a doua nu aduce nimic, dar nici nu strică."
+              }
+            },
+            {
+              "text": {
+                "en": "0 rows, the list with NULL breaks everything",
+                "ro": "0 rânduri, lista cu NULL strică totul"
+              },
+              "correct": false,
+              "explain": {
+                "en": "NULL breaks `NOT IN`, not `IN`: with `OR`, a true stays true even next to an unknown.",
+                "ro": "NULL-ul strică `NOT IN`, nu `IN`: la `OR`, un adevărat rămâne adevărat chiar lângă un necunoscut."
+              },
+              "misconception": "not-in-null"
+            }
+          ],
+          "review": "bd-l05"
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s14",
+      "title": {
+        "en": "Alexandru, Ioana or Marius",
+        "ro": "Alexandru, Ioana sau Marius"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l07-ex-2-12",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 12): \"Show all the information about the students whose first name is “Alexandru”, “Ioana” or “Marius”.\"\n\nCareful: the curly quotes in the statement are not apostrophes. If you copy them into the query you get an error. In SQL, text goes between straight single quotes ('…').",
+            "ro": "Enunț oficial (laborator 2, ex. 12): «Afișați toate informațiile despre studenții al căror prenume este “Alexandru”, “Ioana” sau “Marius”.»\n\nAtenție: ghilimelele curbe din enunț nu sunt apostrofuri. Dacă le copiezi în interogare, apare o eroare. În SQL, textul se scrie între apostrofuri drepte ('…')."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 12
+          },
+          "starter": "SELECT * FROM studenti WHERE prenume IN ()",
+          "solution": "SELECT * FROM studenti WHERE prenume IN ('Alexandru', 'Ioana', 'Marius')",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You want the rows whose first name is one of three values. You no longer write three separate conditions.",
+              "ro": "Vrei rândurile al căror prenume este una dintre trei valori. Nu mai scrii trei condiții separate."
+            },
+            {
+              "en": "`SELECT * FROM studenti WHERE prenume IN (..., ..., ...)`. Each value is text in single quotes, separated by commas.",
+              "ro": "`SELECT * FROM studenti WHERE prenume IN (..., ..., ...)`. Fiecare valoare e un text între apostrofuri, despărțite prin virgulă."
+            },
+            {
+              "en": "The quotes in the statement (“ ”) are typographic and cause an error. Use straight single quotes. Marius does not exist in the table, so he adds nothing, but does no harm.",
+              "ro": "Ghilimelele din enunț (“ ”) sunt tipografice și dau eroare. Folosește apostrofuri drepte. Marius nu există în tabel, deci nu aduce nimic, dar nici nu strică."
+            }
+          ],
+          "explain": {
+            "en": "4 rows remain: Antonie Ioana, Panaite Alexandru and the two Bodnar Ioana.",
+            "ro": "Rămân 4 rânduri: Antonie Ioana, Panaite Alexandru și cei doi Bodnar Ioana."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s15",
+      "title": {
+        "en": "Scholarships between 300 and 400",
+        "ro": "Burse între 300 și 400"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l07-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the name and scholarship of students whose scholarship is between 300 and 400 (ends included).",
+            "ro": "Afișează numele și bursa studenților a căror bursă este între 300 și 400 (capetele incluse)."
+          },
+          "solution": "SELECT nume, bursa FROM studenti WHERE bursa BETWEEN 300 AND 400",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You are looking for a value within a range, with both ends included.",
+              "ro": "Cauți o valoare dintr-un interval, cu ambele capete incluse."
+            },
+            {
+              "en": "`SELECT nume, bursa FROM studenti WHERE bursa BETWEEN ... AND ...`. The small limit first, then the large one.",
+              "ro": "`SELECT nume, bursa FROM studenti WHERE bursa BETWEEN ... AND ...`. Mai întâi limita mică, apoi cea mare."
+            },
+            {
+              "en": "Students without a scholarship (NULL) do not pass, because NULL is not between anything. Do not write `BETWEEN 400 AND 300`: the order of the limits matters.",
+              "ro": "Studenții fără bursă (NULL) nu trec, fiindcă NULL nu e între nimic. Nu scrie `BETWEEN 400 AND 300`: ordinea limitelor contează."
+            }
+          ],
+          "explain": {
+            "en": "Three students have scholarship 350 (Archip, Ciobotariu, Cobzaru). 450 and 250 are outside the range.",
+            "ro": "Trei studenți au bursa 350 (Archip, Ciobotariu, Cobzaru). 450 și 250 sunt în afara intervalului."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l07-s16",
+      "title": {
+        "en": "Outside some groups",
+        "ro": "În afara unor grupe"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l07-ex-x2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the surname and first name of students who are not in groups A1, A2 or B1.",
+            "ro": "Afișează numele și prenumele studenților care nu sunt în grupele A1, A2 sau B1."
+          },
+          "solution": "SELECT nume, prenume FROM studenti WHERE grupa NOT IN ('A1', 'A2', 'B1')",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You want the rows whose group is not in a list of three groups.",
+              "ro": "Cauți rândurile a căror grupă nu se află într-o listă de trei grupe."
+            },
+            {
+              "en": "`WHERE grupa NOT IN (..., ..., ...)`, with each group in single quotes.",
+              "ro": "`WHERE grupa NOT IN (..., ..., ...)`, cu fiecare grupă între apostrofuri."
+            },
+            {
+              "en": "Text is exact, case included: `'A1'`. The list must not contain NULL, otherwise `NOT IN` returns nothing.",
+              "ro": "Textul e exact, cu majuscule: `'A1'`. Lista nu are voie să conțină NULL, altfel `NOT IN` nu mai întoarce nimic."
+            }
+          ],
+          "explain": {
+            "en": "The groups A4, B3 and B2 remain: Arhire Raluca, Panaite Alexandru, Bodnar Ioana (B2) and Bucur Andreea.",
+            "ro": "Rămân grupele A4, B3 și B2: Arhire Raluca, Panaite Alexandru, Bodnar Ioana (B2) și Bucur Andreea."
+          }
+        }
+      ]
+    }
+  ]
+}

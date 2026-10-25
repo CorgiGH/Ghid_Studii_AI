@@ -2,31 +2,44 @@
   "meta": {
     "id": "bd-l01",
     "title": {
-      "en": "Lesson 1: First queries",
-      "ro": "Lecția 1: Primele interogări"
+      "en": "Lesson 1: Table, row, column, NULL, key",
+      "ro": "Lecția 1: Tabel, rând, coloană, NULL, cheie"
     },
     "shortTitle": {
-      "en": "L1: First queries",
-      "ro": "L1: Primele interogări"
+      "en": "L1: Tables and keys",
+      "ro": "L1: Tabele și chei"
     },
     "source": {
-      "en": "Placeholder lesson so the routes exist.",
-      "ro": "Lecție provizorie, ca rutele să existe."
+      "en": "Lab 1, Databases, UAIC FII",
+      "ro": "Laboratorul 1, Baze de date, UAIC FII"
     }
   },
   "steps": [
     {
       "id": "bd-l01-s1",
       "title": {
-        "en": "What a query asks",
-        "ro": "Ce cere o interogare"
+        "en": "Two sheets, one grade",
+        "ro": "Două foi, o notă"
       },
       "blocks": [
         {
-          "type": "learn",
-          "content": {
-            "en": "A table is a list of rows. A query says which columns you want and which rows you keep, and the database answers with a new table.",
-            "ro": "Un tabel este o listă de rânduri. O interogare spune ce coloane vrei și ce rânduri păstrezi, iar baza de date răspunde cu un tabel nou."
+          "type": "reflect",
+          "id": "bd-l01-r1",
+          "prompt": {
+            "en": "The secretary keeps two sheets: one with students and one with grades. Below is the grades sheet for course 24. Each grade has a number but no name. How does the secretary find out whose 9 it is?",
+            "ro": "Secretara ține două foi: una cu studenții și una cu notele. Mai jos e foaia cu notele de la cursul 24. Fiecare notă are un număr, dar nu apare niciun nume. Cum află secretara a cui e nota 9?"
+          },
+          "placeholder": {
+            "en": "Write how you think it is done",
+            "ro": "Scrie cum crezi că se face"
+          },
+          "answer": {
+            "en": "The number on the grades sheet (`nr_matricol`) is the same number written on the student's row in the students sheet. You look the number up there and read the name. That way you never copy the student's name next to every grade.",
+            "ro": "Numărul de pe foaia cu note (`nr_matricol`) e același număr care stă pe rândul studentului din foaia cu studenți. Cauți numărul acolo și citești numele. Așa nu copiezi numele studentului lângă fiecare notă."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nr_matricol, id_curs, valoare FROM note WHERE id_curs = '24'"
           }
         }
       ]
@@ -34,20 +47,31 @@
     {
       "id": "bd-l01-s2",
       "title": {
-        "en": "Your first SELECT",
-        "ro": "Primul tău SELECT"
+        "en": "Map of the tables",
+        "ro": "Harta tabelelor"
       },
       "blocks": [
         {
-          "type": "code",
-          "language": "sql",
-          "code": "SELECT nume, prenume\nFROM studenti\nWHERE an = 1\nORDER BY nume;"
-        },
-        {
           "type": "learn",
           "content": {
-            "en": "SELECT names the columns, FROM names the table, WHERE keeps the matching rows and ORDER BY sorts the answer.",
-            "ro": "SELECT numește coloanele, FROM numește tabelul, WHERE păstrează rândurile potrivite, iar ORDER BY sortează răspunsul."
+            "en": "A relational database is a set of **tables**. Each row of `note` carries `nr_matricol`, the student's number. Click it and see where it leads.",
+            "ro": "O bază de date relațională e o mulțime de **tabele**. Fiecare rând din `note` poartă `nr_matricol`, adică numărul studentului. Apasă pe el și vezi unde duce."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l01-viz1",
+          "widget": "table-map",
+          "predict": true,
+          "props": {
+            "dataset": "facultate",
+            "from": "note.nr_matricol",
+            "to": "studenti.nr_matricol",
+            "question": {
+              "en": "At course 24 there is a grade 9. Whose is it?",
+              "ro": "La cursul 24 există o notă 9. A cui este?"
+            },
+            "answerKey": "111"
           }
         }
       ]
@@ -55,16 +79,413 @@
     {
       "id": "bd-l01-s3",
       "title": {
-        "en": "A missing value is not zero",
-        "ro": "O valoare lipsă nu e zero"
+        "en": "The empty cell: NULL",
+        "ro": "Celula goală: NULL"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Not every student has a scholarship. For them the cell does not hold 0; it stays empty. An empty cell is called **NULL** and means \"we do not have the information\". Look at the `bursa` column: 8 of the 13 students have NULL.",
+            "ro": "Nu toți studenții au bursă. Pentru ei celula nu conține 0, ci rămâne goală. O celulă goală se numește **NULL** și înseamnă „nu avem informația”. Uită-te la coloana `bursa`: 8 din cei 13 studenți au NULL."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l01-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, bursa FROM studenti",
+          "stages": [
+            {
+              "clause": "from"
+            }
+          ],
+          "show": [
+            "nume",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "The `studenti` table has 13 rows. The grey cells in `bursa` are NULL: 8 rows. Five students have an amount (250, 350 or 450).",
+              "ro": "Tabelul `studenti` are 13 rânduri. Celulele gri din `bursa` sunt NULL: 8 rânduri. Cinci studenți au o sumă (250, 350 sau 450)."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01-s4",
+      "title": {
+        "en": "NULL is not 0, a name is not a key",
+        "ro": "NULL nu e 0, numele nu e cheie"
       },
       "blocks": [
         {
           "type": "callout",
           "variant": "trap",
           "content": {
-            "en": "A missing value is NULL, which means unknown. The test `bursa = NULL` never matches a row; use `bursa IS NULL`.",
-            "ro": "O valoare lipsă este NULL, adică necunoscută. Testul `bursa = NULL` nu găsește niciun rând; folosește `bursa IS NULL`."
+            "en": "**NULL is not 0.** 0 means \"gets 0 lei\". NULL means \"we do not know\". Zero is a real value that takes part in calculations; NULL does not. It is not a blank space or text either.",
+            "ro": "**NULL nu e 0.** 0 înseamnă „primește 0 lei”. NULL înseamnă „nu știm”. Zero e o valoare reală care intră în calcule; NULL nu. Nu e nici spațiu gol, nici text."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A name does not identify a student.** Bodnar Ioana appears twice: `116` (group A1) and `119` (group B2). They are two different people with the same first and last name. That is why the table has an `nr_matricol` that never repeats.",
+            "ro": "**Numele nu identifică un student.** Bodnar Ioana apare de două ori: `116` (grupa A1) și `119` (grupa B2). Sunt doi oameni diferiți, cu același nume și prenume. De aceea tabelul are un `nr_matricol` care nu se repetă."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The order of rows in a table carries no meaning: \"the first row\" does not exist as information. One oddity of the lab script: it declares no key (it only has `NOT NULL` on two columns), and in `profesori` the identifiers `p20` and `p21` each appear twice. So a key is a rule the database may or may not enforce; the next lesson shows how to declare one.",
+            "ro": "Ordinea rândurilor dintr-un tabel nu înseamnă nimic: „primul rând” nu există ca informație. Și o ciudățenie a scriptului laboratorului: nu declară nicio cheie (are doar `NOT NULL` pe două coloane), iar în `profesori` identificatorii `p20` și `p21` apar de câte două ori. Cheia e deci o regulă pe care baza o poate impune sau nu; în lecția următoare vezi cum se declară."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01-s5",
+      "title": {
+        "en": "What the pieces are called",
+        "ro": "Cum se numesc piesele"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "text",
+          "code": "studenti(nr_matricol, nume, prenume, an, grupa, bursa, data_nastere)\ncursuri(id_curs, titlu_curs, an, semestru, credite)\nnote(nr_matricol, id_curs, valoare, data_notare)\nprofesori(id_prof, nume, prenume, grad_didactic)\ndidactic(id_prof, id_curs)"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Table, row, column",
+            "ro": "Tabel, rând, coloană"
+          },
+          "content": {
+            "en": "A **table** has columns (each with a name and a type: CHAR, VARCHAR2, NUMBER, DATE) and rows (one student, one grade, one course). The order of rows does not matter.",
+            "ro": "Un **tabel** are coloane (fiecare cu nume și tip: CHAR, VARCHAR2, NUMBER, DATE) și rânduri (câte un student, o notă, un curs). Ordinea rândurilor nu contează."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "NULL",
+            "ro": "NULL"
+          },
+          "content": {
+            "en": "A special value: the information is missing or unknown. It is not 0 and not text.",
+            "ro": "Valoare specială: informația lipsește sau nu e cunoscută. Nu e 0 și nu e text."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Primary key",
+            "ro": "Cheie primară"
+          },
+          "content": {
+            "en": "The column (or columns) that identifies a row, never repeats and is never NULL: `studenti.nr_matricol`, `cursuri.id_curs`.",
+            "ro": "Coloana (sau coloanele) care identifică un rând și nu se repetă și nu e NULL: `studenti.nr_matricol`, `cursuri.id_curs`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Foreign key",
+            "ro": "Cheie străină"
+          },
+          "content": {
+            "en": "A column that points to another table's key: `note.nr_matricol` points to `studenti`, `note.id_curs` points to `cursuri`.",
+            "ro": "Coloană care trimite la cheia altui tabel: `note.nr_matricol` trimite la `studenti`, `note.id_curs` trimite la `cursuri`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Schema and instance",
+            "ro": "Schemă și instanță"
+          },
+          "content": {
+            "en": "The **schema** is the structure (which tables, which columns, which types). The **instance** is the content right now (the rows).",
+            "ro": "**Schema** e structura (ce tabele, ce coloane, ce tipuri). **Instanța** e conținutul de acum (rândurile)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01-s6",
+      "title": {
+        "en": "Why NULL and not 0?",
+        "ro": "De ce NULL și nu 0?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l01-r2",
+          "prompt": {
+            "en": "Why is NULL used, not 0, for a student with no scholarship?",
+            "ro": "De ce se pune NULL, nu 0, pentru un student fără bursă?"
+          },
+          "answer": {
+            "en": "Because 0 is a piece of information: \"gets 0 lei\". NULL says \"we do not have the information\". Zero takes part in calculations (an average of scholarships would drop), while NULL stays out of them. If you put 0, you can no longer tell \"has no scholarship\" from \"has a scholarship of 0 lei\".",
+            "ro": "Pentru că 0 înseamnă o informație: „primește 0 lei”. NULL spune „nu avem informația”. Zero intră în calcule (o medie a burselor ar scădea), pe când NULL rămâne în afara lor. Dacă pui 0, nu mai poți deosebi „n-are bursă” de „are bursă de 0 lei”."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01-s7",
+      "title": {
+        "en": "What is NULL in bursa?",
+        "ro": "Ce este NULL în bursa?"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01-q1",
+          "question": {
+            "en": "A student has no scholarship. What is in his `bursa` cell?",
+            "ro": "Un student nu are bursă. Ce este în celula `bursa` a lui?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "The lack of information: NULL",
+                "ro": "Lipsa informației: NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. NULL means we do not have the value.",
+                "ro": "Corect. NULL înseamnă că nu avem valoarea."
+              }
+            },
+            {
+              "text": {
+                "en": "Zero",
+                "ro": "Zero"
+              },
+              "correct": false,
+              "misconception": "null-arith",
+              "explain": {
+                "en": "Zero would be a real amount (0 lei). Here the cell is empty, and the database calls it NULL.",
+                "ro": "Zero ar fi o sumă reală (0 lei). Aici celula e goală, iar baza îi spune NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "A blank space",
+                "ro": "Un spațiu gol"
+              },
+              "correct": false,
+              "misconception": "empty-str-null",
+              "explain": {
+                "en": "A space is a text character. NULL is not a character: it means there is no value. (In Oracle even the empty string `''` becomes NULL, as you will see when inserting.)",
+                "ro": "Un spațiu e un caracter text. NULL nu e un caracter: înseamnă că nu există valoare. (În Oracle chiar și șirul vid `''` devine NULL, cum vei vedea la inserare.)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01-s8",
+      "title": {
+        "en": "The foreign key",
+        "ro": "Cheia străină"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01-q2",
+          "question": {
+            "en": "Which column of `note` points to the `studenti` table?",
+            "ro": "Care coloană din `note` trimite la tabelul `studenti`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`nr_matricol`",
+                "ro": "`nr_matricol`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Yes. The same number is found in `studenti.nr_matricol`.",
+                "ro": "Da. Același număr se găsește în `studenti.nr_matricol`."
+              }
+            },
+            {
+              "text": {
+                "en": "`valoare`",
+                "ro": "`valoare`"
+              },
+              "correct": false,
+              "misconception": "value-is-id",
+              "explain": {
+                "en": "`valoare` is the grade (1 to 10). Several students can have 10; it identifies nobody.",
+                "ro": "`valoare` e nota (de la 1 la 10). Mai mulți studenți pot avea 10; nu identifică pe nimeni."
+              }
+            },
+            {
+              "text": {
+                "en": "`id_curs`",
+                "ro": "`id_curs`"
+              },
+              "correct": false,
+              "misconception": "fk-wrong-target",
+              "explain": {
+                "en": "`id_curs` is also a foreign key, but it points to `cursuri`, not `studenti`.",
+                "ro": "`id_curs` e și el cheie străină, dar trimite la `cursuri`, nu la `studenti`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01-s9",
+      "title": {
+        "en": "Same name",
+        "ro": "Același nume"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01-q3",
+          "question": {
+            "en": "Can two students have the same last name and the same first name?",
+            "ro": "Pot exista doi studenți cu același nume și același prenume?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Yes: Bodnar Ioana appears with `116` and with `119`. That is why the name is not a key.",
+                "ro": "Da: Bodnar Ioana apare cu `116` și cu `119`. De aceea numele nu e cheie."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Only `nr_matricol` tells them apart.",
+                "ro": "Corect. Doar `nr_matricol` le deosebește."
+              }
+            },
+            {
+              "text": {
+                "en": "No, the first and last name are unique.",
+                "ro": "Nu, numele și prenumele sunt unice."
+              },
+              "correct": false,
+              "misconception": "name-is-key",
+              "explain": {
+                "en": "Your data says otherwise: there are two Bodnar Ioana rows (groups A1 and B2).",
+                "ro": "Datele tale spun altceva: sunt două rânduri Bodnar Ioana (grupa A1 și B2)."
+              }
+            },
+            {
+              "text": {
+                "en": "Yes, but then they also have the same `nr_matricol`.",
+                "ro": "Da, dar atunci au și același `nr_matricol`."
+              },
+              "correct": false,
+              "misconception": "name-is-key",
+              "explain": {
+                "en": "No. Their `nr_matricol` differs: `116` and `119`. The number is exactly what tells them apart.",
+                "ro": "Nu. Au `nr_matricol` diferit: `116` și `119`. Tocmai numărul le face diferite."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01-s10",
+      "title": {
+        "en": "Schema or instance?",
+        "ro": "Schema sau instanța?"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01-q4",
+          "question": {
+            "en": "You add a new student to `studenti`. What changes?",
+            "ro": "Adaugi un student nou în `studenti`. Ce se schimbă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "The instance: the content of the table",
+                "ro": "Instanța: conținutul tabelului"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The schema (columns and types) stays the same.",
+                "ro": "Corect. Schema (coloanele și tipurile) rămâne la fel."
+              }
+            },
+            {
+              "text": {
+                "en": "The schema",
+                "ro": "Schema"
+              },
+              "correct": false,
+              "misconception": "schema-vs-instance",
+              "explain": {
+                "en": "The schema is the structure: columns and their types. A new row does not change it. Adding a column would.",
+                "ro": "Schema e structura: coloanele și tipurile lor. Un rând nou nu o schimbă. Ar schimba-o adăugarea unei coloane."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01-s11",
+      "title": {
+        "en": "Explore the tables",
+        "ro": "Explorează tabelele"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `didactic` table links professors to courses: one line means \"this professor teaches this course\". To see everything in a table you write `SELECT * FROM table_name`. Try it on `didactic` (10 rows). The same pattern works on all five tables: `studenti` has 13 rows, `cursuri` 9, `note` 42, `profesori` 16.",
+            "ro": "Tabelul `didactic` leagă profesorii de cursuri: o linie înseamnă „acest profesor predă acest curs”. Ca să vezi tot ce e într-un tabel, scrii `SELECT * FROM numele_tabelului`. Încearcă pe `didactic` (10 rânduri). Același tipar merge pe toate cele cinci tabele: `studenti` are 13 rânduri, `cursuri` 9, `note` 42, `profesori` 16."
+          }
+        },
+        {
+          "type": "sql-exercise",
+          "id": "bd-l01-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display everything in the `didactic` table. Fill in the table name.",
+            "ro": "Afișează tot conținutul tabelului `didactic`. Completează numele tabelului."
+          },
+          "starter": "SELECT * FROM ",
+          "solution": "SELECT * FROM didactic",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You want all columns and all rows from a single table. Pick the table.",
+              "ro": "Vrei toate coloanele și toate rândurile dintr-un singur tabel. Alege tabelul."
+            },
+            {
+              "en": "`SELECT * FROM ...` and you put the table name in place of the dots.",
+              "ro": "`SELECT * FROM ...` și pui numele tabelului în loc de puncte."
+            },
+            {
+              "en": "The table name has no quotes and no spaces: `didactic`. The query returns 10 rows with 2 columns.",
+              "ro": "Numele tabelului nu are ghilimele și nu are spații: `didactic`. Interogarea întoarce 10 rânduri, cu 2 coloane."
+            }
+          ],
+          "explain": {
+            "en": "`*` means \"all columns\". With no condition, all rows come back: 10 professor-course pairs.",
+            "ro": "`*` înseamnă „toate coloanele”. Fără nicio condiție, vin toate rândurile: 10 perechi profesor–curs."
           }
         }
       ]

@@ -1,0 +1,649 @@
+{
+  "meta": {
+    "id": "bd-l17",
+    "title": {
+      "en": "Lesson 17: Cheat sheet — conversions and rare functions",
+      "ro": "Lecția 17: Fișă — conversii și funcții rare"
+    },
+    "shortTitle": {
+      "en": "L17: Conversions",
+      "ro": "L17: Conversii"
+    },
+    "source": {
+      "en": "Lab 3 — conversion functions and other functions (UAIC, Databases)",
+      "ro": "Laboratorul 3 — funcții de conversie și alte funcții (UAIC, Baze de date)"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l17-s1",
+      "title": {
+        "en": "What does '01110' + 1 give?",
+        "ro": "Ce dă '01110' + 1?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l17-r1",
+          "prompt": {
+            "en": "In the table below you see a text made of digits. What do you think `'01110' + 1` gives: 1111, the text `011101`, or an error? Write what you think and why.",
+            "ro": "În tabelul de mai jos vezi un text cu cifre. Ce crezi că dă `'01110' + 1`: 1111, textul `011101` sau o eroare? Scrie ce crezi și de ce."
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "It gives **1111**. The `+` operator is arithmetic, so Oracle turns the text `'01110'` into the number 1110 by itself and only then adds 1. It does not glue texts (that is what `||` is for) and it does not raise an error, as long as the text looks like a number. The cheat sheet below gathers the conversions Oracle does by itself and the ones you ask for.",
+            "ro": "Dă **1111**. Operatorul `+` este aritmetic, deci Oracle transformă singur textul `'01110'` în numărul 1110 și abia apoi adună 1. Nu lipește texte (pentru asta există `||`) și nu dă eroare, atât timp cât textul arată a număr. Fișa de mai jos strânge conversiile pe care le face Oracle singur și pe cele pe care le ceri tu."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT '01110' AS sir FROM DUAL"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s2",
+      "title": {
+        "en": "Pipes between types",
+        "ro": "Conducte între tipuri"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each operator expects a certain type. When it gets another, Oracle runs it through a conversion pipe. Guess the type that comes out of each pipe before you open it.",
+            "ro": "Fiecare operator așteaptă un anumit tip. Când primește altul, Oracle îl trece printr-o conductă de conversie. Ghicește tipul care iese din fiecare conductă înainte să o deschizi."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l17-v1",
+          "widget": "type-pipes",
+          "predict": true,
+          "props": {
+            "conversions": [
+              {
+                "from": "VARCHAR2",
+                "to": "NUMBER",
+                "value": "'12'",
+                "fn": "'12' * 2"
+              },
+              {
+                "from": "NUMBER",
+                "to": "VARCHAR2",
+                "value": "450",
+                "fn": "450 || ' RON'"
+              },
+              {
+                "from": "DATE",
+                "to": "VARCHAR2",
+                "value": "17-FEB-95",
+                "fn": "data_nastere || ''"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s3",
+      "title": {
+        "en": "Conversions you ask for",
+        "ro": "Conversii cerute explicit"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "When you do not want to rely on automatic conversion, you ask for it: `TO_NUMBER` turns text into a number (optionally with a mask), `TO_CHAR` turns a number or date into text, and `CAST(expression AS type)` does the same job in the standard SQL form.",
+            "ro": "Când nu vrei să te bazezi pe conversia automată, o ceri tu: `TO_NUMBER` face din text un număr (opțional cu o mască), `TO_CHAR` face din număr sau dată un text, iar `CAST(expresie AS tip)` face aceeași treabă în forma standard SQL."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT TO_NUMBER('100.52', '9,999.99') FROM DUAL;      -- 100.52\nSELECT TO_CHAR(450, 'FM$99,999') FROM DUAL;           -- $450\nSELECT CAST(450 AS VARCHAR2(10)) FROM DUAL;          -- 450 (text)\nSELECT CAST('450' AS NUMBER) + 1 FROM DUAL;          -- 451"
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s4",
+      "title": {
+        "en": "LEAST, GREATEST, NULLIF, USER, CONVERT",
+        "ro": "LEAST, GREATEST, NULLIF, USER, CONVERT"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`LEAST` and `GREATEST` pick the smallest and the largest value in a list; for text, by alphabetical order. `NULLIF(a, b)` gives NULL when a and b are equal, otherwise a. `USER` is the name of the connected user. `CONVERT(text, destination_charset)` rewrites a text in another character encoding; a character missing from the destination encoding becomes the closest equivalent character if there is one (ă becomes a), otherwise `?` (Ș becomes ?).",
+            "ro": "`LEAST` și `GREATEST` aleg cea mai mică, respectiv cea mai mare valoare dintr-o listă; la text, după ordinea alfabetică. `NULLIF(a, b)` dă NULL când a și b sunt egale, altfel dă a. `USER` este numele utilizatorului conectat. `CONVERT(text, codificare_destinație)` rescrie un text într-o altă codificare de caractere; un caracter care lipsește din codificarea destinație devine cel mai apropiat caracter echivalent, dacă există (ă devine a), altfel `?` (Ș devine ?)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT LEAST('Mihai', 'Andrei', 'Anca') FROM DUAL;                  -- Anca\nSELECT GREATEST('Stefan', 'Mihai', 'Andrei', 'Anca') FROM DUAL;    -- Stefan\nSELECT NULLIF(5, 5), NULLIF(5, 6) FROM DUAL;                       -- NULL, 5\nSELECT USER FROM DUAL;                                              -- STUDENT\nSELECT CONVERT('Bălan', 'US7ASCII') FROM DUAL;                         -- Balan\nSELECT CONVERT('Ștefan', 'US7ASCII') FROM DUAL;                       -- ?tefan"
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s5",
+      "title": {
+        "en": "Text or number",
+        "ro": "Text sau număr"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Text is compared character by character, numbers by value.** For strings, `'10' < '9'` is true: the first character, `1`, comes before `9`. For numbers, `10 < 9` is false. When you compare text with a number, Oracle turns the text into a number, so `'10' < 9` is false too. And a text that does not look like a number breaks everything: `'abc' + 1` raises ORA-01722. In the code examples, `n = 1` means that the query returns 1 row.",
+            "ro": "**Textul se compară caracter cu caracter, numerele după valoare.** Pentru șiruri, `'10' < '9'` este adevărat: primul caracter, `1`, vine înaintea lui `9`. Pentru numere, `10 < 9` este fals. Când compari un text cu un număr, Oracle face din text număr, deci `'10' < 9` este și el fals. Iar un text care nu arată a număr strică totul: `'abc' + 1` dă ORA-01722. În exemplele de cod, `n = 1` înseamnă că interogarea întoarce 1 rând."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT 1 FROM DUAL WHERE '10' < '9';   -- n = 1\nSELECT 1 FROM DUAL WHERE 10 < 9;         -- n = 0\nSELECT 1 FROM DUAL WHERE '10' < 9;       -- n = 0\nSELECT 'abc' + 1 FROM DUAL;                 -- ORA-01722"
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s6",
+      "title": {
+        "en": "NULL and precedence",
+        "ro": "NULL și precedența"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A NULL in the list of `LEAST` or `GREATEST` makes the whole result NULL.** It is not ignored: `GREATEST(1, NULL, 3)` is NULL, not 3. And one more thing: `||` and `+` have the same precedence and are evaluated left to right, so `3 || 4 + 1` means `(3 || 4) + 1`, that is `'34' + 1` = 35.",
+            "ro": "**Un NULL în lista lui `LEAST` sau `GREATEST` face tot rezultatul NULL.** Nu e ignorat: `GREATEST(1, NULL, 3)` este NULL, nu 3. Și încă ceva: `||` și `+` au aceeași precedență și se evaluează de la stânga la dreapta, deci `3 || 4 + 1` înseamnă `(3 || 4) + 1`, adică `'34' + 1` = 35."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT GREATEST(1, NULL, 3) FROM DUAL;   -- NULL\nSELECT LEAST(1, NULL, 3) FROM DUAL;       -- NULL\nSELECT 3 || 4 + 1 FROM DUAL;              -- 35"
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s7",
+      "title": {
+        "en": "Conversions at a glance",
+        "ro": "Conversiile, pe scurt"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT TO_NUMBER('450') + 50 FROM DUAL;               -- 500\nSELECT TO_CHAR(450) || ' lei' FROM DUAL;              -- 450 lei\nSELECT CAST('12' AS NUMBER) * 2 FROM DUAL;            -- 24\nSELECT LEAST(3, 1, 2), GREATEST(3, 1, 2) FROM DUAL;   -- 1  3"
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "en": "Expression",
+              "ro": "Expresia"
+            },
+            {
+              "en": "What it does",
+              "ro": "Ce face"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "en": "`TO_NUMBER('str' [, 'fmt'])`",
+                "ro": "`TO_NUMBER('str' [, 'fmt'])`"
+              },
+              {
+                "en": "text to number",
+                "ro": "din text face număr"
+              }
+            ],
+            [
+              {
+                "en": "`TO_CHAR(x [, 'fmt'])`",
+                "ro": "`TO_CHAR(x [, 'fmt'])`"
+              },
+              {
+                "en": "number or date to text",
+                "ro": "din număr sau dată face text"
+              }
+            ],
+            [
+              {
+                "en": "`CAST(expr AS type)`",
+                "ro": "`CAST(expr AS type)`"
+              },
+              {
+                "en": "the standard SQL conversion",
+                "ro": "conversia standard SQL"
+              }
+            ],
+            [
+              {
+                "en": "`LEAST(a, b, ...)`, `GREATEST(a, b, ...)`",
+                "ro": "`LEAST(a, b, ...)`, `GREATEST(a, b, ...)`"
+              },
+              {
+                "en": "the smallest, the largest value of the list",
+                "ro": "cea mai mică, cea mai mare valoare din listă"
+              }
+            ],
+            [
+              {
+                "en": "`NULLIF(a, b)`",
+                "ro": "`NULLIF(a, b)`"
+              },
+              {
+                "en": "NULL if a = b, otherwise a",
+                "ro": "NULL dacă a = b, altfel a"
+              }
+            ],
+            [
+              {
+                "en": "`USER`",
+                "ro": "`USER`"
+              },
+              {
+                "en": "the connected user",
+                "ro": "utilizatorul conectat"
+              }
+            ],
+            [
+              {
+                "en": "`CONVERT(str, dest_charset [, src_charset])`",
+                "ro": "`CONVERT(str, dest_charset [, src_charset])`"
+              },
+              {
+                "en": "rewrites the text in another encoding",
+                "ro": "rescrie textul într-o altă codificare"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "implicit conversion",
+            "ro": "conversie implicită"
+          },
+          "content": {
+            "en": "Oracle itself turns VARCHAR2 or CHAR into NUMBER or DATE, and NUMBER or DATE into text, depending on the operator used. It works only if the text looks like a number or a date in the session format.",
+            "ro": "Oracle trece singur VARCHAR2 sau CHAR în NUMBER sau DATE, și NUMBER sau DATE în text, după operatorul folosit. Merge doar dacă textul arată a număr sau a dată în formatul sesiunii."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "explicit conversion",
+            "ro": "conversie explicită"
+          },
+          "content": {
+            "en": "The one you ask for with `TO_NUMBER`, `TO_CHAR`, `TO_DATE` or `CAST`. Choose it when the result type matters.",
+            "ro": "Cea cerută de tine cu `TO_NUMBER`, `TO_CHAR`, `TO_DATE` sau `CAST`. Alege-o când tipul rezultatului contează."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s8",
+      "title": {
+        "en": "Why is '10' < '9'?",
+        "ro": "De ce '10' < '9'?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l17-r2",
+          "prompt": {
+            "en": "Why is `'10' < '9'` true for strings, while `10 < 9` is false for numbers?",
+            "ro": "De ce `'10' < '9'` este adevărat pentru șiruri, dar `10 < 9` este fals pentru numere?"
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "Because text is compared character by character, from the left: `'1'` comes before `'9'`, so `'10'` is \"smaller\" than `'9'`, regardless of the following digits. Numbers are compared by value: 10 is greater than 9. That is why the data type matters: a text column holding numbers sorts alphabetically, not numerically.",
+            "ro": "Pentru că textul se compară caracter cu caracter, de la stânga: `'1'` vine înaintea lui `'9'`, deci `'10'` este „mai mic” decât `'9'`, fără să conteze cifrele următoare. Numerele se compară după valoare: 10 este mai mare decât 9. De aceea tipul datelor contează: o coloană text cu numere se sortează alfabetic, nu numeric."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s9",
+      "title": {
+        "en": "The text '01110' plus 1",
+        "ro": "Textul '01110' plus 1"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l17-q1",
+          "question": {
+            "en": "What does `'01110' + 1` give?",
+            "ro": "Ce dă `'01110' + 1`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "011101",
+                "ro": "011101"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is what `||` would do, it glues texts. `+` does not glue.",
+                "ro": "Asta ar face `||`, care lipește texte. `+` nu lipește."
+              },
+              "misconception": "implicit-conv"
+            },
+            {
+              "text": {
+                "en": "Error, because `'01110'` is text",
+                "ro": "Eroare, pentru că `'01110'` este text"
+              },
+              "correct": false,
+              "explain": {
+                "en": "No error appears as long as the text looks like a number: Oracle converts it by itself.",
+                "ro": "Nu apare nicio eroare, cât timp textul arată a număr: Oracle îl convertește singur."
+              },
+              "misconception": "implicit-conv"
+            },
+            {
+              "text": {
+                "en": "1111",
+                "ro": "1111"
+              },
+              "correct": true,
+              "explain": {
+                "en": "`+` is arithmetic: the text becomes the number 1110, then 1 is added.",
+                "ro": "`+` este aritmetic: textul devine numărul 1110, apoi se adună 1."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s10",
+      "title": {
+        "en": "LEAST on names",
+        "ro": "LEAST pe nume"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l17-q2",
+          "question": {
+            "en": "What does `LEAST('Mihai', 'Andrei', 'Anca')` give?",
+            "ro": "Ce dă `LEAST('Mihai', 'Andrei', 'Anca')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Anca",
+                "ro": "Anca"
+              },
+              "correct": true,
+              "explain": {
+                "en": "For text, `LEAST` takes the first in alphabetical order: Anca comes before Andrei and Mihai.",
+                "ro": "La text, `LEAST` ia primul în ordine alfabetică: Anca vine înaintea lui Andrei și a lui Mihai."
+              }
+            },
+            {
+              "text": {
+                "en": "Mihai",
+                "ro": "Mihai"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Mihai is last alphabetically, so it would be the result of `GREATEST` among these three names.",
+                "ro": "Mihai este ultimul alfabetic, deci ar fi rezultatul lui `GREATEST` printre aceste trei nume."
+              },
+              "misconception": "least-greatest"
+            },
+            {
+              "text": {
+                "en": "Andrei",
+                "ro": "Andrei"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Andrei is the longest, but `LEAST` does not look at length, only at alphabetical order.",
+                "ro": "Andrei este cel mai lung, dar `LEAST` nu se uită la lungime, ci la ordinea alfabetică."
+              },
+              "misconception": "least-greatest"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s11",
+      "title": {
+        "en": "NULLIF with equal values",
+        "ro": "NULLIF cu valori egale"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l17-q3",
+          "question": {
+            "en": "What does `NULLIF(5, 5)` give?",
+            "ro": "Ce dă `NULLIF(5, 5)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "5",
+                "ro": "5"
+              },
+              "correct": false,
+              "explain": {
+                "en": "5 would be the result if the values were different, for example `NULLIF(5, 6)`.",
+                "ro": "5 ar fi rezultatul dacă valorile ar fi diferite, de exemplu `NULLIF(5, 6)`."
+              },
+              "misconception": "nullif"
+            },
+            {
+              "text": {
+                "en": "0",
+                "ro": "0"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`NULLIF` never produces 0 by itself: it gives the first argument or NULL.",
+                "ro": "`NULLIF` nu produce niciodată 0 singură: dă primul argument sau NULL."
+              },
+              "misconception": "nullif"
+            },
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "`NULLIF(a, b)` gives NULL when a and b are equal.",
+                "ro": "`NULLIF(a, b)` dă NULL când a și b sunt egale."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s12",
+      "title": {
+        "en": "GREATEST with a NULL",
+        "ro": "GREATEST cu un NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l17-q4",
+          "question": {
+            "en": "What does `GREATEST(1, NULL, 3)` give?",
+            "ro": "Ce dă `GREATEST(1, NULL, 3)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "A NULL in the list makes the result NULL, for `GREATEST` as for `LEAST`.",
+                "ro": "Un NULL în listă face rezultatul NULL, la `GREATEST` ca și la `LEAST`."
+              }
+            },
+            {
+              "text": {
+                "en": "3",
+                "ro": "3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "NULL is not ignored here. If you want 3, put `NVL(value, 0)` in the list.",
+                "ro": "NULL nu este ignorat aici. Dacă vrei 3, pui `NVL(valoare, 0)` în listă."
+              },
+              "misconception": "null-func"
+            },
+            {
+              "text": {
+                "en": "1",
+                "ro": "1"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1 would be the result of `LEAST` if NULL were ignored, but `LEAST` does not ignore NULL either: it gives NULL.",
+                "ro": "1 ar fi rezultatul lui `LEAST` dacă NULL ar fi ignorat, dar nici `LEAST` nu ignoră NULL: dă NULL."
+              },
+              "misconception": "null-func"
+            }
+          ],
+          "review": "bd-l16"
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s13",
+      "title": {
+        "en": "GREATEST on text",
+        "ro": "GREATEST pe text"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l17-q5",
+          "question": {
+            "en": "What does `GREATEST('10', '9')` give?",
+            "ro": "Ce dă `GREATEST('10', '9')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`9`",
+                "ro": "`9`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. As text, `'9'` is greater than `'10'`, because the first character decides: «9» comes after «1». As numbers, `GREATEST(10, 9)` gives 10.",
+                "ro": "Corect. Ca text, `'9'` e mai mare decât `'10'`, fiindcă primul caracter decide: «9» vine după «1». Ca numere, `GREATEST(10, 9)` dă 10."
+              }
+            },
+            {
+              "text": {
+                "en": "`10`",
+                "ro": "`10`"
+              },
+              "correct": false,
+              "misconception": "least-greatest",
+              "explain": {
+                "en": "10 is larger as a number, but here both values are text. Text is compared character by character: «9» comes after «1».",
+                "ro": "10 e mai mare ca număr, dar aici ambele valori sunt text. Textul se compară caracter cu caracter: «9» vine după «1»."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: GREATEST works only with numbers",
+                "ro": "Eroare: GREATEST lucrează doar cu numere"
+              },
+              "correct": false,
+              "misconception": "least-greatest",
+              "explain": {
+                "en": "GREATEST works on any type that can be compared, text and dates included.",
+                "ro": "GREATEST merge pe orice tip care se poate compara, inclusiv text și date."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l17-s14",
+      "title": {
+        "en": "NULLIF on scholarships",
+        "ro": "NULLIF pe burse"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l17-q6",
+          "question": {
+            "en": "What does `NULLIF(bursa, 350)` give for Antonie (scholarship 450) and for Archip (scholarship 350)?",
+            "ro": "Ce dă `NULLIF(bursa, 350)` pentru Antonie (bursa 450) și pentru Archip (bursa 350)?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "NULL for Antonie and 350 for Archip",
+                "ro": "NULL pentru Antonie și 350 pentru Archip"
+              },
+              "correct": false,
+              "misconception": "nullif",
+              "explain": {
+                "en": "It is the other way round: NULLIF gives NULL when the two values are equal, that is for Archip, and the first argument when they differ, that is 450 for Antonie.",
+                "ro": "E invers: NULLIF dă NULL când cele două valori sunt egale, adică la Archip, și primul argument când diferă, adică 450 la Antonie."
+              }
+            },
+            {
+              "text": {
+                "en": "450 for Antonie and 350 for Archip",
+                "ro": "450 pentru Antonie și 350 pentru Archip"
+              },
+              "correct": false,
+              "misconception": "nullif",
+              "explain": {
+                "en": "NULLIF does not always return the first argument: when the two values are equal, as for Archip, it gives NULL.",
+                "ro": "NULLIF nu întoarce mereu primul argument: când cele două valori sunt egale, ca la Archip, dă NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "450 for Antonie and NULL for Archip",
+                "ro": "450 pentru Antonie și NULL pentru Archip"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. For Antonie the values differ, so 450 stays; for Archip they are equal, so NULL.",
+                "ro": "Corect. La Antonie valorile diferă, deci rămâne 450; la Archip sunt egale, deci NULL."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,685 @@
+{
+  "meta": {
+    "id": "bd-l03",
+    "title": {
+      "en": "Lesson 3: Calculations and text",
+      "ro": "Lecția 3: Calcule și text"
+    },
+    "shortTitle": {
+      "en": "L3: Calculations, ||, NULL",
+      "ro": "L3: Calcule, ||, NULL"
+    },
+    "source": {
+      "en": "Lab 2, Databases, UAIC FII",
+      "ro": "Laboratorul 2, Baze de date, UAIC FII"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l03-s1",
+      "title": {
+        "en": "The sponsor and the students without a scholarship",
+        "ro": "Sponsorul și studenții fără bursă"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l03-r1",
+          "prompt": {
+            "en": "A sponsor gives each student 10 lei. If you add 10 to the `bursa` column, what shows up next to a student who has no scholarship?",
+            "ro": "Un sponsor dă 10 lei fiecărui student. Dacă adaugi 10 la coloana `bursa`, ce apare în dreptul unui student care nu are bursă?"
+          },
+          "placeholder": {
+            "en": "Write what you think",
+            "ro": "Scrie ce crezi"
+          },
+          "answer": {
+            "en": "It stays empty (NULL). We do not know how much he had, so we do not know how much he has now. NULL + 10 is NULL, not 10. That is how the 8 students with no scholarship end up with no result.",
+            "ro": "Rămâne gol (NULL). Nu știm cât avea, deci nu știm cât are acum. NULL + 10 este NULL, nu 10. Așa rămân fără rezultat cei 8 studenți fără bursă."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, bursa FROM studenti"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s2",
+      "title": {
+        "en": "Calculations on columns",
+        "ro": "Calcule pe coloane"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "In `SELECT` you can write expressions with `+`, `-`, `*`, `/`. They are computed for each row. Watch what happens to NULL. Before the machine runs, guess which rows pass `WHERE bursa + 10 > 300`.",
+            "ro": "În `SELECT` poți scrie expresii cu `+`, `-`, `*`, `/`. Se calculează pentru fiecare rând. Urmărește ce se întâmplă cu NULL. Înainte să pornească mașina, ghicește ce rânduri trec de `WHERE bursa + 10 > 300`."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l03-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, bursa, bursa + 10 FROM studenti WHERE bursa + 10 > 300",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "13 rows; 8 have `bursa` NULL.",
+              "ro": "13 rânduri; 8 au `bursa` NULL."
+            },
+            "where": {
+              "en": "`bursa + 10 > 300` keeps 4 rows: 460 and 360 pass. 260 does not pass. For the 8 NULL rows the result of `bursa + 10` is NULL, the comparison is not TRUE, and they fall away.",
+              "ro": "`bursa + 10 > 300` păstrează 4 rânduri: 460 și 360 trec. 260 nu trece. Pentru cele 8 rânduri cu NULL, `bursa + 10` dă NULL, comparația nu e TRUE și ele cad."
+            },
+            "select": {
+              "en": "`bursa + 10` is computed row by row: 450 becomes 460, 350 becomes 360. Where `bursa` is NULL, the result would stay NULL.",
+              "ro": "`bursa + 10` se calculează rând cu rând: 450 devine 460, 350 devine 360. Unde `bursa` e NULL, rezultatul ar rămâne NULL."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s3",
+      "title": {
+        "en": "Gluing text: ||",
+        "ro": "Lipirea textului: ||"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The operator `||` (two vertical bars) glues strings together. Numbers turn into text by themselves. Here is the difference from `+`: `||` treats NULL as if it were an empty string. Guess which rows pass `WHERE 'Bursa: ' || bursa = 'Bursa: '`.",
+            "ro": "Operatorul `||` (două bare verticale) lipește șiruri de caractere. Numerele se transformă singure în text. Aici, diferența față de `+`: `||` trece peste NULL ca și cum ar fi un șir vid. Ghicește ce rânduri trec de `WHERE 'Bursa: ' || bursa = 'Bursa: '`."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l03-qm2",
+          "dataset": "facultate",
+          "sql": "SELECT nume, 'Bursa: ' || bursa FROM studenti WHERE 'Bursa: ' || bursa = 'Bursa: '",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "The same 13 rows.",
+              "ro": "Aceleași 13 rânduri."
+            },
+            "where": {
+              "en": "8 rows pass: exactly the ones with `bursa` NULL, because `'Bursa: ' || NULL` is `'Bursa: '`, not NULL. The 5 with a scholarship give `Bursa: 450` and so on, and fall away.",
+              "ro": "Trec 8 rânduri: exact cele cu `bursa` NULL, fiindcă `'Bursa: ' || NULL` este `'Bursa: '`, nu NULL. Cele 5 cu bursă dau `Bursa: 450` și așa mai departe, și cad."
+            },
+            "select": {
+              "en": "The 8 rows show `Bursa: ` with nothing after it, not NULL.",
+              "ro": "Cele 8 rânduri arată `Bursa: ` cu nimic după, nu NULL."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s4",
+      "title": {
+        "en": "NULL in expressions",
+        "ro": "NULL în expresii"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**NULL contaminates arithmetic.** Any calculation with a NULL gives NULL: `bursa + 10`, `bursa * 2`, `bursa / 3`. For 8 of the 13 students the result is empty, not 10.",
+            "ro": "**NULL contaminează aritmetica.** Orice calcul cu un NULL dă NULL: `bursa + 10`, `bursa * 2`, `bursa / 3`. Pentru 8 din cei 13 studenți rezultatul e gol, nu 10."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`||` does not behave like `+`.** `'Bursa: ' || bursa` gives `Bursa: ` when `bursa` is NULL. Oracle treats NULL as an empty string in concatenation (other systems give NULL).",
+            "ro": "**`||` nu se comportă ca `+`.** `'Bursa: ' || bursa` dă `Bursa: ` când `bursa` e NULL. Oracle tratează NULL ca șir vid la concatenare (alte sisteme dau NULL)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s5",
+      "title": {
+        "en": "Division and precedence",
+        "ro": "Împărțirea și precedența"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**There is no integer division.** `5 / 2` gives `2.5`, and `bursa / 100` for 450 gives `4.5`. Decimals are not cut.",
+            "ro": "**Nu există împărțire întreagă.** `5 / 2` dă `2.5`, iar `bursa / 100` pentru 450 dă `4.5`. Nu se taie zecimalele."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Parentheses change the result.** For a scholarship of 450: `(bursa + 100) * 2` gives 1100, but `bursa + 100 * 2` gives 650, because the multiplication happens first. And watch out: `||`, `+` and `-` have the same precedence, they are evaluated left to right. `1 + 2 || 'a'` gives `3a`, while `'a' || 1 + 2` gives `ORA-01722: invalid number`, because `'a' || 1` is computed first, that is `a1`, then `a1 + 2`.",
+            "ro": "**Parantezele schimbă rezultatul.** Pentru bursa 450: `(bursa + 100) * 2` dă 1100, dar `bursa + 100 * 2` dă 650, fiindcă înmulțirea se face prima. Și atenție: `||`, `+` și `-` au aceeași precedență, se evaluează de la stânga la dreapta. `1 + 2 || 'a'` dă `3a`, iar `'a' || 1 + 2` dă `ORA-01722: invalid number`, pentru că se calculează întâi `'a' || 1`, adică `a1`, apoi `a1 + 2`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s6",
+      "title": {
+        "en": "Operators, NULL and ||",
+        "ro": "Operatori, NULL și ||"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, bursa * 2 + 100\nFROM   studenti;\n\nSELECT 'Studentul ' || nume || ' este in anul ' || an AS info\nFROM   studenti;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Precedence",
+            "ro": "Precedența"
+          },
+          "content": {
+            "en": "`*` and `/` before `+` and `-`. Parentheses are computed first. `||`, `+`, `-` share the same level: left to right.",
+            "ro": "`*` și `/` înaintea lui `+` și `-`. Parantezele se calculează primele. `||`, `+`, `-` au aceeași treaptă: de la stânga la dreapta."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "NULL in arithmetic",
+            "ro": "NULL în aritmetică"
+          },
+          "content": {
+            "en": "A calculation containing a NULL gives NULL.",
+            "ro": "Un calcul în care apare un NULL dă NULL."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Concatenation ||",
+            "ro": "Concatenare ||"
+          },
+          "content": {
+            "en": "Glues texts; numbers become text by themselves; a NULL behaves like an empty string. Constant texts go between apostrophes.",
+            "ro": "Lipește texte; numerele devin text singure; un NULL se comportă ca un șir vid. Textele constante stau între apostrofuri."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s7",
+      "title": {
+        "en": "Why NULL + 10, but 'abc' || NULL?",
+        "ro": "De ce NULL + 10, dar 'abc' || NULL?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l03-r2",
+          "prompt": {
+            "en": "Why does `NULL + 10` give NULL, but `'abc' || NULL` gives `abc`?",
+            "ro": "De ce `NULL + 10` dă NULL, dar `'abc' || NULL` dă `abc`?"
+          },
+          "answer": {
+            "en": "Arithmetic with an unknown value stays unknown: we do not know what NULL is, so we do not know the sum. For concatenation, Oracle chose to treat NULL as empty text, so `abc` stays `abc`. It is an Oracle rule; other databases give NULL here too.",
+            "ro": "Aritmetica cu o valoare necunoscută rămâne necunoscută: nu știm cât e NULL, deci nu știm suma. La concatenare, Oracle a ales să trateze NULL ca text vid, așa că din `abc` rămâne `abc`. E o regulă a Oracle; alte baze de date dau NULL și aici."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s8",
+      "title": {
+        "en": "Scholarship plus ten",
+        "ro": "Bursă plus zece"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l03-q1",
+          "question": {
+            "en": "What does `bursa + 10` give for a student with no scholarship?",
+            "ro": "Ce dă `bursa + 10` pentru un student fără bursă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: NULL in a calculation gives NULL.",
+                "ro": "Corect: NULL în calcul dă NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "10",
+                "ro": "10"
+              },
+              "correct": false,
+              "misconception": "null-arith",
+              "explain": {
+                "en": "10 would mean NULL is 0. It is not: we do not know the value.",
+                "ro": "10 ar însemna că NULL e 0. Nu e: nu știm valoarea."
+              }
+            },
+            {
+              "text": {
+                "en": "Error",
+                "ro": "Eroare"
+              },
+              "correct": false,
+              "misconception": "null-arith",
+              "explain": {
+                "en": "There is no error; the calculation runs and the result is NULL.",
+                "ro": "Nu e nicio eroare; calculul se face și rezultatul e NULL."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s9",
+      "title": {
+        "en": "Parentheses",
+        "ro": "Paranteze"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l03-q2",
+          "question": {
+            "en": "For a scholarship of 450, what do `(bursa + 100) / 2` and `bursa + 100 / 2` give?",
+            "ro": "Pentru bursa 450, ce dau `(bursa + 100) / 2` și `bursa + 100 / 2`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "275 and 500",
+                "ro": "275 și 500"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: (450 + 100) / 2 = 275, and 450 + (100 / 2) = 500.",
+                "ro": "Corect: (450 + 100) / 2 = 275, iar 450 + (100 / 2) = 500."
+              }
+            },
+            {
+              "text": {
+                "en": "The same in both: 275",
+                "ro": "La fel în ambele: 275"
+              },
+              "correct": false,
+              "misconception": "left-to-right",
+              "explain": {
+                "en": "That is what you get by reading `bursa + 100 / 2` from left to right: 450 + 100 = 550, then 550 / 2 = 275. But division goes first: 450 + 50 = 500. The first expression, with parentheses, does give 275.",
+                "ro": "Asta obții citind `bursa + 100 / 2` de la stânga la dreapta: 450 + 100 = 550, apoi 550 / 2 = 275. Dar împărțirea se face prima: 450 + 50 = 500. Prima expresie, cu paranteză, chiar dă 275."
+              }
+            },
+            {
+              "text": {
+                "en": "500 in both",
+                "ro": "500 în ambele"
+              },
+              "correct": false,
+              "misconception": "parens-ignored",
+              "explain": {
+                "en": "That is what you get by ignoring the parentheses: 450 + 100 / 2 = 500. But in `(bursa + 100) / 2` the parentheses force the addition first: 550 / 2 = 275.",
+                "ro": "Asta obții ignorând parantezele: 450 + 100 / 2 = 500. Dar în `(bursa + 100) / 2` parantezele forțează adunarea prima: 550 / 2 = 275."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s10",
+      "title": {
+        "en": "A number in text",
+        "ro": "Număr în text"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l03-q3",
+          "question": {
+            "en": "What does `'Anul ' || an || '.'` give for a second-year student?",
+            "ro": "Ce dă `'Anul ' || an || '.'` pentru un student din anul 2?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`Anul 2.`",
+                "ro": "`Anul 2.`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: the number becomes text by itself.",
+                "ro": "Corect: numărul devine text singur."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: `an` is a number, not text",
+                "ro": "Eroare: `an` e număr, nu text"
+              },
+              "correct": false,
+              "misconception": "implicit-conv",
+              "explain": {
+                "en": "Oracle converts the number to text with `||`.",
+                "ro": "Oracle convertește numărul în text la `||`."
+              }
+            },
+            {
+              "text": {
+                "en": "`Anul .`",
+                "ro": "`Anul .`"
+              },
+              "correct": false,
+              "misconception": "number-ignored",
+              "explain": {
+                "en": "The number does not vanish; it is glued into the text.",
+                "ro": "Numărul nu dispare; el e lipit în text."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s11",
+      "title": {
+        "en": "Text with NULL",
+        "ro": "Text cu NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l03-q4",
+          "question": {
+            "en": "What does `'Bursa: ' || bursa` give when `bursa` is NULL?",
+            "ro": "Ce dă `'Bursa: ' || bursa` când `bursa` e NULL?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`Bursa: ` (the text with nothing after it)",
+                "ro": "`Bursa: ` (textul fără nimic după)"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: with `||`, NULL behaves like an empty string.",
+                "ro": "Corect: la `||`, NULL se poartă ca un șir vid."
+              }
+            },
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": false,
+              "misconception": "concat-null",
+              "explain": {
+                "en": "NULL is the answer for `bursa + 10`, not for `||`. With `||`, Oracle treats the NULL as an empty string. (And `'Bursa: ' + bursa` does not give NULL either: it fails with ORA-01722, invalid number.)",
+                "ro": "NULL e răspunsul pentru `bursa + 10`, nu pentru `||`. La `||`, Oracle tratează NULL-ul ca șir vid. (Iar `'Bursa: ' + bursa` nu dă NULL nici el: eșuează cu ORA-01722, invalid number.)"
+              }
+            },
+            {
+              "text": {
+                "en": "`Bursa: 0`",
+                "ro": "`Bursa: 0`"
+              },
+              "correct": false,
+              "misconception": "null-arith",
+              "explain": {
+                "en": "NULL is not 0 here either.",
+                "ro": "NULL nu e 0 nici aici."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s12",
+      "title": {
+        "en": "Parentheses and minus",
+        "ro": "Paranteze și minus"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l03-q5",
+          "question": {
+            "en": "For a scholarship of 350, what do `(bursa - 50) * 2` and `bursa - 50 * 2` give?",
+            "ro": "Pentru bursa 350, ce dau `(bursa - 50) * 2` și `bursa - 50 * 2`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "250 in both",
+                "ro": "250 în ambele"
+              },
+              "correct": false,
+              "misconception": "parens-ignored",
+              "explain": {
+                "en": "That is what you get by ignoring the parentheses. In `(bursa - 50) * 2` the subtraction comes first: 300 * 2 = 600.",
+                "ro": "Asta obții ignorând parantezele. În `(bursa - 50) * 2` scăderea se face prima: 300 * 2 = 600."
+              }
+            },
+            {
+              "text": {
+                "en": "600 in both",
+                "ro": "600 în ambele"
+              },
+              "correct": false,
+              "misconception": "left-to-right",
+              "explain": {
+                "en": "That is what you get reading `bursa - 50 * 2` left to right: 350 - 50 = 300, then 300 * 2 = 600. But multiplication comes first: 350 - 100 = 250.",
+                "ro": "Asta obții citind `bursa - 50 * 2` de la stânga la dreapta: 350 - 50 = 300, apoi 300 * 2 = 600. Dar înmulțirea se face prima: 350 - 100 = 250."
+              }
+            },
+            {
+              "text": {
+                "en": "600 and 250",
+                "ro": "600 și 250"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: (350 - 50) * 2 = 600, while 350 - (50 * 2) = 250, because multiplication comes before subtraction.",
+                "ro": "Corect: (350 - 50) * 2 = 600, iar 350 - (50 * 2) = 250, fiindcă înmulțirea se face înaintea scăderii."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s13",
+      "title": {
+        "en": "A number stuck to text",
+        "ro": "Un număr lipit de text"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l03-q6",
+          "question": {
+            "en": "Popescu is in year 3, group `A2`. What does `an || grupa` give for him?",
+            "ro": "Popescu este în anul 3, grupa `A2`. Ce dă `an || grupa` pentru el?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`3A2`",
+                "ro": "`3A2`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: `||` turns the number 3 into the text `'3'` and sticks it to `A2`.",
+                "ro": "Corect: `||` transformă numărul 3 în textul `'3'` și îl lipește de `A2`."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: `an` is a number and `grupa` is text",
+                "ro": "Eroare: `an` e număr, iar `grupa` e text"
+              },
+              "correct": false,
+              "misconception": "implicit-conv",
+              "explain": {
+                "en": "At `||` Oracle converts the number to text by itself; no `TO_CHAR` is needed.",
+                "ro": "La `||` Oracle convertește singur numărul în text; nu e nevoie de `TO_CHAR`."
+              }
+            },
+            {
+              "text": {
+                "en": "`A2`",
+                "ro": "`A2`"
+              },
+              "correct": false,
+              "misconception": "number-ignored",
+              "explain": {
+                "en": "The number does not vanish when concatenating: it becomes text and stays in front.",
+                "ro": "Numărul nu dispare la concatenare: devine text și rămâne în față."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s14",
+      "title": {
+        "en": "Scholarship plus an amount",
+        "ro": "Bursa plus o sumă"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l03-ex-2-inline-2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "\"Exercise: Display half of the value of the students' scholarship after an amount of 100 ron has been added to it first. Mind the operator precedence.\" (quoted from the lab)\n\n(Display the last name, the first name and the computed value, for all 13 students. For those without a scholarship the result stays NULL.)",
+            "ro": "„Exerciţiu: Afişaţi jumătate din valoarea bursei studenţilor la care a fost adăugat în prealabil o sumă de 100 ron. Ţineţi cont de precedenţa operatorilor.”\n\n(Afișează numele, prenumele și valoarea calculată, pentru toți cei 13 studenți. La cei fără bursă rezultatul rămâne NULL.)"
+          },
+          "official": {
+            "lab": 2,
+            "ex": "inline-2"
+          },
+          "solution": "SELECT nume, prenume, (bursa + 100) / 2 FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "First you add the amount, only then divide by 2.",
+              "ro": "Mai întâi adaugi suma, abia apoi împarți la 2."
+            },
+            {
+              "en": "`SELECT nume, prenume, (... + ...) / ... FROM studenti`",
+              "ro": "`SELECT nume, prenume, (... + ...) / ... FROM studenti`"
+            },
+            {
+              "en": "The addition must happen first, so it goes in parentheses: `(bursa + 100) / 2`. Without parentheses, only 100 would be divided by 2.",
+              "ro": "Adunarea trebuie să se facă prima, deci stă între paranteze: `(bursa + 100) / 2`. Fără paranteze, doar 100 s-ar împărți la 2."
+            }
+          ],
+          "explain": {
+            "en": "Five students have a scholarship: 275, 225, 225, 175 and 225. The other 8 stay with NULL.",
+            "ro": "Cinci studenți au bursă: 275, 225, 225, 175 și 225. Ceilalți 8 rămân cu NULL."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l03-s15",
+      "title": {
+        "en": "A sentence from columns",
+        "ro": "O propoziție din coloane"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l03-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display, in a single column named `info`, the sentence \"Studentul Popescu Bogdan este inmatriculat in anul 3.\" for each student: with the last name, first name and year taken from the table (without diacritics, with a full stop at the end).",
+            "ro": "Afișează, într-o singură coloană numită `info`, propoziția „Studentul Popescu Bogdan este inmatriculat in anul 3.” pentru fiecare student: cu numele, prenumele și anul luate din tabel (fără diacritice, cu punct la sfârșit)."
+          },
+          "solution": "SELECT 'Studentul ' || nume || ' ' || prenume || ' este inmatriculat in anul ' || an || '.' AS info FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "aliases": [
+              "INFO"
+            ]
+          },
+          "hints": [
+            {
+              "en": "The sentence is made of constant texts and columns, glued one after another.",
+              "ro": "Propoziția se compune din texte constante și din coloane, lipite una după alta."
+            },
+            {
+              "en": "`'Studentul ' || nume || ' ' || ... || an || '.' AS info`",
+              "ro": "`'Studentul ' || nume || ' ' || ... || an || '.' AS info`"
+            },
+            {
+              "en": "The spaces are inside the constant texts: `'Studentul '`, `' '`, `' este inmatriculat in anul '`. The alias without quotes, `info`.",
+              "ro": "Spațiile sunt în interiorul textelor constante: `'Studentul '`, `' '`, `' este inmatriculat in anul '`. Aliasul fără ghilimele, `info`."
+            }
+          ],
+          "explain": {
+            "en": "Each piece between apostrophes is constant text, while `nume`, `prenume`, `an` are columns. `an` is a number, but `||` converts it to text.",
+            "ro": "Fiecare bucată între apostrofuri e text constant, iar `nume`, `prenume`, `an` sunt coloane. `an` e număr, dar `||` îl convertește în text."
+          }
+        }
+      ]
+    }
+  ]
+}

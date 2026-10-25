@@ -1,0 +1,721 @@
+{
+  "meta": {
+    "id": "bd-l06",
+    "title": {
+      "en": "Lesson 6: LIKE",
+      "ro": "Lecția 6: LIKE"
+    },
+    "shortTitle": {
+      "en": "L6: LIKE",
+      "ro": "L6: LIKE"
+    },
+    "source": {
+      "en": "Databases lab 2, UAIC (Oracle SQL); queries checked on Oracle 11g",
+      "ro": "Laboratorul 2 de Baze de date, UAIC (Oracle SQL); interogări verificate pe Oracle 11g"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l06-s1",
+      "title": {
+        "en": "How do you search by part of a name?",
+        "ro": "Cum cauți după o bucată de nume?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l06-reflect-pre",
+          "prompt": {
+            "en": "How would you find, in the table, all the surnames that end in \"escu\"? You cannot write the full names, because you do not know them in advance.",
+            "ro": "Cum ai găsi, în tabel, toate numele care se termină în «escu»? Nu poți scrie numele întregi, pentru că nu le știi dinainte."
+          },
+          "answer": {
+            "en": "You search for a **pattern**, not an exact value: \"anything, followed by escu\". In SQL the pattern is written with `LIKE`, and the `%` sign stands for any number of characters: `nume LIKE '%escu'`. It finds Popescu and Pintescu.",
+            "ro": "Cauți un **șablon**, nu o valoare exactă: «orice, urmat de escu». În SQL, șablonul se scrie cu `LIKE`, iar semnul `%` ține locul oricâtor caractere: `nume LIKE '%escu'`. Găsește Popescu și Pintescu."
+          },
+          "placeholder": {
+            "en": "Write your answer here…",
+            "ro": "Scrie-ți răspunsul aici…"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, prenume, an FROM studenti ORDER BY nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s2",
+      "title": {
+        "en": "The pattern slides over the names",
+        "ro": "Șablonul glisează peste nume"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The pattern `'%escu'` is laid over each name. `%` can be any length (even empty), and the letters in the pattern must match exactly. Press \"Next\" and watch how it fits each name.",
+            "ro": "Șablonul `'%escu'` se așază peste fiecare nume. `%` poate fi oricât de lung (chiar gol), iar literele din șablon trebuie să se potrivească exact. Apasă «Următorul» și urmărește cum se potrivește pe fiecare nume."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l06-viz1",
+          "widget": "like-slider",
+          "predict": false,
+          "props": {
+            "pattern": "%escu",
+            "values": [
+              "Popescu",
+              "Prelipcean",
+              "Antonie",
+              "Arhire",
+              "Panaite",
+              "Bodnar",
+              "Archip",
+              "Ciobotariu",
+              "Bodnar",
+              "Pintescu",
+              "Arhire",
+              "Cobzaru",
+              "Bucur"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s3",
+      "title": {
+        "en": "One more sign: _ means exactly one character",
+        "ro": "Încă un semn: _ înseamnă un singur caracter"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The `_` sign stands for **exactly one character**. The pattern `'_r%'` means: any one character, then the letter `r`, then anything. **Guess which names fit, then check.**",
+            "ro": "Semnul `_` ține locul **exact unui caracter**. Șablonul `'_r%'` înseamnă: un caracter oarecare, apoi litera `r`, apoi orice. **Ghicește care nume se potrivesc, apoi verifică.**"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l06-viz2",
+          "widget": "like-slider",
+          "predict": true,
+          "props": {
+            "pattern": "_r%",
+            "values": [
+              "Popescu",
+              "Prelipcean",
+              "Antonie",
+              "Arhire",
+              "Panaite",
+              "Bodnar",
+              "Archip",
+              "Ciobotariu",
+              "Bodnar",
+              "Pintescu",
+              "Arhire",
+              "Cobzaru",
+              "Bucur"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s4",
+      "title": {
+        "en": "NOT LIKE: \"exactly once\"",
+        "ro": "NOT LIKE: «exact o dată»"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "How do you find surnames that contain the letter `o` **exactly once**? There is an `o` (`LIKE '%o%'`), but not two (`NOT LIKE '%o%o%'`). The two conditions are joined with `AND`. The order of letters in the pattern matters: `'%o%o%'` means \"an o, then, further on, another o\", not two adjacent o's. On our data this leaves Antonie, Bodnar (twice), Cobzaru and Popescu; Ciobotariu has two `o` and goes out.",
+            "ro": "Cum găsești numele de familie care conțin litera `o` **exact o dată**? Are un `o` (`LIKE '%o%'`), dar nu are două (`NOT LIKE '%o%o%'`). Cele două condiții se leagă cu `AND`. Ordinea literelor din șablon contează: `'%o%o%'` înseamnă «un o, apoi, mai departe, încă un o», nu două litere «o» alăturate. Pe datele noastre rămân Antonie, Bodnar (de două ori), Cobzaru și Popescu; Ciobotariu are două `o` și iese."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume\nFROM studenti\nWHERE nume LIKE '%o%' AND nume NOT LIKE '%o%o%';"
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s5",
+      "title": {
+        "en": "LIKE tells uppercase from lowercase",
+        "ro": "LIKE face diferență între majuscule și minuscule"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "`LIKE` is **case-sensitive**, like any text comparison. `prenume LIKE '%andr%'` finds only Alexandru and Alexandra (where \"andr\" is lowercase) and does not find Andrei or Andrada, which start with \"Andr\". On the nume column the same pattern finds nothing.",
+            "ro": "`LIKE` este **sensibil la majuscule**, ca orice comparație de text. `prenume LIKE '%andr%'` găsește doar Alexandru și Alexandra (acolo «andr» e scris cu litere mici) și nu găsește Andrei sau Andrada, care încep cu «Andr». Pe coloana nume, același șablon nu găsește nimic."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT prenume FROM studenti WHERE prenume LIKE '%andr%';"
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s6",
+      "title": {
+        "en": "When you want the actual % or _ sign",
+        "ro": "Când vrei chiar semnul % sau _"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "If you want the actual `%` or `_` character, you must take it out of its wildcard role with **`ESCAPE`**. There is no default escape: the lab page says `\\` is enough, but without `ESCAPE '\\'` the backslash is just an ordinary character that LIKE looks for in the value (`nume LIKE '%\\_%'` without ESCAPE returns 0 rows). `nume LIKE '%_%'` returns all 13 (because `_` is a wildcard), while `nume LIKE '%\\_%' ESCAPE '\\'` looks for a real underscore and returns none.",
+            "ro": "Dacă cauți chiar caracterul `%` sau `_`, trebuie să-l scoți din rolul de joker cu **`ESCAPE`**. Nu există un escape implicit: pagina laboratorului spune că ajunge `\\`, dar fără `ESCAPE '\\'` bara este un caracter obișnuit pe care LIKE îl caută în valoare (`nume LIKE '%\\_%'` fără ESCAPE aduce 0 rânduri). `nume LIKE '%_%'` aduce toți cei 13 (fiindcă `_` e joker), iar `nume LIKE '%\\_%' ESCAPE '\\'` caută un underscore adevărat și nu aduce niciunul."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume FROM studenti WHERE nume LIKE '%\\_%' ESCAPE '\\';"
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s7",
+      "title": {
+        "en": "The syntax of LIKE",
+        "ro": "Sintaxa lui LIKE"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT coloane\nFROM tabel\nWHERE coloană [NOT] LIKE 'șablon' [ESCAPE 'c'];"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "%",
+            "ro": "%"
+          },
+          "content": {
+            "en": "Stands for any number of characters, including none.",
+            "ro": "Ține locul a oricâte caractere, inclusiv a niciunuia."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "_",
+            "ro": "_"
+          },
+          "content": {
+            "en": "Stands for exactly one character.",
+            "ro": "Ține locul exact unui caracter."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "LIKE",
+            "ro": "LIKE"
+          },
+          "content": {
+            "en": "Matches the whole text against the pattern, telling uppercase from lowercase. NOT LIKE keeps the rows that do not match.",
+            "ro": "Potrivește tot textul cu șablonul, cu diferență între majuscule și minuscule. NOT LIKE păstrează rândurile care nu se potrivesc."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s8",
+      "title": {
+        "en": "Why does '%andr%' not find \"Andrei\"?",
+        "ro": "De ce '%andr%' nu găsește «Andrei»?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l06-reflect-why",
+          "prompt": {
+            "en": "Why does `prenume LIKE '%andr%'` not find \"Andrei\"?",
+            "ro": "De ce `prenume LIKE '%andr%'` nu găsește «Andrei»?"
+          },
+          "answer": {
+            "en": "Because LIKE compares letter by letter and tells uppercase from lowercase. \"Andrei\" contains \"Andr\" with a capital A, not \"andr\". The pattern finds only Alexandru and Alexandra, where \"andr\" appears in lowercase inside the name.",
+            "ro": "Pentru că LIKE compară literă cu literă și face diferență între majuscule și minuscule. În «Andrei» apare «Andr», cu A mare, nu «andr». Șablonul găsește doar Alexandru și Alexandra, unde «andr» apare cu litere mici, în interiorul numelui."
+          },
+          "placeholder": {
+            "en": "Explain in your own words…",
+            "ro": "Explică în cuvintele tale…"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s9",
+      "title": {
+        "en": "Two letters a",
+        "ro": "Două litere a"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l06-mcq1",
+          "question": {
+            "en": "What does `prenume LIKE '%a%a%'` match?",
+            "ro": "Ce potrivește `prenume LIKE '%a%a%'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "First names with exactly two letters \"a\"",
+                "ro": "Prenumele cu exact două litere «a»"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`%a%a%` does not limit the count: a name with three \"a\" matches too. For \"exactly two\" you need one more condition, which excludes names with three \"a\".",
+                "ro": "`%a%a%` nu limitează numărul: un nume cu trei «a» se potrivește și el. Pentru «exact două» ai nevoie de încă o condiție, care exclude numele cu trei «a»."
+              },
+              "misconception": "like-wildcard"
+            },
+            {
+              "text": {
+                "en": "First names containing \"aa\" (two adjacent letters)",
+                "ro": "Prenumele care conțin «aa» (două litere alăturate)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`%` can be anything between the two letters, they need not be adjacent. The pattern for \"aa\" would be `'%aa%'` (0 rows on our data).",
+                "ro": "`%` poate fi orice între cele două litere, nu e nevoie să fie alăturate. Șablonul pentru «aa» ar fi `'%aa%'` (0 rânduri pe datele noastre)."
+              },
+              "misconception": "like-wildcard"
+            },
+            {
+              "text": {
+                "en": "First names with at least two lowercase letters \"a\", anywhere in the name",
+                "ro": "Prenumele cu cel puțin două litere «a» mici, oriunde în nume"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Around and between the two \"a\" letters, `%` can be anything. On our data: Ioana (three times), Raluca, Andrada, Alexandra, that is 6 rows.",
+                "ro": "Corect. Între cele două «a» și în jurul lor `%` poate fi orice. Pe datele noastre: Ioana (de trei ori), Raluca, Andrada, Alexandra, adică 6 rânduri."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s10",
+      "title": {
+        "en": "Names starting with p",
+        "ro": "Nume care încep cu p"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l06-mcq2",
+          "question": {
+            "en": "How many rows does `WHERE nume LIKE 'p%'` return?",
+            "ro": "Câte rânduri întoarce `WHERE nume LIKE 'p%'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "4 rows: Popescu, Prelipcean, Panaite, Pintescu",
+                "ro": "4 rânduri: Popescu, Prelipcean, Panaite, Pintescu"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Those 4 names would be returned by `'P%'`, with a capital P. LIKE does not ignore the difference between uppercase and lowercase.",
+                "ro": "Aceste 4 nume le-ar aduce `'P%'`, cu P mare. LIKE nu ignoră diferența dintre majuscule și minuscule."
+              },
+              "misconception": "case-sens"
+            },
+            {
+              "text": {
+                "en": "0 rows",
+                "ro": "0 rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. All surnames starting with P have a capital P, and `'p%'` asks for a small p.",
+                "ro": "Corect. Toate numele care încep cu P au P mare, iar `'p%'` cere p mic."
+              }
+            },
+            {
+              "text": {
+                "en": "An error, because the pattern is not capitalised",
+                "ro": "Eroare, fiindcă șablonul nu e scris cu literă mare"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no error: the pattern is just a piece of text. Simply, nothing matches.",
+                "ro": "Nu apare nicio eroare: șablonul e un text oarecare. Pur și simplu nu se potrivește nimic."
+              },
+              "misconception": "case-sens"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s11",
+      "title": {
+        "en": "The _ sign",
+        "ro": "Semnul _"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l06-mcq3",
+          "question": {
+            "en": "What does `_` mean in a LIKE pattern?",
+            "ro": "Ce înseamnă `_` într-un șablon LIKE?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Exactly one arbitrary character",
+                "ro": "Exact un caracter oarecare"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. For example `'B____'` (B and four `_`) matches five-letter surnames starting with B: Bucur.",
+                "ro": "Corect. De exemplu `'B____'` (B și patru `_`) se potrivește cu numele de cinci litere care încep cu B: Bucur."
+              }
+            },
+            {
+              "text": {
+                "en": "Zero or more characters, like `%`",
+                "ro": "Zero sau mai multe caractere, ca `%`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is what `%` does. The underscore counts: each `_` takes exactly one place.",
+                "ro": "Asta face `%`. Underscore-ul numără: fiecare `_` ocupă exact un loc."
+              },
+              "misconception": "like-wildcard"
+            },
+            {
+              "text": {
+                "en": "The actual underscore character, with no special role",
+                "ro": "Chiar caracterul underscore, fără rol special"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`_` is a wildcard. If you want the actual underscore you write `ESCAPE`, for example `LIKE '%\\_%' ESCAPE '\\'`.",
+                "ro": "`_` este joker. Dacă vrei chiar underscore-ul, scrii `ESCAPE`, de exemplu `LIKE '%\\_%' ESCAPE '\\'`."
+              },
+              "misconception": "like-escape"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s12",
+      "title": {
+        "en": "LIKE and AND",
+        "ro": "LIKE și AND"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l06-mcq4",
+          "question": {
+            "en": "Which condition returns only the student Bucur?",
+            "ro": "Care condiție întoarce doar studentul Bucur?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`nume LIKE 'B%' OR an = 1`",
+                "ro": "`nume LIKE 'B%' OR an = 1`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "With OR it is enough that one condition is true: it returns 6 rows (the 3 with B and the 4 first-years, Bucur being in both groups).",
+                "ro": "Cu OR ajunge să fie adevărată una dintre condiții: aduce 6 rânduri (cei 3 cu B și cei 4 din anul 1, Bucur fiind în ambele grupuri)."
+              },
+              "misconception": "and-or"
+            },
+            {
+              "text": {
+                "en": "`nume LIKE 'b%' AND an = 1`",
+                "ro": "`nume LIKE 'b%' AND an = 1`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`'b%'` asks for a small b, and the surnames start with a capital B: 0 rows.",
+                "ro": "`'b%'` cere b mic, iar numele încep cu B mare: 0 rânduri."
+              },
+              "misconception": "case-sens"
+            },
+            {
+              "text": {
+                "en": "`nume LIKE 'B%' AND an = 1`",
+                "ro": "`nume LIKE 'B%' AND an = 1`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Both conditions must be true: the surname starts with B and the student is in year 1. Only Bucur meets both.",
+                "ro": "Corect. Ambele condiții trebuie să fie adevărate: numele începe cu B și e în anul 1. Numai Bucur le îndeplinește pe amândouă."
+              }
+            }
+          ],
+          "review": "bd-l04"
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s13",
+      "title": {
+        "en": "The underscore in LIKE",
+        "ro": "Underscore-ul în LIKE"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l06-mcq5",
+          "question": {
+            "en": "How many rows does `SELECT * FROM studenti WHERE nume LIKE '%_%'` return?",
+            "ro": "Câte rânduri întoarce `SELECT * FROM studenti WHERE nume LIKE '%_%'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0 rows: no name contains the `_` character",
+                "ro": "0 rânduri: niciun nume nu conține caracterul `_`"
+              },
+              "correct": false,
+              "misconception": "like-escape",
+              "explain": {
+                "en": "In a pattern, `_` is not the underscore character but the one-character wildcard. `'%_%'` only asks for a name of at least one letter.",
+                "ro": "În șablon, `_` nu e caracterul underscore, ci jokerul pentru un caracter. `'%_%'` cere doar un nume de cel puțin o literă."
+              }
+            },
+            {
+              "text": {
+                "en": "13 rows: all the students",
+                "ro": "13 rânduri: toți studenții"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `'%_%'` means \"at least one character of any kind\", so every name matches. For a real underscore you write `LIKE '%\\_%' ESCAPE '\\'`.",
+                "ro": "Corect. `'%_%'` înseamnă „cel puțin un caracter oarecare”, deci se potrivește orice nume. Pentru un underscore adevărat scrii `LIKE '%\\_%' ESCAPE '\\'`."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: `_` must be written `\\_`",
+                "ro": "Eroare: `_` trebuie scris `\\_`"
+              },
+              "correct": false,
+              "misconception": "like-escape",
+              "explain": {
+                "en": "There is no default escape. `'%\\_%'` without `ESCAPE '\\'` looks for an actual backslash followed by a character (0 rows here), and `'%_%'` runs without an error.",
+                "ro": "Nu există escape implicit. `'%\\_%'` fără `ESCAPE '\\'` caută chiar un backslash urmat de un caracter (0 rânduri aici), iar `'%_%'` rulează fără eroare."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s14",
+      "title": {
+        "en": "A P surname in year 1",
+        "ro": "Nume cu P în anul 1"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l06-ex-2-10",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 10): \"Show the students whose surname starts with the letter P and who are in year 1.\"\n\nShow all columns.",
+            "ro": "Enunț oficial (laborator 2, ex. 10): «Afișați studenții al căror nume începe cu litera P și sunt în anul 1 de studiu.»\n\nAfișează toate coloanele."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 10
+          },
+          "starter": "SELECT * FROM studenti WHERE nume LIKE '' AND an = ",
+          "solution": "SELECT * FROM studenti WHERE nume LIKE 'P%' AND an = 1",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Pick the table, then filter: two conditions true at the same time, one on text (starts with P) and one on a number (year 1).",
+              "ro": "Alege tabelul, apoi filtrează: două condiții adevărate în același timp, una pe text (începe cu P) și una pe număr (anul 1)."
+            },
+            {
+              "en": "`SELECT * FROM studenti WHERE nume LIKE '...' AND an = ...`. \"Starts with P\" means P followed by anything: `'P%'`.",
+              "ro": "`SELECT * FROM studenti WHERE nume LIKE '...' AND an = ...`. «Începe cu P» înseamnă P urmat de orice: `'P%'`."
+            },
+            {
+              "en": "P is written in capitals, as in the data: `'P%'`, not `'p%'`. The two conditions are joined with `AND`, not `OR`.",
+              "ro": "P se scrie cu majusculă, ca în date: `'P%'`, nu `'p%'`. Cele două condiții se leagă cu `AND`, nu cu `OR`."
+            }
+          ],
+          "explain": {
+            "en": "`'P%'` keeps Popescu, Prelipcean, Panaite and Pintescu, and `an = 1` leaves only Pintescu.",
+            "ro": "`'P%'` păstrează Popescu, Prelipcean, Panaite și Pintescu, iar `an = 1` îl lasă doar pe Pintescu."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s15",
+      "title": {
+        "en": "Scholarship holders in half-year A",
+        "ro": "Bursieri din semianul A"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l06-ex-2-13",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 13): \"Show the scholarship students from half-year A.\"\n\nShow all columns. Half-year A means the groups that start with the letter A (A1, A2, A4).",
+            "ro": "Enunț oficial (laborator 2, ex. 13): «Afișați studenții bursieri din semianul A.»\n\nAfișează toate coloanele. Semianul A înseamnă grupele care încep cu litera A (A1, A2, A4)."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 13
+          },
+          "solution": "SELECT * FROM studenti WHERE grupa LIKE 'A%' AND bursa IS NOT NULL",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Two conditions: the group belongs to half-year A and the student has a scholarship.",
+              "ro": "Două condiții: grupa face parte din semianul A și studentul are bursă."
+            },
+            {
+              "en": "`WHERE grupa LIKE '...' AND bursa IS ...`. All groups in half-year A start with the same letter.",
+              "ro": "`WHERE grupa LIKE '...' AND bursa IS ...`. Grupele din semianul A încep toate cu aceeași literă."
+            },
+            {
+              "en": "\"Has a scholarship\" is written `bursa IS NOT NULL`, not `bursa <> NULL` and not `bursa = ''`.",
+              "ro": "«Are bursă» se scrie `bursa IS NOT NULL`, nu `bursa <> NULL` și nu `bursa = ''`."
+            }
+          ],
+          "explain": {
+            "en": "`grupa LIKE 'A%'` keeps groups A1, A2, A4, and `bursa IS NOT NULL` leaves three students: Antonie, Archip and Ciobotariu.",
+            "ro": "`grupa LIKE 'A%'` păstrează grupele A1, A2, A4, iar `bursa IS NOT NULL` lasă trei studenți: Antonie, Archip și Ciobotariu."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s16",
+      "title": {
+        "en": "Exactly one \"a\" in the first name",
+        "ro": "Exact un «a» în prenume"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l06-ex-2-14",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 14): \"Show all the information about the students whose first name contains the letter 'a' EXACTLY once (ignore the letter 'A' at the beginning of some first names).\"",
+            "ro": "Enunț oficial (laborator 2, ex. 14): «Afișați toate informatiile despre studentii ale caror prenume contine EXACT o singura data litera 'a' (se ignora litera 'A' de la inceputul unor prenume).»"
+          },
+          "official": {
+            "lab": 2,
+            "ex": 14
+          },
+          "solution": "SELECT * FROM studenti WHERE prenume LIKE '%a%' AND prenume NOT LIKE '%a%a%'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "The first name must have a lowercase \"a\", but not two. Think of two conditions joined by AND, one positive and one negated.",
+              "ro": "Prenumele trebuie să aibă un «a» mic, dar nu două. Gândește-te la două condiții legate prin AND, una pozitivă și una negată."
+            },
+            {
+              "en": "`WHERE prenume LIKE '%a%' AND prenume NOT LIKE '...'`. The second pattern describes \"an a, then another a\".",
+              "ro": "`WHERE prenume LIKE '%a%' AND prenume NOT LIKE '...'`. Al doilea șablon descrie «un a, apoi încă un a»."
+            },
+            {
+              "en": "The capital A at the start is not counted: patterns with a lowercase `a` do not see it. That is why Andrei is out, but Andreea (a single lowercase `a`, at the end) is in.",
+              "ro": "Litera A mare de la început nu se numără: șabloanele cu `a` mic nu o văd. De aceea Andrei nu intră, dar Andreea (un singur `a` mic, la sfârșit) intră."
+            }
+          ],
+          "explain": {
+            "en": "5 first names remain: Bogdan, Radu, Alexandru, Ciprian, Andreea.",
+            "ro": "Rămân 5 prenume: Bogdan, Radu, Alexandru, Ciprian, Andreea."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l06-s17",
+      "title": {
+        "en": "Two letters \"a\"",
+        "ro": "Două litere «a»"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l06-ex-2-11",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 11): \"Show all the information about the students who have two occurrences of the letter “a” in their first name.\"\n\nIn the app: the lowercase letter a (not capital A), exactly twice. Show all columns.",
+            "ro": "Enunț oficial (laborator 2, ex. 11): «Afișați toate informațiile despre studenții care au două apariții ale literei “a” în prenume.»\n\nÎn aplicație: litera a mică (nu și A mare), exact de două ori. Afișează toate coloanele."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 11
+          },
+          "solution": "SELECT * FROM studenti WHERE prenume LIKE '%a%a%' AND prenume NOT LIKE '%a%a%a%'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "\"Exactly twice\" means it has at least two and does not have three.",
+              "ro": "«Exact de două ori» înseamnă că are cel puțin două și nu are trei."
+            },
+            {
+              "en": "At least two `a` is written `LIKE '%a%a%'`. For \"not three\" you need a `NOT LIKE` with three `a`.",
+              "ro": "Cel puțin două `a` se scrie `LIKE '%a%a%'`. Pentru «nu trei» ai nevoie de un `NOT LIKE` cu trei `a`."
+            },
+            {
+              "en": "Only lowercase `a` counts: Andrada and Alexandra start with a capital A that LIKE does not match with `a`, yet they still have two lowercase `a`, so they stay in. Think of \"at least two\" and \"not three\" as two separate conditions.",
+              "ro": "Contează doar `a` mic: Andrada și Alexandra încep cu A mare, pe care LIKE nu-l potrivește cu `a`, dar mai au două `a` mici, deci rămân. Gândește «cel puțin două» și «nu trei» ca două condiții separate."
+            }
+          ],
+          "explain": {
+            "en": "6 rows remain: Antonie Ioana, Arhire Raluca, Bodnar Ioana (twice), Archip Andrada and Arhire Alexandra.",
+            "ro": "Rămân 6 rânduri: Antonie Ioana, Arhire Raluca, Bodnar Ioana (de două ori), Archip Andrada și Arhire Alexandra."
+          }
+        }
+      ]
+    }
+  ]
+}

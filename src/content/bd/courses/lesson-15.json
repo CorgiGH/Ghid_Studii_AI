@@ -1,0 +1,699 @@
+{
+  "meta": {
+    "id": "bd-l15",
+    "title": {
+      "en": "Lesson 15: Dates III — birthday, age, first day of the month",
+      "ro": "Lecția 15: Date III — ziua de naștere, vârsta, prima zi a lunii"
+    },
+    "shortTitle": {
+      "en": "L15: Dates III",
+      "ro": "L15: Date III"
+    },
+    "source": {
+      "en": "Lab 3 — functions for the DATE type (UAIC, Databases)",
+      "ro": "Laboratorul 3 — funcții pentru tipul DATE (UAIC, Baze de date)"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l15-s1",
+      "title": {
+        "en": "How many days until his birthday?",
+        "ro": "Câte zile până la ziua lui?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l15-r1",
+          "prompt": {
+            "en": "Today is 26.10.2026. Popescu was born on 17.02.1995. How many days does he still have until his next birthday? How would you compute it?",
+            "ro": "Azi e 26.10.2026. Popescu s-a născut pe 17.02.1995. Câte zile mai are până la următoarea zi de naștere? Cum ai calcula-o?"
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "The answer is 114 days: Popescu's next birthday is Wednesday, 17.02.2027. To find it, you add a whole number of **years** to the date of birth (with `ADD_MONTHS`, 12 months per year) until you pass today, then subtract today's date, without the time. Further below you lay his age on a timeline.",
+            "ro": "Răspunsul este 114 zile: următoarea aniversare a lui Popescu e miercuri, 17.02.2027. Ca s-o găsești, adaugi la data nașterii un număr întreg de **ani** (cu `ADD_MONTHS`, 12 luni pe an) până treci peste azi, apoi scazi data de azi, fără oră. Mai jos îi așezi vârsta pe o linie a timpului."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, data_nastere, SYSDATE AS azi FROM studenti WHERE nume = 'Popescu'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s2",
+      "title": {
+        "en": "Age on a timeline",
+        "ro": "Vârsta, pe o linie a timpului"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Popescu's age is made of three arcs laid end to end on the same bar: **years**, then **months**, then **days**. Guess how long each arc is before you uncover it.",
+            "ro": "Vârsta lui Popescu e formată din trei arce puse cap la cap pe aceeași bară: **ani**, apoi **luni**, apoi **zile**. Ghicește cât măsoară fiecare arc înainte să-l descoperi."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l15-v1",
+          "widget": "age-timeline",
+          "predict": true,
+          "props": {
+            "birth": "1995-02-17",
+            "today": "2026-10-26 14:30"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s3",
+      "title": {
+        "en": "Age in three steps",
+        "ro": "Vârsta în trei pași"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "For Popescu: first the **whole months** (1), then you split them into years and leftover months (2), and finally count the **days** (3) from the last monthly anniversary until today.",
+            "ro": "Pentru Popescu: întâi **lunile întregi** (1), apoi le împarți în ani și luni rămase (2), la final numeri **zilele** (3) de la ultima aniversare lunară până azi."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- 1)\nSELECT TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere))\nFROM studenti WHERE nume = 'Popescu';          -- 380\n\n-- 2)\nSELECT TRUNC(380 / 12), MOD(380, 12) FROM DUAL;  -- 31, 8\n\n-- 3)\nSELECT TRUNC(SYSDATE) - ADD_MONTHS(data_nastere, 380)\nFROM studenti WHERE nume = 'Popescu';          -- 9"
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s4",
+      "title": {
+        "en": "The time inside a day difference",
+        "ro": "Ora în diferența de zile"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Subtract `TRUNC(SYSDATE)`, not `SYSDATE`.** Today is 26.10 at 14:30 and the target day is tomorrow, 27.10. `zi - SYSDATE` gives 0.395833333, because today's time is subtracted as well. Rounded or truncated, the difference gives 0, even though tomorrow is 1 day away. With `zi - TRUNC(SYSDATE)` both dates are at midnight and a whole number of days remains: 1.",
+            "ro": "**Scazi `TRUNC(SYSDATE)`, nu `SYSDATE`.** Azi e 26.10 la 14:30 și ziua cerută e mâine, 27.10. `zi - SYSDATE` dă 0.395833333, pentru că ora de azi se scade și ea. Rotunjită sau trunchiată, diferența dă 0, deși mâine e la 1 zi distanță. Cu `zi - TRUNC(SYSDATE)` ambele date sunt la miezul nopții și rămâne un număr întreg de zile: 1."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT TO_DATE('27-10-2026','DD-MM-YYYY') - SYSDATE FROM DUAL;\n-- 0.395833333\nSELECT ROUND(TO_DATE('27-10-2026','DD-MM-YYYY') - SYSDATE) FROM DUAL;\n-- 0\nSELECT TO_DATE('27-10-2026','DD-MM-YYYY') - TRUNC(SYSDATE) FROM DUAL;\n-- 1"
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s5",
+      "title": {
+        "en": "Years of 365 days",
+        "ro": "Ani de 365 de zile"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A year does not always have 365 days, and a month does not always have 30.** Whoever writes `(SYSDATE - data_nastere) / 365` ignores leap years: every leap day since the birth adds an extra day, so the age looks reached several days too early. Example: someone born on 26.08.1996 turns 30 on 26.08.2026, but dividing by 365 already gives 30 from 19.08.2026, 7 days early (one for each 29 February in between). On 25.08.2026 it gives 30.016..., so 30, although the person is still 29. `MONTHS_BETWEEN` / 12 correctly gives 29.99...",
+            "ro": "**Un an nu are mereu 365 de zile, iar o lună nu are mereu 30.** Cine face `(SYSDATE - data_nastere) / 365` ignoră anii bisecți: fiecare 29 februarie de la naștere adaugă o zi în plus, așa că vârsta pare împlinită cu câteva zile prea devreme. Exemplu: cineva născut pe 26.08.1996 împlinește 30 de ani pe 26.08.2026, dar împărțirea la 365 dă 30 încă din 19.08.2026, cu 7 zile mai devreme (câte una pentru fiecare 29 februarie dintre cele două date). Pe 25.08.2026 dă 30.016..., deci 30, deși omul are încă 29. `MONTHS_BETWEEN` / 12 dă corect 29.99..."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT (TO_DATE('25-08-2026','DD-MM-YYYY') - TO_DATE('26-08-1996','DD-MM-YYYY')) / 365 FROM DUAL;\n-- 30.0164384\nSELECT MONTHS_BETWEEN(TO_DATE('25-08-2026','DD-MM-YYYY'), TO_DATE('26-08-1996','DD-MM-YYYY')) / 12 FROM DUAL;\n-- 29.9973118"
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s6",
+      "title": {
+        "en": "NEXT_DAY and 29 February",
+        "ro": "NEXT_DAY și 29 februarie"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`NEXT_DAY` does not stay in place.** `NEXT_DAY(d, 'SUNDAY')` gives the Sunday **after** `d`; if `d` is itself a Sunday (25.10.2026 is one), you skip a whole week (+7 days). And `ADD_MONTHS` does not invent days: `ADD_MONTHS(29-FEB-1996, 12)` is 28-FEB-97, not 1 March.",
+            "ro": "**`NEXT_DAY` nu rămâne pe loc.** `NEXT_DAY(d, 'SUNDAY')` dă duminica **de după** `d`; dacă `d` este chiar duminică (25.10.2026 este), sari o săptămână întreagă (+7 zile). Și `ADD_MONTHS` nu inventează zile: `ADD_MONTHS(29-FEB-1996, 12)` este 28-FEB-97, nu 1 martie."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT NEXT_DAY(TO_DATE('25-10-2026','DD-MM-YYYY'), 'SUNDAY') FROM DUAL;\n-- 01-NOV-26\nSELECT ADD_MONTHS(TO_DATE('29-02-1996','DD-MM-YYYY'), 12) FROM DUAL;\n-- 28-FEB-97"
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s7",
+      "title": {
+        "en": "Age and birthday formulas",
+        "ro": "Vârsta și aniversarea, în formule"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12) AS ani\nFROM   studenti\nWHERE  nr_matricol = '111';                              -- 31\n\nSELECT TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM') FROM DUAL;   -- 01-SEP-26"
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "en": "What you compute",
+              "ro": "Ce calculezi"
+            },
+            {
+              "en": "Expression",
+              "ro": "Expresia"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "en": "age in whole years",
+                "ro": "vârsta în ani întregi"
+              },
+              {
+                "en": "`TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)`",
+                "ro": "`TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)`"
+              }
+            ],
+            [
+              {
+                "en": "next birthday (n = whole years completed + 1)",
+                "ro": "următoarea zi de naștere (n = anii întregi împliniți + 1)"
+              },
+              {
+                "en": "`ADD_MONTHS(data_nastere, 12 * n)`",
+                "ro": "`ADD_MONTHS(data_nastere, 12 * n)`"
+              }
+            ],
+            [
+              {
+                "en": "days until a date",
+                "ro": "zile până la o dată"
+              },
+              {
+                "en": "`d - TRUNC(SYSDATE)`",
+                "ro": "`d - TRUNC(SYSDATE)`"
+              }
+            ],
+            [
+              {
+                "en": "first day of the previous month",
+                "ro": "prima zi din luna precedentă"
+              },
+              {
+                "en": "`TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM')`",
+                "ro": "`TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM')`"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "anniversary",
+            "ro": "aniversare"
+          },
+          "content": {
+            "en": "The date of birth plus a whole number of years. Years are added as 12 months with `ADD_MONTHS`, so you do not count 29 February by hand.",
+            "ro": "Data nașterii plus un număr întreg de ani. Anii se adună ca 12 luni cu `ADD_MONTHS`, ca să nu numeri de mână 29 februarie."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "age",
+            "ro": "vârsta"
+          },
+          "content": {
+            "en": "Whole months, `TRUNC(MONTHS_BETWEEN(...))`, split into years and leftover months, plus the days since the last monthly anniversary.",
+            "ro": "Luni întregi, `TRUNC(MONTHS_BETWEEN(...))`, împărțite în ani și luni rămase, plus zilele de la ultima aniversare lunară."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s8",
+      "title": {
+        "en": "Why not divide by 365?",
+        "ro": "De ce nu împărțim la 365?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l15-r2",
+          "prompt": {
+            "en": "Why do we not compute age as `(SYSDATE - data_nastere) / 365`?",
+            "ro": "De ce nu calculăm vârsta ca `(SYSDATE - data_nastere) / 365`?"
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "Because not all years have 365 days (leap years have 366) and months have different lengths. Dividing by 365 breaks down mostly around the birthday: someone can look a year older a few days before turning that age. `MONTHS_BETWEEN` and `ADD_MONTHS` work with calendar months, so they respect the real lengths.",
+            "ro": "Pentru că anii nu au toți 365 de zile (cei bisecți au 366) și lunile nu au aceeași lungime. Împărțirea la 365 se strică mai ales în jurul zilei de naștere: cineva poate părea cu un an mai mare cu câteva zile înainte să-l împlinească. `MONTHS_BETWEEN` și `ADD_MONTHS` lucrează cu luni din calendar, deci țin cont de lungimile reale."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s9",
+      "title": {
+        "en": "Age in whole years",
+        "ro": "Vârsta în ani întregi"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l15-q1",
+          "question": {
+            "en": "Which expression gives the age in whole years (31 for Popescu)?",
+            "ro": "Care expresie dă vârsta în ani întregi (31 pentru Popescu)?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "ROUND(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)",
+                "ro": "ROUND(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "ROUND rounds 31.69 to 32, but Popescu has not turned 32 yet. For age you truncate.",
+                "ro": "ROUND rotunjește 31.69 la 32, dar Popescu nu a împlinit încă 32 de ani. Pentru vârstă trunchiezi."
+              },
+              "misconception": "age-round"
+            },
+            {
+              "text": {
+                "en": "(SYSDATE - data_nastere) / 365",
+                "ro": "(SYSDATE - data_nastere) / 365"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The result is not a whole number (above 31.7) and it ignores leap years. Dividing by 365 breaks down around the birthday.",
+                "ro": "Rezultatul nu e întreg (peste 31.7) și ignoră anii bisecți. Împărțirea la 365 se strică în jurul zilei de naștere."
+              },
+              "misconception": "year-365"
+            },
+            {
+              "text": {
+                "en": "TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)",
+                "ro": "TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)"
+              },
+              "correct": true,
+              "explain": {
+                "en": "380.3 months / 12 = 31.69, and TRUNC keeps the integer part: 31 years.",
+                "ro": "380.3 luni / 12 = 31.69, iar TRUNC păstrează partea întreagă: 31 de ani."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s10",
+      "title": {
+        "en": "NEXT_DAY on a Sunday",
+        "ro": "NEXT_DAY într-o duminică"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l15-q2",
+          "question": {
+            "en": "What does `NEXT_DAY(d, 'SUNDAY')` give when `d` is itself a Sunday?",
+            "ro": "Ce dă `NEXT_DAY(d, 'SUNDAY')` când `d` este chiar o duminică?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "The same date, `d`",
+                "ro": "Aceeași dată, `d`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "No: the current day is never counted. If you want `d` itself, use `NEXT_DAY(d - 1, 'SUNDAY')`.",
+                "ro": "Nu: ziua curentă nu se numără niciodată. Dacă vrei și ziua `d`, folosești `NEXT_DAY(d - 1, 'SUNDAY')`."
+              },
+              "misconception": "next-day"
+            },
+            {
+              "text": {
+                "en": "Error, because `d` is already a Sunday",
+                "ro": "Eroare, fiindcă `d` este deja duminică"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no error: `NEXT_DAY` simply looks for the Sunday after `d`, whatever day `d` is.",
+                "ro": "Nu apare nicio eroare: `NEXT_DAY` caută pur și simplu duminica de după `d`, oricare ar fi ziua lui `d`."
+              },
+              "misconception": "next-day"
+            },
+            {
+              "text": {
+                "en": "The next Sunday, 7 days after `d`",
+                "ro": "Duminica următoare, la 7 zile după `d`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "`NEXT_DAY` is strictly after the date. For 25.10.2026 (a Sunday) you get 01-NOV-26.",
+                "ro": "`NEXT_DAY` este strict după dată. Pentru 25.10.2026 (duminică) iese 01-NOV-26."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s11",
+      "title": {
+        "en": "Days until tomorrow",
+        "ro": "Zilele până mâine"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l15-q3",
+          "question": {
+            "en": "Today is 26.10 at 14:30 and the target day is tomorrow, 27.10. `zi - SYSDATE` gives 0.396. How do you find out it is **1** day away?",
+            "ro": "Azi e 26.10 la 14:30, iar ziua căutată e mâine, 27.10. `zi - SYSDATE` dă 0.396. Cum afli că mai e **1** zi?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "ROUND(zi - SYSDATE)",
+                "ro": "ROUND(zi - SYSDATE)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "0.396 rounds to 0, not 1.",
+                "ro": "0.396 se rotunjește la 0, nu la 1."
+              },
+              "misconception": "date-time-part"
+            },
+            {
+              "text": {
+                "en": "zi - TRUNC(SYSDATE)",
+                "ro": "zi - TRUNC(SYSDATE)"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Both dates are at midnight, so the difference is a whole number of days: 1.",
+                "ro": "Ambele date sunt la miezul nopții, deci diferența e un număr întreg de zile: 1."
+              }
+            },
+            {
+              "text": {
+                "en": "TRUNC(zi - SYSDATE)",
+                "ro": "TRUNC(zi - SYSDATE)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "TRUNC cuts the fraction: 0.396 becomes 0, not 1.",
+                "ro": "TRUNC taie fracția: 0.396 devine 0, nu 1."
+              },
+              "misconception": "date-time-part"
+            }
+          ],
+          "review": "bd-l13"
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s12",
+      "title": {
+        "en": "ADD_MONTHS from 29 February",
+        "ro": "ADD_MONTHS din 29 februarie"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l15-q4",
+          "question": {
+            "en": "What does `ADD_MONTHS(TO_DATE('29-02-1996','DD-MM-YYYY'), 12)` give?",
+            "ro": "Ce dă `ADD_MONTHS(TO_DATE('29-02-1996','DD-MM-YYYY'), 12)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "28-FEB-97",
+                "ro": "28-FEB-97"
+              },
+              "correct": true,
+              "explain": {
+                "en": "February 1997 has no day 29, so the result is the last day of the month: 28 February 1997.",
+                "ro": "Februarie 1997 nu are ziua 29, deci rezultatul este ultima zi a lunii: 28 februarie 1997."
+              }
+            },
+            {
+              "text": {
+                "en": "01-MAR-97",
+                "ro": "01-MAR-97"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`ADD_MONTHS` does not spill into the next month: when the day does not exist, it takes the last day of the target month.",
+                "ro": "`ADD_MONTHS` nu trece în luna următoare: când ziua nu există, ia ultima zi a lunii țintă."
+              },
+              "misconception": "add-months-eom"
+            },
+            {
+              "text": {
+                "en": "Error: 1997 is not a leap year",
+                "ro": "Eroare: 1997 nu este an bisect"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no error: Oracle picks the last day of the target month.",
+                "ro": "Nu apare nicio eroare: Oracle alege ultima zi a lunii țintă."
+              },
+              "misconception": "add-months-eom"
+            }
+          ],
+          "review": "bd-l13"
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s13",
+      "title": {
+        "en": "The birthday is tomorrow",
+        "ro": "Ziua de naștere e mâine"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l15-q5",
+          "question": {
+            "en": "A student was born on 27.10.1996 and turns 30 tomorrow. Today, 26.10.2026 at 14:30, which expression gives his correct age, 29?",
+            "ro": "Un student s-a născut pe 27.10.1996 și împlinește 30 de ani mâine. Azi, 26.10.2026 la 14:30, care expresie dă vârsta lui corectă, 29?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`ROUND(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)`",
+                "ro": "`ROUND(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)`"
+              },
+              "correct": false,
+              "misconception": "age-round",
+              "explain": {
+                "en": "ROUND takes 29.999 to 30, although the student has not turned 30 yet.",
+                "ro": "ROUND duce 29.999 la 30, deși studentul încă nu a împlinit 30 de ani."
+              }
+            },
+            {
+              "text": {
+                "en": "`TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)`",
+                "ro": "`TRUNC(MONTHS_BETWEEN(SYSDATE, data_nastere) / 12)`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: 359.99 months / 12 = 29.999, and TRUNC keeps 29.",
+                "ro": "Corect: 359.99 luni / 12 = 29.999, iar TRUNC păstrează 29."
+              }
+            },
+            {
+              "text": {
+                "en": "`TRUNC((SYSDATE - data_nastere) / 365)`",
+                "ro": "`TRUNC((SYSDATE - data_nastere) / 365)`"
+              },
+              "correct": false,
+              "misconception": "year-365",
+              "explain": {
+                "en": "There are 10956.6 days between the two dates, 7 of them added by 29 February. Divided by 365 that is 30.02, so 30: the leap years each added an extra day.",
+                "ro": "Între cele două date sunt 10956.6 zile, 7 dintre ele aduse de 29 februarie. Împărțit la 365 dă 30.02, deci 30: anii bisecți au adunat câte o zi în plus."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s14",
+      "title": {
+        "en": "The day name in NEXT_DAY",
+        "ro": "Numele zilei în NEXT_DAY"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l15-q6",
+          "question": {
+            "en": "The session is in English. What does `NEXT_DAY(SYSDATE, 'DUMINICA')` give?",
+            "ro": "Sesiunea este în engleză. Ce dă `NEXT_DAY(SYSDATE, 'DUMINICA')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`01-NOV-26`, the Sunday after 26.10.2026",
+                "ro": "`01-NOV-26`, duminica de după 26.10.2026"
+              },
+              "correct": false,
+              "misconception": "next-day",
+              "explain": {
+                "en": "That is what `NEXT_DAY(SYSDATE, 'SUNDAY')` gives. The day name is written in the session language, English here.",
+                "ro": "Asta dă `NEXT_DAY(SYSDATE, 'SUNDAY')`. Numele zilei se scrie în limba sesiunii, aici engleză."
+              }
+            },
+            {
+              "text": {
+                "en": "Error `ORA-01846: not a valid day of the week`",
+                "ro": "Eroare `ORA-01846: not a valid day of the week`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. In the English session, `DUMINICA` is not a day name. You write `'SUNDAY'`.",
+                "ro": "Corect. În sesiunea în engleză, `DUMINICA` nu e un nume de zi. Scrii `'SUNDAY'`."
+              }
+            },
+            {
+              "text": {
+                "en": "`25-OCT-26`, the nearest Sunday",
+                "ro": "`25-OCT-26`, duminica cea mai apropiată"
+              },
+              "correct": false,
+              "misconception": "next-day",
+              "explain": {
+                "en": "`NEXT_DAY` only looks forward, strictly after the date, never back. And here the Romanian name gives an error.",
+                "ro": "`NEXT_DAY` caută doar înainte, strict după dată, niciodată înapoi. Iar aici numele în română dă eroare."
+              }
+            }
+          ],
+          "review": "bd-l13"
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s15",
+      "title": {
+        "en": "The birthday and the Sunday after",
+        "ro": "Aniversarea și duminica de după"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l15-ex-3-7",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "For each student display the surname, the date of birth, the date on which the student will celebrate their birthday, and the first Sunday after it. (In the app: if the birthday falls on today, the birthday of next year is used. \"Today\" here is 26 August 2026.)",
+            "ro": "Pentru fiecare student afișați numele, data de nastere, data la care studentul urmeaza sa isi sarbatoreasca ziua de nastere si prima zi de duminică de dupa. (În aplicație: dacă ziua de naștere cade chiar azi, se ia aniversarea de anul viitor. „Azi” este aici 26 august 2026.)"
+          },
+          "official": {
+            "lab": 3,
+            "ex": 7
+          },
+          "solution": "SELECT nume, data_nastere, ADD_MONTHS(data_nastere, 12 * (TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), data_nastere) / 12) + 1)) AS aniversare, NEXT_DAY(ADD_MONTHS(data_nastere, 12 * (TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), data_nastere) / 12) + 1)), 'SUNDAY') AS duminica FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "clock": "2026-08-26",
+          "hints": [
+            {
+              "en": "Two steps: find the next birthday, then find the Sunday after it. The first part is the harder one.",
+              "ro": "Doi pași: cauți prima aniversare viitoare, apoi cauți duminica de după ea. Prima parte e mai grea."
+            },
+            {
+              "en": "The birthday is the date of birth plus a whole number of years: `ADD_MONTHS(data_nastere, 12 * years)`. The number of years is the age in whole years plus 1. For the Sunday you have `NEXT_DAY(..., 'SUNDAY')`.",
+              "ro": "Aniversarea este data nașterii plus un număr întreg de ani: `ADD_MONTHS(data_nastere, 12 * ani)`. Numărul de ani este vârsta în ani întregi plus 1. Pentru duminică ai `NEXT_DAY(..., 'SUNDAY')`."
+            },
+            {
+              "en": "The trap is the order of the pieces: cut the age to whole years first, and only then add 1, otherwise a birthday that already passed this year would be chosen. The Sunday follows the birthday, not the date of birth. Popescu: 17-FEB-27 and 21-FEB-27.",
+              "ro": "Capcana este ordinea pieselor: tai întâi vârsta la ani întregi și abia apoi adaugi 1, altfel s-ar alege o aniversare care a trecut deja anul acesta. Duminica urmează după aniversare, nu după data nașterii. Popescu: 17-FEB-27 și 21-FEB-27."
+            }
+          ],
+          "explain": {
+            "en": "The age in whole years plus 1 gives the number of years until the first future birthday, and `ADD_MONTHS` places it on the calendar (17-FEB-27 for Popescu). `NEXT_DAY(..., 'SUNDAY')` gives the Sunday strictly after it (21-FEB-27). If the birthday is exactly today, `TRUNC(...) + 1` moves to next year, which is why the \"today\" case has a clear answer.",
+            "ro": "Vârsta în ani întregi plus 1 dă numărul de ani până la prima aniversare viitoare, iar `ADD_MONTHS` o așază pe calendar (17-FEB-27 pentru Popescu). `NEXT_DAY(..., 'SUNDAY')` dă duminica strict după ea (21-FEB-27). Dacă ziua de naștere e chiar azi, `TRUNC(...) + 1` trece la anul următor, de aceea cazul „azi” are răspuns clar."
+          },
+          "starter": "SELECT nume, data_nastere,\n       ADD_MONTHS(data_nastere, 12 * (____)) AS aniversare,\n       NEXT_DAY(____, 'SUNDAY') AS duminica\nFROM studenti"
+        }
+      ]
+    },
+    {
+      "id": "bd-l15-s16",
+      "title": {
+        "en": "Age and days until the birthday",
+        "ro": "Vârsta și zilele până la ziua lui"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l15-ex-3-11",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display for each student the surname, their age at the current date in the form '<x> ani <y> luni și <z> zile' (e.g. '19 ani 3 luni și 2 zile') and the number of days until they celebrate their birthday (again). (In the app: if the birthday falls today, the age has 0 months and 0 days, and the next birthday is next year's. \"Today\" here is 26 August 2026.)",
+            "ro": "Afișați pentru fiecare student numele, vârsta acestuia la data curentă sub forma '<x> ani <y> luni și <z> zile' (de ex '19 ani 3 luni și 2 zile') și numărul de zile până își va sărbători (din nou) ziua de naștere. (În aplicație: dacă ziua de naștere cade chiar azi, vârsta are 0 luni și 0 zile, iar următoarea aniversare este cea de anul viitor. „Azi” este aici 26 august 2026.)"
+          },
+          "official": {
+            "lab": 3,
+            "ex": 11
+          },
+          "solution": "SELECT nume, TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), data_nastere) / 12) || ' ani ' || TRUNC(MOD(MONTHS_BETWEEN(TRUNC(SYSDATE), data_nastere), 12)) || ' luni și ' || (TRUNC(SYSDATE) - ADD_MONTHS(data_nastere, TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), data_nastere)))) || ' zile' AS varsta, ADD_MONTHS(data_nastere, 12 * (TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), data_nastere) / 12) + 1)) - TRUNC(SYSDATE) AS zile_pana FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "clock": "2026-08-26",
+          "hints": [
+            {
+              "en": "Two computed columns: a text with three numbers glued together, and a number of days. Start with the numbers: years, months, days.",
+              "ro": "Două coloane calculate: un text cu trei numere lipite și un număr de zile. Începe cu numerele: ani, luni, zile."
+            },
+            {
+              "en": "Whole months = `TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), data_nastere))`. Years = months / 12, leftover months = `MOD(months, 12)`, days = `TRUNC(SYSDATE) - ADD_MONTHS(data_nastere, months)`. You glue them with `||`.",
+              "ro": "Luni întregi = `TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), data_nastere))`. Ani = luni / 12, luni rămase = `MOD(luni, 12)`, zile = `TRUNC(SYSDATE) - ADD_MONTHS(data_nastere, luni)`. Le lipești cu `||`."
+            },
+            {
+              "en": "Days until the birthday: the next birthday (as in the previous exercise) minus `TRUNC(SYSDATE)`. Popescu: `31 ani 6 luni și 9 zile` and 175.",
+              "ro": "Zilele până la aniversare: aniversarea viitoare (ca la exercițiul precedent) minus `TRUNC(SYSDATE)`. Popescu: `31 ani 6 luni și 9 zile` și 175."
+            }
+          ],
+          "explain": {
+            "en": "Age breaks down into whole months (378 for Popescu), then years (31), leftover months (6) and days since the last monthly anniversary (9). The `||` operator glues numbers to text, converting them by itself. The number of days comes from subtracting `TRUNC(SYSDATE)`, not `SYSDATE`, so no fraction is left (175).",
+            "ro": "Vârsta se descompune în luni întregi (378 pentru Popescu), apoi ani (31), luni rămase (6) și zile de la ultima aniversare lunară (9). Operatorul `||` lipește numerele cu textul, convertindu-le singur. Numărul de zile se obține scăzând `TRUNC(SYSDATE)`, nu `SYSDATE`, ca să nu rămână fracție (175)."
+          }
+        }
+      ]
+    }
+  ]
+}

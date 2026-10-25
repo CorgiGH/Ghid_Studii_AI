@@ -1,0 +1,687 @@
+{
+  "meta": {
+    "id": "bd-l09",
+    "title": {
+      "en": "Lesson 9: UNION, UNION ALL, INTERSECT, MINUS",
+      "ro": "Lecția 9: UNION, UNION ALL, INTERSECT, MINUS"
+    },
+    "shortTitle": {
+      "en": "L9: Sets",
+      "ro": "L9: Mulțimi"
+    },
+    "source": {
+      "en": "Databases lab 2, UAIC (Oracle SQL); queries checked on Oracle 11g",
+      "ro": "Laboratorul 2 de Baze de date, UAIC (Oracle SQL); interogări verificate pe Oracle 11g"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l09-s1",
+      "title": {
+        "en": "Two lists put on top of each other",
+        "ro": "Două liste puse una peste alta"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l09-reflect-pre",
+          "prompt": {
+            "en": "You have the list of surnames of year-2 students and the list of surnames of year-3 students. You put them one under the other in a single list. How many distinct surnames do you have? Watch for repeated surnames.",
+            "ro": "Ai lista numelor studenților din anul 2 și lista numelor din anul 3. Le pui una sub alta într-o singură listă. Câte nume distincte ai? Atenție la numele care se repetă."
+          },
+          "answer": {
+            "en": "Year 2 has 4 students (Bodnar appears twice), year 3 has 5. Put end to end, they make 9 names; if you keep a single copy of each name, **8** remain, because the two Bodnar merge. The first version is called `UNION ALL` (9), the second `UNION` (8).",
+            "ro": "Anul 2 are 4 studenți (Bodnar apare de două ori), anul 3 are 5. Puse cap la cap, sunt 9 nume; dacă păstrezi un singur exemplar din fiecare nume, rămân **8**, fiindcă cei doi Bodnar se contopesc. Prima variantă se numește `UNION ALL` (9), a doua `UNION` (8)."
+          },
+          "placeholder": {
+            "en": "Write your answer here…",
+            "ro": "Scrie-ți răspunsul aici…"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, prenume, an, bursa FROM studenti ORDER BY an, nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s2",
+      "title": {
+        "en": "UNION and UNION ALL",
+        "ro": "UNION și UNION ALL"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Two operators put two lists on top of each other. `UNION ALL` keeps everything. `UNION` keeps a single copy of each identical row. **Guess how many rows each gives, then check.**",
+            "ro": "Doi operatori pun două liste una peste alta. `UNION ALL` păstrează tot. `UNION` păstrează câte un exemplar din fiecare rând identic. **Ghicește câte rânduri dă fiecare, apoi verifică.**"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l09-viz1",
+          "widget": "set-balls",
+          "predict": true,
+          "props": {
+            "left": "SELECT nume FROM studenti WHERE an = 2",
+            "right": "SELECT nume FROM studenti WHERE an = 3",
+            "ops": [
+              "UNION",
+              "UNION ALL"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s3",
+      "title": {
+        "en": "INTERSECT: only what is in both lists",
+        "ro": "INTERSECT: doar ce e în ambele liste"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`INTERSECT` keeps the rows that appear **in both** lists, once. First list: surnames from year 2. Second: surnames of students with a scholarship. **Guess what remains.**",
+            "ro": "`INTERSECT` păstrează rândurile care apar **în ambele** liste, o singură dată. Prima listă: numele din anul 2. A doua: numele studenților cu bursă. **Ghicește ce rămâne.**"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l09-viz2",
+          "widget": "set-balls",
+          "predict": true,
+          "props": {
+            "left": "SELECT nume FROM studenti WHERE an = 2",
+            "right": "SELECT nume FROM studenti WHERE bursa IS NOT NULL",
+            "ops": [
+              "INTERSECT"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s4",
+      "title": {
+        "en": "MINUS: from the first list, without what is in the second",
+        "ro": "MINUS: din prima listă, fără ce e în a doua"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`MINUS` starts from the first list and removes everything that also appears in the second. First list: surnames from year 3. Second list: surnames of students without a scholarship. Order matters: `A MINUS B` is not `B MINUS A`. **Guess what remains from year 3.**",
+            "ro": "`MINUS` pornește de la prima listă și scoate tot ce apare și în a doua. Prima listă: numele din anul 3. A doua listă: numele studenților fără bursă. Ordinea contează: `A MINUS B` nu este `B MINUS A`. **Ghicește ce rămâne din anul 3.**"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l09-viz3",
+          "widget": "set-balls",
+          "predict": true,
+          "props": {
+            "left": "SELECT nume FROM studenti WHERE an = 3",
+            "right": "SELECT nume FROM studenti WHERE bursa IS NULL",
+            "ops": [
+              "MINUS"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s5",
+      "title": {
+        "en": "MINUS is not commutative",
+        "ro": "MINUS nu este comutativ"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "From year 3, **Antonie** remains. The year 3 students without a scholarship (111 Popescu, 112 Prelipcean, 114 Arhire, 115 Panaite) have their surnames in the no-scholarship list, so they are removed; only Antonie has a scholarship. The other way round, `no scholarship MINUS year 3` gives Bodnar and Bucur.",
+            "ro": "Din anul 3 rămâne **Antonie**. Studenții din anul 3 fără bursă (111 Popescu, 112 Prelipcean, 114 Arhire, 115 Panaite) au numele în lista celor fără bursă, deci sunt scoși; doar Antonie are bursă. Invers, `fără bursă MINUS anul 3` dă Bodnar și Bucur."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume FROM studenti WHERE bursa IS NULL\nMINUS\nSELECT nume FROM studenti WHERE an = 3;"
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s6",
+      "title": {
+        "en": "The rules of set operators",
+        "ro": "Regulile operatorilor pe mulțimi"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "The two queries must have the **same number of columns**, with **compatible types**, in the same order. Otherwise: ORA-01789 (different count) or ORA-01790 (different types, for example text and number). An `ORDER BY` is written **once, at the end**, after the last SELECT; put after the first, it gives ORA-00933. The names of the result columns come from the first query.",
+            "ro": "Cele două interogări trebuie să aibă **același număr de coloane**, cu **tipuri compatibile**, în aceeași ordine. Altfel: ORA-01789 (număr diferit) sau ORA-01790 (tipuri diferite, de exemplu text și număr). Un `ORDER BY` se scrie **o singură dată, la sfârșit**, după ultimul SELECT; pus după primul, dă ORA-00933. Numele coloanelor rezultatului vin din prima interogare."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "warning",
+          "content": {
+            "en": "In Oracle 11g there is **no** `EXCEPT` (its operator is called `MINUS`) and no `INTERSECT ALL`. The official lab page writes `INTERSECT [ALL]`, but in 11g `ALL` does not work: ORA-00928.",
+            "ro": "În Oracle 11g **nu există** `EXCEPT` (operatorul lui se numește `MINUS`) și nici `INTERSECT ALL`. Pagina oficială a laboratorului scrie `INTERSECT [ALL]`, dar în 11g `ALL` nu merge: ORA-00928."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s7",
+      "title": {
+        "en": "The whole row, not the key",
+        "ro": "Rândul întreg, nu cheia"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "Set operators compare the **whole row**, so two different students with the same surname are, to them, a single row. Year 2 without the scholarship holders has two students (Bodnar 116 and Bodnar 119), but `... MINUS ...` on `nume` returns only **one** row. If you add `nr_matricol` to the SELECT, the rows become different and both remain.",
+            "ro": "Operatorii pe mulțimi compară **rândul întreg**, deci doi studenți diferiți cu același nume sunt, pentru ei, un singur rând. Anul 2 fără cei cu bursă are doi studenți (Bodnar 116 și Bodnar 119), dar `... MINUS ...` pe `nume` întoarce doar **un** rând. Dacă adaugi `nr_matricol` în SELECT, rândurile devin diferite și rămân amândoi."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nr_matricol, nume FROM studenti WHERE an = 2\nMINUS\nSELECT nr_matricol, nume FROM studenti WHERE bursa IS NOT NULL;"
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s8",
+      "title": {
+        "en": "The syntax of set operators",
+        "ro": "Sintaxa operatorilor pe mulțimi"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT coloane FROM tabel1 [WHERE ...]\nUNION | UNION ALL | INTERSECT | MINUS\nSELECT coloane FROM tabel2 [WHERE ...]\n[ORDER BY coloană];"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "UNION / UNION ALL",
+            "ro": "UNION / UNION ALL"
+          },
+          "content": {
+            "en": "Combines the two lists. UNION removes identical rows, UNION ALL keeps them.",
+            "ro": "Reunește cele două liste. UNION elimină rândurile identice, UNION ALL le păstrează."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "INTERSECT",
+            "ro": "INTERSECT"
+          },
+          "content": {
+            "en": "Keeps the rows that appear in both lists, without duplicates.",
+            "ro": "Păstrează rândurile care apar în ambele liste, fără duplicate."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "MINUS",
+            "ro": "MINUS"
+          },
+          "content": {
+            "en": "The distinct rows of the first list that do not appear in the second. It is not commutative.",
+            "ro": "Rândurile distincte din prima listă care nu apar în a doua. Nu este comutativ."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "the rules",
+            "ro": "regulile"
+          },
+          "content": {
+            "en": "Same number of columns, compatible types, the whole row is compared, ORDER BY once, at the end.",
+            "ro": "Același număr de coloane, tipuri compatibile, rândul întreg se compară, ORDER BY o singură dată, la sfârșit."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s9",
+      "title": {
+        "en": "Two students with the same surname in a UNION",
+        "ro": "Doi studenți cu același nume într-un UNION"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l09-reflect-why",
+          "prompt": {
+            "en": "Two different students with the same surname appear in a `UNION` result on the column `nume`. What happens to them? How do you avoid it?",
+            "ro": "Doi studenți diferiți, cu același nume, apar într-un rezultat de `UNION` pe coloana `nume`. Ce se întâmplă cu ei? Cum eviți asta?"
+          },
+          "answer": {
+            "en": "They merge into a single row, because set operators compare the whole row and do not know they are different people. You avoid it by including in the SELECT a column that tells them apart, usually the key (`nr_matricol`).",
+            "ro": "Se contopesc într-un singur rând, fiindcă operatorii pe mulțimi compară rândul întreg și nu știu că sunt oameni diferiți. Eviți asta incluzând în SELECT o coloană care îi deosebește, de obicei cheia (`nr_matricol`)."
+          },
+          "placeholder": {
+            "en": "Explain in your own words…",
+            "ro": "Explică în cuvintele tale…"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s10",
+      "title": {
+        "en": "How many rows UNION gives compared with UNION ALL",
+        "ro": "Câte rânduri dă UNION față de UNION ALL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l09-mcq1",
+          "question": {
+            "en": "On the surnames of year 2 and the surnames of year 3, how many rows do `UNION` and `UNION ALL` give?",
+            "ro": "Pe numele din anul 2 și numele din anul 3, câte rânduri dau `UNION` și `UNION ALL`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "9 for both",
+                "ro": "9 pentru amândouă"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You believed UNION keeps duplicates. That is exactly what separates it from UNION ALL.",
+                "ro": "Ai crezut că UNION păstrează duplicatele. Tocmai asta îl deosebește de UNION ALL."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "9 for UNION and 8 for UNION ALL",
+                "ro": "9 pentru UNION și 8 pentru UNION ALL"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The other way round. UNION ALL is the one that removes nothing.",
+                "ro": "Invers. UNION ALL este cel care nu elimină nimic."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "8 for UNION and 9 for UNION ALL",
+                "ro": "8 pentru UNION și 9 pentru UNION ALL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. UNION ALL keeps all 4 + 5 = 9 rows. UNION merges the two Bodnar.",
+                "ro": "Corect. UNION ALL păstrează toate cele 4 + 5 = 9 rânduri. UNION îi contopește pe cei doi Bodnar."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s11",
+      "title": {
+        "en": "Number of columns",
+        "ro": "Număr de coloane"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l09-mcq2",
+          "question": {
+            "en": "What does `SELECT nume, prenume FROM studenti UNION SELECT nume FROM profesori` do?",
+            "ro": "Ce face `SELECT nume, prenume FROM studenti UNION SELECT nume FROM profesori`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Fills the missing column with NULL and works",
+                "ro": "Completează cu NULL coloana lipsă și merge"
+              },
+              "correct": false,
+              "explain": {
+                "en": "It would be convenient, but no: if you want that, you write `NULL` yourself in the second query.",
+                "ro": "Ar fi comod, dar nu: dacă vrei așa, scrii singur `NULL` în a doua interogare."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "Gives ORA-01789: the number of columns differs",
+                "ro": "Dă ORA-01789: numărul de coloane diferă"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The first query has 2 columns, the second one. Oracle does not fill in NULL by itself.",
+                "ro": "Corect. Prima interogare are 2 coloane, a doua una. Oracle nu completează singur cu NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "Works and ignores the extra column",
+                "ro": "Merge și ignoră coloana în plus"
+              },
+              "correct": false,
+              "explain": {
+                "en": "It ignores nothing; the number of columns must be equal.",
+                "ro": "Nu ignoră nimic; numărul de coloane trebuie să fie egal."
+              },
+              "misconception": "setop-rules"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s12",
+      "title": {
+        "en": "No scholarship MINUS year 3",
+        "ro": "Fără bursă MINUS anul 3"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l09-mcq3",
+          "question": {
+            "en": "Surnames from year 3 MINUS surnames without a scholarship gives 1 row (Antonie). What does surnames without a scholarship MINUS surnames from year 3 give?",
+            "ro": "Numele din anul 3 MINUS numele fără bursă dă 1 rând (Antonie). Ce dă numele fără bursă MINUS numele din anul 3?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "A different result: Bodnar and Bucur (2 rows)",
+                "ro": "Alt rezultat: Bodnar și Bucur (2 rânduri)"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `A MINUS B` takes from A and removes what is in B. Swapping the lists, you start from another set.",
+                "ro": "Corect. `A MINUS B` ia din A și scoate ce e în B. Inversând listele, pornești din altă mulțime."
+              }
+            },
+            {
+              "text": {
+                "en": "The same: Antonie",
+                "ro": "La fel: Antonie"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would be true for UNION or INTERSECT, not for MINUS.",
+                "ro": "Asta ar fi adevărat pentru UNION sau INTERSECT, nu pentru MINUS."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "Everything that is not common to both lists",
+                "ro": "Tot ce nu e comun celor două liste"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would be the symmetric difference, which Oracle has no operator for. MINUS is the difference in one direction only.",
+                "ro": "Asta ar fi diferența simetrică, pe care Oracle nu o are ca operator. MINUS e diferența într-un singur sens."
+              },
+              "misconception": "setop-rules"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s13",
+      "title": {
+        "en": "ORDER BY in a UNION",
+        "ro": "ORDER BY într-un UNION"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l09-mcq4",
+          "question": {
+            "en": "Where is ORDER BY written in a query with UNION?",
+            "ro": "Unde se scrie ORDER BY într-o interogare cu UNION?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "After each SELECT",
+                "ro": "După fiecare SELECT"
+              },
+              "correct": false,
+              "explain": {
+                "en": "An ORDER BY before UNION gives ORA-00933 (SQL command not properly ended).",
+                "ro": "Un ORDER BY înainte de UNION dă ORA-00933 (SQL command not properly ended)."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "Nowhere, UNION does not allow sorting",
+                "ro": "Nicăieri, UNION nu permite ordonare"
+              },
+              "correct": false,
+              "explain": {
+                "en": "It does, but at the end. Without ORDER BY the row order is not guaranteed.",
+                "ro": "Permite, dar la sfârșit. Fără ORDER BY, ordinea rândurilor nu este garantată."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "Once, at the end, after the last SELECT",
+                "ro": "O singură dată, la sfârșit, după ultimul SELECT"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. ORDER BY sorts the final result of the union, so it comes last.",
+                "ro": "Corect. ORDER BY ordonează rezultatul final al reuniunii, deci vine ultimul."
+              }
+            }
+          ],
+          "review": "bd-l08"
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s14",
+      "title": {
+        "en": "UNION on names, without the key",
+        "ro": "UNION pe nume, fără cheie"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l09-mcq5",
+          "question": {
+            "en": "How many rows does `SELECT nume, prenume FROM studenti WHERE nr_matricol = '116' UNION SELECT nume, prenume FROM studenti WHERE nr_matricol = '119'` return?",
+            "ro": "Câte rânduri întoarce `SELECT nume, prenume FROM studenti WHERE nr_matricol = '116' UNION SELECT nume, prenume FROM studenti WHERE nr_matricol = '119'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "2 rows: they are two different students",
+                "ro": "2 rânduri: sunt doi studenți diferiți"
+              },
+              "correct": false,
+              "misconception": "minus-key",
+              "explain": {
+                "en": "They are two students, but UNION sees only the SELECT columns. Without the key, the two rows are identical and become one.",
+                "ro": "Sunt doi studenți, dar UNION vede doar coloanele din SELECT. Fără cheie, cele două rânduri sunt identice și devin unul."
+              }
+            },
+            {
+              "text": {
+                "en": "1 row: Bodnar Ioana",
+                "ro": "1 rând: Bodnar Ioana"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Both are Bodnar Ioana, so the `(nume, prenume)` rows are identical and UNION merges them. With `nr_matricol` in the list you would get 2.",
+                "ro": "Corect. Ambii sunt Bodnar Ioana, deci rândurile `(nume, prenume)` sunt identice și UNION le contopește. Cu `nr_matricol` în listă ar ieși 2."
+              }
+            },
+            {
+              "text": {
+                "en": "0 rows: UNION keeps only what differs",
+                "ro": "0 rânduri: UNION păstrează doar ce diferă"
+              },
+              "correct": false,
+              "misconception": "setop-rules",
+              "explain": {
+                "en": "No operator does that. UNION keeps everything that appears in either list, once.",
+                "ro": "Niciun operator nu face asta. UNION păstrează tot ce apare în oricare listă, o singură dată."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s15",
+      "title": {
+        "en": "A list of surnames, in order",
+        "ro": "O listă de nume, în ordine"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l09-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show in a single list, in alphabetical order, the surnames of year 1 students and those of year 3 students. A surname that appears in both years is shown once.",
+            "ro": "Afișează într-o singură listă, în ordine alfabetică, numele studenților din anul 1 și ale celor din anul 3. Un nume care apare în ambii ani se afișează o singură dată."
+          },
+          "solution": "SELECT nume FROM studenti WHERE an = 1 UNION SELECT nume FROM studenti WHERE an = 3 ORDER BY nume",
+          "check": {
+            "order": "required",
+            "orderBy": [
+              "nume"
+            ],
+            "mode": "set"
+          },
+          "hints": [
+            {
+              "en": "Two lists put on top of each other, without duplicates, then sorting the final list.",
+              "ro": "Două liste puse una peste alta, fără duplicate, apoi sortarea listei finale."
+            },
+            {
+              "en": "The skeleton: `SELECT nume FROM studenti WHERE an = ... UNION SELECT nume FROM studenti WHERE an = ... ORDER BY nume`.",
+              "ro": "Scheletul: `SELECT nume FROM studenti WHERE an = ... UNION SELECT nume FROM studenti WHERE an = ... ORDER BY nume`."
+            },
+            {
+              "en": "ORDER BY is written once, at the end. Arhire appears in both year 1 and year 3, but UNION keeps it once.",
+              "ro": "ORDER BY se scrie o singură dată, la sfârșit. Arhire apare și în anul 1, și în anul 3, dar UNION îl păstrează o singură dată."
+            }
+          ],
+          "explain": {
+            "en": "8 surnames remain: 4 from year 1 + 5 from year 3 − 1 (Arhire, shared).",
+            "ro": "Rămân 8 nume: 4 din anul 1 + 5 din anul 3 − 1 (Arhire, comun)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s16",
+      "title": {
+        "en": "Shared first names",
+        "ro": "Prenume comune"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l09-ex-x2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the first names that appear both among year 2 students and among year 3 students.",
+            "ro": "Afișează prenumele care apar atât printre studenții din anul 2, cât și printre cei din anul 3."
+          },
+          "solution": "SELECT prenume FROM studenti WHERE an = 2 INTERSECT SELECT prenume FROM studenti WHERE an = 3",
+          "check": {
+            "order": "any",
+            "mode": "set"
+          },
+          "hints": [
+            {
+              "en": "You are looking for what the two lists of first names have in common.",
+              "ro": "Cauți ce e comun celor două liste de prenume."
+            },
+            {
+              "en": "`SELECT prenume FROM studenti WHERE an = 2 ... SELECT prenume FROM studenti WHERE an = 3`. Between them you pick the operator that keeps only what is in both.",
+              "ro": "`SELECT prenume FROM studenti WHERE an = 2 ... SELECT prenume FROM studenti WHERE an = 3`. Între ele alegi operatorul care păstrează doar ce e în ambele."
+            },
+            {
+              "en": "The result has a single row, even though Ioana appears several times in the table: set operators remove duplicates.",
+              "ro": "Rezultatul are un singur rând, chiar dacă Ioana apare de mai multe ori în tabel: operatorii pe mulțimi elimină duplicatele."
+            }
+          ],
+          "explain": {
+            "en": "The only shared first name is Ioana (once in year 3, twice in year 2), shown once.",
+            "ro": "Singurul prenume comun este Ioana (o dată în anul 3, de două ori în anul 2), afișat o singură dată."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l09-s17",
+      "title": {
+        "en": "Surnames only in year 1",
+        "ro": "Nume doar în anul 1"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l09-ex-x3",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the surnames of year 1 students that do not appear among the surnames of year 3 students.",
+            "ro": "Afișează numele studenților din anul 1 care nu apar printre numele studenților din anul 3."
+          },
+          "solution": "SELECT nume FROM studenti WHERE an = 1 MINUS SELECT nume FROM studenti WHERE an = 3",
+          "check": {
+            "order": "any",
+            "mode": "set"
+          },
+          "hints": [
+            {
+              "en": "You start from the year 1 surnames and remove those that also appear in year 3.",
+              "ro": "Pornești de la numele din anul 1 și le scoți pe cele care apar și în anul 3."
+            },
+            {
+              "en": "`SELECT nume ... an = 1` then the operator that subtracts the second list from the first, then `SELECT nume ... an = 3`.",
+              "ro": "`SELECT nume ... an = 1` apoi operatorul care scade a doua listă din prima, apoi `SELECT nume ... an = 3`."
+            },
+            {
+              "en": "The order of the lists matters: you subtract the second from the first. Arhire is in both lists and disappears from the result.",
+              "ro": "Ordinea listelor contează: din prima o scazi pe a doua. Arhire e în ambele liste și dispare din rezultat."
+            }
+          ],
+          "explain": {
+            "en": "Bucur, Cobzaru and Pintescu remain. Arhire is also in year 3, so it goes out.",
+            "ro": "Rămân Bucur, Cobzaru și Pintescu. Arhire este și în anul 3, deci iese."
+          }
+        }
+      ]
+    }
+  ]
+}

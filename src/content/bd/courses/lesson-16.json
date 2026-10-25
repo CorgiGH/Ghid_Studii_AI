@@ -1,0 +1,755 @@
+{
+  "meta": {
+    "id": "bd-l16",
+    "title": {
+      "en": "Lesson 16: NVL, DECODE, CASE",
+      "ro": "Lecția 16: NVL, DECODE, CASE"
+    },
+    "shortTitle": {
+      "en": "L16: NVL, DECODE, CASE",
+      "ro": "L16: NVL, DECODE, CASE"
+    },
+    "source": {
+      "en": "Lab 3 — other functions: NVL, DECODE (UAIC, Databases)",
+      "ro": "Laboratorul 3 — alte funcții: NVL, DECODE (UAIC, Baze de date)"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l16-s1",
+      "title": {
+        "en": "Prizes by scholarship value",
+        "ro": "Premii după valoarea bursei"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l16-r1",
+          "prompt": {
+            "en": "The prize table: a scholarship of 450 gets \"premiul 1\", 350 gets \"premiul 2\", 250 gets \"premiul 3\", and whoever has no scholarship gets \"mentiune\". How would you ask the database for this, for each student?",
+            "ro": "Tabelul de premii: bursa 450 primește „premiul 1”, 350 „premiul 2”, 250 „premiul 3”, iar cine nu are bursă primește „mentiune”. Cum ai cere asta bazei de date, pentru fiecare student?"
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "You need a function that **picks a value depending on what it finds**: `DECODE(bursa, 450, 'premiul 1', 350, 'premiul 2', ...)`, with one last value for whatever matches none of the pairs. Below you see how each value falls through a sieve with drawers, and where the student without a scholarship ends up.",
+            "ro": "Ai nevoie de o funcție care **alege o valoare în funcție de ce găsește**: `DECODE(bursa, 450, 'premiul 1', 350, 'premiul 2', ...)`, cu o ultimă valoare pentru tot ce nu se potrivește cu nicio pereche. Mai jos vezi cum cade fiecare valoare printr-o sită cu sertare și unde ajunge studentul fără bursă."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, bursa FROM studenti ORDER BY nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s2",
+      "title": {
+        "en": "The DECODE sieve",
+        "ro": "Sita DECODE"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The scholarship value falls in turn through the drawers `450`, `350`, `250`. If it matches one, that drawer's result comes out. If not, it ends up in the default drawer. For each value, guess which drawer it reaches, especially for NULL.",
+            "ro": "Valoarea bursei cade pe rând prin sertarele `450`, `350`, `250`. Dacă se potrivește cu unul, iese rezultatul lui. Dacă nu, ajunge în sertarul implicit. Pentru fiecare valoare, ghicește în ce sertar ajunge, mai ales pentru NULL."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l16-v1",
+          "widget": "decode-sieve",
+          "predict": true,
+          "props": {
+            "expr": "bursa",
+            "pairs": [
+              [
+                450,
+                "premiul 1"
+              ],
+              [
+                350,
+                "premiul 2"
+              ],
+              [
+                250,
+                "premiul 3"
+              ]
+            ],
+            "default": "mentiune",
+            "values": [
+              450,
+              350,
+              250,
+              null
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s3",
+      "title": {
+        "en": "NVL: replace the missing value",
+        "ro": "NVL: înlocuiește lipsa"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`NVL(expression, replacement)` returns the expression, and if it is NULL, returns the replacement. It is useful because arithmetic with NULL gives NULL: if everyone got 100 extra, `100 + bursa` is NULL for the 8 students without a scholarship, but `100 + NVL(bursa, 0)` gives 100.",
+            "ro": "`NVL(expresie, înlocuitor)` întoarce expresia, iar dacă ea este NULL, întoarce înlocuitorul. E utilă pentru că aritmetica cu NULL dă NULL: dacă toți ar primi 100 în plus, `100 + bursa` este NULL pentru cei 8 studenți fără bursă, dar `100 + NVL(bursa, 0)` dă 100."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, 100 + bursa           FROM studenti;  -- NULL ×8\nSELECT nume, 100 + NVL(bursa, 0)  FROM studenti;  -- 100 ×8"
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s4",
+      "title": {
+        "en": "CASE: conditions and ranges",
+        "ro": "CASE: condiții și intervale"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`DECODE` checks only equality. For a range, such as \"scholarship of at least 400\", you use `CASE`, which takes full conditions. The first true `WHEN` wins, and `ELSE` catches the rest.",
+            "ro": "`DECODE` verifică doar egalitatea. Pentru un interval, cum e „bursa de cel puțin 400”, folosești `CASE`, care primește condiții întregi. Primul `WHEN` adevărat câștigă, iar `ELSE` prinde restul."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, bursa,\n       CASE WHEN bursa >= 400 THEN 'sus'\n            WHEN bursa IS NULL THEN 'fara'\n            ELSE 'jos'\n       END AS nivel\nFROM studenti;\n-- sus ×1, jos ×4, fara ×8"
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s5",
+      "title": {
+        "en": "DECODE and NULL",
+        "ro": "DECODE și NULL"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`DECODE` matches NULL with NULL, `=` does not.** `bursa = NULL` is never true, but `DECODE(bursa, NULL, 'fara', 'are')` finds exactly the students without a scholarship. Note though: `DECODE` checks only equality, and without a default value, whatever does not match becomes NULL.",
+            "ro": "**`DECODE` potrivește NULL cu NULL, `=` nu.** `bursa = NULL` nu este niciodată adevărat, dar `DECODE(bursa, NULL, 'fara', 'are')` găsește exact studenții fără bursă. Atenție însă: `DECODE` verifică doar egalitatea, iar fără valoare implicită, ce nu se potrivește devine NULL."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, DECODE(bursa, NULL, 'fara', 'are') FROM studenti;\n-- fara ×8, are ×5\n\nSELECT nume, DECODE(bursa, 450, 'premiul 1') FROM studenti;\n-- premiul 1 ×1, NULL ×12"
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s6",
+      "title": {
+        "en": "CASE without ELSE",
+        "ro": "CASE fără ELSE"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`CASE` without `ELSE` gives NULL, and `WHEN x = NULL` catches nothing.** If no `WHEN` is true and `ELSE` is missing, the result is NULL, with no error. And `CASE WHEN bursa = NULL THEN 'fara' ELSE 'are' END` writes \"are\" for all 13 students, because `bursa = NULL` is never true. The correct condition is `WHEN bursa IS NULL`.",
+            "ro": "**`CASE` fără `ELSE` dă NULL, iar `WHEN x = NULL` nu prinde nimic.** Dacă niciun `WHEN` nu e adevărat și lipsește `ELSE`, rezultatul este NULL, fără eroare. Iar `CASE WHEN bursa = NULL THEN 'fara' ELSE 'are' END` scrie „are” pentru toți cei 13 studenți, fiindcă `bursa = NULL` nu e niciodată adevărat. Condiția corectă este `WHEN bursa IS NULL`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT CASE WHEN bursa = NULL THEN 'fara' ELSE 'are' END FROM studenti;\n-- are ×13\n\nSELECT CASE WHEN bursa IS NULL THEN 'fara' ELSE 'are' END FROM studenti;\n-- fara ×8, are ×5"
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s7",
+      "title": {
+        "en": "The type of NVL",
+        "ro": "Tipul lui NVL"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`NVL` converts the replacement to the type of the first argument.** `bursa / 50` is a number, so `NVL(bursa / 50, 'lipsa')` tries to turn the text into a number and raises ORA-01722. The fix: first turn the number into text, `NVL(TO_CHAR(bursa / 50), 'lipsa')`. A text that looks like a number, such as `'0'`, passes without trouble.",
+            "ro": "**`NVL` convertește înlocuitorul spre tipul primului argument.** `bursa / 50` este număr, deci `NVL(bursa / 50, 'lipsa')` încearcă să facă număr din text și dă ORA-01722. Soluția: transformi întâi numărul în text, `NVL(TO_CHAR(bursa / 50), 'lipsa')`. Un text care arată a număr, ca `'0'`, trece fără probleme."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT NVL(bursa / 50, 'lipsa') FROM studenti;\n-- ORA-01722: invalid number\n\nSELECT NVL(TO_CHAR(bursa / 50), 'lipsa') FROM studenti;\n-- 9, 7, 5, ..., lipsa ×8\n\nSELECT NVL(bursa / 50, '0') FROM studenti;\n-- 0 ×8"
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s8",
+      "title": {
+        "en": "Functions and NULL",
+        "ro": "Funcțiile și NULL"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A function that receives NULL usually returns NULL.** `ABS(bursa)` and `ROUND(bursa / 7)` are NULL for the 8 students without a scholarship, and `LENGTH(NULL)` or `UPPER(NULL)` give NULL too, with no error. Among the exceptions are the functions made to handle NULL, such as `NVL` and `DECODE`, and a few others that skip it, such as `CONCAT`, which treats NULL as empty text.",
+            "ro": "**O funcție care primește NULL întoarce, de obicei, NULL.** `ABS(bursa)` și `ROUND(bursa / 7)` sunt NULL pentru cei 8 studenți fără bursă, iar `LENGTH(NULL)` sau `UPPER(NULL)` dau tot NULL, fără eroare. Printre excepții sunt funcțiile făcute să lucreze cu NULL, ca `NVL` și `DECODE`, și câteva altele care îl ocolesc, ca `CONCAT`, care îl tratează ca text gol."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT COUNT(*) FROM studenti WHERE ABS(bursa) IS NULL;   -- 8\nSELECT LENGTH(NULL), UPPER(NULL) FROM DUAL;                -- NULL, NULL\nSELECT CONCAT('ab', NULL) FROM DUAL;                       -- ab"
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s9",
+      "title": {
+        "en": "NVL, DECODE and CASE at a glance",
+        "ro": "NVL, DECODE și CASE, pe scurt"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "NVL(expr, repl)\n\nDECODE(expr, search1, res1,\n            search2, res2,\n            ...,\n            def)\n\nCASE WHEN cond1 THEN res1\n     WHEN cond2 THEN res2\n     ELSE def\nEND"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "NVL",
+            "ro": "NVL"
+          },
+          "content": {
+            "en": "If the first argument is NULL, it returns the second. The result type is the type of the first argument.",
+            "ro": "Dacă primul argument e NULL, întoarce al doilea. Tipul rezultatului este tipul primului argument."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "DECODE",
+            "ro": "DECODE"
+          },
+          "content": {
+            "en": "Compares the expression with each searched value, by equality only; NULL matches NULL. Without a default value, whatever does not match gives NULL.",
+            "ro": "Compară expresia cu fiecare valoare căutată, doar prin egalitate; NULL se potrivește cu NULL. Fără valoare implicită, ce nu se potrivește dă NULL."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "CASE",
+            "ro": "CASE"
+          },
+          "content": {
+            "en": "Evaluates conditions in order and returns the result of the first true one; it can test ranges and `IS NULL`. Without `ELSE`, whatever remains gives NULL.",
+            "ro": "Evaluează condițiile în ordine și întoarce rezultatul primei adevărate; poate testa intervale și `IS NULL`. Fără `ELSE`, ce rămâne dă NULL."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s10",
+      "title": {
+        "en": "Why does DECODE catch NULL?",
+        "ro": "De ce DECODE prinde NULL?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l16-r2",
+          "prompt": {
+            "en": "Why does `DECODE(bursa, NULL, 'fara', 'are')` work, while `bursa = NULL` does not?",
+            "ro": "De ce `DECODE(bursa, NULL, 'fara', 'are')` merge, iar `bursa = NULL` nu?"
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "Because NULL means \"unknown\", and `=` between two unknowns is still \"unknown\", not \"true\". Among the functions and comparisons you write inside an expression, `DECODE` is the one that treats NULL with NULL as a match (`DISTINCT`, `GROUP BY` and `UNION` also see NULLs as equal, but those are not comparisons inside an expression). Everywhere else, the test for a missing value is `IS NULL`, including inside `CASE`.",
+            "ro": "Pentru că NULL înseamnă „nu se știe”, iar `=` între două necunoscute este tot „nu se știe”, nu „adevărat”. Dintre funcțiile și comparațiile pe care le scrii într-o expresie, `DECODE` este cea care tratează NULL cu NULL ca potrivire (`DISTINCT`, `GROUP BY` și `UNION` văd și ele NULL-urile ca egale, dar nu sunt comparații dintr-o expresie). În rest, testul pentru lipsă este `IS NULL`, inclusiv în `CASE`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s11",
+      "title": {
+        "en": "NVL with text in place of a number",
+        "ro": "NVL cu text în loc de număr"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l16-q1",
+          "question": {
+            "en": "What happens with `SELECT NVL(bursa, 'lipsa') FROM studenti`?",
+            "ro": "Ce se întâmplă la `SELECT NVL(bursa, 'lipsa') FROM studenti`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Error ORA-01722: the text cannot become a number",
+                "ro": "Eroare ORA-01722: textul nu se poate face număr"
+              },
+              "correct": true,
+              "explain": {
+                "en": "`NVL` converts the second argument to the type of the first, a number. The fix: turn the first argument into text with `TO_CHAR`.",
+                "ro": "`NVL` convertește al doilea argument spre tipul primului, adică număr. Soluția: transformi primul argument în text cu `TO_CHAR`."
+              }
+            },
+            {
+              "text": {
+                "en": "It shows \"lipsa\" for those without a scholarship",
+                "ro": "Afișează „lipsa” pentru cei fără bursă"
+              },
+              "correct": false,
+              "explain": {
+                "en": "It would work only if the scholarship were text. A number does not accept a replacement that cannot be converted to a number.",
+                "ro": "Ar merge doar dacă bursa ar fi text. Numărul nu acceptă un înlocuitor care nu se poate converti în număr."
+              },
+              "misconception": "implicit-conv"
+            },
+            {
+              "text": {
+                "en": "It shows 0 for those without a scholarship",
+                "ro": "Afișează 0 pentru cei fără bursă"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`NVL` does not invent values: it uses exactly the replacement you wrote. Here the replacement is text and the conversion fails.",
+                "ro": "`NVL` nu inventează valori: folosește chiar înlocuitorul scris de tine. Aici înlocuitorul e text și conversia eșuează."
+              },
+              "misconception": "implicit-conv"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s12",
+      "title": {
+        "en": "DECODE without a default value",
+        "ro": "DECODE fără valoare implicită"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l16-q2",
+          "question": {
+            "en": "What does `DECODE(bursa, 450, 'premiul 1')` give for a student without a scholarship?",
+            "ro": "Ce dă `DECODE(bursa, 450, 'premiul 1')` pentru un student fără bursă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0",
+                "ro": "0"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`DECODE` does not put 0 by itself: if you want a default value, you write it at the end.",
+                "ro": "`DECODE` nu pune 0 singur: valoarea implicită, dacă o vrei, o scrii tu la sfârșit."
+              },
+              "misconception": "decode-null"
+            },
+            {
+              "text": {
+                "en": "premiul 1",
+                "ro": "premiul 1"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Only 450 gets \"premiul 1\". NULL matches only an explicitly searched `NULL`.",
+                "ro": "Doar 450 primește „premiul 1”. NULL se potrivește doar cu un `NULL` căutat explicit."
+              },
+              "misconception": "decode-null"
+            },
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Nothing matches and there is no default value, so the result is NULL.",
+                "ro": "Nu se potrivește nimic și nu există valoare implicită, deci rezultatul este NULL."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s13",
+      "title": {
+        "en": "Testing a scholarship above 300",
+        "ro": "Testarea unei burse peste 300"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l16-q3",
+          "question": {
+            "en": "How do you test \"scholarship greater than 300\"?",
+            "ro": "Cum testezi „bursa mai mare de 300”?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "DECODE(bursa > 300, TRUE, 'mare')",
+                "ro": "DECODE(bursa > 300, TRUE, 'mare')"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`DECODE` compares values by equality only, and Oracle SQL has no `TRUE` value in expressions. It raises an error (ORA-00907).",
+                "ro": "`DECODE` compară doar valori prin egalitate, iar SQL-ul Oracle nu are valoarea `TRUE` în expresii. Dă eroare (ORA-00907)."
+              },
+              "misconception": "decode-null"
+            },
+            {
+              "text": {
+                "en": "CASE WHEN bursa > 300 THEN 'mare' END",
+                "ro": "CASE WHEN bursa > 300 THEN 'mare' END"
+              },
+              "correct": true,
+              "explain": {
+                "en": "`CASE` takes full conditions, so it can test ranges.",
+                "ro": "`CASE` primește condiții întregi, deci poate testa intervale."
+              }
+            },
+            {
+              "text": {
+                "en": "DECODE(bursa, > 300, 'mare')",
+                "ro": "DECODE(bursa, > 300, 'mare')"
+              },
+              "correct": false,
+              "explain": {
+                "en": "A comparison operator cannot stand in for a value. `DECODE` only searches for equalities.",
+                "ro": "Un operator de comparare nu poate sta în loc de valoare. `DECODE` caută doar egalități."
+              },
+              "misconception": "decode-null"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s14",
+      "title": {
+        "en": "CASE with = NULL",
+        "ro": "CASE cu = NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l16-q4",
+          "question": {
+            "en": "What does `CASE WHEN bursa = NULL THEN 'fara' ELSE 'are' END` give for a student without a scholarship?",
+            "ro": "Ce dă `CASE WHEN bursa = NULL THEN 'fara' ELSE 'are' END` pentru un student fără bursă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "fara",
+                "ro": "fara"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is what you would get with `WHEN bursa IS NULL`. With `= NULL` the condition is \"unknown\", not \"true\".",
+                "ro": "Asta ai primi cu `WHEN bursa IS NULL`. Cu `= NULL` condiția e „necunoscut”, nu „adevărat”."
+              },
+              "misconception": "eq-null"
+            },
+            {
+              "text": {
+                "en": "are",
+                "ro": "are"
+              },
+              "correct": true,
+              "explain": {
+                "en": "`bursa = NULL` is never true, so execution reaches `ELSE`. For NULL you need `IS NULL`.",
+                "ro": "`bursa = NULL` nu este adevărat niciodată, așa că se ajunge la `ELSE`. Pentru NULL trebuie `IS NULL`."
+              }
+            },
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is an `ELSE`, so the result is \"are\", not NULL. NULL appears only when `ELSE` is missing.",
+                "ro": "Există `ELSE`, deci rezultatul e „are”, nu NULL. NULL apare doar când lipsește `ELSE`."
+              },
+              "misconception": "eq-null"
+            }
+          ],
+          "review": "bd-l05"
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s15",
+      "title": {
+        "en": "CASE with no matching branch",
+        "ro": "CASE fără ramură potrivită"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l16-q5",
+          "question": {
+            "en": "What does `CASE WHEN bursa > 300 THEN 'mare' END` give for Pintescu, whose scholarship is 250?",
+            "ro": "Ce dă `CASE WHEN bursa > 300 THEN 'mare' END` pentru Pintescu, care are bursa 250?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Error: `ELSE` is missing",
+                "ro": "Eroare: lipsește `ELSE`"
+              },
+              "correct": false,
+              "misconception": "case-no-else",
+              "explain": {
+                "en": "`ELSE` is optional. Without it, a row that matches no branch gets NULL.",
+                "ro": "`ELSE` este opțional. Fără el, un rând care nu intră pe nicio ramură primește NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: 250 is not over 300 and there is no `ELSE`, so the result is NULL. For a text you write, for example, `ELSE 'mica'`.",
+                "ro": "Corect: 250 nu e peste 300 și nu există `ELSE`, deci rezultatul e NULL. Pentru un text scrii, de exemplu, `ELSE 'mica'`."
+              }
+            },
+            {
+              "text": {
+                "en": "`250`, the scholarship value",
+                "ro": "`250`, valoarea bursei"
+              },
+              "correct": false,
+              "misconception": "case-no-else",
+              "explain": {
+                "en": "CASE does not return the tested column when nothing matches: it returns the `ELSE` value, and without `ELSE`, NULL.",
+                "ro": "CASE nu întoarce coloana testată când nu se potrivește nimic: întoarce valoarea din `ELSE`, iar fără `ELSE`, NULL."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s16",
+      "title": {
+        "en": "Each student's prize",
+        "ro": "Premiul fiecărui student"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l16-ex-3-9",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "For each student display the surname, the scholarship value and the text: 'premiul 1' for the value 450, 'premiul 2' for the value 350, 'premiul 3' for the value 250 and 'mentiune' for those who do not receive a scholarship. Give the alias \"Premiu\" to the third column. (In the app: a scholarship with any other value gets no text, NULL.)",
+            "ro": "Pentru fiecare student afișati numele, valoarea bursei si textul: 'premiul 1' pentru valoarea 450, 'premiul 2' pentru valoarea 350, 'premiul 3' pentru valoarea 250 și 'mentiune' pentru cei care nu iau bursa. Pentru cea de a treia coloana dati aliasul \"Premiu\". (În aplicație: o bursă cu orice altă valoare nu primește niciun text, adică NULL.)"
+          },
+          "official": {
+            "lab": 3,
+            "ex": 9
+          },
+          "starter": "SELECT nume, bursa,\n       DECODE(bursa, ____) AS \"Premiu\"\nFROM studenti",
+          "solution": "SELECT nume, bursa, DECODE(bursa, 450, 'premiul 1', 350, 'premiul 2', 250, 'premiul 3', NULL, 'mentiune') AS \"Premiu\" FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "aliases": [
+              "",
+              "",
+              "Premiu"
+            ]
+          },
+          "hints": [
+            {
+              "en": "Three columns. The third picks a text based on the scholarship value, so a function that compares with several values in turn.",
+              "ro": "Trei coloane. A treia alege un text după valoarea bursei, deci o funcție care compară cu mai multe valori pe rând."
+            },
+            {
+              "en": "`DECODE(bursa, 450, 'premiul 1', 350, ..., NULL, '...') AS \"Premiu\"`. Each pair is a searched value and its result. How do you search for the missing scholarship?",
+              "ro": "`DECODE(bursa, 450, 'premiul 1', 350, ..., NULL, '...') AS \"Premiu\"`. Fiecare pereche este o valoare căutată și rezultatul ei. Cum cauți bursa lipsă?"
+            },
+            {
+              "en": "`NULL` is searched like any other value, as one more pair at the end. `bursa = NULL` would never work, but `DECODE` matches NULL with NULL.",
+              "ro": "`NULL` se caută ca orice altă valoare, ca încă o pereche la sfârșit. `bursa = NULL` n-ar merge niciodată, dar `DECODE` potrivește NULL cu NULL."
+            }
+          ],
+          "explain": {
+            "en": "`DECODE` compares `bursa` in turn with 450, 350, 250 and finally with `NULL`: students without a scholarship match the last pair, because `DECODE` matches NULL with NULL. Result: 13 rows (5 students get a prize, the other 8 get \"mentiune\"). Writing the `NULL` pair explicitly says exactly who gets the mention; a default value at the end, with no pair, would catch the NULLs too (and any scholarship value you did not plan for). The alias in double quotes keeps the capital letter.",
+            "ro": "`DECODE` compară `bursa` pe rând cu 450, 350, 250 și, la final, cu `NULL`: studenții fără bursă se potrivesc cu ultima pereche, fiindcă `DECODE` potrivește NULL cu NULL. Rezultat: 13 rânduri (5 studenți primesc un premiu, ceilalți 8 primesc „mentiune”). Perechea `NULL` scrisă explicit spune exact cine primește mențiunea; o valoare implicită la sfârșit, fără pereche, ar prinde și NULL-urile (și orice valoare de bursă neprevăzută). Aliasul în ghilimele duble păstrează litera mare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s17",
+      "title": {
+        "en": "Next month's scholarship",
+        "ro": "Bursa din luna următoare"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l16-ex-3-12",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Assuming that next month the 450 RON scholarship rises by 10%, the 350 RON one by 15% and the 250 RON one by 20%, display for each student the surname, the date of the first day of next month and the scholarship value they will receive next month. For those who do not receive a scholarship, display the value 0. (In the app: any other scholarship value gives an empty cell, NULL. In this exercise \"today\" is 26 August 2026.)",
+            "ro": "Presupunând că în următoarea lună bursa de 450 RON se mărește cu 10%, cea de 350 RON cu 15% și cea de 250 RON cu 20%, afișați pentru fiecare student numele acestuia, data corespunzătoare primei zile din luna urmatoare și valoarea bursei pe care o va încasa luna următoare. Pentru cei care nu iau bursa, se va afisa valoarea 0. (În aplicație: orice altă valoare a bursei dă o celulă goală, NULL. La acest exercițiu „azi” este 26 august 2026.)"
+          },
+          "official": {
+            "lab": 3,
+            "ex": 12
+          },
+          "starter": "SELECT nume,\n       ____ AS prima_zi,\n       DECODE(bursa, ____) AS bursa_noua\nFROM studenti",
+          "solution": "SELECT nume, TRUNC(ADD_MONTHS(SYSDATE, 1), 'MM') AS prima_zi, DECODE(bursa, 450, bursa * 1.10, 350, bursa * 1.15, 250, bursa * 1.20, NULL, 0) AS bursa_noua FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "clock": "2026-08-26",
+          "hints": [
+            {
+              "en": "Two new things besides the surname: a date (the first day of next month) and an amount that depends on the scholarship value.",
+              "ro": "Două lucruri noi pe lângă nume: o dată (prima zi din luna următoare) și o sumă care depinde de valoarea bursei."
+            },
+            {
+              "en": "The date: go one month ahead with `ADD_MONTHS`, then bring it to the first day of the month with `TRUNC(..., 'MM')`. The amount: `DECODE(bursa, 450, bursa * 1.10, ..., NULL, 0)`.",
+              "ro": "Data: mergi o lună înainte cu `ADD_MONTHS`, apoi o aduci la prima zi a lunii cu `TRUNC(..., 'MM')`. Suma: `DECODE(bursa, 450, bursa * 1.10, ..., NULL, 0)`."
+            },
+            {
+              "en": "Check yourself: the three raised amounts are 495, 402.5 and 300, and whoever has no scholarship gets 0. The date column must follow the clock, so do not type the date by hand.",
+              "ro": "Verifică-te: cele trei sume mărite sunt 495, 402.5 și 300, iar cine nu are bursă primește 0. Coloana cu data trebuie să urmeze ceasul, deci nu scrie data de mână."
+            }
+          ],
+          "explain": {
+            "en": "`TRUNC(ADD_MONTHS(SYSDATE, 1), 'MM')` is the first day of next month (01-SEP-26), and `DECODE` picks the percentage by scholarship value: 450 → 495, 350 → 402.5, 250 → 300. Whoever has no scholarship matches the `NULL` pair and gets 0.",
+            "ro": "`TRUNC(ADD_MONTHS(SYSDATE, 1), 'MM')` este prima zi din luna următoare (01-SEP-26), iar `DECODE` alege procentul după valoarea bursei: 450 → 495, 350 → 402.5, 250 → 300. Cine nu are bursă se potrivește cu perechea `NULL` și primește 0."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s18",
+      "title": {
+        "en": "Scholarship category",
+        "ro": "Categoria bursei"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l16-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display each student's surname and the scholarship category: 'mare' if the scholarship is above 300, 'mica' if a scholarship exists but does not exceed 300, 'fara' if there is none. Give the second column the alias \"categorie\".",
+            "ro": "Afișați numele fiecărui student și categoria bursei: 'mare' dacă bursa este peste 300, 'mica' dacă bursa există dar nu depășește 300, 'fara' dacă nu are bursă. Dați coloanei a doua aliasul „categorie”."
+          },
+          "solution": "SELECT nume, CASE WHEN bursa > 300 THEN 'mare' WHEN bursa IS NOT NULL THEN 'mica' ELSE 'fara' END AS categorie FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "aliases": [
+              "",
+              "categorie"
+            ]
+          },
+          "hints": [
+            {
+              "en": "Three categories, one of which is a range. For ranges, `DECODE` is not enough.",
+              "ro": "Trei categorii, dintre care una e un interval. Pentru intervale, `DECODE` nu ajunge."
+            },
+            {
+              "en": "`CASE WHEN condition THEN ... WHEN condition THEN ... ELSE ... END`. Order matters: the first true `WHEN` wins.",
+              "ro": "`CASE WHEN condiție THEN ... WHEN condiție THEN ... ELSE ... END`. Ordinea contează: primul `WHEN` adevărat câștigă."
+            },
+            {
+              "en": "The trap is NULL: a student without a scholarship makes every comparison on `bursa` not true, so those students cannot be caught by a comparison on the value. Think about which branch they end up in, and check the counts: 4 'mare', 1 'mica', 8 'fara'.",
+              "ro": "Capcana este NULL: un student fără bursă face ca orice comparație cu `bursa` să nu fie adevărată, deci nu poți prinde acești studenți cu o comparație pe valoare. Gândește-te în ce ramură ajung și verifică numărătoarea: 4 'mare', 1 'mica', 8 'fara'."
+            }
+          ],
+          "explain": {
+            "en": "For NULL, `bursa > 300` is not true and `bursa IS NOT NULL` is not true, so `ELSE` is reached. Result: 4 × 'mare', 1 × 'mica', 8 × 'fara'. If you had swapped the two `WHEN`s, everyone with a scholarship would have been 'mica'.",
+            "ro": "Pentru NULL, `bursa > 300` nu e adevărat, iar `bursa IS NOT NULL` nu e adevărat, deci se ajunge la `ELSE`. Rezultat: 4 × 'mare', 1 × 'mica', 8 × 'fara'. Dacă ai fi inversat cele două `WHEN`, toți cu bursă ar fi fost 'mica'."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l16-s19",
+      "title": {
+        "en": "The text \"Nu are bursa\"",
+        "ro": "Textul „Nu are bursa”"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l16-ex-x2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Display each student's surname and scholarship, and for those without a scholarship display the text 'Nu are bursa'.",
+            "ro": "Afișați numele fiecărui student și bursa lui, iar pentru cei fără bursă afișați textul 'Nu are bursa'."
+          },
+          "solution": "SELECT nume, NVL(TO_CHAR(bursa), 'Nu are bursa') AS bursa FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "The same column has to hold both numbers and text. What type does it have in this case?",
+              "ro": "Aceeași coloană trebuie să poată conține și numere, și text. Ce tip are ea în acest caz?"
+            },
+            {
+              "en": "`NVL(something, 'Nu are bursa')`: the first argument must be text, otherwise Oracle tries to turn \"Nu are bursa\" into a number.",
+              "ro": "`NVL(ceva, 'Nu are bursa')`: primul argument trebuie să fie text, altfel Oracle încearcă să facă număr din „Nu are bursa”."
+            },
+            {
+              "en": "A function that turns a number into text is `TO_CHAR`. Wrap the scholarship in it before `NVL` sees it.",
+              "ro": "Funcția care face din număr text este `TO_CHAR`. Pune bursa în ea înainte să ajungă la `NVL`."
+            }
+          ],
+          "explain": {
+            "en": "`TO_CHAR(bursa)` turns the number into text, then `NVL` can put another text in place of the NULL. Without `TO_CHAR` you get ORA-01722, because `NVL` converts the replacement to the type of the first argument.",
+            "ro": "`TO_CHAR(bursa)` face din număr text, apoi `NVL` poate pune alt text în locul NULL-ului. Fără `TO_CHAR` apare ORA-01722, fiindcă `NVL` convertește înlocuitorul spre tipul primului argument."
+          }
+        }
+      ]
+    }
+  ]
+}

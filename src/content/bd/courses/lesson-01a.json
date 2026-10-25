@@ -1,0 +1,786 @@
+{
+  "meta": {
+    "id": "bd-l01a",
+    "title": {
+      "en": "Creating tables",
+      "ro": "Crearea tabelelor"
+    },
+    "shortTitle": {
+      "en": "D1: CREATE TABLE",
+      "ro": "D1: CREATE TABLE"
+    },
+    "source": {
+      "en": "Lab 1, Databases, UAIC FII",
+      "ro": "Laboratorul 1, Baze de date, UAIC FII"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l01a-s1",
+      "title": {
+        "en": "What type does each column have?",
+        "ro": "Ce tip are fiecare coloană?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l01a-r1",
+          "prompt": {
+            "en": "You want to store students in a new table. For each column you have to say what kind of data goes in it: `nr_matricol` (six characters, always filled in), `nume` (text of at most 10 letters), `an` (one digit), `bursa` (up to 9999.99), `data_nastere` (a date). How would you tell the database that?",
+            "ro": "Vrei să păstrezi studenții într-un tabel nou. Pentru fiecare coloană trebuie să spui ce fel de date intră în ea: `nr_matricol` (șase caractere, mereu completat), `nume` (text de cel mult 10 litere), `an` (o cifră), `bursa` (până la 9999,99), `data_nastere` (o dată). Cum i-ai spune bazei de date asta?"
+          },
+          "placeholder": {
+            "en": "Write how you think it is done",
+            "ro": "Scrie cum crezi că se face"
+          },
+          "answer": {
+            "en": "Each column gets a name and a type, and it all sits in one `CREATE TABLE` command: `CREATE TABLE studenti (nr_matricol CHAR(6) NOT NULL, nume VARCHAR2(10), an NUMBER(1), bursa NUMBER(6,2), data_nastere DATE)`.",
+            "ro": "Fiecare coloană primește un nume și un tip, iar totul stă într-o comandă `CREATE TABLE`: `CREATE TABLE studenti (nr_matricol CHAR(6) NOT NULL, nume VARCHAR2(10), an NUMBER(1), bursa NUMBER(6,2), data_nastere DATE)`."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT * FROM studenti"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s2",
+      "title": {
+        "en": "The table is built column by column",
+        "ro": "Tabelul se construiește coloană cu coloană"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`CREATE TABLE` builds an empty table: for each column you give the name, the type and, if you want, `NOT NULL`. Rows come later, with `INSERT`. Before the table is built, guess which column cannot stay empty.",
+            "ro": "`CREATE TABLE` construiește un tabel gol: pentru fiecare coloană spui numele, tipul și, dacă vrei, `NOT NULL`. Rândurile vin mai târziu, cu `INSERT`. Înainte să se construiască tabelul, ghicește ce coloană nu poate rămâne goală."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l01a-viz1",
+          "widget": "table-build",
+          "predict": true,
+          "props": {
+            "table": "studenti",
+            "columns": [
+              {
+                "name": "nr_matricol",
+                "type": "CHAR(6)",
+                "notNull": true
+              },
+              {
+                "name": "nume",
+                "type": "VARCHAR2(10)"
+              },
+              {
+                "name": "prenume",
+                "type": "VARCHAR2(10)"
+              },
+              {
+                "name": "an",
+                "type": "NUMBER(1)"
+              },
+              {
+                "name": "grupa",
+                "type": "CHAR(2)"
+              },
+              {
+                "name": "bursa",
+                "type": "NUMBER(6,2)"
+              },
+              {
+                "name": "data_nastere",
+                "type": "DATE"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s3",
+      "title": {
+        "en": "The four types",
+        "ro": "Cele patru tipuri"
+      },
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            {
+              "en": "Type",
+              "ro": "Tip"
+            },
+            {
+              "en": "What it stores",
+              "ro": "Ce păstrează"
+            },
+            {
+              "en": "Example",
+              "ro": "Exemplu"
+            }
+          ],
+          "rows": [
+            [
+              "`CHAR(n)`",
+              {
+                "en": "Text of fixed length n; padded with spaces up to n",
+                "ro": "Text de lungime fixă n; se completează cu spații până la n"
+              },
+              {
+                "en": "`CHAR(6)` for `nr_matricol`",
+                "ro": "`CHAR(6)` pentru `nr_matricol`"
+              }
+            ],
+            [
+              "`VARCHAR2(n)`",
+              {
+                "en": "Text of variable length, at most n characters",
+                "ro": "Text de lungime variabilă, cel mult n caractere"
+              },
+              {
+                "en": "`VARCHAR2(10)` for `nume`",
+                "ro": "`VARCHAR2(10)` pentru `nume`"
+              }
+            ],
+            [
+              "`NUMBER(p,s)`",
+              {
+                "en": "Number with p digits in total, s of them after the decimal point",
+                "ro": "Număr cu p cifre în total, din care s după virgulă"
+              },
+              {
+                "en": "`NUMBER(6,2)` for `bursa` (at most 9999.99)",
+                "ro": "`NUMBER(6,2)` pentru `bursa` (maxim 9999,99)"
+              }
+            ],
+            [
+              "`DATE`",
+              {
+                "en": "A moment: year, month, day, hour, minute, second",
+                "ro": "Un moment: an, lună, zi, oră, minut, secundă"
+              },
+              {
+                "en": "`data_nastere`",
+                "ro": "`data_nastere`"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The difference between `CHAR` and `VARCHAR2` shows in the spaces. The column `profesori.prenume` is `CHAR(10)`, and the word `Cosmin` has 6 letters. What length do you think `LENGTH` reports? Check it in the boxes.",
+            "ro": "Diferența dintre `CHAR` și `VARCHAR2` se vede la spații. Coloana `profesori.prenume` e `CHAR(10)`, iar cuvântul `Cosmin` are 6 litere. Ce lungime crezi că raportează `LENGTH`? Verifică în căsuțe."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l01a-viz2",
+          "widget": "char-boxes",
+          "predict": true,
+          "props": {
+            "value": "Cosmin",
+            "width": 10,
+            "ops": [
+              "LENGTH"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s4",
+      "title": {
+        "en": "Digits, lengths and type names",
+        "ro": "Cifre, lungimi și nume de tipuri"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`NUMBER(6,2)` does not mean 6 decimals.** It means 6 digits in total, 2 of them after the decimal point: so 4 before the point, at most `9999.99`. The value `12345.678` gives `ORA-01438: value larger than specified precision allowed for this column`. But `1234.567` goes in and is silently rounded to `1234.57`.",
+            "ro": "**`NUMBER(6,2)` nu înseamnă 6 zecimale.** Înseamnă 6 cifre în total, 2 dintre ele după virgulă: deci 4 înainte de virgulă, maximum `9999.99`. Valoarea `12345.678` dă `ORA-01438: value larger than specified precision allowed for this column`. Dar `1234.567` intră și se rotunjește în tăcere la `1234.57`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Text that is too long is not cut, it is rejected.** In a `VARCHAR2(10)`, an 11-character string gives `ORA-12899: value too large for column ... (actual: 11, maximum: 10)`. Same for `CHAR(6)` with `'1234567'`, and for `NUMBER(1)` the value `12` gives `ORA-01438`.",
+            "ro": "**Textul prea lung nu se taie, se respinge.** Într-un `VARCHAR2(10)`, un șir de 11 caractere dă `ORA-12899: value too large for column ... (actual: 11, maximum: 10)`. La fel pentru `CHAR(6)` și `'1234567'`, iar pentru `NUMBER(1)` valoarea `12` dă `ORA-01438`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`VARCHAR2` needs a length.** `VARCHAR2` without `(n)` gives `ORA-00906: missing left parenthesis`. Types from other systems, like `STRING(3)`, do not exist (`ORA-00907`). Oracle accepts `VARCHAR(3)`, `INTEGER` and `DECIMAL(5,2)`, but stores them as `VARCHAR2(3)`, `NUMBER(38)` and `NUMBER(5,2)`.",
+            "ro": "**`VARCHAR2` cere lungime.** `VARCHAR2` fără `(n)` dă `ORA-00906: missing left parenthesis`. Tipuri din alte sisteme, ca `STRING(3)`, nu există (`ORA-00907`). Oracle acceptă `VARCHAR(3)`, `INTEGER` și `DECIMAL(5,2)`, dar le păstrează ca `VARCHAR2(3)`, `NUMBER(38)` și `NUMBER(5,2)`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s5",
+      "title": {
+        "en": "Constraints: rules the database enforces",
+        "ro": "Constrângeri: reguli pe care baza le impune"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Besides `NOT NULL`, a column can get rules that stop bad data before it goes in. The tables below are an example (they are not the lab tables).",
+            "ro": "Pe lângă `NOT NULL`, o coloană poate primi reguli care opresc datele greșite înainte să intre. Tabelele de mai jos sunt un exemplu (nu sunt tabelele laboratorului)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "CREATE TABLE stud (\n  nr_matricol CHAR(6) CONSTRAINT pk_stud PRIMARY KEY,\n  email       VARCHAR2(30) CONSTRAINT uq_stud_email UNIQUE,\n  an          NUMBER(1) CONSTRAINT ck_stud_an CHECK (an BETWEEN 1 AND 3)\n);\nCREATE TABLE nota_stud (\n  nr_matricol CHAR(6) CONSTRAINT fk_nota_stud REFERENCES stud(nr_matricol),\n  valoare     NUMBER(2) CONSTRAINT ck_nota CHECK (valoare BETWEEN 1 AND 10)\n);"
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "en": "You try",
+              "ro": "Încerci"
+            },
+            {
+              "en": "You get",
+              "ro": "Primești"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "en": "the same `nr_matricol` a second time in `stud`",
+                "ro": "a doua oară același `nr_matricol` în `stud`"
+              },
+              "`ORA-00001: unique constraint (STUDENT.PK_STUD) violated`"
+            ],
+            [
+              {
+                "en": "the same `email` for two students",
+                "ro": "același `email` pentru doi studenți"
+              },
+              "`ORA-00001: unique constraint (STUDENT.UQ_STUD_EMAIL) violated`"
+            ],
+            [
+              {
+                "en": "`an` = 4",
+                "ro": "`an` = 4"
+              },
+              "`ORA-02290: check constraint (STUDENT.CK_STUD_AN) violated`"
+            ],
+            [
+              {
+                "en": "`nr_matricol` NULL in `stud`",
+                "ro": "`nr_matricol` NULL în `stud`"
+              },
+              "`ORA-01400: cannot insert NULL into (...)`"
+            ],
+            [
+              {
+                "en": "a grade for an `nr_matricol` that does not exist in `stud`",
+                "ro": "o notă pentru un `nr_matricol` care nu există în `stud`"
+              },
+              "`ORA-02291: integrity constraint (STUDENT.FK_NOTA_STUD) violated - parent key not found`"
+            ],
+            [
+              {
+                "en": "you delete a student who has grades",
+                "ro": "ștergi un student care are note"
+              },
+              "`ORA-02292: integrity constraint (STUDENT.FK_NOTA_STUD) violated - child record found`"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "content": {
+            "en": "The lab script puts none of these rules, only `NOT NULL` on `studenti.nr_matricol` and `cursuri.id_curs`. Because of that you can insert the same `nr_matricol` twice and get no error.",
+            "ro": "Scriptul laboratorului nu pune nicio astfel de regulă, doar `NOT NULL` pe `studenti.nr_matricol` și `cursuri.id_curs`. Din cauza asta poți insera de două ori același `nr_matricol` și nu primești eroare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s6",
+      "title": {
+        "en": "CREATE TABLE and DROP TABLE",
+        "ro": "CREATE TABLE și DROP TABLE"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "CREATE TABLE nume_tabel (\n  coloana1 tip [NOT NULL],\n  coloana2 tip,\n  ...\n);\n\nDROP TABLE nume_tabel;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "CREATE TABLE",
+            "ro": "CREATE TABLE"
+          },
+          "content": {
+            "en": "Creates an empty table: the name, then the columns in parentheses, separated by commas. No comma after the last column.",
+            "ro": "Creează un tabel gol: numele, apoi între paranteze coloanele, separate prin virgulă. După ultima coloană nu pui virgulă."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "NOT NULL",
+            "ro": "NOT NULL"
+          },
+          "content": {
+            "en": "The column cannot stay empty: an `INSERT` without it gives `ORA-01400`.",
+            "ro": "Coloana nu poate rămâne goală: un `INSERT` fără ea dă `ORA-01400`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK",
+            "ro": "PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK"
+          },
+          "content": {
+            "en": "Optional constraints: primary key (unique and not null), foreign key (points to another table), unique, a condition checked on every row.",
+            "ro": "Constrângeri opționale: cheie primară (unică și nenulă), cheie străină (trimite la altă tabelă), unic, condiție verificată la fiecare rând."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "DROP TABLE",
+            "ro": "DROP TABLE"
+          },
+          "content": {
+            "en": "Deletes the table together with its rows and cannot be undone with `ROLLBACK`. (A dropped table sits in the recycle bin: `FLASHBACK TABLE name TO BEFORE DROP` brings it back, and `DROP TABLE name PURGE` removes it for good.) The lab script does `DROP` before `CREATE` so it can be run many times.",
+            "ro": "Șterge tabelul cu tot cu rânduri și nu se poate anula cu `ROLLBACK`. (Un tabel șters ajunge în coșul de reciclare: `FLASHBACK TABLE nume TO BEFORE DROP` îl readuce, iar `DROP TABLE nume PURGE` îl elimină definitiv.) Scriptul laboratorului face `DROP` înainte de `CREATE` ca să poată fi rulat de mai multe ori."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s7",
+      "title": {
+        "en": "Why CHAR(6) for nr_matricol?",
+        "ro": "De ce CHAR(6) pentru nr_matricol?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l01a-r2",
+          "prompt": {
+            "en": "Why does `nr_matricol` have the type `CHAR(6)` and not `NUMBER`, although it looks like a number?",
+            "ro": "De ce `nr_matricol` are tipul `CHAR(6)` și nu `NUMBER`, deși arată ca un număr?"
+          },
+          "answer": {
+            "en": "Because it is an identifier, not a quantity: you do not add it or average it. As text it keeps leading zeros (`000123`), and `CHAR(6)` fixes the length at 6 characters (shorter values are padded with spaces). A `NUMBER` would have lost the zeros.",
+            "ro": "Pentru că e un identificator, nu o cantitate: nu îl aduni și nu faci medii cu el. Ca text păstrează zerourile din față (`000123`), iar `CHAR(6)` fixează lungimea la 6 caractere (valorile mai scurte se completează cu spații). Un `NUMBER` ar fi pierdut zerourile."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s8",
+      "title": {
+        "en": "The type for the scholarship",
+        "ro": "Tipul pentru bursă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01a-q1",
+          "question": {
+            "en": "The scholarship is at most 9999.99 and has two decimals. Which type do you choose?",
+            "ro": "Bursa poate fi cel mult 9999,99 și are două zecimale. Ce tip alegi?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`NUMBER(6,2)`",
+                "ro": "`NUMBER(6,2)`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: 6 digits in total, 2 after the point, so 4 before it.",
+                "ro": "Corect: 6 cifre în total, 2 după virgulă, deci 4 înainte."
+              }
+            },
+            {
+              "text": {
+                "en": "`NUMBER(4,2)`",
+                "ro": "`NUMBER(4,2)`"
+              },
+              "correct": false,
+              "misconception": "precision-vs-scale",
+              "explain": {
+                "en": "`NUMBER(4,2)` has 4 digits in total, so at most 99.99. A scholarship of 450 would give `ORA-01438`.",
+                "ro": "`NUMBER(4,2)` are 4 cifre în total, deci maximum 99,99. O bursă de 450 ar da `ORA-01438`."
+              }
+            },
+            {
+              "text": {
+                "en": "`NUMBER(2)`",
+                "ro": "`NUMBER(2)`"
+              },
+              "correct": false,
+              "misconception": "scale-forgotten",
+              "explain": {
+                "en": "`NUMBER(2)` has 2 digits in total, no decimals: 450 gives `ORA-01438`, and 45.6 would be rounded to 46.",
+                "ro": "`NUMBER(2)` are 2 cifre în total, fără zecimale: 450 dă `ORA-01438`, iar 45,6 s-ar rotunji la 46."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s9",
+      "title": {
+        "en": "CHAR and the spaces",
+        "ro": "CHAR și spațiile"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01a-q2",
+          "question": {
+            "en": "The `prenume` column is `CHAR(10)`. You insert `'Cosmin'`. What length does the stored value have?",
+            "ro": "Coloana `prenume` e `CHAR(10)`. Inserezi `'Cosmin'`. Ce lungime are valoarea păstrată?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "10: after the 6 letters, 4 spaces are added",
+                "ro": "10: după cele 6 litere se adaugă 4 spații"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `CHAR(n)` always pads up to n.",
+                "ro": "Corect. `CHAR(n)` umple mereu până la n."
+              }
+            },
+            {
+              "text": {
+                "en": "6, exactly what you wrote",
+                "ro": "6, exact cât ai scris"
+              },
+              "correct": false,
+              "misconception": "char-pad",
+              "explain": {
+                "en": "That would be a `VARCHAR2`. With `CHAR` the padding spaces stay.",
+                "ro": "Asta ar fi un `VARCHAR2`. La `CHAR` rămân spațiile de completare."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: you must write exactly 10 characters",
+                "ro": "Eroare: trebuie să scrii exact 10 caractere"
+              },
+              "correct": false,
+              "misconception": "char-pad",
+              "explain": {
+                "en": "Too short is not an error, it gets padded. The error (`ORA-12899`) only appears when the text is longer than n.",
+                "ro": "Prea scurt nu e eroare, se completează. Eroarea (`ORA-12899`) apare doar când textul e mai lung decât n."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s10",
+      "title": {
+        "en": "What NOT NULL means",
+        "ro": "Ce înseamnă NOT NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01a-q3",
+          "question": {
+            "en": "What does `NOT NULL` do on a column?",
+            "ro": "Ce face `NOT NULL` pe o coloană?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "It does not let the column stay empty: an `INSERT` without it gives `ORA-01400`",
+                "ro": "Nu lasă coloana goală: un `INSERT` fără ea dă `ORA-01400`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct.",
+                "ro": "Corect."
+              }
+            },
+            {
+              "text": {
+                "en": "It does not allow the value 0",
+                "ro": "Nu permite valoarea 0"
+              },
+              "correct": false,
+              "misconception": "null-arith",
+              "explain": {
+                "en": "0 is a value like any other. `NOT NULL` only forbids a missing value.",
+                "ro": "0 e o valoare ca oricare alta. `NOT NULL` interzice doar lipsa valorii."
+              }
+            },
+            {
+              "text": {
+                "en": "It requires values to differ between rows",
+                "ro": "Cere ca valorile să fie diferite între rânduri"
+              },
+              "correct": false,
+              "misconception": "constraint-roles",
+              "explain": {
+                "en": "That is what `UNIQUE` does. Two rows can have the same value in a `NOT NULL` column.",
+                "ro": "Asta face `UNIQUE`. Două rânduri pot avea aceeași valoare într-o coloană `NOT NULL`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s11",
+      "title": {
+        "en": "The foreign key, again",
+        "ro": "Cheia străină, din nou"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01a-q4",
+          "question": {
+            "en": "You want every `nr_matricol` in `note` to also exist in `studenti`. Which constraint do you put on `note.nr_matricol`?",
+            "ro": "Vrei ca fiecare `nr_matricol` din `note` să existe și în `studenti`. Ce constrângere pui pe `note.nr_matricol`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`FOREIGN KEY` (`REFERENCES studenti(nr_matricol)`)",
+                "ro": "`FOREIGN KEY` (`REFERENCES studenti(nr_matricol)`)"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. A grade for a student who does not exist gives `ORA-02291`.",
+                "ro": "Corect. O notă pentru un student care nu există dă `ORA-02291`."
+              }
+            },
+            {
+              "text": {
+                "en": "`PRIMARY KEY`",
+                "ro": "`PRIMARY KEY`"
+              },
+              "correct": false,
+              "misconception": "constraint-roles",
+              "explain": {
+                "en": "A primary key would require each student to have only one grade. A student has many grades.",
+                "ro": "Cheia primară ar cere ca fiecare student să aibă o singură notă. Un student are mai multe note."
+              }
+            },
+            {
+              "text": {
+                "en": "`UNIQUE`",
+                "ro": "`UNIQUE`"
+              },
+              "correct": false,
+              "misconception": "constraint-roles",
+              "explain": {
+                "en": "`UNIQUE` forbids repeating. It would allow a single grade per student and does not check that the student exists.",
+                "ro": "`UNIQUE` interzice repetarea. Ți-ar permite o singură notă pe student și nu verifică dacă studentul există."
+              }
+            }
+          ],
+          "review": "bd-l01"
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s12",
+      "title": {
+        "en": "What links a grade to its course",
+        "ro": "Ce leagă o notă de cursul ei"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01a-q5",
+          "question": {
+            "en": "When you create the `note` table, through which column does a row know which course the grade belongs to?",
+            "ro": "Când creezi tabelul `note`, prin ce coloană știe un rând la ce curs este nota?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`valoare`",
+                "ro": "`valoare`"
+              },
+              "correct": false,
+              "misconception": "value-is-id",
+              "explain": {
+                "en": "`valoare` is the grade itself. Many grades share a value across different courses, so it points to no course.",
+                "ro": "`valoare` este nota însăși. Multe note au aceeași valoare la cursuri diferite, deci nu arată spre niciun curs."
+              }
+            },
+            {
+              "text": {
+                "en": "`id_curs`, which points to `cursuri(id_curs)`",
+                "ro": "`id_curs`, care trimite la `cursuri(id_curs)`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `id_curs` is the foreign key to `cursuri`: the same code is found in `cursuri.id_curs`.",
+                "ro": "Corect. `id_curs` este cheia străină spre `cursuri`: același cod se găsește în `cursuri.id_curs`."
+              }
+            },
+            {
+              "text": {
+                "en": "The course title, for example `'Logica'`, written in each grade",
+                "ro": "Titlul cursului, de exemplu `'Logica'`, scris în fiecare notă"
+              },
+              "correct": false,
+              "misconception": "name-is-key",
+              "explain": {
+                "en": "`note` has no course title, and that is a good thing: a title can repeat or change. The link goes through the code, `id_curs`.",
+                "ro": "`note` nu are titlul cursului, și bine că nu are: un titlu se poate repeta sau schimba. Legătura se face prin cod, `id_curs`."
+              }
+            },
+            {
+              "text": {
+                "en": "`nr_matricol`",
+                "ro": "`nr_matricol`"
+              },
+              "correct": false,
+              "misconception": "fk-wrong-target",
+              "explain": {
+                "en": "`nr_matricol` is also a foreign key, but it points to `studenti`: it says whose grade it is, not which course.",
+                "ro": "`nr_matricol` este tot o cheie străină, dar trimite la `studenti`: spune al cui e nota, nu la ce curs."
+              }
+            }
+          ],
+          "review": "bd-l01"
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s13",
+      "title": {
+        "en": "What changes the schema",
+        "ro": "Ce schimbă schema"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l01a-q6",
+          "question": {
+            "en": "Which of these actions changes the schema, not just the contents of the tables?",
+            "ro": "Care dintre aceste acțiuni schimbă schema, nu doar conținutul tabelelor?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "You add a new student to `studenti`",
+                "ro": "Adaugi un student nou în `studenti`"
+              },
+              "correct": false,
+              "misconception": "schema-vs-instance",
+              "explain": {
+                "en": "A new row changes the instance. The table keeps its 7 columns, with the same types.",
+                "ro": "Un rând nou schimbă instanța. Tabelul are tot cele 7 coloane, cu aceleași tipuri."
+              }
+            },
+            {
+              "text": {
+                "en": "You delete all the grades from `note`",
+                "ro": "Ștergi toate notele din `note`"
+              },
+              "correct": false,
+              "misconception": "schema-vs-instance",
+              "explain": {
+                "en": "The `note` table stays, with the same columns, just without rows. The instance changed, not the schema.",
+                "ro": "Tabelul `note` rămâne, cu aceleași coloane, doar fără rânduri. S-a schimbat instanța, nu schema."
+              }
+            },
+            {
+              "text": {
+                "en": "You create the table `sali (cod CHAR(4), locuri NUMBER(3))`",
+                "ro": "Creezi tabelul `sali (cod CHAR(4), locuri NUMBER(3))`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. A new table appears, with its columns and types: that changes the schema. The table is still empty.",
+                "ro": "Corect. Apare un tabel nou, cu coloanele și tipurile lui: asta schimbă schema. Tabelul e încă gol."
+              }
+            }
+          ],
+          "review": "bd-l01"
+        }
+      ]
+    },
+    {
+      "id": "bd-l01a-s14",
+      "title": {
+        "en": "Create the five tables",
+        "ro": "Creează cele cinci tabele"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l01a-ex-1-1",
+          "dataset": "facultate",
+          "kind": "state",
+          "prompt": {
+            "en": "\"Create these tables using the student account.\" (quoted from the lab)\n\nIn the app the tables already exist (the lab script made them), so first write `DROP TABLE` for each, then `CREATE TABLE`. The structure, as in the lab script:\n\n- `studenti`: `nr_matricol` CHAR(6) NOT NULL, `nume` VARCHAR2(10), `prenume` VARCHAR2(10), `an` NUMBER(1), `grupa` CHAR(2), `bursa` NUMBER(6,2), `data_nastere` DATE\n- `cursuri`: `id_curs` CHAR(4) NOT NULL, `titlu_curs` VARCHAR2(15), `an` NUMBER(1), `semestru` NUMBER(1), `credite` NUMBER(2)\n- `note`: `nr_matricol` CHAR(6), `id_curs` CHAR(4), `valoare` NUMBER(2), `data_notare` DATE\n- `profesori`: `id_prof` CHAR(4), `nume` CHAR(10), `prenume` CHAR(10), `grad_didactic` VARCHAR2(5)\n- `didactic`: `id_prof` CHAR(4), `id_curs` CHAR(4)\n\nThe lab page says `titlu_curs` has at most 10 characters, but the script data goes up to 15 (`Limbaje formale`), so use 15. The page also asks for `NOT NULL` on more columns; here you put `NOT NULL` only on the two above.",
+            "ro": "„Creaţi aceste tabele utilizând contul student.”\n\nÎn aplicație tabelele există deja (le-a făcut scriptul din laborator), așa că scrie întâi `DROP TABLE` pentru fiecare, apoi `CREATE TABLE`. Structura, ca în scriptul laboratorului:\n\n- `studenti`: `nr_matricol` CHAR(6) NOT NULL, `nume` VARCHAR2(10), `prenume` VARCHAR2(10), `an` NUMBER(1), `grupa` CHAR(2), `bursa` NUMBER(6,2), `data_nastere` DATE\n- `cursuri`: `id_curs` CHAR(4) NOT NULL, `titlu_curs` VARCHAR2(15), `an` NUMBER(1), `semestru` NUMBER(1), `credite` NUMBER(2)\n- `note`: `nr_matricol` CHAR(6), `id_curs` CHAR(4), `valoare` NUMBER(2), `data_notare` DATE\n- `profesori`: `id_prof` CHAR(4), `nume` CHAR(10), `prenume` CHAR(10), `grad_didactic` VARCHAR2(5)\n- `didactic`: `id_prof` CHAR(4), `id_curs` CHAR(4)\n\nPagina laboratorului spune că `titlu_curs` are cel mult 10 caractere, dar datele din script au până la 15 (`Limbaje formale`), deci folosește 15. Tot pagina cere `NOT NULL` pe mai multe coloane; aici pui `NOT NULL` doar pe cele două de mai sus."
+          },
+          "official": {
+            "lab": 1,
+            "ex": 1
+          },
+          "solution": "DROP TABLE didactic;\nDROP TABLE profesori;\nDROP TABLE note;\nDROP TABLE cursuri;\nDROP TABLE studenti;\nCREATE TABLE studenti(\n  nr_matricol CHAR(6) NOT NULL,\n  nume VARCHAR2(10),\n  prenume VARCHAR2(10),\n  an NUMBER(1),\n  grupa CHAR(2),\n  bursa NUMBER(6,2),\n  data_nastere DATE\n);\nCREATE TABLE cursuri(\n  id_curs CHAR(4) NOT NULL,\n  titlu_curs VARCHAR2(15),\n  an NUMBER(1),\n  semestru NUMBER(1),\n  credite NUMBER(2)\n);\nCREATE TABLE note(\n  nr_matricol CHAR(6),\n  id_curs CHAR(4),\n  valoare NUMBER(2),\n  data_notare DATE\n);\nCREATE TABLE profesori(\n  id_prof CHAR(4),\n  nume CHAR(10),\n  prenume CHAR(10),\n  grad_didactic VARCHAR2(5)\n);\nCREATE TABLE didactic(\n  id_prof CHAR(4),\n  id_curs CHAR(4)\n)",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "tables": [
+              "studenti",
+              "cursuri",
+              "note",
+              "profesori",
+              "didactic"
+            ]
+          },
+          "hints": [
+            {
+              "en": "Five tables, in order: remove the old ones, then create the new ones, one per command.",
+              "ro": "Cinci tabele, în ordine: șterge-le pe cele vechi, apoi creează-le pe cele noi, câte una pe comandă."
+            },
+            {
+              "en": "`DROP TABLE studenti;` and the same for the other four. Then `CREATE TABLE studenti (nr_matricol CHAR(6) NOT NULL, nume VARCHAR2(10), ...);`. `bursa` has 4 digits before the point and 2 after, so `NUMBER(6,2)`.",
+              "ro": "`DROP TABLE studenti;` și la fel pentru celelalte patru. Apoi `CREATE TABLE studenti (nr_matricol CHAR(6) NOT NULL, nume VARCHAR2(10), ...);`. `bursa` are 4 cifre înainte de virgulă și 2 după, deci `NUMBER(6,2)`."
+            },
+            {
+              "en": "`profesori.nume` and `prenume` are `CHAR(10)` (fixed length), `grad_didactic` is `VARCHAR2(5)`, `titlu_curs` is `VARCHAR2(15)`. `NOT NULL` appears only on `studenti.nr_matricol` and `cursuri.id_curs`. No comma after the last column.",
+              "ro": "`profesori.nume` și `prenume` sunt `CHAR(10)` (lungime fixă), `grad_didactic` e `VARCHAR2(5)`, `titlu_curs` e `VARCHAR2(15)`. `NOT NULL` apare doar la `studenti.nr_matricol` și `cursuri.id_curs`. Nicio virgulă după ultima coloană."
+            }
+          ],
+          "explain": {
+            "en": "The check looks at the structure of the tables: column names, types, lengths and `NOT NULL`. Rows do not matter, the new tables are empty. The lab script does the same thing at its start, before the `INSERT`s.",
+            "ro": "Verificarea se uită la structura tabelelor: numele coloanelor, tipurile, lungimile și `NOT NULL`. Rândurile nu contează, tabelele noi sunt goale. Același lucru face scriptul laboratorului la început, înainte de `INSERT`."
+          }
+        }
+      ]
+    }
+  ]
+}

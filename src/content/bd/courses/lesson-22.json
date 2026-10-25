@@ -1,0 +1,466 @@
+{
+  "meta": {
+    "id": "bd-l22",
+    "title": {
+      "en": "Lesson 22: Self-join with grades — who got more",
+      "ro": "Lecția 22: Self-join cu note — cine a luat mai mult"
+    },
+    "shortTitle": {
+      "en": "L22: Self-join with grades",
+      "ro": "L22: Self-join cu note"
+    },
+    "source": {
+      "en": "Databases – Lab 4 (JOIN), UAIC",
+      "ro": "Baze de date – Laboratorul 4 (JOIN), UAIC"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l22-s1",
+      "title": {
+        "en": "Who got more?",
+        "ro": "Cine a luat mai mult?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l22-r1",
+          "prompt": {
+            "en": "Popescu Bogdan got 8 in Logica and 9 in Matematica. Look at the grades for the two courses. How many classmates got a higher grade than he did in Logica? And in Matematica? And how would you count that for all of his courses at once?",
+            "ro": "Popescu Bogdan a luat 8 la Logica și 9 la Matematica. Uită-te la notele celor două cursuri. Câți colegi au luat o notă mai mare decât el la Logica? Dar la Matematica? Și cum ai număra asta pentru toate cursurile lui deodată?"
+          },
+          "answer": {
+            "en": "In Logica there are 3 classmates with a higher grade (Antonie 9, Panaite 10, Bodnar 10). In Matematica there is just one (Bodnar, 10). Across all 6 of Popescu's courses you find 8 \"course – better classmate\" pairs in total. To count them all at once you need to put each of Popescu's grades face to face with the grades from the same course: that is, the `note` table appears twice in the query.",
+            "ro": "La Logica sunt 3 colegi cu notă mai mare (Antonie 9, Panaite 10, Bodnar 10). La Matematica este unul singur (Bodnar, 10). Pe toate cele 6 cursuri ale lui Popescu găsești în total 8 perechi „curs – coleg mai bun”. Ca să le numeri deodată, ai nevoie să pui fiecare notă a lui Popescu față în față cu notele de la același curs: adică tabela `note` apare de două ori în interogare."
+          },
+          "placeholder": {
+            "en": "Write how you would count",
+            "ro": "Scrie cum ai număra"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT s.nr_matricol, s.nume, s.prenume, c.titlu_curs, n.valoare FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE c.titlu_curs IN ('Logica', 'Matematica') ORDER BY c.titlu_curs, n.valoare DESC"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s2",
+      "title": {
+        "en": "Pairs on the same course",
+        "ro": "Perechi pe același curs"
+      },
+      "blocks": [
+        {
+          "type": "query-machine",
+          "id": "bd-l22-qm",
+          "dataset": "facultate",
+          "sql": "SELECT s1.nume AS mai_slab, n1.valoare AS nota_lui, s2.nume AS mai_bun, n2.valoare AS nota_celuilalt FROM studenti s1 JOIN note n1 ON n1.nr_matricol = s1.nr_matricol AND n1.id_curs = '24' JOIN note n2 ON n2.id_curs = n1.id_curs AND n2.valoare > n1.valoare JOIN studenti s2 ON s2.nr_matricol = n2.nr_matricol ORDER BY s1.nume, n2.valoare",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "join",
+              "predict": true
+            },
+            {
+              "clause": "select"
+            },
+            {
+              "clause": "order"
+            }
+          ],
+          "say": {
+            "from": {
+              "en": "We start from `studenti s1` and the first copy of the grades, `n1`, only for course 24 (BD). Each row of `n1` is one student's grade, the one who can be beaten.",
+              "ro": "Pornim de la `studenti s1` și de la prima copie a notelor, `n1`, doar pentru cursul 24 (BD). Fiecare rând din `n1` este nota unui student, „cel care poate fi învins”."
+            },
+            "join": {
+              "en": "Only the pairs from the same course where `n2` is strictly higher stay: 9 of them. `s2` is the student who got the grade in `n2`.",
+              "ro": "Rămân doar perechile de la același curs în care `n2` e strict mai mare: 9 dintre ele. `s2` este studentul care a luat nota din `n2`."
+            },
+            "select": {
+              "en": "9 pairs are left: Popescu is beaten by 2 classmates, Prelipcean by 3, Arhire by 4, and Antonie and Panaite (with 10) never appear as the weaker one. We pick the columns: who lost, with what grade, who won and with what grade.",
+              "ro": "Au rămas 9 perechi: Popescu e depășit de 2 colegi, Prelipcean de 3, Arhire de 4, iar Antonie și Panaite (cu 10) nu apar deloc ca „mai slabi”. Alegem coloanele: cine a pierdut, cu ce notă, cine a câștigat și cu ce notă."
+            },
+            "order": {
+              "en": "We sort by the weaker student's name and then by the other student's grade.",
+              "ro": "Sortăm după numele celui mai slab și apoi după nota celuilalt."
+            }
+          },
+          "show": [
+            "s1.nume",
+            "n1.valoare",
+            "s2.nume",
+            "n2.valoare"
+          ],
+          "ask": {
+            "join": {
+              "en": "The second copy of the grades, `n2`, is put next to every grade in `n1`, and `s2` is the student who got the grade in `n2`. The pairs below are already from the same course. Which ones also pass `n2.valoare > n1.valoare`, a strictly higher grade?",
+              "ro": "A doua copie a notelor, `n2`, e pusă lângă fiecare notă din `n1`, iar `s2` este studentul care a luat nota din `n2`. Perechile de mai jos sunt deja de la același curs. Care trec și de `n2.valoare > n1.valoare`, adică o notă strict mai mare?"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s3",
+      "title": {
+        "en": "Greater or equal, and the link on the course",
+        "ro": "Mai mare sau egal, și legătura pe curs"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`>=` brings back the pair with itself.** With `n2.valoare >= n1.valoare` every grade is \"greater or equal\" to itself, so you get 42 pairs with itself plus 40 pairs of classmates with the same grade: 200 rows instead of 118. With a strict `>` the pair with itself and the ties disappear on their own.",
+            "ro": "**`>=` aduce perechea cu sine.** Cu `n2.valoare >= n1.valoare` fiecare notă este „mai mare sau egală” cu ea însăși, deci apar 42 de perechi cu sine, plus 40 de perechi de colegi cu aceeași notă: 200 de rânduri în loc de 118. Cu `>` strict, perechea cu sine și egalitățile dispar singure."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Without the link on the course, rows multiply.** If you forget `n2.id_curs = n1.id_curs`, grades are also compared across different courses: 727 rows instead of 118. The result looks plausible, but the sentence \"got a higher grade than X in BD\" would be false, because the two did not take the same exam.",
+            "ro": "**Fără legătura pe curs, rândurile se înmulțesc.** Dacă uiți `n2.id_curs = n1.id_curs`, notele se compară și între cursuri diferite: 727 de rânduri în loc de 118. Rezultatul arată plauzibil, dar propoziția „a luat notă mai mare ca X la BD” ar fi falsă, pentru că cei doi nu au dat același examen."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s4",
+      "title": {
+        "en": "Four instances in FROM",
+        "ro": "Patru instanțe în FROM"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT s1.nume AS mai_slab, n1.valoare AS nota_lui,\n       s2.nume AS mai_bun,  n2.valoare AS nota_celuilalt\nFROM studenti s1\n  JOIN note n1     ON n1.nr_matricol = s1.nr_matricol\n  JOIN note n2     ON n2.id_curs = n1.id_curs AND n2.valoare > n1.valoare\n  JOIN studenti s2 ON s2.nr_matricol = n2.nr_matricol;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Inequality join",
+            "ro": "Join cu inegalitate"
+          },
+          "content": {
+            "en": "The condition in `ON` is no longer an equality but a comparison (`>`): each row of `n1` is linked to every row of `n2` that satisfies it. Here there are 118 such pairs across the 6 courses.",
+            "ro": "Condiția din `ON` nu mai este o egalitate, ci o comparație (`>`): fiecare rând din `n1` se leagă de toate rândurile din `n2` care o îndeplinesc. Aici sunt 118 astfel de perechi pe cele 6 cursuri."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Four instances",
+            "ro": "Patru instanțe"
+          },
+          "content": {
+            "en": "The same table as many times as you need, each with its own alias: `studenti s1`, `note n1`, `note n2`, `studenti s2`. Each alias is an independent copy. The chain reads: student `s1` → his grade `n1` → a higher grade `n2` from the same course → the student `s2` who got it.",
+            "ro": "Aceeași tabelă de câte ori ai nevoie, fiecare cu alias propriu: `studenti s1`, `note n1`, `note n2`, `studenti s2`. Fiecare alias este o copie independentă. Lanțul se citește: studentul `s1` → nota lui `n1` → o notă mai mare `n2` de la același curs → studentul `s2` care a luat-o."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "A sentence with ||",
+            "ro": "Propoziție cu ||"
+          },
+          "content": {
+            "en": "Fixed text and columns are glued with `||`; the spaces and the final period are strings you write yourself, in single quotes.",
+            "ro": "Textul fix și coloanele se lipesc cu `||`; spațiile și punctul de la sfârșit sunt șiruri de caractere puse de tine, între ghilimele simple."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s5",
+      "title": {
+        "en": "No need for s1 <> s2",
+        "ro": "Fără s1 <> s2"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l22-r2",
+          "prompt": {
+            "en": "In the lesson about pairs of classmates you had to remove a student's pair with himself. Here you wrote no condition like `s1.nr_matricol <> s2.nr_matricol`. Why don't you need it?",
+            "ro": "În lecția cu perechi de colegi trebuia să elimini perechea unui student cu el însuși. Aici nu ai scris nicio condiție de felul `s1.nr_matricol <> s2.nr_matricol`. De ce nu ai nevoie de ea?"
+          },
+          "answer": {
+            "en": "Because `n2.valoare > n1.valoare` is a strict comparison: a grade cannot be greater than itself, so a student never ends up paired with himself. The strictness also removes the pairs with equal grades. It would only be a problem with `>=`.",
+            "ro": "Pentru că `n2.valoare > n1.valoare` este o comparație strictă: o notă nu poate fi mai mare decât ea însăși, deci un student nu ajunge niciodată în pereche cu el însuși. Tot strictețea elimină și perechile cu note egale. Ar fi o problemă doar cu `>=`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s6",
+      "title": {
+        "en": ">= instead of >",
+        "ro": ">= în loc de >"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l22-q1",
+          "question": {
+            "en": "What happens if you put `n2.valoare >= n1.valoare` in `ON` instead of `>`?",
+            "ro": "Ce se întâmplă dacă în `ON` pui `n2.valoare >= n1.valoare` în loc de `>`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Ties appear too, including every grade set against itself: 200 rows instead of 118.",
+                "ro": "Apar și notele egale, inclusiv fiecare notă pusă față în față cu ea însăși: 200 de rânduri în loc de 118."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Of the 200 rows, 42 are pairs with itself (one for each grade) and 40 are pairs of classmates with the same grade; 118 + 42 + 40 = 200.",
+                "ro": "Corect. Din cele 200 de rânduri, 42 sunt perechi cu sine (câte una pentru fiecare notă) și 40 sunt perechi de colegi cu aceeași notă; 118 + 42 + 40 = 200."
+              }
+            },
+            {
+              "text": {
+                "en": "Nothing changes: it is still 118 rows.",
+                "ro": "Nu se schimbă nimic: rămân tot 118 rânduri."
+              },
+              "correct": false,
+              "explain": {
+                "en": "It does change. The strict `>` rules out ties; `>=` lets them in, so the result grows.",
+                "ro": "Se schimbă. Comparația strictă `>` exclude egalitățile; `>=` le lasă înăuntru, deci rezultatul crește."
+              },
+              "misconception": "self-pair"
+            },
+            {
+              "text": {
+                "en": "160 rows: the pairs with itself appear, but not the ties between classmates.",
+                "ro": "160 de rânduri: apar perechile cu sine, dar nu și egalitățile dintre colegi."
+              },
+              "correct": false,
+              "explain": {
+                "en": "The ties between classmates appear too: the 40 pairs of classmates with the same grade are in the result. 118 + 42 = 160 would be without them; with them there are 200.",
+                "ro": "Egalitățile dintre colegi apar și ele: cele 40 de perechi de colegi cu aceeași notă intră în rezultat. 118 + 42 = 160 ar fi fără ele; cu ele sunt 200."
+              },
+              "misconception": "self-pair"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s7",
+      "title": {
+        "en": "Without the link on the course",
+        "ro": "Fără legătura pe curs"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l22-q2",
+          "question": {
+            "en": "You delete the condition `n2.id_curs = n1.id_curs` from `ON` and keep only `n2.valoare > n1.valoare`. What do you get?",
+            "ro": "Ștergi condiția `n2.id_curs = n1.id_curs` din `ON` și păstrezi doar `n2.valoare > n1.valoare`. Ce obții?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "The same result, 118 rows, because the higher grade picks the course by itself.",
+                "ro": "Același rezultat, 118 rânduri, pentru că nota mai mare alege singură cursul."
+              },
+              "correct": false,
+              "explain": {
+                "en": "A grade does not pick the course. Without the equality on `id_curs`, any higher grade from any course is a valid pair.",
+                "ro": "Nota nu alege cursul. Fără egalitatea pe `id_curs`, orice notă mai mare din orice curs este o pereche validă."
+              },
+              "misconception": "row-multiply"
+            },
+            {
+              "text": {
+                "en": "Grades from different courses are compared too: 727 rows instead of 118.",
+                "ro": "Se compară și note de la cursuri diferite: 727 de rânduri în loc de 118."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Each grade is compared with every higher grade in the whole table, whatever the course, so the rows multiply and the sentences no longer make sense.",
+                "ro": "Corect. Fiecare notă se compară cu toate notele mai mari din tot tabelul, indiferent de curs, deci rândurile se înmulțesc și propozițiile nu mai au sens."
+              }
+            },
+            {
+              "text": {
+                "en": "A Cartesian product: 1764 rows (42 × 42).",
+                "ro": "Produs cartezian: 1764 de rânduri (42 × 42)."
+              },
+              "correct": false,
+              "explain": {
+                "en": "The condition `n2.valoare > n1.valoare` stays in `ON` and removes the pairs with equal or lower grades. 727 rows remain, not all 1764.",
+                "ro": "Condiția `n2.valoare > n1.valoare` rămâne în `ON` și taie perechile cu note egale sau mai mici. Rămân 727 de rânduri, nu toate cele 1764."
+              },
+              "misconception": "cartesian"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s8",
+      "title": {
+        "en": "Who has the top grade",
+        "ro": "Cine are nota maximă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l22-q3",
+          "question": {
+            "en": "A student has the top grade in a course (for example 10 in Logica). In how many rows does he appear as `s1` for that course?",
+            "ro": "Un student are nota maximă la un curs (de exemplu 10 la Logica). În câte rânduri apare el ca `s1` pentru acel curs?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "In 1 row: the pair with himself.",
+                "ro": "În 1 rând: perechea cu el însuși."
+              },
+              "correct": false,
+              "explain": {
+                "en": "The pair with himself would only exist with `>=`. With a strict `>`, his grade is not greater than itself.",
+                "ro": "Perechea cu sine ar exista doar cu `>=`. Cu `>` strict, nota lui nu este mai mare decât ea însăși."
+              },
+              "misconception": "self-pair"
+            },
+            {
+              "text": {
+                "en": "In as many rows as the course has grades.",
+                "ro": "În atâtea rânduri câte note are cursul."
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would be a Cartesian product per course. The condition `n2.valoare > n1.valoare` filters out almost everything, and for the top grade it leaves nothing.",
+                "ro": "Asta ar fi un produs cartezian pe curs. Condiția `n2.valoare > n1.valoare` filtrează aproape tot, iar pentru nota maximă nu lasă nimic."
+              },
+              "misconception": "row-multiply"
+            },
+            {
+              "text": {
+                "en": "In 0 rows.",
+                "ro": "În 0 rânduri."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. For him to appear as `s1` there would have to be someone with a strictly higher grade, and nobody is above 10 in that course.",
+                "ro": "Corect. Pentru ca el să apară ca `s1`, ar trebui să existe cineva cu nota strict mai mare, iar peste 10 nu mai este nimeni la acel curs."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s9",
+      "title": {
+        "en": "Hidden spaces in CHAR",
+        "ro": "Spații ascunse în CHAR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l22-q4",
+          "question": {
+            "en": "In a sentence you glue `p.nume || ' ' || p.prenume`, with `p` from `profesori` (`CHAR(10)` columns). What do you get for Buraga Sabin?",
+            "ro": "Într-o propoziție lipești `p.nume || ' ' || p.prenume`, cu `p` din `profesori` (coloane `CHAR(10)`). Ce primești pentru Buraga Sabin?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "A string with extra spaces: `Buraga     Sabin     ` (21 characters).",
+                "ro": "Un șir cu spații în plus: `Buraga     Sabin     ` (21 de caractere)."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `CHAR(10)` pads with spaces up to 10 characters, so `Buraga` gets 4 spaces after it and `Sabin` gets 5. The fix is `TRIM(p.nume) || ' ' || TRIM(p.prenume)`.",
+                "ro": "Corect. `CHAR(10)` completează cu spații până la 10 caractere, deci `Buraga` primește 4 spații după el, iar `Sabin` 5. Rezolvarea este `TRIM(p.nume) || ' ' || TRIM(p.prenume)`."
+              }
+            },
+            {
+              "text": {
+                "en": "Exactly `Buraga Sabin`.",
+                "ro": "Exact `Buraga Sabin`."
+              },
+              "correct": false,
+              "explain": {
+                "en": "Only for `VARCHAR2` columns. With `CHAR(10)` the padding spaces are part of the value.",
+                "ro": "Doar pentru coloane `VARCHAR2`. La `CHAR(10)` spațiile de completare fac parte din valoare."
+              },
+              "misconception": "char-pad"
+            },
+            {
+              "text": {
+                "en": "The string `Buraga Sabin     `: the spaces after the last name disappear, only those after the first name stay.",
+                "ro": "Șirul `Buraga Sabin     `: spațiile de după nume dispar, rămân doar cele de după prenume."
+              },
+              "correct": false,
+              "explain": {
+                "en": "Both columns are `CHAR(10)`, so both bring padding spaces. The ones after `Buraga` stay in the middle of the string (4 spaces, plus the separator).",
+                "ro": "Ambele coloane sunt `CHAR(10)`, deci ambele aduc spații de completare. Cele de după `Buraga` rămân în mijlocul șirului (4 spații, plus separatorul)."
+              },
+              "misconception": "char-pad"
+            }
+          ],
+          "review": "bd-l11"
+        }
+      ]
+    },
+    {
+      "id": "bd-l22-s10",
+      "title": {
+        "en": "The sentences with higher grades",
+        "ro": "Propozițiile cu note mai mari"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l22-ex-4-8",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show, for each student, the names of the classmates who got a higher grade than they did in each of the courses. Phrase the results as sentences (of the form \"Popescu Gigel a luat notă mai mare ca Vasilescu Ionel la materia BD.\"). Give the column a suitable name [hint: the query must return 118 rows].\n\nFor the app: the classmate with the higher grade comes first in the sentence, exactly as in the example (with \"notă\", with the diacritic). The column must have an alias of your choosing.",
+            "ro": "Să se afișeze, pentru fiecare student, numele colegilor care au luat notă mai mare ca ei la fiecare dintre cursuri. Formulați rezultatele ca propoziții (de forma \"Popescu Gigel a luat notă mai mare ca Vasilescu Ionel la materia BD.\"). Dați un nume corespunzător coloanei [pont: interogarea trebuie să returneze 118 rânduri].\n\nPentru aplicație: colegul cu nota mai mare apare primul în propoziție, exact ca în exemplu (cu „notă”, cu diacritică). Coloana trebuie să aibă un alias la alegerea ta."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 8
+          },
+          "starter": "SELECT … AS propozitie\nFROM studenti s1\n  JOIN note n1 ON …",
+          "solution": "SELECT s2.nume || ' ' || s2.prenume || ' a luat notă mai mare ca ' || s1.nume || ' ' || s1.prenume || ' la materia ' || c.titlu_curs || '.' AS propozitie\nFROM studenti s1\n  JOIN note n1 ON n1.nr_matricol = s1.nr_matricol\n  JOIN note n2 ON n2.id_curs = n1.id_curs AND n2.valoare > n1.valoare\n  JOIN studenti s2 ON s2.nr_matricol = n2.nr_matricol\n  JOIN cursuri c ON c.id_curs = n1.id_curs",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "aliases": "any-distinct"
+          },
+          "hints": [
+            {
+              "en": "Pick the tables. You need `studenti` twice, `note` twice and `cursuri` once (for the course name).",
+              "ro": "Alege tabelele. Ai nevoie de `studenti` de două ori, de `note` de două ori și de `cursuri` o dată (pentru numele materiei)."
+            },
+            {
+              "en": "Skeleton: `FROM studenti s1 JOIN note n1 ON … JOIN note n2 ON n2.id_curs = … AND n2.valoare … JOIN studenti s2 ON … JOIN cursuri c ON …`. Then the sentence: `s2.nume || ' ' || … || '.' AS …`. The exact form of the sentence: `Surname Name a luat notă mai mare ca Surname Name la materia Course.`, with a single space between words and a full stop at the end.",
+              "ro": "Schelet: `FROM studenti s1 JOIN note n1 ON … JOIN note n2 ON n2.id_curs = … AND n2.valoare … JOIN studenti s2 ON … JOIN cursuri c ON …`. Apoi propoziția: `s2.nume || ' ' || … || '.' AS …`. Forma exactă a propoziției: `Nume Prenume a luat notă mai mare ca Nume Prenume la materia Curs.`, cu un singur spațiu între cuvinte și cu punct la final."
+            },
+            {
+              "en": "The two grades must be linked on the same course and compared strictly (`>`). If you get 727 rows, the equality on `id_curs` is missing; if you get 200, you wrote `>=`.",
+              "ro": "Cele două note trebuie legate pe același curs și comparate strict (`>`). Dacă obții 727 de rânduri, lipsește egalitatea pe `id_curs`; dacă obții 200, ai scris `>=`."
+            }
+          ],
+          "explain": {
+            "en": "Each sentence comes from a pair (`s1`'s grade, a higher grade of `s2` in the same course). The link on the course and the strict comparison give exactly 118 rows, with no pair with itself and no ties. The course name comes from `cursuri`, linked through `n1.id_curs`.",
+            "ro": "Fiecare propoziție vine dintr-o pereche (nota lui `s1`, o notă mai mare a lui `s2` la același curs). Legătura pe curs și comparația strictă dau exact 118 rânduri, fără perechea cu sine și fără egalități. Numele materiei vine din `cursuri`, legat prin `n1.id_curs`."
+          }
+        }
+      ]
+    }
+  ]
+}

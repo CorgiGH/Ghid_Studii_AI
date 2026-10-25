@@ -1,0 +1,770 @@
+{
+  "meta": {
+    "id": "bd-l08",
+    "title": {
+      "en": "Lesson 8: ORDER BY",
+      "ro": "Lecția 8: ORDER BY"
+    },
+    "shortTitle": {
+      "en": "L8: ORDER BY",
+      "ro": "L8: ORDER BY"
+    },
+    "source": {
+      "en": "Databases lab 2, UAIC (Oracle SQL); queries checked on Oracle 11g",
+      "ro": "Laboratorul 2 de Baze de date, UAIC (Oracle SQL); interogări verificate pe Oracle 11g"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l08-s1",
+      "title": {
+        "en": "How do you put rows in order?",
+        "ro": "Cum pui rândurile în ordine?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l08-reflect-pre",
+          "prompt": {
+            "en": "The attendance list must show students in the order of their years, and within each year alphabetically by surname. What would you put in the query to get that?",
+            "ro": "Lista de prezență trebuie să arate studenții în ordinea anilor, iar în cadrul fiecărui an în ordine alfabetică după nume. Ce ai pune în interogare ca să obții asta?"
+          },
+          "answer": {
+            "en": "You ask for **sorting** on two keys, in order of importance: first the year, then the surname. In SQL it is written at the end of the query: `ORDER BY an, nume`. The first key splits the rows into groups, and the second sorts inside each group.",
+            "ro": "Ceri o **ordonare** după două chei, în ordinea importanței: întâi anul, apoi numele. În SQL se scrie la sfârșitul interogării: `ORDER BY an, nume`. Prima cheie împarte rândurile în grupuri, iar a doua le sortează în interiorul fiecărui grup."
+          },
+          "placeholder": {
+            "en": "Write your answer here…",
+            "ro": "Scrie-ți răspunsul aici…"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, prenume, an FROM studenti ORDER BY nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s2",
+      "title": {
+        "en": "ORDER BY: the cards rearrange",
+        "ro": "ORDER BY: fișele se rearanjează"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`ORDER BY` is the last step: the remaining rows are put in order. The first key (`an`) makes groups, the second (`nume`) sorts inside the groups. **Guess the order of the rows, then check.**",
+            "ro": "`ORDER BY` este ultimul pas: rândurile rămase sunt așezate în ordine. Prima cheie (`an`) face grupuri, a doua (`nume`) sortează în interiorul grupurilor. **Ghicește ordinea rândurilor, apoi verifică.**"
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l08-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, prenume, an FROM studenti ORDER BY an, nume",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "select"
+            },
+            {
+              "clause": "order",
+              "predict": true
+            }
+          ],
+          "show": [
+            "nume",
+            "prenume",
+            "an"
+          ],
+          "say": {
+            "from": {
+              "en": "We start with the 13 rows, in the order they are stored (you have no guarantee about it).",
+              "ro": "Pornim cu cele 13 rânduri, în ordinea în care sunt stocate (nu ai nicio garanție asupra ei)."
+            },
+            "select": {
+              "en": "SELECT picks the columns nume, prenume and an.",
+              "ro": "SELECT alege coloanele nume, prenume și an."
+            },
+            "order": {
+              "en": "First by year (1, 2, 3), then, within each year, alphabetically by surname.",
+              "ro": "Întâi după an (1, 2, 3), apoi, în fiecare an, alfabetic după nume."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s3",
+      "title": {
+        "en": "Where do the missing values go?",
+        "ro": "Unde ajung valorile lipsă?"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Eight students have a NULL scholarship. With `ORDER BY bursa`, where do you think they end up: at the start or at the end? **Predict, then check.**",
+            "ro": "Opt studenți au bursa NULL. La `ORDER BY bursa`, unde crezi că ajung: la început sau la sfârșit? **Prezice, apoi verifică.**"
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l08-qm2",
+          "dataset": "facultate",
+          "sql": "SELECT nume, bursa FROM studenti ORDER BY bursa",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "select"
+            },
+            {
+              "clause": "order"
+            }
+          ],
+          "show": [
+            "nume",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "The 13 rows.",
+              "ro": "Cele 13 rânduri."
+            },
+            "select": {
+              "en": "We keep the name and the scholarship.",
+              "ro": "Păstrăm numele și bursa."
+            },
+            "order": {
+              "en": "Ascending: 250, 350, 350, 350, 450, then the 8 with NULL. In Oracle, NULL sorts as **the largest value**: last with ASC, first with DESC.",
+              "ro": "Crescător: 250, 350, 350, 350, 450, apoi cei 8 cu NULL. În Oracle, NULL se sortează ca **cea mai mare valoare**: ultimul la ASC, primul la DESC."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s4",
+      "title": {
+        "en": "When two keys are not enough",
+        "ro": "Când nu ajung două chei"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Two students, both Bodnar Ioana (116 and 119), have the same surname and are in the same year. If the list of keys ends before it separates them, **the order between them is not guaranteed** and may differ from one run to another. Add a key that is unique, usually `nr_matricol`, as the last key.",
+            "ro": "Doi studenți, ambii Bodnar Ioana (116 și 119), au același nume și sunt în același an. Dacă lista de chei se termină înainte să-i despartă, **ordinea dintre ei nu e garantată** și poate diferi de la o rulare la alta. Adaugă o cheie care să fie unică, de obicei `nr_matricol`, ca ultimă cheie."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l08-qm3",
+          "dataset": "facultate",
+          "sql": "SELECT nr_matricol, nume, prenume, an FROM studenti ORDER BY an DESC, nume, nr_matricol",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "select"
+            },
+            {
+              "clause": "order"
+            }
+          ],
+          "show": [
+            "nr_matricol",
+            "nume",
+            "prenume",
+            "an"
+          ],
+          "say": {
+            "from": {
+              "en": "The 13 rows.",
+              "ro": "Cele 13 rânduri."
+            },
+            "select": {
+              "en": "We keep the registration number, surname, first name and year.",
+              "ro": "Păstrăm matricolul, numele, prenumele și anul."
+            },
+            "order": {
+              "en": "The year goes down (3, 2, 1), within each year the surname goes up, and with equal surnames the registration number decides: 116 before 119.",
+              "ro": "Anul coboară (3, 2, 1), în fiecare an numele crește, iar la nume egale decide matricolul: 116 înaintea lui 119."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s5",
+      "title": {
+        "en": "NULL when sorting",
+        "ro": "NULL la sortare"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "In Oracle, NULL is treated as **the largest value** when sorting. With `ORDER BY bursa` (ascending) those without a scholarship come **last**; with `ORDER BY bursa DESC` they come **first**. If you want otherwise, you add `NULLS LAST` or `NULLS FIRST`: `ORDER BY bursa DESC NULLS LAST`.",
+            "ro": "În Oracle, NULL este tratat ca **cea mai mare valoare** la sortare. La `ORDER BY bursa` (crescător) cei fără bursă vin **ultimii**; la `ORDER BY bursa DESC` ei vin **primii**. Dacă vrei altfel, adaugi `NULLS LAST` sau `NULLS FIRST`: `ORDER BY bursa DESC NULLS LAST`."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, bursa FROM studenti ORDER BY bursa DESC NULLS LAST;"
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s6",
+      "title": {
+        "en": "ORDER BY by position",
+        "ro": "ORDER BY pe poziție"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "`ORDER BY 2` means \"the second column in the SELECT list\". With `SELECT *` from `studenti` that is `nume`. It works, but it is fragile: if the column list changes, the sorting changes too, with no error. It is safer to write the column name. An alias defined in SELECT is visible in `ORDER BY` (which runs after SELECT), but **not** in `WHERE` (which runs before): `WHERE n = 'Bucur'` with the alias `n` gives ORA-00904.",
+            "ro": "`ORDER BY 2` înseamnă «a doua coloană din lista de la SELECT». La `SELECT *` din `studenti` aceea este `nume`. Merge, dar e fragil: dacă se schimbă lista de coloane, se schimbă și sortarea, fără nicio eroare. Mai sigur e să scrii numele coloanei. Un alias definit în SELECT se vede în `ORDER BY` (care rulează după SELECT), dar **nu** în `WHERE` (care rulează înainte): `WHERE n = 'Bucur'` cu aliasul `n` dă ORA-00904."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT * FROM studenti ORDER BY 2;"
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s7",
+      "title": {
+        "en": "An alias with quotes",
+        "ro": "Alias cu ghilimele"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "An alias in double quotes keeps its capitals exactly: `AS \"Student\"` stays `Student`. Without quotes Oracle turns it into `STUDENT`. That is why `ORDER BY Student` no longer finds `\"Student\"` and gives **ORA-00904**: \"STUDENT\": invalid identifier. Write `ORDER BY \"Student\"` with the quotes, just as in SELECT.",
+            "ro": "Un alias între ghilimele duble păstrează majusculele exact: `AS \"Student\"` rămâne `Student`. Fără ghilimele, Oracle îl transformă în `STUDENT`. De aceea `ORDER BY Student` nu mai găsește `\"Student\"` și dă **ORA-00904**: \"STUDENT\": invalid identifier. Scrie `ORDER BY \"Student\"` cu ghilimelele, la fel ca în SELECT."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume AS \"Student\" FROM studenti ORDER BY \"Student\";"
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s8",
+      "title": {
+        "en": "The syntax of ORDER BY",
+        "ro": "Sintaxa lui ORDER BY"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT coloane\nFROM tabel\n[WHERE condiție]\nORDER BY cheie1 [ASC | DESC] [NULLS FIRST | NULLS LAST], cheie2 [ASC | DESC], ...;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "ASC and DESC",
+            "ro": "ASC și DESC"
+          },
+          "content": {
+            "en": "ASC (ascending) is the default. DESC (descending) is written after **each** key that wants it; it does not spread to neighbouring keys.",
+            "ro": "ASC (crescător) este implicit. DESC (descrescător) se scrie după **fiecare** cheie care îl vrea; nu se propagă la cheile vecine."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "multiple keys",
+            "ro": "chei multiple"
+          },
+          "content": {
+            "en": "The first key has priority; the next one only decides between rows that have the same value for the previous key.",
+            "ro": "Prima cheie are prioritate; următoarea decide doar între rândurile cu aceeași valoare la cheia dinainte."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "order in the query",
+            "ro": "ordinea în interogare"
+          },
+          "content": {
+            "en": "ORDER BY is the last step (after FROM, WHERE, SELECT), which is why it sees aliases. In WHERE aliases are not visible.",
+            "ro": "ORDER BY este ultimul pas (după FROM, WHERE, SELECT), de aceea vede aliasurile. În WHERE aliasurile nu se văd."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s9",
+      "title": {
+        "en": "Why do students without a scholarship come first with DESC?",
+        "ro": "De ce apar primii cei fără bursă la DESC?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l08-reflect-why",
+          "prompt": {
+            "en": "Why do students without a scholarship appear first with `ORDER BY bursa DESC`, even though they have \"the least\"?",
+            "ro": "De ce la `ORDER BY bursa DESC` apar primii studenții fără bursă, deși ei au «cel mai puțin»?"
+          },
+          "answer": {
+            "en": "Because in Oracle NULL sorts as the largest value. With ASC it comes last, with DESC it comes first. NULL does not mean \"zero\", it means \"unknown\", and the database puts it at one end of the list. If you want the other end, you write `NULLS FIRST` or `NULLS LAST`.",
+            "ro": "Pentru că, în Oracle, NULL se sortează ca cea mai mare valoare. La ASC vine ultimul, la DESC vine primul. NULL nu înseamnă «zero», ci «nu se știe», iar baza de date îl pune la un capăt al listei. Dacă vrei alt capăt, scrii `NULLS FIRST` sau `NULLS LAST`."
+          },
+          "placeholder": {
+            "en": "Explain in your own words…",
+            "ro": "Explică în cuvintele tale…"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s10",
+      "title": {
+        "en": "DESC on several keys",
+        "ro": "DESC pe mai multe chei"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l08-mcq1",
+          "question": {
+            "en": "What does `ORDER BY an, grupa DESC` do?",
+            "ro": "Ce face `ORDER BY an, grupa DESC`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Sorts `an` ascending and, inside each year, `grupa` descending",
+                "ro": "Sortează `an` crescător și, în interiorul fiecărui an, `grupa` descrescător"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. DESC applies only to the key it follows. The result starts with year 1 (B2, B1, B1, B1).",
+                "ro": "Corect. DESC se aplică doar cheii după care stă. Rezultatul începe cu anul 1 (B2, B1, B1, B1)."
+              }
+            },
+            {
+              "text": {
+                "en": "Sorts both keys descending",
+                "ro": "Sortează ambele chei descrescător"
+              },
+              "correct": false,
+              "explain": {
+                "en": "DESC does not spread. For both keys you would write `ORDER BY an DESC, grupa DESC`.",
+                "ro": "DESC nu se propagă. Pentru ambele chei ai scrie `ORDER BY an DESC, grupa DESC`."
+              },
+              "misconception": "desc-scope"
+            },
+            {
+              "text": {
+                "en": "Sorts only by `grupa`; `an` is ignored",
+                "ro": "Sortează doar după `grupa`; `an` e ignorat"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Every key in the list counts; the first one is the most important.",
+                "ro": "Toate cheile din listă contează; prima este chiar cea mai importantă."
+              },
+              "misconception": "desc-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s11",
+      "title": {
+        "en": "Where those without a scholarship appear",
+        "ro": "Unde apar cei fără bursă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l08-mcq2",
+          "question": {
+            "en": "Where do students without a scholarship appear with `ORDER BY bursa`?",
+            "ro": "Unde apar studenții fără bursă la `ORDER BY bursa`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "At the start, because NULL is the smallest value",
+                "ro": "La început, fiindcă NULL este cea mai mică valoare"
+              },
+              "correct": false,
+              "explain": {
+                "en": "In Oracle it is the other way round. (In other databases, for example SQL Server, NULL really is the smallest.)",
+                "ro": "În Oracle e invers. (În alte baze de date, de exemplu SQL Server, NULL e într-adevăr cel mai mic.)"
+              },
+              "misconception": "ordering-nulls"
+            },
+            {
+              "text": {
+                "en": "They do not appear at all, ORDER BY removes them",
+                "ro": "Nu apar deloc, ORDER BY îi elimină"
+              },
+              "correct": false,
+              "explain": {
+                "en": "ORDER BY only orders, it does not remove rows. All 13 rows remain.",
+                "ro": "ORDER BY doar ordonează, nu elimină rânduri. Toate cele 13 rânduri rămân."
+              },
+              "misconception": "ordering-nulls"
+            },
+            {
+              "text": {
+                "en": "At the end",
+                "ro": "La sfârșit"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. For Oracle, NULL is the largest value: with ASC it comes last.",
+                "ro": "Corect. Pentru Oracle, NULL este cea mai mare valoare: la ASC vine ultimul."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s12",
+      "title": {
+        "en": "ORDER BY 2",
+        "ro": "ORDER BY 2"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l08-mcq3",
+          "question": {
+            "en": "What does `SELECT * FROM studenti ORDER BY 2` do?",
+            "ro": "Ce face `SELECT * FROM studenti ORDER BY 2`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Shows only the second row",
+                "ro": "Afișează doar al doilea rând"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The number in ORDER BY points to a column, not a row. All rows remain.",
+                "ro": "Numărul din ORDER BY indică o coloană, nu un rând. Toate rândurile rămân."
+              },
+              "misconception": "order-pos-alias"
+            },
+            {
+              "text": {
+                "en": "Sorts by the second column of the SELECT list, that is `nume`; it works, but it is fragile",
+                "ro": "Sortează după a doua coloană din lista SELECT, adică `nume`; merge, dar e fragil"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. If a column is added before `nume` tomorrow, the sorting changes without any warning.",
+                "ro": "Corect. Dacă mâine se adaugă o coloană înaintea lui `nume`, sortarea se schimbă fără niciun avertisment."
+              }
+            },
+            {
+              "text": {
+                "en": "Gives an error, ORDER BY requires a column name",
+                "ro": "Dă eroare, ORDER BY cere nume de coloană"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Oracle allows a position in ORDER BY, so there is no error. It is just not recommended.",
+                "ro": "Oracle permite poziția în ORDER BY, deci nu dă eroare. Doar că nu e recomandată."
+              },
+              "misconception": "order-pos-alias"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s13",
+      "title": {
+        "en": "The Student alias in ORDER BY",
+        "ro": "Aliasul Student în ORDER BY"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l08-mcq4",
+          "question": {
+            "en": "What does the query `SELECT nume AS \"Student\" FROM studenti ORDER BY Student` do?",
+            "ro": "Interogarea `SELECT nume AS \"Student\" FROM studenti ORDER BY Student` ce face?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Gives ORA-00904, because `Student` without quotes becomes `STUDENT`",
+                "ro": "Dă ORA-00904, pentru că `Student` fără ghilimele devine `STUDENT`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The quoted alias is `Student` (exact), while the unquoted one is looked up as `STUDENT`. The quotes must be repeated in ORDER BY.",
+                "ro": "Corect. Aliasul cu ghilimele este `Student` (exact), iar cel fără ghilimele este căutat ca `STUDENT`. Ghilimelele trebuie repetate în ORDER BY."
+              }
+            },
+            {
+              "text": {
+                "en": "It works: Oracle does not care about capitals",
+                "ro": "Merge: Oracle nu ține cont de majuscule"
+              },
+              "correct": false,
+              "explain": {
+                "en": "For unquoted names yes, but an alias in double quotes is case-sensitive.",
+                "ro": "Pentru nume fără ghilimele da, dar un alias între ghilimele duble este sensibil la majuscule."
+              },
+              "misconception": "quotes-alias"
+            },
+            {
+              "text": {
+                "en": "Gives ORA-00904, because ORDER BY cannot see the aliases from SELECT",
+                "ro": "Dă ORA-00904, pentru că ORDER BY nu vede aliasurile din SELECT"
+              },
+              "correct": false,
+              "explain": {
+                "en": "ORDER BY does see the aliases from SELECT (it runs after it), and `ORDER BY \"Student\"` works. The error comes only from the capitals: `Student` without quotes is looked up as `STUDENT`.",
+                "ro": "ORDER BY vede aliasurile din SELECT (se execută după el), iar `ORDER BY \"Student\"` merge. Eroarea vine doar de la majuscule: `Student` fără ghilimele este căutat ca `STUDENT`."
+              },
+              "misconception": "order-pos-alias"
+            }
+          ],
+          "review": "bd-l02"
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s14",
+      "title": {
+        "en": "DESC on scholarship, then name",
+        "ro": "DESC pe bursă, apoi nume"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l08-mcq5",
+          "question": {
+            "en": "Which rows does `SELECT nume, prenume, bursa FROM studenti ORDER BY bursa DESC, nume` start with?",
+            "ro": "Cu ce rânduri începe `SELECT nume, prenume, bursa FROM studenti ORDER BY bursa DESC, nume`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "With the 8 without a scholarship, in alphabetical order: Arhire, Arhire, Bodnar...",
+                "ro": "Cu cei 8 fără bursă, în ordine alfabetică: Arhire, Arhire, Bodnar..."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. With `DESC`, NULL comes first; among them, `nume` stays ascending. Antonie (450) appears only ninth.",
+                "ro": "Corect. La `DESC`, NULL vine primul; între ei, `nume` rămâne crescător. Antonie (450) apare abia al nouălea."
+              }
+            },
+            {
+              "text": {
+                "en": "With Antonie Ioana, scholarship 450",
+                "ro": "Cu Antonie Ioana, bursa 450"
+              },
+              "correct": false,
+              "misconception": "ordering-nulls",
+              "explain": {
+                "en": "With `DESC`, NULL comes first, because Oracle treats it as the largest value. Antonie appears only after the 8 without a scholarship.",
+                "ro": "La `DESC`, NULL vine primul, fiindcă Oracle îl socotește cea mai mare valoare. Antonie apare abia după cei 8 fără bursă."
+              }
+            },
+            {
+              "text": {
+                "en": "With the 8 without a scholarship, from Prelipcean down to Arhire",
+                "ro": "Cu cei 8 fără bursă, de la Prelipcean spre Arhire"
+              },
+              "correct": false,
+              "misconception": "desc-scope",
+              "explain": {
+                "en": "`DESC` applies only to `bursa`. `nume` stays ascending, so those without a scholarship run from Arhire to Prelipcean.",
+                "ro": "`DESC` se aplică doar lui `bursa`. `nume` rămâne crescător, deci cei fără bursă vin de la Arhire la Prelipcean."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s15",
+      "title": {
+        "en": "Two Bodnar Ioana when sorting",
+        "ro": "Doi Bodnar Ioana la sortare"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l08-mcq6",
+          "question": {
+            "en": "`SELECT nr_matricol, nume, prenume FROM studenti ORDER BY nume, prenume`. In which order do the two Bodnar Ioana (116 and 119) appear?",
+            "ro": "`SELECT nr_matricol, nume, prenume FROM studenti ORDER BY nume, prenume`. În ce ordine apar cei doi Bodnar Ioana (116 și 119)?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Always 116, then 119, by `nr_matricol`",
+                "ro": "Mereu 116, apoi 119, după `nr_matricol`"
+              },
+              "correct": false,
+              "misconception": "order-key",
+              "explain": {
+                "en": "`nr_matricol` is not in `ORDER BY`, so it decides nothing. On Oracle 11g this query actually gives 119 before 116.",
+                "ro": "`nr_matricol` nu e în `ORDER BY`, deci nu decide nimic. Pe Oracle 11g interogarea chiar dă 119 înaintea lui 116."
+              }
+            },
+            {
+              "text": {
+                "en": "In the order they were inserted: 116, then 119",
+                "ro": "În ordinea în care au fost inserați: 116, apoi 119"
+              },
+              "correct": false,
+              "misconception": "order-insert",
+              "explain": {
+                "en": "Insertion order is not promised anywhere. On Oracle 11g this query gives the reverse, 119 before 116.",
+                "ro": "Ordinea inserării nu e promisă nicăieri. Pe Oracle 11g interogarea dă chiar invers, 119 înaintea lui 116."
+              }
+            },
+            {
+              "text": {
+                "en": "It is not guaranteed: when every key ties, either one can come first",
+                "ro": "Nu e garantată: la egalitate pe toate cheile, oricare poate fi primul"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. To fix the order, you add a key that tells them apart: `ORDER BY nume, prenume, nr_matricol`.",
+                "ro": "Corect. Ca să fixezi ordinea, adaugi o cheie care îi deosebește: `ORDER BY nume, prenume, nr_matricol`."
+              }
+            }
+          ],
+          "review": "bd-l02"
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s16",
+      "title": {
+        "en": "Name and year in one column",
+        "ro": "Numele și anul într-o coloană"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l08-ex-2-4",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 4): \"Show the surname concatenated with the first name, followed by a comma and the year of study. Order ascending by year of study. Name the column “Studenți pe ani de studiu”.\"\n\nIn the app: the column looks like the model \"Popescu Bogdan, 3\". Within the same year, order alphabetically by surname and then first name. The alias is written between straight double quotes (\" \").",
+            "ro": "Enunț oficial (laborator 2, ex. 4): «Afișați numele concatenat cu prenumele urmat de virgulă și anul de studiu. Ordonați crescător după anul de studiu. Denumiți coloana “Studenți pe ani de studiu”.»\n\nÎn aplicație: coloana arată ca în modelul «Popescu Bogdan, 3». În cadrul aceluiași an, ordonează alfabetic după nume și prenume. Aliasul se scrie între ghilimele duble drepte (\" \")."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 4
+          },
+          "starter": "SELECT  AS \"Studenți pe ani de studiu\" FROM studenti ORDER BY ",
+          "solution": "SELECT nume || ' ' || prenume || ', ' || an AS \"Studenți pe ani de studiu\" FROM studenti ORDER BY an, nume, prenume",
+          "check": {
+            "order": "required",
+            "orderBy": [],
+            "mode": "bag",
+            "aliases": [
+              "Studenți pe ani de studiu"
+            ]
+          },
+          "hints": [
+            {
+              "en": "Three things: you glue the texts into a single column, give it an alias and order by year of study.",
+              "ro": "Trei lucruri: lipești textele într-o singură coloană, îi dai un alias și ordonezi după anul de studiu."
+            },
+            {
+              "en": "`SELECT nume || ' ' || ... AS \"...\" FROM studenti ORDER BY ...`. The `||` operator glues texts, and the number `an` is glued as text on its own.",
+              "ro": "`SELECT nume || ' ' || ... AS \"...\" FROM studenti ORDER BY ...`. Operatorul `||` lipește texte, iar numărul `an` se lipește singur ca text."
+            },
+            {
+              "en": "You order first by the column `an`, not by the glued text, then by the two names: `ORDER BY an, ...`. An alias with spaces needs straight double quotes, not curly ones (“ ”).",
+              "ro": "Ordonezi întâi după coloana `an`, nu după textul lipit, apoi după cele două nume: `ORDER BY an, ...`. Aliasul cu spații cere ghilimele duble drepte, nu curbe (“ ”)."
+            }
+          ],
+          "explain": {
+            "en": "`nume || ' ' || prenume || ', ' || an` builds \"Popescu Bogdan, 3\". `ORDER BY an, nume, prenume` orders by the numeric year, even though `an` does not appear separately in the result, and inside each year by surname and first name. Only the two identical \"Bodnar Ioana, 2\" rows are tied, and they look the same.",
+            "ro": "`nume || ' ' || prenume || ', ' || an` construiește «Popescu Bogdan, 3». `ORDER BY an, nume, prenume` ordonează după anul numeric, chiar dacă `an` nu apare separat în rezultat, iar în fiecare an după nume și prenume. Doar cele două rânduri «Bodnar Ioana, 2» sunt la egalitate, și arată la fel."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l08-s17",
+      "title": {
+        "en": "Scholarship holders in years 2 and 3",
+        "ro": "Bursieri în anii 2 și 3"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l08-ex-2-8",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 8): \"Show the students (surname and first name) who get a scholarship and are in the 2nd and 3rd year of study. Order alphabetically ascending by surname and descending by first name.\"\n\nIn the app: \"in years 2 and 3\" means in one of them (year 2 or year 3).",
+            "ro": "Enunț oficial (laborator 2, ex. 8): «Afișați studenții (nume și prenume) care iau bursă și sunt în anii 2 și 3 de studiu. Ordonați alfabetic ascendent după nume și descendent după prenume.»\n\nÎn aplicație: «în anii 2 și 3» înseamnă în unul dintre ei (anul 2 sau anul 3)."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 8
+          },
+          "solution": "SELECT nume, prenume FROM studenti WHERE bursa IS NOT NULL AND an IN (2, 3) ORDER BY nume ASC, prenume DESC",
+          "check": {
+            "order": "required",
+            "orderBy": [
+              "nume",
+              "prenume"
+            ],
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Three things: has a scholarship, is in year 2 or 3, then sorting on two keys.",
+              "ro": "Trei lucruri: are bursă, e în anul 2 sau 3, apoi sortarea pe două chei."
+            },
+            {
+              "en": "`WHERE bursa IS NOT NULL AND an IN (..., ...) ORDER BY nume ..., prenume ...`. The last part has two keys, each with its own direction.",
+              "ro": "`WHERE bursa IS NOT NULL AND an IN (..., ...) ORDER BY nume ..., prenume ...`. Ultima parte are două chei, fiecare cu direcția ei."
+            },
+            {
+              "en": "A student cannot be in year 2 and year 3 at once, so `an = 2 AND an = 3` gives 0 rows: use `IN`. `DESC` is written only after `prenume`.",
+              "ro": "Un student nu poate fi în anul 2 și în anul 3 deodată, deci `an = 2 AND an = 3` dă 0 rânduri: folosește `IN`. `DESC` se scrie doar după `prenume`."
+            }
+          ],
+          "explain": {
+            "en": "Three students remain: Antonie Ioana, Archip Andrada, Ciobotariu Ciprian. The surnames are distinct, so `prenume DESC` does not show on the lesson data; it matters when two students share a surname.",
+            "ro": "Rămân trei studenți: Antonie Ioana, Archip Andrada, Ciobotariu Ciprian. Numele sunt distincte, deci `prenume DESC` nu se vede pe datele din lecție; contează când doi studenți au același nume."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,782 @@
+{
+  "meta": {
+    "id": "bd-l13",
+    "title": {
+      "en": "Lesson 13: Dates I — SYSDATE, date arithmetic, calendar functions",
+      "ro": "Lecția 13: Date I — SYSDATE, aritmetica datelor, funcții de calendar"
+    },
+    "shortTitle": {
+      "en": "L13: Dates I",
+      "ro": "L13: Date I"
+    },
+    "source": {
+      "en": "Lab 3 — functions for the DATE type (UAIC, Databases)",
+      "ro": "Laboratorul 3 — funcții pentru tipul DATE (UAIC, Baze de date)"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l13-s1",
+      "title": {
+        "en": "Today plus 10 days, today plus 3 hours",
+        "ro": "Azi plus 10 zile, azi plus 3 ore"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l13-r1",
+          "prompt": {
+            "en": "Today is 26 October 2026, 14:30. What date will it be in 10 days? And what date and time in 3 hours? Write how you would ask the database, even if you have not seen the date functions yet.",
+            "ro": "Azi e 26 octombrie 2026, ora 14:30. Ce dată va fi peste 10 zile? Dar ce dată și oră peste 3 ore? Scrie cum i-ai cere asta bazei de date, chiar dacă n-ai văzut încă funcțiile pentru date."
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "An Oracle date can be added to a number, and the number means **days**: `SYSDATE + 10`. For hours you use a fraction of a day: 3 hours are `3/24` of a day, so `SYSDATE + 3/24`. Below you will see them move on a calendar. One question is left for later: Popescu was born on 17.02.1995. How many months have passed until today? The answer is not a whole number.",
+            "ro": "O dată din Oracle se poate aduna cu un număr, iar numărul înseamnă **zile**: `SYSDATE + 10`. Pentru ore folosești o fracție de zi: 3 ore sunt `3/24` dintr-o zi, deci `SYSDATE + 3/24`. Mai jos le vezi mișcându-se pe un calendar. Pentru mai târziu rămâne o întrebare: Popescu s-a născut pe 17.02.1995. Câte luni au trecut până azi? Răspunsul nu e un număr întreg."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, data_nastere, SYSDATE AS azi FROM studenti WHERE nume = 'Popescu'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s2",
+      "title": {
+        "en": "Days and hours on the calendar",
+        "ro": "Zile și ore pe calendar"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The calendar starts at **26.10.2026, 14:30**. When you add a number to a date, the number means **days**. Guess where you land with `SYSDATE + 10`, then with another 3 hours (`+ 3/24`), and only then check on the calendar.",
+            "ro": "Calendarul pornește de la **26.10.2026, ora 14:30**. Când aduni un număr la o dată, numărul înseamnă **zile**. Ghicește unde ajungi cu `SYSDATE + 10`, apoi cu încă 3 ore (`+ 3/24`), și abia apoi verifică pe calendar."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l13-v1",
+          "widget": "calendar-clock",
+          "predict": true,
+          "props": {
+            "start": "2026-10-26 14:30",
+            "ops": [
+              {
+                "fn": "+",
+                "arg": 10
+              },
+              {
+                "fn": "+",
+                "arg": "3/24"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s3",
+      "title": {
+        "en": "The clock hidden in a date",
+        "ro": "Ceasul ascuns în dată"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`SELECT SYSDATE FROM DUAL` shows only `26-OCT-26`, but the real value is 26.10.2026 **14:30:00**. The time is there; the display format just does not show it. `TRUNC(SYSDATE)` cuts the time and brings the date to 00:00.",
+            "ro": "`SELECT SYSDATE FROM DUAL` afișează doar `26-OCT-26`, dar valoarea reală este 26.10.2026 **14:30:00**. Ora există, doar că formatul de afișare n-o arată. `TRUNC(SYSDATE)` taie ora și aduce data la 00:00."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l13-v2",
+          "widget": "calendar-clock",
+          "predict": false,
+          "props": {
+            "start": "2026-10-26 14:30",
+            "ops": [
+              {
+                "fn": "TRUNC"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s4",
+      "title": {
+        "en": "In a month, at the end of a month",
+        "ro": "Peste o lună, la sfârșit de lună"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "We start from **31.01.2026**. February does not have 31 days. What date is `ADD_MONTHS(date, 1)`? Guess, then check.",
+            "ro": "Pornim de la **31.01.2026**. Februarie n-are 31 de zile. Ce dată e `ADD_MONTHS(data, 1)`? Ghicește, apoi verifică."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l13-v3",
+          "widget": "calendar-clock",
+          "predict": true,
+          "props": {
+            "start": "2026-01-31 14:30",
+            "ops": [
+              {
+                "fn": "ADD_MONTHS",
+                "arg": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s5",
+      "title": {
+        "en": "Other jumps on the calendar",
+        "ro": "Alte salturi pe calendar"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Three functions move the date on the calendar without counting days by hand: `LAST_DAY(d)` jumps to the last day of the month, `NEXT_DAY(d, 'MONDAY')` jumps to the first day called MONDAY after `d`, and `TRUNC(d, 'MM')` goes back to the first day of the month. The calendar applies them one after another, each starting from the result of the previous one: 26-OCT-26 becomes 31-OCT-26, then 02-NOV-26, then 01-NOV-26.",
+            "ro": "Trei funcții mută data pe calendar fără să numeri zile de mână: `LAST_DAY(d)` sare la ultima zi a lunii, `NEXT_DAY(d, 'MONDAY')` sare la prima zi numită MONDAY de după `d`, iar `TRUNC(d, 'MM')` se întoarce la prima zi a lunii. Calendarul le aplică una după alta, fiecare pornind de la rezultatul celei dinainte: 26-OCT-26 devine 31-OCT-26, apoi 02-NOV-26, apoi 01-NOV-26."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l13-v4",
+          "widget": "calendar-clock",
+          "predict": false,
+          "props": {
+            "start": "2026-10-26 14:30",
+            "ops": [
+              {
+                "fn": "LAST_DAY"
+              },
+              {
+                "fn": "NEXT_DAY",
+                "arg": "MONDAY"
+              },
+              {
+                "fn": "TRUNC",
+                "arg": "MM"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s6",
+      "title": {
+        "en": "A date has a time too",
+        "ro": "Data are și ora"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A date has a time too.** `SYSDATE` looks like \"just a day\", but it holds the time. The difference between two dates is a number of **days with a fraction**, and the fraction is the time of day. That is why, at 14:30, `SYSDATE - TRUNC(SYSDATE)` is not 0: it is 14.5 hours out of 24, which is 0.604166667 of a day.",
+            "ro": "**Data are și ora.** `SYSDATE` pare „doar o zi”, dar ține și ora. Diferența dintre două date este un număr de **zile cu fracție**, iar fracția e ora. De aceea, la 14:30, `SYSDATE - TRUNC(SYSDATE)` nu e 0: sunt 14.5 ore din 24, adică 0.604166667 dintr-o zi."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT SYSDATE - TRUNC(SYSDATE) FROM DUAL;\n-- 0.604166667"
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s7",
+      "title": {
+        "en": "ADD_MONTHS and MONTHS_BETWEEN",
+        "ro": "ADD_MONTHS și MONTHS_BETWEEN"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Months are not all the same length.** `ADD_MONTHS` does not add 30 days: it goes to the same day of the next month, and if that day does not exist it lands on the last day of the month. If you start from a last day of a month, you also end on a last day of a month: `ADD_MONTHS(30-APR-2015, 1)` is 31-MAY-15. And `MONTHS_BETWEEN(d1, d2)` is d1 minus d2: it gives a **negative** number when d1 is before d2, and it has a fraction.",
+            "ro": "**Lunile nu au aceeași lungime.** `ADD_MONTHS` nu adună 30 de zile: merge la aceeași zi din luna următoare, iar dacă acea zi nu există, ajunge la ultima zi a lunii. Dacă pornești chiar de la o ultimă zi de lună, ajungi tot la o ultimă zi de lună: `ADD_MONTHS(30-APR-2015, 1)` este 31-MAY-15. Iar `MONTHS_BETWEEN(d1, d2)` este d1 minus d2: dă un număr **negativ** când d1 e înaintea lui d2, și are fracție."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT ADD_MONTHS(TO_DATE('30-04-2015','DD-MM-YYYY'), 1) FROM DUAL;\n-- 31-MAY-15\n\nSELECT MONTHS_BETWEEN(TO_DATE('01-01-2015','DD-MM-YYYY'),\n                      TO_DATE('02-02-2015','DD-MM-YYYY')) FROM DUAL;\n-- -1.0322581"
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s8",
+      "title": {
+        "en": "NEXT_DAY is strictly after the date",
+        "ro": "NEXT_DAY e strict după dată"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`NEXT_DAY` is strictly after the date.** If today is Monday, as 26.10.2026 is, and you ask `NEXT_DAY(SYSDATE, 'MONDAY')`, you do not get today but next Monday. The day name is written in the session language: English here (`MONDAY`), while in a Romanian session it would be `LUNI`. The time of the date stays unchanged.",
+            "ro": "**`NEXT_DAY` e strict după dată.** Dacă azi e luni, ca la 26.10.2026, și ceri `NEXT_DAY(SYSDATE, 'MONDAY')`, nu primești azi, ci luni viitoare. Numele zilei se scrie în limba sesiunii: aici engleză (`MONDAY`), iar într-o sesiune în română ar fi `LUNI`. Ora datei rămâne neschimbată."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT NEXT_DAY(SYSDATE, 'MONDAY') FROM DUAL;\n-- 02-NOV-26"
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s9",
+      "title": {
+        "en": "The date functions at a glance",
+        "ro": "Funcțiile pentru date, pe scurt"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT SYSDATE + 10 FROM DUAL;                  -- 05-NOV-26\nSELECT TRUNC(SYSDATE, 'MM') FROM DUAL;          -- 01-OCT-26\nSELECT LAST_DAY(SYSDATE) FROM DUAL;             -- 31-OCT-26\nSELECT ADD_MONTHS(SYSDATE, 1) FROM DUAL;        -- 26-NOV-26\nSELECT NEXT_DAY(SYSDATE, 'SUNDAY') FROM DUAL;   -- 01-NOV-26"
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "en": "Expression",
+              "ro": "Expresia"
+            },
+            {
+              "en": "What it gives",
+              "ro": "Ce dă"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "en": "`SYSDATE + n`",
+                "ro": "`SYSDATE + n`"
+              },
+              {
+                "en": "n days (n can be a fraction: 3/24 = 3 hours)",
+                "ro": "n zile (n poate fi fracție: 3/24 = 3 ore)"
+              }
+            ],
+            [
+              {
+                "en": "`d1 - d2`",
+                "ro": "`d1 - d2`"
+              },
+              {
+                "en": "a number of days, with a fraction",
+                "ro": "un număr de zile, cu fracție"
+              }
+            ],
+            [
+              {
+                "en": "`TRUNC(d)`",
+                "ro": "`TRUNC(d)`"
+              },
+              {
+                "en": "cuts the time",
+                "ro": "taie ora"
+              }
+            ],
+            [
+              {
+                "en": "`MONTHS_BETWEEN(d1, d2)`",
+                "ro": "`MONTHS_BETWEEN(d1, d2)`"
+              },
+              {
+                "en": "months, with a fraction; negative if d1 < d2",
+                "ro": "luni, cu fracție; negativ dacă d1 < d2"
+              }
+            ],
+            [
+              {
+                "en": "`ADD_MONTHS(d, n)`",
+                "ro": "`ADD_MONTHS(d, n)`"
+              },
+              {
+                "en": "d plus n months",
+                "ro": "d plus n luni"
+              }
+            ],
+            [
+              {
+                "en": "`NEXT_DAY(d, 'MONDAY')`",
+                "ro": "`NEXT_DAY(d, 'MONDAY')`"
+              },
+              {
+                "en": "the first MONDAY strictly after d",
+                "ro": "prima zi MONDAY strict după d"
+              }
+            ],
+            [
+              {
+                "en": "`LAST_DAY(d)`",
+                "ro": "`LAST_DAY(d)`"
+              },
+              {
+                "en": "the last day of the month of d",
+                "ro": "ultima zi din luna lui d"
+              }
+            ],
+            [
+              {
+                "en": "`TRUNC(d, 'MM')`",
+                "ro": "`TRUNC(d, 'MM')`"
+              },
+              {
+                "en": "the first day of the month of d",
+                "ro": "prima zi din luna lui d"
+              }
+            ],
+            [
+              {
+                "en": "`TRUNC(d, 'YYYY')`",
+                "ro": "`TRUNC(d, 'YYYY')`"
+              },
+              {
+                "en": "the first day of the year of d",
+                "ro": "prima zi din anul lui d"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "DATE",
+            "ro": "DATE"
+          },
+          "content": {
+            "en": "A type that holds the date **and the time** (down to the second). The default display shows only the day.",
+            "ro": "Tip care ține data **și ora** (până la secundă). Afișarea implicită arată doar ziua."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "SYSDATE",
+            "ro": "SYSDATE"
+          },
+          "content": {
+            "en": "The current date and time of the server. A SELECT without a table needs `FROM DUAL`.",
+            "ro": "Data și ora curente ale serverului. Un SELECT fără tabel are nevoie de `FROM DUAL`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "date ± number",
+            "ro": "data ± număr"
+          },
+          "content": {
+            "en": "A number added to or subtracted from a date means days; the difference of two dates is a number of days with a fraction.",
+            "ro": "Un număr adunat sau scăzut dintr-o dată înseamnă zile; diferența a două date este un număr de zile cu fracție."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s10",
+      "title": {
+        "en": "Why is it not zero?",
+        "ro": "De ce nu e zero?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l13-r2",
+          "prompt": {
+            "en": "Why is `SYSDATE - TRUNC(SYSDATE)` not 0?",
+            "ro": "De ce `SYSDATE - TRUNC(SYSDATE)` nu este 0?"
+          },
+          "placeholder": {
+            "en": "Write what you think, even if you are not sure",
+            "ro": "Scrie cum crezi, chiar dacă nu ești sigur"
+          },
+          "answer": {
+            "en": "Because `SYSDATE` holds the time and `TRUNC` cuts it. The two values are the same day at different times: one at 14:30, the other at 00:00. The difference is the time elapsed since midnight, expressed in days: 14.5 / 24 = 0.604166667. It would be 0 only at midnight.",
+            "ro": "Pentru că `SYSDATE` ține și ora, iar `TRUNC` o taie. Cele două valori sunt aceeași zi, dar la ore diferite: una la 14:30, cealaltă la 00:00. Diferența este timpul scurs de la miezul nopții, exprimat în zile: 14.5 / 24 = 0.604166667. Ar fi 0 doar la miezul nopții."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s11",
+      "title": {
+        "en": "What a number added to a date means",
+        "ro": "Ce înseamnă un număr adunat la o dată"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l13-q1",
+          "question": {
+            "en": "What does the 10 in `SYSDATE + 10` mean?",
+            "ro": "Ce înseamnă numărul 10 din `SYSDATE + 10`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "10 hours",
+                "ro": "10 ore"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Hours come from fractions of a day: 10 hours are 10/24.",
+                "ro": "Orele se obțin cu fracții de zi: 10 ore sunt 10/24."
+              },
+              "misconception": "date-plus-unit"
+            },
+            {
+              "text": {
+                "en": "10 days",
+                "ro": "10 zile"
+              },
+              "correct": true,
+              "explain": {
+                "en": "A number added to a date means days. From 26.10.2026 you get 05-NOV-26.",
+                "ro": "Un număr adunat la o dată înseamnă zile. Din 26.10.2026 ajungi la 05-NOV-26."
+              }
+            },
+            {
+              "text": {
+                "en": "10 months",
+                "ro": "10 luni"
+              },
+              "correct": false,
+              "explain": {
+                "en": "For months there is `ADD_MONTHS(date, 10)`. The `+` operator adds only days.",
+                "ro": "Pentru luni există `ADD_MONTHS(data, 10)`. Cu `+` se adună doar zile."
+              },
+              "misconception": "date-plus-unit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s12",
+      "title": {
+        "en": "Three hours past SYSDATE",
+        "ro": "Trei ore peste SYSDATE"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l13-q2",
+          "question": {
+            "en": "How do you add 3 hours to `SYSDATE`?",
+            "ro": "Cum adaugi 3 ore la `SYSDATE`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "SYSDATE + 3",
+                "ro": "SYSDATE + 3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That adds 3 **days**, not 3 hours.",
+                "ro": "Asta adaugă 3 **zile**, nu 3 ore."
+              },
+              "misconception": "date-plus-unit"
+            },
+            {
+              "text": {
+                "en": "SYSDATE + 3*24",
+                "ro": "SYSDATE + 3*24"
+              },
+              "correct": false,
+              "explain": {
+                "en": "3*24 = 72, so you add 72 days. You multiplied instead of dividing.",
+                "ro": "3*24 = 72, deci adaugi 72 de zile. Ai înmulțit în loc să împarți."
+              },
+              "misconception": "date-time-part"
+            },
+            {
+              "text": {
+                "en": "SYSDATE + 3/24",
+                "ro": "SYSDATE + 3/24"
+              },
+              "correct": true,
+              "explain": {
+                "en": "A day has 24 hours, so 3 hours are 3/24 of a day. From 26-OCT-26 14:30 you reach 17:30.",
+                "ro": "O zi are 24 de ore, deci 3 ore sunt 3/24 dintr-o zi. Din 26-OCT-26 14:30 ajungi la 17:30."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s13",
+      "title": {
+        "en": "ADD_MONTHS from 31 January",
+        "ro": "ADD_MONTHS de la 31 ianuarie"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l13-q3",
+          "question": {
+            "en": "What does `ADD_MONTHS(TO_DATE('31-01-2015','DD-MM-YYYY'), 1)` return?",
+            "ro": "Ce întoarce `ADD_MONTHS(TO_DATE('31-01-2015','DD-MM-YYYY'), 1)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "28-FEB-15",
+                "ro": "28-FEB-15"
+              },
+              "correct": true,
+              "explain": {
+                "en": "February 2015 has no day 31, so Oracle picks the last day of the month: 28 February.",
+                "ro": "Februarie 2015 nu are ziua 31, așa că Oracle alege ultima zi a lunii: 28 februarie."
+              }
+            },
+            {
+              "text": {
+                "en": "03-MAR-15",
+                "ro": "03-MAR-15"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would be 31 January plus 31 days. `ADD_MONTHS` counts calendar months, not days.",
+                "ro": "Asta ar fi 31 ianuarie plus 31 de zile. `ADD_MONTHS` nu numără zile, ci luni din calendar."
+              },
+              "misconception": "add-months-eom"
+            },
+            {
+              "text": {
+                "en": "Error: 31 February does not exist",
+                "ro": "Eroare: 31 februarie nu există"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no error: when the day does not exist in the target month, the result is the last day of the month.",
+                "ro": "Nu apare nicio eroare: când ziua nu există în luna țintă, rezultatul este ultima zi a lunii."
+              },
+              "misconception": "add-months-eom"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s14",
+      "title": {
+        "en": "The sign of MONTHS_BETWEEN",
+        "ro": "Semnul lui MONTHS_BETWEEN"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l13-q4",
+          "question": {
+            "en": "What does `MONTHS_BETWEEN(TO_DATE('01-01-2015','DD-MM-YYYY'), TO_DATE('02-02-2015','DD-MM-YYYY'))` give?",
+            "ro": "Ce dă `MONTHS_BETWEEN(TO_DATE('01-01-2015','DD-MM-YYYY'), TO_DATE('02-02-2015','DD-MM-YYYY'))`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "1.0322581",
+                "ro": "1.0322581"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Argument order matters. `MONTHS_BETWEEN(d1, d2)` is d1 minus d2 and is positive only when d1 is after d2.",
+                "ro": "Ordinea argumentelor contează. `MONTHS_BETWEEN(d1, d2)` este d1 minus d2 și e pozitiv doar când d1 e după d2."
+              },
+              "misconception": "add-months-eom"
+            },
+            {
+              "text": {
+                "en": "-1",
+                "ro": "-1"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The result keeps the fraction: leftover days are counted in 31sts of a month.",
+                "ro": "Rezultatul păstrează fracția: zilele rămase se numără în 31-imi de lună."
+              },
+              "misconception": "add-months-eom"
+            },
+            {
+              "text": {
+                "en": "-1.0322581",
+                "ro": "-1.0322581"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The first date is before the second, so the result is negative. The fraction comes from the extra day: 1/31 of a month.",
+                "ro": "Prima dată e înaintea celei de-a doua, deci rezultatul e negativ. Fracția vine din ziua în plus: 1/31 dintr-o lună."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s15",
+      "title": {
+        "en": "Today's date",
+        "ro": "Data de azi"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l13-ex-3-1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Write a query to display today's date. Label the column \"Astazi\". (In this exercise \"today\" is 26 August 2026.)",
+            "ro": "Scrieți o interogare pentru a afișa data de azi. Etichetați coloana \"Astazi\". (La acest exercițiu „azi” este 26 august 2026.)"
+          },
+          "official": {
+            "lab": 3,
+            "ex": 1
+          },
+          "starter": "SELECT ____ AS \"Astazi\"\nFROM ____",
+          "solution": "SELECT SYSDATE AS \"Astazi\" FROM DUAL",
+          "check": {
+            "order": "any",
+            "mode": "bag",
+            "aliases": [
+              "Astazi"
+            ]
+          },
+          "clock": "2026-08-26",
+          "hints": [
+            {
+              "en": "You need the function that returns the current system date, and an alias for the column.",
+              "ro": "Ai nevoie de funcția care întoarce data curentă a sistemului și de un alias pentru coloană."
+            },
+            {
+              "en": "The shape is `SELECT ... AS \"Astazi\" FROM ...`. A SELECT without a table needs a special one-row table.",
+              "ro": "Forma este `SELECT ... AS \"Astazi\" FROM ...`. Un SELECT fără tabel cere un tabel special, cu un singur rând."
+            },
+            {
+              "en": "The trap is the alias: double quotes keep the capital letter (`\"Astazi\"`), while without quotes the heading would appear as ASTAZI. And a SELECT with no real table still needs a FROM.",
+              "ro": "Capcana este aliasul: ghilimelele duble păstrează majuscula (`\"Astazi\"`), în timp ce fără ghilimele titlul ar apărea ASTAZI. Iar un SELECT fără un tabel real tot are nevoie de FROM."
+            }
+          ],
+          "explain": {
+            "en": "`SELECT SYSDATE AS \"Astazi\" FROM DUAL` returns a single row. The display shows only the day (26-AUG-26), but the value also holds the time. Without double quotes the alias would have appeared in capitals.",
+            "ro": "`SELECT SYSDATE AS \"Astazi\" FROM DUAL` întoarce un singur rând. Afișarea arată doar ziua (26-AUG-26), dar valoarea ține și ora. Fără ghilimele duble, aliasul ar fi apărut cu majuscule."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s16",
+      "title": {
+        "en": "Months since birth",
+        "ro": "Luni de la naștere"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l13-ex-3-2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "For each student display the name, the date of birth and the number of months between the current date and the date of birth. (In this exercise \"today\" is 26 August 2026.) Keep the fraction exactly as the function returns it; do not round.",
+            "ro": "Pentru fiecare student afișați numele, data de nastere si numărul de luni între data curentă și data nașterii. (La acest exercițiu „azi” este 26 august 2026.) Lasă fracția așa cum o întoarce funcția; nu rotunji."
+          },
+          "official": {
+            "lab": 3,
+            "ex": 2
+          },
+          "starter": "SELECT nume, data_nastere, ____\nFROM studenti",
+          "solution": "SELECT nume, data_nastere, MONTHS_BETWEEN(SYSDATE, data_nastere) FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "clock": "2026-08-26",
+          "hints": [
+            {
+              "en": "One row per student, so `FROM studenti`. A function made for exactly this computes the number of months between two dates.",
+              "ro": "Un rând pentru fiecare student, deci `FROM studenti`. Numărul de luni dintre două date îl calculează o funcție special făcută pentru asta."
+            },
+            {
+              "en": "`MONTHS_BETWEEN(d1, d2)` is d1 minus d2, in months. Put the current date first so the result is positive.",
+              "ro": "`MONTHS_BETWEEN(d1, d2)` este d1 minus d2, în luni. Pune data curentă prima, ca rezultatul să fie pozitiv."
+            },
+            {
+              "en": "The new column is a single function call placed after `data_nastere`. Do not worry about the fraction: for Popescu you get about 378.31 (31 years and 6 months, plus 9 days and the time), and that is how the function is meant to answer.",
+              "ro": "Coloana nouă este un singur apel de funcție, pus după `data_nastere`. Nu te speria de fracție: pentru Popescu iese aproximativ 378.31 (31 de ani și 6 luni, plus 9 zile și ora), așa răspunde funcția."
+            }
+          ],
+          "explain": {
+            "en": "`MONTHS_BETWEEN(SYSDATE, data_nastere)` gives months with a fraction: Popescu gets 378.309812 (378 whole months, plus 9 days and 14:30 measured against a 31-day month). If you swap the arguments every number becomes negative.",
+            "ro": "`MONTHS_BETWEEN(SYSDATE, data_nastere)` dă luni cu fracție: Popescu are 378.309812 (378 de luni întregi, plus 9 zile și 14:30 raportate la o lună de 31 de zile). Dacă inversezi argumentele, toate numerele devin negative."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l13-s17",
+      "title": {
+        "en": "Last day of the birth month",
+        "ro": "Ultima zi din luna nașterii"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l13-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "For each student display the name, the date of birth and the last day of the month in which they were born.",
+            "ro": "Afișați pentru fiecare student numele, data nașterii și ultima zi din luna în care s-a născut."
+          },
+          "solution": "SELECT nume, data_nastere, LAST_DAY(data_nastere) FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "A single calendar function does it all: it knows how many days each month has.",
+              "ro": "O singură funcție de calendar face tot: ea știe câte zile are fiecare lună."
+            },
+            {
+              "en": "The function takes the date of birth and returns a date: `LAST_DAY(...)`.",
+              "ro": "Funcția primește data nașterii și întoarce o dată: `LAST_DAY(...)`."
+            },
+            {
+              "en": "The name of the function says what it does: `LAST_DAY`. For Popescu (17-FEB-95) the result must be 28-FEB-95, because February 1995 has 28 days.",
+              "ro": "Numele funcției spune ce face: `LAST_DAY`. Pentru Popescu (17-FEB-95) rezultatul trebuie să fie 28-FEB-95, fiindcă februarie 1995 are 28 de zile."
+            }
+          ],
+          "explain": {
+            "en": "`LAST_DAY(d)` returns the last day of the month of `d`: 28-FEB-95 for Popescu, 31-MAY-95 for Prelipcean. February 1995 has 28 days.",
+            "ro": "`LAST_DAY(d)` întoarce ultima zi a lunii lui `d`: 28-FEB-95 pentru Popescu, 31-MAY-95 pentru Prelipcean. Februarie 1995 are 28 de zile."
+          }
+        }
+      ]
+    }
+  ]
+}

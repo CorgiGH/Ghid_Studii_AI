@@ -1,0 +1,611 @@
+{
+  "meta": {
+    "id": "bd-l18",
+    "title": {
+      "en": "Lesson 18: Several tables — the Cartesian product and JOIN … ON",
+      "ro": "Lecția 18: Mai multe tabele — produsul cartezian și JOIN … ON"
+    },
+    "shortTitle": {
+      "en": "L18: Cartesian product and JOIN",
+      "ro": "L18: Produs cartezian și JOIN"
+    },
+    "source": {
+      "en": "Databases -- Lab 4 (JOIN), UAIC",
+      "ro": "Baze de date -- Laboratorul 4 (JOIN), UAIC"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l18-s1",
+      "title": {
+        "en": "How many rows?",
+        "ro": "Câte rânduri?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l18-r1",
+          "prompt": {
+            "en": "You have two tables: `studenti` (13 rows, one per student) and `note` (42 rows, one grade per row, with the registration number of the student who got it). What does `SELECT * FROM studenti, note` return? Write how many rows you expect and why.",
+            "ro": "Ai două tabele: `studenti` (13 rânduri, câte unul pe student) și `note` (42 de rânduri, câte o notă pe rând, cu numărul matricol al studentului care a luat-o). Ce întoarce `SELECT * FROM studenti, note`? Scrie câte rânduri crezi că apar și de ce."
+          },
+          "placeholder": {
+            "en": "How many rows, and why?",
+            "ro": "Câte rânduri și de ce?"
+          },
+          "answer": {
+            "en": "546 rows, that is 13 × 42. The comma between the tables links nothing: the database takes each student and puts them next to every grade, including grades that belong to other students. This is called a Cartesian product. It is not a syntax error, so the query runs and returns a big table that looks plausible. That is exactly what makes it dangerous.",
+            "ro": "546 de rânduri, adică 13 × 42. Virgula dintre tabele nu leagă nimic: baza de date ia fiecare student și îl pune lângă fiecare notă, inclusiv lângă notele altor studenți. Se numește produs cartezian. Nu e o greșeală de sintaxă, așa că interogarea rulează și întoarce un tabel mare care arată plauzibil. Exact asta o face periculoasă."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nr_matricol, nume, prenume, an FROM studenti"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s2",
+      "title": {
+        "en": "The 13 × 42 grid",
+        "ro": "Grila 13 × 42"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Every cell of the grid is one pair (a student, a grade). Look at the cells where the student's number matches the grade's number: only those 42 pairs are real, the other 504 just sit next to each other.",
+            "ro": "Fiecare celulă a grilei este o pereche (un student, o notă). Uită-te la celulele în care numărul matricol al studentului coincide cu cel al notei: doar cele 42 de perechi sunt adevărate, celelalte 504 doar stau alături."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l18-viz1",
+          "widget": "cartesian-grid",
+          "predict": false,
+          "props": {
+            "left": "studenti",
+            "right": "note",
+            "on": "studenti.nr_matricol = note.nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s3",
+      "title": {
+        "en": "From 42 pairs, 12 remain",
+        "ro": "Din 42 de perechi rămân 12"
+      },
+      "blocks": [
+        {
+          "type": "query-machine",
+          "id": "bd-l18-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, prenume, valoare FROM studenti JOIN note ON studenti.nr_matricol = note.nr_matricol WHERE prenume = 'Ioana'",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "join"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            }
+          ],
+          "show": [
+            "nume",
+            "prenume",
+            "valoare"
+          ],
+          "say": {
+            "from": {
+              "en": "`FROM studenti JOIN note` starts from every student–grade pair, 13 × 42 = 546.",
+              "ro": "`FROM studenti JOIN note` pornește de la toate perechile student–notă, 13 × 42 = 546."
+            },
+            "join": {
+              "en": "The `ON` condition switches off every pair where the registration number in `studenti` is not the one in `note`. Exactly 42 remain, one for each grade.",
+              "ro": "Condiția din `ON` stinge perechile în care numărul matricol din `studenti` nu este cel din `note`. Rămân exact 42, câte una pentru fiecare notă."
+            },
+            "where": {
+              "en": "12 rows stay: the three students called Ioana have 6 + 3 + 3 grades. The other 30 rows belong to other first names.",
+              "ro": "Rămân 12 rânduri: cele trei studente numite Ioana au 6 + 3 + 3 note. Celelalte 30 de rânduri aparțin altor prenume."
+            }
+          },
+          "ask": {
+            "where": {
+              "en": "Which of the 42 rows have the first name `Ioana`? (Three students have this first name; one of them, 113, has 6 grades.)",
+              "ro": "Care dintre cele 42 de rânduri au prenumele `Ioana`? (Sunt trei studente cu acest prenume; una dintre ele, 113, are 6 note.)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s4",
+      "title": {
+        "en": "The missing condition",
+        "ro": "Condiția lipsă"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l18-r3",
+          "prompt": {
+            "en": "Andrei Pintescu is the only student with the first name Andrei, and he has no grades at all. What does `SELECT * FROM studenti, note WHERE prenume = 'Andrei'` return? And what does the same filter return when the tables are linked with `JOIN … ON studenti.nr_matricol = note.nr_matricol`?",
+            "ro": "Pintescu Andrei este singurul student cu prenumele Andrei și nu are nicio notă. Ce întoarce `SELECT * FROM studenti, note WHERE prenume = 'Andrei'`? Dar același filtru atunci când tabelele sunt legate cu `JOIN … ON studenti.nr_matricol = note.nr_matricol`?"
+          },
+          "placeholder": {
+            "en": "How many rows in each case?",
+            "ro": "Câte rânduri în fiecare caz?"
+          },
+          "answer": {
+            "en": "Without the link: 42 rows, the one student placed next to all 42 grades. With the link: 0 rows, because he has no pair in `note`.",
+            "ro": "Fără legătură: 42 de rânduri, studentul singur pus lângă toate cele 42 de note. Cu legătura: 0 rânduri, fiindcă nu are nicio pereche în `note`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**The Cartesian product looks plausible.** `SELECT * FROM studenti, note WHERE prenume = 'Andrei'` returns 42 rows, although Andrei has no grades at all. The filter keeps one student but puts him next to all 42 grades. The correct answer is 0 rows: with the link made (`JOIN … ON studenti.nr_matricol = note.nr_matricol`) the query returns 0.",
+            "ro": "**Produsul cartezian arată plauzibil.** `SELECT * FROM studenti, note WHERE prenume = 'Andrei'` întoarce 42 de rânduri, deși Andrei nu are nicio notă. Filtrul păstrează un singur student, dar îl pune lângă toate cele 42 de note. Răspunsul corect este 0 rânduri: cu legătura făcută (`JOIN … ON studenti.nr_matricol = note.nr_matricol`) interogarea întoarce 0."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`JOIN` needs `ON`.** `SELECT * FROM studenti s JOIN note n WHERE s.nr_matricol = n.nr_matricol` gives `ORA-00905: missing keyword`. The link condition goes after the word `ON`, not in `WHERE`. If you do want the Cartesian product, say so openly: `FROM studenti CROSS JOIN note`.",
+            "ro": "**`JOIN` cere `ON`.** `SELECT * FROM studenti s JOIN note n WHERE s.nr_matricol = n.nr_matricol` dă `ORA-00905: missing keyword`. Condiția de legătură se scrie după cuvântul `ON`, nu în `WHERE`. Dacă vrei produsul cartezian, scrie-l pe față: `FROM studenti CROSS JOIN note`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s5",
+      "title": {
+        "en": "Aliases and shared columns",
+        "ro": "Aliasuri și coloane comune"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Ambiguous column.** `nr_matricol` exists in both `studenti` and `note`. `SELECT nr_matricol FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol` gives `ORA-00918: column ambiguously defined`. Add the prefix: `s.nr_matricol`.",
+            "ro": "**Coloană ambiguă.** `nr_matricol` există și în `studenti`, și în `note`. `SELECT nr_matricol FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol` dă `ORA-00918: column ambiguously defined`. Pune prefixul: `s.nr_matricol`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**The alias replaces the table name.** After `FROM studenti s`, the name `studenti` no longer exists in the query: `SELECT studenti.nr_matricol FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol` gives `ORA-00904: \"STUDENTI\".\"NR_MATRICOL\": invalid identifier`. Use the alias everywhere.",
+            "ro": "**Aliasul înlocuiește numele tabelului.** După `FROM studenti s`, numele `studenti` nu mai există în interogare: `SELECT studenti.nr_matricol FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol` dă `ORA-00904: \"STUDENTI\".\"NR_MATRICOL\": invalid identifier`. Folosește peste tot aliasul."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**No `AS` on tables.** `FROM studenti AS s` gives `ORA-00933: SQL command not properly ended`. In Oracle, `AS` is allowed only for column aliases (`SELECT nume AS student`). For a table you write `FROM studenti s` directly.",
+            "ro": "**Fără `AS` la tabele.** `FROM studenti AS s` dă `ORA-00933: SQL command not properly ended`. În Oracle, `AS` se poate pune doar la alias de coloană (`SELECT nume AS student`). La tabel scrii direct `FROM studenti s`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s6",
+      "title": {
+        "en": "Linking two tables",
+        "ro": "Legarea a două tabele"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT s.nume, n.id_curs, n.valoare\nFROM studenti s\n  JOIN note n ON s.nr_matricol = n.nr_matricol\nWHERE n.valoare = 10;"
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- același rezultat, în stilul Oracle vechi:\nSELECT s.nume, n.id_curs, n.valoare\nFROM studenti s, note n\nWHERE s.nr_matricol = n.nr_matricol\n  AND n.valoare = 10;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Cartesian product",
+            "ro": "Produs cartezian"
+          },
+          "content": {
+            "en": "All pairs of rows from two tables. The row counts multiply: 13 × 42 = 546. It appears when tables are listed in `FROM` without a link condition.",
+            "ro": "Toate perechile de rânduri din două tabele. Numărul de rânduri se înmulțește: 13 × 42 = 546. Apare când tabelele sunt puse în `FROM` fără o condiție de legătură."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Join",
+            "ro": "Join"
+          },
+          "content": {
+            "en": "The Cartesian product followed by a filter on the key: you keep only the pairs where the foreign key (`note.nr_matricol`) equals the key of the referenced table (`studenti.nr_matricol`). It is written with `JOIN … ON`, or with a comma and the condition in `WHERE`.",
+            "ro": "Produsul cartezian urmat de un filtru pe cheie: păstrezi doar perechile în care cheia străină (`note.nr_matricol`) este egală cu cheia tabelului referit (`studenti.nr_matricol`). Se scrie cu `JOIN … ON` sau cu virgulă și condiția în `WHERE`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Table alias",
+            "ro": "Alias de tabel"
+          },
+          "content": {
+            "en": "A short name placed after the table in `FROM` (`studenti s`). Once given, it is the only name the table has in the query. Prefix with it any column that exists in several tables.",
+            "ro": "Un nume scurt pus după tabel în `FROM` (`studenti s`). Odată dat, e singurul nume sub care tabelul se vede în interogare. Prefixează cu el orice coloană care există în mai multe tabele."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s7",
+      "title": {
+        "en": "Why 0 and not 42?",
+        "ro": "De ce 0 și nu 42?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l18-r2",
+          "prompt": {
+            "en": "`SELECT * FROM studenti JOIN note ON studenti.nr_matricol = note.nr_matricol WHERE prenume = 'Andrei'` returns 0 rows, while `SELECT * FROM studenti, note WHERE prenume = 'Andrei'` returns 42. Why do they differ? Which one tells the truth?",
+            "ro": "`SELECT * FROM studenti JOIN note ON studenti.nr_matricol = note.nr_matricol WHERE prenume = 'Andrei'` întoarce 0 rânduri, iar `SELECT * FROM studenti, note WHERE prenume = 'Andrei'` întoarce 42. De ce diferă? Care dintre ele spune adevărul?"
+          },
+          "placeholder": {
+            "en": "Explain in your own words",
+            "ro": "Explică în cuvintele tale"
+          },
+          "answer": {
+            "en": "The truth is 0: Andrei has no grades. The first `JOIN` keeps only the pairs where the grade really belongs to the student, and for Andrei no such pair exists. The second query has no link condition, so the filter `prenume = 'Andrei'` leaves one student, but he stays attached to all 42 grades. Those 42 rows are a wrong result that looks fine.",
+            "ro": "Adevărul este 0: Andrei nu are nicio notă. Primul `JOIN` păstrează doar perechile în care nota chiar aparține studentului, iar pentru Andrei nu există nicio astfel de pereche. A doua interogare nu are condiție de legătură, deci filtrul `prenume = 'Andrei'` lasă un student, dar el rămâne lipit de toate cele 42 de note. Cele 42 de rânduri sunt un rezultat greșit care arată bine."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s8",
+      "title": {
+        "en": "Three tables in FROM",
+        "ro": "Trei tabele în FROM"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l18-q1",
+          "question": {
+            "en": "How many rows does `SELECT * FROM studenti, note, cursuri` return? (`studenti` has 13 rows, `note` 42, `cursuri` 9)",
+            "ro": "Câte rânduri întoarce `SELECT * FROM studenti, note, cursuri`? (`studenti` are 13 rânduri, `note` 42, `cursuri` 9)"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "64",
+                "ro": "64"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You added 13 + 42 + 9. A Cartesian product does not add, it multiplies: every row of one table combines with every row of the others.",
+                "ro": "Ai adunat 13 + 42 + 9. Produsul cartezian nu adună, ci înmulțește: fiecare rând dintr-un tabel se combină cu fiecare rând din celelalte."
+              },
+              "misconception": "cartesian"
+            },
+            {
+              "text": {
+                "en": "4914",
+                "ro": "4914"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: 13 × 42 × 9 = 4914.",
+                "ro": "Corect: 13 × 42 × 9 = 4914."
+              }
+            },
+            {
+              "text": {
+                "en": "546",
+                "ro": "546"
+              },
+              "correct": false,
+              "explain": {
+                "en": "546 is 13 × 42, the product of the first two tables. The third table multiplies once more, by 9.",
+                "ro": "546 este 13 × 42, produsul primelor două tabele. Al treilea tabel înmulțește încă o dată, cu 9."
+              },
+              "misconception": "cartesian"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s9",
+      "title": {
+        "en": "No condition in WHERE",
+        "ro": "Fără condiție în WHERE"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l18-q2",
+          "question": {
+            "en": "You write `SELECT * FROM studenti, note` and put nothing in `WHERE`. What happens?",
+            "ro": "Scrii `SELECT * FROM studenti, note` și nu pui nimic în `WHERE`. Ce se întâmplă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "The database guesses the link is `nr_matricol` and returns 42 rows",
+                "ro": "Baza de date ghicește că legătura e `nr_matricol` și întoarce 42 de rânduri"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The database guesses nothing. Only `NATURAL JOIN`, written explicitly, links on the same-named columns.",
+                "ro": "Baza de date nu ghicește nimic. Doar `NATURAL JOIN`, scris explicit, leagă după coloanele cu același nume."
+              },
+              "misconception": "cartesian"
+            },
+            {
+              "text": {
+                "en": "Error `ORA-00905`",
+                "ro": "Eroare `ORA-00905`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`ORA-00905` appears for a `JOIN` written without `ON`. With a comma between the tables the query is valid and runs.",
+                "ro": "`ORA-00905` apare la `JOIN` scris fără `ON`. Cu virgulă între tabele, interogarea este validă și rulează."
+              },
+              "misconception": "cartesian"
+            },
+            {
+              "text": {
+                "en": "It runs and returns 546 rows",
+                "ro": "Rulează și întoarce 546 de rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: a Cartesian product, 13 × 42 = 546, with no warning at all.",
+                "ro": "Corect: produs cartezian, 13 × 42 = 546, fără nicio avertizare."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s10",
+      "title": {
+        "en": "The ambiguous column",
+        "ro": "Coloana ambiguă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l18-q3",
+          "question": {
+            "en": "What does `SELECT nr_matricol FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol` do?",
+            "ro": "Ce face `SELECT nr_matricol FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "It works: it takes the column from the first table, `studenti`",
+                "ro": "Merge: ia coloana din primul tabel, `studenti`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Oracle does not pick a table on its own. If the name exists in several tables in `FROM`, you must prefix it.",
+                "ro": "Oracle nu alege singur un tabel. Dacă numele există în mai multe tabele din `FROM`, trebuie să-l prefixezi."
+              },
+              "misconception": "ambiguous-col"
+            },
+            {
+              "text": {
+                "en": "Error `ORA-00918: column ambiguously defined`",
+                "ro": "Eroare `ORA-00918: column ambiguously defined`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Write `s.nr_matricol` or `n.nr_matricol`.",
+                "ro": "Corect. Scrie `s.nr_matricol` sau `n.nr_matricol`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s11",
+      "title": {
+        "en": "AS on a table",
+        "ro": "AS la un tabel"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l18-q4",
+          "question": {
+            "en": "What does `SELECT s.nume FROM studenti AS s` do in Oracle 11g?",
+            "ro": "Ce face `SELECT s.nume FROM studenti AS s` în Oracle 11g?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "It works, `AS` can be used wherever a name is given",
+                "ro": "Merge, `AS` se poate pune oriunde se dă un nume"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`AS` is allowed only for column aliases. On a table, Oracle raises an error.",
+                "ro": "`AS` este permis doar la alias de coloană. La tabel, Oracle dă eroare."
+              },
+              "misconception": "alias-as"
+            },
+            {
+              "text": {
+                "en": "Error `ORA-00933: SQL command not properly ended`",
+                "ro": "Eroare `ORA-00933: SQL command not properly ended`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. In `FROM` you write `studenti s`, without `AS`.",
+                "ro": "Corect. În `FROM` scrii `studenti s`, fără `AS`."
+              }
+            }
+          ],
+          "review": "bd-l02"
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s12",
+      "title": {
+        "en": "A valid FROM in Oracle",
+        "ro": "Un FROM valid în Oracle"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l18-q5",
+          "question": {
+            "en": "Which `FROM` runs without an error in Oracle 11g?",
+            "ro": "Care `FROM` rulează fără eroare în Oracle 11g?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`FROM studenti AS s JOIN note AS n ON s.nr_matricol = n.nr_matricol`",
+                "ro": "`FROM studenti AS s JOIN note AS n ON s.nr_matricol = n.nr_matricol`"
+              },
+              "correct": false,
+              "misconception": "alias-as",
+              "explain": {
+                "en": "`AS` is not allowed before a table alias: `ORA-00933: SQL command not properly ended`.",
+                "ro": "`AS` nu e permis înaintea aliasului de tabel: `ORA-00933: SQL command not properly ended`."
+              }
+            },
+            {
+              "text": {
+                "en": "`FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol`",
+                "ro": "`FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: alias without `AS` and the link condition after `ON`. It gives 42 rows.",
+                "ro": "Corect: alias fără `AS` și condiția de legătură după `ON`. Dă 42 de rânduri."
+              }
+            },
+            {
+              "text": {
+                "en": "`FROM studenti s JOIN note n`",
+                "ro": "`FROM studenti s JOIN note n`"
+              },
+              "correct": false,
+              "misconception": "join-no-on",
+              "explain": {
+                "en": "After `JOIN` Oracle requires `ON`: `ORA-00905: missing keyword`. A Cartesian product is written with a comma or with `CROSS JOIN`.",
+                "ro": "După `JOIN` Oracle cere `ON`: `ORA-00905: missing keyword`. Produsul cartezian se scrie cu virgulă sau cu `CROSS JOIN`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s13",
+      "title": {
+        "en": "Every grade",
+        "ro": "Toate notele"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l18-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the last name and first name of each student together with the value of each grade they got (in this column order). Use `JOIN … ON` and table aliases. The result has one row per grade.",
+            "ro": "Afișați numele și prenumele fiecărui student împreună cu valoarea fiecărei note pe care a luat-o (în această ordine a coloanelor). Folosiți `JOIN … ON` și aliasuri de tabel. Rezultatul are un rând pe notă."
+          },
+          "starter": "-- 1. Alege tabelele: studenti (s) și note (n)\n-- 2. Leagă-le pe numărul matricol\n-- 3. Alege coloanele: nume, prenume, valoare\nSELECT s.nume, s.prenume, n.valoare\nFROM studenti s\n  JOIN note n ON ",
+          "solution": "SELECT s.nume, s.prenume, n.valoare FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Choose the tables: names are in `studenti`, values in `note`. Link them through the registration number.",
+              "ro": "Alege tabelele: numele sunt în `studenti`, valorile în `note`. Leagă-le prin numărul matricol."
+            },
+            {
+              "en": "Skeleton: `SELECT s.nume, s.prenume, n.valoare FROM studenti s JOIN note n ON …`. Fill in after `ON` with an equality between the two keys.",
+              "ro": "Schelet: `SELECT s.nume, s.prenume, n.valoare FROM studenti s JOIN note n ON …`. Completează după `ON` cu o egalitate între cele două chei."
+            },
+            {
+              "en": "The link condition is `s.nr_matricol = n.nr_matricol`: the key in `studenti` equal to the foreign key in `note`. Without it you get a Cartesian product (546 rows); with it, 42.",
+              "ro": "Condiția de legătură este `s.nr_matricol = n.nr_matricol`: cheia din `studenti` egală cu cheia străină din `note`. Fără ea ai produs cartezian (546 de rânduri); cu ea, 42."
+            }
+          ],
+          "explain": {
+            "en": "`JOIN … ON` keeps from the 546 pairs only those where the grade belongs to the student: 42 rows, one per grade. Students without grades (120–123) do not appear, because they have no pair.",
+            "ro": "`JOIN … ON` păstrează din cele 546 de perechi doar pe cele în care nota aparține studentului: 42 de rânduri, câte unul pe notă. Studenții fără note (120–123) nu apar, fiindcă nu au nicio pereche."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l18-s14",
+      "title": {
+        "en": "The old style",
+        "ro": "Stilul vechi"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l18-ex-x2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Write, in the old Oracle style (tables separated by a comma, the link condition in `WHERE`), the query that shows last name, first name and grade value for the students whose first name is `Ioana` (columns in this order).",
+            "ro": "Scrieți în stilul Oracle vechi (tabelele separate prin virgulă, condiția de legătură în `WHERE`) interogarea care afișează numele, prenumele și valoarea notelor pentru studentele cu prenumele `Ioana` (coloanele în această ordine)."
+          },
+          "starter": "SELECT s.nume, s.prenume, n.valoare\nFROM studenti s, note n\nWHERE ",
+          "solution": "SELECT s.nume, s.prenume, n.valoare FROM studenti s, note n WHERE s.nr_matricol = n.nr_matricol AND s.prenume = 'Ioana'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Put both tables in `FROM`, separated by a comma, with aliases. Two conditions in `WHERE`: the link and the first-name filter.",
+              "ro": "Pune ambele tabele în `FROM`, separate prin virgulă, cu alias. Două condiții în `WHERE`: legătura și filtrul pe prenume."
+            },
+            {
+              "en": "Skeleton: `FROM studenti s, note n WHERE <link> AND <filter>`.",
+              "ro": "Schelet: `FROM studenti s, note n WHERE <legătura> AND <filtrul>`."
+            },
+            {
+              "en": "The link is `s.nr_matricol = n.nr_matricol`, the filter is `s.prenume = 'Ioana'`. If you forget the link, you get 126 rows (3 students called Ioana × 42 grades) instead of 12.",
+              "ro": "Legătura este `s.nr_matricol = n.nr_matricol`, filtrul este `s.prenume = 'Ioana'`. Dacă uiți legătura, ies 126 de rânduri (3 studente × 42 de note) în loc de 12."
+            }
+          ],
+          "explain": {
+            "en": "The two `Ioana` students in year 2 have 3 grades each, and Ioana Antonie has 6: 12 rows in total. In the old style, the link and the filter both live in `WHERE`, joined by `AND`; with `JOIN … ON` the link moves to `ON`.",
+            "ro": "Cele două `Ioana` din anul 2 au 3 note fiecare, iar Ioana Antonie are 6: 12 rânduri în total. În stilul vechi, legătura și filtrul stau amândouă în `WHERE`, legate prin `AND`; cu `JOIN … ON` legătura trece la `ON`."
+          }
+        }
+      ]
+    }
+  ]
+}

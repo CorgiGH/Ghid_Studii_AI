@@ -1,0 +1,619 @@
+{
+  "meta": {
+    "id": "bd-l11",
+    "title": {
+      "en": "Lesson 11: Text functions I and the CHAR trap",
+      "ro": "Lecția 11: Funcții text I și capcana CHAR"
+    },
+    "shortTitle": {
+      "en": "L11: Text functions I",
+      "ro": "L11: Funcții text I"
+    },
+    "source": {
+      "en": "Databases, labs 2 and 3: row functions (UAIC)",
+      "ro": "Baze de date, laboratoarele 2 și 3: funcții pe linie (UAIC)"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l11-s1",
+      "title": {
+        "en": "How many letters does \"Cosmin\" have?",
+        "ro": "Câte litere are «Cosmin»?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l11-r1",
+          "prompt": {
+            "en": "In the `profesori` table the first name \"Cosmin\" has 6 letters. So `LENGTH(prenume)` for him returns 6. True or false? Write what you think and why.",
+            "ro": "În tabelul `profesori`, prenumele «Cosmin» are 6 litere. Deci `LENGTH(prenume)` pentru el întoarce 6. Adevărat sau fals? Scrie ce crezi și de ce."
+          },
+          "answer": {
+            "en": "**False: it returns 10.** In `profesori` the columns `nume` and `prenume` are declared `CHAR(10)`, and a `CHAR(n)` is padded with spaces up to n characters. \"Cosmin\" has 6 letters and 4 invisible spaces after them, and `LENGTH` counts those too. Below you see them as boxes.",
+            "ro": "**Fals: întoarce 10.** În `profesori`, coloanele `nume` și `prenume` sunt declarate `CHAR(10)`, iar un `CHAR(n)` se completează cu spații până la n caractere. «Cosmin» are 6 litere și 4 spații invizibile după ele, iar `LENGTH` le numără și pe acestea. Mai jos le vezi ca pe niște căsuțe."
+          },
+          "placeholder": {
+            "en": "What do you think?",
+            "ro": "Ce crezi?"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT id_prof, nume, prenume FROM profesori WHERE id_prof IN ('p2', 'p6', 'p7')"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s2",
+      "title": {
+        "en": "Ten boxes",
+        "ro": "Zece căsuțe"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A value in a `CHAR(10)` column always takes **10 boxes**: the letters, then spaces up to the end. Before you press, guess for \"Cosmin\": how many boxes `LENGTH` counts, what `TRIM` does and what `LIKE '%n'` finds.",
+            "ro": "O valoare dintr-o coloană `CHAR(10)` ocupă mereu **10 căsuțe**: literele, apoi spații până la capăt. Înainte să apeși, ghicește pentru «Cosmin»: câte căsuțe numără `LENGTH`, ce face `TRIM` și ce găsește `LIKE '%n'`."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l11-viz1",
+          "widget": "char-boxes",
+          "predict": true,
+          "props": {
+            "value": "Cosmin",
+            "width": 10,
+            "ops": [
+              "LENGTH",
+              "TRIM",
+              "LIKE"
+            ],
+            "likePattern": "%n"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s3",
+      "title": {
+        "en": "First names ending in n: without TRIM",
+        "ro": "Prenume care se termină cu n: fără TRIM"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Who stays if we ask for first names ending in the letter n? Mark the rows you think `LIKE '%n'` keeps.",
+            "ro": "Cine rămâne dacă cerem prenumele care se termină cu litera n? Marchează rândurile pe care crezi că le păstrează `LIKE '%n'`."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l11-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, prenume FROM profesori WHERE prenume LIKE '%n'",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            }
+          ],
+          "show": [
+            "nume",
+            "prenume"
+          ],
+          "say": {
+            "from": {
+              "en": "`profesori` has 16 rows, and `prenume` is `CHAR(10)`.",
+              "ro": "`profesori` are 16 rânduri, iar `prenume` este `CHAR(10)`."
+            },
+            "where": {
+              "en": "`LIKE '%n'` requires the **last** character to be n. But in `CHAR(10)` the last character is always a space (the longest first name has only 9 letters). Result: 0 rows.",
+              "ro": "`LIKE '%n'` cere ca **ultimul** caracter să fie n. Dar în `CHAR(10)` ultimul caracter este mereu un spațiu (cel mai lung prenume are doar 9 litere). Rezultat: 0 rânduri."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s4",
+      "title": {
+        "en": "First names ending in n: with TRIM",
+        "ro": "Prenume care se termină cu n: cu TRIM"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`TRIM` removes the spaces at both ends. The question stays the same, but now we ask it of the first name **without** the padding. Mark the rows that stay.",
+            "ro": "`TRIM` scoate spațiile de la capete. Întrebarea rămâne aceeași, dar acum o punem pe prenumele **fără** umplutură. Marchează rândurile care rămân."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l11-qm2",
+          "dataset": "facultate",
+          "sql": "SELECT nume, prenume FROM profesori WHERE TRIM(prenume) LIKE '%n'",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "prenume"
+          ],
+          "say": {
+            "from": {
+              "en": "The same 16 rows.",
+              "ro": "Aceleași 16 rânduri."
+            },
+            "where": {
+              "en": "`TRIM(prenume)` has no spaces, so the last character is the real letter. 6 rows stay: Cristian (twice), Sabin, Florin, Cosmin, Stefan. \"LUCIAN\" does not stay, because it ends in a capital N and `LIKE` tells n from N.",
+              "ro": "`TRIM(prenume)` e fără spații, deci ultimul caracter este litera adevărată. Rămân 6 rânduri: Cristian (de două ori), Sabin, Florin, Cosmin, Stefan. «LUCIAN» nu rămâne, pentru că se termină cu N mare, iar `LIKE` face diferența între n și N."
+            },
+            "select": {
+              "en": "Only `nume` and `prenume` are shown for the 6 rows.",
+              "ro": "Se afișează doar `nume` și `prenume` pentru cele 6 rânduri."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s5",
+      "title": {
+        "en": "CHAR: spaces, LIKE and =",
+        "ro": "CHAR: spații, LIKE și ="
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**CHAR(n) is padded with spaces, VARCHAR2 is not.** `LENGTH`, `LIKE` and `||` see the spaces too: `nume || prenume` for Buraga gives \"Buraga    Sabin     \", with spaces in the middle and at the end. For lengths, `LIKE` matches and concatenations you use `TRIM`.",
+            "ro": "**CHAR(n) se completează cu spații, VARCHAR2 nu.** `LENGTH`, `LIKE` și `||` văd și spațiile: `nume || prenume` pentru Buraga dă «Buraga    Sabin     », cu spații la mijloc și la coadă. Pentru lungimi, potriviri cu `LIKE` și concatenări folosești `TRIM`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Comparing with `=` differs from `LIKE`.** A `CHAR` column compared with a literal is compared with blank padding, so `WHERE prenume = 'Cosmin'` finds the row (1 row), but `WHERE prenume LIKE 'Cosmin'` does not (0 rows). The lab page says `UPPER(nume) = 'BREABAN'` returns 0 rows; on Oracle 11g, verified, it returns 1.",
+            "ro": "**Compararea cu `=` e altfel decât `LIKE`.** O coloană `CHAR` comparată cu un literal se compară cu umplere de spații, deci `WHERE prenume = 'Cosmin'` găsește rândul (1 rând), dar `WHERE prenume LIKE 'Cosmin'` nu (0 rânduri). Pagina de laborator scrie că `UPPER(nume) = 'BREABAN'` întoarce 0 rânduri; pe Oracle 11g, verificat, întoarce 1."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**When you compare two columns and one is VARCHAR2, the padding rule no longer helps.** `studenti.prenume = profesori.prenume` does not match \"Alexandru\" with \"Alexandru \" (one trailing space) and gives 0 rows. With `TRIM(profesori.prenume)` 1 row appears (Panaite and Moruz).",
+            "ro": "**Când compari două coloane și una e VARCHAR2, umplerea nu mai ajută.** `studenti.prenume = profesori.prenume` nu potrivește «Alexandru» cu «Alexandru » (cu un spațiu) și dă 0 rânduri. Cu `TRIM(profesori.prenume)` apare 1 rând (Panaite și Moruz)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s6",
+      "title": {
+        "en": "SUBSTR: from 1 and from the end",
+        "ro": "SUBSTR: de la 1 și de la coadă"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Positions start at 1, not at 0.** `SUBSTR('ABCDEFG', 3, 4)` means \"four characters starting at position 3\" and gives **CDEF**. The third argument is the length, not the end position (otherwise it would be CD).",
+            "ro": "**Pozițiile încep de la 1, nu de la 0.** `SUBSTR('ABCDEFG', 3, 4)` înseamnă «patru caractere începând de la poziția 3» și dă **CDEF**. Al treilea argument este lungimea, nu poziția finală (altfel ar fi CD)."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A negative position is counted from the end.** `SUBSTR('ABCDEFG', -3, 2)` starts at the third character from the end (E) and takes 2 characters: **EF**. The lab page says \"left to right\": that is not so. `INSTR` returns 0 when it finds nothing.",
+            "ro": "**Poziția negativă se numără de la sfârșit.** `SUBSTR('ABCDEFG', -3, 2)` începe de la al treilea caracter de la coadă (E) și ia 2 caractere: **EF**. Pagina de laborator scrie «de la stânga la dreapta»: nu e așa. `INSTR` întoarce 0 când nu găsește nimic."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s7",
+      "title": {
+        "en": "Text functions in a query",
+        "ro": "Funcțiile pentru text într-o interogare"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT UPPER('Stefan'), LOWER('LOWER'), INITCAP('ioana MARIA') FROM DUAL;\n-- STEFAN, lower, Ioana Maria\n\nSELECT SUBSTR('ABCDEFG', 3, 4), SUBSTR('ABCDEFG', -3, 2) FROM DUAL;\n-- CDEF, EF\n\nSELECT INSTR('CORPORATE FLOOR', 'OR', 3, 2) FROM DUAL;\n-- 14\n\nSELECT '-' || TRIM('   test   ') || '-' FROM DUAL;\n-- -test-\n\nSELECT COUNT(*) FROM studenti WHERE LOWER(prenume) = 'ioana';\n-- 3  (fără LOWER, cu 'ioana', ar fi 0)"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "UPPER, LOWER, INITCAP",
+            "ro": "UPPER, LOWER, INITCAP"
+          },
+          "content": {
+            "en": "They change the letters: all capitals, all lowercase, or the first letter of each word capitalised. They are used in WHERE so you do not depend on how the text was written.",
+            "ro": "Schimbă literele: toate mari, toate mici, sau prima literă a fiecărui cuvânt mare. Se folosesc în WHERE ca să nu depinzi de cum a fost scris textul."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "LENGTH, SUBSTR, INSTR",
+            "ro": "LENGTH, SUBSTR, INSTR"
+          },
+          "content": {
+            "en": "`LENGTH(s)` counts characters. `SUBSTR(s, m, n)` takes n characters from position m (negative m counts from the end). `INSTR(s, t)` gives the position of t in s, or 0.",
+            "ro": "`LENGTH(s)` numără caracterele. `SUBSTR(s, m, n)` ia n caractere de la poziția m (m negativ numără de la coadă). `INSTR(s, t)` dă poziția lui t în s, sau 0."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "CHAR(n) and TRIM",
+            "ro": "CHAR(n) și TRIM"
+          },
+          "content": {
+            "en": "`CHAR(n)` is padded with spaces up to n characters, `VARCHAR2(n)` is not (`profesori` uses CHAR(10), `studenti` uses VARCHAR2(10)). `TRIM` removes the spaces at both ends: the cure for the padding.",
+            "ro": "`CHAR(n)` e completat cu spații până la n caractere, `VARCHAR2(n)` nu (`profesori` folosește CHAR(10), `studenti` folosește VARCHAR2(10)). `TRIM` scoate spațiile de la capete: leacul pentru umplutură."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s8",
+      "title": {
+        "en": "Why does one find it and the other not?",
+        "ro": "De ce găsește unul și celălalt nu?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l11-r2",
+          "prompt": {
+            "en": "Why does `LIKE '%n'` not find \"Sabin\" in `profesori.prenume`, yet find \"Ciprian\" in `studenti.prenume`?",
+            "ro": "De ce `LIKE '%n'` nu găsește «Sabin» în `profesori.prenume`, dar găsește «Ciprian» în `studenti.prenume`?"
+          },
+          "answer": {
+            "en": "`profesori.prenume` is `CHAR(10)`: \"Sabin\" actually has 5 letters and 5 spaces, so the last character is a space, not n. `studenti.prenume` is `VARCHAR2`: it keeps exactly the text, and \"Ciprian\" (like \"Bogdan\") ends in n. With `TRIM` in front, the first column would behave like the second: the padding no longer hides the last letter.",
+            "ro": "`profesori.prenume` este `CHAR(10)`: «Sabin» are de fapt 5 litere și 5 spații, deci ultimul caracter este un spațiu, nu n. `studenti.prenume` este `VARCHAR2`: păstrează exact textul, iar «Ciprian» (ca și «Bogdan») se termină cu n. Cu `TRIM` pus în față, prima coloană s-ar comporta ca a doua: umplutura nu mai ascunde ultima literă."
+          },
+          "placeholder": {
+            "en": "Explain in your own words",
+            "ro": "Explică în cuvintele tale"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s9",
+      "title": {
+        "en": "LENGTH on CHAR",
+        "ro": "LENGTH pe CHAR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l11-q1",
+          "question": {
+            "en": "What does `LENGTH(prenume)` return for \"Cosmin\" in the `profesori` table (`prenume` is `CHAR(10)`)?",
+            "ro": "Ce întoarce `LENGTH(prenume)` pentru «Cosmin» în tabelul `profesori` (`prenume` este `CHAR(10)`)?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "10",
+                "ro": "10"
+              },
+              "correct": true,
+              "explain": {
+                "en": "CHAR(10) is padded with spaces up to 10 characters, and LENGTH counts them too.",
+                "ro": "CHAR(10) este completat cu spații până la 10 caractere, iar LENGTH le numără și pe ele."
+              }
+            },
+            {
+              "text": {
+                "en": "6",
+                "ro": "6"
+              },
+              "correct": false,
+              "explain": {
+                "en": "6 would be the length without spaces, that is `LENGTH(TRIM(prenume))`. LENGTH alone counts the padding too.",
+                "ro": "6 ar fi lungimea fără spații, adică `LENGTH(TRIM(prenume))`. LENGTH singur numără și umplutura."
+              },
+              "misconception": "char-pad"
+            },
+            {
+              "text": {
+                "en": "4",
+                "ro": "4"
+              },
+              "correct": false,
+              "explain": {
+                "en": "4 is the number of padding spaces, but LENGTH counts all characters, the letters plus the spaces.",
+                "ro": "4 sunt spațiile de umplutură, dar LENGTH numără toate caracterele, literele plus spațiile."
+              },
+              "misconception": "char-pad"
+            }
+          ],
+          "review": "bd-l01a"
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s10",
+      "title": {
+        "en": "SUBSTR from position 3",
+        "ro": "SUBSTR de la poziția 3"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l11-q2",
+          "question": {
+            "en": "What does `SUBSTR('ABCDEFG', 3, 4)` return?",
+            "ro": "Ce întoarce `SUBSTR('ABCDEFG', 3, 4)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "CDEF",
+                "ro": "CDEF"
+              },
+              "correct": true,
+              "explain": {
+                "en": "It starts at position 3 (C), counting from 1, and takes 4 characters: C, D, E, F.",
+                "ro": "Începe de la poziția 3 (C), numărând de la 1, și ia 4 caractere: C, D, E, F."
+              }
+            },
+            {
+              "text": {
+                "en": "DEFG",
+                "ro": "DEFG"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You counted positions from 0, so position 3 became D (DEFG). In Oracle the first letter is at position 1, so position 3 is C.",
+                "ro": "Ai numărat pozițiile de la 0, așa că poziția 3 a devenit D (DEFG). În Oracle prima literă este pe poziția 1, deci poziția 3 este C."
+              },
+              "misconception": "substr-neg"
+            },
+            {
+              "text": {
+                "en": "CD",
+                "ro": "CD"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You took 4 as the end position (positions 3 to 4 give CD). The third argument is the length: 4 characters, not \"up to position 4\".",
+                "ro": "Ai luat 4 ca poziție finală (pozițiile 3–4 dau CD). Al treilea argument este lungimea: 4 caractere, nu «până la poziția 4»."
+              },
+              "misconception": "substr-neg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s11",
+      "title": {
+        "en": "SUBSTR with a negative position",
+        "ro": "SUBSTR cu poziție negativă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l11-q3",
+          "question": {
+            "en": "What does `SUBSTR('ABCDEFG', -3, 2)` return?",
+            "ro": "Ce întoarce `SUBSTR('ABCDEFG', -3, 2)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "EF",
+                "ro": "EF"
+              },
+              "correct": true,
+              "explain": {
+                "en": "A negative position is counted from the end: −1 is G, −2 is F, −3 is E. From E I take 2 characters: EF.",
+                "ro": "Poziția negativă se numără de la sfârșit: −1 este G, −2 este F, −3 este E. De la E iau 2 caractere: EF."
+              }
+            },
+            {
+              "text": {
+                "en": "AB",
+                "ro": "AB"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You counted from the left (the first 2 characters, AB). The minus says the counting starts from the tail of the string.",
+                "ro": "Ai numărat de la stânga (primele 2 caractere, AB). Minusul spune că numărătoarea începe de la coada șirului."
+              },
+              "misconception": "substr-neg"
+            },
+            {
+              "text": {
+                "en": "EFG",
+                "ro": "EFG"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You ignored the third argument. With 2 it takes only two characters (EF); without it, it would take everything to the end (EFG).",
+                "ro": "Ai ignorat al treilea argument. Cu 2 ia doar două caractere (EF); fără el ar lua până la capăt (EFG)."
+              },
+              "misconception": "substr-neg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s12",
+      "title": {
+        "en": "LIKE on CHAR",
+        "ro": "LIKE pe CHAR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l11-q4",
+          "question": {
+            "en": "How many rows does `SELECT * FROM profesori WHERE prenume LIKE '%n'` return, without TRIM?",
+            "ro": "Câte rânduri întoarce `SELECT * FROM profesori WHERE prenume LIKE '%n'`, fără TRIM?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0 rows",
+                "ro": "0 rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The last character in `CHAR(10)` is a space, not n, so no first name matches.",
+                "ro": "Ultimul caracter din `CHAR(10)` este un spațiu, nu n, deci niciun prenume nu se potrivește."
+              }
+            },
+            {
+              "text": {
+                "en": "6 rows",
+                "ro": "6 rânduri"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You would get 6 rows with `TRIM(prenume) LIKE '%n'`. Without TRIM the padding spaces spoil the match.",
+                "ro": "6 rânduri ai primi cu `TRIM(prenume) LIKE '%n'`. Fără TRIM, spațiile de completare strică potrivirea."
+              },
+              "misconception": "char-pad"
+            },
+            {
+              "text": {
+                "en": "7 rows",
+                "ro": "7 rânduri"
+              },
+              "correct": false,
+              "explain": {
+                "en": "7 appears only if you also use `LOWER` (to catch \"LUCIAN\"), and even then it would not work without TRIM.",
+                "ro": "7 apare doar dacă folosești și `LOWER` (ca să prinzi «LUCIAN»), iar tot fără TRIM n-ar merge."
+              },
+              "misconception": "char-pad"
+            }
+          ],
+          "review": "bd-l06"
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s13",
+      "title": {
+        "en": "The first letter in lowercase, the rest in capitals",
+        "ro": "Prima literă mică, restul mari"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l11-ex-3-6",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "For the professors whose last name starts with B, show the name with the first letter in lowercase and the rest in capitals, and also the length (number of characters) of the name.",
+            "ro": "Pentru profesorii al căror nume începe cu B, afișați numele cu prima litera mică si restul mari, precum și lungimea (nr. de caractere a) numelui."
+          },
+          "official": {
+            "lab": 3,
+            "ex": 6
+          },
+          "starter": "-- 1. tabelul: profesori\n-- 2. numele care încep cu B\n-- 3. prima literă mică, restul mari\n-- 4. lungimea numelui\nSELECT \nFROM profesori\nWHERE ",
+          "solution": "SELECT LOWER(SUBSTR(TRIM(nume), 1, 1)) || UPPER(SUBSTR(TRIM(nume), 2)), LENGTH(TRIM(nume)) FROM profesori WHERE nume LIKE 'B%'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Four steps: the `profesori` table, the names that start with B, the first letter in lowercase plus the rest in capitals, the length of the name. Think about the spaces in `CHAR(10)`.",
+              "ro": "Patru pași: tabelul `profesori`, numele care încep cu B, prima literă mică plus restul cu majuscule, lungimea numelui. Gândește-te la spațiile din `CHAR(10)`."
+            },
+            {
+              "en": "SELECT LOWER(SUBSTR(___, 1, 1)) || UPPER(SUBSTR(___, 2)), LENGTH(___)\nFROM profesori\nWHERE nume LIKE '___%';",
+              "ro": "SELECT LOWER(SUBSTR(___, 1, 1)) || UPPER(SUBSTR(___, 2)), LENGTH(___)\nFROM profesori\nWHERE nume LIKE '___%';"
+            },
+            {
+              "en": "The trap: `nume` is `CHAR(10)`, so `LENGTH(nume)` gives 10, not 6 for \"Buraga\". Put `TRIM(nume)` everywhere you use the name as text: `LENGTH(TRIM(nume))` and `SUBSTR(TRIM(nume), 2)`.",
+              "ro": "Capcana: `nume` este `CHAR(10)`, deci `LENGTH(nume)` dă 10, nu 6 pentru «Buraga». Pune `TRIM(nume)` în fiecare loc unde folosești numele ca text: `LENGTH(TRIM(nume))` și `SUBSTR(TRIM(nume), 2)`."
+            }
+          ],
+          "explain": {
+            "en": "The solution: `LOWER(SUBSTR(TRIM(nume), 1, 1)) || UPPER(SUBSTR(TRIM(nume), 2))` and `LENGTH(TRIM(nume))`, with `WHERE nume LIKE 'B%'`. Result: bURAGA and 6, bREABAN and 7. The `LIKE 'B%'` filter works without TRIM too, because the spaces are at the end, not the beginning; the length however needs TRIM.",
+            "ro": "Soluția: `LOWER(SUBSTR(TRIM(nume), 1, 1)) || UPPER(SUBSTR(TRIM(nume), 2))` și `LENGTH(TRIM(nume))`, cu `WHERE nume LIKE 'B%'`. Rezultat: bURAGA și 6, bREABAN și 7. Filtrul `LIKE 'B%'` merge și fără TRIM, pentru că spațiile sunt la coadă, nu la început; lungimea însă are nevoie de TRIM."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l11-s14",
+      "title": {
+        "en": "First name ending in n",
+        "ro": "Prenume terminat în n"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l11-ex-2-15",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the last name and first name of the professors whose first name ends with the letter \"n\" (trick question)..\n\nIn the app: the letter n may be written in lowercase or uppercase.",
+            "ro": "Afişaţi numele şi prenumele profesorilor a căror prenume se termină cu litera \"n\" (întrebare capcană)..\n\nÎn aplicație: litera n poate fi scrisă mică sau mare."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 15
+          },
+          "starter": "SELECT nume, prenume\nFROM profesori\nWHERE ",
+          "solution": "SELECT nume, prenume FROM profesori WHERE LOWER(TRIM(prenume)) LIKE '%n'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You want the first names that end in n, whether the n is written small or capital. There are two obstacles in `prenume`: what comes after the letters and how the last letter is written.",
+              "ro": "Vrei prenumele care se termină cu n, fie că n-ul e scris mic sau mare. Ai două obstacole în `prenume`: ce e după litere și cum e scrisă ultima literă."
+            },
+            {
+              "en": "SELECT nume, prenume\nFROM profesori\nWHERE ___(___(prenume)) LIKE '%n';",
+              "ro": "SELECT nume, prenume\nFROM profesori\nWHERE ___(___(prenume)) LIKE '%n';"
+            },
+            {
+              "en": "The trap: `CHAR(10)` puts spaces after the first name, so `prenume LIKE '%n'` finds nobody. `TRIM` removes the spaces; `LOWER` turns \"LUCIAN\" (in capitals) into \"lucian\", otherwise it would escape you. With TRIM alone you get 6 rows, with `LOWER(TRIM(prenume))` you get 7.",
+              "ro": "Capcana: `CHAR(10)` pune spații după prenume, deci `prenume LIKE '%n'` nu găsește pe nimeni. `TRIM` scoate spațiile; `LOWER` aduce și «LUCIAN» (scris cu majuscule) la «lucian», altfel ți-ar scăpa. Cu TRIM singur ai 6 rânduri, cu `LOWER(TRIM(prenume))` ai 7."
+            }
+          ],
+          "explain": {
+            "en": "The solution: `WHERE LOWER(TRIM(prenume)) LIKE '%n'`. Result: 7 rows (Cristian twice, Sabin, Florin, Cosmin, Stefan, LUCIAN). `TRIM` solves the CHAR padding, `LOWER` solves the difference between n and N.",
+            "ro": "Soluția: `WHERE LOWER(TRIM(prenume)) LIKE '%n'`. Rezultat: 7 rânduri (Cristian de două ori, Sabin, Florin, Cosmin, Stefan, LUCIAN). `TRIM` rezolvă umplutura din CHAR, `LOWER` rezolvă diferența dintre n și N."
+          }
+        }
+      ]
+    }
+  ]
+}

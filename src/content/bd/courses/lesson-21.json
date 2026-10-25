@@ -1,0 +1,705 @@
+{
+  "meta": {
+    "id": "bd-l21",
+    "title": {
+      "en": "Lesson 21: Self-join — pairs",
+      "ro": "Lecția 21: Self-join — perechi"
+    },
+    "shortTitle": {
+      "en": "L21: Self-join",
+      "ro": "L21: Self-join"
+    },
+    "source": {
+      "en": "Databases -- Lab 4 (JOIN), UAIC",
+      "ro": "Baze de date -- Laboratorul 4 (JOIN), UAIC"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l21-s1",
+      "title": {
+        "en": "Pintescu's classmates",
+        "ro": "Colegii de grupă ai lui Pintescu"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l21-r1",
+          "prompt": {
+            "en": "The table `studenti` gives each student's year and group. How would you find Pintescu's classmates (same group, same year)? Write what you would do, even if you do not know the syntax yet. How do you remove from the list the row where Pintescu appears as his own classmate?",
+            "ro": "Tabelul `studenti` spune pentru fiecare student anul și grupa. Cum ai găsi colegii de grupă ai lui Pintescu (aceeași grupă, același an)? Scrie ce ai face, chiar dacă nu știi încă sintaxa. Cum scoți din listă rândul în care Pintescu apare coleg cu el însuși?"
+          },
+          "placeholder": {
+            "en": "What do you do?",
+            "ro": "Cum procedezi?"
+          },
+          "answer": {
+            "en": "The classmates are Arhire Alexandra and Cobzaru George. You need the table `studenti` twice: one copy for Pintescu and one for his classmates, with different aliases (`s` and `colegi`). You link them on the same group and the same year. The row where the classmate is Pintescu himself is removed with `s.nr_matricol <> colegi.nr_matricol`.",
+            "ro": "Colegii sunt Arhire Alexandra și Cobzaru George. Ai nevoie de tabelul `studenti` de două ori: o copie pentru Pintescu și una pentru colegii lui, cu aliasuri diferite (`s` și `colegi`). Le legi pe aceeași grupă și același an. Rândul în care colegul este chiar Pintescu se scoate cu `s.nr_matricol <> colegi.nr_matricol`."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nr_matricol, nume, prenume, an, grupa FROM studenti WHERE an = 1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s2",
+      "title": {
+        "en": "Two copies of the same table",
+        "ro": "Două copii ale aceluiași tabel"
+      },
+      "blocks": [
+        {
+          "type": "query-machine",
+          "id": "bd-l21-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT colegi.nume, colegi.prenume FROM studenti s JOIN studenti colegi ON s.grupa = colegi.grupa AND s.an = colegi.an WHERE s.nume = 'Pintescu' AND s.nr_matricol <> colegi.nr_matricol",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "join"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            }
+          ],
+          "show": [
+            "s.nume",
+            "colegi.nume",
+            "colegi.prenume"
+          ],
+          "say": {
+            "from": {
+              "en": "`studenti s` is the first copy: this is where Pintescu sits.",
+              "ro": "`studenti s` este prima copie: aici stă Pintescu."
+            },
+            "join": {
+              "en": "`studenti colegi` is the second copy. The `ON` condition puts face to face two students from the same group and year. A student also appears next to himself: the diagonal of the pairs.",
+              "ro": "`studenti colegi` este a doua copie. Condiția `ON` pune față în față doi studenți din aceeași grupă și același an. Un student apare și lângă el însuși: diagonala perechilor."
+            },
+            "where": {
+              "en": "2 rows remain: Arhire Alexandra and Cobzaru George, Pintescu's two colleagues from group B1, year 1.",
+              "ro": "Rămân 2 rânduri: Arhire Alexandra și Cobzaru George, cei doi colegi ai lui Pintescu din grupa B1, anul 1."
+            }
+          },
+          "ask": {
+            "where": {
+              "en": "Which rows remain if you keep only Pintescu's pairs and remove the pair with himself?",
+              "ro": "Care rânduri rămân dacă păstrezi doar perechile lui Pintescu și scoți perechea cu el însuși?"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s3",
+      "title": {
+        "en": "Pairs in both directions",
+        "ro": "Perechi în ambele sensuri"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each student is paired with every other student born on the same day of the week, with `<>`. Look at one pair and find its mirror image: both are in the list.",
+            "ro": "Fiecare student este pus în pereche cu orice alt student născut în aceeași zi a săptămânii, cu `<>`. Alege o pereche și caută-o pe cea în oglindă: sunt amândouă în listă."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l21-viz1",
+          "widget": "self-pairs",
+          "predict": false,
+          "props": {
+            "table": "studenti",
+            "pairOn": "TO_CHAR(data_nastere, 'D')",
+            "order": "<>"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s4",
+      "title": {
+        "en": "Each pair only once",
+        "ro": "Fiecare pereche o singură dată"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Now the condition is `<`. Of each pair and its mirror image only one remains, so every pair appears once. Before you look at the list, predict: how many pairs remain, compared with the previous screen?",
+            "ro": "Acum condiția este `<`. Din fiecare pereche și oglinda ei rămâne una singură, deci fiecare pereche apare o dată. Înainte să te uiți la listă, prezice: câte perechi rămân, față de ecranul anterior?"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l21-viz2",
+          "widget": "self-pairs",
+          "predict": true,
+          "props": {
+            "table": "studenti",
+            "pairOn": "TO_CHAR(data_nastere, 'D')",
+            "order": "<"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s5",
+      "title": {
+        "en": "Pairs: with yourself, twice, without ON",
+        "ro": "Perechile: cu sine, de două ori, fără ON"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**The pair with yourself.** A self-join without an exclusion puts every student next to himself. For students born on the same day of the week, `ON TO_CHAR(s1.data_nastere,'D') = TO_CHAR(s2.data_nastere,'D')` gives 35 rows: 22 real pairs (in both directions) plus 13 pairs with oneself. `AND s1.nr_matricol <> s2.nr_matricol` removes the 13.",
+            "ro": "**Perechea cu tine însuți.** Un self-join fără excludere îl pune pe fiecare student lângă el însuși. Pentru studenții născuți în aceeași zi a săptămânii, `ON TO_CHAR(s1.data_nastere,'D') = TO_CHAR(s2.data_nastere,'D')` dă 35 de rânduri: 22 de perechi reale (în ambele sensuri) plus 13 perechi cu sine. `AND s1.nr_matricol <> s2.nr_matricol` le scoate pe cele 13."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`<>` gives every pair twice.** The pair (Cobzaru, Pintescu) and the pair (Pintescu, Cobzaru) are the same pair. With `<>` on `nr_matricol` you get 22 rows; with `<` you get 11, each pair once.",
+            "ro": "**`<>` dă fiecare pereche de două ori.** Perechea (Cobzaru, Pintescu) și perechea (Pintescu, Cobzaru) sunt aceeași pereche. Cu `<>` pe `nr_matricol` ies 22 de rânduri; cu `<` ies 11, fiecare pereche o singură dată."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`JOIN` without `ON`.** `FROM studenti s1 JOIN studenti s2 WHERE …` gives `ORA-00905: missing keyword`, as with any other join. The matching condition goes after `ON`.",
+            "ro": "**`JOIN` fără `ON`.** `FROM studenti s1 JOIN studenti s2 WHERE …` dă `ORA-00905: missing keyword`, ca la orice alt join. Condiția de potrivire merge după `ON`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s6",
+      "title": {
+        "en": "CHAR columns",
+        "ro": "Coloanele CHAR"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`LENGTH` on a `CHAR` column counts the spaces too.** `profesori.nume` is `CHAR(10)`: `LENGTH(p.nume)` is always 10. A «same number of letters» join without `TRIM` links only the students with 10-letter names (32 rows); with `LENGTH(TRIM(p.nume))` you get 44.",
+            "ro": "**`LENGTH` pe o coloană `CHAR` numără și spațiile.** `profesori.nume` este `CHAR(10)`: `LENGTH(p.nume)` este întotdeauna 10. Un join «același număr de litere» fără `TRIM` leagă doar studenții cu numele de 10 litere (32 de rânduri); cu `LENGTH(TRIM(p.nume))` ies 44."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A `CHAR` is compared with padding when the other side is a literal or also a `CHAR`; against a `VARCHAR2` text (for example the result of `SUBSTR`) there is no padding.** `WHERE nume = 'Varlan'` on `profesori` finds 1 row (the literal is padded with spaces). But `WHERE nume = SUBSTR('Varlan Cosmin', 1, 6)`, where `SUBSTR` returns text without padding, finds 0 rows. When you compare a `CHAR` with a text expression, cut the spaces: `TRIM(nume) = …`.",
+            "ro": "**`CHAR` se compară cu umplere când cealaltă parte e un literal sau tot `CHAR`; cu un text `VARCHAR2` (de exemplu rezultatul lui `SUBSTR`) se compară fără umplere.** `WHERE nume = 'Varlan'` pe `profesori` găsește 1 rând (literalul este completat cu spații). Dar `WHERE nume = SUBSTR('Varlan Cosmin', 1, 6)`, unde `SUBSTR` întoarce un text fără umplere, găsește 0 rânduri. Când compari un `CHAR` cu o expresie de tip text, taie spațiile: `TRIM(nume) = …`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s7",
+      "title": {
+        "en": "Self-join: a table joined with itself",
+        "ro": "Self-join: un tabel legat cu el însuși"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- colegii de grupă ai lui Pintescu\nSELECT colegi.nume, colegi.prenume\nFROM studenti s\n  JOIN studenti colegi\n    ON s.grupa = colegi.grupa AND s.an = colegi.an\nWHERE s.nume = 'Pintescu'\n  AND s.nr_matricol <> colegi.nr_matricol;"
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- perechi neordonate: fiecare pereche o singură dată\nSELECT s1.nume, s2.nume\nFROM studenti s1\n  JOIN studenti s2 ON s1.nr_matricol < s2.nr_matricol;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Self-join",
+            "ro": "Self-join"
+          },
+          "content": {
+            "en": "A join of a table with itself. The table appears twice in `FROM`, with different aliases, as if there were two identical copies.",
+            "ro": "Un join al unui tabel cu el însuși. Tabelul apare de două ori în `FROM`, cu aliasuri diferite, ca și cum ar exista două copii identice."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Ordered / unordered pair",
+            "ro": "Pereche ordonată / neordonată"
+          },
+          "content": {
+            "en": "`<>` produces ordered pairs: (A, B) and (B, A). `<` on a unique key produces unordered pairs, each once. Use the key (`nr_matricol`), not the name: names can repeat.",
+            "ro": "`<>` produce perechi ordonate: (A, B) și (B, A). `<` pe o cheie unică produce perechi neordonate, fiecare o singură dată. Folosește cheia (`nr_matricol`), nu numele: numele se pot repeta."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s8",
+      "title": {
+        "en": "Why is Bodnar–Bodnar lost?",
+        "ro": "De ce pierde Bodnar–Bodnar?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l21-r2",
+          "prompt": {
+            "en": "With `s1.nume < s2.nume` on the pairs of students born on the same day, you lose the pair Bodnar–Bodnar. Why? What do you use instead?",
+            "ro": "Cu `s1.nume < s2.nume` pe perechile de studenți născuți în aceeași zi pierzi perechea Bodnar–Bodnar. De ce? Ce folosești în loc?"
+          },
+          "placeholder": {
+            "en": "Explain in your own words",
+            "ro": "Explică în cuvintele tale"
+          },
+          "answer": {
+            "en": "The two students Bodnar Ioana (116 and 119) have the same last name, and `'Bodnar' < 'Bodnar'` is false in both directions, so the pair never appears: you get 10 pairs instead of 11. `<` on names assumes the names are distinct. A unique key does not have this problem: `s1.nr_matricol < s2.nr_matricol`. If alphabetical order inside the pair matters, you use the name as the first criterion and the key only as a tie-break: `s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol)`.",
+            "ro": "Cele două studente Bodnar Ioana (116 și 119) au același nume de familie, iar `'Bodnar' < 'Bodnar'` este fals în ambele sensuri, deci perechea nu apare niciodată: ies 10 perechi în loc de 11. `<` pe nume presupune că numele sunt distincte. Cheia unică nu are această problemă: `s1.nr_matricol < s2.nr_matricol`. Dacă ordinea alfabetică în pereche contează, folosești numele ca prim criteriu și cheia doar ca departajare: `s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol)`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s9",
+      "title": {
+        "en": "Self-join without ON",
+        "ro": "Self-join fără ON"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l21-q1",
+          "question": {
+            "en": "What does `SELECT * FROM studenti s JOIN studenti c WHERE s.an = c.an` do?",
+            "ro": "Ce face `SELECT * FROM studenti s JOIN studenti c WHERE s.an = c.an`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "A Cartesian product, 169 rows, then filtered by `WHERE`",
+                "ro": "Produs cartezian, 169 de rânduri, apoi filtrat de `WHERE`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "With the word `JOIN`, Oracle requires `ON`. The Cartesian product is obtained either with a comma or with `CROSS JOIN`.",
+                "ro": "Cu cuvântul `JOIN`, Oracle cere `ON`. Produsul cartezian se obține fie cu virgulă, fie cu `CROSS JOIN`."
+              },
+              "misconception": "join-no-on"
+            },
+            {
+              "text": {
+                "en": "Error `ORA-00905: missing keyword`",
+                "ro": "Eroare `ORA-00905: missing keyword`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: after `JOIN studenti c` Oracle expects `ON`.",
+                "ro": "Corect: după `JOIN studenti c` Oracle așteaptă `ON`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s10",
+      "title": {
+        "en": "The < sign on names",
+        "ro": "Semnul < pe nume"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l21-q2",
+          "question": {
+            "en": "What does `s1.nume < s2.nume` do in a self-join on `studenti`?",
+            "ro": "Ce face `s1.nume < s2.nume` într-un self-join pe `studenti`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "It only orders the pairs, without losing anything",
+                "ro": "Doar ordonează perechile, fără să piardă nimic"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The condition is a filter: the pair (A, B) passes only if A < B. For equal names, neither order passes.",
+                "ro": "Condiția este un filtru: perechea (A, B) trece doar dacă A < B. Pentru nume egale, nu trece nicio ordine."
+              },
+              "misconception": "self-pair"
+            },
+            {
+              "text": {
+                "en": "It loses the pairs of students with the same name",
+                "ro": "Pierde perechile de studenți cu același nume"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: Bodnar–Bodnar disappears. For complete pairs use the unique key.",
+                "ro": "Corect: Bodnar–Bodnar dispare. Pentru perechi complete folosește cheia unică."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s11",
+      "title": {
+        "en": "The day of the week",
+        "ro": "Ziua săptămânii"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l21-q3",
+          "question": {
+            "en": "You compare the days of the week of two students with `TO_CHAR(s1.data_nastere,'D') = TO_CHAR(s2.data_nastere,'D')`. Does the result depend on the session's territory (America or Romania)?",
+            "ro": "Compari zilele săptămânii a doi studenți cu `TO_CHAR(s1.data_nastere,'D') = TO_CHAR(s2.data_nastere,'D')`. Depinde rezultatul de teritoriul sesiunii (America sau România)?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Yes, with another territory the pairs change",
+                "ro": "Da, cu alt teritoriu perechile se schimbă"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The territory changes the number a day gets (Tuesday is 3 in America, 2 in Romania), but both sides of the equality are computed the same way.",
+                "ro": "Teritoriul schimbă numărul pe care îl primește ziua (marți e 3 în America, 2 în România), dar ambele părți ale egalității se calculează la fel."
+              },
+              "misconception": "to-char-pad-lang"
+            },
+            {
+              "text": {
+                "en": "No: the numbering differs, but both sides are computed the same way, so the same pairs come out either way",
+                "ro": "Nu: numerotarea diferă, dar ambele părți sunt calculate la fel, deci aceleași perechi ies în ambele cazuri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: 22 rows in both territories. It would matter only if you compared with a number you typed in, for example `= 3`.",
+                "ro": "Corect: 22 de rânduri în ambele teritorii. Ar conta doar dacă ai compara cu un număr scris de mână, de exemplu `= 3`."
+              }
+            }
+          ],
+          "review": "bd-l14"
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s12",
+      "title": {
+        "en": "LENGTH on a CHAR column",
+        "ro": "LENGTH pe o coloană CHAR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l21-q4",
+          "question": {
+            "en": "We link students with professors on `LENGTH(p.nume) = LENGTH(s.nume)`, without `TRIM`. How many rows come out, compared with 44 with `TRIM`?",
+            "ro": "Unim studenții cu profesorii după `LENGTH(p.nume) = LENGTH(s.nume)`, fără `TRIM`. Câte rânduri ies, față de 44 cu `TRIM`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "44, the same: `LENGTH` ignores trailing spaces",
+                "ro": "44, la fel: `LENGTH` ignoră spațiile finale"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`LENGTH` counts the padding spaces of a `CHAR`. `profesori.nume` always has length 10.",
+                "ro": "`LENGTH` numără spațiile de umplere ale unui `CHAR`. `profesori.nume` are mereu lungimea 10."
+              },
+              "misconception": "char-pad"
+            },
+            {
+              "text": {
+                "en": "32: only the students with 10-letter names match, with all 16 professors",
+                "ro": "32: doar studenții cu nume de 10 litere se potrivesc, cu toți cei 16 profesori"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: 2 students (Prelipcean, Ciobotariu) × 16 professors = 32.",
+                "ro": "Corect: 2 studenți (Prelipcean, Ciobotariu) × 16 profesori = 32."
+              }
+            }
+          ],
+          "review": "bd-l11"
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s13",
+      "title": {
+        "en": "Shared first names, CHAR and VARCHAR2",
+        "ro": "Prenume comune, CHAR și VARCHAR2"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l21-q5",
+          "question": {
+            "en": "The student Panaite Alexandru and the professor Moruz Alexandru share a first name. How many rows does `SELECT * FROM studenti s JOIN profesori p ON s.prenume = p.prenume` give?",
+            "ro": "Studentul Panaite Alexandru și profesorul Moruz Alexandru au același prenume. Câte rânduri dă `SELECT * FROM studenti s JOIN profesori p ON s.prenume = p.prenume`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "1 row: Alexandru appears in both tables",
+                "ro": "1 rând: Alexandru apare în ambele tabele"
+              },
+              "correct": false,
+              "misconception": "char-cmp",
+              "explain": {
+                "en": "`p.prenume` is `CHAR(10)`, with a space at the end, while `s.prenume` is `VARCHAR2`. Between them the comparison is done without padding, so «Alexandru» is not equal to «Alexandru» followed by a space.",
+                "ro": "`p.prenume` este `CHAR(10)`, cu un spațiu la sfârșit, iar `s.prenume` este `VARCHAR2`. Între ele comparația se face fără umplere, deci «Alexandru» nu e egal cu «Alexandru» urmat de un spațiu."
+              }
+            },
+            {
+              "text": {
+                "en": "Error: you cannot compare `CHAR` with `VARCHAR2`",
+                "ro": "Eroare: nu poți compara `CHAR` cu `VARCHAR2`"
+              },
+              "correct": false,
+              "misconception": "char-cmp",
+              "explain": {
+                "en": "The comparison is allowed, only it is done without blank padding, so it finds no pair.",
+                "ro": "Comparația e permisă, doar că se face fără umplere cu spații, deci nu găsește nicio pereche."
+              }
+            },
+            {
+              "text": {
+                "en": "0 rows",
+                "ro": "0 rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Between `VARCHAR2` and `CHAR` the comparison is done without padding. With `s.prenume = TRIM(p.prenume)` you get the pair Panaite–Moruz.",
+                "ro": "Corect. Între `VARCHAR2` și `CHAR` comparația se face fără umplere. Cu `s.prenume = TRIM(p.prenume)` iese perechea Panaite–Moruz."
+              }
+            }
+          ],
+          "review": "bd-l11"
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s14",
+      "title": {
+        "en": "Classmates in the same group",
+        "ro": "Colegi din aceeași grupă"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l21-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the last names of the two students in each pair of classmates in the same group and the same year, each pair once (two columns: the first student's last name, the second student's last name). The first student is the one with the smaller `nr_matricol`.",
+            "ro": "Afișați numele de familie al celor doi studenți din fiecare pereche de colegi din aceeași grupă și același an, fiecare pereche o singură dată (două coloane: primul nume, al doilea nume). Primul student este cel cu `nr_matricol` mai mic."
+          },
+          "starter": "-- 1. Alege tabelele: studenti de două ori (s1, s2)\n-- 2. Potrivește: aceeași grupă și același an\n-- 3. Elimină perechea cu sine și dublurile\nSELECT s1.nume, s2.nume\nFROM studenti s1\n  JOIN studenti s2 ON s1.grupa = s2.grupa AND s1.an = s2.an AND ",
+          "solution": "SELECT s1.nume, s2.nume FROM studenti s1 JOIN studenti s2 ON s1.grupa = s2.grupa AND s1.an = s2.an AND s1.nr_matricol < s2.nr_matricol",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You need `studenti` twice. Classmates have the same group and the same year.",
+              "ro": "Ai nevoie de `studenti` de două ori. Colegii au aceeași grupă și același an."
+            },
+            {
+              "en": "Skeleton: `FROM studenti s1 JOIN studenti s2 ON s1.grupa = s2.grupa AND s1.an = s2.an AND …`. For the last condition, compare the keys.",
+              "ro": "Schelet: `FROM studenti s1 JOIN studenti s2 ON s1.grupa = s2.grupa AND s1.an = s2.an AND …`. Pentru ultima condiție, compară cheile."
+            },
+            {
+              "en": "The last condition is `s1.nr_matricol < s2.nr_matricol`: it removes the pair with oneself and keeps each pair once.",
+              "ro": "Ultima condiție este `s1.nr_matricol < s2.nr_matricol`: scoate perechea cu sine și o păstrează pe fiecare pereche o singură dată."
+            }
+          ],
+          "explain": {
+            "en": "The result has 9 pairs: groups A2 (3 students, 3 pairs), A1 (3, 3 pairs), B1 (3, 3 pairs); groups with a single student give no pair, and B2 in year 2 and B2 in year 1 are different groups because `an` is part of the condition.",
+            "ro": "Rezultatul are 9 perechi: grupele A2 (3 studenți, 3 perechi), A1 (3, 3 perechi), B1 (3, 3 perechi); grupele cu un singur student nu dau nicio pereche, iar B2 din anul 2 și B2 din anul 1 sunt grupe diferite pentru că `an` face parte din condiție."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s15",
+      "title": {
+        "en": "The age difference",
+        "ro": "Diferența de vârstă"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l21-ex-4-9",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the students two by two together with the age difference between them. Sort in ascending order of these differences. Be careful not to compare a student with himself.\n\nOfficial statement (Romanian): Afișați studenții doi câte doi împreună cu diferența de vârstă dintre ei. Sortați în ordine crescătoare în funcție de aceste diferențe. Aveți grijă să nu comparați un student cu el însuși.\n\nThe pairs are unordered (each pair once); in each pair the first student is the one with the smaller `nr_matricol`. The difference is measured in days and is positive (absolute value, `ABS`). Columns, in order: `nume1`, `prenume1`, `nume2`, `prenume2`, `diferenta_zile` (aliases required).",
+            "ro": "Afișați studenții doi câte doi împreună cu diferența de vârstă dintre ei. Sortați în ordine crescătoare în funcție de aceste diferențe. Aveți grijă să nu comparați un student cu el însuși.\n\nPerechile sunt neordonate (fiecare pereche o singură dată); în fiecare pereche, primul student este cel cu `nr_matricol` mai mic. Diferența se măsoară în zile și este pozitivă (valoare absolută, `ABS`). Coloanele, în ordine: `nume1`, `prenume1`, `nume2`, `prenume2`, `diferenta_zile` (aliasuri obligatorii)."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 9
+          },
+          "starter": "SELECT s1.nume AS nume1, s1.prenume AS prenume1,\n       s2.nume AS nume2, s2.prenume AS prenume2,\n       ABS(s1.data_nastere - s2.data_nastere) AS diferenta_zile\nFROM studenti s1\n  JOIN studenti s2 ON \nORDER BY diferenta_zile",
+          "solution": "SELECT s1.nume AS nume1, s1.prenume AS prenume1, s2.nume AS nume2, s2.prenume AS prenume2, ABS(s1.data_nastere - s2.data_nastere) AS diferenta_zile FROM studenti s1 JOIN studenti s2 ON s1.nr_matricol < s2.nr_matricol ORDER BY diferenta_zile",
+          "check": {
+            "order": "required",
+            "orderBy": [
+              "diferenta_zile"
+            ],
+            "aliases": [
+              "nume1",
+              "prenume1",
+              "nume2",
+              "prenume2",
+              "diferenta_zile"
+            ],
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You need `studenti` twice. For each pair you compute the difference between the two birth dates.",
+              "ro": "Ai nevoie de `studenti` de două ori. Pentru fiecare pereche calculezi diferența dintre cele două date de naștere."
+            },
+            {
+              "en": "Skeleton: `FROM studenti s1 JOIN studenti s2 ON …`, the column `ABS(s1.data_nastere - s2.data_nastere) AS diferenta_zile` and `ORDER BY diferenta_zile`.",
+              "ro": "Schelet: `FROM studenti s1 JOIN studenti s2 ON …`, coloana `ABS(s1.data_nastere - s2.data_nastere) AS diferenta_zile` și `ORDER BY diferenta_zile`."
+            },
+            {
+              "en": "The condition `ON s1.nr_matricol < s2.nr_matricol` removes the pair with oneself and the duplicates (13 × 12 / 2 = 78 pairs). The difference of two dates is a number of days; `ABS` makes it positive whatever the order.",
+              "ro": "Condiția `ON s1.nr_matricol < s2.nr_matricol` scoate perechea cu sine și dublurile (13 × 12 / 2 = 78 de perechi). Diferența a două date este un număr de zile; `ABS` o face pozitivă indiferent de ordine."
+            }
+          ],
+          "explain": {
+            "en": "78 pairs, sorted in ascending order: the first is Archip–Ciobotariu with 0 days (the same birth date). With `<>` there would have been 156 rows, each pair twice.",
+            "ro": "78 de perechi, sortate crescător: prima este Archip–Ciobotariu cu 0 zile (au aceeași dată de naștere). Cu `<>` ar fi ieșit 156 de rânduri, fiecare pereche de două ori."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s16",
+      "title": {
+        "en": "Student–professor friendships",
+        "ro": "Prieteni student–profesor"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l21-ex-4-10",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the possible friendships between students and professors. A professor and a student can become friends if their last names have the same number of letters.\n\nOfficial statement (Romanian): Afișați posibilele prietenii dintre studenți și profesori. Un profesor și un student se pot împrieteni dacă numele lor de familie are același număr de litere.\n\nColumns, in order: the student's last name and first name, the professor's last name and first name.",
+            "ro": "Afișați posibilele prietenii dintre studenți și profesori. Un profesor și un student se pot împrieteni dacă numele lor de familie are același număr de litere.\n\nColoanele, în ordine: numele și prenumele studentului, numele și prenumele profesorului."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 10
+          },
+          "solution": "SELECT s.nume, s.prenume, p.nume, p.prenume FROM studenti s JOIN profesori p ON LENGTH(s.nume) = LENGTH(TRIM(p.nume))",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "There is no shared key between students and professors: the link is the equality of two lengths.",
+              "ro": "Nu ai o cheie comună între studenți și profesori: legătura este egalitatea a două lungimi."
+            },
+            {
+              "en": "Skeleton: `FROM studenti s JOIN profesori p ON LENGTH(…) = LENGTH(…)`.",
+              "ro": "Schelet: `FROM studenti s JOIN profesori p ON LENGTH(…) = LENGTH(…)`."
+            },
+            {
+              "en": "`profesori.nume` is `CHAR(10)`: `LENGTH` also counts its padding spaces and always gives 10. Cut them with `TRIM`: `LENGTH(TRIM(p.nume))`.",
+              "ro": "`profesori.nume` este `CHAR(10)`: `LENGTH` îi numără și spațiile de umplere și dă mereu 10. Taie-le cu `TRIM`: `LENGTH(TRIM(p.nume))`."
+            }
+          ],
+          "explain": {
+            "en": "44 rows. The link is not an equality of keys but an equality between two computed lengths. Without `TRIM`, `LENGTH(p.nume)` is always 10 and only the students with 10-letter names match: 32 rows.",
+            "ro": "44 de rânduri. Legătura nu este o egalitate de chei, ci o egalitate între două lungimi calculate. Fără `TRIM`, `LENGTH(p.nume)` este mereu 10 și se potrivesc doar studenții cu nume de 10 litere: 32 de rânduri."
+          },
+          "starter": "SELECT s.nume, s.prenume, p.nume, p.prenume\nFROM studenti s\n  JOIN profesori p ON "
+        }
+      ]
+    },
+    {
+      "id": "bd-l21-s17",
+      "title": {
+        "en": "Born on the same day",
+        "ro": "Născuți în aceeași zi"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l21-ex-4-7",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "In the table students there are students who were born on the same day of the week. For example, Cobzaru George and Pintescu Andrei were both born on a Tuesday. Build a list of the students born on the same day, grouping them two by two in alphabetical order of last names (for example, the result will contain the combination Cobzaru-Pintescu, but not Pintescu-Cobzaru). The list must contain only the last names of the two, together with the day on which they were born. Of course, if other students were also born on a Tuesday, they will appear in combination with the two mentioned above. The list will be ordered by the day of the week on which they were born and, when more than three students were born on the same day, the results will also be ordered by the name of the first person in the list.\n\nOfficial statement (Romanian): În tabela studenți există studenți care s-au născut în aceeași zi a săptămânii. De exemplu, Cobzaru George și Pintescu Andrei s-au născut amândoi într-o zi de marți. Construiți o listă cu studenții care s-au născut în aceeași zi, grupându-i doi câte doi în ordine alfabetică a numelor (de exemplu, în rezultat va apărea combinația Cobzaru-Pintescu, dar nu va apărea și Pintescu-Cobzaru). Lista va trebui să conțină doar numele de familie a celor doi, împreună cu ziua în care cei doi s-au născut. Evident, dacă există și alți studenți care s-au născut marți, vor apărea și ei în combinație cu cei doi amintiți mai sus. Lista va fi ordonată în funcție de ziua săptămânii în care s-au născut și, în cazul în care sunt mai mult de trei studenți născuți în aceeași zi, rezultatele vor fi ordonate și după numele primei persoane din listă.\n\nColumns, in order, with the aliases `nume1`, `nume2`, `zi`; the day is shown by its name (for example `Tuesday`). The pair is written in alphabetical order; when the names are equal, the tie is broken by `nr_matricol`. The order of the days is Monday → Sunday.",
+            "ro": "În tabela studenți există studenți care s-au născut în aceeași zi a săptămânii. De exemplu, Cobzaru George și Pintescu Andrei s-au născut amândoi într-o zi de marți. Construiți o listă cu studenții care s-au născut în aceeași zi, grupându-i doi câte doi în ordine alfabetică a numelor (de exemplu, în rezultat va apărea combinația Cobzaru-Pintescu, dar nu va apărea și Pintescu-Cobzaru). Lista va trebui să conțină doar numele de familie a celor doi, împreună cu ziua în care cei doi s-au născut. Evident, dacă există și alți studenți care s-au născut marți, vor apărea și ei în combinație cu cei doi amintiți mai sus. Lista va fi ordonată în funcție de ziua săptămânii în care s-au născut și, în cazul în care sunt mai mult de trei studenți născuți în aceeași zi, rezultatele vor fi ordonate și după numele primei persoane din listă.\n\nColoanele, în ordine, cu aliasurile `nume1`, `nume2`, `zi`; ziua se afișează cu numele ei (de exemplu `Tuesday`). Perechea se scrie în ordine alfabetică; dacă numele sunt egale, se departajează după `nr_matricol`. Ordinea zilelor este luni → duminică."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 7
+          },
+          "solution": "SELECT s1.nume AS nume1, s2.nume AS nume2, TO_CHAR(s1.data_nastere, 'fmDay') AS zi FROM studenti s1 JOIN studenti s2 ON TO_CHAR(s1.data_nastere, 'D') = TO_CHAR(s2.data_nastere, 'D') AND (s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol)) ORDER BY TRUNC(s1.data_nastere) - TRUNC(s1.data_nastere, 'IW'), s1.nume, s2.nume",
+          "check": {
+            "order": "required",
+            "orderBy": [
+              "zi",
+              "nume1"
+            ],
+            "aliases": [
+              "nume1",
+              "nume2",
+              "zi"
+            ],
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "`studenti` twice. The match: the same day of the week, computed the same way on both sides. Then, how do you ask for each pair once, in alphabetical order?",
+              "ro": "`studenti` de două ori. Potrivirea: aceeași zi a săptămânii, calculată la fel pe ambele părți. Apoi, cum ceri fiecare pereche o singură dată, în ordine alfabetică?"
+            },
+            {
+              "en": "Skeleton: `ON TO_CHAR(s1.data_nastere,'D') = TO_CHAR(s2.data_nastere,'D') AND <pair order>`. The day is displayed with `TO_CHAR(s1.data_nastere,'fmDay')`. `ORDER BY` the day of the week, then the names.",
+              "ro": "Schelet: `ON TO_CHAR(s1.data_nastere,'D') = TO_CHAR(s2.data_nastere,'D') AND <ordinea perechii>`. Ziua se afișează cu `TO_CHAR(s1.data_nastere,'fmDay')`. `ORDER BY` după ziua săptămânii, apoi după nume."
+            },
+            {
+              "en": "Pair order: `s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol)`: `s1.nume < s2.nume` alone loses the pair Bodnar–Bodnar. For Monday → Sunday use `TRUNC(date) - TRUNC(date,'IW')`, the number of days since the Monday of the week, which does not depend on the territory.",
+              "ro": "Ordinea perechii: `s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol)`: doar `s1.nume < s2.nume` pierde perechea Bodnar–Bodnar. Pentru luni → duminică folosește `TRUNC(data) - TRUNC(data,'IW')`, numărul de zile de la lunea săptămânii, care nu depinde de teritoriu."
+            }
+          ],
+          "explain": {
+            "en": "11 pairs: Bodnar–Bodnar (Monday), six Tuesday pairs (Antonie, Arhire, Cobzaru, Pintescu), three Wednesday pairs (Archip, Arhire, Ciobotariu) and Popescu–Prelipcean (Friday). With `s1.nume < s2.nume` only 10 would have come out, because the two Bodnars have the same name.",
+            "ro": "11 perechi: Bodnar–Bodnar (luni), șase perechi de marți (Antonie, Arhire, Cobzaru, Pintescu), trei de miercuri (Archip, Arhire, Ciobotariu) și Popescu–Prelipcean (vineri). Cu `s1.nume < s2.nume` ar fi ieșit doar 10, fiindcă cele două Bodnar au același nume."
+          }
+        }
+      ]
+    }
+  ]
+}

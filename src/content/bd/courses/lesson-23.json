@@ -1,0 +1,544 @@
+{
+  "meta": {
+    "id": "bd-l23",
+    "title": {
+      "en": "Lesson 23: At least one vs all — DISTINCT and MINUS",
+      "ro": "Lecția 23: Cel puțin unul vs toate — DISTINCT și MINUS"
+    },
+    "shortTitle": {
+      "en": "L23: At least one vs all",
+      "ro": "L23: Cel puțin unul vs toate"
+    },
+    "source": {
+      "en": "Databases – Lab 4 (JOIN), UAIC",
+      "ro": "Baze de date – Laboratorul 4 (JOIN), UAIC"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l23-s1",
+      "title": {
+        "en": "Who never got below 7?",
+        "ro": "Cine n-a luat niciodată sub 7?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l23-r1",
+          "prompt": {
+            "en": "Look at all the students' grades. Which students never got a grade below 7? (Only count students who have at least one grade.)",
+            "ro": "Uită-te la notele tuturor studenților. Care studenți nu au luat niciodată o notă sub 7? (Numără doar studenții care au cel puțin o notă.)"
+          },
+          "answer": {
+            "en": "Five students: 111, 115, 116, 118 and 119. Students 112, 113, 114 and 117 have at least one grade below 7, so they drop out. Students 120–123 have no grades at all and are not part of the discussion. Notice that \"never got below 7\" speaks about all of a student's grades, not about a single one.",
+            "ro": "Cinci studenți: 111, 115, 116, 118 și 119. Studenții 112, 113, 114 și 117 au măcar o notă sub 7, deci ies. Studenții 120–123 nu au nicio notă și nu intră în discuție. Observă că „n-a luat niciodată sub 7” vorbește despre toate notele unui student, nu despre una singură."
+          },
+          "placeholder": {
+            "en": "Write the student numbers",
+            "ro": "Scrie numerele matricole"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nr_matricol, id_curs, valoare FROM note ORDER BY nr_matricol, id_curs"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s2",
+      "title": {
+        "en": "The drawer of grades",
+        "ro": "Sertarul cu note"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each student's drawer opens. A grade below 7 removes the student. Click the students you think remain, then turn on \"names only\" and watch the two Bodnar Ioana.",
+            "ro": "Sertarul fiecărui student se deschide. O notă sub 7 scoate studentul din listă. Apasă pe studenții care crezi că rămân, apoi pornește „doar nume” și urmărește cei doi Bodnar Ioana."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l23-viz",
+          "widget": "all-vs-some",
+          "predict": true,
+          "props": {
+            "studentsFrom": "studenti",
+            "condition": "valoare < 7",
+            "showMinusByName": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s3",
+      "title": {
+        "en": "The list \"have grades\" minus the list \"have a bad grade\"",
+        "ro": "Lista „au note” minus lista „au o notă rea”"
+      },
+      "blocks": [
+        {
+          "type": "query-machine",
+          "id": "bd-l23-qm",
+          "dataset": "facultate",
+          "sql": "SELECT s.nr_matricol, s.nume, s.prenume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol MINUS SELECT s.nr_matricol, s.nume, s.prenume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol WHERE n.valoare < 8",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "join"
+            },
+            {
+              "clause": "where"
+            },
+            {
+              "clause": "minus"
+            }
+          ],
+          "say": {
+            "from": {
+              "en": "We have to write \"all grades ≥ 8\". We start with the list of those who have at least one grade: students linked to `note`.",
+              "ro": "Avem de scris „toate notele ≥ 8”. Începem cu lista celor care au măcar o notă: studenții legați de `note`."
+            },
+            "join": {
+              "en": "The join links students to their grades: 42 rows, for 9 students. The first-year students have no grades and do not appear. MINUS will remove duplicates, so each student counts only once.",
+              "ro": "Join-ul leagă studenții de notele lor: 42 de rânduri, pentru 9 studenți. Studenții din anul 1 nu au note și nu apar. MINUS va elimina duplicatele, deci fiecare student contează o singură dată."
+            },
+            "where": {
+              "en": "The second list: the students who have at least one grade below 8, that is, the \"counterexamples\". They are 111, 112, 113, 114, 115, 117, 118 and 119: everyone except 116.",
+              "ro": "A doua listă: studenții care au măcar o notă sub 8, adică „contraexemplele”. Sunt 111, 112, 113, 114, 115, 117, 118 și 119: toți în afară de 116."
+            },
+            "minus": {
+              "en": "We take the students of the second list out of the first one. Only one student remains: 116 (Bodnar Ioana), whose lowest grade is 9.",
+              "ro": "Scoatem din prima listă pe cei din a doua. Rămâne un singur student: 116 (Bodnar Ioana), a cărui cea mai mică notă este 9."
+            }
+          },
+          "show": [
+            "s.nr_matricol",
+            "s.nume",
+            "s.prenume",
+            "n.valoare"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s4",
+      "title": {
+        "en": "At least one, namesakes and the MINUS rules",
+        "ro": "Cel puțin una, omonimi și regulile MINUS"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`WHERE valoare >= 7` means \"at least one\".** `WHERE` applies to each grade row, not to each student. `WHERE n.valoare >= 7` keeps any grade ≥ 7, so any student who has at least one: all 9 students with grades, not the 5 we are after.",
+            "ro": "**`WHERE valoare >= 7` înseamnă „cel puțin una”.** `WHERE` se aplică fiecărui rând de notă, nu fiecărui student. `WHERE n.valoare >= 7` păstrează orice notă ≥ 7, deci orice student care are măcar una: toți cei 9 studenți cu note, nu cei 5 căutați."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**MINUS on names merges namesakes.** On `(nume, prenume)` the two students Bodnar Ioana (116 and 119) become a single row: 4 rows instead of 5. Always put `nr_matricol` in both `SELECT`s.",
+            "ro": "**MINUS pe nume contopește omonimii.** Pe `(nume, prenume)` cei doi studenți Bodnar Ioana (116 și 119) devin un singur rând: 4 rânduri în loc de 5. Pune mereu `nr_matricol` în ambele `SELECT`-uri."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Rules for MINUS.** The two `SELECT`s must have the same number of columns (otherwise ORA-01789) and columns of the same type (otherwise ORA-01790). The whole row is compared, and `ORDER BY` only appears at the end, after the last `SELECT`.",
+            "ro": "**Reguli la MINUS.** Cele două `SELECT`-uri trebuie să aibă același număr de coloane (altfel ORA-01789) și coloane de același tip (altfel ORA-01790). Se compară rândul întreg, iar `ORDER BY` apare doar la sfârșit, după ultimul `SELECT`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s5",
+      "title": {
+        "en": "Existential and universal",
+        "ro": "Existențial și universal"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- cel puțin unul: join + DISTINCT\nSELECT DISTINCT s.nr_matricol, s.nume, s.prenume\nFROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol\nWHERE n.valoare = 10;"
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- toate (aici: n-au luat niciodată 10): „au note” MINUS „au un contraexemplu”\nSELECT s.nr_matricol, s.nume, s.prenume\nFROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol\nMINUS\nSELECT s.nr_matricol, s.nume, s.prenume\nFROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol\nWHERE n.valoare = 10;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "At least one",
+            "ro": "Cel puțin unul"
+          },
+          "content": {
+            "en": "A join and `WHERE` on the wanted condition, then `DISTINCT`: a student appears once, however many good grades he has. The first example gives 5 students.",
+            "ro": "Join și `WHERE` pe condiția dorită, apoi `DISTINCT`: un student apare o dată, oricâte note bune are. Primul exemplu dă 5 studenți."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "All",
+            "ro": "Toate"
+          },
+          "content": {
+            "en": "\"All satisfy the condition\" means \"none satisfies the opposite\". You write the list of those who have something, minus the list of those who have a counterexample. The second example gives 4 students (112, 117, 118, 119).",
+            "ro": "„Toate satisfac condiția” înseamnă „niciuna nu satisface contrariul”. Se scrie lista celor care au ceva, minus lista celor care au un contraexemplu. Al doilea exemplu dă 4 studenți (112, 117, 118, 119)."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Students with no grades",
+            "ro": "Studenții fără note"
+          },
+          "content": {
+            "en": "A student with no grades at all has no counterexample, so he \"passes\" any universal test. If the first list were the whole `studenti` table, the 4 students without grades would show up in the result. That is why the first list only contains students who have grades.",
+            "ro": "Un student fără nicio notă nu are niciun contraexemplu, deci „trece” orice test universal. Dacă prima listă ar fi toată tabela `studenti`, cei 4 studenți fără note ar apărea în rezultat. De aceea prima listă conține doar studenții care au note."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s6",
+      "title": {
+        "en": "WHERE valoare >= 7 is not enough",
+        "ro": "WHERE valoare >= 7 nu ajunge"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l23-r2",
+          "prompt": {
+            "en": "Why doesn't `WHERE valoare >= 7` mean \"all grades are at least 7\"?",
+            "ro": "De ce `WHERE valoare >= 7` nu înseamnă „toate notele sunt cel puțin 7”?"
+          },
+          "answer": {
+            "en": "Because `WHERE` judges one row at a time. For a student with grades 4 and 9, the row with 9 passes the filter, so the student stays even though he also has a 4. The filter keeps the rows with a grade ≥ 7, which expresses \"at least one\". For \"all\" you have to look for the counterexamples (grades below 7) and remove the students who have them.",
+            "ro": "Pentru că `WHERE` judecă un rând odată. Pentru un student cu notele 4 și 9, rândul cu 9 trece filtrul, deci studentul rămâne, deși are și un 4. Filtrul păstrează rândurile cu o notă ≥ 7, adică exprimă „cel puțin una”. Pentru „toate” trebuie să cauți contraexemplele (note sub 7) și să-i scoți pe cei care le au."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s7",
+      "title": {
+        "en": "All or at least one",
+        "ro": "Toate sau cel puțin una"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l23-q1",
+          "question": {
+            "en": "A classmate writes `WHERE n.valoare >= 7` for \"students with all grades ≥ 7\". What does it actually do?",
+            "ro": "Un coleg scrie `WHERE n.valoare >= 7` pentru „studenții cu toate notele ≥ 7”. Ce face de fapt?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Exactly what is needed: 5 students.",
+                "ro": "Exact ce trebuie: 5 studenți."
+              },
+              "correct": false,
+              "explain": {
+                "en": "The 5 only come from removing students with a counterexample. A plain `WHERE valoare >= 7` also lets through those with grades below 7, if they have one above as well.",
+                "ro": "Cei 5 se obțin doar scoțând studenții cu un contraexemplu. Un simplu `WHERE valoare >= 7` îi lasă și pe cei cu note sub 7, dacă au și una peste."
+              },
+              "misconception": "all-vs-some"
+            },
+            {
+              "text": {
+                "en": "It keeps students with at least one grade ≥ 7: all 9 students who have grades.",
+                "ro": "Păstrează studenții cu cel puțin o notă ≥ 7: toți cei 9 studenți care au note."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The condition applies to each grade row, so a student stays if at least one of his grades meets it.",
+                "ro": "Corect. Condiția se aplică fiecărui rând de notă, deci un student rămâne dacă măcar una dintre note o îndeplinește."
+              }
+            },
+            {
+              "text": {
+                "en": "It keeps only students whose lowest grade is 7.",
+                "ro": "Păstrează doar studenții a căror notă cea mai mică este 7."
+              },
+              "correct": false,
+              "explain": {
+                "en": "It compares nothing with the minimum. The filter judges row by row, without knowing what other grades the student has.",
+                "ro": "Nu compară nimic cu minimul. Filtrul judecă rând cu rând, fără să știe ce alte note are studentul."
+              },
+              "misconception": "all-vs-some"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s8",
+      "title": {
+        "en": "MINUS on names",
+        "ro": "MINUS pe nume"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l23-q2",
+          "question": {
+            "en": "You write \"have grades\" MINUS \"have a grade below 7\", but select only `nume, prenume` in both parts. How many rows do you get?",
+            "ro": "Scrii „au note” MINUS „au o notă sub 7”, dar selectezi doar `nume, prenume` în ambele părți. Câte rânduri obții?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "5 rows, like when you also select `nr_matricol`.",
+                "ro": "5 rânduri, ca atunci când selectezi și `nr_matricol`."
+              },
+              "correct": false,
+              "explain": {
+                "en": "Only with `nr_matricol` in the list do the two Bodnar stay as different rows. Without it they are identical.",
+                "ro": "Doar cu `nr_matricol` în listă cei doi Bodnar rămân rânduri diferite. Fără el sunt identici."
+              },
+              "misconception": "minus-key"
+            },
+            {
+              "text": {
+                "en": "9 rows: MINUS keeps every student with grades, without merging them.",
+                "ro": "9 rânduri: MINUS păstrează fiecare student cu note, fără să-i contopească."
+              },
+              "correct": false,
+              "explain": {
+                "en": "MINUS removes duplicates: the two Bodnar Ioana become a single row already in the first list, so 9 rows cannot come out.",
+                "ro": "MINUS elimină duplicatele: cei doi Bodnar Ioana devin un singur rând încă din prima listă, deci nu pot ieși 9 rânduri."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "4 rows: the two Bodnar Ioana merge into one.",
+                "ro": "4 rânduri: cei doi Bodnar Ioana se contopesc într-unul."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. MINUS compares the whole row and removes duplicates; students 116 and 119 have the same `(nume, prenume)`, so they become a single row.",
+                "ro": "Corect. MINUS compară rândul întreg și elimină duplicatele; studenții 116 și 119 au același `(nume, prenume)`, deci rămân un singur rând."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s9",
+      "title": {
+        "en": "The student with no grades",
+        "ro": "Studentul fără nicio notă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l23-q3",
+          "question": {
+            "en": "A student has no grades. Does he appear in \"(students with grades) MINUS (students with a grade below 7)\"?",
+            "ro": "Un student nu are nicio notă. Apare el în „(studenții cu note) MINUS (studenții cu o notă sub 7)”?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "No: he is not even in the first list.",
+                "ro": "Nu: nu se află nici în prima listă."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. MINUS can only remove rows that are in the first list, and he is not there. If the first list were the whole `studenti` table, the 4 students without grades would show up (9 rows).",
+                "ro": "Corect. MINUS poate scoate doar rânduri care sunt în prima listă, iar el nu e acolo. Dacă prima listă ar fi toată tabela `studenti`, cei 4 studenți fără note ar apărea (9 rânduri)."
+              }
+            },
+            {
+              "text": {
+                "en": "Yes: he has no grade below 7, so he meets the condition.",
+                "ro": "Da: nu are nicio notă sub 7, deci îndeplinește condiția."
+              },
+              "correct": false,
+              "explain": {
+                "en": "He would only appear if the first list also contained students without grades. Here the first list requires grades, so he is excluded from the start.",
+                "ro": "Ar apărea doar dacă prima listă ar conține și studenții fără note. Aici prima listă cere să aibă note, deci e exclus de la început."
+              },
+              "misconception": "all-vs-some"
+            },
+            {
+              "text": {
+                "en": "Yes: MINUS keeps any student who is missing from the second list.",
+                "ro": "Da: MINUS păstrează orice student care lipsește din a doua listă."
+              },
+              "correct": false,
+              "explain": {
+                "en": "MINUS removes rows from the first list and adds nothing from outside it. The student without grades is not in the first list, so he cannot reach the result.",
+                "ro": "MINUS scoate rânduri din prima listă și nu adaugă nimic din afara ei. Studentul fără note nu este în prima listă, deci nu poate ajunge în rezultat."
+              },
+              "misconception": "setop-rules"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s10",
+      "title": {
+        "en": "MINUS with an empty list",
+        "ro": "MINUS cu o listă goală"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l23-q4",
+          "question": {
+            "en": "What does `A MINUS B` return when `B` has no rows?",
+            "ro": "Ce întoarce `A MINUS B` când `B` nu are niciun rând?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "No rows.",
+                "ro": "Niciun rând."
+              },
+              "correct": false,
+              "explain": {
+                "en": "It would be empty if `B` contained every row of `A`. With `B` empty nothing is removed, so all of `A` stays.",
+                "ro": "Ar fi gol dacă `B` ar conține toate rândurile lui `A`. Cu `B` gol, MINUS nu scoate nimic, deci rămâne tot `A`."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "The rows of `A`, without duplicates.",
+                "ro": "Rândurile lui `A`, fără duplicate."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. There is nothing to remove, but MINUS removes duplicates anyway: `SELECT an FROM studenti MINUS …` with an empty list gives 3 rows, not 13.",
+                "ro": "Corect. Nu e nimic de scos, dar MINUS elimină oricum duplicatele: `SELECT an FROM studenti MINUS …` cu o listă goală dă 3 rânduri, nu 13."
+              }
+            },
+            {
+              "text": {
+                "en": "The rows of `A`, with duplicates kept, as in UNION ALL.",
+                "ro": "Rândurile lui `A`, cu duplicatele păstrate, ca la UNION ALL."
+              },
+              "correct": false,
+              "explain": {
+                "en": "MINUS always deduplicates, like UNION and INTERSECT. Only UNION ALL keeps duplicates.",
+                "ro": "MINUS deduplică întotdeauna, ca UNION și INTERSECT. Doar UNION ALL păstrează duplicatele."
+              },
+              "misconception": "setop-rules"
+            }
+          ],
+          "review": "bd-l09"
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s11",
+      "title": {
+        "en": "Courses with grades up to 8",
+        "ro": "Cursuri cu note cel mult 8"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l23-ex-4-11",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the names of the courses in which grades at most equal to 8 (<=8) were given.\n\nFor the app: show only the `titlu_curs` column.",
+            "ro": "Afișați denumirile cursurilor la care s-au pus note cel mult egale cu 8 (<=8).\n\nPentru aplicație: afișează doar coloana `titlu_curs`."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 11
+          },
+          "starter": "-- 1. Alege tabelele: cursuri (c) și note (n)\n-- 2. Leagă-le: cursuri -> note\n-- 3. Filtrează notele cel mult 8; fiecare curs apare o singură dată\nSELECT c.titlu_curs\nFROM cursuri c\n  JOIN note n ON n.id_curs = c.id_curs\nWHERE ",
+          "solution": "SELECT DISTINCT c.titlu_curs\nFROM cursuri c\n  JOIN note n ON n.id_curs = c.id_curs\nWHERE n.valoare <= 8",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Pick the tables and link them: you need the courses and their grades.",
+              "ro": "Alege tabelele și leagă-le: ai nevoie de cursuri și de notele lor."
+            },
+            {
+              "en": "Skeleton: `SELECT … c.titlu_curs FROM cursuri c JOIN note n ON … WHERE n.valoare …`.",
+              "ro": "Schelet: `SELECT … c.titlu_curs FROM cursuri c JOIN note n ON … WHERE n.valoare …`."
+            },
+            {
+              "en": "A course has several grades, so after the join it appears several times. How do you make each course appear only once?",
+              "ro": "Un curs are mai multe note, deci după join apare de mai multe ori. Cum faci ca fiecare curs să apară o singură dată?"
+            }
+          ],
+          "explain": {
+            "en": "This is the \"at least one\" version: a course reaches the result if at least one of its grades is ≤ 8. `DISTINCT` makes it appear only once. Result: 6 courses (Logica, Matematica, OOP, BD, Java, Tehnologii Web).",
+            "ro": "Aceasta este varianta „cel puțin una”: un curs ajunge în rezultat dacă măcar o notă a lui este ≤ 8. `DISTINCT` îl face să apară o singură dată. Rezultat: 6 cursuri (Logica, Matematica, OOP, BD, Java, Tehnologii Web)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l23-s12",
+      "title": {
+        "en": "Students with all grades ≥ 7",
+        "ro": "Studenții cu toate notele ≥ 7"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l23-ex-4-12",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the names of the students whose grades are all greater than or equal to 7.\n\nFor the app: show the columns `nr_matricol`, `nume`, `prenume`. Only students who have at least one grade count.",
+            "ro": "Afișați numele studenților care au toate notele mai mari ca 7 sau egale cu 7.\n\nPentru aplicație: afișează coloanele `nr_matricol`, `nume`, `prenume`. Contează doar studenții care au cel puțin o notă."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 12
+          },
+          "solution": "SELECT s.nr_matricol, s.nume, s.prenume\nFROM studenti s\n  JOIN note n ON n.nr_matricol = s.nr_matricol\nMINUS\nSELECT s.nr_matricol, s.nume, s.prenume\nFROM studenti s\n  JOIN note n ON n.nr_matricol = s.nr_matricol\nWHERE n.valoare < 7",
+          "check": {
+            "order": "any",
+            "mode": "set"
+          },
+          "hints": [
+            {
+              "en": "Turn the question around: \"all ≥ 7\" means \"none below 7\". You need two lists: those who have grades and those who have a counterexample.",
+              "ro": "Pune întrebarea pe dos: „toate ≥ 7” înseamnă „niciuna sub 7”. Ai nevoie de două liste: cei care au note și cei care au un contraexemplu."
+            },
+            {
+              "en": "Skeleton: `SELECT … FROM studenti s JOIN note n ON … MINUS SELECT … FROM studenti s JOIN note n ON … WHERE n.valoare …`.",
+              "ro": "Schelet: `SELECT … FROM studenti s JOIN note n ON … MINUS SELECT … FROM studenti s JOIN note n ON … WHERE n.valoare …`."
+            },
+            {
+              "en": "Put `nr_matricol` in both `SELECT`s: with `nume, prenume` alone, the two Bodnar Ioana merge and you get 4 rows instead of 5.",
+              "ro": "Pune `nr_matricol` în ambele `SELECT`-uri: cu `nume, prenume` singure, cei doi Bodnar Ioana se contopesc și obții 4 rânduri în loc de 5."
+            }
+          ],
+          "explain": {
+            "en": "\"All grades ≥ 7\" is written as the list of students with grades minus the list of those with a grade < 7. The key `nr_matricol` keeps namesake students distinct. Result: 5 students (111, 115, 116, 118, 119). Students without grades do not appear, because they are not in the first list.",
+            "ro": "„Toate notele ≥ 7” se scrie ca lista studenților cu note minus lista celor cu o notă < 7. Cheia `nr_matricol` păstrează distincți studenții omonimi. Rezultat: 5 studenți (111, 115, 116, 118, 119). Studenții fără note nu apar, fiindcă nu sunt în prima listă."
+          }
+        }
+      ]
+    }
+  ]
+}

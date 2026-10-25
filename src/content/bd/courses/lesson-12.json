@@ -1,0 +1,752 @@
+{
+  "meta": {
+    "id": "bd-l12",
+    "title": {
+      "en": "Lesson 12: Text functions II: CONCAT, LPAD and TRANSLATE",
+      "ro": "Lecția 12: Funcții text II: CONCAT, LPAD și TRANSLATE"
+    },
+    "shortTitle": {
+      "en": "L12: Text functions II",
+      "ro": "L12: Funcții text II"
+    },
+    "source": {
+      "en": "Databases, lab 3: row functions (UAIC)",
+      "ro": "Baze de date, laboratorul 3: funcții pe linie (UAIC)"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l12-s1",
+      "title": {
+        "en": "How do you swap i and a?",
+        "ro": "Cum schimbi i cu a și a cu i?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l12-r1",
+          "prompt": {
+            "en": "You want every letter \"i\" in the name \"Ciobotariu\" to become \"a\" and every \"a\" to become \"i\", simultaneously (the result should be \"Caobotirau\"). How would you do that in SQL? Write what you think, even if you do not know the right function.",
+            "ro": "Vrei ca în numele «Ciobotariu» toate literele «i» să devină «a» și toate «a» să devină «i», simultan (rezultatul ar trebui să fie «Caobotirau»). Cum ai face asta în SQL? Scrie ce crezi, chiar dacă nu cunoști funcția potrivită."
+          },
+          "answer": {
+            "en": "With **`TRANSLATE(nume, 'ia', 'ai')`**: it swaps each character of the first string with the one at the same position in the second, in a single pass. Two `REPLACE` calls one after the other do not work: the second one also sees the letters created by the first. Below you put the two versions side by side.",
+            "ro": "Cu **`TRANSLATE(nume, 'ia', 'ai')`**: schimbă fiecare caracter din primul șir cu cel de pe aceeași poziție din al doilea, într-o singură trecere. Două `REPLACE` puse unul după altul nu merg: al doilea vede și literele create de primul. Mai jos pui cele două variante una lângă alta."
+          },
+          "placeholder": {
+            "en": "How would you do it?",
+            "ro": "Cum ai face?"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nr_matricol, nume FROM studenti WHERE nume IN ('Ciobotariu', 'Archip', 'Bodnar')"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s2",
+      "title": {
+        "en": "LPAD pads on the left",
+        "ro": "LPAD umple la stânga"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The strip below holds the text \"Pagina\" (6 characters). `LPAD('Pagina', 15, '*.')` stretches it to 15 characters by adding on the left. Guess before you press: does the pattern `*.` appear once, or does it repeat until the space is filled?",
+            "ro": "Banda de jos conține textul «Pagina» (6 caractere). `LPAD('Pagina', 15, '*.')` îl lungește la 15 caractere, adăugând în stânga. Ghicește înainte să apeși: modelul `*.` apare o singură dată sau se repetă până se umple locul?"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l12-viz1",
+          "widget": "char-strips",
+          "predict": true,
+          "props": {
+            "mode": "pad",
+            "input": "Pagina",
+            "fn": "LPAD",
+            "len": 15,
+            "fill": "*."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s3",
+      "title": {
+        "en": "LPAD cuts, if the room is too small",
+        "ro": "LPAD taie, dacă locul e prea mic"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "And if the requested length is **smaller** than the text? `LPAD('Pagina', 3, '*')`. Guess what is left of \"Pagina\".",
+            "ro": "Și dacă lungimea cerută e **mai mică** decât textul? `LPAD('Pagina', 3, '*')`. Ghicește ce rămâne din «Pagina»."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l12-viz2",
+          "widget": "char-strips",
+          "predict": true,
+          "props": {
+            "mode": "pad",
+            "input": "Pagina",
+            "fn": "LPAD",
+            "len": 3,
+            "fill": "*"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s4",
+      "title": {
+        "en": "Chained REPLACE against TRANSLATE",
+        "ro": "REPLACE în lanț contra TRANSLATE"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Two strips, the same task: swap \"i\" and \"a\" in \"Ciobotariu\". On the first one `REPLACE` runs twice, on the second `TRANSLATE`. Guess the results before every step.",
+            "ro": "Două benzi, aceeași sarcină: schimbă «i» cu «a» și «a» cu «i» în «Ciobotariu». Pe prima rulează `REPLACE` de două ori, pe a doua `TRANSLATE`. Ghicește rezultatele înainte de fiecare pas."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l12-viz3",
+          "widget": "char-strips",
+          "predict": true,
+          "props": {
+            "mode": "swap",
+            "input": "Ciobotariu",
+            "from": "ia",
+            "to": "ai"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s5",
+      "title": {
+        "en": "TRANSLATE on all the students",
+        "ro": "TRANSLATE pe toți studenții"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`TRANSLATE`, like any row function, is called once for every row.",
+            "ro": "`TRANSLATE` se apelează, ca orice funcție pe linie, o dată pe fiecare rând."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l12-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, TRANSLATE(nume, 'ae', 'ea') FROM studenti",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume"
+          ],
+          "say": {
+            "from": {
+              "en": "The 13 students, with their names.",
+              "ro": "Cei 13 studenți, cu numele lor."
+            },
+            "select": {
+              "en": "Every name goes through `TRANSLATE`: \"Popescu\" becomes \"Popascu\" and \"Prelipcean\" becomes \"Pralipcaen\" (e and a swap places). \"Archip\" stays \"Archip\": it has no lowercase a and no e, and the capital \"A\" is not touched, because TRANSLATE tells a from A.",
+              "ro": "Fiecare nume trece prin `TRANSLATE`: «Popescu» devine «Popascu», iar «Prelipcean» devine «Pralipcaen» (e și a își schimbă locul). «Archip» rămâne «Archip»: nu are a mic și nici e, iar «A» mare nu se atinge, pentru că TRANSLATE face diferența între a mic și A mare."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s6",
+      "title": {
+        "en": "LPAD that cuts, and the CHAR padding",
+        "ro": "LPAD care taie și umplutura lui CHAR"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**LPAD and RPAD do not only pad, they also cut.** If the requested length is smaller than the text, the beginning of it stays: `LPAD('Pagina', 3, '*')` and `RPAD('Pagina', 3, '*')` both give **Pag**. If the third argument is missing, the padding is spaces.",
+            "ro": "**LPAD și RPAD nu doar completează, ci și taie.** Dacă lungimea cerută e mai mică decât textul, rămâne începutul lui: `LPAD('Pagina', 3, '*')` și `RPAD('Pagina', 3, '*')` dau amândouă **Pag**. Dacă lipsește al treilea argument, se completează cu spații."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**The padding of CHAR stays.** `LPAD(nume, 12, '*')` for \"Buraga\" from `profesori` gives 2 stars followed by \"Buraga\" with the 4 spaces of the CHAR (12 characters in total), not 6 stars and \"Buraga\". Put in `TRIM(nume)` if you want only the letters.",
+            "ro": "**Umplutura lui CHAR rămâne.** `LPAD(nume, 12, '*')` pentru «Buraga» din `profesori` dă 2 steluțe urmate de «Buraga» cu cele 4 spații ale lui CHAR (12 caractere în total), nu 6 steluțe și «Buraga». Pune `TRIM(nume)` dacă vrei doar litere."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s7",
+      "title": {
+        "en": "Chained REPLACE, empty TRANSLATE and CONCAT with three arguments",
+        "ro": "REPLACE în lanț, TRANSLATE gol și CONCAT cu trei argumente"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Two chained REPLACE calls spoil the swap.** `REPLACE(REPLACE('Ciobotariu', 'i', 'a'), 'a', 'i')` gives \"Ciobotiriu\": the first step made \"Caobotarau\", and the second turned every \"a\" back into \"i\", including the ones the first step had just created. `TRANSLATE('Ciobotariu', 'ia', 'ai')` gives \"Caobotirau\". And `REPLACE('Ciobotariu', 'ia', 'ai')` changes nothing, because the string \"ia\" does not occur in the name.",
+            "ro": "**Două REPLACE în lanț strică schimbul.** `REPLACE(REPLACE('Ciobotariu', 'i', 'a'), 'a', 'i')` dă «Ciobotiriu»: primul pas a făcut «Caobotarau», iar al doilea a transformat la loc în «i» toate «a»-urile, inclusiv pe cele create de primul pas. `TRANSLATE('Ciobotariu', 'ia', 'ai')` dă «Caobotirau». Iar `REPLACE('Ciobotariu', 'ia', 'ai')` nu schimbă nimic, pentru că șirul «ia» nu apare în nume."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**TRANSLATE with an empty third argument gives NULL**, not the text without the letters: `TRANSLATE('Ciobotariu', 'ia', '')` is NULL, because in Oracle an empty string is NULL. To delete letters you use `REPLACE('Ciobotariu', 'i')` (\"Cobotaru\"). If the second argument is longer than the third, the letters without a partner are deleted: `TRANSLATE('Ciobotariu', 'ia', 'a')` is \"Caobotrau\".",
+            "ro": "**TRANSLATE cu al treilea argument gol dă NULL**, nu textul fără litere: `TRANSLATE('Ciobotariu', 'ia', '')` este NULL, pentru că în Oracle un șir gol este NULL. Ca să ștergi litere folosești `REPLACE('Ciobotariu', 'i')` («Cobotaru»). Dacă al doilea argument e mai lung decât al treilea, literele fără pereche se șterg: `TRANSLATE('Ciobotariu', 'ia', 'a')` este «Caobotrau»."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**CONCAT takes exactly two arguments.** `CONCAT('a', 'b', 'c')` gives `ORA-00909: invalid number of arguments`. For three pieces you nest the calls or use `||`, which does the same thing.",
+            "ro": "**CONCAT primește exact două argumente.** `CONCAT('a', 'b', 'c')` dă `ORA-00909: invalid number of arguments`. Pentru trei bucăți imbrici apelurile sau folosești `||`, care face același lucru."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s8",
+      "title": {
+        "en": "Padding and replacing functions in a query",
+        "ro": "Funcțiile de umplere și înlocuire într-o interogare"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT CONCAT(CONCAT('Ana', ' '), 'Maria') FROM DUAL;   -- Ana Maria\nSELECT LPAD('Pagina', 15, '*.') FROM DUAL;                 -- *.*.*.*.*Pagina\nSELECT RPAD('Pagina', 15, '*.') FROM DUAL;                 -- Pagina*.*.*.*.*\nSELECT LPAD('Pagina', 3, '*') FROM DUAL;                   -- Pag\nSELECT REPLACE('Andrei', 'i', 'ea') FROM DUAL;             -- Andreea\nSELECT TRANSLATE('Ciobotariu', 'ia', 'ai') FROM DUAL;     -- Caobotirau\nSELECT TRIM(LEADING '0' FROM '00010230') FROM DUAL;        -- 10230"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "CONCAT, LPAD, RPAD",
+            "ro": "CONCAT, LPAD, RPAD"
+          },
+          "content": {
+            "en": "`CONCAT(a, b)` joins two strings, like `a || b`; nest it for more pieces. `LPAD / RPAD (text, n, pattern)` bring the text to exactly n characters, padding on the left or right with the repeated pattern (spaces without a pattern) and cutting a longer text.",
+            "ro": "`CONCAT(a, b)` lipește două șiruri, ca `a || b`; pentru mai multe bucăți se imbrică. `LPAD / RPAD (text, n, model)` aduc textul la exact n caractere, completând la stânga sau la dreapta cu modelul repetat (cu spații fără model) și tăind un text mai lung."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "REPLACE and TRANSLATE",
+            "ro": "REPLACE și TRANSLATE"
+          },
+          "content": {
+            "en": "`REPLACE(text, search, new)` replaces a **whole string** with another string. `TRANSLATE(text, from, to)` replaces **character by character**: the k-th character of `from` becomes the k-th of `to`.",
+            "ro": "`REPLACE(text, de_cautat, nou)` înlocuiește un **șir întreg** cu alt șir. `TRANSLATE(text, din, în)` înlocuiește **caracter cu caracter**: al k-lea caracter din `din` devine al k-lea din `în`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "TRIM with LEADING / TRAILING / BOTH",
+            "ro": "TRIM cu LEADING / TRAILING / BOTH"
+          },
+          "content": {
+            "en": "`TRIM(LEADING '0' FROM s)` removes every occurrence of the character at the start, `TRAILING` at the end, `BOTH` (the default) at both ends.",
+            "ro": "`TRIM(LEADING '0' FROM s)` scoate toate aparițiile caracterului de la început, `TRAILING` de la sfârșit, `BOTH` (implicit) de la ambele capete."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s9",
+      "title": {
+        "en": "Why does it not work with two REPLACE calls?",
+        "ro": "De ce nu merge cu două REPLACE?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l12-r2",
+          "prompt": {
+            "en": "Why do two `REPLACE` calls in a row not swap i and a, while `TRANSLATE` does?",
+            "ro": "De ce două `REPLACE` unul după altul nu schimbă i cu a și a cu i, dar `TRANSLATE` da?"
+          },
+          "answer": {
+            "en": "Because the second `REPLACE` works on the result of the first. After the first step all the \"i\" letters became \"a\", so the text holds both the old and the new \"a\" letters, and the second step turns all of them into \"i\". `TRANSLATE` goes through the text only once and changes each character by the `from` → `to` table, without looking at what it already changed.",
+            "ro": "Pentru că al doilea `REPLACE` lucrează pe rezultatul primului. După primul pas toate «i» au devenit «a», deci în text sunt și «a»-urile vechi, și cele noi, iar al doilea pas le face pe toate «i». `TRANSLATE` parcurge textul o singură dată și schimbă fiecare caracter după tabelul `din` → `în`, fără să se uite la ce a schimbat deja."
+          },
+          "placeholder": {
+            "en": "Explain in your own words",
+            "ro": "Explică în cuvintele tale"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s10",
+      "title": {
+        "en": "LPAD with a pattern",
+        "ro": "LPAD cu model"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l12-q1",
+          "question": {
+            "en": "What does `LPAD('Pagina', 15, '*.')` return?",
+            "ro": "Ce întoarce `LPAD('Pagina', 15, '*.')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "*.*.*.*.*Pagina",
+                "ro": "*.*.*.*.*Pagina"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The pattern `*.` repeats on the left until the text reaches 15 characters: 9 of padding plus the 6 of \"Pagina\".",
+                "ro": "Modelul `*.` se repetă în stânga până când textul ajunge la 15 caractere: 9 de completare plus cele 6 ale lui «Pagina»."
+              }
+            },
+            {
+              "text": {
+                "en": "Pagina*.*.*.*.*",
+                "ro": "Pagina*.*.*.*.*"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would be `RPAD`. LPAD (left) adds on the left, RPAD (right) on the right.",
+                "ro": "Asta ar fi `RPAD`. LPAD (left) adaugă în stânga, RPAD (right) în dreapta."
+              },
+              "misconception": "pad-truncate"
+            },
+            {
+              "text": {
+                "en": "*.Pagina",
+                "ro": "*.Pagina"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The pattern is not used just once: it repeats until the length is exactly 15.",
+                "ro": "Modelul nu se folosește o singură dată: se repetă până când lungimea ajunge exact la 15."
+              },
+              "misconception": "pad-truncate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s11",
+      "title": {
+        "en": "A shorter LPAD",
+        "ro": "LPAD cu lungime mai mică"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l12-q2",
+          "question": {
+            "en": "What does `LPAD('Pagina', 3, '*')` return?",
+            "ro": "Ce întoarce `LPAD('Pagina', 3, '*')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Pag",
+                "ro": "Pag"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The requested length (3) is smaller than the text, so LPAD cuts it and keeps the beginning: Pag.",
+                "ro": "Lungimea cerută (3) e mai mică decât a textului, deci LPAD îl taie și păstrează începutul: Pag."
+              }
+            },
+            {
+              "text": {
+                "en": "Pagina",
+                "ro": "Pagina"
+              },
+              "correct": false,
+              "explain": {
+                "en": "LPAD never leaves the result longer than n: if the text is too long, it cuts it.",
+                "ro": "LPAD nu lasă niciodată rezultatul mai lung decât n: dacă textul e prea lung, îl taie."
+              },
+              "misconception": "pad-truncate"
+            },
+            {
+              "text": {
+                "en": "ina",
+                "ro": "ina"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The cut is made from the right, not from the left: the beginning of the text stays, not the end.",
+                "ro": "Tăierea se face de la dreapta, nu de la stânga: rămâne începutul textului, nu sfârșitul."
+              },
+              "misconception": "pad-truncate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s12",
+      "title": {
+        "en": "The letter swap",
+        "ro": "Schimbul de litere"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l12-q3",
+          "question": {
+            "en": "Which expression swaps all \"i\" with \"a\" and all \"a\" with \"i\" in `nume`, simultaneously?",
+            "ro": "Care expresie schimbă în `nume` toate «i» cu «a» și toate «a» cu «i», simultan?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "TRANSLATE(nume, 'ia', 'ai')",
+                "ro": "TRANSLATE(nume, 'ia', 'ai')"
+              },
+              "correct": true,
+              "explain": {
+                "en": "TRANSLATE swaps character by character, in a single pass: i becomes a, a becomes i.",
+                "ro": "TRANSLATE face schimbul caracter cu caracter, într-o singură trecere: i devine a, a devine i."
+              }
+            },
+            {
+              "text": {
+                "en": "REPLACE(REPLACE(nume, 'i', 'a'), 'a', 'i')",
+                "ro": "REPLACE(REPLACE(nume, 'i', 'a'), 'a', 'i')"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The second REPLACE also sees the \"a\" letters created by the first and turns them all into \"i\". For \"Ciobotariu\" you would get \"Ciobotiriu\".",
+                "ro": "Al doilea REPLACE vede și «a»-urile create de primul și le face pe toate «i». La «Ciobotariu» ai primi «Ciobotiriu»."
+              },
+              "misconception": "replace-translate"
+            },
+            {
+              "text": {
+                "en": "REPLACE(nume, 'ia', 'ai')",
+                "ro": "REPLACE(nume, 'ia', 'ai')"
+              },
+              "correct": false,
+              "explain": {
+                "en": "REPLACE looks for the whole string \"ia\", not for the letters separately. \"ia\" does not occur in \"Ciobotariu\", so nothing changes.",
+                "ro": "REPLACE caută șirul întreg «ia», nu literele separat. În «Ciobotariu» nu apare «ia», deci nu se schimbă nimic."
+              },
+              "misconception": "replace-translate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s13",
+      "title": {
+        "en": "LPAD on CHAR",
+        "ro": "LPAD pe CHAR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l12-q4",
+          "question": {
+            "en": "`nume` in `profesori` is `CHAR(10)`. What does `LPAD(nume, 12, '*')` return for \"Buraga\"?",
+            "ro": "`nume` din `profesori` este `CHAR(10)`. Ce întoarce `LPAD(nume, 12, '*')` pentru «Buraga»?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "2 stars, then \"Buraga\" and 4 spaces (12 characters in total)",
+                "ro": "2 steluțe, apoi «Buraga» și 4 spații (12 caractere în total)"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The CHAR(10) value already has 10 characters (Buraga + 4 spaces), so LPAD adds only 2 stars in front.",
+                "ro": "Valoarea din CHAR(10) are deja 10 caractere (Buraga + 4 spații), așa că LPAD adaugă doar 2 steluțe în față."
+              }
+            },
+            {
+              "text": {
+                "en": "6 stars and \"Buraga\", without spaces (12 characters in total)",
+                "ro": "6 steluțe și «Buraga», fără spații (12 caractere în total)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You forgot the invisible padding. The name has 10 characters, not 6, so only 2 are missing up to 12.",
+                "ro": "Ai uitat umplutura invizibilă. Numele are 10 caractere, nu 6, deci lipsesc doar 2 caractere până la 12."
+              },
+              "misconception": "char-pad"
+            }
+          ],
+          "review": "bd-l11"
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s14",
+      "title": {
+        "en": "TRANSLATE with an empty list",
+        "ro": "TRANSLATE cu lista goală"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l12-q5",
+          "question": {
+            "en": "What does `TRANSLATE('Ciobotariu', 'ia', '')` return?",
+            "ro": "Ce întoarce `TRANSLATE('Ciobotariu', 'ia', '')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`Cobotru`: the letters i and a are removed",
+                "ro": "`Cobotru`: literele i și a sunt șterse"
+              },
+              "correct": false,
+              "misconception": "replace-translate",
+              "explain": {
+                "en": "That would happen if `''` were an empty string. In Oracle `''` is NULL, and TRANSLATE with a NULL argument gives NULL.",
+                "ro": "Așa ar fi dacă `''` ar fi un șir gol. În Oracle `''` este NULL, iar TRANSLATE cu un argument NULL dă NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "`Ciobotariu`, unchanged",
+                "ro": "`Ciobotariu`, neschimbat"
+              },
+              "correct": false,
+              "misconception": "replace-translate",
+              "explain": {
+                "en": "An empty list does not mean \"no change\": `''` is NULL, and a function with a NULL argument gives NULL.",
+                "ro": "Lista goală nu înseamnă „nicio schimbare”: `''` este NULL, iar o funcție cu argument NULL dă NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. In Oracle `''` is NULL, so the result is NULL. To remove the letters, you put one extra character in both lists: `TRANSLATE('Ciobotariu', 'xia', 'x')` gives `Cobotru`.",
+                "ro": "Corect. În Oracle `''` este NULL, deci rezultatul e NULL. Ca să ștergi literele, pui un caracter în plus în ambele liste: `TRANSLATE('Ciobotariu', 'xia', 'x')` dă `Cobotru`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s15",
+      "title": {
+        "en": "The text with CONCAT",
+        "ro": "Textul cu CONCAT"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l12-ex-3-4",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Using the concatenation function, get for each student the text 'Elevul <prenume> este in grupa <grupa>' (that is, 'The pupil <first name> is in group <group>', keeping the Romanian wording).",
+            "ro": "Utilizând functia de concatenare, obțineți pentru fiecare student textul 'Elevul <prenume> este in grupa <grupa>'."
+          },
+          "official": {
+            "lab": 3,
+            "ex": 4
+          },
+          "starter": "-- nume, un spațiu, prenume: CONCAT(CONCAT(nume, ' '), prenume)\n-- aici: 'Elevul ' + prenumele, apoi ' este in grupa ', apoi grupa\nSELECT \nFROM studenti",
+          "solution": "SELECT CONCAT(CONCAT(CONCAT('Elevul ', prenume), ' este in grupa '), grupa) FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "The text has three fixed pieces and two values from the table (`prenume` and `grupa`). CONCAT joins only two strings at a time.",
+              "ro": "Textul are trei bucăți fixe și două valori din tabel (`prenume` și `grupa`). CONCAT lipește doar două șiruri odată."
+            },
+            {
+              "en": "CONCAT(CONCAT(CONCAT('Elevul ', ___), ' este in grupa '), ___)",
+              "ro": "CONCAT(CONCAT(CONCAT('Elevul ', ___), ' este in grupa '), ___)"
+            },
+            {
+              "en": "`CONCAT` with three arguments gives `ORA-00909`. Nest them: the result of one CONCAT goes in as the first argument of the next. Mind the spaces: \"Elevul \" has a space at the end, and \" este in grupa \" has spaces at both ends. You can get the same effect with `||`, but the exercise asks for the function.",
+              "ro": "`CONCAT` cu trei argumente dă `ORA-00909`. Imbrică: rezultatul unui CONCAT intră ca prim argument în următorul. Atenție la spații: «Elevul » are un spațiu la sfârșit, iar « este in grupa » are spații la ambele capete. Pentru același efect poți scrie și cu `||`, dar exercițiul cere funcția."
+            }
+          ],
+          "explain": {
+            "en": "The solution: `CONCAT(CONCAT(CONCAT('Elevul ', prenume), ' este in grupa '), grupa)`. Result: 13 rows, for example \"Elevul Bogdan este in grupa A2\". With `||` it would be `'Elevul ' || prenume || ' este in grupa ' || grupa`, the same text.",
+            "ro": "Soluția: `CONCAT(CONCAT(CONCAT('Elevul ', prenume), ' este in grupa '), grupa)`. Rezultat: 13 rânduri, de exemplu «Elevul Bogdan este in grupa A2». Cu `||` ar fi `'Elevul ' || prenume || ' este in grupa ' || grupa`, același text."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s16",
+      "title": {
+        "en": "The grant with $",
+        "ro": "Bursa cu $"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l12-ex-3-5",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the value of the grant on 10 characters, padding the numeric value with the character $.\n\nIn the app: the $ characters go in front of the digits, so the grant is flush to the right.",
+            "ro": "Afisati valoarea bursei pe 10 caractere, completand valoarea numerica cu caracterul $.\n\nÎn aplicație: caracterele $ se pun în fața cifrelor, deci bursa este lipită de dreapta."
+          },
+          "official": {
+            "lab": 3,
+            "ex": 5
+          },
+          "starter": "SELECT \nFROM studenti",
+          "solution": "SELECT LPAD(bursa, 10, '$') FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "For every student the grant must take exactly 10 characters. What is missing is filled with $, in front of the digits.",
+              "ro": "Pentru fiecare student, bursa trebuie să ocupe exact 10 caractere. Ce lipsește se umple cu $, în fața cifrelor."
+            },
+            {
+              "en": "SELECT ___(bursa, ___, '___')\nFROM studenti;",
+              "ro": "SELECT ___(bursa, ___, '___')\nFROM studenti;"
+            },
+            {
+              "en": "`LPAD(text, length, pattern)` glues the pattern on the left until it reaches the length; it works on a number too, which becomes text. For students without a grant (NULL) the result stays NULL: no $$$$$$$$$$ appears.",
+              "ro": "`LPAD(text, lungime, model)` lipește modelul la stânga până ajunge la lungime; merge și pe un număr, care devine text. La studenții fără bursă (NULL) rezultatul rămâne NULL: nu apar $$$$$$$$$$."
+            }
+          ],
+          "explain": {
+            "en": "The solution: `LPAD(bursa, 10, '$')`. Result: 13 rows; five of the form `$$$$$$$450` and eight NULL (LPAD of NULL is NULL).",
+            "ro": "Soluția: `LPAD(bursa, 10, '$')`. Rezultat: 13 rânduri; cinci de forma `$$$$$$$450` și opt NULL (LPAD de NULL este NULL)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s17",
+      "title": {
+        "en": "Swapping i and a",
+        "ro": "Schimbul i și a"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l12-ex-3-10",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the names of all students, replacing the occurrence of the letter i with a and the occurrence of the letter a with i.",
+            "ro": "Afişaţi numele tuturor studenților înlocuind apariţia literei i cu a şi apariţia literei a cu i."
+          },
+          "official": {
+            "lab": 3,
+            "ex": 10
+          },
+          "solution": "SELECT TRANSLATE(nume, 'ia', 'ai') FROM studenti",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Two replacements that must happen at the same time, not one after the other.",
+              "ro": "Două înlocuiri care trebuie să se întâmple în același timp, nu una după alta."
+            },
+            {
+              "en": "SELECT ___(nume, '__', '__')\nFROM studenti;",
+              "ro": "SELECT ___(nume, '__', '__')\nFROM studenti;"
+            },
+            {
+              "en": "The trap: two chained `REPLACE` calls spoil the result (the second sees the letters created by the first). `TRANSLATE(text, 'ia', 'ai')` turns i into a and a into i in a single pass. Capital letters do not change: \"A\" is not \"a\".",
+              "ro": "Capcana: două `REPLACE` în lanț strică rezultatul (al doilea vede literele create de primul). `TRANSLATE(text, 'ia', 'ai')` schimbă i în a și a în i într-o singură trecere. Literele mari nu se schimbă: «A» nu este «a»."
+            }
+          ],
+          "explain": {
+            "en": "The solution: `TRANSLATE(nume, 'ia', 'ai')`. Result: 13 rows, for example \"Ciobotariu\" becomes \"Caobotirau\". \"Antonie\" becomes \"Antonae\": the capital \"A\" stays and the i becomes a.",
+            "ro": "Soluția: `TRANSLATE(nume, 'ia', 'ai')`. Rezultat: 13 rânduri, de exemplu «Ciobotariu» devine «Caobotirau». «Antonie» devine «Antonae»: «A» mare rămâne, iar i-ul devine a."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l12-s18",
+      "title": {
+        "en": "Stars to the right",
+        "ro": "Steluțe la dreapta"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l12-ex-3-13",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "For the students with a grant (only for them) show the student's name and the grant in stars: each star is worth 50 RON. In the table, align the stars to the right.\n\nIn the app: the star column is 9 wide (the largest grant, 450 RON, means 9 stars). All values have the same length, with the stars flush to the right.",
+            "ro": "Pentru studentii bursieri (doar pentru ei) afisati numele studentului si bursa in stelute: fiecare steluta valoreaza 50 RON. In tabel, alineati stelutele la dreapta.\n\nÎn aplicație: coloana de steluțe are lățimea 9 (cea mai mare bursă, 450 RON, înseamnă 9 steluțe). Toate valorile au aceeași lungime, cu steluțele lipite de dreapta."
+          },
+          "official": {
+            "lab": 3,
+            "ex": 13
+          },
+          "solution": "SELECT nume, LPAD(RPAD('*', bursa / 50, '*'), 9) FROM studenti WHERE bursa IS NOT NULL",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Three things: you keep only the students with a grant; for each you build a string of bursa / 50 stars; you push it to the right, on a fixed width.",
+              "ro": "Trei lucruri: păstrezi doar studenții cu bursă; pentru fiecare construiești un șir de bursa / 50 steluțe; îl lipești la dreapta, pe lățime fixă."
+            },
+            {
+              "en": "SELECT nume, LPAD(RPAD('*', ___, '*'), ___)\nFROM studenti\nWHERE bursa ___;",
+              "ro": "SELECT nume, LPAD(RPAD('*', ___, '*'), ___)\nFROM studenti\nWHERE bursa ___;"
+            },
+            {
+              "en": "`RPAD('*', n, '*')` builds n stars (a single character padded up to length n). `LPAD(string, 9)` then puts spaces on the left up to 9 characters: that is how you align to the right. Without `WHERE bursa IS NOT NULL` the 8 students without a grant would show up too, with NULL.",
+              "ro": "`RPAD('*', n, '*')` construiește n steluțe (un singur caracter completat până la lungimea n). `LPAD(șir, 9)` pune apoi spații în stânga până la 9 caractere: așa se aliniază la dreapta. Fără `WHERE bursa IS NOT NULL` ar apărea și cei 8 studenți fără bursă, cu NULL."
+            }
+          ],
+          "explain": {
+            "en": "The solution: `LPAD(RPAD('*', bursa / 50, '*'), 9)` with `WHERE bursa IS NOT NULL`. Result: 5 rows; 450 means 9 stars, 350 means 7 stars with 2 spaces in front, 250 means 5 stars with 4 spaces in front.",
+            "ro": "Soluția: `LPAD(RPAD('*', bursa / 50, '*'), 9)` cu `WHERE bursa IS NOT NULL`. Rezultat: 5 rânduri; 450 înseamnă 9 steluțe, 350 înseamnă 7 steluțe cu 2 spații în față, 250 înseamnă 5 steluțe cu 4 spații în față."
+          }
+        }
+      ]
+    }
+  ]
+}

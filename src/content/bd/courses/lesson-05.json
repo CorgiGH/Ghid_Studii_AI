@@ -1,0 +1,606 @@
+{
+  "meta": {
+    "id": "bd-l05",
+    "title": {
+      "en": "Lesson 5: NULL in WHERE, IS NULL and three-valued logic",
+      "ro": "Lecția 5: NULL în WHERE, IS NULL și logica cu trei valori"
+    },
+    "shortTitle": {
+      "en": "L5: NULL",
+      "ro": "L5: NULL"
+    },
+    "source": {
+      "en": "Databases lab 2, UAIC (Oracle SQL); queries checked on Oracle 11g",
+      "ro": "Laboratorul 2 de Baze de date, UAIC (Oracle SQL); interogări verificate pe Oracle 11g"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l05-s1",
+      "title": {
+        "en": "How do you look for something that is missing?",
+        "ro": "Cum cauți ceva care lipsește?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l05-reflect-pre",
+          "prompt": {
+            "en": "How many students do not get a scholarship? A colleague writes `WHERE bursa = NULL`. What do you think his query returns?",
+            "ro": "Câți studenți nu iau bursă? Un coleg scrie `WHERE bursa = NULL`. Ce crezi că întoarce interogarea lui?"
+          },
+          "answer": {
+            "en": "8 students have no scholarship (they hold NULL in the column). Your colleague's query returns no rows, yet gives no error. NULL means \"unknown\", and \"unknown = unknown\" does not become \"true\". The correct test is `bursa IS NULL`.",
+            "ro": "8 studenți nu au bursă (în coloană au NULL). Interogarea colegului nu întoarce niciun rând, dar nici nu dă eroare. NULL înseamnă «nu se știe», iar «nu se știe = nu se știe» nu devine «adevărat». Testul corect este `bursa IS NULL`."
+          },
+          "placeholder": {
+            "en": "Write your answer here…",
+            "ro": "Scrie-ți răspunsul aici…"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nume, prenume, an, bursa FROM studenti ORDER BY nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s2",
+      "title": {
+        "en": "Three possible answers: true, false, unknown",
+        "ro": "Trei răspunsuri posibile: adevărat, fals, necunoscut"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Until now every row got a \"yes\" or a \"no\". With NULL a third answer appears: **unknown** (grey). For a student without a scholarship, the question \"bursa > 300?\" has no answer, because nobody knows the amount. **Tick the rows that pass.**",
+            "ro": "Până acum fiecare rând primea răspuns «da» sau «nu». Cu NULL apare un al treilea răspuns: **necunoscut** (gri). Pentru un student fără bursă, întrebarea «bursa > 300?» nu are răspuns, fiindcă nu se știe cât e bursa. **Bifează rândurile care trec.**"
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l05-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, an, bursa FROM studenti WHERE bursa > 300",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true,
+              "tri": true
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "an",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "We start with 13 rows.",
+              "ro": "Pornim cu 13 rânduri."
+            },
+            "where": {
+              "en": "Green: the scholarship is above 300 (4 rows). Red: it is known and not above 300 (1 row, Pintescu). Grey: the scholarship is NULL, so the answer is unknown (8 rows). WHERE keeps only the green ones.",
+              "ro": "Verde: bursa e peste 300 (4 rânduri). Roșu: bursa e cunoscută și nu depășește 300 (1 rând, Pintescu). Gri: bursa e NULL, deci răspunsul e necunoscut (8 rânduri). WHERE păstrează doar verdele."
+            },
+            "select": {
+              "en": "We show the requested columns.",
+              "ro": "Afișăm coloanele cerute."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s3",
+      "title": {
+        "en": "What does NOT do to unknown?",
+        "ro": "Ce face NOT cu necunoscutul?"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Now we negate the condition: `NOT (bursa > 300)`. If `bursa > 300` kept 4 rows out of 13, you might guess NOT gives you the other 9. **Predict, then check.**",
+            "ro": "Acum negăm condiția: `NOT (bursa > 300)`. Dacă `bursa > 300` a păstrat 4 rânduri din 13, ghicești că NOT îți aduce celelalte 9? **Prezice, apoi verifică.**"
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l05-qm2",
+          "dataset": "facultate",
+          "sql": "SELECT nume, an, bursa FROM studenti WHERE NOT (bursa > 300)",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true,
+              "tri": true
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "an",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "The same 13 rows.",
+              "ro": "Aceleași 13 rânduri."
+            },
+            "where": {
+              "en": "NOT turns green into red and red into green, but **grey stays grey**: the opposite of \"unknown\" is still unknown. Only one row passes: Pintescu, with 250. The 8 rows with a NULL scholarship are missing from both results.",
+              "ro": "NOT schimbă verdele în roșu și roșul în verde, dar **gri rămâne gri**: opusul lui «necunoscut» tot necunoscut este. Trece un singur rând: Pintescu, cu 250. Cele 8 rânduri cu bursa NULL lipsesc din ambele rezultate."
+            },
+            "select": {
+              "en": "We show the requested columns.",
+              "ro": "Afișăm coloanele cerute."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s4",
+      "title": {
+        "en": "= NULL finds nothing",
+        "ro": "= NULL nu găsește nimic"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "`bursa = NULL` and `bursa <> NULL` never find anything and give no error: a comparison with NULL is always \"unknown\". The only test for a missing value is **`IS NULL`** (and its opposite, **`IS NOT NULL`**).",
+            "ro": "`bursa = NULL` și `bursa <> NULL` nu găsesc niciodată nimic, nici eroare nu dau: comparația cu NULL este mereu «necunoscut». Singurul test pentru o valoare lipsă este **`IS NULL`** (și opusul lui, **`IS NOT NULL`**)."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, bursa FROM studenti WHERE bursa IS NULL;"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "The official lab page says `NULL = NULL` would be FALSE. In Oracle the result is actually unknown, and the difference shows with NOT: `NOT (bursa > 300)` returns 1 row, not 9.",
+            "ro": "Pagina oficială a laboratorului spune că `NULL = NULL` ar fi FALSE. În Oracle rezultatul este de fapt necunoscut, iar diferența se vede la NOT: `NOT (bursa > 300)` dă 1 rând, nu 9."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s5",
+      "title": {
+        "en": "The empty string is NULL",
+        "ro": "Șirul vid este NULL"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "In Oracle, **the empty string `''` is the same as NULL**. That is why `WHERE bursa = ''` returns 0 rows (it is another comparison with NULL), and `WHERE '' IS NULL` is true for all 13 rows. In other databases (Postgres, MySQL) `''` and NULL are different; on the test Oracle rules apply.",
+            "ro": "În Oracle, **șirul vid `''` este același lucru cu NULL**. De aceea `WHERE bursa = ''` dă 0 rânduri (e tot o comparație cu NULL), iar `WHERE '' IS NULL` este adevărat pentru toate cele 13 rânduri. În alte baze de date (Postgres, MySQL) `''` și NULL sunt diferite; la test contează Oracle."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s6",
+      "title": {
+        "en": "Calculations with NULL",
+        "ro": "Calcule cu NULL"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "Any calculation with NULL gives NULL: `bursa + 10` is NULL for the 8 students without a scholarship, not 10. For the same reason, `WHERE bursa > 300 OR bursa <= 300` does not return all 13 students, only 5: for those with a NULL scholarship both parts are unknown.",
+            "ro": "Orice calcul cu NULL dă NULL: `bursa + 10` este NULL pentru cei 8 fără bursă, nu 10. Din același motiv, `WHERE bursa > 300 OR bursa <= 300` nu aduce toți cei 13 studenți, ci doar 5: pentru cei cu bursa NULL ambele părți sunt necunoscute."
+          }
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, bursa, bursa + 10 FROM studenti WHERE an = 2;"
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s7",
+      "title": {
+        "en": "IS NULL and the three truth values",
+        "ro": "IS NULL și cele trei valori de adevăr"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT nume, an FROM studenti WHERE bursa IS NULL;\nSELECT nume, an FROM studenti WHERE bursa IS NOT NULL;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "NULL",
+            "ro": "NULL"
+          },
+          "content": {
+            "en": "A missing value, \"unknown\". It is not 0; in Oracle, the empty string `''` is stored as NULL.",
+            "ro": "Valoare lipsă, «nu se știe». Nu este 0; în Oracle, șirul vid `''` este stocat ca NULL."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "three truth values",
+            "ro": "trei valori de adevăr"
+          },
+          "content": {
+            "en": "A condition can be true, false or unknown. Comparisons with NULL (`=`, `<>`, `<`, `>`) are unknown.",
+            "ro": "O condiție poate fi adevărată, falsă sau necunoscută. Comparațiile cu NULL (`=`, `<>`, `<`, `>`) sunt necunoscute."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "WHERE keeps only true",
+            "ro": "WHERE păstrează doar adevăratul"
+          },
+          "content": {
+            "en": "Rows with a false or unknown answer disappear. `NOT` swaps true and false, but unknown stays unknown.",
+            "ro": "Rândurile cu răspuns fals sau necunoscut dispar. `NOT` schimbă adevărat cu fals, dar necunoscutul rămâne necunoscut."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s8",
+      "title": {
+        "en": "Where are the other 8 rows?",
+        "ro": "Unde sunt celelalte 8 rânduri?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l05-reflect-why",
+          "prompt": {
+            "en": "`bursa > 300` keeps 4 rows and `NOT (bursa > 300)` keeps only 1. The 13 rows should split between them. Where are the other 8?",
+            "ro": "`bursa > 300` păstrează 4 rânduri, iar `NOT (bursa > 300)` păstrează doar 1. Cele 13 rânduri ar trebui să se împartă între ele. Unde sunt celelalte 8?"
+          },
+          "answer": {
+            "en": "They are the 8 students with a NULL scholarship. For them `NULL > 300` is unknown, and `NOT unknown` is still unknown. WHERE keeps only \"true\", so these rows appear in neither result.",
+            "ro": "Sunt cei 8 studenți cu bursa NULL. Pentru ei `NULL > 300` este necunoscut, iar `NOT necunoscut` este tot necunoscut. WHERE păstrează doar «adevărat», deci rândurile nu apar în niciunul dintre rezultate."
+          },
+          "placeholder": {
+            "en": "Explain in your own words…",
+            "ro": "Explică în cuvintele tale…"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s9",
+      "title": {
+        "en": "= NULL",
+        "ro": "= NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l05-mcq1",
+          "question": {
+            "en": "What does `WHERE bursa = NULL` return?",
+            "ro": "Ce întoarce `WHERE bursa = NULL`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0 rows, no error",
+                "ro": "0 rânduri, fără eroare"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The comparison with NULL is unknown for every row, and WHERE keeps only \"true\".",
+                "ro": "Corect. Comparația cu NULL este necunoscută pentru orice rând, iar WHERE păstrează doar «adevărat»."
+              }
+            },
+            {
+              "text": {
+                "en": "The 8 students without a scholarship",
+                "ro": "Cei 8 studenți fără bursă"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You assumed NULL equals NULL. It does not: the result is unknown. For those 8 you need `IS NULL`.",
+                "ro": "Ai crezut că NULL este egal cu NULL. Nu este: rezultatul e necunoscut. Pentru cei 8 ai nevoie de `IS NULL`."
+              },
+              "misconception": "eq-null"
+            },
+            {
+              "text": {
+                "en": "A syntax error",
+                "ro": "Eroare de sintaxă"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The syntax is fine; Oracle runs the query without complaining. That is exactly why the mistake is hard to notice.",
+                "ro": "Sintaxa e corectă; Oracle execută interogarea fără să se plângă. Tocmai de aceea greșeala e greu de observat."
+              },
+              "misconception": "eq-null"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s10",
+      "title": {
+        "en": "Equivalences",
+        "ro": "Echivalențe"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l05-mcq2",
+          "question": {
+            "en": "Which condition is equivalent to `NOT (bursa IS NULL)`?",
+            "ro": "Care condiție este echivalentă cu `NOT (bursa IS NULL)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`bursa <> NULL`",
+                "ro": "`bursa <> NULL`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "It looks like the opposite of `= NULL`, but it is still a comparison with NULL, so unknown: 0 rows, not 5.",
+                "ro": "Pare opusul lui `= NULL`, dar e tot o comparație cu NULL, deci necunoscută: 0 rânduri, nu 5."
+              },
+              "misconception": "eq-null"
+            },
+            {
+              "text": {
+                "en": "`bursa = ''`",
+                "ro": "`bursa = ''`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "In Oracle `''` is NULL, so `bursa = ''` is again a comparison with NULL and returns 0 rows.",
+                "ro": "În Oracle `''` este NULL, deci `bursa = ''` este tot o comparație cu NULL și dă 0 rânduri."
+              },
+              "misconception": "empty-str-null"
+            },
+            {
+              "text": {
+                "en": "`bursa IS NOT NULL`",
+                "ro": "`bursa IS NOT NULL`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Both keep the 5 students with a scholarship. `IS NULL` is never unknown, so NOT behaves normally.",
+                "ro": "Corect. Amândouă păstrează cei 5 studenți cu bursă. `IS NULL` nu poate fi necunoscut, deci NOT se comportă normal."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s11",
+      "title": {
+        "en": "NOT and unknown",
+        "ro": "NOT și necunoscut"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l05-mcq3",
+          "question": {
+            "en": "How many rows does `WHERE NOT (bursa > 300)` return?",
+            "ro": "Câte rânduri întoarce `WHERE NOT (bursa > 300)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "9 rows (those not in `bursa > 300`)",
+                "ro": "9 rânduri (cele care nu sunt în `bursa > 300`)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You took the complement: 13 − 4 = 9. But the NULL rows are not \"false\" for `bursa > 300`, they are \"unknown\", and NOT does not change that.",
+                "ro": "Ai luat complementul: 13 − 4 = 9. Dar rândurile cu NULL nu sunt «false» pentru `bursa > 300`, ci «necunoscute», și NOT nu le schimbă."
+              },
+              "misconception": "eq-null"
+            },
+            {
+              "text": {
+                "en": "1 row (Pintescu)",
+                "ro": "1 rând (Pintescu)"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Only Pintescu has a known scholarship that does not exceed 300 (250). For the NULL ones, NOT unknown stays unknown.",
+                "ro": "Corect. Doar Pintescu are o bursă cunoscută care nu depășește 300 (250). Pentru cei cu NULL, NOT necunoscut rămâne necunoscut."
+              }
+            },
+            {
+              "text": {
+                "en": "8 rows (those without a scholarship)",
+                "ro": "8 rânduri (cei fără bursă)"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Those without a scholarship are exactly the ones that do **not** pass: for them the condition is unknown.",
+                "ro": "Cei fără bursă sunt tocmai cei care **nu** trec: pentru ei condiția e necunoscută."
+              },
+              "misconception": "eq-null"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s12",
+      "title": {
+        "en": "AND and OR",
+        "ro": "AND și OR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l05-mcq4",
+          "question": {
+            "en": "How many rows does `WHERE an = 1 OR bursa IS NULL AND an = 3` return?",
+            "ro": "Câte rânduri întoarce `WHERE an = 1 OR bursa IS NULL AND an = 3`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "8 rows",
+                "ro": "8 rânduri"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: the 4 first-years, plus the 4 third-years without a scholarship (111, 112, 114, 115). AND is evaluated before OR.",
+                "ro": "Corect: cei 4 din anul 1, plus cei 4 din anul 3 fără bursă (111, 112, 114, 115). AND se evaluează înaintea lui OR."
+              }
+            },
+            {
+              "text": {
+                "en": "4 rows",
+                "ro": "4 rânduri"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You read left to right: `(an = 1 OR bursa IS NULL) AND an = 3`. That would give 4, but Oracle evaluates AND first.",
+                "ro": "Ai citit de la stânga la dreapta: `(an = 1 OR bursa IS NULL) AND an = 3`. Așa ar fi dat 4, dar Oracle evaluează AND primul."
+              },
+              "misconception": "and-or"
+            },
+            {
+              "text": {
+                "en": "10 rows",
+                "ro": "10 rânduri"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`an = 1 OR bursa IS NULL` without `an = 3` would give 10. But `an = 3` applies to the NULL branch.",
+                "ro": "10 rânduri ar da `an = 1 OR bursa IS NULL`, fără condiția `an = 3`. Dar `an = 3` se aplică ramurii cu NULL."
+              },
+              "misconception": "and-or"
+            }
+          ],
+          "review": "bd-l04"
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s13",
+      "title": {
+        "en": "Students without a scholarship",
+        "ro": "Studenții fără bursă"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l05-ex-2-7",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 7): \"Show the students (all information about them) who do not get a scholarship.\"",
+            "ro": "Enunț oficial (laborator 2, ex. 7): «Afișați studenții (toate informațiile pentru aceștia) care nu iau bursă.»"
+          },
+          "official": {
+            "lab": 2,
+            "ex": 7
+          },
+          "starter": "SELECT * FROM studenti WHERE ",
+          "solution": "SELECT * FROM studenti WHERE bursa IS NULL",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You want all columns and only the rows where the scholarship is missing.",
+              "ro": "Vrei toate coloanele și doar rândurile la care bursa lipsește."
+            },
+            {
+              "en": "`SELECT * FROM studenti WHERE ...`: for a missing value there is an operator starting with `IS`.",
+              "ro": "`SELECT * FROM studenti WHERE ...`: pentru o valoare lipsă există un operator care începe cu `IS`."
+            },
+            {
+              "en": "`bursa = NULL` finds nothing and gives no error.",
+              "ro": "`bursa = NULL` nu găsește nimic și nici eroare nu dă."
+            }
+          ],
+          "explain": {
+            "en": "`IS NULL` is the only test for a missing value. The result has 8 rows: 111, 112, 114, 115, 116, 119, 121, 123.",
+            "ro": "`IS NULL` este singurul test pentru valoare lipsă. Rezultatul are 8 rânduri: 111, 112, 114, 115, 116, 119, 121, 123."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l05-s14",
+      "title": {
+        "en": "The scholarship increased by 15%",
+        "ro": "Bursa mărită cu 15%"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l05-ex-2-9",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Official statement (lab 2, ex. 9): \"Show the students who get a scholarship, together with the value of the scholarship if it were increased by 15%.\"\n\nIn the app: \"get a scholarship\" means the scholarship is not NULL. Show, in this order, the columns nume, prenume, bursa and the increased scholarship.",
+            "ro": "Enunț oficial (laborator 2, ex. 9): «Afișați studenții care iau bursă, precum și valoarea bursei dacă aceasta ar fi mărită cu 15%.»\n\nÎn aplicație: «iau bursă» înseamnă că bursa nu este NULL. Afișează, în această ordine, coloanele nume, prenume, bursa și bursa mărită."
+          },
+          "official": {
+            "lab": 2,
+            "ex": 9
+          },
+          "solution": "SELECT nume, prenume, bursa, bursa * 1.15 AS bursa_marita FROM studenti WHERE bursa IS NOT NULL",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Two things: you filter the students who have a scholarship and compute a new column from the scholarship.",
+              "ro": "Două lucruri: filtrezi studenții cu bursă și calculezi o coloană nouă din bursă."
+            },
+            {
+              "en": "`SELECT nume, prenume, bursa, bursa * ... FROM studenti WHERE bursa IS ...`. An increase of 15% means multiplying by 1.15.",
+              "ro": "`SELECT nume, prenume, bursa, bursa * ... FROM studenti WHERE bursa IS ...`. O mărire cu 15% înseamnă înmulțire cu 1.15."
+            },
+            {
+              "en": "For those without a scholarship, `bursa * 1.15` would be NULL. The `IS NOT NULL` filter removes them, and `bursa <> NULL` would find nobody.",
+              "ro": "Pentru cei fără bursă, `bursa * 1.15` ar fi NULL. Filtrul `IS NOT NULL` îi scoate, iar `bursa <> NULL` nu ar găsi pe nimeni."
+            }
+          ],
+          "explain": {
+            "en": "5 rows remain, with the increased scholarships 517.5 (Antonie), 402.5 (three times) and 287.5 (Pintescu).",
+            "ro": "Rămân 5 rânduri, cu bursele mărite 517,5 (Antonie), 402,5 (de trei ori) și 287,5 (Pintescu)."
+          }
+        }
+      ]
+    }
+  ]
+}

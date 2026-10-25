@@ -1,0 +1,623 @@
+{
+  "meta": {
+    "id": "bd-l10",
+    "title": {
+      "en": "Lesson 10: Numeric functions, DUAL and the NULL rule",
+      "ro": "Lecția 10: Funcții numerice, DUAL și regula NULL"
+    },
+    "shortTitle": {
+      "en": "L10: Numeric functions",
+      "ro": "L10: Funcții numerice"
+    },
+    "source": {
+      "en": "Databases, lab 3: row functions (UAIC)",
+      "ro": "Baze de date, laboratorul 3: funcții pe linie (UAIC)"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l10-s1",
+      "title": {
+        "en": "What is ROUND(21.665, -1)?",
+        "ro": "Cât face ROUND(21.665, -1)?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l10-r1",
+          "prompt": {
+            "en": "So far you have written queries on tables. SQL can also be a pocket calculator: you give it a function and get a result. So that you do not need a table of your own, Oracle keeps a special one with a single row, called DUAL (shown below). What do you think `SELECT ROUND(21.665, -1) FROM DUAL` returns? Write what you think, even if you have never seen a negative second argument.",
+            "ro": "Până acum ai scris interogări pe tabele. SQL poate fi și un calculator de buzunar: dai o funcție, primești un rezultat. Ca să nu ai nevoie de un tabel al tău, Oracle ține unul special, cu un singur rând, numit DUAL (îl vezi mai jos). Cât crezi că întoarce `SELECT ROUND(21.665, -1) FROM DUAL`? Scrie ce crezi, chiar dacă n-ai mai văzut un al doilea argument negativ."
+          },
+          "answer": {
+            "en": "**20.** The second argument says at which position, relative to the decimal point, you round: 2 means two decimals, 0 means a whole number, −1 means tens (one position to the left of the point). 21.665 lies between 20 and 30 and is closer to 20. Let us see it on a number line.",
+            "ro": "**20.** Al doilea argument spune la ce poziție rotunjești față de virgulă: 2 înseamnă două zecimale, 0 înseamnă un număr întreg, −1 înseamnă la zeci (o poziție în stânga virgulei). 21,665 se află între 20 și 30 și e mai aproape de 20. Hai să vedem asta pe o axă."
+          },
+          "placeholder": {
+            "en": "What do you think comes out?",
+            "ro": "Ce crezi că iese?"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT * FROM dual"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s2",
+      "title": {
+        "en": "CEIL, FLOOR, ROUND, TRUNC on the line",
+        "ro": "CEIL, FLOOR, ROUND, TRUNC pe axă"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "On the line there is the number **51.3**, and below it **−51.3**. For each function (`CEIL`, `FLOOR`, `ROUND`, `TRUNC`) first click, on each line, the mark where you think the number lands, then press **Show**. **Next** moves on to the following function. Watch the negative one: there two of the functions no longer agree.",
+            "ro": "Pe axă e numărul **51,3**, iar sub el **−51,3**. Pentru fiecare funcție (`CEIL`, `FLOOR`, `ROUND`, `TRUNC`) apasă întâi, pe fiecare axă, gradația unde crezi că ajunge numărul, apoi apasă **Arată**. **Mai departe** trece la funcția următoare. Fii atent la cel negativ: acolo două dintre funcții nu mai dau la fel."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l10-viz1",
+          "widget": "number-line",
+          "predict": true,
+          "props": {
+            "values": [
+              51.3,
+              -51.3
+            ],
+            "fns": [
+              "CEIL",
+              "FLOOR",
+              "ROUND",
+              "TRUNC"
+            ],
+            "digits": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s3",
+      "title": {
+        "en": "The second argument: how many decimals stay",
+        "ro": "Al doilea argument: câte zecimale rămân"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "`ROUND(n, m)` and `TRUNC(n, m)` take as the second argument the number of decimals that stay. On 21.365 with m = 2: `ROUND` looks at the third decimal and, being exactly halfway, goes up (**21.37**), while `TRUNC` cuts it off without looking (**21.36**).",
+            "ro": "`ROUND(n, m)` și `TRUNC(n, m)` primesc ca al doilea argument numărul de zecimale care rămân. Pe 21,365 cu m = 2: `ROUND` se uită la a treia zecimală și, fiind la jumătate, merge în sus (**21,37**), iar `TRUNC` o taie fără să se uite la ea (**21,36**)."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l10-viz2",
+          "widget": "number-line",
+          "predict": false,
+          "props": {
+            "values": [
+              21.365
+            ],
+            "fns": [
+              "ROUND",
+              "TRUNC"
+            ],
+            "digits": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s4",
+      "title": {
+        "en": "A negative second argument",
+        "ro": "Al doilea argument negativ"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "With a negative m you round to the left of the decimal point: −1 = tens, −2 = hundreds. Guess before you press: `ROUND(21.665, -1)` and `ROUND(25, -1)`, then `TRUNC` on the same two numbers.",
+            "ro": "Cu m negativ rotunjești la stânga virgulei: −1 = zeci, −2 = sute. Ghicește înainte să apeși: `ROUND(21.665, -1)` și `ROUND(25, -1)`, apoi `TRUNC` pe aceleași două numere."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l10-viz3",
+          "widget": "number-line",
+          "predict": true,
+          "props": {
+            "values": [
+              21.665,
+              25
+            ],
+            "fns": [
+              "ROUND",
+              "TRUNC"
+            ],
+            "digits": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s5",
+      "title": {
+        "en": "One function, run on every row",
+        "ro": "O funcție, rulată pe fiecare rând"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A row function is called **once for every row** and returns one result per row. Below, `ROUND(bursa / 100)` runs over the whole `studenti` table.",
+            "ro": "O funcție pe linie se apelează **o dată pe fiecare rând** și întoarce câte un rezultat pe rând. Mai jos `ROUND(bursa / 100)` rulează peste tot tabelul `studenti`."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l10-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, bursa, ROUND(bursa / 100) FROM studenti",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "select"
+            }
+          ],
+          "show": [
+            "nume",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "The `studenti` table has 13 rows. The function has not been called yet.",
+              "ro": "Tabelul `studenti` are 13 rânduri. Funcția nu s-a apelat încă."
+            },
+            "select": {
+              "en": "`ROUND(bursa / 100)` is computed separately for every row: 450 / 100 = 4.5 becomes 5, 350 / 100 = 3.5 becomes 4, 250 / 100 = 2.5 becomes 3. For the 8 students without a grant the grant is NULL and the result stays NULL.",
+              "ro": "`ROUND(bursa / 100)` se calculează separat pentru fiecare rând: 450 / 100 = 4,5 devine 5, 350 / 100 = 3,5 devine 4, 250 / 100 = 2,5 devine 3. La cei 8 studenți fără bursă, bursa e NULL și rezultatul rămâne NULL."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s6",
+      "title": {
+        "en": "FLOOR, ROUND and MOD on negative numbers",
+        "ro": "FLOOR, ROUND și MOD la numere negative"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**FLOOR and TRUNC are not the same thing.** `FLOOR(-51.3)` is **−52** (FLOOR always goes toward −∞, down the line), while `TRUNC(-51.3)` is **−51** (TRUNC goes toward zero, cutting the decimals). For positive numbers they agree, for negative ones they do not.",
+            "ro": "**FLOOR și TRUNC nu sunt același lucru.** `FLOOR(-51.3)` este **−52** (FLOOR merge mereu spre −∞, în jos pe axă), iar `TRUNC(-51.3)` este **−51** (TRUNC merge spre zero, taie zecimala). La numerele pozitive dau același rezultat, la cele negative nu."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**ROUND at exactly half moves away from zero:** `ROUND(2.5)` is 3, and `ROUND(-2.5)` is **−3**, not −2.",
+            "ro": "**ROUND la jumătate se îndepărtează de zero:** `ROUND(2.5)` este 3, iar `ROUND(-2.5)` este **−3**, nu −2."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**MOD keeps the sign of the dividend:** `MOD(26, 11)` is 4, but `MOD(-26, 11)` is **−4**, not 7 as you would expect if the remainder were always positive. And `MOD(26, 0)` is 26 (not an error).",
+            "ro": "**MOD păstrează semnul deîmpărțitului:** `MOD(26, 11)` este 4, dar `MOD(-26, 11)` este **−4**, nu 7 cum ai crede dacă restul ar trebui să fie mereu pozitiv. Iar `MOD(26, 0)` este 26 (nu eroare)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s7",
+      "title": {
+        "en": "SELECT without FROM, and NULL arguments",
+        "ro": "SELECT fără FROM și argumentele NULL"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**In Oracle a SELECT needs a FROM.** `SELECT 1 + 1;` gives the error `ORA-00923: FROM keyword not found where expected`. For a calculation without a table you write `SELECT 1 + 1 FROM DUAL;`: DUAL has a single row, so you get a single result.",
+            "ro": "**În Oracle, un SELECT are nevoie de FROM.** `SELECT 1 + 1;` dă eroarea `ORA-00923: FROM keyword not found where expected`. Pentru un calcul fără tabel scrii `SELECT 1 + 1 FROM DUAL;`: DUAL are un singur rând, deci primești un singur rezultat."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A function with a NULL argument returns NULL.** `ROUND(NULL)`, `CEIL(NULL)` and `MOD(5, NULL)` all give NULL, just like the rows without a grant on the previous screen. NULL does not become 0. A few functions are exceptions (for example `NVL` and `CONCAT`); you will meet them later.",
+            "ro": "**O funcție cu argument NULL întoarce NULL.** `ROUND(NULL)`, `CEIL(NULL)` și `MOD(5, NULL)` dau toate NULL, la fel ca rândurile fără bursă din ecranul anterior. NULL nu devine 0. Câteva funcții fac excepție (de exemplu `NVL` și `CONCAT`); le vei întâlni mai târziu."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s8",
+      "title": {
+        "en": "Numeric functions in a query",
+        "ro": "Funcțiile numerice într-o interogare"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT CEIL(51.3), FLOOR(51.3), ROUND(21.365, 2), TRUNC(21.365, 2), ROUND(21.665, -1), MOD(26, 11)\nFROM DUAL;\n-- 52, 51, 21.37, 21.36, 20, 4\n\nSELECT nume, ROUND(bursa / 100)\nFROM studenti;\n-- câte un rezultat pe fiecare rând"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "row function",
+            "ro": "funcție pe linie"
+          },
+          "content": {
+            "en": "A function that takes values from a single row (a constant, a column or an expression) and returns one result for that row. It can sit in SELECT, in WHERE and in ORDER BY. A NULL argument makes the result NULL.",
+            "ro": "O funcție care primește valori dintr-un singur rând (o constantă, o coloană sau o expresie) și întoarce un rezultat pentru rândul acela. Poate sta în SELECT, în WHERE și în ORDER BY. Un argument NULL face rezultatul NULL."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "DUAL",
+            "ro": "DUAL"
+          },
+          "content": {
+            "en": "A table with one row and one column, made for calculations without a table: `SELECT ... FROM DUAL`.",
+            "ro": "Tabel cu un singur rând și o singură coloană, făcut pentru calcule fără tabel: `SELECT ... FROM DUAL`."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "ROUND and TRUNC (n, m)",
+            "ro": "ROUND și TRUNC (n, m)"
+          },
+          "content": {
+            "en": "m is the number of decimals kept; m = 0 gives a whole number, a negative m goes to tens, hundreds. ROUND rounds, TRUNC cuts. CEIL goes up, FLOOR goes down, MOD(a, b) is the remainder.",
+            "ro": "m este numărul de zecimale păstrate; m = 0 dă un număr întreg, m negativ merge la zeci, sute. ROUND rotunjește, TRUNC taie. CEIL urcă, FLOOR coboară, MOD(a, b) este restul împărțirii."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s9",
+      "title": {
+        "en": "Why do FLOOR and TRUNC differ?",
+        "ro": "De ce diferă FLOOR și TRUNC?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l10-r2",
+          "prompt": {
+            "en": "Why do `FLOOR(-51.3)` and `TRUNC(-51.3)` give different results, although `FLOOR(51.3)` and `TRUNC(51.3)` give the same? Explain in your own words.",
+            "ro": "De ce `FLOOR(-51.3)` și `TRUNC(-51.3)` dau rezultate diferite, deși `FLOOR(51.3)` și `TRUNC(51.3)` dau același rezultat? Explică în cuvintele tale."
+          },
+          "answer": {
+            "en": "Because the two functions go in different directions. FLOOR goes toward −∞: from −51.3 it moves down the line to −52. TRUNC goes toward zero: it cuts the decimals and stays at −51. For positive numbers \"down\" and \"toward zero\" mean the same thing; for negative numbers they are opposite directions.",
+            "ro": "Pentru că cele două funcții merg în direcții diferite. FLOOR merge spre −∞: de la −51,3 coboară pe axă până la −52. TRUNC merge spre zero: taie zecimala și rămâne la −51. La numerele pozitive «în jos» și «spre zero» înseamnă același lucru; la cele negative sunt direcții opuse."
+          },
+          "placeholder": {
+            "en": "Explain in your own words",
+            "ro": "Explică în cuvintele tale"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s10",
+      "title": {
+        "en": "CEIL and FLOOR on 51.3",
+        "ro": "CEIL și FLOOR pe 51,3"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l10-q1",
+          "question": {
+            "en": "What do `CEIL(51.3)` and `FLOOR(51.3)` return, in this order?",
+            "ro": "Ce întorc `CEIL(51.3)` și `FLOOR(51.3)`, în această ordine?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "52 and 51",
+                "ro": "52 și 51"
+              },
+              "correct": true,
+              "explain": {
+                "en": "CEIL goes up to the whole number above (52), FLOOR goes down to the one below (51).",
+                "ro": "CEIL urcă la întregul de deasupra (52), FLOOR coboară la cel de dedesubt (51)."
+              }
+            },
+            {
+              "text": {
+                "en": "51 and 52",
+                "ro": "51 și 52"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You swapped them. CEIL comes from \"ceiling\", so up; FLOOR means the floor, so down.",
+                "ro": "Le-ai inversat. CEIL vine de la «ceiling» = tavan, deci în sus; FLOOR = podea, deci în jos."
+              },
+              "misconception": "round-neg-mod"
+            },
+            {
+              "text": {
+                "en": "52 and 52",
+                "ro": "52 și 52"
+              },
+              "correct": false,
+              "explain": {
+                "en": "FLOOR never rounds up. It always drops to the whole number below, so it gives 51.",
+                "ro": "FLOOR nu rotunjește în sus. Coboară mereu la întregul de dedesubt, deci dă 51."
+              },
+              "misconception": "round-neg-mod"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s11",
+      "title": {
+        "en": "ROUND with −1",
+        "ro": "ROUND cu −1"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l10-q2",
+          "question": {
+            "en": "What does `ROUND(21.665, -1)` return?",
+            "ro": "Ce întoarce `ROUND(21.665, -1)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "20",
+                "ro": "20"
+              },
+              "correct": true,
+              "explain": {
+                "en": "−1 means rounding to tens. 21.665 is between 20 and 30, closer to 20.",
+                "ro": "−1 înseamnă rotunjire la zeci. 21,665 este între 20 și 30, mai aproape de 20."
+              }
+            },
+            {
+              "text": {
+                "en": "21.7",
+                "ro": "21.7"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You read −1 as a decimal place. The minus sign moves the rounding to the left of the point, not the right.",
+                "ro": "Ai citit −1 ca pe o zecimală. Semnul minus mută rotunjirea în stânga virgulei, nu în dreapta."
+              },
+              "misconception": "round-neg-mod"
+            },
+            {
+              "text": {
+                "en": "30",
+                "ro": "30"
+              },
+              "correct": false,
+              "explain": {
+                "en": "ROUND does not always go up. It would go up only from halfway (25 and above).",
+                "ro": "ROUND nu merge mereu în sus. Ar merge în sus doar dacă numărul ar fi la jumătate sau peste (de la 25 în sus)."
+              },
+              "misconception": "round-neg-mod"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s12",
+      "title": {
+        "en": "FLOOR on negatives",
+        "ro": "FLOOR la numere negative"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l10-q3",
+          "question": {
+            "en": "What does `FLOOR(-51.3)` return?",
+            "ro": "Ce întoarce `FLOOR(-51.3)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "-52",
+                "ro": "-52"
+              },
+              "correct": true,
+              "explain": {
+                "en": "FLOOR always moves down the line, toward −∞, and the first whole number below −51.3 is −52.",
+                "ro": "FLOOR coboară mereu pe axă, spre −∞, iar sub −51,3 primul întreg este −52."
+              }
+            },
+            {
+              "text": {
+                "en": "-51",
+                "ro": "-51"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would be `TRUNC(-51.3)`. FLOOR does not \"cut the decimals\"; it goes down, and for negative numbers down means farther from zero.",
+                "ro": "Asta ar fi `TRUNC(-51.3)`. FLOOR nu «taie zecimalele», ci merge în jos, iar la numerele negative jos înseamnă mai departe de zero."
+              },
+              "misconception": "round-neg-mod"
+            },
+            {
+              "text": {
+                "en": "52",
+                "ro": "52"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The sign is not lost. Numeric functions keep the minus; the result is still negative.",
+                "ro": "Semnul nu se pierde. Funcțiile numerice păstrează minusul; rezultatul e tot negativ."
+              },
+              "misconception": "round-neg-mod"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s13",
+      "title": {
+        "en": "ROUND and NULL",
+        "ro": "ROUND și NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l10-q4",
+          "question": {
+            "en": "For a student without a grant (`bursa` is NULL), what does `ROUND(bursa / 50)` return?",
+            "ro": "Pentru un student fără bursă (`bursa` este NULL), ce întoarce `ROUND(bursa / 50)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "NULL",
+                "ro": "NULL"
+              },
+              "correct": true,
+              "explain": {
+                "en": "NULL / 50 is NULL, and ROUND(NULL) is NULL too.",
+                "ro": "NULL / 50 este NULL, iar ROUND(NULL) este tot NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "0",
+                "ro": "0"
+              },
+              "correct": false,
+              "explain": {
+                "en": "NULL is not 0. \"Unknown\" divided by 50 stays \"unknown\".",
+                "ro": "NULL nu este 0. «Nu se știe» împărțit la 50 rămâne «nu se știe»."
+              },
+              "misconception": "null-arith"
+            },
+            {
+              "text": {
+                "en": "An error",
+                "ro": "Eroare"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no error: the function receives NULL and returns NULL.",
+                "ro": "Nu e nicio eroare: funcția primește NULL și întoarce NULL."
+              },
+              "misconception": "null-func"
+            }
+          ],
+          "review": "bd-l03"
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s14",
+      "title": {
+        "en": "The calculator in one row",
+        "ro": "Calculatorul într-un singur rând"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l10-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Write a single query that shows, in one row and in this order: `CEIL(51.3)`, `FLOOR(-51.3)`, `ROUND(21.665, -1)` and `MOD(26, 11)`. Do not use any of the faculty tables.",
+            "ro": "Scrie o singură interogare care afișează, într-un singur rând și în această ordine: `CEIL(51.3)`, `FLOOR(-51.3)`, `ROUND(21.665, -1)` și `MOD(26, 11)`. Nu folosi niciun tabel al facultății."
+          },
+          "solution": "SELECT CEIL(51.3), FLOOR(-51.3), ROUND(21.665, -1), MOD(26, 11) FROM DUAL",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "You have to pick the table and compute four values. A SELECT without a table of your own still needs one: the one-row table.",
+              "ro": "Ai de ales tabelul și de calculat patru valori. Un SELECT fără tabel al tău are totuși nevoie de unul: cel cu un singur rând."
+            },
+            {
+              "en": "SELECT f1, f2, f3, f4\nFROM ___;",
+              "ro": "SELECT f1, f2, f3, f4\nFROM ___;"
+            },
+            {
+              "en": "Each function takes its values in parentheses, separated by commas, and a negative number is written with a minus in front: `FLOOR(-51.3)`, `ROUND(21.665, -1)`. The column list is separated by commas, and at the end comes `FROM DUAL`.",
+              "ro": "Fiecare funcție primește valorile între paranteze, separate prin virgulă, iar numărul negativ se scrie cu minus în față: `FLOOR(-51.3)`, `ROUND(21.665, -1)`. Lista de coloane se separă cu virgule, iar la sfârșit vine `FROM DUAL`."
+            }
+          ],
+          "explain": {
+            "en": "The solution: `SELECT CEIL(51.3), FLOOR(-51.3), ROUND(21.665, -1), MOD(26, 11) FROM DUAL`. Result: 52, −52, 20, 4. DUAL has a single row, so the query returns a single row.",
+            "ro": "Soluția: `SELECT CEIL(51.3), FLOOR(-51.3), ROUND(21.665, -1), MOD(26, 11) FROM DUAL`. Rezultat: 52, −52, 20, 4. DUAL are un singur rând, deci interogarea întoarce un singur rând."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l10-s15",
+      "title": {
+        "en": "The grant rounded to hundreds",
+        "ro": "Bursa rotunjită la sute"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l10-ex-x2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the name and the grant rounded to hundreds (for example 350 becomes 400) for the students who have a grant.",
+            "ro": "Afișați numele și bursa rotunjită la sute (de exemplu 350 devine 400) pentru studenții care au bursă."
+          },
+          "solution": "SELECT nume, ROUND(bursa, -2) FROM studenti WHERE bursa IS NOT NULL",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Two things: which rows you keep (only those with a grant) and what you compute (the grant rounded to hundreds).",
+              "ro": "Două lucruri: ce rânduri păstrezi (doar cei cu bursă) și ce calculezi (bursa rotunjită la sute)."
+            },
+            {
+              "en": "SELECT nume, ROUND(bursa, ___)\nFROM studenti\nWHERE bursa ___;",
+              "ro": "SELECT nume, ROUND(bursa, ___)\nFROM studenti\nWHERE bursa ___;"
+            },
+            {
+              "en": "`ROUND(n, -2)` rounds to hundreds (−1 would be tens). A missing value is tested with `IS NOT NULL`, not with `<> NULL`. Without the filter the 8 students without a grant would show up too, with NULL.",
+              "ro": "`ROUND(n, -2)` rotunjește la sute (−1 ar fi zeci). Valoarea lipsă se testează cu `IS NOT NULL`, nu cu `<> NULL`. Fără filtru ar apărea și cei 8 studenți fără bursă, cu NULL."
+            }
+          ],
+          "explain": {
+            "en": "The solution: `SELECT nume, ROUND(bursa, -2) FROM studenti WHERE bursa IS NOT NULL`. Result: 5 rows (Antonie 500, Archip 400, Ciobotariu 400, Pintescu 300, Cobzaru 400). Rounding to hundreds comes from the second argument, −2.",
+            "ro": "Soluția: `SELECT nume, ROUND(bursa, -2) FROM studenti WHERE bursa IS NOT NULL`. Rezultat: 5 rânduri (Antonie 500, Archip 400, Ciobotariu 400, Pintescu 300, Cobzaru 400). Rotunjirea la sute vine din al doilea argument, −2."
+          }
+        }
+      ]
+    }
+  ]
+}

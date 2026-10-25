@@ -1,0 +1,979 @@
+{
+  "meta": {
+    "id": "bd-l25",
+    "title": {
+      "en": "Lesson 25: Practice test and revision",
+      "ro": "Lecția 25: Test de probă și revizuire"
+    },
+    "shortTitle": {
+      "en": "L25: Practice test",
+      "ro": "L25: Test de probă"
+    },
+    "source": {
+      "en": "Databases – Lab 4 (JOIN), UAIC",
+      "ro": "Baze de date – Laboratorul 4 (JOIN), UAIC"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l25-s1",
+      "title": {
+        "en": "The result looks fine. Are you sure?",
+        "ro": "Rezultatul arată bine. Ești sigur?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l25-r1",
+          "prompt": {
+            "en": "The requirement: \"first-year students who have no scholarship, ordered by name\". Your classmate writes `SELECT nume FROM studenti WHERE an = 1 AND bursa = NULL ORDER BY nume` and Oracle answers with no error, with 0 rows. What do you do before handing it in? The `studenti` table is below.",
+            "ro": "Cerința: „studenții din anul 1 care nu au bursă, ordonați după nume”. Colegul tău scrie `SELECT nume FROM studenti WHERE an = 1 AND bursa = NULL ORDER BY nume` și Oracle răspunde fără nicio eroare, cu 0 rânduri. Ce faci înainte să predai? Tabelul `studenti` e mai jos."
+          },
+          "answer": {
+            "en": "You compare the number of rows with what you see in the table. In year 1 there are two students without a scholarship (Arhire Alexandra and Bucur Andreea), so 0 rows gives away a mistake. Here it is `= NULL`, which is never true; the correct form is `bursa IS NULL`. In short: don't settle for \"it gave no error\", count and compare with what you expect.",
+            "ro": "Compari numărul de rânduri cu ce vezi în tabel. În anul 1 sunt doi studenți fără bursă (Arhire Alexandra și Bucur Andreea), deci 0 rânduri trădează o greșeală. Aici e `= NULL`, care nu e adevărat niciodată; corect este `bursa IS NULL`. Pe scurt: nu te mulțumi cu „n-a dat eroare”, numără și compară cu ce te aștepți."
+          },
+          "placeholder": {
+            "en": "Write what you check",
+            "ro": "Scrie ce verifici"
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT nr_matricol, nume, prenume, an, bursa FROM studenti ORDER BY nr_matricol"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s2",
+      "title": {
+        "en": "Which rows should remain?",
+        "ro": "Ce rânduri ar trebui să rămână?"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Before trusting \"0 rows\", predict it yourself: which first-year students have no scholarship? Pick the rows that get through `WHERE`.",
+            "ro": "Înainte să te încrezi în „0 rânduri”, prezice tu: care studenți din anul 1 nu au bursă? Alege rândurile care trec de `WHERE`."
+          }
+        },
+        {
+          "type": "query-machine",
+          "id": "bd-l25-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT nume, prenume FROM studenti WHERE an = 1 AND bursa IS NULL ORDER BY nume",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            },
+            {
+              "clause": "select"
+            },
+            {
+              "clause": "order"
+            }
+          ],
+          "show": [
+            "nume",
+            "prenume",
+            "an",
+            "bursa"
+          ],
+          "say": {
+            "from": {
+              "en": "`FROM studenti`: 13 rows.",
+              "ro": "`FROM studenti`: 13 rânduri."
+            },
+            "where": {
+              "en": "`an = 1 AND bursa IS NULL`: Arhire Alexandra and Bucur Andreea remain. With `bursa = NULL` none would remain.",
+              "ro": "`an = 1 AND bursa IS NULL`: rămân Arhire Alexandra și Bucur Andreea. Cu `bursa = NULL` nu rămânea niciunul."
+            },
+            "select": {
+              "en": "`nume` and `prenume` remain.",
+              "ro": "Rămân `nume` și `prenume`."
+            },
+            "order": {
+              "en": "Ordered by name: Arhire, then Bucur. 2 rows, not 0.",
+              "ro": "Ordonate după nume: Arhire, apoi Bucur. 2 rânduri, nu 0."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s3",
+      "title": {
+        "en": "Three things that fool you",
+        "ro": "Trei lucruri care păcălesc"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A plausible result can be wrong.** `SELECT * FROM studenti s, note n WHERE s.prenume = 'Andrei'` gives no error and looks like a list of grades, but it has 42 rows, while the truth is 0. Without the link condition, every student is combined with all the grades.",
+            "ro": "**Un rezultat plauzibil poate fi greșit.** `SELECT * FROM studenti s, note n WHERE s.prenume = 'Andrei'` nu dă eroare și arată a listă de note, dar are 42 de rânduri, iar adevărul este 0. Fără condiția de legătură, fiecare student se combină cu toate notele."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Oracle is not Postgres.** `FROM studenti AS s` (with `AS` before the table alias), `LIMIT 3` and `EXCEPT` all give error ORA-00933. In Oracle 11g the table alias is written without `AS`, limiting is done with `ROWNUM`, and set difference is `MINUS`.",
+            "ro": "**Oracle nu este Postgres.** `FROM studenti AS s` (cu `AS` înaintea aliasului de tabel), `LIMIT 3` și `EXCEPT` dau toate eroarea ORA-00933. În Oracle 11g aliasul de tabel se scrie fără `AS`, limitarea se face cu `ROWNUM`, iar diferența de mulțimi este `MINUS`."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**The written order is not the execution order.** You write `SELECT … FROM … WHERE … ORDER BY`, but Oracle works through `FROM`, `WHERE`, `SELECT`, `ORDER BY`. That is why an alias from `SELECT` is visible in `ORDER BY` but not in `WHERE`.",
+            "ro": "**Ordinea scrisă nu este ordinea de execuție.** Scrii `SELECT … FROM … WHERE … ORDER BY`, dar Oracle lucrează `FROM`, `WHERE`, `SELECT`, `ORDER BY`. De aceea aliasul din `SELECT` se vede în `ORDER BY`, dar nu în `WHERE`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s4",
+      "title": {
+        "en": "The checklist",
+        "ro": "Lista de verificare"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT c.titlu_curs, s.nume, n.valoare\nFROM cursuri c\n  JOIN note n ON n.id_curs = c.id_curs\n  JOIN studenti s ON s.nr_matricol = n.nr_matricol\nWHERE n.valoare >= 9 AND c.an = 1\nORDER BY c.titlu_curs, s.nume;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Count the rows",
+            "ro": "Numără rândurile"
+          },
+          "content": {
+            "en": "Before the values, look at how many rows you have. Too many shows a Cartesian product or a forgotten link; too few shows an `= NULL`, an `INNER` instead of `LEFT` or a `MINUS` on names.",
+            "ro": "Înainte de valori, uită-te la câte rânduri ai. Un număr prea mare arată un produs cartezian sau o legătură uitată; unul prea mic arată un `= NULL`, un `INNER` în loc de `LEFT` sau un `MINUS` pe nume."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Check every requested clause",
+            "ro": "Verifică fiecare clauză cerută"
+          },
+          "content": {
+            "en": "The tables and links, the filter (with parentheses at `OR`), the requested columns, the requested order. If the statement asks for an alias or a format, check those too.",
+            "ro": "Tabelele și legăturile, filtrul (cu paranteze la `OR`), coloanele cerute, ordinea cerută. Dacă enunțul cere un alias sau un format, verifică și acestea."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Spaces, NULL and keys",
+            "ro": "Spații, NULL și chei"
+          },
+          "content": {
+            "en": "`CHAR` columns bring spaces (`TRIM`), `NULL` is tested with `IS NULL`, and pairs and sets are linked on keys (`nr_matricol`), not on names.",
+            "ro": "Coloanele `CHAR` aduc spații (`TRIM`), `NULL` se testează cu `IS NULL`, iar perechile și mulțimile se leagă pe chei (`nr_matricol`), nu pe nume."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s5",
+      "title": {
+        "en": "Count the rows before you trust a result",
+        "ro": "Numără rândurile înainte de a te încrede în rezultat"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l25-r2",
+          "prompt": {
+            "en": "Why is it more useful to look at the number of rows first and only then at the values in the result?",
+            "ro": "De ce e mai util să te uiți întâi la numărul de rânduri și abia apoi la valorile din rezultat?"
+          },
+          "answer": {
+            "en": "Because most mistakes in this course change the number of rows: a forgotten link inflates it (42 instead of 0), `= NULL` takes it to 0, a `WHERE` filter on an outer join lowers it, `MINUS` on names loses a row. A wrong row hides easily among the values, but a wrong count shows right away if you know what count to expect.",
+            "ro": "Pentru că majoritatea greșelilor din acest curs schimbă numărul de rânduri: legătura uitată îl umflă (42 în loc de 0), `= NULL` îl duce la 0, un filtru în `WHERE` pe un join extern îl scade, `MINUS` pe nume pierde un rând. Un rând greșit se ascunde ușor printre valori, dar un număr greșit se vede imediat, dacă știi ce număr să aștepți."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s6",
+      "title": {
+        "en": "The forgotten link",
+        "ro": "Legătura uitată"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q1",
+          "question": {
+            "en": "How many rows does `SELECT * FROM studenti, note WHERE prenume = 'Andrei'` return?",
+            "ro": "Câte rânduri întoarce `SELECT * FROM studenti, note WHERE prenume = 'Andrei'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "42 rows.",
+                "ro": "42 de rânduri."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Andrei Pintescu is a single student, and without a link condition he is combined with all 42 grades.",
+                "ro": "Corect. Andrei Pintescu este un singur student, iar fără condiție de legătură el se combină cu toate cele 42 de note."
+              }
+            },
+            {
+              "text": {
+                "en": "0 rows: Andrei has no grades.",
+                "ro": "0 rânduri: Andrei nu are nicio notă."
+              },
+              "correct": false,
+              "explain": {
+                "en": "It is true that Andrei has no grades, but the query does not check that: the link between the tables is missing, so the Cartesian product is filtered only by first name.",
+                "ro": "E adevărat că Andrei nu are note, dar interogarea nu verifică asta: lipsește legătura dintre tabele, deci produsul cartezian se filtrează doar după prenume."
+              },
+              "misconception": "cartesian"
+            },
+            {
+              "text": {
+                "en": "13 rows: one for each student.",
+                "ro": "13 rânduri: câte unul pentru fiecare student."
+              },
+              "correct": false,
+              "explain": {
+                "en": "The filter `prenume = 'Andrei'` leaves a single student, not 13. And he is combined with all the grades, not with one.",
+                "ro": "Filtrul `prenume = 'Andrei'` lasă un singur student, nu 13. Iar acela se combină cu toate notele, nu cu una."
+              },
+              "misconception": "cartesian"
+            }
+          ],
+          "review": "bd-l18"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s7",
+      "title": {
+        "en": "NULL inside NOT",
+        "ro": "NULL în NOT"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q2",
+          "question": {
+            "en": "How many rows does `SELECT * FROM studenti WHERE NOT (bursa > 300)` return?",
+            "ro": "Câte rânduri întoarce `SELECT * FROM studenti WHERE NOT (bursa > 300)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "9 rows: the 8 without a scholarship \"don't have a scholarship above 300\" too.",
+                "ro": "9 rânduri: și cei 8 fără bursă „nu au bursă peste 300”."
+              },
+              "correct": false,
+              "explain": {
+                "en": "Three-valued logic does not work that way: a missing scholarship does not mean \"not above 300\" but \"unknown\". `NOT` of \"unknown\" is still \"unknown\".",
+                "ro": "Logica cu trei valori nu merge așa: lipsa bursei nu înseamnă „nu e peste 300”, ci „nu se știe”. `NOT` de la „nu se știe” e tot „nu se știe”."
+              },
+              "misconception": "eq-null"
+            },
+            {
+              "text": {
+                "en": "1 row (Pintescu, with the scholarship 250).",
+                "ro": "1 rând (Pintescu, cu bursa 250)."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. For the 8 students without a scholarship, `bursa > 300` is unknown, and `NOT` applied to unknown stays unknown; `WHERE` only keeps true.",
+                "ro": "Corect. Pentru cei 8 studenți fără bursă, `bursa > 300` este necunoscut, iar `NOT` aplicat unui necunoscut rămâne necunoscut; `WHERE` păstrează doar adevărat."
+              }
+            },
+            {
+              "text": {
+                "en": "8 rows: only those without a scholarship.",
+                "ro": "8 rânduri: doar cei fără bursă."
+              },
+              "correct": false,
+              "explain": {
+                "en": "The ones without a scholarship are exactly those who get removed, because for them the condition is unknown. One student with a scholarship below 300 remains.",
+                "ro": "Tocmai cei fără bursă sunt eliminați, fiindcă pentru ei condiția este necunoscută. Rămâne un student cu bursă sub 300."
+              },
+              "misconception": "eq-null"
+            }
+          ],
+          "review": "bd-l05"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s8",
+      "title": {
+        "en": "Pairs of classmates",
+        "ro": "Perechi de colegi"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q3",
+          "question": {
+            "en": "The pairs of students born on the same day of the week are 22 with `s1.nr_matricol <> s2.nr_matricol`. How many are there with `s1.nr_matricol < s2.nr_matricol`?",
+            "ro": "Perechile de studenți născuți în aceeași zi a săptămânii sunt 22 cu `s1.nr_matricol <> s2.nr_matricol`. Câte sunt cu `s1.nr_matricol < s2.nr_matricol`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "22 pairs: nothing changes.",
+                "ro": "22 de perechi: nu se schimbă nimic."
+              },
+              "correct": false,
+              "explain": {
+                "en": "It does change: `<` keeps only one direction out of two.",
+                "ro": "Se schimbă: `<` păstrează doar un sens din două."
+              },
+              "misconception": "self-pair"
+            },
+            {
+              "text": {
+                "en": "10 pairs.",
+                "ro": "10 perechi."
+              },
+              "correct": false,
+              "explain": {
+                "en": "10 pairs come out with `s1.nume < s2.nume`, not with `nr_matricol`: the two Bodnar have the same name, and `<` on names loses their pair.",
+                "ro": "10 perechi ies cu `s1.nume < s2.nume`, nu cu `nr_matricol`: cei doi Bodnar au același nume, iar `<` pe nume le pierde perechea."
+              },
+              "misconception": "self-pair"
+            },
+            {
+              "text": {
+                "en": "11 pairs.",
+                "ro": "11 perechi."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `<>` counts each pair in both directions, `<` on a unique key counts it once.",
+                "ro": "Corect. `<>` numără fiecare pereche în ambele sensuri, `<` pe cheie unică o numără o singură dată."
+              }
+            }
+          ],
+          "review": "bd-l21"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s9",
+      "title": {
+        "en": "UNION",
+        "ro": "UNION"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q4",
+          "question": {
+            "en": "How many rows does `SELECT an FROM studenti UNION SELECT an FROM cursuri` return?",
+            "ro": "Câte rânduri întoarce `SELECT an FROM studenti UNION SELECT an FROM cursuri`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "3 rows.",
+                "ro": "3 rânduri."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. UNION deduplicates the result and in both tables only the years 1, 2 and 3 appear. With UNION ALL it would be 22.",
+                "ro": "Corect. UNION deduplică rezultatul și în ambele tabele apar doar anii 1, 2 și 3. Cu UNION ALL ar fi 22."
+              }
+            },
+            {
+              "text": {
+                "en": "22 rows.",
+                "ro": "22 de rânduri."
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is the value for UNION ALL, which keeps duplicates. UNION removes them.",
+                "ro": "Aceasta e valoarea pentru UNION ALL, care păstrează duplicatele. UNION le elimină."
+              },
+              "misconception": "setop-rules"
+            },
+            {
+              "text": {
+                "en": "13 rows: only those from the first table.",
+                "ro": "13 rânduri: doar cele din prima tabelă."
+              },
+              "correct": false,
+              "explain": {
+                "en": "UNION gathers the results of both `SELECT`s and then removes duplicates; it does not stop at the first.",
+                "ro": "UNION adună rezultatele ambelor `SELECT`-uri și apoi elimină duplicatele; nu se oprește la primul."
+              },
+              "misconception": "setop-rules"
+            }
+          ],
+          "review": "bd-l09"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s10",
+      "title": {
+        "en": "Minutes or month",
+        "ro": "Minute sau luna"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q5",
+          "question": {
+            "en": "What does `TO_CHAR(TO_DATE('17-02-2014', 'DD-MM-YYYY'), 'HH24:MM')` return?",
+            "ro": "Ce întoarce `TO_CHAR(TO_DATE('17-02-2014', 'DD-MM-YYYY'), 'HH24:MM')`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`00:00`",
+                "ro": "`00:00`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is what the mask `HH24:MI` would give. `MM` does not mean minutes.",
+                "ro": "Asta ar da masca `HH24:MI`. `MM` nu înseamnă minute."
+              },
+              "misconception": "mm-mi"
+            },
+            {
+              "text": {
+                "en": "`00:02`",
+                "ro": "`00:02`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The date has no time, so the hour is 00, and `MM` is the month: February, that is, 02.",
+                "ro": "Corect. Data nu are oră, deci ora este 00, iar `MM` este luna: februarie, adică 02."
+              }
+            },
+            {
+              "text": {
+                "en": "`12:02`",
+                "ro": "`12:02`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "`HH24` gives the 24-hour clock, so 00 at midnight. A 12 would come from a mask with `HH` (12-hour clock, where midnight is written 12).",
+                "ro": "`HH24` dă ceasul de 24 de ore, deci 00 la miezul nopții. Un 12 ar rezulta dintr-o mască cu `HH` (ceas de 12 ore, unde miezul nopții se scrie 12)."
+              },
+              "misconception": "mm-mi"
+            }
+          ],
+          "review": "bd-l14"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s11",
+      "title": {
+        "en": "NATURAL JOIN on three tables",
+        "ro": "NATURAL JOIN pe trei tabele"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q6",
+          "question": {
+            "en": "How many rows does `SELECT * FROM studenti NATURAL JOIN note NATURAL JOIN cursuri` return?",
+            "ro": "Câte rânduri întoarce `SELECT * FROM studenti NATURAL JOIN note NATURAL JOIN cursuri`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "42 rows: one for each grade.",
+                "ro": "42 de rânduri: câte una pentru fiecare notă."
+              },
+              "correct": false,
+              "explain": {
+                "en": "That would be so if the link were only on `nr_matricol` and `id_curs`. But `an` is also a common column and enters the condition.",
+                "ro": "Asta ar fi dacă legarea s-ar face doar pe `nr_matricol` și `id_curs`. Dar și `an` este o coloană comună și intră în condiție."
+              },
+              "misconception": "natural-join-all"
+            },
+            {
+              "text": {
+                "en": "An ORA-25155 error.",
+                "ro": "O eroare ORA-25155."
+              },
+              "correct": false,
+              "explain": {
+                "en": "ORA-25155 only appears when a column used in a NATURAL JOIN gets a qualifier (`studenti.an`). There is none here, so the query runs.",
+                "ro": "ORA-25155 apare doar când o coloană folosită în NATURAL JOIN primește un calificator (`studenti.an`). Aici nu e niciunul, deci interogarea rulează."
+              },
+              "misconception": "natural-join-all"
+            },
+            {
+              "text": {
+                "en": "0 rows.",
+                "ro": "0 rânduri."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. NATURAL JOIN links on all columns with the same name. After the first join, `an` is common with `cursuri.an`, so `studenti.an = cursuri.an` is required too, which matches no grade.",
+                "ro": "Corect. NATURAL JOIN leagă pe toate coloanele cu același nume. După primul join, `an` este comun cu `cursuri.an`, deci se cere și `studenti.an = cursuri.an`, ceea ce nu se potrivește pentru nicio notă."
+              }
+            }
+          ],
+          "review": "bd-l19"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s12",
+      "title": {
+        "en": "NOT IN with NULL",
+        "ro": "NOT IN cu NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q7",
+          "question": {
+            "en": "How many rows does `SELECT * FROM studenti WHERE an NOT IN (1, NULL)` return?",
+            "ro": "Câte rânduri întoarce `SELECT * FROM studenti WHERE an NOT IN (1, NULL)`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0 rows.",
+                "ro": "0 rânduri."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `an NOT IN (1, NULL)` means `an <> 1 AND an <> NULL`. The second part is unknown for every row, so nothing is true.",
+                "ro": "Corect. `an NOT IN (1, NULL)` înseamnă `an <> 1 AND an <> NULL`. A doua parte este necunoscută pentru orice rând, deci nimic nu este adevărat."
+              }
+            },
+            {
+              "text": {
+                "en": "9 rows: the students of years 2 and 3.",
+                "ro": "9 rânduri: studenții din anii 2 și 3."
+              },
+              "correct": false,
+              "explain": {
+                "en": "It would be 9 without NULL in the list. With NULL in the list, `NOT IN` returns nothing.",
+                "ro": "Ar fi 9 fără NULL în listă. Cu NULL în listă, `NOT IN` nu mai întoarce nimic."
+              },
+              "misconception": "not-in-null"
+            },
+            {
+              "text": {
+                "en": "13 rows: NULL changes nothing.",
+                "ro": "13 rânduri: NULL nu schimbă nimic."
+              },
+              "correct": false,
+              "explain": {
+                "en": "NULL changes everything: comparing with NULL is unknown and makes the list accept no row at all.",
+                "ro": "NULL schimbă totul: compararea cu NULL este necunoscută și face lista să nu mai accepte niciun rând."
+              },
+              "misconception": "not-in-null"
+            }
+          ],
+          "review": "bd-l07"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s13",
+      "title": {
+        "en": "Concatenation with NULL",
+        "ro": "Concatenare cu NULL"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q8",
+          "question": {
+            "en": "What does `'Bursa: ' || bursa` return for a student with no scholarship?",
+            "ro": "Ce întoarce `'Bursa: ' || bursa` pentru un student care nu are bursă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "NULL, because the scholarship is unknown.",
+                "ro": "NULL, pentru că bursa este necunoscută."
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is how arithmetic behaves (`bursa + 10`). Concatenation with `||` is an exception and keeps the text.",
+                "ro": "Așa se comportă aritmetica (`bursa + 10`). Concatenarea cu `||` face excepție și păstrează textul."
+              },
+              "misconception": "concat-null"
+            },
+            {
+              "text": {
+                "en": "`Bursa: ` (the text with nothing after it; it is not NULL).",
+                "ro": "`Bursa: ` (textul, fără nimic după el; nu este NULL)."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The `||` operator treats NULL as an empty string. Unlike arithmetic, where `bursa + 10` gives NULL.",
+                "ro": "Corect. Operatorul `||` tratează NULL ca șir vid. Spre deosebire de aritmetică, unde `bursa + 10` dă NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "`Bursa: 0`",
+                "ro": "`Bursa: 0`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "NULL does not turn into 0 by itself. You would have to write `NVL(bursa, 0)`.",
+                "ro": "NULL nu se transformă în 0 de la sine. Ar trebui să scrii `NVL(bursa, 0)`."
+              },
+              "misconception": "null-arith"
+            }
+          ],
+          "review": "bd-l03"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s14",
+      "title": {
+        "en": "Outer join and WHERE",
+        "ro": "Join extern și WHERE"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q9",
+          "question": {
+            "en": "You write `studenti s LEFT JOIN note n ON s.nr_matricol = n.nr_matricol WHERE n.valoare >= 5`. What happens to the 4 students without grades?",
+            "ro": "Scrii `studenti s LEFT JOIN note n ON s.nr_matricol = n.nr_matricol WHERE n.valoare >= 5`. Ce se întâmplă cu cei 4 studenți fără note?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "They stay, with NULL in `valoare`.",
+                "ro": "Rămân, cu NULL la `valoare`."
+              },
+              "correct": false,
+              "explain": {
+                "en": "They would stay without the `WHERE` clause. With `WHERE`, the rows with `valoare` NULL are filtered after the join.",
+                "ro": "Ar rămâne fără clauza `WHERE`. Cu `WHERE`, rândurile cu `valoare` NULL sunt filtrate după join."
+              },
+              "misconception": "outer-where"
+            },
+            {
+              "text": {
+                "en": "Only they stay, and the other students disappear.",
+                "ro": "Rămân doar ei, iar ceilalți studenți dispar."
+              },
+              "correct": false,
+              "explain": {
+                "en": "`WHERE n.valoare >= 5` keeps the rows with a grade of at least 5; those without grades have `valoare` NULL and do not meet the condition, so they disappear, not the others.",
+                "ro": "`WHERE n.valoare >= 5` păstrează rândurile cu nota cel puțin 5; cei fără note au `valoare` NULL și nu îndeplinesc condiția, deci dispar ei, nu ceilalți."
+              },
+              "misconception": "outer-where"
+            },
+            {
+              "text": {
+                "en": "They disappear: as with an inner join.",
+                "ro": "Dispar: ca la un join intern."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. LEFT JOIN adds them with `valoare` NULL, but `WHERE n.valoare >= 5` is unknown for NULL and removes them. A filter on the deficient table has to go in `ON` or be written with `OR … IS NULL`.",
+                "ro": "Corect. LEFT JOIN îi adaugă cu `valoare` NULL, dar `WHERE n.valoare >= 5` este necunoscut pentru NULL și îi elimină. Filtrul pe tabela deficitară trebuie pus în `ON` sau scris cu `OR … IS NULL`."
+              }
+            }
+          ],
+          "review": "bd-l20"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s15",
+      "title": {
+        "en": "CASE without ELSE",
+        "ro": "CASE fără ELSE"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q10",
+          "question": {
+            "en": "What does `CASE WHEN an = 3 THEN 'final' END` return for a first-year student?",
+            "ro": "Ce întoarce `CASE WHEN an = 3 THEN 'final' END` pentru un student din anul 1?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "NULL (an empty cell).",
+                "ro": "NULL (o celulă goală)."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Without `ELSE`, a `CASE` that matches no branch gives NULL. Of the 13 students, 8 get NULL.",
+                "ro": "Corect. Fără `ELSE`, un `CASE` care nu potrivește nicio ramură dă NULL. Din cei 13 studenți, 8 primesc NULL."
+              }
+            },
+            {
+              "text": {
+                "en": "0",
+                "ro": "0"
+              },
+              "correct": false,
+              "explain": {
+                "en": "There is no default value of 0. Without `ELSE`, the result is NULL.",
+                "ro": "Nu există nicio valoare implicită de 0. Fără `ELSE`, rezultatul este NULL."
+              },
+              "misconception": "case-no-else"
+            },
+            {
+              "text": {
+                "en": "An error: `CASE` always requires `ELSE`.",
+                "ro": "O eroare: `CASE` cere mereu `ELSE`."
+              },
+              "correct": false,
+              "explain": {
+                "en": "`ELSE` is optional in Oracle. If it is missing and nothing matches, the result is NULL.",
+                "ro": "`ELSE` este opțional în Oracle. Dacă lipsește și nimic nu se potrivește, rezultatul este NULL."
+              },
+              "misconception": "case-no-else"
+            }
+          ],
+          "review": "bd-l16"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s16",
+      "title": {
+        "en": "LIKE on CHAR",
+        "ro": "LIKE pe CHAR"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q11",
+          "question": {
+            "en": "How many professors does `SELECT * FROM profesori WHERE prenume LIKE '%n'` return? (The `prenume` column is `CHAR(10)`; several professors have a first name ending in \"n\", for example Cristian or Florin.)",
+            "ro": "Câți profesori întoarce `SELECT * FROM profesori WHERE prenume LIKE '%n'`? (Coloana `prenume` este `CHAR(10)`; mai mulți profesori au prenumele terminat în „n”, de exemplu Cristian sau Florin.)"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "6 rows: all those whose first name ends in \"n\".",
+                "ro": "6 rânduri: toți cei al căror prenume se termină în „n”."
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is the value after `TRIM`. Without `TRIM`, the padding spaces prevent the match.",
+                "ro": "Aceasta e valoarea după `TRIM`. Fără `TRIM`, spațiile de completare împiedică potrivirea."
+              },
+              "misconception": "char-pad"
+            },
+            {
+              "text": {
+                "en": "0 rows.",
+                "ro": "0 rânduri."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `CHAR(10)` pads with spaces, so the value ends in a space, not in \"n\". With `TRIM(prenume) LIKE '%n'` it would be 6 rows.",
+                "ro": "Corect. `CHAR(10)` completează cu spații, deci valoarea se termină cu spațiu, nu cu „n”. Cu `TRIM(prenume) LIKE '%n'` ar fi 6 rânduri."
+              }
+            },
+            {
+              "text": {
+                "en": "6 rows: `LIKE` ignores the padding spaces on `CHAR`, as `=` does.",
+                "ro": "6 rânduri: `LIKE` ignoră spațiile de completare de la `CHAR`, ca și `=`."
+              },
+              "correct": false,
+              "explain": {
+                "en": "Only `=` does that: between a `CHAR` column and a literal, the comparison is padded, so `prenume = 'Cristian'` finds the rows. `LIKE` does not: the pattern `'%n'` must match up to the end of the value, and the value ends in spaces. So it is 0 rows.",
+                "ro": "Doar `=` face asta: între o coloană `CHAR` și un literal comparația se face cu umplere, deci `prenume = 'Cristian'` găsește rândurile. `LIKE` nu: modelul `'%n'` trebuie să se potrivească până la capătul valorii, iar valoarea se termină cu spații. Deci sunt 0 rânduri."
+              },
+              "misconception": "char-cmp"
+            }
+          ],
+          "review": "bd-l11"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s17",
+      "title": {
+        "en": "DISTINCT on the whole row",
+        "ro": "DISTINCT pe tot rândul"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l25-q12",
+          "question": {
+            "en": "How many rows does `SELECT DISTINCT an, grupa FROM studenti` return?",
+            "ro": "Câte rânduri întoarce `SELECT DISTINCT an, grupa FROM studenti`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "3 rows: as many as there are years.",
+                "ro": "3 rânduri: câți ani sunt."
+              },
+              "correct": false,
+              "explain": {
+                "en": "That is what `SELECT DISTINCT an` would give. With two columns, the deduplication works on the pair, not on the first column.",
+                "ro": "Asta ar da `SELECT DISTINCT an`. Cu două coloane, deduplicarea se face pe pereche, nu pe prima coloană."
+              },
+              "misconception": "distinct-row"
+            },
+            {
+              "text": {
+                "en": "13 rows: no duplicates.",
+                "ro": "13 rânduri: niciun duplicat."
+              },
+              "correct": false,
+              "explain": {
+                "en": "There are duplicates: for example, several year-3 students are in group A2. The pair `(3, 'A2')` appears only once.",
+                "ro": "Există duplicate: de exemplu, mai mulți studenți din anul 3 sunt în grupa A2. Perechea `(3, 'A2')` apare o singură dată."
+              },
+              "misconception": "distinct-row"
+            },
+            {
+              "text": {
+                "en": "7 rows.",
+                "ro": "7 rânduri."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `DISTINCT` acts on the whole row, that is, on the pair `(an, grupa)`: 7 different combinations.",
+                "ro": "Corect. `DISTINCT` acționează pe tot rândul, adică pe perechea `(an, grupa)`: 7 combinații diferite."
+              }
+            }
+          ],
+          "review": "bd-l02"
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s18",
+      "title": {
+        "en": "How to use the practice test",
+        "ro": "Cum folosești testul de probă"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The practice test in the **Teste** tab has 8 problems on a new schema, \"Biblioteca\", with the same kinds of traps as the faculty schema. You can take it in two ways: **on paper** (you write the answer, and only after \"Predă\" does running unlock, then you see the expected result and the solution) or **with running**, as in the lessons.",
+            "ro": "Testul de probă din fila **Teste** are 8 probleme pe o schemă nouă, „Biblioteca”, cu aceleași feluri de capcane ca schema facultății. Îl poți face în două moduri: **pe hârtie** (scrii răspunsul și abia după „Predă” se deblochează rularea, apoi vezi rezultatul așteptat și soluția) sau **cu rulare**, ca în lecții."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "tip",
+          "content": {
+            "en": "Wrong answers from the lessons land in the **Recapitulare** tab and come back the next day and three days later, as a fresh exercise. Take the practice test once Recapitulare is empty.",
+            "ro": "Răspunsurile greșite din lecții ajung în fila **Recapitulare** și revin a doua zi și peste trei zile, ca exercițiu nou. Fă testul de probă după ce Recapitularea s-a golit."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s19",
+      "title": {
+        "en": "The courses of a year, with professors",
+        "ro": "Cursurile unui an, cu profesori"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l25-ex-x1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the title of each year-2 course together with the name of the professor who teaches it. Courses without a professor must appear too, with an empty name. Columns: `titlu_curs`, `nume`. The name must have no trailing spaces (the column is `CHAR`).",
+            "ro": "Afișați titlul fiecărui curs din anul 2, împreună cu numele profesorului care îl ține. Cursurile fără profesor trebuie să apară și ele, cu numele gol. Coloanele: `titlu_curs`, `nume`. Numele să nu aibă spații la sfârșit (coloana este `CHAR`)."
+          },
+          "starter": "-- 1. Alege tabelele: cursuri (c), didactic (d) și profesori (p)\n-- 2. Leagă-le fără să pierzi cursuri: cursuri -> didactic -> profesori\n-- 3. Filtrează cursurile din anul 2\nSELECT c.titlu_curs, TRIM(p.nume) AS nume\nFROM cursuri c\n  LEFT JOIN didactic d ON d.id_curs = c.id_curs\n  LEFT JOIN profesori p ON p.id_prof = d.id_prof\nWHERE ",
+          "solution": "SELECT c.titlu_curs, TRIM(p.nume) AS nume\nFROM cursuri c\n  LEFT JOIN didactic d ON d.id_curs = c.id_curs\n  LEFT JOIN profesori p ON p.id_prof = d.id_prof\nWHERE c.an = 2",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Pick the tables: courses, the `didactic` link and professors. Courses are the table that must be kept in full. The `nume` column of `profesori` is `CHAR`: remove the trailing spaces with `TRIM`.",
+              "ro": "Alege tabelele: cursuri, legătura `didactic` și profesori. Cursurile sunt tabela care trebuie păstrată în întregime. Coloana `nume` din `profesori` este `CHAR`: scoate spațiile de la sfârșit cu `TRIM`."
+            },
+            {
+              "en": "Skeleton: `FROM cursuri c LEFT JOIN didactic d ON … LEFT JOIN profesori p ON … WHERE c.an = 2`.",
+              "ro": "Schelet: `FROM cursuri c LEFT JOIN didactic d ON … LEFT JOIN profesori p ON … WHERE c.an = 2`."
+            },
+            {
+              "en": "The filter `c.an = 2` is on the table that is kept in full (courses), so it can sit in `WHERE` without breaking the outer join. A course with two professors appears on two rows.",
+              "ro": "Filtrul `c.an = 2` este pe tabela păstrată integral (cursurile), deci poate sta în `WHERE` fără să strice join-ul extern. Un curs cu doi profesori apare pe două rânduri."
+            }
+          ],
+          "explain": {
+            "en": "Courses are on the left, so two `LEFT JOIN`s keep all of them, and those without a professor get NULL in `nume`. `TRIM` removes the spaces brought by the `CHAR` column. Result: 5 rows: BD with two professors, Java, Tehnologii Web, and Limbaje formale with no professor, with the name NULL.",
+            "ro": "Cursurile sunt în stânga, deci două `LEFT JOIN`-uri le păstrează pe toate, iar cele fără profesor primesc NULL la `nume`. `TRIM` scoate spațiile aduse de coloana `CHAR`. Rezultat: 5 rânduri: BD cu doi profesori, Java, Tehnologii Web, iar Limbaje formale fără profesor, cu numele NULL."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l25-s20",
+      "title": {
+        "en": "Courses with no grade below 5",
+        "ro": "Cursuri fără note sub 5"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l25-ex-x2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the courses in which grades were given and no grade is below 5. Columns: `id_curs`, `titlu_curs`.",
+            "ro": "Afișați cursurile la care s-au pus note și nicio notă nu este sub 5. Coloanele: `id_curs`, `titlu_curs`."
+          },
+          "solution": "SELECT c.id_curs, c.titlu_curs\nFROM cursuri c\n  JOIN note n ON n.id_curs = c.id_curs\nMINUS\nSELECT c.id_curs, c.titlu_curs\nFROM cursuri c\n  JOIN note n ON n.id_curs = c.id_curs\nWHERE n.valoare < 5",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Turn the question around: \"no grade below 5\" means \"courses with grades\" minus \"courses with a grade below 5\".",
+              "ro": "Pune întrebarea pe dos: „nicio notă sub 5” înseamnă „cursurile cu note” minus „cursurile cu o notă sub 5”."
+            },
+            {
+              "en": "Skeleton: `SELECT … FROM cursuri c JOIN note n ON … MINUS SELECT … FROM cursuri c JOIN note n ON … WHERE n.valoare …`.",
+              "ro": "Schelet: `SELECT … FROM cursuri c JOIN note n ON … MINUS SELECT … FROM cursuri c JOIN note n ON … WHERE n.valoare …`."
+            },
+            {
+              "en": "The key of a course is `id_curs`: put it in both `SELECT`s. Courses with no grades at all must not appear, so the first list starts from a join with `note`.",
+              "ro": "Cheia cursului este `id_curs`: pune-o în ambele `SELECT`-uri. Cursurile fără nicio notă nu trebuie să apară, deci prima listă pornește din join cu `note`."
+            }
+          ],
+          "explain": {
+            "en": "\"All grades are ≥ 5\" is \"have grades\" minus \"have a grade < 5\". Result: 2 courses (Logica and Matematica); the other four each have a grade of 4, and courses without grades are not in the first list.",
+            "ro": "„Toate notele sunt ≥ 5” este „au note” minus „au o notă < 5”. Rezultat: 2 cursuri (Logica și Matematica); celelalte patru au câte o notă de 4, iar cursurile fără note nu sunt în prima listă."
+          }
+        }
+      ]
+    }
+  ]
+}

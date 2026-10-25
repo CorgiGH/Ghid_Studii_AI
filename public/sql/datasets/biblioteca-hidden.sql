@@ -76,7 +76,7 @@ INSERT INTO imprumuturi VALUES ('c1', 'b5', TO_DATE('11/03/2024','dd/mm/yyyy'), 
 INSERT INTO imprumuturi VALUES ('c2', 'b1', TO_DATE('14/01/2024','dd/mm/yyyy'), TO_DATE('29/01/2024','dd/mm/yyyy'), 5);
 INSERT INTO imprumuturi VALUES ('c2', 'b2', TO_DATE('13/03/2024','dd/mm/yyyy'), TO_DATE('27/03/2024','dd/mm/yyyy'), 7);
 INSERT INTO imprumuturi VALUES ('c3', 'b2', TO_DATE('15/01/2024','dd/mm/yyyy'), TO_DATE('31/01/2024','dd/mm/yyyy'), 6);
-INSERT INTO imprumuturi VALUES ('c3', 'b4', TO_DATE('20/03/2024','dd/mm/yyyy'), TO_DATE('04/04/2024','dd/mm/yyyy'), 8);
+INSERT INTO imprumuturi VALUES ('c3', 'b4', TO_DATE('20/03/2023','dd/mm/yyyy'), TO_DATE('04/04/2023','dd/mm/yyyy'), 8);
 INSERT INTO imprumuturi VALUES ('c4', 'b4', TO_DATE('01/02/2024','dd/mm/yyyy'), TO_DATE('15/02/2024','dd/mm/yyyy'), 10);
 INSERT INTO imprumuturi VALUES ('c4', 'b5', TO_DATE('08/04/2024','dd/mm/yyyy'), TO_DATE('22/04/2024','dd/mm/yyyy'), 4);
 INSERT INTO imprumuturi VALUES ('c4', 'b7', TO_DATE('08/04/2024','dd/mm/yyyy'), TO_DATE('23/04/2024','dd/mm/yyyy'), 6);

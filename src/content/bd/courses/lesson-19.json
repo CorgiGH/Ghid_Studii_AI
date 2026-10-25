@@ -1,0 +1,577 @@
+{
+  "meta": {
+    "id": "bd-l19",
+    "title": {
+      "en": "Lesson 19: Chains of JOINs, NATURAL JOIN and the «an» trap",
+      "ro": "Lecția 19: Lanț de JOIN-uri, NATURAL JOIN și capcana «an»"
+    },
+    "shortTitle": {
+      "en": "L19: Chains of JOINs",
+      "ro": "L19: Lanț de JOIN-uri"
+    },
+    "source": {
+      "en": "Databases -- Lab 4 (JOIN), UAIC",
+      "ro": "Baze de date -- Laboratorul 4 (JOIN), UAIC"
+    }
+  },
+  "steps": [
+    {
+      "id": "bd-l19-s1",
+      "title": {
+        "en": "Who gave the 10?",
+        "ro": "Cine a pus nota 10?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l19-r1",
+          "prompt": {
+            "en": "You have five tables: `studenti`, `note` (which grade each student got, at which course), `cursuri`, `didactic` (which professor teaches which course) and `profesori`. You want to find out who gave the 10 at BD. Which tables would you link, and in what order? Look at the table below: what do you notice about courses 21 and 24?",
+            "ro": "Ai cinci tabele: `studenti`, `note` (ce notă a luat fiecare, la ce curs), `cursuri`, `didactic` (care profesor ține care curs) și `profesori`. Vrei să afli cine a pus nota 10 la BD. Ce tabele ai lega și în ce ordine? Uită-te la tabelul de mai jos: ce observi la cursurile 21 și 24?"
+          },
+          "placeholder": {
+            "en": "Which tables do you link, and what do you notice?",
+            "ro": "Ce tabele legi și ce observi?"
+          },
+          "answer": {
+            "en": "The chain is `note` → `cursuri` (to find the course «BD») → `didactic` (who teaches the course) → `profesori` (the names). Courses 21 (Logica) and 24 (BD) each have two professors, so every grade at them appears twice: the schema links professors to courses, not to grades, so you cannot tell which of the two gave a particular grade. The students with a 10 at BD are Antonie Ioana and Panaite Alexandru.",
+            "ro": "Lanțul este `note` → `cursuri` (ca să găsești cursul «BD») → `didactic` (cine predă cursul) → `profesori` (numele). Cursurile 21 (Logica) și 24 (BD) au câte doi profesori, așa că fiecare notă de la ele apare de două ori: schema leagă profesorii de curs, nu de notă, deci nu se poate ști care dintre cei doi a pus o notă anume. Studenții cu 10 la BD sunt Antonie Ioana și Panaite Alexandru."
+          },
+          "table": {
+            "dataset": "facultate",
+            "sql": "SELECT c.id_curs, c.titlu_curs, d.id_prof FROM cursuri c JOIN didactic d ON c.id_curs = d.id_curs ORDER BY c.id_curs"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s2",
+      "title": {
+        "en": "One row splits in two",
+        "ro": "Un rând se desparte în două"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Follow one course on the left: when it has two professors in `didactic`, its row splits into two wires. Count the wires that leave a course and compare with the rows you started from.",
+            "ro": "Urmărește un curs din stânga: când are doi profesori în `didactic`, rândul lui se desparte în două fire. Numără firele care pleacă dintr-un curs și compară cu rândurile de la care ai pornit."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "bd-l19-viz1",
+          "widget": "join-wires",
+          "predict": false,
+          "props": {
+            "left": "cursuri",
+            "right": "didactic",
+            "on": "cursuri.id_curs = didactic.id_curs",
+            "kind": "inner"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s3",
+      "title": {
+        "en": "The chain of five tables",
+        "ro": "Lanțul de cinci tabele"
+      },
+      "blocks": [
+        {
+          "type": "query-machine",
+          "id": "bd-l19-qm1",
+          "dataset": "facultate",
+          "sql": "SELECT s.nume, c.titlu_curs, n.valoare, p.nume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs JOIN didactic d ON d.id_curs = c.id_curs JOIN profesori p ON p.id_prof = d.id_prof WHERE c.titlu_curs = 'BD'",
+          "stages": [
+            {
+              "clause": "from"
+            },
+            {
+              "clause": "join"
+            },
+            {
+              "clause": "where",
+              "predict": true
+            }
+          ],
+          "show": [
+            "s.nume",
+            "c.titlu_curs",
+            "n.valoare",
+            "p.nume"
+          ],
+          "say": {
+            "from": {
+              "en": "We start from `studenti`.",
+              "ro": "Pornim de la `studenti`."
+            },
+            "join": {
+              "en": "The four `JOIN`s apply one after another. The chain starts from 42 grades but returns 56 rows: the 9 grades at Logica and the 5 at BD each appear twice, because those courses have two professors (42 + 9 + 5 = 56).",
+              "ro": "Cele patru `JOIN`-uri se aplică pe rând. Lanțul pornește de la 42 de note, dar întoarce 56 de rânduri: cele 9 note de la Logica și cele 5 de la BD apar fiecare de două ori, pentru că acele cursuri au doi profesori (42 + 9 + 5 = 56)."
+            },
+            "where": {
+              "en": "10 rows stay: the 5 BD grades, each next to both professors of the course.",
+              "ro": "Rămân 10 rânduri: cele 5 note de la BD, fiecare lângă amândoi profesorii cursului."
+            }
+          },
+          "ask": {
+            "where": {
+              "en": "Which of the 56 rows have the course `BD`? There are 5 grades × 2 professors.",
+              "ro": "Care dintre cele 56 de rânduri au cursul `BD`? Sunt 5 note × 2 profesori."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s4",
+      "title": {
+        "en": "Multiplied rows and NATURAL JOIN",
+        "ro": "Rânduri multiplicate și NATURAL JOIN"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Rows multiply.** A course with two professors makes each of its grades appear twice. The chain of five tables gives 56 rows, although there are only 42 grades. This is not a database bug: it is how a 1:N link behaves. If you need one row per grade, do not bring `didactic` and `profesori` into the query.",
+            "ro": "**Rândurile se înmulțesc.** Un curs cu doi profesori face ca fiecare notă a lui să apară de două ori. Lanțul de cinci tabele dă 56 de rânduri, deși există doar 42 de note. Nu e o eroare a bazei de date: așa se comportă o legătură 1:N. Dacă ai nevoie de un rând pe notă, nu aduce `didactic` și `profesori` în interogare."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**`NATURAL JOIN` links on ALL the columns with the same name.** `studenti NATURAL JOIN note` uses only `nr_matricol` (the only shared column) and gives 42 rows. But `studenti NATURAL JOIN note NATURAL JOIN cursuri` gives 0 rows: `cursuri` shares with the result so far both `id_curs` and `an`, and the student's year does not match the course's year.",
+            "ro": "**`NATURAL JOIN` leagă după TOATE coloanele cu același nume.** `studenti NATURAL JOIN note` folosește doar `nr_matricol` (singura coloană comună) și dă 42 de rânduri. Dar `studenti NATURAL JOIN note NATURAL JOIN cursuri` dă 0 rânduri: `cursuri` are în comun cu rezultatul de până acum și `id_curs`, și `an`, iar anul studentului nu coincide cu anul cursului."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s5",
+      "title": {
+        "en": "Columns in a chain",
+        "ro": "Coloane în lanț"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**A `NATURAL JOIN` column takes no prefix.** `SELECT s.nr_matricol FROM studenti s NATURAL JOIN note n` gives `ORA-25155: column used in NATURAL join cannot have qualifier`. Write `SELECT nr_matricol …`, without `s.`. By contrast, with `JOIN … ON` the prefix is mandatory.",
+            "ro": "**Coloana unui `NATURAL JOIN` nu primește prefix.** `SELECT s.nr_matricol FROM studenti s NATURAL JOIN note n` dă `ORA-25155: column used in NATURAL join cannot have qualifier`. Scrie `SELECT nr_matricol …`, fără `s.`. Invers, la `JOIN … ON` prefixul este obligatoriu."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Ambiguous column in a chain.** `id_curs` appears in `note`, `cursuri` and `didactic`. `SELECT id_curs FROM note n JOIN cursuri c ON n.id_curs = c.id_curs JOIN didactic d ON d.id_curs = c.id_curs` gives `ORA-00918: column ambiguously defined`. The longer the chain, the more names repeat: prefix everything.",
+            "ro": "**Coloană ambiguă în lanț.** `id_curs` apare în `note`, `cursuri` și `didactic`. `SELECT id_curs FROM note n JOIN cursuri c ON n.id_curs = c.id_curs JOIN didactic d ON d.id_curs = c.id_curs` dă `ORA-00918: column ambiguously defined`. Cu cât lanțul e mai lung, cu atât mai multe nume se repetă: prefixează tot."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s6",
+      "title": {
+        "en": "A chain of JOINs",
+        "ro": "Lanțul de JOIN-uri"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "SELECT n.valoare, c.titlu_curs, d.id_prof\nFROM note n\n  JOIN cursuri c ON c.id_curs = n.id_curs\n  JOIN didactic d ON d.id_curs = c.id_curs;"
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- NATURAL JOIN: leagă singur după coloanele cu același nume\nSELECT nume, prenume, valoare\nFROM studenti NATURAL JOIN note;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Chain of JOINs",
+            "ro": "Lanț de JOIN-uri"
+          },
+          "content": {
+            "en": "Each `JOIN … ON` adds one table and a condition that links it to one already present. For n tables you need n − 1 conditions.",
+            "ro": "Fiecare `JOIN … ON` adaugă un tabel și o condiție care îl leagă de unul deja prezent. Pentru n tabele ai nevoie de n − 1 condiții."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "Link table",
+            "ro": "Tabel de legătură"
+          },
+          "content": {
+            "en": "A table that exists only to link two others, here `didactic` (professor ↔ course). If a course appears twice in it, its rows are doubled in the result.",
+            "ro": "Un tabel care există doar ca să lege alte două, aici `didactic` (profesor ↔ curs). Dacă un curs apare de două ori în el, rândurile lui se dublează în rezultat."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "NATURAL JOIN",
+            "ro": "NATURAL JOIN"
+          },
+          "content": {
+            "en": "A join that automatically uses all columns with the same name in the two tables, as equalities joined by `AND`. Useful only when you know exactly which columns share a name.",
+            "ro": "Un join care folosește automat toate coloanele cu același nume din cele două tabele, ca egalități legate prin `AND`. Util doar când știi exact ce coloane au numele comun."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s7",
+      "title": {
+        "en": "Why 0 rows?",
+        "ro": "De ce 0 rânduri?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l19-r2",
+          "prompt": {
+            "en": "`studenti NATURAL JOIN note NATURAL JOIN cursuri` returns 0 rows, although a correctly written `JOIN … ON` chain on the same three tables gives 42. Why?",
+            "ro": "`studenti NATURAL JOIN note NATURAL JOIN cursuri` întoarce 0 rânduri, deși un lanț cu `JOIN … ON` corect pe aceleași trei tabele dă 42. De ce?"
+          },
+          "placeholder": {
+            "en": "Explain in your own words",
+            "ro": "Explică în cuvintele tale"
+          },
+          "answer": {
+            "en": "The second `NATURAL JOIN` links on all columns with the same name. Besides `id_curs`, both `studenti` and `cursuri` have a column `an`, so the condition becomes «same course AND same year». Here `an` in `studenti` (the student's year) does not match `an` in `cursuri` (the year the course is taught) on any row that also has the matching grade, so nothing is left. With `ON` you choose the exact equalities. That the result is 0 depends on our data; what matters is that `NATURAL JOIN` silently adds a condition you did not write.",
+            "ro": "Al doilea `NATURAL JOIN` leagă după toate coloanele cu același nume. Pe lângă `id_curs`, și `studenti`, și `cursuri` au o coloană `an`, deci condiția devine «același curs ȘI același an». Aici `an` din `studenti` (anul în care e studentul) nu coincide cu `an` din `cursuri` (anul în care se predă) pe niciun rând care are și nota potrivită, așa că nu rămâne nimic. Cu `ON` alegi tu exact egalitățile. Faptul că rezultatul este 0 ține de datele noastre; important e că `NATURAL JOIN` adaugă în tăcere o condiție pe care n-ai scris-o."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s8",
+      "title": {
+        "en": "Rows in the chain",
+        "ro": "Rânduri în lanț"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l19-q1",
+          "question": {
+            "en": "How many rows does the chain `studenti – note – cursuri – didactic – profesori` return for all the grades?",
+            "ro": "Câte rânduri întoarce lanțul `studenti – note – cursuri – didactic – profesori` pentru toate notele?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "42, one grade per row",
+                "ro": "42, câte o notă pe rând"
+              },
+              "correct": false,
+              "explain": {
+                "en": "42 is the number of grades. But two courses have two professors each and their grades are doubled in the chain.",
+                "ro": "42 este numărul de note. Dar două cursuri au câte doi profesori și își dublează notele în lanț."
+              },
+              "misconception": "row-multiply"
+            },
+            {
+              "text": {
+                "en": "56",
+                "ro": "56"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: 42 + 9 (Logica) + 5 (BD) = 56.",
+                "ro": "Corect: 42 + 9 (Logica) + 5 (BD) = 56."
+              }
+            },
+            {
+              "text": {
+                "en": "10, the number of rows in `didactic`",
+                "ro": "10, numărul de rânduri din `didactic`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "10 is the number of rows in `didactic`, not of the result. The result starts from the grades and is multiplied by the number of professors of each course.",
+                "ro": "10 este numărul de rânduri din `didactic`, nu al rezultatului. Rezultatul pornește de la note și se înmulțește cu numărul de profesori ai fiecărui curs."
+              },
+              "misconception": "row-multiply"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s9",
+      "title": {
+        "en": "What NATURAL JOIN links on",
+        "ro": "Pe ce leagă NATURAL JOIN"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l19-q2",
+          "question": {
+            "en": "`studenti NATURAL JOIN note` links the two tables on:",
+            "ro": "`studenti NATURAL JOIN note` leagă cele două tabele după:"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "all the columns of the two tables",
+                "ro": "toate coloanele celor două tabele"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Only the columns that have the same name in both tables enter the condition.",
+                "ro": "Doar coloanele care au același nume în ambele tabele intră în condiție."
+              },
+              "misconception": "natural-join-all"
+            },
+            {
+              "text": {
+                "en": "`nr_matricol`, the only column with the same name in both",
+                "ro": "`nr_matricol`, singura coloană cu același nume în ambele"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. `studenti` and `note` share no other name, which is why the result has 42 rows.",
+                "ro": "Corect. `studenti` și `note` nu mai au alte nume în comun, de aceea rezultatul are 42 de rânduri."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s10",
+      "title": {
+        "en": "Prefix with NATURAL JOIN",
+        "ro": "Prefix la NATURAL JOIN"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l19-q3",
+          "question": {
+            "en": "What does `SELECT s.nr_matricol FROM studenti s NATURAL JOIN note n` do?",
+            "ro": "Ce face `SELECT s.nr_matricol FROM studenti s NATURAL JOIN note n`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "It works and shows the registration numbers",
+                "ro": "Merge și afișează numerele matricole"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The column that `NATURAL JOIN` uses cannot have a prefix, not even the alias.",
+                "ro": "Coloana pe care o folosește `NATURAL JOIN` nu poate avea prefix, nici măcar aliasul."
+              },
+              "misconception": "natural-join-all"
+            },
+            {
+              "text": {
+                "en": "Error `ORA-25155: column used in NATURAL join cannot have qualifier`",
+                "ro": "Eroare `ORA-25155: column used in NATURAL join cannot have qualifier`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Write `SELECT nr_matricol …` without `s.`.",
+                "ro": "Corect. Scrie `SELECT nr_matricol …` fără `s.`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s11",
+      "title": {
+        "en": "The alias hides the name",
+        "ro": "Aliasul ascunde numele"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "bd-l19-q4",
+          "question": {
+            "en": "What does `SELECT s.nume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol WHERE studenti.nume = 'Bodnar'` do?",
+            "ro": "Ce face `SELECT s.nume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol WHERE studenti.nume = 'Bodnar'`?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "It works: `studenti` stays valid even if you gave an alias",
+                "ro": "Merge: `studenti` rămâne valid chiar dacă ai dat alias"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Once there is an alias, the full table name can no longer be used in any clause of the query.",
+                "ro": "Odată cu aliasul, numele întreg al tabelului nu mai poate fi folosit în nicio clauză a interogării."
+              },
+              "misconception": "ambiguous-col"
+            },
+            {
+              "text": {
+                "en": "Error `ORA-00904: \"STUDENTI\".\"NUME\": invalid identifier`",
+                "ro": "Eroare `ORA-00904: \"STUDENTI\".\"NUME\": invalid identifier`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: write `s.nume` in `WHERE` as well.",
+                "ro": "Corect: scrie `s.nume` și în `WHERE`."
+              }
+            }
+          ],
+          "review": "bd-l18"
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s12",
+      "title": {
+        "en": "Professors and their courses",
+        "ro": "Profesorii și cursurile lor"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l19-ex-4-3",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the professors (last name and first name) together with the courses each one teaches.\n\nOfficial statement (Romanian): Afisaţi profesorii (numele şi prenumele) impreuna cu cursurile pe care fiecare le ţine.\n\nColumns, in order: the professor's last name, the professor's first name, the course title.",
+            "ro": "Afisaţi profesorii (numele şi prenumele) impreuna cu cursurile pe care fiecare le ţine.\n\nColoanele, în ordine: numele profesorului, prenumele profesorului, titlul cursului."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 3
+          },
+          "starter": "-- 1. Alege tabelele: profesori (p), didactic (d), cursuri (c)\n-- 2. Leagă-le în lanț: profesori -> didactic -> cursuri\n-- 3. Alege coloanele: nume, prenume, titlu_curs\nSELECT ____\nFROM profesori p\n  JOIN didactic d ON ____\n  JOIN cursuri c ON ____",
+          "solution": "SELECT p.nume, p.prenume, c.titlu_curs FROM profesori p JOIN didactic d ON p.id_prof = d.id_prof JOIN cursuri c ON d.id_curs = c.id_curs",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Choose the tables: names are in `profesori`, titles in `cursuri`, and `didactic` says who teaches what.",
+              "ro": "Alege tabelele: numele sunt în `profesori`, titlurile în `cursuri`, iar `didactic` spune cine ce predă."
+            },
+            {
+              "en": "Chain them: `profesori p JOIN didactic d ON … JOIN cursuri c ON …`. Each `ON` links the new table to one already written.",
+              "ro": "Leagă-le în lanț: `profesori p JOIN didactic d ON … JOIN cursuri c ON …`. Fiecare `ON` leagă tabelul nou de unul deja scris."
+            },
+            {
+              "en": "The first `ON` is `p.id_prof = d.id_prof`, the second `d.id_curs = c.id_curs`. The middle table is only a bridge: we show nothing from `didactic`. The result has 10 rows, one per row of `didactic`.",
+              "ro": "Primul `ON` este `p.id_prof = d.id_prof`, al doilea `d.id_curs = c.id_curs`. Tabelul din mijloc e doar o punte: nu afișăm nimic din `didactic`. Rezultatul are 10 rânduri, câte unul pe rând din `didactic`."
+            }
+          ],
+          "explain": {
+            "en": "The rows of `profesori` without a course (7 of the 16) do not appear, and Varlan appears twice, because he teaches two courses (BD and DSFUM). This is the base chain that the exercises in the next lesson will modify.",
+            "ro": "Rândurile din `profesori` fără curs (7 dintre cei 16) nu apar, iar Varlan apare de două ori, fiindcă ține două cursuri (BD și DSFUM). Acesta e lanțul de bază pe care îl vor modifica exercițiile din lecția următoare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s13",
+      "title": {
+        "en": "The 10 at BD",
+        "ro": "Nota 10 la BD"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l19-ex-4-2",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the students who got a 10 in the course 'BD'. The only values you may hard-code in the query are the grade (10) and the course name ('BD').\n\nOfficial statement (Romanian): Afişaţi studenţii care au luat nota 10 la materia 'BD'. Singurele valori pe care aveţi voie să le hardcodaţi în interogare sunt valoarea notei (10) şi numele cursului ('BD').\n\nColumns, in order: the student's last name and first name.",
+            "ro": "Afişaţi studenţii care au luat nota 10 la materia 'BD'. Singurele valori pe care aveţi voie să le hardcodaţi în interogare sunt valoarea notei (10) şi numele cursului ('BD').\n\nColoanele, în ordine: numele și prenumele studentului."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 2
+          },
+          "starter": "-- 1. Alege tabelele: studenti (s), note (n), cursuri (c)\n-- 2. Leagă-le: studenti -> note -> cursuri\n-- 3. Filtrează: nota 10 și titlul 'BD'\nSELECT s.nume, s.prenume\nFROM studenti s\n  JOIN note n ON s.nr_matricol = n.nr_matricol\n  JOIN cursuri c ON \nWHERE ",
+          "solution": "SELECT s.nume, s.prenume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE n.valoare = 10 AND c.titlu_curs = 'BD'",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Choose the tables: the students, the grades and the courses (so you can find «BD» by title without knowing its id).",
+              "ro": "Alege tabelele: studenții, notele și cursurile (ca să găsești «BD» după titlu, fără să știi id-ul)."
+            },
+            {
+              "en": "A chain of three tables: `studenti s JOIN note n ON … JOIN cursuri c ON …`, then `WHERE` with two conditions joined by `AND`: the grade and the title.",
+              "ro": "Lanț de trei tabele: `studenti s JOIN note n ON … JOIN cursuri c ON …`, apoi `WHERE` cu două condiții legate prin `AND`: nota și titlul."
+            },
+            {
+              "en": "The links are `s.nr_matricol = n.nr_matricol` and `c.id_curs = n.id_curs`. The filters are `n.valoare = 10` and `c.titlu_curs = 'BD'`. You do not need `didactic`: you do not care about the professor, and bringing it in doubles the rows.",
+              "ro": "Legăturile sunt `s.nr_matricol = n.nr_matricol` și `c.id_curs = n.id_curs`. Filtrele sunt `n.valoare = 10` și `c.titlu_curs = 'BD'`. Nu ai nevoie de `didactic`: nu te interesează profesorul, iar dacă îl aduci rândurile se dublează."
+            }
+          ],
+          "explain": {
+            "en": "Two students have a 10 at BD: Antonie Ioana and Panaite Alexandru. The course is found by title, so you must go through `cursuri`; you may not write `id_curs = '24'` directly.",
+            "ro": "Doi studenți au 10 la BD: Antonie Ioana și Panaite Alexandru. Cursul se caută după titlu, așa că trebuie să treci prin `cursuri`; nu ai voie să scrii direct `id_curs = '24'`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd-l19-s14",
+      "title": {
+        "en": "Students, grades, professors",
+        "ro": "Studenți, note, profesori"
+      },
+      "blocks": [
+        {
+          "type": "sql-exercise",
+          "id": "bd-l19-ex-4-1",
+          "dataset": "facultate",
+          "kind": "query",
+          "prompt": {
+            "en": "Show the students, the grades they got and the professors who gave those grades.\n\nOfficial statement (Romanian): Afişaţi studenţii şi notele pe care le-au luat si profesorii care le-au pus acele note.\n\nThe schema links professors to courses, not to grades, so «the professors who gave the grade» are the professors of that course. Columns, in order: the student's last name and first name, the course title, the grade value, the professor's last name and first name.",
+            "ro": "Afişaţi studenţii şi notele pe care le-au luat si profesorii care le-au pus acele note.\n\nSchema leagă profesorii de curs, nu de notă, așa că «profesorii care au pus nota» sunt profesorii cursului respectiv. Coloanele, în ordine: numele și prenumele studentului, titlul cursului, valoarea notei, numele și prenumele profesorului."
+          },
+          "official": {
+            "lab": 4,
+            "ex": 1
+          },
+          "solution": "SELECT s.nume, s.prenume, c.titlu_curs, n.valoare, p.nume, p.prenume FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs JOIN didactic d ON d.id_curs = c.id_curs JOIN profesori p ON p.id_prof = d.id_prof",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "hints": [
+            {
+              "en": "Choose the tables: all five. The student and grade come from `studenti` and `note`, the course from `cursuri`, the professor from `profesori`, and `didactic` links them.",
+              "ro": "Alege tabelele: toate cinci. Studentul și nota vin din `studenti` și `note`, cursul din `cursuri`, profesorul din `profesori`, iar `didactic` le leagă."
+            },
+            {
+              "en": "Four `JOIN`s, one for each new table, each with an `ON` towards a table already written: studenti–note, note–cursuri, cursuri–didactic, didactic–profesori.",
+              "ro": "Patru `JOIN`-uri, câte unul pentru fiecare tabel nou, fiecare cu `ON` către un tabel deja scris: studenti–note, note–cursuri, cursuri–didactic, didactic–profesori."
+            },
+            {
+              "en": "The conditions: `s.nr_matricol = n.nr_matricol`, `c.id_curs = n.id_curs`, `d.id_curs = c.id_curs`, `p.id_prof = d.id_prof`. If you think too many rows come out, you are right: there are 56, not 42, because two courses have two professors.",
+              "ro": "Condițiile: `s.nr_matricol = n.nr_matricol`, `c.id_curs = n.id_curs`, `d.id_curs = c.id_curs`, `p.id_prof = d.id_prof`. Dacă ți se pare că ies prea multe rânduri, ai dreptate: sunt 56, nu 42, pentru că două cursuri au doi profesori."
+            }
+          ],
+          "explain": {
+            "en": "56 rows: the 42 grades, plus 9 more for Logica and 5 for BD, because those two courses have two professors each. The query cannot say which professor gave the grade, because the schema does not keep that information.",
+            "ro": "56 de rânduri: cele 42 de note, plus încă 9 pentru Logica și 5 pentru BD, fiindcă acele două cursuri au câte doi profesori. Interogarea nu poate spune care profesor a pus nota, pentru că schema nu păstrează acea informație."
+          }
+        }
+      ]
+    }
+  ]
+}
