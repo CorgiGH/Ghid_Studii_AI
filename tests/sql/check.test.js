@@ -29,6 +29,15 @@ describe('checkResult: query results', () => {
     expect(v).toMatchObject({ ok: false, kind: 'rowcount', missing: [['3', null]], extra: [] })
   })
 
+  it('grades a cut-off result by its full row count, not by the rows that were kept', () => {
+    // a cartesian product cut at maxRows: the kept rows miss some expected rows that the full result has
+    const cut = { kind: 'rows', columns: ['A', 'B'], rows: [['1', 'x'], ['1', 'x']], rowCount: 1440, truncated: true }
+    const v = checkResult(cut, expected, ANY)
+    expect(v).toMatchObject({ ok: false, kind: 'rowcount', missing: [], extra: [], rowCount: 1440, expectedCount: 3 })
+    expect(explainVerdict(v).ro).toBe('Rezultatul tău are 1440 de rânduri; cerința are 3.')
+    expect(explainVerdict(v).en).toBe('Your result has 1440 rows; the task asks for 3.')
+  })
+
   it('treats a duplicate row as an extra row in bag mode', () => {
     const v = checkResult(rows(['A', 'B'], ['1', 'x'], ['1', 'x'], ['2', 'y'], ['3', null]), expected, ANY)
     expect(v).toMatchObject({ ok: false, kind: 'rowcount', extra: [['1', 'x']] })

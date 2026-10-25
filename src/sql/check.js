@@ -120,6 +120,9 @@ function checkQuery(actual, expected, spec) {
   if (actual.kind && actual.kind !== 'rows') return verdict('structure', { message: 'the statement did not return rows' })
   const cosmetic = spec.cosmetic ?? []
   if (actual.columns.length !== expected.columns.length) return verdict('columns')
+  // A result cut at maxRows: the kept rows say nothing about which expected rows are missing, so grade by the full count (no
+  // expected answer comes near maxRows, so a cut-off result is never the right one).
+  if (actual.truncated) return verdict('rowcount', { rowCount: actual.rowCount, expectedCount: expected.rows.length })
 
   const merge = spec.mode === 'set' ? (rows) => dedupe(rows, cosmetic) : (rows) => rows
   const aRows = merge(actual.rows)

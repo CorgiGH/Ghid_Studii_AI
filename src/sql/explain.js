@@ -393,6 +393,10 @@ export function explainVerdict(v) {
       return { ro: 'Rezultatul este cel cerut.', en: 'The result is the one asked for.' }
     case 'rows':
     case 'rowcount': {
+      if (v.rowCount != null && v.expectedCount != null) {
+        const de = v.rowCount % 100 === 0 || v.rowCount % 100 >= 20 ? 'de ' : '' // 1440 de rânduri, 512 rânduri
+        return { ro: `Rezultatul tău are ${v.rowCount} ${de}rânduri; cerința are ${v.expectedCount}.`, en: `Your result has ${v.rowCount} rows; the task asks for ${v.expectedCount}.` }
+      }
       const m = count(miss, 'rând așteptat lipsește', 'rânduri așteptate lipsesc', 'expected row is missing', 'expected rows are missing')
       const x = count(extra, 'rând în plus', 'rânduri în plus', 'extra row', 'extra rows')
       const ro = miss && extra ? `${m.ro} și ${x.ro}.` : miss ? `${m.ro}.` : extra ? `Ai ${x.ro}.` : 'Rândurile nu sunt cele cerute.'
