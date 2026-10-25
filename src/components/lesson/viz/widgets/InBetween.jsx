@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame, ValueChips } from '../ui.jsx';
-import { inBetween } from '../logic/in-between.js';
+import { inBetween, inCaption, inCondition, sqlLit } from '../logic/in-between.js';
 
 const mark = (o) => (o === true ? '✓' : o === false ? '✗' : '?');
 
@@ -22,15 +22,13 @@ export default function InBetween({ props, predict }) {
   const combine = mode === 'all' ? t('all must be true (and)', 'toate trebuie să fie adevărate (și)') : t('one true is enough (or)', 'una adevărată e de ajuns (sau)');
   const selected = verdicts.filter(v => v === true).length;
 
+  const capV = k >= 1 ? inCaption(mode, props, value, cur) : null;
+  const list = mode === 'between' ? '' : `(${props.list.map(sqlLit).join(', ')})`;
   const caption = k === 0
     ? (mode === 'between'
       ? t(`BETWEEN ${props.low} AND ${props.high} is a ruler with both ends included.`, `BETWEEN ${props.low} AND ${props.high} este o riglă cu ambele capete incluse.`)
-      : t(`${word} (${props.list.join(', ')}): each value is tried against every drawer; ${combine}.`, `${word} (${props.list.join(', ')}): fiecare valoare se încearcă la fiecare sertar; ${combine}.`))
-    : cur.result === null
-      ? t(`${value === null ? 'NULL' : value}: a comparison with NULL is never true and never false. It is unknown, so the row is not selected.`, `${value === null ? 'NULL' : value}: o comparație cu NULL nu e nici adevărată, nici falsă. E necunoscută, deci rândul nu este ales.`)
-      : cur.result
-        ? t(`${value}: selected.`, `${value}: ales.`)
-        : t(`${value}: not selected.`, `${value}: nu e ales.`);
+      : t(`${word} ${list}: each value is tried against every drawer; ${combine}.`, `${word} ${list}: fiecare valoare se încearcă la fiecare sertar; ${combine}.`))
+    : t(capV.en, capV.ro);
 
   // ruler geometry for BETWEEN
   const nums = mode === 'between' ? values.filter(v => typeof v === 'number').concat([props.low, props.high]) : [];
@@ -70,14 +68,12 @@ export default function InBetween({ props, predict }) {
       )}
       {k >= 1 && (
         <Motion.div key={k} className="viz-combine" variants={m.v.enter} initial="hidden" animate="show" custom={props.list?.length || 2}>
-          {mode === 'between'
-            ? <><code>{props.low} ≤ {value === null ? 'NULL' : value} ≤ {props.high}</code></>
-            : <><code>{value === null ? 'NULL' : value} {op} {mode === 'all' ? 'ALL' : mode === 'any' ? 'ANY' : 'IN'}</code></>}
+          <code>{inCondition(mode, props, value)}</code>
           <span className={`viz-badge ${cur.result === true ? 'yes' : cur.result === false ? 'no' : ''}`}>{cur.result === true ? t('true', 'adevărat') : cur.result === false ? t('false', 'fals') : t('unknown', 'necunoscut')}</span>
         </Motion.div>
       )}
       <ValueChips items={values} step={k} verdicts={verdicts} onPick={s.goto} />
-      {k === values.length && <div className="viz-dim viz-note">{t(`${selected} of ${values.length} rows selected.`, `${selected} din ${values.length} rânduri alese.`)}</div>}
+      {k === values.length && <div className="viz-dim viz-note">{t(`${selected} of ${values.length} rows selected.`, `${selected} din ${values.length} rânduri ${selected === 1 ? 'este ales' : 'sunt alese'}.`)}</div>}
     </VizFrame>
   );
 }

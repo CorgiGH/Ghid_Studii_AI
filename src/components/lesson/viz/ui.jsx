@@ -10,7 +10,8 @@ export function VizFrame({ widget, stepper, caption, children, label }) {
   const { t } = useApp();
   const m = useVizMotion();
   const { n, step } = stepper;
-  const dots = n <= 14;
+  // up to 10 dots fit on one line between Back and "Mai departe" on a phone; longer runs show "3 / 14"
+  const dots = n <= 10;
   return (
     <figure className="viz" data-widget={widget} aria-label={label}>
       <div className="viz-stage">{children}</div>

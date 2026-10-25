@@ -4,6 +4,7 @@ import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame, CountUp } from '../ui.jsx';
 import { setBalls } from '../logic/set-balls.js';
+import { rowsNoun } from '../logic/words.js';
 import { setBallsSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -64,7 +65,7 @@ export default function SetBalls({ props, predict }) {
   const caption = k === 0
     ? t(`Two SELECTs, two piles of values. The set operators combine whole rows: here one name per row.`, `Două SELECT-uri, două grămezi de valori. Operatorii pe mulțimi combină rânduri întregi: aici, un nume pe rând.`)
     : ({
-      UNION: t('UNION puts both piles together and melts equal values into one. The result is also sorted.', 'UNION pune cele două grămezi laolaltă și topește valorile egale într-una. Rezultatul e și sortat.'),
+      UNION: t('UNION puts both piles together and melts equal values into one. The order of the rows is not guaranteed: if you want one, write ORDER BY at the end.', 'UNION pune cele două grămezi laolaltă și topește valorile egale într-una. Ordinea rândurilor nu e garantată: dacă o vrei, scrii ORDER BY la sfârșit.'),
       'UNION ALL': t('UNION ALL just stacks the piles: every ball stays, equal ones included.', 'UNION ALL doar suprapune grămezile: rămâne fiecare bilă, și cele egale.'),
       INTERSECT: t('INTERSECT keeps only values found in both piles, once each.', 'INTERSECT păstrează doar valorile găsite în ambele grămezi, câte una.'),
       MINUS: t('MINUS cuts from the first pile every value that also appears in the second, then removes repeats.', 'MINUS taie din prima grămadă orice valoare care apare și în a doua, apoi scoate repetările.'),
@@ -97,7 +98,7 @@ export default function SetBalls({ props, predict }) {
           );
         })}
       </div>
-      {res && <div className="viz-tally"><span className="viz-badge yes">{res.op}: <CountUp key={k} to={count} duration={0.6} /> {t('rows', 'rânduri')}</span></div>}
+      {res && <div className="viz-tally"><span className="viz-badge yes">{res.op}: <CountUp key={k} to={count} duration={0.6} /> {t(rowsNoun(count).en, rowsNoun(count).ro)}</span></div>}
     </VizFrame>
   );
 }

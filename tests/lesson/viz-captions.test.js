@@ -113,3 +113,50 @@ describe('char-strips swap: the calls are real SQL', () => {
     expect(stageChanges('Caobotarau', 'Ciobotiriu').map((x, i) => (x ? i : -1)).filter(i => i >= 0)).toEqual([1, 6, 8]);
   });
 });
+
+import { likeTrace } from '../../src/components/lesson/viz/logic/common.js';
+import { likeIntro, likeCaption, likeTally } from '../../src/components/lesson/viz/logic/like-slider.js';
+import { inBetween, inCondition, inCaption } from '../../src/components/lesson/viz/logic/in-between.js';
+
+describe('like-slider: % stands for any beginning', () => {
+  it('lines «escu» up with the end of the name, so a failed name shows its ending', () => {
+    const b = likeTrace('%escu', 'Bodnar');
+    expect(b.match).toBe(false);
+    expect(b.steps).toEqual([{ tok: 0, from: 0, to: 2, ok: true }, { tok: 1, from: 2, to: 2, ok: false }]);
+    expect(likeTrace('%escu', 'Prelipcean').steps[0]).toEqual({ tok: 0, from: 0, to: 6, ok: true });
+    expect(likeTrace('%escu', 'Popescu').match).toBe(true);
+  });
+  it('the verdicts do not change', () => {
+    const names = ['Popescu', 'Prelipcean', 'Antonie', 'Arhire', 'Panaite', 'Bodnar', 'Archip', 'Ciobotariu', 'Pintescu', 'Cobzaru', 'Bucur'];
+    expect(names.filter(n => likeTrace('%escu', n).match)).toEqual(['Popescu', 'Pintescu']);
+    expect(names.filter(n => likeTrace('_r%', n).match)).toEqual(['Prelipcean', 'Arhire', 'Archip']);
+  });
+  it('the intro explains only the signs in the pattern', () => {
+    expect(likeIntro('%escu').ro).toBe('Șablonul %escu se așază peste fiecare nume. % ia oricâte litere, chiar niciuna; «escu» trebuie să fie exact la sfârșit.');
+    expect(likeIntro('%escu').ro).not.toContain('_');
+    expect(likeIntro('_r%').ro).toBe('Șablonul _r% se așază peste fiecare nume. _ ia exact o literă; «r» trebuie să fie a doua literă; % ia oricâte litere, chiar niciuna.');
+  });
+  it('the failure caption names what differs', () => {
+    expect(likeCaption('%escu', 'Bodnar', likeTrace('%escu', 'Bodnar')).ro).toBe('Bodnar: % poate lua orice început, dar la sfârșit șablonul cere «escu», iar aici e «dnar». Nu se potrivește.');
+    expect(likeCaption('_r%', 'Popescu', likeTrace('_r%', 'Popescu')).ro).toBe('Popescu: litera «o» nu este «r», cum cere șablonul. Nu se potrivește.');
+    expect(likeCaption('Bucur_', 'Bucur', likeTrace('Bucur_', 'Bucur')).ro).toBe('Bucur: numele s-a terminat înainte ca șablonul să-și găsească toate literele. Nu se potrivește.');
+    expect(likeTally(1, 13).ro).toBe('1 din 13 nume se potrivește.');
+  });
+});
+
+describe('in-between: the condition is printed as valid SQL', () => {
+  const inProps = { list: ['Andrei', 'Radu', 'Marius'] };
+  it('IN, BETWEEN and ANY', () => {
+    expect(inCondition('in', inProps, 'Bogdan')).toBe("'Bogdan' IN ('Andrei', 'Radu', 'Marius')");
+    expect(inCondition('between', { low: 250, high: 350 }, 450)).toBe('450 >= 250 AND 450 <= 350');
+    expect(inCondition('between', { low: 250, high: 350 }, null)).toBe('NULL >= 250 AND NULL <= 350');
+    expect(inCondition('any', { list: [5, 7], op: '>' }, 6)).toBe('6 > ANY (5, 7)');
+  });
+  it('captions say which comparison decided', () => {
+    expect(inCaption('in', inProps, 'Radu', inBetween('in', inProps, 'Radu')).ro).toBe("'Radu' = 'Radu': ajunge o valoare egală. Adevărat, rândul e ales.");
+    expect(inCaption('in', inProps, 'Bogdan', inBetween('in', inProps, 'Bogdan')).ro).toBe("'Bogdan' nu e egal cu niciuna dintre cele 3 valori: fals, rândul nu e ales.");
+    const bp = { low: 250, high: 350 };
+    expect(inCaption('between', bp, 450, inBetween('between', bp, 450)).ro).toBe('450 e peste 350: fals, rândul nu e ales.');
+    expect(inCaption('between', bp, 250, inBetween('between', bp, 250)).ro).toBe('250 e între 250 și 350 (capetele contează): adevărat, rândul e ales.');
+  });
+});

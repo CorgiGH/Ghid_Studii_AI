@@ -12,17 +12,26 @@ export function likeTokens(pattern) {
   return [...pattern].map(c => (c === '%' ? { kind: 'many', ch: c } : c === '_' ? { kind: 'one', ch: c } : { kind: 'lit', ch: c }));
 }
 
-// Walks the pattern over the value. `steps` is the path of the successful match, or
-// (when there is none) the path up to the token that failed, with `ok: false` last.
+// Walks the pattern over the value. `steps` is the path of the successful match, or (when there is none) the path of
+// the first attempt, up to the token that failed, with `ok: false` last.
+// A % first tries the longest run that still leaves one letter for each later fixed sign (_ or a letter), so for
+// '%escu' the letters «escu» line up with the end of the name: % stands for "any beginning", and a failed name shows
+// the ending that differs (Bodnar: % takes «Bo», then «e» meets «d»), not a short % that gives up early.
 export function likeTrace(pattern, value) {
   const toks = likeTokens(pattern);
   const v = [...String(value)];
-  let best = { depth: -1, steps: [] };
+  let first = null;
+  const fixedAfter = (ti) => toks.slice(ti + 1).filter(t => t.kind !== 'many').length;
   const go = (ti, vi, steps) => {
-    if (ti === toks.length) return vi === v.length ? steps : null;
+    if (ti === toks.length) {
+      if (vi === v.length) return steps;
+      // every sign used, but letters are left over
+      if (!first) first = [...steps, { tok: Math.max(0, toks.length - 1), from: vi, to: v.length, ok: false, leftover: true }];
+      return null;
+    }
     const tok = toks[ti];
     if (tok.kind === 'many') {
-      for (let end = vi; end <= v.length; end++) {
+      for (let end = Math.max(vi, v.length - fixedAfter(ti)); end >= vi; end--) {
         const r = go(ti + 1, end, [...steps, { tok: ti, from: vi, to: end, ok: true }]);
         if (r) return r;
       }
@@ -31,16 +40,16 @@ export function likeTrace(pattern, value) {
     const okHere = vi < v.length && (tok.kind === 'one' || v[vi] === tok.ch);
     const step = { tok: ti, from: vi, to: okHere ? vi + 1 : vi, ok: okHere };
     if (!okHere) {
-      if (ti > best.depth) best = { depth: ti, steps: [...steps, step] };
+      if (!first) first = [...steps, step];
       return null;
     }
     return go(ti + 1, vi + 1, [...steps, step]);
   };
   const win = go(0, 0, []);
   if (win) return { match: true, steps: win };
-  if (best.depth >= 0) return { match: false, steps: best.steps };
-  // every token consumed but characters are left over (or the pattern is empty)
-  return { match: false, steps: [{ tok: Math.max(0, toks.length - 1), from: v.length, to: v.length, ok: false, leftover: true }] };
+  if (first) return { match: false, steps: first };
+  // an empty pattern against a non-empty value
+  return { match: false, steps: [{ tok: 0, from: 0, to: v.length, ok: false, leftover: true }] };
 }
 
 export const likeMatch = (pattern, value) => likeTrace(pattern, value).match;
