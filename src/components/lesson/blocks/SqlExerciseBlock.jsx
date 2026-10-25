@@ -210,12 +210,15 @@ export default function SqlExerciseBlock(block) {
         const slim = verdict ? slimVerdict(verdict) : null;
         if (attempted.current) {
           store.updateLastAttempt(id, { sql, verdict: slim, hints: hintsRef.current });
-        } else if (graded || verdict) {
+        } else {
           // The first run is the attempt. A run that ended in an ORA error or a not-Oracle verdict counts as a failed one, so it
-          // reaches the review pile and survives a reload.
+          // reaches the review pile and survives a reload. A run with no verdict at all (expected file missing, grader threw) is
+          // stored as an unscored done marker: it keeps the screen unlocked after a reload and keeps hint reveals, and does not
+          // enqueue a review item the learner could not have got right.
           attempted.current = true;
           store.recordAttempt(id, {
             ok: graded && verdict.ok, hints: hintsRef.current, kind: 'sql', item: id, ref, at: nowMs(), done: true,
+            ...(verdict ? {} : { unscored: true }),
             sql, verdict: slim, misconception: mistake, revealed: false,
           });
         }

@@ -57,7 +57,7 @@ export function createLessonStore(storage) {
     recordAttempt(itemId, a) {
       const history = [...(state.attempts[itemId] || []), a].slice(-MAX_ATTEMPTS);
       const review = { ...state.review };
-      const enqueue = (!a.ok && !a.skipped) || (a.hints || 0) >= 3;
+      const enqueue = (!a.ok && !a.skipped && !a.unscored) || (a.hints || 0) >= 3;
       if (enqueue) {
         review[itemId] = { itemId, ref: a.ref, kind: a.kind, tag: a.misconception || null, due: a.at, streak: 0 };
       }

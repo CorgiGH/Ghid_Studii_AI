@@ -231,6 +231,15 @@ describe('restoring the block after a reload', () => {
     expect(seedGate({ blocks: [{ type: 'sql-exercise' }] }, store.attemptsAt(ref.src, ref.screen))).toEqual({ completed: true });
   });
 
+  it('an unscored first run (no verdict) unlocks after a reload and keeps hints, without entering the review pile', () => {
+    const store = createLessonStore({ getItem: () => null, setItem: () => {} });
+    store.recordAttempt('bd-l02-ex4', { ok: false, hints: 0, kind: 'sql', item: 'bd-l02-ex4', ref, at: 7, done: true, unscored: true, sql: 'SELECT 1', verdict: null });
+    expect(store.pendingCount()).toBe(0);
+    store.updateLastAttempt('bd-l02-ex4', { hints: 2 });
+    expect(store.attemptsAt(ref.src, ref.screen)[0]).toMatchObject({ unscored: true, hints: 2 });
+    expect(seedGate({ blocks: [{ type: 'sql-exercise' }] }, store.attemptsAt(ref.src, ref.screen))).toEqual({ completed: true });
+  });
+
   it('a screen with a sql attempt that ran stays unlocked after a reload, even when the first run was wrong', () => {
     const step = { blocks: [{ type: 'sql-exercise' }] };
     expect(seedGate(step, [{ ok: false, kind: 'sql', done: true }])).toEqual({ completed: true });
