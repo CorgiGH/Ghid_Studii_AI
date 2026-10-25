@@ -39,11 +39,11 @@
           },
           "table": {
             "caption": {
-              "en": "The studenti table (Popescu's row, with today's date)",
-              "ro": "Tabelul studenti (rândul lui Popescu, cu data de azi)"
+              "en": "The app's clock: today's date and the time",
+              "ro": "Ceasul aplicației: data de azi și ora"
             },
             "dataset": "facultate",
-            "sql": "SELECT nume, data_nastere, SYSDATE AS azi FROM studenti WHERE nume = 'Popescu'"
+            "sql": "SELECT SYSDATE AS azi, TO_CHAR(SYSDATE, 'HH24:MI') AS ora FROM DUAL"
           }
         }
       ]
@@ -183,8 +183,8 @@
         {
           "type": "learn",
           "content": {
-            "en": "The same `TRUNC` and `ROUND` also take 'YEAR' or 'MONTH': `TRUNC` goes back to the first day of the year or of the month, and `ROUND` goes to the nearest first day (from 1 July a date rounds up to the next year, from the 16th to the next month).",
-            "ro": "Aceleași `TRUNC` și `ROUND` primesc și 'YEAR' sau 'MONTH': `TRUNC` se întoarce la prima zi a anului sau a lunii, iar `ROUND` merge la cea mai apropiată primă zi (de la 1 iulie o dată se rotunjește la anul următor, de la ziua 16 la luna următoare)."
+            "en": "The same `TRUNC` and `ROUND` also take 'YEAR' or 'MONTH': `TRUNC` goes back to the first day of the year or of the month, and `ROUND` goes to the nearest first day (from 1 July a date rounds up to the next year, from the 16th to the next month). In the examples below, `TO_DATE('27-OCT-16', 'DD-MON-YY')` turns the text into a date: the second text, the mask, says how the date is written (day-month-year). You learn it properly in lesson 14; until then you use it only to write a fixed date.",
+            "ro": "Aceleași `TRUNC` și `ROUND` primesc și 'YEAR' sau 'MONTH': `TRUNC` se întoarce la prima zi a anului sau a lunii, iar `ROUND` merge la cea mai apropiată primă zi (de la 1 iulie o dată se rotunjește la anul următor, de la ziua 16 la luna următoare). În exemplele de mai jos, `TO_DATE('27-OCT-16', 'DD-MON-YY')` face din text o dată: al doilea text, masca, spune cum e scrisă data (zi-lună-an). Îl înveți pe larg în lecția 14; până atunci îl folosești doar ca să scrii o dată fixă."
           }
         },
         {
@@ -227,14 +227,14 @@
           "type": "callout",
           "variant": "trap",
           "content": {
-            "en": "**Months are not all the same length.** `ADD_MONTHS` does not add 30 days: it goes to the same day of the next month, and if that day does not exist it lands on the last day of the month. If you start from a last day of a month, you also end on a last day of a month: `ADD_MONTHS(30-APR-2015, 1)` is 31-MAY-15. And `MONTHS_BETWEEN(d1, d2)` is d1 minus d2: it gives a **negative** number when d1 is before d2, and it has a fraction.",
-            "ro": "**Lunile nu au aceeași lungime.** `ADD_MONTHS` nu adună 30 de zile: merge la aceeași zi din luna următoare, iar dacă acea zi nu există, ajunge la ultima zi a lunii. Dacă pornești chiar de la o ultimă zi de lună, ajungi tot la o ultimă zi de lună: `ADD_MONTHS(30-APR-2015, 1)` este 31-MAY-15. Iar `MONTHS_BETWEEN(d1, d2)` este d1 minus d2: dă un număr **negativ** când d1 e înaintea lui d2, și are fracție."
+            "en": "**Months are not all the same length.** `ADD_MONTHS` does not add 30 days: it goes to the same day of the next month, and if that day does not exist it lands on the last day of the month. If you start from a last day of a month, you also end on a last day of a month: from 30 April 2015, `ADD_MONTHS` by 1 gives 31-MAY-15, not 30-MAY-15 (see the code below). And `MONTHS_BETWEEN(d1, d2)` is d1 minus d2: it gives a **negative** number when d1 is before d2, and it usually has a fraction. The exception: when the two dates fall on the same day of the month (for example, both on the 26th) or are both the last day of their month, the result is a whole number and the time no longer counts.",
+            "ro": "**Lunile nu au aceeași lungime.** `ADD_MONTHS` nu adună 30 de zile: merge la aceeași zi din luna următoare, iar dacă acea zi nu există, ajunge la ultima zi a lunii. Dacă pornești chiar de la o ultimă zi de lună, ajungi tot la o ultimă zi de lună: de la 30 aprilie 2015, `ADD_MONTHS` cu 1 dă 31-MAY-15, nu 30-MAY-15 (vezi codul de mai jos). Iar `MONTHS_BETWEEN(d1, d2)` este d1 minus d2: dă un număr **negativ** când d1 e înaintea lui d2, și de obicei are fracție. Excepția: când cele două date cad în aceeași zi a lunii (de exemplu, amândouă pe 26) sau sunt amândouă ultima zi a lunii lor, rezultatul e un număr întreg, iar ora nu mai contează."
           }
         },
         {
           "type": "code",
           "language": "sql",
-          "code": "SELECT ADD_MONTHS(TO_DATE('30-04-2015','DD-MM-YYYY'), 1) FROM DUAL;\n-- 31-MAY-15\n\nSELECT MONTHS_BETWEEN(TO_DATE('01-01-2015','DD-MM-YYYY'),\n                      TO_DATE('02-02-2015','DD-MM-YYYY')) FROM DUAL;\n-- -1.0322581"
+          "code": "SELECT ADD_MONTHS(\n  TO_DATE('30-04-2015', 'DD-MM-YYYY'), 1)\nFROM DUAL;\n-- 31-MAY-15\n\nSELECT MONTHS_BETWEEN(\n  TO_DATE('01-01-2015', 'DD-MM-YYYY'),\n  TO_DATE('02-02-2015', 'DD-MM-YYYY'))\nFROM DUAL;\n-- -1.0322581\n\nSELECT MONTHS_BETWEEN(\n  TO_DATE('26-10-2026', 'DD-MM-YYYY'),\n  TO_DATE('26-05-1995', 'DD-MM-YYYY'))\nFROM DUAL;\n-- 377  (aceeași zi a lunii: număr întreg)"
         }
       ]
     },
@@ -321,8 +321,8 @@
                 "ro": "`MONTHS_BETWEEN(d1, d2)`"
               },
               {
-                "en": "months, with a fraction; negative if d1 < d2",
-                "ro": "luni, cu fracție; negativ dacă d1 < d2"
+                "en": "months, with a fraction (whole when d1 and d2 fall on the same day of the month); negative if d1 < d2",
+                "ro": "luni, cu fracție (întreg când d1 și d2 cad în aceeași zi a lunii); negativ dacă d1 < d2"
               }
             ],
             [
@@ -666,8 +666,8 @@
           "dataset": "facultate",
           "kind": "query",
           "prompt": {
-            "en": "Write a query to display today's date. Label the column \"Astazi\". (In this exercise \"today\" is 26 August 2026.)",
-            "ro": "Scrieți o interogare pentru a afișa data de azi. Etichetați coloana \"Astazi\". (La acest exercițiu „azi” este 26 august 2026.)"
+            "en": "Write a query to display today's date. Label the column \"Astazi\". (In this exercise the app's clock is moved: \"today\" is 26 August 2026, 14:30, not 26 October as in the rest of the lesson. The same holds for every lab exercise that uses today's date: two students were born on 26 August, so lesson 15 also gets the case \"the birthday is today\".)",
+            "ro": "Scrieți o interogare pentru a afișa data de azi. Etichetați coloana \"Astazi\". (La acest exercițiu ceasul aplicației e mutat: „azi” este 26 august 2026, ora 14:30, nu 26 octombrie ca în restul lecției. La fel e la toate exercițiile de laborator care folosesc data de azi: doi studenți s-au născut pe 26 august, așa că în lecția 15 apare și cazul „ziua de naștere e chiar azi”.)"
           },
           "official": {
             "lab": 3,
@@ -718,8 +718,8 @@
           "dataset": "facultate",
           "kind": "query",
           "prompt": {
-            "en": "For each student display the name, the date of birth and the number of months between the current date and the date of birth. (In this exercise \"today\" is 26 August 2026.) Keep the fraction exactly as the function returns it; do not round.",
-            "ro": "Pentru fiecare student afișați numele, data de nastere si numărul de luni între data curentă și data nașterii. (La acest exercițiu „azi” este 26 august 2026.) Lasă fracția așa cum o întoarce funcția; nu rotunji."
+            "en": "For each student display the name, the date of birth and the number of months between the current date and the date of birth. (In this exercise too, \"today\" is 26 August 2026, 14:30, not 26 October as in the rest of the lesson.) Keep the fraction exactly as the function returns it; do not round.",
+            "ro": "Pentru fiecare student afișați numele, data de nastere si numărul de luni între data curentă și data nașterii. (Și la acest exercițiu „azi” este 26 august 2026, ora 14:30, nu 26 octombrie ca în restul lecției.) Lasă fracția așa cum o întoarce funcția; nu rotunji."
           },
           "official": {
             "lab": 3,
@@ -747,8 +747,8 @@
             }
           ],
           "explain": {
-            "en": "`MONTHS_BETWEEN(SYSDATE, data_nastere)` gives months with a fraction: Popescu gets 378.309812 (378 whole months, plus 9 days and 14:30 measured against a 31-day month). If you swap the arguments every number becomes negative.",
-            "ro": "`MONTHS_BETWEEN(SYSDATE, data_nastere)` dă luni cu fracție: Popescu are 378.309812 (378 de luni întregi, plus 9 zile și 14:30 raportate la o lună de 31 de zile). Dacă inversezi argumentele, toate numerele devin negative."
+            "en": "`MONTHS_BETWEEN(SYSDATE, data_nastere)` gives months with a fraction: Popescu gets 378.309812 (378 whole months, plus 9 days and 14:30 measured against a 31-day month). If you swap the arguments every number becomes negative. Four rows come out as whole numbers: Prelipcean (26-MAY-95) 375, Arhire (26-DEC-95) 368, Bodnar (26-AUG-96) 360 and Pintescu (26-AUG-97) 348. They were born on the 26th, the same day of the month as \"today\", and then Oracle gives a whole number and ignores the time. With \"today\" = 26 October, as at the start of the lesson, Popescu would have 380.309812 months.",
+            "ro": "`MONTHS_BETWEEN(SYSDATE, data_nastere)` dă luni cu fracție: Popescu are 378.309812 (378 de luni întregi, plus 9 zile și 14:30 raportate la o lună de 31 de zile). Dacă inversezi argumentele, toate numerele devin negative. Patru rânduri ies numere întregi: Prelipcean (26-MAY-95) 375, Arhire (26-DEC-95) 368, Bodnar (26-AUG-96) 360 și Pintescu (26-AUG-97) 348. S-au născut pe 26, aceeași zi a lunii ca „azi”, iar atunci Oracle dă un număr întreg și nu mai ține cont de oră. Cu „azi” = 26 octombrie, ca la începutul lecției, Popescu ar avea 380.309812 luni."
           }
         }
       ]
