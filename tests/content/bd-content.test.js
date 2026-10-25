@@ -1,7 +1,10 @@
 // The BD lesson content as a whole: registration order, official-exercise coverage, the text sweep, and the query-machine ask rule.
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { PGlite } from '@electric-sql/pglite';
+import { createEngine } from '../../src/sql/engine/core.js';
+import { datasetText } from '../../scripts/sql/freeze-lib.mjs';
 import bd from '../../src/content/bd/index.js';
 import { coverage } from '../../scripts/sql/coverage.mjs';
 import { sweepDir, sweepNode } from '../../scripts/sql/text-sweep.mjs';
@@ -156,5 +159,60 @@ describe('query machines', () => {
         }
       }
     }
+  });
+});
+
+// A question about data shows that data: an mcq or reflect whose text names a table or column of the lab
+// dataset (in backticks) carries a `table` showing it, unless another block on the same screen already shows
+// rows (a query machine, a widget, or another question with a table).
+const FACULTATE = fs.readFileSync(path.join(ROOT, 'public/sql/datasets/facultate.sql'), 'utf8');
+const LAB_TABLES = [...FACULTATE.matchAll(/CREATE TABLE (\w+)\s*\(([\s\S]*?)\n\s*\)\s*;/g)].map((m) => ({ name: m[1].toLowerCase(), cols: [...m[2].matchAll(/^\s*(\w+)\s+\w/gm)].map((c) => c[1].toLowerCase()).filter((c) => !['constraint', 'primary', 'foreign', 'unique', 'check'].includes(c)) }));
+const LAB_WORDS = new Set(LAB_TABLES.flatMap((t) => [t.name, ...t.cols]));
+const textOf = (b) => JSON.stringify([b.question, b.prompt, b.answer, (b.options || []).map((o) => [o.text, o.explain])]);
+const namedData = (b) => [...new Set([...textOf(b).matchAll(/`([a-z_]+)`/gi)].map((m) => m[1].toLowerCase()).filter((w) => LAB_WORDS.has(w)))];
+const showsRows = (b) => b.type === 'query-machine' || b.type === 'viz' || ((b.type === 'mcq' || b.type === 'reflect') && b.table);
+
+export function questionsWithoutData(list = lessons) {
+  const out = [];
+  for (const { json } of list) {
+    for (const step of json.steps) {
+      for (const b of step.blocks) {
+        if ((b.type !== 'mcq' && b.type !== 'reflect') || b.table) continue;
+        const named = namedData(b);
+        if (named.length && !step.blocks.some((o) => o !== b && showsRows(o))) out.push(`${step.id} ${b.id}: names ${named.join(', ')} but shows no table`);
+      }
+    }
+  }
+  return out;
+}
+
+describe('questions show the data they ask about', () => {
+  it('every mcq or reflect that names a lab table or column shows that data on its screen', () => {
+    expect(questionsWithoutData()).toEqual([]);
+  });
+});
+
+// Every table a question shows runs on the engine and shows a short, non-empty result (the learner reads it on a phone).
+describe('question tables run', () => {
+  let engine;
+  beforeAll(async () => {
+    engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate: datasetText('facultate') } });
+  });
+  it('every question table runs, returns rows, and stays short enough to scroll (at most 45 rows)', async () => {
+    const bad = [];
+    for (const { json } of lessons) {
+      for (const step of json.steps) {
+        for (const b of step.blocks) {
+          if (!b.table) continue;
+          for (const tb of Array.isArray(b.table) ? b.table : [b.table]) {
+            const r = await engine.run(tb.sql, { dataset: tb.dataset, maxRows: 50 });
+            if (r.error) bad.push(`${step.id} ${b.id}: ${r.error.code} for ${tb.sql}`);
+            else if (!r.rows.length) bad.push(`${step.id} ${b.id}: no rows for ${tb.sql}`);
+            else if (r.rowCount > 45) bad.push(`${step.id} ${b.id}: ${r.rowCount} rows (keep it to 45) for ${tb.sql}`);
+          }
+        }
+      }
+    }
+    expect(bad).toEqual([]);
   });
 });

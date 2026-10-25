@@ -6,16 +6,18 @@ import { useScreenGate } from '../ScreenGate';
 import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
 import { restoredMcqPick, shouldRecordAttempt } from '../../../lesson/restore.js';
+import QuestionTables from './QuestionTables.jsx';
 
 const LETTERS = 'ABCDEFGH';
 const Html = ({ as = 'span', className, text, id }) => (
   React.createElement(as, { id, className, dangerouslySetInnerHTML: { __html: formatMarkdown(text) } })
 );
 
-// Block JSON: { type: 'mcq', id, question, options: [{ text, correct, misconception?, explain }], review? }
+// Block JSON: { type: 'mcq', id, question, table?, options: [{ text, correct, misconception?, explain }], review? }
+//   table: the data the question is about (QuestionTables), shown under the question
 // Inside a lesson the first answer is recorded and opens the screen's gate. In the review
 // tab it is rendered with record={false} and reports through onAnswer instead.
-export default function McqBlock({ id, question, options, record = true, onAnswer }) {
+export default function McqBlock({ id, question, table, options, record = true, onAnswer }) {
   const { t } = useApp();
   const { complete, ref } = useScreenGate();
   const store = useLessonStore();
@@ -48,6 +50,7 @@ export default function McqBlock({ id, question, options, record = true, onAnswe
   return (
     <div className="ch ch-mcq" role="group" aria-labelledby={qid} data-testid="mcq-block">
       <Html as="p" id={qid} className="ch-q" text={t(question.en, question.ro)} />
+      <QuestionTables table={table} />
       <ul className="ch-opts">
         {options.map((o, i) => {
           const state = !done ? '' : i === picked ? (o.correct ? ' is-right' : ' is-wrong') : (i === right && !shown.correct ? ' is-key' : ' is-dim');

@@ -38,8 +38,12 @@
             "ro": "Ai nevoie de tabelul `studenti` de două ori: o copie pentru Pintescu și una pentru colegii lui, cu aliasuri diferite (`s` și `colegi`). Le legi pe aceeași grupă și același an. Rândul în care colegul este chiar Pintescu se scoate cu `s.nr_matricol <> colegi.nr_matricol`."
           },
           "table": {
+            "caption": {
+              "en": "The studenti table (only the year-1 students)",
+              "ro": "Tabelul studenti (doar studenții din anul 1)"
+            },
             "dataset": "facultate",
-            "sql": "SELECT nr_matricol, nume, prenume, an, grupa FROM studenti WHERE an = 1"
+            "sql": "SELECT nr_matricol, nume, an, grupa FROM studenti WHERE an = 1 ORDER BY nr_matricol"
           }
         }
       ]
@@ -260,8 +264,8 @@
           "type": "reflect",
           "id": "bd-l21-r2",
           "prompt": {
-            "en": "With `s1.nume < s2.nume` on the pairs of students born on the same day, you lose the pair Bodnar–Bodnar. Why? What do you use instead?",
-            "ro": "Cu `s1.nume < s2.nume` pe perechile de studenți născuți în aceeași zi pierzi perechea Bodnar–Bodnar. De ce? Ce folosești în loc?"
+            "en": "With `s1.nume < s2.nume` on the pairs of students born on the same day of the week, you lose the pair Bodnar–Bodnar. Why? What do you use instead?",
+            "ro": "Cu `s1.nume < s2.nume` pe perechile de studenți născuți în aceeași zi a săptămânii pierzi perechea Bodnar–Bodnar. De ce? Ce folosești în loc?"
           },
           "placeholder": {
             "en": "Explain in your own words",
@@ -270,7 +274,17 @@
           "answer": {
             "en": "The two students Bodnar Ioana (116 and 119) have the same last name, and `'Bodnar' < 'Bodnar'` is false in both directions, so the pair never appears: you get 10 pairs instead of 11. `<` on names assumes the names are distinct. A unique key does not have this problem: `s1.nr_matricol < s2.nr_matricol`. If alphabetical order inside the pair matters, you use the name as the first criterion and the key only as a tie-break: `s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol)`.",
             "ro": "Cele două studente Bodnar Ioana (116 și 119) au același nume de familie, iar `'Bodnar' < 'Bodnar'` este fals în ambele sensuri, deci perechea nu apare niciodată: ies 10 perechi în loc de 11. `<` pe nume presupune că numele sunt distincte. Cheia unică nu are această problemă: `s1.nr_matricol < s2.nr_matricol`. Dacă ordinea alfabetică în pereche contează, folosești numele ca prim criteriu și cheia doar ca departajare: `s1.nume < s2.nume OR (s1.nume = s2.nume AND s1.nr_matricol < s2.nr_matricol)`."
-          }
+          },
+          "table": [
+            {
+              "caption": {
+                "en": "The studenti table with the weekday of birth (all rows)",
+                "ro": "Tabelul studenti cu ziua săptămânii de naștere (toate rândurile)"
+              },
+              "dataset": "facultate",
+              "sql": "SELECT nr_matricol, nume, TO_CHAR(data_nastere, 'fmDay') AS zi FROM studenti ORDER BY nr_matricol"
+            }
+          ]
         }
       ]
     },
@@ -311,6 +325,16 @@
                 "ro": "Cu cuvântul `JOIN`, Oracle cere `ON`. Produsul cartezian se obține fie cu virgulă, fie cu `CROSS JOIN`."
               },
               "misconception": "join-no-on"
+            }
+          ],
+          "table": [
+            {
+              "caption": {
+                "en": "The studenti table (all rows)",
+                "ro": "Tabelul studenti (toate rândurile)"
+              },
+              "dataset": "facultate",
+              "sql": "SELECT nr_matricol, nume, an FROM studenti ORDER BY nr_matricol"
             }
           ]
         }
@@ -353,6 +377,16 @@
                 "en": "Correct: Bodnar–Bodnar disappears. For complete pairs use the unique key.",
                 "ro": "Corect: Bodnar–Bodnar dispare. Pentru perechi complete folosește cheia unică."
               }
+            }
+          ],
+          "table": [
+            {
+              "caption": {
+                "en": "The studenti table (all rows)",
+                "ro": "Tabelul studenti (toate rândurile)"
+              },
+              "dataset": "facultate",
+              "sql": "SELECT nr_matricol, nume, prenume FROM studenti ORDER BY nr_matricol"
             }
           ]
         }
@@ -397,7 +431,17 @@
               "misconception": "to-char-pad-lang"
             }
           ],
-          "review": "bd-l14"
+          "review": "bd-l14",
+          "table": [
+            {
+              "caption": {
+                "en": "The studenti table with the weekday of birth (all rows)",
+                "ro": "Tabelul studenti cu ziua săptămânii de naștere (toate rândurile)"
+              },
+              "dataset": "facultate",
+              "sql": "SELECT nr_matricol, nume, TO_CHAR(data_nastere, 'fmDay') AS zi FROM studenti ORDER BY nr_matricol"
+            }
+          ]
         }
       ]
     },
@@ -440,7 +484,25 @@
               }
             }
           ],
-          "review": "bd-l11"
+          "review": "bd-l11",
+          "table": [
+            {
+              "caption": {
+                "en": "The studenti table (all rows)",
+                "ro": "Tabelul studenti (toate rândurile)"
+              },
+              "dataset": "facultate",
+              "sql": "SELECT nr_matricol, nume FROM studenti ORDER BY nr_matricol"
+            },
+            {
+              "caption": {
+                "en": "The profesori table (all rows)",
+                "ro": "Tabelul profesori (toate rândurile)"
+              },
+              "dataset": "facultate",
+              "sql": "SELECT id_prof, nume FROM profesori ORDER BY id_prof, nume"
+            }
+          ]
         }
       ]
     },
@@ -495,7 +557,25 @@
               }
             }
           ],
-          "review": "bd-l11"
+          "review": "bd-l11",
+          "table": [
+            {
+              "caption": {
+                "en": "The studenti table (all rows)",
+                "ro": "Tabelul studenti (toate rândurile)"
+              },
+              "dataset": "facultate",
+              "sql": "SELECT nr_matricol, nume, prenume FROM studenti ORDER BY nr_matricol"
+            },
+            {
+              "caption": {
+                "en": "The profesori table (all rows)",
+                "ro": "Tabelul profesori (toate rândurile)"
+              },
+              "dataset": "facultate",
+              "sql": "SELECT id_prof, nume, prenume FROM profesori ORDER BY id_prof, nume"
+            }
+          ]
         }
       ]
     },

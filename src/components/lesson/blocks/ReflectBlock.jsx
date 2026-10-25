@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { AnimatePresence, motion as Motion, useReducedMotion } from 'motion/react';
 import { useApp } from '../../../contexts/AppContext';
 import formatMarkdown from '../../blocks/formatMarkdown';
@@ -6,34 +6,7 @@ import { useScreenGate } from '../ScreenGate';
 import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
 import { REFLECT_TEXT_MAX, restoredReflect, shouldRecordAttempt } from '../../../lesson/restore.js';
-import { useSqlRunner } from '../viz/useSqlRunner.js';
-import { MiniTable } from '../viz/ui.jsx';
-import { pickReflectTable, tableFromResult } from './reflectTable.js';
-
-// The small result table a reflect prompt is about: the engine when it is up, else a plain fallback.
-function ReflectTable({ dataset, sql, caption }) {
-  const runner = useSqlRunner();
-  const [fromEngine, setFromEngine] = useState(null);
-  const [failed, setFailed] = useState(false);
-  useEffect(() => {
-    if (runner.status !== 'ready') return undefined;
-    let live = true;
-    // The runner reads the engine status only once, so a run that rejects (engine failed to
-    // start) or gives no table is how a late failure shows; then the fallback takes over.
-    runner.run(sql, { dataset })
-      .then(r => { if (!live) return; const tb = tableFromResult(r); if (tb) setFromEngine(tb); else setFailed(true); })
-      .catch(() => { if (live) setFailed(true); });
-    return () => { live = false; };
-  }, [runner, sql, dataset]);
-  // Nothing while the engine is loading, so the table never visibly swaps; the plain fallback
-  // only when the engine is not there at all or its run failed.
-  const table = useMemo(
-    () => pickReflectTable({ fromEngine, unavailable: runner.status === 'unavailable' || failed, sql }),
-    [fromEngine, runner.status, failed, sql],
-  );
-  if (!table) return null;
-  return <div className="viz ch-table"><MiniTable caption={caption ? <b>{caption}</b> : undefined} columns={table.columns} rows={table.rows} maxHeight="14rem" /></div>;
-}
+import QuestionTables from './QuestionTables.jsx';
 
 // Block JSON: { type: 'reflect', id, prompt, placeholder?, answer, table?: { dataset, sql, caption? } | [{ dataset, sql, caption? }, ...] }
 export default function ReflectBlock({ id, prompt, placeholder, answer, table }) {
@@ -59,9 +32,7 @@ export default function ReflectBlock({ id, prompt, placeholder, answer, table })
   return (
     <div className="ch ch-reflect" data-testid="reflect-block">
       <p className="ch-q" dangerouslySetInnerHTML={{ __html: formatMarkdown(t(prompt.en, prompt.ro)) }} />
-      {table && (Array.isArray(table) ? table : [table]).map((tb, i) => (
-        <ReflectTable key={i} dataset={tb.dataset} sql={tb.sql} caption={tb.caption ? t(tb.caption.en, tb.caption.ro) : null} />
-      ))}
+      <QuestionTables table={table} />
       <textarea
         className="ch-text"
         rows={3}

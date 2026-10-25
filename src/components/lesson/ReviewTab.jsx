@@ -85,7 +85,7 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
         <button type="button" className="ch-back" onClick={() => setActive(null)}>← {t('Back to the list', 'Înapoi la listă')}</button>
         <p className="ch-from">{lessonTitle(item.ref?.src)}</p>
         <div className="ch-card">
-          <McqBlock key={`${variant.entry.id}:${key}`} id={variant.block.id} question={variant.block.question} options={variant.block.options} record={false} onAnswer={onAnswer(item)} />
+          <McqBlock key={`${variant.entry.id}:${key}`} id={variant.block.id} question={variant.block.question} table={variant.block.table} options={variant.block.options} record={false} onAnswer={onAnswer(item)} />
         </div>
         {result && (
           <Motion.div

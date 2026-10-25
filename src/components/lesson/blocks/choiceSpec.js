@@ -15,11 +15,23 @@ const isBi = (v) => !!v && typeof v === 'object' && isStr(v.en) && isStr(v.ro);
 
 // Returns a list of problems; empty means the block is well-formed. `ctx.lessonId` (the id of the
 // lesson file the block sits in) lets it check that `review` names an earlier lesson.
+// table (reflect, mcq): one { dataset, sql } or a list of them, each with an optional bilingual caption.
+export function tableError(table) {
+  if (table === undefined) return null;
+  const list = Array.isArray(table) ? table : [table];
+  if (!list.length || !list.every(tb => tb && isStr(tb.dataset) && isStr(tb.sql) && (tb.caption === undefined || isBi(tb.caption)))) {
+    return 'table needs dataset and sql (and a caption with en + ro if it has one)';
+  }
+  return null;
+}
+
 export function validateMcq(b, ctx = {}) {
   const errs = [];
   const at = (m) => errs.push(`(mcq${b?.id ? ` ${b.id}` : ''}): ${m}`);
   if (!isStr(b?.id)) at('id missing');
   if (!isBi(b?.question)) at('question must have en + ro');
+  const te = tableError(b?.table);
+  if (te) at(te);
   if (b?.review !== undefined) {
     if (lessonOrder(b.review) === null) at('review must be a lesson id like "bd-l05"');
     else if (ctx.lessonId && lessonOrder(ctx.lessonId) !== null && lessonOrder(b.review) >= lessonOrder(ctx.lessonId)) {
@@ -48,10 +60,7 @@ export function validateReflect(b) {
   if (!isBi(b?.prompt)) at('prompt must have en + ro');
   if (!isBi(b?.answer)) at('answer must have en + ro');
   if (b?.placeholder !== undefined && !isBi(b.placeholder)) at('placeholder must have en + ro');
-  // table: one { dataset, sql } or a list of them, each with an optional bilingual caption (e.g. two sheets side by side)
-  if (b?.table !== undefined) {
-    const list = Array.isArray(b.table) ? b.table : [b.table];
-    if (!list.length || !list.every(tb => tb && isStr(tb.dataset) && isStr(tb.sql) && (tb.caption === undefined || isBi(tb.caption)))) at('table needs dataset and sql (and a caption with en + ro if it has one)');
-  }
+  const te = tableError(b?.table);
+  if (te) at(te);
   return errs;
 }
