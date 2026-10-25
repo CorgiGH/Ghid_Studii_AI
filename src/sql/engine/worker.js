@@ -1,5 +1,5 @@
 // The SQL engine inside a Web Worker. Messages (all carry the id of the request they answer):
-//   client -> worker   { id, op: 'boot', dataset } | { id, op: 'run' | 'describe' | 'snapshot', args: [...] }
+//   client -> worker   { id, op: 'boot', dataset } | { id, op: 'run' | 'describe' | 'snapshot' | 'reset', args: [...] }
 //   worker -> client   { id, ok: true, result } | { id, ok: false, error: { code, message } }
 // 'boot' starts PGlite from the prebuilt data directory of the dataset (public/sql/datadir-<dataset>.tar.gz), so the compat layer
 // and the data are not replayed. A worker serves one dataset; the client boots a new worker to switch.

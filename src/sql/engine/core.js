@@ -65,7 +65,8 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
   if (!CLOCK_RE.test(clock)) throw new Error(`clock must look like 'YYYY-MM-DD HH24:MI:SS', got '${clock}'`)
   await pg.waitReady
   if (prebuilt) {
-    await pg.exec("SET search_path = public, pg_catalog; SET TIME ZONE 'UTC'")
+    // session settings do not live in a data directory: replay every SET of the compat layer (time zone, search_path, DateStyle ...)
+    for (const stmt of compatStatements().filter((x) => /^(?:\s*--[^\n]*\n)*\s*SET\s/i.test(x))) await pg.exec(stmt)
   } else {
     for (const stmt of compatStatements()) {
       try {
@@ -74,8 +75,17 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
         throw new Error(`compat layer failed: ${e.message}\n${stmt.slice(0, 200)}`)
       }
     }
-    await pg.query('UPDATE ora_clock SET d = $1::timestamp', [clock])
   }
+  // the clock is a plain table: the default is set here (a data directory carries its own, but set it again to be sure), and a
+  // run may ask for another one (`clock` option, for the exercises on the second clock)
+  let currentClock = null
+  async function setEngineClock(want) {
+    if (!CLOCK_RE.test(want)) throw new Error(`clock must look like 'YYYY-MM-DD HH24:MI:SS', got '${want}'`)
+    if (want === currentClock) return
+    await pg.query('UPDATE ora_clock SET d = $1::timestamp', [want])
+    currentClock = want
+  }
+  await setEngineClock(clock)
 
   let loaded = prebuilt
   // Session NLS state, mirrored from the ora_session table so that result cells can be formatted in the session's language and
@@ -296,9 +306,27 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
     return r.rows.map(([name, type, len, prec, scale, nullable, charLen]) => ({ name, nullable: nullable === 'Y', type: oracleTypeText(type, len, prec, scale, charLen) }))
   }
 
-  async function run(sql, { dataset, maxRows, script = false } = {}) {
+  // Back to a brand-new session: Oracle's default NLS settings and the default clock. Called when a screen or exercise opens, so
+  // nothing a learner did earlier (ALTER SESSION ...) leaks into it.
+  async function resetSession() {
+    session.lang = 'AMERICAN'
+    session.dateFormat = 'DD-MON-RR'
+    lastState = null
+    await writeSession()
+    await setEngineClock(clock)
+  }
+  const reset = ({ dataset } = {}) =>
+    exclusive(async () => {
+      if (dataset) await loadDataset(dataset)
+      await resetSession()
+    })
+
+  // `fresh: true` starts from a reset session; `clock` ('YYYY-MM-DD HH24:MI:SS') runs on that clock instead of the default
+  async function run(sql, { dataset, maxRows, script = false, fresh = false, clock: runClock } = {}) {
     return exclusive(async () => {
       await loadDataset(dataset)
+      if (fresh) await resetSession()
+      await setEngineClock(runClock ?? clock)
       lastState = null
       await begin()
       const tx = { savepoints: [], changed: false }
@@ -348,7 +376,7 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
     })
   }
 
-  return { run, describe, snapshot }
+  return { run, describe, snapshot, reset }
 }
 
 // DESCRIBE's Type column, from the USER_TAB_COLUMNS values

@@ -3,6 +3,8 @@
 //
 //   const sql = getSqlClient()
 //   const result = await sql.run('SELECT nume FROM studenti', { dataset: 'facultate', maxRows: 500 })
+//   sql.run(sql, { dataset, fresh: true, clock: '2026-08-26 14:30:00' })   // fresh session; the second clock
+//   sql.reset({ dataset })             // fresh session, nothing run
 //   sql.cancel()                       // the pending run rejects with { code: 'CANCELLED' }
 //   sql.status                         // 'idle' | 'loading' | 'ready' | 'failed'
 //   const off = sql.onStatus((s) => ...)
@@ -163,6 +165,11 @@ export function createSqlClient({ createWorker = defaultCreateWorker, bootTimeou
     },
     run(sql, o = {}) {
       return call('run', [sql, { ...o, maxRows: o.maxRows ?? DEFAULT_MAX_ROWS }], o.dataset)
+    },
+    // Back to a brand-new session (default NLS settings and clock) without rebooting the worker; also `run(sql, { fresh: true })`.
+    // The player calls it when a screen opens.
+    reset(o = {}) {
+      return call('reset', [o], o.dataset)
     },
     describe(table, o = {}) {
       return call('describe', [table, o], o.dataset)
