@@ -79,7 +79,20 @@ const nextEnabled = (page) => page.evaluate(() => { const b = document.querySele
 
 
 // Click an element the way a learner would: scroll it clear of the fixed footer first, then click its centre.
+// A screen change runs a smooth scroll to the top while the new screen slides in; a click aimed during that motion lands
+// where the target used to be. Wait until no screen is leaving and the page has stopped scrolling (as a person would).
+async function settle(page) {
+  await page.waitForFunction(() => {
+    const w = window.__walkSettle || (window.__walkSettle = { y: -1, same: 0 })
+    if (document.querySelector('[data-testid=lesson-screen][data-leaving]')) { w.same = 0; return false }
+    w.same = window.scrollY === w.y ? w.same + 1 : 0
+    w.y = window.scrollY
+    return w.same >= 3
+  }, { timeout: 5000, polling: 60 }).catch(() => {})
+}
+
 async function clickEl(page, selector) {
+  await settle(page)
   for (let attempt = 0; attempt < 4; attempt++) {
     const box = await page.evaluate((sel, attempt) => {
       const el = [...document.querySelectorAll(sel)].find((e) => e.offsetParent !== null) || document.querySelector(sel)
