@@ -10,7 +10,7 @@ import { shouldRecordAttempt } from '../../../lesson/restore.js';
 import { useSqlRunner } from '../viz/useSqlRunner.js';
 import { useVizMotion } from '../viz/kit.js';
 import { CountUp } from '../viz/ui.jsx';
-import { QM_ALL_ROWS, TRUTH_LABEL, cellText, gridTemplate, markTone, setPanelRows } from './qmLayout.js';
+import { QM_ALL_ROWS, TRUTH_LABEL, cellText, gridTemplate, headParts, markTone, setPanelRows } from './qmLayout.js';
 import { planStages, parseQuery, scoreCount, scoreOrder, scorePicks } from '../../../sql/machine.js';
 import { allPredictionsChecked, buildSteps, chipStep, predictKind, sumChecks, viewAt } from '../../../sql/machineView.js';
 
@@ -138,7 +138,7 @@ function Head({ columns, dimmed, labels, m, lead, end }) {
             exit={{ opacity: 0, transition: { duration: m.reduced ? 0 : 0.12 } }}
             transition={m.reduced ? { duration: 0 } : { duration: 0.22 }}
           >
-            {labels[c] || c}
+            {headParts(labels[c] || c).map((p, i) => <React.Fragment key={i}>{i > 0 && <wbr />}{p}</React.Fragment>)}
           </Motion.span>
         ))}
       </AnimatePresence>

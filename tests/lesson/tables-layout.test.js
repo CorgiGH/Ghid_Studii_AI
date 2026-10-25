@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { QM_ALL_ROWS, TRUTH_LABEL, endKind, gridTemplate, leadKind, markTone, setPanelRows, textWidth } from '../../src/components/lesson/blocks/qmLayout.js';
+import { QM_ALL_ROWS, TRUTH_LABEL, endKind, gridTemplate, headParts, leadKind, markTone, setPanelRows, textWidth } from '../../src/components/lesson/blocks/qmLayout.js';
 import { ALL_ROWS, cellClass, headerParts, spacedColumns, tableFitsWhole } from '../../src/components/lesson/tableText.js';
-import { hiddenRowsAbove, hiddenRowsBelow } from '../../src/components/lesson/useScrollCues.js';
+import { hiddenRowsAbove, hiddenRowsBelow, visibleTopOf } from '../../src/components/lesson/useScrollCues.js';
 import { changedRows, describeRows, sortRows, usesDatasetTables } from '../../src/components/lesson/blocks/sqlExerciseSpec.js';
 
 const row = (key, cells, extra = {}) => ({ key, cells, status: 'plain', ...extra });
@@ -77,6 +77,13 @@ describe('query machine grid', () => {
 });
 
 describe('table text', () => {
+  it('a query machine header breaks after an alias dot or an underscore, never inside a number', () => {
+    expect(headParts('s.nr_matricol')).toEqual(['s.', 'nr_', 'matricol']);
+    expect(headParts('n.valoare')).toEqual(['n.', 'valoare']);
+    expect(headParts('ROUND(bursa / 100)')).toEqual(['ROUND(bursa / 100)']);
+    expect(headParts('ROUND(21.665, -1)')).toEqual(['ROUND(21.665, -1)']);
+  });
+
   it('a header breaks after _ , ( / and spaces', () => {
     expect(headerParts('NR_MATRICOL')).toEqual(['NR_', 'MATRICOL']);
     expect(headerParts("LPAD(RPAD('*',BURSA/50,'*'),9)").join('')).toBe("LPAD(RPAD('*',BURSA/50,'*'),9)");
@@ -87,6 +94,14 @@ describe('table text', () => {
   it('counts the rows wholly below the visible part of a box', () => {
     expect(hiddenRowsBelow(300, [{ top: 10 }, { top: 290 }, { top: 299 }, { top: 330 }])).toBe(2);
     expect(hiddenRowsAbove(100, [{ bottom: 40 }, { bottom: 101 }, { bottom: 140 }])).toBe(2);
+  });
+
+  it('rows above start under a stuck header, and at the box top when the header element has scrolled out', () => {
+    expect(visibleTopOf(100, 130)).toBe(130); // sticky header cells stuck to the top of the box
+    expect(visibleTopOf(100, -800)).toBe(100); // a <thead> keeps its place in the table and scrolls out with it
+    expect(visibleTopOf(100, null)).toBe(100);
+    const rows = Array.from({ length: 40 }, (_, i) => ({ top: -900 + i * 34, bottom: -866 + i * 34 }));
+    expect(hiddenRowsAbove(visibleTopOf(100, -800), rows)).toBe(29);
   });
 });
 

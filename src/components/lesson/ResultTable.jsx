@@ -20,7 +20,7 @@ export default function ResultTable({ title, columns, rows, rowCount, truncated 
   const boxRef = useRef(null);
   // the parent rebuilds `rows` on every render (sorted, mapped), so the effects key on what the table holds, not the array
   const shape = `${rows.length}|${columns.join('\u0001')}|${rows.length ? rows[0].length : 0}`;
-  const cues = useScrollCues(boxRef, 'tbody tr', [shape, capped], 'thead');
+  const cues = useScrollCues(boxRef, 'tbody tr', [shape, capped], 'th'); // the header cells are what sticks
   const unit = countLabel
     ? (total === 1 ? countLabel.one : countLabel)
     : (total === 1 ? { en: 'row', ro: 'rând' } : { en: 'rows', ro: 'rânduri' });

@@ -28,6 +28,12 @@ export function textWidth(s) {
 
 const longestWord = (s) => Math.max(0, ...String(s).split(/\s+/).map(textWidth));
 
+// A column label split where it may break: after an alias dot (s.|nr_|matricol) or an underscore, so a narrow column breaks
+// a header between its parts rather than inside a word (n.valoa|re).
+export function headParts(label) {
+  return String(label ?? '').split(/(?<=_)|(?<=\.)(?=[A-Za-z])/).filter((p) => p !== '');
+}
+
 // The tri-state badge words, in the lesson's own words.
 export const TRUTH_LABEL = {
   T: { en: 'TRUE', ro: 'ADEVĂRAT' },
