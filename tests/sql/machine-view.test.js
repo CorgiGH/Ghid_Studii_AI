@@ -33,6 +33,9 @@ describe('block spec', () => {
     expect(validateQueryMachine({ ...ok, say: { ...ok.say, from: { en: 'x' } } }).join()).toMatch(/en and ro/)
     expect(validateQueryMachine({ ...ok, ask: { select: { en: 'a', ro: 'b' } } }).join()).toMatch(/predicted stage/)
     expect(validateQueryMachine({ ...ok, show: [] }).join()).toMatch(/show/)
+    const left = byId['bd-l20-qm1']
+    expect(validateQueryMachine({ ...left, stages: [{ clause: 'from' }, { clause: 'join', predict: true }, { clause: 'where' }] }).join()).toMatch(/inner JOIN/)
+    expect(validateQueryMachine({ ...left, stages: [{ clause: 'from' }, { clause: 'join' }, { clause: 'where', predict: true }] })).toEqual([])
   })
 })
 
@@ -57,7 +60,7 @@ describe('steps and views', () => {
     expect(predictKind('where')).toBe('rows')
     expect(predictKind('order')).toBe('order')
     expect(predictKind('distinct')).toBe('count')
-    expect(predictKind('join')).toBe('count')
+    expect(predictKind('join')).toBe('rows')
   })
 
   it('ask shows the stage input untouched, show marks kept rows and holds the removed ones when predicted', async () => {
@@ -101,18 +104,45 @@ describe('steps and views', () => {
     expect(shown.rows.every((r) => r.mark === true && r.pos > 0)).toBe(true)
   })
 
-  it('distinct: representatives with counts that add up; join: predicted count; settled carries columns', async () => {
+  it('distinct: representatives with counts that add up; settled carries columns', async () => {
     const d = await planOf(byId['bd-l02-qm3'])
     const shown = viewAt(d, buildSteps(d), 3, { 2: { value: '7' } }, { 2: { correct: 1, total: 1 } })
     expect(shown.rows).toHaveLength(7)
     expect(shown.rows.reduce((n, r) => n + r.count, 0)).toBe(13)
     expect(settled(d, 1).dimmed).toEqual(['nume'])
-    const j = await planOf(byId['bd-l22-qm'])
+  })
+
+  it('a predicted join asks for the surviving pairs by clicking, marks every pair, then goes on with the survivors', async () => {
+    const b = byId['bd-l22-qm']
+    const j = await planOf(b)
     const steps = buildSteps(j)
-    const ask = viewAt(j, steps, 1)
-    expect(ask.ask.kind).toBe('count')
-    expect(ask.rows).toHaveLength(13)
-    expect(viewAt(j, steps, 2, { 1: { value: '9' } }, { 1: { correct: 1, total: 1 } }).meta.count).toMatchObject({ ok: true })
+    expect(steps.map((s) => `${s.stage}:${s.phase}`)).toEqual(['0:show', '1:ask', '1:show', '2:show', '3:show'])
+    const ask = viewAt(j, steps, 1, { 1: { picks: [j[1].kept[0]] } })
+    expect(ask.ask.kind).toBe('rows')
+    expect(ask.columns).toEqual(b.show)
+    expect(ask.rows).toHaveLength(25)
+    expect(ask.rows.every((r) => r.status === 'pickable')).toBe(true)
+    expect(ask.rows.filter((r) => r.picked).map((r) => r.key)).toEqual([j[1].kept[0]])
+    expect(ask.rows.every((r) => r.mark === undefined)).toBe(true)
+    // one survivor missed: every other pair is right
+    const picks = j[1].kept.slice(1)
+    const shown = viewAt(j, steps, 2, { 1: { picks } }, { 1: { correct: 24, total: 25 } })
+    expect(shown.rows).toHaveLength(25)
+    expect(shown.rows.filter((r) => r.status === 'kept')).toHaveLength(9)
+    expect(shown.rows.filter((r) => r.status === 'gone')).toHaveLength(16)
+    expect(shown.rows.filter((r) => r.mark === false).map((r) => r.key)).toEqual([j[1].kept[0]])
+    expect(shown.meta).toMatchObject({ from: 25, to: 9, score: { correct: 24, total: 25 } })
+    expect(settled(j, 1).rows).toHaveLength(9)
+    expect(viewAt(j, steps, 3).rows.map((r) => r.key)).toEqual(j[1].kept)
+  })
+
+  it('an unpredicted join shows its result rows, all of them standing', async () => {
+    const plan = await planOf(byId['bd-l18-qm1'])
+    const steps = buildSteps(plan)
+    const join = viewAt(plan, steps, 1)
+    expect(join.rows).toHaveLength(42)
+    expect(join.meta).toMatchObject({ from: 13, to: 42, product: 546 })
+    expect(settled(plan, 1).rows).toHaveLength(42)
   })
 
   it('set operator: lists first, then the result with the second list left alone for MINUS', async () => {

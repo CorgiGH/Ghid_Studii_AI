@@ -24,6 +24,9 @@ const Html = ({ as = 'span', className, text }) => (
   React.createElement(as, { className, dangerouslySetInnerHTML: { __html: formatMarkdown(text) } })
 );
 
+// SQL from the block goes into text that is rendered as HTML, so its < > & must stay text.
+const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 const cellText = (v) => (v === null || v === undefined ? 'NULL' : displayCell(typeof v === 'string' ? v.replace(/\s+$/, '') : v));
 
 function Mark({ row, m }) {
@@ -202,7 +205,7 @@ function Meta({ view, tick }) {
     parts.push(<span key="b">{t('Second list', 'A doua listă')} {mt.rightDistinct}</span>);
     if (view.phase === 'show') parts.push(<span key="c" className="qm-meta-strong">{t('Result', 'Rezultat')} <CountUp key={`r${tick}`} from={mt.leftDistinct} to={mt.to} /></span>);
   } else if (view.ask) {
-    parts.push(<span key="n">{mt.count} {t('rows', 'rânduri')}</span>);
+    parts.push(<span key="n">{mt.count} {view.clause === 'join' ? t('pairs', 'perechi') : t('rows', 'rânduri')}</span>);
   } else if (view.clause === 'join' && mt.tables && mt.product && mt.tables.length === 2) {
     parts.push(<span key="p">{mt.tables.map((x) => x.count).join(' × ')} = {mt.product} {t('pairs', 'perechi')}</span>);
     parts.push(<span key="r" className="qm-meta-strong"><CountUp key={`j${tick}`} from={mt.product} to={mt.to} duration={0.7} /> {t('rows', 'rânduri')}</span>);
@@ -332,11 +335,15 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
     if (atAsk) {
       const authored = ask[c];
       if (authored) return t(authored.en, authored.ro);
+      if (c === 'join' && stage.test !== undefined) {
+        const cond = `\`${escapeHtml(stage.test)}\``;
+        return stage.given.length
+          ? t(`These pairs already meet the equalities in ON. Which ones also pass ${cond}? Click them, then check.`, `Perechile de mai jos respectă deja egalitățile din ON. Care trec și de ${cond}? Apasă pe ele, apoi verifică.`)
+          : t(`Here is every combination of rows. Which ones pass ${cond}? Click them, then check.`, `Mai jos sunt toate combinațiile de rânduri. Care trec de ${cond}? Apasă pe ele, apoi verifică.`);
+      }
       if (view.ask.kind === 'rows') return t('Which rows will WHERE keep? Click the ones you think stay, then check.', 'Ce rânduri păstrează WHERE? Apasă pe cele care crezi că rămân, apoi verifică.');
       if (view.ask.kind === 'order') return t('Click the rows in the order they will come out, then check.', 'Apasă rândurile în ordinea în care vor ieși, apoi verifică.');
-      return c === 'join'
-        ? t('How many rows will the join give? Type a number, then check.', 'Câte rânduri iese din join? Scrie un număr, apoi verifică.')
-        : t('How many rows are left after DISTINCT? Type a number, then check.', 'Câte rânduri rămân după DISTINCT? Scrie un număr, apoi verifică.');
+      return t('How many rows are left after DISTINCT? Type a number, then check.', 'Câte rânduri rămân după DISTINCT? Scrie un număr, apoi verifică.');
     }
     if (cur.phase === 'lists' && !say[`${c}:lists`]) return t('Two lists, one from each query. Press Next to combine them.', 'Două liste, câte una din fiecare interogare. Apasă Mai departe ca să le combini.');
     const s = say[c];

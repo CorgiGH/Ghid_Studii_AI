@@ -141,7 +141,7 @@ function parseSelect(ts, lo, hi) {
     const end = k + 1 < starts.length ? starts[k + 1].i : fromEnd
     const text = squash(untokenize(ts.slice(s.i, end)))
     if (s.comma) {
-      return { kind: 'comma', text, from: s.i, to: end, ...tableAndAlias(ts, s.i + 1, end), on: null }
+      return { kind: 'comma', text, head: text, from: s.i, to: end, ...tableAndAlias(ts, s.i + 1, end), on: null, using: false }
     }
     const words = []
     let jw = s.i
@@ -161,7 +161,17 @@ function parseSelect(ts, lo, hi) {
       else if (d === 0 && ts[i].type === 'word' && /^(ON|USING)$/i.test(ts[i].text)) { onIdx = i; break }
     }
     const ta = tableAndAlias(ts, jw + 1, onIdx < 0 ? end : onIdx)
-    return { kind, text, from: s.i, to: end, ...ta, on: onIdx < 0 ? null : squash(untokenize(ts.slice(onIdx + 1, end))) }
+    return {
+      kind,
+      text,
+      // "JOIN note n1": the join without its condition
+      head: squash(untokenize(ts.slice(s.i, onIdx < 0 ? end : onIdx))),
+      from: s.i,
+      to: end,
+      ...ta,
+      on: onIdx < 0 ? null : squash(untokenize(ts.slice(onIdx + 1, end))),
+      using: onIdx >= 0 && isWord(ts[onIdx], 'USING'),
+    }
   })
   const fromText = squash(untokenize(ts.slice(fromIdx + 1, fromEnd)))
   const where = whereIdx === undefined ? null : squash(untokenize(ts.slice(whereIdx + 1, whereEnd)))
@@ -186,6 +196,50 @@ function labelPart(ts, p, lo, label, sub) {
   r.joins.forEach((j, k) => set(j.from, j.to, 'join', k + 1))
   if (r.whereIdx !== null) set(r.whereIdx, r.whereEnd, 'where')
   if (r.orderIdx !== null) set(r.orderIdx, r.hi, 'order')
+}
+
+const COMPARE_OPS = new Set(['<', '>', '<=', '>=', '<>', '!=', '^='])
+const COMPARE_WORDS = new Set(['OR', 'NOT', 'LIKE', 'BETWEEN', 'IN', 'IS', 'EXISTS', 'ANY', 'SOME', 'ALL'])
+
+// A plain equality: one `=` outside parentheses and nothing else there that compares.
+function isEquality(seg) {
+  let d = 0
+  let eqs = 0
+  for (const x of seg) {
+    if (isSym(x, '(')) d += 1
+    else if (isSym(x, ')')) d -= 1
+    else if (d > 0 || !isSig(x)) continue
+    else if (isSym(x, '=')) eqs += 1
+    else if (x.type === 'op' && COMPARE_OPS.has(x.text)) return false
+    else if (x.type === 'word' && COMPARE_WORDS.has(x.text.toUpperCase())) return false
+  }
+  return eqs === 1
+}
+
+// conjuncts("a = b AND c > d") -> [{ text: 'a = b', eq: true }, { text: 'c > d', eq: false }].
+// An AND inside parentheses or after BETWEEN stays inside its conjunct.
+export function conjuncts(text) {
+  const ts = tokenize(String(text || ''))
+  const cuts = [-1]
+  let d = 0
+  let between = 0
+  ts.forEach((x, i) => {
+    if (isSym(x, '(')) d += 1
+    else if (isSym(x, ')')) d -= 1
+    else if (d === 0 && isWord(x, 'BETWEEN')) between += 1
+    else if (d === 0 && isWord(x, 'AND')) {
+      if (between) between -= 1
+      else cuts.push(i)
+    }
+  })
+  cuts.push(ts.length)
+  const out = []
+  for (let k = 0; k + 1 < cuts.length; k += 1) {
+    const seg = ts.slice(cuts[k] + 1, cuts[k + 1])
+    const t = squash(untokenize(seg))
+    if (t) out.push({ text: t, eq: isEquality(seg) })
+  }
+  return out
 }
 
 // parseQuery(sql) -> { parts: [Select], ops: ['minus', ...], segments: [{ clause, part, text }] }

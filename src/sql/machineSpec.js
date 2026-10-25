@@ -39,6 +39,9 @@ export function validateQueryMachine(block) {
     for (const s of block.stages) {
       if (s.clause in has && !has[s.clause]) errs.push(`query-machine: stage "${s.clause}" but the query has no such clause`)
     }
+    if (block.stages.some((s) => s.clause === 'join' && s.predict) && a.joins.some((j) => j.kind !== 'inner' || !j.on || j.using)) {
+      errs.push('query-machine: a predicted join needs every join to be an inner JOIN ... ON')
+    }
     if (parsed.ops.length > 1) errs.push('query-machine: only one set operator per query')
     if (parsed.ops.length && block.stages.some((s) => s.clause === 'order')) errs.push('query-machine: order after a set operator is not supported')
     const setIdx = block.stages.findIndex((s) => ['union', 'union-all', 'intersect', 'minus'].includes(s.clause))

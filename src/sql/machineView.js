@@ -19,13 +19,12 @@ export function chipStep(steps, i, checked = {}) {
   return ask >= 0 && !checked[i] ? ask : steps.findIndex((x) => x.stage === i && x.phase === 'show')
 }
 
-// Which kind of answer a predicted stage asks for. A predicted join asks for the row count, not for surviving
-// pairs: the only predicted join (L22, four tables) has 298116 candidate combinations, which cannot be listed
-// for clicking. Joins small enough to list are shown whole by the join step itself.
+// Which kind of answer a predicted stage asks for: WHERE and JOIN have the learner click the rows (for a join,
+// the candidate pairs) that survive, ORDER BY has them placed in order, DISTINCT asks how many rows remain.
 export function predictKind(clause) {
-  if (clause === 'where') return 'rows'
+  if (clause === 'where' || clause === 'join') return 'rows'
   if (clause === 'order') return 'order'
-  return 'count' // join, distinct
+  return 'count' // distinct
 }
 
 const keepRows = (S) => {
@@ -33,11 +32,14 @@ const keepRows = (S) => {
   return S.rows.filter((r) => keep.has(r.key))
 }
 
+// A predicted join's stage lists its candidate pairs (S.test is the part of ON the learner decides).
+const isPairs = (S) => S.clause === 'join' && S.test !== undefined
+
 // Rows and columns standing on screen once stage i is done.
 export function settled(plan, i) {
   if (i < 0) return { rows: [], columns: [], dimmed: [], labels: {} }
   const S = plan[i]
-  const rows = S.clause === 'where' ? keepRows(S) : isSetClause(S.clause) ? [...keepRows(S), ...(S.right || []).filter((r) => S.kept.includes(r.key))] : S.rows
+  const rows = S.clause === 'where' || isPairs(S) ? keepRows(S) : isSetClause(S.clause) ? [...keepRows(S), ...(S.right || []).filter((r) => S.kept.includes(r.key))] : S.rows
   return { rows, columns: S.columns, dimmed: S.dimmed || [], labels: S.labels || {} }
 }
 
@@ -55,10 +57,13 @@ export function viewAt(plan, steps, stepIndex, ui = {}, checked = {}) {
   if (phase === 'ask') {
     const kind = predictKind(S.clause)
     view.ask = { kind, done }
-    const input = i === 0 || S.clause === 'where' ? (S.clause === 'where' ? S.rows : []) : prev.rows
-    view.columns = i === 0 ? S.columns : prev.columns
-    view.dimmed = i === 0 ? [] : prev.dimmed
-    view.labels = i === 0 ? {} : prev.labels
+    // WHERE and a predicted join list their own input rows; the other stages start from what stands on screen.
+    const own = S.clause === 'where' || isPairs(S)
+    const input = own ? S.rows : i === 0 ? [] : prev.rows
+    const fresh = i === 0 || isPairs(S)
+    view.columns = fresh ? S.columns : prev.columns
+    view.dimmed = fresh ? [] : prev.dimmed
+    view.labels = fresh ? {} : prev.labels
     if (kind === 'rows') {
       const picked = new Set(answer.picks || [])
       const score = done ? scorePicks(S, picked) : null
@@ -76,11 +81,11 @@ export function viewAt(plan, steps, stepIndex, ui = {}, checked = {}) {
   if (S.clause === 'from') {
     view.rows = S.rows.map((r) => rowOf(r))
     view.meta = { to: S.rows.length, tables: S.tables || null }
-  } else if (S.clause === 'join') {
+  } else if (S.clause === 'join' && !isPairs(S)) {
     view.rows = S.rows.map((r) => rowOf(r))
     view.meta = { from: prev.rows.length, to: S.rows.length, tables: S.tables || null, product: S.product ?? null }
-  } else if (S.clause === 'where') {
-    const hold = !!(S.predict || S.truth)
+  } else if (S.clause === 'where' || isPairs(S)) {
+    const hold = !!(S.predict || S.truth || isPairs(S))
     const score = done ? scorePicks(S, answer.picks || []) : null
     const keep = new Set(S.kept)
     const rows = hold ? S.rows : keepRows(S)
@@ -114,7 +119,6 @@ export function viewAt(plan, steps, stepIndex, ui = {}, checked = {}) {
     view.panels = { left: side(S.rows, false), right: side(S.right || [], true), result: split ? [...S.rows, ...(S.right || [])].filter((r) => keep.has(r.key)).map((r) => rowOf(r, { status: 'kept' })) : [] }
     view.meta = { left: S.setCounts.left, right: S.setCounts.right, leftDistinct: S.rows.length, rightDistinct: (S.right || []).length, to: S.kept.length }
   }
-  if (S.clause === 'join' && done) view.meta.count = scoreCount(S, answer.value)
   return view
 }
 

@@ -7,9 +7,12 @@
 //
 // `rows` are the rows on screen while the stage runs (for WHERE: its input rows, with `kept` and
 // `removed` telling which survive); the next stage starts from the survivors.
-import { MachineError, parseQuery } from './machineParse.js'
+import { MachineError, conjuncts, parseQuery } from './machineParse.js'
 
-export { MachineError, parseQuery }
+export { MachineError, conjuncts, parseQuery }
+
+// How many candidate pairs a predicted join may put on screen for clicking.
+export const MAX_PAIRS = 60
 
 export const CLAUSES = ['from', 'join', 'where', 'select', 'distinct', 'order', 'union', 'union-all', 'intersect', 'minus']
 const SET_CLAUSES = new Set(['union', 'union-all', 'intersect', 'minus'])
@@ -92,7 +95,54 @@ async function loadPart(runner, dataset, part, show, tag, computed) {
     rows.push({ key, cells })
   })
   rows.forEach((r) => computed.forEach((c) => { r.cells[c.label] = sel[r.key][c.index] }))
-  return { part, rows, sel, ordKey, truth, selExprs, orders, showCols, nShow, rawRows: res.rows, listLen: built.list.length }
+  return { part, rows, sel, ordKey, truth, selExprs, orders, showCols, nShow, rawRows: res.rows, list: built.list }
+}
+
+// The pairs a predicted join puts in front of the learner. The plain equalities of every ON (same student,
+// same course, a fixed course) are already applied, and the learner decides the rest (`n2.valoare > n1.valoare`).
+// When every ON part is an equality, nothing is applied and the pairs are every combination of rows.
+// Survivors are the master query's own rows (matched by value), so later stages carry on from them.
+async function loadPairs(runner, dataset, part, A, rowMap, maxPairs) {
+  if (!part.joins.length || part.joins.some((j) => j.kind !== 'inner' || !j.on || j.using)) {
+    throw new MachineError('A predicted join needs every join to be an inner JOIN ... ON.', 'unsupported')
+  }
+  const split = part.joins.map((j) => conjuncts(j.on))
+  const anyOther = split.some((cs) => cs.some((c) => !c.eq))
+  const isTest = (c) => !anyOther || !c.eq
+  const given = split.flat().filter((c) => !isTest(c)).map((c) => c.text)
+  const test = split.flat().filter(isTest).map((c) => c.text)
+  const fromText = [part.base.text, ...part.joins.map((j, k) => {
+    const on = split[k].filter((c) => !isTest(c)).map((c) => c.text)
+    return `${j.head} ON ${on.length ? on.join(' AND ') : '1 = 1'}`
+  })].join(' ')
+  const n = Number((await exec(runner, dataset, `SELECT COUNT(*) FROM ${fromText}`)).rows[0][0])
+  if (n > maxPairs) throw new MachineError(`A predicted join would list ${n} pairs to click; at most ${maxPairs} fit on screen.`, 'unsupported')
+  const verdict = `CASE WHEN ${test.map((t) => `(${t})`).join(' AND ')} THEN 'T' ELSE 'F' END`
+  const list = [...A.list, verdict]
+  const res = await exec(runner, dataset, `SELECT ${list.map((e, i) => `${e} AS ${q(`x${i}`)}`).join(', ')} FROM ${fromText}`)
+  const queues = new Map()
+  A.rawRows.forEach((r, i) => {
+    const t = tupleKey(r.slice(0, A.list.length))
+    if (!queues.has(t)) queues.set(t, [])
+    queues.get(t).push(A.rows[i].key)
+  })
+  const rows = []
+  const kept = []
+  const removed = []
+  res.rows.forEach((r, i) => {
+    if (r[A.list.length] === 'T') {
+      const key = (queues.get(tupleKey(r.slice(0, A.list.length))) || []).shift()
+      if (key === undefined) throw new MachineError('A predicted join pair did not match the join result.', 'failed')
+      rows.push(rowMap.get(key))
+      kept.push(key)
+    } else {
+      const key = `j${i}`
+      rows.push({ key, cells: Object.fromEntries(A.showCols.map((label, k) => [label, r[k]])) })
+      removed.push(key)
+    }
+  })
+  if (kept.length !== A.rows.length) throw new MachineError('A predicted join pair did not match the join result.', 'failed')
+  return { rows, kept, removed, given, test: test.join(' AND ') }
 }
 
 function columnPlan(part, show) {
@@ -136,7 +186,7 @@ function groupBySel(keys, sel) {
   return groups
 }
 
-export async function planStages(sql, stages, runner, { dataset = 'facultate', show = [] } = {}) {
+export async function planStages(sql, stages, runner, { dataset = 'facultate', show = [], maxPairs = MAX_PAIRS } = {}) {
   const parsed = parseQuery(sql)
   if (parsed.parts.length > 2) throw new MachineError('Only one set operator per query is animated.', 'unsupported')
   const a0 = parsed.parts[0]
@@ -198,6 +248,16 @@ export async function planStages(sql, stages, runner, { dataset = 'facultate', s
         S.columns = showCols
         S.kept = cur.keys.slice()
       }
+    } else if (clause === 'join' && st.predict) {
+      const J = await loadPairs(runner, dataset, a0, A, rowMap, maxPairs)
+      S.rows = J.rows
+      S.columns = showCols
+      S.kept = J.kept
+      S.removed = J.removed
+      S.given = J.given
+      S.test = J.test
+      S.tables = await tablesInfo()
+      cur = { ...cur, keys: J.kept.slice() }
     } else if (clause === 'join') {
       S.rows = rowsOf(cur.keys)
       S.columns = showCols
@@ -304,7 +364,7 @@ export async function planStages(sql, stages, runner, { dataset = 'facultate', s
 
 // ---- predict checks (pure) --------------------------------------------------------------------
 
-// WHERE / JOIN row picks: marks[key] is true when the learner's choice for that row was right.
+// WHERE row picks and JOIN pair picks: marks[key] is true when the learner's choice for that row was right.
 export function scorePicks(stage, picked) {
   const inRows = stage.rows.map((r) => r.key)
   const keep = new Set(stage.kept)
@@ -326,7 +386,7 @@ export function scoreOrder(stage, placed) {
   return { marks, correct: marks.filter(Boolean).length, total: expected.length }
 }
 
-// A predicted row count (DISTINCT or JOIN).
+// A predicted row count (DISTINCT).
 export function expectedCount(stage) {
   return stage.rows.length
 }

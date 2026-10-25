@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { createEngine } from '../../src/sql/engine/core.js'
-import { planStages, parseQuery, scorePicks, scoreOrder, scoreCount } from '../../src/sql/machine.js'
+import { conjuncts, planStages, parseQuery, scorePicks, scoreOrder } from '../../src/sql/machine.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const facultate = fs.readFileSync(path.join(here, '..', '..', 'public', 'sql', 'datasets', 'facultate.sql'), 'utf8')
@@ -36,6 +36,19 @@ describe('parseQuery', () => {
     expect(l.joins[0].kind).toBe('left')
     expect(parseQuery('SELECT DISTINCT an FROM studenti').parts[0].distinct).toBe(true)
     expect(parseQuery('SELECT a FROM t UNION ALL SELECT b FROM u').ops).toEqual(['union-all'])
+  })
+  it('splits an ON condition into conjuncts and tells plain equalities apart', () => {
+    expect(conjuncts('n2.id_curs = n1.id_curs AND n2.valoare > n1.valoare')).toEqual([
+      { text: 'n2.id_curs = n1.id_curs', eq: true },
+      { text: 'n2.valoare > n1.valoare', eq: false },
+    ])
+    expect(conjuncts("a = '1' AND b BETWEEN 1 AND 2 AND (c = 1 OR d = 2) AND UPPER(e) = UPPER(f) AND g <> h AND k IS NULL").map((c) => [c.text, c.eq])).toEqual([
+      ["a = '1'", true], ['b BETWEEN 1 AND 2', false], ['(c = 1 OR d = 2)', false], ['UPPER(e) = UPPER(f)', true], ['g <> h', false], ['k IS NULL', false],
+    ])
+    const j = parseQuery(byId['bd-l22-qm'].sql).parts[0].joins
+    expect(j.map((x) => x.head)).toEqual(['JOIN note n1', 'JOIN note n2', 'JOIN studenti s2'])
+    expect(parseQuery('SELECT * FROM studenti s JOIN note n USING (nr_matricol)').parts[0].joins[0].using).toBe(true)
+    expect(j[0].using).toBe(false)
   })
   it('labels every token with the clause it belongs to', () => {
     const { segments } = parseQuery('SELECT nume FROM studenti WHERE an = 1 ORDER BY nume')
@@ -136,14 +149,54 @@ describe('planStages against the engine', () => {
     const stages = await plan(byId['bd-l22-qm'])
     const sel = stageOf(stages, 'select')
     expect(sel.labels).toMatchObject({ 's1.nume': 'mai_slab', 'n2.valoare': 'nota_celuilalt' })
+  })
+
+  it('a predicted join lists the pairs its ON equalities allow and keeps exactly the rows the join gives (L22)', async () => {
+    const b = byId['bd-l22-qm']
+    const stages = await plan(b)
     const join = stageOf(stages, 'join')
-    expect(join.rows).toHaveLength(9)
-    expect(scoreCount(join, '9').ok).toBe(true)
-    expect(scoreCount(join, '8')).toMatchObject({ ok: false, want: 9, got: 8 })
-    // Why a predicted join asks for a row count and not for surviving pairs: the unfiltered product of its four
-    // tables is 13 x 42 x 42 x 13 = 298116 combinations, far too many to put on screen to click.
-    expect(join.tables.map((t) => t.count)).toEqual([13, 42, 42, 13])
-    expect(join.product).toBe(298116)
+    const cols = b.show.join(', ')
+    const cellsOf = (r) => b.show.map((c) => r.cells[c])
+    const multiset = (rows) => rows.map((r) => r.map(String).join('\u0001')).sort()
+    // The equalities (same student, course 24, same course) pair the 5 BD grades with each other: 5 x 5 = 25 pairs.
+    const given = "studenti s1 JOIN note n1 ON n1.nr_matricol = s1.nr_matricol AND n1.id_curs = '24' JOIN note n2 ON n2.id_curs = n1.id_curs JOIN studenti s2 ON s2.nr_matricol = n2.nr_matricol"
+    expect(join.rows).toHaveLength(25)
+    expect(multiset(join.rows.map(cellsOf))).toEqual(multiset(await rowsOf(`SELECT ${cols} FROM ${given}`)))
+    expect(join.test).toBe('n2.valoare > n1.valoare')
+    expect(join.given).toEqual(["n1.nr_matricol = s1.nr_matricol", "n1.id_curs = '24'", 'n2.id_curs = n1.id_curs', 's2.nr_matricol = n2.nr_matricol'])
+    // The pairs the learner should click are exactly the rows of the real join.
+    const kept = join.rows.filter((r) => join.kept.includes(r.key))
+    expect(kept).toHaveLength(9)
+    expect(join.removed).toHaveLength(16)
+    expect(multiset(kept.map(cellsOf))).toEqual(multiset(await rowsOf(`SELECT ${cols} FROM ${parseQuery(b.sql).parts[0].fromText}`)))
+    // Equal grades are not "strictly higher": Antonie 10 next to Panaite 10 is a removed pair.
+    const ties = join.rows.filter((r) => String(r.cells['n1.valoare']) === String(r.cells['n2.valoare']) && r.cells['s1.nume'] !== r.cells['s2.nume'])
+    expect(ties.length).toBeGreaterThan(0)
+    expect(ties.every((r) => join.removed.includes(r.key))).toBe(true)
+    expect(scorePicks(join, join.kept)).toMatchObject({ correct: 25, total: 25 })
+    expect(scorePicks(join, []).correct).toBe(16)
+    // The next stage starts from the 9 survivors.
+    expect(stageOf(stages, 'select').rows.map((r) => r.key).sort()).toEqual([...join.kept].sort())
+  })
+
+  it('a predicted join with only equalities offers every combination, and refuses a list too long to click', async () => {
+    const sql = 'SELECT c.titlu_curs, d.id_prof FROM cursuri c JOIN didactic d ON d.id_curs = c.id_curs'
+    const stages = await planStages(sql, [{ clause: 'from' }, { clause: 'join', predict: true }], engine, { dataset: 'facultate', show: ['c.titlu_curs', 'd.id_prof'], maxPairs: 90 })
+    const join = stages[1]
+    expect(join.rows).toHaveLength(9 * 10)
+    expect(join.test).toBe('d.id_curs = c.id_curs')
+    expect(join.given).toEqual([])
+    expect(join.kept).toHaveLength((await rowsOf(sql)).length)
+    // studenti JOIN note: 13 x 42 = 546 combinations, over the default limit
+    const big = byId['bd-l18-qm1']
+    await expect(planStages(big.sql, [{ clause: 'from' }, { clause: 'join', predict: true }], engine, { dataset: 'facultate', show: big.show }))
+      .rejects.toMatchObject({ code: 'unsupported', message: expect.stringMatching(/546/) })
+  })
+
+  it('a predicted join needs inner JOIN ... ON', async () => {
+    const left = byId['bd-l20-qm1']
+    await expect(planStages(left.sql, [{ clause: 'from' }, { clause: 'join', predict: true }], engine, { dataset: 'facultate', show: left.show }))
+      .rejects.toMatchObject({ code: 'unsupported' })
   })
 
   it('every staged query-machine block plans, and where it ends in a result that result equals the engine', async () => {
