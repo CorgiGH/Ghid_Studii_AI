@@ -2,6 +2,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useApp } from '../../../contexts/AppContext';
 import ProgressRing from '../../ui/ProgressRing';
+import { totalScore as sumScores } from './testLogic.js';
 
 function stripMd(s) {
   if (!s) return '';
@@ -15,10 +16,11 @@ function truncateOnWord(s, n) {
   return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
 }
 
-export default function TestResults({ questions, answers, totalPoints, onRetake, onReviewMistakes }) {
+// `total`: the test's score from the one shared sum (testLogic.totalScore over the questions shown); computed here when not given.
+export default function TestResults({ questions, answers, total, totalPoints, onRetake, onReviewMistakes }) {
   const { t } = useApp();
 
-  const totalScore = Object.values(answers).reduce((sum, a) => sum + (a.score || 0), 0);
+  const totalScore = Number.isFinite(total) ? total : sumScores(questions, answers);
   const pct = totalPoints > 0 ? totalScore / totalPoints : 0;
   const percent = Math.round(pct * 100);
   const color = pct >= 0.8 ? '#22c55e' : pct >= 0.5 ? '#f59e0b' : '#ef4444';
@@ -77,6 +79,11 @@ export default function TestResults({ questions, answers, totalPoints, onRetake,
                 <span style={{ color, fontSize: '18px' }}>{isCorrect ? '\u2713' : '\u2717'}</span>
                 <span className="flex-1 text-sm" style={{ color: 'var(--theme-content-text)' }}>
                   <span className="font-semibold">{t(`Q${i + 1}`, `Î${i + 1}`)}</span>: {shortPrompt}
+                  {a.ungraded && (
+                    <span className="block text-[11px] mt-0.5" style={{ color: 'var(--theme-muted-text)' }} data-testid="result-ungraded">
+                      {t('This answer could not be graded.', 'Răspunsul nu a putut fi evaluat.')}
+                    </span>
+                  )}
                 </span>
                 <span className="text-xs font-bold" style={{ color }}>
                   {a.score}/{q.points}

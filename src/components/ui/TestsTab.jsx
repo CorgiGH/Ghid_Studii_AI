@@ -16,7 +16,9 @@ function LoadingFallback() {
   );
 }
 
-export default function TestsTab({ tests, courses }) {
+// `player`: the subject's player. A lesson-player subject (BD) has no generated practice: its questions are sql questions the
+// random mix and the AI generator cannot render, so that section is left out.
+export default function TestsTab({ tests, courses, player }) {
   const { t, lang, testProgress } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTest = searchParams.get('test');
@@ -297,7 +299,8 @@ export default function TestsTab({ tests, courses }) {
 
       {/* Generators live below the real exams — still one-click, no longer
           dominating above-the-fold on a tab whose purpose is past papers. */}
-      <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--theme-border)' }}>
+      {player !== 'lesson' && (
+      <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--theme-border)' }} data-testid="tests-generate">
         <h3 className="text-sm font-bold mb-3 uppercase tracking-wide" style={{ color: 'var(--theme-muted-text)' }}>
           {t('Generate practice', 'Generează practică')}
         </h3>
@@ -343,6 +346,7 @@ export default function TestsTab({ tests, courses }) {
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

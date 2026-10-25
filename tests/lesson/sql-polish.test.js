@@ -210,10 +210,11 @@ describe('hand-in grading', () => {
       expect(offersRetry(r.issue)).toBe(true);
     }
   });
-  it('a hard failure outranks a cancel; a missing answer key is its own ungraded case', async () => {
+  it('a cancel ends the hand-in at once (silent); a missing answer key is its own ungraded case', async () => {
     let n = 0;
     const flaky = stub(async () => { n++; throw Object.assign(new Error('x'), { code: n === 1 ? 'CANCELLED' : 'TIMEOUT' }); });
-    expect((await gradeParts(args(flaky, { p1: 'select 1' }))).issue.kind).toBe('timeout');
+    expect((await gradeParts(args(flaky, { p1: 'select 1' }))).issue.kind).toBe('silent');
+    expect(n).toBe(1);
     const r = await gradeParts(args(stub(async () => rowsOf([['1']])), { p1: 'select 1' }, { loadExpected: async () => { throw new Error('404'); } }));
     expect(r.status).toBe('ungraded');
     expect(r.issue.kind).toBe('expected');

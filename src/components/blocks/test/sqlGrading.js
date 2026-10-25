@@ -30,7 +30,10 @@ const PRIORITY = { engine: 4, timeout: 3, silent: 2, expected: 1 };
 //   { status: 'unavailable' }                      the engine cannot run here
 //   { status: 'ungraded', issue, out }             something kept an entry from getting a verdict: `issue.kind` is
 //                                                  'silent' | 'timeout' | 'engine' | 'expected' (missing answer key);
-//                                                  nothing is scored and the learner may hand in again
+//                                                  nothing is scored and the learner may hand in again. A timeout, an engine
+//                                                  fault or a cancel ends the hand-in at once (the question is ungraded anyway,
+//                                                  and every further run could take another minute); a missing answer key
+//                                                  lets the other entries run, so a later timeout still gets its own message
 //   { status: 'graded', out, flat }                out: part id -> [{ dataset, result, verdict, mistake, expected, empty? }];
 //                                                  flat: the verdicts in order (null where there is none)
 export async function gradeParts({ client, parts, base, texts, loadExpected }) {
@@ -60,7 +63,8 @@ export async function gradeParts({ client, parts, base, texts, loadExpected }) {
           const kind = classifyFailure(e);
           if (kind === 'unavailable') return { status: 'unavailable' };
           raise(kind, e);
-          entry = { dataset, result: null, verdict: null, mistake: null, expected: null, failure: e };
+          out[part.id].push({ dataset, result: null, verdict: null, mistake: null, expected: null, failure: e });
+          return { status: 'ungraded', issue, out };
         }
       }
       out[part.id].push(entry);

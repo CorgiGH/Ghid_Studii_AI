@@ -31,3 +31,31 @@ export function totalScore(questions, answers) {
   for (const [id, a] of Object.entries(answers ?? {})) scores[id] = a?.score || 0;
   return scoreMock(questions, scores);
 }
+
+// The time-up hand-in waits for the questions' flushes at most this long; then See Results is available and whatever is still
+// pending counts as not graded.
+export const FLUSH_CAP_MS = 20000;
+
+// flushers: Map questionId -> () => Promise<'done' | 'needs-score'>. Resolves, at the latest after `capMs`, to
+// { outcomes: { id: outcome }, pending: [ids whose flush had not finished] }. A flush that throws counts as 'done'.
+export async function flushWithin(flushers, capMs = FLUSH_CAP_MS) {
+  const entries = [...flushers];
+  const outcomes = {};
+  const all = Promise.all(entries.map(([id, fn]) => Promise.resolve().then(fn).catch(() => 'done').then((o) => { outcomes[id] = o; })));
+  let timer;
+  const cap = new Promise((resolve) => { timer = setTimeout(resolve, capMs); });
+  await Promise.race([all, cap]);
+  clearTimeout(timer);
+  return { outcomes: { ...outcomes }, pending: entries.map(([id]) => id).filter((id) => !(id in outcomes)) };
+}
+
+// The note under the questions once the clock ran out: paper mode asks for the learner's own scores, the other modes are grading.
+export function timeUpText(mode) {
+  if (mode === 'paper') {
+    return {
+      en: 'Time is up. Your answers were handed in; score the paper questions yourself, then see the results.',
+      ro: 'Timpul a expirat. Răspunsurile au fost predate; notează-te singur la întrebările pe hârtie, apoi vezi rezultatele.',
+    };
+  }
+  return { en: 'Time is up. Grading your answers...', ro: 'Timpul a expirat. Se corectează răspunsurile...' };
+}
