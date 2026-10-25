@@ -140,7 +140,21 @@ Learner text must not contain pedagogy labels, study citations or phase names.
 
 **DDL/DML in the sandbox.** Learners may run CREATE/DROP/INSERT/UPDATE/DELETE/COMMIT/ROLLBACK. Each exercise runs in its own throwaway copy of the dataset, reset on every run and every screen, so nothing a learner does leaks. Oracle types map onto Postgres types with Oracle behaviour (VARCHAR2 length errors ORA-12899, NUMBER(p,s) precision ORA-01438 and rounding, CHAR padding, DATE with time). Constraint violations raise the Oracle codes (ORA-00001, ORA-01400, ORA-02291, ORA-02292, ORA-02290). The checker for DDL/DML compares the resulting table structure (columns, types, nullability, constraints, as `DESCRIBE`/`user_tab_columns` would show) and the resulting table contents against Oracle's, not a query result. These statements join the differential test corpus.
 
-**Runtime.** Load PGlite in a **Web Worker** only when the first SQL or query-machine screen opens; show a skeleton meanwhile. Preload a dumped data directory to skip initdb (spike: cold start ≈0.7 s with a 4.65 MB `datadir.tar.gz`, vs ≈2.1 s fresh). Two datasets: the lab's five tables and the Biblioteca mock schema; reset between runs so learners can't damage them (read-only role or rollback). Measured in node: ≈4 MB brotli transfer, RSS ≈720 MB. **Browser memory is unmeasured** and must be measured in Chrome desktop and a phone-sized Chrome before relying on it (§12).
+**Runtime.** Load PGlite in a **Web Worker** only when the first SQL or query-machine screen opens; show a skeleton meanwhile. Preload a dumped data directory to skip initdb (spike: cold start ≈0.7 s with a 4.65 MB `datadir.tar.gz`, vs ≈2.1 s fresh). Two datasets: the lab's five tables and the Biblioteca mock schema; reset between runs so learners can't damage them (read-only role or rollback). Measured in node: ≈4 MB brotli transfer, RSS ≈720 MB.
+
+**Measured in headless Chrome (2026-10-25, `scripts/sql/measure-browser.mjs`, median of 3 cold runs, the real worker bundle served by Vite preview).** The worker starts from `public/sql/datadir-<dataset>.tar.gz` (4.6 MB gzip, built by `npm run build`'s prebuild step; the data dir is fetched from localhost, so real network time comes on top). One worker serves one dataset; a dataset switch boots a new worker.
+
+| | Desktop (1280x800) | Phone-class (390x844, mobile UA, CPU at 25%) |
+|---|---|---|
+| Boot (first `run` until the engine is ready) | 0.9 s | 7.7 to 8.3 s |
+| First query after boot (`SELECT ... ORDER BY`) | 9 ms | 0.2 s |
+| 3-table join with ORDER BY | 7 ms | 0.2 s |
+| 5-table cartesian product (105 300 rows, 500 kept) | 2.8 s | 26 s |
+| Worker JS heap (used / total) | 36 / 55 MB | 6 / 42 MB (measured after a GC) |
+| Page main-thread JS heap | 1 MB | 2 MB |
+| Browser processes, summed RSS | about 1.4 GB (headless, includes browser, GPU and renderer) | about 1.4 GB |
+
+How the phone-class column was produced: the CDP CPU throttle (4x) does not reach a Web Worker, and the engine runs in one, so Chrome was started under a systemd CPU quota of 25% (a 4x cut for the whole browser, hence an upper bound for the worker). Real hardware was not measured. `PAPER_MODE_THRESHOLD` in `src/sql/engine/client.js` is a boot of 20 s: a failed boot or no answer within 20 s sets the status to `failed` and the lesson uses paper mode (worked examples with frozen results); the measured phone-class boot of about 8 s leaves 2.5x headroom. PGlite ignores `statement_timeout` (single-user mode has no timers; a 1.5 s `pg_sleep` under a 300 ms limit ran to the end), so the client enforces a run limit of 60 s by terminating and rebooting the worker; `cancel()` does the same on demand. A statement runs on the dataset's clock of 2026-10-26 14:30:00; exercises on the second clock need their own engine and are not served by these data dirs (see the Task 8 report).
 
 **Differential testing against real Oracle.** A dev-only harness (not shipped) runs a query corpus on Oracle 11g and on the engine and diffs results (values, types as text, row order where ORDER BY exists, error codes). The corpus: every official exercise solution, every alternative correct solution in the lessons, every named wrong answer used by the checker, every query shown in lesson text, the mock test, the 159 smoke queries, the refute probes, and generated variants per function family. Oracle outputs are frozen into a committed JSON snapshot that the app and CI use as "expected". A mismatch blocks shipping the affected exercise.
 

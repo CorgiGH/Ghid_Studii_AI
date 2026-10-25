@@ -59,19 +59,25 @@ export function parseAlterSession(sql) {
   return pairs
 }
 
-export async function createEngine(pg, { clock, datasets }) {
+// `prebuilt: '<dataset>'` means pg was started from a data directory that already holds the compat layer, the clock and that
+// dataset (scripts/sql/build-datadirs.mjs); only the session settings are restored.
+export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
   if (!CLOCK_RE.test(clock)) throw new Error(`clock must look like 'YYYY-MM-DD HH24:MI:SS', got '${clock}'`)
   await pg.waitReady
-  for (const stmt of compatStatements()) {
-    try {
-      await pg.exec(stmt)
-    } catch (e) {
-      throw new Error(`compat layer failed: ${e.message}\n${stmt.slice(0, 200)}`)
+  if (prebuilt) {
+    await pg.exec("SET search_path = public, pg_catalog; SET TIME ZONE 'UTC'")
+  } else {
+    for (const stmt of compatStatements()) {
+      try {
+        await pg.exec(stmt)
+      } catch (e) {
+        throw new Error(`compat layer failed: ${e.message}\n${stmt.slice(0, 200)}`)
+      }
     }
+    await pg.query('UPDATE ora_clock SET d = $1::timestamp', [clock])
   }
-  await pg.query('UPDATE ora_clock SET d = $1::timestamp', [clock])
 
-  let loaded = null
+  let loaded = prebuilt
   // Session NLS state, mirrored from the ora_session table so that result cells can be formatted in the session's language and
   // date format. A default session formats DATE cells in JavaScript; any other goes through ora_to_char_date.
   const session = { lang: 'AMERICAN', dateFormat: 'DD-MON-RR' }
