@@ -282,3 +282,27 @@ describe('Romanian explanations', () => {
     expect(explainOra('ORA-00907').ro).toMatch(/[ăâîșț]/)
   })
 })
+
+describe('a first word that starts no Oracle statement is ORA-00900 (ruling R36)', () => {
+  it.each([
+    'SELEC nume FROM studenti',
+    'selct * from dual',
+    'SELECTT 1 FROM dual',
+    'VALUES (1)',
+    'SHOW TABLES',
+    'nume FROM studenti',
+  ])('%s', async (sql) => {
+    const r = await exec(sql)
+    expect(r.error?.code).toBe('ORA-00900')
+    expect(r.error?.message).toBe('invalid SQL statement')
+  })
+  it.each([
+    'SELECT nume FROM studenti',
+    '(SELECT nume FROM studenti)',
+    'WITH x AS (SELECT 1 a FROM dual) SELECT a FROM x',
+    '  -- note\n select 1 from dual',
+    'EXPLAIN PLAN FOR SELECT 1 FROM dual',
+  ])('does not touch %s', async (sql) => {
+    expect((await exec(sql)).error?.code).not.toBe('ORA-00900')
+  })
+})

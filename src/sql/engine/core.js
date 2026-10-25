@@ -18,7 +18,7 @@ import { rewriteOracle } from '../rewrite/index.js'
 import { dmlTarget } from '../rewrite/pass-ddl.js'
 import { mapPgError, OracleError } from './errors.js'
 import { displayNames, formatCell } from './format.js'
-import { isForeignTransactionStatement, parseDescribe, parseTransactionControl, splitScript } from './script.js'
+import { isForeignTransactionStatement, parseDescribe, parseTransactionControl, splitScript, startsNoOracleStatement } from './script.js'
 
 // Compat files as raw text, sorted by file name (00-base ... 70-ddl). Vite inlines them into this (lazy) chunk.
 const COMPAT_FILES = import.meta.glob('../compat/*.sql', { query: '?raw', import: 'default', eager: true })
@@ -234,7 +234,7 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
         await transactionControl(control, tx)
         return textResult('tx')
       }
-      if (isForeignTransactionStatement(sql)) throw new OracleError('ORA-00900', 'invalid SQL statement')
+      if (isForeignTransactionStatement(sql) || startsNoOracleStatement(sql)) throw new OracleError('ORA-00900', 'invalid SQL statement')
     } catch (err) {
       // an OracleError or a PostgreSQL error (it carries a SQLSTATE code) is the learner's answer; anything else is our bug
       if (!(err instanceof OracleError) && !(err && err.code)) throw err

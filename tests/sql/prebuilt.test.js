@@ -36,7 +36,7 @@ async function runEntry(engine, entry) {
 
 describe('prebuilt engine equals the fresh engine', () => {
   it('has the same session settings', async () => {
-    for (const q of ['SHOW DateStyle', 'SHOW TimeZone', 'SHOW search_path']) {
+    for (const q of ['DateStyle', 'TimeZone', 'search_path'].map((s) => `SELECT current_setting('${s}') AS v FROM dual`)) {
       const a = await fresh.run(q, DS)
       const b = await prebuilt.run(q, DS)
       expect(a.error, q).toBeUndefined()

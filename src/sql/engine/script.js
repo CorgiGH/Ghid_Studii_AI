@@ -107,3 +107,15 @@ export function isForeignTransactionStatement(sql) {
   const ts = sigTokens(sql)
   return ts.length > 0 && FOREIGN_FIRST_WORDS.some((w) => isWord(ts[0], w))
 }
+
+// Oracle answers ORA-00900 (invalid SQL statement) when the first word starts no statement it knows: a misspelled SELEC, or a
+// PostgreSQL-only statement (VALUES, SHOW, COPY ...). Without this check the parser's own error would surface as ORA-00933 or
+// worse. Only a plain first word is judged; a bracket, a number or a quoted name goes on to the parser as before.
+const ORACLE_FIRST_WORDS = new Set([
+  'SELECT', 'WITH', 'INSERT', 'UPDATE', 'DELETE', 'MERGE', 'CREATE', 'DROP', 'ALTER', 'TRUNCATE', 'COMMENT', 'RENAME', 'GRANT',
+  'REVOKE', 'FLASHBACK', 'PURGE', 'LOCK', 'EXPLAIN', 'ANALYZE', 'AUDIT', 'NOAUDIT', 'CALL', 'SET', 'DESCRIBE', 'DESC',
+])
+export function startsNoOracleStatement(sql) {
+  const ts = sigTokens(sql)
+  return ts.length > 0 && ts[0].type === 'word' && !ORACLE_FIRST_WORDS.has(ts[0].text.toUpperCase())
+}
