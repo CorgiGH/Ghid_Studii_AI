@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { QM_ALL_ROWS, TRUTH_LABEL, endKind, gridTemplate, leadKind, markTone, setPanelRows, textWidth } from '../../src/components/lesson/blocks/qmLayout.js';
 import { ALL_ROWS, cellClass, headerParts, spacedColumns, tableFitsWhole } from '../../src/components/lesson/tableText.js';
-import { hiddenRowsBelow } from '../../src/components/lesson/useScrollCues.js';
+import { hiddenRowsAbove, hiddenRowsBelow } from '../../src/components/lesson/useScrollCues.js';
 import { changedRows, describeRows, sortRows, usesDatasetTables } from '../../src/components/lesson/blocks/sqlExerciseSpec.js';
 
 const row = (key, cells, extra = {}) => ({ key, cells, status: 'plain', ...extra });
@@ -68,11 +68,11 @@ describe('query machine grid', () => {
     expect(shown.result).toHaveLength(1);
   });
 
-  it('shows every row up to 16, scrolls past that', () => {
-    expect(QM_ALL_ROWS).toBe(16);
-    expect(ALL_ROWS).toBe(16);
-    expect(tableFitsWhole(16)).toBe(true);
-    expect(tableFitsWhole(17)).toBe(false);
+  it('shows every row up to 20 (13 students, 16 professors, a 17-row outer join), scrolls the 42 grades', () => {
+    expect(QM_ALL_ROWS).toBe(ALL_ROWS);
+    expect(tableFitsWhole(17)).toBe(true);
+    expect(tableFitsWhole(20)).toBe(true);
+    expect(tableFitsWhole(42)).toBe(false);
   });
 });
 
@@ -86,6 +86,7 @@ describe('table text', () => {
 
   it('counts the rows wholly below the visible part of a box', () => {
     expect(hiddenRowsBelow(300, [{ top: 10 }, { top: 290 }, { top: 299 }, { top: 330 }])).toBe(2);
+    expect(hiddenRowsAbove(100, [{ bottom: 40 }, { bottom: 101 }, { bottom: 140 }])).toBe(2);
   });
 });
 

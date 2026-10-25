@@ -382,7 +382,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
   // starts at the first row that stays.
   const scrollRef = useRef(null);
   const capped = !!view && !view.panels && view.rows.length > QM_ALL_ROWS;
-  const cues = useScrollCues(scrollRef, '.qm-body > .qm-row', [step, state.status, view?.rows.length, view?.columns.join('|'), capped]);
+  const cues = useScrollCues(scrollRef, '.qm-body > .qm-row', [step, state.status, view?.rows.length, view?.columns.join('|'), capped], '.qm-head');
   const firstKept = view && !view.panels && view.rows.some((r) => r.status === 'gone') ? view.rows.findIndex((r) => r.status === 'kept') : -1;
   useEffect(() => {
     const box = scrollRef.current;
@@ -499,6 +499,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
           </div>
         )}
       </div>
+      {cues.above > 0 && <p className="qm-cue" data-testid="qm-cue-above">{t(`${cues.above} more ${cues.above === 1 ? 'row' : 'rows'} above: scroll up in the table ↑`, `încă ${cues.above} ${cues.above === 1 ? 'rând' : 'rânduri'} mai sus: derulează în sus în tabel ↑`)}</p>}
       {cues.right && <p className="qm-cue" data-testid="qm-cue-right">{t('The table goes on to the right: swipe it →', 'Tabelul continuă la dreapta: glisează-l →')}</p>}
       {legend && <p className="qm-legend" data-testid="qm-legend">{t(legend.en, legend.ro)}</p>}
 

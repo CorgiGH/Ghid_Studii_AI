@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { useScrollCues } from './useScrollCues.js';
 import { cellClass, headerParts, spacedColumns, tableFitsWhole } from './tableText.js';
@@ -10,19 +10,31 @@ function Header({ text }) {
 
 // A query result as a table: header, rows, "n rows" line and a note when the engine cut the list. `mark` tints rows
 // (extra rows of the learner's table, missing rows of the expected one); `tint` marks rows a script added or changed. NULL
-// reads NULL, never a blank, and a value keeps its spaces (an LPAD result, a padded CHAR). Up to 16 rows the whole table
-// shows; a longer one scrolls inside its box, and the line under it says what is hidden below or to the right.
+// reads NULL, never a blank, and a value keeps its spaces (an LPAD result, a padded CHAR). Up to 20 rows the whole table
+// shows; a longer one scrolls inside its box (opening at the first tinted row), and the line under it says what is hidden
+// below or to the right.
 export default function ResultTable({ title, columns, rows, rowCount, truncated = false, mark, markKind = 'extra', tint, caption, empty, countLabel }) {
   const { t } = useApp();
   const total = rowCount ?? rows.length;
   const capped = !tableFitsWhole(rows.length);
   const boxRef = useRef(null);
-  const cues = useScrollCues(boxRef, 'tbody tr', [rows, columns, capped]);
+  const cues = useScrollCues(boxRef, 'tbody tr', [rows, columns, capped], 'thead');
   const unit = countLabel
     ? (total === 1 ? countLabel.one : countLabel)
     : (total === 1 ? { en: 'row', ro: 'rând' } : { en: 'rows', ro: 'rânduri' });
   const changed = tint ? tint.filter(Boolean).length : 0;
   const mono = useMemo(() => spacedColumns(rows, columns.length), [rows, columns.length]);
+  // a long table opens at the first row the script added or changed (only the box scrolls, never the page)
+  const firstTint = tint ? tint.indexOf(true) : -1;
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!capped || !box || firstTint < 0) return;
+    const tr = box.querySelectorAll('tbody tr')[firstTint];
+    const head = box.querySelector('thead');
+    if (!tr) return;
+    const top = tr.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - (head ? head.offsetHeight : 0) - 4;
+    if (top < box.scrollTop || top + tr.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = Math.max(0, top);
+  }, [capped, firstTint, rows]);
   return (
     <figure className="sx-table" data-testid="sql-result-table">
       {title && <figcaption className="sx-table-title">{title}</figcaption>}
@@ -54,6 +66,7 @@ export default function ResultTable({ title, columns, rows, rowCount, truncated 
             : t(`the ${changed} tinted rows were added or changed by your script`, `cele ${changed} rânduri colorate sunt adăugate sau schimbate de scriptul tău`)}</span>
         )}
         {caption && <span> · {caption}</span>}
+        {cues.above > 0 && <span className="sx-cue" data-testid="sql-cue-above"> · {t(`${cues.above} more above ↑`, `încă ${cues.above} mai sus ↑`)}</span>}
         {cues.below > 0 && <span className="sx-cue" data-testid="sql-cue-below"> · {t(`${cues.below} more below, scroll in the table ↓`, `încă ${cues.below} mai jos, derulează în tabel ↓`)}</span>}
         {cues.right && <span className="sx-cue" data-testid="sql-cue-right"> · {t(`${columns.length} columns, swipe right →`, `${columns.length} coloane, glisează spre dreapta →`)}</span>}
       </p>

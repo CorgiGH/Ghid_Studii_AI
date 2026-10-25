@@ -1,7 +1,8 @@
 // Small rules shared by the lesson's tables (plain functions, tested in node).
 
-// Up to this many rows a table shows them all; a longer one scrolls inside its box and says what is below.
-export const ALL_ROWS = 16;
+// Up to this many rows a table shows them all (13 students, 16 professors, a 17-row outer join); a longer one (42 grades)
+// scrolls inside its box and says what is below.
+export const ALL_ROWS = 20;
 export const tableFitsWhole = (n) => n <= ALL_ROWS;
 
 // A header split where it may break: after _ , ( / and spaces, so NR_MATRICOL or LPAD(RPAD('*',BURSA/50,'*'),9) wraps
