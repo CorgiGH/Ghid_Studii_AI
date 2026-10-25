@@ -399,9 +399,9 @@ body {
 .viz-frame { border: 1.5px solid var(--lt-line); border-radius: 10px; padding: 8px 10px 10px; min-height: 120px; background: var(--theme-card-bg); }
 .viz-frame-title { font-weight: 700; margin-bottom: 8px; }
 .viz-cols { display: flex; flex-wrap: wrap; gap: 6px; }
-.viz-colhead { display: flex; flex-direction: column; gap: 3px; padding: 6px 9px; border-radius: 8px; background: var(--lt-acc-soft); border: 1px solid color-mix(in srgb, var(--lt-acc) 40%, transparent); position: relative; min-width: 84px; }
+.viz-colhead { display: flex; flex-direction: column; gap: 3px; padding: 6px 24px 6px 9px; border-radius: 8px; background: var(--lt-acc-soft); border: 1px solid color-mix(in srgb, var(--lt-acc) 40%, transparent); position: relative; min-width: 84px; }
 .viz-type { font-size: 0.75rem; color: var(--theme-muted-text); font-family: ui-monospace, monospace; }
-.viz-idx { position: absolute; top: 3px; right: 6px; font-size: 0.625rem; color: var(--theme-muted-text); }
+.viz-idx { position: absolute; top: 4px; right: 8px; font-size: 0.6875rem; line-height: 1; color: var(--theme-muted-text); }
 .viz-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--lt-line); background: var(--lt-surface); font-variant-numeric: tabular-nums; }
 .viz-badge.no { color: var(--lt-drop); background: var(--lt-drop-soft); border-color: color-mix(in srgb, var(--lt-drop) 40%, transparent); width: fit-content; }
 .viz-badge.yes { color: var(--lt-keep); background: var(--lt-keep-soft); border-color: color-mix(in srgb, var(--lt-keep) 40%, transparent); }
@@ -409,8 +409,10 @@ body {
 .viz-tally { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 .viz-scrollx { overflow-x: auto; }
-.viz-rowgrid { display: grid; gap: 4px; width: 100%; }
-.viz-rg-head { font-size: 0.75rem; font-weight: 600; color: var(--theme-muted-text); padding: 2px 8px; }
+/* row-insert: one unit per column (name above value); the units wrap instead of scrolling, so no column hides off the edge */
+.viz-rowgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px 4px; width: 100%; }
+.viz-rg-unit { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.viz-rg-head { font-size: 0.75rem; font-weight: 600; color: var(--theme-muted-text); padding: 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .viz-rg-cell { padding: 7px 8px; border-radius: 8px; background: var(--lt-keep-soft); border: 1px solid color-mix(in srgb, var(--lt-keep) 35%, transparent); font-variant-numeric: tabular-nums; min-height: 34px; }
 .viz-rg-cell.empty { background: transparent; border: 1.5px dashed var(--lt-line); }
 .viz-reject { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
@@ -529,8 +531,10 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 /* CHAR boxes and strips */
 .viz-boxes-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .viz-op { padding: 2px 8px; border-radius: 8px; background: var(--lt-acc-soft); }
-.viz-boxes { display: flex; flex-wrap: wrap; gap: 4px; }
-.viz-box { position: relative; width: 32px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 700; font-size: 1.05rem; background: var(--lt-acc-soft); border: 1.5px solid var(--lt-acc); }
+.viz-op.pending { background: transparent; border: 1.5px dashed var(--lt-acc); }
+/* CHAR boxes and LPAD/TRANSLATE strips stay on one line: --n cells share the width, each at most 32px (30px for strips) */
+.viz-boxes { display: grid; grid-template-columns: repeat(var(--n, 10), minmax(18px, 32px)); gap: 4px; overflow-x: auto; }
+.viz-box { position: relative; min-width: 0; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 700; font-size: 1.05rem; background: var(--lt-acc-soft); border: 1.5px solid var(--lt-acc); }
 .viz-box.blank { background: transparent; border: 1.5px dashed var(--theme-muted-text); }
 .viz-box.bad { background: var(--lt-drop-soft); border: 1.5px solid var(--lt-drop); }
 .viz-box.good { background: var(--lt-keep-soft); border: 1.5px solid var(--lt-keep); }
@@ -538,14 +542,17 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-boxes:has(.viz-box-n) { padding-bottom: 18px; }
 .viz-result { display: flex; align-items: baseline; gap: 10px; padding: 8px 12px; border-radius: 10px; background: var(--lt-surface); border: 1px solid var(--lt-line); width: fit-content; max-width: 100%; }
 .viz-result b { font-family: ui-monospace, monospace; word-break: break-all; }
+/* label over value pairs, one per line, the value never broken inside a word */
+.viz-result.pairs { display: grid; grid-template-columns: auto auto; column-gap: 10px; row-gap: 4px; align-items: baseline; }
+.viz-result.pairs b { white-space: nowrap; word-break: normal; }
 .viz-resultcol { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 .viz-resultcol .viz-result b { white-space: nowrap; }
 .viz-maps { display: flex; flex-wrap: wrap; gap: 6px; }
 .viz-map { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid var(--lt-line); font-family: ui-monospace, monospace; }
 .viz-map.t0 { border-color: var(--lt-t0); } .viz-map.t1 { border-color: var(--lt-t1); } .viz-map.t2 { border-color: var(--lt-t2); } .viz-map.t3 { border-color: var(--lt-t3); }
 .viz-map i { font-style: normal; color: var(--theme-muted-text); }
-.viz-strip { display: flex; flex-wrap: wrap; gap: 4px; padding-bottom: 14px; }
-.viz-cell { position: relative; width: 30px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-family: ui-monospace, monospace; font-weight: 700; font-size: 1.05rem; background: var(--lt-acc-soft); border: 1.5px solid var(--lt-acc); transition: background 0.3s ease, border-color 0.3s ease, opacity 0.35s ease, transform 0.35s ease; }
+.viz-strip { display: grid; grid-template-columns: repeat(var(--n, 10), minmax(16px, 30px)); gap: 3px; padding-bottom: 16px; overflow-x: auto; }
+.viz-cell { position: relative; min-width: 0; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-family: ui-monospace, monospace; font-weight: 700; font-size: 1.05rem; background: var(--lt-acc-soft); border: 1.5px solid var(--lt-acc); transition: background 0.3s ease, border-color 0.3s ease, opacity 0.35s ease, transform 0.35s ease; }
 .viz-cell.pad { background: var(--lt-keep-soft); border-color: var(--lt-keep); }
 .viz-cell.empty { background: transparent; border: 1.5px dashed var(--theme-muted-text); }
 .viz-cell.gone { opacity: 0.25; text-decoration: line-through; background: var(--lt-drop-soft); border-color: var(--lt-drop); transform: translateY(8px); }

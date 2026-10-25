@@ -4,7 +4,7 @@ import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
 import { displayCell } from '../logic/date-mask.js';
-import { deleteSweep } from '../logic/delete-sweep.js';
+import { deleteSweep, sweepBadges, sweepCaption } from '../logic/delete-sweep.js';
 
 export default function DeleteSweep({ props, predict }) {
   const { t } = useApp();
@@ -21,15 +21,8 @@ export default function DeleteSweep({ props, predict }) {
   }, [k, m.reduced]);
   const swept = k >= 2;
   const visible = d.rows.map((r, i) => ({ r, i })).filter(({ i }) => !(swept && d.doomed[i]));
-  const caption = k === 0
-    ? t(`${props.table} has ${d.rows.length} rows. ${props.where ? 'The WHERE decides which ones go.' : 'There is no WHERE.'}`, `${props.table} are ${d.rows.length} rânduri. ${props.where ? 'WHERE hotărăște care pleacă.' : 'Nu există WHERE.'}`)
-    : k === 1
-      ? (props.where
-        ? t(`${d.deleted} rows satisfy the condition. Only those are marked.`, `${d.deleted} rânduri îndeplinesc condiția. Doar ele sunt marcate.`)
-        : t('Without WHERE every row is marked.', 'Fără WHERE toate rândurile sunt marcate.'))
-      : (props.where
-        ? t(`${d.deleted} rows deleted, ${d.kept} stay.`, `${d.deleted} rânduri șterse, ${d.kept} rămân.`)
-        : t('All rows are gone, but the table itself, its columns and types, is still there.', 'Toate rândurile au dispărut, dar tabelul, cu coloanele și tipurile lui, există în continuare.'));
+  const cap = sweepCaption(d, k, props);
+  const caption = t(cap.en, cap.ro);
   return (
     <VizFrame widget="delete-sweep" stepper={s} caption={caption} label={t('Deleting rows', 'Ștergerea rândurilor')}>
       <pre className="viz-sql">{d.sql};</pre>
@@ -58,8 +51,11 @@ export default function DeleteSweep({ props, predict }) {
         </div>
       </div>
       <div className="viz-tally">
-        <span className="viz-badge">{t('stay', 'rămân')}: {swept ? d.kept : d.rows.length}</span>
-        {k >= 1 && <span className="viz-badge no">{t('go', 'pleacă')}: {d.deleted}</span>}
+        {sweepBadges(d, k).map(b => (
+          <span key={b.kind} className={`viz-badge${b.kind === 'go' ? ' no' : ''}`}>
+            {b.kind === 'total' ? t('in the table', 'în tabel') : b.kind === 'go' ? t('go', 'pleacă') : t('stay', 'rămân')}: {b.n}
+          </span>
+        ))}
       </div>
     </VizFrame>
   );

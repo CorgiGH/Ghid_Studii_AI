@@ -20,7 +20,7 @@ const SPEC = {
   'like-slider': { pattern: isStr, values: strs },
   'in-between': { mode: oneOf('in', 'between', 'any', 'all'), list: optional(isArr), low: optional(isNum), high: optional(isNum), op: optional(oneOf('=', '<>', '<', '>', '<=', '>=')), values: isArr },
   'number-line': { values: (v) => isArr(v) && v.every(isNum), fns: subsetOf('CEIL', 'FLOOR', 'ROUND', 'TRUNC'), digits: optional(isNum) },
-  'char-boxes': { value: isStr, width: isNum, ops: subsetOf('LENGTH', 'TRIM', 'LIKE'), likePattern: optional(isStr) },
+  'char-boxes': { value: isStr, width: isNum, ops: subsetOf('LENGTH', 'TRIM', 'LIKE'), likePattern: optional(isStr), column: optional(isStr) },
   'char-strips': { mode: oneOf('pad', 'swap'), input: isStr, fn: optional(oneOf('LPAD', 'RPAD')), len: optional(isNum), fill: optional(isStr), from: optional(isStr), to: optional(isStr) },
   'calendar-clock': { start: (v) => DATETIME.test(v) || DATE.test(v), ops: (v) => isArr(v) && v.every(o => o && ['+', 'ADD_MONTHS', 'LAST_DAY', 'NEXT_DAY', 'TRUNC'].includes(o.fn)) },
   'date-mask': { date: (v) => DATE.test(v), masks: strs },

@@ -52,6 +52,20 @@ export function replaceChain({ input, from, to }) {
   return { stages, result: cur };
 }
 
+// The two calls as the learner would write them: REPLACE(REPLACE('Ciobotariu', 'i', 'a'), 'a', 'i') and
+// TRANSLATE('Ciobotariu', 'ia', 'ai').
+export function swapCalls({ input, from, to }) {
+  const f = [...from], t = [...to];
+  const replace = f.reduce((inner, a, i) => `REPLACE(${inner}, '${a}', '${t[i] ?? ''}')`, `'${input}'`);
+  return { replace, translate: `TRANSLATE('${input}', '${from}', '${to}')` };
+}
+
+// Positions a REPLACE stage changed, compared with the text before it.
+export function stageChanges(before, after) {
+  const b = [...before];
+  return [...after].map((c, i) => c !== b[i]);
+}
+
 // What step `k` of the swap view shows, for a chain of `n` REPLACE stages: step 0 introduces
 // both ways, steps 1..n are the REPLACEs one by one, the last step is the single TRANSLATE.
 export function swapStep(k, n) {
