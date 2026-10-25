@@ -1,7 +1,7 @@
 // Automated walk through every screen of every BD lesson, in a real (headless) Chrome against `vite preview`.
 //
 //   PUPPETEER_EXECUTABLE_PATH=/etc/profiles/per-user/alexa/bin/google-chrome-stable \
-//     node scripts/sql/walk-lessons.mjs [--lessons bd-l01,bd-l02] [--widths 390,1280] [--jobs 4] [--out <dir>] [--no-build]
+//     node scripts/sql/walk-lessons.mjs [--lessons bd-l01,bd-l02] [--widths 390,1280] [--jobs 4] [--port 4180] [--out <dir>] [--no-build]
 //
 // For each lesson and each width (390x844 and 1280x800) it opens the lesson in a fresh browser context and goes through the
 // screens with the Continue button. On a gating screen it answers like a learner would:
@@ -28,7 +28,7 @@ const OUT = path.resolve(arg('--out', path.join(ROOT, '.superpowers', 'sdd', '20
 const WIDTHS = arg('--widths', '390,1280').split(',').map(Number)
 const ONLY = arg('--lessons', '') ? new Set(arg('--lessons', '').split(',')) : null
 const JOBS = Number(arg('--jobs', '4'))
-const PORT = 4180
+const PORT = Number(arg('--port', '4180'))
 const BASE = `http://127.0.0.1:${PORT}/Ghid_Studii_AI/y2s1/bd`
 const SIZES = { 390: { width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 1 }, 1280: { width: 1280, height: 800, deviceScaleFactor: 1 } }
 const BLANK_LIMIT_MS = 6000
