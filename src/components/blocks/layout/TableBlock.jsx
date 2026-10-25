@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import formatMarkdown from '../formatMarkdown';
 
@@ -16,6 +16,11 @@ export default function TableBlock({ headers, rows }) {
   const { t } = useApp();
   const wrapRef = useRef(null);
   const [overflowState, setOverflowState] = useState({ overflows: false, atEnd: false });
+  // `fit`: a table of up to three columns that runs past the box in its natural layout is laid out again with equal
+  // columns that wrap anything, long code included (a reference table: expression / what it does). A table that fits
+  // keeps its natural layout, and wider tables (number grids) scroll sideways with a cue.
+  const [fit, setFit] = useState(false);
+  const widthRef = useRef(0);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -56,11 +61,32 @@ export default function TableBlock({ headers, rows }) {
   const mask = showFade
     ? 'linear-gradient(to right, black 0%, black 96%, transparent 100%)'
     : 'none';
+  const columnCount = (resolvedHeaders?.length) || (resolvedRows?.[0] ? resolveRow(resolvedRows[0])?.length : 0) || 0;
+  const canFit = columnCount > 0 && columnCount <= 3;
+
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    if (!el || !canFit) return undefined;
+    const check = () => {
+      const w = el.clientWidth;
+      if (w !== widthRef.current) {
+        // a new box width: look at the natural layout again first
+        widthRef.current = w;
+        if (fit) { setFit(false); return; }
+      }
+      if (!fit && el.scrollWidth > el.clientWidth + 4) setFit(true);
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [canFit, fit, rows]);
 
   return (
+    <>
     <div
       ref={wrapRef}
-      className="overflow-x-auto mb-3 rounded-xl max-w-prose mx-auto"
+      className={`overflow-x-auto rounded-xl max-w-prose mx-auto${showFade ? ' mb-1' : ' mb-3'}${fit ? ' tb-fit' : ''}`}
       style={{
         border: '1px solid var(--theme-border)',
         maskImage: mask,
@@ -136,5 +162,11 @@ export default function TableBlock({ headers, rows }) {
         </tbody>
       </table>
     </div>
+    {showFade && (
+      <p className="max-w-prose mx-auto mb-3 text-xs font-semibold" data-testid="table-scroll-cue" style={{ color: 'var(--theme-muted-text)' }}>
+        {t('The table goes on to the right: swipe it →', 'Tabelul continuă la dreapta: glisează-l →')}
+      </p>
+    )}
+    </>
   );
 }
