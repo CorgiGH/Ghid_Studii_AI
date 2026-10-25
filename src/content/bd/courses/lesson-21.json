@@ -74,8 +74,9 @@
           ],
           "show": [
             "s.nume",
-            "colegi.nume",
-            "colegi.prenume"
+            "s.an",
+            "s.grupa",
+            "colegi.nume"
           ],
           "say": {
             "from": {
@@ -83,12 +84,12 @@
               "ro": "`studenti s` este prima copie: aici stă Pintescu."
             },
             "join": {
-              "en": "`studenti colegi` is the second copy. The `ON` condition puts face to face two students from the same group and year. A student also appears next to himself: the diagonal of the pairs.",
-              "ro": "`studenti colegi` este a doua copie. Condiția `ON` pune față în față doi studenți din aceeași grupă și același an. Un student apare și lângă el însuși: diagonala perechilor."
+              "en": "`studenti colegi` is the second copy. `ON` puts face to face two students with the same group and the same year; every student also appears next to himself (for example Pintescu–Pintescu).",
+              "ro": "`studenti colegi` este a doua copie. `ON` pune față în față doi studenți cu aceeași grupă și același an; fiecare student apare și lângă el însuși (de exemplu Pintescu–Pintescu)."
             },
             "where": {
-              "en": "2 rows remain: Arhire Alexandra and Cobzaru George, Pintescu's two colleagues from group B1, year 1.",
-              "ro": "Rămân 2 rânduri: Arhire Alexandra și Cobzaru George, cei doi colegi ai lui Pintescu din grupa B1, anul 1."
+              "en": "2 rows remain: Arhire and Cobzaru, Pintescu's two classmates from group B1, year 1.",
+              "ro": "Rămân 2 rânduri: Arhire și Cobzaru, cei doi colegi ai lui Pintescu din grupa B1, anul 1."
             }
           },
           "ask": {
@@ -107,6 +108,30 @@
         "ro": "Perechi în ambele sensuri"
       },
       "blocks": [
+        {
+          "type": "reflect",
+          "id": "bd-l21-r3",
+          "prompt": {
+            "en": "Below is the day of the week on which each student was born. Which students were born on the same day?",
+            "ro": "Mai jos e ziua săptămânii în care s-a născut fiecare student. Ce studenți s-au născut în aceeași zi?"
+          },
+          "placeholder": {
+            "en": "Group them by day",
+            "ro": "Grupează-i pe zile"
+          },
+          "answer": {
+            "en": "Monday: Bodnar 116 and Bodnar 119. Tuesday: Antonie, Arhire 114, Pintescu and Cobzaru. Wednesday: Archip, Ciobotariu and Arhire 121. Friday: Popescu and Prelipcean. Panaite (Thursday) and Bucur (Saturday) have nobody. Counted in both directions, that is 2 + 12 + 6 + 2 = 22 pairs: the grid below lights one square for each.",
+            "ro": "Luni: Bodnar 116 și Bodnar 119. Marți: Antonie, Arhire 114, Pintescu și Cobzaru. Miercuri: Archip, Ciobotariu și Arhire 121. Vineri: Popescu și Prelipcean. Panaite (joi) și Bucur (sâmbătă) nu au pe nimeni. Numărate în ambele sensuri, ies 2 + 12 + 6 + 2 = 22 de perechi: grila de mai jos aprinde câte un pătrat pentru fiecare."
+          },
+          "table": {
+            "caption": {
+              "en": "The studenti table with the weekday of birth, grouped by day",
+              "ro": "Tabelul studenti cu ziua săptămânii de naștere, grupat pe zile"
+            },
+            "dataset": "facultate",
+            "sql": "SELECT nr_matricol, nume, TO_CHAR(data_nastere, 'fmDay') AS zi FROM studenti ORDER BY TO_CHAR(data_nastere, 'D'), nr_matricol"
+          }
+        },
         {
           "type": "learn",
           "content": {
@@ -137,8 +162,8 @@
         {
           "type": "learn",
           "content": {
-            "en": "Now the condition is `<`. Of each pair and its mirror image only one remains, so every pair appears once. Before you look at the list, predict: how many pairs remain, compared with the previous screen?",
-            "ro": "Acum condiția este `<`. Din fiecare pereche și oglinda ei rămâne una singură, deci fiecare pereche apare o dată. Înainte să te uiți la listă, prezice: câte perechi rămân, față de ecranul anterior?"
+            "en": "Now the condition is `s1.nr_matricol < s2.nr_matricol`: a pair (a, b) passes only if the registration number a (on the left) is smaller than b (on top). Predict: how many of the 22 pairs from the previous screen remain?",
+            "ro": "Acum condiția este `s1.nr_matricol < s2.nr_matricol`: o pereche (a, b) trece doar dacă numărul matricol a (din stânga) este mai mic decât b (de sus). Prezice: câte perechi rămân din cele 22 de pe ecranul anterior?"
           }
         },
         {
@@ -745,8 +770,8 @@
           "dataset": "facultate",
           "kind": "query",
           "prompt": {
-            "en": "In the table students there are students who were born on the same day of the week. For example, Cobzaru George and Pintescu Andrei were both born on a Tuesday. Build a list of the students born on the same day, grouping them two by two in alphabetical order of last names (for example, the result will contain the combination Cobzaru-Pintescu, but not Pintescu-Cobzaru). The list must contain only the last names of the two, together with the day on which they were born. Of course, if other students were also born on a Tuesday, they will appear in combination with the two mentioned above. The list will be ordered by the day of the week on which they were born and, when more than three students were born on the same day, the results will also be ordered by the name of the first person in the list.\n\nOfficial statement (Romanian): În tabela studenți există studenți care s-au născut în aceeași zi a săptămânii. De exemplu, Cobzaru George și Pintescu Andrei s-au născut amândoi într-o zi de marți. Construiți o listă cu studenții care s-au născut în aceeași zi, grupându-i doi câte doi în ordine alfabetică a numelor (de exemplu, în rezultat va apărea combinația Cobzaru-Pintescu, dar nu va apărea și Pintescu-Cobzaru). Lista va trebui să conțină doar numele de familie a celor doi, împreună cu ziua în care cei doi s-au născut. Evident, dacă există și alți studenți care s-au născut marți, vor apărea și ei în combinație cu cei doi amintiți mai sus. Lista va fi ordonată în funcție de ziua săptămânii în care s-au născut și, în cazul în care sunt mai mult de trei studenți născuți în aceeași zi, rezultatele vor fi ordonate și după numele primei persoane din listă.\n\nColumns, in order, with the aliases `nume1`, `nume2`, `zi`; the day is shown by its name (for example `Tuesday`). The pair is written in alphabetical order; when the names are equal, the tie is broken by `nr_matricol`. The order of the days is Monday → Sunday.",
-            "ro": "În tabela studenți există studenți care s-au născut în aceeași zi a săptămânii. De exemplu, Cobzaru George și Pintescu Andrei s-au născut amândoi într-o zi de marți. Construiți o listă cu studenții care s-au născut în aceeași zi, grupându-i doi câte doi în ordine alfabetică a numelor (de exemplu, în rezultat va apărea combinația Cobzaru-Pintescu, dar nu va apărea și Pintescu-Cobzaru). Lista va trebui să conțină doar numele de familie a celor doi, împreună cu ziua în care cei doi s-au născut. Evident, dacă există și alți studenți care s-au născut marți, vor apărea și ei în combinație cu cei doi amintiți mai sus. Lista va fi ordonată în funcție de ziua săptămânii în care s-au născut și, în cazul în care sunt mai mult de trei studenți născuți în aceeași zi, rezultatele vor fi ordonate și după numele primei persoane din listă.\n\nColoanele, în ordine, cu aliasurile `nume1`, `nume2`, `zi`; ziua se afișează cu numele ei (de exemplu `Tuesday`). Perechea se scrie în ordine alfabetică; dacă numele sunt egale, se departajează după `nr_matricol`. Ordinea zilelor este luni → duminică."
+            "en": "In the table students there are students who were born on the same day of the week. For example, Cobzaru George and Pintescu Andrei were both born on a Tuesday. Build a list of the students born on the same day, grouping them two by two in alphabetical order of last names (for example, the result will contain the combination Cobzaru-Pintescu, but not Pintescu-Cobzaru). The list must contain only the last names of the two, together with the day on which they were born. Of course, if other students were also born on a Tuesday, they will appear in combination with the two mentioned above. The list will be ordered by the day of the week on which they were born and, when more than three students were born on the same day, the results will also be ordered by the name of the first person in the list.\n\nOfficial statement (Romanian): În tabela studenți există studenți care s-au născut în aceeași zi a săptămânii. De exemplu, Cobzaru George și Pintescu Andrei s-au născut amândoi într-o zi de marți. Construiți o listă cu studenții care s-au născut în aceeași zi, grupându-i doi câte doi în ordine alfabetică a numelor (de exemplu, în rezultat va apărea combinația Cobzaru-Pintescu, dar nu va apărea și Pintescu-Cobzaru). Lista va trebui să conțină doar numele de familie a celor doi, împreună cu ziua în care cei doi s-au născut. Evident, dacă există și alți studenți care s-au născut marți, vor apărea și ei în combinație cu cei doi amintiți mai sus. Lista va fi ordonată în funcție de ziua săptămânii în care s-au născut și, în cazul în care sunt mai mult de trei studenți născuți în aceeași zi, rezultatele vor fi ordonate și după numele primei persoane din listă.\n\nColumns, in order, with the aliases `nume1`, `nume2`, `zi`; the day is shown by its name (for example `Tuesday`). The pair is written in alphabetical order; when the names are equal, the tie is broken by `nr_matricol`. The order of the days is Monday → Sunday. For that order you can use `TRUNC(data_nastere) - TRUNC(data_nastere, 'IW')`: `'IW'` cuts the date back to the Monday of its week, so the difference is 0 for Monday, 1 for Tuesday … 6 for Sunday.",
+            "ro": "În tabela studenți există studenți care s-au născut în aceeași zi a săptămânii. De exemplu, Cobzaru George și Pintescu Andrei s-au născut amândoi într-o zi de marți. Construiți o listă cu studenții care s-au născut în aceeași zi, grupându-i doi câte doi în ordine alfabetică a numelor (de exemplu, în rezultat va apărea combinația Cobzaru-Pintescu, dar nu va apărea și Pintescu-Cobzaru). Lista va trebui să conțină doar numele de familie a celor doi, împreună cu ziua în care cei doi s-au născut. Evident, dacă există și alți studenți care s-au născut marți, vor apărea și ei în combinație cu cei doi amintiți mai sus. Lista va fi ordonată în funcție de ziua săptămânii în care s-au născut și, în cazul în care sunt mai mult de trei studenți născuți în aceeași zi, rezultatele vor fi ordonate și după numele primei persoane din listă.\n\nColoanele, în ordine, cu aliasurile `nume1`, `nume2`, `zi`; ziua se afișează cu numele ei (de exemplu `Tuesday`). Perechea se scrie în ordine alfabetică; dacă numele sunt egale, se departajează după `nr_matricol`. Ordinea zilelor este luni → duminică. Pentru această ordine poți folosi `TRUNC(data_nastere) - TRUNC(data_nastere, 'IW')`: `'IW'` taie data la lunea săptămânii ei, deci diferența este 0 pentru luni, 1 pentru marți … 6 pentru duminică."
           },
           "official": {
             "lab": 4,
