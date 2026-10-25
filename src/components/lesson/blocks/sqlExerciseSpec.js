@@ -81,6 +81,30 @@ export function checkSpecOf(b) {
   return { order: 'any', mode: 'bag', ...(b.check ?? {}), kind: b.kind ?? 'query' };
 }
 
+// The engine's default clock (CLOCK in src/sql/engine/worker.js; a test keeps the two equal): the review variant runs on it.
+export const HIDDEN_CLOCK = '2026-10-26 14:30:00';
+const MONTH_NAMES = {
+  ro: ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
+const dayText = (clock, lang) => {
+  const [y, m, d] = clock.slice(0, 10).split('-').map(Number);
+  return `${d} ${MONTH_NAMES[lang][m - 1]} ${y}`;
+};
+
+// The note above a review-variant exercise: other rows than the lesson's, counts and values quoted in the text are the lesson's,
+// and for a clocked exercise which day "today" is here.
+export function hiddenNote(b) {
+  const ro = ['Rânduri diferite față de lecție: interogarea trebuie să meargă pe orice date.', 'Numerele de rânduri și valorile citate în enunț și în explicație sunt cele din lecție.'];
+  const en = ['Different rows than in the lesson: your query has to work on any data.', "Row counts and values quoted in the statement and the explanation are the lesson's."];
+  const clock = clockOf(b?.clock);
+  if (clock && clock.slice(0, 10) !== HIDDEN_CLOCK.slice(0, 10)) {
+    ro.push(`Aici „azi” este ${dayText(HIDDEN_CLOCK, 'ro')}, nu ${dayText(clock, 'ro')}: interogarea trebuie să meargă la orice dată.`);
+    en.push(`Here “today” is ${dayText(HIDDEN_CLOCK, 'en')}, not ${dayText(clock, 'en')}: the query has to work on any date.`);
+  }
+  return { ro: ro.join(' '), en: en.join(' ') };
+}
+
 // ---- how a verdict reads ----------------------------------------------------------------------------------------------
 const HEADLINES = {
   correct: ['Corect', 'Correct', 'ok'],
@@ -198,6 +222,10 @@ export function restoreSqlState(attempts, id) {
     paper: last.paper === true,
     paperDone: last.paper === true && last.paperDone === true,
     ok: last.ok === true,
+    // no verdict yet (expected file missing, a paper hand-in not settled, three hints opened before any run): the first graded run replaces it
+    unscored: last.unscored === true,
+    // the points of a saved paper check that were ticked (indexes into paperChecklist), or null when none were saved
+    ticks: Array.isArray(last.ticks) ? last.ticks.filter((i) => Number.isInteger(i) && i >= 0) : null,
   };
 }
 
@@ -206,45 +234,84 @@ export function restoreSqlState(attempts, id) {
 //   event 'run'          a run finished (verdict may be null when the expected file is missing or the grader threw)
 //   event 'fault'        a run threw something other than a cancel
 //   event 'reveal'       the learner opened the solution
-//   event 'paper-submit' paper mode: the learner handed in
-//   event 'paper-done'   paper mode: the learner confirmed the self-check (`paperOk` = every point ticked)
+//   event 'paper-submit' paper mode: the learner handed in (`paperEmpty` = there is nothing to tick, so the hand-in settles at once)
+//   event 'paper-done'   paper mode: the learner saved the self-check (`paperOk` = every point ticked)
 // hidden = the review variant (never writes an attempt, schedules through markReview); record = this block may write attempts;
-// attempted = an attempt of this block is already stored; marked = the review answer was already given.
-// Returns { type: 'none' | 'record' | 'update' | 'markReview', ok, unscored, set? }.
+// attempted = an attempt of this block is already stored; attemptUnscored = that attempt has no verdict yet; marked = the review
+// answer was already given; edited = the query is not the exercise's starter text (a run of the unedited starter is not an answer:
+// its result and verdict show and the gate opens for this visit, but nothing is recorded).
+// Returns { type: 'none' | 'record' | 'update' | 'markReview', ok, unscored, done?, set?, keepRun?, owns? }:
+//   a record is a new attempt (done: false keeps the gate shut after a reload; set: fields it carries on top);
+//   an update writes only `set` (and, with keepRun, the run's query, verdict and mistake) into the stored attempt.
 const NONE = { type: 'none' };
 export const isGraded = (verdict) => !!verdict && verdict.kind !== 'error' && verdict.kind !== 'not-oracle';
 
-export function attemptAction({ hidden = false, record = false, attempted = false, marked = false, verdict = null, silent = false, event = 'run', paperOk = false, revealed = false, paperOwned = false } = {}) {
+export function attemptAction({
+  hidden = false, record = false, attempted = false, attemptUnscored = false, marked = false, verdict = null, silent = false, event = 'run',
+  paperOk = false, paperEmpty = false, revealed = false, paperOwned = false, edited = true,
+} = {}) {
   if (silent) return NONE;
+  const starterOnly = !edited && (event === 'run' || event === 'fault');
   if (hidden) {
-    if (marked) return NONE;
+    if (marked || starterOnly) return NONE;
     if (event === 'run') return isGraded(verdict) ? { type: 'markReview', ok: verdict.ok === true } : NONE;
     if (event === 'reveal') return { type: 'markReview', ok: false };
     if (event === 'paper-done') return { type: 'markReview', ok: paperOk === true };
     return NONE;
   }
   if (!record) return NONE;
+  if (starterOnly && !attempted) return NONE;
   switch (event) {
     case 'run':
-      return attempted ? { type: 'update' } : { type: 'record', ok: isGraded(verdict) && verdict.ok === true, unscored: !verdict };
+      if (!attempted) return { type: 'record', ok: isGraded(verdict) && verdict.ok === true, unscored: !verdict };
+      // the stored attempt has no verdict yet (no answer key, a paper hand-in, three hints): the first graded run is the attempt
+      if (attemptUnscored && isGraded(verdict)) return { type: 'record', ok: verdict.ok === true, unscored: false };
+      return { type: 'update', keepRun: true };
     case 'fault':
       return attempted ? NONE : { type: 'record', ok: false, unscored: false };
     case 'reveal':
-      return attempted ? { type: 'update' } : { type: 'record', ok: false, unscored: false };
-    case 'paper-submit':
-      if (!attempted) return { type: 'record', ok: false, unscored: true, owns: true };
-      // The solution was opened first: that attempt is already a miss, the hand-in only marks it as a paper one.
-      // An attempt from a live run is somebody else's: the hand-in writes nothing and owns nothing.
-      return revealed ? { type: 'update', owns: true, set: { paper: true } } : NONE;
+      // before a scored attempt (none yet, or only one without a verdict) opening the solution is the attempt, and a miss
+      return attempted && !attemptUnscored ? { type: 'update', set: { revealed: true } } : { type: 'record', ok: false, unscored: false };
+    case 'paper-submit': {
+      const settle = paperEmpty ? { paperDone: true } : {};
+      if (!attempted) return { type: 'record', ok: false, unscored: true, owns: true, done: paperEmpty, set: settle };
+      // The solution was opened first (that attempt already stands as a miss), or the stored attempt has no verdict yet: the hand-in
+      // marks it as the paper one. An attempt from a live run is somebody else's: the hand-in writes nothing and owns nothing.
+      if (revealed || attemptUnscored) return { type: 'update', owns: true, set: { paper: true, ...settle, ...(paperEmpty ? { done: true } : {}) } };
+      return NONE;
+    }
     case 'paper-done':
       if (!attempted) return { type: 'record', ok: paperOk === true, unscored: false };
       if (!paperOwned) return NONE; // only the attempt this paper hand-in made (or marked) may be settled
-      if (revealed) return { type: 'update', set: { paperDone: true } }; // already stands as a miss
-      return paperOk ? { type: 'update', set: { ok: true, unscored: false, paperDone: true } } : { type: 'record', ok: false, unscored: false };
+      if (revealed) return { type: 'update', set: { paperDone: true, done: true } }; // already stands as a miss
+      return paperOk ? { type: 'update', set: { ok: true, unscored: false, paperDone: true, done: true } } : { type: 'record', ok: false, unscored: false };
     default:
       return NONE;
   }
 }
+
+// What the store gets for an action: { method: 'recordAttempt' | 'updateLastAttempt', data } or null. `fields` are what a new record
+// carries (the run's query, verdict, mistake, or the paper flags); an update writes only its own `set` (plus the run's fields when
+// `keepRun`), so a hand-in never wipes a verdict that is already stored. `extra` goes into either (the saved ticks).
+export function attemptWrite(action, { item, ref, at, hints = 0, fields = {}, extra = {} } = {}) {
+  if (action?.type === 'record') {
+    return {
+      method: 'recordAttempt',
+      data: {
+        ok: action.ok === true, hints, kind: 'sql', item, ref, at, done: action.done ?? true, revealed: false,
+        ...(action.unscored ? { unscored: true } : {}), ...fields, ...extra, ...(action.set ?? {}),
+      },
+    };
+  }
+  if (action?.type === 'update') {
+    return { method: 'updateLastAttempt', data: { hints, ...(action.keepRun ? fields : {}), ...extra, ...(action.set ?? {}) } };
+  }
+  return null;
+}
+
+// The record left when the third hint opens before any attempt: it puts the exercise in the review pile (hints >= 3) and keeps the
+// gate shut (not done); the first graded run then becomes the real attempt.
+export const hintMarker = ({ item, ref, at }) => ({ ok: false, unscored: true, hints: HINT_COUNT, done: false, kind: 'sql', item, ref, at });
 
 // The fields the reveal writes: on an existing attempt only the flag (the query, verdict, mistake and ran stay, so a reload brings
 // them back); the first attempt of a block starts with the whole record.

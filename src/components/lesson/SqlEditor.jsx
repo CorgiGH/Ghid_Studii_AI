@@ -28,21 +28,46 @@ const theme = EditorView.theme({
 });
 
 // A CodeMirror 6 editor for one SQL statement or script. Ctrl/Cmd+Enter calls onRun; Tab is left to the browser so the
-// keyboard can leave the editor. `readOnly` is fixed for the life of the editor (the parent changes `key` to switch).
-export default function SqlEditor({ value, onChange, onRun, readOnly = false, label, className = '' }) {
+// keyboard can leave the editor. `readOnly` is fixed for the life of the editor (the parent changes `key` to switch). `onFocus` is
+// called when the editor takes focus; when a press gave it focus, only once the press ends, so a scroll it causes cannot turn the
+// press into a drag that selects text.
+export default function SqlEditor({ value, onChange, onRun, onFocus, readOnly = false, label, className = '' }) {
   const host = useRef(null);
   const view = useRef(null);
-  const cb = useRef({ onChange, onRun });
-  useEffect(() => { cb.current = { onChange, onRun }; });
+  const cb = useRef({ onChange, onRun, onFocus });
+  useEffect(() => { cb.current = { onChange, onRun, onFocus }; });
+
+  const pressed = useRef(false); // a mouse button (or a tap's mouse events) is down on the editor
 
   useEffect(() => {
+    const release = () => {
+      pressed.current = false;
+      window.removeEventListener('mouseup', release, true);
+    };
     const runKey = EditorView.domEventHandlers({
+      mousedown() {
+        pressed.current = true;
+        window.addEventListener('mouseup', release, true);
+        return false;
+      },
       keydown(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
           e.preventDefault();
           cb.current.onRun?.();
           return true;
         }
+        return false;
+      },
+      focus() {
+        if (!pressed.current) {
+          cb.current.onFocus?.();
+          return false;
+        }
+        const later = () => {
+          window.removeEventListener('mouseup', later);
+          setTimeout(() => cb.current.onFocus?.(), 0);
+        };
+        window.addEventListener('mouseup', later);
         return false;
       },
     });
@@ -66,7 +91,7 @@ export default function SqlEditor({ value, onChange, onRun, readOnly = false, la
       }),
     });
     view.current = v;
-    return () => { v.destroy(); view.current = null; };
+    return () => { v.destroy(); view.current = null; release(); };
     // the editor is built once; later `value` changes are applied by the effect below
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readOnly, label]);
