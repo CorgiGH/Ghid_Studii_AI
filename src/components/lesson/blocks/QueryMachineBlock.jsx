@@ -17,6 +17,19 @@ const CLAUSE_LABEL = {
   from: 'FROM', join: 'JOIN', where: 'WHERE', select: 'SELECT', distinct: 'DISTINCT', order: 'ORDER BY',
   union: 'UNION', 'union-all': 'UNION ALL', intersect: 'INTERSECT', minus: 'MINUS',
 };
+// What each clause does, in plain words, shown under the chips for the current step (a chip alone says nothing to a beginner).
+const CLAUSE_HINT = {
+  from: { en: 'FROM: which table the rows come from.', ro: 'FROM: din ce tabel luăm rândurile.' },
+  join: { en: 'JOIN: the rows of the two tables are paired up.', ro: 'JOIN: rândurile celor două tabele se pun în perechi.' },
+  where: { en: 'WHERE: which rows stay.', ro: 'WHERE: ce rânduri rămân.' },
+  select: { en: 'SELECT: which columns are shown.', ro: 'SELECT: ce coloane se afișează.' },
+  distinct: { en: 'DISTINCT: identical rows are kept once.', ro: 'DISTINCT: rândurile identice rămân o singură dată.' },
+  order: { en: 'ORDER BY: in what order the rows come out.', ro: 'ORDER BY: în ce ordine ies rândurile.' },
+  union: { en: 'UNION: the rows of both queries together, without duplicates.', ro: 'UNION: rândurile ambelor interogări, împreună, fără dubluri.' },
+  'union-all': { en: 'UNION ALL: the rows of both queries together, duplicates kept.', ro: 'UNION ALL: rândurile ambelor interogări, împreună, cu dubluri.' },
+  intersect: { en: 'INTERSECT: only the rows both queries return.', ro: 'INTERSECT: doar rândurile pe care le dau ambele interogări.' },
+  minus: { en: 'MINUS: the rows of the first query that the second does not return.', ro: 'MINUS: rândurile primei interogări pe care a doua nu le dă.' },
+};
 const NEW_LINE = new Set(['from', 'join', 'where', 'order', 'union', 'union-all', 'intersect', 'minus']);
 
 const Html = ({ as = 'span', className, text }) => (
@@ -417,6 +430,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
           </button>
         ))}
       </div>
+      {CLAUSE_HINT[stage.clause] && <p className="qm-chip-hint" data-testid="qm-chip-hint">{t(CLAUSE_HINT[stage.clause].en, CLAUSE_HINT[stage.clause].ro)}</p>}
 
       <Meta view={view} tick={tick} />
       <div className={`qm-scroll${view.panels ? ' qm-scroll-free' : ''}`} data-testid="qm-rows">
@@ -477,7 +491,8 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
         </AnimatePresence>
       </div>
 
-      <div className="viz-controls qm-controls">
+      {/* one step and nothing to check: no step controls (a lone '1 / 1' with 'Again' means nothing) */}
+      {(steps.length > 1 || primaryIsCheck) && <div className="viz-controls qm-controls">
         <button type="button" className="viz-btn" onClick={() => go(Math.max(0, step - 1))} disabled={step === 0} aria-label={t('Previous step', 'Pasul anterior')}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </button>
@@ -495,7 +510,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
             {!primaryIsCheck && <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
           </button>
         )}
-      </div>
+      </div>}
     </figure>
   );
 }

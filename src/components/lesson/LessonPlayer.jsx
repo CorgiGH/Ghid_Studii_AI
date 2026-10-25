@@ -56,6 +56,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   // The footer's height, as --lp-footer-h on the root: the card keeps that much room at its bottom and Run scrolls clear of it.
   const rootRef = useRef(null);
   const footerRef = useRef(null);
+  const stageRef = useRef(null); // .lp-stage: held at its height while a scrolled-down screen scrolls to the top
   useEffect(() => {
     const root = rootRef.current;
     const footer = footerRef.current;
@@ -105,10 +106,30 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
     return () => setCourseContext(null);
   }, [step, data.course, setCourseContext, t]);
 
-  // New screen: scroll to the top (focus follows in headingRef).
+  // New screen: scroll to the top (focus follows in headingRef), then let the stage take the new screen's height.
   useEffect(() => {
-    if (firstRender.current) { firstRender.current = false; return; }
+    if (firstRender.current) { firstRender.current = false; return undefined; }
     window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    const stage = stageRef.current;
+    if (!stage || !stage.style.minHeight) return undefined;
+    let timer = null;
+    let lastY = window.scrollY;
+    const release = () => {
+      stage.style.minHeight = '';
+      window.removeEventListener('scroll', onScroll);
+      clearTimeout(timer);
+    };
+    // Let go at the top, or as soon as the learner scrolls down (the smooth scroll only ever goes up), so the new
+    // screen never keeps the old one's empty room under it.
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y <= 0 || y > lastY) release();
+      lastY = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    timer = setTimeout(release, 1200); // the smooth scroll was interrupted (the learner scrolled): let go anyway
+    if (window.scrollY <= 0) release();
+    return release;
   }, [screen, reduced]);
 
   // After a reload, a screen the learner already answered stays unlocked.
@@ -126,6 +147,11 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
 
   const go = useCallback((n) => {
     if (n === screen || n < 1 || n > total) return;
+    // Scrolled down: the leaving screen is lifted out of the flow at once (popLayout), so a shorter next screen would
+    // shrink the page under the scroll position and make it jump. Hold the stage at its height until the scroll to
+    // the top is done (released in the scroll effect below).
+    const stage = stageRef.current;
+    if (stage && window.scrollY > 0) stage.style.minHeight = `${stage.offsetHeight}px`;
     setDir(n > screen ? 1 : -1);
     setParams(prev => paramsForScreen(prev, n), { replace: true });
   }, [screen, total, setParams]);
@@ -197,7 +223,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
           transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 170, damping: 26 }} />
       </div>
 
-      <div className="lp-stage">
+      <div className="lp-stage" ref={stageRef}>
         <AnimatePresence mode="popLayout" initial={false} custom={dir}>
           <Screen
             key={screen}
