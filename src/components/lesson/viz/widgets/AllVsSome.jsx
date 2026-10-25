@@ -25,7 +25,7 @@ export default function AllVsSome({ props, predict }) {
   return (
     <VizFrame widget="all-vs-some" stepper={s} caption={caption} label={t('All grades or at least one, per student', 'Toate notele sau măcar una, pentru fiecare student')}>
       <div className="viz-avs">
-        <div className="viz-avs-head"><span /><span>{t('grades', 'note')}</span><span>{t(head.en, head.ro)}</span><span>{t('stays', 'rămâne')}</span></div>
+        <div className="viz-avs-head"><span /><span>{t('grades', 'note')}</span><span>{t(head.en, head.ro).replace(/ (?=\S+$)/, '\u00a0')}</span><span>{t('stays', 'rămâne')}</span></div>
         {A.students.map((r, i) => {
           const id = r.student.nr_matricol;
           const picked = guess.has(id);
