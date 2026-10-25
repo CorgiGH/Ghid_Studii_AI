@@ -34,3 +34,14 @@ export function pickIsRight(value, fn, digits, picked) {
   const grid = (x) => Math.round(shift(x, digits));
   return grid(numberLine(value, fn, digits)) === grid(picked);
 }
+
+// The furthest step the progress dots may jump to. With predict on, every step after the first asks for a pick
+// and is only left once "Show" was pressed (`shown[step]`), so a dot can reach the first step not yet shown but
+// never one beyond it; without predict every step is open.
+export function reachableStep(to, { n, predict = false, shown = {} }) {
+  let cap = Math.max(0, n - 1);
+  if (predict) {
+    for (let j = 1; j < n; j += 1) if (!shown[j]) { cap = j; break; }
+  }
+  return Math.min(Math.max(0, to), cap);
+}

@@ -7,7 +7,8 @@ import { rowInsert } from '../../src/components/lesson/viz/logic/row-insert.js';
 import { deleteSweep } from '../../src/components/lesson/viz/logic/delete-sweep.js';
 import { likeSteps } from '../../src/components/lesson/viz/logic/like-slider.js';
 import { inBetween } from '../../src/components/lesson/viz/logic/in-between.js';
-import { numberLine } from '../../src/components/lesson/viz/logic/number-line.js';
+import { curveReach, underRunEnd } from '../../src/components/lesson/viz/logic/wire-geometry.js';
+import { numberLine, reachableStep } from '../../src/components/lesson/viz/logic/number-line.js';
 import { charBoxes, charOps } from '../../src/components/lesson/viz/logic/char-boxes.js';
 import { lpad, rpad, translateStr, padPlan, swapPlan, replaceChain, charStrips } from '../../src/components/lesson/viz/logic/char-strips.js';
 import { calendar, calendarSteps } from '../../src/components/lesson/viz/logic/calendar-clock.js';
@@ -419,5 +420,38 @@ describe('table cells', () => {
     expect(displayCell(null)).toBe('NULL');
     expect(displayCell(9)).toBe('9');
     expect(displayCell('2014')).toBe('2014');
+  });
+});
+
+describe('number-line progress dots', () => {
+  it('cannot skip an asking step', () => {
+    // 5 steps (setup + 4 functions), predict on, nothing shown yet: only the first asking step is reachable
+    expect(reachableStep(4, { n: 5, predict: true, shown: {} })).toBe(1);
+    expect(reachableStep(0, { n: 5, predict: true, shown: {} })).toBe(0);
+    // step 1 shown: step 2 is the next asking step
+    expect(reachableStep(4, { n: 5, predict: true, shown: { 1: true } })).toBe(2);
+    expect(reachableStep(1, { n: 5, predict: true, shown: { 1: true } })).toBe(1);
+    expect(reachableStep(4, { n: 5, predict: true, shown: { 1: true, 2: true, 3: true, 4: true } })).toBe(4);
+    // going back is always allowed, and out-of-range targets are clamped
+    expect(reachableStep(-3, { n: 5, predict: true, shown: {} })).toBe(0);
+  });
+  it('without predict every step is open', () => {
+    expect(reachableStep(9, { n: 5 })).toBe(4);
+    expect(reachableStep(3, { n: 5, predict: false, shown: {} })).toBe(3);
+  });
+});
+
+describe('wire along a row gridline', () => {
+  it('stops at the visible edge of a scrolling source table instead of overshooting into the next one', () => {
+    // 700 px: the row is 304 wide but the visible box ends at 285, and the next table starts at 299
+    expect(underRunEnd({ rowLeft: 0, rowRight: 304, wrapLeft: 0, wrapRight: 285, leftToRight: true })).toBe(285);
+    expect(underRunEnd({ rowLeft: 0, rowRight: 315, wrapLeft: 0, wrapRight: 315, leftToRight: true })).toBe(315);
+    expect(underRunEnd({ rowLeft: -20, rowRight: 300, wrapLeft: 10, wrapRight: 300, leftToRight: false })).toBe(10);
+  });
+  it('curve reach never exceeds the gap when the gap is short', () => {
+    expect(curveReach(14)).toBe(14);
+    expect(curveReach(-14)).toBe(14);
+    expect(curveReach(40)).toBe(24);
+    expect(curveReach(200)).toBe(90);
   });
 });

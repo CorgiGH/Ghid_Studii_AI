@@ -3,7 +3,8 @@
 // run(sql, { dataset }) => Promise<Result> (the Engine in tests, the SqlClient in the browser).
 //
 //   planStages(sql, stages, runner, { dataset, show }) -> Promise<StageState[]>
-//   StageState = { clause, rows, kept, removed, columns, dimmed, order?, truth?, ... }
+//   StageState = { clause, rows, kept, removed, columns, dimmed, itemCols, order?, truth?, ... }
+//   itemCols: the cell column each select item reads, in select order.
 //
 // `rows` are the rows on screen while the stage runs (for WHERE: its input rows, with `kept` and
 // `removed` telling which survive); the next stage starts from the survivors.
@@ -95,11 +96,11 @@ async function loadPart(runner, dataset, part, show, tag, computed) {
     rows.push({ key, cells })
   })
   rows.forEach((r) => computed.forEach((c) => { r.cells[c.label] = sel[r.key][c.index] }))
-  return { part, rows, sel, ordKey, truth, selExprs, orders, showCols, nShow, rawRows: res.rows, list: built.list }
+  return { part, rows, sel, ordKey, truth, selExprs, orders, showCols, nShow, rawRows: res.rows, list: built.list, fellBack: nShow === 0 && show.length > 0 }
 }
 
-// The pairs a predicted join puts in front of the learner. The plain equalities of every ON (same student,
-// same course, a fixed course) are already applied, and the learner decides the rest (`n2.valoare > n1.valoare`).
+// The pairs a predicted join puts in front of the learner. The plain equalities of every ON (column = column,
+// column = constant) are already applied, and the learner decides the rest (inequalities, OR, BETWEEN, ...).
 // When every ON part is an equality, nothing is applied and the pairs are every combination of rows.
 // Survivors are the master query's own rows (matched by value), so later stages carry on from them.
 async function loadPairs(runner, dataset, part, A, rowMap, maxPairs) {
@@ -143,6 +144,30 @@ async function loadPairs(runner, dataset, part, A, rowMap, maxPairs) {
   })
   if (kept.length !== A.rows.length) throw new MachineError('A predicted join pair did not match the join result.', 'failed')
   return { rows, kept, removed, given, test: test.join(' AND ') }
+}
+
+// The kept rows of a set operator in the order the full query returns them. Oracle sorts UNION, INTERSECT and
+// MINUS results (ascending, every column) when there is no ORDER BY, and UNION ALL keeps the first list then the
+// second, so the order comes from the engine running the whole query, matched back to the kept rows by value.
+async function orderSetResult(runner, dataset, sql, clause, kept, selOf, width) {
+  const body = String(sql).replace(/;\s*$/, '')
+  const cols = Array.from({ length: width }, (_, i) => i + 1).join(', ')
+  const ordered = clause === 'union-all' ? body : `SELECT * FROM (${body}) ORDER BY ${cols}`
+  const res = await exec(runner, dataset, ordered)
+  const queues = new Map()
+  for (const k of kept) {
+    const t = tupleKey(selOf(k))
+    if (!queues.has(t)) queues.set(t, [])
+    queues.get(t).push(k)
+  }
+  const out = []
+  for (const row of res.rows) {
+    const queue = queues.get(tupleKey(row))
+    if (!queue || !queue.length) throw new MachineError('A row of the set operator result did not match the engine result.', 'failed')
+    out.push(queue.shift())
+  }
+  if (out.length !== kept.length) throw new MachineError('The set operator result does not match the engine result.', 'failed')
+  return out
 }
 
 function columnPlan(part, show) {
@@ -189,9 +214,11 @@ function groupBySel(keys, sel) {
 export async function planStages(sql, stages, runner, { dataset = 'facultate', show = [], maxPairs = MAX_PAIRS } = {}) {
   const parsed = parseQuery(sql)
   if (parsed.parts.length > 2) throw new MachineError('Only one set operator per query is animated.', 'unsupported')
+  if (parsed.parts.length > 1 && parsed.parts.some((p) => p.order.length)) throw new MachineError('ORDER BY after a set operator is not animated.', 'unsupported')
   const a0 = parsed.parts[0]
   const b0 = parsed.parts[1] || null
-  const showCols = show.length ? show : (a0.star ? [] : a0.select.map((it) => it.alias || it.expr))
+  // An alias is not an expression the master query can select, so the default show list is the expressions.
+  const showCols = show.length ? show : (a0.star ? [] : a0.select.map((it) => it.expr))
   if (!showCols.length) throw new MachineError('The block needs a "show" list of columns.', 'unsupported')
   const plan = columnPlan(a0, showCols)
   const A = await loadPart(runner, dataset, a0, showCols, 'a', plan.computed)
@@ -230,13 +257,19 @@ export async function planStages(sql, stages, runner, { dataset = 'facultate', s
     return m >= 0 ? showCols[m] : it.expr
   })
 
+  // The cell column each select item reads from, in select order (the order the engine returns its columns).
+  const itemCols = a0.star ? showCols : a0.select.map((it) => {
+    const m = matchShow(it, showCols)
+    return m >= 0 ? showCols[m] : (it.alias || it.expr)
+  })
+
   const out = []
   let cur = { keys: A.rows.map((r) => r.key), columns: showCols, dimmed: [], labels: {}, part: A }
   let whereDoneA = false
 
   for (const st of stages) {
     const clause = st.clause
-    const S = { clause, rows: [], kept: [], removed: [], columns: [], dimmed: [] }
+    const S = { clause, rows: [], kept: [], removed: [], columns: [], dimmed: [], itemCols }
     if (clause === 'from') {
       if (base) {
         S.rows = base.rows
@@ -270,6 +303,7 @@ export async function planStages(sql, stages, runner, { dataset = 'facultate', s
       let P = A
       if (B && (!a0.where || whereDoneA) && b0.where) P = B
       if (P === A) whereDoneA = true
+      if (P.fellBack) throw new MachineError('The second query does not have the block\'s columns, so its WHERE cannot be shown row by row.', 'unsupported')
       const input = P === A ? cur.keys : P.rows.map((r) => r.key)
       S.rows = rowsOf(input)
       S.columns = showCols
@@ -351,6 +385,7 @@ export async function planStages(sql, stages, runner, { dataset = 'facultate', s
       S.rows = view(A, repsA)
       S.right = view(B, repsB)
       S.kept = kept
+      S.result = await orderSetResult(runner, dataset, sql, clause, kept, (k) => (k.startsWith('a') ? A : B).sel[k], itemLabels.length)
       S.removed = [...repsA, ...repsB].filter((k) => !keptSet.has(k))
       S.columns = itemLabels
       S.setCounts = { left: keysA.length, right: keysB.length }

@@ -5,7 +5,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { createEngine } from '../../src/sql/engine/core.js'
 import { planStages } from '../../src/sql/machine.js'
-import { buildSteps, chipStep, predictKind, settled, viewAt } from '../../src/sql/machineView.js'
+import { allPredictionsChecked, buildSteps, chipStep, predictKind, settled, sumChecks, viewAt } from '../../src/sql/machineView.js'
 import { validateQueryMachine } from '../../src/sql/machineSpec.js'
 import { isGatingBlock, isGatingScreen } from '../../src/components/lesson/playerLogic.js'
 import { blockLoaders } from '../../src/components/blocks/registry.js'
@@ -36,6 +36,49 @@ describe('block spec', () => {
     const left = byId['bd-l20-qm1']
     expect(validateQueryMachine({ ...left, stages: [{ clause: 'from' }, { clause: 'join', predict: true }, { clause: 'where' }] }).join()).toMatch(/inner JOIN/)
     expect(validateQueryMachine({ ...left, stages: [{ clause: 'from' }, { clause: 'join' }, { clause: 'where', predict: true }] })).toEqual([])
+  })
+})
+
+describe('block spec: every clause of the SQL has a stage', () => {
+  const ok = byId['bd-l04-qm1']
+  it('names the missing stage for WHERE, ORDER BY, DISTINCT, JOIN and a set operator', () => {
+    const sql = (q, stages, say = {}) => validateQueryMachine({ ...ok, sql: q, stages, say: { from: ok.say.from, ...say } })
+    const bi = { en: 'x', ro: 'y' }
+    expect(sql('SELECT nume FROM studenti WHERE an = 1 ORDER BY nume', [{ clause: 'from' }, { clause: 'order' }], { order: bi }).join()).toMatch(/has WHERE but no "where" stage/)
+    expect(sql('SELECT nume FROM studenti WHERE an = 1 ORDER BY nume', [{ clause: 'from' }, { clause: 'where' }], { where: bi }).join()).toMatch(/has ORDER but no "order" stage/)
+    expect(sql('SELECT DISTINCT an FROM studenti', [{ clause: 'from' }, { clause: 'select' }], { select: bi }).join()).toMatch(/has DISTINCT but no "distinct" stage/)
+    expect(sql('SELECT nume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol', [{ clause: 'from' }], {}).join()).toMatch(/has JOIN but no "join" stage/)
+    expect(sql('SELECT nume FROM studenti MINUS SELECT nume FROM studenti WHERE an = 1', [{ clause: 'from' }, { clause: 'where' }], { where: bi }).join()).toMatch(/has MINUS but no "minus" stage/)
+    expect(sql('SELECT nume FROM studenti UNION SELECT nume FROM studenti ORDER BY 1', [{ clause: 'from' }, { clause: 'union' }], { union: bi }).join()).toMatch(/ORDER BY after a set operator/)
+  })
+  it('accepts the lists wording of a set operator only for a set operator stage', () => {
+    const m = byId['bd-l23-qm']
+    const lists = { en: 'two lists', ro: 'două liste' }
+    expect(validateQueryMachine({ ...m, say: { ...m.say, 'minus:lists': lists } })).toEqual([])
+    expect(validateQueryMachine({ ...m, say: { ...m.say, 'where:lists': lists } }).join()).toMatch(/not a clause/)
+    expect(validateQueryMachine({ ...m, say: { ...m.say, 'minus:lists': { en: 'x' } } }).join()).toMatch(/en and ro/)
+  })
+})
+
+describe('the gate and the score', () => {
+  it('the gate opens only when every predicted stage is checked', () => {
+    const flags = [false, true, false, true]
+    expect(allPredictionsChecked(flags, {})).toBe(false)
+    expect(allPredictionsChecked(flags, { 1: { correct: 3, total: 4 } })).toBe(false)
+    expect(allPredictionsChecked(flags, { 1: { correct: 3, total: 4 }, 3: { correct: 1, total: 1 } })).toBe(true)
+    expect(allPredictionsChecked([false, false], {})).toBe(true)
+  })
+  it('one score for the block sums its predicted stages', () => {
+    expect(sumChecks([false, true, true], { 1: { correct: 3, total: 4 }, 2: { correct: 5, total: 13 } })).toEqual({ correct: 8, total: 17 })
+  })
+  it('a set operator shows its result in the engine order', async () => {
+    const m = { ...byId['bd-l23-qm'] }
+    const plan = await planOf(m)
+    const steps = buildSteps(plan)
+    const last = plan.length - 1
+    const shown = viewAt(plan, steps, steps.length - 1)
+    expect(shown.panels.result.map((r) => r.key)).toEqual(plan[last].result)
+    expect(settled(plan, last).rows.map((r) => r.key)).toEqual(plan[last].result)
   })
 })
 

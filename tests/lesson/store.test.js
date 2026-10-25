@@ -109,4 +109,12 @@ describe('lesson store', () => {
     st.recordAttempt('sql1', { ok: true, hints: 3, kind: 'sql', ref, at: 10 });
     expect(st.pendingReview(10).map(i => i.itemId)).toEqual(['sql1']);
   });
+
+  it('a prediction attempt (ok: true, kind predict) never enters the review pile', () => {
+    const st = createLessonStore(fakeStorage());
+    st.recordAttempt('qm1', { ok: true, hints: 0, kind: 'predict', item: 'qm1', ref, at: 1000, correct: 2, total: 13 });
+    expect(st.pendingReview(5000)).toEqual([]);
+    expect(st.pendingCount()).toBe(0);
+    expect(st.attemptsAt(ref.src, ref.screen)).toHaveLength(1);
+  });
 });

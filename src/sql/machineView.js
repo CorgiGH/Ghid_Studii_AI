@@ -19,12 +19,34 @@ export function chipStep(steps, i, checked = {}) {
   return ask >= 0 && !checked[i] ? ask : steps.findIndex((x) => x.stage === i && x.phase === 'show')
 }
 
+// The gate of a screen opens once every predicted stage has been checked.
+// `predicted` is the stage list's predict flags; `checked[stageIndex]` is a stage's score.
+export function allPredictionsChecked(predicted, checked = {}) {
+  return predicted.every((p, i) => !p || !!checked[i])
+}
+
+// One score for the whole block: the sum over its predicted stages.
+export function sumChecks(predicted, checked = {}) {
+  let correct = 0
+  let total = 0
+  predicted.forEach((p, i) => {
+    if (p && checked[i]) { correct += checked[i].correct; total += checked[i].total }
+  })
+  return { correct, total }
+}
+
 // Which kind of answer a predicted stage asks for: WHERE and JOIN have the learner click the rows (for a join,
 // the candidate pairs) that survive, ORDER BY has them placed in order, DISTINCT asks how many rows remain.
 export function predictKind(clause) {
   if (clause === 'where' || clause === 'join') return 'rows'
   if (clause === 'order') return 'order'
   return 'count' // distinct
+}
+
+// A set operator's kept rows in the order the full query returns them (S.result), from either list.
+const resultRows = (S) => {
+  const byKey = new Map([...S.rows, ...(S.right || [])].map((r) => [r.key, r]))
+  return (S.result || S.kept).map((k) => byKey.get(k)).filter(Boolean)
 }
 
 const keepRows = (S) => {
@@ -39,7 +61,7 @@ const isPairs = (S) => S.clause === 'join' && S.test !== undefined
 export function settled(plan, i) {
   if (i < 0) return { rows: [], columns: [], dimmed: [], labels: {} }
   const S = plan[i]
-  const rows = S.clause === 'where' || isPairs(S) ? keepRows(S) : isSetClause(S.clause) ? [...keepRows(S), ...(S.right || []).filter((r) => S.kept.includes(r.key))] : S.rows
+  const rows = S.clause === 'where' || isPairs(S) ? keepRows(S) : isSetClause(S.clause) ? resultRows(S) : S.rows
   return { rows, columns: S.columns, dimmed: S.dimmed || [], labels: S.labels || {} }
 }
 
@@ -116,7 +138,7 @@ export function viewAt(plan, steps, stepIndex, ui = {}, checked = {}) {
     // The second list of MINUS / INTERSECT is only the thing compared against, never struck out.
     const operand = S.clause === 'minus' || S.clause === 'intersect'
     const side = (rows, right) => rows.map((r) => rowOf(r, { status: right && operand ? 'plain' : keep.has(r.key) ? 'kept' : 'gone', moved: split && keep.has(r.key) }))
-    view.panels = { left: side(S.rows, false), right: side(S.right || [], true), result: split ? [...S.rows, ...(S.right || [])].filter((r) => keep.has(r.key)).map((r) => rowOf(r, { status: 'kept' })) : [] }
+    view.panels = { left: side(S.rows, false), right: side(S.right || [], true), result: split ? resultRows(S).map((r) => rowOf(r, { status: 'kept' })) : [] }
     view.meta = { left: S.setCounts.left, right: S.setCounts.right, leftDistinct: S.rows.length, rightDistinct: (S.right || []).length, to: S.kept.length }
   }
   return view

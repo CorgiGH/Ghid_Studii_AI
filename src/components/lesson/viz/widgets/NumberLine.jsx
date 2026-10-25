@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { numberLines, pickIsRight } from '../logic/number-line.js';
+import { numberLines, pickIsRight, reachableStep } from '../logic/number-line.js';
 import { numberLineSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -26,8 +26,8 @@ export default function NumberLine({ props, predict }) {
   // A pick only marks the line; every line stays unanswered until "Show", which is also the skip.
   const asking = () => predict && k >= 1 && !shownSteps[k];
   const anyAsking = asking();
-  // Next waits until Show has been pressed.
-  const stepper = { ...s, canNext: s.canNext && !anyAsking, reset: () => { setPicks({}); setShownSteps({}); s.reset(); } };
+  // Next and the progress dots wait until Show has been pressed for the step being asked.
+  const stepper = { ...s, canNext: s.canNext && !anyAsking, goto: (to) => s.goto(reachableStep(to, { n: s.n, predict, shown: shownSteps })), reset: () => { setPicks({}); setShownSteps({}); s.reset(); } };
   const dText = digits === 0 ? '' : `, ${digits}`;
   const hint = {
     CEIL: t('CEIL goes up to the next whole number.', 'CEIL urcă la următorul număr întreg.'),

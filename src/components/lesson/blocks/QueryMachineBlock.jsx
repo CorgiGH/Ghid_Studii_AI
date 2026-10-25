@@ -11,14 +11,13 @@ import { useVizMotion } from '../viz/kit.js';
 import { CountUp } from '../viz/ui.jsx';
 import { displayCell } from '../viz/logic/date-mask.js';
 import { planStages, parseQuery, scoreCount, scoreOrder, scorePicks } from '../../../sql/machine.js';
-import { buildSteps, chipStep, predictKind, viewAt } from '../../../sql/machineView.js';
+import { allPredictionsChecked, buildSteps, chipStep, predictKind, sumChecks, viewAt } from '../../../sql/machineView.js';
 
 const CLAUSE_LABEL = {
   from: 'FROM', join: 'JOIN', where: 'WHERE', select: 'SELECT', distinct: 'DISTINCT', order: 'ORDER BY',
   union: 'UNION', 'union-all': 'UNION ALL', intersect: 'INTERSECT', minus: 'MINUS',
 };
 const NEW_LINE = new Set(['from', 'join', 'where', 'order', 'union', 'union-all', 'intersect', 'minus']);
-const SET_CLAUSES = new Set(['union', 'union-all', 'intersect', 'minus']);
 
 const Html = ({ as = 'span', className, text }) => (
   React.createElement(as, { className, dangerouslySetInnerHTML: { __html: formatMarkdown(text) } })
@@ -27,7 +26,8 @@ const Html = ({ as = 'span', className, text }) => (
 // SQL from the block goes into text that is rendered as HTML, so its < > & must stay text.
 const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const cellText = (v) => (v === null || v === undefined ? 'NULL' : displayCell(typeof v === 'string' ? v.replace(/\s+$/, '') : v));
+// Only a real NULL reads NULL; a value the engine did not give stays blank rather than looking like a NULL.
+const cellText = (v) => (v === undefined ? '' : v === null ? 'NULL' : displayCell(typeof v === 'string' ? v.replace(/\s+$/, '') : v));
 
 function Mark({ row, m }) {
   // One slot before the cells: position number, verdict, tri-state pill or the pick box.
@@ -89,7 +89,7 @@ function Row({ row, columns, dimmed, index, m, onPick, layoutId, animateLayout, 
     >
       <Mark row={row} m={m} />
       {columns.map((c) => (
-        <span key={c} className={`qm-cell${dimmed.includes(c) ? ' is-dim' : ''}${row.cells[c] === null || row.cells[c] === undefined ? ' nul' : ''}`}>{cellText(row.cells[c])}</span>
+        <span key={c} className={`qm-cell${dimmed.includes(c) ? ' is-dim' : ''}${row.cells[c] === null ? ' nul' : ''}`}>{cellText(row.cells[c])}</span>
       ))}
       {row.truth && row.mark !== undefined && (
         <span className={`qm-mark qm-mark-end ${row.mark ? 'ok' : 'bad'}`} role="img" aria-label={row.mark ? 'correct' : 'wrong'}>{row.mark ? '✓' : '✗'}</span>
@@ -170,11 +170,11 @@ function SetPanels({ view, m, id }) {
       <div className="qm-set-pair">
         <section className="qm-set" aria-label={t('First list', 'Prima listă')}>
           <h4 className="qm-set-title">{t('First list', 'Prima listă')} <span>{view.meta.leftDistinct}</span></h4>
-          <Table rows={sets(left, showResult)} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('Nothing left here', 'Nu a rămas nimic aici')} />
+          <div className="qm-set-scroll"><Table rows={sets(left, showResult)} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('Nothing left here', 'Nu a rămas nimic aici')} /></div>
         </section>
         <section className="qm-set" aria-label={t('Second list', 'A doua listă')}>
           <h4 className="qm-set-title">{t('Second list', 'A doua listă')} <span>{view.meta.rightDistinct}</span></h4>
-          <Table rows={sets(right, showResult)} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('Nothing left here', 'Nu a rămas nimic aici')} />
+          <div className="qm-set-scroll"><Table rows={sets(right, showResult)} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('Nothing left here', 'Nu a rămas nimic aici')} /></div>
         </section>
       </div>
       <AnimatePresence initial={false}>
@@ -188,7 +188,7 @@ function SetPanels({ view, m, id }) {
             transition={m.reduced ? { duration: 0 } : m.soft}
           >
             <h4 className="qm-set-title">{t('Result', 'Rezultat')} <span>{view.meta.to}</span></h4>
-            <Table rows={result} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('No rows', 'Niciun rând')} />
+            <div className="qm-set-scroll"><Table rows={result} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('No rows', 'Niciun rând')} /></div>
           </Motion.section>
         )}
       </AnimatePresence>
@@ -225,7 +225,7 @@ function Sql({ segments, active }) {
     <pre className="qm-sql" aria-label="SQL">
       {segments.map((s, i) => {
         const nl = i > 0 && NEW_LINE.has(s.clause);
-        const on = s.clause === active || (SET_CLAUSES.has(active) && s.clause === active);
+        const on = s.clause === active;
         return (
           <React.Fragment key={i}>
             {nl && '\n'}
@@ -235,6 +235,14 @@ function Sql({ segments, active }) {
       })}
     </pre>
   );
+}
+
+// Rendered where the animation cannot run (no engine, or the block's query fails): the screen must not wait on a
+// prediction that cannot be asked, and no skip is recorded for what was not the learner's doing.
+function ReleaseGate() {
+  const { complete } = useScreenGate();
+  useEffect(() => { complete(); }, [complete]);
+  return null;
 }
 
 // Block JSON: { type: 'query-machine', id, dataset, sql, stages: [{ clause, predict?, tri? }], show: [column...],
@@ -302,6 +310,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
     }
   };
 
+  // The gate opens and the attempt is recorded once every predicted stage has been checked.
   const recordOnce = (summary) => {
     const restored = store.attemptsAt && ref ? store.attemptsAt(ref.src, ref.screen).some((a) => a && a.item === id && a.kind === 'predict') : false;
     if (recorded.current || !shouldRecordAttempt({ ref, restored })) return;
@@ -318,9 +327,13 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
     if (kind === 'rows') { const r = scorePicks(stage, a.picks || []); summary = { correct: r.correct, total: r.total }; }
     else if (kind === 'order') { const r = scoreOrder(stage, a.placed || []); summary = { correct: r.correct, total: r.total }; }
     else { const r = scoreCount(stage, a.value ?? ''); summary = { correct: r.ok ? 1 : 0, total: 1 }; }
-    setChecked((c) => ({ ...c, [stageIdx]: summary }));
-    recordOnce(summary);
-    complete();
+    const nextChecked = { ...checked, [stageIdx]: summary };
+    setChecked(nextChecked);
+    const predicted = stages.map((x) => !!x.predict);
+    if (allPredictionsChecked(predicted, nextChecked)) {
+      recordOnce(sumChecks(predicted, nextChecked));
+      complete();
+    }
     go(step + 1);
   };
 
@@ -345,7 +358,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
       if (view.ask.kind === 'order') return t('Click the rows in the order they will come out, then check.', 'Apasă rândurile în ordinea în care vor ieși, apoi verifică.');
       return t('How many rows are left after DISTINCT? Type a number, then check.', 'Câte rânduri rămân după DISTINCT? Scrie un număr, apoi verifică.');
     }
-    if (cur.phase === 'lists' && !say[`${c}:lists`]) return t('Two lists, one from each query. Press Next to combine them.', 'Două liste, câte una din fiecare interogare. Apasă Mai departe ca să le combini.');
+    if (cur.phase === 'lists' && !say[`${c}:lists`]) return t('Two lists, one from each query. Press Combine to merge them.', 'Două liste, câte una din fiecare interogare. Apasă Combină ca să le combini.');
     const s = say[c];
     return s ? t(s.en, s.ro) : null;
   })();
@@ -363,6 +376,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
     return (
       <figure className="qm" data-testid="query-machine">
         <Sql segments={segments} active={null} />
+        <ReleaseGate />
         <p className="qm-note">{t('The SQL engine is not available in this browser right now, so the animation cannot run.', 'Motorul SQL nu este disponibil acum în acest browser, deci animația nu poate rula.')}</p>
       </figure>
     );
@@ -371,7 +385,8 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
     return (
       <figure className="qm" data-testid="query-machine">
         <Sql segments={segments} active={null} />
-        <p className="qm-note">{t('This query could not be run here', 'Interogarea nu a putut fi rulată aici')}{state.error?.code ? ` (${state.error.code})` : ''}.</p>
+        <ReleaseGate />
+        <p className="qm-note">{t('This query could not be run here', 'Interogarea nu a putut fi rulată aici')}{String(state.error?.code).startsWith('ORA-') ? ` (${state.error.code})` : ''}.</p>
       </figure>
     );
   }
@@ -423,9 +438,10 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
 
       {atAsk && view.ask.kind === 'count' && !answered && (
         <form className="qm-count-form" onSubmit={(e) => { e.preventDefault(); if (canCheck) check(); }}>
-          <label htmlFor={`qm-${id}-n`}>{t('Rows left', 'Rânduri rămase')}</label>
+          <label htmlFor={`qm-${id}-n`}>{t('How many rows are left?', 'Câte rânduri rămân?')}</label>
           <input
             id={`qm-${id}-n`}
+            aria-label={t('How many rows are left?', 'Câte rânduri rămân?')}
             className="qm-input"
             type="text"
             inputMode="numeric"

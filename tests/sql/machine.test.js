@@ -19,6 +19,11 @@ beforeAll(async () => {
 const plan = (b) => planStages(b.sql, b.stages, engine, { dataset: b.dataset, show: b.show })
 const rowsOf = async (sql) => (await engine.run(sql, { dataset: 'facultate' })).rows
 const stageOf = (stages, clause) => stages.find((s) => s.clause === clause)
+// Oracle sorts the result of UNION / INTERSECT / MINUS on every column when there is no ORDER BY.
+const sortedRows = async (sql) => {
+  const n = parseQuery(sql).parts[0].select.length
+  return rowsOf(`SELECT * FROM (${sql}) ORDER BY ${Array.from({ length: n }, (_, i) => i + 1).join(', ')}`)
+}
 
 describe('parseQuery', () => {
   it('splits clauses, joins, aliases and set operators', () => {
@@ -54,6 +59,33 @@ describe('parseQuery', () => {
     const { segments } = parseQuery('SELECT nume FROM studenti WHERE an = 1 ORDER BY nume')
     expect(segments.map((s) => s.clause)).toEqual(['select', 'from', 'where', 'order'])
     expect(segments.map((s) => s.text).join('')).toBe('SELECT nume FROM studenti WHERE an = 1 ORDER BY nume')
+  })
+})
+
+describe('parseQuery select items', () => {
+  const items = (sql) => parseQuery(sql).parts[0].select.map((it) => [it.expr, it.alias])
+  it('reads aliases with AS, without AS and quoted, and keeps expressions whole', () => {
+    expect(items('SELECT nume n1, prenume AS p, an "An Studiu", bursa + 10 plus, s.nume FROM studenti s')).toEqual([
+      ['nume', 'n1'], ['prenume', 'p'], ['an', 'An Studiu'], ['bursa + 10', 'plus'], ['s.nume', null],
+    ])
+    expect(items("SELECT bursa IS NULL, CASE WHEN an = 1 THEN 'a' ELSE 'b' END, CASE WHEN an = 1 THEN 'a' END c, UPPER(nume) || ' ' || prenume AS complet FROM studenti")).toEqual([
+      ['bursa IS NULL', null], ["CASE WHEN an = 1 THEN 'a' ELSE 'b' END", null], ["CASE WHEN an = 1 THEN 'a' END", 'c'], ["UPPER(nume) || ' ' || prenume", 'complet'],
+    ])
+    expect(items('SELECT DISTINCT an a FROM studenti')).toEqual([['an', 'a']])
+  })
+  it('EXCEPT is not an Oracle operator, UNION ALL is one', () => {
+    expect(parseQuery('SELECT a FROM t UNION ALL SELECT a FROM u').ops).toEqual(['union-all'])
+    expect(parseQuery('SELECT a FROM t EXCEPT SELECT a FROM u').ops).toEqual([])
+  })
+})
+
+describe('conjuncts and OR', () => {
+  it('a condition with a top-level OR stays whole, because AND binds tighter', () => {
+    expect(conjuncts('a.x = b.x AND a.y = b.y OR a.z > b.z')).toEqual([{ text: 'a.x = b.x AND a.y = b.y OR a.z > b.z', eq: false }])
+    expect(conjuncts('a.z > b.z OR a.x = b.x')).toHaveLength(1)
+    // an OR inside parentheses does not hide the ANDs around it
+    expect(conjuncts('(a.x = b.x OR a.y = b.y) AND c.v = d.v').map((c) => c.text)).toEqual(['(a.x = b.x OR a.y = b.y)', 'c.v = d.v'])
+    expect(conjuncts('a.v BETWEEN 1 AND 2 AND b.w = c.w').map((c) => c.text)).toEqual(['a.v BETWEEN 1 AND 2', 'b.w = c.w'])
   })
 })
 
@@ -105,14 +137,16 @@ describe('planStages against the engine', () => {
     expect(where.kept.length).toBeGreaterThan(0)
   })
 
-  it('MINUS on names reproduces L4.12: Bodnar x2 merges, 4 rows instead of 5', async () => {
-    const sql = 'SELECT s.nume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol MINUS SELECT s.nume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol WHERE n.valoare < 7'
-    const stages = await planStages(sql, [{ clause: 'minus' }], engine, { dataset: 'facultate', show: ['nume'] })
+  it('MINUS on (nume, prenume) reproduces L4.12 as the corpus has it, in the engine order', async () => {
+    const corpus = JSON.parse(fs.readFileSync(path.join(here, 'corpus', 'solutions.json'), 'utf8')).find((x) => x.id === 'sol:L4.12')
+    const stages = await planStages(corpus.sql, [{ clause: 'minus' }], engine, { dataset: 'facultate', show: ['nume', 'prenume'] })
     const s = stages[0]
-    const names = s.kept.map((k) => (s.rows.find((r) => r.key === k) || s.right.find((r) => r.key === k)).cells.nume)
-    expect(names).toHaveLength(4)
-    expect([...names].sort()).toEqual(['Bodnar', 'Ciobotariu', 'Panaite', 'Popescu'])
-    expect(names.sort()).toEqual((await rowsOf(sql)).map((r) => r[0]).sort())
+    const row = (k) => (s.rows.find((r) => r.key === k) || s.right.find((r) => r.key === k)).cells
+    const got = s.result.map((k) => [row(k).nume, row(k).prenume])
+    expect(got).toEqual(await sortedRows(corpus.sql))
+    expect(got.length).toBeGreaterThan(0)
+    // the two columns together are the identity of a row: the homonym surnames stay apart where the first names differ
+    expect(new Set(got.map((r) => r.join('|'))).size).toBe(got.length)
   })
 
   it('homonyms merge: MINUS / UNION / INTERSECT on names equal the engine', async () => {
@@ -120,8 +154,9 @@ describe('planStages against the engine', () => {
       const sql = `SELECT nume FROM studenti WHERE an < 3 ${op} SELECT nume FROM studenti WHERE an > 1`
       const stages = await planStages(sql, [{ clause }], engine, { dataset: 'facultate', show: ['nume'] })
       const s = stages[0]
-      const got = s.kept.map((k) => (s.rows.find((r) => r.key === k) || s.right.find((r) => r.key === k)).cells.nume).sort()
-      expect(got, op).toEqual((await rowsOf(sql)).map((r) => r[0]).sort())
+      const got = s.result.map((k) => (s.rows.find((r) => r.key === k) || s.right.find((r) => r.key === k)).cells.nume)
+      expect(got, op).toEqual((await (clause === 'union-all' ? rowsOf(sql) : sortedRows(sql))).map((r) => r[0]))
+      expect([...s.result].sort(), op).toEqual([...s.kept].sort())
     }
   })
 
@@ -199,9 +234,11 @@ describe('planStages against the engine', () => {
       .rejects.toMatchObject({ code: 'unsupported' })
   })
 
-  it('every staged query-machine block plans, and where it ends in a result that result equals the engine', async () => {
+  it('every staged query-machine block plans, and where it ends in a result that result equals the engine, column by column', async () => {
     expect(blocks).toHaveLength(27)
-    const multiset = (rows) => rows.map((r) => r.map(String).sort().join('\u0001')).sort()
+    // Rows are compared as lists of cells in select order; only the order of the rows is free (no ORDER BY).
+    const cells = (rows) => rows.map((r) => r.map(String).join('\u0001'))
+    const multiset = (rows) => cells(rows).sort()
     let compared = 0
     for (const b of blocks) {
       let stages
@@ -216,19 +253,68 @@ describe('planStages against the engine', () => {
       expect(stages, b.id).toHaveLength(b.stages.length)
       const last = stages[stages.length - 1]
       if (!['select', 'distinct', 'order', 'minus'].includes(last.clause)) continue
+      const expected = await rowsOf(b.sql)
+      if (last.clause === 'minus') {
+        const byKey = new Map([...last.rows, ...last.right].map((r) => [r.key, r]))
+        const result = last.result.map((k) => last.columns.map((c) => byKey.get(k).cells[c]))
+        expect(cells(result), `${b.id} set result`).toEqual(cells(await sortedRows(b.sql)))
+        expect(multiset(result), b.id).toEqual(multiset(expected))
+        compared += 1
+        continue
+      }
       const keep = new Set(last.kept)
-      const gone = new Set(last.dimmed)
-      const cols = last.columns.filter((c) => !gone.has(c))
-      const rows = [...last.rows].filter((r) => keep.has(r.key)).map((r) => cols.map((c) => r.cells[c]))
-      expect(multiset(rows), b.id).toEqual(multiset(await rowsOf(b.sql)))
+      const rows = last.rows.filter((r) => keep.has(r.key)).map((r) => last.itemCols.map((c) => r.cells[c]))
+      expect(multiset(rows), b.id).toEqual(multiset(expected))
       if (last.clause === 'order') {
         // the engine's own order, row by row
-        const sorted = last.order.map((k) => last.rows.find((r) => r.key === k)).map((r) => cols.map((c) => r.cells[c]))
-        expect(sorted.map((r) => r.map(String).sort().join('\u0001')), `${b.id} order`).toEqual((await rowsOf(b.sql)).map((r) => r.map(String).sort().join('\u0001')))
+        const sorted = last.order.map((k) => last.rows.find((r) => r.key === k)).map((r) => last.itemCols.map((c) => r.cells[c]))
+        expect(cells(sorted), `${b.id} order`).toEqual(cells(expected))
       }
       compared += 1
     }
     expect(compared).toBeGreaterThanOrEqual(20)
+  })
+
+  it('select aliases without AS plan, relabel and order by the alias', async () => {
+    const sql = 'SELECT nume n1, bursa + 10 plus FROM studenti WHERE an = 1 ORDER BY n1'
+    const stages = await planStages(sql, [{ clause: 'from' }, { clause: 'where' }, { clause: 'select' }, { clause: 'order' }], engine, { dataset: 'facultate', show: ['nume', 'bursa'] })
+    expect(stageOf(stages, 'select').labels).toEqual({ nume: 'n1' })
+    const order = stageOf(stages, 'order')
+    expect(order.rows.map((r) => [r.cells.nume, Number(r.cells.plus)])).toEqual((await rowsOf(sql)).map((r) => [r[0], Number(r[1])]))
+    // with no show list the expressions (not the aliases) are what the master query selects
+    const bare = await planStages('SELECT nume n1 FROM studenti WHERE an = 1', [{ clause: 'where' }], engine, { dataset: 'facultate' })
+    expect(bare[0].columns).toEqual(['nume'])
+  })
+
+  it('set operator results come out in the engine order: sorted without ORDER BY, UNION ALL keeps the lists', async () => {
+    const sql = 'SELECT nume FROM studenti WHERE an = 3 UNION SELECT nume FROM studenti WHERE an = 1'
+    const [u] = await planStages(sql, [{ clause: 'union' }], engine, { dataset: 'facultate', show: ['nume'] })
+    const name = (k) => (u.rows.find((r) => r.key === k) || u.right.find((r) => r.key === k)).cells.nume
+    const names = u.result.map(name)
+    expect(names).toEqual([...names].sort())
+    expect(names).toEqual((await sortedRows(sql)).map((r) => r[0]))
+    const all = 'SELECT nume FROM studenti WHERE an = 3 UNION ALL SELECT nume FROM studenti WHERE an = 1'
+    const [ua] = await planStages(all, [{ clause: 'union-all' }], engine, { dataset: 'facultate', show: ['nume'] })
+    const left = ua.rows.map((r) => r.key)
+    expect(ua.result.slice(0, left.length)).toEqual(left)
+    expect(ua.result.map((k) => (ua.rows.find((r) => r.key === k) || ua.right.find((r) => r.key === k)).cells.nume)).toEqual((await rowsOf(all)).map((r) => r[0]))
+  })
+
+  it('a second query that lacks the block columns never shows invented NULLs', async () => {
+    const sql = 'SELECT nume FROM studenti UNION SELECT titlu_curs FROM cursuri WHERE id_curs > 0'
+    // plans fine as a set operator (the lists come from the select values) ...
+    const [u] = await planStages(sql, [{ clause: 'union' }], engine, { dataset: 'facultate', show: ['nume'] })
+    expect(u.right.length).toBeGreaterThan(0)
+    expect(u.right.every((r) => r.cells.nume !== undefined && r.cells.nume !== null)).toBe(true)
+    // ... but its WHERE cannot be shown row by row
+    await expect(planStages(sql, [{ clause: 'where' }, { clause: 'union' }], engine, { dataset: 'facultate', show: ['nume'] }))
+      .rejects.toMatchObject({ code: 'unsupported' })
+  })
+
+  it('without an engine the plan fails with the unavailable code, and a set operator with ORDER BY is refused', async () => {
+    await expect(planStages('SELECT nume FROM studenti', [{ clause: 'from' }], null, { dataset: 'facultate', show: ['nume'] })).rejects.toMatchObject({ code: 'unavailable' })
+    await expect(planStages('SELECT nume FROM studenti UNION SELECT nume FROM studenti ORDER BY 1', [{ clause: 'union' }], engine, { dataset: 'facultate', show: ['nume'] }))
+      .rejects.toMatchObject({ code: 'unsupported' })
   })
 
   it('predict scoring', async () => {

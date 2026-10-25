@@ -3,6 +3,7 @@ import { AnimatePresence, animate, motion as Motion } from 'motion/react';
 import { useApp } from '../../../contexts/AppContext';
 import { useVizMotion } from './kit.js';
 import { displayCell } from './logic/date-mask.js';
+import { curveReach, underRunEnd } from './logic/wire-geometry.js';
 
 // Frame every widget sits in: stage, live caption, and the manual controls.
 export function VizFrame({ widget, stepper, caption, children, label }) {
@@ -126,8 +127,9 @@ export function Wires({ boxRef, pairs, settle = 0 }) {
         if (row) {
           // Leave the clicked cell by its bottom edge and run along the row's bottom gridline, so the wire never crosses the row's values.
           x1 = ra.left + ra.width / 2 - b.left; y1 = ra.bottom - b.top;
-          const xr = (leftToRight ? row.right : row.left) - b.left;
-          const dx = Math.max(24, Math.abs(x2 - xr) * 0.45) * (leftToRight ? 1 : -1);
+          const wrap = a.closest('.viz-tablewrap')?.getBoundingClientRect() || row;
+          const xr = underRunEnd({ rowLeft: row.left, rowRight: row.right, wrapLeft: wrap.left, wrapRight: wrap.right, leftToRight }) - b.left;
+          const dx = curveReach(x2 - xr) * (leftToRight ? 1 : -1);
           d = `M${x1} ${y1} L${xr} ${y1} C${xr + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`;
         } else {
           x1 = (leftToRight ? ra.right : ra.left) - b.left;

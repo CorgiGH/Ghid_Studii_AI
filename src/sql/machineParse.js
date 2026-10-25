@@ -10,7 +10,8 @@ export class MachineError extends Error {
   }
 }
 
-const SET_OPS = { UNION: 'union', 'UNION ALL': 'union-all', INTERSECT: 'intersect', MINUS: 'minus', EXCEPT: 'minus' }
+// Oracle 11g has no EXCEPT (that is PostgreSQL), so it is not an operator here.
+const SET_OPS = { UNION: 'union', INTERSECT: 'intersect', MINUS: 'minus' }
 const JOIN_MODS = new Set(['INNER', 'LEFT', 'RIGHT', 'FULL', 'CROSS', 'NATURAL', 'OUTER'])
 
 const squash = (s) => s.replace(/\s+/g, ' ').trim()
@@ -47,17 +48,29 @@ function splitTopComma(ts, from, to) {
   return out.filter(([a, b]) => ts.slice(a, b).some(isSig))
 }
 
+// Words that end an expression without being an alias (`bursa IS NULL`, `CASE ... END`, `INTERVAL '1' DAY`).
+const EXPR_END = new Set(['END', 'NULL', 'TRUE', 'FALSE', 'DAY', 'MONTH', 'YEAR', 'HOUR', 'MINUTE', 'SECOND', 'ASC', 'DESC'])
+// Words that cannot be the last operand before an alias.
+const NOT_OPERAND = new Set(['AND', 'OR', 'NOT', 'IS', 'IN', 'LIKE', 'BETWEEN', 'CASE', 'WHEN', 'THEN', 'ELSE', 'AS', 'ON', 'SELECT', 'DISTINCT', 'UNIQUE', 'ALL', 'FROM', 'INTERVAL', 'DATE', 'TIMESTAMP'])
+
+// "expr", "expr AS alias", "expr alias" and "expr AS "Alias"" -> { text, expr, alias }
 function selectItem(ts, a, b) {
   const sig = []
   for (let i = a; i < b; i += 1) if (isSig(ts[i])) sig.push(i)
   let exprEnd = b
   let alias = null
-  if (sig.length >= 3) {
-    const last = ts[sig[sig.length - 1]]
-    const prev = ts[sig[sig.length - 2]]
-    if (isWord(prev, 'AS') && (last.type === 'word' || last.type === 'qident')) {
+  const last = sig.length ? ts[sig[sig.length - 1]] : null
+  const prev = sig.length > 1 ? ts[sig[sig.length - 2]] : null
+  const isName = (x) => x.type === 'qident' || (x.type === 'word' && !EXPR_END.has(x.text.toUpperCase()))
+  if (last && prev && sig.length >= 3 && isWord(prev, 'AS') && (last.type === 'word' || last.type === 'qident')) {
+    alias = last.text.replace(/^"|"$/g, '')
+    exprEnd = sig[sig.length - 2]
+  } else if (last && prev && isName(last)) {
+    const operandEnd = prev.type === 'qident' || prev.type === 'number' || prev.type === 'string' || isSym(prev, ')')
+      || (prev.type === 'word' && !NOT_OPERAND.has(prev.text.toUpperCase()))
+    if (operandEnd) {
       alias = last.text.replace(/^"|"$/g, '')
-      exprEnd = sig[sig.length - 2]
+      exprEnd = sig[sig.length - 1]
     }
   }
   return { text: squash(untokenize(ts.slice(a, b))), expr: squash(untokenize(ts.slice(a, exprEnd))), alias }
@@ -217,21 +230,29 @@ function isEquality(seg) {
 }
 
 // conjuncts("a = b AND c > d") -> [{ text: 'a = b', eq: true }, { text: 'c > d', eq: false }].
+// AND binds tighter than OR, so a condition with an OR outside parentheses is one disjunction and
+// stays whole (`a = b AND c = d OR e > f` is `(a = b AND c = d) OR e > f`, not two conjuncts).
 // An AND inside parentheses or after BETWEEN stays inside its conjunct.
 export function conjuncts(text) {
   const ts = tokenize(String(text || ''))
   const cuts = [-1]
   let d = 0
   let between = 0
+  let hasOr = false
   ts.forEach((x, i) => {
     if (isSym(x, '(')) d += 1
     else if (isSym(x, ')')) d -= 1
     else if (d === 0 && isWord(x, 'BETWEEN')) between += 1
+    else if (d === 0 && isWord(x, 'OR')) hasOr = true
     else if (d === 0 && isWord(x, 'AND')) {
       if (between) between -= 1
       else cuts.push(i)
     }
   })
+  if (hasOr) {
+    const whole = squash(untokenize(ts))
+    return whole ? [{ text: whole, eq: false }] : []
+  }
   cuts.push(ts.length)
   const out = []
   for (let k = 0; k + 1 < cuts.length; k += 1) {
@@ -245,14 +266,8 @@ export function conjuncts(text) {
 // parseQuery(sql) -> { parts: [Select], ops: ['minus', ...], segments: [{ clause, part, text }] }
 export function parseQuery(sql) {
   const ts = tokenize(String(sql).replace(/;\s*$/, ''))
-  const opIdx = topLevel(ts, (x, i) => {
-    if (x.type !== 'word') return false
-    const w = x.text.toUpperCase()
-    if (!(w in SET_OPS) || w === 'UNION ALL') return false
-    // ALL after UNION belongs to the operator; a lone ALL is not an operator
-    void i
-    return true
-  })
+  // UNION ALL is the word UNION followed by ALL, which the loop below folds into one operator.
+  const opIdx = topLevel(ts, (x) => x.type === 'word' && Object.hasOwn(SET_OPS, x.text.toUpperCase()))
   const bounds = []
   let lo = 0
   const ops = []
@@ -262,7 +277,7 @@ export function parseQuery(sql) {
     const nx = nextSigIdx(ts, i)
     if (name === 'UNION' && nx >= 0 && isWord(ts[nx], 'ALL')) { name = 'UNION ALL'; end = nx + 1 }
     bounds.push({ lo, hi: i, opFrom: i, opTo: end })
-    ops.push(SET_OPS[name])
+    ops.push(name === 'UNION ALL' ? 'union-all' : SET_OPS[name])
     lo = end
   }
   bounds.push({ lo, hi: ts.length, opFrom: null, opTo: null })
