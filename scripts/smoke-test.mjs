@@ -91,6 +91,7 @@ function buildRoutes() {
     if (m.seminars > 0) routes.push(`${base}/seminars`);
     if (m.labs > 0) routes.push(`${base}/labs`);
     if (m.testIds.length > 0) routes.push(`${base}/tests`);
+    if (m.lessonPlayer) routes.push(`${base}/review`); // the review tab (Recapitulare) exists only for lesson-player subjects
     for (let i = 1; i <= m.courses; i++) routes.push(`${base}/course_${i}`);
     for (let i = 1; i <= m.labs; i++) routes.push(`${base}/lab_${i}`);
     for (let i = 1; i <= m.seminars; i++) routes.push(`${base}/sem_${i}`);

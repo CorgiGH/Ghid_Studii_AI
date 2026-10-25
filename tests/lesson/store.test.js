@@ -41,17 +41,18 @@ describe('lesson store', () => {
     expect(st.getPosition('a')).toBe(4);
   });
 
-  it('schedules review: miss due now, right +1 day, right +3 days, third right removes', () => {
+  it('schedules review: miss due now, right next day, right 3 days on, third right removes', () => {
+    const local = (d, h = 0) => new Date(2026, 9, d, h, 0).getTime();
     const st = createLessonStore(fakeStorage());
-    st.recordAttempt('q1', miss());
-    const [item] = st.pendingReview(1000);
-    expect(item).toMatchObject({ itemId: 'q1', due: 1000, streak: 0, kind: 'mcq', ref });
-    st.markReview('q1', true, 2000);
-    expect(st.pendingReview(2000)[0]).toMatchObject({ due: 2000 + DAY, streak: 1 });
-    st.markReview('q1', true, 2000 + DAY);
-    expect(st.pendingReview(2000 + DAY)[0]).toMatchObject({ due: 2000 + 4 * DAY, streak: 2 });
-    st.markReview('q1', true, 2000 + 4 * DAY);
-    expect(st.pendingReview(2000 + 4 * DAY)).toEqual([]);
+    st.recordAttempt('q1', miss({ at: local(20, 10) }));
+    const [item] = st.pendingReview(local(20, 10));
+    expect(item).toMatchObject({ itemId: 'q1', due: local(20, 10), streak: 0, kind: 'mcq', ref });
+    st.markReview('q1', true, local(20, 11));
+    expect(st.pendingReview(local(20, 11))[0]).toMatchObject({ due: local(21), streak: 1 });
+    st.markReview('q1', true, local(21, 9));
+    expect(st.pendingReview(local(21, 9))[0]).toMatchObject({ due: local(24), streak: 2 });
+    st.markReview('q1', true, local(24, 9));
+    expect(st.pendingReview(local(24, 9))).toEqual([]);
   });
 
   it('a miss at any point resets the item to due now', () => {
@@ -116,5 +117,86 @@ describe('lesson store', () => {
     expect(st.pendingReview(5000)).toEqual([]);
     expect(st.pendingCount()).toBe(0);
     expect(st.attemptsAt(ref.src, ref.screen)).toHaveLength(1);
+  });
+});
+
+// Final fix wave: two tabs share one storage (item 3), the idempotent review enqueue (item 12) and the midnight schedule (item 19).
+describe('two tabs on one storage', () => {
+  const at = (h, d = 25) => new Date(2026, 9, d, h, 0).getTime();
+  it("A's miss followed by B's answer keeps both attempts and A's review item", () => {
+    const s = fakeStorage();
+    const a = createLessonStore(s);
+    const b = createLessonStore(s);
+    a.setPosition('bd/courses/lesson-02.json', 9);
+    a.recordAttempt('bd-l02-q1', miss({ at: 1 }));
+    b.recordAttempt('bd-l02-q2', { ok: true, hints: 0, kind: 'mcq', ref: { ...ref, screen: 10 }, at: 2 });
+    b.setPosition('bd/courses/lesson-03.json', 4);
+    const saved = JSON.parse(s.getItem(KEY));
+    expect(Object.keys(saved.attempts).sort()).toEqual(['bd-l02-q1', 'bd-l02-q2']);
+    expect(Object.keys(saved.review)).toEqual(['bd-l02-q1']);
+    expect(saved.positions).toEqual({ 'bd/courses/lesson-02.json': 9, 'bd/courses/lesson-03.json': 4 });
+    // and B now sees A's work in memory too
+    expect(b.pendingCount()).toBe(1);
+  });
+
+  it('reload() picks up what another tab wrote and tells the subscribers', () => {
+    const s = fakeStorage();
+    const a = createLessonStore(s);
+    const b = createLessonStore(s);
+    let heard = 0;
+    b.subscribe(() => { heard += 1; });
+    const v0 = b.getVersion();
+    a.recordAttempt('q1', miss());
+    expect(b.pendingCount()).toBe(0);
+    b.reload();
+    expect(b.pendingCount()).toBe(1);
+    expect(heard).toBe(1);
+    expect(b.getVersion()).toBeGreaterThan(v0);
+  });
+
+  it('keeps the in-memory history when reading storage throws', () => {
+    const s = fakeStorage();
+    const st = createLessonStore(s);
+    st.recordAttempt('q1', miss());
+    s.getItem = () => { throw new Error('blocked'); };
+    st.recordAttempt('q2', miss({ at: 2 }));
+    st.setPosition('x.json', 3);
+    expect(st.pendingReview(10).map((i) => i.itemId).sort()).toEqual(['q1', 'q2']);
+    expect(st.getPosition('x.json')).toBe(3);
+  });
+
+  it('keeps the in-memory history when writes fail and storage stays empty (blocked storage)', () => {
+    const s = { getItem: () => null, setItem() { throw new Error('quota'); } };
+    const st = createLessonStore(s);
+    st.recordAttempt('q1', miss());
+    st.recordAttempt('q2', miss({ at: 2 }));
+    expect(st.pendingCount()).toBe(2);
+  });
+
+  it('enqueueReview adds an item once and leaves an existing entry untouched', () => {
+    const st = createLessonStore(fakeStorage());
+    st.recordAttempt('sql1', { ok: true, hints: 1, kind: 'sql', ref, at: 10 });
+    expect(st.pendingCount()).toBe(0);
+    st.enqueueReview('sql1', { ref, kind: 'sql', at: 20 });
+    expect(st.pendingReview(20)[0]).toMatchObject({ itemId: 'sql1', ref, kind: 'sql', due: 20, streak: 0 });
+    st.markReview('sql1', true, 30);
+    const before = st.pendingReview(30)[0];
+    st.enqueueReview('sql1', { ref, kind: 'sql', at: 40 });
+    expect(st.pendingReview(40)[0]).toEqual(before);
+  });
+
+  it('a right answer is due at the local midnight that starts day +1, then day +3', () => {
+    const st = createLessonStore(fakeStorage());
+    st.recordAttempt('q1', miss({ at: at(20) })); // Sunday 25 Oct, 20:00
+    expect(st.pendingReview(at(20))[0].due).toBe(at(20));
+    st.markReview('q1', true, at(21));
+    expect(st.pendingReview(at(21))[0]).toMatchObject({ streak: 1, due: new Date(2026, 9, 26, 0, 0).getTime() });
+    // Monday 08:00: the item counts as due, and a right answer moves it on
+    const monday8 = at(8, 26);
+    expect(st.dueCount(monday8)).toBe(1);
+    st.markReview('q1', true, monday8);
+    expect(st.pendingReview(monday8)[0]).toMatchObject({ streak: 2, due: new Date(2026, 9, 29, 0, 0).getTime() });
+    st.markReview('q1', false, at(9, 27));
+    expect(st.pendingReview(at(9, 27))[0]).toMatchObject({ streak: 0, due: at(9, 27) });
   });
 });
