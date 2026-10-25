@@ -7,8 +7,8 @@ const bd = {
   title: { en: 'Databases', ro: 'Baze de date' },
   shortTitle: { en: 'DB', ro: 'BD' },
   description: {
-    en: 'SQL on Oracle 11g: querying, joins, grouping, subqueries, creating and changing tables',
-    ro: 'SQL pe Oracle 11g: interogări, joncțiuni, grupare, subinterogări, crearea și modificarea tabelelor',
+    en: 'SQL on Oracle 11g (labs 1–4): queries, functions, joins, set operators, creating and changing tables',
+    ro: 'SQL pe Oracle 11g (laboratoarele 1–4): interogări, funcții, joncțiuni, operatori pe mulțimi, crearea și modificarea tabelelor',
   },
   icon: '🗄️',
   courses: [
@@ -48,8 +48,8 @@ const bd = {
       id: 'bd-mock-l1',
       group: 'mock',
       src: 'bd/tests/mock-l1.json',
-      title: { en: 'Mock test: lesson 1 level', ro: 'Test de probă: nivelul Lecției 1' },
-      shortTitle: { en: 'Mock test L1', ro: 'Test de probă L1' },
+      title: { en: 'Mock test: lab test L1 (labs 1–4)', ro: 'Test de probă: lucrarea de laborator L1 (laboratoarele 1–4)' },
+      shortTitle: { en: 'Mock test: lab test L1', ro: 'Test de probă: lucrarea L1' },
     },
   ],
   practice: lazy(() => import('./practice/Practice.jsx')),

@@ -12,7 +12,9 @@ export function allVsSome({ studentsFrom, condition, showMinusByName }, data = D
       const grades = data.note.filter(n => n.nr_matricol === s.nr_matricol).map(n => n.valoare);
       const bad = grades.map(g => evalWhere(condition, { valoare: g }) === true);
       const some = bad.some(Boolean);
-      return { student: s, grades, bad, some, all: !some };
+      // the grade the SOME column shows: the first one that meets the condition, or null when there is none
+      const counterexample = some ? grades[bad.indexOf(true)] : null;
+      return { student: s, grades, bad, some, counterexample, all: !some };
     })
     .filter(r => r.grades.length > 0);
   // "no grade breaks the condition" as MINUS on (nume, prenume): the names of students with

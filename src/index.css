@@ -414,11 +414,19 @@ body {
 .viz-ghost-cell { padding: 4px 8px; border-radius: 8px; border: 1px dashed var(--lt-drop); background: var(--lt-drop-soft); font-size: 0.8125rem; }
 .viz-ghost-cell.bad { border-style: solid; font-weight: 700; color: var(--lt-drop); }
 
+/* The row grids share one set of columns (subgrid), sized by their content, so 4 columns fit a phone without cutting a
+   date at the scroller's edge; without subgrid every column is at least 84px and the table scrolls sideways. */
 .viz-dtable { min-width: 100%; width: max-content; }
 .viz-dt-body { max-height: 15rem; overflow-y: auto; position: relative; }
-.viz-dt-row { display: grid; gap: 8px; padding: 4px 8px; border-bottom: 1px solid color-mix(in srgb, var(--lt-line) 50%, transparent); font-size: 0.8125rem; font-variant-numeric: tabular-nums; transition: background 0.3s ease; background: var(--theme-card-bg); }
+.viz-dt-row { display: grid; grid-template-columns: repeat(var(--dt-cols, 1), minmax(84px, 1fr)); gap: 8px; padding: 4px 8px; border-bottom: 1px solid color-mix(in srgb, var(--lt-line) 50%, transparent); font-size: 0.8125rem; font-variant-numeric: tabular-nums; transition: background 0.3s ease; background: var(--theme-card-bg); }
 .viz-dt-row.head { font-weight: 600; color: var(--theme-muted-text); position: sticky; top: 0; z-index: 1; }
 .viz-dt-row.doomed { background: var(--lt-drop-soft); color: var(--lt-drop); }
+@supports (grid-template-columns: subgrid) {
+  .viz-dtable { display: grid; grid-template-columns: repeat(var(--dt-cols, 1), auto); column-gap: 8px; }
+  .viz-dtable > .viz-dt-row, .viz-dt-body, .viz-dt-body > .viz-dt-row { grid-column: 1 / -1; grid-template-columns: subgrid; }
+  .viz-dt-body { display: grid; align-content: start; }
+  .viz-dt-body > .viz-emptyrows { grid-column: 1 / -1; }
+}
 
 /* LIKE */
 .viz-like { display: flex; flex-direction: column; gap: 10px; }
@@ -482,13 +490,15 @@ body {
 
 /* number line */
 .viz-lines { display: flex; flex-direction: column; gap: 22px; }
-.viz-line-track { position: relative; height: 82px; margin: 0 18px; }
-.viz-line-axis { position: absolute; left: -12px; right: -12px; top: 44px; height: 2px; background: var(--lt-line); border-radius: 2px; }
-.viz-tick { position: absolute; top: 38px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.viz-line-track { position: relative; height: 82px; margin: 0 18px; --nl-lift: 0px; }
+/* a line whose result can land within one mark of the value keeps room above the axis, so the source pill can move up */
+.viz-line-track.crowded { height: 108px; --nl-lift: 26px; }
+.viz-line-axis { position: absolute; left: -12px; right: -12px; top: calc(44px + var(--nl-lift)); height: 2px; background: var(--lt-line); border-radius: 2px; }
+.viz-tick { position: absolute; top: calc(38px + var(--nl-lift)); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .viz-tick i { width: 2px; height: 14px; background: var(--theme-muted-text); border-radius: 1px; }
 .viz-tick span { font-size: 0.75rem; color: var(--theme-muted-text); font-variant-numeric: tabular-nums; }
 button.viz-tick { background: none; border: 0; padding: 0 6px 4px; margin: 0; font: inherit; cursor: default; }
-button.viz-tick.can-pick { cursor: pointer; border-radius: 10px; min-width: 40px; min-height: 44px; top: 34px; justify-content: flex-start; }
+button.viz-tick.can-pick { cursor: pointer; border-radius: 10px; min-width: 40px; min-height: 44px; top: calc(34px + var(--nl-lift)); justify-content: flex-start; }
 button.viz-tick.can-pick i { height: 18px; width: 3px; background: var(--lt-acc); }
 button.viz-tick.can-pick span { color: var(--lt-acc); font-weight: 700; }
 button.viz-tick.can-pick.sel { background: var(--lt-acc-soft); box-shadow: inset 0 0 0 2px var(--lt-acc); }
@@ -498,9 +508,12 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-tick.wrong i { background: var(--lt-drop); width: 3px; } .viz-tick.wrong span { color: var(--lt-drop); font-weight: 700; text-decoration: line-through; }
 .viz-numline-show { align-self: flex-start; margin-top: 10px; }
 .viz-dot-src, .viz-dot-res { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
-.viz-dot-src { top: 4px; } .viz-dot-res { top: 4px; z-index: 2; }
+.viz-dot-src { top: calc(4px + var(--nl-lift)); transition: top 0.25s ease; } .viz-dot-res { top: calc(4px + var(--nl-lift)); z-index: 2; }
 .viz-dot-src span, .viz-dot-res span { padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.8125rem; font-variant-numeric: tabular-nums; color: #fff; background: var(--lt-acc); }
 .viz-dot-src::after, .viz-dot-res::after { content: ''; width: 2px; height: 28px; background: var(--lt-acc); }
+.viz-dot-src::after { transition: height 0.25s ease; }
+/* the result landed within one mark: the source pill moves up on a longer stem, so neither pill hides the other */
+.viz-dot-src.lift { top: 4px; } .viz-dot-src.lift::after { height: calc(28px + var(--nl-lift)); }
 .viz-dot-res span { background: var(--lt-keep); } .viz-dot-res::after { background: var(--lt-keep); height: 32px; }
 .viz-dot-src { opacity: 0.75; }
 .dark .viz-dot-src span, .dark .viz-dot-res span { color: #0b1020; }
@@ -637,6 +650,7 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-pipe-row { display: flex; align-items: center; gap: 0; }
 .viz-type-node { padding: 6px 10px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; font-family: ui-monospace, monospace; border: 1.5px solid var(--lt-line); background: var(--lt-surface); z-index: 1; }
 .viz-type-node.to { border-color: var(--lt-keep); background: var(--lt-keep-soft); }
+.viz-type-node.to.unknown { border-color: var(--lt-line); border-style: dashed; background: var(--lt-surface); color: var(--theme-muted-text); min-width: 3.5em; text-align: center; }
 .viz-pipe-tube { position: relative; flex: 1; height: 30px; margin: 0 -2px; border-top: 2px solid var(--lt-line); border-bottom: 2px solid var(--lt-line); background: linear-gradient(to bottom, transparent 40%, var(--lt-acc-soft) 40% 60%, transparent 60%); min-width: 90px; }
 .viz-pipe-token { position: absolute; top: 50%; left: 0; transform: translateY(-50%); padding: 3px 10px; border-radius: 999px; font-size: 0.8125rem; font-weight: 700; white-space: nowrap; background: var(--lt-acc); color: #fff; max-width: 100%; margin-top: 0; }
 .dark .viz-pipe-token { color: #0b1020; }
@@ -719,7 +733,7 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .viz-ball2.src.used { opacity: 0.5; }
 .viz-ball2.dest { box-shadow: 0 3px 8px -4px rgba(0, 0, 0, 0.4); z-index: 1; }
 .viz-balls-divider { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px dashed var(--lt-line); }
-.viz-balls-divider span { position: absolute; right: 0; top: -9px; padding: 0 6px; font-size: 0.6875rem; font-weight: 700; color: var(--theme-muted-text); background: color-mix(in srgb, var(--theme-card-bg) 96%, var(--theme-border)); }
+.viz-balls-divider span { position: absolute; right: 0; top: -9px; z-index: 3; padding: 0 6px; border-radius: 6px; font-size: 0.6875rem; font-weight: 700; line-height: 18px; color: var(--theme-muted-text); background: var(--theme-card-bg); }
 
 @media (max-width: 640px) {
   .viz { padding: 12px 10px; }
@@ -731,6 +745,10 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
   .viz-like-body { padding-right: 0; padding-top: 52px; }
   .viz-stamp { right: 0; top: -2px; }
   .viz-avs-head, .viz-avs-row { grid-template-columns: minmax(84px, 1fr) minmax(0, 1.6fr) 36px 36px; }
+  /* nine dots (table-build: a step per column) fit between Back and "Mai departe" on a phone */
+  .viz-progress { gap: 4px; }
+  .viz-dot { width: 6px; height: 6px; }
+  .viz-dot.on { width: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .viz *, .viz *::before, .viz *::after { transition: none !important; animation: none !important; }

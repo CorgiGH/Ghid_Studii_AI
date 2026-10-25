@@ -1,5 +1,6 @@
 import { parseDT, daysInMonth, toUTC } from './common.js';
 import { calendar } from './calendar-clock.js';
+import { formatDate } from './date-mask.js';
 
 const dayFrac = (o) => (o.h * 3600 + o.mi * 60 + o.s) / 86400;
 
@@ -20,6 +21,12 @@ export function ageParts({ birth, today }, months = monthsBetween(today, birth))
   const anchor = calendar(birth, { fn: 'ADD_MONTHS', arg: whole });
   const days = Math.floor((toUTC(parseDT(today)) - toUTC(parseDT(anchor))) / 86400000);
   return { years: Math.trunc(whole / 12), months: whole % 12, days, wholeMonths: whole, anchor };
+}
+
+// The dates as Oracle prints them by default (DD-MON-RR): the birth, today and the ADD_MONTHS anchor of the days arc.
+const oracleDate = (iso) => formatDate(iso, 'DD-MON-RR').text;
+export function ageLabels({ birth, today }, parts) {
+  return { birth: oracleDate(birth), today: oracleDate(today), anchor: oracleDate(parts.anchor) };
 }
 
 // The step on which each arc appears, and the step on which the yearly birthday ticks light up:

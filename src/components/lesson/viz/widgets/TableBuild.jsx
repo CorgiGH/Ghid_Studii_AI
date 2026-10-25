@@ -11,10 +11,11 @@ export default function TableBuild({ props, predict }) {
   const b = tableBuild(props.table, props.columns);
   const s = useStepper(b.count, { predict });
   const k = s.step;
-  const col = props.columns[k - 1];
-  const caption = k === 0
+  const phase = b.phaseAt(k);
+  const col = phase.col;
+  const caption = phase.kind === 'empty'
     ? t(`An empty frame named ${props.table}. Columns come first, rows later.`, `Un cadru gol numit ${props.table}. Mai întâi coloanele, rândurile vin după.`)
-    : k < props.columns.length
+    : phase.kind === 'column'
       ? t(`Column ${col.name}: it can only hold ${col.type}${col.notNull ? ', and it can never be empty' : ''}.`, `Coloana ${col.name}: poate ține doar ${col.type}${col.notNull ? ' și nu poate rămâne goală' : ''}.`)
       : t(`The table exists, with no rows yet: ${props.columns.length} columns, 0 rows.`, `Tabelul există, încă fără rânduri: ${props.columns.length} coloane, 0 rânduri.`);
   return (
@@ -36,7 +37,7 @@ export default function TableBuild({ props, predict }) {
             </AnimatePresence>
             {k === 0 && <div className="viz-empty">{t('no columns yet', 'încă nicio coloană')}</div>}
           </div>
-          {k >= props.columns.length && <div className="viz-emptyrows">{t('0 rows', '0 rânduri')}</div>}
+          {phase.kind === 'done' && <div className="viz-emptyrows">{t('0 rows', '0 rânduri')}</div>}
         </div>
       </div>
     </VizFrame>

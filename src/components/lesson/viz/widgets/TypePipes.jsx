@@ -3,7 +3,7 @@ import { AnimatePresence, motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { typePipes } from '../logic/type-pipes.js';
+import { pipeTarget, typePipes } from '../logic/type-pipes.js';
 import { typePipesSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -61,7 +61,7 @@ export default function TypePipes({ props, predict }) {
                   )}
                   {!done && <span className="viz-pipe-token waiting">{c.value}</span>}
                 </div>
-                <span className="viz-type-node to">{c.to}</span>
+                <span className={`viz-type-node to${done ? '' : ' unknown'}`}>{pipeTarget(c, done)}</span>
               </div>
             </div>
           );

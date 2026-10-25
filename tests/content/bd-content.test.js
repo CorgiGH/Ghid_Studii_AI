@@ -99,6 +99,38 @@ describe('text sweep', () => {
     expect(sql("SELECT NEXT_DAY('13-OCT-15', 'TUESDAY') FROM dual")).toMatch(/4\.1\.14/);
     expect(sql("SELECT NEXT_DAY(TO_DATE('13-10-2015', 'DD-MM-YYYY'), 'TUESDAY') FROM dual")).toBe('');
   });
+  it('catches a phase name that ends in a Romanian letter ("fază")', () => {
+    const ro = (text) => sweepNode({ content: { en: 'x', ro: text } }, 't').map((f) => f.rule).join();
+    expect(ro('În această fază scrii singur interogarea.')).toMatch(/faza/);
+    expect(ro('Faza 2')).toMatch(/faza/);
+    expect(ro('Fazele lunii nu au legătură cu SQL.')).toMatch(/faza/);
+    expect(ro('Frazele de mai jos sunt corecte.')).toBe('');
+  });
+  it('catches a capitalised English word in a Romanian string, but not an SQL keyword in capitals', () => {
+    const ro = (text) => sweepNode({ content: { en: 'x', ro: text } }, 't').map((f) => f.rule).join();
+    expect(ro('Show numele studenților.')).toMatch(/English word in Romanian text: "Show"/);
+    expect(ro('The numele studenților.')).toMatch(/English word/);
+    expect(ro('Folosește IS NULL, nu = NULL, și leagă condițiile cu AND sau OR; NOT schimbă rezultatul.')).toBe('');
+    expect(ro('Comanda CREATE TABLE creează tabelul.')).toBe('');
+  });
+  it('catches a bare "Încearcă singur" used as a label', () => {
+    const ro = (text) => sweepNode({ content: { en: 'x', ro: text } }, 't').map((f) => f.rule).join();
+    expect(ro('Încearcă singur')).toMatch(/Încearcă/);
+    expect(ro('**Încearcă singur**\nScrie interogarea pentru anul 2.')).toMatch(/Încearcă/);
+    expect(ro('Rezolvă exercițiul de mai jos.\nÎncearcă singur')).toMatch(/Încearcă/);
+    expect(ro('Încearcă singur. Scrie interogarea pentru anul 2.')).toMatch(/Încearcă/);
+    expect(ro('Încearcă singur Scrie interogarea pentru anul 2.')).toMatch(/Încearcă/);
+    expect(ro('Încearcă singur să scrii interogarea, apoi compară.')).toBe('');
+    expect(ro('Încearcă să scrii interogarea înainte de indiciu.')).toBe('');
+  });
+  it('catches a text literal followed by TO_CHAR with no || (outline 4.1.12)', () => {
+    const sql = (code) => sweepNode({ solution: code }, 't').map((f) => f.rule).join();
+    expect(sql("SELECT 'Este o zi frumoasa de ' TO_CHAR(SYSDATE, 'Day') FROM dual")).toMatch(/4\.1\.12/);
+    expect(sql("SELECT 'Azi este '\n       TO_CHAR(SYSDATE, 'DD.MM.YYYY') FROM dual")).toMatch(/4\.1\.12/);
+    expect(sql("SELECT 'Este o zi frumoasa de ' || TO_CHAR(SYSDATE, 'Day') FROM dual")).toBe('');
+    expect(sql("SELECT TO_CHAR(SYSDATE, 'DD') AS zi, TO_CHAR(SYSDATE, 'MM') FROM dual")).toBe('');
+    expect(sql("SELECT CASE WHEN bursa IS NULL THEN 'fara' ELSE TO_CHAR(bursa) END FROM studenti")).toBe('');
+  });
 });
 
 describe('query machines', () => {

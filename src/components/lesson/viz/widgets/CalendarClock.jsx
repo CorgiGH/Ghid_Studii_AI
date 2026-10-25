@@ -3,7 +3,7 @@ import { AnimatePresence, animate, motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { calendarSteps, opLabel, oracleDisplay } from '../logic/calendar-clock.js';
+import { calendarSteps, opLabel, oracleDisplay, plusCaption } from '../logic/calendar-clock.js';
 import { calendarSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 import { parseDT, daysInMonth, weekday, MONTHS } from '../logic/common.js';
@@ -80,7 +80,7 @@ export default function CalendarClock({ props, predict }) {
   const caption = k === 0
     ? t('The starting moment. Dates carry a time of day; the clock shows it.', 'Momentul de plecare. Datele au și o oră; ceasul o arată.')
     : ({
-      '+': t(`Adding a number moves the date by that many days; a fraction moves the clock (${op.arg}).`, `Un număr adunat mută data cu atâtea zile; o fracție mută ceasul (${op.arg}).`),
+      '+': t(plusCaption(op.arg).en, plusCaption(op.arg).ro),
       ADD_MONTHS: t('ADD_MONTHS moves whole months. If the day does not exist there, it lands on the last day. From a last day it always lands on a last day.', 'ADD_MONTHS mută luni întregi. Dacă ziua nu există acolo, ajunge pe ultima zi. Din ultima zi a unei luni ajunge mereu pe ultima zi.'),
       LAST_DAY: t('LAST_DAY jumps to the last day of the month; the time stays.', 'LAST_DAY sare la ultima zi a lunii; ora rămâne.'),
       NEXT_DAY: t(`NEXT_DAY goes to the next ${op.arg} strictly after this date; the time stays.`, `NEXT_DAY merge la următoarea zi ${op.arg}, strict după această dată; ora rămâne.`),
