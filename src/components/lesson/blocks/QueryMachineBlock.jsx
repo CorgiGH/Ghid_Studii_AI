@@ -31,6 +31,14 @@ const CLAUSE_HINT = {
   intersect: { en: 'INTERSECT: only the rows both queries return.', ro: 'INTERSECT: doar rândurile pe care le dau ambele interogări.' },
   minus: { en: 'MINUS: the rows of the first query that the second does not return.', ro: 'MINUS: rândurile primei interogări pe care a doua nu le dă.' },
 };
+// "1 rând", "13 rânduri", "42 de rânduri" (Romanian puts "de" before 20+ unless the last two digits are 01-19).
+const unit = (n, t, one, many) => {
+  if (n === 1) return t(one.en, one.ro);
+  const de = n > 0 && (n % 100 === 0 || n % 100 >= 20) ? 'de ' : '';
+  return t(many.en, `${de}${many.ro}`);
+};
+const ROWS = [{ en: 'row', ro: 'rând' }, { en: 'rows', ro: 'rânduri' }];
+const PAIRS = [{ en: 'pair', ro: 'pereche' }, { en: 'pairs', ro: 'perechi' }];
 const NEW_LINE = new Set(['from', 'join', 'where', 'order', 'union', 'union-all', 'intersect', 'minus']);
 
 const Html = ({ as = 'span', className, text }) => (
@@ -228,17 +236,17 @@ function Meta({ view, tick }) {
     parts.push(<span key="b">{t('Second list', 'A doua listă')} {mt.rightDistinct}</span>);
     if (view.phase === 'show') parts.push(<span key="c" className="qm-meta-strong">{t('Result', 'Rezultat')} <CountUp key={`r${tick}`} from={mt.leftDistinct} to={mt.to} /></span>);
   } else if (view.ask) {
-    parts.push(<span key="n">{mt.count} {view.clause === 'join' ? t('pairs', 'perechi') : t('rows', 'rânduri')}</span>);
+    parts.push(<span key="n">{mt.count} {view.clause === 'join' ? unit(mt.count, t, ...PAIRS) : unit(mt.count, t, ...ROWS)}</span>);
   } else if (view.clause === 'join' && mt.tables && mt.product && mt.tables.length === 2) {
-    parts.push(<span key="p">{mt.tables.map((x) => x.count).join(' × ')} = {mt.product} {t('pairs', 'perechi')}</span>);
-    parts.push(<span key="r" className="qm-meta-strong"><CountUp key={`j${tick}`} from={mt.product} to={mt.to} duration={0.7} /> {t('rows', 'rânduri')}</span>);
+    parts.push(<span key="p">{mt.tables.map((x) => x.count).join(' × ')} = {mt.product} {unit(mt.product, t, ...PAIRS)}</span>);
+    parts.push(<span key="r" className="qm-meta-strong"><CountUp key={`j${tick}`} from={mt.product} to={mt.to} duration={0.7} /> {unit(mt.to, t, ...ROWS)}</span>);
   } else if (view.clause === 'from' && mt.tables && mt.tables.length === 2 && mt.tables[1].kind === 'inner') {
-    parts.push(<span key="a">{mt.tables[0].name}: {mt.tables[0].count} {t('rows', 'rânduri')}</span>);
-    parts.push(<span key="b">{mt.tables[1].name}: {mt.tables[1].count} {t('rows', 'rânduri')}</span>);
+    parts.push(<span key="a">{mt.tables[0].name}: {mt.tables[0].count} {unit(mt.tables[0].count, t, ...ROWS)}</span>);
+    parts.push(<span key="b">{mt.tables[1].name}: {mt.tables[1].count} {unit(mt.tables[1].count, t, ...ROWS)}</span>);
   } else if (mt.from !== undefined && mt.from !== mt.to) {
-    parts.push(<span key="n" className="qm-meta-strong"><CountUp key={`c${tick}`} from={mt.from} to={mt.to} duration={0.7} /> {t('rows', 'rânduri')}</span>);
+    parts.push(<span key="n" className="qm-meta-strong"><CountUp key={`c${tick}`} from={mt.from} to={mt.to} duration={0.7} /> {unit(mt.to, t, ...ROWS)}</span>);
   } else {
-    parts.push(<span key="n">{mt.to} {t('rows', 'rânduri')}</span>);
+    parts.push(<span key="n">{mt.to} {unit(mt.to, t, ...ROWS)}</span>);
   }
   return <div className="qm-meta" aria-live="polite">{parts}</div>;
 }

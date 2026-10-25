@@ -171,6 +171,8 @@ async function answerScreen(page, step, ctx) {
       const idx = block.options.findIndex((o) => o.correct)
       const sel = `[data-testid=lesson-screen] [data-testid=mcq-option-${idx}]`
       if (!(await page.$(sel))) { fails.push(`mcq ${block.id}: option ${idx} not found`); continue }
+      // the options wait for the question's tables to load
+      if (!(await waitFor(page, (s) => { const b = document.querySelector(s); return !!b && !b.disabled }, sel, ENGINE_WAIT_MS))) { fails.push(`mcq ${block.id}: options never unlocked (question tables did not load)`); continue }
       await clickEl(page, sel)
       const ok = await waitFor(page, () => !!document.querySelector('[data-testid=mcq-explain]'), null, 5000)
       if (!ok) fails.push(`mcq ${block.id}: no explanation after the answer`)

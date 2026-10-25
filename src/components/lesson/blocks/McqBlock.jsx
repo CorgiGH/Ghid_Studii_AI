@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { AnimatePresence, motion as Motion, useReducedMotion } from 'motion/react';
 import { useApp } from '../../../contexts/AppContext';
 import formatMarkdown from '../../blocks/formatMarkdown';
@@ -30,9 +30,13 @@ export default function McqBlock({ id, question, table, options, record = true, 
   const [picked, setPicked] = useState(restored);
   const answered = useRef(restored !== null);
   const qid = `mcq-${id}`;
+  // The options wait for the question's tables (QuestionTables onReady), so a late table cannot shift them mid-tap.
+  const [tablesReady, setTablesReady] = useState(!table);
+  const onTablesReady = useCallback(() => setTablesReady(true), []);
+  const waiting = !tablesReady && restored === null;
 
   const pick = (i) => {
-    if (answered.current) return;
+    if (answered.current || waiting) return;
     answered.current = true;
     const opt = options[i];
     setPicked(i);
@@ -50,7 +54,7 @@ export default function McqBlock({ id, question, table, options, record = true, 
   return (
     <div className="ch ch-mcq" role="group" aria-labelledby={qid} data-testid="mcq-block">
       <Html as="p" id={qid} className="ch-q" text={t(question.en, question.ro)} />
-      <QuestionTables table={table} />
+      <QuestionTables table={table} onReady={onTablesReady} />
       <ul className="ch-opts">
         {options.map((o, i) => {
           const state = !done ? '' : i === picked ? (o.correct ? ' is-right' : ' is-wrong') : (i === right && !shown.correct ? ' is-key' : ' is-dim');
@@ -59,7 +63,8 @@ export default function McqBlock({ id, question, table, options, record = true, 
               <button
                 type="button"
                 className={`ch-opt${state}`}
-                aria-disabled={done}
+                aria-disabled={done || waiting}
+                disabled={waiting}
                 aria-pressed={done ? i === picked : undefined}
                 data-testid={`mcq-option-${i}`}
                 data-correct={done ? String(!!o.correct) : undefined}
