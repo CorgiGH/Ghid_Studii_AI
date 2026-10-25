@@ -113,8 +113,8 @@
           "type": "callout",
           "variant": "trap",
           "content": {
-            "en": "**`YY` uses the current century, `RR` guesses the century.** `TO_DATE('17-02-95','DD-MM-YY')` is in the year 2095, because `YY` takes the century of the current year. With the `RR` mask you get 1995. Even more: if you write `TO_DATE('26-10-2026')` without a mask, Oracle uses the session default format (`DD-MON-RR`) and raises an error.",
-            "ro": "**`YY` pune secolul curent, `RR` ghicește secolul.** `TO_DATE('17-02-95','DD-MM-YY')` este în anul 2095, pentru că `YY` ia secolul anului curent. Cu masca `RR` obții 1995. Mai mult: dacă scrii `TO_DATE('26-10-2026')` fără mască, Oracle folosește formatul implicit al sesiunii (`DD-MON-RR`) și dă eroare."
+            "en": "**`YY` uses the current century, `RR` picks the century from the year.** `TO_DATE('17-02-95','DD-MM-YY')` is in the year 2095, because `YY` takes the century of the current year. `RR` picks the century from the two digits: now, in 2026, 00-49 means 2000-2049 and 50-99 means 1950-1999. That is why the `RR` mask gives 1995. Even more: if you write `TO_DATE('26-10-2026')` without a mask, Oracle uses the session default format (`DD-MON-RR`) and raises an error.",
+            "ro": "**`YY` pune secolul curent, `RR` alege secolul după an.** `TO_DATE('17-02-95','DD-MM-YY')` este în anul 2095, pentru că `YY` ia secolul anului curent. `RR` alege secolul după cele două cifre: acum, în 2026, 00-49 înseamnă 2000-2049, iar 50-99 înseamnă 1950-1999. De aceea, cu masca `RR` obții 1995. Mai mult: dacă scrii `TO_DATE('26-10-2026')` fără mască, Oracle folosește formatul implicit al sesiunii (`DD-MON-RR`) și dă eroare."
           }
         },
         {
@@ -321,8 +321,8 @@
                 "ro": "D"
               },
               {
-                "en": "6 (Sunday = 1)",
-                "ro": "6 (duminica = 1)"
+                "en": "6: Friday is day 6 of the week, because here the week starts on Sunday (Sunday = 1); with other regional settings it starts on Monday",
+                "ro": "6: vineri e a 6-a zi din săptămână, pentru că aici săptămâna începe duminica (duminica = 1); cu alte setări regionale începe lunea"
               }
             ]
           ]
@@ -362,8 +362,8 @@
           "type": "reflect",
           "id": "bd-l14-r2",
           "prompt": {
-            "en": "Why does `ORDER BY TO_CHAR(data_nastere, 'MONTH')` put AUGUST before JANUARY?",
-            "ro": "De ce `ORDER BY TO_CHAR(data_nastere, 'MONTH')` pune AUGUST înainte de JANUARY?"
+            "en": "Below, the students are sorted with `ORDER BY TO_CHAR(data_nastere, 'MONTH')`, and AUGUST comes out before JANUARY. Why?",
+            "ro": "Mai jos, studenții sunt sortați cu `ORDER BY TO_CHAR(data_nastere, 'MONTH')`, iar AUGUST iese înaintea lui JANUARY. De ce?"
           },
           "placeholder": {
             "en": "Write what you think, even if you are not sure",
@@ -375,10 +375,10 @@
           },
           "table": {
             "dataset": "facultate",
-            "sql": "SELECT nr_matricol, nume, data_nastere FROM studenti ORDER BY nr_matricol",
+            "sql": "SELECT nume, data_nastere, TO_CHAR(data_nastere, 'MONTH') AS luna FROM studenti ORDER BY TO_CHAR(data_nastere, 'MONTH'), nr_matricol",
             "caption": {
-              "en": "The studenti table (name and birth date)",
-              "ro": "Tabelul studenti (numele și data nașterii)"
+              "en": "The studenti table, sorted by the month written in letters",
+              "ro": "Tabelul studenti, sortat după luna scrisă cu litere"
             }
           }
         }
@@ -858,7 +858,7 @@
             "lab": 2,
             "ex": 5
           },
-          "starter": "SELECT nume, prenume, data_nastere\nFROM studenti\nWHERE data_nastere BETWEEN ____ AND ____",
+          "starter": "SELECT nume, prenume, data_nastere\nFROM studenti\nWHERE data_nastere BETWEEN ____ AND ____\nORDER BY ____",
           "solution": "SELECT nume, prenume, data_nastere FROM studenti WHERE data_nastere BETWEEN TO_DATE('01-01-1995', 'DD-MM-YYYY') AND TO_DATE('10-06-1997', 'DD-MM-YYYY') ORDER BY an DESC, nume, prenume, data_nastere",
           "check": {
             "order": "required",
@@ -934,8 +934,8 @@
               "ro": "`WHERE bursa IS NULL`, apoi `ORDER BY TO_CHAR(data_nastere, '...')`. Pentru ordinea din calendar ai nevoie de numărul lunii, nu de numele ei."
             },
             {
-              "en": "The column you display and the key you sort by are two different `TO_CHAR` calls with two different masks. If you sorted by the month name, APRIL would come before FEBRUARY, so the sort key must be a number. Give the displayed one the alias `luna`.",
-              "ro": "Coloana pe care o afișezi și cheia după care sortezi sunt două apeluri `TO_CHAR` diferite, cu două măști diferite. Dacă ai sorta după numele lunii, APRIL ar veni înaintea lui FEBRUARY, deci cheia de sortare trebuie să fie un număr. Aliasul `luna` îl primește coloana afișată."
+              "en": "The column you display and the key you sort by are two different `TO_CHAR` calls with two different masks. If you sorted by the month name, APRIL would come before FEBRUARY. So you sort by the month written with two digits, from '01' to '12': it is still text, but with the leading zero it sorts in calendar order. Give the displayed one the alias `luna`.",
+              "ro": "Coloana pe care o afișezi și cheia după care sortezi sunt două apeluri `TO_CHAR` diferite, cu două măști diferite. Dacă ai sorta după numele lunii, APRIL ar veni înaintea lui FEBRUARY. Sortezi deci după luna scrisă cu două cifre, de la '01' la '12': e tot text, dar cu zero în față se ordonează ca în calendar. Aliasul `luna` îl primește coloana afișată."
             }
           ],
           "explain": {
@@ -977,12 +977,12 @@
               "ro": "Aceeași funcție ca pentru ziua în engleză, dar cu un argument în plus pentru limbă."
             },
             {
-              "en": "`TO_CHAR(data_nastere, 'fmDay', '...')`; the third argument is an NLS setting.",
-              "ro": "`TO_CHAR(data_nastere, 'fmDay', '...')`; al treilea argument este o setare NLS."
+              "en": "`TO_CHAR(data_nastere, 'fmDay', 'NLS_DATE_LANGUAGE=...')`: in place of the dots you write the name of the language, in English, in capitals.",
+              "ro": "`TO_CHAR(data_nastere, 'fmDay', 'NLS_DATE_LANGUAGE=...')`: în locul punctelor scrii numele limbii, în engleză, cu majuscule."
             },
             {
-              "en": "The trap is the padding: without the two-letter prefix, `Vineri` would come out followed by spaces, because the names are padded in Romanian too. The third argument is a text of the form `PARAMETER=VALUE`, where the parameter is the NLS one for the language of date names.",
-              "ro": "Capcana este umplutura: fără prefixul de două litere, `Vineri` ar ieși urmat de spații, fiindcă numele se completează și în română. Al treilea argument este un text de forma `PARAMETRU=VALOARE`, unde parametrul este cel NLS pentru limba numelor din date."
+              "en": "The trap is the padding: without the two-letter prefix, `Vineri` would come out followed by spaces, because the names are padded in Romanian too. And the language name is written in English: `ROMANIAN`, not `ROMANA`.",
+              "ro": "Capcana este umplutura: fără prefixul de două litere, `Vineri` ar ieși urmat de spații, fiindcă numele se completează și în română. Iar numele limbii se scrie în engleză: `ROMANIAN`, nu `ROMANA`."
             }
           ],
           "explain": {
