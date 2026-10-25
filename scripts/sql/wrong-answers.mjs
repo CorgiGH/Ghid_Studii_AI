@@ -2,10 +2,12 @@
 //
 //   node scripts/sql/wrong-answers.mjs [--content src/content/bd/courses] [--out <file>]
 //
-// A wrong answer is the reference solution changed in one small, classic way (a missing condition, an off-by-one number, no
-// DISTINCT, a flipped comparison ...). Each candidate is run on the engine against the frozen Oracle answer and kept only when the
-// checker does NOT call it correct, so the walk can rely on "a wrong answer is graded wrong". Exercises where no candidate
-// works are listed in the output under `none`. Writes { [id]: { name, sql } }.
+// The wrong answer of an exercise is its named mistake from scripts/sql/named-mistakes.json: the classic error its hints, its
+// explanation or the outline's trap name (no TRIM on a CHAR column, = NULL, swapped BETWEEN ends, no parentheses ...). Each one is
+// graded on the lab dataset and on the hidden one against the frozen Oracle answers; the walk gets the first that neither dataset
+// grades as correct and that is a real verdict (not just an ORA error). A generic mutation of the solution (drop the WHERE ...)
+// is only the fallback for an exercise with no usable named mistake, and is listed under `fallback`.
+// Writes { answers: { [id]: { name, sql, source, visible, hidden } }, fallback: [ids], none: [ids] }.
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -22,6 +24,8 @@ const vite = await createServer({ configFile: false, root: ROOT, appType: 'custo
 try {
   const lib = await vite.ssrLoadModule('/scripts/sql/freeze-lib.mjs')
   const { checkResult } = await vite.ssrLoadModule('/src/sql/check.js')
+  const mlib = await vite.ssrLoadModule('/scripts/sql/mistakes-lib.mjs')
+  const named = mlib.loadNamedMistakes()
   const { splitScript } = await vite.ssrLoadModule('/src/sql/engine/script.js')
   const engineFor = lib.engineCache()
 
@@ -46,7 +50,15 @@ try {
   const items = lib.collectExercises(contentDir)
   const out = {}
   const none = []
+  const fallback = []
+  const caught = (k) => k !== 'correct' && k !== 'error'
   for (const item of items.filter((i) => i.id.startsWith('bd-l'))) {
+    let pick = null
+    for (const m of (named[item.id] ?? []).filter((x) => !x.trap)) {
+      const g = await mlib.gradeMistake(item, m, engineFor)
+      if (caught(g.visible) && caught(g.hidden)) { pick = { name: m.name, sql: m.sql, source: 'named', visible: g.visible, hidden: g.hidden }; break }
+    }
+    if (pick) { out[item.id] = pick; continue }
     const clock = lib.clockOf(item.clock)
     const expected = JSON.parse(fs.readFileSync(lib.expectedFile(lib.DEFAULT_EXPECTED_DIR, item.id, item.dataset), 'utf8'))
     const spec = lib.specOf(item)
@@ -75,12 +87,12 @@ try {
       }
       if (!verdict.ok && verdict.kind !== 'error') { found = { name, sql, verdict: verdict.kind }; break }
     }
-    if (found) out[item.id] = found
+    if (found) { out[item.id] = { ...found, source: 'mutation' }; fallback.push(item.id) }
     else none.push(item.id)
   }
   fs.mkdirSync(path.dirname(outFile), { recursive: true })
-  fs.writeFileSync(outFile, JSON.stringify({ answers: out, none }, null, 1) + '\n')
-  console.log(`wrong answers: ${Object.keys(out).length} found, ${none.length} exercises without one${none.length ? `: ${none.join(', ')}` : ''}`)
+  fs.writeFileSync(outFile, JSON.stringify({ answers: out, fallback, none }, null, 1) + '\n')
+  console.log(`wrong answers: ${Object.keys(out).length} found (${Object.keys(out).length - fallback.length} named, ${fallback.length} generic fallback${fallback.length ? `: ${fallback.join(', ')}` : ''}), ${none.length} exercises without one${none.length ? `: ${none.join(', ')}` : ''}`)
 } finally {
   await vite.close()
 }

@@ -5,7 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
 import { checkResult, runWithProbe } from '../../src/sql/check.js'
-import { createEngine } from '../../src/sql/engine/core.js'
+import { createEngine, oracleTypeText } from '../../src/sql/engine/core.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 export const ROOT = path.join(here, '..', '..')
@@ -59,6 +59,7 @@ export function collectExercises(dir) {
   return items
 }
 
+export { oracleTypeText }
 export const specOf = (item) => ({ ...item.check, kind: item.kind })
 
 // One engine per (dataset, clock): an engine holds a single dataset.

@@ -132,6 +132,9 @@ function checkQuery(actual, expected, spec) {
   return verdict('correct')
 }
 
+const sameDescribe = (a, e) =>
+  Array.isArray(a) && a.length === e.length && a.every((c, i) => upper(c.name) === upper(e[i].name) && c.type === e[i].type && c.nullable === e[i].nullable)
+
 function checkState(actual, expected, spec) {
   const upperKeys = (o) => Object.fromEntries(Object.entries(o ?? {}).map(([k, v]) => [k.toUpperCase(), v]))
   const a = upperKeys(actual)
@@ -141,6 +144,8 @@ function checkState(actual, expected, spec) {
     if (!e[t]) throw new Error(`checkResult: no expected rows for table ${t}`)
     if (!a[t] || a[t].error) return verdict('structure', { table: t, message: a[t]?.error?.message ?? 'the table does not exist' })
     if (!sameNames(a[t].columns, e[t].columns)) return verdict('structure', { table: t })
+    // a frozen answer that carries `describe` (types, lengths, NOT NULL) grades the table definition too
+    if (e[t].describe && !sameDescribe(a[t].describe, e[t].describe)) return verdict('structure', { table: t, message: 'the column types or NOT NULL differ' })
   }
   for (const t of tables) {
     const merge = spec.mode === 'set' ? (rows) => dedupe(rows, []) : (rows) => rows

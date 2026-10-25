@@ -319,8 +319,8 @@ export function explainVerdict(v) {
       }
     case 'structure':
       return {
-        ro: 'După rularea comenzilor, un tabel lipsește sau nu are coloanele cerute (nume, ordine). Verifică numele tabelului și al coloanelor.',
-        en: 'After your commands ran, a table is missing or does not have the requested columns (names, order). Check the names of the table and its columns.',
+        ro: 'După rularea comenzilor, un tabel lipsește sau nu are coloanele cerute (nume, ordine, tip, lungime, NOT NULL). Verifică numele tabelului și definiția coloanelor.',
+        en: 'After your commands ran, a table is missing or does not have the requested columns (names, order, type, length, NOT NULL). Check the table name and the column definitions.',
       }
     case 'contents': {
       const m = count(miss, 'rând așteptat lipsește', 'rânduri așteptate lipsesc', 'expected row is missing', 'expected rows are missing')

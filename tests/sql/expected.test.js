@@ -51,12 +51,15 @@ describe('datasets', () => {
 
   it('facultate-hidden: same-name students, NULLs elsewhere, no-grade student, course without professor', async () => {
     const h = 'facultate-hidden'
-    expect((await q(h, 'SELECT COUNT(*) FROM studenti'))[0][0]).toBe('13')
+    expect((await q(h, 'SELECT COUNT(*) FROM studenti'))[0][0]).toBe('14')
     // a surname shared by two students, and a full name shared by two students
     expect((await q(h, 'SELECT nume FROM studenti GROUP BY nume HAVING COUNT(*) > 1 ORDER BY nume')).length).toBeGreaterThanOrEqual(2)
     expect((await q(h, 'SELECT nume, prenume FROM studenti GROUP BY nume, prenume HAVING COUNT(*) > 1')).length).toBe(1)
-    // a student in a year above 1 with no grade, a course with no professor
-    expect((await q(h, 'SELECT nr_matricol FROM studenti WHERE an > 1 AND nr_matricol NOT IN (SELECT nr_matricol FROM note)')).length).toBe(1)
+    // two students with a scholarship in year 2 share a surname and differ in first name (lab 2 ex 8 sorts on both), one first name has three lowercase a (lab 2 ex 11)
+    expect((await q(h, 'SELECT nume FROM studenti WHERE bursa IS NOT NULL AND an IN (2, 3) GROUP BY nume HAVING COUNT(DISTINCT prenume) > 1')).length).toBe(1)
+    expect((await q(h, "SELECT prenume FROM studenti WHERE prenume LIKE '%a%a%a%'")).length).toBeGreaterThanOrEqual(1)
+    // students in a year above 1 with no grade, a course with no professor
+    expect((await q(h, 'SELECT nr_matricol FROM studenti WHERE an > 1 AND nr_matricol NOT IN (SELECT nr_matricol FROM note)')).length).toBe(2)
     expect((await q(h, 'SELECT id_curs FROM cursuri WHERE id_curs NOT IN (SELECT id_curs FROM didactic) ORDER BY id_curs')).map((r) => r[0].trim())).toEqual(['26', '29'])
     // NULLs in places the lab data has none
     expect((await q(h, 'SELECT COUNT(*) FROM studenti WHERE grupa IS NULL OR data_nastere IS NULL'))[0][0]).toBe('2')

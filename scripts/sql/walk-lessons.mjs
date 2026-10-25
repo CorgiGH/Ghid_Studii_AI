@@ -9,8 +9,8 @@
 //   reflect       reveal the answer
 //   viz (predict) press "Arată-mi" (or pick on the number line, then "Arată"); every widget is then stepped to its last step
 //   query machine step through every stage; on a predicted stage pick rows / type a count / click the order, then Check
-//   sql-exercise  type the reference solution: the verdict must be `correct`; then one named wrong answer (from
-//                 scripts/sql/wrong-answers.mjs): the verdict must not be `correct`
+//   sql-exercise  type the reference solution: the verdict must be `correct`; then one named wrong answer (the exercise's classic mistake from
+//                 scripts/sql/named-mistakes.json, via scripts/sql/wrong-answers.mjs): the verdict must not be `correct`
 // and it checks, on every screen: Continue unlocks, no console errors, no page errors, no horizontal overflow, and the screen is
 // not blank for long after the transition. One screenshot per screen per width goes to <out>/shots, the JSON report to
 // <out>/report.json (default .superpowers/sdd/2026-10-24-bd-lessons/walk, which is gitignored). Exit code 1 on any failure.
@@ -205,6 +205,7 @@ async function answerScreen(page, step, ctx) {
       if (good.kind !== 'correct') fails.push(`sql ${block.id}: the reference solution gets "${good.kind}" ${good.note ?? ''}`)
       const w = wrong[block.id]
       if (!w) fails.push(`sql ${block.id}: no wrong answer available`)
+      else if (w.source !== 'named') fails.push(`sql ${block.id}: no named mistake in scripts/sql/named-mistakes.json, only a generic mutation (${w.name})`)
       else {
         const bad = await runSql(page, scope, w.sql)
         rec.wrong = bad.kind; rec.wrongName = w.name

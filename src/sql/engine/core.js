@@ -360,7 +360,8 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
     })
   }
 
-  // The contents of the tables after the last run: { TABLE: Result }. `tables` (any case) limits it; a table that does not
+  // The contents of the tables after the last run: { TABLE: Result } (with `tables`, each also carries `describe`, the column
+  // list as DESCRIBE shows it, which a structure check compares). `tables` (any case) limits it; a table that does not
   // exist comes back as a Result carrying ORA-00942.
   function snapshot({ dataset, tables } = {}) {
     return exclusive(async () => {
@@ -370,7 +371,9 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
       const out = {}
       for (const t of tables) {
         const key = String(t).toUpperCase()
-        out[key] = state.tables[key] ?? { ...textResult('rows'), error: { code: 'ORA-00942', message: 'table or view does not exist' } }
+        out[key] = state.tables[key]
+          ? { ...state.tables[key], describe: state.schema[key] ?? [] }
+          : { ...textResult('rows'), error: { code: 'ORA-00942', message: 'table or view does not exist' } }
       }
       return out
     })
@@ -380,7 +383,7 @@ export async function createEngine(pg, { clock, datasets, prebuilt = null }) {
 }
 
 // DESCRIBE's Type column, from the USER_TAB_COLUMNS values
-function oracleTypeText(type, length, precision, scale, charLength) {
+export function oracleTypeText(type, length, precision, scale, charLength) {
   if (type === 'CHAR' || type === 'VARCHAR2') return `${type}(${charLength || length})`
   if (type === 'FLOAT') return `FLOAT(${precision})`
   if (type === 'NUMBER') {

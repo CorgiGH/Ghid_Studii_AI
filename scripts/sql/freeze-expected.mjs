@@ -30,7 +30,7 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const vite = await createServer({ configFile: false, root: path.join(here, '..', '..'), appType: 'custom', logLevel: 'error', server: { middlewareMode: true, hmr: false, ws: false } })
 const {
   DEFAULT_CLOCK, DEFAULT_CONTENT_DIR, DEFAULT_EXPECTED_DIR, clockOf, collectExercises, datasetPair, datasetText, engineCache,
-  engineDifference, expectedFile, specOf,
+  engineDifference, expectedFile, oracleTypeText, specOf,
 } = await vite.ssrLoadModule('/scripts/sql/freeze-lib.mjs')
 
 const DATE_CELL = /^\d\d-[A-Z]{3}-\d\d$/
@@ -76,7 +76,9 @@ async function oracleState(dataset, clock, item) {
   await loadDatasetOnOracle(dataset, datasetText(dataset))
   const script = splitScript(item.solution)
   const tables = item.check.tables.map((t) => t.toUpperCase())
-  const res = await runOnDataset(dataset, [...script, ...tables.map((t) => `SELECT * FROM ${t}`)], { clock, maxRows: MAX })
+  // `check.structure`: the table definitions (DESCRIBE: type, length, NOT NULL) are part of the answer
+  const describing = item.check.structure ? tables.map((t) => `SELECT column_name, data_type, data_length, data_precision, data_scale, nullable, char_length FROM user_tab_columns WHERE table_name = '${t}' ORDER BY column_id`) : []
+  const res = await runOnDataset(dataset, [...script, ...tables.map((t) => `SELECT * FROM ${t}`), ...describing], { clock, maxRows: MAX })
   const failed = res.slice(0, script.length).findIndex((r) => r.error)
   if (failed >= 0) return { error: `statement ${failed + 1} (${script[failed].slice(0, 60)}...): ${res[failed].error.code} ${res[failed].error.message}` }
   const out = {}
@@ -84,6 +86,11 @@ async function oracleState(dataset, clock, item) {
     const r = res[script.length + i]
     if (r.error) throw new Error(`reading ${t} after the script: ${r.error.code}`)
     out[t] = plain(r)
+    if (describing.length) {
+      const d = res[script.length + tables.length + i]
+      if (d.error) throw new Error(`describing ${t}: ${d.error.code}`)
+      out[t].describe = d.rows.map(([name, type, len, prec, scale, nullable, charLen]) => ({ name, nullable: nullable === 'Y', type: oracleTypeText(type, len, prec, scale, charLen) }))
+    }
   })
   return { expected: out }
 }
@@ -155,7 +162,7 @@ const main = async () => {
         if (!expected) continue
         fs.writeFileSync(expectedFile(opts.out, item.id, dataset), JSON.stringify(expected) + '\n')
         written++
-        const empty = item.kind === 'state' ? Object.values(expected).every((t) => !t.rows.length) : !expected.rows.length
+        const empty = item.kind === 'state' ? Object.values(expected).every((t) => !t.rows.length && !t.describe) : !expected.rows.length
         if (empty) warnings.push(`${item.id} [${dataset}]: the answer is empty, the exercise tells nothing on this dataset`)
         for (const c of new Set([clock, DEFAULT_CLOCK])) {
           const exp = frozen.get(`${item.id}|${dataset}|${c}`)
@@ -177,7 +184,7 @@ const main = async () => {
   // an exercise whose two datasets give the same answer cannot tell a hard-coded result from a real query
   for (const item of items) {
     const [a, b] = datasetPair(item.dataset).map((d) => frozen.get(`${item.id}|${d}|${clockOf(item.clock)}`))
-    if (a && b && JSON.stringify(a) === JSON.stringify(b)) warnings.push(`${item.id}: identical answer on ${item.dataset} and ${item.dataset}-hidden`)
+    if (a && b && !item.check.structure && JSON.stringify(a) === JSON.stringify(b)) warnings.push(`${item.id}: identical answer on ${item.dataset} and ${item.dataset}-hidden`)
   }
 
   console.log(`${items.length} items, ${written} answer files written to ${path.relative(process.cwd(), opts.out) || '.'}`)

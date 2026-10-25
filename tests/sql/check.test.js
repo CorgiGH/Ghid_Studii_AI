@@ -345,3 +345,45 @@ describe('not-oracle comes from the strictness pass, not from the error code', (
     ]) expect((await verdictOf(sql)).kind, sql).toBe('error')
   })
 })
+
+describe('checkResult: a frozen answer with `describe` grades the table definition (lab 1 ex 1)', () => {
+  const spec = { order: 'any', mode: 'bag', kind: 'state', tables: ['studenti'] }
+  const col = (name, type, nullable = true) => ({ name, type, nullable })
+  const expected = { STUDENTI: { ...exp(['NR', 'NUME']), describe: [col('NR', 'CHAR(6)', false), col('NUME', 'VARCHAR2(10)')] } }
+  const actual = (describe) => ({ STUDENTI: { ...rows(['NR', 'NUME']), describe } })
+
+  it('accepts the same types and NOT NULL', () => {
+    expect(checkResult(actual([col('NR', 'CHAR(6)', false), col('NUME', 'VARCHAR2(10)')]), expected, spec).ok).toBe(true)
+  })
+  it('rejects another length, another type, a missing or an extra NOT NULL', () => {
+    for (const d of [
+      [col('NR', 'CHAR(6)', false), col('NUME', 'VARCHAR2(50)')],
+      [col('NR', 'VARCHAR2(6)', false), col('NUME', 'VARCHAR2(10)')],
+      [col('NR', 'CHAR(6)'), col('NUME', 'VARCHAR2(10)')],
+      [col('NR', 'CHAR(6)', false), col('NUME', 'VARCHAR2(10)', false)],
+    ]) expect(checkResult(actual(d), expected, spec)).toMatchObject({ ok: false, kind: 'structure', table: 'STUDENTI' })
+  })
+  it('does not look at types when the frozen answer has none', () => {
+    const plain = { STUDENTI: exp(['NR', 'NUME']) }
+    expect(checkResult(actual([col('NR', 'DATE')]), plain, spec).ok).toBe(true)
+  })
+
+  it('the official CREATE TABLE answer passes on the engine; the page\'s own VARCHAR2(10) title and an all-VARCHAR2(50) version do not', async () => {
+    const fs = await import('node:fs')
+    const lesson = JSON.parse(fs.readFileSync(new URL('../../src/content/bd/courses/lesson-01a.json', import.meta.url), 'utf8'))
+    let item
+    const walk = (o) => { if (o && typeof o === 'object') { if (o.id === 'bd-l01a-ex-1-1') item = o; Object.values(o).forEach(walk) } }
+    walk(lesson)
+    const frozen = JSON.parse(fs.readFileSync(new URL('../../public/sql/expected/bd-l01a-ex-1-1.facultate.json', import.meta.url), 'utf8'))
+    const engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate: datasetText('facultate') } })
+    const grade = async (sql) => {
+      await engine.run(sql, { dataset: 'facultate', script: true })
+      return checkResult(await engine.snapshot({ dataset: 'facultate', tables: item.check.tables }), frozen, { ...item.check, kind: 'state' })
+    }
+    expect(item.check.structure).toBe(true)
+    expect((await grade(item.solution)).ok).toBe(true)
+    expect(await grade(item.solution.replace('VARCHAR2(15)', 'VARCHAR2(10)'))).toMatchObject({ ok: false, kind: 'structure', table: 'CURSURI' })
+    expect(await grade(item.solution.replace(/VARCHAR2\(\d+\)/g, 'VARCHAR2(50)').replace(/NOT NULL/g, ''))).toMatchObject({ ok: false, kind: 'structure' })
+    expect(await grade(item.solution.replace('nr_matricol CHAR(6) NOT NULL', 'nr_matricol CHAR(6)'))).toMatchObject({ ok: false, kind: 'structure', table: 'STUDENTI' })
+  }, 60000)
+})

@@ -52,6 +52,7 @@ INSERT INTO studenti VALUES ('116', 'Lungu', 'Dan',2, 'A1',NULL, TO_DATE('02/10/
 INSERT INTO studenti VALUES ('117', 'Ursu', 'Elena',2, 'A1',NULL, TO_DATE('23/05/1996', 'dd/mm/yyyy'));
 INSERT INTO studenti VALUES ('118', 'Zaharia', 'Cosmin',2, 'A1',350, TO_DATE('17/01/1996', 'dd/mm/yyyy'));
 INSERT INTO studenti VALUES ('119', 'Lungu', 'Dan',2, 'B2',350, TO_DATE('11/12/1996', 'dd/mm/yyyy'));
+INSERT INTO studenti VALUES ('130', 'Lungu', 'Natalia',2, 'B2',300, TO_DATE('06/03/1996', 'dd/mm/yyyy'));
 
 -- anul 1 de studiu
 INSERT INTO studenti VALUES ('120', 'Ungureanu', 'Ioana',1, 'B1',NULL, TO_DATE('09/06/1997', 'dd/mm/yyyy'));
