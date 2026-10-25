@@ -76,3 +76,12 @@ export function seedGate(step, attempts) {
   if (attempts.some(a => (sql ? a.ok === true || a.done === true : true))) return { completed: true };
   return undefined;
 }
+
+// Query params after a move to screen n: ?s= changes and ?variant= (set by a review link for one item) is dropped, so it does not
+// carry over to the later screens of the lesson.
+export function paramsForScreen(prev, n) {
+  const p = new URLSearchParams(prev);
+  p.set('s', String(n));
+  p.delete('variant');
+  return p;
+}

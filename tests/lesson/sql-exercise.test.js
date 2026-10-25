@@ -222,6 +222,15 @@ describe('restoring the block after a reload', () => {
     expect(store.attemptsAt(ref.src, ref.screen)).toHaveLength(1);
   });
 
+  it('a first run that ended in an ORA error is stored as a failed attempt, enqueued, and keeps later hint reveals', () => {
+    const store = createLessonStore({ getItem: () => null, setItem: () => {} });
+    store.recordAttempt('bd-l02-ex3', { ok: false, hints: 0, kind: 'sql', item: 'bd-l02-ex3', ref, at: 5, done: true, sql: 'SELECT * FROM studenti LIMIT 5', verdict: slimVerdict({ ok: false, kind: 'error', code: 'ORA-00933' }) });
+    expect(store.pendingCount()).toBe(1);
+    store.updateLastAttempt('bd-l02-ex3', { hints: 3 });
+    expect(store.attemptsAt(ref.src, ref.screen)[0]).toMatchObject({ ok: false, hints: 3, done: true });
+    expect(seedGate({ blocks: [{ type: 'sql-exercise' }] }, store.attemptsAt(ref.src, ref.screen))).toEqual({ completed: true });
+  });
+
   it('a screen with a sql attempt that ran stays unlocked after a reload, even when the first run was wrong', () => {
     const step = { blocks: [{ type: 'sql-exercise' }] };
     expect(seedGate(step, [{ ok: false, kind: 'sql', done: true }])).toEqual({ completed: true });

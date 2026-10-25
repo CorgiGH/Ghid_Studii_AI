@@ -8,7 +8,7 @@ import formatMarkdown from '../blocks/formatMarkdown';
 import ScreenGate from './ScreenGate';
 import { preloadLessonBlocks } from './preload';
 import { useLessonStore } from '../../lesson/useLessonStore';
-import { canAdvance, isGatingScreen, mergeGate, nextScreen, screenFromUrl, seedGate, skipAttempt, slideVariants } from './playerLogic';
+import { canAdvance, isGatingScreen, mergeGate, nextScreen, screenFromUrl, paramsForScreen, seedGate, skipAttempt, slideVariants } from './playerLogic';
 
 const EDITABLE = 'textarea, input, select, [contenteditable=""], [contenteditable="true"], .cm-editor, [data-lesson-editor]';
 const INTERACTIVE = 'button, a, summary, [role="button"], [role="tab"]';
@@ -113,7 +113,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   const go = useCallback((n) => {
     if (n === screen || n < 1 || n > total) return;
     setDir(n > screen ? 1 : -1);
-    setParams(prev => { const p = new URLSearchParams(prev); p.set('s', String(n)); return p; }, { replace: true });
+    setParams(prev => paramsForScreen(prev, n), { replace: true });
   }, [screen, total, setParams]);
 
   const markDone = useCallback(() => {

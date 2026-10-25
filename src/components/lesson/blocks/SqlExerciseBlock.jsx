@@ -210,10 +210,12 @@ export default function SqlExerciseBlock(block) {
         const slim = verdict ? slimVerdict(verdict) : null;
         if (attempted.current) {
           store.updateLastAttempt(id, { sql, verdict: slim, hints: hintsRef.current });
-        } else if (graded) {
+        } else if (graded || verdict) {
+          // The first run is the attempt. A run that ended in an ORA error or a not-Oracle verdict counts as a failed one, so it
+          // reaches the review pile and survives a reload.
           attempted.current = true;
           store.recordAttempt(id, {
-            ok: verdict.ok, hints: hintsRef.current, kind: 'sql', item: id, ref, at: nowMs(), done: true,
+            ok: graded && verdict.ok, hints: hintsRef.current, kind: 'sql', item: id, ref, at: nowMs(), done: true,
             sql, verdict: slim, misconception: mistake, revealed: false,
           });
         }
@@ -225,7 +227,13 @@ export default function SqlExerciseBlock(block) {
       setNote(e?.code === 'TIMEOUT'
         ? t('The query ran for over a minute and was stopped. Check for a join without a condition.', 'Interogarea a rulat peste un minut și a fost oprită. Verifică dacă ai o joncțiune fără condiție.')
         : t(`The query could not be run (${e?.message ?? e}).`, `Interogarea nu a putut fi rulată (${e?.message ?? e}).`));
-      if (!silent) complete();
+      if (!silent) {
+        complete();
+        if (!hidden && record && !attempted.current) {
+          attempted.current = true;
+          store.recordAttempt(id, { ok: false, hints: hintsRef.current, kind: 'sql', item: id, ref, at: nowMs(), done: true, sql, verdict: null, revealed: false });
+        }
+      }
     } finally {
       busyRef.current = false;
       setBusy(false);

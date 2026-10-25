@@ -107,3 +107,13 @@ describe('seedGate', () => {
     expect(seedGate({ blocks: [{ type: 'learn' }] }, [{ ok: true }])).toBeUndefined();
   });
 });
+
+import { paramsForScreen } from '../../src/components/lesson/playerLogic.js';
+describe('paramsForScreen', () => {
+  it('sets s and drops variant so a review link does not carry over to later screens', () => {
+    const p = paramsForScreen(new URLSearchParams('s=4&variant=hidden&x=1'), 5);
+    expect(p.get('s')).toBe('5');
+    expect(p.has('variant')).toBe(false);
+    expect(p.get('x')).toBe('1');
+  });
+});
