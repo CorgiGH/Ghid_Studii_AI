@@ -4,7 +4,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { PGlite } from '@electric-sql/pglite'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createServer } from 'vite'
 
 // core.js uses import.meta.glob for the compat files, so it is loaded through Vite's module runner rather than plain Node
@@ -24,7 +24,7 @@ export async function buildDatadir(name, createEngine) {
   return Buffer.from(await blob.arrayBuffer())
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const vite = await createServer({ root: ROOT, configFile: false, logLevel: 'error', appType: 'custom', server: { middlewareMode: true, hmr: false, watch: null } })
   try {
     const { createEngine } = await vite.ssrLoadModule('/src/sql/engine/core.js')

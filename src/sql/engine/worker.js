@@ -6,10 +6,14 @@
 import { createEngine } from './core.js'
 
 export const CLOCK = '2026-10-26 14:30:00'
+/* global __SQL_DATADIR_VERSION__ */
+// a hash of the compat layer and the datasets, set at build time (vite.config.js): a redeploy that changes them never meets an
+// old data directory from the browser's cache
+export const DATADIR_VERSION = typeof __SQL_DATADIR_VERSION__ === 'undefined' ? 'dev' : __SQL_DATADIR_VERSION__
 
 // the default boot: fetch the data directory next to the page and start PGlite from it
 export async function bootFromDatadir(dataset, baseUrl) {
-  const [{ PGlite }, res] = await Promise.all([import('@electric-sql/pglite'), fetch(`${baseUrl}sql/datadir-${dataset}.tar.gz`)])
+  const [{ PGlite }, res] = await Promise.all([import('@electric-sql/pglite'), fetch(`${baseUrl}sql/datadir-${dataset}.tar.gz?v=${DATADIR_VERSION}`)])
   if (!res.ok) throw new Error(`data directory for '${dataset}' answered ${res.status}`)
   const loadDataDir = await res.blob()
   const pg = new PGlite({ loadDataDir })
