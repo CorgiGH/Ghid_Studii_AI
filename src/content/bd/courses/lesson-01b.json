@@ -58,8 +58,8 @@
         {
           "type": "learn",
           "content": {
-            "en": "`INSERT` adds a whole row. Each value lands in its own column, in order. Whatever gets no value stays NULL, and a `NOT NULL` column with no value stops everything.",
-            "ro": "`INSERT` adaugă un rând întreg. Fiecare valoare ajunge în coloana ei, în ordine. Ce nu primește valoare rămâne NULL, iar o coloană `NOT NULL` fără valoare oprește totul."
+            "en": "`INSERT` adds a whole row. In the form below, with no column list, you give one value for each column, in the columns' order; where you do not know the value, you write `NULL`. If a `NOT NULL` column gets NULL, the row is rejected. The form with a column list comes on the next screen.",
+            "ro": "`INSERT` adaugă un rând întreg. În forma de mai jos, fără listă de coloane, dai câte o valoare pentru fiecare coloană, în ordinea coloanelor; unde nu știi valoarea, scrii `NULL`. Dacă o coloană `NOT NULL` primește NULL, rândul e respins. Forma cu listă de coloane vine pe ecranul următor."
           }
         },
         {
@@ -166,14 +166,21 @@
         {
           "type": "learn",
           "content": {
-            "en": "`WHERE` picks the rows the command touches; we learn it in detail later. Here you only need the idea: \"only the rows that satisfy the condition\". With `DELETE FROM note WHERE valoare < 5` the grades below 5 disappear. How many do you think there are?",
-            "ro": "`WHERE` alege rândurile pe care le atinge comanda; despre el învățăm în detaliu mai târziu. Aici îți trebuie ideea: „doar rândurile care respectă condiția”. Cu `DELETE FROM note WHERE valoare < 5` dispar notele sub 5. Câte crezi că sunt?"
+            "en": "`WHERE` picks the rows the command touches; you learn it in detail in lesson 4. Here you only need the idea: \"only the rows that satisfy the condition\". Two conditions are joined with `AND`: a row is picked only if it satisfies both. For example, `WHERE an = 2 AND grupa = 'A1'` picks only the year-2 students who are also in group A1.",
+            "ro": "`WHERE` alege rândurile pe care le atinge comanda; îl înveți în detaliu în lecția 4. Aici îți trebuie ideea: „doar rândurile care respectă condiția”. Două condiții se leagă cu `AND`: rândul e ales doar dacă le respectă pe amândouă. De exemplu, `WHERE an = 2 AND grupa = 'A1'` alege doar studenții din anul 2 care sunt și în grupa A1."
           }
         },
         {
           "type": "code",
           "language": "sql",
           "code": "UPDATE studenti\nSET    bursa = 300, grupa = 'B2'\nWHERE  nr_matricol = '121';\n\nDELETE FROM note\nWHERE  valoare < 5;"
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "`UPDATE` changes values in the chosen rows. After `SET` you write `column = new value`; several pairs are separated by commas. The command above touches only the row with `nr_matricol` `'121'`, the student Arhire Alexandra, who is now in group B1 with no scholarship (NULL): her scholarship goes from NULL to 300, and her group from B1 to B2.\n\nThe second command, `DELETE FROM note WHERE valoare < 5`, deletes the grades below 5. How many do you think there are?",
+            "ro": "`UPDATE` schimbă valori în rândurile alese. După `SET` scrii `coloana = valoarea nouă`; mai multe perechi le desparți prin virgulă. Comanda de sus atinge doar rândul cu `nr_matricol` `'121'`, al studentei Arhire Alexandra, care acum e în grupa B1 și n-are bursă (NULL): bursa ei trece din NULL în 300, iar grupa din B1 în B2.\n\nA doua comandă, `DELETE FROM note WHERE valoare < 5`, șterge notele sub 5. Câte crezi că sunt?"
+          }
         },
         {
           "type": "viz",
@@ -223,14 +230,14 @@
         {
           "type": "learn",
           "content": {
-            "en": "The changes made by `INSERT`, `UPDATE` and `DELETE` are not final right away. They stay in a transaction: you can undo them with `ROLLBACK` or make them final with `COMMIT`.",
-            "ro": "Schimbările făcute de `INSERT`, `UPDATE` și `DELETE` nu sunt definitive imediat. Rămân într-o tranzacție: le poți anula cu `ROLLBACK` sau le faci definitive cu `COMMIT`."
+            "en": "The changes made by `INSERT`, `UPDATE` and `DELETE` are not final right away. They stay in a transaction: you can undo them with `ROLLBACK` or make them final with `COMMIT`.\n\nIn the example below, `SELECT COUNT(*) FROM note` does not display the rows but a single number: how many rows the `note` table has at that moment (with a `WHERE`, how many rows pass it).",
+            "ro": "Schimbările făcute de `INSERT`, `UPDATE` și `DELETE` nu sunt definitive imediat. Rămân într-o tranzacție: le poți anula cu `ROLLBACK` sau le faci definitive cu `COMMIT`.\n\nÎn exemplul de mai jos, `SELECT COUNT(*) FROM note` nu afișează rândurile, ci un singur număr: câte rânduri are tabelul `note` în acel moment (cu un `WHERE`, câte rânduri trec de el)."
           }
         },
         {
           "type": "code",
           "language": "sql",
-          "code": "DELETE FROM note WHERE valoare < 5;   -- 5 rows deleted\nSELECT COUNT(*) FROM note;            -- 37\nROLLBACK;\nSELECT COUNT(*) FROM note;            -- 42"
+          "code": "DELETE FROM note\nWHERE  valoare < 5;\n-- 5 rows deleted\nSELECT COUNT(*) FROM note;\n-- 37\nROLLBACK;\nSELECT COUNT(*) FROM note;\n-- 42"
         },
         {
           "type": "callout",
@@ -515,8 +522,8 @@
           "type": "mcq",
           "id": "bd-l01b-q4",
           "question": {
-            "en": "You insert `''` (two apostrophes, nothing between them) into the `bursa` column. What stays in it?",
-            "ro": "Inserezi `''` (două apostrofuri, nimic între ele) în coloana `bursa`. Ce rămâne în ea?"
+            "en": "You insert a new student, and for `prenume`, which is `VARCHAR2(10)`, you write `''` (two apostrophes, nothing between them). What ends up in his `prenume` cell?",
+            "ro": "Inserezi un student nou, iar pentru `prenume`, care e `VARCHAR2(10)`, scrii `''` (două apostrofuri, nimic între ele). Ce rămâne în celula lui `prenume`?"
           },
           "options": [
             {
@@ -532,14 +539,14 @@
             },
             {
               "text": {
-                "en": "0",
-                "ro": "0"
+                "en": "A space (`' '`)",
+                "ro": "Un spațiu (`' '`)"
               },
               "correct": false,
-              "misconception": "null-arith",
+              "misconception": "empty-str-null",
               "explain": {
-                "en": "`''` is not a number. Oracle treats it as a missing value, that is NULL.",
-                "ro": "`''` nu e număr. Oracle îl tratează ca lipsa valorii, adică NULL."
+                "en": "`''` holds no character, not even a space. A space would be `' '`, with a space between the apostrophes. And Oracle turns the empty `''` into NULL.",
+                "ro": "`''` nu conține niciun caracter, nici măcar spațiu. Un spațiu ar fi `' '`, cu un spațiu între apostrofuri. Iar `''` gol Oracle îl transformă în NULL."
               }
             },
             {
@@ -561,7 +568,7 @@
               "ro": "Tabelul studenti (toate rândurile, trei coloane)"
             },
             "dataset": "facultate",
-            "sql": "SELECT nr_matricol, nume, bursa FROM studenti ORDER BY nr_matricol"
+            "sql": "SELECT nr_matricol, nume, prenume FROM studenti ORDER BY nr_matricol"
           }
         }
       ]
