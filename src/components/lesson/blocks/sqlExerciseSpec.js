@@ -183,8 +183,101 @@ export function restoreSqlState(attempts, id) {
     hints,
     revealed: last.revealed === true,
     verdict: last.verdict && typeof last.verdict === 'object' ? last.verdict : null,
+    mistake: typeof last.mistake === 'string' && last.mistake ? last.mistake : (typeof last.verdict?.mistake === 'string' ? last.verdict.mistake : null),
+    // true only when `sql` is a query the learner actually ran: a starter text, a paper hand-in or a reveal never gets re-run
+    ran: last.ran === true && typeof last.sql === 'string' && last.sql.trim().length > 0,
+    paper: last.paper === true,
     ok: last.ok === true,
   };
+}
+
+// ---- what to do with an answer: record it, update it, mark a review, or nothing ------------------------------------------
+// One decision for every path that can end an attempt, so the block has no three copies of the rule.
+//   event 'run'          a run finished (verdict may be null when the expected file is missing or the grader threw)
+//   event 'fault'        a run threw something other than a cancel
+//   event 'reveal'       the learner opened the solution
+//   event 'paper-submit' paper mode: the learner handed in
+//   event 'paper-done'   paper mode: the learner confirmed the self-check (`paperOk` = every point ticked)
+// hidden = the review variant (never writes an attempt, schedules through markReview); record = this block may write attempts;
+// attempted = an attempt of this block is already stored; marked = the review answer was already given.
+// Returns { type: 'none' | 'record' | 'update' | 'markReview', ok, unscored, set? }.
+const NONE = { type: 'none' };
+export const isGraded = (verdict) => !!verdict && verdict.kind !== 'error' && verdict.kind !== 'not-oracle';
+
+export function attemptAction({ hidden = false, record = false, attempted = false, marked = false, verdict = null, silent = false, event = 'run', paperOk = false, revealed = false } = {}) {
+  if (silent) return NONE;
+  if (hidden) {
+    if (marked) return NONE;
+    if (event === 'run') return isGraded(verdict) ? { type: 'markReview', ok: verdict.ok === true } : NONE;
+    if (event === 'reveal') return { type: 'markReview', ok: false };
+    if (event === 'paper-done') return { type: 'markReview', ok: paperOk === true };
+    return NONE;
+  }
+  if (!record) return NONE;
+  switch (event) {
+    case 'run':
+      return attempted ? { type: 'update' } : { type: 'record', ok: isGraded(verdict) && verdict.ok === true, unscored: !verdict };
+    case 'fault':
+      return attempted ? NONE : { type: 'record', ok: false, unscored: false };
+    case 'reveal':
+      return attempted ? { type: 'update' } : { type: 'record', ok: false, unscored: false };
+    case 'paper-submit':
+      return attempted ? NONE : { type: 'record', ok: false, unscored: true };
+    case 'paper-done':
+      if (!attempted) return { type: 'record', ok: paperOk === true, unscored: false };
+      if (revealed) return NONE; // the solution was opened first: the attempt already stands as a miss
+      return paperOk ? { type: 'update', set: { ok: true, unscored: false } } : { type: 'record', ok: false, unscored: false };
+    default:
+      return NONE;
+  }
+}
+
+// A query-kind run that ended in an ORA error is a verdict even without the expected file: the code and its explanation do not
+// depend on the answer key. Returns true when checkResult can be asked.
+export const canGrade = (expected, actual, spec) => !!expected || (spec?.kind !== 'state' && !!actual?.error);
+
+// ---- the rows of a dataset file (the review variant shows them) --------------------------------------------------------
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+function splitValues(body) {
+  const out = [];
+  let cur = '';
+  let depth = 0;
+  let quote = false;
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (quote) {
+      cur += ch;
+      if (ch === "'") { if (body[i + 1] === "'") { cur += "'"; i++; } else quote = false; }
+    } else if (ch === "'") { quote = true; cur += ch; }
+    else if (ch === '(') { depth++; cur += ch; }
+    else if (ch === ')') { depth--; cur += ch; }
+    else if (ch === ',' && depth === 0) { out.push(cur.trim()); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur.trim());
+  return out;
+}
+
+function cellOf(raw) {
+  if (/^null$/i.test(raw)) return null;
+  const d = /^TO_DATE\(\s*'(\d\d)\/(\d\d)\/(\d{4})'\s*,\s*'dd\/mm\/yyyy'\s*\)$/i.exec(raw);
+  if (d) return `${d[1]}-${MONTHS[Number(d[2]) - 1]}-${d[3].slice(2)}`;
+  const q = /^'([\s\S]*)'$/.exec(raw);
+  if (q) return q[1].replace(/''/g, "'");
+  return /^-?\d+(\.\d+)?$/.test(raw) ? String(Number(raw)) : raw;
+}
+
+// [{ table, columns: [names], rows: [[cell]] }] from the CREATE TABLE and INSERT statements of a dataset file, in the order the
+// file creates the tables. Dates read as the engine shows them (DD-MON-RR).
+export function rowsFromSql(text) {
+  const tables = schemaFromSql(text).map((tb) => ({ table: tb.table, columns: tb.columns.map((c) => c.name), rows: [] }));
+  const by = new Map(tables.map((tb) => [tb.table, tb]));
+  for (const m of String(text).matchAll(/^\s*INSERT\s+INTO\s+(\w+)\s+VALUES\s*\((.*)\)\s*;\s*$/gim)) {
+    const tb = by.get(m[1].toUpperCase());
+    if (tb) tb.rows.push(splitValues(m[2]).map(cellOf));
+  }
+  return tables;
 }
 
 // ---- the schema drawer when the engine is not there ---------------------------------------------------------------------

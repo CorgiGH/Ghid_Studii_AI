@@ -11,6 +11,7 @@ import CodeTracingQuestion from './CodeTracingQuestion';
 import SqlQuestion from './SqlQuestion';
 import TestResults from './TestResults';
 import TestModeSelector from '../../ui/TestModeSelector';
+import { formatClock, showGroupStem, timerChoices, timerSeconds, totalScore } from './testLogic.js';
 
 const promptMarkdown = {
   // react-markdown v9+ no longer passes `inline` prop — detect via className
@@ -91,6 +92,35 @@ const questionComponents = {
   'sql': SqlQuestion,
 };
 
+function TimerChoice({ choices, lang, onSelect }) {
+  const ro = lang === 'ro';
+  const options = [{ min: 0, label: ro ? 'Fără timer' : 'No timer' }, ...choices.map((m) => ({ min: m, label: `${m} min` }))];
+  return (
+    <div className="py-8" style={{ maxWidth: 'var(--content-max-width)', margin: '0 auto' }} data-testid="timer-choice">
+      <h2 className="text-center mb-2" style={{ fontSize: 'var(--type-h2)', fontWeight: 'var(--type-h2-weight)', color: 'var(--theme-content-text)' }}>
+        {ro ? 'Vrei un timer?' : 'Do you want a timer?'}
+      </h2>
+      <p className="text-center mb-6 text-sm" style={{ color: 'var(--theme-muted-text)' }}>
+        {ro ? 'La 0 testul se predă singur. Poți alege și fără timer.' : 'At 0 the test is handed in by itself. You can also go without one.'}
+      </p>
+      <div className="flex flex-wrap justify-center gap-3">
+        {options.map((o) => (
+          <button
+            key={o.min}
+            type="button"
+            data-testid={`timer-${o.min}`}
+            onClick={() => onSelect(o.min)}
+            className="px-6 py-3 rounded-xl text-sm font-semibold cursor-pointer"
+            style={{ backgroundColor: 'var(--theme-card-bg)', border: '2px solid var(--theme-border)', color: 'var(--theme-content-text)', minHeight: 44 }}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function TestRenderer({ src }) {
   const { t, lang, saveTestResult, testProgress, setCourseContext } = useApp();
   const [testData, setTestData] = useState(null);
@@ -103,6 +133,7 @@ export default function TestRenderer({ src }) {
   const [reviewQuestionIds, setReviewQuestionIds] = useState([]);
   const [testMode, setTestMode] = useState(null); // null=not started, 'tutor'|'timed'
   const [timeLeft, setTimeLeft] = useState(null);
+  const [timerMin, setTimerMin] = useState(null); // optional timer: null = not chosen yet, 0 = none, else minutes
   const [screen, setScreen] = useState(0); // oneQuestionPerScreen: index of the question on show
   const [attemptId, setAttemptId] = useState(0); // bumped on retake / review-mistakes so child questions remount
 
@@ -115,6 +146,7 @@ export default function TestRenderer({ src }) {
     setShowResults(false);
     setTestMode(null);
     setTimeLeft(null);
+    setTimerMin(null);
     setReviewMode(false);
     setReviewQuestionIds([]);
     setScreen(0);
@@ -142,10 +174,11 @@ export default function TestRenderer({ src }) {
     return () => setCourseContext(null);
   }, [testData, setCourseContext, t]);
 
-  // Timed mode countdown
+  // Countdown: timed mode, or the optional timer the learner chose at the start. At 0 the test is handed in.
+  const choices = timerChoices(testData?.meta);
+  const totalSeconds = testData ? timerSeconds({ meta: testData.meta, questionCount: testData.questions.length, mode: testMode, chosen: timerMin }) : null;
   useEffect(() => {
-    if (testMode !== 'timed' || showResults || !testData) return;
-    const totalSeconds = (testData.meta.duration || testData.questions.length * 2) * 60;
+    if (totalSeconds === null || showResults || !testData) return undefined;
     setTimeLeft(totalSeconds);
     const interval = setInterval(() => {
       setTimeLeft(prev => {
@@ -157,14 +190,14 @@ export default function TestRenderer({ src }) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [testMode, showResults, testData]);
+  }, [totalSeconds, showResults, testData]);
 
   // Auto-submit when timer hits 0
   useEffect(() => {
-    if (timeLeft === 0 && testMode === 'timed' && !showResults) {
+    if (timeLeft === 0 && totalSeconds !== null && !showResults) {
       handleFinishRef.current?.();
     }
-  }, [timeLeft, testMode, showResults]);
+  }, [timeLeft, totalSeconds, showResults]);
 
   const handleAnswer = useCallback((questionId, score, maxScore, meta) => {
     setAnswers(prev => ({ ...prev, [questionId]: { score, maxScore, ...(meta || {}) } }));
@@ -178,13 +211,14 @@ export default function TestRenderer({ src }) {
 
   const handleFinish = useCallback(() => {
     if (!testData) return;
-    const totalScore = Object.values(answers).reduce((sum, a) => sum + (a.score || 0), 0);
+    const counted = reviewMode ? testData.questions.filter(q => reviewQuestionIds.includes(q.id)) : testData.questions;
+    const total = totalScore(counted, answers);
     // Only save to persistent progress for full test attempts, not review-mistakes sessions
     if (!reviewMode) {
-      saveTestResult(testData.meta.id, totalScore, testData.meta.totalPoints, answers);
+      saveTestResult(testData.meta.id, total, testData.meta.totalPoints, answers);
     }
     setShowResults(true);
-  }, [testData, answers, saveTestResult, reviewMode]);
+  }, [testData, reviewQuestionIds, answers, saveTestResult, reviewMode]);
 
   const handleFinishRef = useRef(handleFinish);
   handleFinishRef.current = handleFinish;
@@ -194,6 +228,11 @@ export default function TestRenderer({ src }) {
   // Show mode selector before test starts
   if (!testMode && !reviewMode && testData && !loading) {
     return <TestModeSelector onSelect={setTestMode} lang={lang} only={testData.meta.modes} />;
+  }
+
+  // The optional timer: asked once, after the mode, when the test offers one.
+  if (testMode && testMode !== 'timed' && choices && timerMin === null && !reviewMode && testData && !loading) {
+    return <TimerChoice choices={choices} lang={lang} onSelect={setTimerMin} />;
   }
 
   if (loading) return (
@@ -226,6 +265,7 @@ export default function TestRenderer({ src }) {
     setReviewMode(true);
     setTestMode(null);
     setTimeLeft(null);
+    setTimerMin(null);
     setAnswers({});
     setShowResults(false);
     setActiveQ(null);
@@ -249,12 +289,12 @@ export default function TestRenderer({ src }) {
           )}
         </div>
         <div className="flex flex-wrap gap-3 mt-2 text-xs" style={{ color: 'var(--theme-muted-text)' }}>
-          {testMode === 'timed' && timeLeft !== null && !showResults && (
-            <span style={{ color: timeLeft < 60 ? '#ef4444' : '#3b82f6', fontWeight: 600 }}>
-              {'\u23F1'} {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+          {totalSeconds !== null && timeLeft !== null && !showResults && (
+            <span style={{ color: timeLeft < 60 ? '#ef4444' : '#3b82f6', fontWeight: 600 }} data-testid="test-timer">
+              {'\u23F1'} {formatClock(timeLeft)}
             </span>
           )}
-          {testMode !== 'timed' && meta.duration > 0 && <span>{'\u23F1'} {meta.duration} min</span>}
+          {totalSeconds === null && meta.duration > 0 && <span>{'\u23F1'} {meta.duration} min</span>}
           <span>{meta.totalPoints} {t('points', 'puncte')}</span>
           <span>{visibleQuestionCount} {t('questions', 'întrebări')}</span>
           {prevBest && (
@@ -304,7 +344,8 @@ export default function TestRenderer({ src }) {
           // question is whatever came before in the filtered list, so grouping still dedups.
           const prevGroup = i > 0 ? questions[i - 1].group : null;
           const groupText = q.group && testData?.groupPrompts?.[q.group];
-          const showGroup = groupText && q.group !== prevGroup;
+          // one question per screen: the stem shows and hides with its question
+          const showGroup = showGroupStem({ perScreen, i, current, group: q.group, prevGroup, hasText: !!groupText });
 
           return (
             <React.Fragment key={q.id}>
@@ -410,6 +451,7 @@ export default function TestRenderer({ src }) {
             setReviewQuestionIds([]);
             setTestMode(null);
             setTimeLeft(null);
+            setTimerMin(null);
             setScreen(0);
             setAttemptId(id => id + 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
