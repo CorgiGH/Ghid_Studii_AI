@@ -5,7 +5,7 @@
 //   query exercise: actual is a Result ({ columns, rows, error? ... }), expected is { columns, rows, probe? }
 //   state exercise: actual is { TABLE: Result } (Engine.snapshot), expected is { TABLE: { columns, rows } }
 //   spec = { order: 'any'|'required', orderBy?: string[], aliases?: 'any-distinct'|string[], mode: 'bag'|'set',
-//            kind: 'query'|'state', tables?: string[], cosmetic?: (''|'trim-case')[] }
+//            kind: 'query'|'state', tables?: string[], cosmetic?: (''|'trim'|'trim-case')[] }
 //
 // What counts as the same result:
 //   - cells are compared as the text Oracle displays, no number or date coercion ('0000000450' is not '450')
@@ -16,15 +16,20 @@
 //     a list = those headers (case-insensitive, Oracle shows unquoted aliases in capitals), '' in the list = any header there
 //   - aliasCase: true = a list of aliases is compared letter for letter (a quoted "Astazi" is not the ASTAZI of an unquoted alias)
 //   - aliasesDiffer = positional list of the column names the headers must not equal (an alias equal to its own column renames
-//     nothing); '' in the list = no constraint there
-//   - cosmetic[i] = 'trim-case' compares column i after TRIM and upper-casing (day and month names, padding the exercise does
-//     not ask about)
+//     nothing); '' in the list = no constraint there. The header is compared letter for letter with the name in capitals, the
+//     header Oracle shows without an alias: nume AS nume and "NUME" rename nothing, a quoted "Nume" does
+//   - cosmetic[i] = 'trim' compares column i without its trailing blanks, case kept (the padding of a CHAR(n) column, which the
+//     learner may cut with TRIM or keep); 'trim-case' compares it after TRIM and upper-casing (day and month names, padding the
+//     exercise does not ask about)
 //   - a DATE shows as DD-MON-RR, which hides the century. `runWithProbe` runs the query a second time with
-//     NLS_DATE_FORMAT='SYYYY-MM-DD' and attaches the rows as `probe`; when both sides carry a probe the probes must match too,
-//     so a result with a wrong century fails even though it prints the same
+//     NLS_DATE_FORMAT='SYYYY-MM-DD' and attaches the rows as `probe` (only when that run returns as many rows: a WHERE that reads
+//     the date text finds other rows under the other format, and then the probe says nothing). When both sides carry a probe the
+//     probes must match too, so a result with a wrong century fails even though it prints the same: verdict 'century', whose
+//     missing / extra are the rows as displayed
 //
-// Verdict = { ok, kind, missing, extra, code?, message?, table? }  with kind one of
-//   correct | rows | rowcount | order | columns | alias | error | not-oracle | structure | contents
+// Verdict = { ok, kind, missing, extra, code?, message?, table?, construct? }  with kind one of
+//   correct | rows | rowcount | order | columns | alias | century | error | not-oracle | structure | contents
+// `construct` (not-oracle only) names the other dialect's habit the strictness pass caught: except | limit | ilike | cast | set-all
 // `missing` are expected rows the learner did not return, `extra` are returned rows that are not expected.
 // `mistake` (a MistakeId) is not set here: src/sql/mistakes.js looks at the learner's SQL for that.
 
@@ -38,10 +43,12 @@ const DATE_CELL = /^\d\d-[A-Z]{3}-\d\d$/
 const NULL_KEY = '\u0000null'
 const cellText = (v) => (v === null || v === undefined ? null : String(v))
 
-// A cell as it is compared: null stays distinct from every text, 'trim-case' columns are trimmed and upper-cased.
+// A cell as it is compared: null stays distinct from every text, 'trim' columns lose their trailing blanks, 'trim-case' columns
+// are trimmed and upper-cased.
 function cellKey(v, mode) {
   const t = cellText(v)
   if (t === null) return NULL_KEY
+  if (mode === 'trim') return t.replace(/ +$/, '')
   return mode === 'trim-case' ? t.trim().toUpperCase() : t
 }
 const rowKey = (row, cosmetic = []) => JSON.stringify(row.map((v, i) => cellKey(v, cosmetic[i])))
@@ -82,8 +89,9 @@ function verdict(kind, extra = {}) {
 }
 
 function errorVerdict(result) {
-  const code = result.error.code
-  return verdict(result.error.dialect === true ? 'not-oracle' : 'error', { code, message: result.error.message })
+  const { code, message, construct } = result.error
+  if (result.error.dialect === true) return verdict('not-oracle', { code, message, ...(construct ? { construct } : {}) })
+  return verdict('error', { code, message })
 }
 
 // Is the sequence right, given that rows with equal `orderBy` keys may swap? (the rows themselves already match as a multiset)
@@ -116,12 +124,13 @@ function checkQuery(actual, expected, spec) {
   const merge = spec.mode === 'set' ? (rows) => dedupe(rows, cosmetic) : (rows) => rows
   const aRows = merge(actual.rows)
   const eRows = merge(expected.rows)
-  let { missing, extra } = diffRows(aRows, eRows, cosmetic)
-  if (!missing.length && !extra.length && actual.probe && expected.probe) {
-    ;({ missing, extra } = diffRows(merge(actual.probe), merge(expected.probe), cosmetic))
-  }
+  const { missing, extra } = diffRows(aRows, eRows, cosmetic)
   if (missing.length || extra.length) {
     return verdict(aRows.length === eRows.length ? 'rows' : 'rowcount', { missing, extra })
+  }
+  if (actual.probe && expected.probe) {
+    const century = centuryDiff(actual, expected, merge, cosmetic)
+    if (century) return verdict('century', century)
   }
   if (spec.order === 'required' && !sequenceMatches(aRows, eRows, expected.columns, spec, cosmetic)) return verdict('order')
 
@@ -133,8 +142,27 @@ function checkQuery(actual, expected, spec) {
     const same = spec.aliasCase === true ? (a, b) => a === b : (a, b) => upper(a) === upper(b)
     if (wanted.length !== actual.columns.length || wanted.some((a, i) => a !== '' && !same(a, actual.columns[i]))) return verdict('alias')
   }
-  if (Array.isArray(spec.aliasesDiffer) && spec.aliasesDiffer.some((n, i) => n && upper(n) === upper(actual.columns[i]))) return verdict('alias')
+  if (Array.isArray(spec.aliasesDiffer) && spec.aliasesDiffer.some((n, i) => n && n.toUpperCase() === actual.columns[i])) return verdict('alias')
   return verdict('correct')
+}
+
+// The displayed rows match; do the four-digit years? -> null, or { missing, extra } as displayed rows: each probe row that differs
+// stands for the displayed row at the same position (both runs of a query return their rows in the same order).
+function centuryDiff(actual, expected, merge, cosmetic) {
+  const { missing, extra } = diffRows(merge(actual.probe), merge(expected.probe), cosmetic)
+  if (!missing.length && !extra.length) return null
+  const shown = (probeRows, displayed, picked) => {
+    if (probeRows.length !== displayed.length) return []
+    const left = new Map()
+    picked.forEach((r) => { const k = rowKey(r, cosmetic); left.set(k, (left.get(k) ?? 0) + 1) })
+    const out = []
+    probeRows.forEach((r, i) => {
+      const k = rowKey(r, cosmetic)
+      if (left.get(k) > 0) { left.set(k, left.get(k) - 1); out.push(displayed[i].map(cellText)) }
+    })
+    return out
+  }
+  return { missing: shown(expected.probe, expected.rows, missing), extra: shown(actual.probe, actual.rows, extra) }
 }
 
 const sameDescribe = (a, e) =>
@@ -173,7 +201,9 @@ export async function runWithProbe(runner, sql, opts) {
   await runner.run(`ALTER SESSION SET NLS_DATE_FORMAT='${PROBE_FORMAT}'`, opts)
   try {
     const second = await runner.run(sql, opts)
-    return second.error ? result : { ...result, probe: second.rows }
+    // a condition on the date text (data_nastere LIKE '%FEB%') picks other rows under SYYYY-MM-DD: that probe proves nothing
+    if (second.error || second.rows.length !== result.rows.length) return result
+    return { ...result, probe: second.rows }
   } finally {
     await runner.run(`ALTER SESSION SET NLS_DATE_FORMAT='DD-MON-RR'`, opts)
   }

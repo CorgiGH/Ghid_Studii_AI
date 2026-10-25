@@ -84,6 +84,23 @@ function topLevel(text) {
   return out
 }
 
+// cells that end in a blank (the padding of a CHAR(n) value)
+const paddedCells = (rows) => rows.reduce((n, r) => n + r.filter((v) => typeof v === 'string' && / $/.test(v)).length, 0)
+const NAME_COLUMN = /NUME|NAME|TITLU/i
+// does a name column of the answer hold the same value twice (homonyms)?
+function repeatsAName(expected) {
+  return (expected.columns ?? []).some((col, c) => {
+    if (!NAME_COLUMN.test(String(col))) return false
+    const seen = new Set()
+    for (const r of expected.rows) {
+      const v = r[c] === null || r[c] === undefined ? null : String(r[c]).trim()
+      if (v === null) continue
+      if (seen.has(v)) return true
+      seen.add(v)
+    }
+    return false
+  })
+}
 const hasOuter = (t) => /\b(LEFT|RIGHT|FULL)\b/i.test(t) || /\(\s*\+\s*\)/.test(t)
 const trimCell = (v) => (v === null || v === undefined ? null : String(v).trim())
 const trimRows = (rows) => rows.map((r) => r.map(trimCell))
@@ -92,17 +109,49 @@ const bagEqual = (a, b) => {
   return !d.missing.length && !d.extra.length
 }
 
-// Do the missing rows look like the padding of an outer join? Some column holds NULL (or '0', what COUNT gives a group with no
-// partner) in a missing row while no row of the learner's answer has that value in that column.
-function outerPadded(missing, actualRows) {
+// Do the missing rows look like the padding of an outer join? The columns that hold NULL (or '0', what COUNT gives a group with
+// no partner) in a missing row while no row of the learner's answer has that value there.
+function outerPaddedColumns(missing, actualRows) {
   const width = missing[0]?.length ?? 0
+  const cols = []
   for (let c = 0; c < width; c++) {
     for (const pad of [null, '0']) {
       const same = (v) => (pad === null ? v === null || v === undefined : v !== null && v !== undefined && String(v).trim() === pad)
-      if (missing.some((r) => same(r[c])) && !actualRows.some((r) => same(r[c]))) return true
+      if (missing.some((r) => same(r[c])) && !actualRows.some((r) => same(r[c]))) { cols.push(c); break }
     }
   }
-  return false
+  return cols
+}
+
+// The names (alias, else table) of the FROM clause in order: the first is the table a LEFT JOIN keeps whole, the others are the
+// ones it pads with NULL. Null when the clause has a subquery or cannot be read.
+function fromNames(text, at) {
+  const from = topLevel(clauseText(text, at, 'from'))
+  if (/\(\s*SELECT\b/i.test(clauseText(text, at, 'from'))) return null
+  const factors = from.split(/,|\b(?:NATURAL\s+|CROSS\s+|INNER\s+|(?:LEFT|RIGHT|FULL)(?:\s+OUTER)?\s+)?JOIN\b/i)
+  const names = []
+  for (const f of factors) {
+    const words = f.replace(/\b(ON|USING)\b[\s\S]*$/i, '').trim().split(/\s+/).filter(Boolean)
+    if (!words.length) return null
+    const last = words[words.length - 1].replace(/^.*\./, '')
+    names.push(last.toLowerCase())
+  }
+  return names
+}
+
+// The table alias a select-list item reads its column from (s.nume, COUNT(n.valoare) -> 's', 'n'), or null when it names none.
+function itemQualifiers(text, at) {
+  const list = clauseText(text, at, 'select').replace(/^\s*(DISTINCT|UNIQUE|ALL)\b/i, '')
+  const items = []
+  let depth = 0
+  let cur = ''
+  for (const c of list) {
+    if (c === '(') depth++
+    else if (c === ')') depth--
+    if (c === ',' && depth === 0) { items.push(cur); cur = '' } else cur += c
+  }
+  items.push(cur)
+  return items.map((it) => (/\b([A-Za-z_][\w$#]*)\s*\.\s*[A-Za-z_"]/.exec(it)?.[1] ?? null)?.toLowerCase() ?? null)
 }
 
 // number of tables in the FROM list, and how many join conditions the text provides
@@ -123,14 +172,15 @@ export function detectMistake({ sql, actual, expected, spec }) {
   const { text, strings } = mask(sql)
   const at = clauseStarts(text)
 
-  // a DELETE or UPDATE that touches every row
-  if (/^\s*(DELETE|UPDATE)\b/i.test(text) && !/\bWHERE\b/i.test(text)) return 'dml-no-where'
+  // a DELETE or UPDATE that touches every row, in any statement of the script
+  if (text.split(';').some((st) => /^\s*(DELETE|UPDATE)\b/i.test(st) && !/\bWHERE\b/i.test(st))) return 'dml-no-where'
   if (spec?.kind === 'state' || !actual || actual.error || !Array.isArray(actual.rows) || !expected?.rows) return null
   const diff = diffRows(actual.rows, expected.rows)
   if (!diff.missing.length && !diff.extra.length) return null // the rows are right: nothing to name
 
-  // CHAR columns are padded with blanks: the rows match once the blanks are cut off
-  if (bagEqual(trimRows(actual.rows), trimRows(expected.rows))) return 'char-trim'
+  // CHAR columns are padded with blanks: the rows match once the blanks are cut off. Only the learner's blanks are a mistake to
+  // name (cut them with TRIM); when the answer keeps the padding and the learner cut it, TRIM is not the fix.
+  if (bagEqual(trimRows(actual.rows), trimRows(expected.rows))) return paddedCells(diff.extra) > paddedCells(diff.missing) ? 'char-trim' : null
 
   // = NULL / <> NULL in a condition (UPDATE ... SET x = NULL is not a condition)
   const condition = /^\s*UPDATE\b/i.test(text) ? text.slice(Math.max(0, text.search(/\bWHERE\b/i))) : text
@@ -145,11 +195,12 @@ export function detectMistake({ sql, actual, expected, spec }) {
   const namePair = /\b(\w+)\.(nume|prenume)\s*(<>|!=|<|>)\s*(\w+)\.\2\b/i.exec(text)
   if (namePair && namePair[1].toLowerCase() !== namePair[4].toLowerCase() && diff.missing.length) return 'self-pair-name'
 
-  // MINUS on names: people with the same name merge into one row, so rows are missing
-  if (/\bMINUS\b/i.test(text) && actual.rows.length < expected.rows.length && !diff.extra.length) return 'minus-name-collapse'
+  // MINUS on names: people with the same name merge into one row, so rows are missing (only possible when the answer has a name
+  // column that repeats a value)
+  if (/\bMINUS\b/i.test(text) && actual.rows.length < expected.rows.length && !diff.extra.length && repeatsAName(expected)) return 'minus-name-collapse'
 
-  // AND and OR mixed with no parentheses
-  const where = topLevel(clauseText(text, at, 'where'))
+  // AND and OR mixed with no parentheses (the AND of BETWEEN .. AND is not a condition)
+  const where = topLevel(clauseText(text, at, 'where')).replace(/\bBETWEEN\b[\s\S]*?\bAND\b/gi, 'BETWEEN ')
   if (/\bAND\b/i.test(where) && /\bOR\b/i.test(where)) return 'and-or'
 
   // a text literal in the wrong case, so the condition finds fewer rows than it should
@@ -166,7 +217,14 @@ export function detectMistake({ sql, actual, expected, spec }) {
 
   // an inner join where the exercise wants the rows without a partner too: the missing rows are the ones an outer join pads
   // with NULL (or with 0 from COUNT) in columns where the learner's rows have no NULL (or 0)
-  if (tables >= 2 && !hasOuter(text) && !/\bMINUS\b|\bUNION\b|\bINTERSECT\b/i.test(text) && !diff.extra.length && diff.missing.length && outerPadded(diff.missing, actual.rows)) return 'inner-vs-left'
+  // (an outer join pads the columns of the tables after the first one; a NULL in a column of the first table is something else)
+  if (tables >= 2 && !hasOuter(text) && !/\bMINUS\b|\bUNION\b|\bINTERSECT\b/i.test(text) && !diff.extra.length && diff.missing.length) {
+    const padded = outerPaddedColumns(diff.missing, actual.rows)
+    const names = fromNames(text, at)
+    const quals = itemQualifiers(text, at)
+    const outer = (c) => !names || quals.length !== expected.rows[0]?.length || quals[c] === null || names.slice(1).includes(quals[c])
+    if (padded.some(outer)) return 'inner-vs-left'
+  }
 
   // DISTINCT with several columns while the expected answer has one row per first-column value
   const selectList = topLevel(clauseText(text, at, 'select'))

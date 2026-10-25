@@ -45,8 +45,8 @@ export function validateSqlExercise(b) {
     if (c.aliasesDiffer !== undefined && !(Array.isArray(c.aliasesDiffer) && c.aliasesDiffer.every((a) => typeof a === 'string'))) {
       at('check.aliasesDiffer must be a list of column names');
     }
-    if (c.cosmetic !== undefined && !(Array.isArray(c.cosmetic) && c.cosmetic.every((x) => x === '' || x === 'trim-case'))) {
-      at('check.cosmetic must be a list of "" or "trim-case", one per column');
+    if (c.cosmetic !== undefined && !(Array.isArray(c.cosmetic) && c.cosmetic.every((x) => x === '' || x === 'trim' || x === 'trim-case'))) {
+      at('check.cosmetic must be a list of "", "trim" or "trim-case", one per column');
     }
     if (b?.kind === 'state' && !(Array.isArray(c.tables) && c.tables.length > 0 && c.tables.every(isStr))) at('a state exercise needs check.tables');
   }

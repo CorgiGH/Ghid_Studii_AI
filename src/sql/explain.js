@@ -8,17 +8,25 @@ const TABLE = {
     ro: 'Valoarea introdusă există deja într-o coloană care trebuie să fie unică (cheie primară sau UNIQUE). Folosește o valoare nouă sau modifică rândul existent.',
     en: 'The value already exists in a column that must be unique (primary key or UNIQUE). Use a new value or change the existing row.',
   },
+  'ORA-00900': {
+    ro: 'Comanda nu începe cu un cuvânt pe care Oracle îl cunoaște (de exemplu SELEC în loc de SELECT, sau o comandă din alt sistem, ca SHOW sau VALUES). Verifică primul cuvânt.',
+    en: 'The command does not start with a word Oracle knows (for example SELEC instead of SELECT, or a command from another system such as SHOW or VALUES). Check the first word.',
+  },
   'ORA-00902': {
     ro: 'Tipul de date nu există în Oracle (de exemplu TEXT, BOOLEAN sau SERIAL). Folosește VARCHAR2(n), CHAR(n), NUMBER(p,s) sau DATE.',
     en: 'The data type does not exist in Oracle (for example TEXT, BOOLEAN or SERIAL). Use VARCHAR2(n), CHAR(n), NUMBER(p,s) or DATE.',
+  },
+  'ORA-00903': {
+    ro: 'După FROM lipsește numele tabelului (sau nu e un nume valid). Scrie tabelul din care citești: SELECT * FROM studenti.',
+    en: 'The table name is missing after FROM (or it is not a valid name). Write the table you read from: SELECT * FROM studenti.',
   },
   'ORA-00904': {
     ro: 'Numele unei coloane sau al unei funcții nu există sau este scris greșit. Verifică ortografia și că tabelul din FROM chiar are acea coloană.',
     en: 'The name of a column or function does not exist or is misspelled. Check the spelling and that the table in FROM really has that column.',
   },
   'ORA-00905': {
-    ro: 'Lipsește un cuvânt cheie al comenzii (de exemplu VALUES, SET sau INTO). Recitește forma comenzii și completează cuvântul care lipsește.',
-    en: 'A keyword of the command is missing (for example VALUES, SET or INTO). Re-read the shape of the command and add the missing word.',
+    ro: 'Lipsește un cuvânt cheie al comenzii (de exemplu ON după JOIN, sau VALUES, SET, INTO). Recitește forma comenzii și completează cuvântul care lipsește: un JOIN cere ON cu condiția de legătură (JOIN note n ON s.nr_matricol = n.nr_matricol).',
+    en: 'A keyword of the command is missing (for example ON after JOIN, or VALUES, SET, INTO). Re-read the shape of the command and add the missing word: a JOIN needs ON with the join condition (JOIN note n ON s.nr_matricol = n.nr_matricol).',
   },
   'ORA-00906': {
     ro: 'Lipsește o paranteză stângă. VARCHAR2 cere lungimea între paranteze: VARCHAR2(20).',
@@ -37,8 +45,8 @@ const TABLE = {
     en: 'The requested length is too big for the type: VARCHAR2 holds at most 4000 characters, CHAR at most 2000.',
   },
   'ORA-00911': {
-    ro: 'Comanda conține un caracter pe care Oracle nu îl acceptă aici, de pildă un al doilea ; sau o a doua comandă în aceeași rulare. Rulează o singură comandă și scoate caracterul în plus.',
-    en: 'The command contains a character Oracle does not accept here, for example a second ; or a second command in the same run. Run one command and remove the extra character.',
+    ro: 'Comanda conține un caracter pe care Oracle nu îl acceptă aici: un al doilea ; (o a doua comandă în aceeași rulare) sau un % scris în afara ghilimelelor. % are sens doar într-un tipar LIKE, între apostrofuri (LIKE \'%a%\'); restul împărțirii se calculează cu MOD.',
+    en: 'The command contains a character Oracle does not accept here: a second ; (a second command in the same run) or a % written outside quotes. % only means something in a LIKE pattern, between single quotes (LIKE \'%a%\'); the remainder of a division is MOD.',
   },
   'ORA-00913': {
     ro: 'În VALUES sunt mai multe valori decât coloane în INSERT. Numără coloanele și valorile: trebuie să fie la fel de multe.',
@@ -53,8 +61,8 @@ const TABLE = {
     en: 'The comparison operator does not exist in Oracle (for example ILIKE or ::). Use LIKE, with UPPER on both sides if needed, and CAST or TO_CHAR for conversions.',
   },
   'ORA-00923': {
-    ro: 'Oracle nu a găsit FROM unde îl aștepta: lista de după SELECT are ceva în plus sau îi lipsește o virgulă. Verifică virgulele dintre expresii și că nu ai scris ceva ca TOP 2 sau x::text.',
-    en: 'Oracle did not find FROM where it expected it: the list after SELECT has something extra or is missing a comma. Check the commas between expressions and that you did not write something like TOP 2 or x::text.',
+    ro: 'Oracle nu a găsit FROM unde îl aștepta: lipsește FROM (sau e scris greșit, de pildă FORM), ori lista de după SELECT are ceva în plus sau îi lipsește o virgulă. Orice SELECT are nevoie de FROM (pentru o simplă expresie, FROM DUAL); verifică și virgulele dintre expresii.',
+    en: 'Oracle did not find FROM where it expected it: FROM is missing (or misspelled, for example FORM), or the list after SELECT has something extra or is missing a comma. Every SELECT needs FROM (for a plain expression, FROM DUAL); check the commas between expressions too.',
   },
   'ORA-00928': {
     ro: 'După operatorul de mulțimi lipsește un SELECT. Oracle nu are INTERSECT ALL sau MINUS ALL; folosește INTERSECT, MINUS sau UNION ALL.',
@@ -65,8 +73,8 @@ const TABLE = {
     en: 'The data types do not match (for example you compare a number with a text or a date with a number). Convert one side with TO_CHAR, TO_DATE or TO_NUMBER.',
   },
   'ORA-00933': {
-    ro: 'Comanda are ceva ce Oracle nu recunoaște la sfârșit sau în mijloc (LIMIT, FETCH FIRST, AS înaintea unui alias de tabel). Oracle 11g limitează rândurile cu ROWNUM și nu pune AS între tabel și alias.',
-    en: 'The command has something Oracle does not recognise at the end or in the middle (LIMIT, FETCH FIRST, AS before a table alias). Oracle 11g limits rows with ROWNUM and has no AS between a table and its alias.',
+    ro: 'Comanda nu se termină acolo unde se așteaptă Oracle: după o clauză completă urmează ceva ce nu se potrivește (un cuvânt în plus, o paranteză sau o clauză în locul greșit). De exemplu LIMIT sau FETCH FIRST nu există în Oracle 11g, iar AS nu se pune între tabel și alias. Citește comanda de la locul unde se oprește.',
+    en: 'The command does not end where Oracle expects: after a complete clause comes something that does not fit (an extra word, a parenthesis or a clause in the wrong place). For example LIMIT or FETCH FIRST do not exist in Oracle 11g, and AS does not go between a table and its alias. Read the command from the place where it stops.',
   },
   'ORA-00934': {
     ro: 'O funcție de grup (COUNT, SUM, AVG, MIN, MAX) nu poate sta în WHERE. Mută condiția în HAVING sau calculeaz-o într-o subinterogare.',
@@ -79,6 +87,14 @@ const TABLE = {
   'ORA-00937': {
     ro: 'Amesteci o coloană simplă cu o funcție de grup (COUNT, SUM, ...) fără GROUP BY. Fie adaugi GROUP BY pe coloană, fie scoți coloana din SELECT.',
     en: 'You mix a plain column with a group function (COUNT, SUM, ...) without GROUP BY. Either add GROUP BY on the column or remove the column from SELECT.',
+  },
+  'ORA-00938': {
+    ro: 'Funcția a primit prea puține argumente. Verifică ce cere: de exemplu LPAD(text, lungime [, completare]) și SUBSTR(text, start [, lungime]) au nevoie de cel puțin două.',
+    en: 'The function got too few arguments. Check what it needs: for example LPAD(text, length [, fill]) and SUBSTR(text, start [, length]) need at least two.',
+  },
+  'ORA-00939': {
+    ro: 'Funcția a primit prea multe argumente. Numără virgulele dintre paranteze și compară cu forma funcției (ROUND(n [, zecimale]) are cel mult două).',
+    en: 'The function got too many arguments. Count the commas between the parentheses and compare with the function\'s shape (ROUND(n [, decimals]) has at most two).',
   },
   'ORA-00942': {
     ro: 'Tabelul sau view-ul nu există sau nu ai voie să îl vezi. Verifică numele tabelului și că ai creat tabelul înainte.',
@@ -116,6 +132,14 @@ const TABLE = {
     ro: 'Rezultatul unui calcul întreg este prea mare. Folosește numere mai mici sau împarte calculul în pași.',
     en: 'The result of an integer calculation is too large. Use smaller numbers or split the calculation into steps.',
   },
+  'ORA-01427': {
+    ro: 'Subinterogarea folosită ca o singură valoare (după =, <, > sau în lista din SELECT) întoarce mai multe rânduri. Restrânge-o la un rând sau folosește IN, ANY sau ALL.',
+    en: 'The subquery used as a single value (after =, <, > or in the SELECT list) returns more than one row. Narrow it to one row or use IN, ANY or ALL.',
+  },
+  'ORA-01428': {
+    ro: 'Un argument al funcției este în afara valorilor permise (de exemplu SQRT dintr-un număr negativ sau INSTR cu apariția 0). Verifică valoarea dată funcției.',
+    en: 'An argument of the function is outside the allowed values (for example SQRT of a negative number or INSTR with occurrence 0). Check the value given to the function.',
+  },
   'ORA-01430': {
     ro: 'Coloana pe care vrei s-o adaugi există deja în tabel. Alege alt nume.',
     en: 'The column you want to add already exists in the table. Choose another name.',
@@ -148,6 +172,10 @@ const TABLE = {
     ro: 'Scala din NUMBER(p,s) trebuie să fie între -84 și 127.',
     en: 'The scale in NUMBER(p,s) must be between -84 and 127.',
   },
+  'ORA-01756': {
+    ro: 'Un text între apostrofuri nu este închis: lipsește apostroful de la sfârșit. Închide textul (de exemplu \'Popescu\'); un apostrof din interiorul textului se scrie dublat: \'it\'\'s\'.',
+    en: 'A text between single quotes is not closed: the closing quote is missing. Close the text (for example \'Popescu\'); a quote inside the text is written twice: \'it\'\'s\'.',
+  },
   'ORA-01758': {
     ro: 'Nu poți adăuga o coloană NOT NULL într-un tabel care are deja rânduri, decât dacă îi dai o valoare implicită: ADD (c NUMBER DEFAULT 0 NOT NULL).',
     en: 'You cannot add a NOT NULL column to a table that already has rows unless you give it a default: ADD (c NUMBER DEFAULT 0 NOT NULL).',
@@ -156,9 +184,21 @@ const TABLE = {
     ro: 'ORDER BY trimite la o poziție care nu există în lista din SELECT. Folosește un număr între 1 și numărul de coloane selectate sau numele coloanei.',
     en: 'ORDER BY points to a position that is not in the SELECT list. Use a number from 1 to the number of selected columns, or the column name.',
   },
+  'ORA-01789': {
+    ro: 'Interogările legate cu UNION, INTERSECT sau MINUS trebuie să aibă același număr de coloane. Pune în fiecare SELECT câte coloane are celălalt, în aceeași ordine.',
+    en: 'The queries joined by UNION, INTERSECT or MINUS must have the same number of columns. Give each SELECT as many columns as the other, in the same order.',
+  },
+  'ORA-01790': {
+    ro: 'Coloanele aflate pe aceeași poziție în cele două interogări ale lui UNION, INTERSECT sau MINUS trebuie să aibă același tip (de exemplu text cu text). Convertește una dintre ele cu TO_CHAR sau TO_NUMBER.',
+    en: 'The columns in the same position of the two queries of UNION, INTERSECT or MINUS must have the same type (for example text with text). Convert one of them with TO_CHAR or TO_NUMBER.',
+  },
   'ORA-01791': {
     ro: 'În ORDER BY ai o expresie care nu apare în lista din SELECT DISTINCT sau într-o reuniune. Pune expresia și în SELECT.',
     en: 'ORDER BY has an expression that is not in the SELECT DISTINCT list or in a set operation. Put the expression in SELECT too.',
+  },
+  'ORA-01801': {
+    ro: 'Data nu încape în lungimea cerută: textul ei (de exemplu 26-OCT-26, 9 caractere) e mai lung decât tipul din CAST. Mărește lungimea, de pildă CAST(d AS VARCHAR2(20)), sau folosește TO_CHAR.',
+    en: 'The date does not fit in the requested length: its text (for example 26-OCT-26, 9 characters) is longer than the type in CAST. Make the length larger, for example CAST(d AS VARCHAR2(20)), or use TO_CHAR.',
   },
   'ORA-01821': {
     ro: 'Formatul de dată conține un element necunoscut sau unul care nu se aplică acestui tip (de pildă FF sau TZ pe un DATE). Verifică literele din format: YYYY, MM, DD, HH24, MI, SS.',
@@ -176,13 +216,37 @@ const TABLE = {
     ro: 'Textul este prea scurt pentru formatul de dată (lipsește luna sau anul). Scrie data completă, de exemplu 15-FEB-26, sau folosește TO_DATE.',
     en: 'The text is too short for the date format (the month or year is missing). Write the whole date, for example 15-FEB-26, or use TO_DATE.',
   },
+  'ORA-01841': {
+    ro: 'Anul din dată nu este valid (trebuie să fie între -4713 și 9999, fără 0), adesea pentru că textul nu se potrivește cu formatul. Verifică textul datei și masca din TO_DATE.',
+    en: 'The year of the date is not valid (it must be between -4713 and 9999, not 0), often because the text does not match the format. Check the date text and the mask in TO_DATE.',
+  },
   'ORA-01843': {
     ro: 'Luna din textul de dată nu este validă (de exemplu luna 13 sau un nume scris greșit). Verifică luna și limba numelor de luni din sesiune.',
     en: 'The month in the date text is not valid (for example month 13 or a misspelled name). Check the month and the language of month names in the session.',
   },
+  'ORA-01846': {
+    ro: 'Numele zilei nu este o zi a săptămânii în limba sesiunii. Cu setările implicite (engleză), NEXT_DAY cere de exemplu \'MONDAY\' sau \'SUNDAY\', nu \'LUNI\' sau \'DUMINICA\'.',
+    en: 'The day name is not a day of the week in the session language. With the default settings (English), NEXT_DAY wants for example \'MONDAY\' or \'SUNDAY\', not \'LUNI\' or \'DUMINICA\'.',
+  },
   'ORA-01847': {
     ro: 'Ziua lunii trebuie să fie între 1 și ultima zi a lunii.',
     en: 'The day of the month must be between 1 and the last day of the month.',
+  },
+  'ORA-01849': {
+    ro: 'Cu HH sau HH12 ora trebuie să fie între 1 și 12. Pentru ore ca 13 sau 00 folosește HH24 în format.',
+    en: 'With HH or HH12 the hour must be between 1 and 12. For hours such as 13 or 00, use HH24 in the format.',
+  },
+  'ORA-01850': {
+    ro: 'Cu HH24 ora trebuie să fie între 0 și 23. Verifică ora din textul datei.',
+    en: 'With HH24 the hour must be between 0 and 23. Check the hour in the date text.',
+  },
+  'ORA-01851': {
+    ro: 'Minutele trebuie să fie între 0 și 59. Verifică minutele din textul datei (și că MI, nu MM, stă în format pentru minute).',
+    en: 'The minutes must be between 0 and 59. Check the minutes in the date text (and that the format uses MI, not MM, for minutes).',
+  },
+  'ORA-01852': {
+    ro: 'Secundele trebuie să fie între 0 și 59. Verifică secundele din textul datei.',
+    en: 'The seconds must be between 0 and 59. Check the seconds in the date text.',
   },
   'ORA-01858': {
     ro: 'Oracle a găsit o literă acolo unde formatul cerea cifre, sau invers. Potrivește textul datei cu formatul din TO_DATE, caracter cu caracter.',
@@ -236,6 +300,10 @@ const TABLE = {
     ro: 'Tabelul are o cheie primară sau UNIQUE la care trimit chei străine din alte tabele. Șterge întâi tabelele copil sau folosește DROP TABLE ... CASCADE CONSTRAINTS.',
     en: 'The table has a primary or UNIQUE key that foreign keys in other tables point to. Drop the child tables first or use DROP TABLE ... CASCADE CONSTRAINTS.',
   },
+  'ORA-03001': {
+    ro: 'Forma aceasta (o numește mesajul de eroare) este valabilă în Oracle, dar nu este disponibilă în această bază de date de exercițiu. Scrie interogarea altfel, de exemplu cu ROWNUM pe un singur tabel sau pe o subinterogare, sau încearc-o pe Oracle-ul din laborator.',
+    en: 'This form (the error message names it) is valid in Oracle but is not available in this practice database. Write the query another way, for example with ROWNUM on a single table or on a subquery, or try it on the lab\'s Oracle.',
+  },
   'ORA-04043': {
     ro: 'Obiectul nu există: tabelul nu a fost creat sau numele este scris greșit. SELECT table_name FROM user_tables îți arată tabelele tale.',
     en: 'The object does not exist: the table was not created or the name is misspelled. SELECT table_name FROM user_tables shows your tables.',
@@ -252,6 +320,10 @@ const TABLE = {
     ro: 'Un tabel nu poate rămâne fără nicio coloană. Păstrează cel puțin una sau șterge tabelul cu DROP TABLE.',
     en: 'A table cannot be left without any column. Keep at least one or drop the table with DROP TABLE.',
   },
+  'ORA-25137': {
+    ro: 'Valoarea nu încape în tipul cerut: textul numărului are mai multe caractere decât lungimea din CAST (CAST(1/3 AS VARCHAR2(10)) are nevoie de 40). Mărește lungimea sau rotunjește întâi cu ROUND.',
+    en: 'The value does not fit in the requested type: the text of the number has more characters than the length in CAST (CAST(1/3 AS VARCHAR2(10)) needs 40). Make the length larger or round first with ROUND.',
+  },
   'ORA-25154': {
     ro: 'O coloană din USING nu poate avea prefix de tabel, nici în SELECT, nici în WHERE. Scrie-o fără prefix: nr_matricol, nu s.nr_matricol.',
     en: 'A column in USING cannot have a table prefix, neither in SELECT nor in WHERE. Write it without a prefix: nr_matricol, not s.nr_matricol.',
@@ -263,6 +335,38 @@ const TABLE = {
   'ORA-30088': {
     ro: 'Precizia unui TIMESTAMP trebuie să fie între 0 și 9.',
     en: 'The precision of a TIMESTAMP must be between 0 and 9.',
+  },
+  'ORA-30483': {
+    ro: 'O funcție analitică (cu OVER) nu poate sta în WHERE. Calculeaz-o într-o subinterogare din FROM și filtrează pe rezultatul ei, sau folosește ROWNUM.',
+    en: 'An analytic function (with OVER) cannot be in WHERE. Compute it in a subquery in FROM and filter on its result, or use ROWNUM.',
+  },
+}
+
+// what another dialect's habit is in Oracle 11g, by the construct the strictness pass names (src/sql/rewrite/lint.js)
+const NOT_ORACLE = {
+  except: {
+    ro: 'Oracle 11g nu are EXCEPT: diferența a două interogări se scrie cu MINUS (SELECT ... MINUS SELECT ...).',
+    en: 'Oracle 11g has no EXCEPT: the difference of two queries is written with MINUS (SELECT ... MINUS SELECT ...).',
+  },
+  limit: {
+    ro: 'Oracle 11g nu are LIMIT, OFFSET, FETCH FIRST sau TOP. Primele n rânduri se iau cu WHERE ROWNUM <= n; pentru primele n într-o anumită ordine, pune ORDER BY într-o subinterogare și ROWNUM în afara ei.',
+    en: 'Oracle 11g has no LIMIT, OFFSET, FETCH FIRST or TOP. The first n rows are taken with WHERE ROWNUM <= n; for the first n in a given order, put ORDER BY in a subquery and ROWNUM outside it.',
+  },
+  ilike: {
+    ro: 'Oracle nu are ILIKE. Ca să cauți fără să conteze literele mari și mici, adu ambele părți la aceeași formă: UPPER(nume) LIKE \'POP%\'.',
+    en: 'Oracle has no ILIKE. To search without caring about upper and lower case, bring both sides to the same form: UPPER(nume) LIKE \'POP%\'.',
+  },
+  cast: {
+    ro: 'Oracle nu are operatorul ::. O conversie se scrie cu CAST(x AS tip) sau cu TO_CHAR, TO_NUMBER, TO_DATE.',
+    en: 'Oracle has no :: operator. A conversion is written with CAST(x AS type) or with TO_CHAR, TO_NUMBER, TO_DATE.',
+  },
+  'set-all': {
+    ro: 'Oracle 11g nu are INTERSECT ALL sau MINUS ALL. Folosește INTERSECT sau MINUS (care elimină dublurile) sau UNION ALL.',
+    en: 'Oracle 11g has no INTERSECT ALL or MINUS ALL. Use INTERSECT or MINUS (which remove duplicates) or UNION ALL.',
+  },
+  default: {
+    ro: 'Comanda e scrisă în alt dialect SQL, nu în Oracle 11g. Oracle nu are LIMIT, TOP, ILIKE sau ::; folosește ROWNUM, LIKE cu UPPER, CAST sau TO_CHAR.',
+    en: 'The command is written in another SQL dialect, not Oracle 11g. Oracle has no LIMIT, TOP, ILIKE or ::; use ROWNUM, LIKE with UPPER, CAST or TO_CHAR.',
   },
 }
 
@@ -313,10 +417,7 @@ export function explainVerdict(v) {
     case 'error':
       return explainOra(v.code)
     case 'not-oracle':
-      return {
-        ro: 'Comanda e scrisă în alt dialect SQL, nu în Oracle 11g. Oracle nu are LIMIT, TOP, ILIKE sau ::; folosește ROWNUM, LIKE cu UPPER, CAST sau TO_CHAR.',
-        en: 'The command is written in another SQL dialect, not Oracle 11g. Oracle has no LIMIT, TOP, ILIKE or ::; use ROWNUM, LIKE with UPPER, CAST or TO_CHAR.',
-      }
+      return NOT_ORACLE[v.construct] ?? NOT_ORACLE.default
     case 'structure':
       return {
         ro: 'După rularea comenzilor, un tabel lipsește sau nu are coloanele cerute (nume, ordine, tip, lungime, NOT NULL). Verifică numele tabelului și definiția coloanelor.',
@@ -325,11 +426,19 @@ export function explainVerdict(v) {
     case 'contents': {
       const m = count(miss, 'rând așteptat lipsește', 'rânduri așteptate lipsesc', 'expected row is missing', 'expected rows are missing')
       const x = count(extra, 'rând în plus', 'rânduri în plus', 'extra row', 'extra rows')
+      // a zero count says nothing: name only the side that differs (as the rows verdict does)
+      const ro = [miss ? m.ro : '', extra ? x.ro : ''].filter(Boolean).join(', ')
+      const en = [miss ? m.en : '', extra ? x.en : ''].filter(Boolean).join(', ')
       return {
-        ro: `Tabelul${v.table ? ` ${v.table}` : ''} nu conține datele cerute: ${m.ro}, ${x.ro}.`,
-        en: `The table${v.table ? ` ${v.table}` : ''} does not hold the requested data: ${m.en}, ${x.en}.`,
+        ro: `Tabelul${v.table ? ` ${v.table}` : ''} nu conține datele cerute${ro ? `: ${ro}` : ''}.`,
+        en: `The table${v.table ? ` ${v.table}` : ''} does not hold the requested data${en ? `: ${en}` : ''}.`,
       }
     }
+    case 'century':
+      return {
+        ro: 'Datele se afișează la fel în formatul DD-MON-RR, dar anii întregi diferă (de exemplu 1995 față de 2095): anul din două cifre ascunde secolul. Verifică formatul cu care ai scris anul în TO_DATE (RR sau YYYY) și calculele cu date. Doar o coloană DATE ține anul întreg în spatele afișării; o coloană text făcută cu TO_CHAR nu poartă niciun an ascuns.',
+        en: 'The dates print the same in DD-MON-RR, but the full years differ (for example 1995 against 2095): the two-digit year hides the century. Check the format you wrote the year with in TO_DATE (RR or YYYY) and the date arithmetic. Only a DATE column keeps the full year behind what it shows; a text column made with TO_CHAR carries no hidden year.',
+      }
     default:
       return GENERIC
   }

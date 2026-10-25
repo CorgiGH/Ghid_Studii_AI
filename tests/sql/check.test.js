@@ -133,7 +133,7 @@ describe('checkResult: query results', () => {
       const right = { ...rows(['D'], ['17-FEB-95']), probe: [[' 1995-02-17']] }
       const wrongCentury = { ...rows(['D'], ['17-FEB-95']), probe: [[' 2095-02-17']] }
       expect(checkResult(right, e, ANY).ok).toBe(true)
-      expect(checkResult(wrongCentury, e, ANY)).toMatchObject({ ok: false, kind: 'rows', missing: [[' 1995-02-17']], extra: [[' 2095-02-17']] })
+      expect(checkResult(wrongCentury, e, ANY)).toMatchObject({ ok: false, kind: 'century', missing: [['17-FEB-95']], extra: [['17-FEB-95']] })
       // no probe on the learner's side: the displayed text is all there is to compare
       expect(checkResult(rows(['D'], ['17-FEB-95']), e, ANY).ok).toBe(true)
     })
@@ -203,7 +203,7 @@ describe('checkResult: state exercises', () => {
 
 describe('explanations', () => {
   it('has a Romanian and an English text for every verdict kind', () => {
-    const kinds = ['correct', 'rows', 'rowcount', 'order', 'columns', 'alias', 'error', 'not-oracle', 'structure', 'contents']
+    const kinds = ['correct', 'rows', 'rowcount', 'order', 'columns', 'alias', 'century', 'error', 'not-oracle', 'structure', 'contents']
     for (const kind of kinds) {
       const t = explainVerdict({ ok: kind === 'correct', kind, code: 'ORA-00904', missing: [['a']], extra: [] })
       expect(t.ro.length, kind).toBeGreaterThan(10)
@@ -232,7 +232,7 @@ describe('detectMistake on the lab data', () => {
   let engine
   beforeAll(async () => {
     engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate: datasetText('facultate') } })
-  })
+  }, 60000)
   const run = (sql) => engine.run(sql, { dataset: 'facultate' })
   const expectedOf = async (sql) => {
     const r = await run(sql)
@@ -338,7 +338,7 @@ describe('not-oracle comes from the strictness pass, not from the error code', (
   let engine
   beforeAll(async () => {
     engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate: datasetText('facultate') } })
-  })
+  }, 60000)
   const verdictOf = async (sql) => checkResult(await engine.run(sql, { dataset: 'facultate' }), { columns: ['NUME'], rows: [] }, ANY)
 
   it('names LIMIT, FETCH FIRST, ILIKE, :: and TOP as another dialect', async () => {
@@ -401,4 +401,127 @@ describe('checkResult: a frozen answer with `describe` grades the table definiti
     expect(await grade(item.solution.replace(/VARCHAR2\(\d+\)/g, 'VARCHAR2(50)').replace(/NOT NULL/g, ''))).toMatchObject({ ok: false, kind: 'structure' })
     expect(await grade(item.solution.replace('nr_matricol CHAR(6) NOT NULL', 'nr_matricol CHAR(6)'))).toMatchObject({ ok: false, kind: 'structure', table: 'STUDENTI' })
   }, 60000)
+})
+
+// ---- final fix wave: the checker and the named mistakes --------------------------------------------------------------
+describe('cosmetic trim (CHAR(n) padding the learner may cut)', () => {
+  const e = exp(['NUME', 'PRENUME'], ['Buraga    ', 'Sabin     '])
+  const spec = { ...ANY, cosmetic: ['trim', 'trim'] }
+  it('accepts the trimmed text and the padded one', () => {
+    expect(checkResult(rows(['NUME', 'PRENUME'], ['Buraga', 'Sabin']), e, spec).ok).toBe(true)
+    expect(checkResult(rows(['NUME', 'PRENUME'], ['Buraga    ', 'Sabin     ']), e, spec).ok).toBe(true)
+  })
+  it('keeps case and leading blanks significant', () => {
+    expect(checkResult(rows(['NUME', 'PRENUME'], ['BURAGA', 'Sabin']), e, spec)).toMatchObject({ ok: false, kind: 'rows' })
+    expect(checkResult(rows(['NUME', 'PRENUME'], [' Buraga', 'Sabin']), e, spec).ok).toBe(false)
+  })
+  it('leaves the columns marked "" exact', () => {
+    expect(checkResult(rows(['NUME', 'PRENUME'], ['Buraga', 'Sabin']), e, { ...ANY, cosmetic: ['', 'trim'] }).ok).toBe(false)
+  })
+})
+
+describe('aliasesDiffer is case-sensitive against the header Oracle shows without an alias', () => {
+  const e = exp(['A', 'B'], ['1', 'x'])
+  const spec = { ...ANY, aliasesDiffer: ['nume', 'prenume'] }
+  it('accepts a quoted mixed-case alias ("Nume" is not NUME)', () => {
+    expect(checkResult(rows(['Nume', 'Prenume'], ['1', 'x']), e, spec).ok).toBe(true)
+  })
+  it('still names an alias equal to the column (nume AS nume, "NUME")', () => {
+    expect(checkResult(rows(['NUME', 'PRENUMESTUD'], ['1', 'x']), e, spec)).toMatchObject({ ok: false, kind: 'alias' })
+    expect(checkResult(rows(['FAMILIE', 'PRENUME'], ['1', 'x']), e, spec)).toMatchObject({ ok: false, kind: 'alias' })
+  })
+})
+
+describe('century: only the four-digit years differ', () => {
+  const e = { ...exp(['NUME', 'D'], ['Popescu', '17-FEB-95'], ['Arhire', '26-DEC-95']), probe: [['Popescu', ' 1995-02-17'], ['Arhire', ' 1995-12-26']] }
+  it('gives the century verdict with the rows as displayed, not the probe rows', () => {
+    const a = { ...rows(['NUME', 'D'], ['Popescu', '17-FEB-95'], ['Arhire', '26-DEC-95']), probe: [['Popescu', ' 2095-02-17'], ['Arhire', ' 1995-12-26']] }
+    const v = checkResult(a, e, ANY)
+    expect(v).toMatchObject({ ok: false, kind: 'century', missing: [['Popescu', '17-FEB-95']], extra: [['Popescu', '17-FEB-95']] })
+    expect(JSON.stringify(v)).not.toContain('2095')
+    expect(JSON.stringify(v)).not.toContain('1995-')
+  })
+  it('explains that the dates print the same but the full years differ', () => {
+    const t = explainVerdict({ ok: false, kind: 'century', missing: [['a']], extra: [['a']] })
+    expect(t.ro).toMatch(/DD-MON-RR/)
+    expect(t.ro).toMatch(/TO_CHAR/)
+    expect(t.en).toMatch(/full year/i)
+  })
+  it('a row that really differs is still a rows verdict', () => {
+    const a = { ...rows(['NUME', 'D'], ['Popescu', '17-FEB-95'], ['Bodnar', '26-DEC-95']), probe: [['Popescu', ' 1995-02-17'], ['Bodnar', ' 1995-12-26']] }
+    expect(checkResult(a, e, ANY).kind).toBe('rows')
+  })
+})
+
+describe('runWithProbe drops a probe that changes the row count', () => {
+  it('a WHERE on the date text finds other rows under SYYYY-MM-DD: the probe is dropped and the answer passes', async () => {
+    const engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate: datasetText('facultate') } })
+    const sql = "SELECT nume, data_nastere FROM studenti WHERE data_nastere LIKE '%FEB%'"
+    const r = await runWithProbe(engine, sql, { dataset: 'facultate' })
+    expect(r.rows.length).toBeGreaterThan(0)
+    expect(r.probe).toBeUndefined()
+    const frozen = { columns: r.columns, rows: r.rows, probe: r.rows.map((row) => [row[0], ' 1995-02-17']) }
+    expect(checkResult(r, frozen, ANY).ok).toBe(true)
+  }, 60000)
+})
+
+describe('explainVerdict contents drops zero counts', () => {
+  it('names only the counts that are not zero', () => {
+    const t = explainVerdict({ kind: 'contents', table: 'NOTE', missing: [], extra: [['1']] })
+    expect(t.ro).not.toMatch(/\b0 rânduri/)
+    expect(t.en).not.toMatch(/\b0 expected/)
+    expect(t.en).toContain('1 extra row')
+    const u = explainVerdict({ kind: 'contents', table: 'NOTE', missing: [['1'], ['2']], extra: [] })
+    expect(u.en).toContain('2 expected rows are missing')
+    expect(u.en).not.toMatch(/\b0 extra/)
+  })
+})
+
+describe('char-trim is named only when the learner kept blanks the answer does not have', () => {
+  it('learner padded, expected trimmed: char-trim', () => {
+    const v = detectMistake({ sql: 'SELECT nume FROM profesori', actual: rows(['NUME'], ['Buraga    ']), expected: exp(['NUME'], ['Buraga']), spec: ANY })
+    expect(v).toBe('char-trim')
+  })
+  it('learner trimmed, expected padded: no named mistake (TRIM is not the fix)', () => {
+    const v = detectMistake({ sql: 'SELECT TRIM(nume) FROM profesori', actual: rows(['NUME'], ['Buraga']), expected: exp(['NUME'], ['Buraga    ']), spec: ANY })
+    expect(v).toBeNull()
+  })
+})
+
+describe('named-mistake detectors fire on their own signature only', () => {
+  let engine
+  beforeAll(async () => {
+    engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate: datasetText('facultate') } })
+  }, 60000)
+  const run = (sql) => engine.run(sql, { dataset: 'facultate' })
+  const mistakeOf = async (wrong, right, spec = ANY) => {
+    const e = await run(right)
+    return detectMistake({ sql: wrong, actual: await run(wrong), expected: { columns: e.columns, rows: e.rows }, spec })
+  }
+
+  it('minus-name-collapse needs a name column with repeated values in the answer', async () => {
+    // ids are unique: nothing to collapse, even though MINUS returns fewer rows
+    expect(await mistakeOf('SELECT id_curs FROM cursuri MINUS SELECT id_curs FROM note', 'SELECT id_curs FROM cursuri')).not.toBe('minus-name-collapse')
+    expect(await mistakeOf("SELECT nume FROM studenti MINUS SELECT nume FROM studenti WHERE nr_matricol = '119'", "SELECT nume FROM studenti WHERE nr_matricol <> '119'")).toBe('minus-name-collapse')
+  })
+
+  it('and-or skips the AND of BETWEEN ... AND', async () => {
+    expect(await mistakeOf('SELECT nume FROM studenti WHERE an BETWEEN 1 AND 2 OR bursa > 400', 'SELECT nume FROM studenti WHERE an BETWEEN 1 AND 3 OR bursa > 400')).not.toBe('and-or')
+    expect(await mistakeOf('SELECT nume FROM studenti WHERE an = 1 OR an = 2 AND bursa IS NOT NULL', 'SELECT nume FROM studenti WHERE (an = 1 OR an = 2) AND bursa IS NOT NULL')).toBe('and-or')
+  })
+
+  it('dml-no-where looks at every statement of the script', () => {
+    const spec = { order: 'any', mode: 'bag', kind: 'state', tables: ['note'] }
+    expect(detectMistake({ sql: "INSERT INTO note VALUES ('111', 21, 10, SYSDATE);\nDELETE FROM note", actual: {}, expected: {}, spec })).toBe('dml-no-where')
+    expect(detectMistake({ sql: "INSERT INTO note VALUES ('111', 21, 10, SYSDATE);\nDELETE FROM note WHERE id_curs = 21", actual: {}, expected: {}, spec })).toBeNull()
+    expect(detectMistake({ sql: "UPDATE studenti SET bursa = 1 WHERE an = 1;\nUPDATE studenti SET bursa = 2", actual: {}, expected: {}, spec })).toBe('dml-no-where')
+  })
+
+  it('inner-vs-left only when the NULLs of the missing rows sit in columns of the outer (right-hand) table', () => {
+    const wrong = 'SELECT s.nume, n.valoare FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol'
+    // the NULL is in n.valoare (the table the LEFT JOIN would pad): named
+    expect(detectMistake({ sql: wrong, actual: rows(['NUME', 'VALOARE'], ['Pop', '9']), expected: exp(['NUME', 'VALOARE'], ['Pop', '9'], ['Ion', null]), spec: ANY })).toBe('inner-vs-left')
+    // the NULL is in s.nume, a column of the kept (left-hand) table: an outer join would not produce it
+    expect(detectMistake({ sql: wrong, actual: rows(['NUME', 'VALOARE'], ['Pop', '9']), expected: exp(['NUME', 'VALOARE'], ['Pop', '9'], [null, '7']), spec: ANY })).toBeNull()
+  })
 })
