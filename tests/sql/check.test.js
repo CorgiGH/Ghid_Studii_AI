@@ -82,6 +82,21 @@ describe('checkResult: query results', () => {
       expect(checkResult(rows(['Q', 'ALTA'], ['1', 'x'], ['2', 'y'], ['3', null]), expected, spec)).toMatchObject({ ok: false, kind: 'alias' })
       expect(checkResult(rows(['Q', 'NUME'], ['1', 'x'], ['2', 'y'], ['3', null]), expected, { ...ANY, aliases: ['', 'NUME', 'X'] }).kind).toBe('alias')
     })
+    it('aliasCase compares a listed alias letter for letter ("Astazi" is not ASTAZI)', () => {
+      const e = exp(['Astazi'], ['x'])
+      const spec = { ...ANY, aliases: ['Astazi'], aliasCase: true }
+      expect(checkResult(rows(['Astazi'], ['x']), e, spec).ok).toBe(true)
+      expect(checkResult(rows(['ASTAZI'], ['x']), e, spec)).toMatchObject({ ok: false, kind: 'alias' })
+      expect(checkResult(rows(['ASTAZI'], ['x']), e, { ...ANY, aliases: ['Astazi'] }).ok).toBe(true)
+    })
+
+    it('aliasesDiffer refuses a header equal to the column it came from', () => {
+      const e = exp(['F', 'P'], ['1', '2'])
+      const spec = { ...ANY, aliases: 'any-distinct', aliasesDiffer: ['nume', 'prenume'] }
+      expect(checkResult(rows(['NUME', 'P'], ['1', '2']), e, spec)).toMatchObject({ ok: false, kind: 'alias' })
+      expect(checkResult(rows(['F', 'P'], ['1', '2']), e, spec).ok).toBe(true)
+    })
+
     it('any-distinct accepts any headers that differ from each other', () => {
       const spec = { ...ANY, aliases: 'any-distinct' }
       expect(checkResult(rows(['P', 'Q'], ['1', 'x'], ['2', 'y'], ['3', null]), expected, spec).ok).toBe(true)

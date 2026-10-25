@@ -8,8 +8,8 @@
 // --only     freeze just these ids
 //
 // For each item the reference `solution` runs on Oracle against both datasets of its pair (facultate + facultate-hidden, or
-// biblioteca + biblioteca-hidden), under the item's clock (default 2026-10-26 14:30:00). An item with a `clock` also runs under the
-// default clock, and both clocks must agree with the engine. Each dataset lives in its own Oracle schema (oracle-datasets.mjs), so
+// biblioteca + biblioteca-hidden), under the item's clock on the lab dataset and under the default clock (2026-10-26 14:30:00) on the hidden one, so a
+// date typed by hand fails the hidden variant. An item with a `clock` is also compared with the engine under both clocks. Each dataset lives in its own Oracle schema (oracle-datasets.mjs), so
 // solutions that DROP or UPDATE never touch the STUDENT lab tables.
 //   query item: file = { columns, rows, probe? }; `probe` = the rows again under NLS_DATE_FORMAT='SYYYY-MM-DD', only when the result has DATE cells
 //   state item: file = { TABLE: { columns, rows } } for each check.tables, read after the script ran
@@ -29,7 +29,7 @@ import { loadDatasetOnOracle, runOnDataset } from './oracle-datasets.mjs'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const vite = await createServer({ configFile: false, root: path.join(here, '..', '..'), appType: 'custom', logLevel: 'error', server: { middlewareMode: true, hmr: false, ws: false } })
 const {
-  DEFAULT_CLOCK, DEFAULT_CONTENT_DIR, DEFAULT_EXPECTED_DIR, clockOf, collectExercises, datasetPair, datasetText, engineCache,
+  DEFAULT_CLOCK, DEFAULT_CONTENT_DIR, DEFAULT_EXPECTED_DIR, clockFor, clockOf, collectExercises, datasetPair, datasetText, engineCache,
   engineDifference, expectedFile, oracleTypeText, specOf,
 } = await vite.ssrLoadModule('/scripts/sql/freeze-lib.mjs')
 
@@ -149,7 +149,7 @@ const main = async () => {
 
       // ---- state items, each on a freshly loaded dataset
       for (const item of mine.filter((i) => i.kind === 'state')) {
-        const clock = clockOf(item.clock)
+        const clock = clockFor(item, dataset)
         const r = await oracleState(dataset, clock, item)
         if (r.error) { fail(item, dataset, `solution fails on Oracle: ${r.error}`); continue }
         frozen.set(`${item.id}|${dataset}|${clock}`, r.expected)
@@ -157,7 +157,7 @@ const main = async () => {
 
       // ---- write the answers and compare with the engine
       for (const item of mine) {
-        const clock = clockOf(item.clock)
+        const clock = clockFor(item, dataset)
         const expected = frozen.get(`${item.id}|${dataset}|${clock}`)
         if (!expected) continue
         fs.writeFileSync(expectedFile(opts.out, item.id, dataset), JSON.stringify(expected) + '\n')
@@ -183,7 +183,7 @@ const main = async () => {
 
   // an exercise whose two datasets give the same answer cannot tell a hard-coded result from a real query
   for (const item of items) {
-    const [a, b] = datasetPair(item.dataset).map((d) => frozen.get(`${item.id}|${d}|${clockOf(item.clock)}`))
+    const [a, b] = datasetPair(item.dataset).map((d) => frozen.get(`${item.id}|${d}|${clockFor(item, d)}`))
     if (a && b && !item.check.structure && JSON.stringify(a) === JSON.stringify(b)) warnings.push(`${item.id}: identical answer on ${item.dataset} and ${item.dataset}-hidden`)
   }
 

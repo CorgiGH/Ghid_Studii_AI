@@ -14,6 +14,9 @@
 //     same `orderBy` key values may come in any order among themselves (ties are not an error)
 //   - aliases: absent = the column headers are not compared; 'any-distinct' = any headers, but different from each other;
 //     a list = those headers (case-insensitive, Oracle shows unquoted aliases in capitals), '' in the list = any header there
+//   - aliasCase: true = a list of aliases is compared letter for letter (a quoted "Astazi" is not the ASTAZI of an unquoted alias)
+//   - aliasesDiffer = positional list of the column names the headers must not equal (an alias equal to its own column renames
+//     nothing); '' in the list = no constraint there
 //   - cosmetic[i] = 'trim-case' compares column i after TRIM and upper-casing (day and month names, padding the exercise does
 //     not ask about)
 //   - a DATE shows as DD-MON-RR, which hides the century. `runWithProbe` runs the query a second time with
@@ -127,8 +130,10 @@ function checkQuery(actual, expected, spec) {
     if (names.some((n) => !n) || new Set(names).size !== names.length) return verdict('alias')
   } else if (Array.isArray(spec.aliases)) {
     const wanted = spec.aliases
-    if (wanted.length !== actual.columns.length || wanted.some((a, i) => a !== '' && upper(a) !== upper(actual.columns[i]))) return verdict('alias')
+    const same = spec.aliasCase === true ? (a, b) => a === b : (a, b) => upper(a) === upper(b)
+    if (wanted.length !== actual.columns.length || wanted.some((a, i) => a !== '' && !same(a, actual.columns[i]))) return verdict('alias')
   }
+  if (Array.isArray(spec.aliasesDiffer) && spec.aliasesDiffer.some((n, i) => n && upper(n) === upper(actual.columns[i]))) return verdict('alias')
   return verdict('correct')
 }
 

@@ -16,6 +16,9 @@ export const DATASET_DIR = path.join(ROOT, 'public', 'sql', 'datasets')
 export const DEFAULT_CLOCK = '2026-10-26 14:30:00'
 // an exercise's `clock` is a date ('2026-08-26', at 14:30:00) or a full timestamp
 export const clockOf = (clock) => (!clock ? DEFAULT_CLOCK : clock.length === 10 ? `${clock} 14:30:00` : clock)
+// The clock an exercise is graded on in a dataset: its own on the lab data, the default (second) date on the hidden variant, so a
+// date typed by hand passes one and fails the other (mirrors runOptions in src/components/lesson/blocks/sqlExerciseSpec.js).
+export const clockFor = (item, dataset) => (dataset.endsWith('-hidden') ? DEFAULT_CLOCK : clockOf(item.clock))
 
 export const BASE_DATASETS = ['facultate', 'biblioteca']
 // the datasets an exercise on `dataset` is graded on: the lab data and its altered twin
@@ -93,7 +96,7 @@ export const strictSpec = (item, expected) => ({
 
 // Does the engine reproduce the frozen Oracle answer? -> null, or a one-line description of the first difference
 export async function engineDifference(item, dataset, expected, engineFor) {
-  const clock = clockOf(item.clock)
+  const clock = clockFor(item, dataset)
   const engine = await engineFor(dataset, clock)
   const actual = await runOnEngine(engine, item, dataset)
   if (actual.error) return `engine raises ${actual.error.code} (${actual.error.message})`

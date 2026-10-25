@@ -117,6 +117,10 @@ describe('what the block asks the engine and the files', () => {
     expect(runOptions(block(), { hidden: false })).toEqual({ dataset: 'facultate' });
   });
 
+  it('the hidden variant of a clocked exercise runs on the default clock, so a hand-typed date fails it', () => {
+    expect(runOptions(block({ clock: '2026-08-26' }), { hidden: true })).toEqual({ dataset: 'facultate-hidden' });
+  });
+
   it('a state exercise runs as a script', () => {
     expect(runOptions(block({ kind: 'state', check: { order: 'any', mode: 'bag', tables: ['T'] } }), { hidden: false }).script).toBe(true);
   });

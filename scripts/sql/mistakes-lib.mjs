@@ -8,14 +8,14 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { checkResult, runWithProbe } from '../../src/sql/check.js'
-import { ROOT, clockOf, datasetPair, engineCache, expectedFile, DEFAULT_EXPECTED_DIR, specOf } from './freeze-lib.mjs'
+import { ROOT, clockFor, datasetPair, engineCache, expectedFile, DEFAULT_EXPECTED_DIR, specOf } from './freeze-lib.mjs'
 
 export const NAMED_MISTAKES_FILE = path.join(ROOT, 'scripts', 'sql', 'named-mistakes.json')
 export const loadNamedMistakes = () => JSON.parse(fs.readFileSync(NAMED_MISTAKES_FILE, 'utf8'))
 
 // One mistake of one exercise on one dataset: the checker's verdict kind ('correct', 'rows', 'rowcount', 'contents', 'error' ...)
 export async function gradeOn(item, sql, dataset, engineFor = engineCache()) {
-  const clock = clockOf(item.clock)
+  const clock = clockFor(item, dataset)
   const expected = JSON.parse(fs.readFileSync(expectedFile(DEFAULT_EXPECTED_DIR, item.id, dataset), 'utf8'))
   // a fresh engine for a state exercise: it changes the dataset
   const engine = await (item.kind === 'state' ? engineCache() : engineFor)(dataset, clock)

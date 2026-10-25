@@ -41,6 +41,10 @@ export function validateSqlExercise(b) {
     if (c.aliases !== undefined && c.aliases !== 'any-distinct' && !(Array.isArray(c.aliases) && c.aliases.every((a) => typeof a === 'string'))) {
       at('check.aliases must be "any-distinct" or a list of headers');
     }
+    if (c.aliasCase !== undefined && c.aliasCase !== true) at('check.aliasCase must be true');
+    if (c.aliasesDiffer !== undefined && !(Array.isArray(c.aliasesDiffer) && c.aliasesDiffer.every((a) => typeof a === 'string'))) {
+      at('check.aliasesDiffer must be a list of column names');
+    }
     if (c.cosmetic !== undefined && !(Array.isArray(c.cosmetic) && c.cosmetic.every((x) => x === '' || x === 'trim-case'))) {
       at('check.cosmetic must be a list of "" or "trim-case", one per column');
     }
@@ -59,13 +63,15 @@ export function validateSqlExercise(b) {
 
 // ---- what the block asks the engine and the files ---------------------------------------------------------------------
 export const clockOf = (clock) => (!clock ? undefined : clock.length === 10 ? `${clock} 14:30:00` : clock);
+// A clocked exercise runs on its own date for the learner (the lab data) and on the default date for the hidden variant, so a date
+// typed by hand passes one and fails the other.
 export const datasetFor = (b, hidden) => (hidden ? `${b.dataset}-hidden` : b.dataset);
 export const expectedPath = (id, dataset) => `sql/expected/${id}.${dataset}.json`;
 
 // Options for SqlClient.run: a state exercise runs the learner's text as a script, a clock exercise runs on its own clock.
 export function runOptions(b, { hidden = false } = {}) {
   const o = { dataset: datasetFor(b, hidden) };
-  const clock = clockOf(b.clock);
+  const clock = hidden ? undefined : clockOf(b.clock);
   if (clock) o.clock = clock;
   if (b.kind === 'state') o.script = true;
   return o;
@@ -155,6 +161,9 @@ export function paperChecklist(b, expected) {
     if (named.length) items.push({ ro: `Coloanele se numesc ${named.join(', ')}`, en: `The columns are named ${named.join(', ')}` });
   } else if (c.aliases === 'any-distinct') {
     items.push({ ro: 'Fiecare coloană are un nume propriu, diferit de celelalte', en: 'Every column has a name of its own, different from the others' });
+  }
+  if (Array.isArray(c.aliasesDiffer) && c.aliasesDiffer.some(Boolean)) {
+    items.push({ ro: 'Niciun antet nu e identic cu numele coloanei din tabel', en: 'No header is the same as the name of its column in the table' });
   }
   return items;
 }
