@@ -120,16 +120,16 @@
           "type": "callout",
           "variant": "trap",
           "content": {
-            "en": "**A plausible result can be wrong.** `SELECT * FROM studenti s, note n WHERE s.prenume = 'Andrei'` gives no error and looks like a list of grades, but it has 42 rows, while the truth is 0. Without the link condition, every student is combined with all the grades.",
-            "ro": "**Un rezultat plauzibil poate fi greșit.** `SELECT * FROM studenti s, note n WHERE s.prenume = 'Andrei'` nu dă eroare și arată a listă de note, dar are 42 de rânduri, iar adevărul este 0. Fără condiția de legătură, fiecare student se combină cu toate notele."
+            "en": "**A plausible result can be wrong.** You want the grades of Pintescu Andrei and write `SELECT * FROM studenti s, note n WHERE s.prenume = 'Andrei'`. It gives no error and looks like a list of grades: 42 rows. But Pintescu is in year 1 and has no grade at all, so the right answer is 0 rows. The link condition `s.nr_matricol = n.nr_matricol` is missing.",
+            "ro": "**Un rezultat plauzibil poate fi greșit.** Vrei notele lui Pintescu Andrei și scrii `SELECT * FROM studenti s, note n WHERE s.prenume = 'Andrei'`. Nu dă eroare și arată ca o listă de note: 42 de rânduri. Dar Pintescu este în anul 1 și nu are nicio notă, deci răspunsul corect este 0 rânduri. Lipsește condiția de legătură `s.nr_matricol = n.nr_matricol`."
           }
         },
         {
           "type": "callout",
           "variant": "trap",
           "content": {
-            "en": "**Oracle is not Postgres.** `FROM studenti AS s` (with `AS` before the table alias), `LIMIT 3` and `EXCEPT` all give error ORA-00933. In Oracle 11g the table alias is written without `AS`, limiting is done with `ROWNUM`, and set difference is `MINUS`.",
-            "ro": "**Oracle nu este Postgres.** `FROM studenti AS s` (cu `AS` înaintea aliasului de tabel), `LIMIT 3` și `EXCEPT` dau toate eroarea ORA-00933. În Oracle 11g aliasul de tabel se scrie fără `AS`, limitarea se face cu `ROWNUM`, iar diferența de mulțimi este `MINUS`."
+            "en": "**Syntax from other databases does not work in Oracle.** `FROM studenti AS s` (with `AS` before the table alias), `LIMIT 3` and `EXCEPT` all give error ORA-00933. In Oracle 11g the table alias is written without `AS`, the first rows are taken with `ROWNUM`, the row number in the result (`WHERE ROWNUM <= 3`), and set difference is `MINUS`.",
+            "ro": "**Sintaxa din alte baze de date nu merge în Oracle.** `FROM studenti AS s` (cu `AS` înaintea aliasului de tabel), `LIMIT 3` și `EXCEPT` dau toate eroarea ORA-00933. În Oracle 11g aliasul de tabel se scrie fără `AS`, primele rânduri se iau cu `ROWNUM`, numărul rândului în rezultat (`WHERE ROWNUM <= 3`), iar diferența de mulțimi este `MINUS`."
           }
         },
         {
@@ -152,7 +152,7 @@
         {
           "type": "code",
           "language": "sql",
-          "code": "SELECT c.titlu_curs, s.nume, n.valoare\nFROM cursuri c\n  JOIN note n ON n.id_curs = c.id_curs\n  JOIN studenti s ON s.nr_matricol = n.nr_matricol\nWHERE n.valoare >= 9 AND c.an = 1\nORDER BY c.titlu_curs, s.nume;"
+          "code": "SELECT c.titlu_curs, s.nr_matricol, s.nume, n.valoare\nFROM cursuri c\n  JOIN note n ON n.id_curs = c.id_curs\n  JOIN studenti s ON s.nr_matricol = n.nr_matricol\nWHERE n.valoare >= 9 AND c.an = 1\nORDER BY c.titlu_curs, s.nume, s.nr_matricol;"
         },
         {
           "type": "definition",
@@ -185,6 +185,30 @@
           "content": {
             "en": "`CHAR` columns bring spaces (`TRIM`), `NULL` is tested with `IS NULL`, and pairs and sets are linked on keys (`nr_matricol`), not on names.",
             "ro": "Coloanele `CHAR` aduc spații (`TRIM`), `NULL` se testează cu `IS NULL`, iar perechile și mulțimile se leagă pe chei (`nr_matricol`), nu pe nume."
+          }
+        },
+        {
+          "type": "reflect",
+          "id": "bd-l25-r3",
+          "prompt": {
+            "en": "Apply the list above to the query at the top of this screen. Its result is below: how many rows does it have, and does any row look duplicated?",
+            "ro": "Aplică lista de mai sus pe interogarea de la începutul ecranului. Rezultatul ei e mai jos: câte rânduri are și pare vreun rând dublat?"
+          },
+          "placeholder": {
+            "en": "Count, then look at the values",
+            "ro": "Numără, apoi uită-te la valori"
+          },
+          "answer": {
+            "en": "First the count: 12 rows, the grades of 9 and 10 at the three year-1 courses (Logica, Matematica, OOP). Then the values: \"OOP Bodnar 9\" appears twice, but with different registration numbers, 116 and 119. It is not a duplicated row: they are two different students with the same name. Without `s.nr_matricol` in `SELECT` it would have looked like a duplicate; that is why pairs and sets are linked on keys, not on names.",
+            "ro": "Întâi numărul: 12 rânduri, notele de 9 și 10 de la cele trei cursuri din anul 1 (Logica, Matematica, OOP). Apoi valorile: „OOP Bodnar 9” apare de două ori, dar cu numere matricole diferite, 116 și 119. Nu e un rând dublat: sunt două studente diferite cu același nume. Fără `s.nr_matricol` în `SELECT` ar fi arătat ca un duplicat; de aceea perechile și mulțimile se leagă pe chei, nu pe nume."
+          },
+          "table": {
+            "caption": {
+              "en": "The result of the query above",
+              "ro": "Rezultatul interogării de mai sus"
+            },
+            "dataset": "facultate",
+            "sql": "SELECT c.titlu_curs, s.nr_matricol, s.nume, n.valoare FROM cursuri c JOIN note n ON n.id_curs = c.id_curs JOIN studenti s ON s.nr_matricol = n.nr_matricol WHERE n.valoare >= 9 AND c.an = 1 ORDER BY c.titlu_curs, s.nume, s.nr_matricol"
           }
         }
       ]
@@ -587,8 +611,8 @@
               },
               "correct": true,
               "explain": {
-                "en": "Correct. NATURAL JOIN links on all columns with the same name. After the first join, `an` is common with `cursuri.an`, so `studenti.an = cursuri.an` is required too, which matches no grade.",
-                "ro": "Corect. NATURAL JOIN leagă pe toate coloanele cu același nume. După primul join, `an` este comun cu `cursuri.an`, deci se cere și `studenti.an = cursuri.an`, ceea ce nu se potrivește pentru nicio notă."
+                "en": "Correct. NATURAL JOIN links on all columns with the same name. After the first join, `an` is common with `cursuri.an`, so `studenti.an = cursuri.an` is required too, which matches no grade. Year-3 students have grades only at courses of years 1 and 2, year-2 students only at year-1 courses, and year-1 students have no grades: nobody has a grade at a course of their own year.",
+                "ro": "Corect. NATURAL JOIN leagă pe toate coloanele cu același nume. După primul join, `an` este comun cu `cursuri.an`, deci se cere și `studenti.an = cursuri.an`, ceea ce nu se potrivește pentru nicio notă. Studenții din anul 3 au note doar la cursuri din anii 1 și 2, cei din anul 2 doar la cursuri din anul 1, iar cei din anul 1 nu au note: nimeni nu are notă la un curs din anul lui."
               }
             }
           ],
@@ -1060,7 +1084,7 @@
             "en": "Show the title of each year-2 course together with the name of the professor who teaches it. Courses without a professor must appear too, with an empty name. Columns: `titlu_curs`, `nume`. The name must have no trailing spaces (the column is `CHAR`).",
             "ro": "Afișați titlul fiecărui curs din anul 2, împreună cu numele profesorului care îl ține. Cursurile fără profesor trebuie să apară și ele, cu numele gol. Coloanele: `titlu_curs`, `nume`. Numele să nu aibă spații la sfârșit (coloana este `CHAR`)."
           },
-          "starter": "-- 1. Alege tabelele: cursuri (c), didactic (d) și profesori (p)\n-- 2. Leagă-le fără să pierzi cursuri: cursuri -> didactic -> profesori\n-- 3. Filtrează cursurile din anul 2\nSELECT c.titlu_curs, TRIM(p.nume) AS nume\nFROM cursuri c\n  LEFT JOIN didactic d ON d.id_curs = c.id_curs\n  LEFT JOIN profesori p ON p.id_prof = d.id_prof\nWHERE ",
+          "starter": "-- 1. Alege tabelele: cursuri (c), didactic (d) și profesori (p)\n-- 2. Leagă-le fără să pierzi cursuri: cursuri -> didactic -> profesori\n-- 3. Păstrează cursurile din anul 2",
           "solution": "SELECT c.titlu_curs, TRIM(p.nume) AS nume\nFROM cursuri c\n  LEFT JOIN didactic d ON d.id_curs = c.id_curs\n  LEFT JOIN profesori p ON p.id_prof = d.id_prof\nWHERE c.an = 2",
           "check": {
             "order": "any",

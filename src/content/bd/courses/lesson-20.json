@@ -34,8 +34,8 @@
             "ro": "Apar sau nu, și ce ai vrea să vezi?"
           },
           "answer": {
-            "en": "They do not appear. An ordinary join (INNER) keeps only the pairs that match, and a student without grades has no pair. That is why `SELECT DISTINCT nume` gives 8 names in the join and 11 in `studenti`: the difference is the students without grades. To keep them, you use an outer join: the student stays, and the columns from `note` get NULL.",
-            "ro": "Nu apar. Un join obișnuit (INNER) păstrează doar perechile care se potrivesc, iar un student fără note nu are nicio pereche. De aceea `SELECT DISTINCT nume` dă 8 nume în join și 11 în `studenti`: diferența sunt cei fără note. Ca să-i păstrezi, folosești un join extern: studentul rămâne, iar coloanele din `note` primesc NULL."
+            "en": "They do not appear. An ordinary join (INNER) keeps only the pairs that match, and a student without grades has no pair. A join with `note` has 42 rows and none of them is theirs (no registration number from 120 to 123 appears in `note`), so the 4 students in the first table are missing altogether. To keep them, you use an outer join: the student stays, and the columns from `note` get NULL.",
+            "ro": "Nu apar. Un join obișnuit (INNER) păstrează doar perechile care se potrivesc, iar un student fără note nu are nicio pereche. Un join cu `note` are 42 de rânduri și niciunul nu e al lor (în `note` nu apare niciun număr matricol între 120 și 123), deci cei 4 studenți din primul tabel lipsesc cu totul. Ca să-i păstrezi, folosești un join extern: studentul rămâne, iar coloanele din `note` primesc NULL."
           },
           "table": [
             {
@@ -113,8 +113,8 @@
           "show": [
             "s.nume",
             "s.prenume",
-            "n.valoare",
-            "n.nr_matricol"
+            "n.nr_matricol",
+            "n.valoare"
           ],
           "say": {
             "from": {
@@ -122,12 +122,12 @@
               "ro": "Pornim de la toți studenții."
             },
             "join": {
-              "en": "`LEFT JOIN` keeps all 13 people on the left. Those without a grade get NULL in the columns from `note`. Result: 42 + 4 = 46 rows.",
-              "ro": "`LEFT JOIN` păstrează toate cele 13 persoane din stânga. Cei fără notă primesc NULL în coloanele din `note`. Rezultat: 42 + 4 = 46 de rânduri."
+              "en": "`LEFT JOIN` keeps all 13 people on the left. Those without a grade get NULL in the columns from `note`. Result: 42 + 4 = 46 rows; the 4 students without grades are at the end of the table.",
+              "ro": "`LEFT JOIN` păstrează toate cele 13 persoane din stânga. Cei fără notă primesc NULL în coloanele din `note`. Rezultat: 42 + 4 = 46 de rânduri; cei 4 studenți fără note sunt la sfârșitul tabelului."
             },
             "where": {
-              "en": "4 rows remain: the students without any grade (Arhire, Bucur, Pintescu, Cobzaru), each with NULL in the columns from `note`.",
-              "ro": "Rămân 4 rânduri: studenții fără nicio notă (Arhire, Bucur, Pintescu, Cobzaru), fiecare cu NULL în coloanele din `note`."
+              "en": "4 rows remain: the four students without any grade (Arhire Alexandra, Bucur Andreea, Cobzaru George, Pintescu Andrei), with NULL in `n.nr_matricol` and in `n.valoare`.",
+              "ro": "Rămân 4 rânduri: cei patru studenți fără nicio notă (Arhire Alexandra, Bucur Andreea, Cobzaru George, Pintescu Andrei), cu NULL în `n.nr_matricol` și în `n.valoare`."
             }
           },
           "ask": {
@@ -191,10 +191,51 @@
       ]
     },
     {
+      "id": "bd-l20-s7",
+      "title": {
+        "en": "Outer joins",
+        "ro": "Join extern"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- toate rândurile din stânga, chiar fără pereche\nSELECT s.nume, n.valoare\nFROM studenti s\n  LEFT JOIN note n ON s.nr_matricol = n.nr_matricol;\n\n-- doar cei fără pereche\nSELECT s.nume\nFROM studenti s\n  LEFT JOIN note n ON s.nr_matricol = n.nr_matricol\nWHERE n.nr_matricol IS NULL;"
+        },
+        {
+          "type": "code",
+          "language": "sql",
+          "code": "-- RIGHT JOIN: toate rândurile din dreapta (aici studenti)\nSELECT s.nume, n.valoare\nFROM note n\n  RIGHT JOIN studenti s ON s.nr_matricol = n.nr_matricol;\n-- 46 de rânduri, ca LEFT JOIN cu tabelele inversate\n\n-- FULL JOIN: rândurile fără pereche din ambele părți\nSELECT p.nume, d.id_curs\nFROM profesori p\n  FULL JOIN didactic d ON p.id_prof = d.id_prof;\n-- 17 rânduri: 10 perechi și 7 profesori fără curs\n\n-- stilul Oracle vechi: (+) pe partea care poate lipsi\nSELECT s.nume, n.valoare\nFROM studenti s, note n\nWHERE s.nr_matricol = n.nr_matricol(+);\n-- 46 de rânduri, ca LEFT JOIN"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "LEFT / RIGHT / FULL JOIN",
+            "ro": "LEFT / RIGHT / FULL JOIN"
+          },
+          "content": {
+            "en": "`LEFT` keeps all rows of the left table, `RIGHT` of the right one, `FULL` of both. Rows without a pair get NULL in the columns of the other table.",
+            "ro": "`LEFT` păstrează toate rândurile din tabelul din stânga, `RIGHT` din cel din dreapta, `FULL` din amândouă. Rândurile fără pereche primesc NULL în coloanele celuilalt tabel."
+          }
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "«Who has no…»",
+            "ro": "«Cine nu are»"
+          },
+          "content": {
+            "en": "`LEFT JOIN` followed by `WHERE right_key IS NULL`. Only the rows on the left that found no pair remain.",
+            "ro": "`LEFT JOIN` urmat de `WHERE cheia_din_dreapta IS NULL`. Rămân doar rândurile din stânga care n-au găsit nicio pereche."
+          }
+        }
+      ]
+    },
+    {
       "id": "bd-l20-s5",
       "title": {
-        "en": "The «no match» test",
-        "ro": "Testul «fără pereche»"
+        "en": "WHERE after an outer join",
+        "ro": "WHERE după un join extern"
       },
       "blocks": [
         {
@@ -203,14 +244,6 @@
           "content": {
             "en": "**A filter in `WHERE` breaks the outer join.** `FROM studenti s LEFT JOIN note n ON … WHERE n.valoare = 10` gives 8 rows, exactly what an ordinary join gives: the rows with NULL in `valoare` are removed by `WHERE`. If the filter is part of the link, put it in `ON`: `LEFT JOIN note n ON s.nr_matricol = n.nr_matricol AND n.valoare = 10` keeps all the students (16 rows).",
             "ro": "**Filtrul în `WHERE` strică join-ul extern.** `FROM studenti s LEFT JOIN note n ON … WHERE n.valoare = 10` dă 8 rânduri, exact cât un join obișnuit: rândurile cu NULL în `valoare` sunt eliminate de `WHERE`. Dacă filtrul face parte din legătură, pune-l în `ON`: `LEFT JOIN note n ON s.nr_matricol = n.nr_matricol AND n.valoare = 10` păstrează toți studenții (16 rânduri)."
-          }
-        },
-        {
-          "type": "callout",
-          "variant": "trap",
-          "content": {
-            "en": "**The «no match» test is done on the key on the right.** Write `WHERE n.nr_matricol IS NULL`, not `n.valoare IS NULL`. An existing grade can have a NULL `valoare`; the key on the right is NULL only when the row is missing entirely. On our data the same 4 rows come out, but only by luck.",
-            "ro": "**Testul «fără pereche» se face pe cheia din dreapta.** Scrie `WHERE n.nr_matricol IS NULL`, nu `n.valoare IS NULL`. O notă existentă poate avea `valoare` NULL; cheia din dreapta este NULL doar când rândul lipsește cu totul. Pe datele noastre ies aceleași 4 rânduri, dar numai din întâmplare."
           }
         },
         {
@@ -249,47 +282,6 @@
       ]
     },
     {
-      "id": "bd-l20-s7",
-      "title": {
-        "en": "Outer joins",
-        "ro": "Join extern"
-      },
-      "blocks": [
-        {
-          "type": "code",
-          "language": "sql",
-          "code": "-- toate rândurile din stânga, chiar fără pereche\nSELECT s.nume, n.valoare\nFROM studenti s\n  LEFT JOIN note n ON s.nr_matricol = n.nr_matricol;\n\n-- doar cei fără pereche\nSELECT s.nume\nFROM studenti s\n  LEFT JOIN note n ON s.nr_matricol = n.nr_matricol\nWHERE n.nr_matricol IS NULL;"
-        },
-        {
-          "type": "code",
-          "language": "sql",
-          "code": "-- RIGHT JOIN și FULL JOIN\n... note n RIGHT JOIN studenti s ON s.nr_matricol = n.nr_matricol\n... studenti s FULL JOIN note n ON s.nr_matricol = n.nr_matricol\n\n-- stilul Oracle vechi: (+) pe partea care poate lipsi\nSELECT s.nume, n.valoare\nFROM studenti s, note n\nWHERE s.nr_matricol = n.nr_matricol(+);"
-        },
-        {
-          "type": "definition",
-          "term": {
-            "en": "LEFT / RIGHT / FULL JOIN",
-            "ro": "LEFT / RIGHT / FULL JOIN"
-          },
-          "content": {
-            "en": "`LEFT` keeps all rows of the left table, `RIGHT` of the right one, `FULL` of both. Rows without a pair get NULL in the columns of the other table.",
-            "ro": "`LEFT` păstrează toate rândurile din tabelul din stânga, `RIGHT` din cel din dreapta, `FULL` din amândouă. Rândurile fără pereche primesc NULL în coloanele celuilalt tabel."
-          }
-        },
-        {
-          "type": "definition",
-          "term": {
-            "en": "«Who has no…»",
-            "ro": "«Cine nu are»"
-          },
-          "content": {
-            "en": "`LEFT JOIN` followed by `WHERE right_key IS NULL`. Only the rows on the left that found no pair remain.",
-            "ro": "`LEFT JOIN` urmat de `WHERE cheia_din_dreapta IS NULL`. Rămân doar rândurile din stânga care n-au găsit nicio pereche."
-          }
-        }
-      ]
-    },
-    {
       "id": "bd-l20-s8",
       "title": {
         "en": "Why the key, not the value?",
@@ -308,8 +300,8 @@
             "ro": "Explică în cuvintele tale"
           },
           "answer": {
-            "en": "Because `valoare` can be NULL even on a row that exists (a grade not filled in yet), and then the student would show up as «without grades» without being so. The key on the right, `nr_matricol`, has a value on every real row of `note`; it is NULL only when the join found no row, which is exactly the «no match» case.",
-            "ro": "Fiindcă `valoare` poate fi NULL și pe un rând care există (o notă încă necompletată), iar atunci studentul ar apărea ca «fără note» fără să fie. Cheia din dreapta, `nr_matricol`, are valoare pe orice rând real din `note`; este NULL doar când joinul n-a găsit niciun rând, adică exact cazul «fără pereche»."
+            "en": "Because `valoare` can be NULL even on a row that exists (a grade not filled in yet), and then the student would show up as «without grades» without being so. The key on the right, `nr_matricol`, has a value on every real row of `note`; it is NULL only when the join found no row, which is exactly the «no match» case. On our data `n.valoare IS NULL` happens to give the same 4 rows, but only because no grade has a NULL value.",
+            "ro": "Fiindcă `valoare` poate fi NULL și pe un rând care există (o notă încă necompletată), iar atunci studentul ar apărea ca «fără note» fără să fie. Cheia din dreapta, `nr_matricol`, are valoare pe orice rând real din `note`; este NULL doar când joinul n-a găsit niciun rând, adică exact cazul «fără pereche». Pe datele noastre `n.valoare IS NULL` dă tot cele 4 rânduri, dar numai pentru că nicio notă nu are valoarea NULL."
           },
           "table": [
             {
@@ -360,8 +352,8 @@
             },
             {
               "text": {
-                "en": "`studenti s RIGHT JOIN note n`",
-                "ro": "`studenti s RIGHT JOIN note n`"
+                "en": "`studenti s RIGHT JOIN note n ON s.nr_matricol = n.nr_matricol`",
+                "ro": "`studenti s RIGHT JOIN note n ON s.nr_matricol = n.nr_matricol`"
               },
               "correct": false,
               "explain": {
@@ -707,8 +699,8 @@
           "dataset": "facultate",
           "kind": "query",
           "prompt": {
-            "en": "Modify the query from point 3 so that the professors who do not yet have a course assigned are also shown.\n\nOfficial statement (Romanian): Modificaţi interogarea de la punctul 3 pentru a fi afişaţi şi acei profesori care nu au încă alocat un curs.\n\nThe query from point 3 is:\nSELECT p.nume, p.prenume, c.titlu_curs\nFROM profesori p\n  JOIN didactic d ON p.id_prof = d.id_prof\n  JOIN cursuri c ON d.id_curs = c.id_curs\n\nColumns, in order: the professor's last name, the professor's first name, the course title.",
-            "ro": "Modificaţi interogarea de la punctul 3 pentru a fi afişaţi şi acei profesori care nu au încă alocat un curs.\n\nInterogarea de la punctul 3 este:\nSELECT p.nume, p.prenume, c.titlu_curs\nFROM profesori p\n  JOIN didactic d ON p.id_prof = d.id_prof\n  JOIN cursuri c ON d.id_curs = c.id_curs\n\nColoanele, în ordine: numele profesorului, prenumele profesorului, titlul cursului."
+            "en": "Modify the query from point 3 so that the professors who do not yet have a course assigned are also shown.\n\nOfficial statement (Romanian): Modificaţi interogarea de la punctul 3 pentru a fi afişaţi şi acei profesori care nu au încă alocat un curs.\n\nThe query from point 3 is:\n`SELECT p.nume, p.prenume, c.titlu_curs`\n`FROM profesori p`\n`  JOIN didactic d ON p.id_prof = d.id_prof`\n`  JOIN cursuri c ON d.id_curs = c.id_curs`\n\nColumns, in order: the professor's last name, the professor's first name, the course title.",
+            "ro": "Modificaţi interogarea de la punctul 3 pentru a fi afişaţi şi acei profesori care nu au încă alocat un curs.\n\nInterogarea de la punctul 3 este:\n`SELECT p.nume, p.prenume, c.titlu_curs`\n`FROM profesori p`\n`  JOIN didactic d ON p.id_prof = d.id_prof`\n`  JOIN cursuri c ON d.id_curs = c.id_curs`\n\nColoanele, în ordine: numele profesorului, prenumele profesorului, titlul cursului."
           },
           "official": {
             "lab": 4,
@@ -759,8 +751,8 @@
           "dataset": "facultate",
           "kind": "query",
           "prompt": {
-            "en": "Modify the query from point 3 so that the courses that do not yet have a professor assigned are shown.\n\nOfficial statement (Romanian): Modificaţi interogarea de la punctul 3 pentru a fi afişate acele cursuri ce nu au alocate încă un profesor.\n\nThe query from point 3 is:\nSELECT p.nume, p.prenume, c.titlu_curs\nFROM profesori p\n  JOIN didactic d ON p.id_prof = d.id_prof\n  JOIN cursuri c ON d.id_curs = c.id_curs\n\nColumns, in order: the professor's last name, the professor's first name, the course title.",
-            "ro": "Modificaţi interogarea de la punctul 3 pentru a fi afişate acele cursuri ce nu au alocate încă un profesor.\n\nInterogarea de la punctul 3 este:\nSELECT p.nume, p.prenume, c.titlu_curs\nFROM profesori p\n  JOIN didactic d ON p.id_prof = d.id_prof\n  JOIN cursuri c ON d.id_curs = c.id_curs\n\nColoanele, în ordine: numele profesorului, prenumele profesorului, titlul cursului."
+            "en": "Modify the query from point 3 so that the courses that do not yet have a professor assigned are shown.\n\nOfficial statement (Romanian): Modificaţi interogarea de la punctul 3 pentru a fi afişate acele cursuri ce nu au alocate încă un profesor.\n\nThe query from point 3 is:\n`SELECT p.nume, p.prenume, c.titlu_curs`\n`FROM profesori p`\n`  JOIN didactic d ON p.id_prof = d.id_prof`\n`  JOIN cursuri c ON d.id_curs = c.id_curs`\n\nColumns, in order: the professor's last name, the professor's first name, the course title.",
+            "ro": "Modificaţi interogarea de la punctul 3 pentru a fi afişate acele cursuri ce nu au alocate încă un profesor.\n\nInterogarea de la punctul 3 este:\n`SELECT p.nume, p.prenume, c.titlu_curs`\n`FROM profesori p`\n`  JOIN didactic d ON p.id_prof = d.id_prof`\n`  JOIN cursuri c ON d.id_curs = c.id_curs`\n\nColoanele, în ordine: numele profesorului, prenumele profesorului, titlul cursului."
           },
           "official": {
             "lab": 4,
@@ -811,8 +803,8 @@
           "dataset": "facultate",
           "kind": "query",
           "prompt": {
-            "en": "Modify the query from point 3 so that both the professors who have no course assigned and the courses not yet taught by any professor are shown.\n\nOfficial statement (Romanian): Modificaţi interogarea de la punctul 3 astfel încât să fie afişaţi atat profesorii care nu au nici un curs alocat cât şi cursurile care nu sunt încă predate de nici un profesor.\n\nThe query from point 3 is:\nSELECT p.nume, p.prenume, c.titlu_curs\nFROM profesori p\n  JOIN didactic d ON p.id_prof = d.id_prof\n  JOIN cursuri c ON d.id_curs = c.id_curs\n\nColumns, in order: the professor's last name, the professor's first name, the course title.",
-            "ro": "Modificaţi interogarea de la punctul 3 astfel încât să fie afişaţi atat profesorii care nu au nici un curs alocat cât şi cursurile care nu sunt încă predate de nici un profesor.\n\nInterogarea de la punctul 3 este:\nSELECT p.nume, p.prenume, c.titlu_curs\nFROM profesori p\n  JOIN didactic d ON p.id_prof = d.id_prof\n  JOIN cursuri c ON d.id_curs = c.id_curs\n\nColoanele, în ordine: numele profesorului, prenumele profesorului, titlul cursului."
+            "en": "Modify the query from point 3 so that both the professors who have no course assigned and the courses not yet taught by any professor are shown.\n\nOfficial statement (Romanian): Modificaţi interogarea de la punctul 3 astfel încât să fie afişaţi atat profesorii care nu au nici un curs alocat cât şi cursurile care nu sunt încă predate de nici un profesor.\n\nThe query from point 3 is:\n`SELECT p.nume, p.prenume, c.titlu_curs`\n`FROM profesori p`\n`  JOIN didactic d ON p.id_prof = d.id_prof`\n`  JOIN cursuri c ON d.id_curs = c.id_curs`\n\nColumns, in order: the professor's last name, the professor's first name, the course title.",
+            "ro": "Modificaţi interogarea de la punctul 3 astfel încât să fie afişaţi atat profesorii care nu au nici un curs alocat cât şi cursurile care nu sunt încă predate de nici un profesor.\n\nInterogarea de la punctul 3 este:\n`SELECT p.nume, p.prenume, c.titlu_curs`\n`FROM profesori p`\n`  JOIN didactic d ON p.id_prof = d.id_prof`\n`  JOIN cursuri c ON d.id_curs = c.id_curs`\n\nColoanele, în ordine: numele profesorului, prenumele profesorului, titlul cursului."
           },
           "official": {
             "lab": 4,

@@ -30,8 +30,8 @@
             "ro": "Popescu Bogdan a luat 8 la Logica și 9 la Matematica. Uită-te la notele celor două cursuri. Câți colegi au luat o notă mai mare decât el la Logica? Dar la Matematica? Și cum ai număra asta pentru toate cursurile lui deodată?"
           },
           "answer": {
-            "en": "In Logica there are 3 classmates with a higher grade (Antonie 9, Panaite 10, Bodnar 10). In Matematica there is just one (Bodnar, 10). Across all 6 of Popescu's courses you find 8 \"course – better classmate\" pairs in total. To count them all at once you need to put each of Popescu's grades face to face with the grades from the same course: that is, the `note` table appears twice in the query.",
-            "ro": "La Logica sunt 3 colegi cu notă mai mare (Antonie 9, Panaite 10, Bodnar 10). La Matematica este unul singur (Bodnar, 10). Pe toate cele 6 cursuri ale lui Popescu găsești în total 8 perechi „curs – coleg mai bun”. Ca să le numeri deodată, ai nevoie să pui fiecare notă a lui Popescu față în față cu notele de la același curs: adică tabela `note` apare de două ori în interogare."
+            "en": "In Logica there are 3 classmates with a grade higher than 8: Panaite (10), Bodnar 116 (10) and Antonie (9); the other Bodnar, 119, has 7. In Matematica there is just one: Bodnar 116, with 10. To count this for all of his courses at once, you put each of Popescu's grades face to face with the grades from the same course: the `note` table appears twice in the query, and the condition `>` keeps only the higher grades.",
+            "ro": "La Logica sunt 3 colegi cu notă mai mare decât 8: Panaite (10), Bodnar 116 (10) și Antonie (9); celălalt Bodnar, 119, are 7. La Matematica este unul singur: Bodnar 116, cu 10. Ca să numeri asta pe toate cursurile lui deodată, pui fiecare notă a lui Popescu față în față cu notele de la același curs: tabela `note` apare de două ori în interogare, iar condiția `>` păstrează doar notele mai mari."
           },
           "placeholder": {
             "en": "Write how you would count",
@@ -43,7 +43,7 @@
               "ro": "Notele la Logica și Matematica, cu studenții"
             },
             "dataset": "facultate",
-            "sql": "SELECT s.nume, c.titlu_curs, n.valoare FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE c.titlu_curs IN ('Logica', 'Matematica') ORDER BY c.titlu_curs, n.valoare DESC, s.nr_matricol"
+            "sql": "SELECT c.titlu_curs, n.valoare, s.nr_matricol, s.nume FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs WHERE c.titlu_curs IN ('Logica', 'Matematica') ORDER BY c.titlu_curs, n.valoare DESC, s.nr_matricol"
           }
         }
       ]
@@ -77,8 +77,8 @@
           ],
           "say": {
             "from": {
-              "en": "We start from `studenti s1` and the first copy of the grades, `n1`, only for course 24 (BD). Each row of `n1` is one student's grade, the one who can be beaten.",
-              "ro": "Pornim de la `studenti s1` și de la prima copie a notelor, `n1`, doar pentru cursul 24 (BD). Fiecare rând din `n1` este nota unui student, „cel care poate fi învins”."
+              "en": "We start from `studenti s1`: the 13 students. At the next step each student gets his grade at course 24 (BD) from the first copy of the grades, `n1`, then the higher grades from the second copy, `n2`.",
+              "ro": "Pornim de la `studenti s1`: cei 13 studenți. La pasul următor fiecare student primește nota lui de la cursul 24 (BD), din prima copie a notelor, `n1`, apoi notele mai mari, din a doua copie, `n2`."
             },
             "join": {
               "en": "Only the pairs from the same course where `n2` is strictly higher stay: 9 of them. `s2` is the student who got the grade in `n2`.",
@@ -101,8 +101,8 @@
           ],
           "ask": {
             "join": {
-              "en": "The second copy of the grades, `n2`, is put next to every grade in `n1`, and `s2` is the student who got the grade in `n2`. The pairs below are already from the same course. Which ones also pass `n2.valoare > n1.valoare`, a strictly higher grade?",
-              "ro": "A doua copie a notelor, `n2`, e pusă lângă fiecare notă din `n1`, iar `s2` este studentul care a luat nota din `n2`. Perechile de mai jos sunt deja de la același curs. Care trec și de `n2.valoare > n1.valoare`, adică o notă strict mai mare?"
+              "en": "The second copy of the grades, `n2`, is put next to every grade in `n1`, and `s2` is the student who got the grade in `n2`. The pairs below are already from the same course. Which ones also pass `n2.valoare > n1.valoare`, a strictly higher grade? Compare the columns `n1.valoare` and `n2.valoare`.",
+              "ro": "A doua copie a notelor, `n2`, e pusă lângă fiecare notă din `n1`, iar `s2` este studentul care a luat nota din `n2`. Perechile de mai jos sunt deja de la același curs. Care trec și de `n2.valoare > n1.valoare`, adică o notă strict mai mare? Compară coloanele `n1.valoare` și `n2.valoare`."
             }
           }
         }
@@ -115,6 +115,13 @@
         "ro": "Mai mare sau egal, și legătura pe curs"
       },
       "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The machine showed only course 24 (BD): 9 pairs. Without the condition `n1.id_curs = '24'`, the same query compares the grades of every course and gives 118 pairs. The numbers below are compared with this 118.",
+            "ro": "Mașina a arătat doar cursul 24 (BD): 9 perechi. Fără condiția `n1.id_curs = '24'`, aceeași interogare compară notele de la toate cursurile și dă 118 perechi. Numerele de mai jos se compară cu acest 118."
+          }
+        },
         {
           "type": "callout",
           "variant": "trap",
