@@ -103,7 +103,7 @@ describe('Oracle rejects what PostgreSQL accepts (fix 18)', () => {
 
   it('lintOracle returns the first problem by position, or null', () => {
     expect(lintOracle('SELECT nume FROM studenti')).toBeNull()
-    expect(lintOracle('SELECT nume FROM studenti LIMIT 5')).toEqual({ code: 'ORA-00933', message: 'SQL command not properly ended' })
+    expect(lintOracle('SELECT nume FROM studenti LIMIT 5')).toEqual({ code: 'ORA-00933', message: 'SQL command not properly ended', dialect: true })
     expect(lintOracle("SELECT CONCAT(a, b, c) FROM t WHERE x ILIKE 'a'").code).toBe('ORA-00909')
   })
 })

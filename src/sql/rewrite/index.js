@@ -47,7 +47,7 @@ export function rewriteOracle(sql, opts = {}) {
   // one statement per run; Oracle 11g (DBMS_SQL, measured) answers ORA-00911 for a second statement, not ORA-00933
   if (ts.some((t) => isSym(t, ';'))) throw new OracleError('ORA-00911', 'invalid character')
   const bad = lintOracle(sql)
-  if (bad) throw new OracleError(bad.code, bad.message)
+  if (bad) throw new OracleError(bad.code, bad.message, bad.dialect)
   naturalJoinCheck(ts)
   ts = upperQuotedIdents(ts)
   const ddl = ddlPass(ts, { columns })

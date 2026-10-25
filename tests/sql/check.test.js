@@ -146,9 +146,16 @@ describe('checkResult: query results', () => {
     it('reports an Oracle error with its code', () => {
       expect(checkResult(failed('ORA-00904'), expected, ANY)).toMatchObject({ ok: false, kind: 'error', code: 'ORA-00904' })
     })
-    it('reports PostgreSQL / MySQL habits as not-oracle', () => {
-      for (const code of ['ORA-00920', 'ORA-00923', 'ORA-00928']) {
-        expect(checkResult(failed(code), expected, ANY)).toMatchObject({ ok: false, kind: 'not-oracle', code })
+    it('reports an error the strictness pass marked as another dialect as not-oracle, whatever its code', () => {
+      for (const code of ['ORA-00920', 'ORA-00923', 'ORA-00928', 'ORA-00933']) {
+        const r = failed(code)
+        r.error.dialect = true
+        expect(checkResult(r, expected, ANY)).toMatchObject({ ok: false, kind: 'not-oracle', code })
+      }
+    })
+    it('keeps an unmarked ORA-00900 / 00923 as an Oracle error with its own explanation', () => {
+      for (const code of ['ORA-00900', 'ORA-00923']) {
+        expect(checkResult(failed(code), expected, ANY)).toMatchObject({ ok: false, kind: 'error', code })
       }
     })
   })
@@ -231,6 +238,12 @@ describe('detectMistake on the lab data', () => {
     expect(await mistakeOf(wrong, right)).toBe('inner-vs-left')
   })
 
+  it('inner-vs-left is not named for a filter mistake on a join', async () => {
+    const base = 'SELECT s.nume, n.valoare FROM studenti s JOIN note n ON n.nr_matricol = s.nr_matricol'
+    expect(await mistakeOf(`${base} WHERE n.valoare > 9`, `${base} WHERE n.valoare >= 9`)).toBeNull()
+    expect(await mistakeOf(`${base} WHERE s.prenume = 'ioana'`, `${base} WHERE s.prenume = 'Ioana'`)).toBe('case-literal')
+  })
+
   it('missing-join-cond: three tables, one condition', async () => {
     const right = 'SELECT s.nume, c.titlu_curs, n.valoare FROM studenti s, note n, cursuri c WHERE s.nr_matricol = n.nr_matricol AND n.id_curs = c.id_curs'
     const wrong = 'SELECT s.nume, c.titlu_curs, n.valoare FROM studenti s, note n, cursuri c WHERE s.nr_matricol = n.nr_matricol'
@@ -303,5 +316,32 @@ describe('runWithProbe', () => {
     expect(after.rows).toEqual([['17-FEB-95']])
     const plain = await runWithProbe(engine, 'SELECT nume FROM studenti WHERE nr_matricol = \'111\'', { dataset: 'facultate' })
     expect(plain.probe).toBeUndefined()
+  })
+})
+
+describe('not-oracle comes from the strictness pass, not from the error code', () => {
+  let engine
+  beforeAll(async () => {
+    engine = await createEngine(new PGlite(), { clock: '2026-10-26 14:30:00', datasets: { facultate: datasetText('facultate') } })
+  })
+  const verdictOf = async (sql) => checkResult(await engine.run(sql, { dataset: 'facultate' }), { columns: ['NUME'], rows: [] }, ANY)
+
+  it('names LIMIT, FETCH FIRST, ILIKE, :: and TOP as another dialect', async () => {
+    for (const sql of [
+      'SELECT nume FROM studenti LIMIT 5',
+      'SELECT nume FROM studenti FETCH FIRST 1 ROWS ONLY',
+      "SELECT nume FROM studenti WHERE nume ILIKE 'p%'",
+      'SELECT an::text FROM studenti',
+      'SELECT TOP 2 nume FROM studenti',
+    ]) expect(await verdictOf(sql), sql).toMatchObject({ kind: 'not-oracle' })
+  })
+
+  it('leaves plain typos with their own Oracle error', async () => {
+    for (const sql of [
+      'SELECT nume prenume an FROM studenti',
+      "SELECT 'Azi este ' TO_CHAR(SYSDATE, 'month') FROM dual",
+      'SELECT nume FORM studenti',
+      'BEGIN NULL; END',
+    ]) expect((await verdictOf(sql)).kind, sql).toBe('error')
   })
 })

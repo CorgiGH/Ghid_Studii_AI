@@ -28,8 +28,9 @@
 export const PROBE_FORMAT = 'SYYYY-MM-DD'
 const DATE_CELL = /^\d\d-[A-Z]{3}-\d\d$/
 
-// Errors that mean "this is not Oracle SQL" (a PostgreSQL / MySQL / SQL Server habit), not "Oracle SQL with a mistake".
-const NOT_ORACLE = new Set(['ORA-00900', 'ORA-00920', 'ORA-00923', 'ORA-00928'])
+// "not-oracle" = the strictness pass (src/sql/rewrite/lint.js) caught a PostgreSQL / MySQL / SQL Server habit and marked its
+// error `dialect: true`. The code alone cannot say so: ORA-00923 is also a missing comma, ORA-00900 a PL/SQL block, and
+// LIMIT answers ORA-00933 like any other tail of junk. Every other error keeps its own explanation (explainOra).
 
 const NULL_KEY = '\u0000null'
 const cellText = (v) => (v === null || v === undefined ? null : String(v))
@@ -79,7 +80,7 @@ function verdict(kind, extra = {}) {
 
 function errorVerdict(result) {
   const code = result.error.code
-  return verdict(NOT_ORACLE.has(code) ? 'not-oracle' : 'error', { code, message: result.error.message })
+  return verdict(result.error.dialect === true ? 'not-oracle' : 'error', { code, message: result.error.message })
 }
 
 // Is the sequence right, given that rows with equal `orderBy` keys may swap? (the rows themselves already match as a multiset)

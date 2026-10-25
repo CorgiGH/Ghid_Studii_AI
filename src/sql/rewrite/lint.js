@@ -1,7 +1,9 @@
 // Oracle 11g strictness: things PostgreSQL accepts (or reports differently) that Oracle 11g rejects, answered with the
 // code Oracle gives. Runs on the learner's original text, before any rewrite.
 //
-//   lintOracle(sql) -> { code, message } | null       the first problem by position in the text
+//   lintOracle(sql) -> { code, message, dialect? } | null   the first problem by position in the text; `dialect` is true when the
+//                                                  problem is a habit of another SQL dialect (LIMIT, ILIKE, ::, TOP, EXCEPT ...)
+//                                                  and not a plain typo that happens to have the same code
 //
 // Every code below was measured on the Oracle 11g container (see the probe entries in the differential corpus).
 import { isSig, isSym, isWord, matchParen, selectListBounds, splitTop, tokenize } from './tokens.js'
@@ -49,7 +51,7 @@ export function lintOracle(sql) {
   let ts = tokenize(sql).filter(isSig)
   while (ts.length && (isSym(ts[ts.length - 1], ';') || isSym(ts[ts.length - 1], '/'))) ts = ts.slice(0, -1)
   const found = []
-  const add = (idx, code, message = MESSAGES[code]) => found.push({ idx, code, message })
+  const add = (idx, code, message = MESSAGES[code], dialect = false) => found.push({ idx, code, message, dialect })
   const prevIsDot = (i) => i > 0 && isSym(ts[i - 1], '.')
   const w = (i) => (ts[i] && ts[i].type === 'word' && !prevIsDot(i) ? ts[i].text.toUpperCase() : '')
 
@@ -74,11 +76,11 @@ export function lintOracle(sql) {
       if (!FROM_IN_CALL.has(owners[depth - 1])) inFrom[depth] = true
     } else if (CLAUSE_END.has(u)) inFrom[depth] = false
     else if (u === 'AS' && inFrom[depth]) add(i, asAfterTable(ts, i)) // FROM studenti AS s
-    if ((u === 'LIMIT' || u === 'OFFSET') && ts[i + 1] && ts[i + 1].type === 'number') add(i, 'ORA-00933')
-    else if (u === 'FETCH' && (isWord(ts[i + 1], 'FIRST') || isWord(ts[i + 1], 'NEXT'))) add(i, 'ORA-00933')
-    else if (u === 'EXCEPT') add(i, 'ORA-00933') // Oracle 11g spells it MINUS
-    else if ((u === 'INTERSECT' || u === 'MINUS') && isWord(ts[i + 1], 'ALL')) add(i + 1, 'ORA-00928')
-    else if (u === 'ILIKE') add(i, 'ORA-00920')
+    if ((u === 'LIMIT' || u === 'OFFSET') && ts[i + 1] && ts[i + 1].type === 'number') add(i, 'ORA-00933', undefined, true)
+    else if (u === 'FETCH' && (isWord(ts[i + 1], 'FIRST') || isWord(ts[i + 1], 'NEXT'))) add(i, 'ORA-00933', undefined, true)
+    else if (u === 'EXCEPT') add(i, 'ORA-00933', undefined, true) // Oracle 11g spells it MINUS
+    else if ((u === 'INTERSECT' || u === 'MINUS') && isWord(ts[i + 1], 'ALL')) add(i + 1, 'ORA-00928', undefined, true)
+    else if (u === 'ILIKE') add(i, 'ORA-00920', undefined, true)
     else if (u === 'CONCAT' && isSym(ts[i + 1], '(')) {
       const c = matchParen(ts, i + 1)
       if (c > 0 && (c === i + 2 ? 0 : splitTop(ts.slice(i + 2, c)).length) !== 2) add(i, 'ORA-00909')
@@ -105,17 +107,17 @@ export function lintOracle(sql) {
         const t = item[k]
         if (isSym(t, '(')) depth++
         else if (isSym(t, ')')) depth--
-        if (colonColon(base + k)) add(base + k, 'ORA-00923') // an::text
+        if (colonColon(base + k)) add(base + k, 'ORA-00923', undefined, true) // an::text
         if (depth !== 0) continue
         const nx = item[k + 1]
         // SELECT TOP 2 nume: a name followed by a literal is two expressions with no comma between them
-        if (t.type === 'word' && nx && (nx.type === 'number' || nx.type === 'string') && !BEFORE_LITERAL.has(t.text.toUpperCase())) add(base + k + 1, 'ORA-00923')
+        if (t.type === 'word' && nx && (nx.type === 'number' || nx.type === 'string') && !BEFORE_LITERAL.has(t.text.toUpperCase())) add(base + k + 1, 'ORA-00923', undefined, k === 0 && t.text.toUpperCase() === 'TOP' && nx.type === 'number') // SELECT TOP 2 is SQL Server
         // SELECT 'a' TO_CHAR(..): a literal, an alias, then more
         if ((t.type === 'string' || t.type === 'number') && nx && nx.type === 'word' && !BEFORE_LITERAL.has(nx.text.toUpperCase()) && isSym(item[k + 2], '(')) add(base + k + 2, 'ORA-00923')
       }
     }
   }
-  for (let i = 0; i < ts.length; i++) if (colonColon(i) && !inSelectList.has(i)) add(i, 'ORA-00920') // WHERE x::int = 1
+  for (let i = 0; i < ts.length; i++) if (colonColon(i) && !inSelectList.has(i)) add(i, 'ORA-00920', undefined, true) // WHERE x::int = 1
 
   // ---- missing expression -----------------------------------------------------------------------------------------
   for (let i = 0; i < ts.length; i++) {
@@ -157,5 +159,5 @@ export function lintOracle(sql) {
 
   if (!found.length) return null
   found.sort((a, b) => a.idx - b.idx)
-  return { code: found[0].code, message: found[0].message }
+  return { code: found[0].code, message: found[0].message, dialect: found[0].dialect }
 }

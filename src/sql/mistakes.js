@@ -92,6 +92,19 @@ const bagEqual = (a, b) => {
   return !d.missing.length && !d.extra.length
 }
 
+// Do the missing rows look like the padding of an outer join? Some column holds NULL (or '0', what COUNT gives a group with no
+// partner) in a missing row while no row of the learner's answer has that value in that column.
+function outerPadded(missing, actualRows) {
+  const width = missing[0]?.length ?? 0
+  for (let c = 0; c < width; c++) {
+    for (const pad of [null, '0']) {
+      const same = (v) => (pad === null ? v === null || v === undefined : v !== null && v !== undefined && String(v).trim() === pad)
+      if (missing.some((r) => same(r[c])) && !actualRows.some((r) => same(r[c]))) return true
+    }
+  }
+  return false
+}
+
 // number of tables in the FROM list, and how many join conditions the text provides
 function joinShape(text, at) {
   const from = topLevel(clauseText(text, at, 'from'))
@@ -139,16 +152,6 @@ export function detectMistake({ sql, actual, expected, spec }) {
   const where = topLevel(clauseText(text, at, 'where'))
   if (/\bAND\b/i.test(where) && /\bOR\b/i.test(where)) return 'and-or'
 
-  // an inner join where the exercise wants the rows without a partner too
-  if (tables >= 2 && !hasOuter(text) && !/\bMINUS\b|\bUNION\b|\bINTERSECT\b/i.test(text) && !diff.extra.length && diff.missing.length) return 'inner-vs-left'
-
-  // DISTINCT with several columns while the expected answer has one row per first-column value
-  const selectList = topLevel(clauseText(text, at, 'select'))
-  if (/^\s*DISTINCT\b/i.test(selectList) && (selectList.match(/,/g) ?? []).length >= 1 && actual.rows.length > expected.rows.length) {
-    const firstValues = new Set(actual.rows.map((r) => String(r[0])))
-    if (firstValues.size === expected.rows.length) return 'distinct-first-col'
-  }
-
   // a text literal in the wrong case, so the condition finds fewer rows than it should
   if (actual.rows.length < expected.rows.length && strings.length) {
     const cells = expected.rows.flat().map((v) => (v === null ? '' : String(v).trim()))
@@ -159,6 +162,17 @@ export function detectMistake({ sql, actual, expected, spec }) {
       const insensitive = cells.some((c) => c.toLowerCase().includes(core.toLowerCase()))
       if ((insensitive && !sensitive) || (actual.rows.length === 0 && core === core.toLowerCase() && core.length >= 3)) return 'case-literal'
     }
+  }
+
+  // an inner join where the exercise wants the rows without a partner too: the missing rows are the ones an outer join pads
+  // with NULL (or with 0 from COUNT) in columns where the learner's rows have no NULL (or 0)
+  if (tables >= 2 && !hasOuter(text) && !/\bMINUS\b|\bUNION\b|\bINTERSECT\b/i.test(text) && !diff.extra.length && diff.missing.length && outerPadded(diff.missing, actual.rows)) return 'inner-vs-left'
+
+  // DISTINCT with several columns while the expected answer has one row per first-column value
+  const selectList = topLevel(clauseText(text, at, 'select'))
+  if (/^\s*DISTINCT\b/i.test(selectList) && (selectList.match(/,/g) ?? []).length >= 1 && actual.rows.length > expected.rows.length) {
+    const firstValues = new Set(actual.rows.map((r) => String(r[0])))
+    if (firstValues.size === expected.rows.length) return 'distinct-first-col'
   }
 
   return null

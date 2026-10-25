@@ -1,10 +1,12 @@
 // Oracle-shaped errors. Everything the learner sees as an error is { code: 'ORA-xxxxx', message }.
 
 export class OracleError extends Error {
-  constructor(code, message) {
+  // `dialect` marks a rejection of another SQL dialect's habit (LIMIT, ILIKE, ::); the code alone cannot tell that from a typo
+  constructor(code, message, dialect = false) {
     super(message)
     this.name = 'OracleError'
     this.code = code
+    if (dialect) this.dialect = true
   }
 }
 
@@ -12,7 +14,7 @@ export class OracleError extends Error {
 // `context` is optional: { sql } (the statement as typed) lets 42803 tell ORA-00937 from ORA-00979; { knownFunction } says whether
 // a function of that name exists at all (wrong argument count) or not (unknown name).
 export function mapPgError(err, context = {}) {
-  if (err instanceof OracleError) return { code: err.code, message: err.message }
+  if (err instanceof OracleError) return err.dialect ? { code: err.code, message: err.message, dialect: true } : { code: err.code, message: err.message }
   const m = String((err && err.message) || err)
   const c = (err && err.code) || ''
   const ora = (code, message) => ({ code, message })
