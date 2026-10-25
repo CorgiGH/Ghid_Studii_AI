@@ -118,7 +118,8 @@ function runHit(scope) {
   const top = Math.max(r.top, above)
   const bottom = Math.min(r.bottom, limit)
   const out = { top: Math.round(r.top), bottom: Math.round(r.bottom), limit: Math.round(limit), scrollY: Math.round(scrollY), visible: Math.max(0, Math.round(bottom - top)), clear: r.top >= above && r.bottom <= limit }
-  if (bottom - top < 1) return { ...out, hit: null }
+  // A sliver of a few pixels is no tap target (and its middle can fall on the footer's sub-pixel edge): count it as not visible.
+  if (bottom - top < 4) return { ...out, hit: null }
   const el = document.elementFromPoint(r.left + r.width / 2, (top + bottom) / 2)
   return { ...out, hit: !!el && (el === run || run.contains(el)), at: el ? `${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]}` : null }
 }
