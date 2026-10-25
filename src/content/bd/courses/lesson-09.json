@@ -30,8 +30,8 @@
             "ro": "Ai lista numelor studenților din anul 2 și lista numelor din anul 3. Le pui una sub alta într-o singură listă. Câte nume distincte ai? Atenție la numele care se repetă."
           },
           "answer": {
-            "en": "Put end to end, the two lists keep every name, repeats included: you add up the length of the two lists. If you keep a single copy of each name, a surname that appears more than once counts only once, so fewer remain. The first version is called `UNION ALL`, the second `UNION`.",
-            "ro": "Puse cap la cap, cele două liste păstrează toate numele, cu tot cu repetări: aduni lungimile celor două liste. Dacă păstrezi un singur exemplar din fiecare nume, un nume care apare de mai multe ori se numără o singură dată, deci rămân mai puține. Prima variantă se numește `UNION ALL`, a doua `UNION`."
+            "en": "Year 2 has 4 surnames (Bodnar, Archip, Ciobotariu, Bodnar) and year 3 has 5. Put end to end you have 4 + 5 = 9 rows: that is what `UNION ALL` does. Bodnar appears twice, so if you keep a single copy of each surname, 8 remain: that is what `UNION` does.",
+            "ro": "Anul 2 are 4 nume (Bodnar, Archip, Ciobotariu, Bodnar), iar anul 3 are 5. Puse cap la cap ai 4 + 5 = 9 rânduri: asta face `UNION ALL`. Bodnar apare de două ori, deci dacă păstrezi un singur exemplar din fiecare nume rămân 8: asta face `UNION`."
           },
           "placeholder": {
             "en": "Write your answer here…",
@@ -193,14 +193,14 @@
           "type": "callout",
           "variant": "trap",
           "content": {
-            "en": "Set operators compare the **whole row**, so two different students with the same surname are, to them, a single row. Year 2 without the scholarship holders has two students (Bodnar 116 and Bodnar 119), but `... MINUS ...` on `nume` returns only **one** row. If you add `nr_matricol` to the SELECT, the rows become different and both remain.",
-            "ro": "Operatorii pe mulțimi compară **rândul întreg**, deci doi studenți diferiți cu același nume sunt, pentru ei, un singur rând. Anul 2 fără cei cu bursă are doi studenți (Bodnar 116 și Bodnar 119), dar `... MINUS ...` pe `nume` întoarce doar **un** rând. Dacă adaugi `nr_matricol` în SELECT, rândurile devin diferite și rămân amândoi."
+            "en": "Set operators compare the **whole row**, so two different students with the same surname are, to them, a single row. `SELECT nume FROM studenti WHERE an = 2 MINUS SELECT nume FROM studenti WHERE bursa IS NOT NULL` returns a single row: Bodnar. If you add `nr_matricol` to both SELECTs, the rows 116 Bodnar and 119 Bodnar become different and both remain.",
+            "ro": "Operatorii pe mulțimi compară **rândul întreg**, deci doi studenți diferiți cu același nume sunt, pentru ei, un singur rând. `SELECT nume FROM studenti WHERE an = 2 MINUS SELECT nume FROM studenti WHERE bursa IS NOT NULL` întoarce un singur rând: Bodnar. Dacă adaugi `nr_matricol` în ambele SELECT-uri, rândurile 116 Bodnar și 119 Bodnar devin diferite și rămân amândouă."
           }
         },
         {
           "type": "code",
           "language": "sql",
-          "code": "SELECT nr_matricol, nume FROM studenti WHERE an = 2\nMINUS\nSELECT nr_matricol, nume FROM studenti WHERE bursa IS NOT NULL;"
+          "code": "-- 1 rând: Bodnar\nSELECT nume FROM studenti\nWHERE an = 2\nMINUS\nSELECT nume FROM studenti\nWHERE bursa IS NOT NULL;\n\n-- 2 rânduri:\n-- 116 Bodnar și 119 Bodnar\nSELECT nr_matricol, nume\nFROM studenti\nWHERE an = 2\nMINUS\nSELECT nr_matricol, nume\nFROM studenti\nWHERE bursa IS NOT NULL;"
         }
       ]
     },
@@ -368,8 +368,8 @@
           "type": "mcq",
           "id": "bd-l09-mcq2",
           "question": {
-            "en": "What does `SELECT nume, prenume FROM studenti UNION SELECT nume FROM profesori` do?",
-            "ro": "Ce face `SELECT nume, prenume FROM studenti UNION SELECT nume FROM profesori`?"
+            "en": "What does `SELECT nume, prenume FROM studenti UNION SELECT nume FROM profesori` do? (The profesori table has a nume column too.)",
+            "ro": "Ce face `SELECT nume, prenume FROM studenti UNION SELECT nume FROM profesori`? (Tabelul profesori are și el o coloană nume.)"
           },
           "options": [
             {
