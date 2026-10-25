@@ -301,8 +301,8 @@ const TABLE = {
     en: 'The table has a primary or UNIQUE key that foreign keys in other tables point to. Drop the child tables first or use DROP TABLE ... CASCADE CONSTRAINTS.',
   },
   'ORA-03001': {
-    ro: 'Forma aceasta (o numește mesajul de eroare) este valabilă în Oracle, dar nu este disponibilă în această bază de date de exercițiu. Scrie interogarea altfel, de exemplu cu ROWNUM pe un singur tabel sau pe o subinterogare, sau încearc-o pe Oracle-ul din laborator.',
-    en: 'This form (the error message names it) is valid in Oracle but is not available in this practice database. Write the query another way, for example with ROWNUM on a single table or on a subquery, or try it on the lab\'s Oracle.',
+    ro: 'Forma aceasta (o numește mesajul de eroare) este valabilă în Oracle, dar nu este disponibilă în această bază de date de exercițiu. Scrie interogarea altfel (la ROWNUM: pe un singur tabel sau pe o subinterogare) sau încearc-o pe Oracle-ul din laborator.',
+    en: 'This form (the error message names it) is valid in Oracle but is not available in this practice database. Write the query another way (for ROWNUM: on a single table or on a subquery) or try it on the lab\'s Oracle.',
   },
   'ORA-04043': {
     ro: 'Obiectul nu există: tabelul nu a fost creat sau numele este scris greșit. SELECT table_name FROM user_tables îți arată tabelele tale.',
@@ -401,8 +401,8 @@ export function explainVerdict(v) {
     }
     case 'order':
       return {
-        ro: 'Rândurile sunt cele cerute, dar în altă ordine. Fără ORDER BY, Oracle nu garantează nicio ordine; adaugă ORDER BY cu coloanele cerute.',
-        en: 'The rows are the right ones but in a different order. Without ORDER BY Oracle guarantees no order; add ORDER BY with the requested columns.',
+        ro: 'Rândurile sunt cele cerute, dar în altă ordine. Verifică ORDER BY: coloanele și sensul (ASC/DESC) din enunț, plus coloanele în plus cerute de nota aplicației, dacă enunțul are una. Fără ORDER BY, Oracle nu garantează nicio ordine.',
+        en: 'The rows are the right ones but in a different order. Check ORDER BY: the columns and direction (ASC/DESC) the statement asks for, plus the extra columns the app note asks for, if the statement has one. Without ORDER BY Oracle guarantees no order.',
       }
     case 'columns':
       return {

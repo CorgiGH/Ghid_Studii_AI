@@ -11,10 +11,12 @@ function loadClient() {
   return clientPromise;
 }
 
-// -> { client: SqlClient | null, status: 'loading' (no client yet) | 'idle' | 'ready' | 'failed' }
+// -> { client: SqlClient | null, status: 'loading' (no client yet) | 'idle' | 'ready' | 'failed', reload: () => void }
+// reload() imports the client chunk again after a failed load (it does nothing once a client is there).
 export function useSqlClient() {
   const [client, setClient] = useState(null);
   const [status, setStatus] = useState('loading');
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let live = true;
     let off = () => {};
@@ -25,6 +27,7 @@ export function useSqlClient() {
       off = c.onStatus(setStatus);
     }).catch(() => { if (live) setStatus('failed'); });
     return () => { live = false; off(); };
-  }, []);
-  return { client, status };
+  }, [attempt]);
+  const reload = () => { if (!client) { setStatus('loading'); setAttempt((n) => n + 1); } };
+  return { client, status, reload };
 }

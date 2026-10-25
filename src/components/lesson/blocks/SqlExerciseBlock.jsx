@@ -44,7 +44,7 @@ export default function SqlExerciseBlock(block) {
   const hidden = params.get('variant') === 'hidden';
   const dataset = datasetFor(block, hidden);
   const spec = useMemo(() => checkSpecOf(block), [block]);
-  const { client, status } = useSqlClient();
+  const { client, status, reload } = useSqlClient();
 
   // After a reload or Back the last query, verdict and hints come back, and no second attempt is recorded by accident.
   const [restored] = useState(() => (!hidden && ref ? restoreSqlState(store.attemptsAt(ref.src, ref.screen), id) : null));
@@ -86,7 +86,7 @@ export default function SqlExerciseBlock(block) {
     }
   }, [client, dataset]); // eslint-disable-line react-hooks/exhaustive-deps
   const retryEngine = () => {
-    if (!client) return;
+    if (!client) { reload(); return; }
     client.retry().then((s) => { if (s === 'ready') client.reset({ dataset }).catch(() => {}); });
   };
 
@@ -295,7 +295,7 @@ export default function SqlExerciseBlock(block) {
             {t('The SQL engine has not loaded yet (slow connection?). Meanwhile this exercise works on paper: write the query on a sheet, then hand it in and compare it with the expected answer.',
               'Motorul SQL nu s-a încărcat încă (conexiune lentă?). Până atunci, exercițiul se face pe hârtie: scrie interogarea pe o foaie, apoi predă și compară-o cu răspunsul cerut.')}
             {' '}
-            <button type="button" className="sx-btn" data-testid="sql-engine-retry" onClick={retryEngine} disabled={!client}>{t('Try again', 'Încearcă din nou')}</button>
+            <button type="button" className="sx-btn" data-testid="sql-engine-retry" onClick={retryEngine}>{t('Try again', 'Încearcă din nou')}</button>
           </p>
           <textarea className="sx-paper-text" readOnly value={starter ?? ''} rows={Math.min(8, Math.max(3, (starter ?? '').split('\n').length))}
             aria-label={t('Starting text (read only)', 'Text de pornire (doar citire)')} />
