@@ -131,8 +131,8 @@
       "id": "bd-mock-l1-p6",
       "type": "sql",
       "prompt": {
-        "en": "Show the reader's last name, the book title and the author's last name for the loans rated 9 or 10.",
-        "ro": "Afișați numele cititorului, titlul cărții și numele autorului pentru împrumuturile apreciate cu 9 sau 10."
+        "en": "Show the reader's last name, the book title, the author's last name and the rating for the loans rated 9 or 10.",
+        "ro": "Afișați numele cititorului, titlul cărții, numele autorului și aprecierea pentru împrumuturile apreciate cu 9 sau 10."
       },
       "points": 3,
       "dataset": "biblioteca",
@@ -140,7 +140,13 @@
       "solution": "SELECT c.nume AS cititor, ca.titlu, TRIM(a.nume) AS autor, i.apreciere FROM cititori c JOIN imprumuturi i ON c.id_cititor = i.id_cititor JOIN carti ca ON ca.id_carte = i.id_carte JOIN scris s ON s.id_carte = ca.id_carte JOIN autori a ON a.id_autor = s.id_autor WHERE i.apreciere >= 9",
       "check": {
         "order": "any",
-        "mode": "bag"
+        "mode": "bag",
+        "cosmetic": [
+          "",
+          "",
+          "trim-case",
+          ""
+        ]
       },
       "gradingNotes": {
         "en": "Check: five tables joined in a chain with four join conditions, the link table scris used, the rating filter in WHERE. A book with two authors appears on two rows; that is correct. Typical mistakes: the scris table left out; a missing join condition (Cartesian product).",
@@ -160,7 +166,12 @@
       "solution": "SELECT TRIM(a.nume) AS nume, TRIM(a.prenume) AS prenume, c.titlu FROM autori a LEFT JOIN scris s ON a.id_autor = s.id_autor LEFT JOIN carti c ON c.id_carte = s.id_carte",
       "check": {
         "order": "any",
-        "mode": "bag"
+        "mode": "bag",
+        "cosmetic": [
+          "trim-case",
+          "trim-case",
+          ""
+        ]
       },
       "gradingNotes": {
         "en": "Check (a): outer joins from authors, so Blaga Lucian appears with a NULL title, and the two authors of the shared book appear twice. Check (b): the \"no match\" test is on the key of the right-hand table, in WHERE. Typical mistakes: INNER JOIN in (a); i.apreciere IS NULL in (b), which is wrong because the rating can be NULL on loans that exist (c2/b4, c7/b1).",

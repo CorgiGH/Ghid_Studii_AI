@@ -10,6 +10,7 @@ import { checkSpecOf, runOptions } from '../../lesson/blocks/sqlExerciseSpec.js'
 import { checkResult, runWithProbe } from '../../../sql/check.js';
 import { detectMistake } from '../../../sql/mistakes.js';
 import { SQL_DATASETS, scoreSqlQuestion } from './sqlScoring.js';
+import { exclusive } from './clientLock.js';
 
 // A `sql` test question: one query per part (most problems have one part; `moreParts` adds the others, e.g. 7a and 7b).
 //   practice mode: write, run to see the result, hand in. The query is graded on the lab data and on its altered twin and earns the
@@ -47,7 +48,7 @@ export default function SqlQuestion({ question, onAnswer, suppressFeedback = fal
   // Warm the engine as the question opens. Not tied to `status`: a status change while the hidden twin is loaded must not switch the
   // dataset back under a hand-in that is running.
   useEffect(() => {
-    if (client && client.status !== 'failed' && !paper) client.reset({ dataset: base }).catch(() => {});
+    if (client && client.status !== 'failed' && !paper) exclusive(() => client.reset({ dataset: base })).catch(() => {});
   }, [client, base, paper]);
 
   const setText = (id, v) => setTexts((s) => ({ ...s, [id]: v }));
@@ -57,47 +58,87 @@ export default function SqlQuestion({ question, onAnswer, suppressFeedback = fal
     if (!client || busyRef.current || !sql.trim()) return;
     busyRef.current = true; setBusy(true); setNote(null);
     try {
-      await client.reset({ dataset: base });
-      const result = await runWithProbe(client, sql, runOptions(part));
+      const result = await exclusive(async () => {
+        await client.reset({ dataset: base });
+        return runWithProbe(client, sql, runOptions(part));
+      });
       setRuns((s) => ({ ...s, [part.id]: { result } }));
     } catch (e) {
       if (e?.code !== 'CANCELLED' && e?.code !== 'ENGINE_UNAVAILABLE') setNote(runErrorText(e, t));
     } finally { busyRef.current = false; setBusy(false); }
   }, [client, base, t]);
 
+  // One try at grading: every part on the lab data and on its hidden twin. `ungraded` = something kept an entry from getting a
+  // verdict (the engine was cancelled, an expected file did not load); the question then stays open to try again, not locked at 0.
+  const gradeAll = useCallback(async () => {
+    const out = {};
+    const flat = [];
+    let ungraded = false;
+    for (const part of parts) {
+      const sql = textsRef.current[part.id] ?? '';
+      out[part.id] = [];
+      for (const dataset of SQL_DATASETS(base)) {
+        let entry;
+        try {
+          let expected = null;
+          try { expected = await loadExpected(part.id, dataset); } catch { expected = null; }
+          await client.reset({ dataset });
+          const empty = !sql.trim();
+          const result = empty ? { error: { code: 'EMPTY', message: '' }, columns: [], rows: [] } : await runWithProbe(client, sql, runOptions({ ...part, dataset: base }, { hidden: dataset !== base }));
+          const spec = checkSpecOf(part);
+          const verdict = expected && !empty ? checkResult(result, expected, spec) : null;
+          if (!verdict && !empty) ungraded = true;
+          const mistake = verdict && !verdict.ok ? detectMistake({ sql, actual: result, expected, spec }) : null;
+          entry = { dataset, result, verdict, mistake, expected };
+        } catch (e) {
+          if (e?.code === 'ENGINE_UNAVAILABLE') return null;
+          ungraded = true;
+          entry = { dataset, result: null, verdict: null, mistake: null, expected: null, failure: e };
+        }
+        out[part.id].push(entry);
+        flat.push(entry.verdict);
+      }
+    }
+    return { out, flat, ungraded };
+  }, [client, parts, base]);
+
   const handIn = useCallback(async () => {
     if (!client || busyRef.current) return;
     busyRef.current = true; setBusy(true); setNote(null);
     try {
-      const out = {};
-      const flat = [];
-      for (const part of parts) {
-        const sql = textsRef.current[part.id] ?? '';
-        out[part.id] = [];
-        for (const dataset of SQL_DATASETS(base)) {
-          let entry;
-          try {
-            let expected = null;
-            try { expected = await loadExpected(part.id, dataset); } catch { expected = null; }
-            await client.reset({ dataset });
-            const result = sql.trim() ? await runWithProbe(client, sql, runOptions({ ...part, dataset: base }, { hidden: dataset !== base })) : { error: { code: 'EMPTY', message: '' }, columns: [], rows: [] };
-            const spec = checkSpecOf(part);
-            const verdict = expected && !(result.error?.code === 'EMPTY') ? checkResult(result, expected, spec) : null;
-            const mistake = verdict && !verdict.ok ? detectMistake({ sql, actual: result, expected, spec }) : null;
-            entry = { dataset, result, verdict, mistake, expected };
-          } catch (e) {
-            if (e?.code === 'ENGINE_UNAVAILABLE') return;
-            entry = { dataset, result: null, verdict: null, mistake: null, expected: null, failure: e };
-          }
-          out[part.id].push(entry);
-          flat.push(entry.verdict);
-        }
+      const done = await exclusive(gradeAll);
+      if (!done) return;
+      if (done.ungraded) {
+        setNote(t('The answer could not be checked this time. Nothing was scored; press Hand in to try again.', 'Răspunsul nu a putut fi verificat de data aceasta. Nu s-a notat nimic; apasă Predă ca să încerci din nou.'));
+        return;
       }
-      const score = scoreSqlQuestion(question.points, flat);
-      setGraded({ score, parts: out });
+      const score = scoreSqlQuestion(question.points, done.flat);
+      setGraded({ score, parts: done.out });
       onAnswer?.(question.id, score, question.points, { sql: textsRef.current });
     } finally { busyRef.current = false; setBusy(false); }
-  }, [client, parts, base, question, onAnswer]);
+  }, [client, gradeAll, question, onAnswer, t]);
+
+  // Paper mode after hand-in: the box unlocks so the paper answer can be typed in and checked against the expected table.
+  const [paperRuns, setPaperRuns] = useState({}); // part id -> { result, verdict, mistake } | { failed }
+  const canCheckPaper = mode === 'paper' && !!client && status !== 'failed';
+  const checkPaperPart = async (part) => {
+    const sql = textsRef.current[part.id] ?? '';
+    const expected = paperExpected?.[part.id];
+    if (!client || busyRef.current || !sql.trim() || !expected) return;
+    busyRef.current = true; setBusy(true); setNote(null);
+    try {
+      const result = await exclusive(async () => {
+        await client.reset({ dataset: base });
+        return runWithProbe(client, sql, runOptions(part));
+      });
+      const spec = checkSpecOf(part);
+      const verdict = checkResult(result, expected, spec);
+      const mistake = !verdict.ok ? detectMistake({ sql, actual: result, expected, spec }) : null;
+      setPaperRuns((s) => ({ ...s, [part.id]: { result, verdict, mistake } }));
+    } catch (e) {
+      if (e?.code !== 'CANCELLED' && e?.code !== 'ENGINE_UNAVAILABLE') setNote(runErrorText(e, t));
+    } finally { busyRef.current = false; setBusy(false); }
+  };
 
   const handInPaper = async () => {
     const found = {};
@@ -132,14 +173,32 @@ export default function SqlQuestion({ question, onAnswer, suppressFeedback = fal
       <div className="sx" data-testid="sql-question" data-mode="paper">
         <SchemaPanel dataset={base} client={null} ready={false} />
         <p className="sx-muted" data-testid="sql-paper-note">
-          {t('Paper mode: write the query on a sheet. When you are done, hand in to see the expected table, the reference solution and the grading notes, then score yourself.',
-            'Mod hârtie: scrie interogarea pe o foaie. Când ai terminat, predă ca să vezi tabelul cerut, soluția de referință și notele de corectare, apoi notează-te singur.')}
+          {t('Paper mode: write the query on a sheet. When you are done, hand in and the box unlocks so you can run your answer; you also see the expected table, the reference solution and the grading notes, then score yourself.',
+            'Mod hârtie: scrie interogarea pe o foaie. Când ai terminat, predă: cutia se deblochează ca să-ți poți rula răspunsul, și vezi tabelul cerut, soluția de referință și notele de corectare; apoi notează-te singur.')}
         </p>
-        {parts.map((p) => (
-          <textarea key={p.id} className="sx-paper-text" disabled rows={3} value="" readOnly
-            placeholder={multi ? `(${p.label}) ${t('on paper', 'pe hârtie')}` : t('on paper', 'pe hârtie')}
-            aria-label={t('SQL box (locked in paper mode)', 'Cutia SQL (blocată în modul hârtie)')} />
-        ))}
+        {parts.map((p) => (handedIn && canCheckPaper
+          ? (
+            <div key={p.id} className="sx-part" data-testid="sql-paper-unlocked">
+              <SqlEditor value={texts[p.id] ?? ''} onChange={(v) => setText(p.id, v)} onRun={() => checkPaperPart(p)} label={multi ? `SQL (${p.label})` : t('SQL query', 'Interogare SQL')} />
+              <div className="sx-actions">
+                <button type="button" className="sx-btn" data-testid="sql-paper-run" onClick={() => checkPaperPart(p)} disabled={busy || !(texts[p.id] ?? '').trim() || !paperExpected?.[p.id]}>
+                  {t('Run and check', 'Rulează și verifică')}<kbd className="sx-kbd" aria-hidden="true">Ctrl+Enter</kbd>
+                </button>
+              </div>
+              {paperRuns[p.id] && (
+                <div aria-live="polite" data-testid="sql-paper-verdict">
+                  <VerdictPanel verdict={paperRuns[p.id].verdict} mistake={paperRuns[p.id].mistake} hidden={false} t={t} />
+                  {!paperRuns[p.id].result.error && <Outcome block={p} outcome={{ result: paperRuns[p.id].result, snapshot: null, verdict: paperRuns[p.id].verdict, expected: paperExpected[p.id] }} t={t} />}
+                </div>
+              )}
+            </div>
+          )
+          : (
+            <textarea key={p.id} className="sx-paper-text" disabled rows={3} value="" readOnly
+              placeholder={multi ? `(${p.label}) ${t('on paper', 'pe hârtie')}` : t('on paper', 'pe hârtie')}
+              aria-label={t('SQL box (locked in paper mode)', 'Cutia SQL (blocată în modul hârtie)')} />
+          )))}
+        {note && handedIn && <p className="sx-note" data-testid="sql-note">{note}</p>}
         {!handedIn && <button type="button" className="sx-btn primary" data-testid="sql-submit" onClick={handInPaper}>{t('Hand in', 'Predă')}</button>}
         {handedIn && (
           <div className="sx-paper-result" data-testid="sql-paper-result">
@@ -164,12 +223,13 @@ export default function SqlQuestion({ question, onAnswer, suppressFeedback = fal
   const loadingEngine = status === 'loading' || status === 'idle';
   return (
     <div className="sx" data-testid="sql-question" data-mode="practice">
-      <SchemaPanel dataset={base} client={client} ready={status === 'ready'} />
+      {/* static schema: describing through the shared client would reboot it onto this dataset in the middle of a hand-in */}
+      <SchemaPanel dataset={base} client={null} ready={false} />
       {parts.map((p, idx) => {
         const run = runs[p.id];
         const entries = graded?.parts[p.id];
-        // the entry to show: the first dataset the query got wrong, else the lab data
-        const shown = entries ? (entries.find((e) => e.verdict && !e.verdict.ok) ?? entries.find((e) => e.verdict) ?? entries[0]) : null;
+        // the entry to show: the first dataset the query got wrong, else one that has no verdict, else the lab data
+        const shown = entries ? (entries.find((e) => e.verdict && !e.verdict.ok) ?? entries.find((e) => !e.verdict) ?? entries[0]) : null;
         return (
           <div key={p.id} className="sx-part" data-testid="sql-part">
             {multi && <p className="sx-prompt">{idx > 0 && p.prompt ? t(p.prompt.en, p.prompt.ro) : `(${p.label})`}</p>}
