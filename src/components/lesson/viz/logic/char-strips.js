@@ -5,6 +5,9 @@ function padChars(len, fill) {
 }
 
 // `fill` is optional: like Oracle, LPAD and RPAD pad with a blank when no pad string is given.
+// The call as the learner would write it: LPAD('Pagina', 3, '*'); with no pad string given, the third argument is left out.
+export const padCall = ({ fn, input, len, fill }) => `${fn}('${input}', ${len}${fill === undefined ? '' : `, '${fill}'`})`;
+
 export function padPlan({ input, fn, len, fill = ' ' }) {
   const chars = [...input];
   if (len <= chars.length) {

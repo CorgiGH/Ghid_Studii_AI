@@ -34,8 +34,8 @@ export default function DeleteSweep({ props, predict }) {
     <VizFrame widget="delete-sweep" stepper={s} caption={caption} label={t('Deleting rows', 'Ștergerea rândurilor')}>
       <pre className="viz-sql">{d.sql};</pre>
       <div className="viz-scrollx">
-        <div className="viz-dtable">
-          <div className="viz-dt-row head" style={{ gridTemplateColumns: `repeat(${d.columns.length}, minmax(0, 1fr))` }}>
+        <div className="viz-dtable" style={{ '--dt-cols': d.columns.length }}>
+          <div className="viz-dt-row head">
             {d.columns.map(c => <span key={c}>{c}</span>)}
           </div>
           <div className="viz-dt-body" ref={bodyRef}>
@@ -45,7 +45,6 @@ export default function DeleteSweep({ props, predict }) {
                   key={i}
                   layout={!m.reduced}
                   className={`viz-dt-row${k >= 1 && d.doomed[i] ? ' doomed' : ''}`}
-                  style={{ gridTemplateColumns: `repeat(${d.columns.length}, minmax(0, 1fr))` }}
                   initial={false}
                   exit={m.reduced ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, x: 90, transition: { duration: 0.28, delay: Math.min(i, 24) * 0.012 } }}
                   transition={m.spring}

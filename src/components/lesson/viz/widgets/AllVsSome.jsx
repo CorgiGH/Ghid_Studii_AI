@@ -18,7 +18,7 @@ export default function AllVsSome({ props, predict }) {
   const caption = [
     t(`Students who have grades, each with their grades. A grade that meets ${cond} removes the student. ${predict ? 'Click the students you think stay.' : ''}`, `Studenții care au note, fiecare cu notele lui. O notă care îndeplinește ${cond} elimină studentul. ${predict ? 'Apasă pe studenții care crezi că rămân.' : ''}`),
     t(`The condition ${cond} is tested on each grade: red is a counterexample, green is fine.`, `Condiția ${cond} se testează pe fiecare notă: roșu e contraexemplu, verde e în regulă.`),
-    t('SOME: one counterexample is enough to remove the student.', 'SOME: un singur contraexemplu e de ajuns ca să elimine studentul.'),
+    t('SOME: one counterexample is enough to remove the student. The column shows the first one found.', 'SOME: un singur contraexemplu e de ajuns ca să elimine studentul. Coloana arată primul găsit.'),
     t(`ALL grades fine: no counterexample, the student stays. ${A.qualifying.length} students stay.`, `TOATE notele în regulă: niciun contraexemplu, studentul rămâne. Rămân ${A.qualifying.length} studenți.`),
     A.minus ? t(`Written with MINUS on nume and prenume only, ${A.minus.byName.length} names come out for ${A.minus.byKey.length} students: the two with the same nume and prenume merge. Use the switch to compare.`, `Scris cu MINUS doar pe nume și prenume, ies ${A.minus.byName.length} nume pentru ${A.minus.byKey.length} studenți: cei doi cu același nume și prenume se contopesc. Folosește comutatorul ca să compari.`) : '',
   ][k];
@@ -42,7 +42,7 @@ export default function AllVsSome({ props, predict }) {
               <span className="viz-avs-grades">
                 {r.grades.map((g, j) => <span key={j} className={`viz-g${k >= 1 ? (r.bad[j] ? ' fail' : ' pass') : ''}`}>{g}</span>)}
               </span>
-              <span className={`viz-avs-badge${k >= 2 ? (r.some ? ' no' : '') : ''}`}>{k >= 2 ? (r.some ? '✓' : '–') : ''}</span>
+              <span className={`viz-avs-badge${k >= 2 ? (r.some ? ' no' : '') : ''}`}>{k >= 2 ? (r.some ? r.counterexample : '–') : ''}</span>
               <span className={`viz-avs-badge${k >= 3 ? (r.all ? ' yes' : ' no') : ''}`}>{k >= 3 ? (r.all ? '✓' : '✗') : ''}</span>
             </Motion.div>
           );

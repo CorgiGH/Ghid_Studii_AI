@@ -82,7 +82,8 @@ export default function SetBalls({ props, predict }) {
         {all.map((p, idx) => (
           <span key={`s${idx}`} className={`viz-ball2 src ${p.side}${k >= 1 ? ' used' : ''}`} style={{ transform: `translate(${srcPos(p.i, p.side).x}px, ${srcPos(p.i, p.side).y}px)`, width: W, height: H }}>{p.v}</span>
         ))}
-        {res && <div className="viz-balls-divider" style={{ top: destTop + 4 + 12 }}><span>{res.op}</span></div>}
+        {/* the divider runs through the middle of the gap between the source piles and the result, so its label sits above the result balls */}
+        {res && <div className="viz-balls-divider" style={{ top: destTop - 8 }}><span>{res.op}</span></div>}
         {res && plan.map((p, idx) => {
           const from = srcPos(p.i, p.side);
           if (p.slot < 0) return null;

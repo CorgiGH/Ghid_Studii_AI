@@ -1,9 +1,12 @@
 // Shared animation kit for the visual widgets: the stepper hook and motion variants.
 // Advance is always manual; reduced motion keeps the end state and drops the movement.
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useMemo, useReducer, useRef } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { useScreenGate } from '../ScreenGate.jsx';
+import { getLessonStore } from '../../../lesson/useLessonStore.js';
+import { nowMs } from '../../../lesson/clock.js';
 import { initialStepper, stepperReducer } from './logic/stepper.js';
+import { recordVizPredict } from './logic/predict-record.js';
 
 export const SPRING = { type: 'spring', stiffness: 420, damping: 34 };
 export const SOFT = { type: 'spring', stiffness: 210, damping: 26 };
@@ -15,20 +18,29 @@ export const BOUNCE = { type: 'spring', stiffness: 520, damping: 20 };
 // With `own: true` the widget asks for the pick itself (marks, rows to click): the stepper
 // shows no "Show me" gate of its own, and the widget calls settle() on the first pick or
 // its own reveal button, which is what completes the screen. One gate, not two.
+// Settling a predict also stores one `predict` attempt for the screen (recordVizPredict), so the gate stays open after a reload.
 export function useStepper(n, o = {}) {
   const predict = !!o.predict;
   const own = predict && !!o.own;
   const gate = useScreenGate();
   const gated = predict && !own;
   const [s, dispatch] = useReducer(stepperReducer, { predict: gated }, initialStepper);
+  const recorded = useRef(false);
+  const done = useCallback(() => {
+    if (!predict) return;
+    gate.complete();
+    if (recorded.current || !gate.ref) return;
+    recorded.current = true;
+    recordVizPredict(getLessonStore(), gate.ref, nowMs());
+  }, [predict, gate]);
   const next = useCallback(() => dispatch({ type: 'next', n }), [n]);
   const back = useCallback(() => dispatch({ type: 'back', n }), [n]);
   const goto = useCallback((to) => dispatch({ type: 'goto', to, n }), [n]);
   const reveal = useCallback(() => {
     dispatch({ type: 'reveal', n });
-    if (predict) gate.complete();
-  }, [n, predict, gate]);
-  const settle = useCallback(() => { if (predict) gate.complete(); }, [predict, gate]);
+    done();
+  }, [n, done]);
+  const settle = useCallback(() => { done(); }, [done]);
   const reset = useCallback(() => dispatch({ type: 'reset', revealed: !gated }), [gated]);
   const step = Math.min(s.step, Math.max(0, n - 1));
   return {

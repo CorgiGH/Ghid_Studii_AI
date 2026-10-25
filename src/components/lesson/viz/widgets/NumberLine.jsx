@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { numberLines, pickIsRight, reachableStep } from '../logic/number-line.js';
+import { lineCrowded, nearMarks, numberLines, pickIsRight, reachableStep } from '../logic/number-line.js';
 import { numberLineSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -52,9 +52,11 @@ export default function NumberLine({ props, predict }) {
           const picked = k >= 1 ? picks[`${k}:${li}`] : undefined;
           const oracleVal = res && oracle.values ? oracle.values[li * props.fns.length + (k - 1)] : undefined;
           const shown = oracleVal !== undefined && oracleVal !== null && !Number.isNaN(Number(oracleVal)) ? Number(oracleVal) : res?.result;
+          // within one mark the two pills would cover each other: the source pill moves up (the line keeps room for it)
+          const lift = !!res && nearMarks(ln.value, shown, digits);
           return (
             <div className="viz-line" key={li}>
-              <div className="viz-line-track" role="img" aria-label={`${ln.value}`}>
+              <div className={`viz-line-track${lineCrowded(ln, digits) ? ' crowded' : ''}`} role="img" aria-label={`${ln.value}`}>
                 <div className="viz-line-axis" />
                 {ticks.map((x, i) => {
                   const mark = asking(li) ? (picked === x ? ' sel' : '') : picked !== undefined && pickIsRight(ln.value, fnAt, digits, x) ? ' right' : picked === x ? ' wrong' : '';
@@ -68,7 +70,7 @@ export default function NumberLine({ props, predict }) {
                     )
                     : <div key={i} className={`viz-tick${mark}`} style={{ left: `${(i / span) * 100}%` }}><i /><span>{label(x, Math.max(0, digits))}</span></div>;
                 })}
-                <div className="viz-dot-src" style={{ left: vPct }}><span>{ln.value}</span></div>
+                <div className={`viz-dot-src${lift ? ' lift' : ''}`} style={{ left: vPct }}><span>{ln.value}</span></div>
                 {res && (
                   <Motion.div className="viz-dot-res" initial={{ left: vPct }} animate={{ left: pct(shown) }} transition={m.soft}>
                     <span>{label(shown, Math.max(0, digits))}</span>

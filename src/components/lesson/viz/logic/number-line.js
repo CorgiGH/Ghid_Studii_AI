@@ -35,6 +35,14 @@ export function pickIsRight(value, fn, digits, picked) {
   return grid(numberLine(value, fn, digits)) === grid(picked);
 }
 
+// True when `result` lands within one mark of `value`: drawn side by side, their two pills would cover each other.
+export function nearMarks(value, result, digits = 0) {
+  return Math.abs(shift(result, digits) - shift(value, digits)) <= 1;
+}
+
+// A line on which any result lands within one mark of the value keeps room above the axis for the source pill to move up.
+export const lineCrowded = (line, digits = 0) => line.results.some((r) => nearMarks(line.value, r.result, digits));
+
 // The furthest step the progress dots may jump to. With predict on, every step after the first asks for a pick
 // and is only left once "Show" was pressed (`shown[step]`), so a dot can reach the first step not yet shown but
 // never one beyond it; without predict every step is open.

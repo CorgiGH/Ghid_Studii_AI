@@ -21,6 +21,9 @@ export function convert({ fn, value }) {
   return null;
 }
 
+// The type written at the end of a pipe: '?' until that pipe has run, so the learner guesses it first.
+export const pipeTarget = (item, done) => (done ? item.to : '?');
+
 export function typePipes({ conversions }) {
   return { items: conversions.map(c => ({ ...c, result: convert(c) })), count: conversions.length + 1 };
 }

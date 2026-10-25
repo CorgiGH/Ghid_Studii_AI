@@ -52,6 +52,12 @@ export function calendar(start, { fn, arg }) {
   }
 }
 
+// The caption of a `+ n` step: the argument first, then what a whole number and a fraction do.
+export const plusCaption = (arg) => ({
+  en: `+ ${arg}: adding a number moves the date by that many days; a fraction (for example 3/24) moves the clock`,
+  ro: `+ ${arg}: un număr adunat mută data cu atâtea zile; o fracție (de exemplu 3/24) mută ceasul`,
+});
+
 export function opLabel({ fn, arg }) {
   if (fn === '+') return `+ ${arg}`;
   if (arg === undefined || arg === null) return `${fn}()`;

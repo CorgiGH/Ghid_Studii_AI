@@ -3,7 +3,7 @@ import { motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { charStrips, swapStep } from '../logic/char-strips.js';
+import { charStrips, padCall, swapStep } from '../logic/char-strips.js';
 import { charStripsSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
 
@@ -79,10 +79,11 @@ export default function CharStrips({ props, predict }) {
   const fill = blank ? ' ' : props.fill;
   const cut = plan.cut !== null;
   const padCells = plan.pad.map((ch, i) => ({ ch, i }));
+  const call = padCall(props);
   const caption = [
     cut
-      ? t(`${props.fn}('${props.input}', ${props.len}) must be ${props.len} characters long, but the text is ${plan.input.length}.`, `${props.fn}('${props.input}', ${props.len}) trebuie să aibă ${props.len} caractere, dar textul are ${plan.input.length}.`)
-      : t(`${props.fn}('${props.input}', ${props.len}${blank ? '' : `, '${fill}'`}): the result is ${props.len} characters, so ${plan.padCount} places are still empty.`, `${props.fn}('${props.input}', ${props.len}${blank ? '' : `, '${fill}'`}): rezultatul are ${props.len} caractere, deci mai sunt ${plan.padCount} locuri goale.`),
+      ? t(`${call} must be ${props.len} characters long, but the text is ${plan.input.length}.`, `${call} trebuie să aibă ${props.len} caractere, dar textul are ${plan.input.length}.`)
+      : t(`${call}: the result is ${props.len} characters, so ${plan.padCount} places are still empty.`, `${call}: rezultatul are ${props.len} caractere, deci mai sunt ${plan.padCount} locuri goale.`),
     cut
       ? t(`Too long: ${props.fn} cuts the text from the right, it never pads. The last ${plan.dropped.length} letters go.`, `Prea lung: ${props.fn} taie textul din dreapta, nu mai adaugă nimic. Ultimele ${plan.dropped.length} litere dispar.`)
       : t(`The fill ${blank ? 'is a blank, because no pad string was given' : fill.length > 1 ? `'${fill}' repeats` : `'${fill}'`} on the ${left ? 'left' : 'right'}; the last repeat is cut off when it does not fit.`, `Umplerea ${blank ? 'este un spațiu, fiindcă nu s-a dat niciun șir de umplere' : fill.length > 1 ? `'${fill}' se repetă` : `'${fill}'`} în ${left ? 'stânga' : 'dreapta'}; ultima repetare se taie dacă nu încape.`),
