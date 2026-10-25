@@ -1,0 +1,210 @@
+{
+  "meta": {
+    "id": "bd-mock-l1",
+    "title": {
+      "en": "Mock test: Databases, lesson 1 level",
+      "ro": "Test de probă: Baze de date, nivelul Lecției 1"
+    },
+    "year": 2026,
+    "type": "mock",
+    "duration": 0,
+    "totalPoints": 25,
+    "oneQuestionPerScreen": true,
+    "modes": [
+      "paper",
+      "practice"
+    ]
+  },
+  "questions": [
+    {
+      "id": "bd-mock-l1-p1",
+      "type": "sql",
+      "prompt": {
+        "en": "Show the last name, first name and city of the readers with no fee on record whose first name contains the letter \"a\" (lowercase). Order by city descending and, within the same city, by last name ascending.",
+        "ro": "Afișați numele, prenumele și orașul cititorilor fără taxă înregistrată al căror prenume conține litera „a” (literă mică). Ordonați descrescător după oraș și, la același oraș, crescător după nume."
+      },
+      "points": 3,
+      "dataset": "biblioteca",
+      "kind": "query",
+      "solution": "SELECT nume, prenume, oras FROM cititori WHERE taxa IS NULL AND prenume LIKE '%a%' ORDER BY oras DESC, nume ASC",
+      "check": {
+        "order": "required",
+        "mode": "bag",
+        "orderBy": [
+          "ORAS",
+          "NUME"
+        ]
+      },
+      "gradingNotes": {
+        "en": "Check: the NULL test is written IS NULL; the LIKE pattern uses a lowercase a with a % on both sides; DESC applies to the city and ASC to the name, each written separately. Typical mistakes: taxa = NULL (0 rows), LIKE '%A%', DESC written once and assumed to cover both keys.",
+        "ro": "De urmărit: testul pe NULL este IS NULL; modelul LIKE folosește a mic, cu % de ambele părți; DESC se aplică orașului și ASC numelui, fiecare scris separat. Greșeli tipice: taxa = NULL (0 rânduri), LIKE '%A%', DESC scris o singură dată și crezut valabil pentru ambele chei."
+      }
+    },
+    {
+      "id": "bd-mock-l1-p2",
+      "type": "sql",
+      "prompt": {
+        "en": "Show the readers (id, last name, first name) who have borrowed at least one book and have never given a rating below 7.",
+        "ro": "Afișați cititorii (id, nume, prenume) care au împrumutat cel puțin o carte și nu au dat nicio apreciere sub 7."
+      },
+      "points": 3,
+      "dataset": "biblioteca",
+      "kind": "query",
+      "solution": "SELECT c.id_cititor, c.nume, c.prenume FROM cititori c JOIN imprumuturi i ON c.id_cititor = i.id_cititor MINUS SELECT c.id_cititor, c.nume, c.prenume FROM cititori c JOIN imprumuturi i ON c.id_cititor = i.id_cititor WHERE i.apreciere < 7",
+      "check": {
+        "order": "any",
+        "mode": "bag"
+      },
+      "gradingNotes": {
+        "en": "Check: the first query lists the readers with loans, the second those with a rating below 7, and MINUS removes them; the id is part of both lists. Typical mistakes: MINUS on (last name, first name) only gives 4 rows, because the two Ababei Vlad readers collapse into one; WHERE apreciere >= 7 answers a different question (at least one good rating); the reader with no loans (c6) must not appear.",
+        "ro": "De urmărit: prima interogare dă cititorii cu împrumuturi, a doua pe cei cu apreciere sub 7, iar MINUS îi scade; id-ul face parte din ambele liste. Greșeli tipice: MINUS doar pe (nume, prenume) dă 4 rânduri, fiindcă cei doi Ababei Vlad se contopesc; WHERE apreciere >= 7 răspunde la altă întrebare (cel puțin o apreciere bună); cititorul fără împrumuturi (c6) nu trebuie să apară."
+      }
+    },
+    {
+      "id": "bd-mock-l1-p3",
+      "type": "sql",
+      "prompt": {
+        "en": "For each author show, in a column named \"Autor\", the last name with a capital first letter and the rest lowercase, a space, the initial of the first name and a dot (for example \"Eminescu M.\"), plus the length of the last name (without spaces).",
+        "ro": "Pentru fiecare autor afișați, într-o coloană numită „Autor”, numele cu prima literă mare și restul mici, un spațiu, inițiala prenumelui și un punct (de ex. „Eminescu M.”), plus lungimea numelui (fără spații)."
+      },
+      "points": 3,
+      "dataset": "biblioteca",
+      "kind": "query",
+      "solution": "SELECT INITCAP(TRIM(nume)) || ' ' || SUBSTR(TRIM(prenume),1,1) || '.' AS \"Autor\", LENGTH(TRIM(nume)) AS lungime FROM autori",
+      "check": {
+        "order": "any",
+        "mode": "bag",
+        "aliases": [
+          "Autor",
+          ""
+        ]
+      },
+      "gradingNotes": {
+        "en": "Check: INITCAP for the capitalisation, TRIM on the CHAR columns, SUBSTR(...,1,1) for the initial, || for the concatenation, the alias in double quotes. Typical mistakes: without TRIM the result is \"Calinescu  G.\" (extra spaces) and every length is 10; without INITCAP SADOVEANU stays in capitals.",
+        "ro": "De urmărit: INITCAP pentru majuscule, TRIM pe coloanele CHAR, SUBSTR(...,1,1) pentru inițială, || pentru concatenare, aliasul între ghilimele duble. Greșeli tipice: fără TRIM rezultatul este „Calinescu  G.” (spații în plus) și toate lungimile sunt 10; fără INITCAP SADOVEANU rămâne cu majuscule."
+      }
+    },
+    {
+      "id": "bd-mock-l1-p4",
+      "type": "sql",
+      "prompt": {
+        "en": "For each returned loan made in March (any year), show the reader id, the loan date in the format DD.MM.YYYY, the weekday (in English, with no extra spaces) and the number of days late compared with the 14-day limit (0 if it was not late). Order chronologically.",
+        "ro": "Pentru fiecare împrumut returnat, făcut în martie (orice an), afișați id_cititor, data împrumutului în formatul DD.MM.YYYY, ziua săptămânii (în engleză, fără spații în plus) și numărul de zile de întârziere față de termenul de 14 zile (0 dacă nu a fost întârziere). Ordonați cronologic."
+      },
+      "points": 3,
+      "dataset": "biblioteca",
+      "kind": "query",
+      "solution": "SELECT id_cititor, TO_CHAR(data_imprumut,'DD.MM.YYYY') AS data, TO_CHAR(data_imprumut,'fmDay','NLS_DATE_LANGUAGE=ENGLISH') AS zi, GREATEST(0, data_returnare - data_imprumut - 14) AS intarziere FROM imprumuturi WHERE data_returnare IS NOT NULL AND TO_CHAR(data_imprumut,'MM') = '03' ORDER BY data_imprumut",
+      "check": {
+        "order": "required",
+        "mode": "bag",
+        "orderBy": [
+          "DATA"
+        ]
+      },
+      "gradingNotes": {
+        "en": "Check: TO_CHAR with the format mask and the fm prefix, the NLS_DATE_LANGUAGE argument, date subtraction, GREATEST(0, ...) for the lateness, the NULL return date excluded, ORDER BY on the date itself. Typical mistakes: ORDER BY on the formatted text (not chronological); no fm, so the day reads \"Tuesday  \"; a negative lateness without GREATEST; loans not yet returned left in (the difference is NULL).",
+        "ro": "De urmărit: TO_CHAR cu masca de format și prefixul fm, argumentul NLS_DATE_LANGUAGE, scăderea dintre date, GREATEST(0, ...) pentru întârziere, data de returnare NULL exclusă, ORDER BY pe data propriu-zisă. Greșeli tipice: ORDER BY pe șirul formatat (nu e cronologic); fără fm, ziua apare „Tuesday  ”; întârziere negativă fără GREATEST; împrumuturi nereturnate rămase în rezultat (diferența e NULL)."
+      }
+    },
+    {
+      "id": "bd-mock-l1-p5",
+      "type": "sql",
+      "prompt": {
+        "en": "For each reader show the last name, the fee (0 if missing), the fee increased by 10% and rounded to 2 decimals, a category (\"fara taxa\" if the fee is missing or 0, \"mica\" below 10, \"mare\" otherwise) and a city code using DECODE (\"IS\" for Iasi, \"BC\" for Bacau, \"altul\" otherwise).",
+        "ro": "Pentru fiecare cititor afișați numele, taxa (0 dacă lipsește), taxa majorată cu 10% rotunjită la 2 zecimale, o categorie („fara taxa” dacă taxa lipsește sau e 0, „mica” sub 10, „mare” în rest) și un cod de oraș cu DECODE („IS” pentru Iasi, „BC” pentru Bacau, „altul” în rest)."
+      },
+      "points": 3,
+      "dataset": "biblioteca",
+      "kind": "query",
+      "solution": "SELECT nume, NVL(taxa,0) AS taxa, ROUND(NVL(taxa,0)*1.1,2) AS taxa_majorata, CASE WHEN NVL(taxa,0)=0 THEN 'fara taxa' WHEN taxa<10 THEN 'mica' ELSE 'mare' END AS categorie, DECODE(oras,'Iasi','IS','Bacau','BC','altul') AS cod FROM cititori",
+      "check": {
+        "order": "any",
+        "mode": "bag"
+      },
+      "gradingNotes": {
+        "en": "Check: NVL wherever the fee can be NULL, ROUND(...,2), a CASE with the conditions in the right order, DECODE with search/result pairs and a default. Typical mistakes: taxa < 10 without NVL (a NULL falls into \"mare\"); DECODE written with a comparison (oras = 'Iasi') instead of a value.",
+        "ro": "De urmărit: NVL oriunde taxa poate fi NULL, ROUND(...,2), un CASE cu condițiile în ordinea bună, DECODE cu perechi căutare/rezultat și o valoare implicită. Greșeli tipice: taxa < 10 fără NVL (un NULL ajunge în „mare”); DECODE scris cu comparație (oras = 'Iasi') în loc de valoare."
+      }
+    },
+    {
+      "id": "bd-mock-l1-p6",
+      "type": "sql",
+      "prompt": {
+        "en": "Show the reader's last name, the book title and the author's last name for the loans rated 9 or 10.",
+        "ro": "Afișați numele cititorului, titlul cărții și numele autorului pentru împrumuturile apreciate cu 9 sau 10."
+      },
+      "points": 3,
+      "dataset": "biblioteca",
+      "kind": "query",
+      "solution": "SELECT c.nume AS cititor, ca.titlu, TRIM(a.nume) AS autor, i.apreciere FROM cititori c JOIN imprumuturi i ON c.id_cititor = i.id_cititor JOIN carti ca ON ca.id_carte = i.id_carte JOIN scris s ON s.id_carte = ca.id_carte JOIN autori a ON a.id_autor = s.id_autor WHERE i.apreciere >= 9",
+      "check": {
+        "order": "any",
+        "mode": "bag"
+      },
+      "gradingNotes": {
+        "en": "Check: five tables joined in a chain with four join conditions, the link table scris used, the rating filter in WHERE. A book with two authors appears on two rows; that is correct. Typical mistakes: the scris table left out; a missing join condition (Cartesian product).",
+        "ro": "De urmărit: cinci tabele legate în lanț cu patru condiții de joncțiune, tabela de legătură scris folosită, filtrul pe apreciere în WHERE. Cartea cu doi autori apare pe două rânduri; nu e greșeală. Greșeli tipice: tabela scris omisă; condiție de joncțiune lipsă (produs cartezian)."
+      }
+    },
+    {
+      "id": "bd-mock-l1-p7",
+      "type": "sql",
+      "prompt": {
+        "en": "(a) Show all the authors (last name, first name) with the titles of their books; authors with no book must appear too, with an empty title. (b) Show the titles of the books that have never been borrowed.",
+        "ro": "(a) Afișați toți autorii (nume, prenume) cu titlurile cărților lor; autorii fără nicio carte trebuie să apară și ei, cu titlul gol. (b) Afișați titlurile cărților care nu au fost niciodată împrumutate."
+      },
+      "points": 3,
+      "dataset": "biblioteca",
+      "kind": "query",
+      "solution": "SELECT TRIM(a.nume) AS nume, TRIM(a.prenume) AS prenume, c.titlu FROM autori a LEFT JOIN scris s ON a.id_autor = s.id_autor LEFT JOIN carti c ON c.id_carte = s.id_carte",
+      "check": {
+        "order": "any",
+        "mode": "bag"
+      },
+      "gradingNotes": {
+        "en": "Check (a): outer joins from authors, so Blaga Lucian appears with a NULL title, and the two authors of the shared book appear twice. Check (b): the \"no match\" test is on the key of the right-hand table, in WHERE. Typical mistakes: INNER JOIN in (a); i.apreciere IS NULL in (b), which is wrong because the rating can be NULL on loans that exist (c2/b4, c7/b1).",
+        "ro": "De urmărit (a): joncțiuni externe pornind de la autori, deci Blaga Lucian apare cu titlu NULL, iar cei doi autori ai cărții comune apar de două ori. De urmărit (b): testul «fără pereche» pe cheia tabelei din dreapta, în WHERE. Greșeli tipice: INNER JOIN în (a); i.apreciere IS NULL în (b), greșit, fiindcă aprecierea poate fi NULL pe împrumuturi existente (c2/b4, c7/b1)."
+      },
+      "moreParts": [
+        {
+          "id": "bd-mock-l1-p7b",
+          "label": "b",
+          "type": "sql",
+          "kind": "query",
+          "dataset": "biblioteca",
+          "solution": "SELECT c.titlu FROM carti c LEFT JOIN imprumuturi i ON c.id_carte = i.id_carte WHERE i.id_carte IS NULL",
+          "check": {
+            "order": "any",
+            "mode": "bag"
+          },
+          "prompt": {
+            "en": "(b) The titles of the books that have never been borrowed.",
+            "ro": "(b) Titlurile cărților care nu au fost niciodată împrumutate."
+          }
+        }
+      ],
+      "label": "a"
+    },
+    {
+      "id": "bd-mock-l1-p8",
+      "type": "sql",
+      "prompt": {
+        "en": "Show the pairs of readers from the same city who enrolled on the same day, each pair once, without comparing a reader with itself. Columns: the two ids, the two last names, the city.",
+        "ro": "Afișați perechile de cititori din același oraș care s-au înscris în aceeași zi, fiecare pereche o singură dată, fără a compara un cititor cu el însuși. Coloane: cele două id-uri, cele două nume, orașul."
+      },
+      "points": 4,
+      "dataset": "biblioteca",
+      "kind": "query",
+      "solution": "SELECT a.id_cititor, b.id_cititor, a.nume, b.nume, a.oras FROM cititori a JOIN cititori b ON a.oras = b.oras AND a.data_inscriere = b.data_inscriere AND a.id_cititor < b.id_cititor",
+      "check": {
+        "order": "any",
+        "mode": "bag"
+      },
+      "gradingNotes": {
+        "en": "Check: the table joined to itself with two aliases, the equalities on city and date, and a strict inequality on the key so that each pair appears once. Typical mistakes: a.nume < b.nume loses the pair c2-c3 (identical last names) and can give another pair reversed; <> gives every pair twice.",
+        "ro": "De urmărit: tabela unită cu ea însăși prin două aliasuri, egalitățile pe oraș și dată și o inegalitate strictă pe cheie, ca fiecare pereche să apară o singură dată. Greșeli tipice: a.nume < b.nume pierde perechea c2-c3 (nume identice) și poate da altă pereche în sens invers; <> dă fiecare pereche de două ori."
+      }
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import CodeWritingQuestion from './CodeWritingQuestion';
 import DiagramQuestion from './DiagramQuestion';
 import FillInQuestion from './FillInQuestion';
 import CodeTracingQuestion from './CodeTracingQuestion';
+import SqlQuestion from './SqlQuestion';
 import TestResults from './TestResults';
 import TestModeSelector from '../../ui/TestModeSelector';
 
@@ -87,6 +88,7 @@ const questionComponents = {
   'diagram': DiagramQuestion,
   'fill-in': FillInQuestion,
   'code-tracing': CodeTracingQuestion,
+  'sql': SqlQuestion,
 };
 
 export default function TestRenderer({ src }) {
@@ -101,6 +103,7 @@ export default function TestRenderer({ src }) {
   const [reviewQuestionIds, setReviewQuestionIds] = useState([]);
   const [testMode, setTestMode] = useState(null); // null=not started, 'tutor'|'timed'
   const [timeLeft, setTimeLeft] = useState(null);
+  const [screen, setScreen] = useState(0); // oneQuestionPerScreen: index of the question on show
   const [attemptId, setAttemptId] = useState(0); // bumped on retake / review-mistakes so child questions remount
 
   // Load test JSON
@@ -114,6 +117,7 @@ export default function TestRenderer({ src }) {
     setTimeLeft(null);
     setReviewMode(false);
     setReviewQuestionIds([]);
+    setScreen(0);
 
     try {
       setTestData(loadJson(src));
@@ -189,7 +193,7 @@ export default function TestRenderer({ src }) {
 
   // Show mode selector before test starts
   if (!testMode && !reviewMode && testData && !loading) {
-    return <TestModeSelector onSelect={setTestMode} lang={lang} />;
+    return <TestModeSelector onSelect={setTestMode} lang={lang} only={testData.meta.modes} />;
   }
 
   if (loading) return (
@@ -208,6 +212,9 @@ export default function TestRenderer({ src }) {
     ? allQuestions.filter(q => reviewQuestionIds.includes(q.id))
     : allQuestions;
 
+  const perScreen = !!meta.oneQuestionPerScreen;
+  const current = Math.min(screen, Math.max(0, questions.length - 1));
+
   const startReviewMistakes = () => {
     const wrongIds = allQuestions
       .filter(q => {
@@ -222,6 +229,7 @@ export default function TestRenderer({ src }) {
     setAnswers({});
     setShowResults(false);
     setActiveQ(null);
+    setScreen(0);
     setAttemptId(id => id + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -246,7 +254,7 @@ export default function TestRenderer({ src }) {
               {'\u23F1'} {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
             </span>
           )}
-          {testMode !== 'timed' && meta.duration && <span>{'\u23F1'} {meta.duration} min</span>}
+          {testMode !== 'timed' && meta.duration > 0 && <span>{'\u23F1'} {meta.duration} min</span>}
           <span>{meta.totalPoints} {t('points', 'puncte')}</span>
           <span>{visibleQuestionCount} {t('questions', 'întrebări')}</span>
           {prevBest && (
@@ -272,6 +280,7 @@ export default function TestRenderer({ src }) {
                 style={{ backgroundColor: bg }}
                 onClick={() => {
                   setActiveQ(q.id);
+                  if (perScreen) { setScreen(questions.indexOf(q)); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
                   document.getElementById(`q-${q.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }}
               />
@@ -313,7 +322,7 @@ export default function TestRenderer({ src }) {
                   </ReactMarkdown>
                 </div>
               )}
-            <div id={`q-${q.id}`} className="rounded-xl p-4" style={{ backgroundColor: 'var(--theme-card-bg)', border: `1px solid ${activeQ === q.id ? '#3b82f6' : 'var(--theme-border)'}` }}>
+            <div id={`q-${q.id}`} className="rounded-xl p-4" hidden={perScreen && i !== current} data-screen-question={perScreen ? i : undefined} style={{ backgroundColor: 'var(--theme-card-bg)', border: `1px solid ${activeQ === q.id ? '#3b82f6' : 'var(--theme-border)'}` }}>
               {/* Question header */}
               <div className="flex items-start gap-2 mb-3">
                 <span
@@ -339,12 +348,35 @@ export default function TestRenderer({ src }) {
                 question={q}
                 onAnswer={handleAnswer}
                 suppressFeedback={testMode === 'timed' && !showResults}
+                mode={testMode}
               />
             </div>
             </React.Fragment>
           );
         })}
       </div>
+
+      {perScreen && !showResults && questions.length > 1 && (
+        <div className="flex justify-between items-center mt-4" data-testid="test-screen-nav">
+          <button
+            onClick={() => { setScreen(Math.max(0, current - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            disabled={current === 0}
+            className="px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer"
+            style={{ border: '1px solid var(--theme-border)', color: 'var(--theme-content-text)', opacity: current === 0 ? 0.5 : 1 }}
+          >
+            {t('Previous', 'Înapoi')}
+          </button>
+          <span className="text-xs" style={{ color: 'var(--theme-muted-text)' }}>{current + 1} / {questions.length}</span>
+          <button
+            onClick={() => { setScreen(Math.min(questions.length - 1, current + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            disabled={current === questions.length - 1}
+            className="px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer"
+            style={{ border: '1px solid var(--theme-border)', color: 'var(--theme-content-text)', opacity: current === questions.length - 1 ? 0.5 : 1 }}
+          >
+            {t('Next', 'Înainte')}
+          </button>
+        </div>
+      )}
 
       {/* Finish button / Results */}
       {!showResults && (
@@ -378,6 +410,7 @@ export default function TestRenderer({ src }) {
             setReviewQuestionIds([]);
             setTestMode(null);
             setTimeLeft(null);
+            setScreen(0);
             setAttemptId(id => id + 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}

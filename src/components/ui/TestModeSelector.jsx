@@ -4,8 +4,24 @@ import React from 'react';
  * Pre-test mode selection. Research §10: two cards, hover gets blue border.
  * Tutor = explanations after each Q. Timed = countdown, results at end.
  */
-export default function TestModeSelector({ onSelect, lang }) {
-  const modes = [
+export default function TestModeSelector({ onSelect, lang, only }) {
+  const all = [
+    {
+      key: 'paper',
+      title: lang === 'ro' ? 'Mod Hârtie' : 'Paper Mode',
+      desc: lang === 'ro'
+        ? 'Scrii pe hârtie, apoi predai și compari cu tabelul cerut, soluția și notele de corectare.'
+        : 'Write on paper, then hand in and compare with the expected table, the solution and the grading notes.',
+      icon: '\uD83D\uDCDD',
+    },
+    {
+      key: 'practice',
+      title: lang === 'ro' ? 'Mod Exercițiu' : 'Practice Mode',
+      desc: lang === 'ro'
+        ? 'Scrii interogarea în aplicație; se verifică pe datele din laborator și pe alte date.'
+        : 'Write the query in the app; it is checked on the lab data and on different data.',
+      icon: '\uD83D\uDCBB',
+    },
     {
       key: 'tutor',
       title: lang === 'ro' ? 'Mod Tutor' : 'Tutor Mode',
@@ -23,6 +39,7 @@ export default function TestModeSelector({ onSelect, lang }) {
       icon: '\u23F1\uFE0F',
     },
   ];
+  const modes = only ? all.filter(m => only.includes(m.key)) : all.filter(m => m.key === 'tutor' || m.key === 'timed');
 
   return (
     <div className="py-8" style={{ maxWidth: 'var(--content-max-width)', margin: '0 auto' }}>

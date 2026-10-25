@@ -16,7 +16,14 @@ const bd = {
   ],
   seminars: [],
   labs: [],
-  tests: [],
+  tests: [
+    {
+      id: 'bd-mock-l1',
+      src: 'bd/tests/mock-l1.json',
+      title: { en: 'Mock test: lesson 1 level', ro: 'Test de probă: nivelul Lecției 1' },
+      shortTitle: { en: 'Mock test L1', ro: 'Test de probă L1' },
+    },
+  ],
   practice: lazy(() => import('./practice/Practice.jsx')),
 };
 

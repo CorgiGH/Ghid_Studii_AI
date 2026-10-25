@@ -33,6 +33,18 @@ else {
       if (q.correctIndex === undefined && q.correctIndices === undefined)
         errors.push(`questions[${qi}]: multiple-choice needs correctIndex or correctIndices`);
     }
+    if (q.type === 'sql') {
+      if (typeof q.solution !== 'string' || !q.solution.trim()) errors.push(`questions[${qi}]: sql needs solution`);
+      if (!['facultate', 'biblioteca'].includes(q.dataset))
+        errors.push(`questions[${qi}]: sql needs dataset (facultate or biblioteca)`);
+      if (!q.check || typeof q.check !== 'object') errors.push(`questions[${qi}]: sql needs check`);
+      else {
+        if (!['any', 'required'].includes(q.check.order)) errors.push(`questions[${qi}]: sql check.order must be "any" or "required"`);
+        if (!['bag', 'set'].includes(q.check.mode)) errors.push(`questions[${qi}]: sql check.mode must be "bag" or "set"`);
+      }
+      if (q.kind !== undefined && !['query', 'state'].includes(q.kind)) errors.push(`questions[${qi}]: sql kind must be query or state`);
+      if (!Number.isFinite(q.points) || q.points <= 0) errors.push(`questions[${qi}]: sql needs positive points`);
+    }
     if (q.type === 'fill-in') {
       if (!Array.isArray(q.blanks) || q.blanks.length === 0)
         errors.push(`questions[${qi}]: fill-in needs blanks array`);

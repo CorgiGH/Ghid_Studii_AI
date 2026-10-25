@@ -7,34 +7,19 @@ import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
 import { checkResult, runWithProbe } from '../../../sql/check.js';
 import { detectMistake } from '../../../sql/mistakes.js';
-import { explainMistake, explainVerdict } from '../../../sql/explain.js';
 import SqlEditor from '../SqlEditor.jsx';
-import ResultTable from '../ResultTable.jsx';
 import SchemaPanel from '../SchemaPanel.jsx';
 import { useSqlClient } from './useSqlClient.js';
 import {
-  HINT_COUNT, checkSpecOf, datasetFor, expectedPath, markRows, paperChecklist, restoreSqlState, runOptions, slimVerdict, statementRows,
-  verdictView,
+  HINT_COUNT, checkSpecOf, datasetFor, paperChecklist, restoreSqlState, runOptions, slimVerdict,
 } from './sqlExerciseSpec.js';
+import { loadExpected } from './loadExpected.js';
+import { ExpectedTables, Outcome, VerdictPanel } from './SqlOutcome.jsx';
 
 const Html = ({ as = 'span', className, text }) => (
   React.createElement(as, { className, dangerouslySetInnerHTML: { __html: formatMarkdown(text) } })
 );
 
-// The frozen Oracle answer of an exercise on a dataset (public/sql/expected/<id>.<dataset>.json), fetched once.
-const expectedCache = new Map();
-function loadExpected(id, dataset) {
-  const url = `${import.meta.env.BASE_URL}${expectedPath(id, dataset)}`;
-  if (!expectedCache.has(url)) {
-    const p = fetch(url).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${url}: ${r.status}`))));
-    p.catch(() => expectedCache.delete(url));
-    expectedCache.set(url, p);
-  }
-  return expectedCache.get(url);
-}
-
-const upperKeys = (o) => Object.fromEntries(Object.entries(o ?? {}).map(([k, v]) => [k.toUpperCase(), v]));
-const COMPARE_KINDS = new Set(['rows', 'rowcount', 'order', 'columns', 'alias', 'contents']);
 const officialText = (o, t) => {
   if (!o) return null;
   const inline = typeof o.ex === 'string' ? /^inline-(\d+)$/.exec(o.ex) : null;
@@ -42,82 +27,6 @@ const officialText = (o, t) => {
     ? t(`Lab ${o.lab}, example ${inline[1]}`, `Laborator ${o.lab}, exemplul ${inline[1]}`)
     : t(`Lab ${o.lab}, exercise ${o.ex}`, `Laborator ${o.lab}, exercițiul ${o.ex}`);
 };
-
-function VerdictPanel({ verdict, mistake, hidden, t }) {
-  const head = verdictView(verdict);
-  const why = explainVerdict(verdict);
-  const m = mistake ? explainMistake(mistake) : null;
-  return (
-    <div className={`sx-verdict is-${head.tone}`} data-testid="sql-verdict" data-kind={verdict.kind}>
-      <p className="sx-verdict-head">{t(head.en, head.ro)}</p>
-      {verdict.kind === 'error' && (
-        <p className="sx-ora"><code>{verdict.code}</code>{verdict.message ? ` ${verdict.message}` : ''}</p>
-      )}
-      <p>{t(why.en, why.ro)}</p>
-      {m && <p className="sx-mistake" data-testid="sql-mistake" data-mistake={mistake}><strong>{t('Likely cause: ', 'Posibilă cauză: ')}</strong>{t(m.en, m.ro)}</p>}
-      {hidden && verdict.ok && <p className="sx-muted">{t('Right on different rows too.', 'Corect și pe alte rânduri.')}</p>}
-    </div>
-  );
-}
-
-// What the learner's run left on screen: the result (or the script's statements and tables) and, when it is wrong, the expected
-// table beside it with the differing rows tinted.
-function Outcome({ block, outcome, t }) {
-  const { result, snapshot, verdict, expected } = outcome;
-  const compare = !!expected && !!verdict && !verdict.ok && COMPARE_KINDS.has(verdict.kind);
-  const state = block.kind === 'state';
-  if (state) {
-    const stmts = statementRows(result.statements);
-    const tables = (block.check.tables ?? []).map((n) => n.toUpperCase());
-    const snap = upperKeys(snapshot);
-    const exp = upperKeys(expected);
-    return (
-      <div className="sx-outcome">
-        <ol className="sx-stmts" data-testid="sql-statements">
-          {stmts.map((s, i) => (
-            <li key={i} className={s.ok ? 'ok' : 'bad'}>
-              <code>{s.sql.replace(/\s+/g, ' ').slice(0, 90)}</code>
-              <span className="sx-stmt-state">{s.ok ? `OK · ${t(s.noteEn, s.note)}` : `${s.code} · ${s.note}`}</span>
-            </li>
-          ))}
-        </ol>
-        {tables.map((name) => {
-          const a = snap[name];
-          if (!a || a.error) return <p key={name} className="sx-muted">{name}: {t('the table does not exist', 'tabelul nu există')}</p>;
-          const e = exp[name];
-          const mark = compare && verdict.table?.toUpperCase() === name;
-          return (
-            <div key={name} className={mark && e ? 'sx-compare' : undefined}>
-              <ResultTable title={mark ? `${name} · ${t('yours', 'al tău')}` : name} columns={a.columns} rows={a.rows} rowCount={a.rowCount} truncated={a.truncated}
-                mark={mark ? markRows(a.rows, verdict.extra) : undefined} markKind="extra" />
-              {mark && e && <ResultTable title={`${name} · ${t('expected', 'cerut')}`} columns={e.columns} rows={e.rows} mark={markRows(e.rows, verdict.missing)} markKind="missing" />}
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-  if (result.error || result.kind !== 'rows') return null;
-  return (
-    <div className={`sx-outcome${compare ? ' sx-compare' : ''}`}>
-      <ResultTable title={t('Your result', 'Rezultatul tău')} columns={result.columns} rows={result.rows} rowCount={result.rowCount} truncated={result.truncated}
-        mark={compare ? markRows(result.rows, verdict.extra) : undefined} markKind="extra" />
-      {compare && (
-        <ResultTable title={t('Expected result', 'Rezultatul cerut')} columns={expected.columns} rows={expected.rows}
-          mark={markRows(expected.rows, verdict.missing)} markKind="missing" />
-      )}
-    </div>
-  );
-}
-
-function ExpectedTables({ block, expected, t }) {
-  if (block.kind === 'state') {
-    return Object.entries(upperKeys(expected)).map(([name, e]) => (
-      <ResultTable key={name} title={`${name} · ${t('expected', 'cerut')}`} columns={e.columns} rows={e.rows} />
-    ));
-  }
-  return <ResultTable title={t('Expected result', 'Rezultatul cerut')} columns={expected.columns} rows={expected.rows} />;
-}
 
 // Block JSON: see sqlExerciseSpec.js. Inside a lesson the first run (or the solution being shown) opens the screen's gate and
 // the first graded run is recorded. In the review tab (?variant=hidden) the query is graded on the hidden dataset and the answer
