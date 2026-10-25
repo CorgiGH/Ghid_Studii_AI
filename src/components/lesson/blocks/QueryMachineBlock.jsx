@@ -3,13 +3,14 @@ import { AnimatePresence, motion as Motion } from 'motion/react';
 import { useApp } from '../../../contexts/AppContext';
 import formatMarkdown from '../../blocks/formatMarkdown';
 import { useScreenGate } from '../ScreenGate';
+import { useScrollCues } from '../useScrollCues.js';
 import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
 import { shouldRecordAttempt } from '../../../lesson/restore.js';
 import { useSqlRunner } from '../viz/useSqlRunner.js';
 import { useVizMotion } from '../viz/kit.js';
 import { CountUp } from '../viz/ui.jsx';
-import { displayCell } from '../viz/logic/date-mask.js';
+import { QM_ALL_ROWS, TRUTH_LABEL, cellText, gridTemplate, markTone, setPanelRows } from './qmLayout.js';
 import { planStages, parseQuery, scoreCount, scoreOrder, scorePicks } from '../../../sql/machine.js';
 import { allPredictionsChecked, buildSteps, chipStep, predictKind, sumChecks, viewAt } from '../../../sql/machineView.js';
 
@@ -39,16 +40,15 @@ const Html = ({ as = 'span', className, text }) => (
 // SQL from the block goes into text that is rendered as HTML, so its < > & must stay text.
 const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-// Only a real NULL reads NULL; a value the engine did not give stays blank rather than looking like a NULL.
-const cellText = (v) => (v === undefined ? '' : v === null ? 'NULL' : displayCell(typeof v === 'string' ? v.replace(/\s+$/, '') : v));
-
-function Mark({ row, m }) {
-  // One slot before the cells: position number, verdict, tri-state pill or the pick box.
+function Lead({ row, m, kind, t }) {
+  // The slot before the cells: the tri-state badge, the pick box or the position number. Steps with none of them have no slot.
+  if (kind === 'none') return null;
   let body = null;
   let cls = '';
   if (row.truth) {
     cls = `t-${row.truth}`;
-    body = row.truth === 'T' ? 'TRUE' : row.truth === 'F' ? 'FALSE' : 'UNKNOWN';
+    const l = TRUTH_LABEL[row.truth];
+    body = t(l.en, l.ro);
   } else if (row.status === 'pickable' && row.pickNo !== undefined) {
     cls = row.pickNo ? 'placed' : 'open';
     body = row.pickNo || '';
@@ -59,30 +59,29 @@ function Mark({ row, m }) {
     cls = 'pos';
     body = row.pos;
   }
-  const own = !row.truth && row.mark !== undefined;
-  if (own) cls += row.mark ? ' ok' : ' bad';
   return (
     <span className={`qm-mark ${cls}`} aria-hidden={row.truth ? undefined : 'true'}>
       <AnimatePresence initial={false} mode="popLayout">
         <Motion.span
-          key={`${body}|${row.mark}`}
+          key={`${body}`}
           initial={{ scale: m.reduced ? 1 : 0.4, opacity: m.reduced ? 1 : 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: m.reduced ? 0 : 0.08 } }}
           transition={m.bounce}
           className="qm-mark-in"
         >
-          {own ? (row.mark ? '✓' : '✗') : body}
+          {body}
         </Motion.span>
       </AnimatePresence>
     </span>
   );
 }
 
-function Row({ row, columns, dimmed, index, m, onPick, layoutId, animateLayout, mergeOut }) {
+function Row({ row, columns, dimmed, index, m, onPick, layoutId, animateLayout, mergeOut, lead, end, t, highlightKept }) {
   const pickable = row.status === 'pickable';
   const Tag = pickable ? Motion.button : Motion.div;
   const gone = row.status === 'gone';
+  const tone = markTone(row);
   const fall = mergeOut
     ? { opacity: 0, x: m.reduced ? 0 : -18, scale: m.reduced ? 1 : 0.94, transition: { duration: m.reduced ? 0 : 0.26 } }
     : { opacity: 0, y: m.reduced ? 0 : 30, rotate: m.reduced ? 0 : (index % 2 ? 2.2 : -2.2), transition: { duration: m.reduced ? 0 : 0.34, ease: [0.4, 0, 1, 1] } };
@@ -93,38 +92,41 @@ function Row({ row, columns, dimmed, index, m, onPick, layoutId, animateLayout, 
       type={pickable ? 'button' : undefined}
       aria-pressed={pickable && row.picked !== undefined ? row.picked : undefined}
       onClick={pickable ? () => onPick(row.key) : undefined}
-      className={`qm-row${gone ? ' is-gone' : ''}${row.truth ? ` tri-${row.truth}` : ''}${pickable ? ' is-pickable' : ''}${row.picked ? ' is-picked' : ''}${row.pickNo ? ' is-placed' : ''}`}
-      style={{ '--qm-n': columns.length }}
+      className={`qm-row${gone ? ' is-gone' : ''}${highlightKept && row.status === 'kept' ? ' is-kept' : ''}${row.truth ? ` tri-${row.truth}` : ''}${pickable ? ' is-pickable' : ''}${row.picked ? ' is-picked' : ''}${row.pickNo ? ' is-placed' : ''}`}
       initial={{ opacity: m.reduced ? 1 : 0, y: m.reduced ? 0 : -10 }}
       animate={{ opacity: gone ? 0.5 : 1, y: 0, rotate: 0, scale: 1, x: 0 }}
       exit={fall}
       transition={m.reduced ? { duration: 0 } : { ...m.soft, delay: Math.min(index, 10) * 0.025 }}
     >
-      <Mark row={row} m={m} />
+      <Lead row={row} m={m} kind={lead} t={t} />
       {columns.map((c) => (
         <span key={c} className={`qm-cell${dimmed.includes(c) ? ' is-dim' : ''}${row.cells[c] === null ? ' nul' : ''}`}>{cellText(row.cells[c])}</span>
       ))}
-      {row.truth && row.mark !== undefined && (
-        <span className={`qm-mark qm-mark-end ${row.mark ? 'ok' : 'bad'}`} role="img" aria-label={row.mark ? 'correct' : 'wrong'}>{row.mark ? '✓' : '✗'}</span>
-      )}
-      {row.count > 1 && (
-        <Motion.span
-          className="qm-count"
-          initial={{ scale: m.reduced ? 1 : 0.3, opacity: m.reduced ? 1 : 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={m.reduced ? { duration: 0 } : { ...m.bounce, delay: 0.22 }}
-        >
-          ×{row.count}
-        </Motion.span>
+      {end !== 'none' && (
+        <span className="qm-end">
+          {tone && (
+            <span className={`qm-mark qm-mark-end ${tone}`} role="img" aria-label={tone === 'bad' ? t('wrong', 'greșit') : t('right', 'corect')}>{tone === 'bad' ? '✗' : '✓'}</span>
+          )}
+          {row.count > 1 && (
+            <Motion.span
+              className="qm-count"
+              initial={{ scale: m.reduced ? 1 : 0.3, opacity: m.reduced ? 1 : 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={m.reduced ? { duration: 0 } : { ...m.bounce, delay: 0.22 }}
+            >
+              ×{row.count}
+            </Motion.span>
+          )}
+        </span>
       )}
     </Tag>
   );
 }
 
-function Head({ columns, dimmed, labels, m }) {
+function Head({ columns, dimmed, labels, m, lead, end }) {
   return (
-    <div className="qm-row qm-head" style={{ '--qm-n': columns.length }} role="presentation">
-      <span className="qm-mark" />
+    <div className="qm-row qm-head" role="presentation">
+      {lead !== 'none' && <span className="qm-mark" />}
       <AnimatePresence initial={false} mode="popLayout">
         {columns.map((c) => (
           <Motion.span
@@ -140,15 +142,19 @@ function Head({ columns, dimmed, labels, m }) {
           </Motion.span>
         ))}
       </AnimatePresence>
+      {end !== 'none' && <span />}
     </div>
   );
 }
 
-function Table({ rows, columns, dimmed, labels, m, onPick, mergeOut = false, layoutPrefix = null, empty }) {
+// `sizeRows`: the rows the column widths are worked out from (a set list shares them with the other lists, so the three line up).
+function Table({ rows, columns, dimmed, labels, m, onPick, mergeOut = false, layoutPrefix = null, empty, sizeRows = rows, highlightKept = false }) {
+  const { t, lang } = useApp();
   const animateLayout = !m.reduced && rows.length <= 80;
+  const { template, lead, end } = useMemo(() => gridTemplate({ columns, labels, rows: sizeRows, lang }), [columns, labels, sizeRows, lang]);
   return (
-    <div className="qm-grid" role="group" style={{ '--qm-n': columns.length }}>
-      <Head columns={columns} dimmed={dimmed} labels={labels} m={m} />
+    <div className="qm-grid" role="group" style={{ '--qm-tpl': template }}>
+      <Head columns={columns} dimmed={dimmed} labels={labels} m={m} lead={lead} end={end} />
       <div className="qm-body">
         <AnimatePresence initial mode="popLayout">
           {rows.map((r, i) => (
@@ -163,6 +169,10 @@ function Table({ rows, columns, dimmed, labels, m, onPick, mergeOut = false, lay
               animateLayout={animateLayout}
               mergeOut={mergeOut}
               layoutId={layoutPrefix ? `${layoutPrefix}:${r.key}` : undefined}
+              lead={lead}
+              end={end}
+              t={t}
+              highlightKept={highlightKept}
             />
           ))}
         </AnimatePresence>
@@ -172,22 +182,22 @@ function Table({ rows, columns, dimmed, labels, m, onPick, mergeOut = false, lay
   );
 }
 
-function SetPanels({ view, m, id }) {
+function SetPanels({ view, m }) {
   const { t } = useApp();
-  const { left, right, result } = view.panels;
-  const sets = (rows, moved) => rows.filter((r) => !(moved && r.moved));
+  const { left, right, result } = setPanelRows(view);
   const showResult = view.phase === 'show';
+  const all = useMemo(() => [...left, ...right, ...result], [left, right, result]);
   const noop = () => {};
   return (
     <div className="qm-sets">
       <div className="qm-set-pair">
         <section className="qm-set" aria-label={t('First list', 'Prima listă')}>
           <h4 className="qm-set-title">{t('First list', 'Prima listă')} <span>{view.meta.leftDistinct}</span></h4>
-          <div className="qm-set-scroll"><Table rows={sets(left, showResult)} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('Nothing left here', 'Nu a rămas nimic aici')} /></div>
+          <div className="qm-set-scroll"><Table rows={left} sizeRows={all} highlightKept={showResult} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} empty={t('Nothing left here', 'Nu a rămas nimic aici')} /></div>
         </section>
         <section className="qm-set" aria-label={t('Second list', 'A doua listă')}>
           <h4 className="qm-set-title">{t('Second list', 'A doua listă')} <span>{view.meta.rightDistinct}</span></h4>
-          <div className="qm-set-scroll"><Table rows={sets(right, showResult)} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('Nothing left here', 'Nu a rămas nimic aici')} /></div>
+          <div className="qm-set-scroll"><Table rows={right} sizeRows={all} highlightKept={showResult} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} empty={t('Nothing left here', 'Nu a rămas nimic aici')} /></div>
         </section>
       </div>
       <AnimatePresence initial={false}>
@@ -201,7 +211,7 @@ function SetPanels({ view, m, id }) {
             transition={m.reduced ? { duration: 0 } : m.soft}
           >
             <h4 className="qm-set-title">{t('Result', 'Rezultat')} <span>{view.meta.to}</span></h4>
-            <div className="qm-set-scroll"><Table rows={result} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} layoutPrefix={`${id}-set`} empty={t('No rows', 'Niciun rând')} /></div>
+            <div className="qm-set-scroll"><Table rows={result} sizeRows={all} columns={view.columns} dimmed={[]} labels={view.labels} m={m} onPick={noop} empty={t('No rows', 'Niciun rând')} /></div>
           </Motion.section>
         )}
       </AnimatePresence>
@@ -248,6 +258,19 @@ function Sql({ segments, active }) {
       })}
     </pre>
   );
+}
+
+// One line under the rows once a checked answer is on screen, so a ✓ is not read as "this row stays".
+function legendFor(view) {
+  if (!view || view.panels || !view.rows.some((r) => r.mark !== undefined)) return null;
+  if (view.ask) return { en: 'The mark at the end of the row says whether you judged that row right: ✓ yes, ✗ no.', ro: 'Semnul de la capătul rândului arată dacă ai judecat bine rândul: ✓ da, ✗ nu.' };
+  if (view.clause === 'order') {
+    return { en: 'The number on the left is the row\'s place. The mark at the end of the row says whether you put it in the right place: ✓ yes, ✗ no.', ro: 'Numărul din stânga este locul rândului. Semnul de la capătul rândului arată dacă l-ai pus pe locul bun: ✓ da, ✗ nu.' };
+  }
+  if (view.clause === 'join') {
+    return { en: 'Struck-out pairs do not pass the condition. The mark at the end of the row says whether you judged that pair right: ✓ yes, ✗ no.', ro: 'Perechile tăiate nu trec de condiție. Semnul de la capătul rândului arată dacă ai judecat bine perechea: ✓ da, ✗ nu.' };
+  }
+  return { en: 'Struck-out rows do not pass WHERE. The mark at the end of the row says whether you judged that row right: ✓ yes, ✗ no.', ro: 'Rândurile tăiate nu trec de WHERE. Semnul de la capătul rândului arată dacă ai judecat bine rândul: ✓ da, ✗ nu.' };
 }
 
 // Rendered where the animation cannot run (no engine, or the block's query fails): the screen must not wait on a
@@ -355,6 +378,23 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
   const canCheck = atAsk && !answered && (view.ask.kind !== 'count' || String(ui[stageIdx]?.value ?? '').trim() !== '');
   const reset = () => { setUi({}); setChecked({}); go(0); };
 
+  // Up to QM_ALL_ROWS rows the box shows them all; a longer list scrolls, says how many rows are below, and after a check
+  // starts at the first row that stays.
+  const scrollRef = useRef(null);
+  const capped = !!view && !view.panels && view.rows.length > QM_ALL_ROWS;
+  const cues = useScrollCues(scrollRef, '.qm-body > .qm-row', [step, state.status, view?.rows.length, view?.columns.join('|'), capped]);
+  const firstKept = view && !view.panels && view.rows.some((r) => r.status === 'gone') ? view.rows.findIndex((r) => r.status === 'kept') : -1;
+  useEffect(() => {
+    const box = scrollRef.current;
+    if (!capped || !box || firstKept < 0) return;
+    const row = box.querySelectorAll('.qm-body > .qm-row')[firstKept];
+    const head = box.querySelector('.qm-head');
+    if (!row) return;
+    const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - (head ? head.offsetHeight : 0) - 4;
+    const visible = top >= box.scrollTop && top + row.offsetHeight <= box.scrollTop + box.clientHeight;
+    if (!visible) box.scrollTop = Math.max(0, top);
+  }, [capped, firstKept, step]);
+
   const text = (() => {
     if (!cur || !stage) return null;
     const c = stage.clause;
@@ -413,6 +453,7 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
   }
 
   const reachedStage = Math.max(...steps.map((s, i) => (i <= step ? s.stage : -1)));
+  const legend = legendFor(view);
   return (
     <figure className="qm" data-testid="query-machine" aria-label={t('Step-by-step view of the query', 'Interogarea pas cu pas')}>
       <Sql segments={segments} active={stage.clause} />
@@ -433,9 +474,13 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
       {CLAUSE_HINT[stage.clause] && <p className="qm-chip-hint" data-testid="qm-chip-hint">{t(CLAUSE_HINT[stage.clause].en, CLAUSE_HINT[stage.clause].ro)}</p>}
 
       <Meta view={view} tick={tick} />
-      <div className={`qm-scroll${view.panels ? ' qm-scroll-free' : ''}`} data-testid="qm-rows">
+      <div
+        ref={scrollRef}
+        className={`qm-scroll${view.panels ? ' qm-scroll-free' : ''}${capped ? ' is-capped' : ''}${cues.right ? ' is-cut-right' : ''}`}
+        data-testid="qm-rows"
+      >
         {view.panels
-          ? <SetPanels view={view} m={m} id={id} />
+          ? <SetPanels view={view} m={m} />
           : (
             <Table
               rows={view.rows}
@@ -448,7 +493,14 @@ export default function QueryMachineBlock({ id, dataset = 'facultate', sql, stag
               empty={t('No rows', 'Niciun rând')}
             />
           )}
+        {cues.below > 0 && (
+          <div className="qm-more" data-testid="qm-more" aria-hidden="true">
+            {t(`${cues.below} more ${cues.below === 1 ? 'row' : 'rows'} below ↓`, `încă ${cues.below} ${cues.below === 1 ? 'rând' : 'rânduri'} mai jos ↓`)}
+          </div>
+        )}
       </div>
+      {cues.right && <p className="qm-cue" data-testid="qm-cue-right">{t('The table goes on to the right: swipe it →', 'Tabelul continuă la dreapta: glisează-l →')}</p>}
+      {legend && <p className="qm-legend" data-testid="qm-legend">{t(legend.en, legend.ro)}</p>}
 
       {atAsk && view.ask.kind === 'count' && !answered && (
         <form className="qm-count-form" onSubmit={(e) => { e.preventDefault(); if (canCheck) check(); }}>

@@ -894,23 +894,30 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .qm-chip:focus-visible, .qm-row.is-pickable:focus-visible, .qm-input:focus-visible { outline: 2px solid var(--lt-acc); outline-offset: 2px; }
 .qm-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; min-height: 1.5em; margin-bottom: 6px; color: var(--theme-muted-text); font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
 .qm-meta-strong { color: var(--theme-content-text); font-weight: 700; }
-.qm-scroll { max-height: min(30rem, 72vh); overflow: auto; border: 1px solid var(--lt-line); border-radius: 10px; background: var(--theme-card-bg); position: relative; overscroll-behavior: contain; }
-.qm-scroll.qm-scroll-free { max-height: none; overflow: visible; border: 0; background: transparent; }
-.qm-grid { min-width: max-content; width: 100%; }
+.qm-scroll { overflow-x: auto; overflow-y: hidden; border: 1px solid var(--lt-line); border-radius: 10px; background: var(--theme-card-bg); position: relative; overscroll-behavior-x: contain; }
+.qm-scroll.is-capped { max-height: min(30rem, 72vh); overflow-y: auto; overscroll-behavior: contain; }
+.qm-scroll.is-cut-right { -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%); mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%); }
+.qm-scroll.qm-scroll-free { max-height: none; overflow: visible; border: 0; background: transparent; -webkit-mask-image: none; mask-image: none; }
+.qm-more { position: sticky; bottom: 0; z-index: 3; padding: 6px 10px; text-align: center; font-size: 0.8125rem; font-weight: 700; color: var(--theme-content-text); background: linear-gradient(to bottom, transparent, var(--lt-surface) 35%); pointer-events: none; }
+.qm-cue, .qm-legend { margin: 6px 0 0; font-size: 0.8125rem; line-height: 1.45; color: var(--theme-muted-text); }
+.qm-cue { font-weight: 700; color: var(--theme-content-text); }
+/* the grid fits the box: each column is as wide as its longest word at least (--qm-tpl, worked out from the data) */
+.qm-grid { min-width: min-content; width: 100%; }
 .qm-body { position: relative; }
 .qm-row {
-  display: grid; grid-template-columns: 2.4rem repeat(var(--qm-n, 1), minmax(5.25rem, 1fr)) 3.2rem; align-items: center; gap: 0 6px;
-  min-height: 2.1rem; padding: 0 10px 0 4px; width: 100%; box-sizing: border-box; text-align: left; font: inherit; color: inherit;
+  display: grid; grid-template-columns: var(--qm-tpl, repeat(var(--qm-n, 1), minmax(5.25rem, 1fr))); align-items: center; gap: 0 4px;
+  min-height: 2.1rem; padding: 0 8px 0 6px; width: 100%; box-sizing: border-box; text-align: left; font: inherit; color: inherit;
   background: var(--theme-card-bg); border: 0; border-bottom: 1px solid color-mix(in srgb, var(--lt-line) 55%, transparent);
   position: relative; transform-origin: 50% 100%;
 }
 .qm-head { position: sticky; top: 0; z-index: 2; min-height: 1.9rem; background: var(--lt-surface); border-bottom: 1px solid var(--lt-line); }
-.qm-th { font-weight: 700; font-size: 0.75rem; color: var(--theme-muted-text); text-transform: none; }
-.qm-cell { padding: 4px 4px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity 0.3s ease; }
+.qm-th { font-weight: 700; font-size: 0.75rem; line-height: 1.25; color: var(--theme-muted-text); text-transform: none; white-space: normal; overflow-wrap: anywhere; }
+.qm-cell { padding: 4px 2px; min-width: 0; font-variant-numeric: tabular-nums; white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity 0.3s ease; }
 .qm-cell.nul { color: var(--theme-muted-text); font-style: italic; }
 .qm-cell.is-dim { opacity: 0.32; }
 .qm-row.is-gone .qm-cell { text-decoration: line-through; text-decoration-color: var(--lt-drop); }
 .qm-row.is-gone { background: color-mix(in srgb, var(--lt-drop-soft) 70%, var(--theme-card-bg)); }
+.qm-row.is-kept { background: var(--lt-keep-soft); }
 .qm-row.is-pickable { cursor: pointer; transition: background 0.18s ease; }
 .qm-row.is-pickable:hover { background: var(--lt-acc-soft); }
 .qm-row.is-picked, .qm-row.is-placed { background: var(--lt-acc-soft); }
@@ -923,15 +930,14 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .qm-mark.picked, .qm-mark.placed { background: var(--lt-acc); color: #fff; }
 .qm-mark.pos { color: var(--theme-muted-text); }
 .qm-mark.ok { background: var(--lt-keep); color: #fff; }
+.qm-mark.ok-out { background: transparent; color: var(--theme-muted-text); border: 1.5px solid color-mix(in srgb, var(--theme-muted-text) 60%, transparent); width: 1.35rem; height: 1.35rem; min-width: 1.35rem; }
 .qm-mark.bad { background: var(--lt-drop); color: #fff; }
-.qm-mark.t-T, .qm-mark.t-F, .qm-mark.t-U { border-radius: 6px; padding: 0 5px; font-size: 0.5625rem; letter-spacing: 0.03em; color: #fff; min-width: 3.1rem; }
+.qm-mark.t-T, .qm-mark.t-F, .qm-mark.t-U { border-radius: 6px; padding: 0 4px; font-size: 0.5625rem; letter-spacing: 0.03em; color: #fff; width: 100%; box-sizing: border-box; }
 .qm-mark.t-T { background: var(--lt-keep); }
 .qm-mark.t-F { background: var(--lt-drop); }
 .qm-mark.t-U { background: var(--theme-muted-text); }
-.qm-row:has(.qm-mark.t-T), .qm-row:has(.qm-mark.t-F), .qm-row:has(.qm-mark.t-U) { grid-template-columns: 3.6rem repeat(var(--qm-n, 1), minmax(5.25rem, 1fr)) 3.2rem; }
-.qm-head:has(+ .qm-body .qm-mark.t-T), .qm-head:has(+ .qm-body .qm-mark.t-F), .qm-head:has(+ .qm-body .qm-mark.t-U) { grid-template-columns: 3.6rem repeat(var(--qm-n, 1), minmax(5.25rem, 1fr)) 3.2rem; }
+.qm-end { justify-self: end; display: inline-flex; align-items: center; gap: 4px; }
 .qm-mark-end { justify-self: end; }
-.qm-set .qm-row { grid-template-columns: 2rem repeat(var(--qm-n, 1), minmax(4.4rem, 1fr)) 1.6rem; }
 .qm-count { justify-self: end; font-size: 0.75rem; font-weight: 800; padding: 1px 8px; border-radius: 999px; background: var(--lt-acc); color: #fff; }
 .qm-empty { padding: 14px; color: var(--theme-muted-text); font-style: italic; }
 .qm-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; color: var(--theme-muted-text); font-size: 0.8125rem; }
@@ -954,7 +960,7 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 @media (max-width: 640px) {
   .qm { padding: 12px; }
   .qm-set-pair { grid-template-columns: 1fr; }
-  .qm-scroll { max-height: 19rem; }
+  .qm-scroll.is-capped { max-height: 26rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .qm-seg, .qm-chip, .qm-cell, .qm-row.is-pickable { transition: none !important; }
