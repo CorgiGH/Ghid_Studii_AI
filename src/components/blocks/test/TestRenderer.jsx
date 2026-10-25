@@ -138,6 +138,14 @@ export default function TestRenderer({ src }) {
   const [timerMin, setTimerMin] = useState(null); // optional timer: null = not chosen yet, 0 = none, else minutes
   const [screen, setScreen] = useState(0); // oneQuestionPerScreen: index of the question on show
   const [attemptId, setAttemptId] = useState(0); // bumped on retake / review-mistakes so child questions remount
+  const attemptRef = useRef(0); // current attempt, so a flush from an old attempt cannot touch the new one
+  const [flushing, setFlushing] = useState(false); // time-up hand-in still grading; See Results waits for it
+  const bumpAttempt = () => {
+    attemptRef.current += 1;
+    setAttemptId(attemptRef.current);
+    setFinishPending(false);
+    setFlushing(false);
+  };
 
   // Load test JSON
   useEffect(() => {
@@ -205,8 +213,12 @@ export default function TestRenderer({ src }) {
   useEffect(() => {
     if (timeLeft !== 0 || totalSeconds === null || showResults || timeUp) return;
     setTimeUp(true);
+    setFlushing(true);
+    const mine = attemptRef.current;
     (async () => {
       const outcomes = await Promise.all([...flushers.current.values()].map((fn) => fn().catch(() => 'done')));
+      if (attemptRef.current !== mine) return; // retaken or reviewing meanwhile: drop this flush
+      setFlushing(false);
       if (!outcomes.includes('needs-score')) setFinishPending(true);
     })();
   }, [timeLeft, totalSeconds, showResults, timeUp]);
@@ -285,7 +297,7 @@ export default function TestRenderer({ src }) {
     setShowResults(false);
     setActiveQ(null);
     setScreen(0);
-    setAttemptId(id => id + 1);
+    bumpAttempt();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -402,7 +414,7 @@ export default function TestRenderer({ src }) {
               <QuestionComp
                 key={`${q.id}-${attemptId}`}
                 question={q}
-                onAnswer={handleAnswer}
+                onAnswer={(...a) => { if (attemptRef.current === attemptId) handleAnswer(...a); }}
                 suppressFeedback={testMode === 'timed' && !showResults}
                 mode={testMode}
                 registerFlush={registerFlush}
@@ -446,14 +458,16 @@ export default function TestRenderer({ src }) {
         <div className="flex justify-center mt-6">
           <button
             onClick={handleFinish}
-            disabled={!allAnswered && !timeUp}
+            disabled={flushing || (!allAnswered && !timeUp)}
             className="px-6 py-2.5 rounded-xl text-sm font-bold transition-colors cursor-pointer"
             style={{
-              backgroundColor: (allAnswered || timeUp) ? '#22c55e' : 'var(--theme-border)',
-              color: (allAnswered || timeUp) ? '#fff' : 'var(--theme-muted-text)',
+              backgroundColor: ((allAnswered || timeUp) && !flushing) ? '#22c55e' : 'var(--theme-border)',
+              color: ((allAnswered || timeUp) && !flushing) ? '#fff' : 'var(--theme-muted-text)',
             }}
           >
-            {(allAnswered || timeUp)
+            {flushing
+              ? t('Grading your answers...', 'Se corectează răspunsurile...')
+              : (allAnswered || timeUp)
               ? t('See Results', 'Vezi rezultatele')
               : t(`${answeredCount}/${visibleQuestionCount} answered`, `${answeredCount}/${visibleQuestionCount} răspunse`)}
           </button>
@@ -476,7 +490,7 @@ export default function TestRenderer({ src }) {
             setTimeUp(false);
             setTimerMin(null);
             setScreen(0);
-            setAttemptId(id => id + 1);
+            bumpAttempt();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onReviewMistakes={!reviewMode ? startReviewMistakes : undefined}
