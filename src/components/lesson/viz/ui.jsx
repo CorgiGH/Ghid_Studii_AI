@@ -144,15 +144,21 @@ export function Wires({ boxRef, pairs, settle = 0 }) {
     setPaths(prev => (JSON.stringify(prev) === JSON.stringify(out) ? prev : out));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pairs is summarised by sig
   }, [boxRef, sig]);
+  // When the box mounts together with these wires (the first step of a join), this layout effect runs before React
+  // attaches the parent's ref, so the box is not known yet: measure again on the next frame and after the cards'
+  // entrance, and start watching the box's size as soon as it exists.
   useLayoutEffect(() => {
-    measure();
-    const box = boxRef.current;
-    if (!box) return undefined;
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
-    ro?.observe(box);
-    const timer = setTimeout(measure, 420 + settle);
+    let ro = null;
+    const run = () => {
+      measure();
+      const box = boxRef.current;
+      if (box && !ro && typeof ResizeObserver !== 'undefined') { ro = new ResizeObserver(measure); ro.observe(box); }
+    };
+    run();
+    const raf = typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame(run) : null;
+    const timer = setTimeout(run, 420 + settle);
     window.addEventListener('resize', measure);
-    return () => { ro?.disconnect(); clearTimeout(timer); window.removeEventListener('resize', measure); };
+    return () => { ro?.disconnect(); if (raf !== null) cancelAnimationFrame(raf); clearTimeout(timer); window.removeEventListener('resize', measure); };
   }, [measure, boxRef, settle]);
   return (
     <svg className="viz-wires" aria-hidden="true">

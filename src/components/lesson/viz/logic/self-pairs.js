@@ -26,3 +26,13 @@ export function selfPairs({ table, pairOn, order, key = 'nr_matricol' }) {
   }));
   return { rows, keys, cells, pairs, key, count: order === '<' ? 4 : 3 };
 }
+
+// A row's name in the pair list; two students with the same name (Bodnar) also carry their key, so a pair of
+// them never looks like a student paired with himself.
+export function rowName(row, rows, key = 'nr_matricol') {
+  const twins = rows.filter(r => r.nume === row.nume).length > 1;
+  return twins ? `${row.nume} (${row[key]})` : row.nume;
+}
+
+// The legend under the grid: each axis key with its name, 111 Popescu · 112 Prelipcean · …
+export const axisLegend = (rows, key = 'nr_matricol') => rows.map(r => ({ key: String(r[key]), name: r.nume }));

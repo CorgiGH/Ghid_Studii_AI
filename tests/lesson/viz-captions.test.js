@@ -232,3 +232,78 @@ describe('decode-sieve: a NULL drawer and no default', () => {
     expect(decodeCaption(props, null, null).ro).not.toMatch(/strat/);
   });
 });
+
+import { cartesianGrid, cartesianAxes, cartesianCaption } from '../../src/components/lesson/viz/logic/cartesian-grid.js';
+import { joinRows, joinCaption, joinHeader, whereParts, cardLabel } from '../../src/components/lesson/viz/logic/join-wires.js';
+import { selfPairs, rowName, axisLegend } from '../../src/components/lesson/viz/logic/self-pairs.js';
+import { allVsSome, firstHitHeader, avsCaptions } from '../../src/components/lesson/viz/logic/all-vs-some.js';
+
+describe('cartesian-grid: the keys are labelled and the empty rows named', () => {
+  const props = { left: 'studenti', right: 'note', on: 'studenti.nr_matricol = note.nr_matricol' };
+  const G = cartesianGrid(props);
+  const A = cartesianAxes(G, props);
+  it('labels rows 111…123 and groups the 42 grades by student', () => {
+    expect(A.rowKeys).toEqual(['111', '112', '113', '114', '115', '116', '117', '118', '119', '120', '121', '122', '123']);
+    expect(A.groups.map(g => `${g.key}x${g.span}`)).toEqual(['111x6', '112x6', '113x6', '114x6', '115x6', '116x3', '117x3', '118x3', '119x3']);
+    expect(A.empty).toEqual(['120', '121', '122', '123']);
+  });
+  it('says join-ul, Romanian counts, and why 120–123 stay empty', () => {
+    expect(cartesianCaption(G, A, props, 1, 546, 42).ro).toBe('Fără condiție, join-ul păstrează toate perechile: 13 × 42 = 546 de rânduri.');
+    expect(cartesianCaption(G, A, props, 2, 546, 42).ro).toContain('Rândurile 120–123 rămân goale: acești studenți nu au nicio notă.');
+    expect(JSON.stringify([0, 1, 2].map(k => cartesianCaption(G, A, props, k, 546, 42)))).not.toMatch(/Joncțiunea|joncțiunea/);
+  });
+});
+
+describe('join-wires', () => {
+  const base = { left: 'studenti', right: 'note', on: 'studenti.nr_matricol = note.nr_matricol', kind: 'left' };
+  it('an inner join prints plain JOIN', () => {
+    expect(joinHeader({ left: 'cursuri', right: 'didactic', on: 'cursuri.id_curs = didactic.id_curs', kind: 'inner' })).toBe('cursuri JOIN didactic ON cursuri.id_curs = didactic.id_curs');
+    expect(joinHeader({ ...base, filterIn: 'where', filter: 'note.valoare = 10' })).toBe('studenti LEFT JOIN note ON studenti.nr_matricol = note.nr_matricol WHERE note.valoare = 10');
+  });
+  it('the ON filter ends with the whole result: 8 grades of 10 and 8 NULL rows', () => {
+    const p = { ...base, filterIn: 'on', filter: 'note.valoare = 10' };
+    const J = joinRows(p);
+    expect(J.stages.at(-1)).toEqual({ kind: 'result' });
+    expect(J.pairs.filter(x => x.right).length).toBe(8);
+    expect(J.pairs.filter(x => !x.right).length).toBe(8);
+    expect(joinCaption(J, p, J.count - 1, 16).ro).toBe('Rezultatul: 16 rânduri. 8 au în dreapta un rând din note care trece de note.valoare = 10, iar 8 au NULL în dreapta. Niciun rând din studenti nu s-a pierdut.');
+    // Prelipcean: no 10, six candidates refused, all counted in the caption
+    const k = J.stages.findIndex(st => st.kind === 'left' && J.groups[st.index].left.nr_matricol === '112');
+    expect(J.groups[J.stages[k].index].refused).toHaveLength(6);
+    expect(joinCaption(J, p, k, 16).ro).toBe('Niciun partener. 6 candidați (tăiați) au picat filtrul din ON. Join-ul păstrează totuși rândul și completează cealaltă parte cu NULL.');
+  });
+  it('the WHERE step lists what stays and the NULL rows that go', () => {
+    const p = { ...base, filterIn: 'where', filter: 'note.valoare = 10' };
+    const J = joinRows(p);
+    const W = whereParts(J);
+    expect(W.kept).toHaveLength(8);
+    expect(W.droppedNull.map(x => cardLabel('studenti', x.left))).toEqual(['120 · Pintescu', '121 · Arhire', '122 · Cobzaru', '123 · Bucur']);
+    expect(W.droppedOther).toBe(34);
+    expect(joinCaption(J, p, J.count - 1, 8).ro).toBe('Filtrul din WHERE rulează după join și păstrează doar rândurile pentru care note.valoare = 10 e adevărat: 8 rânduri. Dispar cele 4 rânduri cu NULL și celelalte 34.');
+  });
+});
+
+describe('self-pairs: real keys and names', () => {
+  const P = selfPairs({ table: 'studenti', pairOn: "TO_CHAR(data_nastere, 'D')", order: '<>' });
+  it('the legend maps each full key to its name', () => {
+    const L = axisLegend(P.rows, P.key);
+    expect(L[0]).toEqual({ key: '111', name: 'Popescu' });
+    expect(L).toHaveLength(13);
+  });
+  it('two students with the same name carry their key', () => {
+    const bodnars = P.rows.filter(r => r.nume === 'Bodnar');
+    expect(bodnars.length).toBe(2);
+    expect(rowName(bodnars[0], P.rows)).toBe(`Bodnar (${bodnars[0].nr_matricol})`);
+    expect(rowName(P.rows[0], P.rows)).toBe('Popescu');
+  });
+});
+
+describe('all-vs-some: no English keywords on screen', () => {
+  it('the column header and captions are Romanian', () => {
+    expect(firstHitHeader('valoare < 7').ro).toBe('prima notă < 7');
+    const A = allVsSome({ studentsFrom: 'studenti', condition: 'valoare < 7', showMinusByName: true });
+    const caps = avsCaptions(A, 'valoare < 7', true);
+    expect(caps[2].ro).toBe('Ajunge un singur contraexemplu ca să elimine studentul. Coloana arată primul găsit.');
+    expect(caps.map(c => c.ro).join(' ')).not.toMatch(/\bSOME\b|\bALL\b/);
+  });
+});

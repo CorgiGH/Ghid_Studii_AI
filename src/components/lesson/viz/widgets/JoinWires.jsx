@@ -3,12 +3,12 @@ import { AnimatePresence, motion as Motion } from 'motion/react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper, useVizMotion } from '../kit.js';
 import { VizFrame, Wires, CountUp } from '../ui.jsx';
-import { joinRows } from '../logic/join-wires.js';
+import { cardColumns, cardLabel, joinCaption, joinHeader, joinRows, whereParts } from '../logic/join-wires.js';
 import { joinSql } from '../logic/oracle.js';
 import { useOracleValues } from '../useSqlRunner.js';
+import { rows as rowsWord, rowsNoun } from '../logic/words.js';
 
-const KEYS = { studenti: ['nr_matricol', 'nume'], note: ['nr_matricol', 'id_curs', 'valoare'], cursuri: ['id_curs', 'titlu_curs'], didactic: ['id_prof', 'id_curs'], profesori: ['id_prof', 'nume'] };
-const label = (table, row) => (row ? (KEYS[table] || Object.keys(row).slice(0, 3)).map(c => (row[c] === null ? 'NULL' : row[c])).join(' · ') : 'NULL');
+const MAX_CARDS = 8;
 
 export default function JoinWires({ props, predict }) {
   const { t } = useApp();
@@ -22,29 +22,26 @@ export default function JoinWires({ props, predict }) {
   const stage = J.stages[k];
   const group = stage.kind === 'left' ? J.groups[stage.index] : null;
   const soFar = stage.kind === 'setup' ? 0 : stage.kind === 'left' ? J.groups.slice(0, stage.index + 1).reduce((n, g) => n + g.pairs.length, 0) : J.pairs.length;
-  const wirePairs = group ? group.pairs.map((p, i) => ({ id: `w${stage.index}-${i}`, from: 'L', to: `R${i}`, cls: p.right ? 'keep' : 'null' })) : [];
-  const outer = props.kind !== 'inner';
-  const caption = stage.kind === 'setup'
-    ? t(`${J.leftRows.length} rows in ${props.left}, ${J.rightRows.length} in ${props.right}. A pair is made when ${props.on}${props.filterIn === 'on' ? ` and ${props.filter}` : ''}.`, `${J.leftRows.length} rânduri în ${props.left}, ${J.rightRows.length} în ${props.right}. Se formează o pereche când ${props.on}${props.filterIn === 'on' ? ` și ${props.filter}` : ''}.`)
-    : stage.kind === 'left'
-      ? (group.pairs.some(p => p.right)
-        ? t(`This row finds ${group.pairs.length} partner${group.pairs.length === 1 ? '' : 's'}: ${group.pairs.length} row${group.pairs.length === 1 ? '' : 's'} in the result.${group.refused.length ? ` ${group.refused.length} candidate${group.refused.length === 1 ? '' : 's'} failed the filter in ON.` : ''}`, `Rândul acesta găsește ${group.pairs.length} ${group.pairs.length === 1 ? 'partener' : 'parteneri'}: ${group.pairs.length} ${group.pairs.length === 1 ? 'rând' : 'rânduri'} în rezultat.${group.refused.length ? ` ${group.refused.length} ${group.refused.length === 1 ? 'candidat a picat' : 'candidați au picat'} filtrul din ON.` : ''}`)
-        : outer && props.kind !== 'right'
-          ? t('No partner. The join keeps this row anyway and fills the other side with NULL.', 'Niciun partener. Joncțiunea păstrează rândul și completează cealaltă parte cu NULL.')
-          : t('No partner, so this row leaves no trace in the result.', 'Niciun partener, deci rândul nu apare în rezultat.'))
-      : stage.kind === 'tail'
-        ? t(`${J.tail.length} rows of ${props.right} had no partner; this join keeps them with NULL on the left.`, `${J.tail.length} rânduri din ${props.right} nu au avut partener; joncțiunea le păstrează cu NULL în stânga.`)
-        : t(`The filter in WHERE runs after the join: rows where it is not true are dropped, including the NULL ones. ${J.kept} rows are left.`, `Filtrul din WHERE rulează după joncțiune: rândurile pentru care nu e adevărat dispar, inclusiv cele cu NULL. Rămân ${J.kept} rânduri.`);
+  const wirePairs = group ? group.pairs.slice(0, MAX_CARDS).map((p, i) => ({ id: `w${stage.index}-${i}`, from: 'L', to: `R${i}`, cls: p.right ? 'keep' : 'null' })) : [];
+  const cap = joinCaption(J, props, k, total);
+  // the column names over each side's cards: nr_matricol · id_curs · valoare
+  const colsOf = (table, rows) => cardColumns(table, rows[0]).join(' · ');
+  const leftCols = colsOf(props.left, J.leftRows);
+  const rightCols = colsOf(props.right, J.rightRows);
+  const pairText = (p) => `${cardLabel(props.left, p.left)} | ${cardLabel(props.right, p.right)}`;
+  const shownRefused = group ? group.refused.slice(0, Math.max(0, MAX_CARDS - group.pairs.length)) : [];
+  const hiddenRefused = group ? group.refused.length - shownRefused.length : 0;
+  const W = stage.kind === 'where' ? whereParts(J) : null;
   return (
-    <VizFrame widget="join-wires" stepper={s} caption={caption} label={t('Rows of two tables joined by wires', 'Rândurile a două tabele unite prin fire')}>
-      <div className="viz-jhead"><code>{props.left} {props.kind.toUpperCase()} JOIN {props.right} ON {props.on}{props.filterIn === 'on' ? ` AND ${props.filter}` : ''}{props.filterIn === 'where' ? ` WHERE ${props.filter}` : ''}</code></div>
+    <VizFrame widget="join-wires" stepper={s} caption={t(cap.en, cap.ro)} label={t('Rows of two tables joined by wires', 'Rândurile a două tabele unite prin fire')}>
+      <div className="viz-jhead"><code>{joinHeader(props)}</code></div>
       {(stage.kind === 'left' || stage.kind === 'tail') && (
         <div className="viz-jwires viz-wirebox" ref={box}>
           <div className="viz-jcol">
-            <div className="viz-tablecap"><b>{props.left}</b></div>
+            <div className="viz-tablecap"><b>{props.left}</b><span className="viz-jcols">{leftCols}</span></div>
             <AnimatePresence mode="popLayout" initial={false}>
               {stage.kind === 'left' && (
-                <Motion.div key={`l${stage.index}`} data-wire="L" className="viz-jcard" variants={m.v.enter} initial="hidden" animate="show" exit="exit">{label(props.left, group.left)}</Motion.div>
+                <Motion.div key={`l${stage.index}`} data-wire="L" className="viz-jcard" variants={m.v.enter} initial="hidden" animate="show" exit="exit">{cardLabel(props.left, group.left)}</Motion.div>
               )}
               {stage.kind === 'tail' && J.tail.slice(0, 6).map((p, i) => (
                 <Motion.div key={`n${i}`} className="viz-jcard null" variants={m.v.enter} initial="hidden" animate="show" custom={i}>NULL</Motion.div>
@@ -52,37 +49,56 @@ export default function JoinWires({ props, predict }) {
             </AnimatePresence>
           </div>
           <div className="viz-jcol">
-            <div className="viz-tablecap"><b>{props.right}</b></div>
+            <div className="viz-tablecap"><b>{props.right}</b><span className="viz-jcols">{rightCols}</span></div>
             <AnimatePresence mode="popLayout" initial={false}>
-              {stage.kind === 'left' && group.pairs.slice(0, 8).map((p, i) => (
-                <Motion.div key={`r${stage.index}-${i}`} data-wire={`R${i}`} className={`viz-jcard${p.right ? '' : ' null'}`} variants={m.v.enter} initial="hidden" animate="show" exit="exit" custom={i + 1}>{label(props.right, p.right)}</Motion.div>
+              {stage.kind === 'left' && group.pairs.slice(0, MAX_CARDS).map((p, i) => (
+                <Motion.div key={`r${stage.index}-${i}`} data-wire={`R${i}`} className={`viz-jcard${p.right ? '' : ' null'}`} variants={m.v.enter} initial="hidden" animate="show" exit="exit" custom={i + 1}>{cardLabel(props.right, p.right)}</Motion.div>
               ))}
-              {stage.kind === 'left' && group.refused.slice(0, 4).map((p, i) => (
-                <Motion.div key={`x${stage.index}-${i}`} className="viz-jcard refused" variants={m.v.enter} initial="hidden" animate="show" custom={i + 5}>{label(props.right, p.r)} <span aria-hidden="true">✗</span></Motion.div>
+              {stage.kind === 'left' && shownRefused.map((p, i) => (
+                <Motion.div key={`x${stage.index}-${i}`} className="viz-jcard refused" variants={m.v.enter} initial="hidden" animate="show" custom={i + 2}>{cardLabel(props.right, p.r)} <span aria-hidden="true">✗</span></Motion.div>
               ))}
               {stage.kind === 'tail' && J.tail.slice(0, 6).map((p, i) => (
-                <Motion.div key={`t${i}`} className="viz-jcard" variants={m.v.enter} initial="hidden" animate="show" custom={i}>{label(props.right, p.right)}</Motion.div>
+                <Motion.div key={`t${i}`} className="viz-jcard" variants={m.v.enter} initial="hidden" animate="show" custom={i}>{cardLabel(props.right, p.right)}</Motion.div>
               ))}
             </AnimatePresence>
-            {stage.kind === 'left' && group.pairs.length > 8 && <div className="viz-dim viz-more">+{group.pairs.length - 8}</div>}
+            {stage.kind === 'left' && group.pairs.length > MAX_CARDS && <div className="viz-dim viz-more">+{group.pairs.length - MAX_CARDS}</div>}
+            {stage.kind === 'left' && hiddenRefused > 0 && <div className="viz-dim viz-more">+{hiddenRefused} ✗</div>}
           </div>
           {stage.kind === 'left' && <Wires boxRef={box} pairs={wirePairs} />}
         </div>
       )}
       {stage.kind === 'setup' && (
         <div className="viz-jsetup">
-          <div className="viz-jbadge"><b>{props.left}</b><span>{J.leftRows.length} {t('rows', 'rânduri')}</span></div>
+          <div className="viz-jbadge"><b>{props.left}</b><span>{J.leftRows.length} {t(rowsNoun(J.leftRows.length).en, rowsNoun(J.leftRows.length).ro)}</span></div>
           <span className="viz-arrow" aria-hidden="true">⟷</span>
-          <div className="viz-jbadge"><b>{props.right}</b><span>{J.rightRows.length} {t('rows', 'rânduri')}</span></div>
+          <div className="viz-jbadge"><b>{props.right}</b><span>{J.rightRows.length} {t(rowsNoun(J.rightRows.length).en, rowsNoun(J.rightRows.length).ro)}</span></div>
         </div>
       )}
-      {stage.kind === 'where' && (
-        <div className="viz-jresult">
-          {J.pairs.map((p, i) => (
-            <span key={i} className={`viz-jpair${p.kept ? ' kept' : ' dropped'}`} style={{ transitionDelay: m.reduced ? '0ms' : `${Math.min(i, 30) * 12}ms` }}>
-              {label(props.left, p.left)} | {label(props.right, p.right)}
-            </span>
-          ))}
+      {(stage.kind === 'result' || stage.kind === 'where') && (
+        <div className="viz-jlist">
+          <div className="viz-dim viz-jcols">{leftCols} | {rightCols}</div>
+          {stage.kind === 'result' && (
+            <div className="viz-jresult">
+              {J.pairs.map((p, i) => <span key={i} className={`viz-jpair${p.right ? '' : ' nul'}`}>{pairText(p)}</span>)}
+            </div>
+          )}
+          {stage.kind === 'where' && (
+            <>
+              <div className="viz-jgroup">{t('stay', 'rămân')} ({W.kept.length})</div>
+              <div className="viz-jresult">
+                {W.kept.map((p, i) => <span key={i} className="viz-jpair">{pairText(p)}</span>)}
+              </div>
+              <div className="viz-jgroup no">{t('go', 'dispar')} ({W.droppedNull.length + W.droppedOther})</div>
+              <div className="viz-jresult">
+                {W.droppedNull.map((p, i) => <span key={i} className="viz-jpair dropped">{pairText(p)} ✗</span>)}
+                {W.droppedOther > 0 && (
+                  <span className="viz-jpair dropped summary">
+                    {t(`+ ${rowsWord(W.droppedOther).en} with another value`, `+ ${rowsWord(W.droppedOther).ro} cu altă valoare`)} ✗
+                  </span>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
       <div className="viz-tally">
