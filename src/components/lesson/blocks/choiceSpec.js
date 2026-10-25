@@ -48,6 +48,10 @@ export function validateReflect(b) {
   if (!isBi(b?.prompt)) at('prompt must have en + ro');
   if (!isBi(b?.answer)) at('answer must have en + ro');
   if (b?.placeholder !== undefined && !isBi(b.placeholder)) at('placeholder must have en + ro');
-  if (b?.table !== undefined && !(b.table && isStr(b.table.dataset) && isStr(b.table.sql))) at('table needs dataset and sql');
+  // table: one { dataset, sql } or a list of them, each with an optional bilingual caption (e.g. two sheets side by side)
+  if (b?.table !== undefined) {
+    const list = Array.isArray(b.table) ? b.table : [b.table];
+    if (!list.length || !list.every(tb => tb && isStr(tb.dataset) && isStr(tb.sql) && (tb.caption === undefined || isBi(tb.caption)))) at('table needs dataset and sql (and a caption with en + ro if it has one)');
+  }
   return errs;
 }

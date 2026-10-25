@@ -11,7 +11,7 @@ import { MiniTable } from '../viz/ui.jsx';
 import { pickReflectTable, tableFromResult } from './reflectTable.js';
 
 // The small result table a reflect prompt is about: the engine when it is up, else a plain fallback.
-function ReflectTable({ dataset, sql }) {
+function ReflectTable({ dataset, sql, caption }) {
   const runner = useSqlRunner();
   const [fromEngine, setFromEngine] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -32,10 +32,10 @@ function ReflectTable({ dataset, sql }) {
     [fromEngine, runner.status, failed, sql],
   );
   if (!table) return null;
-  return <div className="viz ch-table"><MiniTable columns={table.columns} rows={table.rows} maxHeight="14rem" /></div>;
+  return <div className="viz ch-table"><MiniTable caption={caption ? <b>{caption}</b> : undefined} columns={table.columns} rows={table.rows} maxHeight="14rem" /></div>;
 }
 
-// Block JSON: { type: 'reflect', id, prompt, placeholder?, answer, table?: { dataset, sql } }
+// Block JSON: { type: 'reflect', id, prompt, placeholder?, answer, table?: { dataset, sql, caption? } | [{ dataset, sql, caption? }, ...] }
 export default function ReflectBlock({ id, prompt, placeholder, answer, table }) {
   const { t } = useApp();
   const { complete, ref } = useScreenGate();
@@ -59,7 +59,9 @@ export default function ReflectBlock({ id, prompt, placeholder, answer, table })
   return (
     <div className="ch ch-reflect" data-testid="reflect-block">
       <p className="ch-q" dangerouslySetInnerHTML={{ __html: formatMarkdown(t(prompt.en, prompt.ro)) }} />
-      {table && <ReflectTable dataset={table.dataset} sql={table.sql} />}
+      {table && (Array.isArray(table) ? table : [table]).map((tb, i) => (
+        <ReflectTable key={i} dataset={tb.dataset} sql={tb.sql} caption={tb.caption ? t(tb.caption.en, tb.caption.ro) : null} />
+      ))}
       <textarea
         className="ch-text"
         rows={3}

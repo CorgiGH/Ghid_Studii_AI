@@ -57,7 +57,7 @@ describe('stepper reducer', () => {
 
 describe('table-map', () => {
   it('follows the grade at course 24 to Popescu', () => {
-    const r = tableMap({ from: 'note.nr_matricol', to: 'studenti.nr_matricol', question: { en: 'At course 24 there is a grade 9. Whose is it?' }, answerKey: '111' });
+    const r = tableMap({ from: 'note.nr_matricol', to: 'studenti.nr_matricol', where: { id_curs: '24' }, question: { en: 'At course 24 there is a grade 9. Whose is it?' }, answerKey: '111' });
     expect(r.fromRows[r.pick]).toMatchObject({ id_curs: '24', valoare: 9 });
     expect(r.target.nume).toBe('Popescu');
   });
@@ -411,6 +411,8 @@ describe('viz block spec', () => {
     expect(validateViz({ ...ok, props: {} }).join(' ')).toMatch(/pattern/);
     expect(validateViz({ ...ok, predict: 'yes' }).join(' ')).toMatch(/predict/);
     expect(validateViz({ type: 'viz', id: 'x', widget: 'table-map', props: { dataset: 'facultate', from: 'a.b', to: 'c.d', question: { en: 'q' }, answerKey: '1' } }).join(' ')).toMatch(/question/);
+    // the rows shown must be the question's own rows (where), never the rows of the answer key
+    expect(validateViz({ type: 'viz', id: 'x', widget: 'table-map', props: { dataset: 'facultate', from: 'a.b', to: 'c.d', question: { en: 'q', ro: 'q' }, answerKey: '1' } }).join(' ')).toMatch(/where/);
   });
 });
 

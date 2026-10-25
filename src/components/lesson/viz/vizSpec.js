@@ -13,7 +13,7 @@ const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
 // widget -> { prop: check } (every prop listed is required unless wrapped in optional()).
 const SPEC = {
-  'table-map': { dataset: isStr, from: (v) => /^\w+\.\w+$/.test(v), to: (v) => /^\w+\.\w+$/.test(v), question: isBi, answerKey: isStr },
+  'table-map': { dataset: isStr, from: (v) => /^\w+\.\w+$/.test(v), to: (v) => /^\w+\.\w+$/.test(v), where: (v) => !!v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0, fromCaption: optional(isBi), question: isBi, answerKey: isStr },
   'table-build': { table: isStr, columns: (v) => isArr(v) && v.every(c => c && isStr(c.name) && isStr(c.type)) },
   'row-insert': { table: isStr, row: (v) => !!v && typeof v === 'object' && Object.keys(v).length > 0, errorCase: optional((v) => !!v && typeof v.row === 'object' && /^ORA-\d{5}$/.test(v.code)) },
   'delete-sweep': { table: isStr, where: optional(isStr) },

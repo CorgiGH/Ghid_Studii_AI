@@ -57,6 +57,10 @@ describe('mcq / reflect validator', () => {
     expect(validateReflect({ id: 'r', prompt: bi('p') }).join(' ')).toMatch(/answer/);
     expect(validateReflect({ id: 'r', prompt: bi('p'), answer: bi('a'), table: { dataset: 'facultate' } }).join(' ')).toMatch(/table/);
     expect(validateReflect({ id: 'r', prompt: bi('p'), answer: bi('a'), table: { dataset: 'facultate', sql: 'SELECT 1 FROM dual' } })).toEqual([]);
+    const sheet = (caption) => ({ dataset: 'facultate', sql: 'SELECT 1 FROM dual', caption });
+    expect(validateReflect({ id: 'r', prompt: bi('p'), answer: bi('a'), table: [sheet(bi('studenti')), sheet(bi('note'))] })).toEqual([]);
+    expect(validateReflect({ id: 'r', prompt: bi('p'), answer: bi('a'), table: [sheet({ en: 'only en' })] }).join(' ')).toMatch(/caption/);
+    expect(validateReflect({ id: 'r', prompt: bi('p'), answer: bi('a'), table: [] }).join(' ')).toMatch(/table/);
   });
 });
 

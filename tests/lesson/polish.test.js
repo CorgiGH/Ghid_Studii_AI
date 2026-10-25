@@ -297,18 +297,26 @@ describe('all-vs-some compares nume and prenume', () => {
 });
 
 describe('table-map arrow fired from a key cell', () => {
-  const m = tableMap({ from: 'note.nr_matricol', to: 'studenti.nr_matricol', question: { en: 'At course 24 there is a grade 9. Whose is it?' }, answerKey: '111' });
-  const cols = Object.keys(m.fromRows[0]);
+  const m = tableMap({ from: 'note.nr_matricol', to: 'studenti.nr_matricol', where: { id_curs: '24' }, question: { en: 'At course 24 there is a grade 9. Whose is it?' }, answerKey: '111' });
 
-  it('leads from the clicked row to the studenti row with the same key', () => {
-    const w = mapWire(m, 2);
-    expect(w.row).toBe(2);
-    expect(w.from).toBe(`from:2:${m.fromCol}`); // starts at the clicked nr_matricol cell
-    expect(w.from.endsWith(':nr_matricol')).toBe(true);
-    expect(w.from.endsWith(`:${cols[cols.length - 1]}`)).toBe(cols[cols.length - 1] === 'nr_matricol');
-    expect(w.to).toBe(`to:${m.toRows.indexOf(m.target)}:nr_matricol`);
+  it('shows the rows the question is about (course 24), each with its own student number', () => {
+    expect(m.fromRows.map((r) => r.nr_matricol)).toEqual(['111', '112', '113', '114', '115']);
+    expect(m.fromRows[m.pick]).toMatchObject({ nr_matricol: '111', id_curs: '24', valoare: 9 });
+    expect(m.about).toEqual([['id_curs', '24'], ['valoare', 9]]); // the cells of the picked row the question names
     expect(m.target.nume).toBe('Popescu');
+  });
+
+  it('leads from the clicked row to that row\'s own student, and says whether it is the asked row', () => {
+    const w = mapWire(m, 1);
+    expect(w.row).toBe(1);
+    expect(w.from).toBe(`from:1:${m.fromCol}`); // starts at the clicked nr_matricol cell
+    expect(w.to).toBe(`to:${m.toRows.findIndex((r) => r.nr_matricol === '112')}:nr_matricol`);
+    expect(w.student.nume).toBe('Prelipcean');
+    expect(w.hit).toBe(false);
     expect(w.under).toBe(true); // routed along the row's gridline, not across its values
+    const right = mapWire(m, m.pick);
+    expect(right.student).toBe(m.target);
+    expect(right.hit).toBe(true);
   });
 
   it('falls back to the picked row for no or a bad click, and gives nothing without a target', () => {
