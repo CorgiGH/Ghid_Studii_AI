@@ -6,7 +6,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import {
-  attemptAction, canGrade, restoreSqlState, rowsFromSql, slimVerdict,
+  attemptAction, canGrade, restoreSqlState, revealFields, rowsFromSql, slimVerdict,
 } from '../../src/components/lesson/blocks/sqlExerciseSpec.js';
 import { checkResult } from '../../src/sql/check.js';
 import {
@@ -63,13 +63,19 @@ describe('attemptAction', () => {
   });
   it('paper: hand-in opens an unscored marker, the self-check decides', () => {
     expect(attemptAction({ ...base, event: 'paper-submit' })).toMatchObject({ type: 'record', unscored: true });
+    expect(attemptAction({ ...base, event: 'paper-submit' }).owns).toBe(true);
+    // an attempt from a live run is not the hand-in's to touch; a revealed (missed) one is marked as the paper one
     expect(attemptAction({ ...base, event: 'paper-submit', attempted: true }).type).toBe('none');
+    expect(attemptAction({ ...base, event: 'paper-submit', attempted: true, revealed: true })).toMatchObject({ type: 'update', owns: true, set: { paper: true } });
     expect(attemptAction({ ...base, hidden: true, event: 'paper-submit' }).type).toBe('none');
     // all ticked: the marker becomes a right answer; anything unticked: a failed attempt that reaches the review pile
-    expect(attemptAction({ ...base, event: 'paper-done', attempted: true, paperOk: true })).toMatchObject({ type: 'update', set: { ok: true, unscored: false } });
-    expect(attemptAction({ ...base, event: 'paper-done', attempted: true, paperOk: false })).toMatchObject({ type: 'record', ok: false, unscored: false });
-    // the solution was opened first: the attempt already stands
-    expect(attemptAction({ ...base, event: 'paper-done', attempted: true, paperOk: true, revealed: true }).type).toBe('none');
+    expect(attemptAction({ ...base, event: 'paper-done', attempted: true, paperOwned: true, paperOk: true })).toMatchObject({ type: 'update', set: { ok: true, unscored: false, paperDone: true } });
+    expect(attemptAction({ ...base, event: 'paper-done', attempted: true, paperOwned: true, paperOk: false })).toMatchObject({ type: 'record', ok: false, unscored: false });
+    // the solution was opened first: the attempt already stands as a miss, it is only marked settled
+    expect(attemptAction({ ...base, event: 'paper-done', attempted: true, paperOwned: true, paperOk: true, revealed: true })).toMatchObject({ type: 'update', set: { paperDone: true } });
+    // after a reload the stored attempt may be a live run's: a second hand-in neither re-enqueues nor turns a miss into a right answer
+    expect(attemptAction({ ...base, event: 'paper-done', attempted: true, paperOk: true }).type).toBe('none');
+    expect(attemptAction({ ...base, event: 'paper-done', attempted: true, paperOk: false }).type).toBe('none');
     // review variant: markReview with the self-check result
     expect(attemptAction({ ...base, hidden: true, event: 'paper-done', paperOk: true })).toMatchObject({ type: 'markReview', ok: true });
     expect(attemptAction({ ...base, hidden: true, event: 'paper-done', paperOk: false })).toMatchObject({ type: 'markReview', ok: false });
@@ -81,13 +87,40 @@ describe('attemptAction', () => {
       const submit = attemptAction({ ...base, event: 'paper-submit' });
       store.recordAttempt('e1', { ok: submit.ok, unscored: submit.unscored, kind: 'sql', item: 'e1', ref, at: 1, done: true, paper: true });
       expect(store.pendingCount()).toBe(0);
-      const done = attemptAction({ ...base, event: 'paper-done', attempted: true, paperOk });
+      const done = attemptAction({ ...base, event: 'paper-done', attempted: true, paperOwned: true, paperOk });
       if (done.type === 'record') store.recordAttempt('e1', { ok: done.ok, kind: 'sql', item: 'e1', ref, at: 2, done: true, paper: true });
       else store.updateLastAttempt('e1', done.set);
       return store.pendingCount();
     };
     expect(run(false)).toBe(1);
     expect(run(true)).toBe(0);
+  });
+});
+
+describe('reveal and paper restore', () => {
+  const ref = { src: 'bd/x', screen: 2 };
+  const fresh = () => createLessonStore({ getItem: () => null, setItem: () => {} });
+  it('run, reveal, restore keeps the verdict, the mistake and ran', () => {
+    const store = fresh();
+    const v = slimVerdict({ ok: false, kind: 'rows', missing: [], extra: [] });
+    store.recordAttempt('e1', { ok: false, hints: 0, kind: 'sql', item: 'e1', ref, at: 1, done: true, revealed: false, sql: 'SELECT 1', verdict: v, mistake: 'eq-null', ran: true });
+    store.updateLastAttempt('e1', { hints: 0, ...revealFields(true, 'SELECT 1') });
+    expect(restoreSqlState(store.attemptsAt(ref.src, ref.screen), 'e1')).toMatchObject({ revealed: true, verdict: v, mistake: 'eq-null', ran: true, sql: 'SELECT 1' });
+    expect(revealFields(false, 'x')).toEqual({ sql: 'x', verdict: null, ran: false, revealed: true });
+  });
+  it('a paper hand-in comes back submitted, and settled after the check was saved', () => {
+    const store = fresh();
+    store.recordAttempt('e1', { ok: false, unscored: true, kind: 'sql', item: 'e1', ref, at: 1, done: true, paper: true, ran: false });
+    expect(restoreSqlState(store.attemptsAt(ref.src, ref.screen), 'e1')).toMatchObject({ paper: true, paperDone: false });
+    store.updateLastAttempt('e1', { ok: true, unscored: false, paperDone: true });
+    expect(restoreSqlState(store.attemptsAt(ref.src, ref.screen), 'e1')).toMatchObject({ paper: true, paperDone: true, ok: true });
+  });
+  it('a live miss survives a later paper hand-in untouched', () => {
+    const store = fresh();
+    store.recordAttempt('e1', { ok: false, kind: 'sql', item: 'e1', ref, at: 1, done: true, sql: 'S', ran: true });
+    expect(attemptAction({ record: true, attempted: true, event: 'paper-submit' }).type).toBe('none');
+    expect(attemptAction({ record: true, attempted: true, event: 'paper-done', paperOk: true }).type).toBe('none');
+    expect(store.attemptsAt(ref.src, ref.screen)).toHaveLength(1);
   });
 });
 

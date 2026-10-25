@@ -24,7 +24,7 @@ const runErrorText = (e, t) => (e?.code === 'TIMEOUT'
   ? t('The query ran for over a minute and was stopped. Check for a join without a condition.', 'Interogarea a rulat peste un minut și a fost oprită. Verifică dacă ai o joncțiune fără condiție.')
   : t(`The query could not be run (${e?.message ?? e}).`, `Interogarea nu a putut fi rulată (${e?.message ?? e}).`));
 
-export default function SqlQuestion({ question, onAnswer, suppressFeedback = false, mode = 'practice' }) {
+export default function SqlQuestion({ question, onAnswer, suppressFeedback = false, mode = 'practice', registerFlush }) {
   const { t } = useApp();
   const { client, status } = useSqlClient();
   const parts = useMemo(() => partsOf(question), [question]);
@@ -107,6 +107,35 @@ export default function SqlQuestion({ question, onAnswer, suppressFeedback = fal
     setPaperExpected(found);
     setHandedIn(true);
   };
+
+  // When the test's clock runs out the test asks every open question to hand in (registerFlush). Practice: the typed text is graded
+  // as it stands, and what cannot be graded scores 0. Paper: the question is handed in so its expected table and solution show,
+  // and the learner still has to score themself. Resolves to 'done' or 'needs-score'.
+  const flushRef = useRef(null);
+  flushRef.current = async () => {
+    for (let i = 0; busyRef.current && i < 100; i++) await new Promise((r) => setTimeout(r, 100));
+    if (paper) {
+      if (!handedIn) await handInPaper();
+      return selfScore === null ? 'needs-score' : 'done';
+    }
+    if (graded) return 'done';
+    const texts0 = textsRef.current;
+    let done = null;
+    if (client && !busyRef.current) {
+      busyRef.current = true; setBusy(true);
+      try { done = await exclusive(() => gradeParts({ client, parts, base, texts: texts0, loadExpected })); } catch { done = null; } finally { busyRef.current = false; setBusy(false); }
+    }
+    if (done?.status === 'graded') {
+      const score = scoreSqlQuestion(question.points, done.flat);
+      setGraded({ score, parts: done.out });
+      onAnswer?.(question.id, score, question.points, { sql: texts0 });
+    } else {
+      setGraded({ score: 0, parts: {} });
+      onAnswer?.(question.id, 0, question.points, { sql: texts0, ungraded: true });
+    }
+    return 'done';
+  };
+  useEffect(() => (registerFlush ? registerFlush(question.id, () => flushRef.current()) : undefined), [registerFlush, question.id]);
 
   const pickScore = (n) => {
     setSelfScore(n);

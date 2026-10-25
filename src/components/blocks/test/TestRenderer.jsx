@@ -101,7 +101,7 @@ function TimerChoice({ choices, lang, onSelect }) {
         {ro ? 'Vrei un timer?' : 'Do you want a timer?'}
       </h2>
       <p className="text-center mb-6 text-sm" style={{ color: 'var(--theme-muted-text)' }}>
-        {ro ? 'La 0 testul se predă singur. Poți alege și fără timer.' : 'At 0 the test is handed in by itself. You can also go without one.'}
+        {ro ? 'La 0 răspunsurile se predau singure (la întrebările pe hârtie te notezi tu). Poți alege și fără timer.' : 'At 0 your answers are handed in by themselves (you still score paper questions yourself). You can also go without one.'}
       </p>
       <div className="flex flex-wrap justify-center gap-3">
         {options.map((o) => (
@@ -133,6 +133,8 @@ export default function TestRenderer({ src }) {
   const [reviewQuestionIds, setReviewQuestionIds] = useState([]);
   const [testMode, setTestMode] = useState(null); // null=not started, 'tutor'|'timed'
   const [timeLeft, setTimeLeft] = useState(null);
+  const [timeUp, setTimeUp] = useState(false); // the clock ran out; open questions are being handed in
+  const [finishPending, setFinishPending] = useState(false);
   const [timerMin, setTimerMin] = useState(null); // optional timer: null = not chosen yet, 0 = none, else minutes
   const [screen, setScreen] = useState(0); // oneQuestionPerScreen: index of the question on show
   const [attemptId, setAttemptId] = useState(0); // bumped on retake / review-mistakes so child questions remount
@@ -146,6 +148,7 @@ export default function TestRenderer({ src }) {
     setShowResults(false);
     setTestMode(null);
     setTimeLeft(null);
+    setTimeUp(false);
     setTimerMin(null);
     setReviewMode(false);
     setReviewQuestionIds([]);
@@ -192,12 +195,21 @@ export default function TestRenderer({ src }) {
     return () => clearInterval(interval);
   }, [totalSeconds, showResults, testData]);
 
-  // Auto-submit when timer hits 0
+  // When the timer hits 0 every open question is handed in first (flush), so typed work is graded instead of scoring 0. A paper
+  // question that still needs the learner's own score keeps the test open (timeUp); everything else finishes the test.
+  const flushers = useRef(new Map());
+  const registerFlush = useCallback((id, fn) => {
+    flushers.current.set(id, fn);
+    return () => { if (flushers.current.get(id) === fn) flushers.current.delete(id); };
+  }, []);
   useEffect(() => {
-    if (timeLeft === 0 && totalSeconds !== null && !showResults) {
-      handleFinishRef.current?.();
-    }
-  }, [timeLeft, totalSeconds, showResults]);
+    if (timeLeft !== 0 || totalSeconds === null || showResults || timeUp) return;
+    setTimeUp(true);
+    (async () => {
+      const outcomes = await Promise.all([...flushers.current.values()].map((fn) => fn().catch(() => 'done')));
+      if (!outcomes.includes('needs-score')) setFinishPending(true);
+    })();
+  }, [timeLeft, totalSeconds, showResults, timeUp]);
 
   const handleAnswer = useCallback((questionId, score, maxScore, meta) => {
     setAnswers(prev => ({ ...prev, [questionId]: { score, maxScore, ...(meta || {}) } }));
@@ -220,8 +232,10 @@ export default function TestRenderer({ src }) {
     setShowResults(true);
   }, [testData, reviewQuestionIds, answers, saveTestResult, reviewMode]);
 
-  const handleFinishRef = useRef(handleFinish);
-  handleFinishRef.current = handleFinish;
+  // Runs after the render that holds the answers the flush just gave.
+  useEffect(() => {
+    if (finishPending && !showResults) { setFinishPending(false); handleFinish(); }
+  }, [finishPending, showResults, handleFinish]);
 
   const prevBest = testProgress?.[testData?.meta?.id];
 
@@ -265,6 +279,7 @@ export default function TestRenderer({ src }) {
     setReviewMode(true);
     setTestMode(null);
     setTimeLeft(null);
+    setTimeUp(false);
     setTimerMin(null);
     setAnswers({});
     setShowResults(false);
@@ -390,6 +405,7 @@ export default function TestRenderer({ src }) {
                 onAnswer={handleAnswer}
                 suppressFeedback={testMode === 'timed' && !showResults}
                 mode={testMode}
+                registerFlush={registerFlush}
               />
             </div>
             </React.Fragment>
@@ -420,18 +436,24 @@ export default function TestRenderer({ src }) {
       )}
 
       {/* Finish button / Results */}
+      {timeUp && !showResults && (
+        <p className="text-sm text-center mt-6" style={{ color: '#ef4444', fontWeight: 600 }} data-testid="test-time-up" role="status">
+          {t('Time is up. Your answers were handed in; score the paper questions yourself, then see the results.',
+            'Timpul a expirat. Răspunsurile au fost predate; notează-te singur la întrebările pe hârtie, apoi vezi rezultatele.')}
+        </p>
+      )}
       {!showResults && (
         <div className="flex justify-center mt-6">
           <button
             onClick={handleFinish}
-            disabled={!allAnswered}
+            disabled={!allAnswered && !timeUp}
             className="px-6 py-2.5 rounded-xl text-sm font-bold transition-colors cursor-pointer"
             style={{
-              backgroundColor: allAnswered ? '#22c55e' : 'var(--theme-border)',
-              color: allAnswered ? '#fff' : 'var(--theme-muted-text)',
+              backgroundColor: (allAnswered || timeUp) ? '#22c55e' : 'var(--theme-border)',
+              color: (allAnswered || timeUp) ? '#fff' : 'var(--theme-muted-text)',
             }}
           >
-            {allAnswered
+            {(allAnswered || timeUp)
               ? t('See Results', 'Vezi rezultatele')
               : t(`${answeredCount}/${visibleQuestionCount} answered`, `${answeredCount}/${visibleQuestionCount} răspunse`)}
           </button>
@@ -451,6 +473,7 @@ export default function TestRenderer({ src }) {
             setReviewQuestionIds([]);
             setTestMode(null);
             setTimeLeft(null);
+            setTimeUp(false);
             setTimerMin(null);
             setScreen(0);
             setAttemptId(id => id + 1);

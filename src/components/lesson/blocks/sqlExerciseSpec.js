@@ -187,6 +187,7 @@ export function restoreSqlState(attempts, id) {
     // true only when `sql` is a query the learner actually ran: a starter text, a paper hand-in or a reveal never gets re-run
     ran: last.ran === true && typeof last.sql === 'string' && last.sql.trim().length > 0,
     paper: last.paper === true,
+    paperDone: last.paper === true && last.paperDone === true,
     ok: last.ok === true,
   };
 }
@@ -204,7 +205,7 @@ export function restoreSqlState(attempts, id) {
 const NONE = { type: 'none' };
 export const isGraded = (verdict) => !!verdict && verdict.kind !== 'error' && verdict.kind !== 'not-oracle';
 
-export function attemptAction({ hidden = false, record = false, attempted = false, marked = false, verdict = null, silent = false, event = 'run', paperOk = false, revealed = false } = {}) {
+export function attemptAction({ hidden = false, record = false, attempted = false, marked = false, verdict = null, silent = false, event = 'run', paperOk = false, revealed = false, paperOwned = false } = {}) {
   if (silent) return NONE;
   if (hidden) {
     if (marked) return NONE;
@@ -222,15 +223,23 @@ export function attemptAction({ hidden = false, record = false, attempted = fals
     case 'reveal':
       return attempted ? { type: 'update' } : { type: 'record', ok: false, unscored: false };
     case 'paper-submit':
-      return attempted ? NONE : { type: 'record', ok: false, unscored: true };
+      if (!attempted) return { type: 'record', ok: false, unscored: true, owns: true };
+      // The solution was opened first: that attempt is already a miss, the hand-in only marks it as a paper one.
+      // An attempt from a live run is somebody else's: the hand-in writes nothing and owns nothing.
+      return revealed ? { type: 'update', owns: true, set: { paper: true } } : NONE;
     case 'paper-done':
       if (!attempted) return { type: 'record', ok: paperOk === true, unscored: false };
-      if (revealed) return NONE; // the solution was opened first: the attempt already stands as a miss
-      return paperOk ? { type: 'update', set: { ok: true, unscored: false } } : { type: 'record', ok: false, unscored: false };
+      if (!paperOwned) return NONE; // only the attempt this paper hand-in made (or marked) may be settled
+      if (revealed) return { type: 'update', set: { paperDone: true } }; // already stands as a miss
+      return paperOk ? { type: 'update', set: { ok: true, unscored: false, paperDone: true } } : { type: 'record', ok: false, unscored: false };
     default:
       return NONE;
   }
 }
+
+// The fields the reveal writes: on an existing attempt only the flag (the query, verdict, mistake and ran stay, so a reload brings
+// them back); the first attempt of a block starts with the whole record.
+export const revealFields = (attempted, sql) => (attempted ? { revealed: true } : { sql, verdict: null, ran: false, revealed: true });
 
 // A query-kind run that ended in an ORA error is a verdict even without the expected file: the code and its explanation do not
 // depend on the answer key. Returns true when checkResult can be asked.
