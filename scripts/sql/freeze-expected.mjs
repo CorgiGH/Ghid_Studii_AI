@@ -98,6 +98,7 @@ const main = async () => {
   const fail = (item, dataset, msg) => failures.push(`${item.id} [${dataset}]: ${msg}`)
   const engineFor = engineCache()
   const frozen = new Map() // `${id}|${dataset}|${clock}` -> expected
+  const frozenAlts = new Map() // `${id}|${dataset}|${clock}` -> [Oracle result of each altSolutions entry]
   let written = 0
 
   for (const base of ['facultate', 'biblioteca']) {
@@ -127,9 +128,12 @@ const main = async () => {
           const expected = plain(main.main)
           if (hasDates(main.main) && !main.probe.error) expected.probe = main.probe.rows
           frozen.set(`${item.id}|${dataset}|${clock}`, expected)
+          const altResults = []
+          frozenAlts.set(`${item.id}|${dataset}|${clock}`, altResults)
           alts.forEach((alt, a) => {
             if (alt.main.error) return fail(item, dataset, `altSolutions[${a}] fails on Oracle: ${alt.main.error.code}`)
             const altResult = { ...plain(alt.main), probe: hasDates(alt.main) ? alt.probe.rows : undefined }
+            altResults[a] = altResult
             const v = checkResult(altResult, expected, specOf(item))
             if (!v.ok) fail(item, dataset, `altSolutions[${a}] differs from the solution (${v.kind}) on clock ${clock}`)
           })
@@ -158,6 +162,13 @@ const main = async () => {
           if (!exp) continue
           const diff = await engineDifference({ ...item, clock: c === DEFAULT_CLOCK ? undefined : item.clock }, dataset, exp, engineFor)
           if (diff) fail(item, dataset, `engine differs from Oracle on clock ${c}: ${diff}`)
+          // every altSolutions entry must be reproduced by the engine as well: a learner who writes it is graded by the engine
+          const altOracle = frozenAlts.get(`${item.id}|${dataset}|${c}`) ?? []
+          for (const [a, altExpected] of altOracle.entries()) {
+            if (!altExpected) continue
+            const altDiff = await engineDifference({ ...item, solution: item.altSolutions[a], altSolutions: [], clock: c === DEFAULT_CLOCK ? undefined : item.clock }, dataset, altExpected, engineFor)
+            if (altDiff) fail(item, dataset, `engine differs from Oracle on altSolutions[${a}] (clock ${c}): ${altDiff}`)
+          }
         }
       }
     }
