@@ -58,22 +58,18 @@
         {
           "type": "learn",
           "content": {
-            "en": "In `SELECT` you can write expressions with `+`, `-`, `*`, `/`. They are computed for each row. Watch what happens to NULL. Before the machine runs, guess which rows pass `WHERE bursa + 10 > 300`.",
-            "ro": "În `SELECT` poți scrie expresii cu `+`, `-`, `*`, `/`. Se calculează pentru fiecare rând. Urmărește ce se întâmplă cu NULL. Înainte să pornească mașina, ghicește ce rânduri trec de `WHERE bursa + 10 > 300`."
+            "en": "In `SELECT` you can write calculations with `+`, `-`, `*`, `/`. They are computed on every row. Guess: what does the `bursa + 10` column show for Popescu, who has no scholarship? Then press Next and check.",
+            "ro": "În `SELECT` poți scrie calcule cu `+`, `-`, `*`, `/`. Se calculează pe fiecare rând. Ghicește: ce scrie în coloana `bursa + 10` la Popescu, care nu are bursă? Apoi apasă «Mai departe» și verifică."
           }
         },
         {
           "type": "query-machine",
           "id": "bd-l03-qm1",
           "dataset": "facultate",
-          "sql": "SELECT nume, bursa, bursa + 10 FROM studenti WHERE bursa + 10 > 300",
+          "sql": "SELECT nume, bursa, bursa + 10 FROM studenti",
           "stages": [
             {
               "clause": "from"
-            },
-            {
-              "clause": "where",
-              "predict": true
             },
             {
               "clause": "select"
@@ -88,13 +84,9 @@
               "en": "13 rows; 8 have `bursa` NULL.",
               "ro": "13 rânduri; 8 au `bursa` NULL."
             },
-            "where": {
-              "en": "`bursa + 10 > 300` keeps 4 rows: 460 and 360 pass. 260 does not pass. For the 8 NULL rows the result of `bursa + 10` is NULL, the comparison is not TRUE, and they fall away.",
-              "ro": "`bursa + 10 > 300` păstrează 4 rânduri: 460 și 360 trec. 260 nu trece. Pentru cele 8 rânduri cu NULL, `bursa + 10` dă NULL, comparația nu e TRUE și ele cad."
-            },
             "select": {
-              "en": "`bursa + 10` is computed row by row: 450 becomes 460, 350 becomes 360. Where `bursa` is NULL, the result would stay NULL.",
-              "ro": "`bursa + 10` se calculează rând cu rând: 450 devine 460, 350 devine 360. Unde `bursa` e NULL, rezultatul ar rămâne NULL."
+              "en": "`bursa + 10` is computed row by row: for Antonie 450 becomes 460, for Pintescu 250 becomes 260, for the three with 350 it becomes 360. For the 8 without a scholarship (Popescu, for example) the new column stays NULL: NULL + 10 is not 10.",
+              "ro": "`bursa + 10` se calculează rând cu rând: la Antonie 450 devine 460, la Pintescu 250 devine 260, la cei trei cu 350 devine 360. La cei 8 fără bursă (de exemplu Popescu) coloana nouă rămâne NULL: NULL + 10 nu e 10."
             }
           }
         }
@@ -110,22 +102,18 @@
         {
           "type": "learn",
           "content": {
-            "en": "The operator `||` (two vertical bars) glues strings together. Numbers turn into text by themselves. Here is the difference from `+`: `||` treats NULL as if it were an empty string. Guess which rows pass `WHERE 'Bursa: ' || bursa = 'Bursa: '`.",
-            "ro": "Operatorul `||` (două bare verticale) lipește șiruri de caractere. Numerele se transformă singure în text. Aici, diferența față de `+`: `||` trece peste NULL ca și cum ar fi un șir vid. Ghicește ce rânduri trec de `WHERE 'Bursa: ' || bursa = 'Bursa: '`."
+            "en": "The operator `||` (two vertical bars) glues strings together. Numbers turn into text by themselves. The difference from `+`: `||` treats NULL as if it were an empty string. Guess what the new column shows for Antonie (scholarship 450) and for Popescu (scholarship NULL), then press Next.",
+            "ro": "Operatorul `||` (două bare verticale) lipește șiruri de caractere. Numerele se transformă singure în text. Diferența față de `+`: `||` trece peste NULL ca și cum ar fi un șir vid. Ghicește ce scrie în coloana nouă la Antonie (bursa 450) și la Popescu (bursa NULL), apoi apasă «Mai departe»."
           }
         },
         {
           "type": "query-machine",
           "id": "bd-l03-qm2",
           "dataset": "facultate",
-          "sql": "SELECT nume, 'Bursa: ' || bursa FROM studenti WHERE 'Bursa: ' || bursa = 'Bursa: '",
+          "sql": "SELECT nume, bursa, 'Bursa: ' || bursa AS mesaj FROM studenti",
           "stages": [
             {
               "clause": "from"
-            },
-            {
-              "clause": "where",
-              "predict": true
             },
             {
               "clause": "select"
@@ -140,13 +128,9 @@
               "en": "The same 13 rows.",
               "ro": "Aceleași 13 rânduri."
             },
-            "where": {
-              "en": "8 rows pass: exactly the ones with `bursa` NULL, because `'Bursa: ' || NULL` is `'Bursa: '`, not NULL. The 5 with a scholarship give `Bursa: 450` and so on, and fall away.",
-              "ro": "Trec 8 rânduri: exact cele cu `bursa` NULL, fiindcă `'Bursa: ' || NULL` este `'Bursa: '`, nu NULL. Cele 5 cu bursă dau `Bursa: 450` și așa mai departe, și cad."
-            },
             "select": {
-              "en": "The 8 rows show `Bursa: ` with nothing after it, not NULL.",
-              "ro": "Cele 8 rânduri arată `Bursa: ` cu nimic după, nu NULL."
+              "en": "Antonie: `Bursa: 450`. For the 8 without a scholarship (Popescu, for example) the column `mesaj` shows `Bursa: ` with nothing after it, not NULL, unlike `bursa + 10` on the previous screen.",
+              "ro": "Antonie: `Bursa: 450`. La cei 8 fără bursă (de exemplu Popescu) coloana `mesaj` arată `Bursa: `, fără nimic după, nu NULL, spre deosebire de `bursa + 10` de pe ecranul anterior."
             }
           }
         }
