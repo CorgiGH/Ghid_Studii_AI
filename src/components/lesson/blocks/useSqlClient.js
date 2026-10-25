@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react';
 
 let clientPromise = null;
 function loadClient() {
-  clientPromise ??= import('../../../sql/engine/client.js').then((m) => m.getSqlClient());
+  if (!clientPromise) {
+    clientPromise = import('../../../sql/engine/client.js').then((m) => m.getSqlClient());
+    clientPromise.catch(() => { clientPromise = null; }); // a failed chunk load is tried again by the next block that mounts
+  }
   return clientPromise;
 }
 

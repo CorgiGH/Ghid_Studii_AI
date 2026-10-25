@@ -8,13 +8,21 @@
 //   sql.cancel()                       // the pending run rejects with { code: 'CANCELLED' }
 //   sql.status                         // 'idle' | 'loading' | 'ready' | 'failed'
 //   const off = sql.onStatus((s) => ...)
+//   sql.retry()                        // after 'failed': boot again; resolves to the status it ends in
 //
-// When the engine cannot start (boot error, or no answer within BOOT_TIMEOUT_MS) the status is 'failed' and every run rejects
-// with { code: 'ENGINE_UNAVAILABLE' }; the lesson then falls back to paper mode (worked examples with frozen results).
+// When the engine cannot start (boot error, the engine files stop arriving for DOWNLOAD_STALL_MS, or no answer within
+// BOOT_TIMEOUT_MS once they are in) the status is 'failed' and every run rejects with { code: 'ENGINE_UNAVAILABLE' }; the lesson
+// then falls back to paper mode until retry() brings the engine back.
+//
+// Boot has two phases, told apart by the worker's progress messages ({ id, progress: { phase: 'download' | 'start' } }): while the
+// files download (about 20 MB) the limit is DOWNLOAD_STALL_MS without a new byte, so a slow connection that still delivers is never
+// cut off; once every file is in ('start') the engine has BOOT_TIMEOUT_MS to come up.
 
-// Measured in scripts/sql/measure-browser.mjs (numbers in spec section 8: about 0.9 s desktop, about 8 s phone-class): a boot that
-// fails, or takes longer than this, forces paper mode.
+// Measured in scripts/sql/measure-browser.mjs (numbers in spec section 8: about 0.9 s desktop, about 8 s phone-class): a start that
+// fails, or takes longer than this after the files are in, forces paper mode.
 export const BOOT_TIMEOUT_MS = 20000
+// The download phase fails only when no byte arrived for this long (the worker reports progress a few times a second).
+export const DOWNLOAD_STALL_MS = 45000
 export const PAPER_MODE_THRESHOLD = { bootMs: BOOT_TIMEOUT_MS }
 export const DEFAULT_MAX_ROWS = 500
 // PGlite ignores statement_timeout (single-user mode has no timers), so the page enforces the limit: a statement that has not
@@ -28,7 +36,7 @@ function defaultCreateWorker() {
   return new Worker(new URL('./worker.js', import.meta.url), { type: 'module' })
 }
 
-export function createSqlClient({ createWorker = defaultCreateWorker, bootTimeoutMs = BOOT_TIMEOUT_MS, runTimeoutMs = RUN_TIMEOUT_MS } = {}) {
+export function createSqlClient({ createWorker = defaultCreateWorker, bootTimeoutMs = BOOT_TIMEOUT_MS, downloadStallMs = DOWNLOAD_STALL_MS, runTimeoutMs = RUN_TIMEOUT_MS } = {}) {
   let status = 'idle'
   const listeners = new Set()
   let worker = null
@@ -79,8 +87,26 @@ export function createSqlClient({ createWorker = defaultCreateWorker, bootTimeou
       return booting
     }
     worker = w
+    // the boot's limit: DOWNLOAD_STALL_MS since the last byte while the files arrive, then BOOT_TIMEOUT_MS from 'start'
+    let timer = null
+    let started = false
+    const arm = (ms, why) => {
+      clearTimeout(timer)
+      timer = setTimeout(() => { if (worker === w) fail(why) }, ms)
+    }
+    const onProgress = (progress) => {
+      if (started) return
+      if (progress?.phase === 'start') {
+        started = true
+        arm(bootTimeoutMs, `engine did not start within ${bootTimeoutMs} ms`)
+      } else arm(downloadStallMs, `the engine files stopped arriving for ${downloadStallMs} ms`)
+    }
     w.onmessage = (ev) => {
-      const { id, ok, result, error } = ev.data
+      const { id, ok, result, error, progress } = ev.data
+      if (progress) {
+        if (worker === w) onProgress(progress)
+        return
+      }
       const p = pending.get(id)
       if (!p || p.worker !== w) return
       pending.delete(id)
@@ -92,9 +118,7 @@ export function createSqlClient({ createWorker = defaultCreateWorker, bootTimeou
       fail(String(ev?.message ?? 'worker error'))
     }
     const p = new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        if (worker === w) fail(`engine did not start within ${bootTimeoutMs} ms`)
-      }, bootTimeoutMs)
+      arm(downloadStallMs, `the engine files did not arrive within ${downloadStallMs} ms`)
       send(w, { id: nextId++, op: 'boot', dataset: ds }).then(
         () => {
           clearTimeout(timer)
@@ -184,6 +208,16 @@ export function createSqlClient({ createWorker = defaultCreateWorker, bootTimeou
     // resolves when the engine is ready (or rejects when it cannot start)
     ready() {
       return booting ?? Promise.reject(err('ENGINE_UNAVAILABLE', 'engine not started'))
+    },
+    // After a failed start: boot the same dataset again (a slow connection may have caught up). Resolves to the status it ends in
+    // ('ready' or 'failed'); never rejects. When nothing failed it changes nothing.
+    retry() {
+      if (status !== 'failed') return (booting ?? Promise.resolve()).then(() => status, () => status)
+      if (!dataset) {
+        setStatus('idle')
+        return Promise.resolve(status)
+      }
+      return boot(dataset).then(() => status, () => status)
     },
   }
   return client
