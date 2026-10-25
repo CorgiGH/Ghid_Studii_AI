@@ -53,6 +53,20 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   const [dir, setDir] = useState(1);
   const firstRender = useRef(true);
 
+  // The footer's height, as --lp-footer-h on the root: the card keeps that much room at its bottom and Run scrolls clear of it.
+  const rootRef = useRef(null);
+  const footerRef = useRef(null);
+  useEffect(() => {
+    const root = rootRef.current;
+    const footer = footerRef.current;
+    if (!root || !footer || typeof ResizeObserver === 'undefined') return undefined;
+    const update = () => root.style.setProperty('--lp-footer-h', `${Math.ceil(footer.getBoundingClientRect().height)}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(footer);
+    return () => ro.disconnect();
+  }, [data.error, total]);
+
   // The heading of a screen that has just entered takes focus as it mounts; the previous
   // screen is still fading out beside it (popLayout), inert, so focus cannot land on it.
   const headingRef = useCallback((el) => {
@@ -172,7 +186,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   const title = t(step.title.en, step.title.ro);
 
   return (
-    <div className="lp-root" data-testid="lesson-player">
+    <div className="lp-root" data-testid="lesson-player" ref={rootRef}>
       <div className="lp-top">
         <span className="lp-lesson-name">{t(data.course.meta.shortTitle.en, data.course.meta.shortTitle.ro)}</span>
         <span className="lp-count" aria-live="polite">{screen} / {total}</span>
@@ -208,7 +222,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
         </AnimatePresence>
       </div>
 
-      <div className="lp-footer">
+      <div className="lp-footer" ref={footerRef}>
         <button type="button" className="lp-btn lp-btn-ghost" data-testid="lesson-back" onClick={back} disabled={screen === 1}>
           <Arrow dir={-1} /><span>{t('Back', 'Înapoi')}</span>
         </button>

@@ -413,7 +413,7 @@ export default function SubjectPage({ sidebarOpen, setSidebarOpen }) {
             )}
 
             {tab === 'tests' && subject.tests && (
-              <TestsTab tests={subject.tests} courses={subject.courses} />
+              <TestsTab tests={subject.tests} courses={subject.courses} player={subject.player} />
             )}
           </main>
         </div>

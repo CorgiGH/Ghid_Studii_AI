@@ -11,7 +11,7 @@ import CodeTracingQuestion from './CodeTracingQuestion';
 import SqlQuestion from './SqlQuestion';
 import TestResults from './TestResults';
 import TestModeSelector from '../../ui/TestModeSelector';
-import { formatClock, showGroupStem, timerChoices, timerSeconds, totalScore } from './testLogic.js';
+import { FLUSH_CAP_MS, flushWithin, formatClock, showGroupStem, timeUpText, timerChoices, timerSeconds, totalScore } from './testLogic.js';
 
 const promptMarkdown = {
   // react-markdown v9+ no longer passes `inline` prop — detect via className
@@ -92,7 +92,7 @@ const questionComponents = {
   'sql': SqlQuestion,
 };
 
-function TimerChoice({ choices, lang, onSelect }) {
+function TimerChoice({ choices, lang, mode, onSelect }) {
   const ro = lang === 'ro';
   const options = [{ min: 0, label: ro ? 'Fără timer' : 'No timer' }, ...choices.map((m) => ({ min: m, label: `${m} min` }))];
   return (
@@ -101,7 +101,9 @@ function TimerChoice({ choices, lang, onSelect }) {
         {ro ? 'Vrei un timer?' : 'Do you want a timer?'}
       </h2>
       <p className="text-center mb-6 text-sm" style={{ color: 'var(--theme-muted-text)' }}>
-        {ro ? 'La 0 răspunsurile se predau singure (la întrebările pe hârtie te notezi tu). Poți alege și fără timer.' : 'At 0 your answers are handed in by themselves (you still score paper questions yourself). You can also go without one.'}
+        {mode === 'paper'
+          ? (ro ? 'La 0 răspunsurile se predau singure (la întrebările pe hârtie te notezi tu). Poți alege și fără timer.' : 'At 0 your answers are handed in by themselves (you still score paper questions yourself). You can also go without one.')
+          : (ro ? 'La 0 răspunsurile se predau singure. Poți alege și fără timer.' : 'At 0 your answers are handed in by themselves. You can also go without one.')}
       </p>
       <div className="flex flex-wrap justify-center gap-3">
         {options.map((o) => (
@@ -139,12 +141,14 @@ export default function TestRenderer({ src }) {
   const [screen, setScreen] = useState(0); // oneQuestionPerScreen: index of the question on show
   const [attemptId, setAttemptId] = useState(0); // bumped on retake / review-mistakes so child questions remount
   const attemptRef = useRef(0); // current attempt, so a flush from an old attempt cannot touch the new one
-  const [flushing, setFlushing] = useState(false); // time-up hand-in still grading; See Results waits for it
+  const [flushing, setFlushing] = useState(false); // time-up hand-in still grading; See Results waits for it (FLUSH_CAP_MS at most)
+  const closedRef = useRef(new Set()); // questions counted as not graded when the hand-in cap ran out: their late flush is ignored
   const bumpAttempt = () => {
     attemptRef.current += 1;
     setAttemptId(attemptRef.current);
     setFinishPending(false);
     setFlushing(false);
+    closedRef.current = new Set();
   };
 
   // Load test JSON
@@ -204,7 +208,9 @@ export default function TestRenderer({ src }) {
   }, [totalSeconds, showResults, testData]);
 
   // When the timer hits 0 every open question is handed in first (flush), so typed work is graded instead of scoring 0. A paper
-  // question that still needs the learner's own score keeps the test open (timeUp); everything else finishes the test.
+  // question that still needs the learner's own score keeps the test open (timeUp); everything else finishes the test. The wait is
+  // capped (a stalled fetch must not keep See Results locked): a question still grading at the cap counts as not graded (0 points)
+  // and See Results is available.
   const flushers = useRef(new Map());
   const registerFlush = useCallback((id, fn) => {
     flushers.current.set(id, fn);
@@ -216,14 +222,22 @@ export default function TestRenderer({ src }) {
     setFlushing(true);
     const mine = attemptRef.current;
     (async () => {
-      const outcomes = await Promise.all([...flushers.current.values()].map((fn) => fn().catch(() => 'done')));
+      const { outcomes, pending } = await flushWithin(flushers.current, FLUSH_CAP_MS);
       if (attemptRef.current !== mine) return; // retaken or reviewing meanwhile: drop this flush
       setFlushing(false);
-      if (!outcomes.includes('needs-score')) setFinishPending(true);
+      if (pending.length) {
+        closedRef.current = new Set(pending);
+        const points = Object.fromEntries((testData?.questions ?? []).map((q) => [q.id, q.points]));
+        setAnswers((prev) => ({ ...prev, ...Object.fromEntries(pending.map((id) => [id, { score: 0, maxScore: points[id] ?? 0, ungraded: true }])) }));
+        return; // the learner opens the results with See Results
+      }
+      if (!Object.values(outcomes).includes('needs-score')) setFinishPending(true);
     })();
-  }, [timeLeft, totalSeconds, showResults, timeUp]);
+  }, [timeLeft, totalSeconds, showResults, timeUp, testData]);
 
+  // A question closed at the hand-in cap keeps its "not graded" 0: only the learner's own paper score may still change it.
   const handleAnswer = useCallback((questionId, score, maxScore, meta) => {
+    if (closedRef.current.has(questionId) && !meta?.paper) return;
     setAnswers(prev => ({ ...prev, [questionId]: { score, maxScore, ...(meta || {}) } }));
   }, []);
 
@@ -258,7 +272,7 @@ export default function TestRenderer({ src }) {
 
   // The optional timer: asked once, after the mode, when the test offers one.
   if (testMode && testMode !== 'timed' && choices && timerMin === null && !reviewMode && testData && !loading) {
-    return <TimerChoice choices={choices} lang={lang} onSelect={setTimerMin} />;
+    return <TimerChoice choices={choices} lang={lang} mode={testMode} onSelect={setTimerMin} />;
   }
 
   if (loading) return (
@@ -450,8 +464,7 @@ export default function TestRenderer({ src }) {
       {/* Finish button / Results */}
       {timeUp && !showResults && (
         <p className="text-sm text-center mt-6" style={{ color: '#ef4444', fontWeight: 600 }} data-testid="test-time-up" role="status">
-          {t('Time is up. Your answers were handed in; score the paper questions yourself, then see the results.',
-            'Timpul a expirat. Răspunsurile au fost predate; notează-te singur la întrebările pe hârtie, apoi vezi rezultatele.')}
+          {t(timeUpText(testMode).en, timeUpText(testMode).ro)}
         </p>
       )}
       {!showResults && (
@@ -478,6 +491,7 @@ export default function TestRenderer({ src }) {
         <TestResults
           questions={questions}
           answers={answers}
+          total={totalScore(questions, answers)}
           totalPoints={reviewMode ? questions.reduce((sum, q) => sum + q.points, 0) : meta.totalPoints}
           onRetake={() => {
             setAnswers({});

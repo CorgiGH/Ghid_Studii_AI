@@ -87,10 +87,12 @@ describe('engine start failure', () => {
     await expect(client.run('SELECT 1 FROM dual', DS)).rejects.toMatchObject({ code: 'ENGINE_UNAVAILABLE' })
   })
 
-  it('a worker that never answers fails at the boot timeout', async () => {
+  it('a worker that never answers fails at the download limit', async () => {
     const mute = () => ({ onmessage: null, postMessage() {}, terminate() {} })
-    const client = createSqlClient({ createWorker: mute, bootTimeoutMs: 150 })
+    const client = createSqlClient({ createWorker: mute, bootTimeoutMs: 5000, downloadStallMs: 150 })
+    const t0 = Date.now()
     await expect(client.run('SELECT 1 FROM dual', DS)).rejects.toMatchObject({ code: 'ENGINE_UNAVAILABLE' })
+    expect(Date.now() - t0).toBeLessThan(2000)
     expect(client.status).toBe('failed')
   })
 
@@ -108,5 +110,90 @@ describe('lazy start', () => {
     expect(log).toEqual([])
     await client.describe('studenti', DS)
     expect(log).toEqual(['boot facultate'])
+  })
+})
+
+// A worker that only speaks the boot protocol: `script` lists what it posts after the boot message, as [delay ms, message] pairs
+// (message 'ready' answers the boot). Runs and resets answer at once.
+function scriptedWorker(script, log = []) {
+  return () => {
+    const w = { onmessage: null, onerror: null, terminated: false, terminate() { this.terminated = true } }
+    w.postMessage = (m) => {
+      if (m.op !== 'boot') { setTimeout(() => !w.terminated && w.onmessage?.({ data: { id: m.id, ok: true, result: { kind: 'rows', columns: [], rows: [] } } }), 0); return }
+      log.push('boot')
+      let at = 0
+      for (const [delay, msg] of script) {
+        at += delay
+        setTimeout(() => {
+          if (w.terminated) return
+          w.onmessage?.({ data: msg === 'ready' ? { id: m.id, ok: true, result: null } : { id: m.id, progress: msg } })
+        }, at)
+      }
+    }
+    return w
+  }
+}
+const bytes = (n) => ({ phase: 'download', received: n * 1000, total: 20000 })
+
+describe('engine start on a slow connection', () => {
+  it('a slow download followed by a fast start does not fail', async () => {
+    // 12 progress messages 60 ms apart (720 ms of download), far over the 200 ms start limit, then a quick start
+    const script = [...Array.from({ length: 12 }, (_, i) => [60, bytes(i + 1)]), [10, { phase: 'start' }], [40, 'ready']]
+    const client = createSqlClient({ createWorker: scriptedWorker(script), bootTimeoutMs: 200, downloadStallMs: 150 })
+    await client.run('SELECT 1 FROM dual', DS)
+    expect(client.status).toBe('ready')
+  })
+
+  it('a download that stops sending bytes fails at the download limit', async () => {
+    const client = createSqlClient({ createWorker: scriptedWorker([[30, bytes(1)], [30, bytes(2)]]), bootTimeoutMs: 5000, downloadStallMs: 150 })
+    const t0 = Date.now()
+    await expect(client.run('SELECT 1 FROM dual', DS)).rejects.toMatchObject({ code: 'ENGINE_UNAVAILABLE' })
+    expect(Date.now() - t0).toBeLessThan(1500)
+    expect(client.status).toBe('failed')
+  })
+
+  it('a start that hangs after the files are in fails at the start limit', async () => {
+    const client = createSqlClient({ createWorker: scriptedWorker([[20, bytes(1)], [20, { phase: 'start' }]]), bootTimeoutMs: 150, downloadStallMs: 5000 })
+    const t0 = Date.now()
+    await expect(client.run('SELECT 1 FROM dual', DS)).rejects.toMatchObject({ code: 'ENGINE_UNAVAILABLE' })
+    const took = Date.now() - t0
+    expect(took).toBeGreaterThanOrEqual(150)
+    expect(took).toBeLessThan(1500)
+    expect(client.status).toBe('failed')
+  })
+
+  it('retry() after a failure boots again', async () => {
+    const log = []
+    let n = 0
+    const failing = scriptedWorker([[20, { phase: 'start' }]], log) // never answers: fails at the start limit
+    const working = scriptedWorker([[20, { phase: 'start' }], [20, 'ready']], log)
+    const client = createSqlClient({ createWorker: () => (n++ === 0 ? failing() : working()), bootTimeoutMs: 100, downloadStallMs: 5000 })
+    const seen = []
+    client.onStatus((s) => seen.push(s))
+    await expect(client.run('SELECT 1 FROM dual', DS)).rejects.toMatchObject({ code: 'ENGINE_UNAVAILABLE' })
+    expect(client.status).toBe('failed')
+    expect(await client.retry()).toBe('ready')
+    expect(client.status).toBe('ready')
+    expect(log).toEqual(['boot', 'boot'])
+    expect(seen).toEqual(['loading', 'failed', 'loading', 'ready'])
+    await client.run('SELECT 1 FROM dual', DS)
+    // retry() when nothing failed changes nothing
+    expect(await client.retry()).toBe('ready')
+    expect(log).toEqual(['boot', 'boot'])
+  })
+})
+
+describe('the worker reports boot progress', () => {
+  it('attachEngine passes a progress callback to boot that posts { id, progress }', async () => {
+    const posted = []
+    const scope = { onmessage: null, postMessage: (m) => posted.push(m) }
+    attachEngine(scope, async (dataset, progress) => {
+      progress({ phase: 'download', received: 10, total: 20 })
+      progress({ phase: 'start' })
+      return { pg: new PGlite(), datasets: { [dataset]: facultate } }
+    })
+    await scope.onmessage({ data: { id: 7, op: 'boot', dataset: 'facultate' } })
+    expect(posted.slice(0, 2)).toEqual([{ id: 7, progress: { phase: 'download', received: 10, total: 20 } }, { id: 7, progress: { phase: 'start' } }])
+    expect(posted[2]).toEqual({ id: 7, ok: true, result: null })
   })
 })

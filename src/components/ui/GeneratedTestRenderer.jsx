@@ -6,6 +6,7 @@ import CodeWritingQuestion from '../blocks/test/CodeWritingQuestion';
 import DiagramQuestion from '../blocks/test/DiagramQuestion';
 import FillInQuestion from '../blocks/test/FillInQuestion';
 import TestResults from '../blocks/test/TestResults';
+import { totalScore } from '../blocks/test/testLogic.js';
 
 const questionComponents = {
   'multiple-choice': MultipleChoiceQuestion,
@@ -123,7 +124,7 @@ export default function GeneratedTestRenderer({ testData }) {
       )}
 
       {showResults && (
-        <TestResults questions={questions} answers={answers} totalPoints={meta.totalPoints} />
+        <TestResults questions={questions} answers={answers} total={totalScore(questions, answers)} totalPoints={meta.totalPoints} />
       )}
     </div>
   );

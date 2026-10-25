@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { validateMcq, validateReflect } from '../../src/components/lesson/blocks/choiceSpec.js';
-import { collectMcqPool, dueLabel, groupReview, itemTag, pickVariant, shuffled } from '../../src/lesson/review.js';
+import { collectMcqPool, dueLabel, groupReview, isPracticeOnly, itemTag, pickVariant, shuffled } from '../../src/lesson/review.js';
 import { fallbackTable, pickReflectTable, tableFromResult } from '../../src/components/lesson/blocks/reflectTable.js';
 import { createLessonStore } from '../../src/lesson/store.js';
 
@@ -129,15 +129,36 @@ describe('review pile: three right answers on three days', () => {
   it('a miss shows up, three right answers on later days remove it', () => {
     const st = createLessonStore(mem());
     const ref = { src: 'bd/courses/lesson-01.json', screen: 2 };
-    const t0 = Date.UTC(2026, 9, 26);
-    st.recordAttempt('q', { ok: false, hints: 0, kind: 'mcq', misconception: 't', ref, at: t0 });
-    expect(st.pendingReview(t0).map(i => i.itemId)).toEqual(['q']);
-    st.markReview('q', true, t0);
-    expect(st.pendingReview(t0 + DAY)[0].due).toBe(t0 + DAY);
-    st.markReview('q', true, t0 + DAY);
-    expect(st.pendingReview(t0 + DAY)[0].due).toBe(t0 + 4 * DAY);
-    st.markReview('q', true, t0 + 4 * DAY);
-    expect(st.pendingReview(t0 + 4 * DAY)).toEqual([]);
+    const day = (d, h = 0) => new Date(2026, 9, d, h, 0).getTime(); // local time: the schedule follows calendar days
+    st.recordAttempt('q', { ok: false, hints: 0, kind: 'mcq', misconception: 't', ref, at: day(26, 9) });
+    expect(st.pendingReview(day(26, 9)).map(i => i.itemId)).toEqual(['q']);
+    st.markReview('q', true, day(26, 9));
+    expect(st.pendingReview(day(27, 8))[0].due).toBe(day(27));
+    st.markReview('q', true, day(27, 8));
+    expect(st.pendingReview(day(27, 8))[0].due).toBe(day(30));
+    st.markReview('q', true, day(30, 23));
+    expect(st.pendingReview(day(30, 23))).toEqual([]);
+  });
+
+  it('a miss on Sunday 20:00 answered right at 21:00 is due on Monday morning, and that answer counts', () => {
+    const st = createLessonStore(mem());
+    const ref = { src: 'bd/courses/lesson-01.json', screen: 2 };
+    const sun20 = new Date(2026, 9, 25, 20, 0).getTime();
+    const sun21 = new Date(2026, 9, 25, 21, 0).getTime();
+    const mon8 = new Date(2026, 9, 26, 8, 0).getTime();
+    st.recordAttempt('q', { ok: false, hints: 0, kind: 'mcq', ref, at: sun20 });
+    st.markReview('q', true, sun21);
+    const [item] = st.pendingReview(sun21);
+    expect(dueLabel(item.due, sun21, 'ro')).toBe('mâine');
+    expect(isPracticeOnly(item, sun21)).toBe(true);
+    // Monday 08:00: the list says "azi", the badge counts it and a right answer moves it on
+    expect(dueLabel(item.due, mon8, 'ro')).toBe('azi');
+    expect(st.dueCount(mon8)).toBe(1);
+    expect(isPracticeOnly(item, mon8)).toBe(false);
+    st.markReview('q', true, mon8);
+    const after = st.pendingReview(mon8)[0];
+    expect(after.streak).toBe(2);
+    expect(dueLabel(after.due, mon8, 'ro')).toBe('în 3 zile');
   });
 });
 

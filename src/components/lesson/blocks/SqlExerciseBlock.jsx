@@ -5,6 +5,7 @@ import formatMarkdown from '../../blocks/formatMarkdown';
 import { useScreenGate } from '../ScreenGate';
 import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
+import { dueLabel, isPracticeOnly } from '../../../lesson/review.js';
 import { checkResult, runWithProbe } from '../../../sql/check.js';
 import { detectMistake } from '../../../sql/mistakes.js';
 import SqlEditor from '../SqlEditor.jsx';
@@ -12,7 +13,8 @@ import SchemaPanel from '../SchemaPanel.jsx';
 import DataPanel from '../DataPanel.jsx';
 import { useSqlClient } from './useSqlClient.js';
 import {
-  HINT_COUNT, attemptAction, canGrade, checkSpecOf, datasetFor, paperChecklist, restoreSqlState, revealFields, runOptions, slimVerdict, verdictView,
+  HINT_COUNT, attemptAction, attemptWrite, canGrade, checkSpecOf, datasetFor, hiddenNote, hintMarker, paperChecklist, restoreSqlState, revealFields,
+  runOptions, slimVerdict, verdictView,
 } from './sqlExerciseSpec.js';
 import { loadExpected } from './loadExpected.js';
 import { ExpectedTables, LiveStatus, Outcome, VerdictPanel } from './SqlOutcome.jsx';
@@ -30,8 +32,9 @@ const officialText = (o, t) => {
 };
 
 // Block JSON: see sqlExerciseSpec.js. Inside a lesson the first run (or the solution being shown) opens the screen's gate and
-// the first graded run is recorded. In the review tab (?variant=hidden) the query is graded on the hidden dataset and the answer
-// goes to store.markReview instead.
+// the first run of an edited query is recorded (a run of the unedited starter only shows its result). In the review tab
+// (?variant=hidden) the query is graded on the hidden dataset and the answer goes to store.markReview instead. In paper mode (the
+// engine did not load) the gate opens when the self-check is saved.
 export default function SqlExerciseBlock(block) {
   const { id, prompt, official, starter, solution, hints: hintTexts, explain } = block;
   const { t } = useApp();
@@ -55,11 +58,15 @@ export default function SqlExerciseBlock(block) {
   // A paper hand-in made before a reload comes back submitted (and settled, when the check was saved); its expected tables load below.
   const [paper, setPaper] = useState({ submitted: restored?.paper === true, expected: null, ticks: {}, done: restored?.paperDone === true });
   const paperOwned = useRef(restored?.paper === true); // the stored attempt was made by a paper hand-in
+  const [reviewNote, setReviewNote] = useState(null); // review variant: the schedule line after an answer that was only practice
+  const actionsRef = useRef(null);
+  const checklistRef = useRef(null);
 
   const textRef = useRef(text);
   const hintsRef = useRef(hints);
   const busyRef = useRef(false);
   const attempted = useRef(restored !== null); // an attempt of this block is in the store
+  const unscored = useRef(restored?.unscored === true); // that attempt has no verdict yet (the first graded run replaces it)
   const marked = useRef(false); // hidden variant: the review answer was given
   useEffect(() => { textRef.current = text; }, [text]);
   useEffect(() => { hintsRef.current = hints; }, [hints]);
@@ -67,29 +74,48 @@ export default function SqlExerciseBlock(block) {
   const paperMode = status === 'failed';
   const record = !hidden && !!ref;
 
-  // Start the engine as the screen opens (a dataset switch reboots the worker, so only this block's dataset is asked for).
+  // Start the engine as the screen opens (a dataset switch reboots the worker, so only this block's dataset is asked for). A screen
+  // that opens while the engine is in the failed state tries it once more (a slow connection may have caught up).
+  const retried = useRef(false);
   useEffect(() => {
-    if (client && status !== 'failed') client.reset({ dataset }).catch(() => {});
+    if (!client) return;
+    if (status !== 'failed') client.reset({ dataset }).catch(() => {});
+    else if (!retried.current) {
+      retried.current = true;
+      client.retry().then((s) => { if (s === 'ready') client.reset({ dataset }).catch(() => {}); });
+    }
   }, [client, dataset]); // eslint-disable-line react-hooks/exhaustive-deps
+  const retryEngine = () => {
+    if (!client) return;
+    client.retry().then((s) => { if (s === 'ready') client.reset({ dataset }).catch(() => {}); });
+  };
 
   const persist = useCallback((patch) => {
     if (record && attempted.current) store.updateLastAttempt(id, patch);
   }, [record, store, id]);
 
-  // Carries out what attemptAction decided (the rule lives in sqlExerciseSpec.js and is tested there).
-  const apply = useCallback((action, fields = {}) => {
+  // Carries out what attemptAction decided (the rule and the written fields live in sqlExerciseSpec.js and are tested there).
+  // `fields` go into a new record (and into an update only when the action keeps the run); `extra` goes into either.
+  const apply = useCallback((action, fields = {}, extra = {}) => {
     if (action.owns) paperOwned.current = true;
     if (action.type === 'markReview') {
       marked.current = true;
-      store.markReview(id, action.ok, nowMs());
-    } else if (action.type === 'record') {
+      const at = nowMs();
+      const before = store.pendingReview(at).find((i) => i.itemId === id);
+      const practice = action.ok && isPracticeOnly(before, at);
+      store.markReview(id, action.ok, at);
+      setReviewNote(practice ? { due: before.due, at } : null);
+      return;
+    }
+    const w = attemptWrite(action, { item: id, ref, at: nowMs(), hints: hintsRef.current, fields, extra });
+    if (!w) return;
+    if (w.method === 'recordAttempt') {
       attempted.current = true;
-      store.recordAttempt(id, {
-        ok: action.ok, hints: hintsRef.current, kind: 'sql', item: id, ref, at: nowMs(), done: true, revealed: false,
-        ...(action.unscored ? { unscored: true } : {}), ...fields,
-      });
-    } else if (action.type === 'update') {
-      store.updateLastAttempt(id, { hints: hintsRef.current, ...fields, ...(action.set ?? {}) });
+      unscored.current = w.data.unscored === true;
+      store.recordAttempt(id, w.data);
+    } else {
+      if (w.data.unscored === false) unscored.current = false;
+      store.updateLastAttempt(id, w.data);
     }
   }, [store, id, ref]);
 
@@ -132,7 +158,10 @@ export default function SqlExerciseBlock(block) {
       // The first run is the attempt. A run that ended in an ORA error or a not-Oracle verdict counts as a failed one, so it reaches
       // the review pile and survives a reload. A run with no verdict at all (expected file missing, grader threw) is stored as an
       // unscored done marker: it keeps the screen unlocked after a reload and does not enqueue a review item.
-      const action = attemptAction({ hidden, record, attempted: attempted.current, marked: marked.current, verdict, silent, event: 'run' });
+      const action = attemptAction({
+        hidden, record, attempted: attempted.current, attemptUnscored: unscored.current, marked: marked.current, verdict, silent, event: 'run',
+        edited: sql.trim() !== (starter ?? '').trim(),
+      });
       apply(action, { sql, verdict: verdict ? slimVerdict(verdict) : null, mistake, misconception: mistake, ran: true });
     } catch (e) {
       if (e?.code === 'CANCELLED') return;
@@ -143,14 +172,14 @@ export default function SqlExerciseBlock(block) {
         : t(`The query could not be run (${e?.message ?? e}).`, `Interogarea nu a putut fi rulată (${e?.message ?? e}).`));
       if (!silent) {
         complete();
-        apply(attemptAction({ hidden, record, attempted: attempted.current, marked: marked.current, silent, event: 'fault' }),
+        apply(attemptAction({ hidden, record, attempted: attempted.current, marked: marked.current, silent, event: 'fault', edited: sql.trim() !== (starter ?? '').trim() }),
           { sql, verdict: null, ran: false });
       }
     } finally {
       busyRef.current = false;
       setBusy(false);
     }
-  }, [client, block, hidden, id, dataset, spec, record, apply, complete, t]);
+  }, [client, block, hidden, id, dataset, spec, record, apply, complete, t, starter]);
 
   // A restored block runs its stored query once more (nothing is recorded) so the result table is back next to the verdict.
   const reran = useRef(false);
@@ -160,33 +189,53 @@ export default function SqlExerciseBlock(block) {
     execute({ silent: true });
   }, [client, restored, paperMode, execute]);
 
+  // The third hint puts the exercise in the review pile: before any attempt as a hint-only marker (it keeps the gate shut, and the
+  // first graded run replaces it), after one by enqueueing the item (an entry already there keeps its schedule).
   const openHint = () => {
     const n = Math.min(HINT_COUNT, hints + 1);
     setHints(n);
     hintsRef.current = n;
+    if (record && n >= HINT_COUNT && !attempted.current) {
+      attempted.current = true;
+      unscored.current = true;
+      store.recordAttempt(id, hintMarker({ item: id, ref, at: nowMs() }));
+      return;
+    }
     persist({ hints: n });
+    if (record && n >= HINT_COUNT) store.enqueueReview(id, { ref, kind: 'sql', at: nowMs() });
   };
+
+  // Keeps Run clear of the sticky footer while the learner types.
+  const showActions = () => actionsRef.current?.scrollIntoView({ block: 'nearest' });
 
   const showSolution = () => {
     if (revealed) return;
     setRevealed(true);
     complete();
-    apply(attemptAction({ hidden, record, attempted: attempted.current, marked: marked.current, event: 'reveal' }),
-      revealFields(attempted.current, textRef.current));
+    apply(attemptAction({ hidden, record, attempted: attempted.current, attemptUnscored: unscored.current, marked: marked.current, event: 'reveal' }),
+      revealFields(attempted.current && !unscored.current, textRef.current));
   };
 
   // Paper mode: the engine is not available, so the learner works on paper and hands in to compare with the expected answer.
-  // The gate opens at hand-in; the self-check decides the result (every point ticked = right) when the learner confirms it.
+  // "Predă" shows the expected answer and the self-check; the gate opens when the check is saved (every point ticked = right).
+  // With nothing to tick (the expected answer could not be loaded) the hand-in settles at once as an unscored, done attempt.
   const submitPaper = async () => {
     let expected = null;
     try { expected = await loadExpected(id, dataset); } catch { expected = null; }
-    setPaper((p) => ({ ...p, submitted: true, expected }));
-    complete();
-    apply(attemptAction({ hidden, record, attempted: attempted.current, marked: marked.current, event: 'paper-submit', revealed }),
-      { verdict: null, paper: true, ran: false });
+    const empty = paperChecklist(block, expected).length === 0;
+    setPaper((p) => ({ ...p, submitted: true, expected, done: empty }));
+    apply(attemptAction({ hidden, record, attempted: attempted.current, attemptUnscored: unscored.current, marked: marked.current, event: 'paper-submit', revealed, paperEmpty: empty }),
+      { verdict: null, paper: true, ran: false, ...(empty ? { paperDone: true } : {}) });
+    if (empty) complete();
   };
+  // the self-check appears below the fold: bring it (and its Save button) into view
+  useEffect(() => {
+    if (!paper.submitted || paper.done || restored?.paper) return;
+    const still = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    checklistRef.current?.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
+  }, [paper.submitted, paper.done, paper.expected, restored]);
 
-  // Restored hand-in: bring the expected tables back (a settled check shows its points ticked when it counted as right).
+  // Restored hand-in: bring the expected tables back, with the points that were ticked when the check was saved.
   const paperLoaded = useRef(false);
   useEffect(() => {
     if (!paperMode || !restored?.paper || paperLoaded.current) return;
@@ -195,7 +244,10 @@ export default function SqlExerciseBlock(block) {
       let expected = null;
       try { expected = await loadExpected(id, dataset); } catch { expected = null; }
       const items = paperChecklist(block, expected);
-      setPaper((p) => ({ ...p, expected, ticks: restored.ok ? Object.fromEntries(items.map((_, i) => [i, true])) : p.ticks }));
+      const saved = restored.ticks
+        ? Object.fromEntries(restored.ticks.filter((i) => i < items.length).map((i) => [i, true]))
+        : (restored.paperDone && restored.ok ? Object.fromEntries(items.map((_, i) => [i, true])) : null);
+      setPaper((p) => ({ ...p, expected, ticks: saved ?? p.ticks }));
     })();
   }, [paperMode, restored, id, dataset, block]);
 
@@ -204,8 +256,10 @@ export default function SqlExerciseBlock(block) {
   const finishPaper = () => {
     if (paper.done) return;
     setPaper((p) => ({ ...p, done: true }));
+    const ticks = checklist.map((_, i) => i).filter((i) => paper.ticks[i]);
     apply(attemptAction({ hidden, record, attempted: attempted.current, marked: marked.current, event: 'paper-done', paperOk, revealed, paperOwned: paperOwned.current }),
-      { verdict: null, paper: true, ran: false, paperDone: true });
+      { verdict: null, paper: true, ran: false, paperDone: true }, { ticks });
+    complete();
   };
 
   const verdict = outcome ? outcome.verdict : restored?.verdict ?? null;
@@ -229,9 +283,7 @@ export default function SqlExerciseBlock(block) {
       {official && <p className="sx-official">{officialText(official, t)}</p>}
       <Html as="p" className="sx-prompt" text={t(prompt.en, prompt.ro)} />
       {hidden && (
-        <p className="sx-hidden-note" data-testid="sql-hidden-note">
-          {t('Different rows than in the lesson: your query has to work on any data.', 'Rânduri diferite față de lecție: interogarea trebuie să meargă pe orice date.')}
-        </p>
+        <p className="sx-hidden-note" data-testid="sql-hidden-note">{t(hiddenNote(block).en, hiddenNote(block).ro)}</p>
       )}
 
       <SchemaPanel dataset={dataset} client={client} ready={status === 'ready'} version={version} />
@@ -240,8 +292,10 @@ export default function SqlExerciseBlock(block) {
       {paperMode ? (
         <div className="sx-paper">
           <p className="sx-muted" data-testid="sql-paper-note">
-            {t('The SQL engine is not available here, so this exercise works on paper: write the query on a sheet, then hand it in and compare it with the expected answer.',
-              'Motorul SQL nu este disponibil aici, deci exercițiul se face pe hârtie: scrie interogarea pe o foaie, apoi predă și compară-o cu răspunsul cerut.')}
+            {t('The SQL engine has not loaded yet (slow connection?). Meanwhile this exercise works on paper: write the query on a sheet, then hand it in and compare it with the expected answer.',
+              'Motorul SQL nu s-a încărcat încă (conexiune lentă?). Până atunci, exercițiul se face pe hârtie: scrie interogarea pe o foaie, apoi predă și compară-o cu răspunsul cerut.')}
+            {' '}
+            <button type="button" className="sx-btn" data-testid="sql-engine-retry" onClick={retryEngine} disabled={!client}>{t('Try again', 'Încearcă din nou')}</button>
           </p>
           <textarea className="sx-paper-text" readOnly value={starter ?? ''} rows={Math.min(8, Math.max(3, (starter ?? '').split('\n').length))}
             aria-label={t('Starting text (read only)', 'Text de pornire (doar citire)')} />
@@ -257,7 +311,7 @@ export default function SqlExerciseBlock(block) {
               <pre className="sx-code"><code>{solution}</code></pre>
               <Html as="p" className="sx-explain" text={t(explain.en, explain.ro)} />
               {checklist.length > 0 && (
-                <>
+                <div className="sx-paper-check" ref={checklistRef}>
                   <p className="sx-muted">{t('Tick what your answer has right. Everything ticked counts as a correct answer.', 'Bifează ce are răspunsul tău corect. Dacă bifezi tot, răspunsul se socotește corect.')}</p>
                   <ul className="sx-checklist" data-testid="sql-checklist">
                     {checklist.map((c, i) => (
@@ -275,15 +329,15 @@ export default function SqlExerciseBlock(block) {
                       {paper.done ? t('Saved', 'Salvat') : t('Save my check', 'Salvează bifele')}
                     </button>
                   </div>
-                </>
+                </div>
               )}
             </div>
           )}
         </div>
       ) : (
         <>
-          <SqlEditor value={text} onChange={setText} onRun={execute} label={t('SQL query', 'Interogare SQL')} />
-          <div className="sx-actions">
+          <SqlEditor value={text} onChange={setText} onRun={execute} onFocus={showActions} label={t('SQL query', 'Interogare SQL')} />
+          <div className="sx-actions" ref={actionsRef}>
             <button type="button" className="sx-btn primary" data-testid="sql-run" onClick={() => execute()} disabled={busy || !client || !text.trim()} aria-busy={busy}>
               {busy ? t('Running…', 'Se rulează…') : t('Run', 'Rulează')}
               {!busy && <kbd className="sx-kbd" aria-hidden="true">Ctrl+Enter</kbd>}
@@ -306,6 +360,12 @@ export default function SqlExerciseBlock(block) {
       <div className="sx-live">
         {note && <p className="sx-note" data-testid="sql-note">{note}</p>}
         {verdict && <VerdictPanel verdict={verdict} mistake={mistake} hidden={hidden} t={t} />}
+        {hidden && reviewNote && (
+          <p className="sx-muted" data-testid="sql-review-practice">
+            {t(`It was not due yet, so this was practice and the schedule did not change. It comes back ${dueLabel(reviewNote.due, reviewNote.at, 'en')}.`,
+              `Încă nu venise vremea, deci a fost doar exercițiu și programul nu s-a schimbat. Revine ${dueLabel(reviewNote.due, reviewNote.at, 'ro')}.`)}
+          </p>
+        )}
         {outcome && <Outcome block={block} outcome={outcome} t={t} />}
       </div>
 

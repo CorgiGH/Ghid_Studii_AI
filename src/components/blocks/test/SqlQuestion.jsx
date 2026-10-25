@@ -130,7 +130,7 @@ export default function SqlQuestion({ question, onAnswer, suppressFeedback = fal
       setGraded({ score, parts: done.out });
       onAnswer?.(question.id, score, question.points, { sql: texts0 });
     } else {
-      setGraded({ score: 0, parts: {} });
+      setGraded({ score: 0, parts: {}, ungraded: true });
       onAnswer?.(question.id, 0, question.points, { sql: texts0, ungraded: true });
     }
     return 'done';
@@ -279,6 +279,7 @@ export default function SqlQuestion({ question, onAnswer, suppressFeedback = fal
       {locked && !suppressFeedback && (
         <>
           <p className="sx-verdict-head" data-testid="sql-score">{graded.score} / {question.points} {t('points', 'puncte')}</p>
+          {graded.ungraded && <p className="sx-note" data-testid="sql-ungraded">{t('This answer could not be graded.', 'Răspunsul nu a putut fi evaluat.')}</p>}
           {solutions}
         </>
       )}
