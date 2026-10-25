@@ -26,7 +26,7 @@ const SPEC = {
   'date-mask': { date: (v) => DATE.test(v), masks: strs },
   'age-timeline': { birth: (v) => DATE.test(v), today: (v) => DATETIME.test(v) },
   'decode-sieve': { expr: isStr, pairs: (v) => isArr(v) && v.every(p => Array.isArray(p) && p.length === 2 && isStr(p[1])), default: optional(isStr), values: isArr },
-  'type-pipes': { conversions: (v) => isArr(v) && v.every(c => c && isStr(c.from) && isStr(c.to) && isStr(c.value) && isStr(c.fn)) },
+  'type-pipes': { conversions: (v) => isArr(v) && v.every(c => c && isStr(c.from) && isStr(c.to) && isStr(c.value) && isStr(c.fn) && (c.say === undefined || isBi(c.say))) },
   'cartesian-grid': { left: isStr, right: isStr, on: isStr },
   'join-wires': { left: isStr, right: isStr, on: isStr, kind: oneOf('inner', 'left', 'right', 'full'), filterIn: optional(oneOf('on', 'where')), filter: optional(isStr) },
   'self-pairs': { table: isStr, pairOn: isStr, order: oneOf('<>', '<') },

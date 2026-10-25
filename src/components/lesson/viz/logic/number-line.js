@@ -53,3 +53,11 @@ export function reachableStep(to, { n, predict = false, shown = {} }) {
   }
   return Math.min(Math.max(0, to), cap);
 }
+
+// The line under the axes once the answers are shown: what the struck red mark and the green mark mean.
+// `verdicts` holds, for each line the learner picked a mark on, whether the pick was right. Null when nothing was picked.
+export function guessLegend(verdicts) {
+  if (!verdicts.length) return null;
+  if (verdicts.some(v => !v)) return { en: 'Struck red = your guess; green = the result.', ro: 'Roșu tăiat = ghicirea ta; verde = rezultatul.' };
+  return { en: 'Green = the result, right where you guessed.', ro: 'Verde = rezultatul, exact unde ai ghicit.' };
+}

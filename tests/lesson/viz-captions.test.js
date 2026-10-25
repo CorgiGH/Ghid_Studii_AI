@@ -160,3 +160,75 @@ describe('in-between: the condition is printed as valid SQL', () => {
     expect(inCaption('between', bp, 250, inBetween('between', bp, 250)).ro).toBe('250 e între 250 și 350 (capetele contează): adevărat, rândul e ales.');
   });
 });
+
+import { guessLegend } from '../../src/components/lesson/viz/logic/number-line.js';
+import { formatDate, maskStep, maskStepCount, maskCaption, hasPadding } from '../../src/components/lesson/viz/logic/date-mask.js';
+import { ageArcCalls, ageCaptions, ageLabels, ageParts, monthsBetween } from '../../src/components/lesson/viz/logic/age-timeline.js';
+import { pipeCaption } from '../../src/components/lesson/viz/logic/type-pipes.js';
+import { decodeSieve, decodeCall, decodeCaption } from '../../src/components/lesson/viz/logic/decode-sieve.js';
+
+describe('number-line: the marks after a guess have a legend', () => {
+  it('explains the struck red mark after a wrong guess', () => {
+    expect(guessLegend([true, false]).ro).toBe('Roșu tăiat = ghicirea ta; verde = rezultatul.');
+    expect(guessLegend([true]).ro).toBe('Verde = rezultatul, exact unde ai ghicit.');
+    expect(guessLegend([])).toBeNull();
+  });
+});
+
+describe('date-mask: each mask is asked, then shown, with its own caption', () => {
+  it('two steps per mask after the intro', () => {
+    expect(maskStepCount(6)).toBe(13);
+    expect([0, 1, 2, 3, 12].map(maskStep)).toEqual([
+      { kind: 'intro', index: -1 }, { kind: 'ask', index: 0 }, { kind: 'show', index: 0 }, { kind: 'ask', index: 1 }, { kind: 'show', index: 5 },
+    ]);
+  });
+  it('Day counts its padding in the dotted boxes; fm says it only stops the padding', () => {
+    const day = formatDate('1995-02-17', 'Day');
+    expect(maskCaption(day, 'show').ro).toBe("TO_CHAR(data, 'Day') scrie numele zilei și îl completează cu spații până la 9 caractere. Fiecare pătrățel punctat este un spațiu: Friday are 6 litere, deci primește 3 spații.");
+    expect(maskCaption(formatDate('1995-02-17', 'fmDay'), 'show').ro).toBe('fm nu scrie nimic din dată: doar oprește completarea cu spații, deci iese Friday fără cele 3 spații de la sfârșit.');
+    expect(maskCaption(formatDate('1995-02-17', 'Month'), 'show').ro).toContain('February are 8 litere, deci primește 1 spațiu.');
+    expect(maskCaption(formatDate('1995-02-17', 'DD-MON-YY'), 'show').ro).toBe("TO_CHAR(data, 'DD-MON-YY'): DD → 17, MON → FEB, YY → 95; celelalte caractere (-) rămân cum sunt.");
+    expect(maskCaption(day, 'ask').ro).toBe("TO_CHAR(data, 'Day'): ce iese? Gândește-te, apoi apasă «Mai departe».");
+    expect(hasPadding(day.text)).toBe(true);
+    expect(hasPadding('Friday')).toBe(false);
+  });
+});
+
+describe('age-timeline: real SQL over the boxes, Romanian counts', () => {
+  const props = { birth: '1995-02-17', today: '2026-10-26 14:30' };
+  const months = monthsBetween(props.today, props.birth);
+  const parts = ageParts(props, months);
+  it('the box calls carry the whole months once they are known', () => {
+    expect(ageArcCalls(parts, false).y.ro).toBe('TRUNC(luni / 12)');
+    const c = ageArcCalls(parts, true);
+    expect([c.y.ro, c.m.ro, c.d.ro]).toEqual(['TRUNC(380 / 12)', 'MOD(380, 12)', 'TRUNC(SYSDATE) - ADD_MONTHS(data_nastere, 380)']);
+    expect(JSON.stringify(c)).not.toMatch(/today|…/);
+  });
+  it('says 380 de luni and 31 de ani', () => {
+    const caps = ageCaptions(ageLabels(props, parts), parts, months);
+    expect(caps[2].ro).toBe('Prima casetă: 380 de luni fac 31 de ani împliniți (372 de luni). O zi de naștere care nu a venit încă nu se numără.');
+    expect(caps[4].ro).toBe('A treia casetă: ADD_MONTHS(data_nastere, 380) este 17-OCT-26. De acolo până azi sunt 9 zile. Vârsta: 31 de ani, 8 luni, 9 zile.');
+  });
+});
+
+describe('type-pipes: each pipe says what it converts', () => {
+  it('uses the lesson sentence, and falls back to the plain fact', () => {
+    const c = { from: 'VARCHAR2', to: 'NUMBER', value: "'12'", fn: "'12' * 2", say: { en: "'12' becomes the number 12, then 12 * 2 = 24.", ro: "'12' devine numărul 12, apoi 12 * 2 = 24." } };
+    expect(pipeCaption(c).ro).toBe("'12' devine numărul 12, apoi 12 * 2 = 24. Nu ai scris nicio conversie; a făcut-o Oracle.");
+    expect(pipeCaption({ ...c, say: undefined }).ro).toBe("VARCHAR2 devine NUMBER în '12' * 2. Nu ai scris nicio conversie; a făcut-o Oracle.");
+  });
+});
+
+describe('decode-sieve: a NULL drawer and no default', () => {
+  const props = { expr: 'bursa', pairs: [[450, 'premiul 1'], [350, 'premiul 2'], [250, 'premiul 3'], [null, 'mentiune']], values: [450, 350, 250, 300, null] };
+  const D = decodeSieve(props);
+  it('300 falls through to NULL, NULL is caught by the NULL drawer', () => {
+    expect(D.routes.map(r => r.result)).toEqual(['premiul 1', 'premiul 2', 'premiul 3', null, 'mentiune']);
+    expect(decodeCall(props)).toBe("DECODE(bursa, 450, 'premiul 1', 350, 'premiul 2', 250, 'premiul 3', NULL, 'mentiune')");
+  });
+  it('captions speak of drawers (sertare), never layers', () => {
+    expect(decodeCaption(props, D.routes[3], null).ro).toBe('300 nu e egal cu niciun sertar, deci cade jos și iese NULL, fiindcă nu s-a dat o valoare implicită.');
+    expect(decodeCaption(props, D.routes[4], 'mentiune').ro).toBe('NULL e oprit de sertarul 4 (NULL): mentiune. În DECODE, NULL e egal cu NULL, spre deosebire de =.');
+    expect(decodeCaption(props, null, null).ro).not.toMatch(/strat/);
+  });
+});
