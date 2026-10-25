@@ -14,13 +14,13 @@ import DataPanel from '../DataPanel.jsx';
 import { useSqlClient } from './useSqlClient.js';
 import {
   HINT_COUNT, attemptAction, attemptWrite, canGrade, checkSpecOf, datasetFor, hiddenNote, hintMarker, paperChecklist, restoreSqlState, revealFields,
-  runOptions, slimVerdict, verdictView,
+  runOptions, slimVerdict, usesDatasetTables, verdictView,
 } from './sqlExerciseSpec.js';
 import { loadExpected } from './loadExpected.js';
 import { ExpectedTables, LiveStatus, Outcome, VerdictPanel } from './SqlOutcome.jsx';
 
-const Html = ({ as = 'span', className, text }) => (
-  React.createElement(as, { className, dangerouslySetInnerHTML: { __html: formatMarkdown(text) } })
+const Html = ({ as = 'span', className, text, testid }) => (
+  React.createElement(as, { className, 'data-testid': testid, dangerouslySetInnerHTML: { __html: formatMarkdown(text) } })
 );
 
 const officialText = (o, t) => {
@@ -132,7 +132,10 @@ export default function SqlExerciseBlock(block) {
       await client.reset({ dataset });
       let result;
       let snapshot = null;
+      let before = null;
       if (block.kind === 'state') {
+        // the tables as they were, so the result can point at the rows the script added or changed
+        try { before = await client.snapshot({ dataset, tables: block.check.tables }); } catch { before = null; }
         result = await client.run(sql, opts);
         snapshot = await client.snapshot({ dataset, tables: block.check.tables });
       } else {
@@ -151,7 +154,7 @@ export default function SqlExerciseBlock(block) {
       } else {
         setNote(t('The expected answer could not be loaded, so the result is shown without a verdict.', 'Răspunsul cerut nu a putut fi încărcat, deci rezultatul apare fără verdict.'));
       }
-      setOutcome({ result, snapshot, verdict, mistake, expected });
+      setOutcome({ result, snapshot, verdict, mistake, expected, before });
       setVersion((v) => v + 1);
       if (silent) return;
       complete();
@@ -286,7 +289,7 @@ export default function SqlExerciseBlock(block) {
         <p className="sx-hidden-note" data-testid="sql-hidden-note">{t(hiddenNote(block).en, hiddenNote(block).ro)}</p>
       )}
 
-      <SchemaPanel dataset={dataset} client={client} ready={status === 'ready'} version={version} />
+      {usesDatasetTables(block) && <SchemaPanel dataset={dataset} client={client} ready={status === 'ready'} version={version} />}
       {hidden && <DataPanel dataset={dataset} />}
 
       {paperMode ? (
@@ -360,6 +363,8 @@ export default function SqlExerciseBlock(block) {
       <div className="sx-live">
         {note && <p className="sx-note" data-testid="sql-note">{note}</p>}
         {verdict && <VerdictPanel verdict={verdict} mistake={mistake} hidden={hidden} t={t} />}
+        {/* a right answer gets the explanation too: it says what the lesson's rows cannot show (a bound no row hits, a tie) */}
+        {verdict?.ok && !hidden && !revealed && explain && <Html as="p" className="sx-explain" testid="sql-explain-ok" text={t(explain.en, explain.ro)} />}
         {hidden && reviewNote && (
           <p className="sx-muted" data-testid="sql-review-practice">
             {t(`It was not due yet, so this was practice and the schedule did not change. It comes back ${dueLabel(reviewNote.due, reviewNote.at, 'en')}.`,

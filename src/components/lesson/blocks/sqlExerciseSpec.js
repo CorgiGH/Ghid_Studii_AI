@@ -13,6 +13,15 @@ export const SCHEMA_TABLES = {
   facultate: ['studenti', 'cursuri', 'note', 'profesori', 'didactic'],
   biblioteca: ['cititori', 'carti', 'autori', 'scris', 'imprumuturi'],
 };
+// Does a solution read any table of its dataset? One that works only on DUAL (the exercise says not to use the faculty's
+// tables) gets no "Tables" drawer.
+export function usesDatasetTables(b) {
+  const names = SCHEMA_TABLES[String(b?.dataset ?? '').replace(/-hidden$/, '')] ?? [];
+  const sql = [b?.solution, ...(b?.altSolutions ?? [])].filter(Boolean).join('\n').toLowerCase();
+  if (!sql) return true;
+  return names.some((n) => new RegExp(`\\b${n.toLowerCase()}\\b`).test(sql));
+}
+
 export const HINT_COUNT = 3;
 
 const isStr = (v) => typeof v === 'string' && v.trim().length > 0;
@@ -143,6 +152,39 @@ export function markRows(rows, list) {
     left.set(k, n - 1);
     return true;
   });
+}
+
+// A table after a script, shown in a steady order: by its first column (numbers by value, NULL last), then by the next ones.
+// The engine hands an updated row back at the end of its table, which reads as if the row had been deleted.
+const cellOrder = (a, b) => {
+  if (a === b) return 0;
+  if (a === null || a === undefined) return 1;
+  if (b === null || b === undefined) return -1;
+  const x = String(a).trim();
+  const y = String(b).trim();
+  if (x !== '' && y !== '' && Number.isFinite(Number(x)) && Number.isFinite(Number(y))) return Number(x) - Number(y);
+  return x.localeCompare(y, 'ro', { numeric: true });
+};
+export function sortRows(rows) {
+  return (rows ?? []).map((r, i) => [r, i]).sort(([x, i], [y, j]) => {
+    for (let k = 0; k < Math.max(x.length, y.length); k++) {
+      const c = cellOrder(x[k], y[k]);
+      if (c) return c;
+    }
+    return i - j;
+  }).map(([r]) => r);
+}
+
+// The rows a script added or changed: those not found (whole rows, counted) among the rows the table had before it ran.
+// undefined when the table did not exist before (a new table: every row is new, nothing to point at).
+export function changedRows(rows, before) {
+  if (!before || before.error || !Array.isArray(before.rows)) return undefined;
+  return markRows(rows, before.rows).map((found) => !found);
+}
+
+// A table's columns the way DESCRIBE lists them: name, type, NOT NULL.
+export function describeRows(describe) {
+  return (describe ?? []).map((c) => [c.name, c.type, c.nullable ? '' : 'NOT NULL']);
 }
 
 // A script's statements for the list under the editor.

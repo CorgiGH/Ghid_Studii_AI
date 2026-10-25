@@ -28,7 +28,7 @@ export default function SchemaPanel({ dataset, client, ready, version = 0 }) {
 
   return (
     <details className="sx-schema" open={open} onToggle={(e) => { const o = e.currentTarget.open; setOpen(o); if (o) setFailed(false); }} data-testid="sql-schema">
-      <summary>{t('Tables', 'Tabelele')}</summary>
+      <summary>{t('Tables (tap to see their columns)', 'Tabelele (apasă ca să vezi coloanele)')}</summary>
       {open && tables === null && !failed && <p className="sx-muted">{t('Loading…', 'Se încarcă…')}</p>}
       {open && failed && (
         <p className="sx-muted" data-testid="sql-schema-error">

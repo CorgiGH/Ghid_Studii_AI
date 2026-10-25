@@ -3,11 +3,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import { useSqlRunner } from '../viz/useSqlRunner.js';
-import { MiniTable } from '../viz/ui.jsx';
+import { displayCell } from '../viz/logic/date-mask.js';
+import ResultTable from '../ResultTable.jsx';
 import { pickReflectTable, tableFromResult } from './reflectTable.js';
 
-// The small result table a reflect prompt is about: the engine when it is up, else a plain fallback.
+// The small result table a question is about: the plain fallback at once (a cold load would otherwise show the question with
+// no table while the engine starts), then the engine's own result once it answers.
 function OneTable({ dataset, sql, caption }) {
+  const { t } = useApp();
   const runner = useSqlRunner();
   const [fromEngine, setFromEngine] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -21,14 +24,13 @@ function OneTable({ dataset, sql, caption }) {
       .catch(() => { if (live) setFailed(true); });
     return () => { live = false; };
   }, [runner, sql, dataset]);
-  // Nothing while the engine is loading, so the table never visibly swaps; the plain fallback
-  // only when the engine is not there at all or its run failed.
-  const table = useMemo(
-    () => pickReflectTable({ fromEngine, unavailable: runner.status === 'unavailable' || failed, sql }),
-    [fromEngine, runner.status, failed, sql],
-  );
-  if (!table) return null;
-  return <div className="viz ch-table"><MiniTable caption={caption ? <b>{caption}</b> : undefined} columns={table.columns} rows={table.rows} maxHeight="14rem" /></div>;
+  const table = useMemo(() => pickReflectTable({ fromEngine, sql }), [fromEngine, sql]);
+  if (!table) {
+    if (runner.status === 'unavailable' || failed) return null;
+    return <p className="ch-table-wait" data-testid="question-table-wait">{t('Loading the table…', 'Se încarcă tabelul…')}</p>;
+  }
+  const rows = table.rows.map((r) => table.columns.map((c) => (r[c] === null || r[c] === undefined ? null : displayCell(r[c]))));
+  return <div className="ch-table" data-testid="question-table"><ResultTable title={caption || undefined} columns={table.columns} rows={rows} /></div>;
 }
 
 export default function QuestionTables({ table }) {

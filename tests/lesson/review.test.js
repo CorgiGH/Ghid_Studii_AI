@@ -221,8 +221,11 @@ describe('reflect table fallback', () => {
 
 describe('pickReflectTable', () => {
   const sql = 'SELECT nume FROM studenti';
-  it('shows nothing while the engine loads', () => {
-    expect(pickReflectTable({ fromEngine: null, unavailable: false, sql })).toBeNull();
+  it('shows the plain fallback while the engine loads (a cold load never shows a question without its table)', () => {
+    expect(pickReflectTable({ fromEngine: null, unavailable: false, sql }).columns).toEqual(['NUME']);
+  });
+  it('shows nothing only when the fallback cannot read the SQL', () => {
+    expect(pickReflectTable({ fromEngine: null, unavailable: false, sql: 'SELECT ROUND(bursa) FROM studenti' })).toBeNull();
   });
   it('falls back when the engine is unavailable or its run failed', () => {
     expect(pickReflectTable({ fromEngine: null, unavailable: true, sql }).columns).toEqual(['NUME']);

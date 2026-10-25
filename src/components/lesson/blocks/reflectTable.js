@@ -51,8 +51,8 @@ export function tableFromResult(res) {
   return { columns: res.columns, rows: (res.rows || []).map(r => Object.fromEntries(res.columns.map((c, i) => [c, r[i] ?? null]))) };
 }
 
-// Which table a reflect block shows: the engine's when it answered, the plain fallback when the
-// engine is unavailable or failed, nothing while it is still loading.
-export function pickReflectTable({ fromEngine, unavailable, sql }) {
-  return fromEngine || (unavailable ? fallbackTable(sql) : null);
+// Which table a question shows: the engine's when it answered, else the plain fallback (while the engine is still loading as
+// well, so a cold load never shows a question about a table that is not there). null only when the fallback cannot read the SQL.
+export function pickReflectTable({ fromEngine, sql }) {
+  return fromEngine || fallbackTable(sql);
 }
