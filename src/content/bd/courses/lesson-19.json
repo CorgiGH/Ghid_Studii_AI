@@ -34,16 +34,16 @@
             "ro": "Ce tabele legi și ce observi?"
           },
           "answer": {
-            "en": "The chain is `note` → `cursuri` (to find the course «BD») → `didactic` (who teaches the course) → `profesori` (the names). Courses 21 (Logica) and 24 (BD) each have two professors, so every grade at them appears twice: the schema links professors to courses, not to grades, so you cannot tell which of the two gave a particular grade. The students with a 10 at BD are Antonie Ioana and Panaite Alexandru.",
-            "ro": "Lanțul este `note` → `cursuri` (ca să găsești cursul «BD») → `didactic` (cine predă cursul) → `profesori` (numele). Cursurile 21 (Logica) și 24 (BD) au câte doi profesori, așa că fiecare notă de la ele apare de două ori: schema leagă profesorii de curs, nu de notă, deci nu se poate ști care dintre cei doi a pus o notă anume. Studenții cu 10 la BD sunt Antonie Ioana și Panaite Alexandru."
+            "en": "The chain is `note` → `cursuri` (to find the course «BD») → `didactic` (who teaches the course) → `profesori` (the names). In the table, courses 21 (Logica) and 24 (BD) each have two professors, so every grade at them appears twice in the chain. For BD you get two professors, Breaban and Varlan: the schema links professors to courses, not to grades, so you cannot tell which of the two gave a particular 10.",
+            "ro": "Lanțul este `note` → `cursuri` (ca să găsești cursul «BD») → `didactic` (cine predă cursul) → `profesori` (numele). În tabel, cursurile 21 (Logica) și 24 (BD) au câte doi profesori, așa că fiecare notă de la ele apare de două ori în lanț. Pentru BD ies doi profesori, Breaban și Varlan: schema leagă profesorii de curs, nu de notă, deci nu se poate ști care dintre cei doi a pus un 10 anume."
           },
           "table": {
             "caption": {
-              "en": "The cursuri and didactic tables, linked (course, title, professor)",
-              "ro": "Tabelele cursuri și didactic, legate (curs, titlu, profesor)"
+              "en": "The cursuri, didactic and profesori tables, linked (course, title, professor code and name)",
+              "ro": "Tabelele cursuri, didactic și profesori, legate (curs, titlu, codul și numele profesorului)"
             },
             "dataset": "facultate",
-            "sql": "SELECT c.id_curs, c.titlu_curs, d.id_prof FROM cursuri c JOIN didactic d ON c.id_curs = d.id_curs ORDER BY c.id_curs"
+            "sql": "SELECT c.id_curs, c.titlu_curs, d.id_prof, p.nume FROM cursuri c JOIN didactic d ON c.id_curs = d.id_curs JOIN profesori p ON p.id_prof = d.id_prof ORDER BY c.id_curs, d.id_prof"
           }
         }
       ]
@@ -101,10 +101,10 @@
             }
           ],
           "show": [
-            "s.nume",
             "c.titlu_curs",
             "n.valoare",
-            "p.nume"
+            "p.nume",
+            "s.nume"
           ],
           "say": {
             "from": {
@@ -116,14 +116,14 @@
               "ro": "Cele patru `JOIN`-uri se aplică pe rând. Lanțul pornește de la 42 de note, dar întoarce 56 de rânduri: cele 9 note de la Logica și cele 5 de la BD apar fiecare de două ori, pentru că acele cursuri au doi profesori (42 + 9 + 5 = 56)."
             },
             "where": {
-              "en": "10 rows stay: the 5 BD grades, each next to both professors of the course.",
-              "ro": "Rămân 10 rânduri: cele 5 note de la BD, fiecare lângă amândoi profesorii cursului."
+              "en": "10 rows stay: the 5 BD grades, each next to both professors of the course, Breaban and Varlan.",
+              "ro": "Rămân 10 rânduri: cele 5 note de la BD, fiecare lângă amândoi profesorii cursului, Breaban și Varlan."
             }
           },
           "ask": {
             "where": {
-              "en": "Which of the 56 rows have the course `BD`? There are 5 grades × 2 professors.",
-              "ro": "Care dintre cele 56 de rânduri au cursul `BD`? Sunt 5 note × 2 profesori."
+              "en": "Which of the 56 rows have the course `BD`? Scroll through the table to find them.",
+              "ro": "Care dintre cele 56 de rânduri au cursul `BD`? Derulează în tabel până la ele."
             }
           }
         }
@@ -145,11 +145,19 @@
           }
         },
         {
-          "type": "callout",
-          "variant": "trap",
+          "type": "code",
+          "language": "sql",
+          "code": "-- NATURAL JOIN: leagă singur după coloanele cu același nume\nSELECT nume, prenume, valoare\nFROM studenti NATURAL JOIN note;"
+        },
+        {
+          "type": "definition",
+          "term": {
+            "en": "NATURAL JOIN",
+            "ro": "NATURAL JOIN"
+          },
           "content": {
-            "en": "**`NATURAL JOIN` links on ALL the columns with the same name.** `studenti NATURAL JOIN note` uses only `nr_matricol` (the only shared column) and gives 42 rows. But `studenti NATURAL JOIN note NATURAL JOIN cursuri` gives 0 rows: `cursuri` shares with the result so far both `id_curs` and `an`, and the student's year does not match the course's year.",
-            "ro": "**`NATURAL JOIN` leagă după TOATE coloanele cu același nume.** `studenti NATURAL JOIN note` folosește doar `nr_matricol` (singura coloană comună) și dă 42 de rânduri. Dar `studenti NATURAL JOIN note NATURAL JOIN cursuri` dă 0 rânduri: `cursuri` are în comun cu rezultatul de până acum și `id_curs`, și `an`, iar anul studentului nu coincide cu anul cursului."
+            "en": "A join that automatically uses all columns with the same name in the two tables, as equalities joined by `AND`. Useful only when you know exactly which columns share a name.",
+            "ro": "Un join care folosește automat toate coloanele cu același nume din cele două tabele, ca egalități legate prin `AND`. Util doar când știi exact ce coloane au numele comun."
           }
         }
       ]
@@ -165,8 +173,8 @@
           "type": "callout",
           "variant": "trap",
           "content": {
-            "en": "**A `NATURAL JOIN` column takes no prefix.** `SELECT s.nr_matricol FROM studenti s NATURAL JOIN note n` gives `ORA-25155: column used in NATURAL join cannot have qualifier`. Write `SELECT nr_matricol …`, without `s.`. By contrast, with `JOIN … ON` the prefix is mandatory.",
-            "ro": "**Coloana unui `NATURAL JOIN` nu primește prefix.** `SELECT s.nr_matricol FROM studenti s NATURAL JOIN note n` dă `ORA-25155: column used in NATURAL join cannot have qualifier`. Scrie `SELECT nr_matricol …`, fără `s.`. Invers, la `JOIN … ON` prefixul este obligatoriu."
+            "en": "**A `NATURAL JOIN` column takes no prefix.** `SELECT s.nr_matricol FROM studenti s NATURAL JOIN note n` gives `ORA-25155: column used in NATURAL join cannot have qualifier`. Write `SELECT nr_matricol …`, without `s.`. By contrast, with `JOIN … ON` a column that exists in both tables (here `nr_matricol`) needs the prefix; `nume` or `valoare` work without one.",
+            "ro": "**Coloana unui `NATURAL JOIN` nu primește prefix.** `SELECT s.nr_matricol FROM studenti s NATURAL JOIN note n` dă `ORA-25155: column used in NATURAL join cannot have qualifier`. Scrie `SELECT nr_matricol …`, fără `s.`. Invers, la `JOIN … ON` o coloană care există în ambele tabele (aici `nr_matricol`) cere prefixul; `nume` sau `valoare` merg și fără."
           }
         },
         {
@@ -192,11 +200,6 @@
           "code": "SELECT n.valoare, c.titlu_curs, d.id_prof\nFROM note n\n  JOIN cursuri c ON c.id_curs = n.id_curs\n  JOIN didactic d ON d.id_curs = c.id_curs;"
         },
         {
-          "type": "code",
-          "language": "sql",
-          "code": "-- NATURAL JOIN: leagă singur după coloanele cu același nume\nSELECT nume, prenume, valoare\nFROM studenti NATURAL JOIN note;"
-        },
-        {
           "type": "definition",
           "term": {
             "en": "Chain of JOINs",
@@ -217,17 +220,6 @@
             "en": "A table that exists only to link two others, here `didactic` (professor ↔ course). If a course appears twice in it, its rows are doubled in the result.",
             "ro": "Un tabel care există doar ca să lege alte două, aici `didactic` (profesor ↔ curs). Dacă un curs apare de două ori în el, rândurile lui se dublează în rezultat."
           }
-        },
-        {
-          "type": "definition",
-          "term": {
-            "en": "NATURAL JOIN",
-            "ro": "NATURAL JOIN"
-          },
-          "content": {
-            "en": "A join that automatically uses all columns with the same name in the two tables, as equalities joined by `AND`. Useful only when you know exactly which columns share a name.",
-            "ro": "Un join care folosește automat toate coloanele cu același nume din cele două tabele, ca egalități legate prin `AND`. Util doar când știi exact ce coloane au numele comun."
-          }
         }
       ]
     },
@@ -242,41 +234,25 @@
           "type": "reflect",
           "id": "bd-l19-r2",
           "prompt": {
-            "en": "`studenti NATURAL JOIN note NATURAL JOIN cursuri` returns 0 rows, although a correctly written `JOIN … ON` chain on the same three tables gives 42. Why?",
-            "ro": "`studenti NATURAL JOIN note NATURAL JOIN cursuri` întoarce 0 rânduri, deși un lanț cu `JOIN … ON` corect pe aceleași trei tabele dă 42. De ce?"
+            "en": "`studenti NATURAL JOIN note NATURAL JOIN cursuri` returns 0 rows, although a correctly written `JOIN … ON` chain on the same three tables gives 42. Why? In the table below, compare the columns `an_student` and `an_curs`.",
+            "ro": "`studenti NATURAL JOIN note NATURAL JOIN cursuri` întoarce 0 rânduri, deși un lanț cu `JOIN … ON` corect pe aceleași trei tabele dă 42. De ce? În tabelul de mai jos, compară coloanele `an_student` și `an_curs`."
           },
           "placeholder": {
             "en": "Explain in your own words",
             "ro": "Explică în cuvintele tale"
           },
           "answer": {
-            "en": "The second `NATURAL JOIN` links on all columns with the same name. Besides `id_curs`, both `studenti` and `cursuri` have a column `an`, so the condition becomes «same course AND same year». Here `an` in `studenti` (the student's year) does not match `an` in `cursuri` (the year the course is taught) on any row that also has the matching grade, so nothing is left. With `ON` you choose the exact equalities. That the result is 0 depends on our data; what matters is that `NATURAL JOIN` silently adds a condition you did not write.",
-            "ro": "Al doilea `NATURAL JOIN` leagă după toate coloanele cu același nume. Pe lângă `id_curs`, și `studenti`, și `cursuri` au o coloană `an`, deci condiția devine «același curs ȘI același an». Aici `an` din `studenti` (anul în care e studentul) nu coincide cu `an` din `cursuri` (anul în care se predă) pe niciun rând care are și nota potrivită, așa că nu rămâne nimic. Cu `ON` alegi tu exact egalitățile. Faptul că rezultatul este 0 ține de datele noastre; important e că `NATURAL JOIN` adaugă în tăcere o condiție pe care n-ai scris-o."
+            "en": "The second `NATURAL JOIN` links on all columns with the same name. Besides `id_curs`, both `studenti` and `cursuri` have a column `an`, so the condition becomes «same course AND same year». Here `an` in `studenti` (the student's year) never matches `an` in `cursuri` (the year the course is taught): the table shows that year-3 students have grades only at courses of years 1 and 2, and year-2 students only at year-1 courses, so nothing is left. With `ON` you choose the exact equalities. That the result is 0 depends on our data; what matters is that `NATURAL JOIN` silently adds a condition you did not write.",
+            "ro": "Al doilea `NATURAL JOIN` leagă după toate coloanele cu același nume. Pe lângă `id_curs`, și `studenti`, și `cursuri` au o coloană `an`, deci condiția devine «același curs ȘI același an». Aici `an` din `studenti` (anul în care e studentul) nu coincide niciodată cu `an` din `cursuri` (anul în care se predă): tabelul arată că studenții din anul 3 au note doar la cursuri din anii 1 și 2, iar cei din anul 2 doar la cursuri din anul 1, așa că nu rămâne nimic. Cu `ON` alegi tu exact egalitățile. Faptul că rezultatul este 0 ține de datele noastre; important e că `NATURAL JOIN` adaugă în tăcere o condiție pe care n-ai scris-o."
           },
           "table": [
             {
               "caption": {
-                "en": "The studenti table (all rows)",
-                "ro": "Tabelul studenti (toate rândurile)"
+                "en": "For the 42 grades: the student's year (an in studenti) and the course's year (an in cursuri), each pair once",
+                "ro": "Pentru cele 42 de note: anul studentului (an din studenti) și anul cursului (an din cursuri), fiecare pereche o dată"
               },
               "dataset": "facultate",
-              "sql": "SELECT nr_matricol, nume, an FROM studenti ORDER BY nr_matricol"
-            },
-            {
-              "caption": {
-                "en": "The cursuri table (all rows)",
-                "ro": "Tabelul cursuri (toate rândurile)"
-              },
-              "dataset": "facultate",
-              "sql": "SELECT id_curs, titlu_curs, an FROM cursuri ORDER BY id_curs"
-            },
-            {
-              "caption": {
-                "en": "The note table (all 42 rows)",
-                "ro": "Tabelul note (toate cele 42 de rânduri)"
-              },
-              "dataset": "facultate",
-              "sql": "SELECT nr_matricol, id_curs, valoare FROM note ORDER BY nr_matricol, id_curs"
+              "sql": "SELECT DISTINCT s.an AS an_student, c.an AS an_curs FROM studenti s JOIN note n ON s.nr_matricol = n.nr_matricol JOIN cursuri c ON c.id_curs = n.id_curs ORDER BY an_student DESC, an_curs"
             }
           ]
         }
