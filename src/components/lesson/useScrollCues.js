@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // What a scroll box hides right now: `right` when there are columns past the right edge the reader has not scrolled to,
 // `below` / `above` the number of rows (matched by `rowSelector`) wholly under the visible part or above it (behind the
 // sticky header matched by `headSelector`, too). Re-measured on scroll, on a resize of the box or its content, and whenever
-// `deps` change.
+// `deps` change (pass values, not arrays rebuilt on every render).
 export function hiddenRowsBelow(boxBottom, rowRects) {
   return rowRects.filter((r) => r.top >= boxBottom - 2).length;
 }
@@ -31,7 +31,8 @@ export function useScrollCues(ref, rowSelector, deps = [], headSelector = null) 
       }
       setCues((p) => (p.right === right && p.below === below && p.above === above && p.scrolls === (wide || tall) ? p : { right, below, above, scrolls: wide || tall }));
     };
-    measure();
+    // Measured on the next frame, never inside the commit: a keystroke in the editor re-renders the result tables, and a
+    // state change made synchronously here would chain into the keystroke's own synchronous update.
     const raf = requestAnimationFrame(measure);
     const late = setTimeout(measure, 450); // after the rows' entrance animation
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;

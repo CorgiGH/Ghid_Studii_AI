@@ -18,7 +18,9 @@ export default function ResultTable({ title, columns, rows, rowCount, truncated 
   const total = rowCount ?? rows.length;
   const capped = !tableFitsWhole(rows.length);
   const boxRef = useRef(null);
-  const cues = useScrollCues(boxRef, 'tbody tr', [rows, columns, capped], 'thead');
+  // the parent rebuilds `rows` on every render (sorted, mapped), so the effects key on what the table holds, not the array
+  const shape = `${rows.length}|${columns.join('\u0001')}|${rows.length ? rows[0].length : 0}`;
+  const cues = useScrollCues(boxRef, 'tbody tr', [shape, capped], 'thead');
   const unit = countLabel
     ? (total === 1 ? countLabel.one : countLabel)
     : (total === 1 ? { en: 'row', ro: 'rând' } : { en: 'rows', ro: 'rânduri' });
@@ -34,7 +36,7 @@ export default function ResultTable({ title, columns, rows, rowCount, truncated 
     if (!tr) return;
     const top = tr.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - (head ? head.offsetHeight : 0) - 4;
     if (top < box.scrollTop || top + tr.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = Math.max(0, top);
-  }, [capped, firstTint, rows]);
+  }, [capped, firstTint, shape]);
   return (
     <figure className="sx-table" data-testid="sql-result-table">
       {title && <figcaption className="sx-table-title">{title}</figcaption>}
