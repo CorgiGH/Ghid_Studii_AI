@@ -20,8 +20,8 @@ BrowserRouter with `basename={import.meta.env.BASE_URL}` (see `src/main.jsx`). U
 GitHub Pages doesn't natively support SPA deep-link refresh. `public/404.html` (rafgraf SPA shim) catches unknown paths and rewrites them into `/?/<path>` query strings; a decode block in `index.html` runs before BrowserRouter mounts and `replaceState`s the URL back to the real path. A second block in `index.html` handles legacy `/#/<path>` bookmarks (HashRouter holdovers from before 2026-04-27) and rewrites them to the BrowserRouter form.
 
 ### Key files
-- `src/main.jsx` — Entry: HashRouter + AppProvider wrapping
-- `src/App.jsx` — Routes shell (~20 lines)
+- `src/main.jsx` — Entry: ErrorBoundary > BrowserRouter (basename from `BASE_URL`, i.e. `/Ghid_Studii_AI/`) > AppProvider
+- `src/App.jsx` — Routes shell: `/` Home, `/:yearSem/:subject/*` SubjectPage
 - `src/contexts/AppContext.jsx` — All shared state: `dark`, `lang`, `palette`, `search`, `checked`, plus `t(en, ro)` helper, `toggleCheck()`, `highlight()`
 - `src/hooks/useLocalStorage.js` — Persist state to localStorage
 - `src/content/registry.js` — Master index of all subjects and year/semesters
@@ -105,7 +105,7 @@ GitHub Pages doesn't natively support SPA deep-link refresh. `public/404.html` (
 - `Section` — Collapsible section with checkbox (props: title, id, checked, onCheck)
 - `CourseBlock` — Course-level collapsible container (themed with CSS vars)
 - `MultipleChoice` — Multiple choice quiz with answer checking
-- `CodeEditor` — CodeMirror 6 wrapper with C syntax highlighting and dark mode
+- `CodeEditor` — Plain `<textarea>` (Tab inserts 2 spaces; props `value`, `onChange`, `readOnly`), no CodeMirror
 - `CodeChallenge` — Interactive coding problem: editor + Judge0 API execution + answer checking
 - `V86Terminal` — Real Linux terminal via v86 x86 emulator (boots Buildroot Linux in browser, ~7MB)
 - `TerminalChallenge` — Unified terminal exercise component: v86 for practice, serial-exec for auto-check
@@ -125,11 +125,49 @@ GitHub Pages doesn't natively support SPA deep-link refresh. `public/404.html` (
 - Used by `CodeChallenge` component for "Run" button
 - Status codes: 3=Accepted, 6=Compilation Error, 11=Runtime Error, 5=Time Limit
 
-## Current subjects (Year 1, Semester 2)
+## Current subjects (see `src/content/registry.js`)
+Year 1, Semester 2 (`y1s2`):
 - **os** — Operating Systems (11 courses, fully populated with bilingual content + practice problems)
 - **prob-stat** — Probabilities & Statistics (placeholder)
-- **alo** — Linear Algebra & Optimization (placeholder)
-- **pa** — Algorithm Design / Proiectarea Algoritmilor (placeholder)
+- **alo** — Linear Algebra & Optimization
+- **pa** — Algorithm Design / Proiectarea Algoritmilor
+- **oop** — Object-Oriented Programming
+
+Year 2, Semester 1 (`y2s1`):
+- **bd** — Databases (Baze de date), SQL on Oracle 11g, labs 1-4. Lesson-player subject (next section).
+
+## Lesson-player subjects (bd)
+- A subject with `player: 'lesson'` (see `src/content/bd/index.js`; consumed in `src/content/registry.js` consumers such as `src/pages/SubjectPage.jsx`, `BottomTabBar.jsx`, `TestsTab.jsx`) uses `src/components/lesson/LessonPlayer.jsx` instead of the course renderer: one screen per step, URL `/y2s1/bd/course_N?s=K` (`?s=` kept in sync with `replace`). Logic is in `playerLogic.js`; a Review tab (Recapitulare) is `ReviewTab.jsx`.
+- Lessons are `src/content/bd/courses/lesson-NN.json` (`bd-lNN`; `01a/b/c` are the DDL/DML detours); entries in `src/content/bd/index.js`. They are eagerly globbed, so the main JS chunk is about 5.7 MB uncompressed.
+- Lesson block types (renderers in `src/components/lesson/blocks/`, schemas in `scripts/validate-course-json.mjs`): `sql-exercise` (graded; `official: {lab, ex}` marks the lab exercises), `query-machine` (step through query evaluation), `viz` (widgets in `src/components/lesson/viz/`), `reflect` (reveal an answer), `mcq`, plus the usual `learn`/`callout`/`code`/`think`... blocks.
+- Progress and review: `src/lesson/` (`store.js` one versioned localStorage blob `bdLessonState.v1`: positions, attempts, review pile; `review.js` due items, gaps of 1 and 3 days; `clock.js` the only wall-clock read; `useLessonStore.js`, `restore.js`).
+- Mock test: `src/content/bd/tests/mock-l1.json` (`bd-mock-l1`), validated by `scripts/validate-test-json.mjs`, rendered by `src/components/blocks/test/` (`TestRenderer.jsx`, `SqlQuestion.jsx` question type `sql`, grading in `sqlGrading.js`/`sqlScoring.js`).
+- Design spec: `docs/superpowers/specs/2026-10-24-bd-lessons-design.md` (section 8 is the SQL engine and its measured numbers).
+
+## In-browser SQL engine (`src/sql/`)
+- `engine/`: PGlite (Postgres in WASM) in a Web Worker (`worker.js`, `client.js` page-side API, `core.js` the engine, `script.js` statement splitter, `errors.js`, `format.js`). Starts from a prebuilt data dir; boot > 20 s or failure sets status `failed` and lessons fall back to paper mode. PGlite ignores `statement_timeout`, so the client enforces a 60 s run limit by killing and rebooting the worker (a TIMEOUT, then the next run is correct). `maxRows` trims only after the whole result is in memory.
+- `compat/*.sql`: Oracle-compat layer (dates, char, numbers, formats, NLS, strings, DDL) installed into Postgres. `rewrite/`: text passes that turn Oracle SQL into Postgres SQL (`index.js` order, `pass-*.js`: outer-join `(+)`, set ops, DECODE, empty-string, clock, ...). `rewrite/lint.js`: Oracle 11g strictness, answers with the ORA code 11g gives (LIMIT, ILIKE, `::`, 3-arg CONCAT, ...), runs on the learner's original text.
+- `check.js`: result checker (verdicts: correct / values / order ...; query and state exercises). `mistakes.js`: named Oracle mistakes (`eq-null`, `char-trim`, `and-or`, ...) detected from the wrong answer. `machine*.js`, `explain.js`: query-machine specs and views.
+- Fixed clock `2026-10-26 14:30:00` for SYSDATE/CURRENT_DATE; an exercise may carry its own `clock`.
+- Datasets in `public/sql/datasets/{facultate,facultate-hidden,biblioteca,biblioteca-hidden}.sql`; prebuilt data dirs `public/sql/datadir-*.tar.gz` come from `scripts/sql/build-datadirs.mjs`, run by the `prebuild` npm script (so `npm run build` rebuilds them). Each graded item has a visible and a hidden dataset.
+- Expected answers: `public/sql/expected/<id>.<dataset>.json`, frozen from real Oracle. Never hand-edit; re-freeze.
+- Tests: `tests/sql/` (vitest); `differential.test.js` compares the engine to `tests/sql/oracle-snapshot.json`; documented engine gaps live in `tests/sql/known-gaps.json` (a listed gap that now passes fails the test: delete the entry).
+
+## Oracle reference workflow (dev only, never shipped)
+- Real Oracle XE 11g runs as container `oraxe11` in rootless Docker (`DOCKER_HOST` defaults to `unix:///run/user/1000/docker.sock` in `scripts/sql/oracle.mjs`); the Docker daemon must be running. User STUDENT; its password is in `~/.config/bd-oracle.env` (`ORA_STUDENT_PW`). Load it with `set -a; . ~/.config/bd-oracle.env; set +a`. Never print or copy the value.
+- Freeze answers: `node scripts/sql/freeze-expected.mjs --content src/content/bd [--only id1,id2]`. It runs each solution on Oracle for both datasets, writes `public/sql/expected/`, then checks the engine matches (non-zero exit on mismatch: the engine is what is wrong).
+- Differential corpus: `tests/sql/corpus/*.json` -> `node scripts/sql/snapshot-oracle.mjs` writes `tests/sql/oracle-snapshot.json` (committed; CI never talks to Oracle). There is no `--check` flag; the check is the vitest differential test.
+
+## BD scripts (`scripts/sql/`)
+- `coverage.mjs` — every official lab exercise (labs 1-4) appears exactly once in the lessons; non-zero otherwise.
+- `text-sweep.mjs` — scans learner-facing text for pedagogy labels, English words in Romanian strings, and official-page mistakes.
+- `walk-lessons.mjs` — headless-Chrome walk of every screen of every lesson at 390 and 1280 px against `vite preview`: answers each block, runs a correct and a named wrong answer, checks overflow/console errors. Flags: `--lessons`, `--widths`, `--jobs`, `--port` (default 4180), `--out`, `--no-build`. On this machine run with `PUPPETEER_EXECUTABLE_PATH=/etc/profiles/per-user/alexa/bin/google-chrome-stable`.
+- `wrong-answers.mjs` — picks one named wrong answer per exercise for the walk (from `named-mistakes.json`).
+- `build-datadirs.mjs` — builds `public/sql/datadir-*.tar.gz` (the `prebuild` script).
+- `freeze-expected.mjs` — freezes expected answers from Oracle (above).
+- `snapshot-oracle.mjs` — freezes the differential corpus from Oracle (above).
+- `measure-browser.mjs` — boot/query/memory numbers of the engine in headless Chrome (spec section 8).
+- Helpers: `freeze-lib.mjs`, `mistakes-lib.mjs`, `oracle.mjs`, `oracle-datasets.mjs`, `named-mistakes.json`, `measure-harness/`.
 
 ## Build & deploy
 ```bash
