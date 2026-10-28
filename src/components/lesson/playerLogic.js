@@ -1,6 +1,6 @@
 // Pure helpers for the lesson player (no React), so they can be tested in node.
 
-const GATING_TYPES = new Set(['reflect', 'mcq', 'sql-exercise']);
+const GATING_TYPES = new Set(['reflect', 'mcq', 'sql-exercise', 'calc-exercise']);
 
 export function screenFromUrl(search, total) {
   const max = Math.max(1, total | 0);
@@ -33,6 +33,7 @@ export function gatingKind(step) {
   if (!b) return 'reflect';
   if (b.type === 'mcq') return 'mcq';
   if (b.type === 'sql-exercise') return 'sql';
+  if (b.type === 'calc-exercise') return 'calc';
   if (b.type === 'reflect') return 'reflect';
   return 'predict';
 }
@@ -67,11 +68,12 @@ export function skipAttempt(step, src, screen, at) {
 
 // Gate state rebuilt from stored attempts for this screen, so an answered screen stays
 // unlocked after a reload. A sql screen needs a right answer, a run or reveal the block
-// marked `done` (its gate opens on the first run), or a skip; other kinds count any answer,
-// because their gate opens on the first answer.
+// marked `done` (its gate opens on the first run), or a skip; a calc screen needs a right
+// answer or a reveal (`done`), because a wrong check leaves it shut; other kinds count any
+// answer, because their gate opens on the first answer.
 export function seedGate(step, attempts) {
   if (!isGatingScreen(step) || !Array.isArray(attempts) || attempts.length === 0) return undefined;
-  const sql = gatingKind(step) === 'sql';
+  const sql = gatingKind(step) === 'sql' || gatingKind(step) === 'calc';
   if (attempts.some(a => a.skipped)) return { skipped: true };
   if (attempts.some(a => (sql ? a.ok === true || a.done === true : true))) return { completed: true };
   return undefined;

@@ -5,13 +5,23 @@ import { useApp } from '../../contexts/AppContext';
 import { loadJson } from '../../content/jsonLoader';
 import formatMarkdown from '../blocks/formatMarkdown';
 import McqBlock from './blocks/McqBlock.jsx';
+import CalcExerciseBlock from './blocks/CalcExerciseBlock.jsx';
 import { useLessonStore } from '../../lesson/useLessonStore';
 import { nowMs } from '../../lesson/clock.js';
 import { pendingReviewFor } from '../../lesson/subjectScope.js';
-import { collectMcqPool, dueLabel, furthestVisited, groupReview, isPracticeOnly, pickVariant } from '../../lesson/review.js';
+import {
+  applyReviewAnswer, collectCalcPool, collectMcqPool, dueLabel, furthestVisited, groupReview, pickCalcVariant, pickVariant,
+} from '../../lesson/review.js';
 
 function readLesson(src) {
   try { return loadJson(src); } catch { return null; }
+}
+
+// The question of a review card: a multiple-choice one or a calculation exercise with new numbers. Neither records an attempt;
+// the first answer goes to onAnswer.
+export function ReviewQuestion({ block, onAnswer }) {
+  if (block.type === 'calc-exercise') return <CalcExerciseBlock {...block} record={false} onAnswer={onAnswer} />;
+  return <McqBlock id={block.id} question={block.question} table={block.table} options={block.options} record={false} onAnswer={onAnswer} />;
 }
 
 // Recapitulare: everything the learner missed and has not yet answered right three times.
@@ -28,6 +38,7 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
     [subject],
   );
   const pool = useMemo(() => collectMcqPool(lessons.filter(l => l.course)), [lessons]);
+  const calcPool = useMemo(() => collectCalcPool(lessons.filter(l => l.course)), [lessons]);
   const bySrc = useMemo(() => Object.fromEntries(lessons.map(l => [l.src, l])), [lessons]);
 
   const now = nowMs();
@@ -37,7 +48,8 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
     const l = bySrc[src];
     return l ? t(l.meta.shortTitle.en, l.meta.shortTitle.ro) : src;
   };
-  const originalOf = (item) => pool.find(p => p.id === item.itemId) || null;
+  const originalOf = (item) => pool.find(p => p.id === item.itemId) || calcPool.find(p => p.id === item.itemId) || null;
+  const questionOf = (orig) => orig.block.question || orig.block.statement;
 
   const openLesson = (item, hidden) => {
     const l = bySrc[item.ref?.src];
@@ -52,13 +64,19 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
       furthestVisited(lessons.map(l => l.src), src => store.hasPosition(src)),
       bySrc[item.ref?.src]?.index ?? -1,
     );
-    const v = pickVariant(item, pool, { avoid: seen.current[item.itemId] || [], upTo });
-    if (v) seen.current[item.itemId] = [...(seen.current[item.itemId] || []), v.entry.id];
+    const avoid = seen.current[item.itemId] || [];
+    if (item.kind === 'calc') {
+      const c = pickCalcVariant(item, calcPool, { avoid });
+      if (c) seen.current[item.itemId] = [...avoid, c.variant];
+      return c;
+    }
+    const v = pickVariant(item, pool, { avoid, upTo });
+    if (v) seen.current[item.itemId] = [...avoid, v.entry.id];
     return v;
-  }, [pool, lessons, bySrc, store]);
+  }, [pool, calcPool, lessons, bySrc, store]);
 
   const start = (item) => {
-    if (item.kind === 'mcq') {
+    if (item.kind === 'mcq' || item.kind === 'calc') {
       const variant = variantFor(item);
       if (variant) { setActive({ item, variant, key: 0, result: null }); return; }
     }
@@ -66,12 +84,8 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
   };
 
   const onAnswer = (item) => ({ ok }) => {
-    const at = nowMs();
-    const before = store.pendingReview(at).find(i => i.itemId === item.itemId);
-    const practice = ok && isPracticeOnly(before, at);
-    store.markReview(item.itemId, ok, at);
-    const left = store.pendingReview(at).find(i => i.itemId === item.itemId);
-    setActive(a => (a ? { ...a, result: { ok, practice, gone: !left, due: left?.due ?? null, at } } : a));
+    const result = applyReviewAnswer(store, item.itemId, ok, nowMs());
+    setActive(a => (a ? { ...a, result } : a));
   };
 
   const another = () => setActive(a => {
@@ -86,7 +100,7 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
         <button type="button" className="ch-back" onClick={() => setActive(null)}>← {t('Back to the list', 'Înapoi la listă')}</button>
         <p className="ch-from">{lessonTitle(item.ref?.src)}</p>
         <div className="ch-card">
-          <McqBlock key={`${variant.entry.id}:${key}`} id={variant.block.id} question={variant.block.question} table={variant.block.table} options={variant.block.options} record={false} onAnswer={onAnswer(item)} />
+          <ReviewQuestion key={`${variant.entry.id}:${key}`} block={variant.block} onAnswer={onAnswer(item)} />
         </div>
         {result && (
           <Motion.div
@@ -131,7 +145,7 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
                 {g.items.map(item => {
                   const orig = originalOf(item);
                   const text = orig
-                    ? t(orig.block.question.en, orig.block.question.ro)
+                    ? t(questionOf(orig).en, questionOf(orig).ro)
                     : (bySrc[item.ref?.src]?.course?.steps?.[item.ref.screen - 1]?.title
                       ? t(bySrc[item.ref.src].course.steps[item.ref.screen - 1].title.en, bySrc[item.ref.src].course.steps[item.ref.screen - 1].title.ro)
                       : item.itemId);
@@ -140,7 +154,7 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
                       <span className="ch-item-text" dangerouslySetInnerHTML={{ __html: formatMarkdown(text) }} />
                       <span className="ch-due">{dueLabel(item.due, now, lang)}</span>
                       <button type="button" className="ch-reveal" onClick={() => start(item)}>
-                        {item.kind === 'mcq' ? t('Practise', 'Exersează') : t('Open the exercise', 'Deschide exercițiul')}
+                        {item.kind === 'mcq' || item.kind === 'calc' ? t('Practise', 'Exersează') : t('Open the exercise', 'Deschide exercițiul')}
                       </button>
                     </li>
                   );
