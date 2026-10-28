@@ -7,6 +7,7 @@ import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
 import { restoredMcqPick, shouldRecordAttempt } from '../../../lesson/restore.js';
 import QuestionTables from './QuestionTables.jsx';
+import { tablesAtOnce } from './choiceSpec.js';
 
 const LETTERS = 'ABCDEFGH';
 const Html = ({ as = 'span', className, text, id }) => (
@@ -31,7 +32,7 @@ export default function McqBlock({ id, question, table, options, record = true, 
   const answered = useRef(restored !== null);
   const qid = `mcq-${id}`;
   // The options wait for the question's tables (QuestionTables onReady), so a late table cannot shift them mid-tap.
-  const [tablesReady, setTablesReady] = useState(!table);
+  const [tablesReady, setTablesReady] = useState(tablesAtOnce(table));
   const onTablesReady = useCallback(() => setTablesReady(true), []);
   const waiting = !tablesReady && restored === null;
 

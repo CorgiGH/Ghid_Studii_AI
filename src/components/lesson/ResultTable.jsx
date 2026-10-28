@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import formatMarkdown from '../blocks/formatMarkdown';
 import { useScrollCues } from './useScrollCues.js';
 import { cellClass, headerParts, spacedColumns, tableFitsWhole } from './tableText.js';
 
 // A column header that may break after _ , ( or / (NR_MATRICOL, LPAD(RPAD('*',BURSA/50,'*'),9)) instead of widening its column.
 function Header({ text }) {
+  // a static table's header may hold KaTeX ($\bar A$); it is typeset whole, never split
+  if (typeof text === 'string' && text.includes('$')) return <span dangerouslySetInnerHTML={{ __html: formatMarkdown(text) }} />;
   return headerParts(text).map((p, i) => <React.Fragment key={i}>{i > 0 && <wbr />}{p}</React.Fragment>);
 }
 
@@ -12,8 +15,9 @@ function Header({ text }) {
 // (extra rows of the learner's table, missing rows of the expected one); `tint` marks rows a script added or changed. NULL
 // reads NULL, never a blank, and a value keeps its spaces (an LPAD result, a padded CHAR). Up to 20 rows the whole table
 // shows; a longer one scrolls inside its box (opening at the first tinted row), and the line under it says what is hidden
-// below or to the right.
-export default function ResultTable({ title, columns, rows, rowCount, truncated = false, mark, markKind = 'extra', tint, caption, empty, countLabel }) {
+// below or to the right. `highlight` ({ rows, cols } of indexes) tints the rows and columns a static table's question is
+// about, without the "added or changed by your script" note that `tint` carries.
+export default function ResultTable({ title, columns, rows, rowCount, truncated = false, mark, markKind = 'extra', tint, highlight, caption, empty, countLabel }) {
   const { t } = useApp();
   const total = rowCount ?? rows.length;
   const capped = !tableFitsWhole(rows.length);
@@ -24,6 +28,8 @@ export default function ResultTable({ title, columns, rows, rowCount, truncated 
   const unit = countLabel
     ? (total === 1 ? countLabel.one : countLabel)
     : (total === 1 ? { en: 'row', ro: 'rând' } : { en: 'rows', ro: 'rânduri' });
+  const hlRows = highlight?.rows || [];
+  const hlCols = highlight?.cols || [];
   const changed = tint ? tint.filter(Boolean).length : 0;
   const mono = useMemo(() => spacedColumns(rows, columns.length), [rows, columns.length]);
   // a long table opens at the first row the script added or changed (only the box scrolls, never the page)
@@ -43,13 +49,13 @@ export default function ResultTable({ title, columns, rows, rowCount, truncated 
       <div ref={boxRef} className={`sx-table-scroll${capped ? ' is-capped' : ''}${cues.right ? ' is-cut-right' : ''}`} tabIndex={0} role="region" aria-label={title || t('Result', 'Rezultat')}>
         <table>
           <thead>
-            <tr>{columns.map((c, i) => <th key={i} scope="col"><Header text={c} /></th>)}</tr>
+            <tr>{columns.map((c, i) => <th key={i} scope="col" className={hlCols.includes(i) ? 'is-hl' : undefined}><Header text={c} /></th>)}</tr>
           </thead>
           <tbody>
             {rows.map((r, ri) => (
-              <tr key={ri} className={mark?.[ri] ? `is-${markKind}` : tint?.[ri] ? 'is-new' : undefined}>
+              <tr key={ri} className={mark?.[ri] ? `is-${markKind}` : tint?.[ri] ? 'is-new' : hlRows.includes(ri) ? 'is-hl' : undefined}>
                 {r.map((v, ci) => (
-                  <td key={ci} className={[cellClass(v), mono[ci] ? 'mono' : null].filter(Boolean).join(' ') || undefined}>{v === null || v === undefined ? 'NULL' : v}</td>
+                  <td key={ci} className={[cellClass(v), mono[ci] ? 'mono' : null, hlCols.includes(ci) ? 'is-hl' : null].filter(Boolean).join(' ') || undefined}>{v === null || v === undefined ? 'NULL' : v}</td>
                 ))}
               </tr>
             ))}
