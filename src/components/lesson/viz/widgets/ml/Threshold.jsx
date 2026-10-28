@@ -79,7 +79,7 @@ function Plot({ W, frame, t }) {
   );
 }
 
-function IgTable({ W, frame, t, guess }) {
+function IgTable({ W, frame, t }) {
   const cl = W.classes;
   const rows = frame.cands;
   return (
@@ -87,24 +87,24 @@ function IgTable({ W, frame, t, guess }) {
       <table className="viz-table mlw4-table">
         <thead>
           <tr>
-            <th>{t('Test', 'Test')}</th><th>{'≤'}</th><th>{'>'}</th><th>IG</th>
+            <th>{t('Test', 'Test')}</th><th>IG</th><th>{'≤'}</th><th>{'>'}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((c) => (
             <tr key={c.key} className={c.best ? 'win' : ''}>
-              <td><span data-mark="threshold" data-value={fmt(c.th)}>{testLabel(c)}</span>{guess === c.key ? ` ← ${t('your pick', 'alegerea ta')}` : ''}</td>
+              <td><span data-mark="threshold" data-value={fmt(c.th)}>{testLabel(c)}</span></td>
+              <td className="num" data-mark="ig" data-value={fmt(c.ig)}>{fmt(c.ig)}</td>
               <td className="num"><Counts counts={c.left} classes={cl} /></td>
               <td className="num"><Counts counts={c.right} classes={cl} /></td>
-              <td className="num" data-mark="ig" data-value={fmt(c.ig)}>{fmt(c.ig)}</td>
             </tr>
           ))}
           {frame.kind === 'contrast' && (
             <tr className="trial">
               <td><span data-mark="threshold" data-value={fmt(frame.trial.th)}>{testLabel(frame.trial)}</span></td>
+              <td className="num" data-mark="ig" data-value={fmt(frame.trial.ig)}>{fmt(frame.trial.ig)}</td>
               <td className="num"><Counts counts={frame.trial.left} classes={cl} /></td>
               <td className="num"><Counts counts={frame.trial.right} classes={cl} /></td>
-              <td className="num" data-mark="ig" data-value={fmt(frame.trial.ig)}>{fmt(frame.trial.ig)}</td>
             </tr>
           )}
         </tbody>
@@ -145,7 +145,7 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false })
           {asking && <div className="viz-dim viz-note">{t('Click the threshold you think wins, or press Show me.', 'Apasă pe pragul care crezi că câștigă, sau apasă Arată-mi.')}</div>}
         </>
       )}
-      {(frame.kind === 'node' || frame.kind === 'contrast') && <IgTable W={W} frame={frame} t={t} guess={frame.id === 0 ? guess : null} />}
+      {(frame.kind === 'node' || frame.kind === 'contrast') && <IgTable W={W} frame={frame} t={t} />}
       {frame.kind === 'zones' && (
         <>
           <div className="mlw4-stat">

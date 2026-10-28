@@ -23,6 +23,7 @@ const WIDGETS = {
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
   'ml-threshold': lazy(() => import('../viz/widgets/ml/Threshold.jsx')),
   'ml-cvloo': lazy(() => import('../viz/widgets/ml/CvLoo.jsx')),
+  'ml-prune': lazy(() => import('../viz/widgets/ml/Prune.jsx')),
 };
 
 function Notice({ children }) {

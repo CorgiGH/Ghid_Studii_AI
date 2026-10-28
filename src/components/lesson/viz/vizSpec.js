@@ -11,6 +11,9 @@ const optional = (f) => (v) => v === undefined || f(v);
 const colName = (c) => (typeof c === 'string' ? c : c?.en);
 const isTbl = (v) => !!v && typeof v === 'object' && Array.isArray(v.columns) && v.columns.length > 0 && Array.isArray(v.rows) && v.rows.length > 0 && v.rows.every(r => Array.isArray(r) && r.length === v.columns.length);
 const isPlane = (v) => !!v && typeof v === 'object' && isStr(v.x) && isStr(v.y);
+// a tree of the ml-prune widget: { attr, ig?, kids: { value: node } } with { leaf } at the ends
+const isPruneNode = (n) => !!n && typeof n === 'object' && (n.leaf !== undefined || (isStr(n.attr) && (n.ig === undefined || isNum(n.ig)) && !!n.kids && typeof n.kids === 'object' && Object.keys(n.kids).length > 0 && Object.values(n.kids).every(isPruneNode)));
+const pruneTests = (n) => (n.leaf !== undefined ? [] : [n, ...Object.values(n.kids).flatMap(pruneTests)]);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
@@ -37,6 +40,7 @@ const SPEC = {
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
   'ml-threshold': { table: isTbl, attr: isStr, target: isStr, plane: optional(isPlane) },
   'ml-cvloo': { table: isTbl, target: isStr, tie: isStr, continuous: optional(strs) },
+  'ml-prune': { tree: isPruneNode, table: optional(isTbl), target: optional(isStr), epsilon: isNum },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -81,6 +85,13 @@ export function validateViz(block) {
   if (w === 'ml-cvloo') {
     mlCols(props.table, [props.target], false);
     mlCols(props.table, Array.isArray(props.continuous) ? props.continuous : [], true);
+  }
+  if (w === 'ml-prune' && isPruneNode(props.tree)) {
+    const tests = pruneTests(props.tree);
+    if (!tests.length) errs.push('viz (ml-prune): the tree needs at least one test node');
+    if (tests.some(n => n.ig === undefined) && !(isTbl(props.table) && isStr(props.target))) errs.push('viz (ml-prune): a test node without ig needs props.table and props.target');
+    if (isTbl(props.table)) mlCols(props.table, [props.target, ...tests.map(n => n.attr)], false);
+    if ((props.table === undefined) !== (props.target === undefined)) errs.push('viz (ml-prune): props.table and props.target go together');
   }
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   return errs;

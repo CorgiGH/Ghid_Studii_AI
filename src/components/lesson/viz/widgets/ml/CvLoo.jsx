@@ -16,7 +16,7 @@ function Tree({ node, W, path, revealed, edge }) {
     <li>
       {edge && <span className="mlw4-edge">{edge}</span>}
       {node.leaf
-        ? <span className={cls} data-mark="leaf" data-value={String(node.label)}><b>{'→'} {String(node.label)}</b>{node.empty ? null : <span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span>}{stop ? <span aria-hidden="true"> {'◀'}</span> : null}</span>
+        ? <span className={cls} data-mark="leaf" data-value={String(node.label)}><b>{'→'} {String(node.label)}</b>{node.empty ? null : <span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span>}{stop ? <span aria-hidden="true"> {'←'}</span> : null}</span>
         : <span className={cls}><b>{node.test.attr}{node.test.th !== undefined ? ' ≤ ' : ' ?'}{node.test.th !== undefined ? <span data-mark="threshold" data-value={fmt(node.test.th)}>{fmt(node.test.th)}</span> : null}</b><span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span></span>}
       {!node.leaf && (
         <ul>
