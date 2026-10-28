@@ -2,13 +2,17 @@
 
 import { TRAP_TAGS } from './trapTags.js';
 
-const LESSON_ID = /^bd-l(\d{2})([a-c]?)$/;
+// A lesson id of a lesson-player subject: "bd-l05", "bd-l01b", "ml-l14".
+const LESSON_ID = /^(bd|ml)-l(\d{2})([a-c]?)$/;
 
-// Place of a lesson id such as "bd-l05" or "bd-l01b" in the course order (01 < 01a < 01b < 02), or null.
+// Place of a lesson id such as "bd-l05" or "bd-l01b" in its subject's course order (01 < 01a < 01b < 02), or null.
 export function lessonOrder(id) {
   const m = typeof id === 'string' ? id.match(LESSON_ID) : null;
-  return m ? Number(m[1]) * 4 + (m[2] ? m[2].charCodeAt(0) - 96 : 0) : null;
+  return m ? Number(m[2]) * 4 + (m[3] ? m[3].charCodeAt(0) - 96 : 0) : null;
 }
+
+// The subject slug a lesson id belongs to ("bd", "ml"), or null.
+const lessonSubject = (id) => (typeof id === 'string' ? id.match(LESSON_ID)?.[1] ?? null : null);
 
 const isStr = (v) => typeof v === 'string' && v.trim().length > 0;
 const isBi = (v) => !!v && typeof v === 'object' && isStr(v.en) && isStr(v.ro);
@@ -40,6 +44,8 @@ function staticTableError(tb) {
     if (!r.every(c => (typeof c === 'string' && c !== '') || (typeof c === 'number' && Number.isFinite(c)))) return `table row ${i + 1} holds a cell that is not a non-empty string or a number`;
   }
   if (tb.caption !== undefined && !isBi(tb.caption)) return 'table caption must have en + ro';
+  // the caption is drawn as plain text (and read out as the table's label), so a $ in it would show raw
+  if (tb.caption !== undefined && /\$/.test(tb.caption.en + tb.caption.ro)) return 'table caption is plain text: a formula goes in a cell or the question, not the caption';
   const h = tb.highlight;
   if (h !== undefined) {
     const okList = (l, n) => l === undefined || (Array.isArray(l) && l.every(v => isIndex(v, n)));
@@ -80,7 +86,9 @@ export function validateMcq(b, ctx = {}) {
   if (te) at(te);
   if (b?.review !== undefined) {
     if (lessonOrder(b.review) === null) at('review must be a lesson id like "bd-l05"');
-    else if (ctx.lessonId && lessonOrder(ctx.lessonId) !== null && lessonOrder(b.review) >= lessonOrder(ctx.lessonId)) {
+    else if (ctx.lessonId && lessonOrder(ctx.lessonId) !== null && lessonSubject(b.review) !== lessonSubject(ctx.lessonId)) {
+      at(`review "${b.review}" must name a lesson of the same subject as ${ctx.lessonId}`);
+    } else if (ctx.lessonId && lessonOrder(ctx.lessonId) !== null && lessonOrder(b.review) >= lessonOrder(ctx.lessonId)) {
       at(`review "${b.review}" must name a lesson earlier than ${ctx.lessonId}`);
     }
   }

@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../../contexts/AppContext';
-import formatMarkdown from '../blocks/formatMarkdown';
 import { useScrollCues } from './useScrollCues.js';
 import { cellClass, headerParts, spacedColumns, tableFitsWhole } from './tableText.js';
 
 // A column header that may break after _ , ( or / (NR_MATRICOL, LPAD(RPAD('*',BURSA/50,'*'),9)) instead of widening its column.
+// A text header is never typeset: a SQL result's header is the learner's own expression, and RPAD('$',3,'$') must read as
+// written. A static table hands in its KaTeX header ($\bar A$) already typeset, as an element, and it is drawn whole.
 function Header({ text }) {
-  // a static table's header may hold KaTeX ($\bar A$); it is typeset whole, never split
-  if (typeof text === 'string' && text.includes('$')) return <span dangerouslySetInnerHTML={{ __html: formatMarkdown(text) }} />;
+  if (React.isValidElement(text)) return text;
   return headerParts(text).map((p, i) => <React.Fragment key={i}>{i > 0 && <wbr />}{p}</React.Fragment>);
 }
 

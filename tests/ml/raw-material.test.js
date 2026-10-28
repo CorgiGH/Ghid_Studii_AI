@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { isRawMaterial, RAW_MATERIAL_DIRS, RAW_MATERIAL_FILES } from '../../src/content/rawMaterial.js';
 import { __keys } from '../../src/content/jsonLoader.js';
 
@@ -29,6 +30,15 @@ describe('isRawMaterial', () => {
 });
 
 describe('jsonLoader glob', () => {
+  // The raw material is not committed, so on a fresh clone the key comparison below has nothing raw to skip; this reads the
+  // literal negations themselves and holds them to RAW_MATERIAL_DIRS / RAW_MATERIAL_FILES.
+  it('negates exactly the raw folders and files, as literals', () => {
+    const src = readFileSync(new URL('../../src/content/jsonLoader.js', import.meta.url), 'utf8');
+    const negations = [...src.matchAll(/'!([^']+)'/g)].map((m) => m[1]).sort();
+    const want = [...RAW_MATERIAL_DIRS.map((d) => `./**/${d}/**`), ...RAW_MATERIAL_FILES.map((f) => `./*/${f}`)].sort();
+    expect(negations).toEqual(want);
+  });
+
   it('loads exactly the non-raw JSON files under src/content', () => {
     const all = Object.keys(import.meta.glob('../../src/content/**/*.json'))
       .map((k) => k.replace('../../src/content/', ''))

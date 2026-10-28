@@ -4,7 +4,7 @@ import { Fraction } from '../../src/ml/calc/fraction.js';
 import { evaluate, toNumber } from '../../src/ml/calc/formula.js';
 
 // Every expected value below is a value the book or verified-answers.md gives for that exercise. Four-decimal values are
-// compared within 5e-5; a value the book truncates (IG(Outlook) = 0.24675 printed 0.2467) gets 1e-4 and says so.
+// compared within 5e-5 (the plan's tolerance); IG(Outlook) = 0.246750 is 0.2467 printed, 4.98e-5 away.
 const fixture = (name) => JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), 'utf8'));
 const PlayTennis = fixture('playtennis'); // ex. 2.27 and 4.54, book p.415 and p.606 (the same 14 days)
 const Startup = fixture('startup-451'); // ex. 4.51, book p.602
@@ -135,7 +135,7 @@ describe('entropy and information gain', () => {
 
   it('PlayTennis: H, IG of every attribute, the best attribute (ex. 4.54 a)', () => {
     close("Hcol(PlayTennis,'EnjoyTennis')", 0.9403);
-    close(PT('IG'), 0.2467, 1e-4); // 0.24675, the book truncates
+    close(PT('IG'), 0.2467); // 0.246750, printed 0.2467
     close("IG(PlayTennis,'Humidity','EnjoyTennis')", 0.1518);
     close("IG(PlayTennis,'Wind','EnjoyTennis')", 0.0481);
     close("IG(PlayTennis,'Temperature','EnjoyTennis')", 0.0292);

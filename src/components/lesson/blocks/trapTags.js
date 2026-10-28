@@ -24,9 +24,12 @@ export const STAGED_TAGS = [
 ];
 
 // ML (Învățare automată) tags. Each is the ASCII kebab-case of the label the ML outline gives a wrong option
-// (docs/superpowers/specs/ml-outline/2026-10-28-ml-lessons-content-outline.md, quiz items "✗[label]"; Romanian diacritics
-// dropped, Greek letters and subscripts spelled out), plus the misconception catalogue of
-// hub/docs/2026-10-28-research-ml/reports/seminar-and-errors.md section B3. The ML content test fails on a tag a lesson uses that is not here.
+// (docs/superpowers/specs/ml-outline/2026-10-28-ml-lessons-content-outline.md, quiz items "✗[label]"), plus the misconception
+// catalogue of hub/docs/2026-10-28-research-ml/reports/seminar-and-errors.md section B3 as short English names. The slug rule:
+// LaTeX commands dropped ($\log$ convexă -> convexa), − ≠ θ σ ρ μ Ω ∅ spelled minus neq theta sigma rho mu omega empty,
+// sub- and superscript digits written as digits (log₂ -> log2, σ² -> sigma-2), diacritics dropped, lower case, every other run
+// of characters one hyphen. tests/ml/second-subject.test.js holds every outline label to this rule, and the ML content test
+// fails on a tag a lesson uses that is not here.
 export const ML_TAGS = [
   'caz-particular', 'empty-nu-e-disjuncta', 'uniune-nedisjuncta', 'monotonie-in-sens-invers',
   'complementul-lui-a-luat-drept-complementul-lui-b', 'p-a-b-p-b-a', 'intersectia-in-loc-de-conditionata',

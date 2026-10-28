@@ -65,6 +65,11 @@ describe('static table shape', () => {
     expect(tableError({ columns: ['X'], rows: 'nope' })).not.toBeNull();
   });
 
+  it('rejects a caption with $: a caption is plain text, a formula goes in a cell or the question', () => {
+    expect(tableError({ columns: ['X'], rows: [[1]], caption: { en: 'The $P$ column', ro: 'Coloana $P$' } })).toMatch(/caption/);
+    expect(tableError({ columns: ['X'], rows: [[1]], caption: { en: 'The data', ro: 'Datele' } })).toBeNull();
+  });
+
   it('rejects a highlight that points outside the table', () => {
     expect(tableError({ columns: ['X', 'Y'], rows: [[1, 0]], highlight: { rows: [1] } })).toMatch(/highlight/);
     expect(tableError({ columns: ['X', 'Y'], rows: [[1, 0]], highlight: { cols: [2] } })).toMatch(/highlight/);
@@ -94,6 +99,14 @@ describe('wide static tables', () => {
     expect(box).toMatch(/border:/);
     // the figure inside .ch-table may shrink below its content, so the box (not the page) takes the overflow
     expect(css).toMatch(/\.sx-table \{[^}]*min-width:\s*0/);
+  });
+
+  it('a highlighted header stays opaque, so rows scrolling under the sticky header do not show through', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync(new URL('../../src/index.css', import.meta.url), 'utf8');
+    const rule = css.match(/\.sx-table th\.is-hl\s*\{([^}]*)\}/);
+    expect(rule).not.toBeNull();
+    expect(rule[1]).toMatch(/var\(--lt-surface\)/);
   });
 
   it('a typeset cell does not get the wrapping class', async () => {
@@ -131,6 +144,22 @@ describe('static table rendering', () => {
     }));
     expect(html).toMatch(/<tr class="is-hl">/);
     expect((html.match(/is-hl/g) || []).length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('typesets a static header written with $…$', () => {
+    const html = renderToStaticMarkup(React.createElement(McqBlock, {
+      id: 'q', question: bi('Care?'), table: { columns: ['$\\bar A$', 'Y'], rows: [[1, 0]] }, options: [opt(true), opt(false, 'not-in-null')],
+    }));
+    expect(html).toMatch(/<th\b[^>]*>\s*<span><span class="katex"/);
+  });
+
+  it('never typesets the header of a SQL result: the dollars of RPAD(\'$\',3,\'$\') stay text and the header still breaks', async () => {
+    const { default: ResultTable } = await import('../../src/components/lesson/ResultTable.jsx');
+    const html = renderToStaticMarkup(React.createElement(ResultTable, { columns: ["RPAD('$',3,'$')"], rows: [['$$$']] }));
+    expect(html).not.toContain('katex');
+    const th = html.match(/<th\b[^>]*>(.*?)<\/th>/)[1];
+    expect(th.match(/<wbr\/>/g)).toHaveLength(3);
+    expect(th.replace(/<wbr\/>/g, '').replace(/&#x27;/g, "'")).toBe("RPAD('$',3,'$')");
   });
 
   it('a reflect block shows a static table too', () => {

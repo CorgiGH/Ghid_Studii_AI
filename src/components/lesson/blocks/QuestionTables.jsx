@@ -44,11 +44,11 @@ function OneTable({ index, dataset, sql, caption, onSettled }) {
 }
 
 // A static table needs no engine: no hook here touches useSqlRunner, and it is settled from the first render. A cell or a
-// header written with $…$ is typeset; a column is a string or { en, ro }.
+// header written with $…$ is typeset here (ResultTable draws text headers as text); a column is a string or { en, ro }.
 function StaticTable({ columns, rows, caption, highlight }) {
   const { t } = useApp();
   const cell = (v) => (typeof v === 'string' && /[$`*]/.test(v) ? <span dangerouslySetInnerHTML={{ __html: formatMarkdown(v) }} /> : v);
-  const head = columns.map((c) => (typeof c === 'string' ? c : t(c.en, c.ro)));
+  const head = columns.map((c) => cell(typeof c === 'string' ? c : t(c.en, c.ro)));
   return (
     <div className="ch-table" data-testid="question-table">
       <ResultTable title={caption ? t(caption.en, caption.ro) : undefined} columns={head} rows={rows.map((r) => r.map(cell))} highlight={highlight} />

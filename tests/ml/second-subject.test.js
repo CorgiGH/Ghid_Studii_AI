@@ -4,7 +4,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom';
 import { createLessonStore } from '../../src/lesson/store.js';
 import { dueCountFor, inSubject, pendingReviewFor } from '../../src/lesson/subjectScope.js';
+import { readFileSync } from 'node:fs';
 import { ML_TAGS, TRAP_TAGS } from '../../src/components/lesson/blocks/trapTags.js';
+import { lessonOrder, validateMcq } from '../../src/components/lesson/blocks/choiceSpec.js';
 
 const memStorage = () => { const m = {}; return { getItem: (k) => m[k] ?? null, setItem: (k, v) => { m[k] = v; } }; };
 const NOW = Date.UTC(2026, 9, 28, 12);
@@ -83,5 +85,47 @@ describe('ML trap tags', () => {
   });
   it('include the outline misconceptions', () => {
     for (const t of ['ln-in-loc-de-log2', 'map-confundat-cu-ml', 'marginala-in-loc-de-conditionata', 'laplace-numerator-only', 'uita-priorul']) expect(TRAP_TAGS.has(t), t).toBe(true);
+  });
+
+  it('hold every ✗[label] of the outline, under the slug rule written in trapTags.js', () => {
+    const outline = readFileSync(new URL('../../docs/superpowers/specs/ml-outline/2026-10-28-ml-lessons-content-outline.md', import.meta.url), 'utf8');
+    const labels = [...new Set([...outline.matchAll(/✗\[([^\]]*)\]/g)].map((m) => m[1]))];
+    expect(labels.length).toBeGreaterThan(250);
+    const missing = labels.filter((l) => !ML_TAGS.includes(mlTag(l))).map((l) => `${l} -> ${mlTag(l)}`);
+    expect(missing).toEqual([]);
+  });
+});
+
+// The slug rule of ML_TAGS (trapTags.js): LaTeX commands dropped, − ≠ and Greek letters spelled out, sub- and superscript
+// digits as digits, diacritics dropped, lower case, every other run of characters a hyphen.
+const WORD = { '−': 'minus', '≠': 'neq', 'θ': 'theta', 'σ': 'sigma', 'ρ': 'rho', 'μ': 'mu', 'Ω': 'omega', '∅': 'empty', '²': '2' };
+const SUB = '₀₁₂₃₄₅₆₇₈₉';
+function mlTag(label) {
+  return label
+    .replace(/\\[A-Za-z]+/g, ' ')
+    .replace(/[₀-₉]/g, (c) => String(SUB.indexOf(c)))
+    .replace(/[−≠θσρμΩ∅²]/g, (c) => ` ${WORD[c]} `)
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+describe('lesson ids of both lesson-player subjects', () => {
+  const bi = (s) => ({ en: s, ro: s });
+  const mcq = (review) => ({
+    id: 'ml-l03-q1', question: bi('q'), review,
+    options: [{ text: bi('a'), correct: true, explain: bi('e') }, { text: bi('b'), correct: false, explain: bi('e'), misconception: 'uita-priorul' }],
+  });
+
+  it('places ml ids in course order like bd ids', () => {
+    expect(lessonOrder('ml-l01')).toBeLessThan(lessonOrder('ml-l02'));
+    expect(lessonOrder('ml-l24')).toBe(lessonOrder('bd-l24'));
+    expect(lessonOrder('ml-24')).toBeNull();
+  });
+
+  it('a review names an earlier lesson of the same subject', () => {
+    expect(validateMcq(mcq('ml-l01'), { lessonId: 'ml-l03' })).toEqual([]);
+    expect(validateMcq(mcq('ml-l04'), { lessonId: 'ml-l03' }).join(' ')).toMatch(/earlier/);
+    expect(validateMcq(mcq('bd-l01'), { lessonId: 'ml-l03' }).join(' ')).toMatch(/same subject/);
+    expect(validateMcq(mcq('ml-l01'), { lessonId: 'bd-l03' }).join(' ')).toMatch(/same subject/);
   });
 });
