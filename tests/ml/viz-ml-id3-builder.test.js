@@ -247,7 +247,7 @@ describe('the widget', () => {
   });
   it('first frame with predict: stumps asks at the formula frame, so Next is open at the setup', () => {
     const h = html(P21, true);
-    expect(h).toContain('Rădăcina: 128 exemple');
+    expect(h).toContain('Rădăcina: 128 de exemple');
     expect(h).not.toContain('mlv-picks');
   });
   it('full with predict: the root pick shows at the first frame and Next is locked', () => {
