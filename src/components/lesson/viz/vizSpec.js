@@ -36,6 +36,7 @@ const SPEC = {
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
   'ml-threshold': { table: isTbl, attr: isStr, target: isStr, plane: optional(isPlane) },
+  'ml-cvloo': { table: isTbl, target: isStr, tie: isStr, continuous: optional(strs) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -76,6 +77,10 @@ export function validateViz(block) {
   if (w === 'ml-threshold') {
     mlCols(props.table, [props.target], false);
     mlCols(props.table, props.plane && isPlane(props.plane) ? [props.attr, props.plane.x, props.plane.y] : [props.attr], true);
+  }
+  if (w === 'ml-cvloo') {
+    mlCols(props.table, [props.target], false);
+    mlCols(props.table, Array.isArray(props.continuous) ? props.continuous : [], true);
   }
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   return errs;

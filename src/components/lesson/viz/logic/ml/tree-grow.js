@@ -42,7 +42,7 @@ function majority(counts, classes, tie) {
   return tiedS.find((l) => String(l) === String(tie)) ?? tiedS[0];
 }
 
-// grow(T, target, { continuous: [names], attrs: [names], tie, maxDepth }) -> the tree.
+// grow(T, target, { continuous: [names], attrs: [names], ids: [row indexes to learn from], tie, maxDepth }) -> the tree.
 // Test node: { ids, counts, label, test: { attr, th? }, ig, cands, kids }  (continuous: kids = [<=, >]; discrete: kids = [{ value, node }] in order of first appearance)
 // Leaf: { ids, counts, label, leaf: true }
 export function grow(T, target, o = {}) {
@@ -100,25 +100,29 @@ export function grow(T, target, o = {}) {
     return { ids, counts, label, test: { attr: best.attr, th: best.th }, ig: best.ig, cands, best, kids };
   };
 
-  const tree = build(T.rows.map((_, i) => i), attrs, 0, undefined);
+  const tree = build(o.ids || T.rows.map((_, i) => i), attrs, 0, undefined);
   return { tree, classes, names, ti, tie };
 }
 
 export const kidNodes = (n) => (n.leaf ? [] : n.kids.map((k) => (k.node ? k.node : k)));
 
-export function classify(T, g, row) {
+// The label the tree gives a row, and the nodes the row passes through (the last one is where it stopped).
+export function classifyPath(g, row) {
   let n = g.tree;
+  const path = [n];
   while (!n.leaf) {
     const ai = g.names.indexOf(n.test.attr);
     if (n.test.th !== undefined) n = n.kids[row[ai] <= n.test.th ? 0 : 1];
     else {
       const k = n.kids.find((x) => x.value === row[ai]);
-      if (!k) return n.label; // a value no training row has: the majority of the node
+      if (!k) return { label: n.label, path }; // a value no training row has: the majority of the node
       n = k.node;
     }
+    path.push(n);
   }
-  return n.label;
+  return { label: n.label, path };
 }
+export const classify = (T, g, row) => classifyPath(g, row).label;
 
 export const countTests = (n) => (n.leaf ? 0 : 1 + kidNodes(n).reduce((s, k) => s + countTests(k), 0));
 

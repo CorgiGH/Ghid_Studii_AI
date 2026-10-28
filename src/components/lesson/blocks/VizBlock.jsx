@@ -22,6 +22,7 @@ const WIDGETS = {
   'all-vs-some': lazy(() => import('../viz/widgets/AllVsSome.jsx')),
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
   'ml-threshold': lazy(() => import('../viz/widgets/ml/Threshold.jsx')),
+  'ml-cvloo': lazy(() => import('../viz/widgets/ml/CvLoo.jsx')),
 };
 
 function Notice({ children }) {
