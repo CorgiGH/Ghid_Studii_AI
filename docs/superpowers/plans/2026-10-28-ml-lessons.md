@@ -201,7 +201,7 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
 - Modify:
   - `src/components/blocks/registry.js` (add `'calc-exercise'`)
   - `scripts/validate-course-json.mjs` (call `validateCalc`)
-  - `src/components/lesson/playerLogic.js` (add it to `GATING_TYPES`; `gatingKind` returns `'calc'`; `seedGate` treats `'calc'` like `'sql'`: a right answer, a reveal or a skip opens the gate)
+  - `src/components/lesson/playerLogic.js` (add it to `GATING_TYPES`; `gatingKind` returns `'calc'`; `seedGate` treats `'calc'` like `'sql'`: a right answer, a reveal or a skip opens the gate, read as an attempt with `ok` or `done`; a wrong check records `done:false`, so the gate stays shut after a reload)
   - `src/index.css` (`.ch-calc*` styles from theme tokens)
 - Test: `tests/ml/calc-exercise.test.js`
 
@@ -213,17 +213,21 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
     fields:[{ id, label:{en,ro}, kind:'num'|'frac'|'choice'|'tf'|'multi', formula, expected, tol?, options?:[{en,ro}],
               accept?:[{ value, note:{en,ro} }] }],
     detectors?:[{ field, formula, message:{en,ro} }],
-    hints:[{en,ro},{en,ro},{en,ro}], solution:{en,ro}, status:'book'|'verified-twice'|'ruled',
-    variants:[{ statement, table?, data?, fields:[{id, formula, expected}], solution }] }
+    hints:[{en,ro},{en,ro},{en,ro}], solution:{en,ro}, status:'book'|'verified-twice'|'ruled', ruledNote?:{en,ro},
+    variants:[{ statement, table?, data?, hints?:[{en,ro},{en,ro},{en,ro}], fields:[{id, formula, expected, tol?, accept?}], solution }] }
   ```
-  - `expected` is what the learner should type. The content test asserts `evaluate(formula, scope) ≈ expected`.
+  - `expected` is what the learner should type. The content test asserts `evaluate(formula, scope) ≈ expected`. A `tf` field expects the string `'true'` or `'false'`; a `choice` field's `expected` is one of its options.
+  - `hints` are exactly three (what to compute, the formula with the numbers in, the full step).
   - `accept` lists alternative answers under a stated convention (D-049).
-  - Default tolerances follow the outline: ±0.0005 below 1 and ±0.001 at 1 and above. Fractions are compared exactly and also accepted as decimals within the tolerance.
-  - `parseAnswer(text, kind)` returns `{ok, value}` and accepts a decimal comma, fractions, leading `.5` and case-insensitive choices.
-  - `grade(field, text, scope) => {verdict:'right'|'wrong'|'accepted-alt'|'unparsed', detector?:message}`.
-  - An attempt is stored with `kind:'calc'`, `item:id`, `hints`, `fields:{id:text}` and `ok`. A wrong first check or a third hint enqueues the item for review (the existing `recordAttempt` rules).
-  - The log calculator is an inline panel with `log₂`, `ln`, `x²`, `√`, fractions and `=`. It is opened by a button on every calc-exercise and keeps its state per screen.
-  - When `status === 'verified-twice'` or `'ruled'`, the solution shows the line "Culegerea nu dă răspunsul; verificat de două ori." (for `ruled`, the outline's line for that exercise instead).
+  - A variant brings its own `hints` and `accept` or none: the block's own carry the block's numbers, so review never shows or accepts them for new numbers (D-666).
+  - `ruledNote` is the outline's line for a `ruled` exercise; the validator requires it when `status === 'ruled'`.
+  - Default tolerances follow the outline: ±0.0005 below 1 and ±0.001 at 1 and above. A fraction typed into a `frac` field must equal the expected fraction exactly (18/34 for 9/17, never a nearby fraction); a decimal is accepted within the tolerance (D-667). A `num` field reads a typed fraction as a number.
+  - `parseAnswer(text, kind, options?)` returns `{ok, value}` (plus `ratio` for `num`/`frac`: the text was a fraction) and accepts a decimal comma, fractions, leading `.5` and case-insensitive choices; `options` are the field's, which a choice is matched against.
+  - `grade(field, text, scope, detectors?) => {verdict:'right'|'wrong'|'accepted-alt'|'unparsed', detector?:message, note?}`. `detectors` are the block's (they are block-level in the JSON); `note` is the matching `accept` entry's.
+  - An attempt is stored with `kind:'calc'`, `item:id`, `hints`, `fields:{id:text}`, `verdicts`, `ok`, `done` and `revealed`. A wrong first check or a third hint enqueues the item for review (the existing `recordAttempt` rules). A third hint before any check is a marker attempt (`unscored:true`) that keeps the gate shut. A value that cannot be read is not an attempt. `calcSpec.js` holds these rules as `calcAction`, `hintAction`, `calcWrite` and `restoreCalcState`.
+  - The log calculator is an inline panel with `log₂`, `ln`, `x²`, `√`, fractions and `=`. It is opened by a button on every calc-exercise and keeps its state per screen in memory (a full reload clears it).
+  - When `status === 'verified-twice'` or `'ruled'`, the solution shows the line "Culegerea nu dă răspunsul; verificat de două ori." (for `ruled`, its `ruledNote` instead).
+  - Small numbers on filled marks use `--theme-content-text` on the soft fill (white on `--lt-hint` or `--lt-acc` is under 4.5:1 in light mode); a locked answer is never dimmed (D-668).
 
 - [ ] **Step 1: Failing tests.**
   - `parseAnswer('0,9183','num').value ≈ 0.9183`; `parseAnswer('9/17','frac')` equals `Fraction(9,17)`; `parseAnswer('outlook','choice')` matches the option `Outlook`.
@@ -241,7 +245,7 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
 
 **Files:**
 - Create: `src/components/lesson/blocks/proofSpec.js`, `src/components/lesson/blocks/ProofStepsBlock.jsx`
-- Modify: `registry.js`, `validate-course-json.mjs`, `playerLogic.js` (`GATING_TYPES`; `gatingKind` returns `'mcq'` for it)
+- Modify: `registry.js`, `validate-course-json.mjs`, `playerLogic.js` (`GATING_TYPES`; `gatingKind` returns `'mcq'` for it; `seedGate` re-opens a proof screen only when `proofDoneFromAttempts` holds, or on a skip)
 - Test: `tests/ml/proof-steps.test.js`
 
 Why a new block: a proof split across mcq screens would hide the earlier steps. This block keeps the whole chain visible on one screen, which the data-on-screen rule requires.
@@ -249,9 +253,10 @@ Why a new block: a proof split across mcq screens would hide the earlier steps. 
 **Interfaces:**
 - Produces: `{ type:'proof-steps', id, exercise?:string|string[], claim:{en,ro}, given?:{en,ro}, table?, steps:[{ shown:{en,ro}, why:{en,ro}?, predict?:{ question:{en,ro}, options:[{text,correct,explain,misconception?}] } }], end:{en,ro} }`.
   - Each `predict` is validated with `validateMcq` rules: one correct option, and every wrong option has a misconception and an `explain`.
-  - Steps appear one at a time. A step with `predict` waits for a pick. Earlier steps stay on screen.
-  - The gate completes when the last step is shown.
-  - Each pick is stored as an attempt (`kind:'mcq'`, `item:` `${id}#${k}`); a wrong pick enqueues the review item.
+  - Steps appear one at a time. A step with `predict` asks it first: the learner chooses the step, then its `shown` text and its `why` appear (the outline's predict-then-reveal; showing the text first gives the answer away, D-664). Earlier steps stay on screen. The Next button says "Mai departe".
+  - The gate completes when the last step is shown, which for a last step with `predict` means its prediction is answered; the end line appears then.
+  - Each pick is stored as an attempt (`kind:'mcq'`, `item:` `${id}#${k}`); a wrong pick enqueues the review item. Each step revealed is stored as `{kind:'proof', item:id, shown:n, ok:true}` (never enqueues), so a reload restores steps that have no prediction. `proofSpec.js` builds both attempts (`pickAttempt`, `revealAttempt`) and rebuilds the state (`restoredProof`).
+  - In Recapitulare a missed pick comes back as a `proof-step` card (Task 8's `collectProofPool`), with the proof up to that step on the card (D-665).
 
 - [ ] **Step 1: Failing tests.**
   - The validator rejects two correct options in one predict.
@@ -270,8 +275,10 @@ Why a new block: a proof split across mcq screens would hide the earlier steps. 
 **Interfaces:**
 - Produces:
   - `collectCalcPool(lessons) => [{id, block, src, screen, lesson}]`.
-  - `pickCalcVariant(item, pool, {avoid, rand}) => {block}`: the block with one of its `variants` swapped in, never the original numbers, avoiding the ones already shown.
-  - In ReviewTab a `calc` item opens inline as a `CalcExerciseBlock` with `record={false}`; `onAnswer` calls `markReview`.
+  - `pickCalcVariant(item, pool, {avoid, rand}) => {block, entry, variant} | null`: the block with one of its `variants` swapped in (`withVariant`), never the original numbers, avoiding the variant indexes in `avoid`; when all were shown it starts over without repeating the last one.
+  - `collectProofPool(lessons) => [{id, block, src, screen, lesson}]`: every proof prediction as `{type:'proof-step', id:'${proofId}#${k}', claim, given, table, before:[{shown, why}], question, options}`; it joins the mcq pool, so `pickVariant` finds it, and the list names it by its claim.
+  - `applyReviewAnswer(store, itemId, ok, at) => {ok, practice, gone, due, at}`: the `markReview` step and the result line, moved out of ReviewTab unchanged.
+  - In ReviewTab (`ReviewQuestion`) a `calc` item opens inline as a `CalcExerciseBlock` with `record={false}`, a proof step as `ProofStepReview`; `onAnswer` calls `applyReviewAnswer`.
 
 - [ ] **Step 1: Failing test.**
   - A pending calc item renders a variant whose statement differs from the original's.
