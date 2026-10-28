@@ -23,6 +23,7 @@ const WIDGETS = {
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
   'ml-id3-builder': lazy(() => import('../viz/widgets/ml/Id3Builder.jsx')),
   'ml-tree-pair': lazy(() => import('../viz/widgets/ml/TreePair.jsx')),
+  'ml-dup-counter': lazy(() => import('../viz/widgets/ml/DupCounter.jsx')),
 };
 
 function Notice({ children }) {
