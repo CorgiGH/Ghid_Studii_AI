@@ -1,6 +1,8 @@
 // Pure helpers for the lesson player (no React), so they can be tested in node.
 
-const GATING_TYPES = new Set(['reflect', 'mcq', 'sql-exercise', 'calc-exercise']);
+import { proofDoneFromAttempts } from './blocks/proofSpec.js';
+
+const GATING_TYPES = new Set(['reflect', 'mcq', 'sql-exercise', 'calc-exercise', 'proof-steps']);
 
 export function screenFromUrl(search, total) {
   const max = Math.max(1, total | 0);
@@ -31,7 +33,7 @@ export function isGatingScreen(step) {
 export function gatingKind(step) {
   const b = (step?.blocks || []).find(isGatingBlock);
   if (!b) return 'reflect';
-  if (b.type === 'mcq') return 'mcq';
+  if (b.type === 'mcq' || b.type === 'proof-steps') return 'mcq';
   if (b.type === 'sql-exercise') return 'sql';
   if (b.type === 'calc-exercise') return 'calc';
   if (b.type === 'reflect') return 'reflect';
@@ -75,6 +77,9 @@ export function seedGate(step, attempts) {
   if (!isGatingScreen(step) || !Array.isArray(attempts) || attempts.length === 0) return undefined;
   const sql = gatingKind(step) === 'sql' || gatingKind(step) === 'calc';
   if (attempts.some(a => a.skipped)) return { skipped: true };
+  // A proof stays locked until its last step is shown: an earlier pick alone does not open the screen.
+  const proof = (step.blocks || []).find(b => b.type === 'proof-steps');
+  if (proof) return proofDoneFromAttempts(proof, attempts) ? { completed: true } : undefined;
   if (attempts.some(a => (sql ? a.ok === true || a.done === true : true))) return { completed: true };
   return undefined;
 }
