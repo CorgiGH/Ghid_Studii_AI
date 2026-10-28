@@ -22,6 +22,7 @@ const WIDGETS = {
   'all-vs-some': lazy(() => import('../viz/widgets/AllVsSome.jsx')),
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
   'ml-pmf-cdf': lazy(() => import('../viz/widgets/ml/PmfCdf.jsx')),
+  'ml-joint-table': lazy(() => import('../viz/widgets/ml/JointTable.jsx')),
 };
 
 function Notice({ children }) {

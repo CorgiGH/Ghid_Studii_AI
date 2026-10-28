@@ -1,5 +1,6 @@
 // Shape of a `viz` block, shared by the validator script and the tests (no React).
 import { pmfCdf } from './logic/ml/pmf-cdf.js';
+import { jointTable } from './logic/ml/joint-table.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -11,6 +12,7 @@ const subsetOf = (...xs) => (v) => isArr(v) && v.every(x => xs.includes(x));
 const optional = (f) => (v) => v === undefined || f(v);
 const isProb = (v) => typeof v === 'number' || (typeof v === 'string' && /^-?\d+(\.\d+)?(\/\d+)?$/.test(v));
 const probList = (v) => isArr(v) && v.every(isProb);
+const isTable = (v) => !!v && typeof v === 'object' && isArr(v.columns) && isArr(v.rows);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
@@ -36,6 +38,7 @@ const SPEC = {
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
   'ml-pmf-cdf': { values: (v) => isArr(v) && v.every(isNum), probs: probList, name: optional(isStr), format: optional(oneOf('fraction', 'decimal')), cdfAt: optional(isNum), second: optional((v) => !!v && typeof v === 'object' && isArr(v.values) && v.values.every(isNum) && probList(v.probs) && (v.name === undefined || isStr(v.name))) },
+  'ml-joint-table': { table: isTable, x: isStr, y: isStr, z: optional(isStr), conditionOn: optional(isArr), explore: optional((v) => typeof v === 'boolean'), rowsAre: optional(oneOf('x', 'y')), format: optional(oneOf('fraction', 'decimal')) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -67,6 +70,9 @@ export function validateViz(block) {
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   if (w === 'ml-pmf-cdf' && errs.length === 0) {
     try { pmfCdf(props); } catch (e) { errs.push(`viz (ml-pmf-cdf): ${e.message}`); }
+  }
+  if (w === 'ml-joint-table' && errs.length === 0) {
+    try { jointTable(props); } catch (e) { errs.push(`viz (ml-joint-table): ${e.message}`); }
   }
   return errs;
 }
