@@ -7,6 +7,7 @@ import formatMarkdown from '../blocks/formatMarkdown';
 import McqBlock from './blocks/McqBlock.jsx';
 import { useLessonStore } from '../../lesson/useLessonStore';
 import { nowMs } from '../../lesson/clock.js';
+import { pendingReviewFor } from '../../lesson/subjectScope.js';
 import { collectMcqPool, dueLabel, furthestVisited, groupReview, isPracticeOnly, pickVariant } from '../../lesson/review.js';
 
 function readLesson(src) {
@@ -30,7 +31,7 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
   const bySrc = useMemo(() => Object.fromEntries(lessons.map(l => [l.src, l])), [lessons]);
 
   const now = nowMs();
-  const groups = groupReview(store.pendingReview(now), now);
+  const groups = groupReview(pendingReviewFor(store, subject.slug, now), now);
 
   const lessonTitle = (src) => {
     const l = bySrc[src];

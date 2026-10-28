@@ -2,10 +2,11 @@ import React from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { useLessonStore } from '../../lesson/useLessonStore';
 import { nowMs } from '../../lesson/clock.js';
+import { dueCountFor } from '../../lesson/subjectScope.js';
 
 const ContentTypeBar = ({ subject, activeTab, onTabChange }) => {
   const { t } = useApp();
-  const pending = useLessonStore().dueCount(nowMs());
+  const pending = dueCountFor(useLessonStore(), subject.slug, nowMs());
 
   const tabs = [];
   if (subject.courses?.length > 0) {
