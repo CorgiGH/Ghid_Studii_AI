@@ -21,6 +21,7 @@ const WIDGETS = {
   'self-pairs': lazy(() => import('../viz/widgets/SelfPairs.jsx')),
   'all-vs-some': lazy(() => import('../viz/widgets/AllVsSome.jsx')),
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
+  'ml-id3-builder': lazy(() => import('../viz/widgets/ml/Id3Builder.jsx')),
 };
 
 function Notice({ children }) {
