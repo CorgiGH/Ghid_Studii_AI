@@ -22,6 +22,7 @@ const WIDGETS = {
   'all-vs-some': lazy(() => import('../viz/widgets/AllVsSome.jsx')),
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
   'ml-omega': lazy(() => import('../viz/widgets/ml/Omega.jsx')),
+  'ml-freq-tree': lazy(() => import('../viz/widgets/ml/FreqTree.jsx')),
 };
 
 function Notice({ children }) {
