@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { validateViz } from '../src/components/lesson/viz/vizSpec.js';
 import { validateMcq, validateReflect } from '../src/components/lesson/blocks/choiceSpec.js';
+import { validateProof } from '../src/components/lesson/blocks/proofSpec.js';
 import { validateQueryMachine } from '../src/sql/machineSpec.js';
 import { validateSqlExercise } from '../src/components/lesson/blocks/sqlExerciseSpec.js';
 
@@ -72,6 +73,9 @@ else {
         }
         if (t === 'sql-exercise') {
           for (const e of validateSqlExercise(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'proof-steps') {
+          for (const e of validateProof(block, { lessonId: json.meta?.id })) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'code') {
           if (!block.code) errors.push(`steps[${si}].blocks[${bi}] (code): missing code field`);

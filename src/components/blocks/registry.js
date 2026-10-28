@@ -28,6 +28,7 @@ export const blockLoaders = {
   'mcq':            () => import('../lesson/blocks/McqBlock.jsx'),
   'query-machine':  () => import('../lesson/blocks/QueryMachineBlock.jsx'),
   'sql-exercise':   () => import('../lesson/blocks/SqlExerciseBlock.jsx'),
+  'proof-steps':    () => import('../lesson/blocks/ProofStepsBlock.jsx'),
 };
 
 const registry = Object.fromEntries(
