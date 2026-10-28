@@ -1,5 +1,7 @@
 // Pure helpers for the review pile (Recapitulare): which items are due, how they are
-// grouped, and which question a pending multiple-choice item comes back as.
+// grouped, and which question a pending multiple-choice or calculation item comes back as.
+import { withVariant } from '../components/lesson/blocks/calcSpec.js';
+
 const DAY = 24 * 60 * 60 * 1000;
 
 // Whole local calendar days from `now` to `due` (0 = the same local day, 1 = the next one);
@@ -100,4 +102,44 @@ export function pickVariant(item, pool, { rand = Math.random, avoid = [], upTo =
   }
   if (!original) return null;
   return { block: { ...original.block, options: shuffled(original.block.options, rand) }, entry: original, reshuffled: true };
+}
+
+// Every calc-exercise in the given lessons: [{ id, block, src, screen, lesson }] (same shape as collectMcqPool).
+export function collectCalcPool(lessons) {
+  const pool = [];
+  for (const [at, { src, course, index }] of lessons.entries()) {
+    const lesson = Number.isInteger(index) ? index : at;
+    (course?.steps || []).forEach((step, i) => {
+      for (const block of step.blocks || []) {
+        if (block.type === 'calc-exercise' && block.id) pool.push({ id: block.id, block, src, screen: i + 1, lesson });
+      }
+    });
+  }
+  return pool;
+}
+
+// The calc-exercise a pending item comes back as: the same exercise with one of its `variants` swapped in (new numbers, never the
+// original's). `avoid` lists the variant indexes already shown for this item; when all have been shown it starts over, without
+// repeating the one just shown when there is another. Returns { block, entry, variant } or null when the exercise is gone or has
+// no variant.
+export function pickCalcVariant(item, pool, { avoid = [], rand = Math.random } = {}) {
+  const entry = pool.find((p) => p.id === item?.itemId);
+  const variants = entry?.block.variants;
+  if (!Array.isArray(variants) || !variants.length) return null;
+  const all = variants.map((_, i) => i);
+  const fresh = all.filter((i) => !avoid.includes(i));
+  const rest = all.filter((i) => i !== avoid[avoid.length - 1]);
+  const from = [fresh, rest, all].find((list) => list.length) || all;
+  const variant = from[Math.floor(rand() * from.length)];
+  return { block: withVariant(entry.block, variants[variant]), entry, variant };
+}
+
+// A review answer given to an item: the schedule moves (markReview) and the result says what the learner is told.
+// { ok, practice (a right answer on an item not yet due changes nothing), gone (the item left the pile), due (when it comes back), at }
+export function applyReviewAnswer(store, itemId, ok, at) {
+  const before = store.pendingReview(at).find((i) => i.itemId === itemId);
+  const practice = ok && isPracticeOnly(before, at);
+  store.markReview(itemId, ok, at);
+  const left = store.pendingReview(at).find((i) => i.itemId === itemId);
+  return { ok, practice, gone: !left, due: left?.due ?? null, at };
 }
