@@ -30,6 +30,8 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
 - Book typos (0.57, 2.4, T20C, 4.19.d, 4.12.b, 4.13) are shown corrected, with a one-line note giving the printed value.
 - Answers that depend on an unprinted convention (D-049) state the book's rule on screen and accept the alternative with a note.
 - Lesson ids are `ml-lNN` (NN = 01…24), step ids `ml-lNN-sK`, files `src/content/ml/courses/lesson-NN.json`, src `ml/courses/lesson-NN.json`. Courses are appended to `ml/index.js` in lesson order.
+- Block ids are `ml-lNN-<name>` and every step and block id is unique across the subject: BD and ML share one progress store keyed by those ids (`tests/content/ml-content.test.js` checks it).
+- Component tests run in vitest's `node` environment: render with `react-dom/server` `renderToStaticMarkup` (inside a `StaticRouter` where a component needs the router), with `vi.mock` replacing `useLessonStore` (a real `createLessonStore` on a memory storage) and `useApp`. The repo has no jsdom or @testing-library and none is added. Typing, pressing and remounting are tested through the block's pure state and restore functions, then a render from the store those functions wrote; the real-Chrome walk (Task 10) presses the real controls.
 - Colours come only from `var(--theme-*)` and the existing lesson tokens `--lt-*` (`--lt-keep` for the + class, `--lt-drop` for the − class, `--lt-hint` for highlights, `--lt-acc` for the accent, `--lt-t0`…`--lt-t3` for series). An ML-only token is defined in `src/index.css` as a `color-mix` of those. No hex in new CSS, and no opacity classes for muted text. Contrast is checked per palette and mode in the final gate.
 - At 390 px there is no horizontal page overflow; wide tables scroll inside their own box. Touch targets are at least 44 px.
 - Visuals advance manually and ask for a prediction first. Reduced motion keeps the end state; nothing autoplays.
@@ -114,32 +116,34 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
 **Interfaces:**
 - Produces:
   - `inSubject(item, slug) => boolean`, true when `item.ref.src` starts with `${slug}/`.
-  - `dueCountFor(store, slug, now) => number`.
-  - `export const ML_TAGS = [...]`, merged into `TRAP_TAGS`. It holds every misconception tag the outline names, kebab-cased. The tags are listed in the outline's quiz items and in `/home/alexa/hub/docs/2026-10-28-research-ml/reports/seminar-and-errors.md`; extract them all, and the content test fails on any tag a lesson uses that is not here.
+  - `pendingReviewFor(store, slug, now) => item[]` (the store's order) and `dueCountFor(store, slug, now) => number`.
+  - `export const ML_TAGS = [...]`, merged into `TRAP_TAGS`. It holds every misconception tag the outline names, kebab-cased. The tags are listed in the outline's quiz items and in `/home/alexa/hub/docs/2026-10-28-research-ml/reports/seminar-and-errors.md`; extract them all, and the content test fails on any tag a lesson uses that is not here. The slug rule is written in `trapTags.js` (LaTeX commands dropped, − ≠ and Greek letters spelled out, sub- and superscript digits as digits, diacritics dropped, lower case, other runs one hyphen), and `tests/ml/second-subject.test.js` holds every outline `✗[label]` to it. The B3 catalogue items are short English names.
 
 - [ ] **Step 1: Failing tests.**
   - With a store holding one BD and one ML review item, `dueCountFor(store,'ml',now) === 1` and `dueCountFor(store,'bd',now) === 1`.
-  - The ReviewTab for `ml` lists only the ML item (render with @testing-library, as `tests/lesson/review.test.js` does).
+  - The ReviewTab for `ml` lists only the ML item (server render with a mocked store, per the testing note in Global Constraints).
 - [ ] **Step 2:** Run `npx vitest run tests/ml/second-subject.test.js tests/lesson`. Expected: the new tests FAIL and the old ones pass.
-- [ ] **Step 3:** Implement. The badge components get the current subject slug from the route (`useParams().subject`).
+- [ ] **Step 3:** Implement. The badge components and ReviewTab take the slug from their `subject` prop (`subject.slug`), which SubjectPage resolves from the route's `useParams().subject`.
 - [ ] **Step 4:** Run `npx vitest run`. Expected: PASS, with all BD tests still green.
 - [ ] **Step 5:** Commit `feat(lesson): scope review and badge to the subject; ML trap tags`.
 
 ### Task 4: Static question tables
 
 **Files:**
-- Modify: `src/components/lesson/blocks/choiceSpec.js` (`tableError`), `src/components/lesson/blocks/QuestionTables.jsx`
+- Modify: `src/components/lesson/blocks/choiceSpec.js` (`tableError`, `lessonOrder`), `src/components/lesson/blocks/QuestionTables.jsx`, `src/components/lesson/ResultTable.jsx` (`highlight`; a header handed in as an element is drawn whole), `src/components/lesson/blocks/McqBlock.jsx` (options ready at once when every table is static), `src/components/lesson/tableText.js` (`cellClass` of a typeset cell), `src/index.css` (`.sx-table … .is-hl`)
 - Test: `tests/ml/static-table.test.js`
 
 **Interfaces:**
-- Produces: a `table` entry may be `{ caption?:{en,ro}, columns:[string|{en,ro}], rows:[[string|number]], highlight?:{rows?:number[], cols?:number[]} }` (static) or BD's `{dataset, sql}`. A static entry renders through `ResultTable` at once, without touching `useSqlRunner`, and settles at once. Cells may hold KaTeX (`$\bar A$`). The block shape is used by `mcq`, `reflect`, `calc-exercise` and `proof-steps`.
+- Produces: a `table` entry may be `{ caption?:{en,ro}, columns:[string|{en,ro}], rows:[[string|number]], highlight?:{rows?:number[], cols?:number[]} }` (static) or BD's `{dataset, sql}`. A static entry renders through `ResultTable` at once, without touching `useSqlRunner`, and settles at once. Cells and column headers may hold KaTeX (`$\bar A$`); QuestionTables typesets them, and ResultTable never typesets a text header (a SQL result header such as `RPAD('$',3,'$')` stays text). The caption is plain text (a `$` in it is rejected). The block shape is used by `mcq`, `reflect`, `calc-exercise` and `proof-steps`.
+  - `choiceSpec.js` also exports `MAX_TABLE_ROWS` (45), `isStaticTable(tb)` and `tablesAtOnce(table)`.
+  - `lessonOrder` reads `bd-lNN` and `ml-lNN` ids; an mcq `review` must name an earlier lesson of the same subject.
 
 - [ ] **Step 1: Failing tests.**
   - `tableError({columns:['X','Y'], rows:[[1,0]]}) === null`.
   - A ragged row is an error, and so is a row count over 45.
-  - Rendering an `mcq` with a static table shows the rows and enables the options without an engine (mock `useSqlRunner` to throw if called).
+  - Rendering an `mcq` with a static table (server render) shows the rows and enables the options without an engine (mock `useSqlRunner` to throw if called).
 - [ ] **Step 2:** Run `npx vitest run tests/ml/static-table.test.js`. Expected: FAIL.
-- [ ] **Step 3:** Implement. The wide-table wrapper scrolls horizontally inside `.ch-table`.
+- [ ] **Step 3:** Implement. A wide table scrolls horizontally inside ResultTable's own `.sx-table-scroll` box (`overflow:auto`) within `.ch-table`; `.ch-table` itself is unchanged, so BD tables are untouched.
 - [ ] **Step 4:** Run `npx vitest run`. Expected: PASS.
 - [ ] **Step 5:** Commit `feat(lesson): static data tables for questions`.
 
@@ -153,8 +157,8 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
 - Produces:
   - `Fraction` with `add sub mul div equals toNumber() toString()` (BigInt numerator and denominator, always reduced).
   - `evaluate(expr: string, scope: object) => number | Fraction | string | boolean`.
-  - `scope.T`: a block's static table, available as `T` (or as `T1`, `T2`… for several).
-  - The language: numbers, fractions `a/b`, `+ - * / ^`, parentheses, comparisons, names from `scope`, string literals, and these functions:
+  - `scope.T`: a block's static table, available as `T` (or as `T1`, `T2`… for several). A table used by the formulas may also carry `ignore:[column]` (columns that are not attributes, such as PlayTennis's `Day`) and `domains:{column:[values]}` (values the rows do not show, for add-one). A column written `{en, ro}` is named by its `en` in formulas. A column named `P` holds row probabilities (a joint distribution) and the counts become weights.
+  - The language: numbers, fractions `a/b`, `+ - * / ^`, parentheses, comparisons, names from `scope`, string literals, `[arrays]`, `{key: value}` options, `true`/`false`, and these functions:
     - `log2 ln log10 sqrt exp abs min max sum`
     - `H(...probs)` (entropy of a distribution, or of counts when the arguments are integers summing to more than 1)
     - `Hc(T, attr, target)`, `IG(T, attr, target)`, `IGR(T, attr, target)` (gain ratio), `splitInfo(T, attr)`, `gini(...p)`, `misclass(...p)`
@@ -164,14 +168,17 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
     - `nb(T, target, row, {laplace:bool})` (class with the larger product), `nbScore(T, target, row, cls, {laplace})`
     - `joint(T, target, row)`, `paramsNB(nAttrs, nVals, nClasses)`, `paramsJoint(...)`
     - `cvlooId3(T, target, {tie})` (number of errors), `trainErrId3(T, target)`
+    - also: `Hcol(T, col)` (entropy of one column), `where(T, cond)` (the rows that satisfy a condition, as a table), `nbProb(T, target, row, cls, {laplace})`, `jointScore(T, target, row, cls)`, `trainErrNB(T, target, {laplace})`, `cvlooNB(T, target, {laplace})`, `id3Root(T, target, opts)`, `id3Tests(T, target, opts)`, `len(x)`
+    - options: `IG`, `Hc`, `IGR` and `splitInfo` take `{threshold:v}` (the test `X <= v`); the ID3 functions and `bestAttr` take `{continuous:[cols]|true, maxDepth, tie:'class0'|'class1'|label, mixedBoundary}`; `thresholds` takes `{mixedBoundary}`, default `true` (the book's count, 6 on 4.51)
+    - `paramsNB(nAttrs, nVals, nClasses=2)` and `paramsJoint(…)`: `nVals` is one number or one per attribute (`[3,3,2,2]` for 2.27). Naive Bayes and Joint Bayes ties go to the first class in sorted order.
     - `binom(n,k)`, `binomPmf(n,p,k)`, `E(values, probs)`, `Var(values, probs)`, `Cov(T, x, y)`
     - `KL(p, q)`, `CH(p, q)`
   - The parser is a small Pratt parser with no `eval` and no `Function`. An unknown name is an error.
 
 - [ ] **Step 1: Failing tests.** These values come from the book and `verified-answers.md`, compared within 5e-5 unless exact:
   - `H(9/14, 5/14) ≈ 0.9403`
-  - `IG(PlayTennis,'Outlook','Play') ≈ 0.2467`
-  - `bestAttr(PlayTennis,'Play') === 'Outlook'`
+  - `IG(PlayTennis,'Outlook','EnjoyTennis') ≈ 0.2467` (the target column keeps the book's name, EnjoyTennis)
+  - `bestAttr(PlayTennis,'EnjoyTennis') === 'Outlook'`
   - `H(1/5,4/5) ≈ 0.7219` and `H(2/5,3/5) ≈ 0.9710` (the T20C hint, corrected)
   - 0.57 `H(C|T) ≈ 0.82740`
   - 2.4 `P(T0|D) = 108/3125` (exact)
@@ -181,7 +188,7 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
   - `evaluate('1/3*1/10', {})` equals `Fraction(1,30)`
   - `evaluate('foo(1)', {})` throws
   
-  Put the PlayTennis table in `tests/ml/fixtures/playtennis.json`, copied from the book page cited in the outline.
+  Put the PlayTennis table in `tests/ml/fixtures/playtennis.json`, copied from the book page cited in the outline (with `ignore:['Day']`).
 - [ ] **Step 2:** Run `npx vitest run tests/ml/calc-math.test.js`. Expected: FAIL.
 - [ ] **Step 3:** Implement. `log2(0)*0` is treated as 0 inside `H`.
 - [ ] **Step 4:** Run the test. Expected: PASS.
@@ -223,8 +230,8 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
   - `grade` gives `right` for `18/34` against expected `9/17`, and `accepted-alt` for `3/5` on the 2.4 field whose `accept` holds 3/5.
   - A detector for `IG` typed where `Hc` was asked returns its message.
   - `validateCalc` rejects: a missing formula; `expected` not a string or number; fewer than 3 hints; no `variants` (at least 1 is required); an unknown `status`.
-  - Rendered block: type a wrong value and press Verifică (verdict "Nu chiar" plus the detector message), then the right value ("Corect"); the gate completes. After an unmount and remount with the same store, the typed values and verdicts are restored.
-  - At 390 px (jsdom width mock) the fields are not inside a horizontally overflowing box. This is asserted by class: the table wrapper has `overflow-x:auto`, the field row does not.
+  - Rendered block (per the testing note in Global Constraints): checking a wrong value through the block's state functions gives "Nu chiar" plus the detector message, then the right value gives "Corect", and the gate completes. A fresh render from the same store shows the typed values and verdicts restored.
+  - At 390 px the fields are not inside a horizontally overflowing box. This is asserted by class and CSS (no DOM here): the table wrapper has `overflow-x:auto`, the field row does not.
 - [ ] **Step 2:** Run `npx vitest run tests/ml/calc-exercise.test.js`. Expected: FAIL.
 - [ ] **Step 3:** Implement. Hints climb in three steps: what to compute, then the formula with the numbers in, then the full step. "Arată soluția" is available after the first check or the third hint.
 - [ ] **Step 4:** Run `npx vitest run`. Expected: PASS.
@@ -248,7 +255,7 @@ Why a new block: a proof split across mcq screens would hide the earlier steps. 
 
 - [ ] **Step 1: Failing tests.**
   - The validator rejects two correct options in one predict.
-  - Rendered: step 1 shows. Picking a wrong option shows its explanation and the right one, and Next reveals step 2. All earlier steps stay in the DOM. The gate completes on the last step. A remount restores the revealed count.
+  - Rendered (per the testing note in Global Constraints): step 1 shows. Picking a wrong option shows its explanation and the right one, and Next reveals step 2. All earlier steps stay in the markup. The gate completes on the last step. A fresh render from the same store restores the revealed count.
 - [ ] **Step 2:** Run `npx vitest run tests/ml/proof-steps.test.js`. Expected: FAIL.
 - [ ] **Step 3:** Implement with `useVizMotion` (reduced motion means no movement).
 - [ ] **Step 4:** Run `npx vitest run`. Expected: PASS.
