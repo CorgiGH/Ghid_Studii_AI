@@ -11,7 +11,8 @@
  *   node scripts/validate-all.mjs
  */
 import { readdirSync, statSync, readFileSync } from 'fs';
-import { join, resolve, sep } from 'path';
+import { join, resolve, sep, relative } from 'path';
+import { isRawMaterial } from '../src/content/rawMaterial.js';
 import { spawnSync } from 'child_process';
 
 const ROOT = resolve(process.cwd());
@@ -21,6 +22,7 @@ function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     if (name === 'node_modules' || name.startsWith('.')) continue;
     const p = join(dir, name);
+    if (isRawMaterial(relative(CONTENT, p))) continue; // source material, not content
     const s = statSync(p);
     if (s.isDirectory()) walk(p, out);
     else if (p.endsWith('.json')) out.push(p);

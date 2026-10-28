@@ -21,7 +21,7 @@ import puppeteer from 'puppeteer';
 const ROOT = resolve(process.cwd());
 const CONTENT = join(ROOT, 'src', 'content');
 const BASE_PATH = '/Ghid_Studii_AI/'; // must match vite.config.js `base`
-const SUBJECTS = ['os', 'prob-stat', 'alo', 'pa', 'oop', 'bd'];
+const SUBJECTS = ['os', 'prob-stat', 'alo', 'pa', 'oop', 'bd', 'ml'];
 
 const args = process.argv.slice(2);
 const PORT = Number(args[args.indexOf('--port') + 1]) || 4173;

@@ -22,6 +22,7 @@
  */
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { resolve, join, relative, sep } from 'path';
+import { isRawMaterial } from '../src/content/rawMaterial.js';
 
 const ROOT = resolve(process.cwd());
 const CONTENT = join(ROOT, 'src', 'content');
@@ -38,6 +39,7 @@ function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     if (name === '.curate' || name === 'node_modules' || name.startsWith('.')) continue;
     const p = join(dir, name);
+    if (isRawMaterial(relative(CONTENT, p))) continue; // source material, not content
     const s = statSync(p);
     if (s.isDirectory()) walk(p, out);
     else out.push(p);

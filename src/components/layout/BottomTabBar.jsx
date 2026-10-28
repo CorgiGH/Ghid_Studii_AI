@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLessonStore } from '../../lesson/useLessonStore';
 import { nowMs } from '../../lesson/clock.js';
+import { dueCountFor } from '../../lesson/subjectScope.js';
 
 const TABS = [
   { key: 'courses', label: 'Courses', labelRo: 'Cursuri', icon: '\uD83D\uDCD6' },
@@ -12,7 +13,7 @@ const TABS = [
 ];
 
 export default function BottomTabBar({ subject, activeTab, onTabChange, lang }) {
-  const pending = useLessonStore().dueCount(nowMs());
+  const pending = dueCountFor(useLessonStore(), subject.slug, nowMs());
   // Only show tabs the subject actually has
   const visibleTabs = TABS.filter(t => {
     if (t.key === 'courses') return subject.courses?.length > 0;
