@@ -4,8 +4,10 @@
 //   { type: 'calc-exercise', id, exercise?: string | string[], source?: {en,ro}, statement: {en,ro}, table?, data?: {name: value},
 //     fields: [{ id, label, kind: 'num'|'frac'|'choice'|'tf'|'multi', formula, expected, tol?, options?, accept?: [{ value, note }] }],
 //     detectors?: [{ field, formula, message }], hints: [h1, h2, h3], solution: {en,ro}, status: 'book'|'verified-twice'|'ruled',
-//     ruledNote?: {en,ro} (the outline's line for a `ruled` exercise), variants: [{ statement, table?, data?, fields: [{ id, formula, expected }], solution }] }
+//     ruledNote?: {en,ro} (the outline's line for a `ruled` exercise),
+//     variants: [{ statement, table?, data?, hints?: [h1, h2, h3], fields: [{ id, formula, expected, tol?, accept? }], solution }] }
 // `formula` is what the content test re-evaluates; `expected` is what the learner should type (the test checks they agree).
+// A variant brings its own hints and accepted alternatives or none: the block's ones carry the block's numbers.
 
 import { tableError, isStaticTable } from './choiceSpec.js';
 import { KINDS, grade, isRight, matchOption, norm } from '../../../ml/calc/answer.js';
@@ -17,6 +19,8 @@ const isStr = (v) => typeof v === 'string' && v.trim().length > 0;
 const isBi = (v) => !!v && typeof v === 'object' && isStr(v.en) && isStr(v.ro);
 const isObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const isValue = (v) => isStr(v) || (typeof v === 'number' && Number.isFinite(v));
+const acceptOk = (list) => Array.isArray(list) && list.every((a) => a && isValue(a.value) && isBi(a.note));
+const hintsOk = (list) => Array.isArray(list) && list.length === HINT_COUNT && list.every(isBi);
 
 export const CHECKED_TWICE = {
   en: 'The workbook gives no answer; checked twice.',
@@ -63,9 +67,7 @@ export function validateCalc(b) {
       if (hasOptions && f.kind !== 'choice' && f.kind !== 'multi') fa('options belong to a choice or multi field');
       if (f?.kind === 'choice' && hasOptions && Array.isArray(f.options) && isValue(f.expected) && !matchOption(String(f.expected), f.options)) fa(`expected "${f.expected}" is not one of the options`);
       if (f?.kind === 'tf' && isValue(f.expected) && !['true', 'false'].includes(String(f.expected))) fa('a tf field expects "true" or "false"');
-      if (f?.accept !== undefined) {
-        if (!Array.isArray(f.accept) || !f.accept.every((a) => a && isValue(a.value) && isBi(a.note))) fa('accept must list { value, note: {en, ro} }');
-      }
+      if (f?.accept !== undefined && !acceptOk(f.accept)) fa('accept must list { value, note: {en, ro} }');
     });
   }
 
@@ -78,7 +80,7 @@ export function validateCalc(b) {
     });
   }
 
-  if (!Array.isArray(b?.hints) || b.hints.length !== HINT_COUNT || !b.hints.every(isBi)) at(`hints must be ${HINT_COUNT} { en, ro } entries: what to compute, the formula with the numbers in, the full step`);
+  if (!hintsOk(b?.hints)) at(`hints must be ${HINT_COUNT} { en, ro } entries: what to compute, the formula with the numbers in, the full step`);
   if (!isBi(b?.solution)) at('solution must have en + ro');
   if (!STATUSES.includes(b?.status)) at(`status must be one of ${STATUSES.join(', ')}`);
   if (b?.status === 'ruled' && !isBi(b.ruledNote)) at('a ruled exercise needs ruledNote { en, ro } (the outline\'s line for it)');
@@ -93,6 +95,7 @@ export function validateCalc(b) {
       if (ve) va(ve);
       if (v?.data !== undefined && !(isObj(v.data) && Object.values(v.data).every((x) => typeof x === 'number' || isStr(x)))) va('data must map names to numbers or strings');
       if (!isBi(v?.solution)) va('solution must have en + ro');
+      if (v?.hints !== undefined && !hintsOk(v.hints)) va(`hints must be ${HINT_COUNT} { en, ro } entries, written for the variant's numbers`);
       if (!Array.isArray(v?.fields)) { va('fields missing'); return; }
       const seen = new Set(v.fields.map((f) => f?.id));
       for (const id of ids) if (!seen.has(id)) va(`no entry for field ${id}`);
@@ -101,6 +104,8 @@ export function validateCalc(b) {
         else {
           if (!isStr(f.formula)) va(`field ${f.id}: formula missing`);
           if (!isValue(f.expected)) va(`field ${f.id}: expected must be a string or a number`);
+          if (f.tol !== undefined && !(typeof f.tol === 'number' && f.tol > 0)) va(`field ${f.id}: tol must be a positive number`);
+          if (f.accept !== undefined && !acceptOk(f.accept)) va(`field ${f.id}: accept must list { value, note: {en, ro} }`);
         }
       });
     });
@@ -124,7 +129,8 @@ export function scopeOf(block) {
 }
 
 // The block with one of its variants swapped in: its statement, tables, data, solution and the formula + expected of each field.
-// The result has no `variants`, so it renders and grades as an ordinary block.
+// Hints and accepted alternatives come from the variant or not at all: the block's own hold the block's numbers. The result has
+// no `variants`, so it renders and grades as an ordinary block.
 export function withVariant(block, variant) {
   if (!variant) return block;
   const byId = Object.fromEntries((variant.fields || []).map((f) => [f.id, f]));
@@ -136,9 +142,10 @@ export function withVariant(block, variant) {
     solution: variant.solution,
     table: variant.table ?? block.table,
     data: variant.data ?? block.data,
+    hints: variant.hints ?? [],
     fields: block.fields.map((f) => {
       const v = byId[f.id];
-      return v ? { ...f, formula: v.formula, expected: v.expected, tol: v.tol ?? f.tol, accept: v.accept ?? f.accept } : f;
+      return v ? { ...f, formula: v.formula, expected: v.expected, tol: v.tol ?? f.tol, accept: v.accept } : f;
     }),
   };
 }

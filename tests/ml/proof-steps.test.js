@@ -2,7 +2,9 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createLessonStore } from '../../src/lesson/store.js';
-import { validateProof, restoredProof, pickOption, canReveal, reveal, proofDone, proofDoneFromAttempts } from '../../src/components/lesson/blocks/proofSpec.js';
+import {
+  validateProof, restoredProof, pickOption, canReveal, reveal, proofDone, proofDoneFromAttempts, pickAttempt, revealAttempt,
+} from '../../src/components/lesson/blocks/proofSpec.js';
 import { gatingKind, isGatingScreen, seedGate } from '../../src/components/lesson/playerLogic.js';
 import { blockLoaders } from '../../src/components/blocks/registry.js';
 
@@ -47,19 +49,16 @@ function render(b, store, gate = {}) {
   );
 }
 
-// What the block does on a pick or a reveal, through its own state functions and the store the block writes to.
+// What the block does on a pick or a reveal, through its own state functions and the attempts it writes (pickAttempt,
+// revealAttempt: the block calls the same two).
 function play(b, store, actions) {
   let st = restoredProof(store.attemptsAt(NO_REF.src, NO_REF.screen), b);
   for (const a of actions) {
     const next = a.pick ? pickOption(st, b, a.k, a.pick.i) : reveal(st, b);
     if (next === st) continue;
     st = next;
-    if (a.pick) {
-      const o = b.steps[a.k].predict.options[a.pick.i];
-      store.recordAttempt(`${b.id}#${a.k}`, { ok: !!o.correct, hints: 0, kind: 'mcq', item: `${b.id}#${a.k}`, option: a.pick.i, misconception: o.misconception || null, ref: NO_REF, at: 1 });
-    } else {
-      store.recordAttempt(b.id, { ok: true, hints: 0, kind: 'proof', item: b.id, shown: st.shown, ref: NO_REF, at: 1 });
-    }
+    const w = a.pick ? pickAttempt(b, a.k, a.pick.i, NO_REF, 1) : revealAttempt(b, st.shown, NO_REF, 1);
+    store.recordAttempt(w.item, w.data);
   }
   return st;
 }
@@ -166,10 +165,10 @@ describe('ProofStepsBlock render', () => {
     const store = createLessonStore(memStorage());
     play(b, store, [{ k: 0 }]);
     let html = render(b, store);
-    expect(html).toContain('AL-DOILEA-PAS');
     expect(html).toContain('PRIMUL-PAS');
     expect(html).toContain('Ce regula se aplica?');
-    expect(html).not.toContain('DE-CE-DOI'); // the reason waits for the pick
+    expect(html).not.toContain('AL-DOILEA-PAS'); // the learner predicts the step before it is shown
+    expect(html).not.toContain('DE-CE-DOI'); // and its reason waits for the pick too
     expect(html).not.toContain('data-testid="proof-next"'); // blocked until a pick
     play(b, store, [{ k: 1, pick: { i: 1 } }]);
     html = render(b, store);
@@ -177,6 +176,7 @@ describe('ProofStepsBlock render', () => {
     expect(html).toContain('explicatie REGULA-RAU');
     expect(html).toContain('Răspunsul corect');
     expect(html).toContain('explicatie REGULA-BUNA');
+    expect(html).toContain('AL-DOILEA-PAS');
     expect(html).toContain('DE-CE-DOI');
     expect(html).toContain('data-testid="proof-next"');
     play(b, store, [{ k: 1 }]);
@@ -219,6 +219,33 @@ describe('ProofStepsBlock render', () => {
     expect(again).toContain('Nu chiar');
     expect(again).toContain('explicatie REGULA-RAU');
     expect(restoredProof(store.attemptsAt(NO_REF.src, NO_REF.screen), b)).toEqual({ shown: 2, picks: { 1: 1 } });
+  });
+
+  it('a step whose prediction is the step itself does not give it away (the outline: choose the next step, then it is shown)', () => {
+    const b = block();
+    b.steps[1].shown = bi('Deci $P(A\\cup B)\\le 1$');
+    b.steps[1].predict.options[0] = opt('$P(A\\cup B)\\le 1$', true);
+    const store = createLessonStore(memStorage());
+    play(b, store, [{ k: 0 }]);
+    expect(render(b, store)).not.toContain('Deci ');
+    play(b, store, [{ k: 1, pick: { i: 1 } }]);
+    expect(render(b, store)).toContain('Deci ');
+  });
+
+  it('the group of a prediction is labelled by its question', () => {
+    const b = block();
+    const store = createLessonStore(memStorage());
+    play(b, store, [{ k: 0 }]);
+    const html = render(b, store);
+    const label = html.match(/role="group" aria-labelledby="([^"]+)"/)[1];
+    expect(html).toContain(`id="${label}"`);
+  });
+
+  it('steps restored after a reload do not fade in again; only the newest step of this visit moves', () => {
+    const b = block();
+    const store = createLessonStore(memStorage());
+    play(b, store, [{ k: 0 }, { k: 1, pick: { i: 0 } }, { k: 1 }]);
+    expect(render(b, store)).not.toMatch(/opacity:\s*0/);
   });
 
   it('a pick on a step restores that step even if no reveal was stored', () => {

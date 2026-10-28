@@ -8,7 +8,7 @@ import { norm } from '../../../ml/calc/answer.js';
 import QuestionTables from './QuestionTables.jsx';
 import LogCalculator from './LogCalculator.jsx';
 import {
-  HINT_COUNT, allRight, calcAction, calcWrite, checkTexts, hintAction, restoreCalcState, solutionNote, unparsedHelp, verdictView,
+  allRight, calcAction, calcWrite, checkTexts, hintAction, restoreCalcState, solutionNote, unparsedHelp, verdictView,
 } from './calcSpec.js';
 
 const Html = ({ as = 'span', className, text, testid }) => (
@@ -39,6 +39,8 @@ export default function CalcExerciseBlock(block) {
   const hintsRef = useRef(nHints);
 
   const canRecord = record && !!ref;
+  // three in a lesson (the validator holds it); a review variant has its own three or none
+  const hintCount = Array.isArray(hints) ? hints.length : 0;
   const checked = Object.keys(verdicts).length > 0;
   const finished = allRight(block, verdicts);
   const open = fields.filter((f) => !isOk(verdicts[f.id]));
@@ -73,7 +75,7 @@ export default function CalcExerciseBlock(block) {
   };
 
   const showHint = () => {
-    const n = Math.min(HINT_COUNT, nHints + 1);
+    const n = Math.min(hintCount, nHints + 1);
     setNHints(n);
     hintsRef.current = n;
     const a = hintAction({ record: canRecord, attempted: attempted.current, n });
@@ -187,11 +189,13 @@ export default function CalcExerciseBlock(block) {
       </div>
       <div className="ch-calc-actions">
         <button type="button" className="sx-btn primary" onClick={check} disabled={!filled || finished || revealed} data-testid="calc-check">{t('Check', 'Verifică')}</button>
-        <button type="button" className="sx-btn" onClick={showHint} disabled={nHints >= HINT_COUNT || finished || revealed} data-testid="calc-hint">
-          {nHints >= HINT_COUNT ? t('No more hints', 'Niciun indiciu în plus') : t(`Hint ${nHints + 1} of ${HINT_COUNT}`, `Indiciul ${nHints + 1} din ${HINT_COUNT}`)}
-        </button>
+        {hintCount > 0 && (
+          <button type="button" className="sx-btn" onClick={showHint} disabled={nHints >= hintCount || finished || revealed} data-testid="calc-hint">
+            {nHints >= hintCount ? t('No more hints', 'Niciun indiciu în plus') : t(`Hint ${nHints + 1} of ${hintCount}`, `Indiciul ${nHints + 1} din ${hintCount}`)}
+          </button>
+        )}
         <button type="button" className="sx-btn ghost" onClick={() => setPadOpen((o) => !o)} aria-expanded={padOpen} data-testid="calc-pad-toggle">{t('Calculator', 'Calculator')}</button>
-        {(checked || nHints >= HINT_COUNT) && !revealed && (
+        {(checked || (hintCount > 0 && nHints >= hintCount)) && !revealed && !finished && (
           <button type="button" className="sx-btn ghost" onClick={showSolution} data-testid="calc-reveal">{t('Show the solution', 'Arată soluția')}</button>
         )}
       </div>

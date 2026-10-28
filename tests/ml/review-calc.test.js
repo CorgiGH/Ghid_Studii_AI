@@ -4,7 +4,8 @@ import { StaticRouter } from 'react-router-dom';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createLessonStore, midnightAfter } from '../../src/lesson/store.js';
 import { applyReviewAnswer, collectCalcPool, collectMcqPool, pickCalcVariant } from '../../src/lesson/review.js';
-import { validateCalc } from '../../src/components/lesson/blocks/calcSpec.js';
+import { validateCalc, scopeOf } from '../../src/components/lesson/blocks/calcSpec.js';
+import { grade } from '../../src/ml/calc/answer.js';
 
 const memStorage = () => {
   const m = new Map();
@@ -80,6 +81,28 @@ describe('pickCalcVariant', () => {
       expect(v.block.variants).toBeUndefined();
       expect(v.block.id).toBe('ml-l07-h');
     }
+  });
+
+  it('a variant keeps only its own hints and accepted alternatives: the original ones carry the original numbers', () => {
+    const orig = {
+      ...calc,
+      hints: [bi('9+ si 5-'), bi('H(9/14, 5/14)'), bi('0,9403')],
+      fields: [{ ...calc.fields[0], accept: [{ value: 0.94, note: bi('rotunjit la două zecimale') }] }],
+    };
+    const v = pickCalcVariant(item, collectCalcPool([{ ...lessons[0], course: { steps: [{ blocks: [orig] }] } }]), { rand: () => 0 });
+    expect(v.block.hints).toEqual([]);
+    expect(v.block.fields[0].accept).toBeUndefined();
+    expect(grade(v.block.fields[0], '0,94', scopeOf(v.block)).verdict).toBe('wrong'); // the original's alternative is not an answer here
+    const own = {
+      ...orig,
+      variants: [{
+        ...calc.variants[0], hints: [bi('3+ si 1-'), bi('H(3/4, 1/4)'), bi('0,8113')],
+        fields: [{ id: 'h', formula: 'H(3,1)', expected: 0.8113, accept: [{ value: 0.81, note: bi('rotunjit') }] }],
+      }],
+    };
+    const w = pickCalcVariant(item, collectCalcPool([{ ...lessons[0], course: { steps: [{ blocks: [own] }] } }]), { rand: () => 0 });
+    expect(w.block.hints).toEqual(own.variants[0].hints);
+    expect(grade(w.block.fields[0], '0,81', scopeOf(w.block)).verdict).toBe('accepted-alt');
   });
 
   it('a second pick differs from the first when there are two variants', () => {

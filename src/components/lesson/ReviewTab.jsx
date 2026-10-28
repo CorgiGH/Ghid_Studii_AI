@@ -6,21 +6,23 @@ import { loadJson } from '../../content/jsonLoader';
 import formatMarkdown from '../blocks/formatMarkdown';
 import McqBlock from './blocks/McqBlock.jsx';
 import CalcExerciseBlock from './blocks/CalcExerciseBlock.jsx';
+import { ProofStepReview } from './blocks/ProofStepsBlock.jsx';
 import { useLessonStore } from '../../lesson/useLessonStore';
 import { nowMs } from '../../lesson/clock.js';
 import { pendingReviewFor } from '../../lesson/subjectScope.js';
 import {
-  applyReviewAnswer, collectCalcPool, collectMcqPool, dueLabel, furthestVisited, groupReview, pickCalcVariant, pickVariant,
+  applyReviewAnswer, collectCalcPool, collectMcqPool, collectProofPool, dueLabel, furthestVisited, groupReview, pickCalcVariant, pickVariant,
 } from '../../lesson/review.js';
 
 function readLesson(src) {
   try { return loadJson(src); } catch { return null; }
 }
 
-// The question of a review card: a multiple-choice one or a calculation exercise with new numbers. Neither records an attempt;
-// the first answer goes to onAnswer.
+// The question of a review card: a multiple-choice one, a step of a proof (with the proof before it) or a calculation exercise
+// with new numbers. None records an attempt; the first answer goes to onAnswer.
 export function ReviewQuestion({ block, onAnswer }) {
   if (block.type === 'calc-exercise') return <CalcExerciseBlock {...block} record={false} onAnswer={onAnswer} />;
+  if (block.type === 'proof-step') return <ProofStepReview block={block} onAnswer={onAnswer} />;
   return <McqBlock id={block.id} question={block.question} table={block.table} options={block.options} record={false} onAnswer={onAnswer} />;
 }
 
@@ -37,7 +39,11 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
     () => subject.courses.map((c, i) => ({ src: c.src, index: i, meta: c, course: c.src ? readLesson(c.src) : null })).filter(l => l.src),
     [subject],
   );
-  const pool = useMemo(() => collectMcqPool(lessons.filter(l => l.course)), [lessons]);
+  // A missed proof pick is an mcq item too: its question joins the multiple-choice pool, with the proof it belongs to.
+  const pool = useMemo(() => {
+    const loaded = lessons.filter(l => l.course);
+    return [...collectMcqPool(loaded), ...collectProofPool(loaded)];
+  }, [lessons]);
   const calcPool = useMemo(() => collectCalcPool(lessons.filter(l => l.course)), [lessons]);
   const bySrc = useMemo(() => Object.fromEntries(lessons.map(l => [l.src, l])), [lessons]);
 
@@ -49,7 +55,8 @@ export default function ReviewTab({ subject, yearSem, subjectSlug }) {
     return l ? t(l.meta.shortTitle.en, l.meta.shortTitle.ro) : src;
   };
   const originalOf = (item) => pool.find(p => p.id === item.itemId) || calcPool.find(p => p.id === item.itemId) || null;
-  const questionOf = (orig) => orig.block.question || orig.block.statement;
+  // The list names a proof step by its proof's claim: its own question means nothing on its own.
+  const questionOf = (orig) => orig.block.claim || orig.block.question || orig.block.statement;
 
   const openLesson = (item, hidden) => {
     const l = bySrc[item.ref?.src];

@@ -1,6 +1,7 @@
 // Pure helpers for the review pile (Recapitulare): which items are due, how they are
-// grouped, and which question a pending multiple-choice or calculation item comes back as.
+// grouped, and which question a pending multiple-choice, proof-step or calculation item comes back as.
 import { withVariant } from '../components/lesson/blocks/calcSpec.js';
+import { stepItem } from '../components/lesson/blocks/proofSpec.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -102,6 +103,34 @@ export function pickVariant(item, pool, { rand = Math.random, avoid = [], upTo =
   }
   if (!original) return null;
   return { block: { ...original.block, options: shuffled(original.block.options, rand) }, entry: original, reshuffled: true };
+}
+
+// Every prediction inside a proof-steps block, as the question a missed pick comes back as: [{ id, block, src, screen, lesson }]
+// (same shape as collectMcqPool; `id` is the stored item, stepItem(proof id, k)). The question means nothing without the proof
+// around it, so the block carries the claim, the given, the table and the steps before it ({ shown, why }), never the step asked.
+export function collectProofPool(lessons) {
+  const pool = [];
+  for (const [at, { src, course, index }] of lessons.entries()) {
+    const lesson = Number.isInteger(index) ? index : at;
+    (course?.steps || []).forEach((step, i) => {
+      for (const block of step.blocks || []) {
+        if (block.type !== 'proof-steps' || !block.id || !Array.isArray(block.steps)) continue;
+        block.steps.forEach((s, k) => {
+          if (!s?.predict) return;
+          const id = stepItem(block.id, k);
+          pool.push({
+            id, src, screen: i + 1, lesson,
+            block: {
+              type: 'proof-step', id, claim: block.claim, given: block.given, table: block.table,
+              before: block.steps.slice(0, k).map(({ shown, why }) => ({ shown, why })),
+              question: s.predict.question, options: s.predict.options,
+            },
+          });
+        });
+      }
+    });
+  }
+  return pool;
 }
 
 // Every calc-exercise in the given lessons: [{ id, block, src, screen, lesson }] (same shape as collectMcqPool).

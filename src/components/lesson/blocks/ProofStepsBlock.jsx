@@ -8,11 +8,12 @@ import { nowMs } from '../../../lesson/clock.js';
 import { shouldRecordAttempt } from '../../../lesson/restore.js';
 import { useVizMotion } from '../viz/kit.js';
 import QuestionTables from './QuestionTables.jsx';
-import { canReveal, pickOption, proofDone, restoredProof, reveal, stepItem } from './proofSpec.js';
+import McqBlock from './McqBlock.jsx';
+import { canReveal, pickAttempt, pickOption, proofDone, restoredProof, reveal, revealAttempt } from './proofSpec.js';
 
 const LETTERS = 'ABCDEFGH';
-const Html = ({ as = 'span', className, text }) => (
-  React.createElement(as, { className, dangerouslySetInnerHTML: { __html: formatMarkdown(text) } })
+const Html = ({ as = 'span', className, text, id }) => (
+  React.createElement(as, { id, className, dangerouslySetInnerHTML: { __html: formatMarkdown(text) } })
 );
 
 // One predict: the options, then (after a pick) the verdict, the explanation and the right answer when the pick was wrong.
@@ -23,7 +24,7 @@ function Predict({ predict, pick, onPick, qid }) {
   const shown = done ? predict.options[pick] : null;
   return (
     <div className="ch-proof-predict" role="group" aria-labelledby={qid}>
-      <Html as="p" className="ch-q" text={t(predict.question.en, predict.question.ro)} />
+      <Html as="p" id={qid} className="ch-q" text={t(predict.question.en, predict.question.ro)} />
       <ul className="ch-opts">
         {predict.options.map((o, i) => {
           const state = !done ? '' : i === pick ? (o.correct ? ' is-right' : ' is-wrong') : (i === right && !shown.correct ? ' is-key' : ' is-dim');
@@ -67,7 +68,8 @@ function Predict({ predict, pick, onPick, qid }) {
 
 // Block JSON: { type: 'proof-steps', id, exercise?, claim, given?, table?, steps: [{ shown, why?, predict? }], end }
 // A proof split across mcq screens would hide its earlier steps, so the chain stays on one screen: the steps appear one at a
-// time, a step with a predict waits for a pick, and the gate opens once the last step is shown (and its predict answered).
+// time, and a step with a predict asks it first: the learner chooses the step, then its text and reason are shown (showing the
+// text first would give the answer away). The gate opens once the last step is shown (and its predict answered).
 export default function ProofStepsBlock(block) {
   const { id, claim, given, table, steps, end } = block;
   const { t } = useApp();
@@ -83,10 +85,10 @@ export default function ProofStepsBlock(block) {
     const next = pickOption(state, block, k, i);
     if (next === state) return;
     setState(next);
-    const o = steps[k].predict.options[i];
     if (!(k in stored.current.picks) && shouldRecordAttempt({ ref })) {
       stored.current = { ...stored.current, picks: { ...stored.current.picks, [k]: i } };
-      store.recordAttempt(stepItem(id, k), { ok: !!o.correct, hints: 0, kind: 'mcq', item: stepItem(id, k), option: i, misconception: o.misconception || null, ref, at: nowMs() });
+      const w = pickAttempt(block, k, i, ref, nowMs());
+      store.recordAttempt(w.item, w.data);
     }
   };
 
@@ -96,7 +98,8 @@ export default function ProofStepsBlock(block) {
     setState(after);
     if (after.shown > stored.current.shown && shouldRecordAttempt({ ref })) {
       stored.current = { ...stored.current, shown: after.shown };
-      store.recordAttempt(id, { ok: true, hints: 0, kind: 'proof', item: id, shown: after.shown, ref, at: nowMs() });
+      const w = revealAttempt(block, after.shown, ref, nowMs());
+      store.recordAttempt(w.item, w.data);
     }
   };
 
@@ -112,20 +115,21 @@ export default function ProofStepsBlock(block) {
       <ol className="ch-proof-steps">
         {visible.map((s, k) => {
           const answered = k in state.picks;
+          const open = !s.predict || answered;
           return (
             <Motion.li
               key={k}
               className="ch-proof-step"
               data-testid="proof-step"
-              initial={k === 0 || m.reduced ? false : { opacity: 0, y: 8 }}
+              initial={k < initial.shown || m.reduced ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={m.soft}
             >
-              <Html as="p" className="ch-proof-shown" text={t(s.shown.en, s.shown.ro)} />
               {s.predict && (
                 <Predict predict={s.predict} pick={answered ? state.picks[k] : undefined} onPick={(i) => pick(k, i)} qid={`proof-${id}-${k}`} />
               )}
-              {s.why && (!s.predict || answered) && <Html as="p" className="ch-proof-why" text={t(s.why.en, s.why.ro)} />}
+              {open && <Html as="p" className="ch-proof-shown" text={t(s.shown.en, s.shown.ro)} />}
+              {open && s.why && <Html as="p" className="ch-proof-why" text={t(s.why.en, s.why.ro)} />}
             </Motion.li>
           );
         })}
@@ -142,6 +146,32 @@ export default function ProofStepsBlock(block) {
           <Html as="p" className="ch-explain ok ch-proof-end" text={t(end.en, end.ro)} />
         )}
       </div>
+    </div>
+  );
+}
+
+// A missed prediction in the review tab (a `proof-step` from collectProofPool): the proof up to that step stays on the card (claim,
+// given, table, the steps before it with their reasons), then the question in the next step's place. Nothing is recorded; the
+// first answer goes to onAnswer, as for any review question.
+export function ProofStepReview({ block, onAnswer }) {
+  const { id, claim, given, table, before, question, options } = block;
+  const { t } = useApp();
+  return (
+    <div className="ch ch-proof" data-testid="proof-review">
+      <Html as="p" className="ch-q" text={t(claim.en, claim.ro)} />
+      {given && <Html as="p" className="ch-proof-given" text={t(given.en, given.ro)} />}
+      <QuestionTables table={table} />
+      <ol className="ch-proof-steps">
+        {before.map((s, k) => (
+          <li key={k} className="ch-proof-step">
+            <Html as="p" className="ch-proof-shown" text={t(s.shown.en, s.shown.ro)} />
+            {s.why && <Html as="p" className="ch-proof-why" text={t(s.why.en, s.why.ro)} />}
+          </li>
+        ))}
+        <li className="ch-proof-step">
+          <McqBlock id={id} question={question} options={options} record={false} onAnswer={onAnswer} />
+        </li>
+      </ol>
     </div>
   );
 }

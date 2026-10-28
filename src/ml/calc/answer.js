@@ -25,9 +25,14 @@ const RATIO = /^([+-]?\d+(?:[.,]\d+)?)\s*\/\s*(\d+(?:[.,]\d+)?)$/;
 
 const asDot = (s) => s.replace(',', '.');
 
+const clean = (text) => String(text ?? '').replace(MINUS, '-').replace(/\s+/g, ' ').trim();
+
+// True when the text is written as a fraction ("9/17", "18 / 34"), not as a decimal.
+const isRatioText = (text) => RATIO.test(clean(text).replace(/\s*\/\s*/, '/'));
+
 // "0,9183", "0.918", ".5", "-1", "9/17" -> a Fraction (exact), or null.
 function readExact(text) {
-  const s = String(text ?? '').replace(MINUS, '-').replace(/\s+/g, ' ').trim();
+  const s = clean(text);
   if (!s) return null;
   if (DECIMAL.test(s)) {
     const d = asDot(s).replace(/^([+-]?)\./, '$10.').replace(/\.$/, '');
@@ -56,7 +61,7 @@ export function matchOption(text, options) {
 
 const splitMulti = (text) => String(text ?? '').split(/[;,\n]+/).map((x) => x.trim()).filter(Boolean);
 
-// parseAnswer(text, kind, options?) -> { ok, value }
+// parseAnswer(text, kind, options?) -> { ok, value } (num and frac also say `ratio`: the text was written as a fraction)
 //   num     value is a JS number ("0,9183", "0.918", ".5", "9/17" all read)
 //   frac    value is an exact Fraction ("9/17", "18/34", "0.5")
 //   choice  value is the chosen option's en text, or the text itself when the field has no options
@@ -66,7 +71,7 @@ export function parseAnswer(text, kind, options) {
   if (kind === 'num' || kind === 'frac') {
     const f = readExact(text);
     if (!f) return { ok: false, value: null };
-    return { ok: true, value: kind === 'frac' ? f : f.toNumber() };
+    return { ok: true, value: kind === 'frac' ? f : f.toNumber(), ratio: isRatioText(text) };
   }
   if (kind === 'choice') {
     const n = norm(text);
@@ -103,15 +108,17 @@ function toExpectedNumber(v) {
 }
 
 // Whether a parsed value equals an expected one (a number/fraction, a name, a boolean or a set) under the field's tolerance.
-function sameValue(field, parsed, expected) {
+// `ratio` says the learner typed a fraction.
+function sameValue(field, parsed, expected, ratio = false) {
   const kind = field.kind;
   if (kind === 'num' || kind === 'frac') {
     const wantNum = toExpectedNumber(expected);
     if (!Number.isFinite(wantNum)) return false;
-    // an exact fraction typed for an exact expected fraction is equal exactly; anything else is a decimal within the tolerance
-    if (parsed instanceof Fraction && typeof expected === 'string') {
+    // a fraction field: a fraction typed against an expected fraction must be the same fraction (18/34 is 9/17; 1/29 is not
+    // 108/3125, though it is within the tolerance). A decimal is right within the tolerance.
+    if (kind === 'frac' && ratio && parsed instanceof Fraction && typeof expected === 'string' && isRatioText(expected)) {
       const want = readExact(expected);
-      if (want && parsed.equals(want)) return true;
+      return !!want && parsed.equals(want);
     }
     const a = parsed instanceof Fraction ? parsed.toNumber() : parsed;
     return Math.abs(a - wantNum) <= tolOf({ ...field, expected });
@@ -141,9 +148,9 @@ function scoped(d, scope) {
 export function grade(field, text, scope = {}, detectors = []) {
   const p = parseAnswer(text, field.kind, field.options);
   if (!p.ok) return { verdict: 'unparsed' };
-  if (sameValue(field, p.value, field.expected)) return { verdict: 'right' };
+  if (sameValue(field, p.value, field.expected, p.ratio)) return { verdict: 'right' };
   for (const a of field.accept || []) {
-    if (sameValue(field, p.value, a.value)) return { verdict: 'accepted-alt', note: a.note };
+    if (sameValue(field, p.value, a.value, p.ratio)) return { verdict: 'accepted-alt', note: a.note };
   }
   for (const d of (detectors || []).filter((x) => x.field === field.id)) {
     const v = scoped(d, scope);

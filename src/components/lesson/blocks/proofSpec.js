@@ -83,3 +83,15 @@ export function proofDone(state, block) {
 }
 
 export const proofDoneFromAttempts = (block, attempts) => proofDone(restoredProof(attempts, block), block);
+
+// What the store gets, as { item, data } for recordAttempt: a pick on step k is an mcq attempt on stepItem(id, k) (a wrong one puts
+// that step in the review pile); a step revealed is a 'proof' attempt that counts the steps on screen and never enqueues.
+export function pickAttempt(block, k, i, ref, at) {
+  const o = block.steps[k].predict.options[i];
+  const item = stepItem(block.id, k);
+  return { item, data: { ok: !!o.correct, hints: 0, kind: 'mcq', item, option: i, misconception: o.misconception || null, ref, at } };
+}
+
+export function revealAttempt(block, shown, ref, at) {
+  return { item: block.id, data: { ok: true, hints: 0, kind: 'proof', item: block.id, shown, ref, at } };
+}

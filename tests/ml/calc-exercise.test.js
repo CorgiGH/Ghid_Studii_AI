@@ -107,6 +107,14 @@ describe('grading', () => {
     expect(grade(f, '9/17', {}).verdict).toBe('right');
     expect(grade(f, '8/17', {}).verdict).toBe('wrong');
   });
+  it('compares a typed fraction exactly: a different fraction close to the value is wrong, a decimal within the tolerance is right', () => {
+    const f = { id: 'p', kind: 'frac', expected: '108/3125' }; // 0,03456
+    expect(grade(f, '1/29', {}).verdict).toBe('wrong'); // 0,03448: within 0,0005, but not the fraction
+    expect(grade(f, '216/6250', {}).verdict).toBe('right');
+    expect(grade(f, '0,0346', {}).verdict).toBe('right');
+    expect(grade(f, '0,0336', {}).verdict).toBe('wrong'); // the value the book prints
+    expect(grade({ id: 'q', kind: 'num', expected: 0.5294 }, '9/17', {}).verdict).toBe('right'); // a num field reads a fraction as a number
+  });
   it('accepts the alternative of a stated convention, with its note (the 2.4 case: 3/5)', () => {
     const f = { id: 'p', kind: 'frac', expected: '108/3125', accept: [{ value: '3/5', note: bi('în cealaltă convenție') }] };
     const g = grade(f, '3/5', {});
@@ -203,6 +211,14 @@ describe('validateCalc', () => {
     expect(validateCalc(c).join('\n')).toMatch(/not one of the options/);
     const v = good(); v.variants[0].fields.pop();
     expect(validateCalc(v).join('\n')).toMatch(/no entry for field frac/);
+  });
+  it('rejects a variant with a hint ladder that is not three steps, or a malformed accept', () => {
+    const b = good(); b.variants[0].hints = [bi('doar unul')];
+    expect(validateCalc(b).join('\n')).toMatch(/variants\[0\]: hints must be 3/);
+    const c = good(); c.variants[0].fields[2].accept = [{ value: '1/2' }];
+    expect(validateCalc(c).join('\n')).toMatch(/variants\[0\]: field frac: accept must list/);
+    const d = good(); d.variants[0].hints = [bi('a'), bi('b'), bi('c')]; d.variants[0].fields[2].accept = [{ value: '1/2', note: bi('n') }];
+    expect(validateCalc(d)).toEqual([]);
   });
   it('rejects a bad table through the same rule as the other blocks', () => {
     const b = good(); b.table = { columns: ['X', 'Y'], rows: [[1]] };
@@ -323,12 +339,21 @@ describe('the rendered block', () => {
     expect(html).toContain('value="0,6935"');
     expect(html).toContain('aria-pressed="true" disabled=""><span>Outlook</span>');
     expect(html).toContain('Culegerea nu dă răspunsul; verificat de două ori.');
+    expect(html).not.toContain('data-testid="calc-reveal"'); // the solution is on screen already: no button that opens it again
     expect(seedGate({ id: 's', blocks: [{ type: 'calc-exercise' }] }, store.attemptsAt(ref.src, ref.screen))).toEqual({ completed: true });
   });
 
   it('a block in the review tab renders without a record and shows its variant', () => {
     const html = renderToStaticMarkup(h(CalcExerciseBlock, { ...withVariant(block, block.variants[0]), record: false, onAnswer: () => {} }));
     expect(html).toContain('Aceeași cerință, alt tabel.');
+  });
+  it('a variant without hints of its own shows no hint button; with its own three it shows them', () => {
+    const bare = renderToStaticMarkup(h(CalcExerciseBlock, { ...withVariant(block, block.variants[0]), record: false, onAnswer: () => {} }));
+    expect(bare).not.toContain('data-testid="calc-hint"');
+    const own = { ...block.variants[0], hints: [bi('V1'), bi('V2'), bi('V3')] };
+    const html = renderToStaticMarkup(h(CalcExerciseBlock, { ...withVariant(block, own), record: false, onAnswer: () => {} }));
+    expect(html).toContain('data-testid="calc-hint"');
+    expect(html).toContain('Indiciul 1 din 3');
   });
 });
 
@@ -349,5 +374,14 @@ describe('the layout rules, asserted on the CSS (no DOM here)', () => {
     for (const sel of ['.ch-calc-in', '.ch-calc-choice', '.ch-calc-key']) expect(rule(sel), sel).toMatch(/min-height:\s*4[4-9]px/);
     const own = css.slice(css.indexOf('/* ---- Calculation exercise block'));
     expect(own).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/);
+  });
+  it('the answer the learner typed is never dimmed, and small text on a filled mark uses the content colour (AA in light mode)', () => {
+    expect(rule('.ch-calc-in:read-only')).not.toMatch(/opacity/);
+    expect(rule('.ch-calc-choice:disabled')).not.toMatch(/opacity/); // a disabled choice may dim only when it is not the chosen one
+    // white on --lt-hint (#b7791f) is 3.6:1 and on --lt-acc (#3b82f6) 3.7:1, both under 4.5:1 for this size
+    for (const sel of ['.ch-calc-hints li::before', '.ch-calc-key.eq', '.ch-proof-step::before']) {
+      expect(rule(sel), sel).toMatch(/color:\s*var\(--theme-content-text\)/);
+      expect(rule(sel), sel).not.toMatch(/(^|[^-])color:\s*var\(--(lt-acc|lt-hint|theme-card-bg)\)/);
+    }
   });
 });
