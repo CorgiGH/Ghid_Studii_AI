@@ -8,6 +8,9 @@ const strs = (v) => isArr(v) && v.every(isStr);
 const oneOf = (...xs) => (v) => xs.includes(v);
 const subsetOf = (...xs) => (v) => isArr(v) && v.every(x => xs.includes(x));
 const optional = (f) => (v) => v === undefined || f(v);
+const colName = (c) => (typeof c === 'string' ? c : c?.en);
+const isTbl = (v) => !!v && typeof v === 'object' && Array.isArray(v.columns) && v.columns.length > 0 && Array.isArray(v.rows) && v.rows.length > 0 && v.rows.every(r => Array.isArray(r) && r.length === v.columns.length);
+const isPlane = (v) => !!v && typeof v === 'object' && isStr(v.x) && isStr(v.y);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
@@ -32,6 +35,7 @@ const SPEC = {
   'self-pairs': { table: isStr, pairOn: isStr, order: oneOf('<>', '<') },
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
+  'ml-threshold': { table: isTbl, attr: isStr, target: isStr, plane: optional(isPlane) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -60,6 +64,19 @@ export function validateViz(block) {
     if (props.mode === 'swap' && !(isStr(props.from) && isStr(props.to))) errs.push('viz (char-strips): swap needs props.from and props.to');
   }
   if (w === 'char-boxes' && props.ops?.includes('LIKE') && !isStr(props.likePattern)) errs.push('viz (char-boxes): LIKE needs props.likePattern');
+  // the ML widgets read columns by name: a name that is not in the table is a content error, not a blank chart
+  const mlCols = (tb, names, numeric) => {
+    if (!isTbl(tb)) return;
+    const cols = tb.columns.map(colName);
+    for (const c of names.filter(isStr)) {
+      if (!cols.includes(c)) errs.push(`viz (${w}): column "${c}" is not in the table (columns: ${cols.join(', ')})`);
+      else if (numeric && !tb.rows.every(r => typeof r[cols.indexOf(c)] === 'number')) errs.push(`viz (${w}): column "${c}" must hold numbers`);
+    }
+  };
+  if (w === 'ml-threshold') {
+    mlCols(props.table, [props.target], false);
+    mlCols(props.table, props.plane && isPlane(props.plane) ? [props.attr, props.plane.x, props.plane.y] : [props.attr], true);
+  }
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   return errs;
 }
