@@ -49,6 +49,7 @@ const SPEC = {
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
   'ml-id3-builder': { mode: oneOf('stumps', 'compare', 'full'), table: optional(isMlTable), target: optional(isStr), given: optional(isStumpsGiven), cases: optional(isCompareCases), positive: optional(isLabel), showValues: optional((v) => typeof v === 'boolean') },
+  'ml-tree-pair': { left: isTree, right: isTree, counts: optional(subsetOf('tests', 'levels', 'leaves')), titles: optional((v) => Array.isArray(v) && v.length === 2 && v.every(isBi)), table: optional(isMlTable), target: optional(isStr) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);

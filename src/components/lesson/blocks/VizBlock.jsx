@@ -22,6 +22,7 @@ const WIDGETS = {
   'all-vs-some': lazy(() => import('../viz/widgets/AllVsSome.jsx')),
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
   'ml-id3-builder': lazy(() => import('../viz/widgets/ml/Id3Builder.jsx')),
+  'ml-tree-pair': lazy(() => import('../viz/widgets/ml/TreePair.jsx')),
 };
 
 function Notice({ children }) {
