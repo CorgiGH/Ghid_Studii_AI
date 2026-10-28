@@ -23,6 +23,7 @@ const WIDGETS = {
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
   'ml-pmf-cdf': lazy(() => import('../viz/widgets/ml/PmfCdf.jsx')),
   'ml-joint-table': lazy(() => import('../viz/widgets/ml/JointTable.jsx')),
+  'ml-entropy-bars': lazy(() => import('../viz/widgets/ml/EntropyBars.jsx')),
 };
 
 function Notice({ children }) {

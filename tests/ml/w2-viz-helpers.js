@@ -4,7 +4,7 @@ export function marks(html) {
   for (const m of html.matchAll(/<[a-z]+\s[^>]*data-kind="([^"]+)"[^>]*>/g)) {
     const tag = m[0];
     const attr = (n) => { const a = tag.match(new RegExp(`\\s${n}="([^"]*)"`)); return a ? a[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"') : undefined; };
-    out.push({ kind: m[1], value: attr('data-value'), x: attr('data-x'), y: attr('data-y'), z: attr('data-z'), tag });
+    out.push({ kind: m[1], value: attr('data-value'), x: attr('data-x'), y: attr('data-y'), z: attr('data-z'), p: attr('data-p'), tag });
   }
   return out;
 }

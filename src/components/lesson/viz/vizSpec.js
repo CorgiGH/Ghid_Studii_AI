@@ -1,6 +1,7 @@
 // Shape of a `viz` block, shared by the validator script and the tests (no React).
 import { pmfCdf } from './logic/ml/pmf-cdf.js';
 import { jointTable } from './logic/ml/joint-table.js';
+import { entropyBars } from './logic/ml/entropy-bars.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -39,6 +40,7 @@ const SPEC = {
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
   'ml-pmf-cdf': { values: (v) => isArr(v) && v.every(isNum), probs: probList, name: optional(isStr), format: optional(oneOf('fraction', 'decimal')), cdfAt: optional(isNum), second: optional((v) => !!v && typeof v === 'object' && isArr(v.values) && v.values.every(isNum) && probList(v.probs) && (v.name === undefined || isStr(v.name))) },
   'ml-joint-table': { table: isTable, x: isStr, y: isStr, z: optional(isStr), conditionOn: optional(isArr), explore: optional((v) => typeof v === 'boolean'), rowsAre: optional(oneOf('x', 'y')), format: optional(oneOf('fraction', 'decimal')) },
+  'ml-entropy-bars': { splits: (v) => isArr(v) && v.every((s) => Array.isArray(s) && s.length === 2 && s.every(Number.isInteger)), venn: optional((v) => !!v && typeof v === 'object' && isStr(v.X) && isStr(v.Y) && (v.xGroups === undefined || strs(v.xGroups)) && (v.yLabels === undefined || (strs(v.yLabels) && v.yLabels.length === 2))) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -73,6 +75,9 @@ export function validateViz(block) {
   }
   if (w === 'ml-joint-table' && errs.length === 0) {
     try { jointTable(props); } catch (e) { errs.push(`viz (ml-joint-table): ${e.message}`); }
+  }
+  if (w === 'ml-entropy-bars' && errs.length === 0) {
+    try { entropyBars(props); } catch (e) { errs.push(`viz (ml-entropy-bars): ${e.message}`); }
   }
   return errs;
 }
