@@ -4,8 +4,9 @@ import alo from './alo/index.js';
 import pa from './pa/index.js';
 import oop from './oop/index.js';
 import bd from './bd/index.js';
+import ml from './ml/index.js';
 
-export const subjects = [os, probStat, alo, pa, oop, bd];
+export const subjects = [os, probStat, alo, pa, oop, bd, ml];
 
 export const yearSemesters = [
   {
@@ -16,7 +17,7 @@ export const yearSemesters = [
   {
     id: 'y2s1',
     title: { en: 'Year 2, Semester 1', ro: 'Anul 2, Semestrul 1' },
-    subjects: ['bd'],
+    subjects: ['bd', 'ml'],
   },
 ];
 
