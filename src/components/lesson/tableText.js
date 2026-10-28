@@ -15,6 +15,7 @@ export function headerParts(text) {
 // hyphens; only a value with words in it (a sentence built with ||) may wrap, at its spaces.
 export function cellClass(v) {
   if (v === null || v === undefined) return 'nul';
+  if (typeof v === 'object') return undefined; // a typeset cell (KaTeX) never wraps
   return /\S\s+\S/.test(String(v)) ? 'words' : undefined;
 }
 
