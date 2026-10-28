@@ -1,4 +1,5 @@
 // Shape of a `viz` block, shared by the validator script and the tests (no React).
+import { pmfCdf } from './logic/ml/pmf-cdf.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -8,6 +9,8 @@ const strs = (v) => isArr(v) && v.every(isStr);
 const oneOf = (...xs) => (v) => xs.includes(v);
 const subsetOf = (...xs) => (v) => isArr(v) && v.every(x => xs.includes(x));
 const optional = (f) => (v) => v === undefined || f(v);
+const isProb = (v) => typeof v === 'number' || (typeof v === 'string' && /^-?\d+(\.\d+)?(\/\d+)?$/.test(v));
+const probList = (v) => isArr(v) && v.every(isProb);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
@@ -32,6 +35,7 @@ const SPEC = {
   'self-pairs': { table: isStr, pairOn: isStr, order: oneOf('<>', '<') },
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
+  'ml-pmf-cdf': { values: (v) => isArr(v) && v.every(isNum), probs: probList, name: optional(isStr), format: optional(oneOf('fraction', 'decimal')), cdfAt: optional(isNum), second: optional((v) => !!v && typeof v === 'object' && isArr(v.values) && v.values.every(isNum) && probList(v.probs) && (v.name === undefined || isStr(v.name))) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -61,5 +65,8 @@ export function validateViz(block) {
   }
   if (w === 'char-boxes' && props.ops?.includes('LIKE') && !isStr(props.likePattern)) errs.push('viz (char-boxes): LIKE needs props.likePattern');
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
+  if (w === 'ml-pmf-cdf' && errs.length === 0) {
+    try { pmfCdf(props); } catch (e) { errs.push(`viz (ml-pmf-cdf): ${e.message}`); }
+  }
   return errs;
 }

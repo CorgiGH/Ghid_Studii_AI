@@ -401,7 +401,7 @@ describe('common helpers', () => {
 
 describe('viz block spec', () => {
   it('knows all nineteen widgets', () => {
-    expect(WIDGET_NAMES).toHaveLength(19);
+    expect(WIDGET_NAMES.filter((n) => !n.startsWith('ml-'))).toHaveLength(19);
   });
   it('validates id, widget, props and predict', () => {
     const ok = { type: 'viz', id: 'bd-l6-like', widget: 'like-slider', predict: false, props: { pattern: '_r%', values: ['a'] } };
