@@ -30,7 +30,7 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
 - Book typos (0.57, 2.4, T20C, 4.19.d, 4.12.b, 4.13) are shown corrected, with a one-line note giving the printed value.
 - Answers that depend on an unprinted convention (D-049) state the book's rule on screen and accept the alternative with a note.
 - Lesson ids are `ml-lNN` (NN = 01…24), step ids `ml-lNN-sK`, files `src/content/ml/courses/lesson-NN.json`, src `ml/courses/lesson-NN.json`. Courses are appended to `ml/index.js` in lesson order.
-- Colours come only from `var(--theme-*)` and derived `--ml-*` tokens, defined for all 5 palettes in light and dark. No hex in new CSS, and no opacity classes for muted text.
+- Colours come only from `var(--theme-*)` and the existing lesson tokens `--lt-*` (`--lt-keep` for the + class, `--lt-drop` for the − class, `--lt-hint` for highlights, `--lt-acc` for the accent, `--lt-t0`…`--lt-t3` for series). An ML-only token is defined in `src/index.css` as a `color-mix` of those. No hex in new CSS, and no opacity classes for muted text. Contrast is checked per palette and mode in the final gate.
 - At 390 px there is no horizontal page overflow; wide tables scroll inside their own box. Touch targets are at least 44 px.
 - Visuals advance manually and ask for a prediction first. Reduced motion keeps the end state; nothing autoplays.
 - `git add` only named paths. Never commit `.claude/settings.local.json`, `scripts/review-gemini-alo-c11.mjs`, or the raw ML material (`src/content/ml/{source,tests/source,refs/files,students,_text}`, `materials.json`, `MATERIALS.md`).
@@ -390,7 +390,7 @@ Each widget task follows the same five steps:
   - Rendered with `predict`: Next stays locked until the prediction; reduced motion renders the end state.
   - **The caption matches the picture (G4).** Every caption and every number in the widget text is built from the logic module's state for that step, never typed into props. The test steps through all frames and asserts each caption's numbers equal the drawn values (read from `data-value` attributes on the marks).
 - [ ] **Step 2:** Run `npx vitest run tests/ml/viz-<name>.test.js`. Expected: FAIL.
-- [ ] **Step 3:** Implement. Colours use only `var(--theme-*)`/`--ml-*`; the widget fits 390 px, scrolling wide tables inside their box.
+- [ ] **Step 3:** Implement. Colours use only `var(--theme-*)` and `--lt-*` (see Global Constraints); the widget fits 390 px, scrolling wide tables inside their box.
 - [ ] **Step 4:** Run `npx vitest run`. Expected: PASS.
 - [ ] **Step 5:** Commit `feat(ml): <name> widget`.
 
