@@ -1,6 +1,7 @@
 // Shape of a `viz` block, shared by the validator script and the tests (no React).
 import { omegaProblems } from './logic/ml/omega.js';
 import { freqTreeProblems } from './logic/ml/freqTree.js';
+import { indepProblems } from './logic/ml/indep2x2.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -35,6 +36,7 @@ const SPEC = {
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
   'ml-omega': { outcomes: (v) => isArr(v) && v.every((x) => isStr(x) || isNum(x)), events: (v) => !!v && typeof v === 'object' && Array.isArray(v.A) && Array.isArray(v.B), restrictTo: optional(oneOf('A', 'B')) },
   'ml-freq-tree': { population: isNum, prior: isNum, sens: isNum, fpr: isNum, labels: (v) => !!v && typeof v === 'object' },
+  'ml-indep-2x2': { counts: (v) => Array.isArray(v) && v.length === 2 && v.every((r) => Array.isArray(r) && r.length === 2 && r.every(isNum)), labels: (v) => !!v && typeof v === 'object' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
 };
 
@@ -67,5 +69,6 @@ export function validateViz(block) {
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   if (w === 'ml-omega') errs.push(...omegaProblems(props).filter((e) => !errs.includes(e)));
   if (w === 'ml-freq-tree') errs.push(...freqTreeProblems(props).filter((e) => !errs.includes(e)));
+  if (w === 'ml-indep-2x2') errs.push(...indepProblems(props).filter((e) => !errs.includes(e)));
   return errs;
 }

@@ -23,6 +23,7 @@ const WIDGETS = {
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
   'ml-omega': lazy(() => import('../viz/widgets/ml/Omega.jsx')),
   'ml-freq-tree': lazy(() => import('../viz/widgets/ml/FreqTree.jsx')),
+  'ml-indep-2x2': lazy(() => import('../viz/widgets/ml/Indep2x2.jsx')),
 };
 
 function Notice({ children }) {
