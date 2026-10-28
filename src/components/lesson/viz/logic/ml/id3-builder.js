@@ -20,7 +20,7 @@ const plus = (xs) => xs.map(showN).join(' + ');
 // mode 'stumps' (L9): the root, every stump's boxes, then the weighted sums and their values
 // ===================================================================================================================
 export function stumpsModel(props) {
-  let classes; let rootCounts; let stumps; let hRoot; let N; let targetLabel;
+  let classes; let rootCounts; let stumps; let hRoot; let N; let targetLabel; let table = null;
   if (props.given) {
     const g = props.given;
     rootCounts = g.root.map(frac);
@@ -38,6 +38,7 @@ export function stumpsModel(props) {
     N = weightOf(P, ids);
     hRoot = K.Hcol(subTable(P, ids), P.target);
     targetLabel = headerOf(P, P.target);
+    table = { headers: P.headers, rows: P.rows };
   }
   const showValues = props.showValues !== false;
   const frames = [{ kind: 'setup' }];
@@ -48,7 +49,7 @@ export function stumpsModel(props) {
   const errs = stumps.map(stumpErrors);
   const errTotal = errs.map((e) => sumF(e));
   const M = {
-    mode: 'stumps', classes, rootCounts, stumps, hRoot, N, best, tied, errs, errTotal, frames, count: frames.length, targetLabel,
+    mode: 'stumps', classes, rootCounts, stumps, hRoot, N, best, tied, errs, errTotal, frames, count: frames.length, targetLabel, table,
     leaves: stumps.map((s) => s.branches.map((b) => leafOf(classes, b))),
   };
   // the arithmetic of IG is written out only when the rounded numbers agree with each other
@@ -56,7 +57,21 @@ export function stumpsModel(props) {
   M.igSum = Math.abs((Number(fmt4(hRoot)) - Number(fmt4(bs.hc))) - Number(fmt4(bs.ig))) < 5e-5;
   M.errFrac = errTotal[best].div(N);
 
+  // with predict the boxes of a stump stay hidden until the learner asks for them (outline L9: predict the boxes first)
+  M.boxesHidden = (k, c = {}) => !!c.predict && frames[k].kind === 'boxes' && c.picks?.[`box${frames[k].i}`] === undefined;
   M.pickSpec = (k, predict) => {
+    if (predict && frames[k].kind === 'boxes') {
+      const s = stumps[frames[k].i];
+      return {
+        items: [{
+          key: `box${frames[k].i}`,
+          prompt: both((lang) => (lang === 'en'
+            ? `How many + and − examples fall in each branch of ${nm(s, 'en')}? Work them out, then show the boxes.`
+            : `Câte exemple + și câte − cad pe fiecare ramură a lui ${nm(s, 'ro')}? Calculează-le, apoi arată cutiile.`)),
+          options: [{ id: 'show', label: { en: 'Show the boxes', ro: 'Arată cutiile' } }],
+        }],
+      };
+    }
     if (!predict || frames[k].kind !== 'formula') return null;
     return {
       items: [{
@@ -80,6 +95,12 @@ export function stumpsModel(props) {
     }
     if (f.kind === 'boxes') {
       const s = stumps[f.i];
+      if (M.boxesHidden(k, c)) {
+        return T(
+          `${nm(s, lang)}: how many + and − examples fall in each branch? Count them before the boxes show.`,
+          `${nm(s, lang)}: câte exemple + și câte − cad pe fiecare ramură? Numără-le înainte să apară cutiile.`,
+        );
+      }
       const parts = s.branches.map((b) => `${lab(b.value, lang)} ${boxText(b.counts)}`).join('; ');
       const ctrl = plus(s.branches.map((b) => b.counts[0]));
       return T(
@@ -89,19 +110,19 @@ export function stumpsModel(props) {
     }
     if (f.kind === 'formula') {
       return T(
-        `The average conditional entropy of a question is the sum over its branches, each weighted by its share of the ${cnt('en', N, 'example', 'examples', 'exemplu', 'exemple')}. Only the form is written, no values yet. Which is the smallest?`,
-        `Entropia condiționată medie a unei întrebări e suma ramurilor ei, fiecare cu ponderea ei din cele ${cnt('ro', N, 'example', 'examples', 'exemplu', 'exemple')}. Se scrie doar forma, fără valori. Care e cea mai mică?`,
+        `The average conditional entropy of a question is the sum of its branches' entropies, each weighted by the branch's share of the ${cnt('en', N, 'example', 'examples', 'exemplu', 'exemple')}. Only the form is written, no values yet. Which is the smallest?`,
+        `Entropia condiționată medie a unei întrebări e suma entropiilor ramurilor ei, fiecare înmulțită cu ponderea ramurii din cele ${cnt('ro', N, 'example', 'examples', 'exemplu', 'exemple')}. Se scrie doar forma, fără valori. Care e cea mai mică?`,
       );
     }
     const vals = stumps.map((s) => `H(${lab(M.targetLabel, lang)}|${nm(s, lang)}) = ${fmt4(s.hc)}`).join(', ');
     if (f.kind === 'values') {
       const win = tied.length > 1
-        ? T(`Tie between ${listIn(lang, tied.map((i) => names[i]))}: the first in the table is taken.`, `Egalitate între ${listIn(lang, tied.map((i) => names[i]))}: se ia prima din tabel.`)
-        : T(`The smallest is ${names[best]}.`, `Cea mai mică e ${names[best]}.`);
+        ? T(`Tie between ${listIn(lang, tied.map((i) => names[i]))}: the first in order is taken.`, `Egalitate între ${listIn(lang, tied.map((i) => names[i]))}: se ia primul în ordine.`)
+        : T(`The smallest is H(${lab(M.targetLabel, lang)}|${names[best]}).`, `Cea mai mică e H(${lab(M.targetLabel, lang)}|${names[best]}).`);
       const p = c.picks?.best;
       const fb = p === undefined ? '' : tied.includes(p)
         ? T(` You picked ${names[p]}: right.`, ` Ai ales ${names[p]}: corect.`)
-        : T(` You picked ${names[p]}: not the smallest.`, ` Ai ales ${names[p]}: nu e cea mai mică.`);
+        : T(` You picked ${names[p]}: its entropy is not the smallest.`, ` Ai ales ${names[p]}: entropia lui nu e cea mai mică.`);
       return `${vals}. ${win}${fb}`;
     }
     // winner
@@ -247,8 +268,8 @@ export function compareModel(props) {
         const p = picks[`${c.ci}:0`];
         const fb = p === undefined ? '' : p === c.sym ? T(` You picked ${p}: right.`, ` Ai ales ${p}: corect.`) : T(` You picked ${p}: not that one.`, ` Ai ales ${p}: nu aceasta.`);
         return T(
-          `Minority share: ${cmpTxt}. Both are below 1/2, where H(p) grows with p, so the first entropy is ${c.sym === '>' ? 'bigger' : c.sym === '<' ? 'smaller' : 'equal'}.${fb}`,
-          `Cota minoritară: ${cmpTxt}. Amândouă sunt sub 1/2, unde H(p) crește cu p, deci prima entropie e ${c.sym === '>' ? 'mai mare' : c.sym === '<' ? 'mai mică' : 'egală'}.${fb}`,
+          `Minority share: ${cmpTxt}. A minority share is at most 1/2, and H(p) grows with p on [0, 1/2], so the first entropy is ${c.sym === '>' ? 'bigger' : c.sym === '<' ? 'smaller' : 'equal'}.${fb}`,
+          `Cota minoritară: ${cmpTxt}. O cotă minoritară e cel mult 1/2, iar H(p) crește cu p pe [0, 1/2], deci prima entropie e ${c.sym === '>' ? 'mai mare' : c.sym === '<' ? 'mai mică' : 'egală'}.${fb}`,
         );
       }
       return T(`The values: ${fmt4(a.h)} ${c.symH} ${fmt4(b.h)}.`, `Valorile: ${fmt4(a.h)} ${c.symH} ${fmt4(b.h)}.`);
@@ -266,12 +287,19 @@ export function compareModel(props) {
           `Ponderile coincid: ${wA.join(', ')} la amândouă. Se potrivesc ramurile două câte două.${ask}`,
         );
       }
+      const asking = ctx.predict && picks[`${c.ci}:match`] === undefined;
+      if (asking) {
+        return head + (c.sameShape
+          ? T(`The weights: ${sname(0)} ${wA.join(', ')}; ${sname(1)} ${wB.join(', ')}.`, `Ponderile: ${sname(0)} ${wA.join(', ')}; ${sname(1)} ${wB.join(', ')}.`)
+          : T(`${sname(0)} has ${A.branches.length} branches, ${sname(1)} has ${B.branches.length}.`, `${sname(0)} are ${A.branches.length} ramuri, ${sname(1)} are ${B.branches.length}.`));
+      }
       const why = !c.sameShape
-        ? T('The stumps have different numbers of branches.', 'Ciotul are alt număr de ramuri.')
+        ? T('The stumps have different numbers of branches.', 'Cioturile au număr diferit de ramuri.')
         : c.weightsEqual
           ? T('The pairs point in different directions.', 'Perechile arată în direcții diferite.')
           : T(`The weights differ: ${wA.join(', ')} against ${wB.join(', ')}.`, `Ponderile diferă: ${wA.join(', ')} față de ${wB.join(', ')}.`);
-      const fb = ctx.predict && picks[`${c.ci}:match`] === 'yes' ? T(' Not here.', ' Aici nu.') : '';
+      const pk = picks[`${c.ci}:match`];
+      const fb = !ctx.predict || pk === undefined ? '' : pk === 'no' ? T(' You said no: right.', ' Ai spus nu: corect.') : T(' You said yes: not here.', ' Ai spus da: aici nu.');
       return head + T(`${why} It does not match, so the branch-by-branch comparison cannot decide. Use the product formula.${fb}`, `${why} Nu se potrivește, deci comparația ramură cu ramură nu poate hotărî. Se trece la formula produsului.${fb}`);
     }
     if (f.kind === 'symbols') {
@@ -280,16 +308,19 @@ export function compareModel(props) {
         const sh = p.shares ? `${T('minority share', 'cota minoritară')} ${showN(p.shares[0])} ${p.sym} ${showN(p.shares[1])}` : `${fmt4(o.h)} ${p.sym} ${fmt4(q.h)}`;
         const pk = picks[`${c.ci}:${p.j}`];
         const fb = pk === undefined ? '' : pk === p.sym ? T(' (you picked it)', ' (ai ales corect)') : T(` (you picked ${pk})`, ` (ai ales ${pk})`);
-        return `${T('pair', 'perechea')} ${p.j + 1}: ${boxText(o.counts)} ${p.sym} ${boxText(q.counts)}, ${sh}${fb}`;
+        return `${p.j === 0 ? T('Pair', 'Perechea') : T('pair', 'perechea')} ${p.j + 1}: ${boxText(o.counts)} ${p.sym} ${boxText(q.counts)}, ${sh}${fb}`;
       });
-      return T(`${lines.join('; ')}. Same weights, so the branch with the smaller entropy wins.`, `${lines.join('; ')}. Aceleași ponderi, deci câștigă ramura cu entropia mai mică.`);
+      return T(
+        `${lines.join('; ')}. The weights are the same, so the pairs can be compared branch by branch: the smaller minority share has the smaller entropy (H(p) grows on [0, 1/2]).`,
+        `${lines.join('; ')}. Ponderile sunt aceleași, deci perechile se compară ramură cu ramură: cota minoritară mai mică are entropia mai mică (H(p) crește pe [0, 1/2]).`,
+      );
     }
     if (f.kind === 'values') {
       const worse = c.verdict === 'A' ? sname(1) : sname(0);
       const sym = SYM_OF(A.hc - B.hc);
       const v = c.verdict === 'tie'
         ? T('The two stumps are equal.', 'Cele două cioturi sunt egale.')
-        : T(`${c.verdict === 'A' ? sname(0) : sname(1)} is better: each of its branches has at most the entropy of the matching one in ${worse}.`, `${c.verdict === 'A' ? sname(0) : sname(1)} e mai bun: fiecare ramură a lui are cel mult entropia celei potrivite din ${worse}.`);
+        : T(`${c.verdict === 'A' ? sname(0) : sname(1)} is better: each of its branches has at most the entropy of its pair in ${worse}.`, `${c.verdict === 'A' ? sname(0) : sname(1)} e mai bun: fiecare ramură a lui are cel mult entropia perechii ei din ${worse}.`);
       return `${v} H(Y|${sname(0)}) = ${fmt4(A.hc)} ${sym} H(Y|${sname(1)}) = ${fmt4(B.hc)}.`;
     }
     // product

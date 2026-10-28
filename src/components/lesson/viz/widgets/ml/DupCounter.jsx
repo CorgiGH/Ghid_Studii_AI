@@ -2,7 +2,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useApp } from '../../../../../contexts/AppContext';
 import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
-import { dupModel, tupleText } from '../../logic/ml/dup-counter.js';
+import { dupModel, tupleText, times } from '../../logic/ml/dup-counter.js';
+import { enNoun, roNoun } from '../../logic/words.js';
 import { fmtDec } from '../../logic/ml/id3-common.js';
 import { PickBar, Val, allAnswered } from './mlParts.jsx';
 
@@ -20,6 +21,7 @@ export function DupStage({ model: M, k, predict }) {
   const up = prev && state.errs > prev.errs;
   const summary = f.kind === 'summary';
   const header = M.names.map((_, i) => L(M.headers[i]));
+  const tgt = header[M.ti];
   return (
     <div className="mlv-stack">
       <div className="viz-tablewrap mlv-table">
@@ -36,7 +38,7 @@ export function DupStage({ model: M, k, predict }) {
         </table>
       </div>
       <div className={`mlv-counter${up ? ' up' : ''}`}>
-        <span>{t('Smallest error count', 'Cele mai puține rânduri greșite')}</span>
+        <span>{t('Smallest training error', 'Eroarea minimă la antrenare')}</span>
         {prev && <><b className="mlv-dim" data-value={String(prev.errs)}>{prev.errs}</b><span className="mlv-dim">/</span><b className="mlv-dim" data-value={String(prev.n)}>{prev.n}</b><span aria-hidden="true">{'→'}</span></>}
         <b data-value={String(state.errs)}>{state.errs}</b><span>/</span><b data-value={String(state.n)}>{state.n}</b>
         {summary && <span>= <Val v={fmtDec(state.errs / state.n)} /></span>}
@@ -44,15 +46,15 @@ export function DupStage({ model: M, k, predict }) {
       {g && (
         <div className="mlv-group">
           <Val v={tupleText(g.vals)} />
-          <span>{t('appears', 'apare')} <Val v={String(g.n)} /> {t('time(s)', 'ori')}:</span>
-          {g.labels.map((l, i) => <span key={i}><Val v={String(l)} /> {'×'} <Val v={String(g.counts[i])} /></span>)}
-          {g.errs > 0 && <span>{t('wrong on', 'greșește pe')} <Val v={String(g.errs)} /></span>}
+          <span data-value={String(g.n)}>{t('appears', 'apare')} {t(times(g.n, 'en'), times(g.n, 'ro'))}:</span>
+          {g.labels.map((l, i) => <span key={i}>{tgt} = <Val v={String(l)} />: <Val v={String(g.counts[i])} />{i < g.labels.length - 1 ? ';' : ''}</span>)}
+          {g.errs > 0 && <span>{t('a tree is wrong on', 'un arbore greșește pe')} <Val v={String(g.errs)} /> {t(enNoun(g.errs, 'row', 'rows'), roNoun(g.errs, 'rând', 'rânduri'))}</span>}
         </div>
       )}
       {summary && state.contradictory.length > 0 && (
         <div className="viz-tablewrap">
-          <table className="viz-table">
-            <thead><tr><th>{t('inputs', 'intrări')}</th><th>{t('rows', 'rânduri')}</th><th>{t('most frequent', 'cea mai frecventă')}</th><th>{t('wrong', 'greșite')}</th></tr></thead>
+          <table className="viz-table mlv-sumtable">
+            <thead><tr><th>{t('inputs', 'intrări')}</th><th>{t('rows', 'rânduri')}</th><th>{t('rows with the most frequent label', 'rânduri cu eticheta cea mai frecventă')}</th><th>{t('wrong', 'greșite')}</th></tr></thead>
             <tbody>
               {state.contradictory.map((cg) => (
                 <tr key={cg.key}>

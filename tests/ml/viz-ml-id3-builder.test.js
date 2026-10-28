@@ -81,10 +81,10 @@ describe('stumps (L9, P21)', () => {
     const spec = M.pickSpec(4, true);
     expect(spec.items[0].options).toHaveLength(3);
     expect(M.pickSpec(4, false)).toBeNull();
-    expect(M.pickSpec(3, true)).toBeNull();
+    expect(M.pickSpec(3, true).items[0].key).toBe('box2'); // the boxes of the last stump are asked first
   });
   it('a pick is answered in the values caption', () => {
-    expect(M.caption(5, { picks: { best: 1 } }).ro).toContain('Ai ales In-Debt: nu e cea mai mică.');
+    expect(M.caption(5, { picks: { best: 1 } }).ro).toContain('Ai ales In-Debt: entropia lui nu e cea mai mică.');
     expect(M.caption(5, { picks: { best: 0 } }).en).toContain('You picked Home-Owner: right.');
   });
   it('showValues false stops after the boxes', () => {
@@ -298,5 +298,78 @@ describe('validateViz', () => {
     expect(ok({ mode: 'sideways', table: T20B, target: 'ill' })).not.toEqual([]);
     expect(ok({ mode: 'stumps', given: { root: [4, 4], stumps: [{ name: 'A', branches: [{ counts: [1, 2, 3] }, { counts: [3, 2] }] }] } })).not.toEqual([]);
     expect(ok({ mode: 'compare', cases: [{ nodes: [[1, 2]] }] })).not.toEqual([]);
+  });
+});
+
+describe('review fixes', () => {
+  const css = () => readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/id3.css', import.meta.url), 'utf8');
+  const stage = (M, k, predict, picks) => renderToStaticMarkup(React.createElement(Stage, { model: M, k, predict, picks }));
+  it('stumps with predict asks for the boxes of each stump before drawing them (outline L9: the learner predicts the boxes)', () => {
+    const M = stumpsModel(P21);
+    expect(M.pickSpec(1, true).items[0].key).toBe('box0');
+    expect(M.pickSpec(3, true).items[0].key).toBe('box2');
+    expect(M.pickSpec(1, false)).toBeNull();
+    const ask = M.caption(1, { predict: true, picks: {} });
+    expect(ask.ro).toContain('Home-Owner');
+    expect(numbersOf(ask.ro)).toEqual([]);
+    expect(numbersOf(ask.en)).toEqual([]);
+    expect(M.caption(1, { predict: true, picks: { box0: 'show' } }).ro).toContain('[48+,16−]');
+    const hidden = stage(M, 1, true, {});
+    expect(hidden).not.toContain('data-box="48,16"');
+    expect(hidden).toContain('data-box="64,64"');
+    expect(stage(M, 1, true, { box0: 'show' })).toContain('data-box="48,16"');
+    // an earlier stump stays drawn once its boxes were shown
+    expect(stage(M, 2, true, { box0: 'show' })).toContain('data-box="48,16"');
+    expect(stage(M, 2, true, { box0: 'show' })).not.toContain('data-box="48,48"');
+  });
+  it('the boxes asked before the formula frame still lock Next on the widget', () => {
+    const h = renderToStaticMarkup(React.createElement(Id3Builder, { props: P21, predict: true }));
+    expect(h).toContain('Rădăcina: 128 de exemple');
+  });
+  it('stumps from a table draw the table they count', () => {
+    const h = stage(stumpsModel({ mode: 'stumps', table: VAMP, target: 'V' }), 0, false, {});
+    expect(h).toContain('<th>Counts</th>');
+    expect(h).toContain('data-value="9"');
+  });
+  it('compare: before the yes/no pick the caption does not say whether the branches match', () => {
+    const M = compareModel(CASES);
+    const ask = M.caption(6, { predict: true, picks: {} });
+    expect(ask.en).not.toMatch(/does not match|cannot decide|product/);
+    expect(ask.ro).not.toMatch(/Nu se potrivește|nu poate hotărî|produsului/);
+    expect(M.caption(6, { predict: true, picks: { '2:match': 'no' } }).ro).toContain('corect');
+    expect(M.caption(6, { predict: true, picks: { '2:match': 'yes' } }).ro).toContain('Nu se potrivește');
+    expect(M.caption(6, { predict: false }).ro).toContain('Nu se potrivește');
+  });
+  it('compare: the root box the caption cites is drawn', () => {
+    const M = compareModel(CASES);
+    expect(stage(M, 0, false, {})).toContain('data-box="4,3"');
+    expect(stage(M, 6, false, {})).toContain('data-box="12,8"');
+  });
+  it('compare: Romanian for stumps with different numbers of branches, and the pair sentence', () => {
+    const M = compareModel({ mode: 'compare', cases: [{ stumps: [{ name: 'A', branches: [{ counts: [1, 1] }, { counts: [2, 0] }] }, { name: 'B', branches: [{ counts: [1, 0] }, { counts: [1, 1] }, { counts: [1, 0] }] }] }] });
+    expect(M.caption(0).ro).toContain('Cioturile au număr diferit de ramuri');
+    const C = compareModel(CASES);
+    expect(C.caption(1).ro).toMatch(/^Perechea 1:/);
+    expect(C.caption(1).ro).not.toContain('câștigă ramura');
+    expect(C.caption(2).ro).toContain('perechii ei din B');
+  });
+  it('full: rows outside the node are marked with a class of its own, not the opacity class of the BD tables', () => {
+    const h = stage(fullModel(FULL), 2, false, {});
+    expect(h).not.toMatch(/class="dim"/);
+    expect(h).toContain('mlv-out');
+  });
+  it('values caption names the smallest entropy', () => {
+    expect(stumpsModel(P21).caption(5).ro).toContain('Cea mai mică e H(Y|Home-Owner).');
+  });
+  it('css: the controls reach 44 px and coloured text uses the ink tokens, never a raw lesson token', () => {
+    expect(css()).toMatch(/\.viz\[data-widget\^="ml-"\] \.viz-btn \{[^}]*min-height: 44px/);
+    const colours = [...css().matchAll(/(?:^|[;{\s])color:\s*([^;}]+)/g)].map((m) => m[1]);
+    expect(colours.length).toBeGreaterThan(5);
+    for (const c of colours) expect(c).not.toMatch(/var\(--lt-(keep|drop|hint|acc|t\d)\)|--theme-muted-text/);
+  });
+  it('index.css defines the ML ink tokens as colour mixes of the lesson and theme tokens', () => {
+    const idx = readFileSync(new URL('../../src/index.css', import.meta.url), 'utf8');
+    for (const k of ['keep', 'drop', 'hint']) expect(idx).toContain(`--ml-${k}-ink: color-mix(in srgb, var(--lt-${k}) 70%, var(--theme-content-text));`);
+    expect(idx).toContain('--ml-muted-ink: color-mix(in srgb, var(--theme-muted-text) 60%, var(--theme-content-text));');
   });
 });

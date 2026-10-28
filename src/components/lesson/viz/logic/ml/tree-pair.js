@@ -69,22 +69,28 @@ export function treePairModel(props) {
       levels: (n) => cnt(lang, n, 'level', 'levels', 'nivel', 'niveluri'),
       leaves: (n) => cnt(lang, n, 'leaf', 'leaves', 'frunză', 'frunze'),
     };
-    const side = (i) => `${lab(titles[i], lang)}: ${listIn(lang, shown.map((k) => unit[k](st[i][k])))}`;
+    // a title inside a sentence: "the minimum tree" / "arborele minim" (a leading capital stays when the next letter is one too: ID3)
+    const mid = (i) => {
+      const x = lab(titles[i], lang);
+      const low = x.length > 1 && x[1] === x[1].toLowerCase() ? x[0].toLowerCase() + x.slice(1) : x;
+      return lang === 'en' ? `the ${low}` : low;
+    };
+    const side = (i, first) => `${first ? lab(titles[i], lang) : mid(i)}: ${listIn(lang, shown.map((k) => unit[k](st[i][k])))}`;
     let cmp = '';
     if (shown.includes('tests') && shown.includes('levels') && sameTests && levelDiff > 0) {
       cmp = T(
-        ` Both have ${unit.tests(st[0].tests)}, but ${lab(titles[fewer], lang)} has ${levelDiff} ${levelDiff === 1 ? 'level' : 'levels'} fewer.`,
-        ` Ambii au ${unit.tests(st[0].tests)}, dar ${lab(titles[fewer], lang)} are cu ${levelDiff} ${levelDiff === 1 ? 'nivel' : 'niveluri'} mai puțin.`,
+        ` Both have ${unit.tests(st[0].tests)}, but ${mid(fewer)} has ${levelDiff} ${levelDiff === 1 ? 'level' : 'levels'} fewer.`,
+        ` Ambii au ${unit.tests(st[0].tests)}, dar ${mid(fewer)} are cu ${levelDiff} ${levelDiff === 1 ? 'nivel' : 'niveluri'} mai puțin.`,
       );
     }
     let rows = '';
     if (rowsInfo) {
       rows = T(
-        ` On the ${cnt('en', rowsInfo.n, 'row', 'rows', 'rând', 'rânduri')}: ${lab(titles[0], lang)} gets ${rowsInfo.errors[0]} wrong, ${lab(titles[1], lang)} gets ${rowsInfo.errors[1]} wrong; they agree on ${rowsInfo.agree}.`,
-        ` Pe cele ${cnt('ro', rowsInfo.n, 'row', 'rows', 'rând', 'rânduri')}: ${lab(titles[0], lang)} greșește ${rowsInfo.errors[0]}, ${lab(titles[1], lang)} greșește ${rowsInfo.errors[1]}; sunt de acord pe ${rowsInfo.agree}.`,
+        ` On the ${cnt('en', rowsInfo.n, 'row', 'rows', 'rând', 'rânduri')}, errors: ${mid(0)} ${rowsInfo.errors[0]}, ${mid(1)} ${rowsInfo.errors[1]}; the two trees give the same label on ${cnt('en', rowsInfo.agree, 'row', 'rows', 'rând', 'rânduri')}.`,
+        ` Pe cele ${cnt('ro', rowsInfo.n, 'row', 'rows', 'rând', 'rânduri')}, erori: ${mid(0)} ${rowsInfo.errors[0]}, ${mid(1)} ${rowsInfo.errors[1]}; cei doi arbori dau aceeași etichetă pe ${cnt('ro', rowsInfo.agree, 'row', 'rows', 'rând', 'rânduri')}.`,
       );
     }
-    return `${side(0)}; ${side(1)}.${cmp}${rows}`;
+    return `${side(0, true)}; ${side(1, false)}.${cmp}${rows}`;
   });
   return M;
 }

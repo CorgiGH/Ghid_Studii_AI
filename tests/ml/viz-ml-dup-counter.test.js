@@ -60,9 +60,10 @@ describe('the counter (T21T2 1)', () => {
     expect(M.caption(0).ro).toContain('0/8');
     expect(M.caption(1).ro).toContain('Rând nou (0,0,0) cu Y = 1');
     expect(M.caption(1).ro).toContain('de 2 ori cu etichetele 0 (1) și 1 (1)');
-    expect(M.caption(1).ro).toContain('de la 0/8 la 1/9');
+    expect(M.caption(1).ro).toContain('Eroarea minimă la antrenare trece de la 0/8 la 1/9.');
+    expect(M.caption(1).ro).toContain('oricare etichetă ar da un arbore, greșește pe 1 rând.');
     expect(M.caption(2).ro).toContain('de la 1/9 la 2/10');
-    expect(M.caption(3).ro).toBe('Grupurile contradictorii, rânduri minus eticheta cea mai frecventă: (0,0,0): 2 − 1 = 1; (0,0,1): 2 − 1 = 1. În total 1 + 1 = 2 greșite din 10: 2/10 = 0.2.');
+    expect(M.caption(3).ro).toBe('Grupurile contradictorii, rândurile grupului minus aparițiile etichetei celei mai frecvente: (0,0,0): 2 − 1 = 1; (0,0,1): 2 − 1 = 1. În total 1 + 1 = 2 rânduri greșite din 10: 2/10 = 0.2.');
   });
   it('the counter does not move in the caption before the prediction (the base frame never names the next row)', () => {
     expect(M.caption(0, { predict: true }).ro).not.toContain('1/9');
@@ -144,5 +145,26 @@ describe('validateViz', () => {
   it('the css file has no colour literals', () => {
     const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/id3.css', import.meta.url), 'utf8');
     expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/);
+  });
+});
+
+describe('review fixes', () => {
+  const M = dupModel(PROPS);
+  it('the group line counts the rows per label in words, with the target column named', () => {
+    const html = renderToStaticMarkup(React.createElement(DupStage, { model: M, k: 1, predict: false }));
+    expect(html).toContain('apare de 2 ori');
+    expect(html).toMatch(/Y = <span data-value="0">0<\/span>: <span data-value="1">1<\/span>/);
+    expect(html).toContain('un arbore greșește pe');
+    expect(html).not.toContain('time(s)');
+  });
+  it('the counter is called the smallest training error, the same words as the caption', () => {
+    const html = renderToStaticMarkup(React.createElement(DupStage, { model: M, k: 0, predict: false }));
+    expect(html).toContain('Eroarea minimă la antrenare');
+    expect(M.pickSpec(0, true).items[0].prompt.ro).toContain('eroarea minimă la antrenare');
+  });
+  it('the summary table headers may wrap so the four columns fit a phone', () => {
+    const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/id3.css', import.meta.url), 'utf8');
+    expect(css).toMatch(/\.mlv-sumtable th \{[^}]*white-space: normal/);
+    expect(renderToStaticMarkup(React.createElement(DupStage, { model: M, k: 3, predict: false }))).toContain('mlv-sumtable');
   });
 });

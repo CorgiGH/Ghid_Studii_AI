@@ -12,8 +12,27 @@ const useL = () => {
   return { t, L };
 };
 
+// the data table of a widget (the rows the boxes count); rowClass marks rows in or out of a node
+function DataTable({ headers, rows, rowClass }) {
+  const { L } = useL();
+  return (
+    <div className="viz-tablewrap mlv-table">
+      <table className="viz-table">
+        <thead><tr>{headers.map((h, i) => <th key={i}>{L(h)}</th>)}</tr></thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className={rowClass ? rowClass(i) : ''}>
+              {r.map((c, j) => <td key={j} data-value={String(c)}>{String(c)}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // ---------------- mode stumps ----------------
-export function StumpsStage({ model: M, k }) {
+export function StumpsStage({ model: M, k, predict = false, picks = {} }) {
   const { t, L } = useL();
   const f = M.frames[k];
   const cards = f.kind === 'setup' ? 0 : f.kind === 'boxes' ? f.i + 1 : M.stumps.length;
@@ -21,8 +40,10 @@ export function StumpsStage({ model: M, k }) {
   const showVal = f.kind === 'values' || f.kind === 'winner';
   const winner = f.kind === 'winner';
   const tg = L(M.targetLabel);
+  const hideCur = M.boxesHidden(k, { predict, picks });
   return (
     <div className="mlv-stack">
+      {M.table && <DataTable headers={M.table.headers} rows={M.table.rows} />}
       <div className="mlv-root" data-node="root">
         <b>{t('Root', 'Rădăcina')}</b>
         <CountBox counts={M.rootCounts} />
@@ -38,7 +59,7 @@ export function StumpsStage({ model: M, k }) {
               {s.branches.map((b, j) => (
                 <div key={j} className="mlv-branch">
                   <span className="mlv-bval">{L(b.value)}</span>
-                  <CountBox counts={b.counts} />
+                  <CountBox counts={b.counts} hidden={hideCur && f.i === i} />
                   {winner && i === M.best && (
                     <>
                       <span className="mlv-leaf">{'→'} {M.leaves[i][j].tie ? t('tie', 'egal') : String(M.leaves[i][j].label)}</span>
@@ -94,6 +115,7 @@ function PairRows({ c, f }) {
   );
   return (
     <div className="mlv-stack">
+      <div className="mlv-root" data-node="root"><b>{t('Root', 'Rădăcina')}</b><CountBox counts={c.rootCounts} /></div>
       <span className="mlv-cmp-name">{L(A.label)}</span>
       {row(A, wts)}
       {showSym && (
@@ -108,6 +130,7 @@ function PairRows({ c, f }) {
           ))}
         </div>
       )}
+      {showSym && f.kind === 'symbols' && <span className="mlv-dim">{t('H(p) grows on', 'H(p) crește pe')} [<Val v="0" />, <Val v="1/2" />]</span>}
       <span className="mlv-cmp-name">{L(B.label)}</span>
       {row(B, wts)}
     </div>
@@ -151,7 +174,8 @@ function ProductPanel({ c }) {
               ))}
               {' = '}<b data-value={fmtBig(pr.value)} className={isWin ? 'mlv-win' : ''}>{fmtBig(pr.value)}</b>
             </p>
-            <p>H(Y|{L(S.label)}) = log<sub>2</sub> P / <Val v={showN(c.N)} /> = <b data-value={fmt4(pr.hc)}>{fmt4(pr.hc)}</b>{'  '}IG = <Val v={fmt4(c.hRoot)} /> {MINUS} {fmt4(pr.hc)} = <Val v={fmt4(igv)} /></p>
+            <p>H(Y|{L(S.label)}) = log<sub>2</sub> P / <Val v={showN(c.N)} /> = <b data-value={fmt4(pr.hc)}>{fmt4(pr.hc)}</b></p>
+            <p>IG({L(S.label)}) = <Val v={fmt4(c.hRoot)} /> {MINUS} {fmt4(pr.hc)} = <Val v={fmt4(igv)} /></p>
           </div>
         );
       })}
@@ -175,7 +199,7 @@ function NodesRows({ c, f }) {
         <div className="mlv-expr">
           <span>{t('minority share', 'cota minoritară')}</span><Val v={showN(a.share)} /><span>{c.sym}</span><Val v={showN(b.share)} />
           {a.share.d !== b.share.d && <><span aria-hidden="true">=</span><Val v={`${cd.x}/${cd.den}`} /><span>{c.sym}</span><Val v={`${cd.y}/${cd.den}`} /></>}
-          <span className="mlv-dim">{t('both below', 'amândouă sub')} <Val v="1/2" /></span>
+          <span className="mlv-dim">{t('H(p) grows on', 'H(p) crește pe')} [<Val v="0" />, <Val v="1/2" />]</span>
         </div>
       )}
     </div>
@@ -226,18 +250,7 @@ export function FullStage({ model: M, k, predict }) {
   const e = f.kind === 'split' ? M.expansions[f.e] : null;
   return (
     <div className="mlv-stack">
-      <div className="viz-tablewrap mlv-table">
-        <table className="viz-table">
-          <thead><tr>{M.P.headers.map((h, i) => <th key={i}>{L(h)}</th>)}</tr></thead>
-          <tbody>
-            {M.P.rows.map((r, i) => (
-              <tr key={i} className={focusIds ? (focusIds.has(i) ? 'pick' : 'dim') : ''}>
-                {r.map((c, j) => <td key={j}>{String(c)}</td>)}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable headers={M.P.headers} rows={M.P.rows} rowClass={(i) => (focusIds ? (focusIds.has(i) ? 'pick' : 'mlv-out') : '')} />
       <ul className="mlv-tree" data-tree="">
         <TreeNode node={M.root} k={k} M={M} markNext={markNext} />
       </ul>
@@ -279,8 +292,8 @@ export function FullStage({ model: M, k, predict }) {
   );
 }
 
-export function Stage({ model, k, predict }) {
-  if (model.mode === 'stumps') return <StumpsStage model={model} k={k} />;
+export function Stage({ model, k, predict, picks = {} }) {
+  if (model.mode === 'stumps') return <StumpsStage model={model} k={k} predict={predict} picks={picks} />;
   if (model.mode === 'compare') return <CompareStage model={model} k={k} />;
   return <FullStage model={model} k={k} predict={predict} />;
 }
@@ -309,7 +322,7 @@ export default function Id3Builder({ props, predict }) {
     : props.mode === 'compare' ? t('Comparing two stumps', 'Compararea a două cioturi') : t('ID3 by hand', 'ID3 de mână');
   return (
     <VizFrame widget="ml-id3-builder" stepper={stepper} caption={t(cap.en, cap.ro)} label={label}>
-      <Stage model={model} k={s.step} predict={!!predict} />
+      <Stage model={model} k={s.step} predict={!!predict} picks={picks} />
       <PickBar spec={spec} picks={picks} onPick={onPick} t={t} L={L} />
     </VizFrame>
   );

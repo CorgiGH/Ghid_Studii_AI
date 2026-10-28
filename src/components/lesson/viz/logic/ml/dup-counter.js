@@ -58,7 +58,7 @@ export function dupModel(props) {
     return {
       items: [{
         key: `add${k + 1}`,
-        prompt: { en: 'When this row is added, the smallest error count: stays the same or goes up by 1?', ro: 'Când adaug rândul acesta, numărul minim de rânduri greșite: rămâne la fel sau crește cu 1?' },
+        prompt: { en: 'When this row is added, does the smallest training error (rows wrong) stay the same or go up by 1?', ro: 'Când se adaugă rândul acesta, eroarea minimă la antrenare (rânduri greșite) rămâne la fel sau crește cu 1?' },
         options: [{ id: 'same', label: { en: 'Stays the same', ro: 'Rămâne la fel' } }, { id: 'up', label: { en: 'Goes up by 1', ro: 'Crește cu 1' } }],
       }],
     };
@@ -86,7 +86,7 @@ export function dupModel(props) {
       const key = tupleText(g.vals);
       const lbl = String(row[ti]);
       const delta = cur.errs - prev.errs;
-      const counter = T(`The smallest error count goes from ${prev.errs}/${prev.n} to ${cur.errs}/${cur.n}.`, `Numărul minim de rânduri greșite trece de la ${prev.errs}/${prev.n} la ${cur.errs}/${cur.n}.`);
+      const counter = T(`The smallest training error goes from ${prev.errs}/${prev.n} to ${cur.errs}/${cur.n}.`, `Eroarea minimă la antrenare trece de la ${prev.errs}/${prev.n} la ${cur.errs}/${cur.n}.`);
       const pk = ctx.picks?.[`add${f.j}`];
       const fb = pk === undefined ? '' : (pk === 'up') === (delta === 1) ? T(' You predicted it.', ' Ai prezis corect.') : T(' Not what you predicted.', ' Nu cum ai prezis.');
       let what;
@@ -96,9 +96,10 @@ export function dupModel(props) {
         what = T(`New row ${key} with ${tgt} = ${lbl}: these inputs now appear ${times(g.n, 'en')}, always with the same label. A repeated example contradicts nothing.`, `Rând nou ${key} cu ${tgt} = ${lbl}: aceste intrări apar acum ${times(g.n, 'ro')}, mereu cu aceeași etichetă. Un exemplu repetat nu contrazice nimic.`);
       } else {
         const lc = g.labels.map((l, i) => `${String(l)} (${g.counts[i]})`);
+        const wrong = cnt(lang, g.errs, 'row', 'rows', 'rând', 'rânduri');
         const tie = g.tie
-          ? T(` The labels are tied (${listIn(lang, g.counts.map(String))}): whichever label a tree gives, it is wrong on ${g.errs}.`, ` Etichetele sunt la egalitate (${listIn(lang, g.counts.map(String))}): oricare etichetă ar da un arbore, greșește pe ${g.errs}.`)
-          : T(` A tree gives all of them one label, so it is wrong on ${g.errs}.`, ` Un arbore le dă o singură etichetă, deci greșește pe ${g.errs}.`);
+          ? T(` The labels are tied (${listIn(lang, g.counts.map(String))}): whichever label a tree gives, it is wrong on ${wrong}.`, ` Etichetele sunt la egalitate (${listIn(lang, g.counts.map(String))}): oricare etichetă ar da un arbore, greșește pe ${wrong}.`)
+          : T(` A tree gives all of them one label, so it is wrong on ${wrong}.`, ` Un arbore le dă o singură etichetă, deci greșește pe ${wrong}.`);
         what = T(`New row ${key} with ${tgt} = ${lbl}: these inputs now appear ${times(g.n, 'en')} with labels ${listIn(lang, lc)}.${tie}`, `Rând nou ${key} cu ${tgt} = ${lbl}: aceste intrări apar acum ${times(g.n, 'ro')} cu etichetele ${listIn(lang, lc)}.${tie}`);
       }
       return `${what} ${counter}${fb}`;
@@ -109,8 +110,8 @@ export function dupModel(props) {
     }
     const parts = s.contradictory.map((g) => `${tupleText(g.vals)}: ${g.n} − ${g.max} = ${g.errs}`);
     return T(
-      `Contradictory groups, rows minus the most frequent label: ${parts.join('; ')}. Total ${s.contradictory.map((g) => g.errs).join(' + ')} = ${s.errs} wrong out of ${s.n}: ${s.errs}/${s.n} = ${fmtDec(s.errs / s.n)}.`,
-      `Grupurile contradictorii, rânduri minus eticheta cea mai frecventă: ${parts.join('; ')}. În total ${s.contradictory.map((g) => g.errs).join(' + ')} = ${s.errs} greșite din ${s.n}: ${s.errs}/${s.n} = ${fmtDec(s.errs / s.n)}.`,
+      `Contradictory groups, the rows of the group minus the rows with its most frequent label: ${parts.join('; ')}. In total ${s.contradictory.map((g) => g.errs).join(' + ')} = ${cnt('en', s.errs, 'row', 'rows', 'rând', 'rânduri')} wrong out of ${s.n}: ${s.errs}/${s.n} = ${fmtDec(s.errs / s.n)}.`,
+      `Grupurile contradictorii, rândurile grupului minus aparițiile etichetei celei mai frecvente: ${parts.join('; ')}. În total ${s.contradictory.map((g) => g.errs).join(' + ')} = ${cnt('ro', s.errs, 'row', 'rows', 'rând', 'rânduri')} greșite din ${s.n}: ${s.errs}/${s.n} = ${fmtDec(s.errs / s.n)}.`,
     );
   });
   return M;

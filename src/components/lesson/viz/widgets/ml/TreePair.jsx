@@ -42,7 +42,7 @@ export function PairBody({ model: M }) {
       {(M.levelDiff > 0 || M.rowsInfo) && (
         <div className="mlv-sum" style={{ gridColumn: '1 / -1' }}>
           {M.levelDiff > 0 && M.sameTests && <span className="viz-badge">{t('level difference', 'diferența de niveluri')} <Val v={String(M.levelDiff)} /></span>}
-          {M.rowsInfo && <span className="viz-badge">{t('agree on', 'de acord pe')} <Val v={String(M.rowsInfo.agree)} /> / <Val v={String(M.rowsInfo.n)} /></span>}
+          {M.rowsInfo && <span className="viz-badge">{t('same label on', 'aceeași etichetă pe')} <Val v={String(M.rowsInfo.agree)} /> / <Val v={String(M.rowsInfo.n)} /></span>}
         </div>
       )}
     </div>

@@ -52,8 +52,9 @@ describe('tree stats (E 4.4)', () => {
 describe('model and caption', () => {
   const M = treePairModel(PROPS);
   it('says 3 tests on 3 levels against 3 tests on 2 levels, one level fewer', () => {
-    expect(M.caption().ro).toBe('Arborele ID3: 3 teste și 3 niveluri; Arborele minim: 3 teste și 2 niveluri. Ambii au 3 teste, dar Arborele minim are cu 1 nivel mai puțin. Pe cele 4 rânduri: Arborele ID3 greșește 0, Arborele minim greșește 0; sunt de acord pe 4.');
-    expect(M.caption().en).toContain('Both have 3 tests, but Minimum tree has 1 level fewer.');
+    expect(M.caption().ro).toBe('Arborele ID3: 3 teste și 3 niveluri; arborele minim: 3 teste și 2 niveluri. Ambii au 3 teste, dar arborele minim are cu 1 nivel mai puțin. Pe cele 4 rânduri, erori: arborele ID3 0, arborele minim 0; cei doi arbori dau aceeași etichetă pe 4 rânduri.');
+    expect(M.caption().en).toContain('Both have 3 tests, but the minimum tree has 1 level fewer.');
+    expect(M.caption().en).toContain('On the 4 rows, errors: the ID3 tree 0, the minimum tree 0; the two trees give the same label on 4 rows.');
     expect(M.fewer).toBe(1);
   });
   it('without the table or with different test counts the sentence adapts', () => {

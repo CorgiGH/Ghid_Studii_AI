@@ -7,15 +7,15 @@ export function Val({ v, children, ...rest }) {
   return <span data-value={v} {...rest}>{children ?? v}</span>;
 }
 
-// "[48+,16-]": one mark per count
-export function CountBox({ counts }) {
+// "[48+,16-]": one mark per count; `hidden` draws "[?+,?-]" (the counts are still to be predicted)
+export function CountBox({ counts, hidden = false }) {
   return (
-    <span className="mlv-box" data-box={counts.map(showN).join(',')}>
+    <span className={`mlv-box${hidden ? ' hidden' : ''}`} data-box={hidden ? undefined : counts.map(showN).join(',')}>
       <span className="mlv-sep" aria-hidden="true">[</span>
       {counts.map((c, i) => (
         <React.Fragment key={i}>
           {i > 0 && <span className="mlv-sep" aria-hidden="true">,</span>}
-          <span className={`mlv-c c${i}`}><b data-value={showN(c)}>{showN(c)}</b>{SYMS[i] ?? '?'}</span>
+          <span className={`mlv-c c${i}`}>{hidden ? <b>?</b> : <b data-value={showN(c)}>{showN(c)}</b>}{SYMS[i] ?? '?'}</span>
         </React.Fragment>
       ))}
       <span className="mlv-sep" aria-hidden="true">]</span>
