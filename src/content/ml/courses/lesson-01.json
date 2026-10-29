@@ -1,0 +1,2148 @@
+{
+  "meta": {
+    "id": "ml-l01",
+    "title": {
+      "en": "Lesson 1: Probability, conditional probability, the multiplication rule",
+      "ro": "Lecția 1: Probabilitate, probabilitate condiționată, regula de înmulțire"
+    },
+    "shortTitle": {
+      "en": "L1: Probability",
+      "ro": "L1: Probabilitate"
+    },
+    "source": {
+      "en": "Ciortuz, Machine Learning, UAIC FII",
+      "ro": "Ciortuz, Învățare automată, UAIC FII"
+    }
+  },
+  "steps": [
+    {
+      "id": "ml-l01-s1",
+      "title": {
+        "en": "A die and a piece of news",
+        "ro": "Un zar și o informație"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r1",
+          "prompt": {
+            "en": "We roll a fair die with faces 1, 2, 3, 4, 5 and 6. A friend looks at the die and tells us only this: **an even face came up**. What is the probability now that a 6 came up? Write a number or a fraction; it is fine if you are not sure.",
+            "ro": "Aruncăm un zar corect, cu fețele 1, 2, 3, 4, 5 și 6. Un prieten se uită la zar și ne spune doar atât: **a căzut o față pară**. Cât este acum probabilitatea să fi căzut 6? Scrie un număr sau o fracție; nu-i nimic dacă nu ești sigur."
+          },
+          "placeholder": {
+            "en": "Write a number or a fraction",
+            "ro": "Scrie un număr sau o fracție"
+          },
+          "answer": {
+            "en": "Keep your answer, whatever it is. You check it on the screen with the die drawn out, further on in the lesson.",
+            "ro": "Păstrează răspunsul tău, oricare ar fi. Îl verifici pe ecranul cu zarul desenat, mai departe în lecție."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s2",
+      "title": {
+        "en": "Outcomes and events",
+        "ro": "Rezultate și evenimente"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "A **random experiment** is an action whose result we do not know in advance: we roll a die, we draw a ball from an urn. The set of all possible results is written $\\Omega$ (the Greek letter omega) and is called the **sample space**. Here we take an experiment with only three possible results: $\\Omega = \\{a, b, c\\}$.\n\nAn **event** is any subset of $\\Omega$, that is, any group of results taken from $\\Omega$: the group may be empty (written $\\emptyset$), may hold a single result, or may be all of $\\Omega$. We say that the event $A$ happened if the result of the experiment lies in $A$. The set of all events is written $\\mathcal F$ and is called the **event space**; it is $\\mathcal F = 2^\\Omega$.",
+            "ro": "Un **experiment aleator** este o acțiune al cărei rezultat nu îl știm dinainte: aruncăm un zar, tragem o bilă dintr-o urnă. Mulțimea tuturor rezultatelor posibile se notează $\\Omega$ (litera greacă omega) și se numește **spațiul de eșantionare**. Aici luăm un experiment cu doar trei rezultate posibile: $\\Omega = \\{a, b, c\\}$.\n\nUn **eveniment** este orice submulțime a lui $\\Omega$, adică orice grup de rezultate luate din $\\Omega$: grupul poate fi gol (se scrie $\\emptyset$), poate avea un singur rezultat sau poate fi chiar $\\Omega$ întreg. Spunem că evenimentul $A$ s-a întâmplat dacă rezultatul experimentului se află în $A$. Mulțimea tuturor evenimentelor se notează $\\mathcal F$ și se numește **spațiul evenimentelor**; ea este $\\mathcal F = 2^\\Omega$."
+          }
+        },
+        {
+          "type": "reflect",
+          "id": "ml-l01-r2",
+          "prompt": {
+            "en": "How many events does $\\mathcal F$ have? Count the empty group and the whole of $\\Omega$ too.",
+            "ro": "Câte evenimente are $\\mathcal F$? Numără și grupul gol, și pe $\\Omega$ întreg."
+          },
+          "placeholder": {
+            "en": "Write a number",
+            "ro": "Scrie un număr"
+          },
+          "answer": {
+            "en": "**Eight.** Each of the 3 results is either in the event or not, so there are $2 \\cdot 2 \\cdot 2 = 2^3 = 8$ events: $\\emptyset$, {a}, {b}, {c}, {a, b}, {a, c}, {b, c} and $\\Omega$. This is where the notation $2^\\Omega$ comes from.",
+            "ro": "**Opt.** Fiecare dintre cele 3 rezultate este fie în eveniment, fie nu, deci sunt $2 \\cdot 2 \\cdot 2 = 2^3 = 8$ evenimente: $\\emptyset$, {a}, {b}, {c}, {a, b}, {a, c}, {b, c} și $\\Omega$. De aici vine scrierea $2^\\Omega$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s3",
+      "title": {
+        "en": "Which function cannot be a probability?",
+        "ro": "Care funcție nu poate fi probabilitate?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r3",
+          "prompt": {
+            "en": "A **probability** gives every event a number. Someone started writing four functions $f_1, f_2, f_3, f_4$ that are supposed to be probabilities on $\\mathcal F$; a dash means the value is not written yet. One of them already holds a value that cannot be a probability. Which one?",
+            "ro": "O **probabilitate** dă fiecărui eveniment un număr. Cineva a început să scrie patru funcții $f_1, f_2, f_3, f_4$ care ar trebui să fie probabilități pe $\\mathcal F$; liniuța înseamnă că valoarea nu e scrisă încă. Una dintre ele are deja o valoare care nu poate fi o probabilitate. Care?"
+          },
+          "placeholder": {
+            "en": "Write the name of the function",
+            "ro": "Scrie numele funcției"
+          },
+          "answer": {
+            "en": "**$f_4$**: the value 1.5 is above 1. A probability is a number between 0 and 1 (0 means the event never happens, 1 means it surely happens). The other mistakes are not as easy to see; we find them on the next screens.",
+            "ro": "**$f_4$**: valoarea 1,5 depășește 1. O probabilitate este un număr între 0 și 1 (0 înseamnă că evenimentul nu se întâmplă niciodată, 1 că se întâmplă sigur). Celelalte greșeli nu se văd la fel de ușor; le găsim pe ecranele următoare."
+          },
+          "table": {
+            "caption": {
+              "en": "Four functions, only partly filled in",
+              "ro": "Patru funcții, completate doar în parte"
+            },
+            "columns": [
+              {
+                "en": "event",
+                "ro": "eveniment"
+              },
+              "$f_1$",
+              "$f_2$",
+              "$f_3$",
+              "$f_4$"
+            ],
+            "rows": [
+              [
+                "$\\emptyset$",
+                "—",
+                "1/2",
+                "—",
+                "—"
+              ],
+              [
+                "{a}",
+                "1/3",
+                "—",
+                "—",
+                "1.5"
+              ],
+              [
+                "{b}",
+                "1/3",
+                "—",
+                "—",
+                "—"
+              ],
+              [
+                "{c}",
+                "1/3",
+                "—",
+                "2/3",
+                "—"
+              ],
+              [
+                "{a, b}",
+                "—",
+                "—",
+                "1/3",
+                "—"
+              ],
+              [
+                "{a, c}",
+                "—",
+                "—",
+                "1/3",
+                "—"
+              ],
+              [
+                "{b, c}",
+                "—",
+                "—",
+                "—",
+                "—"
+              ],
+              [
+                "$\\Omega$",
+                "1",
+                "—",
+                "—",
+                "—"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s4",
+      "title": {
+        "en": "The probability of the impossible event",
+        "ro": "Probabilitatea evenimentului imposibil"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r4",
+          "prompt": {
+            "en": "The function $f_2$ gives the impossible event $\\emptyset$ the value 1/2. What value should the probability of the impossible event have?",
+            "ro": "Funcția $f_2$ dă evenimentului imposibil $\\emptyset$ valoarea 1/2. Ce valoare ar trebui să aibă probabilitatea evenimentului imposibil?"
+          },
+          "placeholder": {
+            "en": "Write a number",
+            "ro": "Scrie un număr"
+          },
+          "answer": {
+            "en": "**0.** An event that cannot happen has no chance at all. So $f_2$ cannot be a probability. Further down we show the same thing from the definition alone.",
+            "ro": "**0.** Un eveniment care nu se poate întâmpla nu are nicio șansă. Deci $f_2$ nu poate fi probabilitate. Mai jos arătăm același lucru doar din definiție."
+          },
+          "table": {
+            "caption": {
+              "en": "Four functions, only partly filled in",
+              "ro": "Patru funcții, completate doar în parte"
+            },
+            "columns": [
+              {
+                "en": "event",
+                "ro": "eveniment"
+              },
+              "$f_1$",
+              "$f_2$",
+              "$f_3$",
+              "$f_4$"
+            ],
+            "rows": [
+              [
+                "$\\emptyset$",
+                "—",
+                "1/2",
+                "—",
+                "—"
+              ],
+              [
+                "{a}",
+                "1/3",
+                "—",
+                "—",
+                "1.5"
+              ],
+              [
+                "{b}",
+                "1/3",
+                "—",
+                "—",
+                "—"
+              ],
+              [
+                "{c}",
+                "1/3",
+                "—",
+                "2/3",
+                "—"
+              ],
+              [
+                "{a, b}",
+                "—",
+                "—",
+                "1/3",
+                "—"
+              ],
+              [
+                "{a, c}",
+                "—",
+                "—",
+                "1/3",
+                "—"
+              ],
+              [
+                "{b, c}",
+                "—",
+                "—",
+                "—",
+                "—"
+              ],
+              [
+                "$\\Omega$",
+                "1",
+                "—",
+                "—",
+                "—"
+              ]
+            ],
+            "highlight": {
+              "rows": [
+                0
+              ],
+              "cols": [
+                2
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s5",
+      "title": {
+        "en": "An event more probable than one that contains it",
+        "ro": "Un eveniment mai probabil decât unul care îl conține"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r5",
+          "prompt": {
+            "en": "In $f_3$, the event {c} has 2/3, but {a, c}, which contains {c}, has only 1/3. Can an event be more probable than an event that contains it?",
+            "ro": "La $f_3$, evenimentul {c} are 2/3, dar {a, c}, care îl conține pe {c}, are doar 1/3. Poate un eveniment să fie mai probabil decât un eveniment care îl conține?"
+          },
+          "placeholder": {
+            "en": "Write yes or no",
+            "ro": "Scrie da sau nu"
+          },
+          "answer": {
+            "en": "**No.** If {c} happened, then {a, c} happened too; so {a, c} cannot be less probable. Hence $f_3$ cannot be a probability. We prove the rule further down.",
+            "ro": "**Nu.** Dacă {c} s-a întâmplat, s-a întâmplat și {a, c}; deci {a, c} nu poate fi mai puțin probabil. Așadar $f_3$ nu poate fi probabilitate. Regula o demonstrăm mai jos."
+          },
+          "table": {
+            "caption": {
+              "en": "Four functions, only partly filled in",
+              "ro": "Patru funcții, completate doar în parte"
+            },
+            "columns": [
+              {
+                "en": "event",
+                "ro": "eveniment"
+              },
+              "$f_1$",
+              "$f_2$",
+              "$f_3$",
+              "$f_4$"
+            ],
+            "rows": [
+              [
+                "$\\emptyset$",
+                "—",
+                "1/2",
+                "—",
+                "—"
+              ],
+              [
+                "{a}",
+                "1/3",
+                "—",
+                "—",
+                "1.5"
+              ],
+              [
+                "{b}",
+                "1/3",
+                "—",
+                "—",
+                "—"
+              ],
+              [
+                "{c}",
+                "1/3",
+                "—",
+                "2/3",
+                "—"
+              ],
+              [
+                "{a, b}",
+                "—",
+                "—",
+                "1/3",
+                "—"
+              ],
+              [
+                "{a, c}",
+                "—",
+                "—",
+                "1/3",
+                "—"
+              ],
+              [
+                "{b, c}",
+                "—",
+                "—",
+                "—",
+                "—"
+              ],
+              [
+                "$\\Omega$",
+                "1",
+                "—",
+                "—",
+                "—"
+              ]
+            ],
+            "highlight": {
+              "rows": [
+                3,
+                5
+              ],
+              "cols": [
+                3
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s6",
+      "title": {
+        "en": "How to fill in a correct function",
+        "ro": "Cum se completează o funcție corectă"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r6",
+          "prompt": {
+            "en": "$f_1$ has no contradiction so far. What must $f_1(\\{a, b\\})$ be? Write a fraction.",
+            "ro": "$f_1$ nu are nicio contradicție până acum. Cât trebuie să fie $f_1(\\{a, b\\})$? Scrie o fracție."
+          },
+          "placeholder": {
+            "en": "Write a fraction",
+            "ro": "Scrie o fracție"
+          },
+          "answer": {
+            "en": "**2/3.** The events {a} and {b} have no result in common (they are **disjoint**), and {a, b} happens exactly when one of them happens: $f_1(\\{a, b\\}) = 1/3 + 1/3 = 2/3$. In the same way $f_1(\\{a, c\\}) = f_1(\\{b, c\\}) = 2/3$, and $f_1(\\emptyset) = 0$. Check: $1/3 + 1/3 + 1/3 = 1 = f_1(\\Omega)$. So $f_1$ is a correct probability; $f_2$, $f_3$ and $f_4$ are not.",
+            "ro": "**2/3.** Evenimentele {a} și {b} nu au rezultate comune (sunt **disjuncte**), iar {a, b} se întâmplă exact când se întâmplă unul dintre ele: $f_1(\\{a, b\\}) = 1/3 + 1/3 = 2/3$. La fel, $f_1(\\{a, c\\}) = f_1(\\{b, c\\}) = 2/3$, iar $f_1(\\emptyset) = 0$. Verificare: $1/3 + 1/3 + 1/3 = 1 = f_1(\\Omega)$. Deci $f_1$ este o probabilitate corectă; $f_2$, $f_3$ și $f_4$ nu sunt."
+          },
+          "table": {
+            "caption": {
+              "en": "Four functions, only partly filled in",
+              "ro": "Patru funcții, completate doar în parte"
+            },
+            "columns": [
+              {
+                "en": "event",
+                "ro": "eveniment"
+              },
+              "$f_1$",
+              "$f_2$",
+              "$f_3$",
+              "$f_4$"
+            ],
+            "rows": [
+              [
+                "$\\emptyset$",
+                "—",
+                "1/2",
+                "—",
+                "—"
+              ],
+              [
+                "{a}",
+                "1/3",
+                "—",
+                "—",
+                "1.5"
+              ],
+              [
+                "{b}",
+                "1/3",
+                "—",
+                "—",
+                "—"
+              ],
+              [
+                "{c}",
+                "1/3",
+                "—",
+                "2/3",
+                "—"
+              ],
+              [
+                "{a, b}",
+                "—",
+                "—",
+                "1/3",
+                "—"
+              ],
+              [
+                "{a, c}",
+                "—",
+                "—",
+                "1/3",
+                "—"
+              ],
+              [
+                "{b, c}",
+                "—",
+                "—",
+                "—",
+                "—"
+              ],
+              [
+                "$\\Omega$",
+                "1",
+                "—",
+                "—",
+                "—"
+              ]
+            ],
+            "highlight": {
+              "rows": [
+                4
+              ],
+              "cols": [
+                1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s7",
+      "title": {
+        "en": "The probability space",
+        "ro": "Spațiul de probabilitate"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Probability space",
+            "ro": "Spațiul de probabilitate"
+          },
+          "content": {
+            "en": "A **probability space** has three parts, $(\\Omega, \\mathcal F, P)$. $\\Omega$ is the sample space (the possible results). An **event** is a subset $A \\subseteq \\Omega$ (read: $A$ included in $\\Omega$): $\\Omega$ is the **sure** event, $\\emptyset$ is the **impossible** event, and $\\{\\omega\\}$, with a single result, is an **elementary** event. The event space is $\\mathcal F = 2^\\Omega$.\n\nThe **probability function** $P : \\mathcal F \\to [0, 1]$ gives every event a number between 0 and 1 and has two properties. The first: $P(\\Omega) = 1$. The second, **countable additivity**: for events $A_1, A_2, \\dots$ with no results in common (disjoint), $$P\\left(\\bigcup_i A_i\\right) = \\sum_i P(A_i).$$ Here $\\bigcup_i A_i$ is their union (the event that happens when at least one of them happens), and $\\sum_i$ means the sum.\n\nLecture: slide 4. Workbook: p. 23.",
+            "ro": "Un **spațiu de probabilitate** are trei părți, $(\\Omega, \\mathcal F, P)$. $\\Omega$ este spațiul de eșantionare (rezultatele posibile). Un **eveniment** este o submulțime $A \\subseteq \\Omega$ (se citește: $A$ inclusă în $\\Omega$): $\\Omega$ este evenimentul **sigur**, $\\emptyset$ este evenimentul **imposibil**, iar $\\{\\omega\\}$, cu un singur rezultat, este un eveniment **elementar**. Spațiul evenimentelor este $\\mathcal F = 2^\\Omega$.\n\n**Funcția de probabilitate** $P : \\mathcal F \\to [0, 1]$ dă fiecărui eveniment un număr între 0 și 1 și are două proprietăți. Prima: $P(\\Omega) = 1$. A doua, **aditivitatea numărabilă**: pentru evenimente $A_1, A_2, \\dots$ fără rezultate comune (disjuncte), $$P\\left(\\bigcup_i A_i\\right) = \\sum_i P(A_i).$$ Aici $\\bigcup_i A_i$ este reuniunea lor (evenimentul care se întâmplă când se întâmplă cel puțin unul dintre ele), iar $\\sum_i$ înseamnă suma.\n\nCursul: slide 4. Culegerea: p. 23."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s8",
+      "title": {
+        "en": "The uniform case and set notation",
+        "ro": "Cazul uniform și scrierea cu mulțimi"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**The uniform case.** If $\\Omega$ is finite and all elementary results are equally likely, then $P(A) = \\dfrac{m}{n}$, where $m$ is the number of cases favourable to $A$ and $n$ the number of possible cases. Example: for a fair die, with $A$ = even number = {2, 4, 6}, we get $P(A) = 3/6 = 1/2$.\n\nEvents are combined with operations on sets. The table shows how the words and, or and not are written: $\\cup$ is the union, $\\cap$ is the intersection (the results in common), and the bar on top, as in $\\bar A$, is the complement.",
+            "ro": "**Cazul uniform.** Dacă $\\Omega$ este finit și toate rezultatele elementare sunt la fel de probabile, atunci $P(A) = \\dfrac{m}{n}$, unde $m$ este numărul de cazuri favorabile lui $A$ și $n$ numărul de cazuri posibile. Exemplu: la un zar corect, pentru $A$ = număr par = {2, 4, 6}, avem $P(A) = 3/6 = 1/2$.\n\nEvenimentele se combină cu operații pe mulțimi. În tabel vezi cum se scriu cuvintele și, sau și non: $\\cup$ este reuniunea, $\\cap$ este intersecția (rezultatele comune), iar bara de deasupra, ca în $\\bar A$, este complementul."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "en": "In words",
+              "ro": "În cuvinte"
+            },
+            {
+              "en": "With sets",
+              "ro": "Cu mulțimi"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "en": "A or B",
+                "ro": "A sau B"
+              },
+              {
+                "en": "$A \\cup B$",
+                "ro": "$A \\cup B$"
+              }
+            ],
+            [
+              {
+                "en": "A and B",
+                "ro": "A și B"
+              },
+              {
+                "en": "$A \\cap B$",
+                "ro": "$A \\cap B$"
+              }
+            ],
+            [
+              {
+                "en": "not A (the complement of A)",
+                "ro": "non A (complementul lui A)"
+              },
+              {
+                "en": "$\\bar A$",
+                "ro": "$\\bar A$"
+              }
+            ],
+            [
+              {
+                "en": "A or B, but not both",
+                "ro": "A sau B, dar nu amândouă"
+              },
+              {
+                "en": "$(A \\cup B) \\setminus (A \\cap B)$",
+                "ro": "$(A \\cup B) \\setminus (A \\cap B)$"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Two events are **incompatible** if $P(A \\cap B) = 0$, that is, they cannot happen together. A comma between events means intersection: $P(A, B) = P(A \\cap B)$.\n\nLecture: slide 4. Workbook: p. 23, ex. 0.1.c.",
+            "ro": "Două evenimente sunt **incompatibile** dacă $P(A \\cap B) = 0$, adică nu pot avea loc împreună. Virgula între evenimente înseamnă intersecție: $P(A, B) = P(A \\cap B)$.\n\nCursul: slide 4. Culegerea: p. 23, ex. 0.1.c."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s9",
+      "title": {
+        "en": "Why the impossible event has probability 0",
+        "ro": "De ce probabilitatea evenimentului imposibil este 0"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r7",
+          "prompt": {
+            "en": "Using only the two properties of the definition ($P(\\Omega) = 1$ and additivity), show that $P(\\emptyset) = 0$. Which split of $\\Omega$ into disjoint parts do you start with?",
+            "ro": "Folosind doar cele două proprietăți din definiție ($P(\\Omega) = 1$ și aditivitatea), arată că $P(\\emptyset) = 0$. Cu ce descompunere în părți disjuncte a lui $\\Omega$ începi?"
+          },
+          "placeholder": {
+            "en": "Write the idea",
+            "ro": "Scrie ideea"
+          },
+          "answer": {
+            "en": "$\\Omega = \\Omega \\cup \\emptyset$, and $\\Omega$ and $\\emptyset$ are disjoint (every set is disjoint from $\\emptyset$). Additivity gives $P(\\Omega) = P(\\Omega) + P(\\emptyset)$, that is $1 = 1 + P(\\emptyset)$, so $P(\\emptyset) = 0$.\n\nCareful: writing $\\Omega = \\{a\\} \\cup \\{b\\} \\cup \\{c\\}$ is not enough, because the proof has to work for every $\\Omega$, not only for one with three results. This is why $f_2$, which gives $\\emptyset$ the value 1/2, is not a probability.",
+            "ro": "$\\Omega = \\Omega \\cup \\emptyset$, iar $\\Omega$ și $\\emptyset$ sunt disjuncte (orice mulțime este disjunctă de $\\emptyset$). Aditivitatea dă $P(\\Omega) = P(\\Omega) + P(\\emptyset)$, adică $1 = 1 + P(\\emptyset)$, deci $P(\\emptyset) = 0$.\n\nAtenție: a scrie $\\Omega = \\{a\\} \\cup \\{b\\} \\cup \\{c\\}$ nu ajunge, fiindcă demonstrația trebuie să meargă pentru orice $\\Omega$, nu doar pentru unul cu trei rezultate. Așa se vede de ce $f_2$, care dă lui $\\emptyset$ valoarea 1/2, nu e probabilitate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s10",
+      "title": {
+        "en": "The probability of the complement",
+        "ro": "Probabilitatea complementului"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r8",
+          "prompt": {
+            "en": "Starting from $P(\\Omega) = 1$ and from additivity, show that $P(\\bar A) = 1 - P(A)$. How does $\\Omega$ split with the help of $A$?",
+            "ro": "Pornind de la $P(\\Omega) = 1$ și de la aditivitate, arată că $P(\\bar A) = 1 - P(A)$. Cum se descompune $\\Omega$ cu ajutorul lui $A$?"
+          },
+          "placeholder": {
+            "en": "Write the idea",
+            "ro": "Scrie ideea"
+          },
+          "answer": {
+            "en": "$\\Omega = A \\cup \\bar A$, and $A$ and $\\bar A$ are disjoint. Additivity gives $1 = P(A) + P(\\bar A)$, so $P(\\bar A) = 1 - P(A)$.",
+            "ro": "$\\Omega = A \\cup \\bar A$, iar $A$ și $\\bar A$ sunt disjuncte. Aditivitatea dă $1 = P(A) + P(\\bar A)$, deci $P(\\bar A) = 1 - P(A)$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s11",
+      "title": {
+        "en": "A bigger event is not less probable",
+        "ro": "Un eveniment mai mare nu e mai puțin probabil"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r9",
+          "prompt": {
+            "en": "If $A \\subseteq B$, show that $P(A) \\le P(B)$. How do you write $B$ with the help of $A$, in disjoint parts?",
+            "ro": "Dacă $A \\subseteq B$, arată că $P(A) \\le P(B)$. Cum scrii $B$ cu ajutorul lui $A$, în părți disjuncte?"
+          },
+          "placeholder": {
+            "en": "Write the idea",
+            "ro": "Scrie ideea"
+          },
+          "answer": {
+            "en": "$B = A \\cup (B \\setminus A)$, two disjoint parts ($B \\setminus A$ means the results of $B$ that are not in $A$). So $P(B) = P(A) + P(B \\setminus A) \\ge P(A)$, because a probability is not negative.\n\nCareful: $B = A \\cup B$ does not work, because the parts are not disjoint and additivity cannot be applied. This is why $f_3$ is not a probability.",
+            "ro": "$B = A \\cup (B \\setminus A)$, două părți disjuncte ($B \\setminus A$ înseamnă rezultatele din $B$ care nu sunt în $A$). Deci $P(B) = P(A) + P(B \\setminus A) \\ge P(A)$, fiindcă o probabilitate nu este negativă.\n\nAtenție: $B = A \\cup B$ nu merge, pentru că părțile nu sunt disjuncte și aditivitatea nu se poate aplica. Așa se vede de ce $f_3$ nu e probabilitate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s12",
+      "title": {
+        "en": "The die, once we learn B",
+        "ro": "Zarul, după ce aflăm B"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Back to the die. $\\Omega = \\{1, 2, 3, 4, 5, 6\\}$, the event $B$ is the even numbers = {2, 4, 6}, and $A$ = {6}. The drawing below is stepped through one move at a time; try to guess before each answer.",
+            "ro": "Revenim la zar. $\\Omega = \\{1, 2, 3, 4, 5, 6\\}$, evenimentul $B$ este număr par = {2, 4, 6}, iar $A$ = {6}. Desenul de mai jos se parcurge pe rând; încearcă să ghicești înainte de fiecare răspuns."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ml-l01-viz1",
+          "widget": "ml-omega",
+          "predict": true,
+          "props": {
+            "outcomes": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "events": {
+              "A": [
+                6
+              ],
+              "B": [
+                2,
+                4,
+                6
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s13",
+      "title": {
+        "en": "Conditional probability",
+        "ro": "Probabilitatea condiționată"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Conditional probability",
+            "ro": "Probabilitatea condiționată"
+          },
+          "content": {
+            "en": "The **conditional probability** of $A$, knowing $B$, is $$P(A \\mid B) = \\dfrac{P(A \\cap B)}{P(B)}, \\quad P(B) \\neq 0.$$ It is read: the probability of $A$, knowing $B$. It is also called the a posteriori probability of $A$ given $B$ (more about it in Lesson 2).\n\nThe idea: once we learn that $B$ happened, $B$ becomes the whole space, and we look only at the part of $A$ that lies in $B$, that is at $A \\cap B$. If $B = \\Omega$, we learn nothing new: $P(A \\mid \\Omega) = P(A)$.\n\nLecture: slide 5. Seminar 1, p. 5.",
+            "ro": "**Probabilitatea condiționată** a lui $A$, știind $B$, este $$P(A \\mid B) = \\dfrac{P(A \\cap B)}{P(B)}, \\quad P(B) \\neq 0.$$ Se citește: probabilitatea lui $A$, știind $B$. Se mai numește probabilitate a posteriori a lui $A$ dat $B$ (despre ea, în Lecția 2).\n\nIdeea: după ce aflăm că $B$ s-a întâmplat, $B$ devine tot spațiul, iar noi ne uităm doar la partea lui $A$ care se află în $B$, adică la $A \\cap B$. Dacă $B = \\Omega$, nu aflăm nimic nou: $P(A \\mid \\Omega) = P(A)$.\n\nCursul: slide 5. Seminar 1, p. 5."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s14",
+      "title": {
+        "en": "Two soldiers at the target",
+        "ro": "Doi soldați la țintă"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r10",
+          "prompt": {
+            "en": "Two soldiers shoot at a target. Soldier A misses with probability 1/3. Knowing that A missed, soldier B misses with probability 1/10. What is the probability that **both** miss? Write a fraction.",
+            "ro": "Doi soldați trag la țintă. Soldatul A ratează cu probabilitatea 1/3. Știind că A a ratat, soldatul B ratează cu probabilitatea 1/10. Cât este probabilitatea ca **ambii** să rateze? Scrie o fracție."
+          },
+          "placeholder": {
+            "en": "Write a fraction",
+            "ro": "Scrie o fracție"
+          },
+          "answer": {
+            "en": "**1/30.** The number 1/10 is already a conditional probability, $P(B \\mid A)$, not the probability of B alone. From the definition, $P(A \\cap B) = P(B \\mid A)\\,P(A) = \\dfrac{1}{10} \\cdot \\dfrac{1}{3} = \\dfrac{1}{30}$. If you answered 1/10 or 1/3, you read the conditional as a plain probability.",
+            "ro": "**1/30.** Numărul 1/10 este deja o probabilitate condiționată, $P(B \\mid A)$, nu probabilitatea lui B de unul singur. Din definiție, $P(A \\cap B) = P(B \\mid A)\\,P(A) = \\dfrac{1}{10} \\cdot \\dfrac{1}{3} = \\dfrac{1}{30}$. Dacă ai răspuns 1/10 sau 1/3, ai citit condiționata ca pe o probabilitate simplă."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s15",
+      "title": {
+        "en": "The multiplication rule and the chain rule",
+        "ro": "Regula de înmulțire și regula de înlănțuire"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "The multiplication rule and the chain rule",
+            "ro": "Regula de înmulțire și regula de înlănțuire"
+          },
+          "content": {
+            "en": "**The multiplication rule:** $$P(A \\cap B) = P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A).$$ It follows directly from the definition of conditional probability.\n\n**The chain rule**, for several events: $$P(A_1 \\cap A_2 \\cap \\dots \\cap A_n) = P(A_1)\\,P(A_2 \\mid A_1)\\,P(A_3 \\mid A_1, A_2) \\cdots P(A_n \\mid A_1, \\dots, A_{n-1}).$$\n\n**The conditional version:** $P(A, B \\mid C) = P(A \\mid C)\\,P(B \\mid A, C)$; you prove it in exercise 0.14, further down. Random variables come in Lesson 4. Until then, $P(X{=}x, Y{=}y \\mid Z{=}z)$ means the same thing, with the events $\\{X{=}x\\}$, $\\{Y{=}y\\}$, $\\{Z{=}z\\}$ in place of $A$, $B$, $C$.\n\nLecture: slide 5. Workbook: p. 38 (0.14).",
+            "ro": "**Regula de înmulțire:** $$P(A \\cap B) = P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A).$$ Ea vine direct din definiția probabilității condiționate.\n\n**Regula de înlănțuire**, pentru mai multe evenimente: $$P(A_1 \\cap A_2 \\cap \\dots \\cap A_n) = P(A_1)\\,P(A_2 \\mid A_1)\\,P(A_3 \\mid A_1, A_2) \\cdots P(A_n \\mid A_1, \\dots, A_{n-1}).$$\n\n**Varianta condiționată:** $P(A, B \\mid C) = P(A \\mid C)\\,P(B \\mid A, C)$; o dovedești în exercițiul 0.14, mai jos. Variabilele aleatoare vin în Lecția 4. Până atunci, $P(X{=}x, Y{=}y \\mid Z{=}z)$ înseamnă același lucru, cu evenimentele $\\{X{=}x\\}$, $\\{Y{=}y\\}$, $\\{Z{=}z\\}$ în locul lui $A$, $B$, $C$.\n\nCursul: slide 5. Culegerea: p. 38 (0.14)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s16",
+      "title": {
+        "en": "Why we divide by P(B)",
+        "ro": "De ce se împarte la P(B)"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l01-r11",
+          "prompt": {
+            "en": "Why do we divide by $P(B)$ in the definition of $P(A \\mid B)$, instead of taking $P(A \\cap B)$ directly?",
+            "ro": "De ce împărțim la $P(B)$ în definiția lui $P(A \\mid B)$, în loc să luăm direct $P(A \\cap B)$?"
+          },
+          "placeholder": {
+            "en": "Write what you think",
+            "ro": "Scrie ce crezi"
+          },
+          "answer": {
+            "en": "Once we learn $B$, the event $B$ becomes the whole space, so its probability must be 1: $P(B \\mid B) = P(B) / P(B) = 1$. Without the division, the results inside $B$ would carry a total mass of $P(B)$, which is below 1 (for the die, 1/2), and half of the probability would be lost.\n\nThe division multiplies all results of $B$ by the same number, $1 / P(B)$, so the proportions between them stay: 2, 4 and 6 stay equally likely, 1/3 each.",
+            "ro": "După ce aflăm $B$, evenimentul $B$ devine tot spațiul, deci probabilitatea lui trebuie să fie 1: $P(B \\mid B) = P(B) / P(B) = 1$. Fără împărțire, rezultatele din $B$ ar avea împreună masa $P(B)$, care e mai mică decât 1 (la zar, 1/2), și jumătate din probabilitate s-ar pierde.\n\nÎmpărțirea înmulțește toate rezultatele din $B$ cu același număr, $1 / P(B)$, deci proporțiile dintre ele rămân: 2, 4 și 6 rămân la fel de probabile, câte 1/3."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s17",
+      "title": {
+        "en": "An event and its complement",
+        "ro": "Un eveniment și complementul lui"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l01-q1",
+          "question": {
+            "en": "Let $A \\subseteq B$ and $P(A) = 0.7$. Which of the values is possible for $P(\\bar B)$?",
+            "ro": "Fie $A \\subseteq B$ și $P(A) = 0{,}7$. Care dintre valori este posibilă pentru $P(\\bar B)$?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0.4",
+                "ro": "0,4"
+              },
+              "correct": false,
+              "misconception": "monotonie-in-sens-invers",
+              "explain": {
+                "en": "It would mean $P(B) = 0.6$, below $P(A) = 0.7$. An event that contains $A$ cannot be less probable than $A$.",
+                "ro": "Ar însemna $P(B) = 0{,}6$, mai mic decât $P(A) = 0{,}7$. Un eveniment care îl conține pe $A$ nu poate fi mai puțin probabil decât $A$."
+              }
+            },
+            {
+              "text": {
+                "en": "0.2",
+                "ro": "0,2"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. From $A \\subseteq B$ it follows that $P(B) \\ge 0.7$, so $P(\\bar B) = 1 - P(B) \\le 0.3$. The value 0.2 respects this bound (for example, for $P(B) = 0.8$).",
+                "ro": "Corect. Din $A \\subseteq B$ rezultă $P(B) \\ge 0{,}7$, deci $P(\\bar B) = 1 - P(B) \\le 0{,}3$. Valoarea 0,2 respectă această margine (de exemplu, pentru $P(B) = 0{,}8$)."
+              }
+            },
+            {
+              "text": {
+                "en": "exactly 0.3",
+                "ro": "exact 0,3"
+              },
+              "correct": false,
+              "misconception": "complementul-lui-a-luat-drept-complementul-lui-b",
+              "explain": {
+                "en": "The value $1 - P(A) = 0.3$ is $P(\\bar A)$, not $P(\\bar B)$. From $\\bar B \\subseteq \\bar A$ only $P(\\bar B) \\le 0.3$ follows, not equality.",
+                "ro": "Valoarea $1 - P(A) = 0{,}3$ este $P(\\bar A)$, nu $P(\\bar B)$. Din $\\bar B \\subseteq \\bar A$ rezultă doar $P(\\bar B) \\le 0{,}3$, nu egalitatea."
+              }
+            }
+          ],
+          "check": {
+            "formula": "1-pB",
+            "data": {
+              "pB": 0.8,
+              "pA": 0.7,
+              "bound": 0.3,
+              "pBwrong": 0.6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s18",
+      "title": {
+        "en": "Who knows Python and Rust",
+        "ro": "Cine știe Python și Rust"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l01-q2",
+          "question": {
+            "en": "In a class, 40% know Python, 20% know Rust and 10% know both. What is $P(\\text{Rust} \\mid \\text{Python})$?",
+            "ro": "În grupă, 40% știu Python, 20% știu Rust și 10% le știu pe amândouă. Cât este $P(\\text{Rust} \\mid \\text{Python})$?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0.5",
+                "ro": "0,5"
+              },
+              "correct": false,
+              "misconception": "p-a-b-p-b-a",
+              "explain": {
+                "en": "This is $0.1 / 0.2 = P(\\text{Python} \\mid \\text{Rust})$, the reverse conditional. The denominator is the probability of what we know, that is Python.",
+                "ro": "Aceasta este $0{,}1 / 0{,}2 = P(\\text{Python} \\mid \\text{Rust})$, condiționata inversă. La numitor stă probabilitatea a ceea ce știm, adică Python."
+              }
+            },
+            {
+              "text": {
+                "en": "0.1",
+                "ro": "0,1"
+              },
+              "correct": false,
+              "misconception": "intersectia-in-loc-de-conditionata",
+              "explain": {
+                "en": "This is $P(\\text{Python} \\cap \\text{Rust})$, the intersection. The conditional divides it by the probability of the condition, $P(\\text{Python}) = 0.4$.",
+                "ro": "Aceasta este $P(\\text{Python} \\cap \\text{Rust})$, intersecția. Condiționata o împarte la probabilitatea condiției, $P(\\text{Python}) = 0{,}4$."
+              }
+            },
+            {
+              "text": {
+                "en": "0.2",
+                "ro": "0,2"
+              },
+              "correct": false,
+              "misconception": "marginala-in-loc-de-conditionata",
+              "explain": {
+                "en": "This is $P(\\text{Rust})$, as if knowing that the person knows Python changed nothing.",
+                "ro": "Aceasta este $P(\\text{Rust})$, ca și cum faptul că persoana știe Python n-ar schimba nimic."
+              }
+            },
+            {
+              "text": {
+                "en": "0.25",
+                "ro": "0,25"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: $0.1 / 0.4 = 0.25$. The intersection is divided by the probability of Python, the event we know.",
+                "ro": "Corect: $0{,}1 / 0{,}4 = 0{,}25$. Intersecția se împarte la probabilitatea lui Python, evenimentul pe care îl știm."
+              }
+            }
+          ],
+          "check": {
+            "formula": "both/pPython",
+            "data": {
+              "both": 0.1,
+              "pPython": 0.4,
+              "pRust": 0.2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s19",
+      "title": {
+        "en": "Two balls from the urn",
+        "ro": "Două bile din urnă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l01-q3",
+          "question": {
+            "en": "An urn has 3 red balls and 2 blue balls. We draw two balls, one after the other, without putting the ball back. What is the probability that both are red?",
+            "ro": "O urnă are 3 bile roșii și 2 albastre. Extragem două bile, una după alta, fără să punem bila înapoi. Cât este probabilitatea ca ambele să fie roșii?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "3/5 · 2/4 = 3/10",
+                "ro": "3/5 · 2/4 = 3/10"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The first ball is red with probability 3/5. After it, the urn has 4 balls, 2 of them red, so the second is red with conditional probability 2/4. They are multiplied (the multiplication rule).",
+                "ro": "Corect. Prima bilă e roșie cu probabilitatea 3/5. După ea, urna are 4 bile, dintre care 2 roșii, deci a doua e roșie cu probabilitatea condiționată 2/4. Se înmulțesc (regula de înmulțire)."
+              }
+            },
+            {
+              "text": {
+                "en": "3/5 · 3/5 = 9/25",
+                "ro": "3/5 · 3/5 = 9/25"
+              },
+              "correct": false,
+              "misconception": "uita-conditionarea-extragere-cu-intoarcere",
+              "explain": {
+                "en": "Here the second draw is treated as if the first ball had been put back. But the ball is not put back: at the second draw the urn has 4 balls, not 5.",
+                "ro": "Aici a doua extragere e tratată ca și cum prima bilă ar fi fost pusă înapoi. Dar bila nu se pune înapoi: la a doua extragere urna are 4 bile, nu 5."
+              }
+            },
+            {
+              "text": {
+                "en": "3/5 + 2/4 = 11/10",
+                "ro": "3/5 + 2/4 = 11/10"
+              },
+              "correct": false,
+              "misconception": "aduna-in-loc-sa-inmulteasca",
+              "explain": {
+                "en": "The probabilities in a sequence of draws are multiplied, not added. The sum here, 11/10, is even above 1, so it cannot be a probability.",
+                "ro": "Probabilitățile dintr-un șir de extrageri se înmulțesc, nu se adună. Suma de aici, 11/10, depășește chiar 1, deci nu poate fi probabilitate."
+              }
+            }
+          ],
+          "check": {
+            "formula": "3/5*2/4"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s20",
+      "title": {
+        "en": "The probability of a union",
+        "ro": "Probabilitatea unei reuniuni"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l01-q4",
+          "question": {
+            "en": "We know that $P(A) = 0.6$, $P(B) = 0.3$ and $P(A \\cap B) = 0.2$. What is $P(A \\cup B)$?",
+            "ro": "Se știe că $P(A) = 0{,}6$, $P(B) = 0{,}3$ și $P(A \\cap B) = 0{,}2$. Cât este $P(A \\cup B)$?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0.9",
+                "ro": "0,9"
+              },
+              "correct": false,
+              "misconception": "uita-intersectia",
+              "explain": {
+                "en": "The sum $0.6 + 0.3$ counts $A \\cap B$ twice. The sum is only an upper bound, $P(A \\cup B) \\le P(A) + P(B)$, with equality only for incompatible events.",
+                "ro": "Suma $0{,}6 + 0{,}3$ numără $A \\cap B$ de două ori. Suma este doar o margine superioară, $P(A \\cup B) \\le P(A) + P(B)$, cu egalitate numai pentru evenimente incompatibile."
+              }
+            },
+            {
+              "text": {
+                "en": "0.18",
+                "ro": "0,18"
+              },
+              "correct": false,
+              "misconception": "produsul",
+              "explain": {
+                "en": "The product $0.6 \\cdot 0.3 = 0.18$ is not the union. The intersection is given as $0.2$, so it would not be right as an intersection either.",
+                "ro": "Produsul $0{,}6 \\cdot 0{,}3 = 0{,}18$ nu este reuniunea. Intersecția este dată ca $0{,}2$, deci nici ca intersecție nu ar fi corect."
+              }
+            },
+            {
+              "text": {
+                "en": "0.7",
+                "ro": "0,7"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B) = 0.6 + 0.3 - 0.2 = 0.7$.",
+                "ro": "Corect: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B) = 0{,}6 + 0{,}3 - 0{,}2 = 0{,}7$."
+              }
+            }
+          ],
+          "check": {
+            "formula": "0.6+0.3-0.2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s21",
+      "title": {
+        "en": "Exercise 0.1, part a: an equality from additivity",
+        "ro": "Exercițiul 0.1, punctul a: o egalitate din aditivitate"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l01-pf1",
+          "exercise": [
+            "0.1.a"
+          ],
+          "claim": {
+            "en": "Let $A$ and $B$ be two events. Using only the properties of the definition of the probability function, show that $P(A \\cap \\bar B) = P(A) - P(A \\cap B)$.",
+            "ro": "Fie două evenimente $A$ și $B$. Folosind doar proprietățile din definiția funcției de probabilitate, arată că $P(A \\cap \\bar B) = P(A) - P(A \\cap B)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$A = A \\cap \\Omega = A \\cap (B \\cup \\bar B) = (A \\cap B) \\cup (A \\cap \\bar B)$.",
+                "ro": "$A = A \\cap \\Omega = A \\cap (B \\cup \\bar B) = (A \\cap B) \\cup (A \\cap \\bar B)$."
+              },
+              "why": {
+                "en": "Every result of $A$ is either in $B$ or in $\\bar B$, so $A$ breaks into two pieces.",
+                "ro": "Fiecare rezultat din $A$ este fie în $B$, fie în $\\bar B$, deci $A$ se rupe în două bucăți."
+              },
+              "predict": {
+                "question": {
+                  "en": "How is $A$ written with the help of $B$ and its complement $\\bar B$?",
+                  "ro": "Cum se scrie $A$ cu ajutorul lui $B$ și al complementului lui $\\bar B$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$A = A \\cap B$",
+                      "ro": "$A = A \\cap B$"
+                    },
+                    "correct": false,
+                    "misconception": "a-a-b",
+                    "explain": {
+                      "en": "The equality would hold only if $A \\subseteq B$; in general $A$ also has results outside $B$.",
+                      "ro": "Egalitatea ar fi adevărată doar dacă $A \\subseteq B$; în general $A$ are și rezultate în afara lui $B$."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$A = (A \\cap B) \\cup (A \\cap \\bar B)$",
+                      "ro": "$A = (A \\cap B) \\cup (A \\cap \\bar B)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the part of $A$ that is in $B$ and the part that is not.",
+                      "ro": "Corect: partea din $A$ care e în $B$ și partea care nu e."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "The pieces $A \\cap B$ and $A \\cap \\bar B$ have no results in common, because $B$ and $\\bar B$ have none. Countable additivity gives $P(A) = P(A \\cap B) + P(A \\cap \\bar B)$.",
+                "ro": "Bucățile $A \\cap B$ și $A \\cap \\bar B$ nu au rezultate comune, fiindcă $B$ și $\\bar B$ nu au. Aditivitatea numărabilă dă $P(A) = P(A \\cap B) + P(A \\cap \\bar B)$."
+              },
+              "predict": {
+                "question": {
+                  "en": "Why can we add the probabilities of the two pieces?",
+                  "ro": "De ce putem aduna probabilitățile celor două bucăți?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "Because the pieces are disjoint",
+                      "ro": "Pentru că bucățile sunt disjuncte"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: countable additivity asks for events with no results in common.",
+                      "ro": "Corect: aditivitatea numărabilă cere evenimente fără rezultate comune."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "Because their union is $A$, even if they overlapped",
+                      "ro": "Pentru că reuniunea lor este $A$, chiar dacă s-ar suprapune"
+                    },
+                    "correct": false,
+                    "misconception": "uniune-nedisjuncta",
+                    "explain": {
+                      "en": "If the pieces overlapped, the common part would be counted twice. Additivity asks for disjoint parts.",
+                      "ro": "Dacă bucățile s-ar suprapune, partea comună ar fi numărată de două ori. Aditivitatea cere părți disjuncte."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "We move one term to the other side: $P(A \\cap \\bar B) = P(A) - P(A \\cap B)$.",
+                "ro": "Mutăm un termen în partea cealaltă: $P(A \\cap \\bar B) = P(A) - P(A \\cap B)$."
+              },
+              "why": {
+                "en": "This proves the required equality.",
+                "ro": "Cu aceasta, egalitatea cerută este dovedită."
+              }
+            }
+          ],
+          "end": {
+            "en": "The proof uses only countable additivity, nothing else.",
+            "ro": "Dovada folosește doar aditivitatea numărabilă, nimic altceva."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s22",
+      "title": {
+        "en": "Exercise 0.1, part b: the Bonferroni inequality",
+        "ro": "Exercițiul 0.1, punctul b: inegalitatea lui Bonferroni"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l01-pf2",
+          "exercise": [
+            "0.1.b"
+          ],
+          "claim": {
+            "en": "Let $A$ and $B$ be two events. Prove the Bonferroni inequality: $P(A \\cap B) \\ge P(A) + P(B) - 1$.",
+            "ro": "Fie două evenimente $A$ și $B$. Demonstrează inegalitatea lui Bonferroni: $P(A \\cap B) \\ge P(A) + P(B) - 1$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$A \\cup B = (A \\cap \\bar B) \\cup (A \\cap B) \\cup (\\bar A \\cap B)$: three pieces with no results in common. Additivity gives $P(A \\cup B) = P(A \\cap \\bar B) + P(A \\cap B) + P(\\bar A \\cap B)$.",
+                "ro": "$A \\cup B = (A \\cap \\bar B) \\cup (A \\cap B) \\cup (\\bar A \\cap B)$: trei bucăți fără rezultate comune. Aditivitatea dă $P(A \\cup B) = P(A \\cap \\bar B) + P(A \\cap B) + P(\\bar A \\cap B)$."
+              },
+              "predict": {
+                "question": {
+                  "en": "How do we split $A \\cup B$ into disjoint pieces?",
+                  "ro": "Cum descompunem $A \\cup B$ în bucăți disjuncte?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$A$ and $B$ as two pieces, $A \\cup B = A \\cup B$",
+                      "ro": "$A$ și $B$ ca două bucăți, $A \\cup B = A \\cup B$"
+                    },
+                    "correct": false,
+                    "misconception": "uniune-nedisjuncta",
+                    "explain": {
+                      "en": "$A$ and $B$ overlap in $A \\cap B$, and additivity asks for disjoint pieces; otherwise $A \\cap B$ is counted twice.",
+                      "ro": "$A$ și $B$ se suprapun în $A \\cap B$, iar aditivitatea cere bucăți disjuncte; altfel $A \\cap B$ se numără de două ori."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$(A \\cap \\bar B) \\cup (A \\cap B) \\cup (\\bar A \\cap B)$",
+                      "ro": "$(A \\cap \\bar B) \\cup (A \\cap B) \\cup (\\bar A \\cap B)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: only $A$, only $B$ and both; no pair has results in common.",
+                      "ro": "Corect: doar $A$, doar $B$ și amândouă; nicio pereche nu are rezultate comune."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "We isolate the middle piece: $P(A \\cap B) = P(A \\cup B) - P(A \\cap \\bar B) - P(\\bar A \\cap B)$.",
+                "ro": "Scoatem bucata din mijloc: $P(A \\cap B) = P(A \\cup B) - P(A \\cap \\bar B) - P(\\bar A \\cap B)$."
+              }
+            },
+            {
+              "shown": {
+                "en": "We also have $A \\cup B = (A \\cap \\bar B) \\cup B$ and $A \\cup B = (\\bar A \\cap B) \\cup A$, again unions of disjoint pieces. So $P(A \\cup B) - P(A \\cap \\bar B) = P(B)$ and $P(A \\cup B) - P(\\bar A \\cap B) = P(A)$.",
+                "ro": "Mai avem $A \\cup B = (A \\cap \\bar B) \\cup B$ și $A \\cup B = (\\bar A \\cap B) \\cup A$, tot reuniuni de bucăți disjuncte. Deci $P(A \\cup B) - P(A \\cap \\bar B) = P(B)$ și $P(A \\cup B) - P(\\bar A \\cap B) = P(A)$."
+              }
+            },
+            {
+              "shown": {
+                "en": "We write $P(A \\cap B) = [P(A \\cup B) - P(A \\cap \\bar B)] + [P(A \\cup B) - P(\\bar A \\cap B)] - P(A \\cup B) = P(B) + P(A) - P(A \\cup B)$. From it follows the **addition rule** too: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$.",
+                "ro": "Scriem $P(A \\cap B) = [P(A \\cup B) - P(A \\cap \\bar B)] + [P(A \\cup B) - P(\\bar A \\cap B)] - P(A \\cup B) = P(B) + P(A) - P(A \\cup B)$. Din ea rezultă și **regula de adunare**: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$."
+              }
+            },
+            {
+              "shown": {
+                "en": "Since $P(A \\cup B) \\le 1$, we get $P(A \\cap B) = P(A) + P(B) - P(A \\cup B) \\ge P(A) + P(B) - 1$.",
+                "ro": "Cum $P(A \\cup B) \\le 1$, obținem $P(A \\cap B) = P(A) + P(B) - P(A \\cup B) \\ge P(A) + P(B) - 1$."
+              },
+              "why": {
+                "en": "Subtracting a number that is at most 1 cannot give less than subtracting 1 itself.",
+                "ro": "Scăzând un număr mai mic sau egal cu 1, rezultatul nu poate fi mai mic decât dacă am scădea chiar 1."
+              },
+              "predict": {
+                "question": {
+                  "en": "Which property do we use to go from the equality to the inequality?",
+                  "ro": "Ce proprietate folosim ca să trecem de la egalitate la inegalitate?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(A \\cup B) \\ge P(A \\cap B)$",
+                      "ro": "$P(A \\cup B) \\ge P(A \\cap B)$"
+                    },
+                    "correct": false,
+                    "misconception": "monotonie-in-sens-gresit",
+                    "explain": {
+                      "en": "It is true, but it does not bound the difference $P(A) + P(B) - P(A \\cup B)$ by anything useful here.",
+                      "ro": "Este adevărată, dar nu mărginește diferența $P(A) + P(B) - P(A \\cup B)$ prin ceva util aici."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A \\cup B) \\le 1$",
+                      "ro": "$P(A \\cup B) \\le 1$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: every probability is at most 1, so subtracting $P(A \\cup B)$ leaves at least $P(A) + P(B) - 1$.",
+                      "ro": "Corect: orice probabilitate este cel mult 1, deci scăderea lui $P(A \\cup B)$ lasă cel puțin $P(A) + P(B) - 1$."
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "end": {
+            "en": "The Bonferroni inequality gives a lower bound for the intersection.",
+            "ro": "Inegalitatea lui Bonferroni dă o margine de jos pentru intersecție."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s23",
+      "title": {
+        "en": "Exercise 0.1, part c: can they be incompatible?",
+        "ro": "Exercițiul 0.1, punctul c: pot fi incompatibile?"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l01-c1",
+          "exercise": "0.1.c",
+          "source": {
+            "en": "Workbook, ex. 0.1.c, p. 23",
+            "ro": "Culegerea, ex. 0.1.c, p. 23"
+          },
+          "statement": {
+            "en": "Two events are incompatible if $P(A \\cap B) = 0$. If $P(A) = 1/3$ and $P(B) = 5/6$, can $A$ and $B$ be incompatible? Use the Bonferroni inequality from part b, $P(A \\cap B) \\ge P(A) + P(B) - 1$.",
+            "ro": "Două evenimente sunt incompatibile dacă $P(A \\cap B) = 0$. Dacă $P(A) = 1/3$ și $P(B) = 5/6$, pot $A$ și $B$ să fie incompatibile? Folosește inegalitatea lui Bonferroni de la punctul b, $P(A \\cap B) \\ge P(A) + P(B) - 1$."
+          },
+          "fields": [
+            {
+              "id": "c1",
+              "label": {
+                "en": "Can they be incompatible? (true or false)",
+                "ro": "Pot fi incompatibile? (adevărat sau fals)"
+              },
+              "kind": "tf",
+              "formula": "1/3+5/6<=1",
+              "expected": "false"
+            },
+            {
+              "id": "c2",
+              "label": {
+                "en": "The smallest possible value of $P(A \\cap B)$ (as a fraction)",
+                "ro": "Cea mai mică valoare posibilă a lui $P(A \\cap B)$ (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "1/3+5/6-1",
+              "expected": "1/6"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "c2",
+              "formula": "1/3+5/6",
+              "message": {
+                "en": "This is the sum $P(A) + P(B)$. The Bonferroni inequality subtracts another 1 from it.",
+                "ro": "Aceasta este suma $P(A) + P(B)$. Inegalitatea lui Bonferroni scade din ea încă 1."
+              }
+            },
+            {
+              "field": "c2",
+              "formula": "0",
+              "message": {
+                "en": "0 would be the value for incompatible events, exactly what is being checked here.",
+                "ro": "0 ar fi valoarea pentru evenimente incompatibile, exact ce se verifică aici."
+              }
+            },
+            {
+              "field": "c1",
+              "formula": "true",
+              "message": {
+                "en": "If the sum of the probabilities is above 1, the intersection cannot be 0: the union would have probability above 1.",
+                "ro": "Dacă suma probabilităților depășește 1, intersecția nu poate fi 0: reuniunea ar avea probabilitate peste 1."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Apply the Bonferroni inequality and see what lower bound it gives for $P(A \\cap B)$.",
+              "ro": "Aplică inegalitatea lui Bonferroni și vezi ce margine de jos dă pentru $P(A \\cap B)$."
+            },
+            {
+              "en": "Compute $P(A) + P(B) - 1$ with the given values, that is $\\dfrac{1}{3} + \\dfrac{5}{6} - 1$.",
+              "ro": "Calculează $P(A) + P(B) - 1$ cu valorile date, adică $\\dfrac{1}{3} + \\dfrac{5}{6} - 1$."
+            },
+            {
+              "en": "$\\dfrac{1}{3} + \\dfrac{5}{6} = \\dfrac{7}{6}$, so $P(A \\cap B) \\ge \\dfrac{7}{6} - 1 = \\dfrac{1}{6} > 0$. Incompatible would mean $P(A \\cap B) = 0$.",
+              "ro": "$\\dfrac{1}{3} + \\dfrac{5}{6} = \\dfrac{7}{6}$, deci $P(A \\cap B) \\ge \\dfrac{7}{6} - 1 = \\dfrac{1}{6} > 0$. Incompatibile ar însemna $P(A \\cap B) = 0$."
+            }
+          ],
+          "solution": {
+            "en": "$P(A) + P(B) = \\dfrac{1}{3} + \\dfrac{5}{6} = \\dfrac{7}{6}$, so $P(A \\cap B) \\ge \\dfrac{7}{6} - 1 = \\dfrac{1}{6} > 0$. The intersection cannot be 0, so $A$ and $B$ can **not** be incompatible.",
+            "ro": "$P(A) + P(B) = \\dfrac{1}{3} + \\dfrac{5}{6} = \\dfrac{7}{6}$, deci $P(A \\cap B) \\ge \\dfrac{7}{6} - 1 = \\dfrac{1}{6} > 0$. Intersecția nu poate fi 0, deci $A$ și $B$ **nu** pot fi incompatibile."
+          },
+          "status": "book",
+          "variants": [
+            {
+              "statement": {
+                "en": "Two events are incompatible if $P(A \\cap B) = 0$. If $P(A) = 3/4$ and $P(B) = 1/2$, can $A$ and $B$ be incompatible? Use the Bonferroni inequality, $P(A \\cap B) \\ge P(A) + P(B) - 1$.",
+                "ro": "Două evenimente sunt incompatibile dacă $P(A \\cap B) = 0$. Dacă $P(A) = 3/4$ și $P(B) = 1/2$, pot $A$ și $B$ să fie incompatibile? Folosește inegalitatea lui Bonferroni, $P(A \\cap B) \\ge P(A) + P(B) - 1$."
+              },
+              "fields": [
+                {
+                  "id": "c1",
+                  "formula": "3/4+1/2<=1",
+                  "expected": "false"
+                },
+                {
+                  "id": "c2",
+                  "formula": "3/4+1/2-1",
+                  "expected": "1/4"
+                }
+              ],
+              "solution": {
+                "en": "$P(A) + P(B) = \\dfrac{3}{4} + \\dfrac{1}{2} = \\dfrac{5}{4}$, so $P(A \\cap B) \\ge \\dfrac{5}{4} - 1 = \\dfrac{1}{4} > 0$. The events cannot be incompatible.",
+                "ro": "$P(A) + P(B) = \\dfrac{3}{4} + \\dfrac{1}{2} = \\dfrac{5}{4}$, deci $P(A \\cap B) \\ge \\dfrac{5}{4} - 1 = \\dfrac{1}{4} > 0$. Evenimentele nu pot fi incompatibile."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s24",
+      "title": {
+        "en": "Exercise 0.2: the sum of two dice",
+        "ro": "Exercițiul 0.2: suma a două zaruri"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l01-c2",
+          "exercise": [
+            "0.2.a",
+            "0.2.b"
+          ],
+          "source": {
+            "en": "Workbook, ex. 0.2, p. 24",
+            "ro": "Culegerea, ex. 0.2, p. 24"
+          },
+          "statement": {
+            "en": "Two fair dice are rolled together. Let $S$ be the sum of the numbers on the two faces; the table gives the sum for each of the 36 possible pairs, all equally likely. **a.** Compute $P(S = 11)$. **b.** If we learn that $S$ is a prime number, that is $S \\in \\{2, 3, 5, 7, 11\\}$, what does the probability from part a become?",
+            "ro": "Se aruncă simultan două zaruri corecte. Notăm cu $S$ suma numerelor de pe cele două fețe; tabelul dă suma pentru fiecare dintre cele 36 de perechi posibile, toate la fel de probabile. **a.** Calculează $P(S = 11)$. **b.** Dacă aflăm că $S$ este număr prim, adică $S \\in \\{2, 3, 5, 7, 11\\}$, cât devine probabilitatea de la punctul a?"
+          },
+          "table": {
+            "caption": {
+              "en": "The sum of the two dice, for the 36 pairs",
+              "ro": "Suma celor două zaruri, pentru cele 36 de perechi"
+            },
+            "columns": [
+              {
+                "en": "die 1 ↓, die 2 →",
+                "ro": "zar 1 ↓, zar 2 →"
+              },
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ],
+            "rows": [
+              [
+                "1",
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              [
+                "2",
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              [
+                "3",
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              [
+                "4",
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              [
+                "5",
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ],
+              [
+                "6",
+                7,
+                8,
+                9,
+                10,
+                11,
+                12
+              ]
+            ]
+          },
+          "fields": [
+            {
+              "id": "a",
+              "label": {
+                "en": "a. $P(S = 11)$ (as a fraction)",
+                "ro": "a. $P(S = 11)$ (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "2/36",
+              "expected": "1/18"
+            },
+            {
+              "id": "b0",
+              "label": {
+                "en": "b. How many of the 36 pairs give a prime sum? (whole number, no decimals)",
+                "ro": "b. Câte dintre cele 36 de perechi dau o sumă primă? (număr întreg, fără zecimale)"
+              },
+              "kind": "num",
+              "formula": "1+2+4+6+2",
+              "expected": 15
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "b. $P(S = 11 \\mid S \\in \\{2, 3, 5, 7, 11\\})$ (as a fraction)",
+                "ro": "b. $P(S = 11 \\mid S \\in \\{2, 3, 5, 7, 11\\})$ (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "(2/36)/(15/36)",
+              "expected": "2/15"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "a",
+              "formula": "1/36",
+              "message": {
+                "en": "The sum 11 comes up in two ways, (5, 6) and (6, 5), not in just one.",
+                "ro": "Suma 11 se obține în două moduri, (5, 6) și (6, 5), nu într-unul singur."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "1/18",
+              "message": {
+                "en": "You gave $P(S = 11)$, without using the information that $S$ is prime.",
+                "ro": "Ai dat $P(S = 11)$, fără să folosești informația că $S$ este prim."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "1/5",
+              "message": {
+                "en": "You treated the 5 prime sums as equally likely. The pairs are equally likely, the sums are not.",
+                "ro": "Ai tratat cele 5 sume prime ca la fel de probabile. Perechile sunt la fel de probabile, sumele nu."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "15/36",
+              "message": {
+                "en": "This is $P(S \\in \\{2, 3, 5, 7, 11\\})$, that is the denominator. Divide the numerator by it.",
+                "ro": "Aceasta este $P(S \\in \\{2, 3, 5, 7, 11\\})$, adică numitorul. Împarte la ea numărătorul."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "The two dice give 36 equally likely pairs; the sums are not equally likely. For b, the information that $S$ is prime restricts the possible cases.",
+              "ro": "Cele două zaruri dau 36 de perechi la fel de probabile; sumele nu sunt la fel de probabile. Pentru b, informația că $S$ este prim restrânge cazurile posibile."
+            },
+            {
+              "en": "The prime sums are 2, 3, 5, 7 and 11: count in the table how many times each appears. Then $P(S = 11 \\mid S \\in \\{2, 3, 5, 7, 11\\}) = \\dfrac{P(S = 11)}{P(S \\in \\{2, 3, 5, 7, 11\\})}$.",
+              "ro": "Sumele prime sunt 2, 3, 5, 7 și 11: numără în tabel de câte ori apare fiecare. Apoi $P(S = 11 \\mid S \\in \\{2, 3, 5, 7, 11\\}) = \\dfrac{P(S = 11)}{P(S \\in \\{2, 3, 5, 7, 11\\})}$."
+            },
+            {
+              "en": "The sums 2, 3, 5, 7, 11 appear 1, 2, 4, 6 and 2 times respectively, 15 pairs in total. $P(S = 11 \\mid S \\in \\{2, 3, 5, 7, 11\\}) = \\dfrac{2/36}{15/36}$.",
+              "ro": "Sumele 2, 3, 5, 7, 11 apar de 1, 2, 4, 6 și respectiv 2 ori, în total 15 perechi. $P(S = 11 \\mid S \\in \\{2, 3, 5, 7, 11\\}) = \\dfrac{2/36}{15/36}$."
+            }
+          ],
+          "solution": {
+            "en": "There are $6 \\cdot 6 = 36$ possible cases. $S = 11$ appears in (5, 6) and (6, 5), so $P(S = 11) = \\dfrac{2}{36} = \\dfrac{1}{18}$. The prime sums: $S = 2$ in (1, 1); $S = 3$ in (1, 2), (2, 1); $S = 5$ in 4 pairs; $S = 7$ in 6 pairs; $S = 11$ in 2 pairs; 15 in total, so $P(S \\in \\{2, 3, 5, 7, 11\\}) = \\dfrac{15}{36}$. Then $P(S = 11 \\mid S \\in \\{2, 3, 5, 7, 11\\}) = \\dfrac{2/36}{15/36} = \\dfrac{2}{15}$.\n\nSince $\\dfrac{2}{15} > \\dfrac{1}{18}$, the probability rose after we learned a fact related to it. In general, if $A \\subseteq B$, then $P(A) \\le P(A \\mid B)$.",
+            "ro": "Sunt $6 \\cdot 6 = 36$ cazuri posibile. $S = 11$ apare în (5, 6) și (6, 5), deci $P(S = 11) = \\dfrac{2}{36} = \\dfrac{1}{18}$. Sumele prime: $S = 2$ în (1, 1); $S = 3$ în (1, 2), (2, 1); $S = 5$ în 4 perechi; $S = 7$ în 6 perechi; $S = 11$ în 2 perechi; în total 15, deci $P(S \\in \\{2, 3, 5, 7, 11\\}) = \\dfrac{15}{36}$. Atunci $P(S = 11 \\mid S \\in \\{2, 3, 5, 7, 11\\}) = \\dfrac{2/36}{15/36} = \\dfrac{2}{15}$.\n\nCum $\\dfrac{2}{15} > \\dfrac{1}{18}$, probabilitatea a crescut după ce am aflat un fapt legat de ea. În general, dacă $A \\subseteq B$, atunci $P(A) \\le P(A \\mid B)$."
+          },
+          "status": "book",
+          "variants": [
+            {
+              "statement": {
+                "en": "Two fair dice are rolled together. Let $S$ be the sum of the numbers on the two faces; the table gives the sum for each of the 36 possible pairs, all equally likely. **a.** Compute $P(S = 10)$. **b.** If we learn that $S$ is an even number, that is $S \\in \\{2, 4, 6, 8, 10, 12\\}$, what does the probability from part a become?",
+                "ro": "Se aruncă simultan două zaruri corecte. Notăm cu $S$ suma numerelor de pe cele două fețe; tabelul dă suma pentru fiecare dintre cele 36 de perechi posibile, toate la fel de probabile. **a.** Calculează $P(S = 10)$. **b.** Dacă aflăm că $S$ este număr par, adică $S \\in \\{2, 4, 6, 8, 10, 12\\}$, cât devine probabilitatea de la punctul a?"
+              },
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "3/36",
+                  "expected": "1/12"
+                },
+                {
+                  "id": "b0",
+                  "formula": "1+3+5+5+3+1",
+                  "expected": 18
+                },
+                {
+                  "id": "b",
+                  "formula": "3/18",
+                  "expected": "1/6"
+                }
+              ],
+              "solution": {
+                "en": "$S = 10$ appears in (4, 6), (5, 5), (6, 4): $P(S = 10) = \\dfrac{3}{36} = \\dfrac{1}{12}$. The even sums 2, 4, 6, 8, 10, 12 appear 1, 3, 5, 5, 3 and 1 times, 18 pairs in total. $P(S = 10 \\mid S \\in \\{2, 4, 6, 8, 10, 12\\}) = \\dfrac{3/36}{18/36} = \\dfrac{1}{6}$.",
+                "ro": "$S = 10$ apare în (4, 6), (5, 5), (6, 4): $P(S = 10) = \\dfrac{3}{36} = \\dfrac{1}{12}$. Sumele pare 2, 4, 6, 8, 10, 12 apar de 1, 3, 5, 5, 3 și 1 ori, în total 18 perechi. $P(S = 10 \\mid S \\in \\{2, 4, 6, 8, 10, 12\\}) = \\dfrac{3/36}{18/36} = \\dfrac{1}{6}$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s25",
+      "title": {
+        "en": "Exercise 0.3: three cards",
+        "ro": "Exercițiul 0.3: trei carduri"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l01-c3",
+          "exercise": "0.3",
+          "source": {
+            "en": "Workbook, ex. 0.3, p. 25",
+            "ro": "Culegerea, ex. 0.3, p. 25"
+          },
+          "statement": {
+            "en": "A box holds three cards: one red on both sides, one green on both sides, and one red on one side and green on the other. We pick a card at random and lay it on the table; we see only the top side, and it is green. What is the probability that the other side is green too?",
+            "ro": "O cutie conține trei carduri: unul roșu pe ambele fețe, unul verde pe ambele fețe și unul roșu pe o față și verde pe cealaltă. Alegem un card la întâmplare și îl punem pe masă; vedem doar fața de sus, și e verde. Care este probabilitatea ca și cealaltă față să fie verde?"
+          },
+          "table": {
+            "caption": {
+              "en": "The cards in the box (R = red, V = green)",
+              "ro": "Cardurile din cutie (R = roșu, V = verde)"
+            },
+            "columns": [
+              {
+                "en": "card",
+                "ro": "card"
+              },
+              {
+                "en": "side A",
+                "ro": "fața A"
+              },
+              {
+                "en": "side B",
+                "ro": "fața B"
+              }
+            ],
+            "rows": [
+              [
+                "1",
+                "R",
+                "R"
+              ],
+              [
+                "2",
+                "R",
+                "V"
+              ],
+              [
+                "3",
+                "V",
+                "V"
+              ]
+            ]
+          },
+          "fields": [
+            {
+              "id": "n",
+              "label": {
+                "en": "How many faces does $\\Omega$ have? (whole number, no decimals)",
+                "ro": "Câte fețe are $\\Omega$? (număr întreg, fără zecimale)"
+              },
+              "kind": "num",
+              "formula": "3*2",
+              "expected": 6
+            },
+            {
+              "id": "a",
+              "label": {
+                "en": "The required probability (as a fraction)",
+                "ro": "Probabilitatea cerută (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "2/3",
+              "expected": "2/3"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "a",
+              "formula": "1/2",
+              "message": {
+                "en": "You took the cards as the sample space. But we observe a side, not a whole card, and once you see green the cards are no longer equally likely: the space is made of sides.",
+                "ro": "Ai ales cardurile drept spațiu de eșantionare. Dar observăm o față, nu un card întreg, iar după ce vezi verde cardurile nu mai sunt la fel de probabile: spațiul se formează din fețe."
+              }
+            },
+            {
+              "field": "a",
+              "formula": "1/3",
+              "message": {
+                "en": "You counted a single favourable case. Count the possible green sides and, among them, those whose other side is green too.",
+                "ro": "Ai numărat un singur caz favorabil. Numără fețele verzi posibile și, dintre ele, pe cele la care și cealaltă față este verde."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "What do we observe after the draw: a card or a side? What is the sample space made of?",
+              "ro": "Ce observăm după extragere: un card sau o față? Din ce este format spațiul de eșantionare?"
+            },
+            {
+              "en": "Name the sides R1, R2 (card 1), R3, V4 (card 2), V5, V6 (card 3). The possible cases are the green sides.",
+              "ro": "Notează fețele R1, R2 (cardul 1), R3, V4 (cardul 2), V5, V6 (cardul 3). Cazurile posibile sunt fețele verzi."
+            },
+            {
+              "en": "Possible cases: V4, V5, V6. Favourable cases: V5 and V6, because only for them the other side is green. The probability is the ratio favourable / possible.",
+              "ro": "Cazuri posibile: V4, V5, V6. Cazuri favorabile: V5 și V6, fiindcă doar la ele cealaltă față este verde. Probabilitatea este raportul favorabile / posibile."
+            }
+          ],
+          "solution": {
+            "en": "$\\Omega = \\{R1, R2, R3, V4, V5, V6\\}$: the sides, not the cards, because we observe one side, not both. After seeing green, the possible cases are V4, V5, V6, and the favourable ones are V5 and V6. The classical rule $p = m/n$ gives $p = 2/3$.",
+            "ro": "$\\Omega = \\{R1, R2, R3, V4, V5, V6\\}$: fețele, nu cardurile, fiindcă observăm o față, nu ambele. După ce vedem verde, cazurile posibile sunt V4, V5, V6, iar cele favorabile sunt V5 și V6. Regula clasică $p = m/n$ dă $p = 2/3$."
+          },
+          "status": "book",
+          "variants": [
+            {
+              "statement": {
+                "en": "A box holds four cards: one red on both sides, one red on one side and green on the other, and two green on both sides. We pick a card at random and lay it on the table; we see only the top side, and it is green. What is the probability that the other side is green too?",
+                "ro": "O cutie conține patru carduri: unul roșu pe ambele fețe, unul roșu pe o față și verde pe cealaltă și două verzi pe ambele fețe. Alegem un card la întâmplare și îl punem pe masă; vedem doar fața de sus, și e verde. Care este probabilitatea ca și cealaltă față să fie verde?"
+              },
+              "table": {
+                "caption": {
+                  "en": "The cards in the box (R = red, V = green)",
+                  "ro": "Cardurile din cutie (R = roșu, V = verde)"
+                },
+                "columns": [
+                  {
+                    "en": "card",
+                    "ro": "card"
+                  },
+                  {
+                    "en": "side A",
+                    "ro": "fața A"
+                  },
+                  {
+                    "en": "side B",
+                    "ro": "fața B"
+                  }
+                ],
+                "rows": [
+                  [
+                    "1",
+                    "R",
+                    "R"
+                  ],
+                  [
+                    "2",
+                    "R",
+                    "V"
+                  ],
+                  [
+                    "3",
+                    "V",
+                    "V"
+                  ],
+                  [
+                    "4",
+                    "V",
+                    "V"
+                  ]
+                ]
+              },
+              "fields": [
+                {
+                  "id": "n",
+                  "formula": "4*2",
+                  "expected": 8
+                },
+                {
+                  "id": "a",
+                  "formula": "4/5",
+                  "expected": "4/5"
+                }
+              ],
+              "solution": {
+                "en": "The sample space has $4 \\cdot 2 = 8$ sides. Green sides: one on the red-green card and four on the two green cards, 5 in total. The favourable ones are the 4 on the green cards. The probability is $4/5$.",
+                "ro": "Spațiul de eșantionare are $4 \\cdot 2 = 8$ fețe. Fețe verzi: una pe cardul roșu-verde și patru pe cele două carduri verzi, în total 5. Favorabile sunt cele 4 de pe cardurile verzi. Probabilitatea este $4/5$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s26",
+      "title": {
+        "en": "Exercise 0.14: the conditional multiplication rule",
+        "ro": "Exercițiul 0.14: regula de înmulțire condiționată"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l01-pf3",
+          "exercise": "0.14",
+          "claim": {
+            "en": "Show that for any events $A$, $B$, $C$ with $P(B, C) > 0$ we have $P(A, B \\mid C) = P(A \\mid B, C)\\,P(B \\mid C)$. In the workbook it is written with the values $x$, $y$, $z$ of the variables $X$, $Y$, $Z$ (see Lesson 4): $P(X{=}x, Y{=}y \\mid Z{=}z) = P(X{=}x \\mid Y{=}y, Z{=}z)\\,P(Y{=}y \\mid Z{=}z)$. Hint: the chain rule.",
+            "ro": "Arată că pentru orice evenimente $A$, $B$, $C$ cu $P(B, C) > 0$ avem $P(A, B \\mid C) = P(A \\mid B, C)\\,P(B \\mid C)$. În carte este scrisă cu valorile $x$, $y$, $z$ ale variabilelor $X$, $Y$, $Z$ (vezi Lecția 4): $P(X{=}x, Y{=}y \\mid Z{=}z) = P(X{=}x \\mid Y{=}y, Z{=}z)\\,P(Y{=}y \\mid Z{=}z)$. Indicație: regula de înlănțuire."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$P(A, B \\mid C) = \\dfrac{P(A, B, C)}{P(C)}$.",
+                "ro": "$P(A, B \\mid C) = \\dfrac{P(A, B, C)}{P(C)}$."
+              },
+              "why": {
+                "en": "This is the definition of the conditional, with the event $A \\cap B$ in place of $A$ and the condition $C$.",
+                "ro": "Este definiția condiționatei, cu evenimentul $A \\cap B$ în locul lui $A$ și condiția $C$."
+              },
+              "predict": {
+                "question": {
+                  "en": "How is the left-hand side written with the definition of conditional probability?",
+                  "ro": "Cum se scrie membrul stâng cu definiția probabilității condiționate?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$\\dfrac{P(A, B, C)}{P(C)}$",
+                      "ro": "$\\dfrac{P(A, B, C)}{P(C)}$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the condition is $C$, so $P(C)$ sits in the denominator.",
+                      "ro": "Corect: condiția este $C$, deci la numitor stă $P(C)$."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$\\dfrac{P(A, B, C)}{P(B)}$",
+                      "ro": "$\\dfrac{P(A, B, C)}{P(B)}$"
+                    },
+                    "correct": false,
+                    "misconception": "definitia-cu-alt-numitor",
+                    "explain": {
+                      "en": "The condition is $C$, not $B$; the denominator is the probability of the condition, that is $P(C)$.",
+                      "ro": "Condiția este $C$, nu $B$; numitorul este probabilitatea condiției, adică $P(C)$."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "The chain rule, with the factors in a convenient order: $P(A, B, C) = P(C)\\,P(B \\mid C)\\,P(A \\mid B, C)$.",
+                "ro": "Regula de înlănțuire, cu factorii într-o ordine potrivită: $P(A, B, C) = P(C)\\,P(B \\mid C)\\,P(A \\mid B, C)$."
+              }
+            },
+            {
+              "shown": {
+                "en": "We substitute and cancel $P(C)$: $P(A, B \\mid C) = \\dfrac{P(C)\\,P(B \\mid C)\\,P(A \\mid B, C)}{P(C)} = P(A \\mid B, C)\\,P(B \\mid C)$.",
+                "ro": "Înlocuim și simplificăm cu $P(C)$: $P(A, B \\mid C) = \\dfrac{P(C)\\,P(B \\mid C)\\,P(A \\mid B, C)}{P(C)} = P(A \\mid B, C)\\,P(B \\mid C)$."
+              },
+              "why": {
+                "en": "The condition $P(B, C) > 0$ guarantees that $P(C) > 0$, so the division is allowed.",
+                "ro": "Condiția $P(B, C) > 0$ garantează că $P(C) > 0$, deci împărțirea este permisă."
+              }
+            },
+            {
+              "shown": {
+                "en": "The same proof, with the roles of $A$ and $B$ swapped, gives the equivalent form $P(A, B \\mid C) = P(A \\mid C)\\,P(B \\mid A, C)$.",
+                "ro": "Aceeași demonstrație, cu rolurile lui $A$ și $B$ schimbate, dă forma echivalentă $P(A, B \\mid C) = P(A \\mid C)\\,P(B \\mid A, C)$."
+              },
+              "why": {
+                "en": "Here $P(A, C) > 0$ is needed. Both orders are correct; you meet both of them.",
+                "ro": "Aici se cere $P(A, C) > 0$. Ambele ordini sunt corecte; le întâlnești amândouă."
+              },
+              "predict": {
+                "question": {
+                  "en": "Which is the equivalent form, with the roles of $A$ and $B$ swapped?",
+                  "ro": "Care este forma echivalentă, cu rolurile lui $A$ și $B$ schimbate?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(A, B \\mid C) = P(A \\mid B)\\,P(B \\mid C)$",
+                      "ro": "$P(A, B \\mid C) = P(A \\mid B)\\,P(B \\mid C)$"
+                    },
+                    "correct": false,
+                    "misconception": "transpusa",
+                    "explain": {
+                      "en": "Here the condition $C$ was lost from the first factor. Every factor must keep the condition $C$.",
+                      "ro": "Aici condiția $C$ s-a pierdut din primul factor. Fiecare factor trebuie să păstreze condiția $C$."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A, B \\mid C) = P(A \\mid C)\\,P(B \\mid C)$",
+                      "ro": "$P(A, B \\mid C) = P(A \\mid C)\\,P(B \\mid C)$"
+                    },
+                    "correct": false,
+                    "misconception": "produs-simplu",
+                    "explain": {
+                      "en": "$A$ is missing from the condition of the second factor. This form holds only if $A$ and $B$ are conditionally independent given $C$, see Lesson 3.",
+                      "ro": "Lipsește $A$ din condiția celui de-al doilea factor. Forma aceasta este adevărată numai dacă $A$ și $B$ sunt independente condiționat de $C$, vezi Lecția 3."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A, B \\mid C) = P(A \\mid C)\\,P(B \\mid A, C)$",
+                      "ro": "$P(A, B \\mid C) = P(A \\mid C)\\,P(B \\mid A, C)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the first factor has the condition $C$, the second has both $A$ and $C$.",
+                      "ro": "Corect: primul factor are condiția $C$, al doilea are și $A$, și $C$."
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "end": {
+            "en": "The conditional multiplication rule comes from the definition and the chain rule. Alternatively, expand the right-hand side with the definition: $\\dfrac{P(A, B, C)}{P(B, C)} \\cdot \\dfrac{P(B, C)}{P(C)} = \\dfrac{P(A, B, C)}{P(C)}$.",
+            "ro": "Regula de înmulțire condiționată vine din definiție și din regula de înlănțuire. Alternativ, desfaci membrul drept cu definiția: $\\dfrac{P(A, B, C)}{P(B, C)} \\cdot \\dfrac{P(B, C)}{P(C)} = \\dfrac{P(A, B, C)}{P(C)}$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l01-s27",
+      "title": {
+        "en": "Exercise 0.8 (optional): true or false",
+        "ro": "Exercițiul 0.8 (opțional): adevărat sau fals"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l01-c4",
+          "exercise": [
+            "0.8.a",
+            "0.8.b",
+            "0.8.c",
+            "0.8.d"
+          ],
+          "source": {
+            "en": "Workbook, ex. 0.8, p. 29",
+            "ro": "Culegerea, ex. 0.8, p. 29"
+          },
+          "statement": {
+            "en": "Mark each statement as true or false. **a.** $P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A)$, if $P(A), P(B) > 0$. **b.** $P(A \\cup B) = P(A) + P(B) - P(A \\mid B)$, if $P(B) > 0$. **c.** $\\dfrac{P(A \\cup B \\cup C)}{P(B \\cup C)} \\ge P(A \\mid B \\cup C)\\,P(B \\cup C)$, if $P(B \\cup C) > 0$. **d.** $P(B \\mid A) + P(B \\mid \\bar A) = 1$, if $P(A), P(\\bar A) > 0$. For the false statements, the counterexample uses a fair die: in b, $A = B$ = even number; in d, $A$ = even number, $B$ = face 1.",
+            "ro": "Marchează fiecare afirmație ca adevărată sau falsă. **a.** $P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A)$, dacă $P(A), P(B) > 0$. **b.** $P(A \\cup B) = P(A) + P(B) - P(A \\mid B)$, dacă $P(B) > 0$. **c.** $\\dfrac{P(A \\cup B \\cup C)}{P(B \\cup C)} \\ge P(A \\mid B \\cup C)\\,P(B \\cup C)$, dacă $P(B \\cup C) > 0$. **d.** $P(B \\mid A) + P(B \\mid \\bar A) = 1$, dacă $P(A), P(\\bar A) > 0$. Pentru afirmațiile false, contraexemplul folosește un zar corect: la b, $A = B$ = număr par; la d, $A$ = număr par, $B$ = fața 1."
+          },
+          "fields": [
+            {
+              "id": "a",
+              "label": {
+                "en": "a. (true or false)",
+                "ro": "a. (adevărat sau fals)"
+              },
+              "kind": "tf",
+              "formula": "true",
+              "expected": "true"
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "b. (true or false)",
+                "ro": "b. (adevărat sau fals)"
+              },
+              "kind": "tf",
+              "formula": "3/6 == 3/6+3/6-1",
+              "expected": "false"
+            },
+            {
+              "id": "b1",
+              "label": {
+                "en": "Counterexample for b: $P(A \\cup B)$ (as a fraction)",
+                "ro": "Contraexemplu la b: $P(A \\cup B)$ (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "3/6",
+              "expected": "1/2"
+            },
+            {
+              "id": "b2",
+              "label": {
+                "en": "Counterexample for b: $P(A) + P(B) - P(A \\mid B)$ (as a fraction)",
+                "ro": "Contraexemplu la b: $P(A) + P(B) - P(A \\mid B)$ (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "3/6+3/6-1",
+              "expected": "0"
+            },
+            {
+              "id": "c",
+              "label": {
+                "en": "c. (true or false)",
+                "ro": "c. (adevărat sau fals)"
+              },
+              "kind": "tf",
+              "formula": "true",
+              "expected": "true"
+            },
+            {
+              "id": "d",
+              "label": {
+                "en": "d. (true or false)",
+                "ro": "d. (adevărat sau fals)"
+              },
+              "kind": "tf",
+              "formula": "0/3+1/3 == 1",
+              "expected": "false"
+            },
+            {
+              "id": "d1",
+              "label": {
+                "en": "Counterexample for d: $P(B \\mid A)$ (as a fraction)",
+                "ro": "Contraexemplu la d: $P(B \\mid A)$ (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "0/3",
+              "expected": "0"
+            },
+            {
+              "id": "d2",
+              "label": {
+                "en": "Counterexample for d: $P(B \\mid \\bar A)$ (as a fraction)",
+                "ro": "Contraexemplu la d: $P(B \\mid \\bar A)$ (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "1/3",
+              "expected": "1/3"
+            },
+            {
+              "id": "d3",
+              "label": {
+                "en": "Counterexample for d: the sum $P(B \\mid A) + P(B \\mid \\bar A)$ (as a fraction)",
+                "ro": "Contraexemplu la d: suma $P(B \\mid A) + P(B \\mid \\bar A)$ (ca fracție)"
+              },
+              "kind": "frac",
+              "formula": "0/3+1/3",
+              "expected": "1/3"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "d",
+              "formula": "true",
+              "message": {
+                "en": "The condition has to be the same: $P(B \\mid A) + P(\\bar B \\mid A) = 1$. Here the conditions are $A$ and $\\bar A$, so the sum can be something else.",
+                "ro": "Condiția trebuie să fie aceeași: $P(B \\mid A) + P(\\bar B \\mid A) = 1$. Aici condițiile sunt $A$ și $\\bar A$, deci suma poate fi altceva."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "true",
+              "message": {
+                "en": "The addition rule subtracts $P(A \\cap B)$, not $P(A \\mid B)$. The two coincide only if $P(B) = 1$ or $P(A \\cap B) = 0$.",
+                "ro": "Regula de adunare scade $P(A \\cap B)$, nu $P(A \\mid B)$. Cele două coincid doar dacă $P(B) = 1$ sau $P(A \\cap B) = 0$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Write each side with the multiplication rule or with the definition of conditional probability.",
+              "ro": "Scrie fiecare membru cu regula de înmulțire sau cu definiția probabilității condiționate."
+            },
+            {
+              "en": "For b: the addition rule gives $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$. When is $P(A \\cap B)$ equal to $P(A \\mid B)$?",
+              "ro": "Pentru b: regula de adunare dă $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$. Când este $P(A \\cap B)$ egal cu $P(A \\mid B)$?"
+            },
+            {
+              "en": "For d: $P(B \\mid A) + P(\\bar B \\mid A) = 1$ (the same condition $A$), not $P(B \\mid A) + P(B \\mid \\bar A)$.",
+              "ro": "Pentru d: $P(B \\mid A) + P(\\bar B \\mid A) = 1$ (aceeași condiție $A$), nu $P(B \\mid A) + P(B \\mid \\bar A)$."
+            }
+          ],
+          "solution": {
+            "en": "**a.** True: both sides are $P(A \\cap B)$ (the multiplication rule). **b.** False: it would need $P(A \\cap B) = P(A \\mid B)$, that is $P(A \\cap B) = \\dfrac{P(A \\cap B)}{P(B)}$, so $P(B) = 1$ or $P(A \\cap B) = 0$. On the die, with $A = B$ = even: $P(A \\cup B) = 1/2$, but $\\dfrac{1}{2} + \\dfrac{1}{2} - 1 = 0$. **c.** True: with $D = B \\cup C$, the statement becomes $\\dfrac{P(A \\cup D)}{P(D)} \\ge P(A \\cap D)$; it follows from $\\dfrac{P(A \\cup D)}{P(D)} \\ge P(A \\cup D)$ (because $0 < P(D) \\le 1$) and $P(A \\cup D) \\ge P(A \\cap D)$. **d.** False: $P(B \\mid A) + P(\\bar B \\mid A) = 1$ always, so the equality would need $P(B \\mid \\bar A) = P(\\bar B \\mid A)$. On the die, with $A$ = even and $B$ = face 1: $P(B \\mid A) = 0$ and $P(B \\mid \\bar A) = 1/3$, the sum is $1/3$, not 1.",
+            "ro": "**a.** Adevărat: ambii membri sunt $P(A \\cap B)$ (regula de înmulțire). **b.** Fals: ar cere $P(A \\cap B) = P(A \\mid B)$, adică $P(A \\cap B) = \\dfrac{P(A \\cap B)}{P(B)}$, deci $P(B) = 1$ sau $P(A \\cap B) = 0$. Pe zar, cu $A = B$ = par: $P(A \\cup B) = 1/2$, dar $\\dfrac{1}{2} + \\dfrac{1}{2} - 1 = 0$. **c.** Adevărat: cu $D = B \\cup C$, afirmația devine $\\dfrac{P(A \\cup D)}{P(D)} \\ge P(A \\cap D)$; ea rezultă din $\\dfrac{P(A \\cup D)}{P(D)} \\ge P(A \\cup D)$ (fiindcă $0 < P(D) \\le 1$) și $P(A \\cup D) \\ge P(A \\cap D)$. **d.** Fals: $P(B \\mid A) + P(\\bar B \\mid A) = 1$ întotdeauna, deci egalitatea ar cere $P(B \\mid \\bar A) = P(\\bar B \\mid A)$. Pe zar, cu $A$ = par și $B$ = fața 1: $P(B \\mid A) = 0$ și $P(B \\mid \\bar A) = 1/3$, suma este $1/3$, nu 1."
+          },
+          "status": "book",
+          "variants": [
+            {
+              "statement": {
+                "en": "Mark each statement as true or false. **a.** $P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A)$, if $P(A), P(B) > 0$. **b.** $P(A \\cup B) = P(A) + P(B) - P(A \\mid B)$, if $P(B) > 0$. **c.** $\\dfrac{P(A \\cup B \\cup C)}{P(B \\cup C)} \\ge P(A \\mid B \\cup C)\\,P(B \\cup C)$, if $P(B \\cup C) > 0$. **d.** $P(B \\mid A) + P(B \\mid \\bar A) = 1$, if $P(A), P(\\bar A) > 0$. For the false statements, the counterexample uses a fair die: in b, $A = B$ = face 1 or 2; in d, $A$ = face 1, 2 or 3, and $B$ = face 1 or 2.",
+                "ro": "Marchează fiecare afirmație ca adevărată sau falsă. **a.** $P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A)$, dacă $P(A), P(B) > 0$. **b.** $P(A \\cup B) = P(A) + P(B) - P(A \\mid B)$, dacă $P(B) > 0$. **c.** $\\dfrac{P(A \\cup B \\cup C)}{P(B \\cup C)} \\ge P(A \\mid B \\cup C)\\,P(B \\cup C)$, dacă $P(B \\cup C) > 0$. **d.** $P(B \\mid A) + P(B \\mid \\bar A) = 1$, dacă $P(A), P(\\bar A) > 0$. Pentru afirmațiile false, contraexemplul folosește un zar corect: la b, $A = B$ = fața 1 sau 2; la d, $A$ = fața 1, 2 sau 3, iar $B$ = fața 1 sau 2."
+              },
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "true",
+                  "expected": "true"
+                },
+                {
+                  "id": "b",
+                  "formula": "2/6 == 2/6+2/6-1",
+                  "expected": "false"
+                },
+                {
+                  "id": "b1",
+                  "formula": "2/6",
+                  "expected": "1/3"
+                },
+                {
+                  "id": "b2",
+                  "formula": "2/6+2/6-1",
+                  "expected": "-1/3"
+                },
+                {
+                  "id": "c",
+                  "formula": "true",
+                  "expected": "true"
+                },
+                {
+                  "id": "d",
+                  "formula": "2/3+0/3 == 1",
+                  "expected": "false"
+                },
+                {
+                  "id": "d1",
+                  "formula": "2/3",
+                  "expected": "2/3"
+                },
+                {
+                  "id": "d2",
+                  "formula": "0/3",
+                  "expected": "0"
+                },
+                {
+                  "id": "d3",
+                  "formula": "2/3+0/3",
+                  "expected": "2/3"
+                }
+              ],
+              "solution": {
+                "en": "**a.** True. **b.** False: with $A = B$ = {1, 2}, $P(A \\cup B) = 1/3$, but $\\dfrac{1}{3} + \\dfrac{1}{3} - 1 = -\\dfrac{1}{3}$. **c.** True. **d.** False: with $A$ = {1, 2, 3} and $B$ = {1, 2}, $P(B \\mid A) = 2/3$ and $P(B \\mid \\bar A) = 0$, the sum is $2/3$, not 1.",
+                "ro": "**a.** Adevărat. **b.** Fals: cu $A = B$ = {1, 2}, $P(A \\cup B) = 1/3$, dar $\\dfrac{1}{3} + \\dfrac{1}{3} - 1 = -\\dfrac{1}{3}$. **c.** Adevărat. **d.** Fals: cu $A$ = {1, 2, 3} și $B$ = {1, 2}, $P(B \\mid A) = 2/3$ și $P(B \\mid \\bar A) = 0$, suma este $2/3$, nu 1."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
