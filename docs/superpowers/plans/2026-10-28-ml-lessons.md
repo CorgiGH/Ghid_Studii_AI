@@ -443,7 +443,7 @@ Each lesson task:
   Fix every finding and re-run Steps 2–3.
 - [ ] **Step 5:** Commit `feat(ml): lesson NN, <short title>`.
 
-Lessons are independent once Tasks 1–10 and their widgets are in, so they run in parallel. They are merged in lesson order, and `index.js` is appended in order.
+Lessons are independent once Tasks 1–10 and their widgets are in. They are built at most 3 at a time and published to `main` one by one as each passes every check, in the priority order of design §11 (D-067, D-068). `index.js` keeps the course lines sorted by lesson number. A published lesson's ids never change.
 
 ### Task 53: The two tests (mock T1 and T21P)
 
