@@ -326,7 +326,7 @@ export default function Id3Builder({ props, predict }) {
   };
   const cap = model.caption(s.step, { predict: !!predict, picks });
   const label = props.mode === 'stumps'
-    ? t('Decision stumps and the choice of the root', 'Cioturile de decizie și alegerea rădăcinii')
+    ? t('Decision stumps and the choice of the root', 'Compașii de decizie și alegerea rădăcinii')
     : props.mode === 'compare' ? t('Comparing two stumps', 'Compararea a două cioturi') : t('ID3 by hand', 'ID3 de mână');
   return (
     <VizFrame widget="ml-id3-builder" stepper={stepper} caption={t(cap.en, cap.ro)} label={label}>

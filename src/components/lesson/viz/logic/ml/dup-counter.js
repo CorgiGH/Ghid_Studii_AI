@@ -74,7 +74,7 @@ export function dupModel(props) {
       const body = s.contradictory.length === 0
         ? T(`No input combination appears with two different labels, so the set is consistent and the smallest training error is ${s.errs}/${s.n}.`, `Nicio combinație de intrări nu apare cu etichete diferite, deci setul e consistent și cea mai mică eroare la antrenare e ${s.errs}/${s.n}.`)
         : T(`Some inputs appear with different labels; the smallest training error is ${s.errs}/${s.n}.`, `Unele intrări apar cu etichete diferite; cea mai mică eroare la antrenare e ${s.errs}/${s.n}.`);
-      const ask = ctx.predict && m > 0 ? T(' Rows are added one at a time; before each, say what the count does.', ' Rândurile se adaugă pe rând; înainte de fiecare, spune ce face contorul.') : '';
+      const ask = ctx.predict && m > 0 ? T(' Rows are added one at a time; before each, say what the count does.', ' Rândurile se adaugă unul câte unul; înainte de fiecare, spune ce face contorul.') : '';
       return T(`The table has ${cnt('en', s.n, 'row', 'rows', 'rând', 'rânduri')}. ${body}${ask}`, `Tabelul are ${cnt('ro', s.n, 'row', 'rows', 'rând', 'rânduri')}. ${body}${ask}`);
     }
     if (f.kind === 'add') {

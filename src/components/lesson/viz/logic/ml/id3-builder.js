@@ -259,8 +259,8 @@ export function compareModel(props) {
       const [a, b] = c.units;
       if (f.kind === 'boxes') {
         return T(
-          `Two nodes: ${boxText(a.counts)} and ${boxText(b.counts)}. Which has the bigger entropy? By symmetry only the smaller count matters, so compare the minority share of each.`,
-          `Două noduri: ${boxText(a.counts)} și ${boxText(b.counts)}. Care are entropia mai mare? Din simetrie contează doar numărul mai mic, deci se compară cota minoritară a fiecăruia.`,
+          `Two nodes: ${boxText(a.counts)} and ${boxText(b.counts)}. Which has the bigger entropy? By symmetry only the minority share matters: the smaller count over the total.`,
+          `Două noduri: ${boxText(a.counts)} și ${boxText(b.counts)}. Care are entropia mai mare? Din simetrie contează doar cota minoritară: numărul mai mic împărțit la total.`,
         );
       }
       const cd = commonDen(a.share, b.share);

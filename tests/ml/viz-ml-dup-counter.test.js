@@ -189,3 +189,9 @@ describe('second review', () => {
     expect((html.match(/class="mlv-frac/g) || []).length).toBe(2);
   });
 });
+
+describe('second review: wording', () => {
+  it('rows are added one by one (unul câte unul), not "rândurile se adaugă pe rând"', () => {
+    expect(dupModel(PROPS).caption(0, { predict: true }).ro).toContain('Rândurile se adaugă unul câte unul; înainte de fiecare, spune ce face contorul.');
+  });
+});

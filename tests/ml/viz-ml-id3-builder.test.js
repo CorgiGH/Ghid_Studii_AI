@@ -423,3 +423,15 @@ describe('second review: a tied leaf of the winning stump', () => {
     expect(h).toContain('→ 0 (egalitate)');
   });
 });
+
+describe('second review: wording', () => {
+  it('compare, two nodes: by symmetry the minority share matters, said exactly', () => {
+    const c = compareModel(CASES).caption(3);
+    expect(c.ro).toContain('Din simetrie contează doar cota minoritară: numărul mai mic împărțit la total.');
+    expect(c.en).toContain('By symmetry only the minority share matters: the smaller count over the total.');
+  });
+  it('the ID3 widget calls stumps by the course term, compași de decizie', () => {
+    const h = renderToStaticMarkup(React.createElement(Id3Builder, { props: P21, predict: false }));
+    expect(h).toContain('aria-label="Compașii de decizie și alegerea rădăcinii"');
+  });
+});
