@@ -27,6 +27,9 @@ const WIDGETS = {
   'ml-pmf-cdf': lazy(() => import('../viz/widgets/ml/PmfCdf.jsx')),
   'ml-joint-table': lazy(() => import('../viz/widgets/ml/JointTable.jsx')),
   'ml-entropy-bars': lazy(() => import('../viz/widgets/ml/EntropyBars.jsx')),
+  'ml-id3-builder': lazy(() => import('../viz/widgets/ml/Id3Builder.jsx')),
+  'ml-tree-pair': lazy(() => import('../viz/widgets/ml/TreePair.jsx')),
+  'ml-dup-counter': lazy(() => import('../viz/widgets/ml/DupCounter.jsx')),
 };
 
 function Notice({ children }) {

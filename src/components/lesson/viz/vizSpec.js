@@ -20,6 +20,22 @@ const isTable = (v) => !!v && typeof v === 'object' && isArr(v.columns) && isArr
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
+// ML widgets: a static table is { columns: [string | {en, ro}], rows: [[cell]] } (optional ignore, domains)
+const isLabel = (v) => isStr(v) || isNum(v) || typeof v === 'boolean';
+const isName = (v) => isStr(v) || isBi(v);
+const isMlTable = (v) => !!v && Array.isArray(v.columns) && v.columns.length > 0 && v.columns.every(isName)
+  && Array.isArray(v.rows) && v.rows.length > 0 && v.rows.every((r) => Array.isArray(r) && r.length === v.columns.length);
+const isCounts = (v) => Array.isArray(v) && v.length >= 2 && v.every((x) => isNum(x) && x >= 0);
+const isStump = (v) => !!v && isName(v.name) && Array.isArray(v.branches) && v.branches.length >= 2 && v.branches.every((b) => b && isCounts(b.counts));
+const isStumpsGiven = (v) => !!v && isCounts(v.root) && Array.isArray(v.stumps) && v.stumps.length > 0 && v.stumps.every((s) => isStump(s) && s.branches.every((b) => b.counts.length === v.root.length));
+const isCompareCase = (c) => !!c && ((Array.isArray(c.nodes) && c.nodes.length === 2 && c.nodes.every((n) => isCounts(n) && n.length === 2))
+  || (Array.isArray(c.stumps) && c.stumps.length === 2 && c.stumps.every(isStump)));
+const isCompareCases = (v) => isArr(v) && v.every(isCompareCase);
+// a tree: a leaf { leaf } or a test { attr, kids: { value: tree } }
+const isTree = (t) => !!t && typeof t === 'object' && (Object.prototype.hasOwnProperty.call(t, 'leaf')
+  ? isLabel(t.leaf)
+  : isStr(t.attr) && !!t.kids && typeof t.kids === 'object' && Object.keys(t.kids).length >= 2 && Object.values(t.kids).every(isTree));
+
 // widget -> { prop: check } (every prop listed is required unless wrapped in optional()).
 const SPEC = {
   'table-map': { dataset: isStr, from: (v) => /^\w+\.\w+$/.test(v), to: (v) => /^\w+\.\w+$/.test(v), where: (v) => !!v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0, fromCaption: optional(isBi), question: isBi, answerKey: isStr },
@@ -47,6 +63,9 @@ const SPEC = {
   'ml-pmf-cdf': { values: (v) => isArr(v) && v.every(isNum), probs: probList, name: optional(isStr), format: optional(oneOf('fraction', 'decimal')), cdfAt: optional(isNum), second: optional((v) => !!v && typeof v === 'object' && isArr(v.values) && v.values.every(isNum) && probList(v.probs) && (v.name === undefined || isStr(v.name))) },
   'ml-joint-table': { table: isTable, x: isStr, y: isStr, z: optional(isStr), conditionOn: optional(isArr), explore: optional((v) => typeof v === 'boolean'), rowsAre: optional(oneOf('x', 'y')), format: optional(oneOf('fraction', 'decimal')), first: optional((v) => isArr(v) && v.length === 3) },
   'ml-entropy-bars': { splits: (v) => isArr(v) && v.every((s) => Array.isArray(s) && s.length === 2 && s.every(Number.isInteger)), venn: optional((v) => !!v && typeof v === 'object' && isStr(v.X) && isStr(v.Y) && (v.xGroups === undefined || strs(v.xGroups)) && (v.yLabels === undefined || (strs(v.yLabels) && v.yLabels.length === 2))) },
+  'ml-id3-builder': { mode: oneOf('stumps', 'compare', 'full'), table: optional(isMlTable), target: optional(isStr), given: optional(isStumpsGiven), cases: optional(isCompareCases), positive: optional(isLabel), showValues: optional((v) => typeof v === 'boolean') },
+  'ml-tree-pair': { left: isTree, right: isTree, counts: optional(subsetOf('tests', 'levels', 'leaves')), titles: optional((v) => Array.isArray(v) && v.length === 2 && v.every(isBi)), table: optional(isMlTable), target: optional(isStr) },
+  'ml-dup-counter': { table: isMlTable, target: isStr, added: (v) => Array.isArray(v) && v.length > 0 && v.every(Array.isArray) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -87,6 +106,20 @@ export function validateViz(block) {
   }
   if (w === 'ml-entropy-bars' && errs.length === 0) {
     try { entropyBars(props); } catch (e) { errs.push(`viz (ml-entropy-bars): ${e.message}`); }
+  }
+  if (w === 'ml-id3-builder') {
+    if (props.mode === 'compare') {
+      if (!isCompareCases(props.cases)) errs.push('viz (ml-id3-builder): compare needs props.cases, each with nodes (two [pos, neg] pairs) or stumps (two with branches)');
+    } else if (props.mode === 'stumps' && props.given !== undefined) {
+      if (!isStumpsGiven(props.given)) errs.push('viz (ml-id3-builder): props.given needs root counts and stumps whose branch counts match');
+    } else if (!(isMlTable(props.table) && isStr(props.target) && props.table.columns.some((c) => (c.en ?? c) === props.target))) {
+      errs.push('viz (ml-id3-builder): this mode needs props.table and props.target (a column of the table)');
+    }
+  }
+  if (w === 'ml-tree-pair' && props.table !== undefined && !(isMlTable(props.table) && isStr(props.target))) errs.push('viz (ml-tree-pair): props.table goes with props.target');
+  if (w === 'ml-dup-counter') {
+    if (isMlTable(props.table) && !props.table.columns.some((c) => (c.en ?? c) === props.target)) errs.push('viz (ml-dup-counter): props.target is not a column of the table');
+    if (isMlTable(props.table) && Array.isArray(props.added) && !props.added.every((r) => Array.isArray(r) && r.length === props.table.columns.length)) errs.push('viz (ml-dup-counter): every added row needs one cell per column');
   }
   return errs;
 }
