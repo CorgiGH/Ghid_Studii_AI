@@ -144,6 +144,14 @@ Year 2, Semester 1 (`y2s1`):
 - Mock test: `src/content/bd/tests/mock-l1.json` (`bd-mock-l1`), validated by `scripts/validate-test-json.mjs`, rendered by `src/components/blocks/test/` (`TestRenderer.jsx`, `SqlQuestion.jsx` question type `sql`, grading in `sqlGrading.js`/`sqlScoring.js`).
 - Design spec: `docs/superpowers/specs/2026-10-24-bd-lessons-design.md` (section 8 is the SQL engine and its measured numbers).
 
+## Lesson clarity (every lesson-player subject; Alex's rule, broken twice)
+
+Alex learns from zero, usually hours before a test. A lesson that is correct but unreadable is a failed lesson. BD (2026-10-25) and ML lesson 1 (2026-10-30: "i can't understand shit from lesson 1") both shipped concept-first walls of text.
+- Core first: the main path teaches only what the test needs (for ML, the teacher's list in `docs/superpowers/specs/ml-outline/2026-10-29-teacher-list-coverage.md`). Per idea: a worked example with small real numbers, every step shown; then the rule in one plain Romanian sentence; then the formula with every symbol named in words; then one or two practice items.
+- Formal extras the test does not ask for (axioms, side properties, unrequested proofs) go to optional exercises at the end, titled "Opțional: …", or are cut to one plain screen.
+- One idea per screen, at most 80 words of learner text outside tables and exercise data, no paragraph over 3 sentences, no symbol before words introduce it, at most two `reflect` screens per lesson.
+- Enforced by the ML content gate's clarity check (lessons with `meta.clarity: 1`) and by a reviewer who reads every walk screenshot at 390 px as a first-time learner before anything is published. Never publish a lesson nobody has read that way.
+
 ## In-browser SQL engine (`src/sql/`)
 - `engine/`: PGlite (Postgres in WASM) in a Web Worker (`worker.js`, `client.js` page-side API, `core.js` the engine, `script.js` statement splitter, `errors.js`, `format.js`). Starts from a prebuilt data dir; boot > 20 s or failure sets status `failed` and lessons fall back to paper mode. PGlite ignores `statement_timeout`, so the client enforces a 60 s run limit by killing and rebooting the worker (a TIMEOUT, then the next run is correct). `maxRows` trims only after the whole result is in memory.
 - `compat/*.sql`: Oracle-compat layer (dates, char, numbers, formats, NLS, strings, DDL) installed into Postgres. `rewrite/`: text passes that turn Oracle SQL into Postgres SQL (`index.js` order, `pass-*.js`: outer-join `(+)`, set ops, DECODE, empty-string, clock, ...). `rewrite/lint.js`: Oracle 11g strictness, answers with the ORA code 11g gives (LIMIT, ILIKE, `::`, 3-arg CONCAT, ...), runs on the learner's original text.
