@@ -215,6 +215,28 @@ Format follows `outline-prob.md`. Learner text is Romanian and sits in quote blo
 6. **The Gibbs classifier (ML6:11) and MDL (ML6:25-28)** get one "nu se cere la test" screen in L19, nothing more (design section 3).
 7. **Numbers in pretests and quiz items are new** (never the worked-example data); each is tagged `[construit]` and recomputed.
 
+# Additions for the teacher's list (2026-10-29)
+
+The teacher's list of what the Friday 2026-10-30 test needs (23 items; verbatim in `ml-outline/2026-10-29-teacher-list-coverage.md`, which maps every item to its screens) was checked against this outline item by item (D-069; the plumbing calls are D-072 to D-074). Where the outline covered an item only partly, the missing piece was added to the lesson that owns the topic. Each addition carries **(added 2026-10-29, teacher list item N)** in its heading or builder line; nothing was moved, renumbered or removed, and no item changed owner. New ids: a screen with a letter suffix (`L5.s06a`) sits right after the screen it extends; quiz items continue the lesson's numbering (`L12.Q5`); a constructed exercise is `L<n>.c<k>` and that id is its key in `allocation.json` `exercise_index` (it has no book number; status verified-twice). Every new number is `[construit]` and was computed twice, with `src/ml/calc/formula.js` `evaluate` (the formula is written next to the value) and with exact fractions in Python; for the decision zones of L14, ID3 was rerun with every tie variant. Both scripts are in this folder: `verify_teacher_list.mjs` (run from the worktree root) and `verify_teacher_list.py` (`python3 -I`).
+
+| Lesson | Added | Teacher item |
+|---|---|---|
+| L4 | L4.c1 (proof: $\mathrm{Var}(X+a)=\mathrm{Var}(X)$ from the definition and the linearity of the mean), L4.c2 (is it a p.m.f.?; $p(x)=c\cdot x$) | 1 |
+| L5 | concept (4); L5.s06a (distribution of $g(X,Y)$ from the joint table); L5.s09a (functions of independent variables, $E[XY^2]$); L5.c1 (the product $XY$ of two independent variables, with its variance in field `vz`); one sentence on L5.s08 | 2, 4 |
+| L6 | one sentence on L6.s05 | 4 |
+| L12 | concept (d); R0 (what ID3 optimizes and the model it builds); Q5 | 6 |
+| L14 | R3b (a leaf's zone as inequalities); zone fields in E 3.11.b and E 4.48 | 10 |
+| L15 | R4b (overfitting, underfitting, good fit); Q5; E L15.c1 (roles of the training, validation and test sets; 5-fold estimate; cost of CVLOO) | 11, 12, 13 |
+| L20 | L20.s07 (the decision rule derived as the book justifies it, Bayes then the denominator dropped, and how to write it on paper); L20.s08 (the multiplication-rule step to $P(a_1,\dots,a_n,v_j)$); L20.s11 (free-parameter count for categorical attributes and $K$ classes) | 17, 21 |
+| L21 | concept (3); L21.s09a (imbalanced data: predefined priors); L21.q5; field `e` of L21.e1 (2.8); second prediction on L21.s02 (NB's free parameters on the T21T2 7 rows: 11) | 21, 23 |
+| L22 | L22.s10a (Bayes Naiv and Bayes Comun: advantages and disadvantages, P0-P8); L22.q4 | 22 |
+
+The L20 rows, the L21.s02 prediction and field `vz` of L5.c1 come from the completeness pass that followed (same day): every item was re-read in its owner lesson as a learner who starts from zero, and every added number was recomputed again with code independent of the first two scripts.
+
+Not added, Alex's call: exercise 0.110 (the book's recap exercise on operations with independent variables; `allocation.json` `out_of_scope` says "de decis de Alex"). L5.s09a and L5.c1 teach its skill with our own numbers, so the lesson does not wait for that call.
+
+Open, publish order: item 16 asks for the properties of ID3, and the book's list (B:488) includes (P6), "ID3 e sensibil la atribute cu foarte multe valori", which this outline teaches only in Lecția 17 (concept C17.1). D-068 puts L17 after the test on the premise that L17 covers nothing on the teacher's list. Lecția 13 R4 and 4.56.e teach the mechanism (an injective attribute gets $IG=H(Y)$ and is chosen) but not the property itself. Adding (P6) to L13 would teach it in two lessons, so nothing was moved; publishing L17 right after L16 closes the gap.
+
 # Lessons
 
 ## Lecția 1 (`ml-l01`): Probabilitate: spațiu de probabilitate, probabilitate condiționată, regula de înmulțire
@@ -1064,6 +1086,36 @@ Builder: $\mathrm{Var}(aX+b)$ is not asked in the quiz: it is exercise 0.97 (L4.
 
 **Status note:** answer status "ruled": the book gives no answer; the content map gives the one-line proof above.
 
+#### L4.c1: Var(X+a) = Var(X) din definiție și liniaritatea mediei, `[construit]`, answer status verified-twice (proof; added 2026-10-29, teacher list item 1)
+
+**Enunț:** Fie $X$ o variabilă aleatoare și $a$ o constantă. Folosind definiția varianței și liniaritatea mediei, arătați că $\mathrm{Var}(X+a)=\mathrm{Var}(X)$. Verificați apoi pe $X$ care ia valorile 1 și 4 cu probabilitățile $\frac23$ și $\frac13$, cu $a=5$.
+
+**Proof screens.** 1. Definiția: $\mathrm{Var}(X+a)=E\big[(X+a-E[X+a])^2\big]$. 2. "Cât este $E[X+a]$?" ✓ $E[X]+a$ (liniaritatea mediei, cu $E[a]=a$). ✗[media nu se mută] $E[X]$: adunând $a$ la fiecare valoare, și media crește cu $a$. ✗[constanta înmulțită] $a\,E[X]$: $a$ se adună la $X$, nu îl înmulțește; $E[aX]=aE[X]$ este altă regulă. 3. "Ce rămâne în paranteză?" ✓ $X+a-(E[X]+a)=X-E[X]$: constanta se reduce. ✗[a rămâne în paranteză] $X-E[X]+a$: din $X+a$ se scade toată media, $E[X]+a$, nu doar $E[X]$. 4. Deci $\mathrm{Var}(X+a)=E\big[(X-E[X])^2\big]=\mathrm{Var}(X)$. ∎ Remarcă: împreună cu $\mathrm{Var}(aX)=a^2\mathrm{Var}(X)$ (L4.e2) rezultă $\mathrm{Var}(aX+b)=a^2\mathrm{Var}(X)$.
+
+**Fields (`[construit]`):** `vx` num "$\mathrm{Var}(X)$" `2` (formula `Var([1,4],[2/3,1/3])`); `m` num "$E[X+5]$" `7` (`E([1+5,4+5],[2/3,1/3])`); `v` num "$\mathrm{Var}(X+5)$" `2` (`Var([1+5,4+5],[2/3,1/3])`).
+
+**Hints:** 1) $E[X]=1\cdot\frac23+4\cdot\frac13=2$; $X+5$ ia valorile 6 și 9 cu aceleași probabilități. 2) $E[X+5]=E[X]+5$; abaterile lui $X+5$ față de media ei sunt $6-7=-1$ și $9-7=2$, aceleași ca ale lui $X$ față de 2. 3) $\mathrm{Var}(X+5)=(-1)^2\cdot\frac23+2^2\cdot\frac13=2$.
+
+**Worked solution:** $E[X]=2$, $E[X^2]=\frac23+\frac{16}3=6$, $\mathrm{Var}(X)=6-4=2$. $E[X+5]=7$ și $\mathrm{Var}(X+5)=E[(X+5-7)^2]=E[(X-2)^2]=2$. Culegerea nu dă răspunsul; verificat de două ori.
+
+**Detectors:** `m` = `2` → "Media se mută și ea: $E[X+5]=E[X]+5=7$." `v` = `27` (`E([(1+5-2)^2,(4+5-2)^2],[2/3,1/3])`) → "Ai scăzut media veche, 2, în loc de $E[X+5]=7$: $E[(X+5-2)^2]=\mathrm{Var}(X)+25=27$." `v` = `7` (`Var([1,4],[2/3,1/3])+5`) → "Constanta nu se adună la varianță: toate valorile se mută cu 5, media la fel, deci abaterile rămân aceleași." `v` = `51` (`E([(1+5)^2,(4+5)^2],[2/3,1/3])`) → "Aceasta este $E[(X+5)^2]$; scade $(E[X+5])^2=49$."
+
+**Footnote:** "Cursul: slide 14." Builder: FND:14 states $\mathrm{Var}(X+a)=\mathrm{Var}(X)$ without proof and no book exercise proves it (0.9.b proves only $\mathrm{Var}(aX)$; checked B:30-33). T21P item 2 asks exactly this proof (with $a=10$); the T21P test stays as given, so the learner meets it there as a test item, the way L1's 0.14 meets T21P item 1.
+
+#### L4.c2: este o funcție masă de probabilitate?, `[construit]`, answer status verified-twice (added 2026-10-29, teacher list item 1)
+
+**Enunț:** $X$ ia valorile 1, 2, 3. Pentru fiecare definiție spuneți dacă este o funcție masă de probabilitate validă și de ce. **i.** $p(1)=0{,}5$, $p(2)=0{,}3$, $p(3)=0{,}3$. **ii.** $p(1)=0{,}6$, $p(2)=-0{,}1$, $p(3)=0{,}5$. **iii.** $p(1)=0{,}2$, $p(2)=0{,}5$, $p(3)=0{,}3$. **iv.** $p(x)=c\cdot x$ pentru $x\in\{1,2,3\}$: ce valoare trebuie să aibă $c$? Cât este atunci $P(X=3)$?
+
+**Fields:** `i` tf "i. validă?" `nu` (sum `0.5+0.3+0.3` = 1,1); `ir` choice "i. de ce?" ✓ suma este $1{,}1\ne1$; ✗[o valoare peste 1 sau negativă] "o valoare nu este în $[0,1]$" (explanation: toate trei sunt între 0 și 1; problema este suma). `ii` tf "ii. validă?" `nu` (sum `0.6+(-0.1)+0.5` = 1, `min(0.6,-0.1,0.5)` = −0,1); `iir` choice "ii. de ce?" ✓ $p(2)=-0{,}1<0$; ✗[suma 1 ajunge] "suma nu este 1" (explanation: suma este exact 1, dar o probabilitate nu poate fi negativă; se verifică ambele condiții). `iii` tf "iii. validă?" `da` (sum `0.2+0.5+0.3` = 1, `min(0.2,0.5,0.3)` = 0,2). `c` frac "iv. $c$" `1/6` (`1/(1+2+3)`); `p3` frac "$P(X=3)$" `1/2` (`3/(1+2+3)`).
+
+**Hints:** 1) O p.m.f. cere două lucruri: $p(x)\ge0$ pentru fiecare valoare și $\sum_xp(x)=1$. 2) Verifică pe rând semnul fiecărei valori, apoi suma. 3) La iv: $c\cdot1+c\cdot2+c\cdot3=6c=1$.
+
+**Worked solution:** i. Toate valorile sunt în $[0,1]$, dar suma este $1{,}1$: **nu** este validă. ii. Suma este $0{,}6-0{,}1+0{,}5=1$, dar $p(2)<0$: **nu** este validă. iii. Valorile sunt nenegative și suma este 1: **validă**. iv. $6c=1$, deci $c=\frac16$, iar valorile $\frac16,\frac26,\frac36$ sunt nenegative; $P(X=3)=\frac36=\frac12$. Culegerea nu dă răspunsul; verificat de două ori.
+
+**Detectors:** `ii` = `da` → "Suma este 1, dar $p(2)=-0{,}1$: o probabilitate nu poate fi negativă. Verifică ambele condiții." `c` = `6` → "Ai inversat: $6c=1$ dă $c=\frac16$." `p3` = `3` → "$P(X=3)=3c$, cu $c=\frac16$."
+
+**Footnote:** "Cursul: slide 9. Seminar 2, p. 4." Builder: the check is the definition of L4.s06 (one sentence there; nothing practised it). T21P item 5 asks the same check on $0{,}3$; $0{,}3$; $0{,}4$; these numbers differ on purpose.
+
 ### L4 visual spec: `ml-viz-pmf-cdf` (pmf bars, mean marked, then the c.d.f. staircase)
 
 - **Data:** configuration 1: $X$ on $\{-1,0,1,2\}$ with $\frac16,\frac16,\frac16,\frac12$. Configuration 2 (appears once, for "mean not a value"): $R$ on $\{0,1,2,3\}$ with $\frac18,\frac38,\frac38,\frac18$.
@@ -1077,6 +1129,7 @@ Builder: $\mathrm{Var}(aX+b)$ is not asked in the quiz: it is exercise 0.97 (L4.
 - `[calculat]`/`[construit]` values: all recomputed (checked: $F$ values, $E[R]=3/2$, $E[X^2]=7/3$, $\mathrm{Var}=4/3$, quiz and exercise numerics).
 - Uncertain: nothing numerical. The variance of the binomial through "sum of independent Bernoulli variables" is not taught here (it needs the variance of a sum, Lecția 5); L5 gives it as a one-line back-link to this lesson.
 - Repetition check: Var is taught once (L4.s09) and proven once (L4.e2); the games of L4.s01 return only as the payoff in L4.s12.
+- Added 2026-10-29 (teacher list item 1): L4.c1 proves $\mathrm{Var}(X+a)=\mathrm{Var}(X)$, the one property of L4.s09 that no exercise proved (L4.e9 only checks it numerically), and L4.c2 practises the p.m.f. check of L4.s06. Both use new data that no other lesson or test uses.
 
 ---
 
@@ -1085,6 +1138,8 @@ Builder: $\mathrm{Var}(aX+b)$ is not asked in the quiz: it is exercise 0.97 (L4.
 **Priority A.** **Concepts (3):** (1) distribuția comună, marginalele, distribuțiile condiționate; regula de înlănțuire pentru 3 variabile; (2) independența variabilelor aleatoare (pe toate perechile de valori); (3) covarianța, coeficientul de corelație, $\mathrm{Var}(X+Y)$. **Prerequisites:** vezi Lecția 1 (probabilitate condiționată, înlănțuire); vezi Lecția 3 (independența evenimentelor); vezi Lecția 4 (variabile, medie, varianță, liniaritate).
 
 **Does not teach:** conditional independence of variables (L6).
+
+**Added 2026-10-29 (teacher list item 2; concept C5.4 in `allocation.json`):** (4) variabile construite din două variabile: distribuția lui $g(X,Y)$ din tabelul comun, produsul $XY$, funcții de variabile independente. Screens L5.s06a and L5.s09a, exercise L5.c1.
 
 ### L5 screens: opening question
 
@@ -1137,6 +1192,13 @@ Correct: formula $0{,}24+0{,}21+2(-0{,}02)=0{,}41$. Direct: $X+Y$ ia 0 cu $0{,}1
 
 Footnote: "Cursul: slide 15. Culegerea: p. 39." Builder: continuous version (integrals) exists in FND:15 and is out of scope.
 
+**L5.s06a** (definition + prediction; added 2026-10-29, teacher list item 2)
+> **Funcție de două variabile.** Dacă $g$ este o funcție, $Z=g(X,Y)$ este tot o variabilă aleatoare. Distribuția ei se obține din distribuția comună: $P(Z{=}z)=\sum_{(x,y):\,g(x,y)=z}p(x,y)$, adică se adună celulele care dau aceeași valoare a lui $g$. Așa se obțin $X+Y$, $X-Y$ și **produsul** $XY$. Marginalele singure nu ajung (vezi Lecția 4).
+>
+> Fie distribuția comună $p(0,0)=0{,}1$, $p(1,0)=0{,}2$, $p(0,1)=0{,}3$, $p(1,1)=0{,}4$ (prima cifră: $X$, a doua: $Y$). Ce valori ia $D=X-Y$ și cu ce probabilități?
+
+Prediction (`[construit]`; the four cells are shown on this screen as a compact table): $D$ ia $-1$ cu $0{,}3$ (celula $(0,1)$), $0$ cu $0{,}1+0{,}4=0{,}5$ (celulele $(0,0)$ și $(1,1)$ se adună) și $1$ cu $0{,}2$. Check after the reveal: $E[D]=-0{,}3+0{,}2=-0{,}1=E[X]-E[Y]=0{,}6-0{,}7$ (liniaritatea mediei). Formulas: `0.1+0.4`, `E([-1,0,1],[0.3,0.1+0.4,0.2])`, `(0.2+0.4)-(0.3+0.4)`. Footnote: "Cursul: slide 14." (FND:14: for $g:\mathbb R^n\to\mathbb R^m$, $g(X)$ is a random variable; here $n=2$.) Builder: these are the cells of the worked example (L5.s02), the example continuing inside the lesson; the product $XY$ on them is not asked again (L5.s04 read $E[XY]$ off them); the product as a variable is exercise L5.c1.
+
 **L5.s07** (definition)
 > **Regula de înlănțuire pentru trei variabile:** $P(X,Y,Z)=P(Z)\,P(X\mid Z)\,P(Y\mid X,Z)$. Se aplică regula de înlănțuire pentru evenimente (vezi Lecția 1); ordinea factorilor poate fi oricare.
 
@@ -1146,8 +1208,12 @@ Footnote: "Culegerea: p. 37 (nota 21)."
 > **Independența variabilelor.** $X$ și $Y$ sunt independente dacă $p(x,y)=p_X(x)\,p_Y(y)$ **pentru toate** perechile $(x,y)$. (Echivalent, când $p_Y(y)\ne0$ pentru toți $y$: $p_{X\mid Y}(x\mid y)=p_X(x)$ pentru toți $x,y$.)
 >
 > **Atenție:** la evenimente e o singură egalitate; la variabile sunt câte egalități are tabelul. O celulă care verifică nu ajunge (ecranul de la început). Pentru variabile binare cu valori 0 și 1 se va vedea (ex. 0.11 și 0.99) că o egalitate, împreună cu marginalele, ajunge.
+>
+> Pe hârtie, ca să arăți că două variabile **sunt** independente, scrie egalitatea pentru **toate** celulele, cum cere definiția. Scurtătura cu o singură egalitate pentru variabile binare este corectă, dar se sprijină pe un rezultat pe care ar trebui să-l justifici (ex. 0.11.b), așa că folosește-o ca verificare. Ca să arăți că **nu** sunt, ajunge o celulă care nu verifică.
 
 Footnote: "Cursul: slide 16. Seminar 2, p. 6-7. Culegerea: p. 33."
+
+Builder: the last paragraph was added 2026-10-29 (teacher list item 4): the definition asks for every pair; our own mock T1 2a barem (not an official one) gives the points only for all cells, and one failing cell settles "nu" (T21P 11b solution).
 
 **L5.s09** (definition + list)
 > **Covarianța:** $\mathrm{Cov}(X,Y)=E[(X-E[X])(Y-E[Y])]$; echivalent $\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]$ (se dovedește în ex. 0.9.c). **Coeficientul de corelație:** $\rho(X,Y)=\dfrac{\mathrm{Cov}(X,Y)}{\sigma_X\sigma_Y}$, cu $-1\le\rho\le1$ (ex. 0.19). O covarianță mare indică o dependență aproximativ liniară, $X\approx aY+b$.
@@ -1157,6 +1223,15 @@ Footnote: "Cursul: slide 16. Seminar 2, p. 6-7. Culegerea: p. 33."
 > **Dacă $X$ și $Y$ sunt independente:** $E[XY]=E[X]E[Y]$ (deci $\mathrm{Cov}=0$) și $\mathrm{Var}(X+Y)=\mathrm{Var}(X)+\mathrm{Var}(Y)$ (ex. 0.10). **Reciproca este falsă:** $\mathrm{Cov}=0$ nu implică independența (ex. 0.11).
 
 Footnote: "Cursul: slide 9, 14, 17. Seminar 2, p. 6-7. Culegerea: p. 31, 45."
+
+**L5.s09a** (definition + short proof; added 2026-10-29, teacher list item 2)
+> **Funcții de variabile independente.** Dacă $X$ și $Y$ sunt independente, atunci și $f(X)$ și $g(Y)$ sunt independente, oricare ar fi funcțiile $f$ și $g$:
+> $$P(f(X){=}a,\,g(Y){=}b)=\sum_{x:\,f(x)=a}\ \sum_{y:\,g(y)=b}p_X(x)\,p_Y(y)=P(f(X){=}a)\,P(g(Y){=}b).$$
+> De aici $E[f(X)\,g(Y)]=E[f(X)]\,E[g(Y)]$; de exemplu $E[XY^2]=E[X]\,E[Y^2]$ și $\mathrm{Var}(X+2Y^2)=\mathrm{Var}(X)+4\,\mathrm{Var}(Y^2)$.
+>
+> **Atenție:** $E[XY^2]=E[X]\,E[Y^2]$, **nu** $E[X]\,(E[Y])^2$: pătratul se aplică lui $Y$ înainte de medie (vezi Lecția 4: $E[g(X)]\ne g(E[X])$).
+
+Footnote: "Cursul: slide 17. Culegerea: p. 33 (ex. 0.10)." Builder: FND:17 and ex. 0.10 (L5.e2) give $E[XY]=E[X]E[Y]$ for independent variables; the extension to $f(X)$, $g(Y)$ is the grouping of L5.s06a applied to a product table (the two-line proof above) and is what the book's recap exercise 0.110 needs (0.110 itself stays out of scope until Alex rules). Numeric practice: L5.c1, field `exy2`.
 
 **L5.s10** (callout, one line back to L4)
 > Aceasta explică varianța binomialei din Lecția 4: suma a $n$ variabile Bernoulli($p$) independente, fiecare cu varianța $p(1-p)$, are varianța $np(1-p)$.
@@ -1321,6 +1396,20 @@ Answer: $E[X]=0$ and $E[XY]=E[X^3]=\frac13(-1+0+1)=0$, so $\mathrm{Cov}=E[XY]-E[
 
 **Detector:** `ind` = `da` → "Covarianța 0 nu decide independența; celula $(1,-1)$: $0\ne0{,}04$."
 
+#### L5.c1: produsul a două variabile independente, `[construit]`, answer status verified-twice (added 2026-10-29, teacher list item 2)
+
+**Enunț:** $X$ și $Y$ sunt independente. $X$ ia valorile 1 și 2 cu probabilitățile $0{,}4$ și $0{,}6$; $Y$ ia valorile 0, 1, 2 cu probabilitățile $0{,}5$; $0{,}3$; $0{,}2$ (două tabele statice mici pe ecran: $P(X)$ și $P(Y)$). Fie $Z=XY$. **a.** Cât sunt $P(X{=}2,Y{=}1)$ și $P(X{=}1,Y{=}2)$? **b.** Distribuția lui $Z$. **c.** $E[Z]$, comparat cu $E[X]\,E[Y]$. **d.** $E[XY^2]$. **e.** $\mathrm{Var}(Z)$.
+
+**Fields:** `p21` frac "$P(X{=}2,Y{=}1)$" `9/50` (0,18; `0.6*0.3`); `p12` frac "$P(X{=}1,Y{=}2)$" `2/25` (0,08; `0.4*0.2`); `z0` frac "$P(Z{=}0)$" `1/2` (`0.4*0.5+0.6*0.5`); `z1` frac "$P(Z{=}1)$" `3/25` (`0.4*0.3`); `z2` frac "$P(Z{=}2)$" `13/50` (0,26; `0.4*0.2+0.6*0.3`); `z4` frac "$P(Z{=}4)$" `3/25` (`0.6*0.2`); `ez` frac "$E[Z]$" `28/25` (1,12; `E([0,1,2,4],[0.4*0.5+0.6*0.5,0.4*0.3,0.4*0.2+0.6*0.3,0.6*0.2])`); `exey` frac "$E[X]\,E[Y]$" `28/25` (`E([1,2],[0.4,0.6])*E([0,1,2],[0.5,0.3,0.2])`); `exy2` frac "$E[XY^2]$" `44/25` (1,76; `E([1,2],[0.4,0.6])*E([0,1,4],[0.5,0.3,0.2])`); `vz` frac "$\mathrm{Var}(Z)$" `1141/625` (1,8256, tol ±0,0005; `Var([0,1,2,4],[0.4*0.5+0.6*0.5,0.4*0.3,0.4*0.2+0.6*0.3,0.6*0.2])`; added in the completeness pass, teacher list items 1-2: the variance of the product).
+
+**Hints:** 1) Variabilele sunt independente, deci fiecare celulă a tabelului comun este produsul marginalelor: $p(x,y)=p_X(x)\,p_Y(y)$. 2) $Z=0$ când $Y=0$, pentru ambele valori ale lui $X$; $Z=2$ vine din două celule, $(1,2)$ și $(2,1)$, care se adună. 3) $E[Z]=0\cdot0{,}5+1\cdot0{,}12+2\cdot0{,}26+4\cdot0{,}12$; $E[XY^2]=E[X]\,E[Y^2]$, cu $E[Y^2]=0\cdot0{,}5+1\cdot0{,}3+4\cdot0{,}2$; $\mathrm{Var}(Z)=E[Z^2]-(E[Z])^2$, cu $E[Z^2]=1\cdot0{,}12+4\cdot0{,}26+16\cdot0{,}12$.
+
+**Worked solution:** Tabelul comun: $(1,0)$: $0{,}2$; $(1,1)$: $0{,}12$; $(1,2)$: $0{,}08$; $(2,0)$: $0{,}3$; $(2,1)$: $0{,}18$; $(2,2)$: $0{,}12$ (suma 1). $Z$ ia 0 cu $0{,}2+0{,}3=0{,}5$; 1 cu $0{,}12$; 2 cu $0{,}08+0{,}18=0{,}26$; 4 cu $0{,}12$. $E[Z]=0{,}12+0{,}52+0{,}48=1{,}12$; $E[X]=1{,}6$, $E[Y]=0{,}7$, $E[X]E[Y]=1{,}12$: egale, fiindcă variabilele sunt independente (L5.s09). $E[Y^2]=1{,}1$, deci $E[XY^2]=1{,}6\cdot1{,}1=1{,}76$; direct din cele șase celule: $0{,}12+0{,}32+0{,}36+0{,}96=1{,}76$. Varianța produsului, din distribuția lui $Z$ (vezi Lecția 4): $E[Z^2]=1\cdot0{,}12+4\cdot0{,}26+16\cdot0{,}12=3{,}08$, deci $\mathrm{Var}(Z)=3{,}08-1{,}12^2=1{,}8256$; aceeași $E[Z^2]$ iese și ca $E[X^2]\,E[Y^2]=2{,}8\cdot1{,}1$ ($X^2$ și $Y^2$ sunt independente). Culegerea nu dă răspunsul; verificat de două ori.
+
+**Detectors:** `z2` = `0.08` or `0.18` → "Valoarea 2 vine din două celule, $(X{=}1,Y{=}2)$ și $(X{=}2,Y{=}1)$: $0{,}08+0{,}18$." `z0` = `0.2` or `0.3` → "$Z=0$ pentru orice $X$ când $Y=0$: $0{,}2+0{,}3$." `exy2` = `98/125` (0,784; `E([1,2],[0.4,0.6])*E([0,1,2],[0.5,0.3,0.2])^2`) → "Aceasta este $E[X]\,(E[Y])^2$; media se ia după ridicarea la pătrat: $E[XY^2]=E[X]\,E[Y^2]=1{,}6\cdot1{,}1$." `vz` = `0.1464` (`Var([1,2],[0.4,0.6])*Var([0,1,2],[0.5,0.3,0.2])`) → "Varianța produsului nu este produsul varianțelor ($0{,}24\cdot0{,}61$); calculeaz-o din distribuția lui $Z$: $E[Z^2]-(E[Z])^2$." `vz` = `3.08` (`E([0,1,4,16],[0.4*0.5+0.6*0.5,0.4*0.3,0.4*0.2+0.6*0.3,0.6*0.2])`) → "Aceasta este $E[Z^2]$; mai scade $(E[Z])^2=1{,}2544$."
+
+**Footnote:** "Cursul: slide 14, 17." Builder: the shape of the book's recap exercise 0.110 ($E[XY^2]$ and the products of independent variables), with our own numbers; 0.110 stays out of scope until Alex rules.
+
 ### L5 visual spec: `ml-viz-joint-table` (joint table with marginals filling in and an independence check cell by cell)
 
 - **Config A (opening question):** the 3×2 table of L5.s01, marginals shown, cells clickable to display the product. No auto-reveal; the learner clicks cells.
@@ -1335,6 +1424,8 @@ Answer: $E[X]=0$ and $E[XY]=E[X^3]=\frac13(-1+0+1)=0$, so $\mathrm{Cov}=E[XY]-E[
 - The Cn-s2 table does not coincide with 0.99, 0.100 or T16 (checked: $\alpha\delta=0{,}04\ne\beta\gamma=0{,}06$ for it), so the allocation's fallback "replace with a constructed table" was not needed.
 - Uncertain: the claim "for binary {0,1} variables one equation (with marginals) suffices" is stated in L5.s08 as a forward promise to L5.e3 and L5.e7 (same lesson). 0.19's footnote 27: "Var(X)=0" means constant with probability 1.
 - Repetition check: Var(X+Y) is derived once (L5.e6 c) and used in L5.e5 and the concrete; the formula is stated once (L5.s09).
+- Added 2026-10-29 (teacher list items 2 and 4): L5.s06a, L5.s09a, L5.c1 and the last paragraph of L5.s08. The distribution of $X+Y$ (L5.s05) stays the worked example; L5.s06a states the rule for any $g(X,Y)$ and predicts $X-Y$, not $X+Y$ again.
+- Added in the completeness pass (teacher list items 1-2): field `vz` of L5.c1, the variance of the product $Z=XY$ (1,8256), so the product is practised with its distribution, mean and variance; the detector names the $\mathrm{Var}(X)\mathrm{Var}(Y)$ slip.
 
 ---
 
@@ -1384,9 +1475,13 @@ Correct: $0{,}64;\ 0{,}16;\ 0{,}16;\ 0{,}04$; marginals of the slice $P(X{=}0\mi
 >
 > **Cum se verifică:** fiecare felie $Z=z$ separat, cu toate celulele ei (pentru variabile binare, 4 egalități pe felie, deci 8 în total; într-o felie binară una singură ajunge, împreună cu marginalele feliei, ca în Lecția 5).
 >
+> Pe hârtie, ca să arăți că $X$ și $Y$ **sunt** independente condiționat de $Z$, scrie toate egalitățile (pentru variabile binare, toate 8), cum cere definiția; scurtătura cu o egalitate pe felie folosește-o ca verificare. Ca să arăți că **nu** sunt, ajunge o egalitate care nu se verifică.
+>
 > **Independența și independența condiționată nu se implică una pe alta.** Exemplul de mai sus: dependente, dar independente condiționat. Exercițiul 0.16: independente, dar nu independente condiționat.
 
 Footnote: "Cursul: slide 16. Seminar 2, p. 7. Culegerea: p. 39, 42." Builder: decision 3 (this lesson owns the example).
+
+Builder: the paragraph about the paper answer was added 2026-10-29 (teacher list item 4; our own mock T1 2b barem asks for all eight equalities or an equivalent argument, T21P 13d settles "nu" with one).
 
 **L6.s06** (learn)
 > **Ce poți face cu ea.**
@@ -2034,6 +2129,7 @@ Tabelul T20b 2.1 se partiționează la fiecare split: rândurile cad în cutii, 
 
 **Concepte (3):** (a) spațiul ipotezelor complet, căutare greedy cu 1-step look-ahead, spațiul de versiuni, bias inductiv (de căutare), briciul lui Occam; (b) expresivitate: orice funcție booleană are un arbore (P0); (c) arborele ID3 nu e neapărat optim, nu e unic și e sensibil la atribute superflue (P2, P3, P4).
 **Necesită:** vezi Lecția 9 (IG, cioturi), vezi Lecția 11 (algoritmul ID3, ID3 complet).
+**Added 2026-10-29 (teacher list item 6; concept C12.4 in `allocation.json`):** (d) ce urmărește ID3 și ce model construiește. Rule R0 and quiz item Q5.
 
 ### Pretest
 Ecran: funcția booleană $f(A,B,C)$ egală cu 1 exact pe rândurile $001,010,100,111$ (număr impar de 1) și cu 0 pe celelalte patru. "Poate un arbore de decizie să reprezinte exact $f$? Ce adâncime are arborele complet care o face?" Așteptat: da; adâncime 3, opt frunze (fiecare combinație de valori are propria frunză). Feedback: nu spune încă dacă există unul mai mic.
@@ -2046,6 +2142,7 @@ Sursă: `tests/2020-2021-t1-ciortuz/subiect.pdf:2` (figura de la p.2: la $X_2=1$
 - **C4.** Concluzie: spațiul ipotezelor conține arborele perfect (spațiul e complet), dar căutarea greedy cu 1-step look-ahead nu-l găsește dacă primul pas nu aduce IG. (De ce: ecranul următor.)
 
 ### Regula
+- **R0 Ce urmărește ID3 și ce construiește** (B:486-487, Sumar, notele 490-491; ML3:8; added 2026-10-29, teacher list item 6). **Modelul** este un arbore de decizie: noduri de test cu atribute de intrare, ramuri cu valorile lor, frunze cu valori ale ieșirii (vezi Lecția 9); altfel spus, o ierarhie de partiționări ale exemplelor de antrenament, construită adăugând atributele câte unul (nota 490). **Obiectivul** (B:486-487): un arbore care (i) explică cât mai bine datele (dacă datele sunt consistente, arborele e consistent cu ele), (ii) este cât mai **compact** (puține niveluri și noduri) și (iii) are o putere de **generalizare** cât mai bună. ID3 nu calculează un cost al arborelui întreg: urmărește obiectivul **local**, alegând la fiecare nod atributul cu IG maxim, adică $H(Y|A)$ minim (vezi Lecția 9). Cum caută și ce nu garantează: R1 și R3. (Nota 491, într-o propoziție: ID3 poate fi văzut și ca algoritm de optimizare care caută o distribuție ierarhică de entropie minimă; cerința de arbore cât mai mic este cea practică.)
 - **R1 Căutarea** (B:486-487; ML3:10). Spațiul de căutare e mulțimea tuturor arborilor care se pot construi cu atributele de intrare în nodurile de test și cu valorile ieșirii în frunze, "de dimensiune exponențială" în numărul de atribute; ID3 îl parcurge **greedy**, cu **1-step look-ahead** ("Iterative Dichotomizer", divide-et-impera, recursiv), fără backtracking, și întoarce o singură ipoteză. Spațiul ipotezelor e **complet** (funcția țintă e sigur acolo). Spațiul de versiuni pentru un concept (de învățat) = arborii consistenți cu datele (ex. 1, 3, 32, 39).
 - **R2 Bias inductiv** (ML3:17; B:487): ID3 nu e fără bias. Preferă arbori cu structură ierarhică, **consistenți** cu datele dacă acestea sunt consistente, cu cât mai puține niveluri / noduri, și cu atribute cu IG mare aproape de rădăcină. E un bias de **căutare** (preferință între ipoteze), nu o restricție a spațiului (bias de limbaj, ca la Candidate-Elimination). Briciul lui Occam (ML3:18): argument pentru, puține ipoteze scurte, deci una scurtă consistentă nu e coincidență; argument împotrivă: există multe moduri de a defini mulțimi mici (arbori cu număr prim de noduri), și nimic special la "mic după mărime".
 - **R3 Proprietăți** (B:486-488): **(P0)** orice funcție booleană de $n$ argumente se reprezintă cu un arbore complet (adâncime $n$, $2^n$ frunze). **(P2)** arborele ID3 nu e neapărat unic (egalitățile, vezi Lecția 11). **(P3)** nu e neapărat optimal ca număr de noduri / niveluri (greedy). **(P4)** e sensibil la atribute superflue (un atribut fără rost în concept poate fi ales primul). Complexitatea (B:487; ML3:19, în ipotezele A1 adâncime $O(\log m)$, A2 instanțele diferă, A2' atributele ajung): $O(d\,m\log m)$ la antrenare, $O(d)$ la testare.
@@ -2058,6 +2155,7 @@ Sursă: `tests/2020-2021-t1-ciortuz/subiect.pdf:2` (figura de la p.2: la $X_2=1$
 - **Q2.** După ce a ales rădăcina, poate ID3 să revină asupra ei dacă arborele de dedesubt iese prea mare? ✓ nu: ID3 nu face backtracking; decide la fiecare nod o singură dată, cu 1-step look-ahead. ✗[backtracking]: "da, reface rădăcina dacă arborele final are prea multe noduri" (explicație: în pseudocod nu există niciun pas de revenire; de aceea arborele nu e neapărat minim, (P3)). ✗[privește toți pașii]: "nu e nevoie: ID3 evaluează dinainte toți pașii următori" (explicație: IG se calculează doar pentru pasul curent; varianta cu 2 pași, 4.17-4.18, e o extensie, nu ID3 standard). (Builder: the true/false "ID3 guarantees the optimal tree" is exercise 4.21.a in Lecția 15; not asked here.)
 - **Q3.** Biasul inductiv al lui ID3 este: ✓ o preferință de căutare: arbori scurți, atribute cu IG mare lângă rădăcină. ✗[restricție de spațiu]: ID3 exclude unele funcții (explicație: spațiul e complet, (P0)). ✗[fără bias]: ID3 nu are bias (explicație: preferă anumiți arbori între cei consistenți).
 - **Q4.** Un atribut neutil pentru conceptul real are IG pozitiv la rădăcină. ID3 poate: ✓ să-l aleagă primul, ceea ce dă un arbore mai adânc pe date consistente (P4); eroarea la antrenare rămâne 0. ✗[ignoră]: să-l ignore pentru că nu e în concept (explicație: ID3 nu cunoaște conceptul, vede doar IG). ✗[eroare la antrenare]: să crească eroarea la antrenare (explicație: pe date consistente eroarea rămâne 0; crește doar dimensiunea arborelui).
+- **Q5** (added 2026-10-29, teacher list item 6). Ce model întoarce ID3 și ce urmărește când îl construiește? ✓ un arbore de decizie; caută un arbore consistent cu datele (dacă acestea sunt consistente), cât mai compact și care să generalizeze bine, alegând la fiecare nod atributul cu IG maxim. ✗[ID3 minimizează direct eroarea la antrenare]: "o regulă căutată direct după eroarea minimă la antrenare" (explicație: criteriul de alegere este IG, la fiecare nod; eroarea 0 la antrenare pe date consistente e o consecință, (P1), nu criteriul). ✗[ID3 găsește arborele minim]: "cel mai mic arbore consistent cu datele" (explicație: compactitatea e un obiectiv, dar căutarea greedy nu o garantează, (P3)). ✗[IG maximizat pe tot arborele]: "arborele cu cea mai mare sumă a câștigurilor de informație pe toate nodurile" (explicație: IG se maximizează local, la fiecare nod, o singură dată; ID3 nu compară arbori întregi).
 
 ### Exerciții
 **E 4.1** (B:492-494; status: book; DTs). Enunț: reprezintă arborele / arborii cu numărul minim de noduri care corespund funcției $(\neg A\vee B)\wedge\neg(C\wedge A)$. Tabelul $(A,B,C\to X)$: 000→1, 001→1, 010→1, 011→1, 100→0, 101→0, 110→1, 111→0 ($[5{+},3{-}]$).
@@ -2205,6 +2303,7 @@ Sursă: `ml3.pdf:21` (exemplul cu Temperature 40, 48, 60, 72, 80, 90 și etichet
 - **R1 Pragurile** (B:510): ordonezi crescător valorile atributului care apar în datele de antrenament; pentru perechi consecutive pentru care există instanțe etichetate diferit iei un prag la **jumătatea distanței**. Convenție folosită la numărare (hotărâtă, vezi 4.51.a): o valoare care apare cu **ambele** etichete contează ca graniță, deci între ea și vecinii ei (cu mulțimi de etichete diferite) se ia prag. Nu se testează toate valorile, nici toate mijloacele.
 - **R2 Testul ca atribut discret.** "$X\le v$" împarte nodul în două ramuri, ca un atribut binar. La fiecare nod: atributele discrete rămase + toate pragurile tuturor atributelor continue, **calculate din instanțele nodului**; câștigă IG maxim (T21T2 4b: nodurile luate în calcul pentru rădăcină). Același atribut continuu poate apărea iar mai jos, cu alt prag (4.12.b; 3.11.b obs. 4). Ordinea la egalitate o fixează enunțul (T20a: "crescător pentru atributul continuu").
 - **R3 Zone de decizie** (B:487, B:511-512): fiecare test compară **un** atribut cu un prag, deci granițele de decizie sunt drepte $X_i=v$, **paralele cu axele** (P8); zonele **nu sunt unice** (P9, fiindcă arborele nu e unic, (P2)); "dacă ne uităm doar la zonele de decizie în ansamblu, ordinea testelor nu contează" (nota 502, B:512).
+- **R3b Zona unei frunze** (B:466-467, soluția 3.11.b; DTs:50-52; added 2026-10-29, teacher list item 10). Fiecare frunză corespunde **conjuncției testelor** de pe drumul ei de la rădăcină, deci unei zone dreptunghiulare (eventual nemărginite) cu laturile paralele cu axele, scrisă ca sistem de inegalități: de exemplu, drumul $X_1<3$, apoi $X_2\ge5$ dă zona $\{X_1<3,\ X_2\ge5\}$. Zona de decizie a unei clase este **reuniunea** zonelor frunzelor cu acea etichetă. Un punct nou primește eticheta zonei în care cade (la fel ca parcurgând arborele).
 - **R4 Adâncimea** (P12, B:489; ex. 4.11; în lista proză, nu în tabel): pentru $n$ puncte în $\mathbb R^2$, cel mult $1+\lceil\log_2n\rceil$ dacă sunt liniar separabile și $2\lceil\log_2n\rceil$ dacă nu (ambele $O(\log n)$).
 
 ### De ce?
@@ -2219,6 +2318,7 @@ Sursă: `ml3.pdf:21` (exemplul cu Temperature 40, 48, 60, 72, 80, 90 și etichet
 ### Exerciții
 **E 3.11.b** (B:465-467; status: book). Enunț: zece puncte în plan; pozitive (•): (1,3), (2,3), (2,1), (3,2), (4,5); negative (◦): (1,5), (1,1), (4,3), (5,4), (5,2) (coordonate citite din figura B:465, confirmate: ID3 rulat reproduce arborele cărții). Desenează granițele de decizie și hașurează suprafețele produse de ID3 extins cu atribute continue.
 - Câmpuri: $H(Y)$ = 1; $IG(x<4.5)$ = 0.2365; $IG(x<3.5)$ = 0.1245; $IG(x<1.5)$ = 0.0349; $IG(y<3.5)$ = 0.0349; rădăcina = $x<4.5$; numărul de teste din arbore = 6 (7 frunze); ordinea din carte: $x<4.5$, $x<1.5$, $y<2$, $y<4$, $x<3.5$, $y<4$.
+- Câmpuri adăugate (zone; added 2026-10-29, teacher list item 10; `[construit]`, verified-twice): eticheta dată de arbore punctelor noi $(1,\ 2.5)$ → `+`, $(3,\ 5)$ → `+`, $(4.2,\ 3)$ → `−`, $(6,\ 1)$ → `−`. Soluție: fiecare punct se citește din zona lui: $(1,\ 2.5)$ e în banda $x<1.5$ cu $2<y<4$; $(3,\ 5)$ în $1.5<x<3.5$ (aici arborele nu mai testează $y$); $(4.2,\ 3)$ în $3.5<x<4.5$ cu $y<4$; $(6,\ 1)$ în $x>4.5$. Detector: $(4.2,\ 3)$ → `+` → "În banda $3.5<x<4.5$ zona pozitivă are $y>4$ (punctul $(4,5)$); la $y=3$ zona e negativă (punctul $(4,3)$)." Verificare: ID3 refăcut cu ambele variante de egalitate din bandă (Python, fracții exacte) dă aceleași etichete; inegalitățile zonelor evaluate în `formula.js`.
 - Soluție (B:466-467): $x>4.5$: pur negativ ($(5,4),(5,2)$). $x\le4.5$ (8 puncte): cel mai bun $x<1.5$ (IG 0.1589). Banda $x\le1.5$: $(1,1)-$, $(1,3)+$, $(1,5)-$; pragurile $y=2$ și $y=4$ au același IG (0.2516); rezultă negativ pentru $y<2$, pozitiv pentru $2<y<4$, negativ pentru $y>4$. În $1.5<x\le4.5$: $x<3.5$ separă (IG 0.3219) zona pozitivă $\{(2,3),(2,1),(3,2)\}$ de $(4,3)-$, $(4,5)+$, care se separă cu $y<4$. Regiunile pozitive: banda $x\le1.5$ cu $2<y\le4$; $1.5<x\le3.5$ (orice $y$); $3.5<x\le4.5$ cu $y>4$.
 - Obs. (B:467): (3) la egalitate arborele nu e unic determinat; (4) pragurile pe $y$ sunt $1.5,2.5,3.5,4.5$ la rădăcină, dar doar $2$ și $4$ la nodurile 2 și 3, fiindcă partițiile diferă.
 - Detectoare: "5 teste" → "sunt 6: rădăcina, $x<1.5$, două teste pe $y$ în bandă, $x<3.5$ și $y<4$" (notă constructor: cititorii au numărat 5; figura din carte și rularea dau 6); "prag $x<3.5$ la rădăcină" → "$0.1245<0.2365$".
@@ -2235,6 +2335,7 @@ Sursă: `ml3.pdf:21` (exemplul cu Temperature 40, 48, 60, 72, 80, 90 și etichet
 - Fără câmp numeric; ecrane de demonstrație (mai jos). "Culegerea nu dă răspunsul; răspunsul depinde de convenția spusă mai sus (argument, nu cheie tipărită)." Verificare numerică pe ML3:21: $IG(66)=0.0817<IG(54)=0.4591$.
 **E 4.48** (B:600; soluție DTs:48-52; status: slides). Enunț: nouă puncte $(X_1,X_2,y)$: $x_1=(1,2,+)$, $x_2=(2,3,+)$, $x_3=(3,4,-)$, $x_4=(3,2,-)$, $x_5=(3,1,-)$, $x_6=(4,4,-)$, $x_7=(5,4,-)$, $x_8=(5,2,+)$, $x_9=(5,1,+)$ (tabelul de la B:549). Aplică ID3; precizează la fiecare pas pragurile pentru ambele atribute; desenează arborele și zonele de decizie cu separatorii.
 - Câmpuri: nivelul 1 ($[4{+},5{-}]$), pragurile: $X_1<\tfrac52$, $X_1<\tfrac92$, $X_2<\tfrac32$, $X_2<\tfrac52$, $X_2<\tfrac72$ cu IG: 0.3198 (slide: 0.319), 0.0728 (0.073), 0.0026 (0.003), 0.0911 (0.091), 0.3789 (0.378); toleranță ±0.002; rădăcina = $X_2<\tfrac72$ (N $\to$ $[0{+},3{-}]$ negativ; Y $\to$ $[4{+},2{-}]$). Nivelul 2 (praguri recalculate): $X_1<\tfrac52$ 0.2516, $X_1<4$ 0.2516 ("4 înlocuiește 4.5"), $X_2<\tfrac32$ 0.0441 (0.04), $X_2<\tfrac52$ 0.1092 (0.109); egalitate; arborele: $X_2<\tfrac72$? (nu: −) (da: $X_1<\tfrac52$? (da: +) (nu: $X_1<4$? (da: −) (nu: +))); 3 teste, 4 frunze. Zone pozitive: $\{X_2<3.5,X_1<2.5\}$ și $\{X_2<3.5,X_1\ge4\}$; zona negativă: $\{X_2\ge3.5\}\cup\{X_2<3.5,2.5\le X_1<4\}$.
+- Câmpuri adăugate (zone; added 2026-10-29, teacher list item 10; `[construit]`, verified-twice): etichetele punctelor noi $(2,\ 2)$ → `+`, $(3,\ 3)$ → `−`, $(4.2,\ 1.5)$ → `+`, $(2,\ 5)$ → `−`; `zp` choice "zonele pozitive": ✓ $\{X_2<3.5,\ X_1<2.5\}\cup\{X_2<3.5,\ X_1\ge4\}$; ✗[pragul calculat pe tot setul] $\{X_2<3.5,\ X_1<2.5\}\cup\{X_2<3.5,\ X_1\ge4.5\}$ (explicație: la nivelul 2 pragul se recalculează din instanțele nodului; acolo mijlocul dintre 3 și 5 e 4, nu 4.5); ✗[zona fără testele de pe drum] $\{X_1<2.5\}\cup\{X_1\ge4\}$ (explicație: zona unei frunze e conjuncția **tuturor** testelor de pe drum, deci și $X_2<3.5$; partea $X_2\ge3.5$ e negativă). Detector: $(4.2,\ 1.5)$ → `−` → "Pragul de la nivelul 2 e $X_1<4$ (din instanțele nodului), nu 4.5: $4.2\ge4$ dă $+$." Verificare: ID3 refăcut cu ambele variante de egalitate de la nivelul 2 (Python, fracții exacte; zonele coincid pe o grilă de puncte) și inegalitățile evaluate în `formula.js`.
 - Soluție (DTs:50-52, numere reverificate): nota 2: la egalitate oricare din cele două teste; nota 3: entropiile pondere și nepondere pot merge în sens opus: $H[2{+},2{-}]>H[3{+},2{-}]$ dar $\tfrac46H[2{+},2{-}]<\tfrac56H[3{+},2{-}]$ ($0.6667<0.8091$).
 - Detectoare: "pragul $X_1<4.5$ la nivelul 2" → "pragurile se recalculează din instanțele nodului: punctul (4,4) nu mai e aici, valorile $X_1$ rămase sunt 1, 2, 3, 5, deci între 3 și 5 mijlocul e 4, nu 4.5"; comparație fără ponderi → G-nw.
 **E 4.50** (B:601-602; status: verified-twice; "Culegerea nu dă răspunsul; verificat de două ori."). Enunț: problemă ternară. Dreptunghi dens populat cu trei clase: roșu ($C_1$, $1\times6$, 6000 de puncte, la stânga, $x_1\in[0,1]$, $x_2\in[0,6]$); verde ($C_2$, $7\times3$, 42000 de puncte, sus-dreapta, $x_2\in[3,6]$); galben ($C_3$, $7\times3$, 42000 de puncte, jos-dreapta, $x_2\in[0,3]$). (a) Numărul minim de noduri de test al unui arbore corect. (b) Numărul de noduri de test al arborelui învățat de ID3 cu IG (indicație: proprietatea A3 din ex. 62 pentru entropiile condiționate minime). (c) E același în cele două cazuri? De ce? (d) Condiții generale pe un astfel de set pentru un arbore compact și 100% corect.
@@ -2260,6 +2361,7 @@ Date: valori sortate pe o axă, cu etichete ca puncte colorate; pragurile apar *
 - **4.12:** cartea tipărește $IG$ trunchiat (0.3788); valoarea exactă e 0.3789.
 - Pretest, Q1-Q4 și 4.11 numeric ($n=16$): cifre construite.
 - T21T2 9 (`tests/2021-2022-t2-seminar-ro/subiect.pdf:3`) folosește exact aceleași zece puncte ca 3.11.b (figura din test numerotează testele 0-5: $x<4.5$, $x<1.5$, $y<2$, $y<4$, $x<3.5$, $y<4$; 7 frunze): confirmă cele 6 teste. Testul rămâne în tabloul `tests`.
+- Added 2026-10-29 (teacher list item 10): R3b and the zone fields of 3.11.b and 4.48. The fields make the learner read and write zones; the earlier fields were IG values, thresholds and test counts only. The probe points avoid every boundary, so no strict / non-strict convention decides a label.
 
 ---
 
@@ -2267,6 +2369,7 @@ Date: valori sortate pe o axă, cu etichete ca puncte colorate; pragurile apar *
 
 **Concepte (4):** (a) eroarea și acuratețea la antrenare / validare / test; $Acc,P,R,F,Sp$; (b) protocoale de validare: set de validare, $n$-fold, leave-one-out (CVLOO) și cum se calculează de mână pentru ID3; (c) overfitting (definiția ML3:26) și underfitting; eroarea mică la antrenare nu înseamnă calitate; (d) erori așteptate într-o frunză: aproximarea polinomială a lui $H(p)$.
 **Necesită:** vezi Lecția 7 ($H(p)$), vezi Lecția 9 (eroare la antrenare, set consistent), vezi Lecția 11 (ID3 complet, (P1)), vezi Lecția 14 (praguri; pragurile se mută când scoți un punct).
+**Added 2026-10-29 (teacher list items 11, 12, 13):** rule R4b (overfitting, underfitting, good fit), quiz item Q5, exercise E L15.c1 (no new concept: good fit belongs to concept (c), the protocol to (b)).
 
 ### Pretest
 Ecran: două modele pentru aceeași sarcină. Modelul A: eroare 0% pe datele de antrenament, 30% pe date noi. Modelul B: eroare 12% pe antrenament, 14% pe date noi. "Care model îl alegi și de ce?" Așteptat: **B** (eroarea pe date noi e ce contează; A a "învățat pe de rost" antrenamentul).
@@ -2285,6 +2388,7 @@ Sursă: `tests/2021-2022-t2-seminar-ro/subiect.pdf:2` (0.3 p), soluție `solutii
 - **R2 Protocolul corect** (Cn-s4:1-4). Alegi după acuratețea de antrenare $\Rightarrow$ "ai învățat pe de rost". Alegi după acuratețea de test și o raportezi $\Rightarrow$ estimare optimistă (maximul din 15). Corect: împarți 1000 de rânduri în 900/100; pe cele 900: 810/90 (antrenare/validare) sau $k$-fold (de ex. $k=10$, media celor 10 acurateți); alegi câștigătorul; **reantrenezi pe toate cele 900**; raportezi **o singură dată** pe cele 100. **CVLOO** = $k$-fold cu $k$ = numărul de rânduri ("trebuie să știi să calculezi eroarea sau acuratețea la LOOCV").
 - **R3 CVLOO la ID3 de mână** (4.10; nota 501, B:512). Scoți un punct, refaci arborele pe restul și prezici punctul scos; la atribute continue **pragurile se mută** când scoți un punct (în 4.10: $4.5$, $5.5$, $7.75$, $9.25$). Calculele "nu sunt dificile, mai ales cu raționamente calitative".
 - **R4 Overfitting** (ML3:26). $h\in H$ face overfit pe datele de antrenament dacă există $h'\in H$ cu $error_{train}(h)<error_{train}(h')$ **și** $error_D(h)>error_D(h')$. Overfitting nu e "eroare mare la antrenare"; semnul lui e **diferența mare** antrenare / validare. **Underfitting:** erori mari și apropiate pe ambele. ID3 pe date consistente are mereu eroare 0 la antrenare (P1), deci nu e dovadă de calitate. (P10) (B:488): ID3 e sensibil la zgomote și poate face overfitting.
+- **R4b Trei diagnostice** (Cn-s4:1; T21T2 8; added 2026-10-29, teacher list item 11). Compari eroarea la antrenare cu eroarea pe date noi (validare). **Overfitting:** eroare mică la antrenare, mult mai mare la validare. **Underfitting:** erori mari pe ambele, apropiate între ele. **Good fit:** erori mici pe ambele, apropiate între ele; acesta e modelul de ales. Semnul overfitting-ului este diferența mare dintre cele două erori, nu o eroare mare la antrenare.
 - **R5 Eroare așteptată într-o frunză** (4.44, B:598-599). O frunză cu $M$ instanțe de antrenament și entropie $H$: cu aproximarea parabolică $H(p)\approx4p(1-p)$, fracția minoritară $p=\tfrac{1-\sqrt{1-H}}{2}$ și erorile $\approx M\cdot p$ (ruled: ipoteza intenționată nu e în carte).
 
 ### De ce?
@@ -2295,6 +2399,7 @@ Sursă: `tests/2021-2022-t2-seminar-ro/subiect.pdf:2` (0.3 p), soluție `solutii
 - **Q2.** Rândurile $(A,B\to Y)$: $(0,0\to0)$, $(0,0\to0)$, $(0,1\to0)$, $(1,0\to1)$. Care e $E_{CVLOO}$ al lui ID3 (fără egalități în joc)? ✓ $\tfrac14$ (doar $(1,0\to1)$ se prezice greșit: fără el, toate rândurile rămase au eticheta 0). ✗[CVLOO = antrenare]: 0 (explicație: 0 e eroarea la antrenare; CVLOO scoate rândul înainte de a-l prezice). ✗[rânduri repetate numărate o dată]: $\tfrac13$ (explicație: cele două rânduri $(0,0\to0)$ sunt două exemple; fiecare se scoate pe rând, deci sunt 4 încercări, nu 3).
 - **Q3.** Ipoteza $h$: eroare 5% la antrenare și 20% pe distribuția datelor. Ipoteza $h'$, din același spațiu: 10% la antrenare și 15% pe distribuție. Face $h$ overfitting după definiția ML3:26? ✓ da: există $h'$ cu $error_{train}(h)<error_{train}(h')$ **și** $error_D(h)>error_D(h')$. ✗[overfitting = eroare mare la antrenare]: "nu, $h$ are eroare mică la antrenare" (explicație: tocmai eroarea mică la antrenare, împreună cu cea mare pe distribuție, e semnul overfitting-ului). ✗[definiția cere eroare 0]: "nu, $h$ nu are eroare 0 la antrenare" (explicație: definiția compară două ipoteze; nu cere nicio eroare 0).
 - **Q4.** Validare încrucișată cu $k=10$ pe 1000 de rânduri. De câte ori antrenezi modelul și pe câte rânduri de fiecare dată? ✓ de 10 ori, pe câte 900 de rânduri (validezi pe cele 100 rămase). ✗[o singură antrenare]: "o dată, pe 900" (explicație: fiecare dintre cele 10 părți e pe rând set de validare; media celor 10 erori e estimarea). ✗[CVLOO]: "de 1000 de ori, pe câte 999" (explicație: aceea e CVLOO, cazul $k$ = numărul de rânduri). ✗[antrenare pe parte]: "de 10 ori, pe câte 100" (explicație: antrenezi pe celelalte 9 părți și validezi pe partea scoasă). (Builder: choosing a model by validation error is the pretest and 4.57.c, and not selecting on the test set is the "De ce?" screen; neither is asked again here.)
+- **Q5** (added 2026-10-29, teacher list item 11; `[construit]`, numbers different from T21T2 8 and mock T1 5d). Trei modele, cu eroarea la antrenare și eroarea la validare: A 4% și 5%; B 2% și 31%; C 37% și 38%. Ce diagnostic are fiecare? ✓ A good fit, B overfitting, C underfitting (diferențele: 1, 29 și 1 puncte procentuale; formula `[5-4, 31-2, 38-37]`). ✗[overfitting = eroare mare la antrenare]: "A good fit, B underfitting, C overfitting" (explicație: overfitting înseamnă eroare mică la antrenare și mult mai mare la validare, adică B; C greșește mult peste tot: underfitting). ✗[cea mai mică eroare la antrenare câștigă]: "B good fit, A și C underfitting" (explicație: B are cea mai mică eroare la antrenare, dar 31% la validare; contează eroarea pe date noi și diferența dintre cele două). ✗[erori apropiate = underfitting]: "A și C underfitting, B overfitting" (explicație: erori apropiate înseamnă underfitting doar când sunt mari; A are ambele erori mici, deci good fit).
 
 ### Exerciții
 **E 4.10** (B:510-513; status: book; "overfitting"). Enunț: date $(X,Y)$: $(1,0)$, $(2,0)$, $(3,0)$, $(4,0)$, $(6,1)$, $(7,1)$, $(8,1)$, $(8.5,0)$, $(9,1)$, $(10,1)$. Pragurile: valorile ordonate crescător; pentru perechile consecutive cu instanțe etichetate diferit, prag la jumătatea distanței; la fiecare recursie alt prag rămas. ID3 taie întâi la $X=5$, apoi la $8.25$. $DT^*$ = arborele ID3 complet fără pruning; $DT_2$ = ID3 urmat de pruning la două frunze (un singur split). (a) Eroarea la antrenare a lui $DT_2$ și $DT^*$ (din 10). (b) Eroarea la CVLOO a lor.
@@ -2320,6 +2425,13 @@ Sursă: `tests/2021-2022-t2-seminar-ro/subiect.pdf:2` (0.3 p), soluție `solutii
 - Câmpuri: (a) fals (argumentat: regresia logistică dă direct o probabilitate; arborele dă o clasă; cartea nu dă cheie, regresia logistică nu e predată în lecții); (b) fals ($900/1000=90\%$ cu "mereu fără cancer"); (c) fals (al doilea e mai bun pe validare; primul face overfit).
 - Detectoare: (b) "adevărat, 85% e mare" → "clasificatorul trivial 'mereu fără cancer' are 90%".
 
+**E L15.c1** (`[construit]`; status: verified-twice; "Culegerea nu dă răspunsul; verificat de două ori."; added 2026-10-29, teacher list items 12, 13). Enunț: ai 600 de rânduri etichetate și trei algoritmi candidați, A, B și C. Pui deoparte 100 de rânduri pentru test. Pe celelalte 500 faci validare încrucișată cu $k=5$ (5 pliuri de câte 100 de rânduri). Pentru A, acuratețile pe cele 5 pliuri sunt $0.80$, $0.90$, $0.70$, $0.85$, $0.75$; pentru B și C, estimările 5-fold sunt $0.78$ și $0.83$.
+- Câmpuri: `acc` num "estimarea 5-fold pentru A" `0.80` (`(0.80+0.90+0.70+0.85+0.75)/5`); `alg` choice (A / B / C) "algoritmul ales" `C` (`max((0.80+0.90+0.70+0.85+0.75)/5, 0.78, 0.83)` = 0.83, al lui C); `alege` choice "după ce acuratețe alegi algoritmul?" ✓ "acuratețea de validare (estimarea 5-fold)"; ✗[criteriu pe antrenare] "acuratețea la antrenare" (explicație: ar câștiga modelul care a învățat datele pe de rost); ✗[alegi pe test] "acuratețea pe cele 100 de rânduri de test" (explicație: setul de test e păstrat pentru raportul final; dacă alegi pe el, numărul raportat nu mai e o estimare cinstită); `retrain` num "pe câte rânduri reantrenezi algoritmul ales înainte de test?" `500` (`600-100`); `raport` choice "ce raportezi ca acuratețe finală?" ✓ "acuratețea modelului reantrenat, măsurată o singură dată pe cele 100 de rânduri de test"; ✗[raportezi validarea] "estimarea 5-fold a lui C, $0.83$" (explicație: e cea mai mare dintre trei estimări, deci optimistă; raportul vine de pe date pe care nu ai ales nimic); ✗[alegi pe test] "cea mai mare dintre acuratețile pe test ale celor trei algoritmi" (explicație: maximul a trei estimări cu zgomot, ca în R2); `loo` num "câte antrenări ar cere CVLOO pe cele 500 de rânduri (la 5-fold sunt 5)?" `500` (`600-100`).
+- Indicii: (1) estimarea $k$-fold e media celor $k$ acurateți; (2) alegi pe validare, reantrenezi pe tot ce nu e test, raportezi o singură dată pe test (R2); (3) CVLOO este $k$-fold cu $k$ egal cu numărul de rânduri.
+- Soluție: $0.80$ (media, nu cel mai bun pliu); C câștigă la validare ($0.83$); reantrenezi C pe toate cele 500 de rânduri; raportezi acuratețea lui pe cele 100 de rânduri de test, o singură dată. CVLOO ar cere 500 de antrenări pe câte 499 de rânduri, față de 5 antrenări pe câte 400 la 5-fold: aceeași idee, de 100 de ori mai multe antrenări. Culegerea nu dă răspunsul; verificat de două ori.
+- Detectoare: `acc` = 0.90 → "Ai luat cel mai bun pliu; estimarea e media celor 5." `acc` = 0.75 → "Ai luat ultimul pliu; estimarea e media celor 5." `retrain` = 400 → "După alegere reantrenezi pe toate cele 500 de rânduri (antrenare și validare), nu pe 4 pliuri." `loo` = 5 → "CVLOO scoate câte un singur rând: 500 de antrenări."
+- Sursă: "Seminar 4, p. 1-4." (protocolul din R2, cu alte numere.)
+
 ### Demonstrație (4.44, aproximarea; cu predicție)
 (1) Predicție: care e eroarea frunzei, în funcție de proporția clasei minoritare $p\le\tfrac12$? $M\cdot p$ (frunza etichetează cu clasa majoritară). (2) Cum legi $p$ de $H$? $H=H(p)$; se aproximează $H(p)\approx4p(1-p)$ (se potrivește la 0, la $\tfrac12$ și e simetrică). (3) Rezolvi: $4p^2-4p+H=0$, $p=\tfrac{1-\sqrt{1-H}}{2}$ (rădăcina $\le\tfrac12$). (4) Verificare: $H=1\to p=\tfrac12$, $H=0\to p=0$. Rezultat: $M\cdot\tfrac{1-\sqrt{1-H}}{2}$.
 
@@ -2332,6 +2444,7 @@ Datele: T21T2 5 (cele trei rânduri); la fiecare pas rândul scos se evidențiaz
 - T21T2 5: egalitatea de la scoaterea rândului 2 e decisă de regula "A primul"; valoarea 1/3 numai cu ea (verified-answers).
 - 4.57.a: ruled (nicio cheie); regresia logistică nu e predată (design §3).
 - Pretest, Q1 (confuzie 30/10/20/40) și Q2-Q4: cifre construite.
+- Added 2026-10-29 (teacher list items 11-13): R4b, Q5 and E L15.c1, all with constructed numbers. The pretest (A 0/30, B 12/14), Q3 (5/20 and 10/15), T21T2 8 (5/6, 5/40, 54/55) and mock T1 5d (8/9, 1/34, 41/43) keep their own numbers; Q5 uses 4/5, 2/31, 37/38. E L15.c1 applies R2's protocol to 600 rows with 5-fold; Q4 (counts for $k=10$) is not asked again there.
 
 ---
 
@@ -2964,15 +3077,19 @@ Expected `1/2` and `1/2` (among the four rows with $x=0$: two with $U=0$, two wi
 
 **L20.s07** (definition; ML6:12)
 > **Regula MAP pentru clasificare.** Fie atributele $a_1,\dots,a_n$ ale unei instanțe și clasa $v_j\in V$:
-> $$v_{MAP}=\arg\max_{v_j\in V}P(v_j|a_1,\dots,a_n)=\arg\max_{v_j\in V}P(a_1,\dots,a_n|v_j)\,P(v_j)$$
-> Numitorul $P(a_1,\dots,a_n)$ nu depinde de $v_j$ și se elimină (vezi Lecția 19). Bayes Naiv și Bayes Comun sunt amândouă clasificatoare MAP; diferă prin felul în care estimează $P(a_1,\dots,a_n|v_j)$.
+> $$v_{MAP}=\arg\max_{v_j\in V}P(v_j|a_1,\dots,a_n)=\arg\max_{v_j\in V}\frac{P(a_1,\dots,a_n|v_j)\,P(v_j)}{P(a_1,\dots,a_n)}=\arg\max_{v_j\in V}P(a_1,\dots,a_n|v_j)\,P(v_j)$$
+> Primul pas este formula lui Bayes; al doilea elimină numitorul: $P(a_1,\dots,a_n)>0$ este același număr pentru toate clasele și nu schimbă argmax-ul (vezi Lecția 19). Bayes Naiv și Bayes Comun sunt amândouă clasificatoare MAP; diferă prin felul în care estimează $P(a_1,\dots,a_n|v_j)$.
+>
+> Pe hârtie, când ți se cere să derivezi regula de decizie pentru o instanță dată, scrii acest lanț cu valorile instanței și numești fiecare pas: formula lui Bayes, apoi numitorul care nu depinde de clasă; continui cu pasul propriu fiecărui clasificator: regula de înmulțire la Bayes Comun, independența condiționată la Bayes Naiv.
 
 Footnote: "Cursul: slide 12-13. Culegerea: p. 355."
 
+Builder (added 2026-10-29, teacher list item 17): the middle fraction and the named steps are the book's own justification of the rule (B:355, "Justificarea regulii de decizie", and nota 415 for Bayes Comun) and the form of the handwritten T21T2 7.c.i solution (`tests/2021-2022-t2-seminar-ro/solutii.pdf:4`: $\arg\max P(Y|A,B)\overset{FB}{=}\arg\max\frac{P(A,B|Y)P(Y)}{P(A,B)}=\arg\max P(A,B|Y)P(Y)$, with "ct > 0" under the denominator). The why of dropping $P(\cdot)$ is L19.s08's proof; this screen does not re-prove it. The continuation steps are on L20.s08 (regula de înmulțire) and L20.s09 (independența condiționată).
+
 **L20.s08** (definition; ML6:13; names B:370-371)
 > **Bayes Comun** (Bayes Optimal, Joint Bayes) estimează direct distribuția comună:
-> $$v_{JB}=\arg\max_{v_j\in V}P(a_1,\dots,a_n,v_j)$$
-> Antrenare: estimează $P(v_j)$ și $P(a_1,\dots,a_n|v_j)$ din numărători. Nu face nicio presupunere.
+> $$v_{JB}=\arg\max_{v_j\in V}P(a_1,\dots,a_n|v_j)\,P(v_j)=\arg\max_{v_j\in V}P(a_1,\dots,a_n,v_j)$$
+> (pasul din mijloc: regula de înmulțire, vezi Lecția 1). Antrenare: estimează $P(v_j)$ și $P(a_1,\dots,a_n|v_j)$ din numărători. Nu face nicio presupunere.
 >
 > De ce două nume: **Comun**, fiindcă lucrează cu distribuția comună a atributelor; **Optimal**, fiindcă nicio altă distribuție probabilistă nu poate da o eroare medie la clasificare mai mică. Pe slide-uri apare "Joint Bayes". În exercițiile care urmează, "Bayes Optimal" înseamnă tot Bayes Comun.
 
@@ -2999,9 +3116,13 @@ Footnote: "Seminar 5, p. 4-5; Seminar 6, p. 1."
 > - **Bayes Naiv:** $2n+1$ parametri (o probabilitate $P(a_i{=}0|v_j)$ pentru fiecare atribut și fiecare dintre cele două clase, plus $P(v)$);
 > - **Bayes Comun:** $2^{n+1}-1$ parametri (pentru fiecare clasă, $2^n-1$ valori libere ale lui $P(a_1,\dots,a_n|v_j)$, fiindcă ultima se deduce din suma 1; plus $P(v)$). Cresc **exponențial** cu $n$.
 >
+> Același mod de numărare când atributul $A_i$ are $|Val(A_i)|$ valori și clasa are $K$ valori: priorul dă $K-1$ parametri liberi; pentru fiecare clasă, Bayes Naiv mai estimează $|Val(A_i)|-1$ valori pentru fiecare atribut, iar Bayes Comun $\prod_i|Val(A_i)|-1$ valori pentru toată combinația. Deci NB are $(K-1)+K\sum_i\big(|Val(A_i)|-1\big)$ parametri liberi, iar Bayes Comun $(K-1)+K\big(\prod_i|Val(A_i)|-1\big)$; cu atribute și clasă binare ies $2n+1$ și $2^{n+1}-1$.
+>
 > Complexitate NB (cazul Bernoulli): spațiul $O(dK)$, antrenarea $O(dn)$, testarea $O(dK)$, cu $d$ atribute, $K$ clase și $n$ exemple.
 
 Prediction before the formula: "Pentru $n=3$ atribute binare, câți parametri liberi are NB? Dar Bayes Comun?" Correct `7` and `15` (the case $n=2$, 5 and 7, is exercise 2.7.e and 2.29.a-b; it is not pre-solved here). Footnote: "Culegerea: p. 355 (nota 417), p. 375-376." Builder: the derivation per class belongs to the solution of 2.7.e (L20.e3), not repeated here beyond the two lines above; the formulas hold for Bernoulli inputs and output (B:355, nota 417). For categorical attributes see 2.27.b (convention).
+
+Builder (added 2026-10-29, teacher list item 21): the general paragraph states the free-parameter count the book only gives for Bernoulli variables. It is the count of 2.27.b (L20.e4) and of the handwritten T21T2 7.b solution (`tests/2021-2022-t2-seminar-ro/solutii.pdf:3`: "11 estimări" for CategoricalNB with $A$ of 3 values, $B$ of 2, $Y$ of 3, i.e. $(3-1)+3\big((3-1)+(2-1)\big)=11$; counting every probability instead would give 18). The learner applies it to that table in L21.s02 (the data L21 owns) and to 2.27.b here; this screen has no new number.
 
 **L20.s12-s17** (proof screens; allocation: "derivarea MLE pentru NB cu 9 parametri" and "concavitatea log-verosimilității" = proof 5 of DEM:1, BS:90-93, BS:98; data table 4.2 from Lecția 11, not re-drawn in full)
 > Antrenarea lui NB = relative frequencies. Dovedim că aceasta este chiar estimarea MLE, pe datele cu ciuperci din Lecția 11 (tabelul 4.2, rândurile A-H, atributele $X_1$=NotHeavy, $X_2$=Smelly, $X_3$=Spotted, $X_4$=Smooth, clasa $Y$=Edible). Parametrii: $\theta_{j1}=P(X_j{=}1|Y{=}1)$, $\theta_{j0}=P(X_j{=}1|Y{=}0)$ pentru $j=1..4$, și $\theta_y=P(Y{=}1)$: **nouă** parametri.
@@ -3226,6 +3347,7 @@ Ce răspunde Bayes Naiv pentru $A=0,B=0,C=1$?
 - **Declared reuse:** the 14-day table of 2.27 is the table owned by L16 (`allocation.json` `declared_reuse`); the 4.2 mushroom table of the proof screens is owned by L11. Both are shown compactly with a back-link and are not re-explained.
 - **Uncertain:** the generalisation of parameter counts to categorical attributes is not in the book (convention, `ruled`). 2.27.c's LOO uses the value sets of the full data, which the readers and `verified-answers.md` agree on (6/14 with the same six days).
 - Repetition check: P20's 7-row table is used only on L20.s02-s06; the pretest uses a different 6-row table; 2.7 and 2.29 are two different count tables; the parameter-count formulas are stated once (L20.s11) and the derivations live in the solutions of 2.7.e and 2.29.a-b only as table counts.
+- Added 2026-10-29 (teacher list items 17 and 21, completeness pass): L20.s07 shows the book's justification chain (Bayes, then the denominator dropped) and how to write it on paper; L20.s08 names the multiplication-rule step to $P(a_1,\dots,a_n,v_j)$; L20.s11 states the free-parameter count for categorical attributes and $K$ classes. No new number and no new exercise in this lesson.
 
 ---
 
@@ -3234,6 +3356,8 @@ Ce răspunde Bayes Naiv pentru $A=0,B=0,C=1$?
 **Priority B.** **Concepts (2):** (1) problema probabilităților zero: produs 0, scoruri toate 0, posterior $0/0$; (2) regula add-one a lui Laplace $\dfrac{\text{count}+1}{N+|Val(A)|}$ și estimarea $m$. **Prerequisites:** Lecția 20 (back-link only).
 
 **Does not teach (owned elsewhere):** the NB rule, the factors and the parameter counts (L20); the error rate and duplicated attributes (L22).
+
+**Added 2026-10-29 (teacher list item 23; concept C21.3 in `allocation.json`):** (3) seturi de date nebalansate: priori predefiniți în locul frecvențelor relative. Screen L21.s09a, quiz item L21.q5, field `e` of L21.e1.
 
 ### L21 screens: opening question
 
@@ -3258,6 +3382,11 @@ Choices `0` / `mic, dar pozitiv` / `mare`. Expected `0` `[construit]`. After the
 > Antrenăm Bayes Naiv **fără** regula lui Laplace. Cât sunt $P(Y{=}0)$, $P(Y{=}1)$, $P(Y{=}2)$?
 
 Expected `1/5`, `2/5`, `2/5` `[seminar]` T21T2 7. Reveal: relative frequencies.
+
+Second prediction on the same screen (added 2026-10-29, teacher list item 21; the five rows stay on screen):
+> Câți parametri liberi trebuie să estimeze Bayes Naiv pe aceste date? ($A$ are 3 valori, $B$ are 2, $Y$ are 3; numărarea: vezi Lecția 20.)
+
+Expected `11` (formula `(3-1)+3*((3-1)+(2-1))`) `[seminar]` T21T2 7.b (`solutii.pdf:3`: "11 estimări"). Reveal: $2$ pentru priori ($P(Y{=}0)$, $P(Y{=}1)$; al treilea se deduce) și, pentru fiecare dintre cele 3 clase, $2$ pentru $A$ și $1$ pentru $B$: $2+3\cdot3=11$. Detectors: `18` → "Ai numărat și probabilitățile care se deduc din suma 1: pentru fiecare clasă, ultima valoare a lui $A$ și a lui $B$, iar la priori, a treia clasă." `9` → "Lipsesc cei 2 parametri liberi ai priorului $P(Y)$." `15` → "$3\cdot5$: ai numărat toate cele 5 valori ale lui $A$ și $B$ pe clasă și ai uitat priorul. Se numără doar valorile libere: $3-1$ pentru $A$, $2-1$ pentru $B$, plus $3-1$ pentru prior." Builder: the count rule is L20.s11's; this is its only use with three classes and a three-valued attribute, on the data L21 owns (T21T2 7.b asks exactly this on these rows).
 
 **L21.s03** (prediction; the factors of one class)
 > Instanța de test este $(A{=}0,\,B{=}0)$. Pentru clasa $Y=0$ (un singur rând, $(1,0)$): cât sunt $P(A{=}0|Y{=}0)$ și $P(B{=}0|Y{=}0)$?
@@ -3300,6 +3429,13 @@ Prediction: "Pentru $n=8$, $n_c=3$, $k=3$: cât dă add-one? Dar estimarea $m$ c
 
 Footnote: "Culegerea: p. 376-378 (nota: nu uita $P(\neg\text{free}|\cdot)=1-P(\text{free}|\cdot)$), p. 355 (nota 416: varianta de bază a lui NB, prezență/absență)." Builder: convention (1) is mine (decision 2 above) and agrees with ex. 2.8 and the 0.7586 of ex. 2.30.
 
+**L21.s09a** (definition; added 2026-10-29, teacher list item 23)
+> **Seturi de date nebalansate: priori predefiniți.** Priorul învățat, $\hat P(v_j)$, este frecvența relativă a clasei în setul de antrenament. Dacă setul este **nebalansat** (o clasă e mult mai rară decât cealaltă) sau proporțiile lui diferă de cele reale, $\hat P(v_j)$ trage decizia spre clasa frecventă, chiar când factorii $\hat P(a_i|v_j)$ arată spre cealaltă. Remediul: **priori predefiniți**: fixezi $P(v_j)$ după proporțiile reale, egali, sau după costul fiecărei greșeli, și păstrezi factorii învățați. Decizia rămâne $\arg\max_{v_j}P(v_j)\prod_i\hat P(a_i|v_j)$, cu priorii noi; probabilitățile se normalizează ca înainte, deci suma lor rămâne 1.
+>
+> Cu factorii fixați, decizia între două clase se schimbă la priorul $p$ pentru care $\dfrac{p\,A}{p\,A+(1-p)\,B}=\dfrac12$, unde $A$ și $B$ sunt produsele factorilor celor două clase (ex. 2.8.d).
+
+Footnote: "Culegerea: p. 376-378 (ex. 2.8.a, d)." Builder: ex. 2.8 is the course's only source for this (the filter uses $P(spam)=0{,}1$, not the $\frac23$ of the training data, because the two errors cost differently); Ciortuz's book, slides, Companion, seminar notes and past tests have no separate section on imbalanced data (searched 2026-10-29), so the screen stays at that level: the prior is what changes, the factors stay.
+
 ### L21 screen: why
 
 **L21.s10** (reflect)
@@ -3331,6 +3467,12 @@ Answer: pentru fiecare valoare a lui $A_i$ adăugăm un exemplu virtual, deci nu
 - ✗[add-one în loc de estimarea m] $\dfrac{0+1}{10+2}=\dfrac1{12}$: add-one e cazul $m=k$, $p=\frac1k$ (aici ar fi $m=2$); enunțul dă $m=4$.
 - ✗[MLE] $0$: asta e estimarea fără netezire, exact problema de rezolvat.
 
+**L21.q5** (added 2026-10-29, teacher list item 23; `[construit]`) Un set de antrenament are 5 exemple pozitive și 95 negative. Bayes Naiv a învățat $\hat P(A{=}1|+)=0{,}8$ și $\hat P(A{=}1|-)=0{,}1$. Pentru instanța $A=1$, cu priorii din numărători ($0{,}05$ și $0{,}95$), scorurile sunt $0{,}04$ și $0{,}095$, deci NB prezice $-$, cu $P(+|A{=}1)=\frac8{27}\approx0{,}30$. În realitate cele două clase sunt la fel de frecvente, așa că fixăm priorii la $0{,}5$ și $0{,}5$. Ce se întâmplă? (formulas: `0.05*0.8`, `0.95*0.1`, `0.05*0.8/(0.05*0.8+0.95*0.1)` = 8/27; `0.5*0.8`, `0.5*0.1`, `0.5*0.8/(0.5*0.8+0.5*0.1)` = 8/9)
+- ✓ Factorii rămân $0{,}8$ și $0{,}1$; scorurile devin $0{,}40$ și $0{,}05$, iar NB prezice $+$, cu $P(+|A{=}1)=\frac89\approx0{,}89$.
+- ✗[factorii se reestimează] Trebuie reestimați și factorii $\hat P(A|v)$, altfel priorii noi nu schimbă nimic: factorii sunt condiționați de clasă și nu depind de câte exemple are fiecare clasă; se schimbă doar $P(v)$, iar scorurile se schimbă odată cu el.
+- ✗[priorul trebuie să fie frecvența] Nu e voie: priorii trebuie să rămână frecvențele din antrenament, altfel probabilitățile nu mai au suma 1: după normalizare suma este 1 cu orice priori care au suma 1 ($\frac89+\frac19=1$).
+- ✗[decizia nu se schimbă] Decizia rămâne $-$, fiindcă datele nu s-au schimbat: decizia compară produsele prior · factor; cu $0{,}5$ scorul clasei $+$ ($0{,}40$) îl depășește pe al clasei $-$ ($0{,}05$).
+
 Builder: "all scores 0 ⇒ the probability is $0/0$" is the worked example (L21.s04) and exercise 2.31; it is not asked again. The pretest's 10 spam emails are not reused in q2.
 
 ### L21 exercises (calculation exercises; each owned only here)
@@ -3359,6 +3501,8 @@ Builder: "all scores 0 ⇒ the probability is $0/0$" is the worked example (L21.
 **Worked solution (book, p. 376-378):** (b) fără netezire: $\frac08$, $\frac34$, $\frac88$, $\frac14$, $\frac48$, $\frac14$; cu add-one $\frac{c+1}{N+2}$ ($+2$ = numărul de valori ale fiecărui atribut): $\frac1{10}$, $\frac23$, $\frac9{10}$, $\frac13$, $\frac12$, $\frac13$. (c) $P(spam|s)=\dfrac{\frac1{200}\cdot\frac1{10}}{\frac1{200}\cdot\frac1{10}+\frac4{27}\cdot\frac9{10}}=\dfrac3{803}\approx0{,}0037$ (probabilitate mică; fără regula Laplace ar fi fost $0$, fiindcă niciun email spam nu conține `study`). (d) $\dfrac{\frac p{200}}{\frac p{200}+\frac{4(1-p)}{27}}=\frac12\Leftrightarrow27p=800(1-p)\Leftrightarrow p=\dfrac{800}{827}\approx0{,}9673$.
 
 **Detectors:** `c1 = 0.2` or any value > 0.1 → "Verifică factorul pentru `free`: mesajul **nu** conține `free`; factorul este $1-P(free|\cdot)$, adică $\frac1{10}$ pentru spam și $\frac23$ pentru regular." `b1 = 0` → "Asta e estimarea fără netezire ($\frac08$); cu add-one: $\frac{0+1}{8+2}$." `b1 = 1/9` or `1/8` → "Numitorul este $8+2$ (două valori pentru un atribut binar), nu $8+1$." `d = 0.5` → "Aceea e valoarea cerută pentru $P(spam|s)$; întrebarea cere priorul $p$ care o produce."
+
+**Added field (2026-10-29, teacher list item 23; `[construit]`, verified-twice):** `e` frac "Cu priorul din numărătorile setului de antrenament, $P(spam)=\frac8{12}=\frac23$, și aceiași factori netezi, cât ar fi $P(spam|s)$?" `27/427` (≈0.0632, tol ±0.0005; formula `2/3*(1/10*1/10*1/2)/(2/3*(1/10*1/10*1/2)+1/3*(2/3*2/3*1/3))`). Solution line: $\dfrac{\frac23\cdot\frac1{200}}{\frac23\cdot\frac1{200}+\frac13\cdot\frac4{27}}=\dfrac{27}{427}\approx0{,}063$; cu priorul predefinit $0{,}1$ (partea c) scade la $\frac3{803}\approx0{,}0037$. Factorii sunt aceiași; se schimbă doar priorul. Mesajul rămâne regular în ambele cazuri; decizia s-ar schimba abia la $P(spam)=\frac{800}{827}$ (partea d). Detector: `e` = `3/803` → "Aceasta e valoarea cu priorul predefinit $0{,}1$ (partea c); aici priorul este $\frac23$."
 
 #### L21.e2: ex. 2.30 (B:417), clasificare de texte, answer status **ruled** (convenția priorilor și a netezirii nu e în enunț)
 
@@ -3406,6 +3550,8 @@ $x_1=(0,0,0,1,0,0,1)$, $y_1=1$; $x_2=(0,0,1,1,0,0,0)$, $y_2=1$; $x_3=(1,1,0,0,0,
 - **Conventions on screen:** priors not smoothed (L21.s09); 2.30's three conventions (0.8306 / 0.7586 / 0.8512); the tie in 2.31.z2.
 - **The m-estimate** appears on one screen only (ML6:18); the exam form is add-one (C-14).
 - Repetition check: the five-row table is used on L21.s02-s06 only; 2.8 is the only spam example; "NB rule and factors" are not re-taught (back-link to L20).
+- Added 2026-10-29 (teacher list item 23): L21.s09a, L21.q5 and field `e` of 2.8. The q5 numbers (5 / 95, factors 0,8 and 0,1) are constructed and appear nowhere else; the cost argument of 2.8.a stays on 2.8's own screen.
+- Added 2026-10-29 (teacher list item 21, completeness pass): the second prediction on L21.s02, the free-parameter count of NB on the T21T2 7 rows (11, the official answer of T21T2 7.b), applying L20.s11's general count.
 
 ---
 
@@ -3483,6 +3629,25 @@ Footnote: "Culegerea: p. 356."
 
 Footnote: "Culegerea: p. 356 (P4-P6, nota 419). Cursul: slide 17."
 
+**L22.s10a** (learn, static table; added 2026-10-29, teacher list item 22)
+> **Bayes Naiv și Bayes Comun (Optimal): ce câștigi, ce pierzi.** Proprietățile P0-P8 ale cursului, pe două coloane:
+>
+> | | Bayes Naiv | Bayes Comun (Optimal) |
+> |---|---|---|
+> | Parametri liberi ($n$ atribute binare, clasă binară; P1) | $2n+1$, liniar | $2^{n+1}-1$, exponențial |
+> | Antrenarea (P2) | o trecere de numărare, $O(dn)$; fără căutare | numără, pentru fiecare clasă, fiecare combinație de valori |
+> | Câte exemple cere (P8) | de ordin logaritmic | de ordin exponențial |
+> | Instanță cu o combinație de valori nevăzută la antrenare | scor din factorii separați | toate scorurile 0: nu poate decide |
+> | Surse de eroare (P3) | votul majoritar și presupunerea de independență condiționată | doar votul majoritar |
+> | Date consistente (P4, P7) | nu garantează eroarea 0 (xor: 50%) | eroare 0, pentru orice funcție booleană |
+> | Atribute duplicate (P6) | acuratețea scade | nu e afectat |
+> | Exemple duplicate (P6) | sensibil | sensibil |
+> | Independența condiționată se verifică (P0) | aceleași decizii ca Bayes Comun | aceleași decizii ca Bayes Naiv |
+>
+> Pe scurt: Bayes Naiv e ieftin și fiecare număr al lui se sprijină pe multe exemple, dar plătește cu presupunerea de independență condiționată; probabilitățile lui pot ieși greșite chiar când decizia e corectă. Bayes Comun nu presupune nimic și are cea mai mică eroare medie posibilă, dar cere un număr exponențial de parametri și de exemple.
+
+Footnote: "Culegerea: p. 355-356. Cursul: slide 16-17." Builder: a summary, one line per row, of facts taught in Lecția 20 (P0, P1, P2; the unseen combination and "many rows per factor" are L20.s01 and L20.s18; "Optimal" is L20.s08) and on L22.s09-s10 (P3-P7). Only P8 is new: one line, no proof (ex. 2.13 is week 6, `allocation.json` `out_of_scope`). The table is a static `table` block, not a markdown table in text; rows that rest on Lecția 20 carry "vezi Lecția 20" in the cell's note. The teacher's item asks for exactly this list, so the screen gathers it instead of re-explaining it.
+
 **L22.s11** (learn; New-Bayes, B:378-379 and T20b 3.4, P21 3)
 > **Clasificatorul "în-between".** Dacă atributele $X_1,\dots,X_4$ sunt independente condiționat de $Y$, **cu excepția perechii $(X_3,X_4)$**, Bayes Naiv ar greși. Păstrăm perechea dependentă în același factor:
 > $$\arg\max_y P(X_1|y)\,P(X_2|y)\,P(X_3,X_4|y)\,P(y)$$
@@ -3527,6 +3692,12 @@ Builder: "which distribution the error rate uses" is L22.s07-s08; it is not aske
 - ✓ Bayes Comun are eroarea 0 la antrenare, Bayes Naiv nu garantează 0.
 - ✗[NB garantează 0 pe date consistente] Ambele au eroarea 0: pentru xor, NB are 50%.
 - ✗[votul majoritar rămâne sursă] Niciunul nu poate avea 0 din cauza votului majoritar: pe date consistente fiecare instanță are o singură clasă, deci votul nu mai greșește.
+
+**L22.q4** (added 2026-10-29, teacher list item 22) Care afirmație despre Bayes Comun (Optimal), comparat cu Bayes Naiv, este adevărată?
+- ✓ Cere exponențial mai mulți parametri și mai multe exemple, dar nu greșește din cauza presupunerii de independență condiționată.
+- ✗[Bayes Optimal nu greșește niciodată] Nu greșește niciodată la clasificare; de aceea se numește Optimal: greșește prin votul majoritar când aceeași instanță apare cu clase diferite (P3); Optimal înseamnă cea mai mică eroare medie posibilă, nu eroarea 0.
+- ✗[NB și Bayes Comun inversate] Are mai puțini parametri decât Bayes Naiv, fiindcă nu înmulțește factori: invers; Bayes Comun estimează o probabilitate pentru fiecare combinație de valori, $2^{n+1}-1$, față de $2n+1$.
+- ✗[Bayes Comun e sensibil la atribute duplicate] O copie a unui atribut îi strică deciziile, ca la Bayes Naiv: copia nu schimbă distribuția comună, deci nici deciziile lui Bayes Comun (P6); doar Bayes Naiv numără aceeași dovadă de două ori.
 
 ### L22 exercises (calculation exercises; each owned only here)
 
@@ -3619,6 +3790,7 @@ Tabela de adevăr (de scris întâi): $Y=1$ exact pe $ABC=000,100,110,111$, deci
 
 ### L22 builder notes
 
+- Added 2026-10-29 (teacher list item 22): L22.s10a (the advantages and disadvantages, P0-P8) and L22.q4; the retrieve block now has 4 items. A quiz item on "a combination never seen in training" was not added: it is the opening question of Lecția 20 (L20.s01).
 - Sources: Cn-s6:1-3, BS:49-54, BS:64-72, B:354-357 (P3-P7), B:378-379 (2.9), B:382-385 (2.11), B:419-422 (2.33, 2.35, 2.36), B:429 (2.42), T20C 3 (`tests/2020-2021-t1-ciortuz/subiect.pdf` p. 3), `verified-answers.md` (2.11, 2.33, 2.35, 2.36), `exbook-ch2-3.md` sections 3, 6.
 - **Computed by me:** the $P_{NB}$-error 0,174 (L22.s07); L22.s06 (Bayes Comun error with the copy); the parameter count 11 for 2.9 (the book gives the rule only); the 8 functions of 2.36; the quiz number 0,21. (An earlier draft also asked NB on $Y=A\lor B$; that is 2.11.b, case 2, up to symmetry, so it was removed.) Each is recomputed by `verify_bayes.py` (sections L22 and quiz numbers).
 - **Reading of 2.9:** the book takes "independente două câte două" to mean $X_1$ and $X_2$ are each conditionally independent of the others (stated on L22.s12). Strictly, pairwise independence alone does not give that; the screen states the reading the book uses, in one line, without a discussion.

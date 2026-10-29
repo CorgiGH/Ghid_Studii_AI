@@ -75,6 +75,9 @@ STATUS_PART = {
  '2.33.a':'slides','2.33.b':'slides','2.33.c':'slides','2.33.d':'slides','2.33.e':'slides','2.33.f':'slides',
  '2.29.c':'verified-twice',
 }
+# Constructed exercises added 2026-10-29 for the teacher's list of the Friday test (D-069): they have no book number, so the
+# key is the outline's id "L<n>.c<k>"; each one was computed twice (formula.js evaluate + exact fractions in Python).
+CONSTRUCTED = {'L4.c1': 4, 'L4.c2': 4, 'L5.c1': 5, 'L15.c1': 15}
 
 # ---------------------------------------------------------------- concepts (cap: 4 headline concepts per lesson)
 # (cid, Romanian name, requires)
@@ -460,6 +463,56 @@ lesson(24, 'Entropia încrucișată, inegalitatea lui Gibbs, divergența Kullbac
  misconceptions=['KL e distanță (nesimetrică)','CH e mărginită de log n (nu are limită superioară, B:150)','CH(model,adevărat) în loc de CH(adevărat,model) (0.147)','Cross-entropia mică garantează modelul adevărat (0.63.b: nu garantează)'],
  notes='Numerotarea: caietul 2026 are KL la 0.65.a/b; fișa IT:2 și lista proză (WYSK:4) folosesc numerele vechi 0.63.a/b (C-7). 0.60 și 0.61 (entropia diferențială) cer densități continue și sunt opționale: un ecran de enunț și soluția din carte (0.60 are soluție în carte; 0.61 nu a fost verificată).')
 
+# ---------------------------------------------------------------- 2026-10-29: additions for the teacher's list (D-069)
+# The teacher's list of what the Friday test needs, checked item by item against the outline; the missing pieces were added to
+# the lesson that owns the topic (outline sections marked "added 2026-10-29"). Additions only: no owner, id or item changes.
+CONCEPTS[5].append(('C5.4', 'Variabile construite din două variabile: distribuția lui g(X,Y) din tabelul comun (X+Y, X−Y, produsul XY); funcții de variabile independente', ['C5.1', 'C5.2']))
+CONCEPTS[12].append(('C12.4', 'Obiectivul ID3 (date explicate, model compact, generalizare) și modelul construit: arborele, ierarhie de partiționări', ['C11.1']))
+CONCEPTS[21].append(('C21.3', 'Seturi de date nebalansate: priori predefiniți în locul frecvențelor relative, factorii învățați rămân', ['C20.1']))
+
+ADDITIONS = {
+ 4: dict(
+  proofs=['Var(X+a)=Var(X) din definiția varianței și liniaritatea mediei (L4.c1, construit; aceeași demonstrație o cere T21P 2)'],
+  data_tables=['L4.c1: X∈{1,4} cu 2/3, 1/3, a=5 (construit)', 'L4.c2: trei p.m.f. candidate pe {1,2,3} și p(x)=c·x (construit)'],
+  exercises=['L4.c1', 'L4.c2'],
+  misconceptions=['Media nu se mută la X+a (Var(X+a) calculat cu E[X] în loc de E[X+a])', 'O p.m.f. cere doar suma 1 (se uită p(x)≥0)']),
+ 5: dict(
+  definitions=['Distribuția lui g(X,Y) din tabelul comun: se adună celulele cu aceeași valoare a lui g (X+Y, X−Y, produsul XY)'],
+  properties=['X, Y independente ⇒ f(X), g(Y) independente; E[f(X)g(Y)]=E[f(X)]E[g(Y)], de ex. E[XY²]=E[X]E[Y²]; Var(X+2Y²)=Var X+4Var(Y²)',
+              'Pe hârtie, independența se arată pe toate celulele (definiția; scurtătura binară doar ca verificare); lipsa ei, cu o singură celulă'],
+  data_tables=['L5.c1: X∈{1,2} (0,4; 0,6) și Y∈{0,1,2} (0,5; 0,3; 0,2), independente (construit)'],
+  exercises=['L5.c1'],
+  misconceptions=['E[XY²]=E[X](E[Y])² (pătratul aplicat după medie)', 'O valoare a lui g(X,Y) care vine din mai multe celule ia doar o celulă']),
+ 12: dict(
+  definitions=['Obiectivul ID3 (B:486-487): un arbore care explică datele (consistent dacă datele sunt consistente), cât mai compact și cu putere de generalizare; urmărit local, prin IG maxim la fiecare nod; modelul = arbore de decizie, ierarhie de partiționări (notele 490-491)'],
+  misconceptions=['ID3 minimizează direct eroarea la antrenare / maximizează IG pe tot arborele']),
+ 14: dict(
+  definitions=['Zona unei frunze = conjuncția testelor de pe drum, dreptunghi cu laturi paralele cu axele; zona unei clase = reuniunea frunzelor ei (B:466-467)'],
+  misconceptions=['Zona unei frunze scrisă fără testele de mai sus de pe drum']),
+ 15: dict(
+  definitions=['Good fit: erori mici și apropiate la antrenare și la validare (față de overfitting și underfitting)'],
+  data_tables=['L15.c1: 600 de rânduri, 100 test, 5-fold pe 500 (acurateți 0,80; 0,90; 0,70; 0,85; 0,75) (construit)'],
+  exercises=['L15.c1'],
+  misconceptions=['Erori apropiate înseamnă underfitting și când sunt mici', 'Se raportează estimarea de validare a modelului ales']),
+ 20: dict(
+  definitions=['Justificarea regulii (B:355 și nota 415): argmax P(v|a₁..aₙ) = argmax P(a₁..aₙ|v)P(v)/P(a₁..aₙ) (formula lui Bayes) = argmax P(a₁..aₙ|v)P(v) (numitorul pozitiv nu depinde de v); apoi independența condiționată (NB) sau regula de înmulțire, argmax P(a₁..aₙ,v) (Bayes Comun); forma soluției T21T2 7.c.i'],
+  properties=['Numărarea generală (atribute categoriale, K clase): NB (K−1)+KΣ(|Val(Aᵢ)|−1), Bayes Comun (K−1)+K(Π|Val(Aᵢ)|−1); pentru NB coincide cu soluția oficială T21T2 7.b (11 pentru A cu 3 valori, B cu 2, Y cu 3)']),
+ 21: dict(
+  definitions=['Set de date nebalansat; priori predefiniți (P(v) fixat după proporțiile reale, egal sau după costul erorilor; factorii învățați rămân)'],
+  properties=['Priorul la care decizia NB se schimbă: pA/(pA+(1−p)B)=1/2 (2.8.d)',
+              'Pe rândurile T21T2 7 (A cu 3 valori, B cu 2, Y cu 3) NB estimează 11 parametri liberi (T21T2 7.b; numărarea din L20.s11, a doua predicție din L21.s02)'],
+  data_tables=['L21.q5: 5 pozitive / 95 negative, P(A=1|+)=0,8, P(A=1|−)=0,1 (construit)'],
+  misconceptions=['La priori predefiniți trebuie reestimați și factorii', 'Priorii trebuie să rămână frecvențele din antrenament']),
+ 22: dict(
+  properties=['(P8) complexitatea de eșantionare: logaritmică pentru Bayes Naiv, exponențială pentru Bayes Comun (enunțată, fără demonstrație; 2.13 rămâne în afara programei)'],
+  definitions=['Avantajele și dezavantajele lui Bayes Naiv față de Bayes Comun (P0-P8), adunate într-un tabel: L22.s10a (lista profesorului, item 22)'],
+  misconceptions=['Bayes Optimal nu greșește niciodată (optimal luat drept eroare 0)']),
+}
+for _n, _add in ADDITIONS.items():
+    _d = [d for d in L if d['n'] == _n][0]
+    for _f, _items in _add.items():
+        _d[_f] = list(_d.get(_f, [])) + _items
+
 # ---------------------------------------------------------------- tests
 TESTS = [
  dict(id='ml-test-mock-t1', title_ro='Test de probă T1 (6 p, 100 min, mod hârtie)', after_lesson=24, kind='mock',
@@ -562,6 +615,8 @@ def expand(ex):
     return [ex + '.' + p for p in parts] if parts else [ex]
 
 def atoms_of(ex_id):
+    if ex_id in CONSTRUCTED:
+        return [ex_id]
     if re.match(r'^\d+\.\d+\.[a-z]$', ex_id):
         return [ex_id]
     return expand(ex_id)
@@ -573,10 +628,14 @@ def master_atoms():
     return out
 
 def whole_of(atom):
+    if atom in CONSTRUCTED:
+        return atom
     m = re.match(r'^(\d+\.\d+)(\.[a-z])?$', atom)
     return m.group(1)
 
 def status_of(atom):
+    if atom in CONSTRUCTED:
+        return 'verified-twice'
     if atom in STATUS_PART:
         return STATUS_PART[atom]
     return STATUS[whole_of(atom)]
@@ -625,8 +684,11 @@ def validate():
     for a in master_atoms():
         if a not in owner:
             err.append('UNALLOCATED exercise atom ' + a)
+    for a, n in CONSTRUCTED.items():
+        if owner.get(a) != n:
+            err.append('constructed exercise %s must be owned by L%d' % (a, n))
     for a in owner:
-        if a not in set(master_atoms()):
+        if a not in set(master_atoms()) and a not in CONSTRUCTED:
             err.append('unknown atom ' + a)
         try:
             status_of(a)
@@ -732,7 +794,11 @@ def build():
             slides=d.get('slides', []), one_screen_notes=d.get('one_screen_notes', []),
             notes=d.get('notes', ''), prereq_lessons=sorted(prereq)))
     ex_index = {}
-    for a in sorted(owner, key=lambda x: [int(t) if t.isdigit() else t for t in x.split('.')]):
+    def _key(x):
+        if x in CONSTRUCTED:   # constructed ones after the book numbers, by lesson
+            return (1, CONSTRUCTED[x], x)
+        return (0, [int(t) if t.isdigit() else t for t in x.split('.')], '')
+    for a in sorted(owner, key=_key):
         ex_index[a] = dict(lesson=owner[a], answer_status=status_of(a), optional=whole_of(a) in OPTIONAL)
     out = dict(
         what='Allocation of every concept, definition, property, proof, worked example, data table and exercise (part level) of the ML weeks 1-5 scope to exactly one lesson',
@@ -745,7 +811,7 @@ def build():
             **{'verified-twice': 'reader computation plus an independent recomputation agree (verified-answers.md or verify_extra.py)',
                'ruled': 'no printed key or the answer depends on a convention: the lesson states the ruling and labels the answer as argued / convention-dependent',
                'impl': 'implementation exercise, no answer to grade'}),
-        checks=dict(exercise_atoms=len(owner), exercises_in_master=len(MASTER), lessons=len(L), concept_cap='2..4 per lesson (checked)',
+        checks=dict(exercise_atoms=len(owner), exercises_in_master=len(MASTER), constructed_exercises=len(CONSTRUCTED), lessons=len(L), concept_cap='2..4 per lesson (checked)',
                     forward_use='none (concept requires and exercise needs checked against lesson order)'))
     json.dump(out, open(os.path.join(HERE, 'allocation.json'), 'w'), ensure_ascii=False, indent=1)
     write_md(out)
@@ -763,7 +829,8 @@ def write_md(o):
     A('## 1. Checks that pass')
     A('')
     c = o['checks']
-    A('- Every one of the %d exercise atoms (%d exercise numbers, split into parts where parts go to different lessons) has exactly one owner lesson; `unallocated` is empty. Items left out on purpose are in `out_of_scope` with a reason.' % (c['exercise_atoms'], c['exercises_in_master']))
+    A('- Every one of the %d exercise atoms (%d exercise numbers, split into parts where parts go to different lessons) has exactly one owner lesson; `unallocated` is empty. Items left out on purpose are in `out_of_scope` with a reason.' % (c['exercise_atoms'] - c['constructed_exercises'], c['exercises_in_master']))
+    A('- Added 2026-10-29 for the teacher\'s list of the Friday test (D-069): %d constructed exercises with no book number, keyed by their outline id (%s), each owned by one lesson and computed twice; they are in `exercise_index` with status verified-twice. The coverage map is `2026-10-29-teacher-list-coverage.md`.' % (c['constructed_exercises'], ', '.join(CONSTRUCTED)))
     A('- 24 lessons, 2 to 4 headline concepts each (a headline concept bundles its definitions; properties and proofs are listed separately).')
     A('- No forward use: each concept lists what it requires and each exercise what it needs besides its own lesson\'s concepts; all of it points to the same or an earlier lesson.')
     A('- Each worked example is used by one lesson only, and no property, definition, proof or data table repeats across lessons. Three data families are shared by the book itself and are listed in `declared_reuse`.')
