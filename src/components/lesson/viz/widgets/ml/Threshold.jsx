@@ -36,7 +36,8 @@ function Plot({ W, frame, t, revealed = true }) {
   const ticks = (vs) => [...new Set(vs)].sort((a, b) => a - b);
   const tx = plane ? ticks(W.points.map((p) => p.x)) : [];
   const ty = plane ? ticks(W.points.map((p) => p.y)) : [];
-  const zones = frame.kind === 'zones' ? W.leaves : [];
+  // the zones of the leaves made so far take their class colour; a node still asking keeps its own split uncoloured
+  const zones = (frame.zones || []).filter((l) => revealed || frame.kind !== 'node' || l.parent !== frame.id);
   const zoneRect = (l) => {
     const x0 = S.X(l.region.x[0] === -Infinity ? S.domainX[0] : l.region.x[0]);
     const x1 = S.X(l.region.x[1] === Infinity ? S.domainX[1] : l.region.x[1]);
@@ -171,20 +172,20 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false, r
             <span>{t('tests', 'teste')} <b data-mark="tests" data-value={frame.tests}>{frame.tests}</b></span>
             <span>{t('zones', 'zone')} <b data-mark="zones" data-value={frame.leaves.length}>{frame.leaves.length}</b></span>
           </div>
-          {!W.plane && (
-            <ul className="mlw4-zones">
-              {frame.leaves.map((l, k) => {
-                const m = classMark(W.classes, l.cls);
-                return (
-                  <li key={k}>
-                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><Shape shape={m.shape} cx={8} cy={8} r={5} fill={m.colour} /></svg>
-                    <span>{W.attrs[0]} {'∈'} <span data-mark="interval" data-value={intervalText(l.region.x)}>{intervalText(l.region.x)}</span></span>
-                    <b>{String(l.label)}</b>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <ul className="mlw4-zones">
+            {frame.leaves.map((l, k) => {
+              const m = classMark(W.classes, l.cls);
+              return (
+                <li key={k}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><Shape shape={m.shape} cx={8} cy={8} r={5} fill={m.colour} /></svg>
+                  {W.plane
+                    ? <span data-mark="zone-ineq" data-value={l.ineq}>{l.ineq}</span>
+                    : <span>{W.attrs[0]} {'∈'} <span data-mark="interval" data-value={intervalText(l.region.x)}>{intervalText(l.region.x)}</span></span>}
+                  <b>{'→'} {String(l.label)}</b>
+                </li>
+              );
+            })}
+          </ul>
         </>
       )}
     </div>

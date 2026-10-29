@@ -37,6 +37,7 @@ function PTree({ node, P, frame, edge, t }) {
 // What one frame draws. Exported on its own so a test can check the caption against the marks of every frame.
 export function Stage({ P, frame, choices = [], onEps = null }) {
   const { t } = useApp();
+  const word = (st) => (st === 'kept' ? t('stays', 'rămâne') : st === 'cut' ? t('cut', 'tăiat') : t('removed', 'eliminat'));
   return (
     <div className="mlw4">
       <div className="mlw4-stat">
@@ -59,11 +60,11 @@ export function Stage({ P, frame, choices = [], onEps = null }) {
             </thead>
             <tbody>
               {frame.rows.map((r) => (
-                <tr key={r.id} className={r.td !== r.bu ? 'trial' : ''}>
+                <tr key={r.id} className={(r.td === 'kept') !== (r.bu === 'kept') ? 'trial' : ''}>
                   <td data-mark="node" data-value={r.name}>{r.name}</td>
                   <td className="num" data-mark="ig" data-value={fmt(r.ig)}>{fmt(r.ig)}</td>
-                  <td>{r.td ? t('stays', 'rămâne') : t('cut', 'tăiat')}</td>
-                  <td>{r.bu ? t('stays', 'rămâne') : t('cut', 'tăiat')}</td>
+                  <td>{word(r.td)}</td>
+                  <td>{word(r.bu)}</td>
                 </tr>
               ))}
             </tbody>

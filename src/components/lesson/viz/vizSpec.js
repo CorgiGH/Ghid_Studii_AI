@@ -85,6 +85,11 @@ export function validateViz(block) {
   if (w === 'ml-cvloo') {
     mlCols(props.table, [props.target], false);
     mlCols(props.table, Array.isArray(props.continuous) ? props.continuous : [], true);
+    // tie is the leaf rule (class0, class1 or a label of the target); a tie between attributes goes to the first column
+    if (isTbl(props.table) && isStr(props.tie) && !/^class[01]$/.test(props.tie)) {
+      const ti = props.table.columns.map(colName).indexOf(props.target);
+      if (ti >= 0 && !props.table.rows.some(r => String(r[ti]) === props.tie)) errs.push(`viz (ml-cvloo): props.tie "${props.tie}" is the leaf rule: class0, class1 or a label of ${props.target}; a tie between attributes follows the column order of the table`);
+    }
   }
   if (w === 'ml-prune' && isPruneNode(props.tree)) {
     const tests = pruneTests(props.tree);

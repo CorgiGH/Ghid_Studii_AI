@@ -289,3 +289,37 @@ describe('css of the w4 widgets', () => {
     expect(css).toMatch(/\.mlw4-plot \{[^}]*max-width/);
   });
 });
+
+describe('second review', () => {
+  const temps = mlThreshold({ table: TEMPS, attr: 'Temperature', target: 'Play' });
+  const plane = mlThreshold({ table: PLANE, attr: 'x', target: 'label', plane: { x: 'x', y: 'y' } });
+  const e448 = mlThreshold({ table: P48, attr: 'X1', target: 'Y', plane: { x: 'X1', y: 'X2' } });
+  const zonesOf = (html) => [...html.matchAll(/data-mark="zone" data-value="([^"]*)"/g)].map((m) => m[1]);
+  it('the zones are coloured as the tree grows (outline L14 Vizual), not only at the end', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/Threshold.jsx');
+    const draw = (W, k, revealed = true) => zonesOf(renderToStaticMarkup(React.createElement(Stage, { W, frame: W.frames[k], revealed, onPick: () => {} })));
+    expect(draw(temps, 0)).toEqual([]);
+    expect(draw(temps, 1)).toEqual(['No']); // after the root: (-inf, 54] is a leaf
+    expect(draw(temps, 2)).toEqual(['No']);
+    expect(draw(temps, 3)).toEqual(['No', 'Yes', 'No']);
+    // a node that is still asking does not colour the zones its own split makes
+    expect(draw(e448, 2, false)).toEqual(['-']);
+    expect(draw(e448, 2, true)).toEqual(['+', '-']);
+    expect(draw(e448, 4)).toHaveLength(4);
+  });
+  it('the zones frame of the plane lists every zone as a system of inequalities (R3b, teacher list item 10)', async () => {
+    const z = e448.frames[e448.frames.length - 1];
+    expect(z.leaves.map((l) => `${l.ineq} → ${l.label}`)).toEqual([
+      '{X1 ≤ 2.5, X2 ≤ 3.5} → +', '{2.5 < X1 ≤ 4, X2 ≤ 3.5} → -', '{X1 > 4, X2 ≤ 3.5} → +', '{X2 > 3.5} → -',
+    ]);
+    const p = plane.frames[plane.frames.length - 1];
+    expect(p.leaves.map((l) => `${l.ineq} → ${l.label}`)).toEqual([
+      '{x ≤ 1.5, y ≤ 2} → -', '{x ≤ 1.5, 2 < y ≤ 4} → +', '{x ≤ 1.5, y > 4} → -', '{1.5 < x ≤ 3.5} → +',
+      '{3.5 < x ≤ 4.5, y ≤ 4} → -', '{3.5 < x ≤ 4.5, y > 4} → +', '{x > 4.5} → -',
+    ]);
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/Threshold.jsx');
+    const html = renderToStaticMarkup(React.createElement(Stage, { W: e448, frame: z }));
+    const unescape = (x) => x.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    expect([...html.matchAll(/data-mark="zone-ineq" data-value="([^"]*)"/g)].map((m) => unescape(m[1]))).toEqual(z.leaves.map((l) => l.ineq));
+  });
+});

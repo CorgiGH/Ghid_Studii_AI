@@ -32,18 +32,29 @@ function internalNodes(root, plane) {
   return out;
 }
 
+// Every leaf, left to right, with the test node it hangs from (parent; null for a tree that is one leaf).
 function leaves(root, plane) {
   const out = [];
-  const walk = (node, conds, region) => {
-    if (node.leaf) { out.push({ node, conds, region }); return; }
+  const walk = (node, conds, region, parent) => {
+    if (node.leaf) { out.push({ node, conds, region, parent }); return; }
     const { attr, th } = node.test;
     const axis = plane && attr === plane.y ? 'y' : 'x';
-    walk(node.kids[0], [...conds, { attr, op: '≤', th }], { ...region, [axis]: [region[axis][0], Math.min(region[axis][1], th)] });
-    walk(node.kids[1], [...conds, { attr, op: '>', th }], { ...region, [axis]: [Math.max(region[axis][0], th), region[axis][1]] });
+    walk(node.kids[0], [...conds, { attr, op: '≤', th }], { ...region, [axis]: [region[axis][0], Math.min(region[axis][1], th)] }, node);
+    walk(node.kids[1], [...conds, { attr, op: '>', th }], { ...region, [axis]: [Math.max(region[axis][0], th), region[axis][1]] }, node);
   };
-  walk(root, [], { x: [-Infinity, Infinity], y: [-Infinity, Infinity] });
+  walk(root, [], { x: [-Infinity, Infinity], y: [-Infinity, Infinity] }, null);
   return out;
 }
+
+// One side of a zone: "x ≤ 1.5", "2 < y ≤ 4", "x > 4.5", or null when the zone is open on both ends of that axis.
+const sideIneq = (name, [lo, hi]) => {
+  if (lo === -Infinity && hi === Infinity) return null;
+  if (lo === -Infinity) return `${name} ≤ ${fmt(hi)}`;
+  if (hi === Infinity) return `${name} > ${fmt(lo)}`;
+  return `${fmt(lo)} < ${name} ≤ ${fmt(hi)}`;
+};
+// A zone of the plane as the system of inequalities of its leaf: "{X1 ≤ 2.5, X2 ≤ 3.5}" (lesson 14, R3b).
+export const zoneIneq = (region, xName, yName) => `{${[sideIneq(xName, region.x), sideIneq(yName, region.y)].filter(Boolean).join(', ') || '*'}}`;
 
 // The first midpoint inside the longest run of one label (a threshold nobody should try), or null.
 function insideRun(table, attr, target) {
@@ -83,6 +94,15 @@ export function mlThreshold({ table, attr, target, plane }) {
   const nodes = internalNodes(g.tree, plane);
   const root = nodes[0];
   const frames = [];
+  // the leaves with the id of the test they hang from: a node's frame colours the zones of the leaves made so far
+  const idOf = (node) => (node ? nodes.find((nd) => nd.node === node).id : -1);
+  const lv = leaves(g.tree, plane).map((l) => ({
+    region: l.region, label: l.node.label, cls: classes.indexOf(l.node.label), n: l.node.ids.length, counts: l.node.counts, conds: l.conds,
+    parent: idOf(l.parent),
+    text: l.conds.length ? l.conds.map((c) => `${c.attr} ${c.op} ${fmt(c.th)}`).join(' & ') : '*',
+    ineq: plane ? zoneIneq(l.region, plane.x, plane.y) : null,
+  }));
+  const zonesUpTo = (id) => lv.filter((l) => l.parent <= id);
 
   const rootCands = root ? root.node.cands.map((c) => ({ attr: c.attr, th: c.th, key: candKey(c) })) : [];
   const rootList = rootCands.map((c) => (plane ? test(c) : fmt(c.th))).join(', ');
@@ -120,7 +140,7 @@ export function mlThreshold({ table, attr, target, plane }) {
       }
       : undefined;
     return {
-      kind: 'node', id: nd.id, n: n.ids.length, counts: n.counts, h, cands, best, region: nd.region, conds: nd.conds, showIG: true, lines, ask,
+      kind: 'node', id: nd.id, n: n.ids.length, counts: n.counts, h, cands, best, region: nd.region, conds: nd.conds, showIG: true, lines, ask, zones: zonesUpTo(nd.id),
       caption: bi(`${head.en} ${win.en}`, `${head.ro} ${win.ro}`),
     };
   };
@@ -139,7 +159,7 @@ export function mlThreshold({ table, attr, target, plane }) {
     const b = rootFrame.best;
     frames.push({
       kind: 'contrast', n: points.length, trial: { ...st, ig, left: cnt(below), right: cnt(above) }, best: b, showIG: true,
-      lines: [boundaryOf(root)], cands: rootFrame.cands, region: root.region,
+      lines: [boundaryOf(root)], cands: rootFrame.cands, region: root.region, zones: zonesUpTo(0),
       ask: {
         options: [{ key: 'lower', label: bi(`smaller than ${fmt(b.ig)}`, `mai mic decât ${fmt(b.ig)}`) }, { key: 'higher', label: bi(`larger than ${fmt(b.ig)}`, `mai mare decât ${fmt(b.ig)}`) }],
         caption: bi(`A threshold inside a run of one label: ${test(st)}, with ${ct(cnt(below))} and ${ct(cnt(above))}. Is its IG smaller or larger than ${fmt(b.ig)}, the IG of ${test(b)}?`,
@@ -154,14 +174,10 @@ export function mlThreshold({ table, attr, target, plane }) {
     frames.push(nodeFrame(nd, nodes.slice(0, nd.id + 1).map(boundaryOf)));
   });
 
-  const lv = leaves(g.tree, plane).map((l) => ({
-    region: l.region, label: l.node.label, cls: classes.indexOf(l.node.label), n: l.node.ids.length, counts: l.node.counts, conds: l.conds,
-    text: l.conds.length ? l.conds.map((c) => `${c.attr} ${c.op} ${fmt(c.th)}`).join(' & ') : '*',
-  }));
   const tests = countTests(g.tree);
   const zoneText = (l) => intervalText(l.region.x);
   frames.push({
-    kind: 'zones', n: points.length, tests, leaves: lv, showIG: true, lines: nodes.map(boundaryOf), region: nodes[0]?.region,
+    kind: 'zones', n: points.length, tests, leaves: lv, zones: lv, showIG: true, lines: nodes.map(boundaryOf), region: nodes[0]?.region,
     caption: plane
       ? bi(`The finished tree: ${tests} tests and ${lv.length} zones. Every boundary is parallel to an axis, and each zone takes the label of the points inside it.`,
         `Arborele terminat: ${tests} teste și ${lv.length} zone. Fiecare graniță e paralelă cu o axă, iar fiecare zonă ia eticheta punctelor din ea.`)

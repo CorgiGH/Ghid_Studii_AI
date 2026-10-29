@@ -223,3 +223,31 @@ describe('review fixes', () => {
     expect(html).toContain('data-scroll-to="out"');
   });
 });
+
+describe('second review', () => {
+  it('the class legend shows only where points are drawn (the axis of 4.10), not under a plain table', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/CvLoo.jsx');
+    const three = mlCvloo({ table: THREE, target: 'Y', tie: 'class0' });
+    expect(renderToStaticMarkup(React.createElement(Stage, { W: three, table: THREE, frame: three.frames[1] }))).not.toContain('mlw4-legend');
+    const p = mlCvloo({ table: P410, target: 'Y', tie: 'class0', continuous: ['X'] });
+    expect(renderToStaticMarkup(React.createElement(Stage, { W: p, table: P410, frame: p.frames[1] }))).toContain('mlw4-legend');
+  });
+  it('the left-out row stays readable: marked, not struck through (the learner reads its values to predict)', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/ml-w4.css', import.meta.url), 'utf8');
+    const rule = css.match(/\.mlw4-row-out td \{([^}]*)\}/)[1];
+    expect(rule).not.toContain('line-through');
+    expect(rule).toContain('font-weight: 700');
+  });
+});
+
+describe('second review: the tie prop', () => {
+  const v = (tie) => validateViz({ id: 'v1', widget: 'ml-cvloo', predict: true, props: { table: THREE, target: 'Y', tie } });
+  it('names the leaf tie rule (class0, class1 or a label of the target); an attribute name is rejected, the table order rules attribute ties', () => {
+    expect(v('class0')).toEqual([]);
+    expect(v('class1')).toEqual([]);
+    expect(v('1')).toEqual([]);
+    expect(v('A').join(' ')).toContain('props.tie');
+    expect(v('A').join(' ')).toContain('column order');
+  });
+});

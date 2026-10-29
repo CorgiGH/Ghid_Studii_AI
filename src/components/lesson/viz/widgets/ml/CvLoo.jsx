@@ -111,7 +111,7 @@ export function Stage({ W, table, frame, revealed = true, guess = null, onPick =
       </div>
       <Rows table={table} out={fold ? frame.out : null} t={t} />
       {W.single && <Axis W={W} table={table} frame={frame} t={t} />}
-      <Legend classes={W.classes} />
+      {W.single && <Legend classes={W.classes} />}
       {frame.kind !== 'end' && (
         <div className="mlw4-scroll">
           <ul className="mlw4-tree" aria-label={t('The tree', 'Arborele')}>

@@ -93,7 +93,7 @@ describe('ml-prune on the worked example (T21T2 10)', () => {
     expect(f.buTests).toBe(3);
     expect(f.same).toBe(false);
     expect(f.caption.en).toContain('Only bottom-up keeps A (B = 1), IG 0.02 and C (B = 1, A = 0), IG 0.9');
-    expect(f.rows.map((r) => [r.td, r.bu])).toEqual([[true, true], [false, false], [false, true], [false, true]]);
+    expect(f.rows.map((r) => [r.td === 'kept', r.bu === 'kept'])).toEqual([[true, true], [false, false], [false, true], [false, true]]);
   });
   it('a bigger or smaller epsilon changes the answer', () => {
     expect(epsChoices(T21)).toEqual([0.01, 0.02, 0.03, 0.3, 0.9]);
@@ -265,5 +265,34 @@ describe('review fixes', () => {
     const { readFileSync } = await import('node:fs');
     const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/ml-w4.css', import.meta.url), 'utf8');
     expect(css).toMatch(/\.mlw4-cmp td:first-child \{[^}]*white-space: normal/);
+  });
+});
+
+describe('second review', () => {
+  const P = mlPrune(T21);
+  const Q = mlPrune(E419);
+  it('the count of tests left agrees in number: 1 remains / 3 remain', () => {
+    expect(P.frames[1].caption.en).toContain('1 of 4 tests remains.');
+    expect(P.frames[1].caption.ro).toContain('Rămâne 1 din 4 teste.');
+    expect(P.frames[2].caption.en).toContain('3 of 4 tests remain.');
+    expect(P.frames[2].caption.ro).toContain('Rămân 3 din 4 teste.');
+  });
+  it('a cut without data leaves an empty leaf, in the outline words (frunze goale)', () => {
+    expect(P.frames[1].caption.ro).toContain('Un nod tăiat devine o frunză goală (?): enunțul nu dă date.');
+    expect(P.frames[1].caption.en).toContain('A cut node becomes an empty leaf (?): the exercise gives no data.');
+    expect(Q.frames[1].caption.ro).not.toContain('goală');
+  });
+  it('the Romanian list of cuts reads as a sentence for one or several nodes', () => {
+    expect(P.frames[1].caption.ro).toContain('Se taie: A (B = 0), IG 0.01 și A (B = 1), IG 0.02, cu C sub el.');
+    expect(P.frames[2].caption.ro).toContain('Se taie: A (B = 0), IG 0.01.');
+    expect(P.frames[2].caption.ro).toContain('Păstrat deși IG < ε: A (B = 1), IG 0.02');
+  });
+  it('the comparison says removed for a test under a cut, as the tree does', async () => {
+    const f = P.frames[3];
+    expect(f.rows.map((r) => [r.td, r.bu])).toEqual([['kept', 'kept'], ['cut', 'cut'], ['cut', 'kept'], ['gone', 'kept']]);
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/Prune.jsx');
+    const html = renderToStaticMarkup(React.createElement(Stage, { P, frame: f }));
+    expect(html).toContain('<td>eliminat</td>');
+    expect((html.match(/<td>tăiat<\/td>/g) || []).length).toBe(3);
   });
 });
