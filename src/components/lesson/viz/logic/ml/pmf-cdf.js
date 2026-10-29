@@ -3,7 +3,7 @@
 // here (exact Fractions through mathKit), never from the props' text.
 import Fraction from '../../../../../ml/calc/fraction.js';
 import { E, Var } from '../../../../../ml/calc/mathKit.js';
-import { both, disp, dispNum, fmtFrac, pickMode, toFrac } from './prob-format.js';
+import { both, disp, dispNum, fmtFrac, joinList, pickMode, toFrac } from './prob-format.js';
 
 // One distribution: values sorted ascending with their probabilities, and everything derived from them.
 export function distribution(values, probs, name = 'X') {
@@ -40,7 +40,7 @@ function cdfIndex(D, cdfAt) {
   return at;
 }
 
-const list = (fs, lang, mode) => fs.map((f) => fmtFrac(f, lang, mode)).join(', ');
+const list = (fs, lang, mode) => joinList(fs.map((f) => fmtFrac(f, lang, mode)), lang);
 const rad = (f, l, mode) => (f.isInteger() ? fmtFrac(f, l, mode) : `(${fmtFrac(f, l, mode)})`);
 const wrapNeg = (f, lang, mode) => (f.sign() < 0 ? `(${fmtFrac(f, lang, mode)})` : fmtFrac(f, lang, mode));
 
@@ -70,23 +70,36 @@ export function pmfCdf(props) {
       : `E[${name}] = ${meanTerms(main, l)} = ${fmtFrac(main.mean, l, mode)}. The triangle marks the balance point of the bars.`)),
   });
 
-  const varTerms = (D, l) => D.xs.map((x, i) => `${fmtFrac(D.ps[i], l, mode)}·${fmtFrac(D.sq[i], l, mode)}`).join(' + ');
+  // ask: the deviations and their squares are drawn, the variance is not
   frames.push({
-    kind: 'variance', view: 'main', show: { mean: true, dev: true, sd: true },
+    kind: 'dev', view: 'main', show: { mean: true, dev: true },
     caption: both((l) => (l === 'ro'
-      ? `Abaterile față de medie: ${list(main.dev, l, mode)}; pătratele lor: ${list(main.sq, l, mode)}. Var(${name}) = ${varTerms(main, l)} = ${fmtFrac(main.variance, l, mode)}. Abaterea standard σ = √${rad(main.variance, l, mode)} ≈ ${sdText(main)[l]}, lățimea parantezei din jurul mediei.`
-      : `Deviations from the mean: ${list(main.dev, l, mode)}; their squares: ${list(main.sq, l, mode)}. Var(${name}) = ${varTerms(main, l)} = ${fmtFrac(main.variance, l, mode)}. Standard deviation σ = √${rad(main.variance, l, mode)} ≈ ${sdText(main)[l]}, the width of the bracket around the mean.`)),
+      ? `Abaterile față de medie: ${list(main.dev, l, mode)}; pătratele lor: ${list(main.sq, l, mode)}. Cât este Var(${name}), media pătratelor ponderată cu probabilitățile?`
+      : `Deviations from the mean: ${list(main.dev, l, mode)}; their squares: ${list(main.sq, l, mode)}. What is Var(${name}), the mean of the squares weighted by the probabilities?`)),
+  });
+
+  // (x − μ)²·p(x), in the order of the mean's x·p(x): "1/6·4" would read as 1/(6·4)
+  const varTerms = (D, l) => D.xs.map((x, i) => `${fmtFrac(D.sq[i], l, mode)}·${fmtFrac(D.ps[i], l, mode)}`).join(' + ');
+  frames.push({
+    kind: 'variance', view: 'main', show: { mean: true, dev: true, variance: true, sd: true },
+    caption: both((l) => (l === 'ro'
+      ? `Var(${name}) = ${varTerms(main, l)} = ${fmtFrac(main.variance, l, mode)}. Abaterea standard σ = √${rad(main.variance, l, mode)} ≈ ${sdText(main)[l]}: paranteza se întinde la σ de o parte și de alta a mediei.`
+      : `Var(${name}) = ${varTerms(main, l)} = ${fmtFrac(main.variance, l, mode)}. Standard deviation σ = √${rad(main.variance, l, mode)} ≈ ${sdText(main)[l]}: the bracket reaches σ on each side of the mean.`)),
   });
 
   if (second) {
     const r = second.name;
     frames.push({
+      kind: 'second-ask', view: 'second', show: {},
+      caption: both((l) => (l === 'ro'
+        ? `${r} ia valorile ${list(second.xs, l, mode)} cu probabilitățile ${list(second.ps, l, mode)}. Unde stă media lui ${r}? Poate media să fie o valoare pe care ${r} nu o ia?`
+        : `${r} takes the values ${list(second.xs, l, mode)} with probabilities ${list(second.ps, l, mode)}. Where is the mean of ${r}? Can the mean be a value ${r} never takes?`)),
+    });
+    frames.push({
       kind: 'second', view: 'second', show: { mean: true },
       caption: both((l) => {
         const m = fmtFrac(second.mean, l, mode);
-        const head = l === 'ro'
-          ? `${r} ia valorile ${list(second.xs, l, mode)} cu probabilitățile ${list(second.ps, l, mode)}. E[${r}] = ${meanTerms(second, l)} = ${m}. `
-          : `${r} takes the values ${list(second.xs, l, mode)} with probabilities ${list(second.ps, l, mode)}. E[${r}] = ${meanTerms(second, l)} = ${m}. `;
+        const head = `E[${r}] = ${meanTerms(second, l)} = ${m}. `;
         if (second.meanIsValue) {
           return head + (l === 'ro'
             ? `Aici ${r} chiar ia valoarea ${m}, dar nu e obligatoriu ca media să fie o valoare posibilă.`
@@ -101,11 +114,19 @@ export function pmfCdf(props) {
 
   const fAt = main.cdf[at];
   const cumTerms = (l) => main.ps.slice(0, at + 1).map((p) => fmtFrac(p, l, mode)).join(' + ');
+  const xAt = (l) => fmtFrac(main.xs[at], l, mode);
+  // ask: the staircase is drawn without its values
+  frames.push({
+    kind: 'cdf-ask', view: 'main', cdf: true, cdfLabels: false, show: { cdf: true },
+    caption: both((l) => (l === 'ro'
+      ? `F(x) = P(${name} ≤ x) crește în trepte, câte una la fiecare valoare. Cât este F(${xAt(l)})?`
+      : `F(x) = P(${name} ≤ x) climbs in steps, one at each value. What is F(${xAt(l)})?`)),
+  });
   frames.push({
     kind: 'cdf', view: 'main', cdf: true, cdfAt: at, show: { cdf: true },
     caption: both((l) => (l === 'ro'
-      ? `F(x) = P(${name} ≤ x) crește în trepte, câte una la fiecare valoare. F(${fmtFrac(main.xs[at], l, mode)}) = ${at > 0 ? `${cumTerms(l)} = ` : ''}${fmtFrac(fAt, l, mode)}.`
-      : `F(x) = P(${name} ≤ x) climbs in steps, one at each value. F(${fmtFrac(main.xs[at], l, mode)}) = ${at > 0 ? `${cumTerms(l)} = ` : ''}${fmtFrac(fAt, l, mode)}.`)),
+      ? `F(${xAt(l)}) = P(${name} ≤ ${xAt(l)}) = ${at > 0 ? `${cumTerms(l)} = ` : ''}${fmtFrac(fAt, l, mode)}: suma probabilităților până la ${xAt(l)} inclusiv.`
+      : `F(${xAt(l)}) = P(${name} ≤ ${xAt(l)}) = ${at > 0 ? `${cumTerms(l)} = ` : ''}${fmtFrac(fAt, l, mode)}: the sum of the probabilities up to ${xAt(l)}, included.`)),
   });
 
   return { name, mode, main, second, cdfAt: at, frames, count: frames.length };

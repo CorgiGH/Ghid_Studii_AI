@@ -79,6 +79,68 @@ describe('joint-table logic, config B (Cn-s2:6, L5.s02-s05)', () => {
   });
 });
 
+// Outline L5/L6 visual specs: the learner predicts each marginal, the conditional, the verdict per cell, E[XY], Var(X+Y);
+// in L6 the first cell, the next one, the marginal dependence, P(Y=1|X=1), each slice and its verdict. Each frame's caption
+// ends with the question the next frame answers, and that question gives away no value.
+describe('joint-table: a question before every reveal', () => {
+  const noValue = (q) => expect(q, q).not.toMatch(/\d[,.]\d|\d\/\d/);
+  it('config B: every frame but the last ends with the next question, and the question holds no value', () => {
+    const M = jointTable(B);
+    const F = M.frames;
+    F.slice(0, -1).forEach((f, i) => {
+      expect(f.ask, `frame ${i}`).toBeTruthy();
+      for (const l of ['ro', 'en']) { expect(f.caption[l].endsWith(f.ask[l]), `frame ${i} ${l}`).toBe(true); noValue(f.ask[l]); expect(f.ask[l]).toMatch(/\?$/); }
+    });
+    expect(F.at(-1).ask).toBeFalsy();
+    expect(F[0].caption.ro).toBe('Distribuția comună a lui (X, Y). Marginalele nu sunt încă scrise. Cât este P(X=0)?');
+    expect(F[1].ask.ro).toBe('Cât este P(X=1)?');
+    expect(F[2].ask.ro).toBe('Cât este P(Y=0)?');
+    expect(F[3].ask.ro).toBe('Cât este P(Y=1)?');
+    expect(F[4].ask.ro).toBe('Cât este P(X=0 | Y=1)?');
+    expect(F[5].ask.ro).toBe('Sunt X și Y independente? Verifică celulă cu celulă: în celula (X=0, Y=0), este P(X=0)·P(Y=0) egal cu valoarea din tabel?');
+    expect(F[6].ask.ro).toBe('Celula (X=1, Y=0): este P(X=1)·P(Y=0) egal cu valoarea din tabel?');
+    expect(F[9].ask.ro).toBe('Cât este E[XY]? Ce semn are Cov(X, Y) = E[XY] − E[X]·E[Y]?');
+    expect(F[10].ask.ro).toBe('Grupează celulele după valoarea lui X+Y: cât este Var(X+Y)?');
+    expect(F[5].caption.ro).toContain('Rândul Y=1, împărțit la 0,7, are suma 1');
+  });
+  it('config B: the frame that asks for a marginal does not draw it yet', () => {
+    LANG = 'ro';
+    const M = jointTable(B);
+    M.frames.slice(0, 4).forEach((f, i) => {
+      const ms = marks(renderToStaticMarkup(React.createElement(JointStage, { model: M, frame: f })));
+      expect(ms.filter((m) => m.kind === 'marg'), `frame ${i}`).toHaveLength(i);
+    });
+  });
+  it('config C: the same, with the L6 questions', () => {
+    const M = jointTable(C);
+    const F = M.frames;
+    F.slice(0, -1).forEach((f, i) => {
+      expect(f.ask, `frame ${i}`).toBeTruthy();
+      for (const l of ['ro', 'en']) { expect(f.caption[l].endsWith(f.ask[l])).toBe(true); noValue(f.ask[l]); expect(f.ask[l]).toMatch(/\?$/); }
+    });
+    expect(F[0].caption.ro).toBe('Tabelul comun al lui (X, Y, Z) are 8 celule, încă goale. Cât este P(X=0, Y=0, Z=0)?');
+    expect(F[1].ask.ro).toBe('Cât este P(X=0, Y=1, Z=0)?');
+    expect(F[2].ask.ro).toBe('Ascunde Z: adună coloanele. Cât este P(X=0, Y=0)? Sunt X și Y independente?');
+    expect(F[3].ask.ro).toBe('Cât este P(Y=1 | X=1)? Față de P(Y=1), crește, scade sau rămâne la fel?');
+    expect(F[4].ask.ro).toBe('Fixează Z=0: împarte coloana Z=0 la P(Z=0). Care este P(X, Y | Z=0)?');
+    expect(F[5].ask.ro).toBe('Compară fiecare celulă cu produsul marginalelor feliei: sunt X și Y independente în felia Z=0?');
+    expect(F[6].ask.ro).toBe('Fixează Z=1: împarte coloana Z=1 la P(Z=1). Care este P(X, Y | Z=1)?');
+    expect(F[7].ask.ro).toBe('Compară fiecare celulă cu produsul marginalelor feliei: sunt X și Y independente în felia Z=1?');
+  });
+});
+
+// Romanian writes the decimal comma, so a list of such numbers joined with ", " is ambiguous ("0,1, 0,4"): it uses "; ".
+const AMBIGUOUS = /\d,\d+, (?=[−\d(P])/;
+describe('joint-table: Romanian lists of decimals are unambiguous', () => {
+  it('no caption joins decimal-comma numbers with ", " (configs A, B, C)', () => {
+    const caps = [B, C].flatMap((p) => jointTable(p).frames.map((f) => f.caption.ro));
+    const J = jointTable({ ...A, format: 'decimal' }).J;
+    caps.push(...[[], [[0, 0]], [[1, 0]]].map((p) => exploreView(J, p).caption.ro));
+    for (const c of caps) expect(c, c).not.toMatch(AMBIGUOUS);
+    expect(exploreView(J, []).caption.ro).toContain('P(X) = (0,5; 0,25; 0,25)');
+  });
+});
+
 describe('joint-table logic, explorer (L5.s01)', () => {
   const M = jointTable(A);
   it('marginals (1/2, 1/4, 1/4) and (1/2, 1/2); cell (0,0) matches, cell (1,0) does not', () => {
@@ -134,6 +196,25 @@ describe('joint-table logic, config C (L6.s02-s04)', () => {
     expect(M.ciAll).toBe(true);
     expect(M.depTotal).toBe(true);
   });
+  // L6.s02 asks for P(X=1, Y=1, Z=1); the widget asks for the cell the lesson names (props.first), the first one otherwise.
+  it('props.first picks the cell the first question asks for, and the next example follows it', () => {
+    const F = jointTable({ ...C, first: [1, 1, 1] }).frames;
+    expect(F[0].caption.ro).toBe('Tabelul comun al lui (X, Y, Z) are 8 celule, încă goale. Cât este P(X=1, Y=1, Z=1)?');
+    expect(F[1].caption.ro).toBe('P(X=1, Y=1, Z=1) = P(Z=1)·P(X=1 | Z=1)·P(Y=1 | Z=1) = 0,5·0,8·0,8 = 0,32. Cât este P(X=1, Y=0, Z=1)?');
+    expect(F[1].caption.en).toContain('P(X=1, Y=1, Z=1) = P(Z=1)·P(X=1 | Z=1)·P(Y=1 | Z=1) = 0.5·0.8·0.8 = 0.32.');
+    expect(F[2].caption.ro).toContain('de exemplu P(X=1, Y=0, Z=1) = 0,5·0,8·0,2 = 0,08.');
+    LANG = 'ro';
+    const ms = marks(renderToStaticMarkup(React.createElement(JointStage, { model: jointTable({ ...C, first: [1, 1, 1] }), frame: F[1] })));
+    expect(ms.filter((m) => m.kind === 'cell' && m.value).map((m) => [m.x, m.y, m.z, m.value])).toEqual([['1', '1', '1', '0,32']]);
+    // without the prop: the first cell, as before
+    expect(jointTable(C).frames[0].caption.ro).toContain('Cât este P(X=0, Y=0, Z=0)?');
+  });
+  it('a slice column is headed by what it holds, P(X, Y | Z=z), not by Z=z as in the joint table', () => {
+    const M = jointTable(C);
+    const heads = M.frames.filter((f) => f.kind === 'slice' || f.kind === 'slicecheck').map((f) => f.grid.colHeads[0].label.ro);
+    expect(heads).toEqual(['P(X, Y | Z=0)', 'P(X, Y | Z=0)', 'P(X, Y | Z=1)', 'P(X, Y | Z=1)']);
+    expect(M.frames[2].grid.colHeads.map((h) => h.label.ro)).toEqual(['Z=0', 'Z=1']);
+  });
   it('a conditionally dependent table fails its slice (0.16 shape: independent overall, not given Z)', () => {
     // X, Y independent overall (uniform) but X = Y inside each slice of Z = X xor Y... built so slice Z=0 fails at (0,0)
     const rows = [[0, 0, 0, '1/8'], [1, 1, 0, '1/8'], [0, 1, 1, '1/8'], [1, 0, 1, '1/8'], [0, 0, 1, 0], [1, 1, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]];
@@ -158,6 +239,10 @@ describe('joint-table validateViz', () => {
     expect(validateViz(block({ ...B, z: 'Z' })).join(' ')).toMatch(/columns/);
     expect(validateViz(block({ ...B, table: { columns: ['X', 'Y', 'P'], rows: [[0, 0, 0.5], [1, 1, 0.4]] } })).join(' ')).toMatch(/sum to 1/);
     expect(validateViz(block({ ...C, explore: true })).join(' ')).toMatch(/explore/);
+    expect(validateViz(block({ ...C, first: [1, 1] })).join(' ')).toMatch(/first/);
+    expect(validateViz(block({ ...C, first: [1, 2, 1] })).join(' ')).toMatch(/first/);
+    expect(validateViz(block({ ...B, first: [1, 1, 1] })).join(' ')).toMatch(/first/);
+    expect(validateViz(block({ ...C, first: [1, 1, 1] }))).toEqual([]);
   });
 });
 

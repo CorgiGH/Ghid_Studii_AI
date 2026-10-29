@@ -4,7 +4,7 @@
 // widget draws or writes is built here, per frame, from the table's P column.
 import Fraction from '../../../../../ml/calc/fraction.js';
 import { E } from '../../../../../ml/calc/mathKit.js';
-import { both, disp, fmtFrac, pickMode, toFrac } from './prob-format.js';
+import { both, disp, fmtFrac, joinList, pickMode, toFrac } from './prob-format.js';
 
 const colName = (c) => (typeof c === 'string' ? c : c.en);
 const cmp = (a, b) => (typeof a === 'number' && typeof b === 'number' ? a - b : String(a) < String(b) ? -1 : String(a) > String(b) ? 1 : 0);
@@ -48,6 +48,19 @@ const f1 = (J, f, l) => fmtFrac(f, l, J.mode);
 const wrapNeg = (J, f, l) => (f.sign() < 0 ? `(${f1(J, f, l)})` : f1(J, f, l));
 const verdictWords = (ok, l) => (l === 'ro' ? (ok ? 'verifică' : 'nu verifică') : (ok ? 'holds' : 'does not hold'));
 const crit = (l, ro, en) => (l === 'ro' ? ro : en);
+
+// Each reveal frame carries `question`, the question its value answers; the frame before it ends its caption with that
+// question (as `ask`), so the learner meets the question first and the next press shows the answer.
+function chainQuestions(frames) {
+  frames.forEach((f, i) => {
+    const q = frames[i + 1]?.question;
+    if (!q) return;
+    f.ask = q;
+    f.caption = both((l) => `${f.caption[l]} ${q[l]}`);
+  });
+  return frames;
+}
+const Q = (ro, en) => ({ ro, en });
 
 // ---------- grid ----------
 // A grid is what the component draws: column heads, rows of cells (each cell has a value text or "?", a class and an optional
@@ -110,8 +123,8 @@ export function jointSteps(J) {
   frames.push({
     kind: 'setup', grid: gridXY(J, () => ({}), copy()), info: [],
     caption: both((l) => crit(l,
-      `Distribuția comună a lui (${names.x}, ${names.y}). Marginalele nu sunt încă scrise. Cât este P(${names.x}=${xs[0]})?`,
-      `The joint distribution of (${names.x}, ${names.y}). The marginals are not written yet. What is P(${names.x}=${xs[0]})?`)),
+      `Distribuția comună a lui (${names.x}, ${names.y}). Marginalele nu sunt încă scrise.`,
+      `The joint distribution of (${names.x}, ${names.y}). The marginals are not written yet.`)),
   });
 
   const margFrame = (axis, idx) => {
@@ -123,6 +136,7 @@ export function jointSteps(J) {
     const isRow = (axis === 'x') === rowsX;
     frames.push({
       kind: 'marginal', axis, idx, info: [],
+      question: Q(`Cât este P(${n}=${v})?`, `What is P(${n}=${v})?`),
       grid: gridXY(J, (i, j) => ({ cls: (axis === 'x' ? i === idx : j === idx) ? 'hl' : '' }), { ...copy(), fresh: { axis, idx } }),
       caption: both((l) => crit(l,
         `P(${n}=${v}) = ${vals.map((f) => f1(J, f, l)).join(' + ')} = ${f1(J, total, l)}: suma ${isRow ? 'rândului' : 'coloanei'} ${n}=${v}, scrisă în marginea tabelului.`,
@@ -136,12 +150,15 @@ export function jointSteps(J) {
   let js = ys.length - 1;
   while (js > 0 && J.py[js].sign() === 0) js -= 1;
   const cond = xs.map((_, i) => J.pxy[i][js].div(J.py[js]));
+  const condLine = (l) => (rowsX ? crit(l, 'Coloana', 'The column') : crit(l, 'Rândul', 'The row'));
+  const condPart = (l) => (rowsX ? crit(l, 'împărțită', 'divided') : crit(l, 'împărțit', 'divided'));
   frames.push({
     kind: 'conditional', info: [], yStar: js,
+    question: Q(`Cât este P(${names.x}=${xs[0]} | ${names.y}=${ys[js]})?`, `What is P(${names.x}=${xs[0]} | ${names.y}=${ys[js]})?`),
     grid: gridXY(J, (i, j) => (j === js ? { v: cond[i], cls: 'cond', cap: i === 0 } : { cls: 'dim' }), copy()),
     caption: both((l) => crit(l,
-      `P(${names.x}=${xs[0]} | ${names.y}=${ys[js]}) = ${f1(J, J.pxy[0][js], l)} / ${f1(J, J.py[js], l)} = ${f1(J, cond[0], l)}. Linia ${names.y}=${ys[js]}, împărțită la ${f1(J, J.py[js], l)}, are suma 1: ${cond.map((f) => f1(J, f, l)).join(' + ')}.`,
-      `P(${names.x}=${xs[0]} | ${names.y}=${ys[js]}) = ${f1(J, J.pxy[0][js], l)} / ${f1(J, J.py[js], l)} = ${f1(J, cond[0], l)}. The ${names.y}=${ys[js]} line, divided by ${f1(J, J.py[js], l)}, sums to 1: ${cond.map((f) => f1(J, f, l)).join(' + ')}.`)),
+      `P(${names.x}=${xs[0]} | ${names.y}=${ys[js]}) = ${f1(J, J.pxy[0][js], l)} / ${f1(J, J.py[js], l)} = ${f1(J, cond[0], l)}. ${condLine(l)} ${names.y}=${ys[js]}, ${condPart(l)} la ${f1(J, J.py[js], l)}, are suma 1: ${cond.map((f) => f1(J, f, l)).join(' + ')}.`,
+      `P(${names.x}=${xs[0]} | ${names.y}=${ys[js]}) = ${f1(J, J.pxy[0][js], l)} / ${f1(J, J.py[js], l)} = ${f1(J, cond[0], l)}. ${condLine(l)} ${names.y}=${ys[js]}, ${condPart(l)} by ${f1(J, J.py[js], l)}, sums to 1: ${cond.map((f) => f1(J, f, l)).join(' + ')}.`)),
   });
 
   // independence, one cell per frame
@@ -156,8 +173,12 @@ export function jointSteps(J) {
       return {};
     };
     const last = n === order.length - 1;
+    const cq = (l) => crit(l,
+      `${n === 0 ? `Sunt ${names.x} și ${names.y} independente? Verifică celulă cu celulă: în celula` : 'Celula'} (${cellName(J, ci, cj)})${n === 0 ? ',' : ':'} este P(${names.x}=${xs[ci]})·P(${names.y}=${ys[cj]}) egal cu valoarea din tabel?`,
+      `${n === 0 ? `Are ${names.x} and ${names.y} independent? Check cell by cell: in the cell` : 'The cell'} (${cellName(J, ci, cj)})${n === 0 ? ',' : ':'} does P(${names.x}=${xs[ci]})·P(${names.y}=${ys[cj]}) equal the value in the table?`);
     frames.push({
       kind: 'check', cell: [ci, cj], info: [],
+      question: both(cq),
       grid: gridXY(J, spec, copy()),
       caption: both((l) => {
         const ok = holds(J, ci, cj);
@@ -185,6 +206,8 @@ export function jointSteps(J) {
     const nzSet = new Set(nz.map(([i, j]) => `${i},${j}`));
     frames.push({
       kind: 'expect', ex, ey, exy, cov,
+      question: Q(`Cât este E[${names.x}${names.y}]? Ce semn are Cov(${names.x}, ${names.y}) = E[${names.x}${names.y}] − E[${names.x}]·E[${names.y}]?`,
+        `What is E[${names.x}${names.y}]? What sign does Cov(${names.x}, ${names.y}) = E[${names.x}${names.y}] − E[${names.x}]·E[${names.y}] have?`),
       grid: gridXY(J, (i, j) => (nzSet.has(`${i},${j}`) ? { cls: 'on' } : { cls: 'dim' }), copy()),
       info: [
         { kind: 'exy', label: lab(`E[${names.x}${names.y}]`), value: disp(exy, J.mode) },
@@ -218,6 +241,8 @@ export function jointSteps(J) {
     const vformula = vx.add(vy).add(cov.mul(2));
     frames.push({
       kind: 'sum', groups: gl, es, es2, vs, vx, vy, vformula,
+      question: Q(`Grupează celulele după valoarea lui ${names.x}+${names.y}: cât este Var(${names.x}+${names.y})?`,
+        `Group the cells by the value of ${names.x}+${names.y}: what is Var(${names.x}+${names.y})?`),
       grid: gridXY(J, (i, j) => ({ cls: `g${gIndex(i, j) % 4}` }), copy()),
       info: [
         ...gl.map((g) => ({ kind: 'group', label: lab(`${names.x}+${names.y}=${f1(J, g.s, 'en')}`), value: disp(g.p, J.mode) })),
@@ -225,14 +250,14 @@ export function jointSteps(J) {
       ],
       caption: both((l) => {
         const gs = gl.map((g) => `${crit(l, 'valoarea', 'the value')} ${f1(J, g.s, l)} ${crit(l, 'cu', 'with')} ${g.cells.length > 1 ? `${g.cells.map(([i, j]) => f1(J, J.pxy[i][j], l)).join(' + ')} = ` : ''}${f1(J, g.p, l)}`);
-        const sumList = gs.length > 1 ? `${gs.slice(0, -1).join(', ')} ${crit(l, 'și', 'and')} ${gs.at(-1)}` : gs[0];
+        const sumList = gs.length > 1 ? `${joinList(gs.slice(0, -1), l)} ${crit(l, 'și', 'and')} ${gs.at(-1)}` : gs[0];
         return crit(l,
           `Celulele cu aceeași sumă se adună: ${names.x}+${names.y} ia ${sumList}. E[${names.x}+${names.y}] = ${f1(J, es, l)}; E[(${names.x}+${names.y})²] − E[${names.x}+${names.y}]² = ${f1(J, es2, l)} − ${f1(J, es.mul(es), l)} = ${f1(J, vs, l)} = Var(${names.x}) + Var(${names.y}) + 2·Cov = ${f1(J, vx, l)} + ${f1(J, vy, l)} + 2·(${f1(J, cov, l)}) = ${f1(J, vformula, l)}.`,
           `Cells with the same sum merge: ${names.x}+${names.y} takes ${sumList}. E[${names.x}+${names.y}] = ${f1(J, es, l)}; E[(${names.x}+${names.y})²] − E[${names.x}+${names.y}]² = ${f1(J, es2, l)} − ${f1(J, es.mul(es), l)} = ${f1(J, vs, l)} = Var(${names.x}) + Var(${names.y}) + 2·Cov = ${f1(J, vx, l)} + ${f1(J, vy, l)} + 2·(${f1(J, cov, l)}) = ${f1(J, vformula, l)}.`);
       }),
     });
   }
-  return { frames, independent, failing };
+  return { frames: chainQuestions(frames), independent, failing };
 }
 
 // ---------- explorer (L5 opening question): all marginals shown, the learner touches cells ----------
@@ -248,8 +273,8 @@ export function exploreView(J, picked = []) {
   };
   const grid = gridXY(J, spec, all);
   const { names, xs, ys } = J;
-  const lstX = (l) => `(${J.px.map((f) => f1(J, f, l)).join(', ')})`;
-  const lstY = (l) => `(${J.py.map((f) => f1(J, f, l)).join(', ')})`;
+  const lstX = (l) => `(${joinList(J.px.map((f) => f1(J, f, l)), l)})`;
+  const lstY = (l) => `(${joinList(J.py.map((f) => f1(J, f, l)), l)})`;
   const failed = picked.filter(([i, j]) => !holds(J, i, j)).length;
   const caption = both((l) => {
     if (!last) {
@@ -290,7 +315,7 @@ function gridXYZ(J, { cols, cell, headCls }) {
   };
 }
 
-export function jointZSteps(J, conditionOn) {
+export function jointZSteps(J, conditionOn, first) {
   const { xs, ys, zs, names } = J;
   const P = J.P;
   const zAll = zs.map((z, k) => ({ k, z, label: lab(`${names.z}=${z}`) }));
@@ -311,36 +336,48 @@ export function jointZSteps(J, conditionOn) {
     kind: 'setup', info: [],
     grid: gridXYZ(J, { cols: full, cell: () => ({ v: null }) }),
     caption: both((l) => crit(l,
-      `Tabelul comun al lui (${names.x}, ${names.y}, ${names.z}) are ${cellsN} celule, încă goale. Prima celulă: P(${names.x}=${xs[0]}, ${names.y}=${ys[0]}, ${names.z}=${zs[0]}).`,
-      `The joint table of (${names.x}, ${names.y}, ${names.z}) has ${cellsN} cells, still empty. The first cell: P(${names.x}=${xs[0]}, ${names.y}=${ys[0]}, ${names.z}=${zs[0]}).`)),
+      `Tabelul comun al lui (${names.x}, ${names.y}, ${names.z}) are ${cellsN} celule, încă goale.`,
+      `The joint table of (${names.x}, ${names.y}, ${names.z}) has ${cellsN} cells, still empty.`)),
   });
 
-  const k0 = zs.findIndex((_, k) => nz(k));
+  // the cell the first question asks for: props.first = [x, y, z] (L6.s02 asks for P(X=1, Y=1, Z=1)), else the first cell
+  let fi = 0, fj = 0, fk = zs.findIndex((_, k) => nz(k));
+  if (first !== undefined) {
+    const at = Array.isArray(first) && first.length === 3 ? [xs.indexOf(first[0]), ys.indexOf(first[1]), zs.indexOf(first[2])] : [-1];
+    if (at.some((v) => v < 0) || !nz(at[2])) throw new RangeError('joint: props.first must be [x, y, z], values of the table with P(z) > 0');
+    [fi, fj, fk] = at;
+  }
   const dtext = (i, j, k, l) => `${f1(J, J.pz[k], l)}·${f1(J, cx(i, k), l)}·${f1(J, cy(j, k), l)} = ${f1(J, decomp(i, j, k), l)}`;
+  const cellP = (i, j, k) => `P(${names.x}=${xs[i]}, ${names.y}=${ys[j]}, ${names.z}=${zs[k]})`;
   frames.push({
     kind: 'first', info: [],
-    grid: gridXYZ(J, { cols: full, cell: (i, j, c) => (i === 0 && j === 0 && c.k === k0 ? { cls: 'cur', cap: true } : { v: null }) }),
+    question: Q(`Cât este ${cellP(fi, fj, fk)}?`, `What is ${cellP(fi, fj, fk)}?`),
+    grid: gridXYZ(J, { cols: full, cell: (i, j, c) => (i === fi && j === fj && c.k === fk ? { cls: 'cur', cap: true } : { v: null }) }),
     caption: both((l) => {
-      const head = `P(${names.x}=${xs[0]}, ${names.y}=${ys[0]}, ${names.z}=${zs[k0]})`;
-      if (decompOk(0, 0, k0)) {
-        return crit(l,
-          `${head} = P(${names.z}=${zs[k0]})·P(${names.x}=${xs[0]} | ${names.z}=${zs[k0]})·P(${names.y}=${ys[0]} | ${names.z}=${zs[k0]}) = ${dtext(0, 0, k0, l)}.`,
-          `${head} = P(${names.z}=${zs[k0]})·P(${names.x}=${xs[0]} | ${names.z}=${zs[k0]})·P(${names.y}=${ys[0]} | ${names.z}=${zs[k0]}) = ${dtext(0, 0, k0, l)}.`);
+      const head = cellP(fi, fj, fk);
+      if (decompOk(fi, fj, fk)) {
+        const factors = `P(${names.z}=${zs[fk]})·P(${names.x}=${xs[fi]} | ${names.z}=${zs[fk]})·P(${names.y}=${ys[fj]} | ${names.z}=${zs[fk]})`;
+        return `${head} = ${factors} = ${dtext(fi, fj, fk, l)}.`;
       }
       return crit(l,
-        `${head} = ${f1(J, P[0][0][k0], l)}. Produsul P(${names.z})·P(${names.x} | ${names.z})·P(${names.y} | ${names.z}) ar da ${f1(J, decomp(0, 0, k0), l)}: celula aceasta nu urmează tiparul.`,
-        `${head} = ${f1(J, P[0][0][k0], l)}. The product P(${names.z})·P(${names.x} | ${names.z})·P(${names.y} | ${names.z}) would give ${f1(J, decomp(0, 0, k0), l)}: this cell does not follow the pattern.`);
+        `${head} = ${f1(J, P[fi][fj][fk], l)}. Produsul P(${names.z})·P(${names.x} | ${names.z})·P(${names.y} | ${names.z}) ar da ${f1(J, decomp(fi, fj, fk), l)}: celula aceasta nu urmează tiparul.`,
+        `${head} = ${f1(J, P[fi][fj][fk], l)}. The product P(${names.z})·P(${names.x} | ${names.z})·P(${names.y} | ${names.z}) would give ${f1(J, decomp(fi, fj, fk), l)}: this cell does not follow the pattern.`);
     }),
   });
+  // the next example: the same x and z, another value of y
+  const fj2 = ys.findIndex((_, j) => j !== fj);
 
   frames.push({
     kind: 'all', info: [], allDecomp,
+    question: allDecomp && fj2 >= 0
+      ? Q(`Cât este ${cellP(fi, fj2, fk)}?`, `What is ${cellP(fi, fj2, fk)}?`)
+      : Q('Cum arată restul tabelului?', 'What does the rest of the table look like?'),
     grid: gridXYZ(J, { cols: full, cell: () => ({}) }),
     caption: both((l) => {
-      if (allDecomp && ys.length > 1) {
+      if (allDecomp && fj2 >= 0) {
         return crit(l,
-          `Celelalte celule urmează același tipar, de exemplu P(${names.x}=${xs[0]}, ${names.y}=${ys[1]}, ${names.z}=${zs[k0]}) = ${dtext(0, 1, k0, l)}. Suma celor ${cellsN} celule este ${f1(J, sum(P.flat(2)), l)}.`,
-          `The other cells follow the same pattern, for example P(${names.x}=${xs[0]}, ${names.y}=${ys[1]}, ${names.z}=${zs[k0]}) = ${dtext(0, 1, k0, l)}. The ${cellsN} cells sum to ${f1(J, sum(P.flat(2)), l)}.`);
+          `Celelalte celule urmează același tipar, de exemplu ${cellP(fi, fj2, fk)} = ${dtext(fi, fj2, fk, l)}. Suma celor ${cellsN} celule este ${f1(J, sum(P.flat(2)), l)}.`,
+          `The other cells follow the same pattern, for example ${cellP(fi, fj2, fk)} = ${dtext(fi, fj2, fk, l)}. The ${cellsN} cells sum to ${f1(J, sum(P.flat(2)), l)}.`);
       }
       return crit(l, `Tabelul complet: suma celor ${cellsN} celule este ${f1(J, sum(P.flat(2)), l)}.`, `The full table: the ${cellsN} cells sum to ${f1(J, sum(P.flat(2)), l)}.`);
     }),
@@ -356,6 +393,8 @@ export function jointZSteps(J, conditionOn) {
   const hidePxy = (i, j) => ({ v: J.pxy[i][j], cls: holdsH(i, j) ? 'ok' : 'bad', annot: { text: prodText(J, i, j), ok: holdsH(i, j), cap: i === hi && j === hj }, cap: i === hi && j === hj });
   frames.push({
     kind: 'hide', depTotal,
+    question: Q(`Ascunde ${names.z}: adună coloanele. Cât este P(${names.x}=${xs[hi]}, ${names.y}=${ys[hj]})? Sunt ${names.x} și ${names.y} independente?`,
+      `Hide ${names.z}: add the columns. What is P(${names.x}=${xs[hi]}, ${names.y}=${ys[hj]})? Are ${names.x} and ${names.y} independent?`),
     grid: gridXYZ(J, { cols: sumCol, cell: hidePxy }),
     info: [
       ...xs.map((_, i) => ({ kind: 'marg', label: lab(`P(${names.x}=${xs[i]})`), value: disp(J.px[i], J.mode) })),
@@ -377,6 +416,8 @@ export function jointZSteps(J, conditionOn) {
   const dirWord = (l) => { const c = condv.cmp(J.py[yj]); return c > 0 ? crit(l, 'crește', 'goes up') : c < 0 ? crit(l, 'scade', 'goes down') : crit(l, 'rămâne la fel', 'stays the same'); };
   frames.push({
     kind: 'cond', condv, dir: condv.cmp(J.py[yj]),
+    question: Q(`Cât este P(${names.y}=${ys[yj]} | ${names.x}=${xs[xi]})? Față de P(${names.y}=${ys[yj]}), crește, scade sau rămâne la fel?`,
+      `What is P(${names.y}=${ys[yj]} | ${names.x}=${xs[xi]})? Compared with P(${names.y}=${ys[yj]}), does it go up, go down or stay the same?`),
     grid: gridXYZ(J, { cols: sumCol, cell: (i, j) => (i === xi ? { v: J.pxy[i][j], cls: j === yj ? 'cur hl' : 'hl', cap: j === yj } : { v: J.pxy[i][j], cls: 'dim' }) }),
     info: [
       { kind: 'cond', label: lab(`P(${names.y}=${ys[yj]} | ${names.x}=${xs[xi]})`), value: disp(condv, J.mode) },
@@ -392,24 +433,29 @@ export function jointZSteps(J, conditionOn) {
   const ciAll = sliceZs.every((k) => order.every(([i, j]) => sliceHolds(i, j, k)));
   const coversAll = zs.every((_, k) => !nz(k) || sliceZs.includes(k));
   sliceZs.forEach((k, n) => {
-    const col = [{ k, label: zAll[k].label }];
+    // the column holds P(X, Y | Z=z), not the joint values the Z=z column held: its head says so
+    const col = [{ k, label: lab(`P(${names.x}, ${names.y} | ${names.z}=${zs[k]})`) }];
     const cv = (i, j) => P[i][j][k].div(J.pz[k]);
     const zname = `${names.z}=${zs[k]}`;
     frames.push({
       kind: 'slice', k,
+      question: Q(`Fixează ${zname}: împarte coloana ${zname} la P(${zname}). Care este P(${names.x}, ${names.y} | ${zname})?`,
+        `Fix ${zname}: divide the ${zname} column by P(${zname}). What is P(${names.x}, ${names.y} | ${zname})?`),
       grid: gridXYZ(J, { cols: col, cell: (i, j) => ({ v: cv(i, j), cls: 'cond', cap: true }) }),
       info: [
         ...xs.map((_, i) => ({ kind: 'smarg', label: lab(`P(${names.x}=${xs[i]} | ${zname})`), value: disp(cx(i, k), J.mode) })),
         ...ys.map((_, j) => ({ kind: 'smarg', label: lab(`P(${names.y}=${ys[j]} | ${zname})`), value: disp(cy(j, k), J.mode) })),
       ],
       caption: both((l) => crit(l,
-        `Cu ${zname} fixat: coloana ${zname}, împărțită la P(${zname}) = ${f1(J, J.pz[k], l)}, dă P(${names.x}, ${names.y} | ${zname}): ${order.map(([i, j]) => f1(J, cv(i, j), l)).join('; ')}. Marginalele feliei: ${[...xs.map((_, i) => `P(${names.x}=${xs[i]} | ${zname}) = ${f1(J, cx(i, k), l)}`), ...ys.map((_, j) => `P(${names.y}=${ys[j]} | ${zname}) = ${f1(J, cy(j, k), l)}`)].join(', ')}.`,
+        `Cu ${zname} fixat: coloana ${zname}, împărțită la P(${zname}) = ${f1(J, J.pz[k], l)}, dă P(${names.x}, ${names.y} | ${zname}): ${order.map(([i, j]) => f1(J, cv(i, j), l)).join('; ')}. Marginalele feliei: ${joinList([...xs.map((_, i) => `P(${names.x}=${xs[i]} | ${zname}) = ${f1(J, cx(i, k), l)}`), ...ys.map((_, j) => `P(${names.y}=${ys[j]} | ${zname}) = ${f1(J, cy(j, k), l)}`)], l)}.`,
         `With ${zname} fixed: the ${zname} column, divided by P(${zname}) = ${f1(J, J.pz[k], l)}, gives P(${names.x}, ${names.y} | ${zname}): ${order.map(([i, j]) => f1(J, cv(i, j), l)).join('; ')}. Slice marginals: ${[...xs.map((_, i) => `P(${names.x}=${xs[i]} | ${zname}) = ${f1(J, cx(i, k), l)}`), ...ys.map((_, j) => `P(${names.y}=${ys[j]} | ${zname}) = ${f1(J, cy(j, k), l)}`)].join(', ')}.`)),
     });
     const passN = order.filter(([i, j]) => sliceHolds(i, j, k)).length;
     const lastSlice = n === sliceZs.length - 1;
     frames.push({
       kind: 'slicecheck', k, pass: passN === order.length, last: lastSlice,
+      question: Q(`Compară fiecare celulă cu produsul marginalelor feliei: sunt ${names.x} și ${names.y} independente în felia ${zname}?`,
+        `Compare each cell with the product of the slice marginals: are ${names.x} and ${names.y} independent in the slice ${zname}?`),
       grid: gridXYZ(J, {
         cols: col,
         cell: (i, j) => ({ v: cv(i, j), cls: sliceHolds(i, j, k) ? 'ok' : 'bad', annot: { text: both((l) => `${f1(J, cx(i, k), l)}·${f1(J, cy(j, k), l)} = ${f1(J, cx(i, k).mul(cy(j, k)), l)}`), ok: sliceHolds(i, j, k), cap: true } }),
@@ -431,7 +477,7 @@ export function jointZSteps(J, conditionOn) {
       }),
     });
   });
-  return { frames, depTotal, ciAll, coversAll, allDecomp };
+  return { frames: chainQuestions(frames), depTotal, ciAll, coversAll, allDecomp };
 }
 
 // The model the widget uses: the table, and its frames (or the explorer).
@@ -441,6 +487,7 @@ export function jointTable(props) {
     if (J.hasZ) throw new RangeError('joint: explore mode has no Z');
     return { J, explore: true, frames: [{ kind: 'explore' }], count: 1 };
   }
-  const r = J.hasZ ? jointZSteps(J, props.conditionOn) : jointSteps(J);
+  if (props.first !== undefined && !J.hasZ) throw new RangeError('joint: props.first names a cell (x, y, z) of a table with Z');
+  const r = J.hasZ ? jointZSteps(J, props.conditionOn, props.first) : jointSteps(J);
   return { J, explore: false, ...r, count: r.frames.length };
 }

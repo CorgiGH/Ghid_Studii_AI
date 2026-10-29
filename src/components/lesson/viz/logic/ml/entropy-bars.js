@@ -5,7 +5,8 @@
 // Every number comes from mathKit's H over the counts, so the drawing and the captions agree by construction.
 import Fraction from '../../../../../ml/calc/fraction.js';
 import { H } from '../../../../../ml/calc/mathKit.js';
-import { both, bits, fmtFrac, fmtNum } from './prob-format.js';
+import { both, bits, fmtFrac, fmtNum, joinList } from './prob-format.js';
+import { enCount, roCount } from '../words.js';
 
 const EQ = 1e-9;
 const MINUS = '−';
@@ -102,6 +103,8 @@ export function igModel(splits, venn) {
   const xName = venn.X, yName = venn.Y;
   const xGroups = venn.xGroups || splits.map((_, g) => `${xName}=${g + 1}`);
   const yLabels = venn.yLabels || [`${yName}+`, `${yName}${MINUS}`];
+  // how a class of Y is named in a sentence: Y=Scumpă when the lesson names the classes, Y+ / Y− otherwise
+  const yClass = venn.yLabels ? venn.yLabels.map((c) => `${yName}=${c}`) : yLabels;
   const N = splits.reduce((s, [a, b]) => s + a + b, 0);
   const sizes = splits.map(([a, b]) => a + b);
   const yPlus = splits.reduce((s, [a]) => s + a, 0), yMinus = splits.reduce((s, [, b]) => s + b, 0);
@@ -120,7 +123,7 @@ export function igModel(splits, venn) {
   const cells = splits.flat();
   const HXY = Hcounts(cells);
   const simple = hGroup.reduce((s, h) => s + h, 0) / G;
-  return { G, N, xName, yName, xGroups, yLabels, splits, sizes, yPlus, yMinus, wX, wY, hGroup, hYgroup, yGroups, HY, HYgX, IG: IGy, HX, HXgY, IGx, HXY, simple };
+  return { G, N, xName, yName, xGroups, yLabels, yClass, named: !!venn.yLabels, splits, sizes, yPlus, yMinus, wX, wY, hGroup, hYgroup, yGroups, HY, HYgX, IG: IGy, HX, HXgY, IGx, HXY, simple };
 }
 
 function igFrames(M) {
@@ -128,13 +131,17 @@ function igFrames(M) {
   const frames = [];
   const hb = (name, value, kind, cap = true) => ({ name, value, kind, cap });
   const eqW = M.wX.every((w) => w.equals(M.wX[0]));
-  frames.push({
-    kind: 'hy', dir: 'y', bars: [hb(`H(${Y})`, M.HY, 'full')], groups: [], venn: null,
-    caption: both((l) => crit(l,
-      `Setul are ${M.yPlus} cu ${Y}+ și ${M.yMinus} cu ${Y}${MINUS}: H(${Y}) = ${bits(M.HY)[l]} ${unit(M.HY, l)}. Dacă afli ${X}, cât din nesiguranța asta rămâne?`,
-      `The set has ${M.yPlus} with ${Y}+ and ${M.yMinus} with ${Y}${MINUS}: H(${Y}) = ${bits(M.HY)[l]} ${unit(M.HY, l)}. If you learn ${X}, how much of this uncertainty is left?`)),
-  });
   const groupRows = (names, splits, ws, hs) => splits.map((s, g) => ({ name: names[g], counts: label(s[0], s[1]), w: ws[g], H: hs[g] }));
+  // when the lesson names the classes, the [a+,b−] counts of the groups need the key: which class is + and which is −
+  const key = (k) => (M.named ? `${M.yClass[k]} (${k === 0 ? '+' : MINUS})` : M.yClass[k]);
+  frames.push({
+    kind: 'hy', dir: 'y', bars: [hb(`H(${Y})`, M.HY, 'full')], venn: null,
+    // the groups of X are the data the question needs: their counts show now, their H and weight on the next frame
+    groups: groupRows(M.xGroups, M.splits, M.wX, M.hGroup).map((g) => ({ ...g, hidden: true })),
+    caption: both((l) => crit(l,
+      `În set sunt ${roCount(M.yPlus, 'exemplu', 'exemple')} cu ${key(0)} și ${roCount(M.yMinus, 'exemplu', 'exemple')} cu ${key(1)}: H(${Y}) = ${bits(M.HY)[l]} ${unit(M.HY, l)}. Dacă afli ${X}, cât din nesiguranța asta rămâne?`,
+      `The set has ${enCount(M.yPlus, 'example', 'examples')} with ${key(0)} and ${enCount(M.yMinus, 'example', 'examples')} with ${key(1)}: H(${Y}) = ${bits(M.HY)[l]} ${unit(M.HY, l)}. If you learn ${X}, how much of this uncertainty is left?`)),
+  });
   frames.push({
     kind: 'hyx', dir: 'y', bars: [hb(`H(${Y})`, M.HY, 'full', false), hb(`H(${Y}|${X})`, M.HYgX, 'cond')],
     groups: groupRows(M.xGroups, M.splits, M.wX, M.hGroup), venn: null,
@@ -170,14 +177,25 @@ function igFrames(M) {
     kind: 'venn-ask', dir: 'venn', bars: [], groups: [], venn: { ...regions, filled: false },
     bank: [M.IG, M.HYgX, M.HXgY],
     caption: both((l) => crit(l,
-      `Diagrama Venn: cercul din stânga este H(${X}), cel din dreapta H(${Y}). Pune valorile ${[M.IG, M.HYgX, M.HXgY].map((v) => bits(v)[l]).join(', ')} în H(${X}|${Y}), IG(${X};${Y}) și H(${Y}|${X}), apoi verifică.`,
-      `The Venn diagram: the left circle is H(${X}), the right one H(${Y}). Put the values ${[M.IG, M.HYgX, M.HXgY].map((v) => bits(v)[l]).join(', ')} into H(${X}|${Y}), IG(${X};${Y}) and H(${Y}|${X}), then check.`)),
+      `Diagrama Venn: cercul din stânga este H(${X}), cel din dreapta H(${Y}). Pune valorile ${joinList([M.IG, M.HYgX, M.HXgY].map((v) => bits(v)[l]), l)} în H(${X}|${Y}), IG(${X};${Y}) și H(${Y}|${X}), apoi verifică.`,
+      `The Venn diagram: the left circle is H(${X}), the right one H(${Y}). Put the values ${joinList([M.IG, M.HYgX, M.HXgY].map((v) => bits(v)[l]), l)} into H(${X}|${Y}), IG(${X};${Y}) and H(${Y}|${X}), then check.`)),
   });
   frames.push({
     kind: 'venn', dir: 'venn', bars: [], groups: [], venn: { ...regions, filled: true },
     caption: both((l) => crit(l,
       `H(${X}|${Y}) = ${bits(M.HXgY)[l]} (doar ${X}), IG(${X};${Y}) = ${bits(M.IG)[l]} (intersecția), H(${Y}|${X}) = ${bits(M.HYgX)[l]} (doar ${Y}); împreună, reuniunea este H(${X},${Y}) = ${bits(M.HXY)[l]}. (Valorile sunt rotunjite la 4 zecimale.)`,
       `H(${X}|${Y}) = ${bits(M.HXgY)[l]} (only ${X}), IG(${X};${Y}) = ${bits(M.IG)[l]} (the overlap), H(${Y}|${X}) = ${bits(M.HYgX)[l]} (only ${Y}); together the union is H(${X},${Y}) = ${bits(M.HXY)[l]}. (Values are rounded to 4 decimals.)`)),
+  });
+  // the question each reveal answers ends the caption of the frame before it
+  const ask = {
+    ig: { ro: `Cât din H(${Y}) dispare după ce afli ${X}, adică IG(${Y};${X}) = H(${Y}) ${MINUS} H(${Y}|${X})?`, en: `How much of H(${Y}) disappears once you know ${X}, that is IG(${Y};${X}) = H(${Y}) ${MINUS} H(${Y}|${X})?` },
+    rev: { ro: `Invers: afli ${Y} și încerci să-l ghicești pe ${X}. Cât este IG(${X};${Y}) = H(${X}) ${MINUS} H(${X}|${Y})? Iese același număr?`, en: `The other way: you learn ${Y} and try to guess ${X}. What is IG(${X};${Y}) = H(${X}) ${MINUS} H(${X}|${Y})? Is it the same number?` },
+  };
+  frames.forEach((f, i) => {
+    const q = ask[frames[i + 1]?.kind];
+    if (!q) return;
+    f.ask = q;
+    f.caption = both((l) => `${f.caption[l]} ${q[l]}`);
   });
   return frames;
 }

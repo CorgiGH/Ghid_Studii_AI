@@ -117,6 +117,36 @@ describe('entropy-bars logic, L8 (the ten flats)', () => {
     expect(frames[5].caption.ro).toContain('H(X,Y) = 1,8464');
     expect(frames[5].caption.en).toContain('1.8464');
   });
+  it('asks before every reveal (outline L8 Vizual: each value predicted before it is shown)', () => {
+    expect(frames[0].caption.ro).toBe('În set sunt 5 exemple cu Y=Scumpă (+) și 5 exemple cu Y=Ieftină (−): H(Y) = 1 bit. Dacă afli X, cât din nesiguranța asta rămâne?');
+    expect(frames[0].caption.en).toBe('The set has 5 examples with Y=Scumpă (+) and 5 examples with Y=Ieftină (−): H(Y) = 1 bit. If you learn X, how much of this uncertainty is left?');
+    expect(frames[1].ask.ro).toBe('Cât din H(Y) dispare după ce afli X, adică IG(Y;X) = H(Y) − H(Y|X)?');
+    expect(frames[2].ask.ro).toBe('Invers: afli Y și încerci să-l ghicești pe X. Cât este IG(X;Y) = H(X) − H(X|Y)? Iese același număr?');
+    for (const f of [frames[1], frames[2]]) {
+      for (const l of ['ro', 'en']) {
+        expect(f.caption[l].endsWith(f.ask[l])).toBe(true);
+        expect(f.ask[l]).not.toMatch(/\d[,.]\d/);
+      }
+    }
+    // the IG value is not in the frame that asks for it
+    expect(frames[1].caption.ro).not.toContain('0,1245');
+    const plain = entropyBars({ splits: [[3, 1], [2, 4]], venn: { X: 'A', Y: 'B' } });
+    expect(plain.frames[0].caption.ro).toContain('5 exemple cu B+ și 5 exemple cu B−');
+    const big = entropyBars({ splits: [[30, 10], [20, 40]], venn: { X: 'A', Y: 'B' } });
+    expect(big.frames[0].caption.ro).toContain('50 de exemple cu B+ și 50 de exemple cu B−');
+  });
+  // The first frame asks how much of H(Y) is left once X is known: the groups of X, with their counts, are the data that
+  // question needs, so they are on the screen; their entropies and weights are what the next frame reveals.
+  it('the first frame shows the groups of X with their counts, their H and weight still hidden', () => {
+    expect(frames[0].groups.map((g) => [g.name, g.counts])).toEqual([['Centru', '[3+,1−]'], ['Periferie', '[2+,4−]']]);
+    expect(frames[0].groups.every((g) => g.hidden)).toBe(true);
+    LANG = 'ro';
+    const html = renderToStaticMarkup(React.createElement(EntropyStage, { model: entropyBars(L8), frame: frames[0] }));
+    expect(text(html)).toContain('Centru [3+,1−] ? ?');
+    expect(text(html)).toContain('Periferie [2+,4−] ? ?');
+    expect(marks(html).filter((m) => m.kind === 'grp-h' || m.kind === 'grp-w')).toHaveLength(0);
+    expect(frames[1].groups.some((g) => g.hidden)).toBe(false);
+  });
   it('the Venn regions printed add up to the union at 4 decimals', () => {
     const v = frames[5].venn;
     expect(r4(v.left) + r4(v.mid) + r4(v.right)).toBeCloseTo(r4(v.union), 10);
@@ -128,6 +158,15 @@ describe('entropy-bars logic, L8 (the ten flats)', () => {
   it('the Venn ask frame lists the three values still to be placed', () => {
     expect(frames[4].bank.map(r4)).toEqual([0.1245, 0.8755, 0.8464]);
     expect(frames[4].venn.filled).toBe(false);
+  });
+});
+
+// Romanian writes the decimal comma, so a list of such numbers joined with ", " is ambiguous ("0,1, 0,4"): it uses "; ".
+const AMBIGUOUS = /\d,\d+, (?=[−\d(P])/;
+describe('entropy-bars: Romanian lists of decimals are unambiguous', () => {
+  it('no caption joins decimal-comma numbers with ", "', () => {
+    for (const p of [L7, L8]) for (const f of entropyBars(p).frames) expect(f.caption.ro, f.caption.ro).not.toMatch(AMBIGUOUS);
+    expect(entropyBars(L8).frames[4].caption.ro).toContain('Pune valorile 0,1245; 0,8755; 0,8464 în');
   });
 });
 
@@ -174,6 +213,18 @@ describe('entropy-bars: the caption matches the drawing (G4)', () => {
     expect(html).toContain('H = ?');
     expect((html.match(/meb-sq pos/g) || []).length).toBe(3);
   });
+  // Seen in Chrome: the axis name "p" sat on top of the "1/2" tick under the curve.
+  it('the axis name p does not sit on the 1/2 tick', () => {
+    const model = entropyBars(L7);
+    const html = renderToStaticMarkup(React.createElement(EntropyStage, { model, frame: model.frames[0] }));
+    const at = (label) => { const m = html.match(new RegExp(`<text class="meb-tick" x="([\\d.]+)" y="([\\d.]+)"[^>]*>${label.replace('/', '\\/')}</text>`)); return m && { x: Number(m[1]), y: Number(m[2]) }; };
+    const p = at('p'), half = at('1/2');
+    expect(p && half).toBeTruthy();
+    // 12px text: either 16 units apart vertically or 24 apart horizontally
+    expect(Math.abs(p.y - half.y) >= 16 || Math.abs(p.x - half.x) >= 24).toBe(true);
+    const box = Number(html.match(/<svg class="meb-curve" viewBox="0 0 \d+ (\d+)"/)[1]);
+    expect(p.y).toBeLessThanOrEqual(box);
+  });
   it('the slider frame shows the live readout from the logic', () => {
     const model = entropyBars(L7);
     const html = renderToStaticMarkup(React.createElement(EntropyStage, { model, frame: model.frames[4], live: 50 }));
@@ -186,6 +237,10 @@ describe('entropy-bars: the caption matches the drawing (G4)', () => {
     const model = entropyBars(L7);
     const ms = marks(renderToStaticMarkup(React.createElement(EntropyStage, { model, frame: model.frames[5] })));
     expect(ms.find((m) => m.kind === 'max').value).toBe('1');
+    // with the slider at p = 1/2 the live point sits on the maximum: the maximum is drawn on top of it
+    const html = renderToStaticMarkup(React.createElement(EntropyStage, { model, frame: model.frames[5], live: 50 }));
+    expect(html.indexOf('data-kind="max"')).toBeGreaterThan(html.indexOf('data-kind="live-point"'));
+    expect(html.indexOf('data-kind="live-point"')).toBeGreaterThan(-1);
   });
   it('the IG frames draw the three bars and the colored gap', () => {
     const model = entropyBars(L8);
@@ -240,7 +295,7 @@ describe('entropy-bars widget', () => {
   it('the curve is a scaling SVG', () => {
     const model = entropyBars(L7);
     const html = renderToStaticMarkup(React.createElement(EntropyStage, { model, frame: model.frames[1] }));
-    expect(html).toMatch(/<svg[^>]*viewBox="0 0 300 150"/);
+    expect(html).toMatch(/<svg[^>]*viewBox="0 0 300 164"/);
     expect(html).not.toMatch(/<svg[^>]*\swidth=/);
   });
 });

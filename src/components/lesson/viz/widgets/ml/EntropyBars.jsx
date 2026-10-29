@@ -8,7 +8,8 @@ import { bits, disp, fmtNum } from '../../logic/ml/prob-format.js';
 import './ml-w2.css';
 
 const MINUS = '−';
-const CW = 300, CH = 150, CL = 30, CR = 290, CB = 125, CT = 20;
+// CH leaves a line under the tick labels for the axis name p (at 150 it sat on the 1/2 tick)
+const CW = 300, CH = 164, CL = 30, CR = 290, CB = 125, CT = 20;
 const cx = (p) => CL + (CR - CL) * p;
 const cy = (h) => CB - (CB - CT) * h;
 const CURVE = Array.from({ length: 51 }, (_, i) => curvePoint(i / 50)).map((c) => `${cx(c.p).toFixed(1)},${cy(c.H).toFixed(1)}`).join(' ');
@@ -53,10 +54,11 @@ function Curve({ frame, live }) {
           <text className="meb-ptlab" x={cx(b.p.toNumber())} y={cy(b.H) - 10} textAnchor="middle">{b.label}</text>
         </g>
       ))}
-      {frame.showMax && (
-        <circle className="meb-pt max" cx={cx(frame.max.p)} cy={cy(frame.max.H)} r="7" data-kind="max" data-value={fmtNum(frame.max.H, t('en', 'ro'), 4)} data-cap="1" />
-      )}
       {lp && <circle className="meb-pt live" cx={cx(lp.p)} cy={cy(lp.H)} r="6" data-kind="live-point" />}
+      {/* drawn last, so the live point never hides the coloured maximum */}
+      {frame.showMax && (
+        <circle className="meb-pt max" cx={cx(frame.max.p)} cy={cy(frame.max.H)} r="8" data-kind="max" data-value={fmtNum(frame.max.H, t('en', 'ro'), 4)} data-cap="1" />
+      )}
     </svg>
   );
 }
@@ -99,12 +101,19 @@ function Groups({ rows }) {
           {rows.map((r, i) => {
             const h = bits(r.H);
             const w = r.wText;
+            // a hidden row shows the counts (the data of the question) and keeps its H and weight for the next frame
             return (
               <tr key={i}>
                 <th scope="row">{r.name}</th>
-                <td>{r.counts}</td>
-                <td data-kind="grp-h" data-value={t(h.en, h.ro)} data-cap="1">{t(h.en, h.ro)}</td>
-                <td data-kind="grp-w" data-value={t(w.en, w.ro)} data-cap="1">{t(w.en, w.ro)}</td>
+                <td className="meb-cnt">{r.counts}</td>
+                {r.hidden
+                  ? <><td>?</td><td>?</td></>
+                  : (
+                    <>
+                      <td data-kind="grp-h" data-value={t(h.en, h.ro)} data-cap="1">{t(h.en, h.ro)}</td>
+                      <td data-kind="grp-w" data-value={t(w.en, w.ro)} data-cap="1">{t(w.en, w.ro)}</td>
+                    </>
+                  )}
               </tr>
             );
           })}

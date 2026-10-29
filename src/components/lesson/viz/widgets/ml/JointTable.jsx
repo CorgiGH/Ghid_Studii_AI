@@ -94,13 +94,14 @@ export function JointStage({ model, frame }) {
   );
 }
 
-function Explorer({ props }) {
+// With predict the learner's first touched cell is the pick that completes the screen (own mode: no "Show me" gate).
+function Explorer({ props, predict }) {
   const { t } = useApp();
   const model = jointTable(props);
   const [picked, setPicked] = useState([]);
-  const s = useStepper(1, { predict: false });
+  const s = useStepper(1, { predict, own: true });
   const view = exploreView(model.J, picked);
-  const pick = (i, j) => setPicked((p) => [...p.filter(([a, b]) => !(a === i && b === j)), [i, j]]);
+  const pick = (i, j) => { setPicked((p) => [...p.filter(([a, b]) => !(a === i && b === j)), [i, j]]); s.settle(); };
   const stepper = { ...s, reset: () => { s.reset(); setPicked([]); } };
   return (
     <VizFrame widget="ml-joint-table" stepper={stepper} caption={t(view.caption.en, view.caption.ro)} label={t('Joint table: compare each cell with the product of the marginals', 'Tabel comun: compară fiecare celulă cu produsul marginalelor')}>
@@ -122,5 +123,5 @@ function Steps({ props, predict }) {
 }
 
 export default function JointTable({ props, predict }) {
-  return props.explore ? <Explorer props={props} /> : <Steps props={props} predict={predict} />;
+  return props.explore ? <Explorer props={props} predict={predict} /> : <Steps props={props} predict={predict} />;
 }

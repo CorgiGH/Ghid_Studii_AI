@@ -53,6 +53,9 @@ export const dispNum = (x, digits = 2) => ({ en: fmtNum(x, 'en', digits), ro: fm
 // Entropy values: 4 decimals, as the lessons print them.
 export const bits = (x) => dispNum(x, 4);
 
+// A list in a caption: Romanian writes the decimal comma, so a list whose items hold one ("0,1, 0,4") is joined with "; ".
+export const joinList = (items, lang) => (lang === 'ro' && items.some((s) => /\d,\d/.test(s)) ? items.join('; ') : items.join(', '));
+
 // A caption (or any text) that differs only by the number format: build it once per language.
 export const both = (fn) => ({ en: fn('en'), ro: fn('ro') });
 // Pick the language of a disp pair inside a builder.

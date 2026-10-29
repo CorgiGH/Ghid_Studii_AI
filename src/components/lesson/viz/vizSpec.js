@@ -39,7 +39,7 @@ const SPEC = {
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
   'ml-pmf-cdf': { values: (v) => isArr(v) && v.every(isNum), probs: probList, name: optional(isStr), format: optional(oneOf('fraction', 'decimal')), cdfAt: optional(isNum), second: optional((v) => !!v && typeof v === 'object' && isArr(v.values) && v.values.every(isNum) && probList(v.probs) && (v.name === undefined || isStr(v.name))) },
-  'ml-joint-table': { table: isTable, x: isStr, y: isStr, z: optional(isStr), conditionOn: optional(isArr), explore: optional((v) => typeof v === 'boolean'), rowsAre: optional(oneOf('x', 'y')), format: optional(oneOf('fraction', 'decimal')) },
+  'ml-joint-table': { table: isTable, x: isStr, y: isStr, z: optional(isStr), conditionOn: optional(isArr), explore: optional((v) => typeof v === 'boolean'), rowsAre: optional(oneOf('x', 'y')), format: optional(oneOf('fraction', 'decimal')), first: optional((v) => isArr(v) && v.length === 3) },
   'ml-entropy-bars': { splits: (v) => isArr(v) && v.every((s) => Array.isArray(s) && s.length === 2 && s.every(Number.isInteger)), venn: optional((v) => !!v && typeof v === 'object' && isStr(v.X) && isStr(v.Y) && (v.xGroups === undefined || strs(v.xGroups)) && (v.yLabels === undefined || (strs(v.yLabels) && v.yLabels.length === 2))) },
 };
 

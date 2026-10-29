@@ -40,7 +40,7 @@ export function PmfCdfStage({ model, frame }) {
   return (
     <div className="mpc" data-view={frame.view} data-frame={frame.kind}>
       <svg className="mpc-svg" viewBox={`0 0 ${W} ${H}`} role="img"
-        aria-label={frame.cdf ? t('Cumulative distribution function', 'Funcția de repartiție') : t('Bars of the probability distribution', 'Barele distribuției de probabilitate')}>
+        aria-label={frame.cdf ? t('Cumulative distribution function', 'Funcția de distribuție cumulativă') : t('Bars of the probability distribution', 'Barele distribuției de probabilitate')}>
         <line className="mpc-axis" x1={L} x2={W - R} y1={BASE} y2={BASE} />
         {!frame.cdf && D.xs.map((x, i) => {
           const h = (D.ps[i].toNumber() / pmax) * (BASE - TOP - 14);
@@ -57,13 +57,15 @@ export function PmfCdfStage({ model, frame }) {
             <Motion.path className="mpc-stair" d={stair} fill="none" initial={{ pathLength: m.reduced ? 1 : 0 }} animate={{ pathLength: 1 }} transition={m.reduced ? { duration: 0 } : { duration: 0.6 }} />
             <text className="mpc-lab dim" x={L} y={BASE - 4}>0</text>
             <text className="mpc-lab dim" x={L} y={TOP - 4}>1</text>
-            {D.cdf.map((f, i) => (
-              <g key={i}>
-                <circle className={`mpc-dot${i === frame.cdfAt ? ' at' : ''}`} cx={sx(xs[i])} cy={fy(f)} r={i === frame.cdfAt ? 5 : 3.5}
-                  data-kind={i === frame.cdfAt ? 'cdf-at' : 'cdf'} data-x={t(S.xs[i].en, S.xs[i].ro)} data-value={t(S.cdf[i].en, S.cdf[i].ro)} />
-                <text className={`mpc-lab${i === frame.cdfAt ? ' at' : ''}`} x={sx(xs[i])} y={fy(f) - 8} textAnchor="middle">{t(S.cdf[i].en, S.cdf[i].ro)}</text>
-              </g>
-            ))}
+            {D.cdf.map((f, i) => (frame.cdfLabels === false
+              ? <circle key={i} className="mpc-dot" cx={sx(xs[i])} cy={fy(f)} r="3.5" />
+              : (
+                <g key={i}>
+                  <circle className={`mpc-dot${i === frame.cdfAt ? ' at' : ''}`} cx={sx(xs[i])} cy={fy(f)} r={i === frame.cdfAt ? 5 : 3.5}
+                    data-kind={i === frame.cdfAt ? 'cdf-at' : 'cdf'} data-x={t(S.xs[i].en, S.xs[i].ro)} data-value={t(S.cdf[i].en, S.cdf[i].ro)} />
+                  <text className={`mpc-lab${i === frame.cdfAt ? ' at' : ''}`} x={sx(xs[i])} y={fy(f) - 8} textAnchor="middle">{t(S.cdf[i].en, S.cdf[i].ro)}</text>
+                </g>
+              )))}
           </>
         )}
         {D.xs.map((x, i) => (
@@ -92,7 +94,9 @@ export function PmfCdfStage({ model, frame }) {
               <tr><th scope="row">(x − μ)²</th>{S.sq.map((v, i) => <td key={i} data-kind="sq" data-value={t(v.en, v.ro)}>{t(v.en, v.ro)}</td>)}</tr>
             </tbody>
           </table>
-          <div className="mpc-var">{`Var(${D.name}) = `}<b data-kind="variance" data-value={t(S.variance.en, S.variance.ro)}>{t(S.variance.en, S.variance.ro)}</b></div>
+          <div className="mpc-var">{`Var(${D.name}) = `}{show.variance
+            ? <b data-kind="variance" data-value={t(S.variance.en, S.variance.ro)}>{t(S.variance.en, S.variance.ro)}</b>
+            : <b>?</b>}</div>
         </div>
       )}
     </div>
@@ -105,7 +109,7 @@ export default function PmfCdf({ props, predict }) {
   const s = useStepper(model.count, { predict });
   const frame = model.frames[s.step];
   return (
-    <VizFrame widget="ml-pmf-cdf" stepper={s} caption={t(frame.caption.en, frame.caption.ro)} label={t('Probability distribution, mean, variance and c.d.f.', 'Distribuție de probabilitate, medie, varianță și funcție de repartiție')}>
+    <VizFrame widget="ml-pmf-cdf" stepper={s} caption={t(frame.caption.en, frame.caption.ro)} label={t('Probability distribution, mean, variance and c.d.f.', 'Distribuție de probabilitate, medie, varianță și funcția de distribuție cumulativă')}>
       <PmfCdfStage model={model} frame={frame} />
     </VizFrame>
   );
