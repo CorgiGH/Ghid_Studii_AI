@@ -3,7 +3,6 @@
 // caption is built from the same frame state the picture is drawn from.
 import Fraction from '../../../../../ml/calc/fraction.js';
 import { P, Pc, count, div, mul } from '../../../../../ml/calc/mathKit.js';
-import { listEn, listRo } from '../words.js';
 
 const isLabel = (v) => (typeof v === 'string' && v.length > 0) || Number.isFinite(v);
 
@@ -60,7 +59,6 @@ export function omega(props) {
   const q = {
     N, nG, nAG, mass: mass.toString(), pG: pG.toString(), pAG: pAG.toString(), pA: pA.toString(), cond: cond.toString(), factor: factor.toString(), condMass: condMass.toString(),
   };
-  const lst = (xs) => ({ en: listEn(xs), ro: listRo(xs) });
   const Gs = g;
   const As = a;
 
@@ -68,7 +66,9 @@ export function omega(props) {
     const s = Math.max(0, Math.min(OMEGA_FRAMES - 1, step));
     const kind = s === 6 ? 'info' : s % 2 === 0 ? 'ask' : 'reveal';
     const phase = s <= 1 ? 'count' : s <= 3 ? 'fav' : s <= 5 ? 'cond' : 'omega';
-    const out = (l) => !inG.has(l) && (s === 1 || s === 3 || s === 5);
+    // once B is learned (frames 1-3) and in the rescaled frame 5 the outcomes outside B stay greyed; frame 4 shows the
+    // unconditional masses of every outcome, frame 6 has B = Ω
+    const out = (l) => !inG.has(l) && (s >= 1 && s <= 3 || s === 5);
     const cells = labels.map((l) => {
       const cg = s === 6 ? true : inG.has(l);
       const ca = inA.has(l);
@@ -83,7 +83,6 @@ export function omega(props) {
     });
     const marks = [{ id: 'omega-size', value: String(N) }];
     let caption;
-    const GA = lst(aInG);
     if (s === 0) {
       caption = {
         en: `We learn that ${Gs} happened. How many of the ${N} outcomes are still possible?`,
@@ -93,7 +92,7 @@ export function omega(props) {
       marks.push({ id: 'remaining', value: String(nG) });
       caption = {
         en: `Only the outcomes in ${Gs} remain: ${nG} of ${N}. The others cannot have happened.`,
-        ro: `Rămân doar rezultatele din ${Gs}: ${nG} din ${N}. Celelalte nu mai pot fi cele întâmplate.`,
+        ro: `Rămân doar rezultatele din ${Gs}: ${nG} din ${N}. Celelalte nu mai sunt posibile.`,
       };
     } else if (s === 2) {
       marks.push({ id: 'remaining', value: String(nG) });
@@ -103,11 +102,17 @@ export function omega(props) {
       };
     } else if (s === 3) {
       marks.push({ id: 'remaining', value: String(nG) }, { id: 'favourable', value: String(nAG) }, { id: 'ratio', value: q.cond });
-      caption = {
-        en: `${As} happened in ${nAG} of the ${nG} remaining outcomes${aInG.length ? ` (${GA.en})` : ''}: ${q.cond}.`,
-        ro: `${As} s-a întâmplat în ${nAG} din cele ${nG} rezultate rămase${aInG.length ? ` (${GA.ro})` : ''}: ${q.cond}.`,
-      };
-      if (nAG === 0) caption = { en: `${As} happened in none of the ${nG} remaining outcomes: 0.`, ro: `${As} nu s-a întâmplat în niciunul dintre cele ${nG} rezultate rămase: 0.` };
+      // A ∩ B written as a set, as the lesson writes events ({2, 4, 6}); "(6)" after a count read as a number
+      const AG = `${As} ∩ ${Gs} = ${aInG.length ? `{${aInG.join(', ')}}` : '∅'}`;
+      caption = nAG === 0
+        ? {
+          en: `${AG}: ${As} happened in none of the ${nG} remaining outcomes, so P(${As} | ${Gs}) = ${q.cond}.`,
+          ro: `${AG}: ${As} nu s-a întâmplat în niciunul dintre cele ${nG} rezultate rămase, deci P(${As} | ${Gs}) = ${q.cond}.`,
+        }
+        : {
+          en: `${AG}: ${As} happened in ${nAG} of the ${nG} remaining outcomes, so P(${As} | ${Gs}) = ${q.cond}.`,
+          ro: `${AG}: ${As} s-a întâmplat în ${nAG} din cele ${nG} rezultate rămase, deci P(${As} | ${Gs}) = ${q.cond}.`,
+        };
     } else if (s === 4) {
       marks.push({ id: 'mass', value: q.mass }, { id: 'pG', value: q.pG }, { id: 'pAG', value: q.pAG });
       caption = {
@@ -117,8 +122,8 @@ export function omega(props) {
     } else if (s === 5) {
       marks.push({ id: 'factor', value: q.factor }, { id: 'condMass', value: q.condMass }, { id: 'pG', value: q.pG }, { id: 'pAG', value: q.pAG }, { id: 'cond', value: q.cond });
       caption = {
-        en: `The outcomes in ${Gs} are rescaled by ${q.factor} so that they add up to 1: each now has mass ${q.condMass}. P(${As} | ${Gs}) = ${q.pAG} / ${q.pG} = ${q.cond}.`,
-        ro: `Rezultatele din ${Gs} se înmulțesc cu ${q.factor} ca să dea împreună 1: fiecare are acum masa ${q.condMass}. P(${As} | ${Gs}) = ${q.pAG} / ${q.pG} = ${q.cond}.`,
+        en: `The mass of each outcome in ${Gs} is multiplied by ${q.factor} so that their masses add up to 1: each now has mass ${q.condMass}. P(${As} | ${Gs}) = (${q.pAG}) / (${q.pG}) = ${q.cond}.`,
+        ro: `Masa fiecărui rezultat din ${Gs} se înmulțește cu ${q.factor}, ca masele lor să dea împreună 1: fiecare are acum masa ${q.condMass}. P(${As} | ${Gs}) = (${q.pAG}) / (${q.pG}) = ${q.cond}.`,
       };
     } else {
       marks.push({ id: 'mass', value: q.mass }, { id: 'pA', value: q.pA });

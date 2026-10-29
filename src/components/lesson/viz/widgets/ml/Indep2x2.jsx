@@ -47,7 +47,7 @@ export function Indep2x2Body({ props, stepper }) {
                 <th scope="col" />
                 <th scope="col">{Y}</th>
                 <th scope="col">{non(Y)}</th>
-                <th scope="col" className="mli-margin">{t('row total', 'total rând')}</th>
+                <th scope="col" className="mli-margin">{t('total', 'total')}</th>
               </tr>
             </thead>
             <tbody>
@@ -64,7 +64,7 @@ export function Indep2x2Body({ props, stepper }) {
                 <td className="mli-margin"><b data-mark="pNX" data-value={q.pNX}>{d(q.pNX)}</b></td>
               </tr>
               <tr className="mli-margin">
-                <th scope="row">{t('column total', 'total coloană')}</th>
+                <th scope="row">{t('total', 'total')}</th>
                 <td><b data-mark="pY" data-value={q.pY}>{d(q.pY)}</b></td>
                 <td><b data-mark="pNY" data-value={q.pNY}>{d(q.pNY)}</b></td>
                 <td />

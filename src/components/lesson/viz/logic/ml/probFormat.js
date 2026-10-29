@@ -39,6 +39,9 @@ export function group(n) {
   return s.length > 3 ? s.replace(/\B(?=(\d{3})+(?!\d))/g, NBSP) : s;
 }
 
+// A list in a caption: Romanian writes the decimal comma, so a list whose items hold one ("0,1, 0,4") is joined with "; ".
+export const joinList = (items, lang) => (lang === 'ro' && items.some((s) => /\d,\d/.test(s)) ? items.join('; ') : items.join(', '));
+
 // Both languages for a decimal value.
 export const decBi = (f, places) => { const t = dec(f, places); return { en: t, ro: loc(t, 'ro') }; };
 

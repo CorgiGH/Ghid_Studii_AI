@@ -2,7 +2,7 @@
 // the four counts through mathKit (P, Pc, mul), the product of the margins is computed cell by cell, and every caption
 // is built from the frame state that is drawn.
 import { P, Pc, mul } from '../../../../../ml/calc/mathKit.js';
-import { dec, loc } from './probFormat.js';
+import { dec, joinList, loc } from './probFormat.js';
 
 const isCount = (v) => Number.isInteger(v) && v >= 0;
 
@@ -40,6 +40,7 @@ export function indep2x2(props) {
   const eq = [0, 1].map((i) => [0, 1].map((j) => cellP[i][j].equals(prodP[i][j])));
   const condYX = Pc(T, 'Y=1', 'X=1');
   const independent = eq.flat().every(Boolean);
+  if (!independent && eq.flat().some(Boolean)) throw new RangeError('ml-indep-2x2: the cells disagree, the margins are inconsistent');
   const D = (f) => dec(f);
   const pos = (id) => [Number(id[0]), Number(id[1])];
   const at = (m, id) => { const [i, j] = pos(id); return m[i][j]; };
@@ -91,23 +92,25 @@ export function indep2x2(props) {
           : `Tabelul dă P(${X} ∩ ${Y}) = ${c00}, iar produsul marginalelor este ${p00}. Sunt ${X} și ${Y} independente?`;
         case 3: return q.equal['00']
           ? (en
-            ? `${c00} = ${p00}: the product form holds in this cell. In the conditional form, P(${Y} | ${X}) = ${d(q.condYX)} = ${d(q.pY)} = P(${Y}).`
-            : `${c00} = ${p00}: forma cu produs se verifică în această celulă. În forma condiționată, P(${Y} | ${X}) = ${d(q.condYX)} = ${d(q.pY)} = P(${Y}).`)
+            ? `${c00} = ${p00}: the product form holds in this cell. In the conditional-probability form, P(${Y} | ${X}) = ${d(q.condYX)} = ${d(q.pY)} = P(${Y}).`
+            : `${c00} = ${p00}: forma cu produs se verifică în această celulă. În forma cu probabilitate condiționată, P(${Y} | ${X}) = ${d(q.condYX)} = ${d(q.pY)} = P(${Y}).`)
           : (en
-            ? `${c00} ≠ ${p00}: not independent. The conditional form agrees: P(${Y} | ${X}) = ${d(q.condYX)} ≠ ${d(q.pY)} = P(${Y}). The equality must be exact.`
-            : `${c00} ≠ ${p00}: nu sunt independente. Forma condiționată spune la fel: P(${Y} | ${X}) = ${d(q.condYX)} ≠ ${d(q.pY)} = P(${Y}). Egalitatea trebuie să fie exactă.`);
+            ? `${c00} ≠ ${p00}: not independent. The conditional-probability form agrees: P(${Y} | ${X}) = ${d(q.condYX)} ≠ ${d(q.pY)} = P(${Y}). The equality must be exact.`
+            : `${c00} ≠ ${p00}: nu sunt independente. Forma cu probabilitate condiționată spune la fel: P(${Y} | ${X}) = ${d(q.condYX)} ≠ ${d(q.pY)} = P(${Y}). Egalitatea trebuie să fie exactă.`);
         case 4: return en
           ? `Do the other three cells equal their products?`
           : `Sunt celelalte trei celule egale cu produsele lor?`;
         case 5: {
-          const list = `${c01} / ${p01}, ${c10} / ${p10}, ${c11} / ${p11}`;
-          if (nEq === 0) return en ? `Cell against product: ${list}. None of them matches. For events one failed equation already decides.` : `Celulă față de produs: ${list}. Niciuna nu se potrivește. La evenimente o singură egalitate nerespectată hotărăște.`;
-          if (nEq === 3) return en ? `Cell against product: ${list}. All of them match.` : `Celulă față de produs: ${list}. Toate se potrivesc.`;
-          return en ? `Cell against product: ${list}. Some match and some do not; one cell that fails is enough to decide.` : `Celulă față de produs: ${list}. Unele se potrivesc, altele nu; o singură celulă care nu se potrivește ajunge ca să hotărască.`;
+          const vs = en ? 'against' : 'față de';
+          const list = joinList([`${c01} ${vs} ${p01}`, `${c10} ${vs} ${p10}`, `${c11} ${vs} ${p11}`], lang);
+          // with the margins fixed a 2x2 table of events has one degree of freedom, so the four cells hold or fail together
+          return nEq === 3
+            ? (en ? `Cell against product: ${list}. All of them match: for events the four cells hold or fail together.` : `Celulă față de produs: ${list}. Toate se potrivesc: la evenimente cele patru celule se verifică sau cad împreună.`)
+            : (en ? `Cell against product: ${list}. None of them matches: for events the four cells hold or fail together, so one failed equation already decides.` : `Celulă față de produs: ${list}. Niciuna nu se potrivește: la evenimente cele patru celule se verifică sau cad împreună, deci o singură egalitate nerespectată hotărăște.`);
         }
         default: return en
-          ? `With the same margins, the independent table would be ${p00}, ${p01}, ${p10}, ${p11}: every cell equals its product, so ${X} and ${Y} would be independent.`
-          : `Cu aceleași marginale, tabelul independent ar fi ${p00}, ${p01}, ${p10}, ${p11}: fiecare celulă este egală cu produsul ei, deci ${X} și ${Y} ar fi independente.`;
+          ? `With the same margins, the independent table would be ${joinList([p00, p01, p10, p11], lang)}: every cell equals its product, so ${X} and ${Y} would be independent.`
+          : `Cu aceleași marginale, tabelul independent ar fi ${joinList([p00, p01, p10, p11], lang)}: fiecare celulă este egală cu produsul ei, deci ${X} și ${Y} ar fi independente.`;
       }
     };
     return { step: s, kind, cells, marks, caption: { en: cap('en'), ro: cap('ro') }, variant: s === 6 ? 'independent' : 'data' };

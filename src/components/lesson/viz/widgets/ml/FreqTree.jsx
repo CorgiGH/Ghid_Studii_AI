@@ -64,7 +64,7 @@ export function FreqTreeBody({ props, stepper }) {
         {f.step >= 7 && (
           <div className="mlw-stats">
             <Stat id="positives" value={m.positives} shown={group(m.positives)} label={lab('pos')} />
-            {m['positive-prob'] !== undefined && <Stat id="positive-prob" value={m['positive-prob']} shown={loc(m['positive-prob'], l)} label={t(`all ${lab('pos')}`, `toți cei ${lab('pos')}`)} />}
+            {m['positive-prob'] !== undefined && <Stat id="positive-prob" value={m['positive-prob']} shown={loc(m['positive-prob'], l)} label={t(`share ${lab('pos')}`, `ponderea celor ${lab('pos')}`)} />}
             <Stat id="fraction" value={m.fraction} shown={m.fraction.split('/').map(group).join('/')} label={t('fraction', 'fracția')} />
             <Stat id="posterior" value={m.posterior} shown={loc(m.posterior, l)} label={`${t('result', 'rezultat')}`} keyed />
           </div>

@@ -12,7 +12,6 @@ const STAT = {
   favourable: { en: 'favourable', ro: 'favorabile', key: false },
   ratio: { en: 'by counting', ro: 'prin numărare', key: true },
   mass: { en: 'mass of one outcome', ro: 'masa unui rezultat', key: false },
-  condMass: { en: 'mass after', ro: 'masa după', key: false },
   factor: { en: 'factor', ro: 'factor', key: false },
   cond: { en: 'result', ro: 'rezultat', key: true },
 };
@@ -21,6 +20,7 @@ function statLabel(id, ev, t) {
   if (id === 'pG') return `P(${ev.learned})`;
   if (id === 'pAG') return `P(${ev.asked} ∩ ${ev.learned})`;
   if (id === 'pA') return `P(${ev.asked})`;
+  if (id === 'condMass') return t(`new mass of an outcome in ${ev.learned}`, `masa nouă a unui rezultat din ${ev.learned}`);
   if (id === 'cond') return `P(${ev.asked} | ${ev.learned})`;
   if (id === 'ratio') return `P(${ev.asked} | ${ev.learned}) ${t('by counting', 'prin numărare')}`;
   const s = STAT[id];

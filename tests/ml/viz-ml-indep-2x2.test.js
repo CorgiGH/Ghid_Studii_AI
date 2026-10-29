@@ -11,7 +11,7 @@ vi.mock('../../src/contexts/AppContext', () => ({ useApp: () => ({ t: (en, ro) =
 vi.mock('../../src/lesson/useLessonStore', () => ({ getLessonStore: () => ({}), useLessonStore: () => ({}) }));
 vi.mock('motion/react', async (orig) => ({ ...(await orig()), useReducedMotion: () => true }));
 
-const { Indep2x2Body } = await import('../../src/components/lesson/viz/widgets/ml/Indep2x2.jsx');
+const { default: Indep2x2, Indep2x2Body } = await import('../../src/components/lesson/viz/widgets/ml/Indep2x2.jsx');
 
 // The outline's L3 example (Cn-s1:7): P(X)=0.5, P(Y)=0.2, P(X and Y)=0.11 out of 100.
 const SEMINAR = { counts: [[11, 39], [9, 41]], labels: { x: 'X', y: 'Y' } };
@@ -62,9 +62,33 @@ describe('ml-indep-2x2 logic: the outline numbers', () => {
     expect(I.frame(5).caption.en).toContain('All of them match');
     expect(I.frame(5).cells.every((c) => c.sign === 'eq')).toBe(true);
   });
-  it('writes the Romanian comma and the conditional form', () => {
-    expect(L.frame(3).caption.ro).toBe('0,11 ≠ 0,1: nu sunt independente. Forma condiționată spune la fel: P(Y | X) = 0,22 ≠ 0,2 = P(Y). Egalitatea trebuie să fie exactă.');
-    expect(L.frame(5).caption.ro).toContain('Niciuna nu se potrivește');
+  it('writes the Romanian comma and the conditional form in the lesson terms', () => {
+    expect(L.frame(3).caption.ro).toBe('0,11 ≠ 0,1: nu sunt independente. Forma cu probabilitate condiționată spune la fel: P(Y | X) = 0,22 ≠ 0,2 = P(Y). Egalitatea trebuie să fie exactă.');
+    expect(L.frame(3).caption.en).toContain('The conditional-probability form agrees');
+  });
+  it('lists each cell against its product with "față de", never with a slash that reads as a division', () => {
+    expect(L.frame(5).caption.ro).toBe('Celulă față de produs: 0,39 față de 0,4; 0,09 față de 0,1; 0,41 față de 0,4. Niciuna nu se potrivește: la evenimente cele patru celule se verifică sau cad împreună, deci o singură egalitate nerespectată hotărăște.');
+    expect(L.frame(5).caption.en).toBe('Cell against product: 0.39 against 0.4, 0.09 against 0.1, 0.41 against 0.4. None of them matches: for events the four cells hold or fail together, so one failed equation already decides.');
+    for (const props of [SEMINAR, INDEP]) {
+      const X = indep2x2(props);
+      for (let s = 0; s < X.n; s += 1) for (const lang of ['en', 'ro']) expect(X.frame(s).caption[lang], `frame ${s}`).not.toMatch(/\d \/ \d/);
+    }
+  });
+  it('Romanian lists of decimal-comma numbers use "; ", never the ambiguous ", " (0,1, 0,4)', () => {
+    for (const props of [SEMINAR, INDEP]) {
+      const X = indep2x2(props);
+      for (let s = 0; s < X.n; s += 1) expect(X.frame(s).caption.ro, `frame ${s}`).not.toMatch(/\d,\d+, (?=[−\d(P])/);
+    }
+    expect(L.frame(6).caption.ro).toContain('tabelul independent ar fi 0,1; 0,4; 0,1; 0,4:');
+    expect(L.frame(6).caption.en).toContain('the independent table would be 0.1, 0.4, 0.1, 0.4:');
+  });
+  it('the four cells always agree: one equal cell means all four are equal (consistent margins)', () => {
+    for (let a = 0; a <= 6; a += 1) for (let b = 0; b <= 6; b += 1) for (let c = 0; c <= 6; c += 1) for (let d = 0; d <= 6; d += 1) {
+      const props = { counts: [[a, b], [c, d]], labels: { x: 'X', y: 'Y' } };
+      if (indepProblems(props).length) continue;
+      const eq = Object.values(indep2x2(props).q.equal);
+      expect(new Set(eq).size, JSON.stringify(props.counts)).toBe(1);
+    }
   });
 });
 
@@ -104,6 +128,13 @@ describe('ml-indep-2x2 render', () => {
       }
     }
     LANG = 'ro';
+  });
+  it('with predict, the widget shows only "Arată-mi" (no Next) and the first question', () => {
+    LANG = 'ro';
+    const h = renderToStaticMarkup(React.createElement(Indep2x2, { props: SEMINAR, predict: true }));
+    expect(h).toContain('Arată-mi');
+    expect(h).not.toContain('Mai departe');
+    expect(h).toContain(esc(indep2x2(SEMINAR).frame(0).caption.ro));
   });
   it('the end state (reduced motion) is the independent table', () => {
     const h = html(6);
