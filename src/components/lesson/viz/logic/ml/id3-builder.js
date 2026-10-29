@@ -41,6 +41,8 @@ export function stumpsModel(props) {
     table = { headers: P.headers, rows: P.rows };
   }
   const showValues = props.showValues !== false;
+  // boxes given by a statement are worked out; boxes over a table are counted
+  const counted = !props.given;
   const frames = [{ kind: 'setup' }];
   stumps.forEach((_, i) => frames.push({ kind: 'boxes', i }));
   if (showValues) frames.push({ kind: 'formula' }, { kind: 'values' }, { kind: 'winner' });
@@ -66,8 +68,8 @@ export function stumpsModel(props) {
         items: [{
           key: `box${frames[k].i}`,
           prompt: both((lang) => (lang === 'en'
-            ? `How many + and − examples fall in each branch of ${nm(s, 'en')}? Work them out, then show the boxes.`
-            : `Câte exemple + și câte − cad pe fiecare ramură a lui ${nm(s, 'ro')}? Calculează-le, apoi arată cutiile.`)),
+            ? `How many + and − examples fall in each branch of ${nm(s, 'en')}? ${counted ? 'Count them' : 'Work them out'}, then show the boxes.`
+            : `Câte exemple + și câte − cad pe fiecare ramură a lui ${nm(s, 'ro')}? ${counted ? 'Numără-le' : 'Calculează-le'}, apoi arată cutiile.`)),
           options: [{ id: 'show', label: { en: 'Show the boxes', ro: 'Arată cutiile' } }],
         }],
       };
@@ -97,8 +99,8 @@ export function stumpsModel(props) {
       const s = stumps[f.i];
       if (M.boxesHidden(k, c)) {
         return T(
-          `${nm(s, lang)}: how many + and − examples fall in each branch? Count them before the boxes show.`,
-          `${nm(s, lang)}: câte exemple + și câte − cad pe fiecare ramură? Numără-le înainte să apară cutiile.`,
+          `${nm(s, lang)}: how many + and − examples fall in each branch? ${counted ? 'Count them' : 'Work them out'} before the boxes show.`,
+          `${nm(s, lang)}: câte exemple + și câte − cad pe fiecare ramură? ${counted ? 'Numără-le' : 'Calculează-le'} înainte să apară cutiile.`,
         );
       }
       const parts = s.branches.map((b) => `${lab(b.value, lang)} ${boxText(b.counts)}`).join('; ');

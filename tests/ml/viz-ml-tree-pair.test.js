@@ -97,3 +97,12 @@ describe('validateViz', () => {
     expect(v({ left: ID3, right: MIN, counts: ['nodes'] })).not.toEqual([]);
   });
 });
+
+describe('second review', () => {
+  it('an edge names its test (C = 0), so a branch value is never read as the number of a test', () => {
+    const html = renderToStaticMarkup(React.createElement(PairBody, { model: treePairModel(PROPS) }));
+    expect(html).toContain('<span class="mlv-edge">C = 0</span>');
+    expect(html).toContain('<span class="mlv-edge">A = 1</span>');
+    expect(html).not.toContain('<span class="mlv-edge">0</span>');
+  });
+});

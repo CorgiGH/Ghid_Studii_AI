@@ -373,3 +373,37 @@ describe('review fixes', () => {
     expect(idx).toContain('--ml-muted-ink: color-mix(in srgb, var(--theme-muted-text) 60%, var(--theme-content-text));');
   });
 });
+
+describe('second review', () => {
+  const stage = (M, k, predict, picks = {}) => renderToStaticMarkup(React.createElement(Stage, { model: M, k, predict, picks }));
+  it('full: the rules use the outline notation IF ... ∧ ... THEN (L11 C5), in both languages', () => {
+    const M = fullModel(FULL);
+    const h = stage(M, M.count - 1, false);
+    expect(h).not.toMatch(/DACĂ|ATUNCI|ȘI/);
+    const text = h.replace(/<[^>]+>/g, '');
+    expect(text).toContain('IF running nose = + THEN ill = +');
+    expect(text).toContain('IF running nose = - ∧ fever = + THEN ill = +');
+    expect(text).toContain('IF running nose = - ∧ fever = - THEN ill = -');
+  });
+  it('full with predict: while the learner picks the attribute of the marked node, the table marks that node\'s rows', () => {
+    const M = fullModel(FULL);
+    const rowsMarked = (h) => (h.match(/<tr class="pick">/g) || []).length;
+    expect(rowsMarked(stage(M, 1, false))).toBe(6); // the frame of the root split: all rows
+    expect(rowsMarked(stage(M, 1, true))).toBe(3); // asked next: running nose = -, rows 3, 5 and 6
+    expect(rowsMarked(stage(M, 0, true))).toBe(6);
+  });
+  it('compare: each pair shows its shares in short, the words "minority share" once', () => {
+    const M = compareModel(CASES);
+    const h = stage(M, 1, false);
+    expect((h.match(/cota minoritară/g) || []).length).toBe(1);
+    expect(h).toContain('data-value="1/5"');
+  });
+  it('stumps: the caption and the prompt ask the same thing (computed from a statement, counted from a table)', () => {
+    const G = stumpsModel(P21);
+    expect(G.caption(1, { predict: true, picks: {} }).ro).toContain('Calculează-le');
+    expect(G.pickSpec(1, true).items[0].prompt.ro).toContain('Calculează-le');
+    const V = stumpsModel({ mode: 'stumps', table: VAMP, target: 'V' });
+    expect(V.caption(1, { predict: true, picks: {} }).ro).toContain('Numără-le');
+    expect(V.pickSpec(1, true).items[0].prompt.ro).toContain('Numără-le');
+  });
+});

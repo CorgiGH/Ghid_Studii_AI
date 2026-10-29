@@ -39,15 +39,16 @@ export function DupStage({ model: M, k, predict }) {
       </div>
       <div className={`mlv-counter${up ? ' up' : ''}`}>
         <span>{t('Smallest training error', 'Eroarea minimă la antrenare')}</span>
-        {prev && <><b className="mlv-dim" data-value={String(prev.errs)}>{prev.errs}</b><span className="mlv-dim">/</span><b className="mlv-dim" data-value={String(prev.n)}>{prev.n}</b><span aria-hidden="true">{'→'}</span></>}
-        <b data-value={String(state.errs)}>{state.errs}</b><span>/</span><b data-value={String(state.n)}>{state.n}</b>
+        {/* each fraction stays whole when the line wraps on a phone */}
+        {prev && <><span className="mlv-frac mlv-dim"><b data-value={String(prev.errs)}>{prev.errs}</b>/<b data-value={String(prev.n)}>{prev.n}</b></span><span aria-hidden="true">{'→'}</span></>}
+        <span className="mlv-frac"><b data-value={String(state.errs)}>{state.errs}</b>/<b data-value={String(state.n)}>{state.n}</b></span>
         {summary && <span>= <Val v={fmtDec(state.errs / state.n)} /></span>}
       </div>
       {g && (
         <div className="mlv-group">
           <Val v={tupleText(g.vals)} />
           <span data-value={String(g.n)}>{t('appears', 'apare')} {t(times(g.n, 'en'), times(g.n, 'ro'))}:</span>
-          {g.labels.map((l, i) => <span key={i}>{tgt} = <Val v={String(l)} />: <Val v={String(g.counts[i])} />{i < g.labels.length - 1 ? ';' : ''}</span>)}
+          {g.labels.map((l, i) => <span key={i}>{tgt} = <Val v={String(l)} /> <span data-value={String(g.counts[i])}>{t(times(g.counts[i], 'en'), times(g.counts[i], 'ro'))}</span>{i < g.labels.length - 1 ? ';' : ''}</span>)}
           {g.errs > 0 && <span>{t('a tree is wrong on', 'un arbore greșește pe')} <Val v={String(g.errs)} /> {t(enNoun(g.errs, 'row', 'rows'), roNoun(g.errs, 'rând', 'rânduri'))}</span>}
         </div>
       )}

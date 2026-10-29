@@ -124,13 +124,19 @@ function PairRows({ c, f }) {
             <div key={j} className="mlv-seg" style={grow(A.branches[j])}>
               <span className="mlv-sym" data-value={p.sym}>{p.sym}</span>
               {f.kind === 'symbols' && p.shares && (
-                <span className="mlv-wt">{t('minority share', 'cota minoritară')} <Val v={showN(p.shares[0])} /> {p.sym} <Val v={showN(p.shares[1])} /></span>
+                <span className="mlv-wt"><Val v={showN(p.shares[0])} /> {p.sym} <Val v={showN(p.shares[1])} /></span>
               )}
             </div>
           ))}
         </div>
       )}
-      {showSym && f.kind === 'symbols' && <span className="mlv-dim">{t('H(p) grows on', 'H(p) crește pe')} [<Val v="0" />, <Val v="1/2" />]</span>}
+      {showSym && f.kind === 'symbols' && (
+        <span className="mlv-dim">
+          {c.pairs.some((p) => p.shares)
+            ? t(`Under each symbol: the minority share in ${L(A.label)} against ${L(B.label)}; H(p) grows on`, `Sub fiecare simbol: cota minoritară în ${L(A.label)} față de ${L(B.label)}; H(p) crește pe`)
+            : t('H(p) grows on', 'H(p) crește pe')} [<Val v="0" />, <Val v="1/2" />]
+        </span>
+      )}
       <span className="mlv-cmp-name">{L(B.label)}</span>
       {row(B, wts)}
     </div>
@@ -244,7 +250,8 @@ function TreeNode({ node, k, M, markNext }) {
 export function FullStage({ model: M, k, predict }) {
   const { t, L } = useL();
   const f = M.frames[k];
-  const focus = M.focusNode(k);
+  // with predict, the rows of the node the learner is asked about (the marked one); else the rows of the split shown
+  const focus = predict && M.nextNode(k) ? M.nextNode(k) : M.focusNode(k);
   const focusIds = focus ? new Set(focus.ids) : null;
   const markNext = predict ? M.nextNode(k) : null;
   const e = f.kind === 'split' ? M.expansions[f.e] : null;
@@ -281,8 +288,9 @@ export function FullStage({ model: M, k, predict }) {
           <ol className="mlv-rules">
             {M.leaves.map((lf, i) => (
               <li key={i}>
-                {t('IF', 'DACĂ')} {M.pathOf(lf).map((ed, q) => <span key={q}>{q > 0 && ` ${t('AND', 'ȘI')} `}{L(headerOf(M.P, ed.attr))} = {String(ed.value)}</span>)}
-                {' '}{t('THEN', 'ATUNCI')} {L(headerOf(M.P, M.P.target))} = <b>{String(lf.major.label)}</b>
+                {/* the outline's notation for rules, in both languages: IF a = x ∧ b = y THEN class (L11 C5) */}
+                {M.pathOf(lf).length > 0 && <>IF {M.pathOf(lf).map((ed, q) => <span key={q}>{q > 0 && ' ∧ '}{L(headerOf(M.P, ed.attr))} = {String(ed.value)}</span>)} THEN </>}
+                {L(headerOf(M.P, M.P.target))} = <b>{String(lf.major.label)}</b>
               </li>
             ))}
           </ol>

@@ -59,7 +59,7 @@ describe('the counter (T21T2 1)', () => {
     expect(M.caption(0).ro).toContain('Tabelul are 8 rânduri.');
     expect(M.caption(0).ro).toContain('0/8');
     expect(M.caption(1).ro).toContain('Rând nou (0,0,0) cu Y = 1');
-    expect(M.caption(1).ro).toContain('de 2 ori cu etichetele 0 (1) și 1 (1)');
+    expect(M.caption(1).ro).toContain('de 2 ori, cu Y = 0 o dată și Y = 1 o dată');
     expect(M.caption(1).ro).toContain('Eroarea minimă la antrenare trece de la 0/8 la 1/9.');
     expect(M.caption(1).ro).toContain('oricare etichetă ar da un arbore, greșește pe 1 rând.');
     expect(M.caption(2).ro).toContain('de la 1/9 la 2/10');
@@ -153,7 +153,7 @@ describe('review fixes', () => {
   it('the group line counts the rows per label in words, with the target column named', () => {
     const html = renderToStaticMarkup(React.createElement(DupStage, { model: M, k: 1, predict: false }));
     expect(html).toContain('apare de 2 ori');
-    expect(html).toMatch(/Y = <span data-value="0">0<\/span>: <span data-value="1">1<\/span>/);
+    expect(html).toMatch(/Y = <span data-value="0">0<\/span> <span data-value="1">o dată<\/span>/);
     expect(html).toContain('un arbore greșește pe');
     expect(html).not.toContain('time(s)');
   });
@@ -166,5 +166,26 @@ describe('review fixes', () => {
     const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/id3.css', import.meta.url), 'utf8');
     expect(css).toMatch(/\.mlv-sumtable th \{[^}]*white-space: normal/);
     expect(renderToStaticMarkup(React.createElement(DupStage, { model: M, k: 3, predict: false }))).toContain('mlv-sumtable');
+  });
+});
+
+describe('second review', () => {
+  const M = dupModel(PROPS);
+  it('the labels of a group are counted in words, not as "0 (1) and 1 (1)"', () => {
+    expect(M.caption(1).ro).toContain('aceste intrări apar acum de 2 ori, cu Y = 0 o dată și Y = 1 o dată.');
+    expect(M.caption(1).ro).toContain('Etichetele sunt la egalitate: oricare etichetă ar da un arbore, greșește pe 1 rând.');
+    expect(M.caption(1).en).toContain('these inputs now appear 2 times, with Y = 0 once and Y = 1 once.');
+    const D = dupModel({ table: TABLE, target: 'Y', added: [[0, 0, 0, 1], [0, 0, 0, 1]] });
+    expect(D.caption(2).ro).toContain('de 3 ori, cu Y = 0 o dată și Y = 1 de 2 ori. Un arbore le dă o singură etichetă, deci greșește pe 1 rând.');
+    const html = renderToStaticMarkup(React.createElement(DupStage, { model: M, k: 1, predict: false }));
+    expect(html.replace(/<[^>]+>/g, '')).toContain('Y = 0 o dată;');
+    expect(html.replace(/<[^>]+>/g, '')).toContain('Y = 1 o dată');
+    expect(html.replace(/<[^>]+>/g, '')).not.toMatch(/Y = 0: 1/);
+  });
+  it('the counter keeps each fraction whole on a phone: 0/8 → 1/9 never breaks inside a fraction', () => {
+    const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/id3.css', import.meta.url), 'utf8');
+    expect(css).toMatch(/\.mlv-frac \{[^}]*white-space: nowrap/);
+    const html = renderToStaticMarkup(React.createElement(DupStage, { model: M, k: 1, predict: false }));
+    expect((html.match(/class="mlv-frac/g) || []).length).toBe(2);
   });
 });

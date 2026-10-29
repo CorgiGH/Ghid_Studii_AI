@@ -95,12 +95,13 @@ export function dupModel(props) {
       } else if (!g.contradictory) {
         what = T(`New row ${key} with ${tgt} = ${lbl}: these inputs now appear ${times(g.n, 'en')}, always with the same label. A repeated example contradicts nothing.`, `Rând nou ${key} cu ${tgt} = ${lbl}: aceste intrări apar acum ${times(g.n, 'ro')}, mereu cu aceeași etichetă. Un exemplu repetat nu contrazice nimic.`);
       } else {
-        const lc = g.labels.map((l, i) => `${String(l)} (${g.counts[i]})`);
+        // "Y = 0 once and Y = 1 twice": each label with how often it occurs in the group
+        const lc = g.labels.map((l, i) => `${tgt} = ${String(l)} ${times(g.counts[i], lang)}`);
         const wrong = cnt(lang, g.errs, 'row', 'rows', 'rând', 'rânduri');
         const tie = g.tie
-          ? T(` The labels are tied (${listIn(lang, g.counts.map(String))}): whichever label a tree gives, it is wrong on ${wrong}.`, ` Etichetele sunt la egalitate (${listIn(lang, g.counts.map(String))}): oricare etichetă ar da un arbore, greșește pe ${wrong}.`)
+          ? T(` The labels are tied: whichever label a tree gives, it is wrong on ${wrong}.`, ` Etichetele sunt la egalitate: oricare etichetă ar da un arbore, greșește pe ${wrong}.`)
           : T(` A tree gives all of them one label, so it is wrong on ${wrong}.`, ` Un arbore le dă o singură etichetă, deci greșește pe ${wrong}.`);
-        what = T(`New row ${key} with ${tgt} = ${lbl}: these inputs now appear ${times(g.n, 'en')} with labels ${listIn(lang, lc)}.${tie}`, `Rând nou ${key} cu ${tgt} = ${lbl}: aceste intrări apar acum ${times(g.n, 'ro')} cu etichetele ${listIn(lang, lc)}.${tie}`);
+        what = T(`New row ${key} with ${tgt} = ${lbl}: these inputs now appear ${times(g.n, 'en')}, with ${listIn(lang, lc)}.${tie}`, `Rând nou ${key} cu ${tgt} = ${lbl}: aceste intrări apar acum ${times(g.n, 'ro')}, cu ${listIn(lang, lc)}.${tie}`);
       }
       return `${what} ${counter}${fb}`;
     }

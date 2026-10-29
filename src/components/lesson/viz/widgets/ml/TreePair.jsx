@@ -14,7 +14,8 @@ function Item({ node, edge }) {
           ? <span className="mlv-leafchip" data-leaf={String(node.label)}>{'\u2192'} {String(node.label)}</span>
           : <><span className="mlv-tnum" data-value={String(node.num)}>{node.num}</span><b className="mlv-test">{node.attr}?</b></>}
       </span>
-      {!leaf && <ul>{node.kids.map((k, i) => <Item key={i} node={k.node} edge={k.value} />)}</ul>}
+      {/* "Legs = 2": a bare 2 beside the numbered test 2 would read as a test number */}
+      {!leaf && <ul>{node.kids.map((k, i) => <Item key={i} node={k.node} edge={`${node.attr} = ${k.value}`} />)}</ul>}
     </li>
   );
 }
