@@ -161,6 +161,7 @@ Asked one at a time after the builder check; answers go here.
 - **Public or laptop?** Public. Alex, 2026-10-29: "my classmates also need this". Each lesson is pushed to `main` (the public site) on its own once it passes every check, in the priority order below (D-067, D-070).
 - **Order.** The teacher's 2026-10-29 list of what the Friday test needs sets the priority: L1–L16, L18–L22, the two paper tests, then L17, L23, L24 (D-068). Items of that list the outline covered only partly are added to their owner lesson (D-069); the map is `ml-outline/2026-10-29-teacher-list-coverage.md`.
 - **Published ids are frozen.** Once a lesson is public, its lesson, step and block ids never change: learners' progress is stored under them.
+- **Clarity rewrite (2026-10-30, D-083).** Every lesson is rewritten to the plan's clarity standard and republished in order. Blocks that survive keep their ids; new blocks get new ids; a removed id is never reused for other content.
 
 ## 12. Left to the builder
 
