@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import {
   overflowFindings, escapesContainer, scrollsX, sticksOut, smallTarget, visibleBand, hitFindings, joltFindings,
-  parseColour, effectiveColour, sameColour, backgroundFindings, wrongAttempt, rightText, unknownLessons, MIN_TARGET,
+  parseColour, effectiveColour, sameColour, backgroundFindings, wrongAttempt, rightText, unknownLessons, MIN_TARGET, buttonClicks,
 } from '../../scripts/ml/walk-helpers.mjs'
 import { grade, isRight } from '../../src/ml/calc/answer.js'
 import { scopeOf } from '../../src/components/lesson/blocks/calcSpec.js'
@@ -263,5 +263,20 @@ describe('the shared player and viz kit, as the walk needs them', () => {
     expect(rule('.lp-skip')).toMatch(/min-height:\s*44px/)
     expect(rule('.viz-btn')).toMatch(/min-height:\s*44px/)
     expect(rule('.viz-btn')).toMatch(/min-width:\s*44px/)
+  })
+})
+
+describe('option buttons of a calc field', () => {
+  // A tf or choice field is single-select: pressing one option releases the others. Unpressing the old one by a second
+  // click would press it again (True after a wrong False came back as False, Lecția 6, ex. 0.15).
+  it('a single-select field clicks only the wanted option, once', () => {
+    expect(buttonClicks([false, true], [0], true)).toEqual([0])
+    expect(buttonClicks([true, false], [1], true)).toEqual([1])
+    expect(buttonClicks([true, false], [0], true)).toEqual([])
+    expect(buttonClicks([false, false], [1], true)).toEqual([1])
+  })
+  it('a multi field toggles each button whose state differs', () => {
+    expect(buttonClicks([true, false, false], [1, 2], false)).toEqual([0, 1, 2])
+    expect(buttonClicks([false, true, false], [1], false)).toEqual([])
   })
 })

@@ -171,6 +171,14 @@ export function backgroundFindings(samples, allowed) {
 
 const TF_VALUES = ['true', 'false']
 
+// The option buttons of a calc field to click, in order, so that exactly the options `want` (indexes) end up pressed, from the
+// pressed `states` read once before clicking. A tf or choice field is single-select (pressing an option releases the others),
+// so only the wanted option is clicked; a second click on the old one would press it again. A multi field toggles each button.
+export function buttonClicks(states, want, single) {
+  if (single) return want.filter((j) => !states[j]).slice(0, 1)
+  return states.map((s, j) => (s !== want.includes(j) ? j : -1)).filter((j) => j >= 0)
+}
+
 // The text to type for the right answer: the value of the field's formula over the block's data, so a wrong `expected` in the JSON
 // makes the page's verdict wrong and the walk fails (the content test checks the same agreement). A formula that does not evaluate
 // falls back to `expected`.

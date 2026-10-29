@@ -52,7 +52,7 @@ export const ML_TAGS = [
   'var-0-inseamna-x-0', 'var-0-inseamna-media-0', 'desfacere-cu-semn-gresit', 'doar-o-celula',
   'sigma-in-loc-de-sigma-2', 'fara-factorul-2', 'linia-gresita', 'celula-singura', 'suma-in-loc-de-produs',
   'produs-pe-randuri', 'independenta-se-mosteneste', 'niciodata', 'o-singura-felie', 'dependenta-marginala',
-  'doar-valorile-lui-z', 'presupui-independenta-inainte-de-a-insuma', 'o-singura-celula', 'insumare-dupa-z',
+  'doar-valorile-lui-z', 'presupui-independenta-inainte-de-a-insuma', 'o-singura-celula', 'insumare-dupa-z', 'insumare-dupa-w',
   'marginita-de-1', 'numarul-de-valori', 'ln-in-loc-de-log2', 'semn-pierdut', 'log10', 'ln',
   'h-probabilitatea-clasei-rare', 'h-probabilitatea-clasei-majoritare', 'doar-termenul-rar',
   'clasa-majoritara-conteaza', 'etichetele-conteaza', 'entropia-comuna-cea-mai-mare-dintre-ele',

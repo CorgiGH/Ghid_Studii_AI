@@ -1,0 +1,2193 @@
+{
+ "meta": {
+  "id": "ml-l06",
+  "title": {
+   "en": "Lesson 6: Conditional independence of random variables",
+   "ro": "Lecția 6: Independența condiționată a variabilelor aleatoare"
+  },
+  "shortTitle": {
+   "en": "L6: Conditional independence",
+   "ro": "L6: Independența condiționată"
+  },
+  "source": {
+   "en": "Ciortuz, Machine Learning, slides, seminar 2 and workbook chapter 0, UAIC FII",
+   "ro": "Ciortuz, Învățare automată, cursul, seminarul 2 și culegerea, capitolul 0, UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "ml-l06-s1",
+   "title": {
+    "en": "Two devices that copy a bit",
+    "ro": "Două aparate care copiază un bit"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l06-pre",
+     "question": {
+      "en": "A correct bit $Z$ is 0 or 1, each with probability 0.5. Two devices, $X$ and $Y$, try to copy it, but they make mistakes: each one gives the value of $Z$ with probability 0.8 and the flipped value (0 instead of 1, or 1 instead of 0) with probability 0.2. If we knew $Z$, the mistakes of the two devices would have no connection with each other. We do not see $Z$. We only see that device $X$ gave 1. Compared with the 0.5 we had at the start, how does the probability that device $Y$ gives 1 change?",
+      "ro": "Un bit corect $Z$ este 0 sau 1, fiecare cu probabilitatea 0,5. Două aparate, $X$ și $Y$, încearcă să-l copieze, dar greșesc: fiecare dă valoarea lui $Z$ cu probabilitatea 0,8 și valoarea inversată (0 în loc de 1, sau 1 în loc de 0) cu probabilitatea 0,2. Dacă am ști $Z$, greșelile celor două aparate nu ar avea nicio legătură între ele. Noi nu vedem $Z$. Vedem doar că aparatul $X$ a dat 1. Față de 0,5 de la început, cum se schimbă probabilitatea ca aparatul $Y$ să dea 1?"
+     },
+     "table": {
+      "columns": [
+       "Bitul $Z$",
+       "$P(Z)$",
+       "$P(X{=}1\\mid Z)$",
+       "$P(Y{=}1\\mid Z)$"
+      ],
+      "rows": [
+       [
+        "0",
+        "0,5",
+        "0,2",
+        "0,2"
+       ],
+       [
+        "1",
+        "0,5",
+        "0,8",
+        "0,8"
+       ]
+      ],
+      "caption": {
+       "en": "What the devices give, for each correct bit",
+       "ro": "Ce dau aparatele, pentru fiecare bit corect"
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "It goes down, below 0.5",
+        "ro": "Scade, sub 0,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Seeing $X=1$ makes $Z=1$ more likely, and when $Z=1$ the device $Y$ gives 1 with probability 0.8. So it cannot go down.",
+        "ro": "Faptul că $X=1$ face mai probabil $Z=1$, iar când $Z=1$ aparatul $Y$ dă 1 cu probabilitatea 0,8. Deci nu poate scădea."
+       },
+       "misconception": "sens-inversat"
+      },
+      {
+       "text": {
+        "en": "It goes up, above 0.5",
+        "ro": "Crește, peste 0,5"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Seeing $X=1$ tells us that $Z$ is probably 1, and device $Y$ copies the same bit $Z$. You compute the exact value in the example that follows. Keep your answer.",
+        "ro": "Faptul că $X=1$ ne spune că $Z$ este probabil 1, iar aparatul $Y$ copiază același bit $Z$. Valoarea exactă o calculezi în exemplul care urmează. Păstrează răspunsul."
+       }
+      },
+      {
+       "text": {
+        "en": "It stays 0.5",
+        "ro": "Rămâne 0,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "This assumes the devices are independent. They are independent only when $Z$ is known; without $Z$, device $X$ tells us something about $Z$, and so about $Y$.",
+        "ro": "Asta presupune că aparatele sunt independente. Sunt independente doar când $Z$ este cunoscut; fără $Z$, aparatul $X$ ne spune ceva despre $Z$, deci și despre $Y$."
+       },
+       "misconception": "variabile-independente-tacit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s2",
+   "title": {
+    "en": "Eight cells from three factors",
+    "ro": "Opt celule din trei factori"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Each device is a noisy copy of $Z$: it copies the correct bit, but sometimes makes a mistake. The three variables $X$, $Y$, $Z$ have two values each (0 or 1), so their joint distribution has $2\\cdot2\\cdot2=8$ cells (see Lecția 5 for the joint distribution). The probability of a cell $(x,y,z)$ is written with the chain rule for three variables (see Lecția 5): first the bit $Z$, then device $X$, then device $Y$: $P(x,y,z)=P(z)\\,P(x\\mid z)\\,P(y\\mid x,z)$. Here the assumption comes in: when $z$ is known, the mistakes of the devices have no connection, so learning $x$ changes nothing about $y$: $P(y\\mid x,z)=P(y\\mid z)$. Three factors remain: $P(x,y,z)=P(z)\\,P(x\\mid z)\\,P(y\\mid z)$. We read $P(x\\mid z)$ as the probability that device $X$ gives $x$ when the correct bit is $z$.",
+      "ro": "Fiecare aparat este o copie zgomotoasă a lui $Z$: copiază bitul corect, dar uneori greșește. Cele trei variabile $X$, $Y$, $Z$ au câte două valori (0 sau 1), deci distribuția lor comună are $2\\cdot2\\cdot2=8$ celule (vezi Lecția 5 pentru distribuția comună). Probabilitatea unei celule $(x,y,z)$ se scrie cu regula de înlănțuire pentru trei variabile (vezi Lecția 5): mai întâi bitul $Z$, apoi aparatul $X$, apoi aparatul $Y$: $P(x,y,z)=P(z)\\,P(x\\mid z)\\,P(y\\mid x,z)$. Aici intervine ipoteza: când $z$ este cunoscut, greșelile aparatelor nu au nicio legătură, deci aflarea lui $x$ nu schimbă nimic la $y$: $P(y\\mid x,z)=P(y\\mid z)$. Rămân trei factori: $P(x,y,z)=P(z)\\,P(x\\mid z)\\,P(y\\mid z)$. Citim $P(x\\mid z)$ drept probabilitatea ca aparatul $X$ să dea $x$ când bitul corect este $z$."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ml-l06-m1",
+     "question": {
+      "en": "With the probabilities in the table, how much is $P(X{=}1,Y{=}1,Z{=}1)$, the probability that the correct bit is 1 and both devices give 1?",
+      "ro": "Cu probabilitățile din tabel, cât este $P(X{=}1,Y{=}1,Z{=}1)$, adică probabilitatea ca bitul corect să fie 1 și ambele aparate să dea 1?"
+     },
+     "table": {
+      "columns": [
+       "Bitul $Z$",
+       "$P(Z)$",
+       "$P(X{=}1\\mid Z)$",
+       "$P(Y{=}1\\mid Z)$"
+      ],
+      "rows": [
+       [
+        "0",
+        "0,5",
+        "0,2",
+        "0,2"
+       ],
+       [
+        "1",
+        "0,5",
+        "0,8",
+        "0,8"
+       ]
+      ],
+      "caption": {
+       "en": "What the devices give, for each correct bit",
+       "ro": "Ce dau aparatele, pentru fiecare bit corect"
+      }
+     },
+     "check": {
+      "formula": "0.5*0.8*0.8"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.32",
+        "ro": "0,32"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$0.5\\cdot0.8\\cdot0.8=0.32$: the bit 1 (0.5), then $X$ gives 1 (0.8) and $Y$ gives 1 (0.8), independently when $Z$ is known.",
+        "ro": "$0{,}5\\cdot0{,}8\\cdot0{,}8=0{,}32$: bitul 1 (0,5), apoi $X$ dă 1 (0,8) și $Y$ dă 1 (0,8), independent când $Z$ este cunoscut."
+       }
+      },
+      {
+       "text": {
+        "en": "0.64",
+        "ro": "0,64"
+       },
+       "correct": false,
+       "explain": {
+        "en": "You multiplied only $0.8\\cdot0.8$ and forgot the factor $P(Z{=}1)=0.5$. The bit must also be 1, not only the devices giving 1.",
+        "ro": "Ai înmulțit doar $0{,}8\\cdot0{,}8$ și ai uitat factorul $P(Z{=}1)=0{,}5$. Trebuie ca și bitul să fie 1, nu doar aparatele să dea 1."
+       },
+       "misconception": "uita-priorul"
+      },
+      {
+       "text": {
+        "en": "0.4",
+        "ro": "0,4"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$0.5\\cdot0.8$ takes a single device. The cell asks for both devices, so three factors, not two.",
+        "ro": "$0{,}5\\cdot0{,}8$ ia un singur aparat. Celula cere ambele aparate, deci trei factori, nu doi."
+       },
+       "misconception": "un-singur-termen"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s3",
+   "title": {
+    "en": "Without Z, the two columns add up",
+    "ro": "Fără Z, cele două coloane se adună"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "With the same rule, $P(z)\\,P(x\\mid z)\\,P(y\\mid z)$, all eight cells are filled in; for example $P(X{=}0,Y{=}1,Z{=}0)=0.5\\cdot0.8\\cdot0.2=0.08$. Now we no longer see $Z$: we care only about the pair $(X,Y)$. For each pair we add its two cells, one from the column $Z=0$ and one from the column $Z=1$. This is marginalization: we sum over the variable we do not care about (see Lecția 5).",
+      "ro": "Cu aceeași regulă, $P(z)\\,P(x\\mid z)\\,P(y\\mid z)$, se completează toate cele opt celule; de exemplu $P(X{=}0,Y{=}1,Z{=}0)=0{,}5\\cdot0{,}8\\cdot0{,}2=0{,}08$. Acum nu mai vedem $Z$: ne interesează doar perechea $(X,Y)$. Pentru fiecare pereche adunăm cele două celule ale ei, una din coloana $Z=0$ și una din coloana $Z=1$. Se numește marginalizare: însumăm pe variabila care nu ne interesează (vezi Lecția 5)."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ml-l06-m2",
+     "question": {
+      "en": "Without $Z$: how much is $P(X{=}0,Y{=}0)$, the probability that both devices give 0, whatever the correct bit is? Each device gives 0 in half of the cases: $P(X{=}0)=0.5$ and $P(Y{=}0)=0.5$.",
+      "ro": "Fără $Z$: cât este $P(X{=}0,Y{=}0)$, probabilitatea ca ambele aparate să dea 0, oricare ar fi bitul corect? Fiecare aparat dă 0 în jumătate din cazuri: $P(X{=}0)=0{,}5$ și $P(Y{=}0)=0{,}5$."
+     },
+     "table": {
+      "columns": [
+       "Perechea $(X,Y)$",
+       "$Z=0$",
+       "$Z=1$"
+      ],
+      "rows": [
+       [
+        "$(0,0)$",
+        "0,32",
+        "0,02"
+       ],
+       [
+        "$(0,1)$",
+        "0,08",
+        "0,08"
+       ],
+       [
+        "$(1,0)$",
+        "0,08",
+        "0,08"
+       ],
+       [
+        "$(1,1)$",
+        "0,02",
+        "0,32"
+       ]
+      ],
+      "caption": {
+       "en": "The probabilities of the eight cells",
+       "ro": "Probabilitățile celor opt celule"
+      }
+     },
+     "check": {
+      "formula": "0.32+0.02"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.25",
+        "ro": "0,25"
+       },
+       "correct": false,
+       "explain": {
+        "en": "You multiplied $0.5\\cdot0.5$, as if $X$ and $Y$ were independent. Without $Z$ they are not: you add the cells.",
+        "ro": "Ai înmulțit $0{,}5\\cdot0{,}5$, ca și cum $X$ și $Y$ ar fi independente. Fără $Z$ nu sunt: adună celulele."
+       },
+       "misconception": "produsul"
+      },
+      {
+       "text": {
+        "en": "0.32",
+        "ro": "0,32"
+       },
+       "correct": false,
+       "explain": {
+        "en": "That is only the cell of the column $Z=0$. The pair $(0,0)$ also appears in the column $Z=1$, and both must be counted.",
+        "ro": "Aceea este doar celula din coloana $Z=0$. Perechea $(0,0)$ apare și în coloana $Z=1$, iar ambele trebuie numărate."
+       },
+       "misconception": "doar-o-celula"
+      },
+      {
+       "text": {
+        "en": "0.34",
+        "ro": "0,34"
+       },
+       "correct": true,
+       "explain": {
+        "en": "The pair $(0,0)$ is in both columns: 0.32 when $Z=0$ and 0.02 when $Z=1$. We add them: 0.34.",
+        "ro": "Perechea $(0,0)$ este în ambele coloane: 0,32 când $Z=0$ și 0,02 când $Z=1$. Le adunăm: 0,34."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ml-l06-m3",
+     "question": {
+      "en": "Independence asks for $P(X{=}0,Y{=}0)=P(X{=}0)\\,P(Y{=}0)$. Here $P(X{=}0,Y{=}0)=0.34$ (the sum we just made), and $P(X{=}0)=P(Y{=}0)=0.5$. Are $X$ and $Y$ independent, when we do not know $Z$?",
+      "ro": "Independența cere $P(X{=}0,Y{=}0)=P(X{=}0)\\,P(Y{=}0)$. Aici $P(X{=}0,Y{=}0)=0{,}34$ (suma făcută adineauri), iar $P(X{=}0)=P(Y{=}0)=0{,}5$. Sunt $X$ și $Y$ independente, când nu știm $Z$?"
+     },
+     "check": {
+      "formula": "0.5*0.5"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Yes, because the mistakes of the devices are independent",
+        "ro": "Da, pentru că greșelile aparatelor sunt independente"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The mistakes are independent only when $Z$ is known. Without $Z$, a device that gives 1 makes us think $Z$ is 1, so the other device will also give 1 more often.",
+        "ro": "Greșelile sunt independente doar când $Z$ este cunoscut. Fără $Z$, un aparat care dă 1 ne face să credem că $Z$ este 1, deci și celălalt aparat va da 1 mai des."
+       },
+       "misconception": "variabile-independente-tacit"
+      },
+      {
+       "text": {
+        "en": "No: $0.34$ differs from $0.5\\cdot0.5$",
+        "ro": "Nu: $0{,}34$ este diferit de $0{,}5\\cdot0{,}5$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$0.5\\cdot0.5=0.25$, and 0.25 is not 0.34: the cell is not the product of the marginals, so $X$ and $Y$ are dependent.",
+        "ro": "$0{,}5\\cdot0{,}5=0{,}25$, iar 0,25 nu este 0,34: celula nu este produsul marginalelor, deci $X$ și $Y$ sunt dependente."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s4",
+   "title": {
+    "en": "What X tells us about Y",
+    "ro": "Ce ne spune X despre Y"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Conditional probability (see Lecția 1): $P(Y{=}1\\mid X{=}1)=\\dfrac{P(X{=}1,Y{=}1)}{P(X{=}1)}$. We learn that device $X$ gave 1, and we ask how much we now believe that $Y$ gives 1 as well.",
+      "ro": "Probabilitatea condiționată (vezi Lecția 1): $P(Y{=}1\\mid X{=}1)=\\dfrac{P(X{=}1,Y{=}1)}{P(X{=}1)}$. Aflăm că aparatul $X$ a dat 1 și ne întrebăm cât credem acum că va da 1 și $Y$."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ml-l06-m4",
+     "question": {
+      "en": "How much is $P(Y{=}1\\mid X{=}1)$? Device $X$ gives 1 with probability $P(X{=}1)=0.5$.",
+      "ro": "Cât este $P(Y{=}1\\mid X{=}1)$? Aparatul $X$ dă 1 cu probabilitatea $P(X{=}1)=0{,}5$."
+     },
+     "table": {
+      "columns": [
+       "Perechea $(X,Y)$",
+       "$P(x,y)$"
+      ],
+      "rows": [
+       [
+        "$(0,0)$",
+        "0,34"
+       ],
+       [
+        "$(0,1)$",
+        "0,16"
+       ],
+       [
+        "$(1,0)$",
+        "0,16"
+       ],
+       [
+        "$(1,1)$",
+        "0,34"
+       ]
+      ],
+      "caption": {
+       "en": "The pairs when Z is not seen",
+       "ro": "Perechile când Z nu se vede"
+      }
+     },
+     "check": {
+      "formula": "0.34/0.5"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.68",
+        "ro": "0,68"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$0.34/0.5=0.68$. It is more than the 0.5 we started with: after seeing $X=1$, $Y=1$ became more likely (the answer to the first question).",
+        "ro": "$0{,}34/0{,}5=0{,}68$. Este mai mult decât 0,5 de la început: după ce vedem $X=1$, devine mai probabil și $Y=1$ (răspunsul la prima întrebare)."
+       }
+      },
+      {
+       "text": {
+        "en": "0.34",
+        "ro": "0,34"
+       },
+       "correct": false,
+       "explain": {
+        "en": "0.34 is $P(X{=}1,Y{=}1)$, the probability that both give 1. For the conditional probability you divide by $P(X{=}1)$.",
+        "ro": "0,34 este $P(X{=}1,Y{=}1)$, probabilitatea ca ambele să dea 1. Pentru probabilitatea condiționată împarți la $P(X{=}1)$."
+       },
+       "misconception": "intersectia-in-loc-de-conditionata"
+      },
+      {
+       "text": {
+        "en": "0.5",
+        "ro": "0,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "0.5 would be the answer if $X$ and $Y$ were independent. We saw that they are not.",
+        "ro": "0,5 ar fi răspunsul dacă $X$ și $Y$ ar fi independente. Am văzut că nu sunt."
+       },
+       "misconception": "variabile-independente-tacit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s5",
+   "title": {
+    "en": "We fix Z: a slice of the table",
+    "ro": "Fixăm Z: o felie a tabelului"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Now we fix $Z=0$: we keep only the column $Z=0$, which is a **slice** of the table, and we divide it by $P(Z{=}0)=0.5$, so that it adds up to 1 again. The result is the conditional distribution $P(x,y\\mid Z{=}0)$. The new question: inside the slice, are $X$ and $Y$ still linked?",
+      "ro": "Acum fixăm $Z=0$: păstrăm doar coloana $Z=0$, care este o **felie** a tabelului, și o împărțim la $P(Z{=}0)=0{,}5$, ca să se adune din nou la 1. Rezultatul este distribuția condiționată $P(x,y\\mid Z{=}0)$. Întrebarea nouă: în interiorul feliei, mai sunt $X$ și $Y$ legate?"
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ml-l06-m5",
+     "question": {
+      "en": "What is the slice $P(x,y\\mid Z{=}0)$, for the pairs $(0,0)$, $(0,1)$, $(1,0)$, $(1,1)$ in this order? The column $Z=0$ is divided by $P(Z{=}0)=0.5$.",
+      "ro": "Care este felia $P(x,y\\mid Z{=}0)$, pentru perechile $(0,0)$, $(0,1)$, $(1,0)$, $(1,1)$, în această ordine? Coloana $Z=0$ se împarte la $P(Z{=}0)=0{,}5$."
+     },
+     "table": {
+      "columns": [
+       "Perechea $(X,Y)$",
+       "$Z=0$",
+       "$Z=1$"
+      ],
+      "rows": [
+       [
+        "$(0,0)$",
+        "0,32",
+        "0,02"
+       ],
+       [
+        "$(0,1)$",
+        "0,08",
+        "0,08"
+       ],
+       [
+        "$(1,0)$",
+        "0,08",
+        "0,08"
+       ],
+       [
+        "$(1,1)$",
+        "0,02",
+        "0,32"
+       ]
+      ],
+      "caption": {
+       "en": "The probabilities of the eight cells",
+       "ro": "Probabilitățile celor opt celule"
+      }
+     },
+     "check": {
+      "formula": "0.32/0.5",
+      "data": {
+       "a": 0.16,
+       "b": 0.04
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.32; 0.08; 0.08; 0.02",
+        "ro": "0,32; 0,08; 0,08; 0,02"
+       },
+       "correct": false,
+       "explain": {
+        "en": "That is the column $Z=0$ not yet divided: it adds up to 0.5, not to 1.",
+        "ro": "Aceea este coloana $Z=0$ încă neîmpărțită: se adună la 0,5, nu la 1."
+       },
+       "misconception": "uitarea-numitorului"
+      },
+      {
+       "text": {
+        "en": "0.34; 0.16; 0.16; 0.34",
+        "ro": "0,34; 0,16; 0,16; 0,34"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Those are the probabilities without $Z$ (the two columns added). A slice keeps a single column.",
+        "ro": "Acestea sunt probabilitățile fără $Z$ (cele două coloane adunate). O felie păstrează o singură coloană."
+       },
+       "misconception": "marginala-in-loc-de-conditionata"
+      },
+      {
+       "text": {
+        "en": "0.64; 0.16; 0.16; 0.04",
+        "ro": "0,64; 0,16; 0,16; 0,04"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$0.32/0.5=0.64$, $0.08/0.5=0.16$, $0.02/0.5=0.04$. Now the slice adds up to 1.",
+        "ro": "$0{,}32/0{,}5=0{,}64$, $0{,}08/0{,}5=0{,}16$, $0{,}02/0{,}5=0{,}04$. Acum felia se adună la 1."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ml-l06-m6",
+     "question": {
+      "en": "In the slice $Z=0$ the marginals are $P(X{=}0\\mid Z{=}0)=0.8$ and $P(Y{=}0\\mid Z{=}0)=0.8$ (the sum of the row $X=0$ and of the column $Y=0$), so $P(X{=}1\\mid Z{=}0)=P(Y{=}1\\mid Z{=}0)=0.2$. Are $X$ and $Y$ independent in this slice, that is, is each cell the product of its marginals?",
+      "ro": "În felia $Z=0$ marginalele sunt $P(X{=}0\\mid Z{=}0)=0{,}8$ și $P(Y{=}0\\mid Z{=}0)=0{,}8$ (suma rândului $X=0$ și a coloanei $Y=0$), deci $P(X{=}1\\mid Z{=}0)=P(Y{=}1\\mid Z{=}0)=0{,}2$. Sunt $X$ și $Y$ independente în această felie, adică fiecare celulă este produsul marginalelor ei?"
+     },
+     "table": {
+      "columns": [
+       "$X \\backslash Y$",
+       "$Y=0$",
+       "$Y=1$"
+      ],
+      "rows": [
+       [
+        "$X=0$",
+        "0,64",
+        "0,16"
+       ],
+       [
+        "$X=1$",
+        "0,16",
+        "0,04"
+       ]
+      ],
+      "caption": {
+       "en": "The slice for Z=0",
+       "ro": "Felia pentru Z=0"
+      }
+     },
+     "check": {
+      "formula": "0.8*0.8",
+      "data": {
+       "a": 0.2
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "No, because we saw that $X$ and $Y$ are dependent",
+        "ro": "Nu, pentru că am văzut că $X$ și $Y$ sunt dependente"
+       },
+       "correct": false,
+       "explain": {
+        "en": "That dependence is for the pair seen without $Z$. Inside a slice $Z=z$ it can disappear: that is the point of conditional independence.",
+        "ro": "Acea dependență este a perechii văzute fără $Z$. În interiorul unei felii $Z=z$ ea poate dispărea: asta este ideea independenței condiționate."
+       },
+       "misconception": "dependenta-marginala"
+      },
+      {
+       "text": {
+        "en": "Yes: each cell equals the product of its marginals",
+        "ro": "Da: fiecare celulă este egală cu produsul marginalelor ei"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$0.8\\cdot0.8=0.64$, $0.8\\cdot0.2=0.16$, $0.2\\cdot0.2=0.04$: all four cells check. The same happens in the slice $Z=1$.",
+        "ro": "$0{,}8\\cdot0{,}8=0{,}64$, $0{,}8\\cdot0{,}2=0{,}16$, $0{,}2\\cdot0{,}2=0{,}04$: toate cele patru celule verifică. La fel se întâmplă în felia $Z=1$."
+       }
+      },
+      {
+       "text": {
+        "en": "No: 0.64 differs from $0.5\\cdot0.5$",
+        "ro": "Nu: 0,64 este diferit de $0{,}5\\cdot0{,}5$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The product with 0.5 uses the marginals without $Z$. In the slice we use the marginals of the slice, 0.8 and 0.2.",
+        "ro": "Produsul cu 0,5 folosește marginalele fără $Z$. În felie se folosesc marginalele feliei, 0,8 și 0,2."
+       },
+       "misconception": "produsul"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s6",
+   "title": {
+    "en": "The whole example on one table",
+    "ro": "Tot exemplul pe un singur tabel"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "The whole example on the table of the eight cells. Press forward step by step: first the cells fill in, then you hide $Z$ (the two columns add up), then you fix $Z=0$ and then $Z=1$ and compare each cell of the slice with the product of the slice marginals. Guess each value before you press.",
+      "ro": "Tot exemplul, pe tabelul celor opt celule. Apasă înainte pas cu pas: întâi se completează celulele, apoi ascunzi $Z$ (cele două coloane se adună), apoi fixezi $Z=0$ și apoi $Z=1$ și compari fiecare celulă a feliei cu produsul marginalelor feliei. Ghicește fiecare valoare înainte să apeși."
+     }
+    },
+    {
+     "type": "viz",
+     "id": "ml-l06-viz1",
+     "widget": "ml-joint-table",
+     "predict": true,
+     "props": {
+      "table": {
+       "columns": [
+        "X",
+        "Y",
+        "Z",
+        "P"
+       ],
+       "rows": [
+        [
+         0,
+         0,
+         0,
+         0.32
+        ],
+        [
+         0,
+         1,
+         0,
+         0.08
+        ],
+        [
+         1,
+         0,
+         0,
+         0.08
+        ],
+        [
+         1,
+         1,
+         0,
+         0.02
+        ],
+        [
+         0,
+         0,
+         1,
+         0.02
+        ],
+        [
+         0,
+         1,
+         1,
+         0.08
+        ],
+        [
+         1,
+         0,
+         1,
+         0.08
+        ],
+        [
+         1,
+         1,
+         1,
+         0.32
+        ]
+       ]
+      },
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "conditionOn": [
+       0,
+       1
+      ],
+      "format": "decimal"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s7",
+   "title": {
+    "en": "Conditional independence of variables",
+    "ro": "Independența condiționată a variabilelor"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Conditional independence of variables",
+      "ro": "Independența condiționată a variabilelor"
+     },
+     "content": {
+      "en": "$X$ and $Y$ are **conditionally independent given $Z$** (written $X \\perp Y \\mid Z$) if, for **all** values $x$, $y$, $z$ (with $P(Z{=}z)\\ne0$): $p(x,y\\mid z)=p(x\\mid z)\\,p(y\\mid z)$. In words: in each slice $Z=z$ taken separately, $X$ and $Y$ are independent. The equivalent form, when $p(y,z)\\ne0$: $p(x\\mid y,z)=p(x\\mid z)$, that is, once $z$ is known, learning $y$ no longer changes the probability of $x$ (the equivalence: exercise 0.92, see Lecția 3 for events).\n\n**How to check it:** each slice $Z=z$ separately, with all its cells. For binary variables there are 4 equalities per slice, so 8 in all; in a binary slice a single one is enough, together with the marginals of the slice (as in Lecția 5).\n\nOn paper, to show that $X$ and $Y$ **are** conditionally independent given $Z$, write all the equalities (for binary variables, all 8), as the definition asks; use the one-equality shortcut only as a check. To show that they are **not**, one equality that fails is enough.\n\nCourse: slide 16. Seminar 2, p. 7. Workbook: p. 39, 42.",
+      "ro": "$X$ și $Y$ sunt **independente condiționat de $Z$** (se scrie $X \\perp Y \\mid Z$) dacă, pentru **toate** valorile $x$, $y$, $z$ (cu $P(Z{=}z)\\ne0$): $p(x,y\\mid z)=p(x\\mid z)\\,p(y\\mid z)$. Pe scurt: în fiecare felie $Z=z$ luată separat, $X$ și $Y$ sunt independente. Forma echivalentă, când $p(y,z)\\ne0$: $p(x\\mid y,z)=p(x\\mid z)$, adică, odată ce $z$ este cunoscut, aflarea lui $y$ nu mai schimbă probabilitatea lui $x$ (echivalența: exercițiul 0.92, vezi Lecția 3 pentru evenimente).\n\n**Cum se verifică:** fiecare felie $Z=z$ separat, cu toate celulele ei. Pentru variabile binare sunt 4 egalități pe felie, deci 8 în total; într-o felie binară una singură ajunge, împreună cu marginalele feliei (ca în Lecția 5).\n\nPe hârtie, ca să arăți că $X$ și $Y$ **sunt** independente condiționat de $Z$, scrie toate egalitățile (pentru variabile binare, toate 8), cum cere definiția; scurtătura cu o egalitate pe felie folosește-o ca verificare. Ca să arăți că **nu** sunt, ajunge o egalitate care nu se verifică.\n\nCursul: slide 16. Seminar 2, p. 7. Culegerea: p. 39, 42."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s8",
+   "title": {
+    "en": "Two independences, two different things",
+    "ro": "Două independențe, două lucruri diferite"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Independence and conditional independence",
+      "ro": "Independența și independența condiționată"
+     },
+     "content": {
+      "en": "From $X \\perp Y$ it does not follow that $X \\perp Y \\mid Z$, and from $X \\perp Y \\mid Z$ it does not follow that $X \\perp Y$. The example of the two devices shows the second direction: $X$ and $Y$ are dependent (0.34 against $0.5\\cdot0.5=0.25$), but conditionally independent given $Z$ (in both slices each cell is the product of the marginals; the slice $Z=1$ has the cells 0.04, 0.16, 0.16, 0.64, the products of the marginals 0.2 and 0.8). The first direction is shown by exercise 0.16: $X$ and $Y$ are independent, but a slice $Z=z$ fails the check. So one cannot be assumed from the other: you check the slices.",
+      "ro": "Din $X \\perp Y$ nu rezultă $X \\perp Y \\mid Z$, și din $X \\perp Y \\mid Z$ nu rezultă $X \\perp Y$. Exemplul cu cele două aparate arată a doua direcție: $X$ și $Y$ sunt dependente (0,34 față de $0{,}5\\cdot0{,}5=0{,}25$), dar independente condiționat de $Z$ (în ambele felii fiecare celulă este produsul marginalelor; felia $Z=1$ are celulele 0,04, 0,16, 0,16, 0,64, produsele marginalelor 0,2 și 0,8). Prima direcție o arată exercițiul 0.16: $X$ și $Y$ sunt independente, dar o felie $Z=z$ nu verifică. Deci una nu se poate presupune din cealaltă: verifici feliile."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s9",
+   "title": {
+    "en": "What you can do with it",
+    "ro": "Ce poți face cu ea"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Two pieces of evidence and conditional marginalization",
+      "ro": "Două dovezi și marginalizarea condiționată"
+     },
+     "content": {
+      "en": "**Bayes with two pieces of evidence.** Let $H$ be a hypothesis and $E_1$, $E_2$ two pieces of evidence (observations) (see Lecția 2 for Bayes' formula): $P(H\\mid E_1,E_2)=\\dfrac{P(E_1,E_2\\mid H)\\,P(H)}{P(E_1,E_2)}$. You need $P(E_1,E_2\\mid H)$. If $E_1 \\perp E_2 \\mid H$, it splits into $P(E_1\\mid H)\\,P(E_2\\mid H)$: you need only the separate probabilities.\n\n**Conditional marginalization.** $p(x\\mid z)=\\sum_y p(x,y\\mid z)$: inside the slice $Z=z$ you sum over the variable you do not care about ($\\sum$ means the sum over all values of $y$). **No independence is needed** to do this.\n\nWorkbook: p. 220.",
+      "ro": "**Bayes cu două dovezi.** Fie $H$ o ipoteză și $E_1$, $E_2$ două dovezi (observații) (vezi Lecția 2 pentru formula lui Bayes): $P(H\\mid E_1,E_2)=\\dfrac{P(E_1,E_2\\mid H)\\,P(H)}{P(E_1,E_2)}$. Ai nevoie de $P(E_1,E_2\\mid H)$. Dacă $E_1 \\perp E_2 \\mid H$, el se descompune în $P(E_1\\mid H)\\,P(E_2\\mid H)$: ai nevoie doar de probabilitățile separate.\n\n**Marginalizarea condiționată.** $p(x\\mid z)=\\sum_y p(x,y\\mid z)$: în interiorul feliei $Z=z$ însumezi după variabila care nu te interesează ($\\sum$ înseamnă suma pe toate valorile lui $y$). **Nu este nevoie de nicio independență** ca să faci asta.\n\nCulegerea: p. 220."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s10",
+   "title": {
+    "en": "Why the link disappears",
+    "ro": "De ce dispare legătura"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "ml-l06-why",
+     "table": {
+      "columns": [
+       "Bitul $Z$",
+       "$P(Z)$",
+       "$P(X{=}1\\mid Z)$",
+       "$P(Y{=}1\\mid Z)$"
+      ],
+      "rows": [
+       [
+        "0",
+        "0,5",
+        "0,2",
+        "0,2"
+       ],
+       [
+        "1",
+        "0,5",
+        "0,8",
+        "0,8"
+       ]
+      ],
+      "caption": {
+       "en": "What the devices give, for each correct bit",
+       "ro": "Ce dau aparatele, pentru fiecare bit corect"
+      }
+     },
+     "prompt": {
+      "en": "In the example with the two devices: why, once we know $Z$, does learning $X$ tell us nothing about $Y$, although without $Z$ they were linked?",
+      "ro": "În exemplul cu cele două aparate: de ce, odată ce știm $Z$, aflarea lui $X$ nu mai spune nimic despre $Y$, deși fără $Z$ erau legate?"
+     },
+     "placeholder": {
+      "en": "Write your explanation",
+      "ro": "Scrie explicația ta"
+     },
+     "answer": {
+      "en": "$X$ tells us something about $Y$ only because it tells us something about $Z$, which both devices copy. When $Z$ is known, that road is closed: in each device only its own mistake is left, and the mistakes are independent. All the link between $X$ and $Y$, when $Z$ is not seen, went through $Z$.",
+      "ro": "$X$ ne spune ceva despre $Y$ doar pentru că ne spune ceva despre $Z$, pe care îl copiază amândouă aparatele. Când $Z$ este cunoscut, acea cale se închide: în fiecare aparat a rămas doar propria lui greșeală, iar greșelile sunt independente. Toată legătura dintre $X$ și $Y$, când $Z$ nu se vede, trecea prin $Z$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s11",
+   "title": {
+    "en": "Adding a condition",
+    "ro": "Adăugăm o condiție"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l06-q1",
+     "question": {
+      "en": "$X$ and $Y$ are independent. Does it follow that they are also independent given a third variable $Z$?",
+      "ro": "$X$ și $Y$ sunt independente. Rezultă că sunt independente și condiționat de o a treia variabilă $Z$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Not necessarily: an equality that holds overall may fail inside a slice $Z=z$",
+        "ro": "Nu neapărat: o egalitate care ține în total poate să nu mai țină într-o felie $Z=z$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Conditioning picks a slice and renormalizes it; two variables independent overall can become dependent inside the slices.",
+        "ro": "Condiționarea alege o felie și o renormalizează; două variabile independente în total pot deveni dependente în felii."
+       }
+      },
+      {
+       "text": {
+        "en": "Yes: independence is kept when you add a condition",
+        "ro": "Da: independența se păstrează când adaugi o condiție"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Adding the condition $Z=z$ changes the distribution (a different slice, divided by $P(Z{=}z)$), so what held before may not hold now.",
+        "ro": "Condiția $Z=z$ schimbă distribuția (o altă felie, împărțită la $P(Z{=}z)$), deci ce ținea înainte poate să nu mai țină acum."
+       },
+       "misconception": "independenta-se-mosteneste"
+      },
+      {
+       "text": {
+        "en": "No, never",
+        "ro": "Nu, niciodată"
+       },
+       "correct": false,
+       "explain": {
+        "en": "They can also be conditionally independent (for example when $Z$ has nothing to do with them); in general you cannot say, you have to check the slices.",
+        "ro": "Pot fi și independente condiționat (de exemplu dacă $Z$ nu are nicio legătură cu ele); în general nu se poate spune, trebuie verificate feliile."
+       },
+       "misconception": "niciodata"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s12",
+   "title": {
+    "en": "Which slices must be checked",
+    "ro": "Ce felii trebuie verificate"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l06-q2",
+     "question": {
+      "en": "The binary variables $X$, $Y$, $Z$ have the probabilities in the table. In a binary slice, a single equality (the cell $(1,1)$) is enough, together with the marginals of the slice. Is $X \\perp Y \\mid Z$?",
+      "ro": "Variabilele binare $X$, $Y$, $Z$ au probabilitățile din tabel. Într-o felie binară, o singură egalitate (celula $(1,1)$) ajunge, împreună cu marginalele feliei. Este $X \\perp Y \\mid Z$?"
+     },
+     "table": {
+      "columns": [
+       "Felia",
+       "$P(X{=}1\\mid Z)$",
+       "$P(Y{=}1\\mid Z)$",
+       "$P(X{=}1,Y{=}1\\mid Z)$"
+      ],
+      "rows": [
+       [
+        "$Z=0$",
+        "0,5",
+        "0,4",
+        "0,2"
+       ],
+       [
+        "$Z=1$",
+        "0,9",
+        "0,5",
+        "0,5"
+       ]
+      ],
+      "caption": {
+       "en": "The two slices of the binary variables X, Y, Z",
+       "ro": "Cele două felii ale variabilelor binare X, Y, Z"
+      }
+     },
+     "check": {
+      "formula": "0.9*0.5"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Yes: the slice $Z=0$ checks ($0.5\\cdot0.4=0.2$)",
+        "ro": "Da: felia $Z=0$ verifică ($0{,}5\\cdot0{,}4=0{,}2$)"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The slice $Z=0$ checks, but the definition asks for all values of $z$. The slice $Z=1$ still has to be checked.",
+        "ro": "Felia $Z=0$ verifică, dar definiția cere toate valorile lui $z$. Mai trebuie verificată felia $Z=1$."
+       },
+       "misconception": "o-singura-felie"
+      },
+      {
+       "text": {
+        "en": "No: $X$ and $Y$ are dependent in general",
+        "ro": "Nu: $X$ și $Y$ sunt dependente în general"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Conditional independence does not depend on the independence of $X$ and $Y$ without $Z$; only the slices are checked.",
+        "ro": "Independența condiționată nu depinde de independența lui $X$ și $Y$ fără $Z$; se verifică doar feliile."
+       },
+       "misconception": "dependenta-marginala"
+      },
+      {
+       "text": {
+        "en": "No: the slice $Z=1$ does not check ($0.9\\cdot0.5=0.45$, not 0.5)",
+        "ro": "Nu: felia $Z=1$ nu verifică ($0{,}9\\cdot0{,}5=0{,}45$, nu 0,5)"
+       },
+       "correct": true,
+       "explain": {
+        "en": "In the slice $Z=1$ the product of the marginals is 0.45, which differs from 0.5. One slice that fails is enough for the answer to be no.",
+        "ro": "În felia $Z=1$ produsul marginalelor este 0,45, diferit de 0,5. O singură felie care nu verifică ajunge ca răspunsul să fie nu."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s13",
+   "title": {
+    "en": "Counting the equalities",
+    "ro": "Numărăm egalitățile"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l06-q3",
+     "question": {
+      "en": "The variables $X$, $Y$, $Z$ are binary. How many equalities $p(x,y\\mid z)=p(x\\mid z)\\,p(y\\mid z)$ does the definition of $X \\perp Y \\mid Z$ contain?",
+      "ro": "Variabilele $X$, $Y$, $Z$ sunt binare. Câte egalități $p(x,y\\mid z)=p(x\\mid z)\\,p(y\\mid z)$ cuprinde definiția lui $X \\perp Y \\mid Z$?"
+     },
+     "check": {
+      "formula": "2*2*2"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "4",
+        "ro": "4"
+       },
+       "correct": false,
+       "explain": {
+        "en": "4 are the equalities of a single slice; $z$ takes two values, each with its own 4 equalities.",
+        "ro": "4 sunt egalitățile unei singure felii; $z$ ia două valori, fiecare cu cele 4 egalități ale ei."
+       },
+       "misconception": "o-singura-felie"
+      },
+      {
+       "text": {
+        "en": "2",
+        "ro": "2"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The definition asks for the equality for all values of $x$, $y$ **and** $z$, not only for the values of $z$.",
+        "ro": "Definiția cere egalitatea pentru toate valorile lui $x$, $y$ **și** $z$, nu doar pentru valorile lui $z$."
+       },
+       "misconception": "doar-valorile-lui-z"
+      },
+      {
+       "text": {
+        "en": "8",
+        "ro": "8"
+       },
+       "correct": true,
+       "explain": {
+        "en": "One for each triple $(x,y,z)$: $2\\cdot2\\cdot2=8$.",
+        "ro": "Câte una pentru fiecare triplet $(x,y,z)$: $2\\cdot2\\cdot2=8$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s14",
+   "title": {
+    "en": "A conditional probability from the joint",
+    "ro": "O probabilitate condiționată din cea comună"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l06-q4",
+     "question": {
+      "en": "You have the joint probabilities $P(x,y,z)$ of three variables and you want $P(X{=}0\\mid Z{=}1)$. What do you do?",
+      "ro": "Ai probabilitățile comune $P(x,y,z)$ ale trei variabile și vrei $P(X{=}0\\mid Z{=}1)$. Ce faci?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "First assume $X \\perp Y$ and then compute",
+        "ro": "Presupui mai întâi $X \\perp Y$ și apoi calculezi"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Marginalization asks for no independence at all; the sum over $y$ is correct anyway.",
+        "ro": "Marginalizarea nu cere nicio independență; suma după $y$ este corectă oricum."
+       },
+       "misconception": "presupui-independenta-inainte-de-a-insuma"
+      },
+      {
+       "text": {
+        "en": "You sum over $y$ and divide: $\\dfrac{P(X{=}0,Z{=}1)}{P(Z{=}1)}$, with $P(X{=}0,Z{=}1)=\\sum_y P(X{=}0,y,Z{=}1)$",
+        "ro": "Însumezi după $y$ și împarți: $\\dfrac{P(X{=}0,Z{=}1)}{P(Z{=}1)}$, cu $P(X{=}0,Z{=}1)=\\sum_y P(X{=}0,y,Z{=}1)$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "You add the cells for all values of $y$ (the variable you do not care about), then divide by the probability of the condition.",
+        "ro": "Aduni celulele pentru toate valorile lui $y$ (variabila care nu te interesează), apoi împarți la probabilitatea condiției."
+       }
+      },
+      {
+       "text": {
+        "en": "You take $P(X{=}0,Y{=}0,Z{=}1)/P(Z{=}1)$",
+        "ro": "Iei $P(X{=}0,Y{=}0,Z{=}1)/P(Z{=}1)$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "That is a single cell (the one with $Y=0$), not the whole probability of $X=0$.",
+        "ro": "Aceea este o singură celulă (cea cu $Y=0$), nu toată probabilitatea lui $X=0$."
+       },
+       "misconception": "o-singura-celula"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s15",
+   "title": {
+    "en": "Exercise 0.15: conditional independence on eight rows",
+    "ro": "Exercițiul 0.15: independența condiționată pe opt rânduri"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l06-c15",
+     "exercise": [
+      "0.15.a",
+      "0.15.b"
+     ],
+     "status": "book",
+     "statement": {
+      "en": "The binary variables $A$, $B$, $C$ have the uniform joint distribution: each of the eight rows has probability $\\frac18$. **a.** Is $A$ conditionally independent of $B$ given $C$, that is $A \\perp B \\mid C$? **b.** We change the first two rows (marked): $P(0,0,0)=\\frac14$ and $P(0,0,1)=0$ (the sum stays 1). After the change, compute $P(A{=}0\\mid B{=}0,C{=}0)$ and $P(A{=}0\\mid C{=}0)$, as fractions, then say whether $A \\perp B \\mid C$ still holds.",
+      "ro": "Variabilele binare $A$, $B$, $C$ au distribuția comună uniformă: fiecare dintre cele opt rânduri are probabilitatea $\\frac18$. **a.** Este $A$ independentă condiționat de $B$ în raport cu $C$, adică $A \\perp B \\mid C$? **b.** Schimbăm primele două rânduri (marcate): $P(0,0,0)=\\frac14$ și $P(0,0,1)=0$ (suma rămâne 1). După schimbare, calculează $P(A{=}0\\mid B{=}0,C{=}0)$ și $P(A{=}0\\mid C{=}0)$, ca fracții, apoi spune dacă $A \\perp B \\mid C$ mai ține."
+     },
+     "table": {
+      "columns": [
+       "A",
+       "B",
+       "C",
+       "P"
+      ],
+      "rows": [
+       [
+        0,
+        0,
+        0,
+        "1/8"
+       ],
+       [
+        0,
+        0,
+        1,
+        "1/8"
+       ],
+       [
+        0,
+        1,
+        0,
+        "1/8"
+       ],
+       [
+        0,
+        1,
+        1,
+        "1/8"
+       ],
+       [
+        1,
+        0,
+        0,
+        "1/8"
+       ],
+       [
+        1,
+        0,
+        1,
+        "1/8"
+       ],
+       [
+        1,
+        1,
+        0,
+        "1/8"
+       ],
+       [
+        1,
+        1,
+        1,
+        "1/8"
+       ]
+      ],
+      "caption": {
+       "en": "The joint distribution of A, B, C (the first two rows are marked)",
+       "ro": "Distribuția comună a lui A, B, C (primele două rânduri sunt marcate)"
+      },
+      "highlight": {
+       "rows": [
+        0,
+        1
+       ]
+      }
+     },
+     "data": {
+      "u": 0.25
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "tf",
+       "label": {
+        "en": "Before the change: is $A \\perp B \\mid C$?",
+        "ro": "Înainte de schimbare: este $A \\perp B \\mid C$?"
+       },
+       "formula": "(abs(P(T,'A=0 & B=0 & C=0')/P(T,'C=0')-(P(T,'A=0 & C=0')/P(T,'C=0'))*(P(T,'B=0 & C=0')/P(T,'C=0')))+abs(P(T,'A=0 & B=0 & C=1')/P(T,'C=1')-(P(T,'A=0 & C=1')/P(T,'C=1'))*(P(T,'B=0 & C=1')/P(T,'C=1')))+abs(P(T,'A=0 & B=1 & C=0')/P(T,'C=0')-(P(T,'A=0 & C=0')/P(T,'C=0'))*(P(T,'B=1 & C=0')/P(T,'C=0')))+abs(P(T,'A=0 & B=1 & C=1')/P(T,'C=1')-(P(T,'A=0 & C=1')/P(T,'C=1'))*(P(T,'B=1 & C=1')/P(T,'C=1')))+abs(P(T,'A=1 & B=0 & C=0')/P(T,'C=0')-(P(T,'A=1 & C=0')/P(T,'C=0'))*(P(T,'B=0 & C=0')/P(T,'C=0')))+abs(P(T,'A=1 & B=0 & C=1')/P(T,'C=1')-(P(T,'A=1 & C=1')/P(T,'C=1'))*(P(T,'B=0 & C=1')/P(T,'C=1')))+abs(P(T,'A=1 & B=1 & C=0')/P(T,'C=0')-(P(T,'A=1 & C=0')/P(T,'C=0'))*(P(T,'B=1 & C=0')/P(T,'C=0')))+abs(P(T,'A=1 & B=1 & C=1')/P(T,'C=1')-(P(T,'A=1 & C=1')/P(T,'C=1'))*(P(T,'B=1 & C=1')/P(T,'C=1')))) == 0",
+       "expected": "true"
+      },
+      {
+       "id": "b1",
+       "kind": "frac",
+       "label": {
+        "en": "After the change: $P(A{=}0\\mid B{=}0,C{=}0)$, as a fraction",
+        "ro": "După schimbare: $P(A{=}0\\mid B{=}0,C{=}0)$, ca fracție"
+       },
+       "formula": "u/(u+1/8)",
+       "expected": "2/3"
+      },
+      {
+       "id": "b2",
+       "kind": "frac",
+       "label": {
+        "en": "After the change: $P(A{=}0\\mid C{=}0)$, as a fraction",
+        "ro": "După schimbare: $P(A{=}0\\mid C{=}0)$, ca fracție"
+       },
+       "formula": "(u+1/8)/(u+1/8+1/8+1/8)",
+       "expected": "3/5"
+      },
+      {
+       "id": "b",
+       "kind": "tf",
+       "label": {
+        "en": "After the change: is $A \\perp B \\mid C$?",
+        "ro": "După schimbare: este $A \\perp B \\mid C$?"
+       },
+       "formula": "u/(u+1/8) == (u+1/8)/(u+1/8+1/8+1/8)",
+       "expected": "false"
+      }
+     ],
+     "detectors": [
+      {
+       "field": "a",
+       "formula": "false",
+       "message": {
+        "en": "All rows have the same probability, so $P(A{=}0\\mid B{=}b,C{=}c)=\\frac12$ for every $b$ and $c$, and so is $P(A{=}0\\mid C{=}c)$.",
+        "ro": "Toate rândurile au aceeași probabilitate, deci $P(A{=}0\\mid B{=}b,C{=}c)=\\frac12$ pentru toate $b$ și $c$, la fel ca $P(A{=}0\\mid C{=}c)$."
+       }
+      },
+      {
+       "field": "b1",
+       "formula": "(u+1/8)/(u+1/8+1/8+1/8)",
+       "message": {
+        "en": "That is $P(A{=}0\\mid C{=}0)$, without the condition $B{=}0$. Here keep only the rows with $B=0$ and $C=0$.",
+        "ro": "Aceea este $P(A{=}0\\mid C{=}0)$, fără condiția $B{=}0$. Aici păstrezi doar rândurile cu $B=0$ și $C=0$."
+       }
+      },
+      {
+       "field": "b2",
+       "formula": "u/(u+1/8)",
+       "message": {
+        "en": "That is the value with $B{=}0$ also fixed. For $P(A{=}0\\mid C{=}0)$ keep all rows with $C=0$.",
+        "ro": "Aceea este valoarea cu $B{=}0$ fixat și el. Pentru $P(A{=}0\\mid C{=}0)$ păstrezi toate rândurile cu $C=0$."
+       }
+      },
+      {
+       "field": "b",
+       "formula": "true",
+       "message": {
+        "en": "The two probabilities differ ($\\frac23$ and $\\frac35$): one mismatch is enough to reject conditional independence.",
+        "ro": "Cele două probabilități sunt diferite ($\\frac23$ și $\\frac35$): o singură nepotrivire ajunge ca să respingi independența condiționată."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "The convenient form: $A \\perp B \\mid C$ means $P(A{=}a\\mid B{=}b,C{=}c)=P(A{=}a\\mid C{=}c)$ for all values $a$, $b$, $c$ (when $P(B{=}b,C{=}c)\\ne0$). Compute the two probabilities.",
+       "ro": "Forma convenabilă: $A \\perp B \\mid C$ înseamnă $P(A{=}a\\mid B{=}b,C{=}c)=P(A{=}a\\mid C{=}c)$ pentru toate valorile $a$, $b$, $c$ (când $P(B{=}b,C{=}c)\\ne0$). Calculează cele două probabilități."
+      },
+      {
+       "en": "$P(A{=}0\\mid B{=}0,C{=}0)$ is the row $(0,0,0)$ divided by the sum of the rows with $B=0$ and $C=0$. $P(A{=}0\\mid C{=}0)$ adds the rows with $C=0$: those with $A=0$ on top, all of them below.",
+       "ro": "$P(A{=}0\\mid B{=}0,C{=}0)$ este rândul $(0,0,0)$ împărțit la suma rândurilor cu $B=0$ și $C=0$. $P(A{=}0\\mid C{=}0)$ adună rândurile cu $C=0$: cele cu $A=0$ la numărător, toate la numitor."
+      },
+      {
+       "en": "(a) Yes: with all rows equal, both probabilities are $\\frac12$ for every $b$ and $c$. (b) $\\dfrac{1/4}{1/4+1/8}=\\dfrac23$ and $\\dfrac{1/4+1/8}{1/4+1/8+1/8+1/8}=\\dfrac35$; they differ, so no.",
+       "ro": "(a) Da: cu toate rândurile egale, ambele probabilități sunt $\\frac12$ pentru toate $b$ și $c$. (b) $\\dfrac{1/4}{1/4+1/8}=\\dfrac23$ și $\\dfrac{1/4+1/8}{1/4+1/8+1/8+1/8}=\\dfrac35$; sunt diferite, deci nu."
+      }
+     ],
+     "solution": {
+      "en": "(a) Yes. All rows have the same probability, so $P(A{=}0\\mid B{=}b,C{=}c)=\\frac12=P(A{=}0\\mid C{=}c)$ for all $b$, $c$. (b) After the change $P(A{=}0\\mid B{=}0,C{=}0)=\\dfrac{1/4}{1/4+1/8}=\\dfrac23$ and $P(A{=}0\\mid C{=}0)=\\dfrac{1/4+1/8}{1/4+1/8+1/8+1/8}=\\dfrac35$. Since $\\frac23\\ne\\frac35$, one case is enough: $A \\perp B \\mid C$ no longer holds. The workbook leaves the change to you: any $P(0,0,0)=u$, $P(0,0,1)=\\frac14-u$ with $u\\ne\\frac18$ works, because $\\dfrac{u}{u+1/8}=\\dfrac{u+1/8}{u+3/8}$ only for $u=\\frac18$.",
+      "ro": "(a) Da. Toate rândurile au aceeași probabilitate, deci $P(A{=}0\\mid B{=}b,C{=}c)=\\frac12=P(A{=}0\\mid C{=}c)$ pentru toate $b$, $c$. (b) După schimbare $P(A{=}0\\mid B{=}0,C{=}0)=\\dfrac{1/4}{1/4+1/8}=\\dfrac23$ și $P(A{=}0\\mid C{=}0)=\\dfrac{1/4+1/8}{1/4+1/8+1/8+1/8}=\\dfrac35$. Cum $\\frac23\\ne\\frac35$, un singur caz ajunge: $A \\perp B \\mid C$ nu mai ține. Culegerea lasă schimbarea la alegerea ta: merge orice $P(0,0,0)=u$, $P(0,0,1)=\\frac14-u$ cu $u\\ne\\frac18$, pentru că $\\dfrac{u}{u+1/8}=\\dfrac{u+1/8}{u+3/8}$ doar pentru $u=\\frac18$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The binary variables $A$, $B$, $C$ have the uniform joint distribution: each of the eight rows has probability $\\frac18$. **a.** Is $A$ conditionally independent of $B$ given $C$, that is $A \\perp B \\mid C$? **b.** We change the first two rows (marked): $P(0,0,0)=\\frac3{16}$ and $P(0,0,1)=\\frac1{16}$ (the sum stays $\\frac14$ for these two rows). After the change, compute $P(A{=}0\\mid B{=}0,C{=}0)$ and $P(A{=}0\\mid C{=}0)$, as fractions, then say whether $A \\perp B \\mid C$ still holds.",
+        "ro": "Variabilele binare $A$, $B$, $C$ au distribuția comună uniformă: fiecare dintre cele opt rânduri are probabilitatea $\\frac18$. **a.** Este $A$ independentă condiționat de $B$ în raport cu $C$, adică $A \\perp B \\mid C$? **b.** Schimbăm primele două rânduri (marcate): $P(0,0,0)=\\frac3{16}$ și $P(0,0,1)=\\frac1{16}$ (suma acestor două rânduri rămâne $\\frac14$). După schimbare, calculează $P(A{=}0\\mid B{=}0,C{=}0)$ și $P(A{=}0\\mid C{=}0)$, ca fracții, apoi spune dacă $A \\perp B \\mid C$ mai ține."
+       },
+       "data": {
+        "u": 0.1875
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "(abs(P(T,'A=0 & B=0 & C=0')/P(T,'C=0')-(P(T,'A=0 & C=0')/P(T,'C=0'))*(P(T,'B=0 & C=0')/P(T,'C=0')))+abs(P(T,'A=0 & B=0 & C=1')/P(T,'C=1')-(P(T,'A=0 & C=1')/P(T,'C=1'))*(P(T,'B=0 & C=1')/P(T,'C=1')))+abs(P(T,'A=0 & B=1 & C=0')/P(T,'C=0')-(P(T,'A=0 & C=0')/P(T,'C=0'))*(P(T,'B=1 & C=0')/P(T,'C=0')))+abs(P(T,'A=0 & B=1 & C=1')/P(T,'C=1')-(P(T,'A=0 & C=1')/P(T,'C=1'))*(P(T,'B=1 & C=1')/P(T,'C=1')))+abs(P(T,'A=1 & B=0 & C=0')/P(T,'C=0')-(P(T,'A=1 & C=0')/P(T,'C=0'))*(P(T,'B=0 & C=0')/P(T,'C=0')))+abs(P(T,'A=1 & B=0 & C=1')/P(T,'C=1')-(P(T,'A=1 & C=1')/P(T,'C=1'))*(P(T,'B=0 & C=1')/P(T,'C=1')))+abs(P(T,'A=1 & B=1 & C=0')/P(T,'C=0')-(P(T,'A=1 & C=0')/P(T,'C=0'))*(P(T,'B=1 & C=0')/P(T,'C=0')))+abs(P(T,'A=1 & B=1 & C=1')/P(T,'C=1')-(P(T,'A=1 & C=1')/P(T,'C=1'))*(P(T,'B=1 & C=1')/P(T,'C=1')))) == 0",
+         "expected": "true"
+        },
+        {
+         "id": "b1",
+         "formula": "u/(u+1/8)",
+         "expected": "3/5"
+        },
+        {
+         "id": "b2",
+         "formula": "(u+1/8)/(u+1/8+1/8+1/8)",
+         "expected": "5/9"
+        },
+        {
+         "id": "b",
+         "formula": "u/(u+1/8) == (u+1/8)/(u+1/8+1/8+1/8)",
+         "expected": "false"
+        }
+       ],
+       "solution": {
+        "en": "(a) Yes, as before: all rows are equal. (b) $P(A{=}0\\mid B{=}0,C{=}0)=\\dfrac{3/16}{3/16+1/8}=\\dfrac35$ and $P(A{=}0\\mid C{=}0)=\\dfrac{3/16+1/8}{3/16+1/8+1/8+1/8}=\\dfrac59$. They differ, so $A \\perp B \\mid C$ no longer holds.",
+        "ro": "(a) Da, ca înainte: toate rândurile sunt egale. (b) $P(A{=}0\\mid B{=}0,C{=}0)=\\dfrac{3/16}{3/16+1/8}=\\dfrac35$ și $P(A{=}0\\mid C{=}0)=\\dfrac{3/16+1/8}{3/16+1/8+1/8+1/8}=\\dfrac59$. Sunt diferite, deci $A \\perp B \\mid C$ nu mai ține."
+       }
+      }
+     ],
+     "source": {
+      "en": "Workbook, ex. 0.15, p. 38-39",
+      "ro": "Culegerea, ex. 0.15, p. 38-39"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s16",
+   "title": {
+    "en": "Exercise 0.16: find the unknowns, then check the slices",
+    "ro": "Exercițiul 0.16: aflăm necunoscutele, apoi verificăm feliile"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l06-c16",
+     "exercise": [
+      "0.16.a",
+      "0.16.b"
+     ],
+     "status": "book",
+     "statement": {
+      "en": "The variables $X$, $Y$, $Z$ take the values 0 and 1. Their joint distribution is in the table; $p$ and $q$ are unknown. **a.** Assuming that $X$ and $Y$ are independent, find $p$ and $q$. **b.** With the $p$ and $q$ of part a, are $X$ and $Y$ conditionally independent given $Z$? Why? To decide, compare for $x=y=z=0$ the two sides of $P(0,0,0)\\,P(Z{=}0)=P(X{=}0,Z{=}0)\\,P(Y{=}0,Z{=}0)$ (it is the definition $p(x,y\\mid z)=p(x\\mid z)\\,p(y\\mid z)$ written with the joint probabilities and multiplied by $P(Z{=}0)^2$). Answer as fractions.",
+      "ro": "Variabilele $X$, $Y$, $Z$ iau valorile 0 și 1. Distribuția lor comună este în tabel; $p$ și $q$ sunt necunoscute. **a.** Presupunând că $X$ și $Y$ sunt independente, găsește $p$ și $q$. **b.** Cu valorile lui $p$ și $q$ de la punctul a, sunt $X$ și $Y$ independente condiționat de $Z$? De ce? Ca să decizi, compară pentru $x=y=z=0$ cele două părți ale egalității $P(0,0,0)\\,P(Z{=}0)=P(X{=}0,Z{=}0)\\,P(Y{=}0,Z{=}0)$ (este definiția $p(x,y\\mid z)=p(x\\mid z)\\,p(y\\mid z)$ scrisă cu probabilitățile comune și înmulțită cu $P(Z{=}0)^2$). Răspunde ca fracții."
+     },
+     "table": {
+      "columns": [
+       "$Y$",
+       "$Z=0$, $X=0$",
+       "$Z=0$, $X=1$",
+       "$Z=1$, $X=0$",
+       "$Z=1$, $X=1$"
+      ],
+      "rows": [
+       [
+        "$Y=0$",
+        "1/24",
+        "1/12",
+        "1/12",
+        "5/24"
+       ],
+       [
+        "$Y=1$",
+        "1/12",
+        "$p$",
+        "$q$",
+        "7/24"
+       ]
+      ],
+      "caption": {
+       "en": "The joint distribution, with the unknowns p and q",
+       "ro": "Distribuția comună, cu necunoscutele p și q"
+      }
+     },
+     "fields": [
+      {
+       "id": "s",
+       "kind": "frac",
+       "label": {
+        "en": "$p+q$ (from the sum of all cells), as a fraction",
+        "ro": "$p+q$ (din suma tuturor celulelor), ca fracție"
+       },
+       "formula": "1-(1/24+1/12+1/12+5/24+1/12+7/24)",
+       "expected": "5/24"
+      },
+      {
+       "id": "p",
+       "kind": "frac",
+       "label": {
+        "en": "$p$, as a fraction",
+        "ro": "$p$, ca fracție"
+       },
+       "formula": "(1/24+1/12+1/12+(1-(1/24+1/12+1/12+5/24+1/12+7/24)))-(1/24+1/12)/(1/24+1/12+1/12+5/24)",
+       "expected": "7/60"
+      },
+      {
+       "id": "q",
+       "kind": "frac",
+       "label": {
+        "en": "$q$, as a fraction",
+        "ro": "$q$, ca fracție"
+       },
+       "formula": "(1-(1/24+1/12+1/12+5/24+1/12+7/24))-((1/24+1/12+1/12+(1-(1/24+1/12+1/12+5/24+1/12+7/24)))-(1/24+1/12)/(1/24+1/12+1/12+5/24))",
+       "expected": "11/120"
+      },
+      {
+       "id": "pz",
+       "kind": "frac",
+       "label": {
+        "en": "$P(Z{=}0)$, as a fraction",
+        "ro": "$P(Z{=}0)$, ca fracție"
+       },
+       "formula": "1/24+1/12+1/12+((1/24+1/12+1/12+(1-(1/24+1/12+1/12+5/24+1/12+7/24)))-(1/24+1/12)/(1/24+1/12+1/12+5/24))",
+       "expected": "13/40"
+      },
+      {
+       "id": "l",
+       "kind": "frac",
+       "label": {
+        "en": "Left side: $P(0,0,0)\\cdot P(Z{=}0)$, as a fraction",
+        "ro": "Partea stângă: $P(0,0,0)\\cdot P(Z{=}0)$, ca fracție"
+       },
+       "formula": "1/24*(1/24+1/12+1/12+((1/24+1/12+1/12+(1-(1/24+1/12+1/12+5/24+1/12+7/24)))-(1/24+1/12)/(1/24+1/12+1/12+5/24)))",
+       "expected": "13/960"
+      },
+      {
+       "id": "r",
+       "kind": "frac",
+       "label": {
+        "en": "Right side: $P(X{=}0,Z{=}0)\\cdot P(Y{=}0,Z{=}0)$, as a fraction",
+        "ro": "Partea dreaptă: $P(X{=}0,Z{=}0)\\cdot P(Y{=}0,Z{=}0)$, ca fracție"
+       },
+       "formula": "(1/24+1/12)*(1/24+1/12)",
+       "expected": "1/64"
+      },
+      {
+       "id": "ci",
+       "kind": "tf",
+       "label": {
+        "en": "Is $X \\perp Y \\mid Z$?",
+        "ro": "Este $X \\perp Y \\mid Z$?"
+       },
+       "formula": "(1/24*(1/24+1/12+1/12+((1/24+1/12+1/12+(1-(1/24+1/12+1/12+5/24+1/12+7/24)))-(1/24+1/12)/(1/24+1/12+1/12+5/24)))) == ((1/24+1/12)*(1/24+1/12))",
+       "expected": "false"
+      }
+     ],
+     "detectors": [
+      {
+       "field": "ci",
+       "formula": "true",
+       "message": {
+        "en": "Independence does not imply conditional independence: for $x=y=z=0$ the two sides differ.",
+        "ro": "Independența nu implică independența condiționată: pentru $x=y=z=0$ cele două părți sunt diferite."
+       }
+      },
+      {
+       "field": "p",
+       "formula": "1-(1/24+1/12+1/12+5/24+1/12+7/24)",
+       "message": {
+        "en": "That is $p+q$. You still need the equation from the cell $(0,0)$ of the independence.",
+        "ro": "Aceea este $p+q$. Mai ai nevoie de ecuația din celula $(0,0)$ a independenței."
+       }
+      },
+      {
+       "field": "l",
+       "formula": "(1/24+1/12)*(1/24+1/12)",
+       "message": {
+        "en": "That is the right side. The left side is $P(0,0,0)\\cdot P(Z{=}0)$, with $P(0,0,0)$ read from the cell.",
+        "ro": "Aceasta este partea dreaptă. Partea stângă este $P(0,0,0)\\cdot P(Z{=}0)$, cu $P(0,0,0)$ citit din celulă."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "All eight probabilities sum to 1, which gives $p+q$. Then add over $Z$ to get $P(X)$ and $P(Y)$ (marginals).",
+       "ro": "Cele opt probabilități se adună la 1, ceea ce dă $p+q$. Apoi adună după $Z$ ca să afli $P(X)$ și $P(Y)$ (marginalele)."
+      },
+      {
+       "en": "The cell $(0,0)$ without $Z$: $P(X{=}0,Y{=}0)=\\frac1{24}+\\frac1{12}$ must equal $P(X{=}0)\\,P(Y{=}0)$, where $P(Y{=}0)=\\frac1{24}+\\frac1{12}+\\frac1{12}+\\frac5{24}$ and $P(X{=}0)=\\frac1{24}+\\frac1{12}+\\frac1{12}+q$, with $q=(p+q)-p$.",
+       "ro": "Celula $(0,0)$ fără $Z$: $P(X{=}0,Y{=}0)=\\frac1{24}+\\frac1{12}$ trebuie să fie egală cu $P(X{=}0)\\,P(Y{=}0)$, unde $P(Y{=}0)=\\frac1{24}+\\frac1{12}+\\frac1{12}+\\frac5{24}$ și $P(X{=}0)=\\frac1{24}+\\frac1{12}+\\frac1{12}+q$, cu $q=(p+q)-p$."
+      },
+      {
+       "en": "$p+q=\\frac5{24}$, so $P(X{=}0)=\\frac5{12}-p$ and $\\frac18=\\left(\\frac5{12}-p\\right)\\frac5{12}$ gives $p=\\frac7{60}$, $q=\\frac{11}{120}$. Then $P(Z{=}0)=\\frac5{24}+p=\\frac{13}{40}$; the left side is $\\frac1{24}\\cdot\\frac{13}{40}=\\frac{13}{960}$, the right side $\\frac18\\cdot\\frac18=\\frac1{64}$.",
+       "ro": "$p+q=\\frac5{24}$, deci $P(X{=}0)=\\frac5{12}-p$, iar $\\frac18=\\left(\\frac5{12}-p\\right)\\frac5{12}$ dă $p=\\frac7{60}$, $q=\\frac{11}{120}$. Apoi $P(Z{=}0)=\\frac5{24}+p=\\frac{13}{40}$; partea stângă este $\\frac1{24}\\cdot\\frac{13}{40}=\\frac{13}{960}$, partea dreaptă $\\frac18\\cdot\\frac18=\\frac1{64}$."
+      }
+     ],
+     "solution": {
+      "en": "**a.** The eight probabilities sum to 1: $\\frac{19}{24}+p+q=1$, so $p+q=\\frac5{24}$. Marginals: $P(Y{=}0)=\\frac5{12}$, $P(Y{=}1)=\\frac7{12}$, $P(X{=}0)=\\frac5{24}+q$, $P(X{=}1)=\\frac7{12}+p$. With $p+q=\\frac5{24}$ we get $P(X{=}0)=\\frac5{12}-p$. The cell $(0,0)$: $\\frac18=\\left(\\frac5{12}-p\\right)\\frac5{12}$, so $\\frac5{12}-p=\\frac3{10}$, $p=\\frac7{60}$ and $q=\\frac5{24}-\\frac7{60}=\\frac{11}{120}$. The other three cells hold too, with $P(X{=}0)=\\frac3{10}$ and $P(X{=}1)=\\frac7{10}$: $\\frac1{12}+q=\\frac7{40}=\\frac3{10}\\cdot\\frac7{12}$, $\\frac7{24}=\\frac7{10}\\cdot\\frac5{12}$, $\\frac7{24}+p=\\frac{49}{120}=\\frac7{10}\\cdot\\frac7{12}$. **b.** The definition asks $P(X{=}0,Y{=}0\\mid Z{=}0)=P(X{=}0\\mid Z{=}0)\\,P(Y{=}0\\mid Z{=}0)$; written with the joint probabilities and multiplied by $P(Z{=}0)^2$, it becomes $P(0,0,0)\\,P(Z{=}0)=P(X{=}0,Z{=}0)\\,P(Y{=}0,Z{=}0)$. $P(Z{=}0)=\\frac5{24}+p=\\frac{13}{40}$. For $x=y=z=0$: $\\frac1{24}\\cdot\\frac{13}{40}=\\frac{13}{960}$ against $\\frac18\\cdot\\frac18=\\frac1{64}=\\frac{15}{960}$. They differ, so $X$ and $Y$ are **not** conditionally independent given $Z$, although they are independent: independence does not imply conditional independence.",
+      "ro": "**a.** Cele opt probabilități se adună la 1: $\\frac{19}{24}+p+q=1$, deci $p+q=\\frac5{24}$. Marginalele: $P(Y{=}0)=\\frac5{12}$, $P(Y{=}1)=\\frac7{12}$, $P(X{=}0)=\\frac5{24}+q$, $P(X{=}1)=\\frac7{12}+p$. Cu $p+q=\\frac5{24}$ obținem $P(X{=}0)=\\frac5{12}-p$. Celula $(0,0)$: $\\frac18=\\left(\\frac5{12}-p\\right)\\frac5{12}$, deci $\\frac5{12}-p=\\frac3{10}$, $p=\\frac7{60}$ și $q=\\frac5{24}-\\frac7{60}=\\frac{11}{120}$. Celelalte trei celule se verifică și ele, cu $P(X{=}0)=\\frac3{10}$ și $P(X{=}1)=\\frac7{10}$: $\\frac1{12}+q=\\frac7{40}=\\frac3{10}\\cdot\\frac7{12}$, $\\frac7{24}=\\frac7{10}\\cdot\\frac5{12}$, $\\frac7{24}+p=\\frac{49}{120}=\\frac7{10}\\cdot\\frac7{12}$. **b.** Definiția cere $P(X{=}0,Y{=}0\\mid Z{=}0)=P(X{=}0\\mid Z{=}0)\\,P(Y{=}0\\mid Z{=}0)$; scrisă cu probabilitățile comune și înmulțită cu $P(Z{=}0)^2$, devine $P(0,0,0)\\,P(Z{=}0)=P(X{=}0,Z{=}0)\\,P(Y{=}0,Z{=}0)$. $P(Z{=}0)=\\frac5{24}+p=\\frac{13}{40}$. Pentru $x=y=z=0$: $\\frac1{24}\\cdot\\frac{13}{40}=\\frac{13}{960}$ față de $\\frac18\\cdot\\frac18=\\frac1{64}=\\frac{15}{960}$. Sunt diferite, deci $X$ și $Y$ **nu** sunt independente condiționat de $Z$, deși sunt independente: independența nu implică independența condiționată."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The variables $X$, $Y$, $Z$ take the values 0 and 1. Their joint distribution is in the table; $p$ and $q$ are unknown. **a.** Assuming that $X$ and $Y$ are independent, find $p$ and $q$. **b.** With the $p$ and $q$ of part a, are $X$ and $Y$ conditionally independent given $Z$? Why? To decide, compare for $x=y=z=0$ the two sides of $P(0,0,0)\\,P(Z{=}0)=P(X{=}0,Z{=}0)\\,P(Y{=}0,Z{=}0)$ (it is the definition $p(x,y\\mid z)=p(x\\mid z)\\,p(y\\mid z)$ written with the joint probabilities and multiplied by $P(Z{=}0)^2$). Answer as fractions.",
+        "ro": "Variabilele $X$, $Y$, $Z$ iau valorile 0 și 1. Distribuția lor comună este în tabel; $p$ și $q$ sunt necunoscute. **a.** Presupunând că $X$ și $Y$ sunt independente, găsește $p$ și $q$. **b.** Cu valorile lui $p$ și $q$ de la punctul a, sunt $X$ și $Y$ independente condiționat de $Z$? De ce? Ca să decizi, compară pentru $x=y=z=0$ cele două părți ale egalității $P(0,0,0)\\,P(Z{=}0)=P(X{=}0,Z{=}0)\\,P(Y{=}0,Z{=}0)$ (este definiția $p(x,y\\mid z)=p(x\\mid z)\\,p(y\\mid z)$ scrisă cu probabilitățile comune și înmulțită cu $P(Z{=}0)^2$). Răspunde ca fracții."
+       },
+       "table": {
+        "columns": [
+         "$Y$",
+         "$Z=0$, $X=0$",
+         "$Z=0$, $X=1$",
+         "$Z=1$, $X=0$",
+         "$Z=1$, $X=1$"
+        ],
+        "rows": [
+         [
+          "$Y=0$",
+          "1/10",
+          "1/10",
+          "1/10",
+          "1/5"
+         ],
+         [
+          "$Y=1$",
+          "1/20",
+          "$p$",
+          "$q$",
+          "1/6"
+         ]
+        ],
+        "caption": {
+         "en": "The joint distribution, with the unknowns p and q",
+         "ro": "Distribuția comună, cu necunoscutele p și q"
+        }
+       },
+       "fields": [
+        {
+         "id": "s",
+         "formula": "1-(1/10+1/10+1/10+1/5+1/20+1/6)",
+         "expected": "17/60"
+        },
+        {
+         "id": "p",
+         "formula": "(1/10+1/10+1/20+(1-(1/10+1/10+1/10+1/5+1/20+1/6)))-(1/10+1/10)/(1/10+1/10+1/10+1/5)",
+         "expected": "2/15"
+        },
+        {
+         "id": "q",
+         "formula": "(1-(1/10+1/10+1/10+1/5+1/20+1/6))-((1/10+1/10+1/20+(1-(1/10+1/10+1/10+1/5+1/20+1/6)))-(1/10+1/10)/(1/10+1/10+1/10+1/5))",
+         "expected": "3/20"
+        },
+        {
+         "id": "pz",
+         "formula": "1/10+1/10+1/20+((1/10+1/10+1/20+(1-(1/10+1/10+1/10+1/5+1/20+1/6)))-(1/10+1/10)/(1/10+1/10+1/10+1/5))",
+         "expected": "23/60"
+        },
+        {
+         "id": "l",
+         "formula": "1/10*(1/10+1/10+1/20+((1/10+1/10+1/20+(1-(1/10+1/10+1/10+1/5+1/20+1/6)))-(1/10+1/10)/(1/10+1/10+1/10+1/5)))",
+         "expected": "23/600"
+        },
+        {
+         "id": "r",
+         "formula": "(1/10+1/20)*(1/10+1/10)",
+         "expected": "3/100"
+        },
+        {
+         "id": "ci",
+         "formula": "(1/10*(1/10+1/10+1/20+((1/10+1/10+1/20+(1-(1/10+1/10+1/10+1/5+1/20+1/6)))-(1/10+1/10)/(1/10+1/10+1/10+1/5)))) == ((1/10+1/20)*(1/10+1/10))",
+         "expected": "false"
+        }
+       ],
+       "solution": {
+        "en": "The eight probabilities sum to 1, so $p+q=\\frac{17}{60}$. The cell $(0,0)$: $P(Y{=}0)=\\frac12$ and $P(0,0)=\\frac15$, so $P(X{=}0)=\\frac25$; but $P(X{=}0)=\\frac14+q=\\frac14+\\frac{17}{60}-p$, which gives $p=\\frac2{15}$ and $q=\\frac3{20}$. **b.** $P(Z{=}0)=\\frac{23}{60}$; the left side is $\\frac1{10}\\cdot\\frac{23}{60}=\\frac{23}{600}$, the right side $\\frac3{20}\\cdot\\frac15=\\frac3{100}=\\frac{18}{600}$. They differ: not conditionally independent.",
+        "ro": "Cele opt probabilități se adună la 1, deci $p+q=\\frac{17}{60}$. Celula $(0,0)$: $P(Y{=}0)=\\frac12$ și $P(0,0)=\\frac15$, deci $P(X{=}0)=\\frac25$; dar $P(X{=}0)=\\frac14+q=\\frac14+\\frac{17}{60}-p$, ceea ce dă $p=\\frac2{15}$ și $q=\\frac3{20}$. **b.** $P(Z{=}0)=\\frac{23}{60}$; partea stângă este $\\frac1{10}\\cdot\\frac{23}{60}=\\frac{23}{600}$, partea dreaptă $\\frac3{20}\\cdot\\frac15=\\frac3{100}=\\frac{18}{600}$. Sunt diferite: nu sunt independente condiționat."
+       }
+      }
+     ],
+     "source": {
+      "en": "Workbook, ex. 0.16, p. 39-42",
+      "ro": "Culegerea, ex. 0.16, p. 39-42"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s17",
+   "title": {
+    "en": "Exercise 0.101: independence, slices, a conditioned event",
+    "ro": "Exercițiul 0.101: independență, felii, un eveniment condiționat"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l06-c101",
+     "exercise": [
+      "0.101.a",
+      "0.101.b",
+      "0.101.c"
+     ],
+     "status": "verified-twice",
+     "statement": {
+      "en": "The variables $X$, $Y$, $Z$ take the values 0 and 1, with the joint distribution below (for example $P(X{=}0,Y{=}1,Z{=}0)=\\frac1{10}$ and $P(X{=}1,Y{=}1,Z{=}1)=\\frac4{45}$). **a.** Are $X$ and $Y$ independent? **b.** Is $X$ conditionally independent of $Y$ given $Z$, that is $X \\perp Y \\mid Z$? **c.** Compute $P(X{=}0\\mid X+Y>0)$. Answer as fractions.",
+      "ro": "Variabilele $X$, $Y$, $Z$ iau valorile 0 și 1, cu distribuția comună de mai jos (de exemplu $P(X{=}0,Y{=}1,Z{=}0)=\\frac1{10}$ și $P(X{=}1,Y{=}1,Z{=}1)=\\frac4{45}$). **a.** Sunt $X$ și $Y$ independente? **b.** Este $X$ independentă condiționat de $Y$ în raport cu $Z$, adică $X \\perp Y \\mid Z$? **c.** Calculează $P(X{=}0\\mid X+Y>0)$. Răspunde ca fracții."
+     },
+     "table": {
+      "columns": [
+       "X",
+       "Y",
+       "Z",
+       "P"
+      ],
+      "rows": [
+       [
+        0,
+        0,
+        0,
+        "1/15"
+       ],
+       [
+        0,
+        1,
+        0,
+        "1/10"
+       ],
+       [
+        1,
+        0,
+        0,
+        "1/15"
+       ],
+       [
+        1,
+        1,
+        0,
+        "1/10"
+       ],
+       [
+        0,
+        0,
+        1,
+        "4/15"
+       ],
+       [
+        0,
+        1,
+        1,
+        "8/45"
+       ],
+       [
+        1,
+        0,
+        1,
+        "2/15"
+       ],
+       [
+        1,
+        1,
+        1,
+        "4/45"
+       ]
+      ],
+      "caption": {
+       "en": "The joint distribution of X, Y, Z, one row per cell",
+       "ro": "Distribuția comună a lui X, Y, Z, câte un rând pe celulă"
+      }
+     },
+     "fields": [
+      {
+       "id": "px",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X{=}0)$, as a fraction",
+        "ro": "$P(X{=}0)$, ca fracție"
+       },
+       "formula": "P(T,'X=0')",
+       "expected": "11/18"
+      },
+      {
+       "id": "py",
+       "kind": "frac",
+       "label": {
+        "en": "$P(Y{=}0)$, as a fraction",
+        "ro": "$P(Y{=}0)$, ca fracție"
+       },
+       "formula": "P(T,'Y=0')",
+       "expected": "8/15"
+      },
+      {
+       "id": "p00",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X{=}0,Y{=}0)$, as a fraction",
+        "ro": "$P(X{=}0,Y{=}0)$, ca fracție"
+       },
+       "formula": "P(T,'X=0 & Y=0')",
+       "expected": "1/3"
+      },
+      {
+       "id": "pr",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X{=}0)\\,P(Y{=}0)$, as a fraction",
+        "ro": "$P(X{=}0)\\,P(Y{=}0)$, ca fracție"
+       },
+       "formula": "P(T,'X=0')*P(T,'Y=0')",
+       "expected": "44/135"
+      },
+      {
+       "id": "a",
+       "kind": "tf",
+       "label": {
+        "en": "(a) Are $X$ and $Y$ independent?",
+        "ro": "(a) Sunt $X$ și $Y$ independente?"
+       },
+       "formula": "P(T,'X=0 & Y=0') == P(T,'X=0')*P(T,'Y=0')",
+       "expected": "false"
+      },
+      {
+       "id": "c0",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X{=}0\\mid Z{=}0)$, as a fraction",
+        "ro": "$P(X{=}0\\mid Z{=}0)$, ca fracție"
+       },
+       "formula": "Pc(T,'X=0','Z=0')",
+       "expected": "1/2"
+      },
+      {
+       "id": "c1",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X{=}0\\mid Z{=}1)$, as a fraction",
+        "ro": "$P(X{=}0\\mid Z{=}1)$, ca fracție"
+       },
+       "formula": "Pc(T,'X=0','Z=1')",
+       "expected": "2/3"
+      },
+      {
+       "id": "b",
+       "kind": "tf",
+       "label": {
+        "en": "(b) Is $X \\perp Y \\mid Z$ (all eight equalities)?",
+        "ro": "(b) Este $X \\perp Y \\mid Z$ (toate cele opt egalități)?"
+       },
+       "formula": "(abs(P(T,'X=0 & Y=0 & Z=0')/P(T,'Z=0')-(P(T,'X=0 & Z=0')/P(T,'Z=0'))*(P(T,'Y=0 & Z=0')/P(T,'Z=0')))+abs(P(T,'X=0 & Y=0 & Z=1')/P(T,'Z=1')-(P(T,'X=0 & Z=1')/P(T,'Z=1'))*(P(T,'Y=0 & Z=1')/P(T,'Z=1')))+abs(P(T,'X=0 & Y=1 & Z=0')/P(T,'Z=0')-(P(T,'X=0 & Z=0')/P(T,'Z=0'))*(P(T,'Y=1 & Z=0')/P(T,'Z=0')))+abs(P(T,'X=0 & Y=1 & Z=1')/P(T,'Z=1')-(P(T,'X=0 & Z=1')/P(T,'Z=1'))*(P(T,'Y=1 & Z=1')/P(T,'Z=1')))+abs(P(T,'X=1 & Y=0 & Z=0')/P(T,'Z=0')-(P(T,'X=1 & Z=0')/P(T,'Z=0'))*(P(T,'Y=0 & Z=0')/P(T,'Z=0')))+abs(P(T,'X=1 & Y=0 & Z=1')/P(T,'Z=1')-(P(T,'X=1 & Z=1')/P(T,'Z=1'))*(P(T,'Y=0 & Z=1')/P(T,'Z=1')))+abs(P(T,'X=1 & Y=1 & Z=0')/P(T,'Z=0')-(P(T,'X=1 & Z=0')/P(T,'Z=0'))*(P(T,'Y=1 & Z=0')/P(T,'Z=0')))+abs(P(T,'X=1 & Y=1 & Z=1')/P(T,'Z=1')-(P(T,'X=1 & Z=1')/P(T,'Z=1'))*(P(T,'Y=1 & Z=1')/P(T,'Z=1')))) == 0",
+       "expected": "true"
+      },
+      {
+       "id": "n",
+       "kind": "frac",
+       "label": {
+        "en": "(c) $P(X{=}0,\\,X{+}Y>0)$, as a fraction",
+        "ro": "(c) $P(X{=}0,\\,X{+}Y>0)$, ca fracție"
+       },
+       "formula": "P(T,'X=0 & Y=1')",
+       "expected": "5/18"
+      },
+      {
+       "id": "d",
+       "kind": "frac",
+       "label": {
+        "en": "(c) $P(X{+}Y>0)$, as a fraction",
+        "ro": "(c) $P(X{+}Y>0)$, ca fracție"
+       },
+       "formula": "1-P(T,'X=0 & Y=0')",
+       "expected": "2/3"
+      },
+      {
+       "id": "r",
+       "kind": "frac",
+       "label": {
+        "en": "(c) $P(X{=}0\\mid X{+}Y>0)$, as a fraction",
+        "ro": "(c) $P(X{=}0\\mid X{+}Y>0)$, ca fracție"
+       },
+       "formula": "P(T,'X=0 & Y=1')/(1-P(T,'X=0 & Y=0'))",
+       "expected": "5/12"
+      }
+     ],
+     "detectors": [
+      {
+       "field": "a",
+       "formula": "true",
+       "message": {
+        "en": "Independence is checked on all cells: $P(0,0)=\\frac13$ differs from the product of the marginals.",
+        "ro": "Independența se verifică pe toate celulele: $P(0,0)=\\frac13$ diferă de produsul marginalelor."
+       }
+      },
+      {
+       "field": "b",
+       "formula": "false",
+       "message": {
+        "en": "Check the slices: $\\frac12$ against $\\frac12$ for $Z=0$ and $\\frac23$ against $\\frac23$ for $Z=1$.",
+        "ro": "Verifică feliile: $\\frac12$ față de $\\frac12$ pentru $Z=0$ și $\\frac23$ față de $\\frac23$ pentru $Z=1$."
+       }
+      },
+      {
+       "field": "r",
+       "formula": "P(T,'X=0 & Y=1')",
+       "message": {
+        "en": "That is the numerator; divide by $P(X{+}Y>0)$.",
+        "ro": "Aceasta este numărătorul; împarte la $P(X{+}Y>0)$."
+       }
+      },
+      {
+       "field": "r",
+       "formula": "P(T,'X=0')",
+       "message": {
+        "en": "That is $P(X{=}0)$. The condition $X+Y>0$ changes the space: it removes the cell $(0,0)$.",
+        "ro": "Aceasta este $P(X{=}0)$. Condiția $X+Y>0$ schimbă spațiul: scoate celula $(0,0)$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "(a) Marginalize: $P(X{=}0)$ and $P(Y{=}0)$ come from adding the matching rows; then compare $P(X{=}0,Y{=}0)$ with their product. (b) Check the slices $Z=0$ and $Z=1$. (c) The event $X+Y>0$ removes only the rows with $X=0$, $Y=0$ (for both values of $Z$).",
+       "ro": "(a) Marginalizează: $P(X{=}0)$ și $P(Y{=}0)$ se obțin adunând rândurile potrivite; apoi compară $P(X{=}0,Y{=}0)$ cu produsul lor. (b) Verifică feliile $Z=0$ și $Z=1$. (c) Evenimentul $X+Y>0$ scoate doar rândurile cu $X=0$, $Y=0$ (pentru ambele valori ale lui $Z$)."
+      },
+      {
+       "en": "(b) $P(X{=}0\\mid Y{=}y,Z{=}z)$ must equal $P(X{=}0\\mid Z{=}z)$ for all four pairs $(y,z)$. (c) $P(X{=}0\\mid X+Y>0)=\\dfrac{P(X{=}0,Y{=}1)}{1-P(X{=}0,Y{=}0)}$.",
+       "ro": "(b) $P(X{=}0\\mid Y{=}y,Z{=}z)$ trebuie să fie egală cu $P(X{=}0\\mid Z{=}z)$ pentru toate patru perechile $(y,z)$. (c) $P(X{=}0\\mid X+Y>0)=\\dfrac{P(X{=}0,Y{=}1)}{1-P(X{=}0,Y{=}0)}$."
+      },
+      {
+       "en": "(a) $P(X{=}0)=\\frac{11}{18}$, $P(Y{=}0)=\\frac8{15}$, product $\\frac{44}{135}$, but $P(0,0)=\\frac13$: not independent. (b) $\\frac12$ for $z=0$ and $\\frac23$ for $z=1$, whatever $y$ is: yes. (c) $\\dfrac{5/18}{2/3}=\\dfrac5{12}$.",
+       "ro": "(a) $P(X{=}0)=\\frac{11}{18}$, $P(Y{=}0)=\\frac8{15}$, produsul $\\frac{44}{135}$, dar $P(0,0)=\\frac13$: nu sunt independente. (b) $\\frac12$ pentru $z=0$ și $\\frac23$ pentru $z=1$, oricare ar fi $y$: da. (c) $\\dfrac{5/18}{2/3}=\\dfrac5{12}$."
+      }
+     ],
+     "solution": {
+      "en": "(a) $P(X{=}0)=\\frac{11}{18}$ and $P(Y{=}0)=\\frac8{15}$, their product is $\\frac{44}{135}$, while $P(X{=}0,Y{=}0)=\\frac13$: **not** independent. (b) We use the equivalent form $P(X{=}x\\mid Y{=}y,Z{=}z)=P(X{=}x\\mid Z{=}z)$, 8 equalities for $x,y,z\\in\\{0,1\\}$. The slice $Z=0$: $P(X{=}0\\mid Z{=}0)=\\frac{1/15+1/10}{1/3}=\\frac12$, and $P(X{=}0\\mid Y{=}0,Z{=}0)=\\frac{1/15}{2/15}=\\frac12$ and $P(X{=}0\\mid Y{=}1,Z{=}0)=\\frac{1/10}{2/10}=\\frac12$. The slice $Z=1$: $P(X{=}0\\mid Z{=}1)=\\frac{4/15+8/45}{2/3}=\\frac23$, and $P(X{=}0\\mid Y{=}0,Z{=}1)=\\frac{4/15}{6/15}=\\frac23$ and $P(X{=}0\\mid Y{=}1,Z{=}1)=\\frac{8/45}{12/45}=\\frac23$. These are the 4 equalities with $x=0$; the 4 with $x=1$ follow from the complement ($1-\\frac12=\\frac12$, $1-\\frac23=\\frac13$ on both sides). All 8 hold, so **yes**, $X \\perp Y \\mid Z$. This is the opposite of exercise 0.16: dependent, but conditionally independent. (c) The numerator is $P(X{=}0,Y{=}1)=\\frac5{18}$, the denominator $1-P(X{=}0,Y{=}0)=\\frac23$, the ratio $\\frac5{12}$.",
+      "ro": "(a) $P(X{=}0)=\\frac{11}{18}$ și $P(Y{=}0)=\\frac8{15}$, produsul lor este $\\frac{44}{135}$, iar $P(X{=}0,Y{=}0)=\\frac13$: **nu** sunt independente. (b) Folosim forma echivalentă $P(X{=}x\\mid Y{=}y,Z{=}z)=P(X{=}x\\mid Z{=}z)$, 8 egalități pentru $x,y,z\\in\\{0,1\\}$. Felia $Z=0$: $P(X{=}0\\mid Z{=}0)=\\frac{1/15+1/10}{1/3}=\\frac12$, iar $P(X{=}0\\mid Y{=}0,Z{=}0)=\\frac{1/15}{2/15}=\\frac12$ și $P(X{=}0\\mid Y{=}1,Z{=}0)=\\frac{1/10}{2/10}=\\frac12$. Felia $Z=1$: $P(X{=}0\\mid Z{=}1)=\\frac{4/15+8/45}{2/3}=\\frac23$, iar $P(X{=}0\\mid Y{=}0,Z{=}1)=\\frac{4/15}{6/15}=\\frac23$ și $P(X{=}0\\mid Y{=}1,Z{=}1)=\\frac{8/45}{12/45}=\\frac23$. Acestea sunt cele 4 egalități cu $x=0$; cele 4 cu $x=1$ urmează din complement ($1-\\frac12=\\frac12$, $1-\\frac23=\\frac13$ de ambele părți). Toate cele 8 se verifică, deci **da**, $X \\perp Y \\mid Z$. Este opusul exercițiului 0.16: dependente, dar independente condiționat. (c) Numărătorul este $P(X{=}0,Y{=}1)=\\frac5{18}$, numitorul $1-P(X{=}0,Y{=}0)=\\frac23$, raportul $\\frac5{12}$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The variables $X$, $Y$, $Z$ take the values 0 and 1, with the joint distribution below. **a.** Are $X$ and $Y$ independent? **b.** Is $X$ conditionally independent of $Y$ given $Z$, that is $X \\perp Y \\mid Z$? **c.** Compute $P(X{=}0\\mid X+Y>0)$. Answer as fractions.",
+        "ro": "Variabilele $X$, $Y$, $Z$ iau valorile 0 și 1, cu distribuția comună de mai jos. **a.** Sunt $X$ și $Y$ independente? **b.** Este $X$ independentă condiționat de $Y$ în raport cu $Z$, adică $X \\perp Y \\mid Z$? **c.** Calculează $P(X{=}0\\mid X+Y>0)$. Răspunde ca fracții."
+       },
+       "table": {
+        "columns": [
+         "X",
+         "Y",
+         "Z",
+         "P"
+        ],
+        "rows": [
+         [
+          0,
+          0,
+          0,
+          "1/20"
+         ],
+         [
+          0,
+          1,
+          0,
+          "1/20"
+         ],
+         [
+          1,
+          0,
+          0,
+          "3/20"
+         ],
+         [
+          1,
+          1,
+          0,
+          "3/20"
+         ],
+         [
+          0,
+          0,
+          1,
+          "3/20"
+         ],
+         [
+          0,
+          1,
+          1,
+          "3/10"
+         ],
+         [
+          1,
+          0,
+          1,
+          "1/20"
+         ],
+         [
+          1,
+          1,
+          1,
+          "1/10"
+         ]
+        ],
+        "caption": {
+         "en": "The joint distribution of X, Y, Z, one row per cell",
+         "ro": "Distribuția comună a lui X, Y, Z, câte un rând pe celulă"
+        }
+       },
+       "fields": [
+        {
+         "id": "px",
+         "formula": "P(T,'X=0')",
+         "expected": "11/20"
+        },
+        {
+         "id": "py",
+         "formula": "P(T,'Y=0')",
+         "expected": "2/5"
+        },
+        {
+         "id": "p00",
+         "formula": "P(T,'X=0 & Y=0')",
+         "expected": "1/5"
+        },
+        {
+         "id": "pr",
+         "formula": "P(T,'X=0')*P(T,'Y=0')",
+         "expected": "11/50"
+        },
+        {
+         "id": "a",
+         "formula": "P(T,'X=0 & Y=0') == P(T,'X=0')*P(T,'Y=0')",
+         "expected": "false"
+        },
+        {
+         "id": "c0",
+         "formula": "Pc(T,'X=0','Z=0')",
+         "expected": "1/4"
+        },
+        {
+         "id": "c1",
+         "formula": "Pc(T,'X=0','Z=1')",
+         "expected": "3/4"
+        },
+        {
+         "id": "b",
+         "formula": "(abs(P(T,'X=0 & Y=0 & Z=0')/P(T,'Z=0')-(P(T,'X=0 & Z=0')/P(T,'Z=0'))*(P(T,'Y=0 & Z=0')/P(T,'Z=0')))+abs(P(T,'X=0 & Y=0 & Z=1')/P(T,'Z=1')-(P(T,'X=0 & Z=1')/P(T,'Z=1'))*(P(T,'Y=0 & Z=1')/P(T,'Z=1')))+abs(P(T,'X=0 & Y=1 & Z=0')/P(T,'Z=0')-(P(T,'X=0 & Z=0')/P(T,'Z=0'))*(P(T,'Y=1 & Z=0')/P(T,'Z=0')))+abs(P(T,'X=0 & Y=1 & Z=1')/P(T,'Z=1')-(P(T,'X=0 & Z=1')/P(T,'Z=1'))*(P(T,'Y=1 & Z=1')/P(T,'Z=1')))+abs(P(T,'X=1 & Y=0 & Z=0')/P(T,'Z=0')-(P(T,'X=1 & Z=0')/P(T,'Z=0'))*(P(T,'Y=0 & Z=0')/P(T,'Z=0')))+abs(P(T,'X=1 & Y=0 & Z=1')/P(T,'Z=1')-(P(T,'X=1 & Z=1')/P(T,'Z=1'))*(P(T,'Y=0 & Z=1')/P(T,'Z=1')))+abs(P(T,'X=1 & Y=1 & Z=0')/P(T,'Z=0')-(P(T,'X=1 & Z=0')/P(T,'Z=0'))*(P(T,'Y=1 & Z=0')/P(T,'Z=0')))+abs(P(T,'X=1 & Y=1 & Z=1')/P(T,'Z=1')-(P(T,'X=1 & Z=1')/P(T,'Z=1'))*(P(T,'Y=1 & Z=1')/P(T,'Z=1')))) == 0",
+         "expected": "true"
+        },
+        {
+         "id": "n",
+         "formula": "P(T,'X=0 & Y=1')",
+         "expected": "7/20"
+        },
+        {
+         "id": "d",
+         "formula": "1-P(T,'X=0 & Y=0')",
+         "expected": "4/5"
+        },
+        {
+         "id": "r",
+         "formula": "P(T,'X=0 & Y=1')/(1-P(T,'X=0 & Y=0'))",
+         "expected": "7/16"
+        }
+       ],
+       "solution": {
+        "en": "(a) $P(X{=}0)=\\frac{11}{20}$ and $P(Y{=}0)=\\frac25$, product $\\frac{11}{50}$, while $P(X{=}0,Y{=}0)=\\frac15$: not independent. (b) $P(X{=}0\\mid Z{=}0)=\\frac14$ and $P(X{=}0\\mid Z{=}1)=\\frac34$, and the same values for $y=0,1$: all eight equalities hold, so yes. (c) $\\dfrac{7/20}{4/5}=\\dfrac7{16}$.",
+        "ro": "(a) $P(X{=}0)=\\frac{11}{20}$ și $P(Y{=}0)=\\frac25$, produsul $\\frac{11}{50}$, iar $P(X{=}0,Y{=}0)=\\frac15$: nu sunt independente. (b) $P(X{=}0\\mid Z{=}0)=\\frac14$ și $P(X{=}0\\mid Z{=}1)=\\frac34$, aceleași valori pentru $y=0,1$: toate cele opt egalități se verifică, deci da. (c) $\\dfrac{7/20}{4/5}=\\dfrac7{16}$."
+       }
+      }
+     ],
+     "source": {
+      "en": "Workbook, ex. 0.101, p. 219-220",
+      "ro": "Culegerea, ex. 0.101, p. 219-220"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s18",
+   "title": {
+    "en": "Exercise 0.102: which numbers are enough for two pieces of evidence",
+    "ro": "Exercițiul 0.102: ce numere ajung pentru două dovezi"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l06-c102",
+     "exercise": [
+      "0.102.a",
+      "0.102.b"
+     ],
+     "status": "verified-twice",
+     "statement": {
+      "en": "We want $P(H\\mid E_1,E_2)$, the probability of the hypothesis $H$ after seeing two pieces of evidence (observations) $E_1$ and $E_2$. By $P(H)$, $P(E_1\\mid H)$ and so on we mean the lists with all the values. Three sets of known numbers: **(i)** $P(E_1,E_2)$, $P(H)$, $P(E_1\\mid H)$, $P(E_2\\mid H)$; **(ii)** $P(E_1,E_2)$, $P(H)$, $P(E_1,E_2\\mid H)$; **(iii)** $P(H)$, $P(E_1\\mid H)$, $P(E_2\\mid H)$. **a.** With no conditional independence information, which sets are enough to compute $P(H\\mid E_1,E_2)$? **b.** We assume $E_1 \\perp E_2 \\mid H$. Which sets are enough now?",
+      "ro": "Vrem $P(H\\mid E_1,E_2)$, probabilitatea ipotezei $H$ după ce am văzut două dovezi (observații) $E_1$ și $E_2$. Prin $P(H)$, $P(E_1\\mid H)$ și așa mai departe înțelegem listele cu toate valorile. Trei seturi de numere cunoscute: **(i)** $P(E_1,E_2)$, $P(H)$, $P(E_1\\mid H)$, $P(E_2\\mid H)$; **(ii)** $P(E_1,E_2)$, $P(H)$, $P(E_1,E_2\\mid H)$; **(iii)** $P(H)$, $P(E_1\\mid H)$, $P(E_2\\mid H)$. **a.** Fără nicio informație de independență condiționată, care seturi ajung ca să calculezi $P(H\\mid E_1,E_2)$? **b.** Presupunem $E_1 \\perp E_2 \\mid H$. Care seturi ajung acum?"
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "multi",
+       "options": [
+        {
+         "en": "(i)",
+         "ro": "(i)"
+        },
+        {
+         "en": "(ii)",
+         "ro": "(ii)"
+        },
+        {
+         "en": "(iii)",
+         "ro": "(iii)"
+        }
+       ],
+       "label": {
+        "en": "(a) The sets that are enough, without conditional independence",
+        "ro": "(a) Seturile care ajung, fără independență condiționată"
+       },
+       "formula": "['(ii)']",
+       "expected": "(ii)"
+      },
+      {
+       "id": "b",
+       "kind": "multi",
+       "options": [
+        {
+         "en": "(i)",
+         "ro": "(i)"
+        },
+        {
+         "en": "(ii)",
+         "ro": "(ii)"
+        },
+        {
+         "en": "(iii)",
+         "ro": "(iii)"
+        }
+       ],
+       "label": {
+        "en": "(b) The sets that are enough, with $E_1 \\perp E_2 \\mid H$",
+        "ro": "(b) Seturile care ajung, cu $E_1 \\perp E_2 \\mid H$"
+       },
+       "formula": "['(i)','(ii)','(iii)']",
+       "expected": "(i), (ii), (iii)"
+      }
+     ],
+     "detectors": [
+      {
+       "field": "a",
+       "formula": "['(ii)','(iii)']",
+       "message": {
+        "en": "Set (iii) does not give $P(E_1,E_2\\mid H)$: from the separate $P(E_1\\mid H)$ and $P(E_2\\mid H)$ you cannot build the joint probability without conditional independence (and it lacks $P(E_1,E_2)$ too).",
+        "ro": "Setul (iii) nu dă $P(E_1,E_2\\mid H)$: din $P(E_1\\mid H)$ și $P(E_2\\mid H)$ luate separat nu poți construi probabilitatea comună fără independență condiționată (și îi lipsește și $P(E_1,E_2)$)."
+       }
+      },
+      {
+       "field": "a",
+       "formula": "['(i)','(ii)']",
+       "message": {
+        "en": "Set (i) has the two separate probabilities but not $P(E_1,E_2\\mid H)$, which the formula needs.",
+        "ro": "Setul (i) are cele două probabilități separate, dar nu $P(E_1,E_2\\mid H)$, pe care formula îl cere."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Write Bayes' formula for $P(H\\mid E_1,E_2)$ (see Lecția 2) and see which three quantities it asks for: $P(E_1,E_2\\mid H)$, $P(H)$ and $P(E_1,E_2)$.",
+       "ro": "Scrie formula lui Bayes pentru $P(H\\mid E_1,E_2)$ (vezi Lecția 2) și vezi ce trei mărimi cere: $P(E_1,E_2\\mid H)$, $P(H)$ și $P(E_1,E_2)$."
+      },
+      {
+       "en": "A set is enough if you have each of the three quantities, directly or computable from the others. The separate $P(E_1\\mid H)$ and $P(E_2\\mid H)$ alone do not determine the joint probability $P(E_1,E_2\\mid H)$.",
+       "ro": "Un set ajunge dacă ai fiecare dintre cele trei mărimi, direct sau calculabilă din celelalte. $P(E_1\\mid H)$ și $P(E_2\\mid H)$ luate separat nu determină probabilitatea comună $P(E_1,E_2\\mid H)$."
+      },
+      {
+       "en": "(a) Only (ii) has all three quantities. (b) With $E_1 \\perp E_2 \\mid H$, $P(E_1,E_2\\mid H)=P(E_1\\mid H)\\,P(E_2\\mid H)$, and $P(E_1,E_2)=\\sum_h P(h)\\,P(E_1\\mid h)\\,P(E_2\\mid h)$ (total probability), so all three sets are enough.",
+       "ro": "(a) Doar (ii) are toate trei mărimile. (b) Cu $E_1 \\perp E_2 \\mid H$, $P(E_1,E_2\\mid H)=P(E_1\\mid H)\\,P(E_2\\mid H)$, iar $P(E_1,E_2)=\\sum_h P(h)\\,P(E_1\\mid h)\\,P(E_2\\mid h)$ (probabilitatea totală), deci toate trei seturile ajung."
+      }
+     ],
+     "solution": {
+      "en": "(a) Bayes' formula needs $P(E_1,E_2\\mid H)$, $P(H)$ and $P(E_1,E_2)$. Only (ii) has all three. (i) and (iii) lack $P(E_1,E_2\\mid H)$, and (iii) also lacks $P(E_1,E_2)$. (b) With $E_1 \\perp E_2 \\mid H$: $P(E_1,E_2\\mid H)=P(E_1\\mid H)\\,P(E_2\\mid H)$, so (i) works, (ii) works, and (iii) works too because $P(E_1,E_2)$ comes from the total probability formula.",
+      "ro": "(a) Formula lui Bayes cere $P(E_1,E_2\\mid H)$, $P(H)$ și $P(E_1,E_2)$. Doar (ii) le are pe toate trei. Lui (i) și (iii) le lipsește $P(E_1,E_2\\mid H)$, iar lui (iii) îi lipsește și $P(E_1,E_2)$. (b) Cu $E_1 \\perp E_2 \\mid H$: $P(E_1,E_2\\mid H)=P(E_1\\mid H)\\,P(E_2\\mid H)$, deci (i) ajunge, (ii) ajunge, iar (iii) ajunge și el, pentru că $P(E_1,E_2)$ iese din formula probabilității totale."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "We want $P(H\\mid E_1,E_2)$, the probability of the hypothesis $H$ after seeing two pieces of evidence (observations) $E_1$ and $E_2$. By $P(H)$, $P(E_1\\mid H)$ and so on we mean the lists with all the values. Three sets of known numbers: **(i)** $P(E_1,E_2\\mid H)$, $P(H)$, $P(E_1,E_2)$; **(ii)** $P(E_1\\mid H)$, $P(E_2\\mid H)$, $P(H)$, $P(E_1,E_2)$; **(iii)** $P(E_1,E_2\\mid H)$, $P(E_1\\mid H)$, $P(E_2\\mid H)$. **a.** With no conditional independence information, which sets are enough to compute $P(H\\mid E_1,E_2)$? **b.** We assume $E_1 \\perp E_2 \\mid H$. Which sets are enough now?",
+        "ro": "Vrem $P(H\\mid E_1,E_2)$, probabilitatea ipotezei $H$ după ce am văzut două dovezi (observații) $E_1$ și $E_2$. Prin $P(H)$, $P(E_1\\mid H)$ și așa mai departe înțelegem listele cu toate valorile. Trei seturi de numere cunoscute: **(i)** $P(E_1,E_2\\mid H)$, $P(H)$, $P(E_1,E_2)$; **(ii)** $P(E_1\\mid H)$, $P(E_2\\mid H)$, $P(H)$, $P(E_1,E_2)$; **(iii)** $P(E_1,E_2\\mid H)$, $P(E_1\\mid H)$, $P(E_2\\mid H)$. **a.** Fără nicio informație de independență condiționată, care seturi ajung ca să calculezi $P(H\\mid E_1,E_2)$? **b.** Presupunem $E_1 \\perp E_2 \\mid H$. Care seturi ajung acum?"
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "['(i)']",
+         "expected": "(i)"
+        },
+        {
+         "id": "b",
+         "formula": "['(i)','(ii)']",
+         "expected": "(i), (ii)"
+        }
+       ],
+       "solution": {
+        "en": "(a) Only (i) has all three quantities of Bayes' formula: $P(E_1,E_2\\mid H)$, $P(H)$ and $P(E_1,E_2)$. (ii) lacks $P(E_1,E_2\\mid H)$; (iii) lacks $P(H)$ and $P(E_1,E_2)$. (b) With $E_1 \\perp E_2 \\mid H$, (ii) now gives $P(E_1,E_2\\mid H)$ as a product, so (ii) is enough, and so is (i). (iii) is not: it lacks $P(H)$, and without $P(H)$ neither Bayes' formula nor the total probability can be used.",
+        "ro": "(a) Doar (i) are cele trei mărimi ale formulei lui Bayes: $P(E_1,E_2\\mid H)$, $P(H)$ și $P(E_1,E_2)$. Lui (ii) îi lipsește $P(E_1,E_2\\mid H)$; lui (iii) îi lipsesc $P(H)$ și $P(E_1,E_2)$. (b) Cu $E_1 \\perp E_2 \\mid H$, (ii) dă acum $P(E_1,E_2\\mid H)$ ca produs, deci (ii) ajunge, la fel ca (i). (iii) nu ajunge: îi lipsește $P(H)$, iar fără $P(H)$ nu se pot folosi nici formula lui Bayes, nici probabilitatea totală."
+       }
+      }
+     ],
+     "source": {
+      "en": "Workbook, ex. 0.102, p. 220",
+      "ro": "Culegerea, ex. 0.102, p. 220"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l06-s19",
+   "title": {
+    "en": "Exercise 0.103: the pair against W, one variable at a time",
+    "ro": "Exercițiul 0.103: perechea față de W, câte o variabilă"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ml-l06-p103",
+     "exercise": "0.103",
+     "claim": {
+      "en": "Show that if the pair $(X,Y)$ is independent of $W$ given $Z$ (written $(X,Y) \\perp W \\mid Z$), then $X \\perp W \\mid Z$, and likewise $Y \\perp W \\mid Z$.",
+      "ro": "Arată că dacă perechea $(X,Y)$ este independentă de $W$ în raport cu $Z$ (se scrie $(X,Y) \\perp W \\mid Z$), atunci $X \\perp W \\mid Z$, și la fel $Y \\perp W \\mid Z$."
+     },
+     "given": {
+      "en": "$(X,Y) \\perp W \\mid Z$ means $p(x,y,w\\mid z)=p(x,y\\mid z)\\,p(w\\mid z)$ for all values.",
+      "ro": "$(X,Y) \\perp W \\mid Z$ înseamnă $p(x,y,w\\mid z)=p(x,y\\mid z)\\,p(w\\mid z)$ pentru toate valorile."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "The hypothesis: $p(x,y,w\\mid z)=p(x,y\\mid z)\\,p(w\\mid z)$ for all $x,y,w,z$.",
+        "ro": "Ipoteza: $p(x,y,w\\mid z)=p(x,y\\mid z)\\,p(w\\mid z)$ pentru toate $x,y,w,z$."
+       },
+       "why": {
+        "en": "This is the definition, with the pair $(X,Y)$ in the place of $X$.",
+        "ro": "Aceasta este definiția, cu perechea $(X,Y)$ în locul lui $X$."
+       }
+      },
+      {
+       "shown": {
+        "en": "We sum both sides over $y$.",
+        "ro": "Însumăm ambii membri după $y$."
+       },
+       "why": {
+        "en": "We want to get rid of $Y$, and a sum over its values does that.",
+        "ro": "Vrem să scăpăm de $Y$, iar o sumă pe valorile lui o face."
+       },
+       "predict": {
+        "question": {
+         "en": "What do we sum over to get rid of $Y$?",
+         "ro": "După ce însumăm ca să scăpăm de $Y$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Both sides, over $z$",
+           "ro": "Ambii membri, după $z$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "The condition $Z$ must stay: we want an equality inside each slice $Z=z$.",
+           "ro": "Condiția $Z$ trebuie să rămână: vrem o egalitate în fiecare felie $Z=z$."
+          },
+          "misconception": "insumare-dupa-z"
+         },
+         {
+          "text": {
+           "en": "Both sides, over $w$",
+           "ro": "Ambii membri, după $w$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Summing over $w$ removes $W$, the very variable the claim $X \\perp W \\mid Z$ is about. We remove $Y$, which the claim does not contain.",
+           "ro": "Însumarea după $w$ scoate $W$, chiar variabila despre care vorbește afirmația $X \\perp W \\mid Z$. Scoatem $Y$, pe care afirmația nu o conține."
+          },
+          "misconception": "insumare-dupa-w"
+         },
+         {
+          "text": {
+           "en": "Both sides, over $y$ (the values of $Y$)",
+           "ro": "Ambii membri, după $y$ (valorile lui $Y$)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "We keep $Z$ and $W$ and remove only $Y$.",
+           "ro": "Păstrăm $Z$ și $W$ și scoatem doar $Y$."
+          }
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Left side: $\\sum_y p(x,y,w\\mid z)=p(x,w\\mid z)$.",
+        "ro": "Membrul stâng: $\\sum_y p(x,y,w\\mid z)=p(x,w\\mid z)$."
+       },
+       "why": {
+        "en": "This is conditional marginalization, which asks for no independence.",
+        "ro": "Aceasta este marginalizarea condiționată, care nu cere nicio independență."
+       }
+      },
+      {
+       "shown": {
+        "en": "Right side: $\\sum_y p(x,y\\mid z)\\,p(w\\mid z)=p(w\\mid z)\\sum_y p(x,y\\mid z)=p(w\\mid z)\\,p(x\\mid z)$.",
+        "ro": "Membrul drept: $\\sum_y p(x,y\\mid z)\\,p(w\\mid z)=p(w\\mid z)\\sum_y p(x,y\\mid z)=p(w\\mid z)\\,p(x\\mid z)$."
+       },
+       "why": {
+        "en": "The factor $p(w\\mid z)$ does not contain $y$, so it comes out of the sum; what remains is the marginalization of $(X,Y)$ over $y$.",
+        "ro": "Factorul $p(w\\mid z)$ nu conține $y$, deci iese din sumă; rămâne marginalizarea lui $(X,Y)$ după $y$."
+       },
+       "predict": {
+        "question": {
+         "en": "Why does $p(w\\mid z)$ come out in front of the sum over $y$?",
+         "ro": "De ce iese $p(w\\mid z)$ în fața sumei după $y$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Because $W$ is independent of $Z$",
+           "ro": "Pentru că $W$ este independentă de $Z$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "We assume nothing like that: the hypothesis is conditioned on $Z$, and $p(w\\mid z)$ may well depend on $z$.",
+           "ro": "Nu presupunem așa ceva: ipoteza este condiționată de $Z$, iar $p(w\\mid z)$ poate depinde de $z$."
+          },
+          "misconception": "variabile-independente-tacit"
+         },
+         {
+          "text": {
+           "en": "It does not depend on $y$, so it is a constant inside the sum",
+           "ro": "Nu depinde de $y$, deci este o constantă în interiorul sumei"
+          },
+          "correct": true,
+          "explain": {
+           "en": "A factor that does not contain the summation variable can be taken out.",
+           "ro": "Un factor care nu conține variabila de însumare poate fi scos."
+          }
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "So $p(x,w\\mid z)=p(x\\mid z)\\,p(w\\mid z)$ for all $x,w,z$.",
+        "ro": "Deci $p(x,w\\mid z)=p(x\\mid z)\\,p(w\\mid z)$ pentru toate $x,w,z$."
+       },
+       "why": {
+        "en": "This is exactly the definition of $X \\perp W \\mid Z$.",
+        "ro": "Aceasta este chiar definiția lui $X \\perp W \\mid Z$."
+       }
+      },
+      {
+       "shown": {
+        "en": "For $Y$ we sum over $x$ instead, and in the same way $Y \\perp W \\mid Z$.",
+        "ro": "Pentru $Y$ însumăm după $x$ și obținem la fel $Y \\perp W \\mid Z$."
+       }
+      }
+     ],
+     "end": {
+      "en": "We showed $X \\perp W \\mid Z$ and $Y \\perp W \\mid Z$. $\\blacksquare$",
+      "ro": "Am arătat că $X \\perp W \\mid Z$ și $Y \\perp W \\mid Z$. $\\blacksquare$"
+     }
+    }
+   ]
+  }
+ ]
+}
