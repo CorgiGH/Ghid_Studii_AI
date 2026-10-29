@@ -38,7 +38,7 @@ import puppeteer from 'puppeteer'
 import { preview } from 'vite'
 import {
   overflowFindings, sticksOut, smallTarget, visibleBand, hitFindings, joltFindings, backgroundFindings, wrongAttempt,
-  rightText, unknownLessons,
+  rightText, unknownLessons, buttonClicks,
 } from './walk-helpers.mjs'
 import { parseAnswer, norm } from '../../src/ml/calc/answer.js'
 
@@ -281,21 +281,19 @@ const PROOF = `${SCREEN} [data-testid=proof-block]`
 const CALC = `${SCREEN} [data-testid=calc-exercise]`
 
 // Fill the buttons of one choice / tf / multi field of the current calc block so that exactly `want` (option indexes) are pressed.
-async function setButtons(page, fieldIdx, want) {
+async function setButtons(page, fieldIdx, want, single = false) {
   const states = await page.evaluate((cur, fieldIdx) => {
     const f = [...document.querySelectorAll(`${cur} .ch-calc-field`)][fieldIdx]
     return f ? [...f.querySelectorAll('.ch-calc-choice')].map((b) => b.getAttribute('aria-pressed') === 'true') : null
   }, CUR, fieldIdx)
   if (!states) throw new Error(`calc field ${fieldIdx} not found`)
-  for (let j = 0; j < states.length; j++) {
-    if (states[j] !== want.includes(j)) await clickAt(page, `${CUR} .ch-calc-field`, fieldIdx, { sel: '.ch-calc-choice', i: j })
-  }
+  for (const j of buttonClicks(states, want, single)) await clickAt(page, `${CUR} .ch-calc-field`, fieldIdx, { sel: '.ch-calc-choice', i: j })
 }
 
 // Type (or press) `text` as the answer to field `f`, the fieldIdx-th field of the current calc block.
 async function enter(page, f, fieldIdx, text) {
-  if (f.kind === 'tf') return setButtons(page, fieldIdx, [text === 'true' ? 0 : 1])
-  if (f.kind === 'choice' && f.options) return setButtons(page, fieldIdx, [f.options.findIndex((o) => norm(o.en) === norm(text) || norm(o.ro) === norm(text))])
+  if (f.kind === 'tf') return setButtons(page, fieldIdx, [text === 'true' ? 0 : 1], true)
+  if (f.kind === 'choice' && f.options) return setButtons(page, fieldIdx, [f.options.findIndex((o) => norm(o.en) === norm(text) || norm(o.ro) === norm(text))], true)
   if (f.kind === 'multi') {
     const names = parseAnswer(text, 'multi', f.options).value || []
     return setButtons(page, fieldIdx, f.options.map((o, j) => (names.some((n) => norm(n) === norm(o.en)) ? j : -1)).filter((j) => j >= 0))
