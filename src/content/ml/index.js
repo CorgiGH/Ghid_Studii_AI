@@ -15,6 +15,7 @@ const ml = {
   icon: '🤖',
   courses: [
     { id: "ml-l01", title: {"en":"Lesson 1: Probability, conditional probability, the multiplication rule","ro":"Lecția 1: Probabilitate, probabilitate condiționată, regula de înmulțire"}, shortTitle: {"en":"L1: Probability","ro":"L1: Probabilitate"}, sectionCount: 27, metaId: "ml-l01", src: "ml/courses/lesson-01.json" },
+    { id: "ml-l02", title: {"en":"Lesson 2: Total probability and Bayes' formula","ro":"Lecția 2: Probabilitatea totală și formula lui Bayes"}, shortTitle: {"en":"L2: Total and Bayes","ro":"L2: Totală și Bayes"}, sectionCount: 19, metaId: "ml-l02", src: "ml/courses/lesson-02.json" },
   ],
   seminars: [],
   labs: [],
