@@ -38,6 +38,14 @@ Worktree: `/home/alexa/Desktop/SO/os-study-guide-ml`, branch `ml-lessons` (from 
 - `git add` only named paths. Never commit `.claude/settings.local.json`, `scripts/review-gemini-alo-c11.mjs`, or the raw ML material (`src/content/ml/{source,tests/source,refs/files,students,_text}`, `materials.json`, `MATERIALS.md`).
 - No push to origin without Alex's word. A push to main deploys the public site.
 - Builders run on Sonnet; reviewers and the final verify run on Opus.
+- **Clarity standard (Alex, 2026-10-30, after lesson 1 was unreadable: "i can't understand shit from lesson 1").** Every lesson, published or not, follows it; a reviewer rejects a lesson that breaks it.
+  1. Core first. The main path teaches only what the teacher's list (`ml-outline/2026-10-29-teacher-list-coverage.md`) needs from this lesson. For each idea, in this order: a worked example with small concrete numbers, step by step; the rule in one plain Romanian sentence; the formula with every symbol named in words; one or two practice items.
+  2. Formal material the list does not ask for (axioms, side properties, proofs the list does not name) is cut to at most one plain screen when a later lesson needs it; otherwise it moves into the optional exercises at the end, titled "Opțional: …". Order: core screens, core exercises, optional exercises.
+  3. One idea per screen. Outside tables and exercise data, a screen has at most 80 words of learner text and no paragraph longer than 3 sentences.
+  4. No symbol or term before plain words introduce it.
+  5. At most two `reflect` screens per lesson (the pretest and the why-question), both answerable by common sense; other checks are pick-one questions.
+  6. Core exercises are the ones that look like test questions (the teacher's list, T1 and T21P items); a long multi-part exercise is split or made optional.
+  7. Nothing verified becomes wrong: every number, formula and verified answer is kept or recomputed with `evaluate`.
 
 ## Review Focus
 
