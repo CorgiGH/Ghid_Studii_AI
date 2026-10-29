@@ -108,6 +108,13 @@ export const ML_TAGS = [
   'nb-useless-when-dependent', 'nb-differs-from-jb-always', 'zero-count-is-impossible',
   'laplace-numerator-only', 'add-one-is-map', 'map-ml-swap', 'zero-scores-ratio', 'free-parameters-forgotten',
   'nb-error-counts-test-rows-only',
+  // added 2026-10-29 with the outline items for the teacher's list of the Friday test (D-069)
+  'media-nu-se-muta', 'constanta-inmultita', 'a-ramane-in-paranteza', 'o-valoare-peste-1-sau-negativa', 'suma-1-ajunge',
+  'id3-minimizeaza-direct-eroarea-la-antrenare', 'id3-gaseste-arborele-minim', 'ig-maximizat-pe-tot-arborele',
+  'pragul-calculat-pe-tot-setul', 'zona-fara-testele-de-pe-drum', 'cea-mai-mica-eroare-la-antrenare-castiga',
+  'erori-apropiate-underfitting', 'alegi-pe-test', 'raportezi-validarea', 'factorii-se-reestimeaza',
+  'priorul-trebuie-sa-fie-frecventa', 'decizia-nu-se-schimba', 'bayes-optimal-nu-greseste-niciodata',
+  'nb-si-bayes-comun-inversate', 'bayes-comun-e-sensibil-la-atribute-duplicate',
 ];
 
 export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS]);
