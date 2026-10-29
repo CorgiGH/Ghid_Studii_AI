@@ -1,0 +1,3556 @@
+{
+  "meta": {
+    "id": "ml-l04",
+    "title": {
+      "en": "Lesson 4: Discrete random variables: distribution, mean, variance; Bernoulli and binomial",
+      "ro": "Lecția 4: Variabile aleatoare discrete: distribuție, medie, varianță; Bernoulli și binomială"
+    },
+    "shortTitle": {
+      "en": "L4: Random variables",
+      "ro": "L4: Variabile aleatoare"
+    },
+    "source": {
+      "en": "Machine learning course, UAIC FII, weeks 1–2",
+      "ro": "Cursul de învățare automată, UAIC FII, săptămânile 1–2"
+    }
+  },
+  "steps": [
+    {
+      "id": "ml-l04-s1",
+      "title": {
+        "en": "Two coin games",
+        "ro": "Două jocuri cu moneda"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l04-r1",
+          "prompt": {
+            "en": "Two games with a fair coin (heads and tails are equally likely). **Game 1:** you win 1000 lei on heads and lose 1000 lei on tails. **Game 2:** you win 1 leu on heads and lose 1 leu on tails. In both games the average gain is 0. Which game is riskier, and how would you put the risk into a single number?",
+            "ro": "Două jocuri cu o monedă corectă (stema și pajura au aceeași șansă). **Jocul 1:** câștigi 1000 de lei la stemă, pierzi 1000 de lei la pajură. **Jocul 2:** câștigi 1 leu la stemă, pierzi 1 leu la pajură. În ambele jocuri câștigul mediu este 0. Care joc e mai riscant și cum ai pune riscul într-un singur număr?"
+          },
+          "placeholder": {
+            "en": "Write how you would measure the risk",
+            "ro": "Scrie cum ai măsura riscul"
+          },
+          "answer": {
+            "en": "**Game 1** is riskier. One possible number is the average squared distance from the mean: $10^6$ for game 1, against $1$ for game 2 (or its square root: 1000 against 1). If you guessed the idea of spread around the mean, that is good. Keep the idea; you come back to it later.",
+            "ro": "**Jocul 1** e mai riscant. Un număr posibil este distanța pătrată medie față de medie: $10^6$ pentru jocul 1, față de $1$ pentru jocul 2 (sau rădăcina ei: 1000 față de 1). Dacă ai ghicit ideea de împrăștiere față de medie, e bine. Păstrează ideea; revii la ea mai departe."
+          },
+          "table": {
+            "columns": [
+              {
+                "en": "Game",
+                "ro": "Joc"
+              },
+              {
+                "en": "On heads",
+                "ro": "La stemă"
+              },
+              {
+                "en": "On tails",
+                "ro": "La pajură"
+              },
+              {
+                "en": "Average gain",
+                "ro": "Câștig mediu"
+              }
+            ],
+            "rows": [
+              [
+                "1",
+                "+1000 lei",
+                "−1000 lei",
+                "0"
+              ],
+              [
+                "2",
+                "+1 leu",
+                "−1 leu",
+                "0"
+              ]
+            ],
+            "caption": {
+              "en": "The gains of the two games",
+              "ro": "Câștigurile celor două jocuri"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s2",
+      "title": {
+        "en": "A variable is a function on outcomes",
+        "ro": "Variabila este o funcție pe rezultate"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "We toss 3 fair coins. The 8 outcomes, all equally likely, are `HHH`, `HHT`, `HTH`, `THH`, `HTT`, `THT`, `TTH`, `TTT` (H = heads, T = tails); their set is written $\\Omega$ (see Lecția 1). Let $R$ be the number of heads among the 3 coins. $R$ takes an outcome and gives a number: for example $R(\\text{HHT})=2$, because `HHT` has two heads.",
+            "ro": "Aruncăm 3 monede corecte. Cele 8 rezultate, toate la fel de probabile, sunt `HHH`, `HHT`, `HTH`, `THH`, `HTT`, `THT`, `TTH`, `TTT` (H = stemă, T = pajură); mulțimea lor se notează $\\Omega$ (vezi Lecția 1). Fie $R$ numărul de steme dintre cele 3 monede. $R$ primește un rezultat și dă un număr: de exemplu $R(\\text{HHT})=2$, pentru că `HHT` are două steme."
+          }
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m1",
+          "question": {
+            "en": "What is $R(\\text{HTH})$, that is, the value of $R$ on the outcome `HTH`?",
+            "ro": "Cât este $R(\\text{HTH})$, adică valoarea lui $R$ pe rezultatul `HTH`?"
+          },
+          "check": {
+            "formula": "1+0+1"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "3",
+                "ro": "3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "3 is the number of coins, not the number of heads. $R$ counts only the coins that landed on heads.",
+                "ro": "3 este numărul de monede, nu numărul de steme. $R$ numără doar monedele care au căzut pe stemă."
+              },
+              "misconception": "numarul-de-valori"
+            },
+            {
+              "text": {
+                "en": "2",
+                "ro": "2"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The outcome `HTH` has two heads (the first and the third coin), so $R(\\text{HTH})=2$. A random variable is a function: it takes an outcome and gives a number.",
+                "ro": "Rezultatul `HTH` are două steme (prima și a treia monedă), deci $R(\\text{HTH})=2$. O variabilă aleatoare este o funcție: ea primește un rezultat și dă un număr."
+              }
+            },
+            {
+              "text": {
+                "en": "1/8",
+                "ro": "1/8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1/8 is the probability of the outcome `HTH`. $R$ does not give the probability, it gives the number of heads.",
+                "ro": "1/8 este probabilitatea rezultatului `HTH`. $R$ nu dă probabilitatea, ci numărul de steme."
+              },
+              "misconception": "probabilitatea-numarului-de-steme"
+            }
+          ]
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m2",
+          "question": {
+            "en": "How many of the 8 outcomes have $R=1$ (exactly one head)? With that count, what is $P(R=1)$?",
+            "ro": "Câte dintre cele 8 rezultate au $R=1$ (exact o stemă)? Cu ele, cât este $P(R=1)$?"
+          },
+          "check": {
+            "formula": "3/8"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "3/8",
+                "ro": "3/8"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The outcomes `HTT`, `THT`, `TTH` have $R=1$: 3 out of 8, so $P(R=1)=3/8$. The statement $R=1$ is an event, that is, a set of outcomes.",
+                "ro": "Au $R=1$ rezultatele `HTT`, `THT`, `TTH`: 3 din 8, deci $P(R=1)=3/8$. $R=1$ este un eveniment, adică o mulțime de rezultate."
+              }
+            },
+            {
+              "text": {
+                "en": "1/8",
+                "ro": "1/8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1/8 is the probability of a single outcome. The value $R=1$ is reached by three outcomes, not one.",
+                "ro": "1/8 este probabilitatea unui singur rezultat. Valoarea $R=1$ este atinsă de trei rezultate, nu de unul."
+              },
+              "misconception": "o-singura-celula"
+            },
+            {
+              "text": {
+                "en": "1/4",
+                "ro": "1/4"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1/4 would be right if the four values of $R$ (0, 1, 2, 3) were equally likely. They are not: the value 1 comes in 3 ways, the value 0 in only one.",
+                "ro": "1/4 ar fi corect dacă cele patru valori ale lui $R$ (0, 1, 2, 3) ar fi la fel de probabile. Nu sunt: valoarea 1 se obține în 3 feluri, valoarea 0 într-unul singur."
+              },
+              "misconception": "parti-egale-presupuse"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s3",
+      "title": {
+        "en": "The distribution of R",
+        "ro": "Distribuția lui R"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The distribution of $R$ says which values $R$ can take and with what probability. We toss 3 fair coins. The 8 outcomes, all equally likely, are `HHH`, `HHT`, `HTH`, `THH`, `HTT`, `THT`, `TTH`, `TTT` (H = heads, T = tails); their set is written $\\Omega$ (see Lecția 1). Let $R$ be the number of heads among the 3 coins.",
+            "ro": "Distribuția lui $R$ spune ce valori poate lua $R$ și cu ce probabilitate. Aruncăm 3 monede corecte. Cele 8 rezultate, toate la fel de probabile, sunt `HHH`, `HHT`, `HTH`, `THH`, `HTT`, `THT`, `TTH`, `TTT` (H = stemă, T = pajură); mulțimea lor se notează $\\Omega$ (vezi Lecția 1). Fie $R$ numărul de steme dintre cele 3 monede."
+          }
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m3",
+          "question": {
+            "en": "What is the distribution of $R$ (the number of heads on 3 fair coins)?",
+            "ro": "Care este distribuția lui $R$ (numărul de steme la 3 monede corecte)?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "$R$ takes the values 0, 1, 2, 3 with probabilities 1/4, 1/4, 1/4, 1/4",
+                "ro": "$R$ ia valorile 0, 1, 2, 3 cu probabilitățile 1/4, 1/4, 1/4, 1/4"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The values are not equally likely: the value 1 comes in 3 ways, the value 0 in only one.",
+                "ro": "Valorile nu sunt la fel de probabile: valoarea 1 se obține în 3 feluri, valoarea 0 într-unul singur."
+              },
+              "misconception": "parti-egale-presupuse"
+            },
+            {
+              "text": {
+                "en": "$R$ takes the values 0, 1, 2, 3 with probability 1/8 each",
+                "ro": "$R$ ia valorile 0, 1, 2, 3 cu probabilitatea 1/8 fiecare"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1/8 is the probability of a single outcome. Four values with 1/8 each add up to less than 1, and the values 1 and 2 each come from 3 outcomes.",
+                "ro": "1/8 este probabilitatea unui singur rezultat. Patru valori cu câte 1/8 dau o sumă mai mică decât 1, iar valorile 1 și 2 se obțin fiecare din 3 rezultate."
+              },
+              "misconception": "o-singura-celula"
+            },
+            {
+              "text": {
+                "en": "$R$ takes the values 0, 1, 2, 3 with probabilities 1/8, 3/8, 3/8, 1/8",
+                "ro": "$R$ ia valorile 0, 1, 2, 3 cu probabilitățile 1/8, 3/8, 3/8, 1/8"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The value 0 comes from one outcome (`TTT`), the value 1 from three, the value 2 from three, the value 3 from one (`HHH`). The four probabilities add up to 1.",
+                "ro": "Valoarea 0 vine dintr-un rezultat (`TTT`), valoarea 1 din trei, valoarea 2 din trei, valoarea 3 dintr-unul (`HHH`). Cele patru probabilități adunate dau 1."
+              }
+            }
+          ]
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m4",
+          "question": {
+            "en": "What is $P(R\\in\\{0,1\\})$, the probability that $R$ is 0 or 1? ($\\in$ is read: belongs to.)",
+            "ro": "Cât este $P(R\\in\\{0,1\\})$, probabilitatea ca $R$ să fie 0 sau 1? ($\\in$ se citește: face parte din.)"
+          },
+          "table": {
+            "columns": [
+              "$r$",
+              "0",
+              "1",
+              "2",
+              "3"
+            ],
+            "rows": [
+              [
+                "$P(R=r)$",
+                "1/8",
+                "3/8",
+                "3/8",
+                "1/8"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of R: the probability of each value",
+              "ro": "Distribuția lui R: probabilitatea fiecărei valori"
+            }
+          },
+          "check": {
+            "formula": "1/8+3/8"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "3/8",
+                "ro": "3/8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "3/8 is only $P(R=1)$. The event also asks for the value 0.",
+                "ro": "3/8 este doar $P(R=1)$. Evenimentul cere și valoarea 0."
+              },
+              "misconception": "o-singura-celula"
+            },
+            {
+              "text": {
+                "en": "1/2",
+                "ro": "1/2"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The events $R=0$ and $R=1$ have no outcome in common, so their probabilities add: 1/8 + 3/8 = 1/2.",
+                "ro": "Evenimentele $R=0$ și $R=1$ nu au rezultate comune, deci probabilitățile lor se adună: 1/8 + 3/8 = 1/2."
+              }
+            },
+            {
+              "text": {
+                "en": "3/64",
+                "ro": "3/64"
+              },
+              "correct": false,
+              "explain": {
+                "en": "3/64 is the product 1/8 · 3/8. For an either-or between events with no outcome in common the probabilities add, they are not multiplied.",
+                "ro": "3/64 este produsul 1/8 · 3/8. Pentru sau între evenimente fără rezultate comune probabilitățile se adună, nu se înmulțesc."
+              },
+              "misconception": "produs-simplu"
+            }
+          ]
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m5",
+          "question": {
+            "en": "The cumulative function $F(2)=P(R\\le2)$ is the probability that $R$ is at most 2. What is $F(2)$?",
+            "ro": "Funcția cumulativă $F(2)=P(R\\le2)$ este probabilitatea ca $R$ să fie cel mult 2. Cât este $F(2)$?"
+          },
+          "table": {
+            "columns": [
+              "$r$",
+              "0",
+              "1",
+              "2",
+              "3"
+            ],
+            "rows": [
+              [
+                "$P(R=r)$",
+                "1/8",
+                "3/8",
+                "3/8",
+                "1/8"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of R: the probability of each value",
+              "ro": "Distribuția lui R: probabilitatea fiecărei valori"
+            }
+          },
+          "check": {
+            "formula": "1/8+3/8+3/8"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "7/8",
+                "ro": "7/8"
+              },
+              "correct": true,
+              "explain": {
+                "en": "$F(2)=P(R=0)+P(R=1)+P(R=2)=1/8+3/8+3/8=7/8$. You add the probabilities of all values up to 2 inclusive.",
+                "ro": "$F(2)=P(R=0)+P(R=1)+P(R=2)=1/8+3/8+3/8=7/8$. Se adună probabilitățile tuturor valorilor până la 2 inclusiv."
+              }
+            },
+            {
+              "text": {
+                "en": "3/8",
+                "ro": "3/8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "3/8 is $P(R=2)$, the p.m.f. at the point 2. $F(2)$ adds the smaller values too.",
+                "ro": "3/8 este $P(R=2)$, adică p.m.f. în punctul 2. $F(2)$ adună și valorile mai mici."
+              },
+              "misconception": "p-m-f-in-loc-de-c-d-f"
+            },
+            {
+              "text": {
+                "en": "1/8",
+                "ro": "1/8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1/8 is $P(R\\ge3)$, the tail on the right. $F$ adds from the left, up to 2.",
+                "ro": "1/8 este $P(R\\ge3)$, coada din dreapta. $F$ adună de la stânga, până la 2."
+              },
+              "misconception": "coada-opusa"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s4",
+      "title": {
+        "en": "The function is applied to the values",
+        "ro": "Funcția se aplică valorilor"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Let $X$ have the values $-1, 0, 1$ and the probabilities $\\frac12, \\frac14, \\frac14$. If we apply a function to $X$, for example $X^2$ or $2X$, we get a new variable. The function is applied to the **values** of $X$; the probabilities stay with the values we started from, and if two values land on the same result, their probabilities add.",
+            "ro": "Fie $X$ cu valorile $-1, 0, 1$ și probabilitățile $\\frac12, \\frac14, \\frac14$. Dacă aplicăm o funcție lui $X$, de exemplu $X^2$ sau $2X$, obținem o variabilă nouă. Funcția se aplică **valorilor** lui $X$; probabilitățile rămân la valorile de la care s-a pornit, iar dacă două valori ajung la același rezultat, probabilitățile lor se adună."
+          }
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m6",
+          "question": {
+            "en": "What is the distribution of $X^2$?",
+            "ro": "Care este distribuția lui $X^2$?"
+          },
+          "table": {
+            "columns": [
+              "$x$",
+              "−1",
+              "0",
+              "1"
+            ],
+            "rows": [
+              [
+                "$P(X=x)$",
+                "1/2",
+                "1/4",
+                "1/4"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of X",
+              "ro": "Distribuția lui X"
+            }
+          },
+          "options": [
+            {
+              "text": {
+                "en": "$X^2$ takes the values 1, 0, 1 with probabilities 1/4, 1/16, 1/16",
+                "ro": "$X^2$ ia valorile 1, 0, 1 cu probabilitățile 1/4, 1/16, 1/16"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You squared the probabilities. The values of $X$ are squared; the probabilities stay where they are.",
+                "ro": "Ai ridicat la pătrat probabilitățile. La pătrat se ridică valorile lui $X$; probabilitățile rămân la locul lor."
+              },
+              "misconception": "functia-aplicata-probabilitatilor"
+            },
+            {
+              "text": {
+                "en": "$X^2$ takes the value 0 with probability 1/4 and the value 1 with probability 1/2",
+                "ro": "$X^2$ ia valoarea 0 cu probabilitatea 1/4 și valoarea 1 cu probabilitatea 1/2"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You counted only the value $-1$. The value $1$ also gives $1$ when squared, with probability 1/4, which must be added: 1/2 + 1/4 = 3/4.",
+                "ro": "Ai numărat doar valoarea $-1$. Și valoarea $1$ dă $1$ la pătrat, cu probabilitatea 1/4, care trebuie adunată: 1/2 + 1/4 = 3/4."
+              },
+              "misconception": "se-suprapun"
+            },
+            {
+              "text": {
+                "en": "$X^2$ takes the value 0 with probability 1/4 and the value 1 with probability 3/4",
+                "ro": "$X^2$ ia valoarea 0 cu probabilitatea 1/4 și valoarea 1 cu probabilitatea 3/4"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The values $-1$ and $1$ both give $1$, so their probabilities add: 1/2 + 1/4 = 3/4. The value 0 stays with 1/4.",
+                "ro": "Valorile $-1$ și $1$ dau amândouă $1$, deci probabilitățile lor se adună: 1/2 + 1/4 = 3/4. Valoarea 0 rămâne cu 1/4."
+              }
+            }
+          ]
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m7",
+          "question": {
+            "en": "What is the distribution of $2X$?",
+            "ro": "Care este distribuția lui $2X$?"
+          },
+          "table": {
+            "columns": [
+              "$x$",
+              "−1",
+              "0",
+              "1"
+            ],
+            "rows": [
+              [
+                "$P(X=x)$",
+                "1/2",
+                "1/4",
+                "1/4"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of X",
+              "ro": "Distribuția lui X"
+            }
+          },
+          "options": [
+            {
+              "text": {
+                "en": "$2X$ takes the values $-1, 0, 1$ with probabilities 1, 1/2, 1/2",
+                "ro": "$2X$ ia valorile $-1, 0, 1$ cu probabilitățile 1, 1/2, 1/2"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You doubled the probabilities. The function $2X$ doubles the values, not the probabilities (and the sum 1 + 1/2 + 1/2 would exceed 1).",
+                "ro": "Ai dublat probabilitățile. Funcția $2X$ dublează valorile, nu probabilitățile (și suma 1 + 1/2 + 1/2 ar depăși 1)."
+              },
+              "misconception": "functia-aplicata-probabilitatilor"
+            },
+            {
+              "text": {
+                "en": "$2X$ takes the values $-2, 0, 2$ with probabilities 1/2, 1/4, 1/4",
+                "ro": "$2X$ ia valorile $-2, 0, 2$ cu probabilitățile 1/2, 1/4, 1/4"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The values are doubled: $-2, 0, 2$. The probabilities stay 1/2, 1/4, 1/4, because no value merges with another.",
+                "ro": "Valorile se dublează: $-2, 0, 2$. Probabilitățile rămân 1/2, 1/4, 1/4, pentru că nicio valoare nu se unește cu alta."
+              }
+            },
+            {
+              "text": {
+                "en": "$2X$ takes the values $-2, 0, 2$ with probabilities 1/4, 1/8, 1/8",
+                "ro": "$2X$ ia valorile $-2, 0, 2$ cu probabilitățile 1/4, 1/8, 1/8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You halved the probabilities. The probabilities do not change when you multiply the values, and the sum 1/4 + 1/8 + 1/8 would be only 1/2.",
+                "ro": "Ai înjumătățit probabilitățile. Probabilitățile nu se schimbă când multiplici valorile, iar suma 1/4 + 1/8 + 1/8 ar fi doar 1/2."
+              },
+              "misconception": "functia-aplicata-probabilitatilor"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s5",
+      "title": {
+        "en": "Mean and variance on the bars",
+        "ro": "Media și varianța pe bare"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Each bar shows the probability of one value. The **mean** is the point where the bars would balance on the number line. The **variance** measures how far, on average, the bars sit from that point. Follow the steps and guess before each one.",
+            "ro": "Fiecare bară arată probabilitatea unei valori. **Media** este punctul în care barele ar sta în echilibru pe axa numerelor. **Varianța** măsoară cât de departe stau, în medie, barele de acest punct. Urmărește pașii și ghicește înainte de fiecare."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ml-l04-viz1",
+          "widget": "ml-pmf-cdf",
+          "predict": true,
+          "props": {
+            "values": [
+              -1,
+              0,
+              1,
+              2
+            ],
+            "probs": [
+              "1/6",
+              "1/6",
+              "1/6",
+              "1/2"
+            ],
+            "name": "X",
+            "cdfAt": 1,
+            "format": "fraction",
+            "second": {
+              "values": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "probs": [
+                "1/8",
+                "3/8",
+                "3/8",
+                "1/8"
+              ],
+              "name": "R"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s6",
+      "title": {
+        "en": "The mean and variance of X",
+        "ro": "Media și varianța lui X"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l04-m8",
+          "question": {
+            "en": "The variable $X$ takes the values $-1, 0, 1, 2$ with probabilities 1/6, 1/6, 1/6, 1/2. What is the mean $E[X]$, the balance point of the bars?",
+            "ro": "Variabila $X$ ia valorile $-1, 0, 1, 2$ cu probabilitățile 1/6, 1/6, 1/6, 1/2. Cât este media $E[X]$, punctul de echilibru al barelor?"
+          },
+          "table": {
+            "columns": [
+              "$x$",
+              "−1",
+              "0",
+              "1",
+              "2"
+            ],
+            "rows": [
+              [
+                "$P(X=x)$",
+                "1/6",
+                "1/6",
+                "1/6",
+                "1/2"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of X",
+              "ro": "Distribuția lui X"
+            }
+          },
+          "check": {
+            "formula": "E([-1,0,1,2],[1/6,1/6,1/6,1/2])"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "1",
+                "ro": "1"
+              },
+              "correct": true,
+              "explain": {
+                "en": "$E[X]=(-1)\\cdot\\frac16+0\\cdot\\frac16+1\\cdot\\frac16+2\\cdot\\frac12=-\\frac16+0+\\frac16+1=1$. Each value is multiplied by its probability and the results are added.",
+                "ro": "$E[X]=(-1)\\cdot\\frac16+0\\cdot\\frac16+1\\cdot\\frac16+2\\cdot\\frac12=-\\frac16+0+\\frac16+1=1$. Fiecare valoare se înmulțește cu probabilitatea ei și se adună."
+              }
+            },
+            {
+              "text": {
+                "en": "1/2",
+                "ro": "1/2"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1/2 is the plain average of the values, $(-1+0+1+2)/4$. The mean needs weights: the value 2 has probability 1/2, much larger than the others.",
+                "ro": "1/2 este media simplă a valorilor, $(-1+0+1+2)/4$. Media cere ponderi: valoarea 2 are probabilitatea 1/2, mult mai mare decât a celorlalte."
+              },
+              "misconception": "medie-fara-ponderi"
+            },
+            {
+              "text": {
+                "en": "0",
+                "ro": "0"
+              },
+              "correct": false,
+              "explain": {
+                "en": "0 appears if you leave out the term of the last value, $2\\cdot\\frac12$. All the terms $x\\cdot p(x)$ are added.",
+                "ro": "0 apare dacă uiți termenul ultimei valori, $2\\cdot\\frac12$. Toți termenii $x\\cdot p(x)$ se adună."
+              },
+              "misconception": "un-singur-termen"
+            }
+          ]
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m9",
+          "question": {
+            "en": "For the same variable $X$ (its mean is 1), what is the variance $\\mathrm{Var}(X)$? The deviations of the values $-1, 0, 1, 2$ from the mean are $-2, -1, 0, 1$, and their squares are $4, 1, 0, 1$.",
+            "ro": "Pentru aceeași variabilă $X$ (media ei este 1), cât este varianța $\\mathrm{Var}(X)$? Abaterile valorilor $-1, 0, 1, 2$ față de medie sunt $-2, -1, 0, 1$, iar pătratele lor $4, 1, 0, 1$."
+          },
+          "table": {
+            "columns": [
+              "$x$",
+              "−1",
+              "0",
+              "1",
+              "2"
+            ],
+            "rows": [
+              [
+                "$P(X=x)$",
+                "1/6",
+                "1/6",
+                "1/6",
+                "1/2"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of X",
+              "ro": "Distribuția lui X"
+            }
+          },
+          "check": {
+            "formula": "E([4,1,0,1],[1/6,1/6,1/6,1/2])"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "1",
+                "ro": "1"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1 is the mean $E[X]$, not the variance. The variance measures the spread around the mean, not its position.",
+                "ro": "1 este media $E[X]$, nu varianța. Varianța măsoară împrăștierea în jurul mediei, nu poziția ei."
+              },
+              "misconception": "varianta-media"
+            },
+            {
+              "text": {
+                "en": "6",
+                "ro": "6"
+              },
+              "correct": false,
+              "explain": {
+                "en": "6 is the sum of the squared deviations, $4+1+0+1$, without probabilities. Each square must be multiplied by the probability of its value.",
+                "ro": "6 este suma pătratelor abaterilor, $4+1+0+1$, fără probabilități. Fiecare pătrat trebuie înmulțit cu probabilitatea valorii lui."
+              },
+              "misconception": "fara-probabilitati"
+            },
+            {
+              "text": {
+                "en": "4/3",
+                "ro": "4/3"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The variance is the mean of the squared deviations, with the probabilities as weights: $\\frac16\\cdot4+\\frac16\\cdot1+\\frac16\\cdot0+\\frac12\\cdot1=\\frac43$.",
+                "ro": "Varianța este media pătratelor abaterilor, cu probabilitățile ca ponderi: $\\frac16\\cdot4+\\frac16\\cdot1+\\frac16\\cdot0+\\frac12\\cdot1=\\frac43$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s7",
+      "title": {
+        "en": "The mean need not be a value",
+        "ro": "Media nu e neapărat o valoare"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l04-m10",
+          "question": {
+            "en": "The variable $R$ (the number of heads on 3 coins) takes the values 0, 1, 2, 3 with probabilities 1/8, 3/8, 3/8, 1/8. What is the mean $E[R]$?",
+            "ro": "Variabila $R$ (numărul de steme la 3 monede) ia valorile 0, 1, 2, 3 cu probabilitățile 1/8, 3/8, 3/8, 1/8. Cât este media $E[R]$?"
+          },
+          "table": {
+            "columns": [
+              "$r$",
+              "0",
+              "1",
+              "2",
+              "3"
+            ],
+            "rows": [
+              [
+                "$P(R=r)$",
+                "1/8",
+                "3/8",
+                "3/8",
+                "1/8"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of R: the probability of each value",
+              "ro": "Distribuția lui R: probabilitatea fiecărei valori"
+            }
+          },
+          "check": {
+            "formula": "E([0,1,2,3],[1/8,3/8,3/8,1/8])"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "1",
+                "ro": "1"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1 is a possible value, but the mean is not picked among the values: you compute $\\sum x\\,p(x)$ and get 3/2. The mean need not be a value of the variable.",
+                "ro": "1 este o valoare posibilă, dar media nu se alege dintre valori: se calculează $\\sum x\\,p(x)$ și iese 3/2. Media nu trebuie să fie o valoare a variabilei."
+              },
+              "misconception": "mean-must-be-a-value"
+            },
+            {
+              "text": {
+                "en": "3/2",
+                "ro": "3/2"
+              },
+              "correct": true,
+              "explain": {
+                "en": "$E[R]=0\\cdot\\frac18+1\\cdot\\frac38+2\\cdot\\frac38+3\\cdot\\frac18=\\frac32$. $R$ never takes the value 3/2: the mean need not be a possible value of the variable, it is the balance point of the bars.",
+                "ro": "$E[R]=0\\cdot\\frac18+1\\cdot\\frac38+2\\cdot\\frac38+3\\cdot\\frac18=\\frac32$. $R$ nu ia niciodată valoarea 3/2: media nu trebuie să fie o valoare posibilă a variabilei, ci punctul de echilibru al barelor."
+              }
+            },
+            {
+              "text": {
+                "en": "2",
+                "ro": "2"
+              },
+              "correct": false,
+              "explain": {
+                "en": "2 is a possible value (as likely as 1), but the mean is computed, not picked among the values. The computation gives 3/2.",
+                "ro": "2 este o valoare posibilă (la fel de probabilă ca 1), dar media se calculează, nu se alege dintre valori. Calculul dă 3/2."
+              },
+              "misconception": "mean-must-be-a-value"
+            }
+          ]
+        },
+        {
+          "type": "mcq",
+          "id": "ml-l04-m11",
+          "question": {
+            "en": "The variable $X$ in the table takes the values $-1, 0, 1, 2$. What is $F(1)=P(X\\le1)$, the probability that $X$ is at most 1?",
+            "ro": "Variabila $X$ din tabel ia valorile $-1, 0, 1, 2$. Cât este $F(1)=P(X\\le1)$, probabilitatea ca $X$ să fie cel mult 1?"
+          },
+          "table": {
+            "columns": [
+              "$x$",
+              "−1",
+              "0",
+              "1",
+              "2"
+            ],
+            "rows": [
+              [
+                "$P(X=x)$",
+                "1/6",
+                "1/6",
+                "1/6",
+                "1/2"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of X",
+              "ro": "Distribuția lui X"
+            }
+          },
+          "check": {
+            "formula": "1/6+1/6+1/6"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "1/6",
+                "ro": "1/6"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1/6 is $P(X=1)$, the p.m.f. at the point 1. $F(1)$ adds the probabilities of all values up to 1 inclusive.",
+                "ro": "1/6 este $P(X=1)$, adică p.m.f. în punctul 1. $F(1)$ adună probabilitățile tuturor valorilor până la 1 inclusiv."
+              },
+              "misconception": "p-m-f-in-loc-de-c-d-f"
+            },
+            {
+              "text": {
+                "en": "2/3",
+                "ro": "2/3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "2/3 is $P(X\\ge1)=\\frac16+\\frac12$, the tail on the right. $F(x)=P(X\\le x)$ adds from the left.",
+                "ro": "2/3 este $P(X\\ge1)=\\frac16+\\frac12$, coada din dreapta. $F(x)=P(X\\le x)$ adună de la stânga."
+              },
+              "misconception": "coada-opusa"
+            },
+            {
+              "text": {
+                "en": "1/2",
+                "ro": "1/2"
+              },
+              "correct": true,
+              "explain": {
+                "en": "$F(1)=P(X=-1)+P(X=0)+P(X=1)=\\frac16+\\frac16+\\frac16=\\frac12$. The cumulative function climbs like a staircase at each value.",
+                "ro": "$F(1)=P(X=-1)+P(X=0)+P(X=1)=\\frac16+\\frac16+\\frac16=\\frac12$. Funcția cumulativă urcă ca o scară la fiecare valoare."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s8",
+      "title": {
+        "en": "Random variable, p.m.f. and c.d.f.",
+        "ro": "Variabila aleatoare, p.m.f. și c.d.f."
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Random variable, p.m.f., c.d.f.",
+            "ro": "Variabila aleatoare, p.m.f., c.d.f."
+          },
+          "content": {
+            "en": "A **random variable** is a function $X : \\Omega \\to \\mathbb{R}$: it takes an outcome of the experiment (an element of $\\Omega$) and gives a real number ($\\mathbb{R}$ is the set of real numbers). $\\mathrm{Val}(X)$ is the set of values $X$ can take. If $\\mathrm{Val}(X)$ is finite or countable (the values can be numbered $1, 2, 3, \\dots$), $X$ is **discrete**.\n\n**The probability mass function (p.m.f.):** $p(x) = P(X = x)$, with $p(x) \\ge 0$ and $\\sum_x p(x) = 1$ (the symbol $\\sum$ means the sum of the probabilities of all values).\n\n**The cumulative distribution function (c.d.f.):** $F(x) = P(X \\le x)$, with $F : \\mathbb{R} \\to [0,1]$ (its values are between 0 and 1). Slide 8 of the course prints the codomain $[0,\\infty)$; the correct one is $[0,1]$.\n\nCursul: slide 8-9. Seminar 2, p. 4. Culegerea: p. 30.",
+            "ro": "O **variabilă aleatoare** este o funcție $X : \\Omega \\to \\mathbb{R}$: primește un rezultat al experimentului (un element din $\\Omega$) și dă un număr real ($\\mathbb{R}$ este mulțimea numerelor reale). $\\mathrm{Val}(X)$ este mulțimea valorilor pe care le poate lua $X$. Dacă $\\mathrm{Val}(X)$ este finită sau numărabilă (valorile pot fi numerotate $1, 2, 3, \\dots$), $X$ este **discretă**.\n\n**Funcția masă de probabilitate (p.m.f.):** $p(x) = P(X = x)$, cu $p(x) \\ge 0$ și $\\sum_x p(x) = 1$ (simbolul $\\sum$ înseamnă suma probabilităților tuturor valorilor).\n\n**Funcția de distribuție cumulativă (c.d.f.):** $F(x) = P(X \\le x)$, cu $F : \\mathbb{R} \\to [0,1]$ (valorile ei sunt între 0 și 1). Slide-ul 8 al cursului scrie codomeniul $[0,\\infty)$; corect este $[0,1]$.\n\nCursul: slide 8-9. Seminar 2, p. 4. Culegerea: p. 30."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s9",
+      "title": {
+        "en": "A function of a variable",
+        "ro": "Funcție de variabilă"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**A function of a variable.** If $g$ is a function, $g(X)$ is again a random variable: it takes the values $g(x)$, with the probability of the value $x$ (the probabilities of the values that give the same $g(x)$ add up).\n\nCursul: slide 14. Seminar 2, p. 3.",
+            "ro": "**Funcție de variabilă.** Dacă $g$ este o funcție, $g(X)$ este tot o variabilă aleatoare: ia valorile $g(x)$, cu probabilitatea valorii $x$ (probabilitățile valorilor care dau același $g(x)$ se adună).\n\nCursul: slide 14. Seminar 2, p. 3."
+          }
+        },
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Careful.** $X + Y$ **cannot** be found from the separate distributions of $X$ and $Y$. For example, for $X$: 0, 1 with $\\frac12, \\frac12$ and $Y$: 1, 2 with $\\frac13, \\frac23$, the probability $P(X+Y=2) = P(X{=}0, Y{=}2) + P(X{=}1, Y{=}1)$ needs extra information about the pair $(X, Y)$ (the probability that both values occur together), not only the two separate distributions.",
+            "ro": "**Atenție.** $X + Y$ **nu** se poate afla din distribuțiile separate ale lui $X$ și $Y$. De exemplu, pentru $X$: 0, 1 cu $\\frac12, \\frac12$ și $Y$: 1, 2 cu $\\frac13, \\frac23$, probabilitatea $P(X+Y=2) = P(X{=}0, Y{=}2) + P(X{=}1, Y{=}1)$ cere informații în plus despre perechea $(X, Y)$ (probabilitatea ca ambele valori să apară deodată), nu doar cele două distribuții separate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s10",
+      "title": {
+        "en": "The mean and its linearity",
+        "ro": "Media și liniaritatea ei"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "The mean",
+            "ro": "Media"
+          },
+          "content": {
+            "en": "**The mean** (the average value): $E[X] = \\sum_x x\\,p(x)$. Each value is multiplied by its probability and the results are added. It is the point where the bars of the distribution balance, and it need not be a value that $X$ takes.\n\n**Linearity:** $E[aX] = a\\,E[X]$ and $E[X + Y] = E[X] + E[Y]$ (for any $X$ and $Y$, independent or not); more generally $E\\left[\\sum_i a_i X_i\\right] = \\sum_i a_i E[X_i]$.\n\nFor a function $g$, the mean of $g(X)$ is $E[g(X)] = \\sum_x g(x)\\,p(x)$. If $g$ is not linear, in general $E[g(X)] \\ne g(E[X])$.\n\nCursul: slide 9, 14. Culegerea: p. 30.",
+            "ro": "**Media** (valoarea medie): $E[X] = \\sum_x x\\,p(x)$. Fiecare valoare se înmulțește cu probabilitatea ei și rezultatele se adună. Este punctul în care barele distribuției stau în echilibru și nu trebuie să fie o valoare pe care $X$ o ia.\n\n**Liniaritatea:** $E[aX] = a\\,E[X]$ și $E[X + Y] = E[X] + E[Y]$ (pentru orice $X$ și $Y$, independente sau nu); mai general $E\\left[\\sum_i a_i X_i\\right] = \\sum_i a_i E[X_i]$.\n\nPentru o funcție $g$, media lui $g(X)$ este $E[g(X)] = \\sum_x g(x)\\,p(x)$. Dacă $g$ nu este liniară, în general $E[g(X)] \\ne g(E[X])$.\n\nCursul: slide 9, 14. Culegerea: p. 30."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s11",
+      "title": {
+        "en": "Variance and standard deviation",
+        "ro": "Varianța și abaterea standard"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Variance",
+            "ro": "Varianța"
+          },
+          "content": {
+            "en": "The **variance** measures how spread out the values are around the mean: $\\mathrm{Var}(X) = E\\left[(X - E[X])^2\\right]$ (the mean of the squared deviations from the mean). The **standard deviation** is $\\sigma = \\sqrt{\\mathrm{Var}(X)}$ and is measured in the same units as $X$.\n\nProperties: $\\mathrm{Var}(X) = E[X^2] - E^2[X]$ (here $E^2[X]$ means $(E[X])^2$); $\\mathrm{Var}(aX) = a^2\\,\\mathrm{Var}(X)$; $\\mathrm{Var}(X + a) = \\mathrm{Var}(X)$; hence $\\mathrm{Var}(aX + b) = a^2\\,\\mathrm{Var}(X)$. The variance is not linear: $a^2$ appears, not $a$.\n\nCursul: slide 14. Culegerea: p. 31.",
+            "ro": "**Varianța** măsoară cât de împrăștiate sunt valorile în jurul mediei: $\\mathrm{Var}(X) = E\\left[(X - E[X])^2\\right]$ (media pătratelor abaterilor față de medie). **Abaterea standard** este $\\sigma = \\sqrt{\\mathrm{Var}(X)}$ și se măsoară în aceleași unități ca $X$.\n\nProprietăți: $\\mathrm{Var}(X) = E[X^2] - E^2[X]$ (aici $E^2[X]$ înseamnă $(E[X])^2$); $\\mathrm{Var}(aX) = a^2\\,\\mathrm{Var}(X)$; $\\mathrm{Var}(X + a) = \\mathrm{Var}(X)$; deci $\\mathrm{Var}(aX + b) = a^2\\,\\mathrm{Var}(X)$. Varianța nu este liniară: apare $a^2$, nu $a$.\n\nCursul: slide 14. Culegerea: p. 31."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s12",
+      "title": {
+        "en": "Bernoulli, binomial, categorical, indicator",
+        "ro": "Bernoulli, binomială, categorială, indicator"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Common distributions and the indicator variable",
+            "ro": "Distribuții uzuale și variabila indicator"
+          },
+          "content": {
+            "en": "**Bernoulli:** $X \\in \\{0,1\\}$, $P(X{=}1) = p$ (a single toss; 1 means success). $E[X] = p$, $\\mathrm{Var}(X) = p(1-p)$.\n\n**The binomial** $b(r; n, p)$: the number of heads in $n$ independent tosses (see Lecția 3) of a coin with $P(H) = p$: $b(r; n, p) = C_n^r\\, p^r (1-p)^{n-r}$, $r = 0, \\dots, n$, where $C_n^r$ is the number of ways to choose $r$ tosses out of $n$. $E = np$, $\\mathrm{Var} = np(1-p)$. For $n = 1$ it is Bernoulli.\n\n**Categorical:** $X$ takes the values $v_1, \\dots, v_k$ with probabilities $\\pi_1, \\dots, \\pi_k$ ($\\sum \\pi_i = 1$); with two values it is Bernoulli.\n\n**The indicator variable** of an event $A$: it is 1 if $A$ happens and 0 otherwise. Example: $M = 1$ if the 3 coins landed the same way (HHH or TTT), $P(M{=}1) = 2/8$.\n\nCursul: slide 10. Seminar 2, p. 8-9. Culegerea: p. 17-18, 57.",
+            "ro": "**Bernoulli:** $X \\in \\{0,1\\}$, $P(X{=}1) = p$ (o singură aruncare; 1 înseamnă succes). $E[X] = p$, $\\mathrm{Var}(X) = p(1-p)$.\n\n**Binomiala** $b(r; n, p)$: numărul de steme la $n$ aruncări independente (vezi Lecția 3) ale unei monede cu $P(H) = p$: $b(r; n, p) = C_n^r\\, p^r (1-p)^{n-r}$, $r = 0, \\dots, n$, unde $C_n^r$ este numărul de moduri de a alege $r$ aruncări dintre $n$. $E = np$, $\\mathrm{Var} = np(1-p)$. Pentru $n = 1$ este Bernoulli.\n\n**Categorială:** $X$ ia valorile $v_1, \\dots, v_k$ cu probabilitățile $\\pi_1, \\dots, \\pi_k$ ($\\sum \\pi_i = 1$); cu două valori e Bernoulli.\n\n**Variabila indicator** a unui eveniment $A$: este 1 dacă $A$ are loc și 0 altfel. Exemplu: $M = 1$ dacă cele 3 monede au căzut la fel (HHH sau TTT), $P(M{=}1) = 2/8$.\n\nCursul: slide 10. Seminar 2, p. 8-9. Culegerea: p. 17-18, 57."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s13",
+      "title": {
+        "en": "Continuous variables",
+        "ro": "Variabile continue"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "**Continuous variables.** For a continuous variable (one that can take any value in an interval) the function analogous to the p.m.f. is the **density** (p.d.f.), and its value at a point is not a probability.\n\nCursul: slide 8. Culegerea: p. 17.",
+            "ro": "**Variabile continue.** Pentru o variabilă continuă (care poate lua orice valoare dintr-un interval) funcția analoagă p.m.f. este **densitatea** (p.d.f.), iar valoarea ei într-un punct nu este o probabilitate.\n\nCursul: slide 8. Culegerea: p. 17."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s14",
+      "title": {
+        "en": "Why the square of the deviation",
+        "ro": "De ce pătratul abaterii"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l04-r2",
+          "prompt": {
+            "en": "Back to the two games: you win or lose 1000 lei (game 1), respectively 1 leu (game 2), with a fair coin. The average deviation from the mean, $E[X-E[X]]$, is 0 in both games. Why do we not use it as a measure of risk? What do we use instead?",
+            "ro": "Să revenim la cele două jocuri: câștigi sau pierzi 1000 de lei (jocul 1), respectiv 1 leu (jocul 2), cu o monedă corectă. Abaterea medie față de medie, $E[X-E[X]]$, este 0 în ambele jocuri. De ce nu o folosim ca măsură a riscului? Ce folosim în loc?"
+          },
+          "placeholder": {
+            "en": "Write what you would use instead",
+            "ro": "Scrie ce ai folosi în loc"
+          },
+          "answer": {
+            "en": "Positive and negative deviations cancel for **every** variable: $E[X-E[X]]=E[X]-E[X]=0$ (game 1: $\\frac12\\cdot1000+\\frac12\\cdot(-1000)=0$), so it cannot tell the games apart. Squaring makes every deviation positive: $\\mathrm{Var}=\\frac12\\cdot1000^2+\\frac12\\cdot1000^2=1\\,000\\,000$ for game 1 and $1$ for game 2. The unit becomes lei², so we take $\\sigma=\\sqrt{\\mathrm{Var}}$: 1000 lei and 1 leu. One could also use $E|X-E[X]|$, but it is harder to compute with.",
+            "ro": "Abaterile pozitive și negative se anulează pentru **orice** variabilă: $E[X-E[X]]=E[X]-E[X]=0$ (jocul 1: $\\frac12\\cdot1000+\\frac12\\cdot(-1000)=0$), deci nu deosebește jocurile. Ridicarea la pătrat face toate abaterile pozitive: $\\mathrm{Var}=\\frac12\\cdot1000^2+\\frac12\\cdot1000^2=1\\,000\\,000$ pentru jocul 1 și $1$ pentru jocul 2. Unitatea devine lei², așa că luăm $\\sigma=\\sqrt{\\mathrm{Var}}$: 1000 de lei și 1 leu. Se putea folosi și $E|X-E[X]|$, dar e mai greu de calculat."
+          },
+          "table": {
+            "columns": [
+              {
+                "en": "Game",
+                "ro": "Joc"
+              },
+              {
+                "en": "On heads",
+                "ro": "La stemă"
+              },
+              {
+                "en": "On tails",
+                "ro": "La pajură"
+              },
+              {
+                "en": "Average gain",
+                "ro": "Câștig mediu"
+              }
+            ],
+            "rows": [
+              [
+                "1",
+                "+1000 lei",
+                "−1000 lei",
+                "0"
+              ],
+              [
+                "2",
+                "+1 leu",
+                "−1 leu",
+                "0"
+              ]
+            ],
+            "caption": {
+              "en": "The gains of the two games",
+              "ro": "Câștigurile celor două jocuri"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s15",
+      "title": {
+        "en": "The mean of X squared",
+        "ro": "Media lui X la pătrat"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l04-q1",
+          "question": {
+            "en": "$X$ takes the values $-1, 1, 2$ with probabilities $\\frac14, \\frac14, \\frac12$. What is $E[X^2]$?",
+            "ro": "$X$ ia valorile $-1, 1, 2$ cu probabilitățile $\\frac14, \\frac14, \\frac12$. Cât este $E[X^2]$?"
+          },
+          "check": {
+            "formula": "1*1/4+1*1/4+4*1/2"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "2.5",
+                "ro": "2,5"
+              },
+              "correct": true,
+              "explain": {
+                "en": "$E[X^2]=1\\cdot\\frac14+1\\cdot\\frac14+4\\cdot\\frac12=2.5$. The values are squared, the probabilities stay.",
+                "ro": "$E[X^2]=1\\cdot\\frac14+1\\cdot\\frac14+4\\cdot\\frac12=2{,}5$. Valorile se ridică la pătrat, probabilitățile rămân."
+              }
+            },
+            {
+              "text": {
+                "en": "1",
+                "ro": "1"
+              },
+              "correct": false,
+              "explain": {
+                "en": "1 is $(E[X])^2$, because $E[X]=1$. In general $E[X^2]\\ne(E[X])^2$, unless the variance is 0; here the variance is not 0.",
+                "ro": "1 este $(E[X])^2$, pentru că $E[X]=1$. În general $E[X^2]\\ne(E[X])^2$, în afară de cazul în care varianța este 0; aici varianța nu este 0."
+              },
+              "misconception": "g-e-x"
+            },
+            {
+              "text": {
+                "en": "0.375",
+                "ro": "0,375"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You squared the probabilities ($\\frac1{16}+\\frac1{16}+\\frac14$). The values of $X$ are squared; the probabilities stay the same.",
+                "ro": "Ai ridicat la pătrat probabilitățile ($\\frac1{16}+\\frac1{16}+\\frac14$). La pătrat se ridică valorile lui $X$; probabilitățile rămân aceleași."
+              },
+              "misconception": "functia-aplicata-probabilitatilor"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s16",
+      "title": {
+        "en": "Linearity of the mean",
+        "ro": "Liniaritatea mediei"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l04-q2",
+          "question": {
+            "en": "$E[X]=2$ and $E[Y]=5$; $X$ and $Y$ are **not** independent. What is $E[3X-Y+1]$?",
+            "ro": "$E[X]=2$ și $E[Y]=5$; $X$ și $Y$ **nu** sunt independente. Cât este $E[3X-Y+1]$?"
+          },
+          "check": {
+            "formula": "3*2-5+1"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "It cannot be computed: information about the pair $(X,Y)$ is missing",
+                "ro": "Nu se poate calcula: lipsesc informații despre perechea $(X,Y)$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "For a sum of means nothing about the pair is needed. Independence matters for $E[XY]$, not for $E[aX+bY+c]$.",
+                "ro": "Pentru o sumă de medii nu e nevoie de nimic despre pereche. Independența contează la $E[XY]$, nu la $E[aX+bY+c]$."
+              },
+              "misconception": "liniaritatea-cere-independenta"
+            },
+            {
+              "text": {
+                "en": "1",
+                "ro": "1"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You forgot the constant: $3\\cdot2-5=1$, but $E[c]=c$, so the $+1$ is added too.",
+                "ro": "Ai uitat constanta: $3\\cdot2-5=1$, dar $E[c]=c$, deci se adaugă și $+1$."
+              },
+              "misconception": "constanta-ignorata"
+            },
+            {
+              "text": {
+                "en": "12",
+                "ro": "12"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You computed $3\\cdot2+5+1$. The term is $-Y$, so $E[Y]$ is subtracted.",
+                "ro": "Ai calculat $3\\cdot2+5+1$. Termenul este $-Y$, deci se scade $E[Y]$."
+              },
+              "misconception": "semnul-lui-y-pierdut"
+            },
+            {
+              "text": {
+                "en": "2",
+                "ro": "2"
+              },
+              "correct": true,
+              "explain": {
+                "en": "$3\\cdot2-5+1=2$. Linearity of the mean does not need independence: $E[aX+bY+c]=aE[X]+bE[Y]+c$ for any variables.",
+                "ro": "$3\\cdot2-5+1=2$. Liniaritatea mediei nu cere independență: $E[aX+bY+c]=aE[X]+bE[Y]+c$ pentru orice variabile."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s17",
+      "title": {
+        "en": "Variance of the binomial",
+        "ro": "Varianța binomialei"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l04-q3",
+          "question": {
+            "en": "$X$ is the number of heads in 10 independent tosses of a coin with $P(H)=0.3$. What is $\\mathrm{Var}(X)$?",
+            "ro": "$X$ este numărul de steme la 10 aruncări independente ale unei monede cu $P(H)=0{,}3$. Cât este $\\mathrm{Var}(X)$?"
+          },
+          "check": {
+            "formula": "10*0.3*0.7"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "2.1",
+                "ro": "2,1"
+              },
+              "correct": true,
+              "explain": {
+                "en": "$\\mathrm{Var}(X)=np(1-p)=10\\cdot0.3\\cdot(1-0.3)=2.1$.",
+                "ro": "$\\mathrm{Var}(X)=np(1-p)=10\\cdot0{,}3\\cdot(1-0{,}3)=2{,}1$."
+              }
+            },
+            {
+              "text": {
+                "en": "3",
+                "ro": "3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "3 is the mean, $E[X]=np$. The variance of the binomial is $np(1-p)$.",
+                "ro": "3 este media, $E[X]=np$. Varianța binomialei este $np(1-p)$."
+              },
+              "misconception": "varianta-media"
+            },
+            {
+              "text": {
+                "en": "0.21",
+                "ro": "0,21"
+              },
+              "correct": false,
+              "explain": {
+                "en": "0.21 is the variance of a single toss, $p(1-p)$. For $n$ independent tosses you multiply by $n$.",
+                "ro": "0,21 este varianța unei singure aruncări, $p(1-p)$. Pentru $n$ aruncări independente se înmulțește cu $n$."
+              },
+              "misconception": "p-1-minus-p-fara-n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s18",
+      "title": {
+        "en": "The cumulative function",
+        "ro": "Funcția cumulativă"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l04-q4",
+          "question": {
+            "en": "$X$ takes the values 0, 1, 2 with probabilities 0.2, 0.5, 0.3. What is $F(1)$?",
+            "ro": "$X$ ia valorile 0, 1, 2 cu probabilitățile 0,2; 0,5; 0,3. Cât este $F(1)$?"
+          },
+          "table": {
+            "columns": [
+              "$x$",
+              "0",
+              "1",
+              "2"
+            ],
+            "rows": [
+              [
+                "$P(X=x)$",
+                "0,2",
+                "0,5",
+                "0,3"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of X",
+              "ro": "Distribuția lui X"
+            }
+          },
+          "check": {
+            "formula": "0.2+0.5"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0.5",
+                "ro": "0,5"
+              },
+              "correct": false,
+              "explain": {
+                "en": "0.5 is $p(1)=P(X=1)$. $F(1)$ adds the probabilities of all values up to 1 inclusive.",
+                "ro": "0,5 este $p(1)=P(X=1)$. $F(1)$ adună probabilitățile tuturor valorilor până la 1 inclusiv."
+              },
+              "misconception": "p-m-f-in-loc-de-c-d-f"
+            },
+            {
+              "text": {
+                "en": "0.8",
+                "ro": "0,8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "0.8 is $P(X\\ge1)=0.5+0.3$. $F(x)=P(X\\le x)$ adds from the left.",
+                "ro": "0,8 este $P(X\\ge1)=0{,}5+0{,}3$. $F(x)=P(X\\le x)$ adună de la stânga."
+              },
+              "misconception": "coada-opusa"
+            },
+            {
+              "text": {
+                "en": "0.7",
+                "ro": "0,7"
+              },
+              "correct": true,
+              "explain": {
+                "en": "$F(1)=P(X\\le1)=0.2+0.5=0.7$.",
+                "ro": "$F(1)=P(X\\le1)=0{,}2+0{,}5=0{,}7$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s19",
+      "title": {
+        "en": "Linearity of the mean: proof",
+        "ro": "Liniaritatea mediei: demonstrație"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l04-p1",
+          "exercise": "0.9.a",
+          "claim": {
+            "en": "For any two discrete random variables $W$ and $Z$ on the same $\\Omega$ show that $E[W+Z]=E[W]+E[Z]$, and for any constant $a$: $E[aX]=aE[X]$. (Variables with finite sets of values.)",
+            "ro": "Pentru orice două variabile aleatoare discrete $W$ și $Z$ pe același $\\Omega$ arătați că $E[W+Z]=E[W]+E[Z]$, și pentru orice constantă $a$: $E[aX]=aE[X]$. (Variabile cu mulțimi finite de valori.)"
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$E[X]=\\sum_{\\omega\\in\\Omega}X(\\omega)\\,P(\\omega)$",
+                "ro": "$E[X]=\\sum_{\\omega\\in\\Omega}X(\\omega)\\,P(\\omega)$"
+              },
+              "why": {
+                "en": "We group the outcomes that give the same value $x$: together they have probability $P(X=x)$, so they contribute $x\\,P(X=x)$, exactly as in the definition of the mean.",
+                "ro": "Grupăm rezultatele care dau aceeași valoare $x$: împreună au probabilitatea $P(X=x)$, deci contribuie cu $x\\,P(X=x)$, exact ca în definiția mediei."
+              },
+              "predict": {
+                "question": {
+                  "en": "How do we write the mean using the outcomes $\\omega\\in\\Omega$?",
+                  "ro": "Cum scriem media folosind rezultatele $\\omega\\in\\Omega$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$E[X]=\\sum_{\\omega\\in\\Omega}X(\\omega)\\,P(\\omega)$",
+                      "ro": "$E[X]=\\sum_{\\omega\\in\\Omega}X(\\omega)\\,P(\\omega)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Each outcome contributes its value multiplied by its probability.",
+                      "ro": "Fiecare rezultat contribuie cu valoarea lui înmulțită cu probabilitatea lui."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$E[X]=\\sum_{\\omega\\in\\Omega}X(\\omega)$",
+                      "ro": "$E[X]=\\sum_{\\omega\\in\\Omega}X(\\omega)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The probabilities are missing: more likely outcomes must count more.",
+                      "ro": "Lipsesc probabilitățile: rezultatele mai probabile trebuie să conteze mai mult."
+                    },
+                    "misconception": "fara-probabilitati"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$(W+Z)(\\omega)=W(\\omega)+Z(\\omega)$, so $E[W+Z]=\\sum_{\\omega}\\big(W(\\omega)+Z(\\omega)\\big)P(\\omega)$",
+                "ro": "$(W+Z)(\\omega)=W(\\omega)+Z(\\omega)$, deci $E[W+Z]=\\sum_{\\omega}\\big(W(\\omega)+Z(\\omega)\\big)P(\\omega)$"
+              },
+              "why": {
+                "en": "The sum of two variables is taken outcome by outcome.",
+                "ro": "Suma a două variabile se face rezultat cu rezultat."
+              }
+            },
+            {
+              "shown": {
+                "en": "$=\\sum_{\\omega}W(\\omega)P(\\omega)+\\sum_{\\omega}Z(\\omega)P(\\omega)=E[W]+E[Z]$",
+                "ro": "$=\\sum_{\\omega}W(\\omega)P(\\omega)+\\sum_{\\omega}Z(\\omega)P(\\omega)=E[W]+E[Z]$"
+              },
+              "why": {
+                "en": "We split the sum into two sums.",
+                "ro": "Despărțim suma în două sume."
+              }
+            },
+            {
+              "shown": {
+                "en": "$E[aX]=\\sum_{\\omega}aX(\\omega)P(\\omega)=a\\sum_{\\omega}X(\\omega)P(\\omega)=aE[X]$",
+                "ro": "$E[aX]=\\sum_{\\omega}aX(\\omega)P(\\omega)=a\\sum_{\\omega}X(\\omega)P(\\omega)=aE[X]$"
+              },
+              "why": {
+                "en": "The constant $a$ comes out in front of the sum.",
+                "ro": "Constanta $a$ iese în fața sumei."
+              }
+            }
+          ],
+          "end": {
+            "en": "We have shown that $E[W+Z]=E[W]+E[Z]$ and $E[aX]=aE[X]$, without asking for independence. $\\blacksquare$",
+            "ro": "Am arătat că $E[W+Z]=E[W]+E[Z]$ și $E[aX]=aE[X]$, fără să cerem independența. $\\blacksquare$"
+          }
+        },
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c1",
+          "status": "book",
+          "statement": {
+            "en": "Check numerically. On $\\Omega=\\{\\omega_1,\\omega_2\\}$, with $P(\\omega_1)=P(\\omega_2)=\\frac12$, the variables $W$ and $Z$ have the values in the table. Compute $E[W+Z]$ and $E[-2W]$. Answer with a number (with decimals, if needed).",
+            "ro": "Verifică numeric. Pe $\\Omega=\\{\\omega_1,\\omega_2\\}$, cu $P(\\omega_1)=P(\\omega_2)=\\frac12$, variabilele $W$ și $Z$ au valorile din tabel. Calculează $E[W+Z]$ și $E[-2W]$. Răspunde cu un număr (cu zecimale, dacă e cazul)."
+          },
+          "table": {
+            "columns": [
+              {
+                "en": "Outcome",
+                "ro": "Rezultat"
+              },
+              "ω₁",
+              "ω₂"
+            ],
+            "rows": [
+              [
+                "$P$",
+                "1/2",
+                "1/2"
+              ],
+              [
+                "$W$",
+                "1",
+                "3"
+              ],
+              [
+                "$Z$",
+                "2",
+                "0"
+              ]
+            ],
+            "caption": {
+              "en": "The values of W and Z on the two outcomes",
+              "ro": "Valorile lui W și Z pe cele două rezultate"
+            }
+          },
+          "fields": [
+            {
+              "id": "e",
+              "kind": "num",
+              "label": {
+                "en": "$E[W+Z]$",
+                "ro": "$E[W+Z]$"
+              },
+              "formula": "E([1+2,3+0],[1/2,1/2])",
+              "expected": 3
+            },
+            {
+              "id": "e2",
+              "kind": "num",
+              "label": {
+                "en": "$E[-2W]$",
+                "ro": "$E[-2W]$"
+              },
+              "formula": "E([-2*1,-2*3],[1/2,1/2])",
+              "expected": -4
+            }
+          ],
+          "detectors": [
+            {
+              "field": "e",
+              "formula": "max(1,3)+max(2,0)",
+              "message": {
+                "en": "You added the largest values of $W$ and $Z$. The mean is weighted: $W+Z$ takes the values $3$ and $3$, so the mean is 3.",
+                "ro": "Ai adunat valorile maxime ale lui $W$ și $Z$. Media este ponderată: $W+Z$ ia valorile $3$ și $3$, deci media este 3."
+              }
+            },
+            {
+              "field": "e2",
+              "formula": "2*E([1,3],[1/2,1/2])",
+              "message": {
+                "en": "The sign: $E[-2W]=-2\\,E[W]$, so the result is negative.",
+                "ro": "Semnul: $E[-2W]=-2\\,E[W]$, deci rezultatul este negativ."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "First compute $W+Z$ on each outcome, then its mean.",
+              "ro": "Calculează mai întâi $W+Z$ pe fiecare rezultat, apoi media lui."
+            },
+            {
+              "en": "$E[W+Z]=\\frac12(1+2)+\\frac12(3+0)$, and $E[-2W]=-2\\,E[W]$ with $E[W]=\\frac12\\cdot1+\\frac12\\cdot3$.",
+              "ro": "$E[W+Z]=\\frac12(1+2)+\\frac12(3+0)$, iar $E[-2W]=-2\\,E[W]$ cu $E[W]=\\frac12\\cdot1+\\frac12\\cdot3$."
+            },
+            {
+              "en": "$E[W+Z]=\\frac32+\\frac32=3$; $E[W]=2$, so $E[-2W]=-4$.",
+              "ro": "$E[W+Z]=\\frac32+\\frac32=3$; $E[W]=2$, deci $E[-2W]=-4$."
+            }
+          ],
+          "solution": {
+            "en": "$W+Z$ takes the values $3$ and $3$, so $E[W+Z]=3$; $E[W]+E[Z]=2+1$ gives the same. $E[-2W]=-2\\cdot E[W]=-2\\cdot2=-4$.",
+            "ro": "$W+Z$ ia valorile $3$ și $3$, deci $E[W+Z]=3$; același rezultat dă $E[W]+E[Z]=2+1$. $E[-2W]=-2\\cdot E[W]=-2\\cdot2=-4$."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Check numerically. On $\\Omega=\\{\\omega_1,\\omega_2\\}$, with $P(\\omega_1)=P(\\omega_2)=\\frac12$, the variables $W$ and $Z$ have the values in the table. Compute $E[W+Z]$ and $E[-2W]$. Answer with a number (with decimals, if needed).",
+                "ro": "Verifică numeric. Pe $\\Omega=\\{\\omega_1,\\omega_2\\}$, cu $P(\\omega_1)=P(\\omega_2)=\\frac12$, variabilele $W$ și $Z$ au valorile din tabel. Calculează $E[W+Z]$ și $E[-2W]$. Răspunde cu un număr (cu zecimale, dacă e cazul)."
+              },
+              "table": {
+                "columns": [
+                  {
+                    "en": "Outcome",
+                    "ro": "Rezultat"
+                  },
+                  "ω₁",
+                  "ω₂"
+                ],
+                "rows": [
+                  [
+                    "$P$",
+                    "1/2",
+                    "1/2"
+                  ],
+                  [
+                    "$W$",
+                    "2",
+                    "6"
+                  ],
+                  [
+                    "$Z$",
+                    "0",
+                    "4"
+                  ]
+                ],
+                "caption": {
+                  "en": "The values of W and Z on the two outcomes",
+                  "ro": "Valorile lui W și Z pe cele două rezultate"
+                }
+              },
+              "fields": [
+                {
+                  "id": "e",
+                  "formula": "E([2+0,6+4],[1/2,1/2])",
+                  "expected": 6
+                },
+                {
+                  "id": "e2",
+                  "formula": "E([-2*2,-2*6],[1/2,1/2])",
+                  "expected": -8
+                }
+              ],
+              "solution": {
+                "en": "$W+Z$ takes the values $2$ and $10$, so $E[W+Z]=\\frac12\\cdot2+\\frac12\\cdot10=6$. $E[W]=4$, so $E[-2W]=-8$.",
+                "ro": "$W+Z$ ia valorile $2$ și $10$, deci $E[W+Z]=\\frac12\\cdot2+\\frac12\\cdot10=6$. $E[W]=4$, deci $E[-2W]=-8$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s20",
+      "title": {
+        "en": "Variance: proof",
+        "ro": "Varianța: demonstrație"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l04-p2",
+          "exercise": "0.9.b",
+          "claim": {
+            "en": "We write $\\bar X=E[X]$ (the mean of $X$, a fixed number). Show that $\\mathrm{Var}(X)=E[X^2]-(E[X])^2$ and that $\\mathrm{Var}(aX)=a^2\\,\\mathrm{Var}(X)$.",
+            "ro": "Notăm $\\bar X=E[X]$ (media lui $X$, un număr fix). Arătați că $\\mathrm{Var}(X)=E[X^2]-(E[X])^2$ și că $\\mathrm{Var}(aX)=a^2\\,\\mathrm{Var}(X)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$(X-\\bar X)^2=X^2-2\\bar X\\,X+\\bar X^2$",
+                "ro": "$(X-\\bar X)^2=X^2-2\\bar X\\,X+\\bar X^2$"
+              },
+              "why": {
+                "en": "We expand the square. $\\bar X$ is a constant, not a variable.",
+                "ro": "Desfacem pătratul. $\\bar X$ este o constantă, nu o variabilă."
+              }
+            },
+            {
+              "shown": {
+                "en": "$E[X^2]-2\\bar X\\,E[X]+\\bar X^2=E[X^2]-2\\bar X^2+\\bar X^2=E[X^2]-\\bar X^2$",
+                "ro": "$E[X^2]-2\\bar X\\,E[X]+\\bar X^2=E[X^2]-2\\bar X^2+\\bar X^2=E[X^2]-\\bar X^2$"
+              },
+              "why": {
+                "en": "Linearity of the mean: constants come out in front of the mean, and $E[X]=\\bar X$.",
+                "ro": "Liniaritatea mediei: constantele ies în fața mediei, iar $E[X]=\\bar X$."
+              },
+              "predict": {
+                "question": {
+                  "en": "What is $E[2\\bar X\\,X]$?",
+                  "ro": "Cât este $E[2\\bar X\\,X]$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$2\\bar X$",
+                      "ro": "$2\\bar X$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "$E[X]$ does not disappear: after you take out the constant, the mean $E[X]=\\bar X$ remains.",
+                      "ro": "$E[X]$ nu dispare: după ce scoți constanta, rămâne media $E[X]=\\bar X$."
+                    },
+                    "misconception": "constanta-in-exterior"
+                  },
+                  {
+                    "text": {
+                      "en": "$2\\bar X\\,E[X]=2\\bar X^2$",
+                      "ro": "$2\\bar X\\,E[X]=2\\bar X^2$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "The constant $2\\bar X$ comes out in front of the mean, and $E[X]=\\bar X$ remains.",
+                      "ro": "Constanta $2\\bar X$ iese în fața mediei, iar $E[X]=\\bar X$ rămâne."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$\\mathrm{Var}(aX)=E\\big[(aX-E[aX])^2\\big]=E\\big[a^2(X-\\bar X)^2\\big]=a^2\\,\\mathrm{Var}(X)$",
+                "ro": "$\\mathrm{Var}(aX)=E\\big[(aX-E[aX])^2\\big]=E\\big[a^2(X-\\bar X)^2\\big]=a^2\\,\\mathrm{Var}(X)$"
+              },
+              "why": {
+                "en": "We use $E[aX]=a\\bar X$ (linearity of the mean); the constant $a^2$ comes out in front of the mean.",
+                "ro": "Folosim $E[aX]=a\\bar X$ (liniaritatea mediei); constanta $a^2$ iese în fața mediei."
+              }
+            }
+          ],
+          "end": {
+            "en": "So $\\mathrm{Var}(X)=E[X^2]-(E[X])^2$ and $\\mathrm{Var}(aX)=a^2\\,\\mathrm{Var}(X)$. $\\blacksquare$",
+            "ro": "Deci $\\mathrm{Var}(X)=E[X^2]-(E[X])^2$ și $\\mathrm{Var}(aX)=a^2\\,\\mathrm{Var}(X)$. $\\blacksquare$"
+          }
+        },
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c2",
+          "status": "book",
+          "statement": {
+            "en": "Check numerically: $X$ takes the value 1 with probability $\\frac14$ and the value 3 with probability $\\frac34$. Compute $E[X]$, $E[X^2]$ and $\\mathrm{Var}(X)$. Answer with decimals (or as a fraction).",
+            "ro": "Verifică numeric: $X$ ia valoarea 1 cu probabilitatea $\\frac14$ și valoarea 3 cu probabilitatea $\\frac34$. Calculează $E[X]$, $E[X^2]$ și $\\mathrm{Var}(X)$. Răspunde cu zecimale (sau ca fracție)."
+          },
+          "table": {
+            "columns": [
+              "$x$",
+              "1",
+              "3"
+            ],
+            "rows": [
+              [
+                "$P(X=x)$",
+                "1/4",
+                "3/4"
+              ]
+            ],
+            "caption": {
+              "en": "Distribution of X",
+              "ro": "Distribuția lui X"
+            }
+          },
+          "fields": [
+            {
+              "id": "m",
+              "kind": "num",
+              "label": {
+                "en": "$E[X]$",
+                "ro": "$E[X]$"
+              },
+              "formula": "E([1,3],[1/4,3/4])",
+              "expected": 2.5
+            },
+            {
+              "id": "q",
+              "kind": "num",
+              "label": {
+                "en": "$E[X^2]$",
+                "ro": "$E[X^2]$"
+              },
+              "formula": "E([1,9],[1/4,3/4])",
+              "expected": 7
+            },
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "$\\mathrm{Var}(X)$",
+                "ro": "$\\mathrm{Var}(X)$"
+              },
+              "formula": "Var([1,3],[1/4,3/4])",
+              "expected": 0.75
+            }
+          ],
+          "detectors": [
+            {
+              "field": "m",
+              "formula": "(1+3)/2",
+              "message": {
+                "en": "This is the plain average of the values. The mean is weighted with the probabilities: the value 3 has probability $\\frac34$.",
+                "ro": "Aceasta este media simplă a valorilor. Media este ponderată cu probabilitățile: valoarea 3 are probabilitatea $\\frac34$."
+              }
+            },
+            {
+              "field": "q",
+              "formula": "E([1,3],[1/4,3/4])^2",
+              "message": {
+                "en": "This is $(E[X])^2$. For $E[X^2]$ you square the values (1 and 9) and then take the mean.",
+                "ro": "Aceasta este $(E[X])^2$. Pentru $E[X^2]$ se ridică la pătrat valorile (1 și 9) și apoi se face media."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "E([1,9],[1/4,3/4])-E([1,3],[1/4,3/4])",
+              "message": {
+                "en": "You subtracted $E[X]$ instead of $(E[X])^2$. The formula is $E[X^2]-(E[X])^2$.",
+                "ro": "Ai scăzut $E[X]$ în loc de $(E[X])^2$. Formula este $E[X^2]-(E[X])^2$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Compute in turn $E[X]$, then $E[X^2]$ (with the values squared), then subtract.",
+              "ro": "Calculează pe rând $E[X]$, apoi $E[X^2]$ (cu valorile ridicate la pătrat), apoi scade."
+            },
+            {
+              "en": "$E[X]=1\\cdot\\frac14+3\\cdot\\frac34$; $E[X^2]=1\\cdot\\frac14+9\\cdot\\frac34$; $\\mathrm{Var}(X)=E[X^2]-(E[X])^2$.",
+              "ro": "$E[X]=1\\cdot\\frac14+3\\cdot\\frac34$; $E[X^2]=1\\cdot\\frac14+9\\cdot\\frac34$; $\\mathrm{Var}(X)=E[X^2]-(E[X])^2$."
+            },
+            {
+              "en": "$E[X]=\\frac14+\\frac94$, $E[X^2]=\\frac14+\\frac{27}4=7$, and $\\mathrm{Var}(X)=7-6.25$.",
+              "ro": "$E[X]=\\frac14+\\frac94$, $E[X^2]=\\frac14+\\frac{27}4=7$, iar $\\mathrm{Var}(X)=7-6{,}25$."
+            }
+          ],
+          "solution": {
+            "en": "$E[X]=\\frac14+\\frac94=2.5$; $E[X^2]=\\frac14+\\frac{27}{4}=7$; $\\mathrm{Var}(X)=7-2.5^2=7-6.25=0.75$.",
+            "ro": "$E[X]=\\frac14+\\frac94=2{,}5$; $E[X^2]=\\frac14+\\frac{27}{4}=7$; $\\mathrm{Var}(X)=7-2{,}5^2=7-6{,}25=0{,}75$."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Check numerically: $X$ takes the value 2 with probability $\\frac13$ and the value 5 with probability $\\frac23$. Compute $E[X]$, $E[X^2]$ and $\\mathrm{Var}(X)$. Answer with decimals (or as a fraction).",
+                "ro": "Verifică numeric: $X$ ia valoarea 2 cu probabilitatea $\\frac13$ și valoarea 5 cu probabilitatea $\\frac23$. Calculează $E[X]$, $E[X^2]$ și $\\mathrm{Var}(X)$. Răspunde cu zecimale (sau ca fracție)."
+              },
+              "table": {
+                "columns": [
+                  "$x$",
+                  "2",
+                  "5"
+                ],
+                "rows": [
+                  [
+                    "$P(X=x)$",
+                    "1/3",
+                    "2/3"
+                  ]
+                ],
+                "caption": {
+                  "en": "Distribution of X",
+                  "ro": "Distribuția lui X"
+                }
+              },
+              "fields": [
+                {
+                  "id": "m",
+                  "formula": "E([2,5],[1/3,2/3])",
+                  "expected": 4
+                },
+                {
+                  "id": "q",
+                  "formula": "E([4,25],[1/3,2/3])",
+                  "expected": 18
+                },
+                {
+                  "id": "v",
+                  "formula": "Var([2,5],[1/3,2/3])",
+                  "expected": 2
+                }
+              ],
+              "solution": {
+                "en": "$E[X]=\\frac23+\\frac{10}3=4$; $E[X^2]=\\frac43+\\frac{50}3=18$; $\\mathrm{Var}(X)=18-4^2=2$.",
+                "ro": "$E[X]=\\frac23+\\frac{10}3=4$; $E[X^2]=\\frac43+\\frac{50}3=18$; $\\mathrm{Var}(X)=18-4^2=2$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s21",
+      "title": {
+        "en": "The mean of X(X-1) and of (X-c)²",
+        "ro": "Media lui X(X-1) și a lui (X-c)²"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c3",
+          "exercise": [
+            "0.12.a",
+            "0.12.b"
+          ],
+          "status": "book",
+          "data": {
+            "mu": 3,
+            "s2": 2,
+            "c": 5
+          },
+          "statement": {
+            "en": "$X$ has the mean $E[X]=\\mu$ and the variance $\\mathrm{Var}(X)=\\sigma^2$. **a.** What is $E[X(X-1)]$ in terms of $\\mu$ and $\\sigma$? **b.** For an arbitrary number $c$, which of the following is true for $E[(X-c)^2]$? A. $(\\mu-c)^2+\\sigma^2$; B. $(\\mu-c)^2$; C. $(\\mu-c)^2-\\sigma^2$; D. $(\\mu-c)^2+2\\sigma^2$; E. $\\mu^2+c^2+2\\sigma^2$; F. $\\mu^2+c^2-2\\sigma^2$. **c.** Numerically, for $\\mu=3$, $\\sigma^2=2$ and $c=5$: compute the values of a and of b. Answer with a number (with decimals, if needed).",
+            "ro": "$X$ are media $E[X]=\\mu$ și varianța $\\mathrm{Var}(X)=\\sigma^2$. **a.** Cât este $E[X(X-1)]$ în funcție de $\\mu$ și $\\sigma$? **b.** Pentru un număr oarecare $c$, care dintre variantele următoare este adevărată pentru $E[(X-c)^2]$? A. $(\\mu-c)^2+\\sigma^2$; B. $(\\mu-c)^2$; C. $(\\mu-c)^2-\\sigma^2$; D. $(\\mu-c)^2+2\\sigma^2$; E. $\\mu^2+c^2+2\\sigma^2$; F. $\\mu^2+c^2-2\\sigma^2$. **c.** Numeric, pentru $\\mu=3$, $\\sigma^2=2$ și $c=5$: calculează valorile de la a și de la b. Răspunde cu un număr (cu zecimale, dacă e cazul)."
+          },
+          "fields": [
+            {
+              "id": "a",
+              "kind": "choice",
+              "label": {
+                "en": "a: $E[X(X-1)]$ is",
+                "ro": "a: $E[X(X-1)]$ este"
+              },
+              "options": [
+                {
+                  "en": "σ² + μ² − μ",
+                  "ro": "σ² + μ² − μ"
+                },
+                {
+                  "en": "μ² − μ",
+                  "ro": "μ² − μ"
+                },
+                {
+                  "en": "σ² − μ",
+                  "ro": "σ² − μ"
+                }
+              ],
+              "formula": "'σ² + μ² − μ'",
+              "expected": "σ² + μ² − μ"
+            },
+            {
+              "id": "an",
+              "kind": "num",
+              "label": {
+                "en": "a, numeric: $E[X(X-1)]$",
+                "ro": "a, numeric: $E[X(X-1)]$"
+              },
+              "formula": "s2+mu^2-mu",
+              "expected": 8
+            },
+            {
+              "id": "b",
+              "kind": "multi",
+              "label": {
+                "en": "b: the true options (the letter)",
+                "ro": "b: variantele adevărate (litera)"
+              },
+              "options": [
+                {
+                  "en": "A",
+                  "ro": "A"
+                },
+                {
+                  "en": "B",
+                  "ro": "B"
+                },
+                {
+                  "en": "C",
+                  "ro": "C"
+                },
+                {
+                  "en": "D",
+                  "ro": "D"
+                },
+                {
+                  "en": "E",
+                  "ro": "E"
+                },
+                {
+                  "en": "F",
+                  "ro": "F"
+                }
+              ],
+              "formula": "'A'",
+              "expected": "A"
+            },
+            {
+              "id": "bn",
+              "kind": "num",
+              "label": {
+                "en": "b, numeric: $E[(X-c)^2]$",
+                "ro": "b, numeric: $E[(X-c)^2]$"
+              },
+              "formula": "(mu-c)^2+s2",
+              "expected": 6
+            }
+          ],
+          "detectors": [
+            {
+              "field": "an",
+              "formula": "mu*(mu-1)",
+              "message": {
+                "en": "You computed $g(\\mu)=\\mu(\\mu-1)$. For a non-linear $g$, $E[g(X)]\\ne g(E[X])$: $\\sigma^2$ is missing.",
+                "ro": "Ai calculat $g(\\mu)=\\mu(\\mu-1)$. Pentru $g$ neliniară, $E[g(X)]\\ne g(E[X])$: lipsește $\\sigma^2$."
+              }
+            },
+            {
+              "field": "bn",
+              "formula": "(mu-c)^2",
+              "message": {
+                "en": "This is option B, $(\\mu-c)^2$: $\\sigma^2$ is missing. The mean of the squared deviations is larger than the square of the deviation of the mean.",
+                "ro": "Aceasta este varianta B, $(\\mu-c)^2$: lipsește $\\sigma^2$. Media pătratelor abaterilor este mai mare decât pătratul abaterii mediei."
+              }
+            },
+            {
+              "field": "bn",
+              "formula": "(mu-c)^2-s2",
+              "message": {
+                "en": "The variance is not subtracted (option C); $(\\mu-c)^2$ is added to $\\sigma^2$.",
+                "ro": "Varianța nu se scade (varianta C); $(\\mu-c)^2$ se adună cu $\\sigma^2$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "**a.** $E[X(X-1)]=E[X^2]-E[X]$ (linearity of the mean). Then write $E[X^2]$ using the variance.",
+              "ro": "**a.** $E[X(X-1)]=E[X^2]-E[X]$ (liniaritatea mediei). Apoi scrie $E[X^2]$ cu ajutorul varianței."
+            },
+            {
+              "en": "$E[X^2]=\\mathrm{Var}(X)+(E[X])^2$. **b.** Expand $(X-c)^2=X^2-2cX+c^2$ and take the mean.",
+              "ro": "$E[X^2]=\\mathrm{Var}(X)+(E[X])^2$. **b.** Desfă $(X-c)^2=X^2-2cX+c^2$ și ia media."
+            },
+            {
+              "en": "**a.** $E[X(X-1)]=\\sigma^2+\\mu^2-\\mu$. **b.** $E[(X-c)^2]=\\sigma^2+\\mu^2-2c\\mu+c^2=\\sigma^2+(\\mu-c)^2$: only A.",
+              "ro": "**a.** $E[X(X-1)]=\\sigma^2+\\mu^2-\\mu$. **b.** $E[(X-c)^2]=\\sigma^2+\\mu^2-2c\\mu+c^2=\\sigma^2+(\\mu-c)^2$: doar A."
+            }
+          ],
+          "solution": {
+            "en": "(a) $E[X^2-X]=E[X^2]-E[X]=\\sigma^2+\\mu^2-\\mu$. (b) $E[X^2]-2c\\mu+c^2=\\sigma^2+\\mu^2-2c\\mu+c^2=\\sigma^2+(\\mu-c)^2$: only option A is true, the others are false in general. Numerically: $2+3^2-3=8$ and $(3-5)^2+2=6$.",
+            "ro": "(a) $E[X^2-X]=E[X^2]-E[X]=\\sigma^2+\\mu^2-\\mu$. (b) $E[X^2]-2c\\mu+c^2=\\sigma^2+\\mu^2-2c\\mu+c^2=\\sigma^2+(\\mu-c)^2$: doar varianta A este adevărată, celelalte sunt false în general. Numeric: $2+3^2-3=8$ și $(3-5)^2+2=6$."
+          },
+          "variants": [
+            {
+              "data": {
+                "mu": 4,
+                "s2": 3,
+                "c": 7
+              },
+              "statement": {
+                "en": "$X$ has the mean $E[X]=\\mu$ and the variance $\\mathrm{Var}(X)=\\sigma^2$. **a.** What is $E[X(X-1)]$ in terms of $\\mu$ and $\\sigma$? **b.** For an arbitrary number $c$, which of the following is true for $E[(X-c)^2]$? A. $(\\mu-c)^2+\\sigma^2$; B. $(\\mu-c)^2$; C. $(\\mu-c)^2-\\sigma^2$; D. $(\\mu-c)^2+2\\sigma^2$; E. $\\mu^2+c^2+2\\sigma^2$; F. $\\mu^2+c^2-2\\sigma^2$. **c.** Numerically, for $\\mu=4$, $\\sigma^2=3$ and $c=7$: compute the values of a and of b. Answer with a number (with decimals, if needed).",
+                "ro": "$X$ are media $E[X]=\\mu$ și varianța $\\mathrm{Var}(X)=\\sigma^2$. **a.** Cât este $E[X(X-1)]$ în funcție de $\\mu$ și $\\sigma$? **b.** Pentru un număr oarecare $c$, care dintre variantele următoare este adevărată pentru $E[(X-c)^2]$? A. $(\\mu-c)^2+\\sigma^2$; B. $(\\mu-c)^2$; C. $(\\mu-c)^2-\\sigma^2$; D. $(\\mu-c)^2+2\\sigma^2$; E. $\\mu^2+c^2+2\\sigma^2$; F. $\\mu^2+c^2-2\\sigma^2$. **c.** Numeric, pentru $\\mu=4$, $\\sigma^2=3$ și $c=7$: calculează valorile de la a și de la b. Răspunde cu un număr (cu zecimale, dacă e cazul)."
+              },
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "'σ² + μ² − μ'",
+                  "expected": "σ² + μ² − μ"
+                },
+                {
+                  "id": "an",
+                  "formula": "s2+mu^2-mu",
+                  "expected": 15
+                },
+                {
+                  "id": "b",
+                  "formula": "'A'",
+                  "expected": "A"
+                },
+                {
+                  "id": "bn",
+                  "formula": "(mu-c)^2+s2",
+                  "expected": 12
+                }
+              ],
+              "solution": {
+                "en": "(a) $\\sigma^2+\\mu^2-\\mu$. (b) only option A. Numerically: $3+4^2-4=15$ and $(4-7)^2+3=12$.",
+                "ro": "(a) $\\sigma^2+\\mu^2-\\mu$. (b) doar varianta A. Numeric: $3+4^2-4=15$ și $(4-7)^2+3=12$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s22",
+      "title": {
+        "en": "A density is not a probability",
+        "ro": "Densitatea nu este o probabilitate"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c4",
+          "exercise": "0.23.a",
+          "status": "book",
+          "statement": {
+            "en": "True or false: if a continuous random variable $X$ has a density $p$ that is non-zero on the whole domain, then the probability that $X$ takes some value $x$ is $P(X=x)=p(x)$. Then write the value of $P(X=x)$ for any $x$ (a number, with decimals if needed).",
+            "ro": "Adevărat sau fals: dacă o variabilă aleatoare continuă $X$ are densitatea $p$ diferită de zero pe tot domeniul de definiție, atunci probabilitatea ca $X$ să ia o valoare oarecare $x$ este $P(X=x)=p(x)$. Apoi scrie valoarea lui $P(X=x)$ pentru un $x$ oarecare (număr, cu zecimale dacă e nevoie)."
+          },
+          "fields": [
+            {
+              "id": "tf",
+              "kind": "tf",
+              "label": {
+                "en": "Is the claim true?",
+                "ro": "Afirmația este adevărată?"
+              },
+              "formula": "false",
+              "expected": "false"
+            },
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "$P(X=x)$ for any $x$, continuous variable",
+                "ro": "$P(X=x)$ pentru orice $x$, variabilă continuă"
+              },
+              "formula": "1-1",
+              "expected": 0
+            }
+          ],
+          "detectors": [
+            {
+              "field": "tf",
+              "formula": "true",
+              "message": {
+                "en": "A density is not a probability: the probability of one exact point is 0 in the continuous case.",
+                "ro": "Densitatea nu este o probabilitate: probabilitatea unui punct exact este 0 în cazul continuu."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "For a continuous variable probabilities are computed on intervals: $P(a\\le X\\le b)=\\int_a^b p(x)\\,dx$ (the area under the density between $a$ and $b$).",
+              "ro": "Pentru o variabilă continuă probabilitățile se calculează pe intervale: $P(a\\le X\\le b)=\\int_a^b p(x)\\,dx$ (aria de sub densitate între $a$ și $b$)."
+            },
+            {
+              "en": "Take $a=b=x$: the interval has length zero, so its area does too.",
+              "ro": "Ia $a=b=x$: intervalul are lungime zero, deci și aria lui."
+            },
+            {
+              "en": "If $P(X=x)=p(x)$ and $P(X=x)=0$, then $p(x)=0$ everywhere, which contradicts $p$ being non-zero.",
+              "ro": "Dacă $P(X=x)=p(x)$ și $P(X=x)=0$, atunci $p(x)=0$ peste tot, ceea ce contrazice faptul că $p$ este diferită de zero."
+            }
+          ],
+          "solution": {
+            "en": "False. $P(a\\le X\\le b)=\\int_a^b p$, so $P(X=x)=0$ for every $x$. The claim would give $p(x)=0$ everywhere, contradicting the assumption that $p$ is non-zero.",
+            "ro": "Fals. $P(a\\le X\\le b)=\\int_a^b p$, deci $P(X=x)=0$ pentru orice $x$. Afirmația ar da $p(x)=0$ peste tot, contrazicând ipoteza că $p$ este diferită de zero."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "True or false: the continuous variable $X$ has the density $p(x)=\\frac12$ on the interval $[0,2]$ (0 elsewhere). Then $P(X=1)=p(1)=\\frac12$. Then write the value of $P(X=1)$ (a number, with decimals if needed).",
+                "ro": "Adevărat sau fals: variabila continuă $X$ are densitatea $p(x)=\\frac12$ pe intervalul $[0,2]$ (în rest 0). Atunci $P(X=1)=p(1)=\\frac12$. Apoi scrie valoarea lui $P(X=1)$ (număr, cu zecimale dacă e nevoie)."
+              },
+              "fields": [
+                {
+                  "id": "tf",
+                  "formula": "false",
+                  "expected": "false"
+                },
+                {
+                  "id": "v",
+                  "formula": "1-1",
+                  "expected": 0
+                }
+              ],
+              "solution": {
+                "en": "False. For a continuous variable $P(X=1)=\\int_1^1 p=0$; the value of the density, $\\frac12$, is not a probability.",
+                "ro": "Fals. Pentru o variabilă continuă $P(X=1)=\\int_1^1 p=0$; valoarea densității, $\\frac12$, nu este o probabilitate."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s23",
+      "title": {
+        "en": "The hopping rabbit",
+        "ro": "Iepurașul care sare"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c5",
+          "exercise": "0.24",
+          "status": "book",
+          "data": {
+            "n": 9
+          },
+          "statement": {
+            "en": "A rabbit starts at the origin of the axis (the point 0) and makes jumps of length 1: to the right if a coin toss gives heads (probability $p$), to the left if it gives tails. What is the average position after $n$ jumps? Compute: for **case 1** ($p=\\frac23$) the average gain of a single jump; the average position after $n=9$ jumps in **case 1** ($p=\\frac23$), in **case 2** ($p=\\frac13$) and in **case 3** ($p=\\frac12$); then the formula for any $p$. Answer as a fraction or with decimals.",
+            "ro": "Un iepuraș pornește din originea axei (punctul 0) și face salturi de lungime 1: spre dreapta dacă la aruncarea unei monede cade stema (probabilitate $p$), spre stânga dacă cade pajura. Care este poziția medie după $n$ salturi? Calculează: pentru **cazul 1** ($p=\\frac23$) câștigul mediu al unui singur salt; poziția medie după $n=9$ salturi în **cazul 1** ($p=\\frac23$), în **cazul 2** ($p=\\frac13$) și în **cazul 3** ($p=\\frac12$); apoi formula pentru $p$ oarecare. Răspunde ca fracție sau cu zecimale."
+          },
+          "fields": [
+            {
+              "id": "m",
+              "kind": "frac",
+              "label": {
+                "en": "Case 1: $E[X_i]$, a single jump",
+                "ro": "Cazul 1: $E[X_i]$, un singur salt"
+              },
+              "formula": "2*2/3-1",
+              "expected": "1/3"
+            },
+            {
+              "id": "a",
+              "kind": "num",
+              "label": {
+                "en": "Case 1: the average position after 9 jumps",
+                "ro": "Cazul 1: poziția medie după 9 salturi"
+              },
+              "formula": "n*(2*2/3-1)",
+              "expected": 3
+            },
+            {
+              "id": "b",
+              "kind": "num",
+              "label": {
+                "en": "Case 2: the average position after 9 jumps",
+                "ro": "Cazul 2: poziția medie după 9 salturi"
+              },
+              "formula": "n*(2*1/3-1)",
+              "expected": -3
+            },
+            {
+              "id": "c",
+              "kind": "num",
+              "label": {
+                "en": "Case 3: the average position after 9 jumps",
+                "ro": "Cazul 3: poziția medie după 9 salturi"
+              },
+              "formula": "n*(2*1/2-1)",
+              "expected": 0
+            },
+            {
+              "id": "f",
+              "kind": "choice",
+              "label": {
+                "en": "The formula for any $p$ and $n$",
+                "ro": "Formula pentru $p$ și $n$ oarecare"
+              },
+              "options": [
+                {
+                  "en": "n(2p−1)",
+                  "ro": "n(2p−1)"
+                },
+                {
+                  "en": "np",
+                  "ro": "np"
+                },
+                {
+                  "en": "2p−1",
+                  "ro": "2p−1"
+                }
+              ],
+              "formula": "'n(2p−1)'",
+              "expected": "n(2p−1)"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "a",
+              "formula": "n*2/3",
+              "message": {
+                "en": "$np=6$ is the mean number of jumps to the right; the position is (jumps to the right) minus (jumps to the left), that is $6-3$.",
+                "ro": "$np=6$ este media salturilor spre dreapta; poziția este (salturile spre dreapta) minus (salturile spre stânga), adică $6-3$."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "n*(1-2*1/3)",
+              "message": {
+                "en": "The sign: for $p<\\frac12$ the rabbit drifts to the left.",
+                "ro": "Semnul: pentru $p<\\frac12$ iepurașul se îndepărtează spre stânga."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Each jump is a variable $X_i$ with the values $-1$ (left) and $+1$ (right). The position is $X_1+\\dots+X_n$.",
+              "ro": "Fiecare salt este o variabilă $X_i$ cu valorile $-1$ (stânga) și $+1$ (dreapta). Poziția este $X_1+\\dots+X_n$."
+            },
+            {
+              "en": "$E[X_i]=-1\\cdot(1-p)+1\\cdot p$. The mean of the sum is the sum of the means (linearity).",
+              "ro": "$E[X_i]=-1\\cdot(1-p)+1\\cdot p$. Media sumei este suma mediilor (liniaritatea)."
+            },
+            {
+              "en": "$E[X_i]=2p-1$, so $E[X_1+\\dots+X_n]=n(2p-1)$.",
+              "ro": "$E[X_i]=2p-1$, deci $E[X_1+\\dots+X_n]=n(2p-1)$."
+            }
+          ],
+          "solution": {
+            "en": "$E[X_i]=2p-1$; $E[X_1+\\dots+X_n]=n(2p-1)$. For $p=\\frac12$ the average position is 0; for $p=\\frac23$ it is $n/3$; for $p=\\frac13$ it is $-n/3$.",
+            "ro": "$E[X_i]=2p-1$; $E[X_1+\\dots+X_n]=n(2p-1)$. Pentru $p=\\frac12$ poziția medie este 0; pentru $p=\\frac23$ este $n/3$; pentru $p=\\frac13$ este $-n/3$."
+          },
+          "variants": [
+            {
+              "data": {
+                "n": 12
+              },
+              "statement": {
+                "en": "A rabbit starts at the origin of the axis (the point 0) and makes jumps of length 1: to the right if a coin toss gives heads (probability $p$), to the left if it gives tails. What is the average position after $n$ jumps? Compute: for **case 1** ($p=\\frac34$) the average gain of a single jump; the average position after $n=12$ jumps in **case 1** ($p=\\frac34$), in **case 2** ($p=\\frac14$) and in **case 3** ($p=\\frac12$); then the formula for any $p$. Answer as a fraction or with decimals.",
+                "ro": "Un iepuraș pornește din originea axei (punctul 0) și face salturi de lungime 1: spre dreapta dacă la aruncarea unei monede cade stema (probabilitate $p$), spre stânga dacă cade pajura. Care este poziția medie după $n$ salturi? Calculează: pentru **cazul 1** ($p=\\frac34$) câștigul mediu al unui singur salt; poziția medie după $n=12$ salturi în **cazul 1** ($p=\\frac34$), în **cazul 2** ($p=\\frac14$) și în **cazul 3** ($p=\\frac12$); apoi formula pentru $p$ oarecare. Răspunde ca fracție sau cu zecimale."
+              },
+              "fields": [
+                {
+                  "id": "m",
+                  "formula": "2*3/4-1",
+                  "expected": "1/2"
+                },
+                {
+                  "id": "a",
+                  "formula": "n*(2*3/4-1)",
+                  "expected": 6
+                },
+                {
+                  "id": "b",
+                  "formula": "n*(2*1/4-1)",
+                  "expected": -6
+                },
+                {
+                  "id": "c",
+                  "formula": "n*(2*1/2-1)",
+                  "expected": 0
+                },
+                {
+                  "id": "f",
+                  "formula": "'n(2p−1)'",
+                  "expected": "n(2p−1)"
+                }
+              ],
+              "solution": {
+                "en": "$E[X_i]=2\\cdot\\frac34-1=\\frac12$; after 12 jumps: $12\\cdot\\frac12=6$ in case 1, $-6$ in case 2, $0$ in case 3. The general formula: $n(2p-1)$.",
+                "ro": "$E[X_i]=2\\cdot\\frac34-1=\\frac12$; după 12 salturi: $12\\cdot\\frac12=6$ în cazul 1, $-6$ în cazul 2, $0$ în cazul 3. Formula generală: $n(2p-1)$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s24",
+      "title": {
+        "en": "The binomial: p.m.f., mean, variance",
+        "ro": "Binomiala: p.m.f., media, varianța"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l04-p3",
+          "exercise": "0.25.a",
+          "claim": {
+            "en": "The binomial distribution is $b(r;n,p)=C_n^r\\,p^r(1-p)^{n-r}$ for $r\\in\\{0,\\dots,n\\}$. **a.** Check that it is a p.m.f.",
+            "ro": "Distribuția binomială este $b(r;n,p)=C_n^r\\,p^r(1-p)^{n-r}$ pentru $r\\in\\{0,\\dots,n\\}$. **a.** Verificați că este o p.m.f."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "For $p\\in[0,1]$ all the terms $b(r;n,p)$ are $\\ge0$.",
+                "ro": "Pentru $p\\in[0,1]$ toți termenii $b(r;n,p)$ sunt $\\ge0$."
+              },
+              "why": {
+                "en": "They are products of non-negative numbers.",
+                "ro": "Sunt produse de numere nenegative."
+              }
+            },
+            {
+              "shown": {
+                "en": "$\\sum_{r=0}^nC_n^rp^r(1-p)^{n-r}=[p+(1-p)]^n=1^n=1$",
+                "ro": "$\\sum_{r=0}^nC_n^rp^r(1-p)^{n-r}=[p+(1-p)]^n=1^n=1$"
+              },
+              "why": {
+                "en": "Newton's binomial formula: $(u+v)^n=\\sum_rC_n^ru^rv^{n-r}$, with $u=p$ and $v=1-p$.",
+                "ro": "Binomul lui Newton: $(u+v)^n=\\sum_rC_n^ru^rv^{n-r}$, cu $u=p$ și $v=1-p$."
+              },
+              "predict": {
+                "question": {
+                  "en": "Which formula gives the sum $\\sum_rC_n^rp^r(1-p)^{n-r}$?",
+                  "ro": "Ce formulă dă suma $\\sum_rC_n^rp^r(1-p)^{n-r}$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "Newton's binomial formula: $(u+v)^n=\\sum_rC_n^ru^rv^{n-r}$, with $u=p$, $v=1-p$",
+                      "ro": "Binomul lui Newton: $(u+v)^n=\\sum_rC_n^ru^rv^{n-r}$, cu $u=p$, $v=1-p$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "The sum has exactly the form of Newton's binomial formula, and $p+(1-p)=1$.",
+                      "ro": "Suma are exact forma binomului lui Newton, iar $p+(1-p)=1$."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$p+(1-p)=1$, so the sum is 1 because there are two outcomes",
+                      "ro": "$p+(1-p)=1$, deci suma este 1 pentru că sunt două rezultate"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "$p+(1-p)=1$ is the sum of the probabilities of a single toss. For $n$ tosses there are $n+1$ terms, and their sum needs Newton's binomial formula.",
+                      "ro": "$p+(1-p)=1$ este suma probabilităților unei singure aruncări. Pentru $n$ aruncări sunt $n+1$ termeni, iar suma lor cere binomul lui Newton."
+                    },
+                    "misconception": "suma-probabilitatilor-celor-doua-rezultate"
+                  }
+                ]
+              }
+            }
+          ],
+          "end": {
+            "en": "The terms are non-negative and their sum is 1, so $b(r;n,p)$ is a p.m.f. $\\blacksquare$",
+            "ro": "Termenii sunt nenegativi și suma lor este 1, deci $b(r;n,p)$ este o p.m.f. $\\blacksquare$"
+          }
+        },
+        {
+          "type": "proof-steps",
+          "id": "ml-l04-p4",
+          "exercise": "0.25.b",
+          "claim": {
+            "en": "**b.** Compute the mean and the variance of the binomial: $E=np$ and $\\mathrm{Var}=np(1-p)$. We write $q=1-p$.",
+            "ro": "**b.** Calculați media și varianța binomialei: $E=np$ și $\\mathrm{Var}=np(1-p)$. Notăm $q=1-p$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$k\\,C_n^k=n\\,C_{n-1}^{k-1}$",
+                "ro": "$k\\,C_n^k=n\\,C_{n-1}^{k-1}$"
+              },
+              "why": {
+                "en": "In $k\\,\\frac{n!}{k!\\,(n-k)!}$ the $k$ cancels with $k!$ and what remains is $n\\,\\frac{(n-1)!}{(k-1)!\\,(n-k)!}$.",
+                "ro": "Din $k\\,\\frac{n!}{k!\\,(n-k)!}$ se simplifică $k$ cu $k!$ și rămâne $n\\,\\frac{(n-1)!}{(k-1)!\\,(n-k)!}$."
+              }
+            },
+            {
+              "shown": {
+                "en": "$E=\\sum_{k\\ge1}k\\,C_n^kp^kq^{n-k}=np\\sum_{k\\ge1}C_{n-1}^{k-1}p^{k-1}q^{(n-1)-(k-1)}=np\\,[p+q]^{n-1}=np$",
+                "ro": "$E=\\sum_{k\\ge1}k\\,C_n^kp^kq^{n-k}=np\\sum_{k\\ge1}C_{n-1}^{k-1}p^{k-1}q^{(n-1)-(k-1)}=np\\,[p+q]^{n-1}=np$"
+              },
+              "why": {
+                "en": "The last sum is the one from part a, with $n-1$ instead of $n$, so it is 1. A second way: the binomial counts heads in $n$ tosses, that is the sum of $n$ Bernoulli($p$) variables, each with mean $p$; linearity of the mean gives $np$.",
+                "ro": "Ultima sumă este cea de la punctul a, cu $n-1$ în loc de $n$, deci este 1. A doua cale: binomiala numără stemele la $n$ aruncări, adică suma a $n$ variabile Bernoulli($p$), fiecare cu media $p$; liniaritatea mediei dă $np$."
+              }
+            },
+            {
+              "shown": {
+                "en": "$\\mathrm{Var}=E[X^2]-(E[X])^2$",
+                "ro": "$\\mathrm{Var}=E[X^2]-(E[X])^2$"
+              },
+              "why": {
+                "en": "The identity of the variance; we still need $E[X^2]$.",
+                "ro": "Identitatea varianței; ne mai trebuie $E[X^2]$."
+              }
+            },
+            {
+              "shown": {
+                "en": "$E[X^2]=np\\sum_{j=0}^{n-1}(j+1)\\,C_{n-1}^{j}\\,p^{j}q^{(n-1)-j}$, with $j=k-1$",
+                "ro": "$E[X^2]=np\\sum_{j=0}^{n-1}(j+1)\\,C_{n-1}^{j}\\,p^{j}q^{(n-1)-j}$, cu $j=k-1$"
+              },
+              "why": {
+                "en": "The same trick as for the mean, applied to $k\\cdot k\\,C_n^kp^kq^{n-k}$.",
+                "ro": "Același truc ca la medie, aplicat lui $k\\cdot k\\,C_n^kp^kq^{n-k}$."
+              }
+            },
+            {
+              "shown": {
+                "en": "$E[X^2]=np\\,[(n-1)p+1]=n^2p^2-np^2+np$",
+                "ro": "$E[X^2]=np\\,[(n-1)p+1]=n^2p^2-np^2+np$"
+              },
+              "why": {
+                "en": "We split $(j+1)$: the first sum (with $j$) is the mean of the binomial with $n-1$ tosses, that is $(n-1)p$; the second (with 1) is the sum of probabilities, that is 1.",
+                "ro": "Despărțim $(j+1)$: prima sumă (cu $j$) este media binomialei cu $n-1$ aruncări, adică $(n-1)p$; a doua (cu 1) este suma probabilităților, adică 1."
+              },
+              "predict": {
+                "question": {
+                  "en": "What is $\\sum_{j=0}^{n-1}j\\,C_{n-1}^{j}\\,p^{j}q^{(n-1)-j}$?",
+                  "ro": "Cât este $\\sum_{j=0}^{n-1}j\\,C_{n-1}^{j}\\,p^{j}q^{(n-1)-j}$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$np$",
+                      "ro": "$np$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The sum has $n-1$ tosses, not $n$: the mean is $(n-1)p$.",
+                      "ro": "Suma are $n-1$ aruncări, nu $n$: media este $(n-1)p$."
+                    },
+                    "misconception": "numarul-de-valori"
+                  },
+                  {
+                    "text": {
+                      "en": "$p$",
+                      "ro": "$p$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "$p$ is the mean of a single toss. Here there are $n-1$ tosses, so you multiply by $n-1$.",
+                      "ro": "$p$ este media unei singure aruncări. Aici sunt $n-1$ aruncări, deci se înmulțește cu $n-1$."
+                    },
+                    "misconception": "fara-n"
+                  },
+                  {
+                    "text": {
+                      "en": "$(n-1)p$, the mean of the binomial with $n-1$ tosses",
+                      "ro": "$(n-1)p$, media binomialei cu $n-1$ aruncări"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "The sum has the form of a mean, $\\sum_j j\\,b(j;n-1,p)$, so it is $(n-1)p$.",
+                      "ro": "Suma are forma mediei $\\sum_j j\\,b(j;n-1,p)$, deci este $(n-1)p$."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$\\mathrm{Var}=n^2p^2-np^2+np-n^2p^2=np(1-p)$",
+                "ro": "$\\mathrm{Var}=n^2p^2-np^2+np-n^2p^2=np(1-p)$"
+              },
+              "why": {
+                "en": "Check with $n=1$: the mean is $p$ and the variance $p(1-p)$, that is Bernoulli.",
+                "ro": "Verificare cu $n=1$: media este $p$ și varianța $p(1-p)$, adică Bernoulli."
+              }
+            }
+          ],
+          "end": {
+            "en": "So the mean of the binomial is $np$ and its variance is $np(1-p)$. $\\blacksquare$",
+            "ro": "Deci media binomialei este $np$ și varianța este $np(1-p)$. $\\blacksquare$"
+          }
+        },
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c6",
+          "status": "book",
+          "statement": {
+            "en": "Check numerically, for $n=20$ and $p=\\frac14$: the mean $np$, $E[X^2]=n^2p^2-np^2+np$ and the variance $np(1-p)$. Answer with decimals (or as a fraction).",
+            "ro": "Verifică numeric, pentru $n=20$ și $p=\\frac14$: media $np$, $E[X^2]=n^2p^2-np^2+np$ și varianța $np(1-p)$. Răspunde cu zecimale (sau ca fracție)."
+          },
+          "fields": [
+            {
+              "id": "m",
+              "kind": "num",
+              "label": {
+                "en": "The mean $np$",
+                "ro": "Media $np$"
+              },
+              "formula": "20*1/4",
+              "expected": 5
+            },
+            {
+              "id": "q",
+              "kind": "num",
+              "label": {
+                "en": "$E[X^2]=n^2p^2-np^2+np$",
+                "ro": "$E[X^2]=n^2p^2-np^2+np$"
+              },
+              "formula": "20^2*(1/4)^2-20*(1/4)^2+20*1/4",
+              "expected": 28.75
+            },
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "The variance $np(1-p)$",
+                "ro": "Varianța $np(1-p)$"
+              },
+              "formula": "20*1/4*(1-1/4)",
+              "expected": 3.75
+            }
+          ],
+          "detectors": [
+            {
+              "field": "v",
+              "formula": "20*1/4",
+              "message": {
+                "en": "This is the mean $np$; the variance has the factor $(1-p)$.",
+                "ro": "Aceasta este media $np$; varianța are factorul $(1-p)$."
+              }
+            },
+            {
+              "field": "q",
+              "formula": "(20*1/4)^2",
+              "message": {
+                "en": "This is $(E[X])^2=n^2p^2$; $E[X^2]$ exceeds it by the variance.",
+                "ro": "Aceasta este $(E[X])^2=n^2p^2$; $E[X^2]$ o depășește cu varianța."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Put $n$ and $p$ into each formula; $E[X^2]$ and the variance are linked by $\\mathrm{Var}=E[X^2]-(E[X])^2$.",
+              "ro": "Înlocuiește $n$ și $p$ în fiecare formulă; $E[X^2]$ și varianța se leagă prin $\\mathrm{Var}=E[X^2]-(E[X])^2$."
+            },
+            {
+              "en": "$np=20\\cdot\\frac14$; $n^2p^2=400\\cdot\\frac1{16}$; $np^2=20\\cdot\\frac1{16}$; $np(1-p)=20\\cdot\\frac14\\cdot\\frac34$.",
+              "ro": "$np=20\\cdot\\frac14$; $n^2p^2=400\\cdot\\frac1{16}$; $np^2=20\\cdot\\frac1{16}$; $np(1-p)=20\\cdot\\frac14\\cdot\\frac34$."
+            },
+            {
+              "en": "$E[X^2]=25-1.25+5=28.75$ and $\\mathrm{Var}=28.75-25=3.75$.",
+              "ro": "$E[X^2]=25-1{,}25+5=28{,}75$ și $\\mathrm{Var}=28{,}75-25=3{,}75$."
+            }
+          ],
+          "solution": {
+            "en": "$np=5$; $E[X^2]=25-1.25+5=28.75$; $\\mathrm{Var}=28.75-5^2=3.75=np(1-p)$.",
+            "ro": "$np=5$; $E[X^2]=25-1{,}25+5=28{,}75$; $\\mathrm{Var}=28{,}75-5^2=3{,}75=np(1-p)$."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Check numerically, for $n=10$ and $p=\\frac25$: the mean $np$, $E[X^2]=n^2p^2-np^2+np$ and the variance $np(1-p)$. Answer with decimals (or as a fraction).",
+                "ro": "Verifică numeric, pentru $n=10$ și $p=\\frac25$: media $np$, $E[X^2]=n^2p^2-np^2+np$ și varianța $np(1-p)$. Răspunde cu zecimale (sau ca fracție)."
+              },
+              "fields": [
+                {
+                  "id": "m",
+                  "formula": "10*2/5",
+                  "expected": 4
+                },
+                {
+                  "id": "q",
+                  "formula": "10^2*(2/5)^2-10*(2/5)^2+10*2/5",
+                  "expected": 18.4
+                },
+                {
+                  "id": "v",
+                  "formula": "10*2/5*(1-2/5)",
+                  "expected": 2.4
+                }
+              ],
+              "solution": {
+                "en": "$np=4$; $E[X^2]=16-1.6+4=18.4$; $\\mathrm{Var}=18.4-16=2.4=np(1-p)$.",
+                "ro": "$np=4$; $E[X^2]=16-1{,}6+4=18{,}4$; $\\mathrm{Var}=18{,}4-16=2{,}4=np(1-p)$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s25",
+      "title": {
+        "en": "Mean and variance after a transformation",
+        "ro": "Media și varianța după o transformare"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c9",
+          "exercise": "0.97",
+          "status": "verified-twice",
+          "data": {
+            "mean": 1,
+            "vr": 1,
+            "a": 3,
+            "b": 3
+          },
+          "statement": {
+            "en": "$X$ has $E[X]=1$ and $\\mathrm{Var}(X)=1$. Let $a=3$ and $b=3$. Compute: i. $E[aX]$; ii. $\\mathrm{Var}(aX)$; iii. $\\mathrm{Var}(X+b)$. Answer with a number (with decimals, if needed).",
+            "ro": "$X$ are $E[X]=1$ și $\\mathrm{Var}(X)=1$. Fie $a=3$ și $b=3$. Calculează: i. $E[aX]$; ii. $\\mathrm{Var}(aX)$; iii. $\\mathrm{Var}(X+b)$. Răspunde cu un număr (cu zecimale, dacă e cazul)."
+          },
+          "fields": [
+            {
+              "id": "i",
+              "kind": "num",
+              "label": {
+                "en": "i. $E[aX]$",
+                "ro": "i. $E[aX]$"
+              },
+              "formula": "a*mean",
+              "expected": 3
+            },
+            {
+              "id": "ii",
+              "kind": "num",
+              "label": {
+                "en": "ii. $\\mathrm{Var}(aX)$",
+                "ro": "ii. $\\mathrm{Var}(aX)$"
+              },
+              "formula": "a^2*vr",
+              "expected": 9
+            },
+            {
+              "id": "iii",
+              "kind": "num",
+              "label": {
+                "en": "iii. $\\mathrm{Var}(X+b)$",
+                "ro": "iii. $\\mathrm{Var}(X+b)$"
+              },
+              "formula": "vr",
+              "expected": 1
+            }
+          ],
+          "detectors": [
+            {
+              "field": "ii",
+              "formula": "a*vr",
+              "message": {
+                "en": "The variance is not linear: the factor is $a^2=9$, not $a$.",
+                "ro": "Varianța nu e liniară: factorul este $a^2=9$, nu $a$."
+              }
+            },
+            {
+              "field": "iii",
+              "formula": "vr+b",
+              "message": {
+                "en": "A constant added moves all the values the same way, so the spread stays 1.",
+                "ro": "O constantă adăugată mută toate valorile la fel, deci împrăștierea rămâne 1."
+              }
+            },
+            {
+              "field": "iii",
+              "formula": "a^2*vr+vr",
+              "message": {
+                "en": "You combined it with $a^2$: here nothing is multiplied, a constant is added.",
+                "ro": "Ai combinat cu $a^2$: aici nu se înmulțește nimic, se adaugă o constantă."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "The mean is linear. For the variance use the rules for $\\mathrm{Var}(aX)$ and $\\mathrm{Var}(X+b)$.",
+              "ro": "Media este liniară. Pentru varianță folosește regulile pentru $\\mathrm{Var}(aX)$ și $\\mathrm{Var}(X+b)$."
+            },
+            {
+              "en": "$E[aX]=a\\,E[X]$; $\\mathrm{Var}(aX)=a^2\\,\\mathrm{Var}(X)$; $\\mathrm{Var}(X+b)=\\mathrm{Var}(X)$.",
+              "ro": "$E[aX]=a\\,E[X]$; $\\mathrm{Var}(aX)=a^2\\,\\mathrm{Var}(X)$; $\\mathrm{Var}(X+b)=\\mathrm{Var}(X)$."
+            },
+            {
+              "en": "$E[3X]=3\\cdot1$; $\\mathrm{Var}(3X)=3^2\\cdot1$; $\\mathrm{Var}(X+3)=1$.",
+              "ro": "$E[3X]=3\\cdot1$; $\\mathrm{Var}(3X)=3^2\\cdot1$; $\\mathrm{Var}(X+3)=1$."
+            }
+          ],
+          "solution": {
+            "en": "$E[3X]=3\\cdot1=3$; $\\mathrm{Var}(3X)=3^2\\cdot1=9$; $\\mathrm{Var}(X+3)=1$ (a shift does not change the spread).",
+            "ro": "$E[3X]=3\\cdot1=3$; $\\mathrm{Var}(3X)=3^2\\cdot1=9$; $\\mathrm{Var}(X+3)=1$ (o deplasare nu schimbă împrăștierea)."
+          },
+          "variants": [
+            {
+              "data": {
+                "mean": 2,
+                "vr": 3,
+                "a": 4,
+                "b": 5
+              },
+              "statement": {
+                "en": "$X$ has $E[X]=2$ and $\\mathrm{Var}(X)=3$. Let $a=4$ and $b=5$. Compute: i. $E[aX]$; ii. $\\mathrm{Var}(aX)$; iii. $\\mathrm{Var}(X+b)$. Answer with a number (with decimals, if needed).",
+                "ro": "$X$ are $E[X]=2$ și $\\mathrm{Var}(X)=3$. Fie $a=4$ și $b=5$. Calculează: i. $E[aX]$; ii. $\\mathrm{Var}(aX)$; iii. $\\mathrm{Var}(X+b)$. Răspunde cu un număr (cu zecimale, dacă e cazul)."
+              },
+              "fields": [
+                {
+                  "id": "i",
+                  "formula": "a*mean",
+                  "expected": 8
+                },
+                {
+                  "id": "ii",
+                  "formula": "a^2*vr",
+                  "expected": 48
+                },
+                {
+                  "id": "iii",
+                  "formula": "vr",
+                  "expected": 3
+                }
+              ],
+              "solution": {
+                "en": "$E[4X]=4\\cdot2=8$; $\\mathrm{Var}(4X)=4^2\\cdot3=48$; $\\mathrm{Var}(X+5)=3$.",
+                "ro": "$E[4X]=4\\cdot2=8$; $\\mathrm{Var}(4X)=4^2\\cdot3=48$; $\\mathrm{Var}(X+5)=3$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s26",
+      "title": {
+        "en": "The mean of the indicator variable",
+        "ro": "Media variabilei indicator"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l04-p5",
+          "exercise": "0.98",
+          "claim": {
+            "en": "For an event $A$, let $X=1$ if $A$ happens and $X=0$ otherwise (the indicator variable of $A$). Show that $E[X]=P(A)$.",
+            "ro": "Pentru un eveniment $A$, fie $X=1$ dacă $A$ are loc și $X=0$ în caz contrar (variabila indicator a lui $A$). Arătați că $E[X]=P(A)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$X=1$ with probability $P(A)$ and $X=0$ with probability $P(\\bar A)=1-P(A)$",
+                "ro": "$X=1$ cu probabilitatea $P(A)$ și $X=0$ cu probabilitatea $P(\\bar A)=1-P(A)$"
+              },
+              "why": {
+                "en": "$\\bar A$ is the complement of $A$: the event that $A$ does not happen.",
+                "ro": "$\\bar A$ este complementul lui $A$: evenimentul $A$ nu are loc."
+              },
+              "predict": {
+                "question": {
+                  "en": "What are the values and probabilities of $X$?",
+                  "ro": "Care sunt valorile și probabilitățile lui $X$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$X=1$ with probability $\\frac12$ and $X=0$ with probability $\\frac12$",
+                      "ro": "$X=1$ cu probabilitatea $\\frac12$ și $X=0$ cu probabilitatea $\\frac12$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The probabilities are not automatically one half: $X=1$ has the probability of $A$, whatever it is.",
+                      "ro": "Probabilitățile nu sunt automat jumătate: $X=1$ are probabilitatea lui $A$, oricare ar fi ea."
+                    },
+                    "misconception": "jumatate"
+                  },
+                  {
+                    "text": {
+                      "en": "$X=1$ with probability $P(A)$ and $X=0$ with probability $P(\\bar A)$",
+                      "ro": "$X=1$ cu probabilitatea $P(A)$ și $X=0$ cu probabilitatea $P(\\bar A)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "$X$ is 1 exactly when $A$ happens and 0 exactly when $A$ does not happen.",
+                      "ro": "$X$ este 1 exact când $A$ are loc și 0 exact când $A$ nu are loc."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$E[X]=1\\cdot P(A)+0\\cdot P(\\bar A)=P(A)$",
+                "ro": "$E[X]=1\\cdot P(A)+0\\cdot P(\\bar A)=P(A)$"
+              },
+              "why": {
+                "en": "The definition of the mean: each value multiplied by its probability.",
+                "ro": "Definiția mediei: fiecare valoare înmulțită cu probabilitatea ei."
+              }
+            }
+          ],
+          "end": {
+            "en": "So the mean of the indicator of an event is the probability of the event. $\\blacksquare$",
+            "ro": "Deci media indicatorului unui eveniment este probabilitatea evenimentului. $\\blacksquare$"
+          }
+        },
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c10",
+          "status": "ruled",
+          "ruledNote": {
+            "en": "The workbook gives no answer; the one-line proof comes from the content map of the course.",
+            "ro": "Culegerea nu dă răspunsul; demonstrația dintr-o linie vine din harta de conținut a cursului."
+          },
+          "statement": {
+            "en": "Check numerically: for $P(A)=0.3$, what is $E[X]$? Answer as a fraction.",
+            "ro": "Verifică numeric: pentru $P(A)=0{,}3$, cât este $E[X]$? Răspunde ca fracție."
+          },
+          "fields": [
+            {
+              "id": "e",
+              "kind": "frac",
+              "label": {
+                "en": "$E[X]$, as a fraction",
+                "ro": "$E[X]$, ca fracție"
+              },
+              "formula": "3/10",
+              "expected": "3/10"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "e",
+              "formula": "7/10",
+              "message": {
+                "en": "This is $P(\\bar A)$, the probability of the complement. The indicator is worth 1 when $A$ happens, so the mean is $P(A)$.",
+                "ro": "Aceasta este $P(\\bar A)$, probabilitatea complementului. Indicatorul valorează 1 când $A$ are loc, deci media este $P(A)$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Use $E[X]=P(A)$ from the proof.",
+              "ro": "Folosește $E[X]=P(A)$ din demonstrație."
+            },
+            {
+              "en": "$E[X]=1\\cdot P(A)+0\\cdot P(\\bar A)$ with $P(A)=0.3$.",
+              "ro": "$E[X]=1\\cdot P(A)+0\\cdot P(\\bar A)$ cu $P(A)=0{,}3$."
+            },
+            {
+              "en": "$E[X]=0.3=\\frac{3}{10}$.",
+              "ro": "$E[X]=0{,}3=\\frac{3}{10}$."
+            }
+          ],
+          "solution": {
+            "en": "$E[X]=1\\cdot0.3+0\\cdot0.7=\\frac{3}{10}$.",
+            "ro": "$E[X]=1\\cdot0{,}3+0\\cdot0{,}7=\\frac{3}{10}$."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Check numerically: for $P(A)=0.45$, what is $E[X]$? Answer as a fraction.",
+                "ro": "Verifică numeric: pentru $P(A)=0{,}45$, cât este $E[X]$? Răspunde ca fracție."
+              },
+              "fields": [
+                {
+                  "id": "e",
+                  "formula": "9/20",
+                  "expected": "9/20"
+                }
+              ],
+              "solution": {
+                "en": "$E[X]=1\\cdot0.45+0\\cdot0.55=\\frac{9}{20}$.",
+                "ro": "$E[X]=1\\cdot0{,}45+0\\cdot0{,}55=\\frac{9}{20}$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s29",
+      "title": {
+        "en": "Adding a constant leaves the variance unchanged",
+        "ro": "Varianța nu se schimbă când aduni o constantă"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l04-p6",
+          "exercise": "L4.c1",
+          "claim": {
+            "en": "Let $X$ be a random variable and $a$ a constant. Using the definition of the variance and the linearity of the mean, show that $\\mathrm{Var}(X+a)=\\mathrm{Var}(X)$.",
+            "ro": "Fie $X$ o variabilă aleatoare și $a$ o constantă. Folosind definiția varianței și liniaritatea mediei, arătați că $\\mathrm{Var}(X+a)=\\mathrm{Var}(X)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$\\mathrm{Var}(X+a)=E\\big[(X+a-E[X+a])^2\\big]$",
+                "ro": "$\\mathrm{Var}(X+a)=E\\big[(X+a-E[X+a])^2\\big]$"
+              },
+              "why": {
+                "en": "The definition of the variance, applied to the variable $X+a$.",
+                "ro": "Definiția varianței, aplicată variabilei $X+a$."
+              }
+            },
+            {
+              "shown": {
+                "en": "$E[X+a]=E[X]+a$",
+                "ro": "$E[X+a]=E[X]+a$"
+              },
+              "why": {
+                "en": "Linearity of the mean, with $E[a]=a$.",
+                "ro": "Liniaritatea mediei, cu $E[a]=a$."
+              },
+              "predict": {
+                "question": {
+                  "en": "What is $E[X+a]$?",
+                  "ro": "Cât este $E[X+a]$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$E[X]$",
+                      "ro": "$E[X]$"
+                    },
+                    "correct": false,
+                    "misconception": "media-nu-se-muta",
+                    "explain": {
+                      "en": "Adding $a$ to every value moves the mean by $a$ as well.",
+                      "ro": "Adunând $a$ la fiecare valoare, și media crește cu $a$."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$a\\,E[X]$",
+                      "ro": "$a\\,E[X]$"
+                    },
+                    "correct": false,
+                    "misconception": "constanta-inmultita",
+                    "explain": {
+                      "en": "$a$ is added to $X$, not multiplied; $E[aX]=aE[X]$ is a different rule.",
+                      "ro": "$a$ se adună la $X$, nu îl înmulțește; $E[aX]=aE[X]$ este altă regulă."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$E[X]+a$",
+                      "ro": "$E[X]+a$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Linearity of the mean: $E[X+a]=E[X]+E[a]=E[X]+a$.",
+                      "ro": "Liniaritatea mediei: $E[X+a]=E[X]+E[a]=E[X]+a$."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$X+a-(E[X]+a)=X-E[X]$",
+                "ro": "$X+a-(E[X]+a)=X-E[X]$"
+              },
+              "why": {
+                "en": "The constant $a$ cancels.",
+                "ro": "Constanta $a$ se reduce."
+              },
+              "predict": {
+                "question": {
+                  "en": "What is left inside the bracket?",
+                  "ro": "Ce rămâne în paranteză?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$X-E[X]$",
+                      "ro": "$X-E[X]$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "From $X+a$ we subtract the whole mean, $E[X]+a$, so $a$ cancels.",
+                      "ro": "Din $X+a$ se scade toată media, $E[X]+a$, deci $a$ se reduce."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$X-E[X]+a$",
+                      "ro": "$X-E[X]+a$"
+                    },
+                    "correct": false,
+                    "misconception": "a-ramane-in-paranteza",
+                    "explain": {
+                      "en": "From $X+a$ we subtract the whole mean, $E[X]+a$, not only $E[X]$.",
+                      "ro": "Din $X+a$ se scade toată media, $E[X]+a$, nu doar $E[X]$."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$\\mathrm{Var}(X+a)=E\\big[(X-E[X])^2\\big]=\\mathrm{Var}(X)$",
+                "ro": "$\\mathrm{Var}(X+a)=E\\big[(X-E[X])^2\\big]=\\mathrm{Var}(X)$"
+              },
+              "why": {
+                "en": "This is exactly the definition of the variance of $X$.",
+                "ro": "Exact definiția varianței lui $X$."
+              }
+            }
+          ],
+          "end": {
+            "en": "So $\\mathrm{Var}(X+a)=\\mathrm{Var}(X)$. Together with $\\mathrm{Var}(aX)=a^2\\mathrm{Var}(X)$ this gives $\\mathrm{Var}(aX+b)=a^2\\mathrm{Var}(X)$. $\\blacksquare$",
+            "ro": "Deci $\\mathrm{Var}(X+a)=\\mathrm{Var}(X)$. Împreună cu $\\mathrm{Var}(aX)=a^2\\mathrm{Var}(X)$ rezultă $\\mathrm{Var}(aX+b)=a^2\\mathrm{Var}(X)$. $\\blacksquare$"
+          }
+        },
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c11",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Check it on an example: $X$ takes the values 1 and 4 with probabilities $\\frac23$ and $\\frac13$, and $a=5$. Answer each as a fraction or a whole number.",
+            "ro": "Verifică pe un exemplu: $X$ ia valorile 1 și 4 cu probabilitățile $\\frac23$ și $\\frac13$, iar $a=5$. Răspunde la fiecare ca fracție sau număr întreg."
+          },
+          "fields": [
+            {
+              "id": "vx",
+              "kind": "frac",
+              "label": {
+                "en": "$\\mathrm{Var}(X)$, as a fraction",
+                "ro": "$\\mathrm{Var}(X)$, ca fracție"
+              },
+              "formula": "Var([1,4],[2/3,1/3])",
+              "expected": "2"
+            },
+            {
+              "id": "m",
+              "kind": "frac",
+              "label": {
+                "en": "$E[X+5]$, as a fraction",
+                "ro": "$E[X+5]$, ca fracție"
+              },
+              "formula": "E([1+5,4+5],[2/3,1/3])",
+              "expected": "7"
+            },
+            {
+              "id": "v",
+              "kind": "frac",
+              "label": {
+                "en": "$\\mathrm{Var}(X+5)$, as a fraction",
+                "ro": "$\\mathrm{Var}(X+5)$, ca fracție"
+              },
+              "formula": "Var([1+5,4+5],[2/3,1/3])",
+              "expected": "2"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "m",
+              "formula": "E([1,4],[2/3,1/3])",
+              "message": {
+                "en": "The mean moves too: $E[X+a]=E[X]+a$.",
+                "ro": "Media se mută și ea: $E[X+a]=E[X]+a$."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "E([(1+5-2)^2,(4+5-2)^2],[2/3,1/3])",
+              "message": {
+                "en": "You subtracted the old mean of $X$ instead of $E[X+5]$; the deviation is taken from the mean of $X+5$.",
+                "ro": "Ai scăzut media veche a lui $X$ în loc de $E[X+5]$; abaterea se ia față de media lui $X+5$."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "Var([1,4],[2/3,1/3])+5",
+              "message": {
+                "en": "The constant is not added to the variance: all values move by the same amount, so does the mean, so the deviations stay the same.",
+                "ro": "Constanta nu se adună la varianță: toate valorile se mută cu aceeași cantitate, media la fel, deci abaterile rămân aceleași."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "E([(1+5)^2,(4+5)^2],[2/3,1/3])",
+              "message": {
+                "en": "This is $E[(X+5)^2]$; still subtract the square of the mean, $(E[X+5])^2$.",
+                "ro": "Aceasta este $E[(X+5)^2]$; mai scade pătratul mediei, $(E[X+5])^2$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "First compute $E[X]$ and $E[X^2]$; $X+5$ takes the values 6 and 9 with the same probabilities.",
+              "ro": "Calculează întâi $E[X]$ și $E[X^2]$; $X+5$ ia valorile 6 și 9 cu aceleași probabilități."
+            },
+            {
+              "en": "$E[X+5]=E[X]+5$; the deviations of $X+5$ from its mean are the same as those of $X$ from its mean.",
+              "ro": "$E[X+5]=E[X]+5$; abaterile lui $X+5$ față de media ei sunt aceleași ca ale lui $X$ față de media lui."
+            },
+            {
+              "en": "$E[X]=2$, $E[X+5]=7$, and $\\mathrm{Var}(X+5)=(6-7)^2\\cdot\\frac23+(9-7)^2\\cdot\\frac13$.",
+              "ro": "$E[X]=2$, $E[X+5]=7$, iar $\\mathrm{Var}(X+5)=(6-7)^2\\cdot\\frac23+(9-7)^2\\cdot\\frac13$."
+            }
+          ],
+          "solution": {
+            "en": "$E[X]=1\\cdot\\frac23+4\\cdot\\frac13=2$, $E[X^2]=\\frac23+\\frac{16}{3}=6$, $\\mathrm{Var}(X)=6-4=2$. $E[X+5]=7$ and $\\mathrm{Var}(X+5)=E[(X+5-7)^2]=E[(X-2)^2]=2$.",
+            "ro": "$E[X]=1\\cdot\\frac23+4\\cdot\\frac13=2$, $E[X^2]=\\frac23+\\frac{16}{3}=6$, $\\mathrm{Var}(X)=6-4=2$. $E[X+5]=7$ și $\\mathrm{Var}(X+5)=E[(X+5-7)^2]=E[(X-2)^2]=2$."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Check it on an example: $X$ takes the values 2 and 5 with probabilities $\\frac12$ and $\\frac12$, and $a=3$. Answer each as a fraction or a whole number. (The fields ask for $\\mathrm{Var}(X)$, $E[X+3]$ and $\\mathrm{Var}(X+3)$.)",
+                "ro": "Verifică pe un exemplu: $X$ ia valorile 2 și 5 cu probabilitățile $\\frac12$ și $\\frac12$, iar $a=3$. Răspunde la fiecare ca fracție sau număr întreg. (Câmpurile cer $\\mathrm{Var}(X)$, $E[X+3]$ și $\\mathrm{Var}(X+3)$.)"
+              },
+              "fields": [
+                {
+                  "id": "vx",
+                  "formula": "Var([2,5],[1/2,1/2])",
+                  "expected": "9/4"
+                },
+                {
+                  "id": "m",
+                  "formula": "E([2+3,5+3],[1/2,1/2])",
+                  "expected": "13/2"
+                },
+                {
+                  "id": "v",
+                  "formula": "Var([2+3,5+3],[1/2,1/2])",
+                  "expected": "9/4"
+                }
+              ],
+              "hints": [
+                {
+                  "en": "First compute $E[X]$ and $E[X^2]$; $X+3$ takes the values 5 and 8.",
+                  "ro": "Calculează întâi $E[X]$ și $E[X^2]$; $X+3$ ia valorile 5 și 8."
+                },
+                {
+                  "en": "$E[X+3]=E[X]+3$, and the variance does not change.",
+                  "ro": "$E[X+3]=E[X]+3$, iar varianța nu se schimbă."
+                },
+                {
+                  "en": "$E[X]=\\frac72$ and $E[X^2]=\\frac{29}{2}$.",
+                  "ro": "$E[X]=\\frac72$ și $E[X^2]=\\frac{29}{2}$."
+                }
+              ],
+              "solution": {
+                "en": "$E[X]=\\frac72$, $E[X^2]=\\frac{4+25}{2}=\\frac{29}{2}$, $\\mathrm{Var}(X)=\\frac{29}{2}-\\frac{49}{4}=\\frac94$. $E[X+3]=\\frac{13}{2}$ and $\\mathrm{Var}(X+3)=\\frac94$.",
+                "ro": "$E[X]=\\frac72$, $E[X^2]=\\frac{4+25}{2}=\\frac{29}{2}$, $\\mathrm{Var}(X)=\\frac{29}{2}-\\frac{49}{4}=\\frac94$. $E[X+3]=\\frac{13}{2}$ și $\\mathrm{Var}(X+3)=\\frac94$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s30",
+      "title": {
+        "en": "Is it a probability mass function?",
+        "ro": "Este o funcție masă de probabilitate?"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c12",
+          "exercise": "L4.c2",
+          "status": "verified-twice",
+          "statement": {
+            "en": "$X$ takes the values 1, 2, 3. For each definition, say whether it is a valid probability mass function and why. **i.** $p(1)=0.5$, $p(2)=0.3$, $p(3)=0.3$. **ii.** $p(1)=0.6$, $p(2)=-0.1$, $p(3)=0.5$. **iii.** $p(1)=0.2$, $p(2)=0.5$, $p(3)=0.3$. **iv.** $p(x)=c\\cdot x$ for $x\\in\\{1,2,3\\}$: what must $c$ be, and what is $P(X=3)$ then? Answer iv as fractions.",
+            "ro": "$X$ ia valorile 1, 2, 3. Pentru fiecare definiție spune dacă este o funcție masă de probabilitate validă și de ce. **i.** $p(1)=0{,}5$, $p(2)=0{,}3$, $p(3)=0{,}3$. **ii.** $p(1)=0{,}6$, $p(2)=-0{,}1$, $p(3)=0{,}5$. **iii.** $p(1)=0{,}2$, $p(2)=0{,}5$, $p(3)=0{,}3$. **iv.** $p(x)=c\\cdot x$ pentru $x\\in\\{1,2,3\\}$: cât trebuie să fie $c$ și cât este atunci $P(X=3)$? La iv răspunde ca fracții."
+          },
+          "fields": [
+            {
+              "id": "i",
+              "kind": "tf",
+              "label": {
+                "en": "i. Is it valid?",
+                "ro": "i. Este validă?"
+              },
+              "formula": "0.5+0.3+0.3 == 1",
+              "expected": "false"
+            },
+            {
+              "id": "ir",
+              "kind": "choice",
+              "label": {
+                "en": "i. Why?",
+                "ro": "i. De ce?"
+              },
+              "options": [
+                {
+                  "en": "the sum is not 1",
+                  "ro": "suma nu este 1"
+                },
+                {
+                  "en": "a value is negative",
+                  "ro": "o valoare este negativă"
+                }
+              ],
+              "formula": "'the sum is not 1'",
+              "expected": "the sum is not 1"
+            },
+            {
+              "id": "ii",
+              "kind": "tf",
+              "label": {
+                "en": "ii. Is it valid?",
+                "ro": "ii. Este validă?"
+              },
+              "formula": "false",
+              "expected": "false"
+            },
+            {
+              "id": "iir",
+              "kind": "choice",
+              "label": {
+                "en": "ii. Why?",
+                "ro": "ii. De ce?"
+              },
+              "options": [
+                {
+                  "en": "the sum is not 1",
+                  "ro": "suma nu este 1"
+                },
+                {
+                  "en": "a value is negative",
+                  "ro": "o valoare este negativă"
+                }
+              ],
+              "formula": "'a value is negative'",
+              "expected": "a value is negative"
+            },
+            {
+              "id": "iii",
+              "kind": "tf",
+              "label": {
+                "en": "iii. Is it valid?",
+                "ro": "iii. Este validă?"
+              },
+              "formula": "true",
+              "expected": "true"
+            },
+            {
+              "id": "c",
+              "kind": "frac",
+              "label": {
+                "en": "iv. $c$, as a fraction",
+                "ro": "iv. $c$, ca fracție"
+              },
+              "formula": "1/(1+2+3)",
+              "expected": "1/6"
+            },
+            {
+              "id": "p3",
+              "kind": "frac",
+              "label": {
+                "en": "iv. $P(X=3)$, as a fraction",
+                "ro": "iv. $P(X=3)$, ca fracție"
+              },
+              "formula": "3/(1+2+3)",
+              "expected": "1/2"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "c",
+              "formula": "1+2+3",
+              "message": {
+                "en": "Reversed: $c\\cdot(1+2+3)=1$ gives $c$ as one over that sum.",
+                "ro": "Ai inversat: din $c\\cdot(1+2+3)=1$ rezultă $c$ ca unu supra această sumă."
+              }
+            },
+            {
+              "field": "p3",
+              "formula": "3",
+              "message": {
+                "en": "$P(X=3)=3c$: multiply by the $c$ you found at iv.",
+                "ro": "$P(X=3)=3c$: înmulțește cu valoarea lui $c$ găsită la iv."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "A probability mass function needs two things: $p(x)\\ge0$ for every value, and the values add up to 1.",
+              "ro": "O funcție masă de probabilitate cere două lucruri: $p(x)\\ge0$ pentru fiecare valoare, iar suma valorilor este 1."
+            },
+            {
+              "en": "Check the sign of each value first, then the sum.",
+              "ro": "Verifică pe rând semnul fiecărei valori, apoi suma."
+            },
+            {
+              "en": "At iv: $c\\cdot1+c\\cdot2+c\\cdot3=6c$ must be 1.",
+              "ro": "La iv: $c\\cdot1+c\\cdot2+c\\cdot3=6c$ trebuie să fie 1."
+            }
+          ],
+          "solution": {
+            "en": "i. All values are in $[0,1]$, but the sum is $1.1$: **not** valid. ii. The sum is $0.6-0.1+0.5=1$, but $p(2)<0$: **not** valid. iii. The values are non-negative and add up to 1: **valid**. iv. $6c=1$, so $c=\\frac16$, and the values $\\frac16,\\frac26,\\frac36$ are non-negative; $P(X=3)=\\frac36=\\frac12$. A probability mass function needs both conditions.",
+            "ro": "i. Toate valorile sunt în $[0,1]$, dar suma este $1{,}1$: **nu** este validă. ii. Suma este $0{,}6-0{,}1+0{,}5=1$, dar $p(2)<0$: **nu** este validă. iii. Valorile sunt nenegative și suma este 1: **validă**. iv. $6c=1$, deci $c=\\frac16$, iar valorile $\\frac16,\\frac26,\\frac36$ sunt nenegative; $P(X=3)=\\frac36=\\frac12$. O funcție masă de probabilitate cere ambele condiții."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "$X$ takes the values 1, 2, 3. For each definition, say whether it is a valid probability mass function and why. **i.** $p(1)=0.4$, $p(2)=0.4$, $p(3)=0.3$. **ii.** $p(1)=0.7$, $p(2)=-0.2$, $p(3)=0.5$. **iii.** $p(1)=0.1$, $p(2)=0.6$, $p(3)=0.3$. **iv.** $p(x)=c\\cdot x^2$ for $x\\in\\{1,2,3\\}$: what must $c$ be, and what is $P(X=3)$ then? Answer iv as fractions.",
+                "ro": "$X$ ia valorile 1, 2, 3. Pentru fiecare definiție spune dacă este o funcție masă de probabilitate validă și de ce. **i.** $p(1)=0{,}4$, $p(2)=0{,}4$, $p(3)=0{,}3$. **ii.** $p(1)=0{,}7$, $p(2)=-0{,}2$, $p(3)=0{,}5$. **iii.** $p(1)=0{,}1$, $p(2)=0{,}6$, $p(3)=0{,}3$. **iv.** $p(x)=c\\cdot x^2$ pentru $x\\in\\{1,2,3\\}$: cât trebuie să fie $c$ și cât este atunci $P(X=3)$? La iv răspunde ca fracții."
+              },
+              "fields": [
+                {
+                  "id": "i",
+                  "formula": "0.4+0.4+0.3 == 1",
+                  "expected": "false"
+                },
+                {
+                  "id": "ir",
+                  "formula": "'the sum is not 1'",
+                  "expected": "the sum is not 1"
+                },
+                {
+                  "id": "ii",
+                  "formula": "false",
+                  "expected": "false"
+                },
+                {
+                  "id": "iir",
+                  "formula": "'a value is negative'",
+                  "expected": "a value is negative"
+                },
+                {
+                  "id": "iii",
+                  "formula": "true",
+                  "expected": "true"
+                },
+                {
+                  "id": "c",
+                  "formula": "1/(1+4+9)",
+                  "expected": "1/14"
+                },
+                {
+                  "id": "p3",
+                  "formula": "9/(1+4+9)",
+                  "expected": "9/14"
+                }
+              ],
+              "hints": [
+                {
+                  "en": "Check the sign of each value, then the sum.",
+                  "ro": "Verifică semnul fiecărei valori, apoi suma."
+                },
+                {
+                  "en": "At iv the values are $c$, $4c$ and $9c$.",
+                  "ro": "La iv valorile sunt $c$, $4c$ și $9c$."
+                },
+                {
+                  "en": "$c+4c+9c=14c$ must be 1.",
+                  "ro": "$c+4c+9c=14c$ trebuie să fie 1."
+                }
+              ],
+              "solution": {
+                "en": "i. The sum is $1.1$: not valid. ii. $p(2)=-0.2<0$: not valid. iii. Non-negative and the sum is 1: valid. iv. $14c=1$, so $c=\\frac{1}{14}$ and $P(X=3)=\\frac{9}{14}$.",
+                "ro": "i. Suma este $1{,}1$: nu este validă. ii. $p(2)=-0{,}2<0$: nu este validă. iii. Nenegative și suma este 1: validă. iv. $14c=1$, deci $c=\\frac{1}{14}$ și $P(X=3)=\\frac{9}{14}$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s27",
+      "title": {
+        "en": "Optional: the Poisson distribution (not on the test)",
+        "ro": "Opțional: distribuția Poisson (nu e pe test)"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c7",
+          "exercise": "0.27",
+          "status": "book",
+          "data": {
+            "lambda": 2
+          },
+          "statement": {
+            "en": "Optional exercise, with a rarely used distribution. The Poisson distribution has $p(x\\mid\\lambda)=\\dfrac{1}{e^{\\lambda}}\\dfrac{\\lambda^x}{x!}$ for $x\\in\\{0,1,2,\\dots\\}$ (with $0!=1$; $x!$ is $1\\cdot2\\cdots x$). It can be shown to be a p.m.f. (hint: $\\sum_{x\\ge0}\\lambda^x/x!=e^\\lambda$). What is the mean? What is the variance? Numerically, for $\\lambda=2$, what is the variance? Answer with a number (with decimals, if needed).",
+            "ro": "Exercițiu opțional, cu o distribuție folosită rar. Distribuția Poisson are $p(x\\mid\\lambda)=\\dfrac{1}{e^{\\lambda}}\\dfrac{\\lambda^x}{x!}$ pentru $x\\in\\{0,1,2,\\dots\\}$ (cu $0!=1$; $x!$ este $1\\cdot2\\cdots x$). Se poate arăta că este o p.m.f. (sugestie: $\\sum_{x\\ge0}\\lambda^x/x!=e^\\lambda$). Care este media? Care este varianța? Numeric, pentru $\\lambda=2$, cât este varianța? Răspunde cu un număr (cu zecimale, dacă e cazul)."
+          },
+          "fields": [
+            {
+              "id": "m",
+              "kind": "choice",
+              "label": {
+                "en": "The mean",
+                "ro": "Media"
+              },
+              "options": [
+                {
+                  "en": "λ",
+                  "ro": "λ"
+                },
+                {
+                  "en": "λ²",
+                  "ro": "λ²"
+                },
+                {
+                  "en": "1/λ",
+                  "ro": "1/λ"
+                }
+              ],
+              "formula": "'λ'",
+              "expected": "λ"
+            },
+            {
+              "id": "v",
+              "kind": "choice",
+              "label": {
+                "en": "The variance",
+                "ro": "Varianța"
+              },
+              "options": [
+                {
+                  "en": "λ",
+                  "ro": "λ"
+                },
+                {
+                  "en": "λ² + λ",
+                  "ro": "λ² + λ"
+                },
+                {
+                  "en": "λ²",
+                  "ro": "λ²"
+                }
+              ],
+              "formula": "'λ'",
+              "expected": "λ"
+            },
+            {
+              "id": "vn",
+              "kind": "num",
+              "label": {
+                "en": "The variance, numerically",
+                "ro": "Varianța, numeric"
+              },
+              "formula": "lambda",
+              "expected": 2
+            }
+          ],
+          "detectors": [
+            {
+              "field": "vn",
+              "formula": "lambda^2+lambda",
+              "message": {
+                "en": "$\\lambda^2+\\lambda$ is $E[X^2]$. The variance is $E[X^2]-(E[X])^2$, so it comes out as $\\lambda$.",
+                "ro": "$\\lambda^2+\\lambda$ este $E[X^2]$. Varianța este $E[X^2]-(E[X])^2$, deci iese $\\lambda$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Cancel $x$ in $x/x!$ to get the mean; then shift the index to $x-1$.",
+              "ro": "Șterge $x$ din $x/x!$ ca să obții media; apoi schimbă indicele cu $x-1$."
+            },
+            {
+              "en": "For the variance: $E[X^2]=E[X(X-1)]+E[X]$.",
+              "ro": "Pentru varianță: $E[X^2]=E[X(X-1)]+E[X]$."
+            },
+            {
+              "en": "$E[X]=\\lambda$, $E[X^2]=\\lambda^2+\\lambda$, so $\\mathrm{Var}=\\lambda^2+\\lambda-\\lambda^2=\\lambda$.",
+              "ro": "$E[X]=\\lambda$, $E[X^2]=\\lambda^2+\\lambda$, deci $\\mathrm{Var}=\\lambda^2+\\lambda-\\lambda^2=\\lambda$."
+            }
+          ],
+          "solution": {
+            "en": "$p>0$ and $\\frac1{e^\\lambda}\\sum\\frac{\\lambda^x}{x!}=1$, so it is a p.m.f. The mean: $\\sum x\\frac{\\lambda^x}{e^\\lambda x!}=\\frac{\\lambda}{e^\\lambda}\\sum_{x\\ge1}\\frac{\\lambda^{x-1}}{(x-1)!}=\\lambda$. For $E[X^2]$ we write $x^2=x(x-1)+x$ and get $\\lambda^2+\\lambda$; $\\mathrm{Var}=\\lambda^2+\\lambda-\\lambda^2=\\lambda$.",
+            "ro": "$p>0$ și $\\frac1{e^\\lambda}\\sum\\frac{\\lambda^x}{x!}=1$, deci e o p.m.f. Media: $\\sum x\\frac{\\lambda^x}{e^\\lambda x!}=\\frac{\\lambda}{e^\\lambda}\\sum_{x\\ge1}\\frac{\\lambda^{x-1}}{(x-1)!}=\\lambda$. Pentru $E[X^2]$ scriem $x^2=x(x-1)+x$ și obținem $\\lambda^2+\\lambda$; $\\mathrm{Var}=\\lambda^2+\\lambda-\\lambda^2=\\lambda$."
+          },
+          "variants": [
+            {
+              "data": {
+                "lambda": 5
+              },
+              "statement": {
+                "en": "Optional exercise, with a rarely used distribution. The Poisson distribution has $p(x\\mid\\lambda)=\\dfrac{1}{e^{\\lambda}}\\dfrac{\\lambda^x}{x!}$ for $x\\in\\{0,1,2,\\dots\\}$ (with $0!=1$; $x!$ is $1\\cdot2\\cdots x$). What is the mean? What is the variance? Numerically, for $\\lambda=5$, what is the variance? Answer with a number (with decimals, if needed).",
+                "ro": "Exercițiu opțional, cu o distribuție folosită rar. Distribuția Poisson are $p(x\\mid\\lambda)=\\dfrac{1}{e^{\\lambda}}\\dfrac{\\lambda^x}{x!}$ pentru $x\\in\\{0,1,2,\\dots\\}$ (cu $0!=1$; $x!$ este $1\\cdot2\\cdots x$). Care este media? Care este varianța? Numeric, pentru $\\lambda=5$, cât este varianța? Răspunde cu un număr (cu zecimale, dacă e cazul)."
+              },
+              "fields": [
+                {
+                  "id": "m",
+                  "formula": "'λ'",
+                  "expected": "λ"
+                },
+                {
+                  "id": "v",
+                  "formula": "'λ'",
+                  "expected": "λ"
+                },
+                {
+                  "id": "vn",
+                  "formula": "lambda",
+                  "expected": 5
+                }
+              ],
+              "solution": {
+                "en": "The mean and the variance both equal $\\lambda$; for $\\lambda=5$ the variance is 5.",
+                "ro": "Media și varianța sunt egale cu $\\lambda$; pentru $\\lambda=5$ varianța este 5."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l04-s28",
+      "title": {
+        "en": "Optional: the first 6 (not on the test)",
+        "ro": "Opțional: prima față 6 (nu e pe test)"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l04-c8",
+          "exercise": "0.28",
+          "status": "book",
+          "statement": {
+            "en": "Optional exercise (the geometric distribution). What is the average number of throws of a fair die until the face 6 appears? Justify and write the number (with decimals, if needed).",
+            "ro": "Exercițiu opțional (distribuția geometrică). Care este numărul mediu de aruncări ale unui zar corect până când apare fața 6? Justifică și scrie numărul (cu zecimale, dacă e cazul)."
+          },
+          "fields": [
+            {
+              "id": "e",
+              "kind": "num",
+              "label": {
+                "en": "The average number of throws",
+                "ro": "Numărul mediu de aruncări"
+              },
+              "formula": "1/(1/6)",
+              "expected": 6
+            }
+          ],
+          "detectors": [
+            {
+              "field": "e",
+              "formula": "7/2",
+              "message": {
+                "en": "3.5 is the mean of a single throw. Here we count the throws until the first 6, which are on average more.",
+                "ro": "3,5 este media unei singure aruncări. Aici numărăm aruncările până la prima față 6, care sunt în medie mai multe."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "The probability that the first 6 appears on throw $n$ is $\\frac16\\left(\\frac56\\right)^{n-1}$.",
+              "ro": "Probabilitatea ca prima față 6 să apară la aruncarea $n$ este $\\frac16\\left(\\frac56\\right)^{n-1}$."
+            },
+            {
+              "en": "$E=\\sum_n n\\cdot\\frac16\\left(\\frac56\\right)^{n-1}$; write $n=1+(n-1)$.",
+              "ro": "$E=\\sum_n n\\cdot\\frac16\\left(\\frac56\\right)^{n-1}$; scrie $n=1+(n-1)$."
+            },
+            {
+              "en": "This gives $E=\\frac16+\\frac56\\cdot1+\\frac56E$.",
+              "ro": "Rezultă $E=\\frac16+\\frac56\\cdot1+\\frac56E$."
+            }
+          ],
+          "solution": {
+            "en": "$E=\\frac16+\\frac56+\\frac56E$ (the sum of the probabilities is 1, and the shifted sum is again $E$), so $\\frac16E=\\frac16+\\frac56$ and $E=6$.",
+            "ro": "$E=\\frac16+\\frac56+\\frac56E$ (suma probabilităților este 1, iar suma deplasată este tot $E$), deci $\\frac16E=\\frac16+\\frac56$ și $E=6$."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Optional exercise (the geometric distribution). What is the average number of tosses of a coin with $P(H)=\\frac14$ until the first head appears? Justify and write the number (with decimals, if needed).",
+                "ro": "Exercițiu opțional (distribuția geometrică). Care este numărul mediu de aruncări ale unei monede cu $P(H)=\\frac14$ până când apare prima stemă? Justifică și scrie numărul (cu zecimale, dacă e cazul)."
+              },
+              "fields": [
+                {
+                  "id": "e",
+                  "formula": "1/(1/4)",
+                  "expected": 4
+                }
+              ],
+              "solution": {
+                "en": "$E=\\frac14+\\frac34+\\frac34E$, so $\\frac14E=1$ and $E=4$.",
+                "ro": "$E=\\frac14+\\frac34+\\frac34E$, deci $\\frac14E=1$ și $E=4$."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

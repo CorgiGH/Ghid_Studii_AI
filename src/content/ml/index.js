@@ -17,6 +17,7 @@ const ml = {
     { id: "ml-l01", title: {"en":"Lesson 1: Probability, conditional probability, the multiplication rule","ro":"Lecția 1: Probabilitate, probabilitate condiționată, regula de înmulțire"}, shortTitle: {"en":"L1: Probability","ro":"L1: Probabilitate"}, sectionCount: 27, metaId: "ml-l01", src: "ml/courses/lesson-01.json" },
     { id: "ml-l02", title: {"en":"Lesson 2: Total probability and Bayes' formula","ro":"Lecția 2: Probabilitatea totală și formula lui Bayes"}, shortTitle: {"en":"L2: Total and Bayes","ro":"L2: Totală și Bayes"}, sectionCount: 19, metaId: "ml-l02", src: "ml/courses/lesson-02.json" },
     { id: "ml-l03", title: {"en":"Lesson 3: Independence of events and conditional independence","ro":"Lecția 3: Independența evenimentelor și independența condiționată"}, shortTitle: {"en":"L3: Independence","ro":"L3: Independența"}, sectionCount: 26, metaId: "ml-l03", src: "ml/courses/lesson-03.json" },
+    { id: "ml-l04", title: {"en":"Lesson 4: Discrete random variables: distribution, mean, variance; Bernoulli and binomial","ro":"Lecția 4: Variabile aleatoare discrete: distribuție, medie, varianță; Bernoulli și binomială"}, shortTitle: {"en":"L4: Random variables","ro":"L4: Variabile aleatoare"}, sectionCount: 30, metaId: "ml-l04", src: "ml/courses/lesson-04.json" },
   ],
   seminars: [],
   labs: [],
