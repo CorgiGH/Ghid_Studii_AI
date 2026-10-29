@@ -78,7 +78,7 @@ export function Indep2x2Body({ props, stepper }) {
           )}
           {f.marks.some((m) => m.id === 'verdict') && (
             <span className="mlw-stat key" data-mark="verdict" data-value={f.marks.find((m) => m.id === 'verdict').value}>
-              <b>{f.marks.find((m) => m.id === 'verdict').value === 'independent' ? t('independent', 'independente') : t('dependent', 'dependente')}</b>
+              <b>{t(f.verdictLabel.en, f.verdictLabel.ro)}</b>
             </span>
           )}
         </div>
