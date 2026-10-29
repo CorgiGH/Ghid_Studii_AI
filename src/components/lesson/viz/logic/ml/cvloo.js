@@ -74,10 +74,16 @@ export function mlCvloo({ table, target, tie = 'class0', continuous = [] }) {
     ? bi(` Careful: with the columns in the other order the same data give ${alt}/${n}; a tie between two attributes goes to the first column, so the order must be stated.`,
       ` Atenție: cu coloanele în ordine inversă aceleași date dau ${alt}/${n}; la egalitate între două atribute câștigă prima coloană, deci ordinea trebuie spusă.`)
     : bi('', '');
+  // the wrong rows; with one continuous attribute each also gives its value (4.10: X = 8, 8.5, 9)
+  const one = attrs.length === 1 && continuous.includes(attrs[0]) ? attrs[0] : null;
+  const rowName = (r) => (one ? `${r} (${one} = ${table.rows[r - 1][names.indexOf(one)]})` : String(r));
+  const andList = (xs, and) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} ${and} ${xs[xs.length - 1]}` : xs[0]);
+  const wrongEn = !wrongRows.length ? '' : wrongRows.length === 1 ? ` (row ${rowName(wrongRows[0])} is predicted wrong)` : ` (rows ${andList(wrongRows.map(rowName), 'and')} are predicted wrong)`;
+  const wrongRo = !wrongRows.length ? '' : wrongRows.length === 1 ? ` (rândul ${rowName(wrongRows[0])} e prezis greșit)` : ` (rândurile ${andList(wrongRows.map(rowName), 'și')} sunt prezise greșit)`;
   frames.push({
     kind: 'end', n, errors, trainErr, alt: altNote ? alt : null, wrongRows, tree: full.tree,
-    caption: bi(`CVLOO error: ${errors}/${n}${wrongRows.length ? ` (rows ${wrongRows.join(', ')} are predicted wrong)` : ''}. Training error was ${trainErr}/${n}: the training error does not take the row out before predicting it.${tail.en}`,
-      `Eroarea CVLOO: ${errors}/${n}${wrongRows.length ? ` (rândurile ${wrongRows.join(', ')} sunt prezise greșit)` : ''}. Eroarea la antrenare a fost ${trainErr}/${n}: la antrenare rândul nu e scos înainte de a fi prezis.${tail.ro}`),
+    caption: bi(`CVLOO error: ${errors}/${n}${wrongEn}. Training error was ${trainErr}/${n}: the training error does not take the row out before predicting it.${tail.en}`,
+      `Eroarea CVLOO: ${errors}/${n}${wrongRo}. Eroarea la antrenare a fost ${trainErr}/${n}: la antrenare rândul nu e scos înainte de a fi prezis.${tail.ro}`),
   });
 
   const single = attrs.length === 1 && continuous.includes(attrs[0]) ? attrs[0] : null;

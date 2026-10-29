@@ -235,3 +235,35 @@ describe('ml-prune component', () => {
     expect(html).toContain('data-mark="eps" data-value="0.9"');
   });
 });
+
+describe('review fixes', () => {
+  const P = mlPrune(T21);
+  const Q = mlPrune(E419);
+  it('the Romanian uses the lesson terms top-down and bottom-up (outline L16), not a fresh translation', () => {
+    for (const f of [...P.frames, ...Q.frames]) {
+      expect(f.caption.ro).not.toMatch(/[Dd]e sus în jos|[Dd]e jos în sus|sus-jos|jos-sus/);
+    }
+    expect(P.frames[1].caption.ro).toMatch(/^Top-down: /);
+    expect(P.frames[2].caption.ro).toMatch(/^Bottom-up: /);
+    expect(P.frames[3].caption.ro).toContain('Top-down păstrează 1 din 4 teste, bottom-up 3.');
+    expect(Q.frames[3].caption.ro).toContain('Eroarea la antrenare: top-down 2/5, bottom-up 0/5.');
+  });
+  it('the compare table and the counts under it use the same terms', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/Prune.jsx');
+    const html = renderToStaticMarkup(React.createElement(Stage, { P, frame: P.frames[3] }));
+    expect(html).not.toMatch(/sus-jos|jos-sus/);
+    expect(html).toContain('<th>top-down</th><th>bottom-up</th>');
+    expect(html).toContain('mlw4-cmp');
+  });
+  it('two tests with the same name below a cut are counted, not listed twice', () => {
+    expect(Q.frames[1].caption.en).toContain('V (X = 0), IG 0, with two W tests below it');
+    expect(Q.frames[1].caption.ro).toContain('V (X = 0), IG 0, cu două teste W sub el');
+    expect(mlPrune({ ...T21, epsilon: 0.95 }).frames[1].caption.ro).toContain('B, IG 0.3, cu două teste A și C sub el');
+    expect(P.frames[1].caption.ro).toContain('A (B = 1), IG 0.02, cu C sub el');
+  });
+  it('the compare table lets its first column wrap so its four columns fit a phone', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/ml-w4.css', import.meta.url), 'utf8');
+    expect(css).toMatch(/\.mlw4-cmp td:first-child \{[^}]*white-space: normal/);
+  });
+});

@@ -11,6 +11,8 @@ const test = (c) => `${c.attr} ≤ ${fmt(c.th)}`;
 export const candKey = (c) => `${c.attr}@${fmt(c.th)}`;
 
 const sideText = (conds) => conds.map((c) => `${c.attr} ${c.op} ${fmt(c.th)}`).join(', ');
+// an interval of the axis: (−∞, 54], (54, 85], (85, ∞)
+export const intervalText = ([lo, hi]) => `(${lo === -Infinity ? '−∞' : fmt(lo)}, ${hi === Infinity ? '∞)' : `${fmt(hi)}]`}`;
 
 // Every internal node in the order the tree is grown level by level, with the region of the plane it covers.
 function internalNodes(root, plane) {
@@ -102,14 +104,23 @@ export function mlThreshold({ table, attr, target, plane }) {
     const h = Hcol(sub(table, n.ids), target);
     const best = cands.find((c) => c.best);
     const tail = (en, ro) => (tied ? bi(`${en} Another test has the same IG; the first one in the order is kept.`, `${ro} Un alt test are același IG; se păstrează primul în ordine.`) : bi(en, ro));
+    // in the plane two columns share a value (X1 <= 2.5 and X2 <= 2.5), so the list names the column
+    const candList = cands.map((c) => (plane ? test(c) : fmt(c.th))).join(', ');
     const head = nd.id === 0
       ? bi(`Root: ${n.ids.length} points ${ct(n.counts)}, H = ${fmt(h)}.`, `Rădăcina: ${n.ids.length} puncte ${ct(n.counts)}, H = ${fmt(h)}.`)
-      : bi(`Node where ${sideText(nd.conds)}: ${n.ids.length} points ${ct(n.counts)}, H = ${fmt(h)}. Thresholds are recomputed from these points only: ${cands.map((c) => fmt(c.th)).join(', ')}.`,
-        `Nodul în care ${sideText(nd.conds)}: ${n.ids.length} puncte ${ct(n.counts)}, H = ${fmt(h)}. Pragurile se recalculează doar din aceste puncte: ${cands.map((c) => fmt(c.th)).join(', ')}.`);
+      : bi(`Node where ${sideText(nd.conds)}: ${n.ids.length} points ${ct(n.counts)}, H = ${fmt(h)}. Thresholds are recomputed from these points only: ${candList}.`,
+        `Nodul în care ${sideText(nd.conds)}: ${n.ids.length} puncte ${ct(n.counts)}, H = ${fmt(h)}. Pragurile se recalculează doar din aceste puncte: ${candList}.`);
     const win = tail(`Best test: ${test(best)}, IG ${fmt(best.ig)}${runner ? ` (next: ${test(runner)}, IG ${fmt(runner.ig)})` : ''}.`,
       `Cel mai bun test: ${test(best)}, IG ${fmt(best.ig)}${runner ? ` (următorul: ${test(runner)}, IG ${fmt(runner.ig)})` : ''}.`);
+    // a node below the root with a choice to make asks for the winner before its IG and its line show (the root is asked on the setup frame)
+    const ask = nd.id > 0 && cands.length >= 2
+      ? {
+        options: cands.map((c) => ({ key: c.key, th: c.th, label: bi(test(c), test(c)) })),
+        caption: bi(`${head.en} Which test has the largest IG here? Pick one, or press Show me.`, `${head.ro} Care test are cel mai mare IG aici? Alege unul sau apasă Arată-mi.`),
+      }
+      : undefined;
     return {
-      kind: 'node', id: nd.id, n: n.ids.length, counts: n.counts, h, cands, best, region: nd.region, conds: nd.conds, showIG: true, lines,
+      kind: 'node', id: nd.id, n: n.ids.length, counts: n.counts, h, cands, best, region: nd.region, conds: nd.conds, showIG: true, lines, ask,
       caption: bi(`${head.en} ${win.en}`, `${head.ro} ${win.ro}`),
     };
   };
@@ -125,11 +136,17 @@ export function mlThreshold({ table, attr, target, plane }) {
     const above = points.filter((p) => p.x > trial);
     const cnt = (ps) => classes.map((c) => ps.filter((p) => p.label === c).length);
     const ig = IG(table, attr, target, { threshold: trial });
+    const b = rootFrame.best;
     frames.push({
-      kind: 'contrast', n: points.length, trial: { ...st, ig, left: cnt(below), right: cnt(above) }, best: rootFrame.best, showIG: true,
+      kind: 'contrast', n: points.length, trial: { ...st, ig, left: cnt(below), right: cnt(above) }, best: b, showIG: true,
       lines: [boundaryOf(root)], cands: rootFrame.cands, region: root.region,
-      caption: bi(`A threshold inside a run of one label, ${test(st)}: ${ct(cnt(below))} and ${ct(cnt(above))}, IG ${fmt(ig)}. Far below ${fmt(rootFrame.best.ig)}, the IG of ${test(rootFrame.best)}: inside a run a test cannot beat the label change at its end.`,
-        `Un prag în interiorul unui șir cu aceeași etichetă, ${test(st)}: ${ct(cnt(below))} și ${ct(cnt(above))}, IG ${fmt(ig)}. Mult sub ${fmt(rootFrame.best.ig)}, IG-ul lui ${test(rootFrame.best)}: în interiorul unui șir un test nu poate întrece schimbarea de etichetă de la capătul lui.`),
+      ask: {
+        options: [{ key: 'lower', label: bi(`smaller than ${fmt(b.ig)}`, `mai mic decât ${fmt(b.ig)}`) }, { key: 'higher', label: bi(`larger than ${fmt(b.ig)}`, `mai mare decât ${fmt(b.ig)}`) }],
+        caption: bi(`A threshold inside a run of one label: ${test(st)}, with ${ct(cnt(below))} and ${ct(cnt(above))}. Is its IG smaller or larger than ${fmt(b.ig)}, the IG of ${test(b)}?`,
+          `Un prag în interiorul unui șir cu aceeași etichetă: ${test(st)}, cu ${ct(cnt(below))} și ${ct(cnt(above))}. IG-ul lui e mai mic sau mai mare decât ${fmt(b.ig)}, IG-ul lui ${test(b)}?`),
+      },
+      caption: bi(`A threshold inside a run of one label, ${test(st)}: ${ct(cnt(below))} and ${ct(cnt(above))}, IG ${fmt(ig)}, smaller than ${fmt(b.ig)}, the IG of ${test(b)}: inside a run a test cannot beat the label changes at its ends.`,
+        `Un prag în interiorul unui șir cu aceeași etichetă, ${test(st)}: ${ct(cnt(below))} și ${ct(cnt(above))}, IG ${fmt(ig)}, mai mic decât ${fmt(b.ig)}, IG-ul lui ${test(b)}: în interiorul unui șir un test nu poate întrece schimbările de etichetă de la capetele lui.`),
     });
   }
 
@@ -142,7 +159,7 @@ export function mlThreshold({ table, attr, target, plane }) {
     text: l.conds.length ? l.conds.map((c) => `${c.attr} ${c.op} ${fmt(c.th)}`).join(' & ') : '*',
   }));
   const tests = countTests(g.tree);
-  const zoneText = (l) => l.text;
+  const zoneText = (l) => intervalText(l.region.x);
   frames.push({
     kind: 'zones', n: points.length, tests, leaves: lv, showIG: true, lines: nodes.map(boundaryOf), region: nodes[0]?.region,
     caption: plane
@@ -155,13 +172,27 @@ export function mlThreshold({ table, attr, target, plane }) {
   return { frames, points, classes, attrs, plane: !!plane, tests, leaves: lv, root: rootFrame, tree: g.tree, countsText: ct, nodes: nodes.length };
 }
 
-// What the learner's pick was worth (null before a pick or after a skip).
+// What the learner's pick was worth (null before a pick or after a skip). The root's pick is made on the setup frame and
+// read on the root's frame; a later node or the inside-run threshold is asked on its own frame (frame.ask).
 export function guessNote(frame, guess) {
-  if (!guess || frame.kind !== 'node' || frame.id !== 0) return null;
+  if (!guess) return null;
+  if (frame.kind === 'contrast') {
+    const { trial, best } = frame;
+    const right = trial.ig < best.ig - TIE ? 'lower' : trial.ig > best.ig + TIE ? 'higher' : null;
+    const said = (g) => bi(g === 'lower' ? 'smaller' : 'larger', g === 'lower' ? 'mai mic' : 'mai mare');
+    if (right === null) return bi(`IG ${fmt(trial.ig)} equals ${fmt(best.ig)}.`, `IG ${fmt(trial.ig)} e egal cu ${fmt(best.ig)}.`);
+    if (guess === right) return bi(`You said ${said(guess).en}: right.`, `Ai spus ${said(guess).ro}: corect.`);
+    return bi(`You said ${said(guess).en}; it is ${said(right).en}: ${fmt(trial.ig)} against ${fmt(best.ig)}.`, `Ai spus ${said(guess).ro}; e ${said(right).ro}: ${fmt(trial.ig)} față de ${fmt(best.ig)}.`);
+  }
+  if (frame.kind !== 'node' || (frame.id !== 0 && !frame.ask)) return null;
   const picked = frame.cands.find((c) => c.key === guess);
   if (!picked) return null;
   const best = frame.best;
   if (picked.key === best.key) return bi(`You picked ${test(picked)}: right.`, `Ai ales ${test(picked)}: corect.`);
+  if (Math.abs(picked.ig - best.ig) < TIE) {
+    return bi(`You picked ${test(picked)}: right, it has the same IG as ${test(best)}, ${fmt(best.ig)}; the first in order is kept.`,
+      `Ai ales ${test(picked)}: corect, are același IG ca ${test(best)}, ${fmt(best.ig)}; se păstrează primul în ordine.`);
+  }
   return bi(`You picked ${test(picked)}, IG ${fmt(picked.ig)}; the largest is ${test(best)}, IG ${fmt(best.ig)}.`,
     `Ai ales ${test(picked)}, IG ${fmt(picked.ig)}; cel mai mare e ${test(best)}, IG ${fmt(best.ig)}.`);
 }

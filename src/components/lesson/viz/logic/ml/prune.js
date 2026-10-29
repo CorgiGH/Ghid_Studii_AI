@@ -139,16 +139,30 @@ export function mlPrune(props) {
   const frames = [];
   frames.push({
     kind: 'setup', status: stAll, removed: none, tests: nTests, err: trainErrors(A, none), eps,
-    caption: bi(`The tree has ${nTests} test nodes, with the IG of each written on it. The threshold is ε = ${fmt(eps)}: a test with IG below ε is a candidate to be cut. Which nodes remain going top-down from the root? And going bottom-up?${A.table ? ` The training error of this tree is ${trainErrors(A, none)}/${n}.` : ''}`,
-      `Arborele are ${nTests} noduri de test, cu IG-ul fiecăruia scris pe el. Pragul este ε = ${fmt(eps)}: un test cu IG sub ε e candidat la tăiere. Ce noduri rămân mergând de sus în jos de la rădăcină? Dar de jos în sus?${A.table ? ` Eroarea la antrenare a acestui arbore este ${trainErrors(A, none)}/${n}.` : ''}`),
+    caption: bi(`The tree has ${nTests} test nodes, with the IG of each written on it. The threshold is ε = ${fmt(eps)}: a test with IG below ε is a candidate to be cut. Which nodes remain with top-down pruning, from the root down? And with bottom-up?${A.table ? ` The training error of this tree is ${trainErrors(A, none)}/${n}.` : ''}`,
+      `Arborele are ${nTests} noduri de test, cu IG-ul fiecăruia scris pe el. Pragul este ε = ${fmt(eps)}: un test cu IG sub ε e candidat la tăiere. Ce noduri rămân la pruning-ul top-down, de la rădăcină în jos? Dar la bottom-up?${A.table ? ` Eroarea la antrenare a acestui arbore este ${trainErrors(A, none)}/${n}.` : ''}`),
   });
 
   const belowOf = (c, st) => T.filter((x) => st[x.id] === 'gone' && x.conds.length > c.conds.length && c.conds.every((cc, i) => x.conds[i].attr === cc.attr && x.conds[i].value === cc.value)).map((x) => x.attr);
   const cutsText = (st) => {
     const cuts = cutTests(st);
     if (!cuts.length) return bi('Nothing is cut.', 'Nu se taie nimic.');
-    const en = list(cuts.map((c) => { const b = belowOf(c, st); return b.length ? `${name(c)}, with ${b.join(', ')} below it` : name(c); }));
-    const ro = list(cuts.map((c) => { const b = belowOf(c, st); return b.length ? `${name(c)}, cu ${b.join(', ')} sub el` : name(c); }));
+    // the tests under a cut, a repeated name said once with its count in words (4.19: two W tests under V)
+    const WORDS = { en: [null, null, 'two', 'three', 'four'], ro: [null, null, 'două', 'trei', 'patru'] };
+    const under = (c, lang) => {
+      const b = belowOf(c, st);
+      if (!b.length) return name(c);
+      const groups = [...new Set(b)].map((x) => {
+        const k = b.filter((y) => y === x).length;
+        if (k === 1) return x;
+        const w = WORDS[lang][k] || String(k);
+        return lang === 'en' ? `${w} ${x} tests` : `${w} teste ${x}`;
+      });
+      const l = list(groups);
+      return lang === 'en' ? `${name(c)}, with ${l.en} below it` : `${name(c)}, cu ${l.ro} sub el`;
+    };
+    const en = list(cuts.map((c) => under(c, 'en')));
+    const ro = list(cuts.map((c) => under(c, 'ro')));
     return bi(`Cut: ${en.en}.`, `Tăiat: ${ro.ro}.`);
   };
   const cutLabels = (st) => Object.fromEntries(cutTests(st).map((x) => [x.id, majorityLabel(A, x)]));
@@ -158,7 +172,7 @@ export function mlPrune(props) {
   frames.push({
     kind: 'topdown', status: stTD, cutLabels: cutLabels(stTD), removed: td, tests: keptTests(stTD).length, err: eTD, eps,
     caption: bi(`Top-down: from the root, a test with IG below ε = ${fmt(eps)} is replaced at once by a leaf, together with everything below it. ${cutsTD.en} ${keptTests(stTD).length} of ${nTests} tests remain.${errTail(eTD).en}${emptyNote.en}${tieNote(stTD).en}`,
-      `De sus în jos: de la rădăcină, un test cu IG sub ε = ${fmt(eps)} e înlocuit pe loc cu o frunză, împreună cu tot ce e sub el. ${cutsTD.ro} Rămân ${keptTests(stTD).length} din ${nTests} teste.${errTail(eTD).ro}${emptyNote.ro}${tieNote(stTD).ro}`),
+      `Top-down: de la rădăcină în jos, un test cu IG sub ε = ${fmt(eps)} e înlocuit pe loc cu o frunză, împreună cu tot ce e sub el. ${cutsTD.ro} Rămân ${keptTests(stTD).length} din ${nTests} teste.${errTail(eTD).ro}${emptyNote.ro}${tieNote(stTD).ro}`),
   });
 
   const eBU = trainErrors(A, bu);
@@ -172,7 +186,7 @@ export function mlPrune(props) {
   frames.push({
     kind: 'bottomup', status: stBU, cutLabels: cutLabels(stBU), removed: bu, tests: keptTests(stBU).length, err: eBU, keptLow, eps,
     caption: bi(`Bottom-up: start at the parents of the leaves and go up; a test with IG below ε = ${fmt(eps)} goes only if no test below it stays. ${cutsBU.en}${keepEn} ${keptTests(stBU).length} of ${nTests} tests remain.${errTail(eBU).en}${emptyNote.en}${tieNote(stBU).en}`,
-      `De jos în sus: pornești de la părinții frunzelor și urci; un test cu IG sub ε = ${fmt(eps)} se elimină doar dacă niciun test de sub el nu rămâne. ${cutsBU.ro}${keepRo} Rămân ${keptTests(stBU).length} din ${nTests} teste.${errTail(eBU).ro}${emptyNote.ro}${tieNote(stBU).ro}`),
+      `Bottom-up: pornești de la părinții frunzelor și urci; un test cu IG sub ε = ${fmt(eps)} se elimină doar dacă niciun test de sub el nu rămâne. ${cutsBU.ro}${keepRo} Rămân ${keptTests(stBU).length} din ${nTests} teste.${errTail(eBU).ro}${emptyNote.ro}${tieNote(stBU).ro}`),
   });
 
   const onlyBU = T.filter((x) => stBU[x.id] === 'kept' && stTD[x.id] !== 'kept');
@@ -183,13 +197,13 @@ export function mlPrune(props) {
     : `Only bottom-up keeps ${list(onlyBU.map(name)).en}: a test with a small IG can sit above one with a large IG.`;
   const diffRo = sameTree
     ? 'Aici ambele dau același arbore.'
-    : `Doar de jos în sus păstrează ${list(onlyBU.map(name)).ro}: un test cu IG mic poate sta deasupra unuia cu IG mare.`;
-  const errCmp = A.table ? bi(` Training error: top-down ${eTD}/${n}, bottom-up ${eBU}/${n}.`, ` Eroarea la antrenare: de sus în jos ${eTD}/${n}, de jos în sus ${eBU}/${n}.`) : bi('', '');
+    : `Doar bottom-up păstrează ${list(onlyBU.map(name)).ro}: un test cu IG mic poate sta deasupra unuia cu IG mare.`;
+  const errCmp = A.table ? bi(` Training error: top-down ${eTD}/${n}, bottom-up ${eBU}/${n}.`, ` Eroarea la antrenare: top-down ${eTD}/${n}, bottom-up ${eBU}/${n}.`) : bi('', '');
   frames.push({
     kind: 'compare', tdTests: keptTests(stTD).length, buTests: keptTests(stBU).length, same: sameTree, eTD, eBU, eps, tests: nTests,
     rows: T.map((x) => ({ id: x.id, name: nodeName(x), ig: x.ig, td: stTD[x.id] === 'kept', bu: stBU[x.id] === 'kept' })),
     caption: bi(`Top-down keeps ${keptTests(stTD).length} of ${nTests} tests, bottom-up keeps ${keptTests(stBU).length}. ${diffEn}${errCmp.en}`,
-      `De sus în jos se păstrează ${keptTests(stTD).length} din ${nTests} teste, de jos în sus ${keptTests(stBU).length}. ${diffRo}${errCmp.ro}`),
+      `Top-down păstrează ${keptTests(stTD).length} din ${nTests} teste, bottom-up ${keptTests(stBU).length}. ${diffRo}${errCmp.ro}`),
   });
 
   return { frames, A, classes: A.classes, root: A.root, nTests, n, countsText: ct, hasTable: !!A.table };

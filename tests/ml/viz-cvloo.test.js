@@ -202,3 +202,24 @@ describe('ml-cvloo component', () => {
     expect(html).toContain('data-mark="alt" data-value="2"');
   });
 });
+
+describe('review fixes', () => {
+  it('one wrong row is singular in both languages', () => {
+    const W = mlCvloo({ table: THREE, target: 'Y', tie: 'class0' });
+    const end = W.frames[W.frames.length - 1];
+    expect(end.caption.en).toContain('(row 1 is predicted wrong)');
+    expect(end.caption.ro).toContain('(rândul 1 e prezis greșit)');
+  });
+  it('with one continuous attribute the wrong rows also give their value (4.10: X = 8, 8.5, 9)', () => {
+    const W = mlCvloo({ table: P410, target: 'Y', tie: 'class0', continuous: ['X'] });
+    const end = W.frames[W.frames.length - 1];
+    expect(end.caption.en).toContain('(rows 7 (X = 8), 8 (X = 8.5) and 9 (X = 9) are predicted wrong)');
+    expect(end.caption.ro).toContain('(rândurile 7 (X = 8), 8 (X = 8.5) și 9 (X = 9) sunt prezise greșit)');
+  });
+  it('the table box scrolls the left-out row into view (it marks the row it scrolls to)', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/CvLoo.jsx');
+    const W = mlCvloo({ table: P410, target: 'Y', tie: 'class0', continuous: ['X'] });
+    const html = renderToStaticMarkup(React.createElement(Stage, { W, table: P410, frame: W.frames[8] }));
+    expect(html).toContain('data-scroll-to="out"');
+  });
+});

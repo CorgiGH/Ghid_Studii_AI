@@ -218,3 +218,74 @@ describe('ml-threshold component', () => {
     expect([...html.matchAll(/data-mark="boundary" data-value="([^"]*)"/g)].map((m) => m[1])).toEqual(['54', '85']);
   });
 });
+
+describe('review fixes', () => {
+  const temps = mlThreshold({ table: TEMPS, attr: 'Temperature', target: 'Play' });
+  const e448 = mlThreshold({ table: P48, attr: 'X1', target: 'Y', plane: { x: 'X1', y: 'X2' } });
+  const igNums = (f) => f.cands.filter((c) => c.ig !== undefined).map((c) => String(Number(c.ig.toFixed(4))));
+  it('a node after the root with two or more tests asks for the winner before its IG shows (outline L14: predict the winner, then the line is drawn)', () => {
+    const f = e448.frames[2];
+    expect(f.ask.options.map((o) => o.key)).toEqual(['X1@2.5', 'X1@4', 'X2@1.5', 'X2@2.5']);
+    for (const lang of ['en', 'ro']) for (const n of igNums(f)) expect(f.ask.caption[lang]).not.toContain(n);
+    expect(f.ask.caption.ro).toContain('X1 ≤ 2.5, X1 ≤ 4, X2 ≤ 1.5, X2 ≤ 2.5');
+    // a node with one candidate (85 in the temperatures) has nothing to ask
+    expect(temps.frames[3].ask).toBeUndefined();
+  });
+  it('the tie counts as right: X1 <= 4 has the same IG as X1 <= 2.5', () => {
+    const f = e448.frames[2];
+    expect(guessNote(f, 'X1@4').ro).toContain('corect');
+    expect(guessNote(f, 'X1@4').ro).toContain('același IG');
+    expect(guessNote(f, 'X2@1.5').ro).toContain('0.0441');
+  });
+  it('the threshold inside the run asks first whether its IG is smaller or larger (outline C5)', () => {
+    const f = temps.frames[2];
+    expect(f.kind).toBe('contrast');
+    expect(f.ask.options.map((o) => o.key)).toEqual(['lower', 'higher']);
+    expect(f.ask.caption.en).not.toContain('0.0817');
+    expect(f.ask.caption.en).toContain('0.4591');
+    expect(guessNote(f, 'lower').ro).toContain('corect');
+    expect(guessNote(f, 'higher').ro).not.toContain('corect');
+  });
+  it('while it asks, the stage hides the IG of the node and does not draw its line', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/Threshold.jsx');
+    const f = e448.frames[2];
+    const hidden = renderToStaticMarkup(React.createElement(Stage, { W: e448, frame: f, revealed: false, onPick: () => {} }));
+    expect(hidden).not.toContain('data-mark="ig"');
+    expect([...hidden.matchAll(/data-mark="boundary" data-value="([^"]*)"/g)].map((m) => m[1])).toEqual(['3.5']);
+    for (const n of numbers(f.ask.caption.ro)) expect(marks(hidden).has(n), `${n} in ${f.ask.caption.ro}`).toBe(true);
+    const shown = renderToStaticMarkup(React.createElement(Stage, { W: e448, frame: f }));
+    expect([...shown.matchAll(/data-mark="boundary" data-value="([^"]*)"/g)].map((m) => m[1])).toEqual(['3.5', '2.5']);
+    const c = temps.frames[2];
+    const ch = renderToStaticMarkup(React.createElement(Stage, { W: temps, frame: c, revealed: false, onPick: () => {} }));
+    expect(ch).not.toContain('data-value="0.0817"');
+    for (const n of numbers(c.ask.caption.ro)) expect(marks(ch).has(n), `${n} in ${c.ask.caption.ro}`).toBe(true);
+  });
+  it('the zones on the axis read as intervals, as in the outline: (−∞, 54] No, (54, 85] Yes, (85, ∞) No', () => {
+    const z = temps.frames[temps.frames.length - 1];
+    expect(z.caption.ro).toContain('(−∞, 54] → No; (54, 85] → Yes; (85, ∞) → No');
+    expect(z.caption.ro).not.toContain('&');
+  });
+  it('the plane draws the coordinates of its points on the axes', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/Threshold.jsx');
+    const html = renderToStaticMarkup(React.createElement(Stage, { W: e448, frame: e448.frames[0] }));
+    expect([...html.matchAll(/data-mark="tick-x" data-value="([^"]*)"/g)].map((m) => m[1])).toEqual(['1', '2', '3', '4', '5']);
+    expect([...html.matchAll(/data-mark="tick-y" data-value="([^"]*)"/g)].map((m) => m[1])).toEqual(['1', '2', '3', '4']);
+  });
+  it('the inside-run sentence speaks of the label changes at the ends of the run', () => {
+    expect(temps.frames[2].caption.en).toContain('at its ends');
+  });
+});
+
+describe('css of the w4 widgets', () => {
+  it('coloured or muted text uses the ink tokens, never a raw lesson token or the bare muted colour', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/ml-w4.css', import.meta.url), 'utf8');
+    const colours = [...css.matchAll(/(?:^|[;{\s])(?:color|fill):\s*([^;}]+)/g)].map((m) => m[1]).filter((v) => !/none/.test(v));
+    expect(colours.length).toBeGreaterThan(5);
+    for (const c of colours) expect(c).not.toMatch(/var\(--lt-(keep|drop|hint|acc|t\d)\)|--theme-muted-text/);
+    const idx = readFileSync(new URL('../../src/index.css', import.meta.url), 'utf8');
+    for (const k of ['keep', 'drop', 'hint']) expect(idx).toContain(`--ml-${k}-ink: color-mix(in srgb, var(--lt-${k}) 70%, var(--theme-content-text));`);
+    expect(idx).toContain('--ml-muted-ink: color-mix(in srgb, var(--theme-muted-text) 60%, var(--theme-content-text));');
+    expect(css).toMatch(/\.mlw4-plot \{[^}]*max-width/);
+  });
+});

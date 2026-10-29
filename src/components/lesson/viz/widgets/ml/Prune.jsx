@@ -53,9 +53,9 @@ export function Stage({ P, frame, choices = [], onEps = null }) {
       )}
       {frame.kind === 'compare' && (
         <div className="viz-tablewrap">
-          <table className="viz-table mlw4-table">
+          <table className="viz-table mlw4-table mlw4-cmp">
             <thead>
-              <tr><th>{t('Test', 'Test')}</th><th>IG</th><th>{t('top-down', 'sus-jos')}</th><th>{t('bottom-up', 'jos-sus')}</th></tr>
+              <tr><th>{t('Test', 'Test')}</th><th>IG</th><th>top-down</th><th>bottom-up</th></tr>
             </thead>
             <tbody>
               {frame.rows.map((r) => (
@@ -72,8 +72,8 @@ export function Stage({ P, frame, choices = [], onEps = null }) {
       )}
       {frame.kind === 'compare' && (
         <div className="mlw4-stat">
-          <span>{t('top-down keeps', 'sus-jos păstrează')} <b data-mark="td" data-value={frame.tdTests}>{frame.tdTests}</b></span>
-          <span>{t('bottom-up keeps', 'jos-sus păstrează')} <b data-mark="bu" data-value={frame.buTests}>{frame.buTests}</b></span>
+          <span>{t('top-down keeps', 'top-down păstrează')} <b data-mark="td" data-value={frame.tdTests}>{frame.tdTests}</b></span>
+          <span>{t('bottom-up keeps', 'bottom-up păstrează')} <b data-mark="bu" data-value={frame.buTests}>{frame.buTests}</b></span>
           {P.n !== null && <span>{t('training error', 'eroare la antrenare')} <b data-mark="err" data-value={frame.eTD}>{frame.eTD}</b>/<span data-mark="n" data-value={P.n}>{P.n}</span> {t('and', 'și')} <b data-mark="err" data-value={frame.eBU}>{frame.eBU}</b>/{P.n}</span>}
         </div>
       )}

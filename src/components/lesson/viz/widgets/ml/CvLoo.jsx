@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../../../../../contexts/AppContext';
 import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
@@ -34,8 +34,18 @@ function Tree({ node, W, path, revealed, edge }) {
 }
 
 function Rows({ table, out, t }) {
+  // the box shows about six rows: bring the row that is left out into view (4.10 leaves out rows 8-10, below the fold)
+  const box = useRef(null);
+  useEffect(() => {
+    const el = box.current;
+    const row = el && el.querySelector('tr[data-out="true"]');
+    if (!row) return;
+    const r = row.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    if (r.top < b.top || r.bottom > b.bottom) el.scrollTop += r.top - b.top - (b.height - r.height) / 2;
+  }, [out]);
   return (
-    <div className="viz-tablewrap" style={{ maxHeight: '14rem', overflowY: 'auto' }}>
+    <div ref={box} className="viz-tablewrap" style={{ maxHeight: '14rem', overflowY: 'auto' }} data-scroll-to={out !== null && out !== undefined ? 'out' : undefined}>
       <table className="viz-table mlw4-table">
         <thead>
           <tr>

@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { useApp } from '../../../../../contexts/AppContext';
 import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
-import { classMark, guessNote, mlThreshold, plotScale, testLabel } from '../../logic/ml/threshold.js';
+import { classMark, guessNote, intervalText, mlThreshold, plotScale, testLabel } from '../../logic/ml/threshold.js';
 import { fmt } from '../../logic/ml/tree-grow.js';
 import { Counts, Legend, Shape } from './Parts.jsx';
 import './ml-w4.css';
 
-function Plot({ W, frame, t }) {
+function Plot({ W, frame, t, revealed = true }) {
   const plane = W.plane;
   const S = useMemo(() => plotScale(W.points, plane), [W, plane]);
   const { w, h, pad } = S;
@@ -28,9 +28,14 @@ function Plot({ W, frame, t }) {
     const k = plane ? 0 : (stack[p.x] = (stack[p.x] ?? -1) + 1);
     return { p, cx: S.X(p.x), cy: plane ? S.Y(p.y) : h / 2 - k * 15 };
   });
+  // while a node is asked, its own line is not drawn yet
   const lines = frame.kind === 'setup'
     ? frame.cands.map((c) => ({ attr: c.attr, th: c.th, region: { x: [-Infinity, Infinity], y: [-Infinity, Infinity] }, cand: true }))
-    : frame.lines;
+    : frame.lines.filter((b) => revealed || frame.kind !== 'node' || b.node !== frame.id);
+  // the coordinates of the points, on both axes of the plane
+  const ticks = (vs) => [...new Set(vs)].sort((a, b) => a - b);
+  const tx = plane ? ticks(W.points.map((p) => p.x)) : [];
+  const ty = plane ? ticks(W.points.map((p) => p.y)) : [];
   const zones = frame.kind === 'zones' ? W.leaves : [];
   const zoneRect = (l) => {
     const x0 = S.X(l.region.x[0] === -Infinity ? S.domainX[0] : l.region.x[0]);
@@ -73,15 +78,19 @@ function Plot({ W, frame, t }) {
       {showLabels && pos.filter(({ p }, k, arr) => arr.findIndex((q) => q.p.x === p.x) === k).map(({ p, cx }) => (
         <text key={p.i} x={cx} y={h / 2 + 38} textAnchor="middle">{fmt(p.x)}</text>
       ))}
-      {plane && <text x={w - pad} y={h - 6} textAnchor="end">{ax}</text>}
-      {plane && <text x={6} y={pad - 8}>{ay}</text>}
+      {tx.map((v) => <text key={`x${v}`} x={S.X(v)} y={h - pad + 13} textAnchor="middle" data-mark="tick-x" data-value={fmt(v)}>{fmt(v)}</text>)}
+      {ty.map((v) => <text key={`y${v}`} x={pad - 6} y={S.Y(v) + 4} textAnchor="end" data-mark="tick-y" data-value={fmt(v)}>{fmt(v)}</text>)}
+      {plane && <text x={w - 2} y={h - pad + 13} textAnchor="end" className="on">{ax}</text>}
+      {plane && <text x={6} y={pad - 10} className="on">{ay}</text>}
     </svg>
   );
 }
 
-function IgTable({ W, frame, t }) {
+// hideCands: the node's IG values are still to be predicted; hideTrial: the same for the threshold inside the run
+function IgTable({ W, frame, t, hideCands = false, hideTrial = false }) {
   const cl = W.classes;
   const rows = frame.cands;
+  const ig = (v, hide) => (hide ? <td className="num">?</td> : <td className="num" data-mark="ig" data-value={fmt(v)}>{fmt(v)}</td>);
   return (
     <div className="viz-tablewrap">
       <table className="viz-table mlw4-table">
@@ -92,9 +101,9 @@ function IgTable({ W, frame, t }) {
         </thead>
         <tbody>
           {rows.map((c) => (
-            <tr key={c.key} className={c.best ? 'win' : ''}>
+            <tr key={c.key} className={c.best && !hideCands ? 'win' : ''}>
               <td><span data-mark="threshold" data-value={fmt(c.th)}>{testLabel(c)}</span></td>
-              <td className="num" data-mark="ig" data-value={fmt(c.ig)}>{fmt(c.ig)}</td>
+              {ig(c.ig, hideCands)}
               <td className="num"><Counts counts={c.left} classes={cl} /></td>
               <td className="num"><Counts counts={c.right} classes={cl} /></td>
             </tr>
@@ -102,7 +111,7 @@ function IgTable({ W, frame, t }) {
           {frame.kind === 'contrast' && (
             <tr className="trial">
               <td><span data-mark="threshold" data-value={fmt(frame.trial.th)}>{testLabel(frame.trial)}</span></td>
-              <td className="num" data-mark="ig" data-value={fmt(frame.trial.ig)}>{fmt(frame.trial.ig)}</td>
+              {ig(frame.trial.ig, hideTrial)}
               <td className="num"><Counts counts={frame.trial.left} classes={cl} /></td>
               <td className="num"><Counts counts={frame.trial.right} classes={cl} /></td>
             </tr>
@@ -114,7 +123,8 @@ function IgTable({ W, frame, t }) {
 }
 
 // What one frame draws. Exported on its own so a test can check the caption against the marks of every frame.
-export function Stage({ W, frame, guess = null, onPick = null, asking = false }) {
+// revealed = false on a node or the inside-run frame that is still asking: its IG (and a node's line) stay hidden.
+export function Stage({ W, frame, guess = null, onPick = null, asking = false, revealed = true }) {
   const { t } = useApp();
   const stat = (
     <div className="mlw4-stat">
@@ -130,7 +140,7 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false })
   return (
     <div className="mlw4">
       {stat}
-      <Plot W={W} frame={frame} t={t} />
+      <Plot W={W} frame={frame} t={t} revealed={revealed} />
       <Legend classes={W.classes} />
       {frame.kind === 'setup' && (
         <>
@@ -145,7 +155,16 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false })
           {asking && <div className="viz-dim viz-note">{t('Click the threshold you think wins, or press Show me.', 'Apasă pe pragul care crezi că câștigă, sau apasă Arată-mi.')}</div>}
         </>
       )}
-      {(frame.kind === 'node' || frame.kind === 'contrast') && <IgTable W={W} frame={frame} t={t} />}
+      {(frame.kind === 'node' || frame.kind === 'contrast') && <IgTable W={W} frame={frame} t={t} hideCands={!revealed && frame.kind === 'node'} hideTrial={!revealed && frame.kind === 'contrast'} />}
+      {frame.ask && !revealed && (
+        <div className="mlw4-chips" role="group" aria-label={t('Your prediction', 'Predicția ta')}>
+          {frame.ask.options.map((o) => (
+            onPick
+              ? <button key={o.key} type="button" className="mlw4-chip" aria-pressed={guess === o.key} onClick={() => onPick(o.key)} data-mark="option" data-value={o.th !== undefined ? fmt(o.th) : o.key}>{t(o.label.en, o.label.ro)}</button>
+              : <span key={o.key} className="mlw4-chip">{t(o.label.en, o.label.ro)}</span>
+          ))}
+        </div>
+      )}
       {frame.kind === 'zones' && (
         <>
           <div className="mlw4-stat">
@@ -159,7 +178,7 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false })
                 return (
                   <li key={k}>
                     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><Shape shape={m.shape} cx={8} cy={8} r={5} fill={m.colour} /></svg>
-                    <span>{l.conds.length ? l.conds.map((c, j) => <span key={j}>{j ? ' & ' : ''}{c.attr} {c.op} <span data-mark="threshold" data-value={fmt(c.th)}>{fmt(c.th)}</span></span>) : '*'}</span>
+                    <span>{W.attrs[0]} {'∈'} <span data-mark="interval" data-value={intervalText(l.region.x)}>{intervalText(l.region.x)}</span></span>
                     <b>{String(l.label)}</b>
                   </li>
                 );
@@ -176,30 +195,37 @@ export default function Threshold({ props, predict }) {
   const { t } = useApp();
   const W = useMemo(() => mlThreshold(props), [props]);
   const s = useStepper(W.frames.length, { predict, own: true });
-  const [guess, setGuess] = useState(null);
-  const [skipped, setSkipped] = useState(false);
-  const frame = W.frames[s.step];
-  const asking = predict && s.step === 0 && guess === null && !skipped;
-  const pick = (key) => { setGuess(key); s.settle(); };
+  // answers: frame index -> the key picked, or null for Show me. The root is asked on the setup frame (0) and shown on
+  // the next one; a later node with a choice, and the threshold inside the run, are asked on their own frame.
+  const [answers, setAnswers] = useState({});
+  const k = s.step;
+  const frame = W.frames[k];
+  const asksAt = (i) => !!predict && (i === 0 ? W.frames[0].cands.length > 0 && W.frames.length > 1 : !!W.frames[i].ask);
+  const open = (i) => asksAt(i) && answers[i] === undefined;
+  const asking = open(k);
+  const firstOpen = () => { for (let i = 0; i < W.frames.length; i += 1) if (open(i)) return i; return W.frames.length - 1; };
+  const answer = (v) => { setAnswers((a) => ({ ...a, [k]: v })); s.settle(); };
   const stepper = {
     ...s,
-    canNext: s.canNext && !(predict && guess === null && !skipped),
-    goto: (to) => (predict && guess === null && !skipped ? s.step : s.goto(to)),
-    reset: () => { setGuess(null); setSkipped(false); s.reset(); },
+    canNext: s.canNext && !asking,
+    goto: (to) => s.goto(Math.min(to, firstOpen())),
+    reset: () => { setAnswers({}); s.reset(); },
   };
-  const note = guessNote(frame, guess);
+  const guess = frame.kind === 'node' && frame.id === 0 ? answers[0] : answers[k];
+  const note = asking ? null : guessNote(frame, guess);
+  const text = asking && frame.ask ? frame.ask.caption : frame.caption;
   const caption = (
     <>
-      <p>{t(frame.caption.en, frame.caption.ro)}</p>
+      <p>{t(text.en, text.ro)}</p>
       {note && <p data-mark="guess">{t(note.en, note.ro)}</p>}
       {asking && (
-        <button type="button" className="mlw4-tap" onClick={() => { setSkipped(true); s.settle(); }}>{t('Show me', 'Arată-mi')}</button>
+        <button type="button" className="mlw4-tap" onClick={() => answer(null)}>{t('Show me', 'Arată-mi')}</button>
       )}
     </>
   );
   return (
     <VizFrame widget="ml-threshold" stepper={stepper} caption={caption} label={t('Thresholds of a continuous attribute and the decision zones', 'Pragurile unui atribut continuu și zonele de decizie')}>
-      <Stage W={W} frame={frame} guess={guess} onPick={predict && s.step === 0 ? pick : null} asking={asking} />
+      <Stage W={W} frame={frame} guess={answers[k] ?? null} onPick={asking ? answer : null} asking={asking && k === 0} revealed={!asking || k === 0} />
     </VizFrame>
   );
 }
