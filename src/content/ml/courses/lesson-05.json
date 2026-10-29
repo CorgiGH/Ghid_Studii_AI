@@ -1,0 +1,3656 @@
+{
+ "meta": {
+  "id": "ml-l05",
+  "title": {
+   "en": "Lesson 5: Joint, marginal and conditional distributions; independence of variables; covariance",
+   "ro": "Lecția 5: Distribuții comune, marginale, condiționate; independența variabilelor; covarianță"
+  },
+  "shortTitle": {
+   "en": "L5: Joint distributions",
+   "ro": "L5: Distribuții comune"
+  },
+  "source": {
+   "en": "Machine learning course, week 2, UAIC FII",
+   "ro": "Cursul Învățare automată, săptămâna 2, UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "ml-l05-s1",
+   "title": {
+    "en": "Can we say they are independent?",
+    "ro": "Putem spune că sunt independente?"
+   },
+   "blocks": [
+    {
+     "type": "viz",
+     "id": "ml-l05-viz0",
+     "widget": "ml-joint-table",
+     "predict": false,
+     "props": {
+      "table": {
+       "columns": [
+        "X",
+        "Y",
+        "P"
+       ],
+       "rows": [
+        [
+         0,
+         0,
+         "1/4"
+        ],
+        [
+         0,
+         1,
+         "1/4"
+        ],
+        [
+         1,
+         0,
+         "1/4"
+        ],
+        [
+         1,
+         1,
+         0
+        ],
+        [
+         2,
+         0,
+         0
+        ],
+        [
+         2,
+         1,
+         "1/4"
+        ]
+       ]
+      },
+      "x": "X",
+      "y": "Y",
+      "explore": true,
+      "format": "fraction"
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ml-l05-pre",
+     "question": {
+      "en": "$X$ takes the values 0, 1, 2 and $Y$ takes the values 0, 1. Reminder (see Lesson 3): the events $A$ and $B$ are independent if $P(A\\cap B)=P(A)\\,P(B)$. The table gives the probability of each pair of values $(x, y)$; the margins hold the sums of the rows and of the columns. For the cell $(X{=}0,\\,Y{=}0)$ we have $\\frac14=\\frac12\\cdot\\frac12$. Can we say that $X$ and $Y$ are independent?",
+      "ro": "$X$ ia valorile 0, 1, 2, iar $Y$ ia valorile 0, 1. Reamintire (vezi Lecția 3): evenimentele $A$ și $B$ sunt independente dacă $P(A\\cap B)=P(A)\\,P(B)$. Tabelul dă probabilitatea fiecărui cuplu de valori $(x, y)$; pe margini sunt sumele pe rânduri și pe coloane. Pentru celula $(X{=}0,\\,Y{=}0)$ avem $\\frac14=\\frac12\\cdot\\frac12$. Putem spune că $X$ și $Y$ sunt independente?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Yes",
+        "ro": "Da"
+       },
+       "correct": false,
+       "explain": {
+        "en": "One cell that holds is not enough: independence needs the equality in all six cells, and the cell $(X{=}1,\\,Y{=}0)$ does not respect it.",
+        "ro": "O singură celulă care verifică nu ajunge: independența cere egalitatea în toate cele șase celule, iar celula $(X{=}1,\\,Y{=}0)$ nu o respectă."
+       },
+       "misconception": "doar-o-celula"
+      },
+      {
+       "text": {
+        "en": "No",
+        "ro": "Nu"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct. The cell $(X{=}1,\\,Y{=}0)$ gives $\\frac14\\neq\\frac14\\cdot\\frac12=\\frac18$, so the equality does not hold for all the cells. Keep the answer; you will see below how many cells must be checked.",
+        "ro": "Corect. Celula $(X{=}1,\\,Y{=}0)$ dă $\\frac14\\neq\\frac14\\cdot\\frac12=\\frac18$, deci egalitatea nu ține pentru toate celulele. Păstrează răspunsul; vezi mai departe câte celule trebuie verificate."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s2",
+   "title": {
+    "en": "The marginals",
+    "ro": "Marginalele"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-w1",
+     "question": {
+      "en": "The variables $X$ and $Y$ take the values 0 or 1. The table gives the probability of each pair of values. What is $P(X=0)$, that is, the probability that $X$ is 0, whatever the value of $Y$?",
+      "ro": "Variabilele $X$ și $Y$ iau valorile 0 sau 1. Tabelul dă probabilitatea fiecărui cuplu de valori. Cât este $P(X=0)$, adică probabilitatea ca $X$ să fie 0, oricare ar fi valoarea lui $Y$?"
+     },
+     "table": {
+      "columns": [
+       "Y / X",
+       "X=0",
+       "X=1"
+      ],
+      "rows": [
+       [
+        "Y=0",
+        "0,1",
+        "0,2"
+       ],
+       [
+        "Y=1",
+        "0,3",
+        "0,4"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution of the pair (X, Y)",
+       "ro": "Distribuția comună a cuplului (X, Y)"
+      }
+     },
+     "check": {
+      "formula": "a+b",
+      "data": {
+       "a": 0.1,
+       "b": 0.3,
+       "x1": 0.6,
+       "y0": 0.3,
+       "y1": 0.7
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.1",
+        "ro": "0,1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "0.1 is only the cell $(X=0,\\,Y=0)$. For $P(X=0)$ the cell $(X=0,\\,Y=1)$ counts too, that is $0.1+0.3$.",
+        "ro": "0,1 este doar celula $(X=0,\\,Y=0)$. Pentru $P(X=0)$ intră și celula $(X=0,\\,Y=1)$, adică $0{,}1+0{,}3$."
+       },
+       "misconception": "celula-singura"
+      },
+      {
+       "text": {
+        "en": "0.3",
+        "ro": "0,3"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$0.1+0.2=0.3$ is $P(Y=0)$, the sum of the row $Y=0$. For $P(X=0)$ add the column $X=0$.",
+        "ro": "$0{,}1+0{,}2=0{,}3$ este $P(Y=0)$, suma rândului $Y=0$. Pentru $P(X=0)$ se adună coloana $X=0$."
+       },
+       "misconception": "linia-gresita"
+      },
+      {
+       "text": {
+        "en": "0.4",
+        "ro": "0,4"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$P(X=0)=0.1+0.3=0.4$: add the cells of the column $X=0$. The sum is written in the margin of the table, hence the name marginal. In the same way: $P(X=1)=0.6$, $P(Y=0)=0.3$ and $P(Y=1)=0.7$.",
+        "ro": "$P(X=0)=0{,}1+0{,}3=0{,}4$: se adună celulele din coloana $X=0$. Suma se scrie în marginea tabelului, de aici numele de marginală. La fel: $P(X=1)=0{,}6$, $P(Y=0)=0{,}3$ și $P(Y=1)=0{,}7$."
+       }
+      },
+      {
+       "text": {
+        "en": "0.6",
+        "ro": "0,6"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$0.2+0.4=0.6$ is $P(X=1)$, that is, the other column.",
+        "ro": "$0{,}2+0{,}4=0{,}6$ este $P(X=1)$, adică cealaltă coloană."
+       },
+       "misconception": "linia-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s3",
+   "title": {
+    "en": "The conditional distribution",
+    "ro": "Distribuția condiționată"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-w2",
+     "question": {
+      "en": "With the same joint distribution: what is $P(X=0\\mid Y=1)$, that is, the probability that $X$ is 0 when we know that $Y=1$?",
+      "ro": "Cu aceeași distribuție comună: cât este $P(X=0\\mid Y=1)$, adică probabilitatea ca $X$ să fie 0 atunci când știm că $Y=1$?"
+     },
+     "table": {
+      "columns": [
+       "Y / X",
+       "X=0",
+       "X=1"
+      ],
+      "rows": [
+       [
+        "Y=0",
+        "0,1",
+        "0,2"
+       ],
+       [
+        "Y=1",
+        "0,3",
+        "0,4"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution of the pair (X, Y)",
+       "ro": "Distribuția comună a cuplului (X, Y)"
+      }
+     },
+     "check": {
+      "formula": "a/b",
+      "data": {
+       "a": 0.3,
+       "b": 0.7
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.3",
+        "ro": "0,3"
+       },
+       "correct": false,
+       "explain": {
+        "en": "0.3 is the cell $(X=0,\\,Y=1)$, not divided by $P(Y=1)$. Conditioning divides by the probability of the condition.",
+        "ro": "0,3 este celula $(X=0,\\,Y=1)$, neîmpărțită la $P(Y=1)$. Condiționarea împarte la probabilitatea condiției."
+       },
+       "misconception": "celula-comuna-in-loc-de-conditionata"
+      },
+      {
+       "text": {
+        "en": "3/7",
+        "ro": "3/7"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Only the cells with $Y=1$ remain: $0.3+0.4=0.7$. The requested cell is divided by this sum: $0.3/0.7=\\frac37$. Note that $\\frac37\\neq0.4=P(X=0)$.",
+        "ro": "Rămân doar celulele cu $Y=1$: $0{,}3+0{,}4=0{,}7$. Celula cerută se împarte la această sumă: $0{,}3/0{,}7=\\frac37$. Observă că $\\frac37\\neq0{,}4=P(X=0)$."
+       }
+      },
+      {
+       "text": {
+        "en": "0.4",
+        "ro": "0,4"
+       },
+       "correct": false,
+       "explain": {
+        "en": "0.4 is $P(X=0)$, as if the fact that $Y=1$ did not matter.",
+        "ro": "0,4 este $P(X=0)$, ca și cum faptul că $Y=1$ n-ar conta."
+       },
+       "misconception": "marginala-in-loc-de-conditionata"
+      },
+      {
+       "text": {
+        "en": "3/4",
+        "ro": "3/4"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$\\frac34=0.3/0.4$ is $P(Y=1\\mid X=0)$. Here the condition is on $Y$, so we divide by $P(Y=1)$.",
+        "ro": "$\\frac34=0{,}3/0{,}4$ este $P(Y=1\\mid X=0)$. Aici condiția este pe $Y$, deci se împarte la $P(Y=1)$."
+       },
+       "misconception": "conditionata-inversa"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s4",
+   "title": {
+    "en": "Checking independence",
+    "ro": "Verificăm independența"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-w3",
+     "question": {
+      "en": "Are $X$ and $Y$ independent? Check cell by cell: independence needs every cell to equal the product of its marginals.",
+      "ro": "Sunt $X$ și $Y$ independente? Verifică celulă cu celulă: independența cere ca fiecare celulă să fie egală cu produsul marginalelor ei."
+     },
+     "table": {
+      "columns": [
+       "Y / X",
+       "X=0",
+       "X=1"
+      ],
+      "rows": [
+       [
+        "Y=0",
+        "0,1",
+        "0,2"
+       ],
+       [
+        "Y=1",
+        "0,3",
+        "0,4"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution of the pair (X, Y)",
+       "ro": "Distribuția comună a cuplului (X, Y)"
+      }
+     },
+     "check": {
+      "formula": "a*b",
+      "data": {
+       "a": 0.4,
+       "b": 0.3,
+       "p1": 0.12,
+       "p2": 0.18,
+       "p3": 0.28,
+       "p4": 0.42
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "No",
+        "ro": "Nu"
+       },
+       "correct": true,
+       "explain": {
+        "en": "The cell $(X=0,\\,Y=0)$ is $0.1$ and the product of its marginals is $0.4\\cdot0.3=0.12$. The four products are $0.12;\\ 0.18;\\ 0.28;\\ 0.42$, against the cells $0.1;\\ 0.2;\\ 0.3;\\ 0.4$. One cell that fails is enough to say they are not independent.",
+        "ro": "Celula $(X=0,\\,Y=0)$ este $0{,}1$, iar produsul marginalelor ei este $0{,}4\\cdot0{,}3=0{,}12$. Cele patru produse sunt $0{,}12;\\ 0{,}18;\\ 0{,}28;\\ 0{,}42$, față de celulele $0{,}1;\\ 0{,}2;\\ 0{,}3;\\ 0{,}4$. O singură celulă care nu verifică ajunge ca să spunem că nu sunt independente."
+       }
+      },
+      {
+       "text": {
+        "en": "Yes, because $P(X=0\\mid Y=1)=\\frac37$ is close to $P(X=0)=0.4$",
+        "ro": "Da, pentru că $P(X=0\\mid Y=1)=\\frac37$ este aproape de $P(X=0)=0{,}4$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Independence needs exact equality, not closeness: $\\frac37\\neq0.4$.",
+        "ro": "Independența cere egalitate exactă, nu apropiere: $\\frac37\\neq0{,}4$."
+       },
+       "misconception": "aproximativ-independente"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s5",
+   "title": {
+    "en": "The covariance",
+    "ro": "Covarianța"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-w4",
+     "question": {
+      "en": "The mean $E[Z]$ of a variable (see Lesson 4) is the sum of its values times their probabilities, and $E[XY]$ is the mean of the product $X\\cdot Y$. What is $\\mathrm{Cov}(X,Y)=E[XY]-E[X]\\,E[Y]$?",
+      "ro": "Media $E[Z]$ a unei variabile (vezi Lecția 4) este suma valorilor ei înmulțite cu probabilitățile lor, iar $E[XY]$ este media produsului $X\\cdot Y$. Cât este $\\mathrm{Cov}(X,Y)=E[XY]-E[X]\\,E[Y]$?"
+     },
+     "table": {
+      "columns": [
+       "Y / X",
+       "X=0",
+       "X=1"
+      ],
+      "rows": [
+       [
+        "Y=0",
+        "0,1",
+        "0,2"
+       ],
+       [
+        "Y=1",
+        "0,3",
+        "0,4"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution of the pair (X, Y)",
+       "ro": "Distribuția comună a cuplului (X, Y)"
+      }
+     },
+     "check": {
+      "formula": "exy-ex*ey",
+      "data": {
+       "exy": 0.4,
+       "ex": 0.6,
+       "ey": 0.7,
+       "p": 0.42,
+       "s1": 0.36,
+       "s2": 0.49,
+       "vx": 0.24,
+       "vy": 0.21
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.02",
+        "ro": "0,02"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The sign is wrong: $E[XY]=0.4$ is smaller than $E[X]\\,E[Y]=0.42$, so the difference is negative.",
+        "ro": "Semnul e greșit: $E[XY]=0{,}4$ este mai mic decât $E[X]\\,E[Y]=0{,}42$, deci diferența este negativă."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "0",
+        "ro": "0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The covariance would be 0 if $X$ and $Y$ were independent, but they are not: $0.4\\neq0.6\\cdot0.7$.",
+        "ro": "Covarianța ar fi 0 dacă $X$ și $Y$ ar fi independente, dar ele nu sunt: $0{,}4\\neq0{,}6\\cdot0{,}7$."
+       },
+       "misconception": "variabile-independente-tacit"
+      },
+      {
+       "text": {
+        "en": "-0.02",
+        "ro": "-0,02"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$E[X]=0.2+0.4=0.6$ and $E[Y]=0.3+0.4=0.7$. Of the product $X\\cdot Y$ only the cell $(1, 1)$ is non-zero: $E[XY]=1\\cdot1\\cdot0.4=0.4$. So $\\mathrm{Cov}=0.4-0.6\\cdot0.7=0.4-0.42=-0.02$, negative. For a variable with values 0 and 1 we have $X^2=X$, so $\\mathrm{Var}(X)=0.6-0.36=0.24$ and $\\mathrm{Var}(Y)=0.7-0.49=0.21$.",
+        "ro": "$E[X]=0{,}2+0{,}4=0{,}6$ și $E[Y]=0{,}3+0{,}4=0{,}7$. Din produsul $X\\cdot Y$ doar celula $(1, 1)$ e nenulă: $E[XY]=1\\cdot1\\cdot0{,}4=0{,}4$. Deci $\\mathrm{Cov}=0{,}4-0{,}6\\cdot0{,}7=0{,}4-0{,}42=-0{,}02$, negativă. Pentru o variabilă cu valorile 0 și 1 avem $X^2=X$, deci $\\mathrm{Var}(X)=0{,}6-0{,}36=0{,}24$ și $\\mathrm{Var}(Y)=0{,}7-0{,}49=0{,}21$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s6",
+   "title": {
+    "en": "The variance of a sum",
+    "ro": "Varianța sumei"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-w5",
+     "question": {
+      "en": "What is $\\mathrm{Var}(X+Y)$? Hint: the variable $X+Y$ takes the same value on several cells, and their probabilities add up; for the variance you can use $\\mathrm{Var}(X)=0.24$, $\\mathrm{Var}(Y)=0.21$ and $\\mathrm{Cov}(X,Y)=-0.02$.",
+      "ro": "Cât este $\\mathrm{Var}(X+Y)$? Indiciu: variabila $X+Y$ ia aceeași valoare pe mai multe celule, iar probabilitățile lor se adună; pentru varianță sunt la îndemână $\\mathrm{Var}(X)=0{,}24$, $\\mathrm{Var}(Y)=0{,}21$ și $\\mathrm{Cov}(X,Y)=-0{,}02$."
+     },
+     "table": {
+      "columns": [
+       "Y / X",
+       "X=0",
+       "X=1"
+      ],
+      "rows": [
+       [
+        "Y=0",
+        "0,1",
+        "0,2"
+       ],
+       [
+        "Y=1",
+        "0,3",
+        "0,4"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution of the pair (X, Y)",
+       "ro": "Distribuția comună a cuplului (X, Y)"
+      }
+     },
+     "check": {
+      "formula": "s2-s1*s1",
+      "data": {
+       "s2": 2.1,
+       "s1": 1.3,
+       "p1": 0.5,
+       "a": 0.8,
+       "b": 1.6,
+       "sq": 1.69,
+       "vx": 0.24,
+       "vy": 0.21,
+       "c": -0.02,
+       "s45": 0.45,
+       "d4": 0.04
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.41",
+        "ro": "0,41"
+       },
+       "correct": true,
+       "explain": {
+        "en": "With the formula: $0.24+0.21+2\\cdot(-0.02)=0.41$. Directly: $X+Y$ takes 0 with probability $0.1$, takes 1 with $0.2+0.3=0.5$ and takes 2 with $0.4$. The mean is $E[X+Y]=0.5+0.8=1.3$ and $E[(X+Y)^2]=0.5+1.6=2.1$, so $\\mathrm{Var}=2.1-1.69=0.41$. The two ways give the same result. The distribution of $X+Y$ was read from the joint table: the marginals alone are not enough (see Lesson 4).",
+        "ro": "Cu formula: $0{,}24+0{,}21+2\\cdot(-0{,}02)=0{,}41$. Direct: $X+Y$ ia 0 cu probabilitatea $0{,}1$, ia 1 cu $0{,}2+0{,}3=0{,}5$ și ia 2 cu $0{,}4$. Media este $E[X+Y]=0{,}5+0{,}8=1{,}3$, iar $E[(X+Y)^2]=0{,}5+1{,}6=2{,}1$, deci $\\mathrm{Var}=2{,}1-1{,}69=0{,}41$. Cele două drumuri dau același rezultat. Distribuția lui $X+Y$ s-a citit din tabelul comun: marginalele singure nu ajung (vezi Lecția 4)."
+       }
+      },
+      {
+       "text": {
+        "en": "0.45",
+        "ro": "0,45"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$0.24+0.21=0.45$ ignores the covariance. The sum of the variances is right only when $\\mathrm{Cov}=0$.",
+        "ro": "$0{,}24+0{,}21=0{,}45$ ignoră covarianța. Suma varianțelor este corectă doar când $\\mathrm{Cov}=0$."
+       },
+       "misconception": "variabile-independente-tacit"
+      },
+      {
+       "text": {
+        "en": "0.43",
+        "ro": "0,43"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$0.45-0.02=0.43$ adds $\\mathrm{Cov}$ once. The term is $2\\,\\mathrm{Cov}$.",
+        "ro": "$0{,}45-0{,}02=0{,}43$ adaugă $\\mathrm{Cov}$ o singură dată. Termenul este $2\\,\\mathrm{Cov}$."
+       },
+       "misconception": "cov-fara-factorul-2"
+      },
+      {
+       "text": {
+        "en": "0.49",
+        "ro": "0,49"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$0.45+0.04=0.49$ subtracts $2\\,\\mathrm{Cov}$ instead of adding it. Since $\\mathrm{Cov}$ is negative, the sum goes down by $0.04$.",
+        "ro": "$0{,}45+0{,}04=0{,}49$ scade $2\\,\\mathrm{Cov}$ în loc să îl adune. Cum $\\mathrm{Cov}$ este negativă, suma scade cu $0{,}04$."
+       },
+       "misconception": "semn-gresit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s7",
+   "title": {
+    "en": "The whole computation, in the table",
+    "ro": "Tot calculul, în tabel"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Follow in the table all the steps so far: the marginals, the conditional, the four products to check, the mean of the product and the grouping of the cells by the sum $X+Y$. Before each step, guess the value.",
+      "ro": "Urmărește în tabel toți pașii de până acum: marginalele, condiționata, cele patru produse de verificat, media produsului și gruparea celulelor după suma $X+Y$. Înainte de fiecare pas, ghicește valoarea."
+     }
+    },
+    {
+     "type": "viz",
+     "id": "ml-l05-viz1",
+     "widget": "ml-joint-table",
+     "predict": true,
+     "props": {
+      "table": {
+       "columns": [
+        "X",
+        "Y",
+        "P"
+       ],
+       "rows": [
+        [
+         0,
+         0,
+         0.1
+        ],
+        [
+         1,
+         0,
+         0.2
+        ],
+        [
+         0,
+         1,
+         0.3
+        ],
+        [
+         1,
+         1,
+         0.4
+        ]
+       ]
+      },
+      "x": "X",
+      "y": "Y",
+      "rowsAre": "y",
+      "format": "decimal"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s8",
+   "title": {
+    "en": "Joint, marginal, conditional",
+    "ro": "Comună, marginale, condiționate"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Joint distribution, marginals and conditional distribution",
+      "ro": "Distribuția comună, marginalele și distribuția condiționată"
+     },
+     "content": {
+      "en": "The **joint distribution** of $X$ and $Y$ is $p(x,y)=P(X{=}x,\\,Y{=}y)$: the probability that both values appear together (a table with one cell for each pair $(x,y)$). The **marginals** are obtained by adding the cells of a row or of a column: $p_X(x)=\\sum_y p(x,y)$ and $p_Y(y)=\\sum_x p(x,y)$ (the symbol $\\sum_y$ means: add over all the values of $y$, with $x$ fixed). The **conditional distribution** is $p_{X\\mid Y}(x\\mid y)=\\dfrac{p(x,y)}{p_Y(y)}$, defined when $p_Y(y)\\neq0$: the cell is divided by the probability of the condition.",
+      "ro": "**Distribuția comună** a lui $X$ și $Y$ este $p(x,y)=P(X{=}x,\\,Y{=}y)$: probabilitatea ca ambele valori să apară deodată (un tabel cu câte o celulă pentru fiecare cuplu $(x,y)$). **Marginalele** se obțin adunând celulele de pe un rând sau de pe o coloană: $p_X(x)=\\sum_y p(x,y)$ și $p_Y(y)=\\sum_x p(x,y)$ (simbolul $\\sum_y$ înseamnă: adună pentru toate valorile lui $y$, cu $x$ fixat). **Distribuția condiționată** este $p_{X\\mid Y}(x\\mid y)=\\dfrac{p(x,y)}{p_Y(y)}$, definită când $p_Y(y)\\neq0$: celula se împarte la probabilitatea condiției."
+     }
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Course: slide 15. Workbook: p. 39.",
+      "ro": "Cursul: slide 15. Culegerea: p. 39."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s9",
+   "title": {
+    "en": "A function of two variables",
+    "ro": "Funcție de două variabile"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "A function of two variables",
+      "ro": "Funcție de două variabile"
+     },
+     "content": {
+      "en": "If $g$ is a function, $Z=g(X,Y)$ is also a random variable. Its distribution comes from the joint distribution: $P(Z{=}z)=\\sum_{(x,y):\\,g(x,y)=z}p(x,y)$, that is, **the cells that give the same value of $g$ are added**. This is how $X+Y$, $X-Y$ and the **product** $XY$ are obtained. The marginals alone are not enough (see Lesson 4).",
+      "ro": "Dacă $g$ este o funcție, $Z=g(X,Y)$ este tot o variabilă aleatoare. Distribuția ei se obține din distribuția comună: $P(Z{=}z)=\\sum_{(x,y):\\,g(x,y)=z}p(x,y)$, adică **se adună celulele care dau aceeași valoare a lui $g$**. Așa se obțin $X+Y$, $X-Y$ și **produsul** $XY$. Marginalele singure nu ajung (vezi Lecția 4)."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ml-l05-g1",
+     "question": {
+      "en": "The joint distribution of $(X,Y)$ is the one in the table. What values does $D=X-Y$ take, and with what probabilities?",
+      "ro": "Distribuția comună a lui $(X,Y)$ este cea din tabel. Ce valori ia $D=X-Y$ și cu ce probabilități?"
+     },
+     "table": {
+      "columns": [
+       "Y / X",
+       "X=0",
+       "X=1"
+      ],
+      "rows": [
+       [
+        "Y=0",
+        "0,1",
+        "0,2"
+       ],
+       [
+        "Y=1",
+        "0,3",
+        "0,4"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution of the pair (X, Y)",
+       "ro": "Distribuția comună a cuplului (X, Y)"
+      }
+     },
+     "check": {
+      "formula": "a+b",
+      "data": {
+       "a": 0.1,
+       "b": 0.4,
+       "m1": 0.3,
+       "p1": 0.2,
+       "y1": 0.28,
+       "y0": 0.54,
+       "y2": 0.18,
+       "e1": 0.2,
+       "e2": 0.3,
+       "ex": 0.6,
+       "ey": 0.7
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$-1$ with $0.3$; $0$ with $0.1$; $1$ with $0.2$",
+        "ro": "$-1$ cu $0{,}3$; $0$ cu $0{,}1$; $1$ cu $0{,}2$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The value $0$ comes from two cells, $(0, 0)$ and $(1, 1)$, and here only one was taken. The probabilities no longer sum to 1.",
+        "ro": "Valoarea $0$ vine din două celule, $(0, 0)$ și $(1, 1)$, iar aici s-a luat doar una. Probabilitățile nu mai dau suma 1."
+       },
+       "misconception": "celula-singura"
+      },
+      {
+       "text": {
+        "en": "$-1$ with $0.2$; $0$ with $0.5$; $1$ with $0.3$",
+        "ro": "$-1$ cu $0{,}2$; $0$ cu $0{,}5$; $1$ cu $0{,}3$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The signs are reversed: this is $Y-X$. For $D=X-Y$, the cell $(X{=}0,\\,Y{=}1)$ gives $-1$ and has $0.3$.",
+        "ro": "Semnele sunt întoarse: asta e $Y-X$. Pentru $D=X-Y$, celula $(X{=}0,\\,Y{=}1)$ dă $-1$ și are $0{,}3$."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "$-1$ with $0.28$; $0$ with $0.54$; $1$ with $0.18$",
+        "ro": "$-1$ cu $0{,}28$; $0$ cu $0{,}54$; $1$ cu $0{,}18$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "These come out if you multiply the marginals, as if $X$ and $Y$ were independent (for example $0.4\\cdot0.7=0.28$). But $X$ and $Y$ are not independent, and the table gives the probability of each cell directly.",
+        "ro": "Acestea ies dacă înmulțești marginalele, ca și cum $X$ și $Y$ ar fi independente (de pildă $0{,}4\\cdot0{,}7=0{,}28$). Dar $X$ și $Y$ nu sunt independente, iar tabelul dă direct probabilitatea fiecărei celule."
+       },
+       "misconception": "variabile-independente-tacit"
+      },
+      {
+       "text": {
+        "en": "$-1$ with $0.3$; $0$ with $0.5$; $1$ with $0.2$",
+        "ro": "$-1$ cu $0{,}3$; $0$ cu $0{,}5$; $1$ cu $0{,}2$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "The cell $(X{=}0,\\,Y{=}1)$ gives $D=-1$, with $0.3$. The cells $(0, 0)$ and $(1, 1)$ both give $D=0$ and are added: $0.1+0.4=0.5$. The cell $(X{=}1,\\,Y{=}0)$ gives $D=1$, with $0.2$. The sum is $0.3+0.5+0.2=1$. Check: $E[D]=-0.3+0.2=-0.1=E[X]-E[Y]=0.6-0.7$.",
+        "ro": "Celula $(X{=}0,\\,Y{=}1)$ dă $D=-1$, cu $0{,}3$. Celulele $(0, 0)$ și $(1, 1)$ dau amândouă $D=0$ și se adună: $0{,}1+0{,}4=0{,}5$. Celula $(X{=}1,\\,Y{=}0)$ dă $D=1$, cu $0{,}2$. Suma este $0{,}3+0{,}5+0{,}2=1$. Control: $E[D]=-0{,}3+0{,}2=-0{,}1=E[X]-E[Y]=0{,}6-0{,}7$."
+       }
+      }
+     ]
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Course: slide 14.",
+      "ro": "Cursul: slide 14."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s10",
+   "title": {
+    "en": "The chain rule for three variables",
+    "ro": "Regula de înlănțuire pentru trei variabile"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "**The chain rule for three variables.** This is the chain rule for events (see Lesson 1), applied to variables: $P(X,Y,Z)=P(Z)\\,P(X\\mid Z)\\,P(Y\\mid X,Z)$. Here $P(Y\\mid X,Z)$ is the probability of $Y$ when $X$ and $Z$ are both given. The order of the factors can be any. So a joint table over three variables can be given through the factors of the chain.",
+      "ro": "**Regula de înlănțuire pentru trei variabile.** Aceasta este regula de înlănțuire pentru evenimente (vezi Lecția 1), aplicată la variabile: $P(X,Y,Z)=P(Z)\\,P(X\\mid Z)\\,P(Y\\mid X,Z)$. Aici $P(Y\\mid X,Z)$ este probabilitatea lui $Y$ când $X$ și $Z$ sunt date amândouă. Ordinea factorilor poate fi oricare. Așadar un tabel comun pe trei variabile se poate da prin factorii lanțului."
+     }
+    },
+    {
+     "type": "equation",
+     "tex": "P(X,Y,Z)=P(Z)\\,P(X\\mid Z)\\,P(Y\\mid X,Z)"
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Workbook: p. 37 (note 21).",
+      "ro": "Culegerea: p. 37 (nota 21)."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s11",
+   "title": {
+    "en": "Independence of variables",
+    "ro": "Independența variabilelor"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Independence of random variables",
+      "ro": "Independența variabilelor aleatoare"
+     },
+     "content": {
+      "en": "$X$ and $Y$ are **independent** if $p(x,y)=p_X(x)\\,p_Y(y)$ **for all** pairs $(x,y)$: every cell of the table is the product of its marginals. Equivalently, when $p_Y(y)\\neq0$ for every $y$: $p_{X\\mid Y}(x\\mid y)=p_X(x)$ for all $x$ and $y$.",
+      "ro": "$X$ și $Y$ sunt **independente** dacă $p(x,y)=p_X(x)\\,p_Y(y)$ **pentru toate** perechile $(x,y)$: fiecare celulă a tabelului este produsul marginalelor ei. Echivalent, când $p_Y(y)\\neq0$ pentru toți $y$: $p_{X\\mid Y}(x\\mid y)=p_X(x)$ pentru toți $x$ și $y$."
+     }
+    },
+    {
+     "type": "equation",
+     "tex": "p(x,y)=p_X(x)\\,p_Y(y)\\quad\\text{pentru toate perechile }(x,y)"
+    },
+    {
+     "type": "callout",
+     "variant": "trap",
+     "content": {
+      "en": "**For events there is one equality; for variables there are as many equalities as the table has cells.** One cell that holds is not enough (at the start of the lesson, one cell held and another did not). For variables that take only the values 0 and 1, a single equality, together with the marginals, is enough (this is shown in the exercises that follow).",
+      "ro": "**La evenimente e o singură egalitate; la variabile sunt câte egalități are tabelul.** O celulă care verifică nu ajunge (la începutul lecției, o celulă verifica, iar alta nu). Pentru variabile care iau doar valorile 0 și 1, o singură egalitate, împreună cu marginalele, ajunge (se arată în exercițiile de mai departe)."
+     }
+    },
+    {
+     "type": "callout",
+     "variant": "info",
+     "content": {
+      "en": "**On paper:** to show that two variables **are** independent, write the equality for **all** the cells, as the definition asks. The shortcut with a single equality for binary variables is correct, but it rests on a result you would have to justify (ex. 0.11.b), so use it as a check. To show that they are **not** independent, one cell that fails is enough.",
+      "ro": "**Pe hârtie:** ca să arăți că două variabile **sunt** independente, scrie egalitatea pentru **toate** celulele, cum cere definiția. Scurtătura cu o singură egalitate pentru variabile binare este corectă, dar se sprijină pe un rezultat pe care ar trebui să-l justifici (ex. 0.11.b), așa că folosește-o ca verificare. Ca să arăți că **nu** sunt independente, ajunge o celulă care nu verifică."
+     }
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Course: slide 16. Seminar 2, p. 6-7. Workbook: p. 33.",
+      "ro": "Cursul: slide 16. Seminar 2, p. 6-7. Culegerea: p. 33."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s12",
+   "title": {
+    "en": "Covariance and correlation",
+    "ro": "Covarianța și corelația"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Covariance and the correlation coefficient",
+      "ro": "Covarianța și coeficientul de corelație"
+     },
+     "content": {
+      "en": "The **covariance** measures whether $X$ and $Y$ grow together (positive), in opposite directions (negative) or have no linear trend (zero): $\\mathrm{Cov}(X,Y)=E[(X-E[X])(Y-E[Y])]$, equivalently $\\mathrm{Cov}(X,Y)=E[XY]-E[X]\\,E[Y]$. The **correlation coefficient** divides the covariance by the standard deviations $\\sigma_X=\\sqrt{\\mathrm{Var}(X)}$ and $\\sigma_Y$: $\\rho(X,Y)=\\dfrac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\sigma_Y}$, with $-1\\le\\rho\\le1$. A correlation large in absolute value shows an approximately linear dependence, $Y\\approx aX+b$.",
+      "ro": "**Covarianța** măsoară dacă $X$ și $Y$ cresc împreună (pozitivă), în sens opus (negativă) sau nu au o tendință liniară (zero): $\\mathrm{Cov}(X,Y)=E[(X-E[X])(Y-E[Y])]$, echivalent $\\mathrm{Cov}(X,Y)=E[XY]-E[X]\\,E[Y]$. **Coeficientul de corelație** împarte covarianța la abaterile standard $\\sigma_X=\\sqrt{\\mathrm{Var}(X)}$ și $\\sigma_Y$: $\\rho(X,Y)=\\dfrac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\sigma_Y}$, cu $-1\\le\\rho\\le1$. O corelație mare în valoare absolută arată o dependență aproximativ liniară, $Y\\approx aX+b$."
+     }
+    },
+    {
+     "type": "equation",
+     "tex": "\\mathrm{Cov}(X,Y)=E[XY]-E[X]\\,E[Y]\\qquad \\rho(X,Y)=\\frac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\,\\sigma_Y}"
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Course: slide 9, 14, 17. Seminar 2, p. 6-7. Workbook: p. 31, 45.",
+      "ro": "Cursul: slide 9, 14, 17. Seminar 2, p. 6-7. Culegerea: p. 31, 45."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s13",
+   "title": {
+    "en": "The variance of a sum",
+    "ro": "Varianța unei sume"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "**The variance of a sum:** $\\mathrm{Var}(X+Y)=\\mathrm{Var}(X)+\\mathrm{Var}(Y)+2\\,\\mathrm{Cov}(X,Y)$. In general $\\mathrm{Var}(aX+bY+c)=a^2\\mathrm{Var}(X)+b^2\\mathrm{Var}(Y)+2ab\\,\\mathrm{Cov}(X,Y)$ and $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$. **If $X$ and $Y$ are independent:** $E[XY]=E[X]\\,E[Y]$, so $\\mathrm{Cov}=0$, and $\\mathrm{Var}(X+Y)=\\mathrm{Var}(X)+\\mathrm{Var}(Y)$.",
+      "ro": "**Varianța unei sume:** $\\mathrm{Var}(X+Y)=\\mathrm{Var}(X)+\\mathrm{Var}(Y)+2\\,\\mathrm{Cov}(X,Y)$. În general $\\mathrm{Var}(aX+bY+c)=a^2\\mathrm{Var}(X)+b^2\\mathrm{Var}(Y)+2ab\\,\\mathrm{Cov}(X,Y)$ și $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$. **Dacă $X$ și $Y$ sunt independente:** $E[XY]=E[X]\\,E[Y]$, deci $\\mathrm{Cov}=0$, iar $\\mathrm{Var}(X+Y)=\\mathrm{Var}(X)+\\mathrm{Var}(Y)$."
+     }
+    },
+    {
+     "type": "equation",
+     "tex": "\\mathrm{Var}(X+Y)=\\mathrm{Var}(X)+\\mathrm{Var}(Y)+2\\,\\mathrm{Cov}(X,Y)"
+    },
+    {
+     "type": "callout",
+     "variant": "trap",
+     "content": {
+      "en": "**The converse is false** (the other direction): $\\mathrm{Cov}=0$ does not imply independence (you see this in the exercises 0.11 and 0.100 below).",
+      "ro": "**Reciproca este falsă** (adică sensul invers): $\\mathrm{Cov}=0$ nu implică independența (se vede în exercițiile 0.11 și 0.100 de mai departe)."
+     }
+    },
+    {
+     "type": "callout",
+     "variant": "info",
+     "content": {
+      "en": "This explains the variance of the binomial from Lesson 4: the sum of $n$ independent Bernoulli($p$) variables, each with variance $p(1-p)$, has variance $np(1-p)$.",
+      "ro": "Aceasta explică varianța binomialei din Lecția 4: suma a $n$ variabile Bernoulli($p$) independente, fiecare cu varianța $p(1-p)$, are varianța $np(1-p)$."
+     }
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Workbook: p. 55 (ex. 0.23.c), p. 59 (ex. 0.25).",
+      "ro": "Culegerea: p. 55 (ex. 0.23.c), p. 59 (ex. 0.25)."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s14",
+   "title": {
+    "en": "Functions of independent variables",
+    "ro": "Funcții de variabile independente"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "**Functions of independent variables.** If $X$ and $Y$ are independent, then $f(X)$ and $g(Y)$ are independent too, whatever the functions $f$ and $g$ are (for example $f(x)=x$ and $g(y)=y^2$). The reason: the probability that $f(X)=a$ and $g(Y)=b$ is obtained by adding the cells $(x,y)$ with $f(x)=a$ and $g(y)=b$, and every cell is a product; the factor $p_X(x)$ does not depend on $y$, so the two sums separate:",
+      "ro": "**Funcții de variabile independente.** Dacă $X$ și $Y$ sunt independente, atunci și $f(X)$ și $g(Y)$ sunt independente, oricare ar fi funcțiile $f$ și $g$ (de pildă $f(x)=x$ și $g(y)=y^2$). Motivul: probabilitatea ca $f(X)=a$ și $g(Y)=b$ se obține adunând celulele $(x,y)$ cu $f(x)=a$ și $g(y)=b$, iar fiecare celulă este un produs; factorul $p_X(x)$ nu depinde de $y$, deci cele două sume se separă:"
+     }
+    },
+    {
+     "type": "equation",
+     "tex": "P(f(X){=}a,\\,g(Y){=}b)=\\sum_{x:\\,f(x)=a}\\ \\sum_{y:\\,g(y)=b}p_X(x)\\,p_Y(y)=P(f(X){=}a)\\,P(g(Y){=}b)"
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "From this, $E[f(X)\\,g(Y)]=E[f(X)]\\,E[g(Y)]$. For example $E[XY^2]=E[X]\\,E[Y^2]$, and $\\mathrm{Var}(X+2Y^2)=\\mathrm{Var}(X)+4\\,\\mathrm{Var}(Y^2)$ (the variables $X$ and $Y^2$ are independent, so their covariance is 0).",
+      "ro": "De aici $E[f(X)\\,g(Y)]=E[f(X)]\\,E[g(Y)]$. De exemplu $E[XY^2]=E[X]\\,E[Y^2]$, iar $\\mathrm{Var}(X+2Y^2)=\\mathrm{Var}(X)+4\\,\\mathrm{Var}(Y^2)$ (variabilele $X$ și $Y^2$ sunt independente, deci covarianța lor este 0)."
+     }
+    },
+    {
+     "type": "callout",
+     "variant": "trap",
+     "content": {
+      "en": "**Careful:** $E[XY^2]=E[X]\\,E[Y^2]$, **not** $E[X]\\,(E[Y])^2$. The square is applied to $Y$ before the mean (see Lesson 4: $E[g(X)]\\neq g(E[X])$).",
+      "ro": "**Atenție:** $E[XY^2]=E[X]\\,E[Y^2]$, **nu** $E[X]\\,(E[Y])^2$. Pătratul se aplică lui $Y$ înainte de medie (vezi Lecția 4: $E[g(X)]\\neq g(E[X])$)."
+     }
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Course: slide 17. Workbook: p. 33 (ex. 0.10).",
+      "ro": "Cursul: slide 17. Culegerea: p. 33 (ex. 0.10)."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s15",
+   "title": {
+    "en": "Dependence without covariance",
+    "ro": "Dependență fără covarianță"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "ml-l05-why",
+     "prompt": {
+      "en": "$X$ takes the values $-1,\\ 0,\\ 1$, each with probability $\\frac13$, and $Y=X^2$. So $Y=1$ when $X=\\pm1$ and $Y=0$ when $X=0$: $Y$ is completely determined by $X$. Still $\\mathrm{Cov}(X,Y)=0$. Why?",
+      "ro": "$X$ ia valorile $-1,\\ 0,\\ 1$, fiecare cu probabilitatea $\\frac13$, iar $Y=X^2$. Deci $Y=1$ când $X=\\pm1$ și $Y=0$ când $X=0$: $Y$ este complet determinată de $X$. Totuși $\\mathrm{Cov}(X,Y)=0$. De ce?"
+     },
+     "placeholder": {
+      "en": "Write how you think it is explained",
+      "ro": "Scrie cum crezi că se explică"
+     },
+     "answer": {
+      "en": "$E[X]=\\frac13(-1+0+1)=0$ and $E[XY]=E[X^3]=\\frac13(-1+0+1)=0$, so $\\mathrm{Cov}=E[XY]-E[X]\\,E[Y]=0$. The values $-1$ and $1$ give the same value $Y=1$, but $X$ has opposite signs, and their contributions to $E[XY]$ cancel. The covariance measures only a **linear** trend (a line $Y\\approx aX+b$); here the link is a parabola.",
+      "ro": "$E[X]=\\frac13(-1+0+1)=0$ și $E[XY]=E[X^3]=\\frac13(-1+0+1)=0$, deci $\\mathrm{Cov}=E[XY]-E[X]\\,E[Y]=0$. Valorile $-1$ și $1$ dau aceeași valoare $Y=1$, dar $X$ are semne opuse, iar contribuțiile lor la $E[XY]$ se anulează. Covarianța măsoară doar o tendință **liniară** (o dreaptă $Y\\approx aX+b$); aici legătura este o parabolă."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s16",
+   "title": {
+    "en": "A conditional from a joint table",
+    "ro": "Condiționata dintr-un tabel comun"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-q1",
+     "question": {
+      "en": "For the joint distribution in the table (the first column is $X$, the second is $Y$), what is $P(Y=1\\mid X=1)$?",
+      "ro": "Pentru distribuția comună din tabel (prima coloană este $X$, a doua este $Y$), cât este $P(Y=1\\mid X=1)$?"
+     },
+     "table": {
+      "columns": [
+       "X",
+       "Y",
+       "p(x, y)"
+      ],
+      "rows": [
+       [
+        "0",
+        "0",
+        "0,2"
+       ],
+       [
+        "0",
+        "1",
+        "0,2"
+       ],
+       [
+        "1",
+        "0",
+        "0,1"
+       ],
+       [
+        "1",
+        "1",
+        "0,5"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution: the first column is X, the second is Y",
+       "ro": "Distribuția comună: prima coloană este X, a doua este Y"
+      }
+     },
+     "check": {
+      "formula": "a/b",
+      "data": {
+       "a": 0.5,
+       "b": 0.6,
+       "c": 0.7
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0.5",
+        "ro": "0,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "0.5 is the cell $p(1, 1)$, not divided by $P(X=1)$.",
+        "ro": "0,5 este celula $p(1, 1)$, neîmpărțită la $P(X=1)$."
+       },
+       "misconception": "celula-comuna-in-loc-de-conditionata"
+      },
+      {
+       "text": {
+        "en": "0.7",
+        "ro": "0,7"
+       },
+       "correct": false,
+       "explain": {
+        "en": "0.7 is $P(Y=1)=0.2+0.5$, as if the fact that $X=1$ did not matter.",
+        "ro": "0,7 este $P(Y=1)=0{,}2+0{,}5$, ca și cum faptul că $X=1$ n-ar conta."
+       },
+       "misconception": "marginala-in-loc-de-conditionata"
+      },
+      {
+       "text": {
+        "en": "5/7",
+        "ro": "5/7"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$\\frac57=0.5/0.7$ is $P(X=1\\mid Y=1)$. Here the condition is on $X$.",
+        "ro": "$\\frac57=0{,}5/0{,}7$ este $P(X=1\\mid Y=1)$. Aici condiția este pe $X$."
+       },
+       "misconception": "conditionata-inversa"
+      },
+      {
+       "text": {
+        "en": "5/6",
+        "ro": "5/6"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$P(X=1)=0.1+0.5=0.6$, so $P(Y=1\\mid X=1)=0.5/0.6=\\frac56$.",
+        "ro": "$P(X=1)=0{,}1+0{,}5=0{,}6$, deci $P(Y=1\\mid X=1)=0{,}5/0{,}6=\\frac56$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s17",
+   "title": {
+    "en": "The variance of a sum with covariance",
+    "ro": "Varianța unei sume cu covarianță"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-q2",
+     "question": {
+      "en": "Given $\\mathrm{Var}(X)=2$, $\\mathrm{Var}(Y)=3$ and $\\mathrm{Cov}(X,Y)=-0.5$. What is $\\mathrm{Var}(X+Y)$?",
+      "ro": "Se dau $\\mathrm{Var}(X)=2$, $\\mathrm{Var}(Y)=3$ și $\\mathrm{Cov}(X,Y)=-0{,}5$. Cât este $\\mathrm{Var}(X+Y)$?"
+     },
+     "check": {
+      "formula": "a+b+2*c",
+      "data": {
+       "a": 2,
+       "b": 3,
+       "c": -0.5
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "5",
+        "ro": "5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "5 ignores the covariance. The sum of the variances is right only when $\\mathrm{Cov}=0$.",
+        "ro": "5 ignoră covarianța. Suma varianțelor este corectă numai când $\\mathrm{Cov}=0$."
+       },
+       "misconception": "variabile-independente-tacit"
+      },
+      {
+       "text": {
+        "en": "6",
+        "ro": "6"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The term is $+2\\,\\mathrm{Cov}$, and here $\\mathrm{Cov}$ is negative, so the sum goes down by 1.",
+        "ro": "Termenul este $+2\\,\\mathrm{Cov}$, iar aici $\\mathrm{Cov}$ e negativă, deci suma scade cu 1."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "4",
+        "ro": "4"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$2+3+2\\cdot(-0.5)=4$.",
+        "ro": "$2+3+2\\cdot(-0{,}5)=4$."
+       }
+      },
+      {
+       "text": {
+        "en": "4.5",
+        "ro": "4,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The term is $2\\,\\mathrm{Cov}$, not $\\mathrm{Cov}$.",
+        "ro": "Termenul este $2\\,\\mathrm{Cov}$, nu $\\mathrm{Cov}$."
+       },
+       "misconception": "cov-fara-factorul-2"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s18",
+   "title": {
+    "en": "The correlation of a linear link",
+    "ro": "Corelația unei legături liniare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-q3",
+     "question": {
+      "en": "Given $\\mathrm{Var}(X)=4$ and $Y=-3X$. What is $\\rho(X,Y)$?",
+      "ro": "Se dau $\\mathrm{Var}(X)=4$ și $Y=-3X$. Cât este $\\rho(X,Y)$?"
+     },
+     "check": {
+      "formula": "(a*v)/(sqrt(v)*sqrt(a*a*v))",
+      "data": {
+       "v": 4,
+       "a": -3,
+       "c": -12,
+       "sx": 2,
+       "sy": 6
+      }
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$-1$",
+        "ro": "$-1$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "$\\mathrm{Cov}(X,-3X)=-3\\,\\mathrm{Var}(X)=-12$, $\\sigma_X=2$, $\\sigma_Y=6$, so $\\rho=\\frac{-12}{2\\cdot6}=-1$. An exact linear link gives $|\\rho|=1$.",
+        "ro": "$\\mathrm{Cov}(X,-3X)=-3\\,\\mathrm{Var}(X)=-12$, $\\sigma_X=2$, $\\sigma_Y=6$, deci $\\rho=\\frac{-12}{2\\cdot6}=-1$. O legătură liniară exactă dă $|\\rho|=1$."
+       }
+      },
+      {
+       "text": {
+        "en": "$-3$",
+        "ro": "$-3$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$-3$ is the slope of the line. The coefficient $\\rho$ measures how linear the link is, not the slope, and it stays between $-1$ and $1$.",
+        "ro": "$-3$ este panta dreptei. Coeficientul $\\rho$ măsoară cât de liniară este legătura, nu panta, și rămâne între $-1$ și $1$."
+       },
+       "misconception": "rho-ca-panta"
+      },
+      {
+       "text": {
+        "en": "0",
+        "ro": "0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$\\mathrm{Cov}(X,-3X)=-3\\,\\mathrm{Var}(X)=-12\\neq0$. $Y$ being determined by $X$ does not make the covariance zero.",
+        "ro": "$\\mathrm{Cov}(X,-3X)=-3\\,\\mathrm{Var}(X)=-12\\neq0$. $Y$ fiind determinată de $X$ nu înseamnă covarianță nulă."
+       },
+       "misconception": "cov-0-pentru-ca-y-e-determinata"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s19",
+   "title": {
+    "en": "What zero variance means",
+    "ro": "Ce înseamnă varianța zero"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ml-l05-q4",
+     "question": {
+      "en": "For a variable $X$ we have $\\mathrm{Var}(X)=0$. What does this mean?",
+      "ro": "Pentru o variabilă $X$ avem $\\mathrm{Var}(X)=0$. Ce înseamnă asta?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$X=0$",
+        "ro": "$X=0$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The constant can be any number, for example 5.",
+        "ro": "Constanta poate fi orice număr, de pildă 5."
+       },
+       "misconception": "var-0-inseamna-x-0"
+      },
+      {
+       "text": {
+        "en": "$X$ takes a single value, with probability 1 (it is constant)",
+        "ro": "$X$ ia o singură valoare, cu probabilitate 1 (este constantă)"
+       },
+       "correct": true,
+       "explain": {
+        "en": "The variance measures the spread around the mean; it is 0 only when there is no spread.",
+        "ro": "Varianța măsoară împrăștierea în jurul mediei; este 0 doar când nu există împrăștiere."
+       }
+      },
+      {
+       "text": {
+        "en": "$E[X]=0$",
+        "ro": "$E[X]=0$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The variance measures the spread, not the position: $X=5$ has $E[X]=5$ and $\\mathrm{Var}=0$.",
+        "ro": "Varianța măsoară împrăștierea, nu poziția: $X=5$ are $E[X]=5$ și $\\mathrm{Var}=0$."
+       },
+       "misconception": "var-0-inseamna-media-0"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s20",
+   "title": {
+    "en": "Exercise 0.9.c: Cov(X,Y) = E[XY] − E[X]E[Y]",
+    "ro": "Exercițiul 0.9.c: Cov(X,Y) = E[XY] − E[X]E[Y]"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ml-l05-e1",
+     "exercise": "0.9.c",
+     "claim": {
+      "en": "Show that $\\mathrm{Cov}(X,Y)=E[XY]-E[X]\\,E[Y]$ and deduce that $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$.",
+      "ro": "Arătați că $\\mathrm{Cov}(X,Y)=E[XY]-E[X]\\,E[Y]$ și deduceți că $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$."
+     },
+     "given": {
+      "en": "We start from the definition $\\mathrm{Cov}(X,Y)=E[(X-E[X])(Y-E[Y])]$. The numbers $E[X]$ and $E[Y]$ are constants.",
+      "ro": "Pornim de la definiția $\\mathrm{Cov}(X,Y)=E[(X-E[X])(Y-E[Y])]$. Numerele $E[X]$ și $E[Y]$ sunt constante."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "We expand the brackets: $(X-E[X])(Y-E[Y])=XY-X\\,E[Y]-E[X]\\,Y+E[X]E[Y]$.",
+        "ro": "Desfacem parantezele: $(X-E[X])(Y-E[Y])=XY-X\\,E[Y]-E[X]\\,Y+E[X]E[Y]$."
+       },
+       "why": {
+        "en": "Four products, each with its own sign.",
+        "ro": "Patru produse, fiecare cu semnul lui."
+       },
+       "predict": {
+        "question": {
+         "en": "How do we expand the product $(X-E[X])(Y-E[Y])$?",
+         "ro": "Cum desfacem produsul $(X-E[X])(Y-E[Y])$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$XY+X\\,E[Y]+E[X]\\,Y+E[X]E[Y]$",
+           "ro": "$XY+X\\,E[Y]+E[X]\\,Y+E[X]E[Y]$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "The signs are wrong: $X$ and $E[X]$ enter the first bracket with opposite signs.",
+           "ro": "Semnele sunt greșite: $X$ și $E[X]$ intră în prima paranteză cu semne opuse."
+          },
+          "misconception": "desfacere-cu-semn-gresit"
+         },
+         {
+          "text": {
+           "en": "$XY-X\\,E[Y]-E[X]\\,Y+E[X]E[Y]$",
+           "ro": "$XY-X\\,E[Y]-E[X]\\,Y+E[X]E[Y]$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Each term of the first bracket is multiplied by each term of the second, and the product of two terms with a minus gives a plus.",
+           "ro": "Fiecare termen al primei paranteze se înmulțește cu fiecare termen al celei de-a doua, iar produsul a doi termeni cu minus dă plus."
+          }
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "We take the mean and use the linearity of the mean (see Lesson 4); $E[Y]$ and $E[X]$ come out of the mean, being constants: $E[XY]-E[X]\\,E[Y]-E[X]\\,E[Y]+E[X]E[Y]$.",
+        "ro": "Luăm media și folosim liniaritatea mediei (vezi Lecția 4); $E[Y]$ și $E[X]$ ies în fața mediei, fiind constante: $E[XY]-E[X]\\,E[Y]-E[X]\\,E[Y]+E[X]E[Y]$."
+       }
+      },
+      {
+       "shown": {
+        "en": "The last three terms give $-E[X]E[Y]$, so $\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]$.",
+        "ro": "Ultimii trei termeni dau $-E[X]E[Y]$, deci $\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]$."
+       },
+       "predict": {
+        "question": {
+         "en": "The last three terms are all multiples of $E[X]E[Y]$, with the coefficients $-1$, $-1$ and $+1$. What do they give together?",
+         "ro": "Ultimii trei termeni sunt toți multipli de $E[X]E[Y]$, cu coeficienții $-1$, $-1$ și $+1$. Ce dau împreună?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$-E[X]E[Y]$",
+           "ro": "$-E[X]E[Y]$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "$-1-1+1=-1$ times $E[X]E[Y]$.",
+           "ro": "$-1-1+1=-1$ ori $E[X]E[Y]$."
+          }
+         },
+         {
+          "text": {
+           "en": "$+E[X]E[Y]$",
+           "ro": "$+E[X]E[Y]$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Two terms with a minus and one with a plus give a minus, not a plus.",
+           "ro": "Doi termeni cu minus și unul cu plus dau minus, nu plus."
+          },
+          "misconception": "semn-gresit"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "For the constants $a$ and $b$: $E[aX\\cdot bY]-E[aX]\\,E[bY]=ab\\,\\bigl(E[XY]-E[X]E[Y]\\bigr)$, so $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$.",
+        "ro": "Pentru constantele $a$ și $b$: $E[aX\\cdot bY]-E[aX]\\,E[bY]=ab\\,\\bigl(E[XY]-E[X]E[Y]\\bigr)$, deci $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$."
+       }
+      }
+     ],
+     "end": {
+      "en": "We showed $\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]$ and $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$.",
+      "ro": "Am arătat $\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]$ și $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s21",
+   "title": {
+    "en": "Exercise 0.9.c, with numbers",
+    "ro": "Exercițiul 0.9.c, cu numere"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-e1n",
+     "status": "book",
+     "statement": {
+      "en": "For the variables $X$ and $Y$ we know $E[X]=2$, $E[Y]=3$ and $E[XY]=7$. Compute $\\mathrm{Cov}(X,Y)$ and $\\mathrm{Cov}(2X,5Y)$. Write the answers as fractions or as decimals.",
+      "ro": "Pentru variabilele $X$ și $Y$ se știe $E[X]=2$, $E[Y]=3$ și $E[XY]=7$. Calculează $\\mathrm{Cov}(X,Y)$ și $\\mathrm{Cov}(2X,5Y)$. Scrie răspunsurile ca fracții sau ca zecimale."
+     },
+     "data": {
+      "ex": 2,
+      "ey": 3,
+      "exy": 7,
+      "a": 2,
+      "b": 5
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "$\\mathrm{Cov}(X,Y)$",
+        "ro": "$\\mathrm{Cov}(X,Y)$"
+       },
+       "formula": "exy-ex*ey",
+       "expected": 1
+      },
+      {
+       "id": "c2",
+       "kind": "num",
+       "label": {
+        "en": "$\\mathrm{Cov}(2X,5Y)$",
+        "ro": "$\\mathrm{Cov}(2X,5Y)$"
+       },
+       "formula": "a*b*(exy-ex*ey)",
+       "expected": 10
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "exy",
+       "message": {
+        "en": "You gave $E[XY]$; subtract $E[X]E[Y]$.",
+        "ro": "Ai dat $E[XY]$; scade $E[X]E[Y]$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Use $\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]$, then $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$.",
+       "ro": "Folosește $\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]$, apoi $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$."
+      },
+      {
+       "en": "Put the numbers in the formula: $\\mathrm{Cov}(X,Y)=7-2\\cdot3$, and $\\mathrm{Cov}(2X,5Y)=2\\cdot5\\cdot\\mathrm{Cov}(X,Y)$.",
+       "ro": "Pune numerele în formulă: $\\mathrm{Cov}(X,Y)=7-2\\cdot3$, iar $\\mathrm{Cov}(2X,5Y)=2\\cdot5\\cdot\\mathrm{Cov}(X,Y)$."
+      },
+      {
+       "en": "$\\mathrm{Cov}(X,Y)=7-6=1$ and $\\mathrm{Cov}(2X,5Y)=10\\cdot1=10$.",
+       "ro": "$\\mathrm{Cov}(X,Y)=7-6=1$ și $\\mathrm{Cov}(2X,5Y)=10\\cdot1=10$."
+      }
+     ],
+     "solution": {
+      "en": "$\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]=7-2\\cdot3=1$, and $\\mathrm{Cov}(2X,5Y)=2\\cdot5\\cdot1=10$.",
+      "ro": "$\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]=7-2\\cdot3=1$, iar $\\mathrm{Cov}(2X,5Y)=2\\cdot5\\cdot1=10$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "For the variables $X$ and $Y$ we know $E[X]=1$, $E[Y]=4$ and $E[XY]=9$. Compute $\\mathrm{Cov}(X,Y)$ and $\\mathrm{Cov}(3X,2Y)$. Write the answers as fractions or as decimals.",
+        "ro": "Pentru variabilele $X$ și $Y$ se știe $E[X]=1$, $E[Y]=4$ și $E[XY]=9$. Calculează $\\mathrm{Cov}(X,Y)$ și $\\mathrm{Cov}(3X,2Y)$. Scrie răspunsurile ca fracții sau ca zecimale."
+       },
+       "data": {
+        "ex": 1,
+        "ey": 4,
+        "exy": 9,
+        "a": 3,
+        "b": 2
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "exy-ex*ey",
+         "expected": 5
+        },
+        {
+         "id": "c2",
+         "formula": "a*b*(exy-ex*ey)",
+         "expected": 30
+        }
+       ],
+       "solution": {
+        "en": "$\\mathrm{Cov}(X,Y)=9-1\\cdot4=5$, and $\\mathrm{Cov}(3X,2Y)=3\\cdot2\\cdot5=30$.",
+        "ro": "$\\mathrm{Cov}(X,Y)=9-1\\cdot4=5$, iar $\\mathrm{Cov}(3X,2Y)=3\\cdot2\\cdot5=30$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s22",
+   "title": {
+    "en": "Exercise 0.10: independent, so E[XY] = E[X]E[Y]",
+    "ro": "Exercițiul 0.10: independente, deci E[XY] = E[X]E[Y]"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ml-l05-e2",
+     "exercise": "0.10",
+     "claim": {
+      "en": "Show that, if $X$ and $Y$ are independent, then $E[XY]=E[X]\\,E[Y]$, that is $\\mathrm{Cov}(X,Y)=0$.",
+      "ro": "Arătați că, dacă $X$ și $Y$ sunt independente, atunci $E[XY]=E[X]\\,E[Y]$, adică $\\mathrm{Cov}(X,Y)=0$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "The mean of the product, over all pairs of values: $E[XY]=\\sum_x\\sum_y xy\\,P(X{=}x,\\,Y{=}y)$.",
+        "ro": "Media produsului, pe toate cuplurile de valori: $E[XY]=\\sum_x\\sum_y xy\\,P(X{=}x,\\,Y{=}y)$."
+       },
+       "why": {
+        "en": "Each pair $(x,y)$ contributes the value of the product, $xy$, times the probability of the pair.",
+        "ro": "Fiecare cuplu $(x,y)$ contribuie cu valoarea produsului, $xy$, înmulțită cu probabilitatea cuplului."
+       }
+      },
+      {
+       "shown": {
+        "en": "We replace the joint probability: $E[XY]=\\sum_x\\sum_y xy\\,P(X{=}x)\\,P(Y{=}y)$.",
+        "ro": "Înlocuim probabilitatea comună: $E[XY]=\\sum_x\\sum_y xy\\,P(X{=}x)\\,P(Y{=}y)$."
+       },
+       "predict": {
+        "question": {
+         "en": "What do we use to rewrite $P(X{=}x,\\,Y{=}y)$?",
+         "ro": "Ce folosim ca să rescriem $P(X{=}x,\\,Y{=}y)$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "The equality for a single pair $(x,y)$",
+           "ro": "Egalitatea pentru o singură pereche $(x,y)$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "A single equality would change only one term of the sum; the sum has one term for each pair.",
+           "ro": "O singură egalitate ar schimba un singur termen al sumei; suma are un termen pentru fiecare pereche."
+          },
+          "misconception": "doar-o-celula"
+         },
+         {
+          "text": {
+           "en": "Independence: $P(X{=}x,\\,Y{=}y)=P(X{=}x)\\,P(Y{=}y)$ for all pairs",
+           "ro": "Independența: $P(X{=}x,\\,Y{=}y)=P(X{=}x)\\,P(Y{=}y)$ pentru toate perechile"
+          },
+          "correct": true,
+          "explain": {
+           "en": "The sum runs over all pairs, and independence gives the equality on each of them.",
+           "ro": "Suma străbate toate perechile, iar independența dă egalitatea pe fiecare."
+          }
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "The factors separate: $E[XY]=\\sum_x x\\,P(X{=}x)\\cdot\\sum_y y\\,P(Y{=}y)$.",
+        "ro": "Factorii se separă: $E[XY]=\\sum_x x\\,P(X{=}x)\\cdot\\sum_y y\\,P(Y{=}y)$."
+       },
+       "why": {
+        "en": "The factor $x\\,P(X{=}x)$ does not depend on $y$, so it comes out in front of the sum over $y$; what stays in the sum depends only on $y$.",
+        "ro": "Factorul $x\\,P(X{=}x)$ nu depinde de $y$, deci iese în fața sumei după $y$; ce rămâne în sumă depinde doar de $y$."
+       }
+      },
+      {
+       "shown": {
+        "en": "That is $E[XY]=E[X]\\,E[Y]$, so $\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]=0$.",
+        "ro": "Adică $E[XY]=E[X]\\,E[Y]$, deci $\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]=0$."
+       },
+       "why": {
+        "en": "The first sum is the definition of $E[X]$, the second is the definition of $E[Y]$.",
+        "ro": "Prima sumă este definiția lui $E[X]$, a doua este definiția lui $E[Y]$."
+       }
+      }
+     ],
+     "end": {
+      "ro": "Independente implică $\\mathrm{Cov}=0$. Reciproca este falsă: exercițiul 0.11, mai departe, dă un exemplu.",
+      "en": "Independent implies $\\mathrm{Cov}=0$. The converse is false: exercise 0.11, further on, gives an example."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s23",
+   "title": {
+    "en": "Exercise 0.10, with numbers",
+    "ro": "Exercițiul 0.10, cu numere"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-e2n",
+     "status": "book",
+     "statement": {
+      "en": "The variables $X$ and $Y$ are independent, with $E[X]=2$ and $E[Y]=3$. Compute $E[XY]$ and $\\mathrm{Cov}(X,Y)$. Write the answers as fractions or as decimals.",
+      "ro": "Variabilele $X$ și $Y$ sunt independente, cu $E[X]=2$ și $E[Y]=3$. Calculează $E[XY]$ și $\\mathrm{Cov}(X,Y)$. Scrie răspunsurile ca fracții sau ca zecimale."
+     },
+     "data": {
+      "ex": 2,
+      "ey": 3
+     },
+     "fields": [
+      {
+       "id": "e",
+       "kind": "num",
+       "label": {
+        "en": "$E[XY]$",
+        "ro": "$E[XY]$"
+       },
+       "formula": "ex*ey",
+       "expected": 6
+      },
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "$\\mathrm{Cov}(X,Y)$",
+        "ro": "$\\mathrm{Cov}(X,Y)$"
+       },
+       "formula": "ex*ey-ex*ey",
+       "expected": 0
+      }
+     ],
+     "detectors": [
+      {
+       "field": "e",
+       "formula": "ex+ey",
+       "message": {
+        "en": "You added the means; for independent variables the means are multiplied.",
+        "ro": "Ai adunat mediile; pentru variabile independente mediile se înmulțesc."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "For independent variables, the mean of the product is the product of the means.",
+       "ro": "Pentru variabile independente, media produsului este produsul mediilor."
+      },
+      {
+       "en": "$E[XY]=E[X]\\,E[Y]=2\\cdot3$, and $\\mathrm{Cov}=E[XY]-E[X]E[Y]$.",
+       "ro": "$E[XY]=E[X]\\,E[Y]=2\\cdot3$, iar $\\mathrm{Cov}=E[XY]-E[X]E[Y]$."
+      },
+      {
+       "en": "$E[XY]=6$ and $\\mathrm{Cov}=6-2\\cdot3=0$.",
+       "ro": "$E[XY]=6$ și $\\mathrm{Cov}=6-2\\cdot3=0$."
+      }
+     ],
+     "solution": {
+      "en": "$E[XY]=E[X]\\,E[Y]=2\\cdot3=6$, so $\\mathrm{Cov}(X,Y)=6-6=0$.",
+      "ro": "$E[XY]=E[X]\\,E[Y]=2\\cdot3=6$, deci $\\mathrm{Cov}(X,Y)=6-6=0$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The variables $X$ and $Y$ are independent, with $E[X]=4$ and $E[Y]=2$. Compute $E[XY]$ and $\\mathrm{Cov}(X,Y)$. Write the answers as fractions or as decimals.",
+        "ro": "Variabilele $X$ și $Y$ sunt independente, cu $E[X]=4$ și $E[Y]=2$. Calculează $E[XY]$ și $\\mathrm{Cov}(X,Y)$. Scrie răspunsurile ca fracții sau ca zecimale."
+       },
+       "data": {
+        "ex": 4,
+        "ey": 2
+       },
+       "fields": [
+        {
+         "id": "e",
+         "formula": "ex*ey",
+         "expected": 8
+        },
+        {
+         "id": "c",
+         "formula": "ex*ey-ex*ey",
+         "expected": 0
+        }
+       ],
+       "solution": {
+        "en": "$E[XY]=4\\cdot2=8$, so $\\mathrm{Cov}(X,Y)=8-8=0$.",
+        "ro": "$E[XY]=4\\cdot2=8$, deci $\\mathrm{Cov}(X,Y)=8-8=0$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s24",
+   "title": {
+    "en": "Exercise 0.11: Cov = 0, but dependent",
+    "ro": "Exercițiul 0.11: Cov = 0, dar dependente"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-e3",
+     "exercise": [
+      "0.11"
+     ],
+     "status": "book",
+     "statement": {
+      "en": "The variables $X$ and $Y$ have the joint distribution in the table. **a.** Show that $\\mathrm{Cov}(X,Y)=0$ although $X$ and $Y$ are not independent: fill in the marginals, the means, $\\mathrm{Cov}$ and compare the cell $(0,0)$ with the product of its marginals. **b.** If $X$ and $Y$ take only the values 0 and 1 and $E[XY]=E[X]\\,E[Y]$, are they independent? Write the answers as fractions or as decimals.",
+      "ro": "Variabilele $X$ și $Y$ au distribuția comună din tabel. **a.** Arată că $\\mathrm{Cov}(X,Y)=0$ deși $X$ și $Y$ nu sunt independente: completează marginalele, mediile, $\\mathrm{Cov}$ și compară celula $(0,0)$ cu produsul marginalelor ei. **b.** Dacă $X$ și $Y$ iau doar valorile 0 și 1 și $E[XY]=E[X]\\,E[Y]$, sunt ele independente? Scrie răspunsurile ca fracții sau ca zecimale."
+     },
+     "table": {
+      "columns": [
+       "X",
+       "Y",
+       "P"
+      ],
+      "rows": [
+       [
+        0,
+        0,
+        "1/3"
+       ],
+       [
+        1,
+        0,
+        0
+       ],
+       [
+        2,
+        0,
+        "1/3"
+       ],
+       [
+        0,
+        1,
+        0
+       ],
+       [
+        1,
+        1,
+        "1/3"
+       ],
+       [
+        2,
+        1,
+        0
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution P(X, Y)",
+       "ro": "Distribuția comună P(X, Y)"
+      }
+     },
+     "fields": [
+      {
+       "id": "px",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X=0)$",
+        "ro": "$P(X=0)$"
+       },
+       "formula": "P(T,\"X=0\")",
+       "expected": "1/3"
+      },
+      {
+       "id": "py0",
+       "kind": "frac",
+       "label": {
+        "en": "$P(Y=0)$",
+        "ro": "$P(Y=0)$"
+       },
+       "formula": "P(T,\"Y=0\")",
+       "expected": "2/3"
+      },
+      {
+       "id": "ex",
+       "kind": "frac",
+       "label": {
+        "en": "$E[X]$",
+        "ro": "$E[X]$"
+       },
+       "formula": "E([0,1,2],[P(T,\"X=0\"),P(T,\"X=1\"),P(T,\"X=2\")])",
+       "expected": "1"
+      },
+      {
+       "id": "ey",
+       "kind": "frac",
+       "label": {
+        "en": "$E[Y]$",
+        "ro": "$E[Y]$"
+       },
+       "formula": "E([0,1],[P(T,\"Y=0\"),P(T,\"Y=1\")])",
+       "expected": "1/3"
+      },
+      {
+       "id": "exy",
+       "kind": "frac",
+       "label": {
+        "en": "$E[XY]$",
+        "ro": "$E[XY]$"
+       },
+       "formula": "1*1*P(T,\"X=1 & Y=1\")+2*1*P(T,\"X=2 & Y=1\")",
+       "expected": "1/3"
+      },
+      {
+       "id": "cov",
+       "kind": "frac",
+       "label": {
+        "en": "$\\mathrm{Cov}(X,Y)$",
+        "ro": "$\\mathrm{Cov}(X,Y)$"
+       },
+       "formula": "(1*1*P(T,\"X=1 & Y=1\")+2*1*P(T,\"X=2 & Y=1\"))-(E([0,1,2],[P(T,\"X=0\"),P(T,\"X=1\"),P(T,\"X=2\")]))*(E([0,1],[P(T,\"Y=0\"),P(T,\"Y=1\")]))",
+       "expected": "0"
+      },
+      {
+       "id": "c00",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X{=}0)\\,P(Y{=}0)$",
+        "ro": "$P(X{=}0)\\,P(Y{=}0)$"
+       },
+       "formula": "P(T,\"X=0\")*P(T,\"Y=0\")",
+       "expected": "2/9"
+      },
+      {
+       "id": "ind",
+       "kind": "tf",
+       "label": {
+        "ro": "a. Afirmația: $X$ și $Y$ sunt independente.",
+        "en": "a. The claim: $X$ and $Y$ are independent."
+       },
+       "formula": "P(T,\"X=0 & Y=0\") == P(T,\"X=0\")*P(T,\"Y=0\")",
+       "expected": "false"
+      },
+      {
+       "id": "b",
+       "kind": "tf",
+       "label": {
+        "ro": "b. Afirmația: două variabile cu valorile 0 și 1 și cu $E[XY]=E[X]\\,E[Y]$ sunt independente.",
+        "en": "b. The claim: two variables with the values 0 and 1 and with $E[XY]=E[X]\\,E[Y]$ are independent."
+       },
+       "formula": "true",
+       "expected": "true"
+      }
+     ],
+     "detectors": [
+      {
+       "field": "cov",
+       "formula": "P(T,\"X=1 & Y=1\")",
+       "message": {
+        "en": "You forgot to subtract $E[X]E[Y]=1\\cdot\\frac13$: $\\mathrm{Cov}=\\frac13-\\frac13=0$.",
+        "ro": "Ai uitat să scazi $E[X]E[Y]=1\\cdot\\frac13$: $\\mathrm{Cov}=\\frac13-\\frac13=0$."
+       }
+      },
+      {
+       "field": "ind",
+       "formula": "true",
+       "message": {
+        "en": "A zero covariance does not guarantee independence; the cell $(0,0)$ fails: $\\frac13\\neq\\frac29$.",
+        "ro": "Covarianța nulă nu garantează independența; celula $(0,0)$ nu verifică: $\\frac13\\neq\\frac29$."
+       }
+      },
+      {
+       "field": "b",
+       "formula": "false",
+       "message": {
+        "en": "For binary variables, a zero covariance gives one cell; the other three follow from the marginals.",
+        "ro": "Pentru variabile binare, covarianța nulă dă o celulă; celelalte trei se deduc din marginale."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "The marginals: add the cells over $X$ and over $Y$. For $E[XY]$ only the cell $(1,1)$ matters, the only one with $X\\cdot Y\\neq0$ and non-zero probability.",
+       "ro": "Marginalele: adună celulele pe $X$ și pe $Y$. La $E[XY]$ contează doar celula $(1,1)$, singura cu $X\\cdot Y\\neq0$ și probabilitate nenulă."
+      },
+      {
+       "en": "$E[X]=0\\cdot P(X{=}0)+1\\cdot P(X{=}1)+2\\cdot P(X{=}2)$, then $\\mathrm{Cov}=E[XY]-E[X]E[Y]$. Compare the cell $(0,0)$ with $P(X{=}0)\\,P(Y{=}0)$.",
+       "ro": "$E[X]=0\\cdot P(X{=}0)+1\\cdot P(X{=}1)+2\\cdot P(X{=}2)$, apoi $\\mathrm{Cov}=E[XY]-E[X]E[Y]$. Compară celula $(0,0)$ cu $P(X{=}0)\\,P(Y{=}0)$."
+      },
+      {
+       "en": "Each value of $X$ has probability $\\frac13$; $P(Y)=\\frac23,\\ \\frac13$; $E[X]=1$, $E[Y]=\\frac13$, $E[XY]=\\frac13$, so $\\mathrm{Cov}=\\frac13-1\\cdot\\frac13=0$; but the cell $(0,0)$ is $\\frac13\\neq\\frac13\\cdot\\frac23=\\frac29$.",
+       "ro": "Fiecare valoare a lui $X$ are probabilitatea $\\frac13$; $P(Y)=\\frac23,\\ \\frac13$; $E[X]=1$, $E[Y]=\\frac13$, $E[XY]=\\frac13$, deci $\\mathrm{Cov}=\\frac13-1\\cdot\\frac13=0$; dar celula $(0,0)$ este $\\frac13\\neq\\frac13\\cdot\\frac23=\\frac29$."
+      }
+     ],
+     "solution": {
+      "en": "**a.** $P(X)=\\frac13$ for each of 0, 1, 2; $P(Y)=\\frac23,\\ \\frac13$; $E[X]=1$, $E[Y]=\\frac13$, $E[XY]=\\frac13$, so $\\mathrm{Cov}=\\frac13-1\\cdot\\frac13=0$. But $P(X{=}0,\\,Y{=}0)=\\frac13\\neq\\frac13\\cdot\\frac23=\\frac29$, so they are not independent. **b.** For binary variables, $E[X]=P(X{=}1)$, $E[Y]=P(Y{=}1)$ and $E[XY]=P(X{=}1,\\,Y{=}1)$; a zero covariance means $P(X{=}1,\\,Y{=}1)=P(X{=}1)\\,P(Y{=}1)$. The other three cells follow from $P(A\\cap\\bar B)=P(A)-P(A\\cap B)$: for example $P(X{=}1,\\,Y{=}0)=P(X{=}1)-P(X{=}1)P(Y{=}1)=P(X{=}1)\\,P(Y{=}0)$; the other two the same way. So all four equalities of independence hold.",
+      "ro": "**a.** $P(X)=\\frac13$ pentru fiecare dintre 0, 1, 2; $P(Y)=\\frac23,\\ \\frac13$; $E[X]=1$, $E[Y]=\\frac13$, $E[XY]=\\frac13$, deci $\\mathrm{Cov}=\\frac13-1\\cdot\\frac13=0$. Dar $P(X{=}0,\\,Y{=}0)=\\frac13\\neq\\frac13\\cdot\\frac23=\\frac29$, deci nu sunt independente. **b.** Pentru variabile binare, $E[X]=P(X{=}1)$, $E[Y]=P(Y{=}1)$ și $E[XY]=P(X{=}1,\\,Y{=}1)$; covarianța nulă înseamnă $P(X{=}1,\\,Y{=}1)=P(X{=}1)\\,P(Y{=}1)$. Celelalte trei celule se deduc din $P(A\\cap\\bar B)=P(A)-P(A\\cap B)$: de pildă $P(X{=}1,\\,Y{=}0)=P(X{=}1)-P(X{=}1)P(Y{=}1)=P(X{=}1)\\,P(Y{=}0)$; la fel celelalte două. Deci toate cele patru egalități ale independenței au loc."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The variables $X$ and $Y$ have the joint distribution in the table. **a.** Show that $\\mathrm{Cov}(X,Y)=0$ although $X$ and $Y$ are not independent: fill in the marginals, the means, $\\mathrm{Cov}$ and compare the cell $(0,0)$ with the product of its marginals. **b.** If $X$ and $Y$ take only the values 0 and 1 and $E[XY]=E[X]\\,E[Y]$, are they independent? Write the answers as fractions or as decimals.",
+        "ro": "Variabilele $X$ și $Y$ au distribuția comună din tabel. **a.** Arată că $\\mathrm{Cov}(X,Y)=0$ deși $X$ și $Y$ nu sunt independente: completează marginalele, mediile, $\\mathrm{Cov}$ și compară celula $(0,0)$ cu produsul marginalelor ei. **b.** Dacă $X$ și $Y$ iau doar valorile 0 și 1 și $E[XY]=E[X]\\,E[Y]$, sunt ele independente? Scrie răspunsurile ca fracții sau ca zecimale."
+       },
+       "table": {
+        "columns": [
+         "X",
+         "Y",
+         "P"
+        ],
+        "rows": [
+         [
+          0,
+          0,
+          "1/4"
+         ],
+         [
+          1,
+          0,
+          0
+         ],
+         [
+          2,
+          0,
+          "1/4"
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          1,
+          1,
+          "1/2"
+         ],
+         [
+          2,
+          1,
+          0
+         ]
+        ],
+        "caption": {
+         "en": "Joint distribution P(X, Y)",
+         "ro": "Distribuția comună P(X, Y)"
+        }
+       },
+       "fields": [
+        {
+         "id": "px",
+         "formula": "P(T,\"X=0\")",
+         "expected": "1/4"
+        },
+        {
+         "id": "py0",
+         "formula": "P(T,\"Y=0\")",
+         "expected": "1/2"
+        },
+        {
+         "id": "ex",
+         "formula": "E([0,1,2],[P(T,\"X=0\"),P(T,\"X=1\"),P(T,\"X=2\")])",
+         "expected": "1"
+        },
+        {
+         "id": "ey",
+         "formula": "E([0,1],[P(T,\"Y=0\"),P(T,\"Y=1\")])",
+         "expected": "1/2"
+        },
+        {
+         "id": "exy",
+         "formula": "1*1*P(T,\"X=1 & Y=1\")+2*1*P(T,\"X=2 & Y=1\")",
+         "expected": "1/2"
+        },
+        {
+         "id": "cov",
+         "formula": "(1*1*P(T,\"X=1 & Y=1\")+2*1*P(T,\"X=2 & Y=1\"))-(E([0,1,2],[P(T,\"X=0\"),P(T,\"X=1\"),P(T,\"X=2\")]))*(E([0,1],[P(T,\"Y=0\"),P(T,\"Y=1\")]))",
+         "expected": "0"
+        },
+        {
+         "id": "c00",
+         "formula": "P(T,\"X=0\")*P(T,\"Y=0\")",
+         "expected": "1/8"
+        },
+        {
+         "id": "ind",
+         "formula": "P(T,\"X=0 & Y=0\") == P(T,\"X=0\")*P(T,\"Y=0\")",
+         "expected": "false"
+        },
+        {
+         "id": "b",
+         "formula": "true",
+         "expected": "true"
+        }
+       ],
+       "solution": {
+        "en": "$P(X)=\\frac14,\\ \\frac12,\\ \\frac14$; $P(Y)=\\frac12,\\ \\frac12$; $E[X]=1$, $E[Y]=\\frac12$, $E[XY]=\\frac12$, so $\\mathrm{Cov}=0$; but the cell $(0,0)$ is $\\frac14\\neq\\frac18$, so they are not independent. In **b**, the answer stays true.",
+        "ro": "$P(X)=\\frac14,\\ \\frac12,\\ \\frac14$; $P(Y)=\\frac12,\\ \\frac12$; $E[X]=1$, $E[Y]=\\frac12$, $E[XY]=\\frac12$, deci $\\mathrm{Cov}=0$; dar celula $(0,0)$ este $\\frac14\\neq\\frac18$, deci nu sunt independente. La **b**, răspunsul rămâne adevărat."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s25",
+   "title": {
+    "en": "Exercise 0.13: which information specifies the joint distribution",
+    "ro": "Exercițiul 0.13: ce informații specifică distribuția comună"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-e4",
+     "exercise": [
+      "0.13"
+     ],
+     "status": "book",
+     "statement": {
+      "en": "Three Boolean variables $X, Y, Z$ (each takes the values true or false; $\\neg X$ reads not-$X$, that is $X$ is false). Which of the sets A, B, C, D in the table are enough to specify the joint distribution $P(x,y,z)$? A complement ($P(\\neg X\\mid Z)=1-P(X\\mid Z)$) counts as known when its probability is known. Answer true (enough) or false for each set, then say how many free numbers specify a joint distribution over three Boolean variables (a whole number, no decimals).",
+      "ro": "Trei variabile booleene $X, Y, Z$ (fiecare ia valorile adevărat sau fals; $\\neg X$ se citește non-$X$, adică $X$ este fals). Care dintre seturile A, B, C, D din tabel sunt suficiente pentru a specifica distribuția comună $P(x,y,z)$? Un complement ($P(\\neg X\\mid Z)=1-P(X\\mid Z)$) se consideră cunoscut când se cunoaște probabilitatea lui. Răspunde adevărat (suficient) sau fals pentru fiecare set, apoi spune câte numere libere specifică o distribuție comună pe trei variabile booleene (număr întreg, fără zecimale)."
+     },
+     "table": {
+      "columns": [
+       "A",
+       "B",
+       "C",
+       "D"
+      ],
+      "rows": [
+       [
+        "$P(\\neg X\\mid Z)$",
+        "$P(\\neg X\\mid\\neg Z)$",
+        "$P(X\\mid Z)$",
+        "$P(X\\mid Z)$"
+       ],
+       [
+        "$P(\\neg X\\mid\\neg Z)$",
+        "$P(X\\mid\\neg Z)$",
+        "$P(X\\mid\\neg Z)$",
+        "$P(X\\mid\\neg Z)$"
+       ],
+       [
+        "$P(\\neg Y\\mid X,Z)$",
+        "$P(Y\\mid X,Z)$",
+        "$P(Y\\mid X,Z)$",
+        "$P(Y\\mid X,Z)$"
+       ],
+       [
+        "$P(\\neg Y\\mid X,\\neg Z)$",
+        "$P(Y\\mid X,\\neg Z)$",
+        "$P(Y\\mid X,\\neg Z)$",
+        "$P(Y\\mid X,\\neg Z)$"
+       ],
+       [
+        "$P(\\neg Y\\mid\\neg X,Z)$",
+        "$P(Y\\mid\\neg X,Z)$",
+        "$P(Y\\mid\\neg X,Z)$",
+        "$P(\\neg Y\\mid\\neg X,\\neg Z)$"
+       ],
+       [
+        "$P(\\neg Y\\mid\\neg X,\\neg Z)$",
+        "$P(Y\\mid\\neg X,\\neg Z)$",
+        "$P(\\neg Y\\mid\\neg X,\\neg Z)$",
+        "$P(Y\\mid\\neg X,\\neg Z)$"
+       ],
+       [
+        "$P(Z)$",
+        "$P(Z)$",
+        "$P(\\neg Z)$",
+        "$P(Z)$"
+       ]
+      ],
+      "caption": {
+       "en": "The sets of probabilities A, B, C, D",
+       "ro": "Seturile de probabilități A, B, C, D"
+      }
+     },
+     "fields": [
+      {
+       "id": "A",
+       "kind": "tf",
+       "label": {
+        "ro": "Setul A este suficient.",
+        "en": "Set A is enough."
+       },
+       "formula": "true",
+       "expected": "true"
+      },
+      {
+       "id": "B",
+       "kind": "tf",
+       "label": {
+        "ro": "Setul B este suficient.",
+        "en": "Set B is enough."
+       },
+       "formula": "false",
+       "expected": "false"
+      },
+      {
+       "id": "C",
+       "kind": "tf",
+       "label": {
+        "ro": "Setul C este suficient.",
+        "en": "Set C is enough."
+       },
+       "formula": "true",
+       "expected": "true"
+      },
+      {
+       "id": "D",
+       "kind": "tf",
+       "label": {
+        "ro": "Setul D este suficient.",
+        "en": "Set D is enough."
+       },
+       "formula": "false",
+       "expected": "false"
+      },
+      {
+       "id": "n",
+       "kind": "num",
+       "label": {
+        "en": "The number of free numbers (whole)",
+        "ro": "Numărul de numere libere (întreg)"
+       },
+       "formula": "2^3-1",
+       "expected": 7
+      }
+     ],
+     "detectors": [
+      {
+       "field": "n",
+       "formula": "2^3",
+       "message": {
+        "en": "The 8 cells sum to 1, so one follows from the others: 7 free numbers.",
+        "ro": "Cele 8 celule au suma 1, deci una se deduce din celelalte: 7 numere libere."
+       }
+      },
+      {
+       "field": "B",
+       "formula": "true",
+       "message": {
+        "en": "Set B repeats the information for $\\neg Z$ and does not give $P(X\\mid Z)$.",
+        "ro": "Setul B repetă informația pentru $\\neg Z$ și nu dă $P(X\\mid Z)$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Use $P(X,Y,Z)=P(Z)\\,P(X\\mid Z)\\,P(Y\\mid X,Z)$: which factors do you need?",
+       "ro": "Folosește $P(X,Y,Z)=P(Z)\\,P(X\\mid Z)\\,P(Y\\mid X,Z)$: de ce factori ai nevoie?"
+      },
+      {
+       "en": "You need $P(Z)$ (or its complement), $P(X\\mid Z)$ and $P(X\\mid\\neg Z)$, and $P(Y\\mid x,z)$ for each of the 4 pairs $(x,z)$ (or their complements). Check each set: is a pair missing, or does the same information appear twice?",
+       "ro": "Ai nevoie de $P(Z)$ (sau complementul), de $P(X\\mid Z)$ și $P(X\\mid\\neg Z)$, și de $P(Y\\mid x,z)$ pentru fiecare dintre cele 4 perechi $(x,z)$ (sau complementele lor). Verifică fiecare set: lipsește vreo pereche sau apare aceeași informație de două ori?"
+      },
+      {
+       "en": "A and C have everything needed. B gives the information for $\\neg Z$ twice and says nothing about $P(X\\mid Z)$. D gives the information for $(\\neg X,\\neg Z)$ twice and says nothing about $P(Y\\mid\\neg X,Z)$. The 8 cells sum to 1: 7 free numbers.",
+       "ro": "A și C au tot ce trebuie. B dă de două ori informația pentru $\\neg Z$ și nu spune nimic despre $P(X\\mid Z)$. D dă de două ori informația pentru $(\\neg X,\\neg Z)$ și nu spune nimic despre $P(Y\\mid\\neg X,Z)$. Cele 8 celule au suma 1: 7 numere libere."
+      }
+     ],
+     "solution": {
+      "en": "**A:** yes; from $P(\\neg X\\mid Z)$ and $P(\\neg X\\mid\\neg Z)$ we get $P(X\\mid Z)$ and $P(X\\mid\\neg Z)$, the four $P(\\neg Y\\mid\\cdot)$ give the four $P(Y\\mid\\cdot)$, and $P(Z)$ gives $P(\\neg Z)$. **B:** no; it gives $P(\\neg X\\mid\\neg Z)$ and $P(X\\mid\\neg Z)$ (the same information twice) and nothing about $P(X\\mid Z)$. **C:** yes; it has everything, through complements. **D:** no; it gives $P(\\neg Y\\mid\\neg X,\\neg Z)$ and $P(Y\\mid\\neg X,\\neg Z)$ (twice) and nothing about $P(Y\\mid\\neg X,Z)$. There are 7 free numbers (the 8 cells sum to 1).",
+      "ro": "**A:** da; din $P(\\neg X\\mid Z)$ și $P(\\neg X\\mid\\neg Z)$ se obțin $P(X\\mid Z)$ și $P(X\\mid\\neg Z)$, cele patru $P(\\neg Y\\mid\\cdot)$ dau cele patru $P(Y\\mid\\cdot)$, iar $P(Z)$ dă $P(\\neg Z)$. **B:** nu; dă $P(\\neg X\\mid\\neg Z)$ și $P(X\\mid\\neg Z)$ (aceeași informație de două ori) și nimic despre $P(X\\mid Z)$. **C:** da; are tot, prin complemente. **D:** nu; dă $P(\\neg Y\\mid\\neg X,\\neg Z)$ și $P(Y\\mid\\neg X,\\neg Z)$ (de două ori) și nimic despre $P(Y\\mid\\neg X,Z)$. Sunt 7 numere libere (cele 8 celule au suma 1)."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Three Boolean variables $X, Y, Z$ (each takes the values true or false; $\\neg X$ reads not-$X$, that is $X$ is false). Which of the sets A, B, C, D in the table are enough to specify the joint distribution $P(x,y,z)$? A complement counts as known when its probability is known. Answer true (enough) or false for each set, then say how many free numbers specify a joint distribution over three Boolean variables (a whole number, no decimals).",
+        "ro": "Trei variabile booleene $X, Y, Z$ (fiecare ia valorile adevărat sau fals; $\\neg X$ se citește non-$X$, adică $X$ este fals). Care dintre seturile A, B, C, D din tabel sunt suficiente pentru a specifica distribuția comună $P(x,y,z)$? Un complement se consideră cunoscut când se cunoaște probabilitatea lui. Răspunde adevărat (suficient) sau fals pentru fiecare set, apoi spune câte numere libere specifică o distribuție comună pe trei variabile booleene (număr întreg, fără zecimale)."
+       },
+       "table": {
+        "columns": [
+         "A",
+         "B",
+         "C",
+         "D"
+        ],
+        "rows": [
+         [
+          "$P(Z)$",
+          "$P(\\neg Z)$",
+          "$P(Z)$",
+          "$P(\\neg Z)$"
+         ],
+         [
+          "$P(X\\mid Z)$",
+          "$P(X\\mid Z)$",
+          "$P(X\\mid Z)$",
+          "$P(\\neg X\\mid Z)$"
+         ],
+         [
+          "$P(X\\mid\\neg Z)$",
+          "$P(\\neg X\\mid Z)$",
+          "$P(X\\mid\\neg Z)$",
+          "$P(\\neg X\\mid\\neg Z)$"
+         ],
+         [
+          "$P(Y\\mid X,Z)$",
+          "$P(Y\\mid X,Z)$",
+          "$P(Y\\mid X,Z)$",
+          "$P(\\neg Y\\mid X,Z)$"
+         ],
+         [
+          "$P(Y\\mid X,\\neg Z)$",
+          "$P(Y\\mid X,\\neg Z)$",
+          "$P(\\neg Y\\mid X,Z)$",
+          "$P(\\neg Y\\mid X,\\neg Z)$"
+         ],
+         [
+          "$P(Y\\mid\\neg X,Z)$",
+          "$P(Y\\mid\\neg X,Z)$",
+          "$P(Y\\mid\\neg X,Z)$",
+          "$P(\\neg Y\\mid\\neg X,Z)$"
+         ],
+         [
+          "$P(Y\\mid\\neg X,\\neg Z)$",
+          "$P(Y\\mid\\neg X,\\neg Z)$",
+          "$P(Y\\mid\\neg X,\\neg Z)$",
+          "$P(\\neg Y\\mid\\neg X,\\neg Z)$"
+         ]
+        ],
+        "caption": {
+         "en": "The sets of probabilities A, B, C, D",
+         "ro": "Seturile de probabilități A, B, C, D"
+        }
+       },
+       "fields": [
+        {
+         "id": "A",
+         "formula": "true",
+         "expected": "true"
+        },
+        {
+         "id": "B",
+         "formula": "false",
+         "expected": "false"
+        },
+        {
+         "id": "C",
+         "formula": "false",
+         "expected": "false"
+        },
+        {
+         "id": "D",
+         "formula": "true",
+         "expected": "true"
+        },
+        {
+         "id": "n",
+         "formula": "2^3-1",
+         "expected": 7
+        }
+       ],
+       "solution": {
+        "en": "**A:** yes, it has $P(Z)$, $P(X\\mid Z)$, $P(X\\mid\\neg Z)$ and the four $P(Y\\mid\\cdot)$. **B:** no, it gives $P(X\\mid Z)$ and $P(\\neg X\\mid Z)$ (the same information twice) and nothing about $P(X\\mid\\neg Z)$. **C:** no, it gives $P(Y\\mid X,Z)$ and $P(\\neg Y\\mid X,Z)$ (twice) and nothing about $P(Y\\mid X,\\neg Z)$. **D:** yes, it has everything through complements. There are 7 free numbers.",
+        "ro": "**A:** da, are $P(Z)$, $P(X\\mid Z)$, $P(X\\mid\\neg Z)$ și cele patru $P(Y\\mid\\cdot)$. **B:** nu, dă $P(X\\mid Z)$ și $P(\\neg X\\mid Z)$ (aceeași informație de două ori) și nimic despre $P(X\\mid\\neg Z)$. **C:** nu, dă $P(Y\\mid X,Z)$ și $P(\\neg Y\\mid X,Z)$ (de două ori) și nimic despre $P(Y\\mid X,\\neg Z)$. **D:** da, are totul prin complemente. Sunt 7 numere libere."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s26",
+   "title": {
+    "en": "Exercise 0.19: the correlation is between −1 and 1",
+    "ro": "Exercițiul 0.19: corelația este între −1 și 1"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ml-l05-e5",
+     "exercise": [
+      "0.19.a",
+      "0.19.b"
+     ],
+     "claim": {
+      "en": "Let $\\rho(X,Y)=\\dfrac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\sigma_Y}$, with $\\mathrm{Var}(X)\\neq0$ and $\\mathrm{Var}(Y)\\neq0$ (the standard deviation is $\\sigma_X=\\sqrt{\\mathrm{Var}(X)}$). **a.** Show that $-1\\le\\rho\\le1$. **b.** Show that, if $\\rho=\\pm1$, then $Y=aX+b$: with $a=\\sigma_Y/\\sigma_X>0$ for $\\rho=1$ and with $a=-\\sigma_Y/\\sigma_X<0$ for $\\rho=-1$.",
+      "ro": "Fie $\\rho(X,Y)=\\dfrac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\sigma_Y}$, cu $\\mathrm{Var}(X)\\neq0$ și $\\mathrm{Var}(Y)\\neq0$ (abaterea standard este $\\sigma_X=\\sqrt{\\mathrm{Var}(X)}$). **a.** Arătați că $-1\\le\\rho\\le1$. **b.** Arătați că, dacă $\\rho=\\pm1$, atunci $Y=aX+b$: cu $a=\\sigma_Y/\\sigma_X>0$ pentru $\\rho=1$ și cu $a=-\\sigma_Y/\\sigma_X<0$ pentru $\\rho=-1$."
+     },
+     "given": {
+      "en": "Hint: we expand $\\mathrm{Var}\\left(\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}\\right)$ and $\\mathrm{Var}\\left(\\frac X{\\sigma_X}-\\frac Y{\\sigma_Y}\\right)$ with the formula for the variance of a sum and with $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$. A variable has variance 0 if and only if it is constant.",
+      "ro": "Indicație: dezvoltăm $\\mathrm{Var}\\left(\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}\\right)$ și $\\mathrm{Var}\\left(\\frac X{\\sigma_X}-\\frac Y{\\sigma_Y}\\right)$ cu formula varianței sumei și cu $\\mathrm{Cov}(aX,bY)=ab\\,\\mathrm{Cov}(X,Y)$. O variabilă are varianța 0 dacă și numai dacă este constantă."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "**a.** $\\mathrm{Var}\\left(\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}\\right)=\\frac{\\mathrm{Var}(X)}{\\sigma_X^2}+\\frac{\\mathrm{Var}(Y)}{\\sigma_Y^2}+2\\,\\frac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\sigma_Y}$.",
+        "ro": "**a.** $\\mathrm{Var}\\left(\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}\\right)=\\frac{\\mathrm{Var}(X)}{\\sigma_X^2}+\\frac{\\mathrm{Var}(Y)}{\\sigma_Y^2}+2\\,\\frac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\sigma_Y}$."
+       },
+       "predict": {
+        "question": {
+         "en": "How much do the first two terms give?",
+         "ro": "Cât dau primii doi termeni?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$1+1$",
+           "ro": "$1+1$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "The variance of $\\frac X{\\sigma_X}$ is $\\frac{\\mathrm{Var}(X)}{\\sigma_X^2}=1$, the same for $Y$.",
+           "ro": "Varianța lui $\\frac X{\\sigma_X}$ este $\\frac{\\mathrm{Var}(X)}{\\sigma_X^2}=1$, la fel pentru $Y$."
+          }
+         },
+         {
+          "text": {
+           "en": "$\\frac1{\\sigma_X}+\\frac1{\\sigma_Y}$",
+           "ro": "$\\frac1{\\sigma_X}+\\frac1{\\sigma_Y}$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "A constant comes out of the variance squared: the variance of $\\frac X{\\sigma_X}$ is $\\mathrm{Var}(X)/\\sigma_X^2$, not $\\mathrm{Var}(X)/\\sigma_X$.",
+           "ro": "Constanta iese din varianță la pătrat: varianța lui $\\frac X{\\sigma_X}$ este $\\mathrm{Var}(X)/\\sigma_X^2$, nu $\\mathrm{Var}(X)/\\sigma_X$."
+          },
+          "misconception": "sigma-in-loc-de-sigma-2"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "So the variance is $1+1+2\\rho=2(1+\\rho)$.",
+        "ro": "Deci varianța este $1+1+2\\rho=2(1+\\rho)$."
+       },
+       "why": {
+        "en": "The first two terms give $1+1=2$, and the third is $2\\rho$.",
+        "ro": "Primii doi termeni dau $1+1=2$, iar al treilea este $2\\rho$."
+       }
+      },
+      {
+       "shown": {
+        "en": "A variance is always $\\ge0$, so $1+\\rho\\ge0$, that is $\\rho\\ge-1$.",
+        "ro": "O varianță este mereu $\\ge0$, deci $1+\\rho\\ge0$, adică $\\rho\\ge-1$."
+       },
+       "why": {
+        "en": "A variance is a mean of squares, so it cannot be negative.",
+        "ro": "O varianță este o medie de pătrate, deci nu poate fi negativă."
+       }
+      },
+      {
+       "shown": {
+        "en": "With the minus sign, $\\mathrm{Var}\\left(\\frac X{\\sigma_X}-\\frac Y{\\sigma_Y}\\right)=2(1-\\rho)\\ge0$, so $\\rho\\le1$.",
+        "ro": "Cu semnul minus, $\\mathrm{Var}\\left(\\frac X{\\sigma_X}-\\frac Y{\\sigma_Y}\\right)=2(1-\\rho)\\ge0$, deci $\\rho\\le1$."
+       },
+       "why": {
+        "en": "The same formula, with $-\\frac Y{\\sigma_Y}$: the middle term changes its sign.",
+        "ro": "Aceeași formulă, cu $-\\frac Y{\\sigma_Y}$: termenul din mijloc își schimbă semnul."
+       }
+      },
+      {
+       "shown": {
+        "en": "**b.** If $\\rho=-1$, the variance $2(1+\\rho)$ is 0, so $\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}$ is constant: $\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}=a'$.",
+        "ro": "**b.** Dacă $\\rho=-1$, varianța $2(1+\\rho)$ este 0, deci $\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}$ este constantă: $\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}=a'$."
+       },
+       "why": {
+        "en": "A variable with variance 0 never leaves its mean: it is constant with probability 1.",
+        "ro": "O variabilă cu varianța 0 nu se abate de la medie: este constantă cu probabilitate 1."
+       }
+      },
+      {
+       "shown": {
+        "en": "We solve for $Y$: $Y=a'\\sigma_Y-\\frac{\\sigma_Y}{\\sigma_X}X$, that is $Y=aX+b$ with $a=-\\frac{\\sigma_Y}{\\sigma_X}<0$.",
+        "ro": "Rezolvăm în $Y$: $Y=a'\\sigma_Y-\\frac{\\sigma_Y}{\\sigma_X}X$, adică $Y=aX+b$ cu $a=-\\frac{\\sigma_Y}{\\sigma_X}<0$."
+       },
+       "why": {
+        "en": "The numbers $\\sigma_X$, $\\sigma_Y$ and $a'$ are constants, so $Y$ is a first-degree function of $X$.",
+        "ro": "Numerele $\\sigma_X$, $\\sigma_Y$ și $a'$ sunt constante, deci $Y$ este o funcție de gradul întâi de $X$."
+       }
+      },
+      {
+       "shown": {
+        "en": "If $\\rho=1$, the variance of the difference $2(1-\\rho)$ is 0, so $\\frac X{\\sigma_X}-\\frac Y{\\sigma_Y}=a''$ and $Y=\\frac{\\sigma_Y}{\\sigma_X}X-a''\\sigma_Y$, with $a=\\frac{\\sigma_Y}{\\sigma_X}>0$.",
+        "ro": "Dacă $\\rho=1$, varianța diferenței $2(1-\\rho)$ este 0, deci $\\frac X{\\sigma_X}-\\frac Y{\\sigma_Y}=a''$ și $Y=\\frac{\\sigma_Y}{\\sigma_X}X-a''\\sigma_Y$, cu $a=\\frac{\\sigma_Y}{\\sigma_X}>0$."
+       },
+       "why": {
+        "en": "The same reasoning, with the difference instead of the sum.",
+        "ro": "Același raționament, cu diferența în loc de sumă."
+       }
+      }
+     ],
+     "end": {
+      "en": "We showed $-1\\le\\rho\\le1$; $\\rho=-1$ gives a decreasing line, $\\rho=1$ an increasing one. The coefficient $a$ is not $\\rho$: $\\rho$ measures how linear the link is.",
+      "ro": "Am arătat $-1\\le\\rho\\le1$; $\\rho=-1$ dă o dreaptă descrescătoare, $\\rho=1$ una crescătoare. Coeficientul $a$ nu este $\\rho$: $\\rho$ măsoară cât de liniară e legătura."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s27",
+   "title": {
+    "en": "Exercise 0.19, with numbers",
+    "ro": "Exercițiul 0.19, cu numere"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-e5n",
+     "status": "book",
+     "statement": {
+      "en": "Let $\\rho$ be the correlation coefficient and $\\sigma_X$, $\\sigma_Y$ the standard deviations. **a.** If $\\rho=-1$, what is $\\mathrm{Var}\\left(\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}\\right)$? **b.** If $\\rho=0.6$, what is the same variance? **c.** If $\\sigma_X=1$, $\\sigma_Y=5$ and $\\rho=-1$, what is the slope $a$ in $Y=aX+b$? Write the answers as fractions or as decimals.",
+      "ro": "Fie $\\rho$ coeficientul de corelație și $\\sigma_X$, $\\sigma_Y$ abaterile standard. **a.** Dacă $\\rho=-1$, cât este $\\mathrm{Var}\\left(\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}\\right)$? **b.** Dacă $\\rho=0{,}6$, cât este aceeași varianță? **c.** Dacă $\\sigma_X=1$, $\\sigma_Y=5$ și $\\rho=-1$, care este panta $a$ din $Y=aX+b$? Scrie răspunsurile ca fracții sau ca zecimale."
+     },
+     "data": {
+      "rho": 0.6,
+      "sx": 1,
+      "sy": 5
+     },
+     "fields": [
+      {
+       "id": "v1",
+       "kind": "num",
+       "label": {
+        "en": "a. $\\mathrm{Var}$ for $\\rho=-1$",
+        "ro": "a. $\\mathrm{Var}$ pentru $\\rho=-1$"
+       },
+       "formula": "2*(1+(-1))",
+       "expected": 0
+      },
+      {
+       "id": "v2",
+       "kind": "num",
+       "label": {
+        "en": "b. $\\mathrm{Var}$ for $\\rho=0.6$",
+        "ro": "b. $\\mathrm{Var}$ pentru $\\rho=0{,}6$"
+       },
+       "formula": "2*(1+rho)",
+       "expected": 3.2
+      },
+      {
+       "id": "s",
+       "kind": "num",
+       "label": {
+        "en": "c. the slope $a$",
+        "ro": "c. panta $a$"
+       },
+       "formula": "-sy/sx",
+       "expected": -5
+      }
+     ],
+     "detectors": [
+      {
+       "field": "v2",
+       "formula": "1+rho",
+       "message": {
+        "en": "The variance is $2(1+\\rho)$; $1+\\rho$ is only half of it.",
+        "ro": "Varianța este $2(1+\\rho)$; $1+\\rho$ este doar jumătate din ea."
+       }
+      },
+      {
+       "field": "s",
+       "formula": "sy/sx",
+       "message": {
+        "en": "For $\\rho=-1$ the slope is negative: $a=-\\sigma_Y/\\sigma_X$.",
+        "ro": "Pentru $\\rho=-1$ panta este negativă: $a=-\\sigma_Y/\\sigma_X$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Divide each variable by its own standard deviation: the variance of $\\frac X{\\sigma_X}$ is 1. Then use the formula for the variance of a sum.",
+       "ro": "Împarte fiecare variabilă la propria abatere standard: varianța lui $\\frac X{\\sigma_X}$ este 1. Apoi folosește formula varianței sumei."
+      },
+      {
+       "en": "The variance is $1+1+2\\rho=2(1+\\rho)$, and the slope is $a=-\\sigma_Y/\\sigma_X$ when $\\rho=-1$.",
+       "ro": "Varianța este $1+1+2\\rho=2(1+\\rho)$, iar panta este $a=-\\sigma_Y/\\sigma_X$ când $\\rho=-1$."
+      },
+      {
+       "en": "a: $2(1-1)=0$. b: $2\\cdot1.6=3.2$. c: $a=-5/1=-5$.",
+       "ro": "a: $2(1-1)=0$. b: $2\\cdot1{,}6=3{,}2$. c: $a=-5/1=-5$."
+      }
+     ],
+     "solution": {
+      "en": "a. $2(1+\\rho)=0$: the variable $\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}$ is constant. b. $2(1+0.6)=3.2$. c. $a=-\\sigma_Y/\\sigma_X=-5$.",
+      "ro": "a. $2(1+\\rho)=0$: variabila $\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}$ este constantă. b. $2(1+0{,}6)=3{,}2$. c. $a=-\\sigma_Y/\\sigma_X=-5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Let $\\rho$ be the correlation coefficient and $\\sigma_X$, $\\sigma_Y$ the standard deviations. **a.** If $\\rho=-1$, what is $\\mathrm{Var}\\left(\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}\\right)$? **b.** If $\\rho=0.3$, what is the same variance? **c.** If $\\sigma_X=2$, $\\sigma_Y=6$ and $\\rho=-1$, what is the slope $a$ in $Y=aX+b$? Write the answers as fractions or as decimals.",
+        "ro": "Fie $\\rho$ coeficientul de corelație și $\\sigma_X$, $\\sigma_Y$ abaterile standard. **a.** Dacă $\\rho=-1$, cât este $\\mathrm{Var}\\left(\\frac X{\\sigma_X}+\\frac Y{\\sigma_Y}\\right)$? **b.** Dacă $\\rho=0{,}3$, cât este aceeași varianță? **c.** Dacă $\\sigma_X=2$, $\\sigma_Y=6$ și $\\rho=-1$, care este panta $a$ din $Y=aX+b$? Scrie răspunsurile ca fracții sau ca zecimale."
+       },
+       "data": {
+        "rho": 0.3,
+        "sx": 2,
+        "sy": 6
+       },
+       "fields": [
+        {
+         "id": "v1",
+         "formula": "2*(1+(-1))",
+         "expected": 0
+        },
+        {
+         "id": "v2",
+         "formula": "2*(1+rho)",
+         "expected": 2.6
+        },
+        {
+         "id": "s",
+         "formula": "-sy/sx",
+         "expected": -3
+        }
+       ],
+       "solution": {
+        "en": "a. $2(1-1)=0$. b. $2(1+0.3)=2.6$. c. $a=-6/2=-3$.",
+        "ro": "a. $2(1-1)=0$. b. $2(1+0{,}3)=2{,}6$. c. $a=-6/2=-3$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s28",
+   "title": {
+    "en": "Exercise 0.23.c: where 2·Cov comes from",
+    "ro": "Exercițiul 0.23.c: de unde vine 2·Cov"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ml-l05-e6p",
+     "claim": {
+      "en": "Derive $\\mathrm{Var}[X+Y]$ in terms of $\\mathrm{Var}[X]$, $\\mathrm{Var}[Y]$ and $\\mathrm{Cov}(X,Y)$, without assuming that $X$ and $Y$ are independent.",
+      "ro": "Deduceți $\\mathrm{Var}[X+Y]$ în funcție de $\\mathrm{Var}[X]$, $\\mathrm{Var}[Y]$ și $\\mathrm{Cov}(X,Y)$, fără să presupuneți că $X$ și $Y$ sunt independente."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "We start from $\\mathrm{Var}[X+Y]=E[(X+Y)^2]-\\bigl(E[X+Y]\\bigr)^2$.",
+        "ro": "Pornim de la $\\mathrm{Var}[X+Y]=E[(X+Y)^2]-\\bigl(E[X+Y]\\bigr)^2$."
+       },
+       "why": {
+        "en": "This is the variance written as $E[W^2]-(E[W])^2$, applied to the variable $W=X+Y$.",
+        "ro": "Aceasta este varianța scrisă ca $E[W^2]-(E[W])^2$, aplicată variabilei $W=X+Y$."
+       }
+      },
+      {
+       "shown": {
+        "en": "The first term: $E[(X+Y)^2]=E[X^2]+2E[XY]+E[Y^2]$.",
+        "ro": "Primul termen: $E[(X+Y)^2]=E[X^2]+2E[XY]+E[Y^2]$."
+       },
+       "why": {
+        "en": "The square of a sum expands as in algebra, $(X+Y)^2=X^2+2XY+Y^2$, then the linearity of the mean applies.",
+        "ro": "Pătratul unei sume se desface ca în algebră, $(X+Y)^2=X^2+2XY+Y^2$, apoi se aplică liniaritatea mediei."
+       }
+      },
+      {
+       "shown": {
+        "en": "The second, with the linearity of the mean: $\\bigl(E[X+Y]\\bigr)^2=\\bigl(E[X]+E[Y]\\bigr)^2=E[X]^2+2E[X]E[Y]+E[Y]^2$.",
+        "ro": "Al doilea, cu liniaritatea mediei: $\\bigl(E[X+Y]\\bigr)^2=\\bigl(E[X]+E[Y]\\bigr)^2=E[X]^2+2E[X]E[Y]+E[Y]^2$."
+       },
+       "why": {
+        "en": "The linearity of the mean gives $E[X+Y]=E[X]+E[Y]$; then a sum of two numbers is squared.",
+        "ro": "Liniaritatea mediei dă $E[X+Y]=E[X]+E[Y]$; apoi se ridică la pătrat o sumă de două numere."
+       }
+      },
+      {
+       "shown": {
+        "en": "We subtract and regroup: $\\mathrm{Var}[X+Y]=\\bigl(E[X^2]-E[X]^2\\bigr)+\\bigl(E[Y^2]-E[Y]^2\\bigr)+2\\bigl(E[XY]-E[X]E[Y]\\bigr)=\\mathrm{Var}[X]+\\mathrm{Var}[Y]+2\\,\\mathrm{Cov}(X,Y)$.",
+        "ro": "Scădem și regrupăm: $\\mathrm{Var}[X+Y]=\\bigl(E[X^2]-E[X]^2\\bigr)+\\bigl(E[Y^2]-E[Y]^2\\bigr)+2\\bigl(E[XY]-E[X]E[Y]\\bigr)=\\mathrm{Var}[X]+\\mathrm{Var}[Y]+2\\,\\mathrm{Cov}(X,Y)$."
+       },
+       "predict": {
+        "question": {
+         "en": "What is obtained as the third term, from $2E[XY]-2E[X]E[Y]$?",
+         "ro": "Ce se obține ca al treilea termen, din $2E[XY]-2E[X]E[Y]$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$\\mathrm{Cov}(X,Y)$",
+           "ro": "$\\mathrm{Cov}(X,Y)$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "From $2E[XY]-2E[X]E[Y]$ the factor 2 is taken out: the term is $2\\,\\mathrm{Cov}$, not $\\mathrm{Cov}$.",
+           "ro": "Din $2E[XY]-2E[X]E[Y]$ se scoate factorul 2: termenul este $2\\,\\mathrm{Cov}$, nu $\\mathrm{Cov}$."
+          },
+          "misconception": "fara-factorul-2"
+         },
+         {
+          "text": {
+           "en": "$2\\bigl(E[XY]-E[X]E[Y]\\bigr)=2\\,\\mathrm{Cov}(X,Y)$",
+           "ro": "$2\\bigl(E[XY]-E[X]E[Y]\\bigr)=2\\,\\mathrm{Cov}(X,Y)$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "The factor 2 stays in front of the covariance.",
+           "ro": "Factorul 2 rămâne în fața covarianței."
+          }
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "The equality $\\mathrm{Var}[X+Y]=\\mathrm{Var}[X]+\\mathrm{Var}[Y]$ needs $\\mathrm{Cov}=0$, for example for independent variables.",
+      "ro": "Egalitatea $\\mathrm{Var}[X+Y]=\\mathrm{Var}[X]+\\mathrm{Var}[Y]$ cere $\\mathrm{Cov}=0$, de pildă pentru variabile independente."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s29",
+   "title": {
+    "en": "Exercise 0.23: true or false for any variables",
+    "ro": "Exercițiul 0.23: adevărat sau fals pentru orice variabile"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-e6",
+     "exercise": [
+      "0.23.b",
+      "0.23.c",
+      "0.23.d"
+     ],
+     "status": "book",
+     "statement": {
+      "en": "Say whether these hold for any two random variables $X, Y$: **b.** $E[X+Y]=E[X]+E[Y]$; **c.** $\\mathrm{Var}[X+Y]=\\mathrm{Var}[X]+\\mathrm{Var}[Y]$; **d.** $E[XY]=E[X]\\,E[Y]$. For counterexamples take $X$ Bernoulli($\\frac12$) (that is $X$ takes 0 or 1, each with probability $\\frac12$) and fill in the requested values. Write the answers as fractions or as decimals.",
+      "ro": "Spune dacă sunt adevărate, pentru orice două variabile aleatoare $X, Y$: **b.** $E[X+Y]=E[X]+E[Y]$; **c.** $\\mathrm{Var}[X+Y]=\\mathrm{Var}[X]+\\mathrm{Var}[Y]$; **d.** $E[XY]=E[X]\\,E[Y]$. Pentru contraexemple ia $X$ Bernoulli($\\frac12$) (adică $X$ ia 0 sau 1, fiecare cu probabilitatea $\\frac12$) și completează valorile cerute. Scrie răspunsurile ca fracții sau ca zecimale."
+     },
+     "data": {
+      "p": 0.5
+     },
+     "fields": [
+      {
+       "id": "b",
+       "kind": "tf",
+       "label": {
+        "en": "b. True or false?",
+        "ro": "b. Adevărat sau fals?"
+       },
+       "formula": "true",
+       "expected": "true"
+      },
+      {
+       "id": "c",
+       "kind": "tf",
+       "label": {
+        "en": "c. True or false?",
+        "ro": "c. Adevărat sau fals?"
+       },
+       "formula": "false",
+       "expected": "false"
+      },
+      {
+       "id": "c1",
+       "kind": "frac",
+       "label": {
+        "en": "c, for $Y=-X$: $\\mathrm{Var}[X+Y]$",
+        "ro": "c, pentru $Y=-X$: $\\mathrm{Var}[X+Y]$"
+       },
+       "formula": "Var([0,0],[p,1-p])",
+       "expected": "0"
+      },
+      {
+       "id": "c2",
+       "kind": "frac",
+       "label": {
+        "en": "c, for $Y=-X$: $\\mathrm{Var}[X]+\\mathrm{Var}[Y]$",
+        "ro": "c, pentru $Y=-X$: $\\mathrm{Var}[X]+\\mathrm{Var}[Y]$"
+       },
+       "formula": "2*p*(1-p)",
+       "expected": "1/2"
+      },
+      {
+       "id": "d",
+       "kind": "tf",
+       "label": {
+        "en": "d. True or false?",
+        "ro": "d. Adevărat sau fals?"
+       },
+       "formula": "false",
+       "expected": "false"
+      },
+      {
+       "id": "d1",
+       "kind": "frac",
+       "label": {
+        "en": "d, for $Y=X$: $E[XY]$",
+        "ro": "d, pentru $Y=X$: $E[XY]$"
+       },
+       "formula": "p",
+       "expected": "1/2"
+      },
+      {
+       "id": "d2",
+       "kind": "frac",
+       "label": {
+        "en": "d, for $Y=X$: $E[X]\\,E[Y]$",
+        "ro": "d, pentru $Y=X$: $E[X]\\,E[Y]$"
+       },
+       "formula": "p*p",
+       "expected": "1/4"
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "true",
+       "message": {
+        "en": "The equality needs $\\mathrm{Cov}=0$; with $Y=-X$ the variance of the sum is 0, not $2\\,\\mathrm{Var}X$.",
+        "ro": "Egalitatea cere $\\mathrm{Cov}=0$; cu $Y=-X$ varianța sumei este 0, nu $2\\,\\mathrm{Var}X$."
+       }
+      },
+      {
+       "field": "d1",
+       "formula": "p*p",
+       "message": {
+        "en": "$E[X\\cdot X]=E[X^2]$ and, since $X$ takes 0 or 1, $X^2=X$; the value you gave is $E[X]E[Y]$.",
+        "ro": "$E[X\\cdot X]=E[X^2]$ și, cum $X$ ia 0 sau 1, $X^2=X$; valoarea pe care ai dat-o este $E[X]E[Y]$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "For b use the linearity of the mean. For c take $Y=-X$, and for d take $Y=X$ with $X$ binary.",
+       "ro": "Pentru b folosește liniaritatea mediei. Pentru c ia $Y=-X$, iar pentru d ia $Y=X$ cu $X$ binară."
+      },
+      {
+       "en": "With $Y=-X$, the sum $X+Y$ is always 0, so it has variance 0, and $\\mathrm{Var}[X]+\\mathrm{Var}[Y]=2\\,\\mathrm{Var}[X]$. With $Y=X$, $E[XY]=E[X^2]$.",
+       "ro": "Cu $Y=-X$, suma $X+Y$ este mereu 0, deci are varianța 0, iar $\\mathrm{Var}[X]+\\mathrm{Var}[Y]=2\\,\\mathrm{Var}[X]$. Cu $Y=X$, $E[XY]=E[X^2]$."
+      },
+      {
+       "en": "b true; c false ($0$ against $2\\cdot\\frac14$); d false ($E[X^2]=E[X]$ because $X\\in\\{0,1\\}$, so $\\frac12$ against $\\frac14$).",
+       "ro": "b adevărat; c fals ($0$ față de $2\\cdot\\frac14$); d fals ($E[X^2]=E[X]$ fiindcă $X\\in\\{0,1\\}$, deci $\\frac12$ față de $\\frac14$)."
+      }
+     ],
+     "solution": {
+      "en": "**b.** True, from the linearity of the mean (Lesson 4). **c.** False: for $Y=-X$, $\\mathrm{Var}[X+Y]=0$, but $\\mathrm{Var}[X]+\\mathrm{Var}[Y]=2\\,\\mathrm{Var}[X]\\neq0$. In general $\\mathrm{Var}[X+Y]=\\mathrm{Var}[X]+\\mathrm{Var}[Y]+2\\,\\mathrm{Cov}(X,Y)$, and the equality needs $\\mathrm{Cov}=0$. **d.** False: it is equivalent to $\\mathrm{Cov}=0$; for $Y=X$ binary with $P(X{=}1)=p$, $E[X^2]=p\\neq p^2$ as long as $p(1-p)\\neq0$.",
+      "ro": "**b.** Adevărat, din liniaritatea mediei (Lecția 4). **c.** Fals: pentru $Y=-X$, $\\mathrm{Var}[X+Y]=0$, dar $\\mathrm{Var}[X]+\\mathrm{Var}[Y]=2\\,\\mathrm{Var}[X]\\neq0$. În general $\\mathrm{Var}[X+Y]=\\mathrm{Var}[X]+\\mathrm{Var}[Y]+2\\,\\mathrm{Cov}(X,Y)$, iar egalitatea cere $\\mathrm{Cov}=0$. **d.** Fals: este echivalentă cu $\\mathrm{Cov}=0$; pentru $Y=X$ binară cu $P(X{=}1)=p$, $E[X^2]=p\\neq p^2$ cât timp $p(1-p)\\neq0$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Say whether these hold for any two random variables $X, Y$: **b.** $E[X+Y]=E[X]+E[Y]$; **c.** $\\mathrm{Var}[X+Y]=\\mathrm{Var}[X]+\\mathrm{Var}[Y]$; **d.** $E[XY]=E[X]\\,E[Y]$. For counterexamples take $X$ Bernoulli($0.2$) (that is $X$ takes 1 with probability $0.2$ and 0 with probability $0.8$) and fill in the requested values. Write the answers as fractions or as decimals.",
+        "ro": "Spune dacă sunt adevărate, pentru orice două variabile aleatoare $X, Y$: **b.** $E[X+Y]=E[X]+E[Y]$; **c.** $\\mathrm{Var}[X+Y]=\\mathrm{Var}[X]+\\mathrm{Var}[Y]$; **d.** $E[XY]=E[X]\\,E[Y]$. Pentru contraexemple ia $X$ Bernoulli($0{,}2$) (adică $X$ ia 1 cu probabilitatea $0{,}2$ și 0 cu probabilitatea $0{,}8$) și completează valorile cerute. Scrie răspunsurile ca fracții sau ca zecimale."
+       },
+       "data": {
+        "p": 0.2
+       },
+       "fields": [
+        {
+         "id": "b",
+         "formula": "true",
+         "expected": "true"
+        },
+        {
+         "id": "c",
+         "formula": "false",
+         "expected": "false"
+        },
+        {
+         "id": "c1",
+         "formula": "Var([0,0],[p,1-p])",
+         "expected": "0"
+        },
+        {
+         "id": "c2",
+         "formula": "2*p*(1-p)",
+         "expected": "8/25"
+        },
+        {
+         "id": "d",
+         "formula": "false",
+         "expected": "false"
+        },
+        {
+         "id": "d1",
+         "formula": "p",
+         "expected": "1/5"
+        },
+        {
+         "id": "d2",
+         "formula": "p*p",
+         "expected": "1/25"
+        }
+       ],
+       "solution": {
+        "en": "b true. c false: $\\mathrm{Var}[X+Y]=0$, but $2\\cdot0.2\\cdot0.8=0.32$. d false: $E[X^2]=0.2$, but $E[X]E[Y]=0.04$.",
+        "ro": "b adevărat. c fals: $\\mathrm{Var}[X+Y]=0$, dar $2\\cdot0{,}2\\cdot0{,}8=0{,}32$. d fals: $E[X^2]=0{,}2$, dar $E[X]E[Y]=0{,}04$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s30",
+   "title": {
+    "en": "Exercise 0.99: binary variables with α, β, γ, δ",
+    "ro": "Exercițiul 0.99: variabile binare cu α, β, γ, δ"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-e7",
+     "exercise": [
+      "0.99.a",
+      "0.99.b"
+     ],
+     "status": "verified-twice",
+     "statement": {
+      "en": "Two variables $X, Y\\in\\{0,1\\}$ have the joint distribution in the table, with $\\alpha+\\beta+\\gamma+\\delta=1$. **a.** Choose the expression of $E[X]$ and the one of $E[Y]$. **b.** Choose the necessary and sufficient condition for $X$ and $Y$ to be independent. **c.** Check the condition for $\\alpha=0.12$, $\\beta=0.28$, $\\gamma=0.18$, $\\delta=0.42$.",
+      "ro": "Două variabile $X, Y\\in\\{0,1\\}$ au distribuția comună din tabel, cu $\\alpha+\\beta+\\gamma+\\delta=1$. **a.** Alege expresia lui $E[X]$ și pe cea a lui $E[Y]$. **b.** Alege condiția necesară și suficientă ca $X$ și $Y$ să fie independente. **c.** Verifică condiția pentru $\\alpha=0{,}12$, $\\beta=0{,}28$, $\\gamma=0{,}18$, $\\delta=0{,}42$."
+     },
+     "table": {
+      "columns": [
+       "X",
+       "Y",
+       "P"
+      ],
+      "rows": [
+       [
+        "0",
+        "0",
+        "α"
+       ],
+       [
+        "0",
+        "1",
+        "β"
+       ],
+       [
+        "1",
+        "0",
+        "γ"
+       ],
+       [
+        "1",
+        "1",
+        "δ"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution P(X, Y)",
+       "ro": "Distribuția comună P(X, Y)"
+      }
+     },
+     "fields": [
+      {
+       "id": "a1",
+       "kind": "choice",
+       "label": {
+        "en": "a. $E[X]$",
+        "ro": "a. $E[X]$"
+       },
+       "options": [
+        {
+         "en": "γ+δ",
+         "ro": "γ+δ"
+        },
+        {
+         "en": "β+δ",
+         "ro": "β+δ"
+        },
+        {
+         "en": "δ",
+         "ro": "δ"
+        }
+       ],
+       "formula": "\"γ+δ\"",
+       "expected": "γ+δ"
+      },
+      {
+       "id": "a2",
+       "kind": "choice",
+       "label": {
+        "en": "a. $E[Y]$",
+        "ro": "a. $E[Y]$"
+       },
+       "options": [
+        {
+         "en": "β+δ",
+         "ro": "β+δ"
+        },
+        {
+         "en": "γ+δ",
+         "ro": "γ+δ"
+        },
+        {
+         "en": "δ",
+         "ro": "δ"
+        }
+       ],
+       "formula": "\"β+δ\"",
+       "expected": "β+δ"
+      },
+      {
+       "id": "b",
+       "kind": "choice",
+       "label": {
+        "en": "b. The independence condition",
+        "ro": "b. Condiția de independență"
+       },
+       "options": [
+        {
+         "en": "αδ = βγ",
+         "ro": "αδ = βγ"
+        },
+        {
+         "en": "α+δ = β+γ",
+         "ro": "α+δ = β+γ"
+        },
+        {
+         "en": "αβ = γδ",
+         "ro": "αβ = γδ"
+        }
+       ],
+       "formula": "\"αδ = βγ\"",
+       "expected": "αδ = βγ"
+      },
+      {
+       "id": "n",
+       "kind": "tf",
+       "label": {
+        "ro": "c. Afirmația: pentru aceste valori, $X$ și $Y$ sunt independente.",
+        "en": "c. The claim: for these values, $X$ and $Y$ are independent."
+       },
+       "formula": "0.12*0.42 == 0.28*0.18",
+       "expected": "true"
+      }
+     ],
+     "detectors": [
+      {
+       "field": "a1",
+       "formula": "\"β+δ\"",
+       "message": {
+        "ro": "Aceasta este $E[Y]$; $X=1$ înseamnă celulele $\\gamma$ și $\\delta$, ultimele două rânduri ale tabelului.",
+        "en": "This is $E[Y]$; $X=1$ means the cells $\\gamma$ and $\\delta$, the last two rows of the table."
+       }
+      },
+      {
+       "field": "b",
+       "formula": "\"α+δ = β+γ\"",
+       "message": {
+        "en": "Independence needs products, not sums: $\\alpha\\delta=\\beta\\gamma$.",
+        "ro": "Independența cere produse, nu sume: $\\alpha\\delta=\\beta\\gamma$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "For a variable with the values 0 and 1, $E[X]=P(X{=}1)$. Independence needs four equalities; write the one for the cell $(1,1)$.",
+       "ro": "Pentru o variabilă cu valorile 0 și 1, $E[X]=P(X{=}1)$. Independența cere patru egalități; scrie-o pe cea pentru celula $(1,1)$."
+      },
+      {
+       "ro": "Scrie $P(X{=}1)$ și $P(Y{=}1)$ ca sume de celule din tabel. Pentru independență, scrie egalitatea celulei $(1,1)$: $\\delta=P(X{=}1)\\,P(Y{=}1)$, apoi folosește $\\alpha+\\beta+\\gamma+\\delta=1$.",
+       "en": "Write $P(X{=}1)$ and $P(Y{=}1)$ as sums of cells of the table. For independence, write the equality of the cell $(1,1)$: $\\delta=P(X{=}1)\\,P(Y{=}1)$, then use $\\alpha+\\beta+\\gamma+\\delta=1$."
+      },
+      {
+       "en": "From $\\delta=(\\gamma+\\delta)(\\beta+\\delta)$ it follows that $\\delta(1-\\beta-\\gamma-\\delta)=\\beta\\gamma$, that is $\\alpha\\delta=\\beta\\gamma$. In c: $\\alpha\\delta=0.12\\cdot0.42$ and $\\beta\\gamma=0.28\\cdot0.18$.",
+       "ro": "Din $\\delta=(\\gamma+\\delta)(\\beta+\\delta)$ rezultă $\\delta(1-\\beta-\\gamma-\\delta)=\\beta\\gamma$, adică $\\alpha\\delta=\\beta\\gamma$. La c: $\\alpha\\delta=0{,}12\\cdot0{,}42$ și $\\beta\\gamma=0{,}28\\cdot0{,}18$."
+      }
+     ],
+     "solution": {
+      "en": "**a.** $E[X]=\\gamma+\\delta$ (the cells with $X=1$) and $E[Y]=\\beta+\\delta$ (the cells with $Y=1$). **b.** Independence means $\\alpha=(\\alpha+\\beta)(\\alpha+\\gamma)$, $\\beta=(\\alpha+\\beta)(\\beta+\\delta)$, $\\gamma=(\\gamma+\\delta)(\\alpha+\\gamma)$, $\\delta=(\\gamma+\\delta)(\\beta+\\delta)$. For binary variables a single one is enough: $\\delta=(\\gamma+\\delta)(\\beta+\\delta)\\iff\\delta(1-\\beta-\\gamma-\\delta)=\\beta\\gamma\\iff\\alpha\\delta=\\beta\\gamma$, because $\\alpha=1-\\beta-\\gamma-\\delta$. **c.** $0.12\\cdot0.42=0.0504=0.28\\cdot0.18$, so they are independent. On paper all four equalities are written: $P(X{=}0)=0.4$, $P(X{=}1)=0.6$, $P(Y{=}0)=0.3$, $P(Y{=}1)=0.7$ and $0.12=0.4\\cdot0.3$, $0.28=0.4\\cdot0.7$, $0.18=0.6\\cdot0.3$, $0.42=0.6\\cdot0.7$.",
+      "ro": "**a.** $E[X]=\\gamma+\\delta$ (celulele cu $X=1$) și $E[Y]=\\beta+\\delta$ (celulele cu $Y=1$). **b.** Independența înseamnă $\\alpha=(\\alpha+\\beta)(\\alpha+\\gamma)$, $\\beta=(\\alpha+\\beta)(\\beta+\\delta)$, $\\gamma=(\\gamma+\\delta)(\\alpha+\\gamma)$, $\\delta=(\\gamma+\\delta)(\\beta+\\delta)$. Pentru variabile binare una singură ajunge: $\\delta=(\\gamma+\\delta)(\\beta+\\delta)\\iff\\delta(1-\\beta-\\gamma-\\delta)=\\beta\\gamma\\iff\\alpha\\delta=\\beta\\gamma$, fiindcă $\\alpha=1-\\beta-\\gamma-\\delta$. **c.** $0{,}12\\cdot0{,}42=0{,}0504=0{,}28\\cdot0{,}18$, deci sunt independente. Pe hârtie se scriu toate cele patru egalități: $P(X{=}0)=0{,}4$, $P(X{=}1)=0{,}6$, $P(Y{=}0)=0{,}3$, $P(Y{=}1)=0{,}7$ și $0{,}12=0{,}4\\cdot0{,}3$, $0{,}28=0{,}4\\cdot0{,}7$, $0{,}18=0{,}6\\cdot0{,}3$, $0{,}42=0{,}6\\cdot0{,}7$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Two variables $X, Y\\in\\{0,1\\}$ have the joint distribution in the table, with $\\alpha+\\beta+\\gamma+\\delta=1$. **a.** Choose the expression of $E[X]$ and the one of $E[Y]$. **b.** Choose the necessary and sufficient condition for $X$ and $Y$ to be independent. **c.** Check the condition for $\\alpha=0.3$, $\\beta=0.2$, $\\gamma=0.1$, $\\delta=0.4$.",
+        "ro": "Două variabile $X, Y\\in\\{0,1\\}$ au distribuția comună din tabel, cu $\\alpha+\\beta+\\gamma+\\delta=1$. **a.** Alege expresia lui $E[X]$ și pe cea a lui $E[Y]$. **b.** Alege condiția necesară și suficientă ca $X$ și $Y$ să fie independente. **c.** Verifică condiția pentru $\\alpha=0{,}3$, $\\beta=0{,}2$, $\\gamma=0{,}1$, $\\delta=0{,}4$."
+       },
+       "fields": [
+        {
+         "id": "a1",
+         "formula": "\"γ+δ\"",
+         "expected": "γ+δ"
+        },
+        {
+         "id": "a2",
+         "formula": "\"β+δ\"",
+         "expected": "β+δ"
+        },
+        {
+         "id": "b",
+         "formula": "\"αδ = βγ\"",
+         "expected": "αδ = βγ"
+        },
+        {
+         "id": "n",
+         "formula": "0.3*0.4 == 0.2*0.1",
+         "expected": "false"
+        }
+       ],
+       "solution": {
+        "en": "$E[X]=\\gamma+\\delta$, $E[Y]=\\beta+\\delta$, the condition $\\alpha\\delta=\\beta\\gamma$. In c: $0.3\\cdot0.4=0.12\\neq0.02=0.2\\cdot0.1$, so they are not independent.",
+        "ro": "$E[X]=\\gamma+\\delta$, $E[Y]=\\beta+\\delta$, condiția $\\alpha\\delta=\\beta\\gamma$. La c: $0{,}3\\cdot0{,}4=0{,}12\\neq0{,}02=0{,}2\\cdot0{,}1$, deci nu sunt independente."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s31",
+   "title": {
+    "en": "Exercise 0.100: only X binary is not enough",
+    "ro": "Exercițiul 0.100: doar X binară nu ajunge"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-e8",
+     "exercise": [
+      "0.100"
+     ],
+     "status": "verified-twice",
+     "statement": {
+      "en": "For variables that take only the values 0 and 1, a zero covariance implies independence. Show that, if only $X$ is binary (and $Y$ takes the values $-1,\\ 0,\\ 1$), a zero covariance does not necessarily imply independence, on the distribution in the table. Write the answers as fractions or as decimals.",
+      "ro": "Pentru variabile care iau doar valorile 0 și 1, covarianța nulă implică independența. Arată că, dacă doar $X$ este binară (iar $Y$ ia valorile $-1,\\ 0,\\ 1$), covarianța nulă nu implică neapărat independența, pe distribuția din tabel. Scrie răspunsurile ca fracții sau ca zecimale."
+     },
+     "table": {
+      "columns": [
+       "X",
+       "Y",
+       "P(X, Y)"
+      ],
+      "rows": [
+       [
+        "0",
+        "-1",
+        "0,1"
+       ],
+       [
+        "0",
+        "0",
+        "0,4"
+       ],
+       [
+        "0",
+        "1",
+        "0,1"
+       ],
+       [
+        "1",
+        "-1",
+        "0"
+       ],
+       [
+        "1",
+        "0",
+        "0,4"
+       ],
+       [
+        "1",
+        "1",
+        "0"
+       ]
+      ],
+      "caption": {
+       "en": "Joint distribution P(X, Y)",
+       "ro": "Distribuția comună P(X, Y)"
+      }
+     },
+     "fields": [
+      {
+       "id": "px1",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X=1)$",
+        "ro": "$P(X=1)$"
+       },
+       "formula": "0+0.4+0",
+       "expected": "2/5"
+      },
+      {
+       "id": "ex",
+       "kind": "frac",
+       "label": {
+        "en": "$E[X]$",
+        "ro": "$E[X]$"
+       },
+       "formula": "0*(0.1+0.4+0.1)+1*(0+0.4+0)",
+       "expected": "2/5"
+      },
+      {
+       "id": "ey",
+       "kind": "num",
+       "label": {
+        "en": "$E[Y]$",
+        "ro": "$E[Y]$"
+       },
+       "formula": "-1*(0.1+0)+0*(0.4+0.4)+1*(0.1+0)",
+       "expected": 0
+      },
+      {
+       "id": "exy",
+       "kind": "num",
+       "label": {
+        "en": "$E[XY]$",
+        "ro": "$E[XY]$"
+       },
+       "formula": "0*(-1)*0.1+0*0*0.4+0*1*0.1+1*(-1)*0+1*0*0.4+1*1*0",
+       "expected": 0
+      },
+      {
+       "id": "cov",
+       "kind": "num",
+       "label": {
+        "en": "$\\mathrm{Cov}(X,Y)$",
+        "ro": "$\\mathrm{Cov}(X,Y)$"
+       },
+       "formula": "0-0.4*0",
+       "expected": 0
+      },
+      {
+       "id": "p",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X{=}1,\\,Y{=}-1)$",
+        "ro": "$P(X{=}1,\\,Y{=}-1)$"
+       },
+       "formula": "0",
+       "expected": "0"
+      },
+      {
+       "id": "pp",
+       "kind": "frac",
+       "label": {
+        "en": "$P(X{=}1)\\,P(Y{=}-1)$",
+        "ro": "$P(X{=}1)\\,P(Y{=}-1)$"
+       },
+       "formula": "0.4*(0.1+0)",
+       "expected": "1/25"
+      },
+      {
+       "id": "ind",
+       "kind": "tf",
+       "label": {
+        "ro": "Afirmația: $X$ și $Y$ sunt independente.",
+        "en": "The claim: $X$ and $Y$ are independent."
+       },
+       "formula": "0 == 0.4*0.1",
+       "expected": "false"
+      }
+     ],
+     "detectors": [
+      {
+       "field": "ind",
+       "formula": "true",
+       "message": {
+        "en": "A covariance of 0 does not decide independence; the cell $(1,-1)$ fails: $0\\neq0.04$.",
+        "ro": "Covarianța 0 nu decide independența; celula $(1,-1)$ nu verifică: $0\\neq0{,}04$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "The marginals: add the cells over $X$ and over $Y$. For $E[XY]$ only the rows with $X=1$ and $Y\\neq0$ matter.",
+       "ro": "Marginalele: adună celulele pe $X$ și pe $Y$. La $E[XY]$ contează doar rândurile cu $X=1$ și $Y\\neq0$."
+      },
+      {
+       "en": "$E[Y]=-1\\cdot P(Y{=}-1)+0\\cdot P(Y{=}0)+1\\cdot P(Y{=}1)$, and $\\mathrm{Cov}=E[XY]-E[X]E[Y]$. Compare the cell $(1,-1)$ with the product of its marginals.",
+       "ro": "$E[Y]=-1\\cdot P(Y{=}-1)+0\\cdot P(Y{=}0)+1\\cdot P(Y{=}1)$, iar $\\mathrm{Cov}=E[XY]-E[X]E[Y]$. Compară celula $(1,-1)$ cu produsul marginalelor ei."
+      },
+      {
+       "en": "$E[Y]=0$ and $E[XY]=0$, so $\\mathrm{Cov}=0$; but the cell $(1,-1)$ is 0, and the product of its marginals is not zero.",
+       "ro": "$E[Y]=0$ și $E[XY]=0$, deci $\\mathrm{Cov}=0$; dar celula $(1,-1)$ este 0, iar produsul marginalelor ei este nenul."
+      }
+     ],
+     "solution": {
+      "en": "$E[X]=0.4$; $E[Y]=-0.1+0.1=0$; $E[XY]=0$ (the terms with $XY\\neq0$ have probability 0); $\\mathrm{Cov}=0-0.4\\cdot0=0$. But $P(X{=}1,\\,Y{=}-1)=0\\neq0.4\\cdot0.1=0.04$: $X$ and $Y$ are dependent.",
+      "ro": "$E[X]=0{,}4$; $E[Y]=-0{,}1+0{,}1=0$; $E[XY]=0$ (termenii cu $XY\\neq0$ au probabilitate 0); $\\mathrm{Cov}=0-0{,}4\\cdot0=0$. Dar $P(X{=}1,\\,Y{=}-1)=0\\neq0{,}4\\cdot0{,}1=0{,}04$: $X$ și $Y$ sunt dependente."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "For variables that take only the values 0 and 1, a zero covariance implies independence. Show that, if only $X$ is binary (and $Y$ takes the values $-1,\\ 0,\\ 1$), a zero covariance does not necessarily imply independence, on the distribution in the table. Write the answers as fractions or as decimals.",
+        "ro": "Pentru variabile care iau doar valorile 0 și 1, covarianța nulă implică independența. Arată că, dacă doar $X$ este binară (iar $Y$ ia valorile $-1,\\ 0,\\ 1$), covarianța nulă nu implică neapărat independența, pe distribuția din tabel. Scrie răspunsurile ca fracții sau ca zecimale."
+       },
+       "table": {
+        "columns": [
+         "X",
+         "Y",
+         "P(X, Y)"
+        ],
+        "rows": [
+         [
+          "0",
+          "-1",
+          "0,2"
+         ],
+         [
+          "0",
+          "0",
+          "0,2"
+         ],
+         [
+          "0",
+          "1",
+          "0,2"
+         ],
+         [
+          "1",
+          "-1",
+          "0"
+         ],
+         [
+          "1",
+          "0",
+          "0,4"
+         ],
+         [
+          "1",
+          "1",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Joint distribution P(X, Y)",
+         "ro": "Distribuția comună P(X, Y)"
+        }
+       },
+       "fields": [
+        {
+         "id": "px1",
+         "formula": "0+0.4+0",
+         "expected": "2/5"
+        },
+        {
+         "id": "ex",
+         "formula": "0*(0.2+0.2+0.2)+1*(0+0.4+0)",
+         "expected": "2/5"
+        },
+        {
+         "id": "ey",
+         "formula": "-1*(0.2+0)+0*(0.2+0.4)+1*(0.2+0)",
+         "expected": 0
+        },
+        {
+         "id": "exy",
+         "formula": "0*(-1)*0.2+0*0*0.2+0*1*0.2+1*(-1)*0+1*0*0.4+1*1*0",
+         "expected": 0
+        },
+        {
+         "id": "cov",
+         "formula": "0-0.4*0",
+         "expected": 0
+        },
+        {
+         "id": "p",
+         "formula": "0",
+         "expected": "0"
+        },
+        {
+         "id": "pp",
+         "formula": "0.4*(0.2+0)",
+         "expected": "2/25"
+        },
+        {
+         "id": "ind",
+         "formula": "0 == 0.4*0.2",
+         "expected": "false"
+        }
+       ],
+       "solution": {
+        "en": "$E[X]=0.4$, $E[Y]=-0.2+0.2=0$, $E[XY]=0$, so $\\mathrm{Cov}=0$. But $P(X{=}1,\\,Y{=}-1)=0\\neq0.4\\cdot0.2=0.08$: they are dependent.",
+        "ro": "$E[X]=0{,}4$, $E[Y]=-0{,}2+0{,}2=0$, $E[XY]=0$, deci $\\mathrm{Cov}=0$. Dar $P(X{=}1,\\,Y{=}-1)=0\\neq0{,}4\\cdot0{,}2=0{,}08$: sunt dependente."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ml-l05-s32",
+   "title": {
+    "en": "The product of two independent variables",
+    "ro": "Produsul a două variabile independente"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ml-l05-c1",
+     "exercise": [
+      "L5.c1"
+     ],
+     "status": "verified-twice",
+     "statement": {
+      "en": "$X$ and $Y$ are independent. $X$ takes the values 1 and 2 with probabilities $0.4$ and $0.6$; $Y$ takes the values 0, 1, 2 with probabilities $0.5$, $0.3$ and $0.2$. The variable $Z=XY$ takes the value $x\\cdot y$ on the cell $(x,y)$ of the joint table. **a.** What are $P(X{=}2,\\,Y{=}1)$ and $P(X{=}1,\\,Y{=}2)$? **b.** The distribution of $Z$: its values are 0, 1, 2 and 4. **c.** $E[Z]$, compared with $E[X]\\,E[Y]$. **d.** $E[XY^2]$. **e.** $\\mathrm{Var}(Z)$, from the distribution of $Z$. Write the answers as fractions or as decimals.",
+      "ro": "$X$ și $Y$ sunt independente. $X$ ia valorile 1 și 2 cu probabilitățile $0{,}4$ și $0{,}6$; $Y$ ia valorile 0, 1, 2 cu probabilitățile $0{,}5$, $0{,}3$ și $0{,}2$. Variabila $Z=XY$ ia valoarea $x\\cdot y$ pe celula $(x,y)$ a tabelului comun. **a.** Cât sunt $P(X{=}2,\\,Y{=}1)$ și $P(X{=}1,\\,Y{=}2)$? **b.** Distribuția lui $Z$: valorile ei sunt 0, 1, 2 și 4. **c.** $E[Z]$, comparat cu $E[X]\\,E[Y]$. **d.** $E[XY^2]$. **e.** $\\mathrm{Var}(Z)$, din distribuția lui $Z$. Scrie răspunsurile ca fracții sau ca zecimale."
+     },
+     "table": [
+      {
+       "columns": [
+        "$x$",
+        "$P(X{=}x)$"
+       ],
+       "rows": [
+        [
+         "1",
+         "0,4"
+        ],
+        [
+         "2",
+         "0,6"
+        ]
+       ],
+       "caption": {
+        "en": "The distribution of X",
+        "ro": "Distribuția lui X"
+       }
+      },
+      {
+       "columns": [
+        "$y$",
+        "$P(Y{=}y)$"
+       ],
+       "rows": [
+        [
+         "0",
+         "0,5"
+        ],
+        [
+         "1",
+         "0,3"
+        ],
+        [
+         "2",
+         "0,2"
+        ]
+       ],
+       "caption": {
+        "en": "The distribution of Y",
+        "ro": "Distribuția lui Y"
+       }
+      }
+     ],
+     "data": {
+      "a1": 0.4,
+      "a2": 0.6,
+      "b0": 0.5,
+      "b1": 0.3,
+      "b2": 0.2
+     },
+     "fields": [
+      {
+       "id": "p21",
+       "kind": "frac",
+       "label": {
+        "en": "a. $P(X{=}2,\\,Y{=}1)$",
+        "ro": "a. $P(X{=}2,\\,Y{=}1)$"
+       },
+       "formula": "a2*b1",
+       "expected": "9/50"
+      },
+      {
+       "id": "p12",
+       "kind": "frac",
+       "label": {
+        "en": "a. $P(X{=}1,\\,Y{=}2)$",
+        "ro": "a. $P(X{=}1,\\,Y{=}2)$"
+       },
+       "formula": "a1*b2",
+       "expected": "2/25"
+      },
+      {
+       "id": "z0",
+       "kind": "frac",
+       "label": {
+        "en": "b. $P(Z{=}0)$",
+        "ro": "b. $P(Z{=}0)$"
+       },
+       "formula": "a1*b0+a2*b0",
+       "expected": "1/2"
+      },
+      {
+       "id": "z1",
+       "kind": "frac",
+       "label": {
+        "en": "b. $P(Z{=}1)$",
+        "ro": "b. $P(Z{=}1)$"
+       },
+       "formula": "a1*b1",
+       "expected": "3/25"
+      },
+      {
+       "id": "z2",
+       "kind": "frac",
+       "label": {
+        "en": "b. $P(Z{=}2)$",
+        "ro": "b. $P(Z{=}2)$"
+       },
+       "formula": "a1*b2+a2*b1",
+       "expected": "13/50"
+      },
+      {
+       "id": "z4",
+       "kind": "frac",
+       "label": {
+        "en": "b. $P(Z{=}4)$",
+        "ro": "b. $P(Z{=}4)$"
+       },
+       "formula": "a2*b2",
+       "expected": "3/25"
+      },
+      {
+       "id": "ez",
+       "kind": "frac",
+       "label": {
+        "en": "c. $E[Z]$",
+        "ro": "c. $E[Z]$"
+       },
+       "formula": "E([0,1,2,4],[a1*b0+a2*b0,a1*b1,a1*b2+a2*b1,a2*b2])",
+       "expected": "28/25"
+      },
+      {
+       "id": "exey",
+       "kind": "frac",
+       "label": {
+        "en": "c. $E[X]\\,E[Y]$",
+        "ro": "c. $E[X]\\,E[Y]$"
+       },
+       "formula": "E([1,2],[a1,a2])*E([0,1,2],[b0,b1,b2])",
+       "expected": "28/25"
+      },
+      {
+       "id": "exy2",
+       "kind": "frac",
+       "label": {
+        "en": "d. $E[XY^2]$",
+        "ro": "d. $E[XY^2]$"
+       },
+       "formula": "E([1,2],[a1,a2])*E([0,1,4],[b0,b1,b2])",
+       "expected": "44/25"
+      },
+      {
+       "id": "vz",
+       "kind": "frac",
+       "label": {
+        "en": "e. $\\mathrm{Var}(Z)$",
+        "ro": "e. $\\mathrm{Var}(Z)$"
+       },
+       "formula": "Var([0,1,2,4],[a1*b0+a2*b0,a1*b1,a1*b2+a2*b1,a2*b2])",
+       "expected": "1141/625",
+       "tol": 0.0005
+      }
+     ],
+     "detectors": [
+      {
+       "field": "z2",
+       "formula": "a1*b2",
+       "message": {
+        "en": "The value 2 comes from two cells, $(X{=}1,\\,Y{=}2)$ and $(X{=}2,\\,Y{=}1)$: add both.",
+        "ro": "Valoarea 2 vine din două celule, $(X{=}1,\\,Y{=}2)$ și $(X{=}2,\\,Y{=}1)$: se adună ambele."
+       }
+      },
+      {
+       "field": "z2",
+       "formula": "a2*b1",
+       "message": {
+        "en": "The value 2 comes from two cells, $(X{=}1,\\,Y{=}2)$ and $(X{=}2,\\,Y{=}1)$: add both.",
+        "ro": "Valoarea 2 vine din două celule, $(X{=}1,\\,Y{=}2)$ și $(X{=}2,\\,Y{=}1)$: se adună ambele."
+       }
+      },
+      {
+       "field": "z0",
+       "formula": "a1*b0",
+       "message": {
+        "en": "$Z=0$ for any $X$ when $Y=0$: add both cells with $Y=0$.",
+        "ro": "$Z=0$ pentru orice $X$ când $Y=0$: se adună ambele celule cu $Y=0$."
+       }
+      },
+      {
+       "field": "z0",
+       "formula": "a2*b0",
+       "message": {
+        "en": "$Z=0$ for any $X$ when $Y=0$: add both cells with $Y=0$.",
+        "ro": "$Z=0$ pentru orice $X$ când $Y=0$: se adună ambele celule cu $Y=0$."
+       }
+      },
+      {
+       "field": "exy2",
+       "formula": "E([1,2],[a1,a2])*E([0,1,2],[b0,b1,b2])^2",
+       "message": {
+        "en": "This is $E[X]\\,(E[Y])^2$. The square is applied to $Y$ before the mean: $E[XY^2]=E[X]\\,E[Y^2]$.",
+        "ro": "Aceasta este $E[X]\\,(E[Y])^2$. Pătratul se aplică lui $Y$ înainte de medie: $E[XY^2]=E[X]\\,E[Y^2]$."
+       }
+      },
+      {
+       "field": "vz",
+       "formula": "Var([1,2],[a1,a2])*Var([0,1,2],[b0,b1,b2])",
+       "message": {
+        "en": "The variance of the product is not the product of the variances. Compute it from the distribution of $Z$: $E[Z^2]-(E[Z])^2$.",
+        "ro": "Varianța produsului nu este produsul varianțelor. Calculeaz-o din distribuția lui $Z$: $E[Z^2]-(E[Z])^2$."
+       }
+      },
+      {
+       "field": "vz",
+       "formula": "E([0,1,4,16],[a1*b0+a2*b0,a1*b1,a1*b2+a2*b1,a2*b2])",
+       "message": {
+        "en": "This is $E[Z^2]$; subtract $(E[Z])^2$ as well.",
+        "ro": "Aceasta este $E[Z^2]$; mai scade $(E[Z])^2$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "The variables are independent, so every cell of the joint table is the product of its marginals: $p(x,y)=p_X(x)\\,p_Y(y)$. Build the table cell by cell.",
+       "ro": "Variabilele sunt independente, deci fiecare celulă a tabelului comun este produsul marginalelor ei: $p(x,y)=p_X(x)\\,p_Y(y)$. Construiește tabelul celulă cu celulă."
+      },
+      {
+       "en": "$Z=0$ when $Y=0$, for both values of $X$; $Z=2$ comes from two cells, $(1,2)$ and $(2,1)$, which are added. Then $E[Z]=\\sum z\\,P(Z{=}z)$, $E[XY^2]=E[X]\\,E[Y^2]$ and $\\mathrm{Var}(Z)=E[Z^2]-(E[Z])^2$.",
+       "ro": "$Z=0$ când $Y=0$, pentru ambele valori ale lui $X$; $Z=2$ vine din două celule, $(1,2)$ și $(2,1)$, care se adună. Apoi $E[Z]=\\sum z\\,P(Z{=}z)$, $E[XY^2]=E[X]\\,E[Y^2]$ și $\\mathrm{Var}(Z)=E[Z^2]-(E[Z])^2$."
+      },
+      {
+       "en": "$E[Z]=0\\cdot0.5+1\\cdot0.12+2\\cdot0.26+4\\cdot0.12$; $E[XY^2]=E[X]\\,E[Y^2]$, with $E[Y^2]=0\\cdot0.5+1\\cdot0.3+4\\cdot0.2$; $\\mathrm{Var}(Z)=E[Z^2]-(E[Z])^2$, with $E[Z^2]=1\\cdot0.12+4\\cdot0.26+16\\cdot0.12$.",
+       "ro": "$E[Z]=0\\cdot0{,}5+1\\cdot0{,}12+2\\cdot0{,}26+4\\cdot0{,}12$; $E[XY^2]=E[X]\\,E[Y^2]$, cu $E[Y^2]=0\\cdot0{,}5+1\\cdot0{,}3+4\\cdot0{,}2$; $\\mathrm{Var}(Z)=E[Z^2]-(E[Z])^2$, cu $E[Z^2]=1\\cdot0{,}12+4\\cdot0{,}26+16\\cdot0{,}12$."
+      }
+     ],
+     "solution": {
+      "en": "The joint table: $(1,0)$: $0.2$; $(1,1)$: $0.12$; $(1,2)$: $0.08$; $(2,0)$: $0.3$; $(2,1)$: $0.18$; $(2,2)$: $0.12$ (sum 1). $Z$ takes 0 with $0.2+0.3=0.5$; 1 with $0.12$; 2 with $0.08+0.18=0.26$; 4 with $0.12$. $E[Z]=0.12+0.52+0.48=1.12$; $E[X]=1.6$, $E[Y]=0.7$, $E[X]\\,E[Y]=1.12$: equal, because the variables are independent. $E[Y^2]=1.1$, so $E[XY^2]=1.6\\cdot1.1=1.76$; directly from the six cells: $0.12+0.32+0.36+0.96=1.76$. The variance of the product, from the distribution of $Z$: $E[Z^2]=1\\cdot0.12+4\\cdot0.26+16\\cdot0.12=3.08$, so $\\mathrm{Var}(Z)=3.08-1.12^2=1.8256$; the same $E[Z^2]$ also comes out as $E[X^2]\\,E[Y^2]=2.8\\cdot1.1$ ($X^2$ and $Y^2$ are independent).",
+      "ro": "Tabelul comun: $(1,0)$: $0{,}2$; $(1,1)$: $0{,}12$; $(1,2)$: $0{,}08$; $(2,0)$: $0{,}3$; $(2,1)$: $0{,}18$; $(2,2)$: $0{,}12$ (suma 1). $Z$ ia 0 cu $0{,}2+0{,}3=0{,}5$; 1 cu $0{,}12$; 2 cu $0{,}08+0{,}18=0{,}26$; 4 cu $0{,}12$. $E[Z]=0{,}12+0{,}52+0{,}48=1{,}12$; $E[X]=1{,}6$, $E[Y]=0{,}7$, $E[X]\\,E[Y]=1{,}12$: egale, fiindcă variabilele sunt independente. $E[Y^2]=1{,}1$, deci $E[XY^2]=1{,}6\\cdot1{,}1=1{,}76$; direct din cele șase celule: $0{,}12+0{,}32+0{,}36+0{,}96=1{,}76$. Varianța produsului, din distribuția lui $Z$: $E[Z^2]=1\\cdot0{,}12+4\\cdot0{,}26+16\\cdot0{,}12=3{,}08$, deci $\\mathrm{Var}(Z)=3{,}08-1{,}12^2=1{,}8256$; aceeași $E[Z^2]$ iese și ca $E[X^2]\\,E[Y^2]=2{,}8\\cdot1{,}1$ ($X^2$ și $Y^2$ sunt independente)."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "$X$ and $Y$ are independent. $X$ takes the values 1 and 2 with probabilities $0.3$ and $0.7$; $Y$ takes the values 0, 1, 2 with probabilities $0.2$, $0.5$ and $0.3$. The variable $Z=XY$ takes the value $x\\cdot y$ on the cell $(x,y)$ of the joint table. **a.** What are $P(X{=}2,\\,Y{=}1)$ and $P(X{=}1,\\,Y{=}2)$? **b.** The distribution of $Z$: its values are 0, 1, 2 and 4. **c.** $E[Z]$, compared with $E[X]\\,E[Y]$. **d.** $E[XY^2]$. **e.** $\\mathrm{Var}(Z)$, from the distribution of $Z$. Write the answers as fractions or as decimals.",
+        "ro": "$X$ și $Y$ sunt independente. $X$ ia valorile 1 și 2 cu probabilitățile $0{,}3$ și $0{,}7$; $Y$ ia valorile 0, 1, 2 cu probabilitățile $0{,}2$, $0{,}5$ și $0{,}3$. Variabila $Z=XY$ ia valoarea $x\\cdot y$ pe celula $(x,y)$ a tabelului comun. **a.** Cât sunt $P(X{=}2,\\,Y{=}1)$ și $P(X{=}1,\\,Y{=}2)$? **b.** Distribuția lui $Z$: valorile ei sunt 0, 1, 2 și 4. **c.** $E[Z]$, comparat cu $E[X]\\,E[Y]$. **d.** $E[XY^2]$. **e.** $\\mathrm{Var}(Z)$, din distribuția lui $Z$. Scrie răspunsurile ca fracții sau ca zecimale."
+       },
+       "table": [
+        {
+         "columns": [
+          "$x$",
+          "$P(X{=}x)$"
+         ],
+         "rows": [
+          [
+           "1",
+           "0,3"
+          ],
+          [
+           "2",
+           "0,7"
+          ]
+         ],
+         "caption": {
+          "en": "The distribution of X",
+          "ro": "Distribuția lui X"
+         }
+        },
+        {
+         "columns": [
+          "$y$",
+          "$P(Y{=}y)$"
+         ],
+         "rows": [
+          [
+           "0",
+           "0,2"
+          ],
+          [
+           "1",
+           "0,5"
+          ],
+          [
+           "2",
+           "0,3"
+          ]
+         ],
+         "caption": {
+          "en": "The distribution of Y",
+          "ro": "Distribuția lui Y"
+         }
+        }
+       ],
+       "data": {
+        "a1": 0.3,
+        "a2": 0.7,
+        "b0": 0.2,
+        "b1": 0.5,
+        "b2": 0.3
+       },
+       "fields": [
+        {
+         "id": "p21",
+         "formula": "a2*b1",
+         "expected": "7/20"
+        },
+        {
+         "id": "p12",
+         "formula": "a1*b2",
+         "expected": "9/100"
+        },
+        {
+         "id": "z0",
+         "formula": "a1*b0+a2*b0",
+         "expected": "1/5"
+        },
+        {
+         "id": "z1",
+         "formula": "a1*b1",
+         "expected": "3/20"
+        },
+        {
+         "id": "z2",
+         "formula": "a1*b2+a2*b1",
+         "expected": "11/25"
+        },
+        {
+         "id": "z4",
+         "formula": "a2*b2",
+         "expected": "21/100"
+        },
+        {
+         "id": "ez",
+         "formula": "E([0,1,2,4],[a1*b0+a2*b0,a1*b1,a1*b2+a2*b1,a2*b2])",
+         "expected": "187/100"
+        },
+        {
+         "id": "exey",
+         "formula": "E([1,2],[a1,a2])*E([0,1,2],[b0,b1,b2])",
+         "expected": "187/100"
+        },
+        {
+         "id": "exy2",
+         "formula": "E([1,2],[a1,a2])*E([0,1,4],[b0,b1,b2])",
+         "expected": "289/100"
+        },
+        {
+         "id": "vz",
+         "formula": "Var([0,1,2,4],[a1*b0+a2*b0,a1*b1,a1*b2+a2*b1,a2*b2])",
+         "expected": "17731/10000",
+         "tol": 0.0005
+        }
+       ],
+       "solution": {
+        "en": "The joint table: $(1,0)$: $0.06$; $(1,1)$: $0.15$; $(1,2)$: $0.09$; $(2,0)$: $0.14$; $(2,1)$: $0.35$; $(2,2)$: $0.21$ (sum 1). $Z$ takes 0 with $0.2$; 1 with $0.15$; 2 with $0.09+0.35=0.44$; 4 with $0.21$. $E[Z]=0.15+0.88+0.84=1.87=E[X]\\,E[Y]=1.7\\cdot1.1$. $E[Y^2]=0.5+1.2=1.7$, so $E[XY^2]=1.7\\cdot1.7=2.89$. $E[Z^2]=0.15+1.76+3.36=5.27$, so $\\mathrm{Var}(Z)=5.27-1.87^2=1.7731$.",
+        "ro": "Tabelul comun: $(1,0)$: $0{,}06$; $(1,1)$: $0{,}15$; $(1,2)$: $0{,}09$; $(2,0)$: $0{,}14$; $(2,1)$: $0{,}35$; $(2,2)$: $0{,}21$ (suma 1). $Z$ ia 0 cu $0{,}2$; 1 cu $0{,}15$; 2 cu $0{,}09+0{,}35=0{,}44$; 4 cu $0{,}21$. $E[Z]=0{,}15+0{,}88+0{,}84=1{,}87=E[X]\\,E[Y]=1{,}7\\cdot1{,}1$. $E[Y^2]=0{,}5+1{,}2=1{,}7$, deci $E[XY^2]=1{,}7\\cdot1{,}7=2{,}89$. $E[Z^2]=0{,}15+1{,}76+3{,}36=5{,}27$, deci $\\mathrm{Var}(Z)=5{,}27-1{,}87^2=1{,}7731$."
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
