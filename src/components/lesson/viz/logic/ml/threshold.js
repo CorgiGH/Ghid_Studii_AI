@@ -1,0 +1,258 @@
+// ml-threshold (L14): the thresholds of a continuous attribute, the IG of each, the winner, the thresholds recomputed
+// in each child node, and the decision zones. Pure: every number, caption and mark comes from here, computed with the
+// ML math kit (thresholds, IG, Hcol) through tree-grow.js. No React.
+import { Hcol, IG } from '../../../../../ml/calc/mathKit.js';
+import { colNames, countsText, fmt, grow, countTests, polarity, sub } from './tree-grow.js';
+
+const bi = (en, ro) => ({ en, ro });
+const TIE = 1e-9;
+
+const test = (c) => `${c.attr} ≤ ${fmt(c.th)}`;
+export const candKey = (c) => `${c.attr}@${fmt(c.th)}`;
+
+const sideText = (conds) => conds.map((c) => `${c.attr} ${c.op} ${fmt(c.th)}`).join(', ');
+// an interval of the axis: (−∞, 54], (54, 85], (85, ∞)
+export const intervalText = ([lo, hi]) => `(${lo === -Infinity ? '−∞' : fmt(lo)}, ${hi === Infinity ? '∞)' : `${fmt(hi)}]`}`;
+
+// Every internal node in the order the tree is grown level by level, with the region of the plane it covers.
+function internalNodes(root, plane) {
+  const out = [];
+  const q = [{ node: root, conds: [], region: { x: [-Infinity, Infinity], y: [-Infinity, Infinity] } }];
+  while (q.length) {
+    const it = q.shift();
+    if (it.node.leaf) continue;
+    out.push({ ...it, id: out.length });
+    const { attr, th } = it.node.test;
+    const axis = plane && attr === plane.y ? 'y' : 'x';
+    const lo = { ...it.region, [axis]: [it.region[axis][0], Math.min(it.region[axis][1], th)] };
+    const hi = { ...it.region, [axis]: [Math.max(it.region[axis][0], th), it.region[axis][1]] };
+    q.push({ node: it.node.kids[0], conds: [...it.conds, { attr, op: '≤', th }], region: lo });
+    q.push({ node: it.node.kids[1], conds: [...it.conds, { attr, op: '>', th }], region: hi });
+  }
+  return out;
+}
+
+// Every leaf, left to right, with the test node it hangs from (parent; null for a tree that is one leaf).
+function leaves(root, plane) {
+  const out = [];
+  const walk = (node, conds, region, parent) => {
+    if (node.leaf) { out.push({ node, conds, region, parent }); return; }
+    const { attr, th } = node.test;
+    const axis = plane && attr === plane.y ? 'y' : 'x';
+    walk(node.kids[0], [...conds, { attr, op: '≤', th }], { ...region, [axis]: [region[axis][0], Math.min(region[axis][1], th)] }, node);
+    walk(node.kids[1], [...conds, { attr, op: '>', th }], { ...region, [axis]: [Math.max(region[axis][0], th), region[axis][1]] }, node);
+  };
+  walk(root, [], { x: [-Infinity, Infinity], y: [-Infinity, Infinity] }, null);
+  return out;
+}
+
+// One side of a zone: "x ≤ 1.5", "2 < y ≤ 4", "x > 4.5", or null when the zone is open on both ends of that axis.
+const sideIneq = (name, [lo, hi]) => {
+  if (lo === -Infinity && hi === Infinity) return null;
+  if (lo === -Infinity) return `${name} ≤ ${fmt(hi)}`;
+  if (hi === Infinity) return `${name} > ${fmt(lo)}`;
+  return `${fmt(lo)} < ${name} ≤ ${fmt(hi)}`;
+};
+// A zone of the plane as the system of inequalities of its leaf: "{X1 ≤ 2.5, X2 ≤ 3.5}" (lesson 14, R3b).
+export const zoneIneq = (region, xName, yName) => `{${[sideIneq(xName, region.x), sideIneq(yName, region.y)].filter(Boolean).join(', ') || '*'}}`;
+
+// The first midpoint inside the longest run of one label (a threshold nobody should try), or null.
+function insideRun(table, attr, target) {
+  const names = colNames(table);
+  const ai = names.indexOf(attr);
+  const ti = names.indexOf(target);
+  const groups = [];
+  for (const r of [...table.rows].sort((a, b) => a[ai] - b[ai])) {
+    const last = groups[groups.length - 1];
+    if (last && last.x === r[ai]) last.ys.add(r[ti]);
+    else groups.push({ x: r[ai], ys: new Set([r[ti]]) });
+  }
+  let best = null;
+  let g = 0;
+  while (g < groups.length) {
+    let e = g;
+    const one = groups[g].ys.size === 1 ? [...groups[g].ys][0] : undefined;
+    if (one !== undefined) while (e + 1 < groups.length && groups[e + 1].ys.size === 1 && [...groups[e + 1].ys][0] === one) e += 1;
+    if (e > g && (!best || e - g > best.e - best.g)) best = { g, e };
+    g = e + 1;
+  }
+  return best ? (groups[best.g].x + groups[best.g + 1].x) / 2 : null;
+}
+
+export function mlThreshold({ table, attr, target, plane }) {
+  const attrs = plane ? [plane.x, plane.y] : [attr];
+  const names = colNames(table);
+  for (const a of attrs) if (!names.includes(a)) throw new RangeError(`unknown column ${a}`);
+  if (!names.includes(target)) throw new RangeError(`unknown column ${target}`);
+  const ti = names.indexOf(target);
+  const g = grow(table, target, { attrs, continuous: attrs });
+  const classes = g.classes;
+  const ct = (counts) => countsText(counts, classes);
+  const points = table.rows.map((r, i) => ({
+    i, x: r[names.indexOf(attrs[0])], y: plane ? r[names.indexOf(attrs[1])] : undefined, label: r[ti], cls: classes.indexOf(r[ti]),
+  }));
+  const nodes = internalNodes(g.tree, plane);
+  const root = nodes[0];
+  const frames = [];
+  // the leaves with the id of the test they hang from: a node's frame colours the zones of the leaves made so far
+  const idOf = (node) => (node ? nodes.find((nd) => nd.node === node).id : -1);
+  const lv = leaves(g.tree, plane).map((l) => ({
+    region: l.region, label: l.node.label, cls: classes.indexOf(l.node.label), n: l.node.ids.length, counts: l.node.counts, conds: l.conds,
+    parent: idOf(l.parent),
+    text: l.conds.length ? l.conds.map((c) => `${c.attr} ${c.op} ${fmt(c.th)}`).join(' & ') : '*',
+    ineq: plane ? zoneIneq(l.region, plane.x, plane.y) : null,
+  }));
+  const zonesUpTo = (id) => lv.filter((l) => l.parent <= id);
+
+  const rootCands = root ? root.node.cands.map((c) => ({ attr: c.attr, th: c.th, key: candKey(c) })) : [];
+  const rootList = rootCands.map((c) => (plane ? test(c) : fmt(c.th))).join(', ');
+  frames.push({
+    kind: 'setup', n: points.length, cands: rootCands, lines: [], showIG: false, h: Hcol(table, target),
+    caption: plane
+      ? bi(`${points.length} points in the plane. A test compares one column with one threshold, so the cuts are straight lines parallel to an axis. Thresholds only sit between neighbouring values whose labels differ: ${rootCands.length} candidates at the root (${rootList}). Which one has the largest IG?`,
+        `${points.length} puncte în plan. Un test compară o singură coloană cu un prag, deci tăieturile sunt drepte paralele cu axele. Pragurile se pun doar între valori vecine cu etichete diferite: ${rootCands.length} candidați la rădăcină (${rootList}). Care are cel mai mare IG?`)
+      : bi(`${points.length} points, sorted by ${attr}. A threshold goes only where the label changes, at the midpoint: ${rootCands.length} candidates (${rootList}). Which one has the largest IG?`,
+        `${points.length} puncte, ordonate după ${attr}. Un prag se pune doar unde se schimbă eticheta, la mijlocul intervalului: ${rootCands.length} candidați (${rootList}). Care are cel mai mare IG?`),
+  });
+
+  const boundaryOf = (nd) => ({ attr: nd.node.test.attr, th: nd.node.test.th, region: nd.region, node: nd.id });
+  const nodeFrame = (nd, lines) => {
+    const n = nd.node;
+    const cands = n.cands.map((c) => ({ attr: c.attr, th: c.th, ig: c.ig, key: candKey(c), left: c.groups[0], right: c.groups[1], best: c === n.best }));
+    const runner = [...cands].filter((c) => !c.best).sort((a, b) => b.ig - a.ig)[0];
+    const tied = cands.some((c) => !c.best && Math.abs(c.ig - n.best.ig) < TIE);
+    const h = Hcol(sub(table, n.ids), target);
+    const best = cands.find((c) => c.best);
+    const tail = (en, ro) => (tied ? bi(`${en} Another test has the same IG; the first one in the order is kept.`, `${ro} Un alt test are același IG; se păstrează primul în ordine.`) : bi(en, ro));
+    // in the plane two columns share a value (X1 <= 2.5 and X2 <= 2.5), so the list names the column
+    const candList = cands.map((c) => (plane ? test(c) : fmt(c.th))).join(', ');
+    const head = nd.id === 0
+      ? bi(`Root: ${n.ids.length} points ${ct(n.counts)}, H = ${fmt(h)}.`, `Rădăcina: ${n.ids.length} puncte ${ct(n.counts)}, H = ${fmt(h)}.`)
+      : bi(`Node where ${sideText(nd.conds)}: ${n.ids.length} points ${ct(n.counts)}, H = ${fmt(h)}. Thresholds are recomputed from these points only: ${candList}.`,
+        `Nodul în care ${sideText(nd.conds)}: ${n.ids.length} puncte ${ct(n.counts)}, H = ${fmt(h)}. Pragurile se recalculează doar din aceste puncte: ${candList}.`);
+    const win = tail(`Best test: ${test(best)}, IG ${fmt(best.ig)}${runner ? ` (next: ${test(runner)}, IG ${fmt(runner.ig)})` : ''}.`,
+      `Cel mai bun test: ${test(best)}, IG ${fmt(best.ig)}${runner ? ` (următorul: ${test(runner)}, IG ${fmt(runner.ig)})` : ''}.`);
+    // a node below the root with a choice to make asks for the winner before its IG and its line show (the root is asked on the setup frame)
+    const ask = nd.id > 0 && cands.length >= 2
+      ? {
+        options: cands.map((c) => ({ key: c.key, th: c.th, label: bi(test(c), test(c)) })),
+        caption: bi(`${head.en} Which test has the largest IG here? Pick one, or press Show me.`, `${head.ro} Care test are cel mai mare IG aici? Alege unul sau apasă Arată-mi.`),
+      }
+      : undefined;
+    return {
+      kind: 'node', id: nd.id, n: n.ids.length, counts: n.counts, h, cands, best, region: nd.region, conds: nd.conds, showIG: true, lines, ask, zones: zonesUpTo(nd.id),
+      caption: bi(`${head.en} ${win.en}`, `${head.ro} ${win.ro}`),
+    };
+  };
+
+  const rootFrame = root ? nodeFrame(root, [boundaryOf(root)]) : null;
+  if (rootFrame) frames.push(rootFrame);
+
+  // a threshold inside a run of one label: the reason thresholds sit only where the label changes
+  const trial = !plane && root ? insideRun(table, attr, target) : null;
+  if (trial !== null && rootFrame) {
+    const st = { attr, th: trial };
+    const below = points.filter((p) => p.x <= trial);
+    const above = points.filter((p) => p.x > trial);
+    const cnt = (ps) => classes.map((c) => ps.filter((p) => p.label === c).length);
+    const ig = IG(table, attr, target, { threshold: trial });
+    const b = rootFrame.best;
+    frames.push({
+      kind: 'contrast', n: points.length, trial: { ...st, ig, left: cnt(below), right: cnt(above) }, best: b, showIG: true,
+      lines: [boundaryOf(root)], cands: rootFrame.cands, region: root.region, zones: zonesUpTo(0),
+      ask: {
+        options: [{ key: 'lower', label: bi(`smaller than ${fmt(b.ig)}`, `mai mic decât ${fmt(b.ig)}`) }, { key: 'higher', label: bi(`larger than ${fmt(b.ig)}`, `mai mare decât ${fmt(b.ig)}`) }],
+        caption: bi(`A threshold inside a run of one label: ${test(st)}, with ${ct(cnt(below))} and ${ct(cnt(above))}. Is its IG smaller or larger than ${fmt(b.ig)}, the IG of ${test(b)}?`,
+          `Un prag în interiorul unui șir cu aceeași etichetă: ${test(st)}, cu ${ct(cnt(below))} și ${ct(cnt(above))}. IG-ul lui e mai mic sau mai mare decât ${fmt(b.ig)}, IG-ul lui ${test(b)}?`),
+      },
+      caption: bi(`A threshold inside a run of one label, ${test(st)}: ${ct(cnt(below))} and ${ct(cnt(above))}, IG ${fmt(ig)}, smaller than ${fmt(b.ig)}, the IG of ${test(b)}: inside a run a test cannot beat the label changes at its ends.`,
+        `Un prag în interiorul unui șir cu aceeași etichetă, ${test(st)}: ${ct(cnt(below))} și ${ct(cnt(above))}, IG ${fmt(ig)}, mai mic decât ${fmt(b.ig)}, IG-ul lui ${test(b)}: în interiorul unui șir un test nu poate întrece schimbările de etichetă de la capetele lui.`),
+    });
+  }
+
+  nodes.slice(1).forEach((nd) => {
+    frames.push(nodeFrame(nd, nodes.slice(0, nd.id + 1).map(boundaryOf)));
+  });
+
+  const tests = countTests(g.tree);
+  const zoneText = (l) => intervalText(l.region.x);
+  frames.push({
+    kind: 'zones', n: points.length, tests, leaves: lv, zones: lv, showIG: true, lines: nodes.map(boundaryOf), region: nodes[0]?.region,
+    caption: plane
+      ? bi(`The finished tree: ${tests} tests and ${lv.length} zones. Every boundary is parallel to an axis, and each zone takes the label of the points inside it.`,
+        `Arborele terminat: ${tests} teste și ${lv.length} zone. Fiecare graniță e paralelă cu o axă, iar fiecare zonă ia eticheta punctelor din ea.`)
+      : bi(`The finished tree: ${tests} tests and ${lv.length} zones on the axis: ${lv.map((l) => `${zoneText(l)} → ${l.label}`).join('; ')}.`,
+        `Arborele terminat: ${tests} teste și ${lv.length} zone pe axă: ${lv.map((l) => `${zoneText(l)} → ${l.label}`).join('; ')}.`),
+  });
+
+  return { frames, points, classes, attrs, plane: !!plane, tests, leaves: lv, root: rootFrame, tree: g.tree, countsText: ct, nodes: nodes.length };
+}
+
+// What the learner's pick was worth (null before a pick or after a skip). The root's pick is made on the setup frame and
+// read on the root's frame; a later node or the inside-run threshold is asked on its own frame (frame.ask).
+export function guessNote(frame, guess) {
+  if (!guess) return null;
+  if (frame.kind === 'contrast') {
+    const { trial, best } = frame;
+    const right = trial.ig < best.ig - TIE ? 'lower' : trial.ig > best.ig + TIE ? 'higher' : null;
+    const said = (g) => bi(g === 'lower' ? 'smaller' : 'larger', g === 'lower' ? 'mai mic' : 'mai mare');
+    if (right === null) return bi(`IG ${fmt(trial.ig)} equals ${fmt(best.ig)}.`, `IG ${fmt(trial.ig)} e egal cu ${fmt(best.ig)}.`);
+    if (guess === right) return bi(`You said ${said(guess).en}: right.`, `Ai spus ${said(guess).ro}: corect.`);
+    return bi(`You said ${said(guess).en}; it is ${said(right).en}: ${fmt(trial.ig)} against ${fmt(best.ig)}.`, `Ai spus ${said(guess).ro}; e ${said(right).ro}: ${fmt(trial.ig)} față de ${fmt(best.ig)}.`);
+  }
+  if (frame.kind !== 'node' || (frame.id !== 0 && !frame.ask)) return null;
+  const picked = frame.cands.find((c) => c.key === guess);
+  if (!picked) return null;
+  const best = frame.best;
+  if (picked.key === best.key) return bi(`You picked ${test(picked)}: right.`, `Ai ales ${test(picked)}: corect.`);
+  if (Math.abs(picked.ig - best.ig) < TIE) {
+    return bi(`You picked ${test(picked)}: right, it has the same IG as ${test(best)}, ${fmt(best.ig)}; the first in order is kept.`,
+      `Ai ales ${test(picked)}: corect, are același IG ca ${test(best)}, ${fmt(best.ig)}; se păstrează primul în ordine.`);
+  }
+  return bi(`You picked ${test(picked)}, IG ${fmt(picked.ig)}; the largest is ${test(best)}, IG ${fmt(best.ig)}.`,
+    `Ai ales ${test(picked)}, IG ${fmt(picked.ig)}; cel mai mare e ${test(best)}, IG ${fmt(best.ig)}.`);
+}
+export const testLabel = test;
+
+// Where the marks go: the plot is `w` wide with `pad` around it; a value maps linearly, a y value upwards.
+export function plotScale(points, plane, w = 320, h = plane ? 250 : 100, pad = 26) {
+  const range = (vs) => {
+    const lo = Math.min(...vs);
+    const hi = Math.max(...vs);
+    const m = hi === lo ? 1 : (hi - lo) * 0.08;
+    return [lo - m, hi + m];
+  };
+  const [x0, x1] = range(points.map((p) => p.x));
+  const [y0, y1] = plane ? range(points.map((p) => p.y)) : [0, 1];
+  const clampTo = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  return {
+    w, h, pad, domainX: [x0, x1], domainY: [y0, y1],
+    X: (x) => pad + ((clampTo(x, x0, x1) - x0) / (x1 - x0)) * (w - 2 * pad),
+    Y: (y) => (plane ? h - pad - ((clampTo(y, y0, y1) - y0) / (y1 - y0)) * (h - 2 * pad) : h / 2),
+  };
+}
+
+// Rows for the labels of the cuts on an axis: a label goes on the first row whose last label is at least `gap` to its left,
+// so two thresholds close together (4.10: 8.25 and 8.75) never print over each other. xs in drawing units; the result is
+// one row index per x, in input order.
+export const AXIS_LABEL_GAP = 30; // two cut labels closer than this (plot units) would print over each other
+export const AXIS_LABEL_ROW = 12; // the next row of labels sits this much higher
+export function labelRows(xs, gap) {
+  const order = xs.map((x, i) => [x, i]).sort((a, b) => a[0] - b[0]);
+  const lastOf = [];
+  const rows = new Array(xs.length);
+  for (const [x, i] of order) {
+    let r = lastOf.findIndex((last) => x - last >= gap);
+    if (r < 0) { r = lastOf.length; lastOf.push(x); } else lastOf[r] = x;
+    rows[i] = r;
+  }
+  return rows;
+}
+
+// The class colour and shape: positive and negative labels use the keep and drop tokens, any other class a series token.
+export function classMark(classes, k) {
+  const l = String(classes[k]).toLowerCase();
+  const pol = polarity(l);
+  const colour = pol === 'pos' ? 'var(--lt-keep)' : pol === 'neg' ? 'var(--lt-drop)' : `var(--lt-t${k % 4})`;
+  return { colour, shape: ['circle', 'square', 'triangle', 'diamond'][k % 4] };
+}

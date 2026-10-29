@@ -30,6 +30,9 @@ const WIDGETS = {
   'ml-id3-builder': lazy(() => import('../viz/widgets/ml/Id3Builder.jsx')),
   'ml-tree-pair': lazy(() => import('../viz/widgets/ml/TreePair.jsx')),
   'ml-dup-counter': lazy(() => import('../viz/widgets/ml/DupCounter.jsx')),
+  'ml-threshold': lazy(() => import('../viz/widgets/ml/Threshold.jsx')),
+  'ml-cvloo': lazy(() => import('../viz/widgets/ml/CvLoo.jsx')),
+  'ml-prune': lazy(() => import('../viz/widgets/ml/Prune.jsx')),
 };
 
 function Notice({ children }) {

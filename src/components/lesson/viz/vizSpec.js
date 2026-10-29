@@ -17,6 +17,12 @@ const optional = (f) => (v) => v === undefined || f(v);
 const isProb = (v) => typeof v === 'number' || (typeof v === 'string' && /^-?\d+(\.\d+)?(\/\d+)?$/.test(v));
 const probList = (v) => isArr(v) && v.every(isProb);
 const isTable = (v) => !!v && typeof v === 'object' && isArr(v.columns) && isArr(v.rows);
+const colName = (c) => (typeof c === 'string' ? c : c?.en);
+const isTbl = (v) => !!v && typeof v === 'object' && Array.isArray(v.columns) && v.columns.length > 0 && Array.isArray(v.rows) && v.rows.length > 0 && v.rows.every(r => Array.isArray(r) && r.length === v.columns.length);
+const isPlane = (v) => !!v && typeof v === 'object' && isStr(v.x) && isStr(v.y);
+// a tree of the ml-prune widget: { attr, ig?, kids: { value: node } } with { leaf } at the ends
+const isPruneNode = (n) => !!n && typeof n === 'object' && (n.leaf !== undefined || (isStr(n.attr) && (n.ig === undefined || isNum(n.ig)) && !!n.kids && typeof n.kids === 'object' && Object.keys(n.kids).length > 0 && Object.values(n.kids).every(isPruneNode)));
+const pruneTests = (n) => (n.leaf !== undefined ? [] : [n, ...Object.values(n.kids).flatMap(pruneTests)]);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
@@ -66,6 +72,9 @@ const SPEC = {
   'ml-id3-builder': { mode: oneOf('stumps', 'compare', 'full'), table: optional(isMlTable), target: optional(isStr), given: optional(isStumpsGiven), cases: optional(isCompareCases), positive: optional(isLabel), showValues: optional((v) => typeof v === 'boolean') },
   'ml-tree-pair': { left: isTree, right: isTree, counts: optional(subsetOf('tests', 'levels', 'leaves')), titles: optional((v) => Array.isArray(v) && v.length === 2 && v.every(isBi)), table: optional(isMlTable), target: optional(isStr) },
   'ml-dup-counter': { table: isMlTable, target: isStr, added: (v) => Array.isArray(v) && v.length > 0 && v.every(Array.isArray) },
+  'ml-threshold': { table: isTbl, attr: isStr, target: isStr, plane: optional(isPlane) },
+  'ml-cvloo': { table: isTbl, target: isStr, tie: isStr, continuous: optional(strs) },
+  'ml-prune': { tree: isPruneNode, table: optional(isTbl), target: optional(isStr), epsilon: isNum },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -94,6 +103,35 @@ export function validateViz(block) {
     if (props.mode === 'swap' && !(isStr(props.from) && isStr(props.to))) errs.push('viz (char-strips): swap needs props.from and props.to');
   }
   if (w === 'char-boxes' && props.ops?.includes('LIKE') && !isStr(props.likePattern)) errs.push('viz (char-boxes): LIKE needs props.likePattern');
+  // the ML widgets read columns by name: a name that is not in the table is a content error, not a blank chart
+  const mlCols = (tb, names, numeric) => {
+    if (!isTbl(tb)) return;
+    const cols = tb.columns.map(colName);
+    for (const c of names.filter(isStr)) {
+      if (!cols.includes(c)) errs.push(`viz (${w}): column "${c}" is not in the table (columns: ${cols.join(', ')})`);
+      else if (numeric && !tb.rows.every(r => typeof r[cols.indexOf(c)] === 'number')) errs.push(`viz (${w}): column "${c}" must hold numbers`);
+    }
+  };
+  if (w === 'ml-threshold') {
+    mlCols(props.table, [props.target], false);
+    mlCols(props.table, props.plane && isPlane(props.plane) ? [props.attr, props.plane.x, props.plane.y] : [props.attr], true);
+  }
+  if (w === 'ml-cvloo') {
+    mlCols(props.table, [props.target], false);
+    mlCols(props.table, Array.isArray(props.continuous) ? props.continuous : [], true);
+    // tie is the leaf rule (class0, class1 or a label of the target); a tie between attributes goes to the first column
+    if (isTbl(props.table) && isStr(props.tie) && !/^class[01]$/.test(props.tie)) {
+      const ti = props.table.columns.map(colName).indexOf(props.target);
+      if (ti >= 0 && !props.table.rows.some(r => String(r[ti]) === props.tie)) errs.push(`viz (ml-cvloo): props.tie "${props.tie}" is the leaf rule: class0, class1 or a label of ${props.target}; a tie between attributes follows the column order of the table`);
+    }
+  }
+  if (w === 'ml-prune' && isPruneNode(props.tree)) {
+    const tests = pruneTests(props.tree);
+    if (!tests.length) errs.push('viz (ml-prune): the tree needs at least one test node');
+    if (tests.some(n => n.ig === undefined) && !(isTbl(props.table) && isStr(props.target))) errs.push('viz (ml-prune): a test node without ig needs props.table and props.target');
+    if (isTbl(props.table)) mlCols(props.table, [props.target, ...tests.map(n => n.attr)], false);
+    if ((props.table === undefined) !== (props.target === undefined)) errs.push('viz (ml-prune): props.table and props.target go together');
+  }
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   if (w === 'ml-omega') errs.push(...omegaProblems(props).filter((e) => !errs.includes(e)));
   if (w === 'ml-freq-tree') errs.push(...freqTreeProblems(props).filter((e) => !errs.includes(e)));
