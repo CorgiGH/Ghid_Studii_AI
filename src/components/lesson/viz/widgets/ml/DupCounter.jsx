@@ -29,7 +29,8 @@ export function DupStage({ model: M, k, predict }) {
           <thead><tr>{header.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
           <tbody>
             {state.rows.map((r, i) => (
-              <tr key={i} className={i === newRow ? 'mlv-new' : contra.has(i) ? 'mlv-contra' : ''}>
+              // the new row keeps its mark and, when it contradicts an earlier row, the tint of the pair too
+              <tr key={i} className={[i === newRow && 'mlv-new', contra.has(i) && 'mlv-contra'].filter(Boolean).join(' ')}>
                 {r.map((c, j) => <td key={j} data-value={String(c)}>{String(c)}</td>)}
               </tr>
             ))}

@@ -195,3 +195,24 @@ describe('second review: wording', () => {
     expect(dupModel(PROPS).caption(0, { predict: true }).ro).toContain('Rândurile se adaugă unul câte unul; înainte de fiecare, spune ce face contorul.');
   });
 });
+
+describe('third review: a contradictory pair is coloured on the frame it appears', () => {
+  const M = dupModel(PROPS);
+  const rowClasses = (model, k) => [...renderToStaticMarkup(React.createElement(DupStage, { model, k, predict: false })).matchAll(/<tr class="([^"]*)">/g)].map((m) => m[1].split(' ').filter(Boolean));
+  it('the added row that contradicts an earlier one carries the contradiction tint as well as the new-row mark (outline L13: the pairs coloured)', () => {
+    const f1 = rowClasses(M, 1);
+    expect(f1).toHaveLength(9);
+    expect(f1[8]).toEqual(expect.arrayContaining(['mlv-new', 'mlv-contra']));
+    expect(f1[0]).toEqual(['mlv-contra']);
+    expect(f1.filter((c) => c.includes('mlv-contra'))).toHaveLength(2);
+    const f2 = rowClasses(M, 2);
+    expect(f2[9]).toEqual(expect.arrayContaining(['mlv-new', 'mlv-contra']));
+    expect(f2.filter((c) => c.includes('mlv-contra'))).toHaveLength(4);
+  });
+  it('a repeated row with the same label is new but not tinted', () => {
+    const D = dupModel({ table: TABLE, target: 'Y', added: [[0, 0, 0, 0]] });
+    const f1 = rowClasses(D, 1);
+    expect(f1[8]).toEqual(['mlv-new']);
+    expect(f1.filter((c) => c.includes('mlv-contra'))).toHaveLength(0);
+  });
+});
