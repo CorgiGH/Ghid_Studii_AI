@@ -323,3 +323,35 @@ describe('second review', () => {
     expect([...html.matchAll(/data-mark="zone-ineq" data-value="([^"]*)"/g)].map((m) => unescape(m[1]))).toEqual(z.leaves.map((l) => l.ineq));
   });
 });
+
+describe('third review', () => {
+  it('labelRows puts labels closer than the gap on separate rows, in input order', async () => {
+    const { labelRows } = await import('../../src/components/lesson/viz/logic/ml/threshold.js');
+    expect(labelRows([10, 100, 112, 124, 200], 30)).toEqual([0, 0, 1, 2, 0]);
+    expect(labelRows([124, 10, 112, 100], 30)).toEqual([2, 0, 1, 0]);
+    expect(labelRows([], 30)).toEqual([]);
+  });
+  it('the candidate labels on the axis never overlap (4.10 at the root: 5, 8.25 and 8.75)', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/Threshold.jsx');
+    const T410 = { columns: ['X', 'Y'], rows: [[1, 0], [2, 0], [3, 0], [4, 0], [6, 1], [7, 1], [8, 1], [8.5, 0], [9, 1], [10, 1]] };
+    const W = mlThreshold({ table: T410, attr: 'X', target: 'Y' });
+    for (const f of W.frames) {
+      const html = renderToStaticMarkup(React.createElement(Stage, { W, frame: f }));
+      const labels = [...html.matchAll(/<text [^>]*data-mark="cut-label"[^>]*>/g)].map((m) => ({ x: Number(/ x="([^"]+)"/.exec(m[0])[1]), y: Number(/ y="([^"]+)"/.exec(m[0])[1]), v: /data-value="([^"]+)"/.exec(m[0])[1] }));
+      if (f.kind === 'setup') expect(labels.map((l) => l.v)).toEqual(['5', '8.25', '8.75']);
+      for (let i = 0; i < labels.length; i++) for (let j = i + 1; j < labels.length; j++) {
+        const [a, b] = [labels[i], labels[j]];
+        expect(Math.abs(a.x - b.x) >= 30 || a.y !== b.y, `${f.kind}: ${a.v} and ${b.v} overlap`).toBe(true);
+      }
+    }
+  });
+  it('the hint under the root chips is muted with the ML ink token, not the bare muted colour (viz-dim)', async () => {
+    const { default: Threshold } = await import('../../src/components/lesson/viz/widgets/ml/Threshold.jsx');
+    const html = renderToStaticMarkup(React.createElement(Threshold, { props: { table: TEMPS, attr: 'Temperature', target: 'Play' }, predict: true }));
+    expect(html).toContain('class="mlw4-hint"');
+    expect(html).not.toContain('viz-dim');
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/ml/ml-w4.css', import.meta.url), 'utf8');
+    expect(css).toMatch(/\.mlw4-hint \{[^}]*color: var\(--ml-muted-ink\)/);
+  });
+});

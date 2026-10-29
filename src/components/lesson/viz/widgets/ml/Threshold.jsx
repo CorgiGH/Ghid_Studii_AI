@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useApp } from '../../../../../contexts/AppContext';
 import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
-import { classMark, guessNote, intervalText, mlThreshold, plotScale, testLabel } from '../../logic/ml/threshold.js';
+import { AXIS_LABEL_GAP as LABEL_GAP, AXIS_LABEL_ROW as LABEL_ROW, classMark, guessNote, intervalText, labelRows, mlThreshold, plotScale, testLabel } from '../../logic/ml/threshold.js';
 import { fmt } from '../../logic/ml/tree-grow.js';
 import { Counts, Legend, Shape } from './Parts.jsx';
 import './ml-w4.css';
@@ -46,8 +46,12 @@ function Plot({ W, frame, t, revealed = true }) {
       : { x: x0, width: x1 - x0, y: h / 2 - 38, height: 66 };
   };
   const reg = frame.kind === 'node' && frame.region ? zoneRect({ region: frame.region }) : null;
+  // on the axis, labels of cuts closer than LABEL_GAP go on rows above each other (4.10: 8.25 and 8.75); the plot grows upwards
+  const contrast = frame.kind === 'contrast';
+  const rows = plane ? lines.map(() => 0) : labelRows([...lines.map((b) => S.X(b.th)), ...(contrast ? [S.X(frame.trial.th)] : [])], LABEL_GAP);
+  const lift = Math.max(0, ...rows) * LABEL_ROW;
   return (
-    <svg className="mlw4-plot" viewBox={`0 0 ${w} ${h}`} role="img"
+    <svg className="mlw4-plot" viewBox={`0 ${-lift} ${w} ${h + lift}`} role="img"
       aria-label={plane ? t(`Points in the plane of ${ax} and ${ay}`, `Puncte în planul ${ax}, ${ay}`) : t(`Points on the ${ax} axis`, `Puncte pe axa ${ax}`)}>
       {plane && <rect x={pad} y={pad} width={w - 2 * pad} height={h - 2 * pad} className="mlw4-frame" />}
       {zones.map((l, k) => {
@@ -62,14 +66,14 @@ function Plot({ W, frame, t, revealed = true }) {
         return (
           <g key={k}>
             <line {...s} className={`mlw4-cut${b.cand ? ' cand' : ''}`} data-mark={b.cand ? 'candidate' : 'boundary'} data-value={fmt(b.th)} data-attr={b.attr} />
-            {(!plane || last || b.cand) && <text x={s.x1 + (plane && b.attr === ay ? 4 : 0)} y={plane ? (b.attr === ay ? s.y1 - 4 : s.y1 - 5) : s.y1 - 5} textAnchor={plane && b.attr === ay ? 'start' : 'middle'} className={last ? 'on' : ''}>{plane ? `${b.attr}≤${fmt(b.th)}` : fmt(b.th)}</text>}
+            {(!plane || last || b.cand) && <text data-mark="cut-label" data-value={fmt(b.th)} x={s.x1 + (plane && b.attr === ay ? 4 : 0)} y={plane ? (b.attr === ay ? s.y1 - 4 : s.y1 - 5) : s.y1 - 5 - rows[k] * LABEL_ROW} textAnchor={plane && b.attr === ay ? 'start' : 'middle'} className={last ? 'on' : ''}>{plane ? `${b.attr}≤${fmt(b.th)}` : fmt(b.th)}</text>}
           </g>
         );
       })}
       {frame.kind === 'contrast' && (
         <g>
           <line x1={S.X(frame.trial.th)} x2={S.X(frame.trial.th)} y1={h / 2 - 34} y2={h / 2 + 22} className="mlw4-cut trial" data-mark="trial" data-value={fmt(frame.trial.th)} />
-          <text x={S.X(frame.trial.th)} y={h / 2 - 39} textAnchor="middle">{fmt(frame.trial.th)}</text>
+          <text data-mark="cut-label" data-value={fmt(frame.trial.th)} x={S.X(frame.trial.th)} y={h / 2 - 39 - rows[rows.length - 1] * LABEL_ROW} textAnchor="middle">{fmt(frame.trial.th)}</text>
         </g>
       )}
       {pos.map(({ p, cx, cy }) => {
@@ -153,7 +157,7 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false, r
                 : <span key={c.key} className="mlw4-chip" data-mark="threshold" data-value={fmt(c.th)}>{testLabel(c)}</span>
             ))}
           </div>
-          {asking && <div className="viz-dim viz-note">{t('Click the threshold you think wins, or press Show me.', 'Apasă pe pragul care crezi că câștigă, sau apasă Arată-mi.')}</div>}
+          {asking && <div className="mlw4-hint">{t('Click the threshold you think wins, or press Show me.', 'Apasă pe pragul care crezi că câștigă, sau apasă Arată-mi.')}</div>}
         </>
       )}
       {(frame.kind === 'node' || frame.kind === 'contrast') && <IgTable W={W} frame={frame} t={t} hideCands={!revealed && frame.kind === 'node'} hideTrial={!revealed && frame.kind === 'contrast'} />}

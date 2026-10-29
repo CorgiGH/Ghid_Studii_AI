@@ -251,3 +251,52 @@ describe('second review: the tie prop', () => {
     expect(v('A').join(' ')).toContain('column order');
   });
 });
+
+describe('third review', () => {
+  const W3 = mlCvloo({ table: THREE, target: 'Y', tie: 'class0' });
+  const P = mlCvloo({ table: P410, target: 'Y', tie: 'class0', continuous: ['X'] });
+  it('the fold decided by a tie between attributes says so (outline L15 C4: IG(A) = IG(B) = 1, the first column wins)', () => {
+    const f2 = W3.frames[2];
+    expect(f2.ties.map((x) => [x.names, Number(x.ig.toFixed(6))])).toEqual([[['A', 'B'], 1]]);
+    for (const c of [f2.askCaption, f2.caption]) {
+      expect(c.ro).toContain('A și B au același IG, 1; la egalitate se ia prima coloană din tabel: A.');
+      expect(c.en).toContain('A and B have the same IG, 1; a tie goes to the first column of the table: A.');
+    }
+    for (const k of [1, 3]) {
+      expect(W3.frames[k].ties).toEqual([]);
+      expect(W3.frames[k].caption.ro).not.toContain('același IG');
+      expect(W3.frames[k].askCaption.ro).not.toContain('același IG');
+    }
+  });
+  it('the refit tree draws the IG of each test, so the tie can be read on it', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/CvLoo.jsx');
+    const asking = renderToStaticMarkup(React.createElement(Stage, { W: W3, table: THREE, frame: W3.frames[2], revealed: false }));
+    expect(asking).toContain('data-mark="ig" data-value="1"');
+    const p = renderToStaticMarkup(React.createElement(Stage, { W: P, table: P410, frame: P.frames[1] }));
+    expect([...p.matchAll(/data-mark="ig" data-value="([^"]*)"/g)].length).toBe(3);
+  });
+  it('a tie between two thresholds of one attribute names the smaller threshold', () => {
+    // X: 1 -> 0, 2 -> 1, 3 -> 0 (out: none): the thresholds 1.5 and 2.5 have the same IG
+    const T = { columns: ['X', 'Y'], rows: [[1, 0], [2, 1], [3, 0], [9, 1]] };
+    const W = mlCvloo({ table: T, target: 'Y', tie: 'class0', continuous: ['X'] });
+    const f = W.frames.find((x) => x.kind === 'fold' && x.ties.length);
+    expect(f).toBeDefined();
+    expect(f.caption.ro).toMatch(/au același IG, [\d.]+; la egalitate se ia pragul mai mic: X ≤ [\d.]+\./);
+    expect(f.caption.en).toMatch(/have the same IG, [\d.]+; a tie goes to the smaller threshold: X ≤ [\d.]+\./);
+  });
+  it('the Romanian speaks of training ID3 / the learnt tree (outline L15 C2, 4.40), not of growing it', () => {
+    for (const W of [W3, P]) for (const f of W.frames) for (const c of [f.caption, f.askCaption].filter(Boolean)) expect(c.ro).not.toMatch(/crescut|crește/);
+    expect(W3.frames[0].caption.ro).toContain('antrenează ID3 pe celelalte 2 rânduri');
+    expect(W3.frames[1].caption.ro).toContain('arborele învățat pe celelalte 2 rânduri');
+  });
+  it('threshold labels on the axis never overlap: with row 10 out of 4.10 the cuts 8.25 and 8.75 sit on two rows', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/CvLoo.jsx');
+    const html = renderToStaticMarkup(React.createElement(Stage, { W: P, table: P410, frame: P.frames[10] }));
+    const labels = [...html.matchAll(/<text [^>]*data-mark="cut-label"[^>]*>/g)].map((m) => ({ x: Number(/ x="([^"]+)"/.exec(m[0])[1]), y: Number(/ y="([^"]+)"/.exec(m[0])[1]), v: /data-value="([^"]+)"/.exec(m[0])[1] }));
+    expect(labels.map((l) => l.v)).toEqual(['5', '8.25', '8.75']);
+    for (let i = 0; i < labels.length; i++) for (let j = i + 1; j < labels.length; j++) {
+      const [a, b] = [labels[i], labels[j]];
+      expect(Math.abs(a.x - b.x) >= 30 || a.y !== b.y, `${a.v} and ${b.v} overlap`).toBe(true);
+    }
+  });
+});

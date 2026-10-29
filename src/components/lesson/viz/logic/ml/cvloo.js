@@ -3,6 +3,9 @@
 import { colNames, countsText, fmt, grow, classifyPath, sub } from './tree-grow.js';
 
 const bi = (en, ro) => ({ en, ro });
+const TIE = 1e-9;
+const listIn = (xs, and) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} ${and} ${xs[xs.length - 1]}` : xs[0]);
+const candName = (c) => (c.th === undefined ? c.attr : `${c.attr} ≤ ${fmt(c.th)}`);
 
 const rowOf = (T, names, attrs, i) => `(${attrs.map((a) => `${a} = ${T.rows[i][names.indexOf(a)]}`).join(', ')})`;
 
@@ -12,6 +15,36 @@ export function treeThresholds(node, out = []) {
   if (node.test.th !== undefined) out.push({ attr: node.test.attr, th: node.test.th });
   for (const k of node.kids) treeThresholds(k.node || k, out);
   return out.sort((a, b) => a.th - b.th);
+}
+
+// The ties a tree was built on: a test node where another candidate had the same IG, so the first in order won (attributes
+// in table order, thresholds ascending). { where: the node's path or null at the root, names: [winner, ...], winner, ig, kind }
+export function treeTies(node, conds = []) {
+  if (node.leaf) return [];
+  const out = [];
+  const others = node.cands.filter((c) => c !== node.best && Math.abs(c.ig - node.best.ig) < TIE);
+  if (others.length) {
+    const all = [node.best, ...others];
+    const kind = all.every((c) => c.th === undefined) ? 'attr' : all.every((c) => c.th !== undefined && c.attr === node.best.attr) ? 'threshold' : 'mixed';
+    out.push({ where: conds.length ? conds.join(', ') : null, names: all.map(candName), winner: candName(node.best), ig: node.best.ig, kind });
+  }
+  node.kids.forEach((k, i) => {
+    const cond = node.test.th !== undefined ? `${node.test.attr} ${i === 0 ? '≤' : '>'} ${fmt(node.test.th)}` : `${node.test.attr} = ${k.value}`;
+    out.push(...treeTies(k.node || k, [...conds, cond]));
+  });
+  return out;
+}
+
+// One sentence per tie (outline L15 C4: "IG(A) = IG(B) = 1, egalitate; regula: A, primul în tabel"), with a leading space.
+function tieText(ties) {
+  const RULE = {
+    attr: ['a tie goes to the first column of the table', 'la egalitate se ia prima coloană din tabel'],
+    threshold: ['a tie goes to the smaller threshold', 'la egalitate se ia pragul mai mic'],
+    mixed: ['a tie goes to the first in order (columns left to right, thresholds ascending)', 'la egalitate se ia primul în ordine (coloanele de la stânga la dreapta, pragurile crescător)'],
+  };
+  const en = ties.map((x) => ` ${x.where ? `At the node ${x.where}, ` : ''}${listIn(x.names, 'and')} have the same IG, ${fmt(x.ig)}; ${RULE[x.kind][0]}: ${x.winner}.`).join('');
+  const ro = ties.map((x) => ` ${x.where ? `În nodul ${x.where}, ` : ''}${listIn(x.names, 'și')} au același IG, ${fmt(x.ig)}; ${RULE[x.kind][1]}: ${x.winner}.`).join('');
+  return bi(en, ro);
 }
 
 export function mlCvloo({ table, target, tie = 'class0', continuous = [] }) {
@@ -42,7 +75,7 @@ export function mlCvloo({ table, target, tie = 'class0', continuous = [] }) {
   const frames = [{
     kind: 'setup', n, tree: full.tree, trainErr, errors: 0,
     caption: bi(`${n} rows. The tree grown on all of them gets ${trainErr} of ${n} wrong: training error ${trainErr}/${n}. CVLOO takes each row out in turn, grows the tree on the other ${n - 1} rows and predicts the row that was left out.`,
-      `${n} rânduri. Arborele crescut pe toate greșește ${trainErr} din ${n}: eroarea la antrenare ${trainErr}/${n}. CVLOO scoate pe rând câte un rând, crește arborele pe celelalte ${n - 1} rânduri și prezice rândul scos.`),
+      `${n} rânduri. Arborele învățat pe toate greșește ${trainErr} din ${n}: eroarea la antrenare ${trainErr}/${n}. CVLOO scoate pe rând câte un rând, antrenează ID3 pe celelalte ${n - 1} rânduri și prezice rândul scos.`),
   }];
 
   let errors = 0;
@@ -57,13 +90,15 @@ export function mlCvloo({ table, target, tie = 'class0', continuous = [] }) {
     const rowText = rowOf(table, names, attrs, i);
     const k = i + 1;
     const counts = g.tree.counts;
+    const ties = treeTies(g.tree);
+    const tie = tieText(ties);
     frames.push({
       kind: 'fold', k, out: i, n, rowText, remaining: n - 1, tree: g.tree, path, thresholds: treeThresholds(g.tree),
-      pred, truth, wrong, errBefore: before, errAfter: errors, counts,
-      askCaption: bi(`Row ${k} is left out: ${rowText}. The tree is grown on the other ${n - 1} rows ${ct(counts)}. What does it predict for row ${k}?`,
-        `Rândul ${k} e scos: ${rowText}. Arborele e crescut pe celelalte ${n - 1} rânduri ${ct(counts)}. Ce prezice pentru rândul ${k}?`),
-      caption: bi(`Row ${k} ${rowText} is left out; the tree grown on the other ${n - 1} rows ${ct(counts)} predicts ${pred}. The row's label is ${truth}: ${wrong ? 'wrong' : 'right'}. Errors so far: ${errors} of ${k}.`,
-        `Rândul ${k} ${rowText} e scos; arborele crescut pe celelalte ${n - 1} rânduri ${ct(counts)} prezice ${pred}. Eticheta rândului e ${truth}: ${wrong ? 'greșit' : 'corect'}. Erori până acum: ${errors} din ${k}.`),
+      pred, truth, wrong, errBefore: before, errAfter: errors, counts, ties,
+      askCaption: bi(`Row ${k} is left out: ${rowText}. The tree is grown on the other ${n - 1} rows ${ct(counts)}.${tie.en} What does it predict for row ${k}?`,
+        `Rândul ${k} e scos: ${rowText}. Arborele e învățat pe celelalte ${n - 1} rânduri ${ct(counts)}.${tie.ro} Ce prezice pentru rândul ${k}?`),
+      caption: bi(`Row ${k} ${rowText} is left out; the tree grown on the other ${n - 1} rows ${ct(counts)} predicts ${pred}.${tie.en} The row's label is ${truth}: ${wrong ? 'wrong' : 'right'}. Errors so far: ${errors} of ${k}.`,
+        `Rândul ${k} ${rowText} e scos; arborele învățat pe celelalte ${n - 1} rânduri ${ct(counts)} prezice ${pred}.${tie.ro} Eticheta rândului e ${truth}: ${wrong ? 'greșit' : 'corect'}. Erori până acum: ${errors} din ${k}.`),
     });
   }
 
@@ -77,9 +112,8 @@ export function mlCvloo({ table, target, tie = 'class0', continuous = [] }) {
   // the wrong rows; with one continuous attribute each also gives its value (4.10: X = 8, 8.5, 9)
   const one = attrs.length === 1 && continuous.includes(attrs[0]) ? attrs[0] : null;
   const rowName = (r) => (one ? `${r} (${one} = ${table.rows[r - 1][names.indexOf(one)]})` : String(r));
-  const andList = (xs, and) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} ${and} ${xs[xs.length - 1]}` : xs[0]);
-  const wrongEn = !wrongRows.length ? '' : wrongRows.length === 1 ? ` (row ${rowName(wrongRows[0])} is predicted wrong)` : ` (rows ${andList(wrongRows.map(rowName), 'and')} are predicted wrong)`;
-  const wrongRo = !wrongRows.length ? '' : wrongRows.length === 1 ? ` (rândul ${rowName(wrongRows[0])} e prezis greșit)` : ` (rândurile ${andList(wrongRows.map(rowName), 'și')} sunt prezise greșit)`;
+  const wrongEn = !wrongRows.length ? '' : wrongRows.length === 1 ? ` (row ${rowName(wrongRows[0])} is predicted wrong)` : ` (rows ${listIn(wrongRows.map(rowName), 'and')} are predicted wrong)`;
+  const wrongRo = !wrongRows.length ? '' : wrongRows.length === 1 ? ` (rândul ${rowName(wrongRows[0])} e prezis greșit)` : ` (rândurile ${listIn(wrongRows.map(rowName), 'și')} sunt prezise greșit)`;
   frames.push({
     kind: 'end', n, errors, trainErr, alt: altNote ? alt : null, wrongRows, tree: full.tree,
     caption: bi(`CVLOO error: ${errors}/${n}${wrongEn}. Training error was ${trainErr}/${n}: the training error does not take the row out before predicting it.${tail.en}`,

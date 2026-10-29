@@ -154,9 +154,13 @@ export function mlPrune(props) {
     const under = (c, lang) => {
       const b = belowOf(c, st);
       if (!b.length) return name(c);
-      const groups = [...new Set(b)].map((x) => {
-        const k = b.filter((y) => y === x).length;
-        if (k === 1) return x;
+      const names = [...new Set(b)];
+      const count = (x) => b.filter((y) => y === x).length;
+      // once one name is counted ("two A tests"), a single one is counted too ("one C test"): "two tests A and C" would read as two tests
+      const counted = names.some((x) => count(x) > 1);
+      const groups = names.map((x) => {
+        const k = count(x);
+        if (k === 1) return !counted ? x : lang === 'en' ? `one ${x} test` : `un test ${x}`;
         const w = WORDS[lang][k] || String(k);
         return lang === 'en' ? `${w} ${x} tests` : `${w} teste ${x}`;
       });

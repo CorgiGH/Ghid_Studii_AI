@@ -3,7 +3,7 @@ import { useApp } from '../../../../../contexts/AppContext';
 import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
 import { foldNote, mlCvloo } from '../../logic/ml/cvloo.js';
-import { classMark, plotScale } from '../../logic/ml/threshold.js';
+import { AXIS_LABEL_GAP, AXIS_LABEL_ROW, classMark, labelRows, plotScale } from '../../logic/ml/threshold.js';
 import { fmt } from '../../logic/ml/tree-grow.js';
 import { Counts, Legend, Shape } from './Parts.jsx';
 import './ml-w4.css';
@@ -17,7 +17,7 @@ function Tree({ node, W, path, revealed, edge }) {
       {edge && <span className="mlw4-edge">{edge}</span>}
       {node.leaf
         ? <span className={cls} data-mark="leaf" data-value={String(node.label)}><b>{'→'} {String(node.label)}</b>{node.empty ? null : <span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span>}{stop ? <span aria-hidden="true"> {'←'}</span> : null}</span>
-        : <span className={cls}><b>{node.test.attr}{node.test.th !== undefined ? ' ≤ ' : ' ?'}{node.test.th !== undefined ? <span data-mark="threshold" data-value={fmt(node.test.th)}>{fmt(node.test.th)}</span> : null}</b><span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span></span>}
+        : <span className={cls}><b>{node.test.attr}{node.test.th !== undefined ? ' ≤ ' : ' ?'}{node.test.th !== undefined ? <span data-mark="threshold" data-value={fmt(node.test.th)}>{fmt(node.test.th)}</span> : null}</b><span className="mlw4-sub">IG <b data-mark="ig" data-value={fmt(node.ig)}>{fmt(node.ig)}</b></span><span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span></span>}
       {!node.leaf && (
         <ul>
           {node.kids.map((k, i) => {
@@ -75,13 +75,16 @@ function Axis({ W, table, frame, t }) {
   const stack = {};
   const out = frame.kind === 'fold' ? frame.out : null;
   const cuts = frame.kind === 'fold' ? frame.thresholds : [];
+  // cuts closer than the width of a label get their labels on rows above each other (4.10: 8.25 and 8.75)
+  const rows = labelRows(cuts.map((c) => S.X(c.th)), AXIS_LABEL_GAP);
+  const lift = Math.max(0, ...rows) * AXIS_LABEL_ROW;
   return (
-    <svg className="mlw4-plot" viewBox={`0 0 ${S.w} ${S.h}`} role="img" aria-label={t(`Rows on the ${attr} axis`, `Rânduri pe axa ${attr}`)}>
+    <svg className="mlw4-plot" viewBox={`0 ${-lift} ${S.w} ${S.h + lift}`} role="img" aria-label={t(`Rows on the ${attr} axis`, `Rânduri pe axa ${attr}`)}>
       <line x1={S.pad} x2={S.w - S.pad} y1={S.h / 2 + 8} y2={S.h / 2 + 8} className="mlw4-axis" />
       {cuts.map((c, k) => (
         <g key={k}>
           <line x1={S.X(c.th)} x2={S.X(c.th)} y1={S.h / 2 - 36} y2={S.h / 2 + 22} className="mlw4-cut" data-mark="boundary" data-value={fmt(c.th)} />
-          <text x={S.X(c.th)} y={S.h / 2 - 41} textAnchor="middle" className="on">{fmt(c.th)}</text>
+          <text data-mark="cut-label" data-value={fmt(c.th)} x={S.X(c.th)} y={S.h / 2 - 41 - rows[k] * AXIS_LABEL_ROW} textAnchor="middle" className="on">{fmt(c.th)}</text>
         </g>
       ))}
       {pts.map((p) => {

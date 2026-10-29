@@ -232,6 +232,23 @@ export function plotScale(points, plane, w = 320, h = plane ? 250 : 100, pad = 2
   };
 }
 
+// Rows for the labels of the cuts on an axis: a label goes on the first row whose last label is at least `gap` to its left,
+// so two thresholds close together (4.10: 8.25 and 8.75) never print over each other. xs in drawing units; the result is
+// one row index per x, in input order.
+export const AXIS_LABEL_GAP = 30; // two cut labels closer than this (plot units) would print over each other
+export const AXIS_LABEL_ROW = 12; // the next row of labels sits this much higher
+export function labelRows(xs, gap) {
+  const order = xs.map((x, i) => [x, i]).sort((a, b) => a[0] - b[0]);
+  const lastOf = [];
+  const rows = new Array(xs.length);
+  for (const [x, i] of order) {
+    let r = lastOf.findIndex((last) => x - last >= gap);
+    if (r < 0) { r = lastOf.length; lastOf.push(x); } else lastOf[r] = x;
+    rows[i] = r;
+  }
+  return rows;
+}
+
 // The class colour and shape: positive and negative labels use the keep and drop tokens, any other class a series token.
 export function classMark(classes, k) {
   const l = String(classes[k]).toLowerCase();
