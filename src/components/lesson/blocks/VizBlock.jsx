@@ -24,6 +24,9 @@ const WIDGETS = {
   'ml-omega': lazy(() => import('../viz/widgets/ml/Omega.jsx')),
   'ml-freq-tree': lazy(() => import('../viz/widgets/ml/FreqTree.jsx')),
   'ml-indep-2x2': lazy(() => import('../viz/widgets/ml/Indep2x2.jsx')),
+  'ml-pmf-cdf': lazy(() => import('../viz/widgets/ml/PmfCdf.jsx')),
+  'ml-joint-table': lazy(() => import('../viz/widgets/ml/JointTable.jsx')),
+  'ml-entropy-bars': lazy(() => import('../viz/widgets/ml/EntropyBars.jsx')),
 };
 
 function Notice({ children }) {

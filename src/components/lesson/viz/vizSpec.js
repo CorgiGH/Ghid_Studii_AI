@@ -2,6 +2,9 @@
 import { omegaProblems } from './logic/ml/omega.js';
 import { freqTreeProblems } from './logic/ml/freqTree.js';
 import { indepProblems } from './logic/ml/indep2x2.js';
+import { pmfCdf } from './logic/ml/pmf-cdf.js';
+import { jointTable } from './logic/ml/joint-table.js';
+import { entropyBars } from './logic/ml/entropy-bars.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -11,6 +14,9 @@ const strs = (v) => isArr(v) && v.every(isStr);
 const oneOf = (...xs) => (v) => xs.includes(v);
 const subsetOf = (...xs) => (v) => isArr(v) && v.every(x => xs.includes(x));
 const optional = (f) => (v) => v === undefined || f(v);
+const isProb = (v) => typeof v === 'number' || (typeof v === 'string' && /^-?\d+(\.\d+)?(\/\d+)?$/.test(v));
+const probList = (v) => isArr(v) && v.every(isProb);
+const isTable = (v) => !!v && typeof v === 'object' && isArr(v.columns) && isArr(v.rows);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
@@ -38,6 +44,9 @@ const SPEC = {
   'ml-freq-tree': { population: isNum, prior: isNum, sens: isNum, fpr: isNum, labels: (v) => !!v && typeof v === 'object' },
   'ml-indep-2x2': { counts: (v) => Array.isArray(v) && v.length === 2 && v.every((r) => Array.isArray(r) && r.length === 2 && r.every(isNum)), labels: (v) => !!v && typeof v === 'object' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
+  'ml-pmf-cdf': { values: (v) => isArr(v) && v.every(isNum), probs: probList, name: optional(isStr), format: optional(oneOf('fraction', 'decimal')), cdfAt: optional(isNum), second: optional((v) => !!v && typeof v === 'object' && isArr(v.values) && v.values.every(isNum) && probList(v.probs) && (v.name === undefined || isStr(v.name))) },
+  'ml-joint-table': { table: isTable, x: isStr, y: isStr, z: optional(isStr), conditionOn: optional(isArr), explore: optional((v) => typeof v === 'boolean'), rowsAre: optional(oneOf('x', 'y')), format: optional(oneOf('fraction', 'decimal')), first: optional((v) => isArr(v) && v.length === 3) },
+  'ml-entropy-bars': { splits: (v) => isArr(v) && v.every((s) => Array.isArray(s) && s.length === 2 && s.every(Number.isInteger)), venn: optional((v) => !!v && typeof v === 'object' && isStr(v.X) && isStr(v.Y) && (v.xGroups === undefined || strs(v.xGroups)) && (v.yLabels === undefined || (strs(v.yLabels) && v.yLabels.length === 2))) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -70,5 +79,14 @@ export function validateViz(block) {
   if (w === 'ml-omega') errs.push(...omegaProblems(props).filter((e) => !errs.includes(e)));
   if (w === 'ml-freq-tree') errs.push(...freqTreeProblems(props).filter((e) => !errs.includes(e)));
   if (w === 'ml-indep-2x2') errs.push(...indepProblems(props).filter((e) => !errs.includes(e)));
+  if (w === 'ml-pmf-cdf' && errs.length === 0) {
+    try { pmfCdf(props); } catch (e) { errs.push(`viz (ml-pmf-cdf): ${e.message}`); }
+  }
+  if (w === 'ml-joint-table' && errs.length === 0) {
+    try { jointTable(props); } catch (e) { errs.push(`viz (ml-joint-table): ${e.message}`); }
+  }
+  if (w === 'ml-entropy-bars' && errs.length === 0) {
+    try { entropyBars(props); } catch (e) { errs.push(`viz (ml-entropy-bars): ${e.message}`); }
+  }
   return errs;
 }
