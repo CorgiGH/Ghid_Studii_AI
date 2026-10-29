@@ -417,6 +417,9 @@ const MARKDOWN_LAYOUT = [
   ['a code fence', /```/],
   ['a markdown table row', /^\s*\|.*\|\s*$/m],
   ['a list item', /^\s*(?:[-*•]|\d+[.)])\s+\S/m],
+  // a backslash and an n typed into the JSON ("\\n") shows on screen as the two characters, not as a line break (lesson 2,
+  // live 2026-10-29); KaTeX commands that start with \n (\ne, \neq, \nu, \not) are followed by a letter and pass
+  ['a literal \\n instead of a line break', /(?<!\\)\\n(?![a-z])/],
 ];
 
 export function textProblems(lessons) {

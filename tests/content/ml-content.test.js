@@ -286,6 +286,10 @@ describe('content gate: edge cases of each rule', () => {
     const ls = asLesson({ meta: { id: 'ml-l03' }, steps: [{ id: 'ml-l03-s1', title: { en: 't', ro: 't' }, blocks: [{ type: 'learn', content: { en: 'Entropy comes later (Lesson 7).', ro: 'Entropia vine mai târziu (vezi Lecția 7).' } }] }] });
     expect(termProblems([ls], owners)).toEqual([]);
   });
+  it('text sweep: a backslash and an n typed as text is not a line break; \\ne and \\neq in a formula are', () => {
+    expect(codes(textProblems([one({ type: 'learn', content: { en: 'One.\\nTwo.', ro: 'Unu.\\nDoi.' } })]))).toEqual(['T6']);
+    expect(textProblems([one({ type: 'learn', content: { en: 'One.\n\nTwo, $i \\ne j$, $a \\neq b$.', ro: 'Unu.\n\nDoi, $i \\ne j$, $a \\neq b$.' } })])).toEqual([]);
+  });
   it('math: a currency sign is not a formula, an unclosed formula is', () => {
     expect(mathParts('Costă $5 și $10').segments).toEqual([]);
     expect(codes(katexProblems([one({ type: 'learn', content: { en: 'a $\\frac{1$', ro: 'a $\\frac{1$' } })]))).toEqual(['K1', 'K1']);
