@@ -46,6 +46,11 @@ EXY2 = sum(x*y*y*p for (x, y), p in J2.items()); rec('L5.c1 E[XY^2] direct', EXY
 rec('L5.c1 det E[X]E[Y]^2', EX*EY*EY)
 rec('L5.c1 det P(Z=2) one cell (1,2)', J2[(1,2)]); rec('L5.c1 det P(Z=2) one cell (2,1)', J2[(2,1)])
 rec('L5.c1 det P(Z=0) one cell', J2[(1,0)])
+# completeness pass: Var(Z), from Z's distribution and as E[X^2]E[Y^2]-(E[XY])^2; detectors Var(X)Var(Y) and E[Z^2]
+EZ2 = sum(z*z*p for z, p in Z.items()); rec('L5.c1 E[Z^2]', EZ2)
+EX2 = sum(x*x*p for x, p in PX.items()); rec('L5.c1 E[X^2]E[Y^2]', EX2*EY2)
+rec('L5.c1 Var(Z)', EZ2 - EZ*EZ); rec('L5.c1 Var(Z) via independence', EX2*EY2 - (EX*EY)**2)
+rec('L5.c1 det Var(X)Var(Y)', (EX2 - EX*EX)*(EY2 - EY*EY))
 
 # ---- L15.Q5 labels, L15.c1 protocol
 folds = [F('0.80'), F('0.90'), F('0.70'), F('0.85'), F('0.75')]
@@ -63,6 +68,18 @@ fs = F(1,10)*F(1,10)*F(1,2); fr = F(2,3)*F(2,3)*F(1,3)
 rec('2.8 factors spam', fs); rec('2.8 factors regular', fr)
 for tag, p in [('book p=0.1', F(1,10)), ('count p=2/3', F(2,3)), ('flip p=800/827', F(800,827))]:
     rec(f'2.8 P(spam|s) {tag}', p*fs/(p*fs+(1-p)*fr))
+
+# ---- completeness pass, L21.s02 second prediction: free parameters of NB / Bayes Comun on the T21T2 7 rows
+# (A 3 values, B 2, Y 3): count every free value of the prior and of each class's distributions
+K, vals = 3, [3, 2]
+rec('L21.s02 NB free params', (K-1) + K*sum(v-1 for v in vals))
+rec('L21.s02 Bayes Comun free params', (K-1) + K*(vals[0]*vals[1]-1))
+rec('L21.s02 det all probabilities', K + K*sum(vals)); rec('L21.s02 det no prior', K*sum(v-1 for v in vals))
+rec('L21.s02 det all values, no prior', K*sum(vals))
+# the same count on 2.27.b (L20.e4) and on the binary formulas of L20.s11
+rec('2.27.b NB (4 attrs 3,3,2,2; K=2)', (2-1) + 2*sum(v-1 for v in [3,3,2,2]))
+rec('2.27.b Bayes Comun', (2-1) + 2*(3*3*2*2-1))
+rec('L20.s11 n=3 binary NB / JB', ((2-1)+2*3, (2-1)+2*(2**3-1)))
 
 # ---- L14: ID3 with continuous thresholds, every tie enumerated; classify probe points
 def H(c):

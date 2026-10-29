@@ -494,9 +494,13 @@ ADDITIONS = {
   data_tables=['L15.c1: 600 de rânduri, 100 test, 5-fold pe 500 (acurateți 0,80; 0,90; 0,70; 0,85; 0,75) (construit)'],
   exercises=['L15.c1'],
   misconceptions=['Erori apropiate înseamnă underfitting și când sunt mici', 'Se raportează estimarea de validare a modelului ales']),
+ 20: dict(
+  definitions=['Justificarea regulii (B:355 și nota 415): argmax P(v|a₁..aₙ) = argmax P(a₁..aₙ|v)P(v)/P(a₁..aₙ) (formula lui Bayes) = argmax P(a₁..aₙ|v)P(v) (numitorul pozitiv nu depinde de v); apoi independența condiționată (NB) sau regula de înmulțire, argmax P(a₁..aₙ,v) (Bayes Comun); forma soluției T21T2 7.c.i'],
+  properties=['Numărarea generală (atribute categoriale, K clase): NB (K−1)+KΣ(|Val(Aᵢ)|−1), Bayes Comun (K−1)+K(Π|Val(Aᵢ)|−1); pentru NB coincide cu soluția oficială T21T2 7.b (11 pentru A cu 3 valori, B cu 2, Y cu 3)']),
  21: dict(
   definitions=['Set de date nebalansat; priori predefiniți (P(v) fixat după proporțiile reale, egal sau după costul erorilor; factorii învățați rămân)'],
-  properties=['Priorul la care decizia NB se schimbă: pA/(pA+(1−p)B)=1/2 (2.8.d)'],
+  properties=['Priorul la care decizia NB se schimbă: pA/(pA+(1−p)B)=1/2 (2.8.d)',
+              'Pe rândurile T21T2 7 (A cu 3 valori, B cu 2, Y cu 3) NB estimează 11 parametri liberi (T21T2 7.b; numărarea din L20.s11, a doua predicție din L21.s02)'],
   data_tables=['L21.q5: 5 pozitive / 95 negative, P(A=1|+)=0,8, P(A=1|−)=0,1 (construit)'],
   misconceptions=['La priori predefiniți trebuie reestimați și factorii', 'Priorii trebuie să rămână frecvențele din antrenament']),
  22: dict(

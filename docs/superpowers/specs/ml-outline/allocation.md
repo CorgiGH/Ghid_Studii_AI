@@ -39,8 +39,8 @@ Priority A = the problem types that appear most in the past T1 papers (map secti
 | 17 | ml-l17 | Raportul câștigului, atribute cu multe valori, alte criterii de impuritate | B | 3 | 3 | 1 | 14 (0) | 7, 9, 11, 14 |
 | 18 | ml-l18 | Estimarea parametrilor: verosimilitate maximă (MLE) | B | 2 | 4 | 1 | 7 (0) | 4 |
 | 19 | ml-l19 | Ipoteze ML și MAP; Bayes pentru ipoteze | A | 4 | 5 | 2 | 28 (3) | 2, 4, 11, 15, 18 |
-| 20 | ml-l20 | Bayes Naiv și Bayes Comun (Optimal); numărul de parametri | A | 4 | 6 | 2 | 19 (0) | 6, 18, 19 |
-| 21 | ml-l21 | Probabilități zero și regula add-one (Laplace) | B | 3 | 4 | 0 | 6 (0) | 20 |
+| 20 | ml-l20 | Bayes Naiv și Bayes Comun (Optimal); numărul de parametri | A | 4 | 7 | 2 | 19 (0) | 6, 18, 19 |
+| 21 | ml-l21 | Probabilități zero și regula add-one (Laplace) | B | 3 | 5 | 0 | 6 (0) | 20 |
 | 22 | ml-l22 | Bayes Naiv în practică: rata erorii, xor, atribute duplicate, New-Bayes | B | 4 | 8 | 2 | 15 (2) | 1, 4, 6, 11, 20 |
 | 23 | ml-l23 | Funcții convexe, inegalitatea lui Jensen și demonstrațiile despre entropie | C | 2 | 7 | 8 | 16 (1) | 4, 8 |
 | 24 | ml-l24 | Entropia încrucișată, inegalitatea lui Gibbs, divergența Kullback–Leibler | C | 4 | 5 | 5 | 12 (3) | 7, 8, 18, 23 |
@@ -552,9 +552,9 @@ Tests (Teste tab, paper mode, not lessons in the player): the mock T1 and the 20
 
 **Concepts:** C20.1 Regula v_MAP = argmax P(a₁..aₙ|v)P(v) pentru clasificare; C20.2 Bayes Comun (Optimal, Joint Bayes): estimarea lui P(a₁..aₙ,v); C20.3 Bayes Naiv: independența condiționată a atributelor față de ieșire; antrenarea = MLE pe fiecare factor; C20.4 Numărul de parametri liberi: NB 2n+1, Bayes Comun 2^(n+1)−1; complexitate.
 
-**Definitions / notation:** v_MAP=argmax P(a₁..aₙ|v)P(v); Bayes Comun / Optimal / Joint Bayes: v_JB=argmax P(a₁..aₙ,v); „Comun” (distribuția comună), „Optimal” (nici o altă distribuție nu dă eroare medie mai mică, B:370–371); Bayes Naiv: v_NB=argmax P(v)ΠP(aᵢ|v), cu independența condiționată a atributelor față de ieșire; Antrenarea = estimarea (MLE) a P(v) și a fiecărui P(aᵢ|v); fără căutare în spațiul ipotezelor (ML6:15); Parametri liberi (complementele nu se numără); Probabilitatea deciziei = produsul normalizat (posteriorul).
+**Definitions / notation:** v_MAP=argmax P(a₁..aₙ|v)P(v); Bayes Comun / Optimal / Joint Bayes: v_JB=argmax P(a₁..aₙ,v); „Comun” (distribuția comună), „Optimal” (nici o altă distribuție nu dă eroare medie mai mică, B:370–371); Bayes Naiv: v_NB=argmax P(v)ΠP(aᵢ|v), cu independența condiționată a atributelor față de ieșire; Antrenarea = estimarea (MLE) a P(v) și a fiecărui P(aᵢ|v); fără căutare în spațiul ipotezelor (ML6:15); Parametri liberi (complementele nu se numără); Probabilitatea deciziei = produsul normalizat (posteriorul); Justificarea regulii (B:355 și nota 415): argmax P(v|a₁..aₙ) = argmax P(a₁..aₙ|v)P(v)/P(a₁..aₙ) (formula lui Bayes) = argmax P(a₁..aₙ|v)P(v) (numitorul pozitiv nu depinde de v); apoi independența condiționată (NB) sau regula de înmulțire, argmax P(a₁..aₙ,v) (Bayes Comun); forma soluției T21T2 7.c.i.
 
-**Properties:** (P0, cap. 2) cu independență condițională NB și Bayes Comun coincid; altfel pot diferi (decizia poate coincide, probabilitățile nu: 2.7, 2.29); (P1, cap. 2) pentru n intrări Bernoulli și ieșire Bernoulli: NB 2n+1, Bayes Comun 2^(n+1)−1 parametri liberi; (P2, cap. 2) NB: spațiu O(dK), antrenare O(dn), testare O(dK); Cu un singur atribut NB = Bayes Comun; NB nu cere atribute independente, ci independente condiționat de ieșire; Numărul de parametri 13 / 71 (EnjoyTennis, 2.27.b) e convenție: se numără doar parametrii liberi.
+**Properties:** (P0, cap. 2) cu independență condițională NB și Bayes Comun coincid; altfel pot diferi (decizia poate coincide, probabilitățile nu: 2.7, 2.29); (P1, cap. 2) pentru n intrări Bernoulli și ieșire Bernoulli: NB 2n+1, Bayes Comun 2^(n+1)−1 parametri liberi; (P2, cap. 2) NB: spațiu O(dK), antrenare O(dn), testare O(dK); Cu un singur atribut NB = Bayes Comun; NB nu cere atribute independente, ci independente condiționat de ieșire; Numărul de parametri 13 / 71 (EnjoyTennis, 2.27.b) e convenție: se numără doar parametrii liberi; Numărarea generală (atribute categoriale, K clase): NB (K−1)+KΣ(|Val(Aᵢ)|−1), Bayes Comun (K−1)+K(Π|Val(Aᵢ)|−1); pentru NB coincide cu soluția oficială T21T2 7.b (11 pentru A cu 3 valori, B cu 2, Y cu 3).
 
 **Proofs:** Concavitatea log-verosimilității pentru datele ciupercilor din 4.2 (Hessiană negativ definită; demonstrația 5 din DEM:1; BS:91–92, Hessiana BS:98); Derivarea MLE pentru NB cu 9 parametri: ∂ℓ/∂θ_y=3/θ_y−5/(1−θ_y)=0 ⇒ θ̂_y=3/8 (BS:91–92).
 
@@ -580,7 +580,7 @@ Tests (Teste tab, paper mode, not lessons in the player): the mock T1 and the 20
 
 **Definitions / notation:** Problema probabilităților zero: un factor 0 anulează produsul; dacă toate scorurile sunt 0, posteriorul 0/(0+0+0) e nedefinit; Regula add-one: (count+1)/(N+|Val(A)|); „+2” pentru atribute Bernoulli; Estimarea m: (n_c+mp)/(n+m); add-one e cazul m=|Val|, p=1/|Val| (C-14); Factorii pentru cuvinte absente: 1−P(cuvânt|clasă); Set de date nebalansat; priori predefiniți (P(v) fixat după proporțiile reale, egal sau după costul erorilor; factorii învățați rămân).
 
-**Properties:** Add-one pune +1 la numărător și |Val(A)| la numitor (nu doar +1 la numărător); Cuvintele absente contribuie cu P(cuvânt absent|clasă); Cu 0/0, regula lui Laplace e remediul (T21T2 7c); Priorul la care decizia NB se schimbă: pA/(pA+(1−p)B)=1/2 (2.8.d).
+**Properties:** Add-one pune +1 la numărător și |Val(A)| la numitor (nu doar +1 la numărător); Cuvintele absente contribuie cu P(cuvânt absent|clasă); Cu 0/0, regula lui Laplace e remediul (T21T2 7c); Priorul la care decizia NB se schimbă: pA/(pA+(1−p)B)=1/2 (2.8.d); Pe rândurile T21T2 7 (A cu 3 valori, B cu 2, Y cu 3) NB estimează 11 parametri liberi (T21T2 7.b; numărarea din L20.s11, a doua predicție din L21.s02).
 
 **Worked example (concrete phase, used nowhere else):** T21T2 7: cinci rânduri cu A,Y cu trei valori: P(Y)=(1/5,2/5,2/5); pentru (A=0,B=0) toate scorurile sunt 0 ⇒ 0/(0+0+0) ⇒ nevoie de Laplace.
 

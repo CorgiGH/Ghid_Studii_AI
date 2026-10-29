@@ -222,15 +222,20 @@ The teacher's list of what the Friday 2026-10-30 test needs (23 items; verbatim 
 | Lesson | Added | Teacher item |
 |---|---|---|
 | L4 | L4.c1 (proof: $\mathrm{Var}(X+a)=\mathrm{Var}(X)$ from the definition and the linearity of the mean), L4.c2 (is it a p.m.f.?; $p(x)=c\cdot x$) | 1 |
-| L5 | concept (4); L5.s06a (distribution of $g(X,Y)$ from the joint table); L5.s09a (functions of independent variables, $E[XY^2]$); L5.c1 (the product $XY$ of two independent variables); one sentence on L5.s08 | 2, 4 |
+| L5 | concept (4); L5.s06a (distribution of $g(X,Y)$ from the joint table); L5.s09a (functions of independent variables, $E[XY^2]$); L5.c1 (the product $XY$ of two independent variables, with its variance in field `vz`); one sentence on L5.s08 | 2, 4 |
 | L6 | one sentence on L6.s05 | 4 |
 | L12 | concept (d); R0 (what ID3 optimizes and the model it builds); Q5 | 6 |
 | L14 | R3b (a leaf's zone as inequalities); zone fields in E 3.11.b and E 4.48 | 10 |
 | L15 | R4b (overfitting, underfitting, good fit); Q5; E L15.c1 (roles of the training, validation and test sets; 5-fold estimate; cost of CVLOO) | 11, 12, 13 |
-| L21 | concept (3); L21.s09a (imbalanced data: predefined priors); L21.q5; field `e` of L21.e1 (2.8) | 23 |
+| L20 | L20.s07 (the decision rule derived as the book justifies it, Bayes then the denominator dropped, and how to write it on paper); L20.s08 (the multiplication-rule step to $P(a_1,\dots,a_n,v_j)$); L20.s11 (free-parameter count for categorical attributes and $K$ classes) | 17, 21 |
+| L21 | concept (3); L21.s09a (imbalanced data: predefined priors); L21.q5; field `e` of L21.e1 (2.8); second prediction on L21.s02 (NB's free parameters on the T21T2 7 rows: 11) | 21, 23 |
 | L22 | L22.s10a (Bayes Naiv and Bayes Comun: advantages and disadvantages, P0-P8); L22.q4 | 22 |
 
+The L20 rows, the L21.s02 prediction and field `vz` of L5.c1 come from the completeness pass that followed (same day): every item was re-read in its owner lesson as a learner who starts from zero, and every added number was recomputed again with code independent of the first two scripts.
+
 Not added, Alex's call: exercise 0.110 (the book's recap exercise on operations with independent variables; `allocation.json` `out_of_scope` says "de decis de Alex"). L5.s09a and L5.c1 teach its skill with our own numbers, so the lesson does not wait for that call.
+
+Open, publish order: item 16 asks for the properties of ID3, and the book's list (B:488) includes (P6), "ID3 e sensibil la atribute cu foarte multe valori", which this outline teaches only in Lecția 17 (concept C17.1). D-068 puts L17 after the test on the premise that L17 covers nothing on the teacher's list. Lecția 13 R4 and 4.56.e teach the mechanism (an injective attribute gets $IG=H(Y)$ and is chosen) but not the property itself. Adding (P6) to L13 would teach it in two lessons, so nothing was moved; publishing L17 right after L16 closes the gap.
 
 # Lessons
 
@@ -1393,15 +1398,15 @@ Answer: $E[X]=0$ and $E[XY]=E[X^3]=\frac13(-1+0+1)=0$, so $\mathrm{Cov}=E[XY]-E[
 
 #### L5.c1: produsul a două variabile independente, `[construit]`, answer status verified-twice (added 2026-10-29, teacher list item 2)
 
-**Enunț:** $X$ și $Y$ sunt independente. $X$ ia valorile 1 și 2 cu probabilitățile $0{,}4$ și $0{,}6$; $Y$ ia valorile 0, 1, 2 cu probabilitățile $0{,}5$; $0{,}3$; $0{,}2$ (două tabele statice mici pe ecran: $P(X)$ și $P(Y)$). Fie $Z=XY$. **a.** Cât sunt $P(X{=}2,Y{=}1)$ și $P(X{=}1,Y{=}2)$? **b.** Distribuția lui $Z$. **c.** $E[Z]$, comparat cu $E[X]\,E[Y]$. **d.** $E[XY^2]$.
+**Enunț:** $X$ și $Y$ sunt independente. $X$ ia valorile 1 și 2 cu probabilitățile $0{,}4$ și $0{,}6$; $Y$ ia valorile 0, 1, 2 cu probabilitățile $0{,}5$; $0{,}3$; $0{,}2$ (două tabele statice mici pe ecran: $P(X)$ și $P(Y)$). Fie $Z=XY$. **a.** Cât sunt $P(X{=}2,Y{=}1)$ și $P(X{=}1,Y{=}2)$? **b.** Distribuția lui $Z$. **c.** $E[Z]$, comparat cu $E[X]\,E[Y]$. **d.** $E[XY^2]$. **e.** $\mathrm{Var}(Z)$.
 
-**Fields:** `p21` frac "$P(X{=}2,Y{=}1)$" `9/50` (0,18; `0.6*0.3`); `p12` frac "$P(X{=}1,Y{=}2)$" `2/25` (0,08; `0.4*0.2`); `z0` frac "$P(Z{=}0)$" `1/2` (`0.4*0.5+0.6*0.5`); `z1` frac "$P(Z{=}1)$" `3/25` (`0.4*0.3`); `z2` frac "$P(Z{=}2)$" `13/50` (0,26; `0.4*0.2+0.6*0.3`); `z4` frac "$P(Z{=}4)$" `3/25` (`0.6*0.2`); `ez` frac "$E[Z]$" `28/25` (1,12; `E([0,1,2,4],[0.4*0.5+0.6*0.5,0.4*0.3,0.4*0.2+0.6*0.3,0.6*0.2])`); `exey` frac "$E[X]\,E[Y]$" `28/25` (`E([1,2],[0.4,0.6])*E([0,1,2],[0.5,0.3,0.2])`); `exy2` frac "$E[XY^2]$" `44/25` (1,76; `E([1,2],[0.4,0.6])*E([0,1,4],[0.5,0.3,0.2])`).
+**Fields:** `p21` frac "$P(X{=}2,Y{=}1)$" `9/50` (0,18; `0.6*0.3`); `p12` frac "$P(X{=}1,Y{=}2)$" `2/25` (0,08; `0.4*0.2`); `z0` frac "$P(Z{=}0)$" `1/2` (`0.4*0.5+0.6*0.5`); `z1` frac "$P(Z{=}1)$" `3/25` (`0.4*0.3`); `z2` frac "$P(Z{=}2)$" `13/50` (0,26; `0.4*0.2+0.6*0.3`); `z4` frac "$P(Z{=}4)$" `3/25` (`0.6*0.2`); `ez` frac "$E[Z]$" `28/25` (1,12; `E([0,1,2,4],[0.4*0.5+0.6*0.5,0.4*0.3,0.4*0.2+0.6*0.3,0.6*0.2])`); `exey` frac "$E[X]\,E[Y]$" `28/25` (`E([1,2],[0.4,0.6])*E([0,1,2],[0.5,0.3,0.2])`); `exy2` frac "$E[XY^2]$" `44/25` (1,76; `E([1,2],[0.4,0.6])*E([0,1,4],[0.5,0.3,0.2])`); `vz` frac "$\mathrm{Var}(Z)$" `1141/625` (1,8256, tol ±0,0005; `Var([0,1,2,4],[0.4*0.5+0.6*0.5,0.4*0.3,0.4*0.2+0.6*0.3,0.6*0.2])`; added in the completeness pass, teacher list items 1-2: the variance of the product).
 
-**Hints:** 1) Variabilele sunt independente, deci fiecare celulă a tabelului comun este produsul marginalelor: $p(x,y)=p_X(x)\,p_Y(y)$. 2) $Z=0$ când $Y=0$, pentru ambele valori ale lui $X$; $Z=2$ vine din două celule, $(1,2)$ și $(2,1)$, care se adună. 3) $E[Z]=0\cdot0{,}5+1\cdot0{,}12+2\cdot0{,}26+4\cdot0{,}12$; $E[XY^2]=E[X]\,E[Y^2]$, cu $E[Y^2]=0\cdot0{,}5+1\cdot0{,}3+4\cdot0{,}2$.
+**Hints:** 1) Variabilele sunt independente, deci fiecare celulă a tabelului comun este produsul marginalelor: $p(x,y)=p_X(x)\,p_Y(y)$. 2) $Z=0$ când $Y=0$, pentru ambele valori ale lui $X$; $Z=2$ vine din două celule, $(1,2)$ și $(2,1)$, care se adună. 3) $E[Z]=0\cdot0{,}5+1\cdot0{,}12+2\cdot0{,}26+4\cdot0{,}12$; $E[XY^2]=E[X]\,E[Y^2]$, cu $E[Y^2]=0\cdot0{,}5+1\cdot0{,}3+4\cdot0{,}2$; $\mathrm{Var}(Z)=E[Z^2]-(E[Z])^2$, cu $E[Z^2]=1\cdot0{,}12+4\cdot0{,}26+16\cdot0{,}12$.
 
-**Worked solution:** Tabelul comun: $(1,0)$: $0{,}2$; $(1,1)$: $0{,}12$; $(1,2)$: $0{,}08$; $(2,0)$: $0{,}3$; $(2,1)$: $0{,}18$; $(2,2)$: $0{,}12$ (suma 1). $Z$ ia 0 cu $0{,}2+0{,}3=0{,}5$; 1 cu $0{,}12$; 2 cu $0{,}08+0{,}18=0{,}26$; 4 cu $0{,}12$. $E[Z]=0{,}12+0{,}52+0{,}48=1{,}12$; $E[X]=1{,}6$, $E[Y]=0{,}7$, $E[X]E[Y]=1{,}12$: egale, fiindcă variabilele sunt independente (L5.s09). $E[Y^2]=1{,}1$, deci $E[XY^2]=1{,}6\cdot1{,}1=1{,}76$; direct din cele șase celule: $0{,}12+0{,}32+0{,}36+0{,}96=1{,}76$. Culegerea nu dă răspunsul; verificat de două ori.
+**Worked solution:** Tabelul comun: $(1,0)$: $0{,}2$; $(1,1)$: $0{,}12$; $(1,2)$: $0{,}08$; $(2,0)$: $0{,}3$; $(2,1)$: $0{,}18$; $(2,2)$: $0{,}12$ (suma 1). $Z$ ia 0 cu $0{,}2+0{,}3=0{,}5$; 1 cu $0{,}12$; 2 cu $0{,}08+0{,}18=0{,}26$; 4 cu $0{,}12$. $E[Z]=0{,}12+0{,}52+0{,}48=1{,}12$; $E[X]=1{,}6$, $E[Y]=0{,}7$, $E[X]E[Y]=1{,}12$: egale, fiindcă variabilele sunt independente (L5.s09). $E[Y^2]=1{,}1$, deci $E[XY^2]=1{,}6\cdot1{,}1=1{,}76$; direct din cele șase celule: $0{,}12+0{,}32+0{,}36+0{,}96=1{,}76$. Varianța produsului, din distribuția lui $Z$ (vezi Lecția 4): $E[Z^2]=1\cdot0{,}12+4\cdot0{,}26+16\cdot0{,}12=3{,}08$, deci $\mathrm{Var}(Z)=3{,}08-1{,}12^2=1{,}8256$; aceeași $E[Z^2]$ iese și ca $E[X^2]\,E[Y^2]=2{,}8\cdot1{,}1$ ($X^2$ și $Y^2$ sunt independente). Culegerea nu dă răspunsul; verificat de două ori.
 
-**Detectors:** `z2` = `0.08` or `0.18` → "Valoarea 2 vine din două celule, $(X{=}1,Y{=}2)$ și $(X{=}2,Y{=}1)$: $0{,}08+0{,}18$." `z0` = `0.2` or `0.3` → "$Z=0$ pentru orice $X$ când $Y=0$: $0{,}2+0{,}3$." `exy2` = `98/125` (0,784; `E([1,2],[0.4,0.6])*E([0,1,2],[0.5,0.3,0.2])^2`) → "Aceasta este $E[X]\,(E[Y])^2$; media se ia după ridicarea la pătrat: $E[XY^2]=E[X]\,E[Y^2]=1{,}6\cdot1{,}1$."
+**Detectors:** `z2` = `0.08` or `0.18` → "Valoarea 2 vine din două celule, $(X{=}1,Y{=}2)$ și $(X{=}2,Y{=}1)$: $0{,}08+0{,}18$." `z0` = `0.2` or `0.3` → "$Z=0$ pentru orice $X$ când $Y=0$: $0{,}2+0{,}3$." `exy2` = `98/125` (0,784; `E([1,2],[0.4,0.6])*E([0,1,2],[0.5,0.3,0.2])^2`) → "Aceasta este $E[X]\,(E[Y])^2$; media se ia după ridicarea la pătrat: $E[XY^2]=E[X]\,E[Y^2]=1{,}6\cdot1{,}1$." `vz` = `0.1464` (`Var([1,2],[0.4,0.6])*Var([0,1,2],[0.5,0.3,0.2])`) → "Varianța produsului nu este produsul varianțelor ($0{,}24\cdot0{,}61$); calculeaz-o din distribuția lui $Z$: $E[Z^2]-(E[Z])^2$." `vz` = `3.08` (`E([0,1,4,16],[0.4*0.5+0.6*0.5,0.4*0.3,0.4*0.2+0.6*0.3,0.6*0.2])`) → "Aceasta este $E[Z^2]$; mai scade $(E[Z])^2=1{,}2544$."
 
 **Footnote:** "Cursul: slide 14, 17." Builder: the shape of the book's recap exercise 0.110 ($E[XY^2]$ and the products of independent variables), with our own numbers; 0.110 stays out of scope until Alex rules.
 
@@ -1420,6 +1425,7 @@ Answer: $E[X]=0$ and $E[XY]=E[X^3]=\frac13(-1+0+1)=0$, so $\mathrm{Cov}=E[XY]-E[
 - Uncertain: the claim "for binary {0,1} variables one equation (with marginals) suffices" is stated in L5.s08 as a forward promise to L5.e3 and L5.e7 (same lesson). 0.19's footnote 27: "Var(X)=0" means constant with probability 1.
 - Repetition check: Var(X+Y) is derived once (L5.e6 c) and used in L5.e5 and the concrete; the formula is stated once (L5.s09).
 - Added 2026-10-29 (teacher list items 2 and 4): L5.s06a, L5.s09a, L5.c1 and the last paragraph of L5.s08. The distribution of $X+Y$ (L5.s05) stays the worked example; L5.s06a states the rule for any $g(X,Y)$ and predicts $X-Y$, not $X+Y$ again.
+- Added in the completeness pass (teacher list items 1-2): field `vz` of L5.c1, the variance of the product $Z=XY$ (1,8256), so the product is practised with its distribution, mean and variance; the detector names the $\mathrm{Var}(X)\mathrm{Var}(Y)$ slip.
 
 ---
 
@@ -3071,15 +3077,19 @@ Expected `1/2` and `1/2` (among the four rows with $x=0$: two with $U=0$, two wi
 
 **L20.s07** (definition; ML6:12)
 > **Regula MAP pentru clasificare.** Fie atributele $a_1,\dots,a_n$ ale unei instanțe și clasa $v_j\in V$:
-> $$v_{MAP}=\arg\max_{v_j\in V}P(v_j|a_1,\dots,a_n)=\arg\max_{v_j\in V}P(a_1,\dots,a_n|v_j)\,P(v_j)$$
-> Numitorul $P(a_1,\dots,a_n)$ nu depinde de $v_j$ și se elimină (vezi Lecția 19). Bayes Naiv și Bayes Comun sunt amândouă clasificatoare MAP; diferă prin felul în care estimează $P(a_1,\dots,a_n|v_j)$.
+> $$v_{MAP}=\arg\max_{v_j\in V}P(v_j|a_1,\dots,a_n)=\arg\max_{v_j\in V}\frac{P(a_1,\dots,a_n|v_j)\,P(v_j)}{P(a_1,\dots,a_n)}=\arg\max_{v_j\in V}P(a_1,\dots,a_n|v_j)\,P(v_j)$$
+> Primul pas este formula lui Bayes; al doilea elimină numitorul: $P(a_1,\dots,a_n)>0$ este același număr pentru toate clasele și nu schimbă argmax-ul (vezi Lecția 19). Bayes Naiv și Bayes Comun sunt amândouă clasificatoare MAP; diferă prin felul în care estimează $P(a_1,\dots,a_n|v_j)$.
+>
+> Pe hârtie, când ți se cere să derivezi regula de decizie pentru o instanță dată, scrii acest lanț cu valorile instanței și numești fiecare pas: formula lui Bayes, apoi numitorul care nu depinde de clasă; continui cu pasul propriu fiecărui clasificator: regula de înmulțire la Bayes Comun, independența condiționată la Bayes Naiv.
 
 Footnote: "Cursul: slide 12-13. Culegerea: p. 355."
 
+Builder (added 2026-10-29, teacher list item 17): the middle fraction and the named steps are the book's own justification of the rule (B:355, "Justificarea regulii de decizie", and nota 415 for Bayes Comun) and the form of the handwritten T21T2 7.c.i solution (`tests/2021-2022-t2-seminar-ro/solutii.pdf:4`: $\arg\max P(Y|A,B)\overset{FB}{=}\arg\max\frac{P(A,B|Y)P(Y)}{P(A,B)}=\arg\max P(A,B|Y)P(Y)$, with "ct > 0" under the denominator). The why of dropping $P(\cdot)$ is L19.s08's proof; this screen does not re-prove it. The continuation steps are on L20.s08 (regula de înmulțire) and L20.s09 (independența condiționată).
+
 **L20.s08** (definition; ML6:13; names B:370-371)
 > **Bayes Comun** (Bayes Optimal, Joint Bayes) estimează direct distribuția comună:
-> $$v_{JB}=\arg\max_{v_j\in V}P(a_1,\dots,a_n,v_j)$$
-> Antrenare: estimează $P(v_j)$ și $P(a_1,\dots,a_n|v_j)$ din numărători. Nu face nicio presupunere.
+> $$v_{JB}=\arg\max_{v_j\in V}P(a_1,\dots,a_n|v_j)\,P(v_j)=\arg\max_{v_j\in V}P(a_1,\dots,a_n,v_j)$$
+> (pasul din mijloc: regula de înmulțire, vezi Lecția 1). Antrenare: estimează $P(v_j)$ și $P(a_1,\dots,a_n|v_j)$ din numărători. Nu face nicio presupunere.
 >
 > De ce două nume: **Comun**, fiindcă lucrează cu distribuția comună a atributelor; **Optimal**, fiindcă nicio altă distribuție probabilistă nu poate da o eroare medie la clasificare mai mică. Pe slide-uri apare "Joint Bayes". În exercițiile care urmează, "Bayes Optimal" înseamnă tot Bayes Comun.
 
@@ -3106,9 +3116,13 @@ Footnote: "Seminar 5, p. 4-5; Seminar 6, p. 1."
 > - **Bayes Naiv:** $2n+1$ parametri (o probabilitate $P(a_i{=}0|v_j)$ pentru fiecare atribut și fiecare dintre cele două clase, plus $P(v)$);
 > - **Bayes Comun:** $2^{n+1}-1$ parametri (pentru fiecare clasă, $2^n-1$ valori libere ale lui $P(a_1,\dots,a_n|v_j)$, fiindcă ultima se deduce din suma 1; plus $P(v)$). Cresc **exponențial** cu $n$.
 >
+> Același mod de numărare când atributul $A_i$ are $|Val(A_i)|$ valori și clasa are $K$ valori: priorul dă $K-1$ parametri liberi; pentru fiecare clasă, Bayes Naiv mai estimează $|Val(A_i)|-1$ valori pentru fiecare atribut, iar Bayes Comun $\prod_i|Val(A_i)|-1$ valori pentru toată combinația. Deci NB are $(K-1)+K\sum_i\big(|Val(A_i)|-1\big)$ parametri liberi, iar Bayes Comun $(K-1)+K\big(\prod_i|Val(A_i)|-1\big)$; cu atribute și clasă binare ies $2n+1$ și $2^{n+1}-1$.
+>
 > Complexitate NB (cazul Bernoulli): spațiul $O(dK)$, antrenarea $O(dn)$, testarea $O(dK)$, cu $d$ atribute, $K$ clase și $n$ exemple.
 
 Prediction before the formula: "Pentru $n=3$ atribute binare, câți parametri liberi are NB? Dar Bayes Comun?" Correct `7` and `15` (the case $n=2$, 5 and 7, is exercise 2.7.e and 2.29.a-b; it is not pre-solved here). Footnote: "Culegerea: p. 355 (nota 417), p. 375-376." Builder: the derivation per class belongs to the solution of 2.7.e (L20.e3), not repeated here beyond the two lines above; the formulas hold for Bernoulli inputs and output (B:355, nota 417). For categorical attributes see 2.27.b (convention).
+
+Builder (added 2026-10-29, teacher list item 21): the general paragraph states the free-parameter count the book only gives for Bernoulli variables. It is the count of 2.27.b (L20.e4) and of the handwritten T21T2 7.b solution (`tests/2021-2022-t2-seminar-ro/solutii.pdf:3`: "11 estimări" for CategoricalNB with $A$ of 3 values, $B$ of 2, $Y$ of 3, i.e. $(3-1)+3\big((3-1)+(2-1)\big)=11$; counting every probability instead would give 18). The learner applies it to that table in L21.s02 (the data L21 owns) and to 2.27.b here; this screen has no new number.
 
 **L20.s12-s17** (proof screens; allocation: "derivarea MLE pentru NB cu 9 parametri" and "concavitatea log-verosimilității" = proof 5 of DEM:1, BS:90-93, BS:98; data table 4.2 from Lecția 11, not re-drawn in full)
 > Antrenarea lui NB = relative frequencies. Dovedim că aceasta este chiar estimarea MLE, pe datele cu ciuperci din Lecția 11 (tabelul 4.2, rândurile A-H, atributele $X_1$=NotHeavy, $X_2$=Smelly, $X_3$=Spotted, $X_4$=Smooth, clasa $Y$=Edible). Parametrii: $\theta_{j1}=P(X_j{=}1|Y{=}1)$, $\theta_{j0}=P(X_j{=}1|Y{=}0)$ pentru $j=1..4$, și $\theta_y=P(Y{=}1)$: **nouă** parametri.
@@ -3333,6 +3347,7 @@ Ce răspunde Bayes Naiv pentru $A=0,B=0,C=1$?
 - **Declared reuse:** the 14-day table of 2.27 is the table owned by L16 (`allocation.json` `declared_reuse`); the 4.2 mushroom table of the proof screens is owned by L11. Both are shown compactly with a back-link and are not re-explained.
 - **Uncertain:** the generalisation of parameter counts to categorical attributes is not in the book (convention, `ruled`). 2.27.c's LOO uses the value sets of the full data, which the readers and `verified-answers.md` agree on (6/14 with the same six days).
 - Repetition check: P20's 7-row table is used only on L20.s02-s06; the pretest uses a different 6-row table; 2.7 and 2.29 are two different count tables; the parameter-count formulas are stated once (L20.s11) and the derivations live in the solutions of 2.7.e and 2.29.a-b only as table counts.
+- Added 2026-10-29 (teacher list items 17 and 21, completeness pass): L20.s07 shows the book's justification chain (Bayes, then the denominator dropped) and how to write it on paper; L20.s08 names the multiplication-rule step to $P(a_1,\dots,a_n,v_j)$; L20.s11 states the free-parameter count for categorical attributes and $K$ classes. No new number and no new exercise in this lesson.
 
 ---
 
@@ -3367,6 +3382,11 @@ Choices `0` / `mic, dar pozitiv` / `mare`. Expected `0` `[construit]`. After the
 > Antrenăm Bayes Naiv **fără** regula lui Laplace. Cât sunt $P(Y{=}0)$, $P(Y{=}1)$, $P(Y{=}2)$?
 
 Expected `1/5`, `2/5`, `2/5` `[seminar]` T21T2 7. Reveal: relative frequencies.
+
+Second prediction on the same screen (added 2026-10-29, teacher list item 21; the five rows stay on screen):
+> Câți parametri liberi trebuie să estimeze Bayes Naiv pe aceste date? ($A$ are 3 valori, $B$ are 2, $Y$ are 3; numărarea: vezi Lecția 20.)
+
+Expected `11` (formula `(3-1)+3*((3-1)+(2-1))`) `[seminar]` T21T2 7.b (`solutii.pdf:3`: "11 estimări"). Reveal: $2$ pentru priori ($P(Y{=}0)$, $P(Y{=}1)$; al treilea se deduce) și, pentru fiecare dintre cele 3 clase, $2$ pentru $A$ și $1$ pentru $B$: $2+3\cdot3=11$. Detectors: `18` → "Ai numărat și probabilitățile care se deduc din suma 1: pentru fiecare clasă, ultima valoare a lui $A$ și a lui $B$, iar la priori, a treia clasă." `9` → "Lipsesc cei 2 parametri liberi ai priorului $P(Y)$." `15` → "$3\cdot5$: ai numărat toate cele 5 valori ale lui $A$ și $B$ pe clasă și ai uitat priorul. Se numără doar valorile libere: $3-1$ pentru $A$, $2-1$ pentru $B$, plus $3-1$ pentru prior." Builder: the count rule is L20.s11's; this is its only use with three classes and a three-valued attribute, on the data L21 owns (T21T2 7.b asks exactly this on these rows).
 
 **L21.s03** (prediction; the factors of one class)
 > Instanța de test este $(A{=}0,\,B{=}0)$. Pentru clasa $Y=0$ (un singur rând, $(1,0)$): cât sunt $P(A{=}0|Y{=}0)$ și $P(B{=}0|Y{=}0)$?
@@ -3531,6 +3551,7 @@ $x_1=(0,0,0,1,0,0,1)$, $y_1=1$; $x_2=(0,0,1,1,0,0,0)$, $y_2=1$; $x_3=(1,1,0,0,0,
 - **The m-estimate** appears on one screen only (ML6:18); the exam form is add-one (C-14).
 - Repetition check: the five-row table is used on L21.s02-s06 only; 2.8 is the only spam example; "NB rule and factors" are not re-taught (back-link to L20).
 - Added 2026-10-29 (teacher list item 23): L21.s09a, L21.q5 and field `e` of 2.8. The q5 numbers (5 / 95, factors 0,8 and 0,1) are constructed and appear nowhere else; the cost argument of 2.8.a stays on 2.8's own screen.
+- Added 2026-10-29 (teacher list item 21, completeness pass): the second prediction on L21.s02, the free-parameter count of NB on the T21T2 7 rows (11, the official answer of T21T2 7.b), applying L20.s11's general count.
 
 ---
 
