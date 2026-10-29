@@ -62,7 +62,7 @@ export function StumpsStage({ model: M, k, predict = false, picks = {} }) {
                   <CountBox counts={b.counts} hidden={hideCur && f.i === i} />
                   {winner && i === M.best && (
                     <>
-                      <span className="mlv-leaf">{'→'} {M.leaves[i][j].tie ? t('tie', 'egal') : String(M.leaves[i][j].label)}</span>
+                      <span className="mlv-leaf">{'→'} {String(M.leaves[i][j].label)}{M.leaves[i][j].tie ? t(' (a tie)', ' (egalitate)') : ''}</span>
                       <span className="mlv-wt">{t('wrong', 'greșite')}: <Val v={showN(M.errs[i][j])} /></span>
                     </>
                   )}

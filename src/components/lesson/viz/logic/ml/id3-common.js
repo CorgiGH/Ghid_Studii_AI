@@ -150,11 +150,12 @@ export function stumpErrors(stump) {
   return stump.branches.map((b) => b.n.sub(b.counts.reduce((m, c) => (c.cmp(m) > 0 ? c : m), new Fraction(0))));
 }
 
-// the leaf a branch ends in: its majority class label (null label on a tie)
+// the leaf a branch ends in: its majority class label; a tie goes to the smallest label (the outline's class-0 rule, as
+// mathKit and majorityOf do), and tie says so
 export function leafOf(classes, branch) {
   const top = branch.counts.reduce((m, c) => (c.cmp(m) > 0 ? c : m), new Fraction(0));
   const tied = classes.filter((_, k) => branch.counts[k].equals(top));
-  return { label: tied.length === 1 ? tied[0] : null, tie: tied.length > 1, tied };
+  return { label: tied.length === 1 ? tied[0] : [...tied].sort(cmpLabel)[0], tie: tied.length > 1, tied };
 }
 
 export const bestIndex = (stumps) => stumps.reduce((bi, s, i) => (s.hc < stumps[bi].hc - EPS ? i : bi), 0);

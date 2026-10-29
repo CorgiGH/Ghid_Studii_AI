@@ -136,7 +136,7 @@ export function stumpsModel(props) {
     const errTxt = e.length === 0 ? '0' : e.length === 1 ? `${showN(e[0])}/${showN(N)} = ${showN(M.errFrac)}` : `(${plus(e)})/${showN(N)} = ${showN(M.errFrac)}`;
     const leafTxt = stumps[best].branches.map((b, j) => {
       const lf = M.leaves[best][j];
-      return `${lab(b.value, lang)} → ${lf.tie ? T('tie', 'egal') : String(lf.label)}`;
+      return `${lab(b.value, lang)} → ${String(lf.label)}${lf.tie ? T(' (a tie)', ' (egalitate)') : ''}`;
     }).join(', ');
     return T(
       `Root: ${bsn}. ${ig}. As a tree with one question: ${leafTxt}. Training error: ${errTxt}.`,

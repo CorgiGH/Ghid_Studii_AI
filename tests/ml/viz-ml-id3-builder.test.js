@@ -407,3 +407,19 @@ describe('second review', () => {
     expect(V.pickSpec(1, true).items[0].prompt.ro).toContain('Numără-le');
   });
 });
+
+describe('second review: a tied leaf of the winning stump', () => {
+  // 4.2 (mushrooms): the root stump Netedă has the branch Netedă = 0 with [2+,2−]
+  const T42 = { columns: ['Ușoară', 'Mirositoare', 'ArePete', 'Netedă', 'Comestibilă'], rows: [[1, 0, 0, 0, 1], [1, 0, 1, 0, 1], [0, 1, 0, 1, 1], [0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 0, 1, 1, 0], [1, 0, 0, 1, 0], [0, 1, 0, 0, 0]] };
+  it('gets a label by the default tie rule (class 0, as the kit), with the tie said, not the bare word "egal"', () => {
+    const M = stumpsModel({ mode: 'stumps', table: T42, target: 'Comestibilă' });
+    const last = M.count - 1;
+    expect(M.stumps[M.best].attr).toBe('Netedă');
+    expect(M.caption(last).ro).toContain('Ca arbore cu o singură întrebare: 0 → 0 (egalitate), 1 → 0.');
+    expect(M.caption(last).en).toContain('As a tree with one question: 0 → 0 (a tie), 1 → 0.');
+    expect(M.caption(last).ro).toContain('(2 + 1)/8 = 3/8');
+    const h = renderToStaticMarkup(React.createElement(Stage, { model: M, k: last, predict: false }));
+    expect(h).not.toMatch(/→ egal</);
+    expect(h).toContain('→ 0 (egalitate)');
+  });
+});
