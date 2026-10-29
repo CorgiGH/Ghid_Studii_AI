@@ -73,6 +73,11 @@ export function indep2x2(props) {
     }
     if (s === 3) marks.push({ id: 'condYX', value: q.condYX });
     if (s >= 3) marks.push({ id: 'verdict', value: s === 6 || q.independent ? 'independent' : 'dependent' });
+    // The last frame draws the table that would be independent, not the data: its label says which table it judges, so a
+    // learner who stops there does not read "independent" as the verdict on the data.
+    const verdictLabel = s < 3 ? null : s === 6
+      ? { en: `if P(${X} ∩ ${Y}) = ${loc(q.prod['00'], 'en')}: independent`, ro: `dacă P(${X} ∩ ${Y}) = ${loc(q.prod['00'], 'ro')}: independente` }
+      : (q.independent ? { en: 'independent', ro: 'independente' } : { en: 'dependent', ro: 'dependente' });
     const rest = ['01', '10', '11'];
     const nEq = rest.filter((id) => q.equal[id]).length;
     const cap = (lang) => {
@@ -113,7 +118,7 @@ export function indep2x2(props) {
           : `Cu aceleași marginale, tabelul independent ar fi ${joinList([p00, p01, p10, p11], lang)}: fiecare celulă este egală cu produsul ei, deci ${X} și ${Y} ar fi independente.`;
       }
     };
-    return { step: s, kind, cells, marks, caption: { en: cap('en'), ro: cap('ro') }, variant: s === 6 ? 'independent' : 'data' };
+    return { step: s, kind, cells, marks, caption: { en: cap('en'), ro: cap('ro') }, verdictLabel, variant: s === 6 ? 'independent' : 'data' };
   }
 
   return { n: INDEP_FRAMES, frame, q };

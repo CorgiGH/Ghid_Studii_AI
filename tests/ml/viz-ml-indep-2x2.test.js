@@ -142,6 +142,18 @@ describe('ml-indep-2x2 render', () => {
     expect(h).toContain('data-mark="verdict" data-value="independent"');
     expect(h).toContain('data-mark="cell-11" data-value="0.4"');
   });
+  it('the verdict label says which table it judges: the data are dependent, the last frame is the what-if table', () => {
+    const L = indep2x2(SEMINAR);
+    expect(L.frame(2).verdictLabel).toBe(null);
+    for (const s of [3, 4, 5]) expect(L.frame(s).verdictLabel).toEqual({ en: 'dependent', ro: 'dependente' });
+    expect(L.frame(6).verdictLabel).toEqual({ en: 'if P(X ∩ Y) = 0.1: independent', ro: 'dacă P(X ∩ Y) = 0,1: independente' });
+    const allowed = new Set(L.frame(6).marks.map((m) => m.value));
+    for (const lang of ['en', 'ro']) for (const tok of numberTokens(L.frame(6).verdictLabel[lang])) expect(allowed.has(tok), tok).toBe(true);
+    LANG = 'ro';
+    expect(html(6)).toContain('dacă P(X ∩ Y) = 0,1: independente');
+    expect(html(3)).toContain('<b>dependente</b>');
+    expect(indep2x2(INDEP).frame(3).verdictLabel.ro).toBe('independente');
+  });
   it('uses no colour literals and no opacity', () => {
     const css = readFileSync('src/components/lesson/viz/widgets/ml/indep2x2.css', 'utf8');
     expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|opacity/);
