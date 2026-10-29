@@ -1,0 +1,2017 @@
+{
+  "meta": {
+    "id": "ml-l02",
+    "title": {
+      "en": "Lesson 2: Total probability and Bayes' formula",
+      "ro": "Lecția 2: Probabilitatea totală și formula lui Bayes"
+    },
+    "shortTitle": {
+      "en": "L2: Total and Bayes",
+      "ro": "L2: Totală și Bayes"
+    },
+    "source": {
+      "en": "Machine learning course, exercise workbook and seminar 1, UAIC FII",
+      "ro": "Cursul de Învățare automată, culegerea de exerciții și seminarul 1, UAIC FII"
+    }
+  },
+  "steps": [
+    {
+      "id": "ml-l02-s1",
+      "title": {
+        "en": "A positive test",
+        "ro": "Un test pozitiv"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l02-r1",
+          "prompt": {
+            "en": "A rare disease affects **1%** of the population. A test detects it in **90%** of the sick, but it also comes out positive in **9%** of healthy people. You tested positive. What is the probability that you are sick? Write a number between 0 and 1.",
+            "ro": "O boală rară afectează **1%** din populație. Un test o detectează la **90%** dintre bolnavi, dar iese pozitiv și la **9%** dintre oamenii sănătoși. Ai ieșit pozitiv la test. Cât este probabilitatea să fii bolnav? Scrie un număr între 0 și 1."
+          },
+          "placeholder": {
+            "en": "Write a number, for example 0.3",
+            "ro": "Scrie un număr, de exemplu 0,3"
+          },
+          "answer": {
+            "en": "Keep your answer. On the next screens you work it out step by step and see how close you were.",
+            "ro": "Păstrează răspunsul. Pe ecranele următoare îl calculezi pas cu pas și vezi cât de aproape ai fost."
+          },
+          "table": {
+            "caption": {
+              "en": "The data of the problem",
+              "ro": "Datele problemei"
+            },
+            "columns": [
+              {
+                "en": "What we know",
+                "ro": "Ce știm"
+              },
+              {
+                "en": "How much",
+                "ro": "Cât"
+              }
+            ],
+            "rows": [
+              [
+                "Bolnavii din toată populația",
+                "1%"
+              ],
+              [
+                "Bolnavii la care testul iese pozitiv",
+                "90%"
+              ],
+              [
+                "Sănătoșii la care testul iese pozitiv",
+                "9%"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s2",
+      "title": {
+        "en": "Ten thousand people",
+        "ro": "Zece mii de persoane"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "First we count people, with no formulas. The data stay: **1%** of the people are sick; the test comes out **positive** (it says you are sick) in **90%** of the sick and in **9%** of the healthy. A healthy person with a positive test is called a **false positive**. We take 10 000 people so that the counts of people come out whole. At each step you guess first, then you see the answer.",
+            "ro": "Mai întâi numărăm oameni, fără formule. Datele rămân: **1%** dintre oameni sunt bolnavi; testul iese **pozitiv** (adică spune că ești bolnav) la **90%** dintre bolnavi și la **9%** dintre sănătoși. Un sănătos cu test pozitiv se numește **fals pozitiv**. Luăm 10 000 de persoane, ca să iasă numere întregi de oameni. La fiecare pas ghicești mai întâi, apoi vezi răspunsul."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ml-l02-v1",
+          "widget": "ml-freq-tree",
+          "predict": true,
+          "props": {
+            "population": 10000,
+            "prior": 0.01,
+            "sens": 0.9,
+            "fpr": 0.09,
+            "labels": {
+              "sick": {
+                "en": "sick",
+                "ro": "bolnavi"
+              },
+              "healthy": {
+                "en": "healthy",
+                "ro": "sănătoși"
+              },
+              "pos": {
+                "en": "positive",
+                "ro": "pozitivi"
+              },
+              "neg": {
+                "en": "negative",
+                "ro": "negativi"
+              },
+              "people": {
+                "en": "people",
+                "ro": "persoane"
+              }
+            }
+          }
+        },
+        {
+          "type": "learn",
+          "content": {
+            "en": "Of the 981 people with a positive test, only 90 are sick: 90/981, about **9%**, not 90%. The 90% says how many of the sick the test catches; it does not say how many of the people with a positive test are sick. There are 891 healthy people with a positive test because the healthy are 99 times more numerous than the sick.",
+            "ro": "Din 981 de persoane cu test pozitiv, doar 90 sunt bolnave: 90/981, adică aproximativ **9%**, nu 90%. Cifra de 90% spune câți dintre bolnavi sunt prinși de test; nu spune câți dintre cei cu test pozitiv sunt bolnavi. Sunt 891 de sănătoși cu test pozitiv pentru că sănătoșii sunt de 99 de ori mai mulți decât bolnavii."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s3",
+      "title": {
+        "en": "A partition",
+        "ro": "Partiția"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Partition",
+            "ro": "Partiție"
+          },
+          "content": {
+            "en": "The events $B_1, \\dots, B_k$ form a **partition** of $\\Omega$ if they are **pairwise disjoint** ($B_i \\cap B_j = \\emptyset$ for $i \\ne j$, that is, they share no outcome) and they **cover everything**: $\\bigcup_i B_i = \\Omega$ (their union is the set of all possible outcomes, see Lesson 1). Example: $B$ and $\\bar B$, where $\\bar B$ is the complement of $B$, that is, everything that is not in $B$.",
+            "ro": "Evenimentele $B_1, \\dots, B_k$ formează o **partiție** a lui $\\Omega$ dacă sunt **disjuncte două câte două** ($B_i \\cap B_j = \\emptyset$ pentru $i \\ne j$, adică nu au niciun rezultat comun) și **acoperă tot**: $\\bigcup_i B_i = \\Omega$ (reuniunea lor este mulțimea tuturor rezultatelor posibile, vezi Lecția 1). Exemplu: $B$ și $\\bar B$, unde $\\bar B$ este complementul lui $B$, adică tot ce nu e în $B$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s4",
+      "title": {
+        "en": "Total probability",
+        "ro": "Probabilitatea totală"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "The total probability formula",
+            "ro": "Formula probabilității totale"
+          },
+          "content": {
+            "en": "To find the probability of an event $A$ when you have a partition, you add up the routes through which $A$ can happen, each with its weight. For two events $B$ and $\\bar B$ it is the formula below. In general, if the $B_i$ are disjoint and $A \\subseteq \\bigcup_i B_i$ (or at least $P(\\bigcup_i B_i) = 1$): $P(A) = \\sum_i P(A \\mid B_i)\\,P(B_i)$, where $\\sum$ means the sum over all $i$.\\nOn the test example, $A$ = positive test and $B$ = sick: $P(A)$ = 0.9 · 0.01 + 0.09 · 0.99 = 0.0981, that is 981/10 000, the number of positives on the tree.\\nCourse: slide 6. Workbook: p. 217 (note 244). Seminar 1, p. 6.",
+            "ro": "Ca să afli probabilitatea unui eveniment $A$ când ai o partiție, aduni drumurile prin care se poate întâmpla $A$, fiecare cu greutatea lui. Pentru două evenimente $B$ și $\\bar B$ este formula de mai jos. În general, dacă $B_i$ sunt disjuncte și $A \\subseteq \\bigcup_i B_i$ (sau măcar $P(\\bigcup_i B_i) = 1$): $P(A) = \\sum_i P(A \\mid B_i)\\,P(B_i)$, unde $\\sum$ înseamnă suma după toți $i$.\\nPe exemplul cu testul, $A$ = test pozitiv și $B$ = bolnav: $P(A)$ = 0,9 · 0,01 + 0,09 · 0,99 = 0,0981, adică 981/10 000, numărul de pozitivi de pe arbore.\\nCursul: slide 6. Culegerea: p. 217 (nota 244). Seminar 1, p. 6."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "P(A) = P(A \\mid B)\\,P(B) + P(A \\mid \\bar B)\\,P(\\bar B)"
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s5",
+      "title": {
+        "en": "Bayes' formula",
+        "ro": "Formula lui Bayes"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Bayes' formula",
+            "ro": "Formula lui Bayes"
+          },
+          "content": {
+            "en": "$P(B \\mid A)$ is read the probability of $B$ given that $A$ happened. Bayes' formula turns a conditional probability around: $P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A)}$, and $P(A)$ is computed with the total probability formula (see below).\\nNames: $P(B)$ is the **prior** probability (before the test: 0.01); $P(A \\mid B)$ is the **likelihood** (how often the test is positive for a sick person: 0.9); $P(B \\mid A)$ is the **posterior** probability (after the test: 0.0917).\\nOn the example: 0.9 · 0.01 / 0.0981 = 90/981. The numerator is the branch sick and positive, the denominator is all the positive branches.\\nCourse: slide 6. Seminar 1, p. 6.",
+            "ro": "$P(B \\mid A)$ se citește probabilitatea lui $B$ știind că $A$ s-a întâmplat. Formula lui Bayes întoarce o probabilitate condiționată: $P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A)}$, iar $P(A)$ se calculează cu formula probabilității totale (vezi mai jos).\\nNume: $P(B)$ este probabilitatea **a priori** (înainte de test: 0,01); $P(A \\mid B)$ este **verosimilitatea** (cât de des iese testul pozitiv la un bolnav: 0,9); $P(B \\mid A)$ este probabilitatea **a posteriori** (după test: 0,0917).\\nPe exemplu: 0,9 · 0,01 / 0,0981 = 90/981. Numărătorul este ramura bolnav și pozitiv, numitorul sunt toate ramurile pozitive.\\nCursul: slide 6. Seminar 1, p. 6."
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A \\mid B)\\,P(B) + P(A \\mid \\bar B)\\,P(\\bar B)}"
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s6",
+      "title": {
+        "en": "Same test, different result",
+        "ro": "Același test, alt rezultat"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "The same test (it detects 90% of the sick, 9% false positives), but now the disease affects **half** of the population. Again 10 000 people: how many of the positives are sick, as a fraction?",
+            "ro": "Același test (detectează 90% dintre bolnavi, 9% fals pozitive), dar acum boala afectează **jumătate** din populație. Din nou 10 000 de persoane: câți dintre cei pozitivi sunt bolnavi, ca fracțiune?"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ml-l02-v2",
+          "widget": "ml-freq-tree",
+          "predict": true,
+          "props": {
+            "population": 10000,
+            "prior": 0.5,
+            "sens": 0.9,
+            "fpr": 0.09,
+            "labels": {
+              "sick": {
+                "en": "sick",
+                "ro": "bolnavi"
+              },
+              "healthy": {
+                "en": "healthy",
+                "ro": "sănătoși"
+              },
+              "pos": {
+                "en": "positive",
+                "ro": "pozitivi"
+              },
+              "neg": {
+                "en": "negative",
+                "ro": "negativi"
+              },
+              "people": {
+                "en": "people",
+                "ro": "persoane"
+              }
+            }
+          }
+        },
+        {
+          "type": "reflect",
+          "id": "ml-l02-r2",
+          "prompt": {
+            "en": "Let $B$ be the event you are sick and $T$ the event the test comes out positive. **Why** does the same test give 9% in one case and 91% in the other? Can $P(B \\mid T)$ be found from $P(T \\mid B)$ alone?",
+            "ro": "Notăm cu $B$ evenimentul ești bolnav și cu $T$ evenimentul testul iese pozitiv. **De ce** același test dă 9% într-un caz și 91% în celălalt? Poate $P(B \\mid T)$ să fie aflat doar din $P(T \\mid B)$?"
+          },
+          "placeholder": {
+            "en": "Write what you think",
+            "ro": "Scrie ce crezi"
+          },
+          "answer": {
+            "en": "No. $P(T \\mid B)$ says how often the test catches the sick; it says nothing about how many sick people there are (the prior probability $P(B)$) or how many positives come from the healthy. Bayes' formula needs both the prior and the denominator. With half the people sick: 4 500 sick positives and 450 healthy positives, so 4 500/4 950 = 10/11, about 91%. The prior changed, the test did not, and the posterior probability changed.",
+            "ro": "Nu. $P(T \\mid B)$ spune cât de des prinde testul bolnavii; nu spune nimic despre câți bolnavi sunt (probabilitatea a priori $P(B)$) și nici câți pozitivi vin din sănătoși. Formula lui Bayes are nevoie și de prior, și de numitor. La jumătate bolnavi: 4 500 pozitivi bolnavi și 450 pozitivi sănătoși, deci 4 500/4 950 = 10/11, aproximativ 91%. Priorul s-a schimbat, testul nu, iar probabilitatea a posteriori s-a schimbat."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s7",
+      "title": {
+        "en": "Defective parts",
+        "ro": "Piese defecte"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l02-q1",
+          "question": {
+            "en": "Machine A makes 60% of the parts (0.6), with 2% defective (0.02); machine B makes 40% (0.4), with 5% defective (0.05). Let $D$ be the event the part is defective. A part picked at random is defective. What is the probability that it came from A, that is $P(A \\mid D)$?",
+            "ro": "Mașina A produce 60% din piese (0,6), cu 2% defecte (0,02); mașina B produce 40% (0,4), cu 5% defecte (0,05). Notăm cu $D$ evenimentul piesa este defectă. O piesă aleasă la întâmplare e defectă. Cât este probabilitatea $P(A \\mid D)$ ca piesa să vină de la A?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0.02",
+                "ro": "0,02"
+              },
+              "correct": false,
+              "explain": {
+                "en": "This is $P(D \\mid A)$, the inverse conditional. The question asks for $P(A \\mid D)$.",
+                "ro": "Aceasta este $P(D \\mid A)$, condiționata inversă. Întrebarea cere $P(A \\mid D)$."
+              },
+              "misconception": "verosimilitate-in-loc-de-posterior"
+            },
+            {
+              "text": {
+                "en": "0.375",
+                "ro": "0,375"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The numerator: 0.6 · 0.02 (a part from A that is defective). The denominator: 0.6 · 0.02 + 0.4 · 0.05 (all the defective parts, from the total probability formula). The ratio is 0.375.",
+                "ro": "Numărătorul: 0,6 · 0,02 (piesă de la A și defectă). Numitorul: 0,6 · 0,02 + 0,4 · 0,05 (toate piesele defecte, din formula probabilității totale). Raportul este 0,375."
+              }
+            },
+            {
+              "text": {
+                "en": "0.6",
+                "ro": "0,6"
+              },
+              "correct": false,
+              "explain": {
+                "en": "This is $P(A)$, the prior probability, from before we knew the part is defective. The news that the part is defective changes it: machine B has more defects per part, so the share of A goes down.",
+                "ro": "Aceasta este $P(A)$, probabilitatea a priori, dinainte de a ști că piesa e defectă. Informația că piesa e defectă o schimbă: mașina B face mai multe defecte pe piesă, deci partea lui A scade."
+              },
+              "misconception": "prior-in-loc-de-posterior"
+            },
+            {
+              "text": {
+                "en": "0.012",
+                "ro": "0,012"
+              },
+              "correct": false,
+              "explain": {
+                "en": "This is the numerator $P(D \\mid A)\\,P(A)$. Divide it by $P(D)$, computed with the total probability formula (0.6 · 0.02 + 0.4 · 0.05).",
+                "ro": "Acesta este numărătorul $P(D \\mid A)\\,P(A)$. Împarte-l la $P(D)$, calculată cu formula probabilității totale (0,6 · 0,02 + 0,4 · 0,05)."
+              },
+              "misconception": "uitarea-numitorului"
+            }
+          ],
+          "check": {
+            "formula": "0.6*0.02/(0.6*0.02+0.4*0.05)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s8",
+      "title": {
+        "en": "Sum of the branches",
+        "ro": "Suma ramurilor"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l02-q2",
+          "question": {
+            "en": "You know that $P(A \\mid B)$ = 0.3, $P(A \\mid \\bar B)$ = 0.5 and $P(B)$ = 0.25. What is $P(A)$?",
+            "ro": "Se știe că $P(A \\mid B)$ = 0,3, $P(A \\mid \\bar B)$ = 0,5 și $P(B)$ = 0,25. Cât este $P(A)$?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "0.4",
+                "ro": "0,4"
+              },
+              "correct": false,
+              "explain": {
+                "en": "This is the plain average of 0.3 and 0.5, without weights. The branches have weights 0.25 and 1 − 0.25, not the same weight.",
+                "ro": "Aceasta este media simplă a lui 0,3 și 0,5, fără ponderi. Ramurile au ponderile 0,25 și 1 − 0,25, nu aceeași pondere."
+              },
+              "misconception": "media-simpla"
+            },
+            {
+              "text": {
+                "en": "0.075",
+                "ro": "0,075"
+              },
+              "correct": false,
+              "explain": {
+                "en": "0.3 · 0.25 is only the branch through $B$; add the branch through $\\bar B$ as well.",
+                "ro": "0,3 · 0,25 este doar ramura prin $B$; adaugă și ramura prin $\\bar B$."
+              },
+              "misconception": "un-singur-termen"
+            },
+            {
+              "text": {
+                "en": "0.8",
+                "ro": "0,8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "$P(A \\mid B) + P(A \\mid \\bar B)$ = 0.3 + 0.5 is not a probability of $A$; each term is multiplied by the probability of its branch, $P(B)$ and $P(\\bar B)$ respectively.",
+                "ro": "$P(A \\mid B) + P(A \\mid \\bar B)$ = 0,3 + 0,5 nu este o probabilitate a lui $A$; fiecare termen se înmulțește cu probabilitatea ramurii lui, $P(B)$, respectiv $P(\\bar B)$."
+              },
+              "misconception": "suma-conditionatelor"
+            },
+            {
+              "text": {
+                "en": "0.45",
+                "ro": "0,45"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The total probability formula: 0.3 · 0.25 + 0.5 · (1 − 0.25) = 0.45.",
+                "ro": "Formula probabilității totale: 0,3 · 0,25 + 0,5 · (1 − 0,25) = 0,45."
+              }
+            }
+          ],
+          "check": {
+            "formula": "0.3*0.25+0.5*(1-0.25)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s9",
+      "title": {
+        "en": "A partition of a die",
+        "ro": "Partiție la zar"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l02-q3",
+          "question": {
+            "en": "For a die, which family of sets is a partition of $\\Omega = \\{1, 2, 3, 4, 5, 6\\}$, the set of the six faces?",
+            "ro": "Pentru un zar, care familie de mulțimi este o partiție a lui $\\Omega = \\{1, 2, 3, 4, 5, 6\\}$, mulțimea celor șase fețe?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "{1,2,3}, {3,4,5}, {6}",
+                "ro": "{1,2,3}, {3,4,5}, {6}"
+              },
+              "correct": false,
+              "explain": {
+                "en": "They cover $\\Omega$, but 3 is in two sets, so they are not disjoint.",
+                "ro": "Acoperă $\\Omega$, dar 3 apare în două mulțimi, deci nu sunt disjuncte."
+              },
+              "misconception": "se-suprapun"
+            },
+            {
+              "text": {
+                "en": "{1,2}, {3,4}",
+                "ro": "{1,2}, {3,4}"
+              },
+              "correct": false,
+              "explain": {
+                "en": "They are disjoint, but their union does not contain 5 and 6.",
+                "ro": "Sunt disjuncte, dar reuniunea lor nu conține 5 și 6."
+              },
+              "misconception": "nu-acopera"
+            },
+            {
+              "text": {
+                "en": "{1,2}, {3,4}, {5,6}",
+                "ro": "{1,2}, {3,4}, {5,6}"
+              },
+              "correct": true,
+              "explain": {
+                "en": "The sets are pairwise disjoint and their union is all of $\\Omega$.",
+                "ro": "Mulțimile sunt disjuncte două câte două și reuniunea lor este toată $\\Omega$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s10",
+      "title": {
+        "en": "The test in a group",
+        "ro": "Testul în grup"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l02-q4",
+          "question": {
+            "en": "In a group of 200 people, 20 have the disease. The test is positive for 18 of the 20 sick and for 18 of the 180 healthy. Among those with a positive test, what fraction is sick?",
+            "ro": "Dintr-un grup de 200 de persoane, 20 au boala. Testul e pozitiv la 18 dintre cei 20 de bolnavi și la 18 dintre cei 180 de sănătoși. Dintre cei cu test pozitiv, ce fracțiune e bolnavă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "1/2",
+                "ro": "1/2"
+              },
+              "correct": true,
+              "explain": {
+                "en": "There are 18 sick with a positive test and 18 healthy with a positive test, so 18 of 18 + 18 = 36 positives are sick: 18/36 = 1/2.",
+                "ro": "Sunt 18 bolnavi cu test pozitiv și 18 sănătoși cu test pozitiv, deci 18 din 18 + 18 = 36 de pozitivi sunt bolnavi: 18/36 = 1/2."
+              }
+            },
+            {
+              "text": {
+                "en": "0.9",
+                "ro": "0,9"
+              },
+              "correct": false,
+              "explain": {
+                "en": "18/20 is the fraction of the sick who have a positive test, not the fraction of those with a positive test who are sick.",
+                "ro": "18/20 este fracțiunea bolnavilor care au testul pozitiv, nu fracțiunea celor cu test pozitiv care sunt bolnavi."
+              },
+              "misconception": "sensibilitate-in-loc-de-posterior"
+            },
+            {
+              "text": {
+                "en": "0.1",
+                "ro": "0,1"
+              },
+              "correct": false,
+              "explain": {
+                "en": "18/180 is the fraction of the healthy who have a positive test.",
+                "ro": "18/180 este fracțiunea sănătoșilor care au testul pozitiv."
+              },
+              "misconception": "rata-fals-pozitivilor"
+            },
+            {
+              "text": {
+                "en": "0.09",
+                "ro": "0,09"
+              },
+              "correct": false,
+              "explain": {
+                "en": "18/200 divides by everybody; the question is only about those with a positive test.",
+                "ro": "18/200 împarte la toată lumea; întrebarea se referă doar la cei cu test pozitiv."
+              },
+              "misconception": "fractiune-din-toti"
+            }
+          ],
+          "check": {
+            "formula": "18/(18+18)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s11",
+      "title": {
+        "en": "Proof of total probability",
+        "ro": "Dovedim formula totală"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l02-p1",
+          "claim": {
+            "en": "$P(A) = P(A \\mid B)\\,P(B) + P(A \\mid \\bar B)\\,P(\\bar B)$",
+            "ro": "$P(A) = P(A \\mid B)\\,P(B) + P(A \\mid \\bar B)\\,P(\\bar B)$"
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$A = (A \\cap B) \\cup (A \\cap \\bar B)$.",
+                "ro": "$A = (A \\cap B) \\cup (A \\cap \\bar B)$."
+              },
+              "why": {
+                "en": "Every outcome of $A$ is either in $B$ or in $\\bar B$, never in both.",
+                "ro": "Orice rezultat din $A$ este fie în $B$, fie în $\\bar B$, niciodată în amândouă."
+              },
+              "predict": {
+                "question": {
+                  "en": "How do we split $A$ into two disjoint pieces?",
+                  "ro": "Cum se rupe $A$ în două bucăți disjuncte?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$A = (A \\cap B) \\cup A$",
+                      "ro": "$A = (A \\cap B) \\cup A$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The pieces overlap ($A \\cap B$ is already inside $A$), so you cannot apply additivity.",
+                      "ro": "Bucățile se suprapun ($A \\cap B$ este deja în $A$), deci nu poți aplica aditivitatea."
+                    },
+                    "misconception": "bucati-suprapuse"
+                  },
+                  {
+                    "text": {
+                      "en": "$A = (A \\cap B) \\cup (A \\cap \\bar B)$",
+                      "ro": "$A = (A \\cap B) \\cup (A \\cap \\bar B)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "The two pieces share no outcome and together they give exactly $A$.",
+                      "ro": "Cele două bucăți nu au niciun rezultat comun și împreună dau exact $A$."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "The pieces are disjoint, so $P(A) = P(A \\cap B) + P(A \\cap \\bar B)$.",
+                "ro": "Bucățile sunt disjuncte, deci $P(A) = P(A \\cap B) + P(A \\cap \\bar B)$."
+              },
+              "why": {
+                "en": "Additivity of probability for disjoint events.",
+                "ro": "Aditivitatea probabilității pentru evenimente disjuncte."
+              }
+            },
+            {
+              "shown": {
+                "en": "The multiplication rule (see Lesson 1) on each term: $P(A \\cap B) = P(A \\mid B)\\,P(B)$ and $P(A \\cap \\bar B) = P(A \\mid \\bar B)\\,P(\\bar B)$.",
+                "ro": "Regula de înmulțire (vezi Lecția 1) pe fiecare termen: $P(A \\cap B) = P(A \\mid B)\\,P(B)$ și $P(A \\cap \\bar B) = P(A \\mid \\bar B)\\,P(\\bar B)$."
+              }
+            }
+          ],
+          "end": {
+            "en": "Adding the two terms gives the formula. ∎ In the general case, $A = \\bigcup_i (A \\cap B_i)$ and the proof is the same.",
+            "ro": "Adunând cei doi termeni obținem formula. ∎ În cazul general, $A = \\bigcup_i (A \\cap B_i)$ și se procedează la fel."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s12",
+      "title": {
+        "en": "Proof of Bayes' formula",
+        "ro": "Dovedim formula lui Bayes"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l02-p2",
+          "claim": {
+            "en": "$P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A)}$",
+            "ro": "$P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A)}$"
+          },
+          "given": {
+            "en": "$P(A) > 0$.",
+            "ro": "$P(A) > 0$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$P(A \\cap B) = P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A)$.",
+                "ro": "$P(A \\cap B) = P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A)$."
+              },
+              "why": {
+                "en": "The multiplication rule, written in two ways (see Lesson 1): either we start with $B$ or with $A$.",
+                "ro": "Regula de înmulțire, scrisă în două feluri (vezi Lecția 1): fie începem cu $B$, fie cu $A$."
+              },
+              "predict": {
+                "question": {
+                  "en": "Which equality do we write for $P(A \\cap B)$ in two ways?",
+                  "ro": "Ce egalitate scriem pentru $P(A \\cap B)$ în două feluri?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(A \\cap B) = P(A) + P(B)$",
+                      "ro": "$P(A \\cap B) = P(A) + P(B)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "An intersection is not obtained by adding; the multiplication rule uses the product of a conditional probability and the probability of its condition.",
+                      "ro": "Intersecția nu se obține prin adunare; regula de înmulțire folosește produsul unei probabilități condiționate cu cea a condiției."
+                    },
+                    "misconception": "aduna-in-loc-sa-inmulteasca"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A \\cap B) = P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A)$",
+                      "ro": "$P(A \\cap B) = P(A \\mid B)\\,P(B) = P(B \\mid A)\\,P(A)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "The same intersection, written once with the condition $B$ and once with the condition $A$.",
+                      "ro": "Aceeași intersecție, scrisă o dată cu condiția $B$ și o dată cu condiția $A$."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "We divide the second equality by $P(A)$: $P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A)}$.",
+                "ro": "Împărțim a doua egalitate la $P(A)$: $P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A)}$."
+              },
+              "predict": {
+                "question": {
+                  "en": "May we divide by $P(A)$?",
+                  "ro": "Putem împărți la $P(A)$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "Yes, we divide without looking at $P(A)$",
+                      "ro": "Da, împărțim fără să ne uităm la $P(A)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Division by 0 makes no sense; the formula is defined only when $P(A) > 0$.",
+                      "ro": "Împărțirea la 0 nu are sens; formula este definită doar când $P(A) > 0$."
+                    },
+                    "misconception": "uita-ipoteza"
+                  },
+                  {
+                    "text": {
+                      "en": "Yes, because we know that $P(A) > 0$",
+                      "ro": "Da, pentru că știm că $P(A) > 0$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "The condition $P(A) > 0$ in the statement allows the division.",
+                      "ro": "Condiția $P(A) > 0$ din enunț permite împărțirea."
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "end": {
+            "en": "∎ The formula is defined only when $P(A) > 0$.",
+            "ro": "∎ Formula este definită numai când $P(A) > 0$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s13",
+      "title": {
+        "en": "Ex. 0.6: what information is enough?",
+        "ro": "Ex. 0.6: ce informații ajung?"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l02-e1",
+          "exercise": "0.6",
+          "statement": {
+            "en": "In each of the four cases, the events $A$ and $B$ come with only the information below. In which case is the information enough to compute $P(B \\mid A)$? Is any of it superfluous?\n(a) $P(A \\mid B) = 2/3$\n(b) $P(A \\mid B) = 2/3$ and $P(A \\mid \\bar B) = 1/3$\n(c) $P(A \\mid B) = 2/3$, $P(A \\mid \\bar B) = 1/3$ and $P(B) = 1/3$\n(d) the three from (c) and $P(A) = 4/9$",
+            "ro": "Evenimentele $A$ și $B$ au, în fiecare dintre cele patru cazuri, doar informațiile de mai jos. În care caz ajung informațiile ca să calculezi $P(B \\mid A)$? Există informații de prisos?\n(a) $P(A \\mid B) = 2/3$\n(b) $P(A \\mid B) = 2/3$ și $P(A \\mid \\bar B) = 1/3$\n(c) $P(A \\mid B) = 2/3$, $P(A \\mid \\bar B) = 1/3$ și $P(B) = 1/3$\n(d) cele trei din (c) și $P(A) = 4/9$"
+          },
+          "fields": [
+            {
+              "id": "a",
+              "label": {
+                "en": "Is the information in (a) enough?",
+                "ro": "Ajung informațiile din (a)?"
+              },
+              "kind": "tf",
+              "formula": "1 >= 3",
+              "expected": "false"
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "Is the information in (b) enough?",
+                "ro": "Ajung informațiile din (b)?"
+              },
+              "kind": "tf",
+              "formula": "2 >= 3",
+              "expected": "false"
+            },
+            {
+              "id": "c",
+              "label": {
+                "en": "Is the information in (c) enough?",
+                "ro": "Ajung informațiile din (c)?"
+              },
+              "kind": "tf",
+              "formula": "3 >= 3",
+              "expected": "true"
+            },
+            {
+              "id": "d",
+              "label": {
+                "en": "Is the information in (d) enough?",
+                "ro": "Ajung informațiile din (d)?"
+              },
+              "kind": "tf",
+              "formula": "3 >= 3",
+              "expected": "true"
+            },
+            {
+              "id": "sup",
+              "label": {
+                "en": "The superfluous information is...",
+                "ro": "Informația de prisos este..."
+              },
+              "kind": "choice",
+              "formula": "'$P(A)$ from case (d)'",
+              "expected": "$P(A)$ from case (d)",
+              "options": [
+                {
+                  "en": "$P(A)$ from case (d)",
+                  "ro": "$P(A)$ din cazul (d)"
+                },
+                {
+                  "en": "$P(A \\mid \\bar B)$ from case (b)",
+                  "ro": "$P(A \\mid \\bar B)$ din cazul (b)"
+                },
+                {
+                  "en": "$P(B)$ from case (c)",
+                  "ro": "$P(B)$ din cazul (c)"
+                }
+              ]
+            },
+            {
+              "id": "v",
+              "label": {
+                "en": "$P(B \\mid A)$ in case (c) (as a fraction or with 4 decimals)",
+                "ro": "$P(B \\mid A)$ în cazul (c) (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "(2/3*1/3)/(2/3*1/3+1/3*(1-1/3))",
+              "expected": "1/2"
+            },
+            {
+              "id": "pa",
+              "label": {
+                "en": "$P(A)$ computed from case (c), with 4 decimals",
+                "ro": "$P(A)$ calculat din cazul (c), cu 4 zecimale"
+              },
+              "kind": "num",
+              "formula": "2/3*1/3+1/3*(1-1/3)",
+              "expected": "0.4444"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "b",
+              "formula": "true",
+              "message": {
+                "en": "In (b) $P(B)$, the prior probability, is missing. Without it the posterior probability is not determined: the same test with different priors gives different results (see the example with the disease in half of the population).",
+                "ro": "În (b) lipsește $P(B)$, probabilitatea a priori. Fără ea, probabilitatea a posteriori nu e determinată: același test cu priori diferiți dă rezultate diferite (vezi exemplul cu boala la jumătate din populație)."
+              }
+            },
+            {
+              "field": "sup",
+              "formula": "'$P(B)$ from case (c)'",
+              "message": {
+                "en": "$P(B)$ is the prior probability; without it Bayes does not work. The superfluous one is $P(A)$, which follows from the total probability formula.",
+                "ro": "$P(B)$ este probabilitatea a priori; fără ea nu merge Bayes. De prisos este $P(A)$, care rezultă din formula probabilității totale."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "2/3",
+              "message": {
+                "en": "This is $P(A \\mid B)$, given in the statement. The question asks for the inverse conditional, $P(B \\mid A)$.",
+                "ro": "Aceasta este $P(A \\mid B)$, dată în enunț. Întrebarea cere condiționata inversă, $P(B \\mid A)$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Write Bayes' formula with the denominator from the total probability formula.",
+              "ro": "Scrie formula lui Bayes cu numitorul din formula probabilității totale."
+            },
+            {
+              "en": "You need three numbers: $P(A \\mid B)$, $P(A \\mid \\bar B)$ and $P(B)$.",
+              "ro": "Ai nevoie de trei numere: $P(A \\mid B)$, $P(A \\mid \\bar B)$ și $P(B)$."
+            },
+            {
+              "en": "In (d) you can compute $P(A) = \\frac23\\cdot\\frac13+\\frac13\\cdot\\frac23 = \\frac49$ from the other three, so $P(A)$ is superfluous.",
+              "ro": "În (d) poți calcula $P(A) = \\frac23\\cdot\\frac13+\\frac13\\cdot\\frac23 = \\frac49$ din celelalte trei, deci $P(A)$ este de prisos."
+            }
+          ],
+          "solution": {
+            "en": "$P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A \\mid B)\\,P(B) + P(A \\mid \\bar B)\\,(1 - P(B))}$. Cases (c) and (d) have all three numbers; (a) and (b) lack $P(B)$, the prior probability. In (d), $P(A)$ is superfluous, because it follows from the other three. Numerically, in (c): $P(B \\mid A) = \\dfrac{2/9}{4/9} = \\dfrac12$.",
+            "ro": "$P(B \\mid A) = \\dfrac{P(A \\mid B)\\,P(B)}{P(A \\mid B)\\,P(B) + P(A \\mid \\bar B)\\,(1 - P(B))}$. Cazurile (c) și (d) au toate cele trei numere; (a) și (b) nu au $P(B)$, probabilitatea a priori. În (d), $P(A)$ este de prisos, fiindcă se deduce din celelalte trei. Numeric, în (c): $P(B \\mid A) = \\dfrac{2/9}{4/9} = \\dfrac12$."
+          },
+          "status": "book",
+          "variants": [
+            {
+              "statement": {
+                "en": "In each of the four cases, the events $A$ and $B$ come with only the information below. In which case is the information enough to compute $P(B \\mid A)$? Is any of it superfluous?\n(a) $P(A \\mid B) = 3/5$\n(b) $P(A \\mid B) = 3/5$ and $P(A \\mid \\bar B) = 1/5$\n(c) $P(A \\mid B) = 3/5$, $P(A \\mid \\bar B) = 1/5$ and $P(B) = 1/4$\n(d) the three from (c) and $P(A) = 3/10$",
+                "ro": "Evenimentele $A$ și $B$ au, în fiecare dintre cele patru cazuri, doar informațiile de mai jos. În care caz ajung informațiile ca să calculezi $P(B \\mid A)$? Există informații de prisos?\n(a) $P(A \\mid B) = 3/5$\n(b) $P(A \\mid B) = 3/5$ și $P(A \\mid \\bar B) = 1/5$\n(c) $P(A \\mid B) = 3/5$, $P(A \\mid \\bar B) = 1/5$ și $P(B) = 1/4$\n(d) cele trei din (c) și $P(A) = 3/10$"
+              },
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "1 >= 3",
+                  "expected": "false"
+                },
+                {
+                  "id": "b",
+                  "formula": "2 >= 3",
+                  "expected": "false"
+                },
+                {
+                  "id": "c",
+                  "formula": "3 >= 3",
+                  "expected": "true"
+                },
+                {
+                  "id": "d",
+                  "formula": "3 >= 3",
+                  "expected": "true"
+                },
+                {
+                  "id": "sup",
+                  "formula": "'$P(A)$ from case (d)'",
+                  "expected": "$P(A)$ from case (d)"
+                },
+                {
+                  "id": "v",
+                  "formula": "(3/5*1/4)/(3/5*1/4+1/5*(1-1/4))",
+                  "expected": "1/2"
+                },
+                {
+                  "id": "pa",
+                  "formula": "3/5*1/4+1/5*(1-1/4)",
+                  "expected": "0.3"
+                }
+              ],
+              "solution": {
+                "en": "The same idea: (c) and (d) are enough, they have all three numbers; $P(A)$ in (d) is superfluous. Numerically, in (c): $P(B \\mid A) = \\dfrac{3/20}{3/10} = \\dfrac12$, and $P(A) = \\dfrac{3}{20} + \\dfrac{3}{20} = \\dfrac{3}{10}$.",
+                "ro": "Aceeași idee: ajung (c) și (d), care au cele trei numere; $P(A)$ din (d) este de prisos. Numeric, în (c): $P(B \\mid A) = \\dfrac{3/20}{3/10} = \\dfrac12$, iar $P(A) = \\dfrac{3}{20} + \\dfrac{3}{20} = \\dfrac{3}{10}$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s14",
+      "title": {
+        "en": "Ex. 0.90: the urn with added balls",
+        "ro": "Ex. 0.90: urna cu bile adăugate"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l02-e3",
+          "exercise": [
+            "0.90.a",
+            "0.90.b"
+          ],
+          "statement": {
+            "en": "An urn holds $w$ white balls and $b$ black balls. You draw a ball at random, put it back together with $d$ more balls of the same colour, then draw another ball. Let $W_1$ and $W_2$ be the events the first and the second ball drawn is white.\n**a.** Show that the probability that the second ball is white does not depend on $d$.\n**b.** Specialise for $w = 2$, $b = 3$, $d = 7$.",
+            "ro": "O urnă conține $w$ bile albe și $b$ bile negre. Extragi o bilă la întâmplare, o pui înapoi împreună cu alte $d$ bile de aceeași culoare, apoi extragi încă o bilă. Notăm cu $W_1$ și $W_2$ evenimentele prima, respectiv a doua bilă extrasă este albă.\n**a.** Arată că probabilitatea ca a doua bilă să fie albă nu depinde de $d$.\n**b.** Particularizează pentru $w = 2$, $b = 3$, $d = 7$."
+          },
+          "data": {
+            "w": 2,
+            "b": 3,
+            "d": 7
+          },
+          "fields": [
+            {
+              "id": "a",
+              "label": {
+                "en": "**a.** $P(W_2)$ is...",
+                "ro": "**a.** $P(W_2)$ este..."
+              },
+              "kind": "choice",
+              "formula": "'$\\\\dfrac{w}{w+b}$'",
+              "expected": "$\\dfrac{w}{w+b}$",
+              "options": [
+                {
+                  "en": "$\\dfrac{w+d}{w+b+d}$",
+                  "ro": "$\\dfrac{w+d}{w+b+d}$"
+                },
+                {
+                  "en": "$\\dfrac{w}{w+b}$",
+                  "ro": "$\\dfrac{w}{w+b}$"
+                },
+                {
+                  "en": "$\\dfrac{w}{w+b+d}$",
+                  "ro": "$\\dfrac{w}{w+b+d}$"
+                }
+              ]
+            },
+            {
+              "id": "p1",
+              "label": {
+                "en": "**b.** $P(W_2 \\mid W_1)$ for the values of $w$, $b$, $d$ in b (as a fraction or with 4 decimals)",
+                "ro": "**b.** $P(W_2 \\mid W_1)$ pentru valorile lui $w$, $b$, $d$ de la b (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "(w+d)/(w+b+d)",
+              "expected": "3/4"
+            },
+            {
+              "id": "p2",
+              "label": {
+                "en": "**b.** $P(W_2 \\mid \\bar W_1)$ for the values of $w$, $b$, $d$ in b (as a fraction or with 4 decimals)",
+                "ro": "**b.** $P(W_2 \\mid \\bar W_1)$ pentru valorile lui $w$, $b$, $d$ de la b (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "w/(w+b+d)",
+              "expected": "1/6"
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "**b.** $P(W_2)$ for the values of $w$, $b$, $d$ in b (as a fraction or with 4 decimals)",
+                "ro": "**b.** $P(W_2)$ pentru valorile lui $w$, $b$, $d$ de la b (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "w/(w+b)*(w+d)/(w+b+d)+b/(w+b)*w/(w+b+d)",
+              "expected": "2/5"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "a",
+              "formula": "'$\\\\dfrac{w+d}{w+b+d}$'",
+              "message": {
+                "en": "You kept only the branch first ball white. The total probability formula adds the branch first ball black as well.",
+                "ro": "Ai păstrat doar ramura prima bilă albă. Formula probabilității totale adună și ramura prima bilă neagră."
+              }
+            },
+            {
+              "field": "a",
+              "formula": "'$\\\\dfrac{w}{w+b+d}$'",
+              "message": {
+                "en": "You put $d$ in the denominator, but $d$ is also added to the numerator when the first ball is white; in the end $d$ cancels.",
+                "ro": "Ai pus $d$ la numitor, dar $d$ se adaugă și la numărător când prima bilă e albă; la sfârșit $d$ se reduce."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "(w+d)/(w+b+d)",
+              "message": {
+                "en": "This is $P(W_2 \\mid W_1)$, only the branch first white; the total probability formula adds the branch first black as well.",
+                "ro": "Aceasta este $P(W_2 \\mid W_1)$, doar ramura prima albă; formula totală adună și ramura prima neagră."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "w/(w+b)*(w+d)/(w+b+d)",
+              "message": {
+                "en": "You added only the white-white branch; the black-white branch is missing.",
+                "ro": "Ai adunat doar ramura alb-alb; lipsește ramura negru-alb."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Split by the colour of the first ball: the total probability formula.",
+              "ro": "Împarte după culoarea primei bile: formula probabilității totale."
+            },
+            {
+              "en": "After a white first ball the urn has $w+b+d$ balls, of which $w+d$ are white; after a black one, $w+b+d$ balls, of which $w$ are white.",
+              "ro": "După prima bilă albă urna are $w+b+d$ bile, din care $w+d$ albe; după una neagră, $w+b+d$ bile, din care $w$ albe."
+            },
+            {
+              "en": "$P(W_2) = \\dfrac{w}{w+b}\\cdot\\dfrac{w+d}{w+b+d}+\\dfrac{b}{w+b}\\cdot\\dfrac{w}{w+b+d}$, then simplify.",
+              "ro": "$P(W_2) = \\dfrac{w}{w+b}\\cdot\\dfrac{w+d}{w+b+d}+\\dfrac{b}{w+b}\\cdot\\dfrac{w}{w+b+d}$, apoi reduci."
+            }
+          ],
+          "solution": {
+            "en": "$P(W_2) = \\dfrac{w(w+d)+bw}{(w+b)(w+b+d)} = \\dfrac{w(w+b+d)}{(w+b)(w+b+d)} = \\dfrac{w}{w+b}$: $d$ cancels. For $w=2$, $b=3$, $d=7$: $\\dfrac25\\cdot\\dfrac{9}{12}+\\dfrac35\\cdot\\dfrac{2}{12}=\\dfrac{3}{10}+\\dfrac{1}{10}=\\dfrac25$.",
+            "ro": "$P(W_2) = \\dfrac{w(w+d)+bw}{(w+b)(w+b+d)} = \\dfrac{w(w+b+d)}{(w+b)(w+b+d)} = \\dfrac{w}{w+b}$: $d$ se reduce. Pentru $w=2$, $b=3$, $d=7$: $\\dfrac25\\cdot\\dfrac{9}{12}+\\dfrac35\\cdot\\dfrac{2}{12}=\\dfrac{3}{10}+\\dfrac{1}{10}=\\dfrac25$."
+          },
+          "status": "verified-twice",
+          "variants": [
+            {
+              "statement": {
+                "en": "An urn holds $w$ white balls and $b$ black balls. You draw a ball at random, put it back together with $d$ more balls of the same colour, then draw another ball. Let $W_1$ and $W_2$ be the events the first and the second ball drawn is white.\n**a.** Show that the probability that the second ball is white does not depend on $d$.\n**b.** Specialise for $w = 3$, $b = 2$, $d = 5$.",
+                "ro": "O urnă conține $w$ bile albe și $b$ bile negre. Extragi o bilă la întâmplare, o pui înapoi împreună cu alte $d$ bile de aceeași culoare, apoi extragi încă o bilă. Notăm cu $W_1$ și $W_2$ evenimentele prima, respectiv a doua bilă extrasă este albă.\n**a.** Arată că probabilitatea ca a doua bilă să fie albă nu depinde de $d$.\n**b.** Particularizează pentru $w = 3$, $b = 2$, $d = 5$."
+              },
+              "data": {
+                "w": 3,
+                "b": 2,
+                "d": 5
+              },
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "'$\\\\dfrac{w}{w+b}$'",
+                  "expected": "$\\dfrac{w}{w+b}$"
+                },
+                {
+                  "id": "p1",
+                  "formula": "(w+d)/(w+b+d)",
+                  "expected": "4/5"
+                },
+                {
+                  "id": "p2",
+                  "formula": "w/(w+b+d)",
+                  "expected": "3/10"
+                },
+                {
+                  "id": "b",
+                  "formula": "w/(w+b)*(w+d)/(w+b+d)+b/(w+b)*w/(w+b+d)",
+                  "expected": "3/5"
+                }
+              ],
+              "solution": {
+                "en": "The same result, $P(W_2) = \\dfrac{w}{w+b}$. For $w=3$, $b=2$, $d=5$: $\\dfrac35\\cdot\\dfrac{8}{10}+\\dfrac25\\cdot\\dfrac{3}{10}=\\dfrac{12}{25}+\\dfrac{3}{25}=\\dfrac35$.",
+                "ro": "Același rezultat, $P(W_2) = \\dfrac{w}{w+b}$. Pentru $w=3$, $b=2$, $d=5$: $\\dfrac35\\cdot\\dfrac{8}{10}+\\dfrac25\\cdot\\dfrac{3}{10}=\\dfrac{12}{25}+\\dfrac{3}{25}=\\dfrac35$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s15",
+      "title": {
+        "en": "Ex. 0.93: a partition and a probability that goes down",
+        "ro": "Ex. 0.93: o partiție și o probabilitate care scade"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l02-p3",
+          "exercise": "0.93",
+          "claim": {
+            "en": "If $P(B_1 \\mid A) < P(B_1)$, then $P(B_i \\mid A) > P(B_i)$ for at least one $i \\in \\{2, \\dots, k\\}$.",
+            "ro": "Dacă $P(B_1 \\mid A) < P(B_1)$, atunci $P(B_i \\mid A) > P(B_i)$ pentru cel puțin un $i \\in \\{2, \\dots, k\\}$."
+          },
+          "given": {
+            "en": "$B_1, \\dots, B_k$ form a partition of $\\Omega$ and $P(A) > 0$.",
+            "ro": "$B_1, \\dots, B_k$ formează o partiție a lui $\\Omega$ și $P(A) > 0$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "(a) $\\sum_i P(B_i) = 1$.",
+                "ro": "(a) $\\sum_i P(B_i) = 1$."
+              },
+              "why": {
+                "en": "The pieces of the partition are disjoint and together give $\\Omega$, so their probabilities add up to $P(\\Omega) = 1$.",
+                "ro": "Bucățile partiției sunt disjuncte și dau împreună $\\Omega$, deci probabilitățile lor se adună la $P(\\Omega) = 1$."
+              },
+              "predict": {
+                "question": {
+                  "en": "Which property gives $\\sum_i P(B_i) = 1$?",
+                  "ro": "Ce proprietate dă $\\sum_i P(B_i) = 1$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "Additivity of probability, even if the pieces overlapped",
+                      "ro": "Aditivitatea probabilității, chiar dacă bucățile s-ar suprapune"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Additivity needs disjoint pieces; with an overlap the common part would be counted twice.",
+                      "ro": "Aditivitatea cere bucăți disjuncte; la o suprapunere, partea comună ar fi numărată de două ori."
+                    },
+                    "misconception": "uniune-nedisjuncta"
+                  },
+                  {
+                    "text": {
+                      "en": "Countable additivity on disjoint pieces, together with $P(\\Omega) = 1$",
+                      "ro": "Aditivitatea numărabilă pe bucăți disjuncte, împreună cu $P(\\Omega) = 1$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "A partition has disjoint pieces whose union is $\\Omega$.",
+                      "ro": "Partiția are bucăți disjuncte a căror reuniune este $\\Omega$."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "(b) $\\sum_i P(B_i \\cap A) = P(A)$.",
+                "ro": "(b) $\\sum_i P(B_i \\cap A) = P(A)$."
+              },
+              "why": {
+                "en": "$A = \\bigcup_i (A \\cap B_i)$ is a union of disjoint pieces; we add their probabilities (the form of the total probability formula).",
+                "ro": "$A = \\bigcup_i (A \\cap B_i)$ este o reuniune de bucăți disjuncte; adunăm probabilitățile lor (forma formulei probabilității totale)."
+              }
+            },
+            {
+              "shown": {
+                "en": "(c) $P(B_i \\mid A)\\,P(A) = P(B_i \\cap A)$.",
+                "ro": "(c) $P(B_i \\mid A)\\,P(A) = P(B_i \\cap A)$."
+              },
+              "why": {
+                "en": "The multiplication rule (see Lesson 1).",
+                "ro": "Regula de înmulțire (vezi Lecția 1)."
+              }
+            },
+            {
+              "shown": {
+                "en": "(d) $\\sum_i P(B_i \\mid A) = 1$.",
+                "ro": "(d) $\\sum_i P(B_i \\mid A) = 1$."
+              },
+              "why": {
+                "en": "We divide (b) by $P(A) > 0$ and use (c).",
+                "ro": "Împărțim (b) la $P(A) > 0$ și folosim (c)."
+              }
+            },
+            {
+              "shown": {
+                "en": "We assume, for a contradiction, that $P(B_i \\mid A) \\le P(B_i)$ for all $i \\ge 2$.",
+                "ro": "Presupunem, prin reducere la absurd, că $P(B_i \\mid A) \\le P(B_i)$ pentru toți $i \\ge 2$."
+              },
+              "predict": {
+                "question": {
+                  "en": "What do we assume in order to get the contradiction?",
+                  "ro": "Ce presupunem pentru a face contradicția?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "For all $i \\ge 2$: $P(B_i \\mid A) < P(B_i)$",
+                      "ro": "Pentru toți $i \\ge 2$: $P(B_i \\mid A) < P(B_i)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The opposite of at least one is larger is none is larger, that is $\\le$; the strict inequality is not needed.",
+                      "ro": "Contrariul lui cel puțin unul este mai mare este niciunul nu este mai mare, adică $\\le$; inegalitatea strictă nu este necesară."
+                    },
+                    "misconception": "negare-gresita"
+                  },
+                  {
+                    "text": {
+                      "en": "For all $i \\ge 2$: $P(B_i \\mid A) \\le P(B_i)$",
+                      "ro": "Pentru toți $i \\ge 2$: $P(B_i \\mid A) \\le P(B_i)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "This is the negation of the claim that at least one $i$ has $P(B_i \\mid A) > P(B_i)$.",
+                      "ro": "Aceasta este negația afirmației că cel puțin un $i$ are $P(B_i \\mid A) > P(B_i)$."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Then $1 = P(B_1 \\mid A) + \\sum_{i \\ge 2} P(B_i \\mid A) < P(B_1) + \\sum_{i \\ge 2} P(B_i) = 1$, a contradiction.",
+                "ro": "Atunci $1 = P(B_1 \\mid A) + \\sum_{i \\ge 2} P(B_i \\mid A) < P(B_1) + \\sum_{i \\ge 2} P(B_i) = 1$, o contradicție."
+              },
+              "why": {
+                "en": "The first equality is (d), the last is (a); the inequality is strict because $P(B_1 \\mid A) < P(B_1)$.",
+                "ro": "Prima egalitate este (d), ultima este (a); inegalitatea este strictă pentru că $P(B_1 \\mid A) < P(B_1)$."
+              }
+            }
+          ],
+          "end": {
+            "en": "The assumption is false, so at least one $i \\ge 2$ has $P(B_i \\mid A) > P(B_i)$. ∎",
+            "ro": "Presupunerea e falsă, deci cel puțin un $i \\ge 2$ are $P(B_i \\mid A) > P(B_i)$. ∎"
+          }
+        },
+        {
+          "type": "calc-exercise",
+          "id": "ml-l02-e4",
+          "statement": {
+            "en": "For a partition $B_1, B_2, B_3$ with $P(B_1) = P(B_2) = P(B_3) = 1/3$ and $P(B_1 \\mid A) = 1/6$, $P(B_2 \\mid A) = 1/6$: what must $P(B_3 \\mid A)$ be?",
+            "ro": "Pentru o partiție $B_1, B_2, B_3$ cu $P(B_1) = P(B_2) = P(B_3) = 1/3$ și $P(B_1 \\mid A) = 1/6$, $P(B_2 \\mid A) = 1/6$: cât trebuie să fie $P(B_3 \\mid A)$?"
+          },
+          "fields": [
+            {
+              "id": "e",
+              "label": {
+                "en": "$P(B_3 \\mid A)$ (as a fraction or with 4 decimals)",
+                "ro": "$P(B_3 \\mid A)$ (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "1-1/6-1/6",
+              "expected": "2/3"
+            }
+          ],
+          "hints": [
+            {
+              "en": "The probabilities $P(B_i \\mid A)$ of a partition add up to 1 (point (d) of the proof).",
+              "ro": "Probabilitățile $P(B_i \\mid A)$ ale unei partiții se adună la 1 (punctul (d) al demonstrației)."
+            },
+            {
+              "en": "$P(B_3 \\mid A) = 1 - P(B_1 \\mid A) - P(B_2 \\mid A)$.",
+              "ro": "$P(B_3 \\mid A) = 1 - P(B_1 \\mid A) - P(B_2 \\mid A)$."
+            },
+            {
+              "en": "$1 - \\frac16 - \\frac16 = \\frac23$, larger than $P(B_3) = \\frac13$, as the claim says.",
+              "ro": "$1 - \\frac16 - \\frac16 = \\frac23$, mai mare decât $P(B_3) = \\frac13$, cum spune enunțul."
+            }
+          ],
+          "solution": {
+            "en": "$P(B_3 \\mid A) = 1 - \\frac16 - \\frac16 = \\frac23$. The two probabilities $P(B_1 \\mid A)$ and $P(B_2 \\mid A)$ went down from $\\frac13$, and what was left went to $B_3$.",
+            "ro": "$P(B_3 \\mid A) = 1 - \\frac16 - \\frac16 = \\frac23$. Cele două probabilități $P(B_1 \\mid A)$ și $P(B_2 \\mid A)$ au scăzut față de $\\frac13$, iar ce a rămas s-a dus în $B_3$."
+          },
+          "status": "verified-twice",
+          "variants": [
+            {
+              "statement": {
+                "en": "For a partition $B_1, B_2, B_3$ with $P(B_1) = 1/2$, $P(B_2) = P(B_3) = 1/4$ and $P(B_1 \\mid A) = 1/5$, $P(B_2 \\mid A) = 1/5$: what must $P(B_3 \\mid A)$ be?",
+                "ro": "Pentru o partiție $B_1, B_2, B_3$ cu $P(B_1) = 1/2$, $P(B_2) = P(B_3) = 1/4$ și $P(B_1 \\mid A) = 1/5$, $P(B_2 \\mid A) = 1/5$: cât trebuie să fie $P(B_3 \\mid A)$?"
+              },
+              "fields": [
+                {
+                  "id": "e",
+                  "formula": "1-1/5-1/5",
+                  "expected": "3/5"
+                }
+              ],
+              "solution": {
+                "en": "$P(B_3 \\mid A) = 1 - \\frac15 - \\frac15 = \\frac35$, larger than $P(B_3) = \\frac14$.",
+                "ro": "$P(B_3 \\mid A) = 1 - \\frac15 - \\frac15 = \\frac35$, mai mare decât $P(B_3) = \\frac14$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s16",
+      "title": {
+        "en": "Ex. 0.94: the nursery children",
+        "ro": "Ex. 0.94: copiii din creșă"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l02-e5",
+          "exercise": "0.94",
+          "table": {
+            "caption": {
+              "en": "The children of the group and those selected",
+              "ro": "Copiii din grupă și cei selectați"
+            },
+            "columns": [
+              {
+                "en": "Eye colour",
+                "ro": "Culoarea ochilor"
+              },
+              {
+                "en": "Share of the group",
+                "ro": "Din grupă"
+              },
+              {
+                "en": "Selected in the first round",
+                "ro": "Selectați în prima rundă"
+              }
+            ],
+            "rows": [
+              [
+                "căprui",
+                "30%",
+                "65%"
+              ],
+              [
+                "albaștri",
+                "50%",
+                "82%"
+              ],
+              [
+                "alte culori",
+                "20%",
+                "50%"
+              ]
+            ]
+          },
+          "data": {
+            "pc": 0.3,
+            "pa": 0.5,
+            "po": 0.2,
+            "sc": 0.65,
+            "sa": 0.82,
+            "so": 0.5
+          },
+          "statement": {
+            "en": "In a nursery group, the children have the eye colours in the table. For the first round of a game, the teacher selects from each group the percentage in the last column. What is the probability that a child chosen at random has blue eyes, given that the child was **not** selected? Let $A$ be the event the child has blue eyes and $N$ the event the child was not selected.",
+            "ro": "Într-o grupă de creșă, copiii au culorile ochilor din tabel. Pentru prima rundă a unui joc, educatoarea selectează din fiecare grup procentul din ultima coloană. Care este probabilitatea ca un copil ales la întâmplare să aibă ochi albaștri, dacă știm că **nu** a fost selecționat? Notăm cu $A$ evenimentul copilul are ochi albaștri și cu $N$ evenimentul copilul nu a fost selecționat."
+          },
+          "fields": [
+            {
+              "id": "n",
+              "label": {
+                "en": "$P(N)$ (as a fraction or with 4 decimals)",
+                "ro": "$P(N)$ (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "pc*(1-sc)+pa*(1-sa)+po*(1-so)",
+              "expected": "59/200"
+            },
+            {
+              "id": "r",
+              "label": {
+                "en": "$P(A \\mid N)$ (as a fraction or with 4 decimals)",
+                "ro": "$P(A \\mid N)$ (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "pa*(1-sa)/(pc*(1-sc)+pa*(1-sa)+po*(1-so))",
+              "expected": "18/59"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "r",
+              "formula": "pa*sa/(pc*sc+pa*sa+po*so)",
+              "message": {
+                "en": "You used the **selection** percentages (0.65; 0.82; 0.5); the question is about the children not selected, with the complementary percentages (0.35; 0.18; 0.5).",
+                "ro": "Ai folosit procentele de **selecție** (0,65; 0,82; 0,5); întrebarea cere copiii neselecționați, cu procentele complementare (0,35; 0,18; 0,5)."
+              }
+            },
+            {
+              "field": "r",
+              "formula": "pa*(1-sa)",
+              "message": {
+                "en": "You forgot the denominator: divide by $P(N)$, computed with the total probability formula.",
+                "ro": "Ai uitat numitorul: împarte la $P(N)$, calculat cu formula probabilității totale."
+              }
+            },
+            {
+              "field": "r",
+              "formula": "1-sa",
+              "message": {
+                "en": "This is $P(N \\mid A)$, the likelihood, not the posterior probability.",
+                "ro": "Aceasta este $P(N \\mid A)$, verosimilitatea, nu probabilitatea a posteriori."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "First find, in each group, the percentage not selected (the complement of the selection percentage).",
+              "ro": "Află mai întâi, în fiecare grup, procentul celor neselecționați (complementul procentului de selecție)."
+            },
+            {
+              "en": "P(not selected) = 0.3 · 0.35 + 0.5 · 0.18 + 0.2 · 0.5 (the total probability formula); then Bayes, with the numerator 0.5 · 0.18.",
+              "ro": "P(neselecționat) = 0,3 · 0,35 + 0,5 · 0,18 + 0,2 · 0,5 (formula probabilității totale); apoi Bayes, cu numărătorul 0,5 · 0,18."
+            },
+            {
+              "en": "The denominator: 0.105 + 0.09 + 0.1 = 0.295. Answer: 0.09 / 0.295 = 18/59.",
+              "ro": "Numitorul: 0,105 + 0,09 + 0,1 = 0,295. Răspuns: 0,09 / 0,295 = 18/59."
+            }
+          ],
+          "solution": {
+            "en": "Not selected: brown 0.35; blue 0.18; other colours 0.5. Total probability: 0.3 · 0.35 + 0.5 · 0.18 + 0.2 · 0.5 = 0.105 + 0.09 + 0.1 = 0.295 = 59/200. Bayes: 0.09 / 0.295 = 18/59, about 0.3051.",
+            "ro": "Neselecționați: căprui 0,35; albaștri 0,18; alte culori 0,5. Formula totală: 0,3 · 0,35 + 0,5 · 0,18 + 0,2 · 0,5 = 0,105 + 0,09 + 0,1 = 0,295 = 59/200. Bayes: 0,09 / 0,295 = 18/59, aproximativ 0,3051."
+          },
+          "status": "verified-twice",
+          "variants": [
+            {
+              "table": {
+                "caption": {
+                  "en": "The children of the group and those selected",
+                  "ro": "Copiii din grupă și cei selectați"
+                },
+                "columns": [
+                  {
+                    "en": "Eye colour",
+                    "ro": "Culoarea ochilor"
+                  },
+                  {
+                    "en": "Share of the group",
+                    "ro": "Din grupă"
+                  },
+                  {
+                    "en": "Selected in the first round",
+                    "ro": "Selectați în prima rundă"
+                  }
+                ],
+                "rows": [
+                  [
+                    "căprui",
+                    "40%",
+                    "50%"
+                  ],
+                  [
+                    "albaștri",
+                    "40%",
+                    "75%"
+                  ],
+                  [
+                    "alte culori",
+                    "20%",
+                    "25%"
+                  ]
+                ]
+              },
+              "data": {
+                "pc": 0.4,
+                "pa": 0.4,
+                "po": 0.2,
+                "sc": 0.5,
+                "sa": 0.75,
+                "so": 0.25
+              },
+              "statement": {
+                "en": "In a nursery group, the children have the eye colours in the table. For the first round of a game, the teacher selects from each group the percentage in the last column. What is the probability that a child chosen at random has blue eyes, given that the child was **not** selected? Let $A$ be the event the child has blue eyes and $N$ the event the child was not selected. (other numbers)",
+                "ro": "Într-o grupă de creșă, copiii au culorile ochilor din tabel. Pentru prima rundă a unui joc, educatoarea selectează din fiecare grup procentul din ultima coloană. Care este probabilitatea ca un copil ales la întâmplare să aibă ochi albaștri, dacă știm că **nu** a fost selecționat? Notăm cu $A$ evenimentul copilul are ochi albaștri și cu $N$ evenimentul copilul nu a fost selecționat. (alte numere)"
+              },
+              "fields": [
+                {
+                  "id": "n",
+                  "formula": "pc*(1-sc)+pa*(1-sa)+po*(1-so)",
+                  "expected": "9/20"
+                },
+                {
+                  "id": "r",
+                  "formula": "pa*(1-sa)/(pc*(1-sc)+pa*(1-sa)+po*(1-so))",
+                  "expected": "2/9"
+                }
+              ],
+              "solution": {
+                "en": "Not selected: 0.5; 0.25; 0.75. Total probability: 0.4 · 0.5 + 0.4 · 0.25 + 0.2 · 0.75 = 0.2 + 0.1 + 0.15 = 0.45 = 9/20. Bayes: 0.1 / 0.45 = 2/9.",
+                "ro": "Neselecționați: 0,5; 0,25; 0,75. Formula totală: 0,4 · 0,5 + 0,4 · 0,25 + 0,2 · 0,75 = 0,2 + 0,1 + 0,15 = 0,45 = 9/20. Bayes: 0,1 / 0,45 = 2/9."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s17",
+      "title": {
+        "en": "Ex. 0.95: two urns",
+        "ro": "Ex. 0.95: două urne"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l02-e6",
+          "exercise": "0.95",
+          "table": {
+            "caption": {
+              "en": "The contents of the two urns",
+              "ro": "Conținutul celor două urne"
+            },
+            "columns": [
+              {
+                "en": "Urn",
+                "ro": "Urna"
+              },
+              {
+                "en": "White balls",
+                "ro": "Bile albe"
+              },
+              {
+                "en": "Red balls",
+                "ro": "Bile roșii"
+              }
+            ],
+            "rows": [
+              [
+                "1",
+                11,
+                4
+              ],
+              [
+                "2",
+                8,
+                5
+              ]
+            ]
+          },
+          "data": {
+            "a1": 11,
+            "r1": 4,
+            "a2": 8,
+            "r2": 5
+          },
+          "statement": {
+            "en": "You pick an urn at random, with the same probability for each, then draw a ball from it. If the ball drawn is white, what is the probability that it came from the first urn? Let $W$ be the event the ball drawn is white and $U_1$ the event we picked the first urn.",
+            "ro": "Alegi o urnă la întâmplare, cu aceeași probabilitate pentru fiecare, apoi extragi o bilă din ea. Dacă bila extrasă e albă, care este probabilitatea să provină din prima urnă? Notăm cu $W$ evenimentul bila extrasă este albă și cu $U_1$ evenimentul am ales prima urnă."
+          },
+          "fields": [
+            {
+              "id": "pw",
+              "label": {
+                "en": "$P(W)$ (as a fraction or with 4 decimals)",
+                "ro": "$P(W)$ (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "1/2*a1/(a1+r1)+1/2*a2/(a2+r2)",
+              "expected": "263/390"
+            },
+            {
+              "id": "r",
+              "label": {
+                "en": "$P(U_1 \\mid W)$ (as a fraction or with 4 decimals)",
+                "ro": "$P(U_1 \\mid W)$ (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "(1/2*a1/(a1+r1))/(1/2*a1/(a1+r1)+1/2*a2/(a2+r2))",
+              "expected": "143/263"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "r",
+              "formula": "a1/(a1+r1)",
+              "message": {
+                "en": "You gave $P(W \\mid U_1)$; the question is $P(U_1 \\mid W)$, the inverse conditional. The two differ (0.73 against 0.54).",
+                "ro": "Ai dat $P(W \\mid U_1)$; întrebarea este $P(U_1 \\mid W)$, condiționata inversă. Cele două diferă (0,73 față de 0,54)."
+              }
+            },
+            {
+              "field": "r",
+              "formula": "a1/(a1+a2)",
+              "message": {
+                "en": "You counted the white balls of both urns (11 out of 19), but the urns do not hold the same (15 and 13 balls), and each urn is equally likely to be picked, not in proportion to its balls.",
+                "ro": "Ai numărat bilele albe din ambele urne (11 din 19), dar urnele nu au același conținut (15 și 13 bile), iar alegerea urnei e la fel de probabilă pentru fiecare, nu proporțională cu bilele."
+              }
+            },
+            {
+              "field": "r",
+              "formula": "1/2",
+              "message": {
+                "en": "This is the prior probability of urn 1; the white ball changes it.",
+                "ro": "Aceasta este probabilitatea a priori a urnei 1; bila albă o schimbă."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Write the probability of drawing a white ball from each urn and the probability of picking each urn.",
+              "ro": "Scrie probabilitatea de a extrage o bilă albă din fiecare urnă și probabilitatea de a alege fiecare urnă."
+            },
+            {
+              "en": "The denominator (total probability): 1/2 · 11/15 + 1/2 · 8/13, and the numerator is the first term.",
+              "ro": "Numitorul (formula totală): 1/2 · 11/15 + 1/2 · 8/13, iar numărătorul este primul termen."
+            },
+            {
+              "en": "$P(U_1 \\mid W) = \\dfrac{\\frac12\\cdot\\frac{11}{15}}{\\frac12\\cdot\\frac{11}{15}+\\frac12\\cdot\\frac{8}{13}} = \\dfrac{143}{143+120} = \\dfrac{143}{263}$",
+              "ro": "$P(U_1 \\mid W) = \\dfrac{\\frac12\\cdot\\frac{11}{15}}{\\frac12\\cdot\\frac{11}{15}+\\frac12\\cdot\\frac{8}{13}} = \\dfrac{143}{143+120} = \\dfrac{143}{263}$"
+            }
+          ],
+          "solution": {
+            "en": "$P(W) = \\frac12\\cdot\\frac{11}{15}+\\frac12\\cdot\\frac{8}{13} = \\frac{263}{390}$. $P(U_1 \\mid W) = \\dfrac{11/15}{11/15+8/13} = \\dfrac{143}{263}$, about 0.5437.",
+            "ro": "$P(W) = \\frac12\\cdot\\frac{11}{15}+\\frac12\\cdot\\frac{8}{13} = \\frac{263}{390}$. $P(U_1 \\mid W) = \\dfrac{11/15}{11/15+8/13} = \\dfrac{143}{263}$, aproximativ 0,5437."
+          },
+          "status": "verified-twice",
+          "variants": [
+            {
+              "table": {
+                "caption": {
+                  "en": "The contents of the two urns",
+                  "ro": "Conținutul celor două urne"
+                },
+                "columns": [
+                  {
+                    "en": "Urn",
+                    "ro": "Urna"
+                  },
+                  {
+                    "en": "White balls",
+                    "ro": "Bile albe"
+                  },
+                  {
+                    "en": "Red balls",
+                    "ro": "Bile roșii"
+                  }
+                ],
+                "rows": [
+                  [
+                    "1",
+                    9,
+                    3
+                  ],
+                  [
+                    "2",
+                    4,
+                    6
+                  ]
+                ]
+              },
+              "data": {
+                "a1": 9,
+                "r1": 3,
+                "a2": 4,
+                "r2": 6
+              },
+              "statement": {
+                "en": "You pick an urn at random, with the same probability for each, then draw a ball from it. If the ball drawn is white, what is the probability that it came from the first urn? Let $W$ be the event the ball drawn is white and $U_1$ the event we picked the first urn. (other contents)",
+                "ro": "Alegi o urnă la întâmplare, cu aceeași probabilitate pentru fiecare, apoi extragi o bilă din ea. Dacă bila extrasă e albă, care este probabilitatea să provină din prima urnă? Notăm cu $W$ evenimentul bila extrasă este albă și cu $U_1$ evenimentul am ales prima urnă. (alt conținut)"
+              },
+              "fields": [
+                {
+                  "id": "pw",
+                  "formula": "1/2*a1/(a1+r1)+1/2*a2/(a2+r2)",
+                  "expected": "23/40"
+                },
+                {
+                  "id": "r",
+                  "formula": "(1/2*a1/(a1+r1))/(1/2*a1/(a1+r1)+1/2*a2/(a2+r2))",
+                  "expected": "15/23"
+                }
+              ],
+              "solution": {
+                "en": "$P(W) = \\frac12\\cdot\\frac34+\\frac12\\cdot\\frac25 = \\frac{23}{40}$. $P(U_1 \\mid W) = \\dfrac{3/8}{23/40} = \\dfrac{15}{23}$.",
+                "ro": "$P(W) = \\frac12\\cdot\\frac34+\\frac12\\cdot\\frac25 = \\frac{23}{40}$. $P(U_1 \\mid W) = \\dfrac{3/8}{23/40} = \\dfrac{15}{23}$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s18",
+      "title": {
+        "en": "Ex. 0.96: does it hold?",
+        "ro": "Ex. 0.96: adevărat sau fals"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l02-e7",
+          "exercise": [
+            "0.96.a",
+            "0.96.b",
+            "0.96.c",
+            "0.96.d"
+          ],
+          "statement": {
+            "en": "For each claim say whether it holds, with a rigorous justification (a counterexample for a claim that fails; the type of property for a claim that holds). In $P(A \\mid B, C)$ the comma means and: $B$ and $C$ are both given.\n(a) $P(A \\cup B \\cup C) \\ge P(A) + P(B) + P(C)$\n(b) $P(A \\mid B, C) = \\dfrac{P(B \\mid A, C)\\,P(A \\mid C)}{P(B \\mid C)}$\n(c) $P(A \\mid C) = \\sum_{i=1}^{n} P(A, B_i \\mid C)$, with $B_i \\cap B_j = \\emptyset$ for $i \\ne j$ and $\\bigcup_i B_i = \\Omega$\n(d) $P(A \\mid C) = \\sum_{i=1}^{n} P(A \\mid B_i, C)\\,P(B_i \\mid C)$, with the same $B_i$\nFor (a) look for a counterexample with $A = B = C$ and $P(A) = 1/2$.",
+            "ro": "Pentru fiecare afirmație spune dacă este adevărată sau falsă, cu justificare riguroasă (contraexemplu pentru cele false; tipul proprietății pentru cele adevărate). În $P(A \\mid B, C)$ virgula înseamnă și: $B$ și $C$ sunt amândouă date.\n(a) $P(A \\cup B \\cup C) \\ge P(A) + P(B) + P(C)$\n(b) $P(A \\mid B, C) = \\dfrac{P(B \\mid A, C)\\,P(A \\mid C)}{P(B \\mid C)}$\n(c) $P(A \\mid C) = \\sum_{i=1}^{n} P(A, B_i \\mid C)$, cu $B_i \\cap B_j = \\emptyset$ pentru $i \\ne j$ și $\\bigcup_i B_i = \\Omega$\n(d) $P(A \\mid C) = \\sum_{i=1}^{n} P(A \\mid B_i, C)\\,P(B_i \\mid C)$, cu aceleași $B_i$\nPentru (a) caută un contraexemplu cu $A = B = C$ și $P(A) = 1/2$."
+          },
+          "fields": [
+            {
+              "id": "a",
+              "label": {
+                "en": "Does claim (a) hold?",
+                "ro": "Afirmația (a) este adevărată?"
+              },
+              "kind": "tf",
+              "formula": "1/2 >= 3*(1/2)",
+              "expected": "false"
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "Does claim (b) hold?",
+                "ro": "Afirmația (b) este adevărată?"
+              },
+              "kind": "tf",
+              "formula": "true",
+              "expected": "true"
+            },
+            {
+              "id": "c",
+              "label": {
+                "en": "Does claim (c) hold?",
+                "ro": "Afirmația (c) este adevărată?"
+              },
+              "kind": "tf",
+              "formula": "true",
+              "expected": "true"
+            },
+            {
+              "id": "d",
+              "label": {
+                "en": "Does claim (d) hold?",
+                "ro": "Afirmația (d) este adevărată?"
+              },
+              "kind": "tf",
+              "formula": "true",
+              "expected": "true"
+            },
+            {
+              "id": "bt",
+              "label": {
+                "en": "The type of claim (b)",
+                "ro": "Tipul afirmației (b)"
+              },
+              "kind": "choice",
+              "formula": "'the Bayes formula, conditional form'",
+              "expected": "the Bayes formula, conditional form",
+              "options": [
+                {
+                  "en": "the Bayes formula, conditional form",
+                  "ro": "formula lui Bayes, forma condiționată"
+                },
+                {
+                  "en": "the total probability formula, conditional form",
+                  "ro": "formula probabilității totale, forma condiționată"
+                },
+                {
+                  "en": "the multiplication rule",
+                  "ro": "regula de înmulțire"
+                }
+              ]
+            },
+            {
+              "id": "ct",
+              "label": {
+                "en": "The type of claims (c) and (d)",
+                "ro": "Tipul afirmațiilor (c) și (d)"
+              },
+              "kind": "choice",
+              "formula": "'the total probability formula, conditional form'",
+              "expected": "the total probability formula, conditional form",
+              "options": [
+                {
+                  "en": "the Bayes formula, conditional form",
+                  "ro": "formula lui Bayes, forma condiționată"
+                },
+                {
+                  "en": "the total probability formula, conditional form",
+                  "ro": "formula probabilității totale, forma condiționată"
+                },
+                {
+                  "en": "the multiplication rule",
+                  "ro": "regula de înmulțire"
+                }
+              ]
+            },
+            {
+              "id": "a1",
+              "label": {
+                "en": "Counterexample: $P(A \\cup B \\cup C)$, as a decimal number (with 4 decimals)",
+                "ro": "Contraexemplu: $P(A \\cup B \\cup C)$, ca număr zecimal (cu 4 zecimale)"
+              },
+              "kind": "num",
+              "formula": "1/2",
+              "expected": "0.5"
+            },
+            {
+              "id": "a2",
+              "label": {
+                "en": "Counterexample: $P(A) + P(B) + P(C)$, as a decimal number (with 4 decimals)",
+                "ro": "Contraexemplu: $P(A) + P(B) + P(C)$, ca număr zecimal (cu 4 zecimale)"
+              },
+              "kind": "num",
+              "formula": "3*(1/2)",
+              "expected": "1.5"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "a",
+              "formula": "true",
+              "message": {
+                "en": "The inequality is the wrong way round. The sum $P(A) + P(B) + P(C)$ counts overlaps several times, so it is at least as large as the union.",
+                "ro": "Inegalitatea e pe dos. Suma $P(A) + P(B) + P(C)$ numără suprapunerile de mai multe ori, deci este cel puțin cât reuniunea."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "For (b)–(d): you know each formula from Lesson 1 and Lesson 2, with $C$ added as given in every probability.",
+              "ro": "Pentru (b)–(d): fiecare formulă o cunoști din Lecția 1 și Lecția 2, cu $C$ adăugat ca dat în toate probabilitățile."
+            },
+            {
+              "en": "(b): $P(A \\mid B, C) = \\dfrac{P(A, B \\mid C)}{P(B \\mid C)}$ and $P(A, B \\mid C) = P(B \\mid A, C)\\,P(A \\mid C)$. (c) and (d): the events $A \\cap B_i$ are disjoint and their union is $A$ (given $C$).",
+              "ro": "(b): $P(A \\mid B, C) = \\dfrac{P(A, B \\mid C)}{P(B \\mid C)}$ și $P(A, B \\mid C) = P(B \\mid A, C)\\,P(A \\mid C)$. (c) și (d): evenimentele $A \\cap B_i$ sunt disjuncte, iar reuniunea lor este $A$ (dat $C$)."
+            },
+            {
+              "en": "(a) fails: when $A = B = C$, the union has the probability of $A$, while the sum counts it three times. (b), (c), (d) hold.",
+              "ro": "(a) este falsă: când $A = B = C$, reuniunea are probabilitatea lui $A$, iar suma o numără de trei ori. (b), (c), (d) sunt adevărate."
+            }
+          ],
+          "solution": {
+            "en": "(a) False: the correct inequality goes the other way, $P(A \\cup B \\cup C) \\le P(A) + P(B) + P(C)$; for $A = B = C$ with $P(A) = 1/2$ we get $1/2 < 3/2$. (b) True, Bayes' formula in the conditional form: $P(A, B \\mid C) = P(A \\mid B, C)\\,P(B \\mid C) = P(B \\mid A, C)\\,P(A \\mid C)$, then we divide by $P(B \\mid C)$. (c) True, the total probability formula in the conditional form: the $A \\cap B_i$ are disjoint and their union is $A$. (d) True: each term of (c) is $P(A \\mid B_i, C)\\,P(B_i \\mid C)$, from the conditional multiplication rule. The workbook's note allows relaxing $\\bigcup_i B_i = \\Omega$ to $P(\\bigcup_i B_i) = 1$ or $A \\subseteq \\bigcup_i B_i$.",
+            "ro": "(a) Falsă: inegalitatea corectă este în sens invers, $P(A \\cup B \\cup C) \\le P(A) + P(B) + P(C)$; pentru $A = B = C$ cu $P(A) = 1/2$ avem $1/2 < 3/2$. (b) Adevărată, formula lui Bayes în forma condiționată: $P(A, B \\mid C) = P(A \\mid B, C)\\,P(B \\mid C) = P(B \\mid A, C)\\,P(A \\mid C)$, apoi împărțim la $P(B \\mid C)$. (c) Adevărată, formula probabilității totale în forma condiționată: $A \\cap B_i$ sunt disjuncte și reuniunea lor este $A$. (d) Adevărată: fiecare termen din (c) este $P(A \\mid B_i, C)\\,P(B_i \\mid C)$, din regula de înmulțire condiționată. Nota din culegere permite relaxarea $\\bigcup_i B_i = \\Omega$ la $P(\\bigcup_i B_i) = 1$ sau $A \\subseteq \\bigcup_i B_i$."
+          },
+          "status": "verified-twice",
+          "variants": [
+            {
+              "statement": {
+                "en": "For each claim say whether it holds, with a rigorous justification (a counterexample for a claim that fails; the type of property for a claim that holds). In $P(A \\mid B, C)$ the comma means and: $B$ and $C$ are both given.\n(a) $P(A \\cup B \\cup C) \\ge P(A) + P(B) + P(C)$\n(b) $P(A \\mid B, C) = \\dfrac{P(B \\mid A, C)\\,P(A \\mid C)}{P(B \\mid C)}$\n(c) $P(A \\mid C) = \\sum_{i=1}^{n} P(A, B_i \\mid C)$, with $B_i \\cap B_j = \\emptyset$ for $i \\ne j$ and $\\bigcup_i B_i = \\Omega$\n(d) $P(A \\mid C) = \\sum_{i=1}^{n} P(A \\mid B_i, C)\\,P(B_i \\mid C)$, with the same $B_i$\nFor (a) look for a counterexample with $A = B = C$ and $P(A) = 1/4$.",
+                "ro": "Pentru fiecare afirmație spune dacă este adevărată sau falsă, cu justificare riguroasă (contraexemplu pentru cele false; tipul proprietății pentru cele adevărate). În $P(A \\mid B, C)$ virgula înseamnă și: $B$ și $C$ sunt amândouă date.\n(a) $P(A \\cup B \\cup C) \\ge P(A) + P(B) + P(C)$\n(b) $P(A \\mid B, C) = \\dfrac{P(B \\mid A, C)\\,P(A \\mid C)}{P(B \\mid C)}$\n(c) $P(A \\mid C) = \\sum_{i=1}^{n} P(A, B_i \\mid C)$, cu $B_i \\cap B_j = \\emptyset$ pentru $i \\ne j$ și $\\bigcup_i B_i = \\Omega$\n(d) $P(A \\mid C) = \\sum_{i=1}^{n} P(A \\mid B_i, C)\\,P(B_i \\mid C)$, cu aceleași $B_i$\nPentru (a) caută un contraexemplu cu $A = B = C$ și $P(A) = 1/4$."
+              },
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "1/4 >= 3*(1/4)",
+                  "expected": "false"
+                },
+                {
+                  "id": "b",
+                  "formula": "true",
+                  "expected": "true"
+                },
+                {
+                  "id": "c",
+                  "formula": "true",
+                  "expected": "true"
+                },
+                {
+                  "id": "d",
+                  "formula": "true",
+                  "expected": "true"
+                },
+                {
+                  "id": "bt",
+                  "formula": "'the Bayes formula, conditional form'",
+                  "expected": "the Bayes formula, conditional form"
+                },
+                {
+                  "id": "ct",
+                  "formula": "'the total probability formula, conditional form'",
+                  "expected": "the total probability formula, conditional form"
+                },
+                {
+                  "id": "a1",
+                  "formula": "1/4",
+                  "expected": "0.25"
+                },
+                {
+                  "id": "a2",
+                  "formula": "3*(1/4)",
+                  "expected": "0.75"
+                }
+              ],
+              "solution": {
+                "en": "The same answers: (a) fails, (b), (c), (d) hold. The counterexample: $A = B = C$ with $P(A) = 1/4$ gives $1/4 < 3/4$.",
+                "ro": "Aceleași răspunsuri: (a) falsă, (b), (c), (d) adevărate. Contraexemplul: $A = B = C$ cu $P(A) = 1/4$ dă $1/4 < 3/4$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l02-s19",
+      "title": {
+        "en": "Ex. 0.7 (optional): the student who guesses",
+        "ro": "Ex. 0.7 (opțional): studentul care ghicește"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l02-e2",
+          "exercise": "0.7",
+          "statement": {
+            "en": "A student either knows the answer to a true or false question (with probability $p$) or guesses (with probability $1-p$). If the student knows, the answer is surely correct; if the student guesses, it is correct with probability 0.5. Let $K$ be the event the student knew and $C$ the event the answer is correct. Express the probability $P(K \\mid C)$ as a function of $p$ and compute it for $p = 1/2$ and for $p = 0{,}8$.",
+            "ro": "Un student fie știe răspunsul la o întrebare de tip adevărat sau fals (cu probabilitatea $p$), fie ghicește (cu probabilitatea $1-p$). Dacă știe, răspunde corect sigur; dacă ghicește, răspunde corect cu probabilitatea 0,5. Notăm cu $K$ evenimentul studentul știa și cu $C$ evenimentul răspunsul este corect. Exprimă în funcție de $p$ probabilitatea $P(K \\mid C)$ și calculeaz-o pentru $p = 1/2$ și pentru $p = 0{,}8$."
+          },
+          "fields": [
+            {
+              "id": "f",
+              "label": {
+                "en": "The formula for $P(K \\mid C)$",
+                "ro": "Formula pentru $P(K \\mid C)$"
+              },
+              "kind": "choice",
+              "formula": "'$\\\\dfrac{2p}{p+1}$'",
+              "expected": "$\\dfrac{2p}{p+1}$",
+              "options": [
+                {
+                  "en": "$\\dfrac{p}{p+\\frac12}$",
+                  "ro": "$\\dfrac{p}{p+\\frac12}$"
+                },
+                {
+                  "en": "$\\dfrac{2p}{p+1}$",
+                  "ro": "$\\dfrac{2p}{p+1}$"
+                },
+                {
+                  "en": "$p$",
+                  "ro": "$p$"
+                }
+              ]
+            },
+            {
+              "id": "n1",
+              "label": {
+                "en": "The value for the first $p$ in the statement (as a fraction or with 4 decimals)",
+                "ro": "Valoarea pentru primul $p$ din enunț (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "2*(1/2)/((1/2)+1)",
+              "expected": "2/3"
+            },
+            {
+              "id": "n2",
+              "label": {
+                "en": "The value for the second $p$ in the statement (as a fraction or with 4 decimals)",
+                "ro": "Valoarea pentru al doilea $p$ din enunț (ca fracție sau cu 4 zecimale)"
+              },
+              "kind": "frac",
+              "formula": "2*0.8/(0.8+1)",
+              "expected": "8/9"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "f",
+              "formula": "'$\\\\dfrac{p}{p+\\\\frac12}$'",
+              "message": {
+                "en": "Guessing has probability 0.5 · (1 − p), not 0.5: the weight of the branch matters.",
+                "ro": "Ghicitul are probabilitatea 0,5 · (1 − p), nu 0,5: ponderea ramurii contează."
+              }
+            },
+            {
+              "field": "f",
+              "formula": "'$p$'",
+              "message": {
+                "en": "A correct answer is evidence that raises the probability of knew above $p$.",
+                "ro": "Un răspuns corect este o dovadă care ridică probabilitatea lui știa peste $p$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "The events are: correct, knew and guessed (that is, did not know).",
+              "ro": "Evenimentele sunt: corect, știa și ghicea (adică nu știa)."
+            },
+            {
+              "en": "P(correct) = 1 · p + 0.5 · (1 − p), from the total probability formula.",
+              "ro": "P(corect) = 1 · p + 0,5 · (1 − p), din formula probabilității totale."
+            },
+            {
+              "en": "$P(K \\mid C) = \\dfrac{1 \\cdot p}{1 \\cdot p + \\frac12 (1-p)} = \\dfrac{2p}{p+1}$",
+              "ro": "$P(K \\mid C) = \\dfrac{1 \\cdot p}{1 \\cdot p + \\frac12 (1-p)} = \\dfrac{2p}{p+1}$"
+            }
+          ],
+          "solution": {
+            "en": "$\\dfrac{p}{\\frac12 p + \\frac12} = \\dfrac{2p}{p+1}$. For $p = 1/2$ we get $2/3$, and for $p = 0{,}8$ we get $8/9$.",
+            "ro": "$\\dfrac{p}{\\frac12 p + \\frac12} = \\dfrac{2p}{p+1}$. Pentru $p = 1/2$ obținem $2/3$, iar pentru $p = 0{,}8$ obținem $8/9$."
+          },
+          "status": "book",
+          "variants": [
+            {
+              "statement": {
+                "en": "A student either knows the answer to a true or false question (with probability $p$) or guesses (with probability $1-p$). If the student knows, the answer is surely correct; if the student guesses, it is correct with probability 0.5. Let $K$ be the event the student knew and $C$ the event the answer is correct. Express the probability $P(K \\mid C)$ as a function of $p$ and compute it for $p = 1/3$ and for $p = 0{,}6$.",
+                "ro": "Un student fie știe răspunsul la o întrebare de tip adevărat sau fals (cu probabilitatea $p$), fie ghicește (cu probabilitatea $1-p$). Dacă știe, răspunde corect sigur; dacă ghicește, răspunde corect cu probabilitatea 0,5. Notăm cu $K$ evenimentul studentul știa și cu $C$ evenimentul răspunsul este corect. Exprimă în funcție de $p$ probabilitatea $P(K \\mid C)$ și calculeaz-o pentru $p = 1/3$ și pentru $p = 0{,}6$."
+              },
+              "fields": [
+                {
+                  "id": "f",
+                  "formula": "'$\\\\dfrac{2p}{p+1}$'",
+                  "expected": "$\\dfrac{2p}{p+1}$"
+                },
+                {
+                  "id": "n1",
+                  "formula": "2*(1/3)/((1/3)+1)",
+                  "expected": "1/2"
+                },
+                {
+                  "id": "n2",
+                  "formula": "2*0.6/(0.6+1)",
+                  "expected": "3/4"
+                }
+              ],
+              "solution": {
+                "en": "The same formula, $\\dfrac{2p}{p+1}$: for $p = 1/3$ we get $1/2$, and for $p = 0{,}6$ we get $3/4$.",
+                "ro": "Aceeași formulă, $\\dfrac{2p}{p+1}$: pentru $p = 1/3$ obținem $1/2$, iar pentru $p = 0{,}6$ obținem $3/4$."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
