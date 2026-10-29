@@ -1,0 +1,2252 @@
+{
+  "meta": {
+    "id": "ml-l03",
+    "title": {
+      "en": "Lesson 3: Independence of events and conditional independence",
+      "ro": "Lecția 3: Independența evenimentelor și independența condiționată"
+    },
+    "shortTitle": {
+      "en": "L3: Independence",
+      "ro": "L3: Independența"
+    },
+    "source": {
+      "en": "Seminar 1 and workbook chapter 0, Machine Learning, UAIC FII",
+      "ro": "Seminarul 1 și culegerea, capitolul 0, Învățare automată, UAIC FII"
+    }
+  },
+  "steps": [
+    {
+      "id": "ml-l03-s1",
+      "title": {
+        "en": "Do the events influence each other?",
+        "ro": "Se influențează evenimentele?"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l03-pre",
+          "question": {
+            "en": "Events **A** and **B** cannot happen together (if one has happened, the other can no longer happen). We know that $P(A)=0.3$ and $P(B)=0.5$; $P(A)$ is read as the probability that A happens. We learn that **A happened**. What is the probability of B now?",
+            "ro": "Evenimentele **A** și **B** nu pot avea loc împreună (dacă unul s-a întâmplat, celălalt nu se mai poate întâmpla). Știm că $P(A)=0{,}3$ și $P(B)=0{,}5$; $P(A)$ se citește probabilitatea ca A să aibă loc. Aflăm că **A s-a întâmplat**. Cât devine acum probabilitatea lui B?"
+          },
+          "check": {
+            "formula": "pAB/pA",
+            "data": {
+              "pAB": 0,
+              "pA": 0.3
+            }
+          },
+          "options": [
+            {
+              "text": {
+                "en": "$0.5$",
+                "ro": "$0{,}5$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You assumed that learning A changes nothing for B. But A and B cannot happen together: once A has happened, B cannot happen.",
+                "ro": "Ai presupus că aflarea lui A nu schimbă nimic pentru B. Dar A și B nu pot avea loc împreună: dacă A s-a întâmplat, B nu mai poate avea loc."
+              },
+              "misconception": "mutually-exclusive-is-independent"
+            },
+            {
+              "text": {
+                "en": "$0$",
+                "ro": "$0$"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. If A happened, B can no longer happen, so $P(B\\mid A)$ (the probability of B knowing that A happened) is $\\dfrac{P(A\\cap B)}{P(A)}=\\dfrac{0}{0.3}=0$; here $A\\cap B$ means that A and B both happen. Keep the answer; the next screens show what it means for two events to have nothing to do with each other.",
+                "ro": "Corect. Dacă A s-a întâmplat, B nu mai poate avea loc, deci $P(B\\mid A)$ (probabilitatea lui B știind că A a avut loc) este $\\dfrac{P(A\\cap B)}{P(A)}=\\dfrac{0}{0{,}3}=0$; aici $A\\cap B$ înseamnă că A și B au loc amândouă. Păstrează răspunsul; mai departe vezi ce înseamnă că două evenimente nu au nicio legătură."
+              }
+            },
+            {
+              "text": {
+                "en": "$0.8$",
+                "ro": "$0{,}8$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "$0.3+0.5$ is the probability that A or B happens (the union), not the probability of B once A has happened.",
+                "ro": "$0{,}3+0{,}5$ este probabilitatea ca A sau B să aibă loc (reuniunea), nu probabilitatea lui B după ce A s-a întâmplat."
+              },
+              "misconception": "reuniunea"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s2",
+      "title": {
+        "en": "Two students, one test",
+        "ro": "Doi studenți, un test"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l03-w1",
+          "question": {
+            "en": "The probability that student **X** gets 6 points on a test is $0.5$. For student **Y** it is $0.2$. We know nothing else about them. What is the probability that **both** get 6 points?",
+            "ro": "Probabilitatea ca studentul **X** să ia 6 puncte la un test este $0{,}5$. Pentru studentul **Y** este $0{,}2$. Nu știm nimic altceva despre ei. Cât este probabilitatea ca **amândoi** să ia 6 puncte?"
+          },
+          "check": {
+            "formula": "0.5*0.2"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "$0.1$",
+                "ro": "$0{,}1$"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: $0.5\\cdot0.2=0.1$. With no other information we **assume** that the events do not influence each other (they are independent) and we multiply. This is an assumption, not a fact: the next screen gives more data.",
+                "ro": "Corect: $0{,}5\\cdot0{,}2=0{,}1$. Fără altă informație **presupunem** că evenimentele nu se influențează (sunt independente) și înmulțim. Este o presupunere, nu un fapt: ecranul următor dă mai multe date."
+              }
+            },
+            {
+              "text": {
+                "en": "$0.7$",
+                "ro": "$0{,}7$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "You added. For both to get 6 points, the probabilities of events that do not influence each other are multiplied, not added.",
+                "ro": "Ai adunat. Pentru ca amândoi să ia 6 puncte, probabilitățile evenimentelor care nu se influențează se înmulțesc, nu se adună."
+              },
+              "misconception": "aduna-in-loc-sa-inmulteasca"
+            },
+            {
+              "text": {
+                "en": "$0.35$",
+                "ro": "$0{,}35$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The average of the two probabilities does not answer the question: both get 6 points only if each one gets 6, so the result must be smaller than each of them.",
+                "ro": "Media celor două probabilități nu răspunde la întrebare: amândoi pot lua 6 doar dacă fiecare ia 6, deci rezultatul trebuie să fie mai mic decât fiecare dintre ele."
+              },
+              "misconception": "media-simpla"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s3",
+      "title": {
+        "en": "Is the product confirmed?",
+        "ro": "Se confirmă produsul?"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Now we are told that the probability that **both** get 6 points is $0.11$. Are the events **X** (X gets 6 points) and **Y** (Y gets 6 points) still independent? In the table each cell is the probability of one combination, for example X gets 6 and Y gets 6. Predict before each step.",
+            "ro": "Acum ni se spune că probabilitatea ca **amândoi** să ia 6 puncte este $0{,}11$. Mai sunt evenimentele **X** (X ia 6 puncte) și **Y** (Y ia 6 puncte) independente? În tabel, fiecare celulă este probabilitatea unei combinații, de exemplu X ia 6 și Y ia 6. Prezice înainte de fiecare pas."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ml-l03-viz1",
+          "widget": "ml-indep-2x2",
+          "predict": true,
+          "props": {
+            "counts": [
+              [
+                11,
+                39
+              ],
+              [
+                9,
+                41
+              ]
+            ],
+            "labels": {
+              "x": "X",
+              "y": "Y"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s4",
+      "title": {
+        "en": "The test was easy",
+        "ro": "Testul a fost ușor"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l03-wc",
+          "question": {
+            "en": "Let **C** be the event **the test was easy**. The probabilities in the table are computed only in the cases where C happened: for example $P(X\\mid C)$ is the probability that X gets 6 points if the test was easy. Are X and Y independent **given C**, that is, independent in the world where C happened?",
+            "ro": "Fie **C** evenimentul **testul a fost ușor**. Probabilitățile din tabel sunt calculate doar în cazurile în care C s-a întâmplat: de exemplu $P(X\\mid C)$ este probabilitatea ca X să ia 6 puncte dacă testul a fost ușor. Sunt X și Y independente **dat C**, adică independente în lumea în care C s-a întâmplat?"
+          },
+          "table": {
+            "caption": {
+              "en": "Probabilities if the test was easy",
+              "ro": "Probabilități dacă testul a fost ușor"
+            },
+            "columns": [
+              {
+                "en": "Probability",
+                "ro": "Probabilitate"
+              },
+              {
+                "en": "Value",
+                "ro": "Valoare"
+              }
+            ],
+            "rows": [
+              [
+                "$P(X\\mid C)$",
+                "0,8"
+              ],
+              [
+                "$P(Y\\mid C)$",
+                "0,5"
+              ],
+              [
+                "$P(X\\cap Y\\mid C)$",
+                "0,4"
+              ]
+            ]
+          },
+          "options": [
+            {
+              "text": {
+                "en": "No: $0.8+0.5\\neq0.4$",
+                "ro": "Nu: $0{,}8+0{,}5\\neq0{,}4$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Independence is not checked by adding. The product form is used, with all probabilities computed in the world of C.",
+                "ro": "Independența nu se verifică prin adunare. Se folosește forma cu produs, cu toate probabilitățile calculate în lumea lui C."
+              },
+              "misconception": "aduna-in-loc-sa-inmulteasca"
+            },
+            {
+              "text": {
+                "en": "It cannot be said without the unconditional $P(X)$ and $P(Y)$",
+                "ro": "Nu se poate spune fără $P(X)$ și $P(Y)$ necondiționate"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The unconditional probabilities are not needed. Inside the world of C, the check uses the probabilities given C, which are exactly the ones in the table.",
+                "ro": "Probabilitățile necondiționate nu sunt necesare. În lumea lui C verificarea folosește probabilitățile dat C, adică exact cele din tabel."
+              },
+              "misconception": "marginala-in-loc-de-conditionata"
+            },
+            {
+              "text": {
+                "en": "Yes: $0.8\\cdot0.5=0.4$",
+                "ro": "Da: $0{,}8\\cdot0{,}5=0{,}4$"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. The check is the same as for ordinary independence, but with every probability computed given C: $P(X\\cap Y\\mid C)=P(X\\mid C)\\,P(Y\\mid C)$.",
+                "ro": "Corect. Verificarea este aceeași ca la independența obișnuită, dar cu toate probabilitățile calculate dat C: $P(X\\cap Y\\mid C)=P(X\\mid C)\\,P(Y\\mid C)$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s5",
+      "title": {
+        "en": "Learning that Y happened",
+        "ro": "Aflăm că Y a avut loc"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l03-wp",
+          "question": {
+            "en": "What is $P(X\\mid Y,C)$, that is, the probability that X gets 6 points if we know that Y got 6 points and the test was easy?",
+            "ro": "Cât este $P(X\\mid Y,C)$, adică probabilitatea ca X să ia 6 puncte dacă știm că Y a luat 6 puncte și că testul a fost ușor?"
+          },
+          "table": {
+            "caption": {
+              "en": "Probabilities if the test was easy",
+              "ro": "Probabilități dacă testul a fost ușor"
+            },
+            "columns": [
+              {
+                "en": "Probability",
+                "ro": "Probabilitate"
+              },
+              {
+                "en": "Value",
+                "ro": "Valoare"
+              }
+            ],
+            "rows": [
+              [
+                "$P(X\\mid C)$",
+                "0,8"
+              ],
+              [
+                "$P(Y\\mid C)$",
+                "0,5"
+              ],
+              [
+                "$P(X\\cap Y\\mid C)$",
+                "0,4"
+              ]
+            ]
+          },
+          "check": {
+            "formula": "0.4/0.5"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "$0.5$",
+                "ro": "$0{,}5$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "$0.4/0.8$ is $P(Y\\mid X,C)$, the other way round. In $P(X\\mid Y,C)$ you divide by the probability of the event you know happened, $P(Y\\mid C)$.",
+                "ro": "$0{,}4/0{,}8$ este $P(Y\\mid X,C)$, invers. La $P(X\\mid Y,C)$ se împarte la probabilitatea evenimentului pe care îl știm întâmplat, $P(Y\\mid C)$."
+              },
+              "misconception": "conditionata-inversa"
+            },
+            {
+              "text": {
+                "en": "$0.8$",
+                "ro": "$0{,}8$"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: $P(X\\mid Y,C)=\\dfrac{P(X\\cap Y\\mid C)}{P(Y\\mid C)}=\\dfrac{0.4}{0.5}=0.8$. It equals $P(X\\mid C)$: learning that Y got 6 does not change the probability of X. Both forms of independence given C give the same verdict.",
+                "ro": "Corect: $P(X\\mid Y,C)=\\dfrac{P(X\\cap Y\\mid C)}{P(Y\\mid C)}=\\dfrac{0{,}4}{0{,}5}=0{,}8$. Este egal cu $P(X\\mid C)$: aflând că Y a luat 6, probabilitatea lui X nu se schimbă. Cele două forme ale independenței dat C dau același verdict."
+              }
+            },
+            {
+              "text": {
+                "en": "$0.4$",
+                "ro": "$0{,}4$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "$0.4$ is $P(X\\cap Y\\mid C)$, the probability that both get 6 points. A conditional probability is that number divided by the probability of the condition.",
+                "ro": "$0{,}4$ este $P(X\\cap Y\\mid C)$, probabilitatea ca ambii să ia 6. O probabilitate condiționată este acest număr împărțit la probabilitatea condiției."
+              },
+              "misconception": "intersectia-in-loc-de-conditionata"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s6",
+      "title": {
+        "en": "Independent events",
+        "ro": "Evenimente independente"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Independent events",
+            "ro": "Evenimente independente"
+          },
+          "content": {
+            "en": "A and B are **independent** if learning B does not change the probability of A. Here $A\\cap B$ means that A and B both happen, and $P(A\\mid B)$ is the probability of A knowing that B happened. There are two forms.\n\n**Product form:** $P(A\\cap B)=P(A)\\,P(B)$.\n\n**Conditional-probability form:** $P(A\\mid B)=P(A)$, for $P(B)\\neq0$.\n\nFor $P(B)\\neq0$ the two forms are equivalent, because $P(A\\mid B)=\\dfrac{P(A\\cap B)}{P(B)}$. The product form also covers the case $P(B)=0$, when $P(A\\mid B)$ does not exist; that is why it is the definition we use.\n\nCourse: slide 7. Seminar 1, p. 7. Workbook: p. 25, p. 217.",
+            "ro": "A și B sunt **independente** dacă aflarea lui B nu schimbă probabilitatea lui A. Aici $A\\cap B$ înseamnă că A și B au loc amândouă, iar $P(A\\mid B)$ este probabilitatea lui A știind că B a avut loc. Există două forme.\n\n**Forma cu produs:** $P(A\\cap B)=P(A)\\,P(B)$.\n\n**Forma cu probabilitate condiționată:** $P(A\\mid B)=P(A)$, pentru $P(B)\\neq0$.\n\nPentru $P(B)\\neq0$ cele două forme sunt echivalente, pentru că $P(A\\mid B)=\\dfrac{P(A\\cap B)}{P(B)}$. Forma cu produs acoperă și cazul $P(B)=0$, când $P(A\\mid B)$ nu există; de aceea este definiția pe care o folosim.\n\nCursul: slide 7. Seminar 1, p. 7. Culegerea: p. 25, p. 217."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s7",
+      "title": {
+        "en": "Independent is not disjoint",
+        "ro": "Independent nu înseamnă disjunct"
+      },
+      "blocks": [
+        {
+          "type": "callout",
+          "variant": "trap",
+          "content": {
+            "en": "**Independent does not mean disjoint.** Disjoint events cannot happen together. If A and B are independent and both have positive probability, then $P(A\\cap B)=P(A)P(B)>0$, so they **can happen together**; they cannot be disjoint. Conversely, disjoint events with positive probabilities are as dependent as can be: once you learn A, the probability of B becomes 0.",
+            "ro": "**Independent nu înseamnă disjunct.** Evenimentele disjuncte nu pot avea loc împreună. Dacă A și B sunt independente și ambele au probabilitate pozitivă, atunci $P(A\\cap B)=P(A)P(B)>0$, deci ele **se pot întâmpla împreună**; nu pot fi disjuncte. Invers, evenimentele disjuncte cu probabilități pozitive sunt cât se poate de dependente: aflând A, probabilitatea lui B devine 0."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s8",
+      "title": {
+        "en": "The union of independent events",
+        "ro": "Reuniunea evenimentelor independente"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "$A\\cup B$ means that at least one of A and B happens. By the addition rule (see Lesson 1), $P(A\\cup B)=P(A)+P(B)-P(A\\cap B)$. If A and B are independent, $P(A\\cap B)=P(A)P(B)$, so:",
+            "ro": "$A\\cup B$ înseamnă că cel puțin unul dintre A și B are loc. Din regula de adunare (vezi Lecția 1), $P(A\\cup B)=P(A)+P(B)-P(A\\cap B)$. Dacă A și B sunt independente, $P(A\\cap B)=P(A)P(B)$, deci:"
+          }
+        },
+        {
+          "type": "equation",
+          "tex": "P(A\\cup B)=P(A)+P(B)-P(A)\\,P(B)"
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s9",
+      "title": {
+        "en": "Conditional independence",
+        "ro": "Independența condiționată"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Conditional independence",
+            "ro": "Independența condiționată"
+          },
+          "content": {
+            "en": "A and B are **independent given C** (written $A\\perp B\\mid C$) if, in the world where C happened, they are independent. Two forms.\n\n**Product form:** $P(A,B\\mid C)=P(A\\mid C)\\,P(B\\mid C)$, for $P(C)\\neq0$.\n\n**Conditional-probability form:** $P(A\\mid B,C)=P(A\\mid C)$, for $P(B,C)\\neq0$.\n\nThe comma stands for and: $P(A,B\\mid C)$ is $P(A\\cap B\\mid C)$. The two forms are equivalent; this is proved in exercise 0.92, below.\n\nCourse: slide 7. Workbook: p. 39.",
+            "ro": "A și B sunt **independente condiționat de C** (se scrie $A\\perp B\\mid C$) dacă, în lumea în care C s-a întâmplat, ele sunt independente. Două forme.\n\n**Forma cu produs:** $P(A,B\\mid C)=P(A\\mid C)\\,P(B\\mid C)$, pentru $P(C)\\neq0$.\n\n**Forma cu probabilitate condiționată:** $P(A\\mid B,C)=P(A\\mid C)$, pentru $P(B,C)\\neq0$.\n\nVirgula ține loc de și: $P(A,B\\mid C)$ este $P(A\\cap B\\mid C)$. Cele două forme sunt echivalente; se dovedește în exercițiul 0.92, mai jos.\n\nCursul: slide 7. Culegerea: p. 39."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s10",
+      "title": {
+        "en": "Two assumptions when there is no other information",
+        "ro": "Două presupuneri când nu ai altă informație"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Default assumptions",
+            "ro": "Presupunerile implicite"
+          },
+          "content": {
+            "en": "When a problem says nothing else, we make two assumptions. **(1)** The outcomes of the experiment are **equally likely** (the uniform case, see Lesson 1). **(2)** The events are **independent**. The example with X and Y started exactly like this: $0.5\\cdot0.2=0.1$.\n\nThey are assumptions, not facts: if the problem gives a probability that contradicts them ($0.11$ instead of $0.1$), the assumption falls.\n\nSeminar 1, p. 4, 7, 8.",
+            "ro": "Când problema nu spune altceva, se fac două presupuneri. **(1)** Rezultatele experimentului sunt **echiprobabile** (cazul uniform, vezi Lecția 1). **(2)** Evenimentele sunt **independente**. Exemplul cu X și Y a început exact așa: $0{,}5\\cdot0{,}2=0{,}1$.\n\nSunt presupuneri, nu fapte: dacă problema dă o probabilitate care le contrazice ($0{,}11$ în loc de $0{,}1$), presupunerea cade.\n\nSeminar 1, p. 4, 7, 8."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s11",
+      "title": {
+        "en": "Why the product form?",
+        "ro": "De ce forma cu produs?"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ml-l03-why",
+          "prompt": {
+            "en": "Why do we prefer the **product form** $P(A\\cap B)=P(A)P(B)$ as the definition, although $P(A\\mid B)=P(A)$ looks closer to the idea of not influencing each other?",
+            "ro": "De ce preferăm ca definiție **forma cu produs** $P(A\\cap B)=P(A)P(B)$, deși $P(A\\mid B)=P(A)$ pare mai apropiată de ideea de a nu se influența?"
+          },
+          "placeholder": {
+            "en": "Write what you think",
+            "ro": "Scrie ce crezi"
+          },
+          "answer": {
+            "en": "Because $P(A\\mid B)$ is defined only when $P(B)\\neq0$, while the product form is symmetric in A and B and always makes sense. It also covers events of probability 0, which the conditional form cannot even write (it would divide by $P(B)=0$). What happens in that case is exercise 0.91, below.",
+            "ro": "Pentru că $P(A\\mid B)$ este definită doar când $P(B)\\neq0$, iar forma cu produs este simetrică în A și B și are sens mereu. Acoperă și evenimentele cu probabilitate 0, pe care forma condiționată nici nu le poate scrie (ar împărți la $P(B)=0$). Ce se întâmplă în acel caz este exercițiul 0.91, mai jos."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s12",
+      "title": {
+        "en": "Can they be disjoint?",
+        "ro": "Pot fi disjuncte?"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l03-q1",
+          "question": {
+            "en": "Two independent events have positive probabilities. Can they be disjoint (can they never happen together)?",
+            "ro": "Două evenimente independente au probabilități pozitive. Pot fi disjuncte (pot să nu se întâmple niciodată împreună)?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Yes, independent means they have nothing in common.",
+                "ro": "Da, independente înseamnă că nu au nimic în comun."
+              },
+              "correct": false,
+              "explain": {
+                "en": "Independence is about probabilities (after learning A, $P(B)$ does not change), not about common elements. Disjoint events with positive probabilities are in fact dependent.",
+                "ro": "Independența este despre probabilități (aflând A, $P(B)$ nu se schimbă), nu despre elemente comune. Evenimentele disjuncte cu probabilități pozitive sunt de fapt dependente."
+              },
+              "misconception": "independent-fara-nimic-in-comun"
+            },
+            {
+              "text": {
+                "en": "Yes, if one of the probabilities is very small.",
+                "ro": "Da, dacă una dintre probabilități este foarte mică."
+              },
+              "correct": false,
+              "explain": {
+                "en": "The product of two positive numbers is positive, however small they are.",
+                "ro": "Produsul a două numere pozitive este pozitiv, oricât de mici ar fi."
+              },
+              "misconception": "o-probabilitate-mica-ajuta"
+            },
+            {
+              "text": {
+                "en": "No: $P(A\\cap B)=P(A)P(B)>0$, so they sometimes happen together.",
+                "ro": "Nu: $P(A\\cap B)=P(A)P(B)>0$, deci se întâmplă uneori împreună."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. If they were disjoint, $P(A\\cap B)$ would be 0, but the product $P(A)P(B)$ is positive: a contradiction.",
+                "ro": "Corect. Dacă ar fi disjuncte, $P(A\\cap B)$ ar fi 0, dar produsul $P(A)P(B)$ este pozitiv: contradicție."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s13",
+      "title": {
+        "en": "Independent or only close?",
+        "ro": "Independente sau doar apropiate?"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l03-q2",
+          "question": {
+            "en": "$P(A)=0.4$, $P(B)=0.3$ and $P(A\\cap B)=0.13$. Are A and B independent?",
+            "ro": "$P(A)=0{,}4$, $P(B)=0{,}3$ și $P(A\\cap B)=0{,}13$. Sunt A și B independente?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "No: $0.4\\cdot0.3=0.12\\neq0.13$",
+                "ro": "Nu: $0{,}4\\cdot0{,}3=0{,}12\\neq0{,}13$"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: the product of the probabilities is $0.12$, and $P(A\\cap B)=0.13$ is not equal to it.",
+                "ro": "Corect: produsul probabilităților este $0{,}12$, iar $P(A\\cap B)=0{,}13$ nu este egal cu el."
+              }
+            },
+            {
+              "text": {
+                "en": "Yes, $0.13$ is close to $0.12$",
+                "ro": "Da, $0{,}13$ este aproape $0{,}12$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The equality must be exact: $P(A\\mid B)=\\dfrac{0.13}{0.3}$ is not equal to $P(A)=0.4$. Almost independent is not independent.",
+                "ro": "Egalitatea trebuie să fie exactă: $P(A\\mid B)=\\dfrac{0{,}13}{0{,}3}$ nu este egal cu $P(A)=0{,}4$. Aproape independente nu înseamnă independente."
+              },
+              "misconception": "aproximativ-independente"
+            },
+            {
+              "text": {
+                "en": "Yes, because $0.13\\le\\min(0.4;\\,0.3)$",
+                "ro": "Da, pentru că $0{,}13\\le\\min(0{,}4;\\,0{,}3)$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Every intersection respects that bound, so it says nothing about independence.",
+                "ro": "Orice intersecție respectă această margine, deci ea nu spune nimic despre independență."
+              },
+              "misconception": "conditie-necesara-luata-drept-suficienta"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s14",
+      "title": {
+        "en": "The union of two independent events",
+        "ro": "Reuniunea a două evenimente independente"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l03-q3",
+          "question": {
+            "en": "A and B are independent, $P(A)=0.2$ and $P(B)=0.5$. What is $P(A\\cup B)$?",
+            "ro": "A și B sunt independente, $P(A)=0{,}2$ și $P(B)=0{,}5$. Cât este $P(A\\cup B)$?"
+          },
+          "check": {
+            "formula": "0.2+0.5-0.2*0.5"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "$0.7$",
+                "ro": "$0{,}7$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "The plain sum counts $A\\cap B$ twice; for independent events $P(A\\cap B)=0.2\\cdot0.5=0.1$, which is subtracted.",
+                "ro": "Suma simplă numără $A\\cap B$ de două ori; pentru evenimente independente $P(A\\cap B)=0{,}2\\cdot0{,}5=0{,}1$, care se scade."
+              },
+              "misconception": "uita-intersectia"
+            },
+            {
+              "text": {
+                "en": "$0.6$",
+                "ro": "$0{,}6$"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct: $P(A\\cup B)=0.2+0.5-0.2\\cdot0.5=0.7-0.1=0.6$.",
+                "ro": "Corect: $P(A\\cup B)=0{,}2+0{,}5-0{,}2\\cdot0{,}5=0{,}7-0{,}1=0{,}6$."
+              }
+            },
+            {
+              "text": {
+                "en": "$0.1$",
+                "ro": "$0{,}1$"
+              },
+              "correct": false,
+              "explain": {
+                "en": "$0.1$ is $P(A\\cap B)$, the intersection, not the union.",
+                "ro": "$0{,}1$ este $P(A\\cap B)$, intersecția, nu reuniunea."
+              },
+              "misconception": "produsul-in-loc-de-reuniune"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s15",
+      "title": {
+        "en": "A colleague writes a probability",
+        "ro": "Un coleg scrie o probabilitate"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ml-l03-q4",
+          "question": {
+            "en": "The statement says only $P(A)=0.3$ and $P(B)=0.4$, with nothing about the link between A and B. A colleague writes $P(A\\cap B)=0.12$. What did the colleague do?",
+            "ro": "Enunțul spune doar $P(A)=0{,}3$ și $P(B)=0{,}4$, fără nimic despre legătura dintre A și B. Un coleg scrie $P(A\\cap B)=0{,}12$. Ce a făcut?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Used the default assumption of independence ($0.3\\cdot0.4$), which is fine as long as the statement gives no information contradicting it.",
+                "ro": "A folosit presupunerea implicită de independență ($0{,}3\\cdot0{,}4$), corectă cât timp enunțul nu dă o informație care o contrazice."
+              },
+              "correct": true,
+              "explain": {
+                "en": "Correct. Without other information, independence is the default assumption of the course.",
+                "ro": "Corect. Fără altă informație, independența este presupunerea implicită a cursului."
+              }
+            },
+            {
+              "text": {
+                "en": "Applied a formula that holds for any two events.",
+                "ro": "A aplicat o formulă valabilă pentru orice două evenimente."
+              },
+              "correct": false,
+              "explain": {
+                "en": "$P(A\\cap B)=P(A)P(B)$ is exactly the definition of independence; for dependent events it is false (see the example with X and Y in this lesson).",
+                "ro": "$P(A\\cap B)=P(A)P(B)$ este chiar definiția independenței; la evenimente dependente nu este adevărată (vezi exemplul cu X și Y din lecție)."
+              },
+              "misconception": "presupunerea-luata-drept-regula-generala"
+            },
+            {
+              "text": {
+                "en": "Made a mistake: without other information, $P(A\\cap B)=0$.",
+                "ro": "A greșit: fără altă informație, $P(A\\cap B)=0$."
+              },
+              "correct": false,
+              "explain": {
+                "en": "$0$ would mean events that cannot happen together, a much stronger assumption and not at all the default one; the default assumption of the course is independence.",
+                "ro": "$0$ ar însemna evenimente care nu pot avea loc împreună, o presupunere mult mai tare și deloc implicită; presupunerea implicită a cursului este independența."
+              },
+              "misconception": "fara-informatie-intersectia-e-0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s16",
+      "title": {
+        "en": "Exercise 0.4 a: A and the complement of B",
+        "ro": "Exercițiul 0.4 a: A și complementul lui B"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l03-x04a",
+          "exercise": "0.4",
+          "claim": {
+            "en": "Show that if A and B are independent, then A and $\\bar B$ are independent. ($\\bar B$ is the complement of B: B does not happen.)",
+            "ro": "Arată că, dacă A și B sunt independente, atunci A și $\\bar B$ sunt independente. ($\\bar B$ este complementul lui B: B nu are loc.)"
+          },
+          "given": {
+            "en": "Independent means $P(A\\cap B)=P(A)P(B)$. The target is $P(A\\cap\\bar B)=P(A)\\,P(\\bar B)$.",
+            "ro": "Independente înseamnă $P(A\\cap B)=P(A)P(B)$. Ținta este $P(A\\cap\\bar B)=P(A)\\,P(\\bar B)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$P(A\\cap\\bar B)=P(A)-P(A\\cap B)$",
+                "ro": "$P(A\\cap\\bar B)=P(A)-P(A\\cap B)$"
+              },
+              "why": {
+                "en": "A splits into the part inside B and the part outside B (exercise 0.1.a, see Lesson 1).",
+                "ro": "A se împarte în partea din B și partea din afara lui B (exercițiul 0.1.a, vezi Lecția 1)."
+              },
+              "predict": {
+                "question": {
+                  "en": "Which property do we start with?",
+                  "ro": "Cu ce proprietate începem?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(A\\cap\\bar B)=P(A)-P(A\\cap B)$",
+                      "ro": "$P(A\\cap\\bar B)=P(A)-P(A\\cap B)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: it rewrites the target using $A\\cap B$, which is the intersection the hypothesis talks about.",
+                      "ro": "Corect: rescrie ținta cu ajutorul lui $A\\cap B$, intersecția despre care vorbește ipoteza."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A\\cap\\bar B)=P(A)+P(\\bar B)-P(A\\cup\\bar B)$",
+                      "ro": "$P(A\\cap\\bar B)=P(A)+P(\\bar B)-P(A\\cup\\bar B)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "True, but it leads away: it never brings in $A\\cap B$, so the independence of A and B cannot be used.",
+                      "ro": "Adevărat, dar duce departe: nu apare $A\\cap B$, deci independența lui A și B nu poate fi folosită."
+                    },
+                    "misconception": "reuniunea"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A\\cap\\bar B)=1-P(A\\cap B)$",
+                      "ro": "$P(A\\cap\\bar B)=1-P(A\\cap B)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "$1-P(A\\cap B)$ is the probability of the complement of $A\\cap B$, which is a different event from $A\\cap\\bar B$.",
+                      "ro": "$1-P(A\\cap B)$ este probabilitatea complementului lui $A\\cap B$, un alt eveniment decât $A\\cap\\bar B$."
+                    },
+                    "misconception": "negare-gresita"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(A\\cap\\bar B)=P(A)-P(A)\\,P(B)$",
+                "ro": "$P(A\\cap\\bar B)=P(A)-P(A)\\,P(B)$"
+              },
+              "why": {
+                "en": "We replaced $P(A\\cap B)$ with the product, which is the hypothesis.",
+                "ro": "Am înlocuit $P(A\\cap B)$ cu produsul, adică ipoteza."
+              },
+              "predict": {
+                "question": {
+                  "en": "What do we use from the hypothesis now?",
+                  "ro": "Ce folosim acum din ipoteză?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "Replace $P(A\\cap B)$ with $P(A)P(B)$.",
+                      "ro": "Înlocuim $P(A\\cap B)$ cu $P(A)P(B)$."
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: this is exactly what independence says.",
+                      "ro": "Corect: exact asta spune independența."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "Nothing: we continue without the hypothesis.",
+                      "ro": "Nimic: continuăm fără ipoteză."
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Without the hypothesis the target would be true for every pair of events, which is false.",
+                      "ro": "Fără ipoteză, ținta ar fi adevărată pentru orice pereche de evenimente, ceea ce este fals."
+                    },
+                    "misconception": "uita-ipoteza"
+                  },
+                  {
+                    "text": {
+                      "en": "Replace $P(A)$ with $1-P(B)$.",
+                      "ro": "Înlocuim $P(A)$ cu $1-P(B)$."
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "A and B are different events; $P(A)$ is not $1-P(B)$.",
+                      "ro": "A și B sunt evenimente diferite; $P(A)$ nu este $1-P(B)$."
+                    },
+                    "misconception": "complementul-lui-a-luat-drept-complementul-lui-b"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(A\\cap\\bar B)=P(A)\\,\\bigl(1-P(B)\\bigr)=P(A)\\,P(\\bar B)$",
+                "ro": "$P(A\\cap\\bar B)=P(A)\\,\\bigl(1-P(B)\\bigr)=P(A)\\,P(\\bar B)$"
+              },
+              "why": {
+                "en": "We factor out $P(A)$ and use $P(\\bar B)=1-P(B)$ (Lesson 1).",
+                "ro": "Dăm factor comun $P(A)$ și folosim $P(\\bar B)=1-P(B)$ (Lecția 1)."
+              }
+            }
+          ],
+          "end": {
+            "en": "So A and $\\bar B$ are independent.",
+            "ro": "Deci A și $\\bar B$ sunt independente."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s17",
+      "title": {
+        "en": "Exercise 0.4 a: the two complements",
+        "ro": "Exercițiul 0.4 a: cele două complemente"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l03-x04b",
+          "claim": {
+            "en": "Show that if A and B are independent, then $\\bar A$ and $\\bar B$ are independent.",
+            "ro": "Arată că, dacă A și B sunt independente, atunci $\\bar A$ și $\\bar B$ sunt independente."
+          },
+          "given": {
+            "en": "From the previous proof we know that $P(A\\cap\\bar B)=P(A)\\,P(\\bar B)$. The target is $P(\\bar A\\cap\\bar B)=P(\\bar A)\\,P(\\bar B)$.",
+            "ro": "Din demonstrația precedentă știm că $P(A\\cap\\bar B)=P(A)\\,P(\\bar B)$. Ținta este $P(\\bar A\\cap\\bar B)=P(\\bar A)\\,P(\\bar B)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A\\cap\\bar B)$",
+                "ro": "$P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A\\cap\\bar B)$"
+              },
+              "why": {
+                "en": "The same property as before, now for the event $\\bar B$ and A (exercise 0.1.a, see Lesson 1).",
+                "ro": "Aceeași proprietate ca înainte, acum pentru evenimentul $\\bar B$ și A (exercițiul 0.1.a, vezi Lecția 1)."
+              },
+              "predict": {
+                "question": {
+                  "en": "How do we write $P(\\bar A\\cap\\bar B)$ using $A\\cap\\bar B$?",
+                  "ro": "Cum scriem $P(\\bar A\\cap\\bar B)$ cu ajutorul lui $A\\cap\\bar B$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A\\cap\\bar B)$",
+                      "ro": "$P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A\\cap\\bar B)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: $\\bar B$ splits into the part inside A and the part outside A.",
+                      "ro": "Corect: $\\bar B$ se împarte în partea din A și partea din afara lui A."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(\\bar A\\cap\\bar B)=1-P(A\\cap B)$",
+                      "ro": "$P(\\bar A\\cap\\bar B)=1-P(A\\cap B)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The complement of $A\\cap B$ is $\\bar A\\cup\\bar B$ (a union), not $\\bar A\\cap\\bar B$.",
+                      "ro": "Complementul lui $A\\cap B$ este $\\bar A\\cup\\bar B$ (o reuniune), nu $\\bar A\\cap\\bar B$."
+                    },
+                    "misconception": "negare-gresita"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(\\bar A\\cap\\bar B)=P(\\bar A)-P(\\bar B)$",
+                      "ro": "$P(\\bar A\\cap\\bar B)=P(\\bar A)-P(\\bar B)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "A difference of probabilities is not an intersection; $P(\\bar A)-P(\\bar B)$ is not even a probability of an event here.",
+                      "ro": "O diferență de probabilități nu este o intersecție; $P(\\bar A)-P(\\bar B)$ nici măcar nu este aici probabilitatea unui eveniment."
+                    },
+                    "misconception": "uita-ipoteza"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A)\\,P(\\bar B)$",
+                "ro": "$P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A)\\,P(\\bar B)$"
+              },
+              "why": {
+                "en": "We replaced $P(A\\cap\\bar B)$ with the product proved just now.",
+                "ro": "Am înlocuit $P(A\\cap\\bar B)$ cu produsul dovedit adineauri."
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(\\bar A\\cap\\bar B)=P(\\bar B)\\,\\bigl(1-P(A)\\bigr)=P(\\bar A)\\,P(\\bar B)$",
+                "ro": "$P(\\bar A\\cap\\bar B)=P(\\bar B)\\,\\bigl(1-P(A)\\bigr)=P(\\bar A)\\,P(\\bar B)$"
+              },
+              "why": {
+                "en": "We factor out $P(\\bar B)$ and use $P(\\bar A)=1-P(A)$.",
+                "ro": "Dăm factor comun $P(\\bar B)$ și folosim $P(\\bar A)=1-P(A)$."
+              }
+            }
+          ],
+          "end": {
+            "en": "So $\\bar A$ and $\\bar B$ are independent.",
+            "ro": "Deci $\\bar A$ și $\\bar B$ sunt independente."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s18",
+      "title": {
+        "en": "Exercise 0.4 b: independent of itself",
+        "ro": "Exercițiul 0.4 b: independent de el însuși"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l03-x04c",
+          "claim": {
+            "en": "If the event A is independent of itself, what can be said about $P(A)$?",
+            "ro": "Dacă evenimentul A este independent de el însuși, ce se poate spune despre $P(A)$?"
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$P(A\\cap A)=P(A)\\,P(A)$",
+                "ro": "$P(A\\cap A)=P(A)\\,P(A)$"
+              },
+              "why": {
+                "en": "This is the product form with B replaced by A.",
+                "ro": "Aceasta este forma cu produs, cu B înlocuit de A."
+              },
+              "predict": {
+                "question": {
+                  "en": "How do we write the independence of A with itself?",
+                  "ro": "Cum scriem independența lui A cu el însuși?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(A\\cap A)=P(A)\\,P(A)$",
+                      "ro": "$P(A\\cap A)=P(A)\\,P(A)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the product form, with the same event in both places.",
+                      "ro": "Corect: forma cu produs, cu același eveniment în ambele locuri."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A\\cap A)=0$, because A cannot happen together with itself",
+                      "ro": "$P(A\\cap A)=0$, pentru că A nu poate avea loc împreună cu el însuși"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "A happens together with itself whenever it happens: $A\\cap A=A$.",
+                      "ro": "A are loc împreună cu el însuși de fiecare dată când are loc: $A\\cap A=A$."
+                    },
+                    "misconception": "mutually-exclusive-is-independent"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A\\cap A)=P(A)+P(A)$",
+                      "ro": "$P(A\\cap A)=P(A)+P(A)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Independence multiplies the probabilities; it does not add them.",
+                      "ro": "Independența înmulțește probabilitățile; nu le adună."
+                    },
+                    "misconception": "aduna-in-loc-sa-inmulteasca"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(A)=\\bigl[P(A)\\bigr]^2$, so $P(A)\\,\\bigl[P(A)-1\\bigr]=0$",
+                "ro": "$P(A)=\\bigl[P(A)\\bigr]^2$, deci $P(A)\\,\\bigl[P(A)-1\\bigr]=0$"
+              },
+              "why": {
+                "en": "Because $A\\cap A=A$.",
+                "ro": "Pentru că $A\\cap A=A$."
+              }
+            },
+            {
+              "shown": {
+                "en": "A product is zero only if a factor is zero: $P(A)=0$ or $P(A)=1$.",
+                "ro": "Un produs este zero doar dacă un factor este zero: $P(A)=0$ sau $P(A)=1$."
+              }
+            }
+          ],
+          "end": {
+            "en": "$P(A)$ is 0 or 1. Careful: this does not mean $A=\\emptyset$ or $A=\\Omega$; an event can have probability 0 without being the empty set.",
+            "ro": "$P(A)$ este 0 sau 1. Atenție: de aici nu rezultă $A=\\emptyset$ sau $A=\\Omega$; un eveniment poate avea probabilitate 0 fără să fie mulțimea vidă."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s19",
+      "title": {
+        "en": "Exercise 0.4: check with numbers",
+        "ro": "Exercițiul 0.4: verificare cu numere"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l03-n04",
+          "status": "book",
+          "statement": {
+            "en": "A and B are independent, with $P(A)=0.3$ and $P(B)=0.5$. Give the answers as fractions or decimals.",
+            "ro": "A și B sunt independente, cu $P(A)=0{,}3$ și $P(B)=0{,}5$. Scrie răspunsurile ca fracții sau zecimale."
+          },
+          "data": {
+            "pA": 0.3,
+            "pB": 0.5
+          },
+          "fields": [
+            {
+              "id": "a1",
+              "label": {
+                "en": "$P(A\\cap\\bar B)$ (fraction or decimal)",
+                "ro": "$P(A\\cap\\bar B)$ (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "pA*(1-pB)",
+              "expected": "3/20"
+            },
+            {
+              "id": "a2",
+              "label": {
+                "en": "$P(\\bar A\\cap\\bar B)$ (fraction or decimal)",
+                "ro": "$P(\\bar A\\cap\\bar B)$ (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "(1-pA)*(1-pB)",
+              "expected": "7/20"
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "If A is independent of itself, $P(A)$ can be",
+                "ro": "Dacă A este independent de el însuși, $P(A)$ poate fi"
+              },
+              "kind": "choice",
+              "options": [
+                {
+                  "en": "0 or 1",
+                  "ro": "0 sau 1"
+                },
+                {
+                  "en": "A = ∅ or A = Ω",
+                  "ro": "A = ∅ sau A = Ω"
+                },
+                {
+                  "en": "1/2",
+                  "ro": "1/2"
+                }
+              ],
+              "formula": "'0 or 1'",
+              "expected": "0 or 1"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "a1",
+              "formula": "(1-pA)*(1-pB)",
+              "message": {
+                "en": "You computed $P(\\bar A\\cap\\bar B)$; the question asks for $P(A\\cap\\bar B)$: A happens, B does not.",
+                "ro": "Ai calculat $P(\\bar A\\cap\\bar B)$; întrebarea cere $P(A\\cap\\bar B)$: A are loc, B nu."
+              }
+            },
+            {
+              "field": "a1",
+              "formula": "pA-pB",
+              "message": {
+                "en": "$P(A)-P(B)$ is not a formula for this; use $P(A)-P(A\\cap B)$.",
+                "ro": "$P(A)-P(B)$ nu este o formulă pentru asta; folosește $P(A)-P(A\\cap B)$."
+              }
+            },
+            {
+              "field": "a2",
+              "formula": "pA*(1-pB)",
+              "message": {
+                "en": "That is $P(A\\cap\\bar B)$; here both events fail: $\\bar A$ and $\\bar B$.",
+                "ro": "Aceea este $P(A\\cap\\bar B)$; aici amândouă evenimentele nu au loc: $\\bar A$ și $\\bar B$."
+              }
+            },
+            {
+              "field": "a2",
+              "formula": "1-pA*pB",
+              "message": {
+                "en": "$1-P(A\\cap B)$ is the probability of the complement of the intersection, a different event from $\\bar A\\cap\\bar B$.",
+                "ro": "$1-P(A\\cap B)$ este probabilitatea complementului intersecției, un alt eveniment decât $\\bar A\\cap\\bar B$."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "'A = ∅ or A = Ω'",
+              "message": {
+                "en": "$P(A)=0$ does not mean $A=\\emptyset$: an event can have probability 0 without being the empty set. The same holds for probability 1 and $\\Omega$.",
+                "ro": "$P(A)=0$ nu înseamnă $A=\\emptyset$: un eveniment poate avea probabilitate 0 fără să fie mulțimea vidă. La fel pentru probabilitatea 1 și $\\Omega$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "For a1 use $P(A\\cap\\bar B)=P(A)-P(A\\cap B)$, and get $P(A\\cap B)$ from independence. For a2 use the same idea for $\\bar B$. For b, write the independence of A with itself.",
+              "ro": "La a1 folosește $P(A\\cap\\bar B)=P(A)-P(A\\cap B)$, iar $P(A\\cap B)$ vine din independență. La a2 folosește aceeași idee pentru $\\bar B$. La b, scrie independența lui A cu el însuși."
+            },
+            {
+              "en": "a1: $P(A\\cap\\bar B)=P(A)-P(A)P(B)=0.3-0.3\\cdot0.5$. a2: $P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A\\cap\\bar B)$, with $P(\\bar B)=1-0.5$. b: $P(A)=P(A)^2$.",
+              "ro": "a1: $P(A\\cap\\bar B)=P(A)-P(A)P(B)=0{,}3-0{,}3\\cdot0{,}5$. a2: $P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A\\cap\\bar B)$, cu $P(\\bar B)=1-0{,}5$. b: $P(A)=P(A)^2$."
+            },
+            {
+              "en": "a1: $0.3-0.15=0.15$. a2: $0.5-0.15=0.35$, which is also $0.7\\cdot0.5$. b: $P(A)\\,[P(A)-1]=0$, so $P(A)$ is 0 or 1.",
+              "ro": "a1: $0{,}3-0{,}15=0{,}15$. a2: $0{,}5-0{,}15=0{,}35$, ceea ce este și $0{,}7\\cdot0{,}5$. b: $P(A)\\,[P(A)-1]=0$, deci $P(A)$ este 0 sau 1."
+            }
+          ],
+          "solution": {
+            "en": "a1: $P(A\\cap\\bar B)=P(A)\\,P(\\bar B)=0.3\\cdot0.5=\\frac{3}{20}$. a2: $P(\\bar A\\cap\\bar B)=P(\\bar A)\\,P(\\bar B)=0.7\\cdot0.5=\\frac{7}{20}$. b: $P(A)$ is 0 or 1, not necessarily $A=\\emptyset$ or $A=\\Omega$.",
+            "ro": "a1: $P(A\\cap\\bar B)=P(A)\\,P(\\bar B)=0{,}3\\cdot0{,}5=\\frac{3}{20}$. a2: $P(\\bar A\\cap\\bar B)=P(\\bar A)\\,P(\\bar B)=0{,}7\\cdot0{,}5=\\frac{7}{20}$. b: $P(A)$ este 0 sau 1, nu neapărat $A=\\emptyset$ sau $A=\\Omega$."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "A and B are independent, with $P(A)=0.4$ and $P(B)=0.2$. Give the answers as fractions or decimals.",
+                "ro": "A și B sunt independente, cu $P(A)=0{,}4$ și $P(B)=0{,}2$. Scrie răspunsurile ca fracții sau zecimale."
+              },
+              "data": {
+                "pA": 0.4,
+                "pB": 0.2
+              },
+              "hints": [
+                {
+                  "en": "For a1 use $P(A\\cap\\bar B)=P(A)-P(A\\cap B)$, and get $P(A\\cap B)$ from independence. For a2 use the same idea for $\\bar B$. For b, write the independence of A with itself.",
+                  "ro": "La a1 folosește $P(A\\cap\\bar B)=P(A)-P(A\\cap B)$, iar $P(A\\cap B)$ vine din independență. La a2 folosește aceeași idee pentru $\\bar B$. La b, scrie independența lui A cu el însuși."
+                },
+                {
+                  "en": "a1: $P(A\\cap\\bar B)=P(A)-P(A)P(B)=0.4-0.4\\cdot0.2$. a2: $P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A\\cap\\bar B)$, with $P(\\bar B)=1-0.2$. b: $P(A)=P(A)^2$.",
+                  "ro": "a1: $P(A\\cap\\bar B)=P(A)-P(A)P(B)=0{,}4-0{,}4\\cdot0{,}2$. a2: $P(\\bar A\\cap\\bar B)=P(\\bar B)-P(A\\cap\\bar B)$, cu $P(\\bar B)=1-0{,}2$. b: $P(A)=P(A)^2$."
+                },
+                {
+                  "en": "a1: $0.4-0.08=0.32$. a2: $0.8-0.32=0.48$, which is also $0.6\\cdot0.8$. b: $P(A)\\,[P(A)-1]=0$, so $P(A)$ is 0 or 1.",
+                  "ro": "a1: $0{,}4-0{,}08=0{,}32$. a2: $0{,}8-0{,}32=0{,}48$, ceea ce este și $0{,}6\\cdot0{,}8$. b: $P(A)\\,[P(A)-1]=0$, deci $P(A)$ este 0 sau 1."
+                }
+              ],
+              "fields": [
+                {
+                  "id": "a1",
+                  "formula": "pA*(1-pB)",
+                  "expected": "8/25"
+                },
+                {
+                  "id": "a2",
+                  "formula": "(1-pA)*(1-pB)",
+                  "expected": "12/25"
+                },
+                {
+                  "id": "b",
+                  "formula": "'0 or 1'",
+                  "expected": "0 or 1"
+                }
+              ],
+              "solution": {
+                "en": "a1: $P(A\\cap\\bar B)=0.4\\cdot0.8=\\frac{8}{25}$. a2: $P(\\bar A\\cap\\bar B)=0.6\\cdot0.8=\\frac{12}{25}$. b: $P(A)$ is 0 or 1, not necessarily $A=\\emptyset$ or $A=\\Omega$.",
+                "ro": "a1: $P(A\\cap\\bar B)=0{,}4\\cdot0{,}8=\\frac{8}{25}$. a2: $P(\\bar A\\cap\\bar B)=0{,}6\\cdot0{,}8=\\frac{12}{25}$. b: $P(A)$ este 0 sau 1, nu neapărat $A=\\emptyset$ sau $A=\\Omega$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s20",
+      "title": {
+        "en": "Exercise 0.5: Robert and Alina",
+        "ro": "Exercițiul 0.5: Robert și Alina"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l03-x05",
+          "exercise": [
+            "0.5.a",
+            "0.5.b",
+            "0.5.c"
+          ],
+          "status": "book",
+          "source": {
+            "en": "Workbook, exercise 0.5, p. 26-27",
+            "ro": "Culegerea, exercițiul 0.5, p. 26-27"
+          },
+          "statement": {
+            "en": "Robert and Alina toss a coin in turns, Alina first; the first one to get heads (S) wins the game. The tosses are independent. **a.** If $P(S)=\\frac12$, what is the probability that Alina wins? **b.** The same question for $P(S)=p\\in(0,1]$. **c.** How would you choose to join the game: first or second? **d.** For $p=\\frac15$, compute the probability of **b** as a number. Give the answers as fractions or decimals.",
+            "ro": "Robert și Alina dau cu banul pe rând, Alina prima; primul care obține stema (S) câștigă jocul. Aruncările sunt independente. **a.** Dacă $P(S)=\\frac12$, care este probabilitatea ca Alina să câștige? **b.** Aceeași întrebare pentru $P(S)=p\\in(0,1]$. **c.** Cum ai alege să intri în joc: primul sau al doilea? **d.** Pentru $p=\\frac15$, calculează probabilitatea de la **b** ca număr. Scrie răspunsurile ca fracții sau zecimale."
+          },
+          "data": {
+            "p": 0.5,
+            "q": 0.2
+          },
+          "fields": [
+            {
+              "id": "p1",
+              "label": {
+                "en": "$P(A_1)$: Alina wins on toss 1 (fraction or decimal)",
+                "ro": "$P(A_1)$: Alina câștigă la aruncarea 1 (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "p",
+              "expected": "1/2"
+            },
+            {
+              "id": "p3",
+              "label": {
+                "en": "$P(A_3)$: Alina wins on toss 3 (fraction or decimal)",
+                "ro": "$P(A_3)$: Alina câștigă la aruncarea 3 (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "(1-p)^2*p",
+              "expected": "1/8"
+            },
+            {
+              "id": "rho",
+              "label": {
+                "en": "Ratio of two consecutive terms of the series (fraction or decimal)",
+                "ro": "Raportul dintre doi termeni consecutivi ai seriei (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "(1-p)^2",
+              "expected": "1/4"
+            },
+            {
+              "id": "a",
+              "label": {
+                "en": "Part a: probability that Alina wins (fraction or decimal)",
+                "ro": "Punctul a: probabilitatea ca Alina să câștige (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "p/(1-(1-p)^2)",
+              "expected": "2/3"
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "Part b: the probability is",
+                "ro": "Punctul b: probabilitatea este"
+              },
+              "kind": "choice",
+              "options": [
+                {
+                  "en": "$1/(2-p)$",
+                  "ro": "$1/(2-p)$"
+                },
+                {
+                  "en": "$1/2$",
+                  "ro": "$1/2$"
+                },
+                {
+                  "en": "$p$",
+                  "ro": "$p$"
+                }
+              ],
+              "formula": "'$1/(2-p)$'",
+              "expected": "$1/(2-p)$"
+            },
+            {
+              "id": "bn",
+              "label": {
+                "en": "Part d: the number (fraction or decimal)",
+                "ro": "Punctul d: numărul (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "q/(1-(1-q)^2)",
+              "expected": "5/9"
+            },
+            {
+              "id": "c",
+              "label": {
+                "en": "Part c: join the game",
+                "ro": "Punctul c: intri în joc"
+              },
+              "kind": "choice",
+              "options": [
+                {
+                  "en": "first",
+                  "ro": "primul"
+                },
+                {
+                  "en": "second",
+                  "ro": "al doilea"
+                },
+                {
+                  "en": "it makes no difference",
+                  "ro": "e indiferent"
+                }
+              ],
+              "formula": "'first'",
+              "expected": "first"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "a",
+              "formula": "p",
+              "message": {
+                "en": "You counted only the first toss. Alina can also win on tosses 3, 5, and so on: the terms of a series add up.",
+                "ro": "Ai numărat doar prima aruncare. Alina mai poate câștiga la aruncările 3, 5 și așa mai departe: termenii unei serii se adună."
+              }
+            },
+            {
+              "field": "a",
+              "formula": "p/(1-(1-p))",
+              "message": {
+                "en": "You used the ratio $1-p$ instead of $(1-p)^2$: between two chances of Alina there are two tosses without heads.",
+                "ro": "Ai folosit raportul $1-p$ în loc de $(1-p)^2$: între două șanse ale Alinei sunt două aruncări fără stemă."
+              }
+            },
+            {
+              "field": "a",
+              "formula": "1-p/(1-(1-p)^2)",
+              "message": {
+                "en": "That is the probability that Robert wins.",
+                "ro": "Aceasta este probabilitatea ca Robert să câștige."
+              }
+            },
+            {
+              "field": "rho",
+              "formula": "1-p",
+              "message": {
+                "en": "Between two chances of Alina there are two tosses without heads (hers and Robert's), so the ratio is $(1-p)^2$, not $1-p$.",
+                "ro": "Între două șanse ale Alinei sunt două aruncări fără stemă (a ei și a lui Robert), deci raportul este $(1-p)^2$, nu $1-p$."
+              }
+            },
+            {
+              "field": "bn",
+              "formula": "q",
+              "message": {
+                "en": "That is only the first toss; Alina can also win later.",
+                "ro": "Aceasta este doar prima aruncare; Alina poate câștiga și mai târziu."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "'$1/2$'",
+              "message": {
+                "en": "Symmetry would give $1/2$ only if both threw at the same time; Alina throws first, so she has an advantage.",
+                "ro": "Simetria ar da $1/2$ doar dacă ar arunca amândoi deodată; Alina aruncă prima, deci are un avantaj."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "'$p$'",
+              "message": {
+                "en": "That is only the first toss.",
+                "ro": "Aceasta este doar prima aruncare."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Alina can win on toss 1, 3, 5, and so on. These events cannot happen together, so their probabilities add up (countable additivity, Lesson 1).",
+              "ro": "Alina poate câștiga la aruncarea 1, 3, 5 și așa mai departe. Aceste evenimente nu pot avea loc împreună, deci probabilitățile lor se adună (aditivitate numărabilă, Lecția 1)."
+            },
+            {
+              "en": "To win on toss $2i+1$, the first $2i$ tosses (of both players) must give no heads, independently, and toss $2i+1$ must give heads: $(1-p)^{2i}\\,p$. The terms form a geometric series, and $\\sum_{i\\ge0}a^i=\\dfrac{1}{1-a}$ for $a\\in[0,1)$.",
+              "ro": "Ca să câștige la aruncarea $2i+1$, primele $2i$ aruncări (ale ambilor) trebuie să nu dea stemă, independent, iar aruncarea $2i+1$ să dea stemă: $(1-p)^{2i}\\,p$. Termenii formează o serie geometrică, iar $\\sum_{i\\ge0}a^i=\\dfrac{1}{1-a}$ pentru $a\\in[0,1)$."
+            },
+            {
+              "en": "The sum is $p\\sum_{i\\ge0}\\bigl[(1-p)^2\\bigr]^i=\\dfrac{p}{1-(1-p)^2}=\\dfrac{p}{2p-p^2}=\\dfrac{1}{2-p}$. For $p=\\frac12$: $\\frac12\\cdot\\frac{1}{1-1/4}$.",
+              "ro": "Suma este $p\\sum_{i\\ge0}\\bigl[(1-p)^2\\bigr]^i=\\dfrac{p}{1-(1-p)^2}=\\dfrac{p}{2p-p^2}=\\dfrac{1}{2-p}$. Pentru $p=\\frac12$: $\\frac12\\cdot\\frac{1}{1-1/4}$."
+            }
+          ],
+          "solution": {
+            "en": "Alina wins on toss $2i+1$ with probability $(1-p)^{2i}p$. For $p=\\frac12$: $\\frac12+\\frac18+\\frac1{32}+\\dots=\\frac12\\cdot\\frac{1}{1-1/4}=\\frac23$ (Alina wins twice as often as Robert only because she throws first). In general $P=p\\cdot\\frac{1}{1-(1-p)^2}=\\frac{p}{2p-p^2}=\\frac{1}{2-p}$. For $p=\\frac15$: $\\frac{1}{2-1/5}=\\frac59$. Since $\\frac{1}{2-p}\\ge\\frac12$, it is better to join first.",
+            "ro": "Alina câștigă la aruncarea $2i+1$ cu probabilitatea $(1-p)^{2i}p$. Pentru $p=\\frac12$: $\\frac12+\\frac18+\\frac1{32}+\\dots=\\frac12\\cdot\\frac{1}{1-1/4}=\\frac23$ (Alina câștigă de două ori mai des decât Robert doar pentru că aruncă prima). În general $P=p\\cdot\\frac{1}{1-(1-p)^2}=\\frac{p}{2p-p^2}=\\frac{1}{2-p}$. Pentru $p=\\frac15$: $\\frac{1}{2-1/5}=\\frac59$. Cum $\\frac{1}{2-p}\\ge\\frac12$, e mai bine să intri primul."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Robert and Alina toss a coin in turns, Alina first; the first one to get heads (S) wins the game. The tosses are independent. **a.** If $P(S)=\\frac14$, what is the probability that Alina wins? **b.** The same question for $P(S)=p\\in(0,1]$. **c.** How would you choose to join the game: first or second? **d.** For $p=\\frac1{10}$, compute the probability of **b** as a number. Give the answers as fractions or decimals.",
+                "ro": "Robert și Alina dau cu banul pe rând, Alina prima; primul care obține stema (S) câștigă jocul. Aruncările sunt independente. **a.** Dacă $P(S)=\\frac14$, care este probabilitatea ca Alina să câștige? **b.** Aceeași întrebare pentru $P(S)=p\\in(0,1]$. **c.** Cum ai alege să intri în joc: primul sau al doilea? **d.** Pentru $p=\\frac1{10}$, calculează probabilitatea de la **b** ca număr. Scrie răspunsurile ca fracții sau zecimale."
+              },
+              "data": {
+                "p": 0.25,
+                "q": 0.1
+              },
+              "hints": [
+                {
+                  "en": "Alina can win on toss 1, 3, 5, and so on. These events cannot happen together, so their probabilities add up (countable additivity, Lesson 1).",
+                  "ro": "Alina poate câștiga la aruncarea 1, 3, 5 și așa mai departe. Aceste evenimente nu pot avea loc împreună, deci probabilitățile lor se adună (aditivitate numărabilă, Lecția 1)."
+                },
+                {
+                  "en": "To win on toss $2i+1$, the first $2i$ tosses (of both players) must give no heads, independently, and toss $2i+1$ must give heads: $(1-p)^{2i}\\,p$. The terms form a geometric series, and $\\sum_{i\\ge0}a^i=\\dfrac{1}{1-a}$ for $a\\in[0,1)$.",
+                  "ro": "Ca să câștige la aruncarea $2i+1$, primele $2i$ aruncări (ale ambilor) trebuie să nu dea stemă, independent, iar aruncarea $2i+1$ să dea stemă: $(1-p)^{2i}\\,p$. Termenii formează o serie geometrică, iar $\\sum_{i\\ge0}a^i=\\dfrac{1}{1-a}$ pentru $a\\in[0,1)$."
+                },
+                {
+                  "en": "The sum is $p\\sum_{i\\ge0}\\bigl[(1-p)^2\\bigr]^i=\\dfrac{p}{1-(1-p)^2}$. For $p=\\frac14$: $\\frac14\\cdot\\frac{1}{1-(3/4)^2}$.",
+                  "ro": "Suma este $p\\sum_{i\\ge0}\\bigl[(1-p)^2\\bigr]^i=\\dfrac{p}{1-(1-p)^2}$. Pentru $p=\\frac14$: $\\frac14\\cdot\\frac{1}{1-(3/4)^2}$."
+                }
+              ],
+              "fields": [
+                {
+                  "id": "p1",
+                  "formula": "p",
+                  "expected": "1/4"
+                },
+                {
+                  "id": "p3",
+                  "formula": "(1-p)^2*p",
+                  "expected": "9/64"
+                },
+                {
+                  "id": "rho",
+                  "formula": "(1-p)^2",
+                  "expected": "9/16"
+                },
+                {
+                  "id": "a",
+                  "formula": "p/(1-(1-p)^2)",
+                  "expected": "4/7"
+                },
+                {
+                  "id": "b",
+                  "formula": "'$1/(2-p)$'",
+                  "expected": "$1/(2-p)$"
+                },
+                {
+                  "id": "bn",
+                  "formula": "q/(1-(1-q)^2)",
+                  "expected": "10/19"
+                },
+                {
+                  "id": "c",
+                  "formula": "'first'",
+                  "expected": "first"
+                }
+              ],
+              "solution": {
+                "en": "Alina wins on toss $2i+1$ with probability $(1-p)^{2i}p$. For $p=\\frac14$: $\\frac14\\cdot\\frac{1}{1-9/16}=\\frac47$. In general $P=\\frac{1}{2-p}$. For $p=\\frac1{10}$: $\\frac{1}{2-1/10}=\\frac{10}{19}$. Since $\\frac{1}{2-p}\\ge\\frac12$, it is better to join first.",
+                "ro": "Alina câștigă la aruncarea $2i+1$ cu probabilitatea $(1-p)^{2i}p$. Pentru $p=\\frac14$: $\\frac14\\cdot\\frac{1}{1-9/16}=\\frac47$. În general $P=\\frac{1}{2-p}$. Pentru $p=\\frac1{10}$: $\\frac{1}{2-1/10}=\\frac{10}{19}$. Cum $\\frac{1}{2-p}\\ge\\frac12$, e mai bine să intri primul."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s21",
+      "title": {
+        "en": "Exercise 0.89: two soldiers",
+        "ro": "Exercițiul 0.89: doi soldați"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l03-x89",
+          "exercise": [
+            "0.89.a",
+            "0.89.b"
+          ],
+          "status": "verified-twice",
+          "statement": {
+            "en": "Two soldiers, A and B, shoot at a target. The probability that A misses is $\\frac15$, that B misses $\\frac12$, and that both miss at the same time $\\frac1{10}$. **a.** What is the probability that at least one soldier misses? **b.** What is the probability that exactly one misses? Give the answers as fractions or decimals.",
+            "ro": "Doi soldați, A și B, trag la țintă. Probabilitatea ca A să greșească este $\\frac15$, ca B să greșească $\\frac12$, iar ca ambii să greșească simultan $\\frac1{10}$. **a.** Care este probabilitatea ca cel puțin unul dintre soldați să greșească? **b.** Dar ca exact unul să greșească? Scrie răspunsurile ca fracții sau zecimale."
+          },
+          "data": {
+            "pa": 0.2,
+            "pb": 0.5,
+            "pab": 0.1
+          },
+          "fields": [
+            {
+              "id": "a",
+              "label": {
+                "en": "Part a: at least one misses (fraction or decimal)",
+                "ro": "Punctul a: cel puțin unul greșește (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "pa+pb-pab",
+              "expected": "3/5"
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "Part b: exactly one misses (fraction or decimal)",
+                "ro": "Punctul b: exact unul greșește (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "pa+pb-2*pab",
+              "expected": "1/2"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "a",
+              "formula": "pa+pb",
+              "message": {
+                "en": "You added the two probabilities and forgot to subtract the intersection, which was counted twice.",
+                "ro": "Ai adunat cele două probabilități și ai uitat să scazi intersecția, numărată de două ori."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "pa+pb-pab",
+              "message": {
+                "en": "That is the answer of part a, at least one; exactly one also excludes the case where both miss.",
+                "ro": "Acesta este răspunsul de la punctul a, cel puțin unul; exact unul exclude și cazul în care ambii greșesc."
+              }
+            },
+            {
+              "field": "b",
+              "formula": "pab",
+              "message": {
+                "en": "That is the probability that both miss.",
+                "ro": "Aceasta este probabilitatea ca ambii să greșească."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "At least one is the union of the two events of missing. Exactly one is the union without the case where both miss.",
+              "ro": "Cel puțin unul este reuniunea celor două evenimente de greșeală. Exact unul este reuniunea fără cazul în care ambii greșesc."
+            },
+            {
+              "en": "Addition rule (Lesson 1): $P(a\\cup b)=P(a)+P(b)-P(a\\cap b)=\\frac15+\\frac12-\\frac1{10}$.",
+              "ro": "Regula de adunare (Lecția 1): $P(a\\cup b)=P(a)+P(b)-P(a\\cap b)=\\frac15+\\frac12-\\frac1{10}$."
+            },
+            {
+              "en": "a: $\\frac{2}{10}+\\frac{5}{10}-\\frac{1}{10}=\\frac{6}{10}$. b: subtract $P(a\\cap b)$ once more from the result of a.",
+              "ro": "a: $\\frac{2}{10}+\\frac{5}{10}-\\frac{1}{10}=\\frac{6}{10}$. b: scade încă o dată $P(a\\cap b)$ din rezultatul de la a."
+            }
+          ],
+          "solution": {
+            "en": "a: $P(a\\cup b)=P(a)+P(b)-P(a\\cap b)=\\frac15+\\frac12-\\frac1{10}=\\frac{6}{10}=\\frac35$. b: exactly one $=P(a\\cup b)-P(a\\cap b)=\\frac{6}{10}-\\frac{1}{10}=\\frac12$. Side note: $P(a)P(b)=\\frac1{10}=P(a\\cap b)$, so the two events are independent.",
+            "ro": "a: $P(a\\cup b)=P(a)+P(b)-P(a\\cap b)=\\frac15+\\frac12-\\frac1{10}=\\frac{6}{10}=\\frac35$. b: exact unul $=P(a\\cup b)-P(a\\cap b)=\\frac{6}{10}-\\frac{1}{10}=\\frac12$. Observație: $P(a)P(b)=\\frac1{10}=P(a\\cap b)$, deci cele două evenimente sunt independente."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Two soldiers, A and B, shoot at a target. The probability that A misses is $\\frac3{10}$, that B misses $\\frac25$, and that both miss at the same time $\\frac3{25}$. **a.** What is the probability that at least one soldier misses? **b.** What is the probability that exactly one misses? Give the answers as fractions or decimals.",
+                "ro": "Doi soldați, A și B, trag la țintă. Probabilitatea ca A să greșească este $\\frac3{10}$, ca B să greșească $\\frac25$, iar ca ambii să greșească simultan $\\frac3{25}$. **a.** Care este probabilitatea ca cel puțin unul dintre soldați să greșească? **b.** Dar ca exact unul să greșească? Scrie răspunsurile ca fracții sau zecimale."
+              },
+              "data": {
+                "pa": 0.3,
+                "pb": 0.4,
+                "pab": 0.12
+              },
+              "hints": [
+                {
+                  "en": "At least one is the union of the two events of missing. Exactly one is the union without the case where both miss.",
+                  "ro": "Cel puțin unul este reuniunea celor două evenimente de greșeală. Exact unul este reuniunea fără cazul în care ambii greșesc."
+                },
+                {
+                  "en": "Addition rule (Lesson 1): $P(a\\cup b)=P(a)+P(b)-P(a\\cap b)=\\frac3{10}+\\frac25-\\frac3{25}$.",
+                  "ro": "Regula de adunare (Lecția 1): $P(a\\cup b)=P(a)+P(b)-P(a\\cap b)=\\frac3{10}+\\frac25-\\frac3{25}$."
+                },
+                {
+                  "en": "a: $0.3+0.4-0.12$. b: subtract $P(a\\cap b)$ once more from the result of a.",
+                  "ro": "a: $0{,}3+0{,}4-0{,}12$. b: scade încă o dată $P(a\\cap b)$ din rezultatul de la a."
+                }
+              ],
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "pa+pb-pab",
+                  "expected": "29/50"
+                },
+                {
+                  "id": "b",
+                  "formula": "pa+pb-2*pab",
+                  "expected": "23/50"
+                }
+              ],
+              "solution": {
+                "en": "a: $P(a\\cup b)=\\frac3{10}+\\frac25-\\frac3{25}=0.58=\\frac{29}{50}$. b: exactly one $=0.58-0.12=0.46=\\frac{23}{50}$.",
+                "ro": "a: $P(a\\cup b)=\\frac3{10}+\\frac25-\\frac3{25}=0{,}58=\\frac{29}{50}$. b: exact unul $=0{,}58-0{,}12=0{,}46=\\frac{23}{50}$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s22",
+      "title": {
+        "en": "Exercise 0.91 a: P(A | A, B)",
+        "ro": "Exercițiul 0.91 a: P(A | A, B)"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l03-x91a",
+          "exercise": "0.91.a",
+          "claim": {
+            "en": "Show that $P(A\\mid A,B)=1$.",
+            "ro": "Arată că $P(A\\mid A,B)=1$."
+          },
+          "given": {
+            "en": "$P(A\\mid A,B)$ is the probability of A knowing that A and B both happened.",
+            "ro": "$P(A\\mid A,B)$ este probabilitatea lui A știind că A și B au avut loc amândouă."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$P(A\\mid A,B)=\\dfrac{P\\bigl(A\\cap(A\\cap B)\\bigr)}{P(A\\cap B)}$",
+                "ro": "$P(A\\mid A,B)=\\dfrac{P\\bigl(A\\cap(A\\cap B)\\bigr)}{P(A\\cap B)}$"
+              },
+              "why": {
+                "en": "The definition of conditional probability, with the condition $A\\cap B$.",
+                "ro": "Definiția probabilității condiționate, cu condiția $A\\cap B$."
+              },
+              "predict": {
+                "question": {
+                  "en": "How do we write the probability with the condition A and B?",
+                  "ro": "Cum scriem probabilitatea cu condiția A și B?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(A\\mid A,B)=\\dfrac{P\\bigl(A\\cap(A\\cap B)\\bigr)}{P(A\\cap B)}$",
+                      "ro": "$P(A\\mid A,B)=\\dfrac{P\\bigl(A\\cap(A\\cap B)\\bigr)}{P(A\\cap B)}$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the numerator is the event and the condition together, the denominator is the condition.",
+                      "ro": "Corect: numărătorul este evenimentul și condiția împreună, numitorul este condiția."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A\\mid A,B)=\\dfrac{P(A)}{P(B)}$",
+                      "ro": "$P(A\\mid A,B)=\\dfrac{P(A)}{P(B)}$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The denominator must be the probability of the whole condition, $A\\cap B$, not of B alone.",
+                      "ro": "Numitorul trebuie să fie probabilitatea întregii condiții, $A\\cap B$, nu doar a lui B."
+                    },
+                    "misconception": "marginala-in-loc-de-conditionata"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A\\mid A,B)=\\dfrac{P(A\\cap B)}{P(A)}$",
+                      "ro": "$P(A\\mid A,B)=\\dfrac{P(A\\cap B)}{P(A)}$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "That is $P(B\\mid A)$, the other way round: the denominator is the probability of the condition.",
+                      "ro": "Aceasta este $P(B\\mid A)$, invers: numitorul este probabilitatea condiției."
+                    },
+                    "misconception": "p-a-b-p-b-a"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$A\\cap(A\\cap B)=A\\cap B$, so the ratio is $\\dfrac{P(A\\cap B)}{P(A\\cap B)}=1$",
+                "ro": "$A\\cap(A\\cap B)=A\\cap B$, deci raportul este $\\dfrac{P(A\\cap B)}{P(A\\cap B)}=1$"
+              },
+              "why": {
+                "en": "A point that is in A and in $A\\cap B$ is simply in $A\\cap B$.",
+                "ro": "Un punct care este în A și în $A\\cap B$ este pur și simplu în $A\\cap B$."
+              }
+            },
+            {
+              "shown": {
+                "en": "Condition: $P(A\\cap B)>0$; otherwise $P(A\\mid A,B)$ does not exist.",
+                "ro": "Condiție: $P(A\\cap B)>0$; altfel $P(A\\mid A,B)$ nu există."
+              },
+              "predict": {
+                "question": {
+                  "en": "What must we say so that the ratio makes sense?",
+                  "ro": "Ce trebuie spus ca raportul să aibă sens?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(A\\cap B)>0$, otherwise we divide by 0",
+                      "ro": "$P(A\\cap B)>0$, altfel împărțim la 0"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the denominator of a conditional probability must not be 0.",
+                      "ro": "Corect: numitorul unei probabilități condiționate nu poate fi 0."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "No condition is needed.",
+                      "ro": "Nu e nevoie de nicio condiție."
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The denominator is $P(A\\cap B)$; if it is 0, the ratio does not exist.",
+                      "ro": "Numitorul este $P(A\\cap B)$; dacă este 0, raportul nu există."
+                    },
+                    "misconception": "uita-conditia"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A)=1$",
+                      "ro": "$P(A)=1$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "That is a special case, not what the ratio needs; it only needs a non-zero denominator.",
+                      "ro": "Acesta este un caz particular, nu ce cere raportul; el cere doar un numitor nenul."
+                    },
+                    "misconception": "caz-particular"
+                  }
+                ]
+              }
+            }
+          ],
+          "end": {
+            "en": "So $P(A\\mid A,B)=1$, whenever $P(A\\cap B)>0$.",
+            "ro": "Deci $P(A\\mid A,B)=1$, ori de câte ori $P(A\\cap B)>0$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s23",
+      "title": {
+        "en": "Exercise 0.91 b: when P(A) is 0",
+        "ro": "Exercițiul 0.91 b: când P(A) este 0"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l03-x91b",
+          "exercise": "0.91.b",
+          "claim": {
+            "en": "Show that if $P(A)=0$, then A and B are independent.",
+            "ro": "Arată că, dacă $P(A)=0$, atunci A și B sunt independente."
+          },
+          "given": {
+            "en": "The product form is the one to prove: $P(A\\cap B)=P(A)\\,P(B)$.",
+            "ro": "Forma cu produs este cea de dovedit: $P(A\\cap B)=P(A)\\,P(B)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$0\\le P(A\\cap B)\\le P(A)=0$",
+                "ro": "$0\\le P(A\\cap B)\\le P(A)=0$"
+              },
+              "why": {
+                "en": "Monotonicity (Lesson 1): $A\\cap B$ is contained in A.",
+                "ro": "Monotonia (Lecția 1): $A\\cap B$ este inclus în A."
+              },
+              "predict": {
+                "question": {
+                  "en": "What bounds does $P(A\\cap B)$ have?",
+                  "ro": "Ce margini are $P(A\\cap B)$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$0\\le P(A\\cap B)\\le P(A)=0$",
+                      "ro": "$0\\le P(A\\cap B)\\le P(A)=0$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the intersection is inside A, so its probability cannot exceed $P(A)$.",
+                      "ro": "Corect: intersecția este în A, deci probabilitatea ei nu poate depăși $P(A)$."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A\\cap B)\\ge P(A)$",
+                      "ro": "$P(A\\cap B)\\ge P(A)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The inequality goes the other way: a part of A cannot be more likely than A.",
+                      "ro": "Inegalitatea merge în sens invers: o parte din A nu poate fi mai probabilă decât A."
+                    },
+                    "misconception": "monotonie-in-sens-invers"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A\\cap B)=P(B)$",
+                      "ro": "$P(A\\cap B)=P(B)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "$A\\cap B$ is contained in B, but it is not equal to it in general.",
+                      "ro": "$A\\cap B$ este inclus în B, dar în general nu este egal cu el."
+                    },
+                    "misconception": "monotonie-in-sens-gresit"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "So $P(A\\cap B)=0$.",
+                "ro": "Deci $P(A\\cap B)=0$."
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(A)\\,P(B)=0\\cdot P(B)=0=P(A\\cap B)$",
+                "ro": "$P(A)\\,P(B)=0\\cdot P(B)=0=P(A\\cap B)$"
+              },
+              "why": {
+                "en": "This is the product form.",
+                "ro": "Aceasta este forma cu produs."
+              }
+            }
+          ],
+          "end": {
+            "en": "So A and B are independent, even though $P(A\\mid B)=P(A)$ may not be written when $P(B)=0$.",
+            "ro": "Deci A și B sunt independente, chiar dacă $P(A\\mid B)=P(A)$ nu se poate scrie când $P(B)=0$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s24",
+      "title": {
+        "en": "Exercise 0.91 c: when P(B) is 1",
+        "ro": "Exercițiul 0.91 c: când P(B) este 1"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l03-x91c",
+          "exercise": "0.91.c",
+          "claim": {
+            "en": "Show that if $P(B)=1$, then $P(A\\mid B)=P(A)$.",
+            "ro": "Arată că, dacă $P(B)=1$, atunci $P(A\\mid B)=P(A)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$P(\\bar B)=1-P(B)=0$",
+                "ro": "$P(\\bar B)=1-P(B)=0$"
+              },
+              "predict": {
+                "question": {
+                  "en": "What do we know about the complement of B?",
+                  "ro": "Ce știm despre complementul lui B?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(\\bar B)=1-P(B)=0$",
+                      "ro": "$P(\\bar B)=1-P(B)=0$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the complement has the remaining probability.",
+                      "ro": "Corect: complementul are probabilitatea rămasă."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(\\bar B)=1$",
+                      "ro": "$P(\\bar B)=1$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The probabilities of B and $\\bar B$ add up to 1; if $P(B)=1$, nothing is left for $\\bar B$.",
+                      "ro": "Probabilitățile lui B și $\\bar B$ se adună la 1; dacă $P(B)=1$, nu rămâne nimic pentru $\\bar B$."
+                    },
+                    "misconception": "negare-gresita"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(\\bar B)=P(B)$",
+                      "ro": "$P(\\bar B)=P(B)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "B and $\\bar B$ are not symmetric: $P(\\bar B)=1-P(B)$.",
+                      "ro": "B și $\\bar B$ nu sunt simetrice: $P(\\bar B)=1-P(B)$."
+                    },
+                    "misconception": "caz-particular"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(A\\cap\\bar B)\\le P(\\bar B)=0$, so $P(A\\cap\\bar B)=0$",
+                "ro": "$P(A\\cap\\bar B)\\le P(\\bar B)=0$, deci $P(A\\cap\\bar B)=0$"
+              },
+              "why": {
+                "en": "Monotonicity (Lesson 1): $A\\cap\\bar B$ is contained in $\\bar B$.",
+                "ro": "Monotonia (Lecția 1): $A\\cap\\bar B$ este inclus în $\\bar B$."
+              },
+              "predict": {
+                "question": {
+                  "en": "What is $P(A\\cap\\bar B)$?",
+                  "ro": "Cât este $P(A\\cap\\bar B)$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "At most $P(\\bar B)=0$, so it is 0",
+                      "ro": "Cel mult $P(\\bar B)=0$, deci este 0"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the intersection is inside $\\bar B$.",
+                      "ro": "Corect: intersecția este în $\\bar B$."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A)$",
+                      "ro": "$P(A)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "That would hold if $\\bar B$ were certain, not impossible.",
+                      "ro": "Asta ar fi adevărat dacă $\\bar B$ ar fi sigur, nu imposibil."
+                    },
+                    "misconception": "uita-ipoteza"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A)\\,P(\\bar B)$, by independence",
+                      "ro": "$P(A)\\,P(\\bar B)$, din independență"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Independence of A and B is not given here; the hypothesis is only $P(B)=1$.",
+                      "ro": "Independența lui A și B nu este dată aici; ipoteza este doar $P(B)=1$."
+                    },
+                    "misconception": "variabile-independente-tacit"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(A\\cap B)=P(A)-P(A\\cap\\bar B)=P(A)$",
+                "ro": "$P(A\\cap B)=P(A)-P(A\\cap\\bar B)=P(A)$"
+              },
+              "why": {
+                "en": "Exercise 0.1.a, see Lesson 1.",
+                "ro": "Exercițiul 0.1.a, vezi Lecția 1."
+              }
+            },
+            {
+              "shown": {
+                "en": "$P(A\\mid B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{P(A)}{1}=P(A)$",
+                "ro": "$P(A\\mid B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{P(A)}{1}=P(A)$"
+              }
+            }
+          ],
+          "end": {
+            "en": "So $P(A\\mid B)=P(A)$ when $P(B)=1$.",
+            "ro": "Deci $P(A\\mid B)=P(A)$ când $P(B)=1$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s25",
+      "title": {
+        "en": "Exercise 0.91: check with numbers",
+        "ro": "Exercițiul 0.91: verificare cu numere"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ml-l03-n91",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Check the three results with numbers. Give the answers as fractions or decimals. Suppose $P(A\\cap B)>0$ and compute $P(A\\mid A,B)$. Then suppose $P(A)=0$ and compute $P(A\\cap B)$. Finally suppose $P(B)=1$ and $P(A)=0.3$ and compute $P(A\\mid B)$.",
+            "ro": "Verifică cele trei rezultate cu numere. Scrie răspunsurile ca fracții sau zecimale. Presupune $P(A\\cap B)>0$ și calculează $P(A\\mid A,B)$. Apoi presupune $P(A)=0$ și calculează $P(A\\cap B)$. În final presupune $P(B)=1$ și $P(A)=0{,}3$ și calculează $P(A\\mid B)$."
+          },
+          "data": {
+            "pA": 0.3
+          },
+          "fields": [
+            {
+              "id": "a",
+              "label": {
+                "en": "$P(A\\mid A,B)$ (decimal)",
+                "ro": "$P(A\\mid A,B)$ (zecimală)"
+              },
+              "kind": "num",
+              "formula": "1",
+              "expected": "1"
+            },
+            {
+              "id": "b",
+              "label": {
+                "en": "If $P(A)=0$: $P(A\\cap B)$ (decimal)",
+                "ro": "Dacă $P(A)=0$: $P(A\\cap B)$ (zecimală)"
+              },
+              "kind": "num",
+              "formula": "0",
+              "expected": "0"
+            },
+            {
+              "id": "c",
+              "label": {
+                "en": "If $P(B)=1$: $P(A\\mid B)$ (fraction or decimal)",
+                "ro": "Dacă $P(B)=1$: $P(A\\mid B)$ (fracție sau zecimală)"
+              },
+              "kind": "frac",
+              "formula": "pA",
+              "expected": "3/10"
+            }
+          ],
+          "detectors": [
+            {
+              "field": "c",
+              "formula": "1",
+              "message": {
+                "en": "With $P(B)=1$, $P(A\\mid B)$ does not make the event certain; it stays $P(A)$.",
+                "ro": "Cu $P(B)=1$, $P(A\\mid B)$ nu face evenimentul sigur; rămâne $P(A)$."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "In the first two cases the answer comes straight from the proofs. In the third, learning a certain event changes nothing.",
+              "ro": "În primele două cazuri răspunsul vine direct din demonstrații. În al treilea, aflarea unui eveniment sigur nu schimbă nimic."
+            },
+            {
+              "en": "First: the ratio of a probability to itself. Second: $0\\le P(A\\cap B)\\le P(A)$. Third: $P(A\\mid B)=P(A\\cap B)/P(B)$ with $P(A\\cap B)=P(A)$ and $P(B)=1$.",
+              "ro": "Primul: raportul unei probabilități la ea însăși. Al doilea: $0\\le P(A\\cap B)\\le P(A)$. Al treilea: $P(A\\mid B)=P(A\\cap B)/P(B)$ cu $P(A\\cap B)=P(A)$ și $P(B)=1$."
+            },
+            {
+              "en": "First: 1. Second: 0. Third: $0.3/1$.",
+              "ro": "Primul: 1. Al doilea: 0. Al treilea: $0{,}3/1$."
+            }
+          ],
+          "solution": {
+            "en": "$P(A\\mid A,B)=1$; $P(A\\cap B)=0$ when $P(A)=0$; and $P(A\\mid B)=P(A)=0.3=\\frac{3}{10}$ when $P(B)=1$.",
+            "ro": "$P(A\\mid A,B)=1$; $P(A\\cap B)=0$ când $P(A)=0$; iar $P(A\\mid B)=P(A)=0{,}3=\\frac{3}{10}$ când $P(B)=1$."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Check the three results with numbers. Give the answers as fractions or decimals. Suppose $P(A\\cap B)>0$ and compute $P(A\\mid A,B)$. Then suppose $P(A)=0$ and compute $P(A\\cap B)$. Finally suppose $P(B)=1$ and $P(A)=0.7$ and compute $P(A\\mid B)$.",
+                "ro": "Verifică cele trei rezultate cu numere. Scrie răspunsurile ca fracții sau zecimale. Presupune $P(A\\cap B)>0$ și calculează $P(A\\mid A,B)$. Apoi presupune $P(A)=0$ și calculează $P(A\\cap B)$. În final presupune $P(B)=1$ și $P(A)=0{,}7$ și calculează $P(A\\mid B)$."
+              },
+              "data": {
+                "pA": 0.7
+              },
+              "hints": [
+                {
+                  "en": "In the first two cases the answer comes straight from the proofs. In the third, learning a certain event changes nothing.",
+                  "ro": "În primele două cazuri răspunsul vine direct din demonstrații. În al treilea, aflarea unui eveniment sigur nu schimbă nimic."
+                },
+                {
+                  "en": "First: the ratio of a probability to itself. Second: $0\\le P(A\\cap B)\\le P(A)$. Third: $P(A\\mid B)=P(A\\cap B)/P(B)$ with $P(A\\cap B)=P(A)$ and $P(B)=1$.",
+                  "ro": "Primul: raportul unei probabilități la ea însăși. Al doilea: $0\\le P(A\\cap B)\\le P(A)$. Al treilea: $P(A\\mid B)=P(A\\cap B)/P(B)$ cu $P(A\\cap B)=P(A)$ și $P(B)=1$."
+                },
+                {
+                  "en": "First: 1. Second: 0. Third: $0.7/1$.",
+                  "ro": "Primul: 1. Al doilea: 0. Al treilea: $0{,}7/1$."
+                }
+              ],
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "1",
+                  "expected": "1"
+                },
+                {
+                  "id": "b",
+                  "formula": "0",
+                  "expected": "0"
+                },
+                {
+                  "id": "c",
+                  "formula": "pA",
+                  "expected": "7/10"
+                }
+              ],
+              "solution": {
+                "en": "$P(A\\mid A,B)=1$; $P(A\\cap B)=0$ when $P(A)=0$; and $P(A\\mid B)=P(A)=0.7=\\frac{7}{10}$ when $P(B)=1$.",
+                "ro": "$P(A\\mid A,B)=1$; $P(A\\cap B)=0$ când $P(A)=0$; iar $P(A\\mid B)=P(A)=0{,}7=\\frac{7}{10}$ când $P(B)=1$."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ml-l03-s26",
+      "title": {
+        "en": "Exercise 0.92: the two forms agree",
+        "ro": "Exercițiul 0.92: cele două forme coincid"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ml-l03-x92",
+          "exercise": "0.92",
+          "claim": {
+            "en": "Using only the definition of conditional probability, show that if $P(A\\mid B,C)=P(A\\mid C)$ or $P(B\\mid A,C)=P(B\\mid C)$, then $P(A,B\\mid C)=P(A\\mid C)\\cdot P(B\\mid C)$.",
+            "ro": "Folosind doar definiția probabilității condiționate, arată că, dacă $P(A\\mid B,C)=P(A\\mid C)$ sau $P(B\\mid A,C)=P(B\\mid C)$, atunci $P(A,B\\mid C)=P(A\\mid C)\\cdot P(B\\mid C)$."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "$P(A,B\\mid C)=P(A\\mid B,C)\\,P(B\\mid C)$",
+                "ro": "$P(A,B\\mid C)=P(A\\mid B,C)\\,P(B\\mid C)$"
+              },
+              "why": {
+                "en": "The multiplication rule with the condition C kept in every factor (exercise 0.14, see Lesson 1).",
+                "ro": "Regula de înmulțire cu condiția C păstrată în fiecare factor (exercițiul 0.14, vezi Lecția 1)."
+              },
+              "predict": {
+                "question": {
+                  "en": "Which equality links $P(A,B\\mid C)$ to $P(A\\mid B,C)$?",
+                  "ro": "Ce egalitate leagă $P(A,B\\mid C)$ de $P(A\\mid B,C)$?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "$P(A,B\\mid C)=P(A\\mid B,C)\\,P(B\\mid C)$",
+                      "ro": "$P(A,B\\mid C)=P(A\\mid B,C)\\,P(B\\mid C)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the multiplication rule, with C in every factor.",
+                      "ro": "Corect: regula de înmulțire, cu C în fiecare factor."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A,B\\mid C)=P(A\\mid B)\\,P(B\\mid C)$",
+                      "ro": "$P(A,B\\mid C)=P(A\\mid B)\\,P(B\\mid C)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The condition C must stay in every factor; here it was dropped from the first one.",
+                      "ro": "Condiția C trebuie să rămână în fiecare factor; aici a dispărut din primul."
+                    },
+                    "misconception": "fara-conditia-c"
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A,B\\mid C)=P(A\\mid B,C)+P(B\\mid C)$",
+                      "ro": "$P(A,B\\mid C)=P(A\\mid B,C)+P(B\\mid C)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The multiplication rule multiplies; it does not add.",
+                      "ro": "Regula de înmulțire înmulțește; nu adună."
+                    },
+                    "misconception": "aduna-in-loc-sa-inmulteasca"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "If $P(A\\mid B,C)=P(A\\mid C)$, we substitute: $P(A,B\\mid C)=P(A\\mid C)\\,P(B\\mid C)$.",
+                "ro": "Dacă $P(A\\mid B,C)=P(A\\mid C)$, înlocuim: $P(A,B\\mid C)=P(A\\mid C)\\,P(B\\mid C)$."
+              }
+            },
+            {
+              "shown": {
+                "en": "For the other hypothesis, $P(A,B\\mid C)=P(B\\mid A,C)\\,P(A\\mid C)$.",
+                "ro": "Pentru cealaltă ipoteză, $P(A,B\\mid C)=P(B\\mid A,C)\\,P(A\\mid C)$."
+              },
+              "predict": {
+                "question": {
+                  "en": "The hypothesis is now $P(B\\mid A,C)=P(B\\mid C)$. What do we write?",
+                  "ro": "Ipoteza este acum $P(B\\mid A,C)=P(B\\mid C)$. Ce scriem?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "The same rule with A and B swapped: $P(A,B\\mid C)=P(B\\mid A,C)\\,P(A\\mid C)$",
+                      "ro": "Aceeași regulă cu A și B inversate: $P(A,B\\mid C)=P(B\\mid A,C)\\,P(A\\mid C)$"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Correct: the order of A and B does not matter, and the hypothesis then fits the first factor.",
+                      "ro": "Corect: ordinea lui A și B nu contează, iar ipoteza se potrivește apoi cu primul factor."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "$P(A,B\\mid C)=P(A\\mid B,C)\\,P(A\\mid C)$",
+                      "ro": "$P(A,B\\mid C)=P(A\\mid B,C)\\,P(A\\mid C)$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "The second factor must be about B; here the roles are mixed up.",
+                      "ro": "Al doilea factor trebuie să fie despre B; aici rolurile sunt amestecate."
+                    },
+                    "misconception": "rolurile-inversate"
+                  },
+                  {
+                    "text": {
+                      "en": "Nothing can be done: this hypothesis does not appear in the rule.",
+                      "ro": "Nu se poate face nimic: această ipoteză nu apare în regulă."
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Swapping A and B in the rule makes the hypothesis appear.",
+                      "ro": "Inversând A și B în regulă, ipoteza apare."
+                    },
+                    "misconception": "uita-ipoteza"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Substituting: $P(A,B\\mid C)=P(B\\mid C)\\,P(A\\mid C)$, the same product.",
+                "ro": "Înlocuind: $P(A,B\\mid C)=P(B\\mid C)\\,P(A\\mid C)$, același produs."
+              }
+            }
+          ],
+          "end": {
+            "en": "The two forms of conditional independence are equivalent. The converse follows by dividing by $P(B\\mid C)$, when $P(B,C)\\neq0$.",
+            "ro": "Cele două forme ale independenței condiționate sunt echivalente. Sensul invers rezultă împărțind la $P(B\\mid C)$, când $P(B,C)\\neq0$."
+          }
+        }
+      ]
+    }
+  ]
+}
