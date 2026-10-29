@@ -145,7 +145,8 @@ export default function CalcExerciseBlock(block) {
         id={iid}
         className={`ch-calc-in${isOk(v) ? ' is-right' : v?.verdict === 'wrong' ? ' is-wrong' : ''}`}
         type="text"
-        inputMode={f.kind === 'choice' ? 'text' : 'decimal'}
+        // the full keyboard: a phone's decimal pad has no "/" (9/17) and, on iOS, no minus sign
+        inputMode="text"
         autoComplete="off"
         autoCapitalize="off"
         spellCheck={false}

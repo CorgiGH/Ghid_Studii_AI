@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
 import {
-  overflowFindings, escapesContainer, smallTarget, visibleBand, hitFindings, joltFindings,
-  parseColour, effectiveColour, sameColour, backgroundFindings, wrongAttempt, rightText, MIN_TARGET,
+  overflowFindings, escapesContainer, scrollsX, sticksOut, smallTarget, visibleBand, hitFindings, joltFindings,
+  parseColour, effectiveColour, sameColour, backgroundFindings, wrongAttempt, rightText, unknownLessons, MIN_TARGET,
 } from '../../scripts/ml/walk-helpers.mjs'
 import { grade, isRight } from '../../src/ml/calc/answer.js'
 import { scopeOf } from '../../src/components/lesson/blocks/calcSpec.js'
@@ -26,6 +27,31 @@ describe('overflow check', () => {
     expect(escapesContainer(wide, card, false)).toBe(true)
     expect(escapesContainer({ left: 16, right: 374.5 }, card, false)).toBe(false)
     expect(escapesContainer({ left: 4, right: 300 }, card, false)).toBe(true)
+  })
+  it('only a box that scrolls lets a wide element through: overflow hidden or clip cuts it off', () => {
+    expect(scrollsX('auto')).toBe(true)
+    expect(scrollsX('scroll')).toBe(true)
+    expect(scrollsX('hidden')).toBe(false)
+    expect(scrollsX('clip')).toBe(false)
+    expect(scrollsX('visible')).toBe(false)
+  })
+  it('an element wider than the screen: fine in a scroller, cut off in a clipping box, out of the screen with neither', () => {
+    const card = { left: 16, right: 374 }
+    const wide = { left: 16, right: 700 }
+    expect(sticksOut(wide, card, [{ overflowX: 'visible', width: 340 }, { overflowX: 'auto', width: 340 }])).toBeNull()
+    expect(sticksOut(wide, card, [{ overflowX: 'hidden', width: 340 }])).toBe('cut')
+    expect(sticksOut(wide, card, [{ overflowX: 'visible', width: 340 }])).toBe('out')
+    expect(sticksOut({ left: 16, right: 300 }, card, [{ overflowX: 'hidden', width: 340 }])).toBeNull()
+    // KaTeX's MathML copy for screen readers sits in a 1 px clipped box on purpose: not a cut
+    expect(sticksOut(wide, card, [{ overflowX: 'hidden', width: 1 }, { overflowX: 'visible', width: 340 }])).toBeNull()
+  })
+})
+
+describe('the lessons to walk', () => {
+  it('a --lessons id with no lesson file is reported, so a typo never walks nothing and passes', () => {
+    expect(unknownLessons(null, ['ml-l01'])).toEqual([])
+    expect(unknownLessons(new Set(['ml-l01', 'ml-l02']), ['ml-l01', 'ml-l02', 'ml-l03'])).toEqual([])
+    expect(unknownLessons(new Set(['ml-l1', 'ml-l02']), ['ml-l01', 'ml-l02'])).toEqual(['ml-l1'])
   })
 })
 
@@ -67,13 +93,19 @@ describe('hit-test geometry', () => {
     expect(b.visible).toBe(0)
     expect(b.tapY).toBeNull()
   })
-  it('reports a covered control, and one that is not clear when it must be', () => {
+  it('reports a covered control, and one that stays under the footer when it must be clear of it', () => {
     const b = visibleBand({ top: 730, bottom: 778 }, 56, limits)
+    expect(b.under).toBe(true)
     expect(hitFindings('Verifică', b, false, 'at landing scroll')[0]).toContain('covered at landing scroll')
     expect(hitFindings('Verifică', b, true, 'at landing scroll')).toEqual([])
-    expect(hitFindings('Verifică', b, true, 'at max scroll', { mustBeClear: true })[0]).toContain('not fully clear')
+    expect(hitFindings('Verifică', b, true, 'at max scroll', { clearOfFooter: true })[0]).toContain('under the footer')
     const gone = visibleBand({ top: 757, bottom: 805 }, 56, limits)
     expect(hitFindings('Verifică', gone, false, 'x')).toEqual([]) // nothing shows, nothing to cover
+  })
+  it('at max scroll a field scrolled up past the top bar is not a footer problem (a long calc screen has 8 fields)', () => {
+    const up = visibleBand({ top: -300, bottom: -252 }, 56, limits)
+    expect(up.under).toBe(false)
+    expect(hitFindings('field a', up, null, 'at max scroll', { clearOfFooter: true })).toEqual([])
   })
 })
 
@@ -90,6 +122,14 @@ describe('jolt on a screen change', () => {
   })
   it('no samples is a finding, not a pass', () => {
     expect(joltFindings([])).toHaveLength(1)
+  })
+  it('the page shrinking under the scroll position is a jolt (the BD bug: a shorter next screen, 224 px in one frame)', () => {
+    const held = [{ t: 0, y: 1400, max: 1400 }, { t: 16, y: 1300, max: 1400 }, { t: 33, y: 900, max: 1400 }, { t: 50, y: 0, max: 1400 }, { t: 66, y: 0, max: 300 }]
+    expect(joltFindings(held)).toEqual([])
+    const shrunk = [{ t: 0, y: 1400, max: 1400 }, { t: 16, y: 1176, max: 1176 }, { t: 33, y: 600, max: 1176 }, { t: 50, y: 0, max: 1176 }]
+    const f = joltFindings(shrunk)
+    expect(f).toHaveLength(1)
+    expect(f[0]).toContain('shrank under the scroll position at 16 ms')
   })
 })
 
@@ -199,7 +239,29 @@ describe('answers to type', () => {
     expect(w.via).toBe('offset')
     expect(Number(w.text)).toBeCloseTo(9 / 17 + 10 * 0.0005, 5) // default tolerance below 1 is 0.0005
   })
+  it('a typed name (a choice field with no options) gets another name', () => {
+    const f = { id: 'root', label: { en: 'r', ro: 'r' }, kind: 'choice', formula: '"Outlook"', expected: 'Outlook' }
+    const w = wrongAttempt({ id: 'b', statement: { en: 'x', ro: 'x' }, fields: [f] })
+    expect(w).toMatchObject({ fieldId: 'root', via: 'other', verdict: 'wrong' })
+    expect(w.text.toLowerCase()).not.toBe('outlook')
+  })
   it('returns null when nothing wrong can be built', () => {
     expect(wrongAttempt({ id: 'z', statement: { en: 'x', ro: 'x' }, fields: [] })).toBeNull()
+  })
+})
+
+// What the walk found on lesson 2 at 390 px, pinned in the shared stylesheet (the BD player and viz kit serve ML too).
+describe('the shared player and viz kit, as the walk needs them', () => {
+  const css = readFileSync(new URL('../../src/index.css', import.meta.url), 'utf8')
+  const rule = (sel) => (css.match(new RegExp(`(^|\\n)${sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{([^}]*)\\}`)) || [])[2] || ''
+  it('the screen sliding in never widens the page: a phone would zoom out and the scroll would jump (44-224 px)', () => {
+    expect(rule('.lp-stage')).toMatch(/overflow-x:\s*clip/)
+    expect(rule('.lp-stage')).not.toMatch(/overflow(-x)?:\s*(hidden|auto|scroll)/) // a scroll container would break the scroll-to-top
+  })
+  it('the reveal, skip and viz step buttons are at least 44 px tall', () => {
+    expect(rule('.ch-reveal')).toMatch(/min-height:\s*44px/)
+    expect(rule('.lp-skip')).toMatch(/min-height:\s*44px/)
+    expect(rule('.viz-btn')).toMatch(/min-height:\s*44px/)
+    expect(rule('.viz-btn')).toMatch(/min-width:\s*44px/)
   })
 })

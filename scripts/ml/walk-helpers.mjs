@@ -21,6 +21,32 @@ export function escapesContainer(rect, container, insideScroller) {
   return rect.right > container.right + 1 || rect.left < container.left - 1
 }
 
+// Whether a box with this computed overflow-x lets the learner reach what sticks out of it: only a box that scrolls. A box with
+// overflow hidden or clip cuts the content off (text cut on a phone, BD-mistakes class 5), so it is no excuse.
+export const scrollsX = (overflowX) => overflowX === 'auto' || overflowX === 'scroll'
+
+// An element that sticks out of the screen (rect vs container, { left, right }), judged by its ancestors up to the screen
+// ([{ overflowX, width }], innermost first): null when a scroller holds it (or it does not stick out), 'cut' when a clipping box
+// (overflow hidden or clip) cuts it off, 'out' when nothing holds it. A clipping box of 4 px or less is a visually hidden copy for
+// screen readers (KaTeX's MathML), not a cut.
+export function sticksOut(rect, container, ancestors) {
+  if (!escapesContainer(rect, container, false)) return null
+  for (const a of ancestors) {
+    if (scrollsX(a.overflowX)) return null
+    if (a.overflowX === 'hidden' || a.overflowX === 'clip') return a.width <= 4 ? null : 'cut'
+  }
+  return 'out'
+}
+
+// ---- what to walk ------------------------------------------------------------------------------------------------------------
+
+// The --lessons ids that name no lesson file: a typo would otherwise walk nothing and pass.
+export function unknownLessons(only, ids) {
+  if (!only) return []
+  const have = new Set(ids)
+  return [...only].filter((id) => !have.has(id))
+}
+
 // ---- tap targets and hit-testing -------------------------------------------------------------------------------------------
 
 export function smallTarget(rect, min = MIN_TARGET) {
@@ -29,8 +55,9 @@ export function smallTarget(rect, min = MIN_TARGET) {
 
 // Where a learner's tap on an element lands at the current scroll: the part of its box between the top bar (`above`) and the lowest
 // obstruction (`limits`: the window's bottom edge, the sticky footer's top, a fixed bottom bar's top).
-// Returns { top, bottom, visible, clear, tapY }; tapY is the middle of the visible part, or null when under 4 px of it shows
-// (a sliver is no tap target, and its middle can fall on a sub-pixel edge of the footer).
+// Returns { top, bottom, visible, clear, under, tapY }; tapY is the middle of the visible part, or null when under 4 px of it
+// shows (a sliver is no tap target, and its middle can fall on a sub-pixel edge of the footer). `under`: part of the element is
+// below the lowest obstruction (the footer or the window's bottom edge).
 export function visibleBand(rect, above, limits) {
   const limit = Math.min(...limits)
   const top = Math.max(rect.top, above)
@@ -42,28 +69,39 @@ export function visibleBand(rect, above, limits) {
     limit: Math.round(limit),
     visible: Math.round(visible),
     clear: rect.top >= above && rect.bottom <= limit,
+    under: rect.bottom > limit + 0.5,
     tapY: bottom - top < 4 ? null : (top + bottom) / 2,
   }
 }
 
 // What a hit-test finds: `reaches` is true when the element at the tap point is the element itself or inside it.
-// A control that is not on screen at all (tapY null) is "covered" only when `mustShow` says part of it should be.
-export function hitFindings(name, band, reaches, where, { mustBeClear = false } = {}) {
+// With `clearOfFooter` (at max scroll, where the page cannot scroll further down) no part of the element may stay under the
+// footer; an element scrolled up past the top bar is fine, the learner scrolls back up to it.
+export function hitFindings(name, band, reaches, where, { clearOfFooter = false } = {}) {
   const out = []
   if (band.tapY !== null && reaches === false) out.push(`${name} is covered ${where}: a tap on its visible part reaches something else`)
-  if (mustBeClear && !band.clear) out.push(`${name} is not fully clear ${where} (${band.top}-${band.bottom}, limit ${band.limit})`)
+  if (clearOfFooter && band.under) out.push(`${name} stays under the footer ${where} (${band.top}-${band.bottom}, limit ${band.limit})`)
   return out
 }
 
 // ---- jolt on screen change ---------------------------------------------------------------------------------------------------
 
-// series: [{ t, y }] of window.scrollY from the Continue press on. Scrolled down and pressing Continue the page may only move up
-// (the smooth scroll to the top); a value higher than an earlier one is a jump back, and the last value must be 0.
+// series: [{ t, y, max }] of window.scrollY (and the page's max scroll, scrollHeight - innerHeight) from the Continue press on.
+// Scrolled down and pressing Continue the page may only move up (the smooth scroll to the top); a value higher than an earlier
+// one is a jump back, and the last value must be 0. The page may not shrink under the scroll position either: that clamps the
+// scroll in one frame and the content jumps (the BD jolt, 224 px when the next screen was shorter; 0735c17 holds the stage's height
+// until the scroll reaches the top).
 export function joltFindings(series) {
   const out = []
   if (!series?.length) return ['no scroll samples after Continue']
   for (let i = 1; i < series.length; i++) {
     if (series[i].y > series[i - 1].y + 1) { out.push(`scroll jumped back down at ${series[i].t} ms (${Math.round(series[i - 1].y)} -> ${Math.round(series[i].y)})`); break }
+  }
+  for (let i = 1; i < series.length; i++) {
+    if (typeof series[i].max === 'number' && series[i].max < series[i - 1].y - 2) {
+      out.push(`the page shrank under the scroll position at ${series[i].t} ms (scrollY ${Math.round(series[i - 1].y)}, the page now scrolls to ${Math.round(series[i].max)})`)
+      break
+    }
   }
   const last = series[series.length - 1].y
   if (last > 1) out.push(`the new screen does not start at its top (scrollY ${Math.round(last)})`)
@@ -148,7 +186,7 @@ export function rightText(field, block) {
 const fixed = (n) => n.toFixed(6).replace(/0+$/, '').replace(/\.$/, '')
 
 // A wrong answer for the block (plan, Task 10): the first detector's value when the block has one, else expected + 10*tol for
-// the first numeric field, else a different choice. Returns { fieldId, text, via } or null when no wrong text can be built.
+// the first numeric field, else a different choice (or, for a typed name, another name). Returns { fieldId, text, via } or null when no wrong text can be built.
 // The text is checked with grade(): it is never accepted as right.
 export function wrongAttempt(block) {
   const scope = scopeOf(block)
@@ -183,6 +221,10 @@ export function wrongAttempt(block) {
     } else if (f.kind === 'choice' && Array.isArray(f.options)) {
       const o = f.options.find((x) => norm(x.en) !== norm(f.expected))
       const a = o && wrong(f, o.en, 'other')
+      if (a) return a
+    } else if (f.kind === 'choice') {
+      // a typed name: one that is not the expected one
+      const a = wrong(f, `${f.expected}x`, 'other')
       if (a) return a
     } else if (f.kind === 'multi' && Array.isArray(f.options)) {
       const o = f.options[0]

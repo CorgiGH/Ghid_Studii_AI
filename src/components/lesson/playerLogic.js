@@ -12,6 +12,35 @@ export function screenFromUrl(search, total) {
   return Math.min(max, Math.max(1, parseInt(raw, 10)));
 }
 
+// After a screen change from a scrolled-down page, the stage keeps the height go() gave it (style.minHeight) until the smooth scroll
+// to the top is done, or the learner scrolls down, or `maxMs` pass: a shorter next screen would otherwise shrink the page under
+// the scroll position and the content would jump (0735c17). Returns the effect's cleanup, which only stops listening: it never
+// clears the height, because by the time React runs it go() may already have set the next change's hold (the ML walk found the
+// jolt back on every other screen change).
+export function holdStageUntilTop(stage, win = window, { maxMs = 1200 } = {}) {
+  if (!stage || !stage.style.minHeight) return undefined;
+  let timer = null;
+  let lastY = win.scrollY;
+  const detach = () => {
+    win.removeEventListener('scroll', onScroll);
+    win.clearTimeout(timer);
+  };
+  const release = () => {
+    stage.style.minHeight = '';
+    detach();
+  };
+  // the smooth scroll only ever goes up: a step down is the learner scrolling
+  function onScroll() {
+    const y = win.scrollY;
+    if (y <= 0 || y > lastY) release();
+    lastY = y;
+  }
+  win.addEventListener('scroll', onScroll, { passive: true });
+  timer = win.setTimeout(release, maxMs);
+  if (win.scrollY <= 0) release();
+  return detach;
+}
+
 export function nextScreen(current, dir, total) {
   return Math.min(Math.max(1, total), Math.max(1, current + (dir < 0 ? -1 : 1)));
 }

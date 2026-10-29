@@ -125,6 +125,25 @@ const valueNumber = (text) => {
   return p.ok ? numberOf(p.value) : NaN;
 };
 
+// For a fraction field whose formula gives an exact Fraction and whose expected is written as a fraction: the formula's value
+// when the two differ (as text), else null.
+function exactFraction(f, scope) {
+  let v;
+  try { v = evaluate(f.formula, scope); } catch { return null; }
+  if (!(v instanceof Fraction) || typeof f.expected !== 'string') return null;
+  const p = parseAnswer(f.expected, 'frac');
+  if (!p.ok || !p.ratio) return null;
+  return p.value.equals(v) ? null : v.toString();
+}
+
+// An option's text read as a plain number: KaTeX fractions (\frac, \dfrac, \tfrac) become a/b, {,} a decimal comma, thin
+// spaces go. "$\frac{3}{4}$" -> "3/4".
+export function optionNumberText(text) {
+  return String(text ?? '').trim()
+    .replace(/\\[dt]?frac\s*\{\s*(-?[\d.,]+)\s*\}\s*\{\s*([\d.,]+)\s*\}/g, '$1/$2')
+    .replace(/\{,\}/g, ',').replace(/\\[,;:! ]/g, '').trim();
+}
+
 // The block and each variant as a plain block (its own statement, data, tables and formulas), for re-evaluating.
 function flavours(block) {
   return [{ label: '', b: block }, ...(block.variants || []).map((v, i) => ({ label: ` variant ${i}`, b: withVariant(block, v) }))];
@@ -139,6 +158,11 @@ export function numberProblems(lessons) {
         for (const f of b.fields || []) {
           const r = formulaMatches(f, scope);
           if (!r.ok) out.push(`N1 ${where}${label} field ${f.id}: formula ${JSON.stringify(f.formula)} gives ${r.error ?? r.value}, expected ${JSON.stringify(f.expected)}`);
+          else if (f.kind === 'frac') {
+            // the page grades a typed fraction against expected exactly (D-667), so a fraction near it is not good enough
+            const exact = exactFraction(f, scope);
+            if (exact) out.push(`N1 ${where}${label} field ${f.id}: formula ${JSON.stringify(f.formula)} gives ${exact}, expected ${JSON.stringify(f.expected)} (a fraction field needs the same fraction)`);
+          }
         }
         for (const d of b.detectors || []) {
           const f = (b.fields || []).find((x) => x.id === d.field);
@@ -158,7 +182,7 @@ export function numberProblems(lessons) {
     }
     if (block.type === 'mcq') {
       const right = (block.options || []).find((o) => o.correct === true);
-      const t = String(right?.text?.ro ?? '').replace(/\{,\}/g, ',').trim();
+      const t = optionNumberText(right?.text?.ro);
       if (!/^\$?-?[\d.,/ ]+\$?$/.test(t)) continue;
       const want = valueNumber(t.replace(/\$/g, ''));
       if (!block.check) { out.push(`N3 ${where}: the correct option "${t}" is a number but the block has no check { formula, data? }`); continue; }
@@ -291,8 +315,9 @@ export function repetitionProblems(lessons, allocation) {
       for (const h of hits) if (h.no !== owner) out.push(`R1 ${h.where}: exercise ${id} belongs to lesson ${owner}, not ${h.no}`);
     }
   }
+  // an optional exercise still has its own block (the outline gives it a section); an implementation exercise is one line of text
   for (const [id, e] of Object.entries(index)) {
-    if (!have.has(e.lesson) || e.optional || e.answer_status === 'impl' || found.has(id)) continue;
+    if (!have.has(e.lesson) || e.answer_status === 'impl' || found.has(id)) continue;
     out.push(`R1 exercise ${id} is owned by lesson ${e.lesson} but no calc-exercise or proof-steps block carries it`);
   }
 
@@ -337,12 +362,22 @@ export function repetitionProblems(lessons, allocation) {
 
 // ---- 4. quiz quality --------------------------------------------------------------------------------------------------------
 
+// The letter of the right answer is spread over a lesson's mcqs (no letter over 40%, from 3 questions on) and, as a pool of its
+// own, over its proof predictions (no position over two thirds, from 3 on): most predictions have two options, so 40% could
+// never hold for them, and a lesson whose predictions are all "B" teaches the letter, not the step (BD-mistakes class 10).
+const PREDICT_SHARE = 2 / 3;
+
 export function quizProblems(lessons) {
   const out = [];
   for (const lesson of lessons) {
     const positions = [];
+    const predicts = [];
     for (const step of lesson.json.steps || []) {
       for (const b of step.blocks || []) {
+        if (b.type === 'proof-steps') {
+          for (const s of b.steps || []) if (s?.predict) predicts.push((s.predict.options || []).findIndex((o) => o.correct === true));
+          continue;
+        }
         if (b.type !== 'mcq') continue;
         const where = `${step.id} ${b.id}`;
         (b.options || []).forEach((o, i) => {
@@ -359,6 +394,13 @@ export function quizProblems(lessons) {
       for (const p of positions) counts[p] = (counts[p] || 0) + 1;
       for (const [p, n] of Object.entries(counts)) {
         if (n / positions.length > 0.4) out.push(`Q2 ${lesson.metaId}: letter ${'ABCDEFGH'[Number(p)] ?? '?'} holds ${n} of ${positions.length} correct answers (more than 40%)`);
+      }
+    }
+    if (predicts.length >= 3) {
+      const counts = {};
+      for (const p of predicts) counts[p] = (counts[p] || 0) + 1;
+      for (const [p, n] of Object.entries(counts)) {
+        if (n / predicts.length > PREDICT_SHARE + 1e-9) out.push(`Q2 ${lesson.metaId}: letter ${'ABCDEFGH'[Number(p)] ?? '?'} holds ${n} of ${predicts.length} proof predictions (more than two thirds)`);
       }
     }
   }
@@ -447,16 +489,23 @@ export function vizProblems(lessons, widgets = registeredWidgets()) {
 // ---- 9. terms before their lesson, answers given away -----------------------------------------------------------------------
 // A term is matched as a run of whole words, each word by its stem (a word of 6+ letters loses its last 2, never below 4 letters),
 // with case and diacritics ignored: "entropie condiționată" finds "entropia condiționată" and "entropiei condiționate".
+// A `strict` term keeps ș and ț apart from s and t and loses only its final vowels: "varianță" (variance, Lesson 4) finds
+// "varianța" and "varianțele" but not "varianta" or "variante" (a variant), which plain matching cannot tell apart.
 
 const words = (s) => (norm(fold(s)).match(/[\p{L}\p{N}]+/gu) || []);
 const stemOf = (w) => (w.length >= 6 ? w.slice(0, Math.max(4, w.length - 2)) : w);
+const strictWords = (s) => (fold(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u0325\u0327-\u036f]/g, '').normalize('NFC')
+  .match(/[\p{L}\p{N}]+/gu) || []);
+const strictStem = (w) => { let x = w; while (x.length > 4 && /[aeiou]$/.test(x)) x = x.slice(0, -1); return x; };
 
-export function termMatcher(term) {
-  const ts = words(term);
+export function termMatcher(term, { strict = false } = {}) {
+  const split = strict ? strictWords : words;
+  const ts = split(term);
+  const same = strict ? (w, t) => w.startsWith(strictStem(t)) : (w, t) => (t.length >= 6 ? w.startsWith(stemOf(t)) : w === t);
   return (text) => {
-    const ws = words(text);
+    const ws = split(text);
     for (let i = 0; i + ts.length <= ws.length; i++) {
-      if (ts.every((t, j) => (t.length >= 6 ? ws[i + j].startsWith(stemOf(t)) : ws[i + j] === t))) return true;
+      if (ts.every((t, j) => same(ws[i + j], t))) return true;
     }
     return false;
   };
@@ -466,8 +515,8 @@ export function termMatcher(term) {
 export function termProblems(lessons, owners) {
   const byTerm = new Map();
   for (const t of owners?.terms || []) {
-    const k = words(t.term).join(' ');
-    if (!byTerm.has(k) || byTerm.get(k).owner > t.owner) byTerm.set(k, { term: t.term, owner: t.owner, match: termMatcher(t.term) });
+    const k = `${t.strict ? 'strict:' : ''}${(t.strict ? strictWords : words)(t.term).join(' ')}`;
+    if (!byTerm.has(k) || byTerm.get(k).owner > t.owner) byTerm.set(k, { term: t.term, owner: t.owner, match: termMatcher(t.term, { strict: !!t.strict }) });
   }
   const out = [];
   for (const lesson of lessons) {
@@ -491,10 +540,13 @@ const decimalForms = (v) => {
 export function giveawayProblems(lessons) {
   const out = [];
   for (const { block, where } of blocksOf(lessons)) {
-    if (block.type === 'mcq') {
-      const right = (block.options || []).find((o) => o.correct === true);
+    // an mcq and each prediction of a proof are quiz stems
+    const asks = block.type === 'mcq' ? [{ q: block, at: '' }]
+      : block.type === 'proof-steps' ? (block.steps || []).map((s, k) => ({ q: s?.predict, at: ` step ${k + 1}` })).filter((x) => x.q) : [];
+    for (const { q, at } of asks) {
+      const right = (q.options || []).find((o) => o.correct === true);
       const t = norm(String(right?.text?.ro ?? '').replace(/\$/g, ''));
-      if (t.length >= 3 && boundary(escapeRe(t)).test(norm(block.question?.ro))) out.push(`L2 ${where}: the stem contains its correct option "${right.text.ro}"`);
+      if (t.length >= 3 && boundary(escapeRe(t)).test(norm(String(q.question?.ro ?? '').replace(/\$/g, '')))) out.push(`L2 ${where}${at}: the stem contains its correct option "${right.text.ro}"`);
     }
     if (block.type !== 'calc-exercise') continue;
     for (const { label, b } of flavours(block)) {
@@ -535,17 +587,20 @@ const ROUNDING_STATED = /zecimal|frac[țţ]ie|frac[țţ]ii|ca raport|rotunjit/i;
 const UNIT_STATED = /în bi[țţ]i|bi[țţ]i|\\log_?\{?2|log₂|log_2/i;
 const BIT_FUNCTIONS = /\b(log2|H|Hc|Hcol|IG|IGR|splitInfo|KL|CH)\s*\(/;
 
+// Each variant too: review shows a variant with its own statement and the block's field labels.
 export function formatProblems(lessons) {
   const out = [];
   for (const { block, where } of blocksOf(lessons)) {
     if (block.type !== 'calc-exercise') continue;
-    const text = fold(`${block.statement?.ro ?? ''} ${(block.fields || []).map((f) => f.label?.ro ?? '').join(' ')}`);
-    for (const f of block.fields || []) {
-      if ((f.kind === 'num' || f.kind === 'frac') && tolOf(f) < 0.01 && !ROUNDING_STATED.test(fold(`${f.label?.ro ?? ''} ${block.statement?.ro ?? ''}`))) {
-        out.push(`F1 ${where} field ${f.id}: tolerance ${tolOf(f)} but neither the label nor the statement says how to round`);
+    for (const { label, b } of flavours(block)) {
+      const text = fold(`${b.statement?.ro ?? ''} ${(b.fields || []).map((f) => f.label?.ro ?? '').join(' ')}`);
+      for (const f of b.fields || []) {
+        if ((f.kind === 'num' || f.kind === 'frac') && tolOf(f) < 0.01 && !ROUNDING_STATED.test(fold(`${f.label?.ro ?? ''} ${b.statement?.ro ?? ''}`))) {
+          out.push(`F1 ${where}${label} field ${f.id}: tolerance ${tolOf(f)} but neither the label nor the statement says how to round`);
+        }
       }
+      if ((b.fields || []).some((f) => BIT_FUNCTIONS.test(f.formula)) && !UNIT_STATED.test(text)) out.push(`F2 ${where}${label}: the formulas use log2, H or IG but the statement does not say "în biți" or $\\log_2$`);
     }
-    if ((block.fields || []).some((f) => BIT_FUNCTIONS.test(f.formula)) && !UNIT_STATED.test(text)) out.push(`F2 ${where}: the formulas use log2, H or IG but the statement does not say "în biți" or $\\log_2$`);
   }
   return out;
 }
@@ -572,33 +627,38 @@ export function katexProblems(lessons) {
 
 const COLOUR_LITERAL = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\(/;
 const OPACITY_CLASS = /\bopacity-\d/;
-// ML rules in the shared stylesheet: the calc-exercise and proof-steps blocks and anything named ml-.
+// ML rules in the shared stylesheet: the calc-exercise and proof-steps blocks and anything named ml-, plus every definition of an
+// ML token (--ml-*), wherever it sits (:root, .dark): an ML token is a color-mix of the theme tokens.
 const ML_SELECTOR = /\.ch-calc|\.ch-proof|\.ml-|\.lc-/;
+const ML_TOKEN = /--ml-[\w-]+\s*:[^;}]*/g;
 
 export function colourProblems(files) {
   const out = [];
   for (const { path: p, src } of files) {
     let text = src;
-    if (p.endsWith('.css')) text = [...src.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter((m) => ML_SELECTOR.test(m[1])).map((m) => m[0]).join('\n');
+    if (p.endsWith('.css')) {
+      const rules = [...src.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+      text = [...rules.filter((m) => ML_SELECTOR.test(m[1])).map((m) => m[0]), ...rules.flatMap((m) => m[2].match(ML_TOKEN) || [])].join('\n');
+    }
     if (COLOUR_LITERAL.test(text)) out.push(`C1 ${p}: a hex, rgb( or hsl( literal (use var(--theme-*) or var(--lt-*))`);
     if (OPACITY_CLASS.test(text)) out.push(`C1 ${p}: an opacity- class (muted text uses a token)`);
   }
   return out;
 }
 
-// The files the colour rule covers.
+// The files the colour rule covers: everything under any ml folder of src/components/lesson (src/components/lesson/**/ml/**),
+// the three ML blocks, and the ML rules of the shared stylesheet.
 export function colourFiles(root = ROOT) {
   const files = [];
-  const walk = (dir) => {
+  const walk = (dir, inMl) => {
     if (!fs.existsSync(dir)) return;
-    for (const name of fs.readdirSync(dir)) {
+    for (const name of fs.readdirSync(dir).sort()) {
       const p = path.join(dir, name);
-      if (fs.statSync(p).isDirectory()) walk(p);
-      else if (/\.(jsx?|css)$/.test(name)) files.push(p);
+      if (fs.statSync(p).isDirectory()) walk(p, inMl || name === 'ml');
+      else if (inMl && /\.(jsx?|css)$/.test(name)) files.push(p);
     }
   };
-  walk(path.join(root, 'src/components/lesson/viz/widgets/ml'));
-  walk(path.join(root, 'src/components/lesson/viz/logic/ml'));
+  walk(path.join(root, 'src/components/lesson'), false);
   for (const n of ['CalcExerciseBlock.jsx', 'ProofStepsBlock.jsx', 'LogCalculator.jsx']) {
     const p = path.join(root, 'src/components/lesson/blocks', n);
     if (fs.existsSync(p)) files.push(p);

@@ -315,6 +315,13 @@ describe('the rendered block', () => {
     expect(html).not.toContain('calc-reveal');
   });
 
+  it('a typed field opens the full keyboard on a phone: the decimal pad has no "/" for 9/17 and, on iOS, no minus', () => {
+    const html = render();
+    const inputs = html.match(/<input[^>]*data-testid="calc-input-[^"]*"[^>]*>/g) || [];
+    expect(inputs.length).toBeGreaterThan(1);
+    for (const i of inputs) expect(i).not.toMatch(/inputmode="(decimal|numeric)"/i);
+  });
+
   it('a wrong value gives "Nu chiar" plus the detector message, a right one "Corect", and the gate opens; a fresh render restores it', () => {
     const wrong = { hc: '0,2467', root: 'wind', frac: '9/14' };
     let r = press(wrong, {});

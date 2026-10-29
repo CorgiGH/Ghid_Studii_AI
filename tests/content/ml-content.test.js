@@ -2,6 +2,7 @@
 // quality, text sweep, structure, terms, formats, KaTeX, colours). The checks live in scripts/ml/content-checks.mjs so the
 // per-lesson report (scripts/ml/check-repetition.mjs) runs the same code; they are re-exported from here.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import ml from '../../src/content/ml/index.js';
@@ -22,6 +23,9 @@ export {
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const COURSES = path.join(ROOT, 'src/content/ml/courses');
 const files = fs.existsSync(COURSES) ? fs.readdirSync(COURSES).filter((f) => /^lesson-\d\d\.json$/.test(f)).sort() : [];
+// Lessons are published in the teacher's priority order (design §11, D-068: L18–L22 before L17) and built in parallel lanes
+// that each hold one lesson, so the registered lessons may have gaps; they are always sorted by lesson number.
+const idOfFile = (f) => `ml-l${f.match(/^lesson-(\d\d)\.json$/)[1]}`;
 
 describe('ml registration', () => {
   it('is a lesson-player subject in year 2 semester 1, after bd', () => {
@@ -37,13 +41,14 @@ describe('ml registration', () => {
     expect(ml.description.en).toMatch(/weeks 1–5/);
     expect(ml.description.ro).toMatch(/săptămânile 1–5/);
   });
-  it('registers one course per lesson file, in ml-l01… order with no gaps', () => {
-    expect(ml.courses.map((c) => c.id)).toEqual(files.map((_, i) => `ml-l${String(i + 1).padStart(2, '0')}`));
+  it('registers one course per lesson file, sorted by lesson number (a lesson not published yet leaves a gap)', () => {
+    expect(ml.courses.map((c) => c.id)).toEqual(files.map(idOfFile));
     expect(ml.courses).toHaveLength(files.length);
   });
   it('gives each course its file, meta id, section count and unique step ids', () => {
-    for (const [i, c] of ml.courses.entries()) {
-      const nn = String(i + 1).padStart(2, '0');
+    for (const c of ml.courses) {
+      const nn = c.id.slice(-2);
+      expect(c.id).toMatch(/^ml-l\d\d$/);
       expect(c.src).toBe(`ml/courses/lesson-${nn}.json`);
       expect(c.metaId).toBe(c.id);
       const json = loadJson(c.src);
@@ -205,14 +210,50 @@ describe('content gate: edge cases of each rule', () => {
     expect(citedNumbers('Are 3 zile, 0,75 și 9/17 și $0{,}5$ la $\\log_2$').map((c) => c.text)).toEqual(['0.75', '9/17', '0.5']);
   });
   it('an exercise atom: in two blocks, in the wrong lesson, or missing from its owner lesson', () => {
-    const alloc = { exercise_index: { '8.1': { lesson: 8 }, '8.2': { lesson: 8 }, '8.3': { lesson: 8, optional: true }, '8.4': { lesson: 8, answer_status: 'impl' }, '9.1': { lesson: 9 } }, declared_reuse: [] };
+    // an optional exercise is still on its lesson's screens (the outline gives each one its own section); only an
+    // implementation exercise has no block (it is one line of text)
+    const alloc = { exercise_index: { '8.1': { lesson: 8 }, '8.2': { lesson: 8 }, '8.3': { lesson: 8, optional: true }, '8.4': { lesson: 8, answer_status: 'impl', optional: true }, '9.1': { lesson: 9 }, '10.1': { lesson: 10 } }, declared_reuse: [] };
     const mkBlock = (id, ex) => ({ type: 'calc-exercise', id, exercise: ex });
     const ls = asLesson({ meta: { id: 'ml-l08' }, steps: [{ id: 'ml-l08-s1', blocks: [mkBlock('ml-l08-a', ['8.1', '9.1']), mkBlock('ml-l08-b', '8.1')] }] });
     expect(repetitionProblems([ls], alloc).map((p) => p.replace(/^R1 /, ''))).toEqual([
       'exercise 8.1 appears in 2 blocks (ml-l08-s1 ml-l08-a; ml-l08-s1 ml-l08-b)',
       'ml-l08-s1 ml-l08-a: exercise 9.1 belongs to lesson 9, not 8',
       'exercise 8.2 is owned by lesson 8 but no calc-exercise or proof-steps block carries it',
+      'exercise 8.3 is owned by lesson 8 but no calc-exercise or proof-steps block carries it',
     ]);
+  });
+  it('a fraction field whose formula gives another fraction fails, even inside the tolerance', () => {
+    // 82/155 = 0.52903 is within 0.0005 of 9/17 = 0.52941, but a learner who types 82/155 is graded against 9/17 exactly
+    const b = calc({ fields: [{ id: 'a', kind: 'frac', label: { en: 'a', ro: 'a' }, formula: '82/155', expected: '9/17' }] });
+    expect(codes(numberProblems([one(b)]))).toEqual(['N1']);
+  });
+  it('a correct option written as a KaTeX fraction is a number and needs its check', () => {
+    const mk = (text, check) => ({ type: 'mcq', question: { en: 'q', ro: 'q' }, ...(check ? { check } : {}), options: [{ correct: true, text: { en: text, ro: text } }, { correct: false, text: { en: 'b', ro: 'b' } }] });
+    expect(codes(numberProblems([one(mk('$\\frac{3}{4}$'))]))).toEqual(['N3']);
+    expect(numberProblems([one(mk('$\\dfrac{3}{4}$', { formula: '3/4' }))])).toEqual([]);
+    expect(codes(numberProblems([one(mk('$\\tfrac{3}{4}$', { formula: '2/3' }))]))).toEqual(['N3']);
+  });
+  it('a variant states the rounding and the unit too (review shows it with its own statement)', () => {
+    const b = calc({
+      statement: { en: 'In bits, to 4 decimals.', ro: 'În biți, cu 4 zecimale.' },
+      fields: [{ id: 'a', kind: 'num', label: { en: 'a', ro: 'a' }, formula: 'H(1/2, 1/2)', expected: 1 }],
+      variants: [{ statement: { en: 'p = 1/4.', ro: 'p = 1/4.' }, solution: { en: 's', ro: 's' }, fields: [{ id: 'a', formula: 'H(1/4, 3/4)', expected: 0.8113 }] }],
+    });
+    expect(formatProblems([one(b)]).map((p) => p.slice(0, 2))).toEqual(['F1', 'F2']);
+    expect(formatProblems([one(b)]).every((p) => p.includes('variant 0'))).toBe(true);
+  });
+  const proof = (picks, question = { en: 'Next?', ro: 'Ce urmează?' }) => ({
+    type: 'proof-steps', claim: { en: 'c', ro: 'c' }, end: { en: 'e', ro: 'e' },
+    steps: picks.map((k) => ({ shown: { en: 's', ro: 's' }, predict: { question, options: [0, 1].map((i) => ({ correct: i === k, text: { en: `form ${i}`, ro: `forma ${i}` }, explain: { en: 'x', ro: 'x' }, misconception: 'caz-particular' })) } })),
+  });
+  it('a proof prediction that holds its correct option in its question gives the answer away', () => {
+    expect(codes(giveawayProblems([one(proof([1], { en: 'Is it form 1?', ro: 'Este forma 1?' }))]))).toEqual(['L2']);
+    expect(giveawayProblems([one(proof([1]))])).toEqual([]);
+  });
+  it('proof predictions: no position holds more than two thirds of a lesson\'s predictions', () => {
+    expect(codes(quizProblems([one(proof([1, 1, 1, 1, 1]))]))).toEqual(['Q2']);
+    expect(quizProblems([one(proof([1, 0, 1, 0, 1]))])).toEqual([]);
+    expect(quizProblems([one(proof([1, 1]))])).toEqual([]); // two are too few to spread
   });
   it('a table shared by lessons is allowed when allocation.json declares the reuse', () => {
     const alloc = { exercise_index: {}, declared_reuse: [{ table: 't', owner: 4, also_in: ['L5: x'] }] };
@@ -229,6 +270,18 @@ describe('content gate: edge cases of each rule', () => {
     expect(m('Entropiei condiționate a lui Y')).toBe(true);
     expect(m('entropia și apoi condiționată')).toBe(false);
   });
+  const learn = (no, ro) => asLesson({ meta: { id: `ml-l${no}` }, steps: [{ id: `ml-l${no}-s1`, title: { en: 't', ro: 't' }, blocks: [{ type: 'learn', content: { en: 'x', ro } }] }] });
+  it('variance (Lesson 4) is not "variant": a strict term keeps ș and ț apart from s and t', () => {
+    expect(termProblems([learn('01', 'Varianta condiționată a regulii de înmulțire.')], owners)).toEqual([]);
+    expect(termProblems([learn('01', 'Alte variante: varianta 2.')], owners)).toEqual([]);
+    expect(codes(termProblems([learn('01', 'Varianța lui X.')], owners))).toEqual(['L1']);
+    expect(codes(termProblems([learn('01', 'Calculăm varianțele.')], owners))).toEqual(['L1']);
+  });
+  it('an everyday word is no lesson\'s term: xor in the tree lessons, the Gibbs classifier before Lesson 24', () => {
+    expect(termProblems([learn('12', 'Pe xor, fiecare atribut are IG 0 la rădăcină.')], owners)).toEqual([]);
+    expect(termProblems([learn('19', 'Pe slide-uri mai există clasificatorul Gibbs.')], owners)).toEqual([]);
+    expect(codes(termProblems([learn('19', 'Inegalitatea lui Gibbs spune că...')], owners))).toEqual(['L1']);
+  });
   it('a forward note that names the owner lesson may use the term', () => {
     const ls = asLesson({ meta: { id: 'ml-l03' }, steps: [{ id: 'ml-l03-s1', title: { en: 't', ro: 't' }, blocks: [{ type: 'learn', content: { en: 'Entropy comes later (Lesson 7).', ro: 'Entropia vine mai târziu (vezi Lecția 7).' } }] }] });
     expect(termProblems([ls], owners)).toEqual([]);
@@ -241,6 +294,24 @@ describe('content gate: edge cases of each rule', () => {
     expect(codes(colourProblems([{ path: 'a.jsx', src: 'style={{ color: "#fff" }}' }, { path: 'b.jsx', src: 'className="opacity-60"' }, { path: 'c.jsx', src: 'var(--lt-acc)' }]))).toEqual(['C1', 'C1']);
     expect(colourProblems([{ path: 'x.css', src: '.qm-scroll { mask: linear-gradient(#000 0, transparent) } .ch-calc { color: var(--theme-text) }' }])).toEqual([]);
     expect(codes(colourProblems([{ path: 'x.css', src: '.ch-calc-key { color: #fff }' }]))).toEqual(['C1']);
+  });
+  it('colours: an ML token is a color-mix of the theme tokens wherever it is defined', () => {
+    expect(codes(colourProblems([{ path: 'x.css', src: ':root { --ml-hl: #ffcc00; --lt-acc: #123456 }' }]))).toEqual(['C1']);
+    expect(codes(colourProblems([{ path: 'x.css', src: '.dark { --ml-hl: rgb(1, 2, 3) }' }]))).toEqual(['C1']);
+    expect(colourProblems([{ path: 'x.css', src: ':root { --ml-hl: color-mix(in srgb, var(--lt-acc) 30%, var(--theme-card-bg)); --lt-acc: #123456 }' }])).toEqual([]);
+  });
+  it('colours: every ml folder under the lesson components is covered', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ml-colour-'));
+    try {
+      for (const p of ['src/components/lesson/blocks/ml/A.jsx', 'src/components/lesson/viz/widgets/ml/sub/B.css', 'src/components/lesson/viz/logic/ml/c.js', 'src/components/lesson/viz/widgets/D.jsx']) {
+        fs.mkdirSync(path.dirname(path.join(root, p)), { recursive: true });
+        fs.writeFileSync(path.join(root, p), 'x');
+      }
+      const got = colourFiles(root).map((f) => f.path).sort();
+      expect(got).toEqual(['src/components/lesson/blocks/ml/A.jsx', 'src/components/lesson/viz/logic/ml/c.js', 'src/components/lesson/viz/widgets/ml/sub/B.css']);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 

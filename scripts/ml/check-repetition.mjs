@@ -10,16 +10,18 @@ const root = i > 0 ? path.resolve(process.argv[i + 1]) : ROOT;
 const lessons = loadLessons(root);
 if (!lessons.length) { console.log('No ML lessons yet.'); process.exit(0); }
 
-const results = runAll(lessons, { allocation: loadAllocation(root), owners: loadTermOwners(root), widgets: registeredWidgets() });
+const widgets = registeredWidgets(path.join(root, 'src/components/lesson/blocks/VizBlock.jsx'));
+const results = runAll(lessons, { allocation: loadAllocation(root), owners: loadTermOwners(root), widgets });
 results.validator = validatorProblems(lessons.map((l) => l.file));
 results.colours = colourProblems(colourFiles(root));
 
-// A problem belongs to the lesson whose id it names (ml-lNN); the others (subject-wide) go under "subject".
+// A problem belongs to the lesson whose id (ml-lNN) or file (lesson-NN.json) it names; the others (subject-wide) go under "subject".
 const bucket = new Map(lessons.map((l) => [l.metaId, []]));
 bucket.set('subject', []);
+const lessonOf = (p) => { const m = p.match(/\bml-l(\d\d)\b|\blesson-(\d\d)\.json\b/); return m ? `ml-l${m[1] ?? m[2]}` : 'subject'; };
 for (const [name, problems] of Object.entries(results)) {
   for (const p of problems) {
-    const id = (p.match(/ml-l\d\d/) || ['subject'])[0];
+    const id = lessonOf(p);
     (bucket.get(id) || bucket.get('subject')).push(`[${name}] ${p}`);
   }
 }

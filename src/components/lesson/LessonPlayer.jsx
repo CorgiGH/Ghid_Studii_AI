@@ -8,7 +8,7 @@ import formatMarkdown from '../blocks/formatMarkdown';
 import ScreenGate from './ScreenGate';
 import { preloadLessonBlocks } from './preload';
 import { useLessonStore } from '../../lesson/useLessonStore';
-import { canAdvance, isGatingScreen, mergeGate, nextScreen, screenFromUrl, paramsForScreen, seedGate, skipAttempt, slideVariants } from './playerLogic';
+import { canAdvance, holdStageUntilTop, isGatingScreen, mergeGate, nextScreen, screenFromUrl, paramsForScreen, seedGate, skipAttempt, slideVariants } from './playerLogic';
 
 const EDITABLE = 'textarea, input, select, [contenteditable=""], [contenteditable="true"], .cm-editor, [data-lesson-editor]';
 const INTERACTIVE = 'button, a, summary, [role="button"], [role="tab"]';
@@ -110,26 +110,8 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   useEffect(() => {
     if (firstRender.current) { firstRender.current = false; return undefined; }
     window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
-    const stage = stageRef.current;
-    if (!stage || !stage.style.minHeight) return undefined;
-    let timer = null;
-    let lastY = window.scrollY;
-    const release = () => {
-      stage.style.minHeight = '';
-      window.removeEventListener('scroll', onScroll);
-      clearTimeout(timer);
-    };
-    // Let go at the top, or as soon as the learner scrolls down (the smooth scroll only ever goes up), so the new
-    // screen never keeps the old one's empty room under it.
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (y <= 0 || y > lastY) release();
-      lastY = y;
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    timer = setTimeout(release, 1200); // the smooth scroll was interrupted (the learner scrolled): let go anyway
-    if (window.scrollY <= 0) release();
-    return release;
+    // Let go at the top, or as soon as the learner scrolls down, so the new screen never keeps the old one's empty room under it.
+    return holdStageUntilTop(stageRef.current, window);
   }, [screen, reduced]);
 
   // After a reload, a screen the learner already answered stays unlocked.
