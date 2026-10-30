@@ -13,6 +13,7 @@ import { validateProof } from '../src/components/lesson/blocks/proofSpec.js';
 import { validateQueryMachine } from '../src/sql/machineSpec.js';
 import { validateSqlExercise } from '../src/components/lesson/blocks/sqlExerciseSpec.js';
 import { validateCalc } from '../src/components/lesson/blocks/calcSpec.js';
+import { validateSteps, validateRule } from '../src/components/lesson/blocks/guideSpec.js';
 
 const file = process.argv[2];
 if (!file) { console.error('Usage: node validate-course-json.mjs <file>'); process.exit(1); }
@@ -80,6 +81,12 @@ else {
         }
         if (t === 'proof-steps') {
           for (const e of validateProof(block, { lessonId: json.meta?.id })) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'steps') {
+          for (const e of validateSteps(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+        }
+        if (t === 'rule') {
+          for (const e of validateRule(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'code') {
           if (!block.code) errors.push(`steps[${si}].blocks[${bi}] (code): missing code field`);

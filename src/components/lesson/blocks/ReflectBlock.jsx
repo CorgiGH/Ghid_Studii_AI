@@ -7,9 +7,12 @@ import { useLessonStore } from '../../../lesson/useLessonStore';
 import { nowMs } from '../../../lesson/clock.js';
 import { REFLECT_TEXT_MAX, restoredReflect, shouldRecordAttempt } from '../../../lesson/restore.js';
 import QuestionTables from './QuestionTables.jsx';
+import { StepsBody } from './GuideParts.jsx';
 
-// Block JSON: { type: 'reflect', id, prompt, placeholder?, answer, table?: { dataset, sql, caption? } | [{ dataset, sql, caption? }, ...] }
-export default function ReflectBlock({ id, prompt, placeholder, answer, table }) {
+// Block JSON: { type: 'reflect', id, prompt, placeholder?, answer, table?: { dataset, sql, caption? } | [{ dataset, sql, caption? }, ...],
+//   answerSteps?: [{ intro?, items?, start?, result? }] }. With answerSteps the revealed answer is drawn as numbered steps (the
+//   Ghid rapid's worked answers); `answer` still holds the same text for the review tab.
+export default function ReflectBlock({ id, prompt, placeholder, answer, table, answerSteps }) {
   const { t } = useApp();
   const { complete, ref } = useScreenGate();
   const store = useLessonStore();
@@ -53,7 +56,9 @@ export default function ReflectBlock({ id, prompt, placeholder, answer, table })
               initial={{ opacity: 0, y: reduced ? 0 : 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 360, damping: 30 }}
-              dangerouslySetInnerHTML={{ __html: `<p>${formatMarkdown(t(answer.en, answer.ro))}</p>` }}
+              {...(answerSteps
+                ? { children: answerSteps.map((g, i) => <div key={i} className="ch-answer-steps"><StepsBody {...g} /></div>) }
+                : { dangerouslySetInnerHTML: { __html: `<p>${formatMarkdown(t(answer.en, answer.ro))}</p>` } })}
             />
           ) : (
             <Motion.div key="btn" exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : 0.12 }}>

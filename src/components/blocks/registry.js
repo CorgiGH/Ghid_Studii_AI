@@ -30,6 +30,8 @@ export const blockLoaders = {
   'sql-exercise':   () => import('../lesson/blocks/SqlExerciseBlock.jsx'),
   'calc-exercise':  () => import('../lesson/blocks/CalcExerciseBlock.jsx'),
   'proof-steps':    () => import('../lesson/blocks/ProofStepsBlock.jsx'),
+  'steps':          () => import('../lesson/blocks/StepsBlock.jsx'),
+  'rule':           () => import('../lesson/blocks/RuleBlock.jsx'),
 };
 
 const registry = Object.fromEntries(
