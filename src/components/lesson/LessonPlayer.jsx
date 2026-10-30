@@ -194,7 +194,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   const title = t(step.title.en, step.title.ro);
 
   return (
-    <div className="lp-root" data-testid="lesson-player" ref={rootRef}>
+    <div className="lp-root" data-testid="lesson-player" data-lesson-kind={data.course.meta.kind || undefined} ref={rootRef}>
       <div className="lp-top">
         <span className="lp-lesson-name">{t(data.course.meta.shortTitle.en, data.course.meta.shortTitle.ro)}</span>
         <span className="lp-count" aria-live="polite">{screen} / {total}</span>
@@ -218,6 +218,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
             exit="exit"
             transition={reduced ? { duration: 0.15 } : { x: { type: 'spring', stiffness: 380, damping: 34 }, opacity: { duration: 0.18 } }}
           >
+            {step.kicker && <p className="lp-kicker" data-testid="lesson-kicker">{t(step.kicker.en, step.kicker.ro)}</p>}
             <h2 ref={headingRef} tabIndex={-1} className="lp-title" dangerouslySetInnerHTML={{ __html: formatMarkdown(title) }} />
             <ScreenGate src={src} screen={screen} state={gate} patchGate={patchGate} onSkip={onSkip}>
               <div className="lp-blocks">

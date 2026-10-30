@@ -86,10 +86,26 @@ const EMPTY_CELL = '\u200b';
 const staticTable = (it) => ({ columns: it.head.map((c) => plainQuotes(c) || EMPTY_CELL), rows: it.rows.map((r) => r.map((c) => plainQuotes(c) || EMPTY_CELL)) });
 
 // A run of non-numbered items as card parts: a paragraph, a bulleted list (consecutive bullets), a table, a formula.
+// Two statements set side by side with \qquad ("overfitting: ... \qquad underfitting: ...") are stacked as two lines of the same
+// formula panel: side by side they are half again as wide as a phone. Only a \qquad outside braces splits.
+export function splitQquad(tex) {
+  const out = [];
+  let depth = 0, from = 0;
+  for (let i = 0; i < tex.length; i++) {
+    const ch = tex[i];
+    if (ch === '\\' && tex[i + 1] && /[{}]/.test(tex[i + 1])) { i++; continue; }
+    if (ch === '{') depth++;
+    else if (ch === '}') depth--;
+    else if (depth === 0 && tex.startsWith('\\qquad', i) && !/[a-zA-Z]/.test(tex[i + 6] || '')) { out.push(tex.slice(from, i)); from = i + 6; i += 5; }
+  }
+  out.push(tex.slice(from));
+  return out.map((t) => t.trim()).filter(Boolean);
+}
+
 function partsOf(items) {
   const parts = [];
   for (const it of items) {
-    if (it.k === 'eq') parts.push({ tex: it.tex });
+    if (it.k === 'eq') for (const tex of splitQquad(it.tex)) parts.push({ tex });
     else if (it.k === 'tb') parts.push({ table: staticTable(it) });
     else if (it.item) {
       const last = parts[parts.length - 1];
@@ -291,10 +307,22 @@ function splitRule(rule, roomFirst) {
     h += uh;
   }
   if (chunks.length < 2) return null;
-  return { head: { ...rule, body: chunks[0] }, rests: chunks.slice(1).map((intro) => ({ type: 'steps', intro })) };
+  return { head: { ...rule, body: chunks[0] }, rests: chunks.slice(1).map((intro) => ({ type: 'steps', variant: 'rule', intro })) };
 }
 const FITS = SCREEN_H;
 const fits = (blocks) => blocks.reduce((h, b) => h + estimate(b), 0) <= FITS;
+
+// A fraction in a line of text is set at full size (\dfrac), as part 1a writes it: a text-size \frac shrinks its digits to
+// about two thirds and reads cramped next to the words. Display formulas (tex) are full size already and a table cell keeps
+// its row height, so both are left alone, and so is an explicit \tfrac.
+const bigFracs = (s) => s.replace(/(^|[^\\$])\$([^$\n]+?)\$/g, (m, pre, tex) => `${pre}$${tex.replace(/\\frac(?![a-zA-Z])/g, '\\dfrac')}$`);
+function typeset(v, key) {
+  if (key === 'table' || key === 'tex') return v;
+  if (typeof v === 'string') return bigFracs(v);
+  if (Array.isArray(v)) return v.map((x) => typeset(x));
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, typeset(x, k)]));
+  return v;
+}
 
 // ---- lessons -------------------------------------------------------------------------------------------------------------
 // Ghid (ml-g<part>): an overview of the part's cards, then per card: when you see it + its symbols, the example (5 steps a
@@ -305,28 +333,36 @@ function lessonOf(kind, part, ptitle, cards) {
   const title = kind === 'g' ? `Ghid rapid ${part}: ${ptitle}` : `Blitz ${part}: ${ptitle}`;
   const steps = [];
   let rn = 0;
-  const step = (stitle, blocks) => steps.push({ id: `${id}-s${steps.length + 1}`, title: pair(stitle), blocks });
-  const sub = (c, what) => `${c.title} · ${what}`;
+  // A screen's title is its card's name; the small line above it (the kicker) says which theme and what part of it:
+  // "Tema 2 din 5" on the card's first screen, then "Tema 2 · Exemplu", "Tema 2 · Regula", "Tema 2 · Încearcă tu, 1 din 2".
+  const step = (stitle, blocks, kicker) => steps.push({ id: `${id}-s${steps.length + 1}`, title: pair(stitle), ...(kicker ? { kicker: pair(kicker) } : {}), blocks: blocks.map(typeset) });
+  const kick = (c, what) => `Tema ${cards.indexOf(c) + 1}${what ? ` · ${what}` : ` din ${cards.length}`}`;
   const whenText = (c) => cap(parseItems(c.sections['Când vezi asta']).map((i) => i.text ?? '').join(' ').trim());
   const exampleSteps = (c) => exampleScreens(groupsOf(parseItems(c.sections['Exemplu'])))
-    .forEach((blocks, i) => step(sub(c, i ? 'Exemplu (continuare)' : 'Exemplu'), blocks));
+    .forEach((blocks, i) => step(c.title, blocks, kick(c, i ? 'Exemplu, continuare' : 'Exemplu')));
   // before: the blocks that share the rule's first screen (the Blitz trigger); trap: the Ghid's warning, after the rule
   const ruleScreens = (c, before, rule, trap) => {
-    const first = before.length ? c.title : sub(c, 'Regula');
+    const first = before.length ? kick(c) : kick(c, 'Regula');
     const all = [...before, rule, ...(trap ? [trap] : [])];
-    if (fits(all)) { step(first, all); return; }
+    if (fits(all)) { step(c.title, all, first); return; }
     // a trap alone on a screen is a thin screen: it stays under the rule unless that makes a long scroll
     const withTrap = (blocks) => blocks.reduce((h, b) => h + estimate(b), 0) <= SCREEN_H * 1.25;
     const room = SCREEN_H - before.reduce((h, b) => h + estimate(b), 0) - CARD_H - textH(rule.text.ro, 34);
     const cut = fits([...before, rule]) ? null : splitRule(rule, Math.max(room, SCREEN_H * 0.3));
-    if (!cut) { if (trap && withTrap(all)) { step(first, all); return; } step(first, [...before, rule]); if (trap) step(sub(c, 'Capcana'), [trap]); return; }
-    step(first, [...before, cut.head]);
+    // a short remainder (one paragraph, a short list) is read with the rule rather than alone on a thin screen of its own
+    const rest = cut ? cut.rests.reduce((h, b) => h + estimate(b), 0) : 0;
+    const short = cut && cut.rests.length === 1 && rest <= SCREEN_H * 0.32 && all.reduce((h, b) => h + estimate(b), 0) <= SCREEN_H * 1.1;
+    if (!cut || short) {
+      if (trap && withTrap(all)) { step(c.title, all, first); return; }
+      step(c.title, [...before, rule], first); if (trap) step(c.title, [trap], kick(c, 'Capcana')); return;
+    }
+    step(c.title, [...before, cut.head], first);
     cut.rests.forEach((rest, i) => {
       const lastOne = i === cut.rests.length - 1;
-      if (lastOne && trap && withTrap([rest, trap])) { step(sub(c, 'Regula (continuare)'), [rest, trap]); trap = null; }
-      else step(sub(c, 'Regula (continuare)'), [rest]);
+      if (lastOne && trap && withTrap([rest, trap])) { step(c.title, [rest, trap], kick(c, 'Regula, continuare')); trap = null; }
+      else step(c.title, [rest], kick(c, 'Regula, continuare'));
     });
-    if (trap) step(sub(c, 'Capcana'), [trap]);
+    if (trap) step(c.title, [trap], kick(c, 'Capcana'));
   };
   if (kind === 'g') {
     step(cap(ptitle), [{ type: 'steps', intro: [{ heading: pair('Ce vei putea face') }], items: cards.map((c) => pair(c.title)) }]);
@@ -341,8 +377,8 @@ function lessonOf(kind, part, ptitle, cards) {
     const symbols = [{ heading: pair('Simboluri') }, ...partsOf(parseItems(S['Simboluri']))];
     const when = { type: 'rule', variant: 'when', label: pair('Când vezi asta'), text: pair(whenText(c)) };
     // a long list of symbols gets its own screen rather than a long scroll under the trigger
-    if (fits([{ ...when, body: symbols }])) step(c.title, [{ ...when, body: symbols }]);
-    else { step(c.title, [when]); step(sub(c, 'Simboluri'), [{ type: 'steps', intro: symbols }]); }
+    if (fits([{ ...when, body: symbols }])) step(c.title, [{ ...when, body: symbols }], kick(c));
+    else { step(c.title, [when], kick(c)); step(c.title, [{ type: 'steps', intro: symbols }], kick(c, 'Simboluri')); }
     exampleSteps(c);
     const rule = ruleBlock(parseItems(S['Regula']));
     const trap = { type: 'callout', variant: 'warning', content: pair(`**Capcana:** ${itemsToText(parseItems(S['Capcana']))}`.trim()) };
@@ -350,7 +386,7 @@ function lessonOf(kind, part, ptitle, cards) {
     const probs = problems(S['Încearcă tu']);
     probs.forEach((p, i) => {
       let items = parseItems(p.prompt);
-      // a prompt written as "1. ..." is numbered by its screen title ("Încearcă tu 1/2"), not by a list of one
+      // a prompt written as "1. ..." is numbered by its screen's kicker ("Încearcă tu, 1 din 2"), not by a list of one
       if (items.length === 1 && items[0].item === 'ol') items = [{ k: 'p', text: items[0].text }];
       // the reflect block draws its tables under the question, so the line that introduced a table ("Tabelul comun:") becomes
       // that table's caption (a caption is plain text: a line with a formula stays in the question) instead of a dangling line
@@ -367,7 +403,7 @@ function lessonOf(kind, part, ptitle, cards) {
       const ans = parseItems(p.answer);
       const block = { type: 'reflect', id: `${id}-r${++rn}`, prompt: pair(itemsToText(text)), answer: pair(itemsToText(ans)), answerSteps: answerSteps(ans) };
       if (tables.length) block.table = tables;
-      step(sub(c, `Încearcă tu${probs.length > 1 ? ` ${i + 1}/${probs.length}` : ''}`), [block]);
+      step(c.title, [block], kick(c, `Încearcă tu${probs.length > 1 ? `, ${i + 1} din ${probs.length}` : ''}`));
     });
   }
   return {

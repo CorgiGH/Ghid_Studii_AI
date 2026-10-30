@@ -173,6 +173,11 @@ body {
    right-edge fade for a stronger hint; this bare wrap is used by
    formatMarkdown inside learn/callout/definition/think prose where a
    permanent fade would be noisy. */
+/* the punctuation formatMarkdown tucks into a formula's last piece, so the two never part at a line end: text font and size */
+.katex .math-punct { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-style: normal; }
+/* KaTeX resets the weight; a mark inside bold text stays as bold as the words around it */
+:is(strong, b) .katex .math-punct { font-weight: 700; }
+:is(.ch-q, .ch-rule:not(.ch-rule-when) > .ch-rule-text) .katex .math-punct { font-weight: 600; }
 .math-display-wrap {
   display: block;
   overflow-x: auto;
@@ -300,6 +305,19 @@ body {
 .lp-btn-primary:disabled { box-shadow: none; }
 .lp-skip { min-height: 44px; min-width: 44px; background: none; border: 0; padding: 8px 4px; font-size: 0.875rem; color: var(--theme-muted-text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .lp-skip:hover { color: var(--theme-content-text); }
+/* the labels stay on one line; on a phone, a footer that also offers "Skip" packs its three buttons a little tighter */
+.lp-btn, .lp-skip { white-space: nowrap; }
+@media (max-width: 420px) {
+  .lp-footer:has(.lp-skip) .lp-footer-end { gap: 8px; }
+  .lp-footer:has(.lp-skip) .lp-btn { padding: 0 12px; gap: 6px; font-size: 0.875rem; }
+}
+/* the line above a screen's title: which theme of the lesson and which part of it */
+.lp-kicker {
+  margin: 0 0 6px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.4;
+  color: color-mix(in srgb, var(--lt-acc) 72%, var(--theme-content-text));
+}
+/* a guide's question tables are data to read, not query results: no "n rows" line under them */
+.lp-root[data-lesson-kind="guide"] .ch-reflect .sx-table-count:not(:has(.sx-cue)) { display: none; }
 @media (max-width: 1023px) {
   /* focus moves and scrollIntoView stop a control above the fixed bottom tab bar, not behind it (a tap there would leave the page) */
   html { scroll-padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
@@ -901,8 +919,8 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 .ch-rule { border-left: 3px solid var(--lt-acc); }
 /* "when you see this": the trigger, read before the rule, so a plain card and regular weight */
 .ch-rule.ch-rule-when { border-left-width: 1px; border-left-color: var(--theme-border); }
-.ch-rule-when .ch-rule-text { font-size: 1rem; font-weight: 500; }
-.ch-rule-text { margin: 0 0 12px; font-size: 1.0625rem; font-weight: 600; line-height: 1.55; }
+.ch-rule-text { margin: 0 0 12px; font-size: 1rem; font-weight: 600; line-height: 1.6; }
+.ch-rule-when .ch-rule-text { font-weight: 400; }
 .ch-rule + .ch-rule { margin-top: 12px; }
 .ch-part-text { margin: 0 0 10px; }
 .ch-part-heading { margin: 16px 0 8px; font-size: 0.9375rem; font-weight: 700; }
@@ -912,9 +930,11 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 /* an example's data is not a query result: no "n rows" line, unless it carries a scroll cue */
 .ch-part-table .sx-table-count:not(:has(.sx-cue)) { display: none; }
 /* a rule's formulas: one panel, stacked and centred, the condition lines small under or between them */
-.ch-math { margin: 12px 0; padding: 4px 14px; border-radius: 12px; border: 1px solid var(--theme-border); background: var(--theme-card-bg); }
-.ch-math-tex .katex-display { margin: 0.55em 0; }
-.ch-math-tex + .ch-math-tex { border-top: 1px dashed var(--theme-border); }
+.ch-math { margin: 12px 0; padding: 6px 14px; border-radius: 10px; background: var(--theme-card-bg); }
+.ch-math-tex { margin: 0.55em 0; text-align: center; line-height: 1.9; text-wrap: balance; overflow-x: auto; overflow-y: hidden; }
+/* a formula's phrase set as words (GuideParts phraseParts): KaTeX's text font and size, so it reads as one formula */
+.ch-math-tex .katex, .ch-math-words { font-size: 1.15em; }
+.ch-math-words { font-family: KaTeX_Main, 'Times New Roman', serif; white-space: pre-wrap; }
 .ch-math-note { margin: -2px 0 8px; text-align: center; font-size: 0.8125rem; line-height: 1.45; color: var(--theme-muted-text); }
 .ch-math > .ch-math-note:first-child { margin-top: 8px; margin-bottom: 0; }
 .ch-points { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -935,16 +955,15 @@ button.viz-tick.can-pick:focus-visible { outline: 2px solid var(--lt-acc); outli
 }
 .ch-step-text { min-width: 0; padding-top: 1px; }
 .ch-steps-result {
-  margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; font-weight: 600; line-height: 1.55;
-  border: 1px solid color-mix(in srgb, var(--lt-keep) 45%, transparent); background: var(--lt-keep-soft);
+  margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; font-weight: 600; line-height: 1.55; background: var(--lt-keep-soft);
 }
 /* a worked answer inside the revealed box: its groups split by a hairline */
 .ch-answer-steps + .ch-answer-steps { margin-top: 14px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--lt-keep) 35%, transparent); }
 .ch-explain .ch-steps-result { background: var(--theme-card-bg); }
 @media (max-width: 640px) {
   .ch-gcard { padding: 14px; }
-  .ch-math { padding: 2px 10px; }
-  .ch-math .katex-display { font-size: 1em; }
+  .ch-math { padding: 4px 10px; }
+  .ch-math-tex .katex, .ch-math-words { font-size: 1.12em; }
 }
 
 .ch-review { max-width: 46rem; width: 100%; margin: 0 auto; }

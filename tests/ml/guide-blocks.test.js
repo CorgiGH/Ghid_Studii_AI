@@ -79,7 +79,9 @@ describe('steps and rule blocks render', () => {
     expect((html.match(/class="ch-math"/g) || [])).toHaveLength(1);
     expect((html.match(/class="ch-math-tex"/g) || [])).toHaveLength(2);
     expect(html).toContain('class="ch-math-note"');
-    expect(html).toContain('katex-display');
+    // display style, set inline so a long formula can break after a relation instead of scrolling
+    expect(html).toContain('katex');
+    expect(html).not.toContain('katex-display');
     expect(html).toContain('Regula');
     expect(html).toContain('<ul class="ch-points">');
   });
@@ -129,19 +131,58 @@ describe('guide converter: screens look designed, not converted', () => {
       }
     }
   });
-  it('opens each Ghid lesson with its cards and names screens "Card · Exemplu", "· Regula", "· Încearcă tu 1/2"', () => {
+  it('opens each Ghid lesson with its cards; a screen is titled by its card, its kicker says which theme and which part', () => {
     const md = fs.readFileSync(path.join(ROOT, 'src/guides/ml/part-1a.md'), 'utf8');
     const [g, b] = convert(md);
     const first = g.steps[0].blocks[0];
     expect(first.intro[0].heading.ro).toBe('Ce vei putea face');
     expect(first.items[0].ro).toBe('Probabilitatea condiționată și regula de înmulțire');
-    const titles = g.steps.map((s) => s.title.ro);
-    expect(titles).toContain('Probabilitatea condiționată și regula de înmulțire · Exemplu');
-    expect(titles).toContain('Probabilitatea condiționată și regula de înmulțire · Exemplu (continuare)');
-    expect(titles).toContain('Probabilitatea condiționată și regula de înmulțire · Regula');
-    expect(titles).toContain('Probabilitatea condiționată și regula de înmulțire · Încearcă tu 1/2');
-    expect(titles.some((t) => /: (Regula|Exemplu)/.test(t))).toBe(false);
+    const card1 = g.steps.filter((s) => s.title.ro === 'Probabilitatea condiționată și regula de înmulțire').map((s) => s.kicker.ro);
+    expect(card1).toEqual(['Tema 1 din 5', 'Tema 1 · Exemplu', 'Tema 1 · Exemplu, continuare', 'Tema 1 · Regula',
+      'Tema 1 · Încearcă tu, 1 din 2', 'Tema 1 · Încearcă tu, 2 din 2']);
+    expect(g.steps[0].kicker).toBeUndefined(); // the overview is the lesson's cover
+    expect(g.steps.some((s) => /·|\(continuare\)|\d\/\d/.test(s.title.ro))).toBe(false);
+    for (const l of lessons) for (const s of l.steps.slice(l.meta.id.startsWith('ml-g') ? 1 : 0)) expect(s.kicker?.ro, s.id).toMatch(/^Tema \d+( din \d+| · .+)$/);
     expect(b.steps[0].blocks.map((x) => x.type)).toEqual(['rule', 'rule']);
     expect(b.steps[0].blocks[0].variant).toBe('when');
+  });
+});
+
+describe('the guide polish: kicker, glued punctuation, panel formulas, rule continued', () => {
+  it('glues the punctuation after an inline formula into its last piece, so a line never starts with it', async () => {
+    const { default: formatMarkdown } = await import('../../src/components/blocks/formatMarkdown.js');
+    const html = formatMarkdown('Fie $P(B) = 0{,}25$. Cât este $P(A)$? Și $a$,$b$.');
+    expect((html.match(/class="math-punct"/g) || [])).toHaveLength(4);
+    expect(html).toMatch(/<span class="math-punct">\.<\/span><\/span><\/span><\/span> Cât/);
+    expect((html.match(/class="katex"/g) || [])).toHaveLength(4);
+    expect(formatMarkdown('cost $5 and $10')).toBe('cost $5 and $10');
+  });
+  it('stacks two statements set side by side with \\qquad, splitting only outside braces', async () => {
+    const { splitQquad } = await import('../../scripts/ml/guide-to-lessons.mjs');
+    expect(splitQquad('a \\qquad b')).toEqual(['a', 'b']);
+    expect(splitQquad('\\text{x \\qquad y} z')).toEqual(['\\text{x \\qquad y} z']);
+  });
+  it('sets a phrase-like formula as wrapping words, keeping bracketed text with its math', async () => {
+    const { phraseParts } = await import('../../src/components/lesson/blocks/GuideParts.jsx');
+    const parts = phraseParts('\\text{tai nodul cu cea mai mare } acc_{val}(\\text{după tăiere}) \\geq 1');
+    expect(parts[0]).toEqual({ text: 'tai nodul cu cea mai mare ' });
+    expect(parts[1].math).toContain('(\\text{după tăiere})');
+    expect(phraseParts('\\text{overfitting: } e \\gg 1')).toBeNull();
+    const html = renderToStaticMarkup(React.createElement(RuleBlock, { text: bi('r'), body: [{ tex: parts ? '\\text{tai nodul cu cea mai mare } x' : 'x' }] }));
+    expect(html).toContain('class="ch-math-words"');
+  });
+  it('keeps the rule rail on a rule continued from the screen before', () => {
+    expect(validateSteps({ variant: 'rule', intro: [{ text: bi('t') }] })).toEqual([]);
+    expect(validateSteps({ variant: 'x', intro: [{ text: bi('t') }] })).toHaveLength(1);
+    const html = renderToStaticMarkup(React.createElement(StepsBlock, { variant: 'rule', intro: [{ text: bi('t') }] }));
+    expect(html).toContain('ch-gcard ch-steps ch-rule');
+  });
+  it('sets a fraction in a line of text at full size, never in a table or a display formula', () => {
+    for (const l of lessons) {
+      for (const s of l.steps) {
+        const flat = JSON.stringify(s.blocks, (k, v) => (k === 'table' || k === 'tex' ? undefined : v));
+        expect(flat, s.id).not.toMatch(/\\\\frac/);
+      }
+    }
   });
 });

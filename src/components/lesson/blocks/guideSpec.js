@@ -46,6 +46,7 @@ export function validateSteps(b) {
   if (b?.start !== undefined && !(Number.isInteger(b.start) && b.start >= 1)) at('start must be a whole number from 1');
   if (b?.result !== undefined && !isBi(b.result)) at('result must have en + ro');
   if (b?.result !== undefined && b?.items === undefined) at('a result needs the steps it ends');
+  if (b?.variant !== undefined && b.variant !== 'rule') at("variant must be 'rule' (a rule continued from the screen before)");
   return errs;
 }
 

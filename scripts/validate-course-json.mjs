@@ -35,6 +35,7 @@ else {
   json.steps.forEach((step, si) => {
     if (!step.id) errors.push(`steps[${si}]: missing id`);
     if (!step.title?.en || !step.title?.ro) errors.push(`steps[${si}]: title must have en + ro`);
+    if (step.kicker !== undefined && (!step.kicker?.en || !step.kicker?.ro)) errors.push(`steps[${si}]: kicker must have en + ro`);
     if (!Array.isArray(step.blocks) || step.blocks.length === 0)
       errors.push(`steps[${si}]: empty or missing blocks array`);
     else {

@@ -23,6 +23,13 @@ const inlineMath = (tex) => {
   }
 };
 
+// KaTeX's inline HTML ends by closing its last .base, .katex-html and .katex; the mark is set in the text font (.math-punct).
+const KATEX_END = '</span></span></span>';
+function gluePunct(html, punct) {
+  if (!html.endsWith(KATEX_END) || !html.includes('<span class="base">')) return html + punct;
+  return `${html.slice(0, -KATEX_END.length)}<span class="math-punct">${punct}</span>${KATEX_END}`;
+}
+
 export default function formatMarkdown(text) {
   if (!text) return '';
 
@@ -56,9 +63,14 @@ export default function formatMarkdown(text) {
   });
 
   // 4. Inline math — $...$  (tight: no currency, no newline, \$ escape supported)
-  //    Group 1: preceding char (not \ or word char). Group 2: tex body.
+  //    Group 1: tex body. Group 2: the punctuation right after it.
   //    Negative lookahead (?!\d) prevents matching $10 style currency.
-  out = out.replace(/(^|[^\\\w])\$([^$\n]+?)\$(?!\d)/g, (match, pre, tex) => pre + tuck(inlineMath(tex)));
+  //    Punctuation right after a formula (", un număr", ". Cât este") goes inside the formula's last unbreakable piece, so a
+  //    line never starts with it (Chrome breaks after KaTeX's inline-blocks even under nowrap); KaTeX's own breaks still apply.
+  //    The preceding character is checked by a lookbehind, so "$a$,$b$" still sees the comma the first formula glued.
+  out = out.replace(/(?<![\\\w])\$([^$\n]+?)\$(?!\d)([.,;:!?)]*)/g, (match, tex, punct) => tuck(punct
+    ? gluePunct(inlineMath(tex), punct)
+    : inlineMath(tex)));
 
   // 5. Bold and line breaks
   out = out
