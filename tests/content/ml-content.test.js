@@ -42,14 +42,18 @@ describe('ml registration', () => {
     expect(ml.description.ro).toMatch(/săptămânile 1–5/);
   });
   it('registers one course per lesson file, sorted by lesson number (a lesson not published yet leaves a gap)', () => {
-    expect(ml.courses.map((c) => c.id)).toEqual(files.map(idOfFile));
-    expect(ml.courses).toHaveLength(files.length);
+    // the ten Ghid rapid lessons (meta.kind "guide") come first, in the order g1a b1a g1b b1b g2 b2 g3 b3 g4 b4
+    const guides = ml.courses.filter((c) => !/^ml-l\d\d$/.test(c.id));
+    expect(guides.map((c) => c.id)).toEqual(['1a', '1b', '2', '3', '4'].flatMap((p) => [`ml-g${p}`, `ml-b${p}`]));
+    expect(ml.courses.slice(0, guides.length)).toEqual(guides);
+    expect(ml.courses.slice(guides.length).map((c) => c.id)).toEqual(files.map(idOfFile));
+    expect(ml.courses).toHaveLength(files.length + guides.length);
   });
   it('gives each course its file, meta id, section count and unique step ids', () => {
     for (const c of ml.courses) {
       const nn = c.id.slice(-2);
-      expect(c.id).toMatch(/^ml-l\d\d$/);
-      expect(c.src).toBe(`ml/courses/lesson-${nn}.json`);
+      expect(c.id).toMatch(/^ml-(l\d\d|[gb]\w+)$/);
+      expect(c.src).toBe(/^ml-l/.test(c.id) ? `ml/courses/lesson-${nn}.json` : `ml/courses/guide-${c.id.slice(3)}.json`);
       expect(c.metaId).toBe(c.id);
       const json = loadJson(c.src);
       expect(json.meta.id).toBe(c.metaId);
@@ -180,6 +184,22 @@ describe('content gate: the bad fixture breaks each rule once and only that rule
     const res = runAll([good], { allocation: GOOD_EXERCISES, owners, widgets });
     expect(res).toEqual(Object.fromEntries(Object.keys(res).map((k) => [k, []])));
     expect(validatorProblems([path.join(FIXTURES, 'lesson-good.json')])).toEqual([]);
+  });
+});
+
+describe('content gate: guide lessons', () => {
+  const guide = { metaId: 'ml-g9', json: { meta: { id: 'ml-g9', kind: 'guide' }, steps: [{ id: 'ml-g9-s1', title: { en: 'A', ro: 'A' }, blocks: [{ type: 'learn', content: { en: 'text', ro: 'text' } }] }] } };
+  const plain = { metaId: 'ml-l09', json: { meta: { id: 'ml-l09' }, steps: guide.json.steps } };
+  it('a lesson with meta.kind "guide" is exempt from the outline checks (structure, repetition, quiz quality, terms)', () => {
+    expect(structureProblems([plain]).length).toBeGreaterThan(0);
+    expect(structureProblems([guide])).toEqual([]);
+    expect(quizProblems([guide])).toEqual([]);
+    expect(repetitionProblems([guide], {})).toEqual([]);
+  });
+  it('a guide lesson still gets the text, KaTeX and en/ro checks', () => {
+    const bad = { metaId: 'ml-g9', json: { meta: { kind: 'guide' }, steps: [{ id: 'ml-g9-s1', title: { en: 'A', ro: 'A' }, blocks: [{ type: 'learn', content: { en: 'a 3', ro: 'a „4” \\frac{' } }, { type: 'equation', tex: '\\frac{' }] }] } };
+    expect(textProblems([bad]).length).toBeGreaterThan(0);
+    expect(pairProblems([bad]).length).toBeGreaterThan(0);
   });
 });
 

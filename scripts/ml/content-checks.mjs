@@ -73,6 +73,12 @@ export function* blocksOf(lessons) {
   }
 }
 
+// A guide lesson (meta.kind === 'guide': the Ghid rapid, converted from the part files) is not an outline lesson, so the
+// outline-specific checks (structure, repetition, allocation, quiz quality, term order, data on screen) skip it; the text, KaTeX and en/ro
+// checks still run on it.
+export const isGuide = (lesson) => lesson?.json?.meta?.kind === 'guide';
+const outlineOnly = (lessons) => lessons.filter((l) => !isGuide(l));
+
 const lessonNo = (metaId) => Number(String(metaId).match(/(\d+)$/)?.[1] ?? NaN);
 
 // Romanian text with the cedilla forms folded into the comma forms, so one regex reads both.
@@ -212,6 +218,7 @@ function screenShowsData(step, block) {
 const mentionsData = (pairs) => pairs.find((p) => DATA_REF.test(fold(p.ro)));
 
 export function dataProblems(lessons) {
+  lessons = outlineOnly(lessons); // a guide screen is a card step, not a question over a table (the D1-D3 heuristics read it wrongly)
   const out = [];
   for (const lesson of lessons) {
     for (const { at, ro } of pairsIn(lesson.json)) if (POINTER.test(fold(ro))) out.push(`D2 ${lesson.metaId} ${at}: points at another screen: "${ro.slice(0, 60)}"`);
@@ -294,6 +301,7 @@ function reuseSets(allocation) {
 }
 
 export function repetitionProblems(lessons, allocation) {
+  lessons = outlineOnly(lessons);
   const out = [];
   const have = new Set(lessons.map((l) => lessonNo(l.metaId)));
 
@@ -368,6 +376,7 @@ export function repetitionProblems(lessons, allocation) {
 const PREDICT_SHARE = 2 / 3;
 
 export function quizProblems(lessons) {
+  lessons = outlineOnly(lessons);
   const out = [];
   for (const lesson of lessons) {
     const positions = [];
@@ -429,7 +438,7 @@ export function textProblems(lessons) {
       const w = `${lesson.metaId} ${at}`;
       if (/[„”“]/.test(ro)) out.push(`T1 ${w}: Romanian quotes in "${ro.slice(0, 50)}"`);
       for (const [lang, s] of [['en', en], ['ro', fold(ro)]]) {
-        const m = s.match(PHASE_WORDS);
+        const m = isGuide(lesson) ? null : s.match(PHASE_WORDS); // the guide's cards are named "Regula:" by design
         if (m) out.push(`T2 ${w}: phase word "${m[1]}" in the ${lang} text`);
       }
       if (STEP_LABEL.test(ro)) out.push(`T2 ${w}: a "Pasul N" label`);
@@ -449,6 +458,7 @@ export function textProblems(lessons) {
 // ---- 6. structure -----------------------------------------------------------------------------------------------------------
 
 export function structureProblems(lessons) {
+  lessons = outlineOnly(lessons);
   const out = [];
   for (const { metaId, json } of lessons) {
     const steps = json.steps || [];
@@ -516,6 +526,7 @@ export function termMatcher(term, { strict = false } = {}) {
 
 // owners: the parsed tests/ml/term-owners.json. A term listed twice counts from its earliest lesson.
 export function termProblems(lessons, owners) {
+  lessons = outlineOnly(lessons);
   const byTerm = new Map();
   for (const t of owners?.terms || []) {
     const k = `${t.strict ? 'strict:' : ''}${(t.strict ? strictWords : words)(t.term).join(' ')}`;
@@ -699,7 +710,7 @@ export function loadTermOwners(root = ROOT) {
 export function loadLessons(root = ROOT) {
   const dir = path.join(root, 'src/content/ml/courses');
   if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir).filter((f) => /^lesson-\d\d\.json$/.test(f)).sort().map((f) => {
+  return fs.readdirSync(dir).filter((f) => /^(lesson-\d\d|guide-[gb]\w+)\.json$/.test(f)).sort().map((f) => {
     const json = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
     return { metaId: json.meta.id, file: path.join(dir, f), json };
   });
