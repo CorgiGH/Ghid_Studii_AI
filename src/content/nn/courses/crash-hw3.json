@@ -1,0 +1,4110 @@
+{
+ "meta": {
+  "id": "nn-crash-hw3",
+  "kind": "guide",
+  "title": {
+   "en": "NN HW3: MLP and backprop for the presentation (Crash pack)",
+   "ro": "RN Tema 3: MLP și backprop pentru prezentare (Mod urgență)"
+  },
+  "shortTitle": {
+   "en": "HW3 · crash",
+   "ro": "Tema 3 · urgență"
+  },
+  "source": {
+   "en": "NN crash pack, UAIC FII",
+   "ro": "Mod urgență RN, UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-crash-hw3-s1",
+   "title": {
+    "en": "The pass line",
+    "ro": "Linia de trecere"
+   },
+   "kicker": {
+    "en": "Crash pack · HW3 NN",
+    "ro": "Mod urgență · Tema 3 RN"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "What",
+          "ro": "Ce"
+         },
+         {
+          "en": "How much",
+          "ro": "Cât"
+         }
+        ],
+        "rows": [
+         [
+          {
+           "en": "Lab",
+           "ro": "Laborator"
+          },
+          {
+           "en": "at least 35 out of 100",
+           "ro": "minim 35 din 100"
+          }
+         ],
+         [
+          {
+           "en": "Exam",
+           "ro": "Examen"
+          },
+          {
+           "en": "at least 35 out of 100",
+           "ro": "minim 35 din 100"
+          }
+         ],
+         [
+          {
+           "en": "Final grade",
+           "ro": "Nota finală"
+          },
+          {
+           "en": "$0.6\\cdot\\text{Lab}+0.4\\cdot\\text{Exam}$",
+           "ro": "$0{,}6\\cdot\\text{Lab}+0{,}4\\cdot\\text{Examen}$"
+          }
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "To pass you need at least 35 out of 100 in the lab and at least 35 out of 100 in the exam.",
+        "ro": "Ca să treci, trebuie să ai cel puțin 35 din 100 la laborator și cel puțin 35 din 100 la examen."
+       }
+      },
+      {
+       "text": {
+        "en": "HW3 gives at most 30 points, so you still need at least 5 points from the rest of the lab.",
+        "ro": "Tema 3 dă cel mult 30 de puncte, deci îți mai trebuie cel puțin 5 puncte din restul laboratorului."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s2",
+   "title": {
+    "en": "The map: what they ask on Thursday",
+    "ro": "Harta: ce te întreabă joi"
+   },
+   "kicker": {
+    "en": "Crash pack · HW3 NN",
+    "ro": "Mod urgență · Tema 3 RN"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Thursday 12 November, 12:00, room C901 (surnames A–O only): you present your notebook and answer questions like those of cards 1-5.",
+        "ro": "Joi 12 noiembrie, 12:00, sala C901 (doar numele de familie A–O): prezinți notebook-ul și răspunzi la întrebări ca cele din cardurile 1-5."
+       }
+      },
+      {
+       "points": [
+        {
+         "en": "Card 1: $\\partial C/\\partial z$. Answer: $\\delta=y-t$.",
+         "ro": "Cardul 1: $\\partial C/\\partial z$. Răspuns: $\\delta=y-t$."
+        },
+        {
+         "en": "Card 2: one hidden ReLU neuron. ReLU folds the plane.",
+         "ro": "Cardul 2: un neuron ReLU ascuns. ReLU pliază planul."
+        },
+        {
+         "en": "Card 3: $z$ versus the dot product. $z=w\\cdot x+b$.",
+         "ro": "Cardul 3: $z$ față de produsul scalar. $z=w\\cdot x+b$."
+        },
+        {
+         "en": "Card 4: $z$ versus distance. The signed distance is $z/|w|$.",
+         "ro": "Cardul 4: $z$ față de distanță. Distanța cu semn este $z/|w|$."
+        },
+        {
+         "en": "Card 5: the linear combination. It stays linear.",
+         "ro": "Cardul 5: combinația liniară. Rămâne liniară."
+        },
+        {
+         "en": "Card 6: the backprop in your code.",
+         "ro": "Cardul 6: backprop-ul din codul tău."
+        }
+       ]
+      },
+      {
+       "text": {
+        "en": "The cards go by importance. Stop after any of them.",
+        "ro": "Cardurile merg după importanță. Poți opri după oricare."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s3",
+   "title": {
+    "en": "The derivative of the cost with respect to the score",
+    "ro": "Derivata costului față de scor"
+   },
+   "kicker": {
+    "en": "Card 1 of 6 · When you see this",
+    "ro": "Cardul 1 din 6 · Când vezi asta"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "\"Compute $dCE/dz$ by hand for one instance with 2 outputs, where $z=w\\cdot x+b$ and $y=\\text{softmax}(z)$.\"",
+      "ro": "\"Calculează pe hârtie $dCE/dz$ pentru o instanță, cu 2 ieșiri, unde $z=w\\cdot x+b$ și $y=\\text{softmax}(z)$.\""
+     },
+     "variant": "when",
+     "label": {
+      "en": "When you see this",
+      "ro": "Când vezi asta"
+     },
+     "body": [
+      {
+       "text": {
+        "en": "The short answer: the output error is the predicted probability minus the correct answer.",
+        "ro": "Răspunsul scurt: eroarea ieșirii este probabilitatea prezisă minus răspunsul corect."
+       }
+      },
+      {
+       "tex": "\\delta_j=\\frac{\\partial C}{\\partial z_j}=y_j-t_j"
+      },
+      {
+       "note": {
+        "en": "$C$ is the cost (cross-entropy), $z_j$ the weighted sum (the score) of class $j$, $y_j$ the predicted probability, $t_j$ the correct answer.",
+        "ro": "$C$ este costul (cross-entropy), $z_j$ suma ponderată (scorul) a clasei $j$, $y_j$ probabilitatea prezisă, $t_j$ răspunsul corect."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s4",
+   "title": {
+    "en": "The derivative of the cost with respect to the score",
+    "ro": "Derivata costului față de scor"
+   },
+   "kicker": {
+    "en": "Card 1 of 6 · The recipe, steps 1-3",
+    "ro": "Cardul 1 din 6 · Rețeta, pașii 1-3"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Softmax turns the scores into probabilities that add up to 1. Here $e\\approx2.718$, and $\\ln$ is the natural logarithm (base $e$).",
+        "ro": "Softmax transformă scorurile în probabilități care dau împreună 1. Aici $e\\approx2{,}718$, iar $\\ln$ este logaritmul natural (în baza $e$)."
+       }
+      },
+      {
+       "text": {
+        "en": "Write $S=e^{z_1}+e^{z_2}$. The correct answer $t$ has a single 1 (one-hot), so $t_1+t_2=1$.",
+        "ro": "Notăm $S=e^{z_1}+e^{z_2}$. Răspunsul corect $t$ are un singur 1 (one-hot), deci $t_1+t_2=1$."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Scores and softmax: $z_j=w_j x+b_j$ and $y_j=\\dfrac{e^{z_j}}{S}$.",
+       "ro": "Scorurile și softmax: $z_j=w_j x+b_j$ și $y_j=\\dfrac{e^{z_j}}{S}$."
+      },
+      {
+       "en": "The cost: $C=-t_1\\ln y_1-t_2\\ln y_2$.",
+       "ro": "Costul: $C=-t_1\\ln y_1-t_2\\ln y_2$."
+      },
+      {
+       "en": "From $y_j=e^{z_j}/S$ we get $\\ln y_j=z_j-\\ln S$. Put it in $C$ and use $t_1+t_2=1$: $C=-t_1z_1-t_2z_2+\\ln S$.",
+       "ro": "Din $y_j=e^{z_j}/S$ rezultă $\\ln y_j=z_j-\\ln S$. Înlocuiești în $C$ și folosești $t_1+t_2=1$: $C=-t_1z_1-t_2z_2+\\ln S$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s5",
+   "title": {
+    "en": "The derivative of the cost with respect to the score",
+    "ro": "Derivata costului față de scor"
+   },
+   "kicker": {
+    "en": "Card 1 of 6 · The recipe, steps 4-5",
+    "ro": "Cardul 1 din 6 · Rețeta, pașii 4-5"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "Differentiate with respect to $z_1$. The term $-t_2z_2$ vanishes and $\\dfrac{\\partial \\ln S}{\\partial z_1}=\\dfrac{e^{z_1}}{S}=y_1$. So $\\dfrac{\\partial C}{\\partial z_1}=-t_1+y_1=y_1-t_1$.",
+       "ro": "Derivezi după $z_1$. Termenul $-t_2z_2$ dispare, iar $\\dfrac{\\partial \\ln S}{\\partial z_1}=\\dfrac{e^{z_1}}{S}=y_1$. Deci $\\dfrac{\\partial C}{\\partial z_1}=-t_1+y_1=y_1-t_1$."
+      },
+      {
+       "en": "The same for $z_2$: $\\delta_2=y_2-t_2$. In short, $\\delta=y-t$.",
+       "ro": "La fel pentru $z_2$: $\\delta_2=y_2-t_2$. Pe scurt, $\\delta=y-t$."
+      },
+      {
+       "en": "Towards the parameters: $\\dfrac{\\partial C}{\\partial w_j}=\\delta_j\\,x$ and $\\dfrac{\\partial C}{\\partial b_j}=\\delta_j$. With an input vector: $\\dfrac{\\partial C}{\\partial w_{ij}}=\\delta_j\\,x_i$, where $w_{ij}$ goes from input $i$ to output $j$.",
+       "ro": "Spre parametri: $\\dfrac{\\partial C}{\\partial w_j}=\\delta_j\\,x$ și $\\dfrac{\\partial C}{\\partial b_j}=\\delta_j$. Cu intrare vector: $\\dfrac{\\partial C}{\\partial w_{ij}}=\\delta_j\\,x_i$, unde $w_{ij}$ leagă intrarea $i$ de ieșirea $j$."
+      }
+     ],
+     "start": 4,
+     "result": {
+      "en": "No softmax derivative appears in the result: everything simplified with $\\ln y_j=z_j-\\ln S$.",
+      "ro": "Nu apare nicio derivată de softmax în rezultat: totul s-a simplificat odată cu $\\ln y_j=z_j-\\ln S$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s6",
+   "title": {
+    "en": "Example: forward",
+    "ro": "Exemplu: forward"
+   },
+   "kicker": {
+    "en": "Card 1 of 6 · Worked example, part 1",
+    "ro": "Cardul 1 din 6 · Exemplul rezolvat, partea 1"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "The input $x=2$, the weights $w=(0.8;\\,0.2)$, the biases $b=(0.4;\\,0.1)$, the correct answer $t=(1;\\,0)$.",
+        "ro": "Intrarea $x=2$, ponderile $w=(0{,}8;\\,0{,}2)$, bias-urile $b=(0{,}4;\\,0{,}1)$, răspunsul corect $t=(1;\\,0)$."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "$j$",
+         "$z_j=w_jx+b_j$",
+         "$e^{z_j}$",
+         "$y_j$"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,8·2+0,4=2,0",
+          "7,3891",
+          "0,8176"
+         ],
+         [
+          "2",
+          "0,2·2+0,1=0,5",
+          "1,6487",
+          "0,1824"
+         ]
+        ],
+        "caption": {
+         "en": "Two classes",
+         "ro": "Două clase"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "The scores: $z_1=2.0$ and $z_2=0.5$.",
+       "ro": "Scorurile: $z_1=2{,}0$ și $z_2=0{,}5$."
+      },
+      {
+       "en": "$S=7.3891+1.6487=9.0378$.",
+       "ro": "$S=7{,}3891+1{,}6487=9{,}0378$."
+      },
+      {
+       "en": "$y_1=7.3891/9.0378=0.8176$ and $y_2=1.6487/9.0378=0.1824$. Together they give 1.",
+       "ro": "$y_1=7{,}3891/9{,}0378=0{,}8176$ și $y_2=1{,}6487/9{,}0378=0{,}1824$. Împreună dau 1."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s7",
+   "title": {
+    "en": "Example: the errors",
+    "ro": "Exemplu: erorile"
+   },
+   "kicker": {
+    "en": "Card 1 of 6 · Worked example, part 2",
+    "ro": "Cardul 1 din 6 · Exemplul rezolvat, partea 2"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$j$",
+         "$\\delta_j$",
+         "$\\partial C/\\partial w_j$",
+         "$\\partial C/\\partial b_j$"
+        ],
+        "rows": [
+         [
+          "1",
+          "−0,1824",
+          "−0,3648",
+          "−0,1824"
+         ],
+         [
+          "2",
+          "+0,1824",
+          "+0,3648",
+          "+0,1824"
+         ]
+        ],
+        "caption": {
+         "en": "The errors and the gradients",
+         "ro": "Erorile și gradienții"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "$\\delta_1=y_1-t_1=0.8176-1=-0.1824$ and $\\delta_2=y_2-t_2=0.1824-0=+0.1824$.",
+       "ro": "$\\delta_1=y_1-t_1=0{,}8176-1=-0{,}1824$ și $\\delta_2=y_2-t_2=0{,}1824-0=+0{,}1824$."
+      },
+      {
+       "en": "$\\partial C/\\partial w_j=\\delta_j\\,x$: $-0.1824\\cdot2=-0.3648$ and $0.1824\\cdot2=+0.3648$.",
+       "ro": "$\\partial C/\\partial w_j=\\delta_j\\,x$: $-0{,}1824\\cdot2=-0{,}3648$ și $0{,}1824\\cdot2=+0{,}3648$."
+      },
+      {
+       "en": "The minus sign on the correct class: if you raise its score, the cost goes down.",
+       "ro": "Semnul minus la clasa corectă: dacă ridici scorul ei, costul scade."
+      },
+      {
+       "en": "Check without the formula: move $z_1$ by $\\pm0.01$ and recompute $C$. The difference $\\dfrac{C(2.01)-C(1.99)}{0.02}\\approx-0.1824$.",
+       "ro": "Verificare fără formulă: mută $z_1$ cu $\\pm0{,}01$ și recalculează $C$. Diferența $\\dfrac{C(2{,}01)-C(1{,}99)}{0{,}02}\\approx-0{,}1824$."
+      }
+     ],
+     "result": {
+      "en": "The cost is $C=-\\ln y_1=-\\ln 0.8176=0.2014$.",
+      "ro": "Costul este $C=-\\ln y_1=-\\ln 0{,}8176=0{,}2014$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s8",
+   "title": {
+    "en": "Practice: the derivative",
+    "ro": "Exersează: derivata"
+   },
+   "kicker": {
+    "en": "Card 1 of 6 · Drill",
+    "ro": "Cardul 1 din 6 · Exercițiu"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-crash-hw3-a-drill",
+     "status": "verified-twice",
+     "statement": {
+      "en": "The input is $x=2$. Compute $\\delta_1=\\partial C/\\partial z_1$, $\\delta_2=\\partial C/\\partial z_2$ and $\\partial C/\\partial w_1$. Round to 4 decimals.",
+      "ro": "Intrarea este $x=2$. Calculează $\\delta_1=\\partial C/\\partial z_1$, $\\delta_2=\\partial C/\\partial z_2$ și $\\partial C/\\partial w_1$. Rotunjește la 4 zecimale."
+     },
+     "table": {
+      "columns": [
+       "$j$",
+       "$w_j$",
+       "$b_j$",
+       "$t_j$"
+      ],
+      "rows": [
+       [
+        "1",
+        "1,0",
+        "0,5",
+        "0"
+       ],
+       [
+        "2",
+        "0,5",
+        "-0,5",
+        "1"
+       ]
+      ],
+      "caption": {
+       "en": "Parameters (the input is x)",
+       "ro": "Parametrii (intrarea este x)"
+      }
+     },
+     "data": {
+      "x": 2,
+      "w1": 1.0,
+      "w2": 0.5,
+      "b1": 0.5,
+      "b2": -0.5,
+      "t1": 0,
+      "t2": 1
+     },
+     "fields": [
+      {
+       "id": "d1",
+       "kind": "num",
+       "label": {
+        "en": "$\\delta_1$",
+        "ro": "$\\delta_1$"
+       },
+       "formula": "exp(w1*x+b1)/(exp(w1*x+b1)+exp(w2*x+b2))-t1",
+       "expected": 0.8808
+      },
+      {
+       "id": "d2",
+       "kind": "num",
+       "label": {
+        "en": "$\\delta_2$",
+        "ro": "$\\delta_2$"
+       },
+       "formula": "exp(w2*x+b2)/(exp(w1*x+b1)+exp(w2*x+b2))-t2",
+       "expected": -0.8808
+      },
+      {
+       "id": "gw1",
+       "kind": "num",
+       "label": {
+        "en": "$\\partial C/\\partial w_1$",
+        "ro": "$\\partial C/\\partial w_1$"
+       },
+       "formula": "(exp(w1*x+b1)/(exp(w1*x+b1)+exp(w2*x+b2))-t1)*x",
+       "expected": 1.7616
+      }
+     ],
+     "hints": [
+      {
+       "en": "First compute the scores $z_j=w_jx+b_j$, then the probabilities $y_j$ with softmax.",
+       "ro": "Întâi calculezi scorurile $z_j=w_jx+b_j$, apoi probabilitățile $y_j$ cu softmax."
+      },
+      {
+       "en": "$z=(2.5,\\,0.5)$, so $y_1=e^{2.5}/(e^{2.5}+e^{0.5})$. Then $\\delta_j=y_j-t_j$.",
+       "ro": "$z=(2{,}5,\\,0{,}5)$, deci $y_1=e^{2{,}5}/(e^{2{,}5}+e^{0{,}5})$. Apoi $\\delta_j=y_j-t_j$."
+      },
+      {
+       "en": "$y=(0.8808,\\,0.1192)$; $\\delta=y-t=(0.8808,\\,-0.8808)$; $\\partial C/\\partial w_1=\\delta_1\\cdot2$.",
+       "ro": "$y=(0{,}8808,\\,0{,}1192)$; $\\delta=y-t=(0{,}8808,\\,-0{,}8808)$; $\\partial C/\\partial w_1=\\delta_1\\cdot2$."
+      }
+     ],
+     "solution": {
+      "en": "$z=(2.5,0.5)$, $y=(0.8808,0.1192)$. The correct class is the second ($t=(0,1)$), so $\\delta=y-t=(0.8808,-0.8808)$ and $\\partial C/\\partial w_1=0.8808\\cdot2=1.7616$.",
+      "ro": "$z=(2{,}5,0{,}5)$, $y=(0{,}8808,0{,}1192)$. Clasa corectă este a doua ($t=(0,1)$), deci $\\delta=y-t=(0{,}8808,-0{,}8808)$ și $\\partial C/\\partial w_1=0{,}8808\\cdot2=1{,}7616$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The input is $x=3$. Compute $\\delta_1$, $\\delta_2$ and $\\partial C/\\partial w_1$ to 4 decimals.",
+        "ro": "Intrarea este $x=3$. Calculează $\\delta_1$, $\\delta_2$ și $\\partial C/\\partial w_1$, la 4 zecimale."
+       },
+       "solution": {
+        "en": "$z=(1.5,-1.0)$, $y=(0.9241,0.0759)$, $t=(1,0)$, so $\\delta=(-0.0759,0.0759)$ and $\\partial C/\\partial w_1=\\delta_1\\cdot3=-0.07586\\cdot3=-0.2276$ (with the rounded $\\delta_1$: $-0.2277$, also accepted).",
+        "ro": "$z=(1{,}5,-1{,}0)$, $y=(0{,}9241,0{,}0759)$, $t=(1,0)$, deci $\\delta=(-0{,}0759,0{,}0759)$ și $\\partial C/\\partial w_1=\\delta_1\\cdot3=-0{,}07586\\cdot3=-0{,}2276$ (cu $\\delta_1$ rotunjit: $-0{,}2277$, acceptat și el)."
+       },
+       "fields": [
+        {
+         "id": "d1",
+         "formula": "exp(w1*x+b1)/(exp(w1*x+b1)+exp(w2*x+b2))-t1",
+         "expected": -0.0759
+        },
+        {
+         "id": "d2",
+         "formula": "exp(w2*x+b2)/(exp(w1*x+b1)+exp(w2*x+b2))-t2",
+         "expected": 0.0759
+        },
+        {
+         "id": "gw1",
+         "formula": "(exp(w1*x+b1)/(exp(w1*x+b1)+exp(w2*x+b2))-t1)*x",
+         "expected": -0.2276
+        }
+       ],
+       "data": {
+        "x": 3,
+        "w1": 0.5,
+        "w2": -0.5,
+        "b1": 0,
+        "b2": 0.5,
+        "t1": 1,
+        "t2": 0
+       },
+       "table": {
+        "columns": [
+         "$j$",
+         "$w_j$",
+         "$b_j$",
+         "$t_j$"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,5",
+          "0,0",
+          "1"
+         ],
+         [
+          "2",
+          "-0,5",
+          "0,5",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Parameters (the input is x)",
+         "ro": "Parametrii (intrarea este x)"
+        }
+       },
+       "hints": [
+        {
+         "en": "Compute $z_j=w_jx+b_j$ then softmax.",
+         "ro": "Calculează $z_j=w_jx+b_j$ și apoi softmax."
+        },
+        {
+         "en": "$z=(1.5,-1.0)$; $y_1=e^{1.5}/(e^{1.5}+e^{-1.0})$.",
+         "ro": "$z=(1{,}5,-1{,}0)$; $y_1=e^{1{,}5}/(e^{1{,}5}+e^{-1{,}0})$."
+        },
+        {
+         "en": "$\\delta=y-t=(-0.0759,0.0759)$; multiply $\\delta_1$ by 3.",
+         "ro": "$\\delta=y-t=(-0{,}0759,0{,}0759)$; înmulțești $\\delta_1$ cu 3."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s9",
+   "title": {
+    "en": "Check: the sign",
+    "ro": "Verifică: semnul"
+   },
+   "kicker": {
+    "en": "Card 1 of 6 · Check",
+    "ro": "Cardul 1 din 6 · Verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-crash-hw3-a-sign",
+     "question": {
+      "en": "In the worked example the correct class is class 1 and $y_1=0.8176$. What sign does $\\partial C/\\partial z_1$ have?",
+      "ro": "În exemplul rezolvat, clasa corectă este clasa 1 și $y_1=0{,}8176$. Ce semn are $\\partial C/\\partial z_1$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Negative, $y_1-1=-0.1824$",
+        "ro": "Negativ, $y_1-1=-0{,}1824$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct: if you raise the score of the correct class the cost goes down, so the derivative is negative.",
+        "ro": "Corect: dacă ridici scorul clasei corecte, costul scade, deci derivata e negativă."
+       }
+      },
+      {
+       "text": {
+        "en": "Positive, $+0.1824$",
+        "ro": "Pozitiv, $+0{,}1824$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "You flipped the difference: it is $y-t$, not $t-y$. With $t_1=1$ it is $0.8176-1$.",
+        "ro": "Ai inversat diferența: este $y-t$, nu $t-y$. Cu $t_1=1$ rezultă $0{,}8176-1$."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "Zero, because $y_1$ is close to 1",
+        "ro": "Zero, pentru că $y_1$ e aproape 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "It would be zero only if $y_1$ were exactly 1. As long as $y_1<1$ there is room to improve.",
+        "ro": "Zero ar fi doar dacă $y_1$ ar fi exact 1. Cât timp $y_1<1$ mai este loc de îmbunătățire."
+       },
+       "misconception": "gradient-zero-aproape-de-tinta"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s10",
+   "title": {
+    "en": "One hidden ReLU neuron, the separator in 2D",
+    "ro": "Un neuron ReLU ascuns, separatorul în 2D"
+   },
+   "kicker": {
+    "en": "Card 2 of 6 · When you see this",
+    "ro": "Cardul 2 din 6 · Când vezi asta"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "\"One hidden perceptron with ReLU and one output perceptron: how does ReLU change the separator in 2D?\"",
+      "ro": "\"Un perceptron ascuns cu ReLU și un perceptron de ieșire: cum schimbă ReLU separatorul în 2D?\""
+     },
+     "variant": "when",
+     "label": {
+      "en": "When you see this",
+      "ro": "Când vezi asta"
+     },
+     "body": [
+      {
+       "text": {
+        "en": "The small number on top is the layer, not a power: 1 = inputs, 2 = hidden, 3 = output (as on the Lab04 sheet). $\\text{ReLU}(z)=\\max(0,z)$ keeps positive numbers and replaces negative ones with 0.",
+        "ro": "Numărul mic de sus este stratul, nu o putere: 1 = intrările, 2 = stratul ascuns, 3 = ieșirea (ca în foaia Lab04). $\\text{ReLU}(z)=\\max(0,z)$ păstrează numerele pozitive și pune 0 în locul celor negative."
+       }
+      },
+      {
+       "text": {
+        "en": "The network: $z^2=x_1+x_2-1$, $y^2=\\max(0,z^2)$, $z^3=2y^2-1$. The last column is $z^3$ without ReLU, that is $2z^2-1$.",
+        "ro": "Rețeaua: $z^2=x_1+x_2-1$, $y^2=\\max(0,z^2)$, $z^3=2y^2-1$. Ultima coloană este $z^3$ fără ReLU, adică $2z^2-1$."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "$(x_1,x_2)$",
+         "$z^2$",
+         "$y^2$",
+         "$z^3$",
+         {
+          "en": "without ReLU",
+          "ro": "fără ReLU"
+         }
+        ],
+        "rows": [
+         [
+          "(2; 1)",
+          "2",
+          "2",
+          "3",
+          "3"
+         ],
+         [
+          "(1; 0,5)",
+          "0,5",
+          "0,5",
+          "0",
+          "0"
+         ],
+         [
+          "(0,5; 0,5)",
+          "0",
+          "0",
+          "−1",
+          "−1"
+         ],
+         [
+          "(1; −2)",
+          "−2",
+          "0",
+          "−1",
+          "−5"
+         ],
+         [
+          "(−1; −1)",
+          "−3",
+          "0",
+          "−1",
+          "−7"
+         ]
+        ],
+        "caption": {
+         "en": "Five points through the network",
+         "ro": "Cinci puncte prin rețea"
+        },
+        "highlight": {
+         "rows": [
+          3,
+          4
+         ],
+         "cols": [
+          3
+         ]
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "ReLU folds the plane along the line $z^2=0$: on one side the output is constant, on the other it varies linearly.",
+        "ro": "ReLU pliază planul pe linia $z^2=0$: pe o parte ieșirea e constantă, pe cealaltă variază liniar."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s11",
+   "title": {
+    "en": "One hidden ReLU neuron, the separator in 2D",
+    "ro": "Un neuron ReLU ascuns, separatorul în 2D"
+   },
+   "kicker": {
+    "en": "Card 2 of 6 · The recipe, steps 1-3",
+    "ro": "Cardul 2 din 6 · Rețeta, pașii 1-3"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "The network: hidden score $z^2=x_1+x_2-1$, hidden output $y^2=\\text{ReLU}(z^2)=\\max(0,z^2)$, final score $z^3=w_{11}^3\\,y^2+b_1^3$. Here $w_{11}^3=2$ and $b_1^3=-1$ are the weight and the bias of the output neuron.",
+        "ro": "Rețeaua: scorul ascuns $z^2=x_1+x_2-1$, ieșirea ascunsă $y^2=\\text{ReLU}(z^2)=\\max(0,z^2)$, scorul final $z^3=w_{11}^3\\,y^2+b_1^3$. Aici $w_{11}^3=2$ și $b_1^3=-1$ sunt ponderea și bias-ul neuronului de ieșire."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "The fold line is $z^2=0$, that is $x_1+x_2=1$.",
+       "ro": "Linia de pliere este $z^2=0$, adică $x_1+x_2=1$."
+      },
+      {
+       "en": "On the side with $z^2\\le0$: $y^2=0$, so $z^3=b_1^3=-1$ everywhere. The output is constant.",
+       "ro": "Pe partea cu $z^2\\le0$: $y^2=0$, deci $z^3=b_1^3=-1$ peste tot. Ieșirea este constantă."
+      },
+      {
+       "en": "On the side with $z^2>0$: $y^2=z^2$, so $z^3=w_{11}^3\\,z^2+b_1^3$ varies linearly.",
+       "ro": "Pe partea cu $z^2>0$: $y^2=z^2$, deci $z^3=w_{11}^3\\,z^2+b_1^3$ variază liniar."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s12",
+   "title": {
+    "en": "One hidden ReLU neuron, the separator in 2D",
+    "ro": "Un neuron ReLU ascuns, separatorul în 2D"
+   },
+   "kicker": {
+    "en": "Card 2 of 6 · The recipe, steps 4-5",
+    "ro": "Cardul 2 din 6 · Rețeta, pașii 4-5"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "The separator is $z^3=0$, that is $y^2=-b_1^3/w_{11}^3=0.5$. From $x_1+x_2-1=0.5$ we get the line $x_1+x_2=1.5$, parallel to the fold line.",
+       "ro": "Separatorul este $z^3=0$, adică $y^2=-b_1^3/w_{11}^3=0{,}5$. Din $x_1+x_2-1=0{,}5$ rezultă dreapta $x_1+x_2=1{,}5$, paralelă cu linia de pliere."
+      },
+      {
+       "en": "Check: at the point $(1;\\,0.5)$ we have $z^2=0.5$, $y^2=0.5$, $z^3=0$. It is on the separator.",
+       "ro": "Verificare: în punctul $(1;\\,0{,}5)$ avem $z^2=0{,}5$, $y^2=0{,}5$, $z^3=0$. Este pe separator."
+      }
+     ],
+     "start": 4,
+     "result": {
+      "en": "One ReLU neuron gives one fold: the separator stays a straight line, not a curve.",
+      "ro": "Un singur neuron ReLU dă o singură pliere: separatorul rămâne o dreaptă, nu o curbă."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s13",
+   "title": {
+    "en": "One hidden ReLU neuron, the separator in 2D",
+    "ro": "Un neuron ReLU ascuns, separatorul în 2D"
+   },
+   "kicker": {
+    "en": "Card 2 of 6 · When the separator is missing",
+    "ro": "Cardul 2 din 6 · Când lipsește separatorul"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "$w_{11}^3=2$, $b_1^3=-1$: the line $x_1+x_2=1.5$, the positive class beyond it.",
+         "ro": "$w_{11}^3=2$, $b_1^3=-1$: dreapta $x_1+x_2=1{,}5$, clasa pozitivă dincolo de ea."
+        },
+        {
+         "en": "$w_{11}^3=2$, $b_1^3=+1$: no separator, $z^3\\ge1$ everywhere.",
+         "ro": "$w_{11}^3=2$, $b_1^3=+1$: nu există separator, $z^3\\ge1$ peste tot."
+        },
+        {
+         "en": "$w_{11}^3=-2$, $b_1^3=+1$: the line $x_1+x_2=1.5$, the positive class on the flat side too.",
+         "ro": "$w_{11}^3=-2$, $b_1^3=+1$: dreapta $x_1+x_2=1{,}5$, clasa pozitivă și pe partea plată."
+        },
+        {
+         "en": "$w_{11}^3=-2$, $b_1^3=-1$: no separator, $z^3\\le-1$ everywhere.",
+         "ro": "$w_{11}^3=-2$, $b_1^3=-1$: nu există separator, $z^3\\le-1$ peste tot."
+        }
+       ]
+      },
+      {
+       "text": {
+        "en": "The separator exists only when $w_{11}^3$ and $b_1^3$ have opposite signs (when $b_1^3=0$, the boundary is the fold line itself).",
+        "ro": "Separatorul există doar când $w_{11}^3$ și $b_1^3$ au semne opuse (când $b_1^3=0$, granița este chiar linia de pliere)."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s14",
+   "title": {
+    "en": "Two hidden neurons: the bend",
+    "ro": "Doi neuroni ascunși: îndoitura"
+   },
+   "kicker": {
+    "en": "Card 2 of 6 · The recipe, continued",
+    "ro": "Cardul 2 din 6 · Rețeta, continuare"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$(x_1,x_2)$",
+         "$y_1^2=\\max(0,x_1)$",
+         "$y_2^2=\\max(0,x_2)$",
+         "$z^3=y_1^2+y_2^2-1$"
+        ],
+        "rows": [
+         [
+          "(0,5; 0,5)",
+          "0,5",
+          "0,5",
+          "0"
+         ],
+         [
+          "(1; −2)",
+          "1",
+          "0",
+          "0"
+         ],
+         [
+          "(−2; 1)",
+          "0",
+          "1",
+          "0"
+         ],
+         [
+          "(2; 2)",
+          "2",
+          "2",
+          "3"
+         ],
+         [
+          "(−1; −1)",
+          "0",
+          "0",
+          "−1"
+         ]
+        ],
+        "caption": {
+         "en": "Two hidden ReLU neurons",
+         "ro": "Doi neuroni ReLU ascunși"
+        },
+        "highlight": {
+         "rows": [
+          0,
+          1,
+          2
+         ],
+         "cols": [
+          3
+         ]
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "The points $(0.5;0.5)$, $(1;-2)$ and $(-2;1)$ all have $z^3=0$ but are not on one line. The separator has three pieces, so it bends.",
+        "ro": "Punctele $(0{,}5;0{,}5)$, $(1;-2)$ și $(-2;1)$ au toate $z^3=0$, dar nu stau pe o dreaptă. Separatorul are trei bucăți, deci se îndoaie."
+       }
+      },
+      {
+       "text": {
+        "en": "To bend the separator you need at least two hidden neurons.",
+        "ro": "Ca să îndoi separatorul îți trebuie cel puțin doi neuroni ascunși."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s15",
+   "title": {
+    "en": "Practice: ReLU",
+    "ro": "Exersează: ReLU"
+   },
+   "kicker": {
+    "en": "Card 2 of 6 · Drill",
+    "ro": "Cardul 2 din 6 · Exercițiu"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-crash-hw3-e-drill",
+     "status": "verified-twice",
+     "statement": {
+      "en": "One hidden neuron: $y^2=\\max(0,\\,2x_1+x_2-2)$. The output: $z^3=3y^2-1.5$. Compute $z^3$ at $A=(2;1)$ and at $B=(-1;0)$, then the value of $2x_1+x_2$ on the separator ($z^3=0$). Round to at most 4 decimals.",
+      "ro": "Un neuron ascuns: $y^2=\\max(0,\\,2x_1+x_2-2)$. Ieșirea: $z^3=3y^2-1{,}5$. Calculează $z^3$ în $A=(2;1)$ și în $B=(-1;0)$, apoi valoarea lui $2x_1+x_2$ pe separator ($z^3=0$). Rotunjește la cel mult 4 zecimale."
+     },
+     "data": {
+      "a1": 2,
+      "a2": 1,
+      "a0": -2,
+      "v": 3,
+      "c0": -1.5,
+      "xa1": 2,
+      "xa2": 1,
+      "xb1": -1,
+      "xb2": 0
+     },
+     "fields": [
+      {
+       "id": "za",
+       "kind": "num",
+       "label": {
+        "en": "$z^3$ at $A$",
+        "ro": "$z^3$ în $A$"
+       },
+       "formula": "v*max(0,a1*xa1+a2*xa2+a0)+c0",
+       "expected": 7.5
+      },
+      {
+       "id": "zb",
+       "kind": "num",
+       "label": {
+        "en": "$z^3$ at $B$",
+        "ro": "$z^3$ în $B$"
+       },
+       "formula": "v*max(0,a1*xb1+a2*xb2+a0)+c0",
+       "expected": -1.5
+      },
+      {
+       "id": "sep",
+       "kind": "num",
+       "label": {
+        "en": "$2x_1+x_2$ on the separator",
+        "ro": "$2x_1+x_2$ pe separator"
+       },
+       "formula": "-c0/v-a0",
+       "expected": 2.5
+      }
+     ],
+     "hints": [
+      {
+       "en": "First $z^2=2x_1+x_2-2$, then ReLU, then $z^3=3y^2-1.5$.",
+       "ro": "Întâi $z^2=2x_1+x_2-2$, apoi ReLU, apoi $z^3=3y^2-1{,}5$."
+      },
+      {
+       "en": "At $A$: $z^2=3$. At $B$: $z^2=-4$, so $y^2=0$. On the separator $y^2=1.5/3=0.5$.",
+       "ro": "În $A$: $z^2=3$. În $B$: $z^2=-4$, deci $y^2=0$. Pe separator $y^2=1{,}5/3=0{,}5$."
+      },
+      {
+       "en": "$z^3(A)=3\\cdot3-1.5=7.5$; $z^3(B)=-1.5$; $2x_1+x_2-2=0.5$ gives $2x_1+x_2=2.5$.",
+       "ro": "$z^3(A)=3\\cdot3-1{,}5=7{,}5$; $z^3(B)=-1{,}5$; $2x_1+x_2-2=0{,}5$ dă $2x_1+x_2=2{,}5$."
+      }
+     ],
+     "solution": {
+      "en": "$A$: $z^2=2\\cdot2+1-2=3$, $y^2=3$, $z^3=3\\cdot3-1.5=7.5$. $B$: $z^2=-4$, $y^2=0$, $z^3=-1.5$ (constant on the flat side). Separator: $y^2=0.5$, so $2x_1+x_2=2.5$.",
+      "ro": "$A$: $z^2=2\\cdot2+1-2=3$, $y^2=3$, $z^3=3\\cdot3-1{,}5=7{,}5$. $B$: $z^2=-4$, $y^2=0$, $z^3=-1{,}5$ (constant pe partea plată). Separator: $y^2=0{,}5$, deci $2x_1+x_2=2{,}5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "One hidden neuron: $y^2=\\max(0,\\,x_1-2x_2-1)$. The output: $z^3=2y^2-3$. Compute $z^3$ at $A=(4;0)$ and at $B=(1;1)$, then the value of $x_1-2x_2$ on the separator. Round to at most 4 decimals.",
+        "ro": "Un neuron ascuns: $y^2=\\max(0,\\,x_1-2x_2-1)$. Ieșirea: $z^3=2y^2-3$. Calculează $z^3$ în $A=(4;0)$ și în $B=(1;1)$, apoi valoarea lui $x_1-2x_2$ pe separator. Rotunjește la cel mult 4 zecimale."
+       },
+       "solution": {
+        "en": "$A$: $z^2=3$, $y^2=3$, $z^3=3$. $B$: $z^2=-2$, $y^2=0$, $z^3=-3$. Separator: $y^2=1.5$, so $x_1-2x_2=2.5$.",
+        "ro": "$A$: $z^2=3$, $y^2=3$, $z^3=3$. $B$: $z^2=-2$, $y^2=0$, $z^3=-3$. Separator: $y^2=1{,}5$, deci $x_1-2x_2=2{,}5$."
+       },
+       "fields": [
+        {
+         "id": "za",
+         "formula": "v*max(0,a1*xa1+a2*xa2+a0)+c0",
+         "expected": 3
+        },
+        {
+         "id": "zb",
+         "formula": "v*max(0,a1*xb1+a2*xb2+a0)+c0",
+         "expected": -3
+        },
+        {
+         "id": "sep",
+         "formula": "-c0/v-a0",
+         "expected": 2.5
+        }
+       ],
+       "data": {
+        "a1": 1,
+        "a2": -2,
+        "a0": -1,
+        "v": 2,
+        "c0": -3,
+        "xa1": 4,
+        "xa2": 0,
+        "xb1": 1,
+        "xb2": 1
+       },
+       "hints": [
+        {
+         "en": "First $z^2$, then ReLU, then $z^3$.",
+         "ro": "Întâi $z^2$, apoi ReLU, apoi $z^3$."
+        },
+        {
+         "en": "At $A$: $z^2=4-0-1=3$. At $B$: $z^2=1-2-1=-2$.",
+         "ro": "În $A$: $z^2=4-0-1=3$. În $B$: $z^2=1-2-1=-2$."
+        },
+        {
+         "en": "$z^3(A)=2\\cdot3-3=3$; $z^3(B)=-3$; $y^2=1.5$ gives $x_1-2x_2=2.5$.",
+         "ro": "$z^3(A)=2\\cdot3-3=3$; $z^3(B)=-3$; $y^2=1{,}5$ dă $x_1-2x_2=2{,}5$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s16",
+   "title": {
+    "en": "Check: the shape of the separator",
+    "ro": "Verifică: forma separatorului"
+   },
+   "kicker": {
+    "en": "Card 2 of 6 · Check",
+    "ro": "Cardul 2 din 6 · Verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-crash-hw3-e-shape",
+     "question": {
+      "en": "A network has one hidden ReLU neuron and one output neuron. What can you say for sure about the separator in the plane?",
+      "ro": "O rețea are un singur neuron ascuns cu ReLU și un neuron de ieșire. Ce poți spune sigur despre separatorul din plan?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "It is a straight line parallel to the fold line, or it is missing",
+        "ro": "Este o dreaptă paralelă cu linia de pliere, sau lipsește"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct: on the flat side the output is constant and on the other it is linear, so a zero crossing gives at most one straight line.",
+        "ro": "Corect: pe partea plată ieșirea e constantă, iar pe cealaltă e liniară, deci o zeroare dă cel mult o dreaptă."
+       }
+      },
+      {
+       "text": {
+        "en": "It is a smooth curve",
+        "ro": "Este o curbă netedă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "ReLU does not curve: it gives straight pieces. A smooth curve would need another activation.",
+        "ro": "ReLU nu curbează: dă bucăți drepte. O curbă netedă ar cere altă activare."
+       },
+       "misconception": "relu-curbeaza"
+      },
+      {
+       "text": {
+        "en": "It is a bent line with a corner",
+        "ro": "Este o dreaptă îndoită, cu un colț"
+       },
+       "correct": false,
+       "explain": {
+        "en": "A corner needs at least two hidden neurons. With one you have a single fold.",
+        "ro": "Un colț cere cel puțin doi neuroni ascunși. Cu unul singur ai o singură pliere."
+       },
+       "misconception": "un-neuron-relu-indoaie"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s17",
+   "title": {
+    "en": "Say it in your own words",
+    "ro": "Spune-o cu vorbele tale"
+   },
+   "kicker": {
+    "en": "Card 2 of 6 · For the oral",
+    "ro": "Cardul 2 din 6 · Pentru oral"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "nn-crash-hw3-e-say",
+     "prompt": {
+      "en": "Say in two sentences how ReLU changes the separator, as at the oral.",
+      "ro": "Spune în două propoziții cum schimbă ReLU separatorul, ca la oral."
+     },
+     "answer": {
+      "en": "ReLU does not curve the separator, it folds the plane along the line $z^2=0$: on one side the output is constant, on the other it varies linearly. With a single neuron the separator stays a straight line (or disappears); to bend it you need at least two hidden neurons.",
+      "ro": "ReLU nu curbează separatorul, ci pliază planul pe linia $z^2=0$: pe o parte ieșirea e constantă, pe cealaltă variază liniar. Cu un singur neuron separatorul rămâne o dreaptă (sau dispare); ca să se îndoaie, trebuie cel puțin doi neuroni ascunși."
+     },
+     "placeholder": {
+      "en": "Write your answer",
+      "ro": "Scrie răspunsul tău"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s18",
+   "title": {
+    "en": "z = w·x + b versus the dot product",
+    "ro": "z = w·x + b față de produsul scalar"
+   },
+   "kicker": {
+    "en": "Card 3 of 6 · When you see this",
+    "ro": "Cardul 3 din 6 · Când vezi asta"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "\"How is $z=w\\cdot x+b$ related to the dot product, and why is it used?\"",
+      "ro": "\"Cum se leagă $z=w\\cdot x+b$ de produsul scalar și de ce se folosește?\""
+     },
+     "variant": "when",
+     "label": {
+      "en": "When you see this",
+      "ro": "Când vezi asta"
+     },
+     "body": [
+      {
+       "table": {
+        "columns": [
+         "$i$",
+         "$w_i$",
+         "$x_i$",
+         "$w_i\\cdot x_i$"
+        ],
+        "rows": [
+         [
+          "1",
+          "3",
+          "2",
+          "6"
+         ],
+         [
+          "2",
+          "4",
+          "1,5",
+          "6"
+         ],
+         [
+          "—",
+          "—",
+          "$w\\cdot x=$",
+          "12"
+         ],
+         [
+          "—",
+          "—",
+          "$z=12+b=12-5=$",
+          "7"
+         ]
+        ],
+        "caption": {
+         "en": "With b = −5",
+         "ro": "Cu b = −5"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "$z$ is the dot product plus the bias $b$ (the bias shifts the threshold): a single number that says how much $x$ looks like $w$.",
+        "ro": "$z$ este produsul scalar plus bias-ul $b$ (bias-ul mută pragul): un singur număr care spune cât seamănă $x$ cu $w$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s19",
+   "title": {
+    "en": "z = w·x + b versus the dot product",
+    "ro": "z = w·x + b față de produsul scalar"
+   },
+   "kicker": {
+    "en": "Card 3 of 6 · The recipe",
+    "ro": "Cardul 3 din 6 · Rețeta"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "The dot product: multiply in pairs and add, $w\\cdot x=\\sum_i w_ix_i$. Here $3\\cdot2+4\\cdot1.5=12$.",
+       "ro": "Produsul scalar: înmulțești pe perechi și aduni, $w\\cdot x=\\sum_i w_ix_i$. Aici $3\\cdot2+4\\cdot1{,}5=12$."
+      },
+      {
+       "en": "Geometrically, $w\\cdot x=|w|\\,|x|\\cos\\theta$, where $|w|=\\sqrt{w_1^2+w_2^2}$ is the length of $w$ (the same for $|x|$) and $\\theta$ the angle between them. Here $|w|=5$, $|x|=2.5$, so $\\cos\\theta=\\dfrac{12}{5\\cdot2.5}=0.96$.",
+       "ro": "Geometric, $w\\cdot x=|w|\\,|x|\\cos\\theta$, unde $|w|=\\sqrt{w_1^2+w_2^2}$ este lungimea lui $w$ (la fel $|x|$), iar $\\theta$ este unghiul dintre ele. Aici $|w|=5$, $|x|=2{,}5$, deci $\\cos\\theta=\\dfrac{12}{5\\cdot2{,}5}=0{,}96$."
+      },
+      {
+       "en": "Large when $x$ points along $w$, zero when they are perpendicular, negative when opposite.",
+       "ro": "Mare când $x$ arată în direcția lui $w$, zero când sunt perpendiculari, negativ când sunt opuși."
+      },
+      {
+       "en": "The bias $b$ shifts the threshold. Without it, $w\\cdot x=0$ always passes through the origin. So $z=w\\cdot x+b$.",
+       "ro": "Bias-ul $b$ mută pragul. Fără el, $w\\cdot x=0$ trece mereu prin origine. Deci $z=w\\cdot x+b$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s20",
+   "title": {
+    "en": "z = w·x + b versus the dot product",
+    "ro": "z = w·x + b față de produsul scalar"
+   },
+   "kicker": {
+    "en": "Card 3 of 6 · Why it is used",
+    "ro": "Cardul 3 din 6 · De ce se folosește"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Three reasons, to say briefly:",
+        "ro": "Trei motive, de spus pe scurt:"
+       }
+      },
+      {
+       "points": [
+        {
+         "en": "One number per neuron: how much the input looks like the pattern $w$.",
+         "ro": "Un singur număr per neuron: cât seamănă intrarea cu tiparul $w$."
+        },
+        {
+         "en": "Cheap: a whole layer is one matrix product.",
+         "ro": "Ieftin: un strat întreg este un singur produs de matrice."
+        },
+        {
+         "en": "Differentiable: $\\partial z/\\partial w_i=x_i$, so backprop works directly.",
+         "ro": "Derivabil: $\\partial z/\\partial w_i=x_i$, deci backprop merge direct."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s21",
+   "title": {
+    "en": "Practice: the dot product",
+    "ro": "Exersează: produsul scalar"
+   },
+   "kicker": {
+    "en": "Card 3 of 6 · Drill",
+    "ro": "Cardul 3 din 6 · Exercițiu"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-crash-hw3-b-drill",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Compute $w\\cdot x$, then $z=w\\cdot x+b$, then $\\cos\\theta$ between $w$ and $x$ (4 decimals).",
+      "ro": "Calculează $w\\cdot x$, apoi $z=w\\cdot x+b$, apoi $\\cos\\theta$ dintre $w$ și $x$ (4 zecimale)."
+     },
+     "table": {
+      "columns": [
+       "$i$",
+       "$w_i$",
+       "$x_i$"
+      ],
+      "rows": [
+       [
+        "1",
+        "4",
+        "1"
+       ],
+       [
+        "2",
+        "3",
+        "2"
+       ]
+      ],
+      "caption": {
+       "en": "With b = -6",
+       "ro": "Cu b = -6"
+      }
+     },
+     "data": {
+      "w1": 4,
+      "w2": 3,
+      "x1": 1,
+      "x2": 2,
+      "b": -6
+     },
+     "fields": [
+      {
+       "id": "dot",
+       "kind": "num",
+       "label": {
+        "en": "$w\\cdot x$",
+        "ro": "$w\\cdot x$"
+       },
+       "formula": "w1*x1+w2*x2",
+       "expected": 10
+      },
+      {
+       "id": "z",
+       "kind": "num",
+       "label": {
+        "en": "$z$",
+        "ro": "$z$"
+       },
+       "formula": "w1*x1+w2*x2+b",
+       "expected": 4
+      },
+      {
+       "id": "cos",
+       "kind": "num",
+       "label": {
+        "en": "$\\cos\\theta$",
+        "ro": "$\\cos\\theta$"
+       },
+       "formula": "(w1*x1+w2*x2)/(sqrt(w1^2+w2^2)*sqrt(x1^2+x2^2))",
+       "expected": 0.8944
+      }
+     ],
+     "hints": [
+      {
+       "en": "Multiply in pairs and add.",
+       "ro": "Înmulțești pe perechi și aduni."
+      },
+      {
+       "en": "$w\\cdot x=4\\cdot1+3\\cdot2$; then add $b=-6$. For the cosine: divide by $|w|\\,|x|$.",
+       "ro": "$w\\cdot x=4\\cdot1+3\\cdot2$; apoi adaugi $b=-6$. Pentru cos: împarți la $|w|\\,|x|$."
+      },
+      {
+       "en": "$w\\cdot x=10$, $z=4$, $|w|=5$, $|x|=\\sqrt5$, $\\cos\\theta=10/(5\\sqrt5)=0.8944$.",
+       "ro": "$w\\cdot x=10$, $z=4$, $|w|=5$, $|x|=\\sqrt5$, $\\cos\\theta=10/(5\\sqrt5)=0{,}8944$."
+      }
+     ],
+     "solution": {
+      "en": "$w\\cdot x=4\\cdot1+3\\cdot2=10$; $z=10-6=4$; $|w|=5$, $|x|=\\sqrt5\\approx2.2361$; $\\cos\\theta=10/(5\\cdot2.2361)=0.8944$.",
+      "ro": "$w\\cdot x=4\\cdot1+3\\cdot2=10$; $z=10-6=4$; $|w|=5$, $|x|=\\sqrt5\\approx2{,}2361$; $\\cos\\theta=10/(5\\cdot2{,}2361)=0{,}8944$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Compute $w\\cdot x$, $z$ and $\\cos\\theta$ (4 decimals).",
+        "ro": "Calculează $w\\cdot x$, $z$ și $\\cos\\theta$ (4 zecimale)."
+       },
+       "solution": {
+        "en": "$w\\cdot x=5\\cdot2+12\\cdot1=22$; $z=22-4=18$; $|w|=13$, $|x|=\\sqrt5$; $\\cos\\theta=0.7568$.",
+        "ro": "$w\\cdot x=5\\cdot2+12\\cdot1=22$; $z=22-4=18$; $|w|=13$, $|x|=\\sqrt5$; $\\cos\\theta=0{,}7568$."
+       },
+       "fields": [
+        {
+         "id": "dot",
+         "formula": "w1*x1+w2*x2",
+         "expected": 22
+        },
+        {
+         "id": "z",
+         "formula": "w1*x1+w2*x2+b",
+         "expected": 18
+        },
+        {
+         "id": "cos",
+         "formula": "(w1*x1+w2*x2)/(sqrt(w1^2+w2^2)*sqrt(x1^2+x2^2))",
+         "expected": 0.7568
+        }
+       ],
+       "data": {
+        "w1": 5,
+        "w2": 12,
+        "x1": 2,
+        "x2": 1,
+        "b": -4
+       },
+       "table": {
+        "columns": [
+         "$i$",
+         "$w_i$",
+         "$x_i$"
+        ],
+        "rows": [
+         [
+          "1",
+          "5",
+          "2"
+         ],
+         [
+          "2",
+          "12",
+          "1"
+         ]
+        ],
+        "caption": {
+         "en": "With b = -4",
+         "ro": "Cu b = -4"
+        }
+       },
+       "hints": [
+        {
+         "en": "Multiply in pairs and add.",
+         "ro": "Înmulțești pe perechi și aduni."
+        },
+        {
+         "en": "$w\\cdot x=5\\cdot2+12\\cdot1$, then $-4$.",
+         "ro": "$w\\cdot x=5\\cdot2+12\\cdot1$, apoi $-4$."
+        },
+        {
+         "en": "$22$, $18$; $\\cos\\theta=22/(13\\sqrt5)=0.7568$.",
+         "ro": "$22$, $18$; $\\cos\\theta=22/(13\\sqrt5)=0{,}7568$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s22",
+   "title": {
+    "en": "Say it in your own words",
+    "ro": "Spune-o cu vorbele tale"
+   },
+   "kicker": {
+    "en": "Card 3 of 6 · For the oral",
+    "ro": "Cardul 3 din 6 · Pentru oral"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "nn-crash-hw3-b-say",
+     "prompt": {
+      "en": "Say in two sentences why $z$ is a dot product plus a bias.",
+      "ro": "Spune în două propoziții de ce $z$ este un produs scalar plus bias."
+     },
+     "answer": {
+      "en": "The dot product $w\\cdot x$ measures how much $x$ points along $w$, so the neuron reacts to the pattern $w$. The bias $b$ shifts the threshold so that the separator does not have to pass through the origin.",
+      "ro": "Produsul scalar $w\\cdot x$ măsoară cât de mult arată $x$ în direcția lui $w$, deci neuronul reacționează la tiparul $w$. Bias-ul $b$ mută pragul, ca separatorul să nu treacă obligatoriu prin origine."
+     },
+     "placeholder": {
+      "en": "Write your answer",
+      "ro": "Scrie răspunsul tău"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s23",
+   "title": {
+    "en": "z versus the distance to a line",
+    "ro": "z față de distanța până la o dreaptă"
+   },
+   "kicker": {
+    "en": "Card 4 of 6 · When you see this",
+    "ro": "Cardul 4 din 6 · Când vezi asta"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "\"How is $z=w\\cdot x+b$ related to the distance from a point to a line?\"",
+      "ro": "\"Cum se leagă $z=w\\cdot x+b$ de distanța de la un punct la o dreaptă?\""
+     },
+     "variant": "when",
+     "label": {
+      "en": "When you see this",
+      "ro": "Când vezi asta"
+     },
+     "body": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "The point $p$",
+          "ro": "Punctul $p$"
+         },
+         "$z=3x_1+4x_2-5$",
+         {
+          "en": "$z/|w|$ with $|w|=5$",
+          "ro": "$z/|w|$ cu $|w|=5$"
+         }
+        ],
+        "rows": [
+         [
+          "(2; 1,5)",
+          "7",
+          "+1,4"
+         ],
+         [
+          "(0,5; 0,5)",
+          "−1,5",
+          "−0,3"
+         ],
+         [
+          "(1; 0,5)",
+          "0",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "The line 3x1 + 4x2 − 5 = 0",
+         "ro": "Dreapta 3x1 + 4x2 − 5 = 0"
+        },
+        "highlight": {
+         "rows": [
+          2
+         ]
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "$z$ divided by the length of $w$ is the signed distance to the line $z=0$.",
+        "ro": "$z$ împărțit la lungimea lui $w$ este distanța cu semn până la dreapta $z=0$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s24",
+   "title": {
+    "en": "z versus the distance to a line",
+    "ro": "z față de distanța până la o dreaptă"
+   },
+   "kicker": {
+    "en": "Card 4 of 6 · The recipe",
+    "ro": "Cardul 4 din 6 · Rețeta"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "The line is the set of points with $w\\cdot x+b=0$. It splits the plane in two parts.",
+       "ro": "Dreapta este mulțimea punctelor cu $w\\cdot x+b=0$. Ea împarte planul în două părți."
+      },
+      {
+       "en": "The distance from the point $p$ to the line is $\\dfrac{|w\\cdot p+b|}{|w|}=\\dfrac{|z|}{|w|}$, with $|w|=\\sqrt{w_1^2+w_2^2}$.",
+       "ro": "Distanța de la punctul $p$ la dreaptă este $\\dfrac{|w\\cdot p+b|}{|w|}=\\dfrac{|z|}{|w|}$, cu $|w|=\\sqrt{w_1^2+w_2^2}$."
+      },
+      {
+       "en": "Without the absolute value, $z/|w|$ is the signed distance: the sign says which side of the line you are on.",
+       "ro": "Fără modul, $z/|w|$ este distanța cu semn: semnul spune pe ce parte a dreptei ești."
+      },
+      {
+       "en": "So $z=|w|\\cdot d$, where $d$ is the distance. Example: $z=7$, $|w|=5$, $d=1.4$.",
+       "ro": "Deci $z=|w|\\cdot d$, unde $d$ este distanța. Exemplu: $z=7$, $|w|=5$, $d=1{,}4$."
+      }
+     ],
+     "result": {
+      "en": "$z$ is the distance itself only when $|w|=1$.",
+      "ro": "$z$ este chiar distanța doar când $|w|=1$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s25",
+   "title": {
+    "en": "Why it is true",
+    "ro": "De ce e adevărat"
+   },
+   "kicker": {
+    "en": "Card 4 of 6 · The short proof",
+    "ro": "Cardul 4 din 6 · Demonstrația scurtă"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-crash-hw3-c-proof",
+     "claim": {
+      "en": "The distance from the point $p$ to the line $w\\cdot x+b=0$ is $\\dfrac{|w\\cdot p+b|}{|w|}$.",
+      "ro": "Distanța de la punctul $p$ la dreapta $w\\cdot x+b=0$ este $\\dfrac{|w\\cdot p+b|}{|w|}$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Pick a point $q$ on the line. Then $w\\cdot q+b=0$, that is $w\\cdot q=-b$.",
+        "ro": "Alege un punct $q$ de pe dreaptă. Atunci $w\\cdot q+b=0$, adică $w\\cdot q=-b$."
+       },
+       "why": {
+        "en": "You need a point on the line to measure from.",
+        "ro": "Ai nevoie de un punct de pe dreaptă ca să măsori de la el."
+       }
+      },
+      {
+       "shown": {
+        "en": "The vector $w$ is perpendicular to the line. The distance is the length of the projection of $p-q$ on the direction $w$: $\\dfrac{|w\\cdot(p-q)|}{|w|}$.",
+        "ro": "Vectorul $w$ este perpendicular pe dreaptă. Distanța este lungimea proiecției lui $p-q$ pe direcția $w$: $\\dfrac{|w\\cdot(p-q)|}{|w|}$."
+       },
+       "why": {
+        "en": "The shortest way to the line is perpendicular to it.",
+        "ro": "Drumul cel mai scurt până la dreaptă este perpendicular pe ea."
+       },
+       "predict": {
+        "question": {
+         "en": "Along which direction is the shortest distance measured?",
+         "ro": "De-a lungul cărei direcții se măsoară distanța cea mai scurtă?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Along $w$",
+           "ro": "De-a lungul lui $w$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Correct: $w$ is perpendicular to the line.",
+           "ro": "Corect: $w$ este perpendicular pe dreaptă."
+          }
+         },
+         {
+          "text": {
+           "en": "Along the line",
+           "ro": "De-a lungul dreptei"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Walking along the line does not bring you closer to it.",
+           "ro": "Mersul de-a lungul dreptei nu te apropie de ea."
+          },
+          "misconception": "directia-distantei-gresita"
+         },
+         {
+          "text": {
+           "en": "Towards the origin",
+           "ro": "Spre origine"
+          },
+          "correct": false,
+          "explain": {
+           "en": "The origin plays no role here; only the line matters.",
+           "ro": "Originea nu are rol aici; contează doar dreapta."
+          },
+          "misconception": "directia-distantei-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Expand: $w\\cdot(p-q)=w\\cdot p-w\\cdot q=w\\cdot p+b$.",
+        "ro": "Desfaci: $w\\cdot(p-q)=w\\cdot p-w\\cdot q=w\\cdot p+b$."
+       },
+       "why": {
+        "en": "Here you use $w\\cdot q=-b$ from the first step.",
+        "ro": "Aici folosești $w\\cdot q=-b$ din primul pas."
+       }
+      },
+      {
+       "shown": {
+        "en": "So the distance is $\\dfrac{|w\\cdot p+b|}{|w|}=\\dfrac{|z|}{|w|}$.",
+        "ro": "Deci distanța este $\\dfrac{|w\\cdot p+b|}{|w|}=\\dfrac{|z|}{|w|}$."
+       }
+      }
+     ],
+     "end": {
+      "en": "The same formula gives $7/5=1.4$ for the point $(2;\\,1.5)$.",
+      "ro": "Aceeași formulă dă $7/5=1{,}4$ pentru punctul $(2;\\,1{,}5)$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s26",
+   "title": {
+    "en": "Practice: the distance",
+    "ro": "Exersează: distanța"
+   },
+   "kicker": {
+    "en": "Card 4 of 6 · Drill",
+    "ro": "Cardul 4 din 6 · Exercițiu"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-crash-hw3-c-drill",
+     "status": "verified-twice",
+     "statement": {
+      "en": "The line has $w=(5,12)$ and $b=-26$. The point is $p=(4,1)$. Compute $z$, $|w|$ and the signed distance $z/|w|$ (4 decimals).",
+      "ro": "Dreapta are $w=(5,12)$ și $b=-26$. Punctul este $p=(4,1)$. Calculează $z$, $|w|$ și distanța cu semn $z/|w|$ (4 zecimale)."
+     },
+     "table": {
+      "columns": [
+       "$w_1$",
+       "$w_2$",
+       "$b$",
+       "$p_1$",
+       "$p_2$"
+      ],
+      "rows": [
+       [
+        "5",
+        "12",
+        "-26",
+        "4",
+        "1"
+       ]
+      ],
+      "caption": {
+       "en": "The line w1x1 + w2x2 + b = 0 and the point p",
+       "ro": "Dreapta w1x1 + w2x2 + b = 0 și punctul p"
+      }
+     },
+     "data": {
+      "w1": 5,
+      "w2": 12,
+      "b": -26,
+      "p1": 4,
+      "p2": 1
+     },
+     "fields": [
+      {
+       "id": "z",
+       "kind": "num",
+       "label": {
+        "en": "$z$",
+        "ro": "$z$"
+       },
+       "formula": "w1*p1+w2*p2+b",
+       "expected": 6
+      },
+      {
+       "id": "nw",
+       "kind": "num",
+       "label": {
+        "en": "$|w|$",
+        "ro": "$|w|$"
+       },
+       "formula": "sqrt(w1^2+w2^2)",
+       "expected": 13
+      },
+      {
+       "id": "dist",
+       "kind": "num",
+       "label": {
+        "en": "$z/|w|$",
+        "ro": "$z/|w|$"
+       },
+       "formula": "(w1*p1+w2*p2+b)/sqrt(w1^2+w2^2)",
+       "expected": 0.4615
+      }
+     ],
+     "hints": [
+      {
+       "en": "First $z=w\\cdot p+b$, then the length of $w$.",
+       "ro": "Întâi $z=w\\cdot p+b$, apoi lungimea lui $w$."
+      },
+      {
+       "en": "$z=5\\cdot4+12\\cdot1-26$; $|w|=\\sqrt{25+144}$.",
+       "ro": "$z=5\\cdot4+12\\cdot1-26$; $|w|=\\sqrt{25+144}$."
+      },
+      {
+       "en": "$z=6$, $|w|=13$, distance $=6/13=0.4615$.",
+       "ro": "$z=6$, $|w|=13$, distanța $=6/13=0{,}4615$."
+      }
+     ],
+     "solution": {
+      "en": "$z=20+12-26=6$; $|w|=\\sqrt{25+144}=13$; signed distance $=6/13=0.4615$, on the positive side.",
+      "ro": "$z=20+12-26=6$; $|w|=\\sqrt{25+144}=13$; distanța cu semn $=6/13=0{,}4615$, pe partea pozitivă."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The line has $w=(6,8)$ and $b=-8$. The point is $p=(1,0)$. Compute $z$, $|w|$ and $z/|w|$. Round to at most 4 decimals.",
+        "ro": "Dreapta are $w=(6,8)$ și $b=-8$. Punctul este $p=(1,0)$. Calculează $z$, $|w|$ și $z/|w|$. Rotunjește la cel mult 4 zecimale."
+       },
+       "solution": {
+        "en": "$z=6+0-8=-2$; $|w|=10$; signed distance $-0.2$ (negative side).",
+        "ro": "$z=6+0-8=-2$; $|w|=10$; distanța cu semn $-0{,}2$ (partea negativă)."
+       },
+       "fields": [
+        {
+         "id": "z",
+         "formula": "w1*p1+w2*p2+b",
+         "expected": -2
+        },
+        {
+         "id": "nw",
+         "formula": "sqrt(w1^2+w2^2)",
+         "expected": 10
+        },
+        {
+         "id": "dist",
+         "formula": "(w1*p1+w2*p2+b)/sqrt(w1^2+w2^2)",
+         "expected": -0.2
+        }
+       ],
+       "data": {
+        "w1": 6,
+        "w2": 8,
+        "b": -8,
+        "p1": 1,
+        "p2": 0
+       },
+       "table": {
+        "columns": [
+         "$w_1$",
+         "$w_2$",
+         "$b$",
+         "$p_1$",
+         "$p_2$"
+        ],
+        "rows": [
+         [
+          "6",
+          "8",
+          "-8",
+          "1",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "The line w1x1 + w2x2 + b = 0 and the point p",
+         "ro": "Dreapta w1x1 + w2x2 + b = 0 și punctul p"
+        }
+       },
+       "hints": [
+        {
+         "en": "First $z=w\\cdot p+b$.",
+         "ro": "Întâi $z=w\\cdot p+b$."
+        },
+        {
+         "en": "$z=6\\cdot1+8\\cdot0-8$; $|w|=\\sqrt{36+64}$.",
+         "ro": "$z=6\\cdot1+8\\cdot0-8$; $|w|=\\sqrt{36+64}$."
+        },
+        {
+         "en": "$z=-2$, $|w|=10$, divide: $-0.2$.",
+         "ro": "$z=-2$, $|w|=10$, împarți: $-0{,}2$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s27",
+   "title": {
+    "en": "Check: the distance",
+    "ro": "Verifică: distanța"
+   },
+   "kicker": {
+    "en": "Card 4 of 6 · Check",
+    "ro": "Cardul 4 din 6 · Verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-crash-hw3-c-dist",
+     "question": {
+      "en": "The point $(2;\\,1.5)$ has $z=7$ and $|w|=5$. What is its distance to the line?",
+      "ro": "Punctul $(2;\\,1{,}5)$ are $z=7$, iar $|w|=5$. Care este distanța lui până la dreaptă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$7/5=1.4$",
+        "ro": "$7/5=1{,}4$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct: the distance is $|z|/|w|$.",
+        "ro": "Corect: distanța este $|z|/|w|$."
+       }
+      },
+      {
+       "text": {
+        "en": "$7$",
+        "ro": "$7$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$z$ is a distance only when $|w|=1$. Here $|w|=5$, so $z$ is 5 times the distance.",
+        "ro": "$z$ este distanță doar când $|w|=1$. Aici $|w|=5$, deci $z$ este de 5 ori distanța."
+       },
+       "misconception": "uitarea-numitorului"
+      },
+      {
+       "text": {
+        "en": "$|b|/|w|=1$",
+        "ro": "$|b|/|w|=1$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$|b|/|w|$ is the distance of the line from the origin, not of the point $p$ from the line.",
+        "ro": "$|b|/|w|$ este distanța dreptei de la origine, nu a punctului $p$ de la dreaptă."
+       },
+       "misconception": "distanta-dreptei-de-la-origine"
+      }
+     ],
+     "table": {
+      "columns": [
+       {
+        "en": "The point $p$",
+        "ro": "Punctul $p$"
+       },
+       "$z=3x_1+4x_2-5$",
+       {
+        "en": "$z/|w|$ with $|w|=5$",
+        "ro": "$z/|w|$ cu $|w|=5$"
+       }
+      ],
+      "rows": [
+       [
+        "(2; 1,5)",
+        "7",
+        "+1,4"
+       ],
+       [
+        "(0,5; 0,5)",
+        "−1,5",
+        "−0,3"
+       ],
+       [
+        "(1; 0,5)",
+        "0",
+        "0"
+       ]
+      ],
+      "caption": {
+       "en": "The line 3x1 + 4x2 − 5 = 0",
+       "ro": "Dreapta 3x1 + 4x2 − 5 = 0"
+      },
+      "highlight": {
+       "rows": [
+        2
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s28",
+   "title": {
+    "en": "A linear combination of linear functions",
+    "ro": "Combinația liniară de funcții liniare"
+   },
+   "kicker": {
+    "en": "Card 5 of 6 · When you see this",
+    "ro": "Cardul 5 din 6 · Când vezi asta"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "\"Show that a linear combination of linear functions is again a linear function.\"",
+      "ro": "\"Arată că o combinație liniară de funcții liniare este tot o funcție liniară.\""
+     },
+     "variant": "when",
+     "label": {
+      "en": "When you see this",
+      "ro": "Când vezi asta"
+     },
+     "body": [
+      {
+       "table": {
+        "columns": [
+         "$x$",
+         "$f_1(x)=2x+1$",
+         "$f_2(x)=-x+3$",
+         "$3f_1-2f_2$",
+         "$8x-3$"
+        ],
+        "rows": [
+         [
+          "0",
+          "1",
+          "3",
+          "−3",
+          "−3"
+         ],
+         [
+          "1",
+          "3",
+          "2",
+          "5",
+          "5"
+         ],
+         [
+          "2",
+          "5",
+          "1",
+          "13",
+          "13"
+         ]
+        ],
+        "caption": {
+         "en": "Same values in the last two columns",
+         "ro": "Aceleași valori în ultimele două coloane"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "The combination $3f_1-2f_2$ gives exactly $8x-3$, again of the form $ax+b$.",
+        "ro": "Combinația $3f_1-2f_2$ dă exact $8x-3$, tot de forma $ax+b$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s29",
+   "title": {
+    "en": "A linear combination of linear functions",
+    "ro": "Combinația liniară de funcții liniare"
+   },
+   "kicker": {
+    "en": "Card 5 of 6 · The recipe",
+    "ro": "Cardul 5 din 6 · Rețeta"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "Linear functions have the form $f_1(x)=a_1x+b_1$ and $f_2(x)=a_2x+b_2$ (a slope and a constant).",
+       "ro": "Funcțiile liniare au forma $f_1(x)=a_1x+b_1$ și $f_2(x)=a_2x+b_2$ (o pantă și un termen liber)."
+      },
+      {
+       "en": "The combination with the numbers $c_1$ and $c_2$: $g(x)=c_1f_1(x)+c_2f_2(x)$.",
+       "ro": "Combinația cu numerele $c_1$ și $c_2$: $g(x)=c_1f_1(x)+c_2f_2(x)$."
+      },
+      {
+       "en": "Expand: $g(x)=(c_1a_1+c_2a_2)\\,x+(c_1b_1+c_2b_2)$.",
+       "ro": "Desfaci: $g(x)=(c_1a_1+c_2a_2)\\,x+(c_1b_1+c_2b_2)$."
+      },
+      {
+       "en": "It is of the form $ax+b$, with $a=c_1a_1+c_2a_2$ and $b=c_1b_1+c_2b_2$. So $g$ is linear.",
+       "ro": "Este de forma $ax+b$, cu $a=c_1a_1+c_2a_2$ și $b=c_1b_1+c_2b_2$. Deci $g$ este liniară."
+      }
+     ],
+     "result": {
+      "en": "Example: $c_1=3$, $c_2=-2$ give the slope $3\\cdot2+(-2)(-1)=8$ and the constant $3\\cdot1-2\\cdot3=-3$.",
+      "ro": "Exemplu: $c_1=3$, $c_2=-2$ dau panta $3\\cdot2+(-2)(-1)=8$ și termenul $3\\cdot1-2\\cdot3=-3$."
+     }
+    },
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "note": {
+        "en": "In networks, \"linear\" means of the form $ax+b$ (strictly, this is called affine). The test $f(u+v)=f(u)+f(v)$ holds only when $b=0$. A combination stays of the form $ax+b$ either way.",
+        "ro": "În rețele, „liniar” înseamnă de forma $ax+b$ (strict vorbind, afin). Testul $f(u+v)=f(u)+f(v)$ merge doar când $b=0$. Combinația rămâne de forma $ax+b$ în ambele cazuri."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s30",
+   "title": {
+    "en": "The same with layers",
+    "ro": "Același lucru cu straturi"
+   },
+   "kicker": {
+    "en": "Card 5 of 6 · The recipe, with layers",
+    "ro": "Cardul 5 din 6 · Rețeta, pe straturi"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "$W^{(l)}$ is the weight matrix of layer $l$ (row $j$ = the weights entering neuron $j$), $b^{(l)}$ its bias vector, and $h$ the output of the first layer.",
+        "ro": "$W^{(l)}$ este matricea ponderilor stratului $l$ (rândul $j$ = ponderile care intră în neuronul $j$), $b^{(l)}$ vectorul ei de bias-uri, iar $h$ ieșirea primului strat."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "Layer",
+          "ro": "Strat"
+         },
+         {
+          "en": "Values",
+          "ro": "Valori"
+         }
+        ],
+        "rows": [
+         [
+          "$W^{(1)}$, $b^{(1)}$",
+          "$\\begin{pmatrix}2&-1\\\\1&3\\end{pmatrix}$, $\\begin{pmatrix}1\\\\-2\\end{pmatrix}$"
+         ],
+         [
+          "$W^{(2)}$, $b^{(2)}$",
+          {
+           "en": "$\\begin{pmatrix}1&2\\\\-1&0.5\\end{pmatrix}$, $\\begin{pmatrix}0.5\\\\1\\end{pmatrix}$",
+           "ro": "$\\begin{pmatrix}1&2\\\\-1&0{,}5\\end{pmatrix}$, $\\begin{pmatrix}0{,}5\\\\1\\end{pmatrix}$"
+          }
+         ],
+         [
+          {
+           "en": "the input $x$",
+           "ro": "intrarea $x$"
+          },
+          {
+           "en": "$\\begin{pmatrix}1.5\\\\-0.5\\end{pmatrix}$",
+           "ro": "$\\begin{pmatrix}1{,}5\\\\-0{,}5\\end{pmatrix}$"
+          }
+         ],
+         [
+          "$h=W^{(1)}x+b^{(1)}$",
+          {
+           "en": "$\\begin{pmatrix}4.5\\\\-2\\end{pmatrix}$",
+           "ro": "$\\begin{pmatrix}4{,}5\\\\-2\\end{pmatrix}$"
+          }
+         ],
+         [
+          "$W^{(2)}h+b^{(2)}$",
+          {
+           "en": "$\\begin{pmatrix}1\\\\-4.5\\end{pmatrix}$",
+           "ro": "$\\begin{pmatrix}1\\\\-4{,}5\\end{pmatrix}$"
+          }
+         ]
+        ],
+        "caption": {
+         "en": "Two linear layers, no activation",
+         "ro": "Două straturi liniare, fără activare"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Two linear layers one after the other: $W^{(2)}\\big(W^{(1)}x+b^{(1)}\\big)+b^{(2)}$.",
+        "ro": "Două straturi liniare una după alta: $W^{(2)}\\big(W^{(1)}x+b^{(1)}\\big)+b^{(2)}$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s31",
+   "title": {
+    "en": "The same with layers",
+    "ro": "Același lucru cu straturi"
+   },
+   "kicker": {
+    "en": "Card 5 of 6 · The merge",
+    "ro": "Cardul 5 din 6 · Contopirea"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "tex": "W^{(2)}\\big(W^{(1)}x+b^{(1)}\\big)+b^{(2)}=\\big(W^{(2)}W^{(1)}\\big)x+\\big(W^{(2)}b^{(1)}+b^{(2)}\\big)"
+      },
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "Quantity",
+          "ro": "Mărimea"
+         },
+         {
+          "en": "Value",
+          "ro": "Valoarea"
+         }
+        ],
+        "rows": [
+         [
+          "$W=W^{(2)}W^{(1)}$",
+          {
+           "en": "$\\begin{pmatrix}4&5\\\\-1.5&2.5\\end{pmatrix}$",
+           "ro": "$\\begin{pmatrix}4&5\\\\-1{,}5&2{,}5\\end{pmatrix}$"
+          }
+         ],
+         [
+          "$b=W^{(2)}b^{(1)}+b^{(2)}$",
+          {
+           "en": "$\\begin{pmatrix}-2.5\\\\-1\\end{pmatrix}$",
+           "ro": "$\\begin{pmatrix}-2{,}5\\\\-1\\end{pmatrix}$"
+          }
+         ],
+         [
+          "$Wx+b$",
+          {
+           "en": "$\\begin{pmatrix}1\\\\-4.5\\end{pmatrix}$, the same as above",
+           "ro": "$\\begin{pmatrix}1\\\\-4{,}5\\end{pmatrix}$, la fel ca mai sus"
+          }
+         ],
+         [
+          {
+           "en": "with ReLU on $h$: $\\begin{pmatrix}4.5\\\\0\\end{pmatrix}$",
+           "ro": "cu ReLU pe $h$: $\\begin{pmatrix}4{,}5\\\\0\\end{pmatrix}$"
+          },
+          {
+           "en": "$\\begin{pmatrix}5\\\\-3.5\\end{pmatrix}$, no longer one layer",
+           "ro": "$\\begin{pmatrix}5\\\\-3{,}5\\end{pmatrix}$, nu mai e un strat"
+          }
+         ]
+        ],
+        "caption": {
+         "en": "A single layer gives the same result; ReLU between layers breaks it",
+         "ro": "Un singur strat dă același rezultat; ReLU între straturi îl strică"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Any number of linear layers merge into one. That is why a nonlinear activation is needed between layers.",
+        "ro": "Oricâte straturi liniare se contopesc într-unul singur. De aceea între straturi trebuie o activare nonliniară."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s32",
+   "title": {
+    "en": "Practice: the merge",
+    "ro": "Exersează: contopirea"
+   },
+   "kicker": {
+    "en": "Card 5 of 6 · Drill",
+    "ro": "Cardul 5 din 6 · Exercițiu"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-crash-hw3-d-drill",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Merge the two layers into one: compute the two components of the bias $b=W^{(2)}b^{(1)}+b^{(2)}$, then the first component of the output $W^{(2)}\\big(W^{(1)}x+b^{(1)}\\big)+b^{(2)}$. Round to at most 4 decimals.",
+      "ro": "Contopește cele două straturi într-unul: calculează cele două componente ale bias-ului $b=W^{(2)}b^{(1)}+b^{(2)}$, apoi prima componentă a ieșirii $W^{(2)}\\big(W^{(1)}x+b^{(1)}\\big)+b^{(2)}$. Rotunjește la cel mult 4 zecimale."
+     },
+     "table": {
+      "columns": [
+       {
+        "en": "Quantity",
+        "ro": "Mărimea"
+       },
+       {
+        "en": "Value",
+        "ro": "Valoarea"
+       }
+      ],
+      "rows": [
+       [
+        "$W^{(1)}$",
+        "$\\begin{pmatrix}1&2\\\\3&-1\\end{pmatrix}$"
+       ],
+       [
+        "$b^{(1)}$",
+        "$\\begin{pmatrix}0\\\\1\\end{pmatrix}$"
+       ],
+       [
+        "$W^{(2)}$",
+        "$\\begin{pmatrix}2&0\\\\1&1\\end{pmatrix}$"
+       ],
+       [
+        "$b^{(2)}$",
+        "$\\begin{pmatrix}-1\\\\2\\end{pmatrix}$"
+       ],
+       [
+        "$x$",
+        "$\\begin{pmatrix}1\\\\1\\end{pmatrix}$"
+       ]
+      ],
+      "caption": {
+       "en": "Two linear layers",
+       "ro": "Două straturi liniare"
+      }
+     },
+     "data": {
+      "q11": 1,
+      "q12": 2,
+      "q21": 3,
+      "q22": -1,
+      "u1": 0,
+      "u2": 1,
+      "p11": 2,
+      "p12": 0,
+      "p21": 1,
+      "p22": 1,
+      "v1": -1,
+      "v2": 2,
+      "x1": 1,
+      "x2": 1
+     },
+     "fields": [
+      {
+       "id": "bm1",
+       "kind": "num",
+       "label": {
+        "en": "$b_1$",
+        "ro": "$b_1$"
+       },
+       "formula": "p11*u1+p12*u2+v1",
+       "expected": -1
+      },
+      {
+       "id": "bm2",
+       "kind": "num",
+       "label": {
+        "en": "$b_2$",
+        "ro": "$b_2$"
+       },
+       "formula": "p21*u1+p22*u2+v2",
+       "expected": 3
+      },
+      {
+       "id": "o1",
+       "kind": "num",
+       "label": {
+        "en": "output 1",
+        "ro": "ieșirea 1"
+       },
+       "formula": "p11*(q11*x1+q12*x2+u1)+p12*(q21*x1+q22*x2+u2)+v1",
+       "expected": 5
+      }
+     ],
+     "hints": [
+      {
+       "en": "The merged bias is $W^{(2)}b^{(1)}+b^{(2)}$, not just $b^{(2)}$.",
+       "ro": "Bias-ul contopit este $W^{(2)}b^{(1)}+b^{(2)}$, nu doar $b^{(2)}$."
+      },
+      {
+       "en": "$b_1=2\\cdot0+0\\cdot1-1$; $b_2=1\\cdot0+1\\cdot1+2$. For the output: first $h=W^{(1)}x+b^{(1)}$.",
+       "ro": "$b_1=2\\cdot0+0\\cdot1-1$; $b_2=1\\cdot0+1\\cdot1+2$. Pentru ieșire: întâi $h=W^{(1)}x+b^{(1)}$."
+      },
+      {
+       "en": "$b=(-1;3)$; $h=(3;3)$; output 1 $=2\\cdot3+0\\cdot3-1=5$.",
+       "ro": "$b=(-1;3)$; $h=(3;3)$; ieșirea 1 $=2\\cdot3+0\\cdot3-1=5$."
+      }
+     ],
+     "solution": {
+      "en": "$W^{(2)}b^{(1)}=(2\\cdot0+0\\cdot1;\\;1\\cdot0+1\\cdot1)=(0;1)$, so $b=(0-1;\\,1+2)=(-1;3)$. $h=W^{(1)}x+b^{(1)}=(3;3)$, and output 1 is $2\\cdot3+0\\cdot3-1=5$.",
+      "ro": "$W^{(2)}b^{(1)}=(2\\cdot0+0\\cdot1;\\;1\\cdot0+1\\cdot1)=(0;1)$, deci $b=(0-1;\\,1+2)=(-1;3)$. $h=W^{(1)}x+b^{(1)}=(3;3)$, iar ieșirea 1 este $2\\cdot3+0\\cdot3-1=5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The same task, with other numbers. Round to at most 4 decimals.",
+        "ro": "Aceeași cerință, cu alte numere. Rotunjește la cel mult 4 zecimale."
+       },
+       "solution": {
+        "en": "$b=(1+1+0;\\,0+2-1)=(2;1)$. $h=(3;6)$, output 1 $=1\\cdot3+1\\cdot6+0=9$.",
+        "ro": "$b=(1+1+0;\\,0+2-1)=(2;1)$. $h=(3;6)$, ieșirea 1 $=1\\cdot3+1\\cdot6+0=9$."
+       },
+       "fields": [
+        {
+         "id": "bm1",
+         "formula": "p11*u1+p12*u2+v1",
+         "expected": 2
+        },
+        {
+         "id": "bm2",
+         "formula": "p21*u1+p22*u2+v2",
+         "expected": 1
+        },
+        {
+         "id": "o1",
+         "formula": "p11*(q11*x1+q12*x2+u1)+p12*(q21*x1+q22*x2+u2)+v1",
+         "expected": 9
+        }
+       ],
+       "data": {
+        "q11": 1,
+        "q12": 0,
+        "q21": 2,
+        "q22": 1,
+        "u1": 1,
+        "u2": 1,
+        "p11": 1,
+        "p12": 1,
+        "p21": 0,
+        "p22": 2,
+        "v1": 0,
+        "v2": -1,
+        "x1": 2,
+        "x2": 1
+       },
+       "table": {
+        "columns": [
+         {
+          "en": "Quantity",
+          "ro": "Mărimea"
+         },
+         {
+          "en": "Value",
+          "ro": "Valoarea"
+         }
+        ],
+        "rows": [
+         [
+          "$W^{(1)}$",
+          "$\\begin{pmatrix}1&0\\\\2&1\\end{pmatrix}$"
+         ],
+         [
+          "$b^{(1)}$",
+          "$\\begin{pmatrix}1\\\\1\\end{pmatrix}$"
+         ],
+         [
+          "$W^{(2)}$",
+          "$\\begin{pmatrix}1&1\\\\0&2\\end{pmatrix}$"
+         ],
+         [
+          "$b^{(2)}$",
+          "$\\begin{pmatrix}0\\\\-1\\end{pmatrix}$"
+         ],
+         [
+          "$x$",
+          "$\\begin{pmatrix}2\\\\1\\end{pmatrix}$"
+         ]
+        ],
+        "caption": {
+         "en": "Two linear layers",
+         "ro": "Două straturi liniare"
+        }
+       },
+       "hints": [
+        {
+         "en": "The merged bias is $W^{(2)}b^{(1)}+b^{(2)}$.",
+         "ro": "Bias-ul contopit este $W^{(2)}b^{(1)}+b^{(2)}$."
+        },
+        {
+         "en": "$b_1=1\\cdot1+1\\cdot1+0$; $b_2=0\\cdot1+2\\cdot1-1$.",
+         "ro": "$b_1=1\\cdot1+1\\cdot1+0$; $b_2=0\\cdot1+2\\cdot1-1$."
+        },
+        {
+         "en": "$b=(2;1)$; $h=(3;6)$; output 1 $=3+6=9$.",
+         "ro": "$b=(2;1)$; $h=(3;6)$; ieșirea 1 $=3+6=9$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s33",
+   "title": {
+    "en": "Check: ReLU is not linear",
+    "ro": "Verifică: ReLU nu e liniară"
+   },
+   "kicker": {
+    "en": "Card 5 of 6 · Check",
+    "ro": "Cardul 5 din 6 · Verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-crash-hw3-d-relu",
+     "question": {
+      "en": "Is $\\text{ReLU}(z)=\\max(0,z)$ a linear function? Try $u=-1$ and $v=2$: $\\text{ReLU}(u+v)=1$ but $\\text{ReLU}(u)+\\text{ReLU}(v)=0+2=2$.",
+      "ro": "Este $\\text{ReLU}(z)=\\max(0,z)$ o funcție liniară? Încearcă $u=-1$ și $v=2$: $\\text{ReLU}(u+v)=1$, dar $\\text{ReLU}(u)+\\text{ReLU}(v)=0+2=2$."
+     },
+     "options": [
+      {
+       "text": {
+        "en": "No: slope 0 left of 0 and slope 1 right of 0, so it is not $ax+b$ on the whole axis",
+        "ro": "Nu: panta 0 la stânga lui 0 și panta 1 la dreapta, deci nu este $ax+b$ pe toată axa"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct: it is piecewise linear, of the form $ax+b$ separately on $z<0$ and on $z>0$, but not on the whole axis. The test with $u$ and $v$ shows the same.",
+        "ro": "Corect: este liniară pe bucăți, de forma $ax+b$ separat pe $z<0$ și pe $z>0$, dar nu pe toată axa. Testul cu $u$ și $v$ arată același lucru."
+       }
+      },
+      {
+       "text": {
+        "en": "Yes, because its graph is made of straight lines",
+        "ro": "Da, pentru că graficul este făcut din drepte"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Two lines with different slopes joined at a corner are not one $ax+b$. The example with $u=-1$, $v=2$ shows it.",
+        "ro": "Două drepte cu pante diferite lipite într-un colț nu formează un singur $ax+b$. Exemplul cu $u=-1$, $v=2$ o arată."
+       },
+       "misconception": "liniar-pe-bucati-luat-drept-liniar"
+      },
+      {
+       "text": {
+        "en": "No, because it is not differentiable at 0",
+        "ro": "Nu, pentru că nu este derivabilă în 0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The conclusion is right, the reason is not: non-differentiability does not define nonlinearity. What matters is that the slope changes at 0.",
+        "ro": "Concluzia e bună, motivul nu: nederivabilitatea nu definește neliniaritatea. Contează că panta se schimbă în 0."
+       },
+       "misconception": "conditie-necesara-luata-drept-suficienta"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s34",
+   "title": {
+    "en": "Backprop in one iteration",
+    "ro": "Backprop pe o iterație"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · When you see this",
+    "ro": "Cardul 6 din 6 · Când vezi asta"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "\"Do one backprop iteration on this network\" or \"how does your code update the weights?\"",
+      "ro": "\"Fă o iterație de backprop pe rețeaua asta\" sau \"cum își actualizează codul tău ponderile?\""
+     },
+     "variant": "when",
+     "label": {
+      "en": "When you see this",
+      "ro": "Când vezi asta"
+     },
+     "body": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "What",
+          "ro": "Ce"
+         },
+         {
+          "en": "Value",
+          "ro": "Valoarea"
+         }
+        ],
+        "rows": [
+         [
+          {
+           "en": "the inputs $y^1$",
+           "ro": "intrările $y^1$"
+          },
+          "(2; 6)"
+         ],
+         [
+          {
+           "en": "target $t$",
+           "ro": "țintă $t$"
+          },
+          "0"
+         ],
+         [
+          {
+           "en": "$w_{11}^2,\\;w_{21}^2$ (into hidden neuron 1)",
+           "ro": "$w_{11}^2,\\;w_{21}^2$ (spre neuronul ascuns 1)"
+          },
+          {
+           "en": "−3 and 1",
+           "ro": "−3 și 1"
+          }
+         ],
+         [
+          {
+           "en": "$w_{12}^2,\\;w_{22}^2$ (into hidden neuron 2)",
+           "ro": "$w_{12}^2,\\;w_{22}^2$ (spre neuronul ascuns 2)"
+          },
+          {
+           "en": "6 and −2",
+           "ro": "6 și −2"
+          }
+         ],
+         [
+          {
+           "en": "$w_{11}^3,\\;w_{21}^3$ (into the output)",
+           "ro": "$w_{11}^3,\\;w_{21}^3$ (spre ieșire)"
+          },
+          {
+           "en": "8 and 4",
+           "ro": "8 și 4"
+          }
+         ],
+         [
+          {
+           "en": "learning rate $\\eta$",
+           "ro": "rata de învățare $\\eta$"
+          },
+          {
+           "en": "0.5",
+           "ro": "0,5"
+          }
+         ]
+        ],
+        "caption": {
+         "en": "Network 2-2-1, sigmoid, cross-entropy, no bias",
+         "ro": "Rețea 2-2-1, sigmoid, cross-entropy, fără bias"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "In $w_{ij}^l$, $i$ is the neuron in layer $l-1$ the weight leaves from, and $j$ the neuron in layer $l$ it enters.",
+        "ro": "În $w_{ij}^l$, $i$ este neuronul din stratul $l-1$ de unde pleacă ponderea, iar $j$ neuronul din stratul $l$ unde ajunge."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s35",
+   "title": {
+    "en": "Backprop in one iteration",
+    "ro": "Backprop pe o iterație"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · The recipe",
+    "ro": "Cardul 6 din 6 · Rețeta"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "$\\sigma(z)=\\dfrac{1}{1+e^{-z}}$ is the sigmoid: it squeezes $z$ into $(0,1)$. Its derivative is $\\sigma'(z)=y(1-y)$, where $y=\\sigma(z)$.",
+        "ro": "$\\sigma(z)=\\dfrac{1}{1+e^{-z}}$ este sigmoida: strânge $z$ în intervalul $(0,1)$. Derivata ei este $\\sigma'(z)=y(1-y)$, unde $y=\\sigma(z)$."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Forward: $z^l$, then $y^l=\\sigma(z^l)$, layer by layer. Keep every value. The inputs have no activation.",
+       "ro": "Forward: $z^l$, apoi $y^l=\\sigma(z^l)$, strat cu strat. Păstrezi toate valorile. Intrările nu au activare."
+      },
+      {
+       "en": "The output error: $\\delta^L=y^L-t^L$.",
+       "ro": "Eroarea ieșirii: $\\delta^L=y^L-t^L$."
+      },
+      {
+       "en": "The hidden errors, with the old weights: $\\delta_i^l=y_i^l(1-y_i^l)\\sum_k\\delta_k^{l+1}\\,w_{ik}^{l+1}$.",
+       "ro": "Erorile ascunse, cu ponderile vechi: $\\delta_i^l=y_i^l(1-y_i^l)\\sum_k\\delta_k^{l+1}\\,w_{ik}^{l+1}$."
+      },
+      {
+       "en": "The gradient of a weight: $\\dfrac{\\partial C}{\\partial w_{ij}^l}=\\delta_j^l\\,y_i^{l-1}$.",
+       "ro": "Gradientul unei ponderi: $\\dfrac{\\partial C}{\\partial w_{ij}^l}=\\delta_j^l\\,y_i^{l-1}$."
+      },
+      {
+       "en": "Only now update all the weights: $w_{ij}^l=w_{ij}^l-\\eta\\,\\dfrac{\\partial C}{\\partial w_{ij}^l}$.",
+       "ro": "Abia acum actualizezi toate ponderile: $w_{ij}^l=w_{ij}^l-\\eta\\,\\dfrac{\\partial C}{\\partial w_{ij}^l}$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s36",
+   "title": {
+    "en": "Backprop in one iteration",
+    "ro": "Backprop pe o iterație"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · Worked example, forward",
+    "ro": "Cardul 6 din 6 · Exemplul rezolvat, forward"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "Neuron",
+          "ro": "Neuron"
+         },
+         "$z$",
+         "$y=\\sigma(z)$"
+        ],
+        "rows": [
+         [
+          {
+           "en": "hidden 1",
+           "ro": "ascuns 1"
+          },
+          "$2\\cdot(-3)+6\\cdot1=0$",
+          "$\\sigma(0)=0{,}5$"
+         ],
+         [
+          {
+           "en": "hidden 2",
+           "ro": "ascuns 2"
+          },
+          "$2\\cdot6+6\\cdot(-2)=0$",
+          "$\\sigma(0)=0{,}5$"
+         ],
+         [
+          {
+           "en": "output",
+           "ro": "ieșire"
+          },
+          "$8\\cdot0{,}5+4\\cdot0{,}5=6$",
+          "$\\sigma(6)\\approx1$"
+         ]
+        ],
+        "caption": {
+         "en": "Forward pass",
+         "ro": "Forward pass"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "The output error: $\\delta^3=y^3-t=1-0=1$.",
+        "ro": "Eroarea ieșirii: $\\delta^3=y^3-t=1-0=1$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s37",
+   "title": {
+    "en": "Backprop in one iteration",
+    "ro": "Backprop pe o iterație"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · Worked example, hidden errors",
+    "ro": "Cardul 6 din 6 · Exemplul rezolvat, erorile ascunse"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "Hidden neuron",
+          "ro": "Neuron ascuns"
+         },
+         "$\\delta_i^2=y_i^2(1-y_i^2)\\cdot\\delta^3\\cdot w_{i1}^3$"
+        ],
+        "rows": [
+         [
+          "1",
+          "$0{,}5\\cdot0{,}5\\cdot(1\\cdot8)=2$"
+         ],
+         [
+          "2",
+          "$0{,}5\\cdot0{,}5\\cdot(1\\cdot4)=1$"
+         ]
+        ],
+        "caption": {
+         "en": "The old weights 8 and 4 are used",
+         "ro": "Se folosesc ponderile vechi 8 și 4"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Each hidden neuron receives the output error, multiplied by the weight that connects them, then by $y(1-y)$.",
+        "ro": "Fiecare neuron ascuns primește eroarea ieșirii, înmulțită cu ponderea care îi leagă, apoi cu $y(1-y)$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s38",
+   "title": {
+    "en": "Backprop in one iteration",
+    "ro": "Backprop pe o iterație"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · Worked example, the output layer",
+    "ro": "Cardul 6 din 6 · Exemplul rezolvat, ieșirea"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "Weight",
+          "ro": "Ponderea"
+         },
+         {
+          "en": "Gradient $\\delta^3\\,y_i^2$",
+          "ro": "Gradientul $\\delta^3\\,y_i^2$"
+         },
+         {
+          "en": "New weight",
+          "ro": "Ponderea nouă"
+         }
+        ],
+        "rows": [
+         [
+          "$w_{11}^3$",
+          "$1\\cdot0{,}5=0{,}5$",
+          "$8-0{,}5\\cdot0{,}5=7{,}75$"
+         ],
+         [
+          "$w_{21}^3$",
+          "$1\\cdot0{,}5=0{,}5$",
+          "$4-0{,}5\\cdot0{,}5=3{,}75$"
+         ]
+        ],
+        "caption": {
+         "en": "The weights between the hidden layer and the output",
+         "ro": "Ponderile dintre stratul ascuns și ieșire"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s39",
+   "title": {
+    "en": "Backprop in one iteration",
+    "ro": "Backprop pe o iterație"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · Worked example, the input layer",
+    "ro": "Cardul 6 din 6 · Exemplul rezolvat, intrarea"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "Weight",
+          "ro": "Ponderea"
+         },
+         {
+          "en": "Gradient $\\delta_j^2\\,y_i^1$",
+          "ro": "Gradientul $\\delta_j^2\\,y_i^1$"
+         },
+         {
+          "en": "New weight",
+          "ro": "Ponderea nouă"
+         }
+        ],
+        "rows": [
+         [
+          "$w_{11}^2$",
+          "$\\delta_1^2\\cdot2=2\\cdot2=4$",
+          "$-3-0{,}5\\cdot4=-5$"
+         ],
+         [
+          "$w_{12}^2$",
+          "$\\delta_2^2\\cdot2=1\\cdot2=2$",
+          "$6-0{,}5\\cdot2=5$"
+         ],
+         [
+          "$w_{21}^2$",
+          "$\\delta_1^2\\cdot6=2\\cdot6=12$",
+          "$1-0{,}5\\cdot12=-5$"
+         ],
+         [
+          "$w_{22}^2$",
+          "$\\delta_2^2\\cdot6=1\\cdot6=6$",
+          "$-2-0{,}5\\cdot6=-5$"
+         ]
+        ],
+        "caption": {
+         "en": "The weights between the input and the hidden layer",
+         "ro": "Ponderile dintre intrare și stratul ascuns"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "The weight $w_{12}^2$ enters neuron 2, so it uses $\\delta_2^2$, not $\\delta_1^2$.",
+        "ro": "Ponderea $w_{12}^2$ intră în neuronul 2, deci folosește $\\delta_2^2$, nu $\\delta_1^2$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s40",
+   "title": {
+    "en": "Two things to say plainly",
+    "ro": "Două lucruri de spus clar"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · About the lab sheet",
+    "ro": "Cardul 6 din 6 · Despre foaia de laborator"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "The sheet writes",
+          "ro": "Foaia scrie"
+         },
+         {
+          "en": "Correct",
+          "ro": "Corect"
+         }
+        ],
+        "rows": [
+         [
+          "$\\delta_1^2\\cdot2=1\\cdot2=2$",
+          "$\\delta_2^2\\cdot2=1\\cdot2=2$"
+         ],
+         [
+          "$\\sigma(6)=1$",
+          {
+           "en": "$\\sigma(6)=0.9975$",
+           "ro": "$\\sigma(6)=0{,}9975$"
+          }
+         ],
+         [
+          "$\\delta_1^2=2$",
+          {
+           "en": "$\\delta_1^2=1.9951$",
+           "ro": "$\\delta_1^2=1{,}9951$"
+          }
+         ],
+         [
+          "$\\delta_2^2=1$",
+          {
+           "en": "$\\delta_2^2=0.9975$",
+           "ro": "$\\delta_2^2=0{,}9975$"
+          }
+         ]
+        ],
+        "caption": {
+         "en": "Two spots on the Lab04 sheet",
+         "ro": "Două locuri din foaia Lab04"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "In the gradient of $w_{12}^2$ the sheet writes $\\delta_1^2$, but the value 1 is $\\delta_2^2$: the weight enters neuron 2. The numbers and the new weight 5 are fine.",
+        "ro": "La gradientul lui $w_{12}^2$ foaia scrie $\\delta_1^2$, dar valoarea 1 este $\\delta_2^2$: ponderea intră în neuronul 2. Numerele și ponderea nouă 5 sunt bune."
+       }
+      },
+      {
+       "text": {
+        "en": "$y^3=\\sigma(6)=1$ is a rounding read off the graph. The results on the sheet are the rounded ones.",
+        "ro": "$y^3=\\sigma(6)=1$ este o rotunjire citită de pe grafic. Rezultatele din foaie sunt cele rotunjite."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s41",
+   "title": {
+    "en": "Practice: one iteration",
+    "ro": "Exersează: o iterație"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · Drill",
+    "ro": "Cardul 6 din 6 · Exercițiu"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-crash-hw3-k-drill",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Use the network in the table. Compute $y^3$, the output error $\\delta^3$, the hidden error $\\delta_1^2$ and the new weight $w_{11}^3$ (4 decimals).",
+      "ro": "Folosește rețeaua din tabel. Calculează $y^3$, eroarea ieșirii $\\delta^3$, eroarea ascunsă $\\delta_1^2$ și ponderea nouă $w_{11}^3$ (4 zecimale)."
+     },
+     "table": {
+      "columns": [
+       {
+        "en": "What",
+        "ro": "Ce"
+       },
+       {
+        "en": "Value",
+        "ro": "Valoarea"
+       }
+      ],
+      "rows": [
+       [
+        {
+         "en": "the inputs $y^1$",
+         "ro": "intrările $y^1$"
+        },
+        "(1; 2)"
+       ],
+       [
+        {
+         "en": "target $t$",
+         "ro": "țintă $t$"
+        },
+        "1"
+       ],
+       [
+        "$w_{11}^2,\\;w_{21}^2$",
+        {
+         "en": "1 and 0.5",
+         "ro": "1 și 0,5"
+        }
+       ],
+       [
+        "$w_{12}^2,\\;w_{22}^2$",
+        {
+         "en": "-1 and 0.5",
+         "ro": "-1 și 0,5"
+        }
+       ],
+       [
+        "$w_{11}^3,\\;w_{21}^3$",
+        {
+         "en": "2 and -1",
+         "ro": "2 și -1"
+        }
+       ]
+      ],
+      "caption": {
+       "en": "Network 2-2-1, sigmoid, cross-entropy, no bias, learning rate 0.5",
+       "ro": "Rețea 2-2-1, sigmoid, cross-entropy, fără bias, rata de învățare 0,5"
+      }
+     },
+     "data": {
+      "i1": 1,
+      "i2": 2,
+      "t": 1,
+      "w11": 1,
+      "w21": 0.5,
+      "w12": -1,
+      "w22": 0.5,
+      "u1": 2,
+      "u2": -1
+     },
+     "fields": [
+      {
+       "id": "y3",
+       "kind": "num",
+       "label": {
+        "en": "$y^3$",
+        "ro": "$y^3$"
+       },
+       "formula": "1/(1+exp(-(u1*1/(1+exp(-(i1*w11+i2*w21)))+u2*1/(1+exp(-(i1*w12+i2*w22))))))",
+       "expected": 0.7793
+      },
+      {
+       "id": "d3",
+       "kind": "num",
+       "label": {
+        "en": "$\\delta^3$",
+        "ro": "$\\delta^3$"
+       },
+       "formula": "(1/(1+exp(-(u1*1/(1+exp(-(i1*w11+i2*w21)))+u2*1/(1+exp(-(i1*w12+i2*w22)))))))-t",
+       "expected": -0.2207
+      },
+      {
+       "id": "dh",
+       "kind": "num",
+       "label": {
+        "en": "$\\delta_1^2$",
+        "ro": "$\\delta_1^2$"
+       },
+       "formula": "1/(1+exp(-(i1*w11+i2*w21)))*(1-1/(1+exp(-(i1*w11+i2*w21))))*((1/(1+exp(-(u1*1/(1+exp(-(i1*w11+i2*w21)))+u2*1/(1+exp(-(i1*w12+i2*w22)))))))-t)*u1",
+       "expected": -0.0463
+      },
+      {
+       "id": "nw",
+       "kind": "num",
+       "label": {
+        "en": "new $w_{11}^3$",
+        "ro": "$w_{11}^3$ nou"
+       },
+       "formula": "u1-0.5*((1/(1+exp(-(u1*1/(1+exp(-(i1*w11+i2*w21)))+u2*1/(1+exp(-(i1*w12+i2*w22)))))))-t)*1/(1+exp(-(i1*w11+i2*w21)))",
+       "expected": 2.0972
+      }
+     ],
+     "hints": [
+      {
+       "en": "Forward: $z_1^2$ and $z_2^2$, then $y^2$, then $z^3$ and $y^3$.",
+       "ro": "Forward: $z_1^2$ și $z_2^2$, apoi $y^2$, apoi $z^3$ și $y^3$."
+      },
+      {
+       "en": "$z_1^2=1\\cdot1+2\\cdot0.5=2$, $z_2^2=1\\cdot(-1)+2\\cdot0.5=0$. Then $\\delta^3=y^3-t$ and $\\delta_1^2=y_1^2(1-y_1^2)\\,\\delta^3\\,w_{11}^3$.",
+       "ro": "$z_1^2=1\\cdot1+2\\cdot0{,}5=2$, $z_2^2=1\\cdot(-1)+2\\cdot0{,}5=0$. Apoi $\\delta^3=y^3-t$ și $\\delta_1^2=y_1^2(1-y_1^2)\\,\\delta^3\\,w_{11}^3$."
+      },
+      {
+       "en": "$y^2=(0.8808;\\,0.5)$, $z^3=1.2616$, $y^3=0.7793$, $\\delta^3=-0.2207$. The new $w_{11}^3=2-0.5\\,\\delta^3\\,y_1^2$.",
+       "ro": "$y^2=(0{,}8808;\\,0{,}5)$, $z^3=1{,}2616$, $y^3=0{,}7793$, $\\delta^3=-0{,}2207$. Noul $w_{11}^3=2-0{,}5\\,\\delta^3\\,y_1^2$."
+      }
+     ],
+     "solution": {
+      "en": "$y^2=(\\sigma(2);\\sigma(0))=(0.8808;0.5)$; $z^3=2\\cdot0.8808-1\\cdot0.5=1.2616$; $y^3=0.7793$; $\\delta^3=y^3-1=-0.2207$; $\\delta_1^2=0.8808\\cdot0.1192\\cdot-0.2207\\cdot2=-0.0463$; $w_{11}^3=2-0.5\\cdot(-0.2207)\\cdot0.8808=2.0972$.",
+      "ro": "$y^2=(\\sigma(2);\\sigma(0))=(0{,}8808;0{,}5)$; $z^3=2\\cdot0{,}8808-1\\cdot0{,}5=1{,}2616$; $y^3=0{,}7793$; $\\delta^3=y^3-1=-0{,}2207$; $\\delta_1^2=0{,}8808\\cdot0{,}1192\\cdot-0{,}2207\\cdot2=-0{,}0463$; $w_{11}^3=2-0{,}5\\cdot(-0{,}2207)\\cdot0{,}8808=2{,}0972$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The same task, with other numbers. Round to at most 4 decimals.",
+        "ro": "Aceeași cerință, cu alte numere. Rotunjește la cel mult 4 zecimale."
+       },
+       "solution": {
+        "en": "$y^3=0.9124$, $\\delta^3=0.9124$, $\\delta_1^2=0.0958$, $w_{11}^3=0.5982$.",
+        "ro": "$y^3=0{,}9124$, $\\delta^3=0{,}9124$, $\\delta_1^2=0{,}0958$, $w_{11}^3=0{,}5982$."
+       },
+       "fields": [
+        {
+         "id": "y3",
+         "formula": "1/(1+exp(-(u1*1/(1+exp(-(i1*w11+i2*w21)))+u2*1/(1+exp(-(i1*w12+i2*w22))))))",
+         "expected": 0.9124
+        },
+        {
+         "id": "d3",
+         "formula": "(1/(1+exp(-(u1*1/(1+exp(-(i1*w11+i2*w21)))+u2*1/(1+exp(-(i1*w12+i2*w22)))))))-t",
+         "expected": 0.9124
+        },
+        {
+         "id": "dh",
+         "formula": "1/(1+exp(-(i1*w11+i2*w21)))*(1-1/(1+exp(-(i1*w11+i2*w21))))*((1/(1+exp(-(u1*1/(1+exp(-(i1*w11+i2*w21)))+u2*1/(1+exp(-(i1*w12+i2*w22)))))))-t)*u1",
+         "expected": 0.0958
+        },
+        {
+         "id": "nw",
+         "formula": "u1-0.5*((1/(1+exp(-(u1*1/(1+exp(-(i1*w11+i2*w21)))+u2*1/(1+exp(-(i1*w12+i2*w22)))))))-t)*1/(1+exp(-(i1*w11+i2*w21)))",
+         "expected": 0.5982
+        }
+       ],
+       "data": {
+        "i1": 2,
+        "i2": 1,
+        "t": 0,
+        "w11": 0.5,
+        "w21": 1,
+        "w12": 1,
+        "w22": -1,
+        "u1": 1,
+        "u2": 2
+       },
+       "table": {
+        "columns": [
+         {
+          "en": "What",
+          "ro": "Ce"
+         },
+         {
+          "en": "Value",
+          "ro": "Valoarea"
+         }
+        ],
+        "rows": [
+         [
+          {
+           "en": "the inputs $y^1$",
+           "ro": "intrările $y^1$"
+          },
+          "(2; 1)"
+         ],
+         [
+          {
+           "en": "target $t$",
+           "ro": "țintă $t$"
+          },
+          "0"
+         ],
+         [
+          "$w_{11}^2,\\;w_{21}^2$",
+          {
+           "en": "0.5 and 1",
+           "ro": "0,5 și 1"
+          }
+         ],
+         [
+          "$w_{12}^2,\\;w_{22}^2$",
+          {
+           "en": "1 and -1",
+           "ro": "1 și -1"
+          }
+         ],
+         [
+          "$w_{11}^3,\\;w_{21}^3$",
+          {
+           "en": "1 and 2",
+           "ro": "1 și 2"
+          }
+         ]
+        ],
+        "caption": {
+         "en": "Network 2-2-1, sigmoid, cross-entropy, no bias, learning rate 0.5",
+         "ro": "Rețea 2-2-1, sigmoid, cross-entropy, fără bias, rata de învățare 0,5"
+        }
+       },
+       "hints": [
+        {
+         "en": "Forward: first the hidden layer, then the output.",
+         "ro": "Forward: întâi stratul ascuns, apoi ieșirea."
+        },
+        {
+         "en": "$z_1^2=2\\cdot0.5+1\\cdot1=2$, $z_2^2=2\\cdot1+1\\cdot(-1)=1$; $z^3=1\\cdot y_1^2+2\\cdot y_2^2$.",
+         "ro": "$z_1^2=2\\cdot0{,}5+1\\cdot1=2$, $z_2^2=2\\cdot1+1\\cdot(-1)=1$; $z^3=1\\cdot y_1^2+2\\cdot y_2^2$."
+        },
+        {
+         "en": "$\\delta^3=y^3-0=0.9124$; then $\\delta_1^2$ and the new weight.",
+         "ro": "$\\delta^3=y^3-0=0{,}9124$; apoi $\\delta_1^2$ și ponderea nouă."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s42",
+   "title": {
+    "en": "Check: the order",
+    "ro": "Verifică: ordinea"
+   },
+   "kicker": {
+    "en": "Card 6 of 6 · Check",
+    "ro": "Cardul 6 din 6 · Verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-crash-hw3-k-order",
+     "question": {
+      "en": "In the worked example the weights $w_{11}^3=8$ and $w_{21}^3=4$ were updated to 7.75 and 3.75. Which weights do you use for $\\delta_1^2$ and $\\delta_2^2$?",
+      "ro": "În exemplul rezolvat, ponderile $w_{11}^3=8$ și $w_{21}^3=4$ s-au actualizat la 7,75 și 3,75. Ce ponderi folosești pentru $\\delta_1^2$ și $\\delta_2^2$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "The old ones, 8 and 4",
+        "ro": "Cele vechi, 8 și 4"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct: all the errors are computed before any update, so with the old weights.",
+        "ro": "Corect: toate erorile se calculează înainte de orice actualizare, deci cu ponderile vechi."
+       }
+      },
+      {
+       "text": {
+        "en": "The new ones, 7.75 and 3.75",
+        "ro": "Cele noi, 7,75 și 3,75"
+       },
+       "correct": false,
+       "explain": {
+        "en": "That would mean updating before backprop is finished. The error would belong to a network that no longer exists.",
+        "ro": "Ar însemna să actualizezi înainte să termini backprop. Eroarea ar corespunde unei rețele care nu mai există."
+       },
+       "misconception": "ponderi-noi-in-backprop"
+      },
+      {
+       "text": {
+        "en": "None: $\\delta_i^2=y_i^2(1-y_i^2)\\,\\delta^3$",
+        "ro": "Niciuna: $\\delta_i^2=y_i^2(1-y_i^2)\\,\\delta^3$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The weighted sum $\\sum_k\\delta_k^{3}w_{ik}^{3}$ is missing: the error reaches the neuron through the weight that connects it to the output.",
+        "ro": "Lipsește suma ponderată $\\sum_k\\delta_k^{3}w_{ik}^{3}$: eroarea ajunge la neuron prin ponderea care îl leagă de ieșire."
+       },
+       "misconception": "un-singur-termen"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s43",
+   "title": {
+    "en": "Traps: the cost and softmax",
+    "ro": "Capcane: costul și softmax"
+   },
+   "kicker": {
+    "en": "Traps",
+    "ro": "Capcane"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Do not say \"$\\delta=y-t$ for any cost\". It holds for cross-entropy with softmax or sigmoid. With MSE and a sigmoid output the factor $\\sigma'(z)$ stays.",
+         "ro": "Nu spune \"$\\delta=y-t$ pentru orice cost\". Este valabil pentru cross-entropy cu softmax sau sigmoid. Cu MSE și ieșire sigmoid rămâne factorul $\\sigma'(z)$."
+        },
+        {
+         "en": "When you use $t_1+t_2=1$, say why: $t$ is one-hot.",
+         "ro": "Când folosești $t_1+t_2=1$, spune de ce: $t$ este one-hot."
+        },
+        {
+         "en": "The sign: with class 1 correct, $\\partial C/\\partial z_1=y_1-1$ is negative.",
+         "ro": "Semnul: cu clasa 1 corectă, $\\partial C/\\partial z_1=y_1-1$ este negativ."
+        },
+        {
+         "en": "Say which pairing you use: softmax with CE or sigmoid with CE.",
+         "ro": "Spune ce pereche folosești: softmax cu CE sau sigmoid cu CE."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s44",
+   "title": {
+    "en": "Traps: the saturation note",
+    "ro": "Capcane: nota despre saturație"
+   },
+   "kicker": {
+    "en": "Traps",
+    "ro": "Capcane"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "The note says",
+          "ro": "Nota spune"
+         },
+         {
+          "en": "Lab04 with CE",
+          "ro": "Lab04 cu CE"
+         }
+        ],
+        "rows": [
+         [
+          {
+           "en": "gradient 0 at the output",
+           "ro": "gradient 0 la ieșire"
+          },
+          {
+           "en": "$\\delta^3=1$, $8\\to7.75$",
+           "ro": "$\\delta^3=1$, $8\\to7{,}75$"
+          }
+         ]
+        ],
+        "caption": {
+         "en": "The note against the Lab04 example",
+         "ro": "Nota față de exemplul din Lab04"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "The lab note \"Sigmoid Saturation\" says that with $y^3=1$ the output gradient is 0 and training stops. With cross-entropy this is wrong.",
+        "ro": "Nota de laborator \"Sigmoid Saturation\" spune că la $y^3=1$ gradientul ieșirii e 0 și antrenarea se oprește. Cu cross-entropy, asta e greșit."
+       }
+      },
+      {
+       "text": {
+        "en": "$\\sigma'$ cancels, $\\delta^3=y-t=1$, and the Lab04 example itself changes $8\\to7.75$. The note admits the exact $\\sigma(6)$ would not give 0.",
+        "ro": "$\\sigma'$ se simplifică, $\\delta^3=y-t=1$, iar chiar exemplul din Lab04 schimbă $8\\to7{,}75$. Nota recunoaște că $\\sigma(6)$ exact nu ar da 0."
+       }
+      },
+      {
+       "text": {
+        "en": "At the oral, politely: \"With cross-entropy I get $\\delta^3=y-t=1$, so the weight changes; a near-zero gradient is what MSE would give.\"",
+        "ro": "La oral, politicos: \"Cu cross-entropy îmi iese $\\delta^3=y-t=1$, deci ponderea se schimbă; gradientul aproape 0 l-ar da MSE.\""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s45",
+   "title": {
+    "en": "Traps: ReLU",
+    "ro": "Capcane: ReLU"
+   },
+   "kicker": {
+    "en": "Traps",
+    "ro": "Capcane"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Do not say \"ReLU curves the separator\". ReLU is piecewise linear: it folds the plane.",
+         "ro": "Nu spune \"ReLU curbează separatorul\". ReLU este liniară pe bucăți: pliază planul."
+        },
+        {
+         "en": "Do not say a single ReLU neuron bends the separator. You need at least two.",
+         "ro": "Nu spune că un singur neuron ReLU îndoaie separatorul. Îți trebuie cel puțin doi."
+        },
+        {
+         "en": "Do not forget the flat side, where the output is constant.",
+         "ro": "Nu uita partea plată, unde ieșirea e constantă."
+        },
+        {
+         "en": "ReLU is not differentiable at 0; in code the derivative is taken as 0 there.",
+         "ro": "ReLU nu este derivabilă în 0; în cod se ia derivata 0 acolo."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s46",
+   "title": {
+    "en": "Traps: dot product, distance, linearity",
+    "ro": "Capcane: produs scalar, distanță, liniaritate"
+   },
+   "kicker": {
+    "en": "Traps",
+    "ro": "Capcane"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "The dot product is not the distance: the distance is $|z|/|w|$.",
+         "ro": "Produsul scalar nu este distanța: distanța este $|z|/|w|$."
+        },
+        {
+         "en": "Do not forget the bias: $z=w\\cdot x+b$. The distance of the line from the origin is $|b|/|w|$, not $b$.",
+         "ro": "Nu uita bias-ul: $z=w\\cdot x+b$. Distanța dreptei de la origine este $|b|/|w|$, nu $b$."
+        },
+        {
+         "en": "ReLU is not linear: slope 0 left of 0 and slope 1 right of 0, so it is not $ax+b$ on the whole axis.",
+         "ro": "ReLU nu este liniară: panta 0 la stânga lui 0 și panta 1 la dreapta, deci nu este $ax+b$ pe toată axa."
+        },
+        {
+         "en": "When merging, the bias is $W^{(2)}b^{(1)}+b^{(2)}$, not just $b^{(2)}$.",
+         "ro": "La contopire, bias-ul este $W^{(2)}b^{(1)}+b^{(2)}$, nu doar $b^{(2)}$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s47",
+   "title": {
+    "en": "Traps: backprop and notation",
+    "ro": "Capcane: backprop și notația"
+   },
+   "kicker": {
+    "en": "Traps",
+    "ro": "Capcane"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Do not update $w^3$ before $\\delta^2$: all the errors are computed first, with the old weights.",
+         "ro": "Nu actualiza $w^3$ înainte de $\\delta^2$: toate erorile se calculează întâi, cu ponderile vechi."
+        },
+        {
+         "en": "The indices: $\\partial C/\\partial w_{ij}^l=\\delta_j^l\\,y_i^{l-1}$, the error of the neuron the weight enters, times the output of the one it leaves.",
+         "ro": "Indicii: $\\partial C/\\partial w_{ij}^l=\\delta_j^l\\,y_i^{l-1}$, eroarea neuronului în care intră ponderea, înmulțită cu ieșirea celui din care pleacă."
+        },
+        {
+         "en": "Use the professor's notation: $w_{ij}^l$, $z$, $y$, $t$, $C$, $\\delta_j^l=\\partial C/\\partial z_j^l$, $\\eta$.",
+         "ro": "Folosește notația profesorului: $w_{ij}^l$, $z$, $y$, $t$, $C$, $\\delta_j^l=\\partial C/\\partial z_j^l$, $\\eta$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s47b",
+   "title": {
+    "en": "Traps: the backprop in your code",
+    "ro": "Capcane: backprop-ul din codul tău"
+   },
+   "kicker": {
+    "en": "Traps",
+    "ro": "Capcane"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         {
+          "en": "Lab04 sheet",
+          "ro": "Foaia Lab04"
+         },
+         {
+          "en": "Your code",
+          "ro": "Codul tău"
+         }
+        ],
+        "rows": [
+         [
+          {
+           "en": "hidden sigmoid",
+           "ro": "sigmoid ascuns"
+          },
+          {
+           "en": "hidden ReLU",
+           "ro": "ReLU ascuns"
+          }
+         ],
+         [
+          {
+           "en": "one instance",
+           "ro": "o instanță"
+          },
+          {
+           "en": "a mini-batch",
+           "ro": "un mini-batch"
+          }
+         ],
+         [
+          "$w_{ij}^l$",
+          "$W^{(l)}_{ji}$"
+         ],
+         [
+          "$w^2$",
+          "$W^{(1)}$"
+         ]
+        ],
+        "caption": {
+         "en": "The sheet against your code",
+         "ro": "Foaia față de codul tău"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "For a hidden neuron: $\\delta_i^l=f'(z_i^l)\\sum_k\\delta_k^{l+1}w_{ik}^{l+1}$, where $f'$, the derivative of the activation, is $y(1-y)$ for sigmoid and 1 if $z>0$ (else 0) for ReLU.",
+        "ro": "Pentru un neuron ascuns: $\\delta_i^l=f'(z_i^l)\\sum_k\\delta_k^{l+1}w_{ik}^{l+1}$, unde $f'$, derivata activării, este $y(1-y)$ la sigmoid și 1 dacă $z>0$ (altfel 0) la ReLU."
+       }
+      },
+      {
+       "text": {
+        "en": "On a mini-batch: $g=\\frac{1}{BS}\\sum_i g_i$, the average of the gradients $g_i$ of its $BS$ instances.",
+        "ro": "Pe un mini-batch: $g=\\frac{1}{BS}\\sum_i g_i$, media gradienților $g_i$ ai celor $BS$ instanțe din el."
+       }
+      },
+      {
+       "text": {
+        "en": "$W^{(l)}_{ji}$ is row $j$, column $i$ of the matrix: the weight from $i$ to $j$. The sheet counts the inputs as layer 1, so its $w^2$ is card 5's $W^{(1)}$.",
+        "ro": "$W^{(l)}_{ji}$ este rândul $j$, coloana $i$ din matrice: ponderea de la $i$ la $j$. Foaia numără intrările ca stratul 1, deci $w^2$ din foaie este $W^{(1)}$ din cardul 5."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s48",
+   "title": {
+    "en": "Before you go in",
+    "ro": "Înainte să intri"
+   },
+   "kicker": {
+    "en": "Recap",
+    "ro": "Recapitulare"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "$\\delta=y-t$ for cross-entropy with softmax ($t$ one-hot).",
+         "ro": "$\\delta=y-t$ pentru cross-entropy cu softmax ($t$ one-hot)."
+        },
+        {
+         "en": "ReLU folds: one flat side, one linear side; one neuron gives a straight separator or none.",
+         "ro": "ReLU pliază: o parte constantă, una liniară; un neuron dă separator dreaptă sau lipsă."
+        },
+        {
+         "en": "$z=w\\cdot x+b$: how much $x$ looks like $w$, plus the bias $b$ (the bias shifts the threshold).",
+         "ro": "$z=w\\cdot x+b$: cât seamănă $x$ cu $w$, plus bias-ul $b$ (bias-ul mută pragul)."
+        },
+        {
+         "en": "The signed distance is $z/|w|$.",
+         "ro": "Distanța cu semn este $z/|w|$."
+        },
+        {
+         "en": "A linear combination stays linear; linear layers merge.",
+         "ro": "Combinația liniară rămâne liniară; straturile liniare se contopesc."
+        },
+        {
+         "en": "Backprop: forward, $\\delta^L=y-t$, hidden $\\delta$ with the old weights, then update.",
+         "ro": "Backprop: forward, $\\delta^L=y-t$, $\\delta$ ascunse cu ponderile vechi, apoi actualizezi."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s49",
+   "title": {
+    "en": "Mini-test: the derivative",
+    "ro": "Mini-test: derivata"
+   },
+   "kicker": {
+    "en": "Mini-test · 1 of 5",
+    "ro": "Mini-test · 1 din 5"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-crash-hw3-t1",
+     "status": "verified-twice",
+     "statement": {
+      "en": "The scores are $z=(0,\\,1)$ and the correct class is the second ($t=(0,1)$). Compute $\\delta_1$ and $\\delta_2$ (4 decimals).",
+      "ro": "Scorurile sunt $z=(0,\\,1)$, iar clasa corectă este a doua ($t=(0,1)$). Calculează $\\delta_1$ și $\\delta_2$ (4 zecimale)."
+     },
+     "data": {
+      "z1": 0,
+      "z2": 1,
+      "t1": 0,
+      "t2": 1
+     },
+     "fields": [
+      {
+       "id": "d1",
+       "kind": "num",
+       "label": {
+        "en": "$\\delta_1$",
+        "ro": "$\\delta_1$"
+       },
+       "formula": "exp(z1)/(exp(z1)+exp(z2))-t1",
+       "expected": 0.2689
+      },
+      {
+       "id": "d2",
+       "kind": "num",
+       "label": {
+        "en": "$\\delta_2$",
+        "ro": "$\\delta_2$"
+       },
+       "formula": "exp(z2)/(exp(z1)+exp(z2))-t2",
+       "expected": -0.2689
+      }
+     ],
+     "hints": [
+      {
+       "en": "$\\delta=y-t$, so softmax first.",
+       "ro": "$\\delta=y-t$, deci întâi softmax."
+      },
+      {
+       "en": "$y_1=e^0/(e^0+e^1)$.",
+       "ro": "$y_1=e^0/(e^0+e^1)$."
+      },
+      {
+       "en": "$y=(0.2689;0.7311)$, $\\delta=(0.2689;-0.2689)$.",
+       "ro": "$y=(0{,}2689;0{,}7311)$, $\\delta=(0{,}2689;-0{,}2689)$."
+      }
+     ],
+     "solution": {
+      "en": "$y=(1/(1+e);\\,e/(1+e))=(0.2689;0.7311)$, so $\\delta=y-t=(0.2689;-0.2689)$.",
+      "ro": "$y=(1/(1+e);\\,e/(1+e))=(0{,}2689;0{,}7311)$, deci $\\delta=y-t=(0{,}2689;-0{,}2689)$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The scores are $z=(1,\\,3)$ and the correct class is the first ($t=(1,0)$). Compute $\\delta_1$ and $\\delta_2$. Round to at most 4 decimals.",
+        "ro": "Scorurile sunt $z=(1,\\,3)$, iar clasa corectă este prima ($t=(1,0)$). Calculează $\\delta_1$ și $\\delta_2$. Rotunjește la cel mult 4 zecimale."
+       },
+       "solution": {
+        "en": "$y=(0.1192;0.8808)$, $\\delta=(-0.8808;0.8808)$.",
+        "ro": "$y=(0{,}1192;0{,}8808)$, $\\delta=(-0{,}8808;0{,}8808)$."
+       },
+       "fields": [
+        {
+         "id": "d1",
+         "formula": "exp(z1)/(exp(z1)+exp(z2))-t1",
+         "expected": -0.8808
+        },
+        {
+         "id": "d2",
+         "formula": "exp(z2)/(exp(z1)+exp(z2))-t2",
+         "expected": 0.8808
+        }
+       ],
+       "data": {
+        "z1": 1,
+        "z2": 3,
+        "t1": 1,
+        "t2": 0
+       },
+       "hints": [
+        {
+         "en": "Softmax first.",
+         "ro": "Întâi softmax."
+        },
+        {
+         "en": "$y_1=e^1/(e^1+e^3)$.",
+         "ro": "$y_1=e^1/(e^1+e^3)$."
+        },
+        {
+         "en": "$\\delta=(-0.8808;0.8808)$.",
+         "ro": "$\\delta=(-0{,}8808;0{,}8808)$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s50",
+   "title": {
+    "en": "Mini-test: ReLU",
+    "ro": "Mini-test: ReLU"
+   },
+   "kicker": {
+    "en": "Mini-test · 2 of 5",
+    "ro": "Mini-test · 2 din 5"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-crash-hw3-t2",
+     "question": {
+      "en": "A hidden neuron has $y^2=\\text{ReLU}(x_1-x_2)$ and the output is $z^3=y^2+1$. How many classes are there in the plane?",
+      "ro": "Un neuron ascuns are $y^2=\\text{ReLU}(x_1-x_2)$, iar ieșirea este $z^3=y^2+1$. Câte clase există în plan?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Just one: $z^3\\ge1$ everywhere",
+        "ro": "Una singură: $z^3\\ge1$ peste tot"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct: $w_{11}^3=1$ and $b_1^3=1$ have the same sign, so $z^3$ never becomes 0.",
+        "ro": "Corect: $w_{11}^3=1$ și $b_1^3=1$ au același semn, deci $z^3$ nu devine niciodată 0."
+       }
+      },
+      {
+       "text": {
+        "en": "Two, separated by a straight line",
+        "ro": "Două, separate de o dreaptă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "A line would need $z^3=0$ somewhere, but $z^3\\ge1$.",
+        "ro": "O dreaptă ar cere $z^3=0$ undeva, dar $z^3\\ge1$."
+       },
+       "misconception": "separator-care-nu-exista"
+      },
+      {
+       "text": {
+        "en": "Two, separated by a curve",
+        "ro": "Două, separate de o curbă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "ReLU does not produce curves, and here there is no zero at all.",
+        "ro": "ReLU nu produce curbe, iar aici nu există nicio zeroare."
+       },
+       "misconception": "relu-curbeaza"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s51",
+   "title": {
+    "en": "Mini-test: the distance",
+    "ro": "Mini-test: distanța"
+   },
+   "kicker": {
+    "en": "Mini-test · 3 of 5",
+    "ro": "Mini-test · 3 din 5"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-crash-hw3-t3",
+     "status": "verified-twice",
+     "statement": {
+      "en": "The line has $w=(8,6)$ and $b=-20$. The point is $p=(5,3)$. Compute $z$ and the signed distance to the line. Round to at most 4 decimals.",
+      "ro": "Dreapta are $w=(8,6)$ și $b=-20$. Punctul este $p=(5,3)$. Calculează $z$ și distanța cu semn până la dreaptă. Rotunjește la cel mult 4 zecimale."
+     },
+     "data": {
+      "w1": 8,
+      "w2": 6,
+      "b": -20,
+      "p1": 5,
+      "p2": 3
+     },
+     "fields": [
+      {
+       "id": "z",
+       "kind": "num",
+       "label": {
+        "en": "$z$",
+        "ro": "$z$"
+       },
+       "formula": "w1*p1+w2*p2+b",
+       "expected": 38
+      },
+      {
+       "id": "dist",
+       "kind": "num",
+       "label": {
+        "en": "signed distance",
+        "ro": "distanța cu semn"
+       },
+       "formula": "(w1*p1+w2*p2+b)/sqrt(w1^2+w2^2)",
+       "expected": 3.8
+      }
+     ],
+     "hints": [
+      {
+       "en": "$z=w\\cdot p+b$.",
+       "ro": "$z=w\\cdot p+b$."
+      },
+      {
+       "en": "$z=8\\cdot5+6\\cdot3-20$; $|w|=\\sqrt{64+36}$.",
+       "ro": "$z=8\\cdot5+6\\cdot3-20$; $|w|=\\sqrt{64+36}$."
+      },
+      {
+       "en": "$z=38$, $|w|=10$, distance $3.8$.",
+       "ro": "$z=38$, $|w|=10$, distanța $3{,}8$."
+      }
+     ],
+     "solution": {
+      "en": "$z=40+18-20=38$, $|w|=10$, signed distance $38/10=3.8$.",
+      "ro": "$z=40+18-20=38$, $|w|=10$, distanța cu semn $38/10=3{,}8$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "The line has $w=(5,12)$ and $b=-1$. The point is $p=(1,2)$. Compute $z$ and the signed distance. Round to at most 4 decimals.",
+        "ro": "Dreapta are $w=(5,12)$ și $b=-1$. Punctul este $p=(1,2)$. Calculează $z$ și distanța cu semn. Rotunjește la cel mult 4 zecimale."
+       },
+       "solution": {
+        "en": "$z=5+24-1=28$, $|w|=13$, distance $28/13=2.1538$.",
+        "ro": "$z=5+24-1=28$, $|w|=13$, distanța $28/13=2{,}1538$."
+       },
+       "fields": [
+        {
+         "id": "z",
+         "formula": "w1*p1+w2*p2+b",
+         "expected": 28
+        },
+        {
+         "id": "dist",
+         "formula": "(w1*p1+w2*p2+b)/sqrt(w1^2+w2^2)",
+         "expected": 2.1538
+        }
+       ],
+       "data": {
+        "w1": 5,
+        "w2": 12,
+        "b": -1,
+        "p1": 1,
+        "p2": 2
+       },
+       "hints": [
+        {
+         "en": "$z=w\\cdot p+b$.",
+         "ro": "$z=w\\cdot p+b$."
+        },
+        {
+         "en": "$z=5\\cdot1+12\\cdot2-1$; $|w|=13$.",
+         "ro": "$z=5\\cdot1+12\\cdot2-1$; $|w|=13$."
+        },
+        {
+         "en": "$z=28$; $28/13=2.1538$.",
+         "ro": "$z=28$; $28/13=2{,}1538$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s52",
+   "title": {
+    "en": "Mini-test: the merge",
+    "ro": "Mini-test: contopirea"
+   },
+   "kicker": {
+    "en": "Mini-test · 4 of 5",
+    "ro": "Mini-test · 4 din 5"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-crash-hw3-t4",
+     "question": {
+      "en": "The first layer is $h=2x+1$, the second $o=3h-4$, both linear. Which single layer is equivalent, $o(x)$?",
+      "ro": "Primul strat este $h=2x+1$, al doilea $o=3h-4$, ambele liniare. Care este stratul unic echivalent $o(x)$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$6x-1$",
+        "ro": "$6x-1$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct: $3(2x+1)-4=6x+3-4=6x-1$.",
+        "ro": "Corect: $3(2x+1)-4=6x+3-4=6x-1$."
+       }
+      },
+      {
+       "text": {
+        "en": "$6x-4$",
+        "ro": "$6x-4$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "You forgot that the $3\\cdot1$ from the first bias goes through the second layer.",
+        "ro": "Ai uitat că $3\\cdot1$ din primul bias trece prin al doilea strat."
+       },
+       "misconception": "constanta-ignorata"
+      },
+      {
+       "text": {
+        "en": "$5x-3$",
+        "ro": "$5x-3$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Slopes multiply ($2\\cdot3$), they do not add.",
+        "ro": "Pantele se înmulțesc ($2\\cdot3$), nu se adună."
+       },
+       "misconception": "aduna-in-loc-sa-inmulteasca"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-crash-hw3-s53",
+   "title": {
+    "en": "Mini-test: where δ = y − t applies",
+    "ro": "Mini-test: când se aplică δ = y − t"
+   },
+   "kicker": {
+    "en": "Mini-test · 5 of 5",
+    "ro": "Mini-test · 5 din 5"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-crash-hw3-t5",
+     "question": {
+      "en": "When is it true that the output error is $\\delta^L=y-t$?",
+      "ro": "Când este adevărat că eroarea ieșirii este $\\delta^L=y-t$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "With cross-entropy and softmax or sigmoid",
+        "ro": "La cross-entropy cu softmax sau cu sigmoid"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Correct: the derivative of the activation cancels with the derivative of the cost.",
+        "ro": "Corect: derivata activării se simplifică cu derivata costului."
+       }
+      },
+      {
+       "text": {
+        "en": "With any cost function",
+        "ro": "La orice funcție de cost"
+       },
+       "correct": false,
+       "explain": {
+        "en": "With MSE and sigmoid the factor $\\sigma'(z)$ stays.",
+        "ro": "Cu MSE și sigmoid rămâne factorul $\\sigma'(z)$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Only when $y$ is close to 1",
+        "ro": "Doar când $y$ este aproape de 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "The formula does not depend on the value of $y$, but on the cost-activation pair.",
+        "ro": "Formula nu depinde de valoarea lui $y$, ci de perechea cost-activare."
+       },
+       "misconception": "formula-depinde-de-y"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
