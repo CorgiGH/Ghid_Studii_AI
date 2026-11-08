@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { useLessonStore } from '../lesson/useLessonStore';
 import schedule from '../content/schedule-y2s1.json';
@@ -67,7 +67,8 @@ export default function Azi() {
   const store = useLessonStore();
   const [done, setDone] = useState(loadDone);
   const [now, setNow] = useState(() => Date.now());
-  const cardRef = useRef(null);
+  const [params, setParams] = useSearchParams();
+  const topRef = useRef(null); // the Înapoi/Înainte row plus the card
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000);
@@ -78,17 +79,28 @@ export default function Azi() {
     () => [...schedule.steps].sort((a, b) => new Date(a.due) - new Date(b.due)),
     [],
   );
-  const [index, setIndex] = useState(() => openingIndex(steps, loadDone(), Date.now()));
+  // ?pas=<step id> keeps the step on screen when the learner comes back from a lesson; plain /azi opens as usual.
+  const [index, setIndex] = useState(() => {
+    const i = steps.findIndex(s => s.id === params.get('pas'));
+    return i >= 0 ? i : openingIndex(steps, loadDone(), Date.now());
+  });
   const step = steps[index];
+
+  useEffect(() => {
+    if (step && params.get('pas') !== step.id) setParams({ pas: step.id }, { replace: true });
+  }, [step, params, setParams]);
+
   const isDone = !!step && done.includes(step.id);
   const passed = !!step && isPassed(step, now);
   const currentId = steps.find(s => !done.includes(s.id) && !isPassed(s, now))?.id;
   const allDone = steps.every(s => done.includes(s.id));
 
-  const show = (i) => {
-    setIndex(i);
-    try { cardRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch { /* no scrolling */ }
+  const scrollToTop = () => {
+    try { topRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch { /* no scrolling */ }
   };
+  // Înapoi / Înainte sit right above the card: they only change the step, never scroll themselves away.
+  const move = (dir) => setIndex(moveIndex(index, dir, steps.length));
+  const showFromList = (i) => { setIndex(i); scrollToTop(); };
 
   const commit = (nd) => { setDone(nd); saveDone(nd); };
   const onDone = () => {
@@ -96,6 +108,9 @@ export default function Azi() {
     const nd = markDone(done, step.id);
     commit(nd);
     setIndex(nextIndexAfter(steps, nd, now, index));
+    let above = false;
+    try { above = !!topRef.current && topRef.current.getBoundingClientRect().top < 0; } catch { /* no layout */ }
+    if (above) scrollToTop();
   };
   const onUndo = () => { if (step) commit(unmarkDone(done, step.id)); };
 
@@ -124,22 +139,22 @@ export default function Azi() {
       </h2>
 
       {step && (
-        <>
+        <div ref={topRef} style={{ scrollMarginTop: 'calc(var(--topbar-height, 56px) + 8px)' }}>
           <div className="flex items-center gap-3 mb-3">
-            <button type="button" onClick={() => show(moveIndex(index, -1, steps.length))} disabled={index <= 0}
+            <button type="button" onClick={() => move(-1)} disabled={index <= 0}
               className="rounded-xl px-4 py-3 text-base font-bold disabled:opacity-40" style={navStyle} data-testid="azi-prev">
               ‹ {t('Back', 'Înapoi')}
             </button>
             <p className="flex-1 text-center text-sm font-semibold" style={muted} aria-live="polite" data-testid="azi-position">
               {t(`Step ${index + 1} of ${steps.length}`, `Pasul ${index + 1} din ${steps.length}`)}
             </p>
-            <button type="button" onClick={() => show(moveIndex(index, 1, steps.length))} disabled={index >= steps.length - 1}
+            <button type="button" onClick={() => move(1)} disabled={index >= steps.length - 1}
               className="rounded-xl px-4 py-3 text-base font-bold disabled:opacity-40" style={navStyle} data-testid="azi-forward">
               {t('Next', 'Înainte')} ›
             </button>
           </div>
 
-          <section ref={cardRef} className="rounded-2xl p-5 scroll-mt-4" style={card} data-testid="azi-next">
+          <section className="rounded-2xl p-5" style={card} data-testid="azi-next">
             {isDone && (
               <p className="inline-block rounded-full px-3 py-1 text-sm font-bold mb-3" style={{ backgroundColor: '#16a34a', color: '#fff' }} data-testid="azi-done-badge">
                 ✓ {t('This one is done', 'Pasul ăsta e gata')}
@@ -160,8 +175,8 @@ export default function Azi() {
             <p className="text-lg leading-relaxed mb-6">{step.why[lang]}</p>
 
             <div className="flex flex-col gap-3">
-              {targets.map((target, i) => (
-                <ActionButton key={target.key} target={target} primary={hasLesson ? target.kind === 'lesson' : i === 0}
+              {targets.map((target) => (
+                <ActionButton key={target.key} target={target} primary={hasLesson ? target.kind === 'lesson' : target.kind === 'crash'}
                   label={labelOf(target)} progress={progressOf(target)} />
               ))}
               {isDone ? (
@@ -175,7 +190,7 @@ export default function Azi() {
               )}
             </div>
           </section>
-        </>
+        </div>
       )}
 
       {allDone && (
@@ -184,7 +199,7 @@ export default function Azi() {
         </p>
       )}
 
-      <h3 className="text-sm font-bold uppercase tracking-wide mt-6 mb-2" style={muted}>{t('All steps', 'Toate pașii')}</h3>
+      <h3 className="text-sm font-bold uppercase tracking-wide mt-6 mb-2" style={muted}>{t('All steps', 'Toți pașii')}</h3>
       <ol className="flex flex-col gap-2" data-testid="azi-list">
         {steps.map((s, i) => {
           const sDone = done.includes(s.id);
@@ -194,7 +209,7 @@ export default function Azi() {
           const markText = sDone ? t('done', 'gata') : sPassed ? t('deadline passed', 'termen depășit') : s.id === currentId ? t('now', 'acum') : '';
           return (
             <li key={s.id}>
-              <button type="button" onClick={() => show(i)} aria-current={selected ? 'step' : undefined}
+              <button type="button" onClick={() => showFromList(i)} aria-current={selected ? 'step' : undefined}
                 className="w-full rounded-xl px-3 py-3 text-left flex items-center gap-3 min-h-[48px]"
                 style={{ ...card, borderColor: selected ? '#3b82f6' : 'var(--theme-border)', borderWidth: 2, backgroundColor: selected ? 'color-mix(in srgb, #3b82f6 12%, var(--theme-card-bg))' : 'var(--theme-card-bg)', opacity: sDone || sPassed ? 0.75 : 1 }}>
                 <span aria-hidden="true" className="w-6 text-center text-lg" style={{ color: sDone ? '#16a34a' : sPassed ? '#ef4444' : s.id === currentId ? '#3b82f6' : 'var(--theme-muted-text)' }}>{mark}</span>
