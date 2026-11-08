@@ -21,7 +21,7 @@ import puppeteer from 'puppeteer';
 const ROOT = resolve(process.cwd());
 const CONTENT = join(ROOT, 'src', 'content');
 const BASE_PATH = '/Ghid_Studii_AI/'; // must match vite.config.js `base`
-const SUBJECTS = ['os', 'prob-stat', 'alo', 'pa', 'oop', 'bd', 'ml'];
+const SUBJECTS = ['os', 'prob-stat', 'alo', 'pa', 'oop', 'bd', 'ml', 'ag', 'ia', 'nn'];
 
 const args = process.argv.slice(2);
 const PORT = Number(args[args.indexOf('--port') + 1]) || 4173;
@@ -142,7 +142,7 @@ async function startPreview() {
 async function smoke(routes) {
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });

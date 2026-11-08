@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { yearSemesters, subjects } from '../content/registry';
 import SubjectCard from '../components/ui/SubjectCard';
@@ -18,6 +19,14 @@ export default function Home() {
           {t('Select a subject to start studying', 'Selecteaz\u0103 o materie pentru a \u00eencepe studiul')}
         </p>
       </div>
+
+      <Link
+        to="/azi"
+        className="block w-full text-center rounded-2xl px-6 py-5 mb-12 text-2xl font-bold text-white shadow-lg active:scale-[0.98] transition-transform"
+        style={{ backgroundColor: '#3b82f6' }}
+      >
+        {t('Today: what to do now', 'Azi: ce fac acum')}
+      </Link>
 
       {yearSemesters.map(ys => (
         <div key={ys.id} className="mb-12">

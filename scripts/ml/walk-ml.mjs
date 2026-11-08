@@ -51,16 +51,25 @@ const ONLY = arg('--lessons', '') ? new Set(arg('--lessons', '').split(',')) : n
 const JOBS = Number(arg('--jobs', '4'))
 const PORT = Number(arg('--port', '4190'))
 const ORIGIN = `http://127.0.0.1:${PORT}`
-const BASE = `${ORIGIN}/Ghid_Studii_AI/y2s1/ml`
+const SUBJECT = arg('--subject', 'ml')
+const FILES_LIKE = arg('--files-like', '') // regex over the file name; with it (or a non-ml subject) the lessons come from the subject's index.js, in registration order
+const BASE = `${ORIGIN}/Ghid_Studii_AI/y2s1/${SUBJECT}`
 const SIZES = { 390: { width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 1 }, 1280: { width: 1280, height: 800, deviceScaleFactor: 1 } }
 const BLANK_LIMIT_MS = 6000
 const SCREEN = '[data-testid=lesson-screen]:not([data-leaving])'
 
 // ---- what to walk: the lesson files in registration order (tests/content/ml-content.test.js pins the order to index.js); a
 // lesson's route is its place in that list, /course_N
-const COURSES = path.join(ROOT, 'src', 'content', 'ml', 'courses')
-const allLessons = (fs.existsSync(COURSES) ? fs.readdirSync(COURSES) : []).filter((f) => /^lesson-\d\d\.json$/.test(f)).sort()
-  .map((f, i) => ({ n: i + 1, file: f, json: JSON.parse(fs.readFileSync(path.join(COURSES, f), 'utf8')) }))
+const COURSES = path.join(ROOT, 'src', 'content', SUBJECT, 'courses')
+const fromIndex = () => {
+  const src = fs.readFileSync(path.join(ROOT, 'src', 'content', SUBJECT, 'index.js'), 'utf8')
+  const re = FILES_LIKE ? new RegExp(FILES_LIKE) : /./
+  return [...src.matchAll(/src:\s*"[^"]*\/courses\/([^"]+\.json)"/g)].map((m, i) => ({ n: i + 1, file: m[1] }))
+    .filter((l) => re.test(l.file)).map((l) => ({ ...l, json: JSON.parse(fs.readFileSync(path.join(COURSES, l.file), 'utf8')) }))
+}
+const allLessons = (SUBJECT !== 'ml' || FILES_LIKE) ? fromIndex()
+  : (fs.existsSync(COURSES) ? fs.readdirSync(COURSES) : []).filter((f) => /^lesson-\d\d\.json$/.test(f)).sort()
+    .map((f, i) => ({ n: i + 1, file: f, json: JSON.parse(fs.readFileSync(path.join(COURSES, f), 'utf8')) }))
 const unknown = unknownLessons(ONLY, allLessons.map((l) => l.json.meta.id))
 if (unknown.length) {
   console.error(`walk: no lesson file for ${unknown.join(', ')} (lessons here: ${allLessons.map((l) => l.json.meta.id).join(', ') || 'none'})`)

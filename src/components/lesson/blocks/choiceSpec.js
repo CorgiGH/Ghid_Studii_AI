@@ -32,7 +32,8 @@ export const tablesAtOnce = (table) => {
 
 const isIndex = (v, n) => Number.isInteger(v) && v >= 0 && v < n;
 
-// Problem with one static table, or null. columns: string | {en, ro}; cells: string (may hold $KaTeX$) or a finite number;
+// Problem with one static table, or null. columns: string | {en, ro}; cells: string (may hold $KaTeX$), a finite number or
+// { en, ro } (a cell with words, each side may hold $KaTeX$);
 // highlight: row and column indexes to tint.
 function staticTableError(tb) {
   if (tb.dataset !== undefined || tb.sql !== undefined) return 'table is either static (columns + rows) or a dataset + sql, not both';
@@ -42,7 +43,7 @@ function staticTableError(tb) {
   for (let i = 0; i < tb.rows.length; i++) {
     const r = tb.rows[i];
     if (!Array.isArray(r) || r.length !== tb.columns.length) return `table row ${i + 1} must have ${tb.columns.length} cells`;
-    if (!r.every(c => (typeof c === 'string' && c !== '') || (typeof c === 'number' && Number.isFinite(c)))) return `table row ${i + 1} holds a cell that is not a non-empty string or a number`;
+    if (!r.every(c => (typeof c === 'string' && c !== '') || (typeof c === 'number' && Number.isFinite(c)) || isBi(c))) return `table row ${i + 1} holds a cell that is not a non-empty string, a number or { en, ro }`;
   }
   if (tb.caption !== undefined && !isBi(tb.caption)) return 'table caption must have en + ro';
   // the caption is drawn as plain text (and read out as the table's label), so a $ in it would show raw

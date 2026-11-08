@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import Home from './pages/Home';
 import SubjectPage from './pages/SubjectPage';
+import Azi from './pages/Azi';
 
 // Dev-only page that shows every visual widget (never part of production or the smoke walk).
 const VizGallery = import.meta.env.DEV ? lazy(() => import('./pages/VizGallery.jsx')) : null;
@@ -17,6 +18,7 @@ export default function App() {
         ) : (
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/azi" element={<Azi />} />
           <Route path="/:yearSem/:subject/*" element={<SubjectPage sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />} />
         </Routes>
         )

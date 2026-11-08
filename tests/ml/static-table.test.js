@@ -34,10 +34,11 @@ describe('static table shape', () => {
     const t = {
       caption: bi('Datele'),
       columns: [bi('Vreme'), '$\\bar A$'],
-      rows: [['Soare', '$0{,}5$'], ['Ploaie', 3]],
+      rows: [['Soare', '$0{,}5$'], ['Ploaie', 3], [{ en: 'Sun', ro: 'Soare' }, { en: '$x$ is $0.5$', ro: '$x$ este $0{,}5$' }]],
       highlight: { rows: [1], cols: [0] },
     };
     expect(tableError(t)).toBeNull();
+    expect(tableError({ columns: ['X'], rows: [[{ en: 'Sun' }]] })).toMatch(/row 1/);
   });
 
   it('still accepts the BD dataset form, alone or in a list', () => {
@@ -160,6 +161,15 @@ describe('static table rendering', () => {
     const th = html.match(/<th\b[^>]*>(.*?)<\/th>/)[1];
     expect(th.match(/<wbr\/>/g)).toHaveLength(3);
     expect(th.replace(/<wbr\/>/g, '').replace(/&#x27;/g, "'")).toBe("RPAD('$',3,'$')");
+  });
+
+  it('draws a { en, ro } cell in the page language and typesets its $…$', () => {
+    const html = renderToStaticMarkup(React.createElement(McqBlock, {
+      id: 'q', question: bi('Care?'), table: { columns: ['X'], rows: [[{ en: 'output $y$', ro: 'ieșirea $y$' }]] }, options: [opt(true), opt(false, 'not-in-null')],
+    }));
+    expect(html).toContain('ieșirea');
+    expect(html).not.toContain('output');
+    expect(html).toContain('katex');
   });
 
   it('a reflect block shows a static table too', () => {

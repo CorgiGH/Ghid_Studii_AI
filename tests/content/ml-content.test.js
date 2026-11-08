@@ -35,7 +35,7 @@ describe('ml registration', () => {
     expect(ml.title).toEqual({ en: 'Machine learning', ro: 'Învățare automată' });
     expect(ml.shortTitle).toEqual({ en: 'ML', ro: 'ML' });
     expect(getSubject('ml')).toBe(ml);
-    expect(yearSemesters.find((y) => y.id === 'y2s1').subjects).toEqual(['bd', 'ml']);
+    expect(yearSemesters.find((y) => y.id === 'y2s1').subjects).toEqual(['bd', 'ml', 'ag', 'ia', 'nn']);
   });
   it('has a bilingual description', () => {
     expect(ml.description.en).toMatch(/weeks 1–5/);
@@ -43,17 +43,20 @@ describe('ml registration', () => {
   });
   it('registers one course per lesson file, sorted by lesson number (a lesson not published yet leaves a gap)', () => {
     // the ten Ghid rapid lessons (meta.kind "guide") come first, in the order g1a b1a g1b b1b g2 b2 g3 b3 g4 b4
-    const guides = ml.courses.filter((c) => !/^ml-l\d\d$/.test(c.id));
+    // crash packs (ml-crash-*, "Mod urgență") are appended after the lessons
+    const crash = ml.courses.filter((c) => /^ml-crash-/.test(c.id));
+    const guides = ml.courses.filter((c) => !/^ml-l\d\d$/.test(c.id) && !/^ml-crash-/.test(c.id));
     expect(guides.map((c) => c.id)).toEqual(['1a', '1b', '2', '3', '4'].flatMap((p) => [`ml-g${p}`, `ml-b${p}`]));
     expect(ml.courses.slice(0, guides.length)).toEqual(guides);
-    expect(ml.courses.slice(guides.length).map((c) => c.id)).toEqual(files.map(idOfFile));
-    expect(ml.courses).toHaveLength(files.length + guides.length);
+    expect(ml.courses.slice(guides.length, guides.length + files.length).map((c) => c.id)).toEqual(files.map(idOfFile));
+    expect(ml.courses.slice(guides.length + files.length)).toEqual(crash);
+    expect(ml.courses).toHaveLength(files.length + guides.length + crash.length);
   });
   it('gives each course its file, meta id, section count and unique step ids', () => {
     for (const c of ml.courses) {
       const nn = c.id.slice(-2);
-      expect(c.id).toMatch(/^ml-(l\d\d|[gb]\w+)$/);
-      expect(c.src).toBe(/^ml-l/.test(c.id) ? `ml/courses/lesson-${nn}.json` : `ml/courses/guide-${c.id.slice(3)}.json`);
+      expect(c.id).toMatch(/^ml-(l\d\d|[gb]\w+|crash-[a-z0-9]+)$/);
+      expect(c.src).toBe(/^ml-l/.test(c.id) ? `ml/courses/lesson-${nn}.json` : /^ml-crash-/.test(c.id) ? `ml/courses/${c.id.slice(3)}.json` : `ml/courses/guide-${c.id.slice(3)}.json`);
       expect(c.metaId).toBe(c.id);
       const json = loadJson(c.src);
       expect(json.meta.id).toBe(c.metaId);

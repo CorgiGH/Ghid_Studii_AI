@@ -117,4 +117,12 @@ export const ML_TAGS = [
   'nb-si-bayes-comun-inversate', 'bayes-comun-e-sensibil-la-atribute-duplicate',
 ];
 
-export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS]);
+// NN (Rețele neuronale) tags: the mistakes the NN crash packs name, in the ASCII kebab-case Romanian of the ML slug rule.
+// Tags that already fit a mistake (semn-gresit, uitarea-numitorului, un-singur-termen, ...) are reused from ML_TAGS.
+export const NN_TAGS = [
+  'gradient-zero-aproape-de-tinta', 'relu-curbeaza', 'un-neuron-relu-indoaie', 'directia-distantei-gresita',
+  'distanta-dreptei-de-la-origine', 'liniar-pe-bucati-luat-drept-liniar', 'ponderi-noi-in-backprop',
+  'separator-care-nu-exista', 'formula-depinde-de-y',
+];
+
+export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS]);
