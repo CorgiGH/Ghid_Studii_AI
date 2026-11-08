@@ -8,6 +8,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const GUIDES = path.join(ROOT, 'src/guides/ml');
 const OUT = path.join(ROOT, 'src/content/ml/courses');
 const PARTS = ['1a', '1b', '2', '3', '4'];
+// Hand-edited lessons: the generator no longer writes their JSON (progress is saved by step id and position, so a regeneration
+// would undo the edits). Their index line stays and its sectionCount is read from the file on disk.
+const HAND_EDITED = new Set(['ml-g4']);
 
 // the content gate (T1) writes Romanian quotes as plain "…": „ and ” become "
 const plainQuotes = (s) => s.replace(/[„”“]/g, '"');
@@ -423,6 +426,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const lessons = convert(fs.readFileSync(path.join(GUIDES, `part-${p}.md`), 'utf8'));
     for (const l of lessons) {
       const file = `guide-${l.meta.id.slice(3)}.json`;
+      if (HAND_EDITED.has(l.meta.id)) {
+        const onDisk = JSON.parse(fs.readFileSync(path.join(OUT, file), 'utf8'));
+        courses[l.meta.id] = { l: onDisk, file };
+        console.log(l.meta.id, onDisk.steps.length, '(hand-edited, not written)');
+        continue;
+      }
       fs.writeFileSync(path.join(OUT, file), JSON.stringify(l, null, 2) + '\n');
       courses[l.meta.id] = { l, file };
       console.log(l.meta.id, l.steps.length);
