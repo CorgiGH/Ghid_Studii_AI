@@ -1,8 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
-import { subjects } from '../content/registry';
+import { useLessonStore } from '../lesson/useLessonStore';
 import schedule from '../content/schedule-y2s1.json';
+import {
+  courseInfo, buildTargets, isPassed, openingIndex, nextIndexAfter, moveIndex, markDone, unmarkDone,
+} from './aziLogic';
 
 const STORE_KEY = 'azi.v1';
 
@@ -17,34 +20,6 @@ function loadDone() {
 
 function saveDone(done) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(done)); } catch { /* ignore */ }
-}
-
-// Course id -> player route, by position in the subject's courses list (routes are course_N, N = index + 1).
-// Returns null when the course (or subject) does not exist yet.
-export function resolveCourse(subjectSlug, courseId) {
-  const subject = subjects.find(s => s.slug === subjectSlug);
-  if (!subject) return null;
-  const idx = subject.courses.findIndex(c => c.id === courseId);
-  if (idx < 0) return null;
-  return `/${subject.yearSemester}/${subject.slug}/course_${idx + 1}`;
-}
-
-function findSubjectOf(courseId) {
-  return subjects.find(s => s.courses.some(c => c.id === courseId));
-}
-
-function resolveLink(link) {
-  if (!link) return null;
-  if (typeof link === 'string') return { href: link, external: true };
-  if (link.url) return { href: link.url, external: true };
-  const to = resolveCourse(link.subject, link.course);
-  return to ? { href: to, external: false } : null;
-}
-
-function resolveCrash(step) {
-  if (!step.crash) return null;
-  const subj = (step.link && step.link.subject) || findSubjectOf(step.crash)?.slug;
-  return subj ? resolveCourse(subj, step.crash) : null;
 }
 
 function countdown(due, now, lang) {
@@ -68,113 +43,171 @@ function formatDue(due, lang) {
   });
 }
 
-const btnBase = 'block w-full text-center rounded-xl px-5 py-4 text-lg font-bold transition-all active:scale-[0.98]';
+const btnBase = 'block w-full text-center rounded-xl px-5 py-4 text-lg font-bold transition-all active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100';
+const muted = { color: 'var(--theme-muted-text)' };
 
-function ActionButton({ target, primary, children }) {
+function ActionButton({ target, primary, label, progress }) {
   const style = primary
     ? { backgroundColor: '#3b82f6', color: '#fff' }
     : { backgroundColor: 'var(--theme-card-bg)', color: 'var(--theme-content-text)', border: '2px solid #ef4444' };
+  const inner = (
+    <>
+      <span className="block">{label}</span>
+      {progress && <span className="block text-sm font-medium opacity-80 mt-0.5">{progress}</span>}
+    </>
+  );
   if (target.external) {
-    return <a href={target.href} target="_blank" rel="noreferrer" className={btnBase} style={style}>{children}</a>;
+    return <a href={target.href} target="_blank" rel="noreferrer" className={btnBase} style={style}>{inner}</a>;
   }
-  return <Link to={target.href} className={btnBase} style={style}>{children}</Link>;
+  return <Link to={target.href} className={btnBase} style={style}>{inner}</Link>;
 }
 
 export default function Azi() {
   const { lang, t } = useApp();
+  const store = useLessonStore();
   const [done, setDone] = useState(loadDone);
-  const [showAll, setShowAll] = useState(false);
-  const now = Date.now();
+  const [now, setNow] = useState(() => Date.now());
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, []);
 
   const steps = useMemo(
     () => [...schedule.steps].sort((a, b) => new Date(a.due) - new Date(b.due)),
     [],
   );
-  const next = steps.find(s => !done.includes(s.id));
+  const [index, setIndex] = useState(() => openingIndex(steps, loadDone(), Date.now()));
+  const step = steps[index];
+  const isDone = !!step && done.includes(step.id);
+  const passed = !!step && isPassed(step, now);
+  const currentId = steps.find(s => !done.includes(s.id) && !isPassed(s, now))?.id;
+  const allDone = steps.every(s => done.includes(s.id));
 
-  const markDone = () => {
-    if (!next) return;
-    const nd = [...done, next.id];
-    setDone(nd);
-    saveDone(nd);
+  const show = (i) => {
+    setIndex(i);
+    try { cardRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch { /* no scrolling */ }
   };
 
-  const primary = next ? resolveLink(next.link) : null;
-  const crash = next ? resolveCrash(next) : null;
+  const commit = (nd) => { setDone(nd); saveDone(nd); };
+  const onDone = () => {
+    if (!step) return;
+    const nd = markDone(done, step.id);
+    commit(nd);
+    setIndex(nextIndexAfter(steps, nd, now, index));
+  };
+  const onUndo = () => { if (step) commit(unmarkDone(done, step.id)); };
+
+  const targets = step ? buildTargets(step) : [];
+  const hasLesson = targets.some(x => x.kind === 'lesson');
+  const progressOf = (target) => {
+    const info = target.courseId ? courseInfo(target.subject, target.courseId) : null;
+    if (!info || !info.src || !info.total || !store.hasPosition(info.src)) return null;
+    const at = Math.min(info.total, store.getPosition(info.src));
+    return t(`${at} / ${info.total} screens`, `${at} / ${info.total} ecrane`);
+  };
+  const labelOf = (target) => {
+    if (target.kind === 'lesson') return t('Open the lesson', 'Deschide lecția');
+    if (target.parts > 1) return t(`Emergency mode · part ${target.part}`, `Mod urgență · partea ${target.part}`);
+    return t('Emergency mode', 'Mod urgență');
+  };
+
   const card = { backgroundColor: 'var(--theme-card-bg)', border: '1px solid var(--theme-border)' };
+  const shortDate = (due) => new Date(due).toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { timeZone: 'Europe/Bucharest', day: 'numeric', month: 'short' });
+  const navStyle = { backgroundColor: 'transparent', color: 'var(--theme-content-text)', border: '2px solid var(--theme-border)' };
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-6">
-      <h2 className="text-sm font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--theme-muted-text)' }}>
+      <h2 className="text-sm font-bold uppercase tracking-wide mb-3" style={muted}>
         {t('Today: what to do now', 'Azi: ce fac acum')}
       </h2>
 
-      {next ? (
-        <section className="rounded-2xl p-5" style={card} data-testid="azi-next">
-          <h3 className="text-3xl font-bold leading-tight mb-2">{next.title[lang]}</h3>
-          <p className="text-lg font-semibold text-blue-500 mb-1">{formatDue(next.due, lang)}</p>
-          <p className="text-xl font-bold mb-5" style={{ color: '#ef4444' }}>{countdown(next.due, now, lang)}</p>
-
-          <h4 className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--theme-muted-text)' }}>
-            {t('What to do', 'Ce faci')}
-          </h4>
-          <p className="text-lg leading-relaxed mb-4">{next.action[lang]}</p>
-
-          <h4 className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--theme-muted-text)' }}>
-            {t('Why it matters', 'De ce contează')}
-          </h4>
-          <p className="text-lg leading-relaxed mb-6">{next.why[lang]}</p>
-
-          <div className="flex flex-col gap-3">
-            {primary && (
-              <ActionButton target={primary} primary>{t('Open the lesson', 'Deschide lecția')}</ActionButton>
-            )}
-            {crash && (
-              <ActionButton target={{ href: crash, external: false }}>{t('Emergency mode', 'Mod urgență')}</ActionButton>
-            )}
-            <button
-              type="button"
-              onClick={markDone}
-              className={btnBase}
-              style={{ backgroundColor: 'transparent', color: 'var(--theme-content-text)', border: '2px solid var(--theme-border)' }}
-            >
-              {t('Done, next', 'Gata, următorul')}
+      {step && (
+        <>
+          <div className="flex items-center gap-3 mb-3">
+            <button type="button" onClick={() => show(moveIndex(index, -1, steps.length))} disabled={index <= 0}
+              className="rounded-xl px-4 py-3 text-base font-bold disabled:opacity-40" style={navStyle} data-testid="azi-prev">
+              ‹ {t('Back', 'Înapoi')}
+            </button>
+            <p className="flex-1 text-center text-sm font-semibold" style={muted} aria-live="polite" data-testid="azi-position">
+              {t(`Step ${index + 1} of ${steps.length}`, `Pasul ${index + 1} din ${steps.length}`)}
+            </p>
+            <button type="button" onClick={() => show(moveIndex(index, 1, steps.length))} disabled={index >= steps.length - 1}
+              className="rounded-xl px-4 py-3 text-base font-bold disabled:opacity-40" style={navStyle} data-testid="azi-forward">
+              {t('Next', 'Înainte')} ›
             </button>
           </div>
-        </section>
-      ) : (
-        <section className="rounded-2xl p-5 text-center" style={card}>
-          <p className="text-2xl font-bold">{t('Everything on the list is done.', 'Tot ce era pe listă e gata.')}</p>
-        </section>
+
+          <section ref={cardRef} className="rounded-2xl p-5 scroll-mt-4" style={card} data-testid="azi-next">
+            {isDone && (
+              <p className="inline-block rounded-full px-3 py-1 text-sm font-bold mb-3" style={{ backgroundColor: '#16a34a', color: '#fff' }} data-testid="azi-done-badge">
+                ✓ {t('This one is done', 'Pasul ăsta e gata')}
+              </p>
+            )}
+            <h3 className="text-3xl font-bold leading-tight mb-2 break-words">{step.title[lang]}</h3>
+            <p className="text-lg font-semibold text-blue-500 mb-1">{formatDue(step.due, lang)}</p>
+            <p className="text-xl font-bold mb-5" style={passed || isDone ? muted : { color: '#ef4444' }}>{countdown(step.due, now, lang)}</p>
+
+            <h4 className="text-xs font-bold uppercase tracking-wide mb-1" style={muted}>
+              {t('What to do', 'Ce faci')}
+            </h4>
+            <p className="text-lg leading-relaxed mb-4">{step.action[lang]}</p>
+
+            <h4 className="text-xs font-bold uppercase tracking-wide mb-1" style={muted}>
+              {t('Why it matters', 'De ce contează')}
+            </h4>
+            <p className="text-lg leading-relaxed mb-6">{step.why[lang]}</p>
+
+            <div className="flex flex-col gap-3">
+              {targets.map((target, i) => (
+                <ActionButton key={target.key} target={target} primary={hasLesson ? target.kind === 'lesson' : i === 0}
+                  label={labelOf(target)} progress={progressOf(target)} />
+              ))}
+              {isDone ? (
+                <button type="button" onClick={onUndo} className={btnBase} style={navStyle} data-testid="azi-undo">
+                  {t('Not done, put it back', 'Nu e gata, pune-l înapoi')}
+                </button>
+              ) : (
+                <button type="button" onClick={onDone} className={btnBase} style={navStyle} data-testid="azi-done">
+                  {t('Done, next', 'Gata, următorul')}
+                </button>
+              )}
+            </div>
+          </section>
+        </>
       )}
 
-      <div className="mt-6">
-        <button
-          type="button"
-          onClick={() => setShowAll(v => !v)}
-          aria-expanded={showAll}
-          className="text-sm font-medium py-2"
-          style={{ color: 'var(--theme-muted-text)' }}
-        >
-          {showAll ? '▾' : '▸'} {t('All steps', 'Toate pașii')}
-        </button>
-        {showAll && (
-          <ol className="mt-2 flex flex-col gap-2">
-            {steps.map(s => {
-              const isDone = done.includes(s.id);
-              return (
-                <li key={s.id} className="rounded-lg px-3 py-2 text-sm flex justify-between gap-3"
-                  style={{ ...card, opacity: isDone ? 0.5 : 1 }}>
-                  <span style={{ textDecoration: isDone ? 'line-through' : 'none' }}>{s.title[lang]}</span>
-                  <span style={{ color: 'var(--theme-muted-text)' }}>
-                    {new Date(s.due).toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { timeZone: 'Europe/Bucharest', day: 'numeric', month: 'short' })}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </div>
+      {allDone && (
+        <p className="mt-4 text-center text-lg font-bold" data-testid="azi-all-done">
+          {t('Everything on the list is done.', 'Tot ce era pe listă e gata.')}
+        </p>
+      )}
+
+      <h3 className="text-sm font-bold uppercase tracking-wide mt-6 mb-2" style={muted}>{t('All steps', 'Toate pașii')}</h3>
+      <ol className="flex flex-col gap-2" data-testid="azi-list">
+        {steps.map((s, i) => {
+          const sDone = done.includes(s.id);
+          const sPassed = isPassed(s, now);
+          const selected = i === index;
+          const mark = sDone ? '✓' : sPassed ? '⏱' : s.id === currentId ? '●' : '○';
+          const markText = sDone ? t('done', 'gata') : sPassed ? t('deadline passed', 'termen depășit') : s.id === currentId ? t('now', 'acum') : '';
+          return (
+            <li key={s.id}>
+              <button type="button" onClick={() => show(i)} aria-current={selected ? 'step' : undefined}
+                className="w-full rounded-xl px-3 py-3 text-left flex items-center gap-3 min-h-[48px]"
+                style={{ ...card, borderColor: selected ? '#3b82f6' : 'var(--theme-border)', borderWidth: 2, backgroundColor: selected ? 'color-mix(in srgb, #3b82f6 12%, var(--theme-card-bg))' : 'var(--theme-card-bg)', opacity: sDone || sPassed ? 0.75 : 1 }}>
+                <span aria-hidden="true" className="w-6 text-center text-lg" style={{ color: sDone ? '#16a34a' : sPassed ? '#ef4444' : s.id === currentId ? '#3b82f6' : 'var(--theme-muted-text)' }}>{mark}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="block font-semibold break-words" style={{ textDecoration: sDone ? 'line-through' : 'none' }}>{s.title[lang]}</span>
+                  {markText && <span className="block text-xs" style={muted}>{markText}</span>}
+                </span>
+                <span className="text-sm shrink-0" style={muted}>{shortDate(s.due)}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
     </main>
   );
 }
