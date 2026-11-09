@@ -14,7 +14,7 @@ const nn = {
   },
   icon: '🔗',
   courses: [
-    { id: "nn-crash-hw3", title: {"en":"HW3: MLP and backprop for the presentation (Crash pack)","ro":"Tema 3: MLP și backprop pentru prezentare (Mod urgență)"}, shortTitle: {"en":"HW3 crash","ro":"Tema 3 urgență"}, sectionCount: 54, metaId: "nn-crash-hw3", src: "nn/courses/crash-hw3.json" },
+    { id: "nn-crash-hw3", title: {"en":"HW3: MLP and backprop for the presentation (Crash pack)","ro":"Tema 3: MLP și backprop pentru prezentare (Mod urgență)"}, shortTitle: {"en":"HW3 crash","ro":"Tema 3 urgență"}, sectionCount: 76, metaId: "nn-crash-hw3", src: "nn/courses/crash-hw3.json" },
   ],
   seminars: [],
   labs: [],
