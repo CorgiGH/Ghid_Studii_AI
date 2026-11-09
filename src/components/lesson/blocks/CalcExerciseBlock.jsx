@@ -7,8 +7,9 @@ import { nowMs } from '../../../lesson/clock.js';
 import { norm } from '../../../ml/calc/answer.js';
 import QuestionTables from './QuestionTables.jsx';
 import LogCalculator from './LogCalculator.jsx';
+import { Figure } from './FigureParts.jsx';
 import {
-  allRight, calcAction, calcWrite, checkTexts, hintAction, restoreCalcState, solutionNote, unparsedHelp, verdictView,
+  allRight, calcAction, calcWrite, checkTexts, hintAction, restoreCalcState, unparsedHelp, verdictView,
 } from './calcSpec.js';
 
 const Html = ({ as = 'span', className, text, testid }) => (
@@ -22,7 +23,7 @@ const isOk = (v) => v && (v.verdict === 'right' || v.verdict === 'accepted-alt')
 // right answer or the solution opens the screen's gate, and a reload brings back what was typed with its verdicts and hints. In
 // the review tab it is rendered with record={false} and reports its first answer through onAnswer.
 export default function CalcExerciseBlock(block) {
-  const { id, source, statement, table, fields, hints, solution, record = true, onAnswer } = block;
+  const { id, source, statement, table, figure, fields, hints, solution, record = true, onAnswer } = block;
   const { t } = useApp();
   const { complete, ref } = useScreenGate();
   const store = useLessonStore();
@@ -97,7 +98,6 @@ export default function CalcExerciseBlock(block) {
   };
 
   const setText = (fid, v) => setTexts((p) => ({ ...p, [fid]: v }));
-  const note = solutionNote(block);
 
   const input = (f) => {
     const v = verdicts[f.id];
@@ -179,6 +179,7 @@ export default function CalcExerciseBlock(block) {
       {source && <p className="ch-calc-source">{t(source.en, source.ro)}</p>}
       <Html as="p" className="ch-q" text={t(statement.en, statement.ro)} />
       <QuestionTables table={table} />
+      {figure && <Figure figure={figure} />}
       <div className="ch-calc-fields">
         {fields.map((f) => (
           <div className="ch-calc-field" key={f.id}>
@@ -209,7 +210,6 @@ export default function CalcExerciseBlock(block) {
       {(revealed || finished) && (
         <div className="ch-explain ok ch-calc-solution" data-testid="calc-solution">
           <Html as="p" text={t(solution.en, solution.ro)} />
-          {note && <p className="ch-calc-note" data-testid="calc-note">{t(note.en, note.ro)}</p>}
         </div>
       )}
     </div>

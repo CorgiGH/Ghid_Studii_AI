@@ -4,12 +4,13 @@
 //   { type: 'calc-exercise', id, exercise?: string | string[], source?: {en,ro}, statement: {en,ro}, table?, data?: {name: value},
 //     fields: [{ id, label, kind: 'num'|'frac'|'choice'|'tf'|'multi', formula, expected, tol?, options?, accept?: [{ value, note }] }],
 //     detectors?: [{ field, formula, message }], hints: [h1, h2, h3], solution: {en,ro}, status: 'book'|'verified-twice'|'ruled',
-//     ruledNote?: {en,ro} (the outline's line for a `ruled` exercise),
-//     variants: [{ statement, table?, data?, hints?: [h1, h2, h3], fields: [{ id, formula, expected, tol?, accept? }], solution }] }
+//     ruledNote?: {en,ro} (an author's note on a `ruled` exercise; never shown to the learner),
+//     figure?: { svg, alt, caption? } (figureSvg.js; a variant brings its own figure or none),
+//     variants: [{ statement, table?, data?, figure?, hints?: [h1, h2, h3], fields: [{ id, formula, expected, tol?, accept? }], solution }] }
 // `formula` is what the content test re-evaluates; `expected` is what the learner should type (the test checks they agree).
 // A variant brings its own hints and accepted alternatives or none: the block's ones carry the block's numbers.
 
-import { tableError, isStaticTable } from './choiceSpec.js';
+import { tableError, isStaticTable, blockFigureError } from './choiceSpec.js';
 import { KINDS, grade, isRight, matchOption, norm } from '../../../ml/calc/answer.js';
 
 export const HINT_COUNT = 3;
@@ -22,18 +23,8 @@ const isValue = (v) => isStr(v) || (typeof v === 'number' && Number.isFinite(v))
 const acceptOk = (list) => Array.isArray(list) && list.every((a) => a && isValue(a.value) && isBi(a.note));
 const hintsOk = (list) => Array.isArray(list) && list.length === HINT_COUNT && list.every(isBi);
 
-export const CHECKED_TWICE = {
-  en: 'The workbook gives no answer; checked twice.',
-  ro: 'Culegerea nu dă răspunsul; verificat de două ori.',
-};
-
-// The line under the solution that says where the answer comes from: none for a book answer, the standard line for one we
-// checked twice, the outline's own line for a ruled one.
-export function solutionNote(block) {
-  if (block?.status === 'verified-twice') return CHECKED_TWICE;
-  if (block?.status === 'ruled') return block.ruledNote || null;
-  return null;
-}
+// Where an answer comes from (`status`, `ruledNote`) is for authors: no provenance line ("checked twice", "verified by calculator")
+// shows under a solution on a learner screen.
 
 // Returns a list of problems; empty means the block is well-formed.
 export function validateCalc(b) {
@@ -45,6 +36,8 @@ export function validateCalc(b) {
   if (!isBi(b?.statement)) at('statement must have en + ro');
   const te = tableError(b?.table);
   if (te) at(te);
+  const fe = blockFigureError(b?.figure);
+  if (fe) at(fe);
   if (b?.data !== undefined && !(isObj(b.data) && Object.values(b.data).every((v) => typeof v === 'number' || isStr(v)))) at('data must map names to numbers or strings');
 
   const fields = b?.fields;
@@ -83,7 +76,6 @@ export function validateCalc(b) {
   if (!hintsOk(b?.hints)) at(`hints must be ${HINT_COUNT} { en, ro } entries: what to compute, the formula with the numbers in, the full step`);
   if (!isBi(b?.solution)) at('solution must have en + ro');
   if (!STATUSES.includes(b?.status)) at(`status must be one of ${STATUSES.join(', ')}`);
-  if (b?.status === 'ruled' && !isBi(b.ruledNote)) at('a ruled exercise needs ruledNote { en, ro } (the outline\'s line for it)');
   if (b?.ruledNote !== undefined && !isBi(b.ruledNote)) at('ruledNote must have en + ro');
 
   if (!Array.isArray(b?.variants) || !b.variants.length) at('needs at least 1 variant (review brings the exercise back with new numbers)');
@@ -94,6 +86,8 @@ export function validateCalc(b) {
       const ve = tableError(v?.table);
       if (ve) va(ve);
       if (v?.data !== undefined && !(isObj(v.data) && Object.values(v.data).every((x) => typeof x === 'number' || isStr(x)))) va('data must map names to numbers or strings');
+      const vfe = blockFigureError(v?.figure);
+      if (vfe) va(vfe);
       if (!isBi(v?.solution)) va('solution must have en + ro');
       if (v?.hints !== undefined && !hintsOk(v.hints)) va(`hints must be ${HINT_COUNT} { en, ro } entries, written for the variant's numbers`);
       if (!Array.isArray(v?.fields)) { va('fields missing'); return; }
@@ -142,6 +136,7 @@ export function withVariant(block, variant) {
     solution: variant.solution,
     table: variant.table ?? block.table,
     data: variant.data ?? block.data,
+    figure: variant.figure, // the block's picture shows the block's numbers: a variant draws its own or none
     hints: variant.hints ?? [],
     fields: block.fields.map((f) => {
       const v = byId[f.id];

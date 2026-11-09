@@ -5,6 +5,7 @@ import katex from 'katex';
 import { useApp } from '../../../contexts/AppContext';
 import formatMarkdown from '../../blocks/formatMarkdown';
 import QuestionTables from './QuestionTables.jsx';
+import { Figure, CardLinks } from './FigureParts.jsx';
 
 const html = (s) => ({ __html: formatMarkdown(s) });
 
@@ -144,6 +145,8 @@ export function Parts({ parts }) {
       );
     }
     if ('steps' in p) return <StepList key={i} items={p.steps} />;
+    if ('figure' in p) return <Figure key={i} figure={p.figure} />;
+    if ('cardlinks' in p) return <CardLinks key={i} links={p.cardlinks} />;
     if ('table' in p) return <div key={i} className="ch-part-table"><QuestionTables table={p.table} /></div>;
     return null;
   });

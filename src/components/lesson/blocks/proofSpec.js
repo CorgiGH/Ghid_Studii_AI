@@ -1,12 +1,25 @@
 // Shape and state of the `proof-steps` block, shared by the validator script, the block and the player (no React).
-// Block JSON: { type:'proof-steps', id, exercise?, claim, given?, table?, steps:[{ shown, why?, predict? }], end }
+// Block JSON: { type:'proof-steps', id, exercise?, claim, given?, table?, figure?, steps:[{ shown, why?, predict?, figure? }], end }
+//   figure: a picture (figureSvg.js); a step's own figure replaces the block's while that step is the latest one shown (figureAt)
 //   predict: { question, options:[{ text, correct, explain, misconception? }] }, checked like an mcq.
 
-import { tableError, validateMcq } from './choiceSpec.js';
+import { tableError, validateMcq, blockFigureError } from './choiceSpec.js';
 import { restoredMcqPick } from '../../../lesson/restore.js';
 
 const isStr = (v) => typeof v === 'string' && v.trim().length > 0;
 const isBi = (v) => !!v && typeof v === 'object' && isStr(v.en) && isStr(v.ro);
+
+// The picture to show with `shown` steps on screen: the figure of the latest of them that has one, else the block's own (or none).
+export function figureAt(block, shown) {
+  for (let k = Math.min(shown, block.steps.length) - 1; k >= 0; k--) if (block.steps[k].figure) return block.steps[k].figure;
+  return block.figure || null;
+}
+
+// How many steps are open on screen: a step with a predict is open only after its pick (its picture would give the pick away).
+export const openSteps = (state, block) => {
+  const last = state.shown - 1;
+  return block.steps[last]?.predict && !(last in state.picks) ? last : state.shown;
+};
 
 // The item id under which the pick on step k is stored (and queued for review when it is wrong).
 export const stepItem = (id, k) => `${id}#${k}`;
@@ -24,12 +37,16 @@ export function validateProof(b, ctx = {}) {
   }
   const te = tableError(b?.table);
   if (te) at(te);
+  const fe = blockFigureError(b?.figure);
+  if (fe) at(fe);
   const steps = b?.steps;
   if (!Array.isArray(steps) || steps.length === 0) { at('steps must be a non-empty list'); return errs; }
   steps.forEach((s, k) => {
     if (!s || typeof s !== 'object') { at(`steps[${k}] is not an object`); return; }
     if (!isBi(s.shown)) at(`steps[${k}].shown must have en + ro`);
     if (s.why !== undefined && !isBi(s.why)) at(`steps[${k}].why must have en + ro`);
+    const sfe = blockFigureError(s.figure);
+    if (sfe) at(`steps[${k}] ${sfe}`);
     if (s.predict !== undefined) {
       if (!s.predict || typeof s.predict !== 'object') { at(`steps[${k}].predict is not an object`); return; }
       const inner = validateMcq({ id: stepItem(b?.id || 'proof', k), question: s.predict.question, options: s.predict.options }, ctx);

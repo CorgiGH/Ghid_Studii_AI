@@ -1,6 +1,7 @@
 // Shape of `mcq` and `reflect` blocks, shared by the validator script and the tests (no React).
 
 import { TRAP_TAGS } from './trapTags.js';
+import { figureError } from './figureSvg.js';
 import { answerStepsError } from './guideSpec.js'; // a cycle, safe: both sides only call each other's functions at run time
 
 // A lesson id of a lesson-player subject: "bd-l05", "bd-l01b", "ml-l14".
@@ -79,6 +80,9 @@ export function tableError(table) {
   return null;
 }
 
+// Problem with a block's optional `figure` field (see figureSvg.js), or null.
+export const blockFigureError = (fig) => (fig === undefined ? null : figureError(fig));
+
 export function validateMcq(b, ctx = {}) {
   const errs = [];
   const at = (m) => errs.push(`(mcq${b?.id ? ` ${b.id}` : ''}): ${m}`);
@@ -86,6 +90,8 @@ export function validateMcq(b, ctx = {}) {
   if (!isBi(b?.question)) at('question must have en + ro');
   const te = tableError(b?.table);
   if (te) at(te);
+  const fe = blockFigureError(b?.figure);
+  if (fe) at(fe);
   if (b?.review !== undefined) {
     if (lessonOrder(b.review) === null) at('review must be a lesson id like "bd-l05"');
     else if (ctx.lessonId && lessonOrder(ctx.lessonId) !== null && lessonSubject(b.review) !== lessonSubject(ctx.lessonId)) {
@@ -109,7 +115,7 @@ export function validateMcq(b, ctx = {}) {
   return errs;
 }
 
-export function validateReflect(b) {
+export function validateReflect(b, ctx = {}) {
   const errs = [];
   const at = (m) => errs.push(`(reflect${b?.id ? ` ${b.id}` : ''}): ${m}`);
   if (!isStr(b?.id)) at('id missing');
@@ -118,7 +124,9 @@ export function validateReflect(b) {
   if (b?.placeholder !== undefined && !isBi(b.placeholder)) at('placeholder must have en + ro');
   const te = tableError(b?.table);
   if (te) at(te);
-  const se = answerStepsError(b?.answerSteps);
+  const fe = blockFigureError(b?.figure);
+  if (fe) at(fe);
+  const se = answerStepsError(b?.answerSteps, ctx);
   if (se) at(se);
   return errs;
 }

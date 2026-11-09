@@ -20,6 +20,7 @@ if (!file) { console.error('Usage: node validate-course-json.mjs <file>'); proce
 
 const json = JSON.parse(readFileSync(resolve(file), 'utf-8'));
 const errors = [];
+const ctx = { stepIds: Array.isArray(json.steps) ? json.steps.map((s) => s?.id) : [] }; // for cardlinks
 
 // Meta validation
 if (!json.meta) errors.push('Missing "meta" object');
@@ -69,7 +70,7 @@ else {
           for (const e of validateMcq(block, { lessonId: json.meta?.id })) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'reflect') {
-          for (const e of validateReflect(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+          for (const e of validateReflect(block, ctx)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'query-machine') {
           for (const e of validateQueryMachine(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
@@ -84,10 +85,10 @@ else {
           for (const e of validateProof(block, { lessonId: json.meta?.id })) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'steps') {
-          for (const e of validateSteps(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+          for (const e of validateSteps(block, ctx)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'rule') {
-          for (const e of validateRule(block)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
+          for (const e of validateRule(block, ctx)) errors.push(`steps[${si}].blocks[${bi}] ${e}`);
         }
         if (t === 'code') {
           if (!block.code) errors.push(`steps[${si}].blocks[${bi}] (code): missing code field`);

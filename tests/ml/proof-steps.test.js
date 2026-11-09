@@ -186,6 +186,51 @@ describe('ProofStepsBlock render', () => {
     expect(html).toContain('AL-DOILEA-PAS');
   });
 
+  it('draws the picture right under the latest open step, so a picture that changes after a pick changes where the learner looks', () => {
+    const pic = (label) => ({ svg: `<svg viewBox="0 0 120 40"><text x="5" y="25">${label}</text></svg>`, alt: { en: label, ro: label } });
+    const b = block();
+    b.figure = pic('POZA-BLOC');
+    b.steps[1].figure = pic('POZA-DOI');
+    const store = createLessonStore(memStorage());
+    const at = (html, s) => { const i = html.indexOf(s); expect(i, s).toBeGreaterThanOrEqual(0); return i; };
+    const figures = (html) => html.match(/data-testid="figure"/g)?.length ?? 0;
+    // step 1 open: the block's picture under it, above Next
+    let html = render(b, store);
+    expect(figures(html)).toBe(1);
+    expect(at(html, 'POZA-BLOC')).toBeGreaterThan(at(html, 'DE-CE-UNU'));
+    expect(at(html, 'POZA-BLOC')).toBeLessThan(at(html, 'data-testid="proof-next"'));
+    expect(html.indexOf('POZA-BLOC')).toBeGreaterThan(html.indexOf('<ol')); // not above the list any more
+    // step 2 waits for its pick: the picture stays under step 1, just above the open predict, and step 2's picture is not out yet
+    play(b, store, [{ k: 0 }]);
+    html = render(b, store);
+    expect(figures(html)).toBe(1);
+    expect(html).not.toContain('POZA-DOI');
+    expect(at(html, 'POZA-BLOC')).toBeGreaterThan(at(html, 'DE-CE-UNU'));
+    expect(at(html, 'POZA-BLOC')).toBeLessThan(at(html, 'Ce regula se aplica?'));
+    // after the pick, step 2's picture takes its place under step 2's text and reason, above Next
+    play(b, store, [{ k: 1, pick: { i: 0 } }]);
+    html = render(b, store);
+    expect(figures(html)).toBe(1);
+    expect(html).not.toContain('POZA-BLOC');
+    expect(at(html, 'POZA-DOI')).toBeGreaterThan(at(html, 'DE-CE-DOI'));
+    expect(at(html, 'POZA-DOI')).toBeLessThan(at(html, 'data-testid="proof-next"'));
+    // step 3 has no picture of its own: step 2's stays the latest, and moves under step 3
+    play(b, store, [{ k: 1 }]);
+    html = render(b, store);
+    expect(figures(html)).toBe(1);
+    expect(at(html, 'POZA-DOI')).toBeGreaterThan(at(html, 'AL-TREILEA-PAS'));
+  });
+
+  it('a block whose first step waits for a pick draws its picture above the list, just above that predict', () => {
+    const b = block();
+    b.figure = { svg: '<svg viewBox="0 0 120 40"><text x="5" y="25">POZA-BLOC</text></svg>', alt: { en: 'x', ro: 'x' } };
+    b.steps[0].predict = b.steps[1].predict;
+    const html = render(b, createLessonStore(memStorage()));
+    expect(html.indexOf('POZA-BLOC')).toBeGreaterThan(0);
+    expect(html.indexOf('POZA-BLOC')).toBeLessThan(html.indexOf('<ol'));
+    expect(html.indexOf('POZA-BLOC')).toBeLessThan(html.indexOf('Ce regula se aplica?'));
+  });
+
   it('the wrong pick joins the review pile; a right pick does not', () => {
     const b = block();
     const wrong = createLessonStore(memStorage());
