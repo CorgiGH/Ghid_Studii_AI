@@ -1,5 +1,11 @@
 // Shared by the ML widget tests: read the numbers out of a caption and out of the marks a widget draws.
-export const numbersOf = (text) => text.match(/(?<![A-Za-z_\d.])\d+(?:\.\d+)?/g) || [];
+// Romanian prints the decimal comma (numbers-bilingual.js roNums): 0,8113 reads back as 0.8113. A tuple of three or more
+// values, (0,0,1), keeps its commas: it is protected first, then every other digit,digit is a decimal.
+const foldRo = (text) => text
+  .replace(/\(\d+(?:,\d+){2,}\)/g, (m) => m.replace(/,/g, '§'))
+  .replace(/(\d),(\d)/g, '$1.$2')
+  .replace(/§/g, ',');
+export const numbersOf = (text) => foldRo(text).match(/(?<![A-Za-z_\d.])\d+(?:\.\d+)?/g) || [];
 export const marksOf = (html) => {
   const out = new Set();
   for (const m of html.matchAll(/data-(?:value|box)="([^"]*)"/g)) for (const n of m[1].match(/\d+(?:\.\d+)?/g) || []) out.add(n);

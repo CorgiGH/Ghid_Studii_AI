@@ -195,3 +195,38 @@ describe('ml-freq-tree render', () => {
     expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|opacity/);
   });
 });
+
+// ml-g4 s2 and s4: the coins (feminine nouns), and s9: the cancer test (masculine, the default)
+describe('ml-freq-tree Romanian agreement (ml-g4 s2, s4, s9)', () => {
+  const COINS = { population: 20, prior: 0.5, sens: 0.9, fpr: 0.5, feminine: true, labels: {
+    sick: { en: 'rigged', ro: 'măsluite' }, healthy: { en: 'fair', ro: 'corecte' }, pos: { en: 'heads', ro: 'cu cap' }, neg: { en: 'tails', ro: 'cu pajură' }, people: { en: 'coins', ro: 'monede' } } };
+  const cap = (props, s) => freqTree(props).frame(s).caption.ro;
+  it('feminine: câte, celelalte, cele, ele; a count of 1 reads "cealaltă"', () => {
+    expect(cap(COINS, 0)).toBe('Imaginează-ți 20 de monede. Câte măsluite sunt în acest grup?');
+    expect(cap(COINS, 1)).toContain('; celelalte 10 sunt corecte.');
+    expect(cap(COINS, 2)).toBe('Dintre cele 10 măsluite, câte sunt cu cap? (0,9 dintre ele.)');
+    expect(cap(COINS, 3)).toBe('10 × 0,9 = 9 cu cap; cealaltă cu pajură.');
+    expect(cap(COINS, 6)).toBe('Câte sunt cu cap în total și câte dintre ele sunt măsluite? Ce fracție?');
+    expect(cap(COINS, 7)).toContain('dintre ele 9 sunt măsluite');
+    for (let s = 0; s < FREQ_FRAMES; s++) expect(cap(COINS, s)).not.toMatch(/Câți|ceilalți|dintre ei\b|Dintre cei/);
+  });
+  it('a label that is a prepositional phrase takes no "de" after a count from 20 up (ml-g4 s4: 45 cu cap)', () => {
+    const S4 = { ...COINS, population: 100, prior: 0.1 };
+    expect(cap(S4, 4)).toBe('Dintre cele 90 de corecte, câte sunt cu cap? (0,5 dintre ele.)');
+    expect(cap(S4, 5)).toBe('90 × 0,5 = 45 cu cap; celelalte 45 cu pajură.');
+    expect(cap(S4, 7)).toMatch(/^9 \+ 45 = 54 cu cap; dintre ele 9 sunt măsluite\./);
+    for (let s = 0; s < FREQ_FRAMES; s++) expect(cap(S4, s)).not.toMatch(/ de cu /);
+  });
+  it('the default stays masculine: câți, cei, ceilalți (ml-g4 s9 with "bolnavi de cancer")', () => {
+    const CANCER = { population: 100000, prior: 0.008, sens: 0.98, fpr: 0.03, labels: {
+      sick: { en: 'with cancer', ro: 'bolnavi de cancer' }, healthy: { en: 'healthy', ro: 'sănătoși' }, pos: { en: 'positive', ro: 'pozitivi' }, neg: { en: 'negative', ro: 'negativi' }, people: { en: 'people', ro: 'persoane' } } };
+    expect(cap(CANCER, 0)).toContain('Câți bolnavi de cancer sunt în acest grup?');
+    expect(cap(CANCER, 2)).toContain('Dintre cei 800 de bolnavi de cancer, câți sunt pozitivi?');
+    expect(cap(CANCER, 3)).toContain('ceilalți 16 negativi');
+  });
+  it('validateViz accepts feminine as a boolean only', () => {
+    const b = (props) => ({ id: 'x', type: 'viz', widget: 'ml-freq-tree', predict: true, props });
+    expect(validateViz(b(COINS))).toEqual([]);
+    expect(validateViz(b({ ...COINS, feminine: 'yes' })).length).toBe(1);
+  });
+});

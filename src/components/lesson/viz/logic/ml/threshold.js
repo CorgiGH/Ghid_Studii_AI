@@ -3,8 +3,10 @@
 // ML math kit (thresholds, IG, Hcol) through tree-grow.js. No React.
 import { Hcol, IG } from '../../../../../ml/calc/mathKit.js';
 import { colNames, countsText, fmt, grow, countTests, polarity, sub } from './tree-grow.js';
+import { roNums } from './numbers-bilingual.js';
 
-const bi = (en, ro) => ({ en, ro });
+// Romanian prints the decimal comma (numbers-bilingual.js)
+const bi = (en, ro) => ({ en, ro: roNums(ro) });
 const TIE = 1e-9;
 
 const test = (c) => `${c.attr} ≤ ${fmt(c.th)}`;

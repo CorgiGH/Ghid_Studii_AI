@@ -1,8 +1,8 @@
 import React from 'react';
 
-// The ML notation h_MAP, h_ML and P_NB stays plain text in the logic modules (the tests read it as text);
+// The ML notation h_MAP, h_ML, P_NB, θ̂_MLE and θ̂_MAP stays plain text in the logic modules (the tests read it as text);
 // on screen the tail is drawn as a real subscript.
-const SUB = /\b([hP])_(MAP|ML|NB)\b/g;
+const SUB = /(?<![A-Za-z])(h|P|θ̂)_(MAP|MLE|ML|NB)(?![A-Za-z])/g;
 
 export function withSubs(text) {
   const parts = String(text).split(SUB);

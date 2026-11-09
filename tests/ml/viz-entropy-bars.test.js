@@ -299,3 +299,27 @@ describe('entropy-bars widget', () => {
     expect(html).not.toMatch(/<svg[^>]*\swidth=/);
   });
 });
+
+// crash-p1 s20: [4+,6−] against [0+,4−], then [4+,2−] against [5+,5−]
+describe('entropy-bars compare mode: own picks (crash-p1 s20)', () => {
+  const S20 = { splits: [[4, 6], [0, 4], [4, 2], [5, 5]] };
+  const model = entropyBars(S20);
+  const asks = model.frames.filter((f) => f.pick);
+  it('each ask frame carries a pick: tap a bar, then the maximum', () => {
+    expect(asks.map((f) => [f.kind, f.pick.kind, f.pick.right])).toEqual([['ask', 'bar', 'a'], ['ask', 'bar', 'b'], ['max-ask', 'list', '0.5']]);
+  });
+  it('the bars, "la fel" and the values of p are the options; every wrong one has a reason', () => {
+    expect(asks[0].pick.options.map((o) => o.id)).toEqual(['a', 'b', 'same']);
+    for (const f of asks) for (const o of f.pick.options.filter((x) => x.id !== f.pick.right)) expect(f.pick.whys[o.id]?.ro?.length, `${f.kind}/${o.id}`).toBeGreaterThan(10);
+    expect(asks[0].pick.whys.b.ro).toContain('[0+,4−] e mai aproape de un nod pur');
+  });
+  it('with predict the bars are buttons and Next waits for the pick; without predict they stay plain', () => {
+    LANG = 'ro';
+    const html = renderToStaticMarkup(React.createElement(EntropyBars, { props: S20, predict: true }));
+    expect((html.match(/<button type="button" class="meb-barrow meb-barbtn mlv-opt"/g) || []).length).toBe(2);
+    expect(html).toContain('la fel');
+    expect(html).not.toContain('Arată-mi');
+    expect(html).toMatch(/disabled=""><span>Mai departe/);
+    expect(renderToStaticMarkup(React.createElement(EntropyBars, { props: S20, predict: false }))).not.toContain('meb-barbtn');
+  });
+});

@@ -195,8 +195,9 @@ export function paramsFrame(n) {
   const c = paramCounts(n);
   return {
     id: 'params', mode: 'joint', state: { kind: 'params', ...c },
-    // the nouns agree with their numbers: 1 atribut binar, 10 atribute binare; 11 parametri, 21 de parametri
-    caption: bi((L) => `${L.t('With', 'Cu')} n = ${c.n} ${L.t(enNoun(c.n, 'binary attribute', 'binary attributes'), roNoun(c.n, 'atribut binar', 'atribute binare'))} ${L.t('and a binary class', 'și o clasă binară')}: ${L.t('Naive Bayes', 'Bayes Naiv')} 2n + 1 = ${c.nb} ${L.t('free parameters', roNoun(c.nb, 'parametru liber', 'parametri liberi'))}, ${L.t('Joint Bayes', 'Bayes Optimal')} 2ⁿ⁺¹ − 1 = ${c.joint}.`),
+    // d = the number of input attributes, as the lessons write it (EB ex. 2.7 calls it n); the nouns agree with their
+    // numbers: 1 atribut binar, 10 atribute binare; 11 parametri, 21 de parametri
+    caption: bi((L) => `${L.t('With', 'Cu')} d = ${c.n} ${L.t(enNoun(c.n, 'binary attribute', 'binary attributes'), roNoun(c.n, 'atribut binar', 'atribute binare'))} ${L.t('and a binary class', 'și o clasă binară')}: ${L.t('Naive Bayes', 'Bayes Naiv')} 2d + 1 = ${c.nb} ${L.t('free parameters', roNoun(c.nb, 'parametru liber', 'parametri liberi'))}, ${L.t('Joint Bayes', 'Bayes Optimal')} 2ᵈ⁺¹ − 1 = ${c.joint}.`),
     ask: null,
     cites: [FX('params-nb', c.nb), FX('params-joint', c.joint)],
   };

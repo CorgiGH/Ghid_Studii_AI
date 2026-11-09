@@ -4,6 +4,7 @@
 // count, the unweighted score, the wrong error).
 import Fraction from '../../../../../ml/calc/fraction.js';
 import { bi } from './numbers-bilingual.js';
+import { enCount, roCount } from '../words.js';
 import { classScores, jointRows, errorTable, factor, paramCounts } from './nb.js';
 
 const lab = (m, cls) => `${m.target}=${cls}`;
@@ -14,6 +15,8 @@ const NONE = { en: 'none', ro: 'niciuna' };
 const same = (cell, lit) => String(cell) === String(lit) || (typeof cell === 'number' && Number(lit) === cell);
 const fr = (a, b) => new Fraction(a, b);
 const fmt = (x) => (x instanceof Fraction ? x.toString() : String(x));
+// an error rate as the errors mode prints it (a P column holds decimals): 0.3 / 0,3; the id is the English side
+const dec = (x) => bi((L) => L.n(x));
 
 // right + up to two different wrong labels (strings), in a fixed order that is not "right first":
 // the right one sits at position (frameNumber mod 3), so a run of frames does not always put it first.
@@ -38,7 +41,7 @@ export function nbPick(m, frame, k) {
       const first = m.T.rows.filter((r) => same(r[m.cols.indexOf(m.pairs[0][0])], m.pairs[0][1])).length;
       return build(id, k, bi((L) => L.t('How many rows of the table have exactly the values of the instance?', 'Câte rânduri din tabel au exact valorile instanței?')),
         String(J.ids.length), [String(first), String(N), String(Math.max(0, J.ids.length - 1))],
-        bi((L) => L.t(`${J.ids.length} rows match every value, the class column does not matter.`, `${J.ids.length} rânduri se potrivesc la toate valorile; coloana clasei nu contează.`)));
+        bi((L) => L.t(`${enCount(J.ids.length, 'row matches', 'rows match')} every value, the class column does not matter.`, `${roCount(J.ids.length, 'rând se potrivește', 'rânduri se potrivesc')} la toate valorile; coloana clasei nu contează.`)));
     }
     case 'joint-1': {
       const n0 = m.T.rows.filter((r) => same(r[m.ti], c0)).length;
@@ -88,7 +91,7 @@ export function nbPick(m, frame, k) {
       const s = (nb, jb) => ({ en: `Naive Bayes ${nb}, Optimal Bayes ${jb}`, ro: `Bayes Naiv ${nb}, Bayes Optimal ${jb}` });
       return build(id, k, bi((L) => L.t('With 5 binary attributes and a binary class: how many free parameters for each classifier?', 'Cu 5 atribute binare și o clasă binară: câți parametri liberi are fiecare clasificator?')),
         s(c.nb, c.joint), [s(c.nb - 1, c.joint + 1), s(c.nb, 2 ** 5), s(5, c.joint)],
-        bi((L) => L.t(`2n + 1 = ${c.nb} and 2ⁿ⁺¹ − 1 = ${c.joint}.`, `2n + 1 = ${c.nb} și 2ⁿ⁺¹ − 1 = ${c.joint}.`)));
+        bi((L) => L.t(`2d + 1 = ${c.nb} and 2ᵈ⁺¹ − 1 = ${c.joint}, with d = 5.`, `2d + 1 = ${c.nb} și 2ᵈ⁺¹ − 1 = ${c.joint}, cu d = 5.`)));
     }
     case 'laplace-0': {
       const off = classScores(m, m.pairs, false);
@@ -138,7 +141,7 @@ export function nbPick(m, frame, k) {
       const base = errorTable(m, m.attrs.slice(0, 1));
       const err = base.errTrue;
       return build(id, k, bi((L) => L.t('The error rate is the sum of the numbers the classifier did not choose. What is it?', 'Rata erorii este suma numerelor pe care clasificatorul nu le-a ales. Cât este?')),
-        fmt(err), [fmt(new Fraction(1).sub(err)), fmt(err.div(new Fraction(2))), '1/2'],
+        dec(err), [dec(new Fraction(1).sub(err)), dec(err.div(new Fraction(2))), dec(new Fraction(1, 2))],
         bi((L) => L.t('Add the lost numbers, not the chosen ones.', 'Aduni numerele pierdute, nu cele alese.')));
     }
     case 'errors-2': {
@@ -160,7 +163,7 @@ export function nbPick(m, frame, k) {
     case 'errors-4': {
       const full = errorTable(m, m.attrs);
       return build(id, k, bi((L) => L.t('What is the error rate of Optimal Bayes on the same data, with the copy?', 'Cât este rata erorii la Bayes Optimal pe aceleași date, cu copia?')),
-        fmt(full.errJB), [fmt(full.errTrue), fmt(full.errNB), fmt(new Fraction(1).sub(full.errJB))],
+        dec(full.errJB), [dec(full.errTrue), dec(full.errNB), dec(new Fraction(1).sub(full.errJB))],
         bi((L) => L.t('Optimal Bayes ignores the copy: its error does not change.', 'Bayes Optimal ignoră copia: eroarea lui nu se schimbă.')));
     }
     default:

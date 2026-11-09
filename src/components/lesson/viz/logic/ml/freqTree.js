@@ -106,35 +106,41 @@ export function freqTree(props) {
       const L = (k) => props.labels[k][lang];
       const d = (x) => (lang === 'ro' ? loc(x, 'ro') : x);
       const G = (x) => group(n(x));
-      const cn = (x, k) => `${G(x)} ${lang === 'ro' ? roDe(Number(n(x))) : ''}${L(k)}`;
+      // "20 de pacienți" but "45 cu cap": a label that is a prepositional phrase (cu cap, fără cancer) takes no "de"
+      const cn = (x, k) => `${G(x)} ${lang === 'ro' && !/^(cu|fără|din|de) /.test(L(k)) ? roDe(Number(n(x))) : ''}${L(k)}`;
       return { L, d, G, cn };
     };
+    // Romanian agrees with the noun the labels stand for: masculine (oameni: câți, cei, ceilalți, ei) by default,
+    // feminine (monede: câte, cele, celelalte, ele) with props.feminine. "the other one" drops its count: cealaltă cu pajură.
+    const fem = props.feminine === true;
+    const RO = fem ? { how: 'câte', How: 'Câte', the: 'cele', them: 'ele', others: 'celelalte', other: 'cealaltă' } : { how: 'câți', How: 'Câți', the: 'cei', them: 'ei', others: 'ceilalți', other: 'celălalt' };
+    const rest = (x, k, cn, L) => (n(x) === '1' ? `${RO.other} ${L(k)}` : `${RO.others} ${cn(x, k)}`);
     const cap = (lang) => {
       const { L, d, G, cn } = T(lang);
       const en = lang === 'en';
       switch (s) {
-        case 0: return en ? `Imagine ${G(N)} ${L('people')}. How many of them are ${L('sick')}?` : `Imaginează-ți ${cn(N, 'people')}. Câți ${L('sick')} sunt în acest grup?`;
+        case 0: return en ? `Imagine ${G(N)} ${L('people')}. How many of them are ${L('sick')}?` : `Imaginează-ți ${cn(N, 'people')}. ${RO.How} ${L('sick')} sunt în acest grup?`;
         case 1: return en
           ? `${G(sickN)} of ${G(N)} are ${L('sick')} (${d(V.prior)}); the other ${G(healthyN)} are ${L('healthy')}.`
-          : `Sunt ${cn(sickN, 'sick')} din ${G(N)} (${d(V.prior)}); ceilalți ${G(healthyN)} sunt ${L('healthy')}.`;
+          : `Sunt ${cn(sickN, 'sick')} din ${G(N)} (${d(V.prior)}); ${RO.others} ${G(healthyN)} sunt ${L('healthy')}.`;
         case 2: return en
           ? `Of the ${G(sickN)} ${L('sick')}, how many are ${L('pos')}? (${d(V.sens)} of them.)`
-          : `Dintre cei ${cn(sickN, 'sick')}, câți sunt ${L('pos')}? (${d(V.sens)} dintre ei.)`;
+          : `Dintre ${RO.the} ${cn(sickN, 'sick')}, ${RO.how} sunt ${L('pos')}? (${d(V.sens)} dintre ${RO.them}.)`;
         case 3: return en
           ? `${G(sickN)} × ${d(V.sens)} = ${G(c.sickPos)} are ${L('pos')}; the other ${G(c.sickNeg)} are ${L('neg')}.`
-          : `${G(sickN)} × ${d(V.sens)} = ${cn(c.sickPos, 'pos')}; ceilalți ${cn(c.sickNeg, 'neg')}.`;
+          : `${G(sickN)} × ${d(V.sens)} = ${cn(c.sickPos, 'pos')}; ${rest(c.sickNeg, 'neg', cn, L)}.`;
         case 4: return en
           ? `Of the ${G(healthyN)} ${L('healthy')}, how many are ${L('pos')}? (${d(V.fpr)} of them.)`
-          : `Dintre cei ${cn(healthyN, 'healthy')}, câți sunt ${L('pos')}? (${d(V.fpr)} dintre ei.)`;
+          : `Dintre ${RO.the} ${cn(healthyN, 'healthy')}, ${RO.how} sunt ${L('pos')}? (${d(V.fpr)} dintre ${RO.them}.)`;
         case 5: return en
           ? `${G(healthyN)} × ${d(V.fpr)} = ${G(c.healthyPos)} are ${L('pos')}; the other ${G(c.healthyNeg)} are ${L('neg')}.`
-          : `${G(healthyN)} × ${d(V.fpr)} = ${cn(c.healthyPos, 'pos')}; ceilalți ${cn(c.healthyNeg, 'neg')}.`;
+          : `${G(healthyN)} × ${d(V.fpr)} = ${cn(c.healthyPos, 'pos')}; ${rest(c.healthyNeg, 'neg', cn, L)}.`;
         case 6: return en
           ? `How many are ${L('pos')} in all, and how many of those are ${L('sick')}? What fraction?`
-          : `Câți sunt ${L('pos')} în total și câți dintre ei sunt ${L('sick')}? Ce fracție?`;
+          : `${RO.How} sunt ${L('pos')} în total și ${RO.how} dintre ${RO.them} sunt ${L('sick')}? Ce fracție?`;
         case 7: return en
           ? `${G(c.sickPos)} + ${G(c.healthyPos)} = ${G(total)} are ${L('pos')}; ${G(c.sickPos)} of them are ${L('sick')}. Fraction ${G(c.sickPos)}/${G(total)} ${sign} ${d(V.post)}.`
-          : `${G(c.sickPos)} + ${G(c.healthyPos)} = ${cn(total, 'pos')}; dintre ei ${G(c.sickPos)} sunt ${L('sick')}. Fracția ${G(c.sickPos)}/${G(total)} ${sign} ${d(V.post)}.`;
+          : `${G(c.sickPos)} + ${G(c.healthyPos)} = ${cn(total, 'pos')}; dintre ${RO.them} ${G(c.sickPos)} sunt ${L('sick')}. Fracția ${G(c.sickPos)}/${G(total)} ${sign} ${d(V.post)}.`;
         default: return en
           ? `With probabilities: ${d(V.prior)} × ${d(V.sens)} = ${d(Q.sickPos)} and ${d(V.priorC)} × ${d(V.fpr)} = ${d(Q.healthyPos)} are the ${L('pos')} leaves. ${d(Q.sickPos)} / (${d(Q.sickPos)} + ${d(Q.healthyPos)}) = ${d(Q.sickPos)} / ${d(V.posProb)} ${sign} ${d(V.post)}, the same fraction.`
           : `Cu probabilități: ${d(V.prior)} × ${d(V.sens)} = ${d(Q.sickPos)} și ${d(V.priorC)} × ${d(V.fpr)} = ${d(Q.healthyPos)} sunt frunzele celor ${L('pos')}. ${d(Q.sickPos)} / (${d(Q.sickPos)} + ${d(Q.healthyPos)}) = ${d(Q.sickPos)} / ${d(V.posProb)} ${sign} ${d(V.post)}, aceeași fracție.`;

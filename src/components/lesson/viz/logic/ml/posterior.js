@@ -145,6 +145,61 @@ export function mlPosterior({ hypotheses }) {
     const b = bars('eq', S.prodEq, prodEqF, S.mapEq, 'rel', 'prod');
     frames.push({ id: 'equal', quantity: 'prod', names, caption: cap, facts: used, ...b, marks: [mk('eqprior', eqF, { en: 'every prior', ro: 'fiecare prior' }), ...b.marks], flips });
   }
+  // The pick before each reveal (own picks with PickBar): the question that ends a frame's caption is answered on the next
+  // frame, so the frame that asks carries the pick. Options and the right one come from the same exact values; every wrong
+  // option has its own reason.
+  const TIE = { en: 'they are equal', ro: 'sunt egale' };
+  const nameOpts = (tie) => [...names.map((nm) => ({ id: nm, label: { en: nm, ro: nm } })), ...(tie ? [{ id: 'tie', label: TIE }] : [])];
+  const winnerId = (idx) => (idx.length === 1 ? names[idx[0]] : 'tie');
+  const rowOf = (fs) => ({ en: names.map((nm, i) => `${nm} ${fs[i].text.en}`).join('; '), ro: names.map((nm, i) => `${nm} ${fs[i].text.ro}`).join('; ') });
+  const whyNames = (idx, fs, what) => {
+    const row = rowOf(fs);
+    const out = {};
+    for (const o of nameOpts(true)) {
+      if (o.id === winnerId(idx)) continue;
+      out[o.id] = o.id === 'tie'
+        ? { en: `They differ: ${row.en}.`, ro: `Diferă: ${row.ro}.` }
+        : { en: `${what.en} of ${o.id} is smaller: ${row.en}.`, ro: `${what.ro} lui ${o.id} e mai mic: ${row.ro}.` };
+    }
+    return out;
+  };
+  const pickOf = (key, prompt, right, options, why, whys) => ({ key, prompt, options, right, why, whys });
+  const byId = Object.fromEntries(frames.map((f) => [f.id, f]));
+  byId.ask.pick = pickOf('ask', { en: 'Before the data, which hypothesis is more plausible?', ro: 'Înainte de date, care ipoteză e mai plauzibilă?' },
+    winnerId(topPrior), nameOpts(topPrior.length > 1),
+    { en: `The larger prior P(h): ${rowOf(priF).en}.`, ro: `Priorul P(h) mai mare: ${rowOf(priF).ro}.` },
+    whyNames(topPrior, priF, { en: 'The prior P(h)', ro: 'Priorul P(h) al' }));
+  byId.prior.pick = pickOf('prior', { en: 'Which hypothesis has the larger P(D|h)?', ro: 'Care ipoteză are P(D|h) mai mare?' },
+    winnerId(S.ml), nameOpts(S.ml.length > 1),
+    { en: `Only P(D|h) counts here, not the prior: ${rowOf(likF).en}.`, ro: `Aici contează doar P(D|h), nu priorul: ${rowOf(likF).ro}.` },
+    whyNames(S.ml, likF, { en: 'P(D|h)', ro: 'P(D|h) al' }));
+  byId.lik.pick = pickOf('lik', { en: 'Which hypothesis will be h_MAP?', ro: 'Care ipoteză va fi h_MAP?' },
+    winnerId(S.map), nameOpts(S.map.length > 1),
+    { en: `h_MAP compares the products P(D|h)P(h): ${rowOf(prodF).en}.`, ro: `h_MAP compară produsele P(D|h)P(h): ${rowOf(prodF).ro}.` },
+    whyNames(S.map, prodF, { en: 'The product P(D|h)P(h)', ro: 'Produsul P(D|h)P(h) al' }));
+  if (S.map.length === 1) {
+    const w = S.map[0];
+    const cands = [[postF[w], 'right'], [prodF[w], 'prod'], [likF[w], 'lik'], [priF[w], 'prior']];
+    const seen = new Set();
+    const opts = cands.filter(([f]) => (seen.has(f.canon) ? false : (seen.add(f.canon), true))).slice(0, 3);
+    const reason = {
+      prod: { en: 'That is the product P(D|h)P(h), not yet divided by P(D), the sum of the products.', ro: 'Acesta e produsul P(D|h)P(h), încă neîmpărțit la P(D), suma produselor.' },
+      lik: { en: 'That is the likelihood P(D|h): it goes the other way.', ro: 'Aceasta e verosimilitatea P(D|h): condiționarea e pe dos.' },
+      prior: { en: 'That is the prior, before the data.', ro: 'Acesta e priorul, dinainte de date.' },
+    };
+    byId.product.pick = pickOf('product', { en: `What is P(${names[w]}|D)?`, ro: `Cât este P(${names[w]}|D)?` },
+      postF[w].canon, opts.map(([f]) => ({ id: f.canon, label: f.text })).sort((a, b) => Number(a.id) - Number(b.id)),
+      { en: `The product of ${names[w]} divided by P(D) = ${pdF.text.en}.`, ro: `Produsul lui ${names[w]} împărțit la P(D) = ${pdF.text.ro}.` },
+      Object.fromEntries(opts.filter(([, k]) => k !== 'right').map(([f, k]) => [f.canon, reason[k]])));
+  }
+  byId.posterior.pick = pickOf('posterior', { en: 'With equal priors, would the winner change?', ro: 'Cu priori egali, s-ar schimba câștigătoarea?' },
+    flips ? 'yes' : 'no', [{ id: 'yes', label: { en: 'yes', ro: 'da' } }, { id: 'no', label: { en: 'no', ro: 'nu' } }],
+    flips
+      ? { en: `Yes: with equal priors only P(D|h) decides, and h_ML = ${list(S.ml)}.`, ro: `Da: cu priori egali decide doar P(D|h), iar h_ML = ${list(S.ml)}.` }
+      : { en: `No: with equal priors only P(D|h) decides, and h_ML = ${list(S.ml)} is already h_MAP.`, ro: `Nu: cu priori egali decide doar P(D|h), iar h_ML = ${list(S.ml)} e deja h_MAP.` },
+    flips
+      ? { no: { en: `With equal priors the prior cancels and h_ML = ${list(S.ml)} wins, not ${list(S.map)}.`, ro: `Cu priori egali priorul se simplifică și câștigă h_ML = ${list(S.ml)}, nu ${list(S.map)}.` } }
+      : { yes: { en: `h_MAP = ${list(S.map)} already has the larger P(D|h), so equal priors do not move it.`, ro: `h_MAP = ${list(S.map)} are deja P(D|h) mai mare, deci priorii egali nu îl schimbă.` } });
   // on the equal-priors frame the table's prior column shows the prior its bars use
   const givenEq = given.map((g, i) => ({ ...g, prior: mk(`gp${i}`, eqF, g.prior.label), changed: true }));
   for (const fr of frames) {

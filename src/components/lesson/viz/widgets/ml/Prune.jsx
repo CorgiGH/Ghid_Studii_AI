@@ -4,11 +4,16 @@ import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
 import { epsChoices, mlPrune } from '../../logic/ml/prune.js';
 import { fmt } from '../../logic/ml/tree-grow.js';
+import { roNums } from '../../logic/ml/numbers-bilingual.js';
 import { Counts } from './Parts.jsx';
 import './ml-w4.css';
 
+// a number as the learner reads it: Romanian prints the decimal comma (data-value keeps the point)
+const dnOf = (t) => (s) => t(String(s), roNums(String(s)));
+
 function PTree({ node, P, frame, edge, t }) {
   const st = frame.status[node.id];
+  const dn = dnOf(t);
   const cls = frame.kind === 'setup' ? '' : ` ${st}`;
   const word = frame.kind === 'setup' ? null : st === 'cut' ? t('cut', 'tăiat') : st === 'gone' ? t('removed', 'eliminat') : null;
   return (
@@ -19,7 +24,7 @@ function PTree({ node, P, frame, edge, t }) {
         : (
           <span className={`mlw4-node${cls}`}>
             <b>{node.attr}</b>
-            <span className="mlw4-sub">IG <b data-mark="ig" data-value={fmt(node.ig)}>{fmt(node.ig)}</b></span>
+            <span className="mlw4-sub">IG <b data-mark="ig" data-value={fmt(node.ig)}>{dn(fmt(node.ig))}</b></span>
             {node.counts && <span className="mlw4-sub"><Counts counts={node.counts} classes={P.classes} /></span>}
             {st === 'cut' && <b>{'→'} <span data-mark="leaf" data-value={String(frame.cutLabels[node.id])}>{String(frame.cutLabels[node.id])}</span></b>}
             {word && <span className="mlw4-sub">{word}</span>}
@@ -37,11 +42,12 @@ function PTree({ node, P, frame, edge, t }) {
 // What one frame draws. Exported on its own so a test can check the caption against the marks of every frame.
 export function Stage({ P, frame, choices = [], onEps = null }) {
   const { t } = useApp();
+  const dn = dnOf(t);
   const word = (st) => (st === 'kept' ? t('stays', 'rămâne') : st === 'cut' ? t('cut', 'tăiat') : t('removed', 'eliminat'));
   return (
     <div className="mlw4">
       <div className="mlw4-stat">
-        <span>{'ε'} <b data-mark="epsilon" data-value={fmt(frame.eps)}>{fmt(frame.eps)}</b></span>
+        <span>{'ε'} <b data-mark="epsilon" data-value={fmt(frame.eps)}>{dn(fmt(frame.eps))}</b></span>
         <span>{frame.kind === 'topdown' || frame.kind === 'bottomup' ? t('tests left', 'teste rămase') : t('tests', 'teste')} <b data-mark="tests" data-value={frame.kind === 'compare' ? P.nTests : frame.tests}>{frame.kind === 'compare' ? P.nTests : frame.tests}</b>{(frame.kind === 'topdown' || frame.kind === 'bottomup') && <> {t('of', 'din')} <span data-mark="of" data-value={P.nTests}>{P.nTests}</span></>}</span>
         {P.n !== null && frame.kind !== 'compare' && <span>{t('training error', 'eroare la antrenare')} <b data-mark="err" data-value={frame.err}>{frame.err}</b>/<span data-mark="n" data-value={P.n}>{P.n}</span></span>}
       </div>
@@ -62,7 +68,7 @@ export function Stage({ P, frame, choices = [], onEps = null }) {
               {frame.rows.map((r) => (
                 <tr key={r.id} className={(r.td === 'kept') !== (r.bu === 'kept') ? 'trial' : ''}>
                   <td data-mark="node" data-value={r.name}>{r.name}</td>
-                  <td className="num" data-mark="ig" data-value={fmt(r.ig)}>{fmt(r.ig)}</td>
+                  <td className="num" data-mark="ig" data-value={fmt(r.ig)}>{dn(fmt(r.ig))}</td>
                   <td>{word(r.td)}</td>
                   <td>{word(r.bu)}</td>
                 </tr>
@@ -82,8 +88,8 @@ export function Stage({ P, frame, choices = [], onEps = null }) {
         <div className="mlw4-chips" role="group" aria-label={t('Threshold', 'Pragul')}>
           {choices.map((v) => (
             onEps
-              ? <button key={fmt(v)} type="button" className="mlw4-chip" aria-pressed={fmt(v) === fmt(frame.eps)} onClick={() => onEps(v)} data-mark="eps" data-value={fmt(v)}>{'ε'} = {fmt(v)}</button>
-              : <span key={fmt(v)} className="mlw4-chip" data-mark="eps" data-value={fmt(v)}>{'ε'} = {fmt(v)}</span>
+              ? <button key={fmt(v)} type="button" className="mlw4-chip" aria-pressed={fmt(v) === fmt(frame.eps)} onClick={() => onEps(v)} data-mark="eps" data-value={fmt(v)}>{'ε'} = {dn(fmt(v))}</button>
+              : <span key={fmt(v)} className="mlw4-chip" data-mark="eps" data-value={fmt(v)}>{'ε'} = {dn(fmt(v))}</span>
           ))}
         </div>
       )}

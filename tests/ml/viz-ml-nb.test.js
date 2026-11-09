@@ -109,7 +109,7 @@ describe('ml-nb logic: L20 (P20, instance x=0 y=1 z=0)', () => {
   });
   it('the slider frame is rebuilt from n and its caption follows it', () => {
     const f = paramsFrame(5);
-    expect(f.caption.en).toContain('n = 5');
+    expect(f.caption.en).toContain('d = 5');
     expect(f.caption.en).toContain('= 11');
     expect(f.caption.en).toContain('= 63');
     expect(markFor(stage(m, f, { n: 5 }), 'params-joint')).toBe('63');
@@ -272,9 +272,9 @@ describe('ml-nb review fixes', () => {
     expect(hint).toContain('evidențiezi');
     expect(hint).not.toContain('luminezi');
   });
-  it('the parameter counter writes 2ⁿ⁺¹ − 1, not 2^(n+1)', () => {
-    expect(paramsFrame(10).caption.en).toContain('2ⁿ⁺¹ − 1 = 2047');
-    expect(paramsFrame(10).caption.ro).toContain('2ⁿ⁺¹ − 1 = 2047');
+  it('the parameter counter writes 2ᵈ⁺¹ − 1 with d as the lessons do, not 2^(n+1)', () => {
+    expect(paramsFrame(10).caption.en).toContain('2ᵈ⁺¹ − 1 = 2047');
+    expect(paramsFrame(10).caption.ro).toContain('2ᵈ⁺¹ − 1 = 2047');
     expect(paramsFrame(10).caption.en).not.toContain('^');
   });
   it('a negative number prints with the minus sign', () => {
@@ -338,10 +338,10 @@ describe('ml-nb second review: data on screen, 390 px, Romanian, contrast', () =
     expect(f.ask.ro).toBe('Prezice: câte rânduri din clasa U=0 au x=0? Deci cât este P(x=0 | U=0)?');
   });
   it('the parameter counter agrees its nouns with the numbers (21 de parametri, 1 atribut binar)', () => {
-    expect(paramsFrame(10).caption.ro).toContain('Cu n = 10 atribute binare și o clasă binară: Bayes Naiv 2n + 1 = 21 de parametri liberi, Bayes Optimal 2ⁿ⁺¹ − 1 = 2047.');
+    expect(paramsFrame(10).caption.ro).toContain('Cu d = 10 atribute binare și o clasă binară: Bayes Naiv 2d + 1 = 21 de parametri liberi, Bayes Optimal 2ᵈ⁺¹ − 1 = 2047.');
     expect(paramsFrame(5).caption.ro).toContain('= 11 parametri liberi');
-    expect(paramsFrame(1).caption.ro).toContain('Cu n = 1 atribut binar și o clasă binară');
-    expect(paramsFrame(1).caption.en).toContain('With n = 1 binary attribute and a binary class');
+    expect(paramsFrame(1).caption.ro).toContain('Cu d = 1 atribut binar și o clasă binară');
+    expect(paramsFrame(1).caption.en).toContain('With d = 1 binary attribute and a binary class');
     expect(paramsFrame(10).caption.en).toContain('= 21 free parameters');
   });
   it('the factor table fits a phone: the class cell is the bare value, headers have no spaces, a smoothed factor breaks after its fraction', () => {
@@ -436,7 +436,9 @@ describe('ml-nb own picks', () => {
   it('errors: the error-rate pick is the sum of the lost numbers and the exam asks for the true distribution', () => {
     const { frames } = nbFrames(ERRORS);
     const m = nbModel(ERRORS);
-    expect(frames.find((f) => f.id === 'errors-1').pick.right).toBe(errorTable(m, m.attrs.slice(0, 1)).errTrue.toString());
+    // the options are decimals, as in the P column: the id is the English side (decimal point)
+    expect(frames.find((f) => f.id === 'errors-1').pick.right).toBe(String(errorTable(m, m.attrs.slice(0, 1)).errTrue.toNumber()));
+    expect(frames.find((f) => f.id === 'errors-3').pick.right).toBe('true');
   });
   it('a wrong pick explains and a right pick moves on: the widget shows feedback only after a pick and the pick is in a 44 px button row', () => {
     const html = widget(JOINT, true);
@@ -445,5 +447,38 @@ describe('ml-nb own picks', () => {
   });
   it('without predict no frame asks for a pick', () => {
     expect(widget(JOINT, false)).not.toContain('mlv-picks');
+  });
+});
+
+describe('ml-nb review b3: one row, the whole table, d', () => {
+  it('a single matching row is "1 rând se potrivește" (ml-g4 s13, the 7-row table)', () => {
+    const f = nbFrames(JOINT).frames.find((x) => x.id === 'joint-0');
+    expect(f.pick.why.ro).toBe('1 rând se potrivește la toate valorile; coloana clasei nu contează.');
+    expect(f.pick.why.en).toBe('1 row matches every value, the class column does not matter.');
+  });
+  it('the data table is drawn whole: no fixed height, so 16 rows are counted without an inner scroll (crash-p1 s09)', () => {
+    const T16 = { columns: ['A', 'B', 'Y'], rows: [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0], [1, 1, 0], [1, 1, 0], [0, 0, 1], [0, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]] };
+    const html = widget({ table: T16, target: 'Y', row: 'A=1 & B=1', modes: ['joint'] }, true);
+    expect(html).toContain('class="viz-tablewrap mlnb-table"');
+    expect(html).not.toMatch(/max-height/);
+    expect((html.match(/data-row="/g) || []).length).toBe(16);
+  });
+  it('the parameter pick says 2d + 1 and 2ᵈ⁺¹ − 1, as the lessons do', () => {
+    const f = nbFrames(JOINT).frames.find((x) => x.id === 'joint-6');
+    expect(f.pick.why.ro).toBe('2d + 1 = 11 și 2ᵈ⁺¹ − 1 = 63, cu d = 5.');
+  });
+});
+
+describe('roNums: the Romanian decimal comma for the ID3 widgets', () => {
+  it('turns the point into a comma and keeps a list of decimals readable', async () => {
+    const { roNums } = await import('../../src/components/lesson/viz/logic/ml/numbers-bilingual.js');
+    expect(roNums('IG 0.4591, mai mic')).toBe('IG 0,4591, mai mic');
+    expect(roNums('praguri: 19.5, 22.5 și 28.5')).toBe('praguri: 19,5; 22,5 și 28,5');
+    expect(roNums('(1.5, 4]')).toBe('(1,5; 4]');
+    // crash-p1 s30c: the zones of the threshold tree
+    expect(roNums('(−∞, 19.5] → nu; (19.5, 28.5] → da; (28.5, ∞) → nu')).toBe('(−∞; 19,5] → nu; (19,5; 28,5] → da; (28,5; ∞) → nu');
+    expect(roNums('(−∞, 54] → No')).toBe('(−∞, 54] → No');
+    expect(roNums('ε = 0.02')).toBe('ε = 0,02');
+    expect(roNums('[3+, 1−] și (0, 1)')).toBe('[3+, 1−] și (0, 1)');
   });
 });

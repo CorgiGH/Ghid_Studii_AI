@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useApp } from '../../../../../contexts/AppContext';
 import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
 import { mlPosterior } from '../../logic/ml/posterior.js';
 import { withSubs } from './subscript.jsx';
+import { PickBar } from './mlParts.jsx';
 import './ml-common.css';
 import './ml-widgets.css';
 
@@ -77,14 +78,39 @@ export function PosteriorView({ frame }) {
   );
 }
 
+// With predict, every frame that ends with a question asks for a pick (PickBar) before Next shows the answer; a wrong
+// pick gets the reason of that option.
 export default function MlPosterior({ props, predict }) {
   const { t } = useApp();
   const model = useMemo(() => mlPosterior(props), [props]);
-  const s = useStepper(model.n, { predict });
+  const hasPicks = !!predict && model.frames.some((f) => f.pick);
+  const s = useStepper(model.n, { predict, own: hasPicks });
+  const [picks, setPicks] = useState({});
   const frame = model.frames[s.step];
+  const spec = predict && frame.pick ? { items: [frame.pick] } : null;
+  const done = frame.pick ? picks[frame.pick.key] : undefined;
+  const right = done !== undefined && done === frame.pick.right;
+  const answered = !spec || right;
+  const reason = done === undefined ? null : right ? frame.pick.why : frame.pick.whys?.[done];
+  const blocked = (to) => Array.from({ length: to }, (_, i) => i).some((i) => model.frames[i].pick && predict && picks[model.frames[i].pick.key] !== model.frames[i].pick.right);
+  const stepper = {
+    ...s,
+    canNext: s.canNext && answered,
+    goto: (to) => { if (to <= s.step || !blocked(to)) s.goto(to); },
+    reset: () => { setPicks({}); s.reset(); },
+  };
+  const onPick = (key, id) => { setPicks((p) => ({ ...p, [key]: id })); s.settle(); };
+  const L = (x) => (x !== null && typeof x === 'object' ? t(x.en, x.ro) : String(x));
+  const ts = (en, ro) => withSubs(t(en, ro));
   return (
-    <VizFrame widget="ml-posterior" stepper={s} caption={withSubs(t(frame.caption.en, frame.caption.ro))} label={t('Prior, likelihood and posterior bars', 'Bare de a priori, verosimilitate și a posteriori')}>
+    <VizFrame widget="ml-posterior" stepper={stepper} caption={withSubs(t(frame.caption.en, frame.caption.ro))} label={t('Prior, likelihood and posterior bars', 'Bare de a priori, verosimilitate și a posteriori')}>
       <PosteriorView frame={frame} />
+      <PickBar spec={spec} picks={picks} onPick={onPick} t={ts} L={L} />
+      {done !== undefined && (
+        <p className={`mlv-fb ${right ? 'ok' : 'no'}`} role="status" data-pick={right ? 'right' : 'wrong'}>
+          {right ? t('Right. ', 'Corect. ') : t('Not quite: ', 'Nu chiar: ')}{reason ? withSubs(t(reason.en, reason.ro)) : t('look again at the question.', 'citește încă o dată întrebarea.')}
+        </p>
+      )}
     </VizFrame>
   );
 }

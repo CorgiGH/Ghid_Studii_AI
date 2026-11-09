@@ -24,7 +24,7 @@ function DataTable({ model, hit = [], inClass = [], withValue = [] }) {
     return '';
   };
   return (
-    <div className="viz-tablewrap mlnb-table" style={{ maxHeight: '15rem', overflowY: 'auto' }}>
+    <div className="viz-tablewrap mlnb-table">
       <table className="viz-table">
         <thead><tr>{m.cols.map((c) => <th key={c} className={c === m.target ? 'hl' : ''}>{c}</th>)}</tr></thead>
         <tbody>
@@ -108,8 +108,8 @@ function Params({ state, n, onN, t }) {
   return (
     <div className="mlnb-bars">
       <div className="mlnb-slider">
-        <span className="mlnb-hint">n</span>
-        <input type="range" min={PARAM_N.min} max={PARAM_N.max} step={1} value={n} onChange={(e) => onN(Number(e.target.value))} aria-label={t('Number of attributes n', 'Numărul de atribute n')} />
+        <span className="mlnb-hint">d</span>
+        <input type="range" min={PARAM_N.min} max={PARAM_N.max} step={1} value={n} onChange={(e) => onN(Number(e.target.value))} aria-label={t('Number of attributes d', 'Numărul de atribute d')} />
         <b data-key="params-n" data-value={String(n)}>{n}</b>
       </div>
       <div className="mlnb-bar"><span>{t('Naive Bayes', 'Bayes Naiv')}</span>

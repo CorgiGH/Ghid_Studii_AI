@@ -72,8 +72,8 @@ describe('stumps (L9, P21)', () => {
   });
   it('captions state the outline numbers', () => {
     expect(M.caption(1).ro).toBe('Home-Owner: adevărat [48+,16−]; fals [16+,48−]. Control: exemplele + din cutii dau 48 + 16 = 64.');
-    expect(M.caption(5).ro).toContain('H(Y|Home-Owner) = 0.8113, H(Y|In-Debt) = 1.0000, H(Y|Rich) = 0.9377');
-    expect(M.caption(6).ro).toContain('IG = H(Y) − H(Y|Home-Owner) = 1.0000 − 0.8113 = 0.1887');
+    expect(M.caption(5).ro).toContain('H(Y|Home-Owner) = 0,8113, H(Y|In-Debt) = 1,0000, H(Y|Rich) = 0,9377');
+    expect(M.caption(6).ro).toContain('IG = H(Y) − H(Y|Home-Owner) = 1,0000 − 0,8113 = 0,1887');
     expect(M.caption(6).ro).toContain('(16 + 16)/128 = 1/4');
   });
   it('the values stay out of every caption until the prediction (formula frame)', () => {
@@ -186,9 +186,9 @@ describe('full (L11, T20b 2.1)', () => {
     expect(M.pickSpec(0, false)).toBeNull();
   });
   it('captions', () => {
-    expect(M.caption(0).ro).toBe('Rădăcina: 6 exemple, [4+,2−], H(ill) = 0.9183.');
+    expect(M.caption(0).ro).toBe('Rădăcina: 6 exemple, [4+,2−], H(ill) = 0,9183.');
     expect(stumpsModel(P21).caption(0).ro).toContain('128 de exemple');
-    expect(M.caption(1).ro).toContain('Cel mai bun e running nose (IG = 0.4591)');
+    expect(M.caption(1).ro).toContain('Cel mai bun e running nose (IG = 0,4591)');
     expect(M.caption(3).ro).toBe('Arborele e gata: 2 teste, 3 frunze. Eroarea la antrenare: 0/6.');
   });
   it('the setup caption does not name the split before the prediction', () => {

@@ -74,7 +74,7 @@ const SPEC = {
   'game-tree': { mode: oneOf('minimax', 'alphabeta'), root: oneOf('MIN', 'MAX'), rootLabel: optional(isBi), tree: isGameNode },
   'payoff-matrix': { mode: oneOf('nash', 'dominance'), players: (v) => !!v && isStr(v.row) && isStr(v.col), rows: strs, cols: strs, payoffs: isPayoffs, compare: optional((v) => strs(v) && v.length === 2) },
   'ml-omega': { outcomes: (v) => isArr(v) && v.every((x) => isStr(x) || isNum(x)), events: (v) => !!v && typeof v === 'object' && Array.isArray(v.A) && Array.isArray(v.B), restrictTo: optional(oneOf('A', 'B')) },
-  'ml-freq-tree': { population: isNum, prior: isNum, sens: isNum, fpr: isNum, labels: (v) => !!v && typeof v === 'object' },
+  'ml-freq-tree': { population: isNum, prior: isNum, sens: isNum, fpr: isNum, labels: (v) => !!v && typeof v === 'object', feminine: optional((v) => typeof v === 'boolean') },
   'ml-indep-2x2': { counts: (v) => Array.isArray(v) && v.length === 2 && v.every((r) => Array.isArray(r) && r.length === 2 && r.every(isNum)), labels: (v) => !!v && typeof v === 'object' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
   'ml-pmf-cdf': { values: (v) => isArr(v) && v.every(isNum), probs: probList, name: optional(isStr), format: optional(oneOf('fraction', 'decimal')), cdfAt: optional(isNum), second: optional((v) => !!v && typeof v === 'object' && isArr(v.values) && v.values.every(isNum) && probList(v.probs) && (v.name === undefined || isStr(v.name))) },

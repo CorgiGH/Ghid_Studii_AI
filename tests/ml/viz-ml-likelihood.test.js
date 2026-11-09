@@ -237,3 +237,47 @@ describe('ml-likelihood own picks and the Beta prior', () => {
     }
   });
 });
+
+// crash-p1 s40: 7 ones in 10, the grid 0.3 / 0.5 / 0.7 / 0.9, the prior Beta(2, 2)
+describe('ml-likelihood reasons, notation and Romanian (crash-p1 s40)', () => {
+  const COIN = { data: [{ heads: 7, n: 10 }, { heads: 70, n: 100 }], grid: [0.3, 0.5, 0.7, 0.9], prior: { a: 2, b: 2 } };
+  const fr = mlLikelihood(COIN).frames;
+  it('a wrong theta gets the reason of that option: the share of tails, the fair coin, too high', () => {
+    const w = fr[0].pick.whys;
+    expect(Object.keys(w).sort()).toEqual(['0.3', '0.5', '0.9']);
+    expect(w['0.3'].ro).toBe('0,3 este ponderea banilor (3 bani din 10); θ este probabilitatea stemei.');
+    expect(w['0.5'].ro).toContain('ar fi o monedă corectă');
+    expect(w['0.9'].ro).toContain('Prea mare');
+  });
+  it('the two questions that end the values and ln captions are picks: the peak stays under ln, the area is less than 1', () => {
+    const v = fr.find((f) => f.id === 'values').pick;
+    expect(v.right).toBe('no');
+    expect(v.options.find((o) => o.id === 'no').label.ro).toBe('nu, rămâne la θ = 0,7');
+    expect(v.whys.yes.ro).toContain('nu ordinea lor');
+    const a = fr.find((f) => f.id === 'ln').pick;
+    expect(a.right).toBe('less');
+    expect(Object.keys(a.whys).sort()).toEqual(['more', 'one']);
+    expect(a.why.ro).toBe('L nu trece de 0,002224, iar θ parcurge un interval de lungime 1, deci aria e cel mult 0,002224.');
+    // the area itself is shown only on the next frame
+    expect(fr.find((f) => f.id === 'ln').caption.ro).not.toContain('1320');
+  });
+  it('the prior question: MLE, the prior peak and the rest have their own reasons', () => {
+    const p = fr.find((f) => f.id === 'prior-ask').pick;
+    expect(p.whys['0.7'].ro).toContain('θ̂_MLE');
+    expect(p.whys['0.5'].ro).toContain('vârful priorului singur');
+    for (const o of p.options.filter((x) => x.id !== p.right)) expect(p.whys[o.id]).toBeDefined();
+  });
+  it('Beta(2, 2) adds "încă o stemă și un ban", with no "1 steme"', () => {
+    const c = fr.find((f) => f.id === 'prior-ask').caption.ro;
+    expect(c).toContain('încă o stemă și un ban');
+    expect(c).not.toMatch(/1 steme|1 bani/);
+    expect(mlLikelihood({ ...COIN, prior: { a: 3, b: 2 } }).frames.find((f) => f.id === 'prior-ask').caption.ro).toContain('încă 2 steme și un ban');
+  });
+  it('the estimators are θ̂_MLE and θ̂_MAP, drawn with a real subscript', async () => {
+    const { withSubs } = await import('../../src/components/lesson/viz/widgets/ml/subscript.jsx');
+    const pr = fr.find((f) => f.id === 'prior');
+    expect(pr.caption.ro).toContain('θ̂_MLE');
+    expect(pr.marks.map((m) => m.label.ro)).toEqual(['θ̂_MLE', 'θ̂_MAP']);
+    expect(renderToStaticMarkup(React.createElement('p', null, withSubs('vârful la θ̂_MAP = 0,6667')))).toBe('<p>vârful la θ̂<sub>MAP</sub> = 0,6667</p>');
+  });
+});

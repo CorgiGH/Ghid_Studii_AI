@@ -2,7 +2,7 @@
 // the maximum for other data. Exact arithmetic comes from the ML formula kit; a caption uses only this module's facts.
 import { evaluate, toNumber } from '../../../../../ml/calc/formula.js';
 import { caption, fact, sup } from './fact-text.js';
-import { enNoun, roNoun } from '../words.js';
+import { enCount, enNoun, roCount, roNoun } from '../words.js';
 
 const STEPS = 200; // curve points: theta = 0, 0.005, ..., 1
 const NATS = 6; // the ln curve shows this many nats below its maximum
@@ -64,13 +64,35 @@ const TOSSES = { en: 'tosses', ro: 'aruncări' };
 
 // The pick before a reveal: which value of theta is the maximum. Options are theta values (facts, so both languages print them
 // with their own decimal mark); the right one is computed from the data, the wrong ones are the slips: the middle, the
-// candidate beside the peak, the share of tails.
-function thetaPick(id, prompt, right, extras, why) {
+// candidate beside the peak, the share of tails. `whyOf(fact)` gives each wrong option its own reason ({en, ro}).
+function thetaPick(id, prompt, right, extras, why, whyOf) {
   const seen = new Set([right.canon]);
   const opts = [right];
   for (const x of extras) if (!seen.has(x.canon)) { seen.add(x.canon); opts.push(x); }
   opts.sort((a, b) => a.value - b.value);
-  return { key: id, prompt, options: opts.map((f) => ({ id: f.canon, label: f.text })), right: right.canon, why };
+  const whys = Object.fromEntries(opts.filter((f) => f !== right).map((f) => [f.canon, whyOf(f)]));
+  return { key: id, prompt, options: opts.map((f) => ({ id: f.canon, label: f.text })), right: right.canon, why, whys };
+}
+
+// Why a theta is not the peak of L for data d (h heads, t tails in n): the share of tails, the fair coin, too high, too low.
+const EQ = 1e-9;
+function slipOf(d) {
+  const r = d.heads / d.n;
+  const heads = { en: enCount(d.heads, 'head', 'heads'), ro: roCount(d.heads, 'stemă', 'steme') };
+  const tails = { en: enCount(d.tails, 'tail', 'tails'), ro: roCount(d.tails, 'ban', 'bani') };
+  return (f) => {
+    const v = f.value;
+    const x = f.text;
+    if (Math.abs(v - d.tails / d.n) < EQ && Math.abs(v - r) > EQ) {
+      return { en: `${x.en} is the share of tails (${tails.en} in ${d.n}); θ is the probability of heads.`, ro: `${x.ro} este ponderea banilor (${tails.ro} din ${d.n}); θ este probabilitatea stemei.` };
+    }
+    if (Math.abs(v - 0.5) < EQ) {
+      return { en: `${x.en} would be a fair coin; the data have ${heads.en} in ${d.n}, not half.`, ro: `${x.ro} ar fi o monedă corectă; datele au ${heads.ro} din ${d.n}, nu jumătate.` };
+    }
+    return v > r
+      ? { en: `Too high: with θ = ${x.en} the coin would rarely give ${tails.en} in ${d.n}, so L is smaller there.`, ro: `Prea mare: cu θ = ${x.ro} moneda ar da rar ${tails.ro} din ${d.n}, deci L e mai mic acolo.` }
+      : { en: `Too low: with θ = ${x.en} the coin would rarely give ${heads.en} in ${d.n}, so L is smaller there.`, ro: `Prea mic: cu θ = ${x.ro} moneda ar da rar ${heads.ro} din ${d.n}, deci L e mai mic acolo.` };
+  };
 }
 const clip = (x) => Math.min(0.95, Math.max(0.05, Math.round(x * 100) / 100));
 
@@ -106,7 +128,8 @@ export function mlLikelihood({ data, grid, prior }) {
       const pick = thetaPick('ask',
         { en: 'Where is the peak of L(θ)? Pick the θ.', ro: 'Unde este vârful lui L(θ)? Alege θ.' },
         amf, [...gs.map((x) => x.gf), fact(0.5)],
-        { en: `θ = ${amf.text.en}: the share of heads, ${main.heads} / ${main.n}.`, ro: `θ = ${amf.text.ro}: ponderea stemelor, ${main.heads} / ${main.n}.` });
+        { en: `θ = ${amf.text.en}: the share of heads, ${main.heads} / ${main.n}.`, ro: `θ = ${amf.text.ro}: ponderea stemelor, ${main.heads} / ${main.n}.` },
+        slipOf(main));
       frames.push({ id: 'ask', kind: 'ask', caption: cap, facts: used, pick, marks: [...dm, ...gMarks], candidates: gs.map((x) => x.g), points: grid.map((g, i) => ({ theta: g, y: 0, id: `theta${i}` })), hidden: [amf, Lm, ...gs.map((x) => x.Lf)] });
     }
     {
@@ -122,8 +145,19 @@ export function mlLikelihood({ data, grid, prior }) {
           ? `For these data L(θ) = ${form}. ${vals}.${zero} The curve peaks at θ = ${n(amf)}, which is ${n(hf)} / ${n(nf)}, the share of heads in the data; there L = ${n(Lm)}. If we take the logarithm, ℓ(θ) = ln L(θ), does the peak move?`
           : `Pentru aceste date L(θ) = ${form}. ${vals}.${zero} Curba are maximul la θ = ${n(amf)}, adică ${n(hf)} / ${n(nf)}, ponderea stemelor din date; acolo L = ${n(Lm)}. Dacă luăm logaritmul, ℓ(θ) = ln L(θ), se mută maximul?`;
       });
+      // the question that ends this caption (does the peak move under ln?) is a pick; the next frame answers it
+      const samplePeak = (key) => curve.reduce((b, p) => (p[key] > b[key] ? p : b)).theta;
+      const movesUnderLn = Math.abs(samplePeak('l') - samplePeak('L')) > 1e-9;
+      const pick = {
+        key: 'ln-move',
+        prompt: { en: 'Take ℓ(θ) = ln L(θ). Does the peak move?', ro: 'Iei ℓ(θ) = ln L(θ). Se mută vârful?' },
+        options: [{ id: 'yes', label: { en: 'yes', ro: 'da' } }, { id: 'no', label: { en: `no, it stays at θ = ${amf.text.en}`, ro: `nu, rămâne la θ = ${amf.text.ro}` } }],
+        right: movesUnderLn ? 'yes' : 'no',
+        why: { en: 'ln grows with its argument: a larger L gives a larger ln L, so the order of the heights, and the peak, stay.', ro: 'ln crește odată cu argumentul: un L mai mare dă un ln L mai mare, deci ordinea înălțimilor, și vârful, rămân.' },
+        whys: { [movesUnderLn ? 'no' : 'yes']: { en: 'ln changes the heights, not their order: where L is largest, ln L is largest too.', ro: 'ln schimbă înălțimile, nu ordinea lor: unde L e cel mai mare, și ln L e cel mai mare.' } },
+      };
       frames.push({
-        id: 'values', kind: 'curve', fn: 'L', caption: cap, facts: used, curve,
+        id: 'values', kind: 'curve', fn: 'L', caption: cap, facts: used, curve, pick,
         axis: { top: Lm, bottom: fact(0) }, candidates: gs.map((x) => x.g), points: pointsOf(grid, main.heads, main.n, 'L'), peak: num(am),
         marks: [...dm, ...gs.flatMap((x, i) => [mk(`theta${i}`, x.gf, { en: 'θ', ro: 'θ' }), mk(`L${i}`, x.Lf, { en: `L(${x.gf.text.en})`, ro: `L(${x.gf.text.ro})` })]), mk('argmax', amf, { en: 'maximum at θ', ro: 'maximul la θ' }), mk('Lmax', Lm, { en: 'L at the maximum', ro: 'L în maxim' })],
       });
@@ -142,8 +176,22 @@ export function mlLikelihood({ data, grid, prior }) {
           ? `Now ℓ(θ) = ln L(θ). ${vals}. At the maximum ℓ = ${n(lmf)}. ${stay} What area do you think lies under the curve of L?`
           : `Acum ℓ(θ) = ln L(θ). ${vals}. În maxim ℓ = ${n(lmf)}. ${stay} Ce arie crezi că e sub curba lui L?`;
       });
+      // the area question that ends this caption is a pick; the next frame answers it with the exact area
+      const A = area(main.heads, main.n);
+      const aNum = num(A);
+      const pick = {
+        key: 'area',
+        prompt: { en: 'How large is the area under the curve of L?', ro: 'Cât de mare e aria de sub curba lui L?' },
+        options: [{ id: 'one', label: { en: 'exactly 1', ro: 'exact 1' } }, { id: 'less', label: { en: 'less than 1', ro: 'mai puțin de 1' } }, { id: 'more', label: { en: 'more than 1', ro: 'mai mult de 1' } }],
+        right: Math.abs(aNum - 1) < 1e-12 ? 'one' : aNum < 1 ? 'less' : 'more',
+        why: { en: `L never goes above ${Lm.text.en}, and θ runs over an interval of length 1, so the area is at most ${Lm.text.en}.`, ro: `L nu trece de ${Lm.text.ro}, iar θ parcurge un interval de lungime 1, deci aria e cel mult ${Lm.text.ro}.` },
+        whys: {
+          one: { en: 'Area 1 belongs to a density. L is a function of θ with the data fixed, not a density over θ.', ro: 'Aria 1 o are o densitate. L este o funcție de θ cu datele fixate, nu o densitate peste θ.' },
+          more: { en: `The highest point of L is ${Lm.text.en}, and θ runs over an interval of length 1.`, ro: `Cel mai înalt punct al lui L este ${Lm.text.ro}, iar θ parcurge un interval de lungime 1.` },
+        },
+      };
       frames.push({
-        id: 'ln', kind: 'curve', fn: 'l', caption: cap, facts: used, curve,
+        id: 'ln', kind: 'curve', fn: 'l', caption: cap, facts: used, curve, pick,
         axis: { top: lmf, bottom: fact(lmax - NATS) }, candidates: gs.map((x) => x.g), points: pointsOf(grid, main.heads, main.n, 'l'), peak: num(am), moved,
         marks: [...gs.flatMap((x, i) => [mk(`theta${i}`, x.gf, { en: 'θ', ro: 'θ' }), mk(`l${i}`, x.lf, { en: `ℓ(${x.gf.text.en})`, ro: `ℓ(${x.gf.text.ro})` }), ...(num(x.L) === 0 ? [mk(`Lz${i}`, x.Lf, { en: `L(${x.gf.text.en})`, ro: `L(${x.gf.text.ro})` })] : [])]), mk('argmax', amf, { en: 'maximum at θ', ro: 'maximul la θ' }), mk('lmax', lmf, { en: 'ℓ at the maximum', ro: 'ℓ în maxim' })],
       });
@@ -180,7 +228,8 @@ export function mlLikelihood({ data, grid, prior }) {
       const pick = thetaPick(`ask-${i + 1}`,
         { en: 'Where is the peak of L(θ)? Pick the θ.', ro: 'Unde este vârful lui L(θ)? Alege θ.' },
         amf, [fact(clip(a - 0.2)), fact(clip(a + 0.2)), fact(0.5)],
-        { en: `θ = ${amf.text.en}: ${d.heads} / ${d.n}.`, ro: `θ = ${amf.text.ro}: ${d.heads} / ${d.n}.` });
+        { en: `θ = ${amf.text.en}: ${d.heads} / ${d.n}.`, ro: `θ = ${amf.text.ro}: ${d.heads} / ${d.n}.` },
+        slipOf(d));
       frames.push({ id: `ask-${i + 1}`, kind: 'ask', caption: cap, facts: used, pick, marks: dm, candidates: [], points: [], hidden: [amf, Lm] });
     }
     {
@@ -211,23 +260,34 @@ export function mlLikelihood({ data, grid, prior }) {
     const pa = fact(a, { kind: 'count' });
     const pb = fact(b, { kind: 'count' });
     {
+      // "încă o stemă și un ban", "încă 2 steme": a single extra observation is written as a word, so the noun agrees
+      const extra = (f, k, n, l) => (f.value === 1
+        ? (l === 'en' ? `one extra ${NOUN[k][0]}` : `${k === 'head' ? 'o' : 'un'} ${NOUN[k][2]}`)
+        : (l === 'en' ? `${n(f)} extra ${NOUN[k][1]}` : `${n(f)} ${roNoun(f.value, NOUN[k][2], NOUN[k][3])}`));
       const { caption: cap, used } = caption((l, n) => (l === 'en'
-        ? `A prior Beta(${n(pa)}, ${n(pb)}) acts as if we had already seen ${n(af)} extra heads and ${n(bf)} extra tails. The data are still ${cn(hf, 'head', l, n)} and ${cn(tf, 'tail', l, n)}. Where does the product L(θ)·p(θ) peak?`
-        : `Un prior Beta(${n(pa)}, ${n(pb)}) se poartă ca și cum am fi văzut deja încă ${n(af)} steme și ${n(bf)} bani. Datele rămân ${cn(hf, 'head', l, n)} și ${cn(tf, 'tail', l, n)}. Unde are vârful produsul L(θ)·p(θ)?`));
+        ? `A prior Beta(${n(pa)}, ${n(pb)}) acts as if we had already seen ${extra(af, 'head', n, l)} and ${extra(bf, 'tail', n, l)}. The data are still ${cn(hf, 'head', l, n)} and ${cn(tf, 'tail', l, n)}. Where does the product L(θ)·p(θ) peak?`
+        : `Un prior Beta(${n(pa)}, ${n(pb)}) se poartă ca și cum am fi văzut deja încă ${extra(af, 'head', n, l)} și ${extra(bf, 'tail', n, l)}. Datele rămân ${cn(hf, 'head', l, n)} și ${cn(tf, 'tail', l, n)}. Unde are vârful produsul L(θ)·p(θ)?`));
       const pick = thetaPick('prior-ask',
         { en: 'Where is the peak of L(θ)·p(θ)? Pick the θ.', ro: 'Unde este vârful lui L(θ)·p(θ)? Alege θ.' },
         mapF, [mleF, fact(0.5), fact(clip(mapV + 0.1)), fact(clip(mapV - 0.1))],
-        { en: `θ = ${mapF.text.en}: (${main.heads} + ${a - 1}) / (${main.n} + ${a - 1} + ${b - 1}).`, ro: `θ = ${mapF.text.ro}: (${main.heads} + ${a - 1}) / (${main.n} + ${a - 1} + ${b - 1}).` });
+        { en: `θ = ${mapF.text.en}: (${main.heads} + ${a - 1}) / (${main.n} + ${a - 1} + ${b - 1}).`, ro: `θ = ${mapF.text.ro}: (${main.heads} + ${a - 1}) / (${main.n} + ${a - 1} + ${b - 1}).` },
+        (f) => {
+          const x = f.text;
+          if (f === mleF || f.canon === mleF.canon) return { en: `${x.en} is the peak of L alone, θ̂_MLE; the prior adds its own observations.`, ro: `${x.ro} este vârful lui L singur, θ̂_MLE; priorul adaugă și observațiile lui.` };
+          const mode = a + b > 2 ? (a - 1) / (a + b - 2) : null;
+          if (mode !== null && Math.abs(f.value - mode) < EQ) return { en: `${x.en} is the peak of the prior alone; the data pull the product toward ${mleF.text.en}.`, ro: `${x.ro} este vârful priorului singur; datele trag produsul spre ${mleF.text.ro}.` };
+          return { en: `Count the prior's observations too: (${main.heads} + ${a - 1}) / (${main.n} + ${a - 1} + ${b - 1}).`, ro: `Numără și observațiile priorului: (${main.heads} + ${a - 1}) / (${main.n} + ${a - 1} + ${b - 1}).` };
+        });
       frames.push({ id: 'prior-ask', kind: 'ask', caption: cap, facts: used, pick, marks: [mk('heads', hf, HEADS), mk('tails', tf, TAILS), mk('n', nf, TOSSES), mk('alpha', pa, { en: 'α', ro: 'α' }), mk('beta', pb, { en: 'β', ro: 'β' })], candidates: [], points: [], hidden: [mapF] });
     }
     {
       const { caption: cap, used } = caption((l, n) => (l === 'en'
-        ? `The solid curve is L(θ), peak at θ_MLE = ${n(mleF)}. The dashed curve is L(θ)·p(θ) for the Beta(${n(pa)}, ${n(pb)}) prior, peak at θ_MAP = (${n(hf)} + ${n(af)}) / (${n(nf)} + ${n(af)} + ${n(bf)}) = ${n(mapF)}. The prior pulls the peak toward ${mapV < num(mle) ? 'the middle' : 'the prior'}; each curve is drawn up to its own peak.`
-        : `Curba plină este L(θ), cu vârful la θ_MLE = ${n(mleF)}. Curba punctată este L(θ)·p(θ) pentru priorul Beta(${n(pa)}, ${n(pb)}), cu vârful la θ_MAP = (${n(hf)} + ${n(af)}) / (${n(nf)} + ${n(af)} + ${n(bf)}) = ${n(mapF)}. Priorul trage vârful spre ${mapV < num(mle) ? 'mijloc' : 'prior'}; fiecare curbă e desenată până la propriul vârf.`));
+        ? `The solid curve is L(θ), peak at θ̂_MLE = ${n(mleF)}. The dashed curve is L(θ)·p(θ) for the Beta(${n(pa)}, ${n(pb)}) prior, peak at θ̂_MAP = (${n(hf)} + ${n(af)}) / (${n(nf)} + ${n(af)} + ${n(bf)}) = ${n(mapF)}. The prior pulls the peak toward ${mapV < num(mle) ? 'the middle' : 'the prior'}; each curve is drawn up to its own peak.`
+        : `Curba plină este L(θ), cu vârful la θ̂_MLE = ${n(mleF)}. Curba punctată este L(θ)·p(θ) pentru priorul Beta(${n(pa)}, ${n(pb)}), cu vârful la θ̂_MAP = (${n(hf)} + ${n(af)}) / (${n(nf)} + ${n(af)} + ${n(bf)}) = ${n(mapF)}. Priorul trage vârful spre ${mapV < num(mle) ? 'mijloc' : 'prior'}; fiecare curbă e desenată până la propriul vârf.`));
       frames.push({
         id: 'prior', kind: 'curve', fn: 'L', caption: cap, facts: used, curve: curveL, curve2: curveP,
         axis: null, candidates: [], points: [], peak: num(mle), peak2: mapV,
-        marks: [mk('mle', mleF, { en: 'θ_MLE', ro: 'θ_MLE' }), mk('map', mapF, { en: 'θ_MAP', ro: 'θ_MAP' })],
+        marks: [mk('mle', mleF, { en: 'θ̂_MLE', ro: 'θ̂_MLE' }), mk('map', mapF, { en: 'θ̂_MAP', ro: 'θ̂_MAP' })],
       });
     }
   }

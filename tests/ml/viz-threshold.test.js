@@ -44,7 +44,7 @@ describe('ml-threshold on the temperatures (L14 worked example)', () => {
     expect(byKey(f, 'Temperature@85').right).toEqual([0, 1]);
     expect(f.caption.en).toContain('[3+,3−]');
     expect(f.caption.en).toContain('IG 0.4591');
-    expect(f.caption.ro).toContain('IG 0.4591');
+    expect(f.caption.ro).toContain('IG 0,4591');
   });
   it('a threshold inside the run of Yes (66) has IG 0.0817', () => {
     const f = W.frames[2];
@@ -80,7 +80,7 @@ describe('ml-threshold on the temperatures (L14 worked example)', () => {
     expect(guessNote(W.frames[3], 'Temperature@85')).toBeNull();
   });
   it('every frame has an English and a Romanian caption with the same numbers', () => {
-    const nums = (s) => (s.match(/\d+(?:\.\d+)?/g) || []).join(' ');
+    const nums = (s) => (s.replace(/(\d),(\d)/g, '$1.$2').match(/\d+(?:\.\d+)?/g) || []).join(' ');
     for (const f of W.frames) {
       expect(f.caption.en.length).toBeGreaterThan(10);
       expect(nums(f.caption.ro)).toBe(nums(f.caption.en));
@@ -151,7 +151,8 @@ describe('validateViz for ml-threshold', () => {
   });
 });
 
-const numbers = (str) => (String(str).match(/-?\d+(?:\.\d+)?/g) || []).map((x) => String(Number(x)));
+// Romanian prints the decimal comma (numbers-bilingual.js roNums): fold it back to the point the marks carry
+const numbers = (str) => (String(str).replace(/(\d),(\d)/g, '$1.$2').match(/-?\d+(?:\.\d+)?/g) || []).map((x) => String(Number(x)));
 const marks = (html) => {
   const out = new Set();
   for (const m of html.matchAll(/data-value="([^"]*)"/g)) for (const n of numbers(m[1])) out.add(n);
@@ -226,8 +227,8 @@ describe('review fixes', () => {
   it('a node after the root with two or more tests asks for the winner before its IG shows (outline L14: predict the winner, then the line is drawn)', () => {
     const f = e448.frames[2];
     expect(f.ask.options.map((o) => o.key)).toEqual(['X1@2.5', 'X1@4', 'X2@1.5', 'X2@2.5']);
-    for (const lang of ['en', 'ro']) for (const n of igNums(f)) expect(f.ask.caption[lang]).not.toContain(n);
-    expect(f.ask.caption.ro).toContain('X1 ≤ 2.5, X1 ≤ 4, X2 ≤ 1.5, X2 ≤ 2.5');
+    for (const lang of ['en', 'ro']) for (const n of igNums(f)) expect(f.ask.caption[lang]).not.toContain(lang === 'ro' ? n.replace('.', ',') : n);
+    expect(f.ask.caption.ro).toContain('X1 ≤ 2,5, X1 ≤ 4, X2 ≤ 1,5, X2 ≤ 2,5');
     // a node with one candidate (85 in the temperatures) has nothing to ask
     expect(temps.frames[3].ask).toBeUndefined();
   });
@@ -235,7 +236,7 @@ describe('review fixes', () => {
     const f = e448.frames[2];
     expect(guessNote(f, 'X1@4').ro).toContain('corect');
     expect(guessNote(f, 'X1@4').ro).toContain('același IG');
-    expect(guessNote(f, 'X2@1.5').ro).toContain('0.0441');
+    expect(guessNote(f, 'X2@1.5').ro).toContain('0,0441');
   });
   it('the threshold inside the run asks first whether its IG is smaller or larger (outline C5)', () => {
     const f = temps.frames[2];

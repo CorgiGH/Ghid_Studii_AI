@@ -41,5 +41,15 @@ export function numberTokens(text) {
   return (String(text).replace(/(\d),(\d)/g, '$1.$2').match(/\d+(?:\.\d+)?/g) || []);
 }
 
+// The Romanian side of a text whose numbers were printed with a decimal point (the ID3 widgets build both sides from one
+// formatter): 0.4591 -> 0,4591. A comma between two numbers then becomes a semicolon, so "19.5, 22.5" reads "19,5; 22,5"
+// and never as one number; an end of an interval beside such a number too: (28,5; ∞), (−∞; 19,5].
+export function roNums(s) {
+  return String(s)
+    .replace(/(\d)\.(\d)/g, '$1,$2')
+    .replace(/(\d,\d+), (?=[−-]?(?:\d|∞))/g, '$1; ')
+    .replace(/(\d|∞), (?=[−-]?\d+,\d)/g, '$1; ');
+}
+
 // "a, b and c" / "a, b și c"
 export const joinList = (L, xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${L.t('and', 'și')} ${xs.at(-1)}`);

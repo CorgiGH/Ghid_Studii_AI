@@ -4,6 +4,7 @@ import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
 import { mlLikelihood } from '../../logic/ml/likelihood.js';
 import { PickBar } from './mlParts.jsx';
+import { withSubs } from './subscript.jsx';
 import './ml-common.css';
 import './ml-widgets.css';
 
@@ -68,7 +69,7 @@ export function LikelihoodView({ model, frame }) {
       <ul className="mlv-readout" aria-label={t('Values on the drawing', 'Valorile din desen')}>
         {frame.marks.map((m) => (
           <li key={m.id} data-mark={m.id} data-value={m.fact.canon}>
-            <span className="mlv-name">{t(m.label.en, m.label.ro)}</span>
+            <span className="mlv-name">{withSubs(t(m.label.en, m.label.ro))}</span>
             <b>{say(m.fact)}</b>
           </li>
         ))}
@@ -87,6 +88,8 @@ export default function MlLikelihood({ props, predict }) {
   const spec = predict && frame.pick ? { items: [frame.pick] } : null;
   const done = frame.pick ? picks[frame.pick.key] : undefined;
   const right = done !== undefined && done === frame.pick.right;
+  // a wrong pick gets the reason of that option (the share of tails, the fair coin, the peak without the prior)
+  const reason = done === undefined ? null : right ? frame.pick.why : frame.pick.whys?.[done];
   const answered = !spec || right;
   const blocked = (to) => Array.from({ length: to }, (_, i) => i).some((i) => model.frames[i].pick && predict && picks[model.frames[i].pick.key] !== model.frames[i].pick.right);
   const stepper = {
@@ -98,12 +101,12 @@ export default function MlLikelihood({ props, predict }) {
   const onPick = (key, id) => { setPicks((p) => ({ ...p, [key]: id })); s.settle(); };
   const L = (x) => (x !== null && typeof x === 'object' ? t(x.en, x.ro) : String(x));
   return (
-    <VizFrame widget="ml-likelihood" stepper={stepper} caption={t(frame.caption.en, frame.caption.ro)} label={t('The likelihood curve of coin data', 'Curba verosimilității datelor unei monede')}>
+    <VizFrame widget="ml-likelihood" stepper={stepper} caption={withSubs(t(frame.caption.en, frame.caption.ro))} label={t('The likelihood curve of coin data', 'Curba verosimilității datelor unei monede')}>
       <LikelihoodView model={model} frame={frame} />
       <PickBar spec={spec} picks={picks} onPick={onPick} t={t} L={L} />
       {done !== undefined && (
         <p className={`mlv-fb ${right ? 'ok' : 'no'}`} role="status" data-pick={right ? 'right' : 'wrong'}>
-          {right ? t('Right. ', 'Corect. ') : t('Not quite: look again at the question. ', 'Nu chiar: citește încă o dată întrebarea. ')}{right ? t(frame.pick.why.en, frame.pick.why.ro) : ''}
+          {right ? t('Right. ', 'Corect. ') : t('Not quite: ', 'Nu chiar: ')}{reason ? withSubs(t(reason.en, reason.ro)) : t('look again at the question.', 'citește încă o dată întrebarea.')}
         </p>
       )}
     </VizFrame>

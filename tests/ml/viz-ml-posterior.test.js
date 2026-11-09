@@ -195,10 +195,12 @@ describe('ml-posterior block', () => {
     expect(validateViz(block({ hypotheses: [{ name: 'a', prior: 0.5, lik: 0.5 }, { name: 'a', prior: 0.5, lik: 0.5 }] })).length).toBe(1);
     expect(validateViz(block({ hypotheses: [{ name: 'a', prior: 0.5 }, { name: 'b', prior: 0.5, lik: 0.5 }] })).length).toBe(1);
   });
-  it('first frame with predict: the question, the given table, empty bars, Show me, no Next', () => {
+  it('first frame with predict: the question as a pick of its own, the given table, empty bars, Next locked', () => {
     const html = renderToStaticMarkup(React.createElement(MlPosterior, { props: CANCER, predict: true }));
-    expect(html).toContain('Arată-mi');
-    expect(html).not.toContain('Mai departe');
+    expect(html).not.toContain('Arată-mi');
+    expect(html).toContain('Înainte de date, care ipoteză e mai plauzibilă?');
+    expect(html).toMatch(/<button type="button" class="viz-btn viz-btn-primary" disabled=""><span>Mai departe/);
+    expect((html.match(/class="mlv-opt"/g) || []).length).toBe(2);
     expect(html).not.toMatch(/data-mark="(prior|lik|prod|post|eq|pct)\d/);
     expect(html).toContain('data-mark="gp0" data-value="0.008"');
     expect(html).toContain('data-mark="gl1" data-value="0.03"');
@@ -246,5 +248,42 @@ describe('ml-posterior second review', () => {
     const fs = await import('node:fs');
     const css = fs.readFileSync('src/components/lesson/viz/widgets/ml/ml-widgets.css', 'utf8');
     expect(css).toMatch(/\.mlv-chart \{[^}]*max-height: 300px/);
+  });
+});
+
+// crash-p1 s34 (the flu test of card 3): bolnav 0.2 / 0.6, sănătos 0.8 / 0.05; products 0.12 and 0.04, P(bolnav|D) = 3/4
+describe('ml-posterior own picks (crash-p1 s34)', () => {
+  const FLU = { hypotheses: [{ name: 'bolnav', prior: 0.2, lik: 0.6 }, { name: 'sănătos', prior: 0.8, lik: 0.05 }] };
+  const fr = mlPosterior(FLU).frames;
+  const pick = (id) => fr.find((f) => f.id === id).pick;
+  it('every frame that ends with a question carries a pick; the last frame asks nothing', () => {
+    expect(fr.map((f) => !!f.pick)).toEqual([true, true, true, true, true, false]);
+  });
+  it('the right answers come from the exact values: the larger prior, h_ML, h_MAP, P(bolnav|D) = 0.75, no flip', () => {
+    expect(pick('ask').right).toBe('sănătos');
+    expect(pick('prior').right).toBe('bolnav');
+    expect(pick('lik').right).toBe('bolnav');
+    expect(pick('product').right).toBe('0.75');
+    expect(pick('product').options.map((o) => o.id)).toEqual(['0.12', '0.6', '0.75']);
+    expect(pick('posterior').right).toBe('no');
+  });
+  it('every wrong option has its own reason, in both languages', () => {
+    for (const f of fr.filter((x) => x.pick)) {
+      for (const o of f.pick.options.filter((x) => x.id !== f.pick.right)) {
+        const w = f.pick.whys[o.id];
+        expect(w, `${f.id}/${o.id}`).toBeDefined();
+        expect(w.ro.length).toBeGreaterThan(10);
+        expect(w.en.length).toBeGreaterThan(10);
+      }
+    }
+    expect(pick('product').whys['0.12'].ro).toContain('neîmpărțit la P(D)');
+    expect(pick('product').whys['0.6'].ro).toContain('verosimilitatea');
+    expect(pick('prior').whys['sănătos'].ro).toContain('P(D|h) al lui sănătos e mai mic');
+  });
+  it('with predict, Next stays locked on the first frame until the pick, and the prompt names h_MAP with a subscript', () => {
+    const html = renderToStaticMarkup(React.createElement(MlPosterior, { props: FLU, predict: true }));
+    expect(html).toContain('Înainte de date, care ipoteză e mai plauzibilă?');
+    expect(html).toMatch(/disabled=""><span>Mai departe/);
+    expect(renderToStaticMarkup(React.createElement('p', null, withSubs('Care ipoteză va fi h_MAP?')))).toBe('<p>Care ipoteză va fi h<sub>MAP</sub>?</p>');
   });
 });

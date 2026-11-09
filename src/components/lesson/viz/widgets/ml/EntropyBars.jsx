@@ -5,7 +5,9 @@ import { useStepper, useVizMotion } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
 import { entropyBars, curvePoint } from '../../logic/ml/entropy-bars.js';
 import { bits, disp, fmtNum } from '../../logic/ml/prob-format.js';
+import { PickBar } from './mlParts.jsx';
 import './ml-w2.css';
+import './ml-widgets.css';
 
 const MINUS = '−';
 // CH leaves a line under the tick labels for the axis name p (at 150 it sat on the 1/2 tick)
@@ -152,8 +154,9 @@ function Venn({ v, names, filled, bank }) {
   );
 }
 
-// The drawing of one frame (exported so a test can render any frame).
-export function EntropyStage({ model, frame, live = 20 }) {
+// The drawing of one frame (exported so a test can render any frame). With onBar (an ask frame with own picks) each bar
+// is a button: the learner taps the bar with the larger entropy.
+export function EntropyStage({ model, frame, live = 20, onBar = null, chosen }) {
   const { t } = useApp();
   const m = useVizMotion();
   const fade = { initial: { opacity: m.reduced ? 1 : 0.4 }, animate: { opacity: 1 }, transition: m.reduced ? { duration: 0 } : { duration: 0.2 } };
@@ -161,15 +164,21 @@ export function EntropyStage({ model, frame, live = 20 }) {
     const lp = frame.slider ? curvePoint(live / 100) : null;
     return (
       <Motion.div className="meb" data-frame={frame.kind} {...fade}>
-        {frame.bars.map((b, i) => (
-          <div className="meb-barrow" key={i}>
-            <span className="meb-blabel">{b.label}</span>
-            <SquareBar a={b.a} b={b.b} />
-            <span className="meb-bval" data-kind={frame.values ? 'H' : undefined} data-value={frame.values ? t(bits(b.H).en, bits(b.H).ro) : undefined} data-cap={frame.values ? '1' : undefined}>
-              {frame.values ? `H = ${t(bits(b.H).en, bits(b.H).ro)}` : 'H = ?'}
-            </span>
-          </div>
-        ))}
+        {frame.bars.map((b, i) => {
+          const inner = (
+            <>
+              <span className="meb-blabel">{b.label}</span>
+              <SquareBar a={b.a} b={b.b} />
+              <span className="meb-bval" data-kind={frame.values ? 'H' : undefined} data-value={frame.values ? t(bits(b.H).en, bits(b.H).ro) : undefined} data-cap={frame.values ? '1' : undefined}>
+                {frame.values ? `H = ${t(bits(b.H).en, bits(b.H).ro)}` : 'H = ?'}
+              </span>
+            </>
+          );
+          const id = i === 0 ? 'a' : 'b';
+          return onBar
+            ? <button type="button" className="meb-barrow meb-barbtn mlv-opt" key={i} aria-pressed={chosen === id} onClick={() => onBar(id)}>{inner}</button>
+            : <div className="meb-barrow" key={i}>{inner}</div>;
+        })}
         <Curve frame={frame} live={frame.slider ? live / 100 : 0} />
         {frame.slider && <SliderReadout live={live} lp={lp} />}
       </Motion.div>
@@ -197,17 +206,50 @@ function SliderReadout({ live, lp }) {
   );
 }
 
+// Compare mode with predict: every ask frame waits for the learner's own pick (tap a bar, a value of p, yes or no) and
+// Next opens only on the right one; a wrong pick gets the reason of that option. The ig mode keeps the reveal button.
 export default function EntropyBars({ props, predict }) {
   const { t } = useApp();
   const model = entropyBars(props);
-  const s = useStepper(model.count, { predict });
+  const hasPicks = !!predict && model.mode === 'compare';
+  const s = useStepper(model.count, { predict, own: hasPicks });
   const [live, setLive] = useState(20);
+  const [picks, setPicks] = useState({});
   const frame = model.frames[s.step];
+  const pick = hasPicks ? frame.pick : null;
+  const done = pick ? picks[pick.key] : undefined;
+  const right = done !== undefined && done === pick.right;
+  const reason = done === undefined ? null : right ? pick.why : pick.whys?.[done];
+  const blocked = (to) => Array.from({ length: to }, (_, i) => i).some((i) => hasPicks && model.frames[i].pick && picks[model.frames[i].pick.key] !== model.frames[i].pick.right);
+  const stepper = {
+    ...s,
+    canNext: s.canNext && (!pick || right),
+    goto: (to) => { if (to <= s.step || !blocked(to)) s.goto(to); },
+    reset: () => { setPicks({}); s.reset(); },
+  };
+  const onPick = (key, id) => { setPicks((p) => ({ ...p, [key]: id })); s.settle(); };
+  const L = (x) => (x !== null && typeof x === 'object' ? t(x.en, x.ro) : String(x));
+  const listSpec = pick && pick.kind === 'list' ? { items: [pick] } : null;
+  const sameOpt = pick && pick.kind === 'bar' ? pick.options.find((o) => o.id === 'same') : null;
   return (
-    <VizFrame widget="ml-entropy-bars" stepper={s} caption={t(frame.caption.en, frame.caption.ro)} label={model.mode === 'ig' ? t('Entropy bars and information gain', 'Bare de entropie și câștig de informație') : t('Entropy of a bar of + and − squares', 'Entropia unei bare de pătrate + și −')}>
-      <EntropyStage model={model} frame={frame} live={live} />
+    <VizFrame widget="ml-entropy-bars" stepper={stepper} caption={t(frame.caption.en, frame.caption.ro)} label={model.mode === 'ig' ? t('Entropy bars and information gain', 'Bare de entropie și câștig de informație') : t('Entropy of a bar of + and − squares', 'Entropia unei bare de pătrate + și −')}>
+      <EntropyStage model={model} frame={frame} live={live} onBar={pick && pick.kind === 'bar' ? (id) => onPick(pick.key, id) : null} chosen={done} />
       {frame.slider && (
         <input className="meb-slider" type="range" min="0" max="100" step="1" value={live} onChange={(e) => setLive(Number(e.target.value))} aria-label={t('Move the point along the curve', 'Mută punctul pe curbă')} />
+      )}
+      {sameOpt && (
+        <div className="mlv-picks" role="group">
+          <p className="mlv-prompt">{L(pick.prompt)}</p>
+          <div className="mlv-opts">
+            <button type="button" className="mlv-opt" aria-pressed={done === sameOpt.id} onClick={() => onPick(pick.key, sameOpt.id)}>{L(sameOpt.label)}</button>
+          </div>
+        </div>
+      )}
+      <PickBar spec={listSpec} picks={picks} onPick={onPick} t={t} L={L} />
+      {done !== undefined && (
+        <p className={`mlv-fb ${right ? 'ok' : 'no'}`} role="status" data-pick={right ? 'right' : 'wrong'}>
+          {right ? t('Right. ', 'Corect. ') : t('Not quite: ', 'Nu chiar: ')}{reason ? L(reason) : t('look again at the question.', 'citește încă o dată întrebarea.')}
+        </p>
       )}
     </VizFrame>
   );
