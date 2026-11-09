@@ -1,0 +1,1971 @@
+{
+  "meta": {
+    "id": "ia-l05b",
+    "title": {
+      "en": "Cursul 5, partea 2: minimax, adâncimea și funcția de scor",
+      "ro": "Cursul 5, partea 2: minimax, adâncimea și funcția de scor"
+    },
+    "shortTitle": {
+      "en": "IA C5: minimax",
+      "ro": "IA C5: minimax"
+    },
+    "source": {
+      "en": "Cursul 5 (c5.pdf), slide-urile 16–18",
+      "ro": "Cursul 5 (c5.pdf), slide-urile 16–18"
+    },
+    "clarity": 1
+  },
+  "steps": [
+    {
+      "id": "ia-l05b-s01",
+      "title": {
+        "en": "Alegi A, B sau C?",
+        "ro": "Alegi A, B sau C?"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16–18",
+        "ro": "Cursul 5 · slide 16–18"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ia-l05b-q01",
+          "question": {
+            "en": "Alegi o ramură; apoi adversarul alege frunza cea mai bună pentru el. Numerele sunt scoruri pentru adversar: noi vrem unul cât mai mic. Ce alegi?",
+            "ro": "Alegi o ramură; apoi adversarul alege frunza cea mai bună pentru el. Numerele sunt scoruri pentru adversar: noi vrem unul cât mai mic. Ce alegi?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "A, pentru că are frunza 2",
+                "ro": "A, pentru că are frunza 2"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Frunza 2 nu o vei primi: adversarul va alege 7, nu 2.",
+                "ro": "Frunza 2 nu o vei primi: adversarul va alege 7, nu 2."
+              },
+              "misconception": "frunza-cea-mai-mica-iluzorie"
+            },
+            {
+              "text": {
+                "en": "B",
+                "ro": "B"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Corect: dacă alegi B, adversarul poate lua 5; la A poate lua 7, la C 6. Cel mai mic dintre 7, 5, 6 este 5.",
+                "ro": "Corect: dacă alegi B, adversarul poate lua 5; la A poate lua 7, la C 6. Cel mai mic dintre 7, 5, 6 este 5."
+              }
+            },
+            {
+              "text": {
+                "en": "C, pentru că are frunza 3",
+                "ro": "C, pentru că are frunza 3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Adversarul va alege 6, nu 3.",
+                "ro": "Adversarul va alege 6, nu 3."
+              },
+              "misconception": "frunza-cea-mai-mica-iluzorie"
+            },
+            {
+              "text": {
+                "en": "oricare, sunt egale",
+                "ro": "oricare, sunt egale"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Nu sunt egale: răspunsurile adversarului sunt 7, 5 și 6.",
+                "ro": "Nu sunt egale: răspunsurile adversarului sunt 7, 5 și 6."
+              },
+              "misconception": "ramuri-socotite-egale"
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>Arbore: noi alegem A, B sau C; adversarul alege o frunză</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='94.3' y2='88'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='70.2' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='118.5' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='166.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='215.2' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='287.7' y2='88'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='263.5' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='311.8' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='94.3,69 116.3,105 72.3,105'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='56.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='70.2' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='104.5' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='118.5' y='156' text-anchor='middle'>7</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='152.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='166.8' y='156' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='201.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='215.2' y='156' text-anchor='middle'>5</text><polygon class='warn fill-bg' stroke-width='2.5' points='287.7,69 309.7,105 265.7,105'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='249.5' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='263.5' y='156' text-anchor='middle'>6</text><rect class='fg fill-soft' stroke-width='2' x='297.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='311.8' y='156' text-anchor='middle'>3</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore cu rădăcina S și ramurile A (2, 7), B (4, 5), C (6, 3)",
+              "ro": "Arbore cu rădăcina S și ramurile A (2, 7), B (4, 5), C (6, 3)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s02",
+      "title": {
+        "en": "Cel mai mic număr înșală",
+        "ro": "Cel mai mic număr înșală"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 18",
+        "ro": "Cursul 5 · slide 18"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Adversarul răspunde cu cea mai bună frunză pentru el, adică cu maximul de sub ramura aleasă.",
+                "ro": "Adversarul răspunde cu cea mai bună frunză pentru el, adică cu maximul de sub ramura aleasă."
+              }
+            },
+            {
+              "table": {
+                "columns": [
+                  "Ramura",
+                  "Frunzele",
+                  "Alege adversarul"
+                ],
+                "rows": [
+                  [
+                    "A",
+                    "2, 7",
+                    "7"
+                  ],
+                  [
+                    "B",
+                    "4, 5",
+                    "5"
+                  ],
+                  [
+                    "C",
+                    "6, 3",
+                    "6"
+                  ]
+                ]
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "Dacă alegi A, primești 7, nu 2.",
+              "ro": "Dacă alegi A, primești 7, nu 2."
+            },
+            {
+              "en": "Dacă alegi B, primești 5.",
+              "ro": "Dacă alegi B, primești 5."
+            },
+            {
+              "en": "Dacă alegi C, primești 6.",
+              "ro": "Dacă alegi C, primești 6."
+            }
+          ],
+          "result": {
+            "en": "Alegi minimul dintre 7, 5 și 6: B, cu valoarea 5.",
+            "ro": "Alegi minimul dintre 7, 5 și 6: B, cu valoarea 5."
+          }
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Minimax urmărește ca adversarul să facă cele mai proaste mutări, presupunând că el alege mereu cea mai bună mutare disponibilă.",
+            "ro": "Minimax urmărește ca adversarul să facă cele mai proaste mutări, presupunând că el alege mereu cea mai bună mutare disponibilă."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Slide 18: «MINIMAX considerations».",
+                "ro": "Slide 18: «MINIMAX considerations»."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s03",
+      "title": {
+        "en": "Cine e MIN, cine e MAX",
+        "ro": "Cine e MIN, cine e MAX"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Funcția de scor (score function, heuristic) dă fiecărei stări un număr: valoarea ei pentru adversar.",
+                "ro": "Funcția de scor (score function, heuristic) dă fiecărei stări un număr: valoarea ei pentru adversar."
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "Cu cât scorul e mai bun pentru adversar, cu atât starea e mai puțin dorită pentru noi.",
+              "ro": "Cu cât scorul e mai bun pentru adversar, cu atât starea e mai puțin dorită pentru noi."
+            },
+            {
+              "en": "Noi (AI) minimizăm: vrem scor mic.",
+              "ro": "Noi (AI) minimizăm: vrem scor mic."
+            },
+            {
+              "en": "Adversarul (OP) maximizează: vrea scor mare.",
+              "ro": "Adversarul (OP) maximizează: vrea scor mare."
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Jucătorul minimizant alege cel mai mic scor, cel maximizant alege cel mai mare.",
+            "ro": "Jucătorul minimizant alege cel mai mic scor, cel maximizant alege cel mai mare."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Slide 16 lasă adversarul maximizant sau minimizant; slide 17 îl face maximizant. Folosim slide 17 și spunem mereu cine e MIN.",
+                "ro": "Slide 16 lasă adversarul maximizant sau minimizant; slide 17 îl face maximizant. Folosim slide 17 și spunem mereu cine e MIN."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s04",
+      "title": {
+        "en": "Arborele din slide",
+        "ro": "Arborele din slide"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 17",
+        "ro": "Cursul 5 · slide 17"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "S este starea noastră. Avem trei mutări: A, B, C. După fiecare, adversarul are alegeri; frunzele sunt scorurile.",
+                "ro": "S este starea noastră. Avem trei mutări: A, B, C. După fiecare, adversarul are alegeri; frunzele sunt scorurile."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>Arborele din slide: A (1, 5, 9), B (8), C (3, 9, 2)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='108.1' y2='88'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='66.7' y2='150'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='108.1' y2='150'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='149.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='273.9' y2='88'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='232.4' y2='150'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='273.9' y2='150'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='315.3' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='108.1,69 130.1,105 86.1,105'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='52.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='66.7' y='156' text-anchor='middle'>1</text><rect class='fg fill-soft' stroke-width='2' x='94.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='135.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='149.6' y='156' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='273.9,69 295.9,105 251.9,105'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='218.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='232.4' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='259.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='156' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='301.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='315.3' y='156' text-anchor='middle'>2</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arbore cu S în vârf, apoi A, B, C și frunzele 1 5 9, 8, 3 9 2",
+                  "ro": "Arbore cu S în vârf, apoi A, B, C și frunzele 1 5 9, 8, 3 9 2"
+                }
+              }
+            },
+            {
+              "text": {
+                "en": "Nodurile A, B, C sunt ale adversarului (MAX); S este al nostru (MIN).",
+                "ro": "Nodurile A, B, C sunt ale adversarului (MAX); S este al nostru (MIN)."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s05",
+      "title": {
+        "en": "Calculează de jos în sus",
+        "ro": "Calculează de jos în sus"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 17",
+        "ro": "Cursul 5 · slide 17"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Întâi nodurile adversarului (A, B, C: maximul frunzelor lor), apoi S (minimul lor). Prezice fiecare valoare, apoi vezi.",
+            "ro": "Întâi nodurile adversarului (A, B, C: maximul frunzelor lor), apoi S (minimul lor). Prezice fiecare valoare, apoi vezi."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ia-l05b-v01",
+          "widget": "game-tree",
+          "predict": true,
+          "props": {
+            "mode": "minimax",
+            "root": "MIN",
+            "rootLabel": {
+              "en": "noi (AI)",
+              "ro": "noi (AI)"
+            },
+            "tree": {
+              "id": "S",
+              "children": [
+                {
+                  "id": "A",
+                  "children": [
+                    {
+                      "leaf": 1
+                    },
+                    {
+                      "leaf": 5
+                    },
+                    {
+                      "leaf": 9
+                    }
+                  ]
+                },
+                {
+                  "id": "B",
+                  "children": [
+                    {
+                      "leaf": 8
+                    }
+                  ]
+                },
+                {
+                  "id": "C",
+                  "children": [
+                    {
+                      "leaf": 3
+                    },
+                    {
+                      "leaf": 9
+                    },
+                    {
+                      "leaf": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s06",
+      "title": {
+        "en": "Formula din slide",
+        "ro": "Formula din slide"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 17",
+        "ro": "Cursul 5 · slide 17"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "max(1, 5, 9) = 9",
+              "ro": "max(1, 5, 9) = 9"
+            },
+            {
+              "en": "max(8) = 8",
+              "ro": "max(8) = 8"
+            },
+            {
+              "en": "max(3, 9, 2) = 9",
+              "ro": "max(3, 9, 2) = 9"
+            },
+            {
+              "en": "min(9, 8, 9) = 8",
+              "ro": "min(9, 8, 9) = 8"
+            }
+          ],
+          "result": {
+            "en": "Valoarea lui S este 8, iar alegerea este B.",
+            "ro": "Valoarea lui S este 8, iar alegerea este B."
+          }
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Minimax: nodul nostru alege minimul valorilor, nodul adversarului alege maximul; valoarea se calculează de jos în sus.",
+            "ro": "Minimax: nodul nostru alege minimul valorilor, nodul adversarului alege maximul; valoarea se calculează de jos în sus."
+          },
+          "body": [
+            {
+              "tex": "\\begin{aligned}\\text{minimax}(2,S,AI)&=\\min\\big(\\max(1,5,9),\\\\&\\qquad\\max(8),\\ \\max(3,9,2)\\big)\\\\&=8\\end{aligned}"
+            },
+            {
+              "note": {
+                "en": "Slide 17 scrie score(minimax(1, A, OP)): score doar arată valoarea întoarsă de nodul A. OP este adversarul, AI suntem noi.",
+                "ro": "Slide 17 scrie score(minimax(1, A, OP)): score doar arată valoarea întoarsă de nodul A. OP este adversarul, AI suntem noi."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s07",
+      "title": {
+        "en": "Valoarea unui arbore nou",
+        "ro": "Valoarea unui arbore nou"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 17",
+        "ro": "Cursul 5 · slide 17"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05b-e01",
+          "status": "verified-twice",
+          "statement": {
+            "en": "S este al nostru (MIN); A, B, C sunt ale adversarului (MAX). Calculează valorile.",
+            "ro": "S este al nostru (MIN); A, B, C sunt ale adversarului (MAX). Calculează valorile."
+          },
+          "fields": [
+            {
+              "id": "a",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui A",
+                "ro": "Valoarea lui A"
+              },
+              "formula": "max(3,12,8)",
+              "expected": 12
+            },
+            {
+              "id": "b",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui B",
+                "ro": "Valoarea lui B"
+              },
+              "formula": "max(2,4,6)",
+              "expected": 6
+            },
+            {
+              "id": "c",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui C",
+                "ro": "Valoarea lui C"
+              },
+              "formula": "max(14,5,2)",
+              "expected": 14
+            },
+            {
+              "id": "s",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "min(12,6,14)",
+              "expected": 6
+            }
+          ],
+          "hints": [
+            {
+              "en": "A, B, C sunt MAX: ia maximul frunzelor fiecăruia.",
+              "ro": "A, B, C sunt MAX: ia maximul frunzelor fiecăruia."
+            },
+            {
+              "en": "max(3, 12, 8) = 12; max(2, 4, 6) = 6; max(14, 5, 2) = 14.",
+              "ro": "max(3, 12, 8) = 12; max(2, 4, 6) = 6; max(14, 5, 2) = 14."
+            },
+            {
+              "en": "S este MIN: min(12, 6, 14) = 6.",
+              "ro": "S este MIN: min(12, 6, 14) = 6."
+            }
+          ],
+          "solution": {
+            "en": "A = max(3, 12, 8) = 12, B = max(2, 4, 6) = 6, C = max(14, 5, 2) = 14. S = min(12, 6, 14) = 6 (alegerea B).",
+            "ro": "A = max(3, 12, 8) = 12, B = max(2, 4, 6) = 6, C = max(14, 5, 2) = 14. S = min(12, 6, 14) = 6 (alegerea B)."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (3, 12, 8), B (2, 4, 6), C (14, 5, 2)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='94.3' y2='88'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='62.1' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='94.3' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='126.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='158.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='223.2' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='287.7' y2='88'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='255.4' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='287.7' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='319.9' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='94.3,69 116.3,105 72.3,105'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='48.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='62.1' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='80.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='156' text-anchor='middle'>12</text><rect class='fg fill-soft' stroke-width='2' x='112.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='126.6' y='156' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='144.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='158.8' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='209.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='223.2' y='156' text-anchor='middle'>6</text><polygon class='warn fill-bg' stroke-width='2.5' points='287.7,69 309.7,105 265.7,105'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='241.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='255.4' y='156' text-anchor='middle'>14</text><rect class='fg fill-soft' stroke-width='2' x='273.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='305.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='319.9' y='156' text-anchor='middle'>2</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore cu A (3, 12, 8), B (2, 4, 6), C (14, 5, 2)",
+              "ro": "Arbore cu A (3, 12, 8), B (2, 4, 6), C (14, 5, 2)"
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Alt arbore, aceleași roluri: S este MIN, A, B, C sunt MAX.",
+                "ro": "Alt arbore, aceleași roluri: S este MIN, A, B, C sunt MAX."
+              },
+              "solution": {
+                "en": "A = max(7, 1) = 7, B = max(5, 9) = 9, C = max(4, 8, 2) = 8. S = min(7, 9, 8) = 7 (alegerea A).",
+                "ro": "A = max(7, 1) = 7, B = max(5, 9) = 9, C = max(4, 8, 2) = 8. S = min(7, 9, 8) = 7 (alegerea A)."
+              },
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "max(7,1)",
+                  "expected": 7
+                },
+                {
+                  "id": "b",
+                  "formula": "max(5,9)",
+                  "expected": 9
+                },
+                {
+                  "id": "c",
+                  "formula": "max(4,8,2)",
+                  "expected": 8
+                },
+                {
+                  "id": "s",
+                  "formula": "min(7,9,8)",
+                  "expected": 7
+                }
+              ],
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (7, 1), B (5, 9), C (4, 8, 2)</title><line class='muted' stroke-width='2' x1='180.6' y1='26' x2='87.4' y2='88'/><line class='muted' stroke-width='2' x1='87.4' y1='88' x2='66.7' y2='150'/><line class='muted' stroke-width='2' x1='87.4' y1='88' x2='108.1' y2='150'/><line class='muted' stroke-width='2' x1='180.6' y1='26' x2='170.3' y2='88'/><line class='muted' stroke-width='2' x1='170.3' y1='88' x2='149.6' y2='150'/><line class='muted' stroke-width='2' x1='170.3' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='180.6' y1='26' x2='273.9' y2='88'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='232.4' y2='150'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='273.9' y2='150'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='315.3' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='158.6,9 202.6,9 180.6,45'/><text class='fg' font-size='15' font-weight='700' x='180.6' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='87.4,69 109.4,105 65.4,105'/><text class='fg' font-size='15' font-weight='700' x='87.4' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='52.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='66.7' y='156' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='94.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='156' text-anchor='middle'>1</text><polygon class='warn fill-bg' stroke-width='2.5' points='170.3,69 192.3,105 148.3,105'/><text class='fg' font-size='15' font-weight='700' x='170.3' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='135.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='149.6' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='273.9,69 295.9,105 251.9,105'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='218.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='232.4' y='156' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='259.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='156' text-anchor='middle'>8</text><rect class='fg fill-soft' stroke-width='2' x='301.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='315.3' y='156' text-anchor='middle'>2</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arbore cu A (7, 1), B (5, 9), C (4, 8, 2)",
+                  "ro": "Arbore cu A (7, 1), B (5, 9), C (4, 8, 2)"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s08",
+      "title": {
+        "en": "Aceleași numere, S este MAX",
+        "ro": "Aceleași numere, S este MAX"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16–17",
+        "ro": "Cursul 5 · slide 16–17"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Aceiași frunze, dar acum rădăcina S este MAX, iar A, B, C sunt MIN. Nivelurile se inversează, deci se schimbă și alegerea.",
+            "ro": "Aceiași frunze, dar acum rădăcina S este MAX, iar A, B, C sunt MIN. Nivelurile se inversează, deci se schimbă și alegerea."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ia-l05b-v02",
+          "widget": "game-tree",
+          "predict": true,
+          "props": {
+            "mode": "minimax",
+            "root": "MAX",
+            "rootLabel": {
+              "en": "adversarul",
+              "ro": "adversarul"
+            },
+            "tree": {
+              "id": "S",
+              "children": [
+                {
+                  "id": "A",
+                  "children": [
+                    {
+                      "leaf": 3
+                    },
+                    {
+                      "leaf": 12
+                    },
+                    {
+                      "leaf": 8
+                    }
+                  ]
+                },
+                {
+                  "id": "B",
+                  "children": [
+                    {
+                      "leaf": 2
+                    },
+                    {
+                      "leaf": 4
+                    },
+                    {
+                      "leaf": 6
+                    }
+                  ]
+                },
+                {
+                  "id": "C",
+                  "children": [
+                    {
+                      "leaf": 14
+                    },
+                    {
+                      "leaf": 5
+                    },
+                    {
+                      "leaf": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s09",
+      "title": {
+        "en": "Valoare și alegere",
+        "ro": "Valoare și alegere"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 17",
+        "ro": "Cursul 5 · slide 17"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Aceleași frunze, două roluri pentru S:",
+                "ro": "Aceleași frunze, două roluri pentru S:"
+              }
+            },
+            {
+              "table": {
+                "columns": [
+                  "S este",
+                  "A",
+                  "B",
+                  "C",
+                  "Valoarea lui S",
+                  "Alegerea"
+                ],
+                "rows": [
+                  [
+                    "MIN",
+                    "12",
+                    "6",
+                    "14",
+                    "6",
+                    "B"
+                  ],
+                  [
+                    "MAX",
+                    "3",
+                    "2",
+                    "2",
+                    "3",
+                    "A"
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Minimax întoarce o valoare; alegerea este fiul lui S care dă acea valoare.",
+            "ro": "Minimax întoarce o valoare; alegerea este fiul lui S care dă acea valoare."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Dacă doi fii dau aceeași valoare lui S, oricare dintre ei este o alegere bună.",
+                "ro": "Dacă doi fii dau aceeași valoare lui S, oricare dintre ei este o alegere bună."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s10",
+      "title": {
+        "en": "Valoarea și alegerea, un arbore nou",
+        "ro": "Valoarea și alegerea, un arbore nou"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 17",
+        "ro": "Cursul 5 · slide 17"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05b-e02",
+          "status": "verified-twice",
+          "statement": {
+            "en": "S este MIN (al nostru); A, B, C sunt MAX. Care e valoarea lui B, valoarea lui S și alegerea?",
+            "ro": "S este MIN (al nostru); A, B, C sunt MAX. Care e valoarea lui B, valoarea lui S și alegerea?"
+          },
+          "fields": [
+            {
+              "id": "b",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui B",
+                "ro": "Valoarea lui B"
+              },
+              "formula": "max(6,2,8)",
+              "expected": 8
+            },
+            {
+              "id": "s",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "min(9,8,7)",
+              "expected": 7
+            },
+            {
+              "id": "ch",
+              "kind": "choice",
+              "label": {
+                "en": "Alegerea",
+                "ro": "Alegerea"
+              },
+              "formula": "'C'",
+              "expected": "C",
+              "options": [
+                {
+                  "en": "A",
+                  "ro": "A"
+                },
+                {
+                  "en": "B",
+                  "ro": "B"
+                },
+                {
+                  "en": "C",
+                  "ro": "C"
+                }
+              ]
+            }
+          ],
+          "hints": [
+            {
+              "en": "A, B, C sunt MAX.",
+              "ro": "A, B, C sunt MAX."
+            },
+            {
+              "en": "A = 9, B = 8, C = 7; S este MIN.",
+              "ro": "A = 9, B = 8, C = 7; S este MIN."
+            },
+            {
+              "en": "min(9, 8, 7) = 7 vine din C.",
+              "ro": "min(9, 8, 7) = 7 vine din C."
+            }
+          ],
+          "solution": {
+            "en": "A = max(4, 9) = 9, B = max(6, 2, 8) = 8, C = max(3, 7) = 7. S = min(9, 8, 7) = 7, alegerea C.",
+            "ro": "A = max(4, 9) = 9, B = max(6, 2, 8) = 8, C = max(3, 7) = 7. S = min(9, 8, 7) = 7, alegerea C."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (4, 9), B (6, 2, 8), C (3, 7)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='87.4' y2='88'/><line class='muted' stroke-width='2' x1='87.4' y1='88' x2='66.7' y2='150'/><line class='muted' stroke-width='2' x1='87.4' y1='88' x2='108.1' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='149.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='232.4' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='294.6' y2='88'/><line class='muted' stroke-width='2' x1='294.6' y1='88' x2='273.9' y2='150'/><line class='muted' stroke-width='2' x1='294.6' y1='88' x2='315.3' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='87.4,69 109.4,105 65.4,105'/><text class='fg' font-size='15' font-weight='700' x='87.4' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='52.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='66.7' y='156' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='94.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='156' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='135.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='149.6' y='156' text-anchor='middle'>6</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='218.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='232.4' y='156' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='294.6,69 316.6,105 272.6,105'/><text class='fg' font-size='15' font-weight='700' x='294.6' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='259.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='301.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='315.3' y='156' text-anchor='middle'>7</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore cu A (4, 9), B (6, 2, 8), C (3, 7)",
+              "ro": "Arbore cu A (4, 9), B (6, 2, 8), C (3, 7)"
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Același arbore, dar S este MAX; A, B, C sunt MIN.",
+                "ro": "Același arbore, dar S este MAX; A, B, C sunt MIN."
+              },
+              "solution": {
+                "en": "A = min(4, 9) = 4, B = min(6, 2, 8) = 2, C = min(3, 7) = 3. S = max(4, 2, 3) = 4, alegerea A.",
+                "ro": "A = min(4, 9) = 4, B = min(6, 2, 8) = 2, C = min(3, 7) = 3. S = max(4, 2, 3) = 4, alegerea A."
+              },
+              "fields": [
+                {
+                  "id": "b",
+                  "formula": "min(6,2,8)",
+                  "expected": 2
+                },
+                {
+                  "id": "s",
+                  "formula": "max(4,2,3)",
+                  "expected": 4
+                },
+                {
+                  "id": "ch",
+                  "formula": "'A'",
+                  "expected": "A"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s11",
+      "title": {
+        "en": "Adâncimea",
+        "ro": "Adâncimea"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16–17",
+        "ro": "Cursul 5 · slide 16–17"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>Adâncimea scade cu 1 la fiecare nivel</title><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='117.6' y2='88'/><line class='muted' stroke-width='2' x1='117.6' y1='88' x2='77.9' y2='150'/><line class='muted' stroke-width='2' x1='117.6' y1='88' x2='117.6' y2='150'/><line class='muted' stroke-width='2' x1='117.6' y1='88' x2='157.3' y2='150'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='197.0' y2='88'/><line class='muted' stroke-width='2' x1='197.0' y1='88' x2='197.0' y2='150'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='276.4' y2='88'/><line class='muted' stroke-width='2' x1='276.4' y1='88' x2='236.7' y2='150'/><line class='muted' stroke-width='2' x1='276.4' y1='88' x2='276.4' y2='150'/><line class='muted' stroke-width='2' x1='276.4' y1='88' x2='316.1' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='175.0,9 219.0,9 197.0,45'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='117.6,69 139.6,105 95.6,105'/><text class='fg' font-size='15' font-weight='700' x='117.6' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='63.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='77.9' y='156' text-anchor='middle'>1</text><rect class='fg fill-soft' stroke-width='2' x='103.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='117.6' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='143.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='157.3' y='156' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='197.0,69 219.0,105 175.0,105'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='183.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='156' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='276.4,69 298.4,105 254.4,105'/><text class='fg' font-size='15' font-weight='700' x='276.4' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='222.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='236.7' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='262.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='276.4' y='156' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='302.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='316.1' y='156' text-anchor='middle'>2</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>depth 2</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>depth 1</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>depth 0</text></svg>",
+                "alt": {
+                  "en": "Arborele din slide cu adâncimile 2, 1, 0 pe niveluri",
+                  "ro": "Arborele din slide cu adâncimile 2, 1, 0 pe niveluri"
+                }
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "minimax(2, S, AI): adâncimea 2 înseamnă două niveluri sub S.",
+              "ro": "minimax(2, S, AI): adâncimea 2 înseamnă două niveluri sub S."
+            },
+            {
+              "en": "Fiecare apel recursiv coboară cu un nivel: depth − 1.",
+              "ro": "Fiecare apel recursiv coboară cu un nivel: depth − 1."
+            },
+            {
+              "en": "La depth = 0 nu mai coborâm: întoarcem score(state).",
+              "ro": "La depth = 0 nu mai coborâm: întoarcem score(state)."
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Căutarea se oprește când starea e finală sau adâncimea a ajuns la 0; atunci întoarce scorul stării.",
+            "ro": "Căutarea se oprește când starea e finală sau adâncimea a ajuns la 0; atunci întoarce scorul stării."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "În slide: final(state) || (depth == 0). Adâncimea trebuie să includă cel puțin o mutare a fiecărui alt jucător.",
+                "ro": "În slide: final(state) || (depth == 0). Adâncimea trebuie să includă cel puțin o mutare a fiecărui alt jucător."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s12",
+      "title": {
+        "en": "De ce adâncimea e limitată",
+        "ro": "De ce adâncimea e limitată"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 18",
+        "ro": "Cursul 5 · slide 18"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "La X și O, numărăm secvențele posibile de mutări, începând de pe tabla goală.",
+                "ro": "La X și O, numărăm secvențele posibile de mutări, începând de pe tabla goală."
+              }
+            },
+            {
+              "table": {
+                "columns": [
+                  "Adâncime",
+                  "Secvențe de mutări"
+                ],
+                "rows": [
+                  [
+                    "1",
+                    "9"
+                  ],
+                  [
+                    "2",
+                    "9 · 8 = 72"
+                  ],
+                  [
+                    "3",
+                    "9 · 8 · 7 = 504"
+                  ]
+                ]
+              }
+            },
+            {
+              "text": {
+                "en": "Tot arborele X și O are 549 946 de noduri; la șah, factorul de ramificare mediu e 35, deci numerele cresc mult mai repede.",
+                "ro": "Tot arborele X și O are 549 946 de noduri; la șah, factorul de ramificare mediu e 35, deci numerele cresc mult mai repede."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s13",
+      "title": {
+        "en": "Câte frunze are arborele",
+        "ro": "Câte frunze are arborele"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 18",
+        "ro": "Cursul 5 · slide 18"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05b-e03",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Factorul de ramificare b este numărul de mutări posibile dintr-o stare. Un arbore cu b mutări în fiecare stare are b^d frunze la adâncimea d. Pentru șah, b = 35.",
+            "ro": "Factorul de ramificare b este numărul de mutări posibile dintr-o stare. Un arbore cu b mutări în fiecare stare are b^d frunze la adâncimea d. Pentru șah, b = 35."
+          },
+          "fields": [
+            {
+              "id": "d2",
+              "kind": "num",
+              "label": {
+                "en": "Frunze la adâncimea 2",
+                "ro": "Frunze la adâncimea 2"
+              },
+              "formula": "35^2",
+              "expected": 1225
+            },
+            {
+              "id": "d3",
+              "kind": "num",
+              "label": {
+                "en": "Frunze la adâncimea 3",
+                "ro": "Frunze la adâncimea 3"
+              },
+              "formula": "35^3",
+              "expected": 42875
+            },
+            {
+              "id": "d4",
+              "kind": "num",
+              "label": {
+                "en": "Frunze la adâncimea 4 (numărul din slide)",
+                "ro": "Frunze la adâncimea 4 (numărul din slide)"
+              },
+              "formula": "35^4",
+              "expected": 1500625
+            }
+          ],
+          "hints": [
+            {
+              "en": "b^d: înmulțești pe b cu el însuși de d ori.",
+              "ro": "b^d: înmulțești pe b cu el însuși de d ori."
+            },
+            {
+              "en": "35 · 35 = 1225; 1225 · 35 = 42875.",
+              "ro": "35 · 35 = 1225; 1225 · 35 = 42875."
+            },
+            {
+              "en": "42875 · 35 = 1500625.",
+              "ro": "42875 · 35 = 1500625."
+            }
+          ],
+          "solution": {
+            "en": "35² = 1225, 35³ = 42875, 35⁴ = 1500625. Greșeală în slide: «1,500,625 states» sunt doar frunzele; toate stările până la adâncimea 4 sunt 1544761.",
+            "ro": "35² = 1225, 35³ = 42875, 35⁴ = 1500625. Greșeală în slide: «1,500,625 states» sunt doar frunzele; toate stările până la adâncimea 4 sunt 1544761."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Un joc cu b = 10 mutări în fiecare stare.",
+                "ro": "Un joc cu b = 10 mutări în fiecare stare."
+              },
+              "solution": {
+                "en": "10² = 100, 10³ = 1000, 10⁴ = 10000. Fiecare nivel în plus înmulțește cu 10.",
+                "ro": "10² = 100, 10³ = 1000, 10⁴ = 10000. Fiecare nivel în plus înmulțește cu 10."
+              },
+              "fields": [
+                {
+                  "id": "d2",
+                  "formula": "10^2",
+                  "expected": 100
+                },
+                {
+                  "id": "d3",
+                  "formula": "10^3",
+                  "expected": 1000
+                },
+                {
+                  "id": "d4",
+                  "formula": "10^4",
+                  "expected": 10000
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s14",
+      "title": {
+        "en": "O stare neterminată are nevoie de un număr",
+        "ro": "O stare neterminată are nevoie de un număr"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "La adâncimea limită jocul nu s-a terminat. Funcția de scor (score function) dă totuși stării un număr, ca să putem compara mutările.",
+                "ro": "La adâncimea limită jocul nu s-a terminat. Funcția de scor (score function) dă totuși stării un număr, ca să putem compara mutările."
+              }
+            },
+            {
+              "text": {
+                "en": "Slide-ul nu dă un scor pentru X și O: alegem unul noi, din liniile care mai pot fi câștigate.",
+                "ro": "Slide-ul nu dă un scor pentru X și O: alegem unul noi, din liniile care mai pot fi câștigate."
+              }
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Funcția de scor dă un număr stărilor la adâncimea limită, ca minimax să poată alege.",
+            "ro": "Funcția de scor dă un număr stărilor la adâncimea limită, ca minimax să poată alege."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Un scor mai bun pentru adversar înseamnă o stare mai rea pentru noi.",
+                "ro": "Un scor mai bun pentru adversar înseamnă o stare mai rea pentru noi."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s15",
+      "title": {
+        "en": "Liniile deschise",
+        "ro": "Liniile deschise"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "O linie e deschisă pentru un jucător dacă nu are nicio piesă a celuilalt. Pe tablă sunt 8 linii: 3 rânduri, 3 coloane, 2 diagonale. Noi suntem X, adversarul O. Scor = linii deschise ale lui O − linii deschise ale lui X.",
+                "ro": "O linie e deschisă pentru un jucător dacă nu are nicio piesă a celuilalt. Pe tablă sunt 8 linii: 3 rânduri, 3 coloane, 2 diagonale. Noi suntem X, adversarul O. Scor = linii deschise ale lui O − linii deschise ale lui X."
+              }
+            },
+            {
+              "table": {
+                "columns": [
+                  "Prima mutare a lui X",
+                  "deschise X",
+                  "deschise O",
+                  "scor"
+                ],
+                "rows": [
+                  [
+                    "centru",
+                    "8",
+                    "4",
+                    "−4"
+                  ],
+                  [
+                    "colț",
+                    "8",
+                    "5",
+                    "−3"
+                  ],
+                  [
+                    "margine",
+                    "8",
+                    "6",
+                    "−2"
+                  ]
+                ]
+              }
+            },
+            {
+              "text": {
+                "en": "Centru: 4 − 8 = −4, cel mai mic scor, deci cea mai bună primă mutare după acest scor.",
+                "ro": "Centru: 4 − 8 = −4, cel mai mic scor, deci cea mai bună primă mutare după acest scor."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s16",
+      "title": {
+        "en": "Scorul unei poziții",
+        "ro": "Scorul unei poziții"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05b-e04",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Noi suntem X, adversarul O. Scor = linii deschise ale lui O − linii deschise ale lui X. O linie e deschisă dacă nu are nicio piesă a celuilalt.",
+            "ro": "Noi suntem X, adversarul O. Scor = linii deschise ale lui O − linii deschise ale lui X. O linie e deschisă dacă nu are nicio piesă a celuilalt."
+          },
+          "fields": [
+            {
+              "id": "x",
+              "kind": "num",
+              "label": {
+                "en": "Linii deschise pentru X",
+                "ro": "Linii deschise pentru X"
+              },
+              "formula": "5",
+              "expected": 5
+            },
+            {
+              "id": "o",
+              "kind": "num",
+              "label": {
+                "en": "Linii deschise pentru O",
+                "ro": "Linii deschise pentru O"
+              },
+              "formula": "4",
+              "expected": 4
+            },
+            {
+              "id": "s",
+              "kind": "num",
+              "label": {
+                "en": "Scorul",
+                "ro": "Scorul"
+              },
+              "formula": "4-5",
+              "expected": -1
+            }
+          ],
+          "hints": [
+            {
+              "en": "Numără liniile fără nicio piesă a adversarului. O în colțul b11 blochează 3 linii pentru X; X în centru blochează 4 pentru O.",
+              "ro": "Numără liniile fără nicio piesă a adversarului. O în colțul b11 blochează 3 linii pentru X; X în centru blochează 4 pentru O."
+            },
+            {
+              "en": "Pentru X: 8 − 3 = 5. Pentru O: 8 − 4 = 4.",
+              "ro": "Pentru X: 8 − 3 = 5. Pentru O: 8 − 4 = 4."
+            },
+            {
+              "en": "Scor = 4 − 5 = −1.",
+              "ro": "Scor = 4 − 5 = −1."
+            }
+          ],
+          "solution": {
+            "en": "Colțul b11 blochează rândul 1, coloana 1 și o diagonală pentru X: 8 − 3 = 5. Centrul blochează 4 linii pentru O: 8 − 4 = 4. Scor = 4 − 5 = −1.",
+            "ro": "Colțul b11 blochează rândul 1, coloana 1 și o diagonală pentru X: 8 − 3 = 5. Centrul blochează 4 linii pentru O: 8 − 4 = 4. Scor = 4 − 5 = −1."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 180 168'><title>Tablă: O în colț, X în centru</title><rect class='fg fill-bg' stroke-width='2' x='6' y='6' width='52' height='52'/><text class='bad' font-size='28' font-weight='700' x='32.0' y='41.0' text-anchor='middle'>O</text><rect class='fg fill-bg' stroke-width='2' x='58' y='6' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='110' y='6' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='6' y='58' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='58' y='58' width='52' height='52'/><text class='accent' font-size='28' font-weight='700' x='84.0' y='93.0' text-anchor='middle'>X</text><rect class='fg fill-bg' stroke-width='2' x='110' y='58' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='6' y='110' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='58' y='110' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='110' y='110' width='52' height='52'/></svg>",
+            "alt": {
+              "en": "Tablă cu O în b11 și X în b22",
+              "ro": "Tablă cu O în b11 și X în b22"
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Același X în centru, dar O este pe margine, în b12.",
+                "ro": "Același X în centru, dar O este pe margine, în b12."
+              },
+              "solution": {
+                "en": "O în b12 blochează rândul 1 și coloana 2 pentru X: 8 − 2 = 6. X în centru blochează 4 linii pentru O: 4. Scor = 4 − 6 = −2.",
+                "ro": "O în b12 blochează rândul 1 și coloana 2 pentru X: 8 − 2 = 6. X în centru blochează 4 linii pentru O: 4. Scor = 4 − 6 = −2."
+              },
+              "fields": [
+                {
+                  "id": "x",
+                  "formula": "6",
+                  "expected": 6
+                },
+                {
+                  "id": "o",
+                  "formula": "4",
+                  "expected": 4
+                },
+                {
+                  "id": "s",
+                  "formula": "4-6",
+                  "expected": -2
+                }
+              ],
+              "figure": {
+                "svg": "<svg viewBox='0 0 180 168'><title>Tablă: O pe margine, X în centru</title><rect class='fg fill-bg' stroke-width='2' x='6' y='6' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='58' y='6' width='52' height='52'/><text class='bad' font-size='28' font-weight='700' x='84.0' y='41.0' text-anchor='middle'>O</text><rect class='fg fill-bg' stroke-width='2' x='110' y='6' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='6' y='58' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='58' y='58' width='52' height='52'/><text class='accent' font-size='28' font-weight='700' x='84.0' y='93.0' text-anchor='middle'>X</text><rect class='fg fill-bg' stroke-width='2' x='110' y='58' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='6' y='110' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='58' y='110' width='52' height='52'/><rect class='fg fill-bg' stroke-width='2' x='110' y='110' width='52' height='52'/></svg>",
+                "alt": {
+                  "en": "Tablă cu O în b12 și X în b22",
+                  "ro": "Tablă cu O în b12 și X în b22"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s17",
+      "title": {
+        "en": "Stările finale",
+        "ro": "Stările finale"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "O stare finală nu are nevoie de linii deschise: știm cine a câștigat. Îi dăm un număr foarte mare sau foarte mic, ca o victorie să bată orice scor obișnuit.",
+                "ro": "O stare finală nu are nevoie de linii deschise: știm cine a câștigat. Îi dăm un număr foarte mare sau foarte mic, ca o victorie să bată orice scor obișnuit."
+              }
+            },
+            {
+              "table": {
+                "columns": [
+                  "Starea finală",
+                  "Scorul (pentru adversar)"
+                ],
+                "rows": [
+                  [
+                    "adversarul câștigă",
+                    "+100"
+                  ],
+                  [
+                    "noi câștigăm",
+                    "−100"
+                  ],
+                  [
+                    "remiză",
+                    "0"
+                  ]
+                ]
+              }
+            },
+            {
+              "text": {
+                "en": "Valorile ±100 sunt alegerea noastră; slide-ul nu dă niciun scor.",
+                "ro": "Valorile ±100 sunt alegerea noastră; slide-ul nu dă niciun scor."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s18",
+      "title": {
+        "en": "Adâncimea 1: ce alegem?",
+        "ro": "Adâncimea 1: ce alegem?"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16–18",
+        "ro": "Cursul 5 · slide 16–18"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Noi suntem X și mutăm acum. La adâncimea 1 punem piesa și calculăm scorul stării (scor = linii deschise ale lui O − ale lui X). Alegem cel mai mic scor.",
+            "ro": "Noi suntem X și mutăm acum. La adâncimea 1 punem piesa și calculăm scorul stării (scor = linii deschise ale lui O − ale lui X). Alegem cel mai mic scor."
+          }
+        },
+        {
+          "type": "mcq",
+          "id": "ia-l05b-q02",
+          "question": {
+            "en": "Care celulă o alege căutarea la adâncimea 1?",
+            "ro": "Care celulă o alege căutarea la adâncimea 1?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "9",
+                "ro": "9"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Scorul lui 9 este 0, mai mare decât −1.",
+                "ro": "Scorul lui 9 este 0, mai mare decât −1."
+              },
+              "misconception": "alege-blocarea-fara-calcul"
+            },
+            {
+              "text": {
+                "en": "3",
+                "ro": "3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Scorul lui 3 este +1.",
+                "ro": "Scorul lui 3 este +1."
+              },
+              "misconception": "scor-maxim-in-loc-de-minim"
+            },
+            {
+              "text": {
+                "en": "7",
+                "ro": "7"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Corect: 7 are scorul −1, cel mai mic.",
+                "ro": "Corect: 7 are scorul −1, cel mai mic."
+              }
+            },
+            {
+              "text": {
+                "en": "8",
+                "ro": "8"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Scorul lui 8 este +1.",
+                "ro": "Scorul lui 8 este +1."
+              },
+              "misconception": "scor-maxim-in-loc-de-minim"
+            }
+          ],
+          "table": {
+            "columns": [
+              "Celula",
+              "3",
+              "4",
+              "7",
+              "8",
+              "9"
+            ],
+            "rows": [
+              [
+                "Scor",
+                "+1",
+                "+1",
+                "−1",
+                "+1",
+                "0"
+              ]
+            ]
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 180 168'><title>Poziția: O în 1 și 5, X în 2 și 6; urmează X (noi)</title><rect class='fg fill-bg' stroke-width='2' x='6' y='6' width='52' height='52'/><text class='bad' font-size='28' font-weight='700' x='32.0' y='41.0' text-anchor='middle'>O</text><rect class='fg fill-bg' stroke-width='2' x='58' y='6' width='52' height='52'/><text class='accent' font-size='28' font-weight='700' x='84.0' y='41.0' text-anchor='middle'>X</text><rect class='fg fill-bg' stroke-width='2' x='110' y='6' width='52' height='52'/><text class='muted' font-size='18' x='136.0' y='38.0' text-anchor='middle'>3</text><rect class='fg fill-bg' stroke-width='2' x='6' y='58' width='52' height='52'/><text class='muted' font-size='18' x='32.0' y='90.0' text-anchor='middle'>4</text><rect class='fg fill-bg' stroke-width='2' x='58' y='58' width='52' height='52'/><text class='bad' font-size='28' font-weight='700' x='84.0' y='93.0' text-anchor='middle'>O</text><rect class='fg fill-bg' stroke-width='2' x='110' y='58' width='52' height='52'/><text class='accent' font-size='28' font-weight='700' x='136.0' y='93.0' text-anchor='middle'>X</text><rect class='fg fill-bg' stroke-width='2' x='6' y='110' width='52' height='52'/><text class='muted' font-size='18' x='32.0' y='142.0' text-anchor='middle'>7</text><rect class='fg fill-bg' stroke-width='2' x='58' y='110' width='52' height='52'/><text class='muted' font-size='18' x='84.0' y='142.0' text-anchor='middle'>8</text><rect class='fg fill-bg' stroke-width='2' x='110' y='110' width='52' height='52'/><text class='muted' font-size='18' x='136.0' y='142.0' text-anchor='middle'>9</text></svg>",
+            "alt": {
+              "en": "Tablă cu O în 1 și 5, X în 2 și 6; celulele libere sunt numerotate",
+              "ro": "Tablă cu O în 1 și 5, X în 2 și 6; celulele libere sunt numerotate"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s19",
+      "title": {
+        "en": "Adâncimea 2: răspunsul lui O",
+        "ro": "Adâncimea 2: răspunsul lui O"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16–18",
+        "ro": "Cursul 5 · slide 16–18"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Acum vedem și răspunsul lui O. Pentru celula 7, O poate răspunde în 9 (diagonala 1-5-9) și câștigă: +100. Celulele 3, 4, 8 se termină la fel. Doar celula 9 blochează diagonala.",
+            "ro": "Acum vedem și răspunsul lui O. Pentru celula 7, O poate răspunde în 9 (diagonala 1-5-9) și câștigă: +100. Celulele 3, 4, 8 se termină la fel. Doar celula 9 blochează diagonala."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ia-l05b-v03",
+          "widget": "game-tree",
+          "predict": true,
+          "props": {
+            "mode": "minimax",
+            "root": "MIN",
+            "rootLabel": {
+              "en": "noi (X)",
+              "ro": "noi (X)"
+            },
+            "tree": {
+              "id": "S",
+              "children": [
+                {
+                  "id": "c7",
+                  "children": [
+                    {
+                      "leaf": 0
+                    },
+                    {
+                      "leaf": -1
+                    },
+                    {
+                      "leaf": 0
+                    },
+                    {
+                      "leaf": 100
+                    }
+                  ]
+                },
+                {
+                  "id": "c9",
+                  "children": [
+                    {
+                      "leaf": 1
+                    },
+                    {
+                      "leaf": 0
+                    },
+                    {
+                      "leaf": 1
+                    },
+                    {
+                      "leaf": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s20",
+      "title": {
+        "en": "Câte mutări trebuie să vedem",
+        "ro": "Câte mutări trebuie să vedem"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "table": {
+                "columns": [
+                  "Adâncimea",
+                  "Mutarea aleasă",
+                  "Ce vede"
+                ],
+                "rows": [
+                  [
+                    "1",
+                    "7",
+                    "doar mutarea noastră"
+                  ],
+                  [
+                    "2",
+                    "9",
+                    "și răspunsul lui O"
+                  ],
+                  [
+                    "3",
+                    "9",
+                    "încă o mutare a noastră"
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Adâncimea trebuie să includă cel puțin o mutare a fiecărui alt jucător; altfel nu vezi răspunsul adversarului.",
+            "ro": "Adâncimea trebuie să includă cel puțin o mutare a fiecărui alt jucător; altfel nu vezi răspunsul adversarului."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Slide 16: `at the minimum it has to include a full step for all other players`.",
+                "ro": "Slide 16: `at the minimum it has to include a full step for all other players`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s21",
+      "title": {
+        "en": "De ce pierde adâncimea 1",
+        "ro": "De ce pierde adâncimea 1"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16–18",
+        "ro": "Cursul 5 · slide 16–18"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ia-l05b-q03",
+          "question": {
+            "en": "La adâncimea 1, minimax a ales celula 7, care pierde. De ce?",
+            "ro": "La adâncimea 1, minimax a ales celula 7, care pierde. De ce?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "funcția de scor este greșită",
+                "ro": "funcția de scor este greșită"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Funcția e aceeași și la adâncimea 2, care alege bine.",
+                "ro": "Funcția e aceeași și la adâncimea 2, care alege bine."
+              },
+              "misconception": "vina-pe-functia-de-scor"
+            },
+            {
+              "text": {
+                "en": "minimax presupune un adversar slab",
+                "ro": "minimax presupune un adversar slab"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Minimax presupune că adversarul alege mereu cea mai bună mutare.",
+                "ro": "Minimax presupune că adversarul alege mereu cea mai bună mutare."
+              },
+              "misconception": "minimax-presupune-adversar-slab"
+            },
+            {
+              "text": {
+                "en": "adâncimea 1 explorează prea multe stări",
+                "ro": "adâncimea 1 explorează prea multe stări"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Adâncimea 1 explorează cele mai puține stări.",
+                "ro": "Adâncimea 1 explorează cele mai puține stări."
+              },
+              "misconception": "adancime-mica-explorare-mare"
+            },
+            {
+              "text": {
+                "en": "scorul s-a calculat chiar după mutarea noastră, fără răspunsul lui O",
+                "ro": "scorul s-a calculat chiar după mutarea noastră, fără răspunsul lui O"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Corect: răspunsul lui O în 9 nu a intrat în calcul.",
+                "ro": "Corect: răspunsul lui O în 9 nu a intrat în calcul."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s22",
+      "title": {
+        "en": "Minimax e previzibil",
+        "ro": "Minimax e previzibil"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 18",
+        "ro": "Cursul 5 · slide 18"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Presupune că adversarul alege mereu cea mai bună mutare.",
+              "ro": "Presupune că adversarul alege mereu cea mai bună mutare."
+            },
+            {
+              "en": "Adâncimea este esențială pentru acuratețe.",
+              "ro": "Adâncimea este esențială pentru acuratețe."
+            },
+            {
+              "en": "Adâncimea e limitată de memoria pentru stările explorate: la șah, 35 de mutări pe stare.",
+              "ro": "Adâncimea e limitată de memoria pentru stările explorate: la șah, 35 de mutări pe stare."
+            },
+            {
+              "en": "E previzibil: aceeași stare, aceeași mutare.",
+              "ro": "E previzibil: aceeași stare, aceeași mutare."
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Minimax este previzibil și presupune adversari previzibili.",
+            "ro": "Minimax este previzibil și presupune adversari previzibili."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Slide 18: `MINIMAX is predictable and assumes predictable opponents`.",
+                "ro": "Slide 18: `MINIMAX is predictable and assumes predictable opponents`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s23",
+      "title": {
+        "en": "Pseudocodul din slide, rând cu rând",
+        "ro": "Pseudocodul din slide, rând cu rând"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "text",
+          "code": "score minimax(depth, state,\n    next_player)\n{\n  if(final(state)||(depth==0))\n    return score(state);\n  else\n    if (next_player is the\n        minimising one)\n      return\n          min(minimax(depth-1,\n         each neighbour\n             state,next_player);\n    else\n      return\n          max(minimax(depth-1,\n         each neighbour\n             state,next_player);\n}"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Prima condiție: starea e finală sau adâncimea e 0: întoarce score(state).",
+              "ro": "Prima condiție: starea e finală sau adâncimea e 0: întoarce score(state)."
+            },
+            {
+              "en": "Altfel, dacă urmează jucătorul minimizant: întoarce minimul valorilor vecinilor.",
+              "ro": "Altfel, dacă urmează jucătorul minimizant: întoarce minimul valorilor vecinilor."
+            },
+            {
+              "en": "Altfel: întoarce maximul valorilor vecinilor.",
+              "ro": "Altfel: întoarce maximul valorilor vecinilor."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s24",
+      "title": {
+        "en": "Pseudocodul, corectat",
+        "ro": "Pseudocodul, corectat"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Greșeală în slide: apelul recursiv trimite aceleași next_player, deci jucătorii nu alternează; parantezele de la min și max nu se închid. Versiunea corectată (a noastră):",
+                "ro": "Greșeală în slide: apelul recursiv trimite aceleași next_player, deci jucătorii nu alternează; parantezele de la min și max nu se închid. Versiunea corectată (a noastră):"
+              }
+            }
+          ]
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "score minimax(depth, state,\n    next_player)\n{\n  if (final(state) || depth ==\n      0)\n    return score(state);\n  if (next_player is the\n      minimising one)\n    return min over each\n        neighbour state of\n      minimax(depth-1,\n          neighbour, other\n          player);\n  else\n    return max over each\n        neighbour state of\n      minimax(depth-1,\n          neighbour, other\n          player);\n}"
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s25",
+      "title": {
+        "en": "O euristică pentru jucătorul 1",
+        "ro": "O euristică pentru jucătorul 1"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Cerință de examen: X și O pun pe rând piese pe o tablă 3×3. Propune o euristică prin care MIN-MAX merge pentru jucătorul 1 (X).",
+                "ro": "Cerință de examen: X și O pun pe rând piese pe o tablă 3×3. Propune o euristică prin care MIN-MAX merge pentru jucătorul 1 (X)."
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "Stări finale: +100 dacă X a câștigat, −100 dacă O a câștigat, 0 la remiză.",
+              "ro": "Stări finale: +100 dacă X a câștigat, −100 dacă O a câștigat, 0 la remiză."
+            },
+            {
+              "en": "Altfel: scor = linii deschise ale lui X − linii deschise ale lui O.",
+              "ro": "Altfel: scor = linii deschise ale lui X − linii deschise ale lui O."
+            },
+            {
+              "en": "La mutările lui X se ia maximul, la ale lui O minimul.",
+              "ro": "La mutările lui X se ia maximul, la ale lui O minimul."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s26",
+      "title": {
+        "en": "Care convenție?",
+        "ro": "Care convenție?"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "rule",
+          "text": {
+            "en": "O euristică dă un număr oricărei stări, iar numărul mai mare înseamnă mai bine pentru jucătorul pentru care joacă algoritmul.",
+            "ro": "O euristică dă un număr oricărei stări, iar numărul mai mare înseamnă mai bine pentru jucătorul pentru care joacă algoritmul."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Scorul din ecranul anterior e pentru X; slide-ul îl dă pentru adversar. Amândouă merg, dacă spui care e MIN și care MAX.",
+                "ro": "Scorul din ecranul anterior e pentru X; slide-ul îl dă pentru adversar. Amândouă merg, dacă spui care e MIN și care MAX."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s27",
+      "title": {
+        "en": "Altă euristică, scrisă de tine",
+        "ro": "Altă euristică, scrisă de tine"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16",
+        "ro": "Cursul 5 · slide 16"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ia-l05b-r01",
+          "prompt": {
+            "en": "Același joc, X și O pe o tablă 3×3. Propune o euristică pentru jucătorul 1 (X) diferită de cea cu liniile deschise. Spune ce scor dai stărilor finale și ce scor dai celor neterminate.",
+            "ro": "Același joc, X și O pe o tablă 3×3. Propune o euristică pentru jucătorul 1 (X) diferită de cea cu liniile deschise. Spune ce scor dai stărilor finale și ce scor dai celor neterminate."
+          },
+          "placeholder": {
+            "en": "Scrie ce crezi",
+            "ro": "Scrie ce crezi"
+          },
+          "answer": {
+            "en": "Un răspuns acceptabil: stări finale +100 / −100 / 0; altfel scor = (liniile cu două X și nicio O) − (liniile cu două O și nicio X). Număr mare = bine pentru X; ia maximul la mutările lui X și minimul la ale lui O.",
+            "ro": "Un răspuns acceptabil: stări finale +100 / −100 / 0; altfel scor = (liniile cu două X și nicio O) − (liniile cu două O și nicio X). Număr mare = bine pentru X; ia maximul la mutările lui X și minimul la ale lui O."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s28",
+      "title": {
+        "en": "Recapitulare",
+        "ro": "Recapitulare"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16–18",
+        "ro": "Cursul 5 · slide 16–18"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Minimax: MIN alege minimul, MAX maximul, de jos în sus; valoarea e un număr, alegerea e un fiu.",
+              "ro": "Minimax: MIN alege minimul, MAX maximul, de jos în sus; valoarea e un număr, alegerea e un fiu."
+            },
+            {
+              "en": "Căutarea se oprește la stare finală sau la adâncimea 0 și întoarce score(state).",
+              "ro": "Căutarea se oprește la stare finală sau la adâncimea 0 și întoarce score(state)."
+            },
+            {
+              "en": "Adâncimea trebuie să includă răspunsul fiecărui alt jucător.",
+              "ro": "Adâncimea trebuie să includă răspunsul fiecărui alt jucător."
+            },
+            {
+              "en": "Funcția de scor: linii deschise, +100 / −100 / 0 la stări finale.",
+              "ro": "Funcția de scor: linii deschise, +100 / −100 / 0 la stări finale."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05b-s29",
+      "title": {
+        "en": "Verificare: valoare, alegere, scor",
+        "ro": "Verificare: valoare, alegere, scor"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 16–18",
+        "ro": "Cursul 5 · slide 16–18"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05b-e05",
+          "status": "verified-twice",
+          "statement": {
+            "en": "S este MIN (al nostru); A, B, C sunt MAX. Calculează valoarea lui S și alegerea; apoi scorul unei poziții cu un singur X, în centru (scor = linii deschise ale lui O − ale lui X).",
+            "ro": "S este MIN (al nostru); A, B, C sunt MAX. Calculează valoarea lui S și alegerea; apoi scorul unei poziții cu un singur X, în centru (scor = linii deschise ale lui O − ale lui X)."
+          },
+          "fields": [
+            {
+              "id": "s",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "min(max(5,8),max(3,9),max(6,4))",
+              "expected": 6
+            },
+            {
+              "id": "ch",
+              "kind": "choice",
+              "label": {
+                "en": "Alegerea",
+                "ro": "Alegerea"
+              },
+              "formula": "'C'",
+              "expected": "C",
+              "options": [
+                {
+                  "en": "A",
+                  "ro": "A"
+                },
+                {
+                  "en": "B",
+                  "ro": "B"
+                },
+                {
+                  "en": "C",
+                  "ro": "C"
+                }
+              ]
+            },
+            {
+              "id": "sc",
+              "kind": "num",
+              "label": {
+                "en": "Scorul poziției cu X în centru",
+                "ro": "Scorul poziției cu X în centru"
+              },
+              "formula": "4-8",
+              "expected": -4
+            },
+            {
+              "id": "n",
+              "kind": "num",
+              "label": {
+                "en": "Frunze la adâncimea 3 cu b = 6",
+                "ro": "Frunze la adâncimea 3 cu b = 6"
+              },
+              "formula": "6^3",
+              "expected": 216
+            }
+          ],
+          "hints": [
+            {
+              "en": "A = max(5, 8) = 8, B = 9, C = 6.",
+              "ro": "A = max(5, 8) = 8, B = 9, C = 6."
+            },
+            {
+              "en": "min(8, 9, 6) = 6, de la C. Scor: O are 4 linii deschise, X are 8.",
+              "ro": "min(8, 9, 6) = 6, de la C. Scor: O are 4 linii deschise, X are 8."
+            },
+            {
+              "en": "4 − 8 = −4. 6 · 6 · 6 = 216.",
+              "ro": "4 − 8 = −4. 6 · 6 · 6 = 216."
+            }
+          ],
+          "solution": {
+            "en": "A = 8, B = 9, C = 6; S = min(8, 9, 6) = 6, alegerea C. Poziția: X are 8 linii deschise, O are 4: scor 4 − 8 = −4. 6³ = 216.",
+            "ro": "A = 8, B = 9, C = 6; S = min(8, 9, 6) = 6, alegerea C. Poziția: X are 8 linii deschise, O are 4: scor 4 − 8 = −4. 6³ = 216."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (5, 8), B (3, 9), C (6, 4)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='94.3' y2='88'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='70.2' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='118.5' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='166.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='215.2' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='287.7' y2='88'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='263.5' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='311.8' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='94.3,69 116.3,105 72.3,105'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='56.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='70.2' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='104.5' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='118.5' y='156' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='152.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='166.8' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='201.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='215.2' y='156' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='287.7,69 309.7,105 265.7,105'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='249.5' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='263.5' y='156' text-anchor='middle'>6</text><rect class='fg fill-soft' stroke-width='2' x='297.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='311.8' y='156' text-anchor='middle'>4</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore cu A (5, 8), B (3, 9), C (6, 4)",
+              "ro": "Arbore cu A (5, 8), B (3, 9), C (6, 4)"
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Alt arbore: A (2, 6), B (7, 1, 4), C (3, 5); aceleași întrebări, cu b = 5 la ultima.",
+                "ro": "Alt arbore: A (2, 6), B (7, 1, 4), C (3, 5); aceleași întrebări, cu b = 5 la ultima."
+              },
+              "solution": {
+                "en": "A = 6, B = 7, C = 5; S = min(6, 7, 5) = 5, alegerea C. Poziția cu X în centru: scor 4 − 8 = −4. 5³ = 125.",
+                "ro": "A = 6, B = 7, C = 5; S = min(6, 7, 5) = 5, alegerea C. Poziția cu X în centru: scor 4 − 8 = −4. 5³ = 125."
+              },
+              "fields": [
+                {
+                  "id": "s",
+                  "formula": "min(max(2,6),max(7,1,4),max(3,5))",
+                  "expected": 5
+                },
+                {
+                  "id": "ch",
+                  "formula": "'C'",
+                  "expected": "C"
+                },
+                {
+                  "id": "sc",
+                  "formula": "4-8",
+                  "expected": -4
+                },
+                {
+                  "id": "n",
+                  "formula": "5^3",
+                  "expected": 125
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

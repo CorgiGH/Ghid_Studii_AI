@@ -133,6 +133,9 @@ export const IA_TAGS = [
   'egalitatea-strica-nash', 'egalitatea-strica-dominanta', 'lcv-luat-drept-mrv', 'lcv-luat-drept-fc', 'lcv-valoarea-invers',
   'ac-ca-fc', 'ac-ordine-alfabetica', 'baza-si-exponent-inversate', 'produs-in-loc-de-putere', 'complexitatea-ac3-la-backtracking',
   'limita-sub-numarul-real', 'limita-prea-larga', 'toate-colorarile-complete',
+  // ia-l05 tags begin (IA lecture 5 full lessons ia-l05a..e, D-099)
+  'adancime-mica-explorare-mare', 'alege-blocarea-fara-calcul', 'alegeri-diferite-luate-drept-nesimetric', 'alpha-in-loc-de-beta', 'citeste-tot-din-prudenta', 'cooperarea-pare-dominanta', 'dilema-fara-dominanta', 'doi-jucatori-luati-drept-unul', 'echilibru-implica-dominanta', 'frunza-cea-mai-mica-iluzorie', 'joc-neterminat-cu-tabla-plina', 'kriegspiel-ca-sah', 'max-poate-scadea-sub-prima-frunza', 'minimax-presupune-adversar-slab', 'parte-existenta-luata-drept-lipsa', 'ramuri-socotite-egale', 'remiza-strica-suma-nula', 'scor-maxim-in-loc-de-minim', 'simultan-luat-drept-alternativ', 'tabla-plina-e-remiza', 'taiere-intoarce-valoarea-reala', 'vina-pe-functia-de-scor',
+  // ia-l05 tags end
 ];
 
 export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS, ...IA_TAGS]);
