@@ -26,6 +26,11 @@ const table = (course, id, which = 0) => step(course, id).blocks.find((b) => b.t
 const vizOf = (course, id) => step(course, id).blocks.find((b) => b.type === 'viz');
 // The worked traces of the lesson as the course prints them (c4ro p.28-30 and p.34-38; every row recomputed in Python). The lesson
 // screens now draw them with the widgets; these tables are what the widgets must reproduce.
+// The course tables the lessons used to print before the screens drew them with the widgets (ag-cp-2b/2c, 2d, 8b, 10b); the widgets must reproduce them.
+const T2C = {"rows": [["$DE$", 1, "{D,E}", "✓"], ["$AC$", 2, "{A,C}", "✓"], ["$BD$", 3, "{B,D,E}", "✓"], ["$AB$", 4, "{A,B,C,D,E}", "✓"], ["$BC$", 5, "–", "✗"], ["$CE$", 6, "–", "✗"], ["$CD$", 7, "–", "✗"]]};
+const T2D = {"rows": [["A", "4 (A)", "2 (A)", "∞", "∞"], ["C", "4 (A)", "–", "7 (C)", "6 (C)"], ["B", "–", "–", "3 (B)", "6 (C)"], ["D", "–", "–", "–", "1 (D)"], ["E", "–", "–", "–", "–"]]};
+const T8B = {"rows": [[1, 1, "–"], [2, 1, "–"], [3, 2, "✓"], [4, 1, "–"], [5, 2, "✓"], [6, 1, "–"]]};
+const T10B = {"rows": [["$h$", "$r_1$, $r_2$, $r_3$, $r_4$, $r_5$", 1], ["$r_1$", "$h$, $r_2$, $r_5$", 2], ["$r_2$", "$h$, $r_1$, $r_3$", 3], ["$r_3$", "$h$, $r_2$, $r_4$", 2], ["$r_4$", "$h$, $r_3$, $r_5$", 3], ["$r_5$", "$h$, $r_1$, $r_4$", 4]]};
 const S14_ROWS = [["A", "B, C", "{r, g, b}"], ["B", "A, C, D", "{r, g, b}"], ["C", "A, B, D", "{r, g, b}"], ["D", "B, C, E", "{r, g, b}"], ["E", "D", "{r, g, b}"]];
 const S16_TABLE = {"rows": [["start", "{r, g, b}", "{r, g, b}", "{r, g, b}", "{r, g, b}", "{r, g, b}"], ["1. A = r", "= r", "{g, b}", "{g, b}", "{r, g, b}", "{r, g, b}"], ["2. B = g", "= r", "= g", "{b}", "{r, b}", "{r, g, b}"], ["3. C = b", "= r", "= g", "= b", "{r}", "{r, g, b}"], ["4. D = r", "= r", "= g", "= b", "= r", "{g, b}"], ["5. E = g", "= r", "= g", "= b", "= r", "= g"]], "caption": "Domeniile după fiecare alegere și după FC"};
 const S20_DOMAINS = [["A", "{1, 2, 3}"], ["B", "{1, 2, 3}"], ["C", "{1, 2, 3}"]];
@@ -316,13 +321,13 @@ describe('ac3 reproduces the 11 arcs of s22', () => {
   });
 });
 
-describe('dijkstra reproduces ag-cp-1c', () => {
-  const props = vizOf(AG, 'ag-cp-1c2').props;
+describe('dijkstra on ag-cp-1c reproduces the finished run of ag-cp-1c2', () => {
+  const props = vizOf(AG, 'ag-cp-1c').props;
   const M = graphModel(props);
-  const T = table(AG, 'ag-cp-1c', 0);
-  it('the arcs of the new screen are the arcs the lesson draws on ag-cp-1c', () => {
-    // ag-cp-1c draws its digraph as a figure: node letters and arc costs are its text labels
-    const svg = step(AG, 'ag-cp-1c').blocks[0].intro.find((p) => p.figure).figure.svg;
+  const T = table(AG, 'ag-cp-1c2', 0);
+  it('the arcs of the walk are the arcs the lesson draws on ag-cp-1c2', () => {
+    // ag-cp-1c2 draws its digraph as a figure: node letters and arc costs are its text labels
+    const svg = step(AG, 'ag-cp-1c2').blocks[0].intro.find((p) => p.figure).figure.svg;
     const labels = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
     const costs = labels.filter((t) => /^\d+$/.test(t)).map(Number).sort((a, b) => a - b);
     const nodes = labels.filter((t) => /^[a-z]$/.test(t)).sort();
@@ -433,7 +438,7 @@ describe('the drawing', () => {
     ['csp-fc', () => vizOf(IA, 'ia-ct2-s15').props],
     ['csp-fc dead end', () => S19(['r', 'g'])],
     ['ac3', () => vizOf(IA, 'ia-ct2-s22a').props],
-    ['dijkstra', () => vizOf(AG, 'ag-cp-1c2').props],
+    ['dijkstra', () => vizOf(AG, 'ag-cp-1c').props],
     ['kruskal', () => ({ ...M2, mode: 'kruskal' })],
     ['prim', () => ({ ...COURSE_MST, mode: 'prim', source: 'A' })],
     ['bfm', () => BFM],
@@ -559,7 +564,7 @@ describe('validateViz and the lesson JSON', () => {
     expect(WIDGET_NAMES).toContain('graph-walk');
     expect(validateViz(vizOf(IA, 'ia-ct2-s15'))).toEqual([]);
     expect(validateViz(vizOf(IA, 'ia-ct2-s22a'))).toEqual([]);
-    expect(validateViz(vizOf(AG, 'ag-cp-1c2'))).toEqual([]);
+    expect(validateViz(vizOf(AG, 'ag-cp-1c'))).toEqual([]);
   });
   it('rejects an unknown mode, a mode whose data is incomplete, a bad node, a missing domain and a node that is not there', () => {
     const p = vizOf(IA, 'ia-ct2-s22a').props;
@@ -571,7 +576,7 @@ describe('validateViz and the lesson JSON', () => {
     expect(validateViz(block({ ...p, edges: [{ u: 'A', v: 'Z' }] })).join(' ')).toMatch(/unknown node/);
     expect(validateViz(block({ ...p, constraint: 'sum' })).join(' ')).toMatch(/constraint/);
     expect(graphProblems({ mode: 'ac3', nodes: [], edges: [] })).not.toEqual([]);
-    const d = vizOf(AG, 'ag-cp-1c2').props;
+    const d = vizOf(AG, 'ag-cp-1c').props;
     expect(validateViz(block({ ...d, source: undefined })).join(' ')).toMatch(/source/);
   });
   it('the new screens sit right after the screens they extend, and the section counts follow the steps', () => {
@@ -584,7 +589,7 @@ describe('validateViz and the lesson JSON', () => {
     expect(count('ag', 'ag-crash-partial')).toBe(AG.steps.length);
   });
   it('the screens hold one widget that asks for picks and carry no teaching-step label', () => {
-    for (const [c, id] of [[IA, 'ia-ct2-s15'], [IA, 'ia-ct2-s16'], [IA, 'ia-ct2-s22a'], [AG, 'ag-cp-1c2']]) {
+    for (const [c, id] of [[IA, 'ia-ct2-s15'], [IA, 'ia-ct2-s16'], [IA, 'ia-ct2-s22a'], [AG, 'ag-cp-1c']]) {
       const s = step(c, id);
       const v = s.blocks.filter((b) => b.type === 'viz');
       expect(v).toHaveLength(1);
@@ -594,9 +599,9 @@ describe('validateViz and the lesson JSON', () => {
   });
 });
 
-describe('kruskal reproduces the table of ag-cp-2c', () => {
+describe('kruskal reproduces the table of the worked run (ag-cp-2b)', () => {
   const M = graphModel({ ...COURSE_MST, mode: 'kruskal' });
-  const T = table(AG, 'ag-cp-2c', 0);
+  const T = T2C;
   it('the sorted edges, the component after each and the verdict are the lesson table, row by row', () => {
     expect(M.count).toBe(1 + T.rows.length);
     T.rows.forEach((r, i) => {
@@ -679,7 +684,7 @@ describe('kruskal on the new m2 data: 17, CD rejected first', () => {
 
 describe('prim reproduces the table of ag-cp-2d', () => {
   const M = graphModel({ ...COURSE_MST, mode: 'prim', source: 'A' });
-  const T = table(AG, 'ag-cp-2d', 1);
+  const T = T2D;
   it('the rows of beta[j] and alpha[j] are the lesson table: added A, C, B, D, E', () => {
     expect(M.count).toBe(T.rows.length);
     T.rows.forEach((r, i) => {
@@ -766,7 +771,7 @@ describe('bfm on the notation of agr3 p.18-22', () => {
 
 describe('cut reproduces ag-cp-8b and ag-cp-8e', () => {
   const M = graphModel({ ...CUT_8B, mode: 'cut' });
-  const T = table(AG2, 'ag-cp-8b', 1);
+  const T = T8B;
   it('the node rows are the lesson table: components left and the cut-vertex mark', () => {
     const last = M.scene(6).table;
     expect(last.rows).toHaveLength(T.rows.length);
@@ -820,7 +825,7 @@ describe('cut reproduces ag-cp-8b and ag-cp-8e', () => {
 
 describe('colour reproduces the wheel of ag-cp-10b', () => {
   const M = graphModel({ ...WHEEL, mode: 'colour' });
-  const T = table(AG2, 'ag-cp-10b', 0);
+  const T = T10B;
   it('h, r1 .. r5 get 1, 2, 3, 2, 3, 4 as in the lesson table', () => {
     expect(M.steps.map((s) => s.c)).toEqual(T.rows.map((r) => r[2]));
     expect(M.steps.map((s) => s.id)).toEqual(['h', 'r1', 'r2', 'r3', 'r4', 'r5']);
@@ -831,7 +836,7 @@ describe('colour reproduces the wheel of ag-cp-10b', () => {
     expect(M.chi).toBe(4);
     expect(M.caption(M.count - 1).ro).toMatch(/χ\(G\) ≤ 4.*ω\(G\) = 3/);
     expect(M.caption(M.count - 1).ro).toContain('Nu există colorare cu 3 culori, deci χ(G) = 4.');
-    expect(step(AG2, 'ag-cp-10b').blocks[0].result.ro).toContain('\\chi(G)=4');
+    expect(step(AG2, 'ag-cp-10b2').blocks.find((b) => b.type === 'steps').result.ro).toContain('\\chi(G)=4');
   });
   it('a bad order uses more colours than needed, and the end says so: a path a-b-c-d in the order a, d, b, c', () => {
     const P = graphModel({ ...mk('abcd', [['a', 'b'], ['b', 'c'], ['c', 'd']]), mode: 'colour', order: ['a', 'd', 'b', 'c'] });
@@ -872,5 +877,57 @@ describe('colour reproduces the wheel of ag-cp-10b', () => {
     const sc = M.scene(3);
     expect(sc.nodes.find((n) => n.id === 'r2').label.items[0].t).toBe('3');
     expect(sc.nodes.find((n) => n.id === 'r4').cls).toBe('');
+  });
+});
+
+// The lesson screens' own widget data (not the constants above) must give the traces the lessons state (review of 2026-11-09;
+// expected values recomputed in Python from the same JSON).
+describe('the AG lessons\' own widget data reproduce their traces', () => {
+  const model = (course, id) => graphModel(vizOf(course, id).props);
+  it('ag-cp-2b: Kruskal accepts DE, AC, BD, AB for cost 10 and rejects BC, CE, CD, row by row as the course table', () => {
+    const M = model(AG, 'ag-cp-2b');
+    expect(M.cost).toBe(10);
+    expect(M.accepted).toEqual(['DE', 'AC', 'BD', 'AB']);
+    expect([...M.rejected].sort()).toEqual(['BC', 'CD', 'CE']);
+    T2C.rows.forEach((r, i) => {
+      const sc = M.scene(i + 1).table.rows[i];
+      expect(sc.edge, `row ${i}`).toBe(clean(r[0]));
+      expect(sc.ok).toBe(r[3]);
+    });
+  });
+  it('ag-cp-2d: Prim from A adds C, B, D, E (tree AC, AB, BD, DE, cost 10), as the course table', () => {
+    const M = model(AG, 'ag-cp-2d');
+    expect(M.tree.map((e) => `${e.u}${e.v}`)).toEqual(['AC', 'AB', 'BD', 'DE']);
+    expect(M.cost).toBe(10);
+    T2D.rows.forEach((r, i) => expect(M.scene(i).table.rows[i].added, `row ${i}`).toBe(r[0]));
+  });
+  it('ag-cp-1g: Bellman-Ford-Moore gives u^1 = (0, 3, 4, inf), u^2 = (0, 2, 4, 5), u^3 = (0, 2, 4, 4)', () => {
+    const M = model(AG, 'ag-cp-1g');
+    expect(M.tables).toEqual([{ s: 0, a: 3, b: 4, c: Infinity }, { s: 0, a: 2, b: 4, c: 5 }, { s: 0, a: 2, b: 4, c: 4 }]);
+  });
+  it('ag-cp-1f2: Dijkstra fixes s, z, w, t, v, y, u with u = 0, 1, 2, 3, 4, 6, 7', () => {
+    const M = model(AG, 'ag-cp-1f2');
+    expect(M.rounds.map((r) => r.fixed)).toEqual(['s', 'z', 'w', 't', 'v', 'y', 'u']);
+    expect(['z', 'w', 't', 'v', 'y', 'u'].map((i) => M.final.u[i])).toEqual([1, 2, 3, 4, 6, 7]);
+  });
+  it('ag-cp-2f1: Kruskal with negative costs accepts AB, CF, DE, BC, BE for cost -3', () => {
+    const M = model(AG, 'ag-cp-2f1');
+    expect(M.cost).toBe(-3);
+    expect([...M.accepted].sort()).toEqual(['AB', 'BC', 'BE', 'CF', 'DE']);
+    expect([...M.rejected].sort()).toEqual(['AD', 'BD', 'EF']);
+  });
+  it('ag-cp-8b: the cut walk finds cut vertices 3, 5 and the bridge 56', () => {
+    const M = model(AG2, 'ag-cp-8b');
+    expect(M.cutVertices).toEqual(['3', '5']);
+    expect(M.bridges).toEqual(['56']);
+    T8B.rows.forEach((r, i) => expect(M.scene(6).table.rows[i].n, `node ${r[0]}`).toBe(r[1]));
+  });
+  it('ag-cp-10b: the wheel is coloured h, r1..r5 = 1, 2, 3, 2, 3, 4; chi = 4, omega = 3 (the colouring drawn on ag-cp-10b2)', () => {
+    const M = model(AG2, 'ag-cp-10b');
+    expect(M.steps.map((s) => s.c)).toEqual([1, 2, 3, 2, 3, 4]);
+    expect([M.chi, M.omega]).toEqual([4, 3]);
+    const svg = step(AG2, 'ag-cp-10b2').blocks[0].intro.find((p) => p.figure).figure.svg;
+    const labels = [...svg.matchAll(/<title>([^<]*)<\/title><circle[^>]*\/><text[^>]*>[^<]*<\/text><text[^>]*>(\d)<\/text>/g)].map((m) => `${m[1]}:${m[2]}`);
+    expect(labels).toEqual(['h:1', 'r1:2', 'r2:3', 'r3:2', 'r4:3', 'r5:4']);
   });
 });
