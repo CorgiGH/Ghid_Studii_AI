@@ -101,10 +101,12 @@ export function kruskal(props) {
     const state = new Map(f.decided.map((d, i) => [sorted[i].name, d]));
     const nodes = G.nodes.map((nd) => ({ id: nd.id, x: nd.x, y: nd.y, cls: colourOf[nd.id] || '', above: nd.lab === 'above' }));
     const circ = new Set(f.kind === 'edge' && f.circuit ? f.circuit.edges : []);
+    const ask = frames[k + 1]?.edge; // the edge the next question is about, dashed
     const edges = sorted.map((e) => {
       const d = state.get(e.name);
       let cls = '';
       if (f.kind === 'edge' && f.edge === e) cls = f.ok ? 'ok' : 'bad';
+      else if (e === ask) cls = 'target';
       else if (circ.has(e.name)) cls = 'hl';
       else if (d) cls = d.ok ? 'ok' : 'dim';
       return { u: e.u, v: e.v, w: e.w, cls };

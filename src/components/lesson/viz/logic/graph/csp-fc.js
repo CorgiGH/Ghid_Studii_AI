@@ -23,6 +23,12 @@ export function cspFc(props) {
     const min = Math.min(...un.map((id) => domains[id].length));
     return un.find((id) => domains[id].length === min);
   };
+  // more than one unassigned variable has the fewest values: MRV broke a tie
+  const tieOf = (domains, assigned) => {
+    const un = ids.filter((id) => !(id in assigned));
+    const min = Math.min(...un.map((id) => domains[id].length));
+    return un.filter((id) => domains[id].length === min).length > 1;
+  };
 
   const frames = [];
   const startMrv = mrvOf(dom0, {});
@@ -30,12 +36,13 @@ export function cspFc(props) {
 
   const run = (domains, assigned, depth) => {
     const X = mrvOf(domains, assigned);
+    const tie = tieOf(domains, assigned);
     const tried = [];
     const vals = [...domains[X]];
     for (let i = 0; i < vals.length; i++) {
       const v = vals[i];
       const asg = { ...assigned, [X]: v };
-      frames.push({ kind: 'assign', domains: clone(domains), assigned: asg, X, v, tried: [...tried], size: domains[X].length });
+      frames.push({ kind: 'assign', domains: clone(domains), assigned: asg, X, v, tried: [...tried], size: domains[X].length, tie });
       const nd = clone(domains);
       nd[X] = [v];
       const removed = {};
@@ -79,12 +86,18 @@ export function cspFc(props) {
     if (!predict || !f) return null;
     if (f.kind === 'choose') {
       const un = ids.filter((id) => !(id in f.assigned));
+      if (un.length < 2) return null; // one variable left: nothing to choose
+      const ties = order.filter((id) => !(id in f.assigned) && sizeOf(f, id) === sizeOf(f, f.mrv));
       return { items: [{
         key: `f${k}-mrv`, kind: 'single', answer: f.mrv,
         prompt: { en: 'Which variable does MRV take now? Ties go to the first in alphabetical order.', ro: 'Ce variabilă ia MRV acum? La egalitate, prima în ordine alfabetică.' },
         options: un.map((id) => ({ id, label: id })),
         fb: (p, ok) => both((lang) => {
           const T = (en, ro) => (lang === 'en' ? en : ro);
+          if (ok && ties.length > 1) {
+            const n = valuesWord(sizeOf(f, f.mrv));
+            return T(`${lst(lang, ties)} have ${n.en} each; on a tie, the first alphabetically: ${f.mrv}.`, `${lst(lang, ties)} au câte ${n.ro}; la egalitate, prima alfabetic: ${f.mrv}.`);
+          }
           if (ok) return T(`${f.mrv} has the fewest values: ${sizeOf(f, f.mrv)}.`, `${f.mrv} are cele mai puține valori: ${sizeOf(f, f.mrv)}.`);
           if (sizeOf(f, p) === sizeOf(f, f.mrv)) return T(`${p} ties with ${f.mrv}, and ${f.mrv} comes first alphabetically.`, `${p} e la egalitate cu ${f.mrv}, iar ${f.mrv} e prima în ordine alfabetică.`);
           return T(`${p} has ${sizeOf(f, p)} values but ${f.mrv} has only ${sizeOf(f, f.mrv)}: MRV takes the fewest.`, `${p} are ${sizeOf(f, p)} valori, dar ${f.mrv} are doar ${sizeOf(f, f.mrv)}: MRV ia variabila cu cele mai puține.`);
@@ -93,6 +106,7 @@ export function cspFc(props) {
     }
     if (f.kind === 'assign') {
       const opts = ids.filter((id) => !(id in f.assigned) && f.domains[id].includes(f.v));
+      if (opts.length === 0) return null; // nothing unassigned still has the value: nothing to tap
       const nbs = G.nb(f.X);
       const answer = opts.filter((id) => nbs.includes(id));
       return { items: [{
@@ -102,8 +116,8 @@ export function cspFc(props) {
         options: opts.map((id) => ({ id, label: { en: `${f.v} from ${id}`, ro: `${f.v} din ${id}` } })),
         fb: (p, ok) => both((lang) => {
           const T = (en, ro) => (lang === 'en' ? en : ro);
-          const right = answer.length ? lst(lang, answer) : T('no variable', 'nicio variabilă');
-          if (ok) return T(`Right: ${f.v} leaves ${right}, the unassigned neighbours of ${f.X} that still have it.`, `Corect: ${f.v} iese din ${right}, vecinii nefixați ai lui ${f.X} care îl mai au.`);
+          if (ok && answer.length === 0) return T(`Right: no unassigned neighbour of ${f.X} still has ${f.v}, so nothing leaves.`, `Corect: niciun vecin nefixat al lui ${f.X} nu mai are ${f.v}, deci nu iese nimic.`);
+          if (ok) return T(`Right: ${f.v} leaves ${lst(lang, answer)}, the unassigned neighbours of ${f.X} that still have it.`, `Corect: ${f.v} iese din ${lst(lang, answer)}, vecinii nefixați ai lui ${f.X} care îl mai au.`);
           const extra = (p || []).filter((id) => !answer.includes(id));
           const miss = answer.filter((id) => !(p || []).includes(id));
           if (extra.length) return T(`${lst(lang, extra)} ${extra.length > 1 ? 'are' : 'is'} not a neighbour of ${f.X}: FC cuts only from neighbours.`, `${lst(lang, extra)} ${extra.length > 1 ? 'nu sunt vecini' : 'nu e vecin'} cu ${f.X}: FC taie doar din vecini.`);
@@ -127,9 +141,12 @@ export function cspFc(props) {
           key: `f${k}-next`, kind: 'single', answer: f.next,
           prompt: { en: `Which value of ${f.X} do you try now?`, ro: `Ce valoare încerci acum la ${f.X}?` },
           options: f.domains[f.X].map((v) => ({ id: v, label: v })),
-          fb: (p, ok) => both((lang) => (ok
-            ? (lang === 'en' ? `${f.next}: the first value not tried yet.` : `${f.next}: prima valoare neîncercată.`)
-            : (lang === 'en' ? `${p} was already tried, or an earlier value is still free: take the first untried one.` : `${p} fie a fost încercată, fie e o valoare mai devreme neîncercată: ia prima neîncercată.`))),
+          fb: (p, ok) => both((lang) => {
+            const T = (en, ro) => (lang === 'en' ? en : ro);
+            if (ok) return T(`${f.next}: the first value not tried yet.`, `${f.next}: prima valoare neîncercată.`);
+            if (f.tried.includes(p)) return T(`${p} was already tried; the next untried one is ${f.next}.`, `${p} a fost deja încercată; următoarea neîncercată e ${f.next}.`);
+            return T(`${p} is not tried yet, but ${f.next} comes before it: take the values in order.`, `${p} e încă neîncercată, dar ${f.next} vine înaintea ei: ia valorile în ordine.`);
+          }),
         }] };
       }
       return { items: [{
@@ -160,7 +177,8 @@ export function cspFc(props) {
     }
     if (f.kind === 'assign') {
       if (f.tried.length) return T(`Next value of ${f.X}: ${f.v}. The neighbours still have what they had before.`, `Următoarea valoare a lui ${f.X}: ${f.v}. Vecinii au din nou ce aveau înainte.`);
-      return T(`MRV took ${f.X}: ${f.size} ${f.size === 1 ? 'value' : 'values'}, the fewest (ties alphabetical). It gets its first legal value, ${f.v}.`, `MRV a luat ${f.X}: ${valuesWord(f.size).ro}, cele mai puține (la egalitate, alfabetic). Primește prima valoare legală, ${f.v}.`);
+      const tie = f.tie ? T(' (ties alphabetical)', ' (la egalitate, alfabetic)') : '';
+      return T(`MRV took ${f.X}: ${valuesWord(f.size).en}, the fewest${tie}. It gets its first legal value, ${f.v}.`, `MRV a luat ${f.X}: ${valuesWord(f.size).ro}, cele mai puține${tie}. Primește prima valoare legală, ${f.v}.`);
     }
     if (f.kind === 'wipeout') {
       return T(`Empty domain: you go back. ${f.empty} has no value left after ${f.X} = ${f.v}.`, `Domeniu gol: te întorci. ${f.empty} a rămas fără nicio valoare după ${f.X} = ${f.v}.`);

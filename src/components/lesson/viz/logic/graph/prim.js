@@ -1,6 +1,7 @@
-// graph-walk, mode prim: notation of the course (agr5 p.10-12): β[j] is the cost of the cheapest edge from j into the tree T,
-// α[j] its end in T, so β[j] = c(α[j] j). Start with one node; add the node outside T with the smallest β (ties alphabetical),
-// then update β and α of its neighbours outside T.
+// graph-walk, mode prim: notation of the course (agr5 p.10-12): the tree is T_s = (V_s, E_s), V_s its nodes. For j outside V_s,
+// β[j] = c(α[j]j) = min over i in V_s, ij in E of c(ij): the cost of the cheapest edge from j to a node of V_s, α[j] that node.
+// Start with V_s = {s}; add j*, the node outside V_s with the smallest β (ties alphabetical), then update β and α of the nodes
+// outside V_s.
 import { both, readGraph, INF, alpha } from './common.js';
 
 export function prim(props) {
@@ -51,13 +52,14 @@ export function prim(props) {
     const f = frames[k];
     const next = frames[k + 1].added;
     const out = ids.filter((i) => !f.T.includes(i));
+    if (out.length < 2) return null; // one node left outside V_s: nothing to choose
     return { items: [{
       key: `f${k}-add`, kind: 'single', answer: next,
       prompt: { en: 'Which node joins the tree now?', ro: 'Care nod intră acum în arbore?' },
       options: out.map((i) => ({ id: i, label: i })),
       fb: (p, ok) => both((lang) => (lang === 'en'
-        ? (ok ? `β[${next}] = ${B(f.beta[next])} is the smallest outside T.` : `β[${p}] = ${B(f.beta[p])}, but β[${next}] = ${B(f.beta[next])} is smaller: take the smallest β outside T.`)
-        : (ok ? `β[${next}] = ${B(f.beta[next])} e cel mai mic din afara lui T.` : `β[${p}] = ${B(f.beta[p])}, dar β[${next}] = ${B(f.beta[next])} e mai mic: luăm cel mai mic β din afara lui T.`))),
+        ? (ok ? `β[${next}] = ${B(f.beta[next])} is the smallest outside V_s.` : `β[${p}] = ${B(f.beta[p])}, but β[${next}] = ${B(f.beta[next])} is smaller: take the smallest β outside V_s.`)
+        : (ok ? `β[${next}] = ${B(f.beta[next])} e cel mai mic din afara lui V_s.` : `β[${p}] = ${B(f.beta[p])}, dar β[${next}] = ${B(f.beta[next])} e mai mic: luăm cel mai mic β din afara lui V_s.`))),
     }] };
   };
 
@@ -69,11 +71,11 @@ export function prim(props) {
     if (k === 0) {
       const none = others.filter((i) => al[i] === null && f.beta[i] === Infinity);
       return T_(
-        `T = {${start}}. β[j] is the cost of the cheapest edge from j into T, α[j] its end in T: ${ups.map(upText).join('; ') || 'no edge leaves T'}${none.length ? `; β = ${INF} for ${none.join(', ')}` : ''}.`,
-        `T = {${start}}. β[j] e costul celei mai ieftine muchii de la j în T, α[j] capătul ei din T: ${ups.map(upText).join('; ') || 'nicio muchie nu iese din T'}${none.length ? `; β = ${INF} pentru ${none.join(', ')}` : ''}.`);
+        `V_s = {${start}}, the nodes of the tree T. β[j] is the cost of the cheapest edge from j to a node of V_s, α[j] that node: ${ups.map(upText).join('; ') || 'no edge leaves V_s'}${none.length ? `; β = ${INF} for ${none.join(', ')}` : ''}.`,
+        `V_s = {${start}}, nodurile arborelui T. β[j] e costul celei mai ieftine muchii de la j la un nod din V_s, α[j] acel nod: ${ups.map(upText).join('; ') || 'nicio muchie nu iese din V_s'}${none.length ? `; β = ${INF} pentru ${none.join(', ')}` : ''}.`);
     }
     const e = f.edge;
-    const head = T_(`${e.u}${e.v} (${e.w}) joins ${e.v}: β[${e.v}] = ${e.w} was the smallest outside T. T = {${f.T.join(', ')}}.`, `${e.u}${e.v} (${e.w}) aduce nodul ${e.v}: β[${e.v}] = ${e.w} era cel mai mic din afara lui T. T = {${f.T.join(', ')}}.`);
+    const head = T_(`${e.u}${e.v} (${e.w}) joins ${e.v}: β[${e.v}] = ${e.w} was the smallest outside V_s. V_s = {${f.T.join(', ')}}.`, `${e.u}${e.v} (${e.w}) aduce nodul ${e.v}: β[${e.v}] = ${e.w} era cel mai mic din afara lui V_s. V_s = {${f.T.join(', ')}}.`);
     const tail = f.updates.length === 0 ? '' : ups.length ? T_(` Update: ${ups.map(upText).join('; ')}.`, ` Actualizăm: ${ups.map(upText).join('; ')}.`) : T_(' No β gets smaller.', ' Niciun β nu scade.');
     const end = k === R ? T_(` Done: c(T) = ${f.cost}, with ${R} edges = n\u00a0−\u00a01.`, ` Gata: c(T) = ${f.cost}, cu ${R} muchii = n\u00a0−\u00a01.`) : '';
     return head + tail + end;

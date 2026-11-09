@@ -103,6 +103,38 @@ describe('csp-fc reproduces the s16 table of the lesson', () => {
     const k2 = 5; // C = b: D loses b; B is fixed
     expect(M.pickSpec(k2, true).items[0].answer).toEqual(['D']);
   });
+  it('a tie is named as a tie: all five have 3 values at the start, B and C have 2 after A = r (the s16 "alfabetic")', () => {
+    const it0 = M.pickSpec(0, true).items[0];
+    expect(it0.fb('A', true).ro).toBe('A, B, C, D și E au câte 3 valori; la egalitate, prima alfabetic: A.');
+    expect(it0.fb('C', false).ro).toBe('C e la egalitate cu A, iar A e prima în ordine alfabetică.');
+    expect(M.pickSpec(2, true).items[0].fb('B', true).ro).toBe('B și C au câte 2 valori; la egalitate, prima alfabetic: B.');
+    // after B = g only C is down to one value: no tie
+    expect(M.pickSpec(4, true).items[0].fb('C', true).ro).toBe('C are cele mai puține valori: 1.');
+    expect(M.caption(1).ro).toContain('(la egalitate, alfabetic)');
+    expect(M.caption(3).ro).toContain('(la egalitate, alfabetic)');
+    for (const k of [5, 7, 9]) expect(M.caption(k).ro, `frame ${k}`).not.toContain('egalitate');
+    expect(M.frames.filter((f) => f.kind === 'assign').map((f) => f.tie)).toEqual([true, true, false, false, false]);
+  });
+  it('no question with nothing to choose: frame 8 has only E left, frame 9 (E = g) has no unassigned variable', () => {
+    expect(M.frames[8].kind).toBe('choose');
+    expect(M.pickSpec(8, true)).toBeNull();
+    expect(M.frames[9].kind).toBe('assign');
+    expect(M.pickSpec(9, true)).toBeNull();
+    for (let k = 0; k < M.count; k++) {
+      const spec = M.pickSpec(k, true);
+      if (spec && spec.items[0].kind === 'single') expect(spec.items[0].options.length, `frame ${k}`).toBeGreaterThan(1);
+      if (spec && spec.items[0].kind === 'multi') expect(spec.items[0].options.length, `frame ${k}`).toBeGreaterThan(0);
+    }
+  });
+  it('an FC question whose answer is empty says that no neighbour still has the value', () => {
+    // X - Y, Z alone: X = a leaves Y alone (Y has only b); Z still has a but is not a neighbour
+    const F = graphModel({ mode: 'csp-fc', nodes: [{ id: 'X', x: 0, y: 0 }, { id: 'Y', x: 90, y: 0 }, { id: 'Z', x: 180, y: 0 }], edges: [{ u: 'X', v: 'Y' }], domains: { X: ['a'], Y: ['b'], Z: ['a', 'b'] } });
+    const it = F.pickSpec(1, true).items[0];
+    expect(it.options.map((o) => o.id)).toEqual(['Z']);
+    expect(it.answer).toEqual([]);
+    expect(it.fb([], true).ro).toBe('Corect: niciun vecin nefixat al lui X nu mai are a, deci nu iese nimic.');
+    expect(it.fb(['Z'], false).ro).toContain('Z nu e vecin cu X');
+  });
   it('captions name MRV, the value and what FC took out', () => {
     expect(M.caption(1).ro).toContain('MRV a luat A');
     expect(M.caption(1).ro).toContain('prima valoare legală, r');
@@ -137,6 +169,17 @@ describe('csp-fc on the s19 map with two colours (the dead end of the lesson)', 
     const [b1, b2] = [wipe + 1, wipe + 2];
     expect(M.pickSpec(b1, true).items[0].answer).toBe('no');
     expect(M.pickSpec(b2, true).items[0].answer).toBe('g');
+  });
+  it('a wrong next value: a tried one is named as tried, a later untried one is told to wait its turn', () => {
+    const b2 = M.frames.findIndex((f) => f.kind === 'back' && f.next === 'g');
+    expect(M.pickSpec(b2, true).items[0].fb('r', false).ro).toBe('r a fost deja încercată; următoarea neîncercată e g.');
+    // K4 with three colours: A = r fails all the way down, so A asks for its next value among r, g, b
+    const K4 = graphModel({ mode: 'csp-fc', nodes: ['A', 'B', 'C', 'D'].map((id, i) => ({ id, x: i * 80, y: (i % 2) * 60 })), edges: [['A', 'B'], ['A', 'C'], ['A', 'D'], ['B', 'C'], ['B', 'D'], ['C', 'D']].map(([u, v]) => ({ u, v })), domains: Object.fromEntries(['A', 'B', 'C', 'D'].map((id) => [id, ['r', 'g', 'b']])) });
+    const kA = K4.frames.findIndex((f) => f.kind === 'back' && f.X === 'A' && f.next === 'g');
+    const it = K4.pickSpec(kA, true).items[0];
+    expect(it.fb('r', false).ro).toBe('r a fost deja încercată; următoarea neîncercată e g.');
+    expect(it.fb('b', false).ro).toBe('b e încă neîncercată, dar g vine înaintea ei: ia valorile în ordine.');
+    expect(K4.solved).toBe(false);
   });
   it('with three colours the same map has a solution and nothing goes empty', () => {
     const M3 = graphModel(S19(['r', 'g', 'b']));
@@ -213,6 +256,7 @@ describe('ac3 reproduces the 11 arcs of s22', () => {
     const it = M.pickSpec(rev, true).items[0];
     expect(it.answer).toEqual(['B,A']);
     expect(it.options.map((o) => o.label)).toEqual(['(B, A)', '(A, B)']);
+    expect(it.fb(['B,A'], true).ro).toBe('Corect: (X_k, A) pentru fiecare vecin X_k al lui A, inclusiv B (cel abia verificat), pentru că A s-a schimbat.');
     // row 2 revises B: neighbours A and C
     const rev2 = M.frames.findIndex((f, i) => f.kind === 'revised' && i > rev);
     expect(M.pickSpec(rev2, true).items[0].answer).toEqual(['A,B', 'C,B']);
@@ -292,15 +336,19 @@ describe('dijkstra reproduces ag-cp-1c', () => {
     expect(up(3)).toEqual(['d:9->8']);
     expect(M.rounds[3].relaxed).toEqual([['c', 'd']]);
   });
-  it('the pick before each round: the node with the smallest u outside S; the last asks the cost', () => {
+  it('the pick before each round: the node with the smallest u outside S; none when only d is left; the last asks the path', () => {
     expect(M.pickSpec(0, true).items[0].answer).toBe('b');
     expect(M.pickSpec(0, true).items[0].options.map((o) => o.id)).toEqual(['a', 'b', 'c', 'd']);
     expect(M.pickSpec(1, true).items[0].answer).toBe('a');
     expect(M.pickSpec(2, true).items[0].answer).toBe('c');
-    expect(M.pickSpec(3, true).items[0].answer).toBe('d');
+    expect(M.pickSpec(3, true)).toBeNull(); // S = {s, b, a, c}: d is the only node left
     const last = M.pickSpec(4, true).items[0];
-    expect(last.answer).toBe('8');
-    expect(last.options.map((o) => o.id)).toEqual(['2', '5', '6', '8']);
+    // the path read back through before[] (cost 8) and the two next cheapest paths: s-b-a-d (2+3+4 = 9), s-a-c-d (7+1+2 = 10)
+    expect(last.answer).toBe('s → b → a → c → d');
+    expect(last.options.map((o) => o.id)).toEqual(['s → a → c → d', 's → b → a → c → d', 's → b → a → d']);
+    expect(last.fb(last.answer, true).ro).toBe('Corect: before[d] = c, before[c] = a, before[a] = b, before[b] = s.');
+    expect(last.fb('s → b → a → d', false).ro).toBe('Drumul acela costă 9. Citește-l înapoi din d: before[d] = c, before[c] = a, before[a] = b, before[b] = s.');
+    expect(last.prompt.ro).not.toMatch(/costul minim/);
     expect(M.pickSpec(5, true)).toBeNull();
   });
   it('captions use the notation of agr3 p.9: S, u_i, before[i], a_si', () => {
@@ -330,6 +378,16 @@ describe('dijkstra reproduces ag-cp-1c', () => {
   it('an undirected graph relaxes both ways', () => {
     const G = graphModel({ mode: 'dijkstra', directed: false, source: 'a', nodes: [{ id: 'a', x: 0, y: 0 }, { id: 'b', x: 50, y: 0 }, { id: 'c', x: 100, y: 0 }], edges: [{ u: 'b', v: 'a', w: 4 }, { u: 'c', v: 'b', w: 1 }] });
     expect(G.final.u).toEqual({ a: 0, b: 4, c: 5 });
+  });
+  it('an undirected graph lights its edges whichever way they are stored', () => {
+    // s-b 1, a-b 2, a-t 5 is the path (1 + 2 + 5 = 8); b-s and t-a are stored the other way round
+    const G = graphModel({ mode: 'dijkstra', directed: false, source: 's', target: 't', nodes: [{ id: 's', x: 0, y: 50 }, { id: 'a', x: 100, y: 0 }, { id: 'b', x: 100, y: 100 }, { id: 't', x: 200, y: 50 }], edges: [{ u: 'a', v: 's', w: 4 }, { u: 'b', v: 's', w: 1 }, { u: 'a', v: 'b', w: 2 }, { u: 't', v: 'a', w: 5 }, { u: 't', v: 'b', w: 8 }] });
+    expect(G.pathTo('t')).toEqual(['s', 'b', 'a', 't']);
+    expect(G.final.u.t).toBe(8);
+    const cls = (k) => Object.fromEntries(G.scene(k).edges.map((e) => [`${e.u}${e.v}`, e.cls]));
+    expect(cls(G.count - 1)).toEqual({ as: 'dim', bs: 'ok', ab: 'ok', ta: 'ok', tb: 'dim' });
+    // round 1 fixes b and relaxes a (4 to 3) and t (to 9) along a-b and t-b
+    expect(cls(1)).toMatchObject({ ab: 'ok', tb: 'ok' });
   });
   it('rejects a negative cost, an unknown source and an edge to a missing node', () => {
     const base = { mode: 'dijkstra', directed: true, source: 's', nodes: [{ id: 's', x: 0, y: 0 }, { id: 'a', x: 5, y: 5 }] };
@@ -428,6 +486,28 @@ describe('the drawing', () => {
     expect(html).toContain('<i>a</i><sub>si</sub>');
     expect(html).toContain('<i>X</i><sub>k</sub>');
     expect(html).toContain('<sub>j*</sub>');
+    expect(renderToStaticMarkup(React.createElement('p', null, notation('V_s = {A}')))).toContain('<i>V</i><sub>s</sub>');
+  });
+  it('the AC-3 arc bends to the side away from the constraint text, for (B, A) as for (A, B)', () => {
+    const props = vizOf(IA, 'ia-ct2-s22a').props;
+    const M = graphModel(props);
+    const y = props.nodes[0].y; // the chain is drawn on one line
+    let seen = 0;
+    for (let k = 0; k < M.count; k++) {
+      if (!M.scene(k).arc) continue;
+      const html = renderToStaticMarkup(React.createElement(Stage, { model: M, k, props, picks: {}, spec: null, onPick() {}, onToggle() {}, onConfirm() {} }));
+      const q = html.match(/class="gw-arcpath" d="M[-\d.]+ ([-\d.]+) Q[-\d.]+ ([-\d.]+) [-\d.]+ ([-\d.]+)"/);
+      expect(q, `frame ${k}`).not.toBeNull();
+      const [sy, cy, ey] = q.slice(1).map(Number);
+      expect(cy, `frame ${k} ${M.scene(k).arc.join('>')}`).toBeGreaterThan(y);
+      expect(sy).toBeGreaterThan(y);
+      expect(ey).toBeGreaterThan(y);
+      // the constraint text sits over the line
+      const t = [...html.matchAll(/class="gw-w [^"]*" x="[-\d.]+" y="([-\d.]+)"/g)].map((m) => Number(m[1]));
+      for (const ty of t) expect(ty).toBeLessThan(y);
+      seen++;
+    }
+    expect(seen).toBe(16); // 11 pops and 5 revisions draw the arc
   });
   it('the box leaves room under the lowest node for its labels', () => {
     const b = boxOf([{ id: 'a', x: 10, y: 10 }, { id: 'b', x: 110, y: 90 }]);
@@ -438,6 +518,11 @@ describe('the drawing', () => {
   it('the css has no colour literals and never autoplays', () => {
     const css = readFileSync(new URL('../../src/components/lesson/viz/widgets/graph-walk.css', import.meta.url), 'utf8');
     expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/);
+    // a struck value keeps no card-coloured halo, which would paint over the line-through
+    expect(css).toMatch(/\.gw-lab \.struck \{[^}]*line-through[^}]*stroke: none/);
+    // a removed edge is dashed, not a thick solid red
+    expect(css).toMatch(/\.gw-edge\.cut \{[^}]*stroke-dasharray/);
+    expect(css).toMatch(/@media \(max-width: 420px\)/);
     const jsx = readFileSync(new URL('../../src/components/lesson/viz/widgets/GraphWalk.jsx', import.meta.url), 'utf8');
     expect(jsx).not.toMatch(/setInterval|setTimeout|autoplay/i);
   });
@@ -552,6 +637,14 @@ describe('kruskal on the new m2 data: 17, CD rejected first', () => {
     expect(sc.nodes.find((n) => n.id === 'A').cls).toBe('');
     expect(sc.table.rowCls[3]).toBe('gw-rej');
   });
+  it('the edge the next question asks about is dashed in the picture', () => {
+    const cls = (k) => Object.fromEntries(M.scene(k).edges.map((e) => [`${e.u}${e.v}`, e.cls]));
+    expect(cls(0).EF).toBe('target');
+    expect(cls(3).CD).toBe('target');
+    expect(cls(4).AC).toBe('target');
+    expect(Object.values(cls(M.count - 1))).not.toContain('target');
+    for (let k = 0; k < M.count - 1; k++) expect(Object.values(cls(k)).filter((c) => c === 'target'), `frame ${k}`).toHaveLength(1);
+  });
   it('rejects a directed graph and an edge without cost', () => {
     expect(() => graphModel({ ...M2, mode: 'kruskal', directed: true })).toThrow(/undirected/);
     expect(() => graphModel({ ...mk('AB', [['A', 'B']]), mode: 'kruskal' })).toThrow(/cost/);
@@ -580,7 +673,14 @@ describe('prim reproduces the table of ag-cp-2d', () => {
     expect(it0.answer).toBe('C');
     expect(it0.options.map((o) => o.id)).toEqual(['B', 'C', 'D', 'E']);
     expect(it0.fb('B', false).ro).toMatch(/β\[B\] = 4, dar β\[C\] = 2 e mai mic/);
+    expect(it0.fb('C', true).ro).toBe('β[C] = 2 e cel mai mic din afara lui V_s.');
+    expect(M.pickSpec(M.count - 2, true)).toBeNull(); // only E is left outside V_s
     expect(M.pickSpec(M.count - 1, true)).toBeNull();
+  });
+  it('captions use V_s for the nodes of the tree, as agr5 p.10-11', () => {
+    expect(M.caption(0).ro).toMatch(/^V_s = \{A\}, nodurile arborelui T\. β\[j\] e costul celei mai ieftine muchii de la j la un nod din V_s, α\[j\] acel nod/);
+    expect(M.caption(1).ro).toContain('din afara lui V_s. V_s = {A, C}');
+    for (let k = 0; k < M.count; k++) expect(M.caption(k).ro, `frame ${k}`).not.toMatch(/(^|[^_A-Za-z])T = \{|afara lui T\b/);
   });
   it('the picture: tree edges green, the cheapest edge into each outside node lit, beta on the node', () => {
     const sc = M.scene(1);
@@ -677,6 +777,16 @@ describe('cut reproduces ag-cp-8b and ag-cp-8e', () => {
     expect(sc.nodes.find((n) => n.id === '1').cls).not.toBe(sc.nodes.find((n) => n.id === '4').cls);
     expect(sc.nodes.find((n) => n.id === '1').cls).toBe(sc.nodes.find((n) => n.id === '2').cls);
   });
+  it('the removed edge is drawn as cut (dashed), not as emphasised; the next item asked is marked', () => {
+    const e7 = M.scene(7);
+    expect(e7.edges.find((e) => e.u === '1' && e.v === '2').cls).toBe('cut');
+    expect(e7.edges.find((e) => e.u === '1' && e.v === '3').cls).toBe('target'); // the next question: edge 13
+    expect(M.scene(0).nodes.find((n) => n.id === '1').cls).toBe('target');
+    expect(M.scene(3).nodes.find((n) => n.id === '4').cls).toMatch(/\btarget$/);
+    expect(M.scene(6).edges.find((e) => e.u === '1' && e.v === '2').cls).toBe('target'); // after the last node: the first edge
+    expect(JSON.stringify(M.scene(M.count - 1))).not.toContain('target');
+    expect(JSON.stringify(M.scene(7))).not.toContain('"bad"');
+  });
   it('refuses a graph that is not connected', () => {
     expect(() => graphModel({ ...mk('ABC', [['A', 'B']]), mode: 'cut' })).toThrow(/connected/);
   });
@@ -690,9 +800,25 @@ describe('colour reproduces the wheel of ag-cp-10b', () => {
     expect(M.steps.map((s) => s.id)).toEqual(['h', 'r1', 'r2', 'r3', 'r4', 'r5']);
     expect(M.K).toBe(4);
   });
-  it('a triangle gives omega = 3, below the 4 colours used', () => {
+  it('a triangle gives omega = 3, below the 4 colours used; no colouring with 3 exists, so chi = 4 (lesson 10b)', () => {
     expect(M.omega).toBe(3);
+    expect(M.chi).toBe(4);
     expect(M.caption(M.count - 1).ro).toMatch(/χ\(G\) ≤ 4.*ω\(G\) = 3/);
+    expect(M.caption(M.count - 1).ro).toContain('Nu există colorare cu 3 culori, deci χ(G) = 4.');
+    expect(step(AG2, 'ag-cp-10b').blocks[0].result.ro).toContain('\\chi(G)=4');
+  });
+  it('a bad order uses more colours than needed, and the end says so: a path a-b-c-d in the order a, d, b, c', () => {
+    const P = graphModel({ ...mk('abcd', [['a', 'b'], ['b', 'c'], ['c', 'd']]), mode: 'colour', order: ['a', 'd', 'b', 'c'] });
+    expect(P.K).toBe(3);
+    expect(P.omega).toBe(2);
+    expect(P.chi).toBe(2);
+    expect(P.caption(P.count - 1).ro).toContain('Există însă o colorare cu 2 culori, cât cere clica: χ(G) = 2.');
+  });
+  it('the options go one past the colours greedy uses, and the next node is marked', () => {
+    expect(M.pickSpec(0, true).items[0].options.map((o) => o.id)).toEqual(['1', '2', '3', '4', '5']);
+    expect(M.scene(0).nodes.find((n) => n.id === 'h').cls).toBe('target');
+    expect(M.scene(3).nodes.find((n) => n.id === 'r3').cls).toBe('target');
+    expect(M.scene(M.count - 1).nodes.some((n) => n.cls === 'target')).toBe(false);
   });
   it('when the clique number equals the colours used, chi is stated', () => {
     const tri = graphModel({ ...mk('ABC', [['A', 'B'], ['B', 'C'], ['A', 'C']]), mode: 'colour' });

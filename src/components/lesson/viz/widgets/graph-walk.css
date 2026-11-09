@@ -1,24 +1,29 @@
 /* graph-walk: nodes, arrows, value labels, the queue strip. Colours: theme and lesson tokens only, so both themes read. */
 .gw-stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .gw-svg { display: block; width: 100%; height: auto; max-height: 340px; }
-.gw-edge { stroke: var(--lt-line); stroke-width: 2.2; fill: none; transition: stroke 0.25s ease; }
+/* plain edges mix the line token with the text colour so they stay visible on the dark card */
+.gw-edge { stroke: color-mix(in srgb, var(--lt-line) 65%, var(--theme-content-text)); stroke-width: 2.2; fill: none; transition: stroke 0.25s ease; }
 .gw-edge.hl { stroke: var(--lt-acc); stroke-width: 3.2; }
 .gw-edge.ok { stroke: var(--lt-keep); stroke-width: 3.4; }
 .gw-edge.bad { stroke: var(--lt-drop); stroke-width: 3.4; }
-.gw-edge.dim { opacity: 0.35; }
-.gw-ah { fill: var(--lt-line); }
-.gw-ah.hl { fill: var(--lt-acc); } .gw-ah.ok { fill: var(--lt-keep); } .gw-ah.bad { fill: var(--lt-drop); } .gw-ah.arc { fill: var(--lt-acc); } .gw-ah.dim { fill: var(--lt-line); }
+.gw-edge.dim { opacity: 0.5; }
+/* a removed edge (cut mode): dashed and faded, so it reads as gone, not as emphasised */
+.gw-edge.cut { stroke: var(--lt-drop); stroke-dasharray: 6 5; opacity: 0.7; }
+/* the edge the next question is about */
+.gw-edge.target { stroke: var(--lt-acc); stroke-width: 3.2; stroke-dasharray: 7 5; }
+.gw-ah { fill: color-mix(in srgb, var(--lt-line) 65%, var(--theme-content-text)); }
+.gw-ah.hl { fill: var(--lt-acc); } .gw-ah.ok { fill: var(--lt-keep); } .gw-ah.bad { fill: var(--lt-drop); } .gw-ah.arc { fill: var(--lt-acc); } .gw-ah.dim { fill: color-mix(in srgb, var(--lt-line) 65%, var(--theme-content-text)); } .gw-ah.cut { fill: var(--lt-drop); } .gw-ah.target { fill: var(--lt-acc); }
 .gw-arcpath { fill: none; stroke: var(--lt-acc); stroke-width: 3.2; stroke-linecap: round; }
 .gw-w { font-size: 14px; font-weight: 700; fill: var(--theme-content-text); paint-order: stroke; stroke: var(--theme-card-bg); stroke-width: 4px; stroke-linejoin: round; font-variant-numeric: tabular-nums; }
 .gw-w.hl, .gw-w.ok { fill: var(--theme-content-text); }
 .gw-node { fill: var(--theme-card-bg); stroke: var(--lt-line); stroke-width: 2.2; transition: fill 0.25s ease, stroke 0.25s ease; }
 .gw-node.fixed { fill: var(--lt-keep-soft); stroke: var(--lt-keep); }
 .gw-node.focus { fill: var(--lt-acc-soft); stroke: var(--lt-acc); stroke-width: 3.4; }
-.gw-node.target { stroke: var(--lt-acc); stroke-dasharray: 4 3; stroke-width: 2.6; }
 .gw-node.empty { fill: var(--lt-drop-soft); stroke: var(--lt-drop); stroke-width: 3.4; }
 .gw-id { font-size: 16px; font-weight: 700; fill: var(--theme-content-text); }
 .gw-lab { font-size: 14px; fill: var(--theme-content-text); font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--theme-card-bg); stroke-width: 4px; stroke-linejoin: round; }
-.gw-lab .struck { text-decoration: line-through; fill: var(--ml-drop-ink); }
+/* no halo on a struck value: the card-coloured outline would paint over the line-through */
+.gw-lab .struck { text-decoration: line-through; text-decoration-thickness: 1.5px; fill: var(--ml-drop-ink); stroke: none; }
 .gw-lab .hl { font-weight: 700; }
 .gw-sub { font-size: 13px; fill: var(--ml-muted-ink); paint-order: stroke; stroke: var(--theme-card-bg); stroke-width: 4px; stroke-linejoin: round; }
 .gw-sym i { font-style: italic; }
@@ -54,5 +59,12 @@
 .gw-node.c3 { fill: color-mix(in srgb, var(--lt-t3) 24%, var(--theme-card-bg)); stroke: var(--lt-t3); stroke-width: 3; }
 .gw-node.c4 { fill: color-mix(in srgb, var(--lt-hint) 24%, var(--theme-card-bg)); stroke: var(--lt-hint); stroke-width: 3; }
 .gw-node.c5 { fill: color-mix(in srgb, var(--lt-keep) 24%, var(--theme-card-bg)); stroke: var(--lt-keep); stroke-width: 3; }
+/* the node the next question is about, over a component colour too */
+.gw-node.target { stroke: var(--lt-acc); stroke-dasharray: 4 3; stroke-width: 3; }
 .gw-node.gone { fill: var(--lt-surface); stroke: var(--lt-line); stroke-dasharray: 3 3; opacity: 0.55; }
 .viz[data-widget="graph-walk"] .viz-table tr.gw-rej td { background: var(--lt-drop-soft); opacity: 1; }
+/* at phone width the round tables fit the card: no sideways scroll */
+@media (max-width: 420px) {
+  .viz[data-widget="graph-walk"] .viz-table { font-size: 0.75rem; }
+  .viz[data-widget="graph-walk"] .viz-table td, .viz[data-widget="graph-walk"] .viz-table th { padding: 4px 4px; }
+}

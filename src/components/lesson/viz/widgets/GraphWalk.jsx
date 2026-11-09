@@ -9,8 +9,8 @@ import './graph-walk.css';
 
 const R = 19; // node radius in the picture's own units
 
-// u_a, a_si, X_k, u_j*, x^k: the subscripts of the course's notation, drawn as subscripts
-const NOTATION = /(?<![A-Za-z])([uαβaX])_\{?([A-Za-z0-9*]+)\}?(?:\^(?:\{([^}]+)\}|([A-Za-z0-9]+)))?/g;
+// u_a, a_si, X_k, u_j*, V_s, x^k: the subscripts of the course's notation, drawn as subscripts
+const NOTATION = /(?<![A-Za-z])([uαβaXV])_\{?([A-Za-z0-9*]+)\}?(?:\^(?:\{([^}]+)\}|([A-Za-z0-9]+)))?/g;
 // eslint-disable-next-line react-refresh/only-export-components -- a tiny helper that belongs with the widget
 export function notation(text) {
   const out = [];
@@ -61,7 +61,7 @@ function Graph({ scene, box, pos, label, L }) {
   return (
     <svg className="gw-svg" viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`} role="img" aria-label={label}>
       <defs>
-        {['', 'hl', 'ok', 'bad', 'arc', 'dim'].map((c) => (
+        {['', 'hl', 'ok', 'bad', 'arc', 'dim', 'cut', 'target'].map((c) => (
           <marker key={c || 'n'} id={mk(c)} viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse">
             <path d="M0 0 L10 5 L0 10 z" className={`gw-ah ${c}`} />
           </marker>
@@ -90,8 +90,12 @@ function Graph({ scene, box, pos, label, L }) {
         const a = pos[scene.arc[0]];
         const b = pos[scene.arc[1]];
         const u = unit(a, b);
-        const nx = -u.y;
-        const ny = u.x;
+        // the bulge side comes from the stored edge, not from the arc's direction, so (B, A) bends the same way as (A, B):
+        // away from the constraint text that sits on the other side of the edge
+        const ed = scene.edges.find((e) => (e.u === scene.arc[0] && e.v === scene.arc[1]) || (e.u === scene.arc[1] && e.v === scene.arc[0]));
+        const sd = ed ? unit(pos[ed.u], pos[ed.v]) : u;
+        const nx = -sd.y;
+        const ny = sd.x;
         const sx = a.x + u.x * (R + 2) + nx * 7;
         const sy = a.y + u.y * (R + 2) + ny * 7;
         const ex = b.x - u.x * (R + 5) + nx * 7;

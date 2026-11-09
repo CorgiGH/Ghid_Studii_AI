@@ -122,7 +122,7 @@ export function ac3(props) {
         options: opts,
         fb: (p, ok) => both((lang) => {
           const T = (en, ro) => (lang === 'en' ? en : ro);
-          if (ok) return T(`Right: (X_k, ${X}) for every neighbour X_k of ${X}, ${Y} too, because ${X} changed.`, `Corect: (X_k, ${X}) pentru fiecare vecin X_k al lui ${X}, și ${Y}, pentru că ${X} s-a schimbat.`);
+          if (ok) return T(`Right: (X_k, ${X}) for every neighbour X_k of ${X}, including ${Y} (the one just checked), because ${X} changed.`, `Corect: (X_k, ${X}) pentru fiecare vecin X_k al lui ${X}, inclusiv ${Y} (cel abia verificat), pentru că ${X} s-a schimbat.`);
           const flip = (p || []).some((id) => id.startsWith(`${X},`));
           if (flip) return T(`The new arcs end in ${X}: (X_k, ${X}). Only the neighbours' values depend on ${X}.`, `Arcele noi se termină în ${X}: (X_k, ${X}). Valorile vecinilor depind de ${X}.`);
           return T(`Every neighbour of ${X} gets an arc, the one just checked (${Y}) too.`, `Fiecare vecin al lui ${X} primește un arc, și cel abia verificat (${Y}).`);

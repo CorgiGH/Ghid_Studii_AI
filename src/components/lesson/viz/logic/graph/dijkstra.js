@@ -49,6 +49,19 @@ export function dijkstra(props) {
     while (p[0] !== s && before[p[0]] !== null && before[p[0]] !== undefined) p.unshift(before[p[0]]);
     return p[0] === s ? p : null;
   };
+  // every simple path from x to y (the graphs of a lesson are small), and the cost of one
+  const simplePaths = (x, y) => {
+    const out = [];
+    const walk = (p) => {
+      if (out.length >= 200) return;
+      const last = p[p.length - 1];
+      if (last === y) { out.push(p); return; }
+      for (const n of ids) if (a[last][n] !== undefined && !p.includes(n)) walk([...p, n]);
+    };
+    walk([x]);
+    return out;
+  };
+  const costOf = (p) => p.slice(1).reduce((acc, n, i) => acc + a[p[i]][n], 0);
   const frames = rounds.map((r) => ({ kind: 'round', ...r }));
   if (target !== undefined) frames.push({ kind: 'done', ...snap(), k: R + 1, path: pathTo(target) });
 
@@ -65,6 +78,7 @@ export function dijkstra(props) {
     if (!predict || !f) return null;
     if (f.kind === 'round' && k < R) {
       const out = ids.filter((i) => !f.S.includes(i));
+      if (out.length < 2) return null; // one node left outside S: nothing to choose
       const next = rounds[k + 1].fixed;
       return { items: [{
         key: `f${k}-fix`, kind: 'single', answer: next,
@@ -76,15 +90,23 @@ export function dijkstra(props) {
       }] };
     }
     if (f.kind === 'round' && target !== undefined) {
-      const ans = U(u[target]);
-      const opts = [...new Set(others.map((i) => u[i]).filter((x) => x !== Infinity))].sort((x, y) => x - y);
+      // the path to the target, read back through before[]; the other options are the next cheapest paths of the graph
+      const path = pathTo(target);
+      if (!path) return null;
+      const chains = [path, ...simplePaths(s, target).filter((q) => q.join() !== path.join()).sort((x, y) => costOf(x) - costOf(y) || alpha(x.join(), y.join())).slice(0, 2)];
+      if (chains.length < 2) return null;
+      const show = (q) => q.join(' → ');
+      const back = path.slice(1).reverse().map((n) => `before[${n}] = ${before[n]}`).join(', ');
       return { items: [{
-        key: `f${k}-cost`, kind: 'single', answer: ans,
-        prompt: { en: `What is the least cost from ${s} to ${target}?`, ro: `Care e costul minim de la ${s} la ${target}?` },
-        options: opts.map((x) => ({ id: String(x), label: String(x) })),
-        fb: (p, ok) => both((lang) => (ok
-          ? (lang === 'en' ? `u_${target} = ${ans}, final because ${target} is in S.` : `u_${target} = ${ans}, final pentru că ${target} e în S.`)
-          : (lang === 'en' ? `That is the cost of another node: read u_${target} in the last row.` : `Acela e costul altui nod: citește u_${target} din ultimul rând.`))),
+        key: `f${k}-path`, kind: 'single', answer: show(path),
+        prompt: { en: `Follow before[i] back from ${target}: which path reaches ${target} at cost u_${target}?`, ro: `Urmează before[i] înapoi din ${target}: pe ce drum se ajunge la ${target} cu costul u_${target}?` },
+        options: [...chains].sort((x, y) => alpha(x.join(), y.join())).map((q) => ({ id: show(q), label: show(q) })),
+        fb: (p, ok) => both((lang) => {
+          const T = (en, ro) => (lang === 'en' ? en : ro);
+          if (ok) return T(`Right: ${back}.`, `Corect: ${back}.`);
+          const q = chains.find((x) => show(x) === p);
+          return T(`That path costs ${costOf(q)}. Read it back from ${target}: ${back}.`, `Drumul acela costă ${costOf(q)}. Citește-l înapoi din ${target}: ${back}.`);
+        }),
       }] };
     }
     return null;
@@ -119,7 +141,12 @@ export function dijkstra(props) {
     const f = frames[k];
     const isDone = f.kind === 'done';
     const treeEdge = new Set();
-    if (isDone && f.path) f.path.slice(1).forEach((n, i) => treeEdge.add(`${f.path[i]}>${n}`));
+    if (isDone && f.path) {
+      f.path.slice(1).forEach((n, i) => {
+        treeEdge.add(`${f.path[i]}>${n}`);
+        if (!G.directed) treeEdge.add(`${n}>${f.path[i]}`); // an undirected edge may be stored the other way round
+      });
+    }
     const nodes = G.nodes.map((n) => {
       const id = n.id;
       const inS = f.S.includes(id);
@@ -130,7 +157,7 @@ export function dijkstra(props) {
       const sub = id !== s && f.before[id] !== null && f.before[id] !== undefined && f.u[id] !== Infinity ? { en: `(${f.before[id]})`, ro: `(${f.before[id]})` } : undefined;
       return { id, x: n.x, y: n.y, cls, label: lbl, sub, above: n.lab === 'above' };
     });
-    const hasA = (list, e) => list.some((x) => x[0] === e.u && x[1] === e.v);
+    const hasA = (list, e) => list.some((x) => (x[0] === e.u && x[1] === e.v) || (!G.directed && x[0] === e.v && x[1] === e.u));
     const edges = G.edges.map((e) => {
       let cls = '';
       if (isDone) cls = treeEdge.has(`${e.u}>${e.v}`) ? 'ok' : 'dim';

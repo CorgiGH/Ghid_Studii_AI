@@ -56,11 +56,18 @@ export function cut(props) {
     const comps = f.comps;
     const colourOf = {};
     if (k > 0) comps.forEach((c, i) => c.forEach((x) => { colourOf[x] = comps.length > 1 ? `c${i % 6}` : 'fixed'; }));
-    const nodes = G.nodes.map((nd) => ({ id: nd.id, x: nd.x, y: nd.y, cls: f.kind === 'node' && f.id === nd.id ? 'gone' : colourOf[nd.id] || '', above: nd.lab === 'above' }));
+    // the node or edge the next question is about: a dashed ring, or a dashed edge
+    const ask = frames[k + 1];
+    const nodes = G.nodes.map((nd) => {
+      let cls = f.kind === 'node' && f.id === nd.id ? 'gone' : colourOf[nd.id] || '';
+      if (ask?.kind === 'node' && ask.id === nd.id) cls = `${cls} target`.trim();
+      return { id: nd.id, x: nd.x, y: nd.y, cls, above: nd.lab === 'above' };
+    });
     const edges = G.edges.map((e) => {
       let cls = '';
-      if (f.kind === 'node' && (e.u === f.id || e.v === f.id)) cls = 'dim';
-      else if (f.kind === 'edge' && f.e === e) cls = 'bad';
+      if (ask?.kind === 'edge' && ask.e === e) cls = 'target';
+      else if (f.kind === 'node' && (e.u === f.id || e.v === f.id)) cls = 'dim';
+      else if (f.kind === 'edge' && f.e === e) cls = 'cut'; // removed: dashed and faded, not emphasised
       return { u: e.u, v: e.v, cls };
     });
     // the table of the course: what was removed, the components left, and the verdict, one row per frame

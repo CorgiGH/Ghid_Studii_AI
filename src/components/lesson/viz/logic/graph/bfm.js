@@ -61,6 +61,7 @@ export function bfm(props) {
     const cand = new Set([cur[i]]);
     for (const j of ids) if (j !== i && a[j][i] !== undefined && cur[j] !== Infinity) cand.add(cur[j] + a[j][i]);
     const opts = [...cand].sort((x, y) => (x === Infinity ? 1 : y === Infinity ? -1 : x - y));
+    if (opts.length < 2) return null; // one candidate value: nothing to choose
     const ans = frames[k + 1].u[i];
     const kk = frames[k].k;
     return { items: [{
