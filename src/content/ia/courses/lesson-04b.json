@@ -1,0 +1,1795 @@
+{
+  "meta": {
+    "id": "ia-l04b",
+    "title": {
+      "en": "Lecția 4b: Căutarea cu backtracking",
+      "ro": "Lecția 4b: Căutarea cu backtracking"
+    },
+    "shortTitle": {
+      "en": "L4b: Backtracking",
+      "ro": "L4b: Backtracking"
+    },
+    "clarity": 1,
+    "source": {
+      "en": "Cursul de Inteligență artificială, cursul 4, UAIC FII",
+      "ro": "Cursul de Inteligență artificială, cursul 4, UAIC FII"
+    }
+  },
+  "steps": [
+    {
+      "id": "ia-l04b-s1",
+      "title": {
+        "en": "Colorăm pe rând",
+        "ro": "Colorăm pe rând"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ia-l04b-q1",
+          "question": {
+            "en": "Ai colorat WA = red și NT = green. Ce culori sunt legale pentru Q (vecin cu NT, SA și NSW; nu cu WA)?",
+            "ro": "Ai colorat WA = red și NT = green. Ce culori sunt legale pentru Q (vecin cu NT, SA și NSW; nu cu WA)?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "oricare din cele 3 culori",
+                "ro": "oricare din cele 3 culori"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Green e interzis: NT e vecin cu Q și are deja green.",
+                "ro": "Green e interzis: NT e vecin cu Q și are deja green."
+              },
+              "misconception": "ignora-restrictiile"
+            },
+            {
+              "text": {
+                "en": "red sau blue: doar green e interzis, de NT",
+                "ro": "red sau blue: doar green e interzis, de NT"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Corect: Q se învecinează cu NT (green), deci green cade. WA nu e vecin cu Q, deci red rămâne legal.",
+                "ro": "Corect: Q se învecinează cu NT (green), deci green cade. WA nu e vecin cu Q, deci red rămâne legal."
+              }
+            },
+            {
+              "text": {
+                "en": "doar blue: red e interzis de WA",
+                "ro": "doar blue: red e interzis de WA"
+              },
+              "correct": false,
+              "explain": {
+                "en": "WA și Q nu au graniță comună. Red rămâne legal.",
+                "ro": "WA și Q nu au graniță comună. Red rămâne legal."
+              },
+              "misconception": "restrictie-la-regiune-nevecina"
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 218'><title>WA roșu, NT verde</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='fg fill-bg' stroke-width='2' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='fg fill-bg' stroke-width='2' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+            "alt": {
+              "en": "Australia cu WA roșu și NT verde; celelalte regiuni necolorate.",
+              "ro": "Australia cu WA roșu și NT verde; celelalte regiuni necolorate."
+            },
+            "caption": {
+              "en": "WA = red, NT = green.",
+              "ro": "WA = red, NT = green."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s2",
+      "title": {
+        "en": "Stările căutării",
+        "ro": "Stările căutării"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Starea: o asignare parțială, de exemplu [WA = red, NT = green].",
+              "ro": "Starea: o asignare parțială, de exemplu [WA = red, NT = green]."
+            },
+            {
+              "en": "Starea de început: asignarea vidă, scrisă ∅.",
+              "ro": "Starea de început: asignarea vidă, scrisă ∅."
+            },
+            {
+              "en": "Pasul: alegi o variabilă neasignată și îi dai o valoare.",
+              "ro": "Pasul: alegi o variabilă neasignată și îi dai o valoare."
+            },
+            {
+              "en": "Scopul: o asignare completă și consistentă, la adâncimea n (n variabile).",
+              "ro": "Scopul: o asignare completă și consistentă, la adâncimea n (n variabile)."
+            }
+          ],
+          "result": {
+            "en": "Soluțiile sunt la adâncimea n, deci căutarea potrivită e cea în adâncime (DFS).",
+            "ro": "Soluțiile sunt la adâncimea n, deci căutarea potrivită e cea în adâncime (DFS)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s3",
+      "title": {
+        "en": "Primul nivel al arborelui",
+        "ro": "Primul nivel al arborelui"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 140'><title>Primul nivel: variabila WA</title><line class='muted' stroke-width='2' x1='180' y1='28' x2='70' y2='110'/><line class='muted' stroke-width='2' x1='180' y1='28' x2='180' y2='110'/><line class='muted' stroke-width='2' x1='180' y1='28' x2='290' y2='110'/><circle class='fg fill-bg' stroke-width='3' cx='180' cy='28' r='26'/><text class='fg' font-size='15' font-weight='700' x='180' y='33' text-anchor='middle'>∅</text><circle class='fg fill-bg' stroke-width='3' cx='70' cy='110' r='26'/><text class='fg' font-size='15' font-weight='700' x='70' y='115' text-anchor='middle'>WA=r</text><circle class='fg fill-bg' stroke-width='3' cx='180' cy='110' r='26'/><text class='fg' font-size='15' font-weight='700' x='180' y='115' text-anchor='middle'>WA=g</text><circle class='fg fill-bg' stroke-width='3' cx='290' cy='110' r='26'/><text class='fg' font-size='15' font-weight='700' x='290' y='115' text-anchor='middle'>WA=b</text></svg>",
+                "alt": {
+                  "en": "Arbore: rădăcina ∅ are trei copii, WA = red, WA = green, WA = blue.",
+                  "ro": "Arbore: rădăcina ∅ are trei copii, WA = red, WA = green, WA = blue."
+                },
+                "caption": {
+                  "en": "Dacă alegi variabila WA: 3 copii.",
+                  "ro": "Dacă alegi variabila WA: 3 copii."
+                }
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "Alegi variabila WA: rădăcina are d = 3 copii, câte unul pentru fiecare culoare.",
+              "ro": "Alegi variabila WA: rădăcina are d = 3 copii, câte unul pentru fiecare culoare."
+            },
+            {
+              "en": "Dacă ai alege liber orice variabilă din cele 7: 7 · 3 = 21 de copii.",
+              "ro": "Dacă ai alege liber orice variabilă din cele 7: 7 · 3 = 21 de copii."
+            }
+          ],
+          "result": {
+            "en": "Cursul scrie asta ca nd pe primul nivel, (n − 1)d pe al doilea, și așa mai departe.",
+            "ro": "Cursul scrie asta ca nd pe primul nivel, (n − 1)d pe al doilea, și așa mai departe."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s4",
+      "title": {
+        "en": "Cu alegere liberă a variabilei",
+        "ro": "Cu alegere liberă a variabilei"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l04b-e1",
+          "status": "ruled",
+          "statement": {
+            "en": "Patru variabile, fiecare cu 3 valori (n = 4, d = 3). La fiecare pas poți alege orice variabilă neasignată. Numără copiii și frunzele.",
+            "ro": "Patru variabile, fiecare cu 3 valori (n = 4, d = 3). La fiecare pas poți alege orice variabilă neasignată. Numără copiii și frunzele."
+          },
+          "fields": [
+            {
+              "id": "c1",
+              "kind": "num",
+              "label": {
+                "en": "Câți copii are rădăcina? (n · d)",
+                "ro": "Câți copii are rădăcina? (n · d)"
+              },
+              "formula": "4*3",
+              "expected": 12
+            },
+            {
+              "id": "c2",
+              "kind": "num",
+              "label": {
+                "en": "Câți copii are fiecare nod de pe nivelul 1? ((n − 1) · d)",
+                "ro": "Câți copii are fiecare nod de pe nivelul 1? ((n − 1) · d)"
+              },
+              "formula": "3*3",
+              "expected": 9
+            },
+            {
+              "id": "leaves",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze are arborele? (produsul tuturor ramificărilor)",
+                "ro": "Câte frunze are arborele? (produsul tuturor ramificărilor)"
+              },
+              "formula": "12*9*6*3",
+              "expected": 1944
+            }
+          ],
+          "detectors": [
+            {
+              "field": "leaves",
+              "formula": "3^4",
+              "message": {
+                "en": "Aceea e numărul asignărilor distincte, 81; frunzele arborelui cu alegere liberă sunt mai multe ($n! \\cdot d^n$).",
+                "ro": "Aceea e numărul asignărilor distincte, 81; frunzele arborelui cu alegere liberă sunt mai multe ($n! \\cdot d^n$)."
+              }
+            }
+          ],
+          "hints": [
+            {
+              "en": "Pe primul nivel poți alege oricare din cele 4 variabile, cu oricare din cele 3 valori.",
+              "ro": "Pe primul nivel poți alege oricare din cele 4 variabile, cu oricare din cele 3 valori."
+            },
+            {
+              "en": "Pe următoarele niveluri variabilele rămase scad: 4, 3, 2, 1, mereu înmulțite cu d = 3.",
+              "ro": "Pe următoarele niveluri variabilele rămase scad: 4, 3, 2, 1, mereu înmulțite cu d = 3."
+            },
+            {
+              "en": "Ramificările sunt 12, 9, 6, 3; produsul lor e frunzele.",
+              "ro": "Ramificările sunt 12, 9, 6, 3; produsul lor e frunzele."
+            }
+          ],
+          "solution": {
+            "en": "Ramificările sunt 4 · 3 = 12, apoi 3 · 3 = 9, apoi 2 · 3 = 6, apoi 1 · 3 = 3. Produsul: 12 · 9 · 6 · 3 = 1944 = 4! · $3^{4}$ (4! = 24 de ordini de alegere a variabilelor).",
+            "ro": "Ramificările sunt 4 · 3 = 12, apoi 3 · 3 = 9, apoi 2 · 3 = 6, apoi 1 · 3 = 3. Produsul: 12 · 9 · 6 · 3 = 1944 = 4! · $3^{4}$ (4! = 24 de ordini de alegere a variabilelor)."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Același calcul pentru n = 3 variabile cu d = 2 valori.",
+                "ro": "Același calcul pentru n = 3 variabile cu d = 2 valori."
+              },
+              "solution": {
+                "en": "Ramificările: 3 · 2 = 6, 2 · 2 = 4, 1 · 2 = 2. Frunze: 6 · 4 · 2 = 48 = 3! · $2^{3}$.",
+                "ro": "Ramificările: 3 · 2 = 6, 2 · 2 = 4, 1 · 2 = 2. Frunze: 6 · 4 · 2 = 48 = 3! · $2^{3}$."
+              },
+              "fields": [
+                {
+                  "id": "c1",
+                  "formula": "3*2",
+                  "expected": 6
+                },
+                {
+                  "id": "c2",
+                  "formula": "2*2",
+                  "expected": 4
+                },
+                {
+                  "id": "leaves",
+                  "formula": "6*4*2",
+                  "expected": 48
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s5",
+      "title": {
+        "en": "Câte asignări sunt de fapt",
+        "ro": "Câte asignări sunt de fapt"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l04b-e2",
+          "status": "ruled",
+          "statement": {
+            "en": "În arborele cu 1944 de frunze (n = 4, d = 3), o frunză este o asignare completă. Dar aceeași asignare apare de mai multe ori, cu variabilele alese în altă ordine.",
+            "ro": "În arborele cu 1944 de frunze (n = 4, d = 3), o frunză este o asignare completă. Dar aceeași asignare apare de mai multe ori, cu variabilele alese în altă ordine."
+          },
+          "fields": [
+            {
+              "id": "dist",
+              "kind": "num",
+              "label": {
+                "en": "Câte asignări complete distincte există? ($d^{n}$)",
+                "ro": "Câte asignări complete distincte există? ($d^{n}$)"
+              },
+              "formula": "3^4",
+              "expected": 81
+            },
+            {
+              "id": "rep",
+              "kind": "num",
+              "label": {
+                "en": "De câte ori apare fiecare asignare? (n!)",
+                "ro": "De câte ori apare fiecare asignare? (n!)"
+              },
+              "formula": "4*3*2*1",
+              "expected": 24
+            }
+          ],
+          "hints": [
+            {
+              "en": "O asignare completă dă fiecărei variabile o valoare: câte alegeri sunt în total?",
+              "ro": "O asignare completă dă fiecărei variabile o valoare: câte alegeri sunt în total?"
+            },
+            {
+              "en": "Distincte: 3 la puterea 4. Repetări: câte ordini de alegere a celor 4 variabile există.",
+              "ro": "Distincte: 3 la puterea 4. Repetări: câte ordini de alegere a celor 4 variabile există."
+            },
+            {
+              "en": "81 asignări; 1944 / 81 = 24 = 4!.",
+              "ro": "81 asignări; 1944 / 81 = 24 = 4!."
+            }
+          ],
+          "solution": {
+            "en": "Sunt $3^{4}$ = 81 asignări distincte. Fiecare apare de 4! = 24 de ori, în câte o ordine de alegere a variabilelor: 81 · 24 = 1944. Slide-ul scrie și $d^{n}$ asignări, și n! $d^{n}$ frunze: nu se contrazic, frunzele repetă aceleași asignări.",
+            "ro": "Sunt $3^{4}$ = 81 asignări distincte. Fiecare apare de 4! = 24 de ori, în câte o ordine de alegere a variabilelor: 81 · 24 = 1944. Slide-ul scrie și $d^{n}$ asignări, și n! $d^{n}$ frunze: nu se contrazic, frunzele repetă aceleași asignări."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Același calcul pentru n = 3 variabile și d = 2 valori.",
+                "ro": "Același calcul pentru n = 3 variabile și d = 2 valori."
+              },
+              "solution": {
+                "en": "$2^{3}$ = 8 asignări, fiecare de 3! = 6 ori: 8 · 6 = 48 frunze.",
+                "ro": "$2^{3}$ = 8 asignări, fiecare de 3! = 6 ori: 8 · 6 = 48 frunze."
+              },
+              "fields": [
+                {
+                  "id": "dist",
+                  "formula": "2^3",
+                  "expected": 8
+                },
+                {
+                  "id": "rep",
+                  "formula": "3*2*1",
+                  "expected": 6
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s6",
+      "title": {
+        "en": "Ordinea nu contează",
+        "ro": "Ordinea nu contează"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Asignările sunt comutative",
+            "ro": "Asignările sunt comutative"
+          },
+          "content": {
+            "en": "[WA = red, apoi NT = green] este aceeași asignare ca [NT = green, apoi WA = red]. Cursul spune că asignările de variabile sunt **comutative**: contează ce valoare are fiecare variabilă, nu în ce ordine le-ai fixat.",
+            "ro": "[WA = red, apoi NT = green] este aceeași asignare ca [NT = green, apoi WA = red]. Cursul spune că asignările de variabile sunt **comutative**: contează ce valoare are fiecare variabilă, nu în ce ordine le-ai fixat."
+          }
+        },
+        {
+          "type": "callout",
+          "content": {
+            "en": "Deci nu ai nevoie să încerci aceeași asignare în toate ordinile: e destul să ai o singură ordine a variabilelor.",
+            "ro": "Deci nu ai nevoie să încerci aceeași asignare în toate ordinile: e destul să ai o singură ordine a variabilelor."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s7",
+      "title": {
+        "en": "O variabilă pe nivel",
+        "ro": "O variabilă pe nivel"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Alegi o variabilă pentru tot nivelul: pe nivelul 1 variabila WA, pe nivelul 2 NT, și așa mai departe.",
+              "ro": "Alegi o variabilă pentru tot nivelul: pe nivelul 1 variabila WA, pe nivelul 2 NT, și așa mai departe."
+            },
+            {
+              "en": "Fiecare nod are d copii: factorul de ramificare este b = d.",
+              "ro": "Fiecare nod are d copii: factorul de ramificare este b = d."
+            },
+            {
+              "en": "Un copil se adaugă doar dacă e consistent cu asignarea de până acum.",
+              "ro": "Un copil se adaugă doar dacă e consistent cu asignarea de până acum."
+            }
+          ],
+          "result": {
+            "en": "Arborele are cel mult $d^{n}$ frunze, nu $n! \\cdot d^n$.",
+            "ro": "Arborele are cel mult $d^{n}$ frunze, nu $n! \\cdot d^n$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s8",
+      "title": {
+        "en": "Câte frunze, în două feluri",
+        "ro": "Câte frunze, în două feluri"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l04b-e3",
+          "status": "ruled",
+          "statement": {
+            "en": "Harta Australiei: n = 7 variabile, d = 3 culori. Compară arborele cu o variabilă pe nivel cu cel în care alegi liber variabila.",
+            "ro": "Harta Australiei: n = 7 variabile, d = 3 culori. Compară arborele cu o variabilă pe nivel cu cel în care alegi liber variabila."
+          },
+          "fields": [
+            {
+              "id": "fix",
+              "kind": "num",
+              "label": {
+                "en": "Frunze cu o variabilă pe nivel ($d^{n}$)",
+                "ro": "Frunze cu o variabilă pe nivel ($d^{n}$)"
+              },
+              "formula": "3^7",
+              "expected": 2187
+            },
+            {
+              "id": "free",
+              "kind": "num",
+              "label": {
+                "en": "Frunze cu alegere liberă ($n! \\cdot d^n$)",
+                "ro": "Frunze cu alegere liberă ($n! \\cdot d^n$)"
+              },
+              "formula": "5040*2187",
+              "expected": 11022480
+            },
+            {
+              "id": "ratio",
+              "kind": "num",
+              "label": {
+                "en": "De câte ori e mai mare al doilea? (n!)",
+                "ro": "De câte ori e mai mare al doilea? (n!)"
+              },
+              "formula": "7*6*5*4*3*2*1",
+              "expected": 5040
+            }
+          ],
+          "hints": [
+            {
+              "en": "Pentru prima, fiecare nivel înmulțește cu d = 3. Pentru a doua mai apare factorul n!.",
+              "ro": "Pentru prima, fiecare nivel înmulțește cu d = 3. Pentru a doua mai apare factorul n!."
+            },
+            {
+              "en": "7! = 5040; $3^{7}$ = 2187.",
+              "ro": "7! = 5040; $3^{7}$ = 2187."
+            },
+            {
+              "en": "2187 · 5040 = 11 022 480.",
+              "ro": "2187 · 5040 = 11 022 480."
+            }
+          ],
+          "solution": {
+            "en": "Cu o variabilă pe nivel: $3^{7}$ = 2187 frunze. Cu alegere liberă: 7! · $3^{7}$ = 5040 · 2187 = 11 022 480. Raportul este tocmai 7! = 5040: regula „o variabilă pe nivel” taie toate repetările.",
+            "ro": "Cu o variabilă pe nivel: $3^{7}$ = 2187 frunze. Cu alegere liberă: 7! · $3^{7}$ = 5040 · 2187 = 11 022 480. Raportul este tocmai 7! = 5040: regula „o variabilă pe nivel” taie toate repetările."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Același calcul pentru n = 5 variabile și d = 3 culori.",
+                "ro": "Același calcul pentru n = 5 variabile și d = 3 culori."
+              },
+              "solution": {
+                "en": "$3^{5}$ = 243; 5! = 120; 120 · 243 = 29 160.",
+                "ro": "$3^{5}$ = 243; 5! = 120; 120 · 243 = 29 160."
+              },
+              "fields": [
+                {
+                  "id": "fix",
+                  "formula": "3^5",
+                  "expected": 243
+                },
+                {
+                  "id": "free",
+                  "formula": "120*243",
+                  "expected": 29160
+                },
+                {
+                  "id": "ratio",
+                  "formula": "5*4*3*2*1",
+                  "expected": 120
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s9",
+      "title": {
+        "en": "Backtracking",
+        "ro": "Backtracking"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "definition",
+          "term": {
+            "en": "Backtracking",
+            "ro": "Backtracking"
+          },
+          "content": {
+            "en": "Backtracking = DFS + ordinea variabilelor + eșec la încălcarea unei restricții. Parcurgi arborele în adâncime, cu o variabilă pe nivel; când o valoare încalcă o restricție, nu o adaugi, iar când o variabilă rămâne fără nicio valoare te întorci la variabila de dinainte.",
+            "ro": "Backtracking = DFS + ordinea variabilelor + eșec la încălcarea unei restricții. Parcurgi arborele în adâncime, cu o variabilă pe nivel; când o valoare încalcă o restricție, nu o adaugi, iar când o variabilă rămâne fără nicio valoare te întorci la variabila de dinainte."
+          }
+        },
+        {
+          "type": "callout",
+          "content": {
+            "en": "Este algoritmul de bază, neinformat, pentru CSP. Cursul spune că rezolvă problema damelor pentru n ≈ 25.",
+            "ro": "Este algoritmul de bază, neinformat, pentru CSP. Cursul spune că rezolvă problema damelor pentru n ≈ 25."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s10",
+      "title": {
+        "en": "Backtracking pe Australia, fără întoarceri",
+        "ro": "Backtracking pe Australia, fără întoarceri"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ia-l04b-p1",
+          "claim": {
+            "en": "Ordinea WA, NT, Q, NSW, V, SA, T și culorile r, g, b dau o soluție fără nicio întoarcere.",
+            "ro": "Ordinea WA, NT, Q, NSW, V, SA, T și culorile r, g, b dau o soluție fără nicio întoarcere."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "Ordinea variabilelor: WA, NT, Q, NSW, V, SA, T; culorile în ordinea r, g, b. WA primește r, prima culoare.",
+                "ro": "Ordinea variabilelor: WA, NT, Q, NSW, V, SA, T; culorile în ordinea r, g, b. WA primește r, prima culoare."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='fg fill-bg' stroke-width='2' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='fg fill-bg' stroke-width='2' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='fg fill-bg' stroke-width='2' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: WA red.",
+                  "ro": "Australia cu regiunile colorate până acum: WA red."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "NT este vecin cu WA (r), deci r e interzis. Prima culoare legală: g.",
+                "ro": "NT este vecin cu WA (r), deci r e interzis. Prima culoare legală: g."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='fg fill-bg' stroke-width='2' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='fg fill-bg' stroke-width='2' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: WA red, NT green.",
+                  "ro": "Australia cu regiunile colorate până acum: WA red, NT green."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Ce culoare primește NT?",
+                  "ro": "Ce culoare primește NT?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "g",
+                      "ro": "g"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Corect: r e interzis de vecinul WA, g e prima legală.",
+                      "ro": "Corect: r e interzis de vecinul WA, g e prima legală."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "r",
+                      "ro": "r"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "WA e vecin cu NT și are r: r e interzis.",
+                      "ro": "WA e vecin cu NT și are r: r e interzis."
+                    },
+                    "misconception": "culoare-interzisa-de-vecin"
+                  },
+                  {
+                    "text": {
+                      "en": "b",
+                      "ro": "b"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "b e legală, dar ordinea cere prima culoare legală, adică g.",
+                      "ro": "b e legală, dar ordinea cere prima culoare legală, adică g."
+                    },
+                    "misconception": "nu-prima-culoare-legala"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Q este vecin cu NT (g); WA nu e vecin. r e legală și e prima.",
+                "ro": "Q este vecin cu NT (g); WA nu e vecin. r e legală și e prima."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='bad fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='fg fill-bg' stroke-width='2' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: WA red, NT green, Q red.",
+                  "ro": "Australia cu regiunile colorate până acum: WA red, NT green, Q red."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Ce culoare primește Q?",
+                  "ro": "Ce culoare primește Q?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "r",
+                      "ro": "r"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Corect: Q se învecinează cu NT (g), nu cu WA; r e prima legală.",
+                      "ro": "Corect: Q se învecinează cu NT (g), nu cu WA; r e prima legală."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "g",
+                      "ro": "g"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "NT e vecin cu Q și are g: g e interzis.",
+                      "ro": "NT e vecin cu Q și are g: g e interzis."
+                    },
+                    "misconception": "culoare-interzisa-de-vecin"
+                  },
+                  {
+                    "text": {
+                      "en": "b",
+                      "ro": "b"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "b e legală, dar r e prima în ordine și e și ea legală.",
+                      "ro": "b e legală, dar r e prima în ordine și e și ea legală."
+                    },
+                    "misconception": "nu-prima-culoare-legala"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "NSW este vecin cu Q (r): r e interzis, g e legală.",
+                "ro": "NSW este vecin cu Q (r): r e interzis, g e legală."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='bad fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='ok fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: WA red, NT green, Q red, NSW green.",
+                  "ro": "Australia cu regiunile colorate până acum: WA red, NT green, Q red, NSW green."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "V este vecin cu NSW (g): r e legală.",
+                "ro": "V este vecin cu NSW (g): r e legală."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='bad fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='ok fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='bad fill-bg' stroke-width='5' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: WA red, NT green, Q red, NSW green, V red.",
+                  "ro": "Australia cu regiunile colorate până acum: WA red, NT green, Q red, NSW green, V red."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "SA are vecinii WA (r), NT (g), Q (r), NSW (g), V (r): r și g sunt interzise; rămâne b.",
+                "ro": "SA are vecinii WA (r), NT (g), Q (r), NSW (g), V (r): r și g sunt interzise; rămâne b."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='bad fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='accent fill-bg' stroke-width='5' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='ok fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='bad fill-bg' stroke-width='5' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: WA red, NT green, Q red, NSW green, V red, SA blue.",
+                  "ro": "Australia cu regiunile colorate până acum: WA red, NT green, Q red, NSW green, V red, SA blue."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Ce culoare primește SA?",
+                  "ro": "Ce culoare primește SA?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "r",
+                      "ro": "r"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "WA, Q și V sunt vecini ai lui SA și au r.",
+                      "ro": "WA, Q și V sunt vecini ai lui SA și au r."
+                    },
+                    "misconception": "culoare-interzisa-de-vecin"
+                  },
+                  {
+                    "text": {
+                      "en": "g",
+                      "ro": "g"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "NT și NSW sunt vecini ai lui SA și au g.",
+                      "ro": "NT și NSW sunt vecini ai lui SA și au g."
+                    },
+                    "misconception": "culoare-interzisa-de-vecin"
+                  },
+                  {
+                    "text": {
+                      "en": "b",
+                      "ro": "b"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Corect: vecinii folosesc r și g, deci singura legală e b.",
+                      "ro": "Corect: vecinii folosesc r și g, deci singura legală e b."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "T nu are vecini: prima culoare, r.",
+                "ro": "T nu are vecini: prima culoare, r."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='bad fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='accent fill-bg' stroke-width='5' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='ok fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='bad fill-bg' stroke-width='5' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='bad fill-bg' stroke-width='5' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: WA red, NT green, Q red, NSW green, V red, SA blue, T red.",
+                  "ro": "Australia cu regiunile colorate până acum: WA red, NT green, Q red, NSW green, V red, SA blue, T red."
+                }
+              }
+            }
+          ],
+          "end": {
+            "en": "Soluția: WA r, NT g, Q r, NSW g, V r, SA b, T r. Au fost 7 asignări și nicio anulare.",
+            "ro": "Soluția: WA r, NT g, Q r, NSW g, V r, SA b, T r. Au fost 7 asignări și nicio anulare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s11",
+      "title": {
+        "en": "Backtracking cu o fundătură",
+        "ro": "Backtracking cu o fundătură"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ia-l04b-p2",
+          "claim": {
+            "en": "Ordinea NSW, WA, NT, Q, V, SA, T cu culorile r, g, b: urmărește unde apare o fundătură.",
+            "ro": "Ordinea NSW, WA, NT, Q, V, SA, T cu culorile r, g, b: urmărește unde apare o fundătură."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "Altă ordine: NSW, WA, NT, Q, V, SA, T. NSW = r, WA = r (WA nu e vecin cu NSW), NT = g (r e interzis de WA).",
+                "ro": "Altă ordine: NSW, WA, NT, Q, V, SA, T. NSW = r, WA = r (WA nu e vecin cu NSW), NT = g (r e interzis de WA)."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='fg fill-bg' stroke-width='2' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='bad fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: NSW red, WA red, NT green.",
+                  "ro": "Australia cu regiunile colorate până acum: NSW red, WA red, NT green."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "Q = b: r e interzis de NSW, g e interzis de NT. Apoi V = g: r e interzis de NSW.",
+                "ro": "Q = b: r e interzis de NSW, g e interzis de NT. Apoi V = g: r e interzis de NSW."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='accent fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='bad fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='ok fill-bg' stroke-width='5' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: NSW red, WA red, NT green, Q blue, V green.",
+                  "ro": "Australia cu regiunile colorate până acum: NSW red, WA red, NT green, Q blue, V green."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Acum urmează SA. Ce se întâmplă?",
+                  "ro": "Acum urmează SA. Ce se întâmplă?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "Nu are nicio culoare legală: WA r, NT g și Q b folosesc toate cele 3 culori",
+                      "ro": "Nu are nicio culoare legală: WA r, NT g și Q b folosesc toate cele 3 culori"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Corect: SA e vecin cu WA, NT și Q, care au r, g, b. Nicio valoare nu e legală, deci eșec.",
+                      "ro": "Corect: SA e vecin cu WA, NT și Q, care au r, g, b. Nicio valoare nu e legală, deci eșec."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "Ia culoarea r, prima din ordine",
+                      "ro": "Ia culoarea r, prima din ordine"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "WA e vecin cu SA și are r.",
+                      "ro": "WA e vecin cu SA și are r."
+                    },
+                    "misconception": "culoare-interzisa-de-vecin"
+                  },
+                  {
+                    "text": {
+                      "en": "Ia culoarea b",
+                      "ro": "Ia culoarea b"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Q e vecin cu SA și are b.",
+                      "ro": "Q e vecin cu SA și are b."
+                    },
+                    "misconception": "culoare-interzisa-de-vecin"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "SA nu are nicio valoare: apelul returnează eșec. Te întorci la V, ultima asignare, și o anulezi. V încearcă b.",
+                "ro": "SA nu are nicio valoare: apelul returnează eșec. Te întorci la V, ultima asignare, și o anulezi. V încearcă b."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='accent fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='bad fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: NSW red, WA red, NT green, Q blue.",
+                  "ro": "Australia cu regiunile colorate până acum: NSW red, WA red, NT green, Q blue."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "Cu V = b, SA are aceeași problemă: eșec. V nu mai are valori; anulezi și V.",
+                "ro": "Cu V = b, SA are aceeași problemă: eșec. V nu mai are valori; anulezi și V."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='ok fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='accent fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='bad fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='accent fill-bg' stroke-width='5' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: NSW red, WA red, NT green, Q blue, V blue.",
+                  "ro": "Australia cu regiunile colorate până acum: NSW red, WA red, NT green, Q blue, V blue."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "V a încercat toate culorile. Ce faci?",
+                  "ro": "V a încercat toate culorile. Ce faci?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "Sari direct la WA, care a produs problema",
+                      "ro": "Sari direct la WA, care a produs problema"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Asta ar fi o întoarcere inteligentă, nu backtracking simplu. Backtracking-ul se întoarce un singur nivel.",
+                      "ro": "Asta ar fi o întoarcere inteligentă, nu backtracking simplu. Backtracking-ul se întoarce un singur nivel."
+                    },
+                    "misconception": "sare-la-vinovat"
+                  },
+                  {
+                    "text": {
+                      "en": "Reiei de la V = r",
+                      "ro": "Reiei de la V = r"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "V = r e interzisă de NSW, iar V a epuizat deja valorile ei legale.",
+                      "ro": "V = r e interzisă de NSW, iar V a epuizat deja valorile ei legale."
+                    },
+                    "misconception": "reluare-gresita"
+                  },
+                  {
+                    "text": {
+                      "en": "Anulezi Q = b, ultima asignare dinainte de V",
+                      "ro": "Anulezi Q = b, ultima asignare dinainte de V"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Corect: backtracking merge înapoi o variabilă, la cea de dinainte. Q nu mai are altă culoare legală (r, g sunt interzise).",
+                      "ro": "Corect: backtracking merge înapoi o variabilă, la cea de dinainte. Q nu mai are altă culoare legală (r, g sunt interzise)."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Q nu are altă culoare legală, deci anulezi Q = b, apoi NT = g. NT încearcă b: NT = b, apoi Q = g. Din nou V (g, apoi b) lasă SA fără culoare.",
+                "ro": "Q nu are altă culoare legală, deci anulezi Q = b, apoi NT = g. NT încearcă b: NT = b, apoi Q = g. Din nou V (g, apoi b) lasă SA fără culoare."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='accent fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='ok fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='bad fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: NSW red, WA red, NT blue, Q green.",
+                  "ro": "Australia cu regiunile colorate până acum: NSW red, WA red, NT blue, Q green."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "Anulezi V, Q = g și NT = b. NT a epuizat g și b (r e interzis de WA). Te întorci la WA, care era de fapt alegerea greșită.",
+                "ro": "Anulezi V, Q = g și NT = b. NT a epuizat g și b (r e interzis de WA). Te întorci la WA, care era de fapt alegerea greșită."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='bad fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='fg fill-bg' stroke-width='2' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='fg fill-bg' stroke-width='2' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='bad fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='fg fill-bg' stroke-width='2' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: NSW red, WA red.",
+                  "ro": "Australia cu regiunile colorate până acum: NSW red, WA red."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "WA încearcă g, apoi NT = r, Q = g, V = g.",
+                "ro": "WA încearcă g, apoi NT = r, Q = g, V = g."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='ok fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='bad fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='ok fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='fg fill-bg' stroke-width='2' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='bad fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='ok fill-bg' stroke-width='5' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='fg fill-bg' stroke-width='2' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: NSW red, WA green, NT red, Q green, V green.",
+                  "ro": "Australia cu regiunile colorate până acum: NSW red, WA green, NT red, Q green, V green."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "SA = b (vecinii folosesc g și r), apoi T = r.",
+                "ro": "SA = b (vecinii folosesc g și r), apoi T = r."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 218'><title>Colorarea de până acum</title><line class='muted' stroke-width='2' x1='42' y1='78' x2='130' y2='34'/><line class='muted' stroke-width='2' x1='42' y1='78' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='140' y2='116'/><line class='muted' stroke-width='2' x1='130' y1='34' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='240' y2='34'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='140' y1='116' x2='205' y2='168'/><line class='muted' stroke-width='2' x1='240' y1='34' x2='252' y2='112'/><line class='muted' stroke-width='2' x1='252' y1='112' x2='205' y2='168'/><circle class='ok fill-bg' stroke-width='5' cx='42' cy='78' r='23'/><text class='fg' font-size='16' font-weight='700' x='42' y='84.1' text-anchor='middle'>WA</text><circle class='bad fill-bg' stroke-width='5' cx='130' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='130' y='40.1' text-anchor='middle'>NT</text><circle class='ok fill-bg' stroke-width='5' cx='240' cy='34' r='23'/><text class='fg' font-size='16' font-weight='700' x='240' y='40.1' text-anchor='middle'>Q</text><circle class='accent fill-bg' stroke-width='5' cx='140' cy='116' r='23'/><text class='fg' font-size='16' font-weight='700' x='140' y='122.1' text-anchor='middle'>SA</text><circle class='bad fill-bg' stroke-width='5' cx='252' cy='112' r='23'/><text class='fg' font-size='16' font-weight='700' x='252' y='118.1' text-anchor='middle'>NSW</text><circle class='ok fill-bg' stroke-width='5' cx='205' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='205' y='174.1' text-anchor='middle'>V</text><circle class='bad fill-bg' stroke-width='5' cx='318' cy='168' r='23'/><text class='fg' font-size='16' font-weight='700' x='318' y='174.1' text-anchor='middle'>T</text><text class='bad' font-size='15' font-weight='700' x='12' y='210' text-anchor='start'>r</text><text class='fg' font-size='15' x='26' y='210' text-anchor='start'>roșu</text><text class='ok' font-size='15' font-weight='700' x='76' y='210' text-anchor='start'>g</text><text class='fg' font-size='15' x='90' y='210' text-anchor='start'>verde</text><text class='accent' font-size='15' font-weight='700' x='140' y='210' text-anchor='start'>b</text><text class='fg' font-size='15' x='154' y='210' text-anchor='start'>albastru</text></svg>",
+                "alt": {
+                  "en": "Australia cu regiunile colorate până acum: NSW red, WA green, NT red, Q green, V green, SA blue, T red.",
+                  "ro": "Australia cu regiunile colorate până acum: NSW red, WA green, NT red, Q green, V green, SA blue, T red."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Câte asignări au fost încercate în total (cu cele anulate)?",
+                  "ro": "Câte asignări au fost încercate în total (cu cele anulate)?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "7",
+                      "ro": "7"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "7 sunt doar asignările din soluție. Cele 9 anulate au fost și ele încercate.",
+                      "ro": "7 sunt doar asignările din soluție. Cele 9 anulate au fost și ele încercate."
+                    },
+                    "misconception": "numara-doar-solutia"
+                  },
+                  {
+                    "text": {
+                      "en": "9",
+                      "ro": "9"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "9 sunt anulările. Asignările încercate sunt 16: 7 rămase, 9 anulate.",
+                      "ro": "9 sunt anulările. Asignările încercate sunt 16: 7 rămase, 9 anulate."
+                    },
+                    "misconception": "numara-doar-anularile"
+                  },
+                  {
+                    "text": {
+                      "en": "16",
+                      "ro": "16"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Corect: 7 în drumul final, plus 9 care au fost anulate.",
+                      "ro": "Corect: 7 în drumul final, plus 9 care au fost anulate."
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "end": {
+            "en": "Soluția: NSW r, WA g, NT r, Q g, V g, SA b, T r. 16 asignări încercate, 9 anulate.",
+            "ro": "Soluția: NSW r, WA g, NT r, Q g, V g, SA b, T r. 16 asignări încercate, 9 anulate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s12",
+      "title": {
+        "en": "Numără asignările",
+        "ro": "Numără asignările"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l04b-e4",
+          "status": "ruled",
+          "statement": {
+            "en": "Ai urmărit ordinea NSW, WA, NT, Q, V, SA, T cu culorile r, g, b. O asignare încercată e o valoare adăugată în asignare; o anulare e o valoare scoasă.",
+            "ro": "Ai urmărit ordinea NSW, WA, NT, Q, V, SA, T cu culorile r, g, b. O asignare încercată e o valoare adăugată în asignare; o anulare e o valoare scoasă."
+          },
+          "fields": [
+            {
+              "id": "tried",
+              "kind": "num",
+              "label": {
+                "en": "Câte asignări au fost încercate?",
+                "ro": "Câte asignări au fost încercate?"
+              },
+              "formula": "7+9",
+              "expected": 16
+            },
+            {
+              "id": "undone",
+              "kind": "num",
+              "label": {
+                "en": "Câte au fost anulate?",
+                "ro": "Câte au fost anulate?"
+              },
+              "formula": "9",
+              "expected": 9
+            },
+            {
+              "id": "left",
+              "kind": "num",
+              "label": {
+                "en": "Câte au rămas în soluție?",
+                "ro": "Câte au rămas în soluție?"
+              },
+              "formula": "16-9",
+              "expected": 7
+            }
+          ],
+          "hints": [
+            {
+              "en": "Soluția are 7 variabile, deci 7 asignări rămân. Restul au fost anulate.",
+              "ro": "Soluția are 7 variabile, deci 7 asignări rămân. Restul au fost anulate."
+            },
+            {
+              "en": "Încercate = rămase + anulate.",
+              "ro": "Încercate = rămase + anulate."
+            },
+            {
+              "en": "7 + 9 = 16; 16 − 9 = 7.",
+              "ro": "7 + 9 = 16; 16 − 9 = 7."
+            }
+          ],
+          "solution": {
+            "en": "Soluția finală are 7 asignări. Au fost anulate 9, deci în total s-au încercat 7 + 9 = 16. Fiecare anulare e o întoarcere în arbore.",
+            "ro": "Soluția finală are 7 asignări. Au fost anulate 9, deci în total s-au încercat 7 + 9 = 16. Fiecare anulare e o întoarcere în arbore."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Altă ordine a variabilelor: WA, NT, NSW, Q, V, SA, T, cu aceleași culori r, g, b. Numără din nou.",
+                "ro": "Altă ordine a variabilelor: WA, NT, NSW, Q, V, SA, T, cu aceleași culori r, g, b. Numără din nou."
+              },
+              "solution": {
+                "en": "Se încearcă 11 asignări și se anulează 4; 7 rămân în soluție.",
+                "ro": "Se încearcă 11 asignări și se anulează 4; 7 rămân în soluție."
+              },
+              "fields": [
+                {
+                  "id": "tried",
+                  "formula": "7+4",
+                  "expected": 11
+                },
+                {
+                  "id": "undone",
+                  "formula": "4",
+                  "expected": 4
+                },
+                {
+                  "id": "left",
+                  "formula": "11-4",
+                  "expected": 7
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s13",
+      "title": {
+        "en": "Pseudocodul: începutul",
+        "ro": "Pseudocodul: începutul"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "text",
+          "code": "BACKTRACKING-SEARCH(csp)\n  return RECURSIVE-BACKTRACKING(\n           { }, csp)\n\nRECURSIVE-BACKTRACKING(\n    assignment, csp)\n  if assignment is complete\n    then return assignment"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Pornești cu asignarea vidă { }.",
+              "ro": "Pornești cu asignarea vidă { }."
+            },
+            {
+              "en": "Dacă asignarea e completă, ai terminat și o returnezi. La Australia: toate cele 7 regiuni au culoare.",
+              "ro": "Dacă asignarea e completă, ai terminat și o returnezi. La Australia: toate cele 7 regiuni au culoare."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s14",
+      "title": {
+        "en": "Două alegeri rămase deschise",
+        "ro": "Două alegeri rămase deschise"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "text",
+          "code": "  var ← SELECT-UNASSIGNED-\n        VARIABLE(VARIABLES[csp],\n        assignment, csp)\n  for each value in\n      ORDER-DOMAIN-VALUES(\n        var, assignment, csp)\n  do"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "SELECT-UNASSIGNED-VARIABLE: ce variabilă urmează.",
+              "ro": "SELECT-UNASSIGNED-VARIABLE: ce variabilă urmează."
+            },
+            {
+              "en": "ORDER-DOMAIN-VALUES: în ce ordine încerci valorile.",
+              "ro": "ORDER-DOMAIN-VALUES: în ce ordine încerci valorile."
+            },
+            {
+              "en": "Până acum: ordine fixă a variabilelor și culorile r, g, b.",
+              "ro": "Până acum: ordine fixă a variabilelor și culorile r, g, b."
+            }
+          ],
+          "result": {
+            "en": "Lecția următoare le face inteligente.",
+            "ro": "Lecția următoare le face inteligente."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s15",
+      "title": {
+        "en": "Adaugă, coboară, șterge",
+        "ro": "Adaugă, coboară, șterge"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "text",
+          "code": "    if value is consistent with\n       assignment given\n       CONSTRAINTS[csp] then\n      add {var = value}\n        to assignment\n      result ← RECURSIVE-\n        BACKTRACKING(\n          assignment, csp)\n      if result ≠ failure\n        then return result\n      remove {var = value}\n        from assignment\n  return failure"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Adaugi {var = value} numai dacă e consistentă.",
+              "ro": "Adaugi {var = value} numai dacă e consistentă."
+            },
+            {
+              "en": "Cobori un nivel, cu un apel nou.",
+              "ro": "Cobori un nivel, cu un apel nou."
+            },
+            {
+              "en": "Dacă apelul întoarce failure, ștergi {var = value} și încerci următoarea valoare.",
+              "ro": "Dacă apelul întoarce failure, ștergi {var = value} și încerci următoarea valoare."
+            }
+          ],
+          "result": {
+            "en": "În exemplul cu fundătură: SA întoarce failure, iar la V se șterge {V = g}.",
+            "ro": "În exemplul cu fundătură: SA întoarce failure, iar la V se șterge {V = g}."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s16",
+      "title": {
+        "en": "Unde se întoarce căutarea",
+        "ro": "Unde se întoarce căutarea"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ia-l04b-q2",
+          "question": {
+            "en": "SA nu are nicio culoare legală și apelul pentru SA întoarce failure. Ce linie din apelul pentru V anulează V = g?",
+            "ro": "SA nu are nicio culoare legală și apelul pentru SA întoarce failure. Ce linie din apelul pentru V anulează V = g?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "`if value is consistent with assignment`",
+                "ro": "`if value is consistent with assignment`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Testul spune doar dacă merită să adaugi valoarea; nu șterge nimic.",
+                "ro": "Testul spune doar dacă merită să adaugi valoarea; nu șterge nimic."
+              },
+              "misconception": "add-in-loc-de-remove"
+            },
+            {
+              "text": {
+                "en": "`add {var = value} to assignment`",
+                "ro": "`add {var = value} to assignment`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "add pune valoarea în asignare, la început; nu o scoate.",
+                "ro": "add pune valoarea în asignare, la început; nu o scoate."
+              },
+              "misconception": "add-in-loc-de-remove"
+            },
+            {
+              "text": {
+                "en": "`if assignment is complete`",
+                "ro": "`if assignment is complete`"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Testul de la începutul apelului verifică dacă ai terminat; aici nu ai terminat.",
+                "ro": "Testul de la începutul apelului verifică dacă ai terminat; aici nu ai terminat."
+              },
+              "misconception": "add-in-loc-de-remove"
+            },
+            {
+              "text": {
+                "en": "`remove {var = value} from assignment`",
+                "ro": "`remove {var = value} from assignment`"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Corect: după apelul recursiv eșuat, linia remove scoate {V = g}, apoi bucla încearcă următoarea valoare.",
+                "ro": "Corect: după apelul recursiv eșuat, linia remove scoate {V = g}, apoi bucla încearcă următoarea valoare."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s17",
+      "title": {
+        "en": "Câte noduri are arborele",
+        "ro": "Câte noduri are arborele"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l04b-e5",
+          "status": "ruled",
+          "statement": {
+            "en": "Harta din examenul 2024 are muchiile A–B, A–C, B–C, C–D și 3 culori. Ordinea variabilelor: A, B, C, D. Numără nodurile arborelui de backtracking: doar asignările consistente, cu rădăcina ∅.",
+            "ro": "Harta din examenul 2024 are muchiile A–B, A–C, B–C, C–D și 3 culori. Ordinea variabilelor: A, B, C, D. Numără nodurile arborelui de backtracking: doar asignările consistente, cu rădăcina ∅."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>Harta din examenul 2024</title><line class='muted' stroke-width='2' x1='60' y1='50' x2='60' y2='150'/><line class='muted' stroke-width='2' x1='60' y1='50' x2='170' y2='100'/><line class='muted' stroke-width='2' x1='60' y1='150' x2='170' y2='100'/><line class='muted' stroke-width='2' x1='170' y1='100' x2='290' y2='100'/><circle class='fg fill-bg' stroke-width='2' cx='60' cy='50' r='23'/><text class='fg' font-size='16' font-weight='700' x='60' y='56.1' text-anchor='middle'>A</text><circle class='fg fill-bg' stroke-width='2' cx='60' cy='150' r='23'/><text class='fg' font-size='16' font-weight='700' x='60' y='156.1' text-anchor='middle'>B</text><circle class='fg fill-bg' stroke-width='2' cx='170' cy='100' r='23'/><text class='fg' font-size='16' font-weight='700' x='170' y='106.1' text-anchor='middle'>C</text><circle class='fg fill-bg' stroke-width='2' cx='290' cy='100' r='23'/><text class='fg' font-size='16' font-weight='700' x='290' y='106.1' text-anchor='middle'>D</text></svg>",
+            "alt": {
+              "en": "Harta din examenul 2024: A, B și C se ating două câte două, iar C se atinge și cu D.",
+              "ro": "Harta din examenul 2024: A, B și C se ating două câte două, iar C se atinge și cu D."
+            },
+            "caption": {
+              "en": "Harta din examenul 2024.",
+              "ro": "Harta din examenul 2024."
+            }
+          },
+          "fields": [
+            {
+              "id": "n2",
+              "kind": "num",
+              "label": {
+                "en": "Noduri pe nivelul 2 (A, B)",
+                "ro": "Noduri pe nivelul 2 (A, B)"
+              },
+              "formula": "3*2",
+              "expected": 6
+            },
+            {
+              "id": "n3",
+              "kind": "num",
+              "label": {
+                "en": "Noduri pe nivelul 3 (A, B, C)",
+                "ro": "Noduri pe nivelul 3 (A, B, C)"
+              },
+              "formula": "3*2*1",
+              "expected": 6
+            },
+            {
+              "id": "n4",
+              "kind": "num",
+              "label": {
+                "en": "Noduri pe nivelul 4 (A, B, C, D)",
+                "ro": "Noduri pe nivelul 4 (A, B, C, D)"
+              },
+              "formula": "3*2*1*2",
+              "expected": 12
+            },
+            {
+              "id": "tot",
+              "kind": "num",
+              "label": {
+                "en": "Total, cu rădăcina",
+                "ro": "Total, cu rădăcina"
+              },
+              "formula": "1+3+6+6+12",
+              "expected": 28
+            }
+          ],
+          "hints": [
+            {
+              "en": "La fiecare nivel, înmulțește numărul de noduri cu câte culori legale are noua variabilă.",
+              "ro": "La fiecare nivel, înmulțește numărul de noduri cu câte culori legale are noua variabilă."
+            },
+            {
+              "en": "B diferă de A: 2 culori. C diferă de A și B, care sunt diferite: 1 culoare. D diferă doar de C: 2 culori.",
+              "ro": "B diferă de A: 2 culori. C diferă de A și B, care sunt diferite: 1 culoare. D diferă doar de C: 2 culori."
+            },
+            {
+              "en": "Niveluri: 1, 3, 6, 6, 12. Total 28.",
+              "ro": "Niveluri: 1, 3, 6, 6, 12. Total 28."
+            }
+          ],
+          "solution": {
+            "en": "A are 3 culori; B diferă de A: 3 · 2 = 6; C diferă de A și B (diferite între ele): 6 · 1 = 6; D diferă doar de C: 6 · 2 = 12. Total 1 + 3 + 6 + 6 + 12 = 28 noduri.",
+            "ro": "A are 3 culori; B diferă de A: 3 · 2 = 6; C diferă de A și B (diferite între ele): 6 · 1 = 6; D diferă doar de C: 6 · 2 = 12. Total 1 + 3 + 6 + 6 + 12 = 28 noduri."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Aceeași hartă, dar ordinea D, A, B, C.",
+                "ro": "Aceeași hartă, dar ordinea D, A, B, C."
+              },
+              "solution": {
+                "en": "D 3; A nu e vecin cu D: 9; B diferă de A: 18; C diferă de A, B, D: doar 12 din cele 18 au o culoare liberă. Total 43.",
+                "ro": "D 3; A nu e vecin cu D: 9; B diferă de A: 18; C diferă de A, B, D: doar 12 din cele 18 au o culoare liberă. Total 43."
+              },
+              "fields": [
+                {
+                  "id": "n2",
+                  "formula": "3*3",
+                  "expected": 9
+                },
+                {
+                  "id": "n3",
+                  "formula": "9*2",
+                  "expected": 18
+                },
+                {
+                  "id": "n4",
+                  "formula": "18*2/3",
+                  "expected": 12
+                },
+                {
+                  "id": "tot",
+                  "formula": "1+3+9+18+12",
+                  "expected": 43
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s18",
+      "title": {
+        "en": "Ordinea schimbă arborele",
+        "ro": "Ordinea schimbă arborele"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l04b-e6",
+          "status": "ruled",
+          "statement": {
+            "en": "Aceeași hartă și aceleași 3 culori, dar ordinea variabilelor este B, D, A, C. Numără nodurile de pe fiecare nivel.",
+            "ro": "Aceeași hartă și aceleași 3 culori, dar ordinea variabilelor este B, D, A, C. Numără nodurile de pe fiecare nivel."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>Harta din examenul 2024</title><line class='muted' stroke-width='2' x1='60' y1='50' x2='60' y2='150'/><line class='muted' stroke-width='2' x1='60' y1='50' x2='170' y2='100'/><line class='muted' stroke-width='2' x1='60' y1='150' x2='170' y2='100'/><line class='muted' stroke-width='2' x1='170' y1='100' x2='290' y2='100'/><circle class='fg fill-bg' stroke-width='2' cx='60' cy='50' r='23'/><text class='fg' font-size='16' font-weight='700' x='60' y='56.1' text-anchor='middle'>A</text><circle class='fg fill-bg' stroke-width='2' cx='60' cy='150' r='23'/><text class='fg' font-size='16' font-weight='700' x='60' y='156.1' text-anchor='middle'>B</text><circle class='fg fill-bg' stroke-width='2' cx='170' cy='100' r='23'/><text class='fg' font-size='16' font-weight='700' x='170' y='106.1' text-anchor='middle'>C</text><circle class='fg fill-bg' stroke-width='2' cx='290' cy='100' r='23'/><text class='fg' font-size='16' font-weight='700' x='290' y='106.1' text-anchor='middle'>D</text></svg>",
+            "alt": {
+              "en": "Harta din examenul 2024: A, B și C se ating două câte două, iar C se atinge și cu D.",
+              "ro": "Harta din examenul 2024: A, B și C se ating două câte două, iar C se atinge și cu D."
+            },
+            "caption": {
+              "en": "Harta din examenul 2024.",
+              "ro": "Harta din examenul 2024."
+            }
+          },
+          "fields": [
+            {
+              "id": "n2",
+              "kind": "num",
+              "label": {
+                "en": "Noduri pe nivelul 2 (B, D)",
+                "ro": "Noduri pe nivelul 2 (B, D)"
+              },
+              "formula": "3*3",
+              "expected": 9
+            },
+            {
+              "id": "n3",
+              "kind": "num",
+              "label": {
+                "en": "Noduri pe nivelul 3 (B, D, A)",
+                "ro": "Noduri pe nivelul 3 (B, D, A)"
+              },
+              "formula": "9*2",
+              "expected": 18
+            },
+            {
+              "id": "n4",
+              "kind": "num",
+              "label": {
+                "en": "Noduri pe nivelul 4 (B, D, A, C)",
+                "ro": "Noduri pe nivelul 4 (B, D, A, C)"
+              },
+              "formula": "12",
+              "expected": 12
+            },
+            {
+              "id": "tot",
+              "kind": "num",
+              "label": {
+                "en": "Total, cu rădăcina",
+                "ro": "Total, cu rădăcina"
+              },
+              "formula": "1+3+9+18+12",
+              "expected": 43
+            }
+          ],
+          "hints": [
+            {
+              "en": "B și D nu sunt vecine: D are 3 culori, indiferent de B. A diferă de B: 2 culori.",
+              "ro": "B și D nu sunt vecine: D are 3 culori, indiferent de B. A diferă de B: 2 culori."
+            },
+            {
+              "en": "C e vecin cu A, B și D. A și B sunt diferite, deci C poate lua o culoare doar dacă D e egală cu A sau cu B.",
+              "ro": "C e vecin cu A, B și D. A și B sunt diferite, deci C poate lua o culoare doar dacă D e egală cu A sau cu B."
+            },
+            {
+              "en": "Din 18 triple (B, D, A): D egală cu A sau B în 12; acolo C are 1 culoare. Nivelul 4: 12.",
+              "ro": "Din 18 triple (B, D, A): D egală cu A sau B în 12; acolo C are 1 culoare. Nivelul 4: 12."
+            }
+          ],
+          "solution": {
+            "en": "B: 3. D nu e vecin cu B: 3 · 3 = 9. A diferă de B: 9 · 2 = 18. Pentru C: A și B au 2 culori diferite, deci C poate avea culoarea rămasă doar dacă D are culoarea lui A sau B (12 din 18 triple, câte o culoare): 12. Total 43, față de 28 la ordinea A, B, C, D.",
+            "ro": "B: 3. D nu e vecin cu B: 3 · 3 = 9. A diferă de B: 9 · 2 = 18. Pentru C: A și B au 2 culori diferite, deci C poate avea culoarea rămasă doar dacă D are culoarea lui A sau B (12 din 18 triple, câte o culoare): 12. Total 43, față de 28 la ordinea A, B, C, D."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Ordinea C, A, B, D.",
+                "ro": "Ordinea C, A, B, D."
+              },
+              "solution": {
+                "en": "C 3; A diferă de C: 6; B diferă de A și C (diferite): 6; D diferă de C: 12. Total 28.",
+                "ro": "C 3; A diferă de C: 6; B diferă de A și C (diferite): 6; D diferă de C: 12. Total 28."
+              },
+              "fields": [
+                {
+                  "id": "n2",
+                  "formula": "3*2",
+                  "expected": 6
+                },
+                {
+                  "id": "n3",
+                  "formula": "6*1",
+                  "expected": 6
+                },
+                {
+                  "id": "n4",
+                  "formula": "6*2",
+                  "expected": 12
+                },
+                {
+                  "id": "tot",
+                  "formula": "1+3+6+6+12",
+                  "expected": 28
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s19",
+      "title": {
+        "en": "Cât de departe ajunge",
+        "ro": "Cât de departe ajunge"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Backtracking simplu rezolvă problema damelor pentru n ≈ 25.",
+              "ro": "Backtracking simplu rezolvă problema damelor pentru n ≈ 25."
+            },
+            {
+              "en": "Mai multe de atât nu: arborele crește prea repede.",
+              "ro": "Mai multe de atât nu: arborele crește prea repede."
+            },
+            {
+              "en": "Pentru probleme mai mari, ordonezi bine variabilele și valorile, și tai ramurile moarte mai devreme.",
+              "ro": "Pentru probleme mai mari, ordonezi bine variabilele și valorile, și tai ramurile moarte mai devreme."
+            }
+          ],
+          "result": {
+            "en": "Despre asta e lecția următoare.",
+            "ro": "Despre asta e lecția următoare."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s20",
+      "title": {
+        "en": "Pe scurt",
+        "ro": "Pe scurt"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Stările căutării sunt asignările parțiale; start ∅, scop o asignare completă consistentă.",
+              "ro": "Stările căutării sunt asignările parțiale; start ∅, scop o asignare completă consistentă."
+            },
+            {
+              "en": "Asignările sunt comutative: o variabilă pe nivel, deci b = d și cel mult $d^{n}$ frunze (nu $n! \\cdot d^n$).",
+              "ro": "Asignările sunt comutative: o variabilă pe nivel, deci b = d și cel mult $d^{n}$ frunze (nu $n! \\cdot d^n$)."
+            },
+            {
+              "en": "Backtracking = DFS + ordinea variabilelor + eșec la încălcare.",
+              "ro": "Backtracking = DFS + ordinea variabilelor + eșec la încălcare."
+            },
+            {
+              "en": "Dacă o variabilă rămâne fără valoare, te întorci un nivel și ștergi ultima asignare.",
+              "ro": "Dacă o variabilă rămâne fără valoare, te întorci un nivel și ștergi ultima asignare."
+            },
+            {
+              "en": "Ordinea variabilelor schimbă mărimea arborelui (28 sau 43 de noduri pe aceeași hartă).",
+              "ro": "Ordinea variabilelor schimbă mărimea arborelui (28 sau 43 de noduri pe aceeași hartă)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l04b-s21",
+      "title": {
+        "en": "Verificare: backtracking pe o problemă mică",
+        "ro": "Verificare: backtracking pe o problemă mică"
+      },
+      "kicker": {
+        "en": "Lecția 4b",
+        "ro": "Lecția 4b"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l04b-e7",
+          "status": "ruled",
+          "statement": {
+            "en": "Trei variabile X, Y, Z cu domeniul {1, 2}, cu restricțiile X ≠ Y, Y ≠ Z, X ≠ Z. Backtracking cu ordinea X, Y, Z și valorile 1, 2. Numără doar valorile adăugate în asignare (cele consistente).",
+            "ro": "Trei variabile X, Y, Z cu domeniul {1, 2}, cu restricțiile X ≠ Y, Y ≠ Z, X ≠ Z. Backtracking cu ordinea X, Y, Z și valorile 1, 2. Numără doar valorile adăugate în asignare (cele consistente)."
+          },
+          "fields": [
+            {
+              "id": "added",
+              "kind": "num",
+              "label": {
+                "en": "Câte valori se adaugă în asignare până la final?",
+                "ro": "Câte valori se adaugă în asignare până la final?"
+              },
+              "formula": "4",
+              "expected": 4
+            },
+            {
+              "id": "sol",
+              "kind": "tf",
+              "label": {
+                "en": "Problema are soluție?",
+                "ro": "Problema are soluție?"
+              },
+              "formula": "false",
+              "expected": "false"
+            },
+            {
+              "id": "fix",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze are arborele cu o variabilă pe nivel? ($d^{n}$)",
+                "ro": "Câte frunze are arborele cu o variabilă pe nivel? ($d^{n}$)"
+              },
+              "formula": "2^3",
+              "expected": 8
+            },
+            {
+              "id": "free",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze ar avea cu alegere liberă? ($n! \\cdot d^n$)",
+                "ro": "Câte frunze ar avea cu alegere liberă? ($n! \\cdot d^n$)"
+              },
+              "formula": "6*8",
+              "expected": 48
+            }
+          ],
+          "hints": [
+            {
+              "en": "X = 1; Y poate fi doar 2; Z ar trebui să difere de 1 și de 2.",
+              "ro": "X = 1; Y poate fi doar 2; Z ar trebui să difere de 1 și de 2."
+            },
+            {
+              "en": "Z nu are nicio valoare, te întorci: Y nu mai are valori, te întorci la X și încerci X = 2.",
+              "ro": "Z nu are nicio valoare, te întorci: Y nu mai are valori, te întorci la X și încerci X = 2."
+            },
+            {
+              "en": "Adăugate: X = 1, Y = 2, X = 2, Y = 1, în total 4. Nicio soluție.",
+              "ro": "Adăugate: X = 1, Y = 2, X = 2, Y = 1, în total 4. Nicio soluție."
+            }
+          ],
+          "solution": {
+            "en": "Se adaugă X = 1, Y = 2; Z nu are valoare (1 e interzis de X, 2 de Y), te întorci. Apoi X = 2, Y = 1 și iar Z nu are valoare. În total 4 adăugări și nicio soluție: trei variabile care se ating cer 3 valori diferite. Frunze: $2^{3}$ = 8, față de 3! · $2^{3}$ = 48.",
+            "ro": "Se adaugă X = 1, Y = 2; Z nu are valoare (1 e interzis de X, 2 de Y), te întorci. Apoi X = 2, Y = 1 și iar Z nu are valoare. În total 4 adăugări și nicio soluție: trei variabile care se ating cer 3 valori diferite. Frunze: $2^{3}$ = 8, față de 3! · $2^{3}$ = 48."
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Aceleași restricții, dar domeniul este {1, 2, 3}.",
+                "ro": "Aceleași restricții, dar domeniul este {1, 2, 3}."
+              },
+              "solution": {
+                "en": "X = 1, Y = 2, Z = 3: 3 adăugări, fără întoarcere. Soluție există. Frunze: $3^{3}$ = 27, apoi 3! · 27 = 162.",
+                "ro": "X = 1, Y = 2, Z = 3: 3 adăugări, fără întoarcere. Soluție există. Frunze: $3^{3}$ = 27, apoi 3! · 27 = 162."
+              },
+              "fields": [
+                {
+                  "id": "added",
+                  "formula": "3",
+                  "expected": 3
+                },
+                {
+                  "id": "sol",
+                  "formula": "true",
+                  "expected": "true"
+                },
+                {
+                  "id": "fix",
+                  "formula": "3^3",
+                  "expected": 27
+                },
+                {
+                  "id": "free",
+                  "formula": "6*27",
+                  "expected": 162
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
