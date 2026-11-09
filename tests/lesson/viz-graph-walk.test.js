@@ -260,7 +260,7 @@ describe('ac3 reproduces the 11 arcs of s22', () => {
     expect(M.frames.at(-1).kind).toBe('done');
   });
   it('frame 0 shows no queue chips and no arc count before the pick is revealed, then all 4 arcs', () => {
-    expect(M.scene(0, { pending: true }).strips).toEqual([]);
+    expect(M.scene(0, { pending: true }).strips[0].chips).toEqual([]);
     expect(M.caption(0, { pending: true }).ro).not.toContain('două arce');
     expect(M.scene(0, { pending: false }).strips[0].chips).toHaveLength(4);
     expect(M.scene(0).strips[0].chips).toHaveLength(4);
@@ -505,7 +505,8 @@ describe('the drawing', () => {
   it('ac3 widget: before the first pick no queue chip and no two-arcs caption; without predict the queue shows', () => {
     const props = vizOf(IA, 'ia-ct2-s22a').props;
     const on = renderToStaticMarkup(React.createElement(GraphWalk, { props, predict: true }));
-    expect(on).not.toContain('gw-chip');
+    expect(on).not.toContain('viz-chip gw-chip');
+    expect(on).toMatch(/data-queue=""><span class="gw-empty">\?<\/span>/);
     expect(on).not.toContain('două arce');
     const off = renderToStaticMarkup(React.createElement(GraphWalk, { props, predict: false }));
     expect(off).toContain('data-queue="(A, B) (B, A) (B, C) (C, B)"');

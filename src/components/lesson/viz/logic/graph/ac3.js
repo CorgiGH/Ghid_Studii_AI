@@ -156,7 +156,7 @@ export function ac3(props) {
     return T(`The queue is empty. ${fin}. No domain is empty, so the problem is not inconsistent.`, `Coada e goală. ${fin}. Niciun domeniu nu e gol, deci problema nu e inconsistentă.`);
   });
 
-  // opts.pending: the pick of this frame is not answered yet. On the start frame the queue would give the answer away (2 x constraints), so the strip stays hidden.
+  // opts.pending: the pick of this frame is not answered yet. On the start frame the queue would give the answer away (2 x constraints), so the strip stays in place, empty, with a "?" (the question can point at it and nothing moves when the arcs appear).
   M.scene = (k, opts = {}) => {
     const f = frames[k];
     const arc = f.arc || null;
@@ -174,7 +174,7 @@ export function ac3(props) {
       u: e.u, v: e.v, text: edgeText(e),
       cls: arc && ((e.u === arc[0] && e.v === arc[1]) || (e.u === arc[1] && e.v === arc[0])) ? 'hl' : '',
     }));
-    const strips = f.kind === 'start' && opts.pending ? [] : [{
+    const strips = f.kind === 'start' && opts.pending ? [{ title: { en: 'Queue', ro: 'Coada' }, chips: [], empty: { en: '?', ro: '?' } }] : [{
       title: { en: 'Queue', ro: 'Coada' },
       chips: f.queue.map((it, i) => ({ t: arcText(it.arc), cls: (f.kind === 'pop' && i === 0) ? 'cur' : it.fresh ? 'new' : '' })),
       empty: { en: 'empty', ro: 'goală' },
