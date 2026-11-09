@@ -430,13 +430,21 @@ async function answerScreen(page, step, ctx) {
       const scope = `figure.viz[data-widget="${block.widget}"]`
       if (!(await waitFor(page, (s) => !!document.querySelector(s), scope, 15000))) { fails.push(`viz ${block.id}: widget ${block.widget} did not render`); continue }
       let actions = 0
-      for (let k = 0; k < 30; k++) {
+      for (let k = 0; k < 120; k++) {
         const acted = await page.evaluate((s) => {
           const fig = [...document.querySelectorAll(s)].find((f) => f.offsetParent !== null) || document.querySelector(s)
           const vis = (b) => b && b.offsetParent !== null && !b.disabled
           const show = fig.parentElement.querySelector('.viz-numline-show') || fig.querySelector('.viz-numline-show')
           if (vis(show)) { show.click(); return 'show' }
           const prim = fig.querySelector('.viz-btn-primary')
+          // the pick widgets (payoff-matrix, game-tree, graph-walk): answer the frame's question (any pick gates the frame), confirm, then step
+          const conf = [...fig.querySelectorAll('.gw-confirm')].find(vis)
+          if (conf) { conf.click(); return 'confirm' }
+          const nextOk = [...fig.querySelectorAll('.viz-btn-primary')].some((b) => vis(b) && /departe|Next/i.test(b.innerText))
+          const cell = [...fig.querySelectorAll('.pm-btn')].find(vis)
+          if (cell && !nextOk) { if (cell.getAttribute('aria-pressed') !== 'true') { cell.click(); return 'tap' } }
+          const opt = [...fig.querySelectorAll('.mlv-opt:not(.gw-confirm)')].find((b) => vis(b) && b.getAttribute('aria-pressed') !== 'true')
+          if (opt && !nextOk) { opt.click(); return 'pick' }
           if (vis(prim)) { const label = prim.innerText.trim(); prim.click(); return label }
           return null
         }, scope)

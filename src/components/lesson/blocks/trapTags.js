@@ -125,4 +125,12 @@ export const NN_TAGS = [
   'separator-care-nu-exista', 'formula-depinde-de-y',
 ];
 
-export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS]);
+// IA (Inteligență artificială) tags: the mistakes the IA crash pack names (ASCII kebab-case Romanian, the ML slug rule).
+export const IA_TAGS = [
+  'arc-scoate-din-y', 'arc-in-ambele-sensuri', 'fc-vede-nefixate', 'strict-cu-egalitate', 'dominanta-nu-e-strict-dominanta',
+  'egalitatea-strica-nash', 'egalitatea-strica-dominanta', 'lcv-luat-drept-mrv', 'lcv-luat-drept-fc', 'lcv-valoarea-invers',
+  'ac-ca-fc', 'ac-ordine-alfabetica', 'baza-si-exponent-inversate', 'produs-in-loc-de-putere', 'complexitatea-ac3-la-backtracking',
+  'limita-sub-numarul-real', 'limita-prea-larga', 'toate-colorarile-complete',
+];
+
+export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS, ...IA_TAGS]);

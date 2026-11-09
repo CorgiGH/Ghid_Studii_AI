@@ -24,6 +24,13 @@ const AG2 = read('ag/courses/ag-crash-partial-2.json');
 const step = (course, id) => course.steps.find((s) => s.id === id);
 const table = (course, id, which = 0) => step(course, id).blocks.find((b) => b.type === 'steps').intro.filter((p) => p.table)[which].table;
 const vizOf = (course, id) => step(course, id).blocks.find((b) => b.type === 'viz');
+// The worked traces of the lesson as the course prints them (c4ro p.28-30 and p.34-38; every row recomputed in Python). The lesson
+// screens now draw them with the widgets; these tables are what the widgets must reproduce.
+const S14_ROWS = [["A", "B, C", "{r, g, b}"], ["B", "A, C, D", "{r, g, b}"], ["C", "A, B, D", "{r, g, b}"], ["D", "B, C, E", "{r, g, b}"], ["E", "D", "{r, g, b}"]];
+const S16_TABLE = {"rows": [["start", "{r, g, b}", "{r, g, b}", "{r, g, b}", "{r, g, b}", "{r, g, b}"], ["1. A = r", "= r", "{g, b}", "{g, b}", "{r, g, b}", "{r, g, b}"], ["2. B = g", "= r", "= g", "{b}", "{r, b}", "{r, g, b}"], ["3. C = b", "= r", "= g", "= b", "{r}", "{r, g, b}"], ["4. D = r", "= r", "= g", "= b", "= r", "{g, b}"], ["5. E = g", "= r", "= g", "= b", "= r", "= g"]], "caption": "Domeniile după fiecare alegere și după FC"};
+const S20_DOMAINS = [["A", "{1, 2, 3}"], ["B", "{1, 2, 3}"], ["C", "{1, 2, 3}"]];
+const S20_CONSTRAINTS = [["A < B", "(A, B) și (B, A)"], ["B < C", "(B, C) și (C, B)"]];
+const S22_TABLE = {"rows": [["(A, B)", "{1, 2, 3}", "3", "{1, 2}", "(B, A)"], ["(B, A)", "{1, 2, 3}", "1", "{2, 3}", "(A, B), (C, B)"], ["(B, C)", "{2, 3}", "3", "{2}", "(A, B), (C, B)"], ["(C, B)", "{1, 2, 3}", "1, 2", "{3}", "(B, C)"], ["(B, A)", "{2}", "—", "{2}", "—"], ["(A, B)", "{1, 2}", "2", "{1}", "(B, A)"], ["(C, B)", "{3}", "—", "{3}", "—"], ["(A, B)", "{1}", "—", "{1}", "—"], ["(C, B)", "{3}", "—", "{3}", "—"], ["(B, C)", "{2}", "—", "{2}", "—"], ["(B, A)", "{2}", "—", "{2}", "—"]], "caption": "Coada pornește cu (A, B), (B, A), (B, C), (C, B); arcele noi intră la sfârșit"};
 
 // a cell of the lesson's s16 table as the widget draws a variable
 const cellOf = (frame, id) => (id in frame.assigned ? `= ${frame.assigned[id]}` : `{${frame.domains[id].join(', ')}}`);
@@ -54,12 +61,12 @@ const clean = (v) => String(v).replace(/\$/g, '');
 const names = (M) => M.sorted.map((e) => e.name);
 
 describe('csp-fc reproduces the s16 table of the lesson', () => {
-  const props = vizOf(IA, 'ia-ct2-s16a').props;
+  const props = vizOf(IA, 'ia-ct2-s15').props;
   const M = graphModel(props);
-  const T = table(IA, 'ia-ct2-s16');
+  const T = S16_TABLE;
   const rowFrames = [0, 2, 4, 6, 8, 10]; // the start, then the frame after each FC
   it('the new screen draws the same map as s16: regions, neighbours and domains', () => {
-    const rows = table(IA, 'ia-ct2-s14').rows;
+    const rows = S14_ROWS;
     for (const [name, neigh, dom] of rows) {
       const n = props.edges.filter((e) => e.u === name || e.v === name).map((e) => (e.u === name ? e.v : e.u)).sort();
       expect(n.join(', ')).toBe(neigh);
@@ -208,12 +215,12 @@ describe('csp-fc on the s19 map with two colours (the dead end of the lesson)', 
 describe('ac3 reproduces the 11 arcs of s22', () => {
   const props = vizOf(IA, 'ia-ct2-s22a').props;
   const M = graphModel(props);
-  const T = table(IA, 'ia-ct2-s22');
+  const T = S22_TABLE;
   const arcText = (a) => `(${a[0]}, ${a[1]})`;
   const setText = (v) => `{${v.join(', ')}}`;
   it('the new screen has the lesson data: A < B, B < C, domains {1, 2, 3}', () => {
-    const d = table(IA, 'ia-ct2-s20', 0).rows;
-    const c = table(IA, 'ia-ct2-s20', 1).rows;
+    const d = S20_DOMAINS;
+    const c = S20_CONSTRAINTS;
     expect(d.map((r) => `${r[0]}=${r[1]}`)).toEqual(['A={1, 2, 3}', 'B={1, 2, 3}', 'C={1, 2, 3}']);
     expect(props.constraint).toBe('lt');
     expect(props.edges.map((e) => `${e.u} < ${e.v}`)).toEqual(c.map((r) => r[0]));
@@ -228,12 +235,11 @@ describe('ac3 reproduces the 11 arcs of s22', () => {
   });
   it('the queue starts with (A, B), (B, A), (B, C), (C, B), as the caption of the table says', () => {
     expect(M.frames[0].queue.map((q) => arcText(q.arc)).join(', ')).toBe('(A, B), (B, A), (B, C), (C, B)');
-    expect(T.caption.ro).toContain('(A, B), (B, A), (B, C), (C, B)');
+    expect(T.caption).toContain('(A, B), (B, A), (B, C), (C, B)');
   });
   it('the result: A = {1}, B = {2}, C = {3}, nothing empty', () => {
     expect(M.finalDomains).toEqual({ A: ['1'], B: ['2'], C: ['3'] });
     expect(M.inconsistent).toBe(false);
-    expect(step(IA, 'ia-ct2-s22').blocks.find((b) => b.type === 'rule').text.ro).toContain('A = {1}, B = {2}, C = {3}');
   });
   it('the queue rule: the checked neighbour is re-queued and duplicates stay (row 3 adds (A, B) while (A, B) is already waiting)', () => {
     const pop3 = M.frames.filter((f) => f.kind === 'pop')[2];
@@ -403,7 +409,7 @@ describe('dijkstra reproduces ag-cp-1c', () => {
 
 describe('the picks gate the next frame', () => {
   it('a single pick is answered once picked, a set pick once confirmed', () => {
-    const M = graphModel(vizOf(IA, 'ia-ct2-s16a').props);
+    const M = graphModel(vizOf(IA, 'ia-ct2-s15').props);
     const mrv = M.pickSpec(0, true);
     expect(answered(mrv, {})).toBe(false);
     expect(answered(mrv, { [mrv.items[0].key]: 'B' })).toBe(true); // a wrong pick still answers; the feedback says why
@@ -417,7 +423,7 @@ describe('the picks gate the next frame', () => {
 
 describe('the drawing', () => {
   const cases = [
-    ['csp-fc', () => vizOf(IA, 'ia-ct2-s16a').props],
+    ['csp-fc', () => vizOf(IA, 'ia-ct2-s15').props],
     ['csp-fc dead end', () => S19(['r', 'g'])],
     ['ac3', () => vizOf(IA, 'ia-ct2-s22a').props],
     ['dijkstra', () => vizOf(AG, 'ag-cp-1c2').props],
@@ -463,8 +469,8 @@ describe('the drawing', () => {
     expect(draw(w)).toContain('data-state="empty"');
   });
   it('a pick after the answer shows its feedback; a wrong set pick marks the chips', () => {
-    const M = graphModel(vizOf(IA, 'ia-ct2-s16a').props);
-    const props = vizOf(IA, 'ia-ct2-s16a').props;
+    const M = graphModel(vizOf(IA, 'ia-ct2-s15').props);
+    const props = vizOf(IA, 'ia-ct2-s15').props;
     const spec = M.pickSpec(1, true);
     const key = spec.items[0].key;
     const html = renderToStaticMarkup(React.createElement(Stage, { model: M, k: 1, props, picks: { [key]: ['B', 'E'], [confirmKey(key)]: true }, spec, onPick() {}, onToggle() {}, onConfirm() {} }));
@@ -475,7 +481,7 @@ describe('the drawing', () => {
     expect(html).toContain('E nu e vecin cu A');
   });
   it('the widget: with predict the first frame shows the pick and Next is locked; without, Next is open', () => {
-    const props = vizOf(IA, 'ia-ct2-s16a').props;
+    const props = vizOf(IA, 'ia-ct2-s15').props;
     const on = renderToStaticMarkup(React.createElement(GraphWalk, { props, predict: true }));
     expect(on).toContain('data-widget="graph-walk"');
     expect(on).toContain('mlv-picks');
@@ -536,7 +542,7 @@ describe('validateViz and the lesson JSON', () => {
   const block = (props) => ({ type: 'viz', id: 'x-1', widget: 'graph-walk', predict: true, props });
   it('is registered and accepts the three new screens', () => {
     expect(WIDGET_NAMES).toContain('graph-walk');
-    expect(validateViz(vizOf(IA, 'ia-ct2-s16a'))).toEqual([]);
+    expect(validateViz(vizOf(IA, 'ia-ct2-s15'))).toEqual([]);
     expect(validateViz(vizOf(IA, 'ia-ct2-s22a'))).toEqual([]);
     expect(validateViz(vizOf(AG, 'ag-cp-1c2'))).toEqual([]);
   });
@@ -555,7 +561,7 @@ describe('validateViz and the lesson JSON', () => {
   });
   it('the new screens sit right after the screens they extend, and the section counts follow the steps', () => {
     const idx = (c, id) => c.steps.findIndex((s) => s.id === id);
-    expect(idx(IA, 'ia-ct2-s16a')).toBe(idx(IA, 'ia-ct2-s16') + 1);
+    expect(idx(IA, 'ia-ct2-s15')).toBe(idx(IA, 'ia-ct2-s14') + 1);
     expect(idx(IA, 'ia-ct2-s22a')).toBe(idx(IA, 'ia-ct2-s22') + 1);
     expect(idx(AG, 'ag-cp-1c2')).toBe(idx(AG, 'ag-cp-1c') + 1);
     const count = (file, id) => Number(readFileSync(new URL(`../../src/content/${file}/index.js`, import.meta.url), 'utf8').match(new RegExp(`id: "${id}"[^\\n]*?sectionCount: (\\d+)`))[1]);
@@ -563,10 +569,11 @@ describe('validateViz and the lesson JSON', () => {
     expect(count('ag', 'ag-crash-partial')).toBe(AG.steps.length);
   });
   it('the screens hold one widget that asks for picks and carry no teaching-step label', () => {
-    for (const [c, id] of [[IA, 'ia-ct2-s16a'], [IA, 'ia-ct2-s22a'], [AG, 'ag-cp-1c2']]) {
+    for (const [c, id] of [[IA, 'ia-ct2-s15'], [IA, 'ia-ct2-s16'], [IA, 'ia-ct2-s22a'], [AG, 'ag-cp-1c2']]) {
       const s = step(c, id);
-      expect(s.blocks).toHaveLength(1);
-      expect(s.blocks[0].predict).toBe(true);
+      const v = s.blocks.filter((b) => b.type === 'viz');
+      expect(v).toHaveLength(1);
+      expect(v[0].predict).toBe(true);
       expect(JSON.stringify([s.title, s.kicker])).not.toMatch(/Exemplu|Exersează|Rețeta|Exercițiu|Încearcă|Rândul tău|Simboluri/);
     }
   });
