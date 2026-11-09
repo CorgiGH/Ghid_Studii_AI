@@ -9,8 +9,8 @@ const ia = {
   title: { en: 'Introducere în Inteligența Artificială', ro: 'Introducere în Inteligența Artificială' },
   shortTitle: { en: 'IA', ro: 'IA' },
   description: {
-    en: 'Intro to AI: written lab test crash packs',
-    ro: 'Introducere în IA: pachete de urgență pentru testele scrise de laborator',
+    en: 'Intro to AI: the lecture 4 lessons (CSP) and the Test 2 crash pack',
+    ro: 'Introducere în IA: lecțiile cursului 4 (CSP) și pachetul de urgență T2',
   },
   icon: '🧠',
   courses: [
