@@ -445,6 +445,9 @@ async function answerScreen(page, step, ctx) {
           if (cell && !nextOk) { if (cell.getAttribute('aria-pressed') !== 'true') { cell.click(); return 'tap' } }
           const opt = [...fig.querySelectorAll('.mlv-opt:not(.gw-confirm)')].find((b) => vis(b) && b.getAttribute('aria-pressed') !== 'true')
           if (opt && !nextOk) { opt.click(); return 'pick' }
+          // the chip widgets (ml-threshold, ml-cvloo, ml-prune): any chip of the asking frame gates it
+          const chip = [...fig.querySelectorAll('button.mlw4-chip')].find((b) => vis(b) && b.getAttribute('aria-pressed') !== 'true')
+          if (chip && !nextOk) { chip.click(); return 'chip' }
           if (vis(prim)) { const label = prim.innerText.trim(); prim.click(); return label }
           return null
         }, scope)

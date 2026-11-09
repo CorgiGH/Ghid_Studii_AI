@@ -38,7 +38,7 @@ const WIDGETS = {
   'ml-nb': lazy(() => import('../viz/widgets/ml/Nb.jsx')),
   'ml-likelihood': lazy(() => import('../viz/widgets/ml/MlLikelihood.jsx')),
   'ml-posterior': lazy(() => import('../viz/widgets/ml/MlPosterior.jsx')),
-  'graph-walk': lazy((() => import('../viz/widgets/GraphWalk.jsx')),
+  'graph-walk': lazy(() => import('../viz/widgets/GraphWalk.jsx')),
 };
 
 function Notice({ children }) {

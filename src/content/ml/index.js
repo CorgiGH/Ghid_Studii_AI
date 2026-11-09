@@ -30,7 +30,7 @@ const ml = {
     { id: "ml-l04", title: {"en":"Lesson 4: Discrete random variables: distribution, mean, variance; Bernoulli and binomial","ro":"Lecția 4: Variabile aleatoare discrete: distribuție, medie, varianță; Bernoulli și binomială"}, shortTitle: {"en":"L4: Random variables","ro":"L4: Variabile aleatoare"}, sectionCount: 30, metaId: "ml-l04", src: "ml/courses/lesson-04.json" },
     { id: "ml-l05", title: {"en":"Lesson 5: Joint, marginal and conditional distributions; independence of variables; covariance","ro":"Lecția 5: Distribuții comune, marginale, condiționate; independența variabilelor; covarianță"}, shortTitle: {"en":"L5: Joint distributions","ro":"L5: Distribuții comune"}, sectionCount: 32, metaId: "ml-l05", src: "ml/courses/lesson-05.json" },
     { id: "ml-l06", title: {"en":"Lesson 6: Conditional independence of random variables","ro":"Lecția 6: Independența condiționată a variabilelor aleatoare"}, shortTitle: {"en":"L6: Conditional independence","ro":"L6: Independența condiționată"}, sectionCount: 21, metaId: "ml-l06", src: "ml/courses/lesson-06.json" },
-    { id: "ml-crash-p1", title: {"en":"Crash mode: Midterm 1 (weeks 1-7)","ro":"Mod urgență: parțialul 1 (săptămânile 1-7)"}, shortTitle: {"en":"Crash P1","ro":"Urgență P1"}, sectionCount: 62, metaId: "ml-crash-p1", src: "ml/courses/crash-p1.json" },
+    { id: "ml-crash-p1", title: {"en":"Crash mode: Midterm 1 (weeks 1-7)","ro":"Mod urgență: parțialul 1 (săptămânile 1-7)"}, shortTitle: {"en":"Crash P1","ro":"Urgență P1"}, sectionCount: 98, metaId: "ml-crash-p1", src: "ml/courses/crash-p1.json" },
   ],
   seminars: [],
   labs: [],

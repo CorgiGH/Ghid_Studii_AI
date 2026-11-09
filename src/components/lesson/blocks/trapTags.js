@@ -115,6 +115,8 @@ export const ML_TAGS = [
   'erori-apropiate-underfitting', 'alegi-pe-test', 'raportezi-validarea', 'factorii-se-reestimeaza',
   'priorul-trebuie-sa-fie-frecventa', 'decizia-nu-se-schimba', 'bayes-optimal-nu-greseste-niciodata',
   'nb-si-bayes-comun-inversate', 'bayes-comun-e-sensibil-la-atribute-duplicate',
+  // added 2026-11-09 with the ML crash P1 rework (D-099)
+  'alege-mai-mic', 'atribut-lipsa', 'cale-gresita', 'celula-gresita', 'conditie-lipsa', 'depinde-de-clasa', 'doar-priorul', 'fara-presupunere', 'inlocuire-gresita', 'nu-sterge-nimic', 'numarat-gresit', 'numitor-schimba-clasa', 'ordinea-pruning-inversata', 'prag-gresit', 'prior-compenseaza', 'regula-inventata', 'rezultate-egale', 'sau-in-loc-de-si', 'sterge-clasa', 'zero-compensat',
 ];
 
 // NN (Rețele neuronale) tags: the mistakes the NN crash packs name, in the ASCII kebab-case Romanian of the ML slug rule.
