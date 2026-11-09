@@ -5,6 +5,7 @@ import { indepProblems } from './logic/ml/indep2x2.js';
 import { pmfCdf } from './logic/ml/pmf-cdf.js';
 import { jointTable } from './logic/ml/joint-table.js';
 import { entropyBars } from './logic/ml/entropy-bars.js';
+import { ALL_MODES, graphProblems } from './logic/graph/index.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -75,6 +76,7 @@ const SPEC = {
   'ml-threshold': { table: isTbl, attr: isStr, target: isStr, plane: optional(isPlane) },
   'ml-cvloo': { table: isTbl, target: isStr, tie: isStr, continuous: optional(strs) },
   'ml-prune': { tree: isPruneNode, table: optional(isTbl), target: optional(isStr), epsilon: isNum },
+  'graph-walk': { mode: oneOf(...ALL_MODES), nodes: isArr, edges: (v) => Array.isArray(v), source: optional(isStr), target: optional(isStr), directed: optional((v) => typeof v === 'boolean'), domains: optional((v) => !!v && typeof v === 'object' && !Array.isArray(v)), constraint: optional(oneOf('different', 'lt', 'divides')), tieBreak: optional(oneOf('alpha', 'order')), order: optional(strs) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -132,6 +134,7 @@ export function validateViz(block) {
     if (isTbl(props.table)) mlCols(props.table, [props.target, ...tests.map(n => n.attr)], false);
     if ((props.table === undefined) !== (props.target === undefined)) errs.push('viz (ml-prune): props.table and props.target go together');
   }
+  if (w === 'graph-walk' && errs.length === 0) errs.push(...graphProblems(props));
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   if (w === 'ml-omega') errs.push(...omegaProblems(props).filter((e) => !errs.includes(e)));
   if (w === 'ml-freq-tree') errs.push(...freqTreeProblems(props).filter((e) => !errs.includes(e)));
