@@ -410,10 +410,8 @@ const ag1 = loadJson('src/content/ag/courses/ag-crash-partial.json');
 const stepOf = (course, id) => course.steps.find((s) => s.id === id);
 
 describe('ag-cp-1c: the digraph is drawn from the screen\'s own arc list', () => {
-  const arcsOf1a = stepOf(ag1, 'ag-cp-1a').blocks[0].body[0].table.rows.map(([a, c]) => {
-    const m = /^\$(\w)\\to (\w)\$$/.exec(a);
-    return `${m[1]}→${m[2]}: ${c}`;
-  });
+  // the arc list the lesson printed on ag-cp-1a before that screen drew its own picture: the figure of ag-cp-1c must keep these arcs
+  const arcsOf1a = [['s', 'a', 7], ['s', 'b', 2], ['b', 'a', 3], ['b', 'c', 8], ['a', 'c', 1], ['a', 'd', 4], ['c', 'd', 2]].map(([a, b, c]) => `${a}→${b}: ${c}`);
   const part = stepOf(ag1, 'ag-cp-1c').blocks[0].intro[0];
   const { root } = parseSvg(part.figure.svg);
   const walk = (n, f) => { f(n); (n.children || []).forEach((c) => c.tag && walk(c, f)); };
@@ -488,14 +486,16 @@ describe('ag-cp-1c: the digraph is drawn from the screen\'s own arc list', () =>
 describe('ag-cp-order: the card menu', () => {
   const order = stepOf(ag1, 'ag-cp-order');
   const part = order.blocks[0].intro[0];
-  it('lists cards 1 to 6 of this lesson, each opening the first screen of its card', () => {
-    expect(part.cardlinks.map((l) => l.step)).toEqual(['ag-cp-1a', 'ag-cp-2a', 'ag-cp-3a', 'ag-cp-4a', 'ag-cp-5a', 'ag-cp-6a']);
+  it('lists the cards of this lesson (cards 1 to 6 and the continuations of cards 1 and 2), each opening the first screen of its card', () => {
+    const cards = part.cardlinks.filter((l) => /^\d · /.test(l.text.ro));
+    expect(cards.map((l) => l.step)).toEqual(['ag-cp-1a', 'ag-cp-1g', 'ag-cp-1h', 'ag-cp-1i', 'ag-cp-2a', 'ag-cp-2g', 'ag-cp-3a', 'ag-cp-3f', 'ag-cp-4a', 'ag-cp-5a', 'ag-cp-6a']);
     expect(partError(part, { stepIds: ag1.steps.map((s) => s.id) })).toBeNull();
     // each target screen's kicker says it is that card
-    part.cardlinks.forEach((l, i) => {
-      expect(stepOf(ag1, l.step).kicker.ro).toMatch(new RegExp(`^Cardul ${i + 1} din 10`));
-      expect(l.text.ro).toMatch(new RegExp(`^${i + 1} · `));
+    cards.forEach((l) => {
+      expect(stepOf(ag1, l.step).kicker.ro).toMatch(new RegExp(`^Cardul ${l.text.ro[0]} din 10`));
     });
+    // the mixed checks and the notation card are listed too
+    expect(part.cardlinks.map((l) => l.step)).toEqual(expect.arrayContaining(['ag-cp-x1', 'ag-cp-x2', 'ag-cp-n1']));
   });
   it('drops the effort words', () => {
     expect(JSON.stringify(order)).not.toMatch(/ușor|ușoare|easy/);
@@ -503,7 +503,7 @@ describe('ag-cp-order: the card menu', () => {
   it('the last screen of each of cards 1 to 6 links back to it (browser Back leaves the lesson after a jump)', () => {
     const lastOf = (n) => ag1.steps.filter((s) => s.kicker?.ro?.startsWith(`Cardul ${n} din 10`)).at(-1);
     const lasts = [1, 2, 3, 4, 5, 6].map(lastOf);
-    expect(lasts.map((s) => s.id)).toEqual(['ag-cp-1f', 'ag-cp-2f', 'ag-cp-3e', 'ag-cp-4f', 'ag-cp-5e', 'ag-cp-6e']);
+    expect(lasts.map((s) => s.id)).toEqual(['ag-cp-1j', 'ag-cp-2g', 'ag-cp-3f', 'ag-cp-4f', 'ag-cp-5e', 'ag-cp-6e']);
     for (const s of lasts) {
       const back = s.blocks.flatMap((b) => b.intro || []).find((p) => p.cardlinks);
       expect(back, s.id).toBeTruthy();
@@ -514,10 +514,8 @@ describe('ag-cp-order: the card menu', () => {
 });
 
 describe('ag-cp-6c: the tree path on card 1\'s digraph', () => {
-  const arcs = Object.fromEntries(stepOf(ag1, 'ag-cp-1a').blocks[0].body[0].table.rows.map(([a, c]) => {
-    const m = /^\$(\w)\\to (\w)\$$/.exec(a);
-    return [`${m[1]}${m[2]}`, c];
-  }));
+  // the arcs of card 1's digraph (drawn on ag-cp-1a and ag-cp-1c)
+  const arcs = Object.fromEntries([['sa', 7], ['sb', 2], ['ba', 3], ['bc', 8], ['ac', 1], ['ad', 4], ['cd', 2]]);
   const tab = stepOf(ag1, 'ag-cp-6c').blocks[0].intro[0].table;
   it('has two columns, path and cost, so the cost fits a phone', () => {
     expect(tab.columns.map((c) => c.ro)).toEqual(['Drum de la $s$ la $c$', 'Cost']);

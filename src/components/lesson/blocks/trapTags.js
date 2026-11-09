@@ -135,4 +135,6 @@ export const IA_TAGS = [
   'limita-sub-numarul-real', 'limita-prea-larga', 'toate-colorarile-complete',
 ];
 
-export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS, ...IA_TAGS]);
+import { AG_TAGS } from './trapTagsAg.js';
+
+export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS, ...IA_TAGS, ...AG_TAGS]);

@@ -26,6 +26,11 @@ const table = (course, id, which = 0) => step(course, id).blocks.find((b) => b.t
 const vizOf = (course, id) => step(course, id).blocks.find((b) => b.type === 'viz');
 // The worked traces of the lesson as the course prints them (c4ro p.28-30 and p.34-38; every row recomputed in Python). The lesson
 // screens now draw them with the widgets; these tables are what the widgets must reproduce.
+// The course tables the lessons used to print before the screens drew them with the widgets (ag-cp-2b/2c, 2d, 8b, 10b); the widgets must reproduce them.
+const T2C = {"rows": [["$DE$", 1, "{D,E}", "✓"], ["$AC$", 2, "{A,C}", "✓"], ["$BD$", 3, "{B,D,E}", "✓"], ["$AB$", 4, "{A,B,C,D,E}", "✓"], ["$BC$", 5, "–", "✗"], ["$CE$", 6, "–", "✗"], ["$CD$", 7, "–", "✗"]]};
+const T2D = {"rows": [["A", "4 (A)", "2 (A)", "∞", "∞"], ["C", "4 (A)", "–", "7 (C)", "6 (C)"], ["B", "–", "–", "3 (B)", "6 (C)"], ["D", "–", "–", "–", "1 (D)"], ["E", "–", "–", "–", "–"]]};
+const T8B = {"rows": [[1, 1, "–"], [2, 1, "–"], [3, 2, "✓"], [4, 1, "–"], [5, 2, "✓"], [6, 1, "–"]]};
+const T10B = {"rows": [["$h$", "$r_1$, $r_2$, $r_3$, $r_4$, $r_5$", 1], ["$r_1$", "$h$, $r_2$, $r_5$", 2], ["$r_2$", "$h$, $r_1$, $r_3$", 3], ["$r_3$", "$h$, $r_2$, $r_4$", 2], ["$r_4$", "$h$, $r_3$, $r_5$", 3], ["$r_5$", "$h$, $r_1$, $r_4$", 4]]};
 const S14_ROWS = [["A", "B, C", "{r, g, b}"], ["B", "A, C, D", "{r, g, b}"], ["C", "A, B, D", "{r, g, b}"], ["D", "B, C, E", "{r, g, b}"], ["E", "D", "{r, g, b}"]];
 const S16_TABLE = {"rows": [["start", "{r, g, b}", "{r, g, b}", "{r, g, b}", "{r, g, b}", "{r, g, b}"], ["1. A = r", "= r", "{g, b}", "{g, b}", "{r, g, b}", "{r, g, b}"], ["2. B = g", "= r", "= g", "{b}", "{r, b}", "{r, g, b}"], ["3. C = b", "= r", "= g", "= b", "{r}", "{r, g, b}"], ["4. D = r", "= r", "= g", "= b", "= r", "{g, b}"], ["5. E = g", "= r", "= g", "= b", "= r", "= g"]], "caption": "Domeniile după fiecare alegere și după FC"};
 const S20_DOMAINS = [["A", "{1, 2, 3}"], ["B", "{1, 2, 3}"], ["C", "{1, 2, 3}"]];
@@ -579,9 +584,9 @@ describe('validateViz and the lesson JSON', () => {
   });
 });
 
-describe('kruskal reproduces the table of ag-cp-2c', () => {
+describe('kruskal reproduces the table of the worked run (ag-cp-2b)', () => {
   const M = graphModel({ ...COURSE_MST, mode: 'kruskal' });
-  const T = table(AG, 'ag-cp-2c', 0);
+  const T = T2C;
   it('the sorted edges, the component after each and the verdict are the lesson table, row by row', () => {
     expect(M.count).toBe(1 + T.rows.length);
     T.rows.forEach((r, i) => {
@@ -664,7 +669,7 @@ describe('kruskal on the new m2 data: 17, CD rejected first', () => {
 
 describe('prim reproduces the table of ag-cp-2d', () => {
   const M = graphModel({ ...COURSE_MST, mode: 'prim', source: 'A' });
-  const T = table(AG, 'ag-cp-2d', 1);
+  const T = T2D;
   it('the rows of beta[j] and alpha[j] are the lesson table: added A, C, B, D, E', () => {
     expect(M.count).toBe(T.rows.length);
     T.rows.forEach((r, i) => {
@@ -751,7 +756,7 @@ describe('bfm on the notation of agr3 p.18-22', () => {
 
 describe('cut reproduces ag-cp-8b and ag-cp-8e', () => {
   const M = graphModel({ ...CUT_8B, mode: 'cut' });
-  const T = table(AG2, 'ag-cp-8b', 1);
+  const T = T8B;
   it('the node rows are the lesson table: components left and the cut-vertex mark', () => {
     const last = M.scene(6).table;
     expect(last.rows).toHaveLength(T.rows.length);
@@ -805,7 +810,7 @@ describe('cut reproduces ag-cp-8b and ag-cp-8e', () => {
 
 describe('colour reproduces the wheel of ag-cp-10b', () => {
   const M = graphModel({ ...WHEEL, mode: 'colour' });
-  const T = table(AG2, 'ag-cp-10b', 0);
+  const T = T10B;
   it('h, r1 .. r5 get 1, 2, 3, 2, 3, 4 as in the lesson table', () => {
     expect(M.steps.map((s) => s.c)).toEqual(T.rows.map((r) => r[2]));
     expect(M.steps.map((s) => s.id)).toEqual(['h', 'r1', 'r2', 'r3', 'r4', 'r5']);
@@ -816,7 +821,7 @@ describe('colour reproduces the wheel of ag-cp-10b', () => {
     expect(M.chi).toBe(4);
     expect(M.caption(M.count - 1).ro).toMatch(/χ\(G\) ≤ 4.*ω\(G\) = 3/);
     expect(M.caption(M.count - 1).ro).toContain('Nu există colorare cu 3 culori, deci χ(G) = 4.');
-    expect(step(AG2, 'ag-cp-10b').blocks[0].result.ro).toContain('\\chi(G)=4');
+    expect(step(AG2, 'ag-cp-10b').blocks.find((b) => b.type === 'steps').result.ro).toContain('\\chi(G)=4');
   });
   it('a bad order uses more colours than needed, and the end says so: a path a-b-c-d in the order a, d, b, c', () => {
     const P = graphModel({ ...mk('abcd', [['a', 'b'], ['b', 'c'], ['c', 'd']]), mode: 'colour', order: ['a', 'd', 'b', 'c'] });
