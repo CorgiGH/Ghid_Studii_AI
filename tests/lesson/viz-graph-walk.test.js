@@ -497,6 +497,14 @@ describe('the drawing', () => {
     expect(off).not.toContain('mlv-picks');
     expect(off).not.toMatch(/viz-btn-primary[^>]*disabled/);
   });
+  it('ac3 widget: before the first pick no queue chip and no two-arcs caption; without predict the queue shows', () => {
+    const props = vizOf(IA, 'ia-ct2-s22a').props;
+    const on = renderToStaticMarkup(React.createElement(GraphWalk, { props, predict: true }));
+    expect(on).not.toContain('gw-chip');
+    expect(on).not.toContain('două arce');
+    const off = renderToStaticMarkup(React.createElement(GraphWalk, { props, predict: false }));
+    expect(off).toContain('data-queue="(A, B) (B, A) (B, C) (C, B)"');
+  });
   it('subscripts of the course notation are drawn as subscripts', () => {
     const html = renderToStaticMarkup(React.createElement('p', null, notation('u_a = min(7, 2 + 3), a_si, X_k, u_j*, fără u_ ')));
     expect(html).toContain('<i>u</i><sub>a</sub>');
