@@ -132,12 +132,13 @@ export function ac3(props) {
     return null;
   };
 
-  M.caption = (k) => both((lang) => {
+  M.caption = (k, opts = {}) => both((lang) => {
     const f = frames[k];
     const T = (en, ro) => (lang === 'en' ? en : ro);
     const dm = (id) => showSet(f.domains[id]);
     if (f.kind === 'start') {
       const cons = G.edges.map(edgeText).join(', ');
+      if (opts.pending) return T(`Constraints: ${cons}. The domains start full.`, `Constrângeri: ${cons}. Domeniile pornesc întregi.`);
       return T(`Constraints: ${cons}. Each gives two arcs, one each way, and all go into the queue in this order. The domains start full.`, `Constrângeri: ${cons}. Fiecare dă două arce, câte unul în fiecare sens; toate intră în coadă în ordinea asta. Domeniile pornesc întregi.`);
     }
     if (f.kind === 'pop') {
@@ -155,7 +156,8 @@ export function ac3(props) {
     return T(`The queue is empty. ${fin}. No domain is empty, so the problem is not inconsistent.`, `Coada e goală. ${fin}. Niciun domeniu nu e gol, deci problema nu e inconsistentă.`);
   });
 
-  M.scene = (k) => {
+  // opts.pending: the pick of this frame is not answered yet. On the start frame the queue would give the answer away (2 x constraints), so the strip stays hidden.
+  M.scene = (k, opts = {}) => {
     const f = frames[k];
     const arc = f.arc || null;
     const nodes = G.nodes.map((n) => {
@@ -172,7 +174,7 @@ export function ac3(props) {
       u: e.u, v: e.v, text: edgeText(e),
       cls: arc && ((e.u === arc[0] && e.v === arc[1]) || (e.u === arc[1] && e.v === arc[0])) ? 'hl' : '',
     }));
-    const strips = [{
+    const strips = f.kind === 'start' && opts.pending ? [] : [{
       title: { en: 'Queue', ro: 'Coada' },
       chips: f.queue.map((it, i) => ({ t: arcText(it.arc), cls: (f.kind === 'pop' && i === 0) ? 'cur' : it.fresh ? 'new' : '' })),
       empty: { en: 'empty', ro: 'goală' },

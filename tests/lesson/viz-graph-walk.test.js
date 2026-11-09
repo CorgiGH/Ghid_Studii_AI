@@ -254,6 +254,13 @@ describe('ac3 reproduces the 11 arcs of s22', () => {
     expect(M.frames[0].kind).toBe('start');
     expect(M.frames.at(-1).kind).toBe('done');
   });
+  it('frame 0 shows no queue chips and no arc count before the pick is revealed, then all 4 arcs', () => {
+    expect(M.scene(0, { pending: true }).strips).toEqual([]);
+    expect(M.caption(0, { pending: true }).ro).not.toContain('două arce');
+    expect(M.scene(0, { pending: false }).strips[0].chips).toHaveLength(4);
+    expect(M.scene(0).strips[0].chips).toHaveLength(4);
+    expect(M.caption(0).ro).toContain('două arce');
+  });
   it('picks: the start asks 4 arcs; a pop asks the leaving values; a revised frame asks the arcs added', () => {
     expect(M.pickSpec(0, true).items[0].answer).toBe('4');
     const pop1 = M.frames.findIndex((f) => f.kind === 'pop');

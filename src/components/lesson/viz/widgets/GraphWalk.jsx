@@ -177,7 +177,7 @@ export function useGraphModel(props) {
 export function Stage({ model, k, picks, spec, onPick, onToggle, onConfirm }) {
   const { t } = useApp();
   const L = (x) => (x !== null && typeof x === 'object' ? t(x.en, x.ro) : String(x));
-  const scene = model.scene(k);
+  const scene = model.scene(k, { pending: !answered(spec, picks) });
   const box = useMemo(() => boxOf(model.nodes), [model.nodes]);
   const pos = useMemo(() => Object.fromEntries(model.nodes.map((n) => [n.id, n])), [model.nodes]);
   const heads = scene.table?.heads;
@@ -237,7 +237,7 @@ export default function GraphWalk({ props, predict }) {
     goto: (to) => { if (to <= s.step || !blocked(to)) s.goto(to); },
     reset: () => { setPicks({}); s.reset(); },
   };
-  const cap = model.caption(s.step);
+  const cap = model.caption(s.step, { pending: !ok });
   return (
     <VizFrame widget="graph-walk" stepper={stepper} caption={notation(t(cap.en, cap.ro))} label={t('Walk through a graph algorithm', 'Parcurgerea unui algoritm pe graf')}>
       <Stage model={model} k={s.step} picks={picks} spec={spec} onPick={onPick} onToggle={onToggle} onConfirm={onConfirm} />
