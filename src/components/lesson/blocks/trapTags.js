@@ -123,6 +123,8 @@ export const NN_TAGS = [
   'gradient-zero-aproape-de-tinta', 'relu-curbeaza', 'un-neuron-relu-indoaie', 'directia-distantei-gresita',
   'distanta-dreptei-de-la-origine', 'liniar-pe-bucati-luat-drept-liniar', 'ponderi-noi-in-backprop',
   'separator-care-nu-exista', 'formula-depinde-de-y',
+  // added 2026-11-09 with the HW3 crash lesson rework (D-099)
+  'aceeasi-dreapta-fara-verificare', 'actualizare-cu-plus', 'actualizare-pentru-memorie', 'bias-scaleaza-w', 'cos-confundat', 'derivata-dupa-alt-z', 'eroarea-iesirii-la-intrare', 'factor-sigmoid-pastrat', 'forma-transpusa', 'indice-gresit-din-foaie', 'liniar-doar-fara-bias', 'ln-aplicat-lui-z', 'ln-uitat', 'o-singura-intrare', 'pondere-din-alta-sageata', 'separator-fara-relu', 'separator-vechi-pastrat', 'termenul-nu-dispare', 'uita-1-supra-s', 'uita-derivata-exponentialei', 'uita-factorul-y1-y', 'uita-iesirea-sursei', 'uita-ponderea', 'uita-suma-pe-lot', 'z-luat-drept-distanta',
 ];
 
 export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS]);
