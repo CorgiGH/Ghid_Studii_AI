@@ -50,8 +50,10 @@ describe('azi back / forward and undo', () => {
 });
 
 describe('azi buttons', () => {
-  it('IA step has exactly one button', () => {
-    expect(buildTargets(byId('ia-test-scris-2'))).toHaveLength(1);
+  it('IA step has the lecture 4 lesson and the crash pack, two different buttons', () => {
+    const t = buildTargets(byId('ia-test-scris-2'));
+    expect(t.map((x) => x.kind)).toEqual(['lesson', 'crash']);
+    expect(new Set(t.map((x) => x.href)).size).toBe(2);
   });
   it('single-pack steps give one crash button', () => {
     for (const id of ['nn-tema-3', 'ml-p1']) {
