@@ -21,6 +21,8 @@ const WIDGETS = {
   'self-pairs': lazy(() => import('../viz/widgets/SelfPairs.jsx')),
   'all-vs-some': lazy(() => import('../viz/widgets/AllVsSome.jsx')),
   'set-balls': lazy(() => import('../viz/widgets/SetBalls.jsx')),
+  'game-tree': lazy(() => import('../viz/widgets/GameTree.jsx')),
+  'payoff-matrix': lazy(() => import('../viz/widgets/PayoffMatrix.jsx')),
   'ml-omega': lazy(() => import('../viz/widgets/ml/Omega.jsx')),
   'ml-freq-tree': lazy(() => import('../viz/widgets/ml/FreqTree.jsx')),
   'ml-indep-2x2': lazy(() => import('../viz/widgets/ml/Indep2x2.jsx')),
@@ -33,6 +35,7 @@ const WIDGETS = {
   'ml-threshold': lazy(() => import('../viz/widgets/ml/Threshold.jsx')),
   'ml-cvloo': lazy(() => import('../viz/widgets/ml/CvLoo.jsx')),
   'ml-prune': lazy(() => import('../viz/widgets/ml/Prune.jsx')),
+  'graph-walk': lazy(() => import('../viz/widgets/GraphWalk.jsx')),
 };
 
 function Notice({ children }) {

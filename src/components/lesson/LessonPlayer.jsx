@@ -4,11 +4,12 @@ import { AnimatePresence, motion as Motion, useIsPresent, useReducedMotion } fro
 import { useApp } from '../../contexts/AppContext';
 import { loadJson } from '../../content/jsonLoader';
 import BlockRenderer from '../blocks/BlockRenderer';
+import LessonNavContext from './LessonNav.js';
 import formatMarkdown from '../blocks/formatMarkdown';
 import ScreenGate from './ScreenGate';
 import { preloadLessonBlocks } from './preload';
 import { useLessonStore } from '../../lesson/useLessonStore';
-import { canAdvance, holdStageUntilTop, isGatingScreen, mergeGate, nextScreen, screenFromUrl, paramsForScreen, seedGate, skipAttempt, slideVariants } from './playerLogic';
+import { canAdvance, holdStageUntilTop, isGatingScreen, mergeGate, nextScreen, screenFromUrl, paramsForScreen, screenOfStep, seedGate, skipAttempt, slideVariants } from './playerLogic';
 
 const EDITABLE = 'textarea, input, select, [contenteditable=""], [contenteditable="true"], .cm-editor, [data-lesson-editor]';
 const INTERACTIVE = 'button, a, summary, [role="button"], [role="tab"]';
@@ -40,7 +41,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
   const data = useMemo(() => {
     try { return { course: loadJson(src), error: null }; } catch (e) { return { course: null, error: e.message }; }
   }, [src]);
-  const steps = data.course?.steps || [];
+  const steps = useMemo(() => data.course?.steps || [], [data.course]);
   const total = steps.length;
 
   const rawS = params.get('s');
@@ -138,6 +139,12 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
     setParams(prev => paramsForScreen(prev, n), { replace: true });
   }, [screen, total, setParams]);
 
+  // cardlinks: open the screen that holds a step id (by id, so a screen added later does not break the link)
+  const nav = useMemo(() => ({
+    stepIds: steps.map((s) => s.id),
+    goToStep: (id) => { const n = screenOfStep(steps, id); if (n) go(n); },
+  }), [steps, go]);
+
   const markDone = useCallback(() => {
     if (step && !progress[step.id]?.understood) toggleUnderstood(step.id);
   }, [step, progress, toggleUnderstood]);
@@ -220,6 +227,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
           >
             {step.kicker && <p className="lp-kicker" data-testid="lesson-kicker">{t(step.kicker.en, step.kicker.ro)}</p>}
             <h2 ref={headingRef} tabIndex={-1} className="lp-title" dangerouslySetInnerHTML={{ __html: formatMarkdown(title) }} />
+            <LessonNavContext.Provider value={nav}>
             <ScreenGate src={src} screen={screen} state={gate} patchGate={patchGate} onSkip={onSkip}>
               <div className="lp-blocks">
                 {step.blocks.map((block, i) => (
@@ -227,6 +235,7 @@ export default function LessonPlayer({ src, onFinish, hasNext = false }) {
                 ))}
               </div>
             </ScreenGate>
+            </LessonNavContext.Provider>
           </Screen>
         </AnimatePresence>
       </div>

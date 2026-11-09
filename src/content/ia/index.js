@@ -14,7 +14,7 @@ const ia = {
   },
   icon: '🧠',
   courses: [
-    { id: "ia-crash-t2", title: {"en":"Crash pack: written test 2 (CSP and game theory)","ro":"Mod urgență: Testul scris 2 (CSP și teoria jocurilor)"}, shortTitle: {"en":"Test 2 crash pack","ro":"Mod urgență T2"}, sectionCount: 47, metaId: "ia-crash-t2", src: "ia/courses/crash-t2.json" },
+    { id: "ia-crash-t2", title: {"en":"Crash pack: written test 2 (CSP and game theory)","ro":"Mod urgență: Testul scris 2 (CSP și teoria jocurilor)"}, shortTitle: {"en":"Test 2 crash pack","ro":"Mod urgență T2"}, sectionCount: 51, metaId: "ia-crash-t2", src: "ia/courses/crash-t2.json" },
   ],
   seminars: [],
   labs: [],

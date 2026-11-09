@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Fraction } from '../../src/ml/calc/fraction.js';
 import { parseAnswer, grade, formulaMatches, padEval, tolOf } from '../../src/ml/calc/answer.js';
 import {
-  validateCalc, scopeOf, withVariant, checkTexts, allRight, restoreCalcState, calcAction, hintAction, calcWrite, solutionNote, CHECKED_TWICE,
+  validateCalc, scopeOf, withVariant, checkTexts, allRight, restoreCalcState, calcAction, hintAction, calcWrite,
 } from '../../src/components/lesson/blocks/calcSpec.js';
 import { seedGate, gatingKind, isGatingScreen } from '../../src/components/lesson/playerLogic.js';
 
@@ -196,11 +196,11 @@ describe('validateCalc', () => {
     delete b.variants;
     expect(validateCalc(b).join('\n')).toMatch(/at least 1 variant/);
   });
-  it('rejects an unknown status, and a ruled one without the outline line', () => {
+  it('rejects an unknown status; a ruled one needs no author note', () => {
     const b = good(); b.status = 'guessed';
     expect(validateCalc(b).join('\n')).toMatch(/status must be one of/);
     const r = good(); r.status = 'ruled';
-    expect(validateCalc(r).join('\n')).toMatch(/ruledNote/);
+    expect(validateCalc(r)).toEqual([]);
     r.ruledNote = bi('Convenția cărții.');
     expect(validateCalc(r)).toEqual([]);
   });
@@ -227,11 +227,22 @@ describe('validateCalc', () => {
 });
 
 describe('what the solution says about where the answer comes from', () => {
-  it('shows the standard line for a verified-twice exercise, the outline line for a ruled one, none for a book answer', () => {
-    expect(solutionNote(block)).toEqual(CHECKED_TWICE);
-    expect(CHECKED_TWICE.ro).toBe('Culegerea nu dă răspunsul; verificat de două ori.');
-    expect(solutionNote({ status: 'ruled', ruledNote: bi('linia din outline') })).toEqual(bi('linia din outline'));
-    expect(solutionNote({ status: 'book' })).toBeNull();
+  // `status` and `ruledNote` are for authors: a revealed solution shows the solution and no provenance line
+  it.each(['book', 'verified-twice', 'ruled'])('shows no provenance line under a revealed %s solution', (status) => {
+    const own = { ...block, id: `ml-l07-note-${status}`, status, ruledNote: bi('Răspuns verificat pe calculator, prin calcul direct.') };
+    const ref = { src: 'ml/courses/lesson-07.json', screen: 9 };
+    store.recordAttempt(own.id, { ok: false, hints: 0, kind: 'calc', item: own.id, ref, at: 1000, done: true, revealed: true, fields: {}, verdicts: {} });
+    const html = renderToStaticMarkup(h(ScreenGate, { src: ref.src, screen: ref.screen, state: {}, patchGate: () => {}, onSkip: () => {} }, h(CalcExerciseBlock, own)));
+    expect(html).toContain('data-testid="calc-solution"');
+    expect(html).toContain('Soluția completă.');
+    expect(html).not.toContain('calc-note');
+    expect(html).not.toMatch(/verificat|Culegerea nu dă/);
+  });
+  it('still validates a ruled exercise with or without its author note, and rejects a malformed note', () => {
+    const ruled = { ...block, status: 'ruled' };
+    expect(validateCalc(ruled)).toEqual([]);
+    expect(validateCalc({ ...ruled, ruledNote: bi('nota autorului') })).toEqual([]);
+    expect(validateCalc({ ...ruled, ruledNote: 'x' }).join('\n')).toMatch(/ruledNote/);
   });
 });
 
@@ -345,7 +356,8 @@ describe('the rendered block', () => {
     expect(html).toContain('Corect');
     expect(html).toContain('value="0,6935"');
     expect(html).toContain('aria-pressed="true" disabled=""><span>Outlook</span>');
-    expect(html).toContain('Culegerea nu dă răspunsul; verificat de două ori.');
+    expect(html).toContain('Soluția completă.'); // the solution, and no line about where the answer comes from
+    expect(html).not.toMatch(/verificat de două ori|Culegerea nu dă/);
     expect(html).not.toContain('data-testid="calc-reveal"'); // the solution is on screen already: no button that opens it again
     expect(seedGate({ id: 's', blocks: [{ type: 'calc-exercise' }] }, store.attemptsAt(ref.src, ref.screen))).toEqual({ completed: true });
   });

@@ -5,6 +5,9 @@ import { indepProblems } from './logic/ml/indep2x2.js';
 import { pmfCdf } from './logic/ml/pmf-cdf.js';
 import { jointTable } from './logic/ml/joint-table.js';
 import { entropyBars } from './logic/ml/entropy-bars.js';
+import { gameTree } from './logic/game-tree.js';
+import { payoffMatrix } from './logic/payoff-matrix.js';
+import { ALL_MODES, graphProblems } from './logic/graph/index.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -23,6 +26,10 @@ const isPlane = (v) => !!v && typeof v === 'object' && isStr(v.x) && isStr(v.y);
 // a tree of the ml-prune widget: { attr, ig?, kids: { value: node } } with { leaf } at the ends
 const isPruneNode = (n) => !!n && typeof n === 'object' && (n.leaf !== undefined || (isStr(n.attr) && (n.ig === undefined || isNum(n.ig)) && !!n.kids && typeof n.kids === 'object' && Object.keys(n.kids).length > 0 && Object.values(n.kids).every(isPruneNode)));
 const pruneTests = (n) => (n.leaf !== undefined ? [] : [n, ...Object.values(n.kids).flatMap(pruneTests)]);
+// game-tree: a node is { id, children } or { leaf: number }
+const isGameNode = (n) => !!n && typeof n === 'object' && (n.leaf !== undefined ? isNum(n.leaf) : isStr(n.id) && Array.isArray(n.children) && n.children.length > 0 && n.children.every(isGameNode));
+const isPayCell = (c) => Array.isArray(c) && c.length === 2 && c.every(isNum);
+const isPayoffs = (v) => isArr(v) && v.every((r) => isArr(r) && r.every(isPayCell));
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
 
@@ -62,6 +69,8 @@ const SPEC = {
   'join-wires': { left: isStr, right: isStr, on: isStr, kind: oneOf('inner', 'left', 'right', 'full'), filterIn: optional(oneOf('on', 'where')), filter: optional(isStr) },
   'self-pairs': { table: isStr, pairOn: isStr, order: oneOf('<>', '<') },
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
+  'game-tree': { mode: oneOf('minimax', 'alphabeta'), root: oneOf('MIN', 'MAX'), rootLabel: optional(isBi), tree: isGameNode },
+  'payoff-matrix': { mode: oneOf('nash', 'dominance'), players: (v) => !!v && isStr(v.row) && isStr(v.col), rows: strs, cols: strs, payoffs: isPayoffs, compare: optional((v) => strs(v) && v.length === 2) },
   'ml-omega': { outcomes: (v) => isArr(v) && v.every((x) => isStr(x) || isNum(x)), events: (v) => !!v && typeof v === 'object' && Array.isArray(v.A) && Array.isArray(v.B), restrictTo: optional(oneOf('A', 'B')) },
   'ml-freq-tree': { population: isNum, prior: isNum, sens: isNum, fpr: isNum, labels: (v) => !!v && typeof v === 'object' },
   'ml-indep-2x2': { counts: (v) => Array.isArray(v) && v.length === 2 && v.every((r) => Array.isArray(r) && r.length === 2 && r.every(isNum)), labels: (v) => !!v && typeof v === 'object' },
@@ -75,6 +84,7 @@ const SPEC = {
   'ml-threshold': { table: isTbl, attr: isStr, target: isStr, plane: optional(isPlane) },
   'ml-cvloo': { table: isTbl, target: isStr, tie: isStr, continuous: optional(strs) },
   'ml-prune': { tree: isPruneNode, table: optional(isTbl), target: optional(isStr), epsilon: isNum },
+  'graph-walk': { mode: oneOf(...ALL_MODES), nodes: isArr, edges: (v) => Array.isArray(v), source: optional(isStr), target: optional(isStr), directed: optional((v) => typeof v === 'boolean'), domains: optional((v) => !!v && typeof v === 'object' && !Array.isArray(v)), constraint: optional(oneOf('different', 'lt', 'divides')), tieBreak: optional(oneOf('alpha', 'order')), order: optional(strs) },
 };
 
 export const WIDGET_NAMES = Object.keys(SPEC);
@@ -132,6 +142,13 @@ export function validateViz(block) {
     if (isTbl(props.table)) mlCols(props.table, [props.target, ...tests.map(n => n.attr)], false);
     if ((props.table === undefined) !== (props.target === undefined)) errs.push('viz (ml-prune): props.table and props.target go together');
   }
+  if (w === 'game-tree' && errs.length === 0) {
+    try { gameTree(props); } catch (e) { errs.push(`viz (game-tree): ${e.message}`); }
+  }
+  if (w === 'payoff-matrix' && errs.length === 0) {
+    try { payoffMatrix(props); } catch (e) { errs.push(`viz (payoff-matrix): ${e.message}`); }
+  }
+  if (w === 'graph-walk' && errs.length === 0) errs.push(...graphProblems(props));
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   if (w === 'ml-omega') errs.push(...omegaProblems(props).filter((e) => !errs.includes(e)));
   if (w === 'ml-freq-tree') errs.push(...freqTreeProblems(props).filter((e) => !errs.includes(e)));

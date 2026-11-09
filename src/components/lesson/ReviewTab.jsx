@@ -23,7 +23,7 @@ function readLesson(src) {
 export function ReviewQuestion({ block, onAnswer }) {
   if (block.type === 'calc-exercise') return <CalcExerciseBlock {...block} record={false} onAnswer={onAnswer} />;
   if (block.type === 'proof-step') return <ProofStepReview block={block} onAnswer={onAnswer} />;
-  return <McqBlock id={block.id} question={block.question} table={block.table} options={block.options} record={false} onAnswer={onAnswer} />;
+  return <McqBlock id={block.id} question={block.question} table={block.table} figure={block.figure} options={block.options} record={false} onAnswer={onAnswer} />;
 }
 
 // Recapitulare: everything the learner missed and has not yet answered right three times.

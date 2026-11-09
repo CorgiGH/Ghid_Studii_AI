@@ -1,7 +1,7 @@
 // Pure helpers for the review pile (Recapitulare): which items are due, how they are
 // grouped, and which question a pending multiple-choice, proof-step or calculation item comes back as.
 import { withVariant } from '../components/lesson/blocks/calcSpec.js';
-import { stepItem } from '../components/lesson/blocks/proofSpec.js';
+import { figureAt, stepItem } from '../components/lesson/blocks/proofSpec.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -121,7 +121,7 @@ export function collectProofPool(lessons) {
           pool.push({
             id, src, screen: i + 1, lesson,
             block: {
-              type: 'proof-step', id, claim: block.claim, given: block.given, table: block.table,
+              type: 'proof-step', id, claim: block.claim, given: block.given, table: block.table, figure: figureAt(block, k) || undefined,
               before: block.steps.slice(0, k).map(({ shown, why }) => ({ shown, why })),
               question: s.predict.question, options: s.predict.options,
             },

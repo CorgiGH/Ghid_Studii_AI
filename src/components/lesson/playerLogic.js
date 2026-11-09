@@ -115,6 +115,13 @@ export function seedGate(step, attempts) {
 
 // Query params after a move to screen n: ?s= changes and ?variant= (set by a review link for one item) is dropped, so it does not
 // carry over to the later screens of the lesson.
+// The 1-based screen that holds the step with this id (cardlinks open a screen by id, so a screen added later does not break the
+// link), or null when no step has it.
+export function screenOfStep(steps, id) {
+  const i = Array.isArray(steps) ? steps.findIndex((s) => s?.id === id) : -1;
+  return i < 0 ? null : i + 1;
+}
+
 export function paramsForScreen(prev, n) {
   const p = new URLSearchParams(prev);
   p.set('s', String(n));

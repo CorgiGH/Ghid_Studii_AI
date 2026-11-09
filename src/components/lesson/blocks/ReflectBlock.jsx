@@ -8,11 +8,12 @@ import { nowMs } from '../../../lesson/clock.js';
 import { REFLECT_TEXT_MAX, restoredReflect, shouldRecordAttempt } from '../../../lesson/restore.js';
 import QuestionTables from './QuestionTables.jsx';
 import { StepsBody } from './GuideParts.jsx';
+import { Figure } from './FigureParts.jsx';
 
-// Block JSON: { type: 'reflect', id, prompt, placeholder?, answer, table?: { dataset, sql, caption? } | [{ dataset, sql, caption? }, ...],
+// Block JSON: { type: 'reflect', id, prompt, placeholder?, answer, figure?, table?: { dataset, sql, caption? } | [{ dataset, sql, caption? }, ...],
 //   answerSteps?: [{ intro?, items?, start?, result? }] }. With answerSteps the revealed answer is drawn as numbered steps (the
 //   Ghid rapid's worked answers); `answer` still holds the same text for the review tab.
-export default function ReflectBlock({ id, prompt, placeholder, answer, table, answerSteps }) {
+export default function ReflectBlock({ id, prompt, placeholder, answer, table, figure, answerSteps }) {
   const { t } = useApp();
   const { complete, ref } = useScreenGate();
   const store = useLessonStore();
@@ -36,6 +37,7 @@ export default function ReflectBlock({ id, prompt, placeholder, answer, table, a
     <div className="ch ch-reflect" data-testid="reflect-block">
       <p className="ch-q" dangerouslySetInnerHTML={{ __html: formatMarkdown(t(prompt.en, prompt.ro)) }} />
       <QuestionTables table={table} />
+      {figure && <Figure figure={figure} />}
       <textarea
         className="ch-text"
         rows={3}
