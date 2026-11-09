@@ -8,6 +8,8 @@ import { entropyBars } from './logic/ml/entropy-bars.js';
 import { gameTree } from './logic/game-tree.js';
 import { payoffMatrix } from './logic/payoff-matrix.js';
 import { ALL_MODES, graphProblems } from './logic/graph/index.js';
+import { nbProblems } from './logic/ml/nb.js';
+import { posteriorProblems } from './logic/ml/posterior.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -84,6 +86,17 @@ const SPEC = {
   'ml-threshold': { table: isTbl, attr: isStr, target: isStr, plane: optional(isPlane) },
   'ml-cvloo': { table: isTbl, target: isStr, tie: isStr, continuous: optional(strs) },
   'ml-prune': { tree: isPruneNode, table: optional(isTbl), target: optional(isStr), epsilon: isNum },
+  'ml-nb': { table: (v) => !!v && typeof v === 'object' && isArr(v.columns) && isArr(v.rows), target: isStr, row: (v) => isStr(v) || (!!v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0), modes: subsetOf('joint', 'laplace', 'errors') },
+  'ml-likelihood': {
+    data: (v) => (Array.isArray(v) ? v.length > 0 : v !== undefined) && (Array.isArray(v) ? v : [v]).every((d) => !!d && Number.isInteger(d.n) && d.n >= 2 && Number.isInteger(d.heads) && d.heads >= 0 && d.heads <= d.n),
+    grid: (v) => isArr(v) && v.length <= 5 && v.every((x) => isNum(x) && x >= 0 && x <= 1),
+    prior: optional((v) => !!v && Number.isInteger(v.a) && Number.isInteger(v.b) && v.a >= 1 && v.b >= 1),
+  },
+  'ml-posterior': {
+    hypotheses: (v) => isArr(v) && v.length >= 2 && v.length <= 6 && v.every((h) => !!h && isStr(h.name) && [h.prior, h.lik].every((x) => (isNum(x) && x > 0 && x <= 1) || isStr(x)))
+      && new Set(v.map((h) => h.name)).size === v.length
+      && (v.some((h) => isStr(h.prior)) || Math.abs(v.reduce((s, h) => s + h.prior, 0) - 1) < 1e-9),
+  },
   'graph-walk': { mode: oneOf(...ALL_MODES), nodes: isArr, edges: (v) => Array.isArray(v), source: optional(isStr), target: optional(isStr), directed: optional((v) => typeof v === 'boolean'), domains: optional((v) => !!v && typeof v === 'object' && !Array.isArray(v)), constraint: optional(oneOf('different', 'lt', 'divides')), tieBreak: optional(oneOf('alpha', 'order')), order: optional(strs) },
 };
 
@@ -149,6 +162,8 @@ export function validateViz(block) {
     try { payoffMatrix(props); } catch (e) { errs.push(`viz (payoff-matrix): ${e.message}`); }
   }
   if (w === 'graph-walk' && errs.length === 0) errs.push(...graphProblems(props));
+  if (w === 'ml-posterior' && errs.length === 0) errs.push(...posteriorProblems(props).map((e) => `viz (ml-posterior): ${e}`));
+  if (w === 'ml-nb' && errs.length === 0) errs.push(...nbProblems(props).map((e) => `viz (ml-nb): ${e}`));
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   if (w === 'ml-omega') errs.push(...omegaProblems(props).filter((e) => !errs.includes(e)));
   if (w === 'ml-freq-tree') errs.push(...freqTreeProblems(props).filter((e) => !errs.includes(e)));
