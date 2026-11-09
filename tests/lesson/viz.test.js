@@ -401,7 +401,7 @@ describe('common helpers', () => {
 
 describe('viz block spec', () => {
   it('knows all twenty-one widgets', () => {
-    expect(WIDGET_NAMES.filter((n) => !n.startsWith('ml-'))).toHaveLength(21); // the ML widgets have their own tests/ml/viz-*.test.js
+    expect(WIDGET_NAMES.filter((n) => !n.startsWith('ml-') && n !== 'graph-walk')).toHaveLength(21); // the ML widgets have their own tests/ml/viz-*.test.js; graph-walk has tests/lesson/viz-graph-walk.test.js
   });
   it('validates id, widget, props and predict', () => {
     const ok = { type: 'viz', id: 'bd-l6-like', widget: 'like-slider', predict: false, props: { pattern: '_r%', values: ['a'] } };

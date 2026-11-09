@@ -64,14 +64,15 @@ export function VizFrame({ widget, stepper, caption, children, label }) {
 // Plain table used by several widgets. Rows and cells take class hooks so the widget
 // decides the colour; transitions are CSS so a 40-row table stays cheap.
 // `cellButton(i, column, row)` may return { label, onClick } to make that cell a button.
-export function MiniTable({ columns, rows, rowClass, cellClass, cellButton, wirePrefix, caption, highlightCols, fmt, maxHeight }) {
+// `colLabel(column)` draws the header text for a column key (a subscript, a translation); the key still names the cell.
+export function MiniTable({ columns, rows, rowClass, cellClass, cellButton, wirePrefix, caption, highlightCols, fmt, maxHeight, colLabel }) {
   const show = (v) => (fmt ? fmt(v) : displayCell(v));
   return (
     <div className="viz-tablewrap" style={maxHeight ? { maxHeight, overflowY: 'auto' } : undefined}>
       {caption && <div className="viz-tablecap">{caption}</div>}
       <table className="viz-table">
         <thead>
-          <tr>{columns.map(c => <th key={c} className={highlightCols?.includes(c) ? 'hl' : ''}>{c}</th>)}</tr>
+          <tr>{columns.map(c => <th key={c} className={highlightCols?.includes(c) ? 'hl' : ''}>{colLabel ? colLabel(c) : c}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
@@ -197,7 +198,7 @@ export function CountUp({ to, from = 0, digits = 0, duration = 0.9 }) {
 }
 
 // A row of chips, one per value; the current one is lit and earlier ones carry their verdict.
-export function ValueChips({ items, step, verdicts, onPick, className = '' }) {
+export function ValueChips({ items, step, verdicts, onPick, className = '', readOnly = false }) {
   return (
     <div className={`viz-chips ${className}`}>
       {items.map((it, i) => {
@@ -205,12 +206,16 @@ export function ValueChips({ items, step, verdicts, onPick, className = '' }) {
         const cur = i === step - 1;
         const v = verdicts ? verdicts[i] : undefined;
         const tone = done || cur ? (v === true ? 'yes' : v === false ? 'no' : 'unk') : '';
-        return (
-          <button key={i} type="button" className={`viz-chip ${tone}${cur ? ' cur' : ''}`} onClick={() => onPick?.(i + 1)} aria-current={cur ? 'true' : undefined}>
+        const body = (
+          <>
             {it === null || it === undefined ? <em>NULL</em> : String(it)}
             {(done || cur) && <span className="viz-chip-mark" aria-hidden="true">{v === true ? '✓' : v === false ? '✗' : '?'}</span>}
-          </button>
+          </>
         );
+        // readOnly: a chip that only shows its verdict (not a button, not in the tab order)
+        return readOnly
+          ? <span key={i} className={`viz-chip ${tone}${cur ? ' cur' : ''}`}>{body}</span>
+          : <button key={i} type="button" className={`viz-chip ${tone}${cur ? ' cur' : ''}`} onClick={() => onPick?.(i + 1)} aria-current={cur ? 'true' : undefined}>{body}</button>;
       })}
     </div>
   );
