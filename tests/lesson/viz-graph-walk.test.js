@@ -931,3 +931,46 @@ describe('the AG lessons\' own widget data reproduce their traces', () => {
     expect(labels).toEqual(['h:1', 'r1:2', 'r2:3', 'r3:2', 'r4:3', 'r5:4']);
   });
 });
+
+// IA lecture 4 full lessons (ia-l04c, ia-l04d): every graph-walk screen reproduces the trace its lesson writes in words
+// (lesson screens c-s18, c-s20, d-s15, d-s17, d-s22; the numbers were recomputed in Python before they went on screen).
+describe('the graph-walk screens of the lecture 4 lessons match their worked traces', () => {
+  const L4C = read('ia/courses/lesson-04c.json');
+  const L4D = read('ia/courses/lesson-04d.json');
+  const assigns = (M) => M.frames.filter((f) => f.kind === 'assign').map((f) => `${f.X} ${f.v}`);
+  it('c-s18: MRV + FC on Australia (ties alphabetical) colours NSW r, Q g, SA b, NT r, V g, WA g, T r, with no going back', () => {
+    const M = graphModel(vizOf(L4C, 'ia-l04c-s18').props);
+    expect(assigns(M)).toEqual(['NSW r', 'Q g', 'SA b', 'NT r', 'V g', 'WA g', 'T r']);
+    expect(M.solved).toBe(true);
+    expect(M.backtracked).toBe(false);
+  });
+  it('c-s20: the 2024 exam map gives A r, B g, C b, D r', () => {
+    const M = graphModel(vizOf(L4C, 'ia-l04c-s20').props);
+    expect(assigns(M)).toEqual(['A r', 'B g', 'C b', 'D r']);
+    expect(M.solved).toBe(true);
+  });
+  it('d-s15: on NSW, SA, NT, V (slide 34 domains) SA is wiped out at the fifth arc, (SA, NT)', () => {
+    const M = graphModel(vizOf(L4D, 'ia-l04d-s15').props);
+    expect(M.inconsistent).toBe(true);
+    expect(M.trace).toHaveLength(5);
+    expect(M.trace[4].arc).toEqual(['SA', 'NT']);
+    expect(M.trace[4].after).toEqual([]);
+    expect(M.trace[0].arc).toEqual(['NSW', 'SA']);
+    expect(M.trace[3].arc).toEqual(['V', 'NSW']);
+  });
+  it('d-s17: the 2024 B problem takes 7 arcs and ends v1 {2}, v2 {2, 4}, v3 {2}; the last three arcs remove nothing', () => {
+    const M = graphModel(vizOf(L4D, 'ia-l04d-s17').props);
+    expect(M.trace).toHaveLength(7);
+    expect(M.finalDomains).toEqual({ v1: ['2'], v2: ['2', '4'], v3: ['2'] });
+    expect(M.inconsistent).toBe(false);
+    expect(M.trace.slice(4).map((t) => `(${t.arc.join(', ')})`)).toEqual(['(v2, v1)', '(v3, v1)', '(v1, v3)']);
+    expect(M.trace.slice(4).every((t) => t.removed.length === 0)).toBe(true);
+  });
+  it('d-s22: P, Q, R start with the queue (P, Q), (Q, P), (Q, R), (R, Q), take 10 arcs and end P {1}, Q {2}, R {2, 6}', () => {
+    const M = graphModel(vizOf(L4D, 'ia-l04d-s22').props);
+    expect(M.frames[0].queue.map((q) => `(${q.arc.join(', ')})`).join(', ')).toBe('(P, Q), (Q, P), (Q, R), (R, Q)');
+    expect(M.trace).toHaveLength(10);
+    expect(M.finalDomains).toEqual({ P: ['1'], Q: ['2'], R: ['2', '6'] });
+    expect(M.inconsistent).toBe(false);
+  });
+});

@@ -212,6 +212,12 @@ describe('validateCalc', () => {
     const v = good(); v.variants[0].fields.pop();
     expect(validateCalc(v).join('\n')).toMatch(/no entry for field frac/);
   });
+  it('rejects a variant whose choice answer is not one of the block options (review keeps the block options)', () => {
+    const c = good(); c.variants[0].fields[1].expected = 'Humidity';
+    expect(validateCalc(c).join('\n')).toMatch(/variants\[0\]: field root: expected "Humidity" is not one of the block's options/);
+    const ok = good(); ok.variants[0].fields[1].expected = 'Wind';
+    expect(validateCalc(ok)).toEqual([]);
+  });
   it('rejects a variant with a hint ladder that is not three steps, or a malformed accept', () => {
     const b = good(); b.variants[0].hints = [bi('doar unul')];
     expect(validateCalc(b).join('\n')).toMatch(/variants\[0\]: hints must be 3/);

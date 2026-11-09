@@ -98,6 +98,12 @@ export function validateCalc(b) {
         else {
           if (!isStr(f.formula)) va(`field ${f.id}: formula missing`);
           if (!isValue(f.expected)) va(`field ${f.id}: expected must be a string or a number`);
+          // A variant keeps the block's labels and options (withVariant): its answer must be one the learner can pick.
+          const bf = Array.isArray(fields) ? fields.find((x) => x?.id === f.id) : null;
+          if (bf?.kind === 'choice' && Array.isArray(bf.options) && isValue(f.expected) && !matchOption(String(f.expected), bf.options)) {
+            va(`field ${f.id}: expected "${f.expected}" is not one of the block's options (a variant keeps the block's options)`);
+          }
+          if (bf?.kind === 'tf' && isValue(f.expected) && !['true', 'false'].includes(String(f.expected))) va(`field ${f.id}: a tf field expects "true" or "false"`);
           if (f.tol !== undefined && !(typeof f.tol === 'number' && f.tol > 0)) va(`field ${f.id}: tol must be a positive number`);
           if (f.accept !== undefined && !acceptOk(f.accept)) va(`field ${f.id}: accept must list { value, note: {en, ro} }`);
         }
