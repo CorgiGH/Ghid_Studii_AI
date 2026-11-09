@@ -2,13 +2,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useApp } from '../../../../contexts/AppContext';
 import { useStepper } from '../kit.js';
 import { VizFrame } from '../ui.jsx';
-import { gameTree, showBound } from '../logic/game-tree.js';
+import { gameTree, showBound, layoutOf } from '../logic/game-tree.js';
 import { PickBar, allAnswered } from './ml/mlParts.jsx';
 import './game-tree.css';
-
-const SLOT = 48;
-const ROW = 78;
-const TOP = 38;
 
 // the tree of one frame
 export function Stage({ M, k, answered = true }) {
@@ -16,10 +12,8 @@ export function Stage({ M, k, answered = true }) {
   const T = M.T;
   const f = M.frames[k];
   const st = M.state(k, answered);
-  const W = Math.max(300, T.leaves.length * SLOT);
-  const H = TOP + T.maxDepth * ROW + 38;
-  const px = (id) => (T.x[id] + 0.5) * (W / T.leaves.length);
-  const py = (id) => TOP + T.nodes[id].depth * ROW;
+  const { H, leafW, vbX, vbW, px, py } = layoutOf(T);
+  const half = leafW / 2;
   const under = (id) => (T.nodes[id].leaf ? [id] : T.nodes[id].children.flatMap(under));
   const gone = (id) => under(id).every((l) => st.leaves[l] === 'skipped');
   const cutFrom = new Set(st.cuts.map((c) => c.from));
@@ -27,16 +21,17 @@ export function Stage({ M, k, answered = true }) {
   const edges = ids.filter((id) => T.nodes[id].parent !== null);
   const curNode = M.mode === 'minimax' && f.kind === 'node' ? f.node : null;
   const onPath = (id) => curNode && T.nodes[curNode].children.includes(id);
+  const chosen = new Set(st.chosen.map(([p, c]) => `${p}>${c}`));
   return (
     <div className="gt">
-      <svg className="gt-svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t('The game tree', 'Arborele jocului')}>
+      <svg className="gt-svg" viewBox={`${vbX} 0 ${vbW} ${H}`} role="img" aria-label={t('The game tree', 'Arborele jocului')}>
         {edges.map((id) => {
           const p = T.nodes[id].parent;
           const x1 = px(p); const y1 = py(p) + 18; const x2 = px(id); const y2 = py(id) - (T.nodes[id].leaf ? 16 : 19);
           const skip = st.leaves && gone(id);
           return (
             <g key={`e-${id}`}>
-              <line className={`gt-edge${skip ? ' skip' : ''}${onPath(id) ? ' on' : ''}`} x1={x1} y1={y1} x2={x2} y2={y2} />
+              <line className={`gt-edge${skip ? ' skip' : ''}${chosen.has(`${p}>${id}`) ? ' pick' : onPath(id) ? ' on' : ''}`} data-mark={chosen.has(`${p}>${id}`) ? 'pick' : undefined} x1={x1} y1={y1} x2={x2} y2={y2} />
               {cutFrom.has(id) && (
                 <line className="gt-slash" data-mark="slash" data-value={p} x1={(x1 + x2) / 2 - 9} y1={(y1 + y2) / 2 - 7} x2={(x1 + x2) / 2 + 9} y2={(y1 + y2) / 2 + 7} />
               )}
@@ -50,9 +45,9 @@ export function Stage({ M, k, answered = true }) {
             const status = st.leaves[id];
             return (
               <g key={id} className={`gt-leaf ${status}`} data-leaf={status}>
-                <rect x={x - 18} y={y - 15} width={36} height={30} rx={7} />
+                <rect x={x - half} y={y - 15} width={leafW} height={30} rx={7} />
                 <text className="num" x={x} y={y + 5.5} textAnchor="middle" data-mark="leaf" data-value={n.value}>{n.value}</text>
-                {status === 'skipped' && <line className="x" x1={x - 15} y1={y + 12} x2={x + 15} y2={y - 12} />}
+                {status === 'skipped' && <line className="x" x1={x - half + 3} y1={y + 12} x2={x + half - 3} y2={y - 12} />}
               </g>
             );
           }

@@ -85,7 +85,8 @@ export function payoffMatrix(props) {
       { kind: 'setup' },
       ...cols.map((_, c) => ({ kind: 'col', c, ...bestRowsIn(P, c) })),
       ...rows.map((_, r) => ({ kind: 'row', r, ...bestColsIn(P, r) })),
-      { kind: 'end', nash: M.nash },
+      // one end frame per equilibrium, each checking that cell's deviations; one end frame saying "none" when there is none
+      ...(M.nash.length ? M.nash.map((eq, i) => ({ kind: 'end', eq, i, nash: M.nash })) : [{ kind: 'end', eq: null, i: 0, nash: [] }]),
     ];
   } else {
     const [ra, rb] = (props.compare || []).map((n) => rows.indexOf(n));
@@ -103,9 +104,9 @@ export function payoffMatrix(props) {
 
   // ---- what is drawn at frame k; `answered` is false while the learner still has to pick ----
   // rowBest / colBest: cells whose row-player / column-player number is marked [ ]; nash: cells both marked at the end;
-  // deviations: from each equilibrium cell, the cells a single player could move to
+  // eq: the equilibrium this end frame checks; deviations: from that cell, the cells a single player could move to
   M.state = (k, answered = true) => {
-    const st = { rowBest: [], colBest: [], nash: [], deviations: [], focusCol: null, focusRow: null, rels: [], pair: null };
+    const st = { rowBest: [], colBest: [], nash: [], eq: null, deviations: [], focusCol: null, focusRow: null, rels: [], pair: null };
     if (mode === 'nash') {
       M.frames.forEach((f, j) => {
         const shown = j < k || (j === k && answered) || M.frames[k].kind === 'end';
@@ -118,7 +119,9 @@ export function payoffMatrix(props) {
       if (f.kind === 'row') st.focusRow = f.r;
       if (f.kind === 'end') {
         st.nash = M.nash;
-        for (const [r, c] of M.nash) {
+        if (f.eq) {
+          const [r, c] = f.eq;
+          st.eq = f.eq;
           rows.forEach((_, r2) => { if (r2 !== r) st.deviations.push({ from: [r, c], to: [r2, c], player: 'row' }); });
           cols.forEach((_, c2) => { if (c2 !== c) st.deviations.push({ from: [r, c], to: [r, c2], player: 'col' }); });
         }
@@ -141,15 +144,15 @@ export function payoffMatrix(props) {
     if (mode === 'nash' && f.kind === 'col') {
       return {
         type: 'cells', axis: 'col', index: f.c, answer: f.at,
-        prompt: bi(`On column ${cols[f.c]}, which row gives ${who.row} the most? Tap the cell, or every cell if there is a tie.`,
-          `Pe coloana ${cols[f.c]}, ce rând îi dă lui ${who.row} cel mai mult? Atinge celula, sau toate celulele dacă sunt egale.`),
+        prompt: bi(`On column ${cols[f.c]}, which row is best for ${who.row}? Tap the cell, or every cell if there is a tie.`,
+          `Pe coloana ${cols[f.c]}, ce rând e cel mai bun pentru ${who.row}? Atinge celula, sau toate celulele dacă sunt egale.`),
       };
     }
     if (mode === 'nash' && f.kind === 'row') {
       return {
         type: 'cells', axis: 'row', index: f.r, answer: f.at,
-        prompt: bi(`On row ${rows[f.r]}, which column gives ${who.col} the most? Tap the cell, or every cell if there is a tie.`,
-          `Pe rândul ${rows[f.r]}, ce coloană îi dă lui ${who.col} cel mai mult? Atinge celula, sau toate celulele dacă sunt egale.`),
+        prompt: bi(`On row ${rows[f.r]}, which column is best for ${who.col}? Tap the cell, or every cell if there is a tie.`,
+          `Pe rândul ${rows[f.r]}, ce coloană e cea mai bună pentru ${who.col}? Atinge celula, sau toate celulele dacă sunt egale.`),
       };
     }
     return null;
@@ -161,8 +164,8 @@ export function payoffMatrix(props) {
     return {
       items: [{
         key: `d${k}`,
-        prompt: bi(`On column ${cols[f.c]}: does row ${a} give ${who.row} at least as much as row ${b}?`,
-          `Pe coloana ${cols[f.c]}: rândul ${a} îi dă lui ${who.row} cel puțin cât rândul ${b}?`),
+        prompt: bi(`On column ${cols[f.c]}: for ${who.row}, does row ${a} give at least as much as row ${b}?`,
+          `Pe coloana ${cols[f.c]}: pentru ${who.row}, rândul ${a} dă cel puțin cât rândul ${b}?`),
         options: [{ id: 'ge', label: '≥' }, { id: 'lt', label: '<' }],
       }],
     };
@@ -181,10 +184,10 @@ export function payoffMatrix(props) {
     const f = M.frames[k];
     if (f.kind === 'setup') {
       return mode === 'nash'
-        ? bi(`${who.row} picks a row, ${who.col} picks a column. A cell shows (${who.row}'s payoff, ${who.col}'s payoff). Look for a cell where neither wants to change alone.`,
-          `${who.row} alege un rând, ${who.col} alege o coloană. Celula arată (câștigul lui ${who.row}, câștigul lui ${who.col}). Căutăm celula în care niciunul nu vrea să schimbe singur.`)
-        : bi(`Compare row ${rows[M.cmp.a]} with row ${rows[M.cmp.b]} on every column, using ${who.row}'s payoff only (the left number).`,
-          `Compară rândul ${rows[M.cmp.a]} cu rândul ${rows[M.cmp.b]} pe fiecare coloană, doar după câștigul lui ${who.row} (numărul din stânga).`);
+        ? bi(`${who.row} picks a row, ${who.col} picks a column. A cell shows (${who.row}'s payoff, ${who.col}'s payoff). Look for a cell where no player gains more by changing their own choice alone.`,
+          `${who.row} alege un rând, ${who.col} alege o coloană. Celula arată (câștig ${who.row}, câștig ${who.col}). Căutăm celula în care niciun jucător nu câștigă mai mult schimbându-și singur alegerea.`)
+        : bi(`Compare row ${rows[M.cmp.a]} with row ${rows[M.cmp.b]} on every column. Only the left number counts: the payoff for ${who.row}.`,
+          `Compară rândul ${rows[M.cmp.a]} cu rândul ${rows[M.cmp.b]} pe fiecare coloană. Contează doar numărul din stânga: câștigul pentru ${who.row}.`);
     }
     if (f.kind === 'col' || f.kind === 'row') {
       const col = f.kind === 'col';
@@ -228,17 +231,20 @@ export function payoffMatrix(props) {
       );
       return bi(`${word.en} ${all.en}`, `${word.ro} ${all.ro}`);
     }
-    // nash, end
-    if (!f.nash.length) return bi('No cell is marked twice: there is no pure Nash equilibrium.', 'Nicio celulă nu are ambele marcaje: nu există echilibru Nash pur.');
-    const eq = f.nash.map(([r, c]) => bi(`${cell(r, c)} with payoffs ${pay(r, c)}`, `${cell(r, c)}, cu câștigurile ${pay(r, c)}`));
-    const dev = f.nash.map(([r, c]) => {
-      const rv = P.flatMap((x, i) => (i === r ? [] : [x[c][0]]));
-      const cv = P[r].flatMap((x, j) => (j === c ? [] : [x[1]]));
-      return bi(`In ${cell(r, c)}: if ${who.row} changes row alone, ${who.row} gets ${listIn(rv, 'or')}; if ${who.col} changes column alone, ${who.col} gets ${listIn(cv, 'or')}.`,
-        `În ${cell(r, c)}: dacă ${who.row} schimbă singur rândul, ia ${listIn(rv, 'sau')}; dacă ${who.col} schimbă singur coloana, ia ${listIn(cv, 'sau')}.`);
-    });
-    return bi(`Pure Nash ${f.nash.length > 1 ? 'equilibria' : 'equilibrium'}: ${listIn(eq.map((x) => x.en), 'and')}. ${dev.map((x) => x.en).join(' ')}`,
-      `Echilibr${f.nash.length > 1 ? 'e' : 'u'} Nash pur${f.nash.length > 1 ? 'e' : ''}: ${listIn(eq.map((x) => x.ro), 'și')}. ${dev.map((x) => x.ro).join(' ')}`);
+    // nash, end: the first end frame names every equilibrium; each end frame checks one of them against a lone change
+    if (!f.eq) return bi('No cell is marked twice: there is no pure Nash equilibrium.', 'Nicio celulă nu are ambele marcaje: nu există echilibru Nash pur.');
+    const many = f.nash.length > 1;
+    const head = f.i === 0
+      ? bi(`Pure Nash ${many ? 'equilibria' : 'equilibrium'}: ${listIn(f.nash.map(([r, c]) => cell(r, c)), 'and')}. `,
+        `Echilibr${many ? 'e' : 'u'} Nash pur${many ? 'e' : ''}: ${listIn(f.nash.map(([r, c]) => cell(r, c)), 'și')}. `)
+      : bi('', '');
+    const [r, c] = f.eq;
+    const rv = P.flatMap((x, i) => (i === r ? [] : [x[c][0]]));
+    const cv = P[r].flatMap((x, j) => (j === c ? [] : [x[1]]));
+    return bi(
+      `${head.en}Check ${cell(r, c)}, with payoffs ${pay(r, c)}: if only ${who.row} changes row, ${who.row} gets ${listIn(rv, 'or')}, no more than ${P[r][c][0]}; if only ${who.col} changes column, ${who.col} gets ${listIn(cv, 'or')}, no more than ${P[r][c][1]}.`,
+      `${head.ro}Verifică ${cell(r, c)}, cu câștigurile ${pay(r, c)}: dacă doar ${who.row} își schimbă rândul, ia ${listIn(rv, 'sau')}, nu mai mult de ${P[r][c][0]}; dacă doar ${who.col} își schimbă coloana, ia ${listIn(cv, 'sau')}, nu mai mult de ${P[r][c][1]}.`,
+    );
   };
   return M;
 }

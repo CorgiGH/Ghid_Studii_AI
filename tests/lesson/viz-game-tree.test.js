@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { gameTree, buildTree, minimaxValues, alphaBetaRun } from '../../src/components/lesson/viz/logic/game-tree.js';
+import { gameTree, buildTree, minimaxValues, alphaBetaRun, layoutOf } from '../../src/components/lesson/viz/logic/game-tree.js';
 import { validateViz } from '../../src/components/lesson/viz/vizSpec.js';
 import { expectCaptionDrawn } from '../ml/ml-viz-helpers.js';
 
@@ -17,6 +17,19 @@ const course = (root) => ({ mode: 'alphabeta', root, tree: { id: 'S', children: 
 const lesson = { mode: 'alphabeta', root: 'MIN', tree: { id: 'S', children: [kids('A', 4, 9, 6), kids('B', 11, 5, 7), kids('C', 7, 10, 2)] } };
 // c5 p.22: S MIN = 9, A MAX = 9 over (9, 8), B MAX >= 10 (the leaf 10 reaches beta = 9, the next leaf is cut)
 const p22 = { mode: 'alphabeta', root: 'MIN', tree: { id: 'S', children: [kids('A', 9, 8), kids('B', 10, 4)] } };
+// the crash pack's s30: S = MAX over A(5, 8, 6), B(4, 9, 3), C(9, 7, 12); its solution: root 7, B cut after 4 (9 and 3)
+const s30 = { mode: 'alphabeta', root: 'MAX', tree: { id: 'S', children: [kids('A', 5, 8, 6), kids('B', 4, 9, 3), kids('C', 9, 7, 12)] } };
+// three levels: S MAX over X MIN(A MAX(5), B MAX(2, 9)) and Y MIN(C MAX(1, 2), D MAX(3, 7)); X = 5, then C = 2 <= alpha 5 in Y
+const deep = { mode: 'alphabeta', root: 'MAX', tree: { id: 'S', children: [
+  { id: 'X', children: [kids('A', 5), kids('B', 2, 9)] },
+  { id: 'Y', children: [kids('C', 1, 2), kids('D', 3, 7)] },
+] } };
+// a cut whose bound was set higher up: R MAX gets alpha 8 from P (8); in Q (MIN) -> Z (MAX) -> X (MIN), the leaf 3 <= 8 cuts X,
+// but the 8 belongs to R, not to X's parent Z
+const far = { mode: 'alphabeta', root: 'MAX', tree: { id: 'R', children: [
+  kids('P', 8),
+  { id: 'Q', children: [{ id: 'Z', children: [kids('X', 3, 10), kids('W', 1)] }, L(2)] },
+] } };
 
 const leafValues = (M, ids) => ids.map((id) => M.T.nodes[id].value);
 const evaluated = (M) => M.run.frames.map((f) => f.v);
@@ -82,13 +95,22 @@ describe('game-tree logic: the lesson trees and c5 p.22', () => {
     expect(f.cut).toBe(false);
     expect(M.answer(2)).toBe('go');
   });
+  it("the crash pack's s30 tree (S = MAX): root 7, B cut after its first leaf 4, so 9 and 3 are not evaluated", () => {
+    const M = gameTree(s30);
+    expect(M.rootValue).toBe(7);
+    expect(M.run.rootValue).toBe(7);
+    expect(leafValues(M, M.run.skipped)).toEqual([9, 3]);
+    expect(evaluated(M)).toEqual([5, 8, 6, 4, 9, 7, 12]);
+    expect(M.run.closed.A).toEqual({ value: 5, bound: null });
+    expect(M.run.closed.B).toEqual({ value: 4, bound: '≤' });
+    expect(M.run.closed.C).toEqual({ value: 7, bound: null });
+    const k = M.frames.findIndex((f) => f.cut);
+    expect([M.frames[k].v, M.frames[k].parent, M.answer(k)]).toEqual([4, 'B', 'cut']);
+    expect(M.caption(k).ro).toMatch(/^B: 4 ≤ alpha = 5, deci restul lui B se taie: B va fi cel mult 4, iar S are deja 5, așa că S nu alege B\. B se închide cu ≤ 4\. S: B ≤ 4 nu este ≥ beta = \+∞; alpha rămâne 5\.$/);
+    expect(M.caption(M.count - 1).ro).toBe('S = 7, ca la minimax. Frunze neevaluate: 2 din 9.');
+  });
   it('works over three levels: a cut at the last leaf of C lifts to Y and drops the whole subtree D', () => {
-    // S MAX over X MIN(A MAX(5), B MAX(2, 9)) and Y MIN(C MAX(1, 2), D MAX(3, 7)); X = 5, then C = 2 <= alpha 5 in Y
-    const props = { mode: 'alphabeta', root: 'MAX', tree: { id: 'S', children: [
-      { id: 'X', children: [kids('A', 5), kids('B', 2, 9)] },
-      { id: 'Y', children: [kids('C', 1, 2), kids('D', 3, 7)] },
-    ] } };
-    const M = gameTree(props);
+    const M = gameTree(deep);
     expect(M.rootValue).toBe(5);
     expect(M.run.rootValue).toBe(5);
     expect(M.run.closed.X).toEqual({ value: 5, bound: null });
@@ -98,6 +120,31 @@ describe('game-tree logic: the lesson trees and c5 p.22', () => {
     expect([f.v, f.parent]).toEqual([2, 'C']); // the pick "tai restul" is right at C's last leaf: the cut is higher up
     expect(f.steps.map((x) => [x.node, x.cut])).toEqual([['C', false], ['Y', true], ['S', false]]); // Y closes with <= 2 and S reads it
     expect(M.answer(M.frames.indexOf(f))).toBe('cut');
+    // the last leaf of C asks about a cut higher up and shows the bounds of every open node above C
+    const spec = M.pickSpec(M.frames.indexOf(f)).items[0];
+    expect(spec.prompt.ro).toBe('Frunza 2 este ultima din C (MAX ▲). Se închide C: se taie ceva mai sus? Deasupra, [alpha, beta]: Y (MIN ▼) [5, +∞]; S (MAX ▲) [5, +∞].');
+    expect(spec.options.map((o) => [o.id, o.label.ro])).toEqual([['go', 'nu'], ['cut', 'da, se taie']]);
+    // the caption follows the order things happen: C closes, then Y reads it and cuts
+    expect(M.caption(M.frames.indexOf(f)).ro).toMatch(/C se închide cu 2\. Y: C = 2 ≤ alpha = 5, deci restul lui Y se taie: Y va fi cel mult 2, iar S are deja 5, așa că S nu alege Y\. Y se închide cu ≤ 2\./);
+  });
+  it('a cut against a bound set higher up names the node that holds it', () => {
+    const M = gameTree(far);
+    expect(M.run.rootValue).toBe(M.rootValue);
+    expect(M.rootValue).toBe(8);
+    const k = M.frames.findIndex((f) => f.cut);
+    const step = M.frames[k].steps.find((x) => x.cut);
+    expect([step.node, step.v, step.alpha, step.origin, M.T.nodes.X.parent]).toEqual(['X', 3, 8, 'R', 'Z']);
+    expect(M.caption(k).ro).toMatch(/X va fi cel mult 3, iar R are deja 8 pe altă ramură, așa că valoarea exactă a lui X nu mai contează\./);
+    // then W's only leaf closes W, Z closes with 3 and Q (whose parent is R) cuts the leaf 2: two cuts, 10 and 2 not evaluated
+    expect(leafValues(M, M.run.skipped)).toEqual([10, 2]);
+    const last = M.frames.findIndex((f) => f.v === 1);
+    expect([M.frames[last].last, M.answer(last)]).toEqual([true, 'cut']);
+    expect(M.caption(last).ro).toMatch(/Q va fi cel mult 3, iar R are deja 8, așa că R nu alege Q\./);
+  });
+  it('a cut on a tie says the parent gains nothing', () => {
+    const M = gameTree({ mode: 'alphabeta', root: 'MIN', tree: { id: 'S', children: [kids('A', 8), kids('B', 8, 1)] } });
+    const k = M.frames.findIndex((f) => f.cut);
+    expect(M.caption(k).ro).toMatch(/^B: 8 ≥ beta = 8, deci restul lui B se taie: B va fi cel puțin 8, iar S are deja 8, așa că S nu câștigă nimic alegând B\./);
   });
   it('alpha-beta always returns the minimax value (random trees, both root types)', () => {
     let seed = 7;
@@ -134,6 +181,28 @@ describe('game-tree minimax frames', () => {
     expect(M.pickSpec(1).items[0].options.map((o) => o.id)).toEqual([1, 5, 9]);
     expect(M.answer(4)).toBe(8);
   });
+  it('asks nothing where there is nothing to choose (B has one child), and says so', () => {
+    expect(M.pickSpec(2)).toBeNull();
+    expect(M.answer(2)).toBeNull();
+    expect(M.caption(2).ro).toBe('B = max(8) = 8: are un singur copil.');
+    // two children with the same value leave nothing to choose either
+    const same = gameTree({ mode: 'minimax', root: 'MAX', tree: kids('S', 4, 4) });
+    expect(same.pickSpec(1)).toBeNull();
+  });
+  it('the reveal marks the child a node takes, and the root names it (c5 p.17: "= 8 (choice B)")', () => {
+    expect(M.state(1, false).chosen).toEqual([]);
+    expect(M.state(1, true).chosen).toEqual([['A', 'l3']]);
+    expect(M.state(4, true).chosen).toContainEqual(['S', 'B']);
+    expect(M.caption(4).ro).toBe('S = min(9, 8, 9) = 8: cea mai mică dintre copii. S alege B.');
+    expect(M.caption(1).ro).toBe('A = max(1, 5, 9) = 9: cea mai mare dintre copii.');
+  });
+  it('a wrong pick starts with "Nu chiar"', () => {
+    expect(M.caption(1, { picks: { v1: 5 } }).ro).toBe('Nu chiar (ai ales 5). A = max(1, 5, 9) = 9: cea mai mare dintre copii.');
+  });
+  it('names the root with its label', () => {
+    const R = gameTree({ ...course('MIN'), mode: 'minimax', rootLabel: { en: 'us (AI)', ro: 'noi (AI)' } });
+    expect(R.caption(0).ro).toMatch(/ Rădăcina S: noi \(AI\)\.$/);
+  });
   it('writes the value inside the node only after the pick', () => {
     expect(M.state(1, false).nodes).toEqual({});
     expect(M.state(1, true).nodes.A.value).toBe(9);
@@ -163,8 +232,25 @@ describe('game-tree alpha-beta picks and state', () => {
   });
   it('captions say what happened and a wrong pick is named', () => {
     expect(M.caption(6, { answered: true, picks: { c6: 'cut' } }).ro).toMatch(/9 ≥ beta = 8, deci restul lui C se taie/);
-    expect(M.caption(6, { answered: true, picks: { c6: 'go' } }).ro).toMatch(/^Nu chiar/);
+    expect(M.caption(6, { answered: true, picks: { c6: 'go' } }).ro).toMatch(/^Nu chiar \(ai ales „continui”\)/);
     expect(M.caption(7).ro).toBe('S = 8, ca la minimax. Frunze neevaluate: 1 din 7.');
+  });
+  it('the cut says why it is safe, and a node closed early is written with its limit', () => {
+    expect(M.caption(6).ro).toBe('C: 9 ≥ beta = 8, deci restul lui C se taie: C va fi cel puțin 9, iar S are deja 8, așa că S nu alege C. C se închide cu ≥ 9. S: C ≥ 9 nu este ≤ alpha = −∞; beta rămâne 8. S se închide cu 8.');
+    expect(M.caption(6).ro).toMatch(/S: C ≥ 9/);
+    const X = gameTree(course('MAX'));
+    const k = X.frames.findIndex((f) => f.cut);
+    expect(X.caption(k).ro).toMatch(/^C: 3 ≤ alpha = 8, deci restul lui C se taie: C va fi cel mult 3, iar S are deja 8, așa că S nu alege C\. C se închide cu ≤ 3\. S: C ≤ 3 nu este/);
+  });
+  it('a leaf with siblings after it asks "continui / tai restul"; a last leaf asks about a cut higher up', () => {
+    const ask = (k) => M.pickSpec(k).items[0];
+    expect(ask(2).prompt.ro).toBe('Frunza 5 ajunge în A (MAX ▲), [alpha, beta] = [1, +∞]. Continui sau tai restul?');
+    expect(ask(2).options.map((o) => o.label.ro)).toEqual(['continui', 'tai restul']);
+    expect(ask(3).prompt.ro).toBe('Frunza 9 este ultima din A (MAX ▲). Se închide A: se taie ceva mai sus? Deasupra, [alpha, beta]: S (MIN ▼) [−∞, +∞].');
+    expect(ask(4).prompt.ro).toBe('Frunza 8 este ultima din B (MAX ▲). Se închide B: se taie ceva mai sus? Deasupra, [alpha, beta]: S (MIN ▼) [−∞, 9].');
+    expect(ask(4).options.map((o) => o.label.ro)).toEqual(['nu', 'da, se taie']);
+    expect([3, 4].map((k) => M.answer(k))).toEqual(['go', 'go']);
+    expect(M.caption(3, { picks: { c3: 'cut' } }).ro).toBe('Nu chiar (ai ales „da, se taie”). A: 9 nu este ≥ beta = +∞; alpha devine 9. A se închide cu 9. S: A = 9 nu este ≤ alpha = −∞; beta devine 9.');
   });
   it('validates as a viz block', () => {
     const block = { type: 'viz', id: 'x', widget: 'game-tree', predict: true, props: course('MIN') };
@@ -175,9 +261,39 @@ describe('game-tree alpha-beta picks and state', () => {
 });
 
 describe('game-tree drawing', () => {
+  it('keeps the viewBox at most 336 wide (a 9-leaf tree is at most 360), so the text keeps its size on a phone', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/GameTree.jsx');
+    for (const props of [lesson, s30]) {
+      const M = gameTree(props);
+      expect(M.T.leaves).toHaveLength(9);
+      const G = layoutOf(M.T);
+      expect(G.W).toBeLessThanOrEqual(360);
+      expect(G.W).toBe(336);
+      expect(G.leafW).toBeLessThanOrEqual(G.slot - 4);
+      const html = renderToStaticMarkup(React.createElement(Stage, { M, k: 0 }));
+      const vb = html.match(/viewBox="(-?[\d.]+) 0 ([\d.]+) ([\d.]+)"/);
+      expect(Number(vb[1])).toBe(0);
+      expect(Number(vb[2])).toBeLessThanOrEqual(360);
+    }
+    const C = layoutOf(gameTree(course('MIN')).T);
+    expect([C.W, C.vbX, C.vbW]).toEqual([336, 0, 336]);
+  });
+  it('widens the viewBox only as much as a node name or [alpha, beta] at the edge needs', () => {
+    const G = layoutOf(gameTree(deep).T); // A sits over the first leaf alone, so its name would fall off the left edge
+    expect(G.vbX).toBeLessThan(0);
+    expect(G.px('A') - 31 - 9 - G.vbX).toBeGreaterThan(0);
+    expect(G.vbW).toBeLessThanOrEqual(360);
+  });
+  it('draws the edge to the child a revealed minimax node takes', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/GameTree.jsx');
+    const M = gameTree({ ...course('MIN'), mode: 'minimax' });
+    expect(renderToStaticMarkup(React.createElement(Stage, { M, k: 1, answered: false }))).not.toContain('data-mark="pick"');
+    const html = renderToStaticMarkup(React.createElement(Stage, { M, k: 4 }));
+    expect((html.match(/data-mark="pick"/g) || []).length).toBe(4); // A-9, B-8, C-9 and S-B
+  });
   it('draws every number of every caption and the cut leaf greyed (both modes, every frame)', async () => {
     const { Stage } = await import('../../src/components/lesson/viz/widgets/GameTree.jsx');
-    for (const props of [course('MIN'), course('MAX'), lesson, { ...course('MIN'), mode: 'minimax' }]) {
+    for (const props of [course('MIN'), course('MAX'), lesson, s30, deep, far, { ...course('MIN'), mode: 'minimax' }]) {
       const M = gameTree(props);
       for (let k = 0; k < M.count; k += 1) {
         for (const answered of [false, true]) {

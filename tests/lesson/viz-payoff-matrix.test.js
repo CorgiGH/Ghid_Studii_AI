@@ -108,12 +108,38 @@ describe('payoff-matrix frames', () => {
     expect(end.rowBest).toHaveLength(3);
     expect(end.colBest).toHaveLength(3);
     expect(end.deviations).toHaveLength(4); // two rows and two columns to move to
-    expect(M.caption(7).ro).toBe('Echilibru Nash pur: (y, q), cu câștigurile (5, 4). În (y, q): dacă Ana schimbă singur rândul, ia 2 sau 0; dacă Bogdan schimbă singur coloana, ia 2 sau 3.');
+    // the check compares with the equilibrium's own payoff ("niciun jucător nu câștigă mai mult schimbându-și singur alegerea")
+    expect(M.caption(7).ro).toBe('Echilibru Nash pur: (y, q). Verifică (y, q), cu câștigurile (5, 4): dacă doar Ana își schimbă rândul, ia 2 sau 0, nu mai mult de 5; dacă doar Bogdan își schimbă coloana, ia 2 sau 3, nu mai mult de 4.');
   });
-  it('nash: 2024-B ends with two equilibria; matching pennies ends with none', () => {
-    expect(payoffMatrix({ mode: 'nash', ...DAFFY }).caption(7).ro).toMatch(/^Echilibre Nash pure: \(Hug, Hug\), cu câștigurile \(3, 3\) și \(Shoot, Shoot\), cu câștigurile \(4, 4\)\./);
+  it('nash: 2024-B ends with one check per equilibrium, each with its own four lone changes', () => {
+    const M = payoffMatrix({ mode: 'nash', ...DAFFY });
+    expect(M.frames.map((f) => f.kind)).toEqual(['setup', 'col', 'col', 'col', 'row', 'row', 'row', 'end', 'end']);
+    expect(M.frames.slice(7).map((f) => f.eq)).toEqual([[0, 0], [1, 1]]);
+    expect(M.caption(7).ro).toBe('Echilibre Nash pure: (Hug, Hug) și (Shoot, Shoot). Verifică (Hug, Hug), cu câștigurile (3, 3): dacă doar Daffy își schimbă rândul, ia 3 sau 1, nu mai mult de 3; dacă doar Bugs își schimbă coloana, ia 3 sau 1, nu mai mult de 3.');
+    expect(M.caption(8).ro).toBe('Verifică (Shoot, Shoot), cu câștigurile (4, 4): dacă doar Daffy își schimbă rândul, ia 0 sau 2, nu mai mult de 4; dacă doar Bugs își schimbă coloana, ia 0 sau 2, nu mai mult de 4.');
+    for (const k of [7, 8]) {
+      const st = M.state(k);
+      expect(st.deviations).toHaveLength(4);
+      expect(st.deviations.every((d) => d.from[0] === st.eq[0] && d.from[1] === st.eq[1])).toBe(true);
+      expect(new Set(st.deviations.map((d) => d.to.join())).size).toBe(4);
+    }
+    expect(M.state(7).deviations.map((d) => [d.to, d.player])).toEqual([[[1, 0], 'row'], [[2, 0], 'row'], [[0, 1], 'col'], [[0, 2], 'col']]);
+  });
+  it('nash: matching pennies ends with none', () => {
     const P = payoffMatrix({ mode: 'nash', ...PENNIES });
+    expect(P.frames[P.count - 1]).toMatchObject({ kind: 'end', eq: null });
+    expect(P.state(P.count - 1).deviations).toEqual([]);
     expect(P.caption(P.count - 1).ro).toMatch(/nu există echilibru Nash pur/);
+  });
+  it('the text needs no declension or gender of the players\' names', () => {
+    const M = payoffMatrix({ mode: 'nash', ...ANA });
+    expect(M.caption(0).ro).toMatch(/Celula arată \(câștig Ana, câștig Bogdan\)/);
+    expect(M.ask(1).prompt.ro).toMatch(/^Pe coloana p, ce rând e cel mai bun pentru Ana\?/);
+    expect(M.ask(4).prompt.ro).toMatch(/^Pe rândul x, ce coloană e cea mai bună pentru Bogdan\?/);
+    const D = payoffMatrix({ mode: 'dominance', ...ANA, compare: ['y', 'x'] });
+    expect(D.pickSpec(1).items[0].prompt.ro).toBe('Pe coloana p: pentru Ana, rândul y dă cel puțin cât rândul x?');
+    const all = [M, D].flatMap((X) => X.frames.flatMap((_, k) => [X.caption(k).ro, X.ask(k)?.prompt.ro, X.pickSpec(k)?.items[0].prompt.ro])).filter(Boolean).join(' ');
+    expect(all).not.toMatch(/lui Ana|singur rândul|singur coloana/);
   });
   it('dominance: one frame per column, the pick is >= or <, the verdict follows the course', () => {
     const M = payoffMatrix({ mode: 'dominance', ...DAFFY, compare: ['Shoot', 'Run'] });
@@ -163,6 +189,38 @@ describe('payoff-matrix drawing', () => {
     const html = renderToStaticMarkup(React.createElement(Stage, { M, k: M.count - 1 }));
     expect((html.match(/data-nash="true"/g) || []).length).toBe(2);
     expect(html).toContain('data-mark="deviation"');
+  });
+  it('2024-B: every end frame draws exactly one arrow in each of its four target cells, and the number to compare in red', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/PayoffMatrix.jsx');
+    const M = payoffMatrix({ mode: 'nash', ...DAFFY });
+    const cellsOf = (html) => [...html.matchAll(/<td[^>]*data-cell="([^"]+)"[^>]*>(.*?)<\/td>/g)].map((m) => ({ cell: m[1], body: m[2] }));
+    for (const k of [7, 8]) {
+      const html = renderToStaticMarkup(React.createElement(Stage, { M, k }));
+      expect((html.match(/data-mark="deviation"/g) || []).length).toBe(4);
+      const targets = M.state(k).deviations.map((d) => `${M.rows[d.to[0]]},${M.cols[d.to[1]]}`);
+      for (const { cell, body } of cellsOf(html)) {
+        const arrows = (body.match(/data-mark="deviation"/g) || []).length;
+        expect(arrows, `frame ${k} cell ${cell}`).toBe(targets.includes(cell) ? 1 : 0);
+      }
+      // the deviating player's payoff is the one marked; no number is faded
+      expect((html.match(/pm-n [ab][^"]* dev"/g) || []).length).toBe(4);
+      expect(html).not.toContain('worse');
+    }
+    // (Shoot, Hug) is a target of both equilibria: Daffy's arrow from (Hug, Hug), then Bugs' arrow from (Shoot, Shoot)
+    const at = (k, cell) => cellsOf(renderToStaticMarkup(React.createElement(Stage, { M, k }))).find((c) => c.cell === cell).body;
+    expect(at(7, 'Shoot,Hug')).toMatch(/pm-arrow above[^>]*>↓/);
+    expect(at(7, 'Shoot,Hug')).toMatch(/pm-n a[^"]* dev" data-value="3"/);
+    expect(at(8, 'Shoot,Hug')).toMatch(/pm-arrow right[^>]*>←/);
+    expect(at(8, 'Shoot,Hug')).toMatch(/pm-n b[^"]* dev" data-value="0"/);
+    expect(at(8, 'Hug,Shoot')).toMatch(/pm-arrow below[^>]*>↑/);
+  });
+  it('dominance: the column being compared is marked and only the left number is in full colour', async () => {
+    const { Stage } = await import('../../src/components/lesson/viz/widgets/PayoffMatrix.jsx');
+    const M = payoffMatrix({ mode: 'dominance', ...ANA, compare: ['y', 'x'] });
+    const html = renderToStaticMarkup(React.createElement(Stage, { M, k: 2, answered: false }));
+    expect(html).toMatch(/class="pm dom"/);
+    const focused = [...html.matchAll(/<td class="([^"]*)" data-cell="([^"]+)"/g)].filter((m) => m[1].split(' ').includes('focus')).map((m) => m[2]);
+    expect(focused).toEqual(['x,q', 'y,q', 'z,q']);
   });
   it('an asked column makes its cells tappable, the others stay plain', async () => {
     const { Stage } = await import('../../src/components/lesson/viz/widgets/PayoffMatrix.jsx');

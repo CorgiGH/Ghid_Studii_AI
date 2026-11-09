@@ -6,7 +6,8 @@ import { payoffMatrix } from '../logic/payoff-matrix.js';
 import { PickBar, allAnswered } from './ml/mlParts.jsx';
 import './payoff-matrix.css';
 
-const ARROW = (from, to) => (to[0] < from[0] ? '↑' : to[0] > from[0] ? '↓' : to[1] < from[1] ? '←' : '→');
+// a lone change from the equilibrium `from` to the cell `to`: the arrow and the side of `to` that faces the equilibrium
+const ARROW = (from, to) => (to[0] < from[0] ? ['↑', 'below'] : to[0] > from[0] ? ['↓', 'above'] : to[1] < from[1] ? ['←', 'right'] : ['→', 'left']);
 
 // One frame's table. `taps` is the set of indices the learner has tapped while the frame is still asked.
 export function Stage({ M, k, answered = true, taps = [], onTap = null }) {
@@ -15,9 +16,9 @@ export function Stage({ M, k, answered = true, taps = [], onTap = null }) {
   const st = M.state(k, answered);
   const asking = !answered && (f.kind === 'col' || f.kind === 'row');
   const has = (list, r, c) => list.some(([a, b]) => a === r && b === c);
-  const dev = (r, c) => st.deviations.find((d) => d.to[0] === r && d.to[1] === c);
+  const devs = (r, c) => st.deviations.filter((d) => d.to[0] === r && d.to[1] === c);
   return (
-    <div className="pm">
+    <div className={`pm${M.mode === 'dominance' ? ' dom' : ''}`}>
       <table className="pm-table" aria-label={t('Payoff matrix', 'Matrice de câștiguri')}>
         <thead>
           <tr>
@@ -34,19 +35,22 @@ export function Stage({ M, k, answered = true, taps = [], onTap = null }) {
                 const markA = has(st.rowBest, r, c);
                 const markB = has(st.colBest, r, c);
                 const isNash = has(st.nash, r, c);
-                const d = dev(r, c);
-                const inFocus = (f.kind === 'col' && st.focusCol === c) || (f.kind === 'row' && st.focusRow === r);
+                const isEq = !!st.eq && st.eq[0] === r && st.eq[1] === c;
+                const ds = devs(r, c);
+                const devA = ds.some((d) => d.player === 'row');
+                const devB = ds.some((d) => d.player === 'col');
+                const inFocus = ((f.kind === 'col' || f.kind === 'cmp') && st.focusCol === c) || (f.kind === 'row' && st.focusRow === r);
                 const idx = f.kind === 'col' ? r : c;
                 const tapped = asking && inFocus && taps.includes(idx);
                 const cls = ['pm-cell'];
-                if (isNash) cls.push('nash');
+                if (isNash) cls.push(st.eq && !isEq ? 'nash other' : 'nash');
                 if (inFocus && !isNash) cls.push('focus');
                 if (st.pair && r === st.pair[0]) cls.push('rowhl');
                 if (st.pair && r === st.pair[1]) cls.push('rowhl2');
                 const nums = (
                   <span className="pm-nums">
-                    <span className={`pm-n a${markA ? ' mark' : ''}${d && d.player === 'row' ? ' worse' : ''}`} data-value={a} data-mark={markA ? 'best-a' : undefined}>{markA ? `[${a}]` : a}</span>
-                    <span className={`pm-n b${markB ? ' mark' : ''}${d && d.player === 'col' ? ' worse' : ''}`} data-value={b} data-mark={markB ? 'best-b' : undefined}>{markB ? `[${b}]` : b}</span>
+                    <span className={`pm-n a${markA ? ' mark' : ''}${devA ? ' dev' : ''}`} data-value={a} data-mark={markA ? 'best-a' : undefined}>{markA ? `[${a}]` : a}</span>
+                    <span className={`pm-n b${markB ? ' mark' : ''}${devB ? ' dev' : ''}`} data-value={b} data-mark={markB ? 'best-b' : undefined}>{markB ? `[${b}]` : b}</span>
                   </span>
                 );
                 const label = `${rn}, ${cn}: ${a}, ${b}`;
@@ -55,7 +59,10 @@ export function Stage({ M, k, answered = true, taps = [], onTap = null }) {
                     {asking && inFocus && onTap
                       ? <button type="button" className="pm-btn" aria-pressed={tapped} aria-label={label} onClick={() => onTap(idx)}>{nums}</button>
                       : nums}
-                    {d && <span className="pm-arrow" aria-hidden="true" data-mark="deviation">{ARROW(d.from, d.to)}</span>}
+                    {ds.map((d) => {
+                      const [glyph, side] = ARROW(d.from, d.to);
+                      return <span key={d.player} className={`pm-arrow ${side}`} aria-hidden="true" data-mark="deviation">{glyph}</span>;
+                    })}
                   </td>
                 );
               })}

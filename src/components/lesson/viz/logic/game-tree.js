@@ -50,6 +50,35 @@ export function buildTree({ root = 'MAX', tree }) {
   return { nodes, order, leaves, root: rootId, maxDepth, x };
 }
 
+// ---- drawing geometry (viewBox units) ----
+// The viewBox is at most 336 wide (seven 48-unit slots) whatever the leaf count, so the text keeps its size on a phone
+// (14-unit labels stay at 12.5 px or more in the 302 px a 390 px screen gives the widget); it is drawn at 100 % width up to
+// 460 px.
+export const TREE_TOP = 40;
+export const TREE_ROW = 78;
+export function layoutOf(T) {
+  const n = T.leaves.length;
+  const slot = Math.min(48, 336 / n);
+  const W = Math.max(300, n * slot);
+  const leafW = Math.min(36, slot - 4);
+  const H = TREE_TOP + T.maxDepth * TREE_ROW + 38;
+  const px = (id) => (T.x[id] + 0.5) * (W / n);
+  // a node's name sits 31 units to its left and its [alpha, beta] (about 66 units wide) is centred above it; a node over a
+  // single edge leaf (deeper trees) would push them out of the picture, so the viewBox widens by just that much
+  let left = 0;
+  let right = W;
+  for (const id of T.order) {
+    if (T.nodes[id].leaf) continue;
+    left = Math.min(left, px(id) - 31 - 9 * id.length - 2, px(id) - 35);
+    right = Math.max(right, px(id) + 35);
+  }
+  return {
+    slot, W, H, leafW, vbX: left, vbW: right - left,
+    px,
+    py: (id) => TREE_TOP + T.nodes[id].depth * TREE_ROW,
+  };
+}
+
 // ---- minimax ----
 export function minimaxValues(T) {
   const val = {};
@@ -78,11 +107,14 @@ export function bottomUp(T) {
 }
 
 // ---- alpha-beta, simulated once; one frame per leaf that is evaluated ----
-// A frame holds the state before the leaf (`before`), what happened (`steps`, `cut`, `closed`) and, once the next frame
-// exists, the state after it (`after`). A state is { bounds: {nodeId: [alpha, beta]} of the open nodes,
-// closed: {nodeId: {value, bound}}, skipped: [leaf ids] }.
+// A frame holds the state before the leaf (`before`), what happened (`steps`, `cut`, `closed`, and both in the order they
+// happen in `events`) and, once the next frame exists, the state after it (`after`). `last` is true when the leaf is its
+// parent's last child. A state is { bounds: {nodeId: [alpha, beta]} of the open nodes, closed: {nodeId: {value, bound}},
+// skipped: [leaf ids] }. A step's `origin` is the node that set the alpha (at a MIN node) or the beta (at a MAX node) it is
+// compared with: the node that already holds that value.
 export function alphaBetaRun(T) {
   const bounds = {};
+  const from = {}; // nodeId: [node that set alpha, node that set beta]; null while the bound is still ±∞
   const closed = {};
   const skipped = [];
   const frames = [];
@@ -97,9 +129,10 @@ export function alphaBetaRun(T) {
     return n.leaf ? [id] : n.children.flatMap(leavesUnder);
   };
 
-  const visit = (id, a, b) => {
+  const visit = (id, a, b, fa, fb) => {
     const n = T.nodes[id];
     bounds[id] = [a, b];
+    from[id] = [fa, fb];
     let best = n.type === 'MAX' ? -INF : INF;
     let bound = null;
     for (let i = 0; i < n.children.length; i += 1) {
@@ -108,23 +141,28 @@ export function alphaBetaRun(T) {
       let v;
       if (c.leaf) {
         v = c.value;
-        cur = { kind: 'leaf', leaf: cid, v, parent: id, before: snap(), steps: [], cut: false, skipped: [], closed: [] };
+        cur = { kind: 'leaf', leaf: cid, v, parent: id, last: i === n.children.length - 1, before: snap(), steps: [], events: [], cut: false, skipped: [], closed: [] };
         frames.push(cur);
       } else {
-        v = visit(cid, bounds[id][0], bounds[id][1]);
+        v = visit(cid, bounds[id][0], bounds[id][1], from[id][0], from[id][1]);
       }
       const [al, be] = bounds[id];
       const remaining = n.children.slice(i + 1);
       const hit = n.type === 'MAX' ? v >= be : v <= al;
       const cut = hit && remaining.length > 0;
-      const step = { node: id, type: n.type, child: cid, childLeaf: c.leaf, v, alpha: al, beta: be, hit, cut, alphaAfter: al, betaAfter: be };
+      const step = {
+        node: id, type: n.type, child: cid, childLeaf: c.leaf, childBound: c.leaf ? null : closed[cid].bound, v,
+        alpha: al, beta: be, origin: n.type === 'MAX' ? from[id][1] : from[id][0], hit, cut, alphaAfter: al, betaAfter: be,
+      };
       best = n.type === 'MAX' ? Math.max(best, v) : Math.min(best, v);
       if (!hit) {
-        if (n.type === 'MAX') bounds[id][0] = Math.max(al, v); else bounds[id][1] = Math.min(be, v);
+        if (n.type === 'MAX' && v > al) { bounds[id][0] = v; from[id][0] = id; }
+        if (n.type === 'MIN' && v < be) { bounds[id][1] = v; from[id][1] = id; }
       }
       step.alphaAfter = bounds[id][0];
       step.betaAfter = bounds[id][1];
       cur.steps.push(step);
+      cur.events.push({ kind: 'step', step });
       if (cut) {
         const gone = remaining.flatMap(leavesUnder);
         skipped.push(...gone);
@@ -138,15 +176,19 @@ export function alphaBetaRun(T) {
     }
     closed[id] = { value: best, bound };
     cur.closed.push({ node: id, value: best, bound });
+    cur.events.push({ kind: 'close', node: id, value: best, bound });
     delete bounds[id];
+    delete from[id];
     return best;
   };
-  const rootValue = visit(T.root, -INF, INF);
+  const rootValue = visit(T.root, -INF, INF, null, null);
   frames.forEach((f, k) => { f.after = k + 1 < frames.length ? frames[k + 1].before : snap(); });
   return { frames, rootValue, skipped, closed };
 }
 
 // ---- the model the widget and the tests read ----
+const listIn = (xs, and) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} ${and} ${xs[xs.length - 1]}` : String(xs[0]));
+
 export function gameTree(props) {
   const mode = props.mode;
   if (mode !== 'minimax' && mode !== 'alphabeta') throw new RangeError('mode must be minimax or alphabeta');
@@ -165,7 +207,9 @@ export function gameTree(props) {
         const n = T.nodes[id];
         const childValues = n.children.map((c) => minimax[c]);
         const options = [...new Set(childValues)].sort((p, q) => p - q);
-        return { kind: 'node', node: id, type: n.type, childValues, options, value: minimax[id] };
+        // the children the node takes: those whose value is the node's value
+        const chosen = n.children.filter((c) => minimax[c] === minimax[id]);
+        return { kind: 'node', node: id, type: n.type, childValues, options, value: minimax[id], chosen };
       }),
     ];
   } else {
@@ -176,15 +220,19 @@ export function gameTree(props) {
   M.count = M.frames.length;
 
   // ---- what is drawn at frame k; `answered` is false while the learner is still to pick ----
+  // chosen: [parent, child] edges of the child a revealed node takes (minimax)
   M.state = (k, answered = true) => {
     const f = M.frames[k];
-    const st = { nodes: {}, leaves: {}, current: null, skipped: [], bounds: {}, cuts: [] };
+    const st = { nodes: {}, leaves: {}, current: null, skipped: [], bounds: {}, cuts: [], chosen: [] };
     for (const id of T.leaves) st.leaves[id] = 'pending';
     if (mode === 'minimax') {
       for (const id of T.leaves) st.leaves[id] = 'done';
       M.frames.forEach((g, j) => {
         if (g.kind !== 'node') return;
-        if (j < k || (j === k && answered)) st.nodes[g.node] = { value: g.value, bound: null };
+        if (j < k || (j === k && answered)) {
+          st.nodes[g.node] = { value: g.value, bound: null };
+          for (const c of g.chosen) st.chosen.push([g.node, c]);
+        }
       });
       if (f.kind === 'node') st.current = f.node;
       return st;
@@ -215,29 +263,62 @@ export function gameTree(props) {
     return st;
   };
 
+  // the open nodes above `id`, nearest first, with their [alpha, beta] in state `s`
+  const openAbove = (id, s) => {
+    const out = [];
+    for (let p = T.nodes[id].parent; p !== null; p = T.nodes[p].parent) if (s.bounds[p]) out.push({ id: p, b: s.bounds[p] });
+    return out;
+  };
+  const boundsText = (b) => `[${showBound(b[0])}, ${showBound(b[1])}]`;
+
   // ---- the pick asked at frame k ----
+  // minimax: none when the children leave a single value (nothing to choose); alpha-beta: "continui / tai restul" at a
+  // leaf with siblings after it, and "se taie ceva mai sus?" at a parent's last leaf (the parent closes, and a cut can only
+  // happen higher up, so the prompt shows the [alpha, beta] of every open node above it).
   M.pickSpec = (k) => {
     const f = M.frames[k];
     if (f.kind === 'node') {
+      if (f.options.length < 2) return null;
+      const one = f.childValues.length === 1;
       return {
         items: [{
           key: `v${k}`,
-          prompt: bi(
-            `${f.node} is a ${typeWord(f.type)} node. Its children are ${f.childValues.join(', ')}. What is its value?`,
-            `${f.node} este nod ${typeWord(f.type)}. Copiii lui au valorile ${f.childValues.join(', ')}. Ce valoare are?`,
-          ),
+          prompt: one
+            ? bi(`${f.node} is a ${typeWord(f.type)} node. Its only child is ${f.childValues[0]}. What is its value?`,
+              `${f.node} este nod ${typeWord(f.type)}. Singurul copil are valoarea ${f.childValues[0]}. Ce valoare are?`)
+            : bi(`${f.node} is a ${typeWord(f.type)} node. Its children are ${f.childValues.join(', ')}. What is its value?`,
+              `${f.node} este nod ${typeWord(f.type)}. Copiii lui au valorile ${f.childValues.join(', ')}. Ce valoare are?`),
           options: f.options.map((o) => ({ id: o, label: String(o) })),
         }],
       };
     }
     if (f.kind === 'leaf') {
-      const b = f.before.bounds[f.parent];
+      const P = f.parent;
+      const pt = typeWord(T.nodes[P].type);
+      if (f.last) {
+        const above = openAbove(P, f.before);
+        const listEn = above.map((a) => `${a.id} (${typeWord(T.nodes[a.id].type)}) ${boundsText(a.b)}`).join('; ');
+        return {
+          items: [{
+            key: `c${k}`,
+            prompt: bi(
+              `Leaf ${f.v} is the last one of ${P} (${pt}). ${P} closes: is anything cut higher up? Above, [alpha, beta]: ${listEn}.`,
+              `Frunza ${f.v} este ultima din ${P} (${pt}). Se închide ${P}: se taie ceva mai sus? Deasupra, [alpha, beta]: ${listEn}.`,
+            ),
+            options: [
+              { id: 'go', label: bi('no', 'nu') },
+              { id: 'cut', label: bi('yes, a cut', 'da, se taie') },
+            ],
+          }],
+        };
+      }
+      const b = f.before.bounds[P];
       return {
         items: [{
           key: `c${k}`,
           prompt: bi(
-            `Leaf ${f.v} reaches ${f.parent} (${typeWord(T.nodes[f.parent].type)}), [alpha, beta] = [${showBound(b[0])}, ${showBound(b[1])}]. Carry on, or cut the rest?`,
-            `Frunza ${f.v} ajunge în ${f.parent} (${typeWord(T.nodes[f.parent].type)}), [alpha, beta] = [${showBound(b[0])}, ${showBound(b[1])}]. Continui sau tai restul?`,
+            `Leaf ${f.v} reaches ${P} (${pt}), [alpha, beta] = ${boundsText(b)}. Carry on, or cut the rest?`,
+            `Frunza ${f.v} ajunge în ${P} (${pt}), [alpha, beta] = ${boundsText(b)}. Continui sau tai restul?`,
           ),
           options: [
             { id: 'go', label: bi('carry on', 'continui') },
@@ -251,7 +332,7 @@ export function gameTree(props) {
   // the right pick at frame k (the option id), or null where nothing is asked
   M.answer = (k) => {
     const f = M.frames[k];
-    if (f.kind === 'node') return f.value;
+    if (f.kind === 'node') return M.pickSpec(k) ? f.value : null;
     if (f.kind === 'leaf') return f.cut ? 'cut' : 'go';
     return null;
   };
@@ -261,14 +342,32 @@ export function gameTree(props) {
     const sym = s.type === 'MAX' ? '≥' : '≤';
     const nm = s.type === 'MAX' ? 'beta' : 'alpha';
     const against = s.type === 'MAX' ? s.beta : s.alpha;
-    const who = s.childLeaf ? `${s.v}` : `${s.child} = ${s.v}`;
+    // a child closed early holds only a limit ("C ≥ 9"), not an exact value
+    const who = s.childLeaf ? `${s.v}` : s.childBound ? `${s.child} ${s.childBound} ${s.v}` : `${s.child} = ${s.v}`;
     const upd = s.type === 'MAX' ? 'alpha' : 'beta';
     const updTo = s.type === 'MAX' ? s.alphaAfter : s.betaAfter;
     const updFrom = s.type === 'MAX' ? s.alpha : s.beta;
     if (s.cut) {
+      // why the cut is safe, in terms of the tree: the node's value can only move away from what the node above already has.
+      // The root never cuts (its alpha or beta stays infinite), so a cut node always has a parent, and the bound it meets was
+      // set by `origin`, an ancestor that already holds that value.
+      const P = T.nodes[s.node].parent;
+      const lim = s.type === 'MAX' ? bi('at least', 'cel puțin') : bi('at most', 'cel mult');
+      const has = showBound(against);
+      let why;
+      if (s.origin === P) {
+        why = s.v === against
+          ? bi(`${s.node} will be ${lim.en} ${s.v}, and ${P} already has ${has}, so ${P} gains nothing by picking ${s.node}`,
+            `${s.node} va fi ${lim.ro} ${s.v}, iar ${P} are deja ${has}, așa că ${P} nu câștigă nimic alegând ${s.node}`)
+          : bi(`${s.node} will be ${lim.en} ${s.v}, and ${P} already has ${has}, so ${P} does not pick ${s.node}`,
+            `${s.node} va fi ${lim.ro} ${s.v}, iar ${P} are deja ${has}, așa că ${P} nu alege ${s.node}`);
+      } else {
+        why = bi(`${s.node} will be ${lim.en} ${s.v}, and ${s.origin} already has ${has} on another branch, so the exact value of ${s.node} no longer matters`,
+          `${s.node} va fi ${lim.ro} ${s.v}, iar ${s.origin} are deja ${has} pe altă ramură, așa că valoarea exactă a lui ${s.node} nu mai contează`);
+      }
       return bi(
-        `${s.node}: ${who} ${sym} ${nm} = ${showBound(against)}, so the rest of ${s.node} is cut.`,
-        `${s.node}: ${who} ${sym} ${nm} = ${showBound(against)}, deci restul lui ${s.node} se taie.`,
+        `${s.node}: ${who} ${sym} ${nm} = ${has}, so the rest of ${s.node} is cut: ${why.en}.`,
+        `${s.node}: ${who} ${sym} ${nm} = ${has}, deci restul lui ${s.node} se taie: ${why.ro}.`,
       );
     }
     if (s.hit) {
@@ -283,15 +382,19 @@ export function gameTree(props) {
       `${s.node}: ${who} nu este ${sym} ${nm} = ${showBound(against)}; ${upd} ${changed ? `devine ${showBound(updTo)}` : `rămâne ${showBound(updTo)}`}.`,
     );
   };
+  const closeText = (c) => {
+    const v = `${c.bound ? `${c.bound} ` : ''}${c.value}`;
+    return bi(`${c.node} closes with ${v}.`, `${c.node} se închide cu ${v}.`);
+  };
 
   M.caption = (k, { answered = true, picks = {} } = {}) => {
     const f = M.frames[k];
     const rl = M.rootLabel;
-    const rootNote = rl ? bi(` The root ${T.root} is ${rl.en}.`, ` Rădăcina ${T.root} este ${rl.ro}.`) : bi('', '');
+    const rootNote = rl ? bi(` Root ${T.root}: ${rl.en}.`, ` Rădăcina ${T.root}: ${rl.ro}.`) : bi('', '');
     if (f.kind === 'setup') {
       if (mode === 'minimax') {
         return bi(
-          `${typeWord(T.nodes[T.root].type)} picks the largest child value if it is MAX, the smallest if it is MIN. Levels alternate. Work from the bottom up.${rootNote.en}`,
+          `A MAX ▲ node takes the largest of its children's values, a MIN ▼ node the smallest. Levels alternate. Work from the bottom up.${rootNote.en}`,
           `Un nod MAX ▲ ia cea mai mare valoare dintre copii, un nod MIN ▼ cea mai mică. Nivelurile alternează. Mergi de jos în sus.${rootNote.ro}`,
         );
       }
@@ -301,31 +404,36 @@ export function gameTree(props) {
       );
     }
     if (f.kind === 'node') {
-      const verb = f.type === 'MAX' ? bi('the largest', 'cea mai mare') : bi('the smallest', 'cea mai mică');
       if (!answered) return bi(`Next: ${f.node}.`, `Urmează: ${f.node}.`);
-      const pick = picks[`v${k}`];
       const fn = f.type === 'MAX' ? 'max' : 'min';
+      const how = f.childValues.length === 1
+        ? bi('it has one child', 'are un singur copil')
+        : f.type === 'MAX' ? bi('the largest of its children', 'cea mai mare dintre copii') : bi('the smallest of its children', 'cea mai mică dintre copii');
+      const choice = f.node === T.root
+        ? bi(` ${f.node} picks ${listIn(f.chosen, 'or')}.`, ` ${f.node} alege ${listIn(f.chosen, 'sau')}.`)
+        : bi('', '');
       const core = bi(
-        `${f.node} = ${fn}(${f.childValues.join(', ')}) = ${f.value}: ${verb.en} of its children.`,
-        `${f.node} = ${fn}(${f.childValues.join(', ')}) = ${f.value}: ${verb.ro} dintre copii.`,
+        `${f.node} = ${fn}(${f.childValues.join(', ')}) = ${f.value}: ${how.en}.${choice.en}`,
+        `${f.node} = ${fn}(${f.childValues.join(', ')}) = ${f.value}: ${how.ro}.${choice.ro}`,
       );
+      const pick = picks[`v${k}`];
       if (pick === undefined || pick === f.value) return core;
-      return bi(`You picked ${pick}; ${core.en}`, `Ai ales ${pick}; ${core.ro}`);
+      return bi(`Not quite (you picked ${pick}). ${core.en}`, `Nu chiar (ai ales ${pick}). ${core.ro}`);
     }
     if (f.kind === 'leaf') {
       if (!answered) {
         return bi(`Next leaf: ${f.v}, inside ${f.parent}.`, `Urmează frunza ${f.v}, în ${f.parent}.`);
       }
-      const lines = f.steps.map(stepText);
-      const closing = f.closed.map((c) => {
-        const v = `${c.bound ? c.bound : ''}${c.value}`;
-        return bi(`${c.node} closes with ${v}.`, `${c.node} se închide cu ${v}.`);
-      });
+      const lines = f.events.map((e) => (e.kind === 'step' ? stepText(e.step) : closeText(e)));
       const pick = picks[`c${k}`];
       const right = pick === undefined || pick === M.answer(k);
-      const lead = right ? bi('', '') : bi(`Not quite (you picked "${pick === 'cut' ? 'cut the rest' : 'carry on'}"). `, `Nu chiar (ai ales „${pick === 'cut' ? 'tai restul' : 'continui'}”). `);
-      const en = `${lead.en}${lines.map((x) => x.en).join(' ')} ${closing.map((x) => x.en).join(' ')}`.replace(/\s+/g, ' ').trim();
-      const ro = `${lead.ro}${lines.map((x) => x.ro).join(' ')} ${closing.map((x) => x.ro).join(' ')}`.replace(/\s+/g, ' ').trim();
+      let lead = bi('', '');
+      if (!right) {
+        const opt = M.pickSpec(k).items[0].options.find((o) => o.id === pick);
+        lead = bi(`Not quite (you picked "${opt.label.en}"). `, `Nu chiar (ai ales „${opt.label.ro}”). `);
+      }
+      const en = `${lead.en}${lines.map((x) => x.en).join(' ')}`.replace(/\s+/g, ' ').trim();
+      const ro = `${lead.ro}${lines.map((x) => x.ro).join(' ')}`.replace(/\s+/g, ' ').trim();
       return bi(en, ro);
     }
     // end
