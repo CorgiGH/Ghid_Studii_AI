@@ -43,11 +43,25 @@ function Notice({ children }) {
 }
 
 // A widget that throws must not take the lesson down with it.
+// A chunk that failed to load (the site was updated while this tab was open) gets a
+// reload button instead of the generic message; main.jsx usually reloads before this.
+const isChunkError = (e) => /dynamically imported module|Importing a module script failed|Loading chunk|preload/i.test(String(e?.message || e));
 class Guard extends React.Component {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
+  state = { failed: false, chunk: false };
+  static getDerivedStateFromError(error) { return { failed: true, chunk: isChunkError(error) }; }
   componentDidCatch(error) { console.error('viz widget failed:', error); }
-  render() { return this.state.failed ? <Notice>{this.props.message}</Notice> : this.props.children; }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    if (this.state.chunk) {
+      return (
+        <Notice>
+          {this.props.updated}{' '}
+          <button type="button" className="underline font-semibold" onClick={() => window.location.reload()}>{this.props.reload}</button>
+        </Notice>
+      );
+    }
+    return <Notice>{this.props.message}</Notice>;
+  }
 }
 
 // Block JSON: { type: 'viz', id, widget, predict, props }
@@ -56,7 +70,11 @@ export default function VizBlock({ widget, props = {}, predict = false }) {
   const Widget = WIDGETS[widget];
   if (!Widget) return <Notice>{t(`Unknown visual: "${widget}".`, `Vizual necunoscut: „${widget}".`)}</Notice>;
   return (
-    <Guard message={t('This visual could not be shown.', 'Acest vizual nu a putut fi afișat.')}>
+    <Guard
+      message={t('This visual could not be shown.', 'Acest vizual nu a putut fi afișat.')}
+      updated={t('The site was updated while this page was open.', 'Site-ul s-a actualizat cât timp pagina era deschisă.')}
+      reload={t('Reload the page', 'Reîncarcă pagina')}
+    >
       <Suspense fallback={<div className="skeleton-shimmer viz-skeleton" />}>
         <Widget props={props} predict={!!predict} />
       </Suspense>
