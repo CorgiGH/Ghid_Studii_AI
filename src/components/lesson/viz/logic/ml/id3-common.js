@@ -4,13 +4,15 @@
 import Fraction from '../../../../../ml/calc/fraction.js';
 import * as K from '../../../../../ml/calc/mathKit.js';
 import { roCount, enCount } from '../words.js';
+import { roNums } from './numbers-bilingual.js';
 
 export const MINUS = '−';
 export const SYMS = ['+', MINUS, '*', '#'];
 export const EPS = 1e-9; // two entropies this close are a tie
 
 // ---- text helpers: every learner string is { en, ro } ----
-export const both = (f) => ({ en: f('en'), ro: f('ro') });
+// the Romanian side prints the decimal comma (numbers-bilingual.js)
+export const both = (f) => ({ en: f('en'), ro: roNums(f('ro')) });
 export const pick = (lang, en, ro) => (lang === 'en' ? en : ro);
 // a label is a plain string/number or { en, ro }
 export const lab = (x, lang) => (x !== null && typeof x === 'object' ? x[lang] : String(x));

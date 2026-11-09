@@ -5,11 +5,14 @@ import { VizFrame } from '../../ui.jsx';
 import { id3Model } from '../../logic/ml/id3-builder.js';
 import { fmt4, fmtBig, showN, headerOf, MINUS } from '../../logic/ml/id3-common.js';
 import { CountBox, PickBar, Val, allAnswered } from './mlParts.jsx';
+import { roNums } from '../../logic/ml/numbers-bilingual.js';
 
+// dn: a number as the learner reads it (Romanian prints the decimal comma; data-value keeps the point)
 const useL = () => {
   const { t } = useApp();
   const L = (x) => (x !== null && typeof x === 'object' ? t(x.en, x.ro) : String(x));
-  return { t, L };
+  const dn = (x) => t(String(x), roNums(String(x)));
+  return { t, L, dn };
 };
 
 // the data table of a widget (the rows the boxes count); rowClass marks rows in or out of a node
@@ -33,7 +36,7 @@ function DataTable({ headers, rows, rowClass }) {
 
 // ---------------- mode stumps ----------------
 export function StumpsStage({ model: M, k, predict = false, picks = {} }) {
-  const { t, L } = useL();
+  const { t, L, dn } = useL();
   const f = M.frames[k];
   const cards = f.kind === 'setup' ? 0 : f.kind === 'boxes' ? f.i + 1 : M.stumps.length;
   const showW = f.kind === 'formula' || f.kind === 'values' || f.kind === 'winner';
@@ -48,7 +51,7 @@ export function StumpsStage({ model: M, k, predict = false, picks = {} }) {
         <b>{t('Root', 'Rădăcina')}</b>
         <CountBox counts={M.rootCounts} />
         <span className="mlv-dim">N = <Val v={showN(M.N)} /></span>
-        {winner && <span>H({tg}) = <Val v={fmt4(M.hRoot)} /></span>}
+        {winner && <span>H({tg}) = <Val v={fmt4(M.hRoot)}>{dn(fmt4(M.hRoot))}</Val></span>}
       </div>
       {M.stumps.slice(0, cards).map((s, i) => {
         const isBest = showVal && M.tied.includes(i) && (!winner || i === M.best);
@@ -80,12 +83,12 @@ export function StumpsStage({ model: M, k, predict = false, picks = {} }) {
                     <CountBox counts={b.counts} />
                   </span>
                 ))}
-                {showVal && <><span aria-hidden="true">=</span><b className="mlv-hc" data-value={fmt4(s.hc)}>{fmt4(s.hc)}</b></>}
+                {showVal && <><span aria-hidden="true">=</span><b className="mlv-hc" data-value={fmt4(s.hc)}>{dn(fmt4(s.hc))}</b></>}
               </div>
             )}
             {winner && i === M.best && (
               <div className="mlv-formula">
-                <span>IG = <Val v={fmt4(s.ig)} /></span>
+                <span>IG = <Val v={fmt4(s.ig)}>{dn(fmt4(s.ig))}</Val></span>
                 <span>{t('training error', 'eroarea la antrenare')} = <Val v={showN(M.errFrac)} /></span>
               </div>
             )}
@@ -144,7 +147,7 @@ function PairRows({ c, f }) {
 }
 
 function ValuesPanel({ c }) {
-  const { L } = useL();
+  const { L, dn } = useL();
   return (
     <div className="mlv-stack">
       {c.stumps.map((S, i) => (
@@ -153,10 +156,10 @@ function ValuesPanel({ c }) {
           {S.branches.map((b, j) => (
             <span key={j} className="mlv-term">
               {j > 0 && <span aria-hidden="true">+</span>}
-              <Val v={`${showN(b.n)}/${showN(c.N)}`} /><span aria-hidden="true">{'·'}</span><Val v={fmt4(b.h)} />
+              <Val v={`${showN(b.n)}/${showN(c.N)}`} /><span aria-hidden="true">{'·'}</span><Val v={fmt4(b.h)}>{dn(fmt4(b.h))}</Val>
             </span>
           ))}
-          <span aria-hidden="true">=</span><b data-value={fmt4(S.hc)}>{fmt4(S.hc)}</b>
+          <span aria-hidden="true">=</span><b data-value={fmt4(S.hc)}>{dn(fmt4(S.hc))}</b>
         </div>
       ))}
     </div>
@@ -164,7 +167,7 @@ function ValuesPanel({ c }) {
 }
 
 function ProductPanel({ c }) {
-  const { t, L } = useL();
+  const { t, L, dn } = useL();
   return (
     <div className="mlv-stack">
       {c.stumps.map((S, i) => {
@@ -178,10 +181,10 @@ function ProductPanel({ c }) {
               {S.branches.map((b, j) => (
                 <span key={j}>{j > 0 && ' · '}{showN(b.n)}<sup>{showN(b.n)}</sup>/({b.counts.filter((x) => x.sign() !== 0).map((x, q) => <span key={q}>{q > 0 && '·'}{showN(x)}<sup>{showN(x)}</sup></span>)})</span>
               ))}
-              {' = '}<b data-value={fmtBig(pr.value)} className={isWin ? 'mlv-win' : ''}>{fmtBig(pr.value)}</b>
+              {' = '}<b data-value={fmtBig(pr.value)} className={isWin ? 'mlv-win' : ''}>{dn(fmtBig(pr.value))}</b>
             </p>
-            <p>H(Y|{L(S.label)}) = log<sub>2</sub> P / <Val v={showN(c.N)} /> = <b data-value={fmt4(pr.hc)}>{fmt4(pr.hc)}</b></p>
-            <p>IG({L(S.label)}) = <Val v={fmt4(c.hRoot)} /> {MINUS} {fmt4(pr.hc)} = <Val v={fmt4(igv)} /></p>
+            <p>H(Y|{L(S.label)}) = log<sub>2</sub> P / <Val v={showN(c.N)} /> = <b data-value={fmt4(pr.hc)}>{dn(fmt4(pr.hc))}</b></p>
+            <p>IG({L(S.label)}) = <Val v={fmt4(c.hRoot)}>{dn(fmt4(c.hRoot))}</Val> {MINUS} {dn(fmt4(pr.hc))} = <Val v={fmt4(igv)}>{dn(fmt4(igv))}</Val></p>
           </div>
         );
       })}
@@ -191,16 +194,16 @@ function ProductPanel({ c }) {
 }
 
 function NodesRows({ c, f }) {
-  const { t } = useL();
+  const { t, dn } = useL();
   const [a, b] = c.units;
   const sym = f.kind === 'values' ? c.symH : c.sym;
   const showSym = f.kind !== 'boxes';
   const cd = (() => { const g = (x, y) => (y === 0n ? x : g(y, x % y)); const l = (a.share.d * b.share.d) / g(a.share.d, b.share.d); return { x: a.share.n * (l / a.share.d), y: b.share.n * (l / b.share.d), den: l }; })();
   return (
     <div className="mlv-stack">
-      <div className="mlv-cmp-row"><CountBox counts={a.counts} />{f.kind === 'values' && <span>H = <Val v={fmt4(a.h)} /></span>}</div>
+      <div className="mlv-cmp-row"><CountBox counts={a.counts} />{f.kind === 'values' && <span>H = <Val v={fmt4(a.h)}>{dn(fmt4(a.h))}</Val></span>}</div>
       {showSym && <div className="mlv-cmp-row"><span className="mlv-sym" data-value={sym}>{sym}</span></div>}
-      <div className="mlv-cmp-row"><CountBox counts={b.counts} />{f.kind === 'values' && <span>H = <Val v={fmt4(b.h)} /></span>}</div>
+      <div className="mlv-cmp-row"><CountBox counts={b.counts} />{f.kind === 'values' && <span>H = <Val v={fmt4(b.h)}>{dn(fmt4(b.h))}</Val></span>}</div>
       {f.kind === 'symbols' && (
         <div className="mlv-expr">
           <span>{t('minority share', 'cota minoritară')}</span><Val v={showN(a.share)} /><span>{c.sym}</span><Val v={showN(b.share)} />
@@ -248,7 +251,7 @@ function TreeNode({ node, k, M, markNext }) {
 }
 
 export function FullStage({ model: M, k, predict }) {
-  const { t, L } = useL();
+  const { t, L, dn } = useL();
   const f = M.frames[k];
   // with predict, the rows of the node the learner is asked about (the marked one); else the rows of the split shown
   const focus = predict && M.nextNode(k) ? M.nextNode(k) : M.focusNode(k);
@@ -269,15 +272,15 @@ export function FullStage({ model: M, k, predict }) {
               {e.cands.map((c, i) => (
                 <tr key={c.attr} className={i === e.best ? 'best' : ''}>
                   <td>{L(c.label)}</td>
-                  <td><Val v={fmt4(c.hc)} /></td>
-                  <td><Val v={fmt4(c.ig)} /></td>
+                  <td><Val v={fmt4(c.hc)}>{dn(fmt4(c.hc))}</Val></td>
+                  <td><Val v={fmt4(c.ig)}>{dn(fmt4(c.ig))}</Val></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      {f.kind === 'setup' && <div className="mlv-sum"><span className="viz-badge">N = <Val v={showN(M.N)} /></span><span className="viz-badge">H({L(headerOf(M.P, M.P.target))}) = <Val v={fmt4(M.hRoot)} /></span></div>}
+      {f.kind === 'setup' && <div className="mlv-sum"><span className="viz-badge">N = <Val v={showN(M.N)} /></span><span className="viz-badge">H({L(headerOf(M.P, M.P.target))}) = <Val v={fmt4(M.hRoot)}>{dn(fmt4(M.hRoot))}</Val></span></div>}
       {f.kind === 'final' && (
         <>
           <div className="mlv-sum">

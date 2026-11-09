@@ -136,7 +136,8 @@ describe('validateViz for ml-cvloo', () => {
   });
 });
 
-const numbers = (str) => (String(str).match(/-?\d+(?:\.\d+)?/g) || []).map((x) => String(Number(x)));
+// Romanian prints the decimal comma (numbers-bilingual.js roNums): fold it back to the point the marks carry
+const numbers = (str) => (String(str).replace(/(\d),(\d)/g, '$1.$2').match(/-?\d+(?:\.\d+)?/g) || []).map((x) => String(Number(x)));
 const marks = (html) => {
   const out = new Set();
   for (const m of html.matchAll(/data-value="([^"]*)"/g)) for (const n of numbers(m[1])) out.add(n);
@@ -214,7 +215,7 @@ describe('review fixes', () => {
     const W = mlCvloo({ table: P410, target: 'Y', tie: 'class0', continuous: ['X'] });
     const end = W.frames[W.frames.length - 1];
     expect(end.caption.en).toContain('(rows 7 (X = 8), 8 (X = 8.5) and 9 (X = 9) are predicted wrong)');
-    expect(end.caption.ro).toContain('(rândurile 7 (X = 8), 8 (X = 8.5) și 9 (X = 9) sunt prezise greșit)');
+    expect(end.caption.ro).toContain('(rândurile 7 (X = 8), 8 (X = 8,5) și 9 (X = 9) sunt prezise greșit)');
   });
   it('the table box scrolls the left-out row into view (it marks the row it scrolls to)', async () => {
     const { Stage } = await import('../../src/components/lesson/viz/widgets/ml/CvLoo.jsx');
@@ -281,7 +282,7 @@ describe('third review', () => {
     const W = mlCvloo({ table: T, target: 'Y', tie: 'class0', continuous: ['X'] });
     const f = W.frames.find((x) => x.kind === 'fold' && x.ties.length);
     expect(f).toBeDefined();
-    expect(f.caption.ro).toMatch(/au același IG, [\d.]+; la egalitate se ia pragul mai mic: X ≤ [\d.]+\./);
+    expect(f.caption.ro).toMatch(/au același IG, [\d,]+; la egalitate se ia pragul mai mic: X ≤ [\d,]+\./);
     expect(f.caption.en).toMatch(/have the same IG, [\d.]+; a tie goes to the smaller threshold: X ≤ [\d.]+\./);
   });
   it('the Romanian speaks of training ID3 / the learnt tree (outline L15 C2, 4.40), not of growing it', () => {

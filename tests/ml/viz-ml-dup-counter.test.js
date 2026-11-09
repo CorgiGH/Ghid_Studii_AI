@@ -63,7 +63,7 @@ describe('the counter (T21T2 1)', () => {
     expect(M.caption(1).ro).toContain('Eroarea minimă la antrenare trece de la 0/8 la 1/9.');
     expect(M.caption(1).ro).toContain('oricare etichetă ar da un arbore, greșește pe 1 rând.');
     expect(M.caption(2).ro).toContain('de la 1/9 la 2/10');
-    expect(M.caption(3).ro).toBe('Grupurile contradictorii, rândurile grupului minus aparițiile etichetei celei mai frecvente: (0,0,0): 2 − 1 = 1; (0,0,1): 2 − 1 = 1. În total 1 + 1 = 2 rânduri greșite din 10: 2/10 = 0.2.');
+    expect(M.caption(3).ro).toBe('Grupurile contradictorii, rândurile grupului minus aparițiile etichetei celei mai frecvente: (0,0,0): 2 − 1 = 1; (0,0,1): 2 − 1 = 1. În total 1 + 1 = 2 rânduri greșite din 10: 2/10 = 0,2.');
   });
   it('the counter does not move in the caption before the prediction (the base frame never names the next row)', () => {
     expect(M.caption(0, { predict: true }).ro).not.toContain('1/9');

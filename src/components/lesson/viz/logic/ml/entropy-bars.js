@@ -33,6 +33,33 @@ const validSplit = (s) => Array.isArray(s) && s.length === 2 && s.every((x) => N
 function bar(a, b) { return { a, b, H: Hab(a, b), label: label(a, b), p: pFrac(a, b) }; }
 
 // ---------------- compare mode ----------------
+// The pick of an ask frame (own picks): the learner taps the bar with the larger entropy, or "la fel". The reason of
+// each option is the share of + in the bar, against 1/2 (the more even, the more mixed).
+function barPick(k, A, B) {
+  const far = (x) => Math.abs(x.p.toNumber() - 0.5);
+  const right = Math.abs(A.H - B.H) < EQ ? 'same' : A.H > B.H ? 'a' : 'b';
+  const share = (x, l) => `${x.label}: p = ${pText(x.a, x.b, l)}`;
+  const nearer = far(A) < far(B) ? A : B;
+  const further = nearer === A ? B : A;
+  const why = both((l) => (right === 'same'
+    ? crit(l, `La fel: ${share(A, l)} și ${share(B, l)} sunt la aceeași distanță de 1/2.`, `The same: ${share(A, l)} and ${share(B, l)} are equally far from 1/2.`)
+    : crit(l, `${nearer.label} are proporția de + mai aproape de 1/2 (${share(nearer, l)}), deci e mai amestecată.`, `${nearer.label} has its share of + closer to 1/2 (${share(nearer, l)}), so it is more mixed.`)));
+  const wrongBar = both((l) => crit(l,
+    `${further.label} e mai aproape de un nod pur: ${share(further, l)}, mai departe de 1/2 decât ${share(nearer, l)}.`,
+    `${further.label} is closer to a pure node: ${share(further, l)}, further from 1/2 than ${share(nearer, l)}.`));
+  const notSame = both((l) => crit(l,
+    `Nu sunt la fel de amestecate: ${share(A, l)} și ${share(B, l)} sunt la distanțe diferite de 1/2.`,
+    `They are not equally mixed: ${share(A, l)} and ${share(B, l)} are at different distances from 1/2.`));
+  const whys = {};
+  if (right === 'same') { whys.a = why; whys.b = why; } else { whys[right === 'a' ? 'b' : 'a'] = wrongBar; whys.same = notSame; }
+  return {
+    key: `bar-${k}`, kind: 'bar',
+    prompt: both((l) => crit(l, 'Atinge bara cu entropia mai mare, sau alege «la fel».', 'Tap the bar with the larger entropy, or pick "the same".')),
+    options: [{ id: 'a', label: { en: A.label, ro: A.label } }, { id: 'b', label: { en: B.label, ro: B.label } }, { id: 'same', label: { en: 'the same', ro: 'la fel' } }],
+    right, why, whys,
+  };
+}
+
 function compareFrames(splits) {
   const frames = [];
   const nPairs = Math.floor(splits.length / 2);
@@ -47,6 +74,7 @@ function compareFrames(splits) {
     });
     const far = (x) => Math.abs(x.p.toNumber() - 0.5);
     const sameDist = Math.abs(far(A) - far(B)) < EQ;
+    frames.at(-1).pick = barPick(k, A, B);
     frames.push({
       ...base, kind: 'show', values: true, points: [A, B], curve: true, slider: false,
       caption: both((l) => {
@@ -65,7 +93,18 @@ function compareFrames(splits) {
   let best = { p: 0, H: -1 };
   for (let i = 0; i <= 100; i++) { const c = curvePoint(i / 100); if (c.H > best.H + 1e-12) best = c; }
   const ends = [curvePoint(0).H, curvePoint(1).H];
+  const pOpts = [...new Map([0, 0.25, best.p, 1].map((p) => [String(p), p])).values()];
+  const pLabel = (p) => both((l) => `p = ${fmtFrac(new Fraction(Math.round(p * 100), 100), l, 'fraction')}`);
   frames.push({
+    pick: {
+      key: 'max', kind: 'list',
+      prompt: both((l) => crit(l, 'Unde este H cel mai mare?', 'Where is H the largest?')),
+      options: pOpts.map((p) => ({ id: String(p), label: pLabel(p) })), right: String(best.p),
+      why: both((l) => crit(l, 'La p = 1/2 cele două clase sunt la fel de probabile: nodul e cel mai amestecat.', 'At p = 1/2 the two classes are equally likely: the node is the most mixed.')),
+      whys: Object.fromEntries(pOpts.filter((p) => p !== best.p).map((p) => [String(p), (p === 0 || p === 1)
+        ? both((l) => crit(l, `La ${pLabel(p)[l]} nodul e pur: H = 0.`, `At ${pLabel(p)[l]} the node is pure: H = 0.`))
+        : both((l) => crit(l, `La ${pLabel(p)[l]} o clasă e mai probabilă decât cealaltă; mută cursorul spre mijloc.`, `At ${pLabel(p)[l]} one class is more likely than the other; move the slider toward the middle.`))])),
+    },
     kind: 'max-ask', bars: [], values: false, points: [], curve: true, slider: true, max: best,
     caption: both((l) => crit(l,
       'Mută cursorul de sub curbă: unde este H cel mai mare? Decide înainte să se coloreze maximul.',
@@ -82,6 +121,13 @@ function compareFrames(splits) {
     const M = bar(A.b, A.a);
     const same = Math.abs(A.H - M.H) < EQ;
     frames.push({
+      pick: {
+        key: 'mirror', kind: 'list',
+        prompt: both((l) => crit(l, 'Se schimbă entropia?', 'Does the entropy change?')),
+        options: [{ id: 'yes', label: { en: 'yes', ro: 'da' } }, { id: 'no', label: { en: 'no', ro: 'nu' } }], right: same ? 'no' : 'yes',
+        why: both((l) => crit(l, 'Entropia depinde doar de cât de amestecat e nodul, nu de care clasă e majoritară: H(p) = H(1 − p).', 'Entropy depends only on how mixed the node is, not on which class is the majority: H(p) = H(1 − p).')),
+        whys: { [same ? 'yes' : 'no']: both((l) => crit(l, 'Întoarcerea schimbă doar numele claselor; proporțiile rămân aceleași, deci și H.', 'Flipping only swaps the class names; the shares stay the same, and so does H.')) },
+      },
       kind: 'mirror-ask', bars: [A], values: false, points: [], curve: true, slider: false,
       caption: both((l) => crit(l,
         `Întoarcem bara: ${A.label} devine ${M.label}. Se schimbă entropia?`,

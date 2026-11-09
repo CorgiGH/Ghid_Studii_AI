@@ -180,7 +180,8 @@ describe('validateViz for ml-prune', () => {
   });
 });
 
-const numbers = (str) => (String(str).match(/-?\d+(?:\.\d+)?/g) || []).map((x) => String(Number(x)));
+// Romanian prints the decimal comma (numbers-bilingual.js roNums): fold it back to the point the marks carry
+const numbers = (str) => (String(str).replace(/(\d),(\d)/g, '$1.$2').match(/-?\d+(?:\.\d+)?/g) || []).map((x) => String(Number(x)));
 const marks = (html) => {
   const out = new Set();
   for (const m of html.matchAll(/data-value="([^"]*)"/g)) for (const n of numbers(m[1])) out.add(n);
@@ -258,8 +259,8 @@ describe('review fixes', () => {
   it('two tests with the same name below a cut are counted, not listed twice', () => {
     expect(Q.frames[1].caption.en).toContain('V (X = 0), IG 0, with two W tests below it');
     expect(Q.frames[1].caption.ro).toContain('V (X = 0), IG 0, cu două teste W sub el');
-    expect(mlPrune({ ...T21, epsilon: 0.95 }).frames[1].caption.ro).toContain('B, IG 0.3, cu două teste A și un test C sub el');
-    expect(P.frames[1].caption.ro).toContain('A (B = 1), IG 0.02, cu C sub el');
+    expect(mlPrune({ ...T21, epsilon: 0.95 }).frames[1].caption.ro).toContain('B, IG 0,3, cu două teste A și un test C sub el');
+    expect(P.frames[1].caption.ro).toContain('A (B = 1), IG 0,02, cu C sub el');
   });
   it('the compare table lets its first column wrap so its four columns fit a phone', async () => {
     const { readFileSync } = await import('node:fs');
@@ -283,9 +284,9 @@ describe('second review', () => {
     expect(Q.frames[1].caption.ro).not.toContain('goală');
   });
   it('the Romanian list of cuts reads as a sentence for one or several nodes', () => {
-    expect(P.frames[1].caption.ro).toContain('Se taie: A (B = 0), IG 0.01 și A (B = 1), IG 0.02, cu C sub el.');
-    expect(P.frames[2].caption.ro).toContain('Se taie: A (B = 0), IG 0.01.');
-    expect(P.frames[2].caption.ro).toContain('Păstrat deși IG < ε: A (B = 1), IG 0.02');
+    expect(P.frames[1].caption.ro).toContain('Se taie: A (B = 0), IG 0,01 și A (B = 1), IG 0,02, cu C sub el.');
+    expect(P.frames[2].caption.ro).toContain('Se taie: A (B = 0), IG 0,01.');
+    expect(P.frames[2].caption.ro).toContain('Păstrat deși IG < ε: A (B = 1), IG 0,02');
   });
   it('the comparison says removed for a test under a cut, as the tree does', async () => {
     const f = P.frames[3];
@@ -300,13 +301,13 @@ describe('second review', () => {
 describe('third review', () => {
   it('a list of tests under a cut that mixes a counted name with a single one counts both (no "two tests A and C")', () => {
     const big = mlPrune({ ...T21, epsilon: 0.95 }).frames[1];
-    expect(big.caption.ro).toContain('Se taie: B, IG 0.3, cu două teste A și un test C sub el.');
+    expect(big.caption.ro).toContain('Se taie: B, IG 0,3, cu două teste A și un test C sub el.');
     expect(big.caption.en).toContain('Cut: B, IG 0.3, with two A tests and one C test below it.');
     const x = mlPrune({ ...E419, epsilon: 1 }).frames[1];
-    expect(x.caption.ro).toContain('X, IG 0.171, cu un test V și două teste W sub el');
+    expect(x.caption.ro).toContain('X, IG 0,171, cu un test V și două teste W sub el');
     expect(x.caption.en).toContain('X, IG 0.171, with one V test and two W tests below it');
     // one name alone, or several single ones, stay bare
-    expect(mlPrune(T21).frames[1].caption.ro).toContain('A (B = 1), IG 0.02, cu C sub el');
+    expect(mlPrune(T21).frames[1].caption.ro).toContain('A (B = 1), IG 0,02, cu C sub el');
     expect(mlPrune(E419).frames[1].caption.ro).toContain('V (X = 0), IG 0, cu două teste W sub el');
   });
 });

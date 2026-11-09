@@ -1,8 +1,10 @@
 // ml-cvloo (L15): leave-one-out cross-validation of ID3 by hand. Take a row out, grow the tree on the others, predict the
 // row, count the error. Pure: trees, predictions, counts and captions all come from here (tree-grow.js on the ML math kit).
 import { colNames, countsText, fmt, grow, classifyPath, sub } from './tree-grow.js';
+import { roNums } from './numbers-bilingual.js';
 
-const bi = (en, ro) => ({ en, ro });
+// Romanian prints the decimal comma (numbers-bilingual.js)
+const bi = (en, ro) => ({ en, ro: roNums(ro) });
 const TIE = 1e-9;
 const listIn = (xs, and) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} ${and} ${xs[xs.length - 1]}` : xs[0]);
 const candName = (c) => (c.th === undefined ? c.attr : `${c.attr} ≤ ${fmt(c.th)}`);

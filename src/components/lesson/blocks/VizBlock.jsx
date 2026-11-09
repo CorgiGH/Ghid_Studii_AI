@@ -35,6 +35,9 @@ const WIDGETS = {
   'ml-threshold': lazy(() => import('../viz/widgets/ml/Threshold.jsx')),
   'ml-cvloo': lazy(() => import('../viz/widgets/ml/CvLoo.jsx')),
   'ml-prune': lazy(() => import('../viz/widgets/ml/Prune.jsx')),
+  'ml-nb': lazy(() => import('../viz/widgets/ml/Nb.jsx')),
+  'ml-likelihood': lazy(() => import('../viz/widgets/ml/MlLikelihood.jsx')),
+  'ml-posterior': lazy(() => import('../viz/widgets/ml/MlPosterior.jsx')),
   'graph-walk': lazy(() => import('../viz/widgets/GraphWalk.jsx')),
 };
 

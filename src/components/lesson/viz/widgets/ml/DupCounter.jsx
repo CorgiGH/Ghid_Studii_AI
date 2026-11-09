@@ -43,7 +43,7 @@ export function DupStage({ model: M, k, predict }) {
         {/* each fraction stays whole when the line wraps on a phone */}
         {prev && <><span className="mlv-frac mlv-dim"><b data-value={String(prev.errs)}>{prev.errs}</b>/<b data-value={String(prev.n)}>{prev.n}</b></span><span aria-hidden="true">{'→'}</span></>}
         <span className="mlv-frac"><b data-value={String(state.errs)}>{state.errs}</b>/<b data-value={String(state.n)}>{state.n}</b></span>
-        {summary && <span>= <Val v={fmtDec(state.errs / state.n)} /></span>}
+        {summary && <span>= <Val v={fmtDec(state.errs / state.n)}>{t(fmtDec(state.errs / state.n), fmtDec(state.errs / state.n).replace('.', ','))}</Val></span>}
       </div>
       {g && (
         <div className="mlv-group">

@@ -5,19 +5,25 @@ import { VizFrame } from '../../ui.jsx';
 import { foldNote, mlCvloo } from '../../logic/ml/cvloo.js';
 import { AXIS_LABEL_GAP, AXIS_LABEL_ROW, classMark, labelRows, plotScale } from '../../logic/ml/threshold.js';
 import { fmt } from '../../logic/ml/tree-grow.js';
+import { roNums } from '../../logic/ml/numbers-bilingual.js';
 import { Counts, Legend, Shape } from './Parts.jsx';
 import './ml-w4.css';
 
+// a number as the learner reads it: Romanian prints the decimal comma (data-value keeps the point)
+const dnOf = (t) => (s) => t(String(s), roNums(String(s)));
+
 function Tree({ node, W, path, revealed, edge }) {
+  const { t } = useApp();
+  const dn = dnOf(t);
   const onPath = revealed && path.includes(node);
   const stop = revealed && path[path.length - 1] === node;
   const cls = `mlw4-node${node.leaf ? ' leaf' : ''}${onPath ? ' kept' : ''}`;
   return (
     <li>
-      {edge && <span className="mlw4-edge">{edge}</span>}
+      {edge && <span className="mlw4-edge">{dn(edge)}</span>}
       {node.leaf
         ? <span className={cls} data-mark="leaf" data-value={String(node.label)}><b>{'→'} {String(node.label)}</b>{node.empty ? null : <span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span>}{stop ? <span aria-hidden="true"> {'←'}</span> : null}</span>
-        : <span className={cls}><b>{node.test.attr}{node.test.th !== undefined ? ' ≤ ' : ' ?'}{node.test.th !== undefined ? <span data-mark="threshold" data-value={fmt(node.test.th)}>{fmt(node.test.th)}</span> : null}</b><span className="mlw4-sub">IG <b data-mark="ig" data-value={fmt(node.ig)}>{fmt(node.ig)}</b></span><span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span></span>}
+        : <span className={cls}><b>{node.test.attr}{node.test.th !== undefined ? ' ≤ ' : ' ?'}{node.test.th !== undefined ? <span data-mark="threshold" data-value={fmt(node.test.th)}>{dn(fmt(node.test.th))}</span> : null}</b><span className="mlw4-sub">IG <b data-mark="ig" data-value={fmt(node.ig)}>{dn(fmt(node.ig))}</b></span><span className="mlw4-sub"><Counts counts={node.counts} classes={W.classes} /></span></span>}
       {!node.leaf && (
         <ul>
           {node.kids.map((k, i) => {
@@ -57,7 +63,7 @@ function Rows({ table, out, t }) {
           {table.rows.map((r, i) => (
             <tr key={i} className={out === i ? 'mlw4-row-out' : ''} data-out={out === i ? 'true' : undefined}>
               <td className="num" data-mark="row" data-value={i + 1}>{i + 1}</td>
-              {r.map((v, j) => <td key={j} className="num" data-mark="cell" data-value={typeof v === 'number' ? fmt(v) : String(v)}>{String(v)}</td>)}
+              {r.map((v, j) => <td key={j} className="num" data-mark="cell" data-value={typeof v === 'number' ? fmt(v) : String(v)}>{typeof v === 'number' ? dnOf(t)(String(v)) : String(v)}</td>)}
             </tr>
           ))}
         </tbody>
@@ -68,6 +74,7 @@ function Rows({ table, out, t }) {
 
 // 4.10: one continuous attribute, so the rows sit on an axis and the thresholds of the refit tree show where it cuts
 function Axis({ W, table, frame, t }) {
+  const dn = dnOf(t);
   const attr = W.single;
   const xi = W.names.indexOf(attr);
   const pts = table.rows.map((r, i) => ({ i, x: r[xi], cls: W.classes.indexOf(r[W.ti]), label: r[W.ti] }));
@@ -84,7 +91,7 @@ function Axis({ W, table, frame, t }) {
       {cuts.map((c, k) => (
         <g key={k}>
           <line x1={S.X(c.th)} x2={S.X(c.th)} y1={S.h / 2 - 36} y2={S.h / 2 + 22} className="mlw4-cut" data-mark="boundary" data-value={fmt(c.th)} />
-          <text data-mark="cut-label" data-value={fmt(c.th)} x={S.X(c.th)} y={S.h / 2 - 41 - rows[k] * AXIS_LABEL_ROW} textAnchor="middle" className="on">{fmt(c.th)}</text>
+          <text data-mark="cut-label" data-value={fmt(c.th)} x={S.X(c.th)} y={S.h / 2 - 41 - rows[k] * AXIS_LABEL_ROW} textAnchor="middle" className="on">{dn(fmt(c.th))}</text>
         </g>
       ))}
       {pts.map((p) => {

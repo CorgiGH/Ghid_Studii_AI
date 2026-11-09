@@ -8,6 +8,8 @@ import { entropyBars } from './logic/ml/entropy-bars.js';
 import { gameTree } from './logic/game-tree.js';
 import { payoffMatrix } from './logic/payoff-matrix.js';
 import { ALL_MODES, graphProblems } from './logic/graph/index.js';
+import { nbProblems } from './logic/ml/nb.js';
+import { posteriorProblems } from './logic/ml/posterior.js';
 
 const isStr = (v) => typeof v === 'string' && v.length > 0;
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -72,7 +74,7 @@ const SPEC = {
   'game-tree': { mode: oneOf('minimax', 'alphabeta'), root: oneOf('MIN', 'MAX'), rootLabel: optional(isBi), tree: isGameNode },
   'payoff-matrix': { mode: oneOf('nash', 'dominance'), players: (v) => !!v && isStr(v.row) && isStr(v.col), rows: strs, cols: strs, payoffs: isPayoffs, compare: optional((v) => strs(v) && v.length === 2) },
   'ml-omega': { outcomes: (v) => isArr(v) && v.every((x) => isStr(x) || isNum(x)), events: (v) => !!v && typeof v === 'object' && Array.isArray(v.A) && Array.isArray(v.B), restrictTo: optional(oneOf('A', 'B')) },
-  'ml-freq-tree': { population: isNum, prior: isNum, sens: isNum, fpr: isNum, labels: (v) => !!v && typeof v === 'object' },
+  'ml-freq-tree': { population: isNum, prior: isNum, sens: isNum, fpr: isNum, labels: (v) => !!v && typeof v === 'object', feminine: optional((v) => typeof v === 'boolean') },
   'ml-indep-2x2': { counts: (v) => Array.isArray(v) && v.length === 2 && v.every((r) => Array.isArray(r) && r.length === 2 && r.every(isNum)), labels: (v) => !!v && typeof v === 'object' },
   'set-balls': { left: isStr, right: isStr, ops: subsetOf('UNION', 'UNION ALL', 'INTERSECT', 'MINUS') },
   'ml-pmf-cdf': { values: (v) => isArr(v) && v.every(isNum), probs: probList, name: optional(isStr), format: optional(oneOf('fraction', 'decimal')), cdfAt: optional(isNum), second: optional((v) => !!v && typeof v === 'object' && isArr(v.values) && v.values.every(isNum) && probList(v.probs) && (v.name === undefined || isStr(v.name))) },
@@ -84,6 +86,17 @@ const SPEC = {
   'ml-threshold': { table: isTbl, attr: isStr, target: isStr, plane: optional(isPlane) },
   'ml-cvloo': { table: isTbl, target: isStr, tie: isStr, continuous: optional(strs) },
   'ml-prune': { tree: isPruneNode, table: optional(isTbl), target: optional(isStr), epsilon: isNum },
+  'ml-nb': { table: (v) => !!v && typeof v === 'object' && isArr(v.columns) && isArr(v.rows), target: isStr, row: (v) => isStr(v) || (!!v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0), modes: subsetOf('joint', 'laplace', 'errors') },
+  'ml-likelihood': {
+    data: (v) => (Array.isArray(v) ? v.length > 0 : v !== undefined) && (Array.isArray(v) ? v : [v]).every((d) => !!d && Number.isInteger(d.n) && d.n >= 2 && Number.isInteger(d.heads) && d.heads >= 0 && d.heads <= d.n),
+    grid: (v) => isArr(v) && v.length <= 5 && v.every((x) => isNum(x) && x >= 0 && x <= 1),
+    prior: optional((v) => !!v && Number.isInteger(v.a) && Number.isInteger(v.b) && v.a >= 1 && v.b >= 1),
+  },
+  'ml-posterior': {
+    hypotheses: (v) => isArr(v) && v.length >= 2 && v.length <= 6 && v.every((h) => !!h && isStr(h.name) && [h.prior, h.lik].every((x) => (isNum(x) && x > 0 && x <= 1) || isStr(x)))
+      && new Set(v.map((h) => h.name)).size === v.length
+      && (v.some((h) => isStr(h.prior)) || Math.abs(v.reduce((s, h) => s + h.prior, 0) - 1) < 1e-9),
+  },
   'graph-walk': { mode: oneOf(...ALL_MODES), nodes: isArr, edges: (v) => Array.isArray(v), source: optional(isStr), target: optional(isStr), directed: optional((v) => typeof v === 'boolean'), domains: optional((v) => !!v && typeof v === 'object' && !Array.isArray(v)), constraint: optional(oneOf('different', 'lt', 'divides')), tieBreak: optional(oneOf('alpha', 'order')), order: optional(strs) },
 };
 
@@ -149,6 +162,8 @@ export function validateViz(block) {
     try { payoffMatrix(props); } catch (e) { errs.push(`viz (payoff-matrix): ${e.message}`); }
   }
   if (w === 'graph-walk' && errs.length === 0) errs.push(...graphProblems(props));
+  if (w === 'ml-posterior' && errs.length === 0) errs.push(...posteriorProblems(props).map((e) => `viz (ml-posterior): ${e}`));
+  if (w === 'ml-nb' && errs.length === 0) errs.push(...nbProblems(props).map((e) => `viz (ml-nb): ${e}`));
   if (w === 'join-wires' && !!props.filter !== !!props.filterIn) errs.push('viz (join-wires): props.filter and props.filterIn go together');
   if (w === 'ml-omega') errs.push(...omegaProblems(props).filter((e) => !errs.includes(e)));
   if (w === 'ml-freq-tree') errs.push(...freqTreeProblems(props).filter((e) => !errs.includes(e)));

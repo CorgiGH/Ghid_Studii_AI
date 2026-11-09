@@ -3,8 +3,10 @@
 // from the node when the exercise states it and gives no data. Pure; no React.
 import { IG } from '../../../../../ml/calc/mathKit.js';
 import { classOrder, cmpLabel, colNames, countsText, fmt, sub } from './tree-grow.js';
+import { roNums } from './numbers-bilingual.js';
 
-const bi = (en, ro) => ({ en, ro });
+// Romanian prints the decimal comma (numbers-bilingual.js)
+const bi = (en, ro) => ({ en, ro: roNums(ro) });
 
 // ---- the tree, with rows, counts and IG on every node ----
 function annotate(props) {

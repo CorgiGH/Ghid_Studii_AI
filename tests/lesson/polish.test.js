@@ -10,7 +10,7 @@ import { oracleDisplay } from '../../src/components/lesson/viz/logic/calendar-cl
 import { charStripsSql } from '../../src/components/lesson/viz/logic/oracle.js';
 import { validateViz } from '../../src/components/lesson/viz/vizSpec.js';
 import { lessonOrder, validateMcq } from '../../src/components/lesson/blocks/choiceSpec.js';
-import { IA_TAGS, ML_TAGS, NN_TAGS, OUTLINE_TAGS, STAGED_TAGS, TRAP_TAGS } from '../../src/components/lesson/blocks/trapTags.js';
+import { G4_TAGS, IA_TAGS, ML_TAGS, NN_TAGS, OUTLINE_TAGS, STAGED_TAGS, TRAP_TAGS } from '../../src/components/lesson/blocks/trapTags.js';
 import { AG_TAGS } from '../../src/components/lesson/blocks/trapTagsAg.js';
 import { REFLECT_TEXT_MAX, restoredMcqPick, restoredReflect, shouldRecordAttempt } from '../../src/lesson/restore.js';
 import { calendarDaysUntil, collectMcqPool, dueLabel, furthestVisited, isPracticeOnly, pickVariant } from '../../src/lesson/review.js';
@@ -26,7 +26,7 @@ describe('trap catalogue in the validator', () => {
   it('knows the outline tags and the staged extras, without duplicates', () => {
     expect(OUTLINE_TAGS.length).toBeGreaterThan(40);
     expect(STAGED_TAGS.length).toBeGreaterThan(20);
-    expect(TRAP_TAGS.size).toBe(OUTLINE_TAGS.length + STAGED_TAGS.length + ML_TAGS.length + NN_TAGS.length + IA_TAGS.length + AG_TAGS.length);
+    expect(TRAP_TAGS.size).toBe(OUTLINE_TAGS.length + STAGED_TAGS.length + ML_TAGS.length + NN_TAGS.length + IA_TAGS.length + AG_TAGS.length + G4_TAGS.length);
     expect(TRAP_TAGS.has('not-in-null')).toBe(true);
   });
 

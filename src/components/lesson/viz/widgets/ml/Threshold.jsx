@@ -4,10 +4,15 @@ import { useStepper } from '../../kit.js';
 import { VizFrame } from '../../ui.jsx';
 import { AXIS_LABEL_GAP as LABEL_GAP, AXIS_LABEL_ROW as LABEL_ROW, classMark, guessNote, intervalText, labelRows, mlThreshold, plotScale, testLabel } from '../../logic/ml/threshold.js';
 import { fmt } from '../../logic/ml/tree-grow.js';
+import { roNums } from '../../logic/ml/numbers-bilingual.js';
 import { Counts, Legend, Shape } from './Parts.jsx';
 import './ml-w4.css';
 
+// a number as the learner reads it: Romanian prints the decimal comma (data-value keeps the point)
+const dnOf = (t) => (s) => t(String(s), roNums(String(s)));
+
 function Plot({ W, frame, t, revealed = true }) {
+  const dn = dnOf(t);
   const plane = W.plane;
   const S = useMemo(() => plotScale(W.points, plane), [W, plane]);
   const { w, h, pad } = S;
@@ -66,14 +71,14 @@ function Plot({ W, frame, t, revealed = true }) {
         return (
           <g key={k}>
             <line {...s} className={`mlw4-cut${b.cand ? ' cand' : ''}`} data-mark={b.cand ? 'candidate' : 'boundary'} data-value={fmt(b.th)} data-attr={b.attr} />
-            {(!plane || last || b.cand) && <text data-mark="cut-label" data-value={fmt(b.th)} x={s.x1 + (plane && b.attr === ay ? 4 : 0)} y={plane ? (b.attr === ay ? s.y1 - 4 : s.y1 - 5) : s.y1 - 5 - rows[k] * LABEL_ROW} textAnchor={plane && b.attr === ay ? 'start' : 'middle'} className={last ? 'on' : ''}>{plane ? `${b.attr}≤${fmt(b.th)}` : fmt(b.th)}</text>}
+            {(!plane || last || b.cand) && <text data-mark="cut-label" data-value={fmt(b.th)} x={s.x1 + (plane && b.attr === ay ? 4 : 0)} y={plane ? (b.attr === ay ? s.y1 - 4 : s.y1 - 5) : s.y1 - 5 - rows[k] * LABEL_ROW} textAnchor={plane && b.attr === ay ? 'start' : 'middle'} className={last ? 'on' : ''}>{dn(plane ? `${b.attr}≤${fmt(b.th)}` : fmt(b.th))}</text>}
           </g>
         );
       })}
       {frame.kind === 'contrast' && (
         <g>
           <line x1={S.X(frame.trial.th)} x2={S.X(frame.trial.th)} y1={h / 2 - 34} y2={h / 2 + 22} className="mlw4-cut trial" data-mark="trial" data-value={fmt(frame.trial.th)} />
-          <text data-mark="cut-label" data-value={fmt(frame.trial.th)} x={S.X(frame.trial.th)} y={h / 2 - 39 - rows[rows.length - 1] * LABEL_ROW} textAnchor="middle">{fmt(frame.trial.th)}</text>
+          <text data-mark="cut-label" data-value={fmt(frame.trial.th)} x={S.X(frame.trial.th)} y={h / 2 - 39 - rows[rows.length - 1] * LABEL_ROW} textAnchor="middle">{dn(fmt(frame.trial.th))}</text>
         </g>
       )}
       {pos.map(({ p, cx, cy }) => {
@@ -81,10 +86,10 @@ function Plot({ W, frame, t, revealed = true }) {
         return <Shape key={p.i} shape={m.shape} cx={cx} cy={cy} r={plane ? 6.5 : 7} fill={m.colour} data-mark="point" data-value={plane ? `${fmt(p.x)} ${fmt(p.y)}` : fmt(p.x)} data-label={String(p.label)} />;
       })}
       {showLabels && pos.filter(({ p }, k, arr) => arr.findIndex((q) => q.p.x === p.x) === k).map(({ p, cx }) => (
-        <text key={p.i} x={cx} y={h / 2 + 38} textAnchor="middle">{fmt(p.x)}</text>
+        <text key={p.i} x={cx} y={h / 2 + 38} textAnchor="middle">{dn(fmt(p.x))}</text>
       ))}
-      {tx.map((v) => <text key={`x${v}`} x={S.X(v)} y={h - pad + 13} textAnchor="middle" data-mark="tick-x" data-value={fmt(v)}>{fmt(v)}</text>)}
-      {ty.map((v) => <text key={`y${v}`} x={pad - 6} y={S.Y(v) + 4} textAnchor="end" data-mark="tick-y" data-value={fmt(v)}>{fmt(v)}</text>)}
+      {tx.map((v) => <text key={`x${v}`} x={S.X(v)} y={h - pad + 13} textAnchor="middle" data-mark="tick-x" data-value={fmt(v)}>{dn(fmt(v))}</text>)}
+      {ty.map((v) => <text key={`y${v}`} x={pad - 6} y={S.Y(v) + 4} textAnchor="end" data-mark="tick-y" data-value={fmt(v)}>{dn(fmt(v))}</text>)}
       {plane && <text x={w - 2} y={h - pad + 13} textAnchor="end" className="on">{ax}</text>}
       {plane && <text x={6} y={pad - 10} className="on">{ay}</text>}
     </svg>
@@ -93,9 +98,10 @@ function Plot({ W, frame, t, revealed = true }) {
 
 // hideCands: the node's IG values are still to be predicted; hideTrial: the same for the threshold inside the run
 function IgTable({ W, frame, t, hideCands = false, hideTrial = false }) {
+  const dn = dnOf(t);
   const cl = W.classes;
   const rows = frame.cands;
-  const ig = (v, hide) => (hide ? <td className="num">?</td> : <td className="num" data-mark="ig" data-value={fmt(v)}>{fmt(v)}</td>);
+  const ig = (v, hide) => (hide ? <td className="num">?</td> : <td className="num" data-mark="ig" data-value={fmt(v)}>{dn(fmt(v))}</td>);
   return (
     <div className="viz-tablewrap">
       <table className="viz-table mlw4-table">
@@ -107,7 +113,7 @@ function IgTable({ W, frame, t, hideCands = false, hideTrial = false }) {
         <tbody>
           {rows.map((c) => (
             <tr key={c.key} className={c.best && !hideCands ? 'win' : ''}>
-              <td><span data-mark="threshold" data-value={fmt(c.th)}>{testLabel(c)}</span></td>
+              <td><span data-mark="threshold" data-value={fmt(c.th)}>{dn(testLabel(c))}</span></td>
               {ig(c.ig, hideCands)}
               <td className="num"><Counts counts={c.left} classes={cl} /></td>
               <td className="num"><Counts counts={c.right} classes={cl} /></td>
@@ -115,7 +121,7 @@ function IgTable({ W, frame, t, hideCands = false, hideTrial = false }) {
           ))}
           {frame.kind === 'contrast' && (
             <tr className="trial">
-              <td><span data-mark="threshold" data-value={fmt(frame.trial.th)}>{testLabel(frame.trial)}</span></td>
+              <td><span data-mark="threshold" data-value={fmt(frame.trial.th)}>{dn(testLabel(frame.trial))}</span></td>
               {ig(frame.trial.ig, hideTrial)}
               <td className="num"><Counts counts={frame.trial.left} classes={cl} /></td>
               <td className="num"><Counts counts={frame.trial.right} classes={cl} /></td>
@@ -131,13 +137,14 @@ function IgTable({ W, frame, t, hideCands = false, hideTrial = false }) {
 // revealed = false on a node or the inside-run frame that is still asking: its IG (and a node's line) stay hidden.
 export function Stage({ W, frame, guess = null, onPick = null, asking = false, revealed = true }) {
   const { t } = useApp();
+  const dn = dnOf(t);
   const stat = (
     <div className="mlw4-stat">
       <span>{t('points', 'puncte')} <b data-mark="n" data-value={frame.n}>{frame.n}</b></span>
       {frame.kind === 'node' && (
         <>
           <span>{t('here', 'aici')} <b><Counts counts={frame.counts} classes={W.classes} /></b></span>
-          <span>H <b data-mark="h" data-value={fmt(frame.h)}>{fmt(frame.h)}</b></span>
+          <span>H <b data-mark="h" data-value={fmt(frame.h)}>{dn(fmt(frame.h))}</b></span>
         </>
       )}
     </div>
@@ -153,8 +160,8 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false, r
           <div className="mlw4-chips" role="group" aria-label={t('Pick the threshold with the largest IG', 'Alege pragul cu cel mai mare IG')}>
             {frame.cands.map((c) => (
               onPick
-                ? <button key={c.key} type="button" className="mlw4-chip" aria-pressed={guess === c.key} onClick={() => onPick(c.key)} data-mark="threshold" data-value={fmt(c.th)}>{testLabel(c)}</button>
-                : <span key={c.key} className="mlw4-chip" data-mark="threshold" data-value={fmt(c.th)}>{testLabel(c)}</span>
+                ? <button key={c.key} type="button" className="mlw4-chip" aria-pressed={guess === c.key} onClick={() => onPick(c.key)} data-mark="threshold" data-value={fmt(c.th)}>{dn(testLabel(c))}</button>
+                : <span key={c.key} className="mlw4-chip" data-mark="threshold" data-value={fmt(c.th)}>{dn(testLabel(c))}</span>
             ))}
           </div>
           {asking && <div className="mlw4-hint">{t('Click the threshold you think wins, or press Show me.', 'Apasă pe pragul care crezi că câștigă, sau apasă Arată-mi.')}</div>}
@@ -165,7 +172,7 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false, r
         <div className="mlw4-chips" role="group" aria-label={t('Your prediction', 'Predicția ta')}>
           {frame.ask.options.map((o) => (
             onPick
-              ? <button key={o.key} type="button" className="mlw4-chip" aria-pressed={guess === o.key} onClick={() => onPick(o.key)} data-mark="option" data-value={o.th !== undefined ? fmt(o.th) : o.key}>{t(o.label.en, o.label.ro)}</button>
+              ? <button key={o.key} type="button" className="mlw4-chip" aria-pressed={guess === o.key} onClick={() => onPick(o.key)} data-mark="option" data-value={o.th !== undefined ? fmt(o.th) : o.key}>{dn(t(o.label.en, o.label.ro))}</button>
               : <span key={o.key} className="mlw4-chip">{t(o.label.en, o.label.ro)}</span>
           ))}
         </div>
@@ -183,8 +190,8 @@ export function Stage({ W, frame, guess = null, onPick = null, asking = false, r
                 <li key={k}>
                   <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><Shape shape={m.shape} cx={8} cy={8} r={5} fill={m.colour} /></svg>
                   {W.plane
-                    ? <span data-mark="zone-ineq" data-value={l.ineq}>{l.ineq}</span>
-                    : <span>{W.attrs[0]} {'∈'} <span data-mark="interval" data-value={intervalText(l.region.x)}>{intervalText(l.region.x)}</span></span>}
+                    ? <span data-mark="zone-ineq" data-value={l.ineq}>{dn(l.ineq)}</span>
+                    : <span>{W.attrs[0]} {'∈'} <span data-mark="interval" data-value={intervalText(l.region.x)}>{dn(intervalText(l.region.x))}</span></span>}
                   <b>{'→'} {String(l.label)}</b>
                 </li>
               );
