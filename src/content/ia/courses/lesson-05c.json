@@ -1,0 +1,2166 @@
+{
+  "meta": {
+    "id": "ia-l05c",
+    "title": {
+      "en": "Lesson 5c: Alpha-beta pruning",
+      "ro": "Lecția 5c: Alpha-beta, minimax fără frunzele inutile"
+    },
+    "shortTitle": {
+      "en": "L5c: Alpha-beta",
+      "ro": "L5c: Alpha-beta"
+    },
+    "source": {
+      "en": "Cursul 5 (c5.pdf), slide-urile 19–24",
+      "ro": "Cursul 5 (c5.pdf), slide-urile 19–24"
+    },
+    "clarity": 1
+  },
+  "steps": [
+    {
+      "id": "ia-l05c-s01",
+      "title": {
+        "en": "Trebuie toate frunzele?",
+        "ro": "Trebuie toate frunzele?"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 19–20",
+        "ro": "Cursul 5 · slide 19–20"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "S este MIN (al nostru); A și B sunt MAX. Citim frunzele lui A: 9 și 8.",
+                "ro": "S este MIN (al nostru); A și B sunt MAX. Citim frunzele lui A: 9 și 8."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>S cu A (9, 8) și B (?, ?)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='118.5' y2='88'/><line class='muted' stroke-width='2' x1='118.5' y1='88' x2='82.2' y2='150'/><line class='muted' stroke-width='2' x1='118.5' y1='88' x2='154.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='263.5' y2='88'/><line class='muted' stroke-width='2' x1='263.5' y1='88' x2='227.2' y2='150'/><line class='muted' stroke-width='2' x1='263.5' y1='88' x2='299.8' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='118.5,69 140.5,105 96.5,105'/><text class='fg' font-size='15' font-weight='700' x='118.5' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='68.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='82.2' y='156' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='140.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='154.8' y='156' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='263.5,69 285.5,105 241.5,105'/><text class='fg' font-size='15' font-weight='700' x='263.5' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='213.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='227.2' y='156' text-anchor='middle'>?</text><rect class='fg fill-soft' stroke-width='2' x='285.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='299.8' y='156' text-anchor='middle'>?</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arbore cu A (9, 8) și B cu frunze încă necitite",
+                  "ro": "Arbore cu A (9, 8) și B cu frunze încă necitite"
+                }
+              }
+            },
+            {
+              "note": {
+                "en": "Slide 19 scrie «S MIN ≤ 9» chiar când A tocmai a citit 9; noi așteptăm să vedem și 8.",
+                "ro": "Slide 19 scrie «S MIN ≤ 9» chiar când A tocmai a citit 9; noi așteptăm să vedem și 8."
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "A este MAX: A = max(9, 8) = 9.",
+              "ro": "A este MAX: A = max(9, 8) = 9."
+            },
+            {
+              "en": "S este MIN: poate alege A și atunci primește 9.",
+              "ro": "S este MIN: poate alege A și atunci primește 9."
+            },
+            {
+              "en": "Deci S poate obține cel mult 9.",
+              "ro": "Deci S poate obține cel mult 9."
+            }
+          ],
+          "result": {
+            "en": "Acum citim primul copil al lui B.",
+            "ro": "Acum citim primul copil al lui B."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s02",
+      "title": {
+        "en": "B începe cu 10",
+        "ro": "B începe cu 10"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 21–22",
+        "ro": "Cursul 5 · slide 21–22"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ia-l05c-q01",
+          "question": {
+            "en": "B (MAX) are prima frunză 10; a doua frunză a lui B nu e citită. S (MIN) are deja 9 prin A. Mai contează restul lui B?",
+            "ro": "B (MAX) are prima frunză 10; a doua frunză a lui B nu e citită. S (MIN) are deja 9 prin A. Mai contează restul lui B?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "Da: B poate coborî sub 10",
+                "ro": "Da: B poate coborî sub 10"
+              },
+              "correct": false,
+              "explain": {
+                "en": "B este MAX: valoarea lui nu poate fi mai mică decât prima frunză, 10.",
+                "ro": "B este MAX: valoarea lui nu poate fi mai mică decât prima frunză, 10."
+              },
+              "misconception": "max-poate-scadea-sub-prima-frunza"
+            },
+            {
+              "text": {
+                "en": "Nu: B este cel puțin 10, deci S nu alege B",
+                "ro": "Nu: B este cel puțin 10, deci S nu alege B"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Corect: B ≥ 10 > 9, iar S este MIN. Restul lui B nu mai poate schimba alegerea.",
+                "ro": "Corect: B ≥ 10 > 9, iar S este MIN. Restul lui B nu mai poate schimba alegerea."
+              }
+            },
+            {
+              "text": {
+                "en": "Da: trebuie citit tot, ca să fim siguri",
+                "ro": "Da: trebuie citit tot, ca să fim siguri"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Nu e nevoie: oricare ar fi restul, B rămâne ≥ 10 și S rămâne la 9.",
+                "ro": "Nu e nevoie: oricare ar fi restul, B rămâne ≥ 10 și S rămâne la 9."
+              },
+              "misconception": "citeste-tot-din-prudenta"
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>S cu A (9, 8) și B (10, ?)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='118.5' y2='88'/><line class='muted' stroke-width='2' x1='118.5' y1='88' x2='82.2' y2='150'/><line class='muted' stroke-width='2' x1='118.5' y1='88' x2='154.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='263.5' y2='88'/><line class='muted' stroke-width='2' x1='263.5' y1='88' x2='227.2' y2='150'/><line class='muted' stroke-width='2' x1='263.5' y1='88' x2='299.8' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='118.5,69 140.5,105 96.5,105'/><text class='fg' font-size='15' font-weight='700' x='118.5' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='68.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='82.2' y='156' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='140.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='154.8' y='156' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='263.5,69 285.5,105 241.5,105'/><text class='fg' font-size='15' font-weight='700' x='263.5' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='213.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='227.2' y='156' text-anchor='middle'>10</text><rect class='fg fill-soft' stroke-width='2' x='285.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='299.8' y='156' text-anchor='middle'>?</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore cu A (9, 8) și B (10, ?)",
+              "ro": "Arbore cu A (9, 8) și B (10, ?)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s03",
+      "title": {
+        "en": "De ce nu mai citim",
+        "ro": "De ce nu mai citim"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 22",
+        "ro": "Cursul 5 · slide 22"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "B este MAX: valoarea lui e cel puțin cât primul copil, deci B ≥ 10.",
+              "ro": "B este MAX: valoarea lui e cel puțin cât primul copil, deci B ≥ 10."
+            },
+            {
+              "en": "S este MIN și are deja A = 9.",
+              "ro": "S este MIN și are deja A = 9."
+            },
+            {
+              "en": "min(9, B) = 9, oricât ar fi B, cât timp B ≥ 10.",
+              "ro": "min(9, B) = 9, oricât ar fi B, cât timp B ≥ 10."
+            }
+          ],
+          "result": {
+            "en": "Restul copiilor lui B nu pot schimba alegerea: nu-i mai citim (îi tăiem).",
+            "ro": "Restul copiilor lui B nu pot schimba alegerea: nu-i mai citim (îi tăiem)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s04",
+      "title": {
+        "en": "Dacă B începe cu 7",
+        "ro": "Dacă B începe cu 7"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 21–22",
+        "ro": "Cursul 5 · slide 21–22"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "table": {
+                "columns": [
+                  "Prima frunză a lui B",
+                  "B este",
+                  "față de 9",
+                  "Citim restul lui B?"
+                ],
+                "rows": [
+                  [
+                    "10",
+                    "≥ 10",
+                    "peste 9",
+                    "nu"
+                  ],
+                  [
+                    "7",
+                    "≥ 7",
+                    "sub 9",
+                    "da"
+                  ]
+                ]
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "Cu 7, B ar putea fi 7 și atunci S ar alege B: trebuie să citim și restul.",
+              "ro": "Cu 7, B ar putea fi 7 și atunci S ar alege B: trebuie să citim și restul."
+            },
+            {
+              "en": "Dacă restul lui B e 4: B = max(7, 4) = 7, iar S = min(9, 7) = 7, alegerea B.",
+              "ro": "Dacă restul lui B e 4: B = max(7, 4) = 7, iar S = min(9, 7) = 7, alegerea B."
+            }
+          ],
+          "result": {
+            "en": "Aceeași formă de arbore, alt număr: la 10 tăiem, la 7 continuăm.",
+            "ro": "Aceeași formă de arbore, alt număr: la 10 tăiem, la 7 continuăm."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s05",
+      "title": {
+        "en": "Regula în cuvinte",
+        "ro": "Regula în cuvinte"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 19–22",
+        "ro": "Cursul 5 · slide 19–22"
+      },
+      "blocks": [
+        {
+          "type": "rule",
+          "text": {
+            "en": "Dacă un nod MAX a trecut deja de ce are MIN în altă parte, restul copiilor lui nu mai contează; la fel, dacă un nod MIN a coborât sub ce are MAX în altă parte.",
+            "ro": "Dacă un nod MAX a trecut deja de ce are MIN în altă parte, restul copiilor lui nu mai contează; la fel, dacă un nod MIN a coborât sub ce are MAX în altă parte."
+          },
+          "body": [
+            {
+              "points": [
+                {
+                  "en": "Nod MAX: valoarea lui doar crește pe măsură ce citim copii.",
+                  "ro": "Nod MAX: valoarea lui doar crește pe măsură ce citim copii."
+                },
+                {
+                  "en": "Nod MIN: valoarea lui doar scade pe măsură ce citim copii.",
+                  "ro": "Nod MIN: valoarea lui doar scade pe măsură ce citim copii."
+                }
+              ]
+            },
+            {
+              "note": {
+                "en": "Slide 19–22: «MIN ≤ 9», «MAX ≥ 9», «MAX ≥ 10». Cuvântul pentru ce facem este tăiere (pruning).",
+                "ro": "Slide 19–22: «MIN ≤ 9», «MAX ≥ 9», «MAX ≥ 10». Cuvântul pentru ce facem este tăiere (pruning)."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s06",
+      "title": {
+        "en": "alpha și beta",
+        "ro": "alpha și beta"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23",
+        "ro": "Cursul 5 · slide 23"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "alpha: cea mai bună valoare pe care MAX o poate garanta deja pe drumul spre nod. Începe la −∞.",
+              "ro": "alpha: cea mai bună valoare pe care MAX o poate garanta deja pe drumul spre nod. Începe la −∞."
+            },
+            {
+              "en": "beta: cea mai bună valoare pe care MIN o poate garanta deja. Începe la +∞.",
+              "ro": "beta: cea mai bună valoare pe care MIN o poate garanta deja. Începe la +∞."
+            },
+            {
+              "en": "Tăiem când alpha ≥ beta: nodul nu mai poate schimba alegerea de mai sus.",
+              "ro": "Tăiem când alpha ≥ beta: nodul nu mai poate schimba alegerea de mai sus."
+            }
+          ],
+          "result": {
+            "en": "Nodul primește alpha și beta de la părinte și le trece mai departe copiilor.",
+            "ro": "Nodul primește alpha și beta de la părinte și le trece mai departe copiilor."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s07",
+      "title": {
+        "en": "Cum citim slide-ul despre alpha și beta",
+        "ro": "Cum citim slide-ul despre alpha și beta"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23",
+        "ro": "Cursul 5 · slide 23"
+      },
+      "blocks": [
+        {
+          "type": "rule",
+          "text": {
+            "en": "alpha și beta sunt două margini pe care le primește fiecare nod de la părinte; când se ating sau se încrucișează, nodul nu mai citește.",
+            "ro": "alpha și beta sunt două margini pe care le primește fiecare nod de la părinte; când se ating sau se încrucișează, nodul nu mai citește."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Slide neclar: slide 23 le descrie cu «minimum maximum» și «maximum score», dar pseudocodul din același slide folosește sensul standard de mai sus.",
+                "ro": "Slide neclar: slide 23 le descrie cu «minimum maximum» și «maximum score», dar pseudocodul din același slide folosește sensul standard de mai sus."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s08",
+      "title": {
+        "en": "Cum se schimbă alpha și beta",
+        "ro": "Cum se schimbă alpha și beta"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23",
+        "ro": "Cursul 5 · slide 23"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "table": {
+                "columns": [
+                  "Nod",
+                  "după fiecare copil",
+                  "tăiem dacă"
+                ],
+                "rows": [
+                  [
+                    "MAX",
+                    "alpha = max(alpha, scor)",
+                    "scor ≥ beta"
+                  ],
+                  [
+                    "MIN",
+                    "beta = min(beta, scor)",
+                    "scor ≤ alpha"
+                  ]
+                ]
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "La rădăcină: alpha = −∞, beta = +∞ (slide 24 scrie la S «beta=-1000», care nu se potrivește cu pseudocodul).",
+              "ro": "La rădăcină: alpha = −∞, beta = +∞ (slide 24 scrie la S «beta=-1000», care nu se potrivește cu pseudocodul)."
+            },
+            {
+              "en": "Fiecare copil pornește cu alpha și beta ale părintelui.",
+              "ro": "Fiecare copil pornește cu alpha și beta ale părintelui."
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Un nod MAX ridică alpha și taie la scor ≥ beta; un nod MIN coboară beta și taie la scor ≤ alpha.",
+            "ro": "Un nod MAX ridică alpha și taie la scor ≥ beta; un nod MIN coboară beta și taie la scor ≤ alpha."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s09",
+      "title": {
+        "en": "Regulile de tăiere din slide",
+        "ro": "Regulile de tăiere din slide"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23",
+        "ro": "Cursul 5 · slide 23"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "text",
+          "code": "if (next_player is minimising)\n   score = ... (child);\n   if (score <= alpha) return\n       alpha;\n   if (score < beta)   beta =\n       score;\nelse\n   score = ... (child);\n   if (score >= beta)  return\n       beta;\n   if (score > alpha)  alpha =\n       score;"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "La un nod MIN: scor ≤ alpha înseamnă că MAX are deja mai bine în altă parte: oprim și întoarcem alpha.",
+              "ro": "La un nod MIN: scor ≤ alpha înseamnă că MAX are deja mai bine în altă parte: oprim și întoarcem alpha."
+            },
+            {
+              "en": "La un nod MAX: scor ≥ beta înseamnă că MIN are deja mai bine în altă parte: oprim și întoarcem beta.",
+              "ro": "La un nod MAX: scor ≥ beta înseamnă că MIN are deja mai bine în altă parte: oprim și întoarcem beta."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s10",
+      "title": {
+        "en": "Alpha-beta pe arborele din slide",
+        "ro": "Alpha-beta pe arborele din slide"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "S este MIN (al nostru), A, B, C sunt MAX. La fiecare frunză prezice: se taie sau se continuă? Apoi vezi alpha, beta și frunzele sărite.",
+            "ro": "S este MIN (al nostru), A, B, C sunt MAX. La fiecare frunză prezice: se taie sau se continuă? Apoi vezi alpha, beta și frunzele sărite."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ia-l05c-v01",
+          "widget": "game-tree",
+          "predict": true,
+          "props": {
+            "mode": "alphabeta",
+            "root": "MIN",
+            "rootLabel": {
+              "en": "noi (AI)",
+              "ro": "noi (AI)"
+            },
+            "tree": {
+              "id": "S",
+              "children": [
+                {
+                  "id": "A",
+                  "children": [
+                    {
+                      "leaf": 1
+                    },
+                    {
+                      "leaf": 5
+                    },
+                    {
+                      "leaf": 9
+                    }
+                  ]
+                },
+                {
+                  "id": "B",
+                  "children": [
+                    {
+                      "leaf": 8
+                    }
+                  ]
+                },
+                {
+                  "id": "C",
+                  "children": [
+                    {
+                      "leaf": 3
+                    },
+                    {
+                      "leaf": 9
+                    },
+                    {
+                      "leaf": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s11",
+      "title": {
+        "en": "A și B",
+        "ro": "A și B"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "S (MIN) începe cu alpha = −∞ și beta = +∞.",
+                "ro": "S (MIN) începe cu alpha = −∞ și beta = +∞."
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "A (MAX) citește 1, 5, 9; alpha urcă 1, 5, 9. A = 9, deci beta la S este 9.",
+              "ro": "A (MAX) citește 1, 5, 9; alpha urcă 1, 5, 9. A = 9, deci beta la S este 9."
+            },
+            {
+              "en": "B (MAX) pornește cu beta = 9 și citește 8: 8 < 9, nu tăiem; alpha = 8. B = 8.",
+              "ro": "B (MAX) pornește cu beta = 9 și citește 8: 8 < 9, nu tăiem; alpha = 8. B = 8."
+            },
+            {
+              "en": "S: beta = min(9, 8) = 8.",
+              "ro": "S: beta = min(9, 8) = 8."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s12",
+      "title": {
+        "en": "C: se taie",
+        "ro": "C: se taie"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "C (MAX) pornește cu beta = 8 de la S.",
+                "ro": "C (MAX) pornește cu beta = 8 de la S."
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "Citește 3: 3 < 8, nu tăiem; alpha = 3.",
+              "ro": "Citește 3: 3 < 8, nu tăiem; alpha = 3."
+            },
+            {
+              "en": "Citește 9: 9 ≥ beta = 8: tăiem. Frunza 2 nu se mai citește.",
+              "ro": "Citește 9: 9 ≥ beta = 8: tăiem. Frunza 2 nu se mai citește."
+            },
+            {
+              "en": "Acum știm doar că C ≥ 9 (widget-ul scrie ≥9); pseudocodul întoarce beta = 8.",
+              "ro": "Acum știm doar că C ≥ 9 (widget-ul scrie ≥9); pseudocodul întoarce beta = 8."
+            }
+          ],
+          "result": {
+            "en": "S = min(9, 8, 8) = 8, alegerea B: C nu poate bate 8.",
+            "ro": "S = min(9, 8, 8) = 8, alegerea B: C nu poate bate 8."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s13",
+      "title": {
+        "en": "Câte frunze am citit",
+        "ro": "Câte frunze am citit"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05c-e01",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Arborele din slide: S este MIN, A (1, 5, 9), B (8), C (3, 9, 2). Alpha-beta cu frunzele citite de la stânga la dreapta.",
+            "ro": "Arborele din slide: S este MIN, A (1, 5, 9), B (8), C (3, 9, 2). Alpha-beta cu frunzele citite de la stânga la dreapta."
+          },
+          "fields": [
+            {
+              "id": "r",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze se citesc?",
+                "ro": "Câte frunze se citesc?"
+              },
+              "formula": "6",
+              "expected": 6
+            },
+            {
+              "id": "k",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze se sar?",
+                "ro": "Câte frunze se sar?"
+              },
+              "formula": "7-6",
+              "expected": 1
+            },
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "min(9,8,9)",
+              "expected": 8
+            }
+          ],
+          "hints": [
+            {
+              "en": "Frunze: 1, 5, 9, 8, 3, 9, 2 (în total 7).",
+              "ro": "Frunze: 1, 5, 9, 8, 3, 9, 2 (în total 7)."
+            },
+            {
+              "en": "Se citește totul până la 9-ul din C; apoi 9 ≥ beta = 8 taie.",
+              "ro": "Se citește totul până la 9-ul din C; apoi 9 ≥ beta = 8 taie."
+            },
+            {
+              "en": "Se sare doar 2. Valoarea este aceeași ca la minimax: 8.",
+              "ro": "Se sare doar 2. Valoarea este aceeași ca la minimax: 8."
+            }
+          ],
+          "solution": {
+            "en": "Se citesc 1, 5, 9, 8, 3, 9: 6 frunze; se sare 2: 1 frunză. Valoarea lui S este 8, ca la minimax.",
+            "ro": "Se citesc 1, 5, 9, 8, 3, 9: 6 frunze; se sare 2: 1 frunză. Valoarea lui S este 8, ca la minimax."
+          },
+          "data": {
+            "kk": 1,
+            "rr": 6,
+            "rootSw": 9
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (1, 5, 9), B (8), C (3, 9, 2)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='108.1' y2='88'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='66.7' y2='150'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='108.1' y2='150'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='149.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='273.9' y2='88'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='232.4' y2='150'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='273.9' y2='150'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='315.3' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='108.1,69 130.1,105 86.1,105'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='52.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='66.7' y='156' text-anchor='middle'>1</text><rect class='fg fill-soft' stroke-width='2' x='94.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='135.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='149.6' y='156' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='273.9,69 295.9,105 251.9,105'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='218.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='232.4' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='259.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='156' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='301.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='315.3' y='156' text-anchor='middle'>2</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arborele din slide",
+              "ro": "Arborele din slide"
+            }
+          },
+          "detectors": [
+            {
+              "field": "r",
+              "formula": "kk",
+              "message": {
+                "en": "Ai inversat: citite sunt frunzele la care ajunge algoritmul, sărite sunt cele de după o tăiere.",
+                "ro": "Ai inversat: citite sunt frunzele la care ajunge algoritmul, sărite sunt cele de după o tăiere."
+              }
+            },
+            {
+              "field": "k",
+              "formula": "rr",
+              "message": {
+                "en": "Ai inversat: sărite sunt doar frunzele de după o tăiere, nu cele citite.",
+                "ro": "Ai inversat: sărite sunt doar frunzele de după o tăiere, nu cele citite."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "rootSw",
+              "message": {
+                "en": "S este MIN: ia cel mai mic dintre A, B și C, nu cel mai mare.",
+                "ro": "S este MIN: ia cel mai mic dintre A, B și C, nu cel mai mare."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "Alt arbore: S este MIN, A (4, 6), B (9, 2), C (3, 5).",
+                "ro": "Alt arbore: S este MIN, A (4, 6), B (9, 2), C (3, 5)."
+              },
+              "solution": {
+                "en": "A = 6, deci beta = 6. B: 9 ≥ 6, tăiem și sărim 2. C: citim 3 și 5. Se citesc 5 frunze, se sare 1; S = min(6, 6, 5) = 5.",
+                "ro": "A = 6, deci beta = 6. B: 9 ≥ 6, tăiem și sărim 2. C: citim 3 și 5. Se citesc 5 frunze, se sare 1; S = min(6, 6, 5) = 5."
+              },
+              "fields": [
+                {
+                  "id": "r",
+                  "formula": "5",
+                  "expected": 5
+                },
+                {
+                  "id": "k",
+                  "formula": "1",
+                  "expected": 1
+                },
+                {
+                  "id": "v",
+                  "formula": "min(6,9,5)",
+                  "expected": 5
+                }
+              ],
+              "data": {
+                "kk": 1,
+                "rr": 5,
+                "rootSw": 9
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (4, 6), B (9, 2), C (3, 5)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='94.3' y2='88'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='70.2' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='118.5' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='166.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='215.2' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='287.7' y2='88'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='263.5' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='311.8' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='94.3,69 116.3,105 72.3,105'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='56.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='70.2' y='156' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='104.5' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='118.5' y='156' text-anchor='middle'>6</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='152.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='166.8' y='156' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='201.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='215.2' y='156' text-anchor='middle'>2</text><polygon class='warn fill-bg' stroke-width='2.5' points='287.7,69 309.7,105 265.7,105'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='249.5' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='263.5' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='297.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='311.8' y='156' text-anchor='middle'>5</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arbore cu A (4, 6), B (9, 2), C (3, 5)",
+                  "ro": "Arbore cu A (4, 6), B (9, 2), C (3, 5)"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s14",
+      "title": {
+        "en": "Același arbore, S este MAX",
+        "ro": "Același arbore, S este MAX"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "S este acum MAX; A, B, C sunt MIN. Prezice la fiecare frunză: se taie sau se continuă?",
+            "ro": "S este acum MAX; A, B, C sunt MIN. Prezice la fiecare frunză: se taie sau se continuă?"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ia-l05c-v02",
+          "widget": "game-tree",
+          "predict": true,
+          "props": {
+            "mode": "alphabeta",
+            "root": "MAX",
+            "rootLabel": {
+              "en": "adversarul",
+              "ro": "adversarul"
+            },
+            "tree": {
+              "id": "S",
+              "children": [
+                {
+                  "id": "A",
+                  "children": [
+                    {
+                      "leaf": 1
+                    },
+                    {
+                      "leaf": 5
+                    },
+                    {
+                      "leaf": 9
+                    }
+                  ]
+                },
+                {
+                  "id": "B",
+                  "children": [
+                    {
+                      "leaf": 8
+                    }
+                  ]
+                },
+                {
+                  "id": "C",
+                  "children": [
+                    {
+                      "leaf": 3
+                    },
+                    {
+                      "leaf": 9
+                    },
+                    {
+                      "leaf": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s15",
+      "title": {
+        "en": "Poza din slide taie 9 și 2",
+        "ro": "Poza din slide taie 9 și 2"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>Tăierea din poza de la slide 24</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='108.1' y2='88'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='66.7' y2='150'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='108.1' y2='150'/><line class='muted' stroke-width='2' x1='108.1' y1='88' x2='149.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='273.9' y2='88'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='232.4' y2='150'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='273.9' y2='150'/><line class='muted' stroke-width='2' x1='273.9' y1='88' x2='315.3' y2='150'/><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,7 213.0,43 169.0,43'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='38' text-anchor='middle'>S</text><polygon class='accent fill-bg' stroke-width='2.5' points='86.1,71 130.1,71 108.1,107'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='84.5' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='52.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='66.7' y='156' text-anchor='middle'>1</text><rect class='fg fill-soft' stroke-width='2' x='94.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='135.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='149.6' y='156' text-anchor='middle'>9</text><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,71 213.0,71 191.0,107'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='84.5' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>8</text><polygon class='accent fill-bg' stroke-width='2.5' points='251.9,71 295.9,71 273.9,107'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='84.5' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='218.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='232.4' y='156' text-anchor='middle'>3</text><rect class='muted fill-bg' stroke-width='2' x='259.9' y='137' width='28' height='26'/><text class='muted' font-size='15' x='273.9' y='156' text-anchor='middle'>9</text><line class='bad' stroke-width='2.5' x1='257.9' y1='165' x2='289.9' y2='135'/><rect class='muted fill-bg' stroke-width='2' x='301.3' y='137' width='28' height='26'/><text class='muted' font-size='15' x='315.3' y='156' text-anchor='middle'>2</text><line class='bad' stroke-width='2.5' x1='299.3' y1='165' x2='331.3' y2='135'/><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arborele din slide cu frunzele 9 și 2 de sub C tăiate",
+                  "ro": "Arborele din slide cu frunzele 9 și 2 de sub C tăiate"
+                },
+                "caption": {
+                  "en": "Poza din slide 24: frunzele 9 și 2 de sub C sunt tăiate (barate).",
+                  "ro": "Poza din slide 24: frunzele 9 și 2 de sub C sunt tăiate (barate)."
+                }
+              }
+            },
+            {
+              "text": {
+                "en": "Cu S = MIN, alpha-beta sare doar frunza 2. Poza taie 9 și 2: așa se întâmplă când S este MAX, iar A, B, C sunt MIN, ca în widget-ul de dinainte.",
+                "ro": "Cu S = MIN, alpha-beta sare doar frunza 2. Poza taie 9 și 2: așa se întâmplă când S este MAX, iar A, B, C sunt MIN, ca în widget-ul de dinainte."
+              }
+            },
+            {
+              "table": {
+                "columns": [
+                  "S este",
+                  "Frunze citite",
+                  "Frunze sărite"
+                ],
+                "rows": [
+                  [
+                    "MIN",
+                    "1, 5, 9, 8, 3, 9",
+                    "2"
+                  ],
+                  [
+                    "MAX",
+                    "1, 5, 9, 8, 3",
+                    "9, 2"
+                  ]
+                ]
+              }
+            },
+            {
+              "text": {
+                "en": "Greșeală în slide: poza arată tăierea pentru S = MAX, dar etichetele ei amestecă alpha și beta ale ambelor convenții; ne ghidăm după pseudocodul de la slide 23.",
+                "ro": "Greșeală în slide: poza arată tăierea pentru S = MAX, dar etichetele ei amestecă alpha și beta ale ambelor convenții; ne ghidăm după pseudocodul de la slide 23."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s16",
+      "title": {
+        "en": "Arbore nou, S este MAX",
+        "ro": "Arbore nou, S este MAX"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05c-e02",
+          "status": "verified-twice",
+          "statement": {
+            "en": "S este MAX; A, B, C sunt MIN. Frunzele se citesc de la stânga la dreapta. Calculează cu alpha-beta.",
+            "ro": "S este MAX; A, B, C sunt MIN. Frunzele se citesc de la stânga la dreapta. Calculează cu alpha-beta."
+          },
+          "fields": [
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "max(min(3,12,8),min(2,4,6),min(14,5,2))",
+              "expected": 3
+            },
+            {
+              "id": "r",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze se citesc?",
+                "ro": "Câte frunze se citesc?"
+              },
+              "formula": "9-2",
+              "expected": 7
+            },
+            {
+              "id": "c",
+              "kind": "choice",
+              "label": {
+                "en": "În ce nod se sar frunze?",
+                "ro": "În ce nod se sar frunze?"
+              },
+              "formula": "'B'",
+              "expected": "B",
+              "options": [
+                {
+                  "en": "A",
+                  "ro": "A"
+                },
+                {
+                  "en": "B",
+                  "ro": "B"
+                },
+                {
+                  "en": "C",
+                  "ro": "C"
+                },
+                {
+                  "en": "în niciunul",
+                  "ro": "în niciunul"
+                }
+              ]
+            }
+          ],
+          "hints": [
+            {
+              "en": "A = min(3, 12, 8) = 3, deci alpha la S este 3.",
+              "ro": "A = min(3, 12, 8) = 3, deci alpha la S este 3."
+            },
+            {
+              "en": "B citește 2: 2 ≤ alpha = 3, tăiem; sar 4 și 6. C citește 14, 5, 2 (ultima frunză).",
+              "ro": "B citește 2: 2 ≤ alpha = 3, tăiem; sar 4 și 6. C citește 14, 5, 2 (ultima frunză)."
+            },
+            {
+              "en": "Se sar 2 frunze (4 și 6) din 9; valoarea lui S este 3.",
+              "ro": "Se sar 2 frunze (4 și 6) din 9; valoarea lui S este 3."
+            }
+          ],
+          "solution": {
+            "en": "A = 3, alpha = 3. B: prima frunză 2 ≤ 3, tăiem, sar 4 și 6. C: 14, 5, 2, nimic de sărit. Se citesc 7 din 9 frunze; S = 3.",
+            "ro": "A = 3, alpha = 3. B: prima frunză 2 ≤ 3, tăiem, sar 4 și 6. C: 14, 5, 2, nimic de sărit. Se citesc 7 din 9 frunze; S = 3."
+          },
+          "data": {
+            "kk": 2,
+            "rootSw": 2
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>S MAX; A (3, 12, 8), B (2, 4, 6), C (14, 5, 2)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='94.3' y2='88'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='62.1' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='94.3' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='126.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='158.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='223.2' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='287.7' y2='88'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='255.4' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='287.7' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='319.9' y2='150'/><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,7 213.0,43 169.0,43'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='38' text-anchor='middle'>S</text><polygon class='accent fill-bg' stroke-width='2.5' points='72.3,71 116.3,71 94.3,107'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='84.5' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='48.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='62.1' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='80.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='156' text-anchor='middle'>12</text><rect class='fg fill-soft' stroke-width='2' x='112.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='126.6' y='156' text-anchor='middle'>8</text><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,71 213.0,71 191.0,107'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='84.5' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='144.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='158.8' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='209.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='223.2' y='156' text-anchor='middle'>6</text><polygon class='accent fill-bg' stroke-width='2.5' points='265.7,71 309.7,71 287.7,107'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='84.5' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='241.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='255.4' y='156' text-anchor='middle'>14</text><rect class='fg fill-soft' stroke-width='2' x='273.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='305.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='319.9' y='156' text-anchor='middle'>2</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore cu A (3, 12, 8), B (2, 4, 6), C (14, 5, 2)",
+              "ro": "Arbore cu A (3, 12, 8), B (2, 4, 6), C (14, 5, 2)"
+            }
+          },
+          "detectors": [
+            {
+              "field": "r",
+              "formula": "kk",
+              "message": {
+                "en": "Ai inversat: întrebarea cere frunzele citite, nu pe cele sărite.",
+                "ro": "Ai inversat: întrebarea cere frunzele citite, nu pe cele sărite."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "rootSw",
+              "message": {
+                "en": "S este MAX: ia cel mai mare dintre A, B și C, nu cel mai mic.",
+                "ro": "S este MAX: ia cel mai mare dintre A, B și C, nu cel mai mic."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "Alt arbore, tot cu S = MAX: A (6, 2, 8), B (4, 9, 1), C (7, 5, 3).",
+                "ro": "Alt arbore, tot cu S = MAX: A (6, 2, 8), B (4, 9, 1), C (7, 5, 3)."
+              },
+              "solution": {
+                "en": "A = 2, alpha = 2. B: 4 > 2, 9 > 2, iar 1 ≤ 2 e ultima frunză; nimic de sărit. C: 7, 5, 3, toate > 2. Se citesc toate cele 9 frunze; S = 3.",
+                "ro": "A = 2, alpha = 2. B: 4 > 2, 9 > 2, iar 1 ≤ 2 e ultima frunză; nimic de sărit. C: 7, 5, 3, toate > 2. Se citesc toate cele 9 frunze; S = 3."
+              },
+              "fields": [
+                {
+                  "id": "v",
+                  "formula": "max(min(6,2,8),min(4,9,1),min(7,5,3))",
+                  "expected": 3
+                },
+                {
+                  "id": "r",
+                  "formula": "9",
+                  "expected": 9
+                },
+                {
+                  "id": "c",
+                  "formula": "'în niciunul'",
+                  "expected": "în niciunul"
+                }
+              ],
+              "data": {
+                "kk": 0,
+                "rootSw": 1
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>S MAX; A (6, 2, 8), B (4, 9, 1), C (7, 5, 3)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='94.3' y2='88'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='62.1' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='94.3' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='126.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='158.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='223.2' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='287.7' y2='88'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='255.4' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='287.7' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='319.9' y2='150'/><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,7 213.0,43 169.0,43'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='38' text-anchor='middle'>S</text><polygon class='accent fill-bg' stroke-width='2.5' points='72.3,71 116.3,71 94.3,107'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='84.5' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='48.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='62.1' y='156' text-anchor='middle'>6</text><rect class='fg fill-soft' stroke-width='2' x='80.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='112.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='126.6' y='156' text-anchor='middle'>8</text><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,71 213.0,71 191.0,107'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='84.5' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='144.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='158.8' y='156' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='209.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='223.2' y='156' text-anchor='middle'>1</text><polygon class='accent fill-bg' stroke-width='2.5' points='265.7,71 309.7,71 287.7,107'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='84.5' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='241.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='255.4' y='156' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='273.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='305.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='319.9' y='156' text-anchor='middle'>3</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arbore cu A (6, 2, 8), B (4, 9, 1), C (7, 5, 3)",
+                  "ro": "Arbore cu A (6, 2, 8), B (4, 9, 1), C (7, 5, 3)"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s17",
+      "title": {
+        "en": "Aceleași frunze, S este MIN",
+        "ro": "Aceleași frunze, S este MIN"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Aceleași numere ca la ecranul anterior, dar S este MIN (al nostru), iar A, B, C sunt MAX. Se taie altceva: prezice unde.",
+            "ro": "Aceleași numere ca la ecranul anterior, dar S este MIN (al nostru), iar A, B, C sunt MAX. Se taie altceva: prezice unde."
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ia-l05c-v03",
+          "widget": "game-tree",
+          "predict": true,
+          "props": {
+            "mode": "alphabeta",
+            "root": "MIN",
+            "rootLabel": {
+              "en": "noi (AI)",
+              "ro": "noi (AI)"
+            },
+            "tree": {
+              "id": "S",
+              "children": [
+                {
+                  "id": "A",
+                  "children": [
+                    {
+                      "leaf": 3
+                    },
+                    {
+                      "leaf": 12
+                    },
+                    {
+                      "leaf": 8
+                    }
+                  ]
+                },
+                {
+                  "id": "B",
+                  "children": [
+                    {
+                      "leaf": 2
+                    },
+                    {
+                      "leaf": 4
+                    },
+                    {
+                      "leaf": 6
+                    }
+                  ]
+                },
+                {
+                  "id": "C",
+                  "children": [
+                    {
+                      "leaf": 14
+                    },
+                    {
+                      "leaf": 5
+                    },
+                    {
+                      "leaf": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s18",
+      "title": {
+        "en": "Un nod tăiat întoarce o margine",
+        "ro": "Un nod tăiat întoarce o margine"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23",
+        "ro": "Cursul 5 · slide 23"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ia-l05c-q02",
+          "question": {
+            "en": "S este MIN, are beta = 6, iar C (MAX) tocmai a citit frunza 14. Cum 14 ≥ 6, tăiem. Ce întoarce C după pseudocodul din slide?",
+            "ro": "S este MIN, are beta = 6, iar C (MAX) tocmai a citit frunza 14. Cum 14 ≥ 6, tăiem. Ce întoarce C după pseudocodul din slide?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "14, valoarea lui C",
+                "ro": "14, valoarea lui C"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Valoarea reală a lui C nu e cunoscută: restul copiilor nu au fost citiți.",
+                "ro": "Valoarea reală a lui C nu e cunoscută: restul copiilor nu au fost citiți."
+              },
+              "misconception": "taiere-intoarce-valoarea-reala"
+            },
+            {
+              "text": {
+                "en": "alpha, adică −∞",
+                "ro": "alpha, adică −∞"
+              },
+              "correct": false,
+              "explain": {
+                "en": "La un nod MAX tăierea întoarce beta, nu alpha.",
+                "ro": "La un nod MAX tăierea întoarce beta, nu alpha."
+              },
+              "misconception": "alpha-in-loc-de-beta"
+            },
+            {
+              "text": {
+                "en": "beta, adică 6",
+                "ro": "beta, adică 6"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Corect: `if (score >= beta) return beta;`. C nu știe valoarea lui reală (e cel puțin 14, de aceea widget-ul scrie ≥14), dar îi ajunge lui S o margine.",
+                "ro": "Corect: `if (score >= beta) return beta;`. C nu știe valoarea lui reală (e cel puțin 14, de aceea widget-ul scrie ≥14), dar îi ajunge lui S o margine."
+              }
+            },
+            {
+              "text": {
+                "en": "ultima frunză citită",
+                "ro": "ultima frunză citită"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Pseudocodul întoarce margina (beta), nu ultimul scor, când taie.",
+                "ro": "Pseudocodul întoarce margina (beta), nu ultimul scor, când taie."
+              },
+              "misconception": "taiere-intoarce-valoarea-reala"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s19",
+      "title": {
+        "en": "Ordinea copiilor contează",
+        "ro": "Ordinea copiilor contează"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Același arbore cu S = MAX, dar copiii lui S citiți în altă ordine.",
+                "ro": "Același arbore cu S = MAX, dar copiii lui S citiți în altă ordine."
+              }
+            },
+            {
+              "table": {
+                "columns": [
+                  "Ordinea",
+                  "ABC",
+                  "ACB",
+                  "BAC",
+                  "BCA",
+                  "CAB",
+                  "CBA"
+                ],
+                "rows": [
+                  [
+                    "Frunze citite",
+                    "7",
+                    "7",
+                    "9",
+                    "9",
+                    "7",
+                    "7"
+                  ]
+                ]
+              }
+            },
+            {
+              "text": {
+                "en": "Când B e citit primul, alpha este doar 2 (valoarea lui B) și nu se sare nimic: toate cele 9 frunze.",
+                "ro": "Când B e citit primul, alpha este doar 2 (valoarea lui B) și nu se sare nimic: toate cele 9 frunze."
+              }
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Alpha-beta este sensibil la ordinea în care se evaluează vecinii.",
+            "ro": "Alpha-beta este sensibil la ordinea în care se evaluează vecinii."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Slide 24: `ALPHA-BETA is sensitive to the order of evaluation of neighbours`.",
+                "ro": "Slide 24: `ALPHA-BETA is sensitive to the order of evaluation of neighbours`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s20",
+      "title": {
+        "en": "Mutările bune întâi",
+        "ro": "Mutările bune întâi"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Slide-ul spune că alpha-beta se poate optimiza și mai mult cu o euristică de ordonare (order heuristic).",
+                "ro": "Slide-ul spune că alpha-beta se poate optimiza și mai mult cu o euristică de ordonare (order heuristic)."
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "Euristica sortează vecinii înainte de a-i citi.",
+              "ro": "Euristica sortează vecinii înainte de a-i citi."
+            },
+            {
+              "en": "Cei mai promițători vin primii: ridică repede alpha sau coboară beta.",
+              "ro": "Cei mai promițători vin primii: ridică repede alpha sau coboară beta."
+            },
+            {
+              "en": "Cu margini bune de la început, tăierile apar mai devreme.",
+              "ro": "Cu margini bune de la început, tăierile apar mai devreme."
+            }
+          ],
+          "result": {
+            "en": "Aici: A (valoarea 3, cea mai bună pentru MAX) înaintea lui B și C: 7 frunze în loc de 9.",
+            "ro": "Aici: A (valoarea 3, cea mai bună pentru MAX) înaintea lui B și C: 7 frunze în loc de 9."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s21",
+      "title": {
+        "en": "Valoarea nu se schimbă",
+        "ro": "Valoarea nu se schimbă"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23–24",
+        "ro": "Cursul 5 · slide 23–24"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "table": {
+                "columns": [
+                  "Arbore",
+                  "minimax",
+                  "alpha-beta",
+                  "frunze citite"
+                ],
+                "rows": [
+                  [
+                    "slide, S = MIN",
+                    "8",
+                    "8",
+                    "6 din 7"
+                  ],
+                  [
+                    "3 × 3, S = MAX",
+                    "3",
+                    "3",
+                    "7 din 9"
+                  ],
+                  [
+                    "3 × 3, S = MIN",
+                    "6",
+                    "6",
+                    "7 din 9"
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "Alpha-beta dă aceeași valoare ca minimax, dar nu citește frunzele care nu pot schimba alegerea.",
+            "ro": "Alpha-beta dă aceeași valoare ca minimax, dar nu citește frunzele care nu pot schimba alegerea."
+          },
+          "body": [
+            {
+              "note": {
+                "en": "Sărim doar ce nu poate conta; de aceea valoarea rădăcinii rămâne identică.",
+                "ro": "Sărim doar ce nu poate conta; de aceea valoarea rădăcinii rămâne identică."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s22",
+      "title": {
+        "en": "Pseudocodul de la slide 23",
+        "ro": "Pseudocodul de la slide 23"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23",
+        "ro": "Cursul 5 · slide 23"
+      },
+      "blocks": [
+        {
+          "type": "code",
+          "language": "text",
+          "code": "score alphabeta(depth, state,\n    next_player, alpha, beta)\n{\n  if(final(state)||(depth==0))\n    return score(state);\n  else for all neighbour states\n    if (next_player is\n        minimising)\n      score =\n          min(alphabeta(depth-1,\n          each_child,\n              next_player,\n              alpha, beta);\n      if (score <= alpha) return\n          alpha;\n      if (score < beta) beta =\n          score;\n    else\n      score =\n          max(alphabeta(depth-1,\n          each_child,\n              next_player,\n              alpha, beta);\n      if (score >= beta) return\n          beta;\n      if (score > alpha) alpha =\n          score;\n  return score;\n}"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Nod final sau adâncime 0: întoarce scorul.",
+              "ro": "Nod final sau adâncime 0: întoarce scorul."
+            },
+            {
+              "en": "Altfel, pentru fiecare copil: calculează scorul și actualizează margina.",
+              "ro": "Altfel, pentru fiecare copil: calculează scorul și actualizează margina."
+            },
+            {
+              "en": "Taie și întoarce alpha sau beta când condiția e îndeplinită; altfel continuă cu copilul următor.",
+              "ro": "Taie și întoarce alpha sau beta când condiția e îndeplinită; altfel continuă cu copilul următor."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s23",
+      "title": {
+        "en": "Ultima linie e greșită",
+        "ro": "Ultima linie e greșită"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23",
+        "ro": "Cursul 5 · slide 23"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Greșeală în slide: ultima linie, return score;, întoarce scorul ultimului copil citit. Exemplu: S = MAX, A (3, 12, 8), B (2, 4, 6), C (14, 5, 2).",
+                "ro": "Greșeală în slide: ultima linie, return score;, întoarce scorul ultimului copil citit. Exemplu: S = MAX, A (3, 12, 8), B (2, 4, 6), C (14, 5, 2)."
+              }
+            }
+          ],
+          "items": [
+            {
+              "en": "A (MIN) citește 3, 12, 8 și întoarce ultimul scor, 8, nu minimul 3.",
+              "ro": "A (MIN) citește 3, 12, 8 și întoarce ultimul scor, 8, nu minimul 3."
+            },
+            {
+              "en": "S ridică alpha la 8; B se taie la prima frunză (2 ≤ 8), iar C după 14 și 5 (5 ≤ 8).",
+              "ro": "S ridică alpha la 8; B se taie la prima frunză (2 ≤ 8), iar C după 14 și 5 (5 ≤ 8)."
+            },
+            {
+              "en": "Slide-ul întoarce 8; valoarea corectă este 3.",
+              "ro": "Slide-ul întoarce 8; valoarea corectă este 3."
+            }
+          ],
+          "result": {
+            "en": "Versiunea noastră, corectată: fiecare nod întoarce cea mai bună valoare găsită.",
+            "ro": "Versiunea noastră, corectată: fiecare nod întoarce cea mai bună valoare găsită."
+          }
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "best = (minimising ? +inf :\n    -inf)\nfor each child:\n   score = alphabeta(depth-1,\n       child, other player,\n       alpha, beta)\n   minimising: best = min(best,\n       score); beta  = min(beta,\n       best)\n   maximising: best = max(best,\n       score); alpha =\n       max(alpha, best)\n   if (alpha >= beta) break\nreturn best"
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s24",
+      "title": {
+        "en": "Tăieri la S = MIN, alt arbore",
+        "ro": "Tăieri la S = MIN, alt arbore"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05c-e03",
+          "status": "verified-twice",
+          "statement": {
+            "en": "S este MIN; A (2, 6, 4), B (8, 3, 9), C (5, 7, 1) sunt MAX. A = max(2, 6, 4) = 6, deci beta la S este 6. Continuă tu cu B și C.",
+            "ro": "S este MIN; A (2, 6, 4), B (8, 3, 9), C (5, 7, 1) sunt MAX. A = max(2, 6, 4) = 6, deci beta la S este 6. Continuă tu cu B și C."
+          },
+          "fields": [
+            {
+              "id": "b",
+              "kind": "num",
+              "label": {
+                "en": "După ce frunză se taie B?",
+                "ro": "După ce frunză se taie B?"
+              },
+              "formula": "8",
+              "expected": 8
+            },
+            {
+              "id": "c",
+              "kind": "num",
+              "label": {
+                "en": "După ce frunză se taie C?",
+                "ro": "După ce frunză se taie C?"
+              },
+              "formula": "7",
+              "expected": 7
+            },
+            {
+              "id": "r",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze se citesc în total?",
+                "ro": "Câte frunze se citesc în total?"
+              },
+              "formula": "9-3",
+              "expected": 6
+            },
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "min(6,9,7)",
+              "expected": 6
+            }
+          ],
+          "hints": [
+            {
+              "en": "B și C sunt MAX; taie la scor ≥ beta = 6.",
+              "ro": "B și C sunt MAX; taie la scor ≥ beta = 6."
+            },
+            {
+              "en": "B: prima frunză 8 ≥ 6, tăiem. C: 5 < 6, continuăm; 7 ≥ 6, tăiem.",
+              "ro": "B: prima frunză 8 ≥ 6, tăiem. C: 5 < 6, continuăm; 7 ≥ 6, tăiem."
+            },
+            {
+              "en": "Se sar 3, 9 (la B) și 1 (la C): 9 − 3 = 6 frunze citite. S = 6.",
+              "ro": "Se sar 3, 9 (la B) și 1 (la C): 9 − 3 = 6 frunze citite. S = 6."
+            }
+          ],
+          "solution": {
+            "en": "B: 8 ≥ 6, tăiem (sar 3 și 9). C: 5 < 6, apoi 7 ≥ 6, tăiem (sare 1). Se citesc 2, 6, 4, 8, 5, 7: 6 frunze. S = 6.",
+            "ro": "B: 8 ≥ 6, tăiem (sar 3 și 9). C: 5 < 6, apoi 7 ≥ 6, tăiem (sare 1). Se citesc 2, 6, 4, 8, 5, 7: 6 frunze. S = 6."
+          },
+          "data": {
+            "kk": 3,
+            "rootSw": 9
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (2, 6, 4), B (8, 3, 9), C (5, 7, 1)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='94.3' y2='88'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='62.1' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='94.3' y2='150'/><line class='muted' stroke-width='2' x1='94.3' y1='88' x2='126.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='158.8' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='223.2' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='287.7' y2='88'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='255.4' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='287.7' y2='150'/><line class='muted' stroke-width='2' x1='287.7' y1='88' x2='319.9' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='94.3,69 116.3,105 72.3,105'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='48.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='62.1' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='80.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='94.3' y='156' text-anchor='middle'>6</text><rect class='fg fill-soft' stroke-width='2' x='112.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='126.6' y='156' text-anchor='middle'>4</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='144.8' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='158.8' y='156' text-anchor='middle'>8</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='209.2' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='223.2' y='156' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='287.7,69 309.7,105 265.7,105'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='241.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='255.4' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='273.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='287.7' y='156' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='305.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='319.9' y='156' text-anchor='middle'>1</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore cu A (2, 6, 4), B (8, 3, 9), C (5, 7, 1)",
+              "ro": "Arbore cu A (2, 6, 4), B (8, 3, 9), C (5, 7, 1)"
+            }
+          },
+          "detectors": [
+            {
+              "field": "r",
+              "formula": "kk",
+              "message": {
+                "en": "Ai inversat: întrebarea cere frunzele citite, nu pe cele sărite.",
+                "ro": "Ai inversat: întrebarea cere frunzele citite, nu pe cele sărite."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "rootSw",
+              "message": {
+                "en": "S este MIN: ia cel mai mic dintre A, B și C, nu cel mai mare.",
+                "ro": "S este MIN: ia cel mai mic dintre A, B și C, nu cel mai mare."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "Alt arbore: S este MIN; A (4, 1), B (9, 3, 6), C (2, 7, 5). A = max(4, 1) = 4, deci beta la S este 4.",
+                "ro": "Alt arbore: S este MIN; A (4, 1), B (9, 3, 6), C (2, 7, 5). A = max(4, 1) = 4, deci beta la S este 4."
+              },
+              "solution": {
+                "en": "B: 9 ≥ 4, tăiem (sar 3 și 6). C: 2 < 4, apoi 7 ≥ 4, tăiem (sare 5). Se citesc 4, 1, 9, 2, 7: 5 frunze. S = 4.",
+                "ro": "B: 9 ≥ 4, tăiem (sar 3 și 6). C: 2 < 4, apoi 7 ≥ 4, tăiem (sare 5). Se citesc 4, 1, 9, 2, 7: 5 frunze. S = 4."
+              },
+              "fields": [
+                {
+                  "id": "b",
+                  "formula": "9",
+                  "expected": 9
+                },
+                {
+                  "id": "c",
+                  "formula": "7",
+                  "expected": 7
+                },
+                {
+                  "id": "r",
+                  "formula": "5",
+                  "expected": 5
+                },
+                {
+                  "id": "v",
+                  "formula": "4",
+                  "expected": 4
+                }
+              ],
+              "data": {
+                "kk": 3,
+                "rootSw": 9
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (4, 1), B (9, 3, 6), C (2, 7, 5)</title><line class='muted' stroke-width='2' x1='181.9' y1='26' x2='82.2' y2='88'/><line class='muted' stroke-width='2' x1='82.2' y1='88' x2='64.1' y2='150'/><line class='muted' stroke-width='2' x1='82.2' y1='88' x2='100.4' y2='150'/><line class='muted' stroke-width='2' x1='181.9' y1='26' x2='172.9' y2='88'/><line class='muted' stroke-width='2' x1='172.9' y1='88' x2='136.6' y2='150'/><line class='muted' stroke-width='2' x1='172.9' y1='88' x2='172.9' y2='150'/><line class='muted' stroke-width='2' x1='172.9' y1='88' x2='209.1' y2='150'/><line class='muted' stroke-width='2' x1='181.9' y1='26' x2='281.6' y2='88'/><line class='muted' stroke-width='2' x1='281.6' y1='88' x2='245.4' y2='150'/><line class='muted' stroke-width='2' x1='281.6' y1='88' x2='281.6' y2='150'/><line class='muted' stroke-width='2' x1='281.6' y1='88' x2='317.9' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='159.9,9 203.9,9 181.9,45'/><text class='fg' font-size='15' font-weight='700' x='181.9' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='82.2,69 104.2,105 60.2,105'/><text class='fg' font-size='15' font-weight='700' x='82.2' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='50.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='64.1' y='156' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='86.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='100.4' y='156' text-anchor='middle'>1</text><polygon class='warn fill-bg' stroke-width='2.5' points='172.9,69 194.9,105 150.9,105'/><text class='fg' font-size='15' font-weight='700' x='172.9' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='122.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='136.6' y='156' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='158.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='172.9' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='195.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='209.1' y='156' text-anchor='middle'>6</text><polygon class='warn fill-bg' stroke-width='2.5' points='281.6,69 303.6,105 259.6,105'/><text class='fg' font-size='15' font-weight='700' x='281.6' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='231.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='245.4' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='267.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='281.6' y='156' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='303.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='317.9' y='156' text-anchor='middle'>5</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arbore cu A (4, 1), B (9, 3, 6), C (2, 7, 5)",
+                  "ro": "Arbore cu A (4, 1), B (9, 3, 6), C (2, 7, 5)"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s25",
+      "title": {
+        "en": "Trei niveluri, pas cu pas",
+        "ro": "Trei niveluri, pas cu pas"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 23–24",
+        "ro": "Cursul 5 · slide 23–24"
+      },
+      "blocks": [
+        {
+          "type": "learn",
+          "content": {
+            "en": "Primul arbore cu trei niveluri: S este MAX, A și B sunt MIN, iar A1, A2, B1, B2 sunt MAX. Alpha și beta coboară două niveluri, de la S până la A1 și B1. Prezice la fiecare frunză: se taie sau se continuă?",
+            "ro": "Primul arbore cu trei niveluri: S este MAX, A și B sunt MIN, iar A1, A2, B1, B2 sunt MAX. Alpha și beta coboară două niveluri, de la S până la A1 și B1. Prezice la fiecare frunză: se taie sau se continuă?"
+          }
+        },
+        {
+          "type": "viz",
+          "id": "ia-l05c-v04",
+          "widget": "game-tree",
+          "predict": true,
+          "props": {
+            "mode": "alphabeta",
+            "root": "MAX",
+            "rootLabel": {
+              "en": "adversarul",
+              "ro": "adversarul"
+            },
+            "tree": {
+              "id": "S",
+              "children": [
+                {
+                  "id": "A",
+                  "children": [
+                    {
+                      "id": "A1",
+                      "children": [
+                        {
+                          "leaf": 3
+                        },
+                        {
+                          "leaf": 5
+                        }
+                      ]
+                    },
+                    {
+                      "id": "A2",
+                      "children": [
+                        {
+                          "leaf": 6
+                        },
+                        {
+                          "leaf": 9
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "B",
+                  "children": [
+                    {
+                      "id": "B1",
+                      "children": [
+                        {
+                          "leaf": 1
+                        },
+                        {
+                          "leaf": 2
+                        }
+                      ]
+                    },
+                    {
+                      "id": "B2",
+                      "children": [
+                        {
+                          "leaf": 7
+                        },
+                        {
+                          "leaf": 4
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s26",
+      "title": {
+        "en": "Trei niveluri, S este MAX",
+        "ro": "Trei niveluri, S este MAX"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05c-e04",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Alt arbore pe trei niveluri: S este MAX, A, B, C sunt MIN, iar A1, A2, … sunt MAX. Frunzele se citesc de la stânga la dreapta, cu alpha-beta.",
+            "ro": "Alt arbore pe trei niveluri: S este MAX, A, B, C sunt MIN, iar A1, A2, … sunt MAX. Frunzele se citesc de la stânga la dreapta, cu alpha-beta."
+          },
+          "fields": [
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "max(min(max(2,7),max(4,1)),min(max(9,3),max(5,8)),min(max(6,0),max(1,2)))",
+              "expected": 8
+            },
+            {
+              "id": "r",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze se citesc?",
+                "ro": "Câte frunze se citesc?"
+              },
+              "formula": "12-2",
+              "expected": 10
+            },
+            {
+              "id": "k",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze se sar?",
+                "ro": "Câte frunze se sar?"
+              },
+              "formula": "2",
+              "expected": 2
+            }
+          ],
+          "hints": [
+            {
+              "en": "A1 = max(2, 7) = 7, deci beta la A este 7; A2 citește 4, apoi 1: A2 = 4, A = 4, alpha la S = 4.",
+              "ro": "A1 = max(2, 7) = 7, deci beta la A este 7; A2 citește 4, apoi 1: A2 = 4, A = 4, alpha la S = 4."
+            },
+            {
+              "en": "B1 = max(9, 3) = 9, beta la B = 9; B2 citește 5 și 8: B2 = 8, B = 8, alpha = 8.",
+              "ro": "B1 = max(9, 3) = 9, beta la B = 9; B2 citește 5 și 8: B2 = 8, B = 8, alpha = 8."
+            },
+            {
+              "en": "C1 = max(6, 0) = 6 ≤ alpha = 8: tăiem și sărim C2 (1 și 2).",
+              "ro": "C1 = max(6, 0) = 6 ≤ alpha = 8: tăiem și sărim C2 (1 și 2)."
+            }
+          ],
+          "solution": {
+            "en": "A = min(7, 4) = 4, alpha = 4. B = min(9, 8) = 8, alpha = 8. C1 = max(6, 0) = 6 ≤ 8: tăiem și sărim 1, 2. S = 8; se citesc 10 frunze, se sar 2.",
+            "ro": "A = min(7, 4) = 4, alpha = 4. B = min(9, 8) = 8, alpha = 8. C1 = max(6, 0) = 6 ≤ 8: tăiem și sărim 1, 2. S = 8; se citesc 10 frunze, se sar 2."
+          },
+          "data": {
+            "kk": 2,
+            "rr": 10,
+            "mmOther": 1
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 228'><title>Arbore pe trei niveluri, S MAX</title><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='104.3' y2='82'/><line class='muted' stroke-width='2' x1='104.3' y1='82' x2='81.2' y2='138'/><line class='muted' stroke-width='2' x1='81.2' y1='138' x2='69.6' y2='194'/><line class='muted' stroke-width='2' x1='81.2' y1='138' x2='92.8' y2='194'/><line class='muted' stroke-width='2' x1='104.3' y1='82' x2='127.5' y2='138'/><line class='muted' stroke-width='2' x1='127.5' y1='138' x2='115.9' y2='194'/><line class='muted' stroke-width='2' x1='127.5' y1='138' x2='139.1' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='197.0' y2='82'/><line class='muted' stroke-width='2' x1='197.0' y1='82' x2='173.8' y2='138'/><line class='muted' stroke-width='2' x1='173.8' y1='138' x2='162.2' y2='194'/><line class='muted' stroke-width='2' x1='173.8' y1='138' x2='185.4' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='82' x2='220.2' y2='138'/><line class='muted' stroke-width='2' x1='220.2' y1='138' x2='208.6' y2='194'/><line class='muted' stroke-width='2' x1='220.2' y1='138' x2='231.8' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='289.7' y2='82'/><line class='muted' stroke-width='2' x1='289.7' y1='82' x2='266.5' y2='138'/><line class='muted' stroke-width='2' x1='266.5' y1='138' x2='254.9' y2='194'/><line class='muted' stroke-width='2' x1='266.5' y1='138' x2='278.1' y2='194'/><line class='muted' stroke-width='2' x1='289.7' y1='82' x2='312.8' y2='138'/><line class='muted' stroke-width='2' x1='312.8' y1='138' x2='301.2' y2='194'/><line class='muted' stroke-width='2' x1='312.8' y1='138' x2='324.4' y2='194'/><polygon class='warn fill-bg' stroke-width='2.5' points='197.0,7 219.0,43 175.0,43'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='38' text-anchor='middle'>S</text><polygon class='accent fill-bg' stroke-width='2.5' points='82.3,65 126.3,65 104.3,101'/><text class='fg' font-size='15' font-weight='700' x='104.3' y='78.5' text-anchor='middle'>A</text><polygon class='warn fill-bg' stroke-width='2.5' points='81.2,119 103.2,155 59.2,155'/><text class='fg' font-size='15' font-weight='700' x='81.2' y='150' text-anchor='middle'>A1</text><rect class='fg fill-soft' stroke-width='2' x='59.5' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='69.6' y='200' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='82.7' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='92.8' y='200' text-anchor='middle'>7</text><polygon class='warn fill-bg' stroke-width='2.5' points='127.5,119 149.5,155 105.5,155'/><text class='fg' font-size='15' font-weight='700' x='127.5' y='150' text-anchor='middle'>A2</text><rect class='fg fill-soft' stroke-width='2' x='105.8' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='115.9' y='200' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='129.0' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='139.1' y='200' text-anchor='middle'>1</text><polygon class='accent fill-bg' stroke-width='2.5' points='175.0,65 219.0,65 197.0,101'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='78.5' text-anchor='middle'>B</text><polygon class='warn fill-bg' stroke-width='2.5' points='173.8,119 195.8,155 151.8,155'/><text class='fg' font-size='15' font-weight='700' x='173.8' y='150' text-anchor='middle'>B1</text><rect class='fg fill-soft' stroke-width='2' x='152.2' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='162.2' y='200' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='175.3' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='185.4' y='200' text-anchor='middle'>3</text><polygon class='warn fill-bg' stroke-width='2.5' points='220.2,119 242.2,155 198.2,155'/><text class='fg' font-size='15' font-weight='700' x='220.2' y='150' text-anchor='middle'>B2</text><rect class='fg fill-soft' stroke-width='2' x='198.5' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='208.6' y='200' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='221.7' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='231.8' y='200' text-anchor='middle'>8</text><polygon class='accent fill-bg' stroke-width='2.5' points='267.7,65 311.7,65 289.7,101'/><text class='fg' font-size='15' font-weight='700' x='289.7' y='78.5' text-anchor='middle'>C</text><polygon class='warn fill-bg' stroke-width='2.5' points='266.5,119 288.5,155 244.5,155'/><text class='fg' font-size='15' font-weight='700' x='266.5' y='150' text-anchor='middle'>C1</text><rect class='fg fill-soft' stroke-width='2' x='244.8' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='254.9' y='200' text-anchor='middle'>6</text><rect class='fg fill-soft' stroke-width='2' x='268.0' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='278.1' y='200' text-anchor='middle'>0</text><polygon class='warn fill-bg' stroke-width='2.5' points='312.8,119 334.8,155 290.8,155'/><text class='fg' font-size='15' font-weight='700' x='312.8' y='150' text-anchor='middle'>C2</text><rect class='fg fill-soft' stroke-width='2' x='291.2' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='301.2' y='200' text-anchor='middle'>1</text><rect class='fg fill-soft' stroke-width='2' x='314.3' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='324.4' y='200' text-anchor='middle'>2</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MAX</text><text class='muted' font-size='14' x='2' y='87' text-anchor='start'>MIN</text><text class='muted' font-size='14' x='2' y='143' text-anchor='start'>MAX</text><text class='muted' font-size='14' x='2' y='199' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore pe trei niveluri: A [[2, 7], [4, 1]], B [[9, 3], [5, 8]], C [[6, 0], [1, 2]]",
+              "ro": "Arbore pe trei niveluri: A [[2, 7], [4, 1]], B [[9, 3], [5, 8]], C [[6, 0], [1, 2]]"
+            }
+          },
+          "detectors": [
+            {
+              "field": "r",
+              "formula": "kk",
+              "message": {
+                "en": "Ai inversat: întrebarea cere frunzele citite, nu pe cele sărite.",
+                "ro": "Ai inversat: întrebarea cere frunzele citite, nu pe cele sărite."
+              }
+            },
+            {
+              "field": "k",
+              "formula": "rr",
+              "message": {
+                "en": "Ai inversat: sărite sunt doar frunzele de după o tăiere.",
+                "ro": "Ai inversat: sărite sunt doar frunzele de după o tăiere."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "mmOther",
+              "message": {
+                "en": "S este MAX: de sus în jos nivelurile sunt MAX, MIN, MAX; ai calculat cu S MIN.",
+                "ro": "S este MAX: de sus în jos nivelurile sunt MAX, MIN, MAX; ai calculat cu S MIN."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "Alt arbore pe trei niveluri: S este MAX, A, B, C sunt MIN, A1, A2, … sunt MAX. Alpha-beta, de la stânga la dreapta.",
+                "ro": "Alt arbore pe trei niveluri: S este MAX, A, B, C sunt MIN, A1, A2, … sunt MAX. Alpha-beta, de la stânga la dreapta."
+              },
+              "solution": {
+                "en": "A1 = 6, beta la A = 6; A2 citește 7 ≥ 6, tăiem și sărim 2: A = 6, alpha = 6. B1 = max(3, 5) = 5 ≤ 6: tăiem și sărim 8, 1. C1 = 9, beta la C = 9; C2 = max(7, 0) = 7: C = 7. S = max(6, 5, 7) = 7; se citesc 9 frunze, se sar 3.",
+                "ro": "A1 = 6, beta la A = 6; A2 citește 7 ≥ 6, tăiem și sărim 2: A = 6, alpha = 6. B1 = max(3, 5) = 5 ≤ 6: tăiem și sărim 8, 1. C1 = 9, beta la C = 9; C2 = max(7, 0) = 7: C = 7. S = max(6, 5, 7) = 7; se citesc 9 frunze, se sar 3."
+              },
+              "fields": [
+                {
+                  "id": "v",
+                  "formula": "max(min(max(4,6),max(7,2)),min(max(3,5),max(8,1)),min(max(9,3),max(7,0)))",
+                  "expected": 7
+                },
+                {
+                  "id": "r",
+                  "formula": "9",
+                  "expected": 9
+                },
+                {
+                  "id": "k",
+                  "formula": "3",
+                  "expected": 3
+                }
+              ],
+              "data": {
+                "kk": 3,
+                "rr": 9,
+                "mmOther": 3
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 228'><title>Arbore pe trei niveluri, S MAX</title><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='104.3' y2='82'/><line class='muted' stroke-width='2' x1='104.3' y1='82' x2='81.2' y2='138'/><line class='muted' stroke-width='2' x1='81.2' y1='138' x2='69.6' y2='194'/><line class='muted' stroke-width='2' x1='81.2' y1='138' x2='92.8' y2='194'/><line class='muted' stroke-width='2' x1='104.3' y1='82' x2='127.5' y2='138'/><line class='muted' stroke-width='2' x1='127.5' y1='138' x2='115.9' y2='194'/><line class='muted' stroke-width='2' x1='127.5' y1='138' x2='139.1' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='197.0' y2='82'/><line class='muted' stroke-width='2' x1='197.0' y1='82' x2='173.8' y2='138'/><line class='muted' stroke-width='2' x1='173.8' y1='138' x2='162.2' y2='194'/><line class='muted' stroke-width='2' x1='173.8' y1='138' x2='185.4' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='82' x2='220.2' y2='138'/><line class='muted' stroke-width='2' x1='220.2' y1='138' x2='208.6' y2='194'/><line class='muted' stroke-width='2' x1='220.2' y1='138' x2='231.8' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='289.7' y2='82'/><line class='muted' stroke-width='2' x1='289.7' y1='82' x2='266.5' y2='138'/><line class='muted' stroke-width='2' x1='266.5' y1='138' x2='254.9' y2='194'/><line class='muted' stroke-width='2' x1='266.5' y1='138' x2='278.1' y2='194'/><line class='muted' stroke-width='2' x1='289.7' y1='82' x2='312.8' y2='138'/><line class='muted' stroke-width='2' x1='312.8' y1='138' x2='301.2' y2='194'/><line class='muted' stroke-width='2' x1='312.8' y1='138' x2='324.4' y2='194'/><polygon class='warn fill-bg' stroke-width='2.5' points='197.0,7 219.0,43 175.0,43'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='38' text-anchor='middle'>S</text><polygon class='accent fill-bg' stroke-width='2.5' points='82.3,65 126.3,65 104.3,101'/><text class='fg' font-size='15' font-weight='700' x='104.3' y='78.5' text-anchor='middle'>A</text><polygon class='warn fill-bg' stroke-width='2.5' points='81.2,119 103.2,155 59.2,155'/><text class='fg' font-size='15' font-weight='700' x='81.2' y='150' text-anchor='middle'>A1</text><rect class='fg fill-soft' stroke-width='2' x='59.5' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='69.6' y='200' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='82.7' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='92.8' y='200' text-anchor='middle'>6</text><polygon class='warn fill-bg' stroke-width='2.5' points='127.5,119 149.5,155 105.5,155'/><text class='fg' font-size='15' font-weight='700' x='127.5' y='150' text-anchor='middle'>A2</text><rect class='fg fill-soft' stroke-width='2' x='105.8' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='115.9' y='200' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='129.0' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='139.1' y='200' text-anchor='middle'>2</text><polygon class='accent fill-bg' stroke-width='2.5' points='175.0,65 219.0,65 197.0,101'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='78.5' text-anchor='middle'>B</text><polygon class='warn fill-bg' stroke-width='2.5' points='173.8,119 195.8,155 151.8,155'/><text class='fg' font-size='15' font-weight='700' x='173.8' y='150' text-anchor='middle'>B1</text><rect class='fg fill-soft' stroke-width='2' x='152.2' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='162.2' y='200' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='175.3' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='185.4' y='200' text-anchor='middle'>5</text><polygon class='warn fill-bg' stroke-width='2.5' points='220.2,119 242.2,155 198.2,155'/><text class='fg' font-size='15' font-weight='700' x='220.2' y='150' text-anchor='middle'>B2</text><rect class='fg fill-soft' stroke-width='2' x='198.5' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='208.6' y='200' text-anchor='middle'>8</text><rect class='fg fill-soft' stroke-width='2' x='221.7' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='231.8' y='200' text-anchor='middle'>1</text><polygon class='accent fill-bg' stroke-width='2.5' points='267.7,65 311.7,65 289.7,101'/><text class='fg' font-size='15' font-weight='700' x='289.7' y='78.5' text-anchor='middle'>C</text><polygon class='warn fill-bg' stroke-width='2.5' points='266.5,119 288.5,155 244.5,155'/><text class='fg' font-size='15' font-weight='700' x='266.5' y='150' text-anchor='middle'>C1</text><rect class='fg fill-soft' stroke-width='2' x='244.8' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='254.9' y='200' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='268.0' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='278.1' y='200' text-anchor='middle'>3</text><polygon class='warn fill-bg' stroke-width='2.5' points='312.8,119 334.8,155 290.8,155'/><text class='fg' font-size='15' font-weight='700' x='312.8' y='150' text-anchor='middle'>C2</text><rect class='fg fill-soft' stroke-width='2' x='291.2' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='301.2' y='200' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='314.3' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='324.4' y='200' text-anchor='middle'>0</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MAX</text><text class='muted' font-size='14' x='2' y='87' text-anchor='start'>MIN</text><text class='muted' font-size='14' x='2' y='143' text-anchor='start'>MAX</text><text class='muted' font-size='14' x='2' y='199' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arbore pe trei niveluri: A [[4, 6], [7, 2]], B [[3, 5], [8, 1]], C [[9, 3], [7, 0]]",
+                  "ro": "Arbore pe trei niveluri: A [[4, 6], [7, 2]], B [[3, 5], [8, 1]], C [[9, 3], [7, 0]]"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s27",
+      "title": {
+        "en": "Aceleași frunze, S este MIN",
+        "ro": "Aceleași frunze, S este MIN"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 24",
+        "ro": "Cursul 5 · slide 24"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05c-e05",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Un arbore pe trei niveluri (desenat mai jos), dar acum S este MIN, copiii lui sunt MAX, iar nepoții MIN. Cât se poate sări?",
+            "ro": "Un arbore pe trei niveluri (desenat mai jos), dar acum S este MIN, copiii lui sunt MAX, iar nepoții MIN. Cât se poate sări?"
+          },
+          "fields": [
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "min(max(min(3,5),min(6,9)),max(min(1,2),min(7,4)),max(min(0,1),min(2,3)))",
+              "expected": 2
+            },
+            {
+              "id": "k",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze se sar?",
+                "ro": "Câte frunze se sar?"
+              },
+              "formula": "0",
+              "expected": 0
+            }
+          ],
+          "hints": [
+            {
+              "en": "Nivelurile se inversează: A1 = min(3, 5), A2 = min(6, 9).",
+              "ro": "Nivelurile se inversează: A1 = min(3, 5), A2 = min(6, 9)."
+            },
+            {
+              "en": "A = max(3, 6) = 6, B = max(1, 4) = 4, C = max(0, 2) = 2.",
+              "ro": "A = max(3, 6) = 6, B = max(1, 4) = 4, C = max(0, 2) = 2."
+            },
+            {
+              "en": "S = min(6, 4, 2) = 2. Nicio condiție de tăiere nu se îndeplinește înainte de ultima frunză: nu se sare nimic.",
+              "ro": "S = min(6, 4, 2) = 2. Nicio condiție de tăiere nu se îndeplinește înainte de ultima frunză: nu se sare nimic."
+            }
+          ],
+          "solution": {
+            "en": "A = max(3, 6) = 6, B = max(1, 4) = 4, C = max(0, 2) = 2; S = min(6, 4, 2) = 2. Se citesc toate cele 12 frunze: răspunsul se schimbă față de S = MAX.",
+            "ro": "A = max(3, 6) = 6, B = max(1, 4) = 4, C = max(0, 2) = 2; S = min(6, 4, 2) = 2. Se citesc toate cele 12 frunze: răspunsul se schimbă față de S = MAX."
+          },
+          "data": {
+            "rr": 12,
+            "mmOther": 5
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 228'><title>Arbore pe trei niveluri, S MIN</title><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='104.3' y2='82'/><line class='muted' stroke-width='2' x1='104.3' y1='82' x2='81.2' y2='138'/><line class='muted' stroke-width='2' x1='81.2' y1='138' x2='69.6' y2='194'/><line class='muted' stroke-width='2' x1='81.2' y1='138' x2='92.8' y2='194'/><line class='muted' stroke-width='2' x1='104.3' y1='82' x2='127.5' y2='138'/><line class='muted' stroke-width='2' x1='127.5' y1='138' x2='115.9' y2='194'/><line class='muted' stroke-width='2' x1='127.5' y1='138' x2='139.1' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='197.0' y2='82'/><line class='muted' stroke-width='2' x1='197.0' y1='82' x2='173.8' y2='138'/><line class='muted' stroke-width='2' x1='173.8' y1='138' x2='162.2' y2='194'/><line class='muted' stroke-width='2' x1='173.8' y1='138' x2='185.4' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='82' x2='220.2' y2='138'/><line class='muted' stroke-width='2' x1='220.2' y1='138' x2='208.6' y2='194'/><line class='muted' stroke-width='2' x1='220.2' y1='138' x2='231.8' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='289.7' y2='82'/><line class='muted' stroke-width='2' x1='289.7' y1='82' x2='266.5' y2='138'/><line class='muted' stroke-width='2' x1='266.5' y1='138' x2='254.9' y2='194'/><line class='muted' stroke-width='2' x1='266.5' y1='138' x2='278.1' y2='194'/><line class='muted' stroke-width='2' x1='289.7' y1='82' x2='312.8' y2='138'/><line class='muted' stroke-width='2' x1='312.8' y1='138' x2='301.2' y2='194'/><line class='muted' stroke-width='2' x1='312.8' y1='138' x2='324.4' y2='194'/><polygon class='accent fill-bg' stroke-width='2.5' points='175.0,9 219.0,9 197.0,45'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='104.3,63 126.3,99 82.3,99'/><text class='fg' font-size='15' font-weight='700' x='104.3' y='94' text-anchor='middle'>A</text><polygon class='accent fill-bg' stroke-width='2.5' points='59.2,121 103.2,121 81.2,157'/><text class='fg' font-size='15' font-weight='700' x='81.2' y='134.5' text-anchor='middle'>A1</text><rect class='fg fill-soft' stroke-width='2' x='59.5' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='69.6' y='200' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='82.7' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='92.8' y='200' text-anchor='middle'>5</text><polygon class='accent fill-bg' stroke-width='2.5' points='105.5,121 149.5,121 127.5,157'/><text class='fg' font-size='15' font-weight='700' x='127.5' y='134.5' text-anchor='middle'>A2</text><rect class='fg fill-soft' stroke-width='2' x='105.8' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='115.9' y='200' text-anchor='middle'>6</text><rect class='fg fill-soft' stroke-width='2' x='129.0' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='139.1' y='200' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='197.0,63 219.0,99 175.0,99'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='94' text-anchor='middle'>B</text><polygon class='accent fill-bg' stroke-width='2.5' points='151.8,121 195.8,121 173.8,157'/><text class='fg' font-size='15' font-weight='700' x='173.8' y='134.5' text-anchor='middle'>B1</text><rect class='fg fill-soft' stroke-width='2' x='152.2' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='162.2' y='200' text-anchor='middle'>1</text><rect class='fg fill-soft' stroke-width='2' x='175.3' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='185.4' y='200' text-anchor='middle'>2</text><polygon class='accent fill-bg' stroke-width='2.5' points='198.2,121 242.2,121 220.2,157'/><text class='fg' font-size='15' font-weight='700' x='220.2' y='134.5' text-anchor='middle'>B2</text><rect class='fg fill-soft' stroke-width='2' x='198.5' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='208.6' y='200' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='221.7' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='231.8' y='200' text-anchor='middle'>4</text><polygon class='warn fill-bg' stroke-width='2.5' points='289.7,63 311.7,99 267.7,99'/><text class='fg' font-size='15' font-weight='700' x='289.7' y='94' text-anchor='middle'>C</text><polygon class='accent fill-bg' stroke-width='2.5' points='244.5,121 288.5,121 266.5,157'/><text class='fg' font-size='15' font-weight='700' x='266.5' y='134.5' text-anchor='middle'>C1</text><rect class='fg fill-soft' stroke-width='2' x='244.8' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='254.9' y='200' text-anchor='middle'>0</text><rect class='fg fill-soft' stroke-width='2' x='268.0' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='278.1' y='200' text-anchor='middle'>1</text><polygon class='accent fill-bg' stroke-width='2.5' points='290.8,121 334.8,121 312.8,157'/><text class='fg' font-size='15' font-weight='700' x='312.8' y='134.5' text-anchor='middle'>C2</text><rect class='fg fill-soft' stroke-width='2' x='291.2' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='301.2' y='200' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='314.3' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='324.4' y='200' text-anchor='middle'>3</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN</text><text class='muted' font-size='14' x='2' y='87' text-anchor='start'>MAX</text><text class='muted' font-size='14' x='2' y='143' text-anchor='start'>MIN</text><text class='muted' font-size='14' x='2' y='199' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore pe trei niveluri, S MIN: A [[3, 5], [6, 9]], B [[1, 2], [7, 4]], C [[0, 1], [2, 3]]",
+              "ro": "Arbore pe trei niveluri, S MIN: A [[3, 5], [6, 9]], B [[1, 2], [7, 4]], C [[0, 1], [2, 3]]"
+            }
+          },
+          "detectors": [
+            {
+              "field": "k",
+              "formula": "rr",
+              "message": {
+                "en": "Întrebarea cere frunzele sărite, nu pe cele citite.",
+                "ro": "Întrebarea cere frunzele sărite, nu pe cele citite."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "mmOther",
+              "message": {
+                "en": "S este MIN acum: de sus în jos nivelurile sunt MIN, MAX, MIN; ai calculat cu S MAX.",
+                "ro": "S este MIN acum: de sus în jos nivelurile sunt MIN, MAX, MIN; ai calculat cu S MAX."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "Aceeași întrebare pentru frunzele A [[2, 7], [4, 1]], B [[9, 3], [5, 8]], C [[6, 0], [1, 2]] cu S = MIN.",
+                "ro": "Aceeași întrebare pentru frunzele A [[2, 7], [4, 1]], B [[9, 3], [5, 8]], C [[6, 0], [1, 2]] cu S = MIN."
+              },
+              "solution": {
+                "en": "A = max(min(2, 7), min(4, 1)) = max(2, 1) = 2, deci beta la S este 2. B1 = min(9, 3) = 3 ≥ 2: tăiem și sărim 5 și 8. C = max(min(6, 0), min(1, 2)) = max(0, 1) = 1. S = min(2, 2, 1) = 1; se sar 2 frunze.",
+                "ro": "A = max(min(2, 7), min(4, 1)) = max(2, 1) = 2, deci beta la S este 2. B1 = min(9, 3) = 3 ≥ 2: tăiem și sărim 5 și 8. C = max(min(6, 0), min(1, 2)) = max(0, 1) = 1. S = min(2, 2, 1) = 1; se sar 2 frunze."
+              },
+              "fields": [
+                {
+                  "id": "v",
+                  "formula": "min(max(min(2,7),min(4,1)),max(min(9,3),min(5,8)),max(min(6,0),min(1,2)))",
+                  "expected": 1
+                },
+                {
+                  "id": "k",
+                  "formula": "2",
+                  "expected": 2
+                }
+              ],
+              "data": {
+                "rr": 10,
+                "mmOther": 8
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 228'><title>Arbore pe trei niveluri, S MIN</title><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='104.3' y2='82'/><line class='muted' stroke-width='2' x1='104.3' y1='82' x2='81.2' y2='138'/><line class='muted' stroke-width='2' x1='81.2' y1='138' x2='69.6' y2='194'/><line class='muted' stroke-width='2' x1='81.2' y1='138' x2='92.8' y2='194'/><line class='muted' stroke-width='2' x1='104.3' y1='82' x2='127.5' y2='138'/><line class='muted' stroke-width='2' x1='127.5' y1='138' x2='115.9' y2='194'/><line class='muted' stroke-width='2' x1='127.5' y1='138' x2='139.1' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='197.0' y2='82'/><line class='muted' stroke-width='2' x1='197.0' y1='82' x2='173.8' y2='138'/><line class='muted' stroke-width='2' x1='173.8' y1='138' x2='162.2' y2='194'/><line class='muted' stroke-width='2' x1='173.8' y1='138' x2='185.4' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='82' x2='220.2' y2='138'/><line class='muted' stroke-width='2' x1='220.2' y1='138' x2='208.6' y2='194'/><line class='muted' stroke-width='2' x1='220.2' y1='138' x2='231.8' y2='194'/><line class='muted' stroke-width='2' x1='197.0' y1='26' x2='289.7' y2='82'/><line class='muted' stroke-width='2' x1='289.7' y1='82' x2='266.5' y2='138'/><line class='muted' stroke-width='2' x1='266.5' y1='138' x2='254.9' y2='194'/><line class='muted' stroke-width='2' x1='266.5' y1='138' x2='278.1' y2='194'/><line class='muted' stroke-width='2' x1='289.7' y1='82' x2='312.8' y2='138'/><line class='muted' stroke-width='2' x1='312.8' y1='138' x2='301.2' y2='194'/><line class='muted' stroke-width='2' x1='312.8' y1='138' x2='324.4' y2='194'/><polygon class='accent fill-bg' stroke-width='2.5' points='175.0,9 219.0,9 197.0,45'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='104.3,63 126.3,99 82.3,99'/><text class='fg' font-size='15' font-weight='700' x='104.3' y='94' text-anchor='middle'>A</text><polygon class='accent fill-bg' stroke-width='2.5' points='59.2,121 103.2,121 81.2,157'/><text class='fg' font-size='15' font-weight='700' x='81.2' y='134.5' text-anchor='middle'>A1</text><rect class='fg fill-soft' stroke-width='2' x='59.5' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='69.6' y='200' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='82.7' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='92.8' y='200' text-anchor='middle'>7</text><polygon class='accent fill-bg' stroke-width='2.5' points='105.5,121 149.5,121 127.5,157'/><text class='fg' font-size='15' font-weight='700' x='127.5' y='134.5' text-anchor='middle'>A2</text><rect class='fg fill-soft' stroke-width='2' x='105.8' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='115.9' y='200' text-anchor='middle'>4</text><rect class='fg fill-soft' stroke-width='2' x='129.0' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='139.1' y='200' text-anchor='middle'>1</text><polygon class='warn fill-bg' stroke-width='2.5' points='197.0,63 219.0,99 175.0,99'/><text class='fg' font-size='15' font-weight='700' x='197.0' y='94' text-anchor='middle'>B</text><polygon class='accent fill-bg' stroke-width='2.5' points='151.8,121 195.8,121 173.8,157'/><text class='fg' font-size='15' font-weight='700' x='173.8' y='134.5' text-anchor='middle'>B1</text><rect class='fg fill-soft' stroke-width='2' x='152.2' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='162.2' y='200' text-anchor='middle'>9</text><rect class='fg fill-soft' stroke-width='2' x='175.3' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='185.4' y='200' text-anchor='middle'>3</text><polygon class='accent fill-bg' stroke-width='2.5' points='198.2,121 242.2,121 220.2,157'/><text class='fg' font-size='15' font-weight='700' x='220.2' y='134.5' text-anchor='middle'>B2</text><rect class='fg fill-soft' stroke-width='2' x='198.5' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='208.6' y='200' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='221.7' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='231.8' y='200' text-anchor='middle'>8</text><polygon class='warn fill-bg' stroke-width='2.5' points='289.7,63 311.7,99 267.7,99'/><text class='fg' font-size='15' font-weight='700' x='289.7' y='94' text-anchor='middle'>C</text><polygon class='accent fill-bg' stroke-width='2.5' points='244.5,121 288.5,121 266.5,157'/><text class='fg' font-size='15' font-weight='700' x='266.5' y='134.5' text-anchor='middle'>C1</text><rect class='fg fill-soft' stroke-width='2' x='244.8' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='254.9' y='200' text-anchor='middle'>6</text><rect class='fg fill-soft' stroke-width='2' x='268.0' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='278.1' y='200' text-anchor='middle'>0</text><polygon class='accent fill-bg' stroke-width='2.5' points='290.8,121 334.8,121 312.8,157'/><text class='fg' font-size='15' font-weight='700' x='312.8' y='134.5' text-anchor='middle'>C2</text><rect class='fg fill-soft' stroke-width='2' x='291.2' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='301.2' y='200' text-anchor='middle'>1</text><rect class='fg fill-soft' stroke-width='2' x='314.3' y='181' width='20.166666666666668' height='26'/><text class='fg' font-size='15' font-weight='700' x='324.4' y='200' text-anchor='middle'>2</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN</text><text class='muted' font-size='14' x='2' y='87' text-anchor='start'>MAX</text><text class='muted' font-size='14' x='2' y='143' text-anchor='start'>MIN</text><text class='muted' font-size='14' x='2' y='199' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Arbore pe trei niveluri, S MIN: A [[2, 7], [4, 1]], B [[9, 3], [5, 8]], C [[6, 0], [1, 2]]",
+                  "ro": "Arbore pe trei niveluri, S MIN: A [[2, 7], [4, 1]], B [[9, 3], [5, 8]], C [[6, 0], [1, 2]]"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s28",
+      "title": {
+        "en": "Recapitulare",
+        "ro": "Recapitulare"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 19–24",
+        "ro": "Cursul 5 · slide 19–24"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Alpha-beta dă aceeași valoare ca minimax, dar sare frunzele care nu pot schimba alegerea.",
+              "ro": "Alpha-beta dă aceeași valoare ca minimax, dar sare frunzele care nu pot schimba alegerea."
+            },
+            {
+              "en": "alpha începe la −∞, beta la +∞; MAX ridică alpha, MIN coboară beta.",
+              "ro": "alpha începe la −∞, beta la +∞; MAX ridică alpha, MIN coboară beta."
+            },
+            {
+              "en": "Nod MAX: tai la scor ≥ beta. Nod MIN: tai la scor ≤ alpha.",
+              "ro": "Nod MAX: tai la scor ≥ beta. Nod MIN: tai la scor ≤ alpha."
+            },
+            {
+              "en": "Ordinea copiilor schimbă câte frunze se citesc, nu valoarea.",
+              "ro": "Ordinea copiilor schimbă câte frunze se citesc, nu valoarea."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ia-l05c-s29",
+      "title": {
+        "en": "Verificare: valoare, frunze sărite, nod",
+        "ro": "Verificare: valoare, frunze sărite, nod"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 19–24",
+        "ro": "Cursul 5 · slide 19–24"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ia-l05c-e06",
+          "status": "verified-twice",
+          "statement": {
+            "en": "S este MIN; A (5, 1), B (7, 3, 9), C (2, 8) sunt MAX. Alpha-beta, frunzele de la stânga la dreapta.",
+            "ro": "S este MIN; A (5, 1), B (7, 3, 9), C (2, 8) sunt MAX. Alpha-beta, frunzele de la stânga la dreapta."
+          },
+          "fields": [
+            {
+              "id": "v",
+              "kind": "num",
+              "label": {
+                "en": "Valoarea lui S",
+                "ro": "Valoarea lui S"
+              },
+              "formula": "min(max(5,1),max(7,3,9),max(2,8))",
+              "expected": 5
+            },
+            {
+              "id": "k",
+              "kind": "num",
+              "label": {
+                "en": "Câte frunze se sar?",
+                "ro": "Câte frunze se sar?"
+              },
+              "formula": "2",
+              "expected": 2
+            },
+            {
+              "id": "n",
+              "kind": "choice",
+              "label": {
+                "en": "În ce nod se sar frunze?",
+                "ro": "În ce nod se sar frunze?"
+              },
+              "formula": "'B'",
+              "expected": "B",
+              "options": [
+                {
+                  "en": "A",
+                  "ro": "A"
+                },
+                {
+                  "en": "B",
+                  "ro": "B"
+                },
+                {
+                  "en": "C",
+                  "ro": "C"
+                },
+                {
+                  "en": "în niciunul",
+                  "ro": "în niciunul"
+                }
+              ]
+            },
+            {
+              "id": "m",
+              "kind": "tf",
+              "label": {
+                "en": "Minimax fără tăiere dă aceeași valoare?",
+                "ro": "Minimax fără tăiere dă aceeași valoare?"
+              },
+              "formula": "true",
+              "expected": "true"
+            }
+          ],
+          "hints": [
+            {
+              "en": "A = max(5, 1) = 5, deci beta la S este 5.",
+              "ro": "A = max(5, 1) = 5, deci beta la S este 5."
+            },
+            {
+              "en": "B citește 7 ≥ 5 și taie: se sar 3 și 9. La C: 2 < 5, apoi 8 ≥ 5 (ultima frunză, nimic de sărit).",
+              "ro": "B citește 7 ≥ 5 și taie: se sar 3 și 9. La C: 2 < 5, apoi 8 ≥ 5 (ultima frunză, nimic de sărit)."
+            },
+            {
+              "en": "S = 5; se sar 2 frunze; alpha-beta nu schimbă valoarea.",
+              "ro": "S = 5; se sar 2 frunze; alpha-beta nu schimbă valoarea."
+            }
+          ],
+          "solution": {
+            "en": "A = 5, beta = 5. B: 7 ≥ 5, tăiem și sărim 3 și 9. C: 2, apoi 8 (ultima, nimic de sărit). S = 5; minimax: min(5, 9, 8) = 5, aceeași valoare.",
+            "ro": "A = 5, beta = 5. B: 7 ≥ 5, tăiem și sărim 3 și 9. C: 2, apoi 8 (ultima, nimic de sărit). S = 5; minimax: min(5, 9, 8) = 5, aceeași valoare."
+          },
+          "data": {
+            "rr": 5,
+            "rootSw": 9
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 340 184'><title>S MIN; A (5, 1), B (7, 3, 9), C (2, 8)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='87.4' y2='88'/><line class='muted' stroke-width='2' x1='87.4' y1='88' x2='66.7' y2='150'/><line class='muted' stroke-width='2' x1='87.4' y1='88' x2='108.1' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='149.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='232.4' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='294.6' y2='88'/><line class='muted' stroke-width='2' x1='294.6' y1='88' x2='273.9' y2='150'/><line class='muted' stroke-width='2' x1='294.6' y1='88' x2='315.3' y2='150'/><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,9 213.0,9 191.0,45'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='22.5' text-anchor='middle'>S</text><polygon class='warn fill-bg' stroke-width='2.5' points='87.4,69 109.4,105 65.4,105'/><text class='fg' font-size='15' font-weight='700' x='87.4' y='100' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='52.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='66.7' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='94.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='156' text-anchor='middle'>1</text><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,69 213.0,105 169.0,105'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='100' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='135.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='149.6' y='156' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='218.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='232.4' y='156' text-anchor='middle'>9</text><polygon class='warn fill-bg' stroke-width='2.5' points='294.6,69 316.6,105 272.6,105'/><text class='fg' font-size='15' font-weight='700' x='294.6' y='100' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='259.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='301.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='315.3' y='156' text-anchor='middle'>8</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+            "alt": {
+              "en": "Arbore cu A (5, 1), B (7, 3, 9), C (2, 8)",
+              "ro": "Arbore cu A (5, 1), B (7, 3, 9), C (2, 8)"
+            }
+          },
+          "detectors": [
+            {
+              "field": "k",
+              "formula": "rr",
+              "message": {
+                "en": "Întrebarea cere frunzele sărite, nu pe cele citite.",
+                "ro": "Întrebarea cere frunzele sărite, nu pe cele citite."
+              }
+            },
+            {
+              "field": "v",
+              "formula": "rootSw",
+              "message": {
+                "en": "Rădăcina ia operația ei (MIN: cel mai mic, MAX: cel mai mare), alta decât a copiilor.",
+                "ro": "Rădăcina ia operația ei (MIN: cel mai mic, MAX: cel mai mare), alta decât a copiilor."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "Același arbore, dar S este MAX; A, B, C sunt MIN.",
+                "ro": "Același arbore, dar S este MAX; A, B, C sunt MIN."
+              },
+              "solution": {
+                "en": "A = min(5, 1) = 1, alpha = 1. B = min(7, 3, 9) = 3, alpha = 3. C: 2 ≤ 3, tăiem și sărim 8. S = 3; se sare 1 frunză; minimax fără tăiere dă tot 3.",
+                "ro": "A = min(5, 1) = 1, alpha = 1. B = min(7, 3, 9) = 3, alpha = 3. C: 2 ≤ 3, tăiem și sărim 8. S = 3; se sare 1 frunză; minimax fără tăiere dă tot 3."
+              },
+              "fields": [
+                {
+                  "id": "v",
+                  "formula": "max(min(5,1),min(7,3,9),min(2,8))",
+                  "expected": 3
+                },
+                {
+                  "id": "k",
+                  "formula": "1",
+                  "expected": 1
+                },
+                {
+                  "id": "n",
+                  "formula": "'C'",
+                  "expected": "C"
+                },
+                {
+                  "id": "m",
+                  "formula": "true",
+                  "expected": "true"
+                }
+              ],
+              "data": {
+                "rr": 6,
+                "rootSw": 1
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 340 184'><title>S MAX; A (5, 1), B (7, 3, 9), C (2, 8)</title><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='87.4' y2='88'/><line class='muted' stroke-width='2' x1='87.4' y1='88' x2='66.7' y2='150'/><line class='muted' stroke-width='2' x1='87.4' y1='88' x2='108.1' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='191.0' y2='88'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='149.6' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='191.0' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='88' x2='232.4' y2='150'/><line class='muted' stroke-width='2' x1='191.0' y1='26' x2='294.6' y2='88'/><line class='muted' stroke-width='2' x1='294.6' y1='88' x2='273.9' y2='150'/><line class='muted' stroke-width='2' x1='294.6' y1='88' x2='315.3' y2='150'/><polygon class='warn fill-bg' stroke-width='2.5' points='191.0,7 213.0,43 169.0,43'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='38' text-anchor='middle'>S</text><polygon class='accent fill-bg' stroke-width='2.5' points='65.4,71 109.4,71 87.4,107'/><text class='fg' font-size='15' font-weight='700' x='87.4' y='84.5' text-anchor='middle'>A</text><rect class='fg fill-soft' stroke-width='2' x='52.7' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='66.7' y='156' text-anchor='middle'>5</text><rect class='fg fill-soft' stroke-width='2' x='94.1' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='108.1' y='156' text-anchor='middle'>1</text><polygon class='accent fill-bg' stroke-width='2.5' points='169.0,71 213.0,71 191.0,107'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='84.5' text-anchor='middle'>B</text><rect class='fg fill-soft' stroke-width='2' x='135.6' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='149.6' y='156' text-anchor='middle'>7</text><rect class='fg fill-soft' stroke-width='2' x='177.0' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='191.0' y='156' text-anchor='middle'>3</text><rect class='fg fill-soft' stroke-width='2' x='218.4' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='232.4' y='156' text-anchor='middle'>9</text><polygon class='accent fill-bg' stroke-width='2.5' points='272.6,71 316.6,71 294.6,107'/><text class='fg' font-size='15' font-weight='700' x='294.6' y='84.5' text-anchor='middle'>C</text><rect class='fg fill-soft' stroke-width='2' x='259.9' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='273.9' y='156' text-anchor='middle'>2</text><rect class='fg fill-soft' stroke-width='2' x='301.3' y='137' width='28' height='26'/><text class='fg' font-size='15' font-weight='700' x='315.3' y='156' text-anchor='middle'>8</text><text class='muted' font-size='14' x='2' y='31' text-anchor='start'>MAX ▲</text><text class='muted' font-size='14' x='2' y='93' text-anchor='start'>MIN ▼</text><text class='muted' font-size='14' x='2' y='155' text-anchor='start'>scor</text></svg>",
+                "alt": {
+                  "en": "Același arbore cu S MAX: A (5, 1), B (7, 3, 9), C (2, 8)",
+                  "ro": "Același arbore cu S MAX: A (5, 1), B (7, 3, 9), C (2, 8)"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
