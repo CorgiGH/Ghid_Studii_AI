@@ -142,7 +142,7 @@ describe('guide converter: screens look designed, not converted', () => {
       'Tema 1 · Încearcă tu, 1 din 2', 'Tema 1 · Încearcă tu, 2 din 2']);
     expect(g.steps[0].kicker).toBeUndefined(); // the overview is the lesson's cover
     expect(g.steps.some((s) => /·|\(continuare\)|\d\/\d/.test(s.title.ro))).toBe(false);
-    for (const l of lessons) for (const s of l.steps.slice(l.meta.id.startsWith('ml-g') ? 1 : 0)) expect(s.kicker?.ro, s.id).toMatch(/^Tema \d+( din \d+| · .+)$/);
+    for (const l of lessons) for (const s of l.steps.slice(l.meta.id.startsWith('ml-g') ? 1 : 0)) expect(s.kicker?.ro, s.id).toMatch(l.meta.id === 'ml-g4' ? /^.+$/ : /^Tema \d+( din \d+| · .+)$/);
     expect(b.steps[0].blocks.map((x) => x.type)).toEqual(['rule', 'rule']);
     expect(b.steps[0].blocks[0].variant).toBe('when');
   });

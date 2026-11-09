@@ -137,4 +137,8 @@ export const IA_TAGS = [
   'limita-sub-numarul-real', 'limita-prea-larga', 'toate-colorarile-complete',
 ];
 
-export const TRAP_TAGS = new Set([...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS, ...IA_TAGS]);
+export const G4_TAGS = [
+  'clasa-gresita', 'compara-numitori', 'confuzie-naiv', 'copie-ambii', 'copie-niciunul', 'dependente', 'estimare-confuzie', 'independenta-simpla', 'motiv-gresit', 'nedecis', 'numitor-1', 'optimal-mai-prost', 'ordine-pasi', 'pas-repetat', 'regula-gresita', 'scor-ca-probabilitate', 'sigur', 'tf-gresit', 'zero-ignorat', 'zero-nedefinit',
+];
+
+export const TRAP_TAGS = new Set([...G4_TAGS, ...OUTLINE_TAGS, ...STAGED_TAGS, ...ML_TAGS, ...NN_TAGS, ...IA_TAGS]);
