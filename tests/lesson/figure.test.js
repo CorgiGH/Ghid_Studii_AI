@@ -1,5 +1,5 @@
 // The `figure` part, the block-level figure and the `cardlinks` part: the sanitiser and validator (figureSvg.js), the shapes in
-// guideSpec / choiceSpec / calcSpec / proofSpec, the render of both parts, and the real figure on ag-cp-1c with the menu on ag-cp-order.
+// guideSpec / choiceSpec / calcSpec / proofSpec, the render of both parts, and the real figure on ag-cp-1c2 with the menu on ag-cp-order.
 // Expected values come from the course's own worked trace: the arcs of the Dijkstra example on ag-cp-1a (s->a 7, s->b 2, b->a 3,
 // b->c 8, a->c 1, a->d 4, c->d 2) and its run on ag-cp-1c (u = a 5, b 2, c 6, d 8; path s, b, a, c, d).
 import { describe, expect, it, vi } from 'vitest';
@@ -409,10 +409,11 @@ describe('the theme: colours only through classes mapped to tokens', () => {
 const ag1 = loadJson('src/content/ag/courses/ag-crash-partial.json');
 const stepOf = (course, id) => course.steps.find((s) => s.id === id);
 
-describe('ag-cp-1c: the digraph is drawn from the screen\'s own arc list', () => {
-  // the arc list the lesson printed on ag-cp-1a before that screen drew its own picture: the figure of ag-cp-1c must keep these arcs
+describe('ag-cp-1c2: the digraph of the finished run is drawn from the screen\'s own arc list', () => {
+  // the arc list the lesson printed on ag-cp-1a before that screen drew its own picture: the figure of the run's summary (ag-cp-1c2, after the
+  // walk on ag-cp-1c) must keep these arcs
   const arcsOf1a = [['s', 'a', 7], ['s', 'b', 2], ['b', 'a', 3], ['b', 'c', 8], ['a', 'c', 1], ['a', 'd', 4], ['c', 'd', 2]].map(([a, b, c]) => `${a}→${b}: ${c}`);
-  const part = stepOf(ag1, 'ag-cp-1c').blocks[0].intro[0];
+  const part = stepOf(ag1, 'ag-cp-1c2').blocks[0].intro[0];
   const { root } = parseSvg(part.figure.svg);
   const walk = (n, f) => { f(n); (n.children || []).forEach((c) => c.tag && walk(c, f)); };
   const collect = (tag) => { const out = []; walk(root, (n) => { if (n.tag === tag) out.push(n); }); return out; };
@@ -422,7 +423,7 @@ describe('ag-cp-1c: the digraph is drawn from the screen\'s own arc list', () =>
     expect(part.figure).toBeTruthy();
     expect(figureError(part.figure)).toBeNull();
     expect(partError(part, { stepIds: ag1.steps.map((s) => s.id) })).toBeNull();
-    expect(JSON.stringify(stepOf(ag1, 'ag-cp-1c'))).not.toContain('Arcs of the example, with cost');
+    expect(JSON.stringify(stepOf(ag1, 'ag-cp-1c2'))).not.toContain('Arcs of the example, with cost');
   });
   it('has one arc per row of the ag-cp-1a list (7 arcs, costs 7, 2, 3, 8, 1, 4, 2) and one node per name (s, a, b, c, d)', () => {
     expect(arcsOf1a).toEqual(['s→a: 7', 's→b: 2', 'b→a: 3', 'b→c: 8', 'a→c: 1', 'a→d: 4', 'c→d: 2']);
@@ -447,7 +448,7 @@ describe('ag-cp-1c: the digraph is drawn from the screen\'s own arc list', () =>
     expect(total).toBe(8);
   });
   it('keeps the rounds table next to it, with the final u_a = 5, u_b = 2, u_c = 6, u_d = 8', () => {
-    const rounds = stepOf(ag1, 'ag-cp-1c').blocks[0].intro[1].table;
+    const rounds = stepOf(ag1, 'ag-cp-1c2').blocks[0].intro[1].table;
     expect(rounds.rows.at(-1)).toEqual([4, 'd', '5 (b)', '2 (s)', '6 (a)', '8 (c) ✓']);
   });
   it('renders at 100% width inside a figure with its label', () => {
@@ -503,7 +504,7 @@ describe('ag-cp-order: the card menu', () => {
   it('the last screen of each of cards 1 to 6 links back to it (browser Back leaves the lesson after a jump)', () => {
     const lastOf = (n) => ag1.steps.filter((s) => s.kicker?.ro?.startsWith(`Cardul ${n} din 10`)).at(-1);
     const lasts = [1, 2, 3, 4, 5, 6].map(lastOf);
-    expect(lasts.map((s) => s.id)).toEqual(['ag-cp-1j', 'ag-cp-2g', 'ag-cp-3f', 'ag-cp-4f', 'ag-cp-5e', 'ag-cp-6e']);
+    expect(lasts.map((s) => s.id)).toEqual(['ag-cp-1j', 'ag-cp-2g2', 'ag-cp-3f2', 'ag-cp-4f', 'ag-cp-5e', 'ag-cp-6e2']);
     for (const s of lasts) {
       const back = s.blocks.flatMap((b) => b.intro || []).find((p) => p.cardlinks);
       expect(back, s.id).toBeTruthy();

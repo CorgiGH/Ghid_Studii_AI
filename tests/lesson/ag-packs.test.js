@@ -41,13 +41,13 @@ describe('ids and section counts', () => {
 });
 
 describe('pictures on the graph screens (plan items 21-22)', () => {
-  const p1 = ['1a', '1c', '1f', '2a', '2e', '3a', '4a', '4d', '5b', '5e', '6a', '6b'];
-  const p2 = ['7a', '7b2', '7c', '8a', '8c', '8d', '8e', '9a', '9c', '9d', '10a', '10c', 'm1', 'm2', 'm5', 'm6'];
+  const p1 = ['1a', '1c2', '1f', '1i', '2a', '2e', '2g', '2g2', '3a', '3f2', '4a', '4d', '4e', '5b', '5c', '5e', '6a', '6b', '6b2', '6e', '6e2'];
+  const p2 = ['7a', '7b2', '7c', '8a', '8c', '8d', '8d2', '8e', '9a', '9b', '9c', '9d', '9f', '9f2', '9g', '9g2', '10a', '10b2', '10c', 'mtree', 'mtree2', 'bfs', 'm1', 'm2', 'm5', 'm6'];
   it.each(p1)('part 1 ag-cp-%s draws a figure', (k) => expect(hasKey(step(P1, `ag-cp-${k}`), 'figure')).toBe(true));
   it.each(p2)('part 2 ag-cp-%s draws a figure', (k) => expect(hasKey(step(P2, `ag-cp-${k}`), 'figure')).toBe(true));
   it('the walks that replace the interims use the graph-walk widget with the picks on', () => {
     const w = (c, id) => step(c, id).blocks.find((b) => b.type === 'viz');
-    for (const [c, id, mode] of [[P1, 'ag-cp-1f2', 'dijkstra'], [P1, 'ag-cp-1g', 'bfm'], [P1, 'ag-cp-2b', 'kruskal'], [P1, 'ag-cp-2d', 'prim'], [P1, 'ag-cp-2f1', 'kruskal'],
+    for (const [c, id, mode] of [[P1, 'ag-cp-1c', 'dijkstra'], [P1, 'ag-cp-1f2', 'dijkstra'], [P1, 'ag-cp-1g', 'bfm'], [P1, 'ag-cp-2b', 'kruskal'], [P1, 'ag-cp-2d', 'prim'], [P1, 'ag-cp-2f1', 'kruskal'],
       [P2, 'ag-cp-8b', 'cut'], [P2, 'ag-cp-10b', 'colour']]) {
       expect(w(c, id)?.widget, id).toBe('graph-walk');
       expect(w(c, id).props.mode, id).toBe(mode);
@@ -67,7 +67,7 @@ describe('pictures on the graph screens (plan items 21-22)', () => {
 describe('cards, menus and back links', () => {
   const backTo = (s) => s.blocks.flatMap((b) => b.intro || []).find((p) => p.cardlinks)?.cardlinks?.[0];
   it('the last screen of cards 7 to 10 and of the completions links back to the part 2 menu', () => {
-    for (const id of ['ag-cp-7e', 'ag-cp-8f', 'ag-cp-9g', 'ag-cp-10d', 'ag-cp-bfs']) {
+    for (const id of ['ag-cp-7e', 'ag-cp-8f2', 'ag-cp-9g2', 'ag-cp-10d', 'ag-cp-bfs2']) {
       const l = backTo(step(P2, id));
       expect(l, id).toBeTruthy();
       expect(l.step).toBe('ag-cp-menu2');
@@ -81,12 +81,28 @@ describe('cards, menus and back links', () => {
     expect(at('ag-cp-10a')).toBeLessThan(at('ag-cp-8a'));
     expect(at('ag-cp-8a')).toBeLessThan(at('ag-cp-7a'));
   });
-  it('the notation card is four screens of at most ten rows, three columns each, linked from both menus', () => {
-    const tabs = [step(P1, 'ag-cp-n1'), step(P1, 'ag-cp-n2'), step(P2, 'ag-cp-trap4'), step(P2, 'ag-cp-trap4b')].map((s) => s.blocks[0].intro.find((p) => p.table).table);
-    for (const t of tabs) { expect(t.rows.length).toBeLessThanOrEqual(10); expect(t.columns).toHaveLength(3); expect(t.rows.every((r) => r.length === 3)).toBe(true); }
-    expect(JSON.stringify(tabs)).toContain('numără MUCHIILE, nu costul');
+  it('the notation card is five screens of at most ten rows, two columns each (it fits a phone), linked from both menus', () => {
+    const screens = [step(P1, 'ag-cp-n1'), step(P1, 'ag-cp-n2'), step(P1, 'ag-cp-n3'), step(P2, 'ag-cp-trap4'), step(P2, 'ag-cp-trap4b')];
+    const tabs = screens.map((s) => s.blocks[0].intro.find((p) => p.table).table);
+    for (const t of tabs) {
+      expect(t.rows.length).toBeLessThanOrEqual(10);
+      expect(t.columns).toHaveLength(2);
+      expect(t.rows.every((r) => r.length === 2)).toBe(true);
+      // the meaning cell is plain words: a cell with math does not wrap and would push the table off a 390 px phone
+      for (const r of t.rows) expect(r[1], r[0]).not.toMatch(/\$/);
+    }
+    screens.forEach((s, i) => expect(s.title.ro).toBe(`Notația cursului (${i + 1} din 5)`));
+    const all = JSON.stringify(tabs);
+    expect(all).toContain('numără MUCHIILE, nu costul');
+    // symbols the lessons use that the card has to name (review of 2026-11-09)
+    for (const sym of ['M\\\\,\\\\Delta\\\\,P', 'q(G-S)', 'L[G]=D-A', 'before(i,j)', 'c_{V_i^2}(y,t)', 'K_p', '$p$-colorare', '$p$-regulat', 'muchie în cross']) expect(all, sym).toContain(sym);
     expect(JSON.stringify(step(P1, 'ag-cp-order'))).toContain('ag-cp-n1');
     expect(JSON.stringify(step(P2, 'ag-cp-menu2'))).toContain('ag-cp-trap4b');
+  });
+  it('the recap is two columns of plain words, so it fits a phone', () => {
+    const t = step(P2, 'ag-cp-recap').blocks[0].intro.find((p) => p.table).table;
+    expect(t.columns).toHaveLength(2);
+    for (const r of t.rows) for (const c of r) expect(c).not.toMatch(/\$/);
   });
 });
 
@@ -100,13 +116,18 @@ describe('labels and words', () => {
     }
   });
   it('learner text has no effort words', () => {
-    const txt = JSON.stringify([P1, P2].map((c) => c.steps.map((s) => s.blocks.map((b) => { const { figure, ...rest } = b; return rest; }))));
+    const txt = JSON.stringify([P1, P2].map((c) => c.steps.map((s) => s.blocks.map((b) => { const { figure: _figure, ...rest } = b; return rest; }))));
     expect(txt).not.toMatch(/\bușor|\bușoar|\brapid|\bmecanic/i);
   });
-  it('Tema 1 guard: no screen of cards 4-6 prints the inequality of problem 1 (b) or the question of 1 (a)', () => {
-    const t = JSON.stringify(P1.steps.filter((s) => /^ag-cp-[456]/.test(s.id)));
+  it('Tema 1 guard: no screen of cards 4-6, and no screen of part 2, prints the first step of problem 1 (b) or the question of 1 (a)', () => {
+    const t = JSON.stringify([...P1.steps.filter((s) => /^ag-cp-[456]/.test(s.id)), ...P2.steps]);
     expect(t).not.toContain('d_G(x_1)+d_G(x_2)');
     expect(t).not.toContain('Când devin cele două inegalități');
+  });
+  it('Tema 1 guard: the part 2 mini-test counts on a set that is not the homework\'s {x1, x2}', () => {
+    const m4 = JSON.stringify(step(P2, 'ag-cp-m4'));
+    expect(m4).not.toMatch(/x_1|x_2/);
+    expect(m4).toContain('X=\\\\{a,b\\\\}');
   });
 });
 
@@ -119,5 +140,61 @@ describe('numbers: every formula equals its expected value, no detector fires on
     for (const c of [P1, P2]) {
       for (const s of c.steps) for (const b of s.blocks) if (b.type === 'calc-exercise') expect(b.detectors?.length, b.id).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('no answer on the screen before the learner answers (review of 2026-11-09)', () => {
+  // these screens hold only the question (or the walk); the rule, the table or the result that answers it is on the next screen
+  const only = (c, id, types) => expect(step(c, id).blocks.map((b) => b.type).filter((t) => !types.includes(t)), id).toEqual([]);
+  it('question screens carry no rule or worked result', () => {
+    only(P2, 'ag-cp-8c', ['calc-exercise']);
+    only(P2, 'ag-cp-8d', ['mcq']);
+    only(P2, 'ag-cp-9b', ['mcq']);
+    only(P2, 'ag-cp-10b', ['viz']);
+    only(P2, 'ag-cp-bfs', ['mcq']);
+    only(P2, 'ag-cp-iso', ['mcq']);
+    only(P1, 'ag-cp-3f', ['mcq']);
+    expect(step(P2, 'ag-cp-10c').blocks.filter((b) => b.type === 'steps').map((b) => JSON.stringify(b))).not.toContain('alpha(G)=2');
+    for (const [c, id, next] of [[P2, 'ag-cp-8d', 'ag-cp-8d2'], [P2, 'ag-cp-9b', 'ag-cp-9b2'], [P2, 'ag-cp-10b', 'ag-cp-10b2'], [P2, 'ag-cp-10c', 'ag-cp-10c2'],
+      [P2, 'ag-cp-bfs', 'ag-cp-bfs2'], [P2, 'ag-cp-iso', 'ag-cp-iso2'], [P1, 'ag-cp-3f', 'ag-cp-3f2'], [P1, 'ag-cp-6b', 'ag-cp-6b2'], [P1, 'ag-cp-6e', 'ag-cp-6e2']]) {
+      expect(ids(c).indexOf(next), next).toBe(ids(c).indexOf(id) + 1);
+    }
+  });
+  it('the exercise figures draw the data, not the answer: no oval, no coloured circuit or crossing edge', () => {
+    const svgOf = (c, id) => JSON.stringify(step(c, id).blocks.filter((b) => b.type === 'calc-exercise' || b.type === 'mcq').map((b) => [b.figure, ...(b.variants || []).map((v) => v.figure)]));
+    for (const [c, id] of [[P1, 'ag-cp-5b'], [P1, 'ag-cp-6b'], [P1, 'ag-cp-6e'], [P1, 'ag-cp-2g2'], [P2, 'ag-cp-m6']]) {
+      const svg = svgOf(c, id);
+      expect(svg, id).not.toContain('<ellipse');
+      expect(svg, id).not.toMatch(/class=\\"warn\\" stroke-width=\\"4\\"/);
+      expect(svg, id).not.toMatch(/class=\\"bad\\" stroke-width=\\"4\\"/);
+    }
+    expect(svgOf(P1, 'ag-cp-4d')).not.toContain('stroke-dasharray');
+    expect(JSON.stringify(step(P2, 'ag-cp-trap2'))).not.toContain('maximal</text>');
+  });
+  it('ag-cp-1c holds the walk and ag-cp-1c2 the finished run, so the widget is not answered on the screen before it', () => {
+    expect(step(P1, 'ag-cp-1c').blocks.some((b) => b.type === 'viz')).toBe(true);
+    expect(JSON.stringify(step(P1, 'ag-cp-1c'))).not.toContain('8 (c)');
+    expect(JSON.stringify(step(P1, 'ag-cp-1c2'))).toContain('8 (c) ✓');
+  });
+});
+
+describe('variants read their own data (review of 2026-11-09: wrong-answer messages named the main exercise)', () => {
+  it('a variant whose block has data brings its own data, so no detector fires with the value of the main exercise', () => {
+    for (const c of [P1, P2]) {
+      for (const s of c.steps) for (const b of s.blocks) {
+        if (b.type !== 'calc-exercise' || !b.data) continue;
+        for (const v of b.variants) expect(v.data, b.id).toBeTruthy();
+      }
+    }
+  });
+  it('no detector message names an edge of the main exercise that its variant lacks (5b, 2e2, 6b, 6e, 8c, 2f)', () => {
+    const msgs = (c, id) => JSON.stringify(step(c, id).blocks.filter((b) => b.type === 'calc-exercise').map((b) => (b.detectors || []).map((d) => d.message.ro)));
+    expect(msgs(P1, 'ag-cp-5b')).not.toMatch(/\\$(BD|DE|AB|AC)\\$/);
+    expect(msgs(P1, 'ag-cp-2e2')).not.toMatch(/\\$(BD|AB|AC)\\$|\\(4 și 5\\)/);
+    expect(msgs(P1, 'ag-cp-6b')).not.toMatch(/\\$at\\$/);
+    expect(msgs(P1, 'ag-cp-6e')).not.toMatch(/\\$cb\\$/);
+    expect(msgs(P1, 'ag-cp-2f')).not.toMatch(/PR|8 - 4/);
+    expect(msgs(P2, 'ag-cp-8c')).not.toMatch(/24|46|56/);
+    expect(msgs(P2, 'ag-cp-10d')).not.toMatch(/Oricare 3 noduri/);
   });
 });

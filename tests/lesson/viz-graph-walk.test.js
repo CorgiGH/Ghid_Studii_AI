@@ -314,13 +314,13 @@ describe('ac3 reproduces the 11 arcs of s22', () => {
   });
 });
 
-describe('dijkstra reproduces ag-cp-1c', () => {
-  const props = vizOf(AG, 'ag-cp-1c2').props;
+describe('dijkstra on ag-cp-1c reproduces the finished run of ag-cp-1c2', () => {
+  const props = vizOf(AG, 'ag-cp-1c').props;
   const M = graphModel(props);
-  const T = table(AG, 'ag-cp-1c', 0);
-  it('the arcs of the new screen are the arcs the lesson draws on ag-cp-1c', () => {
-    // ag-cp-1c draws its digraph as a figure: node letters and arc costs are its text labels
-    const svg = step(AG, 'ag-cp-1c').blocks[0].intro.find((p) => p.figure).figure.svg;
+  const T = table(AG, 'ag-cp-1c2', 0);
+  it('the arcs of the walk are the arcs the lesson draws on ag-cp-1c2', () => {
+    // ag-cp-1c2 draws its digraph as a figure: node letters and arc costs are its text labels
+    const svg = step(AG, 'ag-cp-1c2').blocks[0].intro.find((p) => p.figure).figure.svg;
     const labels = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
     const costs = labels.filter((t) => /^\d+$/.test(t)).map(Number).sort((a, b) => a - b);
     const nodes = labels.filter((t) => /^[a-z]$/.test(t)).sort();
@@ -431,7 +431,7 @@ describe('the drawing', () => {
     ['csp-fc', () => vizOf(IA, 'ia-ct2-s15').props],
     ['csp-fc dead end', () => S19(['r', 'g'])],
     ['ac3', () => vizOf(IA, 'ia-ct2-s22a').props],
-    ['dijkstra', () => vizOf(AG, 'ag-cp-1c2').props],
+    ['dijkstra', () => vizOf(AG, 'ag-cp-1c').props],
     ['kruskal', () => ({ ...M2, mode: 'kruskal' })],
     ['prim', () => ({ ...COURSE_MST, mode: 'prim', source: 'A' })],
     ['bfm', () => BFM],
@@ -549,7 +549,7 @@ describe('validateViz and the lesson JSON', () => {
     expect(WIDGET_NAMES).toContain('graph-walk');
     expect(validateViz(vizOf(IA, 'ia-ct2-s15'))).toEqual([]);
     expect(validateViz(vizOf(IA, 'ia-ct2-s22a'))).toEqual([]);
-    expect(validateViz(vizOf(AG, 'ag-cp-1c2'))).toEqual([]);
+    expect(validateViz(vizOf(AG, 'ag-cp-1c'))).toEqual([]);
   });
   it('rejects an unknown mode, a mode whose data is incomplete, a bad node, a missing domain and a node that is not there', () => {
     const p = vizOf(IA, 'ia-ct2-s22a').props;
@@ -561,7 +561,7 @@ describe('validateViz and the lesson JSON', () => {
     expect(validateViz(block({ ...p, edges: [{ u: 'A', v: 'Z' }] })).join(' ')).toMatch(/unknown node/);
     expect(validateViz(block({ ...p, constraint: 'sum' })).join(' ')).toMatch(/constraint/);
     expect(graphProblems({ mode: 'ac3', nodes: [], edges: [] })).not.toEqual([]);
-    const d = vizOf(AG, 'ag-cp-1c2').props;
+    const d = vizOf(AG, 'ag-cp-1c').props;
     expect(validateViz(block({ ...d, source: undefined })).join(' ')).toMatch(/source/);
   });
   it('the new screens sit right after the screens they extend, and the section counts follow the steps', () => {
@@ -574,7 +574,7 @@ describe('validateViz and the lesson JSON', () => {
     expect(count('ag', 'ag-crash-partial')).toBe(AG.steps.length);
   });
   it('the screens hold one widget that asks for picks and carry no teaching-step label', () => {
-    for (const [c, id] of [[IA, 'ia-ct2-s15'], [IA, 'ia-ct2-s16'], [IA, 'ia-ct2-s22a'], [AG, 'ag-cp-1c2']]) {
+    for (const [c, id] of [[IA, 'ia-ct2-s15'], [IA, 'ia-ct2-s16'], [IA, 'ia-ct2-s22a'], [AG, 'ag-cp-1c']]) {
       const s = step(c, id);
       const v = s.blocks.filter((b) => b.type === 'viz');
       expect(v).toHaveLength(1);
@@ -821,7 +821,7 @@ describe('colour reproduces the wheel of ag-cp-10b', () => {
     expect(M.chi).toBe(4);
     expect(M.caption(M.count - 1).ro).toMatch(/χ\(G\) ≤ 4.*ω\(G\) = 3/);
     expect(M.caption(M.count - 1).ro).toContain('Nu există colorare cu 3 culori, deci χ(G) = 4.');
-    expect(step(AG2, 'ag-cp-10b').blocks.find((b) => b.type === 'steps').result.ro).toContain('\\chi(G)=4');
+    expect(step(AG2, 'ag-cp-10b2').blocks.find((b) => b.type === 'steps').result.ro).toContain('\\chi(G)=4');
   });
   it('a bad order uses more colours than needed, and the end says so: a path a-b-c-d in the order a, d, b, c', () => {
     const P = graphModel({ ...mk('abcd', [['a', 'b'], ['b', 'c'], ['c', 'd']]), mode: 'colour', order: ['a', 'd', 'b', 'c'] });
@@ -862,5 +862,57 @@ describe('colour reproduces the wheel of ag-cp-10b', () => {
     const sc = M.scene(3);
     expect(sc.nodes.find((n) => n.id === 'r2').label.items[0].t).toBe('3');
     expect(sc.nodes.find((n) => n.id === 'r4').cls).toBe('');
+  });
+});
+
+// The lesson screens' own widget data (not the constants above) must give the traces the lessons state (review of 2026-11-09;
+// expected values recomputed in Python from the same JSON).
+describe('the AG lessons\' own widget data reproduce their traces', () => {
+  const model = (course, id) => graphModel(vizOf(course, id).props);
+  it('ag-cp-2b: Kruskal accepts DE, AC, BD, AB for cost 10 and rejects BC, CE, CD, row by row as the course table', () => {
+    const M = model(AG, 'ag-cp-2b');
+    expect(M.cost).toBe(10);
+    expect(M.accepted).toEqual(['DE', 'AC', 'BD', 'AB']);
+    expect([...M.rejected].sort()).toEqual(['BC', 'CD', 'CE']);
+    T2C.rows.forEach((r, i) => {
+      const sc = M.scene(i + 1).table.rows[i];
+      expect(sc.edge, `row ${i}`).toBe(clean(r[0]));
+      expect(sc.ok).toBe(r[3]);
+    });
+  });
+  it('ag-cp-2d: Prim from A adds C, B, D, E (tree AC, AB, BD, DE, cost 10), as the course table', () => {
+    const M = model(AG, 'ag-cp-2d');
+    expect(M.tree.map((e) => `${e.u}${e.v}`)).toEqual(['AC', 'AB', 'BD', 'DE']);
+    expect(M.cost).toBe(10);
+    T2D.rows.forEach((r, i) => expect(M.scene(i).table.rows[i].added, `row ${i}`).toBe(r[0]));
+  });
+  it('ag-cp-1g: Bellman-Ford-Moore gives u^1 = (0, 3, 4, inf), u^2 = (0, 2, 4, 5), u^3 = (0, 2, 4, 4)', () => {
+    const M = model(AG, 'ag-cp-1g');
+    expect(M.tables).toEqual([{ s: 0, a: 3, b: 4, c: Infinity }, { s: 0, a: 2, b: 4, c: 5 }, { s: 0, a: 2, b: 4, c: 4 }]);
+  });
+  it('ag-cp-1f2: Dijkstra fixes s, z, w, t, v, y, u with u = 0, 1, 2, 3, 4, 6, 7', () => {
+    const M = model(AG, 'ag-cp-1f2');
+    expect(M.rounds.map((r) => r.fixed)).toEqual(['s', 'z', 'w', 't', 'v', 'y', 'u']);
+    expect(['z', 'w', 't', 'v', 'y', 'u'].map((i) => M.final.u[i])).toEqual([1, 2, 3, 4, 6, 7]);
+  });
+  it('ag-cp-2f1: Kruskal with negative costs accepts AB, CF, DE, BC, BE for cost -3', () => {
+    const M = model(AG, 'ag-cp-2f1');
+    expect(M.cost).toBe(-3);
+    expect([...M.accepted].sort()).toEqual(['AB', 'BC', 'BE', 'CF', 'DE']);
+    expect([...M.rejected].sort()).toEqual(['AD', 'BD', 'EF']);
+  });
+  it('ag-cp-8b: the cut walk finds cut vertices 3, 5 and the bridge 56', () => {
+    const M = model(AG2, 'ag-cp-8b');
+    expect(M.cutVertices).toEqual(['3', '5']);
+    expect(M.bridges).toEqual(['56']);
+    T8B.rows.forEach((r, i) => expect(M.scene(6).table.rows[i].n, `node ${r[0]}`).toBe(r[1]));
+  });
+  it('ag-cp-10b: the wheel is coloured h, r1..r5 = 1, 2, 3, 2, 3, 4; chi = 4, omega = 3 (the colouring drawn on ag-cp-10b2)', () => {
+    const M = model(AG2, 'ag-cp-10b');
+    expect(M.steps.map((s) => s.c)).toEqual([1, 2, 3, 2, 3, 4]);
+    expect([M.chi, M.omega]).toEqual([4, 3]);
+    const svg = step(AG2, 'ag-cp-10b2').blocks[0].intro.find((p) => p.figure).figure.svg;
+    const labels = [...svg.matchAll(/<title>([^<]*)<\/title><circle[^>]*\/><text[^>]*>[^<]*<\/text><text[^>]*>(\d)<\/text>/g)].map((m) => `${m[1]}:${m[2]}`);
+    expect(labels).toEqual(['h:1', 'r1:2', 'r2:3', 'r3:2', 'r4:3', 'r5:4']);
   });
 });
