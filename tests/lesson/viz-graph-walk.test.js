@@ -306,11 +306,15 @@ describe('ac3 reproduces the 11 arcs of s22', () => {
 describe('dijkstra reproduces ag-cp-1c', () => {
   const props = vizOf(AG, 'ag-cp-1c2').props;
   const M = graphModel(props);
-  const T = table(AG, 'ag-cp-1c', 1);
-  it('the arcs of the new screen are the arcs the lesson lists', () => {
-    const list = table(AG, 'ag-cp-1c', 0).rows[0][0];
-    for (const e of props.edges) expect(list).toContain(`$${e.u}\\to ${e.v}$: ${e.w}`);
-    expect(props.edges).toHaveLength(list.split(',').length);
+  const T = table(AG, 'ag-cp-1c', 0);
+  it('the arcs of the new screen are the arcs the lesson draws on ag-cp-1c', () => {
+    // ag-cp-1c draws its digraph as a figure: node letters and arc costs are its text labels
+    const svg = step(AG, 'ag-cp-1c').blocks[0].intro.find((p) => p.figure).figure.svg;
+    const labels = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
+    const costs = labels.filter((t) => /^\d+$/.test(t)).map(Number).sort((a, b) => a - b);
+    const nodes = labels.filter((t) => /^[a-z]$/.test(t)).sort();
+    expect(props.edges.map((e) => e.w).sort((a, b) => a - b)).toEqual(costs);
+    expect([...new Set(props.edges.flatMap((e) => [e.u, e.v]))].sort()).toEqual(nodes);
   });
   it('the table, round by round: u and before of a, b, c, d and the check mark on the node fixed', () => {
     const rows = M.table.rowsUpTo(4);
