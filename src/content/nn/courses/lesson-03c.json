@@ -1,0 +1,1883 @@
+{
+ "meta": {
+  "id": "nn-l03c",
+  "title": {
+   "en": "Lesson 3c: The cost (mean squared error)",
+   "ro": "Lecția 3c: Costul (eroarea pătratică medie)"
+  },
+  "shortTitle": {
+   "en": "L3c: The cost",
+   "ro": "L3c: Costul"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 3 (Gradient Descent), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 3 (Gradient Descent), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l03c-s01",
+   "title": {
+    "en": "Rețeaua e o funcție de ponderile ei",
+    "ro": "Rețeaua e o funcție de ponderile ei"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 38–39",
+    "ro": "Cursul 3 · slide 38–39"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Rețeaua primește un vector $x$ și dă un vector $y$. Ce dă depinde de **ponderile** ei, notate $w$.",
+        "ro": "Rețeaua primește un vector $x$ și dă un vector $y$. Ce dă depinde de **ponderile** ei, notate $w$."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 110'><title>Rețea ca funcție</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><text class='fg' font-size='17' font-weight='700' x='22' y='60' text-anchor='middle'>x</text><line class='muted' stroke-width='2' x1='38' y1='56' x2='100' y2='56' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='102' y='26' width='136' height='60' rx='8'><title>rețeaua</title></rect><text class='accent' font-size='18' font-weight='700' x='170' y='52' text-anchor='middle'>NN_w</text><text class='muted' font-size='14' x='170' y='74' text-anchor='middle'>ponderile w</text><line class='muted' stroke-width='2' x1='240' y1='56' x2='296' y2='56' marker-end='url(#ah-muted)'/><text class='fg' font-size='17' font-weight='700' x='314' y='60' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Vectorul x intră în cutia NN_w, iese vectorul y",
+         "ro": "Vectorul x intră în cutia NN_w, iese vectorul y"
+        },
+        "caption": {
+         "en": "Aceleași ponderi, aceeași intrare: aceeași ieșire.",
+         "ro": "Aceleași ponderi, aceeași intrare: aceeași ieșire."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s02",
+   "title": {
+    "en": "NN_w duce R^n în R^k",
+    "ro": "NN_w duce R^n în R^k"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 40",
+    "ro": "Cursul 3 · slide 40"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide 40 scrie rețeaua ca o funcție cu ponderile $w$:",
+        "ro": "Slide 40 scrie rețeaua ca o funcție cu ponderile $w$:"
+       }
+      },
+      {
+       "tex": "NN_w:\\ \\mathbb{R}^n\\rightarrow\\mathbb{R}^k"
+      },
+      {
+       "text": {
+        "en": "Citește: intră $n$ numere, ies $k$ numere.",
+        "ro": "Citește: intră $n$ numere, ies $k$ numere."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "$n$: câte numere are o intrare.",
+       "ro": "$n$: câte numere are o intrare."
+      },
+      {
+       "en": "$k$: câte numere dă rețeaua (câți neuroni are ultimul strat).",
+       "ro": "$k$: câte numere dă rețeaua (câți neuroni are ultimul strat)."
+      },
+      {
+       "en": "Atenție: aici $n$ și $k$ sunt dimensiuni, nu numărul de exemple.",
+       "ro": "Atenție: aici $n$ și $k$ sunt dimensiuni, nu numărul de exemple."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s03",
+   "title": {
+    "en": "Tabelul de antrenare",
+    "ro": "Tabelul de antrenare"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 40",
+    "ro": "Cursul 3 · slide 40"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Rețeaua învață dintr-un **tabel de antrenare**: pe fiecare rând, o intrare și ieșirea pe care o vrem.",
+        "ro": "Rețeaua învață dintr-un **tabel de antrenare**: pe fiecare rând, o intrare și ieșirea pe care o vrem."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "#",
+         "intrarea",
+         "ieșirea"
+        ],
+        "rows": [
+         [
+          "1",
+          "…",
+          "…"
+         ],
+         [
+          "2",
+          "0,1  0,5  …  −1,2",
+          "1,5  2  …  0,01"
+         ],
+         [
+          "3",
+          "…",
+          "…"
+         ]
+        ],
+        "caption": {
+         "en": "Slide 41: rândul 2. Punctele «…» ascund valorile din mijloc.",
+         "ro": "Slide 41: rândul 2. Punctele «…» ascund valorile din mijloc."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s04",
+   "title": {
+    "en": "Rândul 2 al tabelului",
+    "ro": "Rândul 2 al tabelului"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 41",
+    "ro": "Cursul 3 · slide 41"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Rândul 2 are intrarea $(0{,}1;\\,0{,}5;\\,\\dots;\\,-1{,}2)$ și ieșirea $(1{,}5;\\,2;\\,\\dots;\\,0{,}01)$.",
+        "ro": "Rândul 2 are intrarea $(0{,}1;\\,0{,}5;\\,\\dots;\\,-1{,}2)$ și ieșirea $(1{,}5;\\,2;\\,\\dots;\\,0{,}01)$."
+       }
+      },
+      {
+       "text": {
+        "en": "Slide-ul nu arată valorile din mijloc. Noi luăm mai departe $k=3$ ieșiri: $1{,}5$; $2$; $0{,}01$.",
+        "ro": "Slide-ul nu arată valorile din mijloc. Noi luăm mai departe $k=3$ ieșiri: $1{,}5$; $2$; $0{,}01$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s05",
+   "title": {
+    "en": "Ce dă rețeaua pe rândul 2",
+    "ro": "Ce dă rețeaua pe rândul 2"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 42",
+    "ro": "Cursul 3 · slide 42"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Dăm rețelei intrarea rândului 2. Ce iese se numește **valoarea prezisă** (predicția).",
+        "ro": "Dăm rețelei intrarea rândului 2. Ce iese se numește **valoarea prezisă** (predicția)."
+       }
+      },
+      {
+       "text": {
+        "en": "Să zicem că rețeaua dă $(1{,}0;\\,2{,}5;\\,0{,}21)$. Numerele sunt inventate pentru exemplu.",
+        "ro": "Să zicem că rețeaua dă $(1{,}0;\\,2{,}5;\\,0{,}21)$. Numerele sunt inventate pentru exemplu."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "aspect",
+         "ieșirea din tabel",
+         "predicția"
+        ],
+        "rows": [
+         [
+          "1",
+          "1,5",
+          "1,0"
+         ],
+         [
+          "2",
+          "2",
+          "2,5"
+         ],
+         [
+          "3",
+          "0,01",
+          "0,21"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s06",
+   "title": {
+    "en": "Vrem predicția aproape de ieșire",
+    "ro": "Vrem predicția aproape de ieșire"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 43–44",
+    "ro": "Cursul 3 · slide 43–44"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Scopul antrenării: predicția să fie **cât mai aproape** de ieșirea din tabel, pe toate rândurile.",
+        "ro": "Scopul antrenării: predicția să fie **cât mai aproape** de ieșirea din tabel, pe toate rândurile."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 220'><title>Țintă și predicție</title><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='110.2' x2='47' y2='110.2'/><text class='muted' font-size='14' x='38' y='115.2' text-anchor='end'>1</text><line class='muted' stroke-width='1.5' x1='41' y1='66.5' x2='47' y2='66.5'/><text class='muted' font-size='14' x='38' y='71.5' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='22.8' x2='47' y2='22.8'/><text class='muted' font-size='14' x='38' y='27.8' text-anchor='end'>3</text><rect class='muted fill-muted' stroke-width='1.5' x='56.6' y='88.4' width='30.6' height='65.6' rx='2'><title>t1 = 1,5</title></rect><rect class='warn fill-warn' stroke-width='1.5' x='89' y='110.2' width='30.6' height='43.8' rx='2'><title>y1 = 1</title></rect><text class='muted' font-size='14' x='89' y='172' text-anchor='middle'>1</text><rect class='muted fill-muted' stroke-width='1.5' x='146.6' y='66.5' width='30.6' height='87.5' rx='2'><title>t2 = 2</title></rect><rect class='warn fill-warn' stroke-width='1.5' x='179' y='44.6' width='30.6' height='109.4' rx='2'><title>y2 = 2,5</title></rect><text class='muted' font-size='14' x='179' y='172' text-anchor='middle'>2</text><rect class='muted fill-muted' stroke-width='1.5' x='236.6' y='153.6' width='30.6' height='1' rx='2'><title>t3 = 0,01</title></rect><rect class='warn fill-warn' stroke-width='1.5' x='269' y='144.8' width='30.6' height='9.2' rx='2'><title>y3 = 0,21</title></rect><text class='muted' font-size='14' x='269' y='172' text-anchor='middle'>3</text><rect class='muted fill-muted' stroke-width='1' x='200' y='190' width='12' height='12' rx='2'/><text class='fg' font-size='14' x='218' y='201' text-anchor='start'>t (țintă)</text><rect class='warn fill-warn' stroke-width='1' x='50' y='190' width='12' height='12' rx='2'/><text class='fg' font-size='14' x='68' y='201' text-anchor='start'>y (predicție)</text></svg>",
+        "alt": {
+         "en": "Trei perechi de bare: ieșirea din tabel și predicția, pe fiecare poziție",
+         "ro": "Trei perechi de bare: ieșirea din tabel și predicția, pe fiecare poziție"
+        },
+        "caption": {
+         "en": "Fiecare pereche de bare ar trebui să fie la fel de înaltă.",
+         "ro": "Fiecare pereche de bare ar trebui să fie la fel de înaltă."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Ne trebuie un număr care măsoară cât de departe e predicția.",
+        "ro": "Ne trebuie un număr care măsoară cât de departe e predicția."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s07",
+   "title": {
+    "en": "Literele X, Y și t",
+    "ro": "Literele X, Y și t"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 45",
+    "ro": "Cursul 3 · slide 45"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide 45 pune nume. Capital în cuvinte, litere mici în formule.",
+        "ro": "Slide 45 pune nume. Capital în cuvinte, litere mici în formule."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "$X$: intrarea.",
+       "ro": "$X$: intrarea."
+      },
+      {
+       "en": "$Y$: predicția rețelei, $Y=NN_w(x)$.",
+       "ro": "$Y$: predicția rețelei, $Y=NN_w(x)$."
+      },
+      {
+       "en": "$t$: ieșirea dorită, adică **ținta** (target). Coloana «ieșire» din tabel este $t$.",
+       "ro": "$t$: ieșirea dorită, adică **ținta** (target). Coloana «ieșire» din tabel este $t$."
+      }
+     ],
+     "result": {
+      "en": "Slide 42 numește «ieșire» și rezultatul rețelei. De aici înainte «ieșire din tabel» = $t$ și «ce dă rețeaua» = $y$.",
+      "ro": "Slide 42 numește «ieșire» și rezultatul rețelei. De aici înainte «ieșire din tabel» = $t$ și «ce dă rețeaua» = $y$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s08",
+   "title": {
+    "en": "Ce spune o funcție de cost",
+    "ro": "Ce spune o funcție de cost"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 46",
+    "ro": "Cursul 3 · slide 46"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "O **funcție de cost** (cost function) primește $t$ și $y$ și dă **un singur număr**: cât de rău se potrivesc.",
+        "ro": "O **funcție de cost** (cost function) primește $t$ și $y$ și dă **un singur număr**: cât de rău se potrivesc."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Cost mic: predicția e aproape de țintă.",
+       "ro": "Cost mic: predicția e aproape de țintă."
+      },
+      {
+       "en": "Cost mare: e departe.",
+       "ro": "Cost mare: e departe."
+      },
+      {
+       "en": "Schimbi o pondere puțin: costul se mișcă, chiar dacă numărul de răspunsuri corecte rămâne același.",
+       "ro": "Schimbi o pondere puțin: costul se mișcă, chiar dacă numărul de răspunsuri corecte rămâne același."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s09",
+   "title": {
+    "en": "Erorile, număr cu număr",
+    "ro": "Erorile, număr cu număr"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 47",
+    "ro": "Cursul 3 · slide 47"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Luăm $t=(1{,}5;\\,2;\\,0{,}01)$ și $y=(1{,}0;\\,2{,}5;\\,0{,}21)$. Eroarea pe fiecare poziție este $t_i-y_i$.",
+        "ro": "Luăm $t=(1{,}5;\\,2;\\,0{,}01)$ și $y=(1{,}0;\\,2{,}5;\\,0{,}21)$. Eroarea pe fiecare poziție este $t_i-y_i$."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "i",
+         "t",
+         "y",
+         "t − y"
+        ],
+        "rows": [
+         [
+          "1",
+          "1,5",
+          "1,0",
+          "0,5"
+         ],
+         [
+          "2",
+          "2",
+          "2,5",
+          "−0,5"
+         ],
+         [
+          "3",
+          "0,01",
+          "0,21",
+          "−0,2"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s10",
+   "title": {
+    "en": "Pătratele și suma lor",
+    "ro": "Pătratele și suma lor"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 47",
+    "ro": "Cursul 3 · slide 47"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03c-p01",
+     "claim": {
+      "en": "Ridicăm fiecare eroare la pătrat (ca să nu se anuleze plusul cu minusul) și adunăm. Erorile: $0{,}5$; $-0{,}5$; $-0{,}2$.",
+      "ro": "Ridicăm fiecare eroare la pătrat (ca să nu se anuleze plusul cu minusul) și adunăm. Erorile: $0{,}5$; $-0{,}5$; $-0{,}2$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$0{,}5^2=0{,}25$",
+        "ro": "$0{,}5^2=0{,}25$"
+       },
+       "why": {
+        "en": "Prima eroare.",
+        "ro": "Prima eroare."
+       },
+       "predict": {
+        "question": {
+         "en": "Cât e $(-0{,}5)^2$, a doua eroare la pătrat?",
+         "ro": "Cât e $(-0{,}5)^2$, a doua eroare la pătrat?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "0,25",
+           "ro": "0,25"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: minus cu minus dă plus.",
+           "ro": "Corect: minus cu minus dă plus."
+          }
+         },
+         {
+          "text": {
+           "en": "−0,25",
+           "ro": "−0,25"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Pătratul nu e niciodată negativ.",
+           "ro": "Pătratul nu e niciodată negativ."
+          },
+          "misconception": "semn-gresit"
+         },
+         {
+          "text": {
+           "en": "−1",
+           "ro": "−1"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai dublat în loc să ridici la pătrat.",
+           "ro": "Ai dublat în loc să ridici la pătrat."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$(-0{,}5)^2=0{,}25$",
+        "ro": "$(-0{,}5)^2=0{,}25$"
+       },
+       "why": {
+        "en": "A doua: erorile cu semn opus se cântăresc la fel.",
+        "ro": "A doua: erorile cu semn opus se cântăresc la fel."
+       }
+      },
+      {
+       "shown": {
+        "en": "$(-0{,}2)^2=0{,}04$",
+        "ro": "$(-0{,}2)^2=0{,}04$"
+       },
+       "why": {
+        "en": "A treia.",
+        "ro": "A treia."
+       }
+      },
+      {
+       "shown": {
+        "en": "$0{,}25+0{,}25+0{,}04=0{,}54$",
+        "ro": "$0{,}25+0{,}25+0{,}04=0{,}54$"
+       },
+       "why": {
+        "en": "Suma pătratelor.",
+        "ro": "Suma pătratelor."
+       },
+       "predict": {
+        "question": {
+         "en": "Cât dă suma $0{,}25+0{,}25+0{,}04$?",
+         "ro": "Cât dă suma $0{,}25+0{,}25+0{,}04$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "0,54",
+           "ro": "0,54"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "0,14",
+           "ro": "0,14"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai scăzut 0,25 − 0,25 și ai adunat 0,04 plus ceva. Toate pătratele se adună.",
+           "ro": "Ai scăzut 0,25 − 0,25 și ai adunat 0,04 plus ceva. Toate pătratele se adună."
+          },
+          "misconception": "semn-gresit"
+         },
+         {
+          "text": {
+           "en": "0,5",
+           "ro": "0,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai uitat termenul 0,04.",
+           "ro": "Ai uitat termenul 0,04."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Suma pătratelor erorilor este $0{,}54$.",
+      "ro": "Suma pătratelor erorilor este $0{,}54$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s11",
+   "title": {
+    "en": "Media: împărțim la k",
+    "ro": "Media: împărțim la k"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 47",
+    "ro": "Cursul 3 · slide 47"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Eroarea pătratică medie este suma pătratelor erorilor, împărțită la numărul de ieșiri.",
+      "ro": "Eroarea pătratică medie este suma pătratelor erorilor, împărțită la numărul de ieșiri."
+     },
+     "body": [
+      {
+       "tex": "MSE=\\dfrac{1}{k}\\sum_{i=1}^{k}(t_i-y_i)^2"
+      },
+      {
+       "points": [
+        {
+         "en": "$MSE$: eroarea pătratică medie (mean squared error)",
+         "ro": "$MSE$: eroarea pătratică medie (mean squared error)"
+        },
+        {
+         "en": "$k$: câte ieșiri are rețeaua",
+         "ro": "$k$: câte ieșiri are rețeaua"
+        },
+        {
+         "en": "$t_i$: ținta de pe poziția $i$",
+         "ro": "$t_i$: ținta de pe poziția $i$"
+        },
+        {
+         "en": "$y_i$: predicția de pe poziția $i$",
+         "ro": "$y_i$: predicția de pe poziția $i$"
+        },
+        {
+         "en": "$\\sum$: adună pentru $i$ de la 1 la $k$",
+         "ro": "$\\sum$: adună pentru $i$ de la 1 la $k$"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru exemplul nostru: $0{,}54/3=0{,}18$.",
+        "ro": "Pentru exemplul nostru: $0{,}54/3=0{,}18$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s12",
+   "title": {
+    "en": "Calculează MSE",
+    "ro": "Calculează MSE"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 47",
+    "ro": "Cursul 3 · slide 47"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03c-e02",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Ținta este $t=(2;\\,0;\\,1)$ și predicția $y=(1;\\,1;\\,3)$. Calculează $MSE=\\frac{1}{k}\\sum (t_i-y_i)^2$ cu $k=3$.",
+      "ro": "Ținta este $t=(2;\\,0;\\,1)$ și predicția $y=(1;\\,1;\\,3)$. Calculează $MSE=\\frac{1}{k}\\sum (t_i-y_i)^2$ cu $k=3$."
+     },
+     "fields": [
+      {
+       "id": "m",
+       "label": {
+        "en": "MSE",
+        "ro": "MSE"
+       },
+       "kind": "num",
+       "formula": "((t1-y1)^2 + (t2-y2)^2 + (t3-y3)^2)/3",
+       "expected": 2
+      }
+     ],
+     "data": {
+      "t1": 2,
+      "t2": 0,
+      "t3": 1,
+      "y1": 1,
+      "y2": 1,
+      "y3": 3
+     },
+     "detectors": [
+      {
+       "field": "m",
+       "formula": "((t1-y1)^2 + (t2-y2)^2 + (t3-y3)^2)",
+       "message": {
+        "en": "Ai uitat să împarți la $k=3$. Suma pătratelor nu e încă media.",
+        "ro": "Ai uitat să împarți la $k=3$. Suma pătratelor nu e încă media."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Întâi eroarea pe fiecare poziție, apoi pătratul ei.",
+       "ro": "Întâi eroarea pe fiecare poziție, apoi pătratul ei."
+      },
+      {
+       "en": "$(2-1)^2+(0-1)^2+(1-3)^2$",
+       "ro": "$(2-1)^2+(0-1)^2+(1-3)^2$"
+      },
+      {
+       "en": "Adună, apoi împarte la 3.",
+       "ro": "Adună, apoi împarte la 3."
+      }
+     ],
+     "solution": {
+      "en": "Pătrate: $1+1+4=6$. Media: $6/3=2$.",
+      "ro": "Pătrate: $1+1+4=6$. Media: $6/3=2$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Ținta este $t=(0,5;\\,1;\\,−1)$ și predicția $y=(1;\\,0;\\,−1)$. Calculează $MSE=\\frac{1}{k}\\sum (t_i-y_i)^2$ cu $k=3$.",
+        "ro": "Ținta este $t=(0,5;\\,1;\\,−1)$ și predicția $y=(1;\\,0;\\,−1)$. Calculează $MSE=\\frac{1}{k}\\sum (t_i-y_i)^2$ cu $k=3$."
+       },
+       "fields": [
+        {
+         "id": "m",
+         "formula": "((t1-y1)^2 + (t2-y2)^2 + (t3-y3)^2)/3",
+         "expected": 0.4167
+        }
+       ],
+       "solution": {
+        "en": "Pătrate: $0{,}25+1+0=1{,}25$. Media: $1{,}25/3=0{,}4167$.",
+        "ro": "Pătrate: $0{,}25+1+0=1{,}25$. Media: $1{,}25/3=0{,}4167$."
+       },
+       "data": {
+        "t1": 0.5,
+        "t2": 1,
+        "t3": -1,
+        "y1": 1,
+        "y2": 0,
+        "y3": -1
+       },
+       "hints": [
+        {
+         "en": "Eroarea pe fiecare poziție, apoi pătratul.",
+         "ro": "Eroarea pe fiecare poziție, apoi pătratul."
+        },
+        {
+         "en": "$(0{,}5-1)^2+(1-0)^2+(-1+1)^2$",
+         "ro": "$(0{,}5-1)^2+(1-0)^2+(-1+1)^2$"
+        },
+        {
+         "en": "$1{,}25/3\\approx 0{,}4167$.",
+         "ro": "$1{,}25/3\\approx 0{,}4167$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Ținta este $t=(3;\\,3;\\,3)$ și predicția $y=(3;\\,3;\\,6)$. Calculează $MSE=\\frac{1}{k}\\sum (t_i-y_i)^2$ cu $k=3$.",
+        "ro": "Ținta este $t=(3;\\,3;\\,3)$ și predicția $y=(3;\\,3;\\,6)$. Calculează $MSE=\\frac{1}{k}\\sum (t_i-y_i)^2$ cu $k=3$."
+       },
+       "fields": [
+        {
+         "id": "m",
+         "formula": "((t1-y1)^2 + (t2-y2)^2 + (t3-y3)^2)/3",
+         "expected": 3
+        }
+       ],
+       "solution": {
+        "en": "Două erori de 0 și una de 3: $9/3=3$.",
+        "ro": "Două erori de 0 și una de 3: $9/3=3$."
+       },
+       "data": {
+        "t1": 3,
+        "t2": 3,
+        "t3": 3,
+        "y1": 3,
+        "y2": 3,
+        "y3": 6
+       },
+       "hints": [
+        {
+         "en": "Compară $t$ cu $y$ pe fiecare poziție.",
+         "ro": "Compară $t$ cu $y$ pe fiecare poziție."
+        },
+        {
+         "en": "Doar a treia diferă, cu 3.",
+         "ro": "Doar a treia diferă, cu 3."
+        },
+        {
+         "en": "$9/3=3$.",
+         "ro": "$9/3=3$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s13",
+   "title": {
+    "en": "Când e costul zero?",
+    "ro": "Când e costul zero?"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 47",
+    "ro": "Cursul 3 · slide 47"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide 47 spune «mereu pozitiv». Corect este: **niciodată negativ**. Fiecare pătrat e cel puțin 0.",
+        "ro": "Slide 47 spune «mereu pozitiv». Corect este: **niciodată negativ**. Fiecare pătrat e cel puțin 0."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03c-q03",
+     "question": {
+      "en": "Când este $MSE=0$ exact?",
+      "ro": "Când este $MSE=0$ exact?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Când $y=t$ pe toate pozițiile",
+        "ro": "Când $y=t$ pe toate pozițiile"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: orice eroare diferită de 0 dă un pătrat pozitiv.",
+        "ro": "Corect: orice eroare diferită de 0 dă un pătrat pozitiv."
+       }
+      },
+      {
+       "text": {
+        "en": "Când erorile au sumă 0",
+        "ro": "Când erorile au sumă 0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Erorile $+1$ și $-1$ au suma 0, dar pătratele lor dau $2$. De aceea ridicăm la pătrat.",
+        "ro": "Erorile $+1$ și $-1$ au suma 0, dar pătratele lor dau $2$. De aceea ridicăm la pătrat."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "Niciodată",
+        "ro": "Niciodată"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se întâmplă când predicția e perfectă.",
+        "ro": "Se întâmplă când predicția e perfectă."
+       },
+       "misconception": "motiv-gresit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s14",
+   "title": {
+    "en": "Predicțiile departe costă mai mult",
+    "ro": "Predicțiile departe costă mai mult"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 47",
+    "ro": "Cursul 3 · slide 47"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pătratul crește repede: eroarea 1 dă 1, eroarea 2 dă 4, eroarea 3 dă 9.",
+        "ro": "Pătratul crește repede: eroarea 1 dă 1, eroarea 2 dă 4, eroarea 3 dă 9."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 220'><title>O predicție foarte greșită</title><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='110.2' x2='47' y2='110.2'/><text class='muted' font-size='14' x='38' y='115.2' text-anchor='end'>1</text><line class='muted' stroke-width='1.5' x1='41' y1='66.5' x2='47' y2='66.5'/><text class='muted' font-size='14' x='38' y='71.5' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='22.8' x2='47' y2='22.8'/><text class='muted' font-size='14' x='38' y='27.8' text-anchor='end'>3</text><rect class='muted fill-muted' stroke-width='1.5' x='56.6' y='88.4' width='30.6' height='65.6' rx='2'><title>t1 = 1,5</title></rect><rect class='warn fill-warn' stroke-width='1.5' x='89' y='88.4' width='30.6' height='65.6' rx='2'><title>y1 = 1,5</title></rect><text class='muted' font-size='14' x='89' y='172' text-anchor='middle'>1</text><rect class='muted fill-muted' stroke-width='1.5' x='146.6' y='66.5' width='30.6' height='87.5' rx='2'><title>t2 = 2</title></rect><rect class='warn fill-warn' stroke-width='1.5' x='179' y='66.5' width='30.6' height='87.5' rx='2'><title>y2 = 2</title></rect><text class='muted' font-size='14' x='179' y='172' text-anchor='middle'>2</text><rect class='muted fill-muted' stroke-width='1.5' x='236.6' y='153.6' width='30.6' height='1' rx='2'><title>t3 = 0,01</title></rect><rect class='warn fill-warn' stroke-width='1.5' x='269' y='22.3' width='30.6' height='131.7' rx='2'><title>y3 = 3,01</title></rect><text class='muted' font-size='14' x='269' y='172' text-anchor='middle'>3</text><rect class='muted fill-muted' stroke-width='1' x='200' y='190' width='12' height='12' rx='2'/><text class='fg' font-size='14' x='218' y='201' text-anchor='start'>t (țintă)</text><rect class='warn fill-warn' stroke-width='1' x='50' y='190' width='12' height='12' rx='2'/><text class='fg' font-size='14' x='68' y='201' text-anchor='start'>y (predicție)</text></svg>",
+        "alt": {
+         "en": "Două poziții perfecte și una cu predicția 3,01 față de ținta 0,01",
+         "ro": "Două poziții perfecte și una cu predicția 3,01 față de ținta 0,01"
+        },
+        "caption": {
+         "en": "Poziția 3 e mult prea sus.",
+         "ro": "Poziția 3 e mult prea sus."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "O eroare mare pare și mai mare după ridicarea la pătrat.",
+        "ro": "O eroare mare pare și mai mare după ridicarea la pătrat."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s15",
+   "title": {
+    "en": "De ce 1/(2k)",
+    "ro": "De ce 1/(2k)"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 48",
+    "ro": "Cursul 3 · slide 48"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide 48 folosește o variantă: **un 2 în plus** la numitor.",
+        "ro": "Slide 48 folosește o variantă: **un 2 în plus** la numitor."
+       }
+      },
+      {
+       "tex": "MSE=\\dfrac{1}{2k}\\sum_{i=1}^{k}(y_i-t_i)^2"
+      }
+     ],
+     "items": [
+      {
+       "en": "Cu aceleași date: $0{,}54/6=0{,}09$, jumătate din $0{,}18$.",
+       "ro": "Cu aceleași date: $0{,}54/6=0{,}09$, jumătate din $0{,}18$."
+      },
+      {
+       "en": "Motivul din slide: derivata unui pătrat are un 2, iar $\\tfrac{1}{2}$ îl anulează la derivare.",
+       "ro": "Motivul din slide: derivata unui pătrat are un 2, iar $\\tfrac{1}{2}$ îl anulează la derivare."
+      },
+      {
+       "en": "$(y_i-t_i)^2=(t_i-y_i)^2$: ordinea nu contează.",
+       "ro": "$(y_i-t_i)^2=(t_i-y_i)^2$: ordinea nu contează."
+      }
+     ],
+     "result": {
+      "en": "Aceeași formă de «medie de pătrate», cu o constantă diferită.",
+      "ro": "Aceeași formă de «medie de pătrate», cu o constantă diferită."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s16",
+   "title": {
+    "en": "Calculează cu 1/(2k)",
+    "ro": "Calculează cu 1/(2k)"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 48",
+    "ro": "Cursul 3 · slide 48"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03c-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Pentru $t=(2;\\,0;\\,1)$ și $y=(1;\\,1;\\,3)$ suma pătratelor erorilor este 6. Calculează $MSE=\\frac{1}{2k}\\sum (y_i-t_i)^2$ cu $k=3$.",
+      "ro": "Pentru $t=(2;\\,0;\\,1)$ și $y=(1;\\,1;\\,3)$ suma pătratelor erorilor este 6. Calculează $MSE=\\frac{1}{2k}\\sum (y_i-t_i)^2$ cu $k=3$."
+     },
+     "fields": [
+      {
+       "id": "m",
+       "label": {
+        "en": "MSE",
+        "ro": "MSE"
+       },
+       "kind": "num",
+       "formula": "6/(2*3)",
+       "expected": 1
+      }
+     ],
+     "detectors": [
+      {
+       "field": "m",
+       "formula": "6/3",
+       "message": {
+        "en": "Ai împărțit doar la $k$. Aici numitorul este $2k=6$.",
+        "ro": "Ai împărțit doar la $k$. Aici numitorul este $2k=6$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Numitorul este $2\\cdot k$.",
+       "ro": "Numitorul este $2\\cdot k$."
+      },
+      {
+       "en": "$2\\cdot 3=6$",
+       "ro": "$2\\cdot 3=6$"
+      },
+      {
+       "en": "$6/6$.",
+       "ro": "$6/6$."
+      }
+     ],
+     "solution": {
+      "en": "$6/(2\\cdot 3)=1$.",
+      "ro": "$6/(2\\cdot 3)=1$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Suma pătratelor erorilor este $0{,}54$ și $k=3$. Calculează $MSE=\\frac{1}{2k}\\sum (y_i-t_i)^2$.",
+        "ro": "Suma pătratelor erorilor este $0{,}54$ și $k=3$. Calculează $MSE=\\frac{1}{2k}\\sum (y_i-t_i)^2$."
+       },
+       "fields": [
+        {
+         "id": "m",
+         "formula": "0.54/6",
+         "expected": 0.09
+        }
+       ],
+       "solution": {
+        "en": "$0{,}54/6=0{,}09$.",
+        "ro": "$0{,}54/6=0{,}09$."
+       },
+       "hints": [
+        {
+         "en": "Numitorul este $2k$.",
+         "ro": "Numitorul este $2k$."
+        },
+        {
+         "en": "$2\\cdot 3=6$.",
+         "ro": "$2\\cdot 3=6$."
+        },
+        {
+         "en": "$0{,}54/6$.",
+         "ro": "$0{,}54/6$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Suma pătratelor erorilor este $9$ și $k=3$. Calculează $MSE=\\frac{1}{2k}\\sum (y_i-t_i)^2$.",
+        "ro": "Suma pătratelor erorilor este $9$ și $k=3$. Calculează $MSE=\\frac{1}{2k}\\sum (y_i-t_i)^2$."
+       },
+       "fields": [
+        {
+         "id": "m",
+         "formula": "9/6",
+         "expected": 1.5
+        }
+       ],
+       "solution": {
+        "en": "$9/6=1{,}5$.",
+        "ro": "$9/6=1{,}5$."
+       },
+       "hints": [
+        {
+         "en": "Numitorul este $2k$.",
+         "ro": "Numitorul este $2k$."
+        },
+        {
+         "en": "$2\\cdot 3=6$.",
+         "ro": "$2\\cdot 3=6$."
+        },
+        {
+         "en": "$9/6$.",
+         "ro": "$9/6$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s17",
+   "title": {
+    "en": "O eroare mare domină",
+    "ro": "O eroare mare domină"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 49",
+    "ro": "Cursul 3 · slide 49"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Aceeași țintă $t=(1{,}5;\\,2;\\,0{,}01)$, dar $y=(1{,}5;\\,2;\\,3{,}01)$: două poziții perfecte, una greșită cu 3.",
+        "ro": "Aceeași țintă $t=(1{,}5;\\,2;\\,0{,}01)$, dar $y=(1{,}5;\\,2;\\,3{,}01)$: două poziții perfecte, una greșită cu 3."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "aspect",
+         "sumă pătrate",
+         "1/k",
+         "1/(2k)"
+        ],
+        "rows": [
+         [
+          "y inițial",
+          "0,54",
+          "0,18",
+          "0,09"
+         ],
+         [
+          "cu o eroare de 3",
+          "9",
+          "3",
+          "1,5"
+         ]
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03c-q05",
+     "question": {
+      "en": "Costul a crescut de la $0{,}18$ la $3$. Ce l-a crescut?",
+      "ro": "Costul a crescut de la $0{,}18$ la $3$. Ce l-a crescut?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "O singură eroare mare, ridicată la pătrat",
+        "ro": "O singură eroare mare, ridicată la pătrat"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $3^2=9$ domină suma. De aceea MSE este sensibil la valori aberante (outliers).",
+        "ro": "Corect: $3^2=9$ domină suma. De aceea MSE este sensibil la valori aberante (outliers)."
+       }
+      },
+      {
+       "text": {
+        "en": "Toate cele trei poziții s-au înrăutățit",
+        "ro": "Toate cele trei poziții s-au înrăutățit"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Două poziții au rămas perfecte; eroarea lor e 0.",
+        "ro": "Două poziții au rămas perfecte; eroarea lor e 0."
+       },
+       "misconception": "motiv-gresit"
+      },
+      {
+       "text": {
+        "en": "Împărțirea la $k$",
+        "ro": "Împărțirea la $k$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Împărțirea e aceeași în ambele cazuri.",
+        "ro": "Împărțirea e aceeași în ambele cazuri."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s18",
+   "title": {
+    "en": "Unde se folosește MSE",
+    "ro": "Unde se folosește MSE"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 49",
+    "ro": "Cursul 3 · slide 49"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "MSE se potrivește când rețeaua prezice **numere** (regresie): prețul unei case, o temperatură.",
+        "ro": "MSE se potrivește când rețeaua prezice **numere** (regresie): prețul unei case, o temperatură."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Penalizează mult erorile mari.",
+       "ro": "Penalizează mult erorile mari."
+      },
+      {
+       "en": "E sensibil la valori aberante.",
+       "ro": "E sensibil la valori aberante."
+      },
+      {
+       "en": "Slide 49 spune «în principal regresie»; în curs îl vom folosi și cu un neuron logistic.",
+       "ro": "Slide 49 spune «în principal regresie»; în curs îl vom folosi și cu un neuron logistic."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s19",
+   "title": {
+    "en": "Costul pe un lot de exemple",
+    "ro": "Costul pe un lot de exemple"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 50–51",
+    "ro": "Cursul 3 · slide 50–51"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Antrenăm pe mai multe rânduri odată: un **lot** (minibatch) de $m$ exemple. Costul face media pe lot.",
+        "ro": "Antrenăm pe mai multe rânduri odată: un **lot** (minibatch) de $m$ exemple. Costul face media pe lot."
+       }
+      },
+      {
+       "tex": "MSE_{batch}=\\dfrac{1}{2m}\\sum_{i=1}^{m}\\dfrac{1}{k}\\sum_{j=1}^{k}(y_{i,j}-t_{i,j})^2"
+      }
+     ],
+     "items": [
+      {
+       "en": "$m$: câte exemple are lotul.",
+       "ro": "$m$: câte exemple are lotul."
+      },
+      {
+       "en": "$i$: al câtelea exemplu.",
+       "ro": "$i$: al câtelea exemplu."
+      },
+      {
+       "en": "$j$: a câta ieșire.",
+       "ro": "$j$: a câta ieșire."
+      },
+      {
+       "en": "$y_{i,j}$: ieșirea $j$ a exemplului $i$.",
+       "ro": "$y_{i,j}$: ieșirea $j$ a exemplului $i$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s20",
+   "title": {
+    "en": "Lot cu m = 2 și k = 2",
+    "ro": "Lot cu m = 2 și k = 2"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 51",
+    "ro": "Cursul 3 · slide 51"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03c-p06",
+     "claim": {
+      "en": "Două exemple, două ieșiri. Ținte: $(1;\\,0)$ și $(0;\\,1)$. Predicții: $(0{,}8;\\,0{,}3)$ și $(0{,}4;\\,0{,}6)$.",
+      "ro": "Două exemple, două ieșiri. Ținte: $(1;\\,0)$ și $(0;\\,1)$. Predicții: $(0{,}8;\\,0{,}3)$ și $(0{,}4;\\,0{,}6)$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Exemplul 1: $(1-0{,}8)^2+(0-0{,}3)^2=0{,}04+0{,}09=0{,}13$",
+        "ro": "Exemplul 1: $(1-0{,}8)^2+(0-0{,}3)^2=0{,}04+0{,}09=0{,}13$"
+       },
+       "why": {
+        "en": "Suma pătratelor pe exemplul 1.",
+        "ro": "Suma pătratelor pe exemplul 1."
+       }
+      },
+      {
+       "shown": {
+        "en": "Exemplul 2: $(0-0{,}4)^2+(1-0{,}6)^2=0{,}16+0{,}16=0{,}32$",
+        "ro": "Exemplul 2: $(0-0{,}4)^2+(1-0{,}6)^2=0{,}16+0{,}16=0{,}32$"
+       },
+       "why": {
+        "en": "Suma pe exemplul 2.",
+        "ro": "Suma pe exemplul 2."
+       },
+       "predict": {
+        "question": {
+         "en": "Exemplul 2 are sumele pătratelor $0{,}16$ și $0{,}16$. Cât dă suma?",
+         "ro": "Exemplul 2 are sumele pătratelor $0{,}16$ și $0{,}16$. Cât dă suma?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "0,32",
+           "ro": "0,32"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "0,16",
+           "ro": "0,16"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai luat un singur termen.",
+           "ro": "Ai luat un singur termen."
+          },
+          "misconception": "un-singur-termen"
+         },
+         {
+          "text": {
+           "en": "0,0256",
+           "ro": "0,0256"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai înmulțit în loc să aduni.",
+           "ro": "Ai înmulțit în loc să aduni."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Total: $0{,}13+0{,}32=0{,}45$",
+        "ro": "Total: $0{,}13+0{,}32=0{,}45$"
+       },
+       "why": {
+        "en": "Adunăm exemplele.",
+        "ro": "Adunăm exemplele."
+       },
+       "predict": {
+        "question": {
+         "en": "Totalul pe lot este $0{,}13+0{,}32$. Cât?",
+         "ro": "Totalul pe lot este $0{,}13+0{,}32$. Cât?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "0,45",
+           "ro": "0,45"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "0,19",
+           "ro": "0,19"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai scăzut. Exemplele se adună.",
+           "ro": "Ai scăzut. Exemplele se adună."
+          },
+          "misconception": "semn-gresit"
+         },
+         {
+          "text": {
+           "en": "0,225",
+           "ro": "0,225"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai împărțit deja la 2; împărțirea vine la sfârșit.",
+           "ro": "Ai împărțit deja la 2; împărțirea vine la sfârșit."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\dfrac{1}{2m}\\cdot\\dfrac{1}{k}\\cdot 0{,}45=\\dfrac{0{,}45}{4\\cdot 2}\\approx 0{,}0563$",
+        "ro": "$\\dfrac{1}{2m}\\cdot\\dfrac{1}{k}\\cdot 0{,}45=\\dfrac{0{,}45}{4\\cdot 2}\\approx 0{,}0563$"
+       },
+       "why": {
+        "en": "Împărțim la $2m=4$ și la $k=2$.",
+        "ro": "Împărțim la $2m=4$ și la $k=2$."
+       }
+      }
+     ],
+     "end": {
+      "en": "Costul lotului este $\\approx 0{,}0563$.",
+      "ro": "Costul lotului este $\\approx 0{,}0563$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s21",
+   "title": {
+    "en": "Calculează MSE pe lot",
+    "ro": "Calculează MSE pe lot"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 51–52",
+    "ro": "Cursul 3 · slide 51–52"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03c-e07",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Lot cu $m=2$ și $k=2$. Suma pătratelor pe exemplul 1 este $0,5$, pe exemplul 2 este $1,5$. Calculează $MSE_{batch}=\\frac{1}{2m}\\cdot\\frac{1}{k}\\cdot(\\text{total})$.",
+      "ro": "Lot cu $m=2$ și $k=2$. Suma pătratelor pe exemplul 1 este $0,5$, pe exemplul 2 este $1,5$. Calculează $MSE_{batch}=\\frac{1}{2m}\\cdot\\frac{1}{k}\\cdot(\\text{total})$."
+     },
+     "fields": [
+      {
+       "id": "m",
+       "label": {
+        "en": "MSE_batch",
+        "ro": "MSE_batch"
+       },
+       "kind": "num",
+       "formula": "(a+b)/(2*2*2)",
+       "expected": 0.25
+      }
+     ],
+     "data": {
+      "a": 0.5,
+      "b": 1.5
+     },
+     "detectors": [
+      {
+       "field": "m",
+       "formula": "(a+b)/(2*2)",
+       "message": {
+        "en": "Ai uitat împărțirea la $k$. Formula de la slide 51 are și $\\frac{1}{k}$.",
+        "ro": "Ai uitat împărțirea la $k$. Formula de la slide 51 are și $\\frac{1}{k}$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Totalul este suma celor două.",
+       "ro": "Totalul este suma celor două."
+      },
+      {
+       "en": "Împarte la $2m=4$ și la $k=2$.",
+       "ro": "Împarte la $2m=4$ și la $k=2$."
+      },
+      {
+       "en": "$(a+b)/8$.",
+       "ro": "$(a+b)/8$."
+      }
+     ],
+     "solution": {
+      "en": "Total: $0{,}5+1{,}5=2$. Apoi $2/(4\\cdot 2)=0{,}25$.",
+      "ro": "Total: $0{,}5+1{,}5=2$. Apoi $2/(4\\cdot 2)=0{,}25$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Lot cu $m=2$ și $k=2$. Suma pătratelor pe exemplul 1 este $0,13$, pe exemplul 2 este $0,32$. Calculează $MSE_{batch}=\\frac{1}{2m}\\cdot\\frac{1}{k}\\cdot(\\text{total})$.",
+        "ro": "Lot cu $m=2$ și $k=2$. Suma pătratelor pe exemplul 1 este $0,13$, pe exemplul 2 este $0,32$. Calculează $MSE_{batch}=\\frac{1}{2m}\\cdot\\frac{1}{k}\\cdot(\\text{total})$."
+       },
+       "fields": [
+        {
+         "id": "m",
+         "formula": "(a+b)/(2*2*2)",
+         "expected": 0.0563,
+         "tol": 0.001
+        }
+       ],
+       "solution": {
+        "en": "$0{,}45/8\\approx 0{,}0563$.",
+        "ro": "$0{,}45/8\\approx 0{,}0563$."
+       },
+       "data": {
+        "a": 0.13,
+        "b": 0.32
+       },
+       "hints": [
+        {
+         "en": "Totalul este $0{,}45$.",
+         "ro": "Totalul este $0{,}45$."
+        },
+        {
+         "en": "Împarte la $2m\\cdot k=8$.",
+         "ro": "Împarte la $2m\\cdot k=8$."
+        },
+        {
+         "en": "$0{,}45/8\\approx 0{,}0563$.",
+         "ro": "$0{,}45/8\\approx 0{,}0563$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Lot cu $m=2$ și $k=2$. Suma pătratelor pe exemplul 1 este $2$, pe exemplul 2 este $2$. Calculează $MSE_{batch}=\\frac{1}{2m}\\cdot\\frac{1}{k}\\cdot(\\text{total})$.",
+        "ro": "Lot cu $m=2$ și $k=2$. Suma pătratelor pe exemplul 1 este $2$, pe exemplul 2 este $2$. Calculează $MSE_{batch}=\\frac{1}{2m}\\cdot\\frac{1}{k}\\cdot(\\text{total})$."
+       },
+       "fields": [
+        {
+         "id": "m",
+         "formula": "(a+b)/(2*2*2)",
+         "expected": 0.5
+        }
+       ],
+       "solution": {
+        "en": "$4/8=0{,}5$.",
+        "ro": "$4/8=0{,}5$."
+       },
+       "data": {
+        "a": 2,
+        "b": 2
+       },
+       "hints": [
+        {
+         "en": "Totalul este $4$.",
+         "ro": "Totalul este $4$."
+        },
+        {
+         "en": "Împarte la $8$.",
+         "ro": "Împarte la $8$."
+        },
+        {
+         "en": "$0{,}5$.",
+         "ro": "$0{,}5$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s22",
+   "title": {
+    "en": "Notația scurtă de la slide 52",
+    "ro": "Notația scurtă de la slide 52"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 52, 75",
+    "ro": "Cursul 3 · slide 52, 75"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide 52 scrie același cost mai scurt, cu norma $\\|\\cdot\\|$ a vectorului diferență:",
+        "ro": "Slide 52 scrie același cost mai scurt, cu norma $\\|\\cdot\\|$ a vectorului diferență:"
+       }
+      },
+      {
+       "tex": "MSE_{batch}=\\dfrac{1}{2m}\\sum_x\\|t_x-y_x\\|^2"
+      },
+      {
+       "text": {
+        "en": "$\\|t_x-y_x\\|^2$ este suma pătratelor erorilor exemplului $x$, adică exact suma interioară de mai înainte.",
+        "ro": "$\\|t_x-y_x\\|^2$ este suma pătratelor erorilor exemplului $x$, adică exact suma interioară de mai înainte."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Aici nu apare $\\frac{1}{k}$.",
+       "ro": "Aici nu apare $\\frac{1}{k}$."
+      },
+      {
+       "en": "Pe exemplul nostru: $0{,}45/4=0{,}1125$, față de $0{,}0563$ cu $\\frac{1}{k}$.",
+       "ro": "Pe exemplul nostru: $0{,}45/4=0{,}1125$, față de $0{,}0563$ cu $\\frac{1}{k}$."
+      }
+     ],
+     "result": {
+      "en": "Diferența e doar o constantă. Slide-ul nu o menționează; la fiecare formulă spunem care variantă o folosim.",
+      "ro": "Diferența e doar o constantă. Slide-ul nu o menționează; la fiecare formulă spunem care variantă o folosim."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s23",
+   "title": {
+    "en": "Cost mai mic înseamnă potrivire mai bună",
+    "ro": "Cost mai mic înseamnă potrivire mai bună"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 53",
+    "ro": "Cursul 3 · slide 53"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cu cât costul pe tabelul de antrenare e mai mic, cu atât predicțiile se potrivesc mai bine pe acele rânduri.",
+        "ro": "Cu cât costul pe tabelul de antrenare e mai mic, cu atât predicțiile se potrivesc mai bine pe acele rânduri."
+       }
+      },
+      {
+       "text": {
+        "en": "A **antrena** rețeaua înseamnă a căuta ponderile $w$ care fac costul cât mai mic. E o problemă de **optimizare**.",
+        "ro": "A **antrena** rețeaua înseamnă a căuta ponderile $w$ care fac costul cât mai mic. E o problemă de **optimizare**."
+       }
+      },
+      {
+       "text": {
+        "en": "Rețelele folosesc pentru asta coborârea pe gradient, în lecțiile următoare.",
+        "ro": "Rețelele folosesc pentru asta coborârea pe gradient, în lecțiile următoare."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s24",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 38–53",
+    "ro": "Cursul 3 · slide 38–53"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Costul, pe scurt:",
+        "ro": "Costul, pe scurt:"
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Rețeaua $NN_w$ duce $n$ numere în $k$ numere, după ponderile $w$.",
+       "ro": "Rețeaua $NN_w$ duce $n$ numere în $k$ numere, după ponderile $w$."
+      },
+      {
+       "en": "$t$: ținta din tabel; $y$: predicția.",
+       "ro": "$t$: ținta din tabel; $y$: predicția."
+      },
+      {
+       "en": "$MSE=\\frac{1}{k}\\sum(t_i-y_i)^2$; variante cu $\\frac{1}{2k}$ și pe lot cu $\\frac{1}{2m}$.",
+       "ro": "$MSE=\\frac{1}{k}\\sum(t_i-y_i)^2$; variante cu $\\frac{1}{2k}$ și pe lot cu $\\frac{1}{2m}$."
+      },
+      {
+       "en": "Niciodată negativ, zero doar când $y=t$; o eroare mare domină.",
+       "ro": "Niciodată negativ, zero doar când $y=t$; o eroare mare domină."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s25",
+   "title": {
+    "en": "Verificare: costul unui lot",
+    "ro": "Verificare: costul unui lot"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 50–51",
+    "ro": "Cursul 3 · slide 50–51"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03c-e08",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Lot cu $m=2$ și $k=1$: ținte $(3;\\,1)$, predicții $(2;\\,4)$. Calculează $MSE_{batch}=\\frac{1}{2m}\\sum_i\\frac{1}{k}(y_i-t_i)^2$.",
+      "ro": "Lot cu $m=2$ și $k=1$: ținte $(3;\\,1)$, predicții $(2;\\,4)$. Calculează $MSE_{batch}=\\frac{1}{2m}\\sum_i\\frac{1}{k}(y_i-t_i)^2$."
+     },
+     "fields": [
+      {
+       "id": "m",
+       "label": {
+        "en": "MSE_batch",
+        "ro": "MSE_batch"
+       },
+       "kind": "num",
+       "formula": "((y1-t1)^2 + (y2-t2)^2)/(2*2*1)",
+       "expected": 2.5
+      }
+     ],
+     "data": {
+      "t1": 3,
+      "t2": 1,
+      "y1": 2,
+      "y2": 4
+     },
+     "detectors": [
+      {
+       "field": "m",
+       "formula": "((y1-t1)^2 + (y2-t2)^2)/1",
+       "message": {
+        "en": "Ai uitat $\\frac{1}{2m}$ cu $m=2$.",
+        "ro": "Ai uitat $\\frac{1}{2m}$ cu $m=2$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Întâi pătratul erorii pe fiecare exemplu.",
+       "ro": "Întâi pătratul erorii pe fiecare exemplu."
+      },
+      {
+       "en": "$(2-3)^2+(4-1)^2=1+9$",
+       "ro": "$(2-3)^2+(4-1)^2=1+9$"
+      },
+      {
+       "en": "Împarte suma la $2m=4$.",
+       "ro": "Împarte suma la $2m=4$."
+      }
+     ],
+     "solution": {
+      "en": "$1+9=10$; $10/4=2{,}5$.",
+      "ro": "$1+9=10$; $10/4=2{,}5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Lot cu $m=2$ și $k=1$: ținte $(0;\\,2)$, predicții $(1;\\,0)$. Calculează $MSE_{batch}=\\frac{1}{2m}\\sum_i\\frac{1}{k}(y_i-t_i)^2$.",
+        "ro": "Lot cu $m=2$ și $k=1$: ținte $(0;\\,2)$, predicții $(1;\\,0)$. Calculează $MSE_{batch}=\\frac{1}{2m}\\sum_i\\frac{1}{k}(y_i-t_i)^2$."
+       },
+       "fields": [
+        {
+         "id": "m",
+         "formula": "((y1-t1)^2 + (y2-t2)^2)/(2*2*1)",
+         "expected": 1.25
+        }
+       ],
+       "solution": {
+        "en": "$1+4=5$; $5/4=1{,}25$.",
+        "ro": "$1+4=5$; $5/4=1{,}25$."
+       },
+       "data": {
+        "t1": 0,
+        "t2": 2,
+        "y1": 1,
+        "y2": 0
+       },
+       "hints": [
+        {
+         "en": "Pătratul erorii pe exemplu.",
+         "ro": "Pătratul erorii pe exemplu."
+        },
+        {
+         "en": "$(1-0)^2+(0-2)^2$",
+         "ro": "$(1-0)^2+(0-2)^2$"
+        },
+        {
+         "en": "$5/4$.",
+         "ro": "$5/4$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s26",
+   "title": {
+    "en": "Verificare: care predicție e mai bună",
+    "ro": "Verificare: care predicție e mai bună"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 47",
+    "ro": "Cursul 3 · slide 47"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03c-q09",
+     "question": {
+      "en": "Ținta e $t=(1;\\,1)$. Predicția A: $(0;\\,2)$. Predicția B: $(1;\\,3)$. Care are MSE mai mic?",
+      "ro": "Ținta e $t=(1;\\,1)$. Predicția A: $(0;\\,2)$. Predicția B: $(1;\\,3)$. Care are MSE mai mic?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "A: suma pătratelor este 2",
+        "ro": "A: suma pătratelor este 2"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $1+1=2$, iar B dă $0+4=4$.",
+        "ro": "Corect: $1+1=2$, iar B dă $0+4=4$."
+       }
+      },
+      {
+       "text": {
+        "en": "B: o poziție e perfectă",
+        "ro": "B: o poziție e perfectă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "O poziție perfectă nu ajunge: cealaltă eroare, 2, dă pătratul 4.",
+        "ro": "O poziție perfectă nu ajunge: cealaltă eroare, 2, dă pătratul 4."
+       },
+       "misconception": "motiv-gresit"
+      },
+      {
+       "text": {
+        "en": "Egal, erorile totale sunt 2",
+        "ro": "Egal, erorile totale sunt 2"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Sumă de erori, nu de pătrate. Pătratele sunt 2 și 4.",
+        "ro": "Sumă de erori, nu de pătrate. Pătratele sunt 2 și 4."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03c-s27",
+   "title": {
+    "en": "Verificare: citirea formulei",
+    "ro": "Verificare: citirea formulei"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 47–52",
+    "ro": "Cursul 3 · slide 47–52"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03c-q10",
+     "question": {
+      "en": "În $MSE_{batch}$, ce reprezintă $y_{i,j}$?",
+      "ro": "În $MSE_{batch}$, ce reprezintă $y_{i,j}$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Ieșirea $j$ a exemplului $i$",
+        "ro": "Ieșirea $j$ a exemplului $i$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $i$ numără exemplele din lot, $j$ numără ieșirile.",
+        "ro": "Corect: $i$ numără exemplele din lot, $j$ numără ieșirile."
+       }
+      },
+      {
+       "text": {
+        "en": "Ieșirea $i$ a exemplului $j$",
+        "ro": "Ieșirea $i$ a exemplului $j$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ordinea e inversă: primul indice e exemplul.",
+        "ro": "Ordinea e inversă: primul indice e exemplul."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "Ținta exemplului $i$",
+        "ro": "Ținta exemplului $i$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ținta se notează $t_{i,j}$.",
+        "ro": "Ținta se notează $t_{i,j}$."
+       },
+       "misconception": "motiv-gresit"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

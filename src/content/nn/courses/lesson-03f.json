@@ -1,0 +1,2303 @@
+{
+ "meta": {
+  "id": "nn-l03f",
+  "title": {
+   "en": "Lesson 3f: Adaline and the logistic neuron",
+   "ro": "Lecția 3f: Adaline și neuronul logistic"
+  },
+  "shortTitle": {
+   "en": "L3f: Adaline and logistic",
+   "ro": "L3f: Adaline și logistic"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 3 (Gradient Descent), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 3 (Gradient Descent), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l03f-s01",
+   "title": {
+    "en": "Neuronul pe care îl antrenăm",
+    "ro": "Neuronul pe care îl antrenăm"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 80",
+    "ro": "Cursul 3 · slide 80"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Începem cu cel mai simplu: **Adaline**, un neuron cu activare liniară, $y=z=wx+b$. O intrare $x$, o pondere $w$.",
+        "ro": "Începem cu cel mai simplu: **Adaline**, un neuron cu activare liniară, $y=z=wx+b$. O intrare $x$, o pondere $w$."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 170'><title>Neuronul Adaline</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='2' x1='62' y1='45' x2='163' y2='85' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='45' r='20'><title>intrarea 1</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='50' text-anchor='middle'>x</text><text class='accent' font-size='14' font-weight='700' x='112' y='57' text-anchor='middle'>w</text><line class='muted' stroke-width='2' x1='62' y1='125' x2='163' y2='85' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='125' r='20'><title>intrarea 2</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='130' text-anchor='middle'>1</text><text class='accent' font-size='14' font-weight='700' x='108' y='97' text-anchor='middle'>b</text><circle class='fg fill-bg' stroke-width='2.5' cx='190' cy='85' r='26'><title>suma ponderată</title></circle><text class='fg' font-size='17' font-weight='700' x='190' y='91' text-anchor='middle'>z</text><line class='muted' stroke-width='2' x1='217' y1='85' x2='248' y2='85' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='250' y='63' width='44' height='44' rx='6'><title>activarea</title></rect><text class='accent' font-size='17' font-weight='700' x='272' y='91' text-anchor='middle'>f</text><line class='muted' stroke-width='2' x1='295' y1='85' x2='322' y2='85' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='310' y='75' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Intrarea x cu ponderea w și intrarea fixă 1 cu ponderea b duc la z, care este chiar y",
+         "ro": "Intrarea x cu ponderea w și intrarea fixă 1 cu ponderea b duc la z, care este chiar y"
+        },
+        "caption": {
+         "en": "Activarea e liniară: ieșirea este chiar $z$.",
+         "ro": "Activarea e liniară: ieșirea este chiar $z$."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Aici $w$ este un număr, nu un vector, ca să vedem mai clar calculul.",
+        "ro": "Aici $w$ este un număr, nu un vector, ca să vedem mai clar calculul."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s02",
+   "title": {
+    "en": "Costul pe n exemple",
+    "ro": "Costul pe n exemple"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 80",
+    "ro": "Cursul 3 · slide 80"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Avem $n$ exemple. Aici $n$ înseamnă **numărul de exemple**, nu numărul de intrări ca în lecțiile 3b–3c.",
+        "ro": "Avem $n$ exemple. Aici $n$ înseamnă **numărul de exemple**, nu numărul de intrări ca în lecțiile 3b–3c."
+       }
+      },
+      {
+       "tex": "MSE=\\dfrac{1}{2n}\\sum_x(t_x-y_x)^2"
+      },
+      {
+       "text": {
+        "en": "$t_x$ și $y_x$: ținta și ieșirea exemplului $x$. Costul este media pătratelor, cu $\\frac{1}{2n}$.",
+        "ro": "$t_x$ și $y_x$: ținta și ieșirea exemplului $x$. Costul este media pătratelor, cu $\\frac{1}{2n}$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s03",
+   "title": {
+    "en": "Datele noastre",
+    "ro": "Datele noastre"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 80",
+    "ro": "Cursul 3 · slide 80"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Trei exemple: $x=(1;\\,2;\\,3)$ cu ținte $t=(2;\\,4;\\,5)$. Pornim din $w=0$, $b=0$, cu $\\eta=0{,}1$.",
+        "ro": "Trei exemple: $x=(1;\\,2;\\,3)$ cu ținte $t=(2;\\,4;\\,5)$. Pornim din $w=0$, $b=0$, cu $\\eta=0{,}1$."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Dreapta de pornire</title><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='44' y1='151' x2='44' y2='157'/><text class='muted' font-size='14' x='44' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='111.5' y1='151' x2='111.5' y2='157'/><text class='muted' font-size='14' x='111.5' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='179' y1='151' x2='179' y2='157'/><text class='muted' font-size='14' x='179' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='246.5' y1='151' x2='246.5' y2='157'/><text class='muted' font-size='14' x='246.5' y='172' text-anchor='middle'>3</text><line class='muted' stroke-width='1.5' x1='314' y1='151' x2='314' y2='157'/><text class='muted' font-size='14' x='314' y='172' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='107.3' x2='47' y2='107.3'/><text class='muted' font-size='14' x='38' y='112.3' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='60.7' x2='47' y2='60.7'/><text class='muted' font-size='14' x='38' y='65.7' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='14' x2='47' y2='14'/><text class='muted' font-size='14' x='38' y='19' text-anchor='end'>6</text><polyline class='muted' stroke-width='2.5' fill='none' points='44,154 71,154 98,154 125,154 152,154 179,154 206,154 233,154 260,154 287,154 314,154'/><circle class='warn fill-warn' stroke-width='2' cx='111.5' cy='107.3' r='5'><title>(1; 2)</title></circle><circle class='warn fill-warn' stroke-width='2' cx='179' cy='60.7' r='5'><title>(2; 4)</title></circle><circle class='warn fill-warn' stroke-width='2' cx='246.5' cy='37.3' r='5'><title>(3; 5)</title></circle><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+        "alt": {
+         "en": "Trei puncte și dreapta orizontală pe zero, departe de ele",
+         "ro": "Trei puncte și dreapta orizontală pe zero, departe de ele"
+        },
+        "caption": {
+         "en": "La început dreapta e pe zero.",
+         "ro": "La început dreapta e pe zero."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s04",
+   "title": {
+    "en": "Erorile și costul de pornire",
+    "ro": "Erorile și costul de pornire"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 80",
+    "ro": "Cursul 3 · slide 80"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03f-p01",
+     "claim": {
+      "en": "Cu $w=0$, $b=0$, toate ieșirile sunt $y=0$. Erorile $t-y$ sunt chiar ținte.",
+      "ro": "Cu $w=0$, $b=0$, toate ieșirile sunt $y=0$. Erorile $t-y$ sunt chiar ținte."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Erori: $(2;\\,4;\\,5)$",
+        "ro": "Erori: $(2;\\,4;\\,5)$"
+       },
+       "why": {
+        "en": "$t-y$ pe fiecare exemplu.",
+        "ro": "$t-y$ pe fiecare exemplu."
+       }
+      },
+      {
+       "shown": {
+        "en": "Pătrate: $4+16+25=45$",
+        "ro": "Pătrate: $4+16+25=45$"
+       },
+       "why": {
+        "en": "Suma pătratelor erorilor.",
+        "ro": "Suma pătratelor erorilor."
+       },
+       "predict": {
+        "question": {
+         "en": "Suma $2^2+4^2+5^2$ este:",
+         "ro": "Suma $2^2+4^2+5^2$ este:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "45",
+           "ro": "45"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "121",
+           "ro": "121"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai ridicat suma la pătrat: $(2+4+5)^2$.",
+           "ro": "Ai ridicat suma la pătrat: $(2+4+5)^2$."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "11",
+           "ro": "11"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat erorile, fără pătrat.",
+           "ro": "Ai adunat erorile, fără pătrat."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$MSE=45/(2\\cdot 3)=7{,}5$",
+        "ro": "$MSE=45/(2\\cdot 3)=7{,}5$"
+       },
+       "why": {
+        "en": "Împărțim la $2n=6$.",
+        "ro": "Împărțim la $2n=6$."
+       },
+       "predict": {
+        "question": {
+         "en": "Costul $45/(2n)$, cu $n=3$ exemple:",
+         "ro": "Costul $45/(2n)$, cu $n=3$ exemple:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "7,5",
+           "ro": "7,5"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "15",
+           "ro": "15"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai împărțit la $n=3$; formula are $2n$.",
+           "ro": "Ai împărțit la $n=3$; formula are $2n$."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "45",
+           "ro": "45"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai uitat împărțirea.",
+           "ro": "Ai uitat împărțirea."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Costul de pornire este $7{,}5$.",
+      "ro": "Costul de pornire este $7{,}5$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s05",
+   "title": {
+    "en": "Lanțul de derivate",
+    "ro": "Lanțul de derivate"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 81",
+    "ro": "Cursul 3 · slide 81"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Costul depinde de $w$ prin $y$. Regula lanțului dă derivata:",
+        "ro": "Costul depinde de $w$ prin $y$. Regula lanțului dă derivata:"
+       }
+      },
+      {
+       "tex": "\\dfrac{\\partial C}{\\partial w}=\\dfrac{\\partial MSE}{\\partial y_x}\\cdot\\dfrac{\\partial y_x}{\\partial w},\\qquad \\dfrac{\\partial C}{\\partial b}=\\dfrac{\\partial MSE}{\\partial y_x}\\cdot\\dfrac{\\partial y_x}{\\partial b}"
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 100'><title>Lanțul w, y, C</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><circle class='fg fill-bg' stroke-width='2.5' cx='30' cy='40' r='20'><title>w</title></circle><text class='fg' font-size='16' font-weight='700' x='30' y='46' text-anchor='middle'>w</text><line class='muted' stroke-width='2' x1='51' y1='40' x2='149' y2='40' marker-end='url(#ah-muted)'/><text class='muted' font-size='14' x='100' y='28' text-anchor='middle'>dy/dw</text><circle class='accent fill-bg' stroke-width='2.5' cx='170' cy='40' r='20'><title>y</title></circle><text class='accent' font-size='16' font-weight='700' x='170' y='46' text-anchor='middle'>y</text><line class='muted' stroke-width='2' x1='191' y1='40' x2='289' y2='40' marker-end='url(#ah-muted)'/><text class='muted' font-size='14' x='240' y='28' text-anchor='middle'>dC/dy</text><circle class='accent fill-bg' stroke-width='2.5' cx='310' cy='40' r='20'><title>C</title></circle><text class='accent' font-size='16' font-weight='700' x='310' y='46' text-anchor='middle'>C</text></svg>",
+        "alt": {
+         "en": "w duce la y, y duce la C",
+         "ro": "w duce la y, y duce la C"
+        },
+        "caption": {
+         "en": "Doi factori: unul de la $w$ la $y$, unul de la $y$ la $C$.",
+         "ro": "Doi factori: unul de la $w$ la $y$, unul de la $y$ la $C$."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s06",
+   "title": {
+    "en": "Primul factor: ∂MSE/∂y",
+    "ro": "Primul factor: ∂MSE/∂y"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 82",
+    "ro": "Cursul 3 · slide 82"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Derivăm costul față de ieșirea unui exemplu. Pătratul dă un 2, care se simplifică cu $\\frac{1}{2}$:",
+        "ro": "Derivăm costul față de ieșirea unui exemplu. Pătratul dă un 2, care se simplifică cu $\\frac{1}{2}$:"
+       }
+      },
+      {
+       "tex": "\\dfrac{\\partial MSE}{\\partial y_x}=-\\dfrac{1}{n}\\,(t_x-y_x)"
+      },
+      {
+       "text": {
+        "en": "Semnul minus vine din $(t-y)^2$ derivat în $y$.",
+        "ro": "Semnul minus vine din $(t-y)^2$ derivat în $y$."
+       }
+      },
+      {
+       "text": {
+        "en": "Slide 82 păstrează suma $\\sum_x$ aici. Pentru un singur $y_x$ rămâne doar termenul lui; suma apare în rezultatul final.",
+        "ro": "Slide 82 păstrează suma $\\sum_x$ aici. Pentru un singur $y_x$ rămâne doar termenul lui; suma apare în rezultatul final."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s07",
+   "title": {
+    "en": "Al doilea factor: ∂y/∂w și ∂y/∂b",
+    "ro": "Al doilea factor: ∂y/∂w și ∂y/∂b"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 83",
+    "ro": "Cursul 3 · slide 83"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cu $y=wx+b$: dacă $w$ crește cu 1, $y$ crește cu $x$; dacă $b$ crește cu 1, $y$ crește cu 1.",
+        "ro": "Cu $y=wx+b$: dacă $w$ crește cu 1, $y$ crește cu $x$; dacă $b$ crește cu 1, $y$ crește cu 1."
+       }
+      },
+      {
+       "tex": "\\dfrac{\\partial y_x}{\\partial w}=x,\\qquad \\dfrac{\\partial y_x}{\\partial b}=1"
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03f-q02",
+     "question": {
+      "en": "Pentru $y=wx+b$ cu $x=3$, cât este $\\partial y/\\partial w$?",
+      "ro": "Pentru $y=wx+b$ cu $x=3$, cât este $\\partial y/\\partial w$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "3",
+        "ro": "3"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: coeficientul lui $w$ este $x$.",
+        "ro": "Corect: coeficientul lui $w$ este $x$."
+       }
+      },
+      {
+       "text": {
+        "en": "1",
+        "ro": "1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Aceasta este $\\partial y/\\partial b$.",
+        "ro": "Aceasta este $\\partial y/\\partial b$."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "$w$",
+        "ro": "$w$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Derivata în $w$ nu mai conține $w$ la o funcție liniară.",
+        "ro": "Derivata în $w$ nu mai conține $w$ la o funcție liniară."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s08",
+   "title": {
+    "en": "Cele două gradiente",
+    "ro": "Cele două gradiente"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 83",
+    "ro": "Cursul 3 · slide 83"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03f-p03",
+     "claim": {
+      "en": "Punem factorii cap la cap, pe toate exemplele: $\\partial C/\\partial w=-\\frac{1}{n}\\sum_x(t_x-y_x)\\,x$ și $\\partial C/\\partial b=-\\frac{1}{n}\\sum_x(t_x-y_x)$. Erorile sunt $(2;\\,4;\\,5)$.",
+      "ro": "Punem factorii cap la cap, pe toate exemplele: $\\partial C/\\partial w=-\\frac{1}{n}\\sum_x(t_x-y_x)\\,x$ și $\\partial C/\\partial b=-\\frac{1}{n}\\sum_x(t_x-y_x)$. Erorile sunt $(2;\\,4;\\,5)$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$\\sum(t-y)x=2\\cdot 1+4\\cdot 2+5\\cdot 3=25$",
+        "ro": "$\\sum(t-y)x=2\\cdot 1+4\\cdot 2+5\\cdot 3=25$"
+       },
+       "why": {
+        "en": "Fiecare eroare cu intrarea ei.",
+        "ro": "Fiecare eroare cu intrarea ei."
+       },
+       "predict": {
+        "question": {
+         "en": "Suma $2\\cdot 1+4\\cdot 2+5\\cdot 3$:",
+         "ro": "Suma $2\\cdot 1+4\\cdot 2+5\\cdot 3$:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "25",
+           "ro": "25"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "11",
+           "ro": "11"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat doar erorile: $2+4+5$. Pentru $w$ înmulțești cu $x$.",
+           "ro": "Ai adunat doar erorile: $2+4+5$. Pentru $w$ înmulțești cu $x$."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "45",
+           "ro": "45"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e suma pătratelor.",
+           "ro": "Aceea e suma pătratelor."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\partial C/\\partial w=-25/3\\approx-8{,}3333$",
+        "ro": "$\\partial C/\\partial w=-25/3\\approx-8{,}3333$"
+       },
+       "why": {
+        "en": "Împărțim la $n=3$.",
+        "ro": "Împărțim la $n=3$."
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\partial C/\\partial b=-(2+4+5)/3\\approx-3{,}6667$",
+        "ro": "$\\partial C/\\partial b=-(2+4+5)/3\\approx-3{,}6667$"
+       },
+       "why": {
+        "en": "Pentru $b$, $\\partial y/\\partial b=1$: doar erorile.",
+        "ro": "Pentru $b$, $\\partial y/\\partial b=1$: doar erorile."
+       },
+       "predict": {
+        "question": {
+         "en": "Gradientul pe $b$: minus media erorilor $(2;\\,4;\\,5)$.",
+         "ro": "Gradientul pe $b$: minus media erorilor $(2;\\,4;\\,5)$."
+        },
+        "options": [
+         {
+          "text": {
+           "en": "−3,6667",
+           "ro": "−3,6667"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $-11/3$.",
+           "ro": "Corect: $-11/3$."
+          }
+         },
+         {
+          "text": {
+           "en": "−8,3333",
+           "ro": "−8,3333"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e pentru $w$.",
+           "ro": "Aceea e pentru $w$."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "3,6667",
+           "ro": "3,6667"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Semnul este minus.",
+           "ro": "Semnul este minus."
+          },
+          "misconception": "semn-gresit"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Ambele gradiente sunt negative: costul scade dacă $w$ și $b$ cresc.",
+      "ro": "Ambele gradiente sunt negative: costul scade dacă $w$ și $b$ cresc."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s09",
+   "title": {
+    "en": "Actualizarea se citește cu plus",
+    "ro": "Actualizarea se citește cu plus"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 84",
+    "ro": "Cursul 3 · slide 84"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Gradientul are minus în față, deci scăderea lui devine adunare.",
+      "ro": "Gradientul are minus în față, deci scăderea lui devine adunare."
+     },
+     "body": [
+      {
+       "tex": "w\\leftarrow w+\\dfrac{\\eta}{n}\\sum_x(t_x-y_x)\\,x,\\qquad b\\leftarrow b+\\dfrac{\\eta}{n}\\sum_x(t_x-y_x)"
+      },
+      {
+       "note": {
+        "en": "Slide 84 are un $\\eta$ în plus în linia lui $b$ (tipar); formula corectă e cea de aici.",
+        "ro": "Slide 84 are un $\\eta$ în plus în linia lui $b$ (tipar); formula corectă e cea de aici."
+       }
+      }
+     ]
+    },
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Eroare pozitivă (ieșirea prea mică): $w$ crește. Eroare negativă: $w$ scade.",
+        "ro": "Eroare pozitivă (ieșirea prea mică): $w$ crește. Eroare negativă: $w$ scade."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s10",
+   "title": {
+    "en": "Calculează noul w și b",
+    "ro": "Calculează noul w și b"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 84",
+    "ro": "Cursul 3 · slide 84"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03f-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Gradientul pe $w$ este $−8,3333$ și pe $b$ este $−3,6667$. Pornești din $w=0$, $b=0$ cu $\\eta=0,1$. Calculează $w$ și $b$ după pas.",
+      "ro": "Gradientul pe $w$ este $−8,3333$ și pe $b$ este $−3,6667$. Pornești din $w=0$, $b=0$ cu $\\eta=0,1$. Calculează $w$ și $b$ după pas."
+     },
+     "fields": [
+      {
+       "id": "w",
+       "label": {
+        "en": "w nou",
+        "ro": "w nou"
+       },
+       "kind": "num",
+       "formula": "w0 - e*gw",
+       "expected": 0.8333
+      },
+      {
+       "id": "b",
+       "label": {
+        "en": "b nou",
+        "ro": "b nou"
+       },
+       "kind": "num",
+       "formula": "b0 - e*gb",
+       "expected": 0.3667
+      }
+     ],
+     "data": {
+      "gw": -8.3333,
+      "gb": -3.6667,
+      "w0": 0,
+      "b0": 0,
+      "e": 0.1
+     },
+     "detectors": [
+      {
+       "field": "w",
+       "formula": "w0 + e*gw",
+       "message": {
+        "en": "Ai adunat gradientul. Regula scade: $w-\\eta\\,\\partial C/\\partial w$. Gradientul e negativ, deci $w$ crește.",
+        "ro": "Ai adunat gradientul. Regula scade: $w-\\eta\\,\\partial C/\\partial w$. Gradientul e negativ, deci $w$ crește."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Noul $w$ este $w-\\eta\\cdot$ gradient.",
+       "ro": "Noul $w$ este $w-\\eta\\cdot$ gradient."
+      },
+      {
+       "en": "$0-0{,}1\\cdot(-8{,}3333)$",
+       "ro": "$0-0{,}1\\cdot(-8{,}3333)$"
+      },
+      {
+       "en": "Același lucru pentru $b$.",
+       "ro": "Același lucru pentru $b$."
+      }
+     ],
+     "solution": {
+      "en": "$w=0+0{,}8333=0{,}8333$; $b=0+0{,}3667=0{,}3667$.",
+      "ro": "$w=0+0{,}8333=0{,}8333$; $b=0+0{,}3667=0{,}3667$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Gradientul pe $w$ este $1,5$ și pe $b$ este $−2$. Pornești din $w=2$, $b=1$ cu $\\eta=0,2$. Calculează $w$ și $b$ după pas.",
+        "ro": "Gradientul pe $w$ este $1,5$ și pe $b$ este $−2$. Pornești din $w=2$, $b=1$ cu $\\eta=0,2$. Calculează $w$ și $b$ după pas."
+       },
+       "fields": [
+        {
+         "id": "w",
+         "formula": "w0 - e*gw",
+         "expected": 1.7
+        },
+        {
+         "id": "b",
+         "formula": "b0 - e*gb",
+         "expected": 1.4
+        }
+       ],
+       "solution": {
+        "en": "$w=2-0{,}2\\cdot 1{,}5=1{,}7$; $b=1+0{,}4=1{,}4$.",
+        "ro": "$w=2-0{,}2\\cdot 1{,}5=1{,}7$; $b=1+0{,}4=1{,}4$."
+       },
+       "data": {
+        "gw": 1.5,
+        "gb": -2,
+        "w0": 2,
+        "b0": 1,
+        "e": 0.2
+       },
+       "hints": [
+        {
+         "en": "$w-\\eta\\cdot$ gradient.",
+         "ro": "$w-\\eta\\cdot$ gradient."
+        },
+        {
+         "en": "$2-0{,}2\\cdot 1{,}5$",
+         "ro": "$2-0{,}2\\cdot 1{,}5$"
+        },
+        {
+         "en": "$1{,}7$ și $1{,}4$.",
+         "ro": "$1{,}7$ și $1{,}4$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Gradientul pe $w$ este $−3,7111$ și pe $b$ este $−1,6333$. Pornești din $w=0,8333$, $b=0,3667$ cu $\\eta=0,1$. Calculează $w$ și $b$ după pas.",
+        "ro": "Gradientul pe $w$ este $−3,7111$ și pe $b$ este $−1,6333$. Pornești din $w=0,8333$, $b=0,3667$ cu $\\eta=0,1$. Calculează $w$ și $b$ după pas."
+       },
+       "fields": [
+        {
+         "id": "w",
+         "formula": "w0 - e*gw",
+         "expected": 1.2044
+        },
+        {
+         "id": "b",
+         "formula": "b0 - e*gb",
+         "expected": 0.53
+        }
+       ],
+       "solution": {
+        "en": "$w\\approx1{,}2044$; $b\\approx0{,}53$.",
+        "ro": "$w\\approx1{,}2044$; $b\\approx0{,}53$."
+       },
+       "data": {
+        "gw": -3.7111,
+        "gb": -1.6333,
+        "w0": 0.8333,
+        "b0": 0.3667,
+        "e": 0.1
+       },
+       "hints": [
+        {
+         "en": "$w-\\eta\\cdot$ gradient.",
+         "ro": "$w-\\eta\\cdot$ gradient."
+        },
+        {
+         "en": "$0{,}8333+0{,}3711$",
+         "ro": "$0{,}8333+0{,}3711$"
+        },
+        {
+         "en": "$1{,}2044$ și $0{,}53$.",
+         "ro": "$1{,}2044$ și $0{,}53$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s11",
+   "title": {
+    "en": "A doua rundă",
+    "ro": "A doua rundă"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 84",
+    "ro": "Cursul 3 · slide 84"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cu $w=0{,}8333$, $b=0{,}3667$:",
+        "ro": "Cu $w=0{,}8333$, $b=0{,}3667$:"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "x",
+         "t",
+         "y",
+         "t − y"
+        ],
+        "rows": [
+         [
+          "1",
+          "2",
+          "1,2",
+          "0,8"
+         ],
+         [
+          "2",
+          "4",
+          "2,0333",
+          "1,9667"
+         ],
+         [
+          "3",
+          "5",
+          "2,8667",
+          "2,1333"
+         ]
+        ]
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Costul: 1,5098 (de la 7,5).",
+       "ro": "Costul: 1,5098 (de la 7,5)."
+      },
+      {
+       "en": "Gradienți: $-3{,}7111$ și $-1{,}6333$.",
+       "ro": "Gradienți: $-3{,}7111$ și $-1{,}6333$."
+      },
+      {
+       "en": "Nou: $w=1{,}2044$, $b=0{,}53$.",
+       "ro": "Nou: $w=1{,}2044$, $b=0{,}53$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s12",
+   "title": {
+    "en": "A treia rundă: dreapta se mișcă",
+    "ro": "A treia rundă: dreapta se mișcă"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 84",
+    "ro": "Cursul 3 · slide 84"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Runda 3 are costul $0{,}3217$ și dă $w=1{,}3697$, $b=0{,}6028$. Dreapta se apropie de puncte.",
+        "ro": "Runda 3 are costul $0{,}3217$ și dă $w=1{,}3697$, $b=0{,}6028$. Dreapta se apropie de puncte."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Dreapta după fiecare rundă</title><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='44' y1='151' x2='44' y2='157'/><text class='muted' font-size='14' x='44' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='111.5' y1='151' x2='111.5' y2='157'/><text class='muted' font-size='14' x='111.5' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='179' y1='151' x2='179' y2='157'/><text class='muted' font-size='14' x='179' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='246.5' y1='151' x2='246.5' y2='157'/><text class='muted' font-size='14' x='246.5' y='172' text-anchor='middle'>3</text><line class='muted' stroke-width='1.5' x1='314' y1='151' x2='314' y2='157'/><text class='muted' font-size='14' x='314' y='172' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='107.3' x2='47' y2='107.3'/><text class='muted' font-size='14' x='38' y='112.3' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='60.7' x2='47' y2='60.7'/><text class='muted' font-size='14' x='38' y='65.7' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='14' x2='47' y2='14'/><text class='muted' font-size='14' x='38' y='19' text-anchor='end'>6</text><polyline class='muted' stroke-width='2.5' fill='none' points='44,154 71,154 98,154 125,154 152,154 179,154 206,154 233,154 260,154 287,154 314,154'/><polyline class='muted' stroke-width='2.5' fill='none' points='44,145.4 71,137.7 98,129.9 125,122.1 152,114.3 179,106.6 206,98.8 233,91 260,83.2 287,75.4 314,67.7'/><polyline class='warn' stroke-width='2.5' fill='none' points='44,141.6 71,130.4 98,119.2 125,107.9 152,96.7 179,85.4 206,74.2 233,62.9 260,51.7 287,40.5 314,29.2'/><polyline class='accent' stroke-width='2.5' fill='none' points='44,139.9 71,127.2 98,114.4 125,101.6 152,88.8 179,76 206,63.2 233,50.4 260,37.7 287,24.9 314,12.1'/><circle class='warn fill-warn' stroke-width='2' cx='111.5' cy='107.3' r='5'><title>(1; 2)</title></circle><circle class='warn fill-warn' stroke-width='2' cx='179' cy='60.7' r='5'><title>(2; 4)</title></circle><circle class='warn fill-warn' stroke-width='2' cx='246.5' cy='37.3' r='5'><title>(3; 5)</title></circle><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+        "alt": {
+         "en": "Patru drepte care se rotesc și urcă spre cele trei puncte",
+         "ro": "Patru drepte care se rotesc și urcă spre cele trei puncte"
+        },
+        "caption": {
+         "en": "Dreapta cea mai de sus e cea mai nouă.",
+         "ro": "Dreapta cea mai de sus e cea mai nouă."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Cea mai bună dreaptă (ajustarea exactă) este $w=1{,}5$, $b=0{,}6667$. Rundele merg spre ea.",
+        "ro": "Cea mai bună dreaptă (ajustarea exactă) este $w=1{,}5$, $b=0{,}6667$. Rundele merg spre ea."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s13",
+   "title": {
+    "en": "Pornim prea sus: w = 3",
+    "ro": "Pornim prea sus: w = 3"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 84",
+    "ro": "Cursul 3 · slide 84"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Acum $w=3$, $b=0$: dreapta e mai sus decât toate punctele. $y=(3;\\,6;\\,9)$, erorile $t-y=(-1;\\,-2;\\,-4)$, costul $3{,}5$.",
+        "ro": "Acum $w=3$, $b=0$: dreapta e mai sus decât toate punctele. $y=(3;\\,6;\\,9)$, erorile $t-y=(-1;\\,-2;\\,-4)$, costul $3{,}5$."
+       }
+      },
+      {
+       "text": {
+        "en": "Gradienții: $\\partial C/\\partial w=+5{,}6667$ și $\\partial C/\\partial b=+2{,}3333$.",
+        "ro": "Gradienții: $\\partial C/\\partial w=+5{,}6667$ și $\\partial C/\\partial b=+2{,}3333$."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03f-q05",
+     "question": {
+      "en": "Cu $\\eta=0{,}1$ și gradienții de mai sus, ce face $w$?",
+      "ro": "Cu $\\eta=0{,}1$ și gradienții de mai sus, ce face $w$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Scade, la $2{,}4333$",
+        "ro": "Scade, la $2{,}4333$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: eroarea e negativă (ieșirea prea mare), deci aceeași regulă coboară $w$.",
+        "ro": "Corect: eroarea e negativă (ieșirea prea mare), deci aceeași regulă coboară $w$."
+       }
+      },
+      {
+       "text": {
+        "en": "Crește, la $3{,}5667$",
+        "ro": "Crește, la $3{,}5667$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Gradientul este pozitiv, iar regula scade din $w$.",
+        "ro": "Gradientul este pozitiv, iar regula scade din $w$."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "Rămâne $3$",
+        "ro": "Rămâne $3$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Gradientul nu e 0.",
+        "ro": "Gradientul nu e 0."
+       },
+       "misconception": "regula-gresita"
+      }
+     ],
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 200'><title>Dreapta w = 3</title><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='44' y1='151' x2='44' y2='157'/><text class='muted' font-size='14' x='44' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='111.5' y1='151' x2='111.5' y2='157'/><text class='muted' font-size='14' x='111.5' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='179' y1='151' x2='179' y2='157'/><text class='muted' font-size='14' x='179' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='246.5' y1='151' x2='246.5' y2='157'/><text class='muted' font-size='14' x='246.5' y='172' text-anchor='middle'>3</text><line class='muted' stroke-width='1.5' x1='314' y1='151' x2='314' y2='157'/><text class='muted' font-size='14' x='314' y='172' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='126' x2='47' y2='126'/><text class='muted' font-size='14' x='38' y='131' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='98' x2='47' y2='98'/><text class='muted' font-size='14' x='38' y='103' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='70' x2='47' y2='70'/><text class='muted' font-size='14' x='38' y='75' text-anchor='end'>6</text><polyline class='muted' stroke-width='2.5' fill='none' points='44,154 71,137.2 98,120.4 125,103.6 152,86.8 179,70 206,53.2 233,36.4 260,19.6 287,2.8 314,-14'/><circle class='warn fill-warn' stroke-width='2' cx='111.5' cy='126' r='5'><title>(1; 2)</title></circle><circle class='warn fill-warn' stroke-width='2' cx='179' cy='98' r='5'><title>(2; 4)</title></circle><circle class='warn fill-warn' stroke-width='2' cx='246.5' cy='84' r='5'><title>(3; 5)</title></circle><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+      "alt": {
+       "en": "Dreapta w egal 3 trece deasupra celor trei puncte",
+       "ro": "Dreapta w egal 3 trece deasupra celor trei puncte"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s14",
+   "title": {
+    "en": "Aceeași regulă ca în cursul 2",
+    "ro": "Aceeași regulă ca în cursul 2"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 85",
+    "ro": "Cursul 3 · slide 85"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide 85 spune: regula e aceeași cu cea din cursul anterior. În curs 2, pasul se aduna pe exemplu: $\\Delta\\mathrel{+}=x\\cdot\\alpha\\cdot\\text{eroare}$.",
+        "ro": "Slide 85 spune: regula e aceeași cu cea din cursul anterior. În curs 2, pasul se aduna pe exemplu: $\\Delta\\mathrel{+}=x\\cdot\\alpha\\cdot\\text{eroare}$."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "aspect",
+         "cursul 2",
+         "cursul 3"
+        ],
+        "rows": [
+         [
+          "rata",
+          "α",
+          "η"
+         ],
+         [
+          "media",
+          "fără 1/n",
+          "cu 1/n"
+         ],
+         [
+          "semnul",
+          "+ eroare",
+          "− gradient"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Aceeași idee: ajustezi în funcție de eroare și de intrare. Diferă litera pentru rată și constanta $1/n$.",
+        "ro": "Aceeași idee: ajustezi în funcție de eroare și de intrare. Diferă litera pentru rată și constanta $1/n$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s15",
+   "title": {
+    "en": "Punem o sigmoidă",
+    "ro": "Punem o sigmoidă"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 86",
+    "ro": "Cursul 3 · slide 86"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Același neuron, dar cu activare logistică: $y=\\sigma(z)$, $z=wx+b$. (Slide 86: «fără activare la intrare» înseamnă că intrarea trece neschimbată.)",
+        "ro": "Același neuron, dar cu activare logistică: $y=\\sigma(z)$, $z=wx+b$. (Slide 86: «fără activare la intrare» înseamnă că intrarea trece neschimbată.)"
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 170'><title>Neuron logistic</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='2' x1='62' y1='45' x2='163' y2='85' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='45' r='20'><title>intrarea 1</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='50' text-anchor='middle'>x</text><text class='accent' font-size='14' font-weight='700' x='112' y='57' text-anchor='middle'>w</text><line class='muted' stroke-width='2' x1='62' y1='125' x2='163' y2='85' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='125' r='20'><title>intrarea 2</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='130' text-anchor='middle'>1</text><text class='accent' font-size='14' font-weight='700' x='108' y='97' text-anchor='middle'>b</text><circle class='fg fill-bg' stroke-width='2.5' cx='190' cy='85' r='26'><title>suma ponderată</title></circle><text class='fg' font-size='17' font-weight='700' x='190' y='91' text-anchor='middle'>z</text><line class='muted' stroke-width='2' x1='217' y1='85' x2='248' y2='85' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='250' y='63' width='44' height='44' rx='6'><title>activarea</title></rect><text class='accent' font-size='17' font-weight='700' x='272' y='91' text-anchor='middle'>f</text><line class='muted' stroke-width='2' x1='295' y1='85' x2='322' y2='85' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='310' y='75' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Ca Adaline, dar după z urmează sigmoida",
+         "ro": "Ca Adaline, dar după z urmează sigmoida"
+        },
+        "caption": {
+         "en": "Ieșirea este $y=\\sigma(z)$.",
+         "ro": "Ieșirea este $y=\\sigma(z)$."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s16",
+   "title": {
+    "en": "Un factor nou în lanț",
+    "ro": "Un factor nou în lanț"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 87",
+    "ro": "Cursul 3 · slide 87"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Acum $y$ nu mai este $z$. Între $z$ și $y$ e sigmoida, deci lanțul are un factor în plus:",
+        "ro": "Acum $y$ nu mai este $z$. Între $z$ și $y$ e sigmoida, deci lanțul are un factor în plus:"
+       }
+      },
+      {
+       "tex": "\\dfrac{\\partial C}{\\partial w}=\\dfrac{\\partial MSE}{\\partial y_x}\\cdot\\dfrac{\\partial y_x}{\\partial z_x}\\cdot\\dfrac{\\partial z_x}{\\partial w}"
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 100'><title>Lanțul w, z, y, C</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><circle class='fg fill-bg' stroke-width='2.5' cx='30' cy='40' r='20'><title>w</title></circle><text class='fg' font-size='16' font-weight='700' x='30' y='46' text-anchor='middle'>w</text><line class='muted' stroke-width='2' x1='51' y1='40' x2='102.3' y2='40' marker-end='url(#ah-muted)'/><text class='muted' font-size='14' x='76.7' y='28' text-anchor='middle'>dz/dw</text><circle class='accent fill-bg' stroke-width='2.5' cx='123.3' cy='40' r='20'><title>z</title></circle><text class='accent' font-size='16' font-weight='700' x='123.3' y='46' text-anchor='middle'>z</text><line class='muted' stroke-width='2' x1='144.3' y1='40' x2='195.7' y2='40' marker-end='url(#ah-muted)'/><text class='muted' font-size='14' x='170' y='28' text-anchor='middle'>dy/dz</text><circle class='accent fill-bg' stroke-width='2.5' cx='216.7' cy='40' r='20'><title>y</title></circle><text class='accent' font-size='16' font-weight='700' x='216.7' y='46' text-anchor='middle'>y</text><line class='muted' stroke-width='2' x1='237.7' y1='40' x2='289' y2='40' marker-end='url(#ah-muted)'/><text class='muted' font-size='14' x='263.3' y='28' text-anchor='middle'>dC/dy</text><circle class='accent fill-bg' stroke-width='2.5' cx='310' cy='40' r='20'><title>C</title></circle><text class='accent' font-size='16' font-weight='700' x='310' y='46' text-anchor='middle'>C</text></svg>",
+        "alt": {
+         "en": "Patru cercuri înlănțuite: w, z, y, C",
+         "ro": "Patru cercuri înlănțuite: w, z, y, C"
+        },
+        "caption": {
+         "en": "Singurul factor nou este $\\partial y/\\partial z$.",
+         "ro": "Singurul factor nou este $\\partial y/\\partial z$."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s17",
+   "title": {
+    "en": "Derivata sigmoidei, linie cu linie",
+    "ro": "Derivata sigmoidei, linie cu linie"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 88",
+    "ro": "Cursul 3 · slide 88"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03f-p06",
+     "claim": {
+      "en": "Pornim de la $y=\\sigma(z)=\\dfrac{1}{1+e^{-z}}$ și căutăm $\\dfrac{\\partial y}{\\partial z}$.",
+      "ro": "Pornim de la $y=\\sigma(z)=\\dfrac{1}{1+e^{-z}}$ și căutăm $\\dfrac{\\partial y}{\\partial z}$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$\\dfrac{\\partial y}{\\partial z}=\\dfrac{e^{-z}}{(1+e^{-z})^2}$",
+        "ro": "$\\dfrac{\\partial y}{\\partial z}=\\dfrac{e^{-z}}{(1+e^{-z})^2}$"
+       },
+       "why": {
+        "en": "Regula lanțului pe $1/(1+e^{-z})$. Slide 88 scrie $d\\sigma'/dz$; corect e $d\\sigma/dz$.",
+        "ro": "Regula lanțului pe $1/(1+e^{-z})$. Slide 88 scrie $d\\sigma'/dz$; corect e $d\\sigma/dz$."
+       }
+      },
+      {
+       "shown": {
+        "en": "$=\\dfrac{1}{1+e^{-z}}\\cdot\\dfrac{e^{-z}}{1+e^{-z}}$",
+        "ro": "$=\\dfrac{1}{1+e^{-z}}\\cdot\\dfrac{e^{-z}}{1+e^{-z}}$"
+       },
+       "why": {
+        "en": "Despărțim în doi factori.",
+        "ro": "Despărțim în doi factori."
+       },
+       "predict": {
+        "question": {
+         "en": "Primul factor, $\\dfrac{1}{1+e^{-z}}$, este chiar:",
+         "ro": "Primul factor, $\\dfrac{1}{1+e^{-z}}$, este chiar:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$y$",
+           "ro": "$y$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: asta e definiția lui $\\sigma(z)$.",
+           "ro": "Corect: asta e definiția lui $\\sigma(z)$."
+          }
+         },
+         {
+          "text": {
+           "en": "$1-y$",
+           "ro": "$1-y$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceasta este celălalt factor.",
+           "ro": "Aceasta este celălalt factor."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "$z$",
+           "ro": "$z$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Nu, e sigmoida lui $z$.",
+           "ro": "Nu, e sigmoida lui $z$."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\dfrac{e^{-z}}{1+e^{-z}}=1-\\dfrac{1}{1+e^{-z}}=1-y$",
+        "ro": "$\\dfrac{e^{-z}}{1+e^{-z}}=1-\\dfrac{1}{1+e^{-z}}=1-y$"
+       },
+       "why": {
+        "en": "Al doilea factor.",
+        "ro": "Al doilea factor."
+       },
+       "predict": {
+        "question": {
+         "en": "Al doilea factor, $\\dfrac{e^{-z}}{1+e^{-z}}$, este:",
+         "ro": "Al doilea factor, $\\dfrac{e^{-z}}{1+e^{-z}}$, este:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$1-y$",
+           "ro": "$1-y$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $\\frac{1+e^{-z}-1}{1+e^{-z}}$.",
+           "ro": "Corect: $\\frac{1+e^{-z}-1}{1+e^{-z}}$."
+          }
+         },
+         {
+          "text": {
+           "en": "$y$",
+           "ro": "$y$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e primul.",
+           "ro": "Aceea e primul."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "$1+y$",
+           "ro": "$1+y$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Semnul este minus.",
+           "ro": "Semnul este minus."
+          },
+          "misconception": "semn-gresit"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\dfrac{\\partial y}{\\partial z}=y\\,(1-y)$",
+        "ro": "$\\dfrac{\\partial y}{\\partial z}=y\\,(1-y)$"
+       },
+       "why": {
+        "en": "Înmulțim.",
+        "ro": "Înmulțim."
+       }
+      }
+     ],
+     "end": {
+      "en": "Derivata sigmoidei se scrie cu ieșirea ei: $\\sigma'(z)=y(1-y)$.",
+      "ro": "Derivata sigmoidei se scrie cu ieșirea ei: $\\sigma'(z)=y(1-y)$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s18",
+   "title": {
+    "en": "Calculează σ′",
+    "ro": "Calculează σ′"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 88",
+    "ro": "Cursul 3 · slide 88"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03f-e07",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Un neuron logistic dă $y=0,7311$. Calculează $\\sigma'(z)=y(1-y)$ (patru zecimale).",
+      "ro": "Un neuron logistic dă $y=0,7311$. Calculează $\\sigma'(z)=y(1-y)$ (patru zecimale)."
+     },
+     "fields": [
+      {
+       "id": "s",
+       "label": {
+        "en": "σ'(z)",
+        "ro": "σ'(z)"
+       },
+       "kind": "num",
+       "formula": "y*(1-y)",
+       "expected": 0.1966
+      }
+     ],
+     "data": {
+      "y": 0.7311
+     },
+     "detectors": [
+      {
+       "field": "s",
+       "formula": "y",
+       "message": {
+        "en": "Ai luat doar $y$. Derivata este $y(1-y)$.",
+        "ro": "Ai luat doar $y$. Derivata este $y(1-y)$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Formula folosește doar $y$.",
+       "ro": "Formula folosește doar $y$."
+      },
+      {
+       "en": "$y(1-y)=0{,}7311\\cdot 0{,}2689$",
+       "ro": "$y(1-y)=0{,}7311\\cdot 0{,}2689$"
+      },
+      {
+       "en": "Înmulțește.",
+       "ro": "Înmulțește."
+      }
+     ],
+     "solution": {
+      "en": "$0{,}7311\\cdot 0{,}2689\\approx 0{,}1966$. Aceasta e panta sigmoidei în $z=1$.",
+      "ro": "$0{,}7311\\cdot 0{,}2689\\approx 0{,}1966$. Aceasta e panta sigmoidei în $z=1$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Un neuron logistic dă $y=0,8808$. Calculează $\\sigma'(z)=y(1-y)$ (patru zecimale).",
+        "ro": "Un neuron logistic dă $y=0,8808$. Calculează $\\sigma'(z)=y(1-y)$ (patru zecimale)."
+       },
+       "fields": [
+        {
+         "id": "s",
+         "formula": "y*(1-y)",
+         "expected": 0.105,
+         "tol": 0.0005
+        }
+       ],
+       "solution": {
+        "en": "$0{,}8808\\cdot 0{,}1192\\approx 0{,}1050$ (panta în $z=2$).",
+        "ro": "$0{,}8808\\cdot 0{,}1192\\approx 0{,}1050$ (panta în $z=2$)."
+       },
+       "data": {
+        "y": 0.8808
+       },
+       "hints": [
+        {
+         "en": "$y(1-y)$.",
+         "ro": "$y(1-y)$."
+        },
+        {
+         "en": "$0{,}8808\\cdot 0{,}1192$",
+         "ro": "$0{,}8808\\cdot 0{,}1192$"
+        },
+        {
+         "en": "$0{,}105$.",
+         "ro": "$0{,}105$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Un neuron logistic dă $y=0,5$. Calculează $\\sigma'(z)=y(1-y)$ (patru zecimale).",
+        "ro": "Un neuron logistic dă $y=0,5$. Calculează $\\sigma'(z)=y(1-y)$ (patru zecimale)."
+       },
+       "fields": [
+        {
+         "id": "s",
+         "formula": "y*(1-y)",
+         "expected": 0.25
+        }
+       ],
+       "solution": {
+        "en": "$0{,}5\\cdot 0{,}5=0{,}25$, pantă maximă în $z=0$.",
+        "ro": "$0{,}5\\cdot 0{,}5=0{,}25$, pantă maximă în $z=0$."
+       },
+       "data": {
+        "y": 0.5
+       },
+       "hints": [
+        {
+         "en": "$y(1-y)$.",
+         "ro": "$y(1-y)$."
+        },
+        {
+         "en": "$0{,}5\\cdot 0{,}5$",
+         "ro": "$0{,}5\\cdot 0{,}5$"
+        },
+        {
+         "en": "$0{,}25$.",
+         "ro": "$0{,}25$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s19",
+   "title": {
+    "en": "Gradientul neuronului logistic",
+    "ro": "Gradientul neuronului logistic"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 89",
+    "ro": "Cursul 3 · slide 89"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Gradientul de la Adaline se înmulțește în plus cu derivata activării.",
+      "ro": "Gradientul de la Adaline se înmulțește în plus cu derivata activării."
+     },
+     "body": [
+      {
+       "tex": "\\dfrac{\\partial C}{\\partial w}=-\\dfrac{1}{n}\\sum_x(t_x-y_x)\\,y_x(1-y_x)\\,x"
+      },
+      {
+       "points": [
+        {
+         "en": "$(t-y)$: eroarea",
+         "ro": "$(t-y)$: eroarea"
+        },
+        {
+         "en": "$y(1-y)$: factorul nou, panta sigmoidei",
+         "ro": "$y(1-y)$: factorul nou, panta sigmoidei"
+        },
+        {
+         "en": "$x$: intrarea, ca la Adaline",
+         "ro": "$x$: intrarea, ca la Adaline"
+        }
+       ]
+      },
+      {
+       "note": {
+        "en": "Perechea este MSE cu sigmoidă. Cu cross-entropy factorul $y(1-y)$ se simplifică; vezi pachetul de urgență.",
+        "ro": "Perechea este MSE cu sigmoidă. Cu cross-entropy factorul $y(1-y)$ se simplifică; vezi pachetul de urgență."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s20",
+   "title": {
+    "en": "Un exemplu cu un singur punct",
+    "ro": "Un exemplu cu un singur punct"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 89–90",
+    "ro": "Cursul 3 · slide 89–90"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03f-p08",
+     "claim": {
+      "en": "Un exemplu: $x=2$, $t=1$, $w=0{,}5$, $b=0$. Calculăm gradientul lui $w$.",
+      "ro": "Un exemplu: $x=2$, $t=1$, $w=0{,}5$, $b=0$. Calculăm gradientul lui $w$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$z=0{,}5\\cdot 2+0=1$, $y=\\sigma(1)=0{,}7311$",
+        "ro": "$z=0{,}5\\cdot 2+0=1$, $y=\\sigma(1)=0{,}7311$"
+       },
+       "why": {
+        "en": "Trecerea înainte.",
+        "ro": "Trecerea înainte."
+       }
+      },
+      {
+       "shown": {
+        "en": "Eroarea $t-y=0{,}2689$; $y(1-y)=0{,}1966$",
+        "ro": "Eroarea $t-y=0{,}2689$; $y(1-y)=0{,}1966$"
+       },
+       "why": {
+        "en": "Cei doi factori.",
+        "ro": "Cei doi factori."
+       },
+       "predict": {
+        "question": {
+         "en": "Cu $t=1$ și $y=0{,}7311$, cât este $t-y$?",
+         "ro": "Cu $t=1$ și $y=0{,}7311$, cât este $t-y$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "0,2689",
+           "ro": "0,2689"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "−0,2689",
+           "ro": "−0,2689"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ținta e mai mare decât ieșirea, deci eroarea e pozitivă.",
+           "ro": "Ținta e mai mare decât ieșirea, deci eroarea e pozitivă."
+          },
+          "misconception": "semn-gresit"
+         },
+         {
+          "text": {
+           "en": "0,7311",
+           "ro": "0,7311"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e $y$.",
+           "ro": "Aceea e $y$."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\partial C/\\partial w=-0{,}2689\\cdot 0{,}1966\\cdot 2=-0{,}1058$",
+        "ro": "$\\partial C/\\partial w=-0{,}2689\\cdot 0{,}1966\\cdot 2=-0{,}1058$"
+       },
+       "why": {
+        "en": "Cu $n=1$ și $x=2$.",
+        "ro": "Cu $n=1$ și $x=2$."
+       },
+       "predict": {
+        "question": {
+         "en": "Produsul $0{,}2689\\cdot 0{,}1966\\cdot 2$ (cu minus în față):",
+         "ro": "Produsul $0{,}2689\\cdot 0{,}1966\\cdot 2$ (cu minus în față):"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "−0,1058",
+           "ro": "−0,1058"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "−0,5379",
+           "ro": "−0,5379"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai uitat factorul $y(1-y)$ (varianta Adaline).",
+           "ro": "Ai uitat factorul $y(1-y)$ (varianta Adaline)."
+          },
+          "misconception": "un-singur-termen"
+         },
+         {
+          "text": {
+           "en": "0,1058",
+           "ro": "0,1058"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Gradientul are minus în față.",
+           "ro": "Gradientul are minus în față."
+          },
+          "misconception": "semn-gresit"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\partial C/\\partial b=-0{,}2689\\cdot 0{,}1966\\cdot 1=-0{,}0529$",
+        "ro": "$\\partial C/\\partial b=-0{,}2689\\cdot 0{,}1966\\cdot 1=-0{,}0529$"
+       },
+       "why": {
+        "en": "Pentru $b$, $\\partial z/\\partial b=1$.",
+        "ro": "Pentru $b$, $\\partial z/\\partial b=1$."
+       }
+      }
+     ],
+     "end": {
+      "en": "Costul acestui exemplu: $\\frac{1}{2}\\cdot 0{,}2689^2\\approx 0{,}0362$.",
+      "ro": "Costul acestui exemplu: $\\frac{1}{2}\\cdot 0{,}2689^2\\approx 0{,}0362$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s21",
+   "title": {
+    "en": "Același punct, regula Adaline",
+    "ro": "Același punct, regula Adaline"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 89",
+    "ro": "Cursul 3 · slide 89"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Dacă am folosi regula Adaline pe aceeași ieșire, ar fi $-(t-y)x=-0{,}2689\\cdot 2=-0{,}5379$.",
+        "ro": "Dacă am folosi regula Adaline pe aceeași ieșire, ar fi $-(t-y)x=-0{,}2689\\cdot 2=-0{,}5379$."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "regula",
+         "∂C/∂w"
+        ],
+        "rows": [
+         [
+          "Adaline",
+          "−0,5379"
+         ],
+         [
+          "logistic",
+          "−0,1058"
+         ]
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03f-q09",
+     "question": {
+      "en": "De ce e gradientul logistic mai mic (în valoare absolută)?",
+      "ro": "De ce e gradientul logistic mai mic (în valoare absolută)?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Se înmulțește cu $y(1-y)=0{,}1966<1$",
+        "ro": "Se înmulțește cu $y(1-y)=0{,}1966<1$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: panta sigmoidei e cel mult 0,25, deci micșorează gradientul.",
+        "ro": "Corect: panta sigmoidei e cel mult 0,25, deci micșorează gradientul."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că $x$ e mai mic",
+        "ro": "Pentru că $x$ e mai mic"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$x=2$ în ambele.",
+        "ro": "$x=2$ în ambele."
+       },
+       "misconception": "motiv-gresit"
+      },
+      {
+       "text": {
+        "en": "Pentru că eroarea e mai mică",
+        "ro": "Pentru că eroarea e mai mică"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Eroarea $t-y=0{,}2689$ este aceeași.",
+        "ro": "Eroarea $t-y=0{,}2689$ este aceeași."
+       },
+       "misconception": "motiv-gresit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s22",
+   "title": {
+    "en": "Actualizarea lui w și b",
+    "ro": "Actualizarea lui w și b"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 90",
+    "ro": "Cursul 3 · slide 90"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Aceeași actualizare, dar cu factorul $y(1-y)$ în sumă.",
+      "ro": "Aceeași actualizare, dar cu factorul $y(1-y)$ în sumă."
+     },
+     "body": [
+      {
+       "tex": "w\\leftarrow w+\\dfrac{\\eta}{n}\\sum_x(t_x-y_x)\\,y_x(1-y_x)\\,x"
+      },
+      {
+       "tex": "b\\leftarrow b+\\dfrac{\\eta}{n}\\sum_x(t_x-y_x)\\,y_x(1-y_x)"
+      },
+      {
+       "note": {
+        "en": "Slide 90 scrie «Adeline»; numele corect este Adaline.",
+        "ro": "Slide 90 scrie «Adeline»; numele corect este Adaline."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s23",
+   "title": {
+    "en": "Un pas logistic",
+    "ro": "Un pas logistic"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 90",
+    "ro": "Cursul 3 · slide 90"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03f-e10",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Neuron logistic cu $n=1$: $x=2$, $t=1$, $w=0,5$, $b=0$, $\\eta=1$. Calculează $w$ nou: $w+\\eta\\,(t-y)\\,y(1-y)\\,x$, cu $y=\\sigma(wx+b)$.",
+      "ro": "Neuron logistic cu $n=1$: $x=2$, $t=1$, $w=0,5$, $b=0$, $\\eta=1$. Calculează $w$ nou: $w+\\eta\\,(t-y)\\,y(1-y)\\,x$, cu $y=\\sigma(wx+b)$."
+     },
+     "fields": [
+      {
+       "id": "w",
+       "label": {
+        "en": "w nou",
+        "ro": "w nou"
+       },
+       "kind": "num",
+       "formula": "w + e*(t - 1/(1+exp(-(w*x+b))))*(1/(1+exp(-(w*x+b))))*(1-(1/(1+exp(-(w*x+b)))))*x",
+       "expected": 0.6058
+      }
+     ],
+     "data": {
+      "x": 2,
+      "t": 1,
+      "w": 0.5,
+      "b": 0,
+      "e": 1
+     },
+     "detectors": [
+      {
+       "field": "w",
+       "formula": "w + e*(t - 1/(1+exp(-(w*x+b))))*x",
+       "message": {
+        "en": "Ai uitat factorul $y(1-y)$ (regula Adaline). La neuronul logistic apare și panta sigmoidei.",
+        "ro": "Ai uitat factorul $y(1-y)$ (regula Adaline). La neuronul logistic apare și panta sigmoidei."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Întâi $z=wx+b$ și $y=\\sigma(z)$.",
+       "ro": "Întâi $z=wx+b$ și $y=\\sigma(z)$."
+      },
+      {
+       "en": "$y=0{,}7311$; $t-y=0{,}2689$; $y(1-y)=0{,}1966$.",
+       "ro": "$y=0{,}7311$; $t-y=0{,}2689$; $y(1-y)=0{,}1966$."
+      },
+      {
+       "en": "Adună $\\eta\\cdot 0{,}2689\\cdot 0{,}1966\\cdot 2$ la $w$.",
+       "ro": "Adună $\\eta\\cdot 0{,}2689\\cdot 0{,}1966\\cdot 2$ la $w$."
+      }
+     ],
+     "solution": {
+      "en": "$w=0{,}5+0{,}1058=0{,}6058$.",
+      "ro": "$w=0{,}5+0{,}1058=0{,}6058$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Neuron logistic cu $n=1$: $x=1$, $t=0$, $w=1$, $b=0$, $\\eta=2$. Calculează $w$ nou: $w+\\eta\\,(t-y)\\,y(1-y)\\,x$, cu $y=\\sigma(wx+b)$.",
+        "ro": "Neuron logistic cu $n=1$: $x=1$, $t=0$, $w=1$, $b=0$, $\\eta=2$. Calculează $w$ nou: $w+\\eta\\,(t-y)\\,y(1-y)\\,x$, cu $y=\\sigma(wx+b)$."
+       },
+       "fields": [
+        {
+         "id": "w",
+         "formula": "w + e*(t - 1/(1+exp(-(w*x+b))))*(1/(1+exp(-(w*x+b))))*(1-(1/(1+exp(-(w*x+b)))))*x",
+         "expected": 0.7125
+        }
+       ],
+       "solution": {
+        "en": "$y=\\sigma(1)=0{,}7311$; $t-y=-0{,}7311$; $y(1-y)=0{,}1966$; $w=1+2\\cdot(-0{,}1437)\\approx 0{,}7126$.",
+        "ro": "$y=\\sigma(1)=0{,}7311$; $t-y=-0{,}7311$; $y(1-y)=0{,}1966$; $w=1+2\\cdot(-0{,}1437)\\approx 0{,}7126$."
+       },
+       "data": {
+        "x": 1,
+        "t": 0,
+        "w": 1,
+        "b": 0,
+        "e": 2
+       },
+       "hints": [
+        {
+         "en": "$z=1$, $y=0{,}7311$.",
+         "ro": "$z=1$, $y=0{,}7311$."
+        },
+        {
+         "en": "$(t-y)\\,y(1-y)=-0{,}1437$.",
+         "ro": "$(t-y)\\,y(1-y)=-0{,}1437$."
+        },
+        {
+         "en": "$1+2\\cdot(-0{,}1437)$.",
+         "ro": "$1+2\\cdot(-0{,}1437)$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Neuron logistic cu $n=1$: $x=3$, $t=1$, $w=0$, $b=0$, $\\eta=1$. Calculează $w$ nou: $w+\\eta\\,(t-y)\\,y(1-y)\\,x$, cu $y=\\sigma(wx+b)$.",
+        "ro": "Neuron logistic cu $n=1$: $x=3$, $t=1$, $w=0$, $b=0$, $\\eta=1$. Calculează $w$ nou: $w+\\eta\\,(t-y)\\,y(1-y)\\,x$, cu $y=\\sigma(wx+b)$."
+       },
+       "fields": [
+        {
+         "id": "w",
+         "formula": "w + e*(t - 1/(1+exp(-(w*x+b))))*(1/(1+exp(-(w*x+b))))*(1-(1/(1+exp(-(w*x+b)))))*x",
+         "expected": 0.375
+        }
+       ],
+       "solution": {
+        "en": "$z=0$, $y=0{,}5$; $0{,}5\\cdot 0{,}25\\cdot 3=0{,}375$; $w=0{,}375$.",
+        "ro": "$z=0$, $y=0{,}5$; $0{,}5\\cdot 0{,}25\\cdot 3=0{,}375$; $w=0{,}375$."
+       },
+       "data": {
+        "x": 3,
+        "t": 1,
+        "w": 0,
+        "b": 0,
+        "e": 1
+       },
+       "hints": [
+        {
+         "en": "$z=0$, $y=0{,}5$.",
+         "ro": "$z=0$, $y=0{,}5$."
+        },
+        {
+         "en": "$t-y=0{,}5$; $y(1-y)=0{,}25$.",
+         "ro": "$t-y=0{,}5$; $y(1-y)=0{,}25$."
+        },
+        {
+         "en": "$0+1\\cdot 0{,}5\\cdot 0{,}25\\cdot 3$.",
+         "ro": "$0+1\\cdot 0{,}5\\cdot 0{,}25\\cdot 3$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s24",
+   "title": {
+    "en": "Saturare: eroare mare, gradient mic",
+    "ro": "Saturare: eroare mare, gradient mic"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 86–90",
+    "ro": "Cursul 3 · slide 86–90"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Luăm $w=3$, $x=2$, $t=0$. Atunci $z=6$ și $y=0{,}9975$: eroarea $t-y=-0{,}9975$ e uriașă. Dar $y(1-y)=0{,}0025$.",
+        "ro": "Luăm $w=3$, $x=2$, $t=0$. Atunci $z=6$ și $y=0{,}9975$: eroarea $t-y=-0{,}9975$ e uriașă. Dar $y(1-y)=0{,}0025$."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 190'><title>Panta sigmoidei</title><line class='muted' stroke-width='1.5' x1='179' y1='144' x2='179' y2='14'/><line class='muted' stroke-width='1.5' x1='44' y1='135.3' x2='314' y2='135.3'/><line class='muted' stroke-width='1.5' x1='63.3' y1='141' x2='63.3' y2='147'/><text class='muted' font-size='14' x='63.3' y='162' text-anchor='middle'>−6</text><line class='muted' stroke-width='1.5' x1='101.9' y1='141' x2='101.9' y2='147'/><text class='muted' font-size='14' x='101.9' y='162' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='140.4' y1='141' x2='140.4' y2='147'/><text class='muted' font-size='14' x='140.4' y='162' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='141' x2='179' y2='147'/><text class='muted' font-size='14' x='179' y='162' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='217.6' y1='141' x2='217.6' y2='147'/><text class='muted' font-size='14' x='217.6' y='162' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='256.1' y1='141' x2='256.1' y2='147'/><text class='muted' font-size='14' x='256.1' y='162' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='294.7' y1='141' x2='294.7' y2='147'/><text class='muted' font-size='14' x='294.7' y='162' text-anchor='middle'>6</text><line class='muted' stroke-width='1.5' x1='41' y1='135.3' x2='47' y2='135.3'/><text class='muted' font-size='14' x='38' y='140.3' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='27' x2='47' y2='27'/><text class='muted' font-size='14' x='38' y='32' text-anchor='end'>0,25</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,134.9 46.7,134.9 49.4,134.8 52.1,134.7 54.8,134.6 57.5,134.5 60.2,134.4 62.9,134.3 65.6,134.1 68.3,133.9 71,133.7 73.7,133.5 76.4,133.2 79.1,132.9 81.8,132.6 84.5,132.2 87.2,131.7 89.9,131.1 92.6,130.5 95.3,129.8 98,129 100.7,128.1 103.4,127.1 106.1,125.9 108.8,124.5 111.5,123 114.2,121.3 116.9,119.3 119.6,117.1 122.3,114.7 125,111.9 127.7,108.9 130.4,105.5 133.1,101.7 135.8,97.7 138.5,93.2 141.2,88.4 143.9,83.3 146.6,78 149.3,72.3 152,66.6 154.7,60.7 157.4,55 160.1,49.4 162.8,44.1 165.5,39.3 168.2,35.1 170.9,31.6 173.6,29.1 176.3,27.5 179,27 181.7,27.5 184.4,29.1 187.1,31.6 189.8,35.1 192.5,39.3 195.2,44.1 197.9,49.4 200.6,55 203.3,60.7 206,66.6 208.7,72.3 211.4,78 214.1,83.3 216.8,88.4 219.5,93.2 222.2,97.7 224.9,101.7 227.6,105.5 230.3,108.9 233,111.9 235.7,114.7 238.4,117.1 241.1,119.3 243.8,121.3 246.5,123 249.2,124.5 251.9,125.9 254.6,127.1 257.3,128.1 260,129 262.7,129.8 265.4,130.5 268.1,131.1 270.8,131.7 273.5,132.2 276.2,132.6 278.9,132.9 281.6,133.2 284.3,133.5 287,133.7 289.7,133.9 292.4,134.1 295.1,134.3 297.8,134.4 300.5,134.5 303.2,134.6 305.9,134.7 308.6,134.8 311.3,134.9 314,134.9'/><circle class='warn fill-warn' stroke-width='2' cx='198.3' cy='50.1' r='5'><title>z = 1</title></circle><circle class='warn fill-warn' stroke-width='2' cx='294.7' cy='134.3' r='5'><title>z = 6</title></circle><text class='fg' font-size='15' x='324' y='140.3' text-anchor='middle'>z</text></svg>",
+        "alt": {
+         "en": "Clopotul pantei sigmoidei: înalt în mijloc, aproape zero la z egal 6",
+         "ro": "Clopotul pantei sigmoidei: înalt în mijloc, aproape zero la z egal 6"
+        },
+        "caption": {
+         "en": "În $z=6$ panta e aproape zero.",
+         "ro": "În $z=6$ panta e aproape zero."
+        }
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "regula",
+         "∂C/∂w"
+        ],
+        "rows": [
+         [
+          "Adaline",
+          "+1,9951"
+         ],
+         [
+          "logistic",
+          "+0,0049"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Eroare mare, dar gradient aproape zero: pasul de învățare aproape dispare.",
+        "ro": "Eroare mare, dar gradient aproape zero: pasul de învățare aproape dispare."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s25",
+   "title": {
+    "en": "Cu cuvintele tale: gradient mic",
+    "ro": "Cu cuvintele tale: gradient mic"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 89",
+    "ro": "Cursul 3 · slide 89"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "nn-l03f-r11",
+     "prompt": {
+      "en": "Cu cuvintele tale: de ce poate un neuron logistic să rămână blocat deși ieșirea lui e total greșită?",
+      "ro": "Cu cuvintele tale: de ce poate un neuron logistic să rămână blocat deși ieșirea lui e total greșită?"
+     },
+     "answer": {
+      "en": "Când $z$ e mare în valoare absolută, sigmoida e aproape plată, deci $y(1-y)$ e aproape 0. Gradientul îl conține ca factor, așa că pasul devine minuscul, deși eroarea $t-y$ e mare.",
+      "ro": "Când $z$ e mare în valoare absolută, sigmoida e aproape plată, deci $y(1-y)$ e aproape 0. Gradientul îl conține ca factor, așa că pasul devine minuscul, deși eroarea $t-y$ e mare."
+     },
+     "placeholder": {
+      "en": "Scrie ce crezi",
+      "ro": "Scrie ce crezi"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s26",
+   "title": {
+    "en": "Un strat nu ajunge",
+    "ro": "Un strat nu ajunge"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 91–92",
+    "ro": "Cursul 3 · slide 91–92"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Ponderile care intră **direct în ieșire** le putem antrena cu regulile de mai sus: eroarea ieșirii e cunoscută.",
+        "ro": "Ponderile care intră **direct în ieșire** le putem antrena cu regulile de mai sus: eroarea ieșirii e cunoscută."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 210'><title>Rețea 3, 4, 2</title><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='158'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='158'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='156' y2='158'/><line class='muted' stroke-width='1.5' x1='184' y1='26' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='26' x2='292' y2='114'/><line class='muted' stroke-width='1.5' x1='184' y1='70' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='70' x2='292' y2='114'/><line class='muted' stroke-width='1.5' x1='184' y1='114' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='114' x2='292' y2='114'/><line class='muted' stroke-width='1.5' x1='184' y1='158' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='158' x2='292' y2='114'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='48' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='92' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='136' r='14'><title>neuronul 3, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='26' r='14'><title>neuronul 1, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='70' r='14'><title>neuronul 2, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='114' r='14'><title>neuronul 3, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='158' r='14'><title>neuronul 4, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='70' r='14'><title>neuronul 1, coloana 3</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='114' r='14'><title>neuronul 2, coloana 3</title></circle><text class='muted' font-size='14' x='34' y='204' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='170' y='204' text-anchor='middle'>ascuns</text><text class='muted' font-size='14' x='306' y='204' text-anchor='middle'>ieșire</text></svg>",
+        "alt": {
+         "en": "Rețea cu 3 intrări, 4 neuroni ascunși și 2 de ieșire",
+         "ro": "Rețea cu 3 intrări, 4 neuroni ascunși și 2 de ieșire"
+        },
+        "caption": {
+         "en": "Doar legăturile din ultimul strat au o eroare direct cunoscută.",
+         "ro": "Doar legăturile din ultimul strat au o eroare direct cunoscută."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru stratul ascuns nu avem o țintă. Slide 91–92: «da, dar nu încă»: aplicăm regula lanțului din nou, în lecția următoare.",
+        "ro": "Pentru stratul ascuns nu avem o țintă. Slide 91–92: «da, dar nu încă»: aplicăm regula lanțului din nou, în lecția următoare."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03f-q12",
+     "question": {
+      "en": "În rețeaua de mai sus, pentru care ponderi putem aplica regula Adaline/logistică direct?",
+      "ro": "În rețeaua de mai sus, pentru care ponderi putem aplica regula Adaline/logistică direct?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Cele care intră în neuronii de ieșire",
+        "ro": "Cele care intră în neuronii de ieșire"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: pentru ele avem ținta și eroarea.",
+        "ro": "Corect: pentru ele avem ținta și eroarea."
+       }
+      },
+      {
+       "text": {
+        "en": "Cele care intră în stratul ascuns",
+        "ro": "Cele care intră în stratul ascuns"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pentru stratul ascuns nu există țintă; trebuie lanțul de derivate.",
+        "ro": "Pentru stratul ascuns nu există țintă; trebuie lanțul de derivate."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "Toate, în același fel",
+        "ro": "Toate, în același fel"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Doar ultimul strat are țintă directă.",
+        "ro": "Doar ultimul strat are țintă directă."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s27",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 80–92",
+    "ro": "Cursul 3 · slide 80–92"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Adaline și neuronul logistic:",
+        "ro": "Adaline și neuronul logistic:"
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Gradientul = (derivata costului în $y$) · (derivata lui $y$ în pondere), prin regula lanțului.",
+       "ro": "Gradientul = (derivata costului în $y$) · (derivata lui $y$ în pondere), prin regula lanțului."
+      },
+      {
+       "en": "Adaline: $w\\leftarrow w+\\frac{\\eta}{n}\\sum(t-y)x$; ponderea crește când ieșirea e prea mică.",
+       "ro": "Adaline: $w\\leftarrow w+\\frac{\\eta}{n}\\sum(t-y)x$; ponderea crește când ieșirea e prea mică."
+      },
+      {
+       "en": "Sigmoida adaugă factorul $\\sigma'(z)=y(1-y)$.",
+       "ro": "Sigmoida adaugă factorul $\\sigma'(z)=y(1-y)$."
+      },
+      {
+       "en": "Când $z$ e mare, factorul e aproape 0 și învățarea se oprește.",
+       "ro": "Când $z$ e mare, factorul e aproape 0 și învățarea se oprește."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s28",
+   "title": {
+    "en": "Verificare: un pas Adaline",
+    "ro": "Verificare: un pas Adaline"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 84",
+    "ro": "Cursul 3 · slide 84"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03f-e13",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Adaline, $n=2$ exemple: $x=(1;\\,3)$, $t=(1;\\,2)$, pornești din $w=0$, $b=0$, $\\eta=0,1$. Calculează $w$ după un pas.",
+      "ro": "Adaline, $n=2$ exemple: $x=(1;\\,3)$, $t=(1;\\,2)$, pornești din $w=0$, $b=0$, $\\eta=0,1$. Calculează $w$ după un pas."
+     },
+     "fields": [
+      {
+       "id": "w",
+       "label": {
+        "en": "w nou",
+        "ro": "w nou"
+       },
+       "kind": "num",
+       "formula": "0 + e*(t1*1 + t2*3)/2",
+       "expected": 0.35
+      }
+     ],
+     "data": {
+      "t1": 1,
+      "t2": 2,
+      "e": 0.1
+     },
+     "detectors": [
+      {
+       "field": "w",
+       "formula": "0 + e*(t1 + t2)/2",
+       "message": {
+        "en": "Ai uitat să înmulțești fiecare eroare cu intrarea ei $x$.",
+        "ro": "Ai uitat să înmulțești fiecare eroare cu intrarea ei $x$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Cu $w=b=0$, $y=0$, erorile sunt chiar ținte.",
+       "ro": "Cu $w=b=0$, $y=0$, erorile sunt chiar ținte."
+      },
+      {
+       "en": "$\\sum(t-y)x=1\\cdot 1+2\\cdot 3=7$",
+       "ro": "$\\sum(t-y)x=1\\cdot 1+2\\cdot 3=7$"
+      },
+      {
+       "en": "$w=0+\\eta\\cdot 7/2$.",
+       "ro": "$w=0+\\eta\\cdot 7/2$."
+      }
+     ],
+     "solution": {
+      "en": "$7/2=3{,}5$; $w=0{,}1\\cdot 3{,}5=0{,}35$.",
+      "ro": "$7/2=3{,}5$; $w=0{,}1\\cdot 3{,}5=0{,}35$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Adaline, $n=2$ exemple: $x=(1;\\,3)$, $t=(0;\\,2)$, pornești din $w=0$, $b=0$, $\\eta=0,5$. Calculează $w$ după un pas.",
+        "ro": "Adaline, $n=2$ exemple: $x=(1;\\,3)$, $t=(0;\\,2)$, pornești din $w=0$, $b=0$, $\\eta=0,5$. Calculează $w$ după un pas."
+       },
+       "fields": [
+        {
+         "id": "w",
+         "formula": "0 + e*(t1*1 + t2*3)/2",
+         "expected": 1.5
+        }
+       ],
+       "solution": {
+        "en": "$\\sum(t-y)x=0\\cdot 1+2\\cdot 3=6$; $w=0{,}5\\cdot 6/2=1{,}5$.",
+        "ro": "$\\sum(t-y)x=0\\cdot 1+2\\cdot 3=6$; $w=0{,}5\\cdot 6/2=1{,}5$."
+       },
+       "data": {
+        "t1": 0,
+        "t2": 2,
+        "e": 0.5
+       },
+       "hints": [
+        {
+         "en": "Erorile sunt țintele.",
+         "ro": "Erorile sunt țintele."
+        },
+        {
+         "en": "$0\\cdot 1+2\\cdot 3=6$",
+         "ro": "$0\\cdot 1+2\\cdot 3=6$"
+        },
+        {
+         "en": "$0{,}5\\cdot 6/2$.",
+         "ro": "$0{,}5\\cdot 6/2$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s29",
+   "title": {
+    "en": "Verificare: care formulă are factorul în plus",
+    "ro": "Verificare: care formulă are factorul în plus"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 84, 90",
+    "ro": "Cursul 3 · slide 84, 90"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03f-q14",
+     "question": {
+      "en": "Care actualizare conține factorul $y(1-y)$?",
+      "ro": "Care actualizare conține factorul $y(1-y)$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Neuronul logistic",
+        "ro": "Neuronul logistic"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: factorul vine din derivata sigmoidei.",
+        "ro": "Corect: factorul vine din derivata sigmoidei."
+       }
+      },
+      {
+       "text": {
+        "en": "Adaline",
+        "ro": "Adaline"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Adaline are activare liniară, derivata ei este 1.",
+        "ro": "Adaline are activare liniară, derivata ei este 1."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "Amândouă",
+        "ro": "Amândouă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Doar cea cu sigmoidă.",
+        "ro": "Doar cea cu sigmoidă."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03f-s30",
+   "title": {
+    "en": "Verificare: panta sigmoidei",
+    "ro": "Verificare: panta sigmoidei"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 88",
+    "ro": "Cursul 3 · slide 88"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03f-q15",
+     "question": {
+      "en": "Un neuron logistic are $y=0{,}98$. Cât este $\\sigma'(z)$?",
+      "ro": "Un neuron logistic are $y=0{,}98$. Cât este $\\sigma'(z)$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$0{,}98\\cdot 0{,}02=0{,}0196$",
+        "ro": "$0{,}98\\cdot 0{,}02=0{,}0196$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $y(1-y)$, mic pentru că neuronul e saturat.",
+        "ro": "Corect: $y(1-y)$, mic pentru că neuronul e saturat."
+       }
+      },
+      {
+       "text": {
+        "en": "$0{,}98$",
+        "ro": "$0{,}98$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Asta e $y$, nu panta.",
+        "ro": "Asta e $y$, nu panta."
+       },
+       "misconception": "un-singur-termen"
+      },
+      {
+       "text": {
+        "en": "$0{,}25$",
+        "ro": "$0{,}25$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Maximul 0,25 e doar în $z=0$, unde $y=0{,}5$.",
+        "ro": "Maximul 0,25 e doar în $z=0$, unde $y=0{,}5$."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
