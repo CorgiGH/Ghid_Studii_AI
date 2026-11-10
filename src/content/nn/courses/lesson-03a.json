@@ -1,0 +1,2270 @@
+{
+ "meta": {
+  "id": "nn-l03a",
+  "title": {
+   "en": "Lesson 3a: The neuron, the threshold and the sigmoid",
+   "ro": "Lecția 3a: Neuronul, pragul și sigmoida"
+  },
+  "shortTitle": {
+   "en": "L3a: The neuron",
+   "ro": "L3a: Neuronul"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 3 (Gradient Descent), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 3 (Gradient Descent), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l03a-s01",
+   "title": {
+    "en": "Un neuron: intră mai multe numere, iese unul",
+    "ro": "Un neuron: intră mai multe numere, iese unul"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 3–4",
+    "ro": "Cursul 3 · slide 3–4"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Un neuron primește mai multe numere. Le combină și dă înapoi **un singur număr**.",
+        "ro": "Un neuron primește mai multe numere. Le combină și dă înapoi **un singur număr**."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 210'><title>Un neuron cu trei intrări</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='2' x1='62' y1='40' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='40' r='20'><title>intrarea 1</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='45' text-anchor='middle'>1</text><line class='muted' stroke-width='2' x1='62' y1='105' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='105' r='20'><title>intrarea 2</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='110' text-anchor='middle'>2</text><line class='muted' stroke-width='2' x1='62' y1='170' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='170' r='20'><title>intrarea 3</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='175' text-anchor='middle'>3</text><circle class='fg fill-bg' stroke-width='2.5' cx='190' cy='105' r='26'><title>suma ponderată</title></circle><text class='fg' font-size='17' font-weight='700' x='190' y='111' text-anchor='middle'>Σ</text><line class='muted' stroke-width='2' x1='217' y1='105' x2='248' y2='105' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='250' y='83' width='44' height='44' rx='6'><title>activarea</title></rect><text class='accent' font-size='17' font-weight='700' x='272' y='111' text-anchor='middle'>f</text><line class='muted' stroke-width='2' x1='295' y1='105' x2='322' y2='105' marker-end='url(#ah-muted)'/><text class='fg' font-size='14' x='312' y='73' text-anchor='middle'>ieșire</text></svg>",
+        "alt": {
+         "en": "Trei intrări intră într-un neuron; din el iese un singur număr",
+         "ro": "Trei intrări intră într-un neuron; din el iese un singur număr"
+        },
+        "caption": {
+         "en": "Trei numere intră, unul iese.",
+         "ro": "Trei numere intră, unul iese."
+        }
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03a-q01",
+     "question": {
+      "en": "Un neuron are 3 numere la intrare. Câte numere dă la ieșire?",
+      "ro": "Un neuron are 3 numere la intrare. Câte numere dă la ieșire?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Un singur număr",
+        "ro": "Un singur număr"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: orice câte intrări ar avea, neuronul dă un singur număr (slide 8–9: «Scalar Value»).",
+        "ro": "Corect: orice câte intrări ar avea, neuronul dă un singur număr (slide 8–9: «Scalar Value»)."
+       }
+      },
+      {
+       "text": {
+        "en": "Trei numere, câte unul pe intrare",
+        "ro": "Trei numere, câte unul pe intrare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu: intrările se combină într-o singură sumă, iar ieșirea e un singur număr.",
+        "ro": "Nu: intrările se combină într-o singură sumă, iar ieșirea e un singur număr."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "Niciunul: neuronul doar ține minte",
+        "ro": "Niciunul: neuronul doar ține minte"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Neuronul calculează o ieșire de fiecare dată când primește intrările.",
+        "ro": "Neuronul calculează o ieșire de fiecare dată când primește intrările."
+       },
+       "misconception": "motiv-gresit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s02",
+   "title": {
+    "en": "Fiecare intrare are o pondere",
+    "ro": "Fiecare intrare are o pondere"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 4",
+    "ro": "Cursul 3 · slide 4"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pe fiecare săgeată stă o **pondere** (weight): un număr care spune cât contează intrarea respectivă.",
+        "ro": "Pe fiecare săgeată stă o **pondere** (weight): un număr care spune cât contează intrarea respectivă."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 210'><title>Ponderile pe săgeți</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='2' x1='62' y1='40' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='40' r='20'><title>intrarea 1</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='45' text-anchor='middle'>1</text><text class='accent' font-size='14' font-weight='700' x='112' y='64.5' text-anchor='middle'>0,5</text><line class='muted' stroke-width='2' x1='62' y1='105' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='105' r='20'><title>intrarea 2</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='110' text-anchor='middle'>2</text><text class='accent' font-size='14' font-weight='700' x='108' y='97' text-anchor='middle'>−1</text><line class='muted' stroke-width='2' x1='62' y1='170' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='170' r='20'><title>intrarea 3</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='175' text-anchor='middle'>3</text><text class='accent' font-size='14' font-weight='700' x='112' y='155.5' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2.5' cx='190' cy='105' r='26'><title>suma ponderată</title></circle><text class='fg' font-size='17' font-weight='700' x='190' y='111' text-anchor='middle'>Σ</text><line class='muted' stroke-width='2' x1='217' y1='105' x2='248' y2='105' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='250' y='83' width='44' height='44' rx='6'><title>activarea</title></rect><text class='accent' font-size='17' font-weight='700' x='272' y='111' text-anchor='middle'>f</text><line class='muted' stroke-width='2' x1='295' y1='105' x2='322' y2='105' marker-end='url(#ah-muted)'/><text class='fg' font-size='14' x='312' y='73' text-anchor='middle'>ieșire</text></svg>",
+        "alt": {
+         "en": "Aceleași trei intrări, cu ponderile 0,5, minus 1 și 2 pe săgeți",
+         "ro": "Aceleași trei intrări, cu ponderile 0,5, minus 1 și 2 pe săgeți"
+        },
+        "caption": {
+         "en": "Ponderile sunt numerele colorate de pe săgeți.",
+         "ro": "Ponderile sunt numerele colorate de pe săgeți."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Pondere mare: intrarea contează mult.",
+       "ro": "Pondere mare: intrarea contează mult."
+      },
+      {
+       "en": "Pondere negativă: intrarea trage rezultatul în jos.",
+       "ro": "Pondere negativă: intrarea trage rezultatul în jos."
+      },
+      {
+       "en": "Pondere 0: intrarea e ignorată.",
+       "ro": "Pondere 0: intrarea e ignorată."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s03",
+   "title": {
+    "en": "Neuronul are trei părți",
+    "ro": "Neuronul are trei părți"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 5–7",
+    "ro": "Cursul 3 · slide 5–7"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pe slide-uri, neuronul se împarte în trei părți, în această ordine:",
+        "ro": "Pe slide-uri, neuronul se împarte în trei părți, în această ordine:"
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 210'><title>Cele trei părți</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='2' x1='62' y1='40' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='40' r='20'><title>intrarea 1</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='45' text-anchor='middle'>1</text><text class='accent' font-size='14' font-weight='700' x='112' y='64.5' text-anchor='middle'>0,5</text><line class='muted' stroke-width='2' x1='62' y1='105' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='105' r='20'><title>intrarea 2</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='110' text-anchor='middle'>2</text><text class='accent' font-size='14' font-weight='700' x='108' y='97' text-anchor='middle'>−1</text><line class='muted' stroke-width='2' x1='62' y1='170' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='170' r='20'><title>intrarea 3</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='175' text-anchor='middle'>3</text><text class='accent' font-size='14' font-weight='700' x='112' y='155.5' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2.5' cx='190' cy='105' r='26'><title>suma ponderată</title></circle><text class='fg' font-size='17' font-weight='700' x='190' y='111' text-anchor='middle'>Σ</text><line class='muted' stroke-width='2' x1='217' y1='105' x2='248' y2='105' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='250' y='83' width='44' height='44' rx='6'><title>activarea</title></rect><text class='accent' font-size='17' font-weight='700' x='272' y='111' text-anchor='middle'>f</text><line class='muted' stroke-width='2' x1='295' y1='105' x2='322' y2='105' marker-end='url(#ah-muted)'/><text class='fg' font-size='14' x='312' y='73' text-anchor='middle'>ieșire</text><text class='accent' font-size='14' x='110' y='14' text-anchor='middle'>1 ponderi</text><text class='fg' font-size='14' x='190' y='155' text-anchor='middle'>2 suma</text><text class='accent' font-size='14' x='272' y='155' text-anchor='middle'>3 activarea</text></svg>",
+        "alt": {
+         "en": "Neuronul cu cele trei părți numerotate: ponderi, suma, activarea",
+         "ro": "Neuronul cu cele trei părți numerotate: ponderi, suma, activarea"
+        },
+        "caption": {
+         "en": "Ponderi, suma, activarea.",
+         "ro": "Ponderi, suma, activarea."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "**Ponderile**: un vector, adică o listă de numere, câte una pe intrare.",
+       "ro": "**Ponderile**: un vector, adică o listă de numere, câte una pe intrare."
+      },
+      {
+       "en": "**Suma ponderată**: înmulțește fiecare intrare cu ponderea ei și adună (produsul scalar, dot product).",
+       "ro": "**Suma ponderată**: înmulțește fiecare intrare cu ponderea ei și adună (produsul scalar, dot product)."
+      },
+      {
+       "en": "**Activarea**: ia un număr și dă alt număr.",
+       "ro": "**Activarea**: ia un număr și dă alt număr."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s04",
+   "title": {
+    "en": "Suma ponderată, număr cu număr",
+    "ro": "Suma ponderată, număr cu număr"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 8–9",
+    "ro": "Cursul 3 · slide 8–9"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03a-p02",
+     "claim": {
+      "en": "Intrările formează **vectorul de intrare** $x=(1;\\,2;\\,3)$. Ponderile formează **vectorul de ponderi** $w=(0{,}5;\\,-1;\\,2)$. Calculăm suma ponderată.",
+      "ro": "Intrările formează **vectorul de intrare** $x=(1;\\,2;\\,3)$. Ponderile formează **vectorul de ponderi** $w=(0{,}5;\\,-1;\\,2)$. Calculăm suma ponderată."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$1\\cdot 0{,}5=0{,}5$",
+        "ro": "$1\\cdot 0{,}5=0{,}5$"
+       },
+       "predict": {
+        "question": {
+         "en": "Prima intrare (1) ori prima pondere (0,5):",
+         "ro": "Prima intrare (1) ori prima pondere (0,5):"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "0,5",
+           "ro": "0,5"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: înmulțim, nu adunăm.",
+           "ro": "Corect: înmulțim, nu adunăm."
+          }
+         },
+         {
+          "text": {
+           "en": "1,5",
+           "ro": "1,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat 1 + 0,5. Suma ponderată înmulțește.",
+           "ro": "Ai adunat 1 + 0,5. Suma ponderată înmulțește."
+          },
+          "misconception": "aduna-in-loc-sa-inmulteasca"
+         },
+         {
+          "text": {
+           "en": "−0,5",
+           "ro": "−0,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ambele numere sunt pozitive, deci produsul e pozitiv.",
+           "ro": "Ambele numere sunt pozitive, deci produsul e pozitiv."
+          },
+          "misconception": "semn-gresit"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$2\\cdot(-1)=-2$",
+        "ro": "$2\\cdot(-1)=-2$"
+       },
+       "predict": {
+        "question": {
+         "en": "A doua intrare (2) ori a doua pondere (−1):",
+         "ro": "A doua intrare (2) ori a doua pondere (−1):"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "−2",
+           "ro": "−2"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: pondere negativă, produs negativ.",
+           "ro": "Corect: pondere negativă, produs negativ."
+          }
+         },
+         {
+          "text": {
+           "en": "2",
+           "ro": "2"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Semnul ponderii se păstrează: 2 · (−1) = −2.",
+           "ro": "Semnul ponderii se păstrează: 2 · (−1) = −2."
+          },
+          "misconception": "semn-gresit"
+         },
+         {
+          "text": {
+           "en": "1",
+           "ro": "1"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat 2 + (−1). Aici se înmulțește.",
+           "ro": "Ai adunat 2 + (−1). Aici se înmulțește."
+          },
+          "misconception": "aduna-in-loc-sa-inmulteasca"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$3\\cdot 2=6$",
+        "ro": "$3\\cdot 2=6$"
+       },
+       "why": {
+        "en": "A treia intrare cu a treia pondere.",
+        "ro": "A treia intrare cu a treia pondere."
+       }
+      },
+      {
+       "shown": {
+        "en": "$0{,}5+(-2)+6=4{,}5$",
+        "ro": "$0{,}5+(-2)+6=4{,}5$"
+       },
+       "predict": {
+        "question": {
+         "en": "Suma celor trei produse, 0,5, −2 și 6:",
+         "ro": "Suma celor trei produse, 0,5, −2 și 6:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "4,5",
+           "ro": "4,5"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: 0,5 − 2 + 6 = 4,5.",
+           "ro": "Corect: 0,5 − 2 + 6 = 4,5."
+          }
+         },
+         {
+          "text": {
+           "en": "8,5",
+           "ro": "8,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat 2 în loc să scazi 2. Produsul −2 rămâne negativ.",
+           "ro": "Ai adunat 2 în loc să scazi 2. Produsul −2 rămâne negativ."
+          },
+          "misconception": "semn-gresit"
+         },
+         {
+          "text": {
+           "en": "6",
+           "ro": "6"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai luat doar ultimul produs. Se adună toate trei.",
+           "ro": "Ai luat doar ultimul produs. Se adună toate trei."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Suma ponderată a lui $x$ cu $w$ este 4,5. Se numește **produsul scalar** și se scrie $x\\cdot w$: înmulțești pe poziții, apoi aduni.",
+      "ro": "Suma ponderată a lui $x$ cu $w$ este 4,5. Se numește **produsul scalar** și se scrie $x\\cdot w$: înmulțești pe poziții, apoi aduni."
+     },
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 210'><title>x și w</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='2' x1='62' y1='40' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='40' r='20'><title>intrarea 1</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='45' text-anchor='middle'>1</text><text class='accent' font-size='14' font-weight='700' x='112' y='64.5' text-anchor='middle'>0,5</text><line class='muted' stroke-width='2' x1='62' y1='105' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='105' r='20'><title>intrarea 2</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='110' text-anchor='middle'>2</text><text class='accent' font-size='14' font-weight='700' x='108' y='97' text-anchor='middle'>−1</text><line class='muted' stroke-width='2' x1='62' y1='170' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='170' r='20'><title>intrarea 3</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='175' text-anchor='middle'>3</text><text class='accent' font-size='14' font-weight='700' x='112' y='155.5' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2.5' cx='190' cy='105' r='26'><title>suma ponderată</title></circle><text class='fg' font-size='17' font-weight='700' x='190' y='111' text-anchor='middle'>Σ</text><line class='muted' stroke-width='2' x1='217' y1='105' x2='248' y2='105' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='250' y='83' width='44' height='44' rx='6'><title>activarea</title></rect><text class='accent' font-size='17' font-weight='700' x='272' y='111' text-anchor='middle'>f</text><line class='muted' stroke-width='2' x1='295' y1='105' x2='322' y2='105' marker-end='url(#ah-muted)'/><text class='fg' font-size='14' x='312' y='73' text-anchor='middle'>ieșire</text></svg>",
+      "alt": {
+       "en": "Intrările 1, 2, 3 și ponderile 0,5, minus 1, 2",
+       "ro": "Intrările 1, 2, 3 și ponderile 0,5, minus 1, 2"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s05",
+   "title": {
+    "en": "Biasul: un număr în plus",
+    "ro": "Biasul: un număr în plus"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 9",
+    "ro": "Cursul 3 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "La suma ponderată se mai adaugă un număr fix, **biasul** $b$. Nu depinde de intrări. Aici $b=-1$.",
+        "ro": "La suma ponderată se mai adaugă un număr fix, **biasul** $b$. Nu depinde de intrări. Aici $b=-1$."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "$x\\cdot w=4{,}5$",
+       "ro": "$x\\cdot w=4{,}5$"
+      },
+      {
+       "en": "Adăugăm biasul: $4{,}5+(-1)$",
+       "ro": "Adăugăm biasul: $4{,}5+(-1)$"
+      }
+     ],
+     "result": {
+      "en": "Rezultatul se notează $z$: $z=3{,}5$. Fără bias, intrările toate 0 ar da mereu $z=0$; biasul mută punctul de plecare.",
+      "ro": "Rezultatul se notează $z$: $z=3{,}5$. Fără bias, intrările toate 0 ar da mereu $z=0$; biasul mută punctul de plecare."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s06",
+   "title": {
+    "en": "Formula neuronului până la z",
+    "ro": "Formula neuronului până la z"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 9",
+    "ro": "Cursul 3 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Neuronul înmulțește pe poziții, adună, apoi adaugă biasul.",
+      "ro": "Neuronul înmulțește pe poziții, adună, apoi adaugă biasul."
+     },
+     "body": [
+      {
+       "tex": "z=\\sum_{i=1}^{n}\\mathit{Input}_i\\times\\mathit{weight}_i+b"
+      },
+      {
+       "tex": "z = x\\cdot w + b"
+      },
+      {
+       "points": [
+        {
+         "en": "$z$: suma ponderată plus bias, un singur număr",
+         "ro": "$z$: suma ponderată plus bias, un singur număr"
+        },
+        {
+         "en": "$\\sum_{i=1}^{n}$: adună termenii pentru $i$ de la 1 la $n$, câte unul pe intrare",
+         "ro": "$\\sum_{i=1}^{n}$: adună termenii pentru $i$ de la 1 la $n$, câte unul pe intrare"
+        },
+        {
+         "en": "$\\mathit{Input}_i\\times\\mathit{weight}_i$: intrarea $i$ ori ponderea ei",
+         "ro": "$\\mathit{Input}_i\\times\\mathit{weight}_i$: intrarea $i$ ori ponderea ei"
+        },
+        {
+         "en": "$x\\cdot w$: aceeași sumă scrisă scurt (produsul scalar)",
+         "ro": "$x\\cdot w$: aceeași sumă scrisă scurt (produsul scalar)"
+        },
+        {
+         "en": "$b$: biasul, un număr fix",
+         "ro": "$b$: biasul, un număr fix"
+        }
+       ]
+      },
+      {
+       "note": {
+        "en": "Slide 9 scrie ambele forme. Slide 4 numește suma y și o compară cu un prag (y ≥ threshold); folosim z, ca slide 9.",
+        "ro": "Slide 9 scrie ambele forme. Slide 4 numește suma y și o compară cu un prag (y ≥ threshold); folosim z, ca slide 9."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s07",
+   "title": {
+    "en": "Calculează z",
+    "ro": "Calculează z"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 9",
+    "ro": "Cursul 3 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03a-e03",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Un neuron are intrările $x=(3;\\,1;\\,2)$, ponderile $w=(2;\\,−4;\\,0{,}5)$ și biasul $b=1$. Calculează $z$.",
+      "ro": "Un neuron are intrările $x=(3;\\,1;\\,2)$, ponderile $w=(2;\\,−4;\\,0{,}5)$ și biasul $b=1$. Calculează $z$."
+     },
+     "fields": [
+      {
+       "id": "z",
+       "label": {
+        "en": "z",
+        "ro": "z"
+       },
+       "kind": "num",
+       "formula": "x1*w1 + x2*w2 + x3*w3 + b",
+       "expected": 4
+      }
+     ],
+     "data": {
+      "x1": 3,
+      "x2": 1,
+      "x3": 2,
+      "w1": 2,
+      "w2": -4,
+      "w3": 0.5,
+      "b": 1
+     },
+     "detectors": [
+      {
+       "field": "z",
+       "formula": "x1*w1 + x2*w2 + x3*w3",
+       "message": {
+        "en": "Ai uitat biasul. Adaugă $b$ la produsul scalar.",
+        "ro": "Ai uitat biasul. Adaugă $b$ la produsul scalar."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Calculează întâi produsul scalar: înmulțești pe poziții.",
+       "ro": "Calculează întâi produsul scalar: înmulțești pe poziții."
+      },
+      {
+       "en": "$z=x_1w_1+x_2w_2+x_3w_3+b$, cu numerele puse în loc.",
+       "ro": "$z=x_1w_1+x_2w_2+x_3w_3+b$, cu numerele puse în loc."
+      },
+      {
+       "en": "Aduni produsele, apoi biasul.",
+       "ro": "Aduni produsele, apoi biasul."
+      }
+     ],
+     "solution": {
+      "en": "Produsul scalar: $6-4+1=3$. Cu biasul: $z=3+1=4$.",
+      "ro": "Produsul scalar: $6-4+1=3$. Cu biasul: $z=3+1=4$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Un neuron are intrările $x=(1;\\,4;\\,2)$, ponderile $w=(−2;\\,0{,}5;\\,1)$ și biasul $b=3$. Calculează $z$.",
+        "ro": "Un neuron are intrările $x=(1;\\,4;\\,2)$, ponderile $w=(−2;\\,0{,}5;\\,1)$ și biasul $b=3$. Calculează $z$."
+       },
+       "fields": [
+        {
+         "id": "z",
+         "formula": "x1*w1 + x2*w2 + x3*w3 + b",
+         "expected": 5
+        }
+       ],
+       "solution": {
+        "en": "$-2+2+2=2$, apoi $2+3=5$.",
+        "ro": "$-2+2+2=2$, apoi $2+3=5$."
+       },
+       "data": {
+        "x1": 1,
+        "x2": 4,
+        "x3": 2,
+        "w1": -2,
+        "w2": 0.5,
+        "w3": 1,
+        "b": 3
+       },
+       "hints": [
+        {
+         "en": "Înmulțești pe poziții, apoi aduni biasul.",
+         "ro": "Înmulțești pe poziții, apoi aduni biasul."
+        },
+        {
+         "en": "$z=1\\cdot(-2)+4\\cdot 0{,}5+2\\cdot 1+3$",
+         "ro": "$z=1\\cdot(-2)+4\\cdot 0{,}5+2\\cdot 1+3$"
+        },
+        {
+         "en": "$-2+2+2+3=5$.",
+         "ro": "$-2+2+2+3=5$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Un neuron are intrările $x=(2;\\,5;\\,1)$, ponderile $w=(1;\\,−1;\\,−3)$ și biasul $b=1$. Calculează $z$. Atenție la semne.",
+        "ro": "Un neuron are intrările $x=(2;\\,5;\\,1)$, ponderile $w=(1;\\,−1;\\,−3)$ și biasul $b=1$. Calculează $z$. Atenție la semne."
+       },
+       "fields": [
+        {
+         "id": "z",
+         "formula": "x1*w1 + x2*w2 + x3*w3 + b",
+         "expected": -5
+        }
+       ],
+       "solution": {
+        "en": "$2-5-3=-6$, apoi $-6+1=-5$.",
+        "ro": "$2-5-3=-6$, apoi $-6+1=-5$."
+       },
+       "data": {
+        "x1": 2,
+        "x2": 5,
+        "x3": 1,
+        "w1": 1,
+        "w2": -1,
+        "w3": -3,
+        "b": 1
+       },
+       "hints": [
+        {
+         "en": "Înmulțești pe poziții, apoi aduni biasul.",
+         "ro": "Înmulțești pe poziții, apoi aduni biasul."
+        },
+        {
+         "en": "$z=2\\cdot 1+5\\cdot(-1)+1\\cdot(-3)+1$",
+         "ro": "$z=2\\cdot 1+5\\cdot(-1)+1\\cdot(-3)+1$"
+        },
+        {
+         "en": "$2-5-3+1=-5$.",
+         "ro": "$2-5-3+1=-5$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s08",
+   "title": {
+    "en": "Activarea: de la z la ieșire",
+    "ro": "Activarea: de la z la ieșire"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 10",
+    "ro": "Cursul 3 · slide 10"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "**Activarea** (activation function) ia numărul $z$ și dă **ieșirea** $y$. Slide 9 scrie:",
+        "ro": "**Activarea** (activation function) ia numărul $z$ și dă **ieșirea** $y$. Slide 9 scrie:"
+       }
+      },
+      {
+       "tex": "y = \\mathit{activation}(z)"
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 210'><title>z intră în activare, y iese</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='2' x1='62' y1='40' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='40' r='20'><title>intrarea 1</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='45' text-anchor='middle'>1</text><line class='muted' stroke-width='2' x1='62' y1='105' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='105' r='20'><title>intrarea 2</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='110' text-anchor='middle'>2</text><line class='muted' stroke-width='2' x1='62' y1='170' x2='163' y2='105' marker-end='url(#ah-muted)'/><circle class='fg fill-bg' stroke-width='2' cx='42' cy='170' r='20'><title>intrarea 3</title></circle><text class='fg' font-size='15' font-weight='700' x='42' y='175' text-anchor='middle'>3</text><circle class='fg fill-bg' stroke-width='2.5' cx='190' cy='105' r='26'><title>suma ponderată</title></circle><text class='fg' font-size='17' font-weight='700' x='190' y='111' text-anchor='middle'>z</text><line class='muted' stroke-width='2' x1='217' y1='105' x2='248' y2='105' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='250' y='83' width='44' height='44' rx='6'><title>activarea</title></rect><text class='accent' font-size='17' font-weight='700' x='272' y='111' text-anchor='middle'>f</text><line class='muted' stroke-width='2' x1='295' y1='105' x2='322' y2='105' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='310' y='95' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Suma z intră în caseta de activare; iese y",
+         "ro": "Suma z intră în caseta de activare; iese y"
+        },
+        "caption": {
+         "en": "z intră, y iese.",
+         "ro": "z intră, y iese."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Numele vine de la neuronul biologic: se «aprinde» sau nu.",
+       "ro": "Numele vine de la neuronul biologic: se «aprinde» sau nu."
+      },
+      {
+       "en": "Unele activări doar transformă numărul, ca să încapă într-un interval.",
+       "ro": "Unele activări doar transformă numărul, ca să încapă într-un interval."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s09",
+   "title": {
+    "en": "Activarea liniară: y = z",
+    "ro": "Activarea liniară: y = z"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 11",
+    "ro": "Cursul 3 · slide 11"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cea mai simplă activare lasă numărul cum e: $y=z$. Din $z=3{,}5$ iese $y=3{,}5$.",
+        "ro": "Cea mai simplă activare lasă numărul cum e: $y=z$. Din $z=3{,}5$ iese $y=3{,}5$."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 190'><title>Activarea liniară</title><line class='muted' stroke-width='1.5' x1='179' y1='146' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='81' x2='314' y2='81'/><line class='muted' stroke-width='1.5' x1='44' y1='143' x2='44' y2='149'/><text class='muted' font-size='14' x='44' y='164' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='111.5' y1='143' x2='111.5' y2='149'/><text class='muted' font-size='14' x='111.5' y='164' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='143' x2='179' y2='149'/><text class='muted' font-size='14' x='179' y='164' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='246.5' y1='143' x2='246.5' y2='149'/><text class='muted' font-size='14' x='246.5' y='164' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='314' y1='143' x2='314' y2='149'/><text class='muted' font-size='14' x='314' y='164' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='146' x2='47' y2='146'/><text class='muted' font-size='14' x='38' y='151' text-anchor='end'>−4</text><line class='muted' stroke-width='1.5' x1='41' y1='113.5' x2='47' y2='113.5'/><text class='muted' font-size='14' x='38' y='118.5' text-anchor='end'>−2</text><line class='muted' stroke-width='1.5' x1='41' y1='48.5' x2='47' y2='48.5'/><text class='muted' font-size='14' x='38' y='53.5' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='16' x2='47' y2='16'/><text class='muted' font-size='14' x='38' y='21' text-anchor='end'>4</text><line class='accent' stroke-width='3' x1='44' y1='146' x2='314' y2='16'/><circle class='warn fill-warn' stroke-width='2' cx='297.1' cy='24.1' r='5'><title>z = 3,5 dă y = 3,5</title></circle><text class='warn' font-size='14' x='289.1' y='14.1' text-anchor='end'>(3,5; 3,5)</text><text class='fg' font-size='15' x='328' y='86' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='20' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Graficul y = z: o dreaptă care urcă",
+         "ro": "Graficul y = z: o dreaptă care urcă"
+        },
+        "caption": {
+         "en": "Activarea liniară: o dreaptă.",
+         "ro": "Activarea liniară: o dreaptă."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Slide 11 spune că nu e «o funcție care se folosește cu adevărat»: nu schimbă nimic. Contează abia mai târziu, la straturi.",
+        "ro": "Slide 11 spune că nu e «o funcție care se folosește cu adevărat»: nu schimbă nimic. Contează abia mai târziu, la straturi."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s10",
+   "title": {
+    "en": "Pragul binar: da sau nu",
+    "ro": "Pragul binar: da sau nu"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 12",
+    "ro": "Cursul 3 · slide 12"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Neuronul compară produsul scalar cu un **prag** și răspunde 1 (da) sau 0 (nu). Luăm $x=(2;\\,1)$, $w=(1;\\,3)$, pragul 4.",
+        "ro": "Neuronul compară produsul scalar cu un **prag** și răspunde 1 (da) sau 0 (nu). Luăm $x=(2;\\,1)$, $w=(1;\\,3)$, pragul 4."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "$w\\cdot x=2\\cdot 1+1\\cdot 3=5$",
+       "ro": "$w\\cdot x=2\\cdot 1+1\\cdot 3=5$"
+      },
+      {
+       "en": "Comparăm: $5>4$.",
+       "ro": "Comparăm: $5>4$."
+      }
+     ],
+     "result": {
+      "en": "5 depășește pragul 4, deci ieșirea e 1.",
+      "ro": "5 depășește pragul 4, deci ieșirea e 1."
+     }
+    },
+    {
+     "type": "rule",
+     "text": {
+      "en": "Prag binar: ieșirea e 1 dacă $w\\cdot x$ depășește pragul, altfel 0.",
+      "ro": "Prag binar: ieșirea e 1 dacă $w\\cdot x$ depășește pragul, altfel 0."
+     },
+     "body": [
+      {
+       "note": {
+        "en": "Slide 12 scrie «0 (sau −1)» pentru «nu»; luăm 0.",
+        "ro": "Slide 12 scrie «0 (sau −1)» pentru «nu»; luăm 0."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s11",
+   "title": {
+    "en": "Pragul devine −b",
+    "ro": "Pragul devine −b"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 13",
+    "ro": "Cursul 3 · slide 13"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Mutăm pragul în bias: $w\\cdot x>4$ înseamnă $w\\cdot x-4>0$. Deci $b=-4$, adică bias = minus prag.",
+        "ro": "Mutăm pragul în bias: $w\\cdot x>4$ înseamnă $w\\cdot x-4>0$. Deci $b=-4$, adică bias = minus prag."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 190'><title>Pragul binar</title><line class='muted' stroke-width='1.5' x1='179' y1='146' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='135.6' x2='314' y2='135.6'/><line class='muted' stroke-width='1.5' x1='44' y1='143' x2='44' y2='149'/><text class='muted' font-size='14' x='44' y='164' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='111.5' y1='143' x2='111.5' y2='149'/><text class='muted' font-size='14' x='111.5' y='164' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='143' x2='179' y2='149'/><text class='muted' font-size='14' x='179' y='164' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='246.5' y1='143' x2='246.5' y2='149'/><text class='muted' font-size='14' x='246.5' y='164' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='314' y1='143' x2='314' y2='149'/><text class='muted' font-size='14' x='314' y='164' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='135.6' x2='47' y2='135.6'/><text class='muted' font-size='14' x='38' y='140.6' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='31.6' x2='47' y2='31.6'/><text class='muted' font-size='14' x='38' y='36.6' text-anchor='end'>1</text><line class='accent' stroke-width='3' x1='44' y1='135.6' x2='179' y2='135.6'/><line class='accent' stroke-width='3' x1='179' y1='31.6' x2='314' y2='31.6'/><line class='accent' stroke-width='1.5' x1='179' y1='135.6' x2='179' y2='31.6' stroke-dasharray='4 4'/><circle class='warn fill-warn' stroke-width='2' cx='212.8' cy='31.6' r='5'><title>z = 1, y = 1</title></circle><text class='fg' font-size='15' x='328' y='140.6' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='23.1' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Treapta: 0 pentru z negativ, 1 pentru z pozitiv; punctul z = 1 are y = 1",
+         "ro": "Treapta: 0 pentru z negativ, 1 pentru z pozitiv; punctul z = 1 are y = 1"
+        },
+        "caption": {
+         "en": "Pentru $z=5-4=1$, ieșirea e 1.",
+         "ro": "Pentru $z=5-4=1$, ieșirea e 1."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Acum pragul e mereu 0: ieșirea e 1 când $z>0$.",
+        "ro": "Acum pragul e mereu 0: ieșirea e 1 când $z>0$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s12",
+   "title": {
+    "en": "Ieșirea pragului pentru z negativ",
+    "ro": "Ieșirea pragului pentru z negativ"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 13",
+    "ro": "Cursul 3 · slide 13"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03a-q04",
+     "question": {
+      "en": "Un neuron cu prag binar are $z=-3$. Ce iese?",
+      "ro": "Un neuron cu prag binar are $z=-3$. Ce iese?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "y = 0",
+        "ro": "y = 0"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: z nu depășește 0, deci răspunsul e «nu», adică 0.",
+        "ro": "Corect: z nu depășește 0, deci răspunsul e «nu», adică 0."
+       }
+      },
+      {
+       "text": {
+        "en": "y = 1",
+        "ro": "y = 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "y = 1 e pentru z > 0. Aici z este negativ.",
+        "ro": "y = 1 e pentru z > 0. Aici z este negativ."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "y = −3",
+        "ro": "y = −3"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Asta ar fi activarea liniară (y = z). Pragul dă doar 0 sau 1.",
+        "ro": "Asta ar fi activarea liniară (y = z). Pragul dă doar 0 sau 1."
+       },
+       "misconception": "regula-gresita"
+      }
+     ],
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 190'><title>Pragul binar</title><line class='muted' stroke-width='1.5' x1='179' y1='146' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='135.6' x2='314' y2='135.6'/><line class='muted' stroke-width='1.5' x1='44' y1='143' x2='44' y2='149'/><text class='muted' font-size='14' x='44' y='164' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='111.5' y1='143' x2='111.5' y2='149'/><text class='muted' font-size='14' x='111.5' y='164' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='143' x2='179' y2='149'/><text class='muted' font-size='14' x='179' y='164' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='246.5' y1='143' x2='246.5' y2='149'/><text class='muted' font-size='14' x='246.5' y='164' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='314' y1='143' x2='314' y2='149'/><text class='muted' font-size='14' x='314' y='164' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='135.6' x2='47' y2='135.6'/><text class='muted' font-size='14' x='38' y='140.6' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='31.6' x2='47' y2='31.6'/><text class='muted' font-size='14' x='38' y='36.6' text-anchor='end'>1</text><line class='accent' stroke-width='3' x1='44' y1='135.6' x2='179' y2='135.6'/><line class='accent' stroke-width='3' x1='179' y1='31.6' x2='314' y2='31.6'/><line class='accent' stroke-width='1.5' x1='179' y1='135.6' x2='179' y2='31.6' stroke-dasharray='4 4'/><circle class='warn fill-warn' stroke-width='2' cx='77.8' cy='135.6' r='5'><title>z = −3</title></circle><text class='fg' font-size='15' x='328' y='140.6' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='23.1' text-anchor='middle'>y</text></svg>",
+      "alt": {
+       "en": "Treapta cu punctul z = −3 pe palierul de jos",
+       "ro": "Treapta cu punctul z = −3 pe palierul de jos"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s13",
+   "title": {
+    "en": "Biasul ca pondere pe o intrare fixă",
+    "ro": "Biasul ca pondere pe o intrare fixă"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 14",
+    "ro": "Cursul 3 · slide 14"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Același $z$ se obține adăugând o intrare care e **mereu 1**; ponderea ei este $b$. Aici $x=(2;\\,1;\\,1)$ și $w=(1;\\,3;\\,-4)$.",
+        "ro": "Același $z$ se obține adăugând o intrare care e **mereu 1**; ponderea ei este $b$. Aici $x=(2;\\,1;\\,1)$ și $w=(1;\\,3;\\,-4)$."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "intrare",
+         "pondere",
+         "produs"
+        ],
+        "rows": [
+         [
+          "2",
+          "1",
+          "2"
+         ],
+         [
+          "1",
+          "3",
+          "3"
+         ],
+         [
+          "1 (fixă)",
+          "−4",
+          "−4"
+         ],
+         [
+          "–",
+          "total",
+          "1"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Suma e 1, la fel ca $z=5-4$. Deci putem scrie «intrări și ponderi» fără să mai ținem separat biasul.",
+        "ro": "Suma e 1, la fel ca $z=5-4$. Deci putem scrie «intrări și ponderi» fără să mai ținem separat biasul."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s14",
+   "title": {
+    "en": "Prag și bias, numere noi",
+    "ro": "Prag și bias, numere noi"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 13",
+    "ro": "Cursul 3 · slide 13"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03a-e05",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Neuronul are $w=(1;\\,3)$, pragul 4 (deci $b=-4$) și prag binar. Pentru $x=(1;\\,0)$, calculează $z$ și ieșirea $y$ (1 sau 0).",
+      "ro": "Neuronul are $w=(1;\\,3)$, pragul 4 (deci $b=-4$) și prag binar. Pentru $x=(1;\\,0)$, calculează $z$ și ieșirea $y$ (1 sau 0)."
+     },
+     "fields": [
+      {
+       "id": "z",
+       "label": {
+        "en": "z",
+        "ro": "z"
+       },
+       "kind": "num",
+       "formula": "x1*w1 + x2*w2 + b",
+       "expected": -3
+      },
+      {
+       "id": "y",
+       "label": {
+        "en": "y",
+        "ro": "y"
+       },
+       "kind": "num",
+       "formula": "0",
+       "expected": 0
+      }
+     ],
+     "data": {
+      "x1": 1,
+      "x2": 0,
+      "w1": 1,
+      "w2": 3,
+      "b": -4
+     },
+     "detectors": [
+      {
+       "field": "z",
+       "formula": "x1*w1 + x2*w2",
+       "message": {
+        "en": "Ai uitat biasul −4. Scade pragul.",
+        "ro": "Ai uitat biasul −4. Scade pragul."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Calculează întâi $z=w\\cdot x+b$.",
+       "ro": "Calculează întâi $z=w\\cdot x+b$."
+      },
+      {
+       "en": "$z=x_1w_1+x_2w_2+b$, cu numerele puse în loc.",
+       "ro": "$z=x_1w_1+x_2w_2+b$, cu numerele puse în loc."
+      },
+      {
+       "en": "Dacă $z$ e negativ sau 0, $y=0$; dacă e pozitiv, $y=1$.",
+       "ro": "Dacă $z$ e negativ sau 0, $y=0$; dacă e pozitiv, $y=1$."
+      }
+     ],
+     "solution": {
+      "en": "$z=1+0-4=-3$. Nu e mai mare decât 0, deci $y=0$.",
+      "ro": "$z=1+0-4=-3$. Nu e mai mare decât 0, deci $y=0$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Neuronul are $w=(1;\\,3)$, pragul 4 (deci $b=-4$) și prag binar. Pentru $x=(2;\\,1)$, calculează $z$ și ieșirea $y$ (1 sau 0).",
+        "ro": "Neuronul are $w=(1;\\,3)$, pragul 4 (deci $b=-4$) și prag binar. Pentru $x=(2;\\,1)$, calculează $z$ și ieșirea $y$ (1 sau 0)."
+       },
+       "fields": [
+        {
+         "id": "z",
+         "formula": "x1*w1 + x2*w2 + b",
+         "expected": 1
+        },
+        {
+         "id": "y",
+         "formula": "1",
+         "expected": 1
+        }
+       ],
+       "solution": {
+        "en": "$z=2+3-4=1>0$, deci $y=1$.",
+        "ro": "$z=2+3-4=1>0$, deci $y=1$."
+       },
+       "data": {
+        "x1": 2,
+        "x2": 1,
+        "w1": 1,
+        "w2": 3,
+        "b": -4
+       },
+       "hints": [
+        {
+         "en": "$z=w\\cdot x+b$.",
+         "ro": "$z=w\\cdot x+b$."
+        },
+        {
+         "en": "$z=2\\cdot 1+1\\cdot 3-4$",
+         "ro": "$z=2\\cdot 1+1\\cdot 3-4$"
+        },
+        {
+         "en": "$z=1$, pozitiv, deci $y=1$.",
+         "ro": "$z=1$, pozitiv, deci $y=1$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Neuronul are $w=(1;\\,3)$, pragul 4 (deci $b=-4$) și prag binar. Pentru $x=(0;\\,1{,}5)$, calculează $z$ și ieșirea $y$ (1 sau 0).",
+        "ro": "Neuronul are $w=(1;\\,3)$, pragul 4 (deci $b=-4$) și prag binar. Pentru $x=(0;\\,1{,}5)$, calculează $z$ și ieșirea $y$ (1 sau 0)."
+       },
+       "fields": [
+        {
+         "id": "z",
+         "formula": "x1*w1 + x2*w2 + b",
+         "expected": 0.5
+        },
+        {
+         "id": "y",
+         "formula": "1",
+         "expected": 1
+        }
+       ],
+       "solution": {
+        "en": "$z=0+4{,}5-4=0{,}5>0$, deci $y=1$.",
+        "ro": "$z=0+4{,}5-4=0{,}5>0$, deci $y=1$."
+       },
+       "data": {
+        "x1": 0,
+        "x2": 1.5,
+        "w1": 1,
+        "w2": 3,
+        "b": -4
+       },
+       "hints": [
+        {
+         "en": "$z=w\\cdot x+b$.",
+         "ro": "$z=w\\cdot x+b$."
+        },
+        {
+         "en": "$z=0\\cdot 1+1{,}5\\cdot 3-4$",
+         "ro": "$z=0\\cdot 1+1{,}5\\cdot 3-4$"
+        },
+        {
+         "en": "$z=0{,}5$, pozitiv, deci $y=1$.",
+         "ro": "$z=0{,}5$, pozitiv, deci $y=1$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s15",
+   "title": {
+    "en": "Exact pe prag: z = 0",
+    "ro": "Exact pe prag: z = 0"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 12–14",
+    "ro": "Cursul 3 · slide 12–14"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Dacă $z$ cade exact pe 0, slide-urile nu se pun de acord: slide 12–13 scriu «mai mare» ($>$), slide 14 scrie «mai mare sau egal» ($\\ge$).",
+        "ro": "Dacă $z$ cade exact pe 0, slide-urile nu se pun de acord: slide 12–13 scriu «mai mare» ($>$), slide 14 scrie «mai mare sau egal» ($\\ge$)."
+       }
+      },
+      {
+       "text": {
+        "en": "În această lecție ieșirea e 1 doar pentru $z>0$. Pentru $z=0$ iese 0.",
+        "ro": "În această lecție ieșirea e 1 doar pentru $z>0$. Pentru $z=0$ iese 0."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03a-q06",
+     "question": {
+      "en": "Neuronul are $w=(1;\\,3)$, $b=-4$ și $x=(1;\\,1)$. Ce iese, cu regula $z>0$?",
+      "ro": "Neuronul are $w=(1;\\,3)$, $b=-4$ și $x=(1;\\,1)$. Ce iese, cu regula $z>0$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "y = 0",
+        "ro": "y = 0"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $z=1+3-4=0$, iar 0 nu e mai mare decât 0.",
+        "ro": "Corect: $z=1+3-4=0$, iar 0 nu e mai mare decât 0."
+       }
+      },
+      {
+       "text": {
+        "en": "y = 1",
+        "ro": "y = 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Asta ar fi regula $z\\ge 0$ din slide 14. Noi folosim $z>0$.",
+        "ro": "Asta ar fi regula $z\\ge 0$ din slide 14. Noi folosim $z>0$."
+       },
+       "misconception": "prag-gresit"
+      },
+      {
+       "text": {
+        "en": "y = 0,5",
+        "ro": "y = 0,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pragul dă doar 0 sau 1; 0,5 ar veni de la o sigmoidă.",
+        "ro": "Pragul dă doar 0 sau 1; 0,5 ar veni de la o sigmoidă."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s16",
+   "title": {
+    "en": "Pragul nu poate învăța (1)",
+    "ro": "Pragul nu poate învăța (1)"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 15",
+    "ro": "Cursul 3 · slide 15"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Antrenarea schimbă ponderile puțin și se uită cum se mișcă ieșirea. Vezi ce face pragul când $z$ crește de la 3,0 la 3,05.",
+        "ro": "Antrenarea schimbă ponderile puțin și se uită cum se mișcă ieșirea. Vezi ce face pragul când $z$ crește de la 3,0 la 3,05."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 190'><title>Două puncte pe palierul de sus</title><line class='muted' stroke-width='1.5' x1='179' y1='146' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='135.6' x2='314' y2='135.6'/><line class='muted' stroke-width='1.5' x1='44' y1='143' x2='44' y2='149'/><text class='muted' font-size='14' x='44' y='164' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='111.5' y1='143' x2='111.5' y2='149'/><text class='muted' font-size='14' x='111.5' y='164' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='143' x2='179' y2='149'/><text class='muted' font-size='14' x='179' y='164' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='246.5' y1='143' x2='246.5' y2='149'/><text class='muted' font-size='14' x='246.5' y='164' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='314' y1='143' x2='314' y2='149'/><text class='muted' font-size='14' x='314' y='164' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='135.6' x2='47' y2='135.6'/><text class='muted' font-size='14' x='38' y='140.6' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='31.6' x2='47' y2='31.6'/><text class='muted' font-size='14' x='38' y='36.6' text-anchor='end'>1</text><line class='accent' stroke-width='3' x1='44' y1='135.6' x2='179' y2='135.6'/><line class='accent' stroke-width='3' x1='179' y1='31.6' x2='314' y2='31.6'/><line class='accent' stroke-width='1.5' x1='179' y1='135.6' x2='179' y2='31.6' stroke-dasharray='4 4'/><circle class='warn fill-warn' stroke-width='2' cx='280.2' cy='31.6' r='5'><title>z = 3,0</title></circle><circle class='ok fill-ok' stroke-width='2' cx='281.9' cy='31.6' r='5'><title>z = 3,05</title></circle><text class='fg' font-size='15' x='328' y='140.6' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='23.1' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Două puncte, z = 3,0 și z = 3,05, amândouă pe palierul de sus al treptei",
+         "ro": "Două puncte, z = 3,0 și z = 3,05, amândouă pe palierul de sus al treptei"
+        },
+        "caption": {
+         "en": "Ambele puncte stau pe palier.",
+         "ro": "Ambele puncte stau pe palier."
+        }
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03a-q07",
+     "question": {
+      "en": "Ponderile se schimbă puțin și $z$ crește de la 3,0 la 3,05. Ce face ieșirea $y$ a pragului?",
+      "ro": "Ponderile se schimbă puțin și $z$ crește de la 3,0 la 3,05. Ce face ieșirea $y$ a pragului?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Rămâne 1",
+        "ro": "Rămâne 1"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: palierul e plat, deci nicio schimbare nu se vede. Antrenarea nu află dacă a mers bine sau rău.",
+        "ro": "Corect: palierul e plat, deci nicio schimbare nu se vede. Antrenarea nu află dacă a mers bine sau rău."
+       }
+      },
+      {
+       "text": {
+        "en": "Crește puțin, odată cu z",
+        "ro": "Crește puțin, odată cu z"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pragul nu are valori între 0 și 1; pe palier rămâne exact 1.",
+        "ro": "Pragul nu are valori între 0 și 1; pe palier rămâne exact 1."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "Devine 0",
+        "ro": "Devine 0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pragul trece la 0 doar când z coboară sub 0.",
+        "ro": "Pragul trece la 0 doar când z coboară sub 0."
+       },
+       "misconception": "semn-gresit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s17",
+   "title": {
+    "en": "Pragul nu poate învăța (2)",
+    "ro": "Pragul nu poate învăța (2)"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 15",
+    "ro": "Cursul 3 · slide 15"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Lângă $z=0$ e invers: $z$ trece de la $-0{,}01$ la $0{,}01$, o schimbare de $0{,}02$, iar ieșirea sare de la 0 la 1.",
+        "ro": "Lângă $z=0$ e invers: $z$ trece de la $-0{,}01$ la $0{,}01$, o schimbare de $0{,}02$, iar ieșirea sare de la 0 la 1."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 190'><title>Saltul din z = 0</title><line class='muted' stroke-width='1.5' x1='179' y1='146' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='135.6' x2='314' y2='135.6'/><line class='muted' stroke-width='1.5' x1='44' y1='143' x2='44' y2='149'/><text class='muted' font-size='14' x='44' y='164' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='111.5' y1='143' x2='111.5' y2='149'/><text class='muted' font-size='14' x='111.5' y='164' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='143' x2='179' y2='149'/><text class='muted' font-size='14' x='179' y='164' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='246.5' y1='143' x2='246.5' y2='149'/><text class='muted' font-size='14' x='246.5' y='164' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='314' y1='143' x2='314' y2='149'/><text class='muted' font-size='14' x='314' y='164' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='135.6' x2='47' y2='135.6'/><text class='muted' font-size='14' x='38' y='140.6' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='31.6' x2='47' y2='31.6'/><text class='muted' font-size='14' x='38' y='36.6' text-anchor='end'>1</text><line class='accent' stroke-width='3' x1='44' y1='135.6' x2='179' y2='135.6'/><line class='accent' stroke-width='3' x1='179' y1='31.6' x2='314' y2='31.6'/><line class='accent' stroke-width='1.5' x1='179' y1='135.6' x2='179' y2='31.6' stroke-dasharray='4 4'/><circle class='warn fill-warn' stroke-width='2' cx='178.7' cy='135.6' r='5'><title>z = −0,01</title></circle><circle class='ok fill-ok' stroke-width='2' cx='179.3' cy='31.6' r='5'><title>z = 0,01</title></circle><text class='fg' font-size='15' x='328' y='140.6' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='23.1' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Punctul z = −0,01 pe palierul de jos și z = 0,01 pe palierul de sus",
+         "ro": "Punctul z = −0,01 pe palierul de jos și z = 0,01 pe palierul de sus"
+        },
+        "caption": {
+         "en": "Un pas de 0,02 în z mută y cu 1.",
+         "ro": "Un pas de 0,02 în z mută y cu 1."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Ori nu se vede nimic, ori sare tot. Nu există «un pic mai bine». Slide 15 spune: «not derivable», adică nu are pantă în salt.",
+        "ro": "Ori nu se vede nimic, ori sare tot. Nu există «un pic mai bine». Slide 15 spune: «not derivable», adică nu are pantă în salt."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s18",
+   "title": {
+    "en": "Sigmoida: o curbă netedă",
+    "ro": "Sigmoida: o curbă netedă"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 16",
+    "ro": "Cursul 3 · slide 16"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Sigmoida (funcția logistică) urcă lin de la 0 la 1.",
+        "ro": "Sigmoida (funcția logistică) urcă lin de la 0 la 1."
+       }
+      },
+      {
+       "tex": "y=\\sigma(z)=\\frac{1}{1+e^{-z}}"
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Sigmoida</title><line class='muted' stroke-width='1.5' x1='179' y1='156' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='146.7' x2='314' y2='146.7'/><line class='muted' stroke-width='1.5' x1='44' y1='153' x2='44' y2='159'/><text class='muted' font-size='14' x='44' y='174' text-anchor='middle'>−6</text><line class='muted' stroke-width='1.5' x1='89' y1='153' x2='89' y2='159'/><text class='muted' font-size='14' x='89' y='174' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='134' y1='153' x2='134' y2='159'/><text class='muted' font-size='14' x='134' y='174' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='153' x2='179' y2='159'/><text class='muted' font-size='14' x='179' y='174' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='224' y1='153' x2='224' y2='159'/><text class='muted' font-size='14' x='224' y='174' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='269' y1='153' x2='269' y2='159'/><text class='muted' font-size='14' x='269' y='174' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='314' y1='153' x2='314' y2='159'/><text class='muted' font-size='14' x='314' y='174' text-anchor='middle'>6</text><line class='muted' stroke-width='1.5' x1='41' y1='146.7' x2='47' y2='146.7'/><text class='muted' font-size='14' x='38' y='151.7' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='88.3' x2='47' y2='88.3'/><text class='muted' font-size='14' x='38' y='93.3' text-anchor='end'>0,5</text><line class='muted' stroke-width='1.5' x1='41' y1='30' x2='47' y2='30'/><text class='muted' font-size='14' x='38' y='35' text-anchor='end'>1</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,146.4 47,146.3 50,146.3 53,146.2 56,146.2 59,146.1 62,146 65,145.9 68,145.8 71,145.7 74,145.6 77,145.4 80,145.3 83,145.1 86,144.8 89,144.6 92,144.3 95,143.9 98,143.6 101,143.1 104,142.6 107,142.1 110,141.5 113,140.8 116,140 119,139.1 122,138.1 125,137 128,135.7 131,134.3 134,132.8 137,131 140,129.1 143,127.1 146,124.8 149,122.3 152,119.7 155,116.8 158,113.7 161,110.5 164,107.1 167,103.5 170,99.8 173,96.1 176,92.2 179,88.3 182,84.5 185,80.6 188,76.8 191,73.1 194,69.6 197,66.2 200,62.9 203,59.9 206,57 209,54.3 212,51.9 215,49.6 218,47.5 221,45.6 224,43.9 227,42.4 230,41 233,39.7 236,38.6 239,37.6 242,36.7 245,35.9 248,35.2 251,34.6 254,34 257,33.5 260,33.1 263,32.7 266,32.4 269,32.1 272,31.8 275,31.6 278,31.4 281,31.2 284,31.1 287,31 290,30.8 293,30.7 296,30.6 299,30.6 302,30.5 305,30.4 308,30.4 311,30.3 314,30.3'/><text class='fg' font-size='15' x='328' y='151.7' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='20' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Graficul sigmoidei: curbă în S, de la 0 la 1, trece prin 0,5 în z = 0",
+         "ro": "Graficul sigmoidei: curbă în S, de la 0 la 1, trece prin 0,5 în z = 0"
+        },
+        "caption": {
+         "en": "Sigmoida $\\sigma(z)$.",
+         "ro": "Sigmoida $\\sigma(z)$."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "$e\\approx 2{,}718$. Un pas mic în $z$ schimbă puțin $y$: exact ce lipsea pragului.",
+        "ro": "$e\\approx 2{,}718$. Un pas mic în $z$ schimbă puțin $y$: exact ce lipsea pragului."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s19",
+   "title": {
+    "en": "Citim sigmoida de pe grafic",
+    "ro": "Citim sigmoida de pe grafic"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 16",
+    "ro": "Cursul 3 · slide 16"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03a-p08",
+     "claim": {
+      "en": "Pe grafic sunt marcate trei puncte ale sigmoidei: în $z=0$, $z=1$ și $z=4$. Cât de sus e fiecare?",
+      "ro": "Pe grafic sunt marcate trei puncte ale sigmoidei: în $z=0$, $z=1$ și $z=4$. Cât de sus e fiecare?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$z=0$: $\\sigma(0)=0{,}5$",
+        "ro": "$z=0$: $\\sigma(0)=0{,}5$"
+       },
+       "why": {
+        "en": "Curba trece exact prin mijloc: $1/(1+e^0)=1/2$.",
+        "ro": "Curba trece exact prin mijloc: $1/(1+e^0)=1/2$."
+       },
+       "predict": {
+        "question": {
+         "en": "La ce înălțime e punctul din $z=0$?",
+         "ro": "La ce înălțime e punctul din $z=0$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "La 0,5, la mijloc",
+           "ro": "La 0,5, la mijloc"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: punctul stă pe linia lui 0,5.",
+           "ro": "Corect: punctul stă pe linia lui 0,5."
+          }
+         },
+         {
+          "text": {
+           "en": "Aproape de 0",
+           "ro": "Aproape de 0"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Curba coboară spre 0 doar pentru z foarte negativ; în z = 0 e la mijloc.",
+           "ro": "Curba coboară spre 0 doar pentru z foarte negativ; în z = 0 e la mijloc."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "Aproape de 1",
+           "ro": "Aproape de 1"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Curba urcă spre 1 doar pentru z mare.",
+           "ro": "Curba urcă spre 1 doar pentru z mare."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$z=1$: $\\sigma(1)=0{,}7311$",
+        "ro": "$z=1$: $\\sigma(1)=0{,}7311$"
+       },
+       "why": {
+        "en": "Pe partea care urcă.",
+        "ro": "Pe partea care urcă."
+       },
+       "predict": {
+        "question": {
+         "en": "La ce înălțime e punctul din $z=1$?",
+         "ro": "La ce înălțime e punctul din $z=1$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Între 0,5 și 1, pe la 0,73",
+           "ro": "Între 0,5 și 1, pe la 0,73"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: a urcat peste mijloc, dar e departe de 1.",
+           "ro": "Corect: a urcat peste mijloc, dar e departe de 1."
+          }
+         },
+         {
+          "text": {
+           "en": "Exact la 1",
+           "ro": "Exact la 1"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Valoarea 1 nu se atinge niciodată.",
+           "ro": "Valoarea 1 nu se atinge niciodată."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "Tot la 0,5",
+           "ro": "Tot la 0,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "0,5 e în z = 0; spre dreapta curba urcă.",
+           "ro": "0,5 e în z = 0; spre dreapta curba urcă."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$z=4$: $\\sigma(4)=0{,}9820$",
+        "ro": "$z=4$: $\\sigma(4)=0{,}9820$"
+       },
+       "why": {
+        "en": "Aproape de capătul de sus.",
+        "ro": "Aproape de capătul de sus."
+       },
+       "predict": {
+        "question": {
+         "en": "La ce înălțime e punctul din $z=4$?",
+         "ro": "La ce înălțime e punctul din $z=4$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Aproape de 1, dar sub 1",
+           "ro": "Aproape de 1, dar sub 1"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: 0,98, foarte aproape de 1.",
+           "ro": "Corect: 0,98, foarte aproape de 1."
+          }
+         },
+         {
+          "text": {
+           "en": "La 4",
+           "ro": "La 4"
+          },
+          "correct": false,
+          "explain": {
+           "en": "σ(z) nu depășește 1. Ieșirea nu e z.",
+           "ro": "σ(z) nu depășește 1. Ieșirea nu e z."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "Pe la 0,73",
+           "ro": "Pe la 0,73"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Acolo e z = 1. La z = 4 curba e mai sus.",
+           "ro": "Acolo e z = 1. La z = 4 curba e mai sus."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "La $z$ negativ curba e simetrică: $\\sigma(-1)=1-0{,}7311=0{,}2689$ și $\\sigma(-4)=1-0{,}9820=0{,}0180$.",
+      "ro": "La $z$ negativ curba e simetrică: $\\sigma(-1)=1-0{,}7311=0{,}2689$ și $\\sigma(-4)=1-0{,}9820=0{,}0180$."
+     },
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 200'><title>Trei puncte pe sigmoidă</title><line class='muted' stroke-width='1.5' x1='179' y1='156' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='146.7' x2='314' y2='146.7'/><line class='muted' stroke-width='1.5' x1='44' y1='153' x2='44' y2='159'/><text class='muted' font-size='14' x='44' y='174' text-anchor='middle'>−6</text><line class='muted' stroke-width='1.5' x1='89' y1='153' x2='89' y2='159'/><text class='muted' font-size='14' x='89' y='174' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='134' y1='153' x2='134' y2='159'/><text class='muted' font-size='14' x='134' y='174' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='153' x2='179' y2='159'/><text class='muted' font-size='14' x='179' y='174' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='201.5' y1='153' x2='201.5' y2='159'/><text class='muted' font-size='14' x='201.5' y='174' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='224' y1='153' x2='224' y2='159'/><text class='muted' font-size='14' x='224' y='174' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='269' y1='153' x2='269' y2='159'/><text class='muted' font-size='14' x='269' y='174' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='314' y1='153' x2='314' y2='159'/><text class='muted' font-size='14' x='314' y='174' text-anchor='middle'>6</text><line class='muted' stroke-width='1.5' x1='41' y1='146.7' x2='47' y2='146.7'/><text class='muted' font-size='14' x='38' y='151.7' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='88.3' x2='47' y2='88.3'/><text class='muted' font-size='14' x='38' y='93.3' text-anchor='end'>0,5</text><line class='muted' stroke-width='1.5' x1='41' y1='30' x2='47' y2='30'/><text class='muted' font-size='14' x='38' y='35' text-anchor='end'>1</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,146.4 47,146.3 50,146.3 53,146.2 56,146.2 59,146.1 62,146 65,145.9 68,145.8 71,145.7 74,145.6 77,145.4 80,145.3 83,145.1 86,144.8 89,144.6 92,144.3 95,143.9 98,143.6 101,143.1 104,142.6 107,142.1 110,141.5 113,140.8 116,140 119,139.1 122,138.1 125,137 128,135.7 131,134.3 134,132.8 137,131 140,129.1 143,127.1 146,124.8 149,122.3 152,119.7 155,116.8 158,113.7 161,110.5 164,107.1 167,103.5 170,99.8 173,96.1 176,92.2 179,88.3 182,84.5 185,80.6 188,76.8 191,73.1 194,69.6 197,66.2 200,62.9 203,59.9 206,57 209,54.3 212,51.9 215,49.6 218,47.5 221,45.6 224,43.9 227,42.4 230,41 233,39.7 236,38.6 239,37.6 242,36.7 245,35.9 248,35.2 251,34.6 254,34 257,33.5 260,33.1 263,32.7 266,32.4 269,32.1 272,31.8 275,31.6 278,31.4 281,31.2 284,31.1 287,31 290,30.8 293,30.7 296,30.6 299,30.6 302,30.5 305,30.4 308,30.4 311,30.3 314,30.3'/><line class='muted' stroke-width='1.5' x1='179' y1='156' x2='179' y2='88.3' stroke-dasharray='3 3'/><line class='muted' stroke-width='1.5' x1='44' y1='88.3' x2='179' y2='88.3' stroke-dasharray='3 3'/><line class='muted' stroke-width='1.5' x1='201.5' y1='156' x2='201.5' y2='61.4' stroke-dasharray='3 3'/><line class='muted' stroke-width='1.5' x1='44' y1='61.4' x2='201.5' y2='61.4' stroke-dasharray='3 3'/><line class='muted' stroke-width='1.5' x1='269' y1='156' x2='269' y2='32.1' stroke-dasharray='3 3'/><line class='muted' stroke-width='1.5' x1='44' y1='32.1' x2='269' y2='32.1' stroke-dasharray='3 3'/><circle class='warn fill-warn' stroke-width='2' cx='179' cy='88.3' r='5'><title>z = 0</title></circle><circle class='warn fill-warn' stroke-width='2' cx='201.5' cy='61.4' r='5'><title>z = 1</title></circle><circle class='warn fill-warn' stroke-width='2' cx='269' cy='32.1' r='5'><title>z = 4</title></circle><text class='fg' font-size='15' x='328' y='151.7' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='20' text-anchor='middle'>y</text></svg>",
+      "alt": {
+       "en": "Sigmoida cu trei puncte marcate, în z egal 0, 1 și 4, cu linii punctate spre axe",
+       "ro": "Sigmoida cu trei puncte marcate, în z egal 0, 1 și 4, cu linii punctate spre axe"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s20",
+   "title": {
+    "en": "Între 0 și 1, niciodată exact",
+    "ro": "Între 0 și 1, niciodată exact"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 17",
+    "ro": "Cursul 3 · slide 17"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Sigmoida dă mereu un număr pozitiv, dar și mai mic decât 1. Nu atinge 0 sau 1.",
+        "ro": "Sigmoida dă mereu un număr pozitiv, dar și mai mic decât 1. Nu atinge 0 sau 1."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Capetele sigmoidei</title><line class='muted' stroke-width='1.5' x1='179' y1='156' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='146.7' x2='314' y2='146.7'/><line class='muted' stroke-width='1.5' x1='44' y1='153' x2='44' y2='159'/><text class='muted' font-size='14' x='44' y='174' text-anchor='middle'>−6</text><line class='muted' stroke-width='1.5' x1='89' y1='153' x2='89' y2='159'/><text class='muted' font-size='14' x='89' y='174' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='134' y1='153' x2='134' y2='159'/><text class='muted' font-size='14' x='134' y='174' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='153' x2='179' y2='159'/><text class='muted' font-size='14' x='179' y='174' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='224' y1='153' x2='224' y2='159'/><text class='muted' font-size='14' x='224' y='174' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='269' y1='153' x2='269' y2='159'/><text class='muted' font-size='14' x='269' y='174' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='314' y1='153' x2='314' y2='159'/><text class='muted' font-size='14' x='314' y='174' text-anchor='middle'>6</text><line class='muted' stroke-width='1.5' x1='41' y1='146.7' x2='47' y2='146.7'/><text class='muted' font-size='14' x='38' y='151.7' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='88.3' x2='47' y2='88.3'/><text class='muted' font-size='14' x='38' y='93.3' text-anchor='end'>0,5</text><line class='muted' stroke-width='1.5' x1='41' y1='30' x2='47' y2='30'/><text class='muted' font-size='14' x='38' y='35' text-anchor='end'>1</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,146.4 47,146.3 50,146.3 53,146.2 56,146.2 59,146.1 62,146 65,145.9 68,145.8 71,145.7 74,145.6 77,145.4 80,145.3 83,145.1 86,144.8 89,144.6 92,144.3 95,143.9 98,143.6 101,143.1 104,142.6 107,142.1 110,141.5 113,140.8 116,140 119,139.1 122,138.1 125,137 128,135.7 131,134.3 134,132.8 137,131 140,129.1 143,127.1 146,124.8 149,122.3 152,119.7 155,116.8 158,113.7 161,110.5 164,107.1 167,103.5 170,99.8 173,96.1 176,92.2 179,88.3 182,84.5 185,80.6 188,76.8 191,73.1 194,69.6 197,66.2 200,62.9 203,59.9 206,57 209,54.3 212,51.9 215,49.6 218,47.5 221,45.6 224,43.9 227,42.4 230,41 233,39.7 236,38.6 239,37.6 242,36.7 245,35.9 248,35.2 251,34.6 254,34 257,33.5 260,33.1 263,32.7 266,32.4 269,32.1 272,31.8 275,31.6 278,31.4 281,31.2 284,31.1 287,31 290,30.8 293,30.7 296,30.6 299,30.6 302,30.5 305,30.4 308,30.4 311,30.3 314,30.3'/><circle class='warn fill-warn' stroke-width='2' cx='44' cy='146.4' r='5'><title>z = −6: 0,0025</title></circle><circle class='warn fill-warn' stroke-width='2' cx='314' cy='30.3' r='5'><title>z = 6: 0,9975</title></circle><text class='fg' font-size='15' x='328' y='151.7' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='20' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Sigmoida cu două puncte la capete: z = −6 dă 0,0025 și z = 6 dă 0,9975",
+         "ro": "Sigmoida cu două puncte la capete: z = −6 dă 0,0025 și z = 6 dă 0,9975"
+        },
+        "caption": {
+         "en": "La $z=\\pm 6$ iese aproape 0, respectiv aproape 1.",
+         "ro": "La $z=\\pm 6$ iese aproape 0, respectiv aproape 1."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Slide 17: «always positive» și «normalizes values in 0..1», adică valori între 0 și 1.",
+        "ro": "Slide 17: «always positive» și «normalizes values in 0..1», adică valori între 0 și 1."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03a-q09",
+     "question": {
+      "en": "Care din aceste valori nu poate fi niciodată ieșirea unei sigmoide?",
+      "ro": "Care din aceste valori nu poate fi niciodată ieșirea unei sigmoide?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "1,2",
+        "ro": "1,2"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: σ nu depășește 1.",
+        "ro": "Corect: σ nu depășește 1."
+       }
+      },
+      {
+       "text": {
+        "en": "0,0025",
+        "ro": "0,0025"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se poate: e σ(−6).",
+        "ro": "Se poate: e σ(−6)."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "0,5",
+        "ro": "0,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se poate: e σ(0).",
+        "ro": "Se poate: e σ(0)."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s21",
+   "title": {
+    "en": "Panta sigmoidei",
+    "ro": "Panta sigmoidei"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 17",
+    "ro": "Cursul 3 · slide 17"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Panta spune cât de repede urcă curba. Sigmoida urcă repede în mijloc și aproape deloc la capete.",
+        "ro": "Panta spune cât de repede urcă curba. Sigmoida urcă repede în mijloc și aproape deloc la capete."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Panta în trei puncte</title><line class='muted' stroke-width='1.5' x1='179' y1='156' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='146.7' x2='314' y2='146.7'/><line class='muted' stroke-width='1.5' x1='44' y1='153' x2='44' y2='159'/><text class='muted' font-size='14' x='44' y='174' text-anchor='middle'>−6</text><line class='muted' stroke-width='1.5' x1='89' y1='153' x2='89' y2='159'/><text class='muted' font-size='14' x='89' y='174' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='134' y1='153' x2='134' y2='159'/><text class='muted' font-size='14' x='134' y='174' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='153' x2='179' y2='159'/><text class='muted' font-size='14' x='179' y='174' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='224' y1='153' x2='224' y2='159'/><text class='muted' font-size='14' x='224' y='174' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='269' y1='153' x2='269' y2='159'/><text class='muted' font-size='14' x='269' y='174' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='314' y1='153' x2='314' y2='159'/><text class='muted' font-size='14' x='314' y='174' text-anchor='middle'>6</text><line class='muted' stroke-width='1.5' x1='41' y1='146.7' x2='47' y2='146.7'/><text class='muted' font-size='14' x='38' y='151.7' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='88.3' x2='47' y2='88.3'/><text class='muted' font-size='14' x='38' y='93.3' text-anchor='end'>0,5</text><line class='muted' stroke-width='1.5' x1='41' y1='30' x2='47' y2='30'/><text class='muted' font-size='14' x='38' y='35' text-anchor='end'>1</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,146.4 47,146.3 50,146.3 53,146.2 56,146.2 59,146.1 62,146 65,145.9 68,145.8 71,145.7 74,145.6 77,145.4 80,145.3 83,145.1 86,144.8 89,144.6 92,144.3 95,143.9 98,143.6 101,143.1 104,142.6 107,142.1 110,141.5 113,140.8 116,140 119,139.1 122,138.1 125,137 128,135.7 131,134.3 134,132.8 137,131 140,129.1 143,127.1 146,124.8 149,122.3 152,119.7 155,116.8 158,113.7 161,110.5 164,107.1 167,103.5 170,99.8 173,96.1 176,92.2 179,88.3 182,84.5 185,80.6 188,76.8 191,73.1 194,69.6 197,66.2 200,62.9 203,59.9 206,57 209,54.3 212,51.9 215,49.6 218,47.5 221,45.6 224,43.9 227,42.4 230,41 233,39.7 236,38.6 239,37.6 242,36.7 245,35.9 248,35.2 251,34.6 254,34 257,33.5 260,33.1 263,32.7 266,32.4 269,32.1 272,31.8 275,31.6 278,31.4 281,31.2 284,31.1 287,31 290,30.8 293,30.7 296,30.6 299,30.6 302,30.5 305,30.4 308,30.4 311,30.3 314,30.3'/><line class='warn' stroke-width='2.5' x1='59.8' y1='147.2' x2='118.2' y2='141.9'><title>panta în z = -4</title></line><line class='warn' stroke-width='2.5' x1='149.8' y1='126.2' x2='208.2' y2='50.4'><title>panta în z = 0</title></line><line class='warn' stroke-width='2.5' x1='239.8' y1='34.8' x2='298.2' y2='29.4'><title>panta în z = 4</title></line><text class='fg' font-size='15' x='328' y='151.7' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='20' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Sigmoida cu segmente de tangentă în z = −4, 0 și 4; cea din mijloc e mai înclinată",
+         "ro": "Sigmoida cu segmente de tangentă în z = −4, 0 și 4; cea din mijloc e mai înclinată"
+        },
+        "caption": {
+         "en": "Segmentele galbene arată panta.",
+         "ro": "Segmentele galbene arată panta."
+        }
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "z",
+         "panta"
+        ],
+        "rows": [
+         [
+          "0",
+          "0,25"
+         ],
+         [
+          "±1",
+          "0,1966"
+         ],
+         [
+          "±2",
+          "0,1050"
+         ],
+         [
+          "±4",
+          "0,0177"
+         ],
+         [
+          "±6",
+          "0,0025"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Slide 17: pantă «consistentă» pe [−4, 4]. Nu e constantă, doar clar nenulă; în afara ei tinde spre 0.",
+        "ro": "Slide 17: pantă «consistentă» pe [−4, 4]. Nu e constantă, doar clar nenulă; în afara ei tinde spre 0."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s22",
+   "title": {
+    "en": "Ce înseamnă o ieșire între 0 și 1",
+    "ro": "Ce înseamnă o ieșire între 0 și 1"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 17",
+    "ro": "Cursul 3 · slide 17"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide 17: la ieșirea unui clasificator binar (două clase, 0 și 1), ieșirea sigmoidei se citește ca **probabilitatea** ca intrarea să fie din clasa 1.",
+        "ro": "Slide 17: la ieșirea unui clasificator binar (două clase, 0 și 1), ieșirea sigmoidei se citește ca **probabilitatea** ca intrarea să fie din clasa 1."
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Aproape de 1: probabil clasa 1.",
+       "ro": "Aproape de 1: probabil clasa 1."
+      },
+      {
+       "en": "Aproape de 0: probabil clasa 0.",
+       "ro": "Aproape de 0: probabil clasa 0."
+      },
+      {
+       "en": "Exact 0,5: 50%, neuronul nu se hotărăște.",
+       "ro": "Exact 0,5: 50%, neuronul nu se hotărăște."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03a-q10",
+     "question": {
+      "en": "Un neuron cu sigmoidă dă $y=0{,}9820$ (adică $z=4$). Cum citim?",
+      "ro": "Un neuron cu sigmoidă dă $y=0{,}9820$ (adică $z=4$). Cum citim?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "98% probabilitate pentru clasa 1",
+        "ro": "98% probabilitate pentru clasa 1"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: ieșirea e probabilitatea clasei 1; 0,9820 înseamnă aproape 98%.",
+        "ro": "Corect: ieșirea e probabilitatea clasei 1; 0,9820 înseamnă aproape 98%."
+       }
+      },
+      {
+       "text": {
+        "en": "98% probabilitate pentru clasa 0",
+        "ro": "98% probabilitate pentru clasa 0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ieșirea e probabilitatea clasei 1. Pentru clasa 0 rămân $1-0{,}9820$, adică 2%.",
+        "ro": "Ieșirea e probabilitatea clasei 1. Pentru clasa 0 rămân $1-0{,}9820$, adică 2%."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "50%: nehotărât",
+        "ro": "50%: nehotărât"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nehotărât ar fi 0,5. Aici ieșirea e aproape de 1.",
+        "ro": "Nehotărât ar fi 0,5. Aici ieșirea e aproape de 1."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s23",
+   "title": {
+    "en": "Calculează σ(z)",
+    "ro": "Calculează σ(z)"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 16",
+    "ro": "Cursul 3 · slide 16"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03a-e11",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Calculează $\\sigma(1)=\\dfrac{1}{1+e^{-1}}$ (patru zecimale).",
+      "ro": "Calculează $\\sigma(1)=\\dfrac{1}{1+e^{-1}}$ (patru zecimale)."
+     },
+     "fields": [
+      {
+       "id": "s",
+       "label": {
+        "en": "σ(1)",
+        "ro": "σ(1)"
+       },
+       "kind": "num",
+       "formula": "1/(1+exp(-z))",
+       "expected": 0.7311
+      }
+     ],
+     "data": {
+      "z": 1
+     },
+     "detectors": [
+      {
+       "field": "s",
+       "formula": "1/(1+exp(z))",
+       "message": {
+        "en": "Ai folosit $e^{z}$ în loc de $e^{-z}$. Semnul minus din exponent contează.",
+        "ro": "Ai folosit $e^{z}$ în loc de $e^{-z}$. Semnul minus din exponent contează."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Întâi $e^{-1}\\approx 0{,}3679$.",
+       "ro": "Întâi $e^{-1}\\approx 0{,}3679$."
+      },
+      {
+       "en": "$\\sigma(1)=\\dfrac{1}{1+0{,}3679}$",
+       "ro": "$\\sigma(1)=\\dfrac{1}{1+0{,}3679}$"
+      },
+      {
+       "en": "$1/1{,}3679\\approx 0{,}7311$.",
+       "ro": "$1/1{,}3679\\approx 0{,}7311$."
+      }
+     ],
+     "solution": {
+      "en": "$e^{-1}=0{,}3679$, $1+0{,}3679=1{,}3679$, $1/1{,}3679=0{,}7311$.",
+      "ro": "$e^{-1}=0{,}3679$, $1+0{,}3679=1{,}3679$, $1/1{,}3679=0{,}7311$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Calculează $\\sigma(−2)=\\dfrac{1}{1+e^{2}}$ (patru zecimale).",
+        "ro": "Calculează $\\sigma(−2)=\\dfrac{1}{1+e^{2}}$ (patru zecimale)."
+       },
+       "fields": [
+        {
+         "id": "s",
+         "formula": "1/(1+exp(-z))",
+         "expected": 0.1192
+        }
+       ],
+       "solution": {
+        "en": "$e^{2}=7{,}3891$, $1+7{,}3891=8{,}3891$, $1/8{,}3891=0{,}1192$.",
+        "ro": "$e^{2}=7{,}3891$, $1+7{,}3891=8{,}3891$, $1/8{,}3891=0{,}1192$."
+       },
+       "data": {
+        "z": -2
+       },
+       "hints": [
+        {
+         "en": "Pentru $z=-2$, exponentul $-z$ este $2$.",
+         "ro": "Pentru $z=-2$, exponentul $-z$ este $2$."
+        },
+        {
+         "en": "$\\sigma(-2)=1/(1+e^{2})$",
+         "ro": "$\\sigma(-2)=1/(1+e^{2})$"
+        },
+        {
+         "en": "$1/8{,}3891\\approx 0{,}1192$.",
+         "ro": "$1/8{,}3891\\approx 0{,}1192$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Calculează $\\sigma(2)=\\dfrac{1}{1+e^{-2}}$ (patru zecimale).",
+        "ro": "Calculează $\\sigma(2)=\\dfrac{1}{1+e^{-2}}$ (patru zecimale)."
+       },
+       "fields": [
+        {
+         "id": "s",
+         "formula": "1/(1+exp(-z))",
+         "expected": 0.8808
+        }
+       ],
+       "solution": {
+        "en": "$e^{-2}=0{,}1353$, $1/1{,}1353=0{,}8808$.",
+        "ro": "$e^{-2}=0{,}1353$, $1/1{,}1353=0{,}8808$."
+       },
+       "data": {
+        "z": 2
+       },
+       "hints": [
+        {
+         "en": "Întâi $e^{-2}$.",
+         "ro": "Întâi $e^{-2}$."
+        },
+        {
+         "en": "$\\sigma(2)=1/(1+0{,}1353)$",
+         "ro": "$\\sigma(2)=1/(1+0{,}1353)$"
+        },
+        {
+         "en": "$1/1{,}1353\\approx 0{,}8808$.",
+         "ro": "$1/1{,}1353\\approx 0{,}8808$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s24",
+   "title": {
+    "en": "Pragul și sigmoida, în cuvintele tale",
+    "ro": "Pragul și sigmoida, în cuvintele tale"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 15–17",
+    "ro": "Cursul 3 · slide 15–17"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "nn-l03a-r12",
+     "prompt": {
+      "en": "Cu cuvintele tale: de ce un pas mic al unei ponderi se vede la ieșirea unei sigmoide, dar de cele mai multe ori nu se vede la ieșirea unui prag?",
+      "ro": "Cu cuvintele tale: de ce un pas mic al unei ponderi se vede la ieșirea unei sigmoide, dar de cele mai multe ori nu se vede la ieșirea unui prag?"
+     },
+     "answer": {
+      "en": "Sigmoida e o curbă netedă: dacă z se schimbă puțin, și y se schimbă puțin, în direcția cunoscută. Pragul are paliere plate (nicio schimbare) și un salt (schimbare uriașă la un pas minuscul), deci nu spune în ce direcție să mergem.",
+      "ro": "Sigmoida e o curbă netedă: dacă z se schimbă puțin, și y se schimbă puțin, în direcția cunoscută. Pragul are paliere plate (nicio schimbare) și un salt (schimbare uriașă la un pas minuscul), deci nu spune în ce direcție să mergem."
+     },
+     "placeholder": {
+      "en": "Scrie ce crezi",
+      "ro": "Scrie ce crezi"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s25",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 2–17",
+    "ro": "Cursul 3 · slide 2–17"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Ce avem despre neuron:",
+        "ro": "Ce avem despre neuron:"
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "$z=x\\cdot w+b$: produs scalar plus bias, un singur număr.",
+       "ro": "$z=x\\cdot w+b$: produs scalar plus bias, un singur număr."
+      },
+      {
+       "en": "Activarea dă ieșirea $y$ din $z$.",
+       "ro": "Activarea dă ieșirea $y$ din $z$."
+      },
+      {
+       "en": "Liniară: $y=z$. Prag binar: $y=1$ pentru $z>0$, altfel 0; nu poate învăța.",
+       "ro": "Liniară: $y=z$. Prag binar: $y=1$ pentru $z>0$, altfel 0; nu poate învăța."
+      },
+      {
+       "en": "Sigmoidă: netedă, cu valori între 0 și 1, pantă maximă 0,25 în $z=0$ și aproape 0 dincolo de $\\pm 4$.",
+       "ro": "Sigmoidă: netedă, cu valori între 0 și 1, pantă maximă 0,25 în $z=0$ și aproape 0 dincolo de $\\pm 4$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s26",
+   "title": {
+    "en": "Verificare: z și sigmoida",
+    "ro": "Verificare: z și sigmoida"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 9–16",
+    "ro": "Cursul 3 · slide 9–16"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03a-e13",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Neuronul are $x=(2;\\,−1)$, $w=(1{,}5;\\,0{,}5)$, $b=−2$ și activarea sigmoidă. Calculează $z$ și $y=\\sigma(z)$ (patru zecimale).",
+      "ro": "Neuronul are $x=(2;\\,−1)$, $w=(1{,}5;\\,0{,}5)$, $b=−2$ și activarea sigmoidă. Calculează $z$ și $y=\\sigma(z)$ (patru zecimale)."
+     },
+     "fields": [
+      {
+       "id": "z",
+       "label": {
+        "en": "z",
+        "ro": "z"
+       },
+       "kind": "num",
+       "formula": "x1*w1 + x2*w2 + b",
+       "expected": 0.5
+      },
+      {
+       "id": "y",
+       "label": {
+        "en": "y",
+        "ro": "y"
+       },
+       "kind": "num",
+       "formula": "1/(1+exp(-(x1*w1 + x2*w2 + b)))",
+       "expected": 0.6225
+      }
+     ],
+     "data": {
+      "x1": 2,
+      "x2": -1,
+      "w1": 1.5,
+      "w2": 0.5,
+      "b": -2
+     },
+     "detectors": [
+      {
+       "field": "z",
+       "formula": "x1*w1 + x2*w2",
+       "message": {
+        "en": "Ai uitat biasul $b$.",
+        "ro": "Ai uitat biasul $b$."
+       }
+      },
+      {
+       "field": "y",
+       "formula": "x1*w1 + x2*w2 + b",
+       "message": {
+        "en": "Ai lăsat $y=z$; sigmoida mai aplică formula $1/(1+e^{-z})$.",
+        "ro": "Ai lăsat $y=z$; sigmoida mai aplică formula $1/(1+e^{-z})$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Întâi $z=x\\cdot w+b$, apoi $y=\\sigma(z)$.",
+       "ro": "Întâi $z=x\\cdot w+b$, apoi $y=\\sigma(z)$."
+      },
+      {
+       "en": "$z=x_1w_1+x_2w_2+b$; apoi $1/(1+e^{-z})$.",
+       "ro": "$z=x_1w_1+x_2w_2+b$; apoi $1/(1+e^{-z})$."
+      },
+      {
+       "en": "Pune $z$ în formula sigmoidei.",
+       "ro": "Pune $z$ în formula sigmoidei."
+      }
+     ],
+     "solution": {
+      "en": "$z=3-0{,}5-2=0{,}5$. $e^{-0{,}5}=0{,}6065$, $y=1/1{,}6065=0{,}6225$.",
+      "ro": "$z=3-0{,}5-2=0{,}5$. $e^{-0{,}5}=0{,}6065$, $y=1/1{,}6065=0{,}6225$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Neuronul are $x=(1;\\,3)$, $w=(−1;\\,1)$, $b=−1$ și activarea sigmoidă. Calculează $z$ și $y=\\sigma(z)$ (patru zecimale).",
+        "ro": "Neuronul are $x=(1;\\,3)$, $w=(−1;\\,1)$, $b=−1$ și activarea sigmoidă. Calculează $z$ și $y=\\sigma(z)$ (patru zecimale)."
+       },
+       "fields": [
+        {
+         "id": "z",
+         "formula": "x1*w1 + x2*w2 + b",
+         "expected": 1
+        },
+        {
+         "id": "y",
+         "formula": "1/(1+exp(-(x1*w1 + x2*w2 + b)))",
+         "expected": 0.7311
+        }
+       ],
+       "solution": {
+        "en": "$z=-1+3-1=1$, $y=\\sigma(1)=0{,}7311$.",
+        "ro": "$z=-1+3-1=1$, $y=\\sigma(1)=0{,}7311$."
+       },
+       "data": {
+        "x1": 1,
+        "x2": 3,
+        "w1": -1,
+        "w2": 1,
+        "b": -1
+       },
+       "hints": [
+        {
+         "en": "Întâi $z$, apoi sigmoida.",
+         "ro": "Întâi $z$, apoi sigmoida."
+        },
+        {
+         "en": "$z=1\\cdot(-1)+3\\cdot 1-1$; apoi $1/(1+e^{-z})$.",
+         "ro": "$z=1\\cdot(-1)+3\\cdot 1-1$; apoi $1/(1+e^{-z})$."
+        },
+        {
+         "en": "$z=1$, $y=0{,}7311$.",
+         "ro": "$z=1$, $y=0{,}7311$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s27",
+   "title": {
+    "en": "Verificare: care se poate antrena",
+    "ro": "Verificare: care se poate antrena"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 15–16",
+    "ro": "Cursul 3 · slide 15–16"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03a-q14",
+     "question": {
+      "en": "Care activare permite să vezi, dintr-un pas mic al ponderilor, în ce direcție se mișcă ieșirea?",
+      "ro": "Care activare permite să vezi, dintr-un pas mic al ponderilor, în ce direcție se mișcă ieșirea?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Sigmoida, pentru că e netedă",
+        "ro": "Sigmoida, pentru că e netedă"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: o schimbare mică în z dă o schimbare mică și vizibilă în y.",
+        "ro": "Corect: o schimbare mică în z dă o schimbare mică și vizibilă în y."
+       }
+      },
+      {
+       "text": {
+        "en": "Pragul binar, pentru că dă doar 0 sau 1",
+        "ro": "Pragul binar, pentru că dă doar 0 sau 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Tocmai din cauza asta nu merge: ieșirea nu se mișcă pe paliere.",
+        "ro": "Tocmai din cauza asta nu merge: ieșirea nu se mișcă pe paliere."
+       },
+       "misconception": "motiv-gresit"
+      },
+      {
+       "text": {
+        "en": "Niciuna: ieșirea nu depinde de ponderi",
+        "ro": "Niciuna: ieșirea nu depinde de ponderi"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ieșirea depinde de ponderi prin z.",
+        "ro": "Ieșirea depinde de ponderi prin z."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03a-s28",
+   "title": {
+    "en": "Verificare: panta",
+    "ro": "Verificare: panta"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 17",
+    "ro": "Cursul 3 · slide 17"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03a-q15",
+     "question": {
+      "en": "Pentru o sigmoidă, unde urcă curba cel mai repede?",
+      "ro": "Pentru o sigmoidă, unde urcă curba cel mai repede?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "În $z=0$",
+        "ro": "În $z=0$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: panta e 0,25 acolo, cea mai mare.",
+        "ro": "Corect: panta e 0,25 acolo, cea mai mare."
+       }
+      },
+      {
+       "text": {
+        "en": "În $z=6$",
+        "ro": "În $z=6$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Acolo panta e 0,0025, aproape zero.",
+        "ro": "Acolo panta e 0,0025, aproape zero."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "În $z=-6$",
+        "ro": "În $z=-6$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Și acolo curba e aproape plată (panta 0,0025).",
+        "ro": "Și acolo curba e aproape plată (panta 0,0025)."
+       },
+       "misconception": "regula-gresita"
+      }
+     ],
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 200'><title>Două tangente</title><line class='muted' stroke-width='1.5' x1='179' y1='156' x2='179' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='146.7' x2='314' y2='146.7'/><line class='muted' stroke-width='1.5' x1='44' y1='153' x2='44' y2='159'/><text class='muted' font-size='14' x='44' y='174' text-anchor='middle'>−6</text><line class='muted' stroke-width='1.5' x1='89' y1='153' x2='89' y2='159'/><text class='muted' font-size='14' x='89' y='174' text-anchor='middle'>−4</text><line class='muted' stroke-width='1.5' x1='134' y1='153' x2='134' y2='159'/><text class='muted' font-size='14' x='134' y='174' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='179' y1='153' x2='179' y2='159'/><text class='muted' font-size='14' x='179' y='174' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='224' y1='153' x2='224' y2='159'/><text class='muted' font-size='14' x='224' y='174' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='269' y1='153' x2='269' y2='159'/><text class='muted' font-size='14' x='269' y='174' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='314' y1='153' x2='314' y2='159'/><text class='muted' font-size='14' x='314' y='174' text-anchor='middle'>6</text><line class='muted' stroke-width='1.5' x1='41' y1='146.7' x2='47' y2='146.7'/><text class='muted' font-size='14' x='38' y='151.7' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='88.3' x2='47' y2='88.3'/><text class='muted' font-size='14' x='38' y='93.3' text-anchor='end'>0,5</text><line class='muted' stroke-width='1.5' x1='41' y1='30' x2='47' y2='30'/><text class='muted' font-size='14' x='38' y='35' text-anchor='end'>1</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,146.4 47,146.3 50,146.3 53,146.2 56,146.2 59,146.1 62,146 65,145.9 68,145.8 71,145.7 74,145.6 77,145.4 80,145.3 83,145.1 86,144.8 89,144.6 92,144.3 95,143.9 98,143.6 101,143.1 104,142.6 107,142.1 110,141.5 113,140.8 116,140 119,139.1 122,138.1 125,137 128,135.7 131,134.3 134,132.8 137,131 140,129.1 143,127.1 146,124.8 149,122.3 152,119.7 155,116.8 158,113.7 161,110.5 164,107.1 167,103.5 170,99.8 173,96.1 176,92.2 179,88.3 182,84.5 185,80.6 188,76.8 191,73.1 194,69.6 197,66.2 200,62.9 203,59.9 206,57 209,54.3 212,51.9 215,49.6 218,47.5 221,45.6 224,43.9 227,42.4 230,41 233,39.7 236,38.6 239,37.6 242,36.7 245,35.9 248,35.2 251,34.6 254,34 257,33.5 260,33.1 263,32.7 266,32.4 269,32.1 272,31.8 275,31.6 278,31.4 281,31.2 284,31.1 287,31 290,30.8 293,30.7 296,30.6 299,30.6 302,30.5 305,30.4 308,30.4 311,30.3 314,30.3'/><line class='warn' stroke-width='2.5' x1='149.8' y1='126.2' x2='208.2' y2='50.4'><title>panta în z = 0</title></line><line class='warn' stroke-width='2.5' x1='284.8' y1='30.7' x2='343.2' y2='29.9'><title>panta în z = 6</title></line><text class='fg' font-size='15' x='328' y='151.7' text-anchor='middle'>z</text><text class='fg' font-size='15' x='191' y='20' text-anchor='middle'>y</text></svg>",
+      "alt": {
+       "en": "Sigmoida cu tangente în z = 0 și z = 6",
+       "ro": "Sigmoida cu tangente în z = 0 și z = 6"
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,2672 @@
+{
+ "meta": {
+  "id": "nn-l03b",
+  "title": {
+   "en": "Lesson 3b: Layers, networks and the matrix form",
+   "ro": "Lecția 3b: Straturi, rețele și forma cu matrice"
+  },
+  "shortTitle": {
+   "en": "L3b: Layers",
+   "ro": "L3b: Straturi"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 3 (Gradient Descent), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 3 (Gradient Descent), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l03b-s01",
+   "title": {
+    "en": "Neuroni așezați pe straturi",
+    "ro": "Neuroni așezați pe straturi"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 18–19",
+    "ro": "Cursul 3 · slide 18–19"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "O rețea neuronală (neural network) are mai mulți neuroni, **așezați pe straturi** (layers). Ieșirile unui strat intră în stratul următor.",
+        "ro": "O rețea neuronală (neural network) are mai mulți neuroni, **așezați pe straturi** (layers). Ieșirile unui strat intră în stratul următor."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 210'><title>Rețea cu patru coloane de neuroni</title><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='110.7' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='110.7' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='110.7' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='110.7' y2='158'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='110.7' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='110.7' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='110.7' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='110.7' y2='158'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='110.7' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='110.7' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='110.7' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='110.7' y2='158'/><line class='muted' stroke-width='1.5' x1='138.7' y1='26' x2='201.3' y2='70'/><line class='muted' stroke-width='1.5' x1='138.7' y1='26' x2='201.3' y2='114'/><line class='muted' stroke-width='1.5' x1='138.7' y1='70' x2='201.3' y2='70'/><line class='muted' stroke-width='1.5' x1='138.7' y1='70' x2='201.3' y2='114'/><line class='muted' stroke-width='1.5' x1='138.7' y1='114' x2='201.3' y2='70'/><line class='muted' stroke-width='1.5' x1='138.7' y1='114' x2='201.3' y2='114'/><line class='muted' stroke-width='1.5' x1='138.7' y1='158' x2='201.3' y2='70'/><line class='muted' stroke-width='1.5' x1='138.7' y1='158' x2='201.3' y2='114'/><line class='muted' stroke-width='1.5' x1='229.3' y1='70' x2='292' y2='92'/><line class='muted' stroke-width='1.5' x1='229.3' y1='114' x2='292' y2='92'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='48' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='92' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='136' r='14'><title>neuronul 3, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='124.7' cy='26' r='14'><title>neuronul 1, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='124.7' cy='70' r='14'><title>neuronul 2, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='124.7' cy='114' r='14'><title>neuronul 3, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='124.7' cy='158' r='14'><title>neuronul 4, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='215.3' cy='70' r='14'><title>neuronul 1, coloana 3</title></circle><circle class='fg fill-bg' stroke-width='2' cx='215.3' cy='114' r='14'><title>neuronul 2, coloana 3</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='92' r='14'><title>neuronul 1, coloana 4</title></circle><text class='muted' font-size='14' x='34' y='204' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='124.7' y='204' text-anchor='middle'>ascuns</text><text class='muted' font-size='14' x='215.3' y='204' text-anchor='middle'>ascuns</text><text class='muted' font-size='14' x='306' y='204' text-anchor='middle'>ieșire</text></svg>",
+        "alt": {
+         "en": "Patru coloane de neuroni: 3, 4, 2 și 1, legate cu săgeți",
+         "ro": "Patru coloane de neuroni: 3, 4, 2 și 1, legate cu săgeți"
+        },
+        "caption": {
+         "en": "O rețea cu 3, 4, 2 și 1 neuroni pe coloane.",
+         "ro": "O rețea cu 3, 4, 2 și 1 neuroni pe coloane."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s02",
+   "title": {
+    "en": "Trei feluri de straturi",
+    "ro": "Trei feluri de straturi"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 19",
+    "ro": "Cursul 3 · slide 19"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 166'><title>Rețea 2-3-1</title><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='184' y1='26' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='70' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='114' x2='292' y2='70'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='48' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='92' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='26' r='14'><title>neuronul 1, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='70' r='14'><title>neuronul 2, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='114' r='14'><title>neuronul 3, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='70' r='14'><title>neuronul 1, coloana 3</title></circle><text class='muted' font-size='14' x='34' y='160' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='170' y='160' text-anchor='middle'>ascuns</text><text class='muted' font-size='14' x='306' y='160' text-anchor='middle'>ieșire</text></svg>",
+        "alt": {
+         "en": "Rețea cu 2 neuroni de intrare, 3 ascunși și 1 de ieșire",
+         "ro": "Rețea cu 2 neuroni de intrare, 3 ascunși și 1 de ieșire"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "**Stratul de intrare** (input layer): primește intrarea.",
+       "ro": "**Stratul de intrare** (input layer): primește intrarea."
+      },
+      {
+       "en": "**Straturile ascunse** (hidden layers): procesează ce vine de la intrare.",
+       "ro": "**Straturile ascunse** (hidden layers): procesează ce vine de la intrare."
+      },
+      {
+       "en": "**Stratul de ieșire** (output layer): dă valoarea finală.",
+       "ro": "**Stratul de ieșire** (output layer): dă valoarea finală."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s03",
+   "title": {
+    "en": "Câte straturi ascunse?",
+    "ro": "Câte straturi ascunse?"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 19–20",
+    "ro": "Cursul 3 · slide 19–20"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03b-q01",
+     "question": {
+      "en": "Rețeaua din figură are 3 intrări, apoi straturi de 4, 2 și 1 neuroni. Câte straturi **ascunse** are?",
+      "ro": "Rețeaua din figură are 3 intrări, apoi straturi de 4, 2 și 1 neuroni. Câte straturi **ascunse** are?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "2",
+        "ro": "2"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: straturile de 4 și de 2 neuroni. Ultimul strat (1 neuron) e cel de ieșire.",
+        "ro": "Corect: straturile de 4 și de 2 neuroni. Ultimul strat (1 neuron) e cel de ieșire."
+       }
+      },
+      {
+       "text": {
+        "en": "3",
+        "ro": "3"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ai numărat și stratul de ieșire. El nu e ascuns: dă valoarea finală.",
+        "ro": "Ai numărat și stratul de ieșire. El nu e ascuns: dă valoarea finală."
+       },
+       "misconception": "numarat-gresit"
+      },
+      {
+       "text": {
+        "en": "4",
+        "ro": "4"
+       },
+       "correct": false,
+       "explain": {
+        "en": "4 e numărul de neuroni din primul strat ascuns, nu numărul straturilor.",
+        "ro": "4 e numărul de neuroni din primul strat ascuns, nu numărul straturilor."
+       },
+       "misconception": "numarat-gresit"
+      }
+     ],
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 210'><title>Rețeaua 3-4-2-1</title><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='110.7' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='110.7' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='110.7' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='110.7' y2='158'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='110.7' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='110.7' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='110.7' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='110.7' y2='158'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='110.7' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='110.7' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='110.7' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='110.7' y2='158'/><line class='muted' stroke-width='1.5' x1='138.7' y1='26' x2='201.3' y2='70'/><line class='muted' stroke-width='1.5' x1='138.7' y1='26' x2='201.3' y2='114'/><line class='muted' stroke-width='1.5' x1='138.7' y1='70' x2='201.3' y2='70'/><line class='muted' stroke-width='1.5' x1='138.7' y1='70' x2='201.3' y2='114'/><line class='muted' stroke-width='1.5' x1='138.7' y1='114' x2='201.3' y2='70'/><line class='muted' stroke-width='1.5' x1='138.7' y1='114' x2='201.3' y2='114'/><line class='muted' stroke-width='1.5' x1='138.7' y1='158' x2='201.3' y2='70'/><line class='muted' stroke-width='1.5' x1='138.7' y1='158' x2='201.3' y2='114'/><line class='muted' stroke-width='1.5' x1='229.3' y1='70' x2='292' y2='92'/><line class='muted' stroke-width='1.5' x1='229.3' y1='114' x2='292' y2='92'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='48' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='92' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='136' r='14'><title>neuronul 3, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='124.7' cy='26' r='14'><title>neuronul 1, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='124.7' cy='70' r='14'><title>neuronul 2, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='124.7' cy='114' r='14'><title>neuronul 3, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='124.7' cy='158' r='14'><title>neuronul 4, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='215.3' cy='70' r='14'><title>neuronul 1, coloana 3</title></circle><circle class='fg fill-bg' stroke-width='2' cx='215.3' cy='114' r='14'><title>neuronul 2, coloana 3</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='92' r='14'><title>neuronul 1, coloana 4</title></circle><text class='muted' font-size='14' x='34' y='204' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='124.7' y='204' text-anchor='middle'>ascuns</text><text class='muted' font-size='14' x='215.3' y='204' text-anchor='middle'>ascuns</text><text class='muted' font-size='14' x='306' y='204' text-anchor='middle'>ieșire</text></svg>",
+      "alt": {
+       "en": "Rețea cu coloane de 3, 4, 2 și 1 neuroni",
+       "ro": "Rețea cu coloane de 3, 4, 2 și 1 neuroni"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s04",
+   "title": {
+    "en": "Ce mai spune slide-ul 20",
+    "ro": "Ce mai spune slide-ul 20"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 20",
+    "ro": "Cursul 3 · slide 20"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Observații din curs:",
+        "ro": "Observații din curs:"
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Stratul de intrare are cel puțin un neuron.",
+       "ro": "Stratul de intrare are cel puțin un neuron."
+      },
+      {
+       "en": "Straturile ascunse sunt opționale și pot avea numere diferite de neuroni.",
+       "ro": "Straturile ascunse sunt opționale și pot avea numere diferite de neuroni."
+      },
+      {
+       "en": "Ieșirea are **un neuron** pentru regresie sau clasificare binară, și **mai mulți** pentru clasificare pe mai multe clase.",
+       "ro": "Ieșirea are **un neuron** pentru regresie sau clasificare binară, și **mai mulți** pentru clasificare pe mai multe clase."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03b-q02",
+     "question": {
+      "en": "O rețea trebuie să aleagă una din 5 clase. Câți neuroni are stratul de ieșire, după curs?",
+      "ro": "O rețea trebuie să aleagă una din 5 clase. Câți neuroni are stratul de ieșire, după curs?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "5, câte unul pe clasă",
+        "ro": "5, câte unul pe clasă"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: clasificare pe mai multe clase înseamnă mai mulți neuroni de ieșire.",
+        "ro": "Corect: clasificare pe mai multe clase înseamnă mai mulți neuroni de ieșire."
+       }
+      },
+      {
+       "text": {
+        "en": "1, ca la clasificarea binară",
+        "ro": "1, ca la clasificarea binară"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Un singur neuron ajunge pentru două clase. Pentru 5 clase sunt mai mulți.",
+        "ro": "Un singur neuron ajunge pentru două clase. Pentru 5 clase sunt mai mulți."
+       },
+       "misconception": "regula-gresita"
+      },
+      {
+       "text": {
+        "en": "2, mereu",
+        "ro": "2, mereu"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Numărul depinde de numărul de clase, nu e fix.",
+        "ro": "Numărul depinde de numărul de clase, nu e fix."
+       },
+       "misconception": "regula-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s05",
+   "title": {
+    "en": "Fără strat ascuns: perceptronul",
+    "ro": "Fără strat ascuns: perceptronul"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 20",
+    "ro": "Cursul 3 · slide 20"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Dacă rețeaua nu are strat ascuns, are un singur neuron de ieșire și activare prag binar, ea este un **perceptron** (perceptron).",
+        "ro": "Dacă rețeaua nu are strat ascuns, are un singur neuron de ieșire și activare prag binar, ea este un **perceptron** (perceptron)."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 166'><title>Perceptron</title><line class='muted' stroke-width='1.5' x1='48' y1='26' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='70' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='114' x2='292' y2='70'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='26' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='70' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='114' r='14'><title>neuronul 3, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='70' r='14'><title>neuronul 1, coloana 2</title></circle><text class='muted' font-size='14' x='34' y='160' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='306' y='160' text-anchor='middle'>ieșire</text></svg>",
+        "alt": {
+         "en": "Trei intrări legate direct de un neuron de ieșire",
+         "ro": "Trei intrări legate direct de un neuron de ieșire"
+        },
+        "caption": {
+         "en": "Trei intrări, un neuron: fără strat ascuns.",
+         "ro": "Trei intrări, un neuron: fără strat ascuns."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s06",
+   "title": {
+    "en": "Complet conectat: MLP",
+    "ro": "Complet conectat: MLP"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 21",
+    "ro": "Cursul 3 · slide 21"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Strat complet conectat",
+      "ro": "Strat complet conectat"
+     },
+     "content": {
+      "en": "Într-o rețea **complet conectată** (fully connected), fiecare neuron primește ieșirile **tuturor** neuronilor din stratul dinaintea lui. Se mai numește perceptron multistrat (**MLP**, Multi Layer Perceptron). Slide 21 spune că numele încurcă: perceptronul cu prag se folosește rar în astfel de rețele.",
+      "ro": "Într-o rețea **complet conectată** (fully connected), fiecare neuron primește ieșirile **tuturor** neuronilor din stratul dinaintea lui. Se mai numește perceptron multistrat (**MLP**, Multi Layer Perceptron). Slide 21 spune că numele încurcă: perceptronul cu prag se folosește rar în astfel de rețele."
+     }
+    },
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 166'><title>MLP complet conectat</title><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='184' y1='26' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='70' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='114' x2='292' y2='70'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='48' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='92' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='26' r='14'><title>neuronul 1, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='70' r='14'><title>neuronul 2, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='114' r='14'><title>neuronul 3, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='70' r='14'><title>neuronul 1, coloana 3</title></circle><text class='muted' font-size='14' x='34' y='160' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='170' y='160' text-anchor='middle'>ascuns</text><text class='muted' font-size='14' x='306' y='160' text-anchor='middle'>ieșire</text></svg>",
+        "alt": {
+         "en": "Fiecare neuron e legat de toți neuronii stratului următor",
+         "ro": "Fiecare neuron e legat de toți neuronii stratului următor"
+        },
+        "caption": {
+         "en": "Fiecare neuron e legat de toți cei din stratul următor.",
+         "ro": "Fiecare neuron e legat de toți cei din stratul următor."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s07",
+   "title": {
+    "en": "Un strat: k neuroni unul lângă altul",
+    "ro": "Un strat: k neuroni unul lângă altul"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 22–24",
+    "ro": "Cursul 3 · slide 22–24"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Un strat complet conectat are $k$ neuroni care primesc **aceleași** intrări. Fiecare face trei lucruri: suma ponderată, activarea, ieșirea.",
+        "ro": "Un strat complet conectat are $k$ neuroni care primesc **aceleași** intrări. Fiecare face trei lucruri: suma ponderată, activarea, ieșirea."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 166'><title>Un strat de 3 neuroni</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='266' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='266' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='266' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='266' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='266' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='266' y2='114'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='48' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='92' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='280' cy='26' r='14'><title>neuronul 1, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='280' cy='70' r='14'><title>neuronul 2, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='280' cy='114' r='14'><title>neuronul 3, coloana 2</title></circle><line class='muted' stroke-width='2' x1='295' y1='26' x2='316' y2='26' marker-end='url(#ah-muted)'/><line class='muted' stroke-width='2' x1='295' y1='70' x2='316' y2='70' marker-end='url(#ah-muted)'/><line class='muted' stroke-width='2' x1='295' y1='114' x2='316' y2='114' marker-end='url(#ah-muted)'/><text class='muted' font-size='14' x='34' y='160' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='280' y='160' text-anchor='middle'>strat cu k = 3</text></svg>",
+        "alt": {
+         "en": "Două intrări legate de trei neuroni, fiecare cu o ieșire",
+         "ro": "Două intrări legate de trei neuroni, fiecare cu o ieșire"
+        },
+        "caption": {
+         "en": "Trei neuroni, trei ieșiri.",
+         "ro": "Trei neuroni, trei ieșiri."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "$\\text{DotProd}_i$: produsul scalar al intrării cu ponderile neuronului $i$.",
+       "ro": "$\\text{DotProd}_i$: produsul scalar al intrării cu ponderile neuronului $i$."
+      },
+      {
+       "en": "$\\text{Activation}_i$: activarea lui.",
+       "ro": "$\\text{Activation}_i$: activarea lui."
+      },
+      {
+       "en": "$\\text{Output}_i$: ieșirea lui.",
+       "ro": "$\\text{Output}_i$: ieșirea lui."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s08",
+   "title": {
+    "en": "Neuronul 1 al unui strat 2 → 3",
+    "ro": "Neuronul 1 al unui strat 2 → 3"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 25–26",
+    "ro": "Cursul 3 · slide 25–26"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Stratul are 2 intrări și 3 neuroni. Intrarea e $(3;\\,2)$. Neuronul 1 folosește **rândul lui** de ponderi: $(1;\\,-1)$.",
+        "ro": "Stratul are 2 intrări și 3 neuroni. Intrarea e $(3;\\,2)$. Neuronul 1 folosește **rândul lui** de ponderi: $(1;\\,-1)$."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "neuron",
+         "intrarea 1",
+         "intrarea 2"
+        ],
+        "rows": [
+         [
+          "neuronul 1",
+          "1",
+          "−1"
+         ],
+         [
+          "neuronul 2",
+          "0,5",
+          "2"
+         ],
+         [
+          "neuronul 3",
+          "−2",
+          "1"
+         ]
+        ],
+        "caption": {
+         "en": "Ponderile stratului: câte un rând pe neuron",
+         "ro": "Ponderile stratului: câte un rând pe neuron"
+        },
+        "highlight": {
+         "rows": [
+          0
+         ]
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "$z_1=1\\cdot 3+(-1)\\cdot 2$",
+       "ro": "$z_1=1\\cdot 3+(-1)\\cdot 2$"
+      },
+      {
+       "en": "$z_1=3-2$",
+       "ro": "$z_1=3-2$"
+      }
+     ],
+     "result": {
+      "en": "$z_1=1$. Nu am pus încă biasul.",
+      "ro": "$z_1=1$. Nu am pus încă biasul."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s09",
+   "title": {
+    "en": "Neuronii 2 și 3",
+    "ro": "Neuronii 2 și 3"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 26–29",
+    "ro": "Cursul 3 · slide 26–29"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03b-p03",
+     "claim": {
+      "en": "Aceeași intrare $(3;\\,2)$. Fiecare neuron înmulțește intrarea cu **rândul lui** de ponderi.",
+      "ro": "Aceeași intrare $(3;\\,2)$. Fiecare neuron înmulțește intrarea cu **rândul lui** de ponderi."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$z_2=0{,}5\\cdot 3+2\\cdot 2=5{,}5$",
+        "ro": "$z_2=0{,}5\\cdot 3+2\\cdot 2=5{,}5$"
+       },
+       "why": {
+        "en": "Rândul 2: $(0{,}5;\\,2)$.",
+        "ro": "Rândul 2: $(0{,}5;\\,2)$."
+       },
+       "predict": {
+        "question": {
+         "en": "Neuronul 2 are rândul $(0{,}5;\\,2)$. Cât e $z_2$ (fără bias)?",
+         "ro": "Neuronul 2 are rândul $(0{,}5;\\,2)$. Cât e $z_2$ (fără bias)?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "5,5",
+           "ro": "5,5"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $1{,}5+4=5{,}5$.",
+           "ro": "Corect: $1{,}5+4=5{,}5$."
+          }
+         },
+         {
+          "text": {
+           "en": "2,5",
+           "ro": "2,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat 0,5 și 2. Se înmulțește pe poziții cu 3 și 2.",
+           "ro": "Ai adunat 0,5 și 2. Se înmulțește pe poziții cu 3 și 2."
+          },
+          "misconception": "aduna-in-loc-sa-inmulteasca"
+         },
+         {
+          "text": {
+           "en": "4",
+           "ro": "4"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai luat doar al doilea produs, $2\\cdot 2$. Se adună ambele.",
+           "ro": "Ai luat doar al doilea produs, $2\\cdot 2$. Se adună ambele."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$z_3=(-2)\\cdot 3+1\\cdot 2=-4$",
+        "ro": "$z_3=(-2)\\cdot 3+1\\cdot 2=-4$"
+       },
+       "why": {
+        "en": "Rândul 3: $(-2;\\,1)$.",
+        "ro": "Rândul 3: $(-2;\\,1)$."
+       },
+       "predict": {
+        "question": {
+         "en": "Neuronul 3 are rândul $(-2;\\,1)$. Cât e $z_3$ (fără bias)?",
+         "ro": "Neuronul 3 are rândul $(-2;\\,1)$. Cât e $z_3$ (fără bias)?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "−4",
+           "ro": "−4"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $-6+2=-4$.",
+           "ro": "Corect: $-6+2=-4$."
+          }
+         },
+         {
+          "text": {
+           "en": "4",
+           "ro": "4"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Semnul: $-6+2$ este negativ.",
+           "ro": "Semnul: $-6+2$ este negativ."
+          },
+          "misconception": "semn-gresit"
+         },
+         {
+          "text": {
+           "en": "−2",
+           "ro": "−2"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai luat doar o parte: $-6+2=-4$.",
+           "ro": "Ai luat doar o parte: $-6+2=-4$."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Cele trei produse scalare dau o coloană de numere: $(1;\\,5{,}5;\\,-4)$ (slide 29: result$_1$ … result$_k$).",
+      "ro": "Cele trei produse scalare dau o coloană de numere: $(1;\\,5{,}5;\\,-4)$ (slide 29: result$_1$ … result$_k$)."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s10",
+   "title": {
+    "en": "Asta e un produs matrice × vector",
+    "ro": "Asta e un produs matrice × vector"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 27–30",
+    "ro": "Cursul 3 · slide 27–30"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cele trei calcule împreună sunt un **produs matrice × vector**: matricea ponderilor $W$ (câte un rând pe neuron) înmulțită cu vectorul de intrare.",
+        "ro": "Cele trei calcule împreună sunt un **produs matrice × vector**: matricea ponderilor $W$ (câte un rând pe neuron) înmulțită cu vectorul de intrare."
+       }
+      },
+      {
+       "tex": "\\begin{pmatrix}1&-1\\\\0{,}5&2\\\\-2&1\\end{pmatrix}\\begin{pmatrix}3\\\\2\\end{pmatrix}=\\begin{pmatrix}1\\\\5{,}5\\\\-4\\end{pmatrix}"
+      },
+      {
+       "text": {
+        "en": "Un rând al lui $W$ cu vectorul dă un număr; trei rânduri dau trei numere.",
+        "ro": "Un rând al lui $W$ cu vectorul dă un număr; trei rânduri dau trei numere."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s11",
+   "title": {
+    "en": "Rândul k aparține neuronului k",
+    "ro": "Rândul k aparține neuronului k"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 28",
+    "ro": "Cursul 3 · slide 28"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "$W$ are $k$ rânduri (câte un neuron) și $n$ coloane (câte o intrare): forma $k\\times n$.",
+      "ro": "$W$ are $k$ rânduri (câte un neuron) și $n$ coloane (câte o intrare): forma $k\\times n$."
+     },
+     "body": [
+      {
+       "tex": "z = W\\,x"
+      },
+      {
+       "points": [
+        {
+         "en": "Rândul $k$ al lui $W$: ponderile neuronului $k$.",
+         "ro": "Rândul $k$ al lui $W$: ponderile neuronului $k$."
+        },
+        {
+         "en": "$W_{k,n}$: primul indice e neuronul, al doilea e intrarea.",
+         "ro": "$W_{k,n}$: primul indice e neuronul, al doilea e intrarea."
+        }
+       ]
+      },
+      {
+       "note": {
+        "en": "Slide 25–27 scriu «input · W_k», dar cu $W$ de forma $k\\times n$ produsul corect e $W\\cdot x$. Tabelul de la slide 29–30 are un indice greșit în ultimele rânduri. Alte foi (Backprop.pdf, chainrule.pdf) pun indicii invers; aici folosim slide-ul 28.",
+        "ro": "Slide 25–27 scriu «input · W_k», dar cu $W$ de forma $k\\times n$ produsul corect e $W\\cdot x$. Tabelul de la slide 29–30 are un indice greșit în ultimele rânduri. Alte foi (Backprop.pdf, chainrule.pdf) pun indicii invers; aici folosim slide-ul 28."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s12",
+   "title": {
+    "en": "Adăugăm biasul",
+    "ro": "Adăugăm biasul"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 9, 28",
+    "ro": "Cursul 3 · slide 9, 28"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Fiecare neuron are propriul bias (slide 9: $z=x\\cdot w+b$). Pentru tot stratul, biasurile formează un vector $b$ cu $k$ numere: $b=(0;\\,1;\\,-1)$.",
+        "ro": "Fiecare neuron are propriul bias (slide 9: $z=x\\cdot w+b$). Pentru tot stratul, biasurile formează un vector $b$ cu $k$ numere: $b=(0;\\,1;\\,-1)$."
+       }
+      },
+      {
+       "tex": "z = W\\,x + b"
+      },
+      {
+       "table": {
+        "columns": [
+         "neuron",
+         "W x",
+         "b",
+         "z"
+        ],
+        "rows": [
+         [
+          "neuronul 1",
+          "1",
+          "0",
+          "1"
+         ],
+         [
+          "neuronul 2",
+          "5,5",
+          "1",
+          "6,5"
+         ],
+         [
+          "neuronul 3",
+          "−4",
+          "−1",
+          "−5"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Slide-urile 25–31 nu arată biasul; aici îl păstrăm, ca la slide 9.",
+        "ro": "Slide-urile 25–31 nu arată biasul; aici îl păstrăm, ca la slide 9."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s13",
+   "title": {
+    "en": "Același strat, altă intrare",
+    "ro": "Același strat, altă intrare"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 28",
+    "ro": "Cursul 3 · slide 28"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03b-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Același strat ($W$ și $b=(0;\\,1;\\,-1)$ ca mai sus). Intrarea este acum $x=(1;\\,3)$. Calculează $z_1$, $z_2$, $z_3$.",
+      "ro": "Același strat ($W$ și $b=(0;\\,1;\\,-1)$ ca mai sus). Intrarea este acum $x=(1;\\,3)$. Calculează $z_1$, $z_2$, $z_3$."
+     },
+     "fields": [
+      {
+       "id": "z1",
+       "label": {
+        "en": "z1",
+        "ro": "z1"
+       },
+       "kind": "num",
+       "formula": "x1*1 + x2*(-1) + 0",
+       "expected": -2
+      },
+      {
+       "id": "z2",
+       "label": {
+        "en": "z2",
+        "ro": "z2"
+       },
+       "kind": "num",
+       "formula": "x1*0.5 + x2*2 + 1",
+       "expected": 7.5
+      },
+      {
+       "id": "z3",
+       "label": {
+        "en": "z3",
+        "ro": "z3"
+       },
+       "kind": "num",
+       "formula": "x1*(-2) + x2*1 - 1",
+       "expected": 0
+      }
+     ],
+     "data": {
+      "x1": 1,
+      "x2": 3
+     },
+     "detectors": [
+      {
+       "field": "z2",
+       "formula": "x1*0.5 + x2*2",
+       "message": {
+        "en": "Ai uitat biasul neuronului 2 ($b_2=1$).",
+        "ro": "Ai uitat biasul neuronului 2 ($b_2=1$)."
+       }
+      },
+      {
+       "field": "z3",
+       "formula": "x1*(-2) + x2*1",
+       "message": {
+        "en": "Ai uitat biasul neuronului 3 ($b_3=-1$).",
+        "ro": "Ai uitat biasul neuronului 3 ($b_3=-1$)."
+       }
+      },
+      {
+       "field": "z1",
+       "formula": "x1*1 + x2*0.5",
+       "message": {
+        "en": "Ai luat prima coloană a lui $W$. Neuronul 1 folosește primul rând: $(1;\\,-1)$.",
+        "ro": "Ai luat prima coloană a lui $W$. Neuronul 1 folosește primul rând: $(1;\\,-1)$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Fiecare $z_i$ folosește rândul $i$ al lui $W$ și biasul $b_i$.",
+       "ro": "Fiecare $z_i$ folosește rândul $i$ al lui $W$ și biasul $b_i$."
+      },
+      {
+       "en": "$z_1=1\\cdot x_1+(-1)\\cdot x_2+0$; $z_2=0{,}5\\,x_1+2\\,x_2+1$; $z_3=-2\\,x_1+x_2-1$.",
+       "ro": "$z_1=1\\cdot x_1+(-1)\\cdot x_2+0$; $z_2=0{,}5\\,x_1+2\\,x_2+1$; $z_3=-2\\,x_1+x_2-1$."
+      },
+      {
+       "en": "Pune $x_1$ și $x_2$ în formule.",
+       "ro": "Pune $x_1$ și $x_2$ în formule."
+      }
+     ],
+     "solution": {
+      "en": "$z_1=1-3+0=-2$, $z_2=0{,}5+6+1=7{,}5$, $z_3=-2+3-1=0$.",
+      "ro": "$z_1=1-3+0=-2$, $z_2=0{,}5+6+1=7{,}5$, $z_3=-2+3-1=0$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același strat ($W$ și $b=(0;\\,1;\\,-1)$ ca mai sus). Intrarea este acum $x=(2;\\,−1)$. Calculează $z_1$, $z_2$, $z_3$.",
+        "ro": "Același strat ($W$ și $b=(0;\\,1;\\,-1)$ ca mai sus). Intrarea este acum $x=(2;\\,−1)$. Calculează $z_1$, $z_2$, $z_3$."
+       },
+       "fields": [
+        {
+         "id": "z1",
+         "formula": "x1*1 + x2*(-1) + 0",
+         "expected": 3
+        },
+        {
+         "id": "z2",
+         "formula": "x1*0.5 + x2*2 + 1",
+         "expected": 0
+        },
+        {
+         "id": "z3",
+         "formula": "x1*(-2) + x2*1 - 1",
+         "expected": -6
+        }
+       ],
+       "solution": {
+        "en": "$z_1=2+1+0=3$, $z_2=1-2+1=0$, $z_3=-4-1-1=-6$.",
+        "ro": "$z_1=2+1+0=3$, $z_2=1-2+1=0$, $z_3=-4-1-1=-6$."
+       },
+       "data": {
+        "x1": 2,
+        "x2": -1
+       },
+       "hints": [
+        {
+         "en": "Rândul $i$ al lui $W$ și $b_i$.",
+         "ro": "Rândul $i$ al lui $W$ și $b_i$."
+        },
+        {
+         "en": "$z_2=0{,}5\\cdot 2+2\\cdot(-1)+1$",
+         "ro": "$z_2=0{,}5\\cdot 2+2\\cdot(-1)+1$"
+        },
+        {
+         "en": "$z_1=3$, $z_2=0$, $z_3=-6$.",
+         "ro": "$z_1=3$, $z_2=0$, $z_3=-6$."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Același strat ($W$ și $b=(0;\\,1;\\,-1)$ ca mai sus). Intrarea este acum $x=(0;\\,2)$. Calculează $z_1$, $z_2$, $z_3$.",
+        "ro": "Același strat ($W$ și $b=(0;\\,1;\\,-1)$ ca mai sus). Intrarea este acum $x=(0;\\,2)$. Calculează $z_1$, $z_2$, $z_3$."
+       },
+       "fields": [
+        {
+         "id": "z1",
+         "formula": "x1*1 + x2*(-1) + 0",
+         "expected": -2
+        },
+        {
+         "id": "z2",
+         "formula": "x1*0.5 + x2*2 + 1",
+         "expected": 5
+        },
+        {
+         "id": "z3",
+         "formula": "x1*(-2) + x2*1 - 1",
+         "expected": 1
+        }
+       ],
+       "solution": {
+        "en": "$z_1=0-2+0=-2$, $z_2=0+4+1=5$, $z_3=0+2-1=1$.",
+        "ro": "$z_1=0-2+0=-2$, $z_2=0+4+1=5$, $z_3=0+2-1=1$."
+       },
+       "data": {
+        "x1": 0,
+        "x2": 2
+       },
+       "hints": [
+        {
+         "en": "Rândul $i$ al lui $W$ și $b_i$.",
+         "ro": "Rândul $i$ al lui $W$ și $b_i$."
+        },
+        {
+         "en": "$z_2=0{,}5\\cdot 0+2\\cdot 2+1$",
+         "ro": "$z_2=0{,}5\\cdot 0+2\\cdot 2+1$"
+        },
+        {
+         "en": "$z_1=-2$, $z_2=5$, $z_3=1$.",
+         "ro": "$z_1=-2$, $z_2=5$, $z_3=1$."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s14",
+   "title": {
+    "en": "Activarea pe tot vectorul",
+    "ro": "Activarea pe tot vectorul"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 31",
+    "ro": "Cursul 3 · slide 31"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "După $z$ urmează activarea, aplicată **separat pe fiecare număr** din vector: $y_i=\\mathit{activation}(z_i)$.",
+        "ro": "După $z$ urmează activarea, aplicată **separat pe fiecare număr** din vector: $y_i=\\mathit{activation}(z_i)$."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "z",
+         "y = σ(z)"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,7311"
+         ],
+         [
+          "6,5",
+          "0,9985"
+         ],
+         [
+          "−5",
+          "0,0067"
+         ]
+        ],
+        "caption": {
+         "en": "Sigmoida pe fiecare element, pentru z = (1; 6,5; −5)",
+         "ro": "Sigmoida pe fiecare element, pentru z = (1; 6,5; −5)"
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Vectorul $y$ are tot $k$ numere. Slide 31 scrie $z_1\\ldots z_n$ deși stratul are $k$ ieșiri: citește $k$.",
+        "ro": "Vectorul $y$ are tot $k$ numere. Slide 31 scrie $z_1\\ldots z_n$ deși stratul are $k$ ieșiri: citește $k$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s15",
+   "title": {
+    "en": "Sigmoida pe un vector nou",
+    "ro": "Sigmoida pe un vector nou"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 31",
+    "ro": "Cursul 3 · slide 31"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03b-e05",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Activarea este sigmoida. Vectorul $z=(−2;\\,7{,}5;\\,0)$. Calculează $y=\\sigma(z)$ pe fiecare element (patru zecimale).",
+      "ro": "Activarea este sigmoida. Vectorul $z=(−2;\\,7{,}5;\\,0)$. Calculează $y=\\sigma(z)$ pe fiecare element (patru zecimale)."
+     },
+     "fields": [
+      {
+       "id": "y1",
+       "label": {
+        "en": "y1",
+        "ro": "y1"
+       },
+       "kind": "num",
+       "formula": "1/(1+exp(-z1))",
+       "expected": 0.1192
+      },
+      {
+       "id": "y2",
+       "label": {
+        "en": "y2",
+        "ro": "y2"
+       },
+       "kind": "num",
+       "formula": "1/(1+exp(-z2))",
+       "expected": 0.9994
+      },
+      {
+       "id": "y3",
+       "label": {
+        "en": "y3",
+        "ro": "y3"
+       },
+       "kind": "num",
+       "formula": "1/(1+exp(-z3))",
+       "expected": 0.5
+      }
+     ],
+     "data": {
+      "z1": -2,
+      "z2": 7.5,
+      "z3": 0
+     },
+     "detectors": [
+      {
+       "field": "y1",
+       "formula": "z1",
+       "message": {
+        "en": "Ai lăsat valoarea lui $z_1$ neschimbată: activarea nu a fost aplicată.",
+        "ro": "Ai lăsat valoarea lui $z_1$ neschimbată: activarea nu a fost aplicată."
+       }
+      },
+      {
+       "field": "y2",
+       "formula": "z2",
+       "message": {
+        "en": "Ai lăsat $z_2$ neschimbat: activarea nu a fost aplicată.",
+        "ro": "Ai lăsat $z_2$ neschimbat: activarea nu a fost aplicată."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Aplici sigmoida pe fiecare număr, pe rând.",
+       "ro": "Aplici sigmoida pe fiecare număr, pe rând."
+      },
+      {
+       "en": "$y_1=1/(1+e^{2})$, $y_2=1/(1+e^{-7{,}5})$, $y_3=1/(1+e^{0})$.",
+       "ro": "$y_1=1/(1+e^{2})$, $y_2=1/(1+e^{-7{,}5})$, $y_3=1/(1+e^{0})$."
+      },
+      {
+       "en": "$0{,}1192$, $0{,}9994$, $0{,}5$.",
+       "ro": "$0{,}1192$, $0{,}9994$, $0{,}5$."
+      }
+     ],
+     "solution": {
+      "en": "$\\sigma(-2)=0{,}1192$, $\\sigma(7{,}5)=0{,}9994$, $\\sigma(0)=0{,}5$.",
+      "ro": "$\\sigma(-2)=0{,}1192$, $\\sigma(7{,}5)=0{,}9994$, $\\sigma(0)=0{,}5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Activarea este sigmoida. Vectorul $z=(3;\\,0;\\,−6)$. Calculează $y=\\sigma(z)$ pe fiecare element (patru zecimale).",
+        "ro": "Activarea este sigmoida. Vectorul $z=(3;\\,0;\\,−6)$. Calculează $y=\\sigma(z)$ pe fiecare element (patru zecimale)."
+       },
+       "fields": [
+        {
+         "id": "y1",
+         "formula": "1/(1+exp(-z1))",
+         "expected": 0.9526
+        },
+        {
+         "id": "y2",
+         "formula": "1/(1+exp(-z2))",
+         "expected": 0.5
+        },
+        {
+         "id": "y3",
+         "formula": "1/(1+exp(-z3))",
+         "expected": 0.0025
+        }
+       ],
+       "solution": {
+        "en": "$\\sigma(3)=0{,}9526$, $\\sigma(0)=0{,}5$, $\\sigma(-6)=0{,}0025$.",
+        "ro": "$\\sigma(3)=0{,}9526$, $\\sigma(0)=0{,}5$, $\\sigma(-6)=0{,}0025$."
+       },
+       "data": {
+        "z1": 3,
+        "z2": 0,
+        "z3": -6
+       },
+       "hints": [
+        {
+         "en": "Sigmoida se aplică separat pe fiecare număr.",
+         "ro": "Sigmoida se aplică separat pe fiecare număr."
+        },
+        {
+         "en": "$\\sigma(z)=1/(1+e^{-z})$.",
+         "ro": "$\\sigma(z)=1/(1+e^{-z})$."
+        },
+        {
+         "en": "Calculează trei valori, una pe element.",
+         "ro": "Calculează trei valori, una pe element."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Activarea este sigmoida. Vectorul $z=(1;\\,−1;\\,2)$. Calculează $y=\\sigma(z)$ pe fiecare element (patru zecimale).",
+        "ro": "Activarea este sigmoida. Vectorul $z=(1;\\,−1;\\,2)$. Calculează $y=\\sigma(z)$ pe fiecare element (patru zecimale)."
+       },
+       "fields": [
+        {
+         "id": "y1",
+         "formula": "1/(1+exp(-z1))",
+         "expected": 0.7311
+        },
+        {
+         "id": "y2",
+         "formula": "1/(1+exp(-z2))",
+         "expected": 0.2689
+        },
+        {
+         "id": "y3",
+         "formula": "1/(1+exp(-z3))",
+         "expected": 0.8808
+        }
+       ],
+       "solution": {
+        "en": "$\\sigma(1)=0{,}7311$, $\\sigma(-1)=0{,}2689$, $\\sigma(2)=0{,}8808$.",
+        "ro": "$\\sigma(1)=0{,}7311$, $\\sigma(-1)=0{,}2689$, $\\sigma(2)=0{,}8808$."
+       },
+       "data": {
+        "z1": 1,
+        "z2": -1,
+        "z3": 2
+       },
+       "hints": [
+        {
+         "en": "Sigmoida se aplică separat pe fiecare număr.",
+         "ro": "Sigmoida se aplică separat pe fiecare număr."
+        },
+        {
+         "en": "$\\sigma(z)=1/(1+e^{-z})$.",
+         "ro": "$\\sigma(z)=1/(1+e^{-z})$."
+        },
+        {
+         "en": "Calculează trei valori, una pe element.",
+         "ro": "Calculează trei valori, una pe element."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s16",
+   "title": {
+    "en": "Cutia n → k și lanțul de cutii",
+    "ro": "Cutia n → k și lanțul de cutii"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 32–33",
+    "ro": "Cursul 3 · slide 32–33"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Un strat complet conectat se desenează ca o **cutie** $n\\rightarrow k$: $n$ numere intră, $k$ numere ies. În cutie: ponderile $W$ (forma $k\\times n$), biasurile și activarea.",
+        "ro": "Un strat complet conectat se desenează ca o **cutie** $n\\rightarrow k$: $n$ numere intră, $k$ numere ies. În cutie: ponderile $W$ (forma $k\\times n$), biasurile și activarea."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 120'><title>Lanț de trei cutii</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><text class='fg' font-size='16' font-weight='700' x='18' y='62' text-anchor='middle'>x</text><line class='muted' stroke-width='2' x1='22' y1='58' x2='37' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='38' y='36' width='62' height='44' rx='6'><title>cutia 3 la 4</title></rect><text class='accent' font-size='16' font-weight='700' x='69' y='63' text-anchor='middle'>3→4</text><text class='muted' font-size='14' x='69' y='24' text-anchor='middle'>strat 1</text><line class='muted' stroke-width='2' x1='162' y1='58' x2='142' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='143' y='36' width='62' height='44' rx='6'><title>cutia 4 la 2</title></rect><text class='accent' font-size='16' font-weight='700' x='174' y='63' text-anchor='middle'>4→2</text><text class='muted' font-size='14' x='174' y='24' text-anchor='middle'>strat 2</text><line class='muted' stroke-width='2' x1='267' y1='58' x2='247' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='248' y='36' width='62' height='44' rx='6'><title>cutia 2 la 1</title></rect><text class='accent' font-size='16' font-weight='700' x='279' y='63' text-anchor='middle'>2→1</text><text class='muted' font-size='14' x='279' y='24' text-anchor='middle'>strat 3</text><line class='muted' stroke-width='2' x1='310' y1='58' x2='330' y2='58' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='340' y='62' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Trei cutii în lanț: 3 la 4, 4 la 2, 2 la 1",
+         "ro": "Trei cutii în lanț: 3 la 4, 4 la 2, 2 la 1"
+        },
+        "caption": {
+         "en": "Ieșirea unei cutii intră în cutia următoare.",
+         "ro": "Ieșirea unei cutii intră în cutia următoare."
+        }
+       }
+      },
+      {
+       "text": {
+        "en": "Slide 33 începe lanțul cu $m_1\\rightarrow m_2$ deși intrarea are $n$ numere; slide 39 îl pornește corect cu $n\\rightarrow m_1$. Intrarea e doar vectorul, nu o cutie.",
+        "ro": "Slide 33 începe lanțul cu $m_1\\rightarrow m_2$ deși intrarea are $n$ numere; slide 39 îl pornește corect cu $n\\rightarrow m_1$. Intrarea e doar vectorul, nu o cutie."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s17",
+   "title": {
+    "en": "Forma lui W în fiecare cutie",
+    "ro": "Forma lui W în fiecare cutie"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 34",
+    "ro": "Cursul 3 · slide 34"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03b-p06",
+     "claim": {
+      "en": "Slide 34: 3 intrări, straturi ascunse de 4 și 2 neuroni, o ieșire. Ce formă are $W$ în fiecare cutie?",
+      "ro": "Slide 34: 3 intrări, straturi ascunse de 4 și 2 neuroni, o ieșire. Ce formă are $W$ în fiecare cutie?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Cutia $3\\rightarrow 4$: $W$ are forma $4\\times 3$.",
+        "ro": "Cutia $3\\rightarrow 4$: $W$ are forma $4\\times 3$."
+       },
+       "why": {
+        "en": "Rânduri: neuronii stratului (4). Coloane: intrările (3).",
+        "ro": "Rânduri: neuronii stratului (4). Coloane: intrările (3)."
+       },
+       "predict": {
+        "question": {
+         "en": "Cutia $3\\rightarrow 4$ (3 intrări, 4 neuroni). Forma lui $W$?",
+         "ro": "Cutia $3\\rightarrow 4$ (3 intrări, 4 neuroni). Forma lui $W$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$4\\times 3$",
+           "ro": "$4\\times 3$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: 4 rânduri (neuroni), 3 coloane (intrări).",
+           "ro": "Corect: 4 rânduri (neuroni), 3 coloane (intrări)."
+          }
+         },
+         {
+          "text": {
+           "en": "$3\\times 4$",
+           "ro": "$3\\times 4$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai inversat: rândurile sunt neuronii, nu intrările.",
+           "ro": "Ai inversat: rândurile sunt neuronii, nu intrările."
+          },
+          "misconception": "forma-transpusa"
+         },
+         {
+          "text": {
+           "en": "$4\\times 4$",
+           "ro": "$4\\times 4$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Coloanele numără intrările (3), nu neuronii.",
+           "ro": "Coloanele numără intrările (3), nu neuronii."
+          },
+          "misconception": "numarat-gresit"
+         }
+        ]
+       },
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 120'><title>Cele trei cutii</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><text class='fg' font-size='16' font-weight='700' x='18' y='62' text-anchor='middle'>x</text><line class='muted' stroke-width='2' x1='22' y1='58' x2='37' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='38' y='36' width='62' height='44' rx='6'><title>cutia 3 la 4</title></rect><text class='accent' font-size='16' font-weight='700' x='69' y='63' text-anchor='middle'>3→4</text><text class='fg' font-size='14' x='69' y='100' text-anchor='middle'>W: 4×3</text><line class='muted' stroke-width='2' x1='162' y1='58' x2='142' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='143' y='36' width='62' height='44' rx='6'><title>cutia 4 la 2</title></rect><text class='accent' font-size='16' font-weight='700' x='174' y='63' text-anchor='middle'>4→2</text><line class='muted' stroke-width='2' x1='267' y1='58' x2='247' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='248' y='36' width='62' height='44' rx='6'><title>cutia 2 la 1</title></rect><text class='accent' font-size='16' font-weight='700' x='279' y='63' text-anchor='middle'>2→1</text><line class='muted' stroke-width='2' x1='310' y1='58' x2='330' y2='58' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='340' y='62' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Cutiile 3 la 4, 4 la 2, 2 la 1, cu forma lui W sub prima cutie: 4 pe 3",
+         "ro": "Cutiile 3 la 4, 4 la 2, 2 la 1, cu forma lui W sub prima cutie: 4 pe 3"
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "Cutia $4\\rightarrow 2$: $W$ are forma $2\\times 4$.",
+        "ro": "Cutia $4\\rightarrow 2$: $W$ are forma $2\\times 4$."
+       },
+       "predict": {
+        "question": {
+         "en": "Cutia $4\\rightarrow 2$. Forma lui $W$?",
+         "ro": "Cutia $4\\rightarrow 2$. Forma lui $W$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$2\\times 4$",
+           "ro": "$2\\times 4$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: 2 neuroni, 4 intrări.",
+           "ro": "Corect: 2 neuroni, 4 intrări."
+          }
+         },
+         {
+          "text": {
+           "en": "$4\\times 2$",
+           "ro": "$4\\times 2$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Inversat: $k$ rânduri, $n$ coloane.",
+           "ro": "Inversat: $k$ rânduri, $n$ coloane."
+          },
+          "misconception": "forma-transpusa"
+         },
+         {
+          "text": {
+           "en": "$2\\times 2$",
+           "ro": "$2\\times 2$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Coloanele sunt 4, câte intrări are cutia.",
+           "ro": "Coloanele sunt 4, câte intrări are cutia."
+          },
+          "misconception": "numarat-gresit"
+         }
+        ]
+       },
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 120'><title>Cele trei cutii</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><text class='fg' font-size='16' font-weight='700' x='18' y='62' text-anchor='middle'>x</text><line class='muted' stroke-width='2' x1='22' y1='58' x2='37' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='38' y='36' width='62' height='44' rx='6'><title>cutia 3 la 4</title></rect><text class='accent' font-size='16' font-weight='700' x='69' y='63' text-anchor='middle'>3→4</text><text class='fg' font-size='14' x='69' y='100' text-anchor='middle'>W: 4×3</text><line class='muted' stroke-width='2' x1='162' y1='58' x2='142' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='143' y='36' width='62' height='44' rx='6'><title>cutia 4 la 2</title></rect><text class='accent' font-size='16' font-weight='700' x='174' y='63' text-anchor='middle'>4→2</text><text class='fg' font-size='14' x='174' y='100' text-anchor='middle'>W: 2×4</text><line class='muted' stroke-width='2' x1='267' y1='58' x2='247' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='248' y='36' width='62' height='44' rx='6'><title>cutia 2 la 1</title></rect><text class='accent' font-size='16' font-weight='700' x='279' y='63' text-anchor='middle'>2→1</text><line class='muted' stroke-width='2' x1='310' y1='58' x2='330' y2='58' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='340' y='62' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Cutiile 3 la 4, 4 la 2, 2 la 1, cu forma lui W sub primele 2 cutii: 4 pe 3, 2 pe 4",
+         "ro": "Cutiile 3 la 4, 4 la 2, 2 la 1, cu forma lui W sub primele 2 cutii: 4 pe 3, 2 pe 4"
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "Cutia $2\\rightarrow 1$: $W$ are forma $1\\times 2$.",
+        "ro": "Cutia $2\\rightarrow 1$: $W$ are forma $1\\times 2$."
+       },
+       "why": {
+        "en": "Un singur neuron de ieșire.",
+        "ro": "Un singur neuron de ieșire."
+       },
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 120'><title>Cele trei cutii</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><text class='fg' font-size='16' font-weight='700' x='18' y='62' text-anchor='middle'>x</text><line class='muted' stroke-width='2' x1='22' y1='58' x2='37' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='38' y='36' width='62' height='44' rx='6'><title>cutia 3 la 4</title></rect><text class='accent' font-size='16' font-weight='700' x='69' y='63' text-anchor='middle'>3→4</text><text class='fg' font-size='14' x='69' y='100' text-anchor='middle'>W: 4×3</text><line class='muted' stroke-width='2' x1='162' y1='58' x2='142' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='143' y='36' width='62' height='44' rx='6'><title>cutia 4 la 2</title></rect><text class='accent' font-size='16' font-weight='700' x='174' y='63' text-anchor='middle'>4→2</text><text class='fg' font-size='14' x='174' y='100' text-anchor='middle'>W: 2×4</text><line class='muted' stroke-width='2' x1='267' y1='58' x2='247' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='248' y='36' width='62' height='44' rx='6'><title>cutia 2 la 1</title></rect><text class='accent' font-size='16' font-weight='700' x='279' y='63' text-anchor='middle'>2→1</text><text class='fg' font-size='14' x='279' y='100' text-anchor='middle'>W: 1×2</text><line class='muted' stroke-width='2' x1='310' y1='58' x2='330' y2='58' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='340' y='62' text-anchor='middle'>y</text></svg>",
+        "alt": {
+         "en": "Cutiile 3 la 4, 4 la 2, 2 la 1, cu forma lui W sub primele 3 cutii: 4 pe 3, 2 pe 4, 1 pe 2",
+         "ro": "Cutiile 3 la 4, 4 la 2, 2 la 1, cu forma lui W sub primele 3 cutii: 4 pe 3, 2 pe 4, 1 pe 2"
+        }
+       }
+      }
+     ],
+     "end": {
+      "en": "Cutia $n\\rightarrow k$ are $W$ de forma $k\\times n$.",
+      "ro": "Cutia $n\\rightarrow k$ are $W$ de forma $k\\times n$."
+     },
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 120'><title>Cele trei cutii</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><text class='fg' font-size='16' font-weight='700' x='18' y='62' text-anchor='middle'>x</text><line class='muted' stroke-width='2' x1='22' y1='58' x2='37' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='38' y='36' width='62' height='44' rx='6'><title>cutia 3 la 4</title></rect><text class='accent' font-size='16' font-weight='700' x='69' y='63' text-anchor='middle'>3→4</text><line class='muted' stroke-width='2' x1='162' y1='58' x2='142' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='143' y='36' width='62' height='44' rx='6'><title>cutia 4 la 2</title></rect><text class='accent' font-size='16' font-weight='700' x='174' y='63' text-anchor='middle'>4→2</text><line class='muted' stroke-width='2' x1='267' y1='58' x2='247' y2='58' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='248' y='36' width='62' height='44' rx='6'><title>cutia 2 la 1</title></rect><text class='accent' font-size='16' font-weight='700' x='279' y='63' text-anchor='middle'>2→1</text><line class='muted' stroke-width='2' x1='310' y1='58' x2='330' y2='58' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='340' y='62' text-anchor='middle'>y</text></svg>",
+      "alt": {
+       "en": "Cutiile 3 la 4, 4 la 2, 2 la 1",
+       "ro": "Cutiile 3 la 4, 4 la 2, 2 la 1"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s18",
+   "title": {
+    "en": "Două straturi liniare, o dreaptă",
+    "ro": "Două straturi liniare, o dreaptă"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 35",
+    "ro": "Cursul 3 · slide 35"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03b-p07",
+     "claim": {
+      "en": "Slide 35: activarea neuronilor ascunși trebuie să fie **neliniară și derivabilă**. De ce? Doi neuroni în lanț, fără activare: $h=3x-2$, apoi $o=0{,}5\\,h+4$.",
+      "ro": "Slide 35: activarea neuronilor ascunși trebuie să fie **neliniară și derivabilă**. De ce? Doi neuroni în lanț, fără activare: $h=3x-2$, apoi $o=0{,}5\\,h+4$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$x=2$: $h=4$, $o=6$",
+        "ro": "$x=2$: $h=4$, $o=6$"
+       },
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Ieșirea o pentru trei valori ale lui x</title><line class='muted' stroke-width='1.5' x1='145.2' y1='154' x2='145.2' y2='14'/><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='77.8' y1='151' x2='77.8' y2='157'/><text class='muted' font-size='14' x='77.8' y='172' text-anchor='middle'>−1</text><line class='muted' stroke-width='1.5' x1='145.2' y1='151' x2='145.2' y2='157'/><text class='muted' font-size='14' x='145.2' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='212.8' y1='151' x2='212.8' y2='157'/><text class='muted' font-size='14' x='212.8' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='280.2' y1='151' x2='280.2' y2='157'/><text class='muted' font-size='14' x='280.2' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='114' x2='47' y2='114'/><text class='muted' font-size='14' x='38' y='119' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='74' x2='47' y2='74'/><text class='muted' font-size='14' x='38' y='79' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='34' x2='47' y2='34'/><text class='muted' font-size='14' x='38' y='39' text-anchor='end'>6</text><circle class='warn fill-warn' stroke-width='2' cx='280.2' cy='34' r='5'><title>x = 2: o = 6</title></circle><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+        "alt": {
+         "en": "Axele x și o, cu primul punct calculat",
+         "ro": "Axele x și o, cu primul punct calculat"
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "$x=0$: $h=-2$, $o=3$",
+        "ro": "$x=0$: $h=-2$, $o=3$"
+       },
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Ieșirea o pentru trei valori ale lui x</title><line class='muted' stroke-width='1.5' x1='145.2' y1='154' x2='145.2' y2='14'/><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='77.8' y1='151' x2='77.8' y2='157'/><text class='muted' font-size='14' x='77.8' y='172' text-anchor='middle'>−1</text><line class='muted' stroke-width='1.5' x1='145.2' y1='151' x2='145.2' y2='157'/><text class='muted' font-size='14' x='145.2' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='212.8' y1='151' x2='212.8' y2='157'/><text class='muted' font-size='14' x='212.8' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='280.2' y1='151' x2='280.2' y2='157'/><text class='muted' font-size='14' x='280.2' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='114' x2='47' y2='114'/><text class='muted' font-size='14' x='38' y='119' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='74' x2='47' y2='74'/><text class='muted' font-size='14' x='38' y='79' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='34' x2='47' y2='34'/><text class='muted' font-size='14' x='38' y='39' text-anchor='end'>6</text><circle class='warn fill-warn' stroke-width='2' cx='280.2' cy='34' r='5'><title>x = 2: o = 6</title></circle><circle class='warn fill-warn' stroke-width='2' cx='145.2' cy='94' r='5'><title>x = 0: o = 3</title></circle><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+        "alt": {
+         "en": "Axele x și o, cu primele 2 puncte calculate",
+         "ro": "Axele x și o, cu primele 2 puncte calculate"
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "$x=-1$: $h=-5$, $o=1{,}5$",
+        "ro": "$x=-1$: $h=-5$, $o=1{,}5$"
+       },
+       "predict": {
+        "question": {
+         "en": "Cât e $o$ pentru $x=-1$?",
+         "ro": "Cât e $o$ pentru $x=-1$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "1,5",
+           "ro": "1,5"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $h=-3-2=-5$, apoi $o=-2{,}5+4=1{,}5$.",
+           "ro": "Corect: $h=-3-2=-5$, apoi $o=-2{,}5+4=1{,}5$."
+          }
+         },
+         {
+          "text": {
+           "en": "6,5",
+           "ro": "6,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai luat $h=5$; $h=-5$ pentru că $x$ e negativ.",
+           "ro": "Ai luat $h=5$; $h=-5$ pentru că $x$ e negativ."
+          },
+          "misconception": "semn-gresit"
+         },
+         {
+          "text": {
+           "en": "−5",
+           "ro": "−5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "$-5$ e $h$, nu $o$. Mai aplici a doua cutie.",
+           "ro": "$-5$ e $h$, nu $o$. Mai aplici a doua cutie."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       },
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Ieșirea o pentru trei valori ale lui x</title><line class='muted' stroke-width='1.5' x1='145.2' y1='154' x2='145.2' y2='14'/><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='77.8' y1='151' x2='77.8' y2='157'/><text class='muted' font-size='14' x='77.8' y='172' text-anchor='middle'>−1</text><line class='muted' stroke-width='1.5' x1='145.2' y1='151' x2='145.2' y2='157'/><text class='muted' font-size='14' x='145.2' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='212.8' y1='151' x2='212.8' y2='157'/><text class='muted' font-size='14' x='212.8' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='280.2' y1='151' x2='280.2' y2='157'/><text class='muted' font-size='14' x='280.2' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='114' x2='47' y2='114'/><text class='muted' font-size='14' x='38' y='119' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='74' x2='47' y2='74'/><text class='muted' font-size='14' x='38' y='79' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='34' x2='47' y2='34'/><text class='muted' font-size='14' x='38' y='39' text-anchor='end'>6</text><circle class='warn fill-warn' stroke-width='2' cx='280.2' cy='34' r='5'><title>x = 2: o = 6</title></circle><circle class='warn fill-warn' stroke-width='2' cx='145.2' cy='94' r='5'><title>x = 0: o = 3</title></circle><circle class='warn fill-warn' stroke-width='2' cx='77.8' cy='124' r='5'><title>x = -1: o = 1,5</title></circle><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+        "alt": {
+         "en": "Axele x și o, cu primele 3 puncte calculate",
+         "ro": "Axele x și o, cu primele 3 puncte calculate"
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "Cele trei puncte stau pe dreapta $o=1{,}5\\,x+3$.",
+        "ro": "Cele trei puncte stau pe dreapta $o=1{,}5\\,x+3$."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce pantă are dreapta prin cele trei puncte?",
+         "ro": "Ce pantă are dreapta prin cele trei puncte?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "1,5",
+           "ro": "1,5"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: pantele se înmulțesc, $3\\cdot 0{,}5=1{,}5$; termenul liber e $0{,}5\\cdot(-2)+4=3$.",
+           "ro": "Corect: pantele se înmulțesc, $3\\cdot 0{,}5=1{,}5$; termenul liber e $0{,}5\\cdot(-2)+4=3$."
+          }
+         },
+         {
+          "text": {
+           "en": "3,5",
+           "ro": "3,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat pantele. La compunere se înmulțesc.",
+           "ro": "Ai adunat pantele. La compunere se înmulțesc."
+          },
+          "misconception": "aduna-in-loc-sa-inmulteasca"
+         },
+         {
+          "text": {
+           "en": "0,5",
+           "ro": "0,5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "E panta doar a celei de-a doua cutii.",
+           "ro": "E panta doar a celei de-a doua cutii."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       },
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Ieșirea o pentru trei valori ale lui x</title><line class='muted' stroke-width='1.5' x1='145.2' y1='154' x2='145.2' y2='14'/><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='77.8' y1='151' x2='77.8' y2='157'/><text class='muted' font-size='14' x='77.8' y='172' text-anchor='middle'>−1</text><line class='muted' stroke-width='1.5' x1='145.2' y1='151' x2='145.2' y2='157'/><text class='muted' font-size='14' x='145.2' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='212.8' y1='151' x2='212.8' y2='157'/><text class='muted' font-size='14' x='212.8' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='280.2' y1='151' x2='280.2' y2='157'/><text class='muted' font-size='14' x='280.2' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='114' x2='47' y2='114'/><text class='muted' font-size='14' x='38' y='119' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='74' x2='47' y2='74'/><text class='muted' font-size='14' x='38' y='79' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='34' x2='47' y2='34'/><text class='muted' font-size='14' x='38' y='39' text-anchor='end'>6</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,139 57.5,133 71,127 84.5,121 98,115 111.5,109 125,103 138.5,97 152,91 165.5,85 179,79 192.5,73 206,67 219.5,61 233,55 246.5,49 260,43 273.5,37 287,31 300.5,25 314,19'/><circle class='warn fill-warn' stroke-width='2' cx='280.2' cy='34' r='5'><title>x = 2: o = 6</title></circle><circle class='warn fill-warn' stroke-width='2' cx='145.2' cy='94' r='5'><title>x = 0: o = 3</title></circle><circle class='warn fill-warn' stroke-width='2' cx='77.8' cy='124' r='5'><title>x = -1: o = 1,5</title></circle><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+        "alt": {
+         "en": "Axele x și o, cu primele 3 puncte calculate și dreapta o = 1,5 x + 3 prin ele",
+         "ro": "Axele x și o, cu primele 3 puncte calculate și dreapta o = 1,5 x + 3 prin ele"
+        }
+       }
+      }
+     ],
+     "end": {
+      "en": "Două cutii liniare dau o singură dreaptă: stratul ascuns nu aduce nimic nou.",
+      "ro": "Două cutii liniare dau o singură dreaptă: stratul ascuns nu aduce nimic nou."
+     },
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 200'><title>Ieșirea o pentru trei valori ale lui x</title><line class='muted' stroke-width='1.5' x1='145.2' y1='154' x2='145.2' y2='14'/><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='77.8' y1='151' x2='77.8' y2='157'/><text class='muted' font-size='14' x='77.8' y='172' text-anchor='middle'>−1</text><line class='muted' stroke-width='1.5' x1='145.2' y1='151' x2='145.2' y2='157'/><text class='muted' font-size='14' x='145.2' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='212.8' y1='151' x2='212.8' y2='157'/><text class='muted' font-size='14' x='212.8' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='280.2' y1='151' x2='280.2' y2='157'/><text class='muted' font-size='14' x='280.2' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='114' x2='47' y2='114'/><text class='muted' font-size='14' x='38' y='119' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='74' x2='47' y2='74'/><text class='muted' font-size='14' x='38' y='79' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='34' x2='47' y2='34'/><text class='muted' font-size='14' x='38' y='39' text-anchor='end'>6</text><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+      "alt": {
+       "en": "Axele x și o",
+       "ro": "Axele x și o"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s19",
+   "title": {
+    "en": "Același lanț, cu litere",
+    "ro": "Același lanț, cu litere"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 36",
+    "ro": "Cursul 3 · slide 36"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03b-p08",
+     "claim": {
+      "en": "Slide 36 face același calcul cu litere: un neuron ascuns, unul de ieșire, fără activare.",
+      "ro": "Slide 36 face același calcul cu litere: un neuron ascuns, unul de ieșire, fără activare."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$z_1=w_1\\,\\mathit{input}+b_1$",
+        "ro": "$z_1=w_1\\,\\mathit{input}+b_1$"
+       },
+       "why": {
+        "en": "Neuronul ascuns.",
+        "ro": "Neuronul ascuns."
+       }
+      },
+      {
+       "shown": {
+        "en": "$y_1=z_1$",
+        "ro": "$y_1=z_1$"
+       },
+       "predict": {
+        "question": {
+         "en": "Fără activare, ce iese din neuronul ascuns?",
+         "ro": "Fără activare, ce iese din neuronul ascuns?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$y_1=z_1$",
+           "ro": "$y_1=z_1$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: fără activare, ieșirea e chiar suma $z_1$.",
+           "ro": "Corect: fără activare, ieșirea e chiar suma $z_1$."
+          }
+         },
+         {
+          "text": {
+           "en": "$y_1=\\sigma(z_1)$",
+           "ro": "$y_1=\\sigma(z_1)$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Sigmoida ar fi o activare; aici nu e niciuna.",
+           "ro": "Sigmoida ar fi o activare; aici nu e niciuna."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "$y_1=0$",
+           "ro": "$y_1=0$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Neuronul dă mereu o ieșire; fără activare ea e chiar $z_1$.",
+           "ro": "Neuronul dă mereu o ieșire; fără activare ea e chiar $z_1$."
+          },
+          "misconception": "regula-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\mathit{output}=z_2=w_2y_1+b_2=w_2(w_1\\,\\mathit{input}+b_1)+b_2$",
+        "ro": "$\\mathit{output}=z_2=w_2y_1+b_2=w_2(w_1\\,\\mathit{input}+b_1)+b_2$"
+       },
+       "why": {
+        "en": "Neuronul de ieșire, cu $y_1$ pus în loc.",
+        "ro": "Neuronul de ieșire, cu $y_1$ pus în loc."
+       },
+       "predict": {
+        "question": {
+         "en": "Punem $y_1$ în $z_2=w_2y_1+b_2$. Ce iese?",
+         "ro": "Punem $y_1$ în $z_2=w_2y_1+b_2$. Ce iese?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$w_2(w_1\\,\\mathit{input}+b_1)+b_2$",
+           "ro": "$w_2(w_1\\,\\mathit{input}+b_1)+b_2$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: tot $y_1$, cu bias cu tot, se înmulțește cu $w_2$.",
+           "ro": "Corect: tot $y_1$, cu bias cu tot, se înmulțește cu $w_2$."
+          }
+         },
+         {
+          "text": {
+           "en": "$w_2w_1\\,\\mathit{input}+b_2$",
+           "ro": "$w_2w_1\\,\\mathit{input}+b_2$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai pierdut $b_1$: și el trece prin $w_2$.",
+           "ro": "Ai pierdut $b_1$: și el trece prin $w_2$."
+          },
+          "misconception": "un-singur-termen"
+         },
+         {
+          "text": {
+           "en": "$w_1\\,\\mathit{input}+b_1+w_2+b_2$",
+           "ro": "$w_1\\,\\mathit{input}+b_1+w_2+b_2$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat cutiile; a doua înmulțește ce primește cu $w_2$.",
+           "ro": "Ai adunat cutiile; a doua înmulțește ce primește cu $w_2$."
+          },
+          "misconception": "aduna-in-loc-sa-inmulteasca"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\mathit{output}=w_2w_1\\,\\mathit{input}+w_2b_1+b_2=w'\\,\\mathit{input}+b'$",
+        "ro": "$\\mathit{output}=w_2w_1\\,\\mathit{input}+w_2b_1+b_2=w'\\,\\mathit{input}+b'$"
+       },
+       "why": {
+        "en": "Desfacem paranteza.",
+        "ro": "Desfacem paranteza."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce e $b'$, termenul fără $\\mathit{input}$?",
+         "ro": "Ce e $b'$, termenul fără $\\mathit{input}$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$w_2b_1+b_2$",
+           "ro": "$w_2b_1+b_2$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $b_1$ trece prin $w_2$, apoi se adaugă $b_2$.",
+           "ro": "Corect: $b_1$ trece prin $w_2$, apoi se adaugă $b_2$."
+          }
+         },
+         {
+          "text": {
+           "en": "$b_1+b_2$",
+           "ro": "$b_1+b_2$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "$b_1$ trece prin a doua cutie, deci se înmulțește cu $w_2$.",
+           "ro": "$b_1$ trece prin a doua cutie, deci se înmulțește cu $w_2$."
+          },
+          "misconception": "aduna-in-loc-sa-inmulteasca"
+         },
+         {
+          "text": {
+           "en": "$b_2$",
+           "ro": "$b_2$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai uitat termenul $w_2b_1$.",
+           "ro": "Ai uitat termenul $w_2b_1$."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Slide 36: «am obținut o activare liniară a intrării, ca și cum am avea un singur strat». Cu numerele de dinainte: $w'=0{,}5\\cdot 3=1{,}5$ și $b'=0{,}5\\cdot(-2)+4=3$.",
+      "ro": "Slide 36: «am obținut o activare liniară a intrării, ca și cum am avea un singur strat». Cu numerele de dinainte: $w'=0{,}5\\cdot 3=1{,}5$ și $b'=0{,}5\\cdot(-2)+4=3$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s20",
+   "title": {
+    "en": "Cu o sigmoidă între straturi",
+    "ro": "Cu o sigmoidă între straturi"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 35",
+    "ro": "Cursul 3 · slide 35"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Punem o sigmoidă între cutii: $h=\\sigma(3x-2)$, apoi $o=0{,}5\\,h+4$. Aceleași trei valori $x=2,\\,0,\\,-1$ dau acum **alte** puncte, iar ele nu mai stau pe dreapta $1{,}5x+3$.",
+        "ro": "Punem o sigmoidă între cutii: $h=\\sigma(3x-2)$, apoi $o=0{,}5\\,h+4$. Aceleași trei valori $x=2,\\,0,\\,-1$ dau acum **alte** puncte, iar ele nu mai stau pe dreapta $1{,}5x+3$."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Puncte care ies de pe dreaptă</title><line class='muted' stroke-width='1.5' x1='145.2' y1='154' x2='145.2' y2='14'/><line class='muted' stroke-width='1.5' x1='44' y1='154' x2='314' y2='154'/><line class='muted' stroke-width='1.5' x1='77.8' y1='151' x2='77.8' y2='157'/><text class='muted' font-size='14' x='77.8' y='172' text-anchor='middle'>−1</text><line class='muted' stroke-width='1.5' x1='145.2' y1='151' x2='145.2' y2='157'/><text class='muted' font-size='14' x='145.2' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='212.8' y1='151' x2='212.8' y2='157'/><text class='muted' font-size='14' x='212.8' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='280.2' y1='151' x2='280.2' y2='157'/><text class='muted' font-size='14' x='280.2' y='172' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='154' x2='47' y2='154'/><text class='muted' font-size='14' x='38' y='159' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='114' x2='47' y2='114'/><text class='muted' font-size='14' x='38' y='119' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='41' y1='74' x2='47' y2='74'/><text class='muted' font-size='14' x='38' y='79' text-anchor='end'>4</text><line class='muted' stroke-width='1.5' x1='41' y1='34' x2='47' y2='34'/><text class='muted' font-size='14' x='38' y='39' text-anchor='end'>6</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,139 57.5,133 71,127 84.5,121 98,115 111.5,109 125,103 138.5,97 152,91 165.5,85 179,79 192.5,73 206,67 219.5,61 233,55 246.5,49 260,43 273.5,37 287,31 300.5,25 314,19'/><circle class='warn fill-warn' stroke-width='2' cx='280.2' cy='64.2' r='5'><title>x = 2</title></circle><circle class='warn fill-warn' stroke-width='2' cx='145.2' cy='72.8' r='5'><title>x = 0</title></circle><circle class='warn fill-warn' stroke-width='2' cx='77.8' cy='73.9' r='5'><title>x = -1</title></circle><text class='fg' font-size='15' x='328' y='159' text-anchor='middle'>x</text></svg>",
+        "alt": {
+         "en": "Dreapta 1,5 x + 3 și trei puncte la 4,49, 4,06 și 4,00, în afara dreptei",
+         "ro": "Dreapta 1,5 x + 3 și trei puncte la 4,49, 4,06 și 4,00, în afara dreptei"
+        },
+        "caption": {
+         "en": "Punctele cu sigmoidă (galben) ies de pe dreaptă.",
+         "ro": "Punctele cu sigmoidă (galben) ies de pe dreaptă."
+        }
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "x",
+         "cu sigmoidă",
+         "dreapta"
+        ],
+        "rows": [
+         [
+          "2",
+          "4,491",
+          "6"
+         ],
+         [
+          "0",
+          "4,060",
+          "3"
+         ],
+         [
+          "−1",
+          "4,003",
+          "1,5"
+         ]
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03b-q09",
+     "question": {
+      "en": "Cu sigmoidă între cutii, cele două cutii pot fi înlocuite cu **o singură dreaptă**?",
+      "ro": "Cu sigmoidă între cutii, cele două cutii pot fi înlocuite cu **o singură dreaptă**?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Nu: ieșirile nu mai stau pe nicio dreaptă",
+        "ro": "Nu: ieșirile nu mai stau pe nicio dreaptă"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: sigmoida îndoaie curba, deci stratul ascuns aduce ceva ce o dreaptă nu poate.",
+        "ro": "Corect: sigmoida îndoaie curba, deci stratul ascuns aduce ceva ce o dreaptă nu poate."
+       }
+      },
+      {
+       "text": {
+        "en": "Da, ca la cutiile liniare",
+        "ro": "Da, ca la cutiile liniare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Asta e adevărat doar fără activare. Sigmoida nu e liniară.",
+        "ro": "Asta e adevărat doar fără activare. Sigmoida nu e liniară."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Da, dar cu altă pantă",
+        "ro": "Da, dar cu altă pantă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nicio dreaptă nu trece prin cele trei puncte.",
+        "ro": "Nicio dreaptă nu trece prin cele trei puncte."
+       },
+       "misconception": "caz-particular"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s21",
+   "title": {
+    "en": "Același lucru cu matrice",
+    "ro": "Același lucru cu matrice"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 36, extins la matrice",
+    "ro": "Cursul 3 · slide 36, extins la matrice"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "nn-l03b-p10",
+     "claim": {
+      "en": "Două straturi liniare cu matrice: $h=A_1x+c_1$, $o=A_2h+c_2$, cu $A_1=\\begin{pmatrix}1&2\\\\0&-1\\end{pmatrix}$, $c_1=(1;\\,0)$, $A_2=\\begin{pmatrix}2&0\\\\1&1\\end{pmatrix}$, $c_2=(-1;\\,2)$ și $x=(2;\\,1)$.",
+      "ro": "Două straturi liniare cu matrice: $h=A_1x+c_1$, $o=A_2h+c_2$, cu $A_1=\\begin{pmatrix}1&2\\\\0&-1\\end{pmatrix}$, $c_1=(1;\\,0)$, $A_2=\\begin{pmatrix}2&0\\\\1&1\\end{pmatrix}$, $c_2=(-1;\\,2)$ și $x=(2;\\,1)$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$h=A_1x+c_1=(5;\\,-1)$",
+        "ro": "$h=A_1x+c_1=(5;\\,-1)$"
+       },
+       "why": {
+        "en": "$1\\cdot 2+2\\cdot 1+1=5$ și $0\\cdot 2-1\\cdot 1+0=-1$.",
+        "ro": "$1\\cdot 2+2\\cdot 1+1=5$ și $0\\cdot 2-1\\cdot 1+0=-1$."
+       },
+       "predict": {
+        "question": {
+         "en": "Cât e prima componentă a lui $h$: $1\\cdot 2+2\\cdot 1+1$?",
+         "ro": "Cât e prima componentă a lui $h$: $1\\cdot 2+2\\cdot 1+1$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "5",
+           "ro": "5"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $2+2+1=5$.",
+           "ro": "Corect: $2+2+1=5$."
+          }
+         },
+         {
+          "text": {
+           "en": "4",
+           "ro": "4"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai uitat prima componentă a lui $c_1$ (1).",
+           "ro": "Ai uitat prima componentă a lui $c_1$ (1)."
+          },
+          "misconception": "un-singur-termen"
+         },
+         {
+          "text": {
+           "en": "3",
+           "ro": "3"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai adunat doar $2+1$.",
+           "ro": "Ai adunat doar $2+1$."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$o=A_2h+c_2=(9;\\,6)$",
+        "ro": "$o=A_2h+c_2=(9;\\,6)$"
+       },
+       "why": {
+        "en": "$2\\cdot 5+0-1=9$ și $1\\cdot 5+1\\cdot(-1)+2=6$.",
+        "ro": "$2\\cdot 5+0-1=9$ și $1\\cdot 5+1\\cdot(-1)+2=6$."
+       }
+      },
+      {
+       "shown": {
+        "en": "$A=A_2A_1=\\begin{pmatrix}2&4\\\\1&1\\end{pmatrix}$ și $b=A_2c_1+c_2=(1;\\,3)$",
+        "ro": "$A=A_2A_1=\\begin{pmatrix}2&4\\\\1&1\\end{pmatrix}$ și $b=A_2c_1+c_2=(1;\\,3)$"
+       },
+       "why": {
+        "en": "Un singur strat care ar trebui să le înlocuiască pe amândouă.",
+        "ro": "Un singur strat care ar trebui să le înlocuiască pe amândouă."
+       }
+      },
+      {
+       "shown": {
+        "en": "$Ax+b=(8;\\,3)+(1;\\,3)=(9;\\,6)$",
+        "ro": "$Ax+b=(8;\\,3)+(1;\\,3)=(9;\\,6)$"
+       },
+       "why": {
+        "en": "Același rezultat ca prin două straturi.",
+        "ro": "Același rezultat ca prin două straturi."
+       },
+       "predict": {
+        "question": {
+         "en": "Cu $A$ și $b$ de mai sus, cât dă $Ax+b$ pentru $x=(2;\\,1)$?",
+         "ro": "Cu $A$ și $b$ de mai sus, cât dă $Ax+b$ pentru $x=(2;\\,1)$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(9; 6)",
+           "ro": "(9; 6)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $Ax=(8;\\,3)$, plus $b=(1;\\,3)$: același rezultat ca prin două straturi.",
+           "ro": "Corect: $Ax=(8;\\,3)$, plus $b=(1;\\,3)$: același rezultat ca prin două straturi."
+          }
+         },
+         {
+          "text": {
+           "en": "(5; −1)",
+           "ro": "(5; −1)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Asta e $h$, rezultatul primului strat.",
+           "ro": "Asta e $h$, rezultatul primului strat."
+          },
+          "misconception": "regula-gresita"
+         },
+         {
+          "text": {
+           "en": "(8; 6)",
+           "ro": "(8; 6)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ai uitat prima componentă a lui $b$ (1): $8+1=9$.",
+           "ro": "Ai uitat prima componentă a lui $b$ (1): $8+1=9$."
+          },
+          "misconception": "un-singur-termen"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Două straturi liniare, un singur strat: $A=A_2A_1$ și $b=A_2c_1+c_2$.",
+      "ro": "Două straturi liniare, un singur strat: $A=A_2A_1$ și $b=A_2c_1+c_2$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s22",
+   "title": {
+    "en": "Complet sau parțial conectat",
+    "ro": "Complet sau parțial conectat"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 37",
+    "ro": "Cursul 3 · slide 37"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Rețeaua poate fi complet conectată (dense) sau **parțial conectată**: unele săgeți lipsesc.",
+        "ro": "Rețeaua poate fi complet conectată (dense) sau **parțial conectată**: unele săgeți lipsesc."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 210'><title>Rețea parțială</title><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='292' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='292' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='292' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='292' y2='158'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='48' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='92' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='136' r='14'><title>neuronul 3, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='26' r='14'><title>neuronul 1, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='70' r='14'><title>neuronul 2, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='114' r='14'><title>neuronul 3, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='158' r='14'><title>neuronul 4, coloana 2</title></circle><text class='muted' font-size='14' x='34' y='204' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='306' y='204' text-anchor='middle'>strat</text></svg>",
+        "alt": {
+         "en": "Trei intrări legate doar de unii dintre cei patru neuroni",
+         "ro": "Trei intrări legate doar de unii dintre cei patru neuroni"
+        },
+        "caption": {
+         "en": "Parțial conectat: lipsesc săgeți.",
+         "ro": "Parțial conectat: lipsesc săgeți."
+        }
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "nn-l03b-q11",
+     "question": {
+      "en": "Rețeaua complet conectată are straturi 3 → 4 → 2. Câte săgeți (ponderi) are în total?",
+      "ro": "Rețeaua complet conectată are straturi 3 → 4 → 2. Câte săgeți (ponderi) are în total?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "20",
+        "ro": "20"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $3\\cdot 4=12$ între primele două straturi și $4\\cdot 2=8$ între ultimele două.",
+        "ro": "Corect: $3\\cdot 4=12$ între primele două straturi și $4\\cdot 2=8$ între ultimele două."
+       }
+      },
+      {
+       "text": {
+        "en": "9",
+        "ro": "9"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ai adunat $3+4+2$. Fiecare neuron se leagă de toți din stratul următor, deci se înmulțește.",
+        "ro": "Ai adunat $3+4+2$. Fiecare neuron se leagă de toți din stratul următor, deci se înmulțește."
+       },
+       "misconception": "aduna-in-loc-sa-inmulteasca"
+      },
+      {
+       "text": {
+        "en": "12",
+        "ro": "12"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ai numărat doar primele două straturi; mai sunt $4\\cdot 2=8$.",
+        "ro": "Ai numărat doar primele două straturi; mai sunt $4\\cdot 2=8$."
+       },
+       "misconception": "un-singur-termen"
+      }
+     ],
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 210'><title>Dens 3-4-2</title><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='48' x2='156' y2='158'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='92' x2='156' y2='158'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='156' y2='26'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='156' y2='70'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='156' y2='114'/><line class='muted' stroke-width='1.5' x1='48' y1='136' x2='156' y2='158'/><line class='muted' stroke-width='1.5' x1='184' y1='26' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='26' x2='292' y2='114'/><line class='muted' stroke-width='1.5' x1='184' y1='70' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='70' x2='292' y2='114'/><line class='muted' stroke-width='1.5' x1='184' y1='114' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='114' x2='292' y2='114'/><line class='muted' stroke-width='1.5' x1='184' y1='158' x2='292' y2='70'/><line class='muted' stroke-width='1.5' x1='184' y1='158' x2='292' y2='114'/><circle class='fg fill-bg' stroke-width='2' cx='34' cy='48' r='14'><title>neuronul 1, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='92' r='14'><title>neuronul 2, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='34' cy='136' r='14'><title>neuronul 3, coloana 1</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='26' r='14'><title>neuronul 1, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='70' r='14'><title>neuronul 2, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='114' r='14'><title>neuronul 3, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='170' cy='158' r='14'><title>neuronul 4, coloana 2</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='70' r='14'><title>neuronul 1, coloana 3</title></circle><circle class='fg fill-bg' stroke-width='2' cx='306' cy='114' r='14'><title>neuronul 2, coloana 3</title></circle><text class='muted' font-size='14' x='34' y='204' text-anchor='middle'>intrare</text><text class='muted' font-size='14' x='170' y='204' text-anchor='middle'>ascuns</text><text class='muted' font-size='14' x='306' y='204' text-anchor='middle'>ieșire</text></svg>",
+      "alt": {
+       "en": "Rețea complet conectată cu 3, 4 și 2 neuroni",
+       "ro": "Rețea complet conectată cu 3, 4 și 2 neuroni"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s23",
+   "title": {
+    "en": "Opțional: câți parametri învață o rețea",
+    "ro": "Opțional: câți parametri învață o rețea"
+   },
+   "kicker": {
+    "en": "Cursul 3 · derivat, nu e pe slide",
+    "ro": "Cursul 3 · derivat, nu e pe slide"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03b-e12",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Rețeaua are straturile $4\\rightarrow 3\\rightarrow 2$ (complet conectată). Câte **ponderi**, câți **biasuri** și câți parametri în total?",
+      "ro": "Rețeaua are straturile $4\\rightarrow 3\\rightarrow 2$ (complet conectată). Câte **ponderi**, câți **biasuri** și câți parametri în total?"
+     },
+     "fields": [
+      {
+       "id": "w",
+       "label": {
+        "en": "ponderi",
+        "ro": "ponderi"
+       },
+       "kind": "num",
+       "formula": "n1*k1 + k1*k2",
+       "expected": 18
+      },
+      {
+       "id": "b",
+       "label": {
+        "en": "biasuri",
+        "ro": "biasuri"
+       },
+       "kind": "num",
+       "formula": "k1 + k2",
+       "expected": 5
+      },
+      {
+       "id": "t",
+       "label": {
+        "en": "total",
+        "ro": "total"
+       },
+       "kind": "num",
+       "formula": "n1*k1 + k1*k2 + k1 + k2",
+       "expected": 23
+      }
+     ],
+     "data": {
+      "n1": 4,
+      "k1": 3,
+      "k2": 2
+     },
+     "detectors": [
+      {
+       "field": "t",
+       "formula": "n1*k1 + k1*k2",
+       "message": {
+        "en": "Ai uitat biasurile: fiecare neuron are unul.",
+        "ro": "Ai uitat biasurile: fiecare neuron are unul."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Ponderi: câte una pe fiecare săgeată. Biasuri: câte unul pe neuron (fără intrare).",
+       "ro": "Ponderi: câte una pe fiecare săgeată. Biasuri: câte unul pe neuron (fără intrare)."
+      },
+      {
+       "en": "Ponderi: $4\\cdot 3+3\\cdot 2$. Biasuri: $3+2$.",
+       "ro": "Ponderi: $4\\cdot 3+3\\cdot 2$. Biasuri: $3+2$."
+      },
+      {
+       "en": "$12+6=18$ ponderi, $5$ biasuri.",
+       "ro": "$12+6=18$ ponderi, $5$ biasuri."
+      }
+     ],
+     "solution": {
+      "en": "Ponderi: $12+6=18$. Biasuri: $3+2=5$. Total: 23. (Pentru 3→4→2→1: 22 + 7 = 29.)",
+      "ro": "Ponderi: $12+6=18$. Biasuri: $3+2=5$. Total: 23. (Pentru 3→4→2→1: 22 + 7 = 29.)"
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Rețeaua are straturile $3\\rightarrow 5\\rightarrow 1$. Câte ponderi, biasuri și parametri în total?",
+        "ro": "Rețeaua are straturile $3\\rightarrow 5\\rightarrow 1$. Câte ponderi, biasuri și parametri în total?"
+       },
+       "fields": [
+        {
+         "id": "w",
+         "formula": "n1*k1 + k1*k2",
+         "expected": 20
+        },
+        {
+         "id": "b",
+         "formula": "k1 + k2",
+         "expected": 6
+        },
+        {
+         "id": "t",
+         "formula": "n1*k1 + k1*k2 + k1 + k2",
+         "expected": 26
+        }
+       ],
+       "solution": {
+        "en": "Ponderi: $15+5=20$. Biasuri: $5+1=6$. Total: 26.",
+        "ro": "Ponderi: $15+5=20$. Biasuri: $5+1=6$. Total: 26."
+       },
+       "data": {
+        "n1": 3,
+        "k1": 5,
+        "k2": 1
+       },
+       "hints": [
+        {
+         "en": "Câte o pondere pe săgeată, câte un bias pe neuron.",
+         "ro": "Câte o pondere pe săgeată, câte un bias pe neuron."
+        },
+        {
+         "en": "Ponderi: $3\\cdot 5+5\\cdot 1$.",
+         "ro": "Ponderi: $3\\cdot 5+5\\cdot 1$."
+        },
+        {
+         "en": "$20$ ponderi, $6$ biasuri.",
+         "ro": "$20$ ponderi, $6$ biasuri."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s24",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 18–37",
+    "ro": "Cursul 3 · slide 18–37"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Straturi și matrice:",
+        "ro": "Straturi și matrice:"
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Rețea: strat de intrare, straturi ascunse (opționale), strat de ieșire.",
+       "ro": "Rețea: strat de intrare, straturi ascunse (opționale), strat de ieșire."
+      },
+      {
+       "en": "Un strat complet conectat $n\\rightarrow k$: $z=W\\,x+b$, cu $W$ de forma $k\\times n$; apoi activarea pe fiecare element.",
+       "ro": "Un strat complet conectat $n\\rightarrow k$: $z=W\\,x+b$, cu $W$ de forma $k\\times n$; apoi activarea pe fiecare element."
+      },
+      {
+       "en": "Rândul $k$ al lui $W$ este neuronul $k$.",
+       "ro": "Rândul $k$ al lui $W$ este neuronul $k$."
+      },
+      {
+       "en": "Fără activare neliniară, straturile se topesc într-unul singur: $A=A_2A_1$, $b=A_2c_1+c_2$.",
+       "ro": "Fără activare neliniară, straturile se topesc într-unul singur: $A=A_2A_1$, $b=A_2c_1+c_2$."
+      },
+      {
+       "en": "Dens: se înmulțesc mărimile straturilor vecine.",
+       "ro": "Dens: se înmulțesc mărimile straturilor vecine."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s25",
+   "title": {
+    "en": "Verificare: un strat",
+    "ro": "Verificare: un strat"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 28–31",
+    "ro": "Cursul 3 · slide 28–31"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03b-e13",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Stratul $3\\rightarrow 2$ are $W=\\begin{pmatrix}1&0&-1\\\\2&1&0\\end{pmatrix}$ și $b=(0;\\,-1)$. Intrarea este $x=(2;\\,1;\\,3)$. Calculează $z=Wx+b$.",
+      "ro": "Stratul $3\\rightarrow 2$ are $W=\\begin{pmatrix}1&0&-1\\\\2&1&0\\end{pmatrix}$ și $b=(0;\\,-1)$. Intrarea este $x=(2;\\,1;\\,3)$. Calculează $z=Wx+b$."
+     },
+     "fields": [
+      {
+       "id": "z1",
+       "label": {
+        "en": "z1",
+        "ro": "z1"
+       },
+       "kind": "num",
+       "formula": "x1*1 + x2*0 + x3*(-1) + 0",
+       "expected": -1
+      },
+      {
+       "id": "z2",
+       "label": {
+        "en": "z2",
+        "ro": "z2"
+       },
+       "kind": "num",
+       "formula": "x1*2 + x2*1 + x3*0 - 1",
+       "expected": 4
+      }
+     ],
+     "data": {
+      "x1": 2,
+      "x2": 1,
+      "x3": 3
+     },
+     "detectors": [
+      {
+       "field": "z2",
+       "formula": "x1*2 + x2*1 + x3*0",
+       "message": {
+        "en": "Ai uitat biasul $b_2=-1$.",
+        "ro": "Ai uitat biasul $b_2=-1$."
+       }
+      },
+      {
+       "field": "z1",
+       "formula": "x1*1 + x2*2 + x3*0",
+       "message": {
+        "en": "Ai citit prima coloană a lui $W$ în loc de primul rând.",
+        "ro": "Ai citit prima coloană a lui $W$ în loc de primul rând."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Rândul $i$ cu vectorul, plus $b_i$.",
+       "ro": "Rândul $i$ cu vectorul, plus $b_i$."
+      },
+      {
+       "en": "$z_1=1\\cdot 2+0\\cdot 1-1\\cdot 3+0$; $z_2=2\\cdot 2+1\\cdot 1+0\\cdot 3-1$.",
+       "ro": "$z_1=1\\cdot 2+0\\cdot 1-1\\cdot 3+0$; $z_2=2\\cdot 2+1\\cdot 1+0\\cdot 3-1$."
+      },
+      {
+       "en": "$z_1=-1$, $z_2=4$.",
+       "ro": "$z_1=-1$, $z_2=4$."
+      }
+     ],
+     "solution": {
+      "en": "$z_1=2+0-3+0=-1$. $z_2=4+1+0-1=4$.",
+      "ro": "$z_1=2+0-3+0=-1$. $z_2=4+1+0-1=4$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Stratul $3\\rightarrow 2$ are $W=\\begin{pmatrix}1&0&-1\\\\2&1&0\\end{pmatrix}$ și $b=(0;\\,-1)$. Intrarea este $x=(1;\\,0;\\,2)$. Calculează $z=Wx+b$.",
+        "ro": "Stratul $3\\rightarrow 2$ are $W=\\begin{pmatrix}1&0&-1\\\\2&1&0\\end{pmatrix}$ și $b=(0;\\,-1)$. Intrarea este $x=(1;\\,0;\\,2)$. Calculează $z=Wx+b$."
+       },
+       "fields": [
+        {
+         "id": "z1",
+         "formula": "x1*1 + x2*0 + x3*(-1) + 0",
+         "expected": -1
+        },
+        {
+         "id": "z2",
+         "formula": "x1*2 + x2*1 + x3*0 - 1",
+         "expected": 1
+        }
+       ],
+       "solution": {
+        "en": "$z_1=1-2=-1$, $z_2=2+0-1=1$.",
+        "ro": "$z_1=1-2=-1$, $z_2=2+0-1=1$."
+       },
+       "data": {
+        "x1": 1,
+        "x2": 0,
+        "x3": 2
+       },
+       "hints": [
+        {
+         "en": "Fiecare $z_i$: rândul $i$ cu $x$, plus $b_i$.",
+         "ro": "Fiecare $z_i$: rândul $i$ cu $x$, plus $b_i$."
+        },
+        {
+         "en": "$z_1=x_1-x_3$; $z_2=2x_1+x_2-1$.",
+         "ro": "$z_1=x_1-x_3$; $z_2=2x_1+x_2-1$."
+        },
+        {
+         "en": "Pune numerele.",
+         "ro": "Pune numerele."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Stratul $3\\rightarrow 2$ are $W=\\begin{pmatrix}1&0&-1\\\\2&1&0\\end{pmatrix}$ și $b=(0;\\,-1)$. Intrarea este $x=(0;\\,3;\\,1)$. Calculează $z=Wx+b$.",
+        "ro": "Stratul $3\\rightarrow 2$ are $W=\\begin{pmatrix}1&0&-1\\\\2&1&0\\end{pmatrix}$ și $b=(0;\\,-1)$. Intrarea este $x=(0;\\,3;\\,1)$. Calculează $z=Wx+b$."
+       },
+       "fields": [
+        {
+         "id": "z1",
+         "formula": "x1*1 + x2*0 + x3*(-1) + 0",
+         "expected": -1
+        },
+        {
+         "id": "z2",
+         "formula": "x1*2 + x2*1 + x3*0 - 1",
+         "expected": 2
+        }
+       ],
+       "solution": {
+        "en": "$z_1=0-1=-1$, $z_2=0+3-1=2$.",
+        "ro": "$z_1=0-1=-1$, $z_2=0+3-1=2$."
+       },
+       "data": {
+        "x1": 0,
+        "x2": 3,
+        "x3": 1
+       },
+       "hints": [
+        {
+         "en": "Fiecare $z_i$: rândul $i$ cu $x$, plus $b_i$.",
+         "ro": "Fiecare $z_i$: rândul $i$ cu $x$, plus $b_i$."
+        },
+        {
+         "en": "$z_1=x_1-x_3$; $z_2=2x_1+x_2-1$.",
+         "ro": "$z_1=x_1-x_3$; $z_2=2x_1+x_2-1$."
+        },
+        {
+         "en": "Pune numerele.",
+         "ro": "Pune numerele."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s26",
+   "title": {
+    "en": "Verificare: topirea a două cutii",
+    "ro": "Verificare: topirea a două cutii"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 35–36",
+    "ro": "Cursul 3 · slide 35–36"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l03b-e14",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Două cutii liniare în lanț: $h=−2x+1$, apoi $o=3h+2$. Ele echivalează cu $o=w'x+b'$. Calculează $w'$ și $b'$.",
+      "ro": "Două cutii liniare în lanț: $h=−2x+1$, apoi $o=3h+2$. Ele echivalează cu $o=w'x+b'$. Calculează $w'$ și $b'$."
+     },
+     "fields": [
+      {
+       "id": "wp",
+       "label": {
+        "en": "w'",
+        "ro": "w'"
+       },
+       "kind": "num",
+       "formula": "w2*w1",
+       "expected": -6
+      },
+      {
+       "id": "bp",
+       "label": {
+        "en": "b'",
+        "ro": "b'"
+       },
+       "kind": "num",
+       "formula": "w2*b1 + b2",
+       "expected": 5
+      }
+     ],
+     "data": {
+      "w1": -2,
+      "b1": 1,
+      "w2": 3,
+      "b2": 2
+     },
+     "detectors": [
+      {
+       "field": "wp",
+       "formula": "w2 + w1",
+       "message": {
+        "en": "Ai adunat pantele; la compunere se înmulțesc.",
+        "ro": "Ai adunat pantele; la compunere se înmulțesc."
+       }
+      },
+      {
+       "field": "bp",
+       "formula": "b1 + b2",
+       "message": {
+        "en": "Ai adunat $b_1$ și $b_2$; $b_1$ trece prin a doua cutie, deci se înmulțește cu $w_2$.",
+        "ro": "Ai adunat $b_1$ și $b_2$; $b_1$ trece prin a doua cutie, deci se înmulțește cu $w_2$."
+       }
+      },
+      {
+       "field": "bp",
+       "formula": "w2*b1",
+       "message": {
+        "en": "Ai uitat $b_2$.",
+        "ro": "Ai uitat $b_2$."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Înlocuiește $h$ în a doua formulă.",
+       "ro": "Înlocuiește $h$ în a doua formulă."
+      },
+      {
+       "en": "$o=w_2(w_1x+b_1)+b_2=w_2w_1x+w_2b_1+b_2$.",
+       "ro": "$o=w_2(w_1x+b_1)+b_2=w_2w_1x+w_2b_1+b_2$."
+      },
+      {
+       "en": "$w'=3\\cdot(-2)$, $b'=3\\cdot 1+2$.",
+       "ro": "$w'=3\\cdot(-2)$, $b'=3\\cdot 1+2$."
+      }
+     ],
+     "solution": {
+      "en": "$w'=3\\cdot(-2)=-6$, $b'=3\\cdot 1+2=5$. Deci $o=-6x+5$.",
+      "ro": "$w'=3\\cdot(-2)=-6$, $b'=3\\cdot 1+2=5$. Deci $o=-6x+5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Două cutii liniare în lanț: $h=4x+1$, apoi $o=−0{,}5h+2$. Ele echivalează cu $o=w'x+b'$. Calculează $w'$ și $b'$.",
+        "ro": "Două cutii liniare în lanț: $h=4x+1$, apoi $o=−0{,}5h+2$. Ele echivalează cu $o=w'x+b'$. Calculează $w'$ și $b'$."
+       },
+       "fields": [
+        {
+         "id": "wp",
+         "formula": "w2*w1",
+         "expected": -2
+        },
+        {
+         "id": "bp",
+         "formula": "w2*b1 + b2",
+         "expected": 1.5
+        }
+       ],
+       "solution": {
+        "en": "$w'=-0{,}5\\cdot 4=-2$, $b'=-0{,}5\\cdot 1+2=1{,}5$.",
+        "ro": "$w'=-0{,}5\\cdot 4=-2$, $b'=-0{,}5\\cdot 1+2=1{,}5$."
+       },
+       "data": {
+        "w1": 4,
+        "b1": 1,
+        "w2": -0.5,
+        "b2": 2
+       },
+       "hints": [
+        {
+         "en": "$o=w_2(w_1x+b_1)+b_2$.",
+         "ro": "$o=w_2(w_1x+b_1)+b_2$."
+        },
+        {
+         "en": "$w'=w_2w_1$ și $b'=w_2b_1+b_2$.",
+         "ro": "$w'=w_2w_1$ și $b'=w_2b_1+b_2$."
+        },
+        {
+         "en": "Pune numerele.",
+         "ro": "Pune numerele."
+        }
+       ]
+      },
+      {
+       "statement": {
+        "en": "Două cutii liniare în lanț: $h=x-3$, apoi $o=2h+1$. Ele echivalează cu $o=w'x+b'$. Calculează $w'$ și $b'$.",
+        "ro": "Două cutii liniare în lanț: $h=x-3$, apoi $o=2h+1$. Ele echivalează cu $o=w'x+b'$. Calculează $w'$ și $b'$."
+       },
+       "fields": [
+        {
+         "id": "wp",
+         "formula": "w2*w1",
+         "expected": 2
+        },
+        {
+         "id": "bp",
+         "formula": "w2*b1 + b2",
+         "expected": -5
+        }
+       ],
+       "solution": {
+        "en": "$w'=2\\cdot 1=2$, $b'=2\\cdot(-3)+1=-5$.",
+        "ro": "$w'=2\\cdot 1=2$, $b'=2\\cdot(-3)+1=-5$."
+       },
+       "data": {
+        "w1": 1,
+        "b1": -3,
+        "w2": 2,
+        "b2": 1
+       },
+       "hints": [
+        {
+         "en": "$o=w_2(w_1x+b_1)+b_2$.",
+         "ro": "$o=w_2(w_1x+b_1)+b_2$."
+        },
+        {
+         "en": "$w'=w_2w_1$ și $b'=w_2b_1+b_2$.",
+         "ro": "$w'=w_2w_1$ și $b'=w_2b_1+b_2$."
+        },
+        {
+         "en": "Pune numerele.",
+         "ro": "Pune numerele."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l03b-s27",
+   "title": {
+    "en": "Verificare: forma lui W",
+    "ro": "Verificare: forma lui W"
+   },
+   "kicker": {
+    "en": "Cursul 3 · slide 28, 32",
+    "ro": "Cursul 3 · slide 28, 32"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l03b-q15",
+     "question": {
+      "en": "O cutie $5\\rightarrow 2$ (5 numere intră, 2 ies). Ce formă are $W$?",
+      "ro": "O cutie $5\\rightarrow 2$ (5 numere intră, 2 ies). Ce formă are $W$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$2\\times 5$",
+        "ro": "$2\\times 5$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: 2 rânduri (neuroni), 5 coloane (intrări).",
+        "ro": "Corect: 2 rânduri (neuroni), 5 coloane (intrări)."
+       }
+      },
+      {
+       "text": {
+        "en": "$5\\times 2$",
+        "ro": "$5\\times 2$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Inversat: rândurile sunt neuronii.",
+        "ro": "Inversat: rândurile sunt neuronii."
+       },
+       "misconception": "forma-transpusa"
+      },
+      {
+       "text": {
+        "en": "$5\\times 5$",
+        "ro": "$5\\times 5$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu: forma depinde de $n=5$ și $k=2$.",
+        "ro": "Nu: forma depinde de $n=5$ și $k=2$."
+       },
+       "misconception": "numarat-gresit"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
