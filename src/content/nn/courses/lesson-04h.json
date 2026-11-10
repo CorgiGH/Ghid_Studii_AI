@@ -1,0 +1,801 @@
+{
+ "meta": {
+  "id": "nn-l04h",
+  "title": {
+   "en": "Lesson 4h: The algorithm in the course pseudocode",
+   "ro": "Lecția 4h: Algoritmul în pseudocodul cursului"
+  },
+  "shortTitle": {
+   "en": "L4h: The pseudocode",
+   "ro": "L4h: Pseudocodul"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l04h-s01",
+   "title": {
+    "en": "Algoritmul în pseudocodul cursului",
+    "ro": "Algoritmul în pseudocodul cursului"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 49",
+    "ro": "Cursul 4 · slide 49"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide-urile 49-51 dau algoritmul în pseudocod. Intrarea x are forma (nr_features, 1), ținta t forma (nr_classes, 1). Pentru o rețea 3-4-2, weights are formele (3, 4) și (4, 2).",
+        "ro": "Slide-urile 49-51 dau algoritmul în pseudocod. Intrarea x are forma (nr_features, 1), ținta t forma (nr_classes, 1). Pentru o rețea 3-4-2, weights are formele (3, 4) și (4, 2)."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Listă",
+         "Formă"
+        ],
+        "rows": [
+         [
+          "x",
+          "(3, 1)"
+         ],
+         [
+          "weights[0]",
+          "(3, 4)"
+         ],
+         [
+          "weights[1]",
+          "(4, 2)"
+         ],
+         [
+          "biases",
+          "vectori (4, 1) și (2, 1)"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-ul scrie biases = [h_size0, ..., nr_classes]: sunt mărimi; fiecare bias e un vector coloană.",
+        "ro": "Slide-ul scrie biases = [h_size0, ..., nr_classes]: sunt mărimi; fiecare bias e un vector coloană."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s02",
+   "title": {
+    "en": "Pasul înainte, linie cu linie",
+    "ro": "Pasul înainte, linie cu linie"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 50",
+    "ro": "Cursul 4 · slide 50"
+   },
+   "blocks": [
+    {
+     "type": "code",
+     "language": "python",
+     "code": "activations = [x]\nzs = []\nfor (w, b) in (weights, biases):\n    z = w.T . activations[-1] + b\n    zs.append(z)\n    a = sigmoid(z)\n    activations.append(a)\nactivations[-1] = softmax(zs[-1])"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p1",
+     "claim": {
+      "en": "Ce formă are z pe fiecare iterație a buclei din slide-ul 50?",
+      "ro": "Ce formă are z pe fiecare iterație a buclei din slide-ul 50?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "z are forma (4, 1): (4, 3) · (3, 1).",
+        "ro": "z are forma (4, 1): (4, 3) · (3, 1)."
+       },
+       "predict": {
+        "question": {
+         "en": "Prima iterație: w are forma (3, 4), iar activations[-1] = x are forma (3, 1). Ce formă are z = w.T . activations[-1] + b?",
+         "ro": "Prima iterație: w are forma (3, 4), iar activations[-1] = x are forma (3, 1). Ce formă are z = w.T . activations[-1] + b?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 1)",
+           "ro": "(4, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: (4, 3) · (3, 1) = (4, 1), plus bias (4, 1).",
+           "ro": "Corect: (4, 3) · (3, 1) = (4, 1), plus bias (4, 1)."
+          }
+         },
+         {
+          "text": {
+           "en": "(3, 4)",
+           "ro": "(3, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e forma lui w. w.T are (4, 3).",
+           "ro": "Aceea e forma lui w. w.T are (4, 3)."
+          },
+          "misconception": "forma-gresita"
+         },
+         {
+          "text": {
+           "en": "(1, 4)",
+           "ro": "(1, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "z e vector coloană, ca x.",
+           "ro": "z e vector coloană, ca x."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "z are forma (2, 1): (2, 4) · (4, 1).",
+        "ro": "z are forma (2, 1): (2, 4) · (4, 1)."
+       },
+       "predict": {
+        "question": {
+         "en": "A doua iterație: w are forma (4, 2), iar activations[-1] are forma (4, 1). Ce formă are z?",
+         "ro": "A doua iterație: w are forma (4, 2), iar activations[-1] are forma (4, 1). Ce formă are z?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: (2, 4) · (4, 1).",
+           "ro": "Corect: (2, 4) · (4, 1)."
+          }
+         },
+         {
+          "text": {
+           "en": "(4, 2)",
+           "ro": "(4, 2)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e forma lui w.",
+           "ro": "Aceea e forma lui w."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Ultima linie înlocuiește ieșirea sigmoidă cu softmax pe ultimul z: activations[-1] = softmax(zs[-1]).",
+        "ro": "Ultima linie înlocuiește ieșirea sigmoidă cu softmax pe ultimul z: activations[-1] = softmax(zs[-1])."
+       }
+      }
+     ],
+     "end": {
+      "en": "Bucla salvează în zs și în activations tot ce are nevoie pasul înapoi.",
+      "ro": "Bucla salvează în zs și în activations tot ce are nevoie pasul înapoi."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s03",
+   "title": {
+    "en": "Linia cu softmax",
+    "ro": "Linia cu softmax"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 50",
+    "ro": "Cursul 4 · slide 50"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04h-q01",
+     "question": {
+      "en": "Pentru ce există linia activations[-1] = softmax(zs[-1]) după buclă?",
+      "ro": "Pentru ce există linia activations[-1] = softmax(zs[-1]) după buclă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Bucla a pus sigmoidă pe ultimul strat; linia o înlocuiește cu softmax",
+        "ro": "Bucla a pus sigmoidă pe ultimul strat; linia o înlocuiește cu softmax"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: ultimul strat primește softmax, ca în lecția 4d.",
+        "ro": "Corect: ultimul strat primește softmax, ca în lecția 4d."
+       }
+      },
+      {
+       "text": {
+        "en": "Aplică softmax pe toate straturile",
+        "ro": "Aplică softmax pe toate straturile"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Softmax se folosește doar în ultimul strat.",
+        "ro": "Softmax se folosește doar în ultimul strat."
+       },
+       "misconception": "softmax-pe-toate"
+      },
+      {
+       "text": {
+        "en": "Salvează z pentru pasul înapoi",
+        "ro": "Salvează z pentru pasul înapoi"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Asta a făcut zs.append(z) în buclă.",
+        "ro": "Asta a făcut zs.append(z) în buclă."
+       },
+       "misconception": "softmax-pe-toate"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s04",
+   "title": {
+    "en": "Pasul înapoi: ieșirea",
+    "ro": "Pasul înapoi: ieșirea"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
+   },
+   "blocks": [
+    {
+     "type": "code",
+     "language": "python",
+     "code": "error = activations[-1] - t\ngradient_b[-1] = error\ngradient_w[-1] = \\\n    activations[-2] . error.T"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p2",
+     "claim": {
+      "en": "Ce fac primele trei instrucțiuni ale pasului înapoi?",
+      "ro": "Ce fac primele trei instrucțiuni ale pasului înapoi?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "error are forma (2, 1): un număr pe clasă.",
+        "ro": "error are forma (2, 1): un număr pe clasă."
+       },
+       "predict": {
+        "question": {
+         "en": "Prima, error = activations[-1] − t, este y − t pe stratul de ieșire, adică δᴸ. Ce formă are error pentru 2 clase?",
+         "ro": "Prima, error = activations[-1] − t, este y − t pe stratul de ieșire, adică δᴸ. Ce formă are error pentru 2 clase?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: un număr pe clasă.",
+           "ro": "Corect: un număr pe clasă."
+          }
+         },
+         {
+          "text": {
+           "en": "(1, 2)",
+           "ro": "(1, 2)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Vectorii sunt coloane în tot codul.",
+           "ro": "Vectorii sunt coloane în tot codul."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "A doua: gradientul biasului este error, adică dC/db = δ.",
+        "ro": "A doua: gradientul biasului este error, adică dC/db = δ."
+       }
+      },
+      {
+       "shown": {
+        "en": "Produsul are forma (4, 2), a lui weights[-1]: un gradient pe fiecare pondere.",
+        "ro": "Produsul are forma (4, 2), a lui weights[-1]: un gradient pe fiecare pondere."
+       },
+       "predict": {
+        "question": {
+         "en": "A treia, gradient_w[-1] = activations[-2] . error.T, înmulțește y-ul de dedesubt cu δ. activations[-2] are forma (4, 1), error.T are (1, 2). Forma produsului este:",
+         "ro": "A treia, gradient_w[-1] = activations[-2] . error.T, înmulțește y-ul de dedesubt cu δ. activations[-2] are forma (4, 1), error.T are (1, 2). Forma produsului este:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 2), forma lui weights[-1]",
+           "ro": "(4, 2), forma lui weights[-1]"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: un gradient pe fiecare pondere.",
+           "ro": "Corect: un gradient pe fiecare pondere."
+          }
+         },
+         {
+          "text": {
+           "en": "(1, 1)",
+           "ro": "(1, 1)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Nu: (4, 1) · (1, 2) = (4, 2), produs exterior.",
+           "ro": "Nu: (4, 1) · (1, 2) = (4, 2), produs exterior."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "A treia instrucțiune este formula δ · y, pentru toate ponderile stratului odată.",
+      "ro": "A treia instrucțiune este formula δ · y, pentru toate ponderile stratului odată."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s05",
+   "title": {
+    "en": "Bucla înapoi",
+    "ro": "Bucla înapoi"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
+   },
+   "blocks": [
+    {
+     "type": "code",
+     "language": "python",
+     "code": "for l from num_layers-2 to 1:\n    z = zs[l-1]\n    sp = sigmoid_prime(z)\n    error = (self.weights[l]\n             . error) * sp\n    gradient_b[l-1] = error\n    gradient_w[l-1] = \\\n        activations[l-1] . error.T\n\n# sigmoid_prime(z) =\n#   sigmoid(z)*(1-sigmoid(z))"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p3",
+     "claim": {
+      "en": "Ce calculează bucla pentru o rețea 3-4-2 (num_layers = 3)?",
+      "ro": "Ce calculează bucla pentru o rețea 3-4-2 (num_layers = 3)?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "weights[1] are forma (4, 2): de la stratul ascuns la ieșire.",
+        "ro": "weights[1] are forma (4, 2): de la stratul ascuns la ieșire."
+       },
+       "predict": {
+        "question": {
+         "en": "Bucla folosește weights[1]. Ce formă are weights[1]?",
+         "ro": "Bucla folosește weights[1]. Ce formă are weights[1]?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 2): de la stratul ascuns la ieșire",
+           "ro": "(4, 2): de la stratul ascuns la ieșire"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "(3, 4)",
+           "ro": "(3, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e weights[0].",
+           "ro": "Aceea e weights[0]."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Rezultatul are forma (4, 1): un δ pe fiecare neuron ascuns; apoi se înmulțește element cu element cu sp.",
+        "ro": "Rezultatul are forma (4, 1): un δ pe fiecare neuron ascuns; apoi se înmulțește element cu element cu sp."
+       },
+       "predict": {
+        "question": {
+         "en": "Linia error = (weights[1] . error) * sp este δ ascuns = σ′ · Σ w δ: matricea ponderilor ori eroarea de sus. Produsul (4, 2) · (2, 1) dă forma:",
+         "ro": "Linia error = (weights[1] . error) * sp este δ ascuns = σ′ · Σ w δ: matricea ponderilor ori eroarea de sus. Produsul (4, 2) · (2, 1) dă forma:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 1), un număr pe neuron ascuns",
+           "ro": "(4, 1), un număr pe neuron ascuns"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Numărul de rânduri e cel al lui weights[1], adică 4.",
+           "ro": "Numărul de rânduri e cel al lui weights[1], adică 4."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Ultimele două instrucțiuni: gradient_b[0] = error și gradient_w[0] = activations[0] . error.T, de forma (3, 4), a lui weights[0].",
+        "ro": "Ultimele două instrucțiuni: gradient_b[0] = error și gradient_w[0] = activations[0] . error.T, de forma (3, 4), a lui weights[0]."
+       }
+      }
+     ],
+     "end": {
+      "en": "Este formula lui δ ascuns și a gradientului, scrisă cu matrice.",
+      "ro": "Este formula lui δ ascuns și a gradientului, scrisă cu matrice."
+     },
+     "given": {
+      "en": "Cu num_layers = 3 bucla rulează o singură dată, cu l = 1. Listele încep de la 0, deci zs[0] este z-ul stratului ascuns.",
+      "ro": "Cu num_layers = 3 bucla rulează o singură dată, cu l = 1. Listele încep de la 0, deci zs[0] este z-ul stratului ascuns."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s06",
+   "title": {
+    "en": "Forma gradientului",
+    "ro": "Forma gradientului"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04h-q02",
+     "question": {
+      "en": "De ce gradient_w[l] are mereu aceeași formă ca weights[l]?",
+      "ro": "De ce gradient_w[l] are mereu aceeași formă ca weights[l]?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Pentru că fiecare pondere are exact un gradient",
+        "ro": "Pentru că fiecare pondere are exact un gradient"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: se actualizează element cu element.",
+        "ro": "Corect: se actualizează element cu element."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că le înmulțim între ele",
+        "ro": "Pentru că le înmulțim între ele"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu le înmulțim; le scădem, cu rata η.",
+        "ro": "Nu le înmulțim; le scădem, cu rata η."
+       },
+       "misconception": "forma-gresita"
+      },
+      {
+       "text": {
+        "en": "Din întâmplare, doar la ultimul strat",
+        "ro": "Din întâmplare, doar la ultimul strat"
+       },
+       "correct": false,
+       "explain": {
+        "en": "E adevărat la toate straturile.",
+        "ro": "E adevărat la toate straturile."
+       },
+       "misconception": "forma-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s07",
+   "title": {
+    "en": "Ce lipsește din pseudocod",
+    "ro": "Ce lipsește din pseudocod"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 42, 51",
+    "ro": "Cursul 4 · slide 42, 51"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pseudocodul nu arată actualizarea ponderilor și nici împărțirea la mărimea lotului. Ele se fac după buclă: w = w − η · gradient, cu gradientul mediat pe lot.",
+        "ro": "Pseudocodul nu arată actualizarea ponderilor și nici împărțirea la mărimea lotului. Ele se fac după buclă: w = w − η · gradient, cu gradientul mediat pe lot."
+       }
+      },
+      {
+       "text": {
+        "en": "Slide-ul 42 pune „actualizează ponderile” în interiorul buclei, lângă „nu actualiza înainte de propagare”. În foaie, tot se actualizează la sfârșit; aici facem la fel.",
+        "ro": "Slide-ul 42 pune „actualizează ponderile” în interiorul buclei, lângă „nu actualiza înainte de propagare”. În foaie, tot se actualizează la sfârșit; aici facem la fel."
+       }
+      },
+      {
+       "note": {
+        "en": "Linia 4 din slide-ul 51 este goală, iar self.weights apare doar o dată.",
+        "ro": "Linia 4 din slide-ul 51 este goală, iar self.weights apare doar o dată."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s08",
+   "title": {
+    "en": "Spune-o cu vorbele tale",
+    "ro": "Spune-o cu vorbele tale"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 42, 51",
+    "ro": "Cursul 4 · slide 42, 51"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "nn-l04h-r03",
+     "prompt": {
+      "en": "De ce actualizăm ponderile abia după ce am calculat toate erorile?",
+      "ro": "De ce actualizăm ponderile abia după ce am calculat toate erorile?"
+     },
+     "answer": {
+      "en": "Eroarea unui strat se calculează cu ponderile stratului de deasupra, așa cum erau când rețeaua a făcut greșeala. Dacă le-am schimba mai devreme, am calcula erorile pentru o altă rețea decât cea care a greșit.",
+      "ro": "Eroarea unui strat se calculează cu ponderile stratului de deasupra, așa cum erau când rețeaua a făcut greșeala. Dacă le-am schimba mai devreme, am calcula erorile pentru o altă rețea decât cea care a greșit."
+     },
+     "placeholder": {
+      "en": "Scrie ce crezi",
+      "ro": "Scrie ce crezi"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s09",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 49-51",
+    "ro": "Cursul 4 · slide 49-51"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Pasul înainte salvează fiecare z în zs și fiecare ieșire în activations; un z are forma (neuroni, 1).",
+         "ro": "Pasul înainte salvează fiecare z în zs și fiecare ieșire în activations; un z are forma (neuroni, 1)."
+        },
+        {
+         "en": "error = activations[-1] − t este δ de ieșire; gradient_w = activations[-2] . error.T are forma lui weights.",
+         "ro": "error = activations[-1] − t este δ de ieșire; gradient_w = activations[-2] . error.T are forma lui weights."
+        },
+        {
+         "en": "Bucla înapoi calculează δ ascuns: (weights[l] . error) * sp, cu sp = σ′(z).",
+         "ro": "Bucla înapoi calculează δ ascuns: (weights[l] . error) * sp, cu sp = σ′(z)."
+        },
+        {
+         "en": "Actualizarea și media pe lot nu apar în pseudocod; se fac după bucla înapoi.",
+         "ro": "Actualizarea și media pe lot nu apar în pseudocod; se fac după bucla înapoi."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s10",
+   "title": {
+    "en": "Mini-test: forma lui weights[0]",
+    "ro": "Mini-test: forma lui weights[0]"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04h-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "O rețea 5-3-2 are 5 intrări, 3 neuroni ascunși și 2 clase. Ce formă are weights[0] în pseudocodul cursului? Scrie numărul de rânduri și de coloane.",
+      "ro": "O rețea 5-3-2 are 5 intrări, 3 neuroni ascunși și 2 clase. Ce formă are weights[0] în pseudocodul cursului? Scrie numărul de rânduri și de coloane."
+     },
+     "fields": [
+      {
+       "id": "r",
+       "label": {
+        "en": "rânduri",
+        "ro": "rânduri"
+       },
+       "kind": "num",
+       "formula": "5",
+       "expected": 5
+      },
+      {
+       "id": "k",
+       "label": {
+        "en": "coloane",
+        "ro": "coloane"
+       },
+       "kind": "num",
+       "formula": "3",
+       "expected": 3
+      }
+     ],
+     "detectors": [
+      {
+       "field": "r",
+       "formula": "3",
+       "message": {
+        "en": "Ai inversat: weights[0] are un rând pe intrare (5) și o coloană pe neuron ascuns (3); de aceea codul scrie w.T.",
+        "ro": "Ai inversat: weights[0] are un rând pe intrare (5) și o coloană pe neuron ascuns (3); de aceea codul scrie w.T."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Pentru rețeaua 3-4-2, weights[0] avea forma (3, 4).",
+       "ro": "Pentru rețeaua 3-4-2, weights[0] avea forma (3, 4)."
+      },
+      {
+       "en": "Rânduri: câte intrări; coloane: câți neuroni ascunși.",
+       "ro": "Rânduri: câte intrări; coloane: câți neuroni ascunși."
+      },
+      {
+       "en": "(5, 3)",
+       "ro": "(5, 3)"
+      }
+     ],
+     "solution": {
+      "en": "weights[0] are forma (5, 3): 5 intrări, 3 neuroni ascunși. Atunci w.T are (3, 5), iar w.T . x dă un z de forma (3, 1).",
+      "ro": "weights[0] are forma (5, 3): 5 intrări, 3 neuroni ascunși. Atunci w.T are (3, 5), iar w.T . x dă un z de forma (3, 1)."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceeași rețea 5-3-2. Ce formă are gradient_w[1]?",
+        "ro": "Aceeași rețea 5-3-2. Ce formă are gradient_w[1]?"
+       },
+       "fields": [
+        {
+         "id": "r",
+         "formula": "3",
+         "expected": 3
+        },
+        {
+         "id": "k",
+         "formula": "2",
+         "expected": 2
+        }
+       ],
+       "solution": {
+        "en": "(3, 2), ca weights[1]: 3 neuroni ascunși, 2 clase",
+        "ro": "(3, 2), ca weights[1]: 3 neuroni ascunși, 2 clase"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s11",
+   "title": {
+    "en": "Mini-test: unde se actualizează",
+    "ro": "Mini-test: unde se actualizează"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04h-q05",
+     "question": {
+      "en": "În pseudocodul din slide-urile 50-51, unde se face actualizarea w = w − η · gradient?",
+      "ro": "În pseudocodul din slide-urile 50-51, unde se face actualizarea w = w − η · gradient?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "După bucla înapoi, când toate gradient_w sunt gata; pseudocodul n-o arată",
+        "ro": "După bucla înapoi, când toate gradient_w sunt gata; pseudocodul n-o arată"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: cu gradienții gata, fiecare pondere se mută contra gradientului ei.",
+        "ro": "Corect: cu gradienții gata, fiecare pondere se mută contra gradientului ei."
+       }
+      },
+      {
+       "text": {
+        "en": "În pasul înainte, imediat după ce un strat își calculează z",
+        "ro": "În pasul înainte, imediat după ce un strat își calculează z"
+       },
+       "correct": false,
+       "explain": {
+        "en": "În pasul înainte nu există încă nicio eroare, deci nici gradient.",
+        "ro": "În pasul înainte nu există încă nicio eroare, deci nici gradient."
+       },
+       "misconception": "ordine-gresita"
+      },
+      {
+       "text": {
+        "en": "În bucla înapoi, înaintea liniei error = (weights[l] . error) * sp",
+        "ro": "În bucla înapoi, înaintea liniei error = (weights[l] . error) * sp"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Linia aceea are nevoie de ponderile vechi ale stratului de sus.",
+        "ro": "Linia aceea are nevoie de ponderile vechi ale stratului de sus."
+       },
+       "misconception": "pondere-noua-in-delta"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

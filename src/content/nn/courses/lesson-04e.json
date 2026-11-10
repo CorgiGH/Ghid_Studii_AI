@@ -1,0 +1,1474 @@
+{
+ "meta": {
+  "id": "nn-l04e",
+  "title": {
+   "en": "Lesson 4e: The gradient of cross-entropy with softmax",
+   "ro": "Lecția 4e: Gradientul entropiei încrucișate cu softmax"
+  },
+  "shortTitle": {
+   "en": "L4e: delta = y - t",
+   "ro": "L4e: δ = y − t"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l04e-s01",
+   "title": {
+    "en": "Ce vrem să aflăm",
+    "ro": "Ce vrem să aflăm"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 32",
+    "ro": "Cursul 4 · slide 32"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Ieșirile sunt y = softmax(z), cu z = [1, 3, 4, 2]. Clasa corectă este 3, deci ținta e t = (0, 0, 1, 0). Vrem să știm cum se schimbă costul C = −Σ tⱼ ln yⱼ când mișcăm un scor zᵢ: derivata dC/dzᵢ.",
+        "ro": "Ieșirile sunt y = softmax(z), cu z = [1, 3, 4, 2]. Clasa corectă este 3, deci ținta e t = (0, 0, 1, 0). Vrem să știm cum se schimbă costul C = −Σ tⱼ ln yⱼ când mișcăm un scor zᵢ: derivata dC/dzᵢ."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 170'><title>Ieșirile și ținta</title><line class='muted' stroke-width='1.5' x1='18' y1='132' x2='332' y2='132'/><rect class='accent fill-accent' stroke-width='1.5' x='32.8' y='128.6' width='48' height='3.4' rx='3'/><text class='fg' font-size='14' font-weight='700' x='56.8' y='122.6' text-anchor='middle'>0,03</text><text class='muted' font-size='14' x='56.8' y='148' text-anchor='middle'>y₁</text><rect class='accent fill-accent' stroke-width='1.5' x='110.2' y='106.9' width='48' height='25.1' rx='3'/><text class='fg' font-size='14' font-weight='700' x='134.2' y='100.9' text-anchor='middle'>0,24</text><text class='muted' font-size='14' x='134.2' y='148' text-anchor='middle'>y₂</text><rect class='ok fill-ok' stroke-width='1.5' x='187.8' y='63.7' width='48' height='68.3' rx='3'/><text class='fg' font-size='14' font-weight='700' x='211.8' y='57.7' text-anchor='middle'>0,64</text><text class='muted' font-size='14' x='211.8' y='148' text-anchor='middle'>y₃</text><rect class='warn' fill='none' stroke-width='2.5' stroke-dasharray='5 3' x='184.8' y='26.0' width='54.0' height='106.0' rx='3'/><rect class='accent fill-accent' stroke-width='1.5' x='265.2' y='122.8' width='48' height='9.2' rx='3'/><text class='fg' font-size='14' font-weight='700' x='289.2' y='116.8' text-anchor='middle'>0,09</text><text class='muted' font-size='14' x='289.2' y='148' text-anchor='middle'>y₄</text></svg>",
+        "alt": {
+         "en": "Patru bare: 0,03; 0,24; 0,64; 0,09, cu un contur punctat pentru ținta 1 la clasa 3",
+         "ro": "Patru bare: 0,03; 0,24; 0,64; 0,09, cu un contur punctat pentru ținta 1 la clasa 3"
+        },
+        "caption": {
+         "en": "Conturul punctat este ținta.",
+         "ro": "Conturul punctat este ținta."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s02",
+   "title": {
+    "en": "Cât costă acum",
+    "ro": "Cât costă acum"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 32",
+    "ro": "Cursul 4 · slide 32"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cu ținta one-hot pe clasa 3, costul este C = −ln y₃ = −ln 0,6439 = 0,4402.",
+        "ro": "Cu ținta one-hot pe clasa 3, costul este C = −ln y₃ = −ln 0,6439 = 0,4402."
+       }
+      },
+      {
+       "text": {
+        "en": "Derivata pe scorul zᵢ spune în ce direcție și cât de tare mișcăm scorul ca să scadă C. Mai jos o scoatem prin calcul, apoi o verificăm pe numere.",
+        "ro": "Derivata pe scorul zᵢ spune în ce direcție și cât de tare mișcăm scorul ca să scadă C. Mai jos o scoatem prin calcul, apoi o verificăm pe numere."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s03",
+   "title": {
+    "en": "Cum se mișcă ieșirile",
+    "ro": "Cum se mișcă ieșirile"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 33",
+    "ro": "Cursul 4 · slide 33"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Un scor influențează toate ieșirile, pentru că toate împart aceeași sumă. Dacă z₃ crește un pic, y₃ crește, iar celelalte ieșiri scad.",
+        "ro": "Un scor influențează toate ieșirile, pentru că toate împart aceeași sumă. Dacă z₃ crește un pic, y₃ crește, iar celelalte ieșiri scad."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Efectul lui z₃ asupra ieșirilor</title><defs><marker id='ah-bad' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-bad' stroke='none' d='M0 1L9 5L0 9z'/></marker><marker id='ah-ok' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-ok' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='1.5' x1='14' y1='140' x2='330' y2='140'/><rect class='accent fill-accent' stroke-width='1.5' x='24' y='136.2' width='40' height='3.8' rx='3'/><text class='muted' font-size='14' x='44' y='158' text-anchor='middle'>y₁</text><text class='fg' font-size='14' font-weight='700' x='44' y='176' text-anchor='middle'>0,03</text><line class='bad' stroke-width='3.5' x1='44' y1='102.2' x2='44' y2='128.2' marker-end='url(#ah-bad)'/><rect class='accent fill-accent' stroke-width='1.5' x='98' y='111.6' width='40' height='28.4' rx='3'/><text class='muted' font-size='14' x='118' y='158' text-anchor='middle'>y₂</text><text class='fg' font-size='14' font-weight='700' x='118' y='176' text-anchor='middle'>0,24</text><line class='bad' stroke-width='3.5' x1='118' y1='77.6' x2='118' y2='103.6' marker-end='url(#ah-bad)'/><rect class='ok fill-ok' stroke-width='1.5' x='172' y='62.7' width='40' height='77.3' rx='3'/><text class='muted' font-size='14' x='192' y='158' text-anchor='middle'>y₃</text><text class='fg' font-size='14' font-weight='700' x='192' y='176' text-anchor='middle'>0,64</text><line class='ok' stroke-width='3.5' x1='192' y1='54.7' x2='192' y2='28.7' marker-end='url(#ah-ok)'/><rect class='accent fill-accent' stroke-width='1.5' x='246' y='129.5' width='40' height='10.5' rx='3'/><text class='muted' font-size='14' x='266' y='158' text-anchor='middle'>y₄</text><text class='fg' font-size='14' font-weight='700' x='266' y='176' text-anchor='middle'>0,09</text><line class='bad' stroke-width='3.5' x1='266' y1='95.5' x2='266' y2='121.5' marker-end='url(#ah-bad)'/><text class='fg' font-size='15' font-weight='700' x='170' y='14' text-anchor='middle'>z₃ crește un pic</text></svg>",
+        "alt": {
+         "en": "Patru bare y; deasupra lui y₃ o săgeată în sus, deasupra celorlalte o săgeată în jos",
+         "ro": "Patru bare y; deasupra lui y₃ o săgeată în sus, deasupra celorlalte o săgeată în jos"
+        },
+        "caption": {
+         "en": "Săgeata arată cum se mișcă fiecare ieșire.",
+         "ro": "Săgeata arată cum se mișcă fiecare ieșire."
+        }
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-ul numește cele două cazuri „yⱼ = zᵢ”; ele sunt j = i și j diferit de i.",
+        "ro": "Slide-ul numește cele două cazuri „yⱼ = zᵢ”; ele sunt j = i și j diferit de i."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s04",
+   "title": {
+    "en": "Cazul j = i",
+    "ro": "Cazul j = i"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 34",
+    "ro": "Cursul 4 · slide 34"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p1",
+     "claim": {
+      "en": "Cât este dyᵢ / dzᵢ, cum se mișcă ieșirea i când mișcăm propriul scor?",
+      "ro": "Cât este dyᵢ / dzᵢ, cum se mișcă ieșirea i când mișcăm propriul scor?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Numărătorul derivatei este $e^{z_i}\\,S - e^{z_i}\\,e^{z_i}$.",
+        "ro": "Numărătorul derivatei este $e^{z_i}\\,S - e^{z_i}\\,e^{z_i}$."
+       },
+       "predict": {
+        "question": {
+         "en": "Cu regula câtului, numărătorul derivatei este:",
+         "ro": "Cu regula câtului, numărătorul derivatei este:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$e^{z_i}\\,S - e^{z_i}\\,e^{z_i}$",
+           "ro": "$e^{z_i}\\,S - e^{z_i}\\,e^{z_i}$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: derivata numărătorului ori numitorul, minus numărătorul ori derivata numitorului.",
+           "ro": "Corect: derivata numărătorului ori numitorul, minus numărătorul ori derivata numitorului."
+          }
+         },
+         {
+          "text": {
+           "en": "$e^{z_i}\\,S$",
+           "ro": "$e^{z_i}\\,S$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Lipsește al doilea termen, cel care vine din derivata sumei.",
+           "ro": "Lipsește al doilea termen, cel care vine din derivata sumei."
+          },
+          "misconception": "termen-gresit-ramas"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Împărțim la $S^2$: $\\frac{e^{z_i}}{S} - \\frac{e^{z_i}}{S}\\cdot\\frac{e^{z_i}}{S} = y_i - y_i^2$.",
+        "ro": "Împărțim la $S^2$: $\\frac{e^{z_i}}{S} - \\frac{e^{z_i}}{S}\\cdot\\frac{e^{z_i}}{S} = y_i - y_i^2$."
+       }
+      },
+      {
+       "shown": {
+        "en": "Deci $\\frac{dy_i}{dz_i} = y_i(1 - y_i)$. Pentru i = 3: 0,6439 · 0,3561 = 0,2293.",
+        "ro": "Deci $\\frac{dy_i}{dz_i} = y_i(1 - y_i)$. Pentru i = 3: 0,6439 · 0,3561 = 0,2293."
+       }
+      }
+     ],
+     "end": {
+      "en": "dyᵢ / dzᵢ = yᵢ (1 − yᵢ): pozitiv, ieșirea crește odată cu scorul ei.",
+      "ro": "dyᵢ / dzᵢ = yᵢ (1 − yᵢ): pozitiv, ieșirea crește odată cu scorul ei."
+     },
+     "given": {
+      "en": "Scriem $y_i = \\frac{e^{z_i}}{S}$, cu $S = \\sum_j e^{z_j}$. Regula câtului: $(f/g)' = \\frac{f'g - fg'}{g^2}$, adică derivata numărătorului ori numitorul, minus numărătorul ori derivata numitorului, totul împărțit la numitor la pătrat. Aici derivata lui $e^{z_i}$ și a lui S, după $z_i$, sunt amândouă $e^{z_i}$.",
+      "ro": "Scriem $y_i = \\frac{e^{z_i}}{S}$, cu $S = \\sum_j e^{z_j}$. Regula câtului: $(f/g)' = \\frac{f'g - fg'}{g^2}$, adică derivata numărătorului ori numitorul, minus numărătorul ori derivata numitorului, totul împărțit la numitor la pătrat. Aici derivata lui $e^{z_i}$ și a lui S, după $z_i$, sunt amândouă $e^{z_i}$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s05",
+   "title": {
+    "en": "Cazul j diferit de i",
+    "ro": "Cazul j diferit de i"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 35",
+    "ro": "Cursul 4 · slide 35"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p2",
+     "claim": {
+      "en": "Cât este dyⱼ / dzᵢ, cum se mișcă ieșirea j când mișcăm scorul altei clase?",
+      "ro": "Cât este dyⱼ / dzᵢ, cum se mișcă ieșirea j când mișcăm scorul altei clase?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Numărătorul derivatei este $0\\cdot S - e^{z_j}\\,e^{z_i} = -e^{z_j}\\,e^{z_i}$.",
+        "ro": "Numărătorul derivatei este $0\\cdot S - e^{z_j}\\,e^{z_i} = -e^{z_j}\\,e^{z_i}$."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce rămâne în numărătorul regulii câtului?",
+         "ro": "Ce rămâne în numărătorul regulii câtului?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$-e^{z_j}\\,e^{z_i}$",
+           "ro": "$-e^{z_j}\\,e^{z_i}$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: 0 · S minus numărătorul ori derivata numitorului.",
+           "ro": "Corect: 0 · S minus numărătorul ori derivata numitorului."
+          }
+         },
+         {
+          "text": {
+           "en": "$e^{z_j}\\,S$",
+           "ro": "$e^{z_j}\\,S$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Acela ar apărea dacă numărătorul ar depinde de $z_i$, dar nu depinde.",
+           "ro": "Acela ar apărea dacă numărătorul ar depinde de $z_i$, dar nu depinde."
+          },
+          "misconception": "termen-gresit-ramas"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Împărțim la $S^2$: $-\\frac{e^{z_j}}{S}\\cdot\\frac{e^{z_i}}{S} = -y_j\\,y_i$, un număr negativ.",
+        "ro": "Împărțim la $S^2$: $-\\frac{e^{z_j}}{S}\\cdot\\frac{e^{z_i}}{S} = -y_j\\,y_i$, un număr negativ."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce semn are $\\frac{dy_j}{dz_i}$?",
+         "ro": "Ce semn are $\\frac{dy_j}{dz_i}$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Negativ: celelalte ieșiri scad",
+           "ro": "Negativ: celelalte ieșiri scad"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect, ca în desen.",
+           "ro": "Corect, ca în desen."
+          }
+         },
+         {
+          "text": {
+           "en": "Pozitiv: cresc toate",
+           "ro": "Pozitiv: cresc toate"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ieșirile fac mereu 1; dacă una crește, restul scad.",
+           "ro": "Ieșirile fac mereu 1; dacă una crește, restul scad."
+          },
+          "misconception": "semn-gresit"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Pentru j = 2 și i = 3: −0,2369 · 0,6439 = −0,1525.",
+        "ro": "Pentru j = 2 și i = 3: −0,2369 · 0,6439 = −0,1525."
+       }
+      }
+     ],
+     "end": {
+      "en": "dyⱼ / dzᵢ = −yⱼ yᵢ pentru j diferit de i.",
+      "ro": "dyⱼ / dzᵢ = −yⱼ yᵢ pentru j diferit de i."
+     },
+     "given": {
+      "en": "Aceeași regulă a câtului, pe $y_j = \\frac{e^{z_j}}{S}$ cu j diferit de i. Numărătorul $e^{z_j}$ nu depinde de $z_i$, deci derivata lui este 0. Numitorul S depinde, cu derivata $e^{z_i}$.",
+      "ro": "Aceeași regulă a câtului, pe $y_j = \\frac{e^{z_j}}{S}$ cu j diferit de i. Numărătorul $e^{z_j}$ nu depinde de $z_i$, deci derivata lui este 0. Numitorul S depinde, cu derivata $e^{z_i}$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s06",
+   "title": {
+    "en": "Calculează o derivată dyⱼ/dzᵢ",
+    "ro": "Calculează o derivată dyⱼ/dzᵢ"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 34-35",
+    "ro": "Cursul 4 · slide 34-35"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04e-e01",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Ieșirile sunt y = [0,0321; 0,2369; 0,6439; 0,0871]. Calculează dy₁/dz₃ (cum se mișcă clasa 1 când mișcăm scorul clasei 3).",
+      "ro": "Ieșirile sunt y = [0,0321; 0,2369; 0,6439; 0,0871]. Calculează dy₁/dz₃ (cum se mișcă clasa 1 când mișcăm scorul clasei 3)."
+     },
+     "fields": [
+      {
+       "id": "d",
+       "label": {
+        "en": "dy₁/dz₃",
+        "ro": "dy₁/dz₃"
+       },
+       "kind": "num",
+       "formula": "-0.03205860328008499*0.6439142598879724",
+       "expected": -0.0206
+      }
+     ],
+     "detectors": [
+      {
+       "field": "d",
+       "formula": "0.03205860328008499*(1-0.03205860328008499)",
+       "message": {
+        "en": "Ai folosit cazul j = i. Aici clasa 1 și scorul 3 sunt diferite: −y₁·y₃.",
+        "ro": "Ai folosit cazul j = i. Aici clasa 1 și scorul 3 sunt diferite: −y₁·y₃."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Clase diferite: −yⱼ · yᵢ.",
+       "ro": "Clase diferite: −yⱼ · yᵢ."
+      },
+      {
+       "en": "−0,0321 · 0,6439",
+       "ro": "−0,0321 · 0,6439"
+      },
+      {
+       "en": "−0,0206",
+       "ro": "−0,0206"
+      }
+     ],
+     "solution": {
+      "en": "dy₁/dz₃ = −y₁ y₃ = −0,0206.",
+      "ro": "dy₁/dz₃ = −y₁ y₃ = −0,0206."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceleași ieșiri. Calculează dy₄/dz₄ (aceeași clasă).",
+        "ro": "Aceleași ieșiri. Calculează dy₄/dz₄ (aceeași clasă)."
+       },
+       "fields": [
+        {
+         "id": "d",
+         "formula": "0.08714431874203257*(1-0.08714431874203257)",
+         "expected": 0.0796
+        }
+       ],
+       "solution": {
+        "en": "y₄ (1 − y₄) = 0,0796",
+        "ro": "y₄ (1 − y₄) = 0,0796"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s07",
+   "title": {
+    "en": "Adunăm contribuțiile",
+    "ro": "Adunăm contribuțiile"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 36",
+    "ro": "Cursul 4 · slide 36"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p3",
+     "claim": {
+      "en": "Cât este dC/dzᵢ, când C = −Σ tⱼ ln yⱼ?",
+      "ro": "Cât este dC/dzᵢ, când C = −Σ tⱼ ln yⱼ?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Un singur termen are j = i; toți ceilalți au j diferit de i.",
+        "ro": "Un singur termen are j = i; toți ceilalți au j diferit de i."
+       },
+       "predict": {
+        "question": {
+         "en": "Câți termeni au cazul j = i?",
+         "ro": "Câți termeni au cazul j = i?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Unul singur",
+           "ro": "Unul singur"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: termenul j = i. Ceilalți sunt de tipul j diferit de i.",
+           "ro": "Corect: termenul j = i. Ceilalți sunt de tipul j diferit de i."
+          }
+         },
+         {
+          "text": {
+           "en": "Toți",
+           "ro": "Toți"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Doar unul are j egal cu i.",
+           "ro": "Doar unul are j egal cu i."
+          },
+          "misconception": "termen-gresit-ramas"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Termenul j = i: $-\\frac{t_i}{y_i}\\cdot y_i(1-y_i) = -t_i(1-y_i)$. Termenii j diferit de i: $-\\frac{t_j}{y_j}\\cdot(-y_j y_i) = t_j\\,y_i$.",
+        "ro": "Termenul j = i: $-\\frac{t_i}{y_i}\\cdot y_i(1-y_i) = -t_i(1-y_i)$. Termenii j diferit de i: $-\\frac{t_j}{y_j}\\cdot(-y_j y_i) = t_j\\,y_i$."
+       }
+      },
+      {
+       "shown": {
+        "en": "Deci $\\frac{dC}{dz_i} = -t_i(1 - y_i) + \\sum_{j\\neq i} t_j\\,y_i$.",
+        "ro": "Deci $\\frac{dC}{dz_i} = -t_i(1 - y_i) + \\sum_{j\\neq i} t_j\\,y_i$."
+       }
+      }
+     ],
+     "end": {
+      "en": "yⱼ se simplifică în fiecare termen. Rămân doar ținta și yᵢ.",
+      "ro": "yⱼ se simplifică în fiecare termen. Rămân doar ținta și yᵢ."
+     },
+     "given": {
+      "en": "Scorul zᵢ influențează toate ieșirile yⱼ, deci adunăm câte un termen pe fiecare ieșire: $\\frac{dC}{dz_i} = \\sum_j \\left(-\\frac{t_j}{y_j}\\right)\\frac{dy_j}{dz_i}$.",
+      "ro": "Scorul zᵢ influențează toate ieșirile yⱼ, deci adunăm câte un termen pe fiecare ieșire: $\\frac{dC}{dz_i} = \\sum_j \\left(-\\frac{t_j}{y_j}\\right)\\frac{dy_j}{dz_i}$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s08",
+   "title": {
+    "en": "Suma țintelor este 1",
+    "ro": "Suma țintelor este 1"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 37",
+    "ro": "Cursul 4 · slide 37"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p4",
+     "claim": {
+      "en": "Cât devine −tᵢ(1 − yᵢ) + yᵢ · (suma țintelor tⱼ cu j diferit de i)?",
+      "ro": "Cât devine −tᵢ(1 − yᵢ) + yᵢ · (suma țintelor tⱼ cu j diferit de i)?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$t_i\\,y_i + y_i \\sum_{j\\neq i} t_j = y_i \\sum_j t_j$, deci avem $-t_i + y_i \\sum_j t_j$.",
+        "ro": "$t_i\\,y_i + y_i \\sum_{j\\neq i} t_j = y_i \\sum_j t_j$, deci avem $-t_i + y_i \\sum_j t_j$."
+       },
+       "predict": {
+        "question": {
+         "en": "Cum se scriu ei împreună?",
+         "ro": "Cum se scriu ei împreună?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$y_i \\sum_j t_j$ (suma peste toate clasele)",
+           "ro": "$y_i \\sum_j t_j$ (suma peste toate clasele)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $t_i\\,y_i$ completează suma peste j diferit de i.",
+           "ro": "Corect: $t_i\\,y_i$ completează suma peste j diferit de i."
+          }
+         },
+         {
+          "text": {
+           "en": "$y_i \\cdot t_i$",
+           "ro": "$y_i \\cdot t_i$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Termenii cu j diferit de i nu dispar.",
+           "ro": "Termenii cu j diferit de i nu dispar."
+          },
+          "misconception": "termen-gresit-ramas"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$\\sum_j t_j = 1$.",
+        "ro": "$\\sum_j t_j = 1$."
+       },
+       "predict": {
+        "question": {
+         "en": "Cât este $\\sum_j t_j$ pentru o țintă one-hot sau o distribuție?",
+         "ro": "Cât este $\\sum_j t_j$ pentru o țintă one-hot sau o distribuție?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "1",
+           "ro": "1"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: asta este definiția unei distribuții.",
+           "ro": "Corect: asta este definiția unei distribuții."
+          }
+         },
+         {
+          "text": {
+           "en": "m, numărul de clase",
+           "ro": "m, numărul de clase"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Ținta one-hot are un singur 1.",
+           "ro": "Ținta one-hot are un singur 1."
+          },
+          "misconception": "suma-diferita-de-1"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Rezultatul: $-t_i + y_i = y_i - t_i$.",
+        "ro": "Rezultatul: $-t_i + y_i = y_i - t_i$."
+       }
+      }
+     ],
+     "end": {
+      "en": "dC/dzᵢ = yᵢ − tᵢ. Pasul cheie a fost Σ tⱼ = 1.",
+      "ro": "dC/dzᵢ = yᵢ − tᵢ. Pasul cheie a fost Σ tⱼ = 1."
+     },
+     "given": {
+      "en": "Desfacem paranteza: $-t_i + t_i\\,y_i + y_i \\sum_{j\\neq i} t_j$. Doi termeni au factorul $y_i$.",
+      "ro": "Desfacem paranteza: $-t_i + t_i\\,y_i + y_i \\sum_{j\\neq i} t_j$. Doi termeni au factorul $y_i$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s09",
+   "title": {
+    "en": "Rezultatul",
+    "ro": "Rezultatul"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 37",
+    "ro": "Cursul 4 · slide 37"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "δᵢ = yᵢ − tᵢ: ieșirea minus ținta.",
+      "ro": "δᵢ = yᵢ − tᵢ: ieșirea minus ținta."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "δᵢ = dC/dzᵢ este eroarea neuronului i. Slide-ul o scrie −(tᵢ − yᵢ), care este același număr.",
+        "ro": "δᵢ = dC/dzᵢ este eroarea neuronului i. Slide-ul o scrie −(tᵢ − yᵢ), care este același număr."
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-ul are „Obseration” (observation) și nu definește xᵢⱼ, intrarea care ajunge pe ponderea wᵢⱼ.",
+        "ro": "Slide-ul are „Obseration” (observation) și nu definește xᵢⱼ, intrarea care ajunge pe ponderea wᵢⱼ."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s10",
+   "title": {
+    "en": "Verificare pe numere",
+    "ro": "Verificare pe numere"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 37",
+    "ro": "Cursul 4 · slide 37"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru z = [1, 3, 4, 2] și t = (0, 0, 1, 0), δ = y − t. O verificare independentă, mișcând fiecare scor cu 0,000001 și măsurând cât se schimbă costul, dă aceleași valori.",
+        "ro": "Pentru z = [1, 3, 4, 2] și t = (0, 0, 1, 0), δ = y − t. O verificare independentă, mișcând fiecare scor cu 0,000001 și măsurând cât se schimbă costul, dă aceleași valori."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Clasa",
+         "y",
+         "t",
+         "δ = y − t"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,0321",
+          "0",
+          "0,0321"
+         ],
+         [
+          "2",
+          "0,2369",
+          "0",
+          "0,2369"
+         ],
+         [
+          "3",
+          "0,6439",
+          "1",
+          "−0,3561"
+         ],
+         [
+          "4",
+          "0,0871",
+          "0",
+          "0,0871"
+         ]
+        ]
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 280'><title>Erorile δ</title><line class='muted' stroke-width='1.5' x1='18' y1='120' x2='332' y2='120'/><rect class='accent fill-accent' stroke-width='1.5' x='32.8' y='111.7' width='48' height='8.3' rx='3'><title>δ₁ = 0,0321</title></rect><text class='fg' font-size='14' font-weight='700' x='56.8' y='104.7' text-anchor='middle'>0,03</text><text class='muted' font-size='14' x='56.8' y='140' text-anchor='middle'>δ₁</text><rect class='accent fill-accent' stroke-width='1.5' x='110.2' y='58.4' width='48' height='61.6' rx='3'><title>δ₂ = 0,2369</title></rect><text class='fg' font-size='14' font-weight='700' x='134.2' y='51.4' text-anchor='middle'>0,24</text><text class='muted' font-size='14' x='134.2' y='140' text-anchor='middle'>δ₂</text><rect class='ok fill-ok' stroke-width='1.5' x='187.8' y='120' width='48' height='92.6' rx='3'><title>δ₃ = −0,3561</title></rect><text class='fg' font-size='14' font-weight='700' x='211.8' y='232.6' text-anchor='middle'>−0,36</text><text class='muted' font-size='14' x='211.8' y='112' text-anchor='middle'>δ₃</text><rect class='accent fill-accent' stroke-width='1.5' x='265.2' y='97.3' width='48' height='22.7' rx='3'><title>δ₄ = 0,0871</title></rect><text class='fg' font-size='14' font-weight='700' x='289.2' y='90.3' text-anchor='middle'>0,09</text><text class='muted' font-size='14' x='289.2' y='140' text-anchor='middle'>δ₄</text></svg>",
+        "alt": {
+         "en": "Patru bare: 0,03; 0,24 și 0,09 în sus, −0,36 în jos pentru clasa 3",
+         "ro": "Patru bare: 0,03; 0,24 și 0,09 în sus, −0,36 în jos pentru clasa 3"
+        },
+        "caption": {
+         "en": "δ este negativ doar pe clasa corectă.",
+         "ro": "δ este negativ doar pe clasa corectă."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s11",
+   "title": {
+    "en": "Calculează δ",
+    "ro": "Calculează δ"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 37",
+    "ro": "Cursul 4 · slide 37"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04e-e02",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Scorurile sunt z = [2, 0, 1], deci y = [0,6652; 0,0900; 0,2447]. Clasa corectă este 3: t = (0, 0, 1). Calculează δ₁, δ₂, δ₃.",
+      "ro": "Scorurile sunt z = [2, 0, 1], deci y = [0,6652; 0,0900; 0,2447]. Clasa corectă este 3: t = (0, 0, 1). Calculează δ₁, δ₂, δ₃."
+     },
+     "fields": [
+      {
+       "id": "a",
+       "label": {
+        "en": "δ₁",
+        "ro": "δ₁"
+       },
+       "kind": "num",
+       "formula": "0.6652409557748218",
+       "expected": 0.6652
+      },
+      {
+       "id": "b",
+       "label": {
+        "en": "δ₂",
+        "ro": "δ₂"
+       },
+       "kind": "num",
+       "formula": "0.09003057317038046",
+       "expected": 0.09
+      },
+      {
+       "id": "c",
+       "label": {
+        "en": "δ₃",
+        "ro": "δ₃"
+       },
+       "kind": "num",
+       "formula": "0.24472847105479764-1",
+       "expected": -0.7553
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "0.24472847105479764",
+       "message": {
+        "en": "Ai uitat să scazi ținta 1 de la y₃.",
+        "ro": "Ai uitat să scazi ținta 1 de la y₃."
+       }
+      },
+      {
+       "field": "c",
+       "formula": "1-0.24472847105479764",
+       "message": {
+        "en": "Ai scăzut invers: δ este y − t, nu t − y.",
+        "ro": "Ai scăzut invers: δ este y − t, nu t − y."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "δᵢ = yᵢ − tᵢ, pe fiecare clasă.",
+       "ro": "δᵢ = yᵢ − tᵢ, pe fiecare clasă."
+      },
+      {
+       "en": "Pe clasele cu t = 0, δ = y.",
+       "ro": "Pe clasele cu t = 0, δ = y."
+      },
+      {
+       "en": "0,6652; 0,0900; −0,7553",
+       "ro": "0,6652; 0,0900; −0,7553"
+      }
+     ],
+     "solution": {
+      "en": "δ = [0,6652; 0,0900; −0,7553]: suma este 0.",
+      "ro": "δ = [0,6652; 0,0900; −0,7553]: suma este 0."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceleași ieșiri, dar clasa corectă este 2: t = (0, 1, 0). Calculează δ₁, δ₂, δ₃.",
+        "ro": "Aceleași ieșiri, dar clasa corectă este 2: t = (0, 1, 0). Calculează δ₁, δ₂, δ₃."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "0.6652409557748218",
+         "expected": 0.6652
+        },
+        {
+         "id": "b",
+         "formula": "0.09003057317038046-1",
+         "expected": -0.91
+        },
+        {
+         "id": "c",
+         "formula": "0.24472847105479764",
+         "expected": 0.2447
+        }
+       ],
+       "solution": {
+        "en": "Negativul se mută pe clasa corectă.",
+        "ro": "Negativul se mută pe clasa corectă."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s12",
+   "title": {
+    "en": "Aceeași ieșire, altă clasă corectă",
+    "ro": "Aceeași ieșire, altă clasă corectă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 37",
+    "ro": "Cursul 4 · slide 37"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04e-e03",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Aceleași scoruri z = [2, 0, 1] și y = [0,6652; 0,0900; 0,2447], dar acum clasa corectă este 1: t = (1, 0, 0). Calculează δ₁, δ₂, δ₃.",
+      "ro": "Aceleași scoruri z = [2, 0, 1] și y = [0,6652; 0,0900; 0,2447], dar acum clasa corectă este 1: t = (1, 0, 0). Calculează δ₁, δ₂, δ₃."
+     },
+     "fields": [
+      {
+       "id": "a",
+       "label": {
+        "en": "δ₁",
+        "ro": "δ₁"
+       },
+       "kind": "num",
+       "formula": "0.6652409557748218-1",
+       "expected": -0.3348
+      },
+      {
+       "id": "b",
+       "label": {
+        "en": "δ₂",
+        "ro": "δ₂"
+       },
+       "kind": "num",
+       "formula": "0.09003057317038046",
+       "expected": 0.09
+      },
+      {
+       "id": "c",
+       "label": {
+        "en": "δ₃",
+        "ro": "δ₃"
+       },
+       "kind": "num",
+       "formula": "0.24472847105479764",
+       "expected": 0.2447
+      }
+     ],
+     "detectors": [
+      {
+       "field": "a",
+       "formula": "0.6652409557748218",
+       "message": {
+        "en": "Ai uitat să scazi ținta 1 de la y₁.",
+        "ro": "Ai uitat să scazi ținta 1 de la y₁."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Ținta 1 este acum pe clasa 1.",
+       "ro": "Ținta 1 este acum pe clasa 1."
+      },
+      {
+       "en": "δ₁ = 0,6652 − 1",
+       "ro": "δ₁ = 0,6652 − 1"
+      },
+      {
+       "en": "−0,3348; 0,0900; 0,2447",
+       "ro": "−0,3348; 0,0900; 0,2447"
+      }
+     ],
+     "solution": {
+      "en": "δ = [−0,3348; 0,0900; 0,2447]. Aceeași ieșire, dar acum clasa 1 e cea împinsă în sus.",
+      "ro": "δ = [−0,3348; 0,0900; 0,2447]. Aceeași ieșire, dar acum clasa 1 e cea împinsă în sus."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același caz, clasa corectă 3 (t = (0, 0, 1)). Calculează δ₁, δ₂, δ₃.",
+        "ro": "Același caz, clasa corectă 3 (t = (0, 0, 1)). Calculează δ₁, δ₂, δ₃."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "0.6652409557748218",
+         "expected": 0.6652
+        },
+        {
+         "id": "b",
+         "formula": "0.09003057317038046",
+         "expected": 0.09
+        },
+        {
+         "id": "c",
+         "formula": "0.24472847105479764-1",
+         "expected": -0.7553
+        }
+       ],
+       "solution": {
+        "en": "δ₃ = y₃ − 1; celelalte rămân y",
+        "ro": "δ₃ = y₃ − 1; celelalte rămân y"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s13",
+   "title": {
+    "en": "Ținta moale",
+    "ro": "Ținta moale"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 17, 37",
+    "ro": "Cursul 4 · slide 17, 37"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Ținta poate fi și o distribuție: t = (0; 0,1; 0,85; 0,05), suma 1. Formula rămâne δ = y − t.",
+        "ro": "Ținta poate fi și o distribuție: t = (0; 0,1; 0,85; 0,05), suma 1. Formula rămâne δ = y − t."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Clasa",
+         "y",
+         "t",
+         "δ"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,0321",
+          "0",
+          "0,0321"
+         ],
+         [
+          "2",
+          "0,2369",
+          "0,1",
+          "0,1369"
+         ],
+         [
+          "3",
+          "0,6439",
+          "0,85",
+          "−0,2061"
+         ],
+         [
+          "4",
+          "0,0871",
+          "0,05",
+          "0,0371"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s14",
+   "title": {
+    "en": "Ținte care nu fac 1",
+    "ro": "Ținte care nu fac 1"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 37",
+    "ro": "Cursul 4 · slide 37"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04e-q04",
+     "question": {
+      "en": "Ținta este t = (0; 0; 0,5; 0): face doar 0,5, nu 1. Ieșirile sunt y = [0,0321; 0,2369; 0,6439; 0,0871]. Cât este dC/dz₃?",
+      "ro": "Ținta este t = (0; 0; 0,5; 0): face doar 0,5, nu 1. Ieșirile sunt y = [0,0321; 0,2369; 0,6439; 0,0871]. Cât este dC/dz₃?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "−0,1780: y₃ · Σt − t₃, nu y₃ − t₃",
+        "ro": "−0,1780: y₃ · Σt − t₃, nu y₃ − t₃"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: cu Σ tⱼ = 0,5, termenul yᵢ · Σ tⱼ nu mai este yᵢ. Verificat și numeric.",
+        "ro": "Corect: cu Σ tⱼ = 0,5, termenul yᵢ · Σ tⱼ nu mai este yᵢ. Verificat și numeric."
+       }
+      },
+      {
+       "text": {
+        "en": "0,1439: y₃ − t₃",
+        "ro": "0,1439: y₃ − t₃"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ai aplicat formula δ = y − t, care cere ca ținta să facă 1.",
+        "ro": "Ai aplicat formula δ = y − t, care cere ca ținta să facă 1."
+       },
+       "misconception": "suma-diferita-de-1"
+      },
+      {
+       "text": {
+        "en": "−0,3561: y₃ − 1, ca la o țintă one-hot",
+        "ro": "−0,3561: y₃ − 1, ca la o țintă one-hot"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ținta clasei 3 este 0,5, nu 1.",
+        "ro": "Ținta clasei 3 este 0,5, nu 1."
+       },
+       "misconception": "tinta-presupusa-one-hot"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s15",
+   "title": {
+    "en": "Semnul lui δ",
+    "ro": "Semnul lui δ"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 44",
+    "ro": "Cursul 4 · slide 44"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04e-q05",
+     "question": {
+      "en": "Pentru o țintă one-hot, ce semne au valorile δᵢ = yᵢ − tᵢ?",
+      "ro": "Pentru o țintă one-hot, ce semne au valorile δᵢ = yᵢ − tᵢ?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Negativ pe clasa corectă, pozitiv pe celelalte",
+        "ro": "Negativ pe clasa corectă, pozitiv pe celelalte"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect. Un pas de gradient (w = w − η·gradient) urcă scorul clasei corecte și coboară pe celelalte.",
+        "ro": "Corect. Un pas de gradient (w = w − η·gradient) urcă scorul clasei corecte și coboară pe celelalte."
+       }
+      },
+      {
+       "text": {
+        "en": "Pozitiv pe toate",
+        "ro": "Pozitiv pe toate"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Dacă toate δ ar fi pozitive, suma lor nu ar mai fi 0. Suma este mereu 0.",
+        "ro": "Dacă toate δ ar fi pozitive, suma lor nu ar mai fi 0. Suma este mereu 0."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "Negativ pe toate",
+        "ro": "Negativ pe toate"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Suma lui δ este (Σ y) − (Σ t) = 1 − 1 = 0, deci nu pot fi toate negative.",
+        "ro": "Suma lui δ este (Σ y) − (Σ t) = 1 − 1 = 0, deci nu pot fi toate negative."
+       },
+       "misconception": "semn-gresit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s16",
+   "title": {
+    "en": "De la δ la pondere",
+    "ro": "De la δ la pondere"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 36-37",
+    "ro": "Cursul 4 · slide 36-37"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "dC/dwᵢⱼ = δᵢ · xᵢⱼ = −(tᵢ − yᵢ) · xᵢⱼ.",
+      "ro": "dC/dwᵢⱼ = δᵢ · xᵢⱼ = −(tᵢ − yᵢ) · xᵢⱼ."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Ponderea wᵢⱼ duce intrarea xᵢⱼ în scorul zᵢ, deci gradientul ei este eroarea scorului ori intrarea. Cu sigmoidă și entropie încrucișată iese aceeași formulă, de aceea regula de actualizare este identică.",
+        "ro": "Ponderea wᵢⱼ duce intrarea xᵢⱼ în scorul zᵢ, deci gradientul ei este eroarea scorului ori intrarea. Cu sigmoidă și entropie încrucișată iese aceeași formulă, de aceea regula de actualizare este identică."
+       }
+      },
+      {
+       "note": {
+        "en": "Aici primul indice al lui wᵢⱼ este destinația (scorul zᵢ). De la slide-ul 39 (lecția 4f), slide-urile schimbă convenția: wˡᵢⱼ merge de la neuronul i la neuronul j, deci primul indice devine sursa.",
+        "ro": "Aici primul indice al lui wᵢⱼ este destinația (scorul zᵢ). De la slide-ul 39 (lecția 4f), slide-urile schimbă convenția: wˡᵢⱼ merge de la neuronul i la neuronul j, deci primul indice devine sursa."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s17",
+   "title": {
+    "en": "Când este δ = y − t",
+    "ro": "Când este δ = y − t"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 37",
+    "ro": "Cursul 4 · slide 37"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "δ = y − t este adevărat doar pentru combinații anume de ieșire și cost:",
+        "ro": "δ = y − t este adevărat doar pentru combinații anume de ieșire și cost:"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Ieșire",
+         "Cost",
+         "δ = y − t?"
+        ],
+        "rows": [
+         [
+          "sigmoidă",
+          "entropie încrucișată",
+          "da"
+         ],
+         [
+          "softmax",
+          "entropie încrucișată",
+          "da"
+         ],
+         [
+          "sigmoidă",
+          "MSE",
+          "nu: apare y(1 − y)"
+         ],
+         [
+          "softmax",
+          "MSE",
+          "nu"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s18",
+   "title": {
+    "en": "Cu MSE ar apărea factorul în plus",
+    "ro": "Cu MSE ar apărea factorul în plus"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 9, 37",
+    "ro": "Cursul 4 · slide 9, 37"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04e-q06",
+     "question": {
+      "en": "Un neuron sigmoid are y₃ = 0,6439 și ținta 1. Care este gradientul față de z cu MSE, (y − t)·y(1 − y), comparat cu entropia încrucișată?",
+      "ro": "Un neuron sigmoid are y₃ = 0,6439 și ținta 1. Care este gradientul față de z cu MSE, (y − t)·y(1 − y), comparat cu entropia încrucișată?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "MSE: −0,0816; CE: −0,3561",
+        "ro": "MSE: −0,0816; CE: −0,3561"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: factorul y(1 − y) = 0,2293 micșorează pasul la MSE.",
+        "ro": "Corect: factorul y(1 − y) = 0,2293 micșorează pasul la MSE."
+       }
+      },
+      {
+       "text": {
+        "en": "La fel în ambele cazuri",
+        "ro": "La fel în ambele cazuri"
+       },
+       "correct": false,
+       "explain": {
+        "en": "La MSE factorul y(1 − y) rămâne; entropia încrucișată îl elimină.",
+        "ro": "La MSE factorul y(1 − y) rămâne; entropia încrucișată îl elimină."
+       },
+       "misconception": "factor-sigmoid-pastrat"
+      },
+      {
+       "text": {
+        "en": "MSE: −0,3561; CE: −0,0816",
+        "ro": "MSE: −0,3561; CE: −0,0816"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Invers: CE este cea fără factorul în plus.",
+        "ro": "Invers: CE este cea fără factorul în plus."
+       },
+       "misconception": "factor-sigmoid-pastrat"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s19",
+   "title": {
+    "en": "Spune-o cu vorbele tale",
+    "ro": "Spune-o cu vorbele tale"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 32-37",
+    "ro": "Cursul 4 · slide 32-37"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "nn-l04e-r07",
+     "prompt": {
+      "en": "De ce este eroarea neuronului de ieșire chiar y − t, fără niciun alt factor?",
+      "ro": "De ce este eroarea neuronului de ieșire chiar y − t, fără niciun alt factor?"
+     },
+     "answer": {
+      "en": "Costul −ln y are derivata −1/y; softmax are derivata yᵢ(1 − yᵢ) pe același scor și −yⱼ yᵢ pe celelalte. Înmulțite, y-ul de la numitor se reduce, iar suma țintelor fiind 1 rămâne yᵢ − tᵢ. Nu mai rămâne niciun factor de pantă.",
+      "ro": "Costul −ln y are derivata −1/y; softmax are derivata yᵢ(1 − yᵢ) pe același scor și −yⱼ yᵢ pe celelalte. Înmulțite, y-ul de la numitor se reduce, iar suma țintelor fiind 1 rămâne yᵢ − tᵢ. Nu mai rămâne niciun factor de pantă."
+     },
+     "placeholder": {
+      "en": "Scrie ce crezi",
+      "ro": "Scrie ce crezi"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s20",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 32-37",
+    "ro": "Cursul 4 · slide 32-37"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Cazul j = i: yᵢ(1 − yᵢ); cazul j diferit de i: −yⱼ yᵢ.",
+         "ro": "Cazul j = i: yᵢ(1 − yᵢ); cazul j diferit de i: −yⱼ yᵢ."
+        },
+        {
+         "en": "Din ele, cu Σ tⱼ = 1, rezultă δᵢ = dC/dzᵢ = yᵢ − tᵢ.",
+         "ro": "Din ele, cu Σ tⱼ = 1, rezultă δᵢ = dC/dzᵢ = yᵢ − tᵢ."
+        },
+        {
+         "en": "Eroarea este negativă pe clasa corectă și suma ei este 0.",
+         "ro": "Eroarea este negativă pe clasa corectă și suma ei este 0."
+        },
+        {
+         "en": "Formula cere ca ținta să fie o distribuție.",
+         "ro": "Formula cere ca ținta să fie o distribuție."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s21",
+   "title": {
+    "en": "Mini-test: δ pentru z = [0, 1]",
+    "ro": "Mini-test: δ pentru z = [0, 1]"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04e-e08",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Scorurile sunt z = [0, 1], deci y = [0,2689; 0,7311]. Clasa corectă este prima: t = (1, 0). Calculează δ₁ și δ₂.",
+      "ro": "Scorurile sunt z = [0, 1], deci y = [0,2689; 0,7311]. Clasa corectă este prima: t = (1, 0). Calculează δ₁ și δ₂."
+     },
+     "fields": [
+      {
+       "id": "a",
+       "label": {
+        "en": "δ₁",
+        "ro": "δ₁"
+       },
+       "kind": "num",
+       "formula": "0.2689414213699951-1",
+       "expected": -0.7311
+      },
+      {
+       "id": "b",
+       "label": {
+        "en": "δ₂",
+        "ro": "δ₂"
+       },
+       "kind": "num",
+       "formula": "0.7310585786300049",
+       "expected": 0.7311
+      }
+     ],
+     "detectors": [
+      {
+       "field": "a",
+       "formula": "1-0.2689414213699951",
+       "message": {
+        "en": "Ai scăzut invers: δ = y − t.",
+        "ro": "Ai scăzut invers: δ = y − t."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "δᵢ = yᵢ − tᵢ.",
+       "ro": "δᵢ = yᵢ − tᵢ."
+      },
+      {
+       "en": "δ₁ = 0,2689 − 1",
+       "ro": "δ₁ = 0,2689 − 1"
+      },
+      {
+       "en": "−0,7311; 0,7311",
+       "ro": "−0,7311; 0,7311"
+      }
+     ],
+     "solution": {
+      "en": "δ = [−0,7311; 0,7311], suma 0.",
+      "ro": "δ = [−0,7311; 0,7311], suma 0."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceleași scoruri, clasa corectă este a doua: t = (0, 1). Calculează δ₁ și δ₂.",
+        "ro": "Aceleași scoruri, clasa corectă este a doua: t = (0, 1). Calculează δ₁ și δ₂."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "0.2689414213699951",
+         "expected": 0.2689
+        },
+        {
+         "id": "b",
+         "formula": "0.7310585786300049-1",
+         "expected": -0.2689
+        }
+       ],
+       "solution": {
+        "en": "Semnele se inversează.",
+        "ro": "Semnele se inversează."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04e-s22",
+   "title": {
+    "en": "Mini-test: de ce trebuie Σ t = 1",
+    "ro": "Mini-test: de ce trebuie Σ t = 1"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04e-q09",
+     "question": {
+      "en": "Ieșirile softmax sunt y = (0,2; 0,5; 0,3). Ținta este t = (0; 1; 0,5), cu suma 1,5. Cât este dC/dz₂?",
+      "ro": "Ieșirile softmax sunt y = (0,2; 0,5; 0,3). Ținta este t = (0; 1; 0,5), cu suma 1,5. Cât este dC/dz₂?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "−0,25: y₂ · Σt − t₂ = 0,5 · 1,5 − 1",
+        "ro": "−0,25: y₂ · Σt − t₂ = 0,5 · 1,5 − 1"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: δ = y − t cere Σ tⱼ = 1. Aici suma este 1,5, deci rămâne forma −tᵢ + yᵢ Σ tⱼ.",
+        "ro": "Corect: δ = y − t cere Σ tⱼ = 1. Aici suma este 1,5, deci rămâne forma −tᵢ + yᵢ Σ tⱼ."
+       }
+      },
+      {
+       "text": {
+        "en": "−0,5: y₂ − t₂",
+        "ro": "−0,5: y₂ − t₂"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Formula δ = y − t merge doar când țintele fac 1. Aici fac 1,5.",
+        "ro": "Formula δ = y − t merge doar când țintele fac 1. Aici fac 1,5."
+       },
+       "misconception": "suma-diferita-de-1"
+      },
+      {
+       "text": {
+        "en": "−1: y₂ − 1,5 · t₂",
+        "ro": "−1: y₂ − 1,5 · t₂"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Factorul Σ t înmulțește y₂, nu t₂: −tᵢ + yᵢ Σ tⱼ.",
+        "ro": "Factorul Σ t înmulțește y₂, nu t₂: −tᵢ + yᵢ Σ tⱼ."
+       },
+       "misconception": "termen-gresit-ramas"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

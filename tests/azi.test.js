@@ -55,8 +55,13 @@ describe('azi buttons', () => {
     expect(t.map((x) => x.kind)).toEqual(['lesson', 'crash']);
     expect(new Set(t.map((x) => x.href)).size).toBe(2);
   });
+  it('NN step has the lecture 3 lesson and the crash pack, two different buttons', () => {
+    const t = buildTargets(byId('nn-tema-3'));
+    expect(t.map((x) => x.kind)).toEqual(['lesson', 'crash']);
+    expect(new Set(t.map((x) => x.href)).size).toBe(2);
+  });
   it('single-pack steps give one crash button', () => {
-    for (const id of ['nn-tema-3', 'ml-p1']) {
+    for (const id of ['ml-p1']) {
       const t = buildTargets(byId(id));
       expect(t).toHaveLength(1);
       expect(t[0].kind).toBe('crash');

@@ -1,0 +1,1604 @@
+{
+ "meta": {
+  "id": "nn-l04f",
+  "title": {
+   "en": "Lesson 4f: Backpropagation, notation and formulas",
+   "ro": "Lecția 4f: Backpropagation, notația și formulele"
+  },
+  "shortTitle": {
+   "en": "L4f: Backprop formulas",
+   "ro": "L4f: Backprop, formulele"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l04f-s01",
+   "title": {
+    "en": "Rețeaua din slide",
+    "ro": "Rețeaua din slide"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 39",
+    "ro": "Cursul 4 · slide 39"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Rețeaua are trei intrări, două straturi ascunse (hidden layers) de câte patru neuroni și două ieșiri. Straturile se numără de la 1 (intrarea) până la L, ultimul strat; aici L = 4.",
+        "ro": "Rețeaua are trei intrări, două straturi ascunse (hidden layers) de câte patru neuroni și două ieșiri. Straturile se numără de la 1 (intrarea) până la L, ultimul strat; aici L = 4."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 236'><title>Rețeaua 3-4-4-2</title><line class='muted' stroke-width='1.2' x1='59' y1='84' x2='112' y2='62'/><line class='muted' stroke-width='1.2' x1='59' y1='84' x2='112' y2='106'/><line class='muted' stroke-width='1.2' x1='59' y1='84' x2='112' y2='150'/><line class='muted' stroke-width='1.2' x1='59' y1='84' x2='112' y2='194'/><line class='muted' stroke-width='1.2' x1='59' y1='128' x2='112' y2='62'/><line class='muted' stroke-width='1.2' x1='59' y1='128' x2='112' y2='106'/><line class='muted' stroke-width='1.2' x1='59' y1='128' x2='112' y2='150'/><line class='muted' stroke-width='1.2' x1='59' y1='128' x2='112' y2='194'/><line class='muted' stroke-width='1.2' x1='59' y1='172' x2='112' y2='62'/><line class='muted' stroke-width='1.2' x1='59' y1='172' x2='112' y2='106'/><line class='muted' stroke-width='1.2' x1='59' y1='172' x2='112' y2='150'/><line class='muted' stroke-width='1.2' x1='59' y1='172' x2='112' y2='194'/><line class='muted' stroke-width='1.2' x1='134' y1='62' x2='207' y2='62'/><line class='muted' stroke-width='1.2' x1='134' y1='62' x2='207' y2='106'/><line class='muted' stroke-width='1.2' x1='134' y1='62' x2='207' y2='150'/><line class='muted' stroke-width='1.2' x1='134' y1='62' x2='207' y2='194'/><line class='muted' stroke-width='1.2' x1='134' y1='106' x2='207' y2='62'/><line class='muted' stroke-width='1.2' x1='134' y1='106' x2='207' y2='106'/><line class='muted' stroke-width='1.2' x1='134' y1='106' x2='207' y2='150'/><line class='muted' stroke-width='1.2' x1='134' y1='106' x2='207' y2='194'/><line class='muted' stroke-width='1.2' x1='134' y1='150' x2='207' y2='62'/><line class='muted' stroke-width='1.2' x1='134' y1='150' x2='207' y2='106'/><line class='muted' stroke-width='1.2' x1='134' y1='150' x2='207' y2='150'/><line class='muted' stroke-width='1.2' x1='134' y1='150' x2='207' y2='194'/><line class='muted' stroke-width='1.2' x1='134' y1='194' x2='207' y2='62'/><line class='muted' stroke-width='1.2' x1='134' y1='194' x2='207' y2='106'/><line class='muted' stroke-width='1.2' x1='134' y1='194' x2='207' y2='150'/><line class='muted' stroke-width='1.2' x1='134' y1='194' x2='207' y2='194'/><line class='muted' stroke-width='1.2' x1='229' y1='62' x2='281' y2='106'/><line class='muted' stroke-width='1.2' x1='229' y1='62' x2='281' y2='150'/><line class='muted' stroke-width='1.2' x1='229' y1='106' x2='281' y2='106'/><line class='muted' stroke-width='1.2' x1='229' y1='106' x2='281' y2='150'/><line class='muted' stroke-width='1.2' x1='229' y1='150' x2='281' y2='106'/><line class='muted' stroke-width='1.2' x1='229' y1='150' x2='281' y2='150'/><line class='muted' stroke-width='1.2' x1='229' y1='194' x2='281' y2='106'/><line class='muted' stroke-width='1.2' x1='229' y1='194' x2='281' y2='150'/><circle class='fg fill-bg' stroke-width='2' cx='48' cy='84' r='11'><title>neuronul 1 al stratului 1</title></circle><text class='fg' font-size='14' font-weight='700' x='48' y='88' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='48' cy='128' r='11'><title>neuronul 2 al stratului 1</title></circle><text class='fg' font-size='14' font-weight='700' x='48' y='132' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='48' cy='172' r='11'><title>neuronul 3 al stratului 1</title></circle><text class='fg' font-size='14' font-weight='700' x='48' y='176' text-anchor='middle'>3</text><circle class='fg fill-bg' stroke-width='2' cx='123' cy='62' r='11'><title>neuronul 1 al stratului 2</title></circle><text class='fg' font-size='14' font-weight='700' x='123' y='66' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='123' cy='106' r='11'><title>neuronul 2 al stratului 2</title></circle><text class='fg' font-size='14' font-weight='700' x='123' y='110' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='123' cy='150' r='11'><title>neuronul 3 al stratului 2</title></circle><text class='fg' font-size='14' font-weight='700' x='123' y='154' text-anchor='middle'>3</text><circle class='fg fill-bg' stroke-width='2' cx='123' cy='194' r='11'><title>neuronul 4 al stratului 2</title></circle><text class='fg' font-size='14' font-weight='700' x='123' y='198' text-anchor='middle'>4</text><circle class='fg fill-bg' stroke-width='2' cx='218' cy='62' r='11'><title>neuronul 1 al stratului 3</title></circle><text class='fg' font-size='14' font-weight='700' x='218' y='66' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='218' cy='106' r='11'><title>neuronul 2 al stratului 3</title></circle><text class='fg' font-size='14' font-weight='700' x='218' y='110' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='218' cy='150' r='11'><title>neuronul 3 al stratului 3</title></circle><text class='fg' font-size='14' font-weight='700' x='218' y='154' text-anchor='middle'>3</text><circle class='fg fill-bg' stroke-width='2' cx='218' cy='194' r='11'><title>neuronul 4 al stratului 3</title></circle><text class='fg' font-size='14' font-weight='700' x='218' y='198' text-anchor='middle'>4</text><circle class='fg fill-bg' stroke-width='2' cx='292' cy='106' r='11'><title>neuronul 1 al stratului 4</title></circle><text class='fg' font-size='14' font-weight='700' x='292' y='110' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='292' cy='150' r='11'><title>neuronul 2 al stratului 4</title></circle><text class='fg' font-size='14' font-weight='700' x='292' y='154' text-anchor='middle'>2</text><text class='muted' font-size='14' x='48' y='16' text-anchor='middle'>strat 1</text><text class='muted' font-size='14' x='123' y='16' text-anchor='middle'>strat 2</text><text class='muted' font-size='14' x='218' y='16' text-anchor='middle'>strat 3</text><text class='muted' font-size='14' x='292' y='16' text-anchor='middle'>strat 4 = L</text><text class='muted' font-size='14' x='48' y='32' text-anchor='middle'>(intrare)</text><text class='muted' font-size='14' x='292' y='32' text-anchor='middle'>(ieșire)</text></svg>",
+        "alt": {
+         "en": "Rețea cu straturile de 3, 4, 4 și 2 neuroni, fiecare neuron legat de toți din stratul următor",
+         "ro": "Rețea cu straturile de 3, 4, 4 și 2 neuroni, fiecare neuron legat de toți din stratul următor"
+        },
+        "caption": {
+         "en": "Fiecare neuron e legat de toți cei din stratul următor.",
+         "ro": "Fiecare neuron e legat de toți cei din stratul următor."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s02",
+   "title": {
+    "en": "O pondere",
+    "ro": "O pondere"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 39",
+    "ro": "Cursul 4 · slide 39"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04f-q01",
+     "question": {
+      "en": "Ponderea w³₃₄ (în general wˡᵢⱼ, cu l = 3, i = 3, j = 4) este desenată. De unde până unde merge?",
+      "ro": "Ponderea w³₃₄ (în general wˡᵢⱼ, cu l = 3, i = 3, j = 4) este desenată. De unde până unde merge?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "De la neuronul 3 al stratului 2, la neuronul 4 al stratului 3",
+        "ro": "De la neuronul 3 al stratului 2, la neuronul 4 al stratului 3"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: wˡᵢⱼ merge de la neuronul i din stratul l−1 la neuronul j din stratul l.",
+        "ro": "Corect: wˡᵢⱼ merge de la neuronul i din stratul l−1 la neuronul j din stratul l."
+       }
+      },
+      {
+       "text": {
+        "en": "De la neuronul 3 al stratului 3, la neuronul 4 al stratului 4",
+        "ro": "De la neuronul 3 al stratului 3, la neuronul 4 al stratului 4"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Stratul l = 3 este stratul în care ajunge ponderea, nu cel din care pleacă.",
+        "ro": "Stratul l = 3 este stratul în care ajunge ponderea, nu cel din care pleacă."
+       },
+       "misconception": "indice-strat-gresit"
+      },
+      {
+       "text": {
+        "en": "De la neuronul 4 la neuronul 3",
+        "ro": "De la neuronul 4 la neuronul 3"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Primul indice e sursa (i = 3), al doilea destinația (j = 4).",
+        "ro": "Primul indice e sursa (i = 3), al doilea destinația (j = 4)."
+       },
+       "misconception": "indici-inversati"
+      }
+     ],
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 236'><title>Rețeaua 3-4-4-2</title><line class='muted' stroke-width='1.2' x1='59' y1='84' x2='112' y2='62'/><line class='muted' stroke-width='1.2' x1='59' y1='84' x2='112' y2='106'/><line class='muted' stroke-width='1.2' x1='59' y1='84' x2='112' y2='150'/><line class='muted' stroke-width='1.2' x1='59' y1='84' x2='112' y2='194'/><line class='muted' stroke-width='1.2' x1='59' y1='128' x2='112' y2='62'/><line class='muted' stroke-width='1.2' x1='59' y1='128' x2='112' y2='106'/><line class='muted' stroke-width='1.2' x1='59' y1='128' x2='112' y2='150'/><line class='muted' stroke-width='1.2' x1='59' y1='128' x2='112' y2='194'/><line class='muted' stroke-width='1.2' x1='59' y1='172' x2='112' y2='62'/><line class='muted' stroke-width='1.2' x1='59' y1='172' x2='112' y2='106'/><line class='muted' stroke-width='1.2' x1='59' y1='172' x2='112' y2='150'/><line class='muted' stroke-width='1.2' x1='59' y1='172' x2='112' y2='194'/><line class='muted' stroke-width='1.2' x1='134' y1='62' x2='207' y2='62'/><line class='muted' stroke-width='1.2' x1='134' y1='62' x2='207' y2='106'/><line class='muted' stroke-width='1.2' x1='134' y1='62' x2='207' y2='150'/><line class='muted' stroke-width='1.2' x1='134' y1='62' x2='207' y2='194'/><line class='muted' stroke-width='1.2' x1='134' y1='106' x2='207' y2='62'/><line class='muted' stroke-width='1.2' x1='134' y1='106' x2='207' y2='106'/><line class='muted' stroke-width='1.2' x1='134' y1='106' x2='207' y2='150'/><line class='muted' stroke-width='1.2' x1='134' y1='106' x2='207' y2='194'/><line class='muted' stroke-width='1.2' x1='134' y1='150' x2='207' y2='62'/><line class='muted' stroke-width='1.2' x1='134' y1='150' x2='207' y2='106'/><line class='muted' stroke-width='1.2' x1='134' y1='150' x2='207' y2='150'/><line class='muted' stroke-width='1.2' x1='134' y1='150' x2='207' y2='194'/><line class='muted' stroke-width='1.2' x1='134' y1='194' x2='207' y2='62'/><line class='muted' stroke-width='1.2' x1='134' y1='194' x2='207' y2='106'/><line class='muted' stroke-width='1.2' x1='134' y1='194' x2='207' y2='150'/><line class='muted' stroke-width='1.2' x1='134' y1='194' x2='207' y2='194'/><line class='muted' stroke-width='1.2' x1='229' y1='62' x2='281' y2='106'/><line class='muted' stroke-width='1.2' x1='229' y1='62' x2='281' y2='150'/><line class='muted' stroke-width='1.2' x1='229' y1='106' x2='281' y2='106'/><line class='muted' stroke-width='1.2' x1='229' y1='106' x2='281' y2='150'/><line class='muted' stroke-width='1.2' x1='229' y1='150' x2='281' y2='106'/><line class='muted' stroke-width='1.2' x1='229' y1='150' x2='281' y2='150'/><line class='muted' stroke-width='1.2' x1='229' y1='194' x2='281' y2='106'/><line class='muted' stroke-width='1.2' x1='229' y1='194' x2='281' y2='150'/><line class='warn' stroke-width='3.5' x1='134' y1='150' x2='207' y2='194'/><circle class='fg fill-bg' stroke-width='2' cx='48' cy='84' r='11'><title>neuronul 1 al stratului 1</title></circle><text class='fg' font-size='14' font-weight='700' x='48' y='88' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='48' cy='128' r='11'><title>neuronul 2 al stratului 1</title></circle><text class='fg' font-size='14' font-weight='700' x='48' y='132' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='48' cy='172' r='11'><title>neuronul 3 al stratului 1</title></circle><text class='fg' font-size='14' font-weight='700' x='48' y='176' text-anchor='middle'>3</text><circle class='fg fill-bg' stroke-width='2' cx='123' cy='62' r='11'><title>neuronul 1 al stratului 2</title></circle><text class='fg' font-size='14' font-weight='700' x='123' y='66' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='123' cy='106' r='11'><title>neuronul 2 al stratului 2</title></circle><text class='fg' font-size='14' font-weight='700' x='123' y='110' text-anchor='middle'>2</text><circle class='warn fill-bg' stroke-width='2' cx='123' cy='150' r='11'><title>neuronul 3 al stratului 2</title></circle><text class='fg' font-size='14' font-weight='700' x='123' y='154' text-anchor='middle'>3</text><circle class='fg fill-bg' stroke-width='2' cx='123' cy='194' r='11'><title>neuronul 4 al stratului 2</title></circle><text class='fg' font-size='14' font-weight='700' x='123' y='198' text-anchor='middle'>4</text><circle class='fg fill-bg' stroke-width='2' cx='218' cy='62' r='11'><title>neuronul 1 al stratului 3</title></circle><text class='fg' font-size='14' font-weight='700' x='218' y='66' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='218' cy='106' r='11'><title>neuronul 2 al stratului 3</title></circle><text class='fg' font-size='14' font-weight='700' x='218' y='110' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='218' cy='150' r='11'><title>neuronul 3 al stratului 3</title></circle><text class='fg' font-size='14' font-weight='700' x='218' y='154' text-anchor='middle'>3</text><circle class='warn fill-bg' stroke-width='2' cx='218' cy='194' r='11'><title>neuronul 4 al stratului 3</title></circle><text class='fg' font-size='14' font-weight='700' x='218' y='198' text-anchor='middle'>4</text><circle class='fg fill-bg' stroke-width='2' cx='292' cy='106' r='11'><title>neuronul 1 al stratului 4</title></circle><text class='fg' font-size='14' font-weight='700' x='292' y='110' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='292' cy='150' r='11'><title>neuronul 2 al stratului 4</title></circle><text class='fg' font-size='14' font-weight='700' x='292' y='154' text-anchor='middle'>2</text><text class='muted' font-size='14' x='48' y='16' text-anchor='middle'>strat 1</text><text class='muted' font-size='14' x='123' y='16' text-anchor='middle'>strat 2</text><text class='muted' font-size='14' x='218' y='16' text-anchor='middle'>strat 3</text><text class='muted' font-size='14' x='292' y='16' text-anchor='middle'>strat 4 = L</text><text class='muted' font-size='14' x='48' y='32' text-anchor='middle'>(intrare)</text><text class='muted' font-size='14' x='292' y='32' text-anchor='middle'>(ieșire)</text></svg>",
+      "alt": {
+       "en": "Aceeași rețea cu o pondere colorată între neuronul 3 al stratului 2 și neuronul 4 al stratului 3",
+       "ro": "Aceeași rețea cu o pondere colorată între neuronul 3 al stratului 2 și neuronul 4 al stratului 3"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s03",
+   "title": {
+    "en": "Un neuron cu toate ponderile lui",
+    "ro": "Un neuron cu toate ponderile lui"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 39",
+    "ro": "Cursul 4 · slide 39"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Neuronul 4 din stratul 3 primește de la toate cele patru ieșiri ale stratului 2, fiecare pe propria pondere. Suma lor ponderată este z³₄.",
+        "ro": "Neuronul 4 din stratul 3 primește de la toate cele patru ieșiri ale stratului 2, fiecare pe propria pondere. Suma lor ponderată este z³₄."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 220'><title>z³₄ și cele patru ponderi</title><defs><marker id='ah-accent' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-accent' stroke='none' d='M0 1L9 5L0 9z'/></marker><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><circle class='fg fill-bg' stroke-width='2' cx='40' cy='30' r='18'><title>y²_1</title></circle><text class='fg' font-size='14' font-weight='700' x='40' y='35' text-anchor='middle'>y²₁</text><line class='accent' stroke-width='2.2' x1='60' y1='30' x2='205' y2='91.5' marker-end='url(#ah-accent)'/><text class='accent' font-size='14' font-weight='700' x='104' y='41.5' text-anchor='middle'>w³₁₄</text><circle class='fg fill-bg' stroke-width='2' cx='40' cy='80' r='18'><title>y²_2</title></circle><text class='fg' font-size='14' font-weight='700' x='40' y='85' text-anchor='middle'>y²₂</text><line class='accent' stroke-width='2.2' x1='60' y1='80' x2='205' y2='100.5' marker-end='url(#ah-accent)'/><text class='accent' font-size='14' font-weight='700' x='104' y='79.2' text-anchor='middle'>w³₂₄</text><circle class='fg fill-bg' stroke-width='2' cx='40' cy='130' r='18'><title>y²_3</title></circle><text class='fg' font-size='14' font-weight='700' x='40' y='135' text-anchor='middle'>y²₃</text><line class='accent' stroke-width='2.2' x1='60' y1='130' x2='205' y2='109.5' marker-end='url(#ah-accent)'/><text class='accent' font-size='14' font-weight='700' x='104' y='116.8' text-anchor='middle'>w³₃₄</text><circle class='fg fill-bg' stroke-width='2' cx='40' cy='180' r='18'><title>y²_4</title></circle><text class='fg' font-size='14' font-weight='700' x='40' y='185' text-anchor='middle'>y²₄</text><line class='accent' stroke-width='2.2' x1='60' y1='180' x2='205' y2='118.5' marker-end='url(#ah-accent)'/><text class='accent' font-size='14' font-weight='700' x='104' y='154.6' text-anchor='middle'>w³₄₄</text><circle class='warn fill-bg' stroke-width='2.5' cx='232' cy='105' r='26'><title>z³₄</title></circle><text class='warn' font-size='15' font-weight='700' x='232' y='110' text-anchor='middle'>z³₄</text><line class='muted' stroke-width='2' x1='259' y1='105' x2='316' y2='105' marker-end='url(#ah-muted)'/><text class='fg' font-size='15' font-weight='700' x='300' y='93' text-anchor='middle'>y³₄</text></svg>",
+        "alt": {
+         "en": "Patru ieșiri y²₁..y²₄, fiecare pe o pondere w³₁₄..w³₄₄, spre neuronul z³₄",
+         "ro": "Patru ieșiri y²₁..y²₄, fiecare pe o pondere w³₁₄..w³₄₄, spre neuronul z³₄"
+        },
+        "caption": {
+         "en": "Patru ponderi intră în același neuron.",
+         "ro": "Patru ponderi intră în același neuron."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s04",
+   "title": {
+    "en": "Suma ponderată",
+    "ro": "Suma ponderată"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 39",
+    "ro": "Cursul 4 · slide 39"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "zˡᵢ = Σⱼ wˡⱼᵢ · yˡ⁻¹ⱼ + bˡᵢ.",
+      "ro": "zˡᵢ = Σⱼ wˡⱼᵢ · yˡ⁻¹ⱼ + bˡᵢ."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Aici yˡ⁻¹ⱼ este ieșirea neuronului j din stratul de dedesubt, wˡⱼᵢ este ponderea de la j la i, iar bˡᵢ este biasul neuronului i. Suma trece prin toți neuronii stratului l−1.",
+        "ro": "Aici yˡ⁻¹ⱼ este ieșirea neuronului j din stratul de dedesubt, wˡⱼᵢ este ponderea de la j la i, iar bˡᵢ este biasul neuronului i. Suma trece prin toți neuronii stratului l−1."
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-urile 32-37 (lecția 4e) scriau invers: acolo wᵢⱼ ducea în scorul zᵢ, primul indice era destinația. De la slide-ul 39, primul indice este sursa.",
+        "ro": "Slide-urile 32-37 (lecția 4e) scriau invers: acolo wᵢⱼ ducea în scorul zᵢ, primul indice era destinația. De la slide-ul 39, primul indice este sursa."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s05",
+   "title": {
+    "en": "Calculează z",
+    "ro": "Calculează z"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 39",
+    "ro": "Cursul 4 · slide 39"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04f-e02",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Un neuron primește y = (0,5; 1; −1) pe ponderile (2; −1; 0,5) și are biasul 0,3. Calculează z = Σ w·y + b.",
+      "ro": "Un neuron primește y = (0,5; 1; −1) pe ponderile (2; −1; 0,5) și are biasul 0,3. Calculează z = Σ w·y + b."
+     },
+     "fields": [
+      {
+       "id": "z",
+       "label": {
+        "en": "z",
+        "ro": "z"
+       },
+       "kind": "num",
+       "formula": "2*0.5+(-1)*1+0.5*(-1)+0.3",
+       "expected": -0.2
+      }
+     ],
+     "detectors": [
+      {
+       "field": "z",
+       "formula": "2*0.5+(-1)*1+0.5*(-1)",
+       "message": {
+        "en": "Ai uitat biasul b.",
+        "ro": "Ai uitat biasul b."
+       }
+      },
+      {
+       "field": "z",
+       "formula": "2+(-1)+0.5+0.3",
+       "message": {
+        "en": "Ai adunat ponderile fără să le înmulțești cu ieșirile.",
+        "ro": "Ai adunat ponderile fără să le înmulțești cu ieșirile."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Înmulțește fiecare pondere cu ieșirea ei.",
+       "ro": "Înmulțește fiecare pondere cu ieșirea ei."
+      },
+      {
+       "en": "1 − 1 − 0,5 + 0,3",
+       "ro": "1 − 1 − 0,5 + 0,3"
+      },
+      {
+       "en": "−0,2",
+       "ro": "−0,2"
+      }
+     ],
+     "solution": {
+      "en": "z = 2·0,5 + (−1)·1 + 0,5·(−1) + 0,3 = −0,2.",
+      "ro": "z = 2·0,5 + (−1)·1 + 0,5·(−1) + 0,3 = −0,2."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același neuron, dar ieșirile sunt y = (1; 0; 2). Calculează z.",
+        "ro": "Același neuron, dar ieșirile sunt y = (1; 0; 2). Calculează z."
+       },
+       "fields": [
+        {
+         "id": "z",
+         "formula": "2*1+(-1)*0+0.5*2+0.3",
+         "expected": 3.3
+        }
+       ],
+       "solution": {
+        "en": "2 + 0 + 1 + 0,3 = 3,3",
+        "ro": "2 + 0 + 1 + 0,3 = 3,3"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s06",
+   "title": {
+    "en": "Activarea",
+    "ro": "Activarea"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 39",
+    "ro": "Cursul 4 · slide 39"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "yˡᵢ = a(zˡᵢ): activarea neuronului este funcția a aplicată lui z.",
+      "ro": "yˡᵢ = a(zˡᵢ): activarea neuronului este funcția a aplicată lui z."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "a este funcția de activare; în curs, sigmoida. L este ultimul strat. Stratul 1 nu are z: ieșirile lui sunt chiar intrările x.",
+        "ro": "a este funcția de activare; în curs, sigmoida. L este ultimul strat. Stratul 1 nu are z: ieșirile lui sunt chiar intrările x."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s07",
+   "title": {
+    "en": "Doi pași",
+    "ro": "Doi pași"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 40",
+    "ro": "Cursul 4 · slide 40"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Algoritmul se numește backpropagation (propagarea înapoi a erorii) și are doi pași. Pasul înainte (forward step) calculează ieșirea; pasul înapoi (backward step) calculează cât a greșit fiecare pondere și o corectează.",
+        "ro": "Algoritmul se numește backpropagation (propagarea înapoi a erorii) și are doi pași. Pasul înainte (forward step) calculează ieșirea; pasul înapoi (backward step) calculează cât a greșit fiecare pondere și o corectează."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 190'><title>Cei doi pași</title><rect class='fg fill-bg' stroke-width='2' x='24' y='78' width='56' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='52' y='102' text-anchor='middle'>strat 1</text><rect class='fg fill-bg' stroke-width='2' x='102' y='78' width='56' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='130' y='102' text-anchor='middle'>strat 2</text><rect class='fg fill-bg' stroke-width='2' x='180' y='78' width='56' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='208' y='102' text-anchor='middle'>strat 3</text><rect class='fg fill-bg' stroke-width='2' x='258' y='78' width='56' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='286' y='102' text-anchor='middle'>strat 4</text><path class='accent' stroke-width='3' fill='none' d='M52 74 C 100 24 238 24 286 74'/><line class='accent' stroke-width='3' x1='284' y1='66' x2='288' y2='74'/><polygon class='fill-accent accent' points='286,76 275,64 293,64'/><path class='warn' stroke-width='3' fill='none' d='M286 120 C 238 170 100 170 52 120'/><polygon class='fill-warn warn' points='52,118 63,130 45,130'/><text class='accent' font-size='14' font-weight='700' x='170' y='20' text-anchor='middle'>înainte: z și y, strat cu strat</text><text class='warn' font-size='14' font-weight='700' x='170' y='184' text-anchor='middle'>înapoi: δ, gradienți, actualizare</text></svg>",
+        "alt": {
+         "en": "Patru straturi; o săgeată de sus de la stratul 1 la 4 (înainte) și una de jos de la 4 la 1 (înapoi)",
+         "ro": "Patru straturi; o săgeată de sus de la stratul 1 la 4 (înainte) și una de jos de la 4 la 1 (înapoi)"
+        },
+        "caption": {
+         "en": "Cei doi pași.",
+         "ro": "Cei doi pași."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s08",
+   "title": {
+    "en": "Pasul înainte",
+    "ro": "Pasul înainte"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 41",
+    "ro": "Cursul 4 · slide 41"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Strat cu strat, fiecare neuron calculează z, apoi y. Ieșirea unui strat este intrarea următorului.",
+        "ro": "Strat cu strat, fiecare neuron calculează z, apoi y. Ieșirea unui strat este intrarea următorului."
+       }
+      },
+      {
+       "points": [
+        {
+         "en": "Salvăm y de la fiecare strat: gradientul ponderilor are nevoie de ele.",
+         "ro": "Salvăm y de la fiecare strat: gradientul ponderilor are nevoie de ele."
+        },
+        {
+         "en": "Pseudocodul din slide salvează și z; derivata sigmoidei se poate scoate din y sau din z.",
+         "ro": "Pseudocodul din slide salvează și z; derivata sigmoidei se poate scoate din y sau din z."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s09",
+   "title": {
+    "en": "Pasul înapoi",
+    "ro": "Pasul înapoi"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 42",
+    "ro": "Cursul 4 · slide 42"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pasul înapoi începe cu eroarea stratului L. Apoi, pe fiecare strat, de la ieșire spre intrare:",
+        "ro": "Pasul înapoi începe cu eroarea stratului L. Apoi, pe fiecare strat, de la ieșire spre intrare:"
+       }
+      },
+      {
+       "points": [
+        {
+         "en": "trimitem eroarea δ la stratul de dedesubt;",
+         "ro": "trimitem eroarea δ la stratul de dedesubt;"
+        },
+        {
+         "en": "calculăm gradienții pentru ponderile stratului;",
+         "ro": "calculăm gradienții pentru ponderile stratului;"
+        },
+        {
+         "en": "actualizăm ponderile stratului.",
+         "ro": "actualizăm ponderile stratului."
+        }
+       ]
+      },
+      {
+       "note": {
+        "en": "Și în ordinea asta, fiecare δ se calculează cu ponderile vechi: un strat își schimbă ponderile abia după ce a trimis eroarea în jos. Foaia de laborator actualizează toate ponderile la sfârșit; numerele ies la fel.",
+        "ro": "Și în ordinea asta, fiecare δ se calculează cu ponderile vechi: un strat își schimbă ponderile abia după ce a trimis eroarea în jos. Foaia de laborator actualizează toate ponderile la sfârșit; numerele ies la fel."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s10",
+   "title": {
+    "en": "Ordinea contează",
+    "ro": "Ordinea contează"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 42",
+    "ro": "Cursul 4 · slide 42"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04f-q03",
+     "question": {
+      "en": "Slide-ul spune: nu actualiza ponderile înainte de a propaga eroarea. De ce?",
+      "ro": "Slide-ul spune: nu actualiza ponderile înainte de a propaga eroarea. De ce?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Eroarea stratului de jos se calculează cu ponderile vechi ale stratului de sus",
+        "ro": "Eroarea stratului de jos se calculează cu ponderile vechi ale stratului de sus"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: gradientul are sens doar pentru rețeaua care a făcut ieșirea.",
+        "ro": "Corect: gradientul are sens doar pentru rețeaua care a făcut ieșirea."
+       }
+      },
+      {
+       "text": {
+        "en": "Actualizarea e prea lentă și ar încetini propagarea",
+        "ro": "Actualizarea e prea lentă și ar încetini propagarea"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu e vorba de viteză, ci de ce valori folosești în formulă.",
+        "ro": "Nu e vorba de viteză, ci de ce valori folosești în formulă."
+       },
+       "misconception": "pondere-noua-in-delta"
+      },
+      {
+       "text": {
+        "en": "Ca să nu depășim numărul de straturi",
+        "ro": "Ca să nu depășim numărul de straturi"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Numărul straturilor nu e afectat de actualizare.",
+        "ro": "Numărul straturilor nu e afectat de actualizare."
+       },
+       "misconception": "pondere-noua-in-delta"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s11",
+   "title": {
+    "en": "Eroarea unui neuron",
+    "ro": "Eroarea unui neuron"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 43",
+    "ro": "Cursul 4 · slide 43"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Eroarea neuronului i din stratul l este δˡᵢ = dC/dz. Spune cât se schimbă costul dacă z se mișcă puțin.",
+        "ro": "Eroarea neuronului i din stratul l este δˡᵢ = dC/dz. Spune cât se schimbă costul dacă z se mișcă puțin."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 150'><title>Un mic Δz schimbă costul</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><circle class='fg fill-bg' stroke-width='2.5' cx='60' cy='75' r='28'><title>z</title></circle><text class='fg' font-size='15' font-weight='700' x='60' y='80' text-anchor='middle'>zˡᵢ</text><line class='muted' stroke-width='2' x1='90' y1='75' x2='160' y2='75' marker-end='url(#ah-muted)'/><text class='warn' font-size='15' font-weight='700' x='125' y='62' text-anchor='middle'>+ Δz</text><rect class='fg fill-bg' stroke-width='2.5' x='165' y='50' width='60' height='50' rx='8'><title>costul</title></rect><text class='fg' font-size='20' font-weight='700' x='195' y='82' text-anchor='middle'>C</text><line class='muted' stroke-width='2' x1='226' y1='75' x2='296' y2='75' marker-end='url(#ah-muted)'/><text class='accent' font-size='14' font-weight='700' x='262' y='66' text-anchor='middle'>se schimbă</text><text class='fg' font-size='15' font-weight='700' x='170' y='130' text-anchor='middle'>schimbarea ≈ δ · Δz, cu δ = dC/dz</text></svg>",
+        "alt": {
+         "en": "Neuronul z, o mică modificare Δz, costul C se schimbă",
+         "ro": "Neuronul z, o mică modificare Δz, costul C se schimbă"
+        },
+        "caption": {
+         "en": "Costul se schimbă cu δ ori Δz.",
+         "ro": "Costul se schimbă cu δ ori Δz."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s12",
+   "title": {
+    "en": "De ce δ",
+    "ro": "De ce δ"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 44",
+    "ro": "Cursul 4 · slide 44"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "δ este direct legat de ponderi, are mărime și semn, și arată când nu mai avem ce corecta.",
+      "ro": "δ este direct legat de ponderi, are mărime și semn, și arată când nu mai avem ce corecta."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Mărimea lui δ spune cât contează neuronul, semnul spune încotro mișcăm. Formulele sunt valabile pentru orice activare: cursul o notează σ, iar derivata ei σ′.",
+        "ro": "Mărimea lui δ spune cât contează neuronul, semnul spune încotro mișcăm. Formulele sunt valabile pentru orice activare: cursul o notează σ, iar derivata ei σ′."
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-ul: δ aproape 0 înseamnă că nu mai putem corecta. Doar într-un loc plat; și un neuron saturat are δ mic.",
+        "ro": "Slide-ul: δ aproape 0 înseamnă că nu mai putem corecta. Doar într-un loc plat; și un neuron saturat are δ mic."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s13",
+   "title": {
+    "en": "Eroarea ieșirii",
+    "ro": "Eroarea ieșirii"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 45",
+    "ro": "Cursul 4 · slide 45"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "δᴸᵢ = dC/dyᴸᵢ · a′(zᴸᵢ); cu entropie încrucișată și softmax, δᴸᵢ = yᵢ − tᵢ.",
+      "ro": "δᴸᵢ = dC/dyᴸᵢ · a′(zᴸᵢ); cu entropie încrucișată și softmax, δᴸᵢ = yᵢ − tᵢ."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Slide-ul scrie −(tᵢ − yᵢ), același număr. Foaia de laborator scrie direct y − t.",
+        "ro": "Slide-ul scrie −(tᵢ − yᵢ), același număr. Foaia de laborator scrie direct y − t."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s14",
+   "title": {
+    "en": "Eroarea ieșirii din foaie",
+    "ro": "Eroarea ieșirii din foaie"
+   },
+   "kicker": {
+    "en": "Laborator · foaia de backprop",
+    "ro": "Laborator · foaia de backprop"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04f-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Rețeaua din foaie are o ieșire cu y³ = 1 (σ(6) citit ca în foaie) și ținta t = 0. Calculează δ³ = y − t.",
+      "ro": "Rețeaua din foaie are o ieșire cu y³ = 1 (σ(6) citit ca în foaie) și ținta t = 0. Calculează δ³ = y − t."
+     },
+     "fields": [
+      {
+       "id": "d",
+       "label": {
+        "en": "δ³",
+        "ro": "δ³"
+       },
+       "kind": "num",
+       "formula": "1-0",
+       "expected": 1
+      }
+     ],
+     "detectors": [
+      {
+       "field": "d",
+       "formula": "0-1",
+       "message": {
+        "en": "Ai scăzut invers. δ = y − t.",
+        "ro": "Ai scăzut invers. δ = y − t."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "δ = y − t.",
+       "ro": "δ = y − t."
+      },
+      {
+       "en": "1 − 0",
+       "ro": "1 − 0"
+      },
+      {
+       "en": "1",
+       "ro": "1"
+      }
+     ],
+     "solution": {
+      "en": "δ³ = 1 − 0 = 1.",
+      "ro": "δ³ = 1 − 0 = 1."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "O ieșire y = 0,8 și ținta t = 1. Calculează δ.",
+        "ro": "O ieșire y = 0,8 și ținta t = 1. Calculează δ."
+       },
+       "fields": [
+        {
+         "id": "d",
+         "formula": "0.8-1",
+         "expected": -0.2
+        }
+       ],
+       "solution": {
+        "en": "0,8 − 1 = −0,2: negativ, ieșirea trebuie să crească",
+        "ro": "0,8 − 1 = −0,2: negativ, ieșirea trebuie să crească"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s15",
+   "title": {
+    "en": "De unde vine eroarea unui neuron ascuns",
+    "ro": "De unde vine eroarea unui neuron ascuns"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 46",
+    "ro": "Cursul 4 · slide 46"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Un neuron ascuns nu are țintă. Eroarea lui vine de sus: neuronul i trimite ieșirea spre toți neuronii k din stratul următor, deci poartă o parte din vina fiecăruia.",
+        "ro": "Un neuron ascuns nu are țintă. Eroarea lui vine de sus: neuronul i trimite ieșirea spre toți neuronii k din stratul următor, deci poartă o parte din vina fiecăruia."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 190'><title>Neuronul i trimite spre toți k</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><circle class='accent fill-bg' stroke-width='2.5' cx='70' cy='95' r='24'><title>neuronul i al stratului l</title></circle><text class='accent' font-size='16' font-weight='700' x='70' y='100' text-anchor='middle'>i</text><text class='muted' font-size='14' x='70' y='140' text-anchor='middle'>strat l</text><text class='muted' font-size='14' x='268' y='186' text-anchor='middle'>strat l + 1</text><line class='muted' stroke-width='2.2' x1='96' y1='95' x2='244' y2='45' marker-end='url(#ah-muted)'/><circle class='warn fill-bg' stroke-width='2.5' cx='268' cy='45' r='22'><title>neuronul 1</title></circle><text class='warn' font-size='14' font-weight='700' x='268' y='50' text-anchor='middle'>k=1</text><text class='accent' font-size='14' font-weight='700' x='150' y='60' text-anchor='middle'>wᵢ₁</text><line class='muted' stroke-width='2.2' x1='96' y1='95' x2='244' y2='145' marker-end='url(#ah-muted)'/><circle class='warn fill-bg' stroke-width='2.5' cx='268' cy='145' r='22'><title>neuronul 2</title></circle><text class='warn' font-size='14' font-weight='700' x='268' y='150' text-anchor='middle'>k=2</text><text class='accent' font-size='14' font-weight='700' x='150' y='140' text-anchor='middle'>wᵢ₂</text><text class='warn' font-size='14' x='268' y='14' text-anchor='middle'>δₖ vine de sus</text></svg>",
+        "alt": {
+         "en": "Neuronul i din stratul l, cu săgeți spre doi neuroni k din stratul l+1",
+         "ro": "Neuronul i din stratul l, cu săgeți spre doi neuroni k din stratul l+1"
+        },
+        "caption": {
+         "en": "Eroarea se întoarce pe aceleași ponderi.",
+         "ro": "Eroarea se întoarce pe aceleași ponderi."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s16",
+   "title": {
+    "en": "Lanțul peste k",
+    "ro": "Lanțul peste k"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 46",
+    "ro": "Cursul 4 · slide 46"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p1",
+     "claim": {
+      "en": "Cât este δˡᵢ = dC/dz în funcție de erorile stratului de sus?",
+      "ro": "Cât este δˡᵢ = dC/dz în funcție de erorile stratului de sus?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$dz^{l+1}_k / dy^l_i = w^{l+1}_{ik}$, ponderea de la i la k.",
+        "ro": "$dz^{l+1}_k / dy^l_i = w^{l+1}_{ik}$, ponderea de la i la k."
+       },
+       "predict": {
+        "question": {
+         "en": "Cât este $dz^{l+1}_k / dy^l_i$, când $z^{l+1}_k = \\sum_j w_{jk}\\, y^l_j + b$?",
+         "ro": "Cât este $dz^{l+1}_k / dy^l_i$, când $z^{l+1}_k = \\sum_j w_{jk}\\, y^l_j + b$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$w^{l+1}_{ik}$, ponderea de la i la k",
+           "ro": "$w^{l+1}_{ik}$, ponderea de la i la k"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: yᵢ apare în suma lui zₖ înmulțit cu această pondere.",
+           "ro": "Corect: yᵢ apare în suma lui zₖ înmulțit cu această pondere."
+          }
+         },
+         {
+          "text": {
+           "en": "$y^l_i$",
+           "ro": "$y^l_i$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Nu: yᵢ este variabila, iar ponderea este constantă.",
+           "ro": "Nu: yᵢ este variabila, iar ponderea este constantă."
+          },
+          "misconception": "derivata-din-alt-loc"
+         },
+         {
+          "text": {
+           "en": "1",
+           "ro": "1"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Doar derivata în raport cu biasul este 1.",
+           "ro": "Doar derivata în raport cu biasul este 1."
+          },
+          "misconception": "derivata-din-alt-loc"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Pentru sigmoidă, $\\sigma'(z) = y(1 - y)$.",
+        "ro": "Pentru sigmoidă, $\\sigma'(z) = y(1 - y)$."
+       },
+       "predict": {
+        "question": {
+         "en": "Al treilea factor, $dy^l_i / dz^l_i$, este derivata activării, $\\sigma'(z^l_i)$. Pentru sigmoidă, $\\sigma'$ este:",
+         "ro": "Al treilea factor, $dy^l_i / dz^l_i$, este derivata activării, $\\sigma'(z^l_i)$. Pentru sigmoidă, $\\sigma'$ este:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$y(1 - y)$",
+           "ro": "$y(1 - y)$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect, ca în lecția 4a.",
+           "ro": "Corect, ca în lecția 4a."
+          }
+         },
+         {
+          "text": {
+           "en": "$1 - y$",
+           "ro": "$1 - y$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Lipsește un factor y.",
+           "ro": "Lipsește un factor y."
+          },
+          "misconception": "derivata-din-alt-loc"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Scoatem factorii care nu depind de k în fața sumei: $\\delta^l_i = \\sigma'(z^l_i)\\sum_k w^{l+1}_{ik}\\,\\delta^{l+1}_k$.",
+        "ro": "Scoatem factorii care nu depind de k în fața sumei: $\\delta^l_i = \\sigma'(z^l_i)\\sum_k w^{l+1}_{ik}\\,\\delta^{l+1}_k$."
+       }
+      }
+     ],
+     "end": {
+      "en": "Eroarea de jos este suma erorilor de sus, trimisă înapoi pe ponderi și înmulțită cu panta activării.",
+      "ro": "Eroarea de jos este suma erorilor de sus, trimisă înapoi pe ponderi și înmulțită cu panta activării."
+     },
+     "given": {
+      "en": "Costul depinde de $z^l_i$ prin $y^l_i$ și prin toți $z^{l+1}_k$ din stratul următor. Adunăm pe k: $\\delta^l_i = \\sum_k \\delta^{l+1}_k \\cdot \\frac{dz^{l+1}_k}{dy^l_i}\\cdot\\frac{dy^l_i}{dz^l_i}$.",
+      "ro": "Costul depinde de $z^l_i$ prin $y^l_i$ și prin toți $z^{l+1}_k$ din stratul următor. Adunăm pe k: $\\delta^l_i = \\sum_k \\delta^{l+1}_k \\cdot \\frac{dz^{l+1}_k}{dy^l_i}\\cdot\\frac{dy^l_i}{dz^l_i}$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s17",
+   "title": {
+    "en": "Formula erorii ascunse",
+    "ro": "Formula erorii ascunse"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 46",
+    "ro": "Cursul 4 · slide 46"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "δˡᵢ = σ′(zˡᵢ) · Σₖ wˡ⁺¹ᵢₖ · δˡ⁺¹ₖ, cu σ′ = y(1 − y).",
+      "ro": "δˡᵢ = σ′(zˡᵢ) · Σₖ wˡ⁺¹ᵢₖ · δˡ⁺¹ₖ, cu σ′ = y(1 − y)."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Aici k parcurge neuronii din stratul l+1, wˡ⁺¹ᵢₖ este ponderea de la neuronul i la neuronul k, iar δˡ⁺¹ₖ este eroarea lui k. Se folosesc ponderile vechi.",
+        "ro": "Aici k parcurge neuronii din stratul l+1, wˡ⁺¹ᵢₖ este ponderea de la neuronul i la neuronul k, iar δˡ⁺¹ₖ este eroarea lui k. Se folosesc ponderile vechi."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s18",
+   "title": {
+    "en": "Calculează δ ascuns",
+    "ro": "Calculează δ ascuns"
+   },
+   "kicker": {
+    "en": "Laborator · foaia de backprop",
+    "ro": "Laborator · foaia de backprop"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04f-e05",
+     "status": "verified-twice",
+     "statement": {
+      "en": "În rețeaua din foaie, neuronul 1 din stratul 2 are y = 0,5 și trimite spre o singură ieșire, cu pondere 8 și δ³ = 1. Calculează δ²₁ = y(1 − y) · w · δ³.",
+      "ro": "În rețeaua din foaie, neuronul 1 din stratul 2 are y = 0,5 și trimite spre o singură ieșire, cu pondere 8 și δ³ = 1. Calculează δ²₁ = y(1 − y) · w · δ³."
+     },
+     "fields": [
+      {
+       "id": "d",
+       "label": {
+        "en": "δ²₁",
+        "ro": "δ²₁"
+       },
+       "kind": "num",
+       "formula": "0.5*(1-0.5)*8*1",
+       "expected": 2
+      }
+     ],
+     "detectors": [
+      {
+       "field": "d",
+       "formula": "8*1",
+       "message": {
+        "en": "Ai uitat factorul y(1 − y).",
+        "ro": "Ai uitat factorul y(1 − y)."
+       }
+      },
+      {
+       "field": "d",
+       "formula": "0.5*(1-0.5)*4*1",
+       "message": {
+        "en": "Ai luat ponderea 4, a celuilalt neuron.",
+        "ro": "Ai luat ponderea 4, a celuilalt neuron."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "y(1 − y) = 0,25.",
+       "ro": "y(1 − y) = 0,25."
+      },
+      {
+       "en": "0,25 · 8 · 1",
+       "ro": "0,25 · 8 · 1"
+      },
+      {
+       "en": "2",
+       "ro": "2"
+      }
+     ],
+     "solution": {
+      "en": "δ²₁ = 0,5 · 0,5 · 8 · 1 = 2.",
+      "ro": "δ²₁ = 0,5 · 0,5 · 8 · 1 = 2."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Un neuron are y = 0,9, trimite spre o ieșire cu pondere −2 și δ = 0,5. Calculează δ.",
+        "ro": "Un neuron are y = 0,9, trimite spre o ieșire cu pondere −2 și δ = 0,5. Calculează δ."
+       },
+       "fields": [
+        {
+         "id": "d",
+         "formula": "0.9*0.1*(-2)*0.5",
+         "expected": -0.09
+        }
+       ],
+       "solution": {
+        "en": "0,09 · (−2) · 0,5 = −0,09",
+        "ro": "0,09 · (−2) · 0,5 = −0,09"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s19",
+   "title": {
+    "en": "Același strat, altă pondere",
+    "ro": "Același strat, altă pondere"
+   },
+   "kicker": {
+    "en": "Laborator · foaia de backprop",
+    "ro": "Laborator · foaia de backprop"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04f-e06",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Neuronul 2 din stratul 2 are y = 0,5 și pondere 4 spre aceeași ieșire (δ³ = 1). Calculează δ²₂.",
+      "ro": "Neuronul 2 din stratul 2 are y = 0,5 și pondere 4 spre aceeași ieșire (δ³ = 1). Calculează δ²₂."
+     },
+     "fields": [
+      {
+       "id": "d",
+       "label": {
+        "en": "δ²₂",
+        "ro": "δ²₂"
+       },
+       "kind": "num",
+       "formula": "0.5*(1-0.5)*4*1",
+       "expected": 1
+      }
+     ],
+     "detectors": [
+      {
+       "field": "d",
+       "formula": "0.5*(1-0.5)*8*1",
+       "message": {
+        "en": "Ai folosit ponderea 8, a neuronului 1. Fiecare neuron folosește ponderea lui.",
+        "ro": "Ai folosit ponderea 8, a neuronului 1. Fiecare neuron folosește ponderea lui."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Aceeași formulă, altă pondere.",
+       "ro": "Aceeași formulă, altă pondere."
+      },
+      {
+       "en": "0,25 · 4 · 1",
+       "ro": "0,25 · 4 · 1"
+      },
+      {
+       "en": "1",
+       "ro": "1"
+      }
+     ],
+     "solution": {
+      "en": "δ²₂ = 0,25 · 4 · 1 = 1, jumătate din δ²₁: ponderea 8 transmite de două ori mai multă vină decât ponderea 4.",
+      "ro": "δ²₂ = 0,25 · 4 · 1 = 1, jumătate din δ²₁: ponderea 8 transmite de două ori mai multă vină decât ponderea 4."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același neuron, dar ponderea este −4. Calculează δ²₂.",
+        "ro": "Același neuron, dar ponderea este −4. Calculează δ²₂."
+       },
+       "fields": [
+        {
+         "id": "d",
+         "formula": "0.25*(-4)*1",
+         "expected": -1
+        }
+       ],
+       "solution": {
+        "en": "−1: semn opus",
+        "ro": "−1: semn opus"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s21",
+   "title": {
+    "en": "Gradientul unei ponderi",
+    "ro": "Gradientul unei ponderi"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 47",
+    "ro": "Cursul 4 · slide 47"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "dC/dwˡₖᵢ = δˡᵢ · yˡ⁻¹ₖ: eroarea neuronului în care intră, ori ieșirea neuronului din care pleacă.",
+      "ro": "dC/dwˡₖᵢ = δˡᵢ · yˡ⁻¹ₖ: eroarea neuronului în care intră, ori ieșirea neuronului din care pleacă."
+     },
+     "body": [
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 160'><title>Gradientul unei ponderi</title><circle class='fg fill-bg' stroke-width='2' cx='50' cy='80' r='24'><title>k</title></circle><text class='fg' font-size='14' font-weight='700' x='50' y='85' text-anchor='middle'>yˡ⁻¹ₖ</text><line class='warn' stroke-width='4' x1='76' y1='80' x2='214' y2='80'><title>ponderea</title></line><text class='warn' font-size='15' font-weight='700' x='145' y='66' text-anchor='middle'>wˡₖᵢ</text><circle class='accent fill-bg' stroke-width='2.5' cx='240' cy='80' r='26'><title>i</title></circle><text class='accent' font-size='15' font-weight='700' x='240' y='85' text-anchor='middle'>δˡᵢ</text><text class='fg' font-size='15' font-weight='700' x='170' y='134' text-anchor='middle'>dC/dw = δˡᵢ · yˡ⁻¹ₖ</text><text class='muted' font-size='14' x='6' y='40' text-anchor='start'>de unde pleacă</text><text class='muted' font-size='14' x='300' y='40' text-anchor='end'>unde intră</text></svg>",
+        "alt": {
+         "en": "Ponderea de la neuronul k la neuronul i, cu δ la capătul de intrare și y la cel de plecare",
+         "ro": "Ponderea de la neuronul k la neuronul i, cu δ la capătul de intrare și y la cel de plecare"
+        },
+        "caption": {
+         "en": "Un capăt dă δ, celălalt dă y.",
+         "ro": "Un capăt dă δ, celălalt dă y."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s22",
+   "title": {
+    "en": "Calculează un gradient",
+    "ro": "Calculează un gradient"
+   },
+   "kicker": {
+    "en": "Laborator · foaia de backprop",
+    "ro": "Laborator · foaia de backprop"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04f-e08",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Ponderea de ieșire w³₁₁ merge de la neuronul 1 din stratul 2 (y = 0,5) la ieșire (δ³ = 1). Calculează dC/dw = δ³ · y.",
+      "ro": "Ponderea de ieșire w³₁₁ merge de la neuronul 1 din stratul 2 (y = 0,5) la ieșire (δ³ = 1). Calculează dC/dw = δ³ · y."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "dC/dw",
+        "ro": "dC/dw"
+       },
+       "kind": "num",
+       "formula": "1*0.5",
+       "expected": 0.5
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "1*8",
+       "message": {
+        "en": "Ai înmulțit cu ponderea în loc de ieșirea y a neuronului din care pleacă.",
+        "ro": "Ai înmulțit cu ponderea în loc de ieșirea y a neuronului din care pleacă."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "δ de la capătul de intrare ori y de la cel de plecare.",
+       "ro": "δ de la capătul de intrare ori y de la cel de plecare."
+      },
+      {
+       "en": "1 · 0,5",
+       "ro": "1 · 0,5"
+      },
+      {
+       "en": "0,5",
+       "ro": "0,5"
+      }
+     ],
+     "solution": {
+      "en": "dC/dw = 1 · 0,5 = 0,5.",
+      "ro": "dC/dw = 1 · 0,5 = 0,5."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Altă pondere: pleacă din neuronul cu y = 0,2, intră în neuronul cu δ = −3. Calculează dC/dw.",
+        "ro": "Altă pondere: pleacă din neuronul cu y = 0,2, intră în neuronul cu δ = −3. Calculează dC/dw."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "(-3)*0.2",
+         "expected": -0.6
+        }
+       ],
+       "solution": {
+        "en": "−0,6",
+        "ro": "−0,6"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s23",
+   "title": {
+    "en": "Gradientul unui bias",
+    "ro": "Gradientul unui bias"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 48",
+    "ro": "Cursul 4 · slide 48"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "dC/dbˡᵢ = δˡᵢ.",
+      "ro": "dC/dbˡᵢ = δˡᵢ."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Biasul intră în z cu coeficientul 1 (dz/db = 1), deci gradientul lui este chiar eroarea neuronului.",
+        "ro": "Biasul intră în z cu coeficientul 1 (dz/db = 1), deci gradientul lui este chiar eroarea neuronului."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s24",
+   "title": {
+    "en": "Actualizarea",
+    "ro": "Actualizarea"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 4",
+    "ro": "Cursul 4 · slide 4"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04f-e09",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Actualizarea este w = w − η · dC/dw, unde η este rata de învățare. Ponderea de ieșire este 8, dC/dw = 0,5, iar η = 0,5. Calculează noua pondere.",
+      "ro": "Actualizarea este w = w − η · dC/dw, unde η este rata de învățare. Ponderea de ieșire este 8, dC/dw = 0,5, iar η = 0,5. Calculează noua pondere."
+     },
+     "fields": [
+      {
+       "id": "w",
+       "label": {
+        "en": "w nou",
+        "ro": "w nou"
+       },
+       "kind": "num",
+       "formula": "8-0.5*0.5",
+       "expected": 7.75
+      }
+     ],
+     "detectors": [
+      {
+       "field": "w",
+       "formula": "8+0.5*0.5",
+       "message": {
+        "en": "Ai adunat. Gradientul se scade: mergem contra lui.",
+        "ro": "Ai adunat. Gradientul se scade: mergem contra lui."
+       }
+      },
+      {
+       "field": "w",
+       "formula": "8-0.5",
+       "message": {
+        "en": "Ai uitat rata η.",
+        "ro": "Ai uitat rata η."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "w − η · gradient.",
+       "ro": "w − η · gradient."
+      },
+      {
+       "en": "8 − 0,5 · 0,5",
+       "ro": "8 − 0,5 · 0,5"
+      },
+      {
+       "en": "7,75",
+       "ro": "7,75"
+      }
+     ],
+     "solution": {
+      "en": "w nou = 8 − 0,5 · 0,5 = 7,75.",
+      "ro": "w nou = 8 − 0,5 · 0,5 = 7,75."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pondere −3, gradient 4, η = 0,5. Calculează w nou.",
+        "ro": "Pondere −3, gradient 4, η = 0,5. Calculează w nou."
+       },
+       "fields": [
+        {
+         "id": "w",
+         "formula": "-3-0.5*4",
+         "expected": -5
+        }
+       ],
+       "solution": {
+        "en": "−3 − 2 = −5",
+        "ro": "−3 − 2 = −5"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s20",
+   "title": {
+    "en": "Ponderile vechi",
+    "ro": "Ponderile vechi"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 42",
+    "ro": "Cursul 4 · slide 42"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04f-q07",
+     "question": {
+      "en": "Ponderea de ieșire a trecut de la 8 la 7,75 după actualizare. Ce valoare folosești la calculul lui δ²₁?",
+      "ro": "Ponderea de ieșire a trecut de la 8 la 7,75 după actualizare. Ce valoare folosești la calculul lui δ²₁?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "8, cea de dinaintea actualizării",
+        "ro": "8, cea de dinaintea actualizării"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: δ se calculează pentru rețeaua care a făcut greșeala.",
+        "ro": "Corect: δ se calculează pentru rețeaua care a făcut greșeala."
+       }
+      },
+      {
+       "text": {
+        "en": "7,75, cea nouă",
+        "ro": "7,75, cea nouă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Actualizarea vine după ce toate erorile sunt calculate.",
+        "ro": "Actualizarea vine după ce toate erorile sunt calculate."
+       },
+       "misconception": "pondere-noua-in-delta"
+      },
+      {
+       "text": {
+        "en": "Media celor două",
+        "ro": "Media celor două"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu se face medie: se folosește pondere veche.",
+        "ro": "Nu se face medie: se folosește pondere veche."
+       },
+       "misconception": "pondere-noua-in-delta"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s25",
+   "title": {
+    "en": "Aceeași pondere, trei litere",
+    "ro": "Aceeași pondere, trei litere"
+   },
+   "kicker": {
+    "en": "Laborator · foaia de backprop",
+    "ro": "Laborator · foaia de backprop"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04f-q10",
+     "question": {
+      "en": "Curs: wˡᵢⱼ merge de la i (stratul l−1) la j (stratul l), iar gradientul se scrie δˡⱼ · yˡ⁻¹ᵢ. Foaia de laborator scrie wᵢⱼˡ la fel. Documentul cu regula lanțului scrie Wⱼᵢ. Ce înseamnă Wⱼᵢ?",
+      "ro": "Curs: wˡᵢⱼ merge de la i (stratul l−1) la j (stratul l), iar gradientul se scrie δˡⱼ · yˡ⁻¹ᵢ. Foaia de laborator scrie wᵢⱼˡ la fel. Documentul cu regula lanțului scrie Wⱼᵢ. Ce înseamnă Wⱼᵢ?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Aceeași pondere: j este destinația, i este sursa",
+        "ro": "Aceeași pondere: j este destinația, i este sursa"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: documentul aranjează indicii invers. Ponderea de la i la j se scrie wᵢⱼ în slide și în foaie, Wⱼᵢ în documentul cu regula lanțului. Verifică mereu care indice e destinația.",
+        "ro": "Corect: documentul aranjează indicii invers. Ponderea de la i la j se scrie wᵢⱼ în slide și în foaie, Wⱼᵢ în documentul cu regula lanțului. Verifică mereu care indice e destinația."
+       }
+      },
+      {
+       "text": {
+        "en": "Altă pondere, de la j la i",
+        "ro": "Altă pondere, de la j la i"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Este aceeași pondere, doar cu indicii scriși în altă ordine.",
+        "ro": "Este aceeași pondere, doar cu indicii scriși în altă ordine."
+       },
+       "misconception": "indici-inversati"
+      },
+      {
+       "text": {
+        "en": "Biasul neuronului i",
+        "ro": "Biasul neuronului i"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Biasul are un singur indice.",
+        "ro": "Biasul are un singur indice."
+       },
+       "misconception": "indici-inversati"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s26",
+   "title": {
+    "en": "Tot algoritmul pe o hartă",
+    "ro": "Tot algoritmul pe o hartă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 40-48",
+    "ro": "Cursul 4 · slide 40-48"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cei cinci pași, în ordine. Actualizarea vine ultima, după ce toate erorile și gradienții sunt gata.",
+        "ro": "Cei cinci pași, în ordine. Actualizarea vine ultima, după ce toate erorile și gradienții sunt gata."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 270'><title>Tot algoritmul</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><rect class='accent fill-bg' stroke-width='2.5' x='20' y='12' width='300' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='170' y='36' text-anchor='middle'>1  înainte: z și y, strat cu strat</text><line class='muted' stroke-width='2' x1='170' y1='51' x2='170' y2='63' marker-end='url(#ah-muted)'/><rect class='warn fill-bg' stroke-width='2.5' x='20' y='64' width='300' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='170' y='88' text-anchor='middle'>2  δ de ieșire: y − t</text><line class='muted' stroke-width='2' x1='170' y1='103' x2='170' y2='115' marker-end='url(#ah-muted)'/><rect class='warn fill-bg' stroke-width='2.5' x='20' y='116' width='300' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='170' y='140' text-anchor='middle'>3  δ în jos: σ′ · Σ w δ (ponderi vechi)</text><line class='muted' stroke-width='2' x1='170' y1='155' x2='170' y2='167' marker-end='url(#ah-muted)'/><rect class='fg fill-bg' stroke-width='2.5' x='20' y='168' width='300' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='170' y='192' text-anchor='middle'>4  gradienți: δ · y și δ</text><line class='muted' stroke-width='2' x1='170' y1='207' x2='170' y2='219' marker-end='url(#ah-muted)'/><rect class='ok fill-bg' stroke-width='2.5' x='20' y='220' width='300' height='38' rx='8'/><text class='fg' font-size='14' font-weight='700' x='170' y='244' text-anchor='middle'>5  actualizare: w = w − η · gradient</text></svg>",
+        "alt": {
+         "en": "Cinci casete una sub alta: înainte, eroarea de ieșire, erori în jos, gradienți, actualizare",
+         "ro": "Cinci casete una sub alta: înainte, eroarea de ieșire, erori în jos, gradienți, actualizare"
+        },
+        "caption": {
+         "en": "Algoritmul într-o singură privire.",
+         "ro": "Algoritmul într-o singură privire."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s27",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 38-48",
+    "ro": "Cursul 4 · slide 38-48"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "z = Σ w·y + b, y = a(z); se salvează z și y.",
+         "ro": "z = Σ w·y + b, y = a(z); se salvează z și y."
+        },
+        {
+         "en": "δ de ieșire = y − t; δ ascuns = σ′ · Σ w δ (ponderi vechi).",
+         "ro": "δ de ieșire = y − t; δ ascuns = σ′ · Σ w δ (ponderi vechi)."
+        },
+        {
+         "en": "Gradient pondere = δ (unde intră) · y (de unde pleacă); gradient bias = δ.",
+         "ro": "Gradient pondere = δ (unde intră) · y (de unde pleacă); gradient bias = δ."
+        },
+        {
+         "en": "Actualizare: w = w − η · gradient, după ce toate erorile sunt calculate.",
+         "ro": "Actualizare: w = w − η · gradient, după ce toate erorile sunt calculate."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s28",
+   "title": {
+    "en": "Mini-test: care δ se calculează primul",
+    "ro": "Mini-test: care δ se calculează primul"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04f-q11",
+     "question": {
+      "en": "Într-o rețea cu trei straturi (intrare, ascuns, ieșire), ce eroare se calculează prima în pasul înapoi?",
+      "ro": "Într-o rețea cu trei straturi (intrare, ascuns, ieșire), ce eroare se calculează prima în pasul înapoi?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "δ-ul stratului de ieșire: y − t",
+        "ro": "δ-ul stratului de ieșire: y − t"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: δ-ul ascuns are nevoie de el.",
+        "ro": "Corect: δ-ul ascuns are nevoie de el."
+       }
+      },
+      {
+       "text": {
+        "en": "δ-ul stratului ascuns",
+        "ro": "δ-ul stratului ascuns"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Acela se calculează din δ-ul de ieșire și din ponderile de ieșire.",
+        "ro": "Acela se calculează din δ-ul de ieșire și din ponderile de ieșire."
+       },
+       "misconception": "ordine-gresita"
+      },
+      {
+       "text": {
+        "en": "Noile ponderi",
+        "ro": "Noile ponderi"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ponderile noi vin ultimele.",
+        "ro": "Ponderile noi vin ultimele."
+       },
+       "misconception": "ordine-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04f-s29",
+   "title": {
+    "en": "Mini-test: δ pentru un neuron ascuns",
+    "ro": "Mini-test: δ pentru un neuron ascuns"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04f-e12",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Un neuron ascuns are y = 0,8. Trimite spre două ieșiri: cu ponderea 1,5 spre o ieșire cu δ = 0,4 și cu ponderea −0,5 spre o ieșire cu δ = −0,2. Calculează δ-ul lui.",
+      "ro": "Un neuron ascuns are y = 0,8. Trimite spre două ieșiri: cu ponderea 1,5 spre o ieșire cu δ = 0,4 și cu ponderea −0,5 spre o ieșire cu δ = −0,2. Calculează δ-ul lui."
+     },
+     "fields": [
+      {
+       "id": "d",
+       "label": {
+        "en": "δ",
+        "ro": "δ"
+       },
+       "kind": "num",
+       "formula": "0.8*(1-0.8)*(1.5*0.4+(-0.5)*(-0.2))",
+       "expected": 0.112
+      }
+     ],
+     "detectors": [
+      {
+       "field": "d",
+       "formula": "1.5*0.4+(-0.5)*(-0.2)",
+       "message": {
+        "en": "Ai uitat factorul y(1 − y) = σ′.",
+        "ro": "Ai uitat factorul y(1 − y) = σ′."
+       }
+      },
+      {
+       "field": "d",
+       "formula": "0.8*(1-0.8)*1.5*0.4",
+       "message": {
+        "en": "Ai luat doar prima ieșire. Se adună peste toate ieșirile k.",
+        "ro": "Ai luat doar prima ieșire. Se adună peste toate ieșirile k."
+       }
+      },
+      {
+       "field": "d",
+       "formula": "0.8*(1-0.8)*(1.5*0.4-(-0.5)*(-0.2))",
+       "message": {
+        "en": "Al doilea termen este (−0,5)·(−0,2) = +0,1: minus ori minus dă plus.",
+        "ro": "Al doilea termen este (−0,5)·(−0,2) = +0,1: minus ori minus dă plus."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "δ = y(1 − y) · Σ w·δ, peste ambele ieșiri.",
+       "ro": "δ = y(1 − y) · Σ w·δ, peste ambele ieșiri."
+      },
+      {
+       "en": "0,8 · 0,2 · (1,5 · 0,4 + (−0,5) · (−0,2))",
+       "ro": "0,8 · 0,2 · (1,5 · 0,4 + (−0,5) · (−0,2))"
+      },
+      {
+       "en": "0,16 · 0,7 = 0,112",
+       "ro": "0,16 · 0,7 = 0,112"
+      }
+     ],
+     "solution": {
+      "en": "Σ w·δ = 0,6 + 0,1 = 0,7; y(1 − y) = 0,16; δ = 0,16 · 0,7 = 0,112.",
+      "ro": "Σ w·δ = 0,6 + 0,1 = 0,7; y(1 − y) = 0,16; δ = 0,16 · 0,7 = 0,112."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Alt neuron ascuns: y = 0,3, ponderea 2 spre o ieșire cu δ = 0,1 și ponderea 1 spre o ieșire cu δ = −0,5. Calculează δ.",
+        "ro": "Alt neuron ascuns: y = 0,3, ponderea 2 spre o ieșire cu δ = 0,1 și ponderea 1 spre o ieșire cu δ = −0,5. Calculează δ."
+       },
+       "fields": [
+        {
+         "id": "d",
+         "formula": "0.3*(1-0.3)*(2*0.1+1*(-0.5))",
+         "expected": -0.063
+        }
+       ],
+       "solution": {
+        "en": "0,21 · (0,2 − 0,5) = 0,21 · (−0,3) = −0,063",
+        "ro": "0,21 · (0,2 − 0,5) = 0,21 · (−0,3) = −0,063"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
