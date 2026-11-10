@@ -196,10 +196,12 @@ export const IA_L4_TAGS = [
   'x7-in-mult-conflict',
 ];
 
-// NN lecture 4 full lessons (nn-l04a..h): generated from the lesson builder, one tag per named mistake.
+// NN lecture 4 full lessons (nn-l04a..i): generated from the lesson builder, one tag per named mistake.
 export const NN_L4_TAGS = [
   'ce-pentru-regresie',
   'cea-mai-mare-valoare-castiga',
+  'constanta-schimba-softmax',
+  'cost-confundat-cu-probabilitatea',
   'cost-mare-la-potrivire',
   'cost-zero-la-model-perfect',
   'derivata-din-alt-loc',
@@ -207,6 +209,7 @@ export const NN_L4_TAGS = [
   'eroare-mare-pas-mare',
   'eta-mare-merge-bine',
   'eta-mic-ajunge-repede',
+  'exponent-fara-scadere',
   'factorul-gresit-vinovat',
   'forgot-bias-input',
   'forma-gresita',
@@ -214,16 +217,19 @@ export const NN_L4_TAGS = [
   'indice-strat-gresit',
   'indici-inversati',
   'ln-1-este-1',
+  'model-uniform-cel-mai-bun',
   'oprire-prea-devreme',
   'ordine-gresita',
   'pasi-egali-la-erori-diferite',
   'pondere-noua-in-delta',
+  'pondere-uitata-in-delta',
   'prag-acelasi-peste-tot',
   'softmax-pe-toate',
   'suma-diferita-de-1',
   'suma-in-loc-de-medie',
   'termen-gresit-ramas',
   'test-folosit-la-alegere',
+  'tinta-presupusa-one-hot',
   'valoare-negativa-in-distributie',
 ];
 

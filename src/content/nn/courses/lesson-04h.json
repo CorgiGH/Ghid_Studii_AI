@@ -2,12 +2,12 @@
  "meta": {
   "id": "nn-l04h",
   "title": {
-   "en": "Lesson 4h: How to choose the hyper-parameters",
-   "ro": "Lecția 4h: Cum alegi hiperparametrii"
+   "en": "Lesson 4h: The algorithm in the course pseudocode",
+   "ro": "Lecția 4h: Algoritmul în pseudocodul cursului"
   },
   "shortTitle": {
-   "en": "L4h: Hyper-parameters",
-   "ro": "L4h: Hiperparametri"
+   "en": "L4h: The pseudocode",
+   "ro": "L4h: Pseudocodul"
   },
   "clarity": 1,
   "source": {
@@ -19,12 +19,12 @@
   {
    "id": "nn-l04h-s01",
    "title": {
-    "en": "Ce controlează învățarea",
-    "ro": "Ce controlează învățarea"
+    "en": "Algoritmul în pseudocodul cursului",
+    "ro": "Algoritmul în pseudocodul cursului"
    },
    "kicker": {
-    "en": "Cursul 4 · slide 53",
-    "ro": "Cursul 4 · slide 53"
+    "en": "Cursul 4 · slide 49",
+    "ro": "Cursul 4 · slide 49"
    },
    "blocks": [
     {
@@ -32,34 +32,40 @@
      "intro": [
       {
        "text": {
-        "en": "Patru hiperparametri controlează antrenarea:",
-        "ro": "Patru hiperparametri controlează antrenarea:"
+        "en": "Slide-urile 49-51 dau algoritmul în pseudocod. Intrarea x are forma (nr_features, 1), ținta t forma (nr_classes, 1). Pentru o rețea 3-4-2, weights are formele (3, 4) și (4, 2).",
+        "ro": "Slide-urile 49-51 dau algoritmul în pseudocod. Intrarea x are forma (nr_features, 1), ținta t forma (nr_classes, 1). Pentru o rețea 3-4-2, weights are formele (3, 4) și (4, 2)."
        }
       },
       {
-       "points": [
-        {
-         "en": "rata de învățare η;",
-         "ro": "rata de învățare η;"
-        },
-        {
-         "en": "mărimea mini-lotului (batch size);",
-         "ro": "mărimea mini-lotului (batch size);"
-        },
-        {
-         "en": "numărul de epoci;",
-         "ro": "numărul de epoci;"
-        },
-        {
-         "en": "numărul de neuroni ascunși.",
-         "ro": "numărul de neuroni ascunși."
-        }
-       ]
+       "table": {
+        "columns": [
+         "Listă",
+         "Formă"
+        ],
+        "rows": [
+         [
+          "x",
+          "(3, 1)"
+         ],
+         [
+          "weights[0]",
+          "(3, 4)"
+         ],
+         [
+          "weights[1]",
+          "(4, 2)"
+         ],
+         [
+          "biases",
+          "vectori (4, 1) și (2, 1)"
+         ]
+        ]
+       }
       },
       {
        "note": {
-        "en": "Îi testezi pe un set de validare separat, nu pe setul de test.",
-        "ro": "Îi testezi pe un set de validare separat, nu pe setul de test."
+        "en": "Slide-ul scrie biases = [h_size0, ..., nr_classes]: sunt mărimi; fiecare bias e un vector coloană.",
+        "ro": "Slide-ul scrie biases = [h_size0, ..., nr_classes]: sunt mărimi; fiecare bias e un vector coloană."
        }
       }
      ]
@@ -69,86 +75,180 @@
   {
    "id": "nn-l04h-s02",
    "title": {
-    "en": "De ce un set de validare separat",
-    "ro": "De ce un set de validare separat"
+    "en": "Pasul înainte, linie cu linie",
+    "ro": "Pasul înainte, linie cu linie"
    },
    "kicker": {
-    "en": "Cursul 4 · slide 53",
-    "ro": "Cursul 4 · slide 53"
+    "en": "Cursul 4 · slide 50",
+    "ro": "Cursul 4 · slide 50"
    },
    "blocks": [
     {
-     "type": "mcq",
-     "id": "nn-l04h-q01",
-     "question": {
-      "en": "Alegi η după acuratețea pe setul de test. Ce se strică?",
-      "ro": "Alegi η după acuratețea pe setul de test. Ce se strică?"
+     "type": "code",
+     "language": "python",
+     "code": "activations = [x]\nzs = []\nfor (w, b) in (weights, biases):\n    z = w.T . activations[-1] + b\n    zs.append(z)\n    a = sigmoid(z)\n    activations.append(a)\nactivations[-1] = softmax(zs[-1])"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p1",
+     "claim": {
+      "en": "Ce formă are z pe fiecare iterație a buclei din slide-ul 50?",
+      "ro": "Ce formă are z pe fiecare iterație a buclei din slide-ul 50?"
      },
-     "options": [
+     "steps": [
       {
-       "text": {
-        "en": "Setul de test devine parte din alegere, deci nu mai măsoară cinstit",
-        "ro": "Setul de test devine parte din alegere, deci nu mai măsoară cinstit"
+       "shown": {
+        "en": "z are forma (4, 1): (4, 3) · (3, 1).",
+        "ro": "z are forma (4, 1): (4, 3) · (3, 1)."
        },
-       "correct": true,
-       "explain": {
-        "en": "Corect: pentru o evaluare cinstită, testul trebuie atins o singură dată, la final.",
-        "ro": "Corect: pentru o evaluare cinstită, testul trebuie atins o singură dată, la final."
+       "predict": {
+        "question": {
+         "en": "Prima iterație: w are forma (3, 4), iar activations[-1] = x are forma (3, 1). Ce formă are z = w.T . activations[-1] + b?",
+         "ro": "Prima iterație: w are forma (3, 4), iar activations[-1] = x are forma (3, 1). Ce formă are z = w.T . activations[-1] + b?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 1)",
+           "ro": "(4, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: (4, 3) · (3, 1) = (4, 1), plus bias (4, 1).",
+           "ro": "Corect: (4, 3) · (3, 1) = (4, 1), plus bias (4, 1)."
+          }
+         },
+         {
+          "text": {
+           "en": "(3, 4)",
+           "ro": "(3, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e forma lui w. w.T are (4, 3).",
+           "ro": "Aceea e forma lui w. w.T are (4, 3)."
+          },
+          "misconception": "forma-gresita"
+         },
+         {
+          "text": {
+           "en": "(1, 4)",
+           "ro": "(1, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "z e vector coloană, ca x.",
+           "ro": "z e vector coloană, ca x."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
        }
       },
       {
-       "text": {
-        "en": "Nimic: testul e doar un set de exemple",
-        "ro": "Nimic: testul e doar un set de exemple"
+       "shown": {
+        "en": "z are forma (2, 1): (2, 4) · (4, 1).",
+        "ro": "z are forma (2, 1): (2, 4) · (4, 1)."
        },
-       "correct": false,
-       "explain": {
-        "en": "Dacă alegi după el, scorul pe test e optimist, pentru că ai ales exact valoarea care îi place.",
-        "ro": "Dacă alegi după el, scorul pe test e optimist, pentru că ai ales exact valoarea care îi place."
-       },
-       "misconception": "test-folosit-la-alegere"
+       "predict": {
+        "question": {
+         "en": "A doua iterație: w are forma (4, 2), iar activations[-1] are forma (4, 1). Ce formă are z?",
+         "ro": "A doua iterație: w are forma (4, 2), iar activations[-1] are forma (4, 1). Ce formă are z?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: (2, 4) · (4, 1).",
+           "ro": "Corect: (2, 4) · (4, 1)."
+          }
+         },
+         {
+          "text": {
+           "en": "(4, 2)",
+           "ro": "(4, 2)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e forma lui w.",
+           "ro": "Aceea e forma lui w."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
       },
       {
-       "text": {
-        "en": "Antrenarea durează mai mult",
-        "ro": "Antrenarea durează mai mult"
-       },
-       "correct": false,
-       "explain": {
-        "en": "Nu timpul e problema, ci cinstea măsurătorii.",
-        "ro": "Nu timpul e problema, ci cinstea măsurătorii."
-       },
-       "misconception": "test-folosit-la-alegere"
+       "shown": {
+        "en": "Ultima linie înlocuiește ieșirea sigmoidă cu softmax pe ultimul z: activations[-1] = softmax(zs[-1]).",
+        "ro": "Ultima linie înlocuiește ieșirea sigmoidă cu softmax pe ultimul z: activations[-1] = softmax(zs[-1])."
+       }
       }
-     ]
+     ],
+     "end": {
+      "en": "Bucla salvează în zs și în activations tot ce are nevoie pasul înapoi.",
+      "ro": "Bucla salvează în zs și în activations tot ce are nevoie pasul înapoi."
+     }
     }
    ]
   },
   {
    "id": "nn-l04h-s03",
    "title": {
-    "en": "Primul scop",
-    "ro": "Primul scop"
+    "en": "Linia cu softmax",
+    "ro": "Linia cu softmax"
    },
    "kicker": {
-    "en": "Cursul 4 · slide 54",
-    "ro": "Cursul 4 · slide 54"
+    "en": "Cursul 4 · slide 50",
+    "ro": "Cursul 4 · slide 50"
    },
    "blocks": [
     {
-     "type": "steps",
-     "intro": [
+     "type": "mcq",
+     "id": "nn-l04h-q01",
+     "question": {
+      "en": "Pentru ce există linia activations[-1] = softmax(zs[-1]) după buclă?",
+      "ro": "Pentru ce există linia activations[-1] = softmax(zs[-1]) după buclă?"
+     },
+     "options": [
       {
        "text": {
-        "en": "Întâi vrem orice învățare reală: mai bine decât la întâmplare. Pentru 10 clase echilibrate, la întâmplare înseamnă 10%, deci țintim peste 10%.",
-        "ro": "Întâi vrem orice învățare reală: mai bine decât la întâmplare. Pentru 10 clase echilibrate, la întâmplare înseamnă 10%, deci țintim peste 10%."
+        "en": "Bucla a pus sigmoidă pe ultimul strat; linia o înlocuiește cu softmax",
+        "ro": "Bucla a pus sigmoidă pe ultimul strat; linia o înlocuiește cu softmax"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: ultimul strat primește softmax, ca în lecția 4d.",
+        "ro": "Corect: ultimul strat primește softmax, ca în lecția 4d."
        }
       },
       {
-       "note": {
-        "en": "Cei 10% sunt valabili doar pentru 10 clase de mărimi egale.",
-        "ro": "Cei 10% sunt valabili doar pentru 10 clase de mărimi egale."
-       }
+       "text": {
+        "en": "Aplică softmax pe toate straturile",
+        "ro": "Aplică softmax pe toate straturile"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Softmax se folosește doar în ultimul strat.",
+        "ro": "Softmax se folosește doar în ultimul strat."
+       },
+       "misconception": "softmax-pe-toate"
+      },
+      {
+       "text": {
+        "en": "Salvează z pentru pasul înapoi",
+        "ro": "Salvează z pentru pasul înapoi"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Asta a făcut zs.append(z) în buclă.",
+        "ro": "Asta a făcut zs.append(z) în buclă."
+       },
+       "misconception": "softmax-pe-toate"
       }
      ]
     }
@@ -157,93 +257,284 @@
   {
    "id": "nn-l04h-s04",
    "title": {
-    "en": "Pornește mic",
-    "ro": "Pornește mic"
+    "en": "Pasul înapoi: ieșirea",
+    "ro": "Pasul înapoi: ieșirea"
    },
    "kicker": {
-    "en": "Cursul 4 · slide 54",
-    "ro": "Cursul 4 · slide 54"
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
    },
    "blocks": [
     {
-     "type": "rule",
-     "text": {
-      "en": "Un set mai mic și o rețea mai mică: două cifre, fără strat ascuns.",
-      "ro": "Un set mai mic și o rețea mai mică: două cifre, fără strat ascuns."
+     "type": "code",
+     "language": "python",
+     "code": "error = activations[-1] - t\ngradient_b[-1] = error\ngradient_w[-1] = \\\n    activations[-2] . error.T"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p2",
+     "claim": {
+      "en": "Ce fac primele trei instrucțiuni ale pasului înapoi?",
+      "ro": "Ce fac primele trei instrucțiuni ale pasului înapoi?"
      },
-     "body": [
+     "steps": [
       {
-       "text": {
-        "en": "Slide-ul propune cifrele 0 și 1 și o rețea 784×10, fără strat ascuns. Experimentele sunt rapide și greșelile se văd repede.",
-        "ro": "Slide-ul propune cifrele 0 și 1 și o rețea 784×10, fără strat ascuns. Experimentele sunt rapide și greșelile se văd repede."
+       "shown": {
+        "en": "error are forma (2, 1): un număr pe clasă.",
+        "ro": "error are forma (2, 1): un număr pe clasă."
+       },
+       "predict": {
+        "question": {
+         "en": "Prima, error = activations[-1] − t, este y − t pe stratul de ieșire, adică δᴸ. Ce formă are error pentru 2 clase?",
+         "ro": "Prima, error = activations[-1] − t, este y − t pe stratul de ieșire, adică δᴸ. Ce formă are error pentru 2 clase?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: un număr pe clasă.",
+           "ro": "Corect: un număr pe clasă."
+          }
+         },
+         {
+          "text": {
+           "en": "(1, 2)",
+           "ro": "(1, 2)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Vectorii sunt coloane în tot codul.",
+           "ro": "Vectorii sunt coloane în tot codul."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "A doua: gradientul biasului este error, adică dC/db = δ.",
+        "ro": "A doua: gradientul biasului este error, adică dC/db = δ."
+       }
+      },
+      {
+       "shown": {
+        "en": "Produsul are forma (4, 2), a lui weights[-1]: un gradient pe fiecare pondere.",
+        "ro": "Produsul are forma (4, 2), a lui weights[-1]: un gradient pe fiecare pondere."
+       },
+       "predict": {
+        "question": {
+         "en": "A treia, gradient_w[-1] = activations[-2] . error.T, înmulțește y-ul de dedesubt cu δ. activations[-2] are forma (4, 1), error.T are (1, 2). Forma produsului este:",
+         "ro": "A treia, gradient_w[-1] = activations[-2] . error.T, înmulțește y-ul de dedesubt cu δ. activations[-2] are forma (4, 1), error.T are (1, 2). Forma produsului este:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 2), forma lui weights[-1]",
+           "ro": "(4, 2), forma lui weights[-1]"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: un gradient pe fiecare pondere.",
+           "ro": "Corect: un gradient pe fiecare pondere."
+          }
+         },
+         {
+          "text": {
+           "en": "(1, 1)",
+           "ro": "(1, 1)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Nu: (4, 1) · (1, 2) = (4, 2), produs exterior.",
+           "ro": "Nu: (4, 1) · (1, 2) = (4, 2), produs exterior."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
        }
       }
-     ]
+     ],
+     "end": {
+      "en": "A treia instrucțiune este formula δ · y, pentru toate ponderile stratului odată.",
+      "ro": "A treia instrucțiune este formula δ · y, pentru toate ponderile stratului odată."
+     }
     }
    ]
   },
   {
    "id": "nn-l04h-s05",
    "title": {
-    "en": "Monitorizează des",
-    "ro": "Monitorizează des"
+    "en": "Bucla înapoi",
+    "ro": "Bucla înapoi"
    },
    "kicker": {
-    "en": "Cursul 4 · slide 55",
-    "ro": "Cursul 4 · slide 55"
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
    },
    "blocks": [
     {
-     "type": "steps",
-     "intro": [
+     "type": "code",
+     "language": "python",
+     "code": "for l from num_layers-2 to 1:\n    z = zs[l-1]\n    sp = sigmoid_prime(z)\n    error = (self.weights[l]\n             . error) * sp\n    gradient_b[l-1] = error\n    gradient_w[l-1] = \\\n        activations[l-1] . error.T\n\n# sigmoid_prime(z) =\n#   sigmoid(z)*(1-sigmoid(z))"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p3",
+     "claim": {
+      "en": "Ce calculează bucla pentru o rețea 3-4-2 (num_layers = 3)?",
+      "ro": "Ce calculează bucla pentru o rețea 3-4-2 (num_layers = 3)?"
+     },
+     "steps": [
       {
-       "text": {
-        "en": "Ca să vezi repede dacă ceva se învață, măsori des și pe puțin: o fracțiune din setul de validare, la fiecare 10 mini-loturi. Apoi reglezi η până când se învață ceva.",
-        "ro": "Ca să vezi repede dacă ceva se învață, măsori des și pe puțin: o fracțiune din setul de validare, la fiecare 10 mini-loturi. Apoi reglezi η până când se învață ceva."
+       "shown": {
+        "en": "weights[1] are forma (4, 2): de la stratul ascuns la ieșire.",
+        "ro": "weights[1] are forma (4, 2): de la stratul ascuns la ieșire."
+       },
+       "predict": {
+        "question": {
+         "en": "Bucla folosește weights[1]. Ce formă are weights[1]?",
+         "ro": "Bucla folosește weights[1]. Ce formă are weights[1]?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 2): de la stratul ascuns la ieșire",
+           "ro": "(4, 2): de la stratul ascuns la ieșire"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "(3, 4)",
+           "ro": "(3, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e weights[0].",
+           "ro": "Aceea e weights[0]."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Rezultatul are forma (4, 1): un δ pe fiecare neuron ascuns; apoi se înmulțește element cu element cu sp.",
+        "ro": "Rezultatul are forma (4, 1): un δ pe fiecare neuron ascuns; apoi se înmulțește element cu element cu sp."
+       },
+       "predict": {
+        "question": {
+         "en": "Linia error = (weights[1] . error) * sp este δ ascuns = σ′ · Σ w δ: matricea ponderilor ori eroarea de sus. Produsul (4, 2) · (2, 1) dă forma:",
+         "ro": "Linia error = (weights[1] . error) * sp este δ ascuns = σ′ · Σ w δ: matricea ponderilor ori eroarea de sus. Produsul (4, 2) · (2, 1) dă forma:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 1), un număr pe neuron ascuns",
+           "ro": "(4, 1), un număr pe neuron ascuns"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Numărul de rânduri e cel al lui weights[1], adică 4.",
+           "ro": "Numărul de rânduri e cel al lui weights[1], adică 4."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Ultimele două instrucțiuni: gradient_b[0] = error și gradient_w[0] = activations[0] . error.T, de forma (3, 4), a lui weights[0].",
+        "ro": "Ultimele două instrucțiuni: gradient_b[0] = error și gradient_w[0] = activations[0] . error.T, de forma (3, 4), a lui weights[0]."
        }
       }
-     ]
+     ],
+     "end": {
+      "en": "Este formula lui δ ascuns și a gradientului, scrisă cu matrice.",
+      "ro": "Este formula lui δ ascuns și a gradientului, scrisă cu matrice."
+     },
+     "given": {
+      "en": "Cu num_layers = 3 bucla rulează o singură dată, cu l = 1. Listele încep de la 0, deci zs[0] este z-ul stratului ascuns.",
+      "ro": "Cu num_layers = 3 bucla rulează o singură dată, cu l = 1. Listele încep de la 0, deci zs[0] este z-ul stratului ascuns."
+     }
     }
    ]
   },
   {
    "id": "nn-l04h-s06",
    "title": {
-    "en": "Un pas pe parabolă",
-    "ro": "Un pas pe parabolă"
+    "en": "Forma gradientului",
+    "ro": "Forma gradientului"
    },
    "kicker": {
-    "en": "Cursul 4 · slide 56",
-    "ro": "Cursul 4 · slide 56"
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
    },
    "blocks": [
     {
-     "type": "steps",
-     "intro": [
+     "type": "mcq",
+     "id": "nn-l04h-q02",
+     "question": {
+      "en": "De ce gradient_w[l] are mereu aceeași formă ca weights[l]?",
+      "ro": "De ce gradient_w[l] are mereu aceeași formă ca weights[l]?"
+     },
+     "options": [
       {
        "text": {
-        "en": "Exemplu mic, al nostru: costul C(w) = w², cu gradientul 2w. Pornim de la w₀ = 1. Un pas dă w = w − η · 2w = (1 − 2η) · w.",
-        "ro": "Exemplu mic, al nostru: costul C(w) = w², cu gradientul 2w. Pornim de la w₀ = 1. Un pas dă w = w − η · 2w = (1 − 2η) · w."
+        "en": "Pentru că fiecare pondere are exact un gradient",
+        "ro": "Pentru că fiecare pondere are exact un gradient"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: se actualizează element cu element.",
+        "ro": "Corect: se actualizează element cu element."
        }
       },
       {
-       "figure": {
-        "svg": "<svg viewBox='0 0 340 200'><title>Parabola C = w² și un pas</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><line class='muted' stroke-width='1.5' x1='179' y1='154' x2='179' y2='14'/><line class='muted' stroke-width='1.5' x1='44' y1='146.6' x2='314' y2='146.6'/><line class='muted' stroke-width='1.5' x1='75.2' y1='151' x2='75.2' y2='157'/><text class='muted' font-size='14' x='75.2' y='172' text-anchor='middle'>−1</text><line class='muted' stroke-width='1.5' x1='179' y1='151' x2='179' y2='157'/><text class='muted' font-size='14' x='179' y='172' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='282.8' y1='151' x2='282.8' y2='157'/><text class='muted' font-size='14' x='282.8' y='172' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='41' y1='146.6' x2='47' y2='146.6'/><text class='muted' font-size='14' x='38' y='151.6' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='72.9' x2='47' y2='72.9'/><text class='muted' font-size='14' x='38' y='77.9' text-anchor='end'>1</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,22.1 47.4,28.3 50.7,34.2 54.1,40.1 57.5,45.8 60.9,51.3 64.2,56.7 67.6,61.9 71,66.9 74.4,71.8 77.8,76.6 81.1,81.2 84.5,85.6 87.9,89.9 91.2,94 94.6,98 98,101.8 101.4,105.5 104.8,109 108.1,112.3 111.5,115.5 114.9,118.5 118.2,121.4 121.6,124.1 125,126.7 128.4,129.1 131.8,131.4 135.1,133.5 138.5,135.4 141.9,137.2 145.2,138.8 148.6,140.3 152,141.7 155.4,142.8 158.8,143.8 162.1,144.7 165.5,145.4 168.9,145.9 172.2,146.3 175.6,146.6 179,146.6 182.4,146.6 185.8,146.3 189.1,145.9 192.5,145.4 195.9,144.7 199.3,143.8 202.6,142.8 206,141.7 209.4,140.3 212.8,138.8 216.1,137.2 219.5,135.4 222.9,133.5 226.2,131.4 229.6,129.1 233,126.7 236.4,124.1 239.8,121.4 243.1,118.5 246.5,115.5 249.9,112.3 253.2,109 256.6,105.5 260,101.8 263.4,98 266.8,94 270.1,89.9 273.5,85.6 276.9,81.2 280.2,76.6 283.6,71.8 287,66.9 290.4,61.9 293.8,56.7 297.1,51.3 300.5,45.8 303.9,40.1 307.2,34.2 310.6,28.3 314,22.1'/><circle class='warn fill-warn' stroke-width='2' cx='282.8' cy='72.9' r='6'><title>w₀ = 1</title></circle><circle class='ok fill-ok' stroke-width='2' cx='262.1' cy='99.5' r='6'><title>w₁</title></circle><line class='muted' stroke-width='2' x1='276.8' y1='76.9' x2='268.1' y2='95.5' marker-end='url(#ah-muted)'/><text class='warn' font-size='14' font-weight='700' x='290.8' y='64.9' text-anchor='start'>w₀ = 1</text><text class='ok' font-size='14' font-weight='700' x='262.1' y='121.5' text-anchor='middle'>w₁ = 0,8</text><text class='fg' font-size='15' x='314' y='180.6' text-anchor='end'>w</text><text class='fg' font-size='15' x='52' y='16' text-anchor='start'>C = w²</text></svg>",
-        "alt": {
-         "en": "Parabola C = w²; un punct la w = 1 și un pas spre w = 0,8 pentru η = 0,1",
-         "ro": "Parabola C = w²; un punct la w = 1 și un pas spre w = 0,8 pentru η = 0,1"
-        },
-        "caption": {
-         "en": "Un pas cu η = 0,1: de la 1 la 0,8.",
-         "ro": "Un pas cu η = 0,1: de la 1 la 0,8."
-        }
-       }
+       "text": {
+        "en": "Pentru că le înmulțim între ele",
+        "ro": "Pentru că le înmulțim între ele"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu le înmulțim; le scădem, cu rata η.",
+        "ro": "Nu le înmulțim; le scădem, cu rata η."
+       },
+       "misconception": "forma-gresita"
       },
       {
-       "note": {
-        "en": "Slide-urile nu dau cifre pentru acest exemplu; este simularea noastră.",
-        "ro": "Slide-urile nu dau cifre pentru acest exemplu; este simularea noastră."
-       }
+       "text": {
+        "en": "Din întâmplare, doar la ultimul strat",
+        "ro": "Din întâmplare, doar la ultimul strat"
+       },
+       "correct": false,
+       "explain": {
+        "en": "E adevărat la toate straturile.",
+        "ro": "E adevărat la toate straturile."
+       },
+       "misconception": "forma-gresita"
       }
      ]
     }
@@ -252,1029 +543,60 @@
   {
    "id": "nn-l04h-s07",
    "title": {
-    "en": "Trei viteze",
-    "ro": "Trei viteze"
+    "en": "Ce lipsește din pseudocod",
+    "ro": "Ce lipsește din pseudocod"
    },
    "kicker": {
-    "en": "Cursul 4 · slide 56",
-    "ro": "Cursul 4 · slide 56"
+    "en": "Cursul 4 · slide 42, 51",
+    "ro": "Cursul 4 · slide 42, 51"
    },
    "blocks": [
     {
-     "type": "proof-steps",
-     "id": "p1",
-     "claim": {
-      "en": "Cum merge w după 5 pași, pentru trei valori ale lui η?",
-      "ro": "Cum merge w după 5 pași, pentru trei valori ale lui η?"
-     },
-     "steps": [
+     "type": "steps",
+     "intro": [
       {
-       "shown": {
-        "en": "Factorul pe pas este 1 − 2η. Pentru η = 0,001 este 0,998.",
-        "ro": "Factorul pe pas este 1 − 2η. Pentru η = 0,001 este 0,998."
-       },
-       "predict": {
-        "question": {
-         "en": "După 5 pași, w₅ = 0,998⁵ este aproape de:",
-         "ro": "După 5 pași, w₅ = 0,998⁵ este aproape de:"
-        },
-        "options": [
-         {
-          "text": {
-           "en": "0,9900: abia s-a mișcat",
-           "ro": "0,9900: abia s-a mișcat"
-          },
-          "correct": true,
-          "explain": {
-           "en": "Corect: η mic înseamnă pași mici, învățare lentă.",
-           "ro": "Corect: η mic înseamnă pași mici, învățare lentă."
-          }
-         },
-         {
-          "text": {
-           "en": "0: a ajuns la minim",
-           "ro": "0: a ajuns la minim"
-          },
-          "correct": false,
-          "explain": {
-           "en": "Factorul 0,998 e aproape 1; w abia scade.",
-           "ro": "Factorul 0,998 e aproape 1; w abia scade."
-          },
-          "misconception": "eta-mic-ajunge-repede"
-         }
-        ]
+       "text": {
+        "en": "Pseudocodul nu arată actualizarea ponderilor și nici împărțirea la mărimea lotului. Ele se fac după buclă: w = w − η · gradient, cu gradientul mediat pe lot.",
+        "ro": "Pseudocodul nu arată actualizarea ponderilor și nici împărțirea la mărimea lotului. Ele se fac după buclă: w = w − η · gradient, cu gradientul mediat pe lot."
        }
       },
       {
-       "shown": {
-        "en": "Pentru η = 0,01 factorul este 0,98.",
-        "ro": "Pentru η = 0,01 factorul este 0,98."
-       },
-       "predict": {
-        "question": {
-         "en": "După 5 pași w₅ = 0,98⁵ este:",
-         "ro": "După 5 pași w₅ = 0,98⁵ este:"
-        },
-        "options": [
-         {
-          "text": {
-           "en": "0,9039",
-           "ro": "0,9039"
-          },
-          "correct": true,
-          "explain": {
-           "en": "Corect: ceva mai jos, încă departe de 0.",
-           "ro": "Corect: ceva mai jos, încă departe de 0."
-          }
-         },
-         {
-          "text": {
-           "en": "0,3277",
-           "ro": "0,3277"
-          },
-          "correct": false,
-          "explain": {
-           "en": "Aceea e valoarea pentru η = 0,1.",
-           "ro": "Aceea e valoarea pentru η = 0,1."
-          },
-          "misconception": "eta-mic-ajunge-repede"
-         }
-        ]
+       "text": {
+        "en": "Slide-ul 42 pune „actualizează ponderile” în interiorul buclei, lângă „nu actualiza înainte de propagare”. În foaie, tot se actualizează la sfârșit; aici facem la fel.",
+        "ro": "Slide-ul 42 pune „actualizează ponderile” în interiorul buclei, lângă „nu actualiza înainte de propagare”. În foaie, tot se actualizează la sfârșit; aici facem la fel."
        }
       },
       {
-       "shown": {
-        "en": "Pentru η = 0,1 factorul este 0,8 și w₅ = 0,3277.",
-        "ro": "Pentru η = 0,1 factorul este 0,8 și w₅ = 0,3277."
+       "note": {
+        "en": "Linia 4 din slide-ul 51 este goală, iar self.weights apare doar o dată.",
+        "ro": "Linia 4 din slide-ul 51 este goală, iar self.weights apare doar o dată."
        }
       }
-     ],
-     "end": {
-      "en": "Crescând η de zece ori, w ajunge mult mai aproape de minim. Dar dacă îl creștem prea mult?",
-      "ro": "Crescând η de zece ori, w ajunge mult mai aproape de minim. Dar dacă îl creștem prea mult?"
-     }
+     ]
     }
    ]
   },
   {
    "id": "nn-l04h-s08",
    "title": {
-    "en": "Pragul",
-    "ro": "Pragul"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 57",
-    "ro": "Cursul 4 · slide 57"
-   },
-   "blocks": [
-    {
-     "type": "proof-steps",
-     "id": "p2",
-     "claim": {
-      "en": "Ce se întâmplă cu η = 1 și cu η = 10?",
-      "ro": "Ce se întâmplă cu η = 1 și cu η = 10?"
-     },
-     "steps": [
-      {
-       "shown": {
-        "en": "Pentru η = 1 factorul este 1 − 2 = −1.",
-        "ro": "Pentru η = 1 factorul este 1 − 2 = −1."
-       },
-       "predict": {
-        "question": {
-         "en": "Cum arată w pe pași?",
-         "ro": "Cum arată w pe pași?"
-        },
-        "options": [
-         {
-          "text": {
-           "en": "+1, −1, +1, −1, ...: oscilează",
-           "ro": "+1, −1, +1, −1, ...: oscilează"
-          },
-          "correct": true,
-          "explain": {
-           "en": "Corect: sare de la o parte la alta a minimului, fără să scadă.",
-           "ro": "Corect: sare de la o parte la alta a minimului, fără să scadă."
-          }
-         },
-         {
-          "text": {
-           "en": "Scade la 0",
-           "ro": "Scade la 0"
-          },
-          "correct": false,
-          "explain": {
-           "en": "Factorul −1 păstrează mărimea: w nu scade.",
-           "ro": "Factorul −1 păstrează mărimea: w nu scade."
-          },
-          "misconception": "eta-mare-merge-bine"
-         }
-        ]
-       }
-      },
-      {
-       "shown": {
-        "en": "Pentru η = 10 factorul este 1 − 20 = −19.",
-        "ro": "Pentru η = 10 factorul este 1 − 20 = −19."
-       },
-       "predict": {
-        "question": {
-         "en": "Cum arată w pe pași?",
-         "ro": "Cum arată w pe pași?"
-        },
-        "options": [
-         {
-          "text": {
-           "en": "1, −19, 361, −6859, ...: crește fără oprire",
-           "ro": "1, −19, 361, −6859, ...: crește fără oprire"
-          },
-          "correct": true,
-          "explain": {
-           "en": "Corect: a depășit pragul, diverge.",
-           "ro": "Corect: a depășit pragul, diverge."
-          }
-         },
-         {
-          "text": {
-           "en": "Se apropie de 0",
-           "ro": "Se apropie de 0"
-          },
-          "correct": false,
-          "explain": {
-           "en": "Factorul −19 înmulțește mărimea cu 19 la fiecare pas.",
-           "ro": "Factorul −19 înmulțește mărimea cu 19 la fiecare pas."
-          },
-          "misconception": "eta-mare-merge-bine"
-         }
-        ]
-       }
-      },
-      {
-       "shown": {
-        "en": "Pentru acest cost, pragul este η = 1, unde apare oscilația.",
-        "ro": "Pentru acest cost, pragul este η = 1, unde apare oscilația."
-       }
-      }
-     ],
-     "end": {
-      "en": "Prea mic: lent. La prag: oscilează. Peste prag: diverge.",
-      "ro": "Prea mic: lent. La prag: oscilează. Peste prag: diverge."
-     }
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s09",
-   "title": {
-    "en": "Cele trei curbe din slide",
-    "ro": "Cele trei curbe din slide"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 56",
-    "ro": "Cursul 4 · slide 56"
-   },
-   "blocks": [
-    {
-     "type": "steps",
-     "intro": [
-      {
-       "text": {
-        "en": "Slide-ul 56 arată costul de antrenare pentru η = 0,03; 0,3; 3: verde lent și neted, negru rapid și neted, albastru zgomotos. Simularea noastră, pe C = 0,25 w², arată poziția w, cu aceleași η: lent, rapid, și un η mare care sare peste minim.",
-        "ro": "Slide-ul 56 arată costul de antrenare pentru η = 0,03; 0,3; 3: verde lent și neted, negru rapid și neted, albastru zgomotos. Simularea noastră, pe C = 0,25 w², arată poziția w, cu aceleași η: lent, rapid, și un η mare care sare peste minim."
-       }
-      },
-      {
-       "figure": {
-        "svg": "<svg viewBox='0 0 340 210'><title>Poziția w pe pași pentru trei valori ale lui η</title><line class='muted' stroke-width='1.5' x1='46' y1='164' x2='46' y2='14'/><line class='muted' stroke-width='1.5' x1='46' y1='107.8' x2='314' y2='107.8'/><line class='muted' stroke-width='1.5' x1='46' y1='161' x2='46' y2='167'/><text class='muted' font-size='14' x='46' y='182' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='180' y1='161' x2='180' y2='167'/><text class='muted' font-size='14' x='180' y='182' text-anchor='middle'>10</text><line class='muted' stroke-width='1.5' x1='314' y1='161' x2='314' y2='167'/><text class='muted' font-size='14' x='314' y='182' text-anchor='middle'>20</text><line class='muted' stroke-width='1.5' x1='43' y1='154.6' x2='49' y2='154.6'/><text class='muted' font-size='14' x='40' y='159.6' text-anchor='end'>−0,5</text><line class='muted' stroke-width='1.5' x1='43' y1='107.8' x2='49' y2='107.8'/><text class='muted' font-size='14' x='40' y='112.8' text-anchor='end'>0,0</text><line class='muted' stroke-width='1.5' x1='43' y1='60.9' x2='49' y2='60.9'/><text class='muted' font-size='14' x='40' y='65.9' text-anchor='end'>0,5</text><line class='muted' stroke-width='1.5' x1='43' y1='14' x2='49' y2='14'/><text class='muted' font-size='14' x='40' y='19' text-anchor='end'>1,0</text><polyline class='ok' stroke-width='2.8' fill='none' points='46,14 59.4,15.4 72.8,16.8 86.2,18.2 99.6,19.5 113,20.8 126.4,22.1 139.8,23.4 153.2,24.7 166.6,25.9 180,27.2 193.4,28.4 206.8,29.6 220.2,30.7 233.6,31.9 247,33 260.4,34.1 273.8,35.2 287.2,36.3 300.6,37.4 314,38.5'/><text class='ok' font-size='14' font-weight='700' x='314' y='32.5' text-anchor='end'>0,03</text><polyline class='accent' stroke-width='2.8' fill='none' points='46,14 59.4,28.1 72.8,40 86.2,50.2 99.6,58.8 113,66.2 126.4,72.4 139.8,77.7 153.2,82.2 166.6,86 180,89.3 193.4,92.1 206.8,94.4 220.2,96.4 233.6,98.1 247,99.6 260.4,100.8 273.8,101.8 287.2,102.7 300.6,103.5 314,104.1'/><text class='accent' font-size='14' font-weight='700' x='314' y='98.1' text-anchor='end'>0,3</text><polyline class='warn' stroke-width='2.8' fill='none' points='46,14 59.4,154.6 72.8,84.3 86.2,119.5 99.6,101.9 113,110.7 126.4,106.3 139.8,108.5 153.2,107.4 166.6,107.9 180,107.7 193.4,107.8 206.8,107.7 220.2,107.8 233.6,107.7 247,107.8 260.4,107.7 273.8,107.8 287.2,107.7 300.6,107.8 314,107.7'/><text class='warn' font-size='14' font-weight='700' x='314' y='101.7' text-anchor='end'>3</text><text class='fg' font-size='15' x='314' y='200' text-anchor='end'>pas</text></svg>",
-        "alt": {
-         "en": "Trei curbe pentru w: η = 0,03 scade foarte încet; η = 0,3 scade repede; η = 3 sare de o parte și de alta a lui 0, cu amplitudine care scade",
-         "ro": "Trei curbe pentru w: η = 0,03 scade foarte încet; η = 0,3 scade repede; η = 3 sare de o parte și de alta a lui 0, cu amplitudine care scade"
-        },
-        "caption": {
-         "en": "Poziția w pe pași, simularea noastră (nu curbele din slide).",
-         "ro": "Poziția w pe pași, simularea noastră (nu curbele din slide)."
-        }
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s10",
-   "title": {
-    "en": "Regula cursului",
-    "ro": "Regula cursului"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 57",
-    "ro": "Cursul 4 · slide 57"
-   },
-   "blocks": [
-    {
-     "type": "rule",
-     "text": {
-      "en": "Pornește de la un η la care costul scade; înmulțește cu 10 până oscilează; ia cam jumătate din prag.",
-      "ro": "Pornește de la un η la care costul scade; înmulțește cu 10 până oscilează; ia cam jumătate din prag."
-     },
-     "body": [
-      {
-       "text": {
-        "en": "Pragul este cea mai mare valoare după care apare oscilația. „Un factor, sau doi, sub prag” înseamnă cam jumătate din ea.",
-        "ro": "Pragul este cea mai mare valoare după care apare oscilația. „Un factor, sau doi, sub prag” înseamnă cam jumătate din ea."
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s11",
-   "title": {
-    "en": "Aplică regula",
-    "ro": "Aplică regula"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 57",
-    "ro": "Cursul 4 · slide 57"
-   },
-   "blocks": [
-    {
-     "type": "calc-exercise",
-     "id": "nn-l04h-e02",
-     "status": "verified-twice",
-     "statement": {
-      "en": "Pe C = w², cu w₀ = 1, η = 0,001 scade prea încet; η = 0,01 și 0,1 scad; η = 1 oscilează. Pragul este 1. Ia jumătate din prag, η = 0,5, și calculează w după un pas: w₁ = (1 − 2η) · w₀.",
-      "ro": "Pe C = w², cu w₀ = 1, η = 0,001 scade prea încet; η = 0,01 și 0,1 scad; η = 1 oscilează. Pragul este 1. Ia jumătate din prag, η = 0,5, și calculează w după un pas: w₁ = (1 − 2η) · w₀."
-     },
-     "fields": [
-      {
-       "id": "w",
-       "label": {
-        "en": "w₁",
-        "ro": "w₁"
-       },
-       "kind": "num",
-       "formula": "(1-2*0.5)*1",
-       "expected": 0
-      }
-     ],
-     "detectors": [
-      {
-       "field": "w",
-       "formula": "1-0.5",
-       "message": {
-        "en": "Ai scăzut η direct. Factorul este 1 − 2η, deoarece gradientul este 2w.",
-        "ro": "Ai scăzut η direct. Factorul este 1 − 2η, deoarece gradientul este 2w."
-       }
-      }
-     ],
-     "hints": [
-      {
-       "en": "w₁ = (1 − 2η) · w₀.",
-       "ro": "w₁ = (1 − 2η) · w₀."
-      },
-      {
-       "en": "(1 − 1) · 1",
-       "ro": "(1 − 1) · 1"
-      },
-      {
-       "en": "0",
-       "ro": "0"
-      }
-     ],
-     "solution": {
-      "en": "Cu η = 0,5, w₁ = 0: un singur pas ajunge la minim, doar pentru acest cost.",
-      "ro": "Cu η = 0,5, w₁ = 0: un singur pas ajunge la minim, doar pentru acest cost."
-     },
-     "variants": [
-      {
-       "statement": {
-        "en": "Același cost, η = 0,3 (nu exact jumătate). Calculează w₂ (după doi pași).",
-        "ro": "Același cost, η = 0,3 (nu exact jumătate). Calculează w₂ (după doi pași)."
-       },
-       "fields": [
-        {
-         "id": "w",
-         "formula": "(1-2*0.3)^2*1",
-         "expected": 0.16
-        }
-       ],
-       "solution": {
-        "en": "w₁ = 0,4 și w₂ = 0,16: scade ușor, fără oscilație",
-        "ro": "w₁ = 0,4 și w₂ = 0,16: scade ușor, fără oscilație"
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s12",
-   "title": {
-    "en": "Altă funcție, alt prag",
-    "ro": "Altă funcție, alt prag"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 57",
-    "ro": "Cursul 4 · slide 57"
-   },
-   "blocks": [
-    {
-     "type": "mcq",
-     "id": "nn-l04h-q03",
-     "question": {
-      "en": "Costul este C = 5w², cu gradientul 10w. Factorul pe pas este 1 − 10η, iar pragul este η = 0,2. Ce face η = 0,3?",
-      "ro": "Costul este C = 5w², cu gradientul 10w. Factorul pe pas este 1 − 10η, iar pragul este η = 0,2. Ce face η = 0,3?"
-     },
-     "options": [
-      {
-       "text": {
-        "en": "Diverge: 1, −2, 4, −8, ...",
-        "ro": "Diverge: 1, −2, 4, −8, ..."
-       },
-       "correct": true,
-       "explain": {
-        "en": "Corect: 1 − 3 = −2. Același η care mergea la C = w² (prag 1) este peste prag aici.",
-        "ro": "Corect: 1 − 3 = −2. Același η care mergea la C = w² (prag 1) este peste prag aici."
-       }
-      },
-      {
-       "text": {
-        "en": "Merge bine: 0,3 < 1",
-        "ro": "Merge bine: 0,3 < 1"
-       },
-       "correct": false,
-       "explain": {
-        "en": "Pragul 1 era pentru C = w². Pentru C = 5w², pragul este 0,2.",
-        "ro": "Pragul 1 era pentru C = w². Pentru C = 5w², pragul este 0,2."
-       },
-       "misconception": "prag-acelasi-peste-tot"
-      },
-      {
-       "text": {
-        "en": "Ajunge la minim într-un pas",
-        "ro": "Ajunge la minim într-un pas"
-       },
-       "correct": false,
-       "explain": {
-        "en": "Într-un pas ajunge η = 0,1 (factor 0). Cu 0,3 factorul este −2.",
-        "ro": "Într-un pas ajunge η = 0,1 (factor 0). Cu 0,3 factorul este −2."
-       },
-       "misconception": "prag-acelasi-peste-tot"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s13",
-   "title": {
-    "en": "Cât timp antrenezi",
-    "ro": "Cât timp antrenezi"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 58",
-    "ro": "Cursul 4 · slide 58"
-   },
-   "blocks": [
-    {
-     "type": "steps",
-     "intro": [
-      {
-       "text": {
-        "en": "Oprire timpurie (early stopping): urmărești acuratețea pe validare și te oprești când nu mai crește de x epoci la rând (x = 10 în slide). La început lași antrenarea destul de mult, ca să treacă de platouri.",
-        "ro": "Oprire timpurie (early stopping): urmărești acuratețea pe validare și te oprești când nu mai crește de x epoci la rând (x = 10 în slide). La început lași antrenarea destul de mult, ca să treacă de platouri."
-       }
-      },
-      {
-       "note": {
-        "en": "Slide-ul scrie „iterații” când înseamnă epoci.",
-        "ro": "Slide-ul scrie „iterații” când înseamnă epoci."
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s14",
-   "title": {
-    "en": "Oprește-te",
-    "ro": "Oprește-te"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 58",
-    "ro": "Cursul 4 · slide 58"
-   },
-   "blocks": [
-    {
-     "type": "proof-steps",
-     "id": "p3",
-     "claim": {
-      "en": "Acuratețea pe validare, pe epoci, cu răbdarea 3. Când te oprești?",
-      "ro": "Acuratețea pe validare, pe epoci, cu răbdarea 3. Când te oprești?"
-     },
-     "steps": [
-      {
-       "shown": {
-        "en": "Epocile 1-5: 0,71; 0,78; 0,82; 0,84; 0,85. Crește mereu; cea mai bună este epoca 5.",
-        "ro": "Epocile 1-5: 0,71; 0,78; 0,82; 0,84; 0,85. Crește mereu; cea mai bună este epoca 5."
-       }
-      },
-      {
-       "shown": {
-        "en": "Epoca 6: 0,848, mai mică decât 0,85.",
-        "ro": "Epoca 6: 0,848, mai mică decât 0,85."
-       },
-       "predict": {
-        "question": {
-         "en": "Te oprești acum (răbdarea 3)?",
-         "ro": "Te oprești acum (răbdarea 3)?"
-        },
-        "options": [
-         {
-          "text": {
-           "en": "Nu: e prima epocă fără îmbunătățire, din trei permise",
-           "ro": "Nu: e prima epocă fără îmbunătățire, din trei permise"
-          },
-          "correct": true,
-          "explain": {
-           "en": "Corect.",
-           "ro": "Corect."
-          }
-         },
-         {
-          "text": {
-           "en": "Da, a scăzut",
-           "ro": "Da, a scăzut"
-          },
-          "correct": false,
-          "explain": {
-           "en": "Răbdarea 3 permite trei epoci la rând fără îmbunătățire.",
-           "ro": "Răbdarea 3 permite trei epoci la rând fără îmbunătățire."
-          },
-          "misconception": "oprire-prea-devreme"
-         }
-        ]
-       }
-      },
-      {
-       "shown": {
-        "en": "Epoca 7: 0,851 este nouă cea mai bună. Numărătoarea se reia de la 0.",
-        "ro": "Epoca 7: 0,851 este nouă cea mai bună. Numărătoarea se reia de la 0."
-       }
-      },
-      {
-       "shown": {
-        "en": "Epocile 8, 9, 10: 0,849; 0,846; 0,847, toate sub 0,851.",
-        "ro": "Epocile 8, 9, 10: 0,849; 0,846; 0,847, toate sub 0,851."
-       },
-       "predict": {
-        "question": {
-         "en": "În ce epocă te oprești și ce ponderi păstrezi?",
-         "ro": "În ce epocă te oprești și ce ponderi păstrezi?"
-        },
-        "options": [
-         {
-          "text": {
-           "en": "Epoca 10, cu ponderile din epoca 7",
-           "ro": "Epoca 10, cu ponderile din epoca 7"
-          },
-          "correct": true,
-          "explain": {
-           "en": "Corect: trei epoci fără îmbunătățire, se păstrează cea mai bună.",
-           "ro": "Corect: trei epoci fără îmbunătățire, se păstrează cea mai bună."
-          }
-         },
-         {
-          "text": {
-           "en": "Epoca 6, cu ponderile din epoca 5",
-           "ro": "Epoca 6, cu ponderile din epoca 5"
-          },
-          "correct": false,
-          "explain": {
-           "en": "Epoca 7 a îmbunătățit totuși, deci numărătoarea s-a reluat.",
-           "ro": "Epoca 7 a îmbunătățit totuși, deci numărătoarea s-a reluat."
-          },
-          "misconception": "oprire-prea-devreme"
-         },
-         {
-          "text": {
-           "en": "Epoca 10, cu ponderile din epoca 10",
-           "ro": "Epoca 10, cu ponderile din epoca 10"
-          },
-          "correct": false,
-          "explain": {
-           "en": "Păstrăm ponderile celei mai bune epoci, adică 7, nu ale ultimei.",
-           "ro": "Păstrăm ponderile celei mai bune epoci, adică 7, nu ale ultimei."
-          },
-          "misconception": "oprire-prea-devreme"
-         }
-        ]
-       }
-      }
-     ],
-     "end": {
-      "en": "Răbdarea 3 oprește la epoca 10 și păstrează epoca 7 (0,851).",
-      "ro": "Răbdarea 3 oprește la epoca 10 și păstrează epoca 7 (0,851)."
-     }
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s15",
-   "title": {
-    "en": "Cu răbdare 1",
-    "ro": "Cu răbdare 1"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 58",
-    "ro": "Cursul 4 · slide 58"
-   },
-   "blocks": [
-    {
-     "type": "mcq",
-     "id": "nn-l04h-q04",
-     "question": {
-      "en": "Aceeași acuratețe pe epoci, dar răbdarea este 1. Ce se întâmplă?",
-      "ro": "Aceeași acuratețe pe epoci, dar răbdarea este 1. Ce se întâmplă?"
-     },
-     "options": [
-      {
-       "text": {
-        "en": "Se oprește la epoca 6 și pierde epoca 7 (0,851)",
-        "ro": "Se oprește la epoca 6 și pierde epoca 7 (0,851)"
-       },
-       "correct": true,
-       "explain": {
-        "en": "Corect: este avertismentul slide-ului. O răbdare prea mică oprește pe un platou.",
-        "ro": "Corect: este avertismentul slide-ului. O răbdare prea mică oprește pe un platou."
-       }
-      },
-      {
-       "text": {
-        "en": "Se oprește la epoca 10 ca și înainte",
-        "ro": "Se oprește la epoca 10 ca și înainte"
-       },
-       "correct": false,
-       "explain": {
-        "en": "Cu răbdare 1, prima scădere (epoca 6) oprește antrenarea.",
-        "ro": "Cu răbdare 1, prima scădere (epoca 6) oprește antrenarea."
-       },
-       "misconception": "oprire-prea-devreme"
-      },
-      {
-       "text": {
-        "en": "Nu se oprește niciodată",
-        "ro": "Nu se oprește niciodată"
-       },
-       "correct": false,
-       "explain": {
-        "en": "Epoca 6 este mai mică decât 0,85, deci se oprește.",
-        "ro": "Epoca 6 este mai mică decât 0,85, deci se oprește."
-       },
-       "misconception": "oprire-prea-devreme"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s16",
-   "title": {
-    "en": "Dimensiunea lotului",
-    "ro": "Dimensiunea lotului"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 59, 60",
-    "ro": "Cursul 4 · slide 59, 60"
-   },
-   "blocks": [
-    {
-     "type": "steps",
-     "intro": [
-      {
-       "text": {
-        "en": "Antrenezi pe mini-loturi, pentru că bibliotecile calculează un lot întreg odată. Slide-ul 60 dă trei game:",
-        "ro": "Antrenezi pe mini-loturi, pentru că bibliotecile calculează un lot întreg odată. Slide-ul 60 dă trei game:"
-       }
-      },
-      {
-       "table": {
-        "columns": [
-         "Lot",
-         "Mărime",
-         "Efect"
-        ],
-        "rows": [
-         [
-          "mic",
-          "8-32",
-          "date puține; generalizează bine; mai zgomotos, mai lent"
-         ],
-         [
-          "mediu",
-          "32-256",
-          "echilibrat, punct bun de plecare"
-         ],
-         [
-          "mare",
-          "512+",
-          "timp de antrenare mic; date multe"
-         ]
-        ]
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s17",
-   "title": {
-    "en": "Rata și lotul",
-    "ro": "Rata și lotul"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 59",
-    "ro": "Cursul 4 · slide 59"
-   },
-   "blocks": [
-    {
-     "type": "rule",
-     "text": {
-      "en": "η nou = η · lot nou / lot vechi.",
-      "ro": "η nou = η · lot nou / lot vechi."
-     },
-     "body": [
-      {
-       "text": {
-        "en": "Dacă mărești lotul de k ori, mărești și η de k ori. Cursul îi spune regula de scalare liniară.",
-        "ro": "Dacă mărești lotul de k ori, mărești și η de k ori. Cursul îi spune regula de scalare liniară."
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s18",
-   "title": {
-    "en": "Lot mai mare",
-    "ro": "Lot mai mare"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 59",
-    "ro": "Cursul 4 · slide 59"
-   },
-   "blocks": [
-    {
-     "type": "calc-exercise",
-     "id": "nn-l04h-e05",
-     "status": "verified-twice",
-     "statement": {
-      "en": "Antrenezi cu η = 0,1 și lot 64. Treci la lotul 256. Calculează noul η.",
-      "ro": "Antrenezi cu η = 0,1 și lot 64. Treci la lotul 256. Calculează noul η."
-     },
-     "fields": [
-      {
-       "id": "e",
-       "label": {
-        "en": "η nou",
-        "ro": "η nou"
-       },
-       "kind": "num",
-       "formula": "0.1*256/64",
-       "expected": 0.4
-      }
-     ],
-     "detectors": [
-      {
-       "field": "e",
-       "formula": "0.1*64/256",
-       "message": {
-        "en": "Ai inversat raportul. Lot mai mare, η mai mare.",
-        "ro": "Ai inversat raportul. Lot mai mare, η mai mare."
-       }
-      }
-     ],
-     "hints": [
-      {
-       "en": "η nou = η · lot nou / lot vechi.",
-       "ro": "η nou = η · lot nou / lot vechi."
-      },
-      {
-       "en": "0,1 · 256 / 64",
-       "ro": "0,1 · 256 / 64"
-      },
-      {
-       "en": "0,4",
-       "ro": "0,4"
-      }
-     ],
-     "solution": {
-      "en": "η nou = 0,1 · 4 = 0,4.",
-      "ro": "η nou = 0,1 · 4 = 0,4."
-     },
-     "variants": [
-      {
-       "statement": {
-        "en": "η = 0,05, lot 32, treci la lotul 128. Calculează noul η.",
-        "ro": "η = 0,05, lot 32, treci la lotul 128. Calculează noul η."
-       },
-       "fields": [
-        {
-         "id": "e",
-         "formula": "0.05*128/32",
-         "expected": 0.2
-        }
-       ],
-       "solution": {
-        "en": "0,2",
-        "ro": "0,2"
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s19",
-   "title": {
-    "en": "Lot mai mic",
-    "ro": "Lot mai mic"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 59",
-    "ro": "Cursul 4 · slide 59"
-   },
-   "blocks": [
-    {
-     "type": "calc-exercise",
-     "id": "nn-l04h-e06",
-     "status": "verified-twice",
-     "statement": {
-      "en": "Antrenezi cu η = 0,1 și lot 64. Acum treci la lotul 32. Calculează noul η.",
-      "ro": "Antrenezi cu η = 0,1 și lot 64. Acum treci la lotul 32. Calculează noul η."
-     },
-     "fields": [
-      {
-       "id": "e",
-       "label": {
-        "en": "η nou",
-        "ro": "η nou"
-       },
-       "kind": "num",
-       "formula": "0.1*32/64",
-       "expected": 0.05
-      }
-     ],
-     "detectors": [
-      {
-       "field": "e",
-       "formula": "0.1*64/32",
-       "message": {
-        "en": "Ai inversat raportul. Lot mai mic, η mai mic.",
-        "ro": "Ai inversat raportul. Lot mai mic, η mai mic."
-       }
-      }
-     ],
-     "hints": [
-      {
-       "en": "η nou = η · lot nou / lot vechi.",
-       "ro": "η nou = η · lot nou / lot vechi."
-      },
-      {
-       "en": "0,1 · 32 / 64",
-       "ro": "0,1 · 32 / 64"
-      },
-      {
-       "en": "0,05",
-       "ro": "0,05"
-      }
-     ],
-     "solution": {
-      "en": "η nou = 0,1 · 0,5 = 0,05: jumătate de lot, jumătate de rată.",
-      "ro": "η nou = 0,1 · 0,5 = 0,05: jumătate de lot, jumătate de rată."
-     },
-     "variants": [
-      {
-       "statement": {
-        "en": "η = 0,4, lot 256, treci la lotul 64. Calculează noul η.",
-        "ro": "η = 0,4, lot 256, treci la lotul 64. Calculează noul η."
-       },
-       "fields": [
-        {
-         "id": "e",
-         "formula": "0.4*64/256",
-         "expected": 0.1
-        }
-       ],
-       "solution": {
-        "en": "0,1",
-        "ro": "0,1"
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s20",
-   "title": {
-    "en": "Cum alegi lotul",
-    "ro": "Cum alegi lotul"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 61",
-    "ro": "Cursul 4 · slide 61"
-   },
-   "blocks": [
-    {
-     "type": "proof-steps",
-     "id": "p4",
-     "claim": {
-      "en": "Care e procedura din slide-ul 61 pentru lot?",
-      "ro": "Care e procedura din slide-ul 61 pentru lot?"
-     },
-     "steps": [
-      {
-       "shown": {
-        "en": "Pornești cu o mărime care încape în memoria plăcii video: 32 sau 64.",
-        "ro": "Pornești cu o mărime care încape în memoria plăcii video: 32 sau 64."
-       }
-      },
-      {
-       "shown": {
-        "en": "Urmărești acuratețea pe validare în raport cu timpul real, nu cu epocile.",
-        "ro": "Urmărești acuratețea pe validare în raport cu timpul real, nu cu epocile."
-       },
-       "predict": {
-        "question": {
-         "en": "De ce timp real și nu epoci?",
-         "ro": "De ce timp real și nu epoci?"
-        },
-        "options": [
-         {
-          "text": {
-           "en": "Un lot mare face epoci mai rapide; epocile nu arată câștigul de timp",
-           "ro": "Un lot mare face epoci mai rapide; epocile nu arată câștigul de timp"
-          },
-          "correct": true,
-          "explain": {
-           "en": "Corect.",
-           "ro": "Corect."
-          }
-         },
-         {
-          "text": {
-           "en": "Epocile nu se pot număra",
-           "ro": "Epocile nu se pot număra"
-          },
-          "correct": false,
-          "explain": {
-           "en": "Se pot număra; dar nu măsoară cât durează efectiv antrenarea.",
-           "ro": "Se pot număra; dar nu măsoară cât durează efectiv antrenarea."
-          },
-          "misconception": "epoci-in-loc-de-timp"
-         }
-        ]
-       }
-      },
-      {
-       "shown": {
-        "en": "Dublezi lotul și măsori din nou. Te oprești când mărirea nu mai ajută.",
-        "ro": "Dublezi lotul și măsori din nou. Te oprești când mărirea nu mai ajută."
-       }
-      }
-     ],
-     "end": {
-      "en": "Alegi lotul cel mai mare la care validarea, pe ceas, încă se îmbunătățește.",
-      "ro": "Alegi lotul cel mai mare la care validarea, pe ceas, încă se îmbunătățește."
-     }
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s21",
-   "title": {
-    "en": "Gradientul pe lot este media",
-    "ro": "Gradientul pe lot este media"
-   },
-   "kicker": {
-    "en": "Cursul 4 · slide 12, 15",
-    "ro": "Cursul 4 · slide 12, 15"
-   },
-   "blocks": [
-    {
-     "type": "mcq",
-     "id": "nn-l04h-q07",
-     "question": {
-      "en": "Un lot de 3 exemple are gradienții 0,8176; −0,2182; −0,1157. Cât este gradientul pentru lot?",
-      "ro": "Un lot de 3 exemple are gradienții 0,8176; −0,2182; −0,1157. Cât este gradientul pentru lot?"
-     },
-     "options": [
-      {
-       "text": {
-        "en": "0,1612: media",
-        "ro": "0,1612: media"
-       },
-       "correct": true,
-       "explain": {
-        "en": "Corect: C are factorul 1/n, deci gradientul este media.",
-        "ro": "Corect: C are factorul 1/n, deci gradientul este media."
-       }
-      },
-      {
-       "text": {
-        "en": "0,4836: suma",
-        "ro": "0,4836: suma"
-       },
-       "correct": false,
-       "explain": {
-        "en": "Fără factorul 1/n, un lot mai mare ar da un pas mai mare doar pentru că are mai mulți termeni.",
-        "ro": "Fără factorul 1/n, un lot mai mare ar da un pas mai mare doar pentru că are mai mulți termeni."
-       },
-       "misconception": "suma-in-loc-de-medie"
-      },
-      {
-       "text": {
-        "en": "0,8176: cel mai mare",
-        "ro": "0,8176: cel mai mare"
-       },
-       "correct": false,
-       "explain": {
-        "en": "Se iau în calcul toți.",
-        "ro": "Se iau în calcul toți."
-       },
-       "misconception": "suma-in-loc-de-medie"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "nn-l04h-s22",
-   "title": {
     "en": "Spune-o cu vorbele tale",
     "ro": "Spune-o cu vorbele tale"
    },
    "kicker": {
-    "en": "Cursul 4 · reflect",
-    "ro": "Cursul 4 · reflect"
+    "en": "Cursul 4 · slide 42, 51",
+    "ro": "Cursul 4 · slide 42, 51"
    },
    "blocks": [
     {
      "type": "reflect",
-     "id": "nn-l04h-r08",
+     "id": "nn-l04h-r03",
      "prompt": {
-      "en": "Costul oscilează de la un pas la altul și nu mai scade. Ce schimbi și de ce?",
-      "ro": "Costul oscilează de la un pas la altul și nu mai scade. Ce schimbi și de ce?"
+      "en": "De ce actualizăm ponderile abia după ce am calculat toate erorile?",
+      "ro": "De ce actualizăm ponderile abia după ce am calculat toate erorile?"
      },
      "answer": {
-      "en": "Rata η e probabil peste prag: pașii depășesc minimul de o parte și de alta. O scad (de exemplu la jumătate) și verific dacă oscilația dispare.",
-      "ro": "Rata η e probabil peste prag: pașii depășesc minimul de o parte și de alta. O scad (de exemplu la jumătate) și verific dacă oscilația dispare."
+      "en": "Eroarea unui strat se calculează cu ponderile stratului de deasupra, așa cum erau când rețeaua a făcut greșeala. Dacă le-am schimba mai devreme, am calcula erorile pentru o altă rețea decât cea care a greșit.",
+      "ro": "Eroarea unui strat se calculează cu ponderile stratului de deasupra, așa cum erau când rețeaua a făcut greșeala. Dacă le-am schimba mai devreme, am calcula erorile pentru o altă rețea decât cea care a greșit."
      },
      "placeholder": {
       "en": "Scrie ce crezi",
@@ -1284,14 +606,14 @@
    ]
   },
   {
-   "id": "nn-l04h-s23",
+   "id": "nn-l04h-s09",
    "title": {
     "en": "Recapitulare",
     "ro": "Recapitulare"
    },
    "kicker": {
-    "en": "Cursul 4 · slide 52-61",
-    "ro": "Cursul 4 · slide 52-61"
+    "en": "Cursul 4 · slide 49-51",
+    "ro": "Cursul 4 · slide 49-51"
    },
    "blocks": [
     {
@@ -1300,20 +622,20 @@
       {
        "points": [
         {
-         "en": "Alegi η, lotul și numărul de epoci pe validare, nu pe test.",
-         "ro": "Alegi η, lotul și numărul de epoci pe validare, nu pe test."
+         "en": "Pasul înainte salvează fiecare z în zs și fiecare ieșire în activations; un z are forma (neuroni, 1).",
+         "ro": "Pasul înainte salvează fiecare z în zs și fiecare ieșire în activations; un z are forma (neuroni, 1)."
         },
         {
-         "en": "η: de zece ori mai mare până oscilează, apoi cam jumătate din prag. Pragul depinde de cost.",
-         "ro": "η: de zece ori mai mare până oscilează, apoi cam jumătate din prag. Pragul depinde de cost."
+         "en": "error = activations[-1] − t este δ de ieșire; gradient_w = activations[-2] . error.T are forma lui weights.",
+         "ro": "error = activations[-1] − t este δ de ieșire; gradient_w = activations[-2] . error.T are forma lui weights."
         },
         {
-         "en": "Early stopping cu răbdare x; păstrezi cea mai bună epocă.",
-         "ro": "Early stopping cu răbdare x; păstrezi cea mai bună epocă."
+         "en": "Bucla înapoi calculează δ ascuns: (weights[l] . error) * sp, cu sp = σ′(z).",
+         "ro": "Bucla înapoi calculează δ ascuns: (weights[l] . error) * sp, cu sp = σ′(z)."
         },
         {
-         "en": "η nou = η · lot nou / lot vechi; gradientul pe lot este media.",
-         "ro": "η nou = η · lot nou / lot vechi; gradientul pe lot este media."
+         "en": "Actualizarea și media pe lot nu apar în pseudocod; se fac după bucla înapoi.",
+         "ro": "Actualizarea și media pe lot nu apar în pseudocod; se fac după bucla înapoi."
         }
        ]
       }
@@ -1322,10 +644,106 @@
    ]
   },
   {
-   "id": "nn-l04h-s24",
+   "id": "nn-l04h-s10",
    "title": {
-    "en": "Mini-test: costul oscilează",
-    "ro": "Mini-test: costul oscilează"
+    "en": "Mini-test: forma lui weights[0]",
+    "ro": "Mini-test: forma lui weights[0]"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04h-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "O rețea 5-3-2 are 5 intrări, 3 neuroni ascunși și 2 clase. Ce formă are weights[0] în pseudocodul cursului? Scrie numărul de rânduri și de coloane.",
+      "ro": "O rețea 5-3-2 are 5 intrări, 3 neuroni ascunși și 2 clase. Ce formă are weights[0] în pseudocodul cursului? Scrie numărul de rânduri și de coloane."
+     },
+     "fields": [
+      {
+       "id": "r",
+       "label": {
+        "en": "rânduri",
+        "ro": "rânduri"
+       },
+       "kind": "num",
+       "formula": "5",
+       "expected": 5
+      },
+      {
+       "id": "k",
+       "label": {
+        "en": "coloane",
+        "ro": "coloane"
+       },
+       "kind": "num",
+       "formula": "3",
+       "expected": 3
+      }
+     ],
+     "detectors": [
+      {
+       "field": "r",
+       "formula": "3",
+       "message": {
+        "en": "Ai inversat: weights[0] are un rând pe intrare (5) și o coloană pe neuron ascuns (3); de aceea codul scrie w.T.",
+        "ro": "Ai inversat: weights[0] are un rând pe intrare (5) și o coloană pe neuron ascuns (3); de aceea codul scrie w.T."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Pentru rețeaua 3-4-2, weights[0] avea forma (3, 4).",
+       "ro": "Pentru rețeaua 3-4-2, weights[0] avea forma (3, 4)."
+      },
+      {
+       "en": "Rânduri: câte intrări; coloane: câți neuroni ascunși.",
+       "ro": "Rânduri: câte intrări; coloane: câți neuroni ascunși."
+      },
+      {
+       "en": "(5, 3)",
+       "ro": "(5, 3)"
+      }
+     ],
+     "solution": {
+      "en": "weights[0] are forma (5, 3): 5 intrări, 3 neuroni ascunși. Atunci w.T are (3, 5), iar w.T . x dă un z de forma (3, 1).",
+      "ro": "weights[0] are forma (5, 3): 5 intrări, 3 neuroni ascunși. Atunci w.T are (3, 5), iar w.T . x dă un z de forma (3, 1)."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceeași rețea 5-3-2. Ce formă are gradient_w[1]?",
+        "ro": "Aceeași rețea 5-3-2. Ce formă are gradient_w[1]?"
+       },
+       "fields": [
+        {
+         "id": "r",
+         "formula": "3",
+         "expected": 3
+        },
+        {
+         "id": "k",
+         "formula": "2",
+         "expected": 2
+        }
+       ],
+       "solution": {
+        "en": "(3, 2), ca weights[1]: 3 neuroni ascunși, 2 clase",
+        "ro": "(3, 2), ca weights[1]: 3 neuroni ascunși, 2 clase"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04h-s11",
+   "title": {
+    "en": "Mini-test: unde se actualizează",
+    "ro": "Mini-test: unde se actualizează"
    },
    "kicker": {
     "en": "Cursul 4 · verificare",
@@ -1334,46 +752,46 @@
    "blocks": [
     {
      "type": "mcq",
-     "id": "nn-l04h-q09",
+     "id": "nn-l04h-q05",
      "question": {
-      "en": "Costul de antrenare sare în sus și în jos, fără să scadă. Ce faci primul?",
-      "ro": "Costul de antrenare sare în sus și în jos, fără să scadă. Ce faci primul?"
+      "en": "În pseudocodul din slide-urile 50-51, unde se face actualizarea w = w − η · gradient?",
+      "ro": "În pseudocodul din slide-urile 50-51, unde se face actualizarea w = w − η · gradient?"
      },
      "options": [
       {
        "text": {
-        "en": "Scazi rata de învățare",
-        "ro": "Scazi rata de învățare"
+        "en": "După bucla înapoi, când toate gradient_w sunt gata; pseudocodul n-o arată",
+        "ro": "După bucla înapoi, când toate gradient_w sunt gata; pseudocodul n-o arată"
        },
        "correct": true,
        "explain": {
-        "en": "Corect: oscilația arată că η e la sau peste prag.",
-        "ro": "Corect: oscilația arată că η e la sau peste prag."
+        "en": "Corect: cu gradienții gata, fiecare pondere se mută contra gradientului ei.",
+        "ro": "Corect: cu gradienții gata, fiecare pondere se mută contra gradientului ei."
        }
       },
       {
        "text": {
-        "en": "Cresc rata de învățare",
-        "ro": "Cresc rata de învățare"
+        "en": "În pasul înainte, imediat după ce un strat își calculează z",
+        "ro": "În pasul înainte, imediat după ce un strat își calculează z"
        },
        "correct": false,
        "explain": {
-        "en": "Ar agrava oscilația.",
-        "ro": "Ar agrava oscilația."
+        "en": "În pasul înainte nu există încă nicio eroare, deci nici gradient.",
+        "ro": "În pasul înainte nu există încă nicio eroare, deci nici gradient."
        },
-       "misconception": "eta-mare-merge-bine"
+       "misconception": "ordine-gresita"
       },
       {
        "text": {
-        "en": "Măresc setul de test",
-        "ro": "Măresc setul de test"
+        "en": "În bucla înapoi, înaintea liniei error = (weights[l] . error) * sp",
+        "ro": "În bucla înapoi, înaintea liniei error = (weights[l] . error) * sp"
        },
        "correct": false,
        "explain": {
-        "en": "Setul de test nu intervine în antrenare.",
-        "ro": "Setul de test nu intervine în antrenare."
+        "en": "Linia aceea are nevoie de ponderile vechi ale stratului de sus.",
+        "ro": "Linia aceea are nevoie de ponderile vechi ale stratului de sus."
        },
-       "misconception": "test-folosit-la-alegere"
+       "misconception": "pondere-noua-in-delta"
       }
      ]
     }

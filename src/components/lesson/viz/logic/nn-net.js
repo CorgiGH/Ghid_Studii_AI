@@ -6,6 +6,8 @@
 //          target: [0], act: 'sigmoid', out: 'sigmoid' | 'softmax', loss?: 'ce' | 'mse', eta: 0.5, values: 'sheet' | 'exact',
 //          layout?: 'bottom-up', edgeLabels?: 'all' | 'active' }
 // 'sheet' reads sigma from the graph like the lab sheet (one decimal: sigma(0) = 0,5, sigma(6) = 1); 'exact' uses the true sigma.
+// Frames: setup; per neuron of a sigmoid layer a 'z' frame then a 'y' frame (z is revealed before y is asked); a softmax layer has
+// its 'z' frames then one 'softmax' frame; the output deltas, the hidden deltas (layer L-1 down to 2), the updates, the end table.
 
 const bi = (en, ro) => ({ en, ro });
 const SIG = (z) => 1 / (1 + Math.exp(-z));
@@ -23,6 +25,18 @@ export const fixed4 = (x) => {
   const z = s === '-0,0000' ? '0,0000' : s;
   return z.startsWith('-') ? MINUS + z.slice(1) : z;
 };
+// on the drawing, exact values keep 2 places (the caption and the end table keep 4)
+export const fixed2 = (x) => {
+  const s = (Object.is(x, -0) ? 0 : x).toFixed(2).replace('.', ',');
+  const z = s === '-0,00' ? '0,00' : s;
+  return z.startsWith('-') ? MINUS + z.slice(1) : z;
+};
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+const SUB = '₀₁₂₃₄₅₆₇₈₉';
+const digits = (n, set) => String(n).split('').map((c) => set[Number(c)]).join('');
+// the lab sheet's name of a weight: w with the layer up and the two neuron numbers down (w²₁₁ goes from neuron 1 below to neuron 1 of layer 2)
+export const wName = (l, i, j) => `w${digits(l, SUP)}${digits(i + 1, SUB)}${digits(j + 1, SUB)}`;
+export const bName = (l, j) => `b${digits(l, SUP)}${digits(j + 1, SUB)}`;
 // the data-value of a number: a point decimal, no sign mark, 4 places at most
 export const dataOf = (x) => String(Math.round(Math.abs(x) * 10000) / 10000);
 
@@ -118,15 +132,22 @@ export function nnNet(props) {
   const R = runNet(P);
   const { layers, L, W, b, hasBias, target, out, loss, eta, values } = P;
   const fm = (x) => (values === 'sheet' ? trimmed(x) : fixed4(x));
+  // on the drawing: 2 places in exact mode, except a small nonzero value that 2 places would show as 0,00 (the MSE deltas)
+  const fd = (x) => (values === 'sheet' ? trimmed(x) : (x !== 0 && Math.abs(x) < 0.005 ? fixed4(x) : fixed2(x)));
   const fi = trimmed;
   const isSoftmaxLayer = (l) => l === L && out === 'softmax';
+  // the exact-mode note names sigma(6) only on a net where some z is 6 (the sheet net), where the sheet reads 1
+  const hasSix = R.z.some((zl) => Array.isArray(zl) && zl.some((v) => Math.abs(v - 6) < 1e-9));
   const sigmaNote = values === 'sheet'
     ? bi('σ read as on the sheet (1 decimal)', 'σ citit ca în foaie (1 zecimală)')
-    : bi('σ exact (σ(6) = 0,9975)', 'σ exact (σ(6) = 0,9975)');
+    : hasSix ? bi('σ exact (σ(6) = 0,9975)', 'σ exact (σ(6) = 0,9975)') : bi('σ exact', 'σ exact');
 
   const frames = [{ kind: 'setup' }];
   for (let l = 2; l <= L; l += 1) {
-    for (let j = 0; j < layers[l - 1]; j += 1) frames.push({ kind: isSoftmaxLayer(l) ? 'z' : 'fwd', l, j });
+    for (let j = 0; j < layers[l - 1]; j += 1) {
+      frames.push({ kind: 'z', l, j });
+      if (!isSoftmaxLayer(l)) frames.push({ kind: 'y', l, j });
+    }
     if (isSoftmaxLayer(l)) frames.push({ kind: 'softmax', l });
   }
   for (let j = 0; j < layers[L - 1]; j += 1) frames.push({ kind: 'dout', l: L, j });
@@ -137,13 +158,13 @@ export function nnNet(props) {
   }
   frames.push({ kind: 'end' });
 
-  const M = { P, R, frames, count: frames.length, sigmaNote, fm, fi, hasBias };
+  const M = { P, R, frames, count: frames.length, sigmaNote, fm, fd, fi, hasBias };
   M.final = { weights: R.newW.slice(2), biases: hasBias ? R.newB.slice(2) : null, flat: R.newW.slice(2).flatMap((m) => m.flat()) };
 
   // what a frame fills in: [kind, layer, i, j?, value]
   const entries = (f) => {
-    if (f.kind === 'fwd') return [['z', f.l, f.j, R.z[f.l][f.j]], ['y', f.l, f.j, R.y[f.l][f.j]]];
     if (f.kind === 'z') return [['z', f.l, f.j, R.z[f.l][f.j]]];
+    if (f.kind === 'y') return [['y', f.l, f.j, R.y[f.l][f.j]]];
     if (f.kind === 'softmax') return R.y[f.l].map((v, j) => ['y', f.l, j, v]);
     if (f.kind === 'dout') return [['d', f.l, f.j, R.d[f.l][f.j]]];
     if (f.kind === 'dhid') return [['d', f.l, f.i, R.d[f.l][f.i]]];
@@ -162,9 +183,11 @@ export function nnNet(props) {
       }
     }
     const f = M.frames[k];
-    if (f.kind === 'fwd' || f.kind === 'z') {
+    if (f.kind === 'z') {
       st.current = [f.l, f.j];
       for (let i = 0; i < layers[f.l - 2]; i += 1) st.lit.push([f.l, i, f.j]);
+    } else if (f.kind === 'y') {
+      st.current = [f.l, f.j];
     } else if (f.kind === 'softmax') {
       st.current = [f.l, 0];
     } else if (f.kind === 'dout') {
@@ -209,7 +232,7 @@ export function nnNet(props) {
   M.pickSpec = (k) => {
     const f = M.frames[k];
     const items = [];
-    if (f.kind === 'fwd' || f.kind === 'z') {
+    if (f.kind === 'z') {
       const { l, j } = f;
       const prev = R.y[l - 1];
       const zc = R.z[l][j];
@@ -222,15 +245,17 @@ export function nnNet(props) {
       else wrongs.push({ id: 'forgot-input', val: W[l].reduce((s, row) => s + row[j], 0) + bj, desc: bi('weights only, without the inputs', 'doar ponderile, fără intrări') });
       items.push(makeItem(k, `z${k}`,
         bi(`Neuron ${nm(l, j)} of layer ${l}: what is z?`, `Neuronul ${nm(l, j)} din stratul ${l}: cât este z?`), zc, wrongs));
-      if (f.kind === 'fwd') {
-        const yc = R.y[l][j];
-        items.push(makeItem(k, `y${k}`,
-          bi(`And y = σ(z) for z = ${fm(zc)}?`, `Și y = σ(z) pentru z = ${fm(zc)}?`), yc, [
-            { id: 'y-este-z', val: zc, desc: bi('z itself', 'chiar z') },
-            { id: 'y-complement', val: 1 - yc, desc: bi('1 − σ(z)', '1 − σ(z)') },
-            { id: 'y-derivata', val: yc * (1 - yc), desc: bi('σ′(z) instead of σ(z)', 'σ′(z) în loc de σ(z)') },
-          ]));
-      }
+    } else if (f.kind === 'y') {
+      // asked only after z is revealed (its own frame), so the prompt may name z
+      const { l, j } = f;
+      const zc = R.z[l][j];
+      const yc = R.y[l][j];
+      items.push(makeItem(k, `y${k}`,
+        bi(`Neuron ${nm(l, j)} of layer ${l} has z = ${fm(zc)}. What is y = σ(z)?`, `Neuronul ${nm(l, j)} din stratul ${l} are z = ${fm(zc)}. Cât este y = σ(z)?`), yc, [
+          { id: 'y-este-z', val: zc, desc: bi('z itself', 'chiar z') },
+          { id: 'y-complement', val: 1 - yc, desc: bi('1 − σ(z)', '1 − σ(z)') },
+          { id: 'y-derivata', val: yc * (1 - yc), desc: bi('σ′(z) instead of σ(z)', 'σ′(z) în loc de σ(z)') },
+        ]));
     } else if (f.kind === 'softmax') {
       const yc = R.y[f.l][0];
       const s = R.z[f.l].map((v) => Math.exp(v));
@@ -274,8 +299,8 @@ export function nnNet(props) {
       const yi = R.y[l - 1][i];
       const c = R.newW[l][i][j];
       items.push(makeItem(k, `u${k}`,
-        bi(`Weight w${i + 1}${j + 1} of layer ${l} is ${fi(w)}, δ = ${fm(dj)}, y = ${fm(yi)}, η = ${fi(eta)}. What is the new weight?`,
-          `Ponderea w${i + 1}${j + 1} din stratul ${l} este ${fi(w)}, δ = ${fm(dj)}, y = ${fm(yi)}, η = ${fi(eta)}. Cât este ponderea nouă?`), c, [
+        bi(`Weight ${wName(l, i, j)} is ${fi(w)}, δ = ${fm(dj)}, y = ${l === 2 ? fi(yi) : fm(yi)}, η = ${fi(eta)}. What is the new weight?`,
+          `Ponderea ${wName(l, i, j)} este ${fi(w)}, δ = ${fm(dj)}, y = ${l === 2 ? fi(yi) : fm(yi)}, η = ${fi(eta)}. Cât este ponderea nouă?`), c, [
             { id: 'sign', val: w + eta * dj * yi, desc: bi('with a plus', 'cu plus') },
             { id: 'forgot-eta', val: w - dj * yi, desc: bi('without η', 'fără η') },
             { id: 'forgot-input', val: w - eta * dj, desc: bi('without the y of the neuron below', 'fără y-ul neuronului de jos') },
@@ -285,8 +310,8 @@ export function nnNet(props) {
       const bb = b[l][j];
       const dj = R.d[l][j];
       items.push(makeItem(k, `b${k}`,
-        bi(`Bias ${j + 1} of layer ${l} is ${fi(bb)}, δ = ${fm(dj)}, η = ${fi(eta)}. What is the new bias?`,
-          `Biasul ${j + 1} din stratul ${l} este ${fi(bb)}, δ = ${fm(dj)}, η = ${fi(eta)}. Cât este biasul nou?`), R.newB[l][j], [
+        bi(`Bias ${bName(l, j)} is ${fi(bb)}, δ = ${fm(dj)}, η = ${fi(eta)}. What is the new bias?`,
+          `Biasul ${bName(l, j)} este ${fi(bb)}, δ = ${fm(dj)}, η = ${fi(eta)}. Cât este biasul nou?`), R.newB[l][j], [
             { id: 'sign', val: bb + eta * dj, desc: bi('with a plus', 'cu plus') },
             { id: 'forgot-eta', val: bb - dj, desc: bi('without η', 'fără η') },
             { id: 'forgot-delta', val: bb - eta, desc: bi('η alone', 'doar η') },
@@ -302,8 +327,10 @@ export function nnNet(props) {
   // ---- captions ----
   const sumText = (l, j) => {
     const prev = R.y[l - 1];
-    const parts = prev.map((v, i) => `${fi(W[l][i][j])}·${l === 2 ? fi(v) : fm(v)}`);
-    const bias = hasBias ? ` + ${fi(b[l][j])}` : '';
+    // a negative factor after the first term goes in brackets: 6·2 + (−2)·6
+    const par = (txt, first) => (!first && txt.startsWith(MINUS) ? `(${txt})` : txt);
+    const parts = prev.map((v, i) => `${par(fi(W[l][i][j]), i === 0)}·${l === 2 ? fi(v) : fm(v)}`);
+    const bias = hasBias ? ` + ${par(fi(b[l][j]), false)}` : '';
     return `${parts.join(' + ')}${bias}`;
   };
   const wrongLead = (k, picks) => {
@@ -319,14 +346,15 @@ export function nnNet(props) {
     if (!bad.length) return bi('', '');
     return bi(`Not quite (you picked: ${bad.map((d) => d.en).join('; ')}). `, `Nu chiar (ai ales: ${bad.map((d) => d.ro).join('; ')}). `);
   };
+  const br = (txt) => (txt.startsWith(MINUS) ? `(${txt})` : txt);
   M.caption = (k, { answered = true, picks = {} } = {}) => {
     const f = M.frames[k];
     if (f.kind === 'setup') {
       const lossEn = loss === 'mse' ? 'MSE' : out === 'softmax' ? 'cross-entropy with softmax' : 'cross-entropy';
       const lossRo = loss === 'mse' ? 'MSE' : out === 'softmax' ? 'entropie încrucișată cu softmax' : 'entropie încrucișată';
       return bi(
-        `The net, bottom up: the inputs sit at the bottom. Weights are on the edges, w_ij goes from neuron i below to neuron j above. Cost: ${lossEn}. η = ${fi(eta)}. ${sigmaNote.en}.`,
-        `Rețeaua, de jos în sus: intrările sunt jos. Ponderile stau pe muchii, w_ij merge de la neuronul i de jos la neuronul j de sus. Cost: ${lossRo}. η = ${fi(eta)}. ${sigmaNote.ro}.`,
+        `The net, bottom up: the inputs sit at the bottom. Weights are on the edges, wᵢⱼ goes from neuron i below to neuron j above. Under each neuron: z, δ${hasBias ? ' and b' : ''}. Cost: ${lossEn}. η = ${fi(eta)}. ${sigmaNote.en}.`,
+        `Rețeaua, de jos în sus: intrările sunt jos. Ponderile stau pe muchii, wᵢⱼ merge de la neuronul i de jos la neuronul j de sus. Sub fiecare neuron: z, δ${hasBias ? ' și b' : ''}. Cost: ${lossRo}. η = ${fi(eta)}. ${sigmaNote.ro}.`,
       );
     }
     if (f.kind === 'end') {
@@ -339,24 +367,22 @@ export function nnNet(props) {
     }
     const lead = answered ? wrongLead(k, picks) : bi('', '');
     if (!answered) {
-      if (f.kind === 'fwd' || f.kind === 'z') return bi(`Forward: neuron ${f.j + 1} of layer ${f.l} sums its weighted inputs.`, `Pasul înainte: neuronul ${f.j + 1} din stratul ${f.l} adună intrările înmulțite cu ponderi.`);
+      if (f.kind === 'z') return bi(`Forward: neuron ${f.j + 1} of layer ${f.l} sums its weighted inputs.`, `Pasul înainte: neuronul ${f.j + 1} din stratul ${f.l} adună intrările înmulțite cu ponderi.`);
+      if (f.kind === 'y') return bi(`Forward: neuron ${f.j + 1} of layer ${f.l} passes its z through the sigmoid.`, `Pasul înainte: neuronul ${f.j + 1} din stratul ${f.l} trece z-ul prin sigmoidă.`);
       if (f.kind === 'softmax') return bi('Softmax turns the scores of the last layer into probabilities.', 'Softmax transformă scorurile ultimului strat în probabilități.');
       if (f.kind === 'dout') return bi(`Backward: the error of output neuron ${f.j + 1}.`, `Pasul înapoi: eroarea neuronului de ieșire ${f.j + 1}.`);
       if (f.kind === 'dhid') return bi(`Backward: the error of hidden neuron ${f.i + 1} of layer ${f.l}, from the layer above.`, `Pasul înapoi: eroarea neuronului ascuns ${f.i + 1} din stratul ${f.l}, adusă din stratul de sus.`);
-      if (f.kind === 'upd') return bi(`Update: weight w${f.i + 1}${f.j + 1} of layer ${f.l}.`, `Actualizare: ponderea w${f.i + 1}${f.j + 1} din stratul ${f.l}.`);
-      return bi(`Update: bias ${f.j + 1} of layer ${f.l}.`, `Actualizare: biasul ${f.j + 1} din stratul ${f.l}.`);
-    }
-    if (f.kind === 'fwd') {
-      const z = R.z[f.l][f.j];
-      const y = R.y[f.l][f.j];
-      return bi(
-        `${lead.en}z = ${sumText(f.l, f.j)} = ${fm(z)}, so y = σ(${fm(z)}) = ${fm(y)}.`,
-        `${lead.ro}z = ${sumText(f.l, f.j)} = ${fm(z)}, deci y = σ(${fm(z)}) = ${fm(y)}.`,
-      );
+      if (f.kind === 'upd') return bi(`Update: weight ${wName(f.l, f.i, f.j)}.`, `Actualizare: ponderea ${wName(f.l, f.i, f.j)}.`);
+      return bi(`Update: bias ${bName(f.l, f.j)}.`, `Actualizare: biasul ${bName(f.l, f.j)}.`);
     }
     if (f.kind === 'z') {
       const z = R.z[f.l][f.j];
       return bi(`${lead.en}z = ${sumText(f.l, f.j)} = ${fm(z)}.`, `${lead.ro}z = ${sumText(f.l, f.j)} = ${fm(z)}.`);
+    }
+    if (f.kind === 'y') {
+      const z = R.z[f.l][f.j];
+      const y = R.y[f.l][f.j];
+      return bi(`${lead.en}y = σ(${fm(z)}) = ${fm(y)}.`, `${lead.ro}y = σ(${fm(z)}) = ${fm(y)}.`);
     }
     if (f.kind === 'softmax') {
       const ys = R.y[f.l].map(fm).join('; ');
@@ -374,7 +400,7 @@ export function nnNet(props) {
     }
     if (f.kind === 'dhid') {
       const y = R.y[f.l][f.i];
-      const terms = W[f.l + 1][f.i].map((w, kk) => `${fi(w)}·${fm(R.d[f.l + 1][kk])}`).join(' + ');
+      const terms = W[f.l + 1][f.i].map((w, kk) => `${kk > 0 && w < 0 ? `(${fi(w)})` : fi(w)}·${R.d[f.l + 1][kk] < 0 ? `(${fm(R.d[f.l + 1][kk])})` : fm(R.d[f.l + 1][kk])}`).join(' + ');
       return bi(
         `${lead.en}δ = y(1 − y)·(${terms}) = ${fm(y)}·(1 − ${fm(y)})·(${terms}) = ${fm(R.d[f.l][f.i])}. The weights are the old ones.`,
         `${lead.ro}δ = y(1 − y)·(${terms}) = ${fm(y)}·(1 − ${fm(y)})·(${terms}) = ${fm(R.d[f.l][f.i])}. Ponderile sunt cele vechi.`,
@@ -385,15 +411,17 @@ export function nnNet(props) {
       const d = R.d[f.l][f.j];
       const yi = R.y[f.l - 1][f.i];
       const yiTxt = f.l === 2 ? fi(yi) : fm(yi);
+      const wn = wName(f.l, f.i, f.j);
       return bi(
-        `${lead.en}w${f.i + 1}${f.j + 1} = ${fi(w)} − ${fi(eta)}·${fm(d)}·${yiTxt} = ${fm(R.newW[f.l][f.i][f.j])}.`,
-        `${lead.ro}w${f.i + 1}${f.j + 1} = ${fi(w)} − ${fi(eta)}·${fm(d)}·${yiTxt} = ${fm(R.newW[f.l][f.i][f.j])}.`,
+        `${lead.en}${wn} = ${fi(w)} − ${fi(eta)}·${br(fm(d))}·${yiTxt} = ${fm(R.newW[f.l][f.i][f.j])}.`,
+        `${lead.ro}${wn} = ${fi(w)} − ${fi(eta)}·${br(fm(d))}·${yiTxt} = ${fm(R.newW[f.l][f.i][f.j])}.`,
       );
     }
     const bb = b[f.l][f.j];
+    const bn = bName(f.l, f.j);
     return bi(
-      `${lead.en}b = ${fi(bb)} − ${fi(eta)}·${fm(R.d[f.l][f.j])} = ${fm(R.newB[f.l][f.j])}.`,
-      `${lead.ro}b = ${fi(bb)} − ${fi(eta)}·${fm(R.d[f.l][f.j])} = ${fm(R.newB[f.l][f.j])}.`,
+      `${lead.en}${bn} = ${fi(bb)} − ${fi(eta)}·${br(fm(R.d[f.l][f.j]))} = ${fm(R.newB[f.l][f.j])}.`,
+      `${lead.ro}${bn} = ${fi(bb)} − ${fi(eta)}·${br(fm(R.d[f.l][f.j]))} = ${fm(R.newB[f.l][f.j])}.`,
     );
   };
   return M;
