@@ -1,0 +1,1573 @@
+{
+ "meta": {
+  "id": "nn-l04b",
+  "title": {
+   "en": "Lesson 4b: Cross-entropy for one neuron",
+   "ro": "Lecția 4b: Entropia încrucișată pentru un neuron"
+  },
+  "shortTitle": {
+   "en": "L4b: Cross-entropy",
+   "ro": "L4b: Entropia încrucișată"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l04b-s01",
+   "title": {
+    "en": "Un cost nou, pentru ținta 0",
+    "ro": "Un cost nou, pentru ținta 0"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 12",
+    "ro": "Cursul 4 · slide 12"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru un exemplu cu ținta t = 0, costul nou este C = −ln(1 − y). Cu cât y este mai departe de 0, cu atât costul crește.",
+        "ro": "Pentru un exemplu cu ținta t = 0, costul nou este C = −ln(1 − y). Cu cât y este mai departe de 0, cu atât costul crește."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "y",
+         "C = −ln(1 − y)"
+        ],
+        "rows": [
+         [
+          "0,1",
+          "0,1054"
+         ],
+         [
+          "0,5",
+          "0,6931"
+         ],
+         [
+          "0,8176",
+          "1,7014"
+         ],
+         [
+          "0,9820",
+          "4,0181"
+         ]
+        ]
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Costul pentru t = 0</title><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='46' y2='14'/><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='314' y2='158'/><line class='muted' stroke-width='1.5' x1='46' y1='155' x2='46' y2='161'/><text class='muted' font-size='14' x='46' y='176' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='180' y1='155' x2='180' y2='161'/><text class='muted' font-size='14' x='180' y='176' text-anchor='middle'>0,5</text><line class='muted' stroke-width='1.5' x1='314' y1='155' x2='314' y2='161'/><text class='muted' font-size='14' x='314' y='176' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='43' y1='158' x2='49' y2='158'/><text class='muted' font-size='14' x='40' y='163' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='43' y1='92.5' x2='49' y2='92.5'/><text class='muted' font-size='14' x='40' y='97.5' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='43' y1='27.1' x2='49' y2='27.1'/><text class='muted' font-size='14' x='40' y='32.1' text-anchor='end'>4</text><polyline class='accent' stroke-width='2.8' fill='none' points='46,158 48.9,157.6 51.9,157.3 54.8,156.9 57.7,156.5 60.7,156.2 63.6,155.8 66.5,155.4 69.5,155 72.4,154.6 75.3,154.2 78.3,153.8 81.2,153.4 84.1,153 87.1,152.6 90,152.1 92.9,151.7 95.9,151.3 98.8,150.8 101.7,150.4 104.7,149.9 107.6,149.5 110.5,149 113.5,148.5 116.4,148 119.3,147.5 122.3,147 125.2,146.5 128.1,146 131.1,145.5 134,145 136.9,144.4 139.9,143.9 142.8,143.3 145.7,142.8 148.7,142.2 151.6,141.6 154.5,141 157.5,140.4 160.4,139.8 163.3,139.2 166.3,138.5 169.2,137.9 172.1,137.2 175.1,136.5 178,135.8 180.9,135.1 183.9,134.4 186.8,133.6 189.7,132.9 192.7,132.1 195.6,131.3 198.5,130.4 201.5,129.6 204.4,128.7 207.3,127.9 210.3,126.9 213.2,126 216.1,125 219.1,124 222,123 224.9,122 227.9,120.9 230.8,119.7 233.7,118.5 236.7,117.3 239.6,116.1 242.5,114.7 245.5,113.4 248.4,111.9 251.3,110.5 254.3,108.9 257.2,107.2 260.1,105.5 263.1,103.7 266,101.7 268.9,99.7 271.8,97.5 274.8,95.1 277.7,92.6 280.6,89.8 283.6,86.8 286.5,83.5 289.4,79.8 292.4,75.6 295.3,70.8 298.2,65.3 301.2,58.5 304.1,50 307,38.5 310,20.6'/><circle class='accent fill-accent' stroke-width='2' cx='180' cy='135.3' r='5'/><circle class='bad fill-bad' stroke-width='2' cx='309.2' cy='26.5' r='5'/><text class='fg' font-size='15' x='314' y='194' text-anchor='end'>y</text><text class='fg' font-size='15' x='54' y='16' text-anchor='start'>C</text></svg>",
+        "alt": {
+         "en": "Curba −ln(1 − y): urcă încet, apoi foarte abrupt când y se apropie de 1",
+         "ro": "Curba −ln(1 − y): urcă încet, apoi foarte abrupt când y se apropie de 1"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s02",
+   "title": {
+    "en": "Același y, altă țintă",
+    "ro": "Același y, altă țintă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 12",
+    "ro": "Cursul 4 · slide 12"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru ținta t = 1, costul este C = −ln y. Același y poate fi bun pentru o țintă și rău pentru alta.",
+        "ro": "Pentru ținta t = 1, costul este C = −ln y. Același y poate fi bun pentru o țintă și rău pentru alta."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "y",
+         "C pentru t = 1",
+         "C pentru t = 0"
+        ],
+        "rows": [
+         [
+          "0,9",
+          "0,1054",
+          "2,3026"
+         ],
+         [
+          "0,1",
+          "2,3026",
+          "0,1054"
+         ]
+        ]
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Cele două curbe de cost</title><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='46' y2='14'/><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='314' y2='158'/><line class='muted' stroke-width='1.5' x1='46' y1='155' x2='46' y2='161'/><text class='muted' font-size='14' x='46' y='176' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='180' y1='155' x2='180' y2='161'/><text class='muted' font-size='14' x='180' y='176' text-anchor='middle'>0,5</text><line class='muted' stroke-width='1.5' x1='314' y1='155' x2='314' y2='161'/><text class='muted' font-size='14' x='314' y='176' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='43' y1='158' x2='49' y2='158'/><text class='muted' font-size='14' x='40' y='163' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='43' y1='92.5' x2='49' y2='92.5'/><text class='muted' font-size='14' x='40' y='97.5' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='43' y1='27.1' x2='49' y2='27.1'/><text class='muted' font-size='14' x='40' y='32.1' text-anchor='end'>4</text><polyline class='accent' stroke-width='2.8' fill='none' points='46,158 48.9,157.6 51.9,157.3 54.8,156.9 57.7,156.5 60.7,156.2 63.6,155.8 66.5,155.4 69.5,155 72.4,154.6 75.3,154.2 78.3,153.8 81.2,153.4 84.1,153 87.1,152.6 90,152.1 92.9,151.7 95.9,151.3 98.8,150.8 101.7,150.4 104.7,149.9 107.6,149.5 110.5,149 113.5,148.5 116.4,148 119.3,147.5 122.3,147 125.2,146.5 128.1,146 131.1,145.5 134,145 136.9,144.4 139.9,143.9 142.8,143.3 145.7,142.8 148.7,142.2 151.6,141.6 154.5,141 157.5,140.4 160.4,139.8 163.3,139.2 166.3,138.5 169.2,137.9 172.1,137.2 175.1,136.5 178,135.8 180.9,135.1 183.9,134.4 186.8,133.6 189.7,132.9 192.7,132.1 195.6,131.3 198.5,130.4 201.5,129.6 204.4,128.7 207.3,127.9 210.3,126.9 213.2,126 216.1,125 219.1,124 222,123 224.9,122 227.9,120.9 230.8,119.7 233.7,118.5 236.7,117.3 239.6,116.1 242.5,114.7 245.5,113.4 248.4,111.9 251.3,110.5 254.3,108.9 257.2,107.2 260.1,105.5 263.1,103.7 266,101.7 268.9,99.7 271.8,97.5 274.8,95.1 277.7,92.6 280.6,89.8 283.6,86.8 286.5,83.5 289.4,79.8 292.4,75.6 295.3,70.8 298.2,65.3 301.2,58.5 304.1,50 307,38.5 310,20.6'/><polyline class='warn' stroke-width='2.8' fill='none' points='50,20.6 53,38.5 55.9,50 58.8,58.5 61.8,65.3 64.7,70.8 67.6,75.6 70.6,79.8 73.5,83.5 76.4,86.8 79.4,89.8 82.3,92.6 85.2,95.1 88.2,97.5 91.1,99.7 94,101.7 96.9,103.7 99.9,105.5 102.8,107.2 105.7,108.9 108.7,110.5 111.6,111.9 114.5,113.4 117.5,114.7 120.4,116.1 123.3,117.3 126.3,118.5 129.2,119.7 132.1,120.9 135.1,122 138,123 140.9,124 143.9,125 146.8,126 149.7,126.9 152.7,127.9 155.6,128.7 158.5,129.6 161.5,130.4 164.4,131.3 167.3,132.1 170.3,132.9 173.2,133.6 176.1,134.4 179.1,135.1 182,135.8 184.9,136.5 187.9,137.2 190.8,137.9 193.7,138.5 196.7,139.2 199.6,139.8 202.5,140.4 205.5,141 208.4,141.6 211.3,142.2 214.3,142.8 217.2,143.3 220.1,143.9 223.1,144.4 226,145 228.9,145.5 231.9,146 234.8,146.5 237.7,147 240.7,147.5 243.6,148 246.5,148.5 249.5,149 252.4,149.5 255.3,149.9 258.3,150.4 261.2,150.8 264.1,151.3 267.1,151.7 270,152.1 272.9,152.6 275.9,153 278.8,153.4 281.7,153.8 284.7,154.2 287.6,154.6 290.5,155 293.5,155.4 296.4,155.8 299.3,156.2 302.3,156.5 305.2,156.9 308.1,157.3 311.1,157.6 314,158'/><text class='warn' font-size='14' font-weight='700' x='56.7' y='30.4' text-anchor='start'>t = 1</text><text class='accent' font-size='14' font-weight='700' x='212.2' y='30.4' text-anchor='start'>t = 0</text><text class='fg' font-size='15' x='314' y='194' text-anchor='end'>y</text><text class='fg' font-size='15' x='54' y='16' text-anchor='start'>C</text></svg>",
+        "alt": {
+         "en": "Două curbe de cost: pentru t = 1 costul scade când y crește, pentru t = 0 crește",
+         "ro": "Două curbe de cost: pentru t = 1 costul scade când y crește, pentru t = 0 crește"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s03",
+   "title": {
+    "en": "Formula cu t și 1 − t",
+    "ro": "Formula cu t și 1 − t"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 12",
+    "ro": "Cursul 4 · slide 12"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Pentru un exemplu, C = −[ t · ln y + (1 − t) · ln(1 − y) ]. Din cei doi termeni rămâne unul singur.",
+      "ro": "Pentru un exemplu, C = −[ t · ln y + (1 − t) · ln(1 − y) ]. Din cei doi termeni rămâne unul singur."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Aici y este ieșirea sigmoidă, t este ținta (0 sau 1), iar ln este logaritmul natural. Dacă t = 1, termenul cu 1 − t dispare; dacă t = 0, dispare termenul cu t.",
+        "ro": "Aici y este ieșirea sigmoidă, t este ținta (0 sau 1), iar ln este logaritmul natural. Dacă t = 1, termenul cu 1 − t dispare; dacă t = 0, dispare termenul cu t."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s04",
+   "title": {
+    "en": "Calculează costul",
+    "ro": "Calculează costul"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 12",
+    "ro": "Cursul 4 · slide 12"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04b-e01",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Ieșirea este y = 0,8. Calculează costul C pentru ținta t = 1 și pentru ținta t = 0.",
+      "ro": "Ieșirea este y = 0,8. Calculează costul C pentru ținta t = 1 și pentru ținta t = 0."
+     },
+     "fields": [
+      {
+       "id": "c1",
+       "label": {
+        "en": "C pentru t = 1",
+        "ro": "C pentru t = 1"
+       },
+       "kind": "num",
+       "formula": "-ln(0.8)",
+       "expected": 0.2231
+      },
+      {
+       "id": "c0",
+       "label": {
+        "en": "C pentru t = 0",
+        "ro": "C pentru t = 0"
+       },
+       "kind": "num",
+       "formula": "-ln(1-0.8)",
+       "expected": 1.6094
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c1",
+       "formula": "-log10(0.8)",
+       "message": {
+        "en": "Ai folosit logaritmul în baza 10. Aici ln înseamnă logaritm natural.",
+        "ro": "Ai folosit logaritmul în baza 10. Aici ln înseamnă logaritm natural."
+       }
+      },
+      {
+       "field": "c1",
+       "formula": "-ln(1-0.8)",
+       "message": {
+        "en": "Ai pus ținta greșită: pentru t = 1 se folosește −ln y.",
+        "ro": "Ai pus ținta greșită: pentru t = 1 se folosește −ln y."
+       }
+      },
+      {
+       "field": "c0",
+       "formula": "-ln(0.8)",
+       "message": {
+        "en": "Ai pus ținta greșită: pentru t = 0 se folosește −ln(1 − y).",
+        "ro": "Ai pus ținta greșită: pentru t = 0 se folosește −ln(1 − y)."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "t = 1 păstrează termenul cu ln y; t = 0 păstrează termenul cu ln(1 − y).",
+       "ro": "t = 1 păstrează termenul cu ln y; t = 0 păstrează termenul cu ln(1 − y)."
+      },
+      {
+       "en": "C = −ln(0,8) și C = −ln(1 − 0,8) = −ln(0,2)",
+       "ro": "C = −ln(0,8) și C = −ln(1 − 0,8) = −ln(0,2)"
+      },
+      {
+       "en": "0,2231 și 1,6094",
+       "ro": "0,2231 și 1,6094"
+      }
+     ],
+     "solution": {
+      "en": "Pentru t = 1: −ln 0,8 = 0,2231. Pentru t = 0: −ln 0,2 = 1,6094. Același y, costuri foarte diferite.",
+      "ro": "Pentru t = 1: −ln 0,8 = 0,2231. Pentru t = 0: −ln 0,2 = 1,6094. Același y, costuri foarte diferite."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Ieșirea este y = 0,9. Calculează C pentru t = 1 și pentru t = 0.",
+        "ro": "Ieșirea este y = 0,9. Calculează C pentru t = 1 și pentru t = 0."
+       },
+       "fields": [
+        {
+         "id": "c1",
+         "formula": "-ln(0.9)",
+         "expected": 0.1054
+        },
+        {
+         "id": "c0",
+         "formula": "-ln(1-0.9)",
+         "expected": 2.3026
+        }
+       ],
+       "solution": {
+        "en": "0,1054 și 2,3026",
+        "ro": "0,1054 și 2,3026"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s05",
+   "title": {
+    "en": "Se comportă ca un cost?",
+    "ro": "Se comportă ca un cost?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 13",
+    "ro": "Cursul 4 · slide 13"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04b-q02",
+     "question": {
+      "en": "Ținta este t = 1 și ieșirea y = 1 (foarte aproape). Ce valoare are costul?",
+      "ro": "Ținta este t = 1 și ieșirea y = 1 (foarte aproape). Ce valoare are costul?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Aproape 0: ieșirea este chiar ținta",
+        "ro": "Aproape 0: ieșirea este chiar ținta"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: −ln 1 = 0. Un cost bun este 0 când ieșirea nimerește ținta și pozitiv în rest.",
+        "ro": "Corect: −ln 1 = 0. Un cost bun este 0 când ieșirea nimerește ținta și pozitiv în rest."
+       }
+      },
+      {
+       "text": {
+        "en": "Aproape 1",
+        "ro": "Aproape 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "ln 1 este 0, nu 1.",
+        "ro": "ln 1 este 0, nu 1."
+       },
+       "misconception": "ln-1-este-1"
+      },
+      {
+       "text": {
+        "en": "Foarte mare",
+        "ro": "Foarte mare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Costul este mare când y este departe de țintă, nu când o nimerește.",
+        "ro": "Costul este mare când y este departe de țintă, nu când o nimerește."
+       },
+       "misconception": "cost-mare-la-potrivire"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s06",
+   "title": {
+    "en": "Media pe trei exemple",
+    "ro": "Media pe trei exemple"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 12",
+    "ro": "Cursul 4 · slide 12"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru un set de n exemple, costul este media costurilor. În formulă, x este un exemplu, iar suma Σ trece prin toate exemplele:",
+        "ro": "Pentru un set de n exemple, costul este media costurilor. În formulă, x este un exemplu, iar suma Σ trece prin toate exemplele:"
+       }
+      },
+      {
+       "tex": "C = -\\frac{1}{n}\\sum_x\\left[t\\ln y + (1-t)\\ln(1-y)\\right]"
+      },
+      {
+       "text": {
+        "en": "Cu w = 0,6 și b = 0,9, trei exemple (x, t):",
+        "ro": "Cu w = 0,6 și b = 0,9, trei exemple (x, t):"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "x",
+         "t",
+         "y",
+         "cost"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "0,8176",
+          "1,7014"
+         ],
+         [
+          "2",
+          "1",
+          "0,8909",
+          "0,1155"
+         ],
+         [
+          "0,5",
+          "1",
+          "0,7685",
+          "0,2633"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s07",
+   "title": {
+    "en": "Media costurilor",
+    "ro": "Media costurilor"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 12",
+    "ro": "Cursul 4 · slide 12"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04b-e03",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Costurile celor trei exemple sunt 1,7014; 0,1155; 0,2633. Calculează costul C al setului.",
+      "ro": "Costurile celor trei exemple sunt 1,7014; 0,1155; 0,2633. Calculează costul C al setului."
+     },
+     "fields": [
+      {
+       "id": "c",
+       "label": {
+        "en": "C",
+        "ro": "C"
+       },
+       "kind": "num",
+       "formula": "(1.7014+0.1155+0.2633)/3",
+       "expected": 0.6934
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "1.7014+0.1155+0.2633",
+       "message": {
+        "en": "Ai adunat costurile. Formula are factorul 1/n: se face media.",
+        "ro": "Ai adunat costurile. Formula are factorul 1/n: se face media."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Media: suma costurilor împărțită la n.",
+       "ro": "Media: suma costurilor împărțită la n."
+      },
+      {
+       "en": "(1,7014 + 0,1155 + 0,2633) / 3",
+       "ro": "(1,7014 + 0,1155 + 0,2633) / 3"
+      },
+      {
+       "en": "2,0802 / 3 = 0,6934",
+       "ro": "2,0802 / 3 = 0,6934"
+      }
+     ],
+     "solution": {
+      "en": "Suma este 2,0802, împărțită la 3 dă 0,6934.",
+      "ro": "Suma este 2,0802, împărțită la 3 dă 0,6934."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Două exemple au costurile 0,2 și 1,0. Calculează costul setului.",
+        "ro": "Două exemple au costurile 0,2 și 1,0. Calculează costul setului."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "(0.2+1.0)/2",
+         "expected": 0.6
+        }
+       ],
+       "solution": {
+        "en": "(0,2 + 1,0) / 2 = 0,6",
+        "ro": "(0,2 + 1,0) / 2 = 0,6"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s08",
+   "title": {
+    "en": "Derivata costului în y",
+    "ro": "Derivata costului în y"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 14",
+    "ro": "Cursul 4 · slide 14"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p2",
+     "claim": {
+      "en": "Cât este dC/dy pentru un exemplu?",
+      "ro": "Cât este dC/dy pentru un exemplu?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Pornim de la $C = -[\\,t\\ln y + (1-t)\\ln(1-y)\\,]$. Derivata lui $\\ln y$ este $\\frac{1}{y}$, iar a lui $\\ln(1-y)$ este $-\\frac{1}{1-y}$.",
+        "ro": "Pornim de la $C = -[\\,t\\ln y + (1-t)\\ln(1-y)\\,]$. Derivata lui $\\ln y$ este $\\frac{1}{y}$, iar a lui $\\ln(1-y)$ este $-\\frac{1}{1-y}$."
+       },
+       "predict": {
+        "question": {
+         "en": "Pentru t = 0 rămâne C = −ln(1 − y). Cât este dC/dy?",
+         "ro": "Pentru t = 0 rămâne C = −ln(1 − y). Cât este dC/dy?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "1/(1 − y)",
+           "ro": "1/(1 − y)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: −ln(1 − y) derivat dă −(−1/(1 − y)) = 1/(1 − y).",
+           "ro": "Corect: −ln(1 − y) derivat dă −(−1/(1 − y)) = 1/(1 − y)."
+          }
+         },
+         {
+          "text": {
+           "en": "−1/y",
+           "ro": "−1/y"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Acela e termenul cu t; pentru t = 0 el dispare.",
+           "ro": "Acela e termenul cu t; pentru t = 0 el dispare."
+          },
+          "misconception": "termen-gresit-ramas"
+         },
+         {
+          "text": {
+           "en": "1/y",
+           "ro": "1/y"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Acela vine din ln y, care nu mai e în cost.",
+           "ro": "Acela vine din ln y, care nu mai e în cost."
+          },
+          "misconception": "termen-gresit-ramas"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "În general: $\\frac{dC}{dy} = -\\frac{t}{y} + \\frac{1-t}{1-y}$.",
+        "ro": "În general: $\\frac{dC}{dy} = -\\frac{t}{y} + \\frac{1-t}{1-y}$."
+       }
+      },
+      {
+       "shown": {
+        "en": "Aducem la același numitor: $\\frac{-t(1-y) + (1-t)\\,y}{y(1-y)} = \\frac{y - t}{y(1-y)}$.",
+        "ro": "Aducem la același numitor: $\\frac{-t(1-y) + (1-t)\\,y}{y(1-y)} = \\frac{y - t}{y(1-y)}$."
+       },
+       "why": {
+        "en": "La numărător, −t + t·y + y − t·y = y − t.",
+        "ro": "La numărător, −t + t·y + y − t·y = y − t."
+       }
+      }
+     ],
+     "end": {
+      "en": "dC/dy = (y − t) / (y(1 − y)). Numitorul y(1 − y) ne amintește de ceva.",
+      "ro": "dC/dy = (y − t) / (y(1 − y)). Numitorul y(1 − y) ne amintește de ceva."
+     },
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 200'><title>Cele două curbe de cost</title><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='46' y2='14'/><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='314' y2='158'/><line class='muted' stroke-width='1.5' x1='46' y1='155' x2='46' y2='161'/><text class='muted' font-size='14' x='46' y='176' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='180' y1='155' x2='180' y2='161'/><text class='muted' font-size='14' x='180' y='176' text-anchor='middle'>0,5</text><line class='muted' stroke-width='1.5' x1='314' y1='155' x2='314' y2='161'/><text class='muted' font-size='14' x='314' y='176' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='43' y1='158' x2='49' y2='158'/><text class='muted' font-size='14' x='40' y='163' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='43' y1='92.5' x2='49' y2='92.5'/><text class='muted' font-size='14' x='40' y='97.5' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='43' y1='27.1' x2='49' y2='27.1'/><text class='muted' font-size='14' x='40' y='32.1' text-anchor='end'>4</text><polyline class='accent' stroke-width='2.8' fill='none' points='46,158 48.9,157.6 51.9,157.3 54.8,156.9 57.7,156.5 60.7,156.2 63.6,155.8 66.5,155.4 69.5,155 72.4,154.6 75.3,154.2 78.3,153.8 81.2,153.4 84.1,153 87.1,152.6 90,152.1 92.9,151.7 95.9,151.3 98.8,150.8 101.7,150.4 104.7,149.9 107.6,149.5 110.5,149 113.5,148.5 116.4,148 119.3,147.5 122.3,147 125.2,146.5 128.1,146 131.1,145.5 134,145 136.9,144.4 139.9,143.9 142.8,143.3 145.7,142.8 148.7,142.2 151.6,141.6 154.5,141 157.5,140.4 160.4,139.8 163.3,139.2 166.3,138.5 169.2,137.9 172.1,137.2 175.1,136.5 178,135.8 180.9,135.1 183.9,134.4 186.8,133.6 189.7,132.9 192.7,132.1 195.6,131.3 198.5,130.4 201.5,129.6 204.4,128.7 207.3,127.9 210.3,126.9 213.2,126 216.1,125 219.1,124 222,123 224.9,122 227.9,120.9 230.8,119.7 233.7,118.5 236.7,117.3 239.6,116.1 242.5,114.7 245.5,113.4 248.4,111.9 251.3,110.5 254.3,108.9 257.2,107.2 260.1,105.5 263.1,103.7 266,101.7 268.9,99.7 271.8,97.5 274.8,95.1 277.7,92.6 280.6,89.8 283.6,86.8 286.5,83.5 289.4,79.8 292.4,75.6 295.3,70.8 298.2,65.3 301.2,58.5 304.1,50 307,38.5 310,20.6'/><polyline class='warn' stroke-width='2.8' fill='none' points='50,20.6 53,38.5 55.9,50 58.8,58.5 61.8,65.3 64.7,70.8 67.6,75.6 70.6,79.8 73.5,83.5 76.4,86.8 79.4,89.8 82.3,92.6 85.2,95.1 88.2,97.5 91.1,99.7 94,101.7 96.9,103.7 99.9,105.5 102.8,107.2 105.7,108.9 108.7,110.5 111.6,111.9 114.5,113.4 117.5,114.7 120.4,116.1 123.3,117.3 126.3,118.5 129.2,119.7 132.1,120.9 135.1,122 138,123 140.9,124 143.9,125 146.8,126 149.7,126.9 152.7,127.9 155.6,128.7 158.5,129.6 161.5,130.4 164.4,131.3 167.3,132.1 170.3,132.9 173.2,133.6 176.1,134.4 179.1,135.1 182,135.8 184.9,136.5 187.9,137.2 190.8,137.9 193.7,138.5 196.7,139.2 199.6,139.8 202.5,140.4 205.5,141 208.4,141.6 211.3,142.2 214.3,142.8 217.2,143.3 220.1,143.9 223.1,144.4 226,145 228.9,145.5 231.9,146 234.8,146.5 237.7,147 240.7,147.5 243.6,148 246.5,148.5 249.5,149 252.4,149.5 255.3,149.9 258.3,150.4 261.2,150.8 264.1,151.3 267.1,151.7 270,152.1 272.9,152.6 275.9,153 278.8,153.4 281.7,153.8 284.7,154.2 287.6,154.6 290.5,155 293.5,155.4 296.4,155.8 299.3,156.2 302.3,156.5 305.2,156.9 308.1,157.3 311.1,157.6 314,158'/><text class='warn' font-size='14' font-weight='700' x='56.7' y='30.4' text-anchor='start'>t = 1</text><text class='accent' font-size='14' font-weight='700' x='212.2' y='30.4' text-anchor='start'>t = 0</text><text class='fg' font-size='15' x='314' y='194' text-anchor='end'>y</text><text class='fg' font-size='15' x='54' y='16' text-anchor='start'>C</text></svg>",
+      "alt": {
+       "en": "Curbele de cost",
+       "ro": "Curbele de cost"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s09",
+   "title": {
+    "en": "Ce factor rămâne",
+    "ro": "Ce factor rămâne"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 14-15",
+    "ro": "Cursul 4 · slide 14-15"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p3",
+     "claim": {
+      "en": "Ce rămâne din lanțul dC/dw cu costul nou?",
+      "ro": "Ce rămâne din lanțul dC/dw cu costul nou?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Lanțul este același: $\\frac{dC}{dw} = \\frac{dC}{dy}\\cdot\\frac{dy}{dz}\\cdot\\frac{dz}{dw}$. Costul nou a schimbat doar prima pantă.",
+        "ro": "Lanțul este același: $\\frac{dC}{dw} = \\frac{dC}{dy}\\cdot\\frac{dy}{dz}\\cdot\\frac{dz}{dw}$. Costul nou a schimbat doar prima pantă."
+       },
+       "predict": {
+        "question": {
+         "en": "Care pantă are acum numitorul y(1 − y)?",
+         "ro": "Care pantă are acum numitorul y(1 − y)?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "dC/dy",
+           "ro": "dC/dy"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: tocmai am văzut-o.",
+           "ro": "Corect: tocmai am văzut-o."
+          }
+         },
+         {
+          "text": {
+           "en": "dy/dz",
+           "ro": "dy/dz"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea este panta sigmoidei, y(1 − y) la numărător.",
+           "ro": "Aceea este panta sigmoidei, y(1 − y) la numărător."
+          },
+          "misconception": "derivata-din-alt-loc"
+         },
+         {
+          "text": {
+           "en": "dz/dw",
+           "ro": "dz/dw"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea este x.",
+           "ro": "Aceea este x."
+          },
+          "misconception": "derivata-din-alt-loc"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Înlocuim: $\\frac{y - t}{y(1-y)}\\cdot y(1-y)\\cdot x$.",
+        "ro": "Înlocuim: $\\frac{y - t}{y(1-y)}\\cdot y(1-y)\\cdot x$."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce se întâmplă cu y(1 − y)?",
+         "ro": "Ce se întâmplă cu y(1 − y)?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Se reduce: apare o dată sus și o dată jos",
+           "ro": "Se reduce: apare o dată sus și o dată jos"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: factorul se simplifică.",
+           "ro": "Corect: factorul se simplifică."
+          }
+         },
+         {
+          "text": {
+           "en": "Rămâne, ca la MSE",
+           "ro": "Rămâne, ca la MSE"
+          },
+          "correct": false,
+          "explain": {
+           "en": "La MSE rămânea pentru că nu exista numitorul. Aici îl anulează.",
+           "ro": "La MSE rămânea pentru că nu exista numitorul. Aici îl anulează."
+          },
+          "misconception": "factor-sigmoid-pastrat"
+         },
+         {
+          "text": {
+           "en": "Se dublează",
+           "ro": "Se dublează"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Se împarte la el, nu se înmulțește încă o dată.",
+           "ro": "Se împarte la el, nu se înmulțește încă o dată."
+          },
+          "misconception": "factor-sigmoid-pastrat"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Rezultatul: $\\frac{dC}{dw} = (y - t)\\,x$.",
+        "ro": "Rezultatul: $\\frac{dC}{dw} = (y - t)\\,x$."
+       }
+      }
+     ],
+     "end": {
+      "en": "Panta sigmoidei a dispărut din gradient. Rămân eroarea y − t și intrarea x.",
+      "ro": "Panta sigmoidei a dispărut din gradient. Rămân eroarea y − t și intrarea x."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s10",
+   "title": {
+    "en": "Rezultatul",
+    "ro": "Rezultatul"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 15",
+    "ro": "Cursul 4 · slide 15"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "dC/dw = (y − t) · x și dC/db = y − t.",
+      "ro": "dC/dw = (y − t) · x și dC/db = y − t."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Pentru un set, se face media peste exemple. Cursul scrie același lucru cu semn schimbat în față:",
+        "ro": "Pentru un set, se face media peste exemple. Cursul scrie același lucru cu semn schimbat în față:"
+       }
+      },
+      {
+       "tex": "\\frac{dC}{dw_i} = -\\frac{1}{n}\\sum_x (t - y)\\,x_i,\\qquad \\frac{dC}{db} = -\\frac{1}{n}\\sum_x (t - y)"
+      },
+      {
+       "note": {
+        "en": "În slide, x înseamnă „un exemplu” pe slide-ul cu costul și „o componentă a intrării” aici. Ține cont de context.",
+        "ro": "În slide, x înseamnă „un exemplu” pe slide-ul cu costul și „o componentă a intrării” aici. Ține cont de context."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s11",
+   "title": {
+    "en": "Gradientul CE, pornirea 1",
+    "ro": "Gradientul CE, pornirea 1"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 16",
+    "ro": "Cursul 4 · slide 16"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04b-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Pornirea 1: x = 1, t = 0, z = 1,5, deci y = 0,8176. Calculează dC/dw cu entropia încrucișată.",
+      "ro": "Pornirea 1: x = 1, t = 0, z = 1,5, deci y = 0,8176. Calculează dC/dw cu entropia încrucișată."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "dC/dw",
+        "ro": "dC/dw"
+       },
+       "kind": "num",
+       "formula": "(1/(1+exp(-(1.5))))*1",
+       "expected": 0.8176
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "(1/(1+exp(-(1.5))))*(1/(1+exp(-(1.5))))*(1-(1/(1+exp(-(1.5)))))",
+       "message": {
+        "en": "Ai păstrat factorul y(1 − y) de la MSE. Cu entropia încrucișată el dispare.",
+        "ro": "Ai păstrat factorul y(1 − y) de la MSE. Cu entropia încrucișată el dispare."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "dC/dw = (y − t) · x.",
+       "ro": "dC/dw = (y − t) · x."
+      },
+      {
+       "en": "(0,8176 − 0) · 1",
+       "ro": "(0,8176 − 0) · 1"
+      },
+      {
+       "en": "0,8176",
+       "ro": "0,8176"
+      }
+     ],
+     "solution": {
+      "en": "(y − t) · x = 0,8176. La MSE ieșea 0,1219.",
+      "ro": "(y − t) · x = 0,8176. La MSE ieșea 0,1219."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același calcul pentru z = 3, deci y = 0,9526, x = 1, t = 0.",
+        "ro": "Același calcul pentru z = 3, deci y = 0,9526, x = 1, t = 0."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "(1/(1+exp(-(3))))*1",
+         "expected": 0.9526
+        }
+       ],
+       "solution": {
+        "en": "0,9526",
+        "ro": "0,9526"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s12",
+   "title": {
+    "en": "Gradientul CE, pornirea 2",
+    "ro": "Gradientul CE, pornirea 2"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 16",
+    "ro": "Cursul 4 · slide 16"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04b-e05",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Pornirea 2: x = 1, t = 0, z = 4, deci y = 0,9820. Calculează dC/dw.",
+      "ro": "Pornirea 2: x = 1, t = 0, z = 4, deci y = 0,9820. Calculează dC/dw."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "dC/dw",
+        "ro": "dC/dw"
+       },
+       "kind": "num",
+       "formula": "(1/(1+exp(-(4))))*1",
+       "expected": 0.982
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "(1/(1+exp(-(4))))*(1/(1+exp(-(4))))*(1-(1/(1+exp(-(4)))))",
+       "message": {
+        "en": "Ai păstrat factorul y(1 − y) de la MSE.",
+        "ro": "Ai păstrat factorul y(1 − y) de la MSE."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "dC/dw = (y − t) · x.",
+       "ro": "dC/dw = (y − t) · x."
+      },
+      {
+       "en": "(0,9820 − 0) · 1",
+       "ro": "(0,9820 − 0) · 1"
+      },
+      {
+       "en": "0,9820",
+       "ro": "0,9820"
+      }
+     ],
+     "solution": {
+      "en": "Gradientul este 0,9820, față de 0,0173 la MSE: un pas mare pentru o eroare mare.",
+      "ro": "Gradientul este 0,9820, față de 0,0173 la MSE: un pas mare pentru o eroare mare."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același calcul pentru z = 5, deci y = 0,9933, x = 1, t = 0.",
+        "ro": "Același calcul pentru z = 5, deci y = 0,9933, x = 1, t = 0."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "(1/(1+exp(-(5))))*1",
+         "expected": 0.9933
+        }
+       ],
+       "solution": {
+        "en": "0,9933",
+        "ro": "0,9933"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s13",
+   "title": {
+    "en": "MSE contra entropie încrucișată",
+    "ro": "MSE contra entropie încrucișată"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 16",
+    "ro": "Cursul 4 · slide 16"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "Pornirea",
+         "Eroarea",
+         "MSE",
+         "CE"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,8176",
+          "0,1219",
+          "0,8176"
+         ],
+         [
+          "2",
+          "0,9820",
+          "0,0173",
+          "0,9820"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Cu entropia încrucișată, pasul urmează eroarea: eroare mai mare, gradient mai mare. Exact ce ne-am dorit.",
+        "ro": "Cu entropia încrucișată, pasul urmează eroarea: eroare mai mare, gradient mai mare. Exact ce ne-am dorit."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s14",
+   "title": {
+    "en": "Câți pași până la 0,5, acum cu CE",
+    "ro": "Câți pași până la 0,5, acum cu CE"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 16",
+    "ro": "Cursul 4 · slide 16"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Același test ca în lecția 4a: η = 0,5 pe w și pe b, până când y scade sub 0,5.",
+        "ro": "Același test ca în lecția 4a: η = 0,5 pe w și pe b, până când y scade sub 0,5."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Pornirea",
+         "MSE",
+         "CE"
+        ],
+        "rows": [
+         [
+          "1",
+          "11",
+          "3"
+         ],
+         [
+          "2",
+          "71",
+          "5"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Cifre calculate de noi. Slide-ul spune doar că rata de învățare trebuie schimbată odată cu costul; asta nu înseamnă trișat.",
+        "ro": "Cifre calculate de noi. Slide-ul spune doar că rata de învățare trebuie schimbată odată cu costul; asta nu înseamnă trișat."
+       }
+      },
+      {
+       "text": {
+        "en": "Pornirea 2 trece de la 71 de pași la 5.",
+        "ro": "Pornirea 2 trece de la 71 de pași la 5."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s15",
+   "title": {
+    "en": "Greșit și saturat, acum cu CE",
+    "ro": "Greșit și saturat, acum cu CE"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 16",
+    "ro": "Cursul 4 · slide 16"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Ținta t = 1, dar z = −6, deci y = 0,0025. Neuronul greșește aproape maxim.",
+        "ro": "Ținta t = 1, dar z = −6, deci y = 0,0025. Neuronul greșește aproape maxim."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Cost",
+         "Gradient (x = 1)"
+        ],
+        "rows": [
+         [
+          "MSE",
+          "−0,0025"
+         ],
+         [
+          "CE",
+          "−0,9975"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Cu MSE neuronul abia se mișcă. Cu CE primește aproape tot pasul de care are nevoie.",
+        "ro": "Cu MSE neuronul abia se mișcă. Cu CE primește aproape tot pasul de care are nevoie."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s16",
+   "title": {
+    "en": "Media pe un lot",
+    "ro": "Media pe un lot"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 15",
+    "ro": "Cursul 4 · slide 15"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Costul are factorul 1/n, deci și gradientul este o medie, nu o sumă. Pe cele trei exemple de mai devreme:",
+        "ro": "Costul are factorul 1/n, deci și gradientul este o medie, nu o sumă. Pe cele trei exemple de mai devreme:"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "x",
+         "t",
+         "y",
+         "(y − t)·x"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "0,8176",
+          "0,8176"
+         ],
+         [
+          "2",
+          "1",
+          "0,8909",
+          "−0,2182"
+         ],
+         [
+          "0,5",
+          "1",
+          "0,7685",
+          "−0,1157"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s17",
+   "title": {
+    "en": "Calculează media gradientelor",
+    "ro": "Calculează media gradientelor"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 15",
+    "ro": "Cursul 4 · slide 15"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04b-e06",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Gradientele celor trei exemple pentru w sunt 0,8176; −0,2182; −0,1157. Calculează dC/dw pentru set.",
+      "ro": "Gradientele celor trei exemple pentru w sunt 0,8176; −0,2182; −0,1157. Calculează dC/dw pentru set."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "dC/dw",
+        "ro": "dC/dw"
+       },
+       "kind": "num",
+       "formula": "(0.8176+(-0.2182)+(-0.1157))/3",
+       "expected": 0.1612
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "0.8176+(-0.2182)+(-0.1157)",
+       "message": {
+        "en": "Ai adunat gradientele. Costul are factorul 1/n, deci se face media.",
+        "ro": "Ai adunat gradientele. Costul are factorul 1/n, deci se face media."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Media gradientelor pe exemple.",
+       "ro": "Media gradientelor pe exemple."
+      },
+      {
+       "en": "(0,8176 + (−0,2182) + (−0,1157)) / 3",
+       "ro": "(0,8176 + (−0,2182) + (−0,1157)) / 3"
+      },
+      {
+       "en": "0,4836 / 3 = 0,1612",
+       "ro": "0,4836 / 3 = 0,1612"
+      }
+     ],
+     "solution": {
+      "en": "Suma este 0,4836; împărțită la 3 dă 0,1612. Pentru bias, media dă 0,1590.",
+      "ro": "Suma este 0,4836; împărțită la 3 dă 0,1612. Pentru bias, media dă 0,1590."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Două exemple au gradientele 0,7 și −1,2. Calculează gradientul setului.",
+        "ro": "Două exemple au gradientele 0,7 și −1,2. Calculează gradientul setului."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "(0.7+(-1.2))/2",
+         "expected": -0.25
+        }
+       ],
+       "solution": {
+        "en": "(0,7 − 1,2) / 2 = −0,25",
+        "ro": "(0,7 − 1,2) / 2 = −0,25"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s18",
+   "title": {
+    "en": "Eroarea neuronului",
+    "ro": "Eroarea neuronului"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 15",
+    "ro": "Cursul 4 · slide 15"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "dC/dz = y − t. Aceasta este „eroarea” neuronului, pe care o vom folosi mai târziu.",
+      "ro": "dC/dz = y − t. Aceasta este „eroarea” neuronului, pe care o vom folosi mai târziu."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Din lanț: dC/dz = dC/dy · dy/dz = y − t. Apoi dC/dw = (y − t) · x și dC/db = y − t. Slide-ul o scrie cu semn schimbat, −(t − y), pentru uz ulterior.",
+        "ro": "Din lanț: dC/dz = dC/dy · dy/dz = y − t. Apoi dC/dw = (y − t) · x și dC/db = y − t. Slide-ul o scrie cu semn schimbat, −(t − y), pentru uz ulterior."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s19",
+   "title": {
+    "en": "De ce nu mai apare σ′?",
+    "ro": "De ce nu mai apare σ′?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 15",
+    "ro": "Cursul 4 · slide 15"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "nn-l04b-r07",
+     "prompt": {
+      "en": "Cu cuvintele tale: de ce a dispărut panta sigmoidei din gradient când am schimbat costul?",
+      "ro": "Cu cuvintele tale: de ce a dispărut panta sigmoidei din gradient când am schimbat costul?"
+     },
+     "answer": {
+      "en": "Costul nou are în derivată numitorul y(1 − y). Panta sigmoidei este tocmai y(1 − y), așa că se simplifică. Rămâne doar eroarea y − t, înmulțită cu intrarea x.",
+      "ro": "Costul nou are în derivată numitorul y(1 − y). Panta sigmoidei este tocmai y(1 − y), așa că se simplifică. Rămâne doar eroarea y − t, înmulțită cu intrarea x."
+     },
+     "placeholder": {
+      "en": "Scrie ce crezi",
+      "ro": "Scrie ce crezi"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s20",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 11-16",
+    "ro": "Cursul 4 · slide 11-16"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Costul pentru un exemplu: C = −[t ln y + (1 − t) ln(1 − y)]; un singur termen rămâne.",
+         "ro": "Costul pentru un exemplu: C = −[t ln y + (1 − t) ln(1 − y)]; un singur termen rămâne."
+        },
+        {
+         "en": "dC/dy = (y − t) / (y(1 − y)); înmulțit cu panta sigmoidei y(1 − y) lasă y − t.",
+         "ro": "dC/dy = (y − t) / (y(1 − y)); înmulțit cu panta sigmoidei y(1 − y) lasă y − t."
+        },
+        {
+         "en": "dC/dw = (y − t) · x și dC/db = y − t, în medie pe lot.",
+         "ro": "dC/dw = (y − t) · x și dC/db = y − t, în medie pe lot."
+        },
+        {
+         "en": "Eroarea mare dă gradient mare, chiar și când sigmoida e saturată.",
+         "ro": "Eroarea mare dă gradient mare, chiar și când sigmoida e saturată."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s21",
+   "title": {
+    "en": "Mini-test: gradientul pentru y = 0,7311",
+    "ro": "Mini-test: gradientul pentru y = 0,7311"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04b-e08",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Un neuron are x = 2, t = 0 și z = 1, deci y = 0,7311. Calculează dC/dw cu entropia încrucișată.",
+      "ro": "Un neuron are x = 2, t = 0 și z = 1, deci y = 0,7311. Calculează dC/dw cu entropia încrucișată."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "dC/dw",
+        "ro": "dC/dw"
+       },
+       "kind": "num",
+       "formula": "(1/(1+exp(-(1))))*2",
+       "expected": 1.4621
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "(1/(1+exp(-(1))))",
+       "message": {
+        "en": "Ai uitat intrarea x = 2.",
+        "ro": "Ai uitat intrarea x = 2."
+       }
+      },
+      {
+       "field": "g",
+       "formula": "(1/(1+exp(-(1))))*(1/(1+exp(-(1))))*(1-(1/(1+exp(-(1)))))*2",
+       "message": {
+        "en": "Ai păstrat factorul y(1 − y) de la MSE.",
+        "ro": "Ai păstrat factorul y(1 − y) de la MSE."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "(y − t) · x.",
+       "ro": "(y − t) · x."
+      },
+      {
+       "en": "(0,7311 − 0) · 2",
+       "ro": "(0,7311 − 0) · 2"
+      },
+      {
+       "en": "1,4621",
+       "ro": "1,4621"
+      }
+     ],
+     "solution": {
+      "en": "(y − t) · x = 0,7311 · 2 = 1,4621.",
+      "ro": "(y − t) · x = 0,7311 · 2 = 1,4621."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același calcul pentru x = 3, t = 0, z = 2, deci y = 0,8808.",
+        "ro": "Același calcul pentru x = 3, t = 0, z = 2, deci y = 0,8808."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "(1/(1+exp(-(2))))*3",
+         "expected": 2.6424
+        }
+       ],
+       "solution": {
+        "en": "2,6424",
+        "ro": "2,6424"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s22",
+   "title": {
+    "en": "Mini-test: semnul gradientului",
+    "ro": "Mini-test: semnul gradientului"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04b-q09",
+     "question": {
+      "en": "Ținta este t = 1, ieșirea y = 0,3 și x = 1. Cât este dC/dw și ce face w?",
+      "ro": "Ținta este t = 1, ieșirea y = 0,3 și x = 1. Cât este dC/dw și ce face w?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "−0,7, iar w crește",
+        "ro": "−0,7, iar w crește"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: dC/dw = (0,3 − 1) · 1 = −0,7. Pasul w − η·(−0,7) mărește w, deci y urcă spre 1.",
+        "ro": "Corect: dC/dw = (0,3 − 1) · 1 = −0,7. Pasul w − η·(−0,7) mărește w, deci y urcă spre 1."
+       }
+      },
+      {
+       "text": {
+        "en": "+0,7, iar w crește",
+        "ro": "+0,7, iar w crește"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Semnul este minus (y < t). Un gradient pozitiv ar scădea w.",
+        "ro": "Semnul este minus (y < t). Un gradient pozitiv ar scădea w."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "−0,7, iar w scade",
+        "ro": "−0,7, iar w scade"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Gradientul negativ înseamnă că w crește: w − η·(−0,7) este mai mare.",
+        "ro": "Gradientul negativ înseamnă că w crește: w − η·(−0,7) este mai mare."
+       },
+       "misconception": "semn-gresit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s23",
+   "title": {
+    "en": "Mini-test: CE sau MSE la saturare",
+    "ro": "Mini-test: CE sau MSE la saturare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04b-q10",
+     "question": {
+      "en": "Neuronul este foarte greșit și saturat (z = −6, t = 1). Ce spune gradientul?",
+      "ro": "Neuronul este foarte greșit și saturat (z = −6, t = 1). Ce spune gradientul?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "CE: aproape −1, pas mare. MSE: aproape 0, pas minuscul",
+        "ro": "CE: aproape −1, pas mare. MSE: aproape 0, pas minuscul"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: −0,9975 contra −0,0025.",
+        "ro": "Corect: −0,9975 contra −0,0025."
+       }
+      },
+      {
+       "text": {
+        "en": "Ambele dau pas mare, pentru că eroarea e mare",
+        "ro": "Ambele dau pas mare, pentru că eroarea e mare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "MSE are factorul σ′(z), aproape 0 aici.",
+        "ro": "MSE are factorul σ′(z), aproape 0 aici."
+       },
+       "misconception": "factor-sigmoid-pastrat"
+      },
+      {
+       "text": {
+        "en": "Ambele dau pas mic, pentru că neuronul e saturat",
+        "ro": "Ambele dau pas mic, pentru că neuronul e saturat"
+       },
+       "correct": false,
+       "explain": {
+        "en": "CE a eliminat factorul σ′(z), deci saturarea nu o mai încetinește.",
+        "ro": "CE a eliminat factorul σ′(z), deci saturarea nu o mai încetinește."
+       },
+       "misconception": "factor-sigmoid-pastrat"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04b-s24",
+   "title": {
+    "en": "Mini-test: media pe lot",
+    "ro": "Mini-test: media pe lot"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04b-e11",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Două exemple au (y − t)·x egal cu 0,7 și −1,2. Calculează dC/dw al lotului.",
+      "ro": "Două exemple au (y − t)·x egal cu 0,7 și −1,2. Calculează dC/dw al lotului."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "dC/dw",
+        "ro": "dC/dw"
+       },
+       "kind": "num",
+       "formula": "(0.7-1.2)/2",
+       "expected": -0.25
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "0.7-1.2",
+       "message": {
+        "en": "Ai adunat gradientele fără să împarți la n.",
+        "ro": "Ai adunat gradientele fără să împarți la n."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Media pe exemple.",
+       "ro": "Media pe exemple."
+      },
+      {
+       "en": "(0,7 − 1,2) / 2",
+       "ro": "(0,7 − 1,2) / 2"
+      },
+      {
+       "en": "−0,25",
+       "ro": "−0,25"
+      }
+     ],
+     "solution": {
+      "en": "Suma este −0,5; împărțită la 2 dă −0,25.",
+      "ro": "Suma este −0,5; împărțită la 2 dă −0,25."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Trei exemple au (y − t)·x egal cu 0,3; 0,6; −0,3. Calculează dC/dw.",
+        "ro": "Trei exemple au (y − t)·x egal cu 0,3; 0,6; −0,3. Calculează dC/dw."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "(0.3+0.6-0.3)/3",
+         "expected": 0.2
+        }
+       ],
+       "solution": {
+        "en": "0,6 / 3 = 0,2",
+        "ro": "0,6 / 3 = 0,2"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

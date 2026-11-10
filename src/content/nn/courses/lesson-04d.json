@@ -1,0 +1,1578 @@
+{
+ "meta": {
+  "id": "nn-l04d",
+  "title": {
+   "en": "Lesson 4d: Softmax",
+   "ro": "Lecția 4d: Softmax"
+  },
+  "shortTitle": {
+   "en": "L4d: Softmax",
+   "ro": "L4d: Softmax"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l04d-s01",
+   "title": {
+    "en": "O ieșire sigmoidă",
+    "ro": "O ieșire sigmoidă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 25",
+    "ro": "Cursul 4 · slide 25"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cu două clase putem folosi un singur neuron: y₁ = σ(z) este probabilitatea clasei 1, iar y₂ = 1 − σ(z) a clasei 2. Cele două ieșiri fac mereu 1.",
+        "ro": "Cu două clase putem folosi un singur neuron: y₁ = σ(z) este probabilitatea clasei 1, iar y₂ = 1 − σ(z) a clasei 2. Cele două ieșiri fac mereu 1."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 240 160'><title>Două ieșiri pentru z = 1,5</title><line class='muted' stroke-width='1.5' x1='18' y1='122' x2='232' y2='122'/><rect class='accent fill-accent' stroke-width='1.5' x='46.5' y='43.5' width='48' height='78.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='70.5' y='37.5' text-anchor='middle'>0,8176</text><text class='muted' font-size='14' x='70.5' y='138' text-anchor='middle'>y₁</text><rect class='accent fill-accent' stroke-width='1.5' x='151.5' y='104.5' width='48' height='17.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='175.5' y='98.5' text-anchor='middle'>0,1824</text><text class='muted' font-size='14' x='175.5' y='138' text-anchor='middle'>y₂</text></svg>",
+        "alt": {
+         "en": "Două bare: y₁ = 0,8176 și y₂ = 0,1824, împreună 1",
+         "ro": "Două bare: y₁ = 0,8176 și y₂ = 0,1824, împreună 1"
+        },
+        "caption": {
+         "en": "z = 1,5: cele două bare fac împreună 1.",
+         "ro": "z = 1,5: cele două bare fac împreună 1."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s02",
+   "title": {
+    "en": "Patru ieșiri sigmoide",
+    "ro": "Patru ieșiri sigmoide"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 26",
+    "ro": "Cursul 4 · slide 26"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cu patru clase, patru neuroni sigmoizi pe scorurile z = [1, 3, 4, 2] dau:",
+        "ro": "Cu patru clase, patru neuroni sigmoizi pe scorurile z = [1, 3, 4, 2] dau:"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Clasa",
+         "z",
+         "σ(z)"
+        ],
+        "rows": [
+         [
+          "1",
+          "1",
+          "0,7311"
+         ],
+         [
+          "2",
+          "3",
+          "0,9526"
+         ],
+         [
+          "3",
+          "4",
+          "0,9820"
+         ],
+         [
+          "4",
+          "2",
+          "0,8808"
+         ],
+         [
+          "Suma",
+          "–",
+          "3,5464"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Suma este 3,5464, nu 1. Costul de la entropia încrucișată cere o distribuție.",
+        "ro": "Suma este 3,5464, nu 1. Costul de la entropia încrucișată cere o distribuție."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s03",
+   "title": {
+    "en": "Ce lipsește",
+    "ro": "Ce lipsește"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 26",
+    "ro": "Cursul 4 · slide 26"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04d-q01",
+     "question": {
+      "en": "Ieșirile sigmoide ale celor patru clase fac 3,5464. Ce ne trebuie ca ele să poată fi probabilități?",
+      "ro": "Ieșirile sigmoide ale celor patru clase fac 3,5464. Ce ne trebuie ca ele să poată fi probabilități?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Să fie pozitive și să aibă suma 1",
+        "ro": "Să fie pozitive și să aibă suma 1"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: asta înseamnă o distribuție.",
+        "ro": "Corect: asta înseamnă o distribuție."
+       }
+      },
+      {
+       "text": {
+        "en": "Să fie toate mai mari decât 0,5",
+        "ro": "Să fie toate mai mari decât 0,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Aici sunt deja, și tot nu fac 1.",
+        "ro": "Aici sunt deja, și tot nu fac 1."
+       },
+       "misconception": "suma-diferita-de-1"
+      },
+      {
+       "text": {
+        "en": "Să fie rotunjite la o zecimală",
+        "ro": "Să fie rotunjite la o zecimală"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Rotunjirea nu schimbă suma.",
+        "ro": "Rotunjirea nu schimbă suma."
+       },
+       "misconception": "suma-diferita-de-1"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s04",
+   "title": {
+    "en": "Exponențialele",
+    "ro": "Exponențialele"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 29",
+    "ro": "Cursul 4 · slide 29"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Primul pas: ridicăm e la fiecare scor. Rezultatul este mereu pozitiv și crește repede cu z.",
+        "ro": "Primul pas: ridicăm e la fiecare scor. Rezultatul este mereu pozitiv și crește repede cu z."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "z",
+         "eᶻ"
+        ],
+        "rows": [
+         [
+          "1",
+          "2,7183"
+         ],
+         [
+          "3",
+          "20,0855"
+         ],
+         [
+          "4",
+          "54,5982"
+         ],
+         [
+          "2",
+          "7,3891"
+         ]
+        ]
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 170'><title>Exponențialele scorurilor</title><line class='muted' stroke-width='1.5' x1='18' y1='132' x2='332' y2='132'/><rect class='accent fill-accent' stroke-width='1.5' x='32.8' y='127.4' width='48' height='4.6' rx='3'/><text class='fg' font-size='14' font-weight='700' x='56.8' y='121.4' text-anchor='middle'>2,7</text><text class='muted' font-size='14' x='56.8' y='148' text-anchor='middle'>e¹</text><rect class='accent fill-accent' stroke-width='1.5' x='110.2' y='97.7' width='48' height='34.3' rx='3'/><text class='fg' font-size='14' font-weight='700' x='134.2' y='91.7' text-anchor='middle'>20,1</text><text class='muted' font-size='14' x='134.2' y='148' text-anchor='middle'>e³</text><rect class='accent fill-accent' stroke-width='1.5' x='187.8' y='38.7' width='48' height='93.3' rx='3'/><text class='fg' font-size='14' font-weight='700' x='211.8' y='32.7' text-anchor='middle'>54,6</text><text class='muted' font-size='14' x='211.8' y='148' text-anchor='middle'>e⁴</text><rect class='accent fill-accent' stroke-width='1.5' x='265.2' y='119.4' width='48' height='12.6' rx='3'/><text class='fg' font-size='14' font-weight='700' x='289.2' y='113.4' text-anchor='middle'>7,4</text><text class='muted' font-size='14' x='289.2' y='148' text-anchor='middle'>e²</text></svg>",
+        "alt": {
+         "en": "Patru bare: 2,7; 20,1; 54,6; 7,4",
+         "ro": "Patru bare: 2,7; 20,1; 54,6; 7,4"
+        },
+        "caption": {
+         "en": "Scorul 4 are o bară mult mai înaltă decât scorul 3.",
+         "ro": "Scorul 4 are o bară mult mai înaltă decât scorul 3."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s05",
+   "title": {
+    "en": "Suma exponențialelor",
+    "ro": "Suma exponențialelor"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 29",
+    "ro": "Cursul 4 · slide 29"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04d-e02",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Exponențialele sunt 2,7183; 20,0855; 54,5982; 7,3891. Calculează suma lor.",
+      "ro": "Exponențialele sunt 2,7183; 20,0855; 54,5982; 7,3891. Calculează suma lor."
+     },
+     "fields": [
+      {
+       "id": "s",
+       "label": {
+        "en": "suma",
+        "ro": "suma"
+       },
+       "kind": "num",
+       "formula": "2.718281828459045+20.085536923187668+54.598150033144236+7.38905609893065",
+       "expected": 84.791,
+       "tol": 0.05
+      }
+     ],
+     "hints": [
+      {
+       "en": "Adună cele patru numere.",
+       "ro": "Adună cele patru numere."
+      },
+      {
+       "en": "2,7183 + 20,0855 = 22,8038",
+       "ro": "2,7183 + 20,0855 = 22,8038"
+      },
+      {
+       "en": "84,7910",
+       "ro": "84,7910"
+      }
+     ],
+     "solution": {
+      "en": "Suma este 84,7910. Slide-ul scrie 84,75 din termeni rotunjiți: și acela este acceptat.",
+      "ro": "Suma este 84,7910. Slide-ul scrie 84,75 din termeni rotunjiți: și acela este acceptat."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pentru z = [2, 0, 1] exponențialele sunt 7,3891; 1; 2,7183. Calculează suma.",
+        "ro": "Pentru z = [2, 0, 1] exponențialele sunt 7,3891; 1; 2,7183. Calculează suma."
+       },
+       "fields": [
+        {
+         "id": "s",
+         "formula": "7.3891+1+2.7183",
+         "expected": 11.1074,
+         "tol": 0.01
+        }
+       ],
+       "solution": {
+        "en": "11,1074",
+        "ro": "11,1074"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s06",
+   "title": {
+    "en": "Împărțim la sumă",
+    "ro": "Împărțim la sumă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 29",
+    "ro": "Cursul 4 · slide 29"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Al doilea pas: împărțim fiecare exponențială la sumă. Așa ieșirile fac 1.",
+        "ro": "Al doilea pas: împărțim fiecare exponențială la sumă. Așa ieșirile fac 1."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "z",
+         "eᶻ",
+         "eᶻ / 84,7910"
+        ],
+        "rows": [
+         [
+          "1",
+          "2,7183",
+          "0,0321"
+         ],
+         [
+          "3",
+          "20,0855",
+          "0,2369"
+         ],
+         [
+          "4",
+          "54,5982",
+          "0,6439"
+         ],
+         [
+          "2",
+          "7,3891",
+          "0,0871"
+         ],
+         [
+          "Suma",
+          "84,7910",
+          "1,0000"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-ul tipărește 54,49 și 27,38 în loc de 54,5982 și 7,3891; rezultatul final rotunjit, 0,03; 0,24; 0,64; 0,09, este corect.",
+        "ro": "Slide-ul tipărește 54,49 și 27,38 în loc de 54,5982 și 7,3891; rezultatul final rotunjit, 0,03; 0,24; 0,64; 0,09, este corect."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s07",
+   "title": {
+    "en": "Cele două rânduri de bare",
+    "ro": "Cele două rânduri de bare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 30",
+    "ro": "Cursul 4 · slide 30"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Scorurile arată cine câștigă, iar softmax le transformă în procente: 3%, 24%, 64%, 9%.",
+        "ro": "Scorurile arată cine câștigă, iar softmax le transformă în procente: 3%, 24%, 64%, 9%."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 150'><title>Scorurile z</title><line class='muted' stroke-width='1.5' x1='18' y1='112' x2='332' y2='112'/><rect class='muted fill-muted' stroke-width='1.5' x='32.8' y='93.3' width='48' height='18.7' rx='3'/><text class='fg' font-size='14' font-weight='700' x='56.8' y='87.3' text-anchor='middle'>1</text><text class='muted' font-size='14' x='56.8' y='128' text-anchor='middle'>1</text><rect class='muted fill-muted' stroke-width='1.5' x='110.2' y='55.9' width='48' height='56.1' rx='3'/><text class='fg' font-size='14' font-weight='700' x='134.2' y='49.9' text-anchor='middle'>3</text><text class='muted' font-size='14' x='134.2' y='128' text-anchor='middle'>2</text><rect class='muted fill-muted' stroke-width='1.5' x='187.8' y='37.2' width='48' height='74.8' rx='3'/><text class='fg' font-size='14' font-weight='700' x='211.8' y='31.2' text-anchor='middle'>4</text><text class='muted' font-size='14' x='211.8' y='128' text-anchor='middle'>3</text><rect class='muted fill-muted' stroke-width='1.5' x='265.2' y='74.6' width='48' height='37.4' rx='3'/><text class='fg' font-size='14' font-weight='700' x='289.2' y='68.6' text-anchor='middle'>2</text><text class='muted' font-size='14' x='289.2' y='128' text-anchor='middle'>4</text></svg>",
+        "alt": {
+         "en": "Patru bare: scorurile 1, 3, 4, 2",
+         "ro": "Patru bare: scorurile 1, 3, 4, 2"
+        },
+        "caption": {
+         "en": "Scorurile z.",
+         "ro": "Scorurile z."
+        }
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 150'><title>softmax(z)</title><line class='muted' stroke-width='1.5' x1='18' y1='112' x2='332' y2='112'/><rect class='accent fill-accent' stroke-width='1.5' x='32.8' y='108.3' width='48' height='3.7' rx='3'/><text class='fg' font-size='14' font-weight='700' x='56.8' y='102.3' text-anchor='middle'>0,03</text><text class='muted' font-size='14' x='56.8' y='128' text-anchor='middle'>1</text><rect class='accent fill-accent' stroke-width='1.5' x='110.2' y='84.8' width='48' height='27.2' rx='3'/><text class='fg' font-size='14' font-weight='700' x='134.2' y='78.8' text-anchor='middle'>0,24</text><text class='muted' font-size='14' x='134.2' y='128' text-anchor='middle'>2</text><rect class='ok fill-ok' stroke-width='1.5' x='187.8' y='38.2' width='48' height='73.8' rx='3'/><text class='fg' font-size='14' font-weight='700' x='211.8' y='32.2' text-anchor='middle'>0,64</text><text class='muted' font-size='14' x='211.8' y='128' text-anchor='middle'>3</text><rect class='accent fill-accent' stroke-width='1.5' x='265.2' y='102' width='48' height='10' rx='3'/><text class='fg' font-size='14' font-weight='700' x='289.2' y='96' text-anchor='middle'>0,09</text><text class='muted' font-size='14' x='289.2' y='128' text-anchor='middle'>4</text></svg>",
+        "alt": {
+         "en": "Patru bare: 0,03; 0,24; 0,64; 0,09",
+         "ro": "Patru bare: 0,03; 0,24; 0,64; 0,09"
+        },
+        "caption": {
+         "en": "softmax(z): clasa a treia este cea mai probabilă.",
+         "ro": "softmax(z): clasa a treia este cea mai probabilă."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s08",
+   "title": {
+    "en": "Regula softmax",
+    "ro": "Regula softmax"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 27",
+    "ro": "Cursul 4 · slide 27"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "softmax(z) = [y₁, ..., yₘ], cu yᵢ = eᶻⁱ împărțit la suma lui eᶻʲ.",
+      "ro": "softmax(z) = [y₁, ..., yₘ], cu yᵢ = eᶻⁱ împărțit la suma lui eᶻʲ."
+     },
+     "body": [
+      {
+       "tex": "y_i = \\frac{e^{z_i}}{\\sum_{j=1}^{m} e^{z_j}}"
+      },
+      {
+       "text": {
+        "en": "Aici zᵢ este scorul clasei i, m este numărul de clase, iar suma de jos adună exponențialele tuturor scorurilor. Se folosește doar în ultimul strat.",
+        "ro": "Aici zᵢ este scorul clasei i, m este numărul de clase, iar suma de jos adună exponențialele tuturor scorurilor. Se folosește doar în ultimul strat."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s09",
+   "title": {
+    "en": "Calculează softmax",
+    "ro": "Calculează softmax"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 27",
+    "ro": "Cursul 4 · slide 27"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04d-e03",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Scorurile sunt z = [2, 0, 1]. Calculează softmax(z): y₁, y₂, y₃.",
+      "ro": "Scorurile sunt z = [2, 0, 1]. Calculează softmax(z): y₁, y₂, y₃."
+     },
+     "fields": [
+      {
+       "id": "y1",
+       "label": {
+        "en": "y₁",
+        "ro": "y₁"
+       },
+       "kind": "num",
+       "formula": "exp(2)/(exp(2)+1+exp(1))",
+       "expected": 0.6652
+      },
+      {
+       "id": "y2",
+       "label": {
+        "en": "y₂",
+        "ro": "y₂"
+       },
+       "kind": "num",
+       "formula": "1/(exp(2)+1+exp(1))",
+       "expected": 0.09
+      },
+      {
+       "id": "y3",
+       "label": {
+        "en": "y₃",
+        "ro": "y₃"
+       },
+       "kind": "num",
+       "formula": "exp(1)/(exp(2)+1+exp(1))",
+       "expected": 0.2447
+      }
+     ],
+     "detectors": [
+      {
+       "field": "y1",
+       "formula": "1/(1+exp(-2))",
+       "message": {
+        "en": "Ai aplicat sigmoida pe scor. Softmax împarte la suma exponențialelor tuturor scorurilor.",
+        "ro": "Ai aplicat sigmoida pe scor. Softmax împarte la suma exponențialelor tuturor scorurilor."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Exponențialele: e² = 7,3891; e⁰ = 1; e¹ = 2,7183.",
+       "ro": "Exponențialele: e² = 7,3891; e⁰ = 1; e¹ = 2,7183."
+      },
+      {
+       "en": "Suma: 11,1074",
+       "ro": "Suma: 11,1074"
+      },
+      {
+       "en": "0,6652; 0,0900; 0,2447",
+       "ro": "0,6652; 0,0900; 0,2447"
+      }
+     ],
+     "solution": {
+      "en": "Suma exponențialelor este 11,1074; rezultatul este 0,6652; 0,0900; 0,2447, care fac 1.",
+      "ro": "Suma exponențialelor este 11,1074; rezultatul este 0,6652; 0,0900; 0,2447, care fac 1."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Scorurile z = [0, 3, 1]. Calculează softmax(z).",
+        "ro": "Scorurile z = [0, 3, 1]. Calculează softmax(z)."
+       },
+       "fields": [
+        {
+         "id": "y1",
+         "formula": "exp(0)/(exp(0)+exp(3)+exp(1))",
+         "expected": 0.042
+        },
+        {
+         "id": "y2",
+         "formula": "exp(3)/(exp(0)+exp(3)+exp(1))",
+         "expected": 0.8438
+        },
+        {
+         "id": "y3",
+         "formula": "exp(1)/(exp(0)+exp(3)+exp(1))",
+         "expected": 0.1142
+        }
+       ],
+       "solution": {
+        "en": "Cel mai mare scor primește cea mai mare probabilitate.",
+        "ro": "Cel mai mare scor primește cea mai mare probabilitate."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s10",
+   "title": {
+    "en": "Scoruri egale",
+    "ro": "Scoruri egale"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 28",
+    "ro": "Cursul 4 · slide 28"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04d-q04",
+     "question": {
+      "en": "Toate cele patru scoruri sunt egale: z = [0, 0, 0, 0]. Ce dă softmax?",
+      "ro": "Toate cele patru scoruri sunt egale: z = [0, 0, 0, 0]. Ce dă softmax?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "0,25 pentru fiecare clasă",
+        "ro": "0,25 pentru fiecare clasă"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: patru exponențiale egale cu 1, suma 4, fiecare 1/4.",
+        "ro": "Corect: patru exponențiale egale cu 1, suma 4, fiecare 1/4."
+       }
+      },
+      {
+       "text": {
+        "en": "0 pentru fiecare clasă",
+        "ro": "0 pentru fiecare clasă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Atunci suma ar fi 0, nu 1. e la 0 este 1, nu 0.",
+        "ro": "Atunci suma ar fi 0, nu 1. e la 0 este 1, nu 0."
+       },
+       "misconception": "suma-diferita-de-1"
+      },
+      {
+       "text": {
+        "en": "1 pentru prima clasă, 0 pentru restul",
+        "ro": "1 pentru prima clasă, 0 pentru restul"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nimic nu o favorizează pe prima: softmax nu rupe egalitatea.",
+        "ro": "Nimic nu o favorizează pe prima: softmax nu rupe egalitatea."
+       },
+       "misconception": "cea-mai-mare-valoare-castiga"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s11",
+   "title": {
+    "en": "Pozitiv, între 0 și 1, suma 1",
+    "ro": "Pozitiv, între 0 și 1, suma 1"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 28",
+    "ro": "Cursul 4 · slide 28"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p1",
+     "claim": {
+      "en": "De ce sunt ieșirile softmax pozitive și fac 1?",
+      "ro": "De ce sunt ieșirile softmax pozitive și fac 1?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Fiecare $e^{z_i}$ este un număr pozitiv, oricare ar fi $z_i$. Notăm suma lor cu $S = \\sum_j e^{z_j}$.",
+        "ro": "Fiecare $e^{z_i}$ este un număr pozitiv, oricare ar fi $z_i$. Notăm suma lor cu $S = \\sum_j e^{z_j}$."
+       },
+       "predict": {
+        "question": {
+         "en": "Poate o ieșire softmax să fie negativă?",
+         "ro": "Poate o ieșire softmax să fie negativă?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Nu: numărător pozitiv, numitor pozitiv",
+           "ro": "Nu: numărător pozitiv, numitor pozitiv"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "Da, dacă scorul z e negativ",
+           "ro": "Da, dacă scorul z e negativ"
+          },
+          "correct": false,
+          "explain": {
+           "en": "e la o putere negativă este mic, dar tot pozitiv: e⁻² = 0,1353.",
+           "ro": "e la o putere negativă este mic, dar tot pozitiv: e⁻² = 0,1353."
+          },
+          "misconception": "valoare-negativa-in-distributie"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Fiecare ieșire este $y_i = e^{z_i} / S$. Adunăm toate ieșirile: $\\sum_i y_i = \\frac{\\sum_i e^{z_i}}{S}$.",
+        "ro": "Fiecare ieșire este $y_i = e^{z_i} / S$. Adunăm toate ieșirile: $\\sum_i y_i = \\frac{\\sum_i e^{z_i}}{S}$."
+       },
+       "predict": {
+        "question": {
+         "en": "Cât este $\\frac{\\sum_i e^{z_i}}{S}$?",
+         "ro": "Cât este $\\frac{\\sum_i e^{z_i}}{S}$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "1, pentru că numărătorul este chiar S",
+           "ro": "1, pentru că numărătorul este chiar S"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "m, numărul de clase",
+           "ro": "m, numărul de clase"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Nu: sumă pe numărător și pe numitor este aceeași.",
+           "ro": "Nu: sumă pe numărător și pe numitor este aceeași."
+          },
+          "misconception": "suma-diferita-de-1"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Fiecare ieșire este mai mică decât 1, pentru că $e^{z_i}$ este doar o parte din S, cu m ≥ 2 clase.",
+        "ro": "Fiecare ieșire este mai mică decât 1, pentru că $e^{z_i}$ este doar o parte din S, cu m ≥ 2 clase."
+       }
+      }
+     ],
+     "end": {
+      "en": "Ieșirile sunt pozitive, mai mici decât 1 și au suma 1. Slide-ul scrie „în [0, 1]”; pentru m ≥ 2 valorile sunt strict între 0 și 1.",
+      "ro": "Ieșirile sunt pozitive, mai mici decât 1 și au suma 1. Slide-ul scrie „în [0, 1]”; pentru m ≥ 2 valorile sunt strict între 0 și 1."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s12",
+   "title": {
+    "en": "Diferențele se amplifică",
+    "ro": "Diferențele se amplifică"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 30",
+    "ro": "Cursul 4 · slide 30"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Scorurile 3 și 4 diferă cu 1. După softmax, raportul probabilităților este chiar e = 2,7183:",
+        "ro": "Scorurile 3 și 4 diferă cu 1. După softmax, raportul probabilităților este chiar e = 2,7183:"
+       }
+      },
+      {
+       "tex": "\\frac{0{,}6439}{0{,}2369} = e^{4-3} = 2{,}7183"
+      },
+      {
+       "note": {
+        "en": "Slide-ul compară 4/3 (33%) cu 0,64/0,24 (166%); 0,64/0,24 este de fapt 2,67, adică 167%. Valoarea exactă este e.",
+        "ro": "Slide-ul compară 4/3 (33%) cu 0,64/0,24 (166%); 0,64/0,24 este de fapt 2,67, adică 167%. Valoarea exactă este e."
+       }
+      },
+      {
+       "text": {
+        "en": "Un scor mai mare cu 1 înmulțește probabilitatea cu e. Așa se amplifică diferențele.",
+        "ro": "Un scor mai mare cu 1 înmulțește probabilitatea cu e. Așa se amplifică diferențele."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s13",
+   "title": {
+    "en": "Adunăm 10 la toate scorurile",
+    "ro": "Adunăm 10 la toate scorurile"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 31",
+    "ro": "Cursul 4 · slide 31"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04d-q05",
+     "question": {
+      "en": "Adunăm 10 la fiecare scor: [11, 13, 14, 12] în loc de [1, 3, 4, 2]. Ce se întâmplă cu softmax?",
+      "ro": "Adunăm 10 la fiecare scor: [11, 13, 14, 12] în loc de [1, 3, 4, 2]. Ce se întâmplă cu softmax?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Nimic: ies aceleași probabilități",
+        "ro": "Nimic: ies aceleași probabilități"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect. eᶻ⁺¹⁰ = e¹⁰ · eᶻ, iar factorul e¹⁰ se reduce între numărător și numitor: 0,0321; 0,2369; 0,6439; 0,0871.",
+        "ro": "Corect. eᶻ⁺¹⁰ = e¹⁰ · eᶻ, iar factorul e¹⁰ se reduce între numărător și numitor: 0,0321; 0,2369; 0,6439; 0,0871."
+       }
+      },
+      {
+       "text": {
+        "en": "Toate cresc cu 10",
+        "ro": "Toate cresc cu 10"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Probabilitățile fac mereu 1; nu pot crește toate.",
+        "ro": "Probabilitățile fac mereu 1; nu pot crește toate."
+       },
+       "misconception": "suma-diferita-de-1"
+      },
+      {
+       "text": {
+        "en": "Cea mai mare crește, restul scad",
+        "ro": "Cea mai mare crește, restul scad"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Raportul dintre două probabilități depinde doar de diferența scorurilor, iar diferențele au rămas la fel.",
+        "ro": "Raportul dintre două probabilități depinde doar de diferența scorurilor, iar diferențele au rămas la fel."
+       },
+       "misconception": "cea-mai-mare-valoare-castiga"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s14",
+   "title": {
+    "en": "Dublăm scorurile",
+    "ro": "Dublăm scorurile"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 30",
+    "ro": "Cursul 4 · slide 30"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Acum dublăm scorurile: [2, 6, 8, 4]. Diferențele se dublează, deci rezultatul se schimbă.",
+        "ro": "Acum dublăm scorurile: [2, 6, 8, 4]. Diferențele se dublează, deci rezultatul se schimbă."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Scoruri",
+         "softmax"
+        ],
+        "rows": [
+         [
+          "[1, 3, 4, 2]",
+          "0,0321 · 0,2369 · 0,6439 · 0,0871"
+         ],
+         [
+          "[2, 6, 8, 4]",
+          "0,0021 · 0,1171 · 0,8650 · 0,0158"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Adunarea unei constante nu schimbă nimic; înmulțirea cu 2 face clasa câștigătoare mai sigură (0,6439 devine 0,8650).",
+        "ro": "Adunarea unei constante nu schimbă nimic; înmulțirea cu 2 face clasa câștigătoare mai sigură (0,6439 devine 0,8650)."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s15",
+   "title": {
+    "en": "Ce schimbă rezultatul?",
+    "ro": "Ce schimbă rezultatul?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 28",
+    "ro": "Cursul 4 · slide 28"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04d-q06",
+     "question": {
+      "en": "Care dintre aceste schimbări modifică softmax(z)?",
+      "ro": "Care dintre aceste schimbări modifică softmax(z)?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Înmulțim toate scorurile cu 2",
+        "ro": "Înmulțim toate scorurile cu 2"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: diferențele dintre scoruri se dublează.",
+        "ro": "Corect: diferențele dintre scoruri se dublează."
+       }
+      },
+      {
+       "text": {
+        "en": "Adunăm 5 la toate scorurile",
+        "ro": "Adunăm 5 la toate scorurile"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Rămâne la fel: constanta se reduce între numărător și numitor.",
+        "ro": "Rămâne la fel: constanta se reduce între numărător și numitor."
+       },
+       "misconception": "derivata-din-alt-loc"
+      },
+      {
+       "text": {
+        "en": "Scădem cel mai mare scor din toate",
+        "ro": "Scădem cel mai mare scor din toate"
+       },
+       "correct": false,
+       "explain": {
+        "en": "E un caz de adunare a unei constante (−4): rezultatul nu se schimbă.",
+        "ro": "E un caz de adunare a unei constante (−4): rezultatul nu se schimbă."
+       },
+       "misconception": "derivata-din-alt-loc"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s16",
+   "title": {
+    "en": "Scoruri uriașe",
+    "ro": "Scoruri uriașe"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 31",
+    "ro": "Cursul 4 · slide 31"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Calculatorul ține numerele în 64 de biți. e⁷⁰⁹ ≈ 8,2 · 10³⁰⁷ încă încape; e⁷¹⁰ nu mai încape și iese „depășire” (overflow).",
+        "ro": "Calculatorul ține numerele în 64 de biți. e⁷⁰⁹ ≈ 8,2 · 10³⁰⁷ încă încape; e⁷¹⁰ nu mai încape și iese „depășire” (overflow)."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru z = [1, 2, 3, 1 000 000], e¹⁰⁰⁰⁰⁰⁰ nu se poate calcula; rezultatul devine inf, iar împărțirea inf / inf dă nan.",
+        "ro": "Pentru z = [1, 2, 3, 1 000 000], e¹⁰⁰⁰⁰⁰⁰ nu se poate calcula; rezultatul devine inf, iar împărțirea inf / inf dă nan."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Calcul",
+         "Rezultat"
+        ],
+        "rows": [
+         [
+          "e⁷⁰⁹",
+          "≈ 8,2 · 10³⁰⁷"
+         ],
+         [
+          "e⁷¹⁰",
+          "depășire (inf)"
+         ],
+         [
+          "inf / inf",
+          "nan (nu e număr)"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s17",
+   "title": {
+    "en": "Varianta stabilă",
+    "ro": "Varianta stabilă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 31",
+    "ro": "Cursul 4 · slide 31"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p2",
+     "claim": {
+      "en": "Cum calculăm softmax pentru z = [1000, 1001, 1002]?",
+      "ro": "Cum calculăm softmax pentru z = [1000, 1001, 1002]?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Scădem cel mai mare scor din toate, 1002: obținem [−2, −1, 0]. Rezultatul softmax nu se schimbă (ca la adunarea lui 10).",
+        "ro": "Scădem cel mai mare scor din toate, 1002: obținem [−2, −1, 0]. Rezultatul softmax nu se schimbă (ca la adunarea lui 10)."
+       },
+       "predict": {
+        "question": {
+         "en": "Care este cel mai mare exponent după scădere?",
+         "ro": "Care este cel mai mare exponent după scădere?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "0, deci cel mai mare termen este e⁰ = 1",
+           "ro": "0, deci cel mai mare termen este e⁰ = 1"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: nicio depășire posibilă.",
+           "ro": "Corect: nicio depășire posibilă."
+          }
+         },
+         {
+          "text": {
+           "en": "1002",
+           "ro": "1002"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e înainte de scădere; după, maximul este 0.",
+           "ro": "Aceea e înainte de scădere; după, maximul este 0."
+          },
+          "misconception": "derivata-din-alt-loc"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Exponențialele: $e^{-2}, e^{-1}, e^{0}$ = 0,1353; 0,3679; 1,0000. Suma este 1,5032.",
+        "ro": "Exponențialele: $e^{-2}, e^{-1}, e^{0}$ = 0,1353; 0,3679; 1,0000. Suma este 1,5032."
+       },
+       "predict": {
+        "question": {
+         "en": "Rezultatul pentru a treia clasă va fi:",
+         "ro": "Rezultatul pentru a treia clasă va fi:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "1 / 1,5032 = 0,6652",
+           "ro": "1 / 1,5032 = 0,6652"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "1,0000, fără împărțire",
+           "ro": "1,0000, fără împărțire"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Împărțim mereu la sumă.",
+           "ro": "Împărțim mereu la sumă."
+          },
+          "misconception": "suma-diferita-de-1"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Rezultat: 0,0900; 0,2447; 0,6652.",
+        "ro": "Rezultat: 0,0900; 0,2447; 0,6652."
+       }
+      }
+     ],
+     "end": {
+      "en": "Formula stabilă: $y_i = \\frac{e^{z_i - \\max z}}{\\sum_j e^{z_j - \\max z}}$. Exponenții sunt cel mult 0, deci nu mai apare depășire.",
+      "ro": "Formula stabilă: $y_i = \\frac{e^{z_i - \\max z}}{\\sum_j e^{z_j - \\max z}}$. Exponenții sunt cel mult 0, deci nu mai apare depășire."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s18",
+   "title": {
+    "en": "Varianta din slide",
+    "ro": "Varianta din slide"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 31",
+    "ro": "Cursul 4 · slide 31"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Slide-ul împarte la k = max eᶻ; practica scade max z din exponent.",
+      "ro": "Slide-ul împarte la k = max eᶻ; practica scade max z din exponent."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Pe hârtie e același lucru: eᶻ/k = $e^{z-\\max z}$. Dar e¹⁰⁰⁰⁰⁰⁰ se depășește deja înainte de împărțire, deci în calculator se scade max z mai întâi.",
+        "ro": "Pe hârtie e același lucru: eᶻ/k = $e^{z-\\max z}$. Dar e¹⁰⁰⁰⁰⁰⁰ se depășește deja înainte de împărțire, deci în calculator se scade max z mai întâi."
+       }
+      },
+      {
+       "note": {
+        "en": "În slide, suma e scrisă până la n, dar înseamnă m, numărul de clase.",
+        "ro": "În slide, suma e scrisă până la n, dar înseamnă m, numărul de clase."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s19",
+   "title": {
+    "en": "Calculează stabil",
+    "ro": "Calculează stabil"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 31",
+    "ro": "Cursul 4 · slide 31"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04d-e07",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Scorurile sunt z = [1002, 1000, 1001]. Scade maximul (1002), apoi calculează softmax: y₁, y₂, y₃.",
+      "ro": "Scorurile sunt z = [1002, 1000, 1001]. Scade maximul (1002), apoi calculează softmax: y₁, y₂, y₃."
+     },
+     "fields": [
+      {
+       "id": "y1",
+       "label": {
+        "en": "y₁",
+        "ro": "y₁"
+       },
+       "kind": "num",
+       "formula": "1/(1+exp(-2)+exp(-1))",
+       "expected": 0.6652
+      },
+      {
+       "id": "y2",
+       "label": {
+        "en": "y₂",
+        "ro": "y₂"
+       },
+       "kind": "num",
+       "formula": "exp(-2)/(1+exp(-2)+exp(-1))",
+       "expected": 0.09
+      },
+      {
+       "id": "y3",
+       "label": {
+        "en": "y₃",
+        "ro": "y₃"
+       },
+       "kind": "num",
+       "formula": "exp(-1)/(1+exp(-2)+exp(-1))",
+       "expected": 0.2447
+      }
+     ],
+     "detectors": [
+      {
+       "field": "y1",
+       "formula": "exp(1002)",
+       "message": {
+        "en": "Ai încercat e¹⁰⁰²: acel număr nu încape într-un număr de 64 de biți. Scade mai întâi maximul.",
+        "ro": "Ai încercat e¹⁰⁰²: acel număr nu încape într-un număr de 64 de biți. Scade mai întâi maximul."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "După scădere: [0, −2, −1].",
+       "ro": "După scădere: [0, −2, −1]."
+      },
+      {
+       "en": "Exponențialele: 1; 0,1353; 0,3679. Suma: 1,5032",
+       "ro": "Exponențialele: 1; 0,1353; 0,3679. Suma: 1,5032"
+      },
+      {
+       "en": "0,6652; 0,0900; 0,2447",
+       "ro": "0,6652; 0,0900; 0,2447"
+      }
+     ],
+     "solution": {
+      "en": "Același set de valori ca la [1000, 1001, 1002], în altă ordine: 0,6652; 0,0900; 0,2447.",
+      "ro": "Același set de valori ca la [1000, 1001, 1002], în altă ordine: 0,6652; 0,0900; 0,2447."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "z = [500, 502, 501]. Scade maximul și calculează softmax.",
+        "ro": "z = [500, 502, 501]. Scade maximul și calculează softmax."
+       },
+       "fields": [
+        {
+         "id": "y1",
+         "formula": "exp(-2)/(exp(-2)+1+exp(-1))",
+         "expected": 0.09
+        },
+        {
+         "id": "y2",
+         "formula": "1/(exp(-2)+1+exp(-1))",
+         "expected": 0.6652
+        },
+        {
+         "id": "y3",
+         "formula": "exp(-1)/(exp(-2)+1+exp(-1))",
+         "expected": 0.2447
+        }
+       ],
+       "solution": {
+        "en": "Aceleași trei valori, în altă ordine.",
+        "ro": "Aceleași trei valori, în altă ordine."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s20",
+   "title": {
+    "en": "Clasa prezisă",
+    "ro": "Clasa prezisă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 28",
+    "ro": "Cursul 4 · slide 28"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04d-q08",
+     "question": {
+      "en": "Pentru z = [1, 3, 4, 2], ce clasă prezice rețeaua, și de ce nu trebuie să calculezi softmax ca s-o afli?",
+      "ro": "Pentru z = [1, 3, 4, 2], ce clasă prezice rețeaua, și de ce nu trebuie să calculezi softmax ca s-o afli?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Clasa 3: scorul cel mai mare dă și probabilitatea cea mai mare",
+        "ro": "Clasa 3: scorul cel mai mare dă și probabilitatea cea mai mare"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect. Softmax păstrează ordinea scorurilor.",
+        "ro": "Corect. Softmax păstrează ordinea scorurilor."
+       }
+      },
+      {
+       "text": {
+        "en": "Clasa 2, pentru că softmax inversează ordinea",
+        "ro": "Clasa 2, pentru că softmax inversează ordinea"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Softmax păstrează ordinea; clasa 3 are și scor, și probabilitate maximă.",
+        "ro": "Softmax păstrează ordinea; clasa 3 are și scor, și probabilitate maximă."
+       },
+       "misconception": "cea-mai-mare-valoare-castiga"
+      },
+      {
+       "text": {
+        "en": "Nu se poate ști fără softmax",
+        "ro": "Nu se poate ști fără softmax"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Exponențiala crește mereu, deci ordinea rămâne aceeași.",
+        "ro": "Exponențiala crește mereu, deci ordinea rămâne aceeași."
+       },
+       "misconception": "cea-mai-mare-valoare-castiga"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s21",
+   "title": {
+    "en": "Costul pe aceste ieșiri",
+    "ro": "Costul pe aceste ieșiri"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 23",
+    "ro": "Cursul 4 · slide 23"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04d-e09",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Ieșirile sunt y = [0,0321, 0,2369, 0,6439, 0,0871]. Clasa corectă este 3 (ținta one-hot). Calculează C = −ln y₃.",
+      "ro": "Ieșirile sunt y = [0,0321, 0,2369, 0,6439, 0,0871]. Clasa corectă este 3 (ținta one-hot). Calculează C = −ln y₃."
+     },
+     "fields": [
+      {
+       "id": "c",
+       "label": {
+        "en": "C",
+        "ro": "C"
+       },
+       "kind": "num",
+       "formula": "-ln(0.6439142598879724)",
+       "expected": 0.4402
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "-ln(0.03205860328008499)",
+       "message": {
+        "en": "Ai luat clasa 1. Clasa corectă este 3.",
+        "ro": "Ai luat clasa 1. Clasa corectă este 3."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Doar clasa corectă contează.",
+       "ro": "Doar clasa corectă contează."
+      },
+      {
+       "en": "C = −ln(0,6439)",
+       "ro": "C = −ln(0,6439)"
+      },
+      {
+       "en": "0,4402",
+       "ro": "0,4402"
+      }
+     ],
+     "solution": {
+      "en": "C = −ln 0,6439 = 0,4402.",
+      "ro": "C = −ln 0,6439 = 0,4402."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceleași ieșiri, dar clasa corectă este 1. Calculează C.",
+        "ro": "Aceleași ieșiri, dar clasa corectă este 1. Calculează C."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "-ln(0.03205860328008499)",
+         "expected": 3.4402
+        }
+       ],
+       "solution": {
+        "en": "−ln 0,0321 = 3,4402: costul crește mult când clasa corectă are probabilitate mică",
+        "ro": "−ln 0,0321 = 3,4402: costul crește mult când clasa corectă are probabilitate mică"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s22",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 24-31",
+    "ro": "Cursul 4 · slide 24-31"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "softmax: yᵢ = eᶻⁱ împărțit la suma eᶻʲ; ieșiri pozitive cu suma 1.",
+         "ro": "softmax: yᵢ = eᶻⁱ împărțit la suma eᶻʲ; ieșiri pozitive cu suma 1."
+        },
+        {
+         "en": "Adunarea aceleiași constante nu schimbă rezultatul; înmulțirea îl schimbă.",
+         "ro": "Adunarea aceleiași constante nu schimbă rezultatul; înmulțirea îl schimbă."
+        },
+        {
+         "en": "Stabil: se scade max z înainte de exponențială.",
+         "ro": "Stabil: se scade max z înainte de exponențială."
+        },
+        {
+         "en": "Se folosește în ultimul strat, împreună cu entropia încrucișată.",
+         "ro": "Se folosește în ultimul strat, împreună cu entropia încrucișată."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s23",
+   "title": {
+    "en": "Mini-test: softmax pentru [3, 1]",
+    "ro": "Mini-test: softmax pentru [3, 1]"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04d-e10",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Două scoruri z = [3, 1]. Calculează softmax(z): y₁ și y₂.",
+      "ro": "Două scoruri z = [3, 1]. Calculează softmax(z): y₁ și y₂."
+     },
+     "fields": [
+      {
+       "id": "y1",
+       "label": {
+        "en": "y₁",
+        "ro": "y₁"
+       },
+       "kind": "num",
+       "formula": "exp(3)/(exp(3)+exp(1))",
+       "expected": 0.8808
+      },
+      {
+       "id": "y2",
+       "label": {
+        "en": "y₂",
+        "ro": "y₂"
+       },
+       "kind": "num",
+       "formula": "exp(1)/(exp(3)+exp(1))",
+       "expected": 0.1192
+      }
+     ],
+     "detectors": [
+      {
+       "field": "y1",
+       "formula": "3/(3+1)",
+       "message": {
+        "en": "Ai împărțit scorurile direct. Softmax ridică mai întâi e la fiecare scor.",
+        "ro": "Ai împărțit scorurile direct. Softmax ridică mai întâi e la fiecare scor."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "e³ = 20,0855; e¹ = 2,7183.",
+       "ro": "e³ = 20,0855; e¹ = 2,7183."
+      },
+      {
+       "en": "Suma: 22,8038",
+       "ro": "Suma: 22,8038"
+      },
+      {
+       "en": "0,8808; 0,1192",
+       "ro": "0,8808; 0,1192"
+      }
+     ],
+     "solution": {
+      "en": "0,8808 și 0,1192; fac 1.",
+      "ro": "0,8808 și 0,1192; fac 1."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Scorurile [2; 0,5]. Calculează softmax.",
+        "ro": "Scorurile [2; 0,5]. Calculează softmax."
+       },
+       "fields": [
+        {
+         "id": "y1",
+         "formula": "exp(2)/(exp(2)+exp(0.5))",
+         "expected": 0.8176
+        },
+        {
+         "id": "y2",
+         "formula": "exp(0.5)/(exp(2)+exp(0.5))",
+         "expected": 0.1824
+        }
+       ],
+       "solution": {
+        "en": "0,8176 și 0,1824: același număr ca σ(1,5) și 1 − σ(1,5)",
+        "ro": "0,8176 și 0,1824: același număr ca σ(1,5) și 1 − σ(1,5)"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04d-s24",
+   "title": {
+    "en": "Mini-test: ce afirmație e greșită",
+    "ro": "Mini-test: ce afirmație e greșită"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04d-q11",
+     "question": {
+      "en": "Care afirmație despre softmax este GREȘITĂ?",
+      "ro": "Care afirmație despre softmax este GREȘITĂ?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Dacă adunăm 10 la toate scorurile, probabilitățile se schimbă",
+        "ro": "Dacă adunăm 10 la toate scorurile, probabilitățile se schimbă"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Aceasta este afirmația greșită: constanta se reduce, probabilitățile rămân la fel.",
+        "ro": "Aceasta este afirmația greșită: constanta se reduce, probabilitățile rămân la fel."
+       }
+      },
+      {
+       "text": {
+        "en": "Ieșirile sunt pozitive și fac 1",
+        "ro": "Ieșirile sunt pozitive și fac 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Adevărat, e definiția.",
+        "ro": "Adevărat, e definiția."
+       },
+       "misconception": "suma-diferita-de-1"
+      },
+      {
+       "text": {
+        "en": "Pentru stabilitate se scade max z",
+        "ro": "Pentru stabilitate se scade max z"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Adevărat: nu schimbă rezultatul și evită depășirea.",
+        "ro": "Adevărat: nu schimbă rezultatul și evită depășirea."
+       },
+       "misconception": "derivata-din-alt-loc"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

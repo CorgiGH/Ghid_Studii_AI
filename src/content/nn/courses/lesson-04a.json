@@ -1,0 +1,1438 @@
+{
+ "meta": {
+  "id": "nn-l04a",
+  "title": {
+   "en": "Lesson 4a: Why MSE with a sigmoid learns slowly",
+   "ro": "Lecția 4a: De ce învață încet MSE cu sigmoidă"
+  },
+  "shortTitle": {
+   "en": "L4a: MSE and sigmoid",
+   "ro": "L4a: MSE și sigmoidă"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l04a-s01",
+   "title": {
+    "en": "Un neuron, o intrare",
+    "ro": "Un neuron, o intrare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 8",
+    "ro": "Cursul 4 · slide 8"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Un neuron primește x = 1, îl înmulțește cu o pondere w, adaugă un bias b și trece totul prin sigmoidă. Rezultatul este ieșirea y.",
+        "ro": "Un neuron primește x = 1, îl înmulțește cu o pondere w, adaugă un bias b și trece totul prin sigmoidă. Rezultatul este ieșirea y."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 170'><title>Un neuron cu o intrare</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><circle class='fg fill-bg' stroke-width='2' cx='34' cy='78' r='22'><title>intrarea</title></circle><text class='fg' font-size='14' font-weight='700' x='34' y='84' text-anchor='middle'>x=1</text><line class='muted' stroke-width='2' x1='57' y1='78' x2='118' y2='78' marker-end='url(#ah-muted)'/><text class='accent' font-size='16' font-weight='700' x='88' y='66' text-anchor='middle'>w</text><rect class='fg fill-bg' stroke-width='2.5' x='120' y='52' width='62' height='52' rx='8'><title>suma</title></rect><text class='fg' font-size='14' font-weight='700' x='151' y='74' text-anchor='middle'>Σ + b</text><text class='muted' font-size='14' x='151' y='94' text-anchor='middle'>z</text><line class='muted' stroke-width='2' x1='184' y1='78' x2='214' y2='78' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='216' y='52' width='46' height='52' rx='8'><title>sigmoida</title></rect><text class='accent' font-size='18' font-weight='700' x='239' y='84' text-anchor='middle'>σ</text><line class='muted' stroke-width='2' x1='264' y1='78' x2='292' y2='78' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='312' y='84' text-anchor='middle'>y</text><text class='warn' font-size='14' font-weight='700' x='312' y='112' text-anchor='middle'>t = 0</text><text class='muted' font-size='14' x='151' y='34' text-anchor='middle'>bias b</text><line class='muted' stroke-width='1.5' x1='151' y1='40' x2='151' y2='50' marker-end='url(#ah-muted)'/><text class='fg' font-size='14' x='170' y='150' text-anchor='middle'>z = w·x + b,  y = σ(z)</text></svg>",
+        "alt": {
+         "en": "Neuron cu intrarea x = 1, ponderea w, biasul b, sigmoida și ieșirea y; ținta este t = 0",
+         "ro": "Neuron cu intrarea x = 1, ponderea w, biasul b, sigmoida și ieșirea y; ținta este t = 0"
+        },
+        "caption": {
+         "en": "Vrem ca ieșirea y să ajungă cât mai aproape de ținta t = 0.",
+         "ro": "Vrem ca ieșirea y să ajungă cât mai aproape de ținta t = 0."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s02",
+   "title": {
+    "en": "Două porniri",
+    "ro": "Două porniri"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 8",
+    "ro": "Cursul 4 · slide 8"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pornim neuronul în două feluri. În amândouă y este departe de ținta 0, dar în a doua este și mai departe.",
+        "ro": "Pornim neuronul în două feluri. În amândouă y este departe de ținta 0, dar în a doua este și mai departe."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Pornirea",
+         "w",
+         "b",
+         "z = w + b",
+         "y"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,6",
+          "0,9",
+          "1,5",
+          "0,8176"
+         ],
+         [
+          "2",
+          "2",
+          "2",
+          "4",
+          "0,9820"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-ul scrie y = 0,81 și 0,98; aici păstrăm 4 zecimale.",
+        "ro": "Slide-ul scrie y = 0,81 și 0,98; aici păstrăm 4 zecimale."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s03",
+   "title": {
+    "en": "Care învață mai repede?",
+    "ro": "Care învață mai repede?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 9",
+    "ro": "Cursul 4 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04a-q01",
+     "question": {
+      "en": "Prezice înainte de orice calcul: care pornire va ajunge mai repede la ținta 0 dacă folosim costul pătratic (MSE)?",
+      "ro": "Prezice înainte de orice calcul: care pornire va ajunge mai repede la ținta 0 dacă folosim costul pătratic (MSE)?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Pornirea 1, cea cu eroarea mai mică",
+        "ro": "Pornirea 1, cea cu eroarea mai mică"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Da, și e surprinzător. Cifrele vin în ecranele următoare.",
+        "ro": "Da, și e surprinzător. Cifrele vin în ecranele următoare."
+       }
+      },
+      {
+       "text": {
+        "en": "Pornirea 2, cea cu eroarea mai mare",
+        "ro": "Pornirea 2, cea cu eroarea mai mare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "E așteptarea firească: eroare mare, pas mare. Cu MSE și sigmoidă iese invers; vezi de ce în ecranele următoare.",
+        "ro": "E așteptarea firească: eroare mare, pas mare. Cu MSE și sigmoidă iese invers; vezi de ce în ecranele următoare."
+       },
+       "misconception": "eroare-mare-pas-mare"
+      },
+      {
+       "text": {
+        "en": "La fel de repede",
+        "ro": "La fel de repede"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Cele două porniri au gradiente diferite, deci pași diferiți. Calculăm în ecranele următoare.",
+        "ro": "Cele două porniri au gradiente diferite, deci pași diferiți. Calculăm în ecranele următoare."
+       },
+       "misconception": "pasi-egali-la-erori-diferite"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s04",
+   "title": {
+    "en": "Pasul trebuie să urmeze eroarea",
+    "ro": "Pasul trebuie să urmeze eroarea"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 7",
+    "ro": "Cursul 4 · slide 7"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Eroare mare, pas mare; eroare mică, pas mic.",
+      "ro": "Eroare mare, pas mare; eroare mică, pas mic."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Acesta este scopul: ponderile se schimbă proporțional cu eroarea. Vedem dacă MSE cu sigmoidă îl atinge.",
+        "ro": "Acesta este scopul: ponderile se schimbă proporțional cu eroarea. Vedem dacă MSE cu sigmoidă îl atinge."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s05",
+   "title": {
+    "en": "Două funcții liniare rămân o funcție liniară",
+    "ro": "Două funcții liniare rămân o funcție liniară"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 5",
+    "ro": "Cursul 4 · slide 5"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Punem un clasificator liniar după altul: f₁(x) = 3x + 1, apoi f₂(u) = 2u + 1.",
+        "ro": "Punem un clasificator liniar după altul: f₁(x) = 3x + 1, apoi f₂(u) = 2u + 1."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "x",
+         "f₁(x)",
+         "f₂(f₁(x))",
+         "6x + 3"
+        ],
+        "rows": [
+         [
+          "0",
+          "1",
+          "3",
+          "3"
+         ],
+         [
+          "1",
+          "4",
+          "9",
+          "9"
+         ],
+         [
+          "2",
+          "7",
+          "15",
+          "15"
+         ]
+        ]
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "f₂(f₁(x)) = 2(3x + 1) + 1 = 6x + 3: tot o dreaptă.",
+       "ro": "f₂(f₁(x)) = 2(3x + 1) + 1 = 6x + 3: tot o dreaptă."
+      }
+     ],
+     "result": {
+      "en": "Combinația liniară a unor clasificatori liniari este liniară. De aceea punem între ei o funcție neliniară: sigmoida.",
+      "ro": "Combinația liniară a unor clasificatori liniari este liniară. De aceea punem între ei o funcție neliniară: sigmoida."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s06",
+   "title": {
+    "en": "Costul pătratic pe un exemplu",
+    "ro": "Costul pătratic pe un exemplu"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 4",
+    "ro": "Cursul 4 · slide 4"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru un exemplu, costul pătratic este $C = \\frac{(y - t)^2}{2}$. Aici y este ieșirea neuronului, t este ținta, iar împărțirea la 2 doar ușurează derivarea.",
+        "ro": "Pentru un exemplu, costul pătratic este $C = \\frac{(y - t)^2}{2}$. Aici y este ieșirea neuronului, t este ținta, iar împărțirea la 2 doar ușurează derivarea."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Pornirea",
+         "y − t",
+         "C"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,8176",
+          "0,3342"
+         ],
+         [
+          "2",
+          "0,9820",
+          "0,4822"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s07",
+   "title": {
+    "en": "Cum se mișcă w",
+    "ro": "Cum se mișcă w"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 9",
+    "ro": "Cursul 4 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "p1",
+     "claim": {
+      "en": "Cât se schimbă costul C când mișc ponderea w?",
+      "ro": "Cât se schimbă costul C când mișc ponderea w?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "C depinde de y, y depinde de z, iar z depinde de w. Regula lanțului înmulțește cele trei pante: $\\frac{dC}{dw} = \\frac{dC}{dy}\\cdot\\frac{dy}{dz}\\cdot\\frac{dz}{dw}$.",
+        "ro": "C depinde de y, y depinde de z, iar z depinde de w. Regula lanțului înmulțește cele trei pante: $\\frac{dC}{dw} = \\frac{dC}{dy}\\cdot\\frac{dy}{dz}\\cdot\\frac{dz}{dw}$."
+       },
+       "predict": {
+        "question": {
+         "en": "Care dintre cele trei pante este panta sigmoidei?",
+         "ro": "Care dintre cele trei pante este panta sigmoidei?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "dy/dz: cât se schimbă y când se schimbă z",
+           "ro": "dy/dz: cât se schimbă y când se schimbă z"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: y = σ(z), deci dy/dz este panta curbei sigmoide.",
+           "ro": "Corect: y = σ(z), deci dy/dz este panta curbei sigmoide."
+          }
+         },
+         {
+          "text": {
+           "en": "dC/dy: cât se schimbă costul când se schimbă y",
+           "ro": "dC/dy: cât se schimbă costul când se schimbă y"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea vine din cost, nu din sigmoidă.",
+           "ro": "Aceea vine din cost, nu din sigmoidă."
+          },
+          "misconception": "derivata-din-alt-loc"
+         },
+         {
+          "text": {
+           "en": "dz/dw: cât se schimbă z când se schimbă w",
+           "ro": "dz/dw: cât se schimbă z când se schimbă w"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea vine din z = w·x + b, nu din sigmoidă.",
+           "ro": "Aceea vine din z = w·x + b, nu din sigmoidă."
+          },
+          "misconception": "derivata-din-alt-loc"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Prima pantă vine din cost: $\\frac{dC}{dy} = y - t$.",
+        "ro": "Prima pantă vine din cost: $\\frac{dC}{dy} = y - t$."
+       },
+       "why": {
+        "en": "Costul pătratic C = (y − t)²/2 derivat după y dă y − t.",
+        "ro": "Costul pătratic C = (y − t)²/2 derivat după y dă y − t."
+       }
+      },
+      {
+       "shown": {
+        "en": "A treia vine din z = w·x + b.",
+        "ro": "A treia vine din z = w·x + b."
+       },
+       "predict": {
+        "question": {
+         "en": "Cât este dz/dw?",
+         "ro": "Cât este dz/dw?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "x, intrarea",
+           "ro": "x, intrarea"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: w este înmulțit cu x, b nu depinde de w.",
+           "ro": "Corect: w este înmulțit cu x, b nu depinde de w."
+          }
+         },
+         {
+          "text": {
+           "en": "w",
+           "ro": "w"
+          },
+          "correct": false,
+          "explain": {
+           "en": "z crește cu x când w crește cu 1, nu cu w.",
+           "ro": "z crește cu x când w crește cu 1, nu cu w."
+          },
+          "misconception": "derivata-din-alt-loc"
+         },
+         {
+          "text": {
+           "en": "1",
+           "ro": "1"
+          },
+          "correct": false,
+          "explain": {
+           "en": "1 este derivata după b, nu după w.",
+           "ro": "1 este derivata după b, nu după w."
+          },
+          "misconception": "derivata-din-alt-loc"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "A doua este panta sigmoidei: $\\frac{dy}{dz} = \\sigma'(z) = y(1-y)$.",
+        "ro": "A doua este panta sigmoidei: $\\frac{dy}{dz} = \\sigma'(z) = y(1-y)$."
+       },
+       "why": {
+        "en": "Se calculează chiar din y, fără alt calcul.",
+        "ro": "Se calculează chiar din y, fără alt calcul."
+       }
+      },
+      {
+       "shown": {
+        "en": "Înmulțite: $\\frac{dC}{dw} = (y - t)\\cdot \\sigma'(z)\\cdot x$.",
+        "ro": "Înmulțite: $\\frac{dC}{dw} = (y - t)\\cdot \\sigma'(z)\\cdot x$."
+       }
+      }
+     ],
+     "end": {
+      "en": "Trei factori: eroarea, panta sigmoidei și intrarea. Panta sigmoidei apare doar pentru că am pus sigmoida în neuron.",
+      "ro": "Trei factori: eroarea, panta sigmoidei și intrarea. Panta sigmoidei apare doar pentru că am pus sigmoida în neuron."
+     },
+     "figure": {
+      "svg": "<svg viewBox='0 0 340 170'><title>Lanțul de la w la cost</title><defs><marker id='ah-muted' viewBox='0 0 10 10' markerWidth='10' markerHeight='10' refX='9' refY='5' orient='auto' markerUnits='userSpaceOnUse'><path class='fill-muted' stroke='none' d='M0 1L9 5L0 9z'/></marker></defs><circle class='fg fill-bg' stroke-width='2' cx='34' cy='78' r='22'><title>intrarea</title></circle><text class='fg' font-size='14' font-weight='700' x='34' y='84' text-anchor='middle'>x=1</text><line class='muted' stroke-width='2' x1='57' y1='78' x2='118' y2='78' marker-end='url(#ah-muted)'/><text class='accent' font-size='16' font-weight='700' x='88' y='66' text-anchor='middle'>w</text><rect class='fg fill-bg' stroke-width='2.5' x='120' y='52' width='62' height='52' rx='8'><title>suma</title></rect><text class='fg' font-size='14' font-weight='700' x='151' y='74' text-anchor='middle'>Σ + b</text><text class='muted' font-size='14' x='151' y='94' text-anchor='middle'>z</text><line class='muted' stroke-width='2' x1='184' y1='78' x2='214' y2='78' marker-end='url(#ah-muted)'/><rect class='accent fill-bg' stroke-width='2.5' x='216' y='52' width='46' height='52' rx='8'><title>sigmoida</title></rect><text class='accent' font-size='18' font-weight='700' x='239' y='84' text-anchor='middle'>σ</text><line class='muted' stroke-width='2' x1='264' y1='78' x2='292' y2='78' marker-end='url(#ah-muted)'/><text class='fg' font-size='16' font-weight='700' x='312' y='84' text-anchor='middle'>y</text><text class='warn' font-size='14' font-weight='700' x='312' y='112' text-anchor='middle'>C</text><text class='muted' font-size='14' x='151' y='34' text-anchor='middle'>bias b</text><line class='muted' stroke-width='1.5' x1='151' y1='40' x2='151' y2='50' marker-end='url(#ah-muted)'/><text class='fg' font-size='14' x='170' y='150' text-anchor='middle'>z = w·x + b,  y = σ(z)</text></svg>",
+      "alt": {
+       "en": "Lanțul w, z, y, C",
+       "ro": "Lanțul w, z, y, C"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s08",
+   "title": {
+    "en": "Cei trei factori, pornirea 1",
+    "ro": "Cei trei factori, pornirea 1"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 9",
+    "ro": "Cursul 4 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pornirea 1: y = 0,8176, t = 0, x = 1. Panta sigmoidei se calculează din y.",
+        "ro": "Pornirea 1: y = 0,8176, t = 0, x = 1. Panta sigmoidei se calculează din y."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Factorul",
+         "Calcul",
+         "Valoare"
+        ],
+        "rows": [
+         [
+          "y − t",
+          "0,8176 − 0",
+          "0,8176"
+         ],
+         [
+          "σ′(z) = y(1 − y)",
+          "0,8176 · 0,1824",
+          "0,1491"
+         ],
+         [
+          "x",
+          "dat",
+          "1"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s09",
+   "title": {
+    "en": "Gradientul primei porniri",
+    "ro": "Gradientul primei porniri"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 9",
+    "ro": "Cursul 4 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04a-e02",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Neuron cu x = 1, ținta t = 0 și z = 1,5, deci y = 0,8176. Calculează gradientul costului pătratic dC/dw.",
+      "ro": "Neuron cu x = 1, ținta t = 0 și z = 1,5, deci y = 0,8176. Calculează gradientul costului pătratic dC/dw."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "Gradientul dC/dw",
+        "ro": "Gradientul dC/dw"
+       },
+       "kind": "num",
+       "formula": "((1/(1+exp(-(1.5))))-0)*(1/(1+exp(-(1.5))))*(1-(1/(1+exp(-(1.5)))))*1",
+       "expected": 0.1219
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "0.8176",
+       "message": {
+        "en": "Ai luat doar eroarea y − t. Lipsește panta sigmoidei y(1 − y).",
+        "ro": "Ai luat doar eroarea y − t. Lipsește panta sigmoidei y(1 − y)."
+       }
+      },
+      {
+       "field": "g",
+       "formula": "0.8176*(1-0.8176)",
+       "message": {
+        "en": "Ai calculat doar panta sigmoidei y(1 − y). Lipsește eroarea y − t.",
+        "ro": "Ai calculat doar panta sigmoidei y(1 − y). Lipsește eroarea y − t."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Trei factori: y − t, y(1 − y) și x.",
+       "ro": "Trei factori: y − t, y(1 − y) și x."
+      },
+      {
+       "en": "(0,8176 − 0) · 0,8176 · (1 − 0,8176) · 1",
+       "ro": "(0,8176 − 0) · 0,8176 · (1 − 0,8176) · 1"
+      },
+      {
+       "en": "0,8176 · 0,1491 = 0,1219",
+       "ro": "0,8176 · 0,1491 = 0,1219"
+      }
+     ],
+     "solution": {
+      "en": "y − t = 0,8176; σ′(z) = 0,8176 · 0,1824 = 0,1491; x = 1. Produsul: 0,1219.",
+      "ro": "y − t = 0,8176; σ′(z) = 0,8176 · 0,1824 = 0,1491; x = 1. Produsul: 0,1219."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceeași formă pentru z = 3, deci y = 0,9526. Calculează dC/dw (x = 1, t = 0).",
+        "ro": "Aceeași formă pentru z = 3, deci y = 0,9526. Calculează dC/dw (x = 1, t = 0)."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "((1/(1+exp(-(3)))))*(1/(1+exp(-(3))))*(1-(1/(1+exp(-(3)))))*1",
+         "expected": 0.043
+        }
+       ],
+       "solution": {
+        "en": "0,9526 · 0,0452 = 0,0430",
+        "ro": "0,9526 · 0,0452 = 0,0430"
+       }
+      },
+      {
+       "statement": {
+        "en": "Aceeași formă pentru z = 0, deci y = 0,5. Calculează dC/dw (x = 1, t = 0).",
+        "ro": "Aceeași formă pentru z = 0, deci y = 0,5. Calculează dC/dw (x = 1, t = 0)."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "((1/(1+exp(-(0)))))*(1/(1+exp(-(0))))*(1-(1/(1+exp(-(0)))))*1",
+         "expected": 0.125
+        }
+       ],
+       "solution": {
+        "en": "0,5 · 0,25 = 0,1250",
+        "ro": "0,5 · 0,25 = 0,1250"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s10",
+   "title": {
+    "en": "Gradientul celei de-a doua porniri",
+    "ro": "Gradientul celei de-a doua porniri"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 9",
+    "ro": "Cursul 4 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04a-e03",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Pornirea 2: x = 1, t = 0, z = 4, deci y = 0,9820. Calculează dC/dw.",
+      "ro": "Pornirea 2: x = 1, t = 0, z = 4, deci y = 0,9820. Calculează dC/dw."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "Gradientul dC/dw",
+        "ro": "Gradientul dC/dw"
+       },
+       "kind": "num",
+       "formula": "((1/(1+exp(-(4)))))*(1/(1+exp(-(4))))*(1-(1/(1+exp(-(4)))))*1",
+       "expected": 0.0173,
+       "tol": 0.0002
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "0.982",
+       "message": {
+        "en": "Ai luat doar eroarea y − t. Lipsește panta sigmoidei y(1 − y).",
+        "ro": "Ai luat doar eroarea y − t. Lipsește panta sigmoidei y(1 − y)."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Aceiași trei factori: y − t, y(1 − y), x.",
+       "ro": "Aceiași trei factori: y − t, y(1 − y), x."
+      },
+      {
+       "en": "0,9820 · 0,9820 · (1 − 0,9820) · 1",
+       "ro": "0,9820 · 0,9820 · (1 − 0,9820) · 1"
+      },
+      {
+       "en": "0,9820 · 0,0177 = 0,0173",
+       "ro": "0,9820 · 0,0177 = 0,0173"
+      }
+     ],
+     "solution": {
+      "en": "σ′(z) = 0,9820 · 0,0180 = 0,0177, iar produsul cu y − t = 0,9820 dă 0,0173.",
+      "ro": "σ′(z) = 0,9820 · 0,0180 = 0,0177, iar produsul cu y − t = 0,9820 dă 0,0173."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același calcul pentru z = 5, deci y = 0,9933. Calculează dC/dw (x = 1, t = 0).",
+        "ro": "Același calcul pentru z = 5, deci y = 0,9933. Calculează dC/dw (x = 1, t = 0)."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "((1/(1+exp(-(5)))))*(1/(1+exp(-(5))))*(1-(1/(1+exp(-(5)))))*1",
+         "expected": 0.0066,
+         "tol": 0.0002
+        }
+       ],
+       "solution": {
+        "en": "0,0066",
+        "ro": "0,0066"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s11",
+   "title": {
+    "en": "Eroare mai mare, gradient mai mic",
+    "ro": "Eroare mai mare, gradient mai mic"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 9",
+    "ro": "Cursul 4 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Acesta este răspunsul la întrebarea de mai devreme.",
+        "ro": "Acesta este răspunsul la întrebarea de mai devreme."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Pornirea",
+         "Eroarea y − t",
+         "Gradientul"
+        ],
+        "rows": [
+         [
+          "1",
+          "0,8176",
+          "0,1219"
+         ],
+         [
+          "2",
+          "0,9820",
+          "0,0173"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Pornirea 2 greșește mai tare, dar se mișcă de aproape 7 ori mai încet. Exact invers decât ne-am dori.",
+        "ro": "Pornirea 2 greșește mai tare, dar se mișcă de aproape 7 ori mai încet. Exact invers decât ne-am dori."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s12",
+   "title": {
+    "en": "Panta sigmoidei",
+    "ro": "Panta sigmoidei"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 10",
+    "ro": "Cursul 4 · slide 10"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Tangenta arată panta. La z = 1,5 curba încă urcă (σ′ = 0,1491). La z = 4 este aproape plată (σ′ = 0,0177).",
+        "ro": "Tangenta arată panta. La z = 1,5 curba încă urcă (σ′ = 0,1491). La z = 4 este aproape plată (σ′ = 0,0177)."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Sigmoida cu tangente la z = 1,5 și z = 4</title><line class='muted' stroke-width='1.5' x1='111.5' y1='156' x2='111.5' y2='16'/><line class='muted' stroke-width='1.5' x1='44' y1='146.7' x2='314' y2='146.7'/><line class='muted' stroke-width='1.5' x1='44' y1='153' x2='44' y2='159'/><text class='muted' font-size='14' x='44' y='174' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='111.5' y1='153' x2='111.5' y2='159'/><text class='muted' font-size='14' x='111.5' y='174' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='179' y1='153' x2='179' y2='159'/><text class='muted' font-size='14' x='179' y='174' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='246.5' y1='153' x2='246.5' y2='159'/><text class='muted' font-size='14' x='246.5' y='174' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='314' y1='153' x2='314' y2='159'/><text class='muted' font-size='14' x='314' y='174' text-anchor='middle'>6</text><line class='muted' stroke-width='1.5' x1='41' y1='146.7' x2='47' y2='146.7'/><text class='muted' font-size='14' x='38' y='151.7' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='41' y1='88.3' x2='47' y2='88.3'/><text class='muted' font-size='14' x='38' y='93.3' text-anchor='end'>0,5</text><line class='muted' stroke-width='1.5' x1='41' y1='30' x2='47' y2='30'/><text class='muted' font-size='14' x='38' y='35' text-anchor='end'>1</text><polyline class='accent' stroke-width='2.5' fill='none' points='44,132.8 47,131.6 50,130.4 53,129.1 56,127.8 59,126.3 62,124.8 65,123.2 68,121.5 71,119.7 74,117.8 77,115.8 80,113.7 83,111.6 86,109.4 89,107.1 92,104.7 95,102.3 98,99.8 101,97.3 104,94.8 107,92.2 110,89.6 113,87 116,84.5 119,81.9 122,79.3 125,76.8 128,74.4 131,71.9 134,69.6 137,67.3 140,65.1 143,62.9 146,60.9 149,58.9 152,57 155,55.2 158,53.5 161,51.9 164,50.3 167,48.9 170,47.5 173,46.2 176,45 179,43.9 182,42.9 185,41.9 188,41 191,40.1 194,39.3 197,38.6 200,37.9 203,37.3 206,36.7 209,36.1 212,35.7 215,35.2 218,34.8 221,34.4 224,34 227,33.7 230,33.4 233,33.1 236,32.8 239,32.6 242,32.4 245,32.2 248,32 251,31.8 254,31.7 257,31.5 260,31.4 263,31.3 266,31.2 269,31.1 272,31 275,30.9 278,30.8 281,30.8 284,30.7 287,30.6 290,30.6 293,30.5 296,30.5 299,30.4 302,30.4 305,30.4 308,30.3 311,30.3 314,30.3'/><line class='warn' stroke-width='2.5' x1='118.2' y1='73.9' x2='206' y2='28.7'><title>panta în z = 1.5</title></line><line class='warn' stroke-width='2.5' x1='202.6' y1='34.8' x2='290.4' y2='29.4'><title>panta în z = 4</title></line><circle class='accent fill-accent' stroke-width='2' cx='162.1' cy='51.3' r='5'><title>z = 1,5</title></circle><circle class='bad fill-bad' stroke-width='2' cx='246.5' cy='32.1' r='5'><title>z = 4</title></circle><text class='fg' font-size='15' x='314' y='180.7' text-anchor='end'>z</text></svg>",
+        "alt": {
+         "en": "Curba sigmoidă cu tangente la z = 1,5 și z = 4",
+         "ro": "Curba sigmoidă cu tangente la z = 1,5 și z = 4"
+        },
+        "caption": {
+         "en": "Tangenta de la z = 4 este aproape orizontală.",
+         "ro": "Tangenta de la z = 4 este aproape orizontală."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s13",
+   "title": {
+    "en": "Sigmoida saturată",
+    "ro": "Sigmoida saturată"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 10",
+    "ro": "Cursul 4 · slide 10"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Când z este mare, sigmoida este plată și σ′(z) este aproape 0.",
+      "ro": "Când z este mare, sigmoida este plată și σ′(z) este aproape 0."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Factorul σ′(z) din gradient înăbușă pasul, chiar dacă eroarea este mare. Neuronul „se blochează” exact când greșește tare.",
+        "ro": "Factorul σ′(z) din gradient înăbușă pasul, chiar dacă eroarea este mare. Neuronul „se blochează” exact când greșește tare."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s14",
+   "title": {
+    "en": "Gradientul MSE pe toată curba",
+    "ro": "Gradientul MSE pe toată curba"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 10",
+    "ro": "Cursul 4 · slide 10"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru t = 0, gradientul MSE este y · y(1 − y), cu x = 1. Are un vârf, apoi scade spre 0 tocmai când eroarea crește.",
+        "ro": "Pentru t = 0, gradientul MSE este y · y(1 − y), cu x = 1. Are un vârf, apoi scade spre 0 tocmai când eroarea crește."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Gradientul MSE în funcție de z</title><line class='muted' stroke-width='1.5' x1='113' y1='158' x2='113' y2='14'/><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='314' y2='158'/><line class='muted' stroke-width='1.5' x1='46' y1='155' x2='46' y2='161'/><text class='muted' font-size='14' x='46' y='176' text-anchor='middle'>−2</text><line class='muted' stroke-width='1.5' x1='113' y1='155' x2='113' y2='161'/><text class='muted' font-size='14' x='113' y='176' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='180' y1='155' x2='180' y2='161'/><text class='muted' font-size='14' x='180' y='176' text-anchor='middle'>2</text><line class='muted' stroke-width='1.5' x1='247' y1='155' x2='247' y2='161'/><text class='muted' font-size='14' x='247' y='176' text-anchor='middle'>4</text><line class='muted' stroke-width='1.5' x1='314' y1='155' x2='314' y2='161'/><text class='muted' font-size='14' x='314' y='176' text-anchor='middle'>6</text><line class='muted' stroke-width='1.5' x1='43' y1='158' x2='49' y2='158'/><text class='muted' font-size='14' x='40' y='163' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='43' y1='78' x2='49' y2='78'/><text class='muted' font-size='14' x='40' y='83' text-anchor='end'>0,1</text><line class='muted' stroke-width='1.5' x1='136.2' y1='158' x2='136.2' y2='14' stroke-dasharray='4 4'/><polyline class='accent' stroke-width='2.8' fill='none' points='46,148 49,146.4 52,144.7 54.9,142.7 57.9,140.4 60.9,137.9 63.9,135.2 66.8,132.1 69.8,128.7 72.8,125.1 75.8,121.1 78.8,116.8 81.7,112.3 84.7,107.4 87.7,102.4 90.7,97.2 93.6,91.8 96.6,86.3 99.6,80.9 102.6,75.4 105.6,70.2 108.5,65.1 111.5,60.3 114.5,55.8 117.5,51.8 120.4,48.3 123.4,45.3 126.4,42.9 129.4,41.2 132.4,40 135.3,39.5 138.3,39.6 141.3,40.4 144.3,41.7 147.2,43.5 150.2,45.9 153.2,48.6 156.2,51.8 159.2,55.3 162.1,59 165.1,62.9 168.1,67 171.1,71.2 174,75.5 177,79.8 180,84 183,88.2 186,92.3 188.9,96.3 191.9,100.2 194.9,103.9 197.9,107.5 200.8,110.9 203.8,114.2 206.8,117.2 209.8,120.2 212.8,122.9 215.7,125.5 218.7,127.9 221.7,130.2 224.7,132.3 227.6,134.3 230.6,136.1 233.6,137.8 236.6,139.4 239.6,140.9 242.5,142.3 245.5,143.5 248.5,144.7 251.5,145.8 254.4,146.8 257.4,147.7 260.4,148.5 263.4,149.3 266.4,150 269.3,150.7 272.3,151.3 275.3,151.8 278.3,152.4 281.2,152.8 284.2,153.3 287.2,153.7 290.2,154 293.2,154.4 296.1,154.7 299.1,154.9 302.1,155.2 305.1,155.4 308,155.7 311,155.9 314,156'/><circle class='accent fill-accent' stroke-width='2' cx='163.2' cy='60.4' r='5'/><circle class='bad fill-bad' stroke-width='2' cx='247' cy='144.1' r='5'/><text class='fg' font-size='14' font-weight='700' x='156.6' y='26' text-anchor='start'>vârf 0,1481</text><text class='bad' font-size='14' font-weight='700' x='253.7' y='130' text-anchor='start'>z = 4</text><text class='fg' font-size='15' x='314' y='194' text-anchor='end'>z</text><text class='fg' font-size='15' x='54' y='16' text-anchor='start'>gradient</text></svg>",
+        "alt": {
+         "en": "Curba gradientului MSE: crește până la un vârf la z = 0,69, apoi scade aproape de 0",
+         "ro": "Curba gradientului MSE: crește până la un vârf la z = 0,69, apoi scade aproape de 0"
+        },
+        "caption": {
+         "en": "Punctele z = 1,5 și z = 4 sunt cele două porniri.",
+         "ro": "Punctele z = 1,5 și z = 4 sunt cele două porniri."
+        }
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "z",
+         "y",
+         "gradient"
+        ],
+        "rows": [
+         [
+          "−2",
+          "0,1192",
+          "0,0125"
+         ],
+         [
+          "0",
+          "0,5000",
+          "0,1250"
+         ],
+         [
+          "0,5",
+          "0,6225",
+          "0,1463"
+         ],
+         [
+          "1,5",
+          "0,8176",
+          "0,1219"
+         ],
+         [
+          "4",
+          "0,9820",
+          "0,0173"
+         ],
+         [
+          "6",
+          "0,9975",
+          "0,0025"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s15",
+   "title": {
+    "en": "Ce eroare are gradient mai mare?",
+    "ro": "Ce eroare are gradient mai mare?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 10",
+    "ro": "Cursul 4 · slide 10"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04a-q04",
+     "question": {
+      "en": "Două porniri cu t = 0: una cu y = 0,6225 (z = 0,5), alta cu y = 0,9820 (z = 4). Care are gradientul MSE mai mare?",
+      "ro": "Două porniri cu t = 0: una cu y = 0,6225 (z = 0,5), alta cu y = 0,9820 (z = 4). Care are gradientul MSE mai mare?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Prima, cu y = 0,6225: gradient 0,1463",
+        "ro": "Prima, cu y = 0,6225: gradient 0,1463"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect. A doua are doar 0,0173. Gradientul nu este proporțional cu eroarea.",
+        "ro": "Corect. A doua are doar 0,0173. Gradientul nu este proporțional cu eroarea."
+       }
+      },
+      {
+       "text": {
+        "en": "A doua, cu y = 0,9820: eroarea e mai mare",
+        "ro": "A doua, cu y = 0,9820: eroarea e mai mare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Eroarea e mai mare, dar gradientul nu urmează eroarea: panta sigmoidei la z = 4 e aproape 0.",
+        "ro": "Eroarea e mai mare, dar gradientul nu urmează eroarea: panta sigmoidei la z = 4 e aproape 0."
+       },
+       "misconception": "eroare-mare-pas-mare"
+      },
+      {
+       "text": {
+        "en": "Sunt egale",
+        "ro": "Sunt egale"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Gradientele sunt 0,1463 și 0,0173, deci foarte diferite.",
+        "ro": "Gradientele sunt 0,1463 și 0,0173, deci foarte diferite."
+       },
+       "misconception": "pasi-egali-la-erori-diferite"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s16",
+   "title": {
+    "en": "Greșit și saturat",
+    "ro": "Greșit și saturat"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 10",
+    "ro": "Cursul 4 · slide 10"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04a-e05",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Ținta este t = 1, dar neuronul are z = −6, deci y = 0,0025: este foarte greșit. Calculează gradientul MSE dC/dw (x = 1).",
+      "ro": "Ținta este t = 1, dar neuronul are z = −6, deci y = 0,0025: este foarte greșit. Calculează gradientul MSE dC/dw (x = 1)."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "Gradientul dC/dw",
+        "ro": "Gradientul dC/dw"
+       },
+       "kind": "num",
+       "formula": "((1/(1+exp(-(-6))))-1)*(1/(1+exp(-(-6))))*(1-(1/(1+exp(-(-6)))))*1",
+       "expected": -0.0025,
+       "tol": 0.0002
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "(1/(1+exp(-(-6))))-1",
+       "message": {
+        "en": "Ai luat doar eroarea y − t. Lipsește panta sigmoidei y(1 − y), care aici este aproape 0.",
+        "ro": "Ai luat doar eroarea y − t. Lipsește panta sigmoidei y(1 − y), care aici este aproape 0."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Aceiași trei factori, cu t = 1.",
+       "ro": "Aceiași trei factori, cu t = 1."
+      },
+      {
+       "en": "(y − 1) · y(1 − y) · 1 cu y = 0,0025",
+       "ro": "(y − 1) · y(1 − y) · 1 cu y = 0,0025"
+      },
+      {
+       "en": "−0,9975 · 0,0025 ≈ −0,0025",
+       "ro": "−0,9975 · 0,0025 ≈ −0,0025"
+      }
+     ],
+     "solution": {
+      "en": "Eroarea este −0,9975, aproape maximă, dar panta sigmoidei este 0,0025. Gradientul iese −0,0025: neuronul abia se mișcă.",
+      "ro": "Eroarea este −0,9975, aproape maximă, dar panta sigmoidei este 0,0025. Gradientul iese −0,0025: neuronul abia se mișcă."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același caz pentru z = −4, t = 1, deci y = 0,0180. Calculează dC/dw (x = 1).",
+        "ro": "Același caz pentru z = −4, t = 1, deci y = 0,0180. Calculează dC/dw (x = 1)."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "((1/(1+exp(-(-4))))-1)*(1/(1+exp(-(-4))))*(1-(1/(1+exp(-(-4)))))*1",
+         "expected": -0.0173,
+         "tol": 0.0002
+        }
+       ],
+       "solution": {
+        "en": "−0,0173",
+        "ro": "−0,0173"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s17",
+   "title": {
+    "en": "Câți pași până la 0,5?",
+    "ro": "Câți pași până la 0,5?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 8-9",
+    "ro": "Cursul 4 · slide 8-9"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cursul nu dă numere de simulare. Le-am calculat noi: w și b se mișcă amândouă cu η = 0,5, de la pornirea 1 și de la pornirea 2, până când y scade sub 0,5.",
+        "ro": "Cursul nu dă numere de simulare. Le-am calculat noi: w și b se mișcă amândouă cu η = 0,5, de la pornirea 1 și de la pornirea 2, până când y scade sub 0,5."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Pornirea",
+         "Pași cu MSE"
+        ],
+        "rows": [
+         [
+          "1 (y = 0,8176)",
+          "11"
+         ],
+         [
+          "2 (y = 0,9820)",
+          "71"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Cifre calculate de noi, nu din slide-uri.",
+        "ro": "Cifre calculate de noi, nu din slide-uri."
+       }
+      },
+      {
+       "text": {
+        "en": "Pornirea 2 are nevoie de 71 pași, față de 11: de peste 6 ori mai mulți.",
+        "ro": "Pornirea 2 are nevoie de 71 pași, față de 11: de peste 6 ori mai mulți."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s18",
+   "title": {
+    "en": "La fel pentru bias",
+    "ro": "La fel pentru bias"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 9",
+    "ro": "Cursul 4 · slide 9"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Același calcul pentru bias: dC/db = (y − t) · σ′(z).",
+      "ro": "Același calcul pentru bias: dC/db = (y − t) · σ′(z)."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Pentru bias, z = w·x + b crește cu 1 când b crește cu 1, deci dz/db = 1 și dispare intrarea x. Factorul σ′(z) rămâne, deci biasul învață la fel de încet.",
+        "ro": "Pentru bias, z = w·x + b crește cu 1 când b crește cu 1, deci dz/db = 1 și dispare intrarea x. Factorul σ′(z) rămâne, deci biasul învață la fel de încet."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s19",
+   "title": {
+    "en": "Regula din cursul 3, cu sigmoidă",
+    "ro": "Regula din cursul 3, cu sigmoidă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 4, 6",
+    "ro": "Cursul 4 · slide 4, 6"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Fără sigmoidă (clasificatorul liniar), regula de actualizare este:",
+        "ro": "Fără sigmoidă (clasificatorul liniar), regula de actualizare este:"
+       }
+      },
+      {
+       "tex": "w \\leftarrow w + \\frac{\\eta}{n}\\sum_x (t_x - y_x)\\,x"
+      },
+      {
+       "text": {
+        "en": "Aici η este rata de învățare, n numărul de exemple, tₓ ținta exemplului x, yₓ ieșirea lui. Cu sigmoidă apare un factor în plus:",
+        "ro": "Aici η este rata de învățare, n numărul de exemple, tₓ ținta exemplului x, yₓ ieșirea lui. Cu sigmoidă apare un factor în plus:"
+       }
+      },
+      {
+       "tex": "w \\leftarrow w + \\frac{\\eta}{n}\\sum_x (t_x - y_x)\\,y_x(1 - y_x)\\,x"
+      },
+      {
+       "note": {
+        "en": "În slide, la bias apare un η în plus în sumă, iar derivata sigmoidei este scrisă cu un prim în plus. Amândouă sunt greșeli de scriere ale slide-ului.",
+        "ro": "În slide, la bias apare un η în plus în sumă, iar derivata sigmoidei este scrisă cu un prim în plus. Amândouă sunt greșeli de scriere ale slide-ului."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s20",
+   "title": {
+    "en": "Ce vrem de la costul nou",
+    "ro": "Ce vrem de la costul nou"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 11",
+    "ro": "Cursul 4 · slide 11"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Vrem un cost a cărui derivată să nu mai conțină σ′(z).",
+      "ro": "Vrem un cost a cărui derivată să nu mai conțină σ′(z)."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Atunci gradientul rămâne mare când eroarea este mare, chiar dacă sigmoida e plată. Acest cost există și se numește entropie încrucișată (cross-entropy). Îl construim în lecția următoare.",
+        "ro": "Atunci gradientul rămâne mare când eroarea este mare, chiar dacă sigmoida e plată. Acest cost există și se numește entropie încrucișată (cross-entropy). Îl construim în lecția următoare."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s21",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 3-10",
+    "ro": "Cursul 4 · slide 3-10"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Cu MSE și sigmoidă, dC/dw = (y − t) · y(1 − y) · x.",
+         "ro": "Cu MSE și sigmoidă, dC/dw = (y − t) · y(1 − y) · x."
+        },
+        {
+         "en": "Eroare mai mare nu înseamnă gradient mai mare: 0,9820 dă 0,0173, iar 0,8176 dă 0,1219.",
+         "ro": "Eroare mai mare nu înseamnă gradient mai mare: 0,9820 dă 0,0173, iar 0,8176 dă 0,1219."
+        },
+        {
+         "en": "Când z este mare, sigmoida e plată, σ′(z) este aproape 0 și învățarea se oprește.",
+         "ro": "Când z este mare, sigmoida e plată, σ′(z) este aproape 0 și învățarea se oprește."
+        },
+        {
+         "en": "Vrem un cost fără factorul σ′(z).",
+         "ro": "Vrem un cost fără factorul σ′(z)."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s22",
+   "title": {
+    "en": "Mini-test: gradientul pentru z = 2",
+    "ro": "Mini-test: gradientul pentru z = 2"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04a-e06",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Neuron cu x = 1, t = 0, z = 2, deci y = 0,8808. Calculează gradientul MSE dC/dw.",
+      "ro": "Neuron cu x = 1, t = 0, z = 2, deci y = 0,8808. Calculează gradientul MSE dC/dw."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "Gradientul dC/dw",
+        "ro": "Gradientul dC/dw"
+       },
+       "kind": "num",
+       "formula": "((1/(1+exp(-(2)))))*(1/(1+exp(-(2))))*(1-(1/(1+exp(-(2)))))*1",
+       "expected": 0.0925,
+       "tol": 0.0002
+      }
+     ],
+     "detectors": [
+      {
+       "field": "g",
+       "formula": "0.8808",
+       "message": {
+        "en": "Ai luat doar eroarea y − t. Lipsește panta sigmoidei.",
+        "ro": "Ai luat doar eroarea y − t. Lipsește panta sigmoidei."
+       }
+      },
+      {
+       "field": "g",
+       "formula": "0.105",
+       "message": {
+        "en": "Ai calculat doar panta sigmoidei y(1 − y). Lipsește eroarea y − t.",
+        "ro": "Ai calculat doar panta sigmoidei y(1 − y). Lipsește eroarea y − t."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "y − t, y(1 − y) și x.",
+       "ro": "y − t, y(1 − y) și x."
+      },
+      {
+       "en": "0,8808 · 0,1050 · 1",
+       "ro": "0,8808 · 0,1050 · 1"
+      },
+      {
+       "en": "0,0925",
+       "ro": "0,0925"
+      }
+     ],
+     "solution": {
+      "en": "σ′(2) = 0,1050, apoi 0,8808 · 0,1050 = 0,0925.",
+      "ro": "σ′(2) = 0,1050, apoi 0,8808 · 0,1050 = 0,0925."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același calcul pentru z = 1, deci y = 0,7311.",
+        "ro": "Același calcul pentru z = 1, deci y = 0,7311."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "((1/(1+exp(-(1)))))*(1/(1+exp(-(1))))*(1-(1/(1+exp(-(1)))))*1",
+         "expected": 0.1437,
+         "tol": 0.0002
+        }
+       ],
+       "solution": {
+        "en": "0,1437",
+        "ro": "0,1437"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s23",
+   "title": {
+    "en": "Mini-test: z = 6 cu MSE",
+    "ro": "Mini-test: z = 6 cu MSE"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04a-q07",
+     "question": {
+      "en": "Ținta este t = 0 și neuronul are z = 6 (y = 0,9975). Ce face un pas MSE?",
+      "ro": "Ținta este t = 0 și neuronul are z = 6 (y = 0,9975). Ce face un pas MSE?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Aproape nimic: gradientul este 0,0025",
+        "ro": "Aproape nimic: gradientul este 0,0025"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: y − t este aproape 1, dar σ′(6) este 0,0025.",
+        "ro": "Corect: y − t este aproape 1, dar σ′(6) este 0,0025."
+       }
+      },
+      {
+       "text": {
+        "en": "Un pas mare, pentru că eroarea este mare",
+        "ro": "Un pas mare, pentru că eroarea este mare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Eroarea este mare, dar factorul σ′(z) o anulează aproape complet.",
+        "ro": "Eroarea este mare, dar factorul σ′(z) o anulează aproape complet."
+       },
+       "misconception": "eroare-mare-pas-mare"
+      },
+      {
+       "text": {
+        "en": "Pas exact 0",
+        "ro": "Pas exact 0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Gradientul este foarte mic, dar nu exact 0.",
+        "ro": "Gradientul este foarte mic, dar nu exact 0."
+       },
+       "misconception": "gradient-zero-exact"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04a-s24",
+   "title": {
+    "en": "Mini-test: de ce este lent",
+    "ro": "Mini-test: de ce este lent"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04a-q08",
+     "question": {
+      "en": "De ce învață încet un neuron sigmoid cu MSE când greșește tare?",
+      "ro": "De ce învață încet un neuron sigmoid cu MSE când greșește tare?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Gradientul conține σ′(z), care este aproape 0 când sigmoida e saturată",
+        "ro": "Gradientul conține σ′(z), care este aproape 0 când sigmoida e saturată"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect.",
+        "ro": "Corect."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că eroarea y − t este aproape 0",
+        "ro": "Pentru că eroarea y − t este aproape 0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Eroarea este mare, aproape 1. Problema este factorul σ′(z).",
+        "ro": "Eroarea este mare, aproape 1. Problema este factorul σ′(z)."
+       },
+       "misconception": "factorul-gresit-vinovat"
+      },
+      {
+       "text": {
+        "en": "Pentru că x este prea mic",
+        "ro": "Pentru că x este prea mic"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Aici x = 1. Intrarea nu explică diferența dintre cele două porniri.",
+        "ro": "Aici x = 1. Intrarea nu explică diferența dintre cele două porniri."
+       },
+       "misconception": "factorul-gresit-vinovat"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

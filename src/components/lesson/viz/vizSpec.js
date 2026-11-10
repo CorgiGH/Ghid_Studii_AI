@@ -6,6 +6,7 @@ import { pmfCdf } from './logic/ml/pmf-cdf.js';
 import { jointTable } from './logic/ml/joint-table.js';
 import { entropyBars } from './logic/ml/entropy-bars.js';
 import { gameTree } from './logic/game-tree.js';
+import { nnNet } from './logic/nn-net.js';
 import { payoffMatrix } from './logic/payoff-matrix.js';
 import { ALL_MODES, graphProblems } from './logic/graph/index.js';
 import { nbProblems } from './logic/ml/nb.js';
@@ -72,6 +73,7 @@ const SPEC = {
   'self-pairs': { table: isStr, pairOn: isStr, order: oneOf('<>', '<') },
   'all-vs-some': { studentsFrom: isStr, condition: isStr, showMinusByName: (v) => typeof v === 'boolean' },
   'game-tree': { mode: oneOf('minimax', 'alphabeta'), root: oneOf('MIN', 'MAX'), rootLabel: optional(isBi), tree: isGameNode },
+  'nn-net': { layers: isArr, inputs: isArr, weights: (v) => !!v && typeof v === 'object' && !Array.isArray(v), target: isArr, eta: isNum, values: oneOf('sheet', 'exact'), out: optional(oneOf('sigmoid', 'softmax')), loss: optional(oneOf('ce', 'mse')), act: optional(oneOf('sigmoid')), biases: optional((v) => !!v && typeof v === 'object' && !Array.isArray(v)), layout: optional(oneOf('bottom-up')), edgeLabels: optional(oneOf('all', 'active')) },
   'payoff-matrix': { mode: oneOf('nash', 'dominance'), players: (v) => !!v && isStr(v.row) && isStr(v.col), rows: strs, cols: strs, payoffs: isPayoffs, compare: optional((v) => strs(v) && v.length === 2) },
   'ml-omega': { outcomes: (v) => isArr(v) && v.every((x) => isStr(x) || isNum(x)), events: (v) => !!v && typeof v === 'object' && Array.isArray(v.A) && Array.isArray(v.B), restrictTo: optional(oneOf('A', 'B')) },
   'ml-freq-tree': { population: isNum, prior: isNum, sens: isNum, fpr: isNum, labels: (v) => !!v && typeof v === 'object', feminine: optional((v) => typeof v === 'boolean') },
@@ -157,6 +159,9 @@ export function validateViz(block) {
   }
   if (w === 'game-tree' && errs.length === 0) {
     try { gameTree(props); } catch (e) { errs.push(`viz (game-tree): ${e.message}`); }
+  }
+  if (w === 'nn-net' && errs.length === 0) {
+    try { nnNet(props); } catch (e) { errs.push(`viz (nn-net): ${e.message}`); }
   }
   if (w === 'payoff-matrix' && errs.length === 0) {
     try { payoffMatrix(props); } catch (e) { errs.push(`viz (payoff-matrix): ${e.message}`); }

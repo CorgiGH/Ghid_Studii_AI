@@ -1,0 +1,2322 @@
+{
+ "meta": {
+  "id": "nn-l04g",
+  "title": {
+   "en": "Lesson 4g: Backprop on numbers, the lab sheet and new nets",
+   "ro": "Lecția 4g: Backprop pe numere, foaia de laborator și rețele noi"
+  },
+  "shortTitle": {
+   "en": "L4g: Backprop on numbers",
+   "ro": "L4g: Backprop pe numere"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l04g-s01",
+   "title": {
+    "en": "Rețeaua din foaie",
+    "ro": "Rețeaua din foaie"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Foaia de laborator are o rețea cu două intrări (2 și 6), două neuroni ascunși și o ieșire. Ținta este t = 0, fără bias, cu sigmoidă, entropie încrucișată și η = 0,5.",
+        "ro": "Foaia de laborator are o rețea cu două intrări (2 și 6), două neuroni ascunși și o ieșire. Ținta este t = 0, fără bias, cu sigmoidă, entropie încrucișată și η = 0,5."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 276'><title>Rețeaua din foaie</title><line class='muted' stroke-width='1.8' x1='110' y1='218' x2='110' y2='146'/><line class='muted' stroke-width='1.8' x1='110' y1='218' x2='230' y2='146'/><line class='muted' stroke-width='1.8' x1='230' y1='218' x2='110' y2='146'/><line class='muted' stroke-width='1.8' x1='230' y1='218' x2='230' y2='146'/><line class='muted' stroke-width='1.8' x1='110' y1='110' x2='170' y2='46'/><line class='muted' stroke-width='1.8' x1='230' y1='110' x2='170' y2='46'/><text class='accent' font-size='14' font-weight='700' x='126' y='182' text-anchor='middle'>−3</text><text class='accent' font-size='14' font-weight='700' x='150.4' y='202.2' text-anchor='middle'>6</text><text class='accent' font-size='14' font-weight='700' x='189.6' y='202.2' text-anchor='middle'>1</text><text class='accent' font-size='14' font-weight='700' x='246' y='182' text-anchor='middle'>−2</text><text class='accent' font-size='14' font-weight='700' x='149.2' y='83.1' text-anchor='middle'>8</text><text class='accent' font-size='14' font-weight='700' x='190.8' y='83.1' text-anchor='middle'>4</text><circle class='fg fill-bg' stroke-width='2' cx='110' cy='236' r='18'><title>neuronul 1 al stratului 1</title></circle><text class='fg' font-size='15' font-weight='700' x='110' y='241' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='230' cy='236' r='18'><title>neuronul 2 al stratului 1</title></circle><text class='fg' font-size='15' font-weight='700' x='230' y='241' text-anchor='middle'>6</text><circle class='fg fill-bg' stroke-width='2' cx='110' cy='128' r='18'><title>neuronul 1 al stratului 2</title></circle><text class='fg' font-size='15' font-weight='700' x='110' y='133' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='230' cy='128' r='18'><title>neuronul 2 al stratului 2</title></circle><text class='fg' font-size='15' font-weight='700' x='230' y='133' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='170' cy='28' r='18'><title>neuronul 1 al stratului 3</title></circle><text class='fg' font-size='15' font-weight='700' x='170' y='33' text-anchor='middle'>1</text><text class='fg' font-size='14' x='8' y='241' text-anchor='middle'></text><text class='fg' font-size='14' x='8' y='133' text-anchor='middle'></text><text class='fg' font-size='14' x='8' y='33' text-anchor='middle'></text><text class='muted' font-size='14' x='332' y='241' text-anchor='end'>strat 1</text><text class='muted' font-size='14' x='332' y='133' text-anchor='end'>strat 2</text><text class='muted' font-size='14' x='332' y='33' text-anchor='end'>strat 3</text></svg>",
+        "alt": {
+         "en": "Rețea 2-2-1 desenată de jos în sus: intrările 2 și 6, ponderile −3, 6, 1, −2 spre stratul 2 și 8, 4 spre ieșire",
+         "ro": "Rețea 2-2-1 desenată de jos în sus: intrările 2 și 6, ponderile −3, 6, 1, −2 spre stratul 2 și 8, 4 spre ieșire"
+        },
+        "caption": {
+         "en": "Straturile cresc în sus, ca în foaie.",
+         "ro": "Straturile cresc în sus, ca în foaie."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s02",
+   "title": {
+    "en": "Cum numim ponderile",
+    "ro": "Cum numim ponderile"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "weights[l][i][j] = wˡᵢⱼ este ponderea de la neuronul i al stratului l−1 la neuronul j al stratului l.",
+        "ro": "weights[l][i][j] = wˡᵢⱼ este ponderea de la neuronul i al stratului l−1 la neuronul j al stratului l."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Pondere",
+         "De la",
+         "La",
+         "Valoare"
+        ],
+        "rows": [
+         [
+          "w²₁₁",
+          "intrarea 1",
+          "neuron 1",
+          "−3"
+         ],
+         [
+          "w²₁₂",
+          "intrarea 1",
+          "neuron 2",
+          "6"
+         ],
+         [
+          "w²₂₁",
+          "intrarea 2",
+          "neuron 1",
+          "1"
+         ],
+         [
+          "w²₂₂",
+          "intrarea 2",
+          "neuron 2",
+          "−2"
+         ],
+         [
+          "w³₁₁",
+          "neuron 1",
+          "ieșire",
+          "8"
+         ],
+         [
+          "w³₂₁",
+          "neuron 2",
+          "ieșire",
+          "4"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s03",
+   "title": {
+    "en": "σ din grafic și σ exact",
+    "ro": "σ din grafic și σ exact"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Foaia citește σ de pe grafic, cu o zecimală: σ(0) = 0,5 și σ(6) = 1. Valoarea exactă este σ(6) = 0,9975.",
+      "ro": "Foaia citește σ de pe grafic, cu o zecimală: σ(0) = 0,5 și σ(6) = 1. Valoarea exactă este σ(6) = 0,9975."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Rețeaua de mai jos are două moduri. „Foaie” folosește cifrele foii, ca să vezi aceleași numere ca la laborator. „Exact” folosește σ adevărat. Un colț al desenului spune mereu care mod este pornit.",
+        "ro": "Rețeaua de mai jos are două moduri. „Foaie” folosește cifrele foii, ca să vezi aceleași numere ca la laborator. „Exact” folosește σ adevărat. Un colț al desenului spune mereu care mod este pornit."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s04",
+   "title": {
+    "en": "Plimbarea completă, cu valorile foii",
+    "ro": "Plimbarea completă, cu valorile foii"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "viz",
+     "id": "nn-l04g-v01",
+     "widget": "nn-net",
+     "predict": true,
+     "props": {
+      "layers": [
+       2,
+       2,
+       1
+      ],
+      "inputs": [
+       2,
+       6
+      ],
+      "weights": {
+       "2": [
+        [
+         -3,
+         6
+        ],
+        [
+         1,
+         -2
+        ]
+       ],
+       "3": [
+        [
+         8
+        ],
+        [
+         4
+        ]
+       ]
+      },
+      "target": [
+       0
+      ],
+      "act": "sigmoid",
+      "out": "sigmoid",
+      "eta": 0.5,
+      "values": "sheet",
+      "layout": "bottom-up"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s05",
+   "title": {
+    "en": "Noile ponderi",
+    "ro": "Noile ponderi"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "După plimbare, cele șase ponderi sunt:",
+        "ro": "După plimbare, cele șase ponderi sunt:"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Pondere",
+         "veche",
+         "nouă"
+        ],
+        "rows": [
+         [
+          "w³₁₁",
+          "8",
+          "7,75"
+         ],
+         [
+          "w³₂₁",
+          "4",
+          "3,75"
+         ],
+         [
+          "w²₁₁",
+          "−3",
+          "−5"
+         ],
+         [
+          "w²₁₂",
+          "6",
+          "5"
+         ],
+         [
+          "w²₂₁",
+          "1",
+          "−5"
+         ],
+         [
+          "w²₂₂",
+          "−2",
+          "−5"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Acestea sunt răspunsurile foii: 7,75; 3,75; −5; 5; −5; −5.",
+        "ro": "Acestea sunt răspunsurile foii: 7,75; 3,75; −5; 5; −5; −5."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s06",
+   "title": {
+    "en": "Calculează noul w²₁₁",
+    "ro": "Calculează noul w²₁₁"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04g-e01",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Neuronul 1 din stratul 2 are δ = 2, iar intrarea lui 1 este 2. Calculează gradientul dC/dw²₁₁ = δ · x₁, apoi noul w²₁₁ cu η = 0,5, plecând de la −3.",
+      "ro": "Neuronul 1 din stratul 2 are δ = 2, iar intrarea lui 1 este 2. Calculează gradientul dC/dw²₁₁ = δ · x₁, apoi noul w²₁₁ cu η = 0,5, plecând de la −3."
+     },
+     "fields": [
+      {
+       "id": "g",
+       "label": {
+        "en": "gradient",
+        "ro": "gradient"
+       },
+       "kind": "num",
+       "formula": "2*2",
+       "expected": 4
+      },
+      {
+       "id": "w",
+       "label": {
+        "en": "w²₁₁ nou",
+        "ro": "w²₁₁ nou"
+       },
+       "kind": "num",
+       "formula": "-3-0.5*2*2",
+       "expected": -5
+      }
+     ],
+     "detectors": [
+      {
+       "field": "w",
+       "formula": "-3+0.5*2*2",
+       "message": {
+        "en": "Ai adunat. Gradientul se scade.",
+        "ro": "Ai adunat. Gradientul se scade."
+       }
+      },
+      {
+       "field": "w",
+       "formula": "-3-0.5*2",
+       "message": {
+        "en": "Ai uitat intrarea x₁ = 2 din gradient.",
+        "ro": "Ai uitat intrarea x₁ = 2 din gradient."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Gradient = δ ori intrarea.",
+       "ro": "Gradient = δ ori intrarea."
+      },
+      {
+       "en": "2 · 2 = 4",
+       "ro": "2 · 2 = 4"
+      },
+      {
+       "en": "−3 − 0,5 · 4 = −5",
+       "ro": "−3 − 0,5 · 4 = −5"
+      }
+     ],
+     "solution": {
+      "en": "Gradient 4; w²₁₁ nou = −3 − 0,5 · 4 = −5.",
+      "ro": "Gradient 4; w²₁₁ nou = −3 − 0,5 · 4 = −5."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Neuronul 2 din stratul 2: δ = 1, intrarea 2 este 6. Calculează gradientul dC/dw²₂₂ și noul w²₂₂ (de la −2).",
+        "ro": "Neuronul 2 din stratul 2: δ = 1, intrarea 2 este 6. Calculează gradientul dC/dw²₂₂ și noul w²₂₂ (de la −2)."
+       },
+       "fields": [
+        {
+         "id": "g",
+         "formula": "1*6",
+         "expected": 6
+        },
+        {
+         "id": "w",
+         "formula": "-2-0.5*1*6",
+         "expected": -5
+        }
+       ],
+       "solution": {
+        "en": "6 și −5",
+        "ro": "6 și −5"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s07",
+   "title": {
+    "en": "De ce 8 și nu 7,75",
+    "ro": "De ce 8 și nu 7,75"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04g-q02",
+     "question": {
+      "en": "Ponderea de ieșire w³₁₁ devine 7,75 în actualizare. Care este δ²₁ al neuronului ascuns 1?",
+      "ro": "Ponderea de ieșire w³₁₁ devine 7,75 în actualizare. Care este δ²₁ al neuronului ascuns 1?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "2: se calculează cu w³₁₁ = 8, cea veche",
+        "ro": "2: se calculează cu w³₁₁ = 8, cea veche"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: 0,5 · 0,5 · 1 · 8 = 2.",
+        "ro": "Corect: 0,5 · 0,5 · 1 · 8 = 2."
+       }
+      },
+      {
+       "text": {
+        "en": "1,9375: cu w³₁₁ = 7,75",
+        "ro": "1,9375: cu w³₁₁ = 7,75"
+       },
+       "correct": false,
+       "explain": {
+        "en": "0,25 · 7,75 = 1,9375, dar 7,75 nu exista încă la calculul lui δ. Toate erorile se calculează înainte de orice actualizare.",
+        "ro": "0,25 · 7,75 = 1,9375, dar 7,75 nu exista încă la calculul lui δ. Toate erorile se calculează înainte de orice actualizare."
+       },
+       "misconception": "pondere-noua-in-delta"
+      },
+      {
+       "text": {
+        "en": "0,25, fără pondere",
+        "ro": "0,25, fără pondere"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ai uitat ponderea w·δ.",
+        "ro": "Ai uitat ponderea w·δ."
+       },
+       "misconception": "factor-sigmoid-pastrat"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s08",
+   "title": {
+    "en": "Greșeala din foaie",
+    "ro": "Greșeala din foaie"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "La pasul 2c, foaia scrie δ₁² pe linia lui w₁₂², dar acolo trebuie δ₂²: ponderea w₁₂² intră în neuronul 2.",
+        "ro": "La pasul 2c, foaia scrie δ₁² pe linia lui w₁₂², dar acolo trebuie δ₂²: ponderea w₁₂² intră în neuronul 2."
+       }
+      },
+      {
+       "text": {
+        "en": "Regula: ponderea wᵢⱼ ia δ-ul neuronului în care intră (j), nu pe cel din care pleacă.",
+        "ro": "Regula: ponderea wᵢⱼ ia δ-ul neuronului în care intră (j), nu pe cel din care pleacă."
+       }
+      },
+      {
+       "note": {
+        "en": "Mai sunt mici greșeli de scriere în foaie („weihts”, „between between”, „Adust”); nu schimbă calculele.",
+        "ro": "Mai sunt mici greșeli de scriere în foaie („weihts”, „between between”, „Adust”); nu schimbă calculele."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s09",
+   "title": {
+    "en": "Aceeași plimbare, cu σ exact",
+    "ro": "Aceeași plimbare, cu σ exact"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "viz",
+     "id": "nn-l04g-v02",
+     "widget": "nn-net",
+     "predict": true,
+     "props": {
+      "layers": [
+       2,
+       2,
+       1
+      ],
+      "inputs": [
+       2,
+       6
+      ],
+      "weights": {
+       "2": [
+        [
+         -3,
+         6
+        ],
+        [
+         1,
+         -2
+        ]
+       ],
+       "3": [
+        [
+         8
+        ],
+        [
+         4
+        ]
+       ]
+      },
+      "target": [
+       0
+      ],
+      "act": "sigmoid",
+      "out": "sigmoid",
+      "eta": 0.5,
+      "values": "exact",
+      "layout": "bottom-up"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s10",
+   "title": {
+    "en": "Ce s-a schimbat",
+    "ro": "Ce s-a schimbat"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Cu σ(6) = 0,9975 în loc de 1, rezultatele diferă puțin:",
+        "ro": "Cu σ(6) = 0,9975 în loc de 1, rezultatele diferă puțin:"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Pondere",
+         "foaie",
+         "exact"
+        ],
+        "rows": [
+         [
+          "w³₁₁",
+          "7,75",
+          "7,7506"
+         ],
+         [
+          "w³₂₁",
+          "3,75",
+          "3,7506"
+         ],
+         [
+          "w²₁₁",
+          "−5",
+          "−4,9951"
+         ],
+         [
+          "w²₁₂",
+          "5",
+          "5,0025"
+         ],
+         [
+          "w²₂₁",
+          "−5",
+          "−4,9852"
+         ],
+         [
+          "w²₂₂",
+          "−5",
+          "−4,9926"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Răspunsul de laborator este cel din foaie, rotunjit.",
+        "ro": "Răspunsul de laborator este cel din foaie, rotunjit."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s11",
+   "title": {
+    "en": "Dacă ținta ar fi 1",
+    "ro": "Dacă ținta ar fi 1"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04g-q03",
+     "question": {
+      "en": "Aceeași rețea, dar ținta este t = 1. În modul foii (y = 1), ce se întâmplă cu ponderile?",
+      "ro": "Aceeași rețea, dar ținta este t = 1. În modul foii (y = 1), ce se întâmplă cu ponderile?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Nu se schimbă niciuna: y − t = 0",
+        "ro": "Nu se schimbă niciuna: y − t = 0"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect. Cu σ exact δ³ = −0,0025: foarte mic, semn opus, iar w³₁₁ devine 8,0006.",
+        "ro": "Corect. Cu σ exact δ³ = −0,0025: foarte mic, semn opus, iar w³₁₁ devine 8,0006."
+       }
+      },
+      {
+       "text": {
+        "en": "Cresc toate cu 0,5",
+        "ro": "Cresc toate cu 0,5"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pasul depinde de δ, iar δ = 0 când y = t.",
+        "ro": "Pasul depinde de δ, iar δ = 0 când y = t."
+       },
+       "misconception": "gradient-zero-exact"
+      },
+      {
+       "text": {
+        "en": "Se schimbă ca la t = 0, dar cu semn opus",
+        "ro": "Se schimbă ca la t = 0, dar cu semn opus"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ar fi adevărat dacă y ar fi 0, nu 1. Aici y = t.",
+        "ro": "Ar fi adevărat dacă y ar fi 0, nu 1. Aici y = t."
+       },
+       "misconception": "semn-gresit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s12",
+   "title": {
+    "en": "Aceeași rețea cu MSE",
+    "ro": "Aceeași rețea cu MSE"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "viz",
+     "id": "nn-l04g-v03",
+     "widget": "nn-net",
+     "predict": true,
+     "props": {
+      "layers": [
+       2,
+       2,
+       1
+      ],
+      "inputs": [
+       2,
+       6
+      ],
+      "weights": {
+       "2": [
+        [
+         -3,
+         6
+        ],
+        [
+         1,
+         -2
+        ]
+       ],
+       "3": [
+        [
+         8
+        ],
+        [
+         4
+        ]
+       ]
+      },
+      "target": [
+       0
+      ],
+      "act": "sigmoid",
+      "out": "sigmoid",
+      "eta": 0.5,
+      "values": "exact",
+      "layout": "bottom-up",
+      "loss": "mse"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s13",
+   "title": {
+    "en": "Ce arată asta",
+    "ro": "Ce arată asta"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Cu MSE și y aproape 1, actualizarea aproape dispare: 8 devine 7,9994, nu 7,75.",
+      "ro": "Cu MSE și y aproape 1, actualizarea aproape dispare: 8 devine 7,9994, nu 7,75."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Neuronul de ieșire este saturat: σ′ ≈ 0. Entropia încrucișată elimină acest factor (lecția 4a), așa încât 8 devine 7,7506.",
+        "ro": "Neuronul de ieșire este saturat: σ′ ≈ 0. Entropia încrucișată elimină acest factor (lecția 4a), așa încât 8 devine 7,7506."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s14",
+   "title": {
+    "en": "O rețea nouă",
+    "ro": "O rețea nouă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Aceeași formă 2-2-1, alte numere (ale noastre, nu din curs). Intrările sunt (1, 2), ținta t = 1, η = 0,5. Rotunjim la 4 zecimale.",
+        "ro": "Aceeași formă 2-2-1, alte numere (ale noastre, nu din curs). Intrările sunt (1, 2), ținta t = 1, η = 0,5. Rotunjim la 4 zecimale."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 276'><title>Rețeaua B</title><line class='muted' stroke-width='1.8' x1='110' y1='218' x2='110' y2='146'/><line class='muted' stroke-width='1.8' x1='110' y1='218' x2='230' y2='146'/><line class='muted' stroke-width='1.8' x1='230' y1='218' x2='110' y2='146'/><line class='muted' stroke-width='1.8' x1='230' y1='218' x2='230' y2='146'/><line class='muted' stroke-width='1.8' x1='110' y1='110' x2='170' y2='46'/><line class='muted' stroke-width='1.8' x1='230' y1='110' x2='170' y2='46'/><text class='accent' font-size='14' font-weight='700' x='126' y='182' text-anchor='middle'>0,5</text><text class='accent' font-size='14' font-weight='700' x='150.4' y='202.2' text-anchor='middle'>−1</text><text class='accent' font-size='14' font-weight='700' x='189.6' y='202.2' text-anchor='middle'>1</text><text class='accent' font-size='14' font-weight='700' x='246' y='182' text-anchor='middle'>0,5</text><text class='accent' font-size='14' font-weight='700' x='149.2' y='83.1' text-anchor='middle'>1</text><text class='accent' font-size='14' font-weight='700' x='190.8' y='83.1' text-anchor='middle'>−1</text><circle class='fg fill-bg' stroke-width='2' cx='110' cy='236' r='18'><title>neuronul 1 al stratului 1</title></circle><text class='fg' font-size='15' font-weight='700' x='110' y='241' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='230' cy='236' r='18'><title>neuronul 2 al stratului 1</title></circle><text class='fg' font-size='15' font-weight='700' x='230' y='241' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='110' cy='128' r='18'><title>neuronul 1 al stratului 2</title></circle><text class='fg' font-size='15' font-weight='700' x='110' y='133' text-anchor='middle'>1</text><circle class='fg fill-bg' stroke-width='2' cx='230' cy='128' r='18'><title>neuronul 2 al stratului 2</title></circle><text class='fg' font-size='15' font-weight='700' x='230' y='133' text-anchor='middle'>2</text><circle class='fg fill-bg' stroke-width='2' cx='170' cy='28' r='18'><title>neuronul 1 al stratului 3</title></circle><text class='fg' font-size='15' font-weight='700' x='170' y='33' text-anchor='middle'>1</text><text class='fg' font-size='14' x='8' y='241' text-anchor='middle'></text><text class='fg' font-size='14' x='8' y='133' text-anchor='middle'></text><text class='fg' font-size='14' x='8' y='33' text-anchor='middle'></text><text class='muted' font-size='14' x='332' y='241' text-anchor='end'>strat 1</text><text class='muted' font-size='14' x='332' y='133' text-anchor='end'>strat 2</text><text class='muted' font-size='14' x='332' y='33' text-anchor='end'>strat 3</text></svg>",
+        "alt": {
+         "en": "Rețea 2-2-1: intrările 1 și 2, ponderile 0,5; −1; 1; 0,5 spre stratul 2 și 1; −1 spre ieșire",
+         "ro": "Rețea 2-2-1: intrările 1 și 2, ponderile 0,5; −1; 1; 0,5 spre stratul 2 și 1; −1 spre ieșire"
+        },
+        "caption": {
+         "en": "Rețeaua B.",
+         "ro": "Rețeaua B."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s15",
+   "title": {
+    "en": "Plimbare pe rețeaua B, ținta 1",
+    "ro": "Plimbare pe rețeaua B, ținta 1"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "viz",
+     "id": "nn-l04g-v04",
+     "widget": "nn-net",
+     "predict": true,
+     "props": {
+      "layers": [
+       2,
+       2,
+       1
+      ],
+      "inputs": [
+       1,
+       2
+      ],
+      "weights": {
+       "2": [
+        [
+         0.5,
+         -1
+        ],
+        [
+         1,
+         0.5
+        ]
+       ],
+       "3": [
+        [
+         1
+        ],
+        [
+         -1
+        ]
+       ]
+      },
+      "target": [
+       1
+      ],
+      "act": "sigmoid",
+      "out": "sigmoid",
+      "eta": 0.5,
+      "values": "exact",
+      "layout": "bottom-up"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s16",
+   "title": {
+    "en": "Calculează noul w³₁₁",
+    "ro": "Calculează noul w³₁₁"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04g-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "La rețeaua B (t = 1) avem y¹ = 0,9241 (ieșirea neuronului 1 din stratul 2) și δ³ = −0,3955. Calculează noul w³₁₁ = 1 − 0,5 · δ³ · y.",
+      "ro": "La rețeaua B (t = 1) avem y¹ = 0,9241 (ieșirea neuronului 1 din stratul 2) și δ³ = −0,3955. Calculează noul w³₁₁ = 1 − 0,5 · δ³ · y."
+     },
+     "fields": [
+      {
+       "id": "w",
+       "label": {
+        "en": "w³₁₁ nou",
+        "ro": "w³₁₁ nou"
+       },
+       "kind": "num",
+       "formula": "1-0.5*(-0.39552607502046)*0.9241418199787566",
+       "expected": 1.1828
+      }
+     ],
+     "detectors": [
+      {
+       "field": "w",
+       "formula": "1+0.5*(-0.39552607502046)*0.9241418199787566",
+       "message": {
+        "en": "Ai adunat în loc să scazi. δ este negativ, deci scăderea urcă ponderea.",
+        "ro": "Ai adunat în loc să scazi. δ este negativ, deci scăderea urcă ponderea."
+       }
+      },
+      {
+       "field": "w",
+       "formula": "1-0.5*(-0.39552607502046)",
+       "message": {
+        "en": "Ai uitat y din gradient.",
+        "ro": "Ai uitat y din gradient."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "gradient = δ³ · y; w nou = w − η · gradient.",
+       "ro": "gradient = δ³ · y; w nou = w − η · gradient."
+      },
+      {
+       "en": "1 − 0,5 · (−0,3955) · 0,9241",
+       "ro": "1 − 0,5 · (−0,3955) · 0,9241"
+      },
+      {
+       "en": "1,1828",
+       "ro": "1,1828"
+      }
+     ],
+     "solution": {
+      "en": "w³₁₁ nou = 1 − 0,5 · (−0,3955) · 0,9241 = 1,1828.",
+      "ro": "w³₁₁ nou = 1 − 0,5 · (−0,3955) · 0,9241 = 1,1828."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Neuronul 2 din stratul 2 are y = 0,5 și aceeași δ³ = −0,3955. Calculează noul w³₂₁ (de la −1).",
+        "ro": "Neuronul 2 din stratul 2 are y = 0,5 și aceeași δ³ = −0,3955. Calculează noul w³₂₁ (de la −1)."
+       },
+       "fields": [
+        {
+         "id": "w",
+         "formula": "-1-0.5*(-0.39552607502046)*0.5",
+         "expected": -0.9011
+        }
+       ],
+       "solution": {
+        "en": "−0,9011",
+        "ro": "−0,9011"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s17",
+   "title": {
+    "en": "Aceeași rețea, ținta 0",
+    "ro": "Aceeași rețea, ținta 0"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "viz",
+     "id": "nn-l04g-v05",
+     "widget": "nn-net",
+     "predict": true,
+     "props": {
+      "layers": [
+       2,
+       2,
+       1
+      ],
+      "inputs": [
+       1,
+       2
+      ],
+      "weights": {
+       "2": [
+        [
+         0.5,
+         -1
+        ],
+        [
+         1,
+         0.5
+        ]
+       ],
+       "3": [
+        [
+         1
+        ],
+        [
+         -1
+        ]
+       ]
+      },
+      "target": [
+       0
+      ],
+      "act": "sigmoid",
+      "out": "sigmoid",
+      "eta": 0.5,
+      "values": "exact",
+      "layout": "bottom-up"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s18",
+   "title": {
+    "en": "Ce semn au gradienții",
+    "ro": "Ce semn au gradienții"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04g-q05",
+     "question": {
+      "en": "La rețeaua B, ținta 1 dă δ³ = −0,3955, ținta 0 dă δ³ = 0,6045. Ce se întâmplă cu semnele erorilor din stratul 2?",
+      "ro": "La rețeaua B, ținta 1 dă δ³ = −0,3955, ținta 0 dă δ³ = 0,6045. Ce se întâmplă cu semnele erorilor din stratul 2?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Se inversează și ele",
+        "ro": "Se inversează și ele"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: δ² = σ′ · w · δ³, iar σ′ și w sunt aceleași; doar δ³ își schimbă semnul. (δ² = −0,0277 față de 0,0424.)",
+        "ro": "Corect: δ² = σ′ · w · δ³, iar σ′ și w sunt aceleași; doar δ³ își schimbă semnul. (δ² = −0,0277 față de 0,0424.)"
+       }
+      },
+      {
+       "text": {
+        "en": "Rămân la fel",
+        "ro": "Rămân la fel"
+       },
+       "correct": false,
+       "explain": {
+        "en": "δ³ apare în formula lui δ²; dacă își schimbă semnul, și δ² și-l schimbă.",
+        "ro": "δ³ apare în formula lui δ²; dacă își schimbă semnul, și δ² și-l schimbă."
+       },
+       "misconception": "semn-gresit"
+      },
+      {
+       "text": {
+        "en": "Devin 0",
+        "ro": "Devin 0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu: ieșirea 0,6045 este departe de ambele ținte.",
+        "ro": "Nu: ieșirea 0,6045 este departe de ambele ținte."
+       },
+       "misconception": "gradient-zero-exact"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s19",
+   "title": {
+    "en": "Softmax la ieșire și bias",
+    "ro": "Softmax la ieșire și bias"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Rețeaua C: două ieșiri cu softmax, biasuri în stratul 2 (0,1; −0,1) și 3 (0; 0), ținta t = (0, 1). Eroarea de ieșire este tot y − t.",
+        "ro": "Rețeaua C: două ieșiri cu softmax, biasuri în stratul 2 (0,1; −0,1) și 3 (0; 0), ținta t = (0, 1). Eroarea de ieșire este tot y − t."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Strat",
+         "Ponderi",
+         "Bias"
+        ],
+        "rows": [
+         [
+          "2",
+          "[0,5; −1], [1; 0,5]",
+          "0,1; −0,1"
+         ],
+         [
+          "3",
+          "[1; −1], [−1; 1]",
+          "0; 0"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s20",
+   "title": {
+    "en": "Plimbare pe rețeaua C",
+    "ro": "Plimbare pe rețeaua C"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "viz",
+     "id": "nn-l04g-v06",
+     "widget": "nn-net",
+     "predict": true,
+     "props": {
+      "layers": [
+       2,
+       2,
+       2
+      ],
+      "inputs": [
+       1,
+       2
+      ],
+      "weights": {
+       "2": [
+        [
+         0.5,
+         -1
+        ],
+        [
+         1,
+         0.5
+        ]
+       ],
+       "3": [
+        [
+         1,
+         -1
+        ],
+        [
+         -1,
+         1
+        ]
+       ]
+      },
+      "biases": {
+       "2": [
+        0.1,
+        -0.1
+       ],
+       "3": [
+        0,
+        0
+       ]
+      },
+      "target": [
+       0,
+       1
+      ],
+      "act": "sigmoid",
+      "out": "softmax",
+      "eta": 0.5,
+      "values": "exact",
+      "layout": "bottom-up"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s21",
+   "title": {
+    "en": "Calculează noul bias",
+    "ro": "Calculează noul bias"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04g-e06",
+     "status": "verified-twice",
+     "statement": {
+      "en": "La rețeaua C, δ³ = (0,7133; −0,7133). Biasul b³₁ este 0. Calculează noul b³₁ = b − η · δ³₁, cu η = 0,5.",
+      "ro": "La rețeaua C, δ³ = (0,7133; −0,7133). Biasul b³₁ este 0. Calculează noul b³₁ = b − η · δ³₁, cu η = 0,5."
+     },
+     "fields": [
+      {
+       "id": "b",
+       "label": {
+        "en": "b³₁ nou",
+        "ro": "b³₁ nou"
+       },
+       "kind": "num",
+       "formula": "0-0.5*0.7133441333951357",
+       "expected": -0.3567
+      }
+     ],
+     "detectors": [
+      {
+       "field": "b",
+       "formula": "0-0.5*0.7133441333951357*0.9308615796566533",
+       "message": {
+        "en": "Ai înmulțit cu y ca la o pondere. Gradientul biasului este chiar δ.",
+        "ro": "Ai înmulțit cu y ca la o pondere. Gradientul biasului este chiar δ."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "dC/db = δ.",
+       "ro": "dC/db = δ."
+      },
+      {
+       "en": "0 − 0,5 · 0,7133",
+       "ro": "0 − 0,5 · 0,7133"
+      },
+      {
+       "en": "−0,3567",
+       "ro": "−0,3567"
+      }
+     ],
+     "solution": {
+      "en": "b³₁ nou = 0 − 0,5 · 0,7133 = −0,3567.",
+      "ro": "b³₁ nou = 0 − 0,5 · 0,7133 = −0,3567."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același caz, pentru b³₂ (δ³₂ = −0,7133).",
+        "ro": "Același caz, pentru b³₂ (δ³₂ = −0,7133)."
+       },
+       "fields": [
+        {
+         "id": "b",
+         "formula": "0-0.5*(-0.7133441333951356)",
+         "expected": 0.3567
+        }
+       ],
+       "solution": {
+        "en": "0,3567",
+        "ro": "0,3567"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s22",
+   "title": {
+    "en": "Gradientul biasului",
+    "ro": "Gradientul biasului"
+   },
+   "kicker": {
+    "en": "Cursul 4 · ale noastre",
+    "ro": "Cursul 4 · ale noastre"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04g-q07",
+     "question": {
+      "en": "Care este gradientul unui bias bˡᵢ?",
+      "ro": "Care este gradientul unui bias bˡᵢ?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "δˡᵢ, eroarea neuronului",
+        "ro": "δˡᵢ, eroarea neuronului"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: z = ... + b, deci dz/db = 1.",
+        "ro": "Corect: z = ... + b, deci dz/db = 1."
+       }
+      },
+      {
+       "text": {
+        "en": "δˡᵢ · yˡ⁻¹",
+        "ro": "δˡᵢ · yˡ⁻¹"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Aceasta e formula unei ponderi; biasul nu are intrare.",
+        "ro": "Aceasta e formula unei ponderi; biasul nu are intrare."
+       },
+       "misconception": "forgot-bias-input"
+      },
+      {
+       "text": {
+        "en": "yˡ⁻¹",
+        "ro": "yˡ⁻¹"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Lipsește δ.",
+        "ro": "Lipsește δ."
+       },
+       "misconception": "forgot-bias-input"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s23",
+   "title": {
+    "en": "Algoritmul în pseudocodul cursului",
+    "ro": "Algoritmul în pseudocodul cursului"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 49",
+    "ro": "Cursul 4 · slide 49"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Slide-urile 49-51 dau algoritmul în pseudocod. Intrarea x are forma (nr_features, 1), ținta t forma (nr_classes, 1). Pentru o rețea 3-4-2, weights are formele (3, 4) și (4, 2).",
+        "ro": "Slide-urile 49-51 dau algoritmul în pseudocod. Intrarea x are forma (nr_features, 1), ținta t forma (nr_classes, 1). Pentru o rețea 3-4-2, weights are formele (3, 4) și (4, 2)."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Listă",
+         "Formă"
+        ],
+        "rows": [
+         [
+          "x",
+          "(3, 1)"
+         ],
+         [
+          "weights[0]",
+          "(3, 4)"
+         ],
+         [
+          "weights[1]",
+          "(4, 2)"
+         ],
+         [
+          "biases",
+          "vectori (4, 1) și (2, 1)"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-ul scrie biases = [h_size0, ..., nr_classes]: sunt mărimi; fiecare bias e un vector coloană.",
+        "ro": "Slide-ul scrie biases = [h_size0, ..., nr_classes]: sunt mărimi; fiecare bias e un vector coloană."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s24",
+   "title": {
+    "en": "Pasul înainte, linie cu linie",
+    "ro": "Pasul înainte, linie cu linie"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 50",
+    "ro": "Cursul 4 · slide 50"
+   },
+   "blocks": [
+    {
+     "type": "code",
+     "language": "python",
+     "code": "activations = [x]\nzs = []\nfor (w, b) in (weights, biases):\n    z = w.T . activations[-1] + b\n    zs.append(z)\n    a = sigmoid(z)\n    activations.append(a)\nactivations[-1] = softmax(zs[-1])"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p1",
+     "claim": {
+      "en": "Ce formă are z pe fiecare iterație a buclei din slide-ul 50?",
+      "ro": "Ce formă are z pe fiecare iterație a buclei din slide-ul 50?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Prima iterație: z = w.T . activations[-1] + b, cu w de forma (3, 4) și activations[-1] = x de forma (3, 1).",
+        "ro": "Prima iterație: z = w.T . activations[-1] + b, cu w de forma (3, 4) și activations[-1] = x de forma (3, 1)."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce formă are z?",
+         "ro": "Ce formă are z?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 1)",
+           "ro": "(4, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: (4, 3) · (3, 1) = (4, 1), plus bias (4, 1).",
+           "ro": "Corect: (4, 3) · (3, 1) = (4, 1), plus bias (4, 1)."
+          }
+         },
+         {
+          "text": {
+           "en": "(3, 4)",
+           "ro": "(3, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e forma lui w. w.T are (4, 3).",
+           "ro": "Aceea e forma lui w. w.T are (4, 3)."
+          },
+          "misconception": "forma-gresita"
+         },
+         {
+          "text": {
+           "en": "(1, 4)",
+           "ro": "(1, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "z e vector coloană, ca x.",
+           "ro": "z e vector coloană, ca x."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "A doua iterație: w de forma (4, 2), activations[-1] de forma (4, 1).",
+        "ro": "A doua iterație: w de forma (4, 2), activations[-1] de forma (4, 1)."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce formă are z?",
+         "ro": "Ce formă are z?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: (2, 4) · (4, 1).",
+           "ro": "Corect: (2, 4) · (4, 1)."
+          }
+         },
+         {
+          "text": {
+           "en": "(4, 2)",
+           "ro": "(4, 2)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e forma lui w.",
+           "ro": "Aceea e forma lui w."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Ultima linie înlocuiește ieșirea sigmoidă cu softmax pe ultimul z: activations[-1] = softmax(zs[-1]).",
+        "ro": "Ultima linie înlocuiește ieșirea sigmoidă cu softmax pe ultimul z: activations[-1] = softmax(zs[-1])."
+       }
+      }
+     ],
+     "end": {
+      "en": "Bucla salvează în zs și în activations tot ce are nevoie pasul înapoi.",
+      "ro": "Bucla salvează în zs și în activations tot ce are nevoie pasul înapoi."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s25",
+   "title": {
+    "en": "Linia cu softmax",
+    "ro": "Linia cu softmax"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 50",
+    "ro": "Cursul 4 · slide 50"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04g-q08",
+     "question": {
+      "en": "Pentru ce există linia activations[-1] = softmax(zs[-1]) după buclă?",
+      "ro": "Pentru ce există linia activations[-1] = softmax(zs[-1]) după buclă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Bucla a pus sigmoidă pe ultimul strat; linia o înlocuiește cu softmax",
+        "ro": "Bucla a pus sigmoidă pe ultimul strat; linia o înlocuiește cu softmax"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: ultimul strat primește softmax, ca în lecția 4d.",
+        "ro": "Corect: ultimul strat primește softmax, ca în lecția 4d."
+       }
+      },
+      {
+       "text": {
+        "en": "Aplică softmax pe toate straturile",
+        "ro": "Aplică softmax pe toate straturile"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Softmax se folosește doar în ultimul strat.",
+        "ro": "Softmax se folosește doar în ultimul strat."
+       },
+       "misconception": "softmax-pe-toate"
+      },
+      {
+       "text": {
+        "en": "Salvează z pentru pasul înapoi",
+        "ro": "Salvează z pentru pasul înapoi"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Asta a făcut zs.append(z) în buclă.",
+        "ro": "Asta a făcut zs.append(z) în buclă."
+       },
+       "misconception": "softmax-pe-toate"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s26",
+   "title": {
+    "en": "Pasul înapoi: ieșirea",
+    "ro": "Pasul înapoi: ieșirea"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
+   },
+   "blocks": [
+    {
+     "type": "code",
+     "language": "python",
+     "code": "error = activations[-1] - t\ngradient_b[-1] = error\ngradient_w[-1] = activations[-2] . error.T"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p2",
+     "claim": {
+      "en": "Ce fac primele trei linii ale pasului înapoi?",
+      "ro": "Ce fac primele trei linii ale pasului înapoi?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Linia 1: error = activations[-1] − t, adică y − t pe stratul de ieșire. Acesta este δᴸ.",
+        "ro": "Linia 1: error = activations[-1] − t, adică y − t pe stratul de ieșire. Acesta este δᴸ."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce formă are error pentru 2 clase?",
+         "ro": "Ce formă are error pentru 2 clase?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: un număr pe clasă.",
+           "ro": "Corect: un număr pe clasă."
+          }
+         },
+         {
+          "text": {
+           "en": "(1, 2)",
+           "ro": "(1, 2)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Vectorii sunt coloane în tot codul.",
+           "ro": "Vectorii sunt coloane în tot codul."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Linia 2: gradientul biasului este error: dC/db = δ.",
+        "ro": "Linia 2: gradientul biasului este error: dC/db = δ."
+       }
+      },
+      {
+       "shown": {
+        "en": "Linia 3: gradientul ponderilor este activations[-2] . error.T, adică y de dedesubt ori δ.",
+        "ro": "Linia 3: gradientul ponderilor este activations[-2] . error.T, adică y de dedesubt ori δ."
+       },
+       "predict": {
+        "question": {
+         "en": "activations[-2] are forma (4, 1), error.T are (1, 2). Forma produsului este:",
+         "ro": "activations[-2] are forma (4, 1), error.T are (1, 2). Forma produsului este:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 2), forma lui weights[-1]",
+           "ro": "(4, 2), forma lui weights[-1]"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: un gradient pe fiecare pondere.",
+           "ro": "Corect: un gradient pe fiecare pondere."
+          }
+         },
+         {
+          "text": {
+           "en": "(1, 1)",
+           "ro": "(1, 1)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Nu: (4, 1) · (1, 2) = (4, 2), produs exterior.",
+           "ro": "Nu: (4, 1) · (1, 2) = (4, 2), produs exterior."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Linia 3 este formula δ · y, pentru toate ponderile stratului odată.",
+      "ro": "Linia 3 este formula δ · y, pentru toate ponderile stratului odată."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s27",
+   "title": {
+    "en": "Bucla înapoi",
+    "ro": "Bucla înapoi"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
+   },
+   "blocks": [
+    {
+     "type": "code",
+     "language": "python",
+     "code": "for l from num_layers-2 to 1:\n    z = zs[l-1]\n    sp = sigmoid_prime(z)\n    error = (self.weights[l] . error) * sp\n    gradient_b[l-1] = error\n    gradient_w[l-1] = activations[l-1] . error.T\n\n# sigmoid_prime(z) = sigmoid(z)*(1-sigmoid(z))"
+    },
+    {
+     "type": "proof-steps",
+     "id": "p3",
+     "claim": {
+      "en": "Ce calculează bucla pentru o rețea 3-4-2 (num_layers = 3)?",
+      "ro": "Ce calculează bucla pentru o rețea 3-4-2 (num_layers = 3)?"
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Cu num_layers = 3 bucla rulează o singură dată, cu l = 1. Listele încep de la 0, deci zs[0] este z-ul stratului ascuns.",
+        "ro": "Cu num_layers = 3 bucla rulează o singură dată, cu l = 1. Listele încep de la 0, deci zs[0] este z-ul stratului ascuns."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce formă are weights[1]?",
+         "ro": "Ce formă are weights[1]?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 2): de la stratul ascuns la ieșire",
+           "ro": "(4, 2): de la stratul ascuns la ieșire"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "(3, 4)",
+           "ro": "(3, 4)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Aceea e weights[0].",
+           "ro": "Aceea e weights[0]."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Linia error = (weights[1] . error) * sp este δ ascuns = σ′ · Σ w δ: matricea ponderilor ori eroarea de sus, apoi înmulțită element cu element cu sp.",
+        "ro": "Linia error = (weights[1] . error) * sp este δ ascuns = σ′ · Σ w δ: matricea ponderilor ori eroarea de sus, apoi înmulțită element cu element cu sp."
+       },
+       "predict": {
+        "question": {
+         "en": "(4, 2) · (2, 1) dă forma:",
+         "ro": "(4, 2) · (2, 1) dă forma:"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "(4, 1), un număr pe neuron ascuns",
+           "ro": "(4, 1), un număr pe neuron ascuns"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "(2, 1)",
+           "ro": "(2, 1)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Numărul de rânduri e cel al lui weights[1], adică 4.",
+           "ro": "Numărul de rânduri e cel al lui weights[1], adică 4."
+          },
+          "misconception": "forma-gresita"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Ultimele două linii: gradient_b[0] = error și gradient_w[0] = activations[0] . error.T, de forma (3, 4), a lui weights[0].",
+        "ro": "Ultimele două linii: gradient_b[0] = error și gradient_w[0] = activations[0] . error.T, de forma (3, 4), a lui weights[0]."
+       }
+      }
+     ],
+     "end": {
+      "en": "Este formula lui δ ascuns și a gradientului, scrisă cu matrice.",
+      "ro": "Este formula lui δ ascuns și a gradientului, scrisă cu matrice."
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s28",
+   "title": {
+    "en": "Forma gradientului",
+    "ro": "Forma gradientului"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 51",
+    "ro": "Cursul 4 · slide 51"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04g-q09",
+     "question": {
+      "en": "De ce gradient_w[l] are mereu aceeași formă ca weights[l]?",
+      "ro": "De ce gradient_w[l] are mereu aceeași formă ca weights[l]?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Pentru că fiecare pondere are exact un gradient",
+        "ro": "Pentru că fiecare pondere are exact un gradient"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: se actualizează element cu element.",
+        "ro": "Corect: se actualizează element cu element."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că le înmulțim între ele",
+        "ro": "Pentru că le înmulțim între ele"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu le înmulțim; le scădem, cu rata η.",
+        "ro": "Nu le înmulțim; le scădem, cu rata η."
+       },
+       "misconception": "forma-gresita"
+      },
+      {
+       "text": {
+        "en": "Din întâmplare, doar la ultimul strat",
+        "ro": "Din întâmplare, doar la ultimul strat"
+       },
+       "correct": false,
+       "explain": {
+        "en": "E adevărat la toate straturile.",
+        "ro": "E adevărat la toate straturile."
+       },
+       "misconception": "forma-gresita"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s29",
+   "title": {
+    "en": "Ce lipsește din pseudocod",
+    "ro": "Ce lipsește din pseudocod"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 42, 51",
+    "ro": "Cursul 4 · slide 42, 51"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pseudocodul nu arată actualizarea ponderilor și nici împărțirea la mărimea lotului. Ele se fac după buclă: w = w − η · gradient, cu gradientul mediat pe lot.",
+        "ro": "Pseudocodul nu arată actualizarea ponderilor și nici împărțirea la mărimea lotului. Ele se fac după buclă: w = w − η · gradient, cu gradientul mediat pe lot."
+       }
+      },
+      {
+       "text": {
+        "en": "Slide-ul 42 pune „actualizează ponderile” în interiorul buclei, lângă „nu actualiza înainte de propagare”. În foaie, tot se actualizează la sfârșit; aici facem la fel.",
+        "ro": "Slide-ul 42 pune „actualizează ponderile” în interiorul buclei, lângă „nu actualiza înainte de propagare”. În foaie, tot se actualizează la sfârșit; aici facem la fel."
+       }
+      },
+      {
+       "note": {
+        "en": "Linia 4 din slide-ul 51 este goală, iar self.weights apare doar o dată.",
+        "ro": "Linia 4 din slide-ul 51 este goală, iar self.weights apare doar o dată."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s30",
+   "title": {
+    "en": "Spune-o cu vorbele tale",
+    "ro": "Spune-o cu vorbele tale"
+   },
+   "kicker": {
+    "en": "Cursul 4 · reflect",
+    "ro": "Cursul 4 · reflect"
+   },
+   "blocks": [
+    {
+     "type": "reflect",
+     "id": "nn-l04g-r10",
+     "prompt": {
+      "en": "De ce actualizăm ponderile abia după ce am calculat toate erorile?",
+      "ro": "De ce actualizăm ponderile abia după ce am calculat toate erorile?"
+     },
+     "answer": {
+      "en": "Eroarea unui strat se calculează cu ponderile stratului de deasupra, așa cum erau când rețeaua a făcut greșeala. Dacă le-am schimba mai devreme, am calcula erorile pentru o altă rețea decât cea care a greșit.",
+      "ro": "Eroarea unui strat se calculează cu ponderile stratului de deasupra, așa cum erau când rețeaua a făcut greșeala. Dacă le-am schimba mai devreme, am calcula erorile pentru o altă rețea decât cea care a greșit."
+     },
+     "placeholder": {
+      "en": "Scrie ce crezi",
+      "ro": "Scrie ce crezi"
+     }
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s31",
+   "title": {
+    "en": "Notația cursului 4 (1 din 3)",
+    "ro": "Notația cursului 4 (1 din 3)"
+   },
+   "kicker": {
+    "en": "Cursul 4 · notație",
+    "ro": "Cursul 4 · notație"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "Simbol",
+         "Se citește",
+         "Slide"
+        ],
+        "rows": [
+         [
+          "w, b, η, n",
+          "pondere, bias, rata de învățare (eta), numărul de exemple",
+          "4"
+         ],
+         [
+          "tₓ, yₓ, Σₓ",
+          "ținta și ieșirea pentru exemplul x; suma peste exemple",
+          "4, 6"
+         ],
+         [
+          "dC/dw, dC/db",
+          "cât se schimbă costul când w (b) se mișcă puțin",
+          "4"
+         ],
+         [
+          "σ(z) = 1/(1+e⁻ᶻ)",
+          "sigmoida; slide-ul 5 îi spune sig(t)",
+          "5, 10"
+         ],
+         [
+          "σ′(z)",
+          "derivata sigmoidei în z; mică pentru z mare",
+          "9, 10"
+         ],
+         [
+          "C = −1/n Σₓ [t ln y + (1−t) ln(1−y)]",
+          "entropia încrucișată pentru un neuron sigmoid",
+          "12"
+         ],
+         [
+          "dC/dwᵢ = −1/n Σₓ (t−y) xᵢ",
+          "gradientul entropiei încrucișate pe ponderea i",
+          "15"
+         ],
+         [
+          "kⱼ, P(date | model)",
+          "numărul de exemple din clasa j; probabilitatea datelor",
+          "18"
+         ],
+         [
+          "−Σⱼ tⱼ ln yⱼ",
+          "entropia încrucișată: minus suma țintă ori ln ieșire",
+          "20"
+         ],
+         [
+          "−Σⱼ tⱼ ln tⱼ",
+          "entropia lui t: incertitudinea distribuției adevărate",
+          "21"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s32",
+   "title": {
+    "en": "Notația cursului 4 (2 din 3)",
+    "ro": "Notația cursului 4 (2 din 3)"
+   },
+   "kicker": {
+    "en": "Cursul 4 · notație",
+    "ro": "Cursul 4 · notație"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "Simbol",
+         "Se citește",
+         "Slide"
+        ],
+        "rows": [
+         [
+          "C = −1/n Σᵢ Σⱼ tᵢⱼ ln yᵢⱼ",
+          "i = exemplu, j = clasă, n exemple, m clase",
+          "22"
+         ],
+         [
+          "C = −ln yⱼ",
+          "ținta one-hot: j este clasa corectă",
+          "23"
+         ],
+         [
+          "yᵢ = eᶻⁱ / Σⱼ eᶻʲ",
+          "softmax: probabilități din scoruri",
+          "27"
+         ],
+         [
+          "k = max eᶻ",
+          "constanta formei stabile (slide-ul 31)",
+          "31"
+         ],
+         [
+          "dyⱼ/dzᵢ, j = i / j ≠ i",
+          "cum se mișcă ieșirea j când mișcăm scorul i",
+          "33-35"
+         ],
+         [
+          "wˡᵢⱼ",
+          "ponderea de la neuronul i din stratul l−1 la neuronul j din stratul l",
+          "39"
+         ],
+         [
+          "L",
+          "ultimul strat",
+          "39"
+         ],
+         [
+          "yˡᵢ = a(zˡᵢ)",
+          "activarea neuronului i din stratul l; a este funcția de activare",
+          "39"
+         ],
+         [
+          "bˡᵢ",
+          "biasul neuronului i din stratul l",
+          "39"
+         ],
+         [
+          "zˡᵢ = Σⱼ wˡⱼᵢ yˡ⁻¹ⱼ + bˡᵢ",
+          "suma ponderată a neuronului i",
+          "39"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s33",
+   "title": {
+    "en": "Notația cursului 4 (3 din 3)",
+    "ro": "Notația cursului 4 (3 din 3)"
+   },
+   "kicker": {
+    "en": "Cursul 4 · notație",
+    "ro": "Cursul 4 · notație"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "Simbol",
+         "Se citește",
+         "Slide"
+        ],
+        "rows": [
+         [
+          "δˡᵢ = dC/dzˡᵢ",
+          "eroarea neuronului i din stratul l",
+          "43"
+         ],
+         [
+          "δᴸᵢ = dC/dyᴸᵢ · a′(zᴸᵢ)",
+          "eroarea ieșirii, forma generală",
+          "45"
+         ],
+         [
+          "δᴸᵢ = −(tᵢ − yᵢ)",
+          "aceeași eroare pentru CE cu softmax (= y − t)",
+          "45"
+         ],
+         [
+          "δˡᵢ = σ′(zˡᵢ) Σₖ wˡ⁺¹ᵢₖ δˡ⁺¹ₖ",
+          "eroarea ascunsă: erorile de sus trimise înapoi, ori σ′",
+          "46"
+         ],
+         [
+          "dC/dwˡₖᵢ = δˡᵢ · yˡ⁻¹ₖ",
+          "gradientul ponderii = δ unde intră ori y de unde pleacă",
+          "47"
+         ],
+         [
+          "dC/dbˡᵢ = δˡᵢ",
+          "gradientul biasului",
+          "48"
+         ],
+         [
+          "activations, zs, weights, biases",
+          "listele din pseudocod",
+          "49-51"
+         ],
+         [
+          "error, gradient_b, gradient_w, sigmoid_prime",
+          "numele din bucla înapoi",
+          "51"
+         ],
+         [
+          "η nou = η · lot nou / lot vechi",
+          "regula de scalare liniară",
+          "59"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s34",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · BP",
+    "ro": "Cursul 4 · BP"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Plimbarea completă: înainte z și y, δ de ieșire y − t, δ în jos cu ponderile vechi, apoi gradienți și actualizare.",
+         "ro": "Plimbarea completă: înainte z și y, δ de ieșire y − t, δ în jos cu ponderile vechi, apoi gradienți și actualizare."
+        },
+        {
+         "en": "Foaia: 7,75; 3,75; −5; 5; −5; −5 (σ citit ca în foaie).",
+         "ro": "Foaia: 7,75; 3,75; −5; 5; −5; −5 (σ citit ca în foaie)."
+        },
+        {
+         "en": "Ținta schimbă semnele; MSE aproape oprește actualizarea la ieșire saturată.",
+         "ro": "Ținta schimbă semnele; MSE aproape oprește actualizarea la ieșire saturată."
+        },
+        {
+         "en": "Bias: gradientul este δ. Pseudocodul: forme (4, 2) pentru gradientul ieșirii.",
+         "ro": "Bias: gradientul este δ. Pseudocodul: forme (4, 2) pentru gradientul ieșirii."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s35",
+   "title": {
+    "en": "Mini-test: o iterație pe rețeaua B",
+    "ro": "Mini-test: o iterație pe rețeaua B"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04g-e11",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Rețeaua B, t = 1, dar acum η = 1. Știi y¹ = 0,9241, δ³ = −0,3955, δ²₁ = −0,0277, intrarea x₁ = 1, w³₁₁ = 1, w²₁₁ = 0,5. Calculează noul w³₁₁ și noul w²₁₁.",
+      "ro": "Rețeaua B, t = 1, dar acum η = 1. Știi y¹ = 0,9241, δ³ = −0,3955, δ²₁ = −0,0277, intrarea x₁ = 1, w³₁₁ = 1, w²₁₁ = 0,5. Calculează noul w³₁₁ și noul w²₁₁."
+     },
+     "fields": [
+      {
+       "id": "a",
+       "label": {
+        "en": "w³₁₁ nou",
+        "ro": "w³₁₁ nou"
+       },
+       "kind": "num",
+       "formula": "1-1*(-0.39552607502046)*0.9241418199787566",
+       "expected": 1.3655
+      },
+      {
+       "id": "b",
+       "label": {
+        "en": "w²₁₁ nou",
+        "ro": "w²₁₁ nou"
+       },
+       "kind": "num",
+       "formula": "0.5-1*(-0.027727847849433475)*1",
+       "expected": 0.5277
+      }
+     ],
+     "detectors": [
+      {
+       "field": "a",
+       "formula": "1-0.5*(-0.39552607502046)*0.9241418199787566",
+       "message": {
+        "en": "Ai folosit η = 0,5. Acum η = 1.",
+        "ro": "Ai folosit η = 0,5. Acum η = 1."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "w nou = w − η · δ · y.",
+       "ro": "w nou = w − η · δ · y."
+      },
+      {
+       "en": "1 − 1 · (−0,3955) · 0,9241; 0,5 − 1 · (−0,0277) · 1",
+       "ro": "1 − 1 · (−0,3955) · 0,9241; 0,5 − 1 · (−0,0277) · 1"
+      },
+      {
+       "en": "1,3655 și 0,5277",
+       "ro": "1,3655 și 0,5277"
+      }
+     ],
+     "solution": {
+      "en": "w³₁₁ = 1,3655; w²₁₁ = 0,5277. δ-urile nu depind de η.",
+      "ro": "w³₁₁ = 1,3655; w²₁₁ = 0,5277. δ-urile nu depind de η."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceleași date, η = 0,5. Calculează noul w³₁₁ și noul w²₁₁.",
+        "ro": "Aceleași date, η = 0,5. Calculează noul w³₁₁ și noul w²₁₁."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "1-0.5*(-0.39552607502046)*0.9241418199787566",
+         "expected": 1.1828
+        },
+        {
+         "id": "b",
+         "formula": "0.5-0.5*(-0.027727847849433475)*1",
+         "expected": 0.5139
+        }
+       ],
+       "solution": {
+        "en": "1,1828 și 0,5139",
+        "ro": "1,1828 și 0,5139"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04g-s36",
+   "title": {
+    "en": "Mini-test: ponderi vechi",
+    "ro": "Mini-test: ponderi vechi"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04g-q12",
+     "question": {
+      "en": "Într-o iterație, ordinea corectă este:",
+      "ro": "Într-o iterație, ordinea corectă este:"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "înainte, toate erorile δ, apoi toate actualizările",
+        "ro": "înainte, toate erorile δ, apoi toate actualizările"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: erorile folosesc ponderile vechi.",
+        "ro": "Corect: erorile folosesc ponderile vechi."
+       }
+      },
+      {
+       "text": {
+        "en": "înainte, actualizează ieșirea, apoi δ-ul ascuns",
+        "ro": "înainte, actualizează ieșirea, apoi δ-ul ascuns"
+       },
+       "correct": false,
+       "explain": {
+        "en": "δ-ul ascuns ar folosi ponderea nouă de ieșire.",
+        "ro": "δ-ul ascuns ar folosi ponderea nouă de ieșire."
+       },
+       "misconception": "pondere-noua-in-delta"
+      },
+      {
+       "text": {
+        "en": "actualizează, apoi înainte",
+        "ro": "actualizează, apoi înainte"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu există eroare de propagat fără trecerea înainte.",
+        "ro": "Nu există eroare de propagat fără trecerea înainte."
+       },
+       "misconception": "ordine-gresita"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

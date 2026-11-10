@@ -1,0 +1,1335 @@
+{
+ "meta": {
+  "id": "nn-l04c",
+  "title": {
+   "en": "Lesson 4c: Where cross-entropy comes from",
+   "ro": "Lecția 4c: De unde vine entropia încrucișată"
+  },
+  "shortTitle": {
+   "en": "L4c: Origin of cross-entropy",
+   "ro": "L4c: Originea entropiei"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII",
+   "ro": "Cursul de Rețele neuronale, cursul 4 (backpropagation), UAIC FII"
+  }
+ },
+ "steps": [
+  {
+   "id": "nn-l04c-s01",
+   "title": {
+    "en": "Ținta ca vector",
+    "ro": "Ținta ca vector"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 17",
+    "ro": "Cursul 4 · slide 17"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru clasificare, ținta este un vector cu o valoare pe clasă. Pentru cifra 8: 1 la cifra 8 și 0 în rest (one-hot). Sau o distribuție, de exemplu 0,05; 0,1; 0,85 pe cifrele 0, 3 și 8.",
+        "ro": "Pentru clasificare, ținta este un vector cu o valoare pe clasă. Pentru cifra 8: 1 la cifra 8 și 0 în rest (one-hot). Sau o distribuție, de exemplu 0,05; 0,1; 0,85 pe cifrele 0, 3 și 8."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 150'><title>Ținta one-hot pentru cifra 8</title><line class='muted' stroke-width='1.5' x1='18' y1='112' x2='332' y2='112'/><rect class='accent fill-accent' stroke-width='1.5' x='25' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='33.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='33.5' y='128' text-anchor='middle'>0</text><rect class='accent fill-accent' stroke-width='1.5' x='56' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='64.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='64.5' y='128' text-anchor='middle'>1</text><rect class='accent fill-accent' stroke-width='1.5' x='87' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='95.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='95.5' y='128' text-anchor='middle'>2</text><rect class='accent fill-accent' stroke-width='1.5' x='118' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='126.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='126.5' y='128' text-anchor='middle'>3</text><rect class='accent fill-accent' stroke-width='1.5' x='149' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='157.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='157.5' y='128' text-anchor='middle'>4</text><rect class='accent fill-accent' stroke-width='1.5' x='180' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='188.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='188.5' y='128' text-anchor='middle'>5</text><rect class='accent fill-accent' stroke-width='1.5' x='211' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='219.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='219.5' y='128' text-anchor='middle'>6</text><rect class='accent fill-accent' stroke-width='1.5' x='242' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='250.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='250.5' y='128' text-anchor='middle'>7</text><rect class='accent fill-accent' stroke-width='1.5' x='273' y='33.8' width='17' height='78.2' rx='3'/><text class='fg' font-size='14' font-weight='700' x='281.5' y='27.8' text-anchor='middle'>1,00</text><text class='muted' font-size='14' x='281.5' y='128' text-anchor='middle'>8</text><rect class='accent fill-accent' stroke-width='1.5' x='304' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='312.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='312.5' y='128' text-anchor='middle'>9</text></svg>",
+        "alt": {
+         "en": "Zece bare, una pe cifră; doar bara cifrei 8 are înălțimea 1",
+         "ro": "Zece bare, una pe cifră; doar bara cifrei 8 are înălțimea 1"
+        },
+        "caption": {
+         "en": "Ținta one-hot pentru cifra 8.",
+         "ro": "Ținta one-hot pentru cifra 8."
+        }
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 150'><title>Ținta moale</title><line class='muted' stroke-width='1.5' x1='18' y1='112' x2='332' y2='112'/><rect class='warn fill-warn' stroke-width='1.5' x='25' y='108.1' width='17' height='3.9' rx='3'/><text class='fg' font-size='14' font-weight='700' x='33.5' y='102.1' text-anchor='middle'>0,05</text><text class='muted' font-size='14' x='33.5' y='128' text-anchor='middle'>0</text><rect class='warn fill-warn' stroke-width='1.5' x='56' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='64.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='64.5' y='128' text-anchor='middle'>1</text><rect class='warn fill-warn' stroke-width='1.5' x='87' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='95.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='95.5' y='128' text-anchor='middle'>2</text><rect class='warn fill-warn' stroke-width='1.5' x='118' y='104.2' width='17' height='7.8' rx='3'/><text class='fg' font-size='14' font-weight='700' x='126.5' y='98.2' text-anchor='middle'>0,10</text><text class='muted' font-size='14' x='126.5' y='128' text-anchor='middle'>3</text><rect class='warn fill-warn' stroke-width='1.5' x='149' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='157.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='157.5' y='128' text-anchor='middle'>4</text><rect class='warn fill-warn' stroke-width='1.5' x='180' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='188.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='188.5' y='128' text-anchor='middle'>5</text><rect class='warn fill-warn' stroke-width='1.5' x='211' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='219.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='219.5' y='128' text-anchor='middle'>6</text><rect class='warn fill-warn' stroke-width='1.5' x='242' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='250.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='250.5' y='128' text-anchor='middle'>7</text><rect class='warn fill-warn' stroke-width='1.5' x='273' y='45.5' width='17' height='66.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='281.5' y='39.5' text-anchor='middle'>0,85</text><text class='muted' font-size='14' x='281.5' y='128' text-anchor='middle'>8</text><rect class='warn fill-warn' stroke-width='1.5' x='304' y='110.5' width='17' height='1.5' rx='3'/><text class='fg' font-size='14' font-weight='700' x='312.5' y='104.5' text-anchor='middle'></text><text class='muted' font-size='14' x='312.5' y='128' text-anchor='middle'>9</text></svg>",
+        "alt": {
+         "en": "Zece bare: 0,05 la cifra 0, 0,1 la cifra 3 și 0,85 la cifra 8",
+         "ro": "Zece bare: 0,05 la cifra 0, 0,1 la cifra 3 și 0,85 la cifra 8"
+        },
+        "caption": {
+         "en": "O țintă moale: o distribuție.",
+         "ro": "O țintă moale: o distribuție."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s02",
+   "title": {
+    "en": "Ieșirea trebuie să fie o distribuție",
+    "ro": "Ieșirea trebuie să fie o distribuție"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 18",
+    "ro": "Cursul 4 · slide 18"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04c-q01",
+     "question": {
+      "en": "Rețeaua are 3 clase. Care vector poate fi o ieșire validă, adică o distribuție?",
+      "ro": "Rețeaua are 3 clase. Care vector poate fi o ieșire validă, adică o distribuție?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "(0,5; 0,3; 0,2)",
+        "ro": "(0,5; 0,3; 0,2)"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: valorile sunt pozitive și fac împreună 1.",
+        "ro": "Corect: valorile sunt pozitive și fac împreună 1."
+       }
+      },
+      {
+       "text": {
+        "en": "(0,7; 0,5; 0,1)",
+        "ro": "(0,7; 0,5; 0,1)"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Valorile fac 1,3, nu 1.",
+        "ro": "Valorile fac 1,3, nu 1."
+       },
+       "misconception": "suma-diferita-de-1"
+      },
+      {
+       "text": {
+        "en": "(0,6; 0,6; −0,2)",
+        "ro": "(0,6; 0,6; −0,2)"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Face 1, dar o probabilitate nu poate fi negativă.",
+        "ro": "Face 1, dar o probabilitate nu poate fi negativă."
+       },
+       "misconception": "valoare-negativa-in-distributie"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s03",
+   "title": {
+    "en": "Zece poze, trei clase",
+    "ro": "Zece poze, trei clase"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 18",
+    "ro": "Cursul 4 · slide 18"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Un set are n = 10 poze. kⱼ este numărul de poze din clasa j. Fracția kⱼ / n este ținta tⱼ a clasei.",
+        "ro": "Un set are n = 10 poze. kⱼ este numărul de poze din clasa j. Fracția kⱼ / n este ținta tⱼ a clasei."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Clasa j",
+         "kⱼ",
+         "tⱼ = kⱼ / n"
+        ],
+        "rows": [
+         [
+          "1",
+          "5",
+          "0,5"
+         ],
+         [
+          "2",
+          "3",
+          "0,3"
+         ],
+         [
+          "3",
+          "2",
+          "0,2"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s04",
+   "title": {
+    "en": "Trei modele",
+    "ro": "Trei modele"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 18",
+    "ro": "Cursul 4 · slide 18"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Trei modele dau fiecare un vector y, la fel pentru toate pozele. Care potrivește mai bine datele?",
+        "ro": "Trei modele dau fiecare un vector y, la fel pentru toate pozele. Care potrivește mai bine datele?"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Model",
+         "y₁",
+         "y₂",
+         "y₃"
+        ],
+        "rows": [
+         [
+          "A",
+          "0,5",
+          "0,3",
+          "0,2"
+         ],
+         [
+          "B",
+          "0,6",
+          "0,3",
+          "0,1"
+         ],
+         [
+          "C",
+          "1/3",
+          "1/3",
+          "1/3"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s05",
+   "title": {
+    "en": "Care model are cea mai mare probabilitate?",
+    "ro": "Care model are cea mai mare probabilitate?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 18",
+    "ro": "Cursul 4 · slide 18"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04c-q02",
+     "question": {
+      "en": "Prezice: care model dă datelor (5 poze, 3 poze, 2 poze) cea mai mare probabilitate?",
+      "ro": "Prezice: care model dă datelor (5 poze, 3 poze, 2 poze) cea mai mare probabilitate?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Modelul A, cel care are y egal cu fracțiile t",
+        "ro": "Modelul A, cel care are y egal cu fracțiile t"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect, vedem cifrele în ecranul următor.",
+        "ro": "Corect, vedem cifrele în ecranul următor."
+       }
+      },
+      {
+       "text": {
+        "en": "Modelul B, pentru că dă 0,6 clasei celei mai mari",
+        "ro": "Modelul B, pentru că dă 0,6 clasei celei mai mari"
+       },
+       "correct": false,
+       "explain": {
+        "en": "B supraestimează clasa 1 și subestimează clasa 3. Verificăm cu cifre.",
+        "ro": "B supraestimează clasa 1 și subestimează clasa 3. Verificăm cu cifre."
+       },
+       "misconception": "cea-mai-mare-valoare-castiga"
+      },
+      {
+       "text": {
+        "en": "Modelul C, pentru că nu favorizează nicio clasă",
+        "ro": "Modelul C, pentru că nu favorizează nicio clasă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "C nu ține cont de faptul că clasa 1 e mai frecventă. Verificăm cu cifre.",
+        "ro": "C nu ține cont de faptul că clasa 1 e mai frecventă. Verificăm cu cifre."
+       },
+       "misconception": "cea-mai-mare-valoare-castiga"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s06",
+   "title": {
+    "en": "Probabilitatea datelor",
+    "ro": "Probabilitatea datelor"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 18",
+    "ro": "Cursul 4 · slide 18"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Probabilitatea ca modelul să producă exact aceste date este produsul yⱼ la puterea kⱼ, peste clase: $P = y_1^{k_1}\\, y_2^{k_2}\\, y_3^{k_3}$. Pentru modelul B: 0,6⁵ · 0,3³ · 0,1² .",
+        "ro": "Probabilitatea ca modelul să producă exact aceste date este produsul yⱼ la puterea kⱼ, peste clase: $P = y_1^{k_1}\\, y_2^{k_2}\\, y_3^{k_3}$. Pentru modelul B: 0,6⁵ · 0,3³ · 0,1² ."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Model",
+         "P"
+        ],
+        "rows": [
+         [
+          "A",
+          "3,3750 · 10⁻⁵"
+         ],
+         [
+          "B",
+          "2,0995 · 10⁻⁵"
+         ],
+         [
+          "C",
+          "1,6935 · 10⁻⁵"
+         ]
+        ]
+       }
+      },
+      {
+       "note": {
+        "en": "Formula din slide numără o singură ordine anume a pozelor; pentru comparația modelelor nu contează.",
+        "ro": "Formula din slide numără o singură ordine anume a pozelor; pentru comparația modelelor nu contează."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s07",
+   "title": {
+    "en": "Calculează P pentru modelul B",
+    "ro": "Calculează P pentru modelul B"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 18",
+    "ro": "Cursul 4 · slide 18"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04c-e03",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Modelul B are y = (0,6; 0,3; 0,1), iar k = (5, 3, 2). Calculează P = 0,6⁵ · 0,3³ · 0,1². Scrie P · 100 000 (P este foarte mic).",
+      "ro": "Modelul B are y = (0,6; 0,3; 0,1), iar k = (5, 3, 2). Calculează P = 0,6⁵ · 0,3³ · 0,1². Scrie P · 100 000 (P este foarte mic)."
+     },
+     "fields": [
+      {
+       "id": "p",
+       "label": {
+        "en": "P · 100 000",
+        "ro": "P · 100 000"
+       },
+       "kind": "num",
+       "formula": "0.6^5*0.3^3*0.1^2*100000",
+       "expected": 2.0995
+      }
+     ],
+     "detectors": [
+      {
+       "field": "p",
+       "formula": "5*0.6+3*0.3+2*0.1",
+       "message": {
+        "en": "Ai înmulțit exponentul cu y și ai adunat. Formula este un produs de puteri: y la puterea k, pentru fiecare clasă, apoi înmulțite între ele.",
+        "ro": "Ai înmulțit exponentul cu y și ai adunat. Formula este un produs de puteri: y la puterea k, pentru fiecare clasă, apoi înmulțite între ele."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Trei puteri, apoi produsul lor.",
+       "ro": "Trei puteri, apoi produsul lor."
+      },
+      {
+       "en": "0,6⁵ = 0,07776; 0,3³ = 0,027; 0,1² = 0,01",
+       "ro": "0,6⁵ = 0,07776; 0,3³ = 0,027; 0,1² = 0,01"
+      },
+      {
+       "en": "0,07776 · 0,027 · 0,01 = 2,0995e-05",
+       "ro": "0,07776 · 0,027 · 0,01 = 2,0995e-05"
+      }
+     ],
+     "solution": {
+      "en": "P = 0,07776 · 0,027 · 0,01 = 0,000020995, adică 2,0995 · 10⁻⁵.",
+      "ro": "P = 0,07776 · 0,027 · 0,01 = 0,000020995, adică 2,0995 · 10⁻⁵."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Modelul A are y = (0,5; 0,3; 0,2). Calculează P · 100 000.",
+        "ro": "Modelul A are y = (0,5; 0,3; 0,2). Calculează P · 100 000."
+       },
+       "fields": [
+        {
+         "id": "p",
+         "formula": "0.5^5*0.3^3*0.2^2*100000",
+         "expected": 3.375
+        }
+       ],
+       "solution": {
+        "en": "3,3750",
+        "ro": "3,3750"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s08",
+   "title": {
+    "en": "Logaritmul",
+    "ro": "Logaritmul"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 19",
+    "ro": "Cursul 4 · slide 19"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "ln P = k₁ ln y₁ + k₂ ln y₂ + ... : logaritmul transformă produsul în sumă.",
+      "ro": "ln P = k₁ ln y₁ + k₂ ln y₂ + ... : logaritmul transformă produsul în sumă."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Logaritmul păstrează ordinea (o probabilitate mai mare are logaritm mai mare), iar suma e mai ușor de derivat decât produsul. Pentru B: 5 ln 0,6 + 3 ln 0,3 + 2 ln 0,1 = −10,7712.",
+        "ro": "Logaritmul păstrează ordinea (o probabilitate mai mare are logaritm mai mare), iar suma e mai ușor de derivat decât produsul. Pentru B: 5 ln 0,6 + 3 ln 0,3 + 2 ln 0,1 = −10,7712."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s09",
+   "title": {
+    "en": "Calculează ln P pentru modelul A",
+    "ro": "Calculează ln P pentru modelul A"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 19",
+    "ro": "Cursul 4 · slide 19"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04c-e04",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Modelul A are y = (0,5; 0,3; 0,2), k = (5, 3, 2). Calculează ln P = 5 ln 0,5 + 3 ln 0,3 + 2 ln 0,2.",
+      "ro": "Modelul A are y = (0,5; 0,3; 0,2), k = (5, 3, 2). Calculează ln P = 5 ln 0,5 + 3 ln 0,3 + 2 ln 0,2."
+     },
+     "fields": [
+      {
+       "id": "l",
+       "label": {
+        "en": "ln P",
+        "ro": "ln P"
+       },
+       "kind": "num",
+       "formula": "5*ln(0.5)+3*ln(0.3)+2*ln(0.2)",
+       "expected": -10.2965
+      }
+     ],
+     "detectors": [
+      {
+       "field": "l",
+       "formula": "-(5*ln(0.5)+3*ln(0.3)+2*ln(0.2))",
+       "message": {
+        "en": "Ai pus semnul plus. Logaritmul unui număr mai mic decât 1 este negativ.",
+        "ro": "Ai pus semnul plus. Logaritmul unui număr mai mic decât 1 este negativ."
+       }
+      },
+      {
+       "field": "l",
+       "formula": "5*log10(0.5)+3*log10(0.3)+2*log10(0.2)",
+       "message": {
+        "en": "Ai folosit logaritm zecimal. Aici ln este logaritmul natural.",
+        "ro": "Ai folosit logaritm zecimal. Aici ln este logaritmul natural."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Fiecare termen: kⱼ ori ln yⱼ.",
+       "ro": "Fiecare termen: kⱼ ori ln yⱼ."
+      },
+      {
+       "en": "5·(−0,6931) + 3·(−1,2040) + 2·(−1,6094)",
+       "ro": "5·(−0,6931) + 3·(−1,2040) + 2·(−1,6094)"
+      },
+      {
+       "en": "−10,2965",
+       "ro": "−10,2965"
+      }
+     ],
+     "solution": {
+      "en": "−3,4657 + −3,6119 + −3,2189 = −10,2965.",
+      "ro": "−3,4657 + −3,6119 + −3,2189 = −10,2965."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Modelul C are y = (1/3; 1/3; 1/3). Calculează ln P cu aceiași k.",
+        "ro": "Modelul C are y = (1/3; 1/3; 1/3). Calculează ln P cu aceiași k."
+       },
+       "fields": [
+        {
+         "id": "l",
+         "formula": "5*ln(1/3)+3*ln(1/3)+2*ln(1/3)",
+         "expected": -10.9861
+        }
+       ],
+       "solution": {
+        "en": "10 · ln(1/3) = −10,9861",
+        "ro": "10 · ln(1/3) = −10,9861"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s10",
+   "title": {
+    "en": "Minus și împărțit la n",
+    "ro": "Minus și împărțit la n"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 20",
+    "ro": "Cursul 4 · slide 20"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Vrem P cât mai mare, deci −ln P cât mai mic. Împărțim la n: kⱼ / n devine ținta tⱼ. Rezultatul este entropia încrucișată:",
+        "ro": "Vrem P cât mai mare, deci −ln P cât mai mic. Împărțim la n: kⱼ / n devine ținta tⱼ. Rezultatul este entropia încrucișată:"
+       }
+      },
+      {
+       "tex": "C = -\\sum_j t_j \\ln y_j"
+      },
+      {
+       "text": {
+        "en": "Aici tⱼ este ținta clasei j, iar yⱼ este ieșirea clasei j.",
+        "ro": "Aici tⱼ este ținta clasei j, iar yⱼ este ieșirea clasei j."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Model",
+         "−ln P",
+         "C = −ln P / 10"
+        ],
+        "rows": [
+         [
+          "A",
+          "10,2965",
+          "1,0297"
+         ],
+         [
+          "B",
+          "10,7712",
+          "1,0771"
+         ],
+         [
+          "C",
+          "10,9861",
+          "1,0986"
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s11",
+   "title": {
+    "en": "Entropia",
+    "ro": "Entropia"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 21",
+    "ro": "Cursul 4 · slide 21"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Entropia distribuției t este H = −Σ tⱼ ln tⱼ = 1,0297. Este cel mai mic cost posibil pentru aceste date, atins când y = t (modelul A).",
+        "ro": "Entropia distribuției t este H = −Σ tⱼ ln tⱼ = 1,0297. Este cel mai mic cost posibil pentru aceste date, atins când y = t (modelul A)."
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 170'><title>Entropia încrucișată a modelelor</title><line class='muted' stroke-width='1.5' x1='18' y1='132' x2='332' y2='132'/><rect class='ok fill-ok' stroke-width='1.5' x='45.7' y='44.7' width='48' height='87.3' rx='3'/><text class='fg' font-size='14' font-weight='700' x='69.7' y='38.7' text-anchor='middle'>1,0297</text><text class='muted' font-size='14' x='69.7' y='148' text-anchor='middle'>A</text><rect class='accent fill-accent' stroke-width='1.5' x='149' y='40.7' width='48' height='91.3' rx='3'/><text class='fg' font-size='14' font-weight='700' x='173' y='34.7' text-anchor='middle'>1,0771</text><text class='muted' font-size='14' x='173' y='148' text-anchor='middle'>B</text><rect class='accent fill-accent' stroke-width='1.5' x='252.3' y='38.8' width='48' height='93.2' rx='3'/><text class='fg' font-size='14' font-weight='700' x='276.3' y='32.8' text-anchor='middle'>1,0986</text><text class='muted' font-size='14' x='276.3' y='148' text-anchor='middle'>C</text></svg>",
+        "alt": {
+         "en": "Trei bare: modelul A 1,0297 (cel mai mic), B 1,0771, C 1,0986",
+         "ro": "Trei bare: modelul A 1,0297 (cel mai mic), B 1,0771, C 1,0986"
+        },
+        "caption": {
+         "en": "Costul fiecărui model.",
+         "ro": "Costul fiecărui model."
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s12",
+   "title": {
+    "en": "Cel mai bun model are cost 0?",
+    "ro": "Cel mai bun model are cost 0?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 21",
+    "ro": "Cursul 4 · slide 21"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04c-q05",
+     "question": {
+      "en": "Modelul A este perfect: y este chiar t. Ce cost C are?",
+      "ro": "Modelul A este perfect: y este chiar t. Ce cost C are?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "1,0297: entropia lui t, nu 0",
+        "ro": "1,0297: entropia lui t, nu 0"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect. Dacă ținta nu este one-hot, chiar și cel mai bun model are cost pozitiv.",
+        "ro": "Corect. Dacă ținta nu este one-hot, chiar și cel mai bun model are cost pozitiv."
+       }
+      },
+      {
+       "text": {
+        "en": "0, pentru că nu greșește",
+        "ro": "0, pentru că nu greșește"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Costul este 0 doar pentru ținte one-hot, când y atinge 1 pe clasa corectă.",
+        "ro": "Costul este 0 doar pentru ținte one-hot, când y atinge 1 pe clasa corectă."
+       },
+       "misconception": "cost-zero-la-model-perfect"
+      },
+      {
+       "text": {
+        "en": "Cel mai mare dintre cele trei",
+        "ro": "Cel mai mare dintre cele trei"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Dimpotrivă: A are cel mai mic cost.",
+        "ro": "Dimpotrivă: A are cel mai mic cost."
+       },
+       "misconception": "cost-zero-la-model-perfect"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s13",
+   "title": {
+    "en": "Surpriza",
+    "ro": "Surpriza"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 21",
+    "ro": "Cursul 4 · slide 21"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "−ln p este „surpriza” unui eveniment de probabilitate p: mică dacă p este mare, mare dacă p este mic. Entropia încrucișată este surpriza medie când crezi y, dar realitatea este t.",
+        "ro": "−ln p este „surpriza” unui eveniment de probabilitate p: mică dacă p este mare, mare dacă p este mic. Entropia încrucișată este surpriza medie când crezi y, dar realitatea este t."
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "p",
+         "surpriza −ln p"
+        ],
+        "rows": [
+         [
+          "0,9",
+          "0,1054"
+         ],
+         [
+          "0,5",
+          "0,6931"
+         ],
+         [
+          "0,05",
+          "2,9957"
+         ]
+        ]
+       }
+      },
+      {
+       "figure": {
+        "svg": "<svg viewBox='0 0 340 200'><title>Surpriza −ln p</title><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='46' y2='14'/><line class='muted' stroke-width='1.5' x1='46' y1='158' x2='314' y2='158'/><line class='muted' stroke-width='1.5' x1='46' y1='155' x2='46' y2='161'/><text class='muted' font-size='14' x='46' y='176' text-anchor='middle'>0</text><line class='muted' stroke-width='1.5' x1='180' y1='155' x2='180' y2='161'/><text class='muted' font-size='14' x='180' y='176' text-anchor='middle'>0,5</text><line class='muted' stroke-width='1.5' x1='314' y1='155' x2='314' y2='161'/><text class='muted' font-size='14' x='314' y='176' text-anchor='middle'>1</text><line class='muted' stroke-width='1.5' x1='43' y1='158' x2='49' y2='158'/><text class='muted' font-size='14' x='40' y='163' text-anchor='end'>0</text><line class='muted' stroke-width='1.5' x1='43' y1='115.6' x2='49' y2='115.6'/><text class='muted' font-size='14' x='40' y='120.6' text-anchor='end'>1</text><line class='muted' stroke-width='1.5' x1='43' y1='73.3' x2='49' y2='73.3'/><text class='muted' font-size='14' x='40' y='78.3' text-anchor='end'>2</text><line class='muted' stroke-width='1.5' x1='43' y1='30.9' x2='49' y2='30.9'/><text class='muted' font-size='14' x='40' y='35.9' text-anchor='end'>3</text><polyline class='accent' stroke-width='2.8' fill='none' points='56.7,21.7 59.6,31.7 62.4,39.8 65.3,46.6 68.2,52.4 71,57.6 73.9,62.1 76.7,66.3 79.6,70 82.4,73.5 85.3,76.7 88.2,79.7 91,82.5 93.9,85.1 96.7,87.5 99.6,89.8 102.5,92 105.3,94.1 108.2,96.1 111,98 113.9,99.8 116.8,101.6 119.6,103.3 122.5,104.9 125.3,106.4 128.2,107.9 131,109.4 133.9,110.8 136.8,112.1 139.6,113.5 142.5,114.7 145.3,116 148.2,117.2 151.1,118.3 153.9,119.5 156.8,120.6 159.6,121.7 162.5,122.7 165.3,123.7 168.2,124.7 171.1,125.7 173.9,126.7 176.8,127.6 179.6,128.5 182.5,129.4 185.4,130.3 188.2,131.2 191.1,132 193.9,132.8 196.8,133.6 199.7,134.4 202.5,135.2 205.4,136 208.2,136.7 211.1,137.5 213.9,138.2 216.8,138.9 219.7,139.6 222.5,140.3 225.4,141 228.2,141.7 231.1,142.3 234,143 236.8,143.6 239.7,144.2 242.5,144.9 245.4,145.5 248.3,146.1 251.1,146.7 254,147.3 256.8,147.8 259.7,148.4 262.5,149 265.4,149.5 268.3,150.1 271.1,150.6 274,151.2 276.8,151.7 279.7,152.2 282.6,152.7 285.4,153.2 288.3,153.7 291.1,154.2 294,154.7 296.8,155.2 299.7,155.7 302.6,156.2 305.4,156.6 308.3,157.1 311.1,157.5 314,158'/><circle class='accent fill-accent' stroke-width='2' cx='287.2' cy='153.5' r='5'/><circle class='accent fill-accent' stroke-width='2' cx='180' cy='128.6' r='5'/><circle class='bad fill-bad' stroke-width='2' cx='59.4' cy='31.1' r='5'/><text class='fg' font-size='15' x='314' y='194' text-anchor='end'>p</text><text class='fg' font-size='15' x='54' y='16' text-anchor='start'>−ln p</text></svg>",
+        "alt": {
+         "en": "Curba −ln p: foarte mare lângă p = 0, 0 la p = 1",
+         "ro": "Curba −ln p: foarte mare lângă p = 0, 0 la p = 1"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s14",
+   "title": {
+    "en": "O țintă one-hot",
+    "ro": "O țintă one-hot"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 23",
+    "ro": "Cursul 4 · slide 23"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04c-e06",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Zece clase, cifra corectă este 8 (ținta one-hot). Rețeaua dă y₈ = 0,80. Calculează C = −ln(y₈).",
+      "ro": "Zece clase, cifra corectă este 8 (ținta one-hot). Rețeaua dă y₈ = 0,80. Calculează C = −ln(y₈)."
+     },
+     "fields": [
+      {
+       "id": "c",
+       "label": {
+        "en": "C",
+        "ro": "C"
+       },
+       "kind": "num",
+       "formula": "-ln(0.8)",
+       "expected": 0.2231
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "-log10(0.8)",
+       "message": {
+        "en": "Ai folosit logaritm zecimal; folosește ln.",
+        "ro": "Ai folosit logaritm zecimal; folosește ln."
+       }
+      },
+      {
+       "field": "c",
+       "formula": "-ln(0.2)",
+       "message": {
+        "en": "Ai luat 1 − y₈. Pentru ținta one-hot rămâne doar −ln y pe clasa corectă.",
+        "ro": "Ai luat 1 − y₈. Pentru ținta one-hot rămâne doar −ln y pe clasa corectă."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Doar clasa corectă contează.",
+       "ro": "Doar clasa corectă contează."
+      },
+      {
+       "en": "C = −ln(0,80)",
+       "ro": "C = −ln(0,80)"
+      },
+      {
+       "en": "0,2231",
+       "ro": "0,2231"
+      }
+     ],
+     "solution": {
+      "en": "Ceilalți termeni tⱼ ln yⱼ au tⱼ = 0 și dispar; rămâne −ln 0,80 = 0,2231.",
+      "ro": "Ceilalți termeni tⱼ ln yⱼ au tⱼ = 0 și dispar; rămâne −ln 0,80 = 0,2231."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Aceeași țintă (cifra 8), dar rețeaua dă y₈ = 0,1. Calculează C.",
+        "ro": "Aceeași țintă (cifra 8), dar rețeaua dă y₈ = 0,1. Calculează C."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "-ln(0.1)",
+         "expected": 2.3026
+        }
+       ],
+       "solution": {
+        "en": "−ln 0,1 = 2,3026: o ieșire greșită costă mult mai mult",
+        "ro": "−ln 0,1 = 2,3026: o ieșire greșită costă mult mai mult"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s15",
+   "title": {
+    "en": "O țintă moale",
+    "ro": "O țintă moale"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 17, 20",
+    "ro": "Cursul 4 · slide 17, 20"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04c-e07",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Ținta moale este t = 0,05 pe cifra 0, 0,1 pe cifra 3 și 0,85 pe cifra 8 (restul 0). Rețeaua dă y₀ = 0,02, y₃ = 0,03, y₈ = 0,80. Calculează C = −Σ tⱼ ln yⱼ.",
+      "ro": "Ținta moale este t = 0,05 pe cifra 0, 0,1 pe cifra 3 și 0,85 pe cifra 8 (restul 0). Rețeaua dă y₀ = 0,02, y₃ = 0,03, y₈ = 0,80. Calculează C = −Σ tⱼ ln yⱼ."
+     },
+     "fields": [
+      {
+       "id": "c",
+       "label": {
+        "en": "C",
+        "ro": "C"
+       },
+       "kind": "num",
+       "formula": "-(0.05*ln(0.02)+0.1*ln(0.03)+0.85*ln(0.8))",
+       "expected": 0.7359
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "-ln(0.8)",
+       "message": {
+        "en": "Ai luat doar clasa cu t cel mai mare. La o țintă moale contează toți termenii cu tⱼ diferit de 0.",
+        "ro": "Ai luat doar clasa cu t cel mai mare. La o țintă moale contează toți termenii cu tⱼ diferit de 0."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Trei termeni nenuli: cifrele 0, 3 și 8.",
+       "ro": "Trei termeni nenuli: cifrele 0, 3 și 8."
+      },
+      {
+       "en": "0,05·(−ln 0,02) + 0,1·(−ln 0,03) + 0,85·(−ln 0,80)",
+       "ro": "0,05·(−ln 0,02) + 0,1·(−ln 0,03) + 0,85·(−ln 0,80)"
+      },
+      {
+       "en": "0,1956 + 0,3507 + 0,1897 = 0,7359",
+       "ro": "0,1956 + 0,3507 + 0,1897 = 0,7359"
+      }
+     ],
+     "solution": {
+      "en": "0,1956 + 0,3507 + 0,1897 = 0,7359.",
+      "ro": "0,1956 + 0,3507 + 0,1897 = 0,7359."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Ținta moale (0,5; 0,5) pe două clase, ieșirea (0,8; 0,2). Calculează C.",
+        "ro": "Ținta moale (0,5; 0,5) pe două clase, ieșirea (0,8; 0,2). Calculează C."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "-(0.5*ln(0.8)+0.5*ln(0.2))",
+         "expected": 0.9163
+        }
+       ],
+       "solution": {
+        "en": "0,9163",
+        "ro": "0,9163"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s16",
+   "title": {
+    "en": "Media pe set",
+    "ro": "Media pe set"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 22",
+    "ro": "Cursul 4 · slide 22"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "C = −(1/n) Σᵢ Σⱼ tᵢⱼ ln yᵢⱼ: se adună peste clase, apoi se face media peste exemple.",
+      "ro": "C = −(1/n) Σᵢ Σⱼ tᵢⱼ ln yᵢⱼ: se adună peste clase, apoi se face media peste exemple."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Aici i este exemplul (de la 1 la n), j este clasa (de la 1 la m), tᵢⱼ este ținta exemplului i pe clasa j, iar yᵢⱼ ieșirea lui.",
+        "ro": "Aici i este exemplul (de la 1 la n), j este clasa (de la 1 la m), tᵢⱼ este ținta exemplului i pe clasa j, iar yᵢⱼ ieșirea lui."
+       }
+      },
+      {
+       "note": {
+        "en": "Slide-ul folosește litera i uneori pentru exemplu, alteori pentru clasă; aici o ținem doar pentru exemplu.",
+        "ro": "Slide-ul folosește litera i uneori pentru exemplu, alteori pentru clasă; aici o ținem doar pentru exemplu."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s17",
+   "title": {
+    "en": "Două clase",
+    "ro": "Două clase"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 22",
+    "ro": "Cursul 4 · slide 22"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "text": {
+        "en": "Pentru două clase, t = (t, 1 − t) și y = (y, 1 − y). Suma peste clase devine formula de la un neuron. Verificare cu t = (1, 0) și y = (0,8; 0,2):",
+        "ro": "Pentru două clase, t = (t, 1 − t) și y = (y, 1 − y). Suma peste clase devine formula de la un neuron. Verificare cu t = (1, 0) și y = (0,8; 0,2):"
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "Formula",
+         "Calcul",
+         "Valoare"
+        ],
+        "rows": [
+         [
+          "pe clase",
+          "−(1·ln 0,8 + 0·ln 0,2)",
+          "0,2231"
+         ],
+         [
+          "cu t și 1 − t",
+          "−(t ln y + (1 − t) ln(1 − y))",
+          "0,2231"
+         ]
+        ]
+       }
+      },
+      {
+       "text": {
+        "en": "Cele două forme dau același număr: este aceeași formulă.",
+        "ro": "Cele două forme dau același număr: este aceeași formulă."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s18",
+   "title": {
+    "en": "Calculează pe un lot",
+    "ro": "Calculează pe un lot"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 22",
+    "ro": "Cursul 4 · slide 22"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04c-e08",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Două exemple, trei clase. Exemplul 1: t = (1, 0, 0), y = (0,7; 0,2; 0,1). Exemplul 2: t = (0, 1, 0), y = (0,25; 0,5; 0,25). Calculează C pentru lot.",
+      "ro": "Două exemple, trei clase. Exemplul 1: t = (1, 0, 0), y = (0,7; 0,2; 0,1). Exemplul 2: t = (0, 1, 0), y = (0,25; 0,5; 0,25). Calculează C pentru lot."
+     },
+     "fields": [
+      {
+       "id": "c",
+       "label": {
+        "en": "C",
+        "ro": "C"
+       },
+       "kind": "num",
+       "formula": "(-ln(0.7)-ln(0.5))/2",
+       "expected": 0.5249
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "-ln(0.7)-ln(0.5)",
+       "message": {
+        "en": "Ai adunat costurile exemplelor fără să împarți la n = 2.",
+        "ro": "Ai adunat costurile exemplelor fără să împarți la n = 2."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "Costul fiecărui exemplu, apoi media.",
+       "ro": "Costul fiecărui exemplu, apoi media."
+      },
+      {
+       "en": "C₁ = −ln 0,7 = 0,3567; C₂ = −ln 0,5 = 0,6931",
+       "ro": "C₁ = −ln 0,7 = 0,3567; C₂ = −ln 0,5 = 0,6931"
+      },
+      {
+       "en": "(0,3567 + 0,6931) / 2 = 0,5249",
+       "ro": "(0,3567 + 0,6931) / 2 = 0,5249"
+      }
+     ],
+     "solution": {
+      "en": "(0,3567 + 0,6931) / 2 = 0,5249.",
+      "ro": "(0,3567 + 0,6931) / 2 = 0,5249."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Exemplul 1: t = (1, 0), y = (0,9; 0,1). Exemplul 2: t = (0, 1), y = (0,4; 0,6). Calculează C pentru lot.",
+        "ro": "Exemplul 1: t = (1, 0), y = (0,9; 0,1). Exemplul 2: t = (0, 1), y = (0,4; 0,6). Calculează C pentru lot."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "(-ln(0.9)-ln(0.6))/2",
+         "expected": 0.3081
+        }
+       ],
+       "solution": {
+        "en": "0,3081",
+        "ro": "0,3081"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s19",
+   "title": {
+    "en": "Pentru ce problemă?",
+    "ro": "Pentru ce problemă?"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 17",
+    "ro": "Cursul 4 · slide 17"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04c-q09",
+     "question": {
+      "en": "Pentru ce fel de ieșire se folosește entropia încrucișată?",
+      "ro": "Pentru ce fel de ieșire se folosește entropia încrucișată?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Pentru o distribuție peste clase, față de o țintă one-hot sau o distribuție",
+        "ro": "Pentru o distribuție peste clase, față de o țintă one-hot sau o distribuție"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect.",
+        "ro": "Corect."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru a prezice un preț sau o temperatură",
+        "ro": "Pentru a prezice un preț sau o temperatură"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Acolo ținta este un număr oarecare, nu o distribuție; se folosește de obicei eroarea pătratică.",
+        "ro": "Acolo ținta este un număr oarecare, nu o distribuție; se folosește de obicei eroarea pătratică."
+       },
+       "misconception": "ce-pentru-regresie"
+      },
+      {
+       "text": {
+        "en": "Pentru orice ieșire, indiferent de sumă",
+        "ro": "Pentru orice ieșire, indiferent de sumă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Formula presupune că y este o distribuție, adică pozitivă și cu suma 1.",
+        "ro": "Formula presupune că y este o distribuție, adică pozitivă și cu suma 1."
+       },
+       "misconception": "ce-pentru-regresie"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s20",
+   "title": {
+    "en": "Recapitulare",
+    "ro": "Recapitulare"
+   },
+   "kicker": {
+    "en": "Cursul 4 · slide 17-23",
+    "ro": "Cursul 4 · slide 17-23"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "points": [
+        {
+         "en": "Probabilitatea datelor este produsul puterilor yⱼ la kⱼ; logaritmul o face sumă.",
+         "ro": "Probabilitatea datelor este produsul puterilor yⱼ la kⱼ; logaritmul o face sumă."
+        },
+        {
+         "en": "C = −Σ tⱼ ln yⱼ, cu tⱼ = kⱼ / n.",
+         "ro": "C = −Σ tⱼ ln yⱼ, cu tⱼ = kⱼ / n."
+        },
+        {
+         "en": "Cel mai bun model are y = t și costul egal cu entropia (1,0297), nu 0.",
+         "ro": "Cel mai bun model are y = t și costul egal cu entropia (1,0297), nu 0."
+        },
+        {
+         "en": "Pentru ținta one-hot, C = −ln y pe clasa corectă.",
+         "ro": "Pentru ținta one-hot, C = −ln y pe clasa corectă."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s21",
+   "title": {
+    "en": "Mini-test: ln P și C pentru modelul C",
+    "ro": "Mini-test: ln P și C pentru modelul C"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "nn-l04c-e10",
+     "status": "verified-twice",
+     "statement": {
+      "en": "Modelul C are y = (1/3; 1/3; 1/3). Datele au k = (5, 3, 2). Calculează ln P și C = −ln P / n.",
+      "ro": "Modelul C are y = (1/3; 1/3; 1/3). Datele au k = (5, 3, 2). Calculează ln P și C = −ln P / n."
+     },
+     "fields": [
+      {
+       "id": "l",
+       "label": {
+        "en": "ln P",
+        "ro": "ln P"
+       },
+       "kind": "num",
+       "formula": "10*ln(1/3)",
+       "expected": -10.9861
+      },
+      {
+       "id": "c",
+       "label": {
+        "en": "C",
+        "ro": "C"
+       },
+       "kind": "num",
+       "formula": "-10*ln(1/3)/10",
+       "expected": 1.0986
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "10*ln(1/3)",
+       "message": {
+        "en": "Ai uitat minusul sau împărțirea la n.",
+        "ro": "Ai uitat minusul sau împărțirea la n."
+       }
+      }
+     ],
+     "hints": [
+      {
+       "en": "ln P = Σ kⱼ ln yⱼ.",
+       "ro": "ln P = Σ kⱼ ln yⱼ."
+      },
+      {
+       "en": "10 · ln(1/3) apoi minus și împărțit la 10",
+       "ro": "10 · ln(1/3) apoi minus și împărțit la 10"
+      },
+      {
+       "en": "−10,9861 și 1,0986",
+       "ro": "−10,9861 și 1,0986"
+      }
+     ],
+     "solution": {
+      "en": "ln P = 10 · ln(1/3) = −10,9861, deci C = 1,0986 (= ln 3).",
+      "ro": "ln P = 10 · ln(1/3) = −10,9861, deci C = 1,0986 (= ln 3)."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Modelul B: y = (0,6; 0,3; 0,1). Calculează ln P și C.",
+        "ro": "Modelul B: y = (0,6; 0,3; 0,1). Calculează ln P și C."
+       },
+       "fields": [
+        {
+         "id": "l",
+         "formula": "5*ln(0.6)+3*ln(0.3)+2*ln(0.1)",
+         "expected": -10.7712
+        },
+        {
+         "id": "c",
+         "formula": "-(5*ln(0.6)+3*ln(0.3)+2*ln(0.1))/10",
+         "expected": 1.0771
+        }
+       ],
+       "solution": {
+        "en": "−10,7712 și 1,0771",
+        "ro": "−10,7712 și 1,0771"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nn-l04c-s22",
+   "title": {
+    "en": "Mini-test: ce model câștigă",
+    "ro": "Mini-test: ce model câștigă"
+   },
+   "kicker": {
+    "en": "Cursul 4 · verificare",
+    "ro": "Cursul 4 · verificare"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "nn-l04c-q11",
+     "question": {
+      "en": "Ținta este t = (0,5; 0,3; 0,2). Modelul P are y = (0,4; 0,4; 0,2), modelul Q are y = (0,55; 0,25; 0,2). Care are costul C mai mic?",
+      "ro": "Ținta este t = (0,5; 0,3; 0,2). Modelul P are y = (0,4; 0,4; 0,2), modelul Q are y = (0,55; 0,25; 0,2). Care are costul C mai mic?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Q: 1,0367 față de 1,0549",
+        "ro": "Q: 1,0367 față de 1,0549"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: Q este mai aproape de t.",
+        "ro": "Corect: Q este mai aproape de t."
+       }
+      },
+      {
+       "text": {
+        "en": "P: 1,0549 față de 1,0367",
+        "ro": "P: 1,0549 față de 1,0367"
+       },
+       "correct": false,
+       "explain": {
+        "en": "P are y₂ = 0,4, departe de t₂ = 0,3. Q greșește mai puțin în total.",
+        "ro": "P are y₂ = 0,4, departe de t₂ = 0,3. Q greșește mai puțin în total."
+       },
+       "misconception": "cea-mai-mare-valoare-castiga"
+      },
+      {
+       "text": {
+        "en": "Au același cost",
+        "ro": "Au același cost"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Costurile sunt diferite: ln este neliniară și cele două vectori diferă.",
+        "ro": "Costurile sunt diferite: ln este neliniară și cele două vectori diferă."
+       },
+       "misconception": "cea-mai-mare-valoare-castiga"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
